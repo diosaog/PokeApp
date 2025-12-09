@@ -1,0 +1,11 @@
+target-version = "py311"
+
+[lint]
+
+[lint.per-file-ignores]
+"interfaz.py" = ["E402"]
+"dexdata.py" = ["E402"]
+"tienda2.py" = ["E702"]
+"ent_tmp_head.py" = ["F821", "E402", "E701", "E702", "F401"]
+"ent_tmp_tail.py" = ["F821", "E402", "E701", "E702", "F401"]
+"entrenadores.py" = ["F821"]

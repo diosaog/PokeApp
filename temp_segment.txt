@@ -1,0 +1,6 @@
+def render_titlebar() -> None:
+    st.title("?? Entrenadores")
+    st.caption("Se alimenta del `.sav` del entrenador (último guardado).")
+
+# ---------- helpers de UI ----------
+def _badge_row(level: int | str | None, is_shiny: bool, gender: str | None) -> str:

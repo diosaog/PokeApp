@@ -1,0 +1,19 @@
+# Python / venv
+.venv/
+__pycache__/
+*.pyc
+.ruff_cache/
+.streamlit/
+
+# Datos locales
+data/
+saves/
+
+# Build C# bridge
+Bridge/PKHeXBridge/bin/
+Bridge/PKHeXBridge/obj/
+Bridge/PKHeXBridge/.vs/
+Bridge/PKHeXBridge/libs/
+
+# Entornos de editor
+.vscode/

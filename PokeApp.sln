@@ -1,0 +1,29 @@
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.5.2.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Bridge", "Bridge", "{68BF4094-9419-05A7-776B-98D5B493D877}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PKHeXBridge", "Bridge\PKHeXBridge\PKHeXBridge.csproj", "{82F3C937-C823-4C1D-94C6-46F3BC36D872}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{82F3C937-C823-4C1D-94C6-46F3BC36D872}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{82F3C937-C823-4C1D-94C6-46F3BC36D872}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{82F3C937-C823-4C1D-94C6-46F3BC36D872}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{82F3C937-C823-4C1D-94C6-46F3BC36D872}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{82F3C937-C823-4C1D-94C6-46F3BC36D872} = {68BF4094-9419-05A7-776B-98D5B493D877}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {A8FD7A1F-6433-4924-BDC6-9968B08694EC}
+	EndGlobalSection
+EndGlobal
