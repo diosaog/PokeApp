@@ -10,7 +10,7 @@ APP_TITLE = "Liga Pokmon"
 APP_ICON = ""
 BASE_SAVES_DIR = Path("./saves")
 # Ruta sugerida al bridge (pista por defecto en la UI)
-DEFAULT_DLL_HINT = r"Bridge\PKHeXBridge\bin\Release\net9.0\win-x64\publish\PKHeXBridge.exe"
+DEFAULT_DLL_HINT = "Bridge/PKHeXBridge/bin/Release/net9.0/linux-x64/publish/PKHeXBridge"
 
 USERS: Dict[str, str] = {
     "Anto":"a07","Victor":"v42","Rober":"r03","Samu":"s88","Daviry":"d15",

@@ -17,3 +17,5 @@ Bridge/PKHeXBridge/libs/
 
 # Entornos de editor
 .vscode/
+
+!Bridge/PKHeXBridge/bin/Release/net9.0/linux-x64/publish/**
