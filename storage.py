@@ -1,15 +1,34 @@
 ﻿from __future__ import annotations
+import os
 import sqlite3
 import hashlib
 import time
 from pathlib import Path
-from typing import Optional, List, Tuple
+from typing import Optional, List, Tuple, Any
+from supabase import create_client, Client
 
 # Rutas de datos en la raíz del proyecto
 BASE_DIR = Path(__file__).resolve().parent
 DATA_DIR = BASE_DIR / "data"
 SAVES_DIR = DATA_DIR / "saves"
 DB_PATH = DATA_DIR / "app.db"
+_SUPABASE: Client | None = None
+_SUPABASE_BUCKET = os.environ.get("SUPABASE_BUCKET", "saves")
+
+
+def _supabase_enabled() -> bool:
+    return bool(os.environ.get("SUPABASE_URL") and os.environ.get("SUPABASE_KEY"))
+
+
+def _sb() -> Client:
+    global _SUPABASE
+    if _SUPABASE is None:
+        url = os.environ.get("SUPABASE_URL")
+        key = os.environ.get("SUPABASE_KEY")
+        if not url or not key:
+            raise RuntimeError("Supabase no configurado")
+        _SUPABASE = create_client(url, key)
+    return _SUPABASE
 
 
 def _conn():
@@ -85,10 +104,61 @@ def _sha256(b: bytes) -> str:
     return h.hexdigest()
 
 
+def _iso_to_ts(val: Any) -> int:
+    try:
+        if val is None:
+            return 0
+        import datetime
+        if isinstance(val, (int, float)):
+            return int(val)
+        s = str(val).replace("Z", "+00:00")
+        dt = datetime.datetime.fromisoformat(s)
+        return int(dt.timestamp())
+    except Exception:
+        return 0
+
+
 def save_upload(content: bytes, original_name: str, uploader: str|None=None) -> dict:
     sha = _sha256(content)
     ts = int(time.time())
     safe_name = f"{ts}_{sha[:8]}.sav"
+
+    if _supabase_enabled():
+        client = _sb()
+        bucket = _SUPABASE_BUCKET or "saves"
+        # Subir al bucket
+        client.storage.from_(bucket).upload(
+            safe_name,
+            content,
+            {"content-type": "application/octet-stream", "upsert": True},
+        )
+        public_url = client.storage.from_(bucket).get_public_url(safe_name)
+        # Insertar metadatos en tabla remota
+        res = client.table("saves").insert(
+            {
+                "filename": safe_name,
+                "original_name": original_name,
+                "user": uploader,
+                "url": public_url,
+                "sha256": sha,
+            }
+        ).execute()
+        new_id = None
+        try:
+            data = res.data or []
+            if data:
+                new_id = data[0].get("id")
+        except Exception:
+            new_id = None
+        return {
+            "id": new_id,
+            "filename": safe_name,
+            "sha256": sha,
+            "created_at": ts,
+            "url": public_url,
+        }
+
+    # Fallback local
     (SAVES_DIR / safe_name).write_bytes(content)
     with _conn() as cx:
         cx.execute(
@@ -101,6 +171,23 @@ def save_upload(content: bytes, original_name: str, uploader: str|None=None) -> 
 
 
 def list_saves(limit: int = 50) -> List[Tuple]:
+    if _supabase_enabled():
+        client = _sb()
+        res = client.table("saves").select("*").order("id", desc=True).limit(limit).execute()
+        out = []
+        for row in res.data or []:
+            ts = _iso_to_ts(row.get("created_at"))
+            out.append(
+                (
+                    row.get("id"),
+                    row.get("filename"),
+                    row.get("original_name"),
+                    row.get("sha256"),
+                    row.get("user"),
+                    ts,
+                )
+            )
+        return out
     with _conn() as cx:
         return cx.execute(
             "SELECT id, filename, original_name, sha256, uploader, created_at FROM saves ORDER BY id DESC LIMIT ?",
@@ -132,6 +219,11 @@ def get_current_save() -> Optional[Tuple]:
 
 
 def load_save_bytes(filename: str) -> bytes:
+    if _supabase_enabled():
+        client = _sb()
+        bucket = _SUPABASE_BUCKET or "saves"
+        res = client.storage.from_(bucket).download(filename)
+        return res
     return (SAVES_DIR / filename).read_bytes()
 
 # Helper: ruta del save actual
@@ -144,6 +236,30 @@ def get_current_save_path() -> Path | None:
 # --- Per-user variants (independent current save and listings) ---
 
 def list_saves_by_user(user: str, limit: int = 50) -> List[Tuple]:
+    if _supabase_enabled():
+        client = _sb()
+        res = (
+            client.table("saves")
+            .select("*")
+            .eq("user", user)
+            .order("id", desc=True)
+            .limit(limit)
+            .execute()
+        )
+        out = []
+        for row in res.data or []:
+            ts = _iso_to_ts(row.get("created_at"))
+            out.append(
+                (
+                    row.get("id"),
+                    row.get("filename"),
+                    row.get("original_name"),
+                    row.get("sha256"),
+                    row.get("user"),
+                    ts,
+                )
+            )
+        return out
     with _conn() as cx:
         return cx.execute(
             """
