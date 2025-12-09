@@ -227,19 +227,24 @@ def get_current_save() -> Optional[Tuple]:
 
 def load_save_bytes(filename: str) -> bytes:
     if _supabase_enabled():
-        client = _sb()
-        bucket = _bucket_name()
-        # Prefer public URL (bucket es público)
         try:
+            client = _sb()
+            bucket = _bucket_name()
+            # Prefer public URL (bucket es público)
             url = client.storage.from_(bucket).get_public_url(filename)
             resp = httpx.get(url, timeout=10)
             resp.raise_for_status()
             return resp.content
         except Exception:
-            # Fallback usando API
-            res = client.storage.from_(bucket).download(filename)
-            return res
-    return (SAVES_DIR / filename).read_bytes()
+            try:
+                res = client.storage.from_(bucket).download(filename)
+                return res
+            except Exception:
+                return b""
+    try:
+        return (SAVES_DIR / filename).read_bytes()
+    except Exception:
+        return b""
 
 # Helper: ruta del save actual
 def get_current_save_path() -> Path | None:
