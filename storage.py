@@ -125,6 +125,34 @@ def _iso_to_ts(val: Any) -> int:
         return 0
 
 
+def _fetch_save_by_id(save_id: int) -> Optional[Tuple]:
+    if _supabase_enabled():
+        try:
+            client = _sb()
+            res = client.table("saves").select("*").eq("id", int(save_id)).limit(1).execute()
+            data = (res.data or [])
+            if not data:
+                return None
+            row = data[0]
+            ts = _iso_to_ts(row.get("created_at"))
+            return (
+                row.get("id"),
+                row.get("filename"),
+                row.get("original_name"),
+                row.get("sha256"),
+                row.get("user"),
+                ts,
+            )
+        except Exception:
+            return None
+    with _conn() as cx:
+        row = cx.execute(
+            "SELECT id, filename, original_name, sha256, uploader, created_at FROM saves WHERE id=?",
+            (int(save_id),),
+        ).fetchone()
+        return row
+
+
 def save_upload(content: bytes, original_name: str, uploader: str|None=None) -> dict:
     sha = _sha256(content)
     ts = int(time.time())
@@ -218,11 +246,7 @@ def get_current_save() -> Optional[Tuple]:
         if not v:
             return None
         save_id = int(v[0])
-        row = cx.execute(
-            "SELECT id, filename, original_name, sha256, uploader, created_at FROM saves WHERE id=?",
-            (save_id,)
-        ).fetchone()
-        return row
+    return _fetch_save_by_id(save_id)
 
 
 def load_save_bytes(filename: str) -> bytes:
@@ -252,8 +276,6 @@ def get_current_save_path() -> Path | None:
     if not cur:
         return None
     return SAVES_DIR / cur[1]
-
-# --- Per-user variants (independent current save and listings) ---
 
 def list_saves_by_user(user: str, limit: int = 50) -> List[Tuple]:
     if _supabase_enabled():
@@ -298,6 +320,8 @@ def _user_key(user: str) -> str:
 
 
 def set_current_save_for_user(user: str, save_id: int) -> None:
+    if save_id is None:
+        return
     with _conn() as cx:
         cx.execute(
             """
@@ -312,14 +336,10 @@ def set_current_save_for_user(user: str, save_id: int) -> None:
 def get_current_save_for_user(user: str) -> Optional[Tuple]:
     with _conn() as cx:
         v = cx.execute("SELECT value FROM settings WHERE key=?", (_user_key(user),)).fetchone()
-        if not v:
-            return None
-        save_id = int(v[0])
-        row = cx.execute(
-            "SELECT id, filename, original_name, sha256, uploader, created_at FROM saves WHERE id=?",
-            (save_id,),
-        ).fetchone()
-        return row
+    if not v:
+        return None
+    save_id = int(v[0])
+    return _fetch_save_by_id(save_id)
 
 
 def get_current_save_path_for_user(user: str):
