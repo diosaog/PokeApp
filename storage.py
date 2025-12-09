@@ -5,6 +5,7 @@ import hashlib
 import time
 from pathlib import Path
 from typing import Optional, List, Tuple, Any
+import httpx
 from supabase import create_client, Client
 
 # Rutas de datos en la raíz del proyecto
@@ -17,18 +18,24 @@ _SUPABASE_BUCKET = os.environ.get("SUPABASE_BUCKET", "saves")
 
 
 def _supabase_enabled() -> bool:
-    return bool(os.environ.get("SUPABASE_URL") and os.environ.get("SUPABASE_KEY"))
+    url = os.environ.get("SUPABASE_URL", "").strip()
+    key = os.environ.get("SUPABASE_KEY", "").strip()
+    return bool(url and key)
 
 
 def _sb() -> Client:
     global _SUPABASE
     if _SUPABASE is None:
-        url = os.environ.get("SUPABASE_URL")
-        key = os.environ.get("SUPABASE_KEY")
+        url = os.environ.get("SUPABASE_URL", "").strip()
+        key = os.environ.get("SUPABASE_KEY", "").strip()
         if not url or not key:
             raise RuntimeError("Supabase no configurado")
         _SUPABASE = create_client(url, key)
     return _SUPABASE
+
+
+def _bucket_name() -> str:
+    return _SUPABASE_BUCKET or "saves"
 
 
 def _conn():
@@ -125,7 +132,7 @@ def save_upload(content: bytes, original_name: str, uploader: str|None=None) -> 
 
     if _supabase_enabled():
         client = _sb()
-        bucket = _SUPABASE_BUCKET or "saves"
+        bucket = _bucket_name()
         # Subir al bucket
         client.storage.from_(bucket).upload(
             safe_name,
@@ -221,9 +228,17 @@ def get_current_save() -> Optional[Tuple]:
 def load_save_bytes(filename: str) -> bytes:
     if _supabase_enabled():
         client = _sb()
-        bucket = _SUPABASE_BUCKET or "saves"
-        res = client.storage.from_(bucket).download(filename)
-        return res
+        bucket = _bucket_name()
+        # Prefer public URL (bucket es público)
+        try:
+            url = client.storage.from_(bucket).get_public_url(filename)
+            resp = httpx.get(url, timeout=10)
+            resp.raise_for_status()
+            return resp.content
+        except Exception:
+            # Fallback usando API
+            res = client.storage.from_(bucket).download(filename)
+            return res
     return (SAVES_DIR / filename).read_bytes()
 
 # Helper: ruta del save actual
