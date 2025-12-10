@@ -159,39 +159,42 @@ def save_upload(content: bytes, original_name: str, uploader: str|None=None) -> 
     safe_name = f"{ts}_{sha[:8]}.sav"
 
     if _supabase_enabled():
-        client = _sb()
-        bucket = _bucket_name()
-        # Subir al bucket
-        client.storage.from_(bucket).upload(
-            safe_name,
-            content,
-            {"contentType": "application/octet-stream", "upsert": True},
-        )
-        public_url = client.storage.from_(bucket).get_public_url(safe_name)
-        # Insertar metadatos en tabla remota
-        res = client.table("saves").insert(
-            {
-                "filename": safe_name,
-                "original_name": original_name,
-                "user": uploader,
-                "url": public_url,
-                "sha256": sha,
-            }
-        ).execute()
-        new_id = None
         try:
-            data = res.data or []
-            if data:
-                new_id = data[0].get("id")
-        except Exception:
+            client = _sb()
+            bucket = _bucket_name()
+            # Subir al bucket (sin upsert para evitar headers inválidos)
+            client.storage.from_(bucket).upload(
+                safe_name,
+                content,
+                {"content-type": "application/octet-stream"},
+            )
+            public_url = client.storage.from_(bucket).get_public_url(safe_name)
+            # Insertar metadatos en tabla remota
+            res = client.table("saves").insert(
+                {
+                    "filename": safe_name,
+                    "original_name": original_name,
+                    "user": uploader,
+                    "url": public_url,
+                    "sha256": sha,
+                }
+            ).execute()
             new_id = None
-        return {
-            "id": new_id,
-            "filename": safe_name,
-            "sha256": sha,
-            "created_at": ts,
-            "url": public_url,
-        }
+            try:
+                data = res.data or []
+                if data:
+                    new_id = data[0].get("id")
+            except Exception:
+                new_id = None
+            return {
+                "id": new_id,
+                "filename": safe_name,
+                "sha256": sha,
+                "created_at": ts,
+                "url": public_url,
+            }
+        except Exception:
+            return {"id": None, "filename": safe_name, "sha256": sha, "created_at": ts, "url": None}
 
     # Fallback local
     (SAVES_DIR / safe_name).write_bytes(content)
@@ -279,29 +282,32 @@ def get_current_save_path() -> Path | None:
 
 def list_saves_by_user(user: str, limit: int = 50) -> List[Tuple]:
     if _supabase_enabled():
-        client = _sb()
-        res = (
-            client.table("saves")
-            .select("*")
-            .eq("user", user)
-            .order("id", desc=True)
-            .limit(limit)
-            .execute()
-        )
-        out = []
-        for row in res.data or []:
-            ts = _iso_to_ts(row.get("created_at"))
-            out.append(
-                (
-                    row.get("id"),
-                    row.get("filename"),
-                    row.get("original_name"),
-                    row.get("sha256"),
-                    row.get("user"),
-                    ts,
-                )
+        try:
+            client = _sb()
+            res = (
+                client.table("saves")
+                .select("*")
+                .eq("user", user)
+                .order("id", desc=True)
+                .limit(limit)
+                .execute()
             )
-        return out
+            out = []
+            for row in res.data or []:
+                ts = _iso_to_ts(row.get("created_at"))
+                out.append(
+                    (
+                        row.get("id"),
+                        row.get("filename"),
+                        row.get("original_name"),
+                        row.get("sha256"),
+                        row.get("user"),
+                        ts,
+                    )
+                )
+            return out
+        except Exception:
+            return []
     with _conn() as cx:
         return cx.execute(
             """
