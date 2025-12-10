@@ -165,7 +165,7 @@ def save_upload(content: bytes, original_name: str, uploader: str|None=None) -> 
         client.storage.from_(bucket).upload(
             safe_name,
             content,
-            {"content-type": "application/octet-stream", "upsert": True},
+            {"contentType": "application/octet-stream", "upsert": True},
         )
         public_url = client.storage.from_(bucket).get_public_url(safe_name)
         # Insertar metadatos en tabla remota
