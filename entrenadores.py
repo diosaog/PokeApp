@@ -501,6 +501,18 @@ COINS_BY_POSITION = {1: 12, 2: 11, 3: 9, 4: 8, 5: 9, 6: 6, 7: 5, 8: 4, 9: 2}
 
 
 def coins_from_league(user: str) -> int:
+    # Si no hay datos en sesión, intenta restaurar desde settings (persistente)
+    if "league_results" not in st.session_state or not st.session_state.get("league_results"):
+        try:
+            import json
+            from storage import settings_get
+            raw = settings_get("league_state")
+            if raw:
+                obj = json.loads(raw)
+                res_in = obj.get("results", {})
+                st.session_state.league_results = {u: {int(k): int(v) for k, v in mp.items()} for u, mp in res_in.items()}
+        except Exception:
+            pass
     lr = st.session_state.get("league_results", {})
     user_map = lr.get(user, {})
     return sum(COINS_BY_POSITION.get(pos, 0) for pos in user_map.values())
