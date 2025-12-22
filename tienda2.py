@@ -33,11 +33,11 @@ def _calc_money_for_user(user: str) -> int:
     liga = coins_from_league(user)
     badge_coins = 0
     try:
-        if get_bridge_path():
-            saves = list_user_saves(user)
-            if saves:
-                sav_json = PKHeXRuntime.open_sav(str(saves[0]))
-                badge_coins = coins_from_badges(sav_json)
+        # Abrir siempre el último .sav local (ya sincronizado desde Supabase) para contar medallas
+        saves = list_user_saves(user)
+        if saves:
+            sav_json = PKHeXRuntime.open_sav(str(saves[0]))
+            badge_coins = coins_from_badges(sav_json)
     except Exception:
         badge_coins = 0
     return int(liga + badge_coins)
