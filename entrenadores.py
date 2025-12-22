@@ -572,7 +572,8 @@ def _trainer_summary_ui(sav_json: dict, box_count: int) -> None:
         medallas = _count_badges(sav_json)
     except Exception:
         medallas = 0
-    monedas_badges = 3 * medallas
+    # 2 monedas por medalla (máx 8)
+    monedas_badges = 2 * medallas
 
     jugador = st.session_state.get("trainer_selected") or st.session_state.get("user")
     monedas_liga = coins_from_league(jugador or "")
@@ -645,7 +646,8 @@ def _trainer_summary_with_portrait_ui(sav_json: dict, box_count: int) -> None:
         medallas = _count_badges(sav_json)
     except Exception:
         medallas = 0
-    monedas_badges = 3 * medallas
+    # 2 monedas por medalla (máx 8)
+    monedas_badges = 2 * medallas
 
     jugador = st.session_state.get("trainer_selected") or st.session_state.get("user")
     monedas_liga = coins_from_league(jugador or "")

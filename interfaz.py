@@ -419,7 +419,7 @@ def _apply_section_theme(section: str) -> None:
 
 # --- Badges scan helper ---
 def coins_from_badges(sav_json: dict) -> int:
-    """Heuristica simple: intenta contar hasta 8 medallas buscando claves 'badge'."""
+    """Cuenta medallas (máx 8) y devuelve las monedas: 2 por cada una."""
     def scan(o) -> int:
         tot = 0
         if isinstance(o, dict):
@@ -436,7 +436,8 @@ def coins_from_badges(sav_json: dict) -> int:
             for it in o:
                 tot += scan(it)
         return tot
-    return min(scan(sav_json), 8)
+    badges = min(scan(sav_json), 8)
+    return badges * 2
 
 
 # --- Pages wrappers ---
