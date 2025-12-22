@@ -17,20 +17,20 @@ from storage import (
 from conex_pkhex import PKHeXRuntime, get_bridge_path, extract_team, extract_box
 from interfaz import coins_from_badges
 
+# Intentar usar la misma función de liga que en Entrenadores para evitar desync
+try:
+    from entrenadores import coins_from_league
+except Exception:
+    def coins_from_league(user: str) -> int:
+        lr = st.session_state.get("league_results", {})
+        return sum(lr.get(user, {}).values())
+
 # Smbolo de moneda (consistente en toda la app)
 COIN = "\U0001FA99"
-COINS_BY_POSITION = {1: 12, 2: 11, 3: 9, 4: 8, 5: 9, 6: 6, 7: 5, 8: 4, 9: 2}
 
 
-def _coins_from_league(user: str) -> int:
-    lr = st.session_state.get("league_results", {})
-    user_map = lr.get(user, {})
-    return sum(COINS_BY_POSITION.get(pos, 0) for pos in user_map.values())
-
-
-@st.cache_data(ttl=60, show_spinner=False)
 def _calc_money_for_user(user: str) -> int:
-    liga = _coins_from_league(user)
+    liga = coins_from_league(user)
     badge_coins = 0
     try:
         if get_bridge_path():
