@@ -18,6 +18,43 @@ def page_saves() -> None:
     current_user = st.session_state.get("user")
     st.caption(f"Este save se registrara a: {current_user}")
 
+    def _bootstrap_latest_save():
+        """Si no hay save actual, toma el último de Supabase y lo marca y guarda en disco local."""
+        if not current_user:
+            return
+        cur = get_current_save_for_user(current_user)
+        if cur:
+            # Asegurar copia local del archivo actual
+            try:
+                folder = ensure_user_dir(current_user)
+                dest = folder / cur[1]
+                if not dest.exists():
+                    data = load_save_bytes(cur[1])
+                    if data:
+                        dest.write_bytes(data)
+            except Exception:
+                pass
+            return
+        # No hay save actual: coger el último listado
+        try:
+            lst = list_saves_by_user(current_user, limit=1)
+            if lst:
+                last_id, fname, oname, sha, up, ts = lst[0]
+                set_current_save_for_user(current_user, last_id)
+                # Guardar copia local
+                try:
+                    folder = ensure_user_dir(current_user)
+                    dest = folder / fname
+                    data = load_save_bytes(fname)
+                    if data:
+                        dest.write_bytes(data)
+                except Exception:
+                    pass
+        except Exception:
+            pass
+
+    _bootstrap_latest_save()
+
     file = st.file_uploader("Sube un archivo .sav", type=["sav"])
 
     col1, col2 = st.columns(2)
