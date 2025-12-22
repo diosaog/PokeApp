@@ -13,7 +13,7 @@ from utils import USERS, list_user_saves, ensure_user_dir
 from storage import (
     add_purchase, total_spent, list_purchases, set_purchase_status, add_redemption, upsert_pokemon_flags,
     get_flags_by_fingerprints, clear_all_pokemon_flags, clear_pokemon_flags_for_owner,
-    list_saves_by_user, load_save_bytes,
+    list_saves_by_user, load_save_bytes, get_current_save_for_user,
 )
 from conex_pkhex import PKHeXRuntime, get_bridge_path, extract_team, extract_box
 from interfaz import coins_from_badges
@@ -26,6 +26,12 @@ except Exception:
         lr = st.session_state.get("league_results", {})
         return sum(lr.get(user, {}).values())
 
+# Conteo robusto de medallas (mismo que Entrenadores) si esta disponible
+try:
+    from entrenadores import _count_badges  # type: ignore
+except Exception:
+    _count_badges = None
+
 # Smbolo de moneda (consistente en toda la app)
 COIN = "\U0001FA99"
 
@@ -34,21 +40,43 @@ def _calc_money_for_user(user: str) -> int:
     liga = coins_from_league(user)
     badge_coins = 0
     try:
-        # Asegurar que tenemos un .sav local; si no hay, bajar el más reciente de Supabase
-        saves = list_user_saves(user)
-        if not saves:
-            remote = list_saves_by_user(user, limit=1)
-            if remote:
-                _, fname, *_ = remote[0]
+        # 1) Intentar usar el save marcado como actual (persistido en settings/Supabase)
+        spath = None
+        cur = get_current_save_for_user(user)
+        if cur:
+            fname = cur[1]  # filename
+            p = ensure_user_dir(user) / fname
+            if not p.exists():
                 data = load_save_bytes(fname)
                 if data:
-                    p = ensure_user_dir(user) / fname
                     p.write_bytes(data)
-                    saves = [p]
+            if p.exists():
+                spath = p
 
-        if saves:
-            sav_json = PKHeXRuntime.open_sav(str(saves[0]))
-            badge_coins = coins_from_badges(sav_json)
+        # 2) Si no hay actual, bajar el más reciente del usuario
+        if spath is None:
+            saves = list_user_saves(user)
+            if not saves:
+                remote = list_saves_by_user(user, limit=1)
+                if remote:
+                    _, fname, *_ = remote[0]
+                    data = load_save_bytes(fname)
+                    if data:
+                        p = ensure_user_dir(user) / fname
+                        p.write_bytes(data)
+                        saves = [p]
+            if saves:
+                spath = saves[0]
+
+        if spath:
+            sav_json = PKHeXRuntime.open_sav(str(spath))
+            if _count_badges:
+                try:
+                    badge_coins = 2 * _count_badges(sav_json)
+                except Exception:
+                    badge_coins = coins_from_badges(sav_json)
+            else:
+                badge_coins = coins_from_badges(sav_json)
     except Exception:
         badge_coins = 0
     return int(liga + badge_coins)
