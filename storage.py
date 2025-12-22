@@ -6,6 +6,7 @@ import time
 from pathlib import Path
 from typing import Optional, List, Tuple, Any
 import httpx
+import datetime
 from supabase import create_client, Client
 
 # Rutas de datos en la raíz del proyecto
@@ -170,6 +171,7 @@ def save_upload(content: bytes, original_name: str, uploader: str|None=None) -> 
             )
             public_url = client.storage.from_(bucket).get_public_url(safe_name)
             # Insertar metadatos en tabla remota
+            dt_iso = datetime.datetime.utcfromtimestamp(ts).isoformat() + "Z"
             res = client.table("saves").insert(
                 {
                     "filename": safe_name,
@@ -177,6 +179,7 @@ def save_upload(content: bytes, original_name: str, uploader: str|None=None) -> 
                     "user": uploader,
                     "url": public_url,
                     "sha256": sha,
+                    "created_at": dt_iso,
                 }
             ).execute()
             new_id = None
@@ -210,22 +213,25 @@ def save_upload(content: bytes, original_name: str, uploader: str|None=None) -> 
 
 def list_saves(limit: int = 50) -> List[Tuple]:
     if _supabase_enabled():
-        client = _sb()
-        res = client.table("saves").select("*").order("id", desc=True).limit(limit).execute()
-        out = []
-        for row in res.data or []:
-            ts = _iso_to_ts(row.get("created_at"))
-            out.append(
-                (
-                    row.get("id"),
-                    row.get("filename"),
-                    row.get("original_name"),
-                    row.get("sha256"),
-                    row.get("user"),
-                    ts,
+        try:
+            client = _sb()
+            res = client.table("saves").select("*").order("id", desc=True).limit(limit).execute()
+            out = []
+            for row in res.data or []:
+                ts = _iso_to_ts(row.get("created_at"))
+                out.append(
+                    (
+                        row.get("id"),
+                        row.get("filename"),
+                        row.get("original_name"),
+                        row.get("sha256"),
+                        row.get("user"),
+                        ts,
+                    )
                 )
-            )
-        return out
+            return out
+        except Exception:
+            return []
     with _conn() as cx:
         return cx.execute(
             "SELECT id, filename, original_name, sha256, uploader, created_at FROM saves ORDER BY id DESC LIMIT ?",
