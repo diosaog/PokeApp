@@ -39,6 +39,10 @@ def _bucket_name() -> str:
     return _SUPABASE_BUCKET or "saves"
 
 
+def _now_iso() -> str:
+    return datetime.datetime.utcnow().isoformat() + "Z"
+
+
 def _conn():
     return sqlite3.connect(DB_PATH)
 
@@ -171,7 +175,6 @@ def save_upload(content: bytes, original_name: str, uploader: str|None=None) -> 
             )
             public_url = client.storage.from_(bucket).get_public_url(safe_name)
             # Insertar metadatos en tabla remota
-            dt_iso = datetime.datetime.utcfromtimestamp(ts).isoformat() + "Z"
             res = client.table("saves").insert(
                 {
                     "filename": safe_name,
@@ -179,7 +182,7 @@ def save_upload(content: bytes, original_name: str, uploader: str|None=None) -> 
                     "user": uploader,
                     "url": public_url,
                     "sha256": sha,
-                    "created_at": dt_iso,
+                    "created_at": _now_iso(),
                 }
             ).execute()
             new_id = None
@@ -240,21 +243,17 @@ def list_saves(limit: int = 50) -> List[Tuple]:
 
 
 def set_current_save(save_id: int):
-    with _conn() as cx:
-        cx.execute(
-            """INSERT INTO settings(key,value) VALUES('current_save', ?)
-                   ON CONFLICT(key) DO UPDATE SET value=excluded.value""",
-            (str(save_id),)
-        )
-        cx.commit()
+    settings_set("current_save", str(save_id))
 
 
 def get_current_save() -> Optional[Tuple]:
-    with _conn() as cx:
-        v = cx.execute("SELECT value FROM settings WHERE key='current_save'").fetchone()
-        if not v:
-            return None
-        save_id = int(v[0])
+    v = settings_get("current_save")
+    if not v:
+        return None
+    try:
+        save_id = int(v)
+    except Exception:
+        return None
     return _fetch_save_by_id(save_id)
 
 
@@ -334,23 +333,17 @@ def _user_key(user: str) -> str:
 def set_current_save_for_user(user: str, save_id: int) -> None:
     if save_id is None:
         return
-    with _conn() as cx:
-        cx.execute(
-            """
-            INSERT INTO settings(key,value) VALUES(?,?)
-            ON CONFLICT(key) DO UPDATE SET value=excluded.value
-            """,
-            (_user_key(user), str(int(save_id))),
-        )
-        cx.commit()
+    settings_set(_user_key(user), str(int(save_id)))
 
 
 def get_current_save_for_user(user: str) -> Optional[Tuple]:
-    with _conn() as cx:
-        v = cx.execute("SELECT value FROM settings WHERE key=?", (_user_key(user),)).fetchone()
+    v = settings_get(_user_key(user))
     if not v:
         return None
-    save_id = int(v[0])
+    try:
+        save_id = int(v)
+    except Exception:
+        return None
     return _fetch_save_by_id(save_id)
 
 
@@ -364,6 +357,24 @@ def get_current_save_path_for_user(user: str):
 
 def add_purchase(user: str, item: str, price: int) -> int:
     ts = int(time.time())
+    if _supabase_enabled():
+        try:
+            client = _sb()
+            res = client.table("purchases").insert(
+                {
+                    "user": user,
+                    "item": item,
+                    "price": int(price),
+                    "created_at": _now_iso(),
+                    "status": "pending",
+                    "redeemed_at": None,
+                }
+            ).execute()
+            data = res.data or []
+            if data:
+                return int(data[0].get("id") or 0)
+        except Exception:
+            pass
     with _conn() as cx:
         cx.execute(
             "INSERT INTO purchases(user, item, price, created_at, status) VALUES(?,?,?,?,?)",
@@ -375,12 +386,56 @@ def add_purchase(user: str, item: str, price: int) -> int:
 
 
 def total_spent(user: str) -> int:
+    if _supabase_enabled():
+        try:
+            client = _sb()
+            res = client.rpc("rpc_total_spent", {"p_user": user}).execute()
+            # rpc_total_spent is optional; fallback to manual sum
+            if res.data:
+                val = res.data[0] if isinstance(res.data, list) else res.data
+                try:
+                    return int(val)
+                except Exception:
+                    pass
+            res = client.table("purchases").select("price").eq("user", user).execute()
+            s = 0
+            for row in res.data or []:
+                try:
+                    s += int(row.get("price") or 0)
+                except Exception:
+                    continue
+            return s
+        except Exception:
+            pass
     with _conn() as cx:
         row = cx.execute("SELECT COALESCE(SUM(price),0) FROM purchases WHERE user=?", (user,)).fetchone()
         return int(row[0] or 0)
 
 
 def list_purchases(user: str | None = None, limit: int = 100):
+    if _supabase_enabled():
+        try:
+            client = _sb()
+            query = client.table("purchases").select("*").order("id", desc=True).limit(limit)
+            if user:
+                query = query.eq("user", user)
+            res = query.execute()
+            out = []
+            for row in res.data or []:
+                out.append(
+                    (
+                        row.get("id"),
+                        row.get("user"),
+                        row.get("item"),
+                        row.get("price"),
+                        _iso_to_ts(row.get("created_at")),
+                        row.get("status"),
+                        _iso_to_ts(row.get("redeemed_at")),
+                    )
+                )
+            return out
+        except Exception:
+            return []
     with _conn() as cx:
         if user:
             return cx.execute(
@@ -394,6 +449,34 @@ def list_purchases(user: str | None = None, limit: int = 100):
 
 
 def list_inventory(user: str, *, status: str | None = None, limit: int = 200):
+    if _supabase_enabled():
+        try:
+            client = _sb()
+            query = (
+                client.table("purchases")
+                .select("id,item,price,created_at,status,redeemed_at")
+                .eq("user", user)
+                .order("id", desc=True)
+                .limit(limit)
+            )
+            if status:
+                query = query.eq("status", status)
+            res = query.execute()
+            out = []
+            for row in res.data or []:
+                out.append(
+                    (
+                        row.get("id"),
+                        row.get("item"),
+                        row.get("price"),
+                        _iso_to_ts(row.get("created_at")),
+                        row.get("status"),
+                        _iso_to_ts(row.get("redeemed_at")),
+                    )
+                )
+            return out
+        except Exception:
+            return []
     with _conn() as cx:
         if status:
             return cx.execute(
@@ -409,6 +492,23 @@ def list_inventory(user: str, *, status: str | None = None, limit: int = 200):
 
 def add_redemption(purchase_id: int, user: str, item: str, payload_json: str) -> int:
     ts = int(time.time())
+    if _supabase_enabled():
+        try:
+            client = _sb()
+            res = client.table("redemptions").insert(
+                {
+                    "purchase_id": int(purchase_id),
+                    "user": user,
+                    "item": item,
+                    "payload_json": payload_json,
+                    "created_at": _now_iso(),
+                }
+            ).execute()
+            data = res.data or []
+            if data:
+                return int(data[0].get("id") or 0)
+        except Exception:
+            pass
     with _conn() as cx:
         cx.execute(
             "INSERT INTO redemptions(purchase_id, user, item, payload_json, created_at) VALUES(?,?,?,?,?)",
@@ -421,6 +521,16 @@ def add_redemption(purchase_id: int, user: str, item: str, payload_json: str) ->
 
 def set_purchase_status(purchase_id: int, status: str) -> None:
     ts = int(time.time())
+    if _supabase_enabled():
+        try:
+            client = _sb()
+            data = {"status": status}
+            if status == "used":
+                data["redeemed_at"] = _now_iso()
+            client.table("purchases").update(data).eq("id", int(purchase_id)).execute()
+            return
+        except Exception:
+            pass
     with _conn() as cx:
         if status == 'used':
             cx.execute("UPDATE purchases SET status=?, redeemed_at=? WHERE id=?", (status, ts, int(purchase_id)))
@@ -432,6 +542,22 @@ def set_purchase_status(purchase_id: int, status: str) -> None:
 
 def upsert_pokemon_flags(owner: str, fingerprint: str, flags_json: str) -> None:
     ts = int(time.time())
+    if _supabase_enabled():
+        try:
+            client = _sb()
+            client.table("pokemon_flags").upsert(
+                {
+                    "owner": owner,
+                    "fingerprint": fingerprint,
+                    "flags_json": flags_json,
+                    "created_at": _now_iso(),
+                    "updated_at": _now_iso(),
+                },
+                on_conflict="fingerprint",
+            ).execute()
+            return
+        except Exception:
+            pass
     with _conn() as cx:
         row = cx.execute("SELECT id FROM pokemon_flags WHERE fingerprint=?", (fingerprint,)).fetchone()
         if row:
@@ -450,6 +576,19 @@ def upsert_pokemon_flags(owner: str, fingerprint: str, flags_json: str) -> None:
 def get_flags_by_fingerprints(fps: list[str]) -> dict:
     if not fps:
         return {}
+    if _supabase_enabled():
+        try:
+            client = _sb()
+            res = client.table("pokemon_flags").select("fingerprint,owner,flags_json").in_("fingerprint", fps).execute()
+            out = {}
+            for row in res.data or []:
+                out[row.get("fingerprint")] = {
+                    "owner": row.get("owner"),
+                    "flags_json": row.get("flags_json"),
+                }
+            return out
+        except Exception:
+            return {}
     qmarks = ",".join(["?"] * len(fps))
     with _conn() as cx:
         rows = cx.execute(
@@ -463,6 +602,13 @@ def get_flags_by_fingerprints(fps: list[str]) -> dict:
 
 
 def clear_purchases() -> None:
+    if _supabase_enabled():
+        try:
+            client = _sb()
+            client.table("purchases").delete().neq("id", -1).execute()
+            return
+        except Exception:
+            pass
     with _conn() as cx:
         cx.execute("DELETE FROM purchases")
         cx.commit()
@@ -470,12 +616,26 @@ def clear_purchases() -> None:
 # Pokemon flags reset helpers
 
 def clear_all_pokemon_flags() -> None:
+    if _supabase_enabled():
+        try:
+            client = _sb()
+            client.table("pokemon_flags").delete().neq("fingerprint", "").execute()
+            return
+        except Exception:
+            pass
     with _conn() as cx:
         cx.execute("DELETE FROM pokemon_flags")
         cx.commit()
 
 
 def clear_pokemon_flags_for_owner(owner: str) -> None:
+    if _supabase_enabled():
+        try:
+            client = _sb()
+            client.table("pokemon_flags").delete().eq("owner", owner).execute()
+            return
+        except Exception:
+            pass
     with _conn() as cx:
         cx.execute("DELETE FROM pokemon_flags WHERE owner=?", (owner,))
         cx.commit()
@@ -483,6 +643,16 @@ def clear_pokemon_flags_for_owner(owner: str) -> None:
 # Settings genéricos
 
 def settings_set(key: str, value: str) -> None:
+    if _supabase_enabled():
+        try:
+            client = _sb()
+            client.table("settings").upsert(
+                {"key": key, "value": value},
+                on_conflict="key",
+            ).execute()
+            return
+        except Exception:
+            pass
     with _conn() as cx:
         cx.execute(
             """INSERT INTO settings(key,value) VALUES(?,?)
@@ -493,6 +663,15 @@ def settings_set(key: str, value: str) -> None:
 
 
 def settings_get(key: str) -> str | None:
+    if _supabase_enabled():
+        try:
+            client = _sb()
+            res = client.table("settings").select("value").eq("key", key).limit(1).execute()
+            data = res.data or []
+            if data:
+                return data[0].get("value")
+        except Exception:
+            pass
     with _conn() as cx:
         row = cx.execute("SELECT value FROM settings WHERE key=?", (key,)).fetchone()
         return row[0] if row else None
