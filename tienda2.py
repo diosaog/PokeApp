@@ -9,10 +9,11 @@ from pathlib import Path
 
 import streamlit as st
 
-from utils import USERS, list_user_saves
+from utils import USERS, list_user_saves, ensure_user_dir
 from storage import (
     add_purchase, total_spent, list_purchases, set_purchase_status, add_redemption, upsert_pokemon_flags,
     get_flags_by_fingerprints, clear_all_pokemon_flags, clear_pokemon_flags_for_owner,
+    list_saves_by_user, load_save_bytes,
 )
 from conex_pkhex import PKHeXRuntime, get_bridge_path, extract_team, extract_box
 from interfaz import coins_from_badges
@@ -33,8 +34,18 @@ def _calc_money_for_user(user: str) -> int:
     liga = coins_from_league(user)
     badge_coins = 0
     try:
-        # Abrir siempre el último .sav local (ya sincronizado desde Supabase) para contar medallas
+        # Asegurar que tenemos un .sav local; si no hay, bajar el más reciente de Supabase
         saves = list_user_saves(user)
+        if not saves:
+            remote = list_saves_by_user(user, limit=1)
+            if remote:
+                _, fname, *_ = remote[0]
+                data = load_save_bytes(fname)
+                if data:
+                    p = ensure_user_dir(user) / fname
+                    p.write_bytes(data)
+                    saves = [p]
+
         if saves:
             sav_json = PKHeXRuntime.open_sav(str(saves[0]))
             badge_coins = coins_from_badges(sav_json)
