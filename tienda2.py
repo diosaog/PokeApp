@@ -15,7 +15,7 @@ from storage import (
     get_flags_by_fingerprints, clear_all_pokemon_flags, clear_pokemon_flags_for_owner,
     list_saves_by_user, load_save_bytes, get_current_save_for_user,
 )
-from conex_pkhex import PKHeXRuntime, get_bridge_path, extract_team, extract_box
+from conex_pkhex import PKHeXRuntime, get_bridge_path, extract_team, extract_box, open_sav_cached
 from interfaz import coins_from_badges
 
 # Intentar usar la misma función de liga que en Entrenadores para evitar desync
@@ -69,7 +69,7 @@ def _calc_money_for_user(user: str) -> int:
                 spath = saves[0]
 
         if spath:
-            sav_json = PKHeXRuntime.open_sav(str(spath))
+            sav_json = open_sav_cached(str(spath))
             if _count_badges:
                 try:
                     badge_coins = 2 * _count_badges(sav_json)
@@ -473,7 +473,7 @@ def _render_redeem_flow(ctx: dict, current_user: str) -> None:
             saves = list_user_saves(target)
             if saves:
                 spath = str(saves[0])
-                sav_json = PKHeXRuntime.open_sav(spath)
+                sav_json = open_sav_cached(spath)
                 if origin_kind == "Equipo":
                     mons = extract_team(sav_json, save_path=spath)
                 else:
@@ -542,7 +542,7 @@ def _render_redeem_flow(ctx: dict, current_user: str) -> None:
             saves = list_user_saves(current_user)
             if saves:
                 spath = str(saves[0])
-                sav_json = PKHeXRuntime.open_sav(spath)
+                sav_json = open_sav_cached(spath)
                 if origin_kind == "Equipo":
                     mons = extract_team(sav_json, save_path=spath)
                 else:
@@ -601,7 +601,7 @@ def _render_redeem_flow(ctx: dict, current_user: str) -> None:
             saves = list_user_saves(current_user)
             if saves:
                 spath = str(saves[0])
-                sav_json = PKHeXRuntime.open_sav(spath)
+                sav_json = open_sav_cached(spath)
                 if origin_kind == "Equipo":
                     mons = extract_team(sav_json, save_path=spath)
                 else:
@@ -662,7 +662,7 @@ def _render_redeem_flow(ctx: dict, current_user: str) -> None:
             saves = list_user_saves(current_user)
             if saves:
                 spath = str(saves[0])
-                sav_json = PKHeXRuntime.open_sav(spath)
+                sav_json = open_sav_cached(spath)
                 mons = extract_box(sav_json, 17, save_path=spath)  # Caja 18
             else:
                 st.warning("No tienes save disponible.")

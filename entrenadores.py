@@ -17,7 +17,7 @@ from utils import USERS, DEFAULT_DLL_HINT, list_user_saves
 from storage import get_flags_by_fingerprints, list_inventory
 from pkmmeta import pokemon_fingerprint
 from conex_pkhex import (
-    PKHeXRuntime, extract_team, extract_box, has_pc_data, get_bridge_path, get_box_meta_quick
+    PKHeXRuntime, extract_team, extract_box, has_pc_data, get_bridge_path, get_box_meta_quick, open_sav_cached
 )
 
 # TamaÂ±os y ajustes
@@ -1180,7 +1180,7 @@ def page_entrenadores_view() -> None:
         if not save_path.exists():
             st.error("El archivo .sav del entrenador no existe.")
             return
-        sav_json = PKHeXRuntime.open_sav(save_path)
+        sav_json = open_sav_cached(save_path)
     except Exception as e:
         st.error(f"No se pudo abrir/validar el guardado: {e}")
         try:
@@ -1439,7 +1439,7 @@ if st is not None:
     @st.cache_data(ttl=120, show_spinner=False)
     def _cached_team(save_path: str, mtime: float) -> List[dict]:
         try:
-            sav_json = PKHeXRuntime.open_sav(save_path)
+            sav_json = open_sav_cached(save_path)
             return extract_team(sav_json, save_path=save_path) or []
         except Exception:
             return []
@@ -1447,7 +1447,7 @@ if st is not None:
     @st.cache_data(ttl=120, show_spinner=False)
     def _cached_box(save_path: str, mtime: float, box_index: int) -> List[dict]:
         try:
-            sav_json = PKHeXRuntime.open_sav(save_path)
+            sav_json = open_sav_cached(save_path)
             return extract_box(sav_json, box_index, save_path=save_path) or []
         except Exception:
             return []

@@ -7,7 +7,7 @@ import streamlit as st
 
 from utils import USERS, list_user_saves
 from storage import settings_get, settings_set, clear_purchases, add_purchase
-from conex_pkhex import PKHeXRuntime, extract_box, has_pc_data
+from conex_pkhex import PKHeXRuntime, extract_box, has_pc_data, open_sav_cached
 
 
 # ===== Estado y persistencia =====
@@ -114,7 +114,7 @@ def _count_muertos_for_trainer(trainer: str) -> int:
         if not saves:
             return 0
         active_path = str(saves[0])
-        sav_json = PKHeXRuntime.open_sav(active_path)
+        sav_json = open_sav_cached(active_path)
         if not has_pc_data(sav_json):
             return 0
         muertos_list = extract_box(sav_json, 17)  # Caja 18

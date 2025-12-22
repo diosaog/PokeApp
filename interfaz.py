@@ -8,7 +8,7 @@ import streamlit as st
 
 from utils import USERS, list_user_saves, DEFAULT_DLL_HINT
 from showdown_sprites import showdown_sprite_url
-from conex_pkhex import PKHeXRuntime, extract_team, get_bridge_path
+from conex_pkhex import PKHeXRuntime, extract_team, get_bridge_path, open_sav_cached
 from storage import init_storage
 
 
@@ -281,7 +281,7 @@ def _get_team_sprite_urls(user: str) -> list[str]:
         if not saves:
             return urls
         sav_path = str(saves[0])
-        sav_json = PKHeXRuntime.open_sav(sav_path)
+        sav_json = open_sav_cached(sav_path)
         mons = extract_team(sav_json, save_path=sav_path) or []
         prefer_anim = False  # sin animaciones en la tarjeta
         for m in mons[:6]:
@@ -318,7 +318,7 @@ def _get_badges_count(user: str) -> int:
         if not saves:
             return 0
         sav_path = str(saves[0])
-        sav_json = PKHeXRuntime.open_sav(sav_path)
+        sav_json = open_sav_cached(sav_path)
         return int(coins_from_badges(sav_json))
     except Exception:
         return 0

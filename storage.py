@@ -8,6 +8,10 @@ from typing import Optional, List, Tuple, Any
 import httpx
 import datetime
 from supabase import create_client, Client
+try:
+    import streamlit as st  # type: ignore
+except Exception:
+    st = None  # type: ignore
 
 # Rutas de datos en la raíz del proyecto
 BASE_DIR = Path(__file__).resolve().parent
@@ -16,6 +20,12 @@ SAVES_DIR = DATA_DIR / "saves"
 DB_PATH = DATA_DIR / "app.db"
 _SUPABASE: Client | None = None
 _SUPABASE_BUCKET = os.environ.get("SUPABASE_BUCKET", "saves")
+
+
+def _cache_data(ttl: int = 15):
+    if st is None:
+        return lambda f: f
+    return st.cache_data(ttl=ttl, show_spinner=False)
 
 
 def _supabase_enabled() -> bool:
@@ -130,6 +140,7 @@ def _iso_to_ts(val: Any) -> int:
         return 0
 
 
+@_cache_data(ttl=20)
 def _fetch_save_by_id(save_id: int) -> Optional[Tuple]:
     if _supabase_enabled():
         try:
@@ -214,6 +225,7 @@ def save_upload(content: bytes, original_name: str, uploader: str|None=None) -> 
     return {"id": rowid, "filename": safe_name, "sha256": sha, "created_at": ts}
 
 
+@_cache_data(ttl=15)
 def list_saves(limit: int = 50) -> List[Tuple]:
     if _supabase_enabled():
         try:
@@ -285,6 +297,7 @@ def get_current_save_path() -> Path | None:
         return None
     return SAVES_DIR / cur[1]
 
+@_cache_data(ttl=15)
 def list_saves_by_user(user: str, limit: int = 50) -> List[Tuple]:
     if _supabase_enabled():
         try:
@@ -412,6 +425,7 @@ def total_spent(user: str) -> int:
         return int(row[0] or 0)
 
 
+@_cache_data(ttl=15)
 def list_purchases(user: str | None = None, limit: int = 100):
     if _supabase_enabled():
         try:
@@ -448,6 +462,7 @@ def list_purchases(user: str | None = None, limit: int = 100):
         ).fetchall()
 
 
+@_cache_data(ttl=15)
 def list_inventory(user: str, *, status: str | None = None, limit: int = 200):
     if _supabase_enabled():
         try:
@@ -662,6 +677,7 @@ def settings_set(key: str, value: str) -> None:
         cx.commit()
 
 
+@_cache_data(ttl=30)
 def settings_get(key: str) -> str | None:
     if _supabase_enabled():
         try:

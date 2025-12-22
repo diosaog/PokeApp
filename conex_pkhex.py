@@ -15,8 +15,14 @@ _BOX_CACHE: Dict[Tuple[str, int, Optional[str]], Dict[str, Any]] = {}
 
 def _clear_caches() -> None:
     _BOX_CACHE.clear()
+    try:
+        import streamlit as st  # type: ignore
+        if hasattr(st, "session_state") and "_sav_cache" in st.session_state:
+            st.session_state.pop("_sav_cache", None)
+    except Exception:
+        pass
 
-__all__ = ["PKHeXRuntime", "extract_team", "get_box_meta", "extract_box", "has_pc_data", "get_bridge_path"]
+__all__ = ["PKHeXRuntime", "extract_team", "get_box_meta", "extract_box", "has_pc_data", "get_bridge_path", "open_sav_cached"]
 
 # ================= bridge runtime / estado =================
 
@@ -93,6 +99,33 @@ class PKHeXRuntime:
                 f"Ruta actual: {bp}"
             )
         return data
+
+
+def open_sav_cached(path: str | Path) -> Dict[str, Any]:
+    """Abre el .sav reutilizando un cache simple por ruta+mtime en session_state.
+    Evita repetir lecturas costosas dentro del mismo proceso de Streamlit."""
+    p = Path(path)
+    if not p.exists():
+        raise FileNotFoundError(f"No existe el .sav: {p}")
+    try:
+        import streamlit as st  # type: ignore
+    except Exception:
+        st = None  # type: ignore
+
+    mtime = p.stat().st_mtime
+    cache = None
+    if st is not None:
+        cache = st.session_state.setdefault("_sav_cache", {})
+        entry = cache.get(str(p))
+        if isinstance(entry, tuple) and len(entry) == 2 and entry[0] == mtime:
+            cached = entry[1]
+            if isinstance(cached, dict):
+                return cached
+
+    data = PKHeXRuntime.open_sav(p)
+    if cache is not None:
+        cache[str(p)] = (mtime, data)
+    return data
 
 def get_bridge_path() -> str | None:
     return str(_BRIDGE_PATH) if _BRIDGE_PATH is not None else None
