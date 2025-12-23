@@ -21,10 +21,11 @@ def apply_css() -> None:
     css = """
     <style>
     :root {
-      --accent: #ef5350; /* rojo Pokemon */
-      --accent-hover: #d32f2f;
+      --accent: #ff1d1d; /* rojo Pokeball */
+      --accent-hover: #d01818;
       --text-1: #e6edf3;
       --text-2: #c9d1d9;
+      --divider: rgba(255,255,255,0.14);
     }
     .main { position: relative; }
     .main:before {
@@ -50,7 +51,13 @@ def apply_css() -> None:
     h1,h2,h3,h4,h5,h6 { color: var(--text-1); }
     p,span,div,label { color: var(--text-2); }
     section[data-testid="stSidebar"] { background: rgba(16,19,26,0.9); backdrop-filter: blur(6px); border-right: 1px solid rgba(255,255,255,0.06); }
-    hr { border-top: 1px solid rgba(255,255,255,0.08); }
+    hr { border: none; height: 2px; background: linear-gradient(90deg, transparent 0 10%, var(--divider) 10% 90%, transparent 90% 100%); position: relative; }
+    hr::after { content:""; position:absolute; top:-7px; left:50%; transform:translateX(-50%); width:20px; height:20px; border-radius:50%;
+      background: radial-gradient(circle at 50% 50%, rgba(255,255,255,0.9) 0 3px, transparent 4px),
+                  linear-gradient(180deg, #ff1d1d 0 50%, #f9f9f9 50% 100%);
+      box-shadow: 0 0 0 2px rgba(0,0,0,0.35), 0 2px 6px rgba(0,0,0,0.25);
+      border: 2px solid #111;
+    }
     .stButton>button, .stDownloadButton>button { border-radius: 16px; padding: 0.6rem 1rem; min-height: 40px; background: linear-gradient(180deg, var(--accent), color-mix(in srgb, var(--accent) 80%, #7f1d1d)); border: 1px solid rgba(255,255,255,0.12); color: #fff; box-shadow: 0 6px 18px rgba(239,83,80,.18); }
     .stButton>button:focus-visible { outline: 2px solid #90caf9; outline-offset: 2px; }
 
@@ -70,8 +77,11 @@ def apply_css() -> None:
     /* Separador Pokeball */
     .poke-sep { position: relative; height: 1px; background: rgba(255,255,255,0.12); margin: 18px 0; }
     .poke-sep::after { content:""; position:absolute; left:50%; top:50%; transform:translate(-50%,-50%); width:28px; height:28px; border-radius:50%;
-      background: radial-gradient(circle at 50% 50%, rgba(255,255,255,0.85) 0 3px, transparent 4px), linear-gradient(0deg, rgba(255,255,255,0.9) 0 50%, rgba(10,13,18,0.9) 50% 100%);
-      box-shadow: 0 0 0 2px rgba(255,255,255,0.12), 0 2px 8px rgba(0,0,0,0.25);
+      background:
+        radial-gradient(circle at 50% 50%, rgba(255,255,255,0.9) 0 3px, transparent 4px),
+        linear-gradient(180deg, #ff1d1d 0 50%, #f7f7f7 50% 100%);
+      box-shadow: 0 0 0 2px rgba(0,0,0,0.4), 0 2px 8px rgba(0,0,0,0.35);
+      border: 2px solid #0b0d12;
     }
     \n    .status-badge { display:inline-block; padding:2px 10px; border-radius:999px; font-weight:700; font-size:0.8rem; margin-left:8px; }\n    .status-ok { background:#1b5e20; color:#e8f5e9; border:1px solid rgba(255,255,255,0.15);}\n    .status-warn { background:#7f1d1d; color:#ffebee; border:1px solid rgba(255,255,255,0.15);}\n
     </style>
@@ -98,7 +108,7 @@ def apply_css() -> None:
         .badge-off img { filter: grayscale(1) opacity(0.35) drop-shadow(0 0 0 rgba(0,0,0,0)); }
         .badge-dot { width:12px; height:12px; border-radius:50%; display:inline-block; box-shadow: inset 0 0 0 1px rgba(0,0,0,0.35); background: rgba(255,255,255,0.12); }
         .badge-on { background: color-mix(in srgb, var(--accent, #ef5350) 75%, #ffffff); }
-        .pokeball-mini { width:16px; height:16px; border-radius:50%; position:relative; display:inline-block; background: linear-gradient(180deg, #fff 0 49%, #e11 51% 100%); border:2px solid #111; box-shadow: inset 0 0 0 2px #111; animation: spin 4s linear infinite; }
+        .pokeball-mini { width:16px; height:16px; border-radius:50%; position:relative; display:inline-block; background: linear-gradient(180deg, #ff1d1d 0 49%, #f7f7f7 51% 100%); border:2px solid #111; box-shadow: inset 0 0 0 2px #111; animation: spin 4s linear infinite; }
         .pokeball-mini::after { content:""; position:absolute; left:50%; top:50%; transform:translate(-50%,-50%); width:6px; height:6px; border-radius:50%; background:#fff; border:2px solid #111; box-shadow: 0 0 0 1px rgba(0,0,0,0.35); }
         @keyframes spin { 0% { transform: rotate(0deg);} 100% { transform: rotate(360deg);} }
         </style>
@@ -114,6 +124,29 @@ def apply_css() -> None:
         .mini-mon { width:28px; height:28px; border-radius:6px; background:rgba(255,255,255,0.06); display:inline-flex; align-items:center; justify-content:center; overflow:hidden; box-shadow: 0 1px 0 rgba(0,0,0,0.25); }
         .mini-mon img { width:100%; height:100%; object-fit:contain; image-rendering: -webkit-optimize-contrast; filter: drop-shadow(0 0 2px rgba(0,0,0,0.35)); }
         </style>
+        """,
+        unsafe_allow_html=True,
+    )
+
+    # Audio global para clicks de botones (tono breve estilo UI Pokémon)
+    st.markdown(
+        """
+        <audio id="poke-click-sound" preload="auto" style="display:none">
+          <source src="data:audio/wav;base64,UklGRjQAAABXQVZFZm10IBAAAAABAAEAIlYAAESsAAACABAAZGF0YQAAAAAA//8AAP//AAD//wAA//8AAP//AAD//wAA//8AAP//AAD//wAA" type="audio/wav">
+        </audio>
+        <script>
+        (function(){
+          const play = () => {
+            const a = document.getElementById("poke-click-sound");
+            if (!a) return;
+            try { a.currentTime = 0; a.play(); } catch(e) {}
+          };
+          document.addEventListener("click", (e) => {
+            const btn = e.target.closest("button, [role='button']");
+            if (btn) play();
+          }, true);
+        })();
+        </script>
         """,
         unsafe_allow_html=True,
     )
