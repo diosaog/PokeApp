@@ -128,28 +128,6 @@ def apply_css() -> None:
         unsafe_allow_html=True,
     )
 
-    # Audio global para clicks de botones (tono breve estilo UI Pokémon)
-    st.markdown(
-        """
-        <audio id="poke-click-sound" preload="auto" style="display:none">
-          <source src="data:audio/wav;base64,UklGRjQAAABXQVZFZm10IBAAAAABAAEAIlYAAESsAAACABAAZGF0YQAAAAAA//8AAP//AAD//wAA//8AAP//AAD//wAA//8AAP//AAD//wAA" type="audio/wav">
-        </audio>
-        <script>
-        (function(){
-          const play = () => {
-            const a = document.getElementById("poke-click-sound");
-            if (!a) return;
-            try { a.currentTime = 0; a.play(); } catch(e) {}
-          };
-          document.addEventListener("click", (e) => {
-            const btn = e.target.closest("button, [role='button']");
-            if (btn) play();
-          }, true);
-        })();
-        </script>
-        """,
-        unsafe_allow_html=True,
-    )
 
     # Filtro global: mostrar texto sin acentos y limpia mojibake comun
     try:
@@ -320,6 +298,21 @@ def _get_team_sprite_urls(user: str) -> list[str]:
     try:
         if not user or user == '-':
             return urls
+        # Cache por usuario+mtime para evitar abrir el save en cada rerun
+        saves = list_user_saves(user)
+        sav_path = None
+        mtime = None
+        try:
+            if saves:
+                import os
+                sav_path = str(saves[0])
+                mtime = os.path.getmtime(sav_path)
+                cache = st.session_state.setdefault("_team_sprite_cache", {})
+                key = (user, mtime)
+                if key in cache:
+                    return cache[key]
+        except Exception:
+            sav_path = str(saves[0]) if saves else None
         # Asegurar bridge cargado (intento rápido)
         if not get_bridge_path():
             try:
@@ -336,10 +329,11 @@ def _get_team_sprite_urls(user: str) -> list[str]:
                     PKHeXRuntime.load(hint)
             except Exception:
                 return urls
-        saves = list_user_saves(user)
-        if not saves:
-            return urls
-        sav_path = str(saves[0])
+        if not sav_path:
+            saves = list_user_saves(user)
+            if not saves:
+                return urls
+            sav_path = str(saves[0])
         sav_json = open_sav_cached(sav_path)
         mons = extract_team(sav_json, save_path=sav_path) or []
         prefer_anim = False  # sin animaciones en la tarjeta
@@ -357,6 +351,11 @@ def _get_team_sprite_urls(user: str) -> list[str]:
                 urls.append(url)
             except Exception:
                 continue
+        try:
+            if mtime is not None:
+                st.session_state.setdefault("_team_sprite_cache", {})[(user, mtime)] = urls
+        except Exception:
+            pass
     except Exception:
         pass
     return urls
@@ -602,3 +601,4 @@ def page_copa() -> None:
             _swiss.page_copa()
     except Exception as e:
         st.error(f"No se pudo cargar la copa: {e}")
+

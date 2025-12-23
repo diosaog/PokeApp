@@ -299,12 +299,12 @@ def page_tienda() -> None:
     st.subheader("Catalogo")
     # Comodines (por diseño, sin porcentajes en la descripción)
     comodines = [
-        {"name": "Revivir Pokemon", "price": 10, "icon": ""},
-        {"name": "Robar Pokemon",   "price": 10, "icon": ""},
-        {"name": "Recaptura",       "price": 8,  "icon": ""},
-        {"name": "Captura Extra",   "price": 5,  "icon": ""},
-        {"name": "Blindar Pokemon", "price": 10, "icon": ""},
-        {"name": "Fosil",           "price": 5,  "icon": ""},
+        {"name": "Revivir Pokemon", "price": 10, "icon": "", "img": _pokeapi_item_png("max-revive")},
+        {"name": "Robar Pokemon",   "price": 10, "icon": "", "img": _pokeapi_item_png("dread-plate")},
+        {"name": "Recaptura",       "price": 8,  "icon": "", "img": _pokeapi_item_png("repeat-ball")},
+        {"name": "Captura Extra",   "price": 5,  "icon": "", "img": _pokeapi_item_png("ultra-ball")},
+        {"name": "Blindar Pokemon", "price": 10, "icon": "", "img": _pokeapi_item_png("metal-coat")},
+        {"name": "Fosil",           "price": 5,  "icon": "", "img": _pokeapi_item_png("helix-fossil")},
     ]
     # Bayas (Gen 14)
     bayas = [
