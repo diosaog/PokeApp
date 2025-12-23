@@ -240,17 +240,38 @@ def render_poke_separator() -> None:
 
 # --- Sidebar profile helpers ---
 def _find_trainer_image_local(trainer: str) -> str:
+    """Busca retrato local reusando la lógica robusta de Entrenadores si está disponible."""
     try:
+        # Reutilizar helper más completo si existe
+        try:
+            import entrenadores as _ent  # type: ignore
+            if hasattr(_ent, "_find_trainer_image"):
+                img = _ent._find_trainer_image(trainer)  # type: ignore
+                if img:
+                    return str(img)
+        except Exception:
+            pass
+
         pdir = Path('assets') / 'trainers'
         if not pdir.exists():
             return ''
-        bases = [trainer, trainer.lower(), trainer.capitalize(), trainer.replace(' ', '_'), trainer.replace(' ', '-')]
-        exts = ['.png','.jpg','.jpeg','.webp']
+        bases = [
+            trainer,
+            trainer.lower(),
+            trainer.capitalize(),
+            trainer.replace(' ', '_'),
+            trainer.replace(' ', '-'),
+        ]
+        exts = ['.png', '.jpg', '.jpeg', '.webp']
+        low = {f.name.lower(): str(f) for f in pdir.glob("*") if f.suffix.lower() in exts}
         for b in bases:
             for e in exts:
-                f = pdir / f"{b}{e}"
-                if f.exists():
-                    return str(f)
+                cand = f"{b}{e}"
+                p = pdir / cand
+                if p.exists():
+                    return str(p)
+                if cand.lower() in low:
+                    return low[cand.lower()]
     except Exception:
         return ''
     return ''
@@ -319,7 +340,8 @@ def _get_badges_count(user: str) -> int:
             return 0
         sav_path = str(saves[0])
         sav_json = open_sav_cached(sav_path)
-        return int(coins_from_badges(sav_json))
+        # coins_from_badges devuelve monedas (2 por medalla); convertimos a medallas
+        return int(coins_from_badges(sav_json) // 2)
     except Exception:
         return 0
 

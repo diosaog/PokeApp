@@ -544,6 +544,7 @@ def _count_badges_from_value(v) -> int:
 def _count_badges(sav_json: dict) -> int:
     if not isinstance(sav_json, dict):
         return 0
+    # Rutas directas preferidas
     for path in [("trainer", "badges"), ("Trainer", "Badges"), ("badges",), ("Badges",)]:
         cur, ok = sav_json, True
         for k in path:
@@ -559,23 +560,33 @@ def _count_badges(sav_json: dict) -> int:
     for k in ("BadgeFlags", "Badges", "badgesFlags", "badge_flags"):
         if k in sav_json and isinstance(sav_json[k], int):
             return min(_bitcount(sav_json[k]), 8)
+
     SINNOH = {"coal", "forest", "relic", "cobble", "fen", "mine", "icicle", "beacon"}
-    def scan(o) -> int:
-        tot = 0
+    seen_keys: set[str] = set()
+    total = 0
+
+    def scan(o):
+        nonlocal total
         if isinstance(o, dict):
             for kk, vv in o.items():
                 kl = str(kk).lower()
                 if "badge" in kl:
-                    tot += _count_badges_from_value(vv)
+                    total += _count_badges_from_value(vv)
+                    continue
                 for nm in SINNOH:
                     if nm in kl:
-                        tot += _count_badges_from_value(vv)
-                tot += scan(vv)
+                        if nm not in seen_keys:
+                            seen_keys.add(nm)
+                            c = _count_badges_from_value(vv)
+                            total += c if c else 1  # al menos 1 si hay marca
+                        continue
+                scan(vv)
         elif isinstance(o, (list, tuple)):
             for it in o:
-                tot += scan(it)
-        return tot
-    return min(scan(sav_json), 8)
+                scan(it)
+
+    scan(sav_json)
+    return min(total, 8)
 
 
 def _trainer_summary_ui(sav_json: dict, box_count: int) -> None:
