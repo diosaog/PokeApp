@@ -37,6 +37,13 @@ COIN = "\U0001FA99"
 
 
 def _calc_money_for_user(user: str) -> int:
+    # Cache por usuario para evitar recomputar en cada render
+    try:
+        cache = st.session_state.setdefault("_money_cache", {})
+        if user in cache:
+            return cache[user]
+    except Exception:
+        cache = None
     liga = coins_from_league(user)
     badge_coins = 0
     try:
@@ -79,7 +86,12 @@ def _calc_money_for_user(user: str) -> int:
                 badge_coins = coins_from_badges(sav_json)
     except Exception:
         badge_coins = 0
-    return int(liga + badge_coins)
+    total = int(liga + badge_coins)
+    try:
+        cache[user] = total
+    except Exception:
+        pass
+    return total
 
 
 def _money_available(user: str | None) -> int:
@@ -215,6 +227,7 @@ def _render_item_card(item: dict, idx_key: str) -> None:
             if desc:
                 st.caption(desc)
             if st.button("Comprar", key=f"buy_{idx_key}", disabled=(not afford) or price <= 0, use_container_width=True):
+                # Guardar pending y feedback inmediato
                 st.session_state["shop_pending"] = {"name": name, "price": int(price)}
             st.caption(f"{COIN} {price}")
             if not afford and price > 0:

@@ -398,6 +398,7 @@ def add_purchase(user: str, item: str, price: int) -> int:
         return int(rowid)
 
 
+@_cache_data(ttl=10)
 def total_spent(user: str) -> int:
     if _supabase_enabled():
         try:
@@ -426,6 +427,7 @@ def total_spent(user: str) -> int:
 
 
 @_cache_data(ttl=15)
+@_cache_data(ttl=10)
 def list_purchases(user: str | None = None, limit: int = 100):
     if _supabase_enabled():
         try:
@@ -463,6 +465,7 @@ def list_purchases(user: str | None = None, limit: int = 100):
 
 
 @_cache_data(ttl=15)
+@_cache_data(ttl=10)
 def list_inventory(user: str, *, status: str | None = None, limit: int = 200):
     if _supabase_enabled():
         try:
@@ -678,6 +681,7 @@ def settings_set(key: str, value: str) -> None:
 
 
 @_cache_data(ttl=30)
+@_cache_data(ttl=15)
 def settings_get(key: str) -> str | None:
     if _supabase_enabled():
         try:

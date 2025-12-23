@@ -63,7 +63,11 @@ def _persist():
     try:
         settings_set("league_state", json.dumps(_serialize_state(), ensure_ascii=False))
     except Exception:
-        pass
+        # Si falla persistencia, avisar
+        try:
+            st.error("No se pudo guardar el estado de la liga (settings).")
+        except Exception:
+            pass
 
 
 # ===== Helpers de liga =====
