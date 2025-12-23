@@ -14,7 +14,7 @@ try:
     from entrenadores import _count_badges  # type: ignore
 except Exception:
     _count_badges = None  # type: ignore
-from storage import init_storage
+from storage import init_storage, settings_get, settings_set
 
 
 def apply_css() -> None:
@@ -398,6 +398,38 @@ def _render_sidebar_profile() -> None:
     st.sidebar.markdown(html, unsafe_allow_html=True)
 
 
+def _render_change_pin_form() -> None:
+    usr = st.session_state.get('user') or ''
+    if not usr or usr == '-':
+        return
+    with st.sidebar.expander("Cambiar PIN (4 dígitos)", expanded=False):
+        def _get_pin(u: str) -> str | None:
+            try:
+                val = settings_get(f"pin:{u}")
+                if val and len(str(val).strip()) == 4 and str(val).strip().isdigit():
+                    return str(val).strip()
+            except Exception:
+                return None
+            return None
+
+        current_pin = _get_pin(usr)
+        cur_in = st.text_input("PIN actual", type="password", max_chars=4, value="") if current_pin else None
+        new_in = st.text_input("PIN nuevo (4 dígitos)", type="password", max_chars=4, value="")
+        if st.button("Guardar PIN", use_container_width=True):
+            if current_pin:
+                if not cur_in or cur_in.strip() != current_pin:
+                    st.error("PIN actual incorrecto.")
+                    return
+            if not new_in or len(new_in.strip()) != 4 or (not new_in.strip().isdigit()):
+                st.error("El PIN debe tener exactamente 4 dígitos.")
+                return
+            try:
+                settings_set(f"pin:{usr}", new_in.strip())
+                st.success("PIN actualizado.")
+            except Exception as e:
+                st.error(f"No se pudo guardar el PIN: {e}")
+
+
 # --- Auth / layout ---
 def login_gate() -> None:
     init_storage()
@@ -408,24 +440,41 @@ def login_gate() -> None:
     with col1:
         user = st.selectbox("Usuario", list(USERS.keys()), index=0)
     with col2:
-        pwd = st.text_input("Codigo de acceso", type="password")
+        pwd = st.text_input("PIN / Codigo de acceso", type="password", max_chars=8)
     ok = st.button("Entrar", type="primary")
     if ok:
-        # Validacion simple: si hay codigo definido para el usuario, debe coincidir
+        # Validacion: primero PIN persistido; si no existe, usa codigo base de USERS
+        pin_key = f"pin:{user}"
+        stored_pin = None
+        try:
+            val = settings_get(pin_key)
+            if val and len(str(val).strip()) == 4 and str(val).strip().isdigit():
+                stored_pin = str(val).strip()
+        except Exception:
+            stored_pin = None
+
         code = USERS.get(user)
-        if not code or (pwd and str(pwd).strip().lower() == str(code).lower()):
+        pwd_in = (pwd or "").strip()
+        ok_pin = False
+        if stored_pin:
+            ok_pin = (pwd_in == stored_pin)
+        else:
+            ok_pin = (not code) or (pwd_in and pwd_in.lower() == str(code).lower())
+
+        if ok_pin:
             st.session_state.auth_ok = True
             st.session_state.user = user
             st.success(f"Bienvenido, {user}")
             st.rerun()
         else:
-            st.error("Usuario o codigo incorrecto")
+            st.error("Usuario o codigo/PIN incorrecto")
     st.stop()
 
 
 def render_sidebar(sections: List[str]) -> str:
     usr = st.session_state.get('user') or '-'
     _render_sidebar_profile()
+    _render_change_pin_form()
     st.sidebar.markdown("---")
     section = st.sidebar.selectbox("Seccion", sections, index=0)
     _apply_section_theme(section)
