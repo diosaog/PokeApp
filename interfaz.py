@@ -9,6 +9,11 @@ import streamlit as st
 from utils import USERS, list_user_saves, DEFAULT_DLL_HINT
 from showdown_sprites import showdown_sprite_url
 from conex_pkhex import PKHeXRuntime, extract_team, get_bridge_path, open_sav_cached
+try:
+    # Reutilizar lógica de medallas de Entrenadores
+    from entrenadores import _count_badges  # type: ignore
+except Exception:
+    _count_badges = None  # type: ignore
 from storage import init_storage
 
 
@@ -340,6 +345,8 @@ def _get_badges_count(user: str) -> int:
             return 0
         sav_path = str(saves[0])
         sav_json = open_sav_cached(sav_path)
+        if _count_badges:
+            return int(_count_badges(sav_json))
         # coins_from_badges devuelve monedas (2 por medalla); convertimos a medallas
         return int(coins_from_badges(sav_json) // 2)
     except Exception:
