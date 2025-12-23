@@ -5,7 +5,6 @@ from pathlib import Path
 from typing import List
 from urllib import request
 from urllib.parse import urlparse
-from collections import Counter
 
 import streamlit as st
 
@@ -26,6 +25,7 @@ TEAM_IMG_W = 88
 BOX_IMG_W = 56
 DETAIL_IMG_W = 112
 TOTAL_BOXES = 18  # valor por defecto/fallback
+COIN = "🪙"
 
 # ===== Pokepaste helpers (compartido con Copa) =====
 def _ensure_pokepaste_state() -> None:
@@ -638,18 +638,19 @@ def _render_purchase_cards(items: list[tuple], title: str, *, show_used: bool=Fa
     for idx, row in enumerate(items):
         # row: (id, item, price, created_at, status, redeemed_at)
         pid, item, price = row[0], row[1], row[2]
-        status = row[4] if len(row) > 4 else None
+        status = (row[4] if len(row) > 4 else None) or "pendiente"
+        status_label = "Disponible" if status != "used" else "Usado"
+        badge_cls = "status-ok" if status != "used" else "status-warn"
         icon = _item_icon_url(item)
         col = cols[idx % 3]
         with col:
-            box_css = "opacity:.55;" if show_used or (status and status == "used") else ""
             st.markdown(
-                f"<div style='border:1px solid rgba(255,255,255,0.12); border-radius:12px; padding:10px; {box_css}'>"
-                f"<div style='display:flex; gap:10px; align-items:center;'>"
-                f"<img src='{icon}' alt='' width='36' onerror=\"this.style.display='none'\"/>"
-                f"<div><strong>{item}</strong><br/><span style='opacity:.8'>{price} {COIN}</span></div>"
+                f"<div style='border:1px solid rgba(255,255,255,0.12); border-radius:12px; padding:10px; background:rgba(255,255,255,0.02); box-shadow: inset 0 0 0 1px rgba(255,255,255,0.03);'>"
+                f"<div style='display:flex; gap:10px; align-items:center; margin-bottom:6px;'>"
+                f"<img src='{icon}' alt='' width='40' onerror=\"this.style.display='none'\"/>"
+                f"<div><strong>{item}</strong><br/><span style='opacity:.8'>{COIN} {price}</span></div>"
                 f"</div>"
-                f"<div style='opacity:.7; font-size:0.85rem;'>Estado: {(status or 'pendiente').capitalize()}</div>"
+                f"<span class='status-badge {badge_cls}'>{status_label}</span>"
                 f"</div>",
                 unsafe_allow_html=True,
             )
@@ -659,7 +660,7 @@ def _purchases_inventory_ui(user: str) -> None:
     if not inv:
         st.caption("Sin compras registradas.")
         return
-    available = [r for r in inv if not r[4] or r[4] != "used"]
+    available = [r for r in inv if len(r) < 5 or not r[4] or r[4] != "used"]
     used = [r for r in inv if len(r) > 4 and r[4] == "used"]
     by_cat: dict[str, list[tuple]] = {}
     for r in available:
@@ -673,48 +674,6 @@ def _purchases_inventory_ui(user: str) -> None:
         with st.expander("Usados"):
             _render_purchase_cards(used, "Usados", show_used=True)
 
-def _collect_held_items(sav_json: dict, box_count: int, save_path: str | None = None) -> list[tuple[str, int]]:
-    items: list[str] = []
-    try:
-        team = extract_team(sav_json, save_path=save_path) or []
-        for m in team:
-            it = m.get("held_item") or m.get("item")
-            if it:
-                items.append(str(it))
-    except Exception:
-        pass
-    # Escanear unas pocas cajas para no penalizar rendimiento
-    max_boxes = max(0, min(box_count or 0, 3))
-    for idx in range(max_boxes):
-        try:
-            box = extract_box(sav_json, idx, save_path=save_path)
-            for m in box:
-                it = m.get("held_item") or m.get("item")
-                if it:
-                    items.append(str(it))
-        except Exception:
-            continue
-    cnt = Counter(items)
-    return sorted(cnt.items(), key=lambda kv: (-kv[1], kv[0]))
-
-def _held_items_ui(sav_json: dict, box_count: int, save_path: str | None = None) -> None:
-    pairs = _collect_held_items(sav_json, box_count, save_path)
-    if not pairs:
-        st.caption("Sin objetos equipados detectados (equipo y primeras cajas).")
-        return
-    cols = st.columns(3)
-    for idx, (name, qty) in enumerate(pairs):
-        col = cols[idx % 3]
-        with col:
-            icon = _item_icon_url(name)
-            st.markdown(
-                f"<div style='border:1px solid rgba(255,255,255,0.12); border-radius:12px; padding:10px;'>"
-                f"<div style='display:flex; gap:10px; align-items:center;'>"
-                f"<img src='{icon}' alt='' width='32' onerror=\"this.style.display='none'\"/>"
-                f"<div><strong>{name}</strong><br/><span style='opacity:.75'>x{qty}</span></div>"
-                f"</div></div>",
-                unsafe_allow_html=True,
-            )
 
 
 def _trainer_summary_ui(sav_json: dict, box_count: int) -> None:
@@ -1385,15 +1344,13 @@ def page_entrenadores_view() -> None:
     # Inventario (compras de tienda y objetos equipados)
     st.markdown("---")
     st.subheader("Inventario")
-    tab_shop, tab_como, tab_items = st.tabs(["Compras (tienda)", "Comodines", "Objetos equipados"])
+    tab_shop, tab_como = st.tabs(["Compras (tienda)", "Comodines"])
     with tab_shop:
         _purchases_inventory_ui(trainer or "")
     with tab_como:
         inv = list_inventory(trainer or "", status=None, limit=200)
         comos = [r for r in inv if _category_for_item(r[1]) == "Comodines"] if inv else []
         _render_purchase_cards(comos, "Comodines")
-    with tab_items:
-        _held_items_ui(sav_json, box_count, save_path=str(save_path))
 
     # Exportar equipo en formato Showdown (tematica competitiva)
     try:
