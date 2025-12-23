@@ -21,8 +21,8 @@ def apply_css() -> None:
     css = """
     <style>
     :root {
-      --accent: #ff1d1d; /* rojo Pokeball */
-      --accent-hover: #d01818;
+      --accent: #e65050; /* rojo Pokeball suavizado */
+      --accent-hover: #c73a3a;
       --text-1: #e6edf3;
       --text-2: #c9d1d9;
       --divider: rgba(255,255,255,0.14);

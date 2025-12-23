@@ -5,6 +5,7 @@ from pathlib import Path
 from typing import List
 from urllib import request
 from urllib.parse import urlparse
+from collections import Counter
 
 import streamlit as st
 
@@ -587,6 +588,133 @@ def _count_badges(sav_json: dict) -> int:
 
     scan(sav_json)
     return min(total, 8)
+
+# ---------- Inventario / Items ----------
+def _norm_item(s: str) -> str:
+    import unicodedata
+    t = (s or "").strip().lower()
+    t = unicodedata.normalize("NFD", t)
+    t = "".join(ch for ch in t if unicodedata.category(ch) != "Mn")
+    return t
+
+def _item_icon_url(name: str) -> str:
+    if not name:
+        return ""
+    n = _norm_item(name)
+    # Comodines
+    if "revivir" in n:
+        slug = "max-revive"
+    elif "robar" in n:
+        slug = "dread-plate"
+    elif "recaptura" in n:
+        slug = "repeat-ball"
+    elif "captura extra" in n:
+        slug = "ultra-ball"
+    elif "blindar" in n or "blindaje" in n:
+        slug = "metal-coat"
+    elif "fosil" in n or "fossil" in n or "fsil" in n:
+        slug = "helix-fossil"
+    else:
+        slug = n.replace(" ", "-")
+    return f"https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/{slug}.png"
+
+def _category_for_item(name: str) -> str:
+    n = _norm_item(name)
+    if any(k in n for k in ("revivir", "robar", "captura extra", "recaptura", "blindar", "comodin")):
+        return "Comodines"
+    if n.startswith("baya ") or "berry" in n:
+        return "Bayas"
+    if any(k in n for k in ("gafas elegidas", "cinta elegida", "panuleo", "panuelo", "vidasfera", "focus", "banda focus", "scope", "restos")):
+        return "Competitivos"
+    if any(k in n for k in ("chapa", "menta", "habilidad", "capsula", "evolutivo", "piedra")):
+        return "Crianza"
+    return "Otros"
+
+def _render_purchase_cards(items: list[tuple], title: str, *, show_used: bool=False):
+    if not items:
+        st.caption(f"Sin {title.lower()}.")
+        return
+    cols = st.columns(3)
+    for idx, row in enumerate(items):
+        # row: (id, item, price, created_at, status, redeemed_at)
+        pid, item, price = row[0], row[1], row[2]
+        status = row[4] if len(row) > 4 else None
+        icon = _item_icon_url(item)
+        col = cols[idx % 3]
+        with col:
+            box_css = "opacity:.55;" if show_used or (status and status == "used") else ""
+            st.markdown(
+                f"<div style='border:1px solid rgba(255,255,255,0.12); border-radius:12px; padding:10px; {box_css}'>"
+                f"<div style='display:flex; gap:10px; align-items:center;'>"
+                f"<img src='{icon}' alt='' width='36' onerror=\"this.style.display='none'\"/>"
+                f"<div><strong>{item}</strong><br/><span style='opacity:.8'>{price} {COIN}</span></div>"
+                f"</div>"
+                f"<div style='opacity:.7; font-size:0.85rem;'>Estado: {(status or 'pendiente').capitalize()}</div>"
+                f"</div>",
+                unsafe_allow_html=True,
+            )
+
+def _purchases_inventory_ui(user: str) -> None:
+    inv = list_inventory(user, limit=200)
+    if not inv:
+        st.caption("Sin compras registradas.")
+        return
+    available = [r for r in inv if not r[4] or r[4] != "used"]
+    used = [r for r in inv if len(r) > 4 and r[4] == "used"]
+    by_cat: dict[str, list[tuple]] = {}
+    for r in available:
+        cat = _category_for_item(r[1])
+        by_cat.setdefault(cat, []).append(r)
+    for cat in ("Comodines", "Bayas", "Competitivos", "Crianza", "Otros"):
+        if cat in by_cat:
+            st.markdown(f"**{cat}**")
+            _render_purchase_cards(by_cat[cat], cat)
+    if used:
+        with st.expander("Usados"):
+            _render_purchase_cards(used, "Usados", show_used=True)
+
+def _collect_held_items(sav_json: dict, box_count: int, save_path: str | None = None) -> list[tuple[str, int]]:
+    items: list[str] = []
+    try:
+        team = extract_team(sav_json, save_path=save_path) or []
+        for m in team:
+            it = m.get("held_item") or m.get("item")
+            if it:
+                items.append(str(it))
+    except Exception:
+        pass
+    # Escanear unas pocas cajas para no penalizar rendimiento
+    max_boxes = max(0, min(box_count or 0, 3))
+    for idx in range(max_boxes):
+        try:
+            box = extract_box(sav_json, idx, save_path=save_path)
+            for m in box:
+                it = m.get("held_item") or m.get("item")
+                if it:
+                    items.append(str(it))
+        except Exception:
+            continue
+    cnt = Counter(items)
+    return sorted(cnt.items(), key=lambda kv: (-kv[1], kv[0]))
+
+def _held_items_ui(sav_json: dict, box_count: int, save_path: str | None = None) -> None:
+    pairs = _collect_held_items(sav_json, box_count, save_path)
+    if not pairs:
+        st.caption("Sin objetos equipados detectados (equipo y primeras cajas).")
+        return
+    cols = st.columns(3)
+    for idx, (name, qty) in enumerate(pairs):
+        col = cols[idx % 3]
+        with col:
+            icon = _item_icon_url(name)
+            st.markdown(
+                f"<div style='border:1px solid rgba(255,255,255,0.12); border-radius:12px; padding:10px;'>"
+                f"<div style='display:flex; gap:10px; align-items:center;'>"
+                f"<img src='{icon}' alt='' width='32' onerror=\"this.style.display='none'\"/>"
+                f"<div><strong>{name}</strong><br/><span style='opacity:.75'>x{qty}</span></div>"
+                f"</div></div>",
+                unsafe_allow_html=True,
+            )
 
 
 def _trainer_summary_ui(sav_json: dict, box_count: int) -> None:
@@ -1253,6 +1381,19 @@ def page_entrenadores_view() -> None:
             st.success("Pokepaste eliminado.")
         st.caption("Tu Pokepaste se reutiliza en la pestaña Copa para mostrar equipos.")
     _pokepaste_preview(existing)
+
+    # Inventario (compras de tienda y objetos equipados)
+    st.markdown("---")
+    st.subheader("Inventario")
+    tab_shop, tab_como, tab_items = st.tabs(["Compras (tienda)", "Comodines", "Objetos equipados"])
+    with tab_shop:
+        _purchases_inventory_ui(trainer or "")
+    with tab_como:
+        inv = list_inventory(trainer or "", status=None, limit=200)
+        comos = [r for r in inv if _category_for_item(r[1]) == "Comodines"] if inv else []
+        _render_purchase_cards(comos, "Comodines")
+    with tab_items:
+        _held_items_ui(sav_json, box_count, save_path=str(save_path))
 
     # Exportar equipo en formato Showdown (tematica competitiva)
     try:
