@@ -226,8 +226,9 @@ def _render_item_card(item: dict, idx_key: str) -> None:
             st.markdown(f"**{name}**")
             if desc:
                 st.caption(desc)
-            if st.button("Comprar", key=f"buy_{idx_key}", disabled=(not afford) or price <= 0, use_container_width=True):
-                # Guardar pending y feedback inmediato
+            if st.button("Comprar", key=f"buy_{idx_key}", disabled=(not afford) or price <= 0, width="stretch"):
+                # Guardar pending y limpiar errores previos
+                st.session_state.pop("shop_error", None)
                 st.session_state["shop_pending"] = {"name": name, "price": int(price)}
             st.caption(f"{COIN} {price}")
             if not afford and price > 0:
@@ -400,22 +401,20 @@ def page_tienda() -> None:
         st.info(f"Comprar '{nombre}' por {COIN} {precio}?")
         c1, c2 = st.columns(2)
         with c1:
-            if st.button("Confirmar compra", use_container_width=True):
-                pid = add_purchase(current_user, nombre, precio)
-                st.session_state.pop("shop_pending", None)
+            if st.button("Confirmar compra", width="stretch"):
                 try:
-                    st.markdown("<audio autoplay style='display:none'><source src='data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAESsAACJWAAACABAAZGF0YQAAAAAA//8AAP//AAAA//8A' type='audio/wav'></audio>", unsafe_allow_html=True)
-                except Exception:
-                    pass
-                st.success(f"Compra registrada (#{pid}).")
-                try:
-                    st.markdown("<div class='confetti-lite'>  </div>", unsafe_allow_html=True)
-                except Exception:
-                    pass
+                    pid = add_purchase(current_user, nombre, precio)
+                    st.session_state.pop("shop_pending", None)
+                    st.session_state.pop("shop_error", None)
+                    st.success(f"Compra registrada (#{pid}).")
+                except Exception as e:
+                    st.session_state["shop_error"] = str(e)
+                    st.error(f"No se pudo registrar la compra: {e}")
         with c2:
-            if st.button("Cancelar", use_container_width=True):
+            if st.button("Cancelar", width="stretch"):
                 st.session_state.pop("shop_pending", None)
-
+        if st.session_state.get("shop_error"):
+            st.error(st.session_state["shop_error"])
     st.markdown("---")
     with st.expander("Historial de compras (global)"):
         compras = list_purchases(limit=50)
