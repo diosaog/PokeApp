@@ -449,7 +449,7 @@ def list_purchases(user: str | None = None, limit: int = 100):
                 )
             return out
         except Exception:
-            return []
+            pass
     with _conn() as cx:
         if user:
             return cx.execute(
@@ -490,7 +490,7 @@ def list_inventory(user: str, *, status: str | None = None, limit: int = 200):
                 )
             return out
         except Exception:
-            return []
+            pass
     with _conn() as cx:
         if status:
             return cx.execute(
