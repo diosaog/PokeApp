@@ -53,17 +53,36 @@ def _now_iso() -> str:
     return datetime.datetime.utcnow().isoformat() + "Z"
 
 
+def _db_path() -> Path:
+    try:
+        DATA_DIR.mkdir(parents=True, exist_ok=True)
+        return DB_PATH
+    except Exception:
+        tmp = Path("/tmp/pokeapp_data")
+        tmp.mkdir(parents=True, exist_ok=True)
+        return tmp / "app.db"
+
+
 def _conn():
-    return sqlite3.connect(DB_PATH)
+    return sqlite3.connect(_db_path())
 
 
 def init_storage():
-    # En entorno Supabase (Streamlit Cloud) evitamos crear SQLite local para no fallar en FS read-only.
+    global DATA_DIR, SAVES_DIR, DB_PATH
+    # En entorno Supabase (Streamlit Cloud) evitamos crear SQLite local salvo que no haya Supabase.
     if _supabase_enabled():
         return
 
-    DATA_DIR.mkdir(exist_ok=True)
-    SAVES_DIR.mkdir(exist_ok=True)
+    try:
+        DATA_DIR.mkdir(exist_ok=True)
+        SAVES_DIR.mkdir(exist_ok=True)
+    except Exception:
+        # Fallback a /tmp si la carpeta del repo es solo lectura
+        DATA_DIR = Path("/tmp/pokeapp_data")
+        SAVES_DIR = DATA_DIR / "saves"
+        DB_PATH = DATA_DIR / "app.db"
+        DATA_DIR.mkdir(parents=True, exist_ok=True)
+        SAVES_DIR.mkdir(parents=True, exist_ok=True)
     with _conn() as cx:
         cx.execute("""CREATE TABLE IF NOT EXISTS saves (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -537,8 +556,8 @@ def add_redemption(purchase_id: int, user: str, item: str, payload_json: str) ->
             data = res.data or []
             if data:
                 return int(data[0].get("id") or 0)
-        except Exception:
-            pass
+        except Exception as e:
+            raise RuntimeError(f"Supabase add_redemption failed: {e}")
     with _conn() as cx:
         cx.execute(
             "INSERT INTO redemptions(purchase_id, user, item, payload_json, created_at) VALUES(?,?,?,?,?)",
@@ -559,8 +578,8 @@ def set_purchase_status(purchase_id: int, status: str) -> None:
                 data["redeemed_at"] = _now_iso()
             client.table("purchases").update(data).eq("id", int(purchase_id)).execute()
             return
-        except Exception:
-            pass
+        except Exception as e:
+            raise RuntimeError(f"Supabase set_purchase_status failed: {e}")
     with _conn() as cx:
         if status == 'used':
             cx.execute("UPDATE purchases SET status=?, redeemed_at=? WHERE id=?", (status, ts, int(purchase_id)))
@@ -586,8 +605,8 @@ def upsert_pokemon_flags(owner: str, fingerprint: str, flags_json: str) -> None:
                 on_conflict="fingerprint",
             ).execute()
             return
-        except Exception:
-            pass
+        except Exception as e:
+            raise RuntimeError(f"Supabase upsert_pokemon_flags failed: {e}")
     with _conn() as cx:
         row = cx.execute("SELECT id FROM pokemon_flags WHERE fingerprint=?", (fingerprint,)).fetchone()
         if row:
@@ -651,8 +670,8 @@ def clear_all_pokemon_flags() -> None:
             client = _sb()
             client.table("pokemon_flags").delete().neq("fingerprint", "").execute()
             return
-        except Exception:
-            pass
+        except Exception as e:
+            raise RuntimeError(f"Supabase clear_all_pokemon_flags failed: {e}")
     with _conn() as cx:
         cx.execute("DELETE FROM pokemon_flags")
         cx.commit()
@@ -664,8 +683,8 @@ def clear_pokemon_flags_for_owner(owner: str) -> None:
             client = _sb()
             client.table("pokemon_flags").delete().eq("owner", owner).execute()
             return
-        except Exception:
-            pass
+        except Exception as e:
+            raise RuntimeError(f"Supabase clear_pokemon_flags_for_owner failed: {e}")
     with _conn() as cx:
         cx.execute("DELETE FROM pokemon_flags WHERE owner=?", (owner,))
         cx.commit()
