@@ -618,6 +618,11 @@ def _norm_item(s: str) -> str:
     t = "".join(ch for ch in t if unicodedata.category(ch) != "Mn")
     return t
 
+def _is_usable_item(name: str) -> bool:
+    n = _norm_item(name)
+    targets = ("revivir pokemon", "robar pokemon", "blindar pokemon", "comodin de blindaje por robo")
+    return any(t in n for t in targets)
+
 def _item_icon_url(name: str) -> str:
     if not name:
         return ""
@@ -675,7 +680,7 @@ def _render_purchase_cards(items: list[tuple], title: str, *, show_used: bool=Fa
                 f"</div>",
                 unsafe_allow_html=True,
             )
-            if (status != "used") and _is_usable_item(item) and st.button("Usar", key=f"use_{pid}"):
+            if (status != "used") and "_is_usable_item" in globals() and _is_usable_item(item) and st.button("Usar", key=f"use_{pid}"):
                 st.session_state["redeem_ctx"] = {"item": item, "pid": pid, "step": 1}
 
 def _purchases_inventory_ui(user: str) -> None:

@@ -438,7 +438,6 @@ def total_spent(user: str) -> int:
         return int(row[0] or 0)
 
 
-@_cache_data(ttl=5)
 def list_purchases(user: str | None = None, limit: int = 100):
     if _supabase_enabled():
         try:
@@ -475,7 +474,6 @@ def list_purchases(user: str | None = None, limit: int = 100):
         ).fetchall()
 
 
-@_cache_data(ttl=5)
 def list_inventory(user: str, *, status: str | None = None, limit: int = 200):
     if _supabase_enabled():
         try:
