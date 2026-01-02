@@ -386,8 +386,9 @@ def add_purchase(user: str, item: str, price: int) -> int:
             data = res.data or []
             if data:
                 return int(data[0].get("id") or 0)
-        except Exception:
-            pass
+        except Exception as e:
+            # Supabase está configurado pero falló: no hacemos fallback silencioso
+            raise RuntimeError(f"Supabase add_purchase failed: {e}")
     with _conn() as cx:
         cx.execute(
             "INSERT INTO purchases(user, item, price, created_at, status) VALUES(?,?,?,?,?)",
