@@ -253,6 +253,15 @@ def _render_shop_items(items: list[dict], category_key: str) -> None:
                     it["img"] = _shop_asset("adamant-mint") or _pokeapi_item_png("adamant-mint")
         except Exception:
             pass
+    else:
+        # Intentar icono propio genérico si existe
+        try:
+            for it in items:
+                if not it.get("img"):
+                    n = it.get("name") or ""
+                    it["img"] = _shop_asset(n) or it.get("img")
+        except Exception:
+            pass
     cols = st.columns(3)
     for idx, it in enumerate(items):
         col = cols[idx % 3]

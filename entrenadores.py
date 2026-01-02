@@ -675,6 +675,8 @@ def _render_purchase_cards(items: list[tuple], title: str, *, show_used: bool=Fa
                 f"</div>",
                 unsafe_allow_html=True,
             )
+            if (status != "used") and _is_usable_item(item) and st.button("Usar", key=f"use_{pid}"):
+                st.session_state["redeem_ctx"] = {"item": item, "pid": pid, "step": 1}
 
 def _purchases_inventory_ui(user: str) -> None:
     inv = list_inventory(user, limit=200)
@@ -1209,6 +1211,21 @@ def _pokemon_detail_panel() -> None:
             "Repeat Ball": "Turno Ball",
             "Max Revive": "Revivir Máximo",
             "Helix Fossil": "Fósil Helix",
+            "Oran Berry": "Baya Aranja",
+            "Sitrus Berry": "Baya Zidra",
+            "Cheri Berry": "Baya Zreza",
+            "Chesto Berry": "Baya Ziuela",
+            "Pecha Berry": "Baya Meloc",
+            "Rawst Berry": "Baya Safre",
+            "Aspear Berry": "Baya Perasi",
+            "Persim Berry": "Baya Atania",
+            "Salac Berry": "Baya Aslac",
+            "Liechi Berry": "Baya Lichi",
+            "Petaya Berry": "Baya Petaya",
+            "Ganlon Berry": "Baya Ganlon",
+            "Apicot Berry": "Baya Apicot",
+            "Lansat Berry": "Baya Lansat",
+            "Starf Berry": "Baya Starf",
         }
         return m.get(str(name), str(name))
     def _s(k):

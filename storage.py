@@ -399,7 +399,6 @@ def add_purchase(user: str, item: str, price: int) -> int:
         return int(rowid)
 
 
-@_cache_data(ttl=5)
 def total_spent(user: str) -> int:
     if _supabase_enabled():
         try:
@@ -414,11 +413,23 @@ def total_spent(user: str) -> int:
                     pass
             res = client.table("purchases").select("price").eq("user", user).execute()
             s = 0
-            for row in res.data or []:
+            data = res.data or []
+            for row in data:
                 try:
                     s += int(row.get("price") or 0)
                 except Exception:
                     continue
+            # Fallback adicional: si sumó 0 pero hay compras en cache local
+            if s == 0:
+                try:
+                    inv = list_inventory(user, limit=300)
+                    for r in inv or []:
+                        try:
+                            s += int(r[2] or 0)
+                        except Exception:
+                            continue
+                except Exception:
+                    pass
             return s
         except Exception:
             pass
