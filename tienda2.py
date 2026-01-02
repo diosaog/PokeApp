@@ -617,7 +617,7 @@ def _render_redeem_flow(ctx: dict, current_user: str) -> None:
                         upsert_pokemon_flags(current_user, fp, json.dumps(base, ensure_ascii=False))
                     except Exception:
                         pass
-                    st.success("Blindaje aplicado."); st.toast("Pokemon blindado", icon="")
+                    st.success("Blindaje aplicado."); st.toast("Pokemon blindado", icon="✅")
                     st.session_state.pop('redeem_ctx', None)
                     st.rerun()
                 except Exception as e:

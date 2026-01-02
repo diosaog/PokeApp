@@ -203,7 +203,7 @@ def _finalize(tramo: int) -> None:
             last_user = rankB[-1]
             add_purchase(last_user, "Robar Pokemon", 0)
             try:
-                st.toast(f"Comodin entregado a {last_user}: Robar Pokemon", icon="")
+                st.toast(f"Comodin entregado a {last_user}: Robar Pokemon", icon="✅")
             except Exception:
                 pass
     except Exception:
