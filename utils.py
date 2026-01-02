@@ -14,7 +14,7 @@ DEFAULT_DLL_HINT = "Bridge/PKHeXBridge/bin/Release/net9.0/linux-x64/publish/PKHe
 
 USERS: Dict[str, str] = {
     "Anto":"a07","Victor":"v42","Rober":"r03","Samu":"s88","Daviry":"d15",
-    "Barto":"b60","Iker":"i09","Aaron":"a31","Miguel":"m77",
+    "Barto":"b60","Iker":"i09","Aaron":"a31","Miguel":"m77","Mario":"m10",
 }
 
 SECTIONS = ["Inicio", "Liga y Tabla", "Entrenadores", "Copa", "Tienda", "Saves"]
@@ -40,9 +40,10 @@ def ensure_user_dir(u: str) -> Path:
     return p
 
 def list_user_saves(u: str) -> List[Path]:
-    """Devuelve una lista ordenada de .sav del usuario (más recientes primero)."""
+    """Devuelve una lista ordenada de .sav/.dsv del usuario (más recientes primero)."""
     folder = ensure_user_dir(u)
-    return sorted(folder.glob("*.sav"), key=lambda p: p.stat().st_mtime, reverse=True)
+    files = list(folder.glob("*.sav")) + list(folder.glob("*.dsv"))
+    return sorted(files, key=lambda p: p.stat().st_mtime, reverse=True)
 
 def format_bytes(n: int) -> str:
     """Formatea bytes a B/KB/MB."""
@@ -56,9 +57,10 @@ def sha256_hex(data: bytes) -> str:
     """Hash SHA-256 en hex (para mostrar)."""
     return hashlib.sha256(data).hexdigest()
 
-def ts_name(user: str) -> str:
-    """Nombre con timestamp para guardados .sav."""
-    return f"{datetime.now().strftime('%Y%m%d_%H%M%S')}_{user}.sav"
+def ts_name(user: str, *, ext: str = ".sav") -> str:
+    """Nombre con timestamp para guardados, permitiendo elegir la extensión."""
+    ext_clean = ext if ext.startswith(".") else f".{ext}"
+    return f"{datetime.now().strftime('%Y%m%d_%H%M%S')}_{user}{ext_clean}"
 
 
 

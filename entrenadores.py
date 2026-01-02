@@ -498,7 +498,7 @@ def _slot_empty_html(label: str) -> str:
 
 
 # ---------- Badges/monedas/puntos ----------
-COINS_BY_POSITION = {1: 12, 2: 11, 3: 9, 4: 8, 5: 9, 6: 6, 7: 5, 8: 4, 9: 2}
+COINS_BY_POSITION = {1: 12, 2: 11, 3: 9, 4: 8, 5: 9, 6: 6, 7: 5, 8: 4, 9: 2, 10: 1}
 
 
 def coins_from_league(user: str) -> int:
@@ -1386,8 +1386,12 @@ def page_entrenadores() -> None:
     default_idx = 0
     try:
         cur = st.session_state.get("trainer_selected")
+        active = st.session_state.get("user")
         if cur in users:
             default_idx = users.index(cur)
+        elif active in users:
+            default_idx = users.index(active)
+            st.session_state.trainer_selected = active
     except Exception:
         pass
     trainer = st.selectbox("Elige un entrenador", users, index=default_idx)

@@ -83,7 +83,7 @@ def _ensure_state():
         st.session_state.league_results = {}
     if "league_divisions" not in st.session_state:
         players = list(USERS.keys())
-        st.session_state.league_divisions = {"A": players[:4], "B": players[4:9]}
+        st.session_state.league_divisions = {"A": players[:4], "B": players[4:]}
     if "league_matches" not in st.session_state:
         st.session_state.league_matches = {}
     if "league_movements" not in st.session_state:
@@ -186,9 +186,10 @@ def _finalize(tramo: int) -> None:
         raise ValueError("Faltan resultados por marcar en A o B.")
     rankA = _rank(A_players, data["A"])
     rankB = _rank(B_players, data["B"])
+    start_b = len(A_players) + 1
     for i, u in enumerate(rankA, start=1):
         _record_position(tramo, u, i)
-    for j, u in enumerate(rankB, start=5):
+    for j, u in enumerate(rankB, start=start_b):
         _record_position(tramo, u, j)
 
     # Premio: Último de B recibe "Robar Pokémon"
@@ -287,6 +288,8 @@ def page_tabla() -> None:
     st.markdown("---")
     A = st.session_state.league_divisions["A"]
     B = st.session_state.league_divisions["B"]
+    pos_b_start = len(A) + 1
+    pos_b_end = pos_b_start + len(B) - 1 if B else pos_b_start - 1
 
     if st.session_state.league_active:
         st.subheader("Resultados - marca el ganador de cada enfrentamiento")
@@ -300,7 +303,8 @@ def page_tabla() -> None:
                 data["A"][(p1, p2)] = pick
                 _persist()
         with cB:
-            st.markdown("**Liga B (posiciones 5-9)**")
+            rango_b = f"{pos_b_start}-{pos_b_end}" if pos_b_start <= pos_b_end else f"{pos_b_start}-?"
+            st.markdown(f"**Liga B (posiciones {rango_b})**")
             for (p1, p2), winner in data["B"].items():
                 idx = (0 if winner == p1 else 1 if winner == p2 else 0)
                 pick = st.radio(f"{p1} vs {p2}", options=[p1, p2], index=idx, horizontal=True, key=f"B_{p1}_{p2}")
@@ -319,7 +323,7 @@ def page_tabla() -> None:
                     st.write(f"{i}. {u}")
             with cb:
                 st.markdown("**Liga B**")
-                for j, u in enumerate(rankB, start=5):
+                for j, u in enumerate(rankB, start=pos_b_start):
                     st.write(f"{j}. {u}")
     else:
         st.subheader("Divisiones actuales")
@@ -330,7 +334,7 @@ def page_tabla() -> None:
                 st.write(f"{i}. {u}")
         with c2:
             st.markdown("**Liga B**")
-            for j, u in enumerate(B, start=5):
+            for j, u in enumerate(B, start=pos_b_start):
                 st.write(f"{j}. {u}")
 
     # Reiniciar Liga (al final)
@@ -372,20 +376,26 @@ def page_tabla() -> None:
             if not entries:
                 continue
             entries.sort(key=lambda x: x[1])
+            a_len = len(st.session_state.league_divisions.get("A", [])) if isinstance(st.session_state.league_divisions, dict) else 4
+            if a_len <= 0:
+                a_len = 4
+            b_len = len(st.session_state.league_divisions.get("B", [])) if isinstance(st.session_state.league_divisions, dict) else 0
+            b_start = a_len + 1
+            b_end = b_start + b_len - 1 if b_len else b_start - 1
             rowsA, rowsB = [], []
             for u, pos in entries:
                 tag = "⬆️ " if u in up_set else ("⬇️ " if u in down_set else "")
                 row = {"Pos": pos, "Jugador": f"{tag}{u}"}
-                if pos <= 4:
+                if pos <= a_len:
                     rowsA.append(row)
                 else:
                     rowsB.append(row)
             c1, c2 = st.columns(2)
             with c1:
-                st.caption("Liga A (1–4)")
+                st.caption(f"Liga A (1-{a_len})")
                 st.dataframe(rowsA or [], use_container_width=True)
             with c2:
-                st.caption("Liga B (5–9)")
+                st.caption(f"Liga B ({b_start}-{b_end})")
                 st.dataframe(rowsB or [], use_container_width=True)    # Reiniciar Liga (al final)
     st.markdown("---")
     st.subheader("Reiniciar Liga")
@@ -398,7 +408,7 @@ def page_tabla() -> None:
             st.session_state.league_results = {}
             st.session_state.league_matches = {}
             st.session_state.league_temp_order = {"A": [], "B": []}
-            st.session_state.league_divisions = {"A": players[:4], "B": players[4:9]}
+            st.session_state.league_divisions = {"A": players[:4], "B": players[4:]}
             st.session_state.league_movements = {}
             try:
                 clear_purchases()

@@ -55,7 +55,7 @@ def page_saves() -> None:
 
     _bootstrap_latest_save()
 
-    file = st.file_uploader("Sube un archivo .sav", type=["sav"])
+    file = st.file_uploader("Sube un archivo .sav o .dsv", type=["sav", "dsv"])
 
     col1, col2 = st.columns(2)
     with col1:
@@ -69,8 +69,10 @@ def page_saves() -> None:
         set_current_save_for_user(current_user, rec["id"])  # marca como actual
         # Copia adicional al directorio de saves del usuario (para Entrenadores)
         try:
+            from pathlib import Path
             folder = ensure_user_dir(current_user)
-            dest = folder / ts_name(current_user)
+            ext = Path(file.name).suffix or ".sav"
+            dest = folder / ts_name(current_user, ext=ext)
             with open(dest, "wb") as f:
                 f.write(data)
         except Exception:
