@@ -316,22 +316,58 @@ def page_tabla() -> None:
     if st.session_state.league_active:
         st.subheader("Resultados - marca el ganador de cada enfrentamiento")
         data = _get_matches_for(tramo)
-        cA, cB = st.columns(2)
-        with cA:
-            st.markdown("**Liga A (posiciones 1-5)**")
-            for (p1, p2), winner in data["A"].items():
-                idx = (0 if winner == p1 else 1 if winner == p2 else 0)
-                pick = st.radio(f"{p1} vs {p2}", options=[p1, p2], index=idx, horizontal=True, key=f"A_{p1}_{p2}")
-                data["A"][(p1, p2)] = pick
+
+        # Estado temporal para no forzar persistencia en cada selección (reduce lag)
+        def _ensure_tmp_results():
+            tmp = st.session_state.setdefault("league_tmp", {})
+            divs = tmp.setdefault(tramo, {"A": {}, "B": {}})
+            for div in ("A", "B"):
+                for (p1, p2), winner in data[div].items():
+                    key = f"{p1} vs {p2}"
+                    divs[div].setdefault(key, winner)
+            return divs
+
+        tmp_divs = _ensure_tmp_results()
+
+        with st.form(f"form_results_{tramo}"):
+            cA, cB = st.columns(2)
+            with cA:
+                st.markdown("**Liga A (posiciones 1-5)**")
+                for (p1, p2), winner in data["A"].items():
+                    key = f"{p1} vs {p2}"
+                    current = tmp_divs["A"].get(key)
+                    opts = ["(sin marcar)", p1, p2]
+                    try:
+                        idx = opts.index(current) if current in opts else 0
+                    except Exception:
+                        idx = 0
+                    pick = st.selectbox(key, opts, index=idx, key=f"A_{p1}_{p2}")
+                    tmp_divs["A"][key] = None if pick == "(sin marcar)" else pick
+            with cB:
+                rango_b = f"{pos_b_start}-{pos_b_end}" if pos_b_start <= pos_b_end else f"{pos_b_start}-?"
+                st.markdown(f"**Liga B (posiciones {rango_b})**")
+                for (p1, p2), winner in data["B"].items():
+                    key = f"{p1} vs {p2}"
+                    current = tmp_divs["B"].get(key)
+                    opts = ["(sin marcar)", p1, p2]
+                    try:
+                        idx = opts.index(current) if current in opts else 0
+                    except Exception:
+                        idx = 0
+                    pick = st.selectbox(key, opts, index=idx, key=f"B_{p1}_{p2}")
+                    tmp_divs["B"][key] = None if pick == "(sin marcar)" else pick
+
+            submitted = st.form_submit_button("Guardar resultados de la jornada")
+            if submitted:
+                for (p1, p2) in list(data["A"].keys()):
+                    k = f"{p1} vs {p2}"
+                    data["A"][(p1, p2)] = tmp_divs["A"].get(k)
+                for (p1, p2) in list(data["B"].keys()):
+                    k = f"{p1} vs {p2}"
+                    data["B"][(p1, p2)] = tmp_divs["B"].get(k)
                 _persist()
-        with cB:
-            rango_b = f"{pos_b_start}-{pos_b_end}" if pos_b_start <= pos_b_end else f"{pos_b_start}-?"
-            st.markdown(f"**Liga B (posiciones {rango_b})**")
-            for (p1, p2), winner in data["B"].items():
-                idx = (0 if winner == p1 else 1 if winner == p2 else 0)
-                pick = st.radio(f"{p1} vs {p2}", options=[p1, p2], index=idx, horizontal=True, key=f"B_{p1}_{p2}")
-                data["B"][(p1, p2)] = pick
-                _persist()
+                st.success("Resultados guardados.")
+                st.rerun()
 
         if _all_filled(data["A"]) and _all_filled(data["B"]):
             st.markdown("---")
