@@ -269,7 +269,6 @@ def page_tabla() -> None:
                     try:
                         _finalize(tramo)
                         st.success("Jornada cerrada: rankings calculados y ascensos/descensos aplicados.")
-                        st.rerun()
                     except Exception as e:
                         st.error(str(e))
             with c2:
@@ -279,7 +278,6 @@ def page_tabla() -> None:
                         del st.session_state.league_matches[tramo]
                     _persist()
                     st.info("Edicion cancelada. No se guardara ningun resultado.")
-                    st.rerun()
         else:
             if liga_finalizada:
                 st.info("La liga ha finalizado. No se pueden crear más jornadas.")
@@ -288,7 +286,6 @@ def page_tabla() -> None:
                     st.session_state.league_active = True
                     _get_matches_for(tramo)
                     _persist()
-                    st.rerun()
 
     st.markdown("---")
     st.subheader("Editar divisiones")
@@ -308,7 +305,6 @@ def page_tabla() -> None:
                 st.session_state.league_movements = {}
                 st.success("Divisiones actualizadas.")
                 _persist()
-                st.rerun()
             else:
                 st.error("Selecciona exactamente 5 en A y 5 en B.")
 
@@ -372,7 +368,6 @@ def page_tabla() -> None:
                     data["B"][(p1, p2)] = tmp_divs["B"].get(k)
                 _persist()
                 st.success("Resultados guardados.")
-                st.rerun()
 
         if _all_filled(data["A"]) and _all_filled(data["B"]):
             st.markdown("---")
@@ -479,7 +474,6 @@ def page_tabla() -> None:
                 pass
             _persist()
             st.success("Liga reiniciada.")
-            st.rerun()
         else:
             st.info("Operación cancelada. La liga sigue igual.")
 
