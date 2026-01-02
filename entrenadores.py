@@ -656,7 +656,7 @@ def _category_for_item(name: str) -> str:
         return "Crianza"
     return "Otros"
 
-def _render_purchase_cards(items: list[tuple], title: str, *, show_used: bool=False):
+def _render_purchase_cards(items: list[tuple], title: str, *, show_used: bool=False, key_prefix: str=""):
     if not items:
         st.caption(f"Sin {title.lower()}.")
         return
@@ -680,7 +680,7 @@ def _render_purchase_cards(items: list[tuple], title: str, *, show_used: bool=Fa
                 f"</div>",
                 unsafe_allow_html=True,
             )
-            if (status != "used") and "_is_usable_item" in globals() and _is_usable_item(item) and st.button("Usar", key=f"use_{pid}"):
+            if (status != "used") and "_is_usable_item" in globals() and _is_usable_item(item) and st.button("Usar", key=f"use_{key_prefix}_{pid}_{idx}"):
                 st.session_state["redeem_ctx"] = {"item": item, "pid": pid, "step": 1}
 
 def _purchases_inventory_ui(user: str) -> None:
@@ -697,10 +697,10 @@ def _purchases_inventory_ui(user: str) -> None:
     for cat in ("Comodines", "Bayas", "Competitivos", "Crianza", "Otros"):
         if cat in by_cat:
             st.markdown(f"**{cat}**")
-            _render_purchase_cards(by_cat[cat], cat)
+            _render_purchase_cards(by_cat[cat], cat, key_prefix=cat)
     if used:
         with st.expander("Usados"):
-            _render_purchase_cards(used, "Usados", show_used=True)
+            _render_purchase_cards(used, "Usados", show_used=True, key_prefix="usados")
 
 
 
