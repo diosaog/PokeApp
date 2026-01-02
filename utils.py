@@ -6,7 +6,7 @@ from datetime import datetime
 import hashlib
 import streamlit as st
 
-APP_TITLE = "Liga Pokmon"
+APP_TITLE = "Liga Pokemon"
 APP_ICON = ""
 BASE_SAVES_DIR = Path("./saves")
 # Ruta sugerida al bridge (pista por defecto en la UI)
