@@ -2,11 +2,12 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import List
+from typing import List, Any, cast
 from urllib import request
 from urllib.parse import urlparse
 
 import streamlit as st
+st = cast(Any, st)  # ayuda al analizador; en runtime es el módulo real
 
 from showdown_sprites import showdown_sprite_url
 from i18n import nature_display_es, translate_types_es, translate_type_es
@@ -1633,11 +1634,6 @@ def _boxes_grid_ui(
 
 
 # Rendimiento: caches de equipo y caja por save
-try:
-    import streamlit as st  # type: ignore
-except Exception:
-    st = None  # type: ignore
-
 def _active_save_for(trainer: str) -> str | None:
     try:
         saves = list_user_saves(trainer)
