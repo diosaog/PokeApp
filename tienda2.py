@@ -388,13 +388,13 @@ def page_tienda() -> None:
 
     tab_com, tab_bay, tab_comp, tab_bred = st.tabs(["Comodines", "Bayas", "Competitivos", "Crianza"])
     with tab_com:
-    _render_shop_items(comodines, "comodines", available=avail if current_user != "-" else None)
+        _render_shop_items(comodines, "comodines", available=avail if current_user != "-" else None)
     with tab_bay:
-    _render_shop_items(bayas, "bayas", available=avail if current_user != "-" else None)
+        _render_shop_items(bayas, "bayas", available=avail if current_user != "-" else None)
     with tab_comp:
-    _render_shop_items(competitivos, "competitivos", available=avail if current_user != "-" else None)
+        _render_shop_items(competitivos, "competitivos", available=avail if current_user != "-" else None)
     with tab_bred:
-    _render_shop_items(crianza, "crianza", available=avail if current_user != "-" else None)
+        _render_shop_items(crianza, "crianza", available=avail if current_user != "-" else None)
 
     # Confirmacion de compra
     pending = st.session_state.get("shop_pending")
