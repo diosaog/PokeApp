@@ -372,6 +372,7 @@ def page_tienda() -> None:
         {"name": "Cinta Elegida",   "price": 5, "img": _pokeapi_item_png("choice-band"),  "desc": "Ataque +50% (x1.5); bloquea cambio de movimiento."},
         {"name": "Panuelo Elegido", "price": 5, "img": _pokeapi_item_png("choice-scarf"), "desc": "Velocidad +50% (x1.5); bloquea cambio de movimiento."},
         {"name": "Periscopio",      "price": 3, "img": _pokeapi_item_png("scope-lens"),   "desc": "Ratio critico +1 etapa (6.25%/12.5%)."},
+        {"name": "Lupa",            "price": 3, "img": _pokeapi_item_png("zoom-lens"),    "desc": "Precision +20% si el usuario actua despues que el rival."},
         {"name": "Restos",          "price": 5, "img": _pokeapi_item_png("leftovers"),    "desc": "Restaura 1/16 de PS por turno (6.25%)."},
         {"name": "Roca del Rey",    "price": 3, "img": _pokeapi_item_png("kings-rock"),   "desc": "10% de hacer retroceder al golpear."},
         {"name": "Hierba Blanca",   "price": 4, "img": _pokeapi_item_png("white-herb"),   "desc": "Restaura reducciones de estadisticas (1 uso)."},
