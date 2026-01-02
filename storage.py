@@ -426,23 +426,29 @@ def total_spent(user: str) -> int:
     if _supabase_enabled():
         try:
             client = _sb()
-            res = client.rpc("rpc_total_spent", {"p_user": user}).execute()
-            # rpc_total_spent is optional; fallback to manual sum
-            if res.data:
-                val = res.data[0] if isinstance(res.data, list) else res.data
-                try:
+            # 1) RPC opcional; si falla seguimos sin lanzar excepci?n
+            try:
+                res = client.rpc("rpc_total_spent", {"p_user": user}).execute()
+                if res.data:
+                    val = res.data[0] if isinstance(res.data, list) else res.data
                     return int(val)
-                except Exception:
-                    pass
-            res = client.table("purchases").select("price").eq("user", user).execute()
+            except Exception:
+                pass
+
+            # 2) Suma manual en la tabla purchases
             s = 0
-            data = res.data or []
-            for row in data:
-                try:
-                    s += int(row.get("price") or 0)
-                except Exception:
-                    continue
-            # Fallback adicional: si sumó 0 pero hay compras en cache local
+            try:
+                res = client.table("purchases").select("price").eq("user", user).execute()
+                data = res.data or []
+                for row in data:
+                    try:
+                        s += int(row.get("price") or 0)
+                    except Exception:
+                        continue
+            except Exception:
+                s = 0
+
+            # 3) Fallback adicional: inventario si sigue en 0
             if s == 0:
                 try:
                     inv = list_inventory(user, limit=300)
