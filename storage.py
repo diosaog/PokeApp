@@ -697,6 +697,13 @@ def clear_pokemon_flags_for_owner(owner: str) -> None:
 
 # Settings genéricos
 
+def _ensure_settings_table(cx) -> None:
+    try:
+        cx.execute("CREATE TABLE IF NOT EXISTS settings (key TEXT PRIMARY KEY, value TEXT)")
+    except Exception:
+        pass
+
+
 def settings_set(key: str, value: str) -> None:
     if _supabase_enabled():
         try:
@@ -709,6 +716,7 @@ def settings_set(key: str, value: str) -> None:
         except Exception:
             pass
     with _conn() as cx:
+        _ensure_settings_table(cx)
         cx.execute(
             """INSERT INTO settings(key,value) VALUES(?,?)
                    ON CONFLICT(key) DO UPDATE SET value=excluded.value""",
@@ -730,6 +738,10 @@ def settings_get(key: str) -> str | None:
         except Exception:
             pass
     with _conn() as cx:
-        row = cx.execute("SELECT value FROM settings WHERE key=?", (key,)).fetchone()
-        return row[0] if row else None
+        try:
+            _ensure_settings_table(cx)
+            row = cx.execute("SELECT value FROM settings WHERE key=?", (key,)).fetchone()
+            return row[0] if row else None
+        except Exception:
+            return None
 
