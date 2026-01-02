@@ -398,7 +398,6 @@ def add_purchase(user: str, item: str, price: int) -> int:
         return int(rowid)
 
 
-@_cache_data(ttl=10)
 def total_spent(user: str) -> int:
     if _supabase_enabled():
         try:
