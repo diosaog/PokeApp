@@ -1,8 +1,10 @@
 from __future__ import annotations
 from typing import List, Optional
 import random
+import json
 import streamlit as st
 from utils import USERS
+from storage import settings_get, settings_set
 
 
 # ===========================
@@ -56,6 +58,34 @@ def _ensure_elim_state() -> None:
             "rounds": [],
             "current_round": 0,
         }
+
+def _persist_elim_state() -> None:
+    try:
+        S = st.session_state.get("elim")
+        if not S:
+            return
+        data = {
+            "players": S.get("players", []),
+            "rounds": S.get("rounds", []),
+            "current_round": S.get("current_round", 0),
+        }
+        settings_set("copa_elim_state", json.dumps(data, ensure_ascii=False))
+    except Exception:
+        pass
+
+def _restore_elim_state() -> None:
+    try:
+        raw = settings_get("copa_elim_state")
+        if not raw:
+            return
+        obj = json.loads(raw)
+        st.session_state.elim = {
+            "players": obj.get("players", []),
+            "rounds": obj.get("rounds", []),
+            "current_round": obj.get("current_round", 0),
+        }
+    except Exception:
+        pass
 
 
 def _render_bracket(state) -> None:
@@ -140,6 +170,7 @@ def _all_reported(round_matches: List[dict]) -> bool:
 
 def page_copa() -> None:
     st.header("Copa - Torneo (Bo3)")
+    _restore_elim_state()
     _ensure_elim_state()
     S = st.session_state.elim
 
@@ -161,6 +192,7 @@ def page_copa() -> None:
                     S["players"] = sel
                     S["rounds"] = [first_round]
                     S["current_round"] = 0
+                    _persist_elim_state()
                     st.success("Bracket creado.")
                     st.rerun()
         with c2:
@@ -174,6 +206,7 @@ def page_copa() -> None:
     with colA:
         if st.button("Resetear torneo"):
             st.session_state.pop("elim")
+            _persist_elim_state()
             st.success("Torneo reiniciado.")
             st.rerun()
     with colB:
@@ -209,5 +242,6 @@ def page_copa() -> None:
                 else:
                     S["rounds"].append(nxt)
                 S["current_round"] = rnd_idx + 1
+                _persist_elim_state()
                 st.rerun()
 

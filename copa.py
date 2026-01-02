@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
 from __future__ import annotations
 import random
+import json
 import streamlit as st
 from utils import USERS
+from storage import settings_get, settings_set
 
 
 # ---------- Estado y helpers ----------
@@ -24,6 +26,72 @@ def _ensure_swiss_state():
             "topcut": None,
             "configured": False,
         }
+
+
+def _persist_swiss_state():
+    try:
+        S = st.session_state.get("swiss")
+        if not S:
+            return
+        # serializar sets/tuplas
+        def _serial_pairs(pairs):
+            return [[a, b] for a, b in pairs]
+
+        data = {
+            "players": S.get("players", []),
+            "round": S.get("round", 1),
+            "max_rounds": S.get("max_rounds", 7),
+            "wins": S.get("wins", {}),
+            "losses": S.get("losses", {}),
+            "byes": S.get("byes", {}),
+            "history": [_serial_pairs(h) for h in S.get("history", [])],
+            "results": {int(r): m for r, m in S.get("results", {}).items()},
+            "qualified": S.get("qualified", {}),
+            "eliminated": list(S.get("eliminated", set())),
+            "current": {
+                "pairs": _serial_pairs(S.get("current", {}).get("pairs", [])),
+                "bye": S.get("current", {}).get("bye"),
+            },
+            "manual": bool(S.get("manual", False)),
+            "topcut": S.get("topcut"),
+            "configured": bool(S.get("configured", False)),
+        }
+        settings_set("copa_swiss_state", json.dumps(data, ensure_ascii=False))
+    except Exception:
+        pass
+
+
+def _restore_swiss_state():
+    try:
+        raw = settings_get("copa_swiss_state")
+        if not raw:
+            return
+        obj = json.loads(raw)
+        def _pairs(lst):
+            out = []
+            for item in lst or []:
+                if isinstance(item, list) and len(item) == 2:
+                    out.append((item[0], item[1]))
+            return out
+        S = {
+            "players": obj.get("players", []),
+            "round": obj.get("round", 1),
+            "max_rounds": obj.get("max_rounds", 7),
+            "wins": obj.get("wins", {}),
+            "losses": obj.get("losses", {}),
+            "byes": obj.get("byes", {}),
+            "history": [_pairs(h) for h in obj.get("history", [])],
+            "results": obj.get("results", {}),
+            "qualified": obj.get("qualified", {}),
+            "eliminated": set(obj.get("eliminated", [])),
+            "current": {"pairs": _pairs(obj.get("current", {}).get("pairs", [])), "bye": obj.get("current", {}).get("bye")},
+            "manual": bool(obj.get("manual", False)),
+            "topcut": obj.get("topcut"),
+            "configured": bool(obj.get("configured", False)),
+        }
+        st.session_state.swiss = S
+    except Exception:
+        pass
 
 
 def _swiss_buchholz(S) -> dict:
@@ -249,6 +317,7 @@ def _render_matchups_tab(S) -> None:
 
 # ---------- Página ----------
 def page_copa() -> None:
+    _restore_swiss_state()
     _ensure_swiss_state()
     st.header("Copa")
     S = st.session_state.swiss
@@ -286,6 +355,7 @@ def page_copa() -> None:
                 S["current"] = {"pairs": [], "bye": None}
                 S["topcut"] = None
                 S["configured"] = True
+                _persist_swiss_state()
                 st.success("Copa creada.")
                 st.rerun()
         return
@@ -295,6 +365,7 @@ def page_copa() -> None:
         if st.button("Resetear copa"):
             del st.session_state.swiss
             _ensure_swiss_state()
+            _persist_swiss_state()
             st.success("Copa reiniciada.")
             st.rerun()
     with colB:
@@ -320,6 +391,7 @@ def page_copa() -> None:
     if not S["current"]["pairs"] and (S.get("topcut") is None) and S["round"] <= S["max_rounds"] and len(S["qualified"]) < 4:
         pairs, bye = _swiss_generate_pairings(S)
         S["current"] = {"pairs": pairs, "bye": bye}
+        _persist_swiss_state()
 
     cur = S["current"]
     if cur["pairs"]:
@@ -336,6 +408,7 @@ def page_copa() -> None:
                 _apply_round_results(S, cur["pairs"], winners, cur["bye"])
                 if len(S["qualified"]) >= 4 or S["round"] > S["max_rounds"]:
                     _build_topcut(S)
+                _persist_swiss_state()
                 st.rerun()
             else:
                 st.error("Marca el ganador en todos los enfrentamientos.")
@@ -356,6 +429,7 @@ def page_copa() -> None:
                 S["wins"].setdefault(p, 0)
                 S["losses"].setdefault(p, 0)
                 S["byes"].setdefault(p, 0)
+            _persist_swiss_state()
             st.rerun()
 
         with st.form("swiss_edit_record"):
@@ -383,6 +457,7 @@ def page_copa() -> None:
                     S["losses"][p] = int(losses)
                 S["qualified"] = {p: S.get("round", 1) for p in S["players"] if S["wins"][p] >= 4}
                 S["eliminated"] = {p for p in S["players"] if S["losses"][p] >= 3}
+                _persist_swiss_state()
                 st.success("Record actualizado.")
 
         st.markdown("Emparejamientos manuales (formato: 'JugadorA - JugadorB' por lnea; 'bye: JugadorX')")
@@ -402,6 +477,7 @@ def page_copa() -> None:
                     if a and b and a in S["players"] and b in S["players"]:
                         pairs.append((a, b))
             S["current"] = {"pairs": pairs, "bye": bye}
+            _persist_swiss_state()
             st.success("Emparejamientos manuales aplicados.")
 
     if S.get("topcut"):
@@ -415,10 +491,11 @@ def page_copa() -> None:
             a2, b2 = tc['semis'][1]
             st.markdown(f"<div class='vs-card'><div class='p'>{a2}</div><div class='vs'>VS</div><div class='p'>{b2}</div></div>", unsafe_allow_html=True)
             w2 = st.radio("Semifinal 2 - ganador", options=[a2, b2], horizontal=True)
-            if st.button("Registrar semifinales"):
-                tc["semi_winners"] = [w1, w2]
-                tc["final"] = (w1, w2)
-                st.rerun()
+        if st.button("Registrar semifinales"):
+            tc["semi_winners"] = [w1, w2]
+            tc["final"] = (w1, w2)
+            _persist_swiss_state()
+            st.rerun()
         elif tc["final"] and not tc.get("champion"):
             a, b = tc["final"]
             st.markdown(f"<div class='vs-card'><div class='p'>{a}</div><div class='vs'>VS</div><div class='p'>{b}</div></div>", unsafe_allow_html=True)
@@ -426,6 +503,7 @@ def page_copa() -> None:
             if st.button("Registrar campen"):
                 tc["champion"] = champ
                 st.success(f"Campen: {champ}")
+                _persist_swiss_state()
         elif tc.get("champion"):
             st.success(f"Campen: {tc['champion']}")
 

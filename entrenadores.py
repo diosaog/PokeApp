@@ -15,7 +15,13 @@ from dexdata import move_name_es, ability_name_es
 from dexdata import species_types, move_info, type_color, showdown_export
 from ui_enhanced import team_grid_ui as _team_grid_ui_enhanced
 from utils import USERS, DEFAULT_DLL_HINT, list_user_saves
-from storage import get_flags_by_fingerprints, list_inventory
+from storage import (
+    get_flags_by_fingerprints,
+    list_inventory,
+    load_save_bytes,
+    get_current_save_for_user,
+    list_saves_by_user,
+)
 from pkmmeta import pokemon_fingerprint
 from conex_pkhex import (
     PKHeXRuntime, extract_team, extract_box, has_pc_data, get_bridge_path, get_box_meta_quick, open_sav_cached
@@ -1047,6 +1053,9 @@ def _pokemon_detail_panel() -> None:
     stx = _extract_stats_from_p(p) or {}
     # Propio vs ajeno: stats completas solo para el dueño; para otros, stats base sin IV/EV/habilidad.
     is_own = st.session_state.get("trainer_selected") == st.session_state.get("user")
+    if not is_own:
+        p = dict(p)
+        p["nature"] = None
 
     def _base_stats_at_level(mon: dict) -> dict:
         try:
@@ -1108,6 +1117,33 @@ def _pokemon_detail_panel() -> None:
                 import re
                 spaced = re.sub(r"(?<!^)(?=[A-Z])", " ", str(name)).replace("_", " ")
                 res2 = move_name_es(spaced.strip())
+                if res2 and res2 != name:
+                    return res2
+            except Exception:
+                pass
+        return res
+
+    def _ability_es(name: str | None) -> str:
+        if not name:
+            return "-"
+        manual = {
+            "Blaze": "Mar Llamas",
+            "Speed Boost": "Impulso",
+            "Huge Power": "Potencia",
+            "Intimidate": "Intimidación",
+            "Overgrow": "Espesura",
+            "Torrent": "Torrente",
+            "Swarm": "Enjambre",
+            "Synchronize": "Sincronía",
+        }
+        if name in manual:
+            return manual[name]
+        res = ability_name_es(str(name))
+        if res == name:
+            try:
+                import re
+                spaced = re.sub(r"(?<!^)(?=[A-Z])", " ", str(name)).replace("_", " ")
+                res2 = ability_name_es(spaced.strip())
                 if res2 and res2 != name:
                     return res2
             except Exception:
@@ -1180,7 +1216,7 @@ def _pokemon_detail_panel() -> None:
             item = '-'
         st.markdown(f"<div class='ds-card'><div><strong>Objeto</strong></div><div class='caption'>{item}</div></div>", unsafe_allow_html=True)
         if ability:
-            st.markdown(f"<div class='ds-card'><div><strong>Habilidad</strong></div><div class='caption'>{ability_name_es(str(ability))}</div></div>", unsafe_allow_html=True)
+            st.markdown(f"<div class='ds-card'><div><strong>Habilidad</strong></div><div class='caption'>{_ability_es(str(ability))}</div></div>", unsafe_allow_html=True)
 
     with colM:
         ps = _s('hp')
@@ -1372,6 +1408,9 @@ def page_entrenadores_view() -> None:
     current_user = st.session_state.get("user")
     is_own_profile = (trainer == current_user)
     _ensure_pokepaste_state()
+
+    # Garantizar save local desde Supabase/DB si falta
+    _ensure_local_save_for(trainer or "")
 
     saves = list_user_saves(trainer) if trainer else []
     active_path = saves[0] if saves else None
@@ -1664,6 +1703,43 @@ def _active_save_for(trainer: str) -> str | None:
         return str(p)
     except Exception:
         return None
+
+
+def _ensure_local_save_for(trainer: str) -> None:
+    """Intenta que haya un save local para el entrenador usando Supabase/DB si falta."""
+    if not trainer:
+        return
+    key = f"_ensure_local_save_for_{trainer}"
+    if st.session_state.get(key):
+        return
+    try:
+        # Si ya hay saves locales, listo
+        if list_user_saves(trainer):
+            st.session_state[key] = True
+            return
+        # 1) Save actual persistido
+        cur = get_current_save_for_user(trainer)
+        if cur:
+            fname = cur[1]
+            data = load_save_bytes(fname)
+            if data:
+                folder = ensure_user_dir(trainer)
+                dest = folder / fname
+                dest.write_bytes(data)
+                st.session_state[key] = True
+                return
+        # 2) Último save remoto
+        remote = list_saves_by_user(trainer, limit=1)
+        if remote:
+            _, fname, *_ = remote[0]
+            data = load_save_bytes(fname)
+            if data:
+                folder = ensure_user_dir(trainer)
+                dest = folder / fname
+                dest.write_bytes(data)
+    except Exception:
+        pass
+    st.session_state[key] = True
 
 if st is not None:
     @st.cache_data(ttl=120, show_spinner=False)
