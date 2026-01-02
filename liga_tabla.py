@@ -295,6 +295,12 @@ def page_tabla() -> None:
         if st.button("Guardar divisiones"):
             if len(sel_A) == 5 and len(sel_B) == 5:
                 st.session_state.league_divisions = {"A": sel_A, "B": sel_B}
+                # Reiniciar jornadas/matches para evitar inconsistencias
+                st.session_state.league_tramo = 1
+                st.session_state.league_active = False
+                st.session_state.league_matches = {}
+                st.session_state.league_results = {}
+                st.session_state.league_movements = {}
                 st.success("Divisiones actualizadas.")
                 _persist()
                 st.rerun()
@@ -312,7 +318,7 @@ def page_tabla() -> None:
         data = _get_matches_for(tramo)
         cA, cB = st.columns(2)
         with cA:
-            st.markdown("**Liga A (posiciones 1-4)**")
+            st.markdown("**Liga A (posiciones 1-5)**")
             for (p1, p2), winner in data["A"].items():
                 idx = (0 if winner == p1 else 1 if winner == p2 else 0)
                 pick = st.radio(f"{p1} vs {p2}", options=[p1, p2], index=idx, horizontal=True, key=f"A_{p1}_{p2}")
