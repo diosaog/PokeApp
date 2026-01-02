@@ -549,6 +549,8 @@ def _render_redeem_flow(ctx: dict, current_user: str) -> None:
                         base['robado'] = True
                         base['robado_from'] = target
                         base['robado_at'] = int(time.time())
+                        # Tras robar, dejamos marcado como blindado para no volver a robarlo
+                        base['blindado'] = True
                         upsert_pokemon_flags(current_user, fp, json.dumps(base, ensure_ascii=False))
                     except Exception:
                         pass
@@ -714,6 +716,19 @@ def _render_redeem_flow(ctx: dict, current_user: str) -> None:
                     # Registrar revivir sin modificar archivos .sav
                     add_redemption(int(pid), current_user, item, json.dumps({"type": "revive", "fingerprint": fp}, ensure_ascii=False))
                     set_purchase_status(int(pid), 'used')
+                    # Marcar flags: blindado y revivido
+                    try:
+                        cur = get_flags_by_fingerprints([fp]).get(fp)
+                        base = {}
+                        if cur and isinstance(cur.get('flags_json'), str) and cur['flags_json'].strip():
+                            base = json.loads(cur['flags_json'])
+                            if not isinstance(base, dict):
+                                base = {}
+                        base['blindado'] = True
+                        base['revivido_at'] = int(time.time())
+                        upsert_pokemon_flags(current_user, fp, json.dumps(base, ensure_ascii=False))
+                    except Exception:
+                        pass
                     st.success("Revivir registrado (sin modificar el save).")
                     st.session_state.pop('redeem_ctx', None)
                     st.rerun()
