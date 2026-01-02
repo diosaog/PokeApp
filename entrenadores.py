@@ -1117,8 +1117,29 @@ def _pokemon_detail_panel() -> None:
     def _item_name_es(name):
         if not name:
             return "-"
-        if isinstance(name, (int, float)) or str(name).lstrip("#").isdigit():
-            return f"Objeto #{str(name).lstrip('#')}"
+        # Normalizar id numérico (p.ej. "#275" de PKHeX) y traducir si es común
+        id_str = str(name).lstrip("#")
+        item_id_es = {
+            "234": "Restos",
+            "275": "Banda Focus",
+            "210": "Gafas Elegidas",
+            "220": "Cinta Elegida",
+            "287": "Pañuelo Elegido",
+            "247": "Vidasfera",
+            "226": "Periscopio",
+            "221": "Roca del Rey",
+            "213": "Hierba Blanca",
+            "247": "Vidasfera",
+            "233": "Revestimiento Metálico",
+            "230": "Piedra Alba",
+            "634": "Cápsula Habilidad",
+            "632": "Chapa Dorada",
+            "631": "Chapa Plateada",
+        }
+        if id_str.isdigit() and id_str in item_id_es:
+            return item_id_es[id_str]
+        if isinstance(name, (int, float)) or id_str.isdigit():
+            return f"Objeto #{id_str}"
         m = {
             "Leftovers": "Restos",
             "Choice Specs": "Gafas Elegidas",
