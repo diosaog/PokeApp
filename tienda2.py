@@ -395,6 +395,11 @@ def page_tienda() -> None:
                     pid = add_purchase(current_user, nombre, precio)
                     # Invalidate cache de dinero para reflejar el gasto
                     st.session_state.pop("_money_cache", None)
+                    try:
+                        import streamlit as _st
+                        _st.cache_data.clear()
+                    except Exception:
+                        pass
                     st.session_state.pop("shop_pending", None)
                     st.session_state.pop("shop_error", None)
                     st.success(f"Compra registrada (#{pid}).")
