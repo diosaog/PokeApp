@@ -148,6 +148,7 @@ def team_grid_ui(team: List[dict]) -> None:
                         "gender": t.get("gender"),
                         "dex_id": t.get("dex_id"),
                         "ivs": t.get("ivs"),
+                        "ability": t.get("ability"),
                         "held_item": t.get("held_item") or t.get("Item"),
                         "evs": t.get("evs"),
                     }

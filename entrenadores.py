@@ -1089,9 +1089,35 @@ def _pokemon_detail_panel() -> None:
         stx = _base_stats_at_level(p)
         ability = None
 
+    def _move_es(name: str) -> str:
+        manual = {
+            "MagnetBomb": "Bomba Imán",
+            "WakeUpSlap": "Espabila",
+            "XScissor": "Tijera X",
+            "SacredFire": "Fuego Sagrado",
+            "Close Combat": "A Bocajarro",
+            "Thunderbolt": "Rayo",
+        }
+        if name in manual:
+            return manual[name]
+        res = move_name_es(str(name))
+        if res == name:
+            # Reintenta separando camelCase
+            try:
+                import re
+                spaced = re.sub(r"(?<!^)(?=[A-Z])", " ", str(name)).replace("_", " ")
+                res2 = move_name_es(spaced.strip())
+                if res2 and res2 != name:
+                    return res2
+            except Exception:
+                pass
+        return res
+
     def _item_name_es(name):
         if not name:
             return "-"
+        if isinstance(name, (int, float)) or str(name).lstrip("#").isdigit():
+            return f"Objeto #{str(name).lstrip('#')}"
         m = {
             "Leftovers": "Restos",
             "Choice Specs": "Gafas Elegidas",
@@ -1156,7 +1182,7 @@ def _pokemon_detail_panel() -> None:
         for idx, mv in enumerate(moves):
             if not mv:
                 continue
-            mv_es = move_name_es(str(mv))
+            mv_es = _move_es(str(mv))
             info = move_info(str(mv)) or {}
             t = info.get('type')
             t_es = translate_type_es(t).upper() if t else '-'
@@ -1288,6 +1314,7 @@ def _boxes_grid_ui(sav_json: dict, box_count: int, box_names: List[str], *, save
                             "dex_id": p.get("dex_id"),
                             "ivs": p.get("ivs"),
                             "evs": p.get("evs"),
+                            "ability": p.get("ability") or p.get("Ability"),
                             "held_item": p.get("held_item") or p.get("Item"),
                         }
 
@@ -1572,25 +1599,26 @@ def _boxes_grid_ui(
                     )
                     st.markdown(html, unsafe_allow_html=True)
                     if st.button("Ver", key=f"box_{box_index}_{idx}"):
-                        st.session_state.selected_pokemon = {
-                            "from": "box",
-                            "box": box_index,
-                            "slot": idx + 1,
-                            "species": title,
-                            "nickname": p.get("nickname", ""),
-                            "level": p.get("level", "-"),
-                            "nature": p.get("nature", "-"),
-                            "moves": p.get("moves", []),
-                            "moves_detail": p.get("moves_detail"),
-                            "form_name": p.get("form_name"),
-                            "form_index": p.get("form_index"),
-                            "is_shiny": p.get("is_shiny", False),
-                            "gender": p.get("gender"),
-                            "dex_id": p.get("dex_id"),
-                            "ivs": p.get("ivs"),
-                            "evs": p.get("evs"),
-                            "held_item": p.get("held_item") or p.get("Item"),
-                        }
+                    st.session_state.selected_pokemon = {
+                        "from": "box",
+                        "box": box_index,
+                        "slot": idx + 1,
+                        "species": title,
+                        "nickname": p.get("nickname", ""),
+                        "level": p.get("level", "-"),
+                        "nature": p.get("nature", "-"),
+                        "moves": p.get("moves", []),
+                        "moves_detail": p.get("moves_detail"),
+                        "form_name": p.get("form_name"),
+                        "form_index": p.get("form_index"),
+                        "is_shiny": p.get("is_shiny", False),
+                        "gender": p.get("gender"),
+                        "dex_id": p.get("dex_id"),
+                        "ivs": p.get("ivs"),
+                        "evs": p.get("evs"),
+                        "ability": p.get("ability") or p.get("Ability"),
+                        "held_item": p.get("held_item") or p.get("Item"),
+                    }
                 else:
                     st.markdown(_slot_empty_html(f"Slot {idx+1}"), unsafe_allow_html=True)
                 idx += 1
