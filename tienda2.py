@@ -37,13 +37,6 @@ COIN = "\U0001FA99"
 
 
 def _calc_money_for_user(user: str) -> int:
-    # Cache por usuario para evitar recomputar en cada render
-    try:
-        cache = st.session_state.setdefault("_money_cache", {})
-        if user in cache:
-            return cache[user]
-    except Exception:
-        cache = None
     liga = coins_from_league(user)
     badge_coins = 0
     try:
@@ -87,10 +80,6 @@ def _calc_money_for_user(user: str) -> int:
     except Exception:
         badge_coins = 0
     total = int(liga + badge_coins)
-    try:
-        cache[user] = total
-    except Exception:
-        pass
     return total
 
 
@@ -404,6 +393,8 @@ def page_tienda() -> None:
             if st.button("Confirmar compra", width="stretch"):
                 try:
                     pid = add_purchase(current_user, nombre, precio)
+                    # Invalidate cache de dinero para reflejar el gasto
+                    st.session_state.pop("_money_cache", None)
                     st.session_state.pop("shop_pending", None)
                     st.session_state.pop("shop_error", None)
                     st.success(f"Compra registrada (#{pid}).")
