@@ -179,7 +179,7 @@ def _fix_text(s: str) -> str:
     return t
 
 # ---- Render tarjeta de item ----
-def _render_item_card(item: dict, idx_key: str) -> None:
+def _render_item_card(item: dict, idx_key: str, *, available: int | None = None) -> None:
     name = item.get("name")
     price = int(item.get("price", 0))
     desc = item.get("desc") or ""
@@ -209,7 +209,8 @@ def _render_item_card(item: dict, idx_key: str) -> None:
             img = None
 
     user = st.session_state.get("user") or "-"
-    available = _money_available(user)
+    if available is None:
+        available = _money_available(user)
     afford = available >= price
     with st.container(border=True):
         cols = st.columns([1, 2])
@@ -230,7 +231,7 @@ def _render_item_card(item: dict, idx_key: str) -> None:
             if not afford and price > 0:
                 st.caption(f"Faltan {COIN} {price - available}")
 
-def _render_shop_items(items: list[dict], category_key: str) -> None:
+def _render_shop_items(items: list[dict], category_key: str, *, available: int | None = None) -> None:
     # Asegurar imágenes para categorías por nombre (soporta textos con acentos o mojibake)
     if category_key == "comodines":
         try:
@@ -273,7 +274,7 @@ def _render_shop_items(items: list[dict], category_key: str) -> None:
     for idx, it in enumerate(items):
         col = cols[idx % 3]
         with col:
-            _render_item_card(it, f"{category_key}_{idx}")
+            _render_item_card(it, f"{category_key}_{idx}", available=available)
     st.write("")
 
 
@@ -298,6 +299,7 @@ def page_tienda() -> None:
 
     st.markdown("<div style=\"height:8px; background: repeating-linear-gradient(45deg, #2a75bb 0 12px, #3b88cc 12px 24px); border-radius: 6px; margin:-6px 0 10px\"></div>", unsafe_allow_html=True)
     current_user = st.session_state.get("user") or "-"
+    avail = None  # cache de saldo disponible para no recalcular por item
     _, colR = st.columns([5, 2])
     with colR:
         if current_user != "-":
@@ -386,13 +388,13 @@ def page_tienda() -> None:
 
     tab_com, tab_bay, tab_comp, tab_bred = st.tabs(["Comodines", "Bayas", "Competitivos", "Crianza"])
     with tab_com:
-        _render_shop_items(comodines, "comodines")
+    _render_shop_items(comodines, "comodines", available=avail if current_user != "-" else None)
     with tab_bay:
-        _render_shop_items(bayas, "bayas")
+    _render_shop_items(bayas, "bayas", available=avail if current_user != "-" else None)
     with tab_comp:
-        _render_shop_items(competitivos, "competitivos")
+    _render_shop_items(competitivos, "competitivos", available=avail if current_user != "-" else None)
     with tab_bred:
-        _render_shop_items(crianza, "crianza")
+    _render_shop_items(crianza, "crianza", available=avail if current_user != "-" else None)
 
     # Confirmacion de compra
     pending = st.session_state.get("shop_pending")
