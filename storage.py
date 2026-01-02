@@ -58,6 +58,10 @@ def _conn():
 
 
 def init_storage():
+    # En entorno Supabase (Streamlit Cloud) evitamos crear SQLite local para no fallar en FS read-only.
+    if _supabase_enabled():
+        return
+
     DATA_DIR.mkdir(exist_ok=True)
     SAVES_DIR.mkdir(exist_ok=True)
     with _conn() as cx:
