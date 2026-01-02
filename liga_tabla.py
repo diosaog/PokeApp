@@ -38,20 +38,25 @@ def _restore_state() -> None:
         if not raw:
             return
         obj = json.loads(raw)
-        st.session_state.league_tramo = int(obj.get("tramo", 1))
-        st.session_state.league_active = bool(obj.get("active", False))
-        st.session_state.league_divisions = obj.get("divisions", {"A": [], "B": []})
-        res_in = obj.get("results", {})
-        st.session_state.league_results = {u: {int(k): int(v) for k, v in mp.items()} for u, mp in res_in.items()}
-        mat_in = obj.get("matches", {})
-        mat_out: Dict[int, Dict[str, Dict[tuple, str | None]]] = {}
-        for tkey, divs in mat_in.items():
-            t = int(tkey)
-            mat_out[t] = {"A": {}, "B": {}}
-            for d in ("A", "B"):
-                for m in divs.get(d, []) or []:
-                    mat_out[t][d][(m.get("p1"), m.get("p2"))] = m.get("winner")
-        st.session_state.league_matches = mat_out
+        if "league_tramo" not in st.session_state:
+            st.session_state.league_tramo = int(obj.get("tramo", 1))
+        if "league_active" not in st.session_state:
+            st.session_state.league_active = bool(obj.get("active", False))
+        if "league_divisions" not in st.session_state:
+            st.session_state.league_divisions = obj.get("divisions", {"A": [], "B": []})
+        if "league_results" not in st.session_state:
+            res_in = obj.get("results", {})
+            st.session_state.league_results = {u: {int(k): int(v) for k, v in mp.items()} for u, mp in res_in.items()}
+        if "league_matches" not in st.session_state:
+            mat_in = obj.get("matches", {})
+            mat_out: Dict[int, Dict[str, Dict[tuple, str | None]]] = {}
+            for tkey, divs in mat_in.items():
+                t = int(tkey)
+                mat_out[t] = {"A": {}, "B": {}}
+                for d in ("A", "B"):
+                    for m in divs.get(d, []) or []:
+                        mat_out[t][d][(m.get("p1"), m.get("p2"))] = m.get("winner")
+            st.session_state.league_matches = mat_out
         mov = obj.get("movements", {})
         if isinstance(mov, dict):
             st.session_state.league_movements = {int(k): v for k, v in mov.items()}
