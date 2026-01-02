@@ -1088,6 +1088,31 @@ def _pokemon_detail_panel() -> None:
     if not is_own:
         stx = _base_stats_at_level(p)
         ability = None
+
+    def _item_name_es(name):
+        if not name:
+            return "-"
+        m = {
+            "Leftovers": "Restos",
+            "Choice Specs": "Gafas Elegidas",
+            "Choice Band": "Cinta Elegida",
+            "Choice Scarf": "Pañuelo Elegido",
+            "Life Orb": "Vidasfera",
+            "Focus Sash": "Banda Focus",
+            "Scope Lens": "Periscopio",
+            "King's Rock": "Roca del Rey",
+            "White Herb": "Hierba Blanca",
+            "Metal Coat": "Revestimiento Metálico",
+            "Dawn Stone": "Piedra Alba",
+            "Ability Capsule": "Cápsula Habilidad",
+            "Bottle Cap": "Chapa Plateada",
+            "Gold Bottle Cap": "Chapa Dorada",
+            "Ultra Ball": "Ultra Ball",
+            "Repeat Ball": "Turno Ball",
+            "Max Revive": "Revivir Máximo",
+            "Helix Fossil": "Fósil Helix",
+        }
+        return m.get(str(name), str(name))
     def _s(k):
         try:
             v = stx.get(k)
@@ -1101,12 +1126,13 @@ def _pokemon_detail_panel() -> None:
         img_url = _sprite_url_from_p(p, prefer_animated=True)
         st.image(img_url, width=DETAIL_IMG_W)
         try:
-            item = p.get('held_item') or p.get('item') or '-'
+            raw_item = p.get('held_item') or p.get('item') or '-'
+            item = _item_name_es(raw_item)
         except Exception:
             item = '-'
         st.markdown(f"<div class='ds-card'><div><strong>Objeto</strong></div><div class='caption'>{item}</div></div>", unsafe_allow_html=True)
         if ability:
-            st.markdown(f"<div class='ds-card'><div><strong>Habilidad</strong></div><div class='caption'>{ability}</div></div>", unsafe_allow_html=True)
+            st.markdown(f"<div class='ds-card'><div><strong>Habilidad</strong></div><div class='caption'>{ability_name_es(str(ability))}</div></div>", unsafe_allow_html=True)
 
     with colM:
         ps = _s('hp')
