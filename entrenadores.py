@@ -703,6 +703,14 @@ def _purchases_inventory_ui(user: str, *, allow_use: bool = True) -> None:
             _render_purchase_cards(used, "Usados", show_used=True, key_prefix="usados", allow_use=allow_use)
 
 
+@st.cache_data(ttl=5, show_spinner=False)
+def _inventory_cached(user: str) -> list[tuple]:
+    try:
+        return list_inventory(user, status=None, limit=200)
+    except Exception:
+        return []
+
+
 
 def _trainer_summary_ui(sav_json: dict, box_count: int) -> None:
     """Monedas netas (liga+medallas Â¢Ã¢Â Â¢Ã¢Â¬Ã¢Â¢ compras), Puntos, Muertos, Medallas."""
@@ -1499,7 +1507,7 @@ def page_entrenadores_view() -> None:
     with tab_shop:
         _purchases_inventory_ui(trainer or "", allow_use=False)
     with tab_como:
-        inv = list_inventory(trainer or "", status=None, limit=200)
+        inv = _inventory_cached(trainer or "")
         comos = [r for r in inv if _category_for_item(r[1]) == "Comodines"] if inv else []
         _render_purchase_cards(comos, "Comodines", key_prefix="comos", allow_use=True)
     # Si hay un comodín en uso, mostrar el flujo aquí también (sin ir a Tienda)
