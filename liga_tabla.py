@@ -83,7 +83,7 @@ def _ensure_state():
         st.session_state.league_results = {}
     if "league_divisions" not in st.session_state:
         players = list(USERS.keys())
-        st.session_state.league_divisions = {"A": players[:4], "B": players[4:]}
+        st.session_state.league_divisions = {"A": players[:5], "B": players[5:10]}
     if "league_matches" not in st.session_state:
         st.session_state.league_matches = {}
     if "league_movements" not in st.session_state:
@@ -204,9 +204,9 @@ def _finalize(tramo: int) -> None:
     except Exception:
         pass
 
-    # Ascensos/descensos
-    nueva_A = [rankA[0], rankA[1], rankB[0], rankB[1]]
-    nueva_B = [rankA[2], rankA[3]] + rankB[2:5]
+    # Ascensos/descensos (5 y 5): bajan 3 últimos de A, suben 3 primeros de B
+    nueva_A = rankA[:2] + rankB[:3]
+    nueva_B = rankA[2:5] + rankB[3:5]
     st.session_state.league_divisions = {"A": nueva_A, "B": nueva_B}
     try:
         st.session_state.league_movements[tramo] = {"up": [rankB[0], rankB[1]], "down": [rankA[2], rankA[3]]}
@@ -284,6 +284,22 @@ def page_tabla() -> None:
                     _get_matches_for(tramo)
                     _persist()
                     st.rerun()
+
+    st.markdown("---")
+    st.subheader("Editar divisiones")
+    with st.expander("Divisiones (5 y 5)", expanded=False):
+        players = list(USERS.keys())
+        sel_A = st.multiselect("Liga A (5 jugadores)", players, default=st.session_state.league_divisions.get("A", [])[:5], max_selections=5)
+        remaining = [p for p in players if p not in sel_A]
+        sel_B = st.multiselect("Liga B (5 jugadores)", remaining, default=st.session_state.league_divisions.get("B", [])[:5], max_selections=5)
+        if st.button("Guardar divisiones"):
+            if len(sel_A) == 5 and len(sel_B) == 5:
+                st.session_state.league_divisions = {"A": sel_A, "B": sel_B}
+                st.success("Divisiones actualizadas.")
+                _persist()
+                st.rerun()
+            else:
+                st.error("Selecciona exactamente 5 en A y 5 en B.")
 
     st.markdown("---")
     A = st.session_state.league_divisions["A"]

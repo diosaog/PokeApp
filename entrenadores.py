@@ -37,6 +37,20 @@ COIN = "🪙"
 # ===== Pokepaste helpers (compartido con Copa) =====
 def _ensure_pokepaste_state() -> None:
     st.session_state.setdefault("pokepastes", {})
+    # Restaurar desde settings para el entrenador actual si no está en sesión
+    try:
+        trainer = st.session_state.get("trainer_selected") or st.session_state.get("user") or ""
+        if trainer and trainer not in st.session_state["pokepastes"]:
+            from storage import settings_get
+            key = f"pokepaste:{trainer}"
+            raw = settings_get(key)
+            if raw:
+                import json
+                obj = json.loads(raw)
+                if isinstance(obj, dict):
+                    st.session_state["pokepastes"][trainer] = obj
+    except Exception:
+        pass
 
 
 def _fetch_pokepaste_text(url: str) -> str:
@@ -1456,7 +1470,19 @@ def page_entrenadores_view() -> None:
     # Resumen con retrato y KPIs
     _trainer_summary_with_portrait_ui(sav_json, box_count)
 
+    # Inventario (cerca del perfil)
+    st.markdown("---")
+    st.subheader("Inventario")
+    tab_shop, tab_como = st.tabs(["Compras (tienda)", "Comodines"])
+    with tab_shop:
+        _purchases_inventory_ui(trainer or "")
+    with tab_como:
+        inv = list_inventory(trainer or "", status=None, limit=200)
+        comos = [r for r in inv if _category_for_item(r[1]) == "Comodines"] if inv else []
+        _render_purchase_cards(comos, "Comodines")
+
     # Equipo actual (con cache si hay ruta activa)
+    st.markdown("---")
     try:
         active_spath = str(save_path) if save_path else None
         if active_spath:
@@ -1471,46 +1497,6 @@ def page_entrenadores_view() -> None:
     except Exception:
         team = []
     _team_grid_ui_enhanced(team)
-
-    # Pokepaste (editor para perfil propio, lectura para otros)
-    st.markdown("---")
-    st.subheader("Pokepaste del entrenador")
-    pokes = st.session_state.get("pokepastes", {})
-    existing = pokes.get(trainer or "", {})
-    if is_own_profile:
-        url_val = existing.get("url", "") if isinstance(existing, dict) else ""
-        col1, col2 = st.columns([3,1])
-        with col1:
-            url_in = st.text_input("URL de Pokepaste", value=url_val, placeholder="https://pokepast.es/...")
-        with col2:
-            if st.button("Guardar Pokepaste", type="primary"):
-                if not url_in.strip():
-                    st.warning("Introduce una URL de Pokepaste.")
-                else:
-                    try:
-                        txt = _fetch_pokepaste_text(url_in.strip())
-                        team_pp = _parse_pokepaste(txt)
-                        team_pp = [_sanitize_mon(m) for m in team_pp if m]
-                        st.session_state.pokepastes[trainer] = {"url": url_in.strip(), "team": team_pp}
-                        st.success("Pokepaste cargado y guardado.")
-                    except Exception as e:
-                        st.error(f"No se pudo cargar el Pokepaste: {e}")
-        if st.button("Borrar Pokepaste"):
-            st.session_state.pokepastes.pop(trainer, None)
-            st.success("Pokepaste eliminado.")
-        st.caption("Tu Pokepaste se reutiliza en la pestaña Copa para mostrar equipos.")
-    _pokepaste_preview(existing)
-
-    # Inventario (compras de tienda y objetos equipados)
-    st.markdown("---")
-    st.subheader("Inventario")
-    tab_shop, tab_como = st.tabs(["Compras (tienda)", "Comodines"])
-    with tab_shop:
-        _purchases_inventory_ui(trainer or "")
-    with tab_como:
-        inv = list_inventory(trainer or "", status=None, limit=200)
-        comos = [r for r in inv if _category_for_item(r[1]) == "Comodines"] if inv else []
-        _render_purchase_cards(comos, "Comodines")
 
     # Exportar equipo en formato Showdown (tematica competitiva)
     try:
@@ -1534,6 +1520,45 @@ def page_entrenadores_view() -> None:
 
     # Cuadrícula de cajas
     _boxes_grid_ui(sav_json, box_count, box_names, save_path=str(save_path))
+
+    # Pokepaste (editor para perfil propio, lectura para otros) al final
+    st.markdown("---")
+    st.subheader("Pokepaste del entrenador")
+    pokes = st.session_state.get("pokepastes", {})
+    existing = pokes.get(trainer or "", {})
+    if is_own_profile:
+        url_val = existing.get("url", "") if isinstance(existing, dict) else ""
+        col1, col2 = st.columns([3,1])
+        with col1:
+            url_in = st.text_input("URL de Pokepaste", value=url_val, placeholder="https://pokepast.es/...")
+        with col2:
+            if st.button("Guardar Pokepaste", type="primary"):
+                if not url_in.strip():
+                    st.warning("Introduce una URL de Pokepaste.")
+                else:
+                    try:
+                        txt = _fetch_pokepaste_text(url_in.strip())
+                        team_pp = _parse_pokepaste(txt)
+                        team_pp = [_sanitize_mon(m) for m in team_pp if m]
+                        st.session_state.pokepastes[trainer] = {"url": url_in.strip(), "team": team_pp}
+                        try:
+                            from storage import settings_set
+                            settings_set(f"pokepaste:{trainer}", json.dumps(st.session_state.pokepastes[trainer], ensure_ascii=False))
+                        except Exception:
+                            pass
+                        st.success("Pokepaste cargado y guardado.")
+                    except Exception as e:
+                        st.error(f"No se pudo cargar el Pokepaste: {e}")
+        if st.button("Borrar Pokepaste"):
+            st.session_state.pokepastes.pop(trainer, None)
+            try:
+                from storage import settings_set
+                settings_set(f"pokepaste:{trainer}", "")
+            except Exception:
+                pass
+            st.success("Pokepaste eliminado.")
+        st.caption("Tu Pokepaste se reutiliza en la pestaña Copa para mostrar equipos.")
+    _pokepaste_preview(existing)
 
 
 def page_entrenadores() -> None:
