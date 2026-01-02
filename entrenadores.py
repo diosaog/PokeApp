@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 from pathlib import Path
+import time
 from typing import List, Any, cast
 from urllib import request
 from urllib.parse import urlparse
@@ -684,7 +685,7 @@ def _render_purchase_cards(items: list[tuple], title: str, *, show_used: bool=Fa
                 st.session_state["redeem_ctx"] = {"item": item, "pid": pid, "step": 1}
 
 def _purchases_inventory_ui(user: str, *, allow_use: bool = True) -> None:
-    inv = list_inventory(user, limit=200)
+    inv = _inventory_cached(user)
     if not inv:
         st.caption("Sin compras registradas.")
         return
@@ -711,6 +712,35 @@ def _inventory_cached(user: str) -> list[tuple]:
         return []
 
 
+def _money_snapshot(user: str, *, medallas: int | None = None, ttl: int = 5) -> tuple[int, int, int]:
+    """
+    Devuelve (base, spent, available) con cache corta en session_state para evitar recalcular en cada render.
+    base = monedas liga + medallas*2; spent = total_spent; available = max(base - spent, 0).
+    Si ya conocemos las medallas (p.ej. del save cargado), pásalas para evitar relecturas.
+    """
+    if not user:
+        return (0, 0, 0)
+    cache = st.session_state.setdefault("_money_cache_entrenadores", {})
+    now = time.time()
+    ent = cache.get(user)
+    if ent and (now - ent.get("ts", 0) < ttl):
+        return ent.get("base", 0), ent.get("spent", 0), ent.get("avail", 0)
+    try:
+        liga = coins_from_league(user)
+    except Exception:
+        liga = 0
+    if medallas is None:
+        medallas = 0
+    base = liga + 2 * medallas
+    try:
+        from storage import total_spent  # lazy import para evitar ciclos
+        spent = total_spent(user)
+    except Exception:
+        spent = 0
+    avail = max(int(base) - int(spent), 0)
+    cache[user] = {"base": int(base), "spent": int(spent), "avail": int(avail), "ts": now}
+    return int(base), int(spent), int(avail)
+
 
 def _trainer_summary_ui(sav_json: dict, box_count: int) -> None:
     """Monedas netas (liga+medallas Â¢Ã¢Â Â¢Ã¢Â¬Ã¢Â¢ compras), Puntos, Muertos, Medallas."""
@@ -718,18 +748,10 @@ def _trainer_summary_ui(sav_json: dict, box_count: int) -> None:
         medallas = _count_badges(sav_json)
     except Exception:
         medallas = 0
-    # 2 monedas por medalla (máx 8)
-    monedas_badges = 2 * medallas
-
     jugador = st.session_state.get("trainer_selected") or st.session_state.get("user")
-    monedas_liga = coins_from_league(jugador or "")
-    bruto = monedas_badges + monedas_liga
-    try:
-        from storage import total_spent
-        spent = total_spent(jugador or "")
-    except Exception:
-        spent = 0
-    monedas = max(bruto - spent, 0)
+    base, spent, monedas = _money_snapshot(jugador or "", medallas=medallas, ttl=5)
+    monedas_badges = 2 * medallas
+    monedas_liga = base - monedas_badges
 
     try:
         from liga_tabla import current_points_total

@@ -413,6 +413,7 @@ def page_tienda() -> None:
                     pid = add_purchase(current_user, nombre, precio)
                     # Invalidate cache de dinero para reflejar el gasto
                     st.session_state.pop("_money_cache", None)
+                    st.session_state.pop("_money_cache_entrenadores", None)
                     try:
                         import streamlit as _st
                         _st.cache_data.clear()
