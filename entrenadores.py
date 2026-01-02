@@ -1044,6 +1044,50 @@ def _pokemon_detail_panel() -> None:
     up_key, down_key = _nature_mods(p.get('nature'))
 
     stx = _extract_stats_from_p(p) or {}
+    # Propio vs ajeno: stats completas solo para el dueño; para otros, stats base sin IV/EV/habilidad.
+    is_own = st.session_state.get("trainer_selected") == st.session_state.get("user")
+
+    def _base_stats_at_level(mon: dict) -> dict:
+        try:
+            from dexdata import pokedex_data
+            from showdown_sprites import showdown_id
+            sid = showdown_id(
+                species_name=mon.get("species_name") or mon.get("species") or "",
+                form_index=mon.get("form_index"),
+                form_name=mon.get("form_name"),
+                gender=mon.get("gender"),
+            )
+            key = sid.replace("-", "").lower()
+            pdx = pokedex_data()
+            entry = pdx.get(key) or {}
+            if not entry and "-" in sid:
+                entry = pdx.get(sid.split("-", 1)[0].replace("-", "").lower()) or {}
+            bstats = entry.get("baseStats") or {}
+            lvl = int(mon.get("level") or 50)
+
+            def hp_calc(base):
+                return int(((2 * base) * lvl) // 100 + lvl + 10)
+
+            def other_calc(base):
+                return int(((2 * base) * lvl) // 100 + 5)
+
+            res = {}
+            for k in ("hp", "atk", "def", "spa", "spd", "spe"):
+                b = bstats.get(k)
+                if b is None:
+                    continue
+                if k == "hp":
+                    res[k] = hp_calc(int(b))
+                else:
+                    res[k] = other_calc(int(b))
+            return res
+        except Exception:
+            return {}
+
+    ability = p.get("ability") or p.get("Ability")
+    if not is_own:
+        stx = _base_stats_at_level(p)
+        ability = None
     def _s(k):
         try:
             v = stx.get(k)
@@ -1061,6 +1105,8 @@ def _pokemon_detail_panel() -> None:
         except Exception:
             item = '-'
         st.markdown(f"<div class='ds-card'><div><strong>Objeto</strong></div><div class='caption'>{item}</div></div>", unsafe_allow_html=True)
+        if ability:
+            st.markdown(f"<div class='ds-card'><div><strong>Habilidad</strong></div><div class='caption'>{ability}</div></div>", unsafe_allow_html=True)
 
     with colM:
         ps = _s('hp')
