@@ -398,6 +398,7 @@ def page_tienda() -> None:
                     st.session_state.pop("shop_pending", None)
                     st.session_state.pop("shop_error", None)
                     st.success(f"Compra registrada (#{pid}).")
+                    st.rerun()
                 except Exception as e:
                     st.session_state["shop_error"] = str(e)
                     st.error(f"No se pudo registrar la compra: {e}")
