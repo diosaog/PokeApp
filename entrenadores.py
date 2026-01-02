@@ -656,7 +656,7 @@ def _category_for_item(name: str) -> str:
         return "Crianza"
     return "Otros"
 
-def _render_purchase_cards(items: list[tuple], title: str, *, show_used: bool=False, key_prefix: str=""):
+def _render_purchase_cards(items: list[tuple], title: str, *, show_used: bool=False, key_prefix: str="", allow_use: bool=True):
     if not items:
         st.caption(f"Sin {title.lower()}.")
         return
@@ -680,10 +680,10 @@ def _render_purchase_cards(items: list[tuple], title: str, *, show_used: bool=Fa
                 f"</div>",
                 unsafe_allow_html=True,
             )
-            if (status != "used") and "_is_usable_item" in globals() and _is_usable_item(item) and st.button("Usar", key=f"use_{key_prefix}_{pid}_{idx}"):
+            if allow_use and (status != "used") and "_is_usable_item" in globals() and _is_usable_item(item) and st.button("Usar", key=f"use_{key_prefix}_{pid}_{idx}"):
                 st.session_state["redeem_ctx"] = {"item": item, "pid": pid, "step": 1}
 
-def _purchases_inventory_ui(user: str) -> None:
+def _purchases_inventory_ui(user: str, *, allow_use: bool = True) -> None:
     inv = list_inventory(user, limit=200)
     if not inv:
         st.caption("Sin compras registradas.")
@@ -697,10 +697,10 @@ def _purchases_inventory_ui(user: str) -> None:
     for cat in ("Comodines", "Bayas", "Competitivos", "Crianza", "Otros"):
         if cat in by_cat:
             st.markdown(f"**{cat}**")
-            _render_purchase_cards(by_cat[cat], cat, key_prefix=cat)
+            _render_purchase_cards(by_cat[cat], cat, key_prefix=cat, allow_use=allow_use)
     if used:
         with st.expander("Usados"):
-            _render_purchase_cards(used, "Usados", show_used=True, key_prefix="usados")
+            _render_purchase_cards(used, "Usados", show_used=True, key_prefix="usados", allow_use=allow_use)
 
 
 
@@ -1497,11 +1497,11 @@ def page_entrenadores_view() -> None:
     st.subheader("Inventario")
     tab_shop, tab_como = st.tabs(["Compras (tienda)", "Comodines"])
     with tab_shop:
-        _purchases_inventory_ui(trainer or "")
+        _purchases_inventory_ui(trainer or "", allow_use=False)
     with tab_como:
         inv = list_inventory(trainer or "", status=None, limit=200)
         comos = [r for r in inv if _category_for_item(r[1]) == "Comodines"] if inv else []
-        _render_purchase_cards(comos, "Comodines")
+        _render_purchase_cards(comos, "Comodines", key_prefix="comos", allow_use=True)
 
     # Equipo actual (con cache si hay ruta activa)
     st.markdown("---")

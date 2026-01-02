@@ -554,32 +554,38 @@ def _render_redeem_flow(ctx: dict, current_user: str) -> None:
 
     # === BLINDAR ===
     if _eq_item(item, "Blindar Pokemon"):
-        origin_kind = st.selectbox("Origen", ["Equipo"] + [f"Caja {i+1}" for i in range(18)], key="shield_origin")
         mons: List[dict] = []
+        labels = []
         try:
             saves = list_user_saves(current_user)
             if saves:
                 spath = str(saves[0])
                 sav_json = open_sav_cached(spath)
-                if origin_kind == "Equipo":
-                    mons = extract_team(sav_json, save_path=spath)
-                else:
-                    idx = int(origin_kind.split()[-1]) - 1
-                    mons = extract_box(sav_json, idx, save_path=spath)
+                # Equipo
+                from pkmmeta import pokemon_fingerprint
+                team = extract_team(sav_json, save_path=spath) or []
+                for i, m in enumerate(team):
+                    fp = pokemon_fingerprint(m)
+                    labels.append((f"Equipo slot {i+1}: {m.get('species_name') or m.get('species')} Lv.{m.get('level','-')}", fp))
+                # Cajas
+                try:
+                    from conex_pkhex import get_box_meta_quick
+                    total_boxes, _ = get_box_meta_quick(sav_json, save_path=spath)
+                except Exception:
+                    total_boxes = 18
+                for b in range(total_boxes):
+                    box_list = extract_box(sav_json, b, save_path=spath) or []
+                    for idx, m in enumerate(box_list):
+                        fp = pokemon_fingerprint(m)
+                        labels.append((f"Caja {b+1} slot {idx+1}: {m.get('species_name') or m.get('species')} Lv.{m.get('level','-')}", fp))
             else:
                 st.warning("No tienes save disponible.")
         except Exception as e:
             st.error(f"No se pudo leer tu save: {e}")
-        options = []
-        from pkmmeta import pokemon_fingerprint
-        for i, m in enumerate(mons):
-            fp = pokemon_fingerprint(m)
-            slot = m.get('slot_index', i)
-            options.append((f"{i+1}. {m.get('species_name') or m.get('species')} Lv.{m.get('level','-')}", int(slot), fp))
-        label_to_idx = {lbl: (idx, fp) for (lbl, idx, fp) in options}
-        choice_lbl = st.selectbox("Pokemon", [lbl for (lbl, _, _) in options]) if options else None
+        label_to_fp = {lbl: fp for (lbl, fp) in labels}
+        choice_lbl = st.selectbox("Pokemon a blindar", list(label_to_fp.keys())) if labels else None
         if choice_lbl:
-            _, fp = label_to_idx[choice_lbl]
+            fp = label_to_fp[choice_lbl]
             # Evitar doble blindaje
             _cur = get_flags_by_fingerprints([fp]).get(fp)
             _already = False
