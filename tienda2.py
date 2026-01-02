@@ -92,6 +92,13 @@ def _money_available(user: str | None) -> int:
         base = 0
     try:
         spent = total_spent(user)
+        if spent == 0:
+            inv = list_inventory(user, limit=300)
+            for r in inv or []:
+                try:
+                    spent += int(r[2] or 0)
+                except Exception:
+                    continue
     except Exception:
         spent = 0
     return max(int(base) - int(spent), 0)

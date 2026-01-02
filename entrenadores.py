@@ -1502,6 +1502,14 @@ def page_entrenadores_view() -> None:
         inv = list_inventory(trainer or "", status=None, limit=200)
         comos = [r for r in inv if _category_for_item(r[1]) == "Comodines"] if inv else []
         _render_purchase_cards(comos, "Comodines", key_prefix="comos", allow_use=True)
+    # Si hay un comodín en uso, mostrar el flujo aquí también (sin ir a Tienda)
+    ctx = st.session_state.get("redeem_ctx")
+    if ctx:
+        try:
+            from tienda2 import _render_redeem_flow  # type: ignore
+            _render_redeem_flow(ctx, current_user)
+        except Exception:
+            st.error("No se pudo cargar el flujo de uso de comodines aquí; ve a la pestaña Tienda.")
 
     # Equipo actual (con cache si hay ruta activa)
     st.markdown("---")
