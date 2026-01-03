@@ -716,7 +716,7 @@ def _inventory_cached(user: str) -> list[tuple]:
 def _money_snapshot(user: str, *, medallas: int | None = None, ttl: int = 5) -> tuple[int, int, int]:
     """
     Devuelve (base, spent, available) con cache corta en session_state para evitar recalcular en cada render.
-    base = monedas liga + medallas*2; spent = total_spent; available = max(base - spent, 0).
+    base = monedas liga + medallas*3; spent = total_spent; available = max(base - spent, 0).
     Si ya conocemos las medallas (p.ej. del save cargado), pásalas para evitar relecturas.
     """
     if not user:
@@ -732,7 +732,7 @@ def _money_snapshot(user: str, *, medallas: int | None = None, ttl: int = 5) -> 
         liga = 0
     if medallas is None:
         medallas = 0
-    base = liga + 2 * medallas
+    base = liga + 3 * medallas
     try:
         from storage import total_spent  # lazy import para evitar ciclos
         spent = total_spent(user)
@@ -751,7 +751,7 @@ def _trainer_summary_ui(sav_json: dict, box_count: int) -> None:
         medallas = 0
     jugador = st.session_state.get("trainer_selected") or st.session_state.get("user")
     base, spent, monedas = _money_snapshot(jugador or "", medallas=medallas, ttl=5)
-    monedas_badges = 2 * medallas
+    monedas_badges = 3 * medallas
     monedas_liga = base - monedas_badges
 
     try:
@@ -816,7 +816,7 @@ def _trainer_summary_with_portrait_ui(sav_json: dict, box_count: int) -> None:
     except Exception:
         medallas = 0
     # 2 monedas por medalla (máx 8)
-    monedas_badges = 2 * medallas
+    monedas_badges = 3 * medallas
 
     jugador = st.session_state.get("trainer_selected") or st.session_state.get("user")
     monedas_liga = coins_from_league(jugador or "")
