@@ -743,6 +743,33 @@ def _money_snapshot(user: str, *, medallas: int | None = None, ttl: int = 5) -> 
     return int(base), int(spent), int(avail)
 
 
+def _revives_key(user: str) -> str:
+    return f"revived_after_wipe:{user}"
+
+
+def _get_revives(user: str) -> int:
+    if not user:
+        return 0
+    try:
+        from storage import settings_get
+        raw = settings_get(_revives_key(user))
+        if raw is None or raw == "":
+            return 0
+        return max(int(raw), 0)
+    except Exception:
+        return 0
+
+
+def _set_revives(user: str, count: int) -> None:
+    if not user:
+        return
+    try:
+        from storage import settings_set
+        settings_set(_revives_key(user), str(max(0, int(count))))
+    except Exception:
+        pass
+
+
 def _trainer_summary_ui(sav_json: dict, box_count: int) -> None:
     """Monedas netas (liga+medallas Â¢Ã¢Â Â¢Ã¢Â¬Ã¢Â¢ compras), Puntos, Muertos, Medallas."""
     try:
@@ -766,6 +793,8 @@ def _trainer_summary_ui(sav_json: dict, box_count: int) -> None:
     except Exception:
         muertos_list = []
     muertos = len(muertos_list)
+    revividos = _get_revives(jugador or "")
+    muertos_total = muertos + revividos
 
     c1, c2, c3, c4 = st.columns(4)
     with c1:
@@ -773,7 +802,7 @@ def _trainer_summary_ui(sav_json: dict, box_count: int) -> None:
     with c2:
         st.metric("Puntos", puntos)
     with c3:
-        st.metric("Muertos", muertos)
+        st.metric("Muertes penalizadas", muertos_total, help="Muertos en Caja 18 + revividos tras wipe (penalizan -0.2 c/u)")
     with c4:
         st.markdown("**Medallas**")
         _render_medals_row(medallas)
@@ -867,6 +896,21 @@ def _trainer_summary_with_portrait_ui(sav_json: dict, box_count: int) -> None:
                     f"<div class='panel-ghost'><div class='title'>Muertos (Caja 18)</div><div class='value'>{muertos}</div></div>",
                     unsafe_allow_html=True,
                 )
+                rev_col1, rev_col2 = st.columns([2, 1.2])
+                with rev_col1:
+                    rev_count = st.number_input(
+                        "Revividos tras wipe (penalizan -0.2 c/u)",
+                        min_value=0,
+                        max_value=30,
+                        step=1,
+                        value=revividos,
+                        key=f"revives_wipe_{jugador}",
+                        help="Usa esta casilla para anotar los que revives tras un wipe; cuentan como muerte extra para los puntos."
+                    )
+                with rev_col2:
+                    if st.button("Guardar revividos", key=f"save_revives_{jugador}"):
+                        _set_revives(jugador or "", rev_count)
+                        st.success("Revividos guardados.")
             except Exception:
                 pass
             st.markdown("</div>", unsafe_allow_html=True)

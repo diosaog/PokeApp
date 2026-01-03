@@ -1,7 +1,6 @@
 ﻿# -*- coding: utf-8 -*-
 from __future__ import annotations
 from typing import Dict
-from functools import lru_cache
 import json
 import streamlit as st
 
@@ -116,7 +115,6 @@ def _get_matches_for(tramo: int) -> dict:
     return st.session_state.league_matches[tramo]
 
 
-@lru_cache(maxsize=64)
 def _count_muertos_for_trainer(trainer: str) -> int:
     try:
         saves = list_user_saves(trainer)
@@ -127,9 +125,18 @@ def _count_muertos_for_trainer(trainer: str) -> int:
         if not has_pc_data(sav_json):
             return 0
         muertos_list = extract_box(sav_json, 17)  # Caja 18
-        return len(muertos_list or [])
+        muertos = len(muertos_list or [])
     except Exception:
-        return 0
+        muertos = 0
+
+    # Penalización extra por revivir tras wipe (guardado en settings)
+    try:
+        extra = settings_get(f"revived_after_wipe:{trainer}")
+        revives = int(extra) if extra not in (None, "") else 0
+        revives = max(revives, 0)
+    except Exception:
+        revives = 0
+    return muertos + revives
 
 
 def _wins_losses(players: list[str], results: dict[tuple[str, str], str]) -> dict:

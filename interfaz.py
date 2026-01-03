@@ -622,6 +622,7 @@ Un Pokemon debilitado se considera muerto y va a la caja de "muertos"; no puede 
 Solo se captura el primer encuentro de cada ruta/area; si se pierde, huye o termina el combate, se pierde la captura.
 Mote obligatorio.
 Clausulas: Duplicados (se fuerza otro encuentro si es linea ya capturada); Legendarios principales no permitidos (se fuerza otro encuentro); Shiny siempre capturable (no consume captura de ruta; si es duplicado eliges cual conservar).
+Subsuelo / kit de exploracion prohibido.
 🧬 2. Restricciones de equipo
 
 Max. 1 pseudo-legendario.
@@ -645,6 +646,7 @@ Divisiones A y B (5 y 5 jugadores); solo se enfrentan dentro.
 Ascensos/descensos al cerrar jornada: bajan 3 ultimos de A, suben 3 primeros de B.
 Primera asignacion: por muertos; empate se resuelve con combate.
 Puntos por jornada: 1o 9 · 2o 8 · 3o 7 · 4o 6 · 5o 5 · 6o 5 · 7o 4 · 8o 3 · 9o 2 · 10o 1. Penalizacion: −0.2 puntos por cada muerto (Caja 18). Total = suma jornadas − 0.2 × muertos.
+Clausula de wipeo: si wipeas el equipo puedes revivir los que quieras, pero cada revivido cuenta como una muerte extra para la penalizacion (ej.: 6 muertos + 3 revividos → 9 × 0.2).
 💰 7. Monedas (sin detallar precios)
 
 Monedas por medallas: 3 por cada medalla (max. 8).
