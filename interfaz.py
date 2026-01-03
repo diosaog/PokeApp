@@ -615,56 +615,197 @@ def page_inicio() -> None:
         "5. 'Liga y Tabla' y 'Copa' muestran clasificaciones y emparejamientos."
     )
     normativa_md = """📜 Normativa ChampionsLocke
-
 🔒 1. Normas Nuzlocke
 
-Un Pokemon debilitado se considera muerto y va a la caja de "muertos"; no puede usarse ni subir de nivel.
-Solo se captura el primer encuentro de cada ruta/area; si se pierde, huye o termina el combate, se pierde la captura.
-Mote obligatorio.
-Clausulas: Duplicados (se fuerza otro encuentro si es linea ya capturada); Legendarios principales no permitidos (se fuerza otro encuentro); Shiny siempre capturable (no consume captura de ruta; si es duplicado eliges cual conservar).
-Subsuelo / kit de exploracion prohibido.
+Todo Pokémon debilitado se considera muerto y debe enviarse a la caja de muertos.
+Un Pokémon muerto no puede volver a usarse ni subir de nivel.
+
+Solo se puede capturar el primer encuentro de cada ruta o área.
+Si ese Pokémon huye, es derrotado o el combate termina por cualquier motivo, la captura de esa zona se pierde.
+
+Mote obligatorio para todos los Pokémon.
+
+Cláusulas especiales
+
+Duplicados: si el primer encuentro pertenece a una línea evolutiva ya capturada, se puede forzar otro encuentro.
+
+Legendarios principales: no están permitidos; si aparecen como primer encuentro, se fuerza otro.
+
+Shiny:
+
+Un Pokémon shiny es siempre capturable, aunque no sea el primer encuentro.
+
+No consume la captura de la ruta.
+
+Si es de una especie ya capturada, el jugador elige cuál conservar y libera el otro.
+
 🧬 2. Restricciones de equipo
 
-Max. 1 pseudo-legendario.
-Max. 1 legendario menor/singular (≤600 BST).
-No repetir fase evolutiva; si obtienes un duplicado, liberas el ultimo (salvo que el previo de esa fase este muerto).
+Máximo 1 pseudo-legendario por equipo.
+
+Máximo 1 legendario menor o singular (≤ 600 BST) por equipo.
+
+No se pueden repetir Pokémon en la misma fase evolutiva.
+
+Si se obtiene un duplicado de fase, debe liberarse el último capturado.
+
+Esta norma no se aplica si el Pokémon previo de esa fase ya estaba muerto.
+
 🧭 3. Estructura por tramos
 
-4 tramos + Liga Pokemon final. Cada tramo acaba tras ciertos gimnasios; al cerrarlo se juega una liga entre jugadores.
-⚔ 4. Combates entre jugadores
+La partida se divide en 4 tramos más una Liga Pokémon final.
 
-Liga: 1 vs 1, Bo1. Limite de nivel = ultimo combate oficial del tramo.
-Copa: tras la Liga Pokemon; eliminatoria, Bo3; cuadro definido antes.
+Cada tramo finaliza tras superar determinados gimnasios.
+
+Al cierre de cada tramo se disputa una liga competitiva entre jugadores.
+
+⚔️ 4. Combates entre jugadores
+Liga
+
+Combates 1 vs 1, formato Bo1.
+
+El límite de nivel lo marca el último combate oficial del tramo.
+
+Copa
+
+Se juega tras completar la Liga Pokémon.
+
+Formato eliminatorio, Bo3.
+
+El cuadro de enfrentamientos se define antes del inicio.
+
 📈 5. Level Caps
+Gimnasios
 
-Gimnasios: Roco 17 · Gardenia 26 · Fantina 31 · Brega 38 · Mananti 44 · Aceron 49 · Inverna 53 · Lectro 60.
-Liga Pokemon: Alecran 64 · Gaia 66 · Fausto 68 · Delos 71 · Cintia 74.
-Nadie puede pasar el cap del siguiente combate; si se pasa, va a caja. Caramelos raros solo para ajustar (se permite resetear si se sube de mas y se habia guardado).
-🧩 6. Divisiones (Liga A/B)
+Roco – 17
 
-Divisiones A y B (5 y 5 jugadores); solo se enfrentan dentro.
-Ascensos/descensos al cerrar jornada: bajan 3 ultimos de A, suben 3 primeros de B.
-Primera asignacion: por muertos; empate se resuelve con combate.
-Puntos por jornada: 1o 9 · 2o 8 · 3o 7 · 4o 6 · 5o 5 · 6o 5 · 7o 4 · 8o 3 · 9o 2 · 10o 1. Penalizacion: −0.2 puntos por cada muerto (Caja 18). Total = suma jornadas − 0.2 × muertos.
-Clausula de wipeo: si wipeas el equipo puedes revivir los que quieras, pero cada revivido cuenta como una muerte extra para la penalizacion (ej.: 6 muertos + 3 revividos → 9 × 0.2).
+Gardenia – 26
+
+Fantina – 31
+
+Brega – 38
+
+Mananti – 44
+
+Aceron – 49
+
+Inverna – 53
+
+Lectro – 60
+
+Liga Pokémon
+
+Alecran – 64
+
+Gaia – 66
+
+Fausto – 68
+
+Delos – 71
+
+Cintia – 74
+
+Normas de nivel
+
+Ningún Pokémon puede superar el cap del siguiente combate oficial.
+
+Si un Pokémon lo supera, debe enviarse a la caja y no puede utilizarse.
+
+Los Caramelos Raros solo pueden usarse para ajustar niveles.
+
+Si se sube accidentalmente de más y se había guardado partida, se permite resetear.
+
+🧩 6. Divisiones (Liga A / B)
+
+Dos divisiones: A y B, con 5 jugadores cada una.
+
+Los jugadores solo se enfrentan contra rivales de su propia división.
+
+Ascensos y descensos
+
+Al cerrar cada jornada:
+
+Descienden los 3 últimos de División A.
+
+Ascienden los 3 primeros de División B.
+
+Primera asignación
+
+Se decide por el número de Pokémon muertos.
+
+En caso de empate, se resuelve mediante combate.
+
+Puntuación por jornada
+
+1.º → 9 puntos
+
+2.º → 8 puntos
+
+3.º → 7 puntos
+
+4.º → 6 puntos
+
+5.º → 5 puntos
+
+6.º → 5 puntos
+
+7.º → 4 puntos
+
+8.º → 3 puntos
+
+9.º → 2 puntos
+
+10.º → 1 punto
+
+Penalización: −0.2 puntos por cada Pokémon muerto (Caja 18).
+Puntuación total = suma de jornadas − (0.2 × muertos).
+
 💰 7. Monedas (sin detallar precios)
 
-Monedas por medallas: 3 por cada medalla (max. 8).
-Monedas por Liga A/B: A → 1o 15 · 2o 14 · 3o 12 · 4o 11 · 5o 10; B → 6o 11 · 7o 9 · 8o 8 · 9o 6 · 10o 4.
-Saldo = (medallas × 3 + liga) − gastado.
+Medallas: 3 monedas por cada medalla (máximo 8).
+
+Liga A/B:
+
+División A
+1.º 15 · 2.º 14 · 3.º 12 · 4.º 11 · 5.º 10
+
+División B
+6.º 11 · 7.º 9 · 8.º 8 · 9.º 6 · 10.º 4
+
+Saldo total = (medallas × 3 + monedas de liga) − monedas gastadas.
+
 🃏 8. Comodines
 
-Revivir: revive un Pokemon de Caja 18; queda marcado blindado + revivido.
-Robar: si el objetivo no esta blindado, se registra el robo y el Pokemon queda robado + blindado; obtienes gratis un Comodin de Blindaje por Robo.
-Blindar: marca el Pokemon como blindado (no se puede robar ni blindar otra vez).
-Captura Extra: permite una captura adicional en una ruta desconocida (no eliges ruta conocida ni sabes que Pokemon saldra).
-Fosil: obtienes un fosil. Flags guardados en Supabase.
-🤝 9. Interaccion
+Revivir: revive un Pokémon de la Caja 18; queda marcado como blindado + revivido.
 
-Se permiten intercambios y combates de practica.
-Comodines sobre otros o sobre uno mismo (Robo no se repite dos veces seguidas sobre el mismo hasta que todos hayan sido objetivo).
-Directos obligatorios: jugar en Discord en directo y avisar por WhatsApp.
-Caramelos Raros y Escamas Corazon: uso ilimitado; venta prohibida.
+Robar:
+
+Si el objetivo no está blindado, se registra el robo.
+
+El Pokémon queda robado + blindado.
+
+El jugador obtiene gratis un Comodín de Blindaje por Robo.
+
+Blindar: marca un Pokémon como blindado (no puede volver a robarse ni blindarse).
+
+Captura Extra: permite una captura adicional únicamente en una ruta desconocida.
+No se puede elegir una ruta ya conocida ni se sabe qué Pokémon aparecerá.
+
+Fósil: permite obtener un fósil.
+
+Los flags de estado se gestionan y guardan en Supabase.
+
+🤝 9. Interacción y normas generales
+
+Se permiten intercambios y combates de práctica.
+
+Los comodines pueden usarse sobre otros jugadores o sobre uno mismo.
+
+El comodín Robar no puede usarse dos veces seguidas sobre el mismo jugador hasta que todos hayan sido objetivo.
+
+Directos obligatorios: los jugadores deben jugar en Discord en directo y avisar previamente por WhatsApp.
+
+Caramelos Raros y Escamas Corazón: uso ilimitado; venta prohibida.
 """
     with st.expander("Normativa ChampionsLocke", expanded=False):
         st.markdown(normativa_md)
