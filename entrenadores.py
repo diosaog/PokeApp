@@ -520,7 +520,10 @@ def _slot_empty_html(label: str) -> str:
 
 
 # ---------- Badges/monedas/puntos ----------
-COINS_BY_POSITION = {1: 12, 2: 11, 3: 9, 4: 8, 5: 9, 6: 6, 7: 5, 8: 4, 9: 2, 10: 1}
+COINS_BY_POSITION = {
+    1: 15, 2: 14, 3: 12, 4: 11, 5: 10,  # Liga A
+    6: 11, 7: 9, 8: 8, 9: 6, 10: 4      # Liga B
+}
 
 
 def coins_from_league(user: str) -> int:
@@ -633,8 +636,6 @@ def _item_icon_url(name: str) -> str:
         slug = "max-revive"
     elif "robar" in n:
         slug = "dread-plate"
-    elif "recaptura" in n:
-        slug = "repeat-ball"
     elif "captura extra" in n:
         slug = "ultra-ball"
     elif "blindar" in n or "blindaje" in n:
@@ -647,7 +648,7 @@ def _item_icon_url(name: str) -> str:
 
 def _category_for_item(name: str) -> str:
     n = _norm_item(name)
-    if any(k in n for k in ("revivir", "robar", "captura extra", "recaptura", "blindar", "comodin")):
+    if any(k in n for k in ("revivir", "robar", "captura extra", "blindar", "comodin")):
         return "Comodines"
     if n.startswith("baya ") or "berry" in n:
         return "Bayas"

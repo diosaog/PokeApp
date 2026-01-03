@@ -197,8 +197,6 @@ def _render_item_card(item: dict, idx_key: str, *, available: int | None = None)
                 img = _shop_asset("revivir") or _pokeapi_item_png("max-revive")
             elif "robar" in n:
                 img = _shop_asset("robar") or _pokeapi_item_png("dread-plate")
-            elif "recaptura" in n:
-                img = _shop_asset("recaptura") or _pokeapi_item_png("repeat-ball")
             elif "captura extra" in n:
                 img = _shop_asset("captura-extra") or _pokeapi_item_png("ultra-ball")
             elif "blindar" in n:
@@ -248,8 +246,6 @@ def _render_shop_items(items: list[dict], category_key: str, *, available: int |
                     it["img"] = _shop_asset("revivir") or _pokeapi_item_png("max-revive")
                 elif ("blindar" in n) and ("img" not in it):
                     it["img"] = _shop_asset("blindar") or _pokeapi_item_png("metal-coat")
-                elif ("recaptura" in n) and ("img" not in it):
-                    it["img"] = _shop_asset("recaptura") or _pokeapi_item_png("repeat-ball")
         except Exception:
             pass
     elif category_key == "crianza":
@@ -320,11 +316,10 @@ def page_tienda() -> None:
     st.subheader("Catalogo")
     # Comodines (por diseño, sin porcentajes en la descripción)
     comodines = [
-        {"name": "Revivir Pokemon", "price": 10, "icon": "", "img": _shop_asset("Revivir") or _shop_asset("revivir") or _pokeapi_item_png("max-revive")},
-        {"name": "Robar Pokemon",   "price": 10, "icon": "", "img": _shop_asset("robar") or _pokeapi_item_png("dread-plate")},
-        {"name": "Recaptura",       "price": 8,  "icon": "", "img": _shop_asset("recaptura") or _pokeapi_item_png("repeat-ball")},
+        {"name": "Revivir Pokemon", "price": 12, "icon": "", "img": _shop_asset("Revivir") or _shop_asset("revivir") or _pokeapi_item_png("max-revive")},
+        {"name": "Robar Pokemon",   "price": 12, "icon": "", "img": _shop_asset("robar") or _pokeapi_item_png("dread-plate")},
         {"name": "Captura Extra",   "price": 5,  "icon": "", "img": _shop_asset("captura-extra") or _pokeapi_item_png("ultra-ball")},
-        {"name": "Blindar Pokemon", "price": 10, "icon": "", "img": _shop_asset("Blindar") or _shop_asset("blindar") or _pokeapi_item_png("metal-coat")},
+        {"name": "Blindar Pokemon", "price": 12, "icon": "", "img": _shop_asset("Blindar") or _shop_asset("blindar") or _pokeapi_item_png("metal-coat")},
         {"name": "Fosil",           "price": 5,  "icon": "", "img": _shop_asset("fosil") or _pokeapi_item_png("helix-fossil")},
     ]
     # Bayas (Gen 14)

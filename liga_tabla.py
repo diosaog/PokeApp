@@ -222,10 +222,16 @@ def _finalize(tramo: int) -> None:
     _persist()
 
 
+POINTS_BY_POSITION = {1: 9, 2: 8, 3: 7, 4: 6, 5: 5, 6: 5, 7: 4, 8: 3, 9: 2, 10: 1}
+
+
 def points_from_league(user: str) -> int:
     lr = st.session_state.get("league_results", {})
     tramos = lr.get(user, {})
-    return sum(10 - pos for pos in tramos.values())
+    total = 0
+    for pos in tramos.values():
+        total += POINTS_BY_POSITION.get(int(pos), 0)
+    return total
 
 
 def _one_decimal(x: float) -> float:
