@@ -794,7 +794,7 @@ def _trainer_summary_ui(sav_json: dict, box_count: int) -> None:
         muertos_list = []
     muertos = len(muertos_list)
     revividos = _get_revives(jugador or "")
-    muertos_total = muertos + revividos
+    muertos_total = muertos + 2 * revividos  # revivido tras wipe penaliza 0.4 (= 2 * 0.2)
 
     c1, c2, c3, c4 = st.columns(4)
     with c1:
@@ -802,7 +802,11 @@ def _trainer_summary_ui(sav_json: dict, box_count: int) -> None:
     with c2:
         st.metric("Puntos", puntos)
     with c3:
-        st.metric("Muertes penalizadas", muertos_total, help="Muertos en Caja 18 + revividos tras wipe (penalizan -0.2 c/u)")
+        st.metric(
+            "Muertes penalizadas",
+            muertos_total,
+            help="Muertos en Caja 18 (-0.2) + revividos tras wipe (-0.4 c/u)"
+        )
     with c4:
         st.markdown("**Medallas**")
         _render_medals_row(medallas)
@@ -897,7 +901,7 @@ def _trainer_summary_with_portrait_ui(sav_json: dict, box_count: int) -> None:
                     f"<div class='panel-ghost'><div class='title'>Muertos (Caja 18)</div><div class='value'>{muertos}</div></div>",
                     unsafe_allow_html=True,
                 )
-                st.caption(f"Revividos tras wipe: {revividos}")
+                st.caption(f"Revividos tras wipe: {revividos} (penalizan 0.4 c/u)")
                 rev_col1, rev_col2 = st.columns([2, 1.2])
                 with rev_col1:
                     rev_count = st.number_input(

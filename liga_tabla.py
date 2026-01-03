@@ -136,7 +136,9 @@ def _count_muertos_for_trainer(trainer: str) -> int:
         revives = max(revives, 0)
     except Exception:
         revives = 0
-    return muertos + revives
+
+    # Cada revivido cuenta como 0.4 (equivalente a 2 muertes de 0.2)
+    return muertos + 2 * revives
 
 
 def _wins_losses(players: list[str], results: dict[tuple[str, str], str]) -> dict:
