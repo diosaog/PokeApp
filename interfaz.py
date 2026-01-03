@@ -3,6 +3,9 @@ from __future__ import annotations
 
 from typing import List
 from pathlib import Path
+from io import BytesIO
+import base64
+import mimetypes
 
 import streamlit as st
 
@@ -15,6 +18,54 @@ try:
 except Exception:
     _count_badges = None  # type: ignore
 from storage import init_storage, settings_get, settings_set
+
+
+def _pdf_from_text(txt: str, *, title: str = "Normativa") -> bytes:
+    """Genera un PDF simple (texto plano) sin dependencias externas."""
+    # Prepara líneas y escapado
+    lines = txt.splitlines()
+    def esc(s: str) -> str:
+        return s.replace("\\", "\\\\").replace("(", "\\(").replace(")", "\\)")
+
+    content_lines = []
+    content_lines.append("BT /F1 12 Tf 50 780 Td")
+    first = True
+    for ln in lines:
+        if not first:
+            content_lines.append("T*")
+        content_lines.append(f"({esc(ln)}) Tj")
+        first = False
+    content_lines.append("ET")
+    content_stream = "\n".join(content_lines)
+    stream_bytes = content_stream.encode("latin-1", errors="replace")
+
+    # Objetos
+    objs = []
+    def add_obj(body: str) -> int:
+        objs.append(body)
+        return len(objs)
+
+    pages_id = add_obj("<< /Type /Pages /Kids [3 0 R] /Count 1 >>")
+    font_id = add_obj("<< /Type /Font /Subtype /Type1 /BaseFont /Courier >>")
+    content_id = add_obj(f"<< /Length {len(stream_bytes)} >>\nstream\n{content_stream}\nendstream")
+    page_obj = f"<< /Type /Page /Parent {pages_id} 0 R /MediaBox [0 0 612 792] /Contents {content_id} 0 R /Resources << /Font << /F1 {font_id} 0 R >> >> >>"
+    page_id = add_obj(page_obj)
+    catalog_id = add_obj(f"<< /Type /Catalog /Pages {pages_id} 0 R /ViewerPreferences << /DisplayDocTitle true >> /Lang (es-ES) /Metadata null >>")
+
+    # Construir PDF
+    out = BytesIO()
+    out.write(b"%PDF-1.4\n%\xFF\xFF\xFF\xFF\n")
+    offsets = []
+    for idx, obj in enumerate(objs, start=1):
+        offsets.append(out.tell())
+        out.write(f"{idx} 0 obj\n{obj}\nendobj\n".encode("latin-1"))
+    xref_pos = out.tell()
+    out.write(f"xref\n0 {len(objs)+1}\n".encode("latin-1"))
+    out.write(b"0000000000 65535 f \n")
+    for off in offsets:
+        out.write(f"{off:010d} 00000 n \n".encode("latin-1"))
+    out.write(f"trailer\n<< /Size {len(objs)+1} /Root {catalog_id} 0 R >>\nstartxref\n{xref_pos}\n%%EOF".encode("latin-1"))
+    return out.getvalue()
 
 
 def apply_css() -> None:
@@ -379,8 +430,8 @@ def _get_badges_count(user: str) -> int:
         sav_json = open_sav_cached(sav_path)
         if _count_badges:
             return int(_count_badges(sav_json))
-        # coins_from_badges devuelve monedas (2 por medalla); convertimos a medallas
-        return int(coins_from_badges(sav_json) // 2)
+        # coins_from_badges devuelve monedas (3 por medalla); convertimos a medallas
+        return int(coins_from_badges(sav_json) // 3)
     except Exception:
         return 0
 
@@ -563,65 +614,58 @@ def page_inicio() -> None:
         "4. En 'Tienda' compra comodines/objetos.\n"
         "5. 'Liga y Tabla' y 'Copa' muestran clasificaciones y emparejamientos."
     )
-    normativa_md = """
-📜 **Normativa ChampionsLocke**
+    normativa_md = """📜 Normativa ChampionsLocke
 
-🔒 **1. Normas Nuzlocke**
-- Un Pokémon debilitado se considera muerto y va a la caja de “muertos”; no puede usarse ni subir de nivel.
-- Solo se captura el primer encuentro de cada ruta/área; si se pierde, huye o termina el combate, se pierde la captura.
-- Mote obligatorio.
-- Cláusulas: Duplicados (se fuerza otro encuentro si es línea ya capturada); Legendarios principales no permitidos (se fuerza otro encuentro); Shiny siempre capturable (no consume captura de ruta; si es duplicado eliges cuál conservar).
+🔒 1. Normas Nuzlocke
 
-🧬 **2. Restricciones de equipo**
-- Máx. 1 pseudo-legendario.
-- Máx. 1 legendario menor/singular (≤600 BST).
-- No repetir fase evolutiva; si obtienes un duplicado, liberas el último (salvo que el previo de esa fase esté muerto).
+Un Pokemon debilitado se considera muerto y va a la caja de "muertos"; no puede usarse ni subir de nivel.
+Solo se captura el primer encuentro de cada ruta/area; si se pierde, huye o termina el combate, se pierde la captura.
+Mote obligatorio.
+Clausulas: Duplicados (se fuerza otro encuentro si es linea ya capturada); Legendarios principales no permitidos (se fuerza otro encuentro); Shiny siempre capturable (no consume captura de ruta; si es duplicado eliges cual conservar).
+🧬 2. Restricciones de equipo
 
-🧭 **3. Estructura por tramos**
-- 4 tramos + Liga Pokémon final. Cada tramo acaba tras ciertos gimnasios; al cerrarlo se juega una liga entre jugadores.
+Max. 1 pseudo-legendario.
+Max. 1 legendario menor/singular (≤600 BST).
+No repetir fase evolutiva; si obtienes un duplicado, liberas el ultimo (salvo que el previo de esa fase este muerto).
+🧭 3. Estructura por tramos
 
-⚔️ **4. Combates entre jugadores**
-- Liga: 1 vs 1, Bo1. Límite de nivel = último combate oficial del tramo.
-- Copa: tras la Liga Pokémon; eliminatoria, Bo3; cuadro definido antes.
+4 tramos + Liga Pokemon final. Cada tramo acaba tras ciertos gimnasios; al cerrarlo se juega una liga entre jugadores.
+⚔ 4. Combates entre jugadores
 
-📈 **5. Level Caps**
-- Gimnasios: Roco 17 · Gardenia 26 · Fantina 31 · Brega 38 · Mananti 44 · Aceron 49 · Inverna 53 · Lectro 60.
-- Liga Pokémon: Alecran 64 · Gaia 66 · Fausto 68 · Delos 71 · Cintia 74.
-- Nadie puede pasar el cap del siguiente combate; si se pasa, va a caja. Caramelos raros solo para ajustar (se permite resetear si se sube de más y se había guardado).
+Liga: 1 vs 1, Bo1. Limite de nivel = ultimo combate oficial del tramo.
+Copa: tras la Liga Pokemon; eliminatoria, Bo3; cuadro definido antes.
+📈 5. Level Caps
 
-🧩 **6. Divisiones (Liga A/B)**
-- Divisiones A y B (5 y 5 jugadores); solo se enfrentan dentro.
-- Ascensos/descensos al cerrar jornada: bajan 3 últimos de A, suben 3 primeros de B.
-- Primera asignación: por muertos; empate se resuelve con combate.
-- Puntos por jornada: 1º 9 · 2º 8 · 3º 7 · 4º 6 · 5º 5 · 6º 5 · 7º 4 · 8º 3 · 9º 2 · 10º 1. Penalización: −0.2 puntos por cada muerto (Caja 18). Total = suma jornadas − 0.2 × muertos.
+Gimnasios: Roco 17 · Gardenia 26 · Fantina 31 · Brega 38 · Mananti 44 · Aceron 49 · Inverna 53 · Lectro 60.
+Liga Pokemon: Alecran 64 · Gaia 66 · Fausto 68 · Delos 71 · Cintia 74.
+Nadie puede pasar el cap del siguiente combate; si se pasa, va a caja. Caramelos raros solo para ajustar (se permite resetear si se sube de mas y se habia guardado).
+🧩 6. Divisiones (Liga A/B)
 
-💰 **7. Monedas (sin detallar precios)**
-- Monedas por medallas: 3 por cada medalla (máx. 8).
-- Monedas por Liga A/B: A → 1º 15 · 2º 14 · 3º 12 · 4º 11 · 5º 10; B → 6º 11 · 7º 9 · 8º 8 · 9º 6 · 10º 4.
-- Saldo = (medallas × 3 + liga) − gastado.
+Divisiones A y B (5 y 5 jugadores); solo se enfrentan dentro.
+Ascensos/descensos al cerrar jornada: bajan 3 ultimos de A, suben 3 primeros de B.
+Primera asignacion: por muertos; empate se resuelve con combate.
+Puntos por jornada: 1o 9 · 2o 8 · 3o 7 · 4o 6 · 5o 5 · 6o 5 · 7o 4 · 8o 3 · 9o 2 · 10o 1. Penalizacion: −0.2 puntos por cada muerto (Caja 18). Total = suma jornadas − 0.2 × muertos.
+💰 7. Monedas (sin detallar precios)
 
-🃏 **8. Comodines**
-- Revivir: revive un Pokémon de Caja 18; queda marcado blindado + revivido.
-- Robar: si el objetivo no está blindado, se registra el robo y el Pokémon queda robado + blindado; obtienes gratis un Comodín de Blindaje por Robo.
-- Blindar: marca el Pokémon como blindado (no se puede robar ni blindar otra vez).
-- Captura Extra: permite una captura adicional en una ruta desconocida (no eliges ruta conocida ni sabes qué Pokémon saldrá).
-- Fósil: obtienes un fósil. Flags guardados en Supabase.
+Monedas por medallas: 3 por cada medalla (max. 8).
+Monedas por Liga A/B: A → 1o 15 · 2o 14 · 3o 12 · 4o 11 · 5o 10; B → 6o 11 · 7o 9 · 8o 8 · 9o 6 · 10o 4.
+Saldo = (medallas × 3 + liga) − gastado.
+🃏 8. Comodines
 
-🤝 **9. Interacción**
-- Se permiten intercambios y combates de práctica.
-- Comodines sobre otros o sobre uno mismo (Robo no se repite dos veces seguidas sobre el mismo hasta que todos hayan sido objetivo).
-- Directos obligatorios: jugar en Discord en directo y avisar por WhatsApp.
-- Caramelos Raros y Escamas Corazón: uso ilimitado; venta prohibida.
+Revivir: revive un Pokemon de Caja 18; queda marcado blindado + revivido.
+Robar: si el objetivo no esta blindado, se registra el robo y el Pokemon queda robado + blindado; obtienes gratis un Comodin de Blindaje por Robo.
+Blindar: marca el Pokemon como blindado (no se puede robar ni blindar otra vez).
+Captura Extra: permite una captura adicional en una ruta desconocida (no eliges ruta conocida ni sabes que Pokemon saldra).
+Fosil: obtienes un fosil. Flags guardados en Supabase.
+🤝 9. Interaccion
+
+Se permiten intercambios y combates de practica.
+Comodines sobre otros o sobre uno mismo (Robo no se repite dos veces seguidas sobre el mismo hasta que todos hayan sido objetivo).
+Directos obligatorios: jugar en Discord en directo y avisar por WhatsApp.
+Caramelos Raros y Escamas Corazon: uso ilimitado; venta prohibida.
 """
     with st.expander("Normativa ChampionsLocke", expanded=False):
         st.markdown(normativa_md)
-        st.download_button(
-            "Descargar normativa (TXT)",
-            data=normativa_md,
-            file_name="Normativa_ChampionsLocke.txt",
-            mime="text/plain",
-            use_container_width=True,
-        )
 
 
 def page_entrenadores() -> None:
@@ -660,4 +704,3 @@ def page_copa() -> None:
             _swiss.page_copa()
     except Exception as e:
         st.error(f"No se pudo cargar la copa: {e}")
-
