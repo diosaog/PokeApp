@@ -615,6 +615,7 @@ def page_inicio() -> None:
         "5. 'Liga y Tabla' y 'Copa' muestran clasificaciones y emparejamientos."
     )
     normativa_md = """📜 Normativa ChampionsLocke
+    
 🔒 1. Normas Nuzlocke
 
 - Todo Pokémon debilitado se considera muerto y debe enviarse a la caja de muertos.
