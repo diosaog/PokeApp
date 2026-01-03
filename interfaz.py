@@ -724,16 +724,16 @@ Saldo total = (medallas × 3 + monedas de liga) − monedas gastadas.
 
 🃏 8. Comodines
 
-Revivir: revive un Pokémon de la Caja 18; queda marcado como blindado + revivido.
-Robar:
+1. Revivir: revive un Pokémon de la Caja 18; queda marcado como blindado + revivido.
+2. Robar:
 - Si el objetivo no está blindado, se registra el robo.
 - El Pokémon queda robado + blindado.
 - El jugador obtiene gratis un Comodín de Blindaje por Robo.
-Blindar: marca un Pokémon como blindado (no puede volver a robarse ni blindarse).
-Captura Extra:
+3. Blindar: marca un Pokémon como blindado (no puede volver a robarse ni blindarse).
+4. Captura Extra:
 - Permite una captura adicional únicamente en una ruta desconocida.
 - No se puede elegir una ruta ya conocida ni se sabe qué Pokémon aparecerá.
-Fósil: permite obtener un fósil.
+5. Fósil: permite obtener un fósil.
 
 
 🤝 9. Interacción y normas generales
