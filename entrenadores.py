@@ -869,6 +869,7 @@ def _trainer_summary_with_portrait_ui(sav_json: dict, box_count: int) -> None:
     except Exception:
         muertos_list = []
     muertos = len(muertos_list)
+    revividos = _get_revives(jugador or "")
 
     colL, colR = st.columns([1, 3], gap="large")
     with colL:
@@ -896,6 +897,7 @@ def _trainer_summary_with_portrait_ui(sav_json: dict, box_count: int) -> None:
                     f"<div class='panel-ghost'><div class='title'>Muertos (Caja 18)</div><div class='value'>{muertos}</div></div>",
                     unsafe_allow_html=True,
                 )
+                st.caption(f"Revividos tras wipe: {revividos}")
                 rev_col1, rev_col2 = st.columns([2, 1.2])
                 with rev_col1:
                     rev_count = st.number_input(
