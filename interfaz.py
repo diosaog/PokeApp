@@ -563,6 +563,65 @@ def page_inicio() -> None:
         "4. En 'Tienda' compra comodines/objetos.\n"
         "5. 'Liga y Tabla' y 'Copa' muestran clasificaciones y emparejamientos."
     )
+    normativa_md = """
+📜 **Normativa ChampionsLocke**
+
+🔒 **1. Normas Nuzlocke**
+- Un Pokémon debilitado se considera muerto y va a la caja de “muertos”; no puede usarse ni subir de nivel.
+- Solo se captura el primer encuentro de cada ruta/área; si se pierde, huye o termina el combate, se pierde la captura.
+- Mote obligatorio.
+- Cláusulas: Duplicados (se fuerza otro encuentro si es línea ya capturada); Legendarios principales no permitidos (se fuerza otro encuentro); Shiny siempre capturable (no consume captura de ruta; si es duplicado eliges cuál conservar).
+
+🧬 **2. Restricciones de equipo**
+- Máx. 1 pseudo-legendario.
+- Máx. 1 legendario menor/singular (≤600 BST).
+- No repetir fase evolutiva; si obtienes un duplicado, liberas el último (salvo que el previo de esa fase esté muerto).
+
+🧭 **3. Estructura por tramos**
+- 4 tramos + Liga Pokémon final. Cada tramo acaba tras ciertos gimnasios; al cerrarlo se juega una liga entre jugadores.
+
+⚔️ **4. Combates entre jugadores**
+- Liga: 1 vs 1, Bo1. Límite de nivel = último combate oficial del tramo.
+- Copa: tras la Liga Pokémon; eliminatoria, Bo3; cuadro definido antes.
+
+📈 **5. Level Caps**
+- Gimnasios: Roco 17 · Gardenia 26 · Fantina 31 · Brega 38 · Mananti 44 · Aceron 49 · Inverna 53 · Lectro 60.
+- Liga Pokémon: Alecran 64 · Gaia 66 · Fausto 68 · Delos 71 · Cintia 74.
+- Nadie puede pasar el cap del siguiente combate; si se pasa, va a caja. Caramelos raros solo para ajustar (se permite resetear si se sube de más y se había guardado).
+
+🧩 **6. Divisiones (Liga A/B)**
+- Divisiones A y B (5 y 5 jugadores); solo se enfrentan dentro.
+- Ascensos/descensos al cerrar jornada: bajan 3 últimos de A, suben 3 primeros de B.
+- Primera asignación: por muertos; empate se resuelve con combate.
+- Puntos por jornada: 1º 9 · 2º 8 · 3º 7 · 4º 6 · 5º 5 · 6º 5 · 7º 4 · 8º 3 · 9º 2 · 10º 1. Penalización: −0.2 puntos por cada muerto (Caja 18). Total = suma jornadas − 0.2 × muertos.
+
+💰 **7. Monedas (sin detallar precios)**
+- Monedas por medallas: 3 por cada medalla (máx. 8).
+- Monedas por Liga A/B: A → 1º 15 · 2º 14 · 3º 12 · 4º 11 · 5º 10; B → 6º 11 · 7º 9 · 8º 8 · 9º 6 · 10º 4.
+- Saldo = (medallas × 3 + liga) − gastado.
+
+🃏 **8. Comodines**
+- Revivir: revive un Pokémon de Caja 18; queda marcado blindado + revivido.
+- Robar: si el objetivo no está blindado, se registra el robo y el Pokémon queda robado + blindado; obtienes gratis un Comodín de Blindaje por Robo.
+- Blindar: marca el Pokémon como blindado (no se puede robar ni blindar otra vez).
+- Captura Extra: permite una captura adicional en una ruta desconocida (no eliges ruta conocida ni sabes qué Pokémon saldrá).
+- Fósil: obtienes un fósil. Flags guardados en Supabase.
+
+🤝 **9. Interacción**
+- Se permiten intercambios y combates de práctica.
+- Comodines sobre otros o sobre uno mismo (Robo no se repite dos veces seguidas sobre el mismo hasta que todos hayan sido objetivo).
+- Directos obligatorios: jugar en Discord en directo y avisar por WhatsApp.
+- Caramelos Raros y Escamas Corazón: uso ilimitado; venta prohibida.
+"""
+    with st.expander("Normativa ChampionsLocke", expanded=False):
+        st.markdown(normativa_md)
+        st.download_button(
+            "Descargar normativa (TXT)",
+            data=normativa_md,
+            file_name="Normativa_ChampionsLocke.txt",
+            mime="text/plain",
+            use_container_width=True,
+        )
 
 
 def page_entrenadores() -> None:
