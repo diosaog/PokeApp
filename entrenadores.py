@@ -1640,8 +1640,12 @@ def page_entrenadores() -> None:
             st.session_state.trainer_selected = active
     except Exception:
         pass
+    prev_trainer = st.session_state.get("trainer_selected")
     trainer = st.selectbox("Elige un entrenador", users, index=default_idx)
     st.session_state.trainer_selected = trainer
+    if prev_trainer and trainer != prev_trainer:
+        # Al cambiar de entrenador, limpiar selección previa para evitar filtrar datos de otro perfil
+        st.session_state.pop("selected_pokemon", None)
 
     # Intento de carga automática del bridge para el propio perfil
     # Intento de carga automática del bridge (sin UI manual)
