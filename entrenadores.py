@@ -1611,23 +1611,6 @@ def page_entrenadores_view() -> None:
         team = []
     _team_grid_ui_enhanced(team)
 
-    # Exportar equipo en formato Showdown (tematica competitiva)
-    try:
-        from dexdata import showdown_export as _sd_export
-        if team:
-            txt = _sd_export(team, include_ability=True, include_evs=False, include_ivs=False)
-            with st.expander("Exportar equipo (Showdown)"):
-                st.code(txt, language="")
-                st.download_button(
-                    label="Descargar .txt",
-                    data=txt.encode("utf-8"),
-                    file_name="equipo_showdown.txt",
-                    mime="text/plain",
-                    use_container_width=True,
-                )
-    except Exception:
-        pass
-
     # Panel de detalle del Pokémon seleccionado
     _pokemon_detail_panel()
 
