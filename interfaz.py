@@ -630,6 +630,7 @@ Shiny:
 - Un Pokémon shiny es siempre capturable, aunque no sea el primer encuentro.
 - No consume la captura de la ruta.
 - Si es de una especie ya capturada, el jugador elige cuál conservar y libera el otro.
+- Esta prohibido usar más de una vez un fosil, ya que son de uso unico
 
 
 🧬 2. Restricciones de equipo
