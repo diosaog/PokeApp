@@ -770,7 +770,7 @@ def _set_revives(user: str, count: int) -> None:
         pass
 
 
-def _trainer_summary_ui(sav_json: dict, box_count: int) -> None:
+def _trainer_summary_ui(sav_json: dict, box_count: int, *, is_own_profile: bool) -> None:
     """Monedas netas (liga+medallas Â¢Ã¢Â Â¢Ã¢Â¬Ã¢Â¢ compras), Puntos, Muertos, Medallas."""
     try:
         medallas = _count_badges(sav_json)
@@ -841,7 +841,7 @@ def _ensure_trainer_css() -> None:
     except Exception:
         pass
 
-def _trainer_summary_with_portrait_ui(sav_json: dict, box_count: int) -> None:
+def _trainer_summary_with_portrait_ui(sav_json: dict, box_count: int, *, is_own_profile: bool) -> None:
     _ensure_trainer_css()
     """Resumen con imagen del entrenador a la izquierda y KPIs a la derecha."""
     try:
@@ -901,22 +901,23 @@ def _trainer_summary_with_portrait_ui(sav_json: dict, box_count: int) -> None:
                     f"<div class='panel-ghost'><div class='title'>Muertos (Caja 18)</div><div class='value'>{muertos}</div></div>",
                     unsafe_allow_html=True,
                 )
-                st.caption(f"Revividos tras wipe: {revividos} (penalizan 0.4 c/u)")
-                rev_col1, rev_col2 = st.columns([2, 1.2])
-                with rev_col1:
-                    rev_count = st.number_input(
-                        "Revividos tras wipe (penalizan -0.2 c/u)",
-                        min_value=0,
-                        max_value=30,
-                        step=1,
-                        value=revividos,
-                        key=f"revives_wipe_{jugador}",
-                        help="Usa esta casilla para anotar los que revives tras un wipe; cuentan como muerte extra para los puntos."
-                    )
-                with rev_col2:
-                    if st.button("Guardar revividos", key=f"save_revives_{jugador}"):
-                        _set_revives(jugador or "", rev_count)
-                        st.success("Revividos guardados.")
+                st.caption(f"Revividos tras wipe: {revividos}")
+                if is_own_profile:
+                    rev_col1, rev_col2 = st.columns([2, 1.2])
+                    with rev_col1:
+                        rev_count = st.number_input(
+                            "Revividos tras wipe (penalizan -0.4 c/u)",
+                            min_value=0,
+                            max_value=30,
+                            step=1,
+                            value=revividos,
+                            key=f"revives_wipe_{jugador}",
+                            help="Usa esta casilla para anotar los que revives tras un wipe; cuentan como muerte extra para los puntos."
+                        )
+                    with rev_col2:
+                        if st.button("Guardar revividos", key=f"save_revives_{jugador}"):
+                            _set_revives(jugador or "", rev_count)
+                            st.success("Revividos guardados.")
             except Exception:
                 pass
             st.markdown("</div>", unsafe_allow_html=True)
@@ -1153,11 +1154,12 @@ def _pokemon_detail_panel() -> None:
     up_key, down_key = _nature_mods(p.get('nature'))
 
     stx = _extract_stats_from_p(p) or {}
-    # Propio vs ajeno: stats completas solo para el dueño; para otros, stats base sin IV/EV/habilidad.
+    # Propio vs ajeno: stats completas solo para el dueño; para otros, stats base sin IV/EV/habilidad ni color de naturaleza.
     is_own = st.session_state.get("trainer_selected") == st.session_state.get("user")
     if not is_own:
         p = dict(p)
         p["nature"] = None
+        up_key, down_key = None, None
 
     def _base_stats_at_level(mon: dict) -> dict:
         try:
@@ -1571,7 +1573,7 @@ def page_entrenadores_view() -> None:
         box_count, box_names = 0, []
 
     # Resumen con retrato y KPIs
-    _trainer_summary_with_portrait_ui(sav_json, box_count)
+    _trainer_summary_with_portrait_ui(sav_json, box_count, is_own_profile=is_own_profile)
 
     # Inventario (cerca del perfil)
     st.markdown("---")
@@ -1631,46 +1633,6 @@ def page_entrenadores_view() -> None:
 
     # Cuadrícula de cajas
     _boxes_grid_ui(sav_json, box_count, box_names, save_path=str(save_path))
-
-    # Pokepaste (editor para perfil propio, lectura para otros) al final
-    st.markdown("---")
-    st.subheader("Pokepaste del entrenador")
-    pokes = st.session_state.get("pokepastes", {})
-    existing = pokes.get(trainer or "", {})
-    if is_own_profile:
-        url_val = existing.get("url", "") if isinstance(existing, dict) else ""
-        col1, col2 = st.columns([3,1])
-        with col1:
-            url_in = st.text_input("URL de Pokepaste", value=url_val, placeholder="https://pokepast.es/...")
-        with col2:
-            if st.button("Guardar Pokepaste", type="primary"):
-                if not url_in.strip():
-                    st.warning("Introduce una URL de Pokepaste.")
-                else:
-                    try:
-                        txt = _fetch_pokepaste_text(url_in.strip())
-                        team_pp = _parse_pokepaste(txt)
-                        team_pp = [_sanitize_mon(m) for m in team_pp if m]
-                        st.session_state.pokepastes[trainer] = {"url": url_in.strip(), "team": team_pp}
-                        try:
-                            from storage import settings_set
-                            settings_set(f"pokepaste:{trainer}", json.dumps(st.session_state.pokepastes[trainer], ensure_ascii=False))
-                        except Exception:
-                            pass
-                        st.success("Pokepaste cargado y guardado.")
-                    except Exception as e:
-                        st.error(f"No se pudo cargar el Pokepaste: {e}")
-        if st.button("Borrar Pokepaste"):
-            st.session_state.pokepastes.pop(trainer, None)
-            try:
-                from storage import settings_set
-                settings_set(f"pokepaste:{trainer}", "")
-            except Exception:
-                pass
-            st.success("Pokepaste eliminado.")
-        st.caption("Tu Pokepaste se reutiliza en la pestaña Copa para mostrar equipos.")
-    _pokepaste_preview(existing)
-
 
 def page_entrenadores() -> None:
     """Entrada principal de la pestaña Entrenadores (selector + contenido)."""

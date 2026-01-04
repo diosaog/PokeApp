@@ -4,8 +4,8 @@ from typing import Dict
 import json
 import streamlit as st
 
-from utils import USERS, list_user_saves
-from storage import settings_get, settings_set, clear_purchases, add_purchase
+from utils import USERS, list_user_saves, ensure_user_dir
+from storage import settings_get, settings_set, clear_purchases, add_purchase, get_current_save_for_user, load_save_bytes
 from conex_pkhex import PKHeXRuntime, extract_box, has_pc_data, open_sav_cached
 
 
@@ -115,12 +115,31 @@ def _get_matches_for(tramo: int) -> dict:
     return st.session_state.league_matches[tramo]
 
 
-def _count_muertos_for_trainer(trainer: str) -> int:
+def _latest_save_path(trainer: str) -> str | None:
+    """Intenta obtener la ruta local del save más reciente, bajándolo de Supabase si falta."""
     try:
         saves = list_user_saves(trainer)
-        if not saves:
+        if saves:
+            return str(saves[0])
+
+        cur = get_current_save_for_user(trainer)
+        if cur:
+            fname = cur[1]
+            data = load_save_bytes(fname)
+            if data:
+                dest = ensure_user_dir(trainer) / fname
+                dest.write_bytes(data)
+                return str(dest)
+    except Exception:
+        pass
+    return None
+
+
+def _count_muertos_for_trainer(trainer: str) -> int:
+    try:
+        active_path = _latest_save_path(trainer)
+        if not active_path:
             return 0
-        active_path = str(saves[0])
         sav_json = open_sav_cached(active_path)
         if not has_pc_data(sav_json):
             return 0
