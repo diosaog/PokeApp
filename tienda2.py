@@ -39,6 +39,7 @@ COIN = "\U0001FA99"
 def _calc_money_for_user(user: str) -> int:
     liga = coins_from_league(user)
     badge_coins = 0
+    badge_found = False
     try:
         # 1) Intentar usar el save marcado como actual (persistido en settings/Supabase)
         spath = None
@@ -68,17 +69,27 @@ def _calc_money_for_user(user: str) -> int:
             if saves:
                 spath = saves[0]
 
-            if spath:
-                sav_json = open_sav_cached(str(spath))
-                if _count_badges:
-                    try:
-                        badge_coins = 4 * _count_badges(sav_json)
-                    except Exception:
-                        badge_coins = coins_from_badges(sav_json)
-                else:
+        if spath:
+            sav_json = open_sav_cached(str(spath))
+            badge_found = True
+            if _count_badges:
+                try:
+                    badge_coins = 4 * _count_badges(sav_json)
+                except Exception:
                     badge_coins = coins_from_badges(sav_json)
+            else:
+                badge_coins = coins_from_badges(sav_json)
     except Exception:
         badge_coins = 0
+        badge_found = False
+    if not badge_found:
+        try:
+            from storage import settings_get
+            raw = settings_get(f"badges_count:{user}")
+            if raw not in (None, ""):
+                badge_coins = 4 * max(int(raw), 0)
+        except Exception:
+            pass
     total = int(liga + badge_coins)
     return total
 

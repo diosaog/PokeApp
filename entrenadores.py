@@ -770,6 +770,23 @@ def _set_revives(user: str, count: int) -> None:
         pass
 
 
+def _persist_badges_count(user: str, count: int) -> None:
+    if not user:
+        return
+    try:
+        cache = st.session_state.setdefault("_badges_cache", {})
+        if cache.get(user) == int(count):
+            return
+        cache[user] = int(count)
+    except Exception:
+        pass
+    try:
+        from storage import settings_set
+        settings_set(f"badges_count:{user}", str(max(0, int(count))))
+    except Exception:
+        pass
+
+
 def _trainer_summary_ui(sav_json: dict, box_count: int, *, is_own_profile: bool) -> None:
     """Monedas netas (liga+medallas Â¢Ã¢Â Â¢Ã¢Â¬Ã¢Â¢ compras), Puntos, Muertos, Medallas."""
     try:
@@ -777,6 +794,8 @@ def _trainer_summary_ui(sav_json: dict, box_count: int, *, is_own_profile: bool)
     except Exception:
         medallas = 0
     jugador = st.session_state.get("trainer_selected") or st.session_state.get("user")
+    _persist_badges_count(jugador or "", medallas)
+    _persist_badges_count(jugador or "", medallas)
     base, spent, monedas = _money_snapshot(jugador or "", medallas=medallas, ttl=5)
     monedas_badges = 4 * medallas
     monedas_liga = base - monedas_badges
