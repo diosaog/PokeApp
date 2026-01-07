@@ -27,6 +27,8 @@ from storage import (
     set_current_save_for_user,
 )
 
+_BOOTSTRAP_ALL_DONE = False
+
 
 def _bootstrap_latest_save_for_user(user: str) -> None:
     """Descarga el ultimo save disponible y lo deja marcado como actual si falta."""
@@ -65,6 +67,49 @@ def _bootstrap_latest_save_for_user(user: str) -> None:
     except Exception:
         pass
     st.session_state[flag] = True
+
+
+def _bootstrap_all_saves() -> None:
+    """Precarga el ultimo save disponible de todos los entrenadores (mejora vistas cruzadas)."""
+    global _BOOTSTRAP_ALL_DONE
+    if _BOOTSTRAP_ALL_DONE:
+        return
+    try:
+        users = list(USERS.keys())
+    except Exception:
+        return
+    for user in users:
+        if not user:
+            continue
+        try:
+            if list_user_saves(user):
+                continue
+            cur = get_current_save_for_user(user)
+            if cur:
+                fname = cur[1]
+                data = load_save_bytes(fname)
+                if data:
+                    folder = ensure_user_dir(user)
+                    dest = folder / fname
+                    if not dest.exists():
+                        dest.write_bytes(data)
+                continue
+            lst = list_saves_by_user(user, limit=1)
+            if lst:
+                last_id, fname, *_ = lst[0]
+                try:
+                    set_current_save_for_user(user, last_id)
+                except Exception:
+                    pass
+                data = load_save_bytes(fname)
+                if data:
+                    folder = ensure_user_dir(user)
+                    dest = folder / fname
+                    if not dest.exists():
+                        dest.write_bytes(data)
+        except Exception:
+            pass
+    _BOOTSTRAP_ALL_DONE = True
 
 
 def _pdf_from_text(txt: str, *, title: str = "Normativa") -> bytes:
@@ -566,6 +611,7 @@ def login_gate() -> None:
     if st.session_state.get("auth_ok"):
         try:
             _bootstrap_latest_save_for_user(st.session_state.get("user") or "")
+            _bootstrap_all_saves()
         except Exception:
             pass
         return
@@ -600,6 +646,7 @@ def login_gate() -> None:
             st.session_state.user = user
             try:
                 _bootstrap_latest_save_for_user(user)
+                _bootstrap_all_saves()
             except Exception:
                 pass
             st.success(f"Bienvenido, {user}")
