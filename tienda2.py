@@ -72,7 +72,7 @@ def _calc_money_for_user(user: str) -> int:
                 sav_json = open_sav_cached(str(spath))
                 if _count_badges:
                     try:
-                        badge_coins = 3 * _count_badges(sav_json)
+                        badge_coins = 4 * _count_badges(sav_json)
                     except Exception:
                         badge_coins = coins_from_badges(sav_json)
                 else:

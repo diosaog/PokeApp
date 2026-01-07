@@ -430,8 +430,8 @@ def _get_badges_count(user: str) -> int:
         sav_json = open_sav_cached(sav_path)
         if _count_badges:
             return int(_count_badges(sav_json))
-        # coins_from_badges devuelve monedas (3 por medalla); convertimos a medallas
-        return int(coins_from_badges(sav_json) // 3)
+        # coins_from_badges devuelve monedas (4 por medalla); convertimos a medallas
+        return int(coins_from_badges(sav_json) // 4)
     except Exception:
         return 0
 
@@ -598,7 +598,7 @@ def coins_from_badges(sav_json: dict) -> int:
                 tot += scan(it)
         return tot
     badges = min(scan(sav_json), 8)
-    return badges * 3
+    return badges * 4
 
 
 # --- Pages wrappers ---
@@ -715,13 +715,13 @@ Puntuación total = suma de jornadas − (0.2 × muertos).
 
 💰 7. Monedas (sin detallar precios)
 
-- Medallas: 3 monedas por cada medalla (máximo 8).
+- Medallas: 4 monedas por cada medalla (máximo 8).
 Liga A/B:
 - División A
 1.º 15 · 2.º 14 · 3.º 12 · 4.º 11 · 5.º 10
 - División B
 6.º 11 · 7.º 9 · 8.º 8 · 9.º 6 · 10.º 4
-Saldo total = (medallas × 3 + monedas de liga) − monedas gastadas.
+Saldo total = (medallas × 4 + monedas de liga) − monedas gastadas.
 
 
 🃏 8. Comodines
