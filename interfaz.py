@@ -842,7 +842,7 @@ Saldo total = (medallas × 4 + monedas de liga) − monedas gastadas.
 
 🤝 9. Interacción y normas generales
 
-- Se permiten intercambios y combates de práctica, estos ultimos solo se podran realizar una vez finalizado el tramo y con el pokepaste subido al discord.
+- Se permiten intercambios y combates de práctica.
 - Los comodines pueden usarse sobre otros jugadores o sobre uno mismo.
 - El comodín Robar no puede usarse dos veces seguidas sobre el mismo jugador hasta que todos hayan sido objetivo.
 - Directos obligatorios: los jugadores deben jugar en Discord en directo y avisar previamente por WhatsApp.
