@@ -9,7 +9,7 @@ import mimetypes
 
 import streamlit as st
 
-from utils import USERS, list_user_saves, DEFAULT_DLL_HINT
+from utils import USERS, list_user_saves, DEFAULT_DLL_HINT, ensure_user_dir
 from showdown_sprites import showdown_sprite_url
 from conex_pkhex import PKHeXRuntime, extract_team, get_bridge_path, open_sav_cached
 try:
@@ -17,7 +17,54 @@ try:
     from entrenadores import _count_badges  # type: ignore
 except Exception:
     _count_badges = None  # type: ignore
-from storage import init_storage, settings_get, settings_set
+from storage import (
+    init_storage,
+    settings_get,
+    settings_set,
+    get_current_save_for_user,
+    list_saves_by_user,
+    load_save_bytes,
+    set_current_save_for_user,
+)
+
+
+def _bootstrap_latest_save_for_user(user: str) -> None:
+    """Descarga el ultimo save disponible y lo deja marcado como actual si falta."""
+    if not user:
+        return
+    flag = f"_bootstrapped_save_{user}"
+    if st.session_state.get(flag):
+        return
+    try:
+        cur = get_current_save_for_user(user)
+        if cur:
+            try:
+                folder = ensure_user_dir(user)
+                dest = folder / cur[1]
+                if not dest.exists():
+                    data = load_save_bytes(cur[1])
+                    if data:
+                        dest.write_bytes(data)
+            except Exception:
+                pass
+            st.session_state[flag] = True
+            return
+
+        lst = list_saves_by_user(user, limit=1)
+        if lst:
+            last_id, fname, *_ = lst[0]
+            set_current_save_for_user(user, last_id)
+            try:
+                folder = ensure_user_dir(user)
+                dest = folder / fname
+                data = load_save_bytes(fname)
+                if data:
+                    dest.write_bytes(data)
+            except Exception:
+                pass
+    except Exception:
+        pass
+    st.session_state[flag] = True
 
 
 def _pdf_from_text(txt: str, *, title: str = "Normativa") -> bytes:
@@ -517,6 +564,10 @@ def _render_change_pin_form() -> None:
 def login_gate() -> None:
     init_storage()
     if st.session_state.get("auth_ok"):
+        try:
+            _bootstrap_latest_save_for_user(st.session_state.get("user") or "")
+        except Exception:
+            pass
         return
     st.header("Inicio de sesion")
     col1, col2 = st.columns(2)
@@ -547,6 +598,10 @@ def login_gate() -> None:
         if ok_pin:
             st.session_state.auth_ok = True
             st.session_state.user = user
+            try:
+                _bootstrap_latest_save_for_user(user)
+            except Exception:
+                pass
             st.success(f"Bienvenido, {user}")
             st.rerun()
         else:
