@@ -325,9 +325,12 @@ def page_tabla() -> None:
     st.subheader("Editar divisiones")
     with st.expander("Divisiones (5 y 5)", expanded=False):
         players = list(USERS.keys())
-        sel_A = st.multiselect("Liga A (5 jugadores)", players, default=st.session_state.league_divisions.get("A", [])[:5], max_selections=5)
+        cur_divs = st.session_state.league_divisions if isinstance(st.session_state.league_divisions, dict) else {"A": [], "B": []}
+        default_A = [p for p in cur_divs.get("A", []) if p in players][:5]
+        sel_A = st.multiselect("Liga A (5 jugadores)", players, default=default_A, max_selections=5)
         remaining = [p for p in players if p not in sel_A]
-        sel_B = st.multiselect("Liga B (5 jugadores)", remaining, default=st.session_state.league_divisions.get("B", [])[:5], max_selections=5)
+        default_B = [p for p in cur_divs.get("B", []) if p in remaining][:5]
+        sel_B = st.multiselect("Liga B (5 jugadores)", remaining, default=default_B, max_selections=5)
         if st.button("Guardar divisiones"):
             if len(sel_A) == 5 and len(sel_B) == 5:
                 st.session_state.league_divisions = {"A": sel_A, "B": sel_B}
@@ -500,7 +503,7 @@ def page_tabla() -> None:
             st.session_state.league_results = {}
             st.session_state.league_matches = {}
             st.session_state.league_temp_order = {"A": [], "B": []}
-            st.session_state.league_divisions = {"A": players[:4], "B": players[4:]}
+            st.session_state.league_divisions = {"A": players[:5], "B": players[5:10]}
             st.session_state.league_movements = {}
             try:
                 clear_purchases()
