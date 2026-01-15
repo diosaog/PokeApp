@@ -10,6 +10,30 @@ from conex_pkhex import PKHeXRuntime, extract_box, has_pc_data, open_sav_cached
 
 
 # ===== Estado y persistencia =====
+def _sanitize_divisions(divs: dict) -> dict:
+    players = list(USERS.keys())
+    canon = {}
+    for u in players:
+        key = str(u).strip()
+        if key and key not in canon:
+            canon[key] = u
+
+    def _norm_list(items: list) -> list[str]:
+        out: list[str] = []
+        for it in items or []:
+            key = str(it).strip()
+            if not key:
+                continue
+            val = canon.get(key)
+            if val and val not in out:
+                out.append(val)
+        return out
+
+    curA = _norm_list(divs.get("A", [])) if isinstance(divs, dict) else []
+    curB = _norm_list(divs.get("B", [])) if isinstance(divs, dict) else []
+    curB = [u for u in curB if u not in curA]
+    return {"A": curA, "B": curB}
+
 def _serialize_state() -> dict:
     S = st.session_state
     matches: Dict[str, Dict[str, list[dict]]] = {}
@@ -43,6 +67,8 @@ def _restore_state() -> None:
             st.session_state.league_active = bool(obj.get("active", False))
         if "league_divisions" not in st.session_state:
             st.session_state.league_divisions = obj.get("divisions", {"A": [], "B": []})
+        if "league_divisions" in st.session_state:
+            st.session_state.league_divisions = _sanitize_divisions(st.session_state.league_divisions)
         if "league_results" not in st.session_state:
             res_in = obj.get("results", {})
             st.session_state.league_results = {u: {int(k): int(v) for k, v in mp.items()} for u, mp in res_in.items()}
@@ -88,6 +114,8 @@ def _ensure_state():
     if "league_divisions" not in st.session_state:
         players = list(USERS.keys())
         st.session_state.league_divisions = {"A": players[:5], "B": players[5:10]}
+    else:
+        st.session_state.league_divisions = _sanitize_divisions(st.session_state.league_divisions)
     if "league_matches" not in st.session_state:
         st.session_state.league_matches = {}
     if "league_movements" not in st.session_state:
