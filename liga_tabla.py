@@ -354,11 +354,32 @@ def page_tabla() -> None:
     with st.expander("Divisiones (5 y 5)", expanded=False):
         players = list(USERS.keys())
         cur_divs = st.session_state.league_divisions if isinstance(st.session_state.league_divisions, dict) else {"A": [], "B": []}
-        default_A = [p for p in cur_divs.get("A", []) if p in players][:5]
-        sel_A = st.multiselect("Liga A (5 jugadores)", players, default=default_A, max_selections=5)
+        def _normalize_players(values: list) -> list[str]:
+            canon = {str(u).strip().lower(): u for u in players}
+            out: list[str] = []
+            for v in values or []:
+                key = str(v).strip().lower()
+                if not key:
+                    continue
+                name = canon.get(key)
+                if name and name not in out:
+                    out.append(name)
+            return out
+
+        key_A = "league_div_A"
+        if key_A in st.session_state:
+            st.session_state[key_A] = _normalize_players(st.session_state.get(key_A))
+
+        default_A = _normalize_players(cur_divs.get("A", []))[:5]
+        sel_A = st.multiselect("Liga A (5 jugadores)", players, default=default_A, max_selections=5, key=key_A)
         remaining = [p for p in players if p not in sel_A]
-        default_B = [p for p in cur_divs.get("B", []) if p in remaining][:5]
-        sel_B = st.multiselect("Liga B (5 jugadores)", remaining, default=default_B, max_selections=5)
+        key_B = "league_div_B"
+        if key_B in st.session_state:
+            st.session_state[key_B] = _normalize_players(st.session_state.get(key_B))
+            st.session_state[key_B] = [p for p in st.session_state[key_B] if p in remaining]
+
+        default_B = [p for p in _normalize_players(cur_divs.get("B", [])) if p in remaining][:5]
+        sel_B = st.multiselect("Liga B (5 jugadores)", remaining, default=default_B, max_selections=5, key=key_B)
         if st.button("Guardar divisiones"):
             if len(sel_A) == 5 and len(sel_B) == 5:
                 st.session_state.league_divisions = {"A": sel_A, "B": sel_B}
