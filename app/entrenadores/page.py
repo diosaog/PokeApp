@@ -117,10 +117,10 @@ def page_entrenadores_view() -> None:
     except Exception:
         team = []
     team_grid_ui(team)
-
-    pokemon_detail_panel()
-
+    detail_slot = st.empty()
     boxes_grid_ui(sav_json, box_count, box_names, save_path=str(save_path))
+    with detail_slot:
+        pokemon_detail_panel()
 
 
 def page_entrenadores() -> None:
@@ -128,22 +128,21 @@ def page_entrenadores() -> None:
     st.caption("Se alimenta del ultimo .sav del entrenador seleccionado.")
 
     users = list(USERS.keys())
-    default_idx = 0
     try:
-        cur = st.session_state.get("trainer_selected")
         active = st.session_state.get("user")
-        if cur in users:
-            default_idx = users.index(cur)
-        elif active in users:
-            default_idx = users.index(active)
-            st.session_state.trainer_selected = active
+        cur = st.session_state.get("trainer_selected")
+        if cur not in users:
+            st.session_state.trainer_selected = active if active in users else (users[0] if users else None)
     except Exception:
         pass
-    prev_trainer = st.session_state.get("trainer_selected")
-    trainer = st.selectbox("Elige un entrenador", users, index=default_idx)
-    st.session_state.trainer_selected = trainer
-    if prev_trainer and trainer != prev_trainer:
+    prev = st.session_state.get("_trainer_selected_last")
+    sel = st.selectbox("Elige un entrenador", users, key="trainer_selected")
+    if prev is None:
+        st.session_state["_trainer_selected_last"] = sel
+    elif sel != prev:
+        st.session_state["_trainer_selected_last"] = sel
         st.session_state.pop("selected_pokemon", None)
+        st.rerun()
 
     try_auto_load_bridge()
 

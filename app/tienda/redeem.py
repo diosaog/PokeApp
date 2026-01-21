@@ -32,11 +32,14 @@ def _fingerprints_for_mon(m: dict) -> tuple[str | None, str | None]:
     return legacy, stable
 
 
-def _load_flags_for_fps(legacy: str | None, stable: str | None) -> tuple[dict, str | None]:
+def _load_flags_for_fps(legacy: str | None, stable: str | None, *, owner: str | None) -> tuple[dict, str | None]:
     fps = [fp for fp in (legacy, stable) if isinstance(fp, str)]
     if not fps:
         return {}, None
-    flags_map = get_flags_by_fingerprints(fps)
+    if owner:
+        flags_map = get_flags_by_fingerprints(fps, owner=owner)
+    else:
+        flags_map = get_flags_by_fingerprints(fps)
     flags: dict = {}
     for fp in (legacy, stable):
         meta = flags_map.get(fp)
@@ -93,7 +96,7 @@ def render_redeem_flow(ctx: dict, current_user: str) -> None:
 
         if choice_lbl:
             idx, fp_legacy, fp_stable = label_to_idx[choice_lbl]
-            flags, fp_key = _load_flags_for_fps(fp_legacy, fp_stable)
+            flags, fp_key = _load_flags_for_fps(fp_legacy, fp_stable, owner=target)
             if flags.get("blindado"):
                 st.error("Este Pokemon esta blindado. No se puede robar.")
                 return
@@ -120,7 +123,7 @@ def render_redeem_flow(ctx: dict, current_user: str) -> None:
                             base["robado_from"] = target
                             base["robado_at"] = int(time.time())
                             base["blindado"] = True
-                            upsert_pokemon_flags(current_user, fp_key, json.dumps(base, ensure_ascii=False))
+                            upsert_pokemon_flags(target, fp_key, json.dumps(base, ensure_ascii=False))
                     except Exception:
                         pass
                     st.success("Robo registrado (sin modificar el save).")
@@ -160,7 +163,7 @@ def render_redeem_flow(ctx: dict, current_user: str) -> None:
         choice_lbl = st.selectbox("Pokemon a blindar", list(label_to_fp.keys())) if labels else None
         if choice_lbl:
             fp_legacy, fp_stable = label_to_fp[choice_lbl]
-            flags, fp_key = _load_flags_for_fps(fp_legacy, fp_stable)
+            flags, fp_key = _load_flags_for_fps(fp_legacy, fp_stable, owner=current_user)
             _already = bool(flags.get("blindado"))
             if _already:
                 st.error("Este Pokemon ya esta blindado.")
@@ -215,7 +218,7 @@ def render_redeem_flow(ctx: dict, current_user: str) -> None:
         choice_lbl = st.selectbox("Pokemon", [lbl for (lbl, _, _, _) in options]) if options else None
         if choice_lbl:
             _, fp_legacy, fp_stable = label_to_idx[choice_lbl]
-            flags, fp_key = _load_flags_for_fps(fp_legacy, fp_stable)
+            flags, fp_key = _load_flags_for_fps(fp_legacy, fp_stable, owner=current_user)
             _already = bool(flags.get("blindado"))
             if _already:
                 st.error("Este Pokemon ya esta blindado.")
@@ -261,7 +264,7 @@ def render_redeem_flow(ctx: dict, current_user: str) -> None:
         choice_lbl = st.selectbox("Pokemon a revivir (Caja 18)", [lbl for (lbl, _, _, _) in options]) if options else None
         if choice_lbl:
             _, fp_legacy, fp_stable = label_to_idx[choice_lbl]
-            flags, fp_key = _load_flags_for_fps(fp_legacy, fp_stable)
+            flags, fp_key = _load_flags_for_fps(fp_legacy, fp_stable, owner=current_user)
             if st.button("Confirmar revivir"):
                 try:
                     payload = {"type": "revive", "fingerprint": fp_key}

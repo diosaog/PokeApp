@@ -78,7 +78,11 @@ def boxes_grid_ui(sav_json: dict, box_count: int, box_names: List[str], *, save_
         if isinstance(stable, str):
             fp_all.append(stable)
     fp_valid = list(dict.fromkeys(fp_all))
-    flags_map = get_flags_by_fingerprints(fp_valid) if fp_valid else {}
+    owner = st.session_state.get("trainer_selected") or st.session_state.get("user")
+    if owner:
+        flags_map = get_flags_by_fingerprints(fp_valid, owner=owner) if fp_valid else {}
+    else:
+        flags_map = get_flags_by_fingerprints(fp_valid) if fp_valid else {}
     flags_by_fp: dict[str, dict] = {}
     for fp, meta in flags_map.items():
         try:
@@ -151,6 +155,7 @@ def boxes_grid_ui(sav_json: dict, box_count: int, box_names: List[str], *, save_
                             "ability": p.get("ability") or p.get("Ability"),
                             "held_item": p.get("held_item") or p.get("Item"),
                         }
+                        st.rerun()
                 else:
                     st.markdown(
                         f"<div class='slot slot-empty'><div class='hint'>Vacio - Slot {idx + 1}</div></div>",

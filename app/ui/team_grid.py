@@ -34,7 +34,11 @@ def team_grid_ui(team: List[dict]) -> None:
         if isinstance(stable, str):
             fp_all.append(stable)
     fp_valid = list(dict.fromkeys(fp_all))
-    flags_map = get_flags_by_fingerprints(fp_valid) if fp_valid else {}
+    owner = st.session_state.get("trainer_selected") or st.session_state.get("user")
+    if owner:
+        flags_map = get_flags_by_fingerprints(fp_valid, owner=owner) if fp_valid else {}
+    else:
+        flags_map = get_flags_by_fingerprints(fp_valid) if fp_valid else {}
     flags_by_fp: dict[str, dict] = {}
     for fp, meta in flags_map.items():
         try:
@@ -109,6 +113,7 @@ def team_grid_ui(team: List[dict]) -> None:
                         "held_item": t.get("held_item") or t.get("Item"),
                         "evs": t.get("evs"),
                     }
+                    st.rerun()
             else:
                 st.markdown(
                     f"<div class='slot slot-empty'><div class='hint'>Vacio - Slot {i + 1}</div></div>",

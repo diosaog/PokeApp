@@ -51,6 +51,7 @@ def _render_item_card(item: dict, idx_key: str, *, available: int | None = None)
             if st.button("Comprar", key=f"buy_{idx_key}", disabled=(not afford) or price <= 0, use_container_width=True):
                 st.session_state.pop("shop_error", None)
                 st.session_state["shop_pending"] = {"name": name, "price": int(price)}
+                st.rerun()
             st.caption(f"{COIN} {price}")
             if not afford and price > 0:
                 st.caption(f"Faltan {COIN} {price - available}")
