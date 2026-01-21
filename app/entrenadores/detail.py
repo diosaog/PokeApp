@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import html as _html
 import streamlit as st
 
 from app.entrenadores.constants import DETAIL_IMG_W
@@ -302,19 +303,28 @@ def pokemon_detail_panel() -> None:
 
     css = """
     <style>
-    .ds-detail { display: grid; grid-template-columns: 1fr 1fr 1.6fr; gap: 14px; }
-    .ds-card { border-radius: 0; background: #0f1319; padding: 10px 12px; border:1px solid #2a2f38; box-shadow: inset 0 1px 0 rgba(255,255,255,0.04), inset 0 0 0 1px rgba(255,255,255,0.02); }
-    .ds-left img { image-rendering: pixelated; filter: drop-shadow(0 4px 10px rgba(0,0,0,0.4)); }
+    .ds-detail { display:grid; grid-template-columns: 1fr 1fr 1.6fr; gap: 12px; }
+    .ds-col { display:flex; flex-direction:column; gap:8px; }
+    .ds-card { border-radius:0; background:#0f1319; padding:10px 12px; border:1px solid #2a2f38; box-shadow: inset 0 1px 0 rgba(255,255,255,0.04), inset 0 0 0 1px rgba(255,255,255,0.02); }
+    .ds-label { font-weight:800; letter-spacing:.3px; text-transform:uppercase; font-size:.72rem; color:#c9d1d9; margin-bottom:4px; }
+    .ds-value { font-weight:700; color:#e6edf3; }
+    .ds-sprite { display:flex; align-items:center; justify-content:center; }
+    .ds-sprite img { image-rendering: pixelated; filter: drop-shadow(0 4px 10px rgba(0,0,0,0.4)); }
     .hp-head { display:flex; align-items:center; justify-content:space-between; font-weight:700; margin-bottom:6px; }
     .hp-bar { height:8px; background:#1b2028; border-radius:0; overflow:hidden; border:1px solid #2a2f38; box-shadow: inset 0 1px 0 rgba(255,255,255,0.06); }
     .hp-fill { height:100%; background: linear-gradient(90deg, #8fd17e, #5bbf68); width:100%; }
-    .stats-table { display:grid; grid-template-columns: 1fr auto; gap:6px 10px; }
+    .stats-table { display:flex; flex-direction:column; gap:6px; }
+    .stat-row { display:grid; grid-template-columns: 86px 54px 1fr; gap:6px; align-items:center; }
     .stat-label { font-weight:700; color:#e6edf3; padding:2px 8px; border-radius:0; background:#232832; border:1px solid #2f3540; text-transform:uppercase; letter-spacing:.2px; font-size:.72rem; }
-    .stat-up { background:#6b1f1f; color:#ffe4e6; border-color:#7f1d1d; }
-    .stat-down { background:#12324e; color:#e0f2fe; border-color:#0e3a5e; }
     .stat-val { text-align:right; font-weight:700; opacity:.95; padding:2px 8px; border-radius:0; background:#121720; border:1px solid #2a2f38; min-width:48px; }
+    .stat-bar { height:6px; background:#1b2028; border-radius:0; overflow:hidden; border:1px solid #2a2f38; }
+    .stat-fill { height:100%; background:#9ca3af; width:var(--stat); }
+    .stat-row.stat-up .stat-label, .stat-row.stat-up .stat-val { background:#6b1f1f; color:#ffe4e6; border-color:#7f1d1d; }
+    .stat-row.stat-down .stat-label, .stat-row.stat-down .stat-val { background:#12324e; color:#e0f2fe; border-color:#0e3a5e; }
+    .stat-row.stat-up .stat-fill { background:#ef4444; }
+    .stat-row.stat-down .stat-fill { background:#38bdf8; }
     .moves-list { display:flex; flex-direction:column; gap:8px; }
-    .move-row { display:grid; grid-template-columns: auto 1fr auto; align-items:center; gap:10px; padding:6px 8px; border-radius:0; border:1px solid #2a2f38; background: #0f1319; box-shadow: inset 0 1px 0 rgba(255,255,255,0.04); }
+    .move-row { display:grid; grid-template-columns: auto 1fr auto; align-items:center; gap:10px; padding:6px 8px; border-radius:0; border:1px solid #2a2f38; background:#0f1319; box-shadow: inset 0 1px 0 rgba(255,255,255,0.04); }
     .move-name { font-weight:700; }
     .type-pill { font-weight:800; letter-spacing:.5px; color:#0b0f14; background:#cbd5e1; border-radius:0; padding:2px 6px; text-transform:uppercase; font-size:.7rem; border:1px solid rgba(255,255,255,0.25); }
     .pp-box { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; color:#e6edf3; text-align:right; min-width:54px; }
@@ -337,71 +347,58 @@ def pokemon_detail_panel() -> None:
         stx = _base_stats_at_level(p)
         ability = None
 
-    colL, colM, colR = st.columns([1, 1, 1.6], gap="large")
+    img_url = sprite_url_from_p(p, prefer_animated=True)
+    raw_item = p.get("held_item") or p.get("item") or "-"
+    item = _item_name_es(raw_item)
+    ability_txt = _ability_es(str(ability)) if ability else ""
 
-    with colL:
-        img_url = sprite_url_from_p(p, prefer_animated=True)
-        st.image(img_url, width=DETAIL_IMG_W)
-        raw_item = p.get("held_item") or p.get("item") or "-"
-        item = _item_name_es(raw_item)
-        st.markdown(
-            f"<div class='ds-card'><div><strong>Objeto</strong></div><div class='caption'>{item}</div></div>",
-            unsafe_allow_html=True,
+    ps = _fmt_stat(stx, "hp")
+    labels = [("atk", "Ataque"), ("def", "Defensa"), ("spa", "At. Esp."), ("spd", "Def. Esp."), ("spe", "Veloc.")]
+    stat_rows = []
+    for key, label in labels:
+        val = _fmt_stat(stx, key)
+        try:
+            val_int = int(val)
+        except Exception:
+            val_int = 0
+        pct = max(0, min(100, int(round((val_int / 200) * 100)))) if val_int else 0
+        row_cls = "stat-row"
+        if up_key and key == up_key:
+            row_cls += " stat-up"
+        if down_key and key == down_key:
+            row_cls += " stat-down"
+        stat_rows.append(
+            f"<div class='{row_cls}' style='--stat:{pct}%;'>"
+            f"<div class='stat-label'>{label}</div>"
+            f"<div class='stat-val'>{val}</div>"
+            "<div class='stat-bar'><div class='stat-fill'></div></div>"
+            "</div>"
         )
-        if ability:
-            st.markdown(
-                f"<div class='ds-card'><div><strong>Habilidad</strong></div><div class='caption'>{_ability_es(str(ability))}</div></div>",
-                unsafe_allow_html=True,
-            )
+    stats_html = "<div class='ds-card'><div class='stats-table'>" + "".join(stat_rows) + "</div></div>"
 
-    with colM:
-        ps = _fmt_stat(stx, "hp")
-        st.markdown(
-            "<div class='ds-card'>"
-            f"<div class='hp-head'><span>PS</span><span>{ps}/{ps}</span></div>"
-            "<div class='hp-bar'><div class='hp-fill'></div></div>"
-            "</div>",
-            unsafe_allow_html=True,
-        )
-        labels = [("atk", "Ataque"), ("def", "Defensa"), ("spa", "At. Esp."), ("spd", "Def. Esp."), ("spe", "Veloc.")]
-        rows = []
-        for key, label in labels:
-            cls = "stat-label"
-            val_cls = "stat-val"
-            if up_key and key == up_key:
-                cls += " stat-up"
-                val_cls += " stat-up"
-            if down_key and key == down_key:
-                cls += " stat-down"
-                val_cls += " stat-down"
-            rows.append(f"<div class='{cls}'>{label}</div><div class='{val_cls}'>{_fmt_stat(stx, key)}</div>")
-        stats_html = "<div class='ds-card'><div class='stats-table'>" + "".join(rows) + "</div></div>"
-        st.markdown(stats_html, unsafe_allow_html=True)
-        if is_own:
-            ivs = p.get("ivs") or {}
-            order = [("hp", "HP"), ("atk", "Atk"), ("def", "Def"), ("spa", "SpA"), ("spd", "SpD"), ("spe", "Spe")]
-            parts = []
-            for k, label in order:
-                v = ivs.get(k)
-                try:
-                    v = int(v)
-                except Exception:
-                    v = None
-                if v is not None:
-                    parts.append(f"{label}:{v}")
-            ivs_txt = " ".join(parts) if parts else "-"
-            st.markdown(
-                f"<div class='ds-card'><div><strong>IVs</strong></div><div class='caption'>{ivs_txt}</div></div>",
-                unsafe_allow_html=True,
-            )
+    ivs_txt = ""
+    if is_own:
+        ivs = p.get("ivs") or {}
+        order = [("hp", "HP"), ("atk", "Atk"), ("def", "Def"), ("spa", "SpA"), ("spd", "SpD"), ("spe", "Spe")]
+        parts = []
+        for k, label in order:
+            v = ivs.get(k)
+            try:
+                v = int(v)
+            except Exception:
+                v = None
+            if v is not None:
+                parts.append(f"{label}:{v}")
+        ivs_txt = " ".join(parts) if parts else "-"
 
-    with colR:
-        moves = p.get("moves", []) or [None, None, None, None]
-        mdet = p.get("moves_detail") or []
-        mv_rows = []
-        for idx, mv in enumerate(moves):
-            if not mv:
-                continue
+    moves = list(p.get("moves", []) or [])
+    moves = moves[:4]
+    while len(moves) < 4:
+        moves.append(None)
+    mdet = p.get("moves_detail") or []
+    mv_rows = []
+    for idx, mv in enumerate(moves):
+        if mv:
             mv_es = _move_es(str(mv))
             info = move_info(str(mv)) or {}
             t = info.get("type")
@@ -413,17 +410,60 @@ def pokemon_detail_panel() -> None:
                 pp_cur = mdet[idx].get("pp")
             if pp_cur is None:
                 pp_cur = pp_tot
+            pp_text = f"{pp_cur}/{pp_tot}" if pp_tot else "--/--"
             try:
                 perc = int(max(0, min(100, round(100 * pp_cur / pp_tot)))) if pp_tot else 0
             except Exception:
                 perc = 0
-            row = (
-                f"<div class='move-row' style='--pp:{perc}%;'>"
-                f"<span class='type-pill' style='background:{color}; color:#fff'>{t_es}</span>"
-                f"<div class='move-name'>{mv_es}</div>"
-                f"<div class='pp-box'><div class='pp-text'>{pp_cur}/{pp_tot}</div>"
-                f"<div class='pp-bar'><div class='pp-fill'></div></div></div>"
-                "</div>"
-            )
-            mv_rows.append(row)
-        st.markdown("<div class='moves-list'>" + "".join(mv_rows) + "</div>", unsafe_allow_html=True)
+        else:
+            mv_es = "-"
+            t_es = "---"
+            color = "#475569"
+            pp_text = "--/--"
+            perc = 0
+        mv_rows.append(
+            "<div class='move-row' style='--pp:{}%;'>"
+            "<span class='type-pill' style='background:{}; color:#fff'>{}</span>"
+            "<div class='move-name'>{}</div>"
+            "<div class='pp-box'><div class='pp-text'>{}</div>"
+            "<div class='pp-bar'><div class='pp-fill'></div></div></div>"
+            "</div>".format(perc, color, t_es, _html.escape(str(mv_es)), pp_text)
+        )
+    moves_html = "<div class='ds-card'><div class='moves-list'>" + "".join(mv_rows) + "</div></div>"
+
+    item_html = (
+        "<div class='ds-card'><div class='ds-label'>Objeto</div>"
+        f"<div class='ds-value'>{_html.escape(str(item))}</div></div>"
+    )
+    ability_html = ""
+    if ability_txt:
+        ability_html = (
+            "<div class='ds-card'><div class='ds-label'>Habilidad</div>"
+            f"<div class='ds-value'>{_html.escape(str(ability_txt))}</div></div>"
+        )
+    ivs_html = ""
+    if is_own:
+        ivs_html = (
+            "<div class='ds-card'><div class='ds-label'>IVs</div>"
+            f"<div class='ds-value'>{_html.escape(str(ivs_txt))}</div></div>"
+        )
+
+    detail_html = (
+        "<div class='ds-detail'>"
+        "<div class='ds-col'>"
+        f"<div class='ds-card ds-sprite'><img src='{_html.escape(str(img_url))}' width='{DETAIL_IMG_W}' alt='sprite'></div>"
+        f"{item_html}{ability_html}"
+        "</div>"
+        "<div class='ds-col'>"
+        "<div class='ds-card'>"
+        f"<div class='hp-head'><span>PS</span><span>{ps}/{ps}</span></div>"
+        "<div class='hp-bar'><div class='hp-fill'></div></div>"
+        "</div>"
+        f"{stats_html}{ivs_html}"
+        "</div>"
+        "<div class='ds-col'>"
+        f"{moves_html}"
+        "</div>"
+        "</div>"
+    )
+    st.markdown(detail_html, unsafe_allow_html=True)
