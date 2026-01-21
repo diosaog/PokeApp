@@ -2,6 +2,7 @@
 import streamlit as st
 
 from utils import APP_TITLE, APP_ICON, SECTIONS, init_session_state
+from app.startup import preload_datasets
 
 st.set_page_config(
     page_title=APP_TITLE,
@@ -32,6 +33,7 @@ def main() -> None:
     ui.apply_css()
     init_session_state()
     ui.login_gate()
+    preload_datasets()
 
     section = ui.render_sidebar(SECTIONS)
     router(section)

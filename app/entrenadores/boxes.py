@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from typing import List
+import json
 import streamlit as st
 
 from app.entrenadores.cache import cached_box
@@ -9,6 +10,8 @@ from app.entrenadores.sprites import sprite_url_from_p
 from app.ui.cards import ensure_type_css, slot_card_html
 from conex_pkhex import extract_box, has_pc_data
 from dexdata import species_types
+from pkmmeta import pokemon_fingerprint, pokemon_fingerprint_stable
+from storage import get_flags_by_fingerprints
 
 
 def resolve_total_boxes(box_count: int, box_names: List[str]) -> int:
@@ -56,6 +59,37 @@ def boxes_grid_ui(sav_json: dict, box_count: int, box_names: List[str], *, save_
         st.error(f"Error al leer la caja: {e}")
         box_list = []
 
+    fp_pairs = []
+    fp_all = []
+    for p in box_list:
+        legacy = None
+        stable = None
+        try:
+            legacy = pokemon_fingerprint(p)
+        except Exception:
+            legacy = None
+        try:
+            stable = pokemon_fingerprint_stable(p)
+        except Exception:
+            stable = None
+        fp_pairs.append((legacy, stable))
+        if isinstance(legacy, str):
+            fp_all.append(legacy)
+        if isinstance(stable, str):
+            fp_all.append(stable)
+    fp_valid = list(dict.fromkeys(fp_all))
+    flags_map = get_flags_by_fingerprints(fp_valid) if fp_valid else {}
+    flags_by_fp: dict[str, dict] = {}
+    for fp, meta in flags_map.items():
+        try:
+            fj = meta.get("flags_json")
+            if isinstance(fj, str) and fj.strip():
+                obj = json.loads(fj)
+                if isinstance(obj, dict):
+                    flags_by_fp[fp] = obj
+        except Exception:
+            continue
+
     rows, cols = 5, 6
     idx = 0
     for _ in range(rows):
@@ -75,6 +109,14 @@ def boxes_grid_ui(sav_json: dict, box_count: int, box_names: List[str], *, save_
                         )
                     except Exception:
                         types = []
+                    fp_legacy, fp_stable = fp_pairs[idx]
+                    flags = {}
+                    if fp_legacy in flags_by_fp:
+                        flags.update(flags_by_fp[fp_legacy])
+                    if fp_stable in flags_by_fp:
+                        flags.update(flags_by_fp[fp_stable])
+                    flag_blindado = bool(flags.get("blindado"))
+                    flag_robado = bool(flags.get("robado"))
                     html = slot_card_html(
                         img_url=img_url,
                         title=title,
@@ -84,6 +126,8 @@ def boxes_grid_ui(sav_json: dict, box_count: int, box_names: List[str], *, save_
                         is_shiny=bool(p.get("is_shiny", False)),
                         gender=p.get("gender"),
                         types=types,
+                        blindado=flag_blindado,
+                        robado=flag_robado,
                     )
                     st.markdown(html, unsafe_allow_html=True)
                     if st.button("Ver", key=f"box_{box_index}_{idx}"):

@@ -58,14 +58,23 @@ def slot_card_html(
 
 
 def ensure_type_css() -> None:
-    css = (
-        "<style>"
-        ".type-chip { display:inline-block; padding:2px 8px; border-radius:999px; color:#fff; font-weight:600; font-size:0.72rem; margin-right:6px; }"
-        ".types { margin-top:4px; }"
-        ".shield-chip { display:inline-block; padding:2px 8px; border-radius:999px; color:#e9f5ff; font-weight:700; font-size:0.72rem; margin-right:6px; border:1px solid rgba(255,255,255,0.35); background:#2563eb; }"
-        ".rob-chip { display:inline-block; padding:2px 8px; border-radius:999px; color:#f6edff; font-weight:700; font-size:0.72rem; margin-right:6px; border:1px solid rgba(255,255,255,0.35); background:#a855f7; }"
-        "</style>"
-    )
+    try:
+        css = st.session_state.get("_type_css")
+    except Exception:
+        css = None
+    if not css:
+        css = (
+            "<style>"
+            ".type-chip { display:inline-block; padding:2px 8px; border-radius:999px; color:#fff; font-weight:600; font-size:0.72rem; margin-right:6px; }"
+            ".types { margin-top:4px; }"
+            ".shield-chip { display:inline-block; padding:2px 8px; border-radius:999px; color:#e9f5ff; font-weight:700; font-size:0.72rem; margin-right:6px; border:1px solid rgba(255,255,255,0.35); background:#2563eb; }"
+            ".rob-chip { display:inline-block; padding:2px 8px; border-radius:999px; color:#f6edff; font-weight:700; font-size:0.72rem; margin-right:6px; border:1px solid rgba(255,255,255,0.35); background:#a855f7; }"
+            "</style>"
+        )
+        try:
+            st.session_state["_type_css"] = css
+        except Exception:
+            pass
     st.markdown(css, unsafe_allow_html=True)
     try:
         st.session_state["_type_css_done"] = True

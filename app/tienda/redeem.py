@@ -14,7 +14,44 @@ from storage import (
     upsert_pokemon_flags,
 )
 from conex_pkhex import extract_box, extract_team, open_sav_cached
+from pkmmeta import pokemon_fingerprint, pokemon_fingerprint_stable
 from utils import USERS, list_user_saves
+
+
+def _fingerprints_for_mon(m: dict) -> tuple[str | None, str | None]:
+    legacy = None
+    stable = None
+    try:
+        legacy = pokemon_fingerprint(m)
+    except Exception:
+        legacy = None
+    try:
+        stable = pokemon_fingerprint_stable(m)
+    except Exception:
+        stable = None
+    return legacy, stable
+
+
+def _load_flags_for_fps(legacy: str | None, stable: str | None) -> tuple[dict, str | None]:
+    fps = [fp for fp in (legacy, stable) if isinstance(fp, str)]
+    if not fps:
+        return {}, None
+    flags_map = get_flags_by_fingerprints(fps)
+    flags: dict = {}
+    for fp in (legacy, stable):
+        meta = flags_map.get(fp)
+        if not meta:
+            continue
+        fj = meta.get("flags_json")
+        if isinstance(fj, str) and fj.strip():
+            try:
+                obj = json.loads(fj)
+                if isinstance(obj, dict):
+                    flags.update(obj)
+            except Exception:
+                pass
+    fp_key = stable or legacy
+    return flags, fp_key
 
 
 def render_redeem_flow(ctx: dict, current_user: str) -> None:
@@ -45,44 +82,45 @@ def render_redeem_flow(ctx: dict, current_user: str) -> None:
             st.error(f"No se pudo leer el save del objetivo: {e}")
 
         options = []
-        from pkmmeta import pokemon_fingerprint
         for i, m in enumerate(mons):
-            fp = pokemon_fingerprint(m)
+            fp_legacy, fp_stable = _fingerprints_for_mon(m)
             slot = m.get("slot_index", i)
             label = f"{i+1}. {m.get('species_name') or m.get('species')} Lv.{m.get('level','-')}"
-            options.append((label, int(slot), fp))
+            options.append((label, int(slot), fp_legacy, fp_stable))
 
-        label_to_idx = {lbl: (idx, fp) for (lbl, idx, fp) in options}
-        choice_lbl = st.selectbox("Pokemon", [lbl for (lbl, _, _) in options]) if options else None
+        label_to_idx = {lbl: (idx, fp_legacy, fp_stable) for (lbl, idx, fp_legacy, fp_stable) in options}
+        choice_lbl = st.selectbox("Pokemon", [lbl for (lbl, _, _, _) in options]) if options else None
 
         if choice_lbl:
-            idx, fp = label_to_idx[choice_lbl]
-            flags = get_flags_by_fingerprints([fp]).get(fp)
-            if flags:
-                try:
-                    fj = json.loads(flags.get("flags_json") or "{}")
-                except Exception:
-                    fj = {}
-                if fj.get("blindado"):
-                    st.error("Este Pokemon esta blindado. No se puede robar.")
-                    return
+            idx, fp_legacy, fp_stable = label_to_idx[choice_lbl]
+            flags, fp_key = _load_flags_for_fps(fp_legacy, fp_stable)
+            if flags.get("blindado"):
+                st.error("Este Pokemon esta blindado. No se puede robar.")
+                return
             if st.button("Confirmar robo"):
                 try:
-                    add_redemption(int(pid), current_user, item, json.dumps({"type": "steal", "from": target, "origin": origin_kind, "choice_index": idx, "fingerprint": fp}, ensure_ascii=False))
+                    payload = {
+                        "type": "steal",
+                        "from": target,
+                        "origin": origin_kind,
+                        "choice_index": idx,
+                        "fingerprint": fp_key,
+                    }
+                    if fp_legacy:
+                        payload["fingerprint_legacy"] = fp_legacy
+                    if fp_stable:
+                        payload["fingerprint_stable"] = fp_stable
+                    add_redemption(int(pid), current_user, item, json.dumps(payload, ensure_ascii=False))
                     set_purchase_status(int(pid), "used")
                     add_purchase(current_user, "Comodin de Blindaje por Robo", 0)
                     try:
-                        cur = get_flags_by_fingerprints([fp]).get(fp)
-                        base = {}
-                        if cur and isinstance(cur.get("flags_json"), str) and cur["flags_json"].strip():
-                            base = json.loads(cur["flags_json"])
-                            if not isinstance(base, dict):
-                                base = {}
-                        base["robado"] = True
-                        base["robado_from"] = target
-                        base["robado_at"] = int(time.time())
-                        base["blindado"] = True
-                        upsert_pokemon_flags(current_user, fp, json.dumps(base, ensure_ascii=False))
+                        if fp_key:
+                            base = dict(flags)
+                            base["robado"] = True
+                            base["robado_from"] = target
+                            base["robado_at"] = int(time.time())
+                            base["blindado"] = True
+                            upsert_pokemon_flags(current_user, fp_key, json.dumps(base, ensure_ascii=False))
                     except Exception:
                         pass
                     st.success("Robo registrado (sin modificar el save).")
@@ -100,11 +138,10 @@ def render_redeem_flow(ctx: dict, current_user: str) -> None:
             if saves:
                 spath = str(saves[0])
                 sav_json = open_sav_cached(spath)
-                from pkmmeta import pokemon_fingerprint
                 team = extract_team(sav_json, save_path=spath) or []
                 for i, m in enumerate(team):
-                    fp = pokemon_fingerprint(m)
-                    labels.append((f"Equipo slot {i+1}: {m.get('species_name') or m.get('species')} Lv.{m.get('level','-')}", fp))
+                    fp_legacy, fp_stable = _fingerprints_for_mon(m)
+                    labels.append((f"Equipo slot {i+1}: {m.get('species_name') or m.get('species')} Lv.{m.get('level','-')}", fp_legacy, fp_stable))
                 try:
                     from conex_pkhex import get_box_meta_quick
                     total_boxes, _ = get_box_meta_quick(sav_json, save_path=spath)
@@ -113,37 +150,35 @@ def render_redeem_flow(ctx: dict, current_user: str) -> None:
                 for b in range(total_boxes):
                     box_list = extract_box(sav_json, b, save_path=spath) or []
                     for idx, m in enumerate(box_list):
-                        fp = pokemon_fingerprint(m)
-                        labels.append((f"Caja {b+1} slot {idx+1}: {m.get('species_name') or m.get('species')} Lv.{m.get('level','-')}", fp))
+                        fp_legacy, fp_stable = _fingerprints_for_mon(m)
+                        labels.append((f"Caja {b+1} slot {idx+1}: {m.get('species_name') or m.get('species')} Lv.{m.get('level','-')}", fp_legacy, fp_stable))
             else:
                 st.warning("No tienes save disponible.")
         except Exception as e:
             st.error(f"No se pudo leer tu save: {e}")
-        label_to_fp = {lbl: fp for (lbl, fp) in labels}
+        label_to_fp = {lbl: (fp_legacy, fp_stable) for (lbl, fp_legacy, fp_stable) in labels}
         choice_lbl = st.selectbox("Pokemon a blindar", list(label_to_fp.keys())) if labels else None
         if choice_lbl:
-            fp = label_to_fp[choice_lbl]
-            _cur = get_flags_by_fingerprints([fp]).get(fp)
-            _already = False
-            if _cur:
-                try:
-                    _fj = json.loads(_cur.get("flags_json") or "{}")
-                except Exception:
-                    _fj = {}
-                _already = bool(_fj.get("blindado"))
+            fp_legacy, fp_stable = label_to_fp[choice_lbl]
+            flags, fp_key = _load_flags_for_fps(fp_legacy, fp_stable)
+            _already = bool(flags.get("blindado"))
             if _already:
                 st.error("Este Pokemon ya esta blindado.")
                 return
             if st.button("Confirmar blindaje"):
                 try:
-                    add_redemption(int(pid), current_user, item, json.dumps({"type": "shield", "fingerprint": fp}, ensure_ascii=False))
+                    payload = {"type": "shield", "fingerprint": fp_key}
+                    if fp_legacy:
+                        payload["fingerprint_legacy"] = fp_legacy
+                    if fp_stable:
+                        payload["fingerprint_stable"] = fp_stable
+                    add_redemption(int(pid), current_user, item, json.dumps(payload, ensure_ascii=False))
                     set_purchase_status(int(pid), "used")
                     try:
-                        base = {}
-                        if _cur and isinstance(_cur.get("flags_json"), str) and _cur["flags_json"].strip():
-                            base = json.loads(_cur["flags_json"]) if isinstance(json.loads(_cur["flags_json"]), dict) else {}
-                        base["blindado"] = True
-                        upsert_pokemon_flags(current_user, fp, json.dumps(base, ensure_ascii=False))
+                        if fp_key:
+                            base = dict(flags)
+                            base["blindado"] = True
+                            upsert_pokemon_flags(current_user, fp_key, json.dumps(base, ensure_ascii=False))
                     except Exception:
                         pass
                     st.success("Blindaje aplicado.")
@@ -172,41 +207,33 @@ def render_redeem_flow(ctx: dict, current_user: str) -> None:
         except Exception as e:
             st.error(f"No se pudo leer tu save: {e}")
         options = []
-        from pkmmeta import pokemon_fingerprint
         for i, m in enumerate(mons):
-            fp = pokemon_fingerprint(m)
+            fp_legacy, fp_stable = _fingerprints_for_mon(m)
             slot = m.get("slot_index", i)
-            options.append((f"{i+1}. {m.get('species_name') or m.get('species')} Lv.{m.get('level','-')}", int(slot), fp))
-        label_to_idx = {lbl: (idx, fp) for (lbl, idx, fp) in options}
-        choice_lbl = st.selectbox("Pokemon", [lbl for (lbl, _, _) in options]) if options else None
+            options.append((f"{i+1}. {m.get('species_name') or m.get('species')} Lv.{m.get('level','-')}", int(slot), fp_legacy, fp_stable))
+        label_to_idx = {lbl: (idx, fp_legacy, fp_stable) for (lbl, idx, fp_legacy, fp_stable) in options}
+        choice_lbl = st.selectbox("Pokemon", [lbl for (lbl, _, _, _) in options]) if options else None
         if choice_lbl:
-            _, fp = label_to_idx[choice_lbl]
-            _cur = get_flags_by_fingerprints([fp]).get(fp)
-            _already = False
-            if _cur:
-                try:
-                    _fj = json.loads(_cur.get("flags_json") or "{}")
-                except Exception:
-                    _fj = {}
-                _already = bool(_fj.get("blindado"))
+            _, fp_legacy, fp_stable = label_to_idx[choice_lbl]
+            flags, fp_key = _load_flags_for_fps(fp_legacy, fp_stable)
+            _already = bool(flags.get("blindado"))
             if _already:
                 st.error("Este Pokemon ya esta blindado.")
                 return
             if st.button("Confirmar blindaje"):
                 try:
-                    add_redemption(int(pid), current_user, item, json.dumps({"type": "shield", "fingerprint": fp}, ensure_ascii=False))
+                    payload = {"type": "shield", "fingerprint": fp_key}
+                    if fp_legacy:
+                        payload["fingerprint_legacy"] = fp_legacy
+                    if fp_stable:
+                        payload["fingerprint_stable"] = fp_stable
+                    add_redemption(int(pid), current_user, item, json.dumps(payload, ensure_ascii=False))
                     set_purchase_status(int(pid), "used")
-                    base = {}
-                    if _cur and isinstance(_cur.get("flags_json"), str) and _cur["flags_json"].strip():
-                        try:
-                            base = json.loads(_cur["flags_json"])
-                            if not isinstance(base, dict):
-                                base = {}
-                        except Exception:
-                            base = {}
-                    base["blindado"] = True
-                    base["blindaje_por_robo"] = True
-                    upsert_pokemon_flags(current_user, fp, json.dumps(base, ensure_ascii=False))
+                    if fp_key:
+                        base = dict(flags)
+                        base["blindado"] = True
+                        base["blindaje_por_robo"] = True
+                        upsert_pokemon_flags(current_user, fp_key, json.dumps(base, ensure_ascii=False))
                     st.success("Blindaje por robo aplicado.")
                     st.session_state.pop("redeem_ctx", None)
                     st.rerun()
@@ -227,28 +254,29 @@ def render_redeem_flow(ctx: dict, current_user: str) -> None:
         except Exception as e:
             st.error(f"No se pudo leer tu save: {e}")
         options = []
-        from pkmmeta import pokemon_fingerprint
         for i, m in enumerate(mons):
-            fp = pokemon_fingerprint(m)
-            options.append((f"{i+1}. {m.get('species_name') or m.get('species')} Lv.{m.get('level','-')}", i, fp))
-        label_to_idx = {lbl: (idx, fp) for (lbl, idx, fp) in options}
-        choice_lbl = st.selectbox("Pokemon a revivir (Caja 18)", [lbl for (lbl, _, _) in options]) if options else None
+            fp_legacy, fp_stable = _fingerprints_for_mon(m)
+            options.append((f"{i+1}. {m.get('species_name') or m.get('species')} Lv.{m.get('level','-')}", i, fp_legacy, fp_stable))
+        label_to_idx = {lbl: (idx, fp_legacy, fp_stable) for (lbl, idx, fp_legacy, fp_stable) in options}
+        choice_lbl = st.selectbox("Pokemon a revivir (Caja 18)", [lbl for (lbl, _, _, _) in options]) if options else None
         if choice_lbl:
-            _, fp = label_to_idx[choice_lbl]
+            _, fp_legacy, fp_stable = label_to_idx[choice_lbl]
+            flags, fp_key = _load_flags_for_fps(fp_legacy, fp_stable)
             if st.button("Confirmar revivir"):
                 try:
-                    add_redemption(int(pid), current_user, item, json.dumps({"type": "revive", "fingerprint": fp}, ensure_ascii=False))
+                    payload = {"type": "revive", "fingerprint": fp_key}
+                    if fp_legacy:
+                        payload["fingerprint_legacy"] = fp_legacy
+                    if fp_stable:
+                        payload["fingerprint_stable"] = fp_stable
+                    add_redemption(int(pid), current_user, item, json.dumps(payload, ensure_ascii=False))
                     set_purchase_status(int(pid), "used")
                     try:
-                        cur = get_flags_by_fingerprints([fp]).get(fp)
-                        base = {}
-                        if cur and isinstance(cur.get("flags_json"), str) and cur["flags_json"].strip():
-                            base = json.loads(cur["flags_json"])
-                            if not isinstance(base, dict):
-                                base = {}
-                        base["blindado"] = True
-                        base["revivido_at"] = int(time.time())
-                        upsert_pokemon_flags(current_user, fp, json.dumps(base, ensure_ascii=False))
+                        if fp_key:
+                            base = dict(flags)
+                            base["blindado"] = True
+                            base["revivido_at"] = int(time.time())
+                            upsert_pokemon_flags(current_user, fp_key, json.dumps(base, ensure_ascii=False))
                     except Exception:
                         pass
                     st.success("Revivir registrado (sin modificar el save).")

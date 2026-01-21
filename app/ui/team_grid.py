@@ -5,7 +5,7 @@ import json
 import streamlit as st
 
 from dexdata import species_types
-from pkmmeta import pokemon_fingerprint
+from pkmmeta import pokemon_fingerprint, pokemon_fingerprint_stable
 from storage import get_flags_by_fingerprints
 from app.ui.cards import TEAM_IMG_W, ensure_type_css, slot_card_html
 from app.entrenadores.sprites import sprite_url_from_p
@@ -15,27 +15,34 @@ def team_grid_ui(team: List[dict]) -> None:
     """Enhanced team grid (6 slots) with type chips and flags."""
     ensure_type_css()
 
-    fps = []
+    fp_pairs = []
+    fp_all = []
     for t in team:
+        legacy = None
+        stable = None
         try:
-            fps.append(pokemon_fingerprint(t))
+            legacy = pokemon_fingerprint(t)
         except Exception:
-            fps.append(None)
-    fp_valid = [fp for fp in fps if isinstance(fp, str)]
+            legacy = None
+        try:
+            stable = pokemon_fingerprint_stable(t)
+        except Exception:
+            stable = None
+        fp_pairs.append((legacy, stable))
+        if isinstance(legacy, str):
+            fp_all.append(legacy)
+        if isinstance(stable, str):
+            fp_all.append(stable)
+    fp_valid = list(dict.fromkeys(fp_all))
     flags_map = get_flags_by_fingerprints(fp_valid) if fp_valid else {}
-
-    blindados: set[str] = set()
-    robados: set[str] = set()
+    flags_by_fp: dict[str, dict] = {}
     for fp, meta in flags_map.items():
         try:
             fj = meta.get("flags_json")
             if isinstance(fj, str) and fj.strip():
                 obj = json.loads(fj)
                 if isinstance(obj, dict):
-                    if obj.get("blindado"):
-                        blindados.add(fp)
-                    if obj.get("robado"):
-                        robados.add(fp)
+                    flags_by_fp[fp] = obj
         except Exception:
             continue
 
@@ -58,9 +65,14 @@ def team_grid_ui(team: List[dict]) -> None:
                 except Exception:
                     types = []
 
-                fp = fps[i]
-                flag_blindado = isinstance(fp, str) and fp in blindados
-                flag_robado = isinstance(fp, str) and fp in robados
+                fp_legacy, fp_stable = fp_pairs[i]
+                flags = {}
+                if fp_legacy in flags_by_fp:
+                    flags.update(flags_by_fp[fp_legacy])
+                if fp_stable in flags_by_fp:
+                    flags.update(flags_by_fp[fp_stable])
+                flag_blindado = bool(flags.get("blindado"))
+                flag_robado = bool(flags.get("robado"))
 
                 subtitle = species if nickname else ""
                 title = nickname if nickname else species

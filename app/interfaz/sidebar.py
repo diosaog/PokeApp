@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import base64
 import mimetypes
+import os
 from pathlib import Path
 import streamlit as st
 
@@ -18,10 +19,27 @@ def _img_uri(p: str) -> str:
     try:
         if not p:
             return ""
+        try:
+            mtime = os.path.getmtime(p)
+        except Exception:
+            mtime = None
+        try:
+            cache = st.session_state.setdefault("_img_uri_cache", {})
+            key = (p, mtime)
+            if key in cache:
+                return cache[key]
+        except Exception:
+            cache = None
         mt = mimetypes.guess_type(p)[0] or "image/png"
         with open(p, "rb") as f:
             b64 = base64.b64encode(f.read()).decode("ascii")
-        return f"data:{mt};base64,{b64}"
+        uri = f"data:{mt};base64,{b64}"
+        if cache is not None:
+            try:
+                cache[(p, mtime)] = uri
+            except Exception:
+                pass
+        return uri
     except Exception:
         return ""
 
