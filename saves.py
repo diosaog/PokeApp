@@ -1,4 +1,4 @@
-﻿from __future__ import annotations
+from __future__ import annotations
 from datetime import datetime
 import streamlit as st
 
@@ -13,18 +13,17 @@ from utils import ensure_user_dir, ts_name
 
 
 def page_saves() -> None:
-    st.header("PC de Bill 💾")
+    st.header("PC de Bill")
 
     current_user = st.session_state.get("user")
     st.caption(f"Este save se registrara a: {current_user}")
 
     def _bootstrap_latest_save():
-        """Si no hay save actual, toma el último de Supabase y lo marca y guarda en disco local."""
+        """If there is no current save, use the latest from storage and cache locally."""
         if not current_user:
             return
         cur = get_current_save_for_user(current_user)
         if cur:
-            # Asegurar copia local del archivo actual
             try:
                 folder = ensure_user_dir(current_user)
                 dest = folder / cur[1]
@@ -35,13 +34,11 @@ def page_saves() -> None:
             except Exception:
                 pass
             return
-        # No hay save actual: coger el último listado
         try:
             lst = list_saves_by_user(current_user, limit=1)
             if lst:
                 last_id, fname, oname, sha, up, ts = lst[0]
                 set_current_save_for_user(current_user, last_id)
-                # Guardar copia local
                 try:
                     folder = ensure_user_dir(current_user)
                     dest = folder / fname
@@ -66,8 +63,7 @@ def page_saves() -> None:
     if file is not None and subir:
         data = file.getvalue()
         rec = save_upload(data, file.name, current_user)
-        set_current_save_for_user(current_user, rec["id"])  # marca como actual
-        # Copia adicional al directorio de saves del usuario (para Entrenadores)
+        set_current_save_for_user(current_user, rec["id"])
         try:
             from pathlib import Path
             folder = ensure_user_dir(current_user)
@@ -91,7 +87,7 @@ def page_saves() -> None:
                 "Descargar save actual",
                 data=load_save_bytes(fname),
                 file_name=oname or fname,
-                key=f"dl_current_{id_}"
+                key=f"dl_current_{id_}",
             )
         else:
             st.caption("Descarga no disponible: solo quien subio el save puede descargarlo.")
@@ -102,7 +98,7 @@ def page_saves() -> None:
         for (id_, fname, oname, sha, up, ts) in list_saves_by_user(current_user, limit=20):
             with st.container(border=True):
                 st.write(f"**[{id_}]** {oname or fname}")
-                st.caption(f"Por {up or '-'} • {datetime.fromtimestamp(ts)} • SHA {sha[:8]}")
+                st.caption(f"Por {up or '-'} - {datetime.fromtimestamp(ts)} - SHA {sha[:8]}")
                 c1, c2 = st.columns(2)
                 with c1:
                     if st.button("Establecer como actual", key=f"set_{id_}"):
@@ -114,7 +110,7 @@ def page_saves() -> None:
                             "Descargar",
                             data=load_save_bytes(fname),
                             file_name=oname or fname,
-                            key=f"dl_{id_}"
+                            key=f"dl_{id_}",
                         )
                     else:
                         st.caption("Solo el autor puede descargar este save.")

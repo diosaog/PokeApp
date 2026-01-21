@@ -108,7 +108,7 @@ def page_copa() -> None:
     st.subheader("Sistema suizo")
     S = st.session_state.swiss
 
-    # Configuración
+    # Configuracion
     with st.expander("Configurar", expanded=False):
         all_players = list(USERS.keys())
         sel = st.multiselect("Jugadores", all_players, default=S.get("players", []))
@@ -148,4 +148,3 @@ def page_copa() -> None:
                 st.error("Marca el ganador en todos los enfrentamientos.")
     else:
         st.caption("Sin emparejamientos activos.")
-

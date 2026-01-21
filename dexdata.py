@@ -9,6 +9,7 @@ para evitar depender siempre de red.
 """
 import json  # noqa: E402
 import time  # noqa: E402
+import unicodedata  # noqa: E402
 from pathlib import Path  # noqa: E402
 from typing import Dict, Any, Optional, List  # noqa: E402
 
@@ -87,6 +88,14 @@ def _slugify(name: str) -> str:
     return s
 
 
+def _to_ascii(text: str) -> str:
+    if not text:
+        return ""
+    t = unicodedata.normalize("NFD", text)
+    t = "".join(ch for ch in t if unicodedata.category(ch) != "Mn")
+    return t
+
+
 MOVES_ES_CACHE_MEM: Dict[str, str] = {}
 ABILITIES_ES_CACHE_MEM: Dict[str, str] = {}
 
@@ -121,11 +130,10 @@ def _cached_lookup(cache_file: Path, key: str, fetch_fn, *, mem_cache: Dict[str,
 
 
 FALLBACK_MOVES_ES = {
-    # Gen 1-4 comunes
     "tackle": "Placaje",
-    "scratch": "Arañazo",
+    "scratch": "Aranazo",
     "leer": "Malicioso",
-    "growl": "Gruñido",
+    "growl": "Grunido",
     "ember": "Ascuas",
     "taunt": "Mofa",
     "defense-curl": "Rizo Defensa",
@@ -135,10 +143,10 @@ FALLBACK_MOVES_ES = {
     "growth": "Desarrollo",
     "stun-spore": "Paralizador",
     "poison-sting": "Picotazo Venenoso",
-    "vine-whip": "Látigo Cepa",
+    "vine-whip": "Latigo Cepa",
     "water-gun": "Pistola Agua",
     "gust": "Tornado",
-    "quick-attack": "Ataque Rápido",
+    "quick-attack": "Ataque Rapido",
 }
 
 
@@ -165,7 +173,7 @@ def move_name_es(name_en: str) -> str:
         return None
 
     val = _cached_lookup(cache_file, slug, fetch, mem_cache=MOVES_ES_CACHE_MEM)
-    return val or name_en
+    return _to_ascii(val or name_en)
 
 
 FALLBACK_ABILITIES_ES = {
@@ -174,7 +182,7 @@ FALLBACK_ABILITIES_ES = {
     "overgrow": "Espesura",
     "rock-head": "Cabeza Roca",
     "sturdy": "Robustez",
-    "poison-point": "Punto Tóxico",
+    "poison-point": "Punto Toxico",
     "natural-cure": "Cura Natural",
     "chlorophyll": "Clorofila",
 }
@@ -203,7 +211,7 @@ def ability_name_es(name_en: str) -> str:
         return None
 
     val = _cached_lookup(cache_file, slug, fetch, mem_cache=ABILITIES_ES_CACHE_MEM)
-    return val or name_en
+    return _to_ascii(val or name_en)
 
 
 def _load_dataset(name: str) -> Dict[str, Any]:

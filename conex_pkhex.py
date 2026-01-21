@@ -84,16 +84,16 @@ class PKHeXRuntime:
         sp = subprocess.run(args, capture_output=True, text=True, timeout=BRIDGE_TIMEOUT)
         if sp.returncode != 0:
             err = sp.stderr.strip() or "Error desconocido del bridge."
-            raise RuntimeError(f"Bridge falló ({sp.returncode}): {err}")
+            raise RuntimeError(f"Bridge fallo ({sp.returncode}): {err}")
         try:
             data = json.loads(sp.stdout)
         except Exception as e:
-            raise RuntimeError(f"Salida del bridge no es JSON válido: {e}")
+            raise RuntimeError(f"Salida del bridge no es JSON valido: {e}")
 
         # Acepta cualquier variante v7 (v7, v7d, v7e, v7h, v7j)
         tag = str(data.get("BridgeTag") or "")
         if not tag.startswith("pc-probed-v7"):
-            bp = str(_BRIDGE_PATH) if _BRIDGE_PATH else "¿no cargado?"
+            bp = str(_BRIDGE_PATH) if _BRIDGE_PATH else "no cargado?"
             raise RuntimeError(
                 f"Bridge desactualizado (tag='{tag}'). Se requiere 'pc-probed-v7*'.\n"
                 f"Ruta actual: {bp}"
