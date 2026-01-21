@@ -31,7 +31,7 @@ def apply_css() -> None:
         radial-gradient(circle at calc(100% - 180px) calc(100% - 220px), color-mix(in srgb, var(--ball-color, #ffffff) 45%, transparent) 0 140px, transparent 141px) 100% 100%/360px 360px no-repeat,
         linear-gradient(180deg, #0a0d12 0%, #0a0d12 60%, #090c10 100%);
     }
-    .block-container { padding-top: 2rem; padding-bottom: 3rem; border-radius: 18px; animation: fadeInUp .35s ease-out both; }
+    .block-container { padding-top: 2rem; padding-bottom: 3rem; border-radius: 0; animation: fadeInUp .35s ease-out both; }
     @keyframes fadeInUp { from { opacity:0; transform: translate3d(0,8px,0);} to { opacity:1; transform: translate3d(0,0,0);} }
     h1,h2,h3,h4,h5,h6 { color: var(--text-1); }
     p,span,div,label { color: var(--text-2); }
@@ -43,17 +43,17 @@ def apply_css() -> None:
       box-shadow: 0 0 0 2px rgba(0,0,0,0.35), 0 2px 6px rgba(0,0,0,0.25);
       border: 2px solid #111;
     }
-    .stButton>button, .stDownloadButton>button { border-radius: 16px; padding: 0.6rem 1rem; min-height: 40px; background: linear-gradient(180deg, var(--accent), color-mix(in srgb, var(--accent) 80%, #7f1d1d)); border: 1px solid rgba(255,255,255,0.12); color: #fff; box-shadow: 0 6px 18px rgba(239,83,80,.18); }
+    .stButton>button, .stDownloadButton>button { border-radius: 0; padding: 0.6rem 1rem; min-height: 40px; background: linear-gradient(180deg, var(--accent), color-mix(in srgb, var(--accent) 80%, #7f1d1d)); border: 1px solid rgba(255,255,255,0.18); color: #fff; box-shadow: inset 0 1px 0 rgba(255,255,255,0.15), 0 4px 12px rgba(0,0,0,0.35); }
     .stButton>button:focus-visible { outline: 2px solid #90caf9; outline-offset: 2px; }
 
-    .slot { background: rgba(255,255,255,0.02); border: 2px solid rgba(255,255,255,0.12); border-radius: 16px; padding: 10px 10px 8px; text-align:center; margin: 6px 0 16px; box-shadow: inset 0 0 0 2px rgba(255,255,255,0.03); }
-    .slot:hover { box-shadow: inset 0 0 0 2px rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.25); }
+    .slot { background: #0f1319; border: 1px solid #2a2f38; border-radius: 0; padding: 10px 10px 8px; text-align:center; margin: 6px 0 16px; box-shadow: inset 0 1px 0 rgba(255,255,255,0.04); }
+    .slot:hover { box-shadow: inset 0 1px 0 rgba(255,255,255,0.08); border-color: #3a4250; }
     .slot .title { font-weight: 600; color: #e6edf3; margin-top: 6px; }
     .slot .sub { color: #9aa3ab; font-size: 0.82rem; }
     .slot { cursor: default; }
-    .slot-empty { border: 2px dashed rgba(255,255,255,0.20); background: transparent; height: 120px; display:flex; align-items:center; justify-content:center; color:#8a919a; border-radius:16px; }
+    .slot-empty { border: 1px dashed #3a4250; background: #0f1319; height: 120px; display:flex; align-items:center; justify-content:center; color:#8a919a; border-radius:0; }
 
-    .pokedex-card { border-radius: 16px; background: linear-gradient(180deg, rgba(42,117,187,0.12), rgba(10,13,18,0.6)); padding: 12px 14px; box-shadow: 0 6px 16px rgba(0,0,0,0.25), inset 0 0 0 3px rgba(255,255,255,0.05); }
+    .pokedex-card { border-radius: 0; background: #0f1319; padding: 12px 14px; border: 1px solid #2a2f38; box-shadow: inset 0 1px 0 rgba(255,255,255,0.04); }
     .pokedex-card .title { font-family: "Press Start 2P", monospace; font-size: 0.9rem; color: #e6edf3; }
     .pokedex-card .meta  { color: #9aa3ab; font-size: 0.85rem; }
 
@@ -65,7 +65,11 @@ def apply_css() -> None:
       box-shadow: 0 0 0 2px rgba(0,0,0,0.4), 0 2px 8px rgba(0,0,0,0.35);
       border: 2px solid #0b0d12;
     }
-    .status-badge { display:inline-block; padding:2px 10px; border-radius:999px; font-weight:700; font-size:0.8rem; margin-left:8px; }
+    .status-badge { display:inline-block; padding:2px 10px; border-radius:0; font-weight:700; font-size:0.8rem; margin-left:8px; }
+    .panel-dashed { border: 1px dashed #3a4250; background: #0f1319; padding: 10px 12px; border-radius:0; }
+    .panel-ghost { border: 1px solid #2a2f38; background: #0f1319; padding: 10px 12px; border-radius:0; }
+    .panel-ghost .title { font-weight:700; margin-bottom:4px; }
+    .panel-ghost .value { font-weight:800; font-size:1.1rem; }
     .status-ok { background:#1b5e20; color:#e8f5e9; border:1px solid rgba(255,255,255,0.15); }
     .status-warn { background:#7f1d1d; color:#ffebee; border:1px solid rgba(255,255,255,0.15); }
     </style>
@@ -75,7 +79,7 @@ def apply_css() -> None:
     st.markdown(
         """
         <style>
-        .profile-card { border-radius: 16px; padding: 12px; background: linear-gradient(180deg, rgba(255,255,255,0.05), rgba(255,255,255,0.02)); border: 1px solid rgba(255,255,255,0.08); box-shadow: inset 0 0 0 2px rgba(255,255,255,0.03); }
+        .profile-card { border-radius: 0; padding: 12px; background: #0f1319; border: 1px solid #2a2f38; box-shadow: inset 0 1px 0 rgba(255,255,255,0.04); }
         .profile-head { display:flex; align-items:center; gap:12px; }
         .profile-avatar { width:64px; height:64px; border-radius:50%; overflow:hidden; flex:0 0 auto; box-shadow: 0 4px 10px rgba(0,0,0,0.35), 0 0 0 3px rgba(255,255,255,0.06); position:relative; }
         .profile-avatar img { width:100%; height:100%; object-fit:cover; display:block; filter: saturate(1.08); }

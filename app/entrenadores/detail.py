@@ -303,10 +303,10 @@ def pokemon_detail_panel() -> None:
     css = """
     <style>
     .ds-detail { display: grid; grid-template-columns: 1fr 1fr 1.6fr; gap: 14px; }
-    .ds-card { border-radius: 0; background: #0f1319; padding: 10px 12px; border:1px solid #2a2f38; box-shadow: inset 0 0 0 1px rgba(255,255,255,0.02); }
+    .ds-card { border-radius: 0; background: #0f1319; padding: 10px 12px; border:1px solid #2a2f38; box-shadow: inset 0 1px 0 rgba(255,255,255,0.04), inset 0 0 0 1px rgba(255,255,255,0.02); }
     .ds-left img { image-rendering: pixelated; filter: drop-shadow(0 4px 10px rgba(0,0,0,0.4)); }
     .hp-head { display:flex; align-items:center; justify-content:space-between; font-weight:700; margin-bottom:6px; }
-    .hp-bar { height:8px; background:#1b2028; border-radius:0; overflow:hidden; border:1px solid #2a2f38; }
+    .hp-bar { height:8px; background:#1b2028; border-radius:0; overflow:hidden; border:1px solid #2a2f38; box-shadow: inset 0 1px 0 rgba(255,255,255,0.06); }
     .hp-fill { height:100%; background: linear-gradient(90deg, #8fd17e, #5bbf68); width:100%; }
     .stats-table { display:grid; grid-template-columns: 1fr auto; gap:6px 10px; }
     .stat-label { font-weight:700; color:#e6edf3; padding:2px 8px; border-radius:0; background:#232832; border:1px solid #2f3540; text-transform:uppercase; letter-spacing:.2px; font-size:.72rem; }
@@ -314,9 +314,11 @@ def pokemon_detail_panel() -> None:
     .stat-down { background:#12324e; color:#e0f2fe; border-color:#0e3a5e; }
     .stat-val { text-align:right; font-weight:700; opacity:.95; padding:2px 8px; border-radius:0; background:#121720; border:1px solid #2a2f38; min-width:48px; }
     .moves-list { display:flex; flex-direction:column; gap:8px; }
-    .move-row { display:grid; grid-template-columns: auto 1fr auto; align-items:center; gap:10px; padding:6px 8px; border-radius:0; border:1px solid #2a2f38; background: #0f1319; }
-    .type-pill { font-weight:800; letter-spacing:.5px; color:#0b0f14; background:#cbd5e1; border-radius:0; padding:2px 6px; text-transform:uppercase; font-size:.7rem; }
-    .pp-box { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; color:#e6edf3; }
+    .move-row { display:grid; grid-template-columns: auto 1fr auto; align-items:center; gap:10px; padding:6px 8px; border-radius:0; border:1px solid #2a2f38; background: #0f1319; box-shadow: inset 0 1px 0 rgba(255,255,255,0.04); }
+    .move-name { font-weight:700; }
+    .type-pill { font-weight:800; letter-spacing:.5px; color:#0b0f14; background:#cbd5e1; border-radius:0; padding:2px 6px; text-transform:uppercase; font-size:.7rem; border:1px solid rgba(255,255,255,0.25); }
+    .pp-box { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; color:#e6edf3; text-align:right; min-width:54px; }
+    .pp-text { font-weight:700; }
     .pp-bar { height:5px; background:#1b2028; border-radius:0; overflow:hidden; margin-top:4px; border:1px solid #2a2f38; }
     .pp-fill { height:100%; background:linear-gradient(90deg,#ffcc80,#fb8c00); width:var(--pp); }
     .caption { opacity:.85 }
@@ -365,11 +367,14 @@ def pokemon_detail_panel() -> None:
         rows = []
         for key, label in labels:
             cls = "stat-label"
+            val_cls = "stat-val"
             if up_key and key == up_key:
                 cls += " stat-up"
+                val_cls += " stat-up"
             if down_key and key == down_key:
                 cls += " stat-down"
-            rows.append(f"<div class='{cls}'>{label}</div><div class='stat-val'>{_fmt_stat(stx, key)}</div>")
+                val_cls += " stat-down"
+            rows.append(f"<div class='{cls}'>{label}</div><div class='{val_cls}'>{_fmt_stat(stx, key)}</div>")
         stats_html = "<div class='ds-card'><div class='stats-table'>" + "".join(rows) + "</div></div>"
         st.markdown(stats_html, unsafe_allow_html=True)
         if is_own:
@@ -415,8 +420,8 @@ def pokemon_detail_panel() -> None:
             row = (
                 f"<div class='move-row' style='--pp:{perc}%;'>"
                 f"<span class='type-pill' style='background:{color}; color:#fff'>{t_es}</span>"
-                f"<div style='font-weight:700'>{mv_es}</div>"
-                f"<div class='pp-box' style='text-align:right'>{pp_cur}/{pp_tot}"
+                f"<div class='move-name'>{mv_es}</div>"
+                f"<div class='pp-box'><div class='pp-text'>{pp_cur}/{pp_tot}</div>"
                 f"<div class='pp-bar'><div class='pp-fill'></div></div></div>"
                 "</div>"
             )

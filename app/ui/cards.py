@@ -74,7 +74,7 @@ def ensure_type_css() -> None:
             "<style>"
             ".badges { display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:6px; }"
             ".badge-right { display:flex; align-items:center; justify-content:flex-end; gap:6px; }"
-            ".pill { display:inline-block; padding:2px 8px; border-radius:999px; font-weight:700; font-size:0.72rem; color:#e6edf3; background: rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.16); }"
+            ".pill { display:inline-block; padding:2px 8px; border-radius:0; font-weight:700; font-size:0.72rem; color:#e6edf3; background: rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.16); }"
             ".pill-empty { opacity:0.0; }"
             ".pill-shiny { background: linear-gradient(135deg, #f59e0b, #f97316); color:#0b0f14; border-color: rgba(255,255,255,0.35); }"
             ".gender-m { background: rgba(56,189,248,0.2); color:#e0f2fe; border-color: rgba(56,189,248,0.4); }"
@@ -83,10 +83,10 @@ def ensure_type_css() -> None:
             ".slot img { display:block; margin: 0 auto 2px; filter: drop-shadow(0 2px 8px rgba(0,0,0,0.35)); image-rendering: pixelated; }"
             ".slot .title { letter-spacing: .3px; }"
             ".slot .sub { margin-top: 2px; }"
-            ".type-chip { display:inline-block; padding:2px 8px; border-radius:999px; color:#fff; font-weight:600; font-size:0.72rem; margin-right:6px; }"
+            ".type-chip { display:inline-block; padding:2px 8px; border-radius:0; color:#fff; font-weight:600; font-size:0.72rem; }"
             ".types { margin-top:6px; display:flex; justify-content:center; gap:6px; flex-wrap:wrap; }"
-            ".shield-chip { display:inline-block; padding:2px 8px; border-radius:999px; color:#e9f5ff; font-weight:700; font-size:0.72rem; margin-right:6px; border:1px solid rgba(255,255,255,0.35); background:#2563eb; }"
-            ".rob-chip { display:inline-block; padding:2px 8px; border-radius:999px; color:#f6edff; font-weight:700; font-size:0.72rem; margin-right:6px; border:1px solid rgba(255,255,255,0.35); background:#a855f7; }"
+            ".shield-chip { display:inline-block; padding:2px 8px; border-radius:0; color:#e9f5ff; font-weight:700; font-size:0.72rem; border:1px solid rgba(255,255,255,0.35); background:#2563eb; }"
+            ".rob-chip { display:inline-block; padding:2px 8px; border-radius:0; color:#f6edff; font-weight:700; font-size:0.72rem; border:1px solid rgba(255,255,255,0.35); background:#a855f7; }"
             "</style>"
         )
         try:
