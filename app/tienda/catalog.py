@@ -52,10 +52,10 @@ def _render_item_card(item: dict, idx_key: str, *, available: int | None = None)
 
     st.markdown(
         "<div class='shop-card'>"
-        "<div class='shop-row'>"
+        f"<div class='shop-head'><span class='shop-name'>{name_html}</span></div>"
+        "<div class='shop-body'>"
         f"{img_html}"
-        "<div>"
-        f"<div class='shop-name'>{name_html}</div>"
+        "<div class='shop-info'>"
         + (f"<div class='shop-desc'>{desc_html}</div>" if desc_html else "")
         + f"<div class='shop-price'>{price_html}</div>"
         + missing_html

@@ -273,9 +273,16 @@ def apply_platinum_ui(section: str) -> None:
       background: var(--pt-paper);
       border: 2px solid var(--pt-beige-dark);
       border-radius: 6px;
-      padding: 8px;
+      padding: 0;
       color: var(--pt-text);
+      overflow: hidden;
     }
+    .main .shop-head {
+      background: var(--pt-yellow);
+      border-bottom: 2px solid var(--pt-yellow-dark);
+      padding: 6px 8px;
+    }
+    .main .shop-body { display:flex; align-items:center; gap:8px; padding: 8px; }
     .main .shop-row { display:flex; align-items:center; gap:8px; }
     .main .shop-icon { width: 42px; height: 42px; image-rendering: pixelated; }
     .main .shop-name { font-size: 11px; color: var(--pt-text); }
@@ -291,6 +298,30 @@ def apply_platinum_ui(section: str) -> None:
       color: var(--pt-text);
     }
     .main .shop-missing { font-size: 10px; color: #7a2e2e; margin-top: 4px; }
+
+    .main .pt-title {
+      display:inline-block;
+      background: var(--pt-yellow);
+      border: 2px solid var(--pt-yellow-dark);
+      border-radius: 6px;
+      padding: 8px 10px;
+      font-size: 14px;
+      color: var(--pt-text);
+    }
+    .main .pt-section {
+      background: var(--pt-paper);
+      border: 2px solid var(--pt-beige-dark);
+      border-radius: 6px;
+      padding: 6px 8px;
+      font-size: 11px;
+      color: var(--pt-text);
+      display:inline-block;
+    }
+    .main .pt-divider {
+      height: 2px;
+      background: #b9b59f;
+      margin: 10px 0 14px;
+    }
     </style>
     """
     st.markdown(css, unsafe_allow_html=True)

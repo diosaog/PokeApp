@@ -12,11 +12,8 @@ from storage import add_purchase, clear_all_pokemon_flags, clear_pokemon_flags_f
 
 def page_tienda() -> None:
     apply_platinum_ui("Tienda")
-    st.header("Poke Mart")
-    st.markdown(
-        "<div style=\"height:8px; background: repeating-linear-gradient(45deg, #2a75bb 0 12px, #3b88cc 12px 24px); border-radius: 6px; margin:-6px 0 10px\"></div>",
-        unsafe_allow_html=True,
-    )
+    st.markdown("<div class='pt-title'>Poke Mart</div>", unsafe_allow_html=True)
+    st.markdown("<div class='pt-divider'></div>", unsafe_allow_html=True)
 
     current_user = st.session_state.get("user") or "-"
     avail = None
@@ -37,7 +34,7 @@ def page_tienda() -> None:
         else:
             st.metric("Disponible", f"{COIN} 0")
 
-    st.subheader("Catalogo")
+    st.markdown("<div class='pt-section'>Catalogo</div>", unsafe_allow_html=True)
     catalog = get_catalog()
     tab_com, tab_bay, tab_comp, tab_bred = st.tabs(["Comodines", "Bayas", "Competitivos", "Crianza"])
     with tab_com:
