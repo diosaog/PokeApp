@@ -113,7 +113,6 @@ def team_grid_ui(team: List[dict]) -> None:
                         "held_item": t.get("held_item") or t.get("Item"),
                         "evs": t.get("evs"),
                     }
-                    st.rerun()
             else:
                 st.markdown(
                     f"<div class='slot slot-empty'><div class='hint'>Vacio - Slot {i + 1}</div></div>",

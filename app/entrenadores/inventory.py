@@ -177,7 +177,6 @@ def _render_purchase_cards(
                 and st.button("Usar", key=f"use_{key_prefix}_{pid}_{idx}")
             ):
                 st.session_state["redeem_ctx"] = {"item": item, "pid": pid, "step": 1}
-                st.rerun()
 
 
 def _purchases_inventory_ui(user: str, *, allow_use: bool = True) -> None:

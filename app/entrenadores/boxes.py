@@ -28,10 +28,23 @@ def muertos_box_index(box_count: int) -> int:
     return 17
 
 
-def boxes_grid_ui(sav_json: dict, box_count: int, box_names: List[str], *, save_path: str | None = None) -> None:
+def boxes_grid_ui(
+    sav_json: dict,
+    box_count: int,
+    box_names: List[str],
+    *,
+    save_path: str | None = None,
+    pc_ok: bool | None = None,
+    mtime: float | None = None,
+) -> None:
     ensure_type_css()
     st.subheader("PC (Cajas)")
-    if not has_pc_data(sav_json, save_path=save_path):
+    if pc_ok is None:
+        try:
+            pc_ok = has_pc_data(sav_json)
+        except Exception:
+            pc_ok = False
+    if not pc_ok:
         st.warning("PC no disponible. Revisa el Bridge si persiste.")
         return
 
@@ -50,8 +63,9 @@ def boxes_grid_ui(sav_json: dict, box_count: int, box_names: List[str], *, save_
 
     try:
         if save_path and st is not None:
-            import os
-            mtime = os.path.getmtime(str(save_path))
+            if mtime is None:
+                import os
+                mtime = os.path.getmtime(str(save_path))
             box_list = cached_box(str(save_path), mtime, int(box_index))
         else:
             box_list = extract_box(sav_json, box_index, save_path=save_path)
@@ -155,7 +169,6 @@ def boxes_grid_ui(sav_json: dict, box_count: int, box_names: List[str], *, save_
                             "ability": p.get("ability") or p.get("Ability"),
                             "held_item": p.get("held_item") or p.get("Item"),
                         }
-                        st.rerun()
                 else:
                     st.markdown(
                         f"<div class='slot slot-empty'><div class='hint'>Vacio - Slot {idx + 1}</div></div>",

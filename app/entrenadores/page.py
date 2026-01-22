@@ -4,7 +4,7 @@ from pathlib import Path
 import streamlit as st
 
 from app.entrenadores.bridge import try_auto_load_bridge
-from app.entrenadores.cache import cached_team
+from app.entrenadores.cache import cached_box_meta_quick, cached_has_pc_data, cached_team, preload_entrenadores_cache
 from app.entrenadores.detail import pokemon_detail_panel
 from app.entrenadores.inventory import _purchases_inventory_ui, _inventory_cached, _render_purchase_cards, _category_for_item
 from app.entrenadores.pokepaste import ensure_pokepaste_state
@@ -13,7 +13,7 @@ from app.entrenadores.summary import trainer_summary_with_portrait_ui
 from app.entrenadores.boxes import boxes_grid_ui
 from app.ui.team_grid import team_grid_ui
 from app.interfaz.theme import apply_platinum_ui
-from conex_pkhex import PKHeXRuntime, extract_team, get_box_meta_quick, get_bridge_path, open_sav_cached
+from conex_pkhex import PKHeXRuntime, extract_team, get_bridge_path, open_sav_cached
 from utils import USERS, DEFAULT_DLL_HINT, list_user_saves
 
 
@@ -72,6 +72,8 @@ def page_entrenadores_view() -> None:
         if not save_path.exists():
             st.error("El archivo .sav del entrenador no existe.")
             return
+        st.session_state.active_sav_path = str(save_path)
+        mtime = save_path.stat().st_mtime
         sav_json = open_sav_cached(save_path)
     except Exception as e:
         st.error(f"No se pudo abrir el guardado: {e}")
@@ -82,9 +84,14 @@ def page_entrenadores_view() -> None:
         return
 
     try:
-        box_count, box_names = get_box_meta_quick(sav_json, save_path=str(save_path))
+        box_count, box_names = cached_box_meta_quick(str(save_path), mtime)
     except Exception:
         box_count, box_names = 0, []
+    try:
+        pc_ok = cached_has_pc_data(str(save_path), mtime)
+    except Exception:
+        pc_ok = False
+    preload_entrenadores_cache(str(save_path), mtime, box_count)
 
     st.markdown("---")
     col_stats, col_inv = st.columns([1.35, 1.1], gap="large")
@@ -117,8 +124,6 @@ def page_entrenadores_view() -> None:
     try:
         active_spath = str(save_path) if save_path else None
         if active_spath:
-            import os
-            mtime = os.path.getmtime(active_spath)
             team = cached_team(active_spath, mtime)
         else:
             team = extract_team(sav_json) or []
@@ -126,7 +131,7 @@ def page_entrenadores_view() -> None:
         team = []
     team_grid_ui(team)
     detail_slot = st.empty()
-    boxes_grid_ui(sav_json, box_count, box_names, save_path=str(save_path))
+    boxes_grid_ui(sav_json, box_count, box_names, save_path=str(save_path), pc_ok=pc_ok, mtime=mtime)
     with detail_slot:
         pokemon_detail_panel()
 
@@ -151,7 +156,6 @@ def page_entrenadores() -> None:
     elif sel != prev:
         st.session_state["_trainer_selected_last"] = sel
         st.session_state.pop("selected_pokemon", None)
-        st.rerun()
 
     try_auto_load_bridge()
 
