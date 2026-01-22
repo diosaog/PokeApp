@@ -225,24 +225,6 @@ def _item_name_es(name):
     if not name:
         return "-"
     id_str = str(name).lstrip("#")
-    item_id_es = {
-        "234": "Restos",
-        "275": "Banda Focus",
-        "210": "Gafas Elegidas",
-        "220": "Cinta Elegida",
-        "287": "Panuelo Elegido",
-        "247": "Vidasfera",
-        "226": "Periscopio",
-        "221": "Roca del Rey",
-        "213": "Hierba Blanca",
-        "233": "Revestimiento Metalico",
-        "230": "Piedra Alba",
-        "634": "Capsula Habilidad",
-        "632": "Chapa Dorada",
-        "631": "Chapa Plateada",
-    }
-    if id_str.isdigit() and id_str in item_id_es:
-        return item_id_es[id_str]
     if isinstance(name, (int, float)) or id_str.isdigit():
         resolved = item_name_es(id_str)
         if resolved and resolved not in (id_str, f"#{id_str}"):

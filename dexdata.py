@@ -100,6 +100,7 @@ MOVES_ES_CACHE_MEM: Dict[str, str] = {}
 ABILITIES_ES_CACHE_MEM: Dict[str, str] = {}
 ABILITY_DESC_ES_CACHE_MEM: Dict[str, str] = {}
 ITEMS_ES_CACHE_MEM: Dict[str, str] = {}
+ITEMS_ID_ES_CACHE_MEM: Dict[str, str] = {}
 
 
 def _cached_lookup(cache_file: Path, key: str, fetch_fn, *, mem_cache: Dict[str, str]) -> Optional[str]:
@@ -250,6 +251,27 @@ def item_name_es(name_or_id: str) -> str:
         return "-"
     if raw.isdigit() and int(raw) == 0:
         return "-"
+    if raw.isdigit():
+        cached = ITEMS_ID_ES_CACHE_MEM.get(raw)
+        if cached:
+            return cached
+        try:
+            cache_paths = [
+                DATA_DIR / "item_names_es.json",
+                Path(__file__).resolve().parents[1] / "assets" / "item_names_es.json",
+            ]
+            for cache_file in cache_paths:
+                if not cache_file.exists():
+                    continue
+                data = json.loads(cache_file.read_text(encoding="utf-8"))
+                if isinstance(data, dict) and raw in data:
+                    name = str(data.get(raw) or "").strip()
+                    if name:
+                        name = _to_ascii(name)
+                        ITEMS_ID_ES_CACHE_MEM[raw] = name
+                        return name
+        except Exception:
+            pass
     slug = raw if raw.isdigit() else _slugify(raw)
     cache_file = DATA_DIR / "items_es_cache.json"
 
