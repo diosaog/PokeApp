@@ -86,25 +86,32 @@ def page_entrenadores_view() -> None:
     except Exception:
         box_count, box_names = 0, []
 
-    trainer_summary_with_portrait_ui(sav_json, box_count, is_own_profile=is_own_profile)
-
     st.markdown("---")
-    st.subheader("Inventario")
-    tab_shop, tab_como = st.tabs(["Compras (tienda)", "Comodines"])
-    with tab_shop:
-        _purchases_inventory_ui(trainer or "", allow_use=False)
-    with tab_como:
-        inv = _inventory_cached(trainer or "")
-        comos = [r for r in inv if _category_for_item(r[1]) == "Comodines"] if inv else []
-        _render_purchase_cards(comos, "Comodines", key_prefix="comos", allow_use=True)
+    col_stats, col_inv = st.columns([1.35, 1.1], gap="large")
+    with col_stats:
+        trainer_summary_with_portrait_ui(sav_json, box_count, is_own_profile=is_own_profile)
+    with col_inv:
+        st.markdown(
+            "<div style='background:#f1c258; border:2px solid #c28f27; border-radius:6px;"
+            " padding:6px 8px; font-weight:900; color:#1f1f1f; font-family:\"Press Start 2P\", monospace;"
+            " font-size:11px;'>Inventario</div>",
+            unsafe_allow_html=True,
+        )
+        tab_shop, tab_como = st.tabs(["Compras (tienda)", "Comodines"])
+        with tab_shop:
+            _purchases_inventory_ui(trainer or "", allow_use=False)
+        with tab_como:
+            inv = _inventory_cached(trainer or "")
+            comos = [r for r in inv if _category_for_item(r[1]) == "Comodines"] if inv else []
+            _render_purchase_cards(comos, "Comodines", key_prefix="comos", allow_use=True)
 
-    ctx = st.session_state.get("redeem_ctx")
-    if ctx:
-        try:
-            from tienda2 import _render_redeem_flow  # wrapper keeps API
-            _render_redeem_flow(ctx, current_user)
-        except Exception:
-            st.error("No se pudo cargar el flujo de uso de comodines. Ve a la pestana Tienda.")
+        ctx = st.session_state.get("redeem_ctx")
+        if ctx:
+            try:
+                from tienda2 import _render_redeem_flow  # wrapper keeps API
+                _render_redeem_flow(ctx, current_user)
+            except Exception:
+                st.error("No se pudo cargar el flujo de uso de comodines. Ve a la pestana Tienda.")
 
     st.markdown("---")
     try:
