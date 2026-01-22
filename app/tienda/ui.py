@@ -29,12 +29,25 @@ def page_tienda() -> None:
             except Exception:
                 spent = 0
             avail = max(int(base) - int(spent), 0)
-            st.metric("Disponible", f"{COIN} {avail}")
-            st.caption(f"Base: {COIN} {base} | Gastado: {COIN} {spent}")
+            st.markdown(
+                "<div class='pt-metric'>"
+                "<div class='pt-label'>Disponible</div>"
+                f"<div class='pt-value'>{COIN} {avail}</div>"
+                f"<div class='pt-sub'>Base: {COIN} {base} | Gastado: {COIN} {spent}</div>"
+                "</div>",
+                unsafe_allow_html=True,
+            )
         else:
-            st.metric("Disponible", f"{COIN} 0")
+            st.markdown(
+                "<div class='pt-metric'>"
+                "<div class='pt-label'>Disponible</div>"
+                f"<div class='pt-value'>{COIN} 0</div>"
+                "</div>",
+                unsafe_allow_html=True,
+            )
 
     st.markdown("<div class='pt-section'>Catalogo</div>", unsafe_allow_html=True)
+    st.markdown("<div class='pt-divider'></div>", unsafe_allow_html=True)
     catalog = get_catalog()
     tab_com, tab_bay, tab_comp, tab_bred = st.tabs(["Comodines", "Bayas", "Competitivos", "Crianza"])
     with tab_com:

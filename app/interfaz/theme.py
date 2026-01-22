@@ -287,6 +287,7 @@ def apply_platinum_ui(section: str) -> None:
     .main .shop-icon { width: 42px; height: 42px; image-rendering: pixelated; }
     .main .shop-name { font-size: 11px; color: var(--pt-text); }
     .main .shop-desc { font-size: 10px; color: #3b3b3b; margin-top: 4px; }
+    .main .shop-info { display:flex; flex-direction:column; gap:4px; }
     .main .shop-price {
       display: inline-block;
       margin-top: 6px;
@@ -317,6 +318,16 @@ def apply_platinum_ui(section: str) -> None:
       color: var(--pt-text);
       display:inline-block;
     }
+    .main .pt-metric {
+      background: var(--pt-paper);
+      border: 2px solid var(--pt-beige-dark);
+      border-radius: 6px;
+      padding: 8px 10px;
+      color: var(--pt-text);
+    }
+    .main .pt-metric .pt-label { font-size: 10px; color: #3b3b3b; }
+    .main .pt-metric .pt-value { font-size: 14px; margin-top: 6px; }
+    .main .pt-metric .pt-sub { font-size: 10px; color: #5a5a5a; margin-top: 6px; }
     .main .pt-divider {
       height: 2px;
       background: #b9b59f;
