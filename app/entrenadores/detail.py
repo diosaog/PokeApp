@@ -378,7 +378,7 @@ def pokemon_detail_panel() -> None:
         hp_pct = 100
         hp_text = "--/--"
 
-    font_base = 'font-family:"Press Start 2P", monospace; font-size:12px; line-height:1.2; font-weight:700; text-shadow: 0 0 0.6px currentColor;'
+    font_base = 'font-family:"Press Start 2P", monospace; font-size:12px; line-height:1.2; font-weight:800; text-shadow: 0 0 1px currentColor;'
     root_style = _style(font_base, "display:grid", "grid-template-columns:1.05fr 1fr 1fr", "gap:16px", "align-items:start")
 
     left_style = _style("background:#d7d4c0", "border:2px solid #9a9680", "border-radius:6px", "padding:8px", "color:#2b2b2b")
@@ -390,8 +390,9 @@ def pokemon_detail_panel() -> None:
         "display:flex",
         "align-items:center",
         "justify-content:space-between",
+        "color:#2b2b2b",
     )
-    name_style = _style("display:flex", "align-items:center", "gap:6px", "font-size:12px", "color:#2b2b2b")
+    name_style = _style("display:flex", "align-items:center", "gap:6px", "font-size:12px", "color:#1f1f1f")
     gender_color = "#d6447a" if gender_cls == "f" else "#2f6ad9"
     gender_style = _style(
         "font-size:12px",
@@ -408,6 +409,7 @@ def pokemon_detail_panel() -> None:
         "border-radius:4px",
         "padding:4px 6px",
         "font-size:11px",
+        "color:#1f1f1f",
     )
     sprite_style = _style(
         "margin-top:8px",
@@ -426,8 +428,9 @@ def pokemon_detail_panel() -> None:
         "border-bottom:2px solid #c28f27",
         "padding:6px 8px",
         "font-size:11px",
+        "color:#1f1f1f",
     )
-    item_value_style = _style("background:#f7f6ef", "padding:6px 8px", "font-size:11px")
+    item_value_style = _style("background:#f7f6ef", "padding:6px 8px", "font-size:11px", "color:#1f1f1f")
 
     tab_wrap_style = _style("display:flex", "gap:4px", "margin-bottom:6px")
     tab_base_style = _style("width:18px", "height:18px", "border:2px solid #5a5a5a", "border-radius:3px", "display:inline-block")
