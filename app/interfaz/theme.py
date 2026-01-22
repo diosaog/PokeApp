@@ -127,3 +127,169 @@ def apply_section_theme(section: str) -> None:
     }
     color = palette.get(section, "#ef5350")
     st.markdown(f"<style>:root{{ --ball-color: {color}; }}</style>", unsafe_allow_html=True)
+
+
+def apply_platinum_ui(section: str) -> None:
+    if section not in ("Entrenadores", "Tienda"):
+        return
+    css = """
+    <style>
+    :root {
+      --pt-beige: #d7d4c0;
+      --pt-beige-dark: #9a9680;
+      --pt-yellow: #f1c258;
+      --pt-yellow-dark: #c28f27;
+      --pt-paper: #f7f6ef;
+      --pt-blue: #7f88dd;
+      --pt-red: #f1a39a;
+      --pt-text: #2b2b2b;
+    }
+
+    .main .block-container { font-family: "Press Start 2P", monospace; }
+    .main h1, .main h2, .main h3, .main h4, .main h5, .main h6 { font-family: "Press Start 2P", monospace; letter-spacing: 0.3px; }
+
+    .main .stButton > button {
+      font-family: "Press Start 2P", monospace;
+      font-size: 11px;
+      background: var(--pt-yellow);
+      color: var(--pt-text);
+      border: 2px solid var(--pt-yellow-dark);
+      border-radius: 6px;
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,0.35);
+    }
+    .main .stButton > button:disabled { opacity: 0.6; }
+
+    .main div[data-baseweb="tab-list"] {
+      background: var(--pt-beige);
+      border: 2px solid var(--pt-beige-dark);
+      border-radius: 6px;
+      padding: 4px;
+      gap: 4px;
+    }
+    .main button[data-baseweb="tab"] {
+      font-family: "Press Start 2P", monospace;
+      font-size: 10px;
+      background: var(--pt-paper);
+      color: var(--pt-text);
+      border: 2px solid var(--pt-beige-dark);
+      border-radius: 4px;
+      padding: 6px 8px;
+    }
+    .main button[data-baseweb="tab"][aria-selected="true"] {
+      background: var(--pt-yellow);
+      border-color: var(--pt-yellow-dark);
+    }
+
+    .main .stSelectbox div[data-baseweb="select"],
+    .main .stTextInput input,
+    .main .stNumberInput input,
+    .main .stTextArea textarea {
+      background: var(--pt-paper);
+      color: var(--pt-text);
+      border: 2px solid var(--pt-beige-dark);
+      border-radius: 6px;
+      font-family: "Press Start 2P", monospace;
+      font-size: 11px;
+    }
+
+    .main div[data-testid="stMetric"] {
+      background: var(--pt-paper);
+      border: 2px solid var(--pt-beige-dark);
+      border-radius: 6px;
+      padding: 8px 10px;
+    }
+    .main div[data-testid="stMetric"] [data-testid="stMetricLabel"],
+    .main div[data-testid="stMetric"] [data-testid="stMetricValue"] {
+      color: var(--pt-text);
+      font-family: "Press Start 2P", monospace;
+    }
+
+    .main div[data-baseweb="notification"] {
+      background: var(--pt-paper);
+      border: 2px solid var(--pt-beige-dark);
+      border-radius: 6px;
+      color: var(--pt-text);
+    }
+
+    .main details[data-testid="stExpander"] {
+      background: var(--pt-paper);
+      border: 2px solid var(--pt-beige-dark);
+      border-radius: 6px;
+    }
+    .main details[data-testid="stExpander"] > summary {
+      background: var(--pt-yellow);
+      border-bottom: 2px solid var(--pt-yellow-dark);
+      color: var(--pt-text);
+      font-family: "Press Start 2P", monospace;
+      border-radius: 4px 4px 0 0;
+    }
+
+    .main .panel-dashed {
+      border: 2px dashed var(--pt-beige-dark);
+      background: var(--pt-paper);
+      border-radius: 6px;
+      color: var(--pt-text);
+    }
+    .main .panel-ghost {
+      border: 2px solid var(--pt-beige-dark);
+      background: var(--pt-paper);
+      border-radius: 6px;
+      color: var(--pt-text);
+    }
+
+    .main .status-badge {
+      font-family: "Press Start 2P", monospace;
+      font-size: 10px;
+      border-radius: 4px;
+      padding: 4px 8px;
+      border: 2px solid #6a6a6a;
+      background: var(--pt-paper);
+      color: var(--pt-text);
+    }
+    .main .status-ok { background: #9de1a5; border-color: #5b9b65; color: #1f3b22; }
+    .main .status-warn { background: var(--pt-red); border-color: #c9756b; color: #4b1f1a; }
+
+    .main .pokedex-card {
+      background: var(--pt-paper);
+      border: 2px solid var(--pt-beige-dark);
+      border-radius: 6px;
+      color: var(--pt-text);
+    }
+
+    .main .pl-card {
+      background: var(--pt-paper);
+      border: 2px solid var(--pt-beige-dark);
+      border-radius: 6px;
+      padding: 8px;
+      color: var(--pt-text);
+    }
+    .main .pl-row { display:flex; align-items:center; gap:8px; }
+    .main .pl-title { font-size: 11px; color: var(--pt-text); }
+    .main .pl-muted { font-size: 10px; color: #5a5a5a; }
+    .main .pl-icon { width: 40px; height: 40px; image-rendering: pixelated; }
+
+    .main .shop-card {
+      background: var(--pt-paper);
+      border: 2px solid var(--pt-beige-dark);
+      border-radius: 6px;
+      padding: 8px;
+      color: var(--pt-text);
+    }
+    .main .shop-row { display:flex; align-items:center; gap:8px; }
+    .main .shop-icon { width: 42px; height: 42px; image-rendering: pixelated; }
+    .main .shop-name { font-size: 11px; color: var(--pt-text); }
+    .main .shop-desc { font-size: 10px; color: #3b3b3b; margin-top: 4px; }
+    .main .shop-price {
+      display: inline-block;
+      margin-top: 6px;
+      background: var(--pt-yellow);
+      border: 2px solid var(--pt-yellow-dark);
+      border-radius: 4px;
+      padding: 4px 6px;
+      font-size: 10px;
+      color: var(--pt-text);
+    }
+    .main .shop-missing { font-size: 10px; color: #7a2e2e; margin-top: 4px; }
+    </style>
+    """
+    st.markdown(css, unsafe_allow_html=True)

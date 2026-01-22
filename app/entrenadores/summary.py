@@ -61,14 +61,18 @@ def _hp_bar(label: str, value: float, cap: float, color: str) -> str:
 def _ensure_trainer_css() -> None:
     css = """
     <style>
-    .trainer-card { border:1px solid rgba(255,255,255,0.14); background:rgba(255,255,255,0.03);
-                    border-radius:14px; padding:12px 14px; }
-    .hp-row { display:grid; grid-template-columns: 96px 1fr 52px; align-items:center; gap:10px; margin:6px 0; }
-    .hp-label { opacity:.85; font-weight:700; }
-    .hp-bar { height:10px; background:rgba(255,255,255,0.08); border-radius:999px; overflow:hidden; border:1px solid rgba(255,255,255,0.12); }
-    .hp-fill { height:100%; border-radius:999px; box-shadow: 0 0 10px rgba(255,255,255,0.12) inset; }
+    .trainer-card {
+        border:2px solid #9a9680; background:#f7f6ef; border-radius:6px; padding:12px;
+        color:#2b2b2b; font-family: "Press Start 2P", monospace;
+    }
+    .hp-row { display:grid; grid-template-columns: 110px 1fr 70px; align-items:center; gap:10px; margin:8px 0; }
+    .hp-label { font-weight:700; font-size:0.7rem; color:#2b2b2b; }
+    .hp-val { font-size:0.7rem; color:#2b2b2b; text-align:right; }
+    .hp-bar { height:10px; background:#2b2b2b; border-radius:6px; overflow:hidden; border:2px solid #2b2b2b; }
+    .hp-fill { height:100%; border-radius:4px; }
     .medals-row { display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-top:6px; }
-    .medals-row img { width: 32px; height:auto; filter: drop-shadow(0 2px 6px rgba(0,0,0,0.35)); }
+    .medals-row img { width: 32px; height:auto; filter:none; }
+    .pokedex-card { border:2px solid #9a9680; background:#f7f6ef; border-radius:6px; padding:10px; color:#2b2b2b; font-family: "Press Start 2P", monospace; }
     </style>
     """
     try:

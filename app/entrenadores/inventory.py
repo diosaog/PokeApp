@@ -90,11 +90,10 @@ def _render_purchase_cards(
         col = cols[idx % 3]
         with col:
             st.markdown(
-                "<div style='border:1px solid rgba(255,255,255,0.12); border-radius:12px; padding:10px;"
-                " background:rgba(255,255,255,0.02); box-shadow: inset 0 0 0 1px rgba(255,255,255,0.03);'>"
-                f"<div style='display:flex; gap:10px; align-items:center; margin-bottom:6px;'>"
-                f"<img src='{icon}' alt='' width='40' onerror=\"this.style.display='none'\"/>"
-                f"<div><strong>{item}</strong><br/><span style='opacity:.8'>{COIN} {price}</span></div>"
+                "<div class='pl-card'>"
+                "<div class='pl-row'>"
+                f"<img class='pl-icon' src='{icon}' alt='' onerror=\"this.style.display='none'\"/>"
+                f"<div><div class='pl-title'>{item}</div><div class='pl-muted'>{COIN} {price}</div></div>"
                 "</div>"
                 f"<span class='status-badge {badge_cls}'>{status_label}</span>"
                 "</div>",

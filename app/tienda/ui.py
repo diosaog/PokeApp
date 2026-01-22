@@ -3,6 +3,7 @@ from __future__ import annotations
 import streamlit as st
 
 from app.common import COIN
+from app.interfaz.theme import apply_platinum_ui
 from app.tienda.catalog import _render_shop_items, get_catalog
 from app.tienda.money import _calc_money_for_user
 from app.tienda.redeem import render_redeem_flow
@@ -10,6 +11,7 @@ from storage import add_purchase, clear_all_pokemon_flags, clear_pokemon_flags_f
 
 
 def page_tienda() -> None:
+    apply_platinum_ui("Tienda")
     st.header("Poke Mart")
     st.markdown(
         "<div style=\"height:8px; background: repeating-linear-gradient(45deg, #2a75bb 0 12px, #3b88cc 12px 24px); border-radius: 6px; margin:-6px 0 10px\"></div>",

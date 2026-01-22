@@ -66,31 +66,36 @@ def slot_card_html(
 
 def ensure_type_css() -> None:
     try:
-        css = st.session_state.get("_type_css")
+        css = st.session_state.get("_type_css_platinum_v1")
     except Exception:
         css = None
     if not css:
         css = (
             "<style>"
-            ".badges { display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:6px; }"
+            ".badges { display:flex; align-items:center; justify-content:space-between; gap:6px; margin-bottom:6px; }"
             ".badge-right { display:flex; align-items:center; justify-content:flex-end; gap:6px; }"
-            ".pill { display:inline-block; padding:2px 8px; border-radius:0; font-weight:700; font-size:0.72rem; color:#e6edf3; background: rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.16); }"
+            ".pill { display:inline-block; padding:2px 6px; border-radius:4px; font-weight:700; font-size:0.7rem; "
+            "color:#2b2b2b; background:#f1c258; border:2px solid #c28f27; }"
             ".pill-empty { opacity:0.0; }"
-            ".pill-shiny { background: linear-gradient(135deg, #f59e0b, #f97316); color:#0b0f14; border-color: rgba(255,255,255,0.35); }"
-            ".gender-m { background: rgba(56,189,248,0.2); color:#e0f2fe; border-color: rgba(56,189,248,0.4); }"
-            ".gender-f { background: rgba(244,114,182,0.2); color:#ffe4f1; border-color: rgba(244,114,182,0.4); }"
-            ".slot-sep { height:1px; background: linear-gradient(90deg, transparent 0 10%, rgba(255,255,255,0.18) 10% 90%, transparent 90% 100%); margin: 4px 0 8px; }"
-            ".slot img { display:block; margin: 0 auto 2px; filter: drop-shadow(0 2px 8px rgba(0,0,0,0.35)); image-rendering: pixelated; }"
-            ".slot .title { letter-spacing: .3px; }"
-            ".slot .sub { margin-top: 2px; }"
-            ".type-chip { display:inline-block; padding:2px 8px; border-radius:0; color:#fff; font-weight:600; font-size:0.72rem; }"
+            ".pill-shiny { background: #f6e7b2; color:#2b2b2b; border-color: #cbb777; }"
+            ".gender-m { background: #b9d9ff; color:#1e3a8a; border-color: #7aa2d8; }"
+            ".gender-f { background: #f8c4da; color:#7a1f3a; border-color: #d58aa7; }"
+            ".slot { background:#f7f6ef; border:2px solid #9a9680; border-radius:6px; padding:8px 8px 6px; "
+            "text-align:center; color:#2b2b2b; font-family: \"Press Start 2P\", monospace; }"
+            ".slot-sep { height:2px; background:#b9b59f; margin: 4px 0 8px; }"
+            ".slot img { display:block; margin: 0 auto 2px; filter: none; image-rendering: pixelated; }"
+            ".slot .title { letter-spacing: 0.2px; font-size:0.72rem; }"
+            ".slot .sub { margin-top: 2px; font-size:0.68rem; color:#5a5a5a; }"
+            ".type-chip { display:inline-block; padding:2px 6px; border-radius:4px; color:#fff; font-weight:700; font-size:0.68rem; border:2px solid rgba(0,0,0,0.15); }"
             ".types { margin-top:6px; display:flex; justify-content:center; gap:6px; flex-wrap:wrap; }"
-            ".shield-chip { display:inline-block; padding:2px 8px; border-radius:0; color:#e9f5ff; font-weight:700; font-size:0.72rem; border:1px solid rgba(255,255,255,0.35); background:#2563eb; }"
-            ".rob-chip { display:inline-block; padding:2px 8px; border-radius:0; color:#f6edff; font-weight:700; font-size:0.72rem; border:1px solid rgba(255,255,255,0.35); background:#a855f7; }"
+            ".shield-chip { display:inline-block; padding:2px 6px; border-radius:4px; color:#102a43; font-weight:700; font-size:0.68rem; border:2px solid #1e40af; background:#bfdbfe; }"
+            ".rob-chip { display:inline-block; padding:2px 6px; border-radius:4px; color:#3b0764; font-weight:700; font-size:0.68rem; border:2px solid #6d28d9; background:#e9d5ff; }"
+            ".slot-empty { border:2px dashed #9a9680; background:#f7f6ef; height:120px; display:flex; align-items:center; "
+            "justify-content:center; color:#6a6a6a; border-radius:6px; font-family: \"Press Start 2P\", monospace; font-size:0.7rem; }"
             "</style>"
         )
         try:
-            st.session_state["_type_css"] = css
+            st.session_state["_type_css_platinum_v1"] = css
         except Exception:
             pass
     st.markdown(css, unsafe_allow_html=True)

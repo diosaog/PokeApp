@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import html as _html
 import streamlit as st
 
 from app.common import COIN
@@ -37,24 +38,34 @@ def _render_item_card(item: dict, idx_key: str, *, available: int | None = None)
     if available is None:
         available = _money_available(user)
     afford = available >= price
-    with st.container(border=True):
-        cols = st.columns([1, 2])
-        with cols[0]:
-            if img:
-                st.image(img, width=48)
-            else:
-                st.markdown(icon)
-        with cols[1]:
-            st.markdown(f"**{name}**")
-            if desc:
-                st.caption(desc)
-            if st.button("Comprar", key=f"buy_{idx_key}", disabled=(not afford) or price <= 0, use_container_width=True):
-                st.session_state.pop("shop_error", None)
-                st.session_state["shop_pending"] = {"name": name, "price": int(price)}
-                st.rerun()
-            st.caption(f"{COIN} {price}")
-            if not afford and price > 0:
-                st.caption(f"Faltan {COIN} {price - available}")
+    img_html = ""
+    if img:
+        img_html = f"<img class='shop-icon' src='{img}' alt='' onerror=\"this.style.display='none'\"/>"
+    else:
+        img_html = icon
+    name_html = _html.escape(str(name)) if name else "-"
+    desc_html = _html.escape(str(desc)) if desc else ""
+    price_html = f"{COIN} {price}"
+    missing_html = ""
+    if (available is not None) and (not afford) and price > 0:
+        missing_html = f"<div class='shop-missing'>Faltan {COIN} {price - available}</div>"
+
+    st.markdown(
+        "<div class='shop-card'>"
+        "<div class='shop-row'>"
+        f"{img_html}"
+        "<div>"
+        f"<div class='shop-name'>{name_html}</div>"
+        + (f"<div class='shop-desc'>{desc_html}</div>" if desc_html else "")
+        + f"<div class='shop-price'>{price_html}</div>"
+        + missing_html
+        + "</div></div></div>",
+        unsafe_allow_html=True,
+    )
+    if st.button("Comprar", key=f"buy_{idx_key}", disabled=(not afford) or price <= 0, use_container_width=True):
+        st.session_state.pop("shop_error", None)
+        st.session_state["shop_pending"] = {"name": name, "price": int(price)}
+        st.rerun()
 
 
 def _render_shop_items(items: list[dict], category_key: str, *, available: int | None = None) -> None:
