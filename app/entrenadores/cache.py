@@ -80,11 +80,12 @@ def preload_entrenadores_cache(save_path: str, mtime: float, box_count: int) -> 
         st = None  # type: ignore
 
     if st is not None:
-        done = st.session_state.setdefault("_preload_done", set())
+        done = st.session_state.setdefault("_preload_done_entrenadores", set())
         key = (save_path, mtime)
-        if key in done:
+        if isinstance(done, set) and key in done:
             return
-        done.add(key)
+        if isinstance(done, set):
+            done.add(key)
 
     try:
         cached_team(save_path, mtime)
