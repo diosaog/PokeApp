@@ -145,7 +145,8 @@ def apply_platinum_ui(section: str) -> None:
       --pt-text: #2b2b2b;
     }
 
-    .main .block-container { font-family: "Press Start 2P", monospace; }
+    .main .block-container { font-family: "Press Start 2P", monospace; font-weight: 700; }
+    .main .block-container * { font-weight: 700; }
     .main h1, .main h2, .main h3, .main h4, .main h5, .main h6 { font-family: "Press Start 2P", monospace; letter-spacing: 0.3px; }
 
     .main .stButton > button {

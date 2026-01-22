@@ -99,6 +99,7 @@ def _to_ascii(text: str) -> str:
 MOVES_ES_CACHE_MEM: Dict[str, str] = {}
 ABILITIES_ES_CACHE_MEM: Dict[str, str] = {}
 ABILITY_DESC_ES_CACHE_MEM: Dict[str, str] = {}
+ITEMS_ES_CACHE_MEM: Dict[str, str] = {}
 
 
 def _cached_lookup(cache_file: Path, key: str, fetch_fn, *, mem_cache: Dict[str, str]) -> Optional[str]:
@@ -238,6 +239,36 @@ def ability_desc_es(name_en: str) -> str:
 
     val = _cached_lookup(cache_file, slug, fetch, mem_cache=ABILITY_DESC_ES_CACHE_MEM)
     return _to_ascii(val or "")
+
+
+def item_name_es(name_or_id: str) -> str:
+    if not name_or_id:
+        return "-"
+    raw = str(name_or_id).strip()
+    raw = raw.lstrip("#")
+    if not raw:
+        return "-"
+    if raw.isdigit() and int(raw) == 0:
+        return "-"
+    slug = raw if raw.isdigit() else _slugify(raw)
+    cache_file = DATA_DIR / "items_es_cache.json"
+
+    def fetch(slug_: str) -> Optional[str]:
+        url = f"https://pokeapi.co/api/v2/item/{slug_}/"
+        try:
+            import urllib.request
+            import json as _json
+            with urllib.request.urlopen(url, timeout=10) as resp:
+                data = _json.loads(resp.read().decode("utf-8"))
+            for n in data.get("names", []):
+                if n and n.get("language", {}).get("name") == "es":
+                    return n.get("name")
+        except Exception:
+            return None
+        return None
+
+    val = _cached_lookup(cache_file, slug, fetch, mem_cache=ITEMS_ES_CACHE_MEM)
+    return _to_ascii(val or name_or_id)
 
 
 def _load_dataset(name: str) -> Dict[str, Any]:

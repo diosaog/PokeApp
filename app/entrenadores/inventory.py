@@ -4,6 +4,7 @@ import unicodedata
 import streamlit as st
 
 from app.common import COIN
+from app.tienda.common import _pokeapi_item_png, _shop_asset
 from storage import list_inventory
 
 
@@ -29,19 +30,89 @@ def _item_icon_url(name: str) -> str:
     if not name:
         return ""
     n = _norm_item(name)
+    custom = {
+        "revivir pokemon": ("Revivir", "max-revive"),
+        "robar pokemon": ("robar", "dread-plate"),
+        "captura extra": ("captura-extra", "ultra-ball"),
+        "blindar pokemon": ("Blindar", "metal-coat"),
+        "comodin de blindaje por robo": ("Blindar", "metal-coat"),
+        "fosil": ("fosil", "helix-fossil"),
+    }
+    if n in custom:
+        asset_slug, poke_slug = custom[n]
+        asset = _shop_asset(asset_slug)
+        return asset or _pokeapi_item_png(poke_slug)
+
+    slug_map = {
+        "gafas elegidas": "choice-specs",
+        "cinta elegida": "choice-band",
+        "panuelo elegido": "choice-scarf",
+        "restos": "leftovers",
+        "banda focus": "focus-sash",
+        "vidasfera": "life-orb",
+        "hierba blanca": "white-herb",
+        "roca del rey": "kings-rock",
+        "periscopio": "scope-lens",
+        "lupa": "zoom-lens",
+        "toxisfera": "toxic-orb",
+        "llamasfera": "flame-orb",
+        "capsula habilidad": "ability-capsule",
+        "chapa dorada": "gold-bottle-cap",
+        "chapa plateada": "bottle-cap",
+        "menta de naturaleza": "adamant-mint",
+        "objeto evolutivo": "dawn-stone",
+        "objeto potenciador de tipo": "silk-scarf",
+    }
+    berry_map = {
+        "baya aranja": "oran-berry",
+        "baya zidra": "sitrus-berry",
+        "baya zreza": "cheri-berry",
+        "baya ziuela": "chesto-berry",
+        "baya meloc": "pecha-berry",
+        "baya safre": "rawst-berry",
+        "baya perasi": "aspear-berry",
+        "baya atania": "persim-berry",
+        "baya aslac": "salac-berry",
+        "baya lichi": "liechi-berry",
+        "baya petaya": "petaya-berry",
+        "baya ganlon": "ganlon-berry",
+        "baya apicot": "apicot-berry",
+        "baya lansat": "lansat-berry",
+        "baya starf": "starf-berry",
+        "baya occa": "occa-berry",
+        "baya passho": "passho-berry",
+        "baya wacan": "wacan-berry",
+        "baya rindo": "rindo-berry",
+        "baya yache": "yache-berry",
+        "baya shuca": "shuca-berry",
+        "baya chople": "chople-berry",
+        "baya kebia": "kebia-berry",
+        "baya coba": "coba-berry",
+        "baya payapa": "payapa-berry",
+        "baya tanga": "tanga-berry",
+        "baya charti": "charti-berry",
+        "baya kasib": "kasib-berry",
+        "baya haban": "haban-berry",
+        "baya colbur": "colbur-berry",
+        "baya babiri": "babiri-berry",
+        "baya chilan": "chilan-berry",
+    }
+    if n in berry_map:
+        return _pokeapi_item_png(berry_map[n])
+    if n in slug_map:
+        return _pokeapi_item_png(slug_map[n])
     if "revivir" in n:
-        slug = "max-revive"
-    elif "robar" in n:
-        slug = "dread-plate"
-    elif "captura extra" in n:
-        slug = "ultra-ball"
-    elif "blindar" in n or "blindaje" in n:
-        slug = "metal-coat"
-    elif "fosil" in n or "fossil" in n or "fsil" in n:
-        slug = "helix-fossil"
-    else:
-        slug = n.replace(" ", "-")
-    return f"https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/{slug}.png"
+        return _pokeapi_item_png("max-revive")
+    if "robar" in n:
+        return _pokeapi_item_png("dread-plate")
+    if "captura extra" in n:
+        return _pokeapi_item_png("ultra-ball")
+    if "blindar" in n or "blindaje" in n:
+        return _pokeapi_item_png("metal-coat")
+    if "fosil" in n or "fossil" in n or "fsil" in n:
+        return _pokeapi_item_png("helix-fossil")
+    slug = n.replace(" ", "-")
+    return _pokeapi_item_png(slug)
 
 
 def _category_for_item(name: str) -> str:

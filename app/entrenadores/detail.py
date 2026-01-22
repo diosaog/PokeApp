@@ -5,7 +5,7 @@ import streamlit as st
 
 from app.entrenadores.constants import DETAIL_IMG_W
 from app.entrenadores.sprites import sprite_url_from_p
-from dexdata import ability_desc_es, ability_name_es, move_info, move_name_es, pokedex_data, type_color
+from dexdata import ability_desc_es, ability_name_es, item_name_es, move_info, move_name_es, pokedex_data, type_color
 from i18n import NATURES_ES, nature_display_es, translate_type_es
 from showdown_sprites import showdown_id
 
@@ -244,7 +244,10 @@ def _item_name_es(name):
     if id_str.isdigit() and id_str in item_id_es:
         return item_id_es[id_str]
     if isinstance(name, (int, float)) or id_str.isdigit():
-        return f"Objeto #{id_str}"
+        resolved = item_name_es(id_str)
+        if resolved and resolved not in (id_str, f"#{id_str}"):
+            return resolved
+        return "Objeto"
     m = {
         "Leftovers": "Restos",
         "Choice Specs": "Gafas Elegidas",
@@ -280,7 +283,12 @@ def _item_name_es(name):
         "Lansat Berry": "Baya Lansat",
         "Starf Berry": "Baya Starf",
     }
-    return m.get(str(name), str(name))
+    base = m.get(str(name), str(name))
+    if base == str(name):
+        resolved = item_name_es(str(name))
+        if resolved:
+            return resolved
+    return base
 
 
 def _fmt_stat(stx: dict, key: str) -> str:
@@ -370,7 +378,7 @@ def pokemon_detail_panel() -> None:
         hp_pct = 100
         hp_text = "--/--"
 
-    font_base = 'font-family:"Press Start 2P", monospace; font-size:12px; line-height:1.2;'
+    font_base = 'font-family:"Press Start 2P", monospace; font-size:12px; line-height:1.2; font-weight:700;'
     root_style = _style(font_base, "display:grid", "grid-template-columns:1.05fr 1fr 1fr", "gap:16px", "align-items:start")
 
     left_style = _style("background:#d7d4c0", "border:2px solid #9a9680", "border-radius:6px", "padding:8px", "color:#2b2b2b")
