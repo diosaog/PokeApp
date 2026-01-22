@@ -4,7 +4,7 @@ import html as _html
 import streamlit as st
 
 from app.common import COIN
-from app.tienda.common import _fix_text, _norm, _pokeapi_item_png, _shop_asset
+from app.tienda.common import _fix_text, _norm, _pokeapi_item_png, _resolve_img_src, _shop_asset
 from app.tienda.money import _money_available
 
 
@@ -33,6 +33,7 @@ def _render_item_card(item: dict, idx_key: str, *, available: int | None = None)
                 img = _shop_asset("fosil") or _pokeapi_item_png("helix-fossil")
         except Exception:
             img = None
+    img = _resolve_img_src(img or "")
 
     user = st.session_state.get("user") or "-"
     if available is None:

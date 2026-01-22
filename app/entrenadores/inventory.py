@@ -4,7 +4,7 @@ import unicodedata
 import streamlit as st
 
 from app.common import COIN
-from app.tienda.common import _pokeapi_item_png, _shop_asset
+from app.tienda.common import _pokeapi_item_png, _resolve_img_src, _shop_asset
 from storage import list_inventory
 
 
@@ -41,7 +41,7 @@ def _item_icon_url(name: str) -> str:
     if n in custom:
         asset_slug, poke_slug = custom[n]
         asset = _shop_asset(asset_slug)
-        return asset or _pokeapi_item_png(poke_slug)
+        return _resolve_img_src(asset or "") or _pokeapi_item_png(poke_slug)
 
     slug_map = {
         "gafas elegidas": "choice-specs",

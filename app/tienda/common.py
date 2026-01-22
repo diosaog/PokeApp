@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import base64
+import mimetypes
 import unicodedata
 from pathlib import Path
 
@@ -11,6 +13,7 @@ def _pokeapi_item_png(slug: str) -> str:
 
 
 SHOP_DIR = Path("assets") / "shop"
+_ASSET_URI_CACHE: dict[tuple[str, float | None], str] = {}
 
 
 def _shop_asset(slug: str) -> str | None:
@@ -29,6 +32,42 @@ def _shop_asset(slug: str) -> str | None:
     except Exception:
         return None
     return None
+
+
+def _file_data_uri(path: str) -> str:
+    try:
+        if not path:
+            return ""
+        p = Path(path)
+        if not p.exists():
+            return ""
+        try:
+            mtime = p.stat().st_mtime
+        except Exception:
+            mtime = None
+        key = (str(p), mtime)
+        if key in _ASSET_URI_CACHE:
+            return _ASSET_URI_CACHE[key]
+        mt = mimetypes.guess_type(str(p))[0] or "image/png"
+        b64 = base64.b64encode(p.read_bytes()).decode("ascii")
+        uri = f"data:{mt};base64,{b64}"
+        _ASSET_URI_CACHE[key] = uri
+        return uri
+    except Exception:
+        return ""
+
+
+def _resolve_img_src(src: str) -> str:
+    if not src:
+        return ""
+    try:
+        p = Path(src)
+        if p.exists():
+            uri = _file_data_uri(str(p))
+            return uri or src
+    except Exception:
+        pass
+    return src
 
 
 def _fix_text(s: str) -> str:
