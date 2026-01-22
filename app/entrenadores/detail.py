@@ -5,7 +5,7 @@ import streamlit as st
 
 from app.entrenadores.constants import DETAIL_IMG_W
 from app.entrenadores.sprites import sprite_url_from_p
-from dexdata import ability_name_es, move_info, move_name_es, pokedex_data, type_color
+from dexdata import ability_desc_es, ability_name_es, move_info, move_name_es, pokedex_data, type_color
 from i18n import NATURES_ES, nature_display_es, translate_type_es
 from showdown_sprites import showdown_id
 
@@ -301,64 +301,6 @@ def pokemon_detail_panel() -> None:
         )
         return
 
-    css = """
-    <style>
-    @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
-    .gb-font { font-family: 'Press Start 2P', monospace; font-size: 12px; line-height: 1.2; color:#2b2b2b; }
-    .gb-font * { box-sizing: border-box; }
-    .gb-left { background:#d7d4c0; border:2px solid #9a9680; border-radius:6px; padding:8px; }
-    .gb-header { background:#f1c258; border:2px solid #c28f27; border-radius:6px; padding:6px 8px; display:flex; align-items:center; justify-content:space-between; }
-    .gb-name { display:flex; align-items:center; gap:6px; font-size:0.9rem; }
-    .gb-ball { width:14px; height:14px; border:2px solid #2a2a2a; border-radius:50%; background: linear-gradient(#d94134 0 50%, #f5f5f5 50% 100%); position:relative; }
-    .gb-ball::after { content:""; position:absolute; left:50%; top:50%; transform:translate(-50%, -50%); width:4px; height:4px; border:2px solid #2a2a2a; border-radius:50%; background:#f5f5f5; }
-    .gb-gender { font-size:0.8rem; padding:2px 6px; border:2px solid #6a6a6a; border-radius:4px; background:#f7f7f7; }
-    .gb-gender.f { color:#d6447a; }
-    .gb-gender.m { color:#2f6ad9; }
-    .gb-level { margin-top:6px; background:#f7f6ef; border:2px solid #b1ac96; border-radius:4px; padding:4px 6px; font-size:0.8rem; }
-    .gb-sprite { margin-top:8px; background: repeating-linear-gradient(0deg, #e9e7d3 0 4px, #d7d5c1 4px 8px); border:2px solid #a29e86; border-radius:6px; padding:10px; display:flex; align-items:center; justify-content:center; min-height:170px; }
-    .gb-sprite img { image-rendering: pixelated; width:140px; max-width:100%; height:auto; }
-    .gb-item { margin-top:8px; border:2px solid #c28f27; border-radius:6px; overflow:hidden; }
-    .gb-item-label { background:#f1c258; padding:6px 8px; border-bottom:2px solid #c28f27; font-size:0.8rem; }
-    .gb-item-value { background:#f7f6ef; padding:6px 8px; font-size:0.85rem; }
-    .gb-tabs { display:flex; gap:4px; margin-bottom:6px; }
-    .gb-tab { width:18px; height:18px; border:2px solid #5a5a5a; border-radius:3px; background:#c7c7c7; }
-    .gb-tab.green { background:#9de1a5; }
-    .gb-tab.blue { background:#9ad0ff; }
-    .gb-tab.cyan { background:#a3efe9; }
-    .gb-tab.red { background:#f2a1a1; }
-    .gb-tab.purple { background:#c9a4ff; }
-    .gb-tab.yellow { background:#f3e28d; }
-    .gb-screen { border:2px solid #6168b2; border-radius:6px; overflow:hidden; }
-    .gb-stats { background:#7f88dd; color:#f7f8ff; }
-    .gb-ps-row { padding:8px; background:#8b95ed; border-bottom:2px solid #6d73bd; display:grid; grid-template-columns: auto 1fr; gap:8px; align-items:center; }
-    .gb-ps-label { font-size:0.85rem; }
-    .gb-ps-value { justify-self:end; background:#f7f6ef; color:#2b2b2b; padding:4px 6px; border:2px solid #6a6a6a; border-radius:6px; font-size:0.8rem; }
-    .gb-ps-bar { grid-column:1 / -1; height:10px; background:#2b2b2b; border-radius:6px; border:2px solid #2b2b2b; position:relative; overflow:hidden; }
-    .gb-ps-fill { height:100%; background:linear-gradient(90deg,#7be16f,#3ecf5b); width:100%; }
-    .gb-stat-row { display:grid; grid-template-columns: 1fr auto; align-items:center; padding:6px 8px; border-bottom:2px solid #6d73bd; }
-    .gb-stat-row.row-a { background:#8b95ed; }
-    .gb-stat-row.row-b { background:#7d86db; }
-    .gb-stat-name { font-size:0.78rem; }
-    .gb-stat-value { background:#f7f6ef; color:#2b2b2b; padding:4px 6px; border:2px solid #6a6a6a; border-radius:6px; font-size:0.8rem; min-width:64px; text-align:right; }
-    .gb-stat-row.up .gb-stat-value { background:#f6e7b2; }
-    .gb-stat-row.down .gb-stat-value { background:#d4ecff; }
-    .gb-ability { background:#8b95ed; border-top:2px solid #6d73bd; padding:8px; }
-    .gb-ability-label { margin-bottom:6px; font-size:0.78rem; }
-    .gb-ability-name { background:#f7f6ef; color:#2b2b2b; padding:6px 8px; border:2px solid #6a6a6a; border-radius:6px; font-size:0.8rem; }
-    .gb-ivs { background:#8b95ed; border-top:2px solid #6d73bd; padding:8px; }
-    .gb-ivs-label { margin-bottom:6px; font-size:0.78rem; }
-    .gb-ivs-value { background:#f7f6ef; color:#2b2b2b; padding:6px 8px; border:2px solid #6a6a6a; border-radius:6px; font-size:0.7rem; }
-    .gb-moves { background:#f1a39a; border-color:#c9756b; }
-    .gb-move-row { display:grid; grid-template-columns: auto 1fr auto; align-items:center; gap:8px; padding:8px; border-bottom:2px solid #c9756b; background:#f1a39a; }
-    .gb-move-type { font-size:0.72rem; padding:4px 6px; border:2px solid #6a6a6a; border-radius:6px; background:#cfcfcf; text-transform:uppercase; }
-    .gb-move-name { font-size:0.78rem; color:#2b2b2b; }
-    .gb-move-pp { display:flex; align-items:center; gap:6px; background:#f7f6ef; border:2px solid #6a6a6a; border-radius:6px; padding:4px 6px; font-size:0.75rem; color:#2b2b2b; }
-    .gb-pp-label { font-size:0.7rem; }
-    .gb-pp-val { font-size:0.75rem; }
-    </style>
-    """
-    st.markdown(css, unsafe_allow_html=True)
-
     up_key, down_key = _nature_mods(p.get("nature"))
     is_own = st.session_state.get("trainer_selected") == st.session_state.get("user")
     stx = _extract_stats_from_p(p) or {}
@@ -375,6 +317,9 @@ def pokemon_detail_panel() -> None:
             return int(val)
         except Exception:
             return None
+
+    def _style(*parts):
+        return "; ".join(p.strip().rstrip(";") for p in parts if p)
 
     def _text_color(hex_color: str) -> str:
         try:
@@ -413,6 +358,7 @@ def pokemon_detail_panel() -> None:
     raw_item = p.get("held_item") or p.get("item") or "-"
     item = _item_name_es(raw_item)
     ability_txt = _ability_es(str(ability)) if ability else ""
+    ability_desc = ability_desc_es(str(ability)) if ability else ""
 
     ps = _fmt_stat(stx, "hp")
     hp_max = _as_int(ps)
@@ -424,28 +370,165 @@ def pokemon_detail_panel() -> None:
         hp_pct = 100
         hp_text = "--/--"
 
+    font_base = 'font-family:"Press Start 2P", monospace; font-size:12px; line-height:1.2;'
+    root_style = _style(font_base, "display:grid", "grid-template-columns:1.05fr 1fr 1fr", "gap:16px", "align-items:start")
+
+    left_style = _style("background:#d7d4c0", "border:2px solid #9a9680", "border-radius:6px", "padding:8px", "color:#2b2b2b")
+    header_style = _style(
+        "background:#f1c258",
+        "border:2px solid #c28f27",
+        "border-radius:6px",
+        "padding:6px 8px",
+        "display:flex",
+        "align-items:center",
+        "justify-content:space-between",
+    )
+    name_style = _style("display:flex", "align-items:center", "gap:6px", "font-size:12px", "color:#2b2b2b")
+    gender_color = "#d6447a" if gender_cls == "f" else "#2f6ad9"
+    gender_style = _style(
+        "font-size:12px",
+        "padding:2px 6px",
+        "border:2px solid #6a6a6a",
+        "border-radius:4px",
+        "background:#f7f7f7",
+        f"color:{gender_color}",
+    )
+    level_style = _style(
+        "margin-top:6px",
+        "background:#f7f6ef",
+        "border:2px solid #b1ac96",
+        "border-radius:4px",
+        "padding:4px 6px",
+        "font-size:11px",
+    )
+    sprite_style = _style(
+        "margin-top:8px",
+        "background:repeating-linear-gradient(0deg, #e9e7d3 0 4px, #d7d5c1 4px 8px)",
+        "border:2px solid #a29e86",
+        "border-radius:6px",
+        "padding:10px",
+        "display:flex",
+        "align-items:center",
+        "justify-content:center",
+        "min-height:180px",
+    )
+    item_box_style = _style("margin-top:8px", "border:2px solid #c28f27", "border-radius:6px", "overflow:hidden")
+    item_label_style = _style(
+        "background:#f1c258",
+        "border-bottom:2px solid #c28f27",
+        "padding:6px 8px",
+        "font-size:11px",
+    )
+    item_value_style = _style("background:#f7f6ef", "padding:6px 8px", "font-size:11px")
+
+    tab_wrap_style = _style("display:flex", "gap:4px", "margin-bottom:6px")
+    tab_base_style = _style("width:18px", "height:18px", "border:2px solid #5a5a5a", "border-radius:3px", "display:inline-block")
+    tab_colors = ["#9de1a5", "#9ad0ff", "#a3efe9", "#f2a1a1", "#c9a4ff", "#f3e28d"]
+    tabs_html = "<div style='{}'>".format(tab_wrap_style)
+    for color in tab_colors:
+        tabs_html += "<div style='{}; background:{};'></div>".format(tab_base_style, color)
+    tabs_html += "</div>"
+
+    stats_screen_style = _style("border:2px solid #6168b2", "border-radius:6px", "overflow:hidden", "background:#7f88dd", "color:#f7f8ff")
+    ps_row_style = _style(
+        "padding:8px",
+        "background:#8b95ed",
+        "border-bottom:2px solid #6d73bd",
+        "display:grid",
+        "grid-template-columns:auto 1fr",
+        "gap:8px",
+        "align-items:center",
+    )
+    ps_label_style = _style("font-size:11px", "color:#f7f8ff")
+    ps_value_style = _style(
+        "justify-self:end",
+        "background:#f7f6ef",
+        "color:#2b2b2b",
+        "padding:4px 6px",
+        "border:2px solid #6a6a6a",
+        "border-radius:6px",
+        "font-size:11px",
+    )
+    ps_bar_style = _style(
+        "grid-column:1 / -1",
+        "height:10px",
+        "background:#2b2b2b",
+        "border:2px solid #2b2b2b",
+        "border-radius:6px",
+        "overflow:hidden",
+    )
+    ps_fill_style = _style("height:100%", "background:linear-gradient(90deg,#7be16f,#3ecf5b)")
+
     labels = [("atk", "Ataque"), ("def", "Defensa"), ("spa", "At. Esp."), ("spd", "Def. Esp."), ("spe", "Veloc.")]
     stat_rows = []
     for idx, (key, label) in enumerate(labels):
-        row_cls = "gb-stat-row row-a" if idx % 2 == 0 else "gb-stat-row row-b"
+        row_bg = "#8b95ed" if idx % 2 == 0 else "#7d86db"
+        row_style = _style(
+            "display:grid",
+            "grid-template-columns:1fr auto",
+            "align-items:center",
+            "padding:6px 8px",
+            f"background:{row_bg}",
+            "border-bottom:2px solid #6d73bd",
+            "color:#f7f8ff",
+        )
+        val_bg = "#f7f6ef"
         if up_key and key == up_key:
-            row_cls += " up"
+            val_bg = "#f6e7b2"
         if down_key and key == down_key:
-            row_cls += " down"
-        val = _fmt_stat(stx, key)
+            val_bg = "#d4ecff"
+        val_style = _style(
+            f"background:{val_bg}",
+            "border:2px solid #6a6a6a",
+            "border-radius:6px",
+            "padding:4px 6px",
+            "min-width:64px",
+            "text-align:right",
+            "color:#2b2b2b",
+            "font-size:11px",
+        )
         stat_rows.append(
-            f"<div class='{row_cls}'><div class='gb-stat-name'>{label}</div>"
-            f"<div class='gb-stat-value'>{val}</div></div>"
+            "<div style='{}'><div style='font-size:11px;'>{}</div><div style='{}'>{}</div></div>".format(
+                row_style,
+                label,
+                val_style,
+                _fmt_stat(stx, key),
+            )
         )
 
-    ability_html = ""
-    if ability_txt:
-        ability_html = (
-            "<div class='gb-ability'>"
-            "<div class='gb-ability-label'>Habilidad</div>"
-            f"<div class='gb-ability-name'>{_html.escape(ability_txt)}</div>"
-            "</div>"
-        )
+    ability_row_style = _style(
+        "padding:8px",
+        "background:#8b95ed",
+        "border-top:2px solid #6d73bd",
+        "display:grid",
+        "grid-template-columns:auto 1fr",
+        "gap:8px",
+        "align-items:center",
+        "color:#f7f8ff",
+    )
+    ability_label_style = _style("font-size:11px")
+    ability_name_style = _style(
+        "background:#f7f6ef",
+        "color:#2b2b2b",
+        "padding:4px 6px",
+        "border:2px solid #6a6a6a",
+        "border-radius:6px",
+        "font-size:11px",
+    )
+    ability_desc_style = _style(
+        "background:#f1e7b2",
+        "border-top:2px solid #cbb777",
+        "padding:8px",
+        "color:#2b2b2b",
+        "font-size:10px",
+        "line-height:1.2",
+        "min-height:40px",
+        "white-space:normal",
+        "word-break:break-word",
+    )
+
+    ability_name_text = _html.escape(ability_txt) if ability_txt else "-"
+    ability_desc_text = _html.escape(ability_desc) if ability_desc else "-"
 
     ivs_html = ""
     if is_own:
@@ -458,48 +541,52 @@ def pokemon_detail_panel() -> None:
                 parts.append(f"{label}:{v}")
         ivs_txt = " ".join(parts) if parts else "-"
         ivs_html = (
-            "<div class='gb-ivs'>"
-            "<div class='gb-ivs-label'>IVs</div>"
-            f"<div class='gb-ivs-value'>{_html.escape(ivs_txt)}</div>"
+            "<div style='padding:8px; background:#8b95ed; border-top:2px solid #6d73bd;'>"
+            "<div style='font-size:11px; margin-bottom:6px; color:#f7f8ff;'>IVs</div>"
+            "<div style='background:#f7f6ef; color:#2b2b2b; padding:6px 8px; border:2px solid #6a6a6a; border-radius:6px; font-size:10px;'>"
+            f"{_html.escape(ivs_txt)}</div>"
             "</div>"
         )
 
-    tabs_html = (
-        "<div class='gb-tabs'>"
-        "<div class='gb-tab green'></div>"
-        "<div class='gb-tab blue'></div>"
-        "<div class='gb-tab cyan'></div>"
-        "<div class='gb-tab red'></div>"
-        "<div class='gb-tab purple'></div>"
-        "<div class='gb-tab yellow'></div>"
-        "</div>"
+    pokeball_html = (
+        "<span style='display:inline-block; width:14px; height:14px; border:2px solid #2a2a2a; "
+        "border-radius:50%; background:linear-gradient(#d94134 0 50%, #f5f5f5 50% 100%); "
+        "position:relative;'>"
+        "<span style='position:absolute; left:50%; top:50%; transform:translate(-50%, -50%); "
+        "width:4px; height:4px; border:2px solid #2a2a2a; border-radius:50%; background:#f5f5f5;'></span>"
+        "</span>"
     )
-
+    gender_html = f"<div style='{gender_style}'>{gender_txt}</div>" if gender_txt else ""
     left_html = (
-        "<div class='gb-font gb-left'>"
-        "<div class='gb-header'>"
-        f"<div class='gb-name'><span class='gb-ball'></span><span>{display_name}</span></div>"
-        + (f"<div class='gb-gender {gender_cls}'>{gender_txt}</div>" if gender_txt else "")
-        + "</div>"
-        f"<div class='gb-level'>{level_txt}</div>"
-        f"<div class='gb-sprite'><img src='{_html.escape(str(img_url))}' width='{DETAIL_IMG_W}' alt='sprite'></div>"
-        "<div class='gb-item'>"
-        "<div class='gb-item-label'>Objeto</div>"
-        f"<div class='gb-item-value'>{_html.escape(str(item))}</div>"
-        "</div>"
-        "</div>"
+        f"<div style='{left_style}'>"
+        f"<div style='{header_style}'>"
+        f"<div style='{name_style}'>{pokeball_html}<span>{display_name}</span></div>"
+        f"{gender_html}</div>"
+        f"<div style='{level_style}'>{level_txt}</div>"
+        f"<div style='{sprite_style}'><img src='{_html.escape(str(img_url))}' "
+        f"style='image-rendering:pixelated; width:140px; height:auto;' alt='sprite'></div>"
+        f"<div style='{item_box_style}'>"
+        f"<div style='{item_label_style}'>Objeto</div>"
+        f"<div style='{item_value_style}'>{_html.escape(str(item))}</div>"
+        "</div></div>"
     )
 
     stats_html = (
-        "<div class='gb-font'>"
-        f"{tabs_html}"
-        "<div class='gb-screen gb-stats'>"
-        "<div class='gb-ps-row'>"
-        f"<div class='gb-ps-label'>PS</div><div class='gb-ps-value'>{hp_text}</div>"
-        f"<div class='gb-ps-bar'><div class='gb-ps-fill' style='width:{hp_pct}%;'></div></div>"
+        f"<div>{tabs_html}"
+        f"<div style='{stats_screen_style}'>"
+        f"<div style='{ps_row_style}'>"
+        f"<div style='{ps_label_style}'>PS</div>"
+        f"<div style='{ps_value_style}'>{hp_text}</div>"
+        f"<div style='{ps_bar_style}'><div style='{ps_fill_style}; width:{hp_pct}%;'></div></div>"
         "</div>"
         + "".join(stat_rows)
-        + ability_html
+        + "<div style='{}'><div style='{}'>Habilid.</div><div style='{}'>{}</div></div>".format(
+            ability_row_style,
+            ability_label_style,
+            ability_name_style,
+            ability_name_text,
+        )
+        + "<div style='{}'>{}</div>".format(ability_desc_style, ability_desc_text)
         + ivs_html
         + "</div></div>"
     )
@@ -531,27 +618,53 @@ def pokemon_detail_panel() -> None:
             color = "#cfcfcf"
             text_color = _text_color(color)
             pp_text = "--/--"
+        move_row_style = _style(
+            "display:grid",
+            "grid-template-columns:auto 1fr auto",
+            "align-items:center",
+            "gap:8px",
+            "padding:8px",
+            "border-bottom:2px solid #c9756b",
+            "background:#f1a39a",
+        )
+        move_type_style = _style(
+            f"background:{color}",
+            f"color:{text_color}",
+            "border:2px solid #6a6a6a",
+            "border-radius:6px",
+            "padding:4px 6px",
+            "font-size:10px",
+            "text-transform:uppercase",
+            "min-width:70px",
+            "text-align:center",
+        )
+        move_name_style = _style("font-size:11px", "color:#2b2b2b")
+        move_pp_style = _style(
+            "display:flex",
+            "align-items:center",
+            "gap:6px",
+            "background:#f7f6ef",
+            "border:2px solid #6a6a6a",
+            "border-radius:6px",
+            "padding:4px 6px",
+            "font-size:10px",
+            "color:#2b2b2b",
+        )
         mv_rows.append(
-            "<div class='gb-move-row'>"
-            f"<div class='gb-move-type' style='background:{color}; color:{text_color};'>{t_es}</div>"
-            f"<div class='gb-move-name'>{_html.escape(str(mv_es))}</div>"
-            "<div class='gb-move-pp'><span class='gb-pp-label'>PP</span>"
-            f"<span class='gb-pp-val'>{pp_text}</span></div>"
-            "</div>"
+            "<div style='{}'><div style='{}'>{}</div><div style='{}'>{}</div>"
+            "<div style='{}'><span>PP</span><span>{}</span></div></div>".format(
+                move_row_style,
+                move_type_style,
+                t_es,
+                move_name_style,
+                _html.escape(str(mv_es)),
+                move_pp_style,
+                pp_text,
+            )
         )
 
-    moves_html = (
-        "<div class='gb-font'>"
-        f"{tabs_html}"
-        "<div class='gb-screen gb-moves'>"
-        + "".join(mv_rows)
-        + "</div></div>"
-    )
+    moves_screen_style = _style("border:2px solid #c9756b", "border-radius:6px", "overflow:hidden", "background:#f1a39a")
+    moves_html = f"<div>{tabs_html}<div style='{moves_screen_style}'>" + "".join(mv_rows) + "</div></div>"
 
-    colL, colM, colR = st.columns([1.1, 1.15, 1.15], gap="large")
-    with colL:
-        st.markdown(left_html, unsafe_allow_html=True)
-    with colM:
-        st.markdown(stats_html, unsafe_allow_html=True)
-    with colR:
-        st.markdown(moves_html, unsafe_allow_html=True)
+    detail_html = f"<div style='{root_style}'>{left_html}{stats_html}{moves_html}</div>"
+    st.markdown(detail_html, unsafe_allow_html=True)

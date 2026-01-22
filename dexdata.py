@@ -98,6 +98,7 @@ def _to_ascii(text: str) -> str:
 
 MOVES_ES_CACHE_MEM: Dict[str, str] = {}
 ABILITIES_ES_CACHE_MEM: Dict[str, str] = {}
+ABILITY_DESC_ES_CACHE_MEM: Dict[str, str] = {}
 
 
 def _cached_lookup(cache_file: Path, key: str, fetch_fn, *, mem_cache: Dict[str, str]) -> Optional[str]:
@@ -212,6 +213,31 @@ def ability_name_es(name_en: str) -> str:
 
     val = _cached_lookup(cache_file, slug, fetch, mem_cache=ABILITIES_ES_CACHE_MEM)
     return _to_ascii(val or name_en)
+
+
+def ability_desc_es(name_en: str) -> str:
+    if not name_en:
+        return ""
+    slug = _slugify(name_en)
+    cache_file = DATA_DIR / "abilities_desc_es_cache.json"
+
+    def fetch(slug_: str) -> Optional[str]:
+        url = f"https://pokeapi.co/api/v2/ability/{slug_}/"
+        try:
+            import urllib.request
+            import json as _json
+            with urllib.request.urlopen(url, timeout=10) as resp:
+                data = _json.loads(resp.read().decode("utf-8"))
+            for entry in data.get("flavor_text_entries", []):
+                if entry and entry.get("language", {}).get("name") == "es":
+                    text = entry.get("flavor_text") or ""
+                    return text.replace("\n", " ").replace("\f", " ").strip()
+        except Exception:
+            return None
+        return None
+
+    val = _cached_lookup(cache_file, slug, fetch, mem_cache=ABILITY_DESC_ES_CACHE_MEM)
+    return _to_ascii(val or "")
 
 
 def _load_dataset(name: str) -> Dict[str, Any]:

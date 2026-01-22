@@ -6,6 +6,7 @@ import streamlit as st
 def apply_css() -> None:
     css = """
     <style>
+    @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
     :root {
       --accent: #e65050;
       --accent-hover: #c73a3a;
