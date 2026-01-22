@@ -378,7 +378,7 @@ def pokemon_detail_panel() -> None:
         hp_pct = 100
         hp_text = "--/--"
 
-    font_base = 'font-family:"Press Start 2P", monospace; font-size:12px; line-height:1.2; font-weight:700;'
+    font_base = 'font-family:"Press Start 2P", monospace; font-size:12px; line-height:1.2; font-weight:700; text-shadow: 0 0 0.6px currentColor;'
     root_style = _style(font_base, "display:grid", "grid-template-columns:1.05fr 1fr 1fr", "gap:16px", "align-items:start")
 
     left_style = _style("background:#d7d4c0", "border:2px solid #9a9680", "border-radius:6px", "padding:8px", "color:#2b2b2b")
