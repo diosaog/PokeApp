@@ -16,7 +16,7 @@ def page_tienda() -> None:
         "<style>"
         ".stButton>button{background:#f1c258 !important; color:#2b2b2b !important; border:2px solid #c28f27 !important; "
         "border-radius:6px !important; font-family:\"Press Start 2P\", monospace !important; font-size:11px !important; "
-        "font-weight:700 !important;}"
+        "font-weight:900 !important; text-shadow:0 0 1px rgba(0,0,0,0.25);}"
         "div[data-baseweb='tab-list']{background:#d7d4c0; border:2px solid #9a9680; border-radius:6px; padding:4px; gap:4px;}"
         "button[data-baseweb='tab']{background:#f7f6ef; color:#2b2b2b; border:2px solid #9a9680; border-radius:4px; "
         "font-family:\"Press Start 2P\", monospace; font-size:10px; padding:6px 8px;}"
