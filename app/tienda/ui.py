@@ -12,8 +12,25 @@ from storage import add_purchase, clear_all_pokemon_flags, clear_pokemon_flags_f
 
 def page_tienda() -> None:
     apply_platinum_ui("Tienda")
-    st.markdown("<div class='pt-title'>Poke Mart</div>", unsafe_allow_html=True)
-    st.markdown("<div class='pt-divider'></div>", unsafe_allow_html=True)
+    st.markdown(
+        "<style>"
+        ".stButton>button{background:#f1c258 !important; color:#2b2b2b !important; border:2px solid #c28f27 !important; "
+        "border-radius:6px !important; font-family:\"Press Start 2P\", monospace !important; font-size:11px !important; "
+        "font-weight:700 !important;}"
+        "div[data-baseweb='tab-list']{background:#d7d4c0; border:2px solid #9a9680; border-radius:6px; padding:4px; gap:4px;}"
+        "button[data-baseweb='tab']{background:#f7f6ef; color:#2b2b2b; border:2px solid #9a9680; border-radius:4px; "
+        "font-family:\"Press Start 2P\", monospace; font-size:10px; padding:6px 8px;}"
+        "button[data-baseweb='tab'][aria-selected='true']{background:#f1c258; border-color:#c28f27;}"
+        "</style>",
+        unsafe_allow_html=True,
+    )
+    st.markdown(
+        "<div style='background:#f1c258; border:2px solid #c28f27; border-radius:6px; "
+        "padding:8px 10px; display:inline-block; font-family:\"Press Start 2P\", monospace; "
+        "font-weight:700; color:#2b2b2b; font-size:14px;'>Poke Mart</div>",
+        unsafe_allow_html=True,
+    )
+    st.markdown("<div style='height:2px; background:#b9b59f; margin:10px 0 14px;'></div>", unsafe_allow_html=True)
 
     current_user = st.session_state.get("user") or "-"
     avail = None
@@ -30,24 +47,31 @@ def page_tienda() -> None:
                 spent = 0
             avail = max(int(base) - int(spent), 0)
             st.markdown(
-                "<div class='pt-metric'>"
-                "<div class='pt-label'>Disponible</div>"
-                f"<div class='pt-value'>{COIN} {avail}</div>"
-                f"<div class='pt-sub'>Base: {COIN} {base} | Gastado: {COIN} {spent}</div>"
+                "<div style='background:#f7f6ef; border:2px solid #9a9680; border-radius:6px; "
+                "padding:8px 10px; color:#2b2b2b; font-family:\"Press Start 2P\", monospace;'>"
+                "<div style='font-size:10px; color:#3b3b3b;'>Disponible</div>"
+                f"<div style='font-size:14px; margin-top:6px;'>{COIN} {avail}</div>"
+                f"<div style='font-size:10px; color:#5a5a5a; margin-top:6px;'>Base: {COIN} {base} | Gastado: {COIN} {spent}</div>"
                 "</div>",
                 unsafe_allow_html=True,
             )
         else:
             st.markdown(
-                "<div class='pt-metric'>"
-                "<div class='pt-label'>Disponible</div>"
-                f"<div class='pt-value'>{COIN} 0</div>"
+                "<div style='background:#f7f6ef; border:2px solid #9a9680; border-radius:6px; "
+                "padding:8px 10px; color:#2b2b2b; font-family:\"Press Start 2P\", monospace;'>"
+                "<div style='font-size:10px; color:#3b3b3b;'>Disponible</div>"
+                f"<div style='font-size:14px; margin-top:6px;'>{COIN} 0</div>"
                 "</div>",
                 unsafe_allow_html=True,
             )
 
-    st.markdown("<div class='pt-section'>Catalogo</div>", unsafe_allow_html=True)
-    st.markdown("<div class='pt-divider'></div>", unsafe_allow_html=True)
+    st.markdown(
+        "<div style='background:#f7f6ef; border:2px solid #9a9680; border-radius:6px; "
+        "padding:6px 8px; font-size:11px; color:#2b2b2b; font-family:\"Press Start 2P\", monospace; "
+        "display:inline-block;'>Catalogo</div>",
+        unsafe_allow_html=True,
+    )
+    st.markdown("<div style='height:2px; background:#b9b59f; margin:10px 0 14px;'></div>", unsafe_allow_html=True)
     catalog = get_catalog()
     tab_com, tab_bay, tab_comp, tab_bred = st.tabs(["Comodines", "Bayas", "Competitivos", "Crianza"])
     with tab_com:

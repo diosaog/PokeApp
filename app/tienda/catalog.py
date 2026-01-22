@@ -40,9 +40,13 @@ def _render_item_card(item: dict, idx_key: str, *, available: int | None = None)
     afford = available >= price
     img_html = ""
     if img:
-        img_html = f"<img class='shop-icon' src='{img}' alt='' onerror=\"this.style.display='none'\"/>"
+        img_html = (
+            "<img class='shop-icon' "
+            "style='width:42px; height:42px; image-rendering:pixelated;' "
+            f"src='{img}' alt='' onerror=\"this.style.display='none'\"/>"
+        )
     else:
-        img_html = icon
+        img_html = f"<div style='font-size:20px; line-height:1;'>{icon}</div>" if icon else ""
     name_html = _html.escape(str(name)) if name else "-"
     desc_html = _html.escape(str(desc)) if desc else ""
     price_html = f"{COIN} {price}"
@@ -50,21 +54,40 @@ def _render_item_card(item: dict, idx_key: str, *, available: int | None = None)
     if (available is not None) and (not afford) and price > 0:
         missing_html = f"<div class='shop-missing'>Faltan {COIN} {price - available}</div>"
 
+    card_style = (
+        "background:#f7f6ef; border:2px solid #9a9680; border-radius:6px; padding:0; "
+        "color:#2b2b2b; margin-bottom:8px; overflow:hidden; "
+        "font-family:\"Press Start 2P\", monospace; font-weight:700;"
+    )
+    head_style = "background:#f1c258; border-bottom:2px solid #c28f27; padding:6px 8px;"
+    body_style = "display:flex; align-items:center; gap:8px; padding:8px;"
+    name_style = "font-size:11px; color:#2b2b2b;"
+    desc_style = "font-size:10px; color:#3b3b3b; margin-top:4px;"
+    price_style = (
+        "display:inline-block; margin-top:6px; background:#f1c258; border:2px solid #c28f27; "
+        "border-radius:4px; padding:4px 6px; font-size:10px; color:#2b2b2b;"
+    )
+    missing_style = "font-size:10px; color:#7a2e2e; margin-top:4px;"
+    info_html = ""
+    if desc_html:
+        info_html += f"<div class='shop-desc' style='{desc_style}'>{desc_html}</div>"
+    info_html += f"<div class='shop-price' style='{price_style}'>{price_html}</div>"
+    if missing_html:
+        info_html += missing_html.replace("shop-missing", "shop-missing' style='" + missing_style)
     st.markdown(
-        "<div class='shop-card'>"
-        f"<div class='shop-head'><span class='shop-name'>{name_html}</span></div>"
-        "<div class='shop-body'>"
+        "<div class='shop-card' style='" + card_style + "'>"
+        f"<div class='shop-head' style='{head_style}'><span class='shop-name' style='{name_style}'>{name_html}</span></div>"
+        f"<div class='shop-body' style='{body_style}'>"
         f"{img_html}"
-        "<div class='shop-info'>"
-        + (f"<div class='shop-desc'>{desc_html}</div>" if desc_html else "")
-        + f"<div class='shop-price'>{price_html}</div>"
-        + missing_html
+        "<div class='shop-info' style='display:flex; flex-direction:column; gap:2px;'>"
+        + info_html
         + "</div></div></div>",
         unsafe_allow_html=True,
     )
     if st.button("Comprar", key=f"buy_{idx_key}", disabled=(not afford) or price <= 0, use_container_width=True):
         st.session_state.pop("shop_error", None)
         st.session_state["shop_pending"] = {"name": name, "price": int(price)}
+    st.markdown("<div style='height:10px'></div>", unsafe_allow_html=True)
 
 
 def _render_shop_items(items: list[dict], category_key: str, *, available: int | None = None) -> None:
