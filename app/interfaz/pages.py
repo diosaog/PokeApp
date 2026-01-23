@@ -78,6 +78,31 @@ Reglas de nivel
 - Dos divisiones: A y B, con 5 jugadores cada una.
 - Los jugadores solo se enfrentan contra rivales de su propia division.
 - Descienden los 3 ultimos de Division A; ascienden los 3 primeros de Division B.
+- Monedas (por posicion)
+
+1: 15
+2: 14
+3: 12
+4: 11
+5: 10
+6: 11
+7: 9
+8: 8
+9: 6
+10: 4
+
+- Puntos (por posicion)
+
+1: 9
+2: 8
+3: 7
+4: 6
+5: 5
+6: 5
+7: 4
+8: 3
+9: 2
+10: 1
 
 7. Monedas
 - Medallas: 4 monedas por cada medalla (max 8).
