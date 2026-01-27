@@ -30,7 +30,6 @@ if not DATA_DIR.exists():
 DATA_DIR.mkdir(exist_ok=True)
 
 CACHE_TTL = 24 * 3600  # 24h
-CACHE_VERSION = "2026-01-27-1"
 
 TYPE_COLORS = {
     "Normal": "#A8A77A",
@@ -332,38 +331,28 @@ def _load_dataset(name: str) -> Dict[str, Any]:
     return _read_json(cache_file) or {}
 
 
+_POKEDEX_CACHE: Optional[Dict[str, Any]] = None
+_MOVES_CACHE: Optional[Dict[str, Any]] = None
+
+
 def pokedex_data() -> Dict[str, Any]:
-    if st is not None:
-        @st.cache_data(show_spinner=False)
-        def _load(version: str) -> Dict[str, Any]:
-            return _load_dataset("pokedex")
-
-        data = _load(CACHE_VERSION)
-    else:
+    global _POKEDEX_CACHE
+    if _POKEDEX_CACHE is None:
         data = _load_dataset("pokedex")
-
-    if not data:
-        disk = _read_json(DATA_DIR / "ps_pokedex.json") or {}
-        if disk:
-            return disk
-    return data
+        if not data:
+            data = _read_json(DATA_DIR / "ps_pokedex.json") or {}
+        _POKEDEX_CACHE = data
+    return _POKEDEX_CACHE or {}
 
 
 def moves_data() -> Dict[str, Any]:
-    if st is not None:
-        @st.cache_data(show_spinner=False)
-        def _load(version: str) -> Dict[str, Any]:
-            return _load_dataset("moves")
-
-        data = _load(CACHE_VERSION)
-    else:
+    global _MOVES_CACHE
+    if _MOVES_CACHE is None:
         data = _load_dataset("moves")
-
-    if not data:
-        disk = _read_json(DATA_DIR / "ps_moves.json") or {}
-        if disk:
-            return disk
-    return data
+        if not data:
+            data = _read_json(DATA_DIR / "ps_moves.json") or {}
+        _MOVES_CACHE = data
+    return _MOVES_CACHE or {}
 
 
 def _to_data_key(showdown_id: str) -> str:
