@@ -10,6 +10,7 @@ para evitar depender siempre de red.
 import json  # noqa: E402
 import time  # noqa: E402
 import unicodedata  # noqa: E402
+import re  # noqa: E402
 from pathlib import Path  # noqa: E402
 from typing import Dict, Any, Optional, List  # noqa: E402
 
@@ -298,6 +299,27 @@ def item_name_es(name_or_id: str) -> str:
     return _to_ascii(val or name_or_id)
 
 
+def _candidate_data_dirs() -> list[Path]:
+    seen = set()
+    out: list[Path] = []
+    for p in (
+        DATA_DIR,
+        _BASE_DIR / "data",
+        _BASE_DIR.parent / "data",
+        Path.cwd() / "data",
+        Path.cwd().parent / "data",
+    ):
+        try:
+            if p and p.exists() and p.is_dir():
+                key = str(p.resolve())
+                if key not in seen:
+                    seen.add(key)
+                    out.append(p)
+        except Exception:
+            continue
+    return out or [DATA_DIR]
+
+
 def _load_dataset(name: str) -> Dict[str, Any]:
     """Carga dataset `name` de Showdown con caché a disco y opcionalmente cacheo en memoria de Streamlit."""
     cache_file = DATA_DIR / f"ps_{name}.json"
@@ -314,6 +336,20 @@ def _load_dataset(name: str) -> Dict[str, Any]:
     if cache_file.exists() and not expired():
         obj = _read_json(cache_file) or {}
         if obj:
+            return obj
+
+    # Busca en otras rutas de data si el cache principal falla
+    for d in _candidate_data_dirs():
+        alt_file = d / f"ps_{name}.json"
+        if alt_file == cache_file:
+            continue
+        obj = _read_json(alt_file) or {}
+        if obj:
+            try:
+                _write_json(cache_file, obj)
+                stamp_file.write_text(str(_now()))
+            except Exception:
+                pass
             return obj
 
     # Descarga
@@ -381,7 +417,7 @@ def species_types(*, species_name: str, form_index: Optional[int] = None,
 def move_info(move_name: str) -> Optional[Dict[str, Any]]:
     if not move_name:
         return None
-    key = move_name.strip().lower().replace(" ", "").replace("-", "")
+    key = re.sub(r"[^a-z0-9]", "", move_name.strip().lower())
     md = moves_data()
     entry = md.get(key)
     if not entry:
