@@ -312,9 +312,13 @@ def _candidate_data_dirs() -> list[Path]:
     for p in (
         DATA_DIR,
         _BASE_DIR / "data",
+        _BASE_DIR / "assets",
         _BASE_DIR.parent / "data",
+        _BASE_DIR.parent / "assets",
         Path.cwd() / "data",
+        Path.cwd() / "assets",
         Path.cwd().parent / "data",
+        Path.cwd().parent / "assets",
     ):
         try:
             if p and p.exists() and p.is_dir():

@@ -595,6 +595,15 @@ def pokemon_detail_panel() -> None:
         "</div></div>"
     )
 
+    nature_row = ""
+    if is_own:
+        nature_row = "<div style='{}'><div style='{}'>Naturaleza</div><div style='{}'>{}</div></div>".format(
+            nature_row_style,
+            nature_label_style,
+            nature_value_style,
+            nature_value_text,
+        )
+
     stats_html = (
         f"<div>{tabs_html}"
         f"<div style='{stats_screen_style}'>"
@@ -604,12 +613,7 @@ def pokemon_detail_panel() -> None:
         f"<div style='{ps_bar_style}'><div style='{ps_fill_style}; width:{hp_pct}%;'></div></div>"
         "</div>"
         + "".join(stat_rows)
-        + "<div style='{}'><div style='{}'>Naturaleza</div><div style='{}'>{}</div></div>".format(
-            nature_row_style,
-            nature_label_style,
-            nature_value_style,
-            nature_value_text,
-        )
+        + nature_row
         + "<div style='{}'><div style='{}'>Habilid.</div><div style='{}'>{}</div></div>".format(
             ability_row_style,
             ability_label_style,
