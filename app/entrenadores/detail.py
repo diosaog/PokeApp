@@ -568,6 +568,9 @@ def pokemon_detail_panel() -> None:
         f"{_html.escape(evs_txt)}</div>"
         "</div>"
     )
+    if not is_own:
+        ivs_html = ""
+        evs_html = ""
 
     pokeball_html = (
         "<span style='display:inline-block; width:14px; height:14px; border:2px solid #2a2a2a; "

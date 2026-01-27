@@ -105,7 +105,8 @@ def _to_ascii(text: str) -> str:
 def _norm_key(text: str) -> str:
     if not text:
         return ""
-    return re.sub(r"[^a-z0-9]", "", str(text).strip().lower())
+    base = _to_ascii(str(text)).strip().lower()
+    return re.sub(r"[^a-z0-9]", "", base)
 
 
 MOVES_ES_CACHE_MEM: Dict[str, str] = {}
@@ -420,6 +421,86 @@ def _dex_index() -> Dict[str, Any]:
     return _DEX_INDEX
 
 
+_MOVES_ES_ID_MAP: Optional[Dict[str, int]] = None
+
+
+def _load_moves_es_id_map() -> Dict[str, int]:
+    global _MOVES_ES_ID_MAP
+    if _MOVES_ES_ID_MAP is not None:
+        return _MOVES_ES_ID_MAP
+    cache_paths = [
+        Path(__file__).resolve().parents[1] / "assets" / "moves_es_id.json",
+        DATA_DIR / "moves_es_id.json",
+    ]
+    for cache_file in cache_paths:
+        if cache_file.exists():
+            try:
+                raw = json.loads(cache_file.read_text(encoding="utf-8"))
+                if isinstance(raw, dict):
+                    _MOVES_ES_ID_MAP = {str(k): int(v) for k, v in raw.items()}
+                    return _MOVES_ES_ID_MAP
+            except Exception:
+                pass
+
+    mapping: Dict[str, int] = {}
+    # PokeAPI CSV (single request) for Spanish move names
+    try:
+        import csv
+        import urllib.request
+        url = "https://raw.githubusercontent.com/PokeAPI/pokeapi/master/data/v2/csv/move_names.csv"
+        req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
+        with urllib.request.urlopen(req, timeout=20) as resp:
+            data = resp.read().decode("utf-8", errors="replace")
+        reader = csv.reader(data.splitlines())
+        header = next(reader, None)
+        # Expected: move_id, local_language_id, name
+        for row in reader:
+            if len(row) < 3:
+                continue
+            try:
+                move_id = int(row[0])
+                lang_id = int(row[1])
+            except Exception:
+                continue
+            if lang_id != 7:
+                continue
+            name_es = row[2]
+            key = _norm_key(name_es)
+            if key and key not in mapping:
+                mapping[key] = move_id
+    except Exception:
+        mapping = {}
+
+    # Fallbacks: manual minimal map
+    manual = {
+        "fuegosagrado": 221,  # Sacred Fire
+        "velocextrema": 245,  # Extreme Speed
+    }
+    for k, v in manual.items():
+        mapping.setdefault(k, v)
+
+    try:
+        (DATA_DIR / "moves_es_id.json").write_text(json.dumps(mapping, ensure_ascii=True), encoding="utf-8")
+    except Exception:
+        pass
+    _MOVES_ES_ID_MAP = mapping
+    return mapping
+
+
+def _move_id_from_es(name: str) -> Optional[int]:
+    if not name:
+        return None
+    key = _norm_key(name)
+    if not key:
+        return None
+    mapping = _load_moves_es_id_map()
+    mid = mapping.get(key)
+    try:
+        return int(mid) if mid is not None else None
+    except Exception:
+        return None
+
+
 def pokedex_data() -> Dict[str, Any]:
     return _dex_index().get("pokedex") or {}
 
@@ -516,6 +597,10 @@ def move_info(move_name: str, *, move_id: Optional[int] = None) -> Optional[Dict
                     entry = dex.get("moves_by_num", {}).get(int(m.group(0)))
                 except Exception:
                     entry = None
+    if not entry and move_name:
+        mid = _move_id_from_es(move_name)
+        if mid is not None:
+            entry = dex.get("moves_by_num", {}).get(int(mid))
     if not entry:
         return None
     # Normaliza campos
