@@ -20,11 +20,17 @@ except Exception:  # pragma: no cover - disponible sólo en runtime de app
 
 BASE_URL = "https://play.pokemonshowdown.com/data"
 
-# Carpeta de datos persistentes (misma que storage.py usa para DB)
-DATA_DIR = Path(__file__).resolve().parents[1] / "data"
+# Carpeta de datos persistentes (alineada con storage.py)
+_BASE_DIR = Path(__file__).resolve().parent
+DATA_DIR = _BASE_DIR / "data"
+if not DATA_DIR.exists():
+    alt = _BASE_DIR.parent / "data"
+    if alt.exists():
+        DATA_DIR = alt
 DATA_DIR.mkdir(exist_ok=True)
 
 CACHE_TTL = 24 * 3600  # 24h
+CACHE_VERSION = "2026-01-27-1"
 
 TYPE_COLORS = {
     "Normal": "#A8A77A",
@@ -329,19 +335,35 @@ def _load_dataset(name: str) -> Dict[str, Any]:
 def pokedex_data() -> Dict[str, Any]:
     if st is not None:
         @st.cache_data(show_spinner=False)
-        def _load() -> Dict[str, Any]:
+        def _load(version: str) -> Dict[str, Any]:
             return _load_dataset("pokedex")
-        return _load()
-    return _load_dataset("pokedex")
+
+        data = _load(CACHE_VERSION)
+    else:
+        data = _load_dataset("pokedex")
+
+    if not data:
+        disk = _read_json(DATA_DIR / "ps_pokedex.json") or {}
+        if disk:
+            return disk
+    return data
 
 
 def moves_data() -> Dict[str, Any]:
     if st is not None:
         @st.cache_data(show_spinner=False)
-        def _load() -> Dict[str, Any]:
+        def _load(version: str) -> Dict[str, Any]:
             return _load_dataset("moves")
-        return _load()
-    return _load_dataset("moves")
+
+        data = _load(CACHE_VERSION)
+    else:
+        data = _load_dataset("moves")
+
+    if not data:
+        disk = _read_json(DATA_DIR / "ps_moves.json") or {}
+        if disk:
+            return disk
+    return data
 
 
 def _to_data_key(showdown_id: str) -> str:
