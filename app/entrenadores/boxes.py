@@ -124,6 +124,7 @@ def boxes_grid_ui(
                             form_index=p.get("form_index"),
                             form_name=p.get("form_name"),
                             gender=p.get("gender"),
+                            dex_id=p.get("dex_id"),
                         )
                     except Exception:
                         types = []

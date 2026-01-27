@@ -5,9 +5,8 @@ import streamlit as st
 
 from app.entrenadores.constants import DETAIL_IMG_W
 from app.entrenadores.sprites import sprite_url_from_p
-from dexdata import ability_desc_es, ability_name_es, item_name_es, move_info, move_name_es, pokedex_data, type_color
+from dexdata import ability_desc_es, ability_name_es, item_name_es, move_info, move_name_es, pokedex_entry, type_color
 from i18n import NATURES_ES, nature_display_es, translate_type_es
-from showdown_sprites import showdown_id
 
 
 def _extract_stats_from_p(p: dict) -> dict | None:
@@ -38,20 +37,30 @@ def _extract_stats_from_p(p: dict) -> dict | None:
         if out and len(out) >= 3:
             return out
 
+        return _calc_stats_from_base(p)
+    except Exception:
+        return None
+
+
+def _calc_stats_from_base(
+    p: dict,
+    *,
+    ivs: dict | None = None,
+    evs: dict | None = None,
+    nature: str | None = None,
+) -> dict | None:
+    try:
         species = p.get("species_name") or p.get("species")
-        if not species:
+        dex_id = p.get("dex_id")
+        if not species and dex_id is None:
             return None
-        sid = showdown_id(
+        entry = pokedex_entry(
             species_name=species,
+            dex_id=dex_id,
             form_index=p.get("form_index"),
             form_name=p.get("form_name"),
             gender=p.get("gender"),
         )
-        key = sid.replace("-", "").lower()
-        pdx = pokedex_data()
-        entry = pdx.get(key) or {}
-        if not entry and "-" in sid:
-            entry = pdx.get(sid.split("-", 1)[0].replace("-", "").lower()) or {}
         bstats = entry.get("baseStats") or {}
         if not bstats:
             return None
@@ -63,11 +72,11 @@ def _extract_stats_from_p(p: dict) -> dict | None:
                 return default
 
         level = _to_int(p.get("level") or 50, 50)
-        ivs = p.get("ivs") or {}
-        evs = p.get("evs") or {}
+        ivs = ivs if ivs is not None else (p.get("ivs") or {})
+        evs = evs if evs is not None else (p.get("evs") or {})
 
         up = down = None
-        nat = p.get("nature")
+        nat = nature if nature is not None else p.get("nature")
         key_nat = str(nat or "").strip()
         key_norm = key_nat.lower().capitalize()
         data = NATURES_ES.get(key_nat) or NATURES_ES.get(key_norm)
@@ -114,39 +123,9 @@ def _extract_stats_from_p(p: dict) -> dict | None:
 
 
 def _base_stats_at_level(mon: dict) -> dict:
-    try:
-        sid = showdown_id(
-            species_name=mon.get("species_name") or mon.get("species") or "",
-            form_index=mon.get("form_index"),
-            form_name=mon.get("form_name"),
-            gender=mon.get("gender"),
-        )
-        key = sid.replace("-", "").lower()
-        pdx = pokedex_data()
-        entry = pdx.get(key) or {}
-        if not entry and "-" in sid:
-            entry = pdx.get(sid.split("-", 1)[0].replace("-", "").lower()) or {}
-        bstats = entry.get("baseStats") or {}
-        lvl = int(mon.get("level") or 50)
-
-        def hp_calc(base):
-            return int(((2 * base) * lvl) // 100 + lvl + 10)
-
-        def other_calc(base):
-            return int(((2 * base) * lvl) // 100 + 5)
-
-        res = {}
-        for k in ("hp", "atk", "def", "spa", "spd", "spe"):
-            b = bstats.get(k)
-            if b is None:
-                continue
-            if k == "hp":
-                res[k] = hp_calc(int(b))
-            else:
-                res[k] = other_calc(int(b))
-        return res
-    except Exception:
-        return {}
+    zero = {"hp": 0, "atk": 0, "def": 0, "spa": 0, "spd": 0, "spe": 0}
+    res = _calc_stats_from_base(mon, ivs=zero, evs=zero, nature=None)
+    return res or {}
 
 
 def _nature_mods(nature_val):
@@ -291,16 +270,34 @@ def pokemon_detail_panel() -> None:
         )
         return
 
-    up_key, down_key = _nature_mods(p.get("nature"))
     is_own = st.session_state.get("trainer_selected") == st.session_state.get("user")
-    stx = _extract_stats_from_p(p) or {}
-    ability = p.get("ability") or p.get("Ability")
-    if not is_own:
+
+    def _stat_dict_from(src: dict | None, default_val: int) -> dict:
+        out = {}
+        for k in ("hp", "atk", "def", "spa", "spd", "spe"):
+            v = None if src is None else src.get(k)
+            try:
+                out[k] = int(v)
+            except Exception:
+                out[k] = default_val
+        return out
+
+    if is_own:
+        up_key, down_key = _nature_mods(p.get("nature"))
+        stx = _extract_stats_from_p(p) or {}
+        ability = p.get("ability") or p.get("Ability")
+        nature_txt = nature_display_es(p.get("nature") or "") or "-"
+        ivs_display = _stat_dict_from(p.get("ivs") or {}, 0)
+        evs_display = _stat_dict_from(p.get("evs") or {}, 0)
+    else:
         p = dict(p)
         p["nature"] = None
         up_key, down_key = None, None
-        stx = _base_stats_at_level(p)
+        ivs_display = _stat_dict_from(None, 1)
+        evs_display = _stat_dict_from(None, 1)
+        stx = _calc_stats_from_base(p, ivs=ivs_display, evs=evs_display, nature=None) or {}
         ability = None
+        nature_txt = "-"
 
     def _as_int(val):
         try:
@@ -489,6 +486,26 @@ def pokemon_detail_panel() -> None:
             )
         )
 
+    nature_row_style = _style(
+        "padding:8px",
+        "background:#8b95ed",
+        "border-top:2px solid #6d73bd",
+        "display:grid",
+        "grid-template-columns:auto 1fr",
+        "gap:8px",
+        "align-items:center",
+        "color:#f7f8ff",
+    )
+    nature_label_style = _style("font-size:11px")
+    nature_value_style = _style(
+        "background:#f7f6ef",
+        "color:#2b2b2b",
+        "padding:4px 6px",
+        "border:2px solid #6a6a6a",
+        "border-radius:6px",
+        "font-size:11px",
+    )
+
     ability_row_style = _style(
         "padding:8px",
         "background:#8b95ed",
@@ -522,24 +539,35 @@ def pokemon_detail_panel() -> None:
 
     ability_name_text = _html.escape(ability_txt) if ability_txt else "-"
     ability_desc_text = _html.escape(ability_desc) if ability_desc else "-"
+    nature_value_text = _html.escape(str(nature_txt or "-"))
 
-    ivs_html = ""
-    if is_own:
-        ivs = p.get("ivs") or {}
-        order = [("hp", "HP"), ("atk", "Atk"), ("def", "Def"), ("spa", "SpA"), ("spd", "SpD"), ("spe", "Spe")]
+    order = [("hp", "HP"), ("atk", "Atk"), ("def", "Def"), ("spa", "SpA"), ("spd", "SpD"), ("spe", "Spe")]
+
+    def _stat_line(vals: dict) -> str:
         parts = []
         for k, label in order:
-            v = _as_int(ivs.get(k))
-            if v is not None:
-                parts.append(f"{label}:{v}")
-        ivs_txt = " ".join(parts) if parts else "-"
-        ivs_html = (
-            "<div style='padding:8px; background:#8b95ed; border-top:2px solid #6d73bd;'>"
-            "<div style='font-size:11px; margin-bottom:6px; color:#f7f8ff;'>IVs</div>"
-            "<div style='background:#f7f6ef; color:#2b2b2b; padding:6px 8px; border:2px solid #6a6a6a; border-radius:6px; font-size:10px;'>"
-            f"{_html.escape(ivs_txt)}</div>"
-            "</div>"
-        )
+            v = _as_int(vals.get(k))
+            if v is None:
+                v = 0
+            parts.append(f"{label}:{v}")
+        return " ".join(parts) if parts else "-"
+
+    ivs_txt = _stat_line(ivs_display)
+    evs_txt = _stat_line(evs_display)
+    ivs_html = (
+        "<div style='padding:8px; background:#8b95ed; border-top:2px solid #6d73bd;'>"
+        "<div style='font-size:11px; margin-bottom:6px; color:#f7f8ff;'>IVs</div>"
+        "<div style='background:#f7f6ef; color:#2b2b2b; padding:6px 8px; border:2px solid #6a6a6a; border-radius:6px; font-size:10px;'>"
+        f"{_html.escape(ivs_txt)}</div>"
+        "</div>"
+    )
+    evs_html = (
+        "<div style='padding:8px; background:#8b95ed; border-top:2px solid #6d73bd;'>"
+        "<div style='font-size:11px; margin-bottom:6px; color:#f7f8ff;'>EVs</div>"
+        "<div style='background:#f7f6ef; color:#2b2b2b; padding:6px 8px; border:2px solid #6a6a6a; border-radius:6px; font-size:10px;'>"
+        f"{_html.escape(evs_txt)}</div>"
+        "</div>"
+    )
 
     pokeball_html = (
         "<span style='display:inline-block; width:14px; height:14px; border:2px solid #2a2a2a; "
@@ -573,6 +601,12 @@ def pokemon_detail_panel() -> None:
         f"<div style='{ps_bar_style}'><div style='{ps_fill_style}; width:{hp_pct}%;'></div></div>"
         "</div>"
         + "".join(stat_rows)
+        + "<div style='{}'><div style='{}'>Naturaleza</div><div style='{}'>{}</div></div>".format(
+            nature_row_style,
+            nature_label_style,
+            nature_value_style,
+            nature_value_text,
+        )
         + "<div style='{}'><div style='{}'>Habilid.</div><div style='{}'>{}</div></div>".format(
             ability_row_style,
             ability_label_style,
@@ -581,6 +615,7 @@ def pokemon_detail_panel() -> None:
         )
         + "<div style='{}'>{}</div>".format(ability_desc_style, ability_desc_text)
         + ivs_html
+        + evs_html
         + "</div></div>"
     )
 
@@ -593,7 +628,18 @@ def pokemon_detail_panel() -> None:
     for idx, mv in enumerate(moves):
         if mv:
             mv_es = _move_es(str(mv))
-            info = move_info(str(mv)) or {}
+            move_id = None
+            if idx < len(mdet) and isinstance(mdet[idx], dict):
+                move_id = mdet[idx].get("id") or mdet[idx].get("MoveId") or mdet[idx].get("move_id")
+            if move_id is None:
+                try:
+                    import re
+                    m = re.search(r"\d+", str(mv))
+                    if m and str(mv).lower().startswith("move"):
+                        move_id = int(m.group(0))
+                except Exception:
+                    move_id = None
+            info = move_info(str(mv), move_id=move_id) or {}
             t = info.get("type")
             t_es = translate_type_es(t).upper() if t else "---"
             color = type_color(t) if t else "#cfcfcf"

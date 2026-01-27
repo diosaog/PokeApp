@@ -65,6 +65,7 @@ def team_grid_ui(team: List[dict]) -> None:
                         form_index=t.get("form_index"),
                         form_name=t.get("form_name"),
                         gender=t.get("gender"),
+                        dex_id=t.get("dex_id"),
                     )
                 except Exception:
                     types = []

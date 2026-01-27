@@ -102,6 +102,12 @@ def _to_ascii(text: str) -> str:
     return t
 
 
+def _norm_key(text: str) -> str:
+    if not text:
+        return ""
+    return re.sub(r"[^a-z0-9]", "", str(text).strip().lower())
+
+
 MOVES_ES_CACHE_MEM: Dict[str, str] = {}
 ABILITIES_ES_CACHE_MEM: Dict[str, str] = {}
 ABILITY_DESC_ES_CACHE_MEM: Dict[str, str] = {}
@@ -367,28 +373,101 @@ def _load_dataset(name: str) -> Dict[str, Any]:
     return _read_json(cache_file) or {}
 
 
-_POKEDEX_CACHE: Optional[Dict[str, Any]] = None
-_MOVES_CACHE: Optional[Dict[str, Any]] = None
+_DEX_INDEX: Optional[Dict[str, Any]] = None
+
+
+def _build_dex_index() -> Dict[str, Any]:
+    pokedex = _load_dataset("pokedex") or {}
+    moves = _load_dataset("moves") or {}
+
+    moves_by_num: Dict[int, Dict[str, Any]] = {}
+    moves_by_key: Dict[str, Dict[str, Any]] = {}
+    for key, entry in (moves or {}).items():
+        if not isinstance(entry, dict):
+            continue
+        num = entry.get("num")
+        if isinstance(num, int):
+            moves_by_num[num] = entry
+        name = entry.get("name")
+        if isinstance(name, str) and name:
+            moves_by_key[_norm_key(name)] = entry
+        if isinstance(key, str) and key:
+            moves_by_key.setdefault(_norm_key(key), entry)
+
+    pokedex_by_num: Dict[int, Dict[str, Any]] = {}
+    for key, entry in (pokedex or {}).items():
+        if not isinstance(entry, dict):
+            continue
+        num = entry.get("num")
+        if isinstance(num, int):
+            pokedex_by_num[num] = entry
+        if isinstance(key, str) and key:
+            entry.setdefault("_key", key)
+
+    return {
+        "pokedex": pokedex or {},
+        "moves": moves or {},
+        "moves_by_num": moves_by_num,
+        "moves_by_key": moves_by_key,
+        "pokedex_by_num": pokedex_by_num,
+    }
+
+
+def _dex_index() -> Dict[str, Any]:
+    global _DEX_INDEX
+    if _DEX_INDEX is None:
+        _DEX_INDEX = _build_dex_index()
+    return _DEX_INDEX
 
 
 def pokedex_data() -> Dict[str, Any]:
-    global _POKEDEX_CACHE
-    if _POKEDEX_CACHE is None:
-        data = _load_dataset("pokedex")
-        if not data:
-            data = _read_json(DATA_DIR / "ps_pokedex.json") or {}
-        _POKEDEX_CACHE = data
-    return _POKEDEX_CACHE or {}
+    return _dex_index().get("pokedex") or {}
 
 
 def moves_data() -> Dict[str, Any]:
-    global _MOVES_CACHE
-    if _MOVES_CACHE is None:
-        data = _load_dataset("moves")
-        if not data:
-            data = _read_json(DATA_DIR / "ps_moves.json") or {}
-        _MOVES_CACHE = data
-    return _MOVES_CACHE or {}
+    return _dex_index().get("moves") or {}
+
+
+def pokedex_entry(
+    *,
+    species_name: str | None,
+    dex_id: Optional[int] = None,
+    form_index: Optional[int] = None,
+    form_name: Optional[str] = None,
+    gender: Optional[str] = None,
+) -> Dict[str, Any]:
+    dex = _dex_index()
+    entry = {}
+    if species_name:
+        from showdown_sprites import showdown_id  # evitar ciclos en import
+        sid = showdown_id(
+            species_name=species_name,
+            form_index=form_index,
+            form_name=form_name,
+            gender=gender,
+        )
+        key = _to_data_key(sid)
+        entry = dex.get("pokedex", {}).get(key) or {}
+        if not entry and "-" in sid:
+            base = sid.split("-", 1)[0]
+            entry = dex.get("pokedex", {}).get(_to_data_key(base)) or {}
+
+    if not entry:
+        num = None
+        if dex_id is not None:
+            try:
+                num = int(dex_id)
+            except Exception:
+                num = None
+        if num is None and species_name:
+            s = str(species_name).strip()
+            if s.startswith("#") and s[1:].isdigit():
+                num = int(s[1:])
+            elif s.isdigit():
+                num = int(s)
+        if num is not None:
+            entry = dex.get("pokedex_by_num", {}).get(num) or {}
+    return entry or {}
 
 
 def _to_data_key(showdown_id: str) -> str:
@@ -396,30 +475,47 @@ def _to_data_key(showdown_id: str) -> str:
     return showdown_id.replace("-", "").lower()
 
 
-def species_types(*, species_name: str, form_index: Optional[int] = None,
-                  form_name: Optional[str] = None, gender: Optional[str] = None) -> List[str]:
-    """Devuelve [Tipo1, Tipo2?] usando Pokédex de Showdown. Usa forma si aplica."""
-    from showdown_sprites import showdown_id  # evitar ciclos en import
-    sid = showdown_id(species_name=species_name, form_index=form_index, form_name=form_name, gender=gender)
-    key = _to_data_key(sid)
-    pdx = pokedex_data()
-    entry = pdx.get(key) or {}
+def species_types(
+    *,
+    species_name: str,
+    form_index: Optional[int] = None,
+    form_name: Optional[str] = None,
+    gender: Optional[str] = None,
+    dex_id: Optional[int] = None,
+) -> List[str]:
+    """Devuelve [Tipo1, Tipo2?] usando Pokedex. Usa forma si aplica."""
+    entry = pokedex_entry(
+        species_name=species_name,
+        dex_id=dex_id,
+        form_index=form_index,
+        form_name=form_name,
+        gender=gender,
+    )
     types = entry.get("types") or []
-    # A veces las formas no están; intenta base sin forma
-    if not types and "-" in sid:
-        base = sid.split("-", 1)[0]
-        entry = pdx.get(_to_data_key(base)) or {}
-        types = entry.get("types") or []
-    # Normaliza a lista de títulos capitalizados
     return [str(t).title() for t in types]
 
 
-def move_info(move_name: str) -> Optional[Dict[str, Any]]:
-    if not move_name:
+def move_info(move_name: str, *, move_id: Optional[int] = None) -> Optional[Dict[str, Any]]:
+    if not move_name and move_id is None:
         return None
-    key = re.sub(r"[^a-z0-9]", "", move_name.strip().lower())
-    md = moves_data()
-    entry = md.get(key)
+    dex = _dex_index()
+    entry = None
+    if move_id is not None:
+        try:
+            entry = dex.get("moves_by_num", {}).get(int(move_id))
+        except Exception:
+            entry = None
+    if not entry and move_name:
+        key = _norm_key(move_name)
+        entry = dex.get("moves", {}).get(key) or dex.get("moves_by_key", {}).get(key)
+        if not entry:
+            import re as _re
+            m = _re.search(r"\d+", str(move_name))
+            if m:
+                try:
+                    entry = dex.get("moves_by_num", {}).get(int(m.group(0)))
+                except Exception:
+                    entry = None
     if not entry:
         return None
     # Normaliza campos
