@@ -10,6 +10,13 @@ from app.entrenadores.badges import count_badges
 from app.entrenadores.boxes import muertos_box_index
 from app.entrenadores.profile import find_trainer_image
 from storage import settings_get, settings_set
+
+
+def _cache_data(ttl: int = 30):
+    try:
+        return st.cache_data(ttl=ttl, show_spinner=False)
+    except Exception:
+        return lambda f: f
 from conex_pkhex import extract_box
 
 
@@ -27,32 +34,21 @@ _SINNOH_BADGE_FILES = [
 ]
 
 
-def _img_uri(path: str) -> str:
+@_cache_data(ttl=120)
+def _img_uri(path: str, mtime: float | None = None) -> str:
     try:
         if not path:
             return ""
-        try:
-            mtime = os.path.getmtime(path)
-        except Exception:
-            mtime = None
-        try:
-            cache = st.session_state.setdefault("_img_uri_cache", {})
-            key = (path, mtime)
-            if key in cache:
-                return cache[key]
-        except Exception:
-            cache = None
         mt = mimetypes.guess_type(path)[0] or "image/png"
         with open(path, "rb") as f:
             b64 = base64.b64encode(f.read()).decode("ascii")
         uri = f"data:{mt};base64,{b64}"
-        if cache is not None:
-            cache[(path, mtime)] = uri
         return uri
     except Exception:
         return ""
 
 
+@_cache_data(ttl=120)
 def _medals_html(count: int) -> str:
     try:
         n = max(0, min(int(count or 0), 8))
@@ -110,6 +106,7 @@ def _revives_key(user: str) -> str:
     return f"revived_after_wipe:{user}"
 
 
+@_cache_data(ttl=30)
 def _get_revives(user: str) -> int:
     if not user:
         return 0
@@ -188,7 +185,13 @@ def trainer_summary_with_portrait_ui(sav_json: dict, box_count: int, *, is_own_p
 
     trainer = jugador or ""
     img = find_trainer_image(trainer)
-    img_uri = _img_uri(img) if img else ""
+    img_mtime = None
+    try:
+        if img:
+            img_mtime = os.path.getmtime(img)
+    except Exception:
+        img_mtime = None
+    img_uri = _img_uri(img, img_mtime) if img else ""
     region = st.session_state.get("trainer_region", {}).get(jugador or "", "Sinnoh")
 
     coins_pct = _hp_bar("Monedas", monedas, 20, "#ffd54f")
