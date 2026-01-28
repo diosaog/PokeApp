@@ -3,7 +3,10 @@ from pathlib import Path
 from typing import Dict, List
 from datetime import datetime
 import hashlib
-import streamlit as st
+try:
+    import streamlit as st  # type: ignore
+except Exception:
+    st = None  # type: ignore
 
 APP_TITLE = "Liga Pokemon"
 APP_ICON = ""
@@ -45,10 +48,22 @@ def ensure_user_dir(u: str) -> Path:
     return p
 
 
-def list_user_saves(u: str) -> List[Path]:
+def _list_user_saves_uncached(u: str) -> List[Path]:
     folder = ensure_user_dir(u)
     files = list(folder.glob("*.sav")) + list(folder.glob("*.dsv"))
     return sorted(files, key=lambda p: p.stat().st_mtime, reverse=True)
+
+
+if st is not None:
+    @st.cache_data(ttl=10, show_spinner=False)
+    def _list_user_saves_cached(u: str) -> List[Path]:
+        return _list_user_saves_uncached(u)
+
+    def list_user_saves(u: str) -> List[Path]:
+        return _list_user_saves_cached(u)
+else:
+    def list_user_saves(u: str) -> List[Path]:
+        return _list_user_saves_uncached(u)
 
 
 def format_bytes(n: int) -> str:

@@ -12,8 +12,19 @@ from storage import (
 )
 from utils import ensure_user_dir, list_user_saves
 from conex_pkhex import open_sav_cached
+try:
+    import streamlit as st  # type: ignore
+except Exception:
+    st = None  # type: ignore
 
 
+def _cache_data(ttl: int = 10):
+    if st is None:
+        return lambda f: f
+    return st.cache_data(ttl=ttl, show_spinner=False)
+
+
+@_cache_data(ttl=10)
 def _calc_money_for_user(user: str) -> int:
     liga = coins_from_league(user)
     badge_coins = 0
@@ -67,6 +78,7 @@ def _calc_money_for_user(user: str) -> int:
     return total
 
 
+@_cache_data(ttl=10)
 def _money_available(user: str | None) -> int:
     if not user:
         return 0
