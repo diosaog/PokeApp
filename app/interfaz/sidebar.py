@@ -15,52 +15,40 @@ from storage import settings_get, settings_set
 from utils import DEFAULT_DLL_HINT, list_user_saves
 
 
-def _img_uri(p: str) -> str:
+def _cache_data(ttl: int = 30):
+    try:
+        return st.cache_data(ttl=ttl, show_spinner=False)
+    except Exception:
+        return lambda f: f
+
+
+@_cache_data(ttl=60)
+def _img_uri(p: str, mtime: float | None = None) -> str:
     try:
         if not p:
             return ""
-        try:
-            mtime = os.path.getmtime(p)
-        except Exception:
-            mtime = None
-        try:
-            cache = st.session_state.setdefault("_img_uri_cache", {})
-            key = (p, mtime)
-            if key in cache:
-                return cache[key]
-        except Exception:
-            cache = None
         mt = mimetypes.guess_type(p)[0] or "image/png"
         with open(p, "rb") as f:
             b64 = base64.b64encode(f.read()).decode("ascii")
         uri = f"data:{mt};base64,{b64}"
-        if cache is not None:
-            try:
-                cache[(p, mtime)] = uri
-            except Exception:
-                pass
         return uri
     except Exception:
         return ""
 
 
-def _get_team_sprite_urls(user: str) -> list[str]:
+@_cache_data(ttl=30)
+def _get_team_sprite_urls(user: str, mtime: float | None = None) -> list[str]:
     urls: list[str] = []
     try:
         if not user or user == "-":
             return urls
         saves = list_user_saves(user)
         sav_path = None
-        mtime = None
         try:
             if saves:
                 import os
                 sav_path = str(saves[0])
                 mtime = os.path.getmtime(sav_path)
-                cache = st.session_state.setdefault("_team_sprite_cache", {})
-                key = (user, mtime)
-                if key in cache:
-                    return cache[key]
         except Exception:
             sav_path = str(saves[0]) if saves else None
 
@@ -96,17 +84,13 @@ def _get_team_sprite_urls(user: str) -> list[str]:
                 urls.append(url)
             except Exception:
                 continue
-        try:
-            if mtime is not None:
-                st.session_state.setdefault("_team_sprite_cache", {})[(user, mtime)] = urls
-        except Exception:
-            pass
     except Exception:
         pass
     return urls
 
 
-def _get_badges_count(user: str) -> int:
+@_cache_data(ttl=30)
+def _get_badges_count(user: str, mtime: float | None = None) -> int:
     try:
         if not user or user == "-":
             return 0
@@ -131,8 +115,14 @@ def _render_sidebar_profile() -> None:
     if not usr or usr == "-":
         return
     img = find_trainer_image(usr)
-    team_urls = _get_team_sprite_urls(usr)
-    badges = max(0, min(8, _get_badges_count(usr)))
+    mtime = None
+    try:
+        if img:
+            mtime = os.path.getmtime(img)
+    except Exception:
+        mtime = None
+    team_urls = _get_team_sprite_urls(usr, mtime)
+    badges = max(0, min(8, _get_badges_count(usr, mtime)))
     dots = "".join([f"<span class='badge-dot{' badge-on' if i < badges else ''}'></span>" for i in range(8)])
     badges_html = f"<div class='badges-row'>{dots}</div>"
     if team_urls:
@@ -145,7 +135,7 @@ def _render_sidebar_profile() -> None:
     <div class='profile-card'>
       <div class='profile-head'>
         <div class='profile-avatar'>
-          {f"<img src='{_img_uri(img)}' alt='trainer'/>" if img else "<div class='pokeball-mini'></div>"}
+          {f"<img src='{_img_uri(img, mtime)}' alt='trainer'/>" if img else "<div class='pokeball-mini'></div>"}
           <div class='glint'></div>
         </div>
         <div class='profile-meta'>
