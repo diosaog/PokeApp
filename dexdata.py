@@ -11,6 +11,7 @@ import json  # noqa: E402
 import time  # noqa: E402
 import unicodedata  # noqa: E402
 import re  # noqa: E402
+from functools import lru_cache  # noqa: E402
 from pathlib import Path  # noqa: E402
 from typing import Dict, Any, Optional, List  # noqa: E402
 
@@ -513,6 +514,7 @@ def moves_data() -> Dict[str, Any]:
     return _dex_index().get("moves") or {}
 
 
+@lru_cache(maxsize=4096)
 def pokedex_entry(
     *,
     species_name: str | None,
@@ -560,6 +562,7 @@ def _to_data_key(showdown_id: str) -> str:
     return showdown_id.replace("-", "").lower()
 
 
+@lru_cache(maxsize=4096)
 def species_types(
     *,
     species_name: str,
@@ -580,6 +583,7 @@ def species_types(
     return [str(t).title() for t in types]
 
 
+@lru_cache(maxsize=8192)
 def move_info(move_name: str, *, move_id: Optional[int] = None) -> Optional[Dict[str, Any]]:
     if not move_name and move_id is None:
         return None
