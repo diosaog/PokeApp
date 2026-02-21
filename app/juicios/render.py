@@ -12,6 +12,9 @@ from app.juicios.constants import (
     STATUS_LABELS,
     STATUS_ORDER,
     STATUS_PROPOSED,
+    VERDICT_LABELS,
+    VOTE_GUILTY,
+    VOTE_NOT_GUILTY,
 )
 
 
@@ -73,6 +76,24 @@ def render_case_info(case: dict[str, Any]) -> None:
         st.caption(f"Creado: {_fmt_ts(case.get('created_at'))}")
         st.caption(f"Actualizado: {_fmt_ts(case.get('updated_at'))}")
         st.caption(f"Finalizado: {_fmt_ts(case.get('resolved_at'))}")
+
+    jury_size = int(case.get("jury_size") or 5)
+    votes = list(case.get("jury_votes") or [])
+    guilty_votes = sum(1 for v in votes if str(v.get("vote") or "") == VOTE_GUILTY)
+    not_guilty_votes = sum(1 for v in votes if str(v.get("vote") or "") == VOTE_NOT_GUILTY)
+    majority = jury_size // 2 + 1
+    verdict = VERDICT_LABELS.get(str(case.get("verdict") or ""), "Pendiente")
+    st.caption(
+        f"Jurado: {jury_size} | Mayoria: {majority} | "
+        f"Culpable: {guilty_votes} | No culpable: {not_guilty_votes} | Veredicto: {verdict}"
+    )
+
+    if votes:
+        with st.expander("Ver votos del jurado", expanded=False):
+            for v in votes:
+                jury = str(v.get("jury") or "-")
+                vote = "Culpable" if str(v.get("vote") or "") == VOTE_GUILTY else "No culpable"
+                st.caption(f"- {jury}: {vote}")
 
     st.markdown("**Razon resumida**")
     st.write(case.get("summary") or "-")

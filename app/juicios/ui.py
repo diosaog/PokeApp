@@ -1,10 +1,17 @@
 from __future__ import annotations
 
-import json
-
 import streamlit as st
 
-from app.juicios.constants import STATUS_FINISHED, STATUS_IN_PROGRESS, STATUS_PROPOSED
+from app.juicios.constants import (
+    PENALTY_TEMPLATE_LABELS,
+    PENALTY_TEMPLATE_ORDER,
+    STATUS_FINISHED,
+    STATUS_IN_PROGRESS,
+    STATUS_PROPOSED,
+    VERDICT_LABELS,
+    VOTE_LABELS,
+    VOTE_ORDER,
+)
 from app.juicios.forms import render_case_details_form, render_resolution_form
 from app.juicios.penalties import get_user_penalties
 from app.juicios.render import case_header, render_case_info
@@ -14,9 +21,10 @@ from app.juicios.repo import (
     delete_case,
     list_cases_for_user,
     next_case_number,
+    register_jury_vote,
     update_case,
 )
-from storage import settings_get
+from utils import USERS
 
 
 def _clear_cache() -> None:
@@ -53,7 +61,7 @@ def _render_create_case(current_user: str) -> None:
         form_key="juicio_new_form",
         case_no=next_case_number(),
         current_user=current_user,
-        initial={"is_public": True, "priority": "Media"},
+        initial={"is_public": True, "priority": "Media", "jury_size": 5},
         submit_label="Confirmar y guardar propuesta",
     )
     if sent and payload:
@@ -69,39 +77,50 @@ def _save_case_update(case_id: int, current_user: str, payload: dict) -> None:
     _clear_cache()
 
 
-def _current_league_tramo() -> int:
-    try:
-        from_session = int(st.session_state.get("league_tramo") or 0)
-        if from_session > 0:
-            return from_session
-    except Exception:
-        pass
-    try:
-        raw = settings_get("league_state")
-        if not raw:
-            return 1
-        obj = json.loads(raw)
-        return max(int(obj.get("tramo") or 1), 1)
-    except Exception:
-        return 1
+def _render_jury_vote_controls(case: dict, current_user: str) -> None:
+    if str(case.get("status") or "") != STATUS_IN_PROGRESS:
+        return
 
+    cid = int(case.get("id") or 0)
+    st.markdown("---")
+    st.caption("Votacion del jurado (cierre automatico por mayoria)")
 
-def _with_store_ban_window(penalties: list[dict]) -> list[dict]:
-    tramo_now = _current_league_tramo()
-    out: list[dict] = []
-    for p in penalties:
-        item = dict(p)
-        if str(item.get("type") or "") == "store_ban":
-            try:
-                start = int(item.get("start_tramo") or 0)
-                end = int(item.get("end_tramo") or 0)
-            except Exception:
-                start, end = 0, 0
-            if start <= 0 or end <= 0:
-                item["start_tramo"] = tramo_now
-                item["end_tramo"] = tramo_now
-        out.append(item)
-    return out
+    can_proxy_vote = can_edit_case(case, current_user)
+    jury_options = list(USERS.keys())
+    default_jury = current_user if current_user in jury_options else (jury_options[0] if jury_options else "")
+
+    if can_proxy_vote and jury_options:
+        jury_member = st.selectbox(
+            "Jurado que vota",
+            options=jury_options,
+            index=jury_options.index(default_jury),
+            key=f"juicio_vote_jury_{cid}",
+        )
+    else:
+        jury_member = current_user
+        st.caption(f"Jurado: {jury_member}")
+
+    vote_value = st.radio(
+        "Voto",
+        options=VOTE_ORDER,
+        format_func=lambda x: VOTE_LABELS.get(x, x),
+        horizontal=True,
+        key=f"juicio_vote_choice_{cid}",
+    )
+
+    if st.button("Registrar voto", key=f"juicio_vote_btn_{cid}"):
+        try:
+            before_status = str(case.get("status") or "")
+            updated = register_jury_vote(cid, current_user, jury_member, vote_value)
+            _clear_cache()
+            if before_status != STATUS_FINISHED and str(updated.get("status") or "") == STATUS_FINISHED:
+                verdict_label = VERDICT_LABELS.get(str(updated.get("verdict") or ""), "Pendiente")
+                st.success(f"Mayoria alcanzada. Juicio finalizado por votacion ({verdict_label}).")
+            else:
+                st.success("Voto registrado.")
+            st.rerun()
+        except Exception as e:
+            st.error(str(e))
 
 
 def _render_proposed_controls(case: dict, current_user: str) -> None:
@@ -151,9 +170,33 @@ def _render_proposed_controls(case: dict, current_user: str) -> None:
 def _render_in_progress_controls(case: dict, current_user: str) -> None:
     cid = int(case.get("id") or 0)
     edit_key = f"juicio_edit_resolution_{cid}"
+    template_key = f"juicio_penalty_template_{cid}"
 
     st.markdown("---")
     st.caption("Etapa En proceso: define castigos propuestos antes de finalizar.")
+
+    t1, t2, t3, t4 = st.columns(4)
+    with t1:
+        if st.button(PENALTY_TEMPLATE_LABELS[PENALTY_TEMPLATE_ORDER[0]], key=f"juicio_tpl_{cid}_0"):
+            st.session_state[template_key] = PENALTY_TEMPLATE_ORDER[0]
+            st.rerun()
+    with t2:
+        if st.button(PENALTY_TEMPLATE_LABELS[PENALTY_TEMPLATE_ORDER[1]], key=f"juicio_tpl_{cid}_1"):
+            st.session_state[template_key] = PENALTY_TEMPLATE_ORDER[1]
+            st.rerun()
+    with t3:
+        if st.button(PENALTY_TEMPLATE_LABELS[PENALTY_TEMPLATE_ORDER[2]], key=f"juicio_tpl_{cid}_2"):
+            st.session_state[template_key] = PENALTY_TEMPLATE_ORDER[2]
+            st.rerun()
+    with t4:
+        if st.button("Limpiar plantilla", key=f"juicio_tpl_{cid}_clear"):
+            st.session_state.pop(template_key, None)
+            st.rerun()
+
+    selected_template = st.session_state.get(template_key)
+    if selected_template:
+        label = PENALTY_TEMPLATE_LABELS.get(str(selected_template), str(selected_template))
+        st.caption(f"Plantilla activa: {label}")
 
     if not st.session_state.get(edit_key, False):
         if st.button("Editar castigos propuestos", key=f"juicio_penalties_btn_{cid}"):
@@ -164,6 +207,7 @@ def _render_in_progress_controls(case: dict, current_user: str) -> None:
             form_key=f"juicio_resolution_form_{cid}",
             initial=case,
             submit_label="Guardar castigos propuestos",
+            template_name=(str(selected_template) if selected_template else None),
         )
         c1, c2 = st.columns(2)
         with c1:
@@ -178,6 +222,7 @@ def _render_in_progress_controls(case: dict, current_user: str) -> None:
                 _save_case_update(cid, current_user, payload)
                 st.success("Castigos propuestos actualizados.")
                 st.session_state[edit_key] = False
+                st.session_state.pop(template_key, None)
                 st.rerun()
             except Exception as e:
                 st.error(str(e))
@@ -188,12 +233,7 @@ def _render_in_progress_controls(case: dict, current_user: str) -> None:
             st.error("Debes guardar al menos un castigo antes de finalizar.")
             return
         try:
-            penalties_final = _with_store_ban_window(penalties)
-            _save_case_update(
-                cid,
-                current_user,
-                {"penalties": penalties_final, "status": STATUS_FINISHED},
-            )
+            _save_case_update(cid, current_user, {"status": STATUS_FINISHED})
             st.success("Juicio finalizado.")
             st.rerun()
         except Exception as e:
@@ -216,6 +256,7 @@ def _render_delete_case_controls(case: dict, current_user: str) -> None:
             st.session_state.pop(confirm_key, None)
             st.session_state.pop(f"juicio_edit_details_{cid}", None)
             st.session_state.pop(f"juicio_edit_resolution_{cid}", None)
+            st.session_state.pop(f"juicio_penalty_template_{cid}", None)
             _clear_cache()
             st.success(
                 f"Juicio #{int(deleted.get('case_no') or 0)} eliminado. "
@@ -229,17 +270,33 @@ def _render_delete_case_controls(case: dict, current_user: str) -> None:
 def _render_case_list(current_user: str) -> None:
     st.markdown("---")
     st.subheader("Juicios")
-    scope = st.radio(
-        "Vista",
-        options=["Publicos y mios", "Solo publicos", "Solo mios"],
-        horizontal=True,
-        index=0,
-    )
+
+    c1, c2 = st.columns(2)
+    with c1:
+        scope = st.radio(
+            "Vista",
+            options=["Publicos y mios", "Solo publicos", "Solo mios"],
+            horizontal=True,
+            index=0,
+        )
+    with c2:
+        state_scope = st.radio(
+            "Estado",
+            options=["Activos", "Archivados", "Todos"],
+            horizontal=True,
+            index=0,
+        )
+
     cases = list_cases_for_user(current_user)
     if scope == "Solo publicos":
         cases = [c for c in cases if bool(c.get("is_public"))]
     elif scope == "Solo mios":
         cases = [c for c in cases if str(c.get("creator")) == str(current_user)]
+
+    if state_scope == "Activos":
+        cases = [c for c in cases if str(c.get("status") or "") != STATUS_FINISHED]
+    elif state_scope == "Archivados":
+        cases = [c for c in cases if str(c.get("status") or "") == STATUS_FINISHED]
 
     if not cases:
         st.info("No hay juicios para mostrar.")
@@ -248,6 +305,9 @@ def _render_case_list(current_user: str) -> None:
     for case in cases:
         with st.expander(case_header(case), expanded=False):
             render_case_info(case)
+
+            _render_jury_vote_controls(case, current_user)
+
             if not can_edit_case(case, current_user):
                 st.caption("Solo el creador puede editar este juicio.")
                 continue
@@ -259,7 +319,7 @@ def _render_case_list(current_user: str) -> None:
                 _render_in_progress_controls(case, current_user)
             else:
                 st.markdown("---")
-                st.caption("Juicio finalizado en rojo. No hay mas cambios de etapa.")
+                st.caption("Juicio finalizado (archivado).")
 
             _render_delete_case_controls(case, current_user)
 

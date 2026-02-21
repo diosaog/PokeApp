@@ -13,6 +13,7 @@ from app.juicios.constants import (
     PENALTY_POKEMON_RELEASE,
     PENALTY_POINTS_REDUCTION,
     PENALTY_STORE_BAN,
+    PENALTY_TEMPLATES,
 )
 from utils import USERS
 
@@ -78,6 +79,24 @@ def _default_hearing_date(raw_date: str) -> date:
         return date.today()
 
 
+def _apply_template_to_map(
+    penalty_map: dict[str, dict[str, Any]],
+    template_name: str | None,
+) -> dict[str, dict[str, Any]]:
+    if not template_name:
+        return penalty_map
+    tpl = list(PENALTY_TEMPLATES.get(template_name) or [])
+    if not tpl:
+        return penalty_map
+    out: dict[str, dict[str, Any]] = {}
+    for item in tpl:
+        ptype = str(item.get("type") or "").strip()
+        if not ptype:
+            continue
+        out[ptype] = dict(item)
+    return out
+
+
 def render_case_details_form(
     *,
     form_key: str,
@@ -122,6 +141,14 @@ def render_case_details_form(
         priority = st.selectbox("Prioridad", priority_options, index=priority_options.index(priority_default))
         category = st.text_input("Categoria o etiqueta (opcional)", value=str(base.get("category") or ""))
         public_vote = st.toggle("Solicitar votacion publica (opcional)", value=bool(base.get("public_vote", False)))
+        jury_size = int(base.get("jury_size") or 5)
+        jury_size = st.number_input(
+            "Tamano del jurado (impar)",
+            min_value=3,
+            max_value=9,
+            step=2,
+            value=(jury_size if jury_size in (3, 5, 7, 9) else 5),
+        )
 
         submitted = st.form_submit_button(submit_label, type="primary")
 
@@ -135,6 +162,8 @@ def render_case_details_form(
         errors.append("La razon resumida del juicio es obligatoria.")
     if not accused:
         errors.append("Debes indicar un acusado.")
+    if int(jury_size) not in (3, 5, 7, 9):
+        errors.append("El jurado debe ser impar: 3, 5, 7 o 9.")
 
     if errors:
         for err in errors:
@@ -152,6 +181,7 @@ def render_case_details_form(
         "priority": priority,
         "category": (category or "").strip(),
         "public_vote": bool(public_vote),
+        "jury_size": int(jury_size),
     }
     return True, payload
 
@@ -161,9 +191,11 @@ def render_resolution_form(
     form_key: str,
     initial: dict[str, Any] | None = None,
     submit_label: str = "Guardar castigos",
+    template_name: str | None = None,
 ) -> tuple[bool, dict[str, Any] | None]:
     base = dict(initial or {})
     penalty_map = _penalty_defaults(list(base.get("penalties") or []))
+    penalty_map = _apply_template_to_map(penalty_map, template_name)
     penalty_selected_default = [p for p in PENALTY_ORDER if p in penalty_map]
 
     with st.form(form_key):

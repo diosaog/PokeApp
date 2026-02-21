@@ -7,9 +7,15 @@ from typing import Any
 from app.juicios.constants import (
     JUICIOS_STATE_KEY,
     LEGACY_STATUS_MAP,
+    PENALTY_STORE_BAN,
     STATUS_FINISHED,
     STATUS_IN_PROGRESS,
     STATUS_PROPOSED,
+    VERDICT_GUILTY,
+    VERDICT_NOT_GUILTY,
+    VERDICT_PENDING,
+    VOTE_GUILTY,
+    VOTE_NOT_GUILTY,
 )
 from storage import settings_get, settings_set
 
@@ -29,11 +35,113 @@ def _normalize_status(raw: Any) -> str:
     return LEGACY_STATUS_MAP.get(status, STATUS_PROPOSED)
 
 
+def _normalize_vote(raw: Any) -> str | None:
+    vote = str(raw or "").strip().lower()
+    if vote in (VOTE_GUILTY, VOTE_NOT_GUILTY):
+        return vote
+    return None
+
+
+def _normalize_verdict(raw: Any) -> str:
+    verdict = str(raw or "").strip().lower()
+    if verdict in (VERDICT_PENDING, VERDICT_GUILTY, VERDICT_NOT_GUILTY):
+        return verdict
+    return VERDICT_PENDING
+
+
+def _normalize_jury_size(raw: Any) -> int:
+    try:
+        val = int(raw)
+    except Exception:
+        val = 5
+    return val if val in (3, 5, 7, 9) else 5
+
+
+def _normalize_votes(raw: Any) -> list[dict[str, Any]]:
+    if not isinstance(raw, list):
+        return []
+    by_jury: dict[str, dict[str, Any]] = {}
+    for item in raw:
+        if not isinstance(item, dict):
+            continue
+        jury = str(item.get("jury") or "").strip()
+        vote = _normalize_vote(item.get("vote"))
+        if not jury or not vote:
+            continue
+        try:
+            ts = int(item.get("ts") or 0)
+        except Exception:
+            ts = 0
+        prev = by_jury.get(jury)
+        if prev is None or ts >= int(prev.get("ts") or 0):
+            by_jury[jury] = {"jury": jury, "vote": vote, "ts": ts}
+    return sorted(by_jury.values(), key=lambda x: str(x.get("jury") or "").lower())
+
+
+def _current_league_tramo() -> int:
+    try:
+        raw = settings_get("league_state")
+        if not raw:
+            return 1
+        obj = json.loads(raw)
+        tramo = int(obj.get("tramo") or 1)
+        return max(tramo, 1)
+    except Exception:
+        return 1
+
+
+def _ensure_store_ban_window(
+    penalties: list[dict[str, Any]],
+    *,
+    current_tramo: int | None = None,
+) -> list[dict[str, Any]]:
+    tramo = int(current_tramo or _current_league_tramo())
+    out: list[dict[str, Any]] = []
+    for p in list(penalties or []):
+        item = dict(p)
+        if str(item.get("type") or "") == PENALTY_STORE_BAN:
+            try:
+                start = int(item.get("start_tramo") or 0)
+                end = int(item.get("end_tramo") or 0)
+            except Exception:
+                start, end = 0, 0
+            if start <= 0 or end <= 0:
+                item["start_tramo"] = tramo
+                item["end_tramo"] = tramo
+        out.append(item)
+    return out
+
+
+def _jury_vote_counts(votes: list[dict[str, Any]]) -> tuple[int, int]:
+    guilty = 0
+    not_guilty = 0
+    for v in list(votes or []):
+        vote = _normalize_vote(v.get("vote"))
+        if vote == VOTE_GUILTY:
+            guilty += 1
+        elif vote == VOTE_NOT_GUILTY:
+            not_guilty += 1
+    return guilty, not_guilty
+
+
+def _jury_majority(jury_size: int) -> int:
+    size = _normalize_jury_size(jury_size)
+    return size // 2 + 1
+
+
 def _normalize_case(raw: dict[str, Any]) -> dict[str, Any]:
     status = _normalize_status(raw.get("status"))
+    verdict = _normalize_verdict(raw.get("verdict"))
+    jury_size = _normalize_jury_size(raw.get("jury_size"))
+    jury_votes = _normalize_votes(raw.get("jury_votes"))
+    penalties = list(raw.get("penalties") or [])
+    if verdict == VERDICT_NOT_GUILTY:
+        penalties = []
+
     resolved_at = int(raw.get("resolved_at") or 0)
     if status == STATUS_FINISHED and resolved_at <= 0:
         resolved_at = int(raw.get("updated_at") or raw.get("created_at") or 0)
+
     return {
         "id": int(raw.get("id", 0) or 0),
         "case_no": int(raw.get("case_no", 0) or 0),
@@ -49,8 +157,11 @@ def _normalize_case(raw: dict[str, Any]) -> dict[str, Any]:
         "category": str(raw.get("category") or "").strip(),
         "public_vote": bool(raw.get("public_vote", False)),
         "status": status,
+        "verdict": verdict,
+        "jury_size": jury_size,
+        "jury_votes": jury_votes,
         "resolution_notes": str(raw.get("resolution_notes") or "").strip(),
-        "penalties": list(raw.get("penalties") or []),
+        "penalties": penalties,
         "created_at": int(raw.get("created_at") or 0),
         "updated_at": int(raw.get("updated_at") or 0),
         "resolved_at": resolved_at,
@@ -142,6 +253,9 @@ def create_case(creator: str, payload: dict[str, Any]) -> dict[str, Any]:
             "category": payload.get("category", ""),
             "public_vote": payload.get("public_vote", False),
             "status": STATUS_PROPOSED,
+            "verdict": VERDICT_PENDING,
+            "jury_size": payload.get("jury_size", 5),
+            "jury_votes": [],
             "resolution_notes": payload.get("resolution_notes", ""),
             "penalties": list(payload.get("penalties") or []),
             "created_at": now,
@@ -192,6 +306,66 @@ def delete_case(case_id: int, editor: str) -> dict[str, Any]:
     return deleted
 
 
+def register_jury_vote(case_id: int, actor: str, jury_member: str, vote: str) -> dict[str, Any]:
+    state = _load_state()
+    idx = -1
+    for i, c in enumerate(state.get("cases") or []):
+        if int(c.get("id") or 0) == int(case_id):
+            idx = i
+            break
+    if idx < 0:
+        raise ValueError("No se encontro el juicio.")
+
+    current = _normalize_case(state["cases"][idx])
+    if not can_view_case(current, actor):
+        raise PermissionError("No tienes permiso para votar en este juicio.")
+
+    jury = str(jury_member or "").strip()
+    if not jury:
+        raise ValueError("Debes indicar un jurado para registrar el voto.")
+
+    if actor != jury and not can_edit_case(current, actor):
+        raise PermissionError("Solo el creador puede registrar votos de terceros.")
+
+    if _normalize_status(current.get("status")) != STATUS_IN_PROGRESS:
+        raise ValueError("Solo se puede votar cuando el juicio esta en proceso.")
+
+    vote_norm = _normalize_vote(vote)
+    if vote_norm is None:
+        raise ValueError("Voto invalido.")
+
+    now = _now()
+    votes = _normalize_votes(current.get("jury_votes"))
+    replaced = False
+    for item in votes:
+        if str(item.get("jury") or "") == jury:
+            item["vote"] = vote_norm
+            item["ts"] = now
+            replaced = True
+            break
+    if not replaced:
+        votes.append({"jury": jury, "vote": vote_norm, "ts": now})
+    votes = _normalize_votes(votes)
+    current["jury_votes"] = votes
+
+    guilty_count, not_guilty_count = _jury_vote_counts(votes)
+    majority = _jury_majority(current.get("jury_size"))
+    if guilty_count >= majority or not_guilty_count >= majority:
+        final_vote = VOTE_GUILTY if guilty_count >= majority else VOTE_NOT_GUILTY
+        current["status"] = STATUS_FINISHED
+        current["verdict"] = VERDICT_GUILTY if final_vote == VOTE_GUILTY else VERDICT_NOT_GUILTY
+        if current["verdict"] == VERDICT_NOT_GUILTY:
+            current["penalties"] = []
+        else:
+            current["penalties"] = _ensure_store_ban_window(list(current.get("penalties") or []))
+        current["resolved_at"] = now
+
+    current["updated_at"] = now
+    state["cases"][idx] = _normalize_case(current)
+    _save_state(state)
+    return state["cases"][idx]
+
+
 def update_case(case_id: int, editor: str, payload: dict[str, Any]) -> dict[str, Any]:
     state = _load_state()
     idx = -1
@@ -228,18 +402,40 @@ def update_case(case_id: int, editor: str, payload: dict[str, Any]) -> dict[str,
         "status",
         "resolution_notes",
         "penalties",
+        "jury_size",
+        "jury_votes",
+        "verdict",
     ):
         if key in payload:
-            current[key] = payload.get(key)
+            if key == "jury_size":
+                current[key] = _normalize_jury_size(payload.get(key))
+            elif key == "jury_votes":
+                current[key] = _normalize_votes(payload.get(key))
+            elif key == "verdict":
+                current[key] = _normalize_verdict(payload.get(key))
+            else:
+                current[key] = payload.get(key)
 
     current_status = _normalize_status(current.get("status"))
     current["status"] = current_status
+    current["verdict"] = _normalize_verdict(current.get("verdict"))
+
     if current_status == STATUS_FINISHED:
-        if not list(current.get("penalties") or []):
-            raise ValueError("Un juicio finalizado debe tener al menos un castigo.")
+        penalties = list(current.get("penalties") or [])
+        if current["verdict"] == VERDICT_PENDING:
+            current["verdict"] = VERDICT_GUILTY if penalties else VERDICT_NOT_GUILTY
+
+        if current["verdict"] == VERDICT_NOT_GUILTY:
+            current["penalties"] = []
+        else:
+            if not penalties:
+                raise ValueError("Un juicio finalizado y culpable debe tener al menos un castigo.")
+            current["penalties"] = _ensure_store_ban_window(penalties)
+
         if previous_status != STATUS_FINISHED:
             current["resolved_at"] = now
     else:
+        current["verdict"] = VERDICT_PENDING
         current["resolved_at"] = 0
 
     current["updated_at"] = now
