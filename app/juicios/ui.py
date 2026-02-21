@@ -120,6 +120,9 @@ def page_juicios() -> None:
     if not current_user:
         st.info("Inicia sesion para usar la seccion de juicios.")
         return
+    if current_user != "Anto":
+        st.info("No tienes acceso a esta seccion.")
+        return
 
     _show_active_penalties(current_user)
 
@@ -139,4 +142,3 @@ def page_juicios() -> None:
         _render_create_case(current_user)
 
     _render_case_list(current_user)
-

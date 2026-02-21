@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import streamlit as st
 
-from utils import APP_TITLE, APP_ICON, SECTIONS, init_session_state
+from utils import APP_TITLE, APP_ICON, init_session_state, sections_for_user
 from app.startup import preload_datasets
 
 st.set_page_config(
@@ -37,7 +37,8 @@ def main() -> None:
     ui.login_gate()
     preload_datasets()
 
-    section = ui.render_sidebar(SECTIONS)
+    user = st.session_state.get("user")
+    section = ui.render_sidebar(sections_for_user(user))
     router(section)
 
 
