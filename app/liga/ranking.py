@@ -20,6 +20,16 @@ def _gen_pairs(players: list[str]) -> list[tuple[str, str]]:
     return res
 
 
+def _players_from_matches(results: dict[tuple[str, str], str | None]) -> list[str]:
+    players: list[str] = []
+    for p1, p2 in results.keys():
+        if p1 and p1 not in players:
+            players.append(p1)
+        if p2 and p2 not in players:
+            players.append(p2)
+    return players
+
+
 def get_matches_for(tramo: int) -> dict:
     if tramo not in st.session_state.league_matches:
         A = st.session_state.league_divisions["A"]
@@ -159,6 +169,53 @@ def finalize(tramo: int) -> None:
         pass
     st.session_state.league_active = False
     st.session_state.league_tramo = tramo + 1
+    persist_state()
+
+
+def recompute_round(tramo: int, *, apply_divisions_from_round: bool = False) -> None:
+    data = st.session_state.get("league_matches", {}).get(tramo)
+    if not data:
+        raise ValueError("No hay resultados guardados para esa jornada.")
+    if not all_filled(data.get("A", {})) or not all_filled(data.get("B", {})):
+        raise ValueError("La jornada anterior tiene enfrentamientos sin ganador.")
+
+    A_results = data.get("A", {})
+    B_results = data.get("B", {})
+    A_players = _players_from_matches(A_results)
+    B_players = _players_from_matches(B_results)
+    if not A_players or not B_players:
+        raise ValueError("No se pudieron reconstruir las divisiones de esa jornada.")
+
+    rankA = _rank(A_players, A_results)
+    rankB = _rank(B_players, B_results)
+    start_b = len(rankA) + 1
+
+    st.session_state.setdefault("league_results", {})
+    for _u, mp in st.session_state.league_results.items():
+        try:
+            mp.pop(tramo, None)
+        except Exception:
+            continue
+
+    for i, u in enumerate(rankA, start=1):
+        _record_position(tramo, u, i)
+    for j, u in enumerate(rankB, start=start_b):
+        _record_position(tramo, u, j)
+
+    try:
+        st.session_state.setdefault("league_movements", {})
+        st.session_state.league_movements[tramo] = {
+            "up": [rankB[0], rankB[1]],
+            "down": [rankA[2], rankA[3]],
+        }
+    except Exception:
+        pass
+
+    if apply_divisions_from_round:
+        nueva_A = rankA[:2] + rankB[:3]
+        nueva_B = rankA[2:5] + rankB[3:5]
+        st.session_state.league_divisions = {"A": nueva_A, "B": nueva_B}
+
     persist_state()
 
 

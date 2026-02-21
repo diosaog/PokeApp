@@ -8,19 +8,103 @@ from app.liga.ranking import (
     finalize,
     general_table_sorted,
     get_matches_for,
+    recompute_round,
 )
 from app.liga.state import ensure_state, persist_state, restore_state
 from storage import clear_purchases
 from utils import USERS
 
 
+def _players_from_match_map(md: dict[tuple[str, str], str | None]) -> list[str]:
+    out: list[str] = []
+    for p1, p2 in md.keys():
+        if p1 and p1 not in out:
+            out.append(p1)
+        if p2 and p2 not in out:
+            out.append(p2)
+    return out
+
+
+def _render_previous_round_editor(*, prev_tramo: int, current_tramo: int) -> None:
+    data = st.session_state.get("league_matches", {}).get(prev_tramo)
+    st.markdown("---")
+    st.subheader(f"Modificar jornada anterior (Tramo {prev_tramo})")
+    if not data:
+        st.info("No hay datos guardados para la jornada anterior.")
+        return
+
+    tmp_all = st.session_state.setdefault("league_tmp_prev", {})
+    tmp_divs = tmp_all.setdefault(prev_tramo, {"A": {}, "B": {}})
+
+    for div in ("A", "B"):
+        for (p1, p2), winner in data.get(div, {}).items():
+            key = f"{p1} vs {p2}"
+            default_winner = winner if winner in (p1, p2) else p1
+            tmp_divs[div].setdefault(key, default_winner)
+
+    a_len = len(_players_from_match_map(data.get("A", {})))
+    b_len = len(_players_from_match_map(data.get("B", {})))
+    b_start = a_len + 1
+    b_end = b_start + b_len - 1 if b_len else b_start - 1
+
+    with st.form(f"form_prev_results_{prev_tramo}"):
+        cA, cB = st.columns(2)
+        with cA:
+            st.markdown("**Liga A (jornada anterior)**")
+            for (p1, p2), _winner in data.get("A", {}).items():
+                key = f"{p1} vs {p2}"
+                current = tmp_divs["A"].get(key, p1)
+                opts = [p1, p2]
+                idx = 0 if current == p1 else 1
+                pick = st.selectbox(key, opts, index=idx, key=f"PREV_A_{prev_tramo}_{p1}_{p2}")
+                tmp_divs["A"][key] = pick
+        with cB:
+            st.markdown(f"**Liga B (posiciones {b_start}-{b_end})**")
+            for (p1, p2), _winner in data.get("B", {}).items():
+                key = f"{p1} vs {p2}"
+                current = tmp_divs["B"].get(key, p1)
+                opts = [p1, p2]
+                idx = 0 if current == p1 else 1
+                pick = st.selectbox(key, opts, index=idx, key=f"PREV_B_{prev_tramo}_{p1}_{p2}")
+                tmp_divs["B"][key] = pick
+
+        submitted = st.form_submit_button("Guardar cambios jornada anterior")
+        if submitted:
+            for (p1, p2) in list(data.get("A", {}).keys()):
+                data["A"][(p1, p2)] = tmp_divs["A"].get(f"{p1} vs {p2}")
+            for (p1, p2) in list(data.get("B", {}).keys()):
+                data["B"][(p1, p2)] = tmp_divs["B"].get(f"{p1} vs {p2}")
+
+            try:
+                is_immediate_previous = prev_tramo == (current_tramo - 1)
+                recompute_round(prev_tramo, apply_divisions_from_round=is_immediate_previous)
+                if is_immediate_previous:
+                    current_matches = st.session_state.get("league_matches", {})
+                    if current_tramo in current_matches:
+                        del current_matches[current_tramo]
+                persist_state()
+                try:
+                    st.cache_data.clear()
+                except Exception:
+                    pass
+                st.success("Jornada anterior actualizada. Puntos y monedas recalculados.")
+                st.rerun()
+            except Exception as e:
+                st.error(str(e))
+
+
 def page_tabla() -> None:
     restore_state()
     ensure_state()
+    st.session_state.setdefault("league_prev_edit_active", False)
+    if st.session_state.get("league_active"):
+        st.session_state["league_prev_edit_active"] = False
 
     st.header("Liga A/B - Jornada")
     tramo = st.session_state.league_tramo
     liga_finalizada = tramo > MAX_JORNADAS
+    prev_tramo = tramo - 1 if tramo > 1 else None
+    has_prev_closed = bool(prev_tramo and prev_tramo in st.session_state.get("league_matches", {}))
 
     colA, colB = st.columns([2, 2])
     with colA:
@@ -49,13 +133,27 @@ def page_tabla() -> None:
                     persist_state()
                     st.info("Edicion cancelada. No se guardara ningun resultado.")
         else:
-            if liga_finalizada:
-                st.info("La liga ha finalizado. No se pueden crear mas jornadas.")
-            else:
-                if st.button("Editar jornada", use_container_width=True):
-                    st.session_state.league_active = True
-                    get_matches_for(tramo)
-                    persist_state()
+            c1, c2 = st.columns(2)
+            with c1:
+                if liga_finalizada:
+                    st.info("La liga ha finalizado. No se pueden crear mas jornadas.")
+                else:
+                    if st.button("Editar jornada", use_container_width=True):
+                        st.session_state.league_prev_edit_active = False
+                        st.session_state.league_active = True
+                        get_matches_for(tramo)
+                        persist_state()
+            with c2:
+                prev_label = (
+                    f"Cerrar edicion tramo {prev_tramo}"
+                    if st.session_state.get("league_prev_edit_active") and prev_tramo
+                    else "Modificar jornada anterior"
+                )
+                if st.button(prev_label, use_container_width=True, disabled=not has_prev_closed):
+                    st.session_state.league_prev_edit_active = not st.session_state.get("league_prev_edit_active", False)
+                    st.rerun()
+                if not has_prev_closed:
+                    st.caption("No hay jornada anterior cerrada para editar.")
 
     st.markdown("---")
     st.subheader("Editar divisiones")
@@ -105,6 +203,9 @@ def page_tabla() -> None:
                 persist_state()
             else:
                 st.error("Selecciona exactamente 5 en A y 5 en B.")
+
+    if st.session_state.get("league_prev_edit_active") and prev_tramo:
+        _render_previous_round_editor(prev_tramo=prev_tramo, current_tramo=tramo)
 
     st.markdown("---")
     A = st.session_state.league_divisions["A"]
