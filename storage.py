@@ -20,12 +20,60 @@ SAVES_DIR = DATA_DIR / "saves"
 DB_PATH = DATA_DIR / "app.db"
 _SUPABASE: Client | None = None
 _SUPABASE_BUCKET = os.environ.get("SUPABASE_BUCKET", "saves")
+_SETTINGS_MEM_TTL = float(os.environ.get("SETTINGS_MEM_TTL", "10"))
+_SETTINGS_MEM_CACHE: dict[str, tuple[float, str | None]] = {}
+_TOTAL_SPENT_MEM_TTL = float(os.environ.get("TOTAL_SPENT_MEM_TTL", "10"))
+_TOTAL_SPENT_MEM_CACHE: dict[str, tuple[float, int]] = {}
 
 
 def _cache_data(ttl: int = 15):
     if st is None:
         return lambda f: f
     return st.cache_data(ttl=ttl, show_spinner=False)
+
+
+def _settings_cache_get(key: str) -> tuple[bool, str | None]:
+    entry = _SETTINGS_MEM_CACHE.get(key)
+    if not entry:
+        return False, None
+    ts, val = entry
+    if (time.time() - float(ts)) <= _SETTINGS_MEM_TTL:
+        return True, val
+    _SETTINGS_MEM_CACHE.pop(key, None)
+    return False, None
+
+
+def _settings_cache_set(key: str, value: str | None) -> None:
+    _SETTINGS_MEM_CACHE[key] = (time.time(), value)
+
+
+def _settings_cache_clear(key: str | None = None) -> None:
+    if key is None:
+        _SETTINGS_MEM_CACHE.clear()
+    else:
+        _SETTINGS_MEM_CACHE.pop(key, None)
+
+
+def _total_spent_cache_get(user: str) -> int | None:
+    entry = _TOTAL_SPENT_MEM_CACHE.get(user)
+    if not entry:
+        return None
+    ts, val = entry
+    if (time.time() - float(ts)) <= _TOTAL_SPENT_MEM_TTL:
+        return int(val)
+    _TOTAL_SPENT_MEM_CACHE.pop(user, None)
+    return None
+
+
+def _total_spent_cache_set(user: str, value: int) -> None:
+    _TOTAL_SPENT_MEM_CACHE[user] = (time.time(), int(value))
+
+
+def _total_spent_cache_invalidate(user: str | None = None) -> None:
+    if user:
+        _TOTAL_SPENT_MEM_CACHE.pop(user, None)
+    else:
+        _TOTAL_SPENT_MEM_CACHE.clear()
 
 
 def _supabase_enabled() -> bool:
@@ -408,7 +456,9 @@ def add_purchase(user: str, item: str, price: int) -> int:
             ).execute()
             data = res.data or []
             if data:
-                return int(data[0].get("id") or 0)
+                pid = int(data[0].get("id") or 0)
+                _total_spent_cache_invalidate(user)
+                return pid
         except Exception as e:
             # Supabase estÃ¡ configurado pero fallÃ³: no hacemos fallback silencioso
             raise RuntimeError(f"Supabase add_purchase failed: {e}")
@@ -419,10 +469,17 @@ def add_purchase(user: str, item: str, price: int) -> int:
         )
         rowid = cx.execute("SELECT last_insert_rowid()").fetchone()[0]
         cx.commit()
+        _total_spent_cache_invalidate(user)
         return int(rowid)
 
 
 def total_spent(user: str) -> int:
+    if not user:
+        return 0
+    cached = _total_spent_cache_get(user)
+    if cached is not None:
+        return int(cached)
+
     if _supabase_enabled():
         try:
             client = _sb()
@@ -431,7 +488,9 @@ def total_spent(user: str) -> int:
                 res = client.rpc("rpc_total_spent", {"p_user": user}).execute()
                 if res.data:
                     val = res.data[0] if isinstance(res.data, list) else res.data
-                    return int(val)
+                    out = int(val)
+                    _total_spent_cache_set(user, out)
+                    return out
             except Exception:
                 pass
 
@@ -459,12 +518,16 @@ def total_spent(user: str) -> int:
                             continue
                 except Exception:
                     pass
-            return s
+            out = int(s)
+            _total_spent_cache_set(user, out)
+            return out
         except Exception:
             pass
     with _conn() as cx:
         row = cx.execute("SELECT COALESCE(SUM(price),0) FROM purchases WHERE user=?", (user,)).fetchone()
-        return int(row[0] or 0)
+        out = int(row[0] or 0)
+        _total_spent_cache_set(user, out)
+        return out
 
 
 def list_purchases(user: str | None = None, limit: int = 100):
@@ -583,6 +646,7 @@ def set_purchase_status(purchase_id: int, status: str) -> None:
             if status == "used":
                 data["redeemed_at"] = _now_iso()
             client.table("purchases").update(data).eq("id", int(purchase_id)).execute()
+            _total_spent_cache_invalidate()
             return
         except Exception as e:
             raise RuntimeError(f"Supabase set_purchase_status failed: {e}")
@@ -592,6 +656,7 @@ def set_purchase_status(purchase_id: int, status: str) -> None:
         else:
             cx.execute("UPDATE purchases SET status=? WHERE id=?", (status, int(purchase_id)))
         cx.commit()
+    _total_spent_cache_invalidate()
 
 # Pokemon flags
 
@@ -713,12 +778,14 @@ def clear_purchases() -> None:
         try:
             client = _sb()
             client.table("purchases").delete().neq("id", -1).execute()
+            _total_spent_cache_invalidate()
             return
         except Exception:
             pass
     with _conn() as cx:
         cx.execute("DELETE FROM purchases")
         cx.commit()
+    _total_spent_cache_invalidate()
 
 # Pokemon flags reset helpers
 
@@ -764,6 +831,7 @@ def settings_set(key: str, value: str) -> None:
                 {"key": key, "value": value},
                 on_conflict="key",
             ).execute()
+            _settings_cache_set(key, value)
             return
         except Exception:
             pass
@@ -775,25 +843,33 @@ def settings_set(key: str, value: str) -> None:
             (key, value)
         )
         cx.commit()
+    _settings_cache_set(key, value)
 
 
-@_cache_data(ttl=30)
-@_cache_data(ttl=15)
 def settings_get(key: str) -> str | None:
+    hit, cached = _settings_cache_get(key)
+    if hit:
+        return cached
+
     if _supabase_enabled():
         try:
             client = _sb()
             res = client.table("settings").select("value").eq("key", key).limit(1).execute()
             data = res.data or []
             if data:
-                return data[0].get("value")
+                value = data[0].get("value")
+                _settings_cache_set(key, value)
+                return value
         except Exception:
             pass
     with _conn() as cx:
         try:
             _ensure_settings_table(cx)
             row = cx.execute("SELECT value FROM settings WHERE key=?", (key,)).fetchone()
-            return row[0] if row else None
+            value = row[0] if row else None
+            _settings_cache_set(key, value)
+            return value
         except Exception:
+            _settings_cache_clear(key)
             return None
 
