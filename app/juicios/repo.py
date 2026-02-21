@@ -57,6 +57,16 @@ def _normalize_case(raw: dict[str, Any]) -> dict[str, Any]:
     }
 
 
+def _reindex_case_numbers(cases: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    ordered = sorted(
+        [_normalize_case(c) for c in cases if isinstance(c, dict)],
+        key=lambda c: (int(c.get("created_at") or 0), int(c.get("id") or 0)),
+    )
+    for idx, case in enumerate(ordered, start=1):
+        case["case_no"] = idx
+    return ordered
+
+
 def _load_state() -> dict[str, Any]:
     raw = settings_get(JUICIOS_STATE_KEY)
     if not raw:
@@ -84,7 +94,8 @@ def _save_state(state: dict[str, Any]) -> None:
 
 def next_case_number() -> int:
     state = _load_state()
-    return int(state.get("next_case_no") or 1)
+    cases = _reindex_case_numbers(list(state.get("cases") or []))
+    return len(cases) + 1
 
 
 def list_cases() -> list[dict[str, Any]]:
@@ -109,8 +120,11 @@ def list_cases_for_user(user: str | None) -> list[dict[str, Any]]:
 
 def create_case(creator: str, payload: dict[str, Any]) -> dict[str, Any]:
     state = _load_state()
-    cid = int(state.get("next_id") or 1)
-    case_no = int(state.get("next_case_no") or 1)
+    existing = _reindex_case_numbers(list(state.get("cases") or []))
+    state["cases"] = existing
+    max_id = max([int(c.get("id") or 0) for c in existing], default=0)
+    cid = max(int(state.get("next_id") or 1), max_id + 1)
+    case_no = len(existing) + 1
     now = _now()
     case = _normalize_case(
         {
@@ -150,6 +164,32 @@ def _status_transition_allowed(current: str, nxt: str) -> bool:
     if current_status == STATUS_IN_PROGRESS:
         return next_status in (STATUS_IN_PROGRESS, STATUS_FINISHED)
     return next_status == STATUS_FINISHED
+
+
+def delete_case(case_id: int, editor: str) -> dict[str, Any]:
+    state = _load_state()
+    cases = list(state.get("cases") or [])
+    idx = -1
+    for i, c in enumerate(cases):
+        if int(c.get("id") or 0) == int(case_id):
+            idx = i
+            break
+    if idx < 0:
+        raise ValueError("No se encontro el juicio.")
+
+    current = _normalize_case(cases[idx])
+    if not can_edit_case(current, editor):
+        raise PermissionError("Solo el creador puede cancelar este juicio.")
+
+    deleted = dict(current)
+    del cases[idx]
+    cases = _reindex_case_numbers(cases)
+    state["cases"] = cases
+    max_id = max([int(c.get("id") or 0) for c in cases], default=0)
+    state["next_id"] = max(int(state.get("next_id") or 1), max_id + 1)
+    state["next_case_no"] = len(cases) + 1
+    _save_state(state)
+    return deleted
 
 
 def update_case(case_id: int, editor: str, payload: dict[str, Any]) -> dict[str, Any]:

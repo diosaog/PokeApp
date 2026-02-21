@@ -11,6 +11,7 @@ from app.juicios.render import case_header, render_case_info
 from app.juicios.repo import (
     can_edit_case,
     create_case,
+    delete_case,
     list_cases_for_user,
     next_case_number,
     update_case,
@@ -199,6 +200,32 @@ def _render_in_progress_controls(case: dict, current_user: str) -> None:
             st.error(str(e))
 
 
+def _render_delete_case_controls(case: dict, current_user: str) -> None:
+    cid = int(case.get("id") or 0)
+    confirm_key = f"juicio_confirm_delete_{cid}"
+
+    st.markdown("---")
+    st.caption("Cancelar Juicio lo elimina permanentemente y reordena la numeracion de casos.")
+    confirm_delete = st.checkbox("Confirmo eliminar este juicio", key=confirm_key)
+    if st.button("Cancelar Juicio", key=f"juicio_delete_{cid}"):
+        if not confirm_delete:
+            st.error("Debes confirmar la eliminacion antes de cancelar el juicio.")
+            return
+        try:
+            deleted = delete_case(cid, current_user)
+            st.session_state.pop(confirm_key, None)
+            st.session_state.pop(f"juicio_edit_details_{cid}", None)
+            st.session_state.pop(f"juicio_edit_resolution_{cid}", None)
+            _clear_cache()
+            st.success(
+                f"Juicio #{int(deleted.get('case_no') or 0)} eliminado. "
+                "Los casos restantes han sido reordenados."
+            )
+            st.rerun()
+        except Exception as e:
+            st.error(str(e))
+
+
 def _render_case_list(current_user: str) -> None:
     st.markdown("---")
     st.subheader("Juicios")
@@ -233,6 +260,8 @@ def _render_case_list(current_user: str) -> None:
             else:
                 st.markdown("---")
                 st.caption("Juicio finalizado en rojo. No hay mas cambios de etapa.")
+
+            _render_delete_case_controls(case, current_user)
 
 
 def page_juicios() -> None:
