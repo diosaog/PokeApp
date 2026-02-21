@@ -73,7 +73,14 @@ else:
 
 
 def preload_entrenadores_cache(save_path: str, mtime: float, box_count: int) -> None:
-    """Warm key caches once per save+mtime to speed up later interactions."""
+    """Warm key caches once per save+mtime to speed up later interactions.
+
+    We intentionally preload only the most relevant data to avoid slow first render:
+    - Team
+    - Box 1
+    - Box 2
+    - Box 18 (muertos)
+    """
     try:
         import streamlit as st  # type: ignore
     except Exception:
@@ -107,7 +114,19 @@ def preload_entrenadores_cache(save_path: str, mtime: float, box_count: int) -> 
         total = 0
     if total > 18:
         total = 18
-    for i in range(total):
+
+    targets: list[int] = []
+    for idx in (0, 1, 17):
+        if total <= 0:
+            continue
+        if 0 <= idx < total and idx not in targets:
+            targets.append(idx)
+
+    # Fallback if total is unknown: try the key boxes directly and ignore failures.
+    if not targets:
+        targets = [0, 1, 17]
+
+    for i in targets:
         try:
             cached_box(save_path, mtime, i)
         except Exception:

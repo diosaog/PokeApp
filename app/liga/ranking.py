@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from pathlib import Path
 from typing import Dict
 import streamlit as st
 
@@ -10,6 +11,13 @@ from utils import USERS, ensure_user_dir, list_user_saves
 from conex_pkhex import extract_box, has_pc_data, open_sav_cached
 
 MAX_JORNADAS = 4
+
+
+def _cache_data(ttl: int = 20):
+    try:
+        return st.cache_data(ttl=ttl, show_spinner=False)
+    except Exception:
+        return lambda f: f
 
 
 def _gen_pairs(players: list[str]) -> list[tuple[str, str]]:
@@ -62,16 +70,25 @@ def _latest_save_path(trainer: str) -> str | None:
     return None
 
 
-def _count_muertos_for_trainer(trainer: str) -> int:
+@_cache_data(ttl=20)
+def _muertos_from_save(active_path: str, mtime: float) -> int:
     try:
-        active_path = _latest_save_path(trainer)
         if not active_path:
             return 0
         sav_json = open_sav_cached(active_path)
         if not has_pc_data(sav_json):
             return 0
         muertos_list = extract_box(sav_json, 17)
-        muertos = len(muertos_list or [])
+        return len(muertos_list or [])
+    except Exception:
+        return 0
+
+
+def _count_muertos_for_trainer(trainer: str) -> int:
+    try:
+        active_path = _latest_save_path(trainer)
+        mtime = Path(active_path).stat().st_mtime if active_path else 0.0
+        muertos = _muertos_from_save(active_path or "", float(mtime))
     except Exception:
         muertos = 0
 
