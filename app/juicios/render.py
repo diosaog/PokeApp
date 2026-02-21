@@ -95,6 +95,17 @@ def render_case_info(case: dict[str, Any]) -> None:
         for p in penalties:
             ptype = str(p.get("type") or "")
             label = PENALTY_LABELS.get(ptype, ptype)
+            if ptype == "store_ban":
+                try:
+                    start = int(p.get("start_tramo") or 0)
+                    end = int(p.get("end_tramo") or 0)
+                except Exception:
+                    start, end = 0, 0
+                if start > 0 and end > 0:
+                    st.write(f"- {label}: tramo {start}-{end}")
+                else:
+                    st.write(f"- {label}")
+                continue
             if "amount" in p:
                 st.write(f"- {label}: {p.get('amount')}")
             elif "text" in p:

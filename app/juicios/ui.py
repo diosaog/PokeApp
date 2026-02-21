@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import json
+
 import streamlit as st
 
 from app.juicios.constants import STATUS_FINISHED, STATUS_IN_PROGRESS, STATUS_PROPOSED
@@ -13,6 +15,7 @@ from app.juicios.repo import (
     next_case_number,
     update_case,
 )
+from storage import settings_get
 
 
 def _clear_cache() -> None:
@@ -29,6 +32,9 @@ def _show_active_penalties(user: str) -> None:
     st.warning("Tienes castigos activos derivados de juicios.")
     if pen.get("store_blocked"):
         st.caption("- Tienda y monedas bloqueadas.")
+        tramos = list(pen.get("store_ban_tramos") or [])
+        if tramos:
+            st.caption(f"- Bloqueo por tramo: {', '.join(tramos)}")
     if pen.get("coins_reduction"):
         st.caption(f"- Reduccion de monedas aplicada: {pen.get('coins_reduction')}")
     if pen.get("points_reduction"):
@@ -60,6 +66,41 @@ def _render_create_case(current_user: str) -> None:
 def _save_case_update(case_id: int, current_user: str, payload: dict) -> None:
     update_case(case_id, current_user, payload)
     _clear_cache()
+
+
+def _current_league_tramo() -> int:
+    try:
+        from_session = int(st.session_state.get("league_tramo") or 0)
+        if from_session > 0:
+            return from_session
+    except Exception:
+        pass
+    try:
+        raw = settings_get("league_state")
+        if not raw:
+            return 1
+        obj = json.loads(raw)
+        return max(int(obj.get("tramo") or 1), 1)
+    except Exception:
+        return 1
+
+
+def _with_store_ban_window(penalties: list[dict]) -> list[dict]:
+    tramo_now = _current_league_tramo()
+    out: list[dict] = []
+    for p in penalties:
+        item = dict(p)
+        if str(item.get("type") or "") == "store_ban":
+            try:
+                start = int(item.get("start_tramo") or 0)
+                end = int(item.get("end_tramo") or 0)
+            except Exception:
+                start, end = 0, 0
+            if start <= 0 or end <= 0:
+                item["start_tramo"] = tramo_now
+                item["end_tramo"] = tramo_now
+        out.append(item)
+    return out
 
 
 def _render_proposed_controls(case: dict, current_user: str) -> None:
@@ -146,7 +187,12 @@ def _render_in_progress_controls(case: dict, current_user: str) -> None:
             st.error("Debes guardar al menos un castigo antes de finalizar.")
             return
         try:
-            _save_case_update(cid, current_user, {"status": STATUS_FINISHED})
+            penalties_final = _with_store_ban_window(penalties)
+            _save_case_update(
+                cid,
+                current_user,
+                {"penalties": penalties_final, "status": STATUS_FINISHED},
+            )
             st.success("Juicio finalizado.")
             st.rerun()
         except Exception as e:

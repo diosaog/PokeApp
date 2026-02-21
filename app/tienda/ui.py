@@ -79,6 +79,9 @@ def page_tienda() -> None:
     )
     if store_locked:
         st.error("Tienda bloqueada por castigo de Juicio. No puedes gastar monedas.")
+        tramos = list(penalties.get("store_ban_tramos") or [])
+        if tramos:
+            st.caption("Tramo de bloqueo: " + ", ".join(tramos))
         src = penalties.get("sources") or []
         if src:
             st.caption("Origen: " + " | ".join(src))

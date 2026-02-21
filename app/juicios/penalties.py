@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 from typing import Any
 
 from app.juicios.constants import (
@@ -12,6 +13,7 @@ from app.juicios.constants import (
     STATUS_FINISHED,
 )
 from app.juicios.repo import list_cases
+from storage import settings_get
 
 
 def _as_float(val: Any, default: float = 0.0) -> float:
@@ -35,6 +37,30 @@ def _normalized_status(raw: Any) -> str:
     return LEGACY_STATUS_MAP.get(status, status)
 
 
+def _current_league_tramo() -> int:
+    try:
+        raw = settings_get("league_state")
+        if not raw:
+            return 1
+        obj = json.loads(raw)
+        tramo = int(obj.get("tramo") or 1)
+        return max(tramo, 1)
+    except Exception:
+        return 1
+
+
+def _store_ban_active_now(penalty: dict[str, Any], current_tramo: int) -> bool:
+    try:
+        start = int(penalty.get("start_tramo") or 0)
+        end = int(penalty.get("end_tramo") or 0)
+    except Exception:
+        start, end = 0, 0
+    if start > 0 and end > 0:
+        return start <= int(current_tramo) <= end
+    # Compatibilidad con castigos antiguos sin ventana de tramo.
+    return True
+
+
 def get_user_penalties(user: str | None) -> dict[str, Any]:
     if not user:
         return {
@@ -44,6 +70,7 @@ def get_user_penalties(user: str | None) -> dict[str, Any]:
             "pokemon_release_notes": [],
             "other_notes": [],
             "sources": [],
+            "store_ban_tramos": [],
         }
 
     store_blocked = False
@@ -52,6 +79,8 @@ def get_user_penalties(user: str | None) -> dict[str, Any]:
     pokemon_release_notes: list[str] = []
     other_notes: list[str] = []
     sources: list[str] = []
+    current_tramo = _current_league_tramo()
+    store_ban_tramos: list[str] = []
 
     for case in list_cases():
         if _normalized_status(case.get("status")) != STATUS_FINISHED:
@@ -67,7 +96,12 @@ def get_user_penalties(user: str | None) -> dict[str, Any]:
                 continue
             has_effect = True
             if ptype == PENALTY_STORE_BAN:
-                store_blocked = True
+                if _store_ban_active_now(p, current_tramo):
+                    store_blocked = True
+                    start = int(p.get("start_tramo") or 0)
+                    end = int(p.get("end_tramo") or 0)
+                    if start > 0 and end > 0:
+                        store_ban_tramos.append(f"{start}-{end}")
                 continue
             if ptype == PENALTY_COINS_REDUCTION:
                 coins_reduction += max(_as_int(p.get("amount")), 0)
@@ -94,4 +128,5 @@ def get_user_penalties(user: str | None) -> dict[str, Any]:
         "pokemon_release_notes": pokemon_release_notes,
         "other_notes": other_notes,
         "sources": sources,
+        "store_ban_tramos": store_ban_tramos,
     }
