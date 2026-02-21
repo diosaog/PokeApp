@@ -4,7 +4,13 @@ import json
 import time
 from typing import Any
 
-from app.juicios.constants import JUICIOS_STATE_KEY
+from app.juicios.constants import (
+    JUICIOS_STATE_KEY,
+    LEGACY_STATUS_MAP,
+    STATUS_FINISHED,
+    STATUS_IN_PROGRESS,
+    STATUS_PROPOSED,
+)
 from storage import settings_get, settings_set
 
 
@@ -16,7 +22,18 @@ def _empty_state() -> dict[str, Any]:
     return {"next_id": 1, "next_case_no": 1, "cases": []}
 
 
+def _normalize_status(raw: Any) -> str:
+    status = str(raw or "").strip().lower()
+    if status in (STATUS_PROPOSED, STATUS_IN_PROGRESS, STATUS_FINISHED):
+        return status
+    return LEGACY_STATUS_MAP.get(status, STATUS_PROPOSED)
+
+
 def _normalize_case(raw: dict[str, Any]) -> dict[str, Any]:
+    status = _normalize_status(raw.get("status"))
+    resolved_at = int(raw.get("resolved_at") or 0)
+    if status == STATUS_FINISHED and resolved_at <= 0:
+        resolved_at = int(raw.get("updated_at") or raw.get("created_at") or 0)
     return {
         "id": int(raw.get("id", 0) or 0),
         "case_no": int(raw.get("case_no", 0) or 0),
@@ -31,12 +48,12 @@ def _normalize_case(raw: dict[str, Any]) -> dict[str, Any]:
         "priority": str(raw.get("priority") or "Media").strip() or "Media",
         "category": str(raw.get("category") or "").strip(),
         "public_vote": bool(raw.get("public_vote", False)),
-        "status": str(raw.get("status") or "abierto").strip() or "abierto",
+        "status": status,
         "resolution_notes": str(raw.get("resolution_notes") or "").strip(),
         "penalties": list(raw.get("penalties") or []),
         "created_at": int(raw.get("created_at") or 0),
         "updated_at": int(raw.get("updated_at") or 0),
-        "resolved_at": int(raw.get("resolved_at") or 0),
+        "resolved_at": resolved_at,
     }
 
 
@@ -110,12 +127,12 @@ def create_case(creator: str, payload: dict[str, Any]) -> dict[str, Any]:
             "priority": payload.get("priority", "Media"),
             "category": payload.get("category", ""),
             "public_vote": payload.get("public_vote", False),
-            "status": payload.get("status", "abierto"),
+            "status": STATUS_PROPOSED,
             "resolution_notes": payload.get("resolution_notes", ""),
-            "penalties": payload.get("penalties", []),
+            "penalties": list(payload.get("penalties") or []),
             "created_at": now,
             "updated_at": now,
-            "resolved_at": now if str(payload.get("status")) == "resuelto" else 0,
+            "resolved_at": 0,
         }
     )
     state["cases"].append(case)
@@ -123,6 +140,16 @@ def create_case(creator: str, payload: dict[str, Any]) -> dict[str, Any]:
     state["next_case_no"] = case_no + 1
     _save_state(state)
     return case
+
+
+def _status_transition_allowed(current: str, nxt: str) -> bool:
+    current_status = _normalize_status(current)
+    next_status = _normalize_status(nxt)
+    if current_status == STATUS_PROPOSED:
+        return next_status in (STATUS_PROPOSED, STATUS_IN_PROGRESS)
+    if current_status == STATUS_IN_PROGRESS:
+        return next_status in (STATUS_IN_PROGRESS, STATUS_FINISHED)
+    return next_status == STATUS_FINISHED
 
 
 def update_case(case_id: int, editor: str, payload: dict[str, Any]) -> dict[str, Any]:
@@ -139,8 +166,14 @@ def update_case(case_id: int, editor: str, payload: dict[str, Any]) -> dict[str,
     if not can_edit_case(current, editor):
         raise PermissionError("Solo el creador puede editar este juicio.")
 
-    previous_status = str(current.get("status") or "abierto")
+    previous_status = _normalize_status(current.get("status"))
     now = _now()
+    if "status" in payload:
+        target_status = _normalize_status(payload.get("status"))
+        if not _status_transition_allowed(previous_status, target_status):
+            raise ValueError("Cambio de etapa no permitido para este juicio.")
+        payload["status"] = target_status
+
     for key in (
         "title",
         "accused",
@@ -159,10 +192,12 @@ def update_case(case_id: int, editor: str, payload: dict[str, Any]) -> dict[str,
         if key in payload:
             current[key] = payload.get(key)
 
-    if str(current.get("status")) == "resuelto":
+    current_status = _normalize_status(current.get("status"))
+    current["status"] = current_status
+    if current_status == STATUS_FINISHED:
         if not list(current.get("penalties") or []):
-            raise ValueError("Un juicio resuelto debe tener al menos un castigo.")
-        if previous_status != "resuelto":
+            raise ValueError("Un juicio finalizado debe tener al menos un castigo.")
+        if previous_status != STATUS_FINISHED:
             current["resolved_at"] = now
     else:
         current["resolved_at"] = 0
@@ -171,4 +206,3 @@ def update_case(case_id: int, editor: str, payload: dict[str, Any]) -> dict[str,
     state["cases"][idx] = _normalize_case(current)
     _save_state(state)
     return state["cases"][idx]
-

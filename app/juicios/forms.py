@@ -13,8 +13,6 @@ from app.juicios.constants import (
     PENALTY_POKEMON_RELEASE,
     PENALTY_POINTS_REDUCTION,
     PENALTY_STORE_BAN,
-    STATUS_LABELS,
-    STATUS_ORDER,
 )
 from utils import USERS
 
@@ -72,13 +70,21 @@ def _build_penalties(
     return penalties, errors
 
 
-def render_case_form(
+def _default_hearing_date(raw_date: str) -> date:
+    try:
+        yy, mm, dd = [int(x) for x in str(raw_date).split("-", 2)]
+        return date(yy, mm, dd)
+    except Exception:
+        return date.today()
+
+
+def render_case_details_form(
     *,
     form_key: str,
     case_no: int,
     current_user: str,
     initial: dict[str, Any] | None = None,
-    can_edit_status: bool,
+    submit_label: str,
 ) -> tuple[bool, dict[str, Any] | None]:
     base = dict(initial or {})
     users = list(USERS.keys())
@@ -86,19 +92,7 @@ def render_case_form(
     if default_accused not in users and users:
         default_accused = users[0]
 
-    default_date = str(base.get("hearing_date") or date.today().isoformat())
-    try:
-        yy, mm, dd = [int(x) for x in default_date.split("-", 2)]
-        date_default = date(yy, mm, dd)
-    except Exception:
-        date_default = date.today()
-
-    selected_status = str(base.get("status") or "abierto")
-    if selected_status not in STATUS_LABELS:
-        selected_status = "abierto"
-
-    penalty_map = _penalty_defaults(list(base.get("penalties") or []))
-    penalty_selected_default = [p for p in PENALTY_ORDER if p in penalty_map]
+    date_default = _default_hearing_date(str(base.get("hearing_date") or date.today().isoformat()))
 
     with st.form(form_key):
         st.markdown(f"**Caso del Juicio:** #{case_no}")
@@ -129,15 +123,50 @@ def render_case_form(
         category = st.text_input("Categoria o etiqueta (opcional)", value=str(base.get("category") or ""))
         public_vote = st.toggle("Solicitar votacion publica (opcional)", value=bool(base.get("public_vote", False)))
 
-        if can_edit_status:
-            status_labels = [STATUS_LABELS[s] for s in STATUS_ORDER]
-            status_idx = STATUS_ORDER.index(selected_status)
-            status_label = st.selectbox("Estado del juicio", status_labels, index=status_idx)
-            status = next(k for k, v in STATUS_LABELS.items() if v == status_label)
-        else:
-            status = "abierto"
-            st.caption("Estado inicial: Abierto")
+        submitted = st.form_submit_button(submit_label, type="primary")
 
+    if not submitted:
+        return False, None
+
+    errors: list[str] = []
+    if not (title or "").strip():
+        errors.append("El titulo del juicio es obligatorio.")
+    if not (summary or "").strip():
+        errors.append("La razon resumida del juicio es obligatoria.")
+    if not accused:
+        errors.append("Debes indicar un acusado.")
+
+    if errors:
+        for err in errors:
+            st.error(err)
+        return True, None
+
+    payload = {
+        "title": (title or "").strip(),
+        "accused": accused,
+        "summary": (summary or "").strip(),
+        "hearing_date": hearing_date.isoformat(),
+        "is_public": bool(is_public),
+        "evidence": (evidence or "").strip(),
+        "witnesses": (witnesses or "").strip(),
+        "priority": priority,
+        "category": (category or "").strip(),
+        "public_vote": bool(public_vote),
+    }
+    return True, payload
+
+
+def render_resolution_form(
+    *,
+    form_key: str,
+    initial: dict[str, Any] | None = None,
+    submit_label: str = "Guardar castigos",
+) -> tuple[bool, dict[str, Any] | None]:
+    base = dict(initial or {})
+    penalty_map = _penalty_defaults(list(base.get("penalties") or []))
+    penalty_selected_default = [p for p in PENALTY_ORDER if p in penalty_map]
+
+    with st.form(form_key):
         st.markdown("**Castigos predefinidos**")
         penalties_selected = st.multiselect(
             "Puedes aplicar uno o mas castigos",
@@ -171,58 +200,32 @@ def render_case_form(
             height=80,
             disabled=PENALTY_OTHER not in penalties_selected,
         )
-
         resolution_notes = st.text_area(
             "Resolucion / observaciones finales",
             value=str(base.get("resolution_notes") or ""),
             height=90,
-            disabled=(status not in ("resuelto", "cancelado")),
         )
-
-        submitted = st.form_submit_button("Guardar juicio", type="primary")
+        submitted = st.form_submit_button(submit_label, type="primary")
 
     if not submitted:
         return False, None
 
-    errors: list[str] = []
-    if not (title or "").strip():
-        errors.append("El titulo del juicio es obligatorio.")
-    if not (summary or "").strip():
-        errors.append("La razon resumida del juicio es obligatoria.")
-    if not accused:
-        errors.append("Debes indicar un acusado.")
-
-    penalties, penalty_errors = _build_penalties(
+    penalties, errors = _build_penalties(
         selected=penalties_selected,
         coin_amount=int(coin_amount),
         points_amount=float(points_amount),
         pokemon_text=pokemon_text,
         other_text=other_text,
     )
-    errors.extend(penalty_errors)
-
-    if status == "resuelto" and not penalties:
-        errors.append("Un juicio resuelto debe tener al menos un castigo.")
-
+    if not penalties:
+        errors.append("Debes proponer al menos un castigo para iniciar/finalizar el juicio.")
     if errors:
         for err in errors:
             st.error(err)
         return True, None
 
     payload = {
-        "title": (title or "").strip(),
-        "accused": accused,
-        "summary": (summary or "").strip(),
-        "hearing_date": hearing_date.isoformat(),
-        "is_public": bool(is_public),
-        "evidence": (evidence or "").strip(),
-        "witnesses": (witnesses or "").strip(),
-        "priority": priority,
-        "category": (category or "").strip(),
-        "public_vote": bool(public_vote),
-        "status": status,
-        "resolution_notes": (resolution_notes or "").strip(),
         "penalties": penalties,
+        "resolution_notes": (resolution_notes or "").strip(),
     }
     return True, payload
-
