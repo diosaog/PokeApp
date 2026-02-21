@@ -4,6 +4,7 @@ import streamlit as st
 
 from app.common import COIN
 from app.interfaz.theme import apply_platinum_ui
+from app.juicios.penalties import get_user_penalties
 from app.tienda.catalog import _render_shop_items, get_catalog
 from app.tienda.money import _calc_money_for_user
 from app.tienda.redeem import render_redeem_flow
@@ -33,6 +34,8 @@ def page_tienda() -> None:
     st.markdown("<div style='height:2px; background:#b9b59f; margin:10px 0 14px;'></div>", unsafe_allow_html=True)
 
     current_user = st.session_state.get("user") or "-"
+    penalties = get_user_penalties(current_user if current_user != "-" else "")
+    store_locked = bool(penalties.get("store_blocked"))
     avail = None
     _, colR = st.columns([5, 2])
     with colR:
@@ -45,13 +48,16 @@ def page_tienda() -> None:
                 spent = total_spent(current_user)
             except Exception:
                 spent = 0
-            avail = max(int(base) - int(spent), 0)
+            extra_reduction = int(penalties.get("coins_reduction") or 0)
+            avail = max(int(base) - int(spent) - extra_reduction, 0)
+            if store_locked:
+                avail = 0
             st.markdown(
                 "<div style='background:#f7f6ef; border:2px solid #9a9680; border-radius:6px; "
                 "padding:8px 10px; color:#2b2b2b; font-family:\"Press Start 2P\", monospace;'>"
                 "<div style='font-size:10px; color:#3b3b3b;'>Disponible</div>"
                 f"<div style='font-size:14px; margin-top:6px;'>{COIN} {avail}</div>"
-                f"<div style='font-size:10px; color:#5a5a5a; margin-top:6px;'>Base: {COIN} {base} | Gastado: {COIN} {spent}</div>"
+                f"<div style='font-size:10px; color:#5a5a5a; margin-top:6px;'>Base: {COIN} {base} | Gastado: {COIN} {spent} | Castigo: {COIN} {extra_reduction}</div>"
                 "</div>",
                 unsafe_allow_html=True,
             )
@@ -71,6 +77,11 @@ def page_tienda() -> None:
         "display:inline-block;'>Catalogo</div>",
         unsafe_allow_html=True,
     )
+    if store_locked:
+        st.error("Tienda bloqueada por castigo de Juicio. No puedes gastar monedas.")
+        src = penalties.get("sources") or []
+        if src:
+            st.caption("Origen: " + " | ".join(src))
     st.markdown("<div style='height:2px; background:#b9b59f; margin:10px 0 14px;'></div>", unsafe_allow_html=True)
     catalog = get_catalog()
     tab_com, tab_bay, tab_comp, tab_bred = st.tabs(["Comodines", "Bayas", "Competitivos", "Crianza"])
@@ -84,7 +95,10 @@ def page_tienda() -> None:
         _render_shop_items(catalog["crianza"], "crianza", available=avail if current_user != "-" else None)
 
     pending = st.session_state.get("shop_pending")
-    if pending:
+    if pending and store_locked:
+        st.session_state.pop("shop_pending", None)
+        st.warning("No se puede completar la compra: la tienda esta bloqueada por castigo.")
+    elif pending:
         nombre = pending.get("name")
         precio = int(pending.get("price") or 0)
         try:

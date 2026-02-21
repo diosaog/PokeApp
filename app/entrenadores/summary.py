@@ -9,6 +9,7 @@ import streamlit as st
 from app.entrenadores.badges import count_badges
 from app.entrenadores.boxes import muertos_box_index
 from app.entrenadores.profile import find_trainer_image
+from app.juicios.penalties import get_user_penalties
 from storage import settings_get, settings_set
 
 
@@ -167,7 +168,12 @@ def trainer_summary_with_portrait_ui(sav_json: dict, box_count: int, *, is_own_p
         spent = total_spent(jugador or "")
     except Exception:
         spent = 0
-    monedas = max(bruto - spent, 0)
+    penalties = get_user_penalties(jugador or "")
+    coins_reduction = int(penalties.get("coins_reduction") or 0)
+    if penalties.get("store_blocked"):
+        monedas = 0
+    else:
+        monedas = max(bruto - spent - coins_reduction, 0)
 
     try:
         from app.liga.ranking import current_points_total

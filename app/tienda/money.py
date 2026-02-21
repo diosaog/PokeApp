@@ -3,6 +3,7 @@ from __future__ import annotations
 from app.liga.coins import coins_from_league
 from app.entrenadores.badges import count_badges
 from app.interfaz.badges import coins_from_badges
+from app.juicios.penalties import get_user_penalties
 from storage import (
     get_current_save_for_user,
     list_inventory,
@@ -82,6 +83,9 @@ def _calc_money_for_user(user: str) -> int:
 def _money_available(user: str | None) -> int:
     if not user:
         return 0
+    penalties = get_user_penalties(user)
+    if penalties.get("store_blocked"):
+        return 0
     try:
         base = _calc_money_for_user(user)
     except Exception:
@@ -97,4 +101,5 @@ def _money_available(user: str | None) -> int:
                     continue
     except Exception:
         spent = 0
-    return max(int(base) - int(spent), 0)
+    extra_reduction = int(penalties.get("coins_reduction") or 0)
+    return max(int(base) - int(spent) - extra_reduction, 0)

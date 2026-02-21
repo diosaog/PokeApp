@@ -122,6 +122,7 @@ def apply_section_theme(section: str) -> None:
         "Entrenadores": "#ef5350",
         "Liga y Tabla": "#f59e0b",
         "Copa": "#8b5cf6",
+        "Juicios": "#dc2626",
         "Tienda": "#2a75bb",
         "Saves": "#10b981",
     }

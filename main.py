@@ -15,6 +15,7 @@ st.set_page_config(
 ui = __import__("interfaz")
 tiend = __import__("tienda2")
 saves = __import__("saves")
+juicios = __import__("juicios")
 
 
 def router(section: str) -> None:
@@ -23,6 +24,7 @@ def router(section: str) -> None:
         "Liga y Tabla": ui.page_tabla,
         "Entrenadores": ui.page_entrenadores,
         "Copa": ui.page_copa,
+        "Juicios": juicios.page_juicios,
         "Tienda": tiend.page_tienda,
         "Saves": saves.page_saves,
     }

@@ -4,6 +4,7 @@ from typing import Dict
 import streamlit as st
 
 from app.liga.state import persist_state
+from app.juicios.penalties import get_user_penalties
 from storage import add_purchase, get_current_save_for_user, load_save_bytes, settings_get
 from utils import USERS, ensure_user_dir, list_user_saves
 from conex_pkhex import extract_box, has_pc_data, open_sav_cached
@@ -239,7 +240,9 @@ def _one_decimal(x: float) -> float:
 def current_points_total(user: str) -> float:
     base = points_from_league(user)
     muertos = _count_muertos_for_trainer(user)
-    total = base - 0.2 * muertos
+    penalties = get_user_penalties(user)
+    points_reduction = float(penalties.get("points_reduction") or 0.0)
+    total = base - 0.2 * muertos - points_reduction
     return _one_decimal(total)
 
 

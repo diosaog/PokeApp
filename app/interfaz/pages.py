@@ -14,8 +14,9 @@ def page_inicio() -> None:
         "1. Ve a 'Saves' y sube tu archivo .sav.\n"
         "2. Configura el lector en 'Entrenadores' si es necesario.\n"
         "3. En 'Entrenadores' puedes ver equipo, cajas y detalles.\n"
-        "4. En 'Tienda' compra comodines/objetos.\n"
-        "5. 'Liga y Tabla' y 'Copa' muestran clasificaciones y emparejamientos."
+        "4. En 'Juicios' crea casos, revisa pruebas y aplica castigos.\n"
+        "5. En 'Tienda' compra comodines/objetos.\n"
+        "6. 'Liga y Tabla' y 'Copa' muestran clasificaciones y emparejamientos."
     )
 
     normativa_md = """
