@@ -24,6 +24,7 @@ from app.juicios.repo import (
     register_jury_vote,
     update_case,
 )
+from app.interfaz.theme import apply_section_theme
 from utils import USERS
 
 
@@ -32,6 +33,157 @@ def _clear_cache() -> None:
         st.cache_data.clear()
     except Exception:
         pass
+
+
+def _apply_juicio_theme() -> None:
+    st.markdown(
+        """
+        <style>
+        .ju-hero{
+          position:relative;
+          background:linear-gradient(135deg,#f5e5bf 0%,#e8cf96 52%,#c48f42 100%);
+          border:3px solid #6f4312;
+          border-radius:10px;
+          padding:14px 16px;
+          color:#2a190b;
+          box-shadow:0 8px 20px rgba(0,0,0,.32), inset 0 1px 0 rgba(255,255,255,.32);
+          margin-bottom:12px;
+        }
+        .ju-hero:after{
+          content:"";
+          position:absolute;
+          right:14px; top:10px;
+          width:28px; height:28px; border-radius:50%;
+          background:
+            radial-gradient(circle at 50% 50%, #ffffff 0 4px, transparent 5px),
+            linear-gradient(180deg,#f04646 0 50%,#f6f1e8 50% 100%);
+          border:2px solid #1a1a1a;
+          box-shadow:0 0 0 2px rgba(0,0,0,.18);
+        }
+        .ju-hero-title{
+          font-family:"Press Start 2P", monospace;
+          font-size:14px;
+          line-height:1.3;
+          margin-bottom:8px;
+          color:#2a190b;
+        }
+        .ju-hero-sub{
+          font-size:12px;
+          color:#35210f;
+        }
+        .ju-hero-chips{
+          display:flex;
+          gap:6px;
+          flex-wrap:wrap;
+          margin-top:10px;
+        }
+        .ju-chip{
+          font-size:10px;
+          font-weight:700;
+          color:#2a190b;
+          background:#f7f1df;
+          border:1px solid #8b642f;
+          border-radius:999px;
+          padding:3px 8px;
+        }
+        .ju-toolbar{
+          background:#f7f1df;
+          border:2px solid #8b642f;
+          border-radius:8px;
+          padding:8px 10px;
+          margin:8px 0 10px 0;
+          color:#2b1d0e;
+          font-size:11px;
+          font-weight:700;
+        }
+        .ju-note{
+          background:#f9f5e9;
+          border:1px dashed #9a7237;
+          border-radius:7px;
+          padding:8px 10px;
+          color:#342110;
+          font-size:11px;
+        }
+        .ju-sep{
+          height:2px;
+          background:linear-gradient(90deg,transparent 0,#8b642f 15%,#8b642f 85%,transparent 100%);
+          margin:10px 0 12px;
+        }
+        .ju-stage-wrap{
+          display:flex;
+          gap:8px;
+          margin:8px 0 12px;
+        }
+        .ju-stage{
+          flex:1;
+          min-width:0;
+          border:1px solid var(--stage-color,#6c757d);
+          border-radius:8px;
+          text-align:center;
+          padding:6px 8px;
+          background:#f0ede5;
+          color:#605548;
+          font-weight:700;
+          font-size:12px;
+          box-shadow:inset 0 1px 0 rgba(255,255,255,.45);
+        }
+        .ju-stage-on{
+          background:var(--stage-color,#6c757d);
+          color:#ffffff;
+        }
+        .ju-docket{
+          background:#f8f2e4;
+          border:2px solid #8b642f;
+          border-radius:8px;
+          padding:8px 10px;
+          margin-bottom:8px;
+          color:#2a1b0d;
+        }
+        .ju-docket-title{
+          font-family:"Press Start 2P", monospace;
+          font-size:10px;
+          margin-bottom:5px;
+        }
+        .ju-docket-sub{
+          font-size:11px;
+          color:#46301a;
+        }
+        .ju-verdict{
+          display:inline-block;
+          padding:3px 8px;
+          border-radius:999px;
+          font-size:10px;
+          font-weight:700;
+          margin-left:6px;
+          border:1px solid #6d4b1f;
+          background:#f1e5c5;
+          color:#2a1c0d;
+        }
+        .ju-v-guilty{ background:#f2c0b8; border-color:#a85345; color:#55170f; }
+        .ju-v-not-guilty{ background:#c8efc7; border-color:#4f8e4f; color:#1e4b1d; }
+        .ju-v-pending{ background:#f0e4c1; border-color:#9f823e; color:#4b3a14; }
+        </style>
+        """,
+        unsafe_allow_html=True,
+    )
+
+
+def _render_juicio_hero() -> None:
+    st.markdown(
+        """
+        <div class='ju-hero'>
+          <div class='ju-hero-title'>TRIBUNAL POKEMON</div>
+          <div class='ju-hero-sub'>Sala de Audiencias: registro de casos, jurado, veredicto y sanciones.</div>
+          <div class='ju-hero-chips'>
+            <span class='ju-chip'>Expedientes</span>
+            <span class='ju-chip'>Jurado</span>
+            <span class='ju-chip'>Veredicto</span>
+            <span class='ju-chip'>Castigos</span>
+          </div>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
 
 
 def _show_active_penalties(user: str) -> None:
@@ -52,6 +204,7 @@ def _show_active_penalties(user: str) -> None:
         st.caption(f"- Liberacion/Muerte de Pokemon: {txt}")
     for txt in pen.get("other_notes") or []:
         st.caption(f"- Otro castigo: {txt}")
+    st.markdown("<div class='ju-sep'></div>", unsafe_allow_html=True)
 
 
 def _render_create_case(current_user: str) -> None:
@@ -270,6 +423,10 @@ def _render_delete_case_controls(case: dict, current_user: str) -> None:
 def _render_case_list(current_user: str) -> None:
     st.markdown("---")
     st.subheader("Juicios")
+    st.markdown(
+        "<div class='ju-toolbar'>Archivo judicial: filtra expedientes por visibilidad y estado.</div>",
+        unsafe_allow_html=True,
+    )
 
     c1, c2 = st.columns(2)
     with c1:
@@ -325,7 +482,10 @@ def _render_case_list(current_user: str) -> None:
 
 
 def page_juicios() -> None:
+    apply_section_theme("Juicios")
+    _apply_juicio_theme()
     st.header("Juicios")
+    _render_juicio_hero()
     current_user = st.session_state.get("user") or ""
     if not current_user:
         st.info("Inicia sesion para usar la seccion de juicios.")

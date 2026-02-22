@@ -41,15 +41,24 @@ def _stage_boxes_html(status: str) -> str:
     for idx, stage in enumerate(STATUS_ORDER):
         color = STATUS_COLORS.get(stage, "#6c757d")
         label = STATUS_LABELS.get(stage, stage)
-        reached = idx <= current_idx
-        bg = color if reached else "#f2f2f2"
-        fg = "#ffffff" if reached else "#5f6368"
+        reached_cls = " ju-stage-on" if idx <= current_idx else ""
         boxes.append(
-            "<div style='flex:1; min-width:0; border:1px solid {color}; border-radius:8px; "
-            "padding:6px 8px; text-align:center; background:{bg}; color:{fg}; font-weight:700; font-size:12px;'>"
-            "{label}</div>".format(color=color, bg=bg, fg=fg, label=label)
+            "<div class='ju-stage{reached}' style='--stage-color:{color};'>{label}</div>".format(
+                reached=reached_cls,
+                color=color,
+                label=label,
+            )
         )
-    return "<div style='display:flex; gap:8px; margin:6px 0 12px 0;'>{}</div>".format("".join(boxes))
+    return "<div class='ju-stage-wrap'>{}</div>".format("".join(boxes))
+
+
+def _verdict_css_class(verdict_raw: Any) -> str:
+    verdict = str(verdict_raw or "").strip().lower()
+    if verdict == "culpable":
+        return "ju-v-guilty"
+    if verdict == "no_culpable":
+        return "ju-v-not-guilty"
+    return "ju-v-pending"
 
 
 def case_header(case: dict[str, Any]) -> str:
@@ -61,6 +70,19 @@ def case_header(case: dict[str, Any]) -> str:
 
 def render_case_info(case: dict[str, Any]) -> None:
     status = _normalize_status(case.get("status"))
+    case_no = int(case.get("case_no") or 0)
+    title = str(case.get("title") or "Sin titulo").strip()
+    verdict = VERDICT_LABELS.get(str(case.get("verdict") or ""), "Pendiente")
+    verdict_cls = _verdict_css_class(case.get("verdict"))
+    st.markdown(
+        (
+            "<div class='ju-docket'>"
+            f"<div class='ju-docket-title'>EXPEDIENTE #{case_no}</div>"
+            f"<div class='ju-docket-sub'>{title} <span class='ju-verdict {verdict_cls}'>{verdict}</span></div>"
+            "</div>"
+        ),
+        unsafe_allow_html=True,
+    )
     st.markdown(_stage_boxes_html(status), unsafe_allow_html=True)
 
     c1, c2, c3 = st.columns(3)
