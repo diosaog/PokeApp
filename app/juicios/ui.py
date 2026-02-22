@@ -484,7 +484,6 @@ def _render_case_list(current_user: str) -> None:
 def page_juicios() -> None:
     apply_section_theme("Juicios")
     _apply_juicio_theme()
-    st.header("Juicios")
     _render_juicio_hero()
     current_user = st.session_state.get("user") or ""
     if not current_user:
