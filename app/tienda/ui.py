@@ -16,13 +16,22 @@ def page_tienda() -> None:
     st.markdown(
         "<style>"
         ".stButton>button{background:#f1c258 !important; color:#2b2b2b !important; border:2px solid #c28f27 !important; "
-        "border-radius:6px !important; font-family:\"Press Start 2P\", monospace !important; font-size:13px !important; "
+        "border-radius:6px !important; font-family:\"Press Start 2P\", monospace !important; font-size:14px !important; "
         "font-weight:900 !important; text-shadow:0 0 1px rgba(0,0,0,0.35); letter-spacing:0.2px;}"
-        ".stButton>button:disabled{opacity:0.92 !important; color:#5c4314 !important; border-color:#c28f27 !important; font-weight:900 !important;}"
+        ".stButton>button, .stButton>button *{font-family:\"Press Start 2P\", monospace !important; font-size:14px !important; "
+        "font-weight:900 !important; color:#2b2b2b !important; -webkit-text-fill-color:#2b2b2b !important; opacity:1 !important;}"
+        ".stButton>button:disabled, .stButton>button:disabled *{opacity:1 !important; background:#e5bf67 !important; "
+        "color:#6a4c16 !important; border-color:#c28f27 !important; font-weight:900 !important; -webkit-text-fill-color:#6a4c16 !important;}"
         "div[data-baseweb='tab-list']{background:#d7d4c0; border:2px solid #9a9680; border-radius:6px; padding:4px; gap:4px;}"
-        "button[data-baseweb='tab']{background:#f7f6ef; color:#2b2b2b; border:2px solid #9a9680; border-radius:4px; "
-        "font-family:\"Press Start 2P\", monospace; font-size:12px; font-weight:900; padding:7px 10px; text-shadow:0 0 1px rgba(0,0,0,0.28);}"
-        "button[data-baseweb='tab'][aria-selected='true']{background:#f1c258; border-color:#c28f27; font-weight:900; color:#2b2b2b;}"
+        "button[data-baseweb='tab'], button[role='tab']{background:#f7f6ef !important; color:#2b2b2b !important; "
+        "border:2px solid #9a9680 !important; border-radius:4px !important; font-family:\"Press Start 2P\", monospace !important; "
+        "font-size:13px !important; font-weight:900 !important; padding:8px 10px !important; text-shadow:0 0 1px rgba(0,0,0,0.32) !important;}"
+        "button[data-baseweb='tab'] *, button[role='tab'] *{font-family:\"Press Start 2P\", monospace !important; "
+        "font-size:13px !important; font-weight:900 !important; color:#2b2b2b !important; -webkit-text-fill-color:#2b2b2b !important; opacity:1 !important;}"
+        "button[data-baseweb='tab'][aria-selected='true'], button[role='tab'][aria-selected='true']{background:#f1c258 !important; "
+        "border-color:#c28f27 !important; font-weight:900 !important; color:#1f1f1f !important;}"
+        "button[data-baseweb='tab'][aria-selected='true'] *, button[role='tab'][aria-selected='true'] *{font-weight:900 !important; "
+        "color:#1f1f1f !important; -webkit-text-fill-color:#1f1f1f !important;}"
         "</style>",
         unsafe_allow_html=True,
     )

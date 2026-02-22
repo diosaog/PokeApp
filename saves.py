@@ -1,5 +1,6 @@
 from __future__ import annotations
 from datetime import datetime
+import html as _html
 import streamlit as st
 
 from app.interfaz.theme import apply_platinum_ui
@@ -57,6 +58,20 @@ def page_saves() -> None:
           font-weight:900;
         }
         .bill-chip b { color:#10263f; }
+        .bill-save-meta {
+          margin-top:8px;
+          background:#10263f;
+          border:1px solid #2a75bb;
+          border-radius:8px;
+          padding:8px 10px;
+          color:#bfd3e8;
+          font-family:"Press Start 2P", monospace;
+          font-size:9px;
+          font-weight:700;
+          line-height:1.45;
+          letter-spacing:0.1px;
+        }
+        .bill-save-meta b { color:#e8f2ff; font-weight:900; }
         div[data-testid="stFileUploaderDropzone"] {
           background:#0f2033 !important;
           border:2px dashed #2a75bb !important;
@@ -155,9 +170,14 @@ def page_saves() -> None:
     st.markdown("<div class='bill-chip'>Save actual</div>", unsafe_allow_html=True)
     if cur:
         id_, fname, oname, sha, up, ts = cur
-        st.info(
-            f"ID: {id_} | Nombre: {oname or fname} | Subido por: {up or '-'} | Fecha: {datetime.fromtimestamp(ts)} | SHA: {sha[:8]}"
+        meta = (
+            f"<div class='bill-save-meta'><b>ID:</b> {_html.escape(str(id_))} | "
+            f"<b>Nombre:</b> {_html.escape(str(oname or fname))} | "
+            f"<b>Subido por:</b> {_html.escape(str(up or '-'))} | "
+            f"<b>Fecha:</b> {_html.escape(str(datetime.fromtimestamp(ts)))} | "
+            f"<b>SHA:</b> {_html.escape(str(sha[:8]))}</div>"
         )
+        st.markdown(meta, unsafe_allow_html=True)
         if up and current_user and current_user == up:
             st.download_button(
                 "Descargar save actual",
