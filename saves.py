@@ -2,6 +2,7 @@ from __future__ import annotations
 from datetime import datetime
 import streamlit as st
 
+from app.interfaz.theme import apply_platinum_ui
 from storage import (
     save_upload,
     load_save_bytes,
@@ -13,10 +14,15 @@ from utils import ensure_user_dir, ts_name
 
 
 def page_saves() -> None:
-    st.header("PC de Bill")
+    apply_platinum_ui("Saves")
+    st.markdown("<div class='pt-title'>PC de Bill</div>", unsafe_allow_html=True)
+    st.markdown("<div class='pt-divider'></div>", unsafe_allow_html=True)
 
     current_user = st.session_state.get("user")
-    st.caption(f"Este save se registrara a: {current_user}")
+    st.markdown(
+        f"<div class='pt-section'>Este save se registrara a: {current_user or '-'}</div>",
+        unsafe_allow_html=True,
+    )
 
     def _bootstrap_latest_save():
         """If there is no current save, use the latest from storage and cache locally."""
@@ -76,7 +82,7 @@ def page_saves() -> None:
         st.success(f"Guardado por {current_user} y establecido como actual (id={rec['id']}).")
 
     cur = get_current_save_for_user(current_user)
-    st.subheader("Save actual")
+    st.markdown("<div class='pt-section'>Save actual</div>", unsafe_allow_html=True)
     if cur:
         id_, fname, oname, sha, up, ts = cur
         st.info(

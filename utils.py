@@ -27,7 +27,6 @@ USERS: Dict[str, str] = {
 }
 
 SECTIONS = ["Inicio", "Liga y Tabla", "Entrenadores", "Copa", "Juicios", "Tienda", "Saves"]
-JUICIOS_ALLOWED_USERS = {"Anto"}
 
 
 def init_session_state() -> None:
@@ -44,10 +43,8 @@ def init_session_state() -> None:
 
 
 def sections_for_user(user: str | None) -> list[str]:
-    sections = list(SECTIONS)
-    if (user or "") not in JUICIOS_ALLOWED_USERS and "Juicios" in sections:
-        sections.remove("Juicios")
-    return sections
+    _ = user
+    return list(SECTIONS)
 
 
 def ensure_user_dir(u: str) -> Path:

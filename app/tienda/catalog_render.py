@@ -58,17 +58,17 @@ def _render_item_card(item: dict, idx_key: str, *, available: int | None = None)
     card_style = (
         "background:#f7f6ef; border:2px solid #9a9680; border-radius:6px; padding:0; "
         "color:#2b2b2b; margin-bottom:8px; overflow:hidden; "
-        "font-family:'Press Start 2P', monospace; font-weight:700;"
+        "font-family:'Press Start 2P', monospace; font-weight:900;"
     )
     head_style = "background:#f1c258; border-bottom:2px solid #c28f27; padding:6px 8px;"
     body_style = "display:flex; align-items:center; gap:8px; padding:8px;"
-    name_style = "font-size:11px; color:#2b2b2b;"
-    desc_style = "font-size:10px; color:#3b3b3b; margin-top:4px;"
+    name_style = "font-size:11px; color:#2b2b2b; font-weight:900;"
+    desc_style = "font-size:10px; color:#3b3b3b; margin-top:4px; font-weight:900;"
     price_style = (
         "display:inline-block; margin-top:6px; background:#f1c258; border:2px solid #c28f27; "
-        "border-radius:4px; padding:4px 6px; font-size:10px; color:#2b2b2b;"
+        "border-radius:4px; padding:4px 6px; font-size:10px; color:#2b2b2b; font-weight:900;"
     )
-    missing_style = "font-size:10px; color:#7a2e2e; margin-top:4px;"
+    missing_style = "font-size:10px; color:#7a2e2e; margin-top:4px; font-weight:900;"
     info_html = ""
     if desc_html:
         info_html += f"<div class='shop-desc' style='{desc_style}'>{desc_html}</div>"
