@@ -16,12 +16,12 @@ def page_tienda() -> None:
     st.markdown(
         "<style>"
         ".stButton>button{background:#f1c258 !important; color:#2b2b2b !important; border:2px solid #c28f27 !important; "
-        "border-radius:6px !important; font-family:\"Press Start 2P\", monospace !important; font-size:11px !important; "
-        "font-weight:900 !important; text-shadow:0 0 1px rgba(0,0,0,0.25);}"
-        ".stButton>button:disabled{opacity:0.95 !important; color:#7a5a20 !important; border-color:#c28f27 !important;}"
+        "border-radius:6px !important; font-family:\"Press Start 2P\", monospace !important; font-size:13px !important; "
+        "font-weight:900 !important; text-shadow:0 0 1px rgba(0,0,0,0.35); letter-spacing:0.2px;}"
+        ".stButton>button:disabled{opacity:0.92 !important; color:#5c4314 !important; border-color:#c28f27 !important; font-weight:900 !important;}"
         "div[data-baseweb='tab-list']{background:#d7d4c0; border:2px solid #9a9680; border-radius:6px; padding:4px; gap:4px;}"
         "button[data-baseweb='tab']{background:#f7f6ef; color:#2b2b2b; border:2px solid #9a9680; border-radius:4px; "
-        "font-family:\"Press Start 2P\", monospace; font-size:10px; font-weight:900; padding:6px 8px;}"
+        "font-family:\"Press Start 2P\", monospace; font-size:12px; font-weight:900; padding:7px 10px; text-shadow:0 0 1px rgba(0,0,0,0.28);}"
         "button[data-baseweb='tab'][aria-selected='true']{background:#f1c258; border-color:#c28f27; font-weight:900; color:#2b2b2b;}"
         "</style>",
         unsafe_allow_html=True,
@@ -55,27 +55,27 @@ def page_tienda() -> None:
                 avail = 0
             st.markdown(
                 "<div style='background:#f7f6ef; border:2px solid #9a9680; border-radius:6px; "
-                "padding:8px 10px; color:#2b2b2b; font-family:\"Press Start 2P\", monospace;'>"
-                "<div style='font-size:10px; color:#3b3b3b; font-weight:900;'>Disponible</div>"
-                f"<div style='font-size:14px; margin-top:6px; font-weight:900;'>{COIN} {avail}</div>"
-                f"<div style='font-size:10px; color:#5a5a5a; margin-top:6px; font-weight:900;'>Base: {COIN} {base} | Gastado: {COIN} {spent} | Castigo: {COIN} {extra_reduction}</div>"
+                "padding:10px 12px; color:#1f1f1f; font-family:\"Press Start 2P\", monospace; box-shadow: inset 0 0 0 1px rgba(255,255,255,0.45);'>"
+                "<div style='font-size:13px; color:#2b2b2b; font-weight:900; text-shadow:0 0 1px rgba(0,0,0,0.35); letter-spacing:0.3px;'>Disponible</div>"
+                f"<div style='font-size:26px; margin-top:8px; font-weight:900; color:#1b1b1b; text-shadow:0 0 1px rgba(0,0,0,0.45);'>{COIN} {avail}</div>"
+                f"<div style='font-size:13px; color:#333; margin-top:8px; font-weight:900; line-height:1.45;'>Base: {COIN} {base} | Gastado: {COIN} {spent} | Castigo: {COIN} {extra_reduction}</div>"
                 "</div>",
                 unsafe_allow_html=True,
             )
         else:
             st.markdown(
                 "<div style='background:#f7f6ef; border:2px solid #9a9680; border-radius:6px; "
-                "padding:8px 10px; color:#2b2b2b; font-family:\"Press Start 2P\", monospace;'>"
-                "<div style='font-size:10px; color:#3b3b3b; font-weight:900;'>Disponible</div>"
-                f"<div style='font-size:14px; margin-top:6px; font-weight:900;'>{COIN} 0</div>"
+                "padding:10px 12px; color:#1f1f1f; font-family:\"Press Start 2P\", monospace;'>"
+                "<div style='font-size:13px; color:#2b2b2b; font-weight:900; text-shadow:0 0 1px rgba(0,0,0,0.35);'>Disponible</div>"
+                f"<div style='font-size:26px; margin-top:8px; font-weight:900; color:#1b1b1b; text-shadow:0 0 1px rgba(0,0,0,0.45);'>{COIN} 0</div>"
                 "</div>",
                 unsafe_allow_html=True,
             )
 
     st.markdown(
         "<div style='background:#f7f6ef; border:2px solid #9a9680; border-radius:6px; "
-        "padding:6px 8px; font-size:11px; color:#2b2b2b; font-family:\"Press Start 2P\", monospace; "
-        "font-weight:900; display:inline-block;'>Catalogo</div>",
+        "padding:8px 10px; font-size:12px; color:#2b2b2b; font-family:\"Press Start 2P\", monospace; "
+        "font-weight:900; text-shadow:0 0 1px rgba(0,0,0,0.25); display:inline-block;'>Catalogo</div>",
         unsafe_allow_html=True,
     )
     if store_locked:

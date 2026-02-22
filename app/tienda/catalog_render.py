@@ -43,11 +43,11 @@ def _render_item_card(item: dict, idx_key: str, *, available: int | None = None)
     if img:
         img_html = (
             "<img class='shop-icon' "
-            "style='width:42px; height:42px; image-rendering:pixelated;' "
+            "style='width:56px; height:56px; image-rendering:pixelated;' "
             f"src='{img}' alt='' onerror='this.style.display=\"none\"'/>"
         )
     else:
-        img_html = f"<div style='font-size:20px; line-height:1;'>{icon}</div>" if icon else ""
+        img_html = f"<div style='font-size:24px; line-height:1;'>{icon}</div>" if icon else ""
     name_html = _html.escape(str(name)) if name else "-"
     desc_html = _html.escape(str(desc)) if desc else ""
     price_html = f"{COIN} {price}"
@@ -60,15 +60,15 @@ def _render_item_card(item: dict, idx_key: str, *, available: int | None = None)
         "color:#2b2b2b; margin-bottom:8px; overflow:hidden; "
         "font-family:'Press Start 2P', monospace; font-weight:900;"
     )
-    head_style = "background:#f1c258; border-bottom:2px solid #c28f27; padding:6px 8px;"
-    body_style = "display:flex; align-items:center; gap:8px; padding:8px;"
-    name_style = "font-size:11px; color:#2b2b2b; font-weight:900;"
-    desc_style = "font-size:10px; color:#3b3b3b; margin-top:4px; font-weight:900;"
+    head_style = "background:#f1c258; border-bottom:2px solid #c28f27; padding:9px 10px;"
+    body_style = "display:flex; align-items:center; gap:10px; padding:10px;"
+    name_style = "font-size:14px; color:#202020; font-weight:900; line-height:1.35; text-shadow:0 0 1px rgba(0,0,0,0.30);"
+    desc_style = "font-size:12px; color:#2f2f2f; margin-top:5px; font-weight:900; line-height:1.45;"
     price_style = (
         "display:inline-block; margin-top:6px; background:#f1c258; border:2px solid #c28f27; "
-        "border-radius:4px; padding:4px 6px; font-size:10px; color:#2b2b2b; font-weight:900;"
+        "border-radius:4px; padding:6px 9px; font-size:13px; color:#1f1f1f; font-weight:900; line-height:1.25;"
     )
-    missing_style = "font-size:10px; color:#7a2e2e; margin-top:4px; font-weight:900;"
+    missing_style = "font-size:12px; color:#7a2e2e; margin-top:6px; font-weight:900; line-height:1.35;"
     info_html = ""
     if desc_html:
         info_html += f"<div class='shop-desc' style='{desc_style}'>{desc_html}</div>"

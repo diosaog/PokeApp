@@ -15,12 +15,82 @@ from utils import ensure_user_dir, ts_name
 
 def page_saves() -> None:
     apply_platinum_ui("Saves")
-    st.markdown("<div class='pt-title'>PC de Bill</div>", unsafe_allow_html=True)
-    st.markdown("<div class='pt-divider'></div>", unsafe_allow_html=True)
+    st.markdown(
+        """
+        <style>
+        .bill-title {
+          display:inline-block;
+          background:linear-gradient(180deg,#f2cc62 0%,#e4b84a 100%);
+          border:2px solid #c28f27;
+          border-radius:8px;
+          padding:10px 12px;
+          color:#222;
+          font-family:"Press Start 2P", monospace;
+          font-size:16px;
+          font-weight:900;
+          letter-spacing:0.4px;
+          text-shadow:0 0 1px rgba(0,0,0,0.25);
+        }
+        .bill-subtitle {
+          margin-top:8px;
+          display:inline-block;
+          background:#10263f;
+          border:2px solid #2a75bb;
+          border-radius:8px;
+          padding:8px 10px;
+          color:#e8f2ff;
+          font-family:"Press Start 2P", monospace;
+          font-size:11px;
+          font-weight:900;
+          text-transform:uppercase;
+        }
+        .bill-divider { height:2px; background:#2a75bb; margin:12px 0 16px; }
+        .bill-chip {
+          display:inline-block;
+          background:#f7f6ef;
+          border:2px solid #9a9680;
+          border-radius:6px;
+          padding:8px 10px;
+          color:#2b2b2b;
+          font-family:"Press Start 2P", monospace;
+          font-size:11px;
+          font-weight:900;
+        }
+        .bill-chip b { color:#10263f; }
+        div[data-testid="stFileUploaderDropzone"] {
+          background:#0f2033 !important;
+          border:2px dashed #2a75bb !important;
+          border-radius:10px !important;
+        }
+        div[data-testid="stFileUploaderDropzone"] * {
+          font-family:"Press Start 2P", monospace !important;
+          font-weight:900 !important;
+          color:#dcecff !important;
+        }
+        div[data-testid="stAlert"] {
+          border:2px solid #2a75bb !important;
+          border-radius:8px !important;
+        }
+        div[data-testid="stAlert"] * {
+          font-family:"Press Start 2P", monospace !important;
+          font-weight:900 !important;
+        }
+        details[data-testid="stExpander"] > summary {
+          font-family:"Press Start 2P", monospace !important;
+          font-weight:900 !important;
+          font-size:11px !important;
+        }
+        </style>
+        """,
+        unsafe_allow_html=True,
+    )
+    st.markdown("<div class='bill-title'>PC de Bill</div>", unsafe_allow_html=True)
+    st.markdown("<div class='bill-subtitle'>Sistema de almacenamiento Pokemon</div>", unsafe_allow_html=True)
+    st.markdown("<div class='bill-divider'></div>", unsafe_allow_html=True)
 
     current_user = st.session_state.get("user")
     st.markdown(
-        f"<div class='pt-section'>Este save se registrara a: {current_user or '-'}</div>",
+        f"<div class='bill-chip'>Entrenador activo: <b>{current_user or '-'}</b></div>",
         unsafe_allow_html=True,
     )
 
@@ -82,7 +152,7 @@ def page_saves() -> None:
         st.success(f"Guardado por {current_user} y establecido como actual (id={rec['id']}).")
 
     cur = get_current_save_for_user(current_user)
-    st.markdown("<div class='pt-section'>Save actual</div>", unsafe_allow_html=True)
+    st.markdown("<div class='bill-chip'>Save actual</div>", unsafe_allow_html=True)
     if cur:
         id_, fname, oname, sha, up, ts = cur
         st.info(
