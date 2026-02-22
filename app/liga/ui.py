@@ -11,6 +11,7 @@ from app.liga.ranking import (
     recompute_round,
 )
 from app.liga.state import ensure_state, persist_state, restore_state
+from app.tienda.money import _money_available
 from storage import clear_purchases
 from utils import USERS
 
@@ -297,8 +298,15 @@ def page_tabla() -> None:
     st.markdown("---")
     st.subheader("Tabla general")
     tabla = general_table_sorted()
+    rows = []
+    for i, (u, pts) in enumerate(tabla):
+        try:
+            coins = int(_money_available(u))
+        except Exception:
+            coins = 0
+        rows.append({"Pos": i + 1, "Jugador": u, "Puntos": pts, "Monedas": coins})
     st.dataframe(
-        [{"Pos": i + 1, "Jugador": u, "Puntos": pts} for i, (u, pts) in enumerate(tabla)],
+        rows,
         use_container_width=True,
     )
 
