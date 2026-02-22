@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import streamlit as st
 
+from app.common import COIN
 from app.liga.ranking import (
     MAX_JORNADAS,
     all_filled,
@@ -24,6 +25,13 @@ def _players_from_match_map(md: dict[tuple[str, str], str | None]) -> list[str]:
         if p2 and p2 not in out:
             out.append(p2)
     return out
+
+
+def _coins_for_user(user: str) -> int:
+    try:
+        return int(_money_available(user))
+    except Exception:
+        return 0
 
 
 def _render_previous_round_editor(*, prev_tramo: int, current_tramo: int) -> None:
@@ -289,26 +297,20 @@ def page_tabla() -> None:
         with c1:
             st.markdown("**Liga A**")
             for i, u in enumerate(A, start=1):
-                st.write(f"{i}. {u}")
+                st.write(f"{i}. {u} | {COIN} {_coins_for_user(u)}")
         with c2:
             st.markdown("**Liga B**")
             for j, u in enumerate(B, start=pos_b_start):
-                st.write(f"{j}. {u}")
+                st.write(f"{j}. {u} | {COIN} {_coins_for_user(u)}")
 
     st.markdown("---")
-    st.subheader("Tabla general")
+    st.subheader("Tabla general (con monedas)")
     tabla = general_table_sorted()
     rows = []
     for i, (u, pts) in enumerate(tabla):
-        try:
-            coins = int(_money_available(u))
-        except Exception:
-            coins = 0
-        rows.append({"Pos": i + 1, "Jugador": u, "Puntos": pts, "Monedas": coins})
-    st.dataframe(
-        rows,
-        use_container_width=True,
-    )
+        coins = _coins_for_user(u)
+        rows.append({"Pos": i + 1, "Jugador": u, "Puntos": pts, "Monedas": f"{COIN} {coins}"})
+    st.table(rows)
 
     if st.session_state.get("league_movements") or st.session_state.get("league_results"):
         st.markdown("---")
