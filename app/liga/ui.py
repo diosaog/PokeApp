@@ -304,13 +304,20 @@ def page_tabla() -> None:
                 st.write(f"{j}. {u} | {COIN} {_coins_for_user(u)}")
 
     st.markdown("---")
-    st.subheader("Tabla general (con monedas)")
     tabla = general_table_sorted()
-    rows = []
-    for i, (u, pts) in enumerate(tabla):
-        coins = _coins_for_user(u)
-        rows.append({"Pos": i + 1, "Jugador": u, "Puntos": pts, "Monedas": f"{COIN} {coins}"})
-    st.table(rows)
+    if st.session_state.league_active:
+        st.subheader("Tabla general")
+        st.dataframe(
+            [{"Pos": i + 1, "Jugador": u, "Puntos": pts} for i, (u, pts) in enumerate(tabla)],
+            use_container_width=True,
+        )
+    else:
+        st.subheader("Tabla general (con monedas)")
+        rows = []
+        for i, (u, pts) in enumerate(tabla):
+            coins = _coins_for_user(u)
+            rows.append({"Pos": i + 1, "Jugador": u, "Puntos": pts, "Monedas": f"{COIN} {coins}"})
+        st.table(rows)
 
     if st.session_state.get("league_movements") or st.session_state.get("league_results"):
         st.markdown("---")
