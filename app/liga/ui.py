@@ -34,6 +34,13 @@ def _coins_for_user(user: str) -> int:
         return 0
 
 
+def _fmt_points(value) -> str:
+    try:
+        return f"{float(value):.1f}"
+    except Exception:
+        return "0.0"
+
+
 def _render_previous_round_editor(*, prev_tramo: int, current_tramo: int) -> None:
     data = st.session_state.get("league_matches", {}).get(prev_tramo)
     st.markdown("---")
@@ -297,18 +304,18 @@ def page_tabla() -> None:
         with c1:
             st.markdown("**Liga A**")
             for i, u in enumerate(A, start=1):
-                st.write(f"{i}. {u} | {COIN} {_coins_for_user(u)}")
+                st.write(f"{i}. {u}")
         with c2:
             st.markdown("**Liga B**")
             for j, u in enumerate(B, start=pos_b_start):
-                st.write(f"{j}. {u} | {COIN} {_coins_for_user(u)}")
+                st.write(f"{j}. {u}")
 
     st.markdown("---")
     tabla = general_table_sorted()
     if st.session_state.league_active:
         st.subheader("Tabla general")
         st.dataframe(
-            [{"Pos": i + 1, "Jugador": u, "Puntos": pts} for i, (u, pts) in enumerate(tabla)],
+            [{"Pos": i + 1, "Jugador": u, "Puntos": _fmt_points(pts)} for i, (u, pts) in enumerate(tabla)],
             use_container_width=True,
         )
     else:
@@ -316,7 +323,7 @@ def page_tabla() -> None:
         rows = []
         for i, (u, pts) in enumerate(tabla):
             coins = _coins_for_user(u)
-            rows.append({"Pos": i + 1, "Jugador": u, "Puntos": pts, "Monedas": f"{COIN} {coins}"})
+            rows.append({"Pos": i + 1, "Jugador": u, "Puntos": _fmt_points(pts), "Monedas": f"{COIN} {coins}"})
         st.table(rows)
 
     if st.session_state.get("league_movements") or st.session_state.get("league_results"):
