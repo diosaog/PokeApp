@@ -317,6 +317,7 @@ def page_tabla() -> None:
         st.dataframe(
             [{"Pos": i + 1, "Jugador": u, "Puntos": _fmt_points(pts)} for i, (u, pts) in enumerate(tabla)],
             use_container_width=True,
+            hide_index=True,
         )
     else:
         st.subheader("Tabla general (con monedas)")
@@ -324,7 +325,7 @@ def page_tabla() -> None:
         for i, (u, pts) in enumerate(tabla):
             coins = _coins_for_user(u)
             rows.append({"Pos": i + 1, "Jugador": u, "Puntos": _fmt_points(pts), "Monedas": f"{COIN} {coins}"})
-        st.table(rows)
+        st.dataframe(rows, use_container_width=True, hide_index=True)
 
     if st.session_state.get("league_movements") or st.session_state.get("league_results"):
         st.markdown("---")
