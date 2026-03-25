@@ -6,6 +6,7 @@ from app.common import COIN
 from app.liga.ranking import (
     MAX_JORNADAS,
     all_filled,
+    final_podium,
     finalize,
     general_table_sorted,
     get_matches_for,
@@ -39,6 +40,40 @@ def _fmt_points(value) -> str:
         return f"{float(value):.1f}"
     except Exception:
         return "0.0"
+
+
+def _render_final_podium() -> None:
+    podium = final_podium()
+    if not podium:
+        return
+    st.markdown("---")
+    st.subheader("Clasificacion final")
+    labels = ["Ganador", "Segundo puesto", "Tercer puesto"]
+    cols = st.columns(3)
+    for idx, col in enumerate(cols):
+        with col:
+            if idx < len(podium):
+                user, pts = podium[idx]
+                st.markdown(
+                    (
+                        "<div class='panel-ghost'>"
+                        f"<div class='title'>{labels[idx]}</div>"
+                        f"<div class='value'>{user}</div>"
+                        f"<div style='margin-top:6px; color:#9aa3ab;'>Puntos: {_fmt_points(pts)}</div>"
+                        "</div>"
+                    ),
+                    unsafe_allow_html=True,
+                )
+            else:
+                st.markdown(
+                    (
+                        "<div class='panel-dashed'>"
+                        f"<div class='title'>{labels[idx]}</div>"
+                        "<div style='margin-top:6px;'>-</div>"
+                        "</div>"
+                    ),
+                    unsafe_allow_html=True,
+                )
 
 
 def _render_previous_round_editor(*, prev_tramo: int, current_tramo: int) -> None:
@@ -92,7 +127,7 @@ def _render_previous_round_editor(*, prev_tramo: int, current_tramo: int) -> Non
                 data["B"][(p1, p2)] = tmp_divs["B"].get(f"{p1} vs {p2}")
 
             try:
-                is_immediate_previous = prev_tramo == (current_tramo - 1)
+                is_immediate_previous = prev_tramo == (current_tramo - 1) and current_tramo <= MAX_JORNADAS
                 recompute_round(prev_tramo, apply_divisions_from_round=is_immediate_previous)
                 if is_immediate_previous:
                     current_matches = st.session_state.get("league_matches", {})
@@ -138,7 +173,19 @@ def page_tabla() -> None:
                 if st.button("Finalizar jornada", use_container_width=True):
                     try:
                         finalize(tramo)
-                        st.success("Jornada cerrada: rankings calculados y ascensos/descensos aplicados.")
+                        if tramo >= MAX_JORNADAS:
+                            podium = final_podium()
+                            if podium:
+                                labels = ["Ganador", "Segundo puesto", "Tercer puesto"]
+                                summary = " | ".join(
+                                    f"{labels[i]}: {user}"
+                                    for i, (user, _pts) in enumerate(podium)
+                                )
+                                st.success(f"Jornada final cerrada. {summary}.")
+                            else:
+                                st.success("Jornada final cerrada. La liga ha terminado.")
+                        else:
+                            st.success("Jornada cerrada: rankings calculados y ascensos/descensos aplicados.")
                     except Exception as e:
                         st.error(str(e))
             with c2:
@@ -312,6 +359,8 @@ def page_tabla() -> None:
 
     st.markdown("---")
     tabla = general_table_sorted()
+    if liga_finalizada and not st.session_state.league_active:
+        _render_final_podium()
     if st.session_state.league_active:
         st.subheader("Tabla general")
         st.dataframe(

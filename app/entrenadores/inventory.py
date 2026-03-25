@@ -155,18 +155,27 @@ def _render_purchase_cards(
     for idx, row in enumerate(items):
         pid, item, price = row[0], row[1], row[2]
         status = (row[4] if len(row) > 4 else None) or "pendiente"
+        show_status = _is_usable_item(item)
         status_label = "Disponible" if status != "used" else "Usado"
         badge_cls = "status-ok" if status != "used" else "status-warn"
         icon = _item_icon_url(item)
         col = cols[idx % 3]
         with col:
+            icon_html = ""
+            if icon:
+                icon_html = (
+                    f"<img src='{icon}' alt='' "
+                    "style='width:36px; height:36px; object-fit:contain; image-rendering:pixelated; "
+                    "flex:0 0 auto;' onerror=\"this.style.display='none'\"/>"
+                )
+            status_html = f"<span class='status-badge {badge_cls}'>{status_label}</span>" if show_status else ""
             st.markdown(
                 "<div class='pl-card'>"
                 "<div class='pl-row'>"
-                f"<img class='pl-icon' src='{icon}' alt='' onerror=\"this.style.display='none'\"/>"
+                f"{icon_html}"
                 f"<div><div class='pl-title'>{item}</div><div class='pl-muted'>{COIN} {price}</div></div>"
                 "</div>"
-                f"<span class='status-badge {badge_cls}'>{status_label}</span>"
+                f"{status_html}"
                 "</div>",
                 unsafe_allow_html=True,
             )

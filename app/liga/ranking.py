@@ -10,7 +10,7 @@ from storage import add_purchase, get_current_save_for_user, load_save_bytes, se
 from utils import USERS, ensure_user_dir, list_user_saves
 from conex_pkhex import extract_box, has_pc_data, open_sav_cached
 
-MAX_JORNADAS = 4
+MAX_JORNADAS = 5
 
 
 def _cache_data(ttl: int = 20):
@@ -178,13 +178,19 @@ def finalize(tramo: int) -> None:
     except Exception:
         pass
 
-    nueva_A = rankA[:2] + rankB[:3]
-    nueva_B = rankA[2:5] + rankB[3:5]
-    st.session_state.league_divisions = {"A": nueva_A, "B": nueva_B}
-    try:
-        st.session_state.league_movements[tramo] = {"up": [rankB[0], rankB[1]], "down": [rankA[2], rankA[3]]}
-    except Exception:
-        pass
+    if tramo < MAX_JORNADAS:
+        nueva_A = rankA[:2] + rankB[:3]
+        nueva_B = rankA[2:5] + rankB[3:5]
+        st.session_state.league_divisions = {"A": nueva_A, "B": nueva_B}
+        try:
+            st.session_state.league_movements[tramo] = {"up": [rankB[0], rankB[1]], "down": [rankA[2], rankA[3]]}
+        except Exception:
+            pass
+    else:
+        try:
+            st.session_state.setdefault("league_movements", {}).pop(tramo, None)
+        except Exception:
+            pass
     st.session_state.league_active = False
     st.session_state.league_tramo = tramo + 1
     persist_state()
@@ -220,16 +226,22 @@ def recompute_round(tramo: int, *, apply_divisions_from_round: bool = False) -> 
     for j, u in enumerate(rankB, start=start_b):
         _record_position(tramo, u, j)
 
-    try:
-        st.session_state.setdefault("league_movements", {})
-        st.session_state.league_movements[tramo] = {
-            "up": [rankB[0], rankB[1]],
-            "down": [rankA[2], rankA[3]],
-        }
-    except Exception:
-        pass
+    if tramo < MAX_JORNADAS:
+        try:
+            st.session_state.setdefault("league_movements", {})
+            st.session_state.league_movements[tramo] = {
+                "up": [rankB[0], rankB[1]],
+                "down": [rankA[2], rankA[3]],
+            }
+        except Exception:
+            pass
+    else:
+        try:
+            st.session_state.setdefault("league_movements", {}).pop(tramo, None)
+        except Exception:
+            pass
 
-    if apply_divisions_from_round:
+    if apply_divisions_from_round and tramo < MAX_JORNADAS:
         nueva_A = rankA[:2] + rankB[:3]
         nueva_B = rankA[2:5] + rankB[3:5]
         st.session_state.league_divisions = {"A": nueva_A, "B": nueva_B}
@@ -264,4 +276,8 @@ def current_points_total(user: str) -> float:
 
 
 def general_table_sorted() -> list[tuple[str, float]]:
-    return sorted([(u, current_points_total(u)) for u in USERS.keys()], key=lambda x: x[1], reverse=True)
+    return sorted([(u, current_points_total(u)) for u in USERS.keys()], key=lambda x: (-x[1], x[0]))
+
+
+def final_podium() -> list[tuple[str, float]]:
+    return general_table_sorted()[:3]
