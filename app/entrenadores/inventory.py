@@ -59,7 +59,7 @@ def _item_icon_url(name: str) -> str:
         "capsula habilidad": "ability-capsule",
         "chapa dorada": "gold-bottle-cap",
         "chapa plateada": "bottle-cap",
-        "menta de naturaleza": "bottle-cap",
+        "menta de naturaleza": "leaf-stone",
         "objeto evolutivo": "dawn-stone",
         "objeto potenciador de tipo": "silk-scarf",
     }
@@ -102,7 +102,7 @@ def _item_icon_url(name: str) -> str:
     if n in slug_map:
         return _pokeapi_item_png(slug_map[n])
     if "menta" in n:
-        return _pokeapi_item_png("bottle-cap")
+        return _pokeapi_item_png("leaf-stone")
     if "revivir" in n:
         return _pokeapi_item_png("max-revive")
     if "robar" in n:
