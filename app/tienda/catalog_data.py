@@ -74,7 +74,7 @@ def get_catalog() -> dict[str, list[dict]]:
         {"name": "Capsula Habilidad", "price": 8, "img": _pokeapi_item_png("ability-capsule"), "desc": "Cambia habilidad normal."},
         {"name": "Chapa Dorada", "price": 15, "img": _pokeapi_item_png("gold-bottle-cap"), "desc": "Maximiza IVs en todos los stats."},
         {"name": "Chapa Plateada", "price": 6, "img": _pokeapi_item_png("bottle-cap"), "desc": "Maximiza un IV concreto."},
-        {"name": "Menta de Naturaleza", "price": 6, "img": _pokeapi_item_png("adamant-mint"), "desc": "Cambia naturaleza."},
+        {"name": "Menta de Naturaleza", "price": 6, "img": _pokeapi_item_png("bottle-cap"), "desc": "Cambia naturaleza."},
         {"name": "Objeto Evolutivo", "price": 4, "img": _pokeapi_item_png("dawn-stone"), "desc": "Piedras y otros objetos de evolucion."},
     ]
     return {
