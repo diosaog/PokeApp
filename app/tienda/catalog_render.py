@@ -113,7 +113,7 @@ def _render_shop_items(items: list[dict], category_key: str, *, available: int |
             for it in items:
                 n = _norm(it.get("name") or "")
                 if ("menta" in n) and (not it.get("img")):
-                    it["img"] = _shop_asset("adamant-mint") or _pokeapi_item_png("leaf-stone")
+                    it["img"] = _shop_asset("menta") or _shop_asset("adamant-mint") or _pokeapi_item_png("leaf-stone")
         except Exception:
             pass
     else:

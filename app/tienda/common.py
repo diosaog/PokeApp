@@ -25,7 +25,7 @@ def _shop_asset(slug: str) -> str | None:
             return None
         candidates = [s, s.replace(" ", "-"), s.replace(" ", "_")]
         for base in candidates:
-            for ext in (".png", ".jpg", ".jpeg", ".webp"):
+            for ext in (".png", ".jpg", ".jpeg", ".webp", ".svg"):
                 p = SHOP_DIR / f"{base}{ext}"
                 if p.exists():
                     return str(p)

@@ -36,6 +36,7 @@ def _item_icon_url(name: str) -> str:
         "captura extra": ("captura-extra", "ultra-ball"),
         "blindar pokemon": ("Blindar", "metal-coat"),
         "comodin de blindaje por robo": ("Blindar", "metal-coat"),
+        "menta de naturaleza": ("menta", "leaf-stone"),
         "fosil": ("fosil", "helix-fossil"),
     }
     if n in custom:
@@ -59,7 +60,6 @@ def _item_icon_url(name: str) -> str:
         "capsula habilidad": "ability-capsule",
         "chapa dorada": "gold-bottle-cap",
         "chapa plateada": "bottle-cap",
-        "menta de naturaleza": "leaf-stone",
         "objeto evolutivo": "dawn-stone",
         "objeto potenciador de tipo": "silk-scarf",
     }
@@ -101,8 +101,6 @@ def _item_icon_url(name: str) -> str:
         return _pokeapi_item_png(berry_map[n])
     if n in slug_map:
         return _pokeapi_item_png(slug_map[n])
-    if "menta" in n:
-        return _pokeapi_item_png("leaf-stone")
     if "revivir" in n:
         return _pokeapi_item_png("max-revive")
     if "robar" in n:
