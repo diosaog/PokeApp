@@ -10,6 +10,12 @@ from app.entrenadores.badges import count_badges
 from app.entrenadores.boxes import muertos_box_index
 from app.entrenadores.profile import find_trainer_image
 from app.juicios.penalties import get_user_penalties
+from app.tienda.money import (
+    LEAGUE_FINISHED_COINS,
+    league_finished_bonus,
+    league_finished_claimed,
+    mark_league_finished_claimed,
+)
 from storage import settings_get, settings_set
 
 
@@ -162,7 +168,8 @@ def trainer_summary_with_portrait_ui(sav_json: dict, box_count: int, *, is_own_p
         monedas_liga = 0
 
     monedas_badges = 4 * medallas
-    bruto = monedas_badges + monedas_liga
+    bonus_liga_finalizada = league_finished_bonus(jugador or "")
+    bruto = monedas_badges + monedas_liga + bonus_liga_finalizada
     try:
         from storage import total_spent
         spent = total_spent(jugador or "")
@@ -250,3 +257,29 @@ def trainer_summary_with_portrait_ui(sav_json: dict, box_count: int, *, is_own_p
             if st.button("Guardar revividos", key=f"save_revives_{jugador}"):
                 _set_revives(jugador or "", rev_count)
                 st.success("Revividos guardados.")
+        already_claimed = league_finished_claimed(jugador or "")
+        can_claim_league_bonus = medallas >= 8 and not already_claimed
+        if st.button(
+            "Liga Finalizada",
+            key=f"league_finished_{jugador}",
+            disabled=not can_claim_league_bonus,
+            help=(
+                "Reclama 12 monedas por completar la liga."
+                if can_claim_league_bonus
+                else "Necesitas las 8 medallas para reclamarlo."
+                if medallas < 8
+                else "Ya has reclamado esta recompensa."
+            ),
+        ):
+            if mark_league_finished_claimed(jugador or ""):
+                st.cache_data.clear()
+                st.success(f"Has recibido {LEAGUE_FINISHED_COINS} monedas por finalizar la liga.")
+                st.rerun()
+            else:
+                st.error("No se pudo guardar la recompensa de liga.")
+        if already_claimed:
+            st.caption(f"Recompensa de liga reclamada: +{LEAGUE_FINISHED_COINS} monedas.")
+        elif medallas < 8:
+            st.caption("La recompensa Liga Finalizada se desbloquea con las 8 medallas.")
+        else:
+            st.caption(f"Pulsa el boton para reclamar +{LEAGUE_FINISHED_COINS} monedas.")

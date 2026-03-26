@@ -9,6 +9,8 @@ from storage import (
     list_inventory,
     list_saves_by_user,
     load_save_bytes,
+    settings_get,
+    settings_set,
     total_spent,
 )
 from utils import ensure_user_dir, list_user_saves
@@ -23,6 +25,40 @@ def _cache_data(ttl: int = 10):
     if st is None:
         return lambda f: f
     return st.cache_data(ttl=ttl, show_spinner=False)
+
+
+LEAGUE_FINISHED_COINS = 12
+
+
+def _league_finished_reward_key(user: str) -> str:
+    return f"league_finished_reward:{user}"
+
+
+@_cache_data(ttl=10)
+def league_finished_claimed(user: str | None) -> bool:
+    if not user:
+        return False
+    try:
+        raw = settings_get(_league_finished_reward_key(user))
+        if raw in (None, "", "0", "false", "False"):
+            return False
+        return True
+    except Exception:
+        return False
+
+
+def mark_league_finished_claimed(user: str | None) -> bool:
+    if not user:
+        return False
+    try:
+        settings_set(_league_finished_reward_key(user), "1")
+        return True
+    except Exception:
+        return False
+
+
+def league_finished_bonus(user: str | None) -> int:
+    return LEAGUE_FINISHED_COINS if league_finished_claimed(user) else 0
 
 
 @_cache_data(ttl=10)
@@ -69,13 +105,12 @@ def _calc_money_for_user(user: str) -> int:
         badge_found = False
     if not badge_found:
         try:
-            from storage import settings_get
             raw = settings_get(f"badges_count:{user}")
             if raw not in (None, ""):
                 badge_coins = 4 * max(int(raw), 0)
         except Exception:
             pass
-    total = int(liga + badge_coins)
+    total = int(liga + badge_coins + league_finished_bonus(user))
     return total
 
 
