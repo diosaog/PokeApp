@@ -6,7 +6,8 @@ import streamlit as st
 
 from app.liga.state import persist_state
 from app.juicios.penalties import get_user_penalties
-from storage import add_purchase, get_current_save_for_user, load_save_bytes, settings_get
+from app.tienda.common import _eq_item
+from storage import add_purchase, get_current_save_for_user, list_inventory, load_save_bytes, settings_get
 from utils import USERS, ensure_user_dir, list_user_saves
 from conex_pkhex import extract_box, has_pc_data, open_sav_cached
 
@@ -99,7 +100,13 @@ def _count_muertos_for_trainer(trainer: str) -> int:
     except Exception:
         revives = 0
 
-    return muertos + 2 * revives
+    try:
+        used_items = list_inventory(trainer, status="used", limit=300)
+        revives_used = sum(1 for row in (used_items or []) if len(row) > 1 and _eq_item(row[1], "Revivir Pokemon"))
+    except Exception:
+        revives_used = 0
+
+    return muertos + revives_used + 2 * revives
 
 
 def _wins_losses(players: list[str], results: dict[tuple[str, str], str]) -> dict:
