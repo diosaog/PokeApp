@@ -32,7 +32,7 @@ Normativa ChampionsLocke
 Clausulas especiales
 - Duplicados: si el primer encuentro pertenece a una linea evolutiva ya capturada, se puede forzar otro encuentro.
 - Legendarios principales: no estan permitidos; si aparecen como primer encuentro, se fuerza otro.
-- Shiny: un Pokemon shiny es siempre capturable y no consume la captura de la ruta.
+- Shiny: El pokemon shiny es capturable 1 unica vez por juego, no se pueden capturar mas de 1.
 - Fosil: solo se puede usar una vez por ser de uso unico.
 
 2. Restricciones de equipo
