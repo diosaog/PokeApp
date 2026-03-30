@@ -117,7 +117,8 @@ Reglas de nivel
 - Fosil: permite obtener un fosil.
 
 9. Normas generales
-- Se permiten intercambios y combates de practica.
+- No e permiten intercambios.
+- Se permiten combates de practica entre jugadores de distintas ligas.
 - Los comodines pueden usarse sobre otros jugadores o sobre uno mismo.
 - El comodin Robar no puede usarse dos veces seguidas sobre el mismo jugador.
 - Directos obligatorios: los jugadores deben jugar en Discord en directo y avisar previamente por WhatsApp.
