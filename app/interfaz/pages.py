@@ -30,16 +30,19 @@ Normativa ChampionsLocke
 - Mote obligatorio para todos los Pokemon.
 
 Clausulas especiales
-- Duplicados: si el primer encuentro pertenece a una linea evolutiva ya capturada, se puede forzar otro encuentro.
+- Duplicados: si el primer encuentro pertenece a una linea evolutiva ya capturada, se debe de forzar otro encuentro, a menos que este haya muerto. Entonces podras decidir.
 - Legendarios principales: no estan permitidos; si aparecen como primer encuentro, se fuerza otro.
 - Shiny: El pokemon shiny es capturable 1 unica vez por juego, no se pueden capturar mas de 1.
 - Fosil: solo se puede usar una vez por ser de uso unico.
+- Pokemon baneados: Slaking, Deoxys.
+- Movimientos baneados: Esquema (Unicamente la MT, en el recuerdamovimientos si se puede).
+- Objetos baneados: Rocio Bondad.
 
 2. Restricciones de equipo
 - Maximo 1 pseudo-legendario por equipo.
 - Maximo 1 legendario menor o singular (<= 600 BST) por equipo.
-- No se pueden repetir Pokemon en la misma fase evolutiva.
-- Si se obtiene un duplicado de fase, debe liberarse el ultimo capturado.
+- No se pueden repetir Pokemon de la misma fase evolutiva.
+- Si se obtiene un duplicado, debe liberarse el ultimo capturado.
 - Esta norma no se aplica si el Pokemon previo de esa fase ya estaba muerto.
 
 3. Estructura por tramos
@@ -117,10 +120,16 @@ Reglas de nivel
 - Fosil: permite obtener un fosil.
 
 9. Normas generales
-- No e permiten intercambios.
+- No se permiten intercambios.
+- Si un Pokemon ha sido eliminado por un juicio y/o ilegalidad de un entrenador, este NO podra volver a tener ese Pokemon.
+- Queda totalmente prohibido explotar el juego, como por ejemplo forzar encuentros no random (cadenas de shiny, arboles de miel, etc.).
+- Las tiendas especiales solo y unicamente se puede comprar 1 objeto.
+- Objetos como las Master Ball de tiendas, solo se pueden comprar una vez.
 - Se permiten combates de practica entre jugadores de distintas ligas.
 - Los comodines pueden usarse sobre otros jugadores o sobre uno mismo.
 - El comodin Robar no puede usarse dos veces seguidas sobre el mismo jugador.
+- Prohibido usar equipos de otros jugadores para practicar y usar herramientas de calculos de daño externas al showdown.
+- Buscar vacios legales en el juego es ilegal, si un entrenador lo encuentra, debe avisar por el grupo y se tomara una decision en base a una votacion.
 - Directos obligatorios: los jugadores deben jugar en Discord en directo y avisar previamente por WhatsApp.
 """
     with st.expander("Normativa ChampionsLocke", expanded=False):
