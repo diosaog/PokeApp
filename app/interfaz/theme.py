@@ -131,7 +131,7 @@ def apply_section_theme(section: str) -> None:
 
 
 def apply_platinum_ui(section: str) -> None:
-    if section not in ("Entrenadores", "Tienda", "Saves"):
+    if section not in ("Entrenadores", "Tienda", "Saves", "Copa"):
         return
     css = """
     <style>

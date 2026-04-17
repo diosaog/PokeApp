@@ -8,6 +8,7 @@ from pathlib import Path
 
 import streamlit as st
 
+from app.interfaz.theme import apply_platinum_ui, render_poke_separator
 from storage import settings_get, settings_set
 from utils import USERS
 
@@ -295,6 +296,124 @@ def _ensure_doubles_css() -> None:
     st.markdown(
         """
         <style>
+        .doubles-banner {
+          background: #f1c258;
+          border: 2px solid #c28f27;
+          border-radius: 6px;
+          padding: 10px 12px;
+          display: inline-block;
+          color: #1f1f1f;
+          font-family: "Press Start 2P", monospace;
+          font-size: 14px;
+          font-weight: 900;
+          letter-spacing: 0.3px;
+          text-shadow: 0 0 1px rgba(0,0,0,0.28);
+        }
+        .doubles-strip {
+          height: 2px;
+          background: #b9b59f;
+          margin: 10px 0 14px;
+        }
+        .doubles-section {
+          display: inline-block;
+          background: #f7f6ef;
+          border: 2px solid #9a9680;
+          border-radius: 6px;
+          padding: 8px 10px;
+          color: #2b2b2b;
+          font-family: "Press Start 2P", monospace;
+          font-size: 11px;
+          font-weight: 900;
+          text-shadow: 0 0 1px rgba(0,0,0,0.2);
+        }
+        .doubles-note {
+          display:inline-block;
+          margin-top: 6px;
+          background: #f7f6ef;
+          border: 2px solid #9a9680;
+          border-radius: 6px;
+          padding: 8px 10px;
+          color: #2b2b2b;
+          font-family: "Press Start 2P", monospace;
+          font-size: 10px;
+          line-height: 1.5;
+        }
+        .doubles-metric {
+          background:#f7f6ef;
+          border:2px solid #9a9680;
+          border-radius:6px;
+          padding:10px 12px;
+          color:#1f1f1f;
+          box-shadow: inset 0 0 0 1px rgba(255,255,255,0.45);
+          min-height: 86px;
+        }
+        .doubles-metric-label {
+          color:#444;
+          font-family:"Press Start 2P", monospace;
+          font-size:10px;
+          font-weight:900;
+          line-height:1.45;
+        }
+        .doubles-metric-value {
+          margin-top:8px;
+          color:#1b1b1b;
+          font-family:"Press Start 2P", monospace;
+          font-size:16px;
+          font-weight:900;
+          line-height:1.3;
+          text-shadow:0 0 1px rgba(0,0,0,0.28);
+        }
+        .doubles-metric-sub {
+          margin-top:8px;
+          color:#555;
+          font-family:"Press Start 2P", monospace;
+          font-size:10px;
+          line-height:1.45;
+        }
+        .doubles-card {
+          background:#f7f6ef;
+          border:2px solid #9a9680;
+          border-radius:6px;
+          overflow:hidden;
+          box-shadow: inset 0 0 0 1px rgba(255,255,255,0.42);
+          margin-bottom: 10px;
+        }
+        .doubles-card-head {
+          background:#f1c258;
+          border-bottom:2px solid #c28f27;
+          padding:8px 10px;
+          color:#1f1f1f;
+          font-family:"Press Start 2P", monospace;
+          font-size:11px;
+          font-weight:900;
+          text-shadow:0 0 1px rgba(0,0,0,0.22);
+        }
+        .doubles-card-body {
+          padding:12px;
+        }
+        .doubles-team-name {
+          color:#1f1f1f;
+          font-family:"Press Start 2P", monospace;
+          font-size:13px;
+          font-weight:900;
+          line-height:1.4;
+          text-shadow:0 0 1px rgba(0,0,0,0.18);
+        }
+        .doubles-team-meta {
+          margin-top:8px;
+          color:#3b3b3b;
+          font-family:"Press Start 2P", monospace;
+          font-size:10px;
+          line-height:1.55;
+        }
+        .doubles-logo-hint {
+          margin-top:10px;
+          color:#5c5c5c;
+          font-family:"Press Start 2P", monospace;
+          font-size:9px;
+          line-height:1.6;
+          word-break: break-word;
+        }
         .doubles-logo-wrap {
           width: 170px;
           height: 170px;
@@ -302,10 +421,10 @@ def _ensure_doubles_css() -> None:
           align-items:center;
           justify-content:center;
           margin: 0 auto;
-          border-radius: 14px;
-          background: rgba(255,255,255,0.03);
-          border: 1px solid rgba(255,255,255,0.08);
-          box-shadow: inset 0 1px 0 rgba(255,255,255,0.04);
+          border-radius: 8px;
+          background: linear-gradient(180deg, #fbfaf4 0%, #efecdf 100%);
+          border: 2px solid #9a9680;
+          box-shadow: inset 0 0 0 1px rgba(255,255,255,0.55);
           padding: 12px;
         }
         .doubles-logo-wrap.compact {
@@ -322,7 +441,30 @@ def _ensure_doubles_css() -> None:
           object-fit: contain;
           display: block;
           image-rendering: -webkit-optimize-contrast;
-          filter: drop-shadow(0 3px 10px rgba(0,0,0,0.28));
+          filter: drop-shadow(0 3px 8px rgba(0,0,0,0.2));
+        }
+        .doubles-vs {
+          display:flex;
+          align-items:center;
+          justify-content:center;
+          min-height:100%;
+          color:#2b2b2b;
+          font-family:"Press Start 2P", monospace;
+          font-size:16px;
+          font-weight:900;
+          text-shadow:0 0 1px rgba(0,0,0,0.18);
+        }
+        .doubles-champion {
+          background:#f1c258;
+          border:2px solid #c28f27;
+          border-radius:6px;
+          padding:10px 12px;
+          color:#1f1f1f;
+          font-family:"Press Start 2P", monospace;
+          font-size:12px;
+          font-weight:900;
+          line-height:1.5;
+          text-shadow:0 0 1px rgba(0,0,0,0.22);
         }
         </style>
         """,
@@ -330,44 +472,85 @@ def _ensure_doubles_css() -> None:
     )
 
 
+def _pt_banner(title: str, subtitle: str | None = None) -> None:
+    st.markdown(f"<div class='doubles-banner'>{title}</div>", unsafe_allow_html=True)
+    st.markdown("<div class='doubles-strip'></div>", unsafe_allow_html=True)
+    if subtitle:
+        st.markdown(f"<div class='doubles-note'>{subtitle}</div>", unsafe_allow_html=True)
+
+
+def _pt_section(title: str) -> None:
+    st.markdown(f"<div class='doubles-section'>{title}</div>", unsafe_allow_html=True)
+
+
+def _pt_metric(label: str, value: str, sub: str | None = None) -> None:
+    sub_html = f"<div class='doubles-metric-sub'>{sub}</div>" if sub else ""
+    st.markdown(
+        (
+            "<div class='doubles-metric'>"
+            f"<div class='doubles-metric-label'>{label}</div>"
+            f"<div class='doubles-metric-value'>{value}</div>"
+            f"{sub_html}"
+            "</div>"
+        ),
+        unsafe_allow_html=True,
+    )
+
+
 def _render_team_card(team: dict, *, compact: bool = False) -> None:
     name = team.get("name") or "-"
     members = list(team.get("members") or [])
-    logo = _logo_for_team(name)
     logo_uri = _logo_data_uri_for_team(name)
     if compact:
-        if logo_uri:
-            st.markdown(
-                (
-                    "<div class='doubles-logo-wrap compact'>"
-                    f"<img class='doubles-logo-img' src='{logo_uri}' alt='logo {name}'/>"
-                    "</div>"
-                ),
-                unsafe_allow_html=True,
-            )
-        st.markdown(f"**{name}**")
-        st.caption(" / ".join(members) if members else "Sin miembros")
+        logo_html = (
+            f"<img class='doubles-logo-img' src='{logo_uri}' alt='logo {name}'/>"
+            if logo_uri
+            else "<div class='doubles-team-meta'>Sin logo</div>"
+        )
+        st.markdown(
+            (
+                "<div style='text-align:center;'>"
+                "<div class='doubles-logo-wrap compact'>"
+                f"{logo_html}"
+                "</div>"
+                f"<div class='doubles-team-name' style='margin-top:8px; text-align:center;'>{name}</div>"
+                f"<div class='doubles-team-meta' style='text-align:center;'>{' / '.join(members) if members else 'Sin miembros'}</div>"
+                "</div>"
+            ),
+            unsafe_allow_html=True,
+        )
         return
-    with st.container(border=True):
-        cols = st.columns([1, 2])
-        with cols[0]:
-            if logo_uri:
-                st.markdown(
-                    (
-                        "<div class='doubles-logo-wrap'>"
-                        f"<img class='doubles-logo-img' src='{logo_uri}' alt='logo {name}'/>"
-                        "</div>"
-                    ),
-                    unsafe_allow_html=True,
-                )
-            else:
-                st.caption("Sin logo")
-        with cols[1]:
-            st.markdown(f"**{name}**")
-            st.caption(" + ".join(members) if members else "Sin miembros")
-            slug = _slug(name)
-            if slug:
-                st.caption(f"Logo: `{slug}.png/.jpg/.jpeg/.webp/.svg`")
+    logo_html = (
+        f"<img class='doubles-logo-img' src='{logo_uri}' alt='logo {name}'/>"
+        if logo_uri
+        else "<div class='doubles-team-meta'>Sin logo</div>"
+    )
+    slug = _slug(name)
+    hint_html = (
+        f"<div class='doubles-logo-hint'>Logo: {slug}.png /.jpg /.jpeg /.webp /.svg</div>"
+        if slug
+        else ""
+    )
+    st.markdown(
+        (
+            "<div class='doubles-card'>"
+            "<div class='doubles-card-head'>Equipo</div>"
+            "<div class='doubles-card-body' style='display:grid; grid-template-columns: 190px 1fr; gap:14px; align-items:center;'>"
+            "<div>"
+            "<div class='doubles-logo-wrap'>"
+            f"{logo_html}"
+            "</div>"
+            "</div>"
+            "<div>"
+            f"<div class='doubles-team-name'>{name}</div>"
+            f"<div class='doubles-team-meta'>{' + '.join(members) if members else 'Sin miembros'}</div>"
+            f"{hint_html}"
+            "</div>"
+            "</div>"
+            "</div>"
+        ),
+        unsafe_allow_html=True,
+    )
 
 
 def _render_configurator(S: dict) -> None:
@@ -376,8 +559,18 @@ def _render_configurator(S: dict) -> None:
     current_count = int(S.get("team_count") or min(5, max_teams))
     current_count = max(2, min(current_count, max_teams))
 
-    st.info("Crea equipos de 2 jugadores. El logo se carga automaticamente desde la carpeta de logos segun el nombre del equipo.")
-    st.caption(f"Carpeta de logos: `{LOGO_DIR_REL}`")
+    render_poke_separator()
+    _pt_section("Configurar Equipos")
+    st.markdown(
+        (
+            "<div class='doubles-note'>"
+            "Crea equipos de 2 jugadores. El logo se carga automaticamente desde la carpeta indicada, "
+            "segun el nombre exacto normalizado del equipo."
+            f"<br/><br/>Carpeta de logos: {LOGO_DIR_REL}"
+            "</div>"
+        ),
+        unsafe_allow_html=True,
+    )
 
     with st.form("copa_dobles_setup"):
         team_count = int(
@@ -446,14 +639,17 @@ def _render_configurator(S: dict) -> None:
 
 
 def page_copa() -> None:
+    apply_platinum_ui("Copa")
     _ensure_logo_dir()
     _restore_state()
     _ensure_state()
     _ensure_doubles_css()
     S = st.session_state.copa_dobles
 
-    st.subheader("Copa Dobles")
-    st.caption("Liga todos contra todos entre equipos de 2 jugadores, con final entre los 2 mejores.")
+    _pt_banner(
+        "Copa Dobles",
+        "Liga todos contra todos entre equipos de 2 jugadores, con final automatica entre los 2 mejores equipos.",
+    )
 
     if not S.get("configured"):
         _render_configurator(S)
@@ -467,9 +663,19 @@ def page_copa() -> None:
     standings = _standings(S)
     complete = _league_complete(S)
 
-    top_a, top_b = st.columns([3, 1])
+    m1, m2, m3 = st.columns(3)
+    with m1:
+        _pt_metric("Equipos", str(len(S.get("teams", []))), "Parejas registradas")
+    with m2:
+        _pt_metric("Jornadas", str(len(S.get("rounds", []))), "Liguilla todos contra todos")
+    with m3:
+        final_value = "Lista" if complete else "Pendiente"
+        _pt_metric("Final", final_value, "Se activa al cerrar la liga")
+
+    st.markdown("<div class='doubles-strip'></div>", unsafe_allow_html=True)
+    top_a, top_b = st.columns([3, 1], gap="large")
     with top_a:
-        st.info(f"Carpeta de logos: `{LOGO_DIR_REL}`")
+        st.markdown(f"<div class='doubles-note'>Carpeta de logos: {LOGO_DIR_REL}</div>", unsafe_allow_html=True)
     with top_b:
         if st.button("Resetear Copa Dobles", use_container_width=True):
             st.session_state.copa_dobles = _empty_state()
@@ -477,20 +683,23 @@ def page_copa() -> None:
             st.success("Copa Dobles reiniciada.")
             st.rerun()
 
-    st.markdown("---")
-    st.subheader("Equipos")
+    render_poke_separator()
+    _pt_section("Equipos")
     team_cols = st.columns(min(2, max(1, len(S.get("teams", [])))))
     for idx, team in enumerate(S.get("teams", [])):
         with team_cols[idx % len(team_cols)]:
             _render_team_card(team)
 
-    st.markdown("---")
-    st.subheader("Liga Regular")
-    st.caption("Resultados validos de Bo3: `2-0`, `2-1`, `1-2` o `0-2`.")
+    render_poke_separator()
+    _pt_section("Liga Regular")
+    st.markdown(
+        "<div class='doubles-note'>Resultados validos de Bo3: 2-0, 2-1, 1-2 o 0-2.</div>",
+        unsafe_allow_html=True,
+    )
     for round_data in S.get("rounds", []):
         round_no = int(round_data.get("round") or 0)
+        st.markdown(f"<div class='doubles-card-head' style='margin-top:12px;'>Jornada {round_no}</div>", unsafe_allow_html=True)
         with st.form(f"copa_dobles_round_{round_no}"):
-            st.markdown(f"**Jornada {round_no}**")
             if not round_data.get("matches"):
                 st.caption("Sin enfrentamientos en esta jornada.")
             for match_idx, match in enumerate(round_data.get("matches", [])):
@@ -499,8 +708,11 @@ def page_copa() -> None:
                 current_label = _label_for_score(match.get("score_a"), match.get("score_b"))
                 cols = st.columns([2, 1, 2])
                 with cols[0]:
-                    st.markdown(f"**{team_a.get('name') or '-'}**")
-                    st.caption(" + ".join(team_a.get("members") or []))
+                    st.markdown(f"<div class='doubles-team-name'>{team_a.get('name') or '-'}</div>", unsafe_allow_html=True)
+                    st.markdown(
+                        f"<div class='doubles-team-meta'>{' + '.join(team_a.get('members') or [])}</div>",
+                        unsafe_allow_html=True,
+                    )
                 with cols[1]:
                     choice = st.selectbox(
                         "Resultado",
@@ -510,8 +722,12 @@ def page_copa() -> None:
                         label_visibility="collapsed",
                     )
                 with cols[2]:
-                    st.markdown(f"**{team_b.get('name') or '-'}**")
-                    st.caption(" + ".join(team_b.get("members") or []))
+                    st.markdown(f"<div class='doubles-team-name'>{team_b.get('name') or '-'}</div>", unsafe_allow_html=True)
+                    st.markdown(
+                        f"<div class='doubles-team-meta'>{' + '.join(team_b.get('members') or [])}</div>",
+                        unsafe_allow_html=True,
+                    )
+                st.markdown("<div class='doubles-strip' style='margin:8px 0 12px;'></div>", unsafe_allow_html=True)
             if st.form_submit_button(f"Guardar jornada {round_no}"):
                 for match_idx, match in enumerate(round_data.get("matches", [])):
                     score_a, score_b = RESULT_LABELS[st.session_state[f"doubles_result_{round_no}_{match_idx}"]]
@@ -521,9 +737,12 @@ def page_copa() -> None:
                 st.success(f"Jornada {round_no} guardada.")
                 st.rerun()
 
-    st.markdown("---")
-    st.subheader("Clasificacion")
-    st.caption("Desempates actuales: series ganadas, diferencia de juegos, juegos ganados y directo si el empate exacto es entre 2 equipos.")
+    render_poke_separator()
+    _pt_section("Clasificacion")
+    st.markdown(
+        "<div class='doubles-note'>Desempates actuales: series ganadas, diferencia de juegos, juegos ganados y directo si el empate exacto es entre 2 equipos.</div>",
+        unsafe_allow_html=True,
+    )
     if standings:
         rows = []
         for pos, row in enumerate(standings, start=1):
@@ -538,37 +757,48 @@ def page_copa() -> None:
                     "Diff": row["game_diff"],
                 }
             )
+        st.markdown("<div class='doubles-card-head' style='margin-top:12px;'>Tabla de Liga</div>", unsafe_allow_html=True)
         st.dataframe(rows, use_container_width=True, hide_index=True)
     else:
         st.caption("Aun no hay equipos configurados.")
 
     if standings:
-        st.markdown("---")
-        st.subheader("Top 2")
+        render_poke_separator()
+        _pt_section("Top 2")
         finalist_cols = st.columns(2)
         for idx, finalist in enumerate(standings[:2]):
             with finalist_cols[idx]:
                 _render_team_card(teams_by_id.get(finalist["id"], {}), compact=True)
-                st.caption(f"Posicion actual: {idx + 1}")
+                st.markdown(
+                    f"<div class='doubles-note' style='margin-top:10px;'>Posicion actual: {idx + 1}</div>",
+                    unsafe_allow_html=True,
+                )
 
-    st.markdown("---")
-    st.subheader("Final")
+    render_poke_separator()
+    _pt_section("Final")
     if not complete:
-        st.caption("La final se desbloquea cuando toda la liga regular tenga resultados.")
+        st.markdown(
+            "<div class='doubles-note'>La final se desbloquea cuando toda la liga regular tenga resultados.</div>",
+            unsafe_allow_html=True,
+        )
         return
 
     final = S.get("final", {})
     final_a = teams_by_id.get(str(final.get("team_a")))
     final_b = teams_by_id.get(str(final.get("team_b")))
     if not final_a or not final_b:
-        st.caption("No se han podido determinar los finalistas.")
+        st.markdown(
+            "<div class='doubles-note'>No se han podido determinar los finalistas.</div>",
+            unsafe_allow_html=True,
+        )
         return
 
-    cols = st.columns([2, 1, 2])
+    st.markdown("<div class='doubles-card-head' style='margin-top:12px;'>Final de Copa</div>", unsafe_allow_html=True)
+    cols = st.columns([2, 0.7, 2], gap="large")
     with cols[0]:
         _render_team_card(final_a, compact=True)
     with cols[1]:
-        st.markdown("### VS")
+        st.markdown("<div class='doubles-vs'>VS</div>", unsafe_allow_html=True)
     with cols[2]:
         _render_team_card(final_b, compact=True)
 
@@ -585,4 +815,7 @@ def page_copa() -> None:
 
     if _valid_bo3(final.get("score_a"), final.get("score_b")):
         champion = final_a if int(final["score_a"]) > int(final["score_b"]) else final_b
-        st.success(f"Campeon de la Copa Dobles: {champion.get('name')}")
+        st.markdown(
+            f"<div class='doubles-champion'>Campeon de la Copa Dobles: {champion.get('name')}</div>",
+            unsafe_allow_html=True,
+        )
