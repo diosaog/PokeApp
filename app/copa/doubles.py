@@ -9,7 +9,9 @@ import streamlit as st
 from storage import settings_get, settings_set
 from utils import USERS
 
-LOGO_DIR = Path("assets") / "copa_dobles" / "team_logos"
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
+LOGO_DIR_REL = Path("assets") / "copa_dobles" / "team_logos"
+LOGO_DIR = PROJECT_ROOT / LOGO_DIR_REL
 LOGO_EXTS = (".png", ".jpg", ".jpeg", ".webp", ".svg")
 RESULT_LABELS = {
     "Sin jugar": (None, None),
@@ -296,7 +298,7 @@ def _render_configurator(S: dict) -> None:
     current_count = max(2, min(current_count, max_teams))
 
     st.info("Crea equipos de 2 jugadores. El logo se carga automaticamente desde la carpeta de logos segun el nombre del equipo.")
-    st.caption(f"Carpeta de logos: `{LOGO_DIR}`")
+    st.caption(f"Carpeta de logos: `{LOGO_DIR_REL}`")
 
     with st.form("copa_dobles_setup"):
         team_count = int(
@@ -387,7 +389,7 @@ def page_copa() -> None:
 
     top_a, top_b = st.columns([3, 1])
     with top_a:
-        st.info(f"Carpeta de logos: `{LOGO_DIR}`")
+        st.info(f"Carpeta de logos: `{LOGO_DIR_REL}`")
     with top_b:
         if st.button("Resetear Copa Dobles", use_container_width=True):
             st.session_state.copa_dobles = _empty_state()
