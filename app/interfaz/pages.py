@@ -157,11 +157,14 @@ def page_copa() -> None:
     try:
         import copa as _swiss
         import copa2 as _elim
+        import copa_dobles as _doubles
         st.subheader("Copa")
-        fmt = st.radio("Formato", ["Copa", "Torneo"], horizontal=True)
+        fmt = st.radio("Formato", ["Copa", "Torneo", "Copa Dobles"], horizontal=True)
         st.markdown("---")
         if fmt == "Torneo":
             _elim.page_copa()
+        elif fmt == "Copa Dobles":
+            _doubles.page_copa()
         else:
             _swiss.page_copa()
     except Exception as e:
