@@ -62,6 +62,16 @@ def _logo_for_team(team_name: str) -> str | None:
     return None
 
 
+def _logo_bytes_for_team(team_name: str) -> bytes | None:
+    logo_path = _logo_for_team(team_name)
+    if not logo_path:
+        return None
+    try:
+        return Path(logo_path).read_bytes()
+    except Exception:
+        return None
+
+
 def _empty_state() -> dict:
     return {
         "configured": False,
@@ -270,17 +280,18 @@ def _render_team_card(team: dict, *, compact: bool = False) -> None:
     name = team.get("name") or "-"
     members = list(team.get("members") or [])
     logo = _logo_for_team(name)
+    logo_bytes = _logo_bytes_for_team(name)
     if compact:
-        if logo:
-            st.image(logo, width=68)
+        if logo_bytes:
+            st.image(logo_bytes, width=68)
         st.markdown(f"**{name}**")
         st.caption(" / ".join(members) if members else "Sin miembros")
         return
     with st.container(border=True):
         cols = st.columns([1, 2])
         with cols[0]:
-            if logo:
-                st.image(logo, width=90)
+            if logo_bytes:
+                st.image(logo_bytes, width=90)
             else:
                 st.caption("Sin logo")
         with cols[1]:
