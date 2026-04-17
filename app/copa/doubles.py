@@ -1,6 +1,8 @@
 from __future__ import annotations
 
+import base64
 import json
+import mimetypes
 import unicodedata
 from pathlib import Path
 
@@ -68,6 +70,19 @@ def _logo_bytes_for_team(team_name: str) -> bytes | None:
         return None
     try:
         return Path(logo_path).read_bytes()
+    except Exception:
+        return None
+
+
+def _logo_data_uri_for_team(team_name: str) -> str | None:
+    logo_path = _logo_for_team(team_name)
+    logo_bytes = _logo_bytes_for_team(team_name)
+    if not logo_path or not logo_bytes:
+        return None
+    try:
+        mime = mimetypes.guess_type(logo_path)[0] or "image/png"
+        encoded = base64.b64encode(logo_bytes).decode("ascii")
+        return f"data:{mime};base64,{encoded}"
     except Exception:
         return None
 
@@ -276,22 +291,75 @@ def _sync_final(S: dict) -> bool:
     return False
 
 
+def _ensure_doubles_css() -> None:
+    st.markdown(
+        """
+        <style>
+        .doubles-logo-wrap {
+          width: 170px;
+          height: 170px;
+          display:flex;
+          align-items:center;
+          justify-content:center;
+          margin: 0 auto;
+          border-radius: 14px;
+          background: rgba(255,255,255,0.03);
+          border: 1px solid rgba(255,255,255,0.08);
+          box-shadow: inset 0 1px 0 rgba(255,255,255,0.04);
+          padding: 12px;
+        }
+        .doubles-logo-wrap.compact {
+          width: 118px;
+          height: 118px;
+          padding: 10px;
+          border-radius: 12px;
+        }
+        .doubles-logo-img {
+          max-width: 100%;
+          max-height: 100%;
+          width: auto;
+          height: auto;
+          object-fit: contain;
+          display: block;
+          image-rendering: -webkit-optimize-contrast;
+          filter: drop-shadow(0 3px 10px rgba(0,0,0,0.28));
+        }
+        </style>
+        """,
+        unsafe_allow_html=True,
+    )
+
+
 def _render_team_card(team: dict, *, compact: bool = False) -> None:
     name = team.get("name") or "-"
     members = list(team.get("members") or [])
     logo = _logo_for_team(name)
-    logo_bytes = _logo_bytes_for_team(name)
+    logo_uri = _logo_data_uri_for_team(name)
     if compact:
-        if logo_bytes:
-            st.image(logo_bytes, width=68)
+        if logo_uri:
+            st.markdown(
+                (
+                    "<div class='doubles-logo-wrap compact'>"
+                    f"<img class='doubles-logo-img' src='{logo_uri}' alt='logo {name}'/>"
+                    "</div>"
+                ),
+                unsafe_allow_html=True,
+            )
         st.markdown(f"**{name}**")
         st.caption(" / ".join(members) if members else "Sin miembros")
         return
     with st.container(border=True):
         cols = st.columns([1, 2])
         with cols[0]:
-            if logo_bytes:
-                st.image(logo_bytes, width=90)
+            if logo_uri:
+                st.markdown(
+                    (
+                        "<div class='doubles-logo-wrap'>"
+                        f"<img class='doubles-logo-img' src='{logo_uri}' alt='logo {name}'/>"
+                        "</div>"
+                    ),
+                    unsafe_allow_html=True,
+                )
             else:
                 st.caption("Sin logo")
         with cols[1]:
@@ -381,6 +449,7 @@ def page_copa() -> None:
     _ensure_logo_dir()
     _restore_state()
     _ensure_state()
+    _ensure_doubles_css()
     S = st.session_state.copa_dobles
 
     st.subheader("Copa Dobles")
@@ -410,7 +479,7 @@ def page_copa() -> None:
 
     st.markdown("---")
     st.subheader("Equipos")
-    team_cols = st.columns(min(3, max(1, len(S.get("teams", [])))))
+    team_cols = st.columns(min(2, max(1, len(S.get("teams", [])))))
     for idx, team in enumerate(S.get("teams", [])):
         with team_cols[idx % len(team_cols)]:
             _render_team_card(team)
