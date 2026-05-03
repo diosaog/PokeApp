@@ -99,9 +99,10 @@ def page_entrenadores_view() -> None:
         trainer_summary_with_portrait_ui(sav_json, box_count, is_own_profile=is_own_profile)
     with col_inv:
         st.markdown(
-            "<div style='background:#f1c258; border:2px solid #c28f27; border-radius:6px;"
-            " padding:6px 8px; font-weight:900; color:#1f1f1f; font-family:\"Press Start 2P\", monospace;"
-            " font-size:11px;'>Inventario</div>",
+            "<div style='display:inline-block; background:linear-gradient(180deg,var(--accent) 0%, var(--accent-dark) 100%);"
+            " border:1px solid var(--bw2-edge-strong); border-radius:0; padding:7px 10px; color:#ffffff;"
+            " font-family:var(--font-pixel); font-size:10px; text-transform:uppercase; letter-spacing:0.04em;"
+            " clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px);'>Inventario</div>",
             unsafe_allow_html=True,
         )
         tab_shop, tab_como = st.tabs(["Compras (tienda)", "Comodines"])

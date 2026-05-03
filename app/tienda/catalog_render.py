@@ -56,19 +56,19 @@ def _render_item_card(item: dict, idx_key: str, *, available: int | None = None)
         missing_html = f"<div class='shop-missing'>Faltan {COIN} {price - available}</div>"
 
     card_style = (
-        "background:#f7f6ef; border:2px solid #9a9680; border-radius:6px; padding:0; "
-        "color:#2b2b2b; margin-bottom:8px; overflow:hidden; "
-        "font-family:'Press Start 2P', monospace; font-weight:900;"
+        "background:linear-gradient(180deg,var(--bw2-panel-2) 0%, var(--bw2-panel) 100%); border:1px solid var(--bw2-edge); border-radius:0; padding:0; "
+        "color:var(--bw2-text); margin-bottom:8px; overflow:hidden; "
+        "font-family:var(--font-ui); font-weight:400; box-shadow: inset 0 1px 0 rgba(255,255,255,0.08), 0 0 0 1px rgba(0,0,0,0.28);"
     )
-    head_style = "background:#f1c258; border-bottom:2px solid #c28f27; padding:9px 10px;"
+    head_style = "background:linear-gradient(180deg,var(--accent) 0%, var(--accent-dark) 100%); border-bottom:1px solid var(--bw2-edge-strong); padding:9px 10px;"
     body_style = "display:flex; align-items:center; gap:10px; padding:10px;"
-    name_style = "font-size:14px; color:#202020; font-weight:900; line-height:1.35; text-shadow:0 0 1px rgba(0,0,0,0.30);"
-    desc_style = "font-size:12px; color:#2f2f2f; margin-top:5px; font-weight:900; line-height:1.45;"
+    name_style = "font-size:10px; color:#ffffff; font-family:var(--font-pixel); font-weight:700; line-height:1.35; text-transform:uppercase; letter-spacing:0.04em;"
+    desc_style = "font-size:18px; color:var(--bw2-text-soft); margin-top:5px; font-weight:400; line-height:1.25;"
     price_style = (
-        "display:inline-block; margin-top:6px; background:#f1c258; border:2px solid #c28f27; "
-        "border-radius:4px; padding:6px 9px; font-size:13px; color:#1f1f1f; font-weight:900; line-height:1.25;"
+        "display:inline-block; margin-top:6px; background:linear-gradient(180deg,var(--bw2-panel-3) 0%, var(--bw2-panel) 100%); border:1px solid rgba(255,255,255,0.12); "
+        "border-radius:0; padding:6px 9px; font-size:10px; color:#ffffff; font-family:var(--font-pixel); font-weight:700; line-height:1.25;"
     )
-    missing_style = "font-size:12px; color:#7a2e2e; margin-top:6px; font-weight:900; line-height:1.35;"
+    missing_style = "font-size:18px; color:#ffaba7; margin-top:6px; font-weight:400; line-height:1.25;"
     info_html = ""
     if desc_html:
         info_html += f"<div class='shop-desc' style='{desc_style}'>{desc_html}</div>"

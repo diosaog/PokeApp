@@ -87,20 +87,21 @@ def _hp_bar(label: str, value: float, cap: float, color: str) -> str:
 def _ensure_trainer_css() -> None:
     css = """
     <style>
-    .trainer-panel { border:2px solid #9a9680; background:#f7f6ef; border-radius:6px; padding:10px; }
-    .trainer-head { background:#f1c258; border:2px solid #c28f27; border-radius:6px; padding:6px 8px; font-weight:900; color:#1f1f1f; }
+    .trainer-panel { border:1px solid var(--bw2-edge); background:linear-gradient(180deg,var(--bw2-panel-2) 0%, var(--bw2-panel) 100%); border-radius:0; padding:10px; box-shadow: inset 0 1px 0 rgba(255,255,255,0.08), 0 0 0 1px rgba(0,0,0,0.28); }
+    .trainer-head { background:linear-gradient(180deg,var(--accent) 0%, var(--accent-dark) 100%); border:1px solid var(--bw2-edge-strong); border-radius:0; padding:7px 9px; font-weight:700; color:#ffffff; font-family:var(--font-pixel); font-size:10px; text-transform:uppercase; letter-spacing:0.04em; clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px); }
     .trainer-grid { display:grid; grid-template-columns: 150px 1fr; gap:10px; margin-top:8px; }
-    .trainer-portrait { background:#e79a46; border:2px solid #c28f27; border-radius:6px; padding:6px; display:flex; align-items:center; justify-content:center; }
+    .trainer-portrait { background:linear-gradient(180deg,var(--bw2-screen-2) 0%, var(--bw2-screen) 100%); border:1px solid var(--bw2-edge); border-radius:0; padding:8px; display:flex; align-items:center; justify-content:center; box-shadow: inset 0 1px 0 rgba(255,255,255,0.06); }
     .trainer-portrait img { width:120px; height:auto; image-rendering:pixelated; }
     .trainer-bars { display:flex; flex-direction:column; gap:8px; }
     .tbar-row { display:grid; grid-template-columns: 110px 1fr 70px; align-items:center; gap:8px; }
-    .tbar-label { font-size:11px; font-weight:900; color:#1f1f1f; }
-    .tbar-track { height:10px; background:#2b2b2b; border:2px solid #2b2b2b; border-radius:6px; overflow:hidden; }
+    .tbar-label { font-size:10px; font-weight:700; color:var(--bw2-text); font-family:var(--font-pixel); text-transform:uppercase; }
+    .tbar-track { height:10px; background:#0d1217; border:1px solid var(--bw2-edge); border-radius:0; overflow:hidden; }
     .tbar-fill { height:100%; border-radius:4px; }
-    .tbar-value { background:#f7f6ef; border:2px solid #9a9680; border-radius:6px; padding:2px 6px; font-size:11px; text-align:right; color:#1f1f1f; }
+    .tbar-value { background:linear-gradient(180deg,var(--bw2-panel-3) 0%, var(--bw2-panel) 100%); border:1px solid var(--bw2-edge); border-radius:0; padding:2px 6px; font-size:1rem; text-align:right; color:var(--bw2-text); }
     .trainer-medals { margin-top:6px; }
-    .trainer-kia { margin-top:8px; background:#f7f6ef; border:2px solid #9a9680; border-radius:6px; padding:8px; font-size:11px; color:#1f1f1f; }
-    .trainer-note { margin-top:6px; font-size:10px; color:#2b2b2b; }
+    .trainer-kia { margin-top:8px; background:linear-gradient(180deg,var(--bw2-panel-3) 0%, var(--bw2-panel) 100%); border:1px solid var(--bw2-edge); border-radius:0; padding:8px; font-size:1rem; color:var(--bw2-text); box-shadow: inset 0 1px 0 rgba(255,255,255,0.06); }
+    .trainer-kia strong { font-family:var(--font-pixel); font-size:10px; color:#ffffff; }
+    .trainer-note { margin-top:6px; font-size:1rem; color:var(--bw2-text-soft); }
     </style>
     """
     try:

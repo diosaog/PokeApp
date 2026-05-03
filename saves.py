@@ -21,86 +21,88 @@ def page_saves() -> None:
         <style>
         .bill-title {
           display:inline-block;
-          background:linear-gradient(180deg,#f2cc62 0%,#e4b84a 100%);
-          border:2px solid #c28f27;
-          border-radius:8px;
+          background:linear-gradient(180deg,var(--accent) 0%, var(--accent-dark) 100%);
+          border:1px solid var(--bw2-edge-strong);
+          border-radius:0;
           padding:10px 12px;
-          color:#222;
-          font-family:"Press Start 2P", monospace;
-          font-size:16px;
-          font-weight:900;
+          color:#fff;
+          font-family:var(--font-pixel);
+          font-size:12px;
+          font-weight:700;
           letter-spacing:0.4px;
-          text-shadow:0 0 1px rgba(0,0,0,0.25);
+          text-transform:uppercase;
+          clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px);
         }
         .bill-subtitle {
           margin-top:8px;
           display:inline-block;
-          background:#10263f;
-          border:2px solid #2a75bb;
-          border-radius:8px;
+          background:linear-gradient(180deg,var(--bw2-panel-2) 0%, var(--bw2-panel) 100%);
+          border:1px solid var(--bw2-edge);
+          border-radius:0;
           padding:8px 10px;
-          color:#e8f2ff;
-          font-family:"Press Start 2P", monospace;
-          font-size:11px;
-          font-weight:900;
+          color:var(--bw2-text);
+          font-family:var(--font-pixel);
+          font-size:10px;
+          font-weight:700;
           text-transform:uppercase;
         }
-        .bill-divider { height:2px; background:#2a75bb; margin:12px 0 16px; }
+        .bill-divider { height:2px; background:linear-gradient(90deg, transparent 0%, var(--accent) 22%, var(--accent) 78%, transparent 100%); margin:12px 0 16px; }
         .bill-chip {
           display:inline-block;
-          background:#f7f6ef;
-          border:2px solid #9a9680;
-          border-radius:6px;
+          background:linear-gradient(180deg,var(--bw2-panel-3) 0%, var(--bw2-panel) 100%);
+          border:1px solid var(--bw2-edge);
+          border-radius:0;
           padding:8px 10px;
-          color:#2b2b2b;
-          font-family:"Press Start 2P", monospace;
-          font-size:11px;
-          font-weight:900;
+          color:var(--bw2-text);
+          font-family:var(--font-pixel);
+          font-size:10px;
+          font-weight:700;
+          text-transform:uppercase;
         }
-        .bill-chip b { color:#10263f; }
+        .bill-chip b { color:#fff; }
         .bill-save-meta {
           margin-top:8px;
-          background:#10263f;
-          border:1px solid #2a75bb;
-          border-radius:8px;
+          background:linear-gradient(180deg,var(--bw2-screen-2) 0%, var(--bw2-screen) 100%);
+          border:1px solid var(--bw2-edge);
+          border-radius:0;
           padding:8px 10px;
-          color:#bfd3e8;
-          font-family:"Press Start 2P", monospace;
-          font-size:9px;
-          font-weight:700;
+          color:var(--bw2-text-soft);
+          font-family:var(--font-ui);
+          font-size:18px;
+          font-weight:400;
           line-height:1.45;
           letter-spacing:0.1px;
         }
-        .bill-save-meta b { color:#e8f2ff; font-weight:900; }
+        .bill-save-meta b { color:#fff; font-weight:700; font-family:var(--font-pixel); font-size:10px; }
         div[data-testid="stFileUploaderDropzone"] {
-          background:#0f2033 !important;
-          border:2px dashed #2a75bb !important;
-          border-radius:10px !important;
+          background:linear-gradient(180deg,var(--bw2-screen-2) 0%, var(--bw2-screen) 100%) !important;
+          border:1px dashed var(--bw2-edge) !important;
+          border-radius:0 !important;
         }
         div[data-testid="stFileUploaderDropzone"] * {
-          font-family:"Press Start 2P", monospace !important;
-          font-weight:900 !important;
-          color:#dcecff !important;
+          font-family:var(--font-ui) !important;
+          font-weight:400 !important;
+          color:var(--bw2-text-soft) !important;
         }
         div[data-testid="stAlert"] {
-          border:2px solid #2a75bb !important;
-          border-radius:8px !important;
+          border:1px solid var(--bw2-edge) !important;
+          border-radius:0 !important;
         }
         div[data-testid="stAlert"] * {
-          font-family:"Press Start 2P", monospace !important;
-          font-weight:900 !important;
+          font-family:var(--font-ui) !important;
+          font-weight:400 !important;
         }
         details[data-testid="stExpander"] > summary {
-          font-family:"Press Start 2P", monospace !important;
-          font-weight:900 !important;
-          font-size:11px !important;
+          font-family:var(--font-pixel) !important;
+          font-weight:700 !important;
+          font-size:10px !important;
         }
         </style>
         """,
         unsafe_allow_html=True,
     )
-    st.markdown("<div class='bill-title'>PC de Bill</div>", unsafe_allow_html=True)
-    st.markdown("<div class='bill-subtitle'>Sistema de almacenamiento Pokemon</div>", unsafe_allow_html=True)
+    st.markdown("<div class='bill-title'>Gestor de Saves</div>", unsafe_allow_html=True)
+    st.markdown("<div class='bill-subtitle'>Terminal de almacenamiento Unova</div>", unsafe_allow_html=True)
     st.markdown("<div class='bill-divider'></div>", unsafe_allow_html=True)
 
     current_user = st.session_state.get("user")

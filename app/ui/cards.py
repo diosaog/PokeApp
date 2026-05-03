@@ -66,7 +66,7 @@ def slot_card_html(
 
 def ensure_type_css() -> None:
     try:
-        css = st.session_state.get("_type_css_platinum_v1")
+        css = st.session_state.get("_type_css_bw2_v1")
     except Exception:
         css = None
     if not css:
@@ -74,30 +74,28 @@ def ensure_type_css() -> None:
             "<style>"
             ".badges { display:flex; align-items:center; justify-content:space-between; gap:6px; margin-bottom:6px; }"
             ".badge-right { display:flex; align-items:center; justify-content:flex-end; gap:6px; }"
-            ".pill { display:inline-block; padding:2px 6px; border-radius:4px; font-weight:900; font-size:0.7rem; "
-            "color:#2b2b2b; background:#f1c258; border:2px solid #c28f27; }"
+            ".pill { display:inline-block; padding:2px 6px; border-radius:0; font-family:var(--font-pixel); font-weight:700; font-size:0.55rem; "
+            "color:#ffffff; background:linear-gradient(180deg,var(--accent) 0%, var(--accent-dark) 100%); border:1px solid var(--bw2-edge-strong); }"
             ".pill-empty { opacity:0.0; }"
-            ".pill-shiny { background: #f6e7b2; color:#2b2b2b; border-color: #cbb777; }"
-            ".gender-m { background: #b9d9ff; color:#1e3a8a; border-color: #7aa2d8; }"
-            ".gender-f { background: #f8c4da; color:#7a1f3a; border-color: #d58aa7; }"
-            ".slot { background:#f7f6ef; border:2px solid #9a9680; border-radius:6px; padding:8px 8px 6px; "
-            "text-align:center; color:#2b2b2b; font-family: \"Press Start 2P\", monospace; font-weight:900; }"
-            ".slot-sep { height:2px; background:#b9b59f; margin: 4px 0 8px; }"
-            ".slot img { display:block; margin: 0 auto 2px; filter: none; image-rendering: pixelated; }"
-            ".slot .title { letter-spacing: 0.2px; font-size:0.72rem; font-weight:900; color:#111111 !important; "
-            "text-shadow: 0 0 1px currentColor; }"
-            ".slot .sub { margin-top: 2px; font-size:0.68rem; color:#1f1f1f !important; font-weight:900; "
-            "text-shadow: 0 0 1px currentColor; }"
-            ".type-chip { display:inline-block; padding:2px 6px; border-radius:4px; color:#fff; font-weight:900; font-size:0.68rem; border:2px solid rgba(0,0,0,0.15); }"
+            ".pill-shiny { background: linear-gradient(180deg,#f6e39c 0%, #b68a28 100%); color:#1d1610; border-color:#fff1be; }"
+            ".gender-m { background: linear-gradient(180deg,#79b9f5 0%, #376c96 100%); color:#ffffff; border-color:#d8dfe8; }"
+            ".gender-f { background: linear-gradient(180deg,#f48bbb 0%, #9e3f68 100%); color:#ffffff; border-color:#f8d4e4; }"
+            ".slot { background:linear-gradient(180deg,var(--bw2-panel-2) 0%, var(--bw2-panel) 100%); border:1px solid var(--bw2-edge); border-radius:0; padding:8px 8px 6px; "
+            "text-align:center; color:var(--bw2-text); font-family:var(--font-ui); font-weight:400; box-shadow: inset 0 1px 0 rgba(255,255,255,0.08), 0 0 0 1px rgba(0,0,0,0.28); }"
+            ".slot-sep { height:2px; background:linear-gradient(90deg, transparent 0%, var(--accent) 18%, var(--accent) 82%, transparent 100%); margin: 4px 0 8px; }"
+            ".slot img { display:block; margin: 0 auto 2px; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.35)); image-rendering: pixelated; }"
+            ".slot .title { letter-spacing: 0.04em; font-size:0.62rem; font-family:var(--font-pixel); font-weight:700; color:var(--bw2-text) !important; text-transform:uppercase; }"
+            ".slot .sub { margin-top: 2px; font-size:1rem; color:var(--bw2-text-soft) !important; font-weight:400; }"
+            ".type-chip { display:inline-block; padding:2px 6px; border-radius:0; color:#fff; font-family:var(--font-pixel); font-weight:700; font-size:0.55rem; border:1px solid rgba(255,255,255,0.16); }"
             ".types { margin-top:6px; display:flex; justify-content:center; gap:6px; flex-wrap:wrap; }"
-            ".shield-chip { display:inline-block; padding:2px 6px; border-radius:4px; color:#102a43; font-weight:900; font-size:0.68rem; border:2px solid #1e40af; background:#bfdbfe; }"
-            ".rob-chip { display:inline-block; padding:2px 6px; border-radius:4px; color:#3b0764; font-weight:900; font-size:0.68rem; border:2px solid #6d28d9; background:#e9d5ff; }"
-            ".slot-empty { border:2px dashed #9a9680; background:#f7f6ef; height:120px; display:flex; align-items:center; "
-            "justify-content:center; color:#6a6a6a; border-radius:6px; font-family: \"Press Start 2P\", monospace; font-size:0.7rem; }"
+            ".shield-chip { display:inline-block; padding:2px 6px; border-radius:0; color:#ffffff; font-family:var(--font-pixel); font-weight:700; font-size:0.55rem; border:1px solid #d8dfe8; background:linear-gradient(180deg,#79b9f5 0%, #376c96 100%); }"
+            ".rob-chip { display:inline-block; padding:2px 6px; border-radius:0; color:#ffffff; font-family:var(--font-pixel); font-weight:700; font-size:0.55rem; border:1px solid #ecd8ff; background:linear-gradient(180deg,#cf74ff 0%, #74389f 100%); }"
+            ".slot-empty { border:1px dashed var(--bw2-edge); background:linear-gradient(180deg,var(--bw2-panel-2) 0%, var(--bw2-panel) 100%); height:120px; display:flex; align-items:center; "
+            "justify-content:center; color:var(--bw2-text-dim); border-radius:0; font-family:var(--font-pixel); font-size:0.58rem; text-transform:uppercase; }"
             "</style>"
         )
         try:
-            st.session_state["_type_css_platinum_v1"] = css
+            st.session_state["_type_css_bw2_v1"] = css
         except Exception:
             pass
     st.markdown(css, unsafe_allow_html=True)

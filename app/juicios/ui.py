@@ -41,35 +41,35 @@ def _apply_juicio_theme() -> None:
         <style>
         .ju-hero{
           position:relative;
-          background:linear-gradient(135deg,#f5e5bf 0%,#e8cf96 52%,#c48f42 100%);
-          border:3px solid #6f4312;
-          border-radius:10px;
+          background:linear-gradient(135deg,var(--bw2-panel-2) 0%, var(--bw2-panel) 68%, #12161c 100%);
+          border:1px solid var(--bw2-edge);
+          border-radius:0;
           padding:14px 16px;
-          color:#2a190b;
-          box-shadow:0 8px 20px rgba(0,0,0,.32), inset 0 1px 0 rgba(255,255,255,.32);
+          color:var(--bw2-text);
+          box-shadow:0 8px 20px rgba(0,0,0,.32), inset 0 1px 0 rgba(255,255,255,.08);
           margin-bottom:12px;
         }
         .ju-hero:after{
           content:"";
           position:absolute;
           right:14px; top:10px;
-          width:28px; height:28px; border-radius:50%;
-          background:
-            radial-gradient(circle at 50% 50%, #ffffff 0 4px, transparent 5px),
-            linear-gradient(180deg,#f04646 0 50%,#f6f1e8 50% 100%);
-          border:2px solid #1a1a1a;
+          width:20px; height:20px;
+          background:linear-gradient(135deg,var(--accent) 0%, var(--accent-dark) 100%);
+          border:1px solid var(--bw2-edge-strong);
           box-shadow:0 0 0 2px rgba(0,0,0,.18);
+          transform:rotate(45deg);
         }
         .ju-hero-title{
-          font-family:"Press Start 2P", monospace;
-          font-size:14px;
+          font-family:var(--font-pixel);
+          font-size:12px;
           line-height:1.3;
           margin-bottom:8px;
-          color:#2a190b;
+          color:#ffffff;
+          text-transform:uppercase;
         }
         .ju-hero-sub{
-          font-size:12px;
-          color:#35210f;
+          font-size:18px;
+          color:var(--bw2-text-soft);
         }
         .ju-hero-chips{
           display:flex;
@@ -80,33 +80,35 @@ def _apply_juicio_theme() -> None:
         .ju-chip{
           font-size:10px;
           font-weight:700;
-          color:#2a190b;
-          background:#f7f1df;
-          border:1px solid #8b642f;
-          border-radius:999px;
-          padding:3px 8px;
+          font-family:var(--font-pixel);
+          color:#ffffff;
+          background:linear-gradient(180deg,var(--accent) 0%, var(--accent-dark) 100%);
+          border:1px solid var(--bw2-edge-strong);
+          border-radius:0;
+          padding:4px 8px;
+          text-transform:uppercase;
         }
         .ju-toolbar{
-          background:#f7f1df;
-          border:2px solid #8b642f;
-          border-radius:8px;
+          background:linear-gradient(180deg,var(--bw2-panel-3) 0%, var(--bw2-panel) 100%);
+          border:1px solid var(--bw2-edge);
+          border-radius:0;
           padding:8px 10px;
           margin:8px 0 10px 0;
-          color:#2b1d0e;
-          font-size:11px;
-          font-weight:700;
+          color:var(--bw2-text-soft);
+          font-size:18px;
+          font-weight:400;
         }
         .ju-note{
-          background:#f9f5e9;
-          border:1px dashed #9a7237;
-          border-radius:7px;
+          background:linear-gradient(180deg,var(--bw2-panel-2) 0%, var(--bw2-panel) 100%);
+          border:1px dashed var(--bw2-edge);
+          border-radius:0;
           padding:8px 10px;
-          color:#342110;
-          font-size:11px;
+          color:var(--bw2-text-soft);
+          font-size:18px;
         }
         .ju-sep{
           height:2px;
-          background:linear-gradient(90deg,transparent 0,#8b642f 15%,#8b642f 85%,transparent 100%);
+          background:linear-gradient(90deg,transparent 0,var(--accent) 20%,var(--accent) 80%,transparent 100%);
           margin:10px 0 12px;
         }
         .ju-stage-wrap{
@@ -117,51 +119,56 @@ def _apply_juicio_theme() -> None:
         .ju-stage{
           flex:1;
           min-width:0;
-          border:1px solid var(--stage-color,#6c757d);
-          border-radius:8px;
+          border:1px solid var(--bw2-edge);
+          border-radius:0;
           text-align:center;
           padding:6px 8px;
-          background:#f0ede5;
-          color:#605548;
-          font-weight:700;
-          font-size:12px;
-          box-shadow:inset 0 1px 0 rgba(255,255,255,.45);
+          background:linear-gradient(180deg,var(--bw2-panel-3) 0%, var(--bw2-panel) 100%);
+          color:var(--bw2-text-soft);
+          font-weight:400;
+          font-size:18px;
+          box-shadow:inset 0 1px 0 rgba(255,255,255,.08);
         }
         .ju-stage-on{
-          background:var(--stage-color,#6c757d);
+          background:linear-gradient(180deg,var(--accent) 0%, var(--accent-dark) 100%);
+          border-color:var(--bw2-edge-strong);
           color:#ffffff;
         }
         .ju-docket{
-          background:#f8f2e4;
-          border:2px solid #8b642f;
-          border-radius:8px;
+          background:linear-gradient(180deg,var(--bw2-panel-2) 0%, var(--bw2-panel) 100%);
+          border:1px solid var(--bw2-edge);
+          border-radius:0;
           padding:8px 10px;
           margin-bottom:8px;
-          color:#2a1b0d;
+          color:var(--bw2-text);
         }
         .ju-docket-title{
-          font-family:"Press Start 2P", monospace;
+          font-family:var(--font-pixel);
           font-size:10px;
           margin-bottom:5px;
+          color:#ffffff;
+          text-transform:uppercase;
         }
         .ju-docket-sub{
-          font-size:11px;
-          color:#46301a;
+          font-size:18px;
+          color:var(--bw2-text-soft);
         }
         .ju-verdict{
           display:inline-block;
           padding:3px 8px;
-          border-radius:999px;
+          border-radius:0;
           font-size:10px;
           font-weight:700;
+          font-family:var(--font-pixel);
           margin-left:6px;
-          border:1px solid #6d4b1f;
-          background:#f1e5c5;
-          color:#2a1c0d;
+          border:1px solid var(--bw2-edge-strong);
+          background:linear-gradient(180deg,var(--bw2-panel-3) 0%, var(--bw2-panel) 100%);
+          color:#ffffff;
+          text-transform:uppercase;
         }
-        .ju-v-guilty{ background:#f2c0b8; border-color:#a85345; color:#55170f; }
-        .ju-v-not-guilty{ background:#c8efc7; border-color:#4f8e4f; color:#1e4b1d; }
-        .ju-v-pending{ background:#f0e4c1; border-color:#9f823e; color:#4b3a14; }
+        .ju-v-guilty{ background:linear-gradient(180deg,#ef5e68 0%, #962d37 100%); border-color:#ffd6da; color:#ffffff; }
+        .ju-v-not-guilty{ background:linear-gradient(180deg,#58d18e 0%, #2a8d5c 100%); border-color:#d8ffee; color:#ffffff; }
+        .ju-v-pending{ background:linear-gradient(180deg,var(--accent) 0%, var(--accent-dark) 100%); border-color:#ffe1ca; color:#ffffff; }
         </style>
         """,
         unsafe_allow_html=True,

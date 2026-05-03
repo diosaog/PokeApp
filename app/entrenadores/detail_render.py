@@ -189,73 +189,98 @@ def render_detail_html(
         hp_pct = 100
         hp_text = "--/--"
 
-    font_base = 'font-family:"Press Start 2P", monospace; font-size:12px; line-height:1.2; font-weight:900; text-shadow: 0 0 1.2px currentColor;'
+    font_base = 'font-family:var(--font-ui); font-size:19px; line-height:1.1; font-weight:400;'
     root_style = _style(font_base, "display:grid", "grid-template-columns:1.05fr 1fr 1fr", "gap:16px", "align-items:start")
 
-    left_style = _style("background:#d7d4c0", "border:2px solid #9a9680", "border-radius:6px", "padding:8px", "color:#2b2b2b")
+    left_style = _style(
+        "background:linear-gradient(180deg,var(--bw2-panel-2) 0%, var(--bw2-panel) 100%)",
+        "border:1px solid var(--bw2-edge)",
+        "border-radius:0",
+        "padding:8px",
+        "color:var(--bw2-text-soft)",
+        "box-shadow: inset 0 1px 0 rgba(255,255,255,0.08), 0 0 0 1px rgba(0,0,0,0.28)",
+    )
     header_style = _style(
-        "background:#f1c258",
-        "border:2px solid #c28f27",
-        "border-radius:6px",
-        "padding:6px 8px",
+        "background:linear-gradient(180deg,var(--accent) 0%, var(--accent-dark) 100%)",
+        "border:1px solid var(--bw2-edge-strong)",
+        "border-radius:0",
+        "padding:7px 9px",
         "display:flex",
         "align-items:center",
         "justify-content:space-between",
-        "color:#2b2b2b",
+        "color:#ffffff",
+        "font-family:var(--font-pixel)",
+        "font-size:10px",
+        "text-transform:uppercase",
+        "clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px)",
     )
-    name_style = _style("display:flex", "align-items:center", "gap:6px", "font-size:12px", "color:#1f1f1f")
+    name_style = _style("display:flex", "align-items:center", "gap:6px", "font-size:10px", "color:#ffffff")
     gender_color = "#d6447a" if gender_cls == "f" else "#2f6ad9"
     gender_style = _style(
         "font-size:12px",
         "padding:2px 6px",
-        "border:2px solid #6a6a6a",
-        "border-radius:4px",
-        "background:#f7f7f7",
-        f"color:{gender_color}",
+        "border:1px solid var(--bw2-edge-strong)",
+        "border-radius:0",
+        f"background:linear-gradient(180deg,{gender_color} 0%, rgba(0,0,0,0.35) 100%)",
+        "color:#ffffff",
     )
     level_style = _style(
         "margin-top:6px",
-        "background:#f7f6ef",
-        "border:2px solid #b1ac96",
-        "border-radius:4px",
+        "background:linear-gradient(180deg,var(--bw2-panel-3) 0%, var(--bw2-panel) 100%)",
+        "border:1px solid var(--bw2-edge)",
+        "border-radius:0",
         "padding:4px 6px",
-        "font-size:11px",
-        "color:#1f1f1f",
+        "font-size:17px",
+        "color:var(--bw2-text)",
     )
     sprite_style = _style(
         "margin-top:8px",
-        "background:repeating-linear-gradient(0deg, #e9e7d3 0 4px, #d7d5c1 4px 8px)",
-        "border:2px solid #a29e86",
-        "border-radius:6px",
+        "background:repeating-linear-gradient(0deg, rgba(121,185,245,0.06) 0 4px, transparent 4px 8px), linear-gradient(180deg,var(--bw2-screen-2) 0%, var(--bw2-screen) 100%)",
+        "border:1px solid var(--bw2-edge)",
+        "border-radius:0",
         "padding:10px",
         "display:flex",
         "align-items:center",
         "justify-content:center",
         "min-height:180px",
     )
-    item_box_style = _style("margin-top:8px", "border:2px solid #c28f27", "border-radius:6px", "overflow:hidden")
+    item_box_style = _style("margin-top:8px", "border:1px solid var(--bw2-edge)", "border-radius:0", "overflow:hidden")
     item_label_style = _style(
-        "background:#f1c258",
-        "border-bottom:2px solid #c28f27",
+        "background:linear-gradient(180deg,var(--accent) 0%, var(--accent-dark) 100%)",
+        "border-bottom:1px solid var(--bw2-edge-strong)",
         "padding:6px 8px",
-        "font-size:11px",
-        "color:#1f1f1f",
+        "font-size:10px",
+        "font-family:var(--font-pixel)",
+        "color:#ffffff",
+        "text-transform:uppercase",
     )
-    item_value_style = _style("background:#f7f6ef", "padding:6px 8px", "font-size:11px", "color:#1f1f1f")
+    item_value_style = _style(
+        "background:linear-gradient(180deg,var(--bw2-panel-3) 0%, var(--bw2-panel) 100%)",
+        "padding:6px 8px",
+        "font-size:17px",
+        "color:var(--bw2-text)",
+    )
 
     tab_wrap_style = _style("display:flex", "gap:4px", "margin-bottom:6px")
-    tab_base_style = _style("width:18px", "height:18px", "border:2px solid #5a5a5a", "border-radius:3px", "display:inline-block")
-    tab_colors = ["#9de1a5", "#9ad0ff", "#a3efe9", "#f2a1a1", "#c9a4ff", "#f3e28d"]
+    tab_base_style = _style("width:18px", "height:18px", "border:1px solid var(--bw2-edge-strong)", "border-radius:0", "display:inline-block")
+    tab_colors = ["#58d18e", "#79b9f5", "#66d1ff", "#f26b61", "#cf74ff", "#e5bc56"]
     tabs_html = "<div style='{}'>".format(tab_wrap_style)
     for color in tab_colors:
         tabs_html += "<div style='{}; background:{};'></div>".format(tab_base_style, color)
     tabs_html += "</div>"
 
-    stats_screen_style = _style("border:2px solid #6168b2", "border-radius:6px", "overflow:hidden", "background:#7f88dd", "color:#f7f8ff")
+    stats_screen_style = _style(
+        "border:1px solid var(--bw2-edge)",
+        "border-radius:0",
+        "overflow:hidden",
+        "background:linear-gradient(180deg,var(--bw2-screen-2) 0%, var(--bw2-screen) 100%)",
+        "color:#f7f8ff",
+        "box-shadow: inset 0 1px 0 rgba(255,255,255,0.06)",
+    )
     ps_row_style = _style(
         "padding:8px",
-        "background:#8b95ed",
-        "border-bottom:2px solid #6d73bd",
+        "background:rgba(121,185,245,0.16)",
+        "border-bottom:1px solid rgba(255,255,255,0.08)",
         "display:grid",
         "grid-template-columns:auto 1fr",
         "gap:8px",
@@ -264,19 +289,19 @@ def render_detail_html(
     ps_label_style = _style("font-size:11px", "color:#f7f8ff")
     ps_value_style = _style(
         "justify-self:end",
-        "background:#f7f6ef",
-        "color:#2b2b2b",
+        "background:linear-gradient(180deg,var(--bw2-panel-3) 0%, var(--bw2-panel) 100%)",
+        "color:var(--bw2-text)",
         "padding:4px 6px",
-        "border:2px solid #6a6a6a",
-        "border-radius:6px",
-        "font-size:11px",
+        "border:1px solid var(--bw2-edge)",
+        "border-radius:0",
+        "font-size:16px",
     )
     ps_bar_style = _style(
         "grid-column:1 / -1",
         "height:10px",
-        "background:#2b2b2b",
-        "border:2px solid #2b2b2b",
-        "border-radius:6px",
+        "background:#090d11",
+        "border:1px solid var(--bw2-edge)",
+        "border-radius:0",
         "overflow:hidden",
     )
     ps_fill_style = _style("height:100%", "background:linear-gradient(90deg,#7be16f,#3ecf5b)")
@@ -284,7 +309,7 @@ def render_detail_html(
     labels = [("atk", "Ataque"), ("def", "Defensa"), ("spa", "At. Esp."), ("spd", "Def. Esp."), ("spe", "Veloc.")]
     stat_rows = []
     for idx, (key, label) in enumerate(labels):
-        row_bg = "#8b95ed" if idx % 2 == 0 else "#7d86db"
+        row_bg = "rgba(121,185,245,0.16)" if idx % 2 == 0 else "rgba(121,185,245,0.10)"
         row_style = _style(
             "display:grid",
             "grid-template-columns:1fr auto",
@@ -294,20 +319,20 @@ def render_detail_html(
             "border-bottom:2px solid #6d73bd",
             "color:#f7f8ff",
         )
-        val_bg = "#f7f6ef"
+        val_bg = "linear-gradient(180deg,var(--bw2-panel-3) 0%, var(--bw2-panel) 100%)"
         if up_key and key == up_key:
-            val_bg = "#f6e7b2"
+            val_bg = "linear-gradient(180deg,#f6e39c 0%, #b68a28 100%)"
         if down_key and key == down_key:
-            val_bg = "#d4ecff"
+            val_bg = "linear-gradient(180deg,#79b9f5 0%, #376c96 100%)"
         val_style = _style(
             f"background:{val_bg}",
-            "border:2px solid #6a6a6a",
-            "border-radius:6px",
+            "border:1px solid var(--bw2-edge)",
+            "border-radius:0",
             "padding:4px 6px",
             "min-width:64px",
             "text-align:right",
-            "color:#2b2b2b",
-            "font-size:11px",
+            "color:#ffffff",
+            "font-size:16px",
         )
         stat_rows.append(
             "<div style='{}'><div style='font-size:11px;'>{}</div><div style='{}'>{}</div></div>".format(
@@ -320,8 +345,8 @@ def render_detail_html(
 
     nature_row_style = _style(
         "padding:8px",
-        "background:#8b95ed",
-        "border-top:2px solid #6d73bd",
+        "background:rgba(121,185,245,0.14)",
+        "border-top:1px solid rgba(255,255,255,0.08)",
         "display:grid",
         "grid-template-columns:auto 1fr",
         "gap:8px",
@@ -330,18 +355,18 @@ def render_detail_html(
     )
     nature_label_style = _style("font-size:11px")
     nature_value_style = _style(
-        "background:#f7f6ef",
-        "color:#2b2b2b",
+        "background:linear-gradient(180deg,var(--bw2-panel-3) 0%, var(--bw2-panel) 100%)",
+        "color:var(--bw2-text)",
         "padding:4px 6px",
-        "border:2px solid #6a6a6a",
-        "border-radius:6px",
-        "font-size:11px",
+        "border:1px solid var(--bw2-edge)",
+        "border-radius:0",
+        "font-size:16px",
     )
 
     ability_row_style = _style(
         "padding:8px",
-        "background:#8b95ed",
-        "border-top:2px solid #6d73bd",
+        "background:rgba(121,185,245,0.14)",
+        "border-top:1px solid rgba(255,255,255,0.08)",
         "display:grid",
         "grid-template-columns:auto 1fr",
         "gap:8px",
@@ -350,19 +375,19 @@ def render_detail_html(
     )
     ability_label_style = _style("font-size:11px")
     ability_name_style = _style(
-        "background:#f7f6ef",
-        "color:#2b2b2b",
+        "background:linear-gradient(180deg,var(--bw2-panel-3) 0%, var(--bw2-panel) 100%)",
+        "color:var(--bw2-text)",
         "padding:4px 6px",
-        "border:2px solid #6a6a6a",
-        "border-radius:6px",
-        "font-size:11px",
+        "border:1px solid var(--bw2-edge)",
+        "border-radius:0",
+        "font-size:16px",
     )
     ability_desc_style = _style(
-        "background:#f1e7b2",
-        "border-top:2px solid #cbb777",
+        "background:rgba(255,255,255,0.05)",
+        "border-top:1px solid rgba(255,255,255,0.08)",
         "padding:8px",
-        "color:#2b2b2b",
-        "font-size:10px",
+        "color:var(--bw2-text-soft)",
+        "font-size:16px",
         "line-height:1.2",
         "min-height:40px",
         "white-space:normal",
@@ -387,16 +412,16 @@ def render_detail_html(
     ivs_txt = _stat_line(ivs_display)
     evs_txt = _stat_line(evs_display)
     ivs_html = (
-        "<div style='padding:8px; background:#8b95ed; border-top:2px solid #6d73bd;'>"
-        "<div style='font-size:11px; margin-bottom:6px; color:#f7f8ff;'>IVs</div>"
-        "<div style='background:#f7f6ef; color:#2b2b2b; padding:6px 8px; border:2px solid #6a6a6a; border-radius:6px; font-size:10px;'>"
+        "<div style='padding:8px; background:rgba(121,185,245,0.14); border-top:1px solid rgba(255,255,255,0.08);'>"
+        "<div style='font-size:11px; margin-bottom:6px; color:#f7f8ff; font-family:var(--font-pixel);'>IVs</div>"
+        "<div style='background:linear-gradient(180deg,var(--bw2-panel-3) 0%, var(--bw2-panel) 100%); color:var(--bw2-text); padding:6px 8px; border:1px solid var(--bw2-edge); border-radius:0; font-size:15px;'>"
         f"{_html.escape(ivs_txt)}</div>"
         "</div>"
     )
     evs_html = (
-        "<div style='padding:8px; background:#8b95ed; border-top:2px solid #6d73bd;'>"
-        "<div style='font-size:11px; margin-bottom:6px; color:#f7f8ff;'>EVs</div>"
-        "<div style='background:#f7f6ef; color:#2b2b2b; padding:6px 8px; border:2px solid #6a6a6a; border-radius:6px; font-size:10px;'>"
+        "<div style='padding:8px; background:rgba(121,185,245,0.14); border-top:1px solid rgba(255,255,255,0.08);'>"
+        "<div style='font-size:11px; margin-bottom:6px; color:#f7f8ff; font-family:var(--font-pixel);'>EVs</div>"
+        "<div style='background:linear-gradient(180deg,var(--bw2-panel-3) 0%, var(--bw2-panel) 100%); color:var(--bw2-text); padding:6px 8px; border:1px solid var(--bw2-edge); border-radius:0; font-size:15px;'>"
         f"{_html.escape(evs_txt)}</div>"
         "</div>"
     )
@@ -501,31 +526,31 @@ def render_detail_html(
             "align-items:center",
             "gap:8px",
             "padding:8px",
-            "border-bottom:2px solid #c9756b",
-            "background:#f1a39a",
-        )
+        "border-bottom:1px solid rgba(255,255,255,0.08)",
+        "background:rgba(242,107,97,0.16)",
+    )
         move_type_style = _style(
             f"background:{color}",
             f"color:{text_color}",
-            "border:2px solid #6a6a6a",
-            "border-radius:6px",
+            "border:1px solid var(--bw2-edge)",
+            "border-radius:0",
             "padding:4px 6px",
             "font-size:10px",
             "text-transform:uppercase",
             "min-width:70px",
             "text-align:center",
         )
-        move_name_style = _style("font-size:11px", "color:#2b2b2b")
+        move_name_style = _style("font-size:16px", "color:var(--bw2-text)")
         move_pp_style = _style(
             "display:flex",
             "align-items:center",
             "gap:6px",
-            "background:#f7f6ef",
-            "border:2px solid #6a6a6a",
-            "border-radius:6px",
+            "background:linear-gradient(180deg,var(--bw2-panel-3) 0%, var(--bw2-panel) 100%)",
+            "border:1px solid var(--bw2-edge)",
+            "border-radius:0",
             "padding:4px 6px",
-            "font-size:10px",
-            "color:#2b2b2b",
+            "font-size:14px",
+            "color:var(--bw2-text)",
         )
         mv_rows.append(
             "<div style='{}'><div style='{}'>{}</div><div style='{}'>{}</div>"
@@ -540,7 +565,13 @@ def render_detail_html(
             )
         )
 
-    moves_screen_style = _style("border:2px solid #c9756b", "border-radius:6px", "overflow:hidden", "background:#f1a39a")
+    moves_screen_style = _style(
+        "border:1px solid var(--bw2-edge)",
+        "border-radius:0",
+        "overflow:hidden",
+        "background:linear-gradient(180deg,var(--bw2-screen-2) 0%, var(--bw2-screen) 100%)",
+        "box-shadow: inset 0 1px 0 rgba(255,255,255,0.06)",
+    )
     moves_html = f"<div>{tabs_html}<div style='{moves_screen_style}'>" + "".join(mv_rows) + "</div></div>"
 
     detail_html = f"<div style='{root_style}'>{left_html}{stats_html}{moves_html}</div>"

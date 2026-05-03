@@ -297,22 +297,23 @@ def _ensure_doubles_css() -> None:
         """
         <style>
         .doubles-banner {
-          background: #f1c258;
-          border: 2px solid #c28f27;
-          border-radius: 6px;
+          background: linear-gradient(180deg, var(--accent) 0%, var(--accent-dark) 100%);
+          border: 1px solid var(--bw2-edge-strong);
+          border-radius: 0;
           padding: 10px 12px;
           display: inline-block;
           margin-bottom: 10px;
-          color: #1f1f1f;
-          font-family: "Press Start 2P", monospace;
-          font-size: 14px;
-          font-weight: 900;
+          color: #ffffff;
+          font-family: var(--font-pixel);
+          font-size: 12px;
+          font-weight: 700;
           letter-spacing: 0.3px;
-          text-shadow: 0 0 1px rgba(0,0,0,0.28);
+          text-transform: uppercase;
+          clip-path: polygon(12px 0, 100% 0, 100% calc(100% - 12px), calc(100% - 12px) 100%, 0 100%, 0 12px);
         }
         .doubles-strip {
           height: 2px;
-          background: #b9b59f;
+          background: linear-gradient(90deg, transparent 0%, var(--accent) 22%, var(--accent) 78%, transparent 100%);
           margin: 10px 0 14px;
         }
         .doubles-gap {
@@ -320,105 +321,106 @@ def _ensure_doubles_css() -> None:
         }
         .doubles-section {
           display: inline-block;
-          background: #f7f6ef;
-          border: 2px solid #9a9680;
-          border-radius: 6px;
+          background: linear-gradient(180deg, var(--bw2-panel-3) 0%, var(--bw2-panel) 100%);
+          border: 1px solid var(--bw2-edge);
+          border-radius: 0;
           padding: 8px 10px;
-          color: #2b2b2b;
-          font-family: "Press Start 2P", monospace;
-          font-size: 11px;
-          font-weight: 900;
-          text-shadow: 0 0 1px rgba(0,0,0,0.2);
+          color: #ffffff;
+          font-family: var(--font-pixel);
+          font-size: 10px;
+          font-weight: 700;
+          text-transform: uppercase;
         }
         .doubles-note {
           display:inline-block;
           margin-top: 10px;
-          background: #f7f6ef;
-          border: 2px solid #9a9680;
-          border-radius: 6px;
+          background: linear-gradient(180deg, var(--bw2-panel-2) 0%, var(--bw2-panel) 100%);
+          border: 1px solid var(--bw2-edge);
+          border-radius: 0;
           padding: 8px 10px;
-          color: #2b2b2b;
-          font-family: "Press Start 2P", monospace;
-          font-size: 10px;
-          line-height: 1.5;
+          color: var(--bw2-text-soft);
+          font-family: var(--font-ui);
+          font-size: 18px;
+          line-height: 1.35;
+          box-shadow: inset 0 1px 0 rgba(255,255,255,0.08), 0 0 0 1px rgba(0,0,0,0.28);
         }
         .doubles-toolbar {
           margin-top: 18px;
           margin-bottom: 10px;
         }
         .doubles-metric {
-          background:#f7f6ef;
-          border:2px solid #9a9680;
-          border-radius:6px;
+          background:linear-gradient(180deg,var(--bw2-panel-2) 0%, var(--bw2-panel) 100%);
+          border:1px solid var(--bw2-edge);
+          border-radius:0;
           padding:10px 12px;
-          color:#1f1f1f;
-          box-shadow: inset 0 0 0 1px rgba(255,255,255,0.45);
+          color:var(--bw2-text);
+          box-shadow: inset 0 1px 0 rgba(255,255,255,0.08), 0 0 0 1px rgba(0,0,0,0.28);
           min-height: 86px;
         }
         .doubles-metric-label {
-          color:#444;
-          font-family:"Press Start 2P", monospace;
+          color:#ffffff;
+          font-family:var(--font-pixel);
           font-size:10px;
-          font-weight:900;
+          font-weight:700;
           line-height:1.45;
+          text-transform:uppercase;
         }
         .doubles-metric-value {
           margin-top:8px;
-          color:#1b1b1b;
-          font-family:"Press Start 2P", monospace;
-          font-size:16px;
-          font-weight:900;
+          color:#ffffff;
+          font-family:var(--font-pixel);
+          font-size:12px;
+          font-weight:700;
           line-height:1.3;
-          text-shadow:0 0 1px rgba(0,0,0,0.28);
         }
         .doubles-metric-sub {
           margin-top:8px;
-          color:#555;
-          font-family:"Press Start 2P", monospace;
-          font-size:10px;
-          line-height:1.45;
+          color:var(--bw2-text-soft);
+          font-family:var(--font-ui);
+          font-size:18px;
+          line-height:1.3;
         }
         .doubles-card {
-          background:#f7f6ef;
-          border:2px solid #9a9680;
-          border-radius:6px;
+          background:linear-gradient(180deg,var(--bw2-panel-2) 0%, var(--bw2-panel) 100%);
+          border:1px solid var(--bw2-edge);
+          border-radius:0;
           overflow:hidden;
-          box-shadow: inset 0 0 0 1px rgba(255,255,255,0.42);
+          box-shadow: inset 0 1px 0 rgba(255,255,255,0.08), 0 0 0 1px rgba(0,0,0,0.28);
           margin-bottom: 10px;
         }
         .doubles-card-head {
-          background:#f1c258;
-          border-bottom:2px solid #c28f27;
+          background:linear-gradient(180deg,var(--accent) 0%, var(--accent-dark) 100%);
+          border-bottom:1px solid var(--bw2-edge-strong);
           padding:8px 10px;
-          color:#1f1f1f;
-          font-family:"Press Start 2P", monospace;
-          font-size:11px;
-          font-weight:900;
-          text-shadow:0 0 1px rgba(0,0,0,0.22);
+          color:#ffffff;
+          font-family:var(--font-pixel);
+          font-size:10px;
+          font-weight:700;
+          text-transform:uppercase;
         }
         .doubles-card-body {
           padding:12px;
         }
         .doubles-team-name {
-          color:#1f1f1f;
-          font-family:"Press Start 2P", monospace;
-          font-size:13px;
-          font-weight:900;
+          color:#ffffff;
+          font-family:var(--font-pixel);
+          font-size:10px;
+          font-weight:700;
           line-height:1.4;
-          text-shadow:0 0 1px rgba(0,0,0,0.18);
+          text-transform:uppercase;
         }
         .doubles-team-meta {
           margin-top:8px;
-          color:#3b3b3b;
-          font-family:"Press Start 2P", monospace;
-          font-size:10px;
-          line-height:1.55;
+          color:var(--bw2-text-soft);
+          font-family:var(--font-ui);
+          font-size:18px;
+          line-height:1.2;
         }
         .doubles-logo-hint {
           margin-top:10px;
-          color:#5c5c5c;
-          font-family:"Press Start 2P", monospace;
-          font-size:9px;
+          color:var(--bw2-text-dim);
+          font-family:var(--font-ui);
+          font-size:17px;
           line-height:1.6;
           word-break: break-word;
         }
@@ -429,17 +431,16 @@ def _ensure_doubles_css() -> None:
           align-items:center;
           justify-content:center;
           margin: 0 auto;
-          border-radius: 8px;
-          background: linear-gradient(180deg, #fbfaf4 0%, #efecdf 100%);
-          border: 2px solid #9a9680;
-          box-shadow: inset 0 0 0 1px rgba(255,255,255,0.55);
+          border-radius: 0;
+          background: linear-gradient(180deg, var(--bw2-screen-2) 0%, var(--bw2-screen) 100%);
+          border: 1px solid var(--bw2-edge);
+          box-shadow: inset 0 1px 0 rgba(255,255,255,0.06);
           padding: 12px;
         }
         .doubles-logo-wrap.compact {
           width: 118px;
           height: 118px;
           padding: 10px;
-          border-radius: 12px;
         }
         .doubles-logo-img {
           max-width: 100%;
@@ -456,68 +457,62 @@ def _ensure_doubles_css() -> None:
           align-items:center;
           justify-content:center;
           min-height:100%;
-          color:#2b2b2b;
-          font-family:"Press Start 2P", monospace;
-          font-size:16px;
-          font-weight:900;
-          text-shadow:0 0 1px rgba(0,0,0,0.18);
+          color:#ffffff;
+          font-family:var(--font-pixel);
+          font-size:12px;
+          font-weight:700;
         }
         .doubles-champion {
-          background:#f1c258;
-          border:2px solid #c28f27;
-          border-radius:6px;
+          background:linear-gradient(180deg,var(--accent) 0%, var(--accent-dark) 100%);
+          border:1px solid var(--bw2-edge-strong);
+          border-radius:0;
           padding:10px 12px;
-          color:#1f1f1f;
-          font-family:"Press Start 2P", monospace;
-          font-size:12px;
-          font-weight:900;
+          color:#ffffff;
+          font-family:var(--font-pixel);
+          font-size:10px;
+          font-weight:700;
           line-height:1.5;
-          text-shadow:0 0 1px rgba(0,0,0,0.22);
+          text-transform:uppercase;
         }
         .doubles-round-head {
-          background:#f1c258;
-          border:2px solid #c28f27;
+          background:linear-gradient(180deg,var(--accent) 0%, var(--accent-dark) 100%);
+          border:1px solid var(--bw2-edge-strong);
           border-bottom:none;
-          border-radius:6px 6px 0 0;
+          border-radius:0;
           padding:8px 10px;
           margin-top:12px;
-          color:#1f1f1f;
-          font-family:"Press Start 2P", monospace;
-          font-size:11px;
-          font-weight:900;
-          text-shadow:0 0 1px rgba(0,0,0,0.22);
+          color:#ffffff;
+          font-family:var(--font-pixel);
+          font-size:10px;
+          font-weight:700;
+          text-transform:uppercase;
         }
         div[data-testid="stForm"] {
-          background:#f7f6ef;
-          border:2px solid #9a9680;
-          border-radius:0 0 6px 6px;
+          background:linear-gradient(180deg,var(--bw2-panel-2) 0%, var(--bw2-panel) 100%);
+          border:1px solid var(--bw2-edge);
+          border-radius:0;
           padding:14px 14px 8px;
-          box-shadow: inset 0 0 0 1px rgba(255,255,255,0.45);
+          box-shadow: inset 0 1px 0 rgba(255,255,255,0.08), 0 0 0 1px rgba(0,0,0,0.28);
         }
         .doubles-round-team-name {
-          color:#1f1f1f;
-          font-family:"Press Start 2P", monospace;
-          font-size:14px;
-          font-weight:900;
+          color:#ffffff;
+          font-family:var(--font-pixel);
+          font-size:10px;
+          font-weight:700;
           line-height:1.45;
-          -webkit-text-stroke: 0.35px rgba(255,255,255,0.2);
-          text-shadow:
-            0 0 1px rgba(255,255,255,0.18),
-            1px 1px 0 rgba(255,255,255,0.12),
-            0 1px 0 rgba(0,0,0,0.18);
+          text-transform:uppercase;
         }
         .doubles-round-team-meta {
           margin-top:8px;
-          color:#343434;
-          font-family:"Press Start 2P", monospace;
-          font-size:11px;
-          font-weight:900;
-          line-height:1.55;
-          text-shadow:0 0 1px rgba(255,255,255,0.16);
+          color:var(--bw2-text-soft);
+          font-family:var(--font-ui);
+          font-size:18px;
+          font-weight:400;
+          line-height:1.2;
         }
         .doubles-round-sep {
           height:2px;
-          background:#b9b59f;
+          background:linear-gradient(90deg, transparent 0%, rgba(216,223,232,0.12) 12%, rgba(216,223,232,0.12) 88%, transparent 100%);
           margin:12px 0 14px;
         }
         </style>

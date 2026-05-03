@@ -15,33 +15,21 @@ def page_tienda() -> None:
     apply_platinum_ui("Tienda")
     st.markdown(
         "<style>"
-        ".stButton>button{background:#f1c258 !important; color:#2b2b2b !important; border:2px solid #c28f27 !important; "
-        "border-radius:6px !important; font-family:\"Press Start 2P\", monospace !important; font-size:14px !important; "
-        "font-weight:900 !important; text-shadow:0 0 1px rgba(0,0,0,0.35); letter-spacing:0.2px;}"
-        ".stButton>button, .stButton>button *{font-family:\"Press Start 2P\", monospace !important; font-size:14px !important; "
-        "font-weight:900 !important; color:#2b2b2b !important; -webkit-text-fill-color:#2b2b2b !important; opacity:1 !important;}"
-        ".stButton>button:disabled, .stButton>button:disabled *{opacity:1 !important; background:#e5bf67 !important; "
-        "color:#6a4c16 !important; border-color:#c28f27 !important; font-weight:900 !important; -webkit-text-fill-color:#6a4c16 !important;}"
-        "div[data-baseweb='tab-list']{background:#d7d4c0; border:2px solid #9a9680; border-radius:6px; padding:4px; gap:4px;}"
-        "button[data-baseweb='tab'], button[role='tab']{background:#f7f6ef !important; color:#2b2b2b !important; "
-        "border:2px solid #9a9680 !important; border-radius:4px !important; font-family:\"Press Start 2P\", monospace !important; "
-        "font-size:13px !important; font-weight:900 !important; padding:8px 10px !important; text-shadow:0 0 1px rgba(0,0,0,0.32) !important;}"
-        "button[data-baseweb='tab'] *, button[role='tab'] *{font-family:\"Press Start 2P\", monospace !important; "
-        "font-size:13px !important; font-weight:900 !important; color:#2b2b2b !important; -webkit-text-fill-color:#2b2b2b !important; opacity:1 !important;}"
-        "button[data-baseweb='tab'][aria-selected='true'], button[role='tab'][aria-selected='true']{background:#f1c258 !important; "
-        "border-color:#c28f27 !important; font-weight:900 !important; color:#1f1f1f !important;}"
-        "button[data-baseweb='tab'][aria-selected='true'] *, button[role='tab'][aria-selected='true'] *{font-weight:900 !important; "
-        "color:#1f1f1f !important; -webkit-text-fill-color:#1f1f1f !important;}"
+        ".stButton>button, .stButton>button *{font-family:var(--font-pixel) !important; font-size:11px !important; "
+        "font-weight:700 !important; color:#ffffff !important; -webkit-text-fill-color:#ffffff !important; opacity:1 !important;}"
+        ".stButton>button:disabled, .stButton>button:disabled *{opacity:1 !important; color:#cbd1d9 !important; -webkit-text-fill-color:#cbd1d9 !important;}"
+        "button[data-baseweb='tab'], button[role='tab'], button[data-baseweb='tab'] *, button[role='tab'] *{font-family:var(--font-pixel) !important; font-size:10px !important; font-weight:700 !important;}"
         "</style>",
         unsafe_allow_html=True,
     )
     st.markdown(
-        "<div style='background:#f1c258; border:2px solid #c28f27; border-radius:6px; "
-        "padding:8px 10px; display:inline-block; font-family:\"Press Start 2P\", monospace; "
-        "font-weight:900; color:#2b2b2b; font-size:14px;'>Poke Mart</div>",
+        "<div style='display:inline-block; background:linear-gradient(180deg,var(--accent) 0%, var(--accent-dark) 100%);"
+        " border:1px solid var(--bw2-edge-strong); border-radius:0; padding:9px 12px; color:#ffffff;"
+        " font-family:var(--font-pixel); font-weight:700; font-size:12px; text-transform:uppercase;"
+        " clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px);'>Poke Mart</div>",
         unsafe_allow_html=True,
     )
-    st.markdown("<div style='height:2px; background:#b9b59f; margin:10px 0 14px;'></div>", unsafe_allow_html=True)
+    st.markdown("<div style='height:2px; background:linear-gradient(90deg, transparent 0%, var(--accent) 22%, var(--accent) 78%, transparent 100%); margin:10px 0 14px;'></div>", unsafe_allow_html=True)
 
     current_user = st.session_state.get("user") or "-"
     penalties = get_user_penalties(current_user if current_user != "-" else "")
@@ -63,28 +51,28 @@ def page_tienda() -> None:
             if store_locked:
                 avail = 0
             st.markdown(
-                "<div style='background:#f7f6ef; border:2px solid #9a9680; border-radius:6px; "
-                "padding:10px 12px; color:#1f1f1f; font-family:\"Press Start 2P\", monospace; box-shadow: inset 0 0 0 1px rgba(255,255,255,0.45);'>"
-                "<div style='font-size:13px; color:#2b2b2b; font-weight:900; text-shadow:0 0 1px rgba(0,0,0,0.35); letter-spacing:0.3px;'>Disponible</div>"
-                f"<div style='font-size:26px; margin-top:8px; font-weight:900; color:#1b1b1b; text-shadow:0 0 1px rgba(0,0,0,0.45);'>{COIN} {avail}</div>"
-                f"<div style='font-size:13px; color:#333; margin-top:8px; font-weight:900; line-height:1.45;'>Base: {COIN} {base} | Gastado: {COIN} {spent} | Castigo: {COIN} {extra_reduction}</div>"
+                "<div style='background:linear-gradient(180deg,var(--bw2-panel-2) 0%, var(--bw2-panel) 100%); border:1px solid var(--bw2-edge); border-radius:0; "
+                "padding:10px 12px; color:var(--bw2-text); font-family:var(--font-ui); box-shadow: inset 0 1px 0 rgba(255,255,255,0.08), 0 0 0 1px rgba(0,0,0,0.28);'>"
+                "<div style='font-size:10px; color:#fff; font-family:var(--font-pixel); font-weight:700; letter-spacing:0.05em; text-transform:uppercase;'>Disponible</div>"
+                f"<div style='font-size:28px; margin-top:8px; color:#ffffff;'>{COIN} {avail}</div>"
+                f"<div style='font-size:18px; color:var(--bw2-text-soft); margin-top:8px; line-height:1.35;'>Base: {COIN} {base} | Gastado: {COIN} {spent} | Castigo: {COIN} {extra_reduction}</div>"
                 "</div>",
                 unsafe_allow_html=True,
             )
         else:
             st.markdown(
-                "<div style='background:#f7f6ef; border:2px solid #9a9680; border-radius:6px; "
-                "padding:10px 12px; color:#1f1f1f; font-family:\"Press Start 2P\", monospace;'>"
-                "<div style='font-size:13px; color:#2b2b2b; font-weight:900; text-shadow:0 0 1px rgba(0,0,0,0.35);'>Disponible</div>"
-                f"<div style='font-size:26px; margin-top:8px; font-weight:900; color:#1b1b1b; text-shadow:0 0 1px rgba(0,0,0,0.45);'>{COIN} 0</div>"
+                "<div style='background:linear-gradient(180deg,var(--bw2-panel-2) 0%, var(--bw2-panel) 100%); border:1px solid var(--bw2-edge); border-radius:0; "
+                "padding:10px 12px; color:var(--bw2-text); font-family:var(--font-ui);'>"
+                "<div style='font-size:10px; color:#fff; font-family:var(--font-pixel); font-weight:700; text-transform:uppercase;'>Disponible</div>"
+                f"<div style='font-size:28px; margin-top:8px; color:#ffffff;'>{COIN} 0</div>"
                 "</div>",
                 unsafe_allow_html=True,
             )
 
     st.markdown(
-        "<div style='background:#f7f6ef; border:2px solid #9a9680; border-radius:6px; "
-        "padding:8px 10px; font-size:12px; color:#2b2b2b; font-family:\"Press Start 2P\", monospace; "
-        "font-weight:900; text-shadow:0 0 1px rgba(0,0,0,0.25); display:inline-block;'>Catalogo</div>",
+        "<div style='display:inline-block; background:linear-gradient(180deg,var(--bw2-panel-3) 0%, var(--bw2-panel) 100%); border:1px solid var(--bw2-edge); border-radius:0; "
+        "padding:8px 10px; font-size:10px; color:#ffffff; font-family:var(--font-pixel); "
+        "font-weight:700; text-transform:uppercase;'>Catalogo</div>",
         unsafe_allow_html=True,
     )
     if store_locked:
@@ -95,7 +83,7 @@ def page_tienda() -> None:
         src = penalties.get("sources") or []
         if src:
             st.caption("Origen: " + " | ".join(src))
-    st.markdown("<div style='height:2px; background:#b9b59f; margin:10px 0 14px;'></div>", unsafe_allow_html=True)
+    st.markdown("<div style='height:2px; background:linear-gradient(90deg, transparent 0%, var(--accent) 22%, var(--accent) 78%, transparent 100%); margin:10px 0 14px;'></div>", unsafe_allow_html=True)
     catalog = get_catalog()
     tab_com, tab_bay, tab_comp, tab_bred = st.tabs(["Comodines", "Bayas", "Competitivos", "Crianza"])
     with tab_com:
