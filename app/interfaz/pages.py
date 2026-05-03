@@ -37,6 +37,7 @@ Clausulas especiales
 - Pokemon baneados: Slaking, Deoxys.
 - Movimientos baneados: Esquema (Unicamente la MT, en el recuerdamovimientos si se puede).
 - Objetos baneados: Rocio Bondad.
+- El pokemon transferido entre juegos NO puede ser pseudo-legendario ni legendario. Tambien, este mismo llevara 1 ataque del juego anterior +2 ataques random elegidos antes en una ruleta y una habilidad random.
 
 2. Restricciones de equipo
 - Maximo 1 pseudo-legendario por equipo.
@@ -56,21 +57,21 @@ Clausulas especiales
 
 5. Level Caps
 Gimnasios
-- Roco 17
-- Gardenia 26
-- Fantina 31
-- Brega 38
-- Mananti 44
-- Aceron 49
-- Inverna 53
-- Lectro 60
+- Cheren 16
+- Hiedra 22
+- Camus 29
+- Camila 36
+- Yakon 40
+- Gerania 47
+- Lirio 58
+- Ciprian 61
 
 Liga Pokemon
-- Alecran 64
-- Gaia 66
-- Fausto 68
-- Delos 71
-- Cintia 74
+- Anis 70
+- Aza 70
+- Catleya 70
+- Lotto 70
+- Iris 71
 
 Reglas de nivel
 - Ningun Pokemon puede superar el cap del siguiente combate oficial.
