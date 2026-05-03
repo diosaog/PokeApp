@@ -62,6 +62,7 @@ def get_catalog() -> dict[str, list[dict]]:
         {"name": "Restos", "price": 8, "img": _pokeapi_item_png("leftovers"), "desc": "Restaura 1/16 de PS por turno (6.25%)."},
         {"name": "Banda Focus", "price": 7, "img": _pokeapi_item_png("focus-sash"), "desc": "Con PS completos, sobrevive a 1 golpe con 1 PS (1 uso)."},
         {"name": "Vidasfera", "price": 7, "img": _pokeapi_item_png("life-orb"), "desc": "Dano +30% (x1.3); pierde 10% PS max tras atacar."},
+        {"name": "Mineral Evolutivo", "price": 7, "img": _shop_asset("mineral-evolutivo") or _shop_asset("eviolite") or _pokeapi_item_png("eviolite"), "desc": "Defensa y Def. Esp. +50% (x1.5) si el Pokemon aun puede evolucionar."},
         {"name": "Hierba Blanca", "price": 5, "img": _pokeapi_item_png("white-herb"), "desc": "Restaura reducciones de estadisticas (1 uso)."},
         {"name": "Roca del Rey", "price": 5, "img": _pokeapi_item_png("kings-rock"), "desc": "10% de hacer retroceder al golpear."},
         {"name": "Periscopio", "price": 5, "img": _pokeapi_item_png("scope-lens"), "desc": "Ratio critico +1 etapa (6.25%/12.5%)."},
