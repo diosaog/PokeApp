@@ -3,6 +3,7 @@ import os
 import sqlite3
 import hashlib
 import time
+import json
 from pathlib import Path
 from typing import Optional, List, Tuple, Any
 import httpx
@@ -948,4 +949,189 @@ def settings_get(key: str) -> str | None:
         except Exception:
             _settings_cache_clear(key)
             return None
+
+
+def _deep_replace_user_refs(obj: Any, old_user: str, new_user: str) -> tuple[Any, bool]:
+    changed = False
+    if isinstance(obj, dict):
+        out = {}
+        for key, value in obj.items():
+            new_key = new_user if isinstance(key, str) and key == old_user else key
+            new_value, value_changed = _deep_replace_user_refs(value, old_user, new_user)
+            if new_key != key or value_changed:
+                changed = True
+            out[new_key] = new_value
+        return out, changed
+    if isinstance(obj, list):
+        out_list = []
+        for item in obj:
+            new_item, item_changed = _deep_replace_user_refs(item, old_user, new_user)
+            changed = changed or item_changed
+            out_list.append(new_item)
+        return out_list, changed
+    if isinstance(obj, str):
+        if obj == old_user:
+            return new_user, True
+        return obj, False
+    return obj, False
+
+
+def _migrate_json_setting(key: str, old_user: str, new_user: str) -> bool:
+    raw = settings_get(key)
+    if not raw:
+        return False
+    try:
+        obj = json.loads(raw)
+    except Exception:
+        return False
+    new_obj, changed = _deep_replace_user_refs(obj, old_user, new_user)
+    if changed:
+        settings_set(key, json.dumps(new_obj, ensure_ascii=False))
+    return changed
+
+
+def _move_local_user_save_dir(old_user: str, new_user: str) -> bool:
+    root = BASE_DIR / "saves"
+    old_dir = root / old_user
+    new_dir = root / new_user
+    if not old_dir.exists():
+        return False
+    changed = False
+    new_dir.mkdir(parents=True, exist_ok=True)
+    for item in list(old_dir.iterdir()):
+        target = new_dir / item.name
+        if target.exists():
+            continue
+        item.replace(target)
+        changed = True
+    try:
+        old_dir.rmdir()
+    except Exception:
+        pass
+    return changed
+
+
+def _migrate_local_user_rows(old_user: str, new_user: str) -> bool:
+    try:
+        with _conn() as cx:
+            before = cx.total_changes
+            cx.execute("UPDATE saves SET uploader=? WHERE uploader=?", (new_user, old_user))
+            cx.execute("UPDATE purchases SET user=? WHERE user=?", (new_user, old_user))
+            cx.execute("UPDATE redemptions SET user=? WHERE user=?", (new_user, old_user))
+            cx.execute("UPDATE pokemon_flags SET owner=? WHERE owner=?", (new_user, old_user))
+            cx.execute(
+                "UPDATE pokemon_flags SET fingerprint=REPLACE(fingerprint, ?, ?) WHERE fingerprint LIKE ?",
+                (f"{old_user}::", f"{new_user}::", f"{old_user}::%"),
+            )
+            cx.commit()
+            return cx.total_changes > before
+    except Exception:
+        return False
+
+
+def _migrate_remote_user_rows(old_user: str, new_user: str) -> bool:
+    if not _supabase_enabled():
+        return False
+    changed = False
+    try:
+        client = _sb()
+        try:
+            client.table("saves").update({"user": new_user}).eq("user", old_user).execute()
+            changed = True
+        except Exception:
+            pass
+        try:
+            client.table("purchases").update({"user": new_user}).eq("user", old_user).execute()
+            changed = True
+        except Exception:
+            pass
+        try:
+            client.table("redemptions").update({"user": new_user}).eq("user", old_user).execute()
+            changed = True
+        except Exception:
+            pass
+        try:
+            flags = client.table("pokemon_flags").select("id,fingerprint").eq("owner", old_user).execute()
+            for row in flags.data or []:
+                fp = str(row.get("fingerprint") or "")
+                new_fp = fp.replace(f"{old_user}::", f"{new_user}::", 1) if fp.startswith(f"{old_user}::") else fp
+                client.table("pokemon_flags").update({"owner": new_user, "fingerprint": new_fp}).eq("id", int(row.get("id"))).execute()
+                changed = True
+        except Exception:
+            pass
+    except Exception:
+        return changed
+    return changed
+
+
+def migrate_user_alias(old_user: str, new_user: str) -> bool:
+    old_user = str(old_user or "").strip()
+    new_user = str(new_user or "").strip()
+    if not old_user or not new_user or old_user == new_user:
+        return False
+
+    migration_key = f"user_alias_migrated:{old_user}->{new_user}:v1"
+    if settings_get(migration_key) == "1":
+        return False
+
+    changed = False
+
+    changed = _move_local_user_save_dir(old_user, new_user) or changed
+    changed = _migrate_local_user_rows(old_user, new_user) or changed
+    changed = _migrate_remote_user_rows(old_user, new_user) or changed
+
+    for prefix in ("badges_count", "revived_after_wipe", "league_finished_reward"):
+        old_key = f"{prefix}:{old_user}"
+        new_key = f"{prefix}:{new_user}"
+        old_value = settings_get(old_key)
+        if old_value not in (None, "") and settings_get(new_key) in (None, ""):
+            settings_set(new_key, old_value)
+            changed = True
+        if old_value not in (None, ""):
+            settings_set(old_key, "")
+
+    old_current = settings_get(_user_key(old_user))
+    if old_current not in (None, "") and settings_get(_user_key(new_user)) in (None, ""):
+        settings_set(_user_key(new_user), old_current)
+        changed = True
+    if old_current not in (None, ""):
+        settings_set(_user_key(old_user), "")
+
+    old_pin_key = f"pin:{old_user}"
+    new_pin_key = f"pin:{new_user}"
+    old_pin = settings_get(old_pin_key)
+    new_pin = settings_get(new_pin_key)
+    if old_pin not in (None, ""):
+        settings_set(old_pin_key, "")
+    if new_pin not in (None, ""):
+        settings_set(new_pin_key, "")
+
+    for setting_key in (
+        "league_state",
+        "copa_swiss_state",
+        "copa_elim_state",
+        "copa_dobles_state",
+        "juicios_state_v1",
+    ):
+        changed = _migrate_json_setting(setting_key, old_user, new_user) or changed
+
+    settings_set(migration_key, "1")
+    _settings_cache_clear()
+    _total_spent_cache_invalidate()
+    _list_inventory_cache_invalidate()
+    _list_purchases_cache_invalidate()
+
+    try:
+        import streamlit as st  # type: ignore
+        for key in list(getattr(st, "session_state", {}).keys()):
+            if key.startswith("_bootstrapped_save_") and old_user in key:
+                st.session_state.pop(key, None)
+        try:
+            st.cache_data.clear()
+        except Exception:
+            pass
+    except Exception:
+        pass
+
+    return changed
 

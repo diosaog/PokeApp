@@ -2,7 +2,7 @@
 import streamlit as st
 
 from utils import APP_TITLE, APP_ICON, init_session_state, sections_for_user
-from app.startup import preload_datasets
+from app.startup import preload_datasets, run_startup_migrations
 
 st.set_page_config(
     page_title=APP_TITLE,
@@ -33,6 +33,7 @@ def router(section: str) -> None:
 
 def main() -> None:
     ui.apply_css()
+    run_startup_migrations()
     init_session_state()
     ui.login_gate()
     preload_datasets()

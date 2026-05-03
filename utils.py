@@ -19,7 +19,7 @@ USERS: Dict[str, str] = {
     "Rober": "r03",
     "Samu": "s88",
     "Daviry": "d15",
-    "Barto": "b60",
+    "Sergio": "s33",
     "Iker": "i09",
     "Aaron": "a31",
     "Miguel": "m77",
