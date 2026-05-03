@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from copy import deepcopy
+from functools import lru_cache
 import json
 import time
 from typing import Any
@@ -178,10 +180,8 @@ def _reindex_case_numbers(cases: list[dict[str, Any]]) -> list[dict[str, Any]]:
     return ordered
 
 
-def _load_state() -> dict[str, Any]:
-    raw = settings_get(JUICIOS_STATE_KEY)
-    if not raw:
-        return _empty_state()
+@lru_cache(maxsize=16)
+def _parse_state_raw(raw: str) -> dict[str, Any]:
     try:
         obj = json.loads(raw)
     except Exception:
@@ -197,6 +197,13 @@ def _load_state() -> dict[str, Any]:
         "next_case_no": int(obj.get("next_case_no") or (max_case_no + 1)),
         "cases": cases,
     }
+
+
+def _load_state() -> dict[str, Any]:
+    raw = settings_get(JUICIOS_STATE_KEY)
+    if not raw:
+        return _empty_state()
+    return deepcopy(_parse_state_raw(raw))
 
 
 def _save_state(state: dict[str, Any]) -> None:

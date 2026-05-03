@@ -55,6 +55,16 @@ def _serialize_state() -> dict:
 
 
 def restore_state() -> None:
+    required = (
+        "league_tramo",
+        "league_active",
+        "league_divisions",
+        "league_results",
+        "league_matches",
+        "league_movements",
+    )
+    if all(key in st.session_state for key in required):
+        return
     try:
         raw = settings_get("league_state")
         if not raw:

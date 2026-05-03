@@ -3,7 +3,13 @@ from __future__ import annotations
 import json
 from typing import Any
 
+try:
+    import streamlit as st  # type: ignore
+except Exception:
+    st = None  # type: ignore
+
 from app.juicios.constants import (
+    JUICIOS_STATE_KEY,
     LEGACY_STATUS_MAP,
     PENALTY_COINS_REDUCTION,
     PENALTY_OTHER,
@@ -12,8 +18,13 @@ from app.juicios.constants import (
     PENALTY_STORE_BAN,
     STATUS_FINISHED,
 )
-from app.juicios.repo import list_cases
 from storage import settings_get
+
+
+def _cache_data(ttl: int = 10):
+    if st is None:
+        return lambda f: f
+    return st.cache_data(ttl=ttl, show_spinner=False)
 
 
 def _as_float(val: Any, default: float = 0.0) -> float:
@@ -37,9 +48,9 @@ def _normalized_status(raw: Any) -> str:
     return LEGACY_STATUS_MAP.get(status, status)
 
 
-def _current_league_tramo() -> int:
+@_cache_data(ttl=10)
+def _current_league_tramo_from_raw(raw: str) -> int:
     try:
-        raw = settings_get("league_state")
         if not raw:
             return 1
         obj = json.loads(raw)
@@ -47,6 +58,10 @@ def _current_league_tramo() -> int:
         return max(tramo, 1)
     except Exception:
         return 1
+
+
+def _current_league_tramo() -> int:
+    return _current_league_tramo_from_raw(settings_get("league_state") or "")
 
 
 def _store_ban_active_now(penalty: dict[str, Any], current_tramo: int) -> bool:
@@ -61,17 +76,28 @@ def _store_ban_active_now(penalty: dict[str, Any], current_tramo: int) -> bool:
     return True
 
 
-def get_user_penalties(user: str | None) -> dict[str, Any]:
+def _empty_penalties() -> dict[str, Any]:
+    return {
+        "store_blocked": False,
+        "coins_reduction": 0,
+        "points_reduction": 0.0,
+        "pokemon_release_notes": [],
+        "other_notes": [],
+        "sources": [],
+        "store_ban_tramos": [],
+    }
+
+
+@_cache_data(ttl=10)
+def _get_user_penalties_cached(user: str, current_tramo: int, juicios_raw: str) -> dict[str, Any]:
     if not user:
-        return {
-            "store_blocked": False,
-            "coins_reduction": 0,
-            "points_reduction": 0.0,
-            "pokemon_release_notes": [],
-            "other_notes": [],
-            "sources": [],
-            "store_ban_tramos": [],
-        }
+        return _empty_penalties()
+
+    try:
+        obj = json.loads(juicios_raw) if juicios_raw else {}
+    except Exception:
+        obj = {}
+    cases = obj.get("cases") if isinstance(obj, dict) and isinstance(obj.get("cases"), list) else []
 
     store_blocked = False
     coins_reduction = 0
@@ -79,10 +105,11 @@ def get_user_penalties(user: str | None) -> dict[str, Any]:
     pokemon_release_notes: list[str] = []
     other_notes: list[str] = []
     sources: list[str] = []
-    current_tramo = _current_league_tramo()
     store_ban_tramos: list[str] = []
 
-    for case in list_cases():
+    for case in cases:
+        if not isinstance(case, dict):
+            continue
         if _normalized_status(case.get("status")) != STATUS_FINISHED:
             continue
         if str(case.get("accused") or "").strip() != str(user).strip():
@@ -91,6 +118,8 @@ def get_user_penalties(user: str | None) -> dict[str, Any]:
         case_ref = f"Caso #{case.get('case_no')}: {case.get('title') or '-'}"
         has_effect = False
         for p in list(case.get("penalties") or []):
+            if not isinstance(p, dict):
+                continue
             ptype = str(p.get("type") or "").strip()
             if not ptype:
                 continue
@@ -130,3 +159,20 @@ def get_user_penalties(user: str | None) -> dict[str, Any]:
         "sources": sources,
         "store_ban_tramos": store_ban_tramos,
     }
+
+
+def get_user_penalties(user: str | None) -> dict[str, Any]:
+    if not user:
+        return _empty_penalties()
+    league_raw = settings_get("league_state") or ""
+    juicios_raw = settings_get(JUICIOS_STATE_KEY) or ""
+    current_tramo = _current_league_tramo_from_raw(league_raw)
+    return _get_user_penalties_cached(str(user), int(current_tramo), juicios_raw)
+
+
+def clear_penalty_caches() -> None:
+    for func in (_current_league_tramo_from_raw, _get_user_penalties_cached):
+        try:
+            func.clear()
+        except Exception:
+            continue

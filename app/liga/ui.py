@@ -6,6 +6,7 @@ from app.common import COIN
 from app.liga.ranking import (
     MAX_JORNADAS,
     all_filled,
+    clear_ranking_caches,
     final_podium,
     finalize,
     general_table_sorted,
@@ -13,7 +14,7 @@ from app.liga.ranking import (
     recompute_round,
 )
 from app.liga.state import ensure_state, persist_state, restore_state
-from app.tienda.money import _money_available
+from app.tienda.money import _money_available, clear_money_caches
 from storage import clear_purchases
 from utils import USERS
 
@@ -134,10 +135,7 @@ def _render_previous_round_editor(*, prev_tramo: int, current_tramo: int) -> Non
                     if current_tramo in current_matches:
                         del current_matches[current_tramo]
                 persist_state()
-                try:
-                    st.cache_data.clear()
-                except Exception:
-                    pass
+                clear_money_caches()
                 st.success("Jornada anterior actualizada. Puntos y monedas recalculados.")
                 st.rerun()
             except Exception as e:
@@ -173,6 +171,7 @@ def page_tabla() -> None:
                 if st.button("Finalizar jornada", use_container_width=True):
                     try:
                         finalize(tramo)
+                        clear_money_caches()
                         if tramo >= MAX_JORNADAS:
                             podium = final_podium()
                             if podium:
@@ -194,6 +193,7 @@ def page_tabla() -> None:
                     if tramo in st.session_state.league_matches:
                         del st.session_state.league_matches[tramo]
                     persist_state()
+                    clear_money_caches()
                     st.info("Edicion cancelada. No se guardara ningun resultado.")
         else:
             c1, c2 = st.columns(2)
@@ -264,6 +264,8 @@ def page_tabla() -> None:
                 st.session_state.league_movements = {}
                 st.success("Divisiones actualizadas.")
                 persist_state()
+                clear_money_caches()
+                clear_ranking_caches()
             else:
                 st.error("Selecciona exactamente 5 en A y 5 en B.")
 
@@ -328,6 +330,7 @@ def page_tabla() -> None:
                     k = f"{p1} vs {p2}"
                     data["B"][(p1, p2)] = tmp_divs["B"].get(k)
                 persist_state()
+                clear_money_caches()
                 st.success("Resultados guardados.")
 
         if all_filled(data["A"]) and all_filled(data["B"]):
@@ -442,6 +445,8 @@ def page_tabla() -> None:
             except Exception:
                 pass
             persist_state()
+            clear_money_caches()
+            clear_ranking_caches()
             st.success("Liga reiniciada.")
         else:
             st.info("Operacion cancelada. La liga sigue igual.")

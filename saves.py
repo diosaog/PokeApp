@@ -3,7 +3,9 @@ from datetime import datetime
 import html as _html
 import streamlit as st
 
+from app.liga.ranking import clear_ranking_caches
 from app.interfaz.theme import apply_platinum_ui
+from app.tienda.money import clear_money_caches
 from storage import (
     save_upload,
     load_save_bytes,
@@ -12,6 +14,18 @@ from storage import (
     get_current_save_for_user,
 )
 from utils import ensure_user_dir, ts_name
+
+
+def _clear_save_related_caches() -> None:
+    clear_money_caches()
+    clear_ranking_caches()
+    try:
+        import utils as _utils
+        cache_fn = getattr(_utils, "_list_user_saves_cached", None)
+        if cache_fn is not None:
+            cache_fn.clear()
+    except Exception:
+        pass
 
 
 def page_saves() -> None:
@@ -166,6 +180,7 @@ def page_saves() -> None:
                 f.write(data)
         except Exception:
             pass
+        _clear_save_related_caches()
         st.success(f"Guardado por {current_user} y establecido como actual (id={rec['id']}).")
 
     cur = get_current_save_for_user(current_user)
@@ -201,6 +216,7 @@ def page_saves() -> None:
                 with c1:
                     if st.button("Establecer como actual", key=f"set_{id_}"):
                         set_current_save_for_user(current_user, id_)
+                        _clear_save_related_caches()
                         st.success(f"Save actual -> {id_}")
                 with c2:
                     if up and current_user and current_user == up:

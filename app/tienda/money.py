@@ -1,12 +1,13 @@
 from __future__ import annotations
 
+from pathlib import Path
+
 from app.liga.coins import coins_from_league
 from app.entrenadores.badges import count_badges
 from app.interfaz.badges import coins_from_badges
 from app.juicios.penalties import get_user_penalties
 from storage import (
     get_current_save_for_user,
-    list_inventory,
     list_saves_by_user,
     load_save_bytes,
     settings_get,
@@ -61,13 +62,9 @@ def league_finished_bonus(user: str | None) -> int:
     return LEAGUE_FINISHED_COINS if league_finished_claimed(user) else 0
 
 
-@_cache_data(ttl=10)
-def _calc_money_for_user(user: str) -> int:
-    liga = coins_from_league(user)
-    badge_coins = 0
-    badge_found = False
+@_cache_data(ttl=15)
+def _resolve_user_save_path(user: str) -> str | None:
     try:
-        spath = None
         cur = get_current_save_for_user(user)
         if cur:
             fname = cur[1]
@@ -77,29 +74,74 @@ def _calc_money_for_user(user: str) -> int:
                 if data:
                     p.write_bytes(data)
             if p.exists():
-                spath = p
+                return str(p)
 
-        if spath is None:
-            saves = list_user_saves(user)
-            if not saves:
-                remote = list_saves_by_user(user, limit=1)
-                if remote:
-                    _, fname, *_ = remote[0]
-                    data = load_save_bytes(fname)
-                    if data:
-                        p = ensure_user_dir(user) / fname
-                        p.write_bytes(data)
-                        saves = [p]
-            if saves:
-                spath = saves[0]
+        saves = list_user_saves(user)
+        if saves:
+            return str(saves[0])
 
+        remote = list_saves_by_user(user, limit=1)
+        if remote:
+            _, fname, *_ = remote[0]
+            data = load_save_bytes(fname)
+            if data:
+                p = ensure_user_dir(user) / fname
+                p.write_bytes(data)
+                return str(p)
+    except Exception:
+        pass
+    return None
+
+
+@_cache_data(ttl=15)
+def _badge_coins_from_save(save_path: str, mtime: float) -> int:
+    try:
+        sav_json = open_sav_cached(str(save_path))
+        try:
+            return int(4 * count_badges(sav_json))
+        except Exception:
+            return int(coins_from_badges(sav_json))
+    except Exception:
+        return 0
+
+
+@_cache_data(ttl=10)
+def money_breakdown(user: str | None) -> dict[str, int | bool]:
+    if not user:
+        return {"base": 0, "spent": 0, "coins_reduction": 0, "store_blocked": False, "available": 0}
+
+    penalties = get_user_penalties(user)
+    try:
+        base = _calc_money_for_user(user)
+    except Exception:
+        base = 0
+    try:
+        spent = total_spent(user)
+    except Exception:
+        spent = 0
+    extra_reduction = int(penalties.get("coins_reduction") or 0)
+    store_blocked = bool(penalties.get("store_blocked"))
+    available = 0 if store_blocked else max(int(base) - int(spent) - extra_reduction, 0)
+    return {
+        "base": int(base),
+        "spent": int(spent),
+        "coins_reduction": extra_reduction,
+        "store_blocked": store_blocked,
+        "available": int(available),
+    }
+
+
+@_cache_data(ttl=10)
+def _calc_money_for_user(user: str) -> int:
+    liga = coins_from_league(user)
+    badge_coins = 0
+    badge_found = False
+    try:
+        spath = _resolve_user_save_path(user)
         if spath:
-            sav_json = open_sav_cached(str(spath))
+            mtime = Path(spath).stat().st_mtime
+            badge_coins = _badge_coins_from_save(str(spath), float(mtime))
             badge_found = True
-            try:
-                badge_coins = 4 * count_badges(sav_json)
-            except Exception:
-                badge_coins = coins_from_badges(sav_json)
     except Exception:
         badge_coins = 0
         badge_found = False
@@ -118,23 +160,19 @@ def _calc_money_for_user(user: str) -> int:
 def _money_available(user: str | None) -> int:
     if not user:
         return 0
-    penalties = get_user_penalties(user)
-    if penalties.get("store_blocked"):
-        return 0
-    try:
-        base = _calc_money_for_user(user)
-    except Exception:
-        base = 0
-    try:
-        spent = total_spent(user)
-        if spent == 0:
-            inv = list_inventory(user, limit=300)
-            for r in inv or []:
-                try:
-                    spent += int(r[2] or 0)
-                except Exception:
-                    continue
-    except Exception:
-        spent = 0
-    extra_reduction = int(penalties.get("coins_reduction") or 0)
-    return max(int(base) - int(spent) - extra_reduction, 0)
+    return int(money_breakdown(user).get("available") or 0)
+
+
+def clear_money_caches() -> None:
+    for func in (
+        league_finished_claimed,
+        _resolve_user_save_path,
+        _badge_coins_from_save,
+        money_breakdown,
+        _calc_money_for_user,
+        _money_available,
+    ):
+        try:
+            func.clear()
+        except Exception:
+            continue

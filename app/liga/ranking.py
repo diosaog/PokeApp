@@ -4,7 +4,6 @@ from pathlib import Path
 from typing import Dict
 import streamlit as st
 
-from app.liga.state import persist_state
 from app.juicios.penalties import get_user_penalties
 from app.tienda.common import _eq_item
 from storage import add_purchase, get_current_save_for_user, list_inventory, load_save_bytes, settings_get
@@ -48,10 +47,10 @@ def get_matches_for(tramo: int) -> dict:
             "A": {pair: None for pair in _gen_pairs(A)},
             "B": {pair: None for pair in _gen_pairs(B)},
         }
-    persist_state()
     return st.session_state.league_matches[tramo]
 
 
+@_cache_data(ttl=15)
 def _latest_save_path(trainer: str) -> str | None:
     try:
         saves = list_user_saves(trainer)
@@ -100,13 +99,18 @@ def _count_muertos_for_trainer(trainer: str) -> int:
     except Exception:
         revives = 0
 
-    try:
-        used_items = list_inventory(trainer, status="used", limit=300)
-        revives_used = sum(1 for row in (used_items or []) if len(row) > 1 and _eq_item(row[1], "Revivir Pokemon"))
-    except Exception:
-        revives_used = 0
+    revives_used = _used_revives_count(trainer)
 
     return muertos + revives_used + 2 * revives
+
+
+@_cache_data(ttl=15)
+def _used_revives_count(trainer: str) -> int:
+    try:
+        used_items = list_inventory(trainer, status="used", limit=300)
+        return sum(1 for row in (used_items or []) if len(row) > 1 and _eq_item(row[1], "Revivir Pokemon"))
+    except Exception:
+        return 0
 
 
 def _wins_losses(players: list[str], results: dict[tuple[str, str], str]) -> dict:
@@ -288,3 +292,11 @@ def general_table_sorted() -> list[tuple[str, float]]:
 
 def final_podium() -> list[tuple[str, float]]:
     return general_table_sorted()[:3]
+
+
+def clear_ranking_caches() -> None:
+    for func in (_latest_save_path, _muertos_from_save, _used_revives_count):
+        try:
+            func.clear()
+        except Exception:
+            continue

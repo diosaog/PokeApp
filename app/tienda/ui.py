@@ -6,9 +6,9 @@ from app.common import COIN
 from app.interfaz.theme import apply_platinum_ui
 from app.juicios.penalties import get_user_penalties
 from app.tienda.catalog import _render_shop_items, get_catalog
-from app.tienda.money import _calc_money_for_user
+from app.tienda.money import clear_money_caches, money_breakdown
 from app.tienda.redeem import render_redeem_flow
-from storage import add_purchase, clear_all_pokemon_flags, clear_pokemon_flags_for_owner, list_purchases, total_spent
+from storage import add_purchase, clear_all_pokemon_flags, clear_pokemon_flags_for_owner, list_purchases
 
 
 def page_tienda() -> None:
@@ -39,17 +39,13 @@ def page_tienda() -> None:
     with colR:
         if current_user != "-":
             try:
-                base = _calc_money_for_user(current_user)
+                breakdown = money_breakdown(current_user)
             except Exception:
-                base = 0
-            try:
-                spent = total_spent(current_user)
-            except Exception:
-                spent = 0
-            extra_reduction = int(penalties.get("coins_reduction") or 0)
-            avail = max(int(base) - int(spent) - extra_reduction, 0)
-            if store_locked:
-                avail = 0
+                breakdown = {"base": 0, "spent": 0, "coins_reduction": 0, "available": 0}
+            base = int(breakdown.get("base") or 0)
+            spent = int(breakdown.get("spent") or 0)
+            extra_reduction = int(breakdown.get("coins_reduction") or 0)
+            avail = int(breakdown.get("available") or 0)
             st.markdown(
                 "<div style='background:linear-gradient(180deg,var(--bw2-panel-2) 0%, var(--bw2-panel) 100%); border:1px solid var(--bw2-edge); border-radius:0; "
                 "padding:10px 12px; color:var(--bw2-text); font-family:var(--font-ui); box-shadow: inset 0 1px 0 rgba(255,255,255,0.08), 0 0 0 1px rgba(0,0,0,0.28);'>"
@@ -115,11 +111,10 @@ def page_tienda() -> None:
             if st.button("Confirmar compra", use_container_width=True):
                 try:
                     pid = add_purchase(current_user, nombre, precio)
-                    st.session_state.pop("_money_cache", None)
-                    st.session_state.pop("_money_cache_entrenadores", None)
+                    clear_money_caches()
                     try:
-                        import streamlit as _st
-                        _st.cache_data.clear()
+                        from app.entrenadores.inventory import _inventory_cached
+                        _inventory_cached.clear()
                     except Exception:
                         pass
                     st.session_state.pop("shop_pending", None)

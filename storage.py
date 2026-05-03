@@ -24,6 +24,10 @@ _SETTINGS_MEM_TTL = float(os.environ.get("SETTINGS_MEM_TTL", "10"))
 _SETTINGS_MEM_CACHE: dict[str, tuple[float, str | None]] = {}
 _TOTAL_SPENT_MEM_TTL = float(os.environ.get("TOTAL_SPENT_MEM_TTL", "10"))
 _TOTAL_SPENT_MEM_CACHE: dict[str, tuple[float, int]] = {}
+_LIST_PURCHASES_MEM_TTL = float(os.environ.get("LIST_PURCHASES_MEM_TTL", "10"))
+_LIST_PURCHASES_MEM_CACHE: dict[tuple[str | None, int], tuple[float, list[tuple]]] = {}
+_LIST_INVENTORY_MEM_TTL = float(os.environ.get("LIST_INVENTORY_MEM_TTL", "10"))
+_LIST_INVENTORY_MEM_CACHE: dict[tuple[str, str | None, int], tuple[float, list[tuple]]] = {}
 
 
 def _cache_data(ttl: int = 15):
@@ -74,6 +78,50 @@ def _total_spent_cache_invalidate(user: str | None = None) -> None:
         _TOTAL_SPENT_MEM_CACHE.pop(user, None)
     else:
         _TOTAL_SPENT_MEM_CACHE.clear()
+
+
+def _list_purchases_cache_get(user: str | None, limit: int) -> list[tuple] | None:
+    entry = _LIST_PURCHASES_MEM_CACHE.get((user, int(limit)))
+    if not entry:
+        return None
+    ts, rows = entry
+    if (time.time() - float(ts)) <= _LIST_PURCHASES_MEM_TTL:
+        return list(rows)
+    _LIST_PURCHASES_MEM_CACHE.pop((user, int(limit)), None)
+    return None
+
+
+def _list_purchases_cache_set(user: str | None, limit: int, rows: list[tuple]) -> None:
+    _LIST_PURCHASES_MEM_CACHE[(user, int(limit))] = (time.time(), list(rows))
+
+
+def _list_purchases_cache_invalidate() -> None:
+    _LIST_PURCHASES_MEM_CACHE.clear()
+
+
+def _list_inventory_cache_get(user: str, status: str | None, limit: int) -> list[tuple] | None:
+    key = (user, status, int(limit))
+    entry = _LIST_INVENTORY_MEM_CACHE.get(key)
+    if not entry:
+        return None
+    ts, rows = entry
+    if (time.time() - float(ts)) <= _LIST_INVENTORY_MEM_TTL:
+        return list(rows)
+    _LIST_INVENTORY_MEM_CACHE.pop(key, None)
+    return None
+
+
+def _list_inventory_cache_set(user: str, status: str | None, limit: int, rows: list[tuple]) -> None:
+    _LIST_INVENTORY_MEM_CACHE[(user, status, int(limit))] = (time.time(), list(rows))
+
+
+def _list_inventory_cache_invalidate(user: str | None = None) -> None:
+    if user is None:
+        _LIST_INVENTORY_MEM_CACHE.clear()
+        return
+    for key in list(_LIST_INVENTORY_MEM_CACHE.keys()):
+        if key[0] == user:
+            _LIST_INVENTORY_MEM_CACHE.pop(key, None)
 
 
 def _supabase_enabled() -> bool:
@@ -458,6 +506,8 @@ def add_purchase(user: str, item: str, price: int) -> int:
             if data:
                 pid = int(data[0].get("id") or 0)
                 _total_spent_cache_invalidate(user)
+                _list_inventory_cache_invalidate(user)
+                _list_purchases_cache_invalidate()
                 return pid
         except Exception as e:
             # Supabase estÃ¡ configurado pero fallÃ³: no hacemos fallback silencioso
@@ -470,6 +520,8 @@ def add_purchase(user: str, item: str, price: int) -> int:
         rowid = cx.execute("SELECT last_insert_rowid()").fetchone()[0]
         cx.commit()
         _total_spent_cache_invalidate(user)
+        _list_inventory_cache_invalidate(user)
+        _list_purchases_cache_invalidate()
         return int(rowid)
 
 
@@ -531,6 +583,9 @@ def total_spent(user: str) -> int:
 
 
 def list_purchases(user: str | None = None, limit: int = 100):
+    cached = _list_purchases_cache_get(user, limit)
+    if cached is not None:
+        return cached
     if _supabase_enabled():
         try:
             client = _sb()
@@ -551,22 +606,30 @@ def list_purchases(user: str | None = None, limit: int = 100):
                         _iso_to_ts(row.get("redeemed_at")),
                     )
                 )
+            _list_purchases_cache_set(user, limit, out)
             return out
         except Exception:
             pass
     with _conn() as cx:
         if user:
-            return cx.execute(
+            rows = cx.execute(
                 "SELECT id, user, item, price, created_at, status, redeemed_at FROM purchases WHERE user=? ORDER BY id DESC LIMIT ?",
                 (user, limit)
             ).fetchall()
-        return cx.execute(
+            _list_purchases_cache_set(user, limit, rows)
+            return rows
+        rows = cx.execute(
             "SELECT id, user, item, price, created_at, status, redeemed_at FROM purchases ORDER BY id DESC LIMIT ?",
             (limit,)
         ).fetchall()
+        _list_purchases_cache_set(user, limit, rows)
+        return rows
 
 
 def list_inventory(user: str, *, status: str | None = None, limit: int = 200):
+    cached = _list_inventory_cache_get(user, status, limit)
+    if cached is not None:
+        return cached
     if _supabase_enabled():
         try:
             client = _sb()
@@ -592,19 +655,24 @@ def list_inventory(user: str, *, status: str | None = None, limit: int = 200):
                         _iso_to_ts(row.get("redeemed_at")),
                     )
                 )
+            _list_inventory_cache_set(user, status, limit, out)
             return out
         except Exception:
             pass
     with _conn() as cx:
         if status:
-            return cx.execute(
+            rows = cx.execute(
                 "SELECT id, item, price, created_at, status, redeemed_at FROM purchases WHERE user=? AND status=? ORDER BY id DESC LIMIT ?",
                 (user, status, limit)
             ).fetchall()
-        return cx.execute(
+            _list_inventory_cache_set(user, status, limit, rows)
+            return rows
+        rows = cx.execute(
             "SELECT id, item, price, created_at, status, redeemed_at FROM purchases WHERE user=? ORDER BY id DESC LIMIT ?",
             (user, limit)
         ).fetchall()
+        _list_inventory_cache_set(user, status, limit, rows)
+        return rows
 
 # Redemptions / vouchers
 
@@ -647,6 +715,8 @@ def set_purchase_status(purchase_id: int, status: str) -> None:
                 data["redeemed_at"] = _now_iso()
             client.table("purchases").update(data).eq("id", int(purchase_id)).execute()
             _total_spent_cache_invalidate()
+            _list_inventory_cache_invalidate()
+            _list_purchases_cache_invalidate()
             return
         except Exception as e:
             raise RuntimeError(f"Supabase set_purchase_status failed: {e}")
@@ -657,6 +727,8 @@ def set_purchase_status(purchase_id: int, status: str) -> None:
             cx.execute("UPDATE purchases SET status=? WHERE id=?", (status, int(purchase_id)))
         cx.commit()
     _total_spent_cache_invalidate()
+    _list_inventory_cache_invalidate()
+    _list_purchases_cache_invalidate()
 
 # Pokemon flags
 
@@ -779,6 +851,8 @@ def clear_purchases() -> None:
             client = _sb()
             client.table("purchases").delete().neq("id", -1).execute()
             _total_spent_cache_invalidate()
+            _list_inventory_cache_invalidate()
+            _list_purchases_cache_invalidate()
             return
         except Exception:
             pass
@@ -786,6 +860,8 @@ def clear_purchases() -> None:
         cx.execute("DELETE FROM purchases")
         cx.commit()
     _total_spent_cache_invalidate()
+    _list_inventory_cache_invalidate()
+    _list_purchases_cache_invalidate()
 
 # Pokemon flags reset helpers
 

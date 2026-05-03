@@ -13,6 +13,7 @@ from app.juicios.constants import (
     VOTE_ORDER,
 )
 from app.juicios.forms import render_case_details_form, render_resolution_form
+from app.juicios.penalties import clear_penalty_caches
 from app.juicios.penalties import get_user_penalties
 from app.juicios.render import case_header, render_case_info
 from app.juicios.repo import (
@@ -25,14 +26,13 @@ from app.juicios.repo import (
     update_case,
 )
 from app.interfaz.theme import apply_section_theme
+from app.tienda.money import clear_money_caches
 from utils import USERS
 
 
 def _clear_cache() -> None:
-    try:
-        st.cache_data.clear()
-    except Exception:
-        pass
+    clear_penalty_caches()
+    clear_money_caches()
 
 
 def _apply_juicio_theme() -> None:

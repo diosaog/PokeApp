@@ -12,6 +12,7 @@ from app.entrenadores.profile import find_trainer_image
 from app.juicios.penalties import get_user_penalties
 from app.tienda.money import (
     LEAGUE_FINISHED_COINS,
+    clear_money_caches,
     league_finished_bonus,
     league_finished_claimed,
     mark_league_finished_claimed,
@@ -273,7 +274,7 @@ def trainer_summary_with_portrait_ui(sav_json: dict, box_count: int, *, is_own_p
             ),
         ):
             if mark_league_finished_claimed(jugador or ""):
-                st.cache_data.clear()
+                clear_money_caches()
                 st.success(f"Has recibido {LEAGUE_FINISHED_COINS} monedas por finalizar la liga.")
                 st.rerun()
             else:
