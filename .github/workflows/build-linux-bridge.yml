@@ -1,0 +1,46 @@
+name: Build Linux Bridge
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - Bridge/PKHeXBridge/**/*.cs
+      - Bridge/PKHeXBridge/*.csproj
+      - .github/workflows/build-linux-bridge.yml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  publish-linux-bridge:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup .NET 9
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 9.0.x
+
+      - name: Publish Linux bridge
+        run: dotnet publish Bridge/PKHeXBridge/PKHeXBridge.csproj -c Release -r linux-x64 --self-contained true
+
+      - name: Commit published bridge
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add Bridge/PKHeXBridge/bin/Release/net9.0/linux-x64/publish/PKHeXBridge
+          git add Bridge/PKHeXBridge/bin/Release/net9.0/linux-x64/publish/PKHeXBridge.pdb
+          if git diff --cached --quiet; then
+            echo "No published bridge changes to commit."
+            exit 0
+          fi
+          git commit -m "Bridge: rebuild linux publish binary [skip ci]"
+          git push
