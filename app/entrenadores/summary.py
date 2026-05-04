@@ -1,12 +1,11 @@
 from __future__ import annotations
 
-from pathlib import Path
 import base64
 import mimetypes
 import os
 import streamlit as st
 
-from app.entrenadores.badges import count_badges
+from app.entrenadores.badges import UNOVA_BW2_BADGE_NAMES, count_badges
 from app.entrenadores.boxes import muertos_box_index
 from app.entrenadores.constants import DEAD_BOX_LABEL
 from app.entrenadores.profile import find_trainer_image
@@ -29,18 +28,16 @@ def _cache_data(ttl: int = 30):
 from conex_pkhex import extract_box
 
 
-BADGES_DIR = Path("assets") / "medallas"
-
-_SINNOH_BADGE_FILES = [
-    "Medalla_Lignito.png",
-    "Medalla_Bosque.png",
-    "Medalla_Reliquia.png",
-    "Medalla_Adoquin.png",
-    "Medalla_Cienaga.png",
-    "Medalla_Mina.png",
-    "Medalla_Carambano.png",
-    "Medalla_Faro.png",
-]
+_UNOVA_BW2_BADGE_COLORS = (
+    "#d8d2bd",
+    "#b56ad6",
+    "#79c255",
+    "#f4c542",
+    "#c08b53",
+    "#75bce8",
+    "#8793d8",
+    "#4fb7d4",
+)
 
 
 @_cache_data(ttl=120)
@@ -63,19 +60,22 @@ def _medals_html(count: int) -> str:
         n = max(0, min(int(count or 0), 8))
     except Exception:
         n = 0
-    files: list[str] = []
-    for i in range(n):
-        p = BADGES_DIR / _SINNOH_BADGE_FILES[i]
-        if p.exists():
-            files.append(str(p))
-    if not files:
-        return "<div style='font-size:11px; color:#5a5a5a;'>Sin medallas</div>"
-    imgs = []
-    for f in files:
-        uri = _img_uri(f)
-        if uri:
-            imgs.append(f"<img src='{uri}' alt='medalla' style='width:28px; height:auto; image-rendering:pixelated;'/>")
-    return "<div style='display:flex; gap:6px; align-items:center; flex-wrap:wrap;'>" + "".join(imgs) + "</div>"
+    chips = []
+    for i, name in enumerate(UNOVA_BW2_BADGE_NAMES):
+        active = i < n
+        color = _UNOVA_BW2_BADGE_COLORS[i]
+        bg = color if active else "rgba(216,223,232,0.08)"
+        border = "#ffffff" if active else "rgba(216,223,232,0.18)"
+        fg = "#10151b" if active else "rgba(216,223,232,0.45)"
+        shadow = "0 0 12px rgba(255,255,255,0.16)" if active else "none"
+        chips.append(
+            "<span title='Medalla "
+            f"{name}' style='display:inline-flex; align-items:center; justify-content:center; min-width:56px; padding:4px 6px; "
+            f"background:{bg}; border:1px solid {border}; color:{fg}; box-shadow:{shadow}; "
+            "font-family:var(--font-pixel); font-size:8px; text-transform:uppercase; letter-spacing:0.02em;'>"
+            f"{name}</span>"
+        )
+    return "<div style='display:flex; gap:5px; align-items:center; flex-wrap:wrap;'>" + "".join(chips) + "</div>"
 
 
 def _hp_bar(label: str, value: float, cap: float, color: str) -> str:

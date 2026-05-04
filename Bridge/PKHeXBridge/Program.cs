@@ -696,15 +696,57 @@ namespace PKHeXBridgeApp
             return false;
         }
 
+        static int CountBits(int value)
+        {
+            int count = 0;
+            uint v = (uint)value;
+            while (v != 0)
+            {
+                count += (int)(v & 1);
+                v >>= 1;
+            }
+            return count;
+        }
+
+        static int GetBadgeFlags(object sav)
+        {
+            object? direct = FirstNotNull(Ref.Get(sav, "Badges"), Ref.Get(sav, "Badges16"));
+            if (direct != null)
+            {
+                try { return Convert.ToInt32(direct); } catch { }
+            }
+
+            object? misc = Ref.Get(sav, "Misc");
+            if (misc == null)
+            {
+                var blocks = Ref.Get(sav, "Blocks");
+                if (blocks != null)
+                    misc = Ref.Get(blocks, "Misc");
+            }
+            if (misc != null)
+            {
+                object? badges = Ref.Get(misc, "Badges");
+                if (badges != null)
+                {
+                    try { return Convert.ToInt32(badges); } catch { }
+                }
+            }
+
+            return 0;
+        }
+
         static Dictionary<string, object?> BuildOutput(Assembly coreAsm, object sav, object info, string mode, int? onlyBox)
         {
+            int badgeFlags = GetBadgeFlags(sav);
             var trainer = new Dictionary<string, object?>()
             {
                 ["Name"] = Ref.Get(sav, "OT") as string ?? "",
                 ["TID"]  = Convert.ToInt32(Ref.Get(sav, "TID") ?? 0),
                 ["SID"]  = Convert.ToInt32(Ref.Get(sav, "SID") ?? 0),
                 ["Money"] = Convert.ToInt32(Ref.Get(sav, "Money") ?? 0),
-                ["Badges"] = Convert.ToInt32(Ref.Get(sav, "Badges") ?? 0),
+                ["Badges"] = badgeFlags,
+                ["BadgeFlags"] = badgeFlags,
+                ["BadgeCount"] = Math.Min(CountBits(badgeFlags), 8),
                 ["PlayTimeHours"] = Convert.ToInt32(Ref.Get(sav, "PlayedHours") ?? 0),
                 ["PlayTimeMinutes"] = Convert.ToInt32(Ref.Get(sav, "PlayedMinutes") ?? 0),
             };
@@ -741,6 +783,8 @@ namespace PKHeXBridgeApp
                 ["Generation"] = Convert.ToInt32(Ref.Get(sav, "Generation") ?? 0),
                 ["SaveClass"] = sav.GetType().Name,
                 ["BoxCount"] = boxCount,
+                ["BadgeFlags"] = badgeFlags,
+                ["BadgeCount"] = Math.Min(CountBits(badgeFlags), 8),
                 ["Trainer"] = trainer,
                 ["Party"] = new Dictionary<string, object?> { ["Mons"] = partyOut },
                 ["Boxes"] = boxesOut,

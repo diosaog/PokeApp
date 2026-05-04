@@ -15,6 +15,8 @@ _BOX_CACHE: Dict[Tuple[str, int, Optional[str]], Dict[str, Any]] = {}
 GEN5_MAX_MOVE_ID = 559
 GEN4_BOX_COUNT = 18
 GEN5_BOX_COUNT = 24
+BW1_BADGE_FLAGS_OFFSET = 0x21204
+BW2_BADGE_FLAGS_OFFSET = 0x21104
 
 def _clear_caches() -> None:
     _BOX_CACHE.clear()
@@ -24,6 +26,50 @@ def _clear_caches() -> None:
             st.session_state.pop("_sav_cache", None)
     except Exception:
         pass
+
+
+def _count_bits(n: int) -> int:
+    try:
+        return int(bin(int(n)).count("1"))
+    except Exception:
+        return 0
+
+
+def _read_byte(path: Path, offset: int) -> int | None:
+    try:
+        with path.open("rb") as f:
+            f.seek(offset)
+            b = f.read(1)
+        return b[0] if b else None
+    except Exception:
+        return None
+
+
+def _gen5_badge_flags_from_raw(data: Dict[str, Any], path: Path) -> int | None:
+    save_class = str(data.get("SaveClass") or "")
+    offset = None
+    if "SAV5B2W2" in save_class:
+        offset = BW2_BADGE_FLAGS_OFFSET
+    elif "SAV5BW" in save_class:
+        offset = BW1_BADGE_FLAGS_OFFSET
+    if offset is None:
+        return None
+    return _read_byte(path, offset)
+
+
+def _enrich_badges_from_save(data: Dict[str, Any], path: Path) -> None:
+    flags = _gen5_badge_flags_from_raw(data, path)
+    if flags is None:
+        return
+    flags = int(flags) & 0xFF
+    count = max(0, min(_count_bits(flags), 8))
+    trainer = data.setdefault("Trainer", {})
+    if isinstance(trainer, dict):
+        trainer["Badges"] = flags
+        trainer["BadgeFlags"] = flags
+        trainer["BadgeCount"] = count
+    data["BadgeFlags"] = flags
+    data["BadgeCount"] = count
 
 __all__ = ["PKHeXRuntime", "extract_team", "get_box_meta", "extract_box", "has_pc_data", "get_bridge_path", "open_sav_cached"]
 
@@ -101,6 +147,7 @@ class PKHeXRuntime:
                 f"Bridge desactualizado (tag='{tag}'). Se requiere 'pc-probed-v7*'.\n"
                 f"Ruta actual: {bp}"
             )
+        _enrich_badges_from_save(data, Path(_LAST_SAV_PATH))
         return data
 
 
@@ -123,9 +170,11 @@ def open_sav_cached(path: str | Path) -> Dict[str, Any]:
         if isinstance(entry, tuple) and len(entry) == 2 and entry[0] == mtime:
             cached = entry[1]
             if isinstance(cached, dict):
+                _enrich_badges_from_save(cached, p)
                 return cached
 
     data = PKHeXRuntime.open_sav(p)
+    _enrich_badges_from_save(data, p)
     if cache is not None:
         cache[str(p)] = (mtime, data)
     return data
