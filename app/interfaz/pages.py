@@ -11,7 +11,7 @@ def page_inicio() -> None:
     render_poke_separator()
     st.subheader("Guia rapida")
     st.markdown(
-        "1. Ve a 'Saves' y sube tu archivo .sav.\n"
+        "1. Ve a 'Saves' y sube tu archivo .sav o .dsv.\n"
         "2. Configura el lector en 'Entrenadores' si es necesario.\n"
         "3. En 'Entrenadores' puedes ver equipo, cajas y detalles.\n"
         "4. En 'Juicios' crea casos, revisa pruebas y aplica castigos.\n"

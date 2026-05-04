@@ -1,4 +1,4 @@
-// Program.cs ? Bridge Gen4 con getter seguro + posiciones + OT + flags (--mode/--box) (v7j)
+// Program.cs - Bridge Gen5 con getter seguro + posiciones + OT + flags (--mode/--box) (v7k)
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -111,8 +111,8 @@ namespace PKHeXBridgeApp
 
     static class Bridge
     {
-        const int GEN4_MAX_DEX = 493;
-        const int GEN4_MAX_MOVE = 467;
+        const int GEN5_MAX_DEX = 649;
+        const int GEN5_MAX_MOVE = 559;
 
         // ===== Flags / parámetros =====
         struct BridgeArgs
@@ -179,13 +179,24 @@ namespace PKHeXBridgeApp
             return sb.ToString().Trim();
         }
 
-        static bool LooksValidGen4(object pkm)
+        static int DefaultBoxCount(object sav)
         {
             try
             {
-                // Para detectar slot ocupado es suficiente con Species v?lido.
+                int gen = Convert.ToInt32(Ref.Get(sav, "Generation") ?? 0);
+                if (gen >= 5) return 24;
+            }
+            catch { }
+            return 18;
+        }
+
+        static bool LooksValidGen5(object pkm)
+        {
+            try
+            {
+                // Para detectar slot ocupado es suficiente con Species valido.
                 int sp = Convert.ToInt32(Ref.Get(pkm, "Species") ?? 0);
-                return sp >= 1 && sp <= GEN4_MAX_DEX;
+                return sp >= 1 && sp <= GEN5_MAX_DEX;
             }
             catch { return false; }
         }
@@ -194,14 +205,14 @@ namespace PKHeXBridgeApp
         static object? AsPKM(object? maybe)
         {
             if (maybe == null) return null;
-            if (LooksValidGen4(maybe)) return maybe;
+            if (LooksValidGen5(maybe)) return maybe;
             var names = new[] { "Pokemon", "PKM", "CurrentPKM", "Current", "Data", "Value", "Entity", "Mon" };
             foreach (var n in names)
             {
                 try
                 {
                     var inner = Ref.Get(maybe, n);
-                    if (inner != null && LooksValidGen4(inner)) return inner;
+                    if (inner != null && LooksValidGen5(inner)) return inner;
                 }
                 catch { }
             }
@@ -212,7 +223,7 @@ namespace PKHeXBridgeApp
         {
             int Species = Convert.ToInt32(Ref.Get(pkm, "Species") ?? 0);
             int Level = Convert.ToInt32(Ref.Get(pkm, "CurrentLevel") ?? Ref.Get(pkm, "Level") ?? 0);
-            if (Species < 1 || Species > GEN4_MAX_DEX) return new();
+            if (Species < 1 || Species > GEN5_MAX_DEX) return new();
 
             int Nature = Convert.ToInt32(Ref.Get(pkm, "Nature") ?? 0);
             int Ability = Convert.ToInt32(Ref.Get(pkm, "Ability") ?? 0);
@@ -253,7 +264,7 @@ namespace PKHeXBridgeApp
                 var gm = Ref.Call(pkm, "GetMove", i);
                 if (gm is not null) moveId = Convert.ToInt32(gm);
                 else moveId = Convert.ToInt32(Ref.Get(pkm, $"Move{i + 1}") ?? 0);
-                if (moveId <= 0 || moveId > GEN4_MAX_MOVE) continue;
+                if (moveId <= 0 || moveId > GEN5_MAX_MOVE) continue;
 
                 int pp = 0;
                 var mpp1 = Ref.Call(pkm, "GetMovePP", i);
@@ -295,7 +306,7 @@ namespace PKHeXBridgeApp
             };
         }
 
-        static bool IsPkm(object? o) => o != null && LooksValidGen4(o);
+        static bool IsPkm(object? o) => o != null && LooksValidGen5(o);
         static int CountEnumerable(IEnumerable e) { int n=0; foreach(var _ in e) n++; return n; }
 
         static List<Dictionary<string, object?>> DumpBox(Assembly core, object sav, IEnumerable slots, int bIndex, string? name, string sourceTag)
@@ -371,7 +382,7 @@ namespace PKHeXBridgeApp
         static List<Dictionary<string, object?>> GetBoxesByMethodForced(Assembly core, object sav, int mode, int? onlyBox = null)
         {
             var result = new List<Dictionary<string, object?>>();
-            int boxCount = Convert.ToInt32(Ref.Get(sav, "BoxCount") ?? 18);
+            int boxCount = Convert.ToInt32(Ref.Get(sav, "BoxCount") ?? DefaultBoxCount(sav));
             int boxSlots = Convert.ToInt32(Ref.Get(sav, "BoxSlotCount") ?? 30);
 
             // Resolver din?micamente la firma correcta para obtener slots
@@ -712,19 +723,20 @@ namespace PKHeXBridgeApp
             int boxCount = 0;
             try
             {
-                boxCount = Convert.ToInt32(Ref.Get(sav, "BoxCount") ?? (boxesOut?.Count ?? 0));
+                boxCount = Convert.ToInt32(Ref.Get(sav, "BoxCount") ?? (boxesOut?.Count ?? DefaultBoxCount(sav)));
             }
-            catch { boxCount = boxesOut?.Count ?? 0; }
+            catch { boxCount = boxesOut?.Count ?? DefaultBoxCount(sav); }
 
             return new()
             {
                 ["Game"] = Ref.Get(info, "Description") as string ?? "Unknown",
+                ["Generation"] = Convert.ToInt32(Ref.Get(sav, "Generation") ?? 0),
                 ["SaveClass"] = sav.GetType().Name,
                 ["BoxCount"] = boxCount,
                 ["Trainer"] = trainer,
                 ["Party"] = new Dictionary<string, object?> { ["Mons"] = partyOut },
                 ["Boxes"] = boxesOut,
-                ["BridgeTag"] = "pc-probed-v7j"
+                ["BridgeTag"] = "pc-probed-v7k"
             };
         }
 
@@ -966,9 +978,9 @@ namespace PKHeXBridgeApp
             if (gen != null)
             {
                 var g = Convert.ToInt32(gen);
-                if (g != 3 && g != 4)
+                if (g != 3 && g != 4 && g != 5)
                 {
-                    Console.Error.WriteLine($"El guardado no es de Gen 3/4 (detectado Gen {gen}).");
+                    Console.Error.WriteLine($"El guardado no es de Gen 3/4/5 (detectado Gen {gen}).");
                     return 7;
                 }
             }

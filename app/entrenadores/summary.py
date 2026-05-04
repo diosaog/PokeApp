@@ -153,6 +153,38 @@ def _persist_badges_count(user: str, count: int) -> None:
         pass
 
 
+def _region_from_save(sav_json: dict, user: str) -> str:
+    try:
+        custom = st.session_state.get("trainer_region", {}).get(user or "")
+        if custom:
+            return str(custom)
+    except Exception:
+        pass
+    try:
+        game = str(sav_json.get("Game") or "").lower()
+        if any(tag in game for tag in ("black", "white", "unova", "teselia")):
+            return "Unova"
+        if any(tag in game for tag in ("heartgold", "soulsilver", "johto")):
+            return "Johto"
+        if any(tag in game for tag in ("diamond", "pearl", "platinum", "sinnoh")):
+            return "Sinnoh"
+        if any(tag in game for tag in ("ruby", "sapphire", "emerald", "firered", "leafgreen", "hoenn", "kanto")):
+            return "Hoenn"
+    except Exception:
+        pass
+    try:
+        gen = int(sav_json.get("Generation") or 0)
+        if gen >= 5:
+            return "Unova"
+        if gen == 4:
+            return "Sinnoh"
+        if gen == 3:
+            return "Hoenn"
+    except Exception:
+        pass
+    return "Unova"
+
+
 def trainer_summary_with_portrait_ui(sav_json: dict, box_count: int, *, is_own_profile: bool) -> None:
     _ensure_trainer_css()
     try:
@@ -207,7 +239,7 @@ def trainer_summary_with_portrait_ui(sav_json: dict, box_count: int, *, is_own_p
     except Exception:
         img_mtime = None
     img_uri = _img_uri(img, img_mtime) if img else ""
-    region = st.session_state.get("trainer_region", {}).get(jugador or "", "Sinnoh")
+    region = _region_from_save(sav_json, jugador or "")
 
     coins_pct = _hp_bar("Monedas", monedas, 20, "#ffd54f")
     points_pct = _hp_bar("Puntos", puntos, 30, "#4fc3f7")

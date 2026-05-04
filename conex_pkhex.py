@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# conex_pkhex.py  Bridge CLI (sin pythonnet): ejecuta un binario que lee .sav Gen3/Gen4 y devuelve JSON
+# conex_pkhex.py  Bridge CLI (sin pythonnet): ejecuta un binario que lee saves Gen3/Gen5 y devuelve JSON
 from __future__ import annotations
 import json
 import subprocess
@@ -12,6 +12,9 @@ BRIDGE_TIMEOUT = int(os.environ.get("PKHEX_TIMEOUT", "15"))
 
 # Caché simple de lecturas por caja: clave = (sav_path, box_index, mode)
 _BOX_CACHE: Dict[Tuple[str, int, Optional[str]], Dict[str, Any]] = {}
+GEN5_MAX_MOVE_ID = 559
+GEN4_BOX_COUNT = 18
+GEN5_BOX_COUNT = 24
 
 def _clear_caches() -> None:
     _BOX_CACHE.clear()
@@ -218,7 +221,32 @@ def _first_present(d: Dict[str, Any], *keys: str):
     return None
 
 
-def _box_count_hint(sav_json: Dict[str, Any]) -> int:
+def _box_count_from_metadata_legacy(sav_json: Dict[str, Any]) -> int | None:
+    try:
+        n = _box_count_from_metadata(sav_json)
+        if n is not None:
+            return n
+    except Exception:
+        pass
+    try:
+        gen = _first_present(sav_json, "Generation", "generation")
+        if gen is not None and int(gen) >= 5:
+            return GEN5_BOX_COUNT
+    except Exception:
+        pass
+    try:
+        game = str(_first_present(sav_json, "Game", "game") or "").lower()
+        save_class = str(_first_present(sav_json, "SaveClass", "save_class") or "").upper()
+        if "black" in game or "white" in game or "unova" in game or "SAV5" in save_class:
+            return GEN5_BOX_COUNT
+        if "SAV4" in save_class:
+            return GEN4_BOX_COUNT
+    except Exception:
+        pass
+    return None
+
+
+def _box_count_hint_legacy(sav_json: Dict[str, Any]) -> int:
     """Intenta deducir cuántas cajas hay en el save."""
     try:
         raw = _first_present(sav_json, "BoxCount", "box_count", "BoxesCount", "boxesCount")
@@ -236,7 +264,53 @@ def _box_count_hint(sav_json: Dict[str, Any]) -> int:
             return len(boxes)
     except Exception:
         pass
-    return 18
+    return GEN4_BOX_COUNT
+
+# Override de compatibilidad para contar cajas correctamente en Gen 5.
+def _box_count_from_metadata(sav_json: Dict[str, Any]) -> int | None:
+    try:
+        raw = _first_present(sav_json, "BoxCount", "box_count", "BoxesCount", "boxesCount")
+        if raw is None and isinstance(sav_json, dict) and "BoxCount" in sav_json:
+            raw = sav_json.get("BoxCount")
+        if raw is not None:
+            n = int(raw)
+            if 1 <= n <= 40:
+                return n
+    except Exception:
+        pass
+    try:
+        gen = _first_present(sav_json, "Generation", "generation")
+        if gen is not None and int(gen) >= 5:
+            return GEN5_BOX_COUNT
+    except Exception:
+        pass
+    try:
+        game = str(_first_present(sav_json, "Game", "game") or "").lower()
+        save_class = str(_first_present(sav_json, "SaveClass", "save_class") or "").upper()
+        if "black" in game or "white" in game or "unova" in game or "SAV5" in save_class:
+            return GEN5_BOX_COUNT
+        if "SAV4" in save_class:
+            return GEN4_BOX_COUNT
+    except Exception:
+        pass
+    return None
+
+
+def _box_count_hint(sav_json: Dict[str, Any]) -> int:
+    """Intenta deducir cuÃ¡ntas cajas hay en el save."""
+    try:
+        n = _box_count_from_metadata(sav_json)
+        if n is not None:
+            return n
+    except Exception:
+        pass
+    try:
+        boxes = _find_boxes_root(sav_json)
+        if isinstance(boxes, list):
+            return len(boxes)
+    except Exception:
+        pass
+    return GEN4_BOX_COUNT
 
 # ================= adaptadores UI =================
 
@@ -276,7 +350,7 @@ def _pkm_to_ui(p: Dict[str, Any]) -> Dict[str, Any]:
                     mpp = 0
                 moves_detail.append({"name": nm, "id": mid, "pp": mpp})
         elif isinstance(m, int):
-            if 1 <= m <= 467:
+            if 1 <= m <= GEN5_MAX_MOVE_ID:
                 norm_moves.append(f"Move#{m}")
                 moves_detail.append({"name": f"Move#{m}", "id": int(m), "pp": None})
         else:
@@ -285,7 +359,7 @@ def _pkm_to_ui(p: Dict[str, Any]) -> Dict[str, Any]:
             s = str(m).strip()
             if not s:
                 continue
-            if s.isdigit() and int(s) > 467:
+            if s.isdigit() and int(s) > GEN5_MAX_MOVE_ID:
                 continue
             norm_moves.append(s)
             moves_detail.append({"name": s, "id": None, "pp": None})
@@ -402,7 +476,8 @@ def _find_boxes_root(data: Dict[str, Any]) -> List[Any]:
         or _first_present(_first_present(data, "Storage") or {}, "AllMons", "Mons", "Pokémon")
     )
     if isinstance(flat_candidates, list) and flat_candidates:
-        boxes_grid: List[List[Dict[str, Any]]] = [[] for _ in range(18)]
+        box_count = _box_count_from_metadata(data) or GEN4_BOX_COUNT
+        boxes_grid: List[List[Dict[str, Any]]] = [[] for _ in range(box_count)]
         placed = 0
         for p in flat_candidates:
             if not isinstance(p, dict):
@@ -429,7 +504,7 @@ def _find_boxes_root(data: Dict[str, Any]) -> List[Any]:
             except Exception:
                 bix = None
 
-            if bix is not None and 0 <= bix < 18:
+            if bix is not None and 0 <= bix < box_count:
                 boxes_grid[bix].append(p)
                 placed += 1
 

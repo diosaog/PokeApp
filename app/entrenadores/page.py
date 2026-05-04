@@ -22,7 +22,7 @@ def page_entrenadores_setup() -> None:
     if not is_own_profile:
         return
     with st.expander(
-        "Configurar lector de .sav (Bridge)",
+        "Configurar lector de saves DS (Bridge)",
         expanded=not st.session_state.get("pkhex_loaded", False),
     ):
         bridge_hint = st.session_state.get("pkhex_dll_path") or DEFAULT_DLL_HINT
@@ -55,14 +55,14 @@ def page_entrenadores_view() -> None:
 
     if not st.session_state.get("pkhex_loaded", False):
         if is_own_profile:
-            st.warning("Configura el lector (bridge) para poder leer el .sav.")
+            st.warning("Configura el lector (bridge) para poder leer el save.")
         else:
             st.info("El guardado no esta disponible en este momento.")
         return
 
     if not active_path:
         if is_own_profile:
-            st.warning("Sube un .sav en la pestana Saves.")
+            st.warning("Sube un .sav o .dsv en la pestana Saves.")
         else:
             st.info("Este entrenador no tiene guardados.")
         return
@@ -70,7 +70,7 @@ def page_entrenadores_view() -> None:
     try:
         save_path = Path(active_path)
         if not save_path.exists():
-            st.error("El archivo .sav del entrenador no existe.")
+            st.error("El archivo del entrenador no existe.")
             return
         st.session_state.active_sav_path = str(save_path)
         mtime = save_path.stat().st_mtime
@@ -140,7 +140,7 @@ def page_entrenadores_view() -> None:
 def page_entrenadores() -> None:
     apply_platinum_ui("Entrenadores")
     st.title("Entrenadores")
-    st.caption("Se alimenta del ultimo .sav del entrenador seleccionado.")
+    st.caption("Se alimenta del ultimo .sav o .dsv del entrenador seleccionado.")
 
     users = list(USERS.keys())
     try:
