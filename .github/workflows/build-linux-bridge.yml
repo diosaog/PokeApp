@@ -31,7 +31,14 @@ jobs:
           dotnet-version: 9.0.x
 
       - name: Publish Linux bridge
-        run: dotnet publish Bridge/PKHeXBridge/PKHeXBridge.csproj -c Release -r linux-x64 --self-contained true
+        run: >
+          dotnet publish Bridge/PKHeXBridge/PKHeXBridge.csproj
+          -c Release
+          -r linux-x64
+          --self-contained true
+          -p:PublishSingleFile=true
+          -p:IncludeNativeLibrariesForSelfExtract=true
+          -p:EnableCompressionInSingleFile=true
 
       - name: Commit published bridge
         env:
@@ -39,7 +46,7 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add -A Bridge/PKHeXBridge/bin/Release/net9.0/linux-x64/publish/
+          git add -f Bridge/PKHeXBridge/bin/Release/net9.0/linux-x64/publish/PKHeXBridge Bridge/PKHeXBridge/bin/Release/net9.0/linux-x64/publish/PKHeXBridge.pdb
           git status --short
           if git diff --cached --quiet; then
             echo "No published bridge changes to commit."
