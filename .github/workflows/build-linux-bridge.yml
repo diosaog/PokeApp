@@ -23,6 +23,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          persist-credentials: false
 
       - name: Setup .NET 9
         uses: actions/setup-dotnet@v4
@@ -33,14 +34,16 @@ jobs:
         run: dotnet publish Bridge/PKHeXBridge/PKHeXBridge.csproj -c Release -r linux-x64 --self-contained true
 
       - name: Commit published bridge
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add Bridge/PKHeXBridge/bin/Release/net9.0/linux-x64/publish/PKHeXBridge
-          git add Bridge/PKHeXBridge/bin/Release/net9.0/linux-x64/publish/PKHeXBridge.pdb
+          git add -A Bridge/PKHeXBridge/bin/Release/net9.0/linux-x64/publish/
+          git status --short
           if git diff --cached --quiet; then
             echo "No published bridge changes to commit."
             exit 0
           fi
           git commit -m "Bridge: rebuild linux publish binary [skip ci]"
-          git push
+          git push "https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" HEAD:main
