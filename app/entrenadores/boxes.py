@@ -5,7 +5,7 @@ import json
 import streamlit as st
 
 from app.entrenadores.cache import cached_box
-from app.entrenadores.constants import BOX_IMG_W, TOTAL_BOXES
+from app.entrenadores.constants import BOX_IMG_W, DEAD_BOX_INDEX, TOTAL_BOXES
 from app.entrenadores.sprites import sprite_url_from_p
 from app.ui.cards import ensure_type_css, slot_card_html
 from conex_pkhex import extract_box, has_pc_data
@@ -15,17 +15,19 @@ from storage import get_flags_by_fingerprints
 
 
 def resolve_total_boxes(box_count: int, box_names: List[str]) -> int:
-    if box_count and box_count > 0:
-        return box_count
+    try:
+        if box_count and int(box_count) > 0:
+            return min(int(box_count), TOTAL_BOXES)
+    except Exception:
+        pass
     if box_names:
-        return len(box_names)
+        return min(len(box_names), TOTAL_BOXES)
     return TOTAL_BOXES
 
 
 def muertos_box_index(box_count: int) -> int:
-    if box_count and box_count > 0:
-        return max(0, min(box_count - 1, 17))
-    return 17
+    total_boxes = resolve_total_boxes(box_count, [])
+    return max(0, min(DEAD_BOX_INDEX, total_boxes - 1))
 
 
 def boxes_grid_ui(

@@ -113,6 +113,8 @@ namespace PKHeXBridgeApp
     {
         const int GEN5_MAX_DEX = 649;
         const int GEN5_MAX_MOVE = 559;
+        const int APP_BOX_COUNT = 8;
+        const int DEAD_BOX_INDEX = APP_BOX_COUNT - 1;
 
         // ===== Flags / parámetros =====
         struct BridgeArgs
@@ -133,7 +135,7 @@ namespace PKHeXBridgeApp
         {
             // Lectura: exe <sav> [core] [--box N] [--mode prop|m0|m1|m2]
             // Escritura:
-            //  - Revivir: exe --op revive --src <sav> --box 17 --slot S [core]
+            //  - Revivir: exe --op revive --src <sav> --box 7 --slot S [core]
             //  - Robar:   exe --op steal --src <victim.sav> --dst <thief.sav> --kind party|box --box B --slot S [core]
             var ba = new BridgeArgs { SavPath = "", CorePath = "", Box = null, Mode = "auto", Op = "", SrcPath = "", DstPath = "", Kind = "box", Slot = null };
             int i = 0;
@@ -184,7 +186,7 @@ namespace PKHeXBridgeApp
             try
             {
                 int gen = Convert.ToInt32(Ref.Get(sav, "Generation") ?? 0);
-                if (gen >= 5) return 24;
+                if (gen >= 5) return APP_BOX_COUNT;
             }
             catch { }
             return 18;
@@ -353,6 +355,7 @@ namespace PKHeXBridgeApp
             int start = onlyBox.HasValue ? onlyBox.Value : 0;
             int end   = onlyBox.HasValue ? onlyBox.Value : boxes.Count - 1;
             start = Math.Max(0, start); end = Math.Min(end, boxes.Count - 1);
+            end = Math.Min(end, APP_BOX_COUNT - 1);
 
             for (int idx = start; idx <= end; idx++)
             {
@@ -383,6 +386,7 @@ namespace PKHeXBridgeApp
         {
             var result = new List<Dictionary<string, object?>>();
             int boxCount = Convert.ToInt32(Ref.Get(sav, "BoxCount") ?? DefaultBoxCount(sav));
+            boxCount = Math.Min(boxCount, APP_BOX_COUNT);
             int boxSlots = Convert.ToInt32(Ref.Get(sav, "BoxSlotCount") ?? 30);
 
             // Resolver din?micamente la firma correcta para obtener slots
@@ -525,9 +529,9 @@ namespace PKHeXBridgeApp
 
         static (int box, int slot) FindFirstFreeSlot(object sav, GetBoxDel? getBox, GetBoxByIndexDel? getBoxIdx)
         {
-            for (int b = 0; b < 18; b++)
+            for (int b = 0; b < APP_BOX_COUNT; b++)
             {
-                if (b == 17) continue; // ignorar caja de muertos
+                if (b == DEAD_BOX_INDEX) continue; // ignorar caja de muertos
                 for (int s = 0; s < 30; s++)
                 {
                     object? el = getBox != null ? getBox(b, s) : (getBoxIdx != null ? getBoxIdx(b * 30 + s) : null);
@@ -729,6 +733,7 @@ namespace PKHeXBridgeApp
                 boxCount = Convert.ToInt32(Ref.Get(sav, "BoxCount") ?? (boxesOut?.Count ?? DefaultBoxCount(sav)));
             }
             catch { boxCount = boxesOut?.Count ?? DefaultBoxCount(sav); }
+            boxCount = Math.Min(boxCount, APP_BOX_COUNT);
 
             return new()
             {
@@ -852,7 +857,7 @@ namespace PKHeXBridgeApp
                         { Console.Error.WriteLine("No se pudo abrir el save src."); return 6; }
                         DetectAccessors(sav, out var gB, out var gBIdx, out var sB, out var sBIdx, out var gP, out var sP);
                         if (gB == null && gBIdx == null) { Console.Error.WriteLine("No se pudo resolver acceso a cajas."); return 10; }
-                        int srcBox = par.Box ?? 17; int srcSlot = par.Slot.Value;
+                        int srcBox = par.Box ?? DEAD_BOX_INDEX; int srcSlot = par.Slot.Value;
                         object? mon = gB != null ? gB(srcBox, srcSlot) : gBIdx!(srcBox * 30 + srcSlot);
                         if (LooksEmpty(mon)) { Console.Error.WriteLine("Slot vacío."); return 11; }
                         var dest = FindFirstFreeSlot(sav, gB, gBIdx);

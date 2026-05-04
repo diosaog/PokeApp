@@ -8,6 +8,7 @@ import streamlit as st
 
 from app.entrenadores.badges import count_badges
 from app.entrenadores.boxes import muertos_box_index
+from app.entrenadores.constants import DEAD_BOX_LABEL
 from app.entrenadores.profile import find_trainer_image
 from app.juicios.penalties import get_user_penalties
 from app.tienda.money import (
@@ -269,7 +270,7 @@ def trainer_summary_with_portrait_ui(sav_json: dict, box_count: int, *, is_own_p
         f"<div class='tbar-value'>{puntos}</div>"
         "</div>"
         f"<div class='trainer-medals'>{medals_html}</div>"
-        f"<div class='trainer-kia'>Muertos (Caja 18)<br/><strong>{muertos}</strong></div>"
+        f"<div class='trainer-kia'>Muertos ({DEAD_BOX_LABEL})<br/><strong>{muertos}</strong></div>"
         f"<div class='trainer-note'>Revividos tras wipe: {revividos}</div>"
         "</div></div></div>"
     )

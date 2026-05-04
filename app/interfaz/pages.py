@@ -114,7 +114,7 @@ Reglas de nivel
 - Saldo total = medallas*4 + monedas de liga - monedas gastadas.
 
 8. Comodines
-- Revivir: revive un Pokemon de la Caja 18; queda marcado como blindado + revivido y sigue contando como muerto a efectos de puntos (-0.2).
+- Revivir: revive un Pokemon de la Caja 8; queda marcado como blindado + revivido y sigue contando como muerto a efectos de puntos (-0.2).
 - Robar: si el objetivo no esta blindado, se registra el robo y queda blindado.
 - Blindar: marca un Pokemon como blindado (no se puede volver a robarse ni blindarse).
 - Captura Extra: permite una captura adicional en una ruta desconocida.

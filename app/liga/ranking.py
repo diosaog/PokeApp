@@ -4,6 +4,7 @@ from pathlib import Path
 from typing import Dict
 import streamlit as st
 
+from app.entrenadores.constants import DEAD_BOX_INDEX
 from app.juicios.penalties import get_user_penalties
 from app.tienda.common import _eq_item
 from storage import add_purchase, get_current_save_for_user, list_inventory, load_save_bytes, settings_get
@@ -78,7 +79,7 @@ def _muertos_from_save(active_path: str, mtime: float) -> int:
         sav_json = open_sav_cached(active_path)
         if not has_pc_data(sav_json):
             return 0
-        muertos_list = extract_box(sav_json, 17)
+        muertos_list = extract_box(sav_json, DEAD_BOX_INDEX)
         return len(muertos_list or [])
     except Exception:
         return 0

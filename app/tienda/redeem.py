@@ -5,6 +5,7 @@ import time
 from typing import List
 import streamlit as st
 
+from app.entrenadores.constants import DEAD_BOX_INDEX, DEAD_BOX_LABEL, TOTAL_BOXES
 from app.tienda.common import _eq_item
 from storage import (
     add_purchase,
@@ -67,7 +68,7 @@ def render_redeem_flow(ctx: dict, current_user: str) -> None:
     if _eq_item(item, "Robar Pokemon"):
         players = [u for u in USERS.keys() if u != current_user]
         target = st.selectbox("Jugador objetivo", players, key="rob_target")
-        origin_kind = st.selectbox("Origen", ["Equipo"] + [f"Caja {i+1}" for i in range(18) if i != 17], key="rob_origin")
+        origin_kind = st.selectbox("Origen", ["Equipo"] + [f"Caja {i+1}" for i in range(TOTAL_BOXES) if i != DEAD_BOX_INDEX], key="rob_origin")
         mons: List[dict] = []
         try:
             saves = list_user_saves(target)
@@ -149,7 +150,12 @@ def render_redeem_flow(ctx: dict, current_user: str) -> None:
                     from conex_pkhex import get_box_meta_quick
                     total_boxes, _ = get_box_meta_quick(sav_json, save_path=spath)
                 except Exception:
-                    total_boxes = 18
+                    total_boxes = TOTAL_BOXES
+                try:
+                    total_boxes = int(total_boxes or 0)
+                except Exception:
+                    total_boxes = 0
+                total_boxes = min(total_boxes, TOTAL_BOXES) if total_boxes > 0 else TOTAL_BOXES
                 for b in range(total_boxes):
                     box_list = extract_box(sav_json, b, save_path=spath) or []
                     for idx, m in enumerate(box_list):
@@ -193,7 +199,7 @@ def render_redeem_flow(ctx: dict, current_user: str) -> None:
         return
 
     if _eq_item(item, "Comodin de Blindaje por Robo"):
-        origin_kind = st.selectbox("Origen", ["Equipo"] + [f"Caja {i+1}" for i in range(18)], key="shieldrob_origin")
+        origin_kind = st.selectbox("Origen", ["Equipo"] + [f"Caja {i+1}" for i in range(TOTAL_BOXES)], key="shieldrob_origin")
         mons: List[dict] = []
         try:
             saves = list_user_saves(current_user)
@@ -251,7 +257,7 @@ def render_redeem_flow(ctx: dict, current_user: str) -> None:
             if saves:
                 spath = str(saves[0])
                 sav_json = open_sav_cached(spath)
-                mons = extract_box(sav_json, 17, save_path=spath)
+                mons = extract_box(sav_json, DEAD_BOX_INDEX, save_path=spath)
             else:
                 st.warning("No tienes save disponible.")
         except Exception as e:
@@ -261,7 +267,7 @@ def render_redeem_flow(ctx: dict, current_user: str) -> None:
             fp_legacy, fp_stable = _fingerprints_for_mon(m)
             options.append((f"{i+1}. {m.get('species_name') or m.get('species')} Lv.{m.get('level','-')}", i, fp_legacy, fp_stable))
         label_to_idx = {lbl: (idx, fp_legacy, fp_stable) for (lbl, idx, fp_legacy, fp_stable) in options}
-        choice_lbl = st.selectbox("Pokemon a revivir (Caja 18)", [lbl for (lbl, _, _, _) in options]) if options else None
+        choice_lbl = st.selectbox(f"Pokemon a revivir ({DEAD_BOX_LABEL})", [lbl for (lbl, _, _, _) in options]) if options else None
         if choice_lbl:
             _, fp_legacy, fp_stable = label_to_idx[choice_lbl]
             flags, fp_key = _load_flags_for_fps(fp_legacy, fp_stable, owner=current_user)

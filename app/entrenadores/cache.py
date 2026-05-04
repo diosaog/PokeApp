@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from typing import List, Tuple
 
+from app.entrenadores.constants import DEAD_BOX_INDEX, TOTAL_BOXES
 from conex_pkhex import extract_box, extract_team, get_box_meta_quick, has_pc_data, open_sav_cached
 
 try:
@@ -79,7 +80,7 @@ def preload_entrenadores_cache(save_path: str, mtime: float, box_count: int) -> 
     - Team
     - Box 1
     - Box 2
-    - Box 18 (muertos)
+    - Box 8 (muertos)
     """
     try:
         import streamlit as st  # type: ignore
@@ -112,11 +113,11 @@ def preload_entrenadores_cache(save_path: str, mtime: float, box_count: int) -> 
         total = 0
     if total < 0:
         total = 0
-    if total > 18:
-        total = 18
+    if total > TOTAL_BOXES:
+        total = TOTAL_BOXES
 
     targets: list[int] = []
-    for idx in (0, 1, 17):
+    for idx in (0, 1, DEAD_BOX_INDEX):
         if total <= 0:
             continue
         if 0 <= idx < total and idx not in targets:
@@ -124,7 +125,7 @@ def preload_entrenadores_cache(save_path: str, mtime: float, box_count: int) -> 
 
     # Fallback if total is unknown: try the key boxes directly and ignore failures.
     if not targets:
-        targets = [0, 1, 17]
+        targets = [0, 1, DEAD_BOX_INDEX]
 
     for i in targets:
         try:
