@@ -462,26 +462,29 @@ namespace PKHeXBridgeApp
                 return GetBoxesByMethodForced(core, sav, mode == "m0" ? 0 : mode == "m1" ? 1 : 2, onlyBox);
 
             // auto
-            var prop = GetBoxesProp(core, sav, onlyBox);
-            // Solo aceptar 'prop' si contiene al menos un mon real
-            bool anyPropMons = prop.Any(b => {
+            static bool AnyMons(List<Dictionary<string, object?>> boxes) => boxes.Any(b => {
                 if (!b.TryGetValue("Mons", out var mv)) return false;
                 var en = mv as IEnumerable; return en != null && en.Cast<object>().Any();
             });
-            if (anyPropMons)
+
+            var candidates = new List<List<Dictionary<string, object?>>>();
+            var prop = GetBoxesProp(core, sav, onlyBox);
+            if (AnyMons(prop))
                 return prop;
+            if (prop.Count > 0)
+                candidates.Add(prop);
 
             for (int m = 0; m < 3; m++)
             {
                 var via = GetBoxesByMethodForced(core, sav, m, onlyBox);
-                bool anyViaMons = via.Any(b => {
-                    if (!b.TryGetValue("Mons", out var mv)) return false;
-                    var en = mv as IEnumerable; return en != null && en.Cast<object>().Any();
-                });
-                if (anyViaMons)
+                if (AnyMons(via))
                     return via;
+                if (via.Count > 0)
+                    candidates.Add(via);
             }
-            return new();
+
+            // Si una caja esta vacia, sigue siendo una caja valida para la UI.
+            return candidates.FirstOrDefault(c => c.Count > 0) ?? new();
         }
 
         // ==== Helpers de escritura ====

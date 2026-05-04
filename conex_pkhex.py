@@ -538,21 +538,25 @@ def _find_boxes_root(data: Dict[str, Any]) -> List[Any]:
 
 # ================= API para la UI =================
 
-def has_pc_data(_: Dict[str, Any], save_path: str | None = None) -> bool:
-    """Verifica el PC haciendo una llamada real a la caja 0."""
+def has_pc_data(sav_json: Dict[str, Any], save_path: str | None = None) -> bool:
+    """Verifica que el save tiene PC, aunque la primera caja este vacia."""
     if save_path:
         p = Path(save_path)
         if not p.exists():
             return False
         PKHeXRuntime.open_sav(p)
     data0 = _run_bridge_for_box(0)
-    if not isinstance(data0, dict):
+    if isinstance(data0, dict):
+        boxes = data0.get("Boxes")
+        if isinstance(boxes, list) and boxes:
+            b0 = boxes[0]
+            if isinstance(b0, dict) and "Mons" in b0:
+                return True  # existe estructura de caja, aunque Mons este vacio
+    try:
+        total = _box_count_from_metadata(sav_json)
+        return bool(total and total > 0)
+    except Exception:
         return False
-    boxes = data0.get("Boxes")
-    if not isinstance(boxes, list) or not boxes:
-        return False
-    b0 = boxes[0]
-    return isinstance(b0, dict) and "Mons" in b0  # existe estructura de caja
 
 def extract_team(sav_json: str | Dict[str, Any], save_path: str | None = None) -> List[Dict[str, Any]]:
     if save_path:
