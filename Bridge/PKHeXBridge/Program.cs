@@ -497,7 +497,7 @@ namespace PKHeXBridgeApp
         delegate object? GetPartyDel(int s);
         delegate void SetPartyDel(int s, object? pkm);
 
-        static bool LooksEmpty(object? pkm) => pkm == null || ! (pkm != null && LooksValidGen4(pkm));
+        static bool LooksEmpty(object? pkm) => pkm == null || !(pkm != null && LooksValidGen5(pkm));
 
         static void DetectAccessors(object sav, out GetBoxDel? getBox, out GetBoxByIndexDel? getBoxIdx, out SetBoxDel? setBox, out SetBoxByIndexDel? setBoxIdx, out GetPartyDel? getParty, out SetPartyDel? setParty)
         {
