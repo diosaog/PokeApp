@@ -1,5 +1,8 @@
 from __future__ import annotations
 
-from app.copa.elim import page_copa
+def page_copa() -> None:
+    from app.copa.elim import page_copa as _page_copa
+
+    _page_copa()
 
 __all__ = ["page_copa"]

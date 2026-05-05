@@ -3,16 +3,7 @@ from __future__ import annotations
 import base64
 import mimetypes
 import os
-from pathlib import Path
 import streamlit as st
-
-from app.entrenadores.profile import find_trainer_image
-from app.entrenadores.bridge import try_auto_load_bridge
-from app.interfaz.badges import coins_from_badges
-from conex_pkhex import PKHeXRuntime, extract_team, get_bridge_path, open_sav_cached
-from showdown_sprites import showdown_sprite_url
-from storage import settings_get, settings_set
-from utils import DEFAULT_DLL_HINT, list_user_saves
 
 
 def _cache_data(ttl: int = 30):
@@ -42,6 +33,11 @@ def _get_team_sprite_urls(user: str, mtime: float | None = None) -> list[str]:
     try:
         if not user or user == "-":
             return urls
+        from app.entrenadores.bridge import try_auto_load_bridge
+        from conex_pkhex import PKHeXRuntime, extract_team, get_bridge_path, open_sav_cached
+        from showdown_sprites import showdown_sprite_url
+        from utils import DEFAULT_DLL_HINT, list_user_saves
+
         saves = list_user_saves(user)
         sav_path = None
         try:
@@ -94,6 +90,11 @@ def _get_badges_count(user: str, mtime: float | None = None) -> int:
     try:
         if not user or user == "-":
             return 0
+        from app.entrenadores.bridge import try_auto_load_bridge
+        from app.interfaz.badges import coins_from_badges
+        from conex_pkhex import get_bridge_path, open_sav_cached
+        from utils import list_user_saves
+
         if not get_bridge_path():
             try_auto_load_bridge()
         saves = list_user_saves(user)
@@ -114,6 +115,8 @@ def _render_sidebar_profile() -> None:
     usr = st.session_state.get("user") or ""
     if not usr or usr == "-":
         return
+    from app.entrenadores.profile import find_trainer_image
+
     img = find_trainer_image(usr)
     mtime = None
     try:
@@ -153,6 +156,8 @@ def _render_change_pin_form() -> None:
     usr = st.session_state.get("user") or ""
     if not usr or usr == "-":
         return
+    from storage import settings_get, settings_set
+
     with st.sidebar.expander("Cambiar PIN (4 digitos)", expanded=False):
         def _get_pin(u: str) -> str | None:
             try:

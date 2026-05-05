@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import streamlit as st
 
-from app.common import COIN
 from app.discord_notify import notify_league_round_finished_async
 from app.liga.ranking import (
     MAX_JORNADAS,
@@ -15,47 +14,15 @@ from app.liga.ranking import (
     recompute_round,
 )
 from app.liga.state import ensure_state, persist_state, restore_state
-from app.tienda.money import _money_available, clear_money_caches
+from app.liga.table_summary import (
+    fmt_points as _fmt_points,
+    league_table_notification_rows as _league_table_notification_rows,
+    league_table_rows as _league_table_rows,
+    players_from_match_map as _players_from_match_map,
+)
+from app.tienda.money import clear_money_caches
 from storage import clear_purchases
 from utils import USERS
-
-
-def _players_from_match_map(md: dict[tuple[str, str], str | None]) -> list[str]:
-    out: list[str] = []
-    for p1, p2 in md.keys():
-        if p1 and p1 not in out:
-            out.append(p1)
-        if p2 and p2 not in out:
-            out.append(p2)
-    return out
-
-
-def _coins_for_user(user: str) -> int:
-    try:
-        return int(_money_available(user))
-    except Exception:
-        return 0
-
-
-def _fmt_points(value) -> str:
-    try:
-        return f"{float(value):.1f}"
-    except Exception:
-        return "0.0"
-
-
-def _league_table_notification_rows() -> list[dict]:
-    rows = []
-    for i, (user, pts) in enumerate(general_table_sorted(), start=1):
-        rows.append(
-            {
-                "pos": i,
-                "user": user,
-                "points": _fmt_points(pts),
-                "coins": _coins_for_user(user),
-            }
-        )
-    return rows
 
 
 def _render_final_podium() -> None:
@@ -189,7 +156,7 @@ def page_tabla() -> None:
                         clear_money_caches()
                         notify_league_round_finished_async(
                             round_no=tramo,
-                            rows=_league_table_notification_rows(),
+                            rows=_league_table_notification_rows(general_table_sorted()),
                         )
                         if tramo >= MAX_JORNADAS:
                             podium = final_podium()
@@ -386,17 +353,13 @@ def page_tabla() -> None:
     if st.session_state.league_active:
         st.subheader("Tabla general")
         st.dataframe(
-            [{"Pos": i + 1, "Jugador": u, "Puntos": _fmt_points(pts)} for i, (u, pts) in enumerate(tabla)],
+            _league_table_rows(tabla),
             use_container_width=True,
             hide_index=True,
         )
     else:
         st.subheader("Tabla general (con monedas)")
-        rows = []
-        for i, (u, pts) in enumerate(tabla):
-            coins = _coins_for_user(u)
-            rows.append({"Pos": i + 1, "Jugador": u, "Puntos": _fmt_points(pts), "Monedas": f"{COIN} {coins}"})
-        st.dataframe(rows, use_container_width=True, hide_index=True)
+        st.dataframe(_league_table_rows(tabla, include_coins=True), use_container_width=True, hide_index=True)
 
     if st.session_state.get("league_movements") or st.session_state.get("league_results"):
         st.markdown("---")

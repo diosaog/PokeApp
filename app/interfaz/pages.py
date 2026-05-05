@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import streamlit as st
 
-from app.discord_notify import sync_normativa_notification
 from app.interfaz.theme import render_poke_separator
 
 
@@ -135,6 +134,8 @@ Reglas de nivel
 - Directos obligatorios: los jugadores deben jugar en Discord en directo y avisar previamente por WhatsApp.
 """
     try:
+        from app.discord_notify import sync_normativa_notification
+
         sync_normativa_notification(normativa_md)
     except Exception:
         pass
@@ -161,17 +162,15 @@ def page_tabla() -> None:
 
 def page_copa() -> None:
     try:
-        import copa as _swiss
-        import copa2 as _elim
-        import copa_dobles as _doubles
         st.subheader("Copa")
         fmt = st.radio("Formato", ["Copa", "Torneo", "Copa Dobles"], horizontal=True)
         st.markdown("---")
         if fmt == "Torneo":
-            _elim.page_copa()
+            import copa2 as _selected
         elif fmt == "Copa Dobles":
-            _doubles.page_copa()
+            import copa_dobles as _selected
         else:
-            _swiss.page_copa()
+            import copa as _selected
+        _selected.page_copa()
     except Exception as e:
         st.error(f"No se pudo cargar la copa: {e}")

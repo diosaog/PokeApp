@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import streamlit as st
 
-from app.interfaz.bootstrap import bootstrap_all_saves, bootstrap_latest_save_for_user
+from app.interfaz.bootstrap import bootstrap_latest_save_for_user
 from storage import init_storage, settings_get
 from utils import USERS
 
@@ -12,7 +12,6 @@ def login_gate() -> None:
     if st.session_state.get("auth_ok"):
         try:
             bootstrap_latest_save_for_user(st.session_state.get("user") or "")
-            bootstrap_all_saves()
         except Exception:
             pass
         return
@@ -46,7 +45,6 @@ def login_gate() -> None:
             st.session_state.user = user
             try:
                 bootstrap_latest_save_for_user(user)
-                bootstrap_all_saves()
             except Exception:
                 pass
             st.success(f"Bienvenido, {user}")
