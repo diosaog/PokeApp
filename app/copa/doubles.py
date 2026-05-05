@@ -1,21 +1,14 @@
 from __future__ import annotations
 
-import base64
 import json
-import mimetypes
-import unicodedata
-from pathlib import Path
 
 import streamlit as st
 
+from app.copa.logos import LOGO_DIR_REL, ensure_logo_dir, logo_data_uri_for_team
 from app.interfaz.theme import apply_platinum_ui
 from storage import settings_get, settings_set
 from utils import USERS
 
-PROJECT_ROOT = Path(__file__).resolve().parents[2]
-LOGO_DIR_REL = Path("assets") / "copa_dobles" / "team_logos"
-LOGO_DIR = PROJECT_ROOT / LOGO_DIR_REL
-LOGO_EXTS = (".png", ".jpg", ".jpeg", ".webp", ".svg")
 RESULT_LABELS = {
     "Sin jugar": (None, None),
     "2-0": (2, 0),
@@ -23,69 +16,6 @@ RESULT_LABELS = {
     "1-2": (1, 2),
     "0-2": (0, 2),
 }
-
-
-def _ensure_logo_dir() -> None:
-    try:
-        LOGO_DIR.mkdir(parents=True, exist_ok=True)
-    except Exception:
-        pass
-
-
-def _slug(text: str) -> str:
-    t = unicodedata.normalize("NFD", str(text or "").strip().lower())
-    t = "".join(ch for ch in t if unicodedata.category(ch) != "Mn")
-    out: list[str] = []
-    prev_dash = False
-    for ch in t:
-        if ch.isalnum():
-            out.append(ch)
-            prev_dash = False
-        elif not prev_dash:
-            out.append("-")
-            prev_dash = True
-    return "".join(out).strip("-")
-
-
-def _logo_for_team(team_name: str) -> str | None:
-    _ensure_logo_dir()
-    slug = _slug(team_name)
-    if not slug:
-        return None
-    for ext in LOGO_EXTS:
-        candidate = LOGO_DIR / f"{slug}{ext}"
-        if candidate.exists():
-            return str(candidate)
-    try:
-        for candidate in LOGO_DIR.iterdir():
-            if candidate.is_file() and candidate.suffix.lower() in LOGO_EXTS and _slug(candidate.stem) == slug:
-                return str(candidate)
-    except Exception:
-        pass
-    return None
-
-
-def _logo_bytes_for_team(team_name: str) -> bytes | None:
-    logo_path = _logo_for_team(team_name)
-    if not logo_path:
-        return None
-    try:
-        return Path(logo_path).read_bytes()
-    except Exception:
-        return None
-
-
-def _logo_data_uri_for_team(team_name: str) -> str | None:
-    logo_path = _logo_for_team(team_name)
-    logo_bytes = _logo_bytes_for_team(team_name)
-    if not logo_path or not logo_bytes:
-        return None
-    try:
-        mime = mimetypes.guess_type(logo_path)[0] or "image/png"
-        encoded = base64.b64encode(logo_bytes).decode("ascii")
-        return f"data:{mime};base64,{encoded}"
-    except Exception:
-        return None
 
 
 def _empty_state() -> dict:
@@ -548,7 +478,7 @@ def _pt_metric(label: str, value: str, sub: str | None = None) -> None:
 def _render_team_card(team: dict, *, compact: bool = False) -> None:
     name = team.get("name") or "-"
     members = list(team.get("members") or [])
-    logo_uri = _logo_data_uri_for_team(name)
+    logo_uri = logo_data_uri_for_team(name)
     if compact:
         logo_html = (
             f"<img class='doubles-logo-img' src='{logo_uri}' alt='logo {name}'/>"
@@ -681,7 +611,7 @@ def _render_configurator(S: dict) -> None:
 
 def page_copa() -> None:
     apply_platinum_ui("Copa")
-    _ensure_logo_dir()
+    ensure_logo_dir()
     _restore_state()
     _ensure_state()
     _ensure_doubles_css()
