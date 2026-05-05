@@ -1,18 +1,7 @@
 from __future__ import annotations
 
-import streamlit as st
-
 from app.tienda.common import _pokeapi_item_png, _shop_asset
 
-
-def _cache_data(ttl: int = 300):
-    try:
-        return st.cache_data(ttl=ttl, show_spinner=False)
-    except Exception:
-        return lambda f: f
-
-
-@_cache_data(ttl=300)
 def get_catalog() -> dict[str, list[dict]]:
     comodines = [
         {"name": "Revivir Pokemon", "price": 12, "icon": "", "img": _shop_asset("Revivir") or _shop_asset("revivir") or _pokeapi_item_png("max-revive")},
