@@ -54,7 +54,7 @@ def get_catalog() -> dict[str, list[dict]]:
         {"name": "Mineral Evolutivo", "price": 8, "img": _shop_asset("mineral-evolutivo") or _shop_asset("eviolite") or _pokeapi_item_png("eviolite"), "desc": "Defensa y Def. Esp. +50% (x1.5) si el Pokemon aun puede evolucionar."},
         {"name": "Casco Dentado", "price": 7, "img": _pokeapi_item_png("rocky-helmet"), "desc": "Hace dano al rival si golpea con contacto."},
         {"name": "Globo Helio", "price": 5, "img": _pokeapi_item_png("air-balloon"), "desc": "Inmunidad a Tierra hasta recibir dano."},
-        {"name": "Gemas Elementales", "price": 5, "img": _pokeapi_item_png("fire-gem"), "desc": "Potencian una vez un movimiento del tipo de la gema."},
+        {"name": "Gemas Elementales", "price": 6, "img": _pokeapi_item_png("fire-gem"), "desc": "Potencian una vez un movimiento del tipo de la gema."},
         {"name": "Boton Escape", "price": 4, "img": _pokeapi_item_png("eject-button"), "desc": "Cambia al portador tras recibir dano (1 uso)."},
         {"name": "Tarjeta Roja", "price": 4, "img": _pokeapi_item_png("red-card"), "desc": "Expulsa al atacante y fuerza cambio (1 uso)."},
         {"name": "Hierba Blanca", "price": 5, "img": _pokeapi_item_png("white-herb"), "desc": "Restaura reducciones de estadisticas (1 uso)."},
