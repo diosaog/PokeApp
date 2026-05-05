@@ -2,7 +2,6 @@ from __future__ import annotations
 import os
 import sqlite3
 import hashlib
-import json
 import time
 from pathlib import Path
 from typing import Optional, List, Tuple, Any
@@ -490,31 +489,10 @@ def get_current_save_path_for_user(user: str):
 
 
 def _notify_purchase_inserted(user: str, item: str, price: int, purchase_id: int) -> None:
-    sent = False
-    error = ""
     try:
-        from app.discord_notify import notify_purchase
+        from app.discord_notify import notify_purchase_async
 
-        sent = bool(notify_purchase(user=user, item=item, price=int(price), purchase_id=int(purchase_id)))
-    except Exception as exc:
-        error = str(exc)
-
-    try:
-        settings_set(
-            "discord_notify:last_purchase",
-            json.dumps(
-                {
-                    "purchase_id": int(purchase_id),
-                    "user": user,
-                    "item": item,
-                    "price": int(price),
-                    "sent": sent,
-                    "error": error,
-                    "created_at": _now_iso(),
-                },
-                ensure_ascii=False,
-            ),
-        )
+        notify_purchase_async(user=user, item=item, price=int(price), purchase_id=int(purchase_id))
     except Exception:
         pass
 

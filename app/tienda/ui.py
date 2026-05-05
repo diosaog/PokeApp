@@ -3,6 +3,7 @@ from __future__ import annotations
 import streamlit as st
 
 from app.common import COIN
+from app.discord_notify import discord_webhook_configured, send_test_notification
 from app.interfaz.theme import apply_platinum_ui
 from app.juicios.penalties import get_user_penalties
 from app.tienda.catalog import _render_shop_items, get_catalog
@@ -155,6 +156,17 @@ def page_tienda() -> None:
             st.dataframe(rows, use_container_width=True)
         else:
             st.caption("Sin compras registradas.")
+
+    with st.expander("Discord"):
+        if discord_webhook_configured():
+            st.caption("Webhook configurado.")
+        else:
+            st.warning("Webhook no configurado en esta app.")
+        if st.button("Probar Aaron Avisa", key="test_discord_webhook"):
+            if send_test_notification():
+                st.success("Mensaje de prueba enviado a Discord.")
+            else:
+                st.error("No se pudo enviar el mensaje de prueba a Discord.")
 
     ctx = st.session_state.get("redeem_ctx")
     if ctx:

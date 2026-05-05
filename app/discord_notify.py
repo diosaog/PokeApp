@@ -3,6 +3,7 @@ from __future__ import annotations
 import hashlib
 import json
 import os
+import threading
 from datetime import datetime, timezone
 from pathlib import Path
 from urllib import request
@@ -19,6 +20,7 @@ except Exception:
 
 
 _NORMATIVA_HASH_KEY = "discord_notify:normativa_hash"
+_WEBHOOK_TIMEOUT_SECONDS = 2.0
 
 
 def _secret(name: str) -> str:
@@ -69,7 +71,7 @@ def _post_webhook(payload: dict) -> bool:
             headers={"Content-Type": "application/json", "User-Agent": "PokeApp"},
             method="POST",
         )
-        with request.urlopen(req, timeout=5.0) as response:
+        with request.urlopen(req, timeout=_WEBHOOK_TIMEOUT_SECONDS) as response:
             return 200 <= int(response.status) < 300
     except Exception:
         return False
@@ -106,6 +108,33 @@ def notify_purchase(*, user: str, item: str, price: int, purchase_id: int | None
                     description="Se ha registrado una compra en PokeApp.",
                     color=0xF1C40F,
                     fields=fields,
+                )
+            ]
+        }
+    )
+
+
+def notify_purchase_async(*, user: str, item: str, price: int, purchase_id: int | None = None) -> None:
+    thread = threading.Thread(
+        target=notify_purchase,
+        kwargs={"user": user, "item": item, "price": price, "purchase_id": purchase_id},
+        daemon=True,
+    )
+    thread.start()
+
+
+def discord_webhook_configured() -> bool:
+    return bool(_webhook_url())
+
+
+def send_test_notification() -> bool:
+    return _post_webhook(
+        {
+            "embeds": [
+                _embed(
+                    title="Prueba de Aaron Avisa",
+                    description="El webhook de Discord esta configurado correctamente en esta app.",
+                    color=0x2ECC71,
                 )
             ]
         }
