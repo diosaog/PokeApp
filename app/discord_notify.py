@@ -6,7 +6,7 @@ import os
 import threading
 from datetime import datetime, timezone
 from pathlib import Path
-from urllib import request
+from urllib import error, request
 
 try:
     import tomllib
@@ -57,10 +57,22 @@ def _webhook_username() -> str:
     return _secret("DISCORD_WEBHOOK_USERNAME") or "PokeApp"
 
 
-def _post_webhook(payload: dict) -> bool:
+def _webhook_validation_error() -> str:
     url = _webhook_url()
     if not url:
-        return False
+        return "Falta DISCORD_WEBHOOK_URL en los secrets."
+    if url.strip().lower() in {"tu webhook", "webhook", "pega_aqui_la_url"}:
+        return "DISCORD_WEBHOOK_URL sigue con texto de ejemplo."
+    if not url.startswith("https://discord.com/api/webhooks/"):
+        return "DISCORD_WEBHOOK_URL no parece una URL de webhook de Discord."
+    return ""
+
+
+def _post_webhook_detail(payload: dict) -> tuple[bool, str]:
+    url = _webhook_url()
+    validation_error = _webhook_validation_error()
+    if validation_error:
+        return False, validation_error
 
     body = {"username": _webhook_username(), **payload}
     try:
@@ -72,9 +84,21 @@ def _post_webhook(payload: dict) -> bool:
             method="POST",
         )
         with request.urlopen(req, timeout=_WEBHOOK_TIMEOUT_SECONDS) as response:
-            return 200 <= int(response.status) < 300
-    except Exception:
-        return False
+            status = int(response.status)
+            if 200 <= status < 300:
+                return True, "Mensaje enviado."
+            return False, f"Discord respondio con HTTP {status}."
+    except error.HTTPError as exc:
+        return False, f"Discord respondio con HTTP {int(exc.code)}."
+    except error.URLError as exc:
+        return False, f"No se pudo conectar con Discord: {exc.reason}"
+    except Exception as exc:
+        return False, f"Error enviando a Discord: {exc}"
+
+
+def _post_webhook(payload: dict) -> bool:
+    ok, _message = _post_webhook_detail(payload)
+    return ok
 
 
 def _embed(*, title: str, description: str, color: int, fields: list[dict] | None = None) -> dict:
@@ -124,11 +148,15 @@ def notify_purchase_async(*, user: str, item: str, price: int, purchase_id: int 
 
 
 def discord_webhook_configured() -> bool:
-    return bool(_webhook_url())
+    return not bool(_webhook_validation_error())
 
 
-def send_test_notification() -> bool:
-    return _post_webhook(
+def discord_webhook_status() -> str:
+    return _webhook_validation_error() or "Webhook configurado."
+
+
+def send_test_notification() -> tuple[bool, str]:
+    return _post_webhook_detail(
         {
             "embeds": [
                 _embed(
