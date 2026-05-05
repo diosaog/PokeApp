@@ -3,6 +3,7 @@ from __future__ import annotations
 import streamlit as st
 
 from app.common import COIN
+from app.discord_notify import notify_league_round_finished_async
 from app.liga.ranking import (
     MAX_JORNADAS,
     all_filled,
@@ -41,6 +42,20 @@ def _fmt_points(value) -> str:
         return f"{float(value):.1f}"
     except Exception:
         return "0.0"
+
+
+def _league_table_notification_rows() -> list[dict]:
+    rows = []
+    for i, (user, pts) in enumerate(general_table_sorted(), start=1):
+        rows.append(
+            {
+                "pos": i,
+                "user": user,
+                "points": _fmt_points(pts),
+                "coins": _coins_for_user(user),
+            }
+        )
+    return rows
 
 
 def _render_final_podium() -> None:
@@ -172,6 +187,10 @@ def page_tabla() -> None:
                     try:
                         finalize(tramo)
                         clear_money_caches()
+                        notify_league_round_finished_async(
+                            round_no=tramo,
+                            rows=_league_table_notification_rows(),
+                        )
                         if tramo >= MAX_JORNADAS:
                             podium = final_podium()
                             if podium:

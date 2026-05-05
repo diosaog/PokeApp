@@ -147,6 +147,45 @@ def notify_purchase_async(*, user: str, item: str, price: int, purchase_id: int 
     thread.start()
 
 
+def notify_league_round_finished(*, round_no: int, rows: list[dict]) -> bool:
+    lines = []
+    for row in rows[:20]:
+        pos = row.get("pos", "-")
+        user = str(row.get("user") or "-")
+        points = str(row.get("points") or "0.0")
+        coins = int(row.get("coins") or 0)
+        lines.append(f"{pos:>2}. {user:<14} {points:>5} pts | {coins:>3} monedas")
+
+    table = "\n".join(lines) if lines else "Sin datos."
+    return _post_webhook(
+        {
+            "embeds": [
+                _embed(
+                    title=f"Jornada {int(round_no)} finalizada",
+                    description="Tabla general actualizada:",
+                    color=0xE67E22,
+                    fields=[
+                        {
+                            "name": "Posiciones, puntos y monedas",
+                            "value": f"```text\n{table}\n```",
+                            "inline": False,
+                        }
+                    ],
+                )
+            ]
+        }
+    )
+
+
+def notify_league_round_finished_async(*, round_no: int, rows: list[dict]) -> None:
+    thread = threading.Thread(
+        target=notify_league_round_finished,
+        kwargs={"round_no": round_no, "rows": rows},
+        daemon=True,
+    )
+    thread.start()
+
+
 def discord_webhook_configured() -> bool:
     return not bool(_webhook_validation_error())
 
