@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import streamlit as st
 
+from app.discord_notify import sync_normativa_notification
 from app.interfaz.theme import render_poke_separator
 
 
@@ -133,6 +134,10 @@ Reglas de nivel
 - Buscar vacios legales en el juego es ilegal, si un entrenador lo encuentra, debe avisar por el grupo y se tomara una decision en base a una votacion.
 - Directos obligatorios: los jugadores deben jugar en Discord en directo y avisar previamente por WhatsApp.
 """
+    try:
+        sync_normativa_notification(normativa_md)
+    except Exception:
+        pass
     with st.expander("Normativa ChampionsLocke", expanded=False):
         st.markdown(normativa_md)
 

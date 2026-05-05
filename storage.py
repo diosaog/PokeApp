@@ -2,6 +2,7 @@ from __future__ import annotations
 import os
 import sqlite3
 import hashlib
+import json
 import time
 from pathlib import Path
 from typing import Optional, List, Tuple, Any
@@ -487,6 +488,37 @@ def get_current_save_path_for_user(user: str):
 
 # Tienda
 
+
+def _notify_purchase_inserted(user: str, item: str, price: int, purchase_id: int) -> None:
+    sent = False
+    error = ""
+    try:
+        from app.discord_notify import notify_purchase
+
+        sent = bool(notify_purchase(user=user, item=item, price=int(price), purchase_id=int(purchase_id)))
+    except Exception as exc:
+        error = str(exc)
+
+    try:
+        settings_set(
+            "discord_notify:last_purchase",
+            json.dumps(
+                {
+                    "purchase_id": int(purchase_id),
+                    "user": user,
+                    "item": item,
+                    "price": int(price),
+                    "sent": sent,
+                    "error": error,
+                    "created_at": _now_iso(),
+                },
+                ensure_ascii=False,
+            ),
+        )
+    except Exception:
+        pass
+
+
 def add_purchase(user: str, item: str, price: int) -> int:
     ts = int(time.time())
     if _supabase_enabled():
@@ -508,6 +540,7 @@ def add_purchase(user: str, item: str, price: int) -> int:
                 _total_spent_cache_invalidate(user)
                 _list_inventory_cache_invalidate(user)
                 _list_purchases_cache_invalidate()
+                _notify_purchase_inserted(user, item, int(price), pid)
                 return pid
         except Exception as e:
             # Supabase estÃ¡ configurado pero fallÃ³: no hacemos fallback silencioso
@@ -522,7 +555,9 @@ def add_purchase(user: str, item: str, price: int) -> int:
         _total_spent_cache_invalidate(user)
         _list_inventory_cache_invalidate(user)
         _list_purchases_cache_invalidate()
-        return int(rowid)
+        pid = int(rowid)
+        _notify_purchase_inserted(user, item, int(price), pid)
+        return pid
 
 
 def total_spent(user: str) -> int:
