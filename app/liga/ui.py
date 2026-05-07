@@ -3,6 +3,8 @@ from __future__ import annotations
 import streamlit as st
 
 from app.discord_notify import notify_league_round_finished_async
+from app.liga.archive import render_season_archive_section
+from app.liga.matchup import render_matchup_preview
 from app.liga.ranking import (
     MAX_JORNADAS,
     all_filled,
@@ -408,6 +410,13 @@ def page_tabla() -> None:
             with c2:
                 st.caption(f"Liga B ({b_start}-{b_end})")
                 st.dataframe(rowsB or [], use_container_width=True)
+
+    st.markdown("---")
+    with st.expander("Previa de enfrentamiento", expanded=False):
+        render_matchup_preview(list(USERS.keys()))
+
+    st.markdown("---")
+    render_season_archive_section()
 
     st.markdown("---")
     st.subheader("Reiniciar Liga")

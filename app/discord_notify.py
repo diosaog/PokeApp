@@ -4,6 +4,7 @@ import hashlib
 import json
 import os
 import threading
+import unicodedata
 from datetime import datetime, timezone
 from pathlib import Path
 from urllib import error, request
@@ -20,7 +21,92 @@ except Exception:
 
 
 _NORMATIVA_HASH_KEY = "discord_notify:normativa_hash"
+_NORMATIVA_SECTION_HASHES_KEY = "discord_notify:normativa_section_hashes"
 _WEBHOOK_TIMEOUT_SECONDS = 2.0
+
+
+def _normalize_normativa_text(normativa_text: str) -> str:
+    normalized = (normativa_text or "").replace("\r\n", "\n").replace("\r", "\n")
+    normalized = unicodedata.normalize("NFC", normalized)
+    lines = [line.rstrip() for line in normalized.split("\n")]
+
+    collapsed_lines: list[str] = []
+    previous_blank = False
+    for line in lines:
+        is_blank = not line.strip()
+        if is_blank:
+            if previous_blank:
+                continue
+            previous_blank = True
+            collapsed_lines.append("")
+            continue
+
+        previous_blank = False
+        collapsed_lines.append(line)
+
+    return "\n".join(collapsed_lines).strip()
+
+
+def _legacy_normativa_hash(normativa_text: str) -> str:
+    normalized = (normativa_text or "").strip().replace("\r\n", "\n")
+    return hashlib.sha256(normalized.encode("utf-8")).hexdigest()
+
+
+def _normativa_hash(normativa_text: str) -> str:
+    normalized = _normalize_normativa_text(normativa_text)
+    return hashlib.sha256(normalized.encode("utf-8")).hexdigest()
+
+
+def _normalize_section_payloads(section_payloads: dict | None) -> dict[str, dict[str, str]]:
+    normalized: dict[str, dict[str, str]] = {}
+    for key, payload in (section_payloads or {}).items():
+        if not isinstance(payload, dict):
+            continue
+        section_id = str(key).strip()
+        if not section_id:
+            continue
+        title = str(payload.get("title") or section_id).strip() or section_id
+        text = str(payload.get("text") or "")
+        normalized[section_id] = {"title": title, "hash": _normativa_hash(text)}
+    return normalized
+
+
+def _load_section_hashes(raw: str | None) -> dict[str, dict[str, str]]:
+    try:
+        obj = json.loads(raw or "")
+    except Exception:
+        return {}
+    if not isinstance(obj, dict):
+        return {}
+
+    out: dict[str, dict[str, str]] = {}
+    for key, payload in obj.items():
+        if not isinstance(payload, dict):
+            continue
+        section_id = str(key).strip()
+        title = str(payload.get("title") or section_id).strip() or section_id
+        digest = str(payload.get("hash") or "").strip()
+        if section_id and digest:
+            out[section_id] = {"title": title, "hash": digest}
+    return out
+
+
+def _changed_normativa_sections(
+    current_sections: dict[str, dict[str, str]],
+    previous_sections: dict[str, dict[str, str]],
+) -> list[str]:
+    changed: list[str] = []
+
+    for section_id, payload in current_sections.items():
+        previous = previous_sections.get(section_id)
+        if previous is None or previous.get("hash") != payload.get("hash"):
+            changed.append(str(payload.get("title") or section_id))
+
+    for section_id, payload in previous_sections.items():
+        if section_id not in current_sections:
+            changed.append(str(payload.get("title") or section_id))
+
+    return changed
 
 
 def _secret(name: str) -> str:
@@ -208,26 +294,59 @@ def send_test_notification() -> tuple[bool, str]:
     )
 
 
-def sync_normativa_notification(normativa_text: str) -> bool:
+def sync_normativa_notification(normativa_text: str, section_payloads: dict | None = None) -> bool:
     from storage import settings_get, settings_set
 
-    normalized = (normativa_text or "").strip().replace("\r\n", "\n")
-    current_hash = hashlib.sha256(normalized.encode("utf-8")).hexdigest()
+    current_hash = _normativa_hash(normativa_text)
+    legacy_hash = _legacy_normativa_hash(normativa_text)
+    current_sections = _normalize_section_payloads(section_payloads)
 
     try:
         previous_hash = settings_get(_NORMATIVA_HASH_KEY)
     except Exception:
         previous_hash = None
+    try:
+        previous_sections_raw = settings_get(_NORMATIVA_SECTION_HASHES_KEY)
+    except Exception:
+        previous_sections_raw = None
+    previous_sections = _load_section_hashes(previous_sections_raw)
 
     if not previous_hash:
         try:
             settings_set(_NORMATIVA_HASH_KEY, current_hash)
+            if current_sections:
+                settings_set(_NORMATIVA_SECTION_HASHES_KEY, json.dumps(current_sections, ensure_ascii=False))
         except Exception:
             pass
         return False
 
-    if previous_hash == current_hash:
+    if previous_hash in {current_hash, legacy_hash}:
+        if previous_hash != current_hash or (current_sections and current_sections != previous_sections):
+            try:
+                settings_set(_NORMATIVA_HASH_KEY, current_hash)
+                if current_sections:
+                    settings_set(_NORMATIVA_SECTION_HASHES_KEY, json.dumps(current_sections, ensure_ascii=False))
+            except Exception:
+                pass
         return False
+
+    changed_sections = _changed_normativa_sections(current_sections, previous_sections)
+    if changed_sections:
+        fields = [
+            {
+                "name": "Secciones modificadas",
+                "value": "\n".join(f"- {title}" for title in changed_sections[:10]),
+                "inline": False,
+            }
+        ]
+    else:
+        fields = [
+            {
+                "name": "Secciones modificadas",
+                "value": "Cambio detectado en la normativa general, sin desglose previo por secciones.",
+                "inline": False,
+            }
+        ]
 
     sent = _post_webhook(
         {
@@ -239,6 +358,7 @@ def sync_normativa_notification(normativa_text: str) -> bool:
                         "Revisad la seccion de inicio de PokeApp para ver los cambios."
                     ),
                     color=0x3498DB,
+                    fields=fields,
                 )
             ]
         }
@@ -246,6 +366,8 @@ def sync_normativa_notification(normativa_text: str) -> bool:
 
     try:
         settings_set(_NORMATIVA_HASH_KEY, current_hash)
+        if current_sections:
+            settings_set(_NORMATIVA_SECTION_HASHES_KEY, json.dumps(current_sections, ensure_ascii=False))
     except Exception:
         pass
     return sent
