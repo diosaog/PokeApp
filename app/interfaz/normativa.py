@@ -470,6 +470,14 @@ def _render_normativa_css() -> None:
           padding-right: 14px !important;
           white-space: nowrap !important;
         }
+        div[data-testid="stTabs"] div[data-baseweb="tab-list"] button:first-of-type,
+        div[data-testid="stTabs"] [role="tablist"] [role="tab"]:first-of-type,
+        div[data-baseweb="tab-list"] button[data-baseweb="tab"]:first-of-type,
+        div[data-baseweb="tab-list"] button[role="tab"]:first-of-type {
+          flex-basis: 176px !important;
+          width: 176px !important;
+          min-width: 176px !important;
+        }
         div[data-testid="stTabs"] button *,
         div[data-testid="stTabs"] [role="tab"] *,
         div[data-baseweb="tab-list"] button[data-baseweb="tab"] p,
