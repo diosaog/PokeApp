@@ -99,6 +99,8 @@ NORMATIVA_SECTIONS = [
             "4. Combates entre jugadores",
             "- Liga: combates 1 vs 1, formato Bo1.",
             "- Copa: se juega tras completar la Liga Pokemon. Formato eliminatorio, Bo3.",
+            "- En combates contra jugadores se aplican Item Clause y Sleep Clause.",
+            "- En combates dobles contra jugadores, el movimiento Brecha Negra no esta permitido.",
         ],
         "visual_blocks": [
             {
@@ -114,6 +116,8 @@ NORMATIVA_SECTIONS = [
                 "items": [
                     "Liga: combates 1 vs 1 en formato Bo1.",
                     "Copa: se juega tras completar la Liga Pokemon y pasa a formato eliminatorio Bo3.",
+                    "En combates contra jugadores se aplican Item Clause y Sleep Clause.",
+                    "En combates dobles contra jugadores, el movimiento Brecha Negra no esta permitido.",
                 ],
             },
         ],
