@@ -17,6 +17,34 @@ from conex_pkhex import PKHeXRuntime, extract_team, get_bridge_path, open_sav_ca
 from utils import USERS, DEFAULT_DLL_HINT, list_user_saves
 
 
+INVENTORY_TABS_CSS = """
+<style>
+div[data-testid="stTabs"] div[data-baseweb="tab-list"],
+div[data-testid="stTabs"] [role="tablist"] {
+  gap: 8px !important;
+  flex-wrap: wrap !important;
+  align-items: stretch !important;
+}
+div[data-testid="stTabs"] div[data-baseweb="tab-list"] button:first-of-type,
+div[data-testid="stTabs"] [role="tablist"] [role="tab"]:first-of-type {
+  flex: 0 0 176px !important;
+  width: 176px !important;
+  min-width: 176px !important;
+  justify-content: center !important;
+  padding-left: 14px !important;
+  padding-right: 14px !important;
+  white-space: nowrap !important;
+}
+div[data-testid="stTabs"] div[data-baseweb="tab-list"] button:first-of-type *,
+div[data-testid="stTabs"] [role="tablist"] [role="tab"]:first-of-type * {
+  width: 100%;
+  text-align: center;
+  white-space: nowrap !important;
+}
+</style>
+"""
+
+
 def page_entrenadores_setup() -> None:
     is_own_profile = st.session_state.get("trainer_selected") == st.session_state.get("user")
     if not is_own_profile:
@@ -105,6 +133,7 @@ def page_entrenadores_view() -> None:
             " clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px);'>Inventario</div>",
             unsafe_allow_html=True,
         )
+        st.markdown(INVENTORY_TABS_CSS, unsafe_allow_html=True)
         tab_shop, tab_como = st.tabs(["Compras (tienda)", "Comodines"])
         with tab_shop:
             _purchases_inventory_ui(trainer or "", allow_use=False)

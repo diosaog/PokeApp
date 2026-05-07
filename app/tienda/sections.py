@@ -17,6 +17,10 @@ SHOP_PAGE_CSS = (
     "font-weight:700 !important; color:#ffffff !important; -webkit-text-fill-color:#ffffff !important; opacity:1 !important;}"
     ".stButton>button:disabled, .stButton>button:disabled *{opacity:1 !important; color:#cbd1d9 !important; -webkit-text-fill-color:#cbd1d9 !important;}"
     "button[data-baseweb='tab'], button[role='tab'], button[data-baseweb='tab'] *, button[role='tab'] *{font-family:var(--font-pixel) !important; font-size:10px !important; font-weight:700 !important;}"
+    "div[data-testid='stTabs'] div[data-baseweb='tab-list'], div[data-testid='stTabs'] [role='tablist']{gap:8px !important; flex-wrap:wrap !important; align-items:stretch !important;}"
+    "div[data-testid='stTabs'] button[data-baseweb='tab'], div[data-testid='stTabs'] button[role='tab']{flex:0 0 136px !important; width:136px !important; min-width:136px !important; justify-content:center !important; padding-left:14px !important; padding-right:14px !important; white-space:nowrap !important;}"
+    "div[data-testid='stTabs'] button[data-baseweb='tab'] *, div[data-testid='stTabs'] button[role='tab'] *{width:100%; text-align:center; white-space:nowrap !important;}"
+    "div[data-testid='stTabs'] button[data-baseweb='tab']:nth-of-type(3), div[data-testid='stTabs'] button[role='tab']:nth-of-type(3){flex-basis:160px !important; width:160px !important; min-width:160px !important;}"
     "</style>"
 )
 DIVIDER_HTML = "<div style='height:2px; background:linear-gradient(90deg, transparent 0%, var(--accent) 22%, var(--accent) 78%, transparent 100%); margin:10px 0 14px;'></div>"
