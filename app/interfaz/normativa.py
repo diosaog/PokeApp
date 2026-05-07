@@ -27,7 +27,7 @@ NORMATIVA_SECTIONS = [
             "- Shiny: El pokemon shiny es capturable 1 unica vez por juego, no se pueden capturar mas de 1.",
             "- Fosil: solo se puede usar una vez por ser de uso unico.",
             "- Pokemon baneados: Slaking, Deoxys.",
-            "- Movimientos baneados: Esquema (Unicamente la MT, en el recuerdamovimientos si se puede).",
+            "- Movimientos baneados: Esquema (Unicamente la MT, en el recuerdamovimientos si se puede) y Brecha Negra en combates dobles contra jugadores.",
             "- Objetos baneados: Rocio Bondad.",
             "- El pokemon transferido entre juegos NO puede ser pseudo-legendario ni legendario. Tambien, este mismo llevara 1 ataque del juego anterior +2 ataques random elegidos antes en una ruleta y una habilidad random.",
         ],
@@ -49,7 +49,7 @@ NORMATIVA_SECTIONS = [
                     "Legendarios principales: no estan permitidos; si aparecen como primer encuentro, se fuerza otro.",
                     "Shiny: solo se puede capturar 1 por juego.",
                     "Fosil: solo se puede usar una vez por ser de uso unico.",
-                    "Baneados: Slaking, Deoxys, Esquema (solo la MT) y Rocio Bondad.",
+                    "Baneados: Slaking, Deoxys, Esquema (solo la MT), Brecha Negra en dobles contra jugadores y Rocio Bondad.",
                     "Pokemon transferido: no puede ser pseudo-legendario ni legendario y arrastra 1 ataque anterior + 2 random + habilidad random.",
                 ],
             },
@@ -100,7 +100,6 @@ NORMATIVA_SECTIONS = [
             "- Liga: combates 1 vs 1, formato Bo1.",
             "- Copa: se juega tras completar la Liga Pokemon. Formato eliminatorio, Bo3.",
             "- En combates contra jugadores se aplican Item Clause y Sleep Clause.",
-            "- En combates dobles contra jugadores, el movimiento Brecha Negra no esta permitido.",
         ],
         "visual_blocks": [
             {
@@ -117,7 +116,6 @@ NORMATIVA_SECTIONS = [
                     "Liga: combates 1 vs 1 en formato Bo1.",
                     "Copa: se juega tras completar la Liga Pokemon y pasa a formato eliminatorio Bo3.",
                     "En combates contra jugadores se aplican Item Clause y Sleep Clause.",
-                    "En combates dobles contra jugadores, el movimiento Brecha Negra no esta permitido.",
                 ],
             },
         ],
