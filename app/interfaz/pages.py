@@ -35,6 +35,16 @@ def page_tabla() -> None:
         st.error(f"No se pudo cargar la tabla: {e}")
 
 
+def page_previa_combate() -> None:
+    try:
+        from app.liga.matchup import render_matchup_preview
+        from utils import USERS
+
+        render_matchup_preview(list(USERS.keys()))
+    except Exception as e:
+        st.error(f"No se pudo cargar la previa de combate: {e}")
+
+
 def page_copa() -> None:
     try:
         st.subheader("Copa")

@@ -6,6 +6,7 @@ import streamlit as st
 
 from utils import USERS
 from storage import settings_get, settings_set
+from dexdata import item_name_es
 
 
 def _ensure_swiss_state():
@@ -240,6 +241,21 @@ def _get_pokepaste(player: str) -> dict | None:
     return st.session_state.get("pokepastes", {}).get(player)
 
 
+def _display_item_name(item: str | None) -> str:
+    if not item:
+        return ""
+    item_txt = str(item).strip()
+    if not item_txt:
+        return ""
+    item_id = item_txt.lstrip("#")
+    if item_id.isdigit():
+        resolved = item_name_es(item_id)
+        if resolved and resolved != "-":
+            return resolved
+        return "Objeto desconocido"
+    return item_txt
+
+
 def _view_paste_card(player: str) -> None:
     st.markdown(f"**{player}**")
     paste = _get_pokepaste(player or "")
@@ -257,8 +273,7 @@ def _view_paste_card(player: str) -> None:
     for mon in team:
         sp = mon.get("species") or "Pokemon"
         title = mon.get("title") or sp
-        item = mon.get("item")
-        ability = mon.get("ability")
+        item = _display_item_name(mon.get("item"))
         moves = mon.get("moves") or []
         try:
             from showdown_sprites import showdown_sprite_url
@@ -272,8 +287,6 @@ def _view_paste_card(player: str) -> None:
                     st.image(img, width=64)
             with cols[1]:
                 st.markdown(f"**{title}** {f'@ {item}' if item else ''}")
-                if ability:
-                    st.caption(f"Habilidad: {ability}")
                 if moves:
                     st.markdown("\n".join([f"- {m}" for m in moves]))
 

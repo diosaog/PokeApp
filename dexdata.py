@@ -60,12 +60,16 @@ def _now() -> int:
 
 
 def _read_json(path: Path) -> Optional[Dict[str, Any]]:
-    try:
-        if not path.exists():
-            return None
-        return json.loads(path.read_text(encoding="utf-8"))
-    except Exception:
+    if not path.exists():
         return None
+    for encoding in ("utf-8", "utf-8-sig", "utf-16"):
+        try:
+            return json.loads(path.read_text(encoding=encoding))
+        except (UnicodeError, json.JSONDecodeError):
+            continue
+        except Exception:
+            return None
+    return None
 
 
 def _write_json(path: Path, obj: Dict[str, Any]) -> None:
@@ -272,12 +276,14 @@ def item_name_es(name_or_id: str) -> str:
         try:
             cache_paths = [
                 DATA_DIR / "item_names_es.json",
-                Path(__file__).resolve().parents[1] / "assets" / "item_names_es.json",
+                _BASE_DIR / "assets" / "item_names_es.json",
+                _BASE_DIR.parent / "assets" / "item_names_es.json",
+                Path.cwd() / "assets" / "item_names_es.json",
             ]
             for cache_file in cache_paths:
                 if not cache_file.exists():
                     continue
-                data = json.loads(cache_file.read_text(encoding="utf-8"))
+                data = _read_json(cache_file)
                 if isinstance(data, dict) and raw in data:
                     name = str(data.get(raw) or "").strip()
                     if name:

@@ -15,6 +15,7 @@ from app.entrenadores.state import ensure_local_save_for
 from app.juicios.penalties import get_user_penalties
 from app.tienda.money import money_breakdown
 from conex_pkhex import extract_box, extract_team, get_box_meta_quick, has_pc_data, open_sav_cached
+from dexdata import item_name_es
 from showdown_sprites import showdown_sprite_url
 from utils import USERS, list_user_saves
 
@@ -113,6 +114,36 @@ def _move_names(mon: dict) -> list[str]:
     return detailed[:4]
 
 
+def _held_item_name(mon: dict) -> str:
+    found_numeric_item = False
+    no_item_names = {"-", "0", "#0", "none", "no item", "(ningun objeto)", "(ningún objeto)"}
+    for raw in (
+        mon.get("held_item_id"),
+        mon.get("ItemId"),
+        mon.get("item_id"),
+        mon.get("held_item"),
+        mon.get("Item"),
+        mon.get("item"),
+    ):
+        if raw is None:
+            continue
+        text = str(raw).strip()
+        if not text:
+            continue
+        if text.lower() in no_item_names:
+            continue
+        raw_id = text.lstrip("#")
+        found_numeric_item = found_numeric_item or raw_id.isdigit()
+        resolved = item_name_es(text)
+        if not resolved or resolved.lower() in no_item_names:
+            continue
+        if raw_id.isdigit() and resolved in {text, raw_id}:
+            continue
+        if resolved:
+            return resolved
+    return "Objeto desconocido" if found_numeric_item else "-"
+
+
 def _summary_snapshot(player: str) -> dict:
     from app.liga.ranking import current_points_total
 
@@ -200,8 +231,7 @@ def _team_card_html(snapshot: dict) -> str:
             gender=mon.get("gender"),
             prefer_animated=False,
         )
-        item = str(mon.get("held_item") or mon.get("Item") or "-").strip()
-        ability = str(mon.get("ability") or mon.get("Ability") or "-").strip()
+        item = _held_item_name(mon)
         moves = _move_names(mon)
         moves_html = "".join(
             f"<div class='matchup-move'>{escape(move)}</div>"
@@ -214,8 +244,7 @@ def _team_card_html(snapshot: dict) -> str:
             "<div class='matchup-mon-meta'>"
             f"<div class='matchup-mon-title'>{escape(title)}</div>"
             f"<div class='matchup-mon-sub'>{escape(subtitle)}</div>"
-            f"<div class='matchup-mon-extra'>Objeto: {escape(item)}</div>"
-            f"<div class='matchup-mon-extra'>Habilidad: {escape(ability)}</div>"
+            f"<div class='matchup-mon-extra matchup-mon-item'>Objeto: {escape(item)}</div>"
             "</div>"
             "</div>"
             "<div class='matchup-move-list'>"
@@ -406,6 +435,9 @@ def _ensure_matchup_css() -> None:
           font-family: var(--font-ui);
           font-size: 18px;
           line-height: 1.05;
+        }
+        .matchup-mon-item {
+          overflow-wrap: anywhere;
         }
         .matchup-move-list {
           display: grid;

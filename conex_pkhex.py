@@ -427,8 +427,9 @@ def _pkm_to_ui(p: Dict[str, Any]) -> Dict[str, Any]:
     ot_sid = p.get("OT_SID")
     ot_name = p.get("OT_Name")
     # Held item / Ability
-    held_item = p.get("Item") or p.get("HeldItem") or p.get("item") or None
-    ability = p.get("Ability") or p.get("ability") or None
+    held_item = _first_present(p, "Item", "HeldItem", "item")
+    held_item_id = _first_present(p, "ItemId", "HeldItemId", "item_id")
+    ability = _first_present(p, "Ability", "ability")
 
     out: Dict[str, Any] = {
         "species": species_display,
@@ -448,6 +449,7 @@ def _pkm_to_ui(p: Dict[str, Any]) -> Dict[str, Any]:
         "ot_sid": ot_sid,
         "ot_name": ot_name,
         "held_item": held_item,
+        "held_item_id": held_item_id,
         "ability": ability,
     }
     # Añadir IVs para cálculo de Hidden Power (sin mostrarlos en UI)

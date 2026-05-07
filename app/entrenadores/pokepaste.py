@@ -6,6 +6,8 @@ import json
 import re
 import streamlit as st
 
+from dexdata import item_name_es
+
 
 def ensure_pokepaste_state() -> None:
     st.session_state.setdefault("pokepastes", {})
@@ -101,6 +103,19 @@ def sanitize_mon(mon: dict) -> dict:
     }
 
 
+def _display_item_name(item: str | None) -> str:
+    item_txt = _clean_text(item)
+    if not item_txt:
+        return ""
+    item_id = item_txt.lstrip("#")
+    if item_id.isdigit():
+        resolved = item_name_es(item_id)
+        if resolved and resolved != "-":
+            return resolved
+        return "Objeto desconocido"
+    return item_txt
+
+
 def pokepaste_preview(paste: dict | None) -> None:
     if not paste or not paste.get("team"):
         st.caption("Sin Pokepaste guardado.")
@@ -111,8 +126,7 @@ def pokepaste_preview(paste: dict | None) -> None:
     for mon in team:
         sp = mon.get("species") or "Pokemon"
         title = mon.get("title") or sp
-        item = mon.get("item")
-        ability = mon.get("ability")
+        item = _display_item_name(mon.get("item"))
         moves = mon.get("moves") or []
         from showdown_sprites import showdown_sprite_url
         img = showdown_sprite_url(species_name=str(sp), prefer_animated=False)
@@ -122,7 +136,5 @@ def pokepaste_preview(paste: dict | None) -> None:
                 st.image(img, width=72)
             with cols[1]:
                 st.markdown(f"**{title}** {f'@ {item}' if item else ''}")
-                if ability:
-                    st.caption(f"Habilidad: {ability}")
                 if moves:
                     st.markdown("\n".join([f"- {m}" for m in moves]))
