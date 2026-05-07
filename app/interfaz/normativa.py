@@ -9,6 +9,7 @@ NORMATIVA_SECTIONS = [
     {
         "id": "nuzlocke",
         "tab": "Nuzlocke",
+        "tab_label": "Normas Nuzlocke",
         "bot_title": "Normas Nuzlocke",
         "eyebrow": "Protocolo Base",
         "summary": "La capa central del reto: captura, muerte permanente y clausulas especiales.",
@@ -57,6 +58,7 @@ NORMATIVA_SECTIONS = [
     {
         "id": "equipo",
         "tab": "Equipo",
+        "tab_label": "Equipo Legal",
         "bot_title": "Restricciones de equipo",
         "eyebrow": "Control de Roster",
         "summary": "Limites competitivos para evitar stacks rotos y duplicados de fase.",
@@ -84,6 +86,7 @@ NORMATIVA_SECTIONS = [
     {
         "id": "estructura",
         "tab": "Tramos",
+        "tab_label": "Tramos Liga",
         "bot_title": "Estructura y combates",
         "eyebrow": "Formato de Liga",
         "summary": "Como se divide la partida y como se resuelven los cruces entre jugadores.",
@@ -118,6 +121,7 @@ NORMATIVA_SECTIONS = [
     {
         "id": "caps",
         "tab": "Level Caps",
+        "tab_label": "Level Caps",
         "bot_title": "Level Caps",
         "eyebrow": "Control de Progresion",
         "summary": "Topes de nivel oficiales para gimnasios, liga final y gestion de caramelos.",
@@ -184,6 +188,7 @@ NORMATIVA_SECTIONS = [
     {
         "id": "liga",
         "tab": "Liga A/B",
+        "tab_label": "Liga A / B",
         "bot_title": "Divisiones, puntos y monedas",
         "eyebrow": "Sistema de Clasificacion",
         "summary": "Distribucion de divisiones, scoring global y economia oficial de la liga.",
@@ -273,6 +278,7 @@ NORMATIVA_SECTIONS = [
     {
         "id": "comodines",
         "tab": "Comodines",
+        "tab_label": "Comodines",
         "bot_title": "Comodines",
         "eyebrow": "Herramientas Especiales",
         "summary": "Objetos de impacto directo sobre cajas, rutas, robos y resurrecciones.",
@@ -300,6 +306,7 @@ NORMATIVA_SECTIONS = [
     {
         "id": "generales",
         "tab": "Generales",
+        "tab_label": "Normas Generales",
         "bot_title": "Normas generales",
         "eyebrow": "Disciplina de Temporada",
         "summary": "Reglas de conducta, legalidad y limites de compra y entrenamiento.",
@@ -428,6 +435,58 @@ def _render_normativa_css() -> None:
           font-family: var(--font-pixel);
           font-size: 9px;
           text-transform: uppercase;
+        }
+        div[data-testid="stTabs"] div[data-baseweb="tab-list"],
+        div[data-testid="stTabs"] [role="tablist"],
+        div[data-baseweb="tab-list"] {
+          gap: 8px !important;
+          flex-wrap: wrap !important;
+          align-items: stretch !important;
+        }
+        div[data-testid="stTabs"] {
+          overflow: visible !important;
+        }
+        div[data-testid="stTabs"] > div {
+          overflow: visible !important;
+        }
+        div[data-testid="stTabs"] div[data-baseweb="tab-list"] > * {
+          flex: 0 0 auto !important;
+        }
+        div[data-testid="stTabs"] [data-baseweb="tab-border"] {
+          display: none !important;
+        }
+        div[data-testid="stTabs"] [data-baseweb="tab-highlight"] {
+          display: none !important;
+        }
+        div[data-testid="stTabs"] button,
+        div[data-testid="stTabs"] [role="tab"],
+        div[data-baseweb="tab-list"] button[data-baseweb="tab"],
+        div[data-baseweb="tab-list"] button[role="tab"] {
+          flex: 0 0 132px !important;
+          width: 132px !important;
+          min-width: 132px !important;
+          justify-content: center !important;
+          padding-left: 14px !important;
+          padding-right: 14px !important;
+          white-space: nowrap !important;
+        }
+        div[data-testid="stTabs"] button *,
+        div[data-testid="stTabs"] [role="tab"] *,
+        div[data-baseweb="tab-list"] button[data-baseweb="tab"] p,
+        div[data-baseweb="tab-list"] button[role="tab"] p {
+          width: 100%;
+          text-align: center;
+          white-space: nowrap !important;
+        }
+        @media (max-width: 720px) {
+          div[data-testid="stTabs"] button,
+          div[data-testid="stTabs"] [role="tab"],
+          div[data-baseweb="tab-list"] button[data-baseweb="tab"],
+          div[data-baseweb="tab-list"] button[role="tab"] {
+            flex: 1 1 calc(50% - 8px);
+            width: auto !important;
+            min-width: 112px !important;
+          }
         }
         .norma-summary {
           margin-bottom: 12px;
@@ -605,7 +664,7 @@ def render_normativa_home() -> None:
         unsafe_allow_html=True,
     )
 
-    tabs = st.tabs([str(section.get("tab") or section.get("bot_title") or section["id"]) for section in NORMATIVA_SECTIONS])
+    tabs = st.tabs([str(section.get("tab_label") or section.get("tab") or section.get("bot_title") or section["id"]) for section in NORMATIVA_SECTIONS])
     for tab, section in zip(tabs, NORMATIVA_SECTIONS):
         with tab:
             _render_section(section)
