@@ -3,6 +3,7 @@ from __future__ import annotations
 from typing import List, Tuple
 
 from app.entrenadores.constants import DEAD_BOX_INDEX, TOTAL_BOXES
+from app.entrenadores.badges import count_badges
 from conex_pkhex import extract_box, extract_team, get_box_meta_quick, has_pc_data, open_sav_cached
 
 try:
@@ -43,6 +44,21 @@ if st is not None:
             return has_pc_data(sav_json)
         except Exception:
             return False
+
+    @st.cache_data(ttl=180, show_spinner=False)
+    def cached_badge_count(save_path: str, mtime: float) -> int:
+        try:
+            sav_json = open_sav_cached(save_path)
+            return int(count_badges(sav_json))
+        except Exception:
+            return 0
+
+    @st.cache_data(ttl=180, show_spinner=False)
+    def cached_dead_count(save_path: str, mtime: float, box_index: int = DEAD_BOX_INDEX) -> int:
+        try:
+            return len(cached_box(save_path, mtime, int(box_index)) or [])
+        except Exception:
+            return 0
 else:
     def cached_team(save_path: str, mtime: float) -> List[dict]:
         try:
@@ -71,6 +87,19 @@ else:
             return has_pc_data(sav_json)
         except Exception:
             return False
+
+    def cached_badge_count(save_path: str, mtime: float) -> int:
+        try:
+            sav_json = open_sav_cached(save_path)
+            return int(count_badges(sav_json))
+        except Exception:
+            return 0
+
+    def cached_dead_count(save_path: str, mtime: float, box_index: int = DEAD_BOX_INDEX) -> int:
+        try:
+            return len(cached_box(save_path, mtime, int(box_index)) or [])
+        except Exception:
+            return 0
 
 
 def preload_entrenadores_cache(save_path: str, mtime: float, box_count: int) -> None:
@@ -105,6 +134,10 @@ def preload_entrenadores_cache(save_path: str, mtime: float, box_count: int) -> 
         pass
     try:
         cached_has_pc_data(save_path, mtime)
+    except Exception:
+        pass
+    try:
+        cached_badge_count(save_path, mtime)
     except Exception:
         pass
     try:

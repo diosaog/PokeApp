@@ -7,14 +7,13 @@ from pathlib import Path
 
 import streamlit as st
 
-from app.entrenadores.badges import count_badges
+from app.entrenadores.cache import cached_badge_count, cached_dead_count, cached_team
 from app.entrenadores.bridge import try_auto_load_bridge
 from app.entrenadores.constants import DEAD_BOX_INDEX
 from app.entrenadores.profile import find_trainer_image
 from app.entrenadores.state import ensure_local_save_for
 from app.juicios.penalties import get_user_penalties
-from app.tienda.money import money_breakdown
-from conex_pkhex import extract_box, extract_team, get_box_meta_quick, has_pc_data, open_sav_cached
+from app.tienda.money import money_breakdown_from_parts
 from dexdata import item_name_es
 from showdown_sprites import showdown_sprite_url
 from utils import USERS, list_user_saves
@@ -40,24 +39,11 @@ def _img_uri(path: str, mtime: float | None = None) -> str:
         return ""
 
 
-@_cache_data(ttl=20)
+@_cache_data(ttl=120)
 def _load_matchup_snapshot(save_path: str, mtime: float) -> dict:
-    sav_json = open_sav_cached(save_path)
-    team = extract_team(sav_json, save_path=save_path) or []
-
-    try:
-        badges = int(count_badges(sav_json))
-    except Exception:
-        badges = 0
-
-    dead_count = 0
-    try:
-        if has_pc_data(sav_json):
-            total_boxes, _ = get_box_meta_quick(sav_json, save_path=save_path)
-            dead_box = max(0, min(DEAD_BOX_INDEX, max(int(total_boxes or 1) - 1, 0)))
-            dead_count = len(extract_box(sav_json, dead_box, save_path=save_path) or [])
-    except Exception:
-        dead_count = 0
+    team = cached_team(save_path, mtime) or []
+    badges = cached_badge_count(save_path, mtime)
+    dead_count = cached_dead_count(save_path, mtime, DEAD_BOX_INDEX)
 
     return {
         "team": team,
@@ -159,8 +145,14 @@ def _summary_snapshot(player: str) -> dict:
         except Exception:
             snapshot = {"team": [], "badges": 0, "dead_count": 0, "save_name": save_name}
 
-    breakdown = money_breakdown(player)
     penalties = get_user_penalties(player)
+    raw_dead_count = int(snapshot.get("dead_count") or 0)
+    badges = int(snapshot.get("badges") or 0)
+    breakdown = money_breakdown_from_parts(
+        player,
+        badge_coins=4 * badges,
+        penalties=penalties,
+    )
     portrait = find_trainer_image(player)
     portrait_mtime = None
     try:
@@ -172,10 +164,10 @@ def _summary_snapshot(player: str) -> dict:
     return {
         "player": player,
         "division": _division_for_player(player),
-        "points": current_points_total(player),
+        "points": current_points_total(player, raw_dead_count=raw_dead_count, penalties=penalties),
         "coins": int(breakdown.get("available") or 0),
-        "badges": int(snapshot.get("badges") or 0),
-        "dead_count": int(snapshot.get("dead_count") or 0),
+        "badges": badges,
+        "dead_count": raw_dead_count,
         "team": list(snapshot.get("team") or []),
         "save_name": str(snapshot.get("save_name") or "Sin save"),
         "store_blocked": bool(penalties.get("store_blocked")),

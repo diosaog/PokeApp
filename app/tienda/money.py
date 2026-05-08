@@ -3,7 +3,7 @@ from __future__ import annotations
 from pathlib import Path
 
 from app.liga.coins import coins_from_league
-from app.entrenadores.badges import count_badges
+from app.entrenadores.cache import cached_badge_count
 from app.interfaz.badges import coins_from_badges
 from app.juicios.penalties import get_user_penalties
 from storage import (
@@ -15,7 +15,6 @@ from storage import (
     total_spent,
 )
 from utils import ensure_user_dir, list_user_saves
-from conex_pkhex import open_sav_cached
 try:
     import streamlit as st  # type: ignore
 except Exception:
@@ -96,25 +95,42 @@ def _resolve_user_save_path(user: str) -> str | None:
 @_cache_data(ttl=15)
 def _badge_coins_from_save(save_path: str, mtime: float) -> int:
     try:
-        sav_json = open_sav_cached(str(save_path))
-        try:
-            return int(4 * count_badges(sav_json))
-        except Exception:
-            return int(coins_from_badges(sav_json))
+        return int(4 * cached_badge_count(str(save_path), float(mtime)))
     except Exception:
-        return 0
+        try:
+            from conex_pkhex import open_sav_cached
+
+            sav_json = open_sav_cached(str(save_path))
+            return int(coins_from_badges(sav_json))
+        except Exception:
+            return 0
 
 
 @_cache_data(ttl=10)
 def money_breakdown(user: str | None) -> dict[str, int | bool]:
+    return money_breakdown_from_parts(user)
+
+
+def money_breakdown_from_parts(
+    user: str | None,
+    *,
+    badge_coins: int | None = None,
+    penalties: dict | None = None,
+) -> dict[str, int | bool]:
     if not user:
         return {"base": 0, "spent": 0, "coins_reduction": 0, "store_blocked": False, "available": 0}
 
-    penalties = get_user_penalties(user)
-    try:
-        base = _calc_money_for_user(user)
-    except Exception:
-        base = 0
+    penalties = penalties if penalties is not None else get_user_penalties(user)
+    if badge_coins is None:
+        try:
+            base = _calc_money_for_user(user)
+        except Exception:
+            base = 0
+    else:
+        try:
+            base = int(coins_from_league(user)) + int(badge_coins) + int(league_finished_bonus(user))
+        except Exception:
+            base = 0
     try:
         spent = total_spent(user)
     except Exception:
@@ -168,6 +184,7 @@ def clear_money_caches() -> None:
         league_finished_claimed,
         _resolve_user_save_path,
         _badge_coins_from_save,
+        cached_badge_count,
         money_breakdown,
         _calc_money_for_user,
         _money_available,

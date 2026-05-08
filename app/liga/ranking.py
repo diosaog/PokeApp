@@ -5,11 +5,11 @@ from typing import Dict
 import streamlit as st
 
 from app.entrenadores.constants import DEAD_BOX_INDEX
+from app.entrenadores.cache import cached_dead_count
 from app.juicios.penalties import get_user_penalties
 from app.tienda.common import _eq_item
 from storage import add_purchase, get_current_save_for_user, list_inventory, load_save_bytes, settings_get
 from utils import USERS, ensure_user_dir, list_user_saves
-from conex_pkhex import extract_box, has_pc_data, open_sav_cached
 
 MAX_JORNADAS = 5
 
@@ -71,27 +71,29 @@ def _latest_save_path(trainer: str) -> str | None:
     return None
 
 
-@_cache_data(ttl=20)
+@_cache_data(ttl=180)
 def _muertos_from_save(active_path: str, mtime: float) -> int:
     try:
         if not active_path:
             return 0
-        sav_json = open_sav_cached(active_path)
-        if not has_pc_data(sav_json):
-            return 0
-        muertos_list = extract_box(sav_json, DEAD_BOX_INDEX)
-        return len(muertos_list or [])
+        return int(cached_dead_count(active_path, float(mtime), DEAD_BOX_INDEX))
     except Exception:
         return 0
 
 
-def _count_muertos_for_trainer(trainer: str) -> int:
-    try:
-        active_path = _latest_save_path(trainer)
-        mtime = Path(active_path).stat().st_mtime if active_path else 0.0
-        muertos = _muertos_from_save(active_path or "", float(mtime))
-    except Exception:
-        muertos = 0
+def _count_muertos_for_trainer(trainer: str, *, raw_dead_count: int | None = None) -> int:
+    if raw_dead_count is None:
+        try:
+            active_path = _latest_save_path(trainer)
+            mtime = Path(active_path).stat().st_mtime if active_path else 0.0
+            muertos = _muertos_from_save(active_path or "", float(mtime))
+        except Exception:
+            muertos = 0
+    else:
+        try:
+            muertos = max(int(raw_dead_count), 0)
+        except Exception:
+            muertos = 0
 
     try:
         extra = settings_get(f"revived_after_wipe:{trainer}")
@@ -278,10 +280,15 @@ def _one_decimal(x: float) -> float:
     return float(Decimal(str(x)).quantize(Decimal("0.0"), rounding=ROUND_HALF_UP))
 
 
-def current_points_total(user: str) -> float:
+def current_points_total(
+    user: str,
+    *,
+    raw_dead_count: int | None = None,
+    penalties: dict | None = None,
+) -> float:
     base = points_from_league(user)
-    muertos = _count_muertos_for_trainer(user)
-    penalties = get_user_penalties(user)
+    muertos = _count_muertos_for_trainer(user, raw_dead_count=raw_dead_count)
+    penalties = penalties if penalties is not None else get_user_penalties(user)
     points_reduction = float(penalties.get("points_reduction") or 0.0)
     total = base - 0.2 * muertos - points_reduction
     return _one_decimal(total)
@@ -296,7 +303,7 @@ def final_podium() -> list[tuple[str, float]]:
 
 
 def clear_ranking_caches() -> None:
-    for func in (_latest_save_path, _muertos_from_save, _used_revives_count):
+    for func in (_latest_save_path, _muertos_from_save, _used_revives_count, cached_dead_count):
         try:
             func.clear()
         except Exception:
