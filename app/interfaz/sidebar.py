@@ -185,6 +185,44 @@ def _render_nav_css() -> None:
           text-transform: uppercase;
           letter-spacing: 0.06em;
         }
+        section[data-testid="stSidebar"] div[role="radiogroup"] {
+          display: grid;
+          gap: 5px;
+        }
+        section[data-testid="stSidebar"] div[role="radiogroup"] label {
+          width: 100%;
+          min-height: 46px;
+          padding: 0.58rem 0.72rem;
+          border: 1px solid rgba(216,223,232,0.34);
+          background:
+            linear-gradient(90deg, rgba(255,255,255,0.07), transparent 58%),
+            linear-gradient(180deg, #252a33 0%, #151a22 100%);
+          box-shadow: inset 0 1px 0 rgba(255,255,255,0.12), 0 4px 10px rgba(0,0,0,0.22);
+          clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px);
+        }
+        section[data-testid="stSidebar"] div[role="radiogroup"] label:has(input:checked) {
+          border-color: var(--bw2-edge-strong);
+          background:
+            linear-gradient(90deg, rgba(255,255,255,0.16), transparent 58%),
+            linear-gradient(180deg, var(--accent) 0%, var(--accent-dark) 100%);
+        }
+        section[data-testid="stSidebar"] div[role="radiogroup"] label p {
+          color: #fff;
+          font-family: var(--font-pixel);
+          font-size: 10px;
+          line-height: 1.18;
+          text-transform: uppercase;
+        }
+        section[data-testid="stSidebar"] div[role="radiogroup"] label:hover {
+          filter: brightness(1.06);
+          transform: translateY(-1px);
+        }
+        section[data-testid="stSidebar"] div[role="radiogroup"] label > div:first-child {
+          margin-right: 8px;
+        }
+        section[data-testid="stSidebar"] div[role="radiogroup"] label:has(input:checked) > div:first-child {
+          color: #ffffff;
+        }
         section[data-testid="stSidebar"] div.stButton > button {
           width: 100%;
           justify-content: flex-start;
@@ -220,25 +258,26 @@ def _render_section_nav(sections: list[str]) -> str:
     if selected not in nav_sections:
         selected = nav_sections[0]
     st.session_state["selected_section"] = selected
+    if _normalize_section(st.session_state.get("selected_section_radio")) not in nav_sections:
+        st.session_state["selected_section_radio"] = selected
 
     _render_nav_css()
     st.sidebar.markdown("<div class='sidebar-nav-title'>Menu principal</div>", unsafe_allow_html=True)
-    for section in nav_sections:
+
+    def _label(section: str) -> str:
         icon, help_text = _SECTION_META.get(section, ("◈", section))
-        active = section == selected
-        marker = "◆" if active else "◇"
-        label = f"{marker} {icon} {section}"
-        if st.sidebar.button(
-            label,
-            key=f"sidebar_nav_{section}",
-            help=help_text,
-            type="primary" if active else "secondary",
-            use_container_width=True,
-        ):
-            if section != selected:
-                st.session_state["selected_section"] = section
-                st.rerun()
-    return str(st.session_state.get("selected_section") or selected)
+        return f"{icon} {section} · {help_text}"
+
+    choice = st.sidebar.radio(
+        "Menu principal",
+        nav_sections,
+        index=nav_sections.index(selected),
+        format_func=_label,
+        key="selected_section_radio",
+        label_visibility="collapsed",
+    )
+    st.session_state["selected_section"] = _normalize_section(choice)
+    return str(st.session_state["selected_section"])
 
 
 def render_sidebar(sections: list[str]) -> str:
