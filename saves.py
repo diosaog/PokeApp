@@ -11,12 +11,50 @@ from app.saves_support import (
     write_uploaded_save_copy,
 )
 from storage import (
+    wipe_all_app_data,
     save_upload,
     load_save_bytes,
     list_saves_by_user,
     set_current_save_for_user,
     get_current_save_for_user,
 )
+
+
+def _clear_runtime_after_wipe(current_user: str | None) -> None:
+    auth_ok = bool(st.session_state.get("auth_ok"))
+    for key in list(st.session_state.keys()):
+        st.session_state.pop(key, None)
+    st.session_state["auth_ok"] = auth_ok
+    st.session_state["user"] = current_user
+    st.session_state["_wipe_done"] = True
+
+
+def _render_admin_wipe(current_user: str | None) -> None:
+    if current_user != "Anto":
+        return
+
+    st.markdown("---")
+    st.markdown("<div class='bill-chip'>Admin Reset / Wipe</div>", unsafe_allow_html=True)
+    st.warning(
+        "Esto borra todos los datos de temporada: saves, compras, inventarios, flags, liga, copas, "
+        "juicios, ajustes y copias locales. No borra codigo ni assets."
+    )
+    confirm = st.text_input("Escribe WIPE para confirmar", key="admin_wipe_confirm")
+    if st.button(
+        "Reset / Wipe",
+        key="admin_wipe_button",
+        type="primary",
+        disabled=confirm != "WIPE",
+        use_container_width=True,
+    ):
+        report = wipe_all_app_data()
+        if report.get("ok"):
+            _clear_runtime_after_wipe(current_user)
+            st.rerun()
+        else:
+            st.error("Wipe incompleto. Revisa estos errores:")
+            for err in report.get("errors") or []:
+                st.caption(f"- {err}")
 
 
 def page_saves() -> None:
@@ -31,6 +69,8 @@ def page_saves() -> None:
         f"<div class='bill-chip'>Entrenador activo: <b>{current_user or '-'}</b></div>",
         unsafe_allow_html=True,
     )
+    if st.session_state.pop("_wipe_done", False):
+        st.success("Reset / Wipe completado. La temporada queda limpia para empezar otro juego.")
 
     bootstrap_latest_save(current_user)
 
@@ -88,3 +128,5 @@ def page_saves() -> None:
                         )
                     else:
                         st.caption("Solo el autor puede descargar este save.")
+
+    _render_admin_wipe(current_user)

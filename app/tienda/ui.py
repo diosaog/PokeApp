@@ -4,7 +4,6 @@ import streamlit as st
 
 from app.interfaz.theme import apply_platinum_ui
 from app.tienda.sections import (
-    render_discord_panel,
     render_flags_reset,
     render_money_panel,
     render_pending_purchase,
@@ -24,7 +23,6 @@ def page_tienda() -> None:
 
     st.markdown("---")
     render_purchase_history()
-    render_discord_panel()
 
     ctx = st.session_state.get("redeem_ctx")
     if ctx:

@@ -1,5 +1,6 @@
 from __future__ import annotations
 import os
+import shutil
 import sqlite3
 import hashlib
 import time
@@ -155,6 +156,148 @@ def init_storage():
         except Exception:
             pass
         cx.commit()
+
+
+def _clear_storage_caches() -> None:
+    _SETTINGS_CACHE.clear()
+    _TOTAL_SPENT_CACHE.clear()
+    _LIST_PURCHASES_CACHE.clear()
+    _LIST_INVENTORY_CACHE.clear()
+    for func in (_fetch_save_by_id, list_saves, list_saves_by_user):
+        try:
+            func.clear()
+        except Exception:
+            pass
+
+
+def _is_within(child: Path, parent: Path) -> bool:
+    try:
+        child.resolve().relative_to(parent.resolve())
+        return True
+    except Exception:
+        return False
+
+
+def _delete_dir_contents(path: Path, allowed_root: Path) -> int:
+    root = path.resolve()
+    allowed = allowed_root.resolve()
+    if root != allowed and not _is_within(root, allowed):
+        raise RuntimeError(f"Ruta fuera del directorio permitido: {root}")
+    if not root.exists():
+        root.mkdir(parents=True, exist_ok=True)
+        return 0
+    removed = 0
+    for child in root.iterdir():
+        try:
+            if child.is_dir() and not child.is_symlink():
+                shutil.rmtree(child)
+            else:
+                child.unlink(missing_ok=True)
+            removed += 1
+        except Exception:
+            continue
+    return removed
+
+
+def _wipe_local_sqlite() -> None:
+    if not _db_path().exists():
+        return
+    with _conn() as cx:
+        for table in ("redemptions", "pokemon_flags", "purchases", "saves", "settings"):
+            try:
+                cx.execute(f"DELETE FROM {table}")
+            except Exception:
+                pass
+        try:
+            cx.execute(
+                "DELETE FROM sqlite_sequence WHERE name IN "
+                "('redemptions','pokemon_flags','purchases','saves')"
+            )
+        except Exception:
+            pass
+        cx.commit()
+
+
+def wipe_all_app_data() -> dict[str, Any]:
+    """Reset completo de temporada: DB remota/local, saves y caches.
+
+    No modifica archivos de codigo ni assets; solo datos generados por la app.
+    """
+    errors: list[str] = []
+    remote_done = False
+
+    if _supabase_enabled():
+        try:
+            client = _sb()
+            for table, column, sentinel in (
+                ("redemptions", "id", -1),
+                ("pokemon_flags", "fingerprint", "__pokeapp_keep__"),
+                ("purchases", "id", -1),
+                ("saves", "id", -1),
+                ("settings", "key", "__pokeapp_keep__"),
+            ):
+                try:
+                    client.table(table).delete().neq(column, sentinel).execute()
+                except Exception as e:
+                    errors.append(f"Supabase {table}: {e}")
+
+            try:
+                bucket_ref = client.storage.from_(_bucket_name())
+                objects = []
+                try:
+                    objects = bucket_ref.list("", {"limit": 1000})
+                except TypeError:
+                    objects = bucket_ref.list()
+                names = [
+                    str(obj.get("name"))
+                    for obj in (objects or [])
+                    if isinstance(obj, dict) and obj.get("name")
+                ]
+                for idx in range(0, len(names), 100):
+                    chunk = names[idx: idx + 100]
+                    if chunk:
+                        bucket_ref.remove(chunk)
+            except Exception as e:
+                errors.append(f"Supabase storage: {e}")
+
+            remote_done = True
+        except Exception as e:
+            errors.append(f"Supabase wipe: {e}")
+
+    try:
+        if not _supabase_enabled():
+            init_storage()
+        _wipe_local_sqlite()
+    except Exception as e:
+        errors.append(f"SQLite local: {e}")
+
+    removed_data_saves = 0
+    removed_user_saves = 0
+    try:
+        removed_data_saves = _delete_dir_contents(SAVES_DIR, DATA_DIR)
+    except Exception as e:
+        errors.append(f"Saves internos: {e}")
+    try:
+        from utils import BASE_SAVES_DIR
+
+        removed_user_saves = _delete_dir_contents(BASE_SAVES_DIR, BASE_SAVES_DIR)
+    except Exception as e:
+        errors.append(f"Saves por usuario: {e}")
+
+    _clear_storage_caches()
+    try:
+        if st is not None:
+            st.cache_data.clear()
+    except Exception:
+        pass
+
+    return {
+        "ok": not errors,
+        "errors": errors,
+        "remote": remote_done,
+        "removed_data_saves": removed_data_saves,
+        "removed_user_saves": removed_user_saves,
+    }
 
 
 def _sha256(b: bytes) -> str:
