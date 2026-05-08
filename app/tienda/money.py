@@ -4,6 +4,7 @@ from pathlib import Path
 
 from app.liga.coins import coins_from_league
 from app.entrenadores.cache import cached_badge_count
+from app.entrenadores.snapshot import clear_trainer_snapshot_runtime_caches, get_trainer_snapshot
 from app.interfaz.badges import coins_from_badges
 from app.juicios.penalties import get_user_penalties
 from storage import (
@@ -106,6 +107,21 @@ def _badge_coins_from_save(save_path: str, mtime: float) -> int:
             return 0
 
 
+def _snapshot_matches_save(snapshot: dict, save_path: str | None) -> bool:
+    if not snapshot or not save_path:
+        return False
+    try:
+        path = Path(save_path)
+        stat = path.stat()
+        if str(snapshot.get("save_name") or "") != path.name:
+            return False
+        if int(snapshot.get("save_size") or -1) != int(stat.st_size):
+            return False
+        return abs(float(snapshot.get("save_mtime") or 0.0) - float(stat.st_mtime)) < 0.001
+    except Exception:
+        return False
+
+
 @_cache_data(ttl=10)
 def money_breakdown(user: str | None) -> dict[str, int | bool]:
     return money_breakdown_from_parts(user)
@@ -152,9 +168,20 @@ def _calc_money_for_user(user: str) -> int:
     liga = coins_from_league(user)
     badge_coins = 0
     badge_found = False
+    spath = None
     try:
         spath = _resolve_user_save_path(user)
-        if spath:
+        snapshot = get_trainer_snapshot(user)
+        if _snapshot_matches_save(snapshot, spath):
+            badge_coins = 4 * max(int(snapshot.get("badge_count") or 0), 0)
+            badge_found = True
+    except Exception:
+        badge_coins = 0
+        badge_found = False
+    try:
+        if not badge_found and not spath:
+            spath = _resolve_user_save_path(user)
+        if spath and not badge_found:
             mtime = Path(spath).stat().st_mtime
             badge_coins = _badge_coins_from_save(str(spath), float(mtime))
             badge_found = True
@@ -193,3 +220,4 @@ def clear_money_caches() -> None:
             func.clear()
         except Exception:
             continue
+    clear_trainer_snapshot_runtime_caches()

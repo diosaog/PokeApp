@@ -8,6 +8,7 @@ from app.saves_support import (
     bootstrap_latest_save,
     clear_save_related_caches,
     current_save_meta_html,
+    refresh_save_snapshot,
     write_uploaded_save_copy,
 )
 from storage import (
@@ -88,6 +89,7 @@ def page_saves() -> None:
         set_current_save_for_user(current_user, rec["id"])
         write_uploaded_save_copy(current_user, file.name, data)
         clear_save_related_caches()
+        refresh_save_snapshot(current_user)
         st.success(f"Guardado por {current_user} y establecido como actual (id={rec['id']}).")
 
     cur = get_current_save_for_user(current_user)
@@ -117,6 +119,7 @@ def page_saves() -> None:
                     if st.button("Establecer como actual", key=f"set_{id_}"):
                         set_current_save_for_user(current_user, id_)
                         clear_save_related_caches()
+                        refresh_save_snapshot(current_user)
                         st.success(f"Save actual -> {id_}")
                 with c2:
                     if up and current_user and current_user == up:

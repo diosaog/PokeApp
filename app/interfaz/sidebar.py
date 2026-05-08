@@ -33,38 +33,11 @@ def _get_team_sprite_urls(user: str, mtime: float | None = None) -> list[str]:
     try:
         if not user or user == "-":
             return urls
-        from app.entrenadores.bridge import try_auto_load_bridge
-        from conex_pkhex import PKHeXRuntime, extract_team, get_bridge_path, open_sav_cached
+        from app.entrenadores.snapshot import get_trainer_snapshot
         from showdown_sprites import showdown_sprite_url
-        from utils import DEFAULT_DLL_HINT, list_user_saves
 
-        saves = list_user_saves(user)
-        sav_path = None
-        try:
-            if saves:
-                import os
-                sav_path = str(saves[0])
-                mtime = os.path.getmtime(sav_path)
-        except Exception:
-            sav_path = str(saves[0]) if saves else None
-
-        if not get_bridge_path():
-            try_auto_load_bridge()
-        if not get_bridge_path():
-            try:
-                hint = st.session_state.get("pkhex_dll_path") or DEFAULT_DLL_HINT
-                if hint:
-                    PKHeXRuntime.load(hint)
-            except Exception:
-                return urls
-        if not sav_path:
-            saves = list_user_saves(user)
-            if not saves:
-                return urls
-            sav_path = str(saves[0])
-
-        sav_json = open_sav_cached(sav_path)
-        mons = extract_team(sav_json, save_path=sav_path) or []
+        snapshot = get_trainer_snapshot(user)
+        mons = list(snapshot.get("team") or [])
         prefer_anim = False
         for m in mons[:6]:
             try:
@@ -90,23 +63,10 @@ def _get_badges_count(user: str, mtime: float | None = None) -> int:
     try:
         if not user or user == "-":
             return 0
-        from app.entrenadores.bridge import try_auto_load_bridge
-        from app.interfaz.badges import coins_from_badges
-        from conex_pkhex import get_bridge_path, open_sav_cached
-        from utils import list_user_saves
+        from app.entrenadores.snapshot import get_trainer_snapshot
 
-        if not get_bridge_path():
-            try_auto_load_bridge()
-        saves = list_user_saves(user)
-        if not saves:
-            return 0
-        sav_path = str(saves[0])
-        sav_json = open_sav_cached(sav_path)
-        try:
-            from app.entrenadores.badges import count_badges
-            return int(count_badges(sav_json))
-        except Exception:
-            return int(coins_from_badges(sav_json) // 4)
+        snapshot = get_trainer_snapshot(user)
+        return int(snapshot.get("badge_count") or 0)
     except Exception:
         return 0
 

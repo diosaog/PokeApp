@@ -102,11 +102,28 @@ def clear_save_related_caches() -> None:
     clear_money_caches()
     clear_ranking_caches()
     try:
+        from app.entrenadores.snapshot import clear_trainer_snapshot_runtime_caches
+
+        clear_trainer_snapshot_runtime_caches()
+    except Exception:
+        pass
+    try:
         import utils as _utils
 
         cache_fn = getattr(_utils, "_list_user_saves_cached", None)
         if cache_fn is not None:
             cache_fn.clear()
+    except Exception:
+        pass
+
+
+def refresh_save_snapshot(current_user: str | None) -> None:
+    if not current_user:
+        return
+    try:
+        from app.entrenadores.snapshot import refresh_trainer_snapshot
+
+        refresh_trainer_snapshot(current_user)
     except Exception:
         pass
 

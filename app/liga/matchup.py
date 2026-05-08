@@ -7,16 +7,14 @@ from pathlib import Path
 
 import streamlit as st
 
-from app.entrenadores.cache import cached_badge_count, cached_dead_count, cached_team
 from app.entrenadores.bridge import try_auto_load_bridge
-from app.entrenadores.constants import DEAD_BOX_INDEX
 from app.entrenadores.profile import find_trainer_image
-from app.entrenadores.state import ensure_local_save_for
+from app.entrenadores.snapshot import get_trainer_snapshot
 from app.juicios.penalties import get_user_penalties
 from app.tienda.money import money_breakdown_from_parts
 from dexdata import item_name_es
 from showdown_sprites import showdown_sprite_url
-from utils import USERS, list_user_saves
+from utils import USERS
 
 
 def _cache_data(ttl: int = 20):
@@ -37,20 +35,6 @@ def _img_uri(path: str, mtime: float | None = None) -> str:
         return f"data:{mime};base64,{encoded}"
     except Exception:
         return ""
-
-
-@_cache_data(ttl=120)
-def _load_matchup_snapshot(save_path: str, mtime: float) -> dict:
-    team = cached_team(save_path, mtime) or []
-    badges = cached_badge_count(save_path, mtime)
-    dead_count = cached_dead_count(save_path, mtime, DEAD_BOX_INDEX)
-
-    return {
-        "team": team,
-        "badges": badges,
-        "dead_count": dead_count,
-        "save_name": Path(save_path).name,
-    }
 
 
 def _division_for_player(player: str) -> str:
@@ -133,21 +117,11 @@ def _held_item_name(mon: dict) -> str:
 def _summary_snapshot(player: str) -> dict:
     from app.liga.ranking import current_points_total
 
-    ensure_local_save_for(player)
-    saves = list_user_saves(player)
-    save_path = str(saves[0]) if saves else None
-    save_name = Path(save_path).name if save_path else "Sin save"
-    snapshot = {"team": [], "badges": 0, "dead_count": 0, "save_name": save_name}
-    if save_path:
-        try:
-            mtime = Path(save_path).stat().st_mtime
-            snapshot = _load_matchup_snapshot(save_path, float(mtime))
-        except Exception:
-            snapshot = {"team": [], "badges": 0, "dead_count": 0, "save_name": save_name}
+    snapshot = get_trainer_snapshot(player)
 
     penalties = get_user_penalties(player)
     raw_dead_count = int(snapshot.get("dead_count") or 0)
-    badges = int(snapshot.get("badges") or 0)
+    badges = int(snapshot.get("badge_count") or snapshot.get("badges") or 0)
     breakdown = money_breakdown_from_parts(
         player,
         badge_coins=4 * badges,

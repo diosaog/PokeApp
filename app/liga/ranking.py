@@ -1,11 +1,11 @@
 from __future__ import annotations
 
-from pathlib import Path
 from typing import Dict
 import streamlit as st
 
 from app.entrenadores.constants import DEAD_BOX_INDEX
 from app.entrenadores.cache import cached_dead_count
+from app.entrenadores.snapshot import clear_trainer_snapshot_runtime_caches, get_trainer_snapshot
 from app.juicios.penalties import get_user_penalties
 from app.tienda.common import _eq_item
 from storage import add_purchase, get_current_save_for_user, list_inventory, load_save_bytes, settings_get
@@ -84,9 +84,8 @@ def _muertos_from_save(active_path: str, mtime: float) -> int:
 def _count_muertos_for_trainer(trainer: str, *, raw_dead_count: int | None = None) -> int:
     if raw_dead_count is None:
         try:
-            active_path = _latest_save_path(trainer)
-            mtime = Path(active_path).stat().st_mtime if active_path else 0.0
-            muertos = _muertos_from_save(active_path or "", float(mtime))
+            snapshot = get_trainer_snapshot(trainer)
+            muertos = max(int(snapshot.get("dead_count") or 0), 0)
         except Exception:
             muertos = 0
     else:
@@ -295,7 +294,15 @@ def current_points_total(
 
 
 def general_table_sorted() -> list[tuple[str, float]]:
-    return sorted([(u, current_points_total(u)) for u in USERS.keys()], key=lambda x: (-x[1], x[0]))
+    rows: list[tuple[str, float]] = []
+    for user in USERS.keys():
+        try:
+            snapshot = get_trainer_snapshot(user)
+            raw_dead_count = int(snapshot.get("dead_count") or 0)
+        except Exception:
+            raw_dead_count = None
+        rows.append((user, current_points_total(user, raw_dead_count=raw_dead_count)))
+    return sorted(rows, key=lambda x: (-x[1], x[0]))
 
 
 def final_podium() -> list[tuple[str, float]]:
@@ -308,3 +315,4 @@ def clear_ranking_caches() -> None:
             func.clear()
         except Exception:
             continue
+    clear_trainer_snapshot_runtime_caches()
