@@ -18,7 +18,9 @@ from app.startup import preload_datasets
 
 
 def router(section: str) -> None:
-    if section == "Liga y Tabla":
+    if section in ("Inicio", "Normativa"):
+        from app.interfaz.pages import page_inicio as page
+    elif section == "Liga y Tabla":
         from app.interfaz.pages import page_tabla as page
     elif section == "Previa Combate":
         from app.interfaz.pages import page_previa_combate as page

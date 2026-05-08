@@ -26,7 +26,7 @@ USERS: Dict[str, str] = {
     "Mario": "m10",
 }
 
-SECTIONS = ["Inicio", "Liga y Tabla", "Previa Combate", "Entrenadores", "Copa", "Juicios", "Tienda", "Saves"]
+SECTIONS = ["Normativa", "Liga y Tabla", "Previa Combate", "Entrenadores", "Copa", "Juicios", "Tienda", "Saves"]
 
 
 def init_session_state() -> None:

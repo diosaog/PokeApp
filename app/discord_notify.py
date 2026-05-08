@@ -355,7 +355,7 @@ def sync_normativa_notification(normativa_text: str, section_payloads: dict | No
                     title="Normativa actualizada",
                     description=(
                         "La normativa de ChampionsLocke ha cambiado. "
-                        "Revisad la seccion de inicio de PokeApp para ver los cambios."
+                        "Revisad la seccion de normativa de PokeApp para ver los cambios."
                     ),
                     color=0x3498DB,
                     fields=fields,

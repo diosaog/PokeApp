@@ -35,7 +35,7 @@ def apply_css() -> None:
       --bw2-shadow: rgba(0, 0, 0, 0.42);
       --divider: rgba(216, 223, 232, 0.18);
       --ball-color: #f57d31;
-      --section-label: "INICIO";
+      --section-label: "NORMATIVA";
     }
 
     html, body, [class*="css"] {
@@ -644,6 +644,7 @@ def render_poke_separator() -> None:
 def apply_section_theme(section: str) -> None:
     palette = {
         "Inicio": ("#6ea8ff", "#29548f"),
+        "Normativa": ("#6ea8ff", "#29548f"),
         "Entrenadores": ("#62c8ff", "#1d679c"),
         "Liga y Tabla": ("#f58b3c", "#9f431f"),
         "Previa Combate": ("#ff6f61", "#8e2d2f"),

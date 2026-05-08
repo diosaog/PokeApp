@@ -5,6 +5,17 @@ import mimetypes
 import os
 import streamlit as st
 
+_SECTION_META = {
+    "Normativa": ("📜", "Reglas y avisos"),
+    "Liga y Tabla": ("🏆", "Clasificacion"),
+    "Previa Combate": ("⚔️", "Duelo"),
+    "Entrenadores": ("🎒", "Equipos"),
+    "Copa": ("🥇", "Torneos"),
+    "Juicios": ("⚖️", "Sanciones"),
+    "Tienda": ("🛒", "Compras"),
+    "Saves": ("💾", "Archivos"),
+}
+
 
 def _cache_data(ttl: int = 30):
     try:
@@ -146,12 +157,97 @@ def _render_change_pin_form() -> None:
                 st.error(f"No se pudo guardar el PIN: {e}")
 
 
+def _normalize_section(section: str | None) -> str:
+    return "Normativa" if section == "Inicio" else str(section or "Normativa")
+
+
+def _normalized_sections(sections: list[str]) -> list[str]:
+    out: list[str] = []
+    for section in sections:
+        normalized = _normalize_section(section)
+        if normalized not in out:
+            out.append(normalized)
+    return out or ["Normativa"]
+
+
+def _render_nav_css() -> None:
+    st.sidebar.markdown(
+        """
+        <style>
+        section[data-testid="stSidebar"] .sidebar-nav-title {
+          margin: 0 0 8px;
+          padding: 7px 9px;
+          border: 1px solid rgba(216,223,232,0.14);
+          background: linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02));
+          color: var(--bw2-text-soft);
+          font-family: var(--font-pixel);
+          font-size: 9px;
+          text-transform: uppercase;
+          letter-spacing: 0.06em;
+        }
+        section[data-testid="stSidebar"] div.stButton > button {
+          width: 100%;
+          justify-content: flex-start;
+          text-align: left;
+          min-height: 46px;
+          margin-bottom: 5px;
+          padding-left: 0.85rem;
+          border-color: rgba(216,223,232,0.34);
+          background:
+            linear-gradient(90deg, rgba(255,255,255,0.07), transparent 58%),
+            linear-gradient(180deg, #252a33 0%, #151a22 100%);
+          box-shadow: inset 0 1px 0 rgba(255,255,255,0.12), 0 4px 10px rgba(0,0,0,0.22);
+        }
+        section[data-testid="stSidebar"] div.stButton > button[kind="primary"] {
+          border-color: var(--bw2-edge-strong);
+          background:
+            linear-gradient(90deg, rgba(255,255,255,0.16), transparent 58%),
+            linear-gradient(180deg, var(--accent) 0%, var(--accent-dark) 100%);
+        }
+        section[data-testid="stSidebar"] div.stButton > button p {
+          font-size: 10px;
+          line-height: 1.15;
+        }
+        </style>
+        """,
+        unsafe_allow_html=True,
+    )
+
+
+def _render_section_nav(sections: list[str]) -> str:
+    nav_sections = _normalized_sections(sections)
+    selected = _normalize_section(st.session_state.get("selected_section") or nav_sections[0])
+    if selected not in nav_sections:
+        selected = nav_sections[0]
+    st.session_state["selected_section"] = selected
+
+    _render_nav_css()
+    st.sidebar.markdown("<div class='sidebar-nav-title'>Menu principal</div>", unsafe_allow_html=True)
+    for section in nav_sections:
+        icon, help_text = _SECTION_META.get(section, ("◈", section))
+        active = section == selected
+        marker = "◆" if active else "◇"
+        label = f"{marker} {icon} {section}"
+        if st.sidebar.button(
+            label,
+            key=f"sidebar_nav_{section}",
+            help=help_text,
+            type="primary" if active else "secondary",
+            use_container_width=True,
+        ):
+            if section != selected:
+                st.session_state["selected_section"] = section
+                st.rerun()
+    return str(st.session_state.get("selected_section") or selected)
+
+
 def render_sidebar(sections: list[str]) -> str:
     _render_sidebar_profile()
     _render_change_pin_form()
     st.sidebar.markdown("---")
-    section = st.sidebar.selectbox("Seccion", sections, index=0)
+    section = _render_section_nav(sections)
     from app.interfaz.theme import apply_section_theme
+
     apply_section_theme(section)
     st.sidebar.markdown("---")
     return section

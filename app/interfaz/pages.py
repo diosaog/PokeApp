@@ -6,8 +6,7 @@ from app.interfaz.normativa import NORMATIVA_MD, get_normativa_section_payloads,
 
 
 def page_inicio() -> None:
-    user = st.session_state.get("user") or "-"
-    st.header(f"Bienvenido, {user}")
+    st.header("Normativa")
 
     try:
         from app.discord_notify import sync_normativa_notification
