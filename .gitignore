@@ -10,6 +10,7 @@ data/
 saves/
 
 # Build C# bridge
+.dotnet-sdk/
 Bridge/PKHeXBridge/bin/
 Bridge/PKHeXBridge/obj/
 Bridge/PKHeXBridge/.vs/
