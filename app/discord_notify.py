@@ -4,6 +4,7 @@ import hashlib
 import json
 import os
 import threading
+import time
 import unicodedata
 from datetime import datetime, timezone
 from pathlib import Path
@@ -22,7 +23,8 @@ except Exception:
 
 _NORMATIVA_HASH_KEY = "discord_notify:normativa_hash"
 _NORMATIVA_SECTION_HASHES_KEY = "discord_notify:normativa_section_hashes"
-_WEBHOOK_TIMEOUT_SECONDS = 2.0
+_WEBHOOK_TIMEOUT_SECONDS = float(os.environ.get("DISCORD_WEBHOOK_TIMEOUT_SECONDS", "8"))
+_WEBHOOK_RETRIES = max(1, int(os.environ.get("DISCORD_WEBHOOK_RETRIES", "3")))
 
 
 def _normalize_normativa_text(normativa_text: str) -> str:
@@ -149,12 +151,15 @@ def _webhook_validation_error() -> str:
         return "Falta DISCORD_WEBHOOK_URL en los secrets."
     if url.strip().lower() in {"tu webhook", "webhook", "pega_aqui_la_url"}:
         return "DISCORD_WEBHOOK_URL sigue con texto de ejemplo."
-    if not url.startswith("https://discord.com/api/webhooks/"):
+    if not (
+        url.startswith("https://discord.com/api/webhooks/")
+        or url.startswith("https://discordapp.com/api/webhooks/")
+    ):
         return "DISCORD_WEBHOOK_URL no parece una URL de webhook de Discord."
     return ""
 
 
-def _post_webhook_detail(payload: dict) -> tuple[bool, str]:
+def _post_webhook_once(payload: dict) -> tuple[bool, str]:
     url = _webhook_url()
     validation_error = _webhook_validation_error()
     if validation_error:
@@ -175,11 +180,31 @@ def _post_webhook_detail(payload: dict) -> tuple[bool, str]:
                 return True, "Mensaje enviado."
             return False, f"Discord respondio con HTTP {status}."
     except error.HTTPError as exc:
-        return False, f"Discord respondio con HTTP {int(exc.code)}."
+        detail = ""
+        try:
+            detail = exc.read(300).decode("utf-8", errors="replace").strip()
+        except Exception:
+            detail = ""
+        suffix = f": {detail}" if detail else "."
+        return False, f"Discord respondio con HTTP {int(exc.code)}{suffix}"
     except error.URLError as exc:
         return False, f"No se pudo conectar con Discord: {exc.reason}"
     except Exception as exc:
         return False, f"Error enviando a Discord: {exc}"
+
+
+def _post_webhook_detail(payload: dict) -> tuple[bool, str]:
+    last_message = ""
+    for attempt in range(1, _WEBHOOK_RETRIES + 1):
+        ok, message = _post_webhook_once(payload)
+        if ok:
+            return True, message
+        last_message = message
+        if "HTTP 4" in message and "HTTP 429" not in message:
+            break
+        if attempt < _WEBHOOK_RETRIES:
+            time.sleep(0.5 * attempt)
+    return False, last_message or "No se pudo enviar a Discord."
 
 
 def _post_webhook(payload: dict) -> bool:
@@ -242,13 +267,13 @@ def notify_purchase_async(*, user: str, item: str, price: int, purchase_id: int 
     thread.start()
 
 
-def notify_league_round_finished(
+def league_round_finished_payload(
     *,
     round_no: int,
     rows: list[dict],
     round_results: list[dict] | None = None,
     summary_lines: list[str] | None = None,
-) -> bool:
+) -> dict:
     lines = []
     for row in rows[:20]:
         pos = row.get("pos", "-")
@@ -287,18 +312,49 @@ def notify_league_round_finished(
         }
     )
 
-    return _post_webhook(
-        {
-            "embeds": [
-                _embed(
-                    title=f"Jornada {int(round_no)} finalizada",
-                    description="Resultados y tabla general actualizados.",
-                    color=0xE67E22,
-                    fields=fields,
-                )
-            ]
-        }
+    return {
+        "embeds": [
+            _embed(
+                title=f"Jornada {int(round_no)} finalizada",
+                description="Resultados y tabla general actualizados.",
+                color=0xE67E22,
+                fields=fields,
+            )
+        ]
+    }
+
+
+def notify_league_round_finished_detail(
+    *,
+    round_no: int,
+    rows: list[dict],
+    round_results: list[dict] | None = None,
+    summary_lines: list[str] | None = None,
+) -> tuple[bool, str]:
+    return _post_webhook_detail(
+        league_round_finished_payload(
+            round_no=round_no,
+            rows=rows,
+            round_results=round_results,
+            summary_lines=summary_lines,
+        )
     )
+
+
+def notify_league_round_finished(
+    *,
+    round_no: int,
+    rows: list[dict],
+    round_results: list[dict] | None = None,
+    summary_lines: list[str] | None = None,
+) -> bool:
+    ok, _message = notify_league_round_finished_detail(
+        round_no=round_no,
+        rows=rows,
+        round_results=round_results,
+        summary_lines=summary_lines,
+    )
+    return ok
 
 
 def notify_league_round_finished_async(

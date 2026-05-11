@@ -1,8 +1,11 @@
 from __future__ import annotations
 
+import json
+from datetime import datetime, timezone
+
 import streamlit as st
 
-from app.discord_notify import notify_league_round_finished
+from app.discord_notify import notify_league_round_finished_detail
 from app.liga.ranking import (
     MAX_JORNADAS,
     all_filled,
@@ -24,8 +27,12 @@ from app.liga.table_summary import (
 )
 from app.juicios.penalties import clear_penalty_caches
 from app.tienda.money import clear_money_caches
-from storage import clear_purchases, settings_clear_cache
+from storage import clear_purchases, settings_clear_cache, settings_get_uncached, settings_set
 from utils import USERS
+
+
+_NOTIFY_SENT_KEY_PREFIX = "league_round_notify_sent"
+_NOTIFY_STATUS_KEY_PREFIX = "league_round_notify_status"
 
 
 def _clear_league_page_caches() -> None:
@@ -36,6 +43,95 @@ def _clear_league_page_caches() -> None:
     clear_penalty_caches()
     clear_money_caches()
     clear_ranking_caches()
+
+
+def _notify_sent_key(round_no: int) -> str:
+    return f"{_NOTIFY_SENT_KEY_PREFIX}:{int(round_no)}"
+
+
+def _notify_status_key(round_no: int) -> str:
+    return f"{_NOTIFY_STATUS_KEY_PREFIX}:{int(round_no)}"
+
+
+def _latest_closed_round() -> int | None:
+    try:
+        current = int(st.session_state.get("league_tramo") or 1)
+    except Exception:
+        current = 1
+    last_round = current - 1
+    if last_round <= 0:
+        return None
+    data = (st.session_state.get("league_matches") or {}).get(last_round)
+    if not data:
+        return None
+    try:
+        if all_filled(data.get("A", {})) and all_filled(data.get("B", {})):
+            return int(last_round)
+    except Exception:
+        return None
+    return None
+
+
+def _notification_already_sent(round_no: int) -> bool:
+    try:
+        raw = settings_get_uncached(_notify_sent_key(round_no))
+        return raw not in (None, "", "0", "false", "False")
+    except Exception:
+        return False
+
+
+def _store_notification_status(round_no: int, *, ok: bool, message: str) -> None:
+    payload = {
+        "round": int(round_no),
+        "ok": bool(ok),
+        "message": str(message or ""),
+        "updated_at": datetime.now(timezone.utc).isoformat(),
+    }
+    try:
+        settings_set(_notify_status_key(round_no), json.dumps(payload, ensure_ascii=False))
+        if ok:
+            settings_set(_notify_sent_key(round_no), payload["updated_at"])
+    except Exception:
+        pass
+
+
+def _send_league_round_notification(round_no: int, *, force: bool = False) -> tuple[bool, str]:
+    if not force and _notification_already_sent(round_no):
+        return True, "El resumen de esta jornada ya constaba como enviado."
+
+    round_data = (st.session_state.get("league_matches") or {}).get(int(round_no))
+    if not round_data:
+        return False, "No hay datos de enfrentamientos para esa jornada."
+
+    table = general_table_sorted()
+    podium = table[:3] if int(round_no) >= MAX_JORNADAS else None
+    ok, message = notify_league_round_finished_detail(
+        round_no=int(round_no),
+        rows=_league_table_notification_rows(table),
+        round_results=_league_round_result_groups(round_data),
+        summary_lines=_league_round_summary_lines(
+            table=table,
+            movements=st.session_state.get("league_movements", {}).get(int(round_no), {}),
+            podium=podium,
+        ),
+    )
+    _store_notification_status(int(round_no), ok=ok, message=message)
+    return ok, message
+
+
+def _auto_notify_latest_closed_round() -> None:
+    round_no = _latest_closed_round()
+    if round_no is None:
+        return
+    attempt_key = f"_league_round_notify_attempted_{round_no}"
+    if st.session_state.get(attempt_key) or _notification_already_sent(round_no):
+        return
+    st.session_state[attempt_key] = True
+    ok, message = _send_league_round_notification(round_no)
+    if ok:
+        st.success(f"Aaron Avisa ha enviado el resumen de la jornada {round_no}.")
+    else:
+        st.warning(f"Aaron Avisa no pudo enviar la jornada {round_no}: {message}")
 
 
 def _render_final_podium() -> None:
@@ -156,6 +252,20 @@ def page_tabla() -> None:
         st.session_state.pop("_league_state_hash", None)
         st.rerun()
 
+    _auto_notify_latest_closed_round()
+    resend_round = _latest_closed_round()
+    if resend_round is not None:
+        if st.button(
+            f"Reenviar resumen jornada {resend_round} a Discord",
+            use_container_width=True,
+            key=f"resend_league_round_{resend_round}",
+        ):
+            ok, message = _send_league_round_notification(resend_round, force=True)
+            if ok:
+                st.success(f"Resumen de jornada {resend_round} enviado a Discord.")
+            else:
+                st.error(f"No se pudo enviar el resumen de jornada {resend_round}: {message}")
+
     tramo = st.session_state.league_tramo
     liga_finalizada = tramo > MAX_JORNADAS
     prev_tramo = tramo - 1 if tramo > 1 else None
@@ -176,25 +286,17 @@ def page_tabla() -> None:
             with c1:
                 if st.button("Finalizar jornada", use_container_width=True):
                     try:
-                        round_results = _league_round_result_groups(get_matches_for(tramo))
+                        get_matches_for(tramo)
                         finalize(tramo)
                         clear_money_caches()
                         clear_ranking_caches()
                         tabla_actualizada = general_table_sorted()
                         podium = tabla_actualizada[:3] if tramo >= MAX_JORNADAS else None
-                        summary_lines = _league_round_summary_lines(
-                            table=tabla_actualizada,
-                            movements=st.session_state.get("league_movements", {}).get(tramo, {}),
-                            podium=podium,
-                        )
-                        notified = notify_league_round_finished(
-                            round_no=tramo,
-                            rows=_league_table_notification_rows(tabla_actualizada),
-                            round_results=round_results,
-                            summary_lines=summary_lines,
-                        )
-                        if not notified:
-                            st.warning("Jornada cerrada, pero Aaron Avisa no pudo enviar el mensaje a Discord.")
+                        notified, notify_message = _send_league_round_notification(tramo, force=True)
+                        if notified:
+                            st.success("Aaron Avisa ha enviado el resumen de la jornada a Discord.")
+                        else:
+                            st.error(f"Jornada cerrada, pero Aaron Avisa no pudo enviar a Discord: {notify_message}")
                         if tramo >= MAX_JORNADAS:
                             if podium:
                                 labels = ["Ganador", "Segundo puesto", "Tercer puesto"]
