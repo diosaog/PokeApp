@@ -45,6 +45,10 @@ def _clear_league_page_caches() -> None:
     clear_ranking_caches()
 
 
+def _current_user_can_resend_summary() -> bool:
+    return str(st.session_state.get("user") or "").strip().lower() == "anto"
+
+
 def _notify_sent_key(round_no: int) -> str:
     return f"{_NOTIFY_SENT_KEY_PREFIX}:{int(round_no)}"
 
@@ -254,17 +258,20 @@ def page_tabla() -> None:
 
     _auto_notify_latest_closed_round()
     resend_round = _latest_closed_round()
-    if resend_round is not None:
+    if resend_round is not None and _current_user_can_resend_summary():
         if st.button(
             f"Reenviar resumen jornada {resend_round} a Discord",
             use_container_width=True,
             key=f"resend_league_round_{resend_round}",
         ):
-            ok, message = _send_league_round_notification(resend_round, force=True)
-            if ok:
-                st.success(f"Resumen de jornada {resend_round} enviado a Discord.")
+            if not _current_user_can_resend_summary():
+                st.error("Solo Anto puede reenviar el resumen de jornada.")
             else:
-                st.error(f"No se pudo enviar el resumen de jornada {resend_round}: {message}")
+                ok, message = _send_league_round_notification(resend_round, force=True)
+                if ok:
+                    st.success(f"Resumen de jornada {resend_round} enviado a Discord.")
+                else:
+                    st.error(f"No se pudo enviar el resumen de jornada {resend_round}: {message}")
 
     tramo = st.session_state.league_tramo
     liga_finalizada = tramo > MAX_JORNADAS
