@@ -36,10 +36,6 @@ def _clear_league_page_caches() -> None:
     clear_penalty_caches()
     clear_money_caches()
     clear_ranking_caches()
-    try:
-        st.cache_data.clear()
-    except Exception:
-        pass
 
 
 def _render_final_podium() -> None:
