@@ -5,11 +5,12 @@ import hashlib
 import json
 import streamlit as st
 
-from storage import settings_get, settings_set
+from storage import settings_get_uncached, settings_set
 from utils import USERS
 
 
 _LEAGUE_STATE_HASH_KEY = "_league_state_hash"
+_LEAGUE_STATE_ERROR_KEY = "_league_state_error"
 
 
 def _sanitize_divisions(divs: dict) -> dict:
@@ -100,31 +101,37 @@ def restore_state() -> bool:
     )
     has_local_state = all(key in st.session_state for key in required)
     try:
-        raw = settings_get("league_state")
+        raw = settings_get_uncached("league_state", strict_remote=True)
         if not raw:
+            st.session_state.pop(_LEAGUE_STATE_ERROR_KEY, None)
             return False
         raw_hash = _state_hash(raw)
         if has_local_state and st.session_state.get(_LEAGUE_STATE_HASH_KEY) == raw_hash:
+            st.session_state.pop(_LEAGUE_STATE_ERROR_KEY, None)
             return False
 
         obj = json.loads(raw)
         _apply_serialized_state(obj)
         st.session_state[_LEAGUE_STATE_HASH_KEY] = raw_hash
+        st.session_state.pop(_LEAGUE_STATE_ERROR_KEY, None)
         return True
-    except Exception:
+    except Exception as e:
+        st.session_state[_LEAGUE_STATE_ERROR_KEY] = str(e)
         return False
 
 
 def persist_state() -> None:
     try:
         raw = json.dumps(_serialize_state(), ensure_ascii=False)
-        settings_set("league_state", raw)
+        settings_set("league_state", raw, strict_remote=True)
         st.session_state[_LEAGUE_STATE_HASH_KEY] = _state_hash(raw)
+        st.session_state.pop(_LEAGUE_STATE_ERROR_KEY, None)
     except Exception:
         try:
             st.error("No se pudo guardar el estado de la liga (settings).")
         except Exception:
             pass
+        raise
 
 
 def ensure_state() -> None:

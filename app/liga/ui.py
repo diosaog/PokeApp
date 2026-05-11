@@ -22,9 +22,24 @@ from app.liga.table_summary import (
     league_table_rows as _league_table_rows,
     players_from_match_map as _players_from_match_map,
 )
+from app.juicios.penalties import clear_penalty_caches
 from app.tienda.money import clear_money_caches
-from storage import clear_purchases
+from storage import clear_purchases, settings_clear_cache
 from utils import USERS
+
+
+def _clear_league_page_caches() -> None:
+    try:
+        settings_clear_cache("league_state")
+    except Exception:
+        pass
+    clear_penalty_caches()
+    clear_money_caches()
+    clear_ranking_caches()
+    try:
+        st.cache_data.clear()
+    except Exception:
+        pass
 
 
 def _render_final_podium() -> None:
@@ -127,16 +142,24 @@ def _render_previous_round_editor(*, prev_tramo: int, current_tramo: int) -> Non
 
 
 def page_tabla() -> None:
+    _clear_league_page_caches()
     state_reloaded = restore_state()
     ensure_state()
     if state_reloaded:
-        clear_money_caches()
-        clear_ranking_caches()
+        st.session_state.pop("league_tmp", None)
+        st.session_state.pop("league_tmp_prev", None)
     st.session_state.setdefault("league_prev_edit_active", False)
     if st.session_state.get("league_active"):
         st.session_state["league_prev_edit_active"] = False
 
     st.header("Liga A/B - Jornada")
+    if st.session_state.get("_league_state_error"):
+        st.error(f"No se pudo leer el estado compartido de la liga: {st.session_state.get('_league_state_error')}")
+    if st.button("Actualizar datos de liga", use_container_width=True, key="refresh_league_table"):
+        _clear_league_page_caches()
+        st.session_state.pop("_league_state_hash", None)
+        st.rerun()
+
     tramo = st.session_state.league_tramo
     liga_finalizada = tramo > MAX_JORNADAS
     prev_tramo = tramo - 1 if tramo > 1 else None

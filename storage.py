@@ -965,7 +965,7 @@ def _ensure_settings_table(cx) -> None:
         pass
 
 
-def settings_set(key: str, value: str) -> None:
+def settings_set(key: str, value: str, *, strict_remote: bool = False) -> None:
     if _supabase_enabled():
         try:
             client = _sb()
@@ -975,8 +975,9 @@ def settings_set(key: str, value: str) -> None:
             ).execute()
             _SETTINGS_CACHE.set(key, value)
             return
-        except Exception:
-            pass
+        except Exception as e:
+            if strict_remote:
+                raise RuntimeError(f"Supabase settings_set failed for {key}: {e}") from e
     with _conn() as cx:
         _ensure_settings_table(cx)
         cx.execute(
@@ -988,10 +989,11 @@ def settings_set(key: str, value: str) -> None:
     _SETTINGS_CACHE.set(key, value)
 
 
-def settings_get(key: str) -> str | None:
-    hit, cached = _SETTINGS_CACHE.get(key)
-    if hit:
-        return cached
+def settings_get(key: str, *, bypass_cache: bool = False, strict_remote: bool = False) -> str | None:
+    if not bypass_cache:
+        hit, cached = _SETTINGS_CACHE.get(key)
+        if hit:
+            return cached
 
     if _supabase_enabled():
         try:
@@ -1002,8 +1004,12 @@ def settings_get(key: str) -> str | None:
                 value = data[0].get("value")
                 _SETTINGS_CACHE.set(key, value)
                 return value
-        except Exception:
-            pass
+            _SETTINGS_CACHE.clear(key)
+            return None
+        except Exception as e:
+            _SETTINGS_CACHE.clear(key)
+            if strict_remote:
+                raise RuntimeError(f"Supabase settings_get failed for {key}: {e}") from e
     with _conn() as cx:
         try:
             _ensure_settings_table(cx)
@@ -1014,4 +1020,13 @@ def settings_get(key: str) -> str | None:
         except Exception:
             _SETTINGS_CACHE.clear(key)
             return None
+
+
+def settings_get_uncached(key: str, *, strict_remote: bool = False) -> str | None:
+    _SETTINGS_CACHE.clear(key)
+    return settings_get(key, bypass_cache=True, strict_remote=strict_remote)
+
+
+def settings_clear_cache(key: str | None = None) -> None:
+    _SETTINGS_CACHE.clear(key)
 
