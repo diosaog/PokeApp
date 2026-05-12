@@ -27,7 +27,7 @@ from app.liga.table_summary import (
 )
 from app.juicios.penalties import clear_penalty_caches
 from app.tienda.money import clear_money_caches
-from storage import clear_purchases, settings_clear_cache, settings_get_uncached, settings_set
+from storage import clear_purchases, settings_clear_cache, settings_get_uncached, settings_set, storage_backend_name
 from utils import USERS
 
 
@@ -99,6 +99,9 @@ def _clear_local_league_state() -> None:
         "league_matches",
         "league_movements",
         "league_temp_order",
+        "league_revision",
+        "league_updated_at",
+        "league_updated_by",
         "_league_state_hash",
         "_league_state_error",
     ):
@@ -108,6 +111,16 @@ def _clear_local_league_state() -> None:
 
 def _current_user_can_resend_summary() -> bool:
     return str(st.session_state.get("user") or "").strip().lower() == "anto"
+
+
+def _render_sync_caption() -> None:
+    try:
+        rev = int(st.session_state.get("league_revision") or 0)
+    except Exception:
+        rev = 0
+    updated_by = str(st.session_state.get("league_updated_by") or "-")
+    updated_at = str(st.session_state.get("league_updated_at") or "-")
+    st.caption(f"Sincronizacion: {storage_backend_name()} - revision {rev} - {updated_by} - {updated_at}")
 
 
 def _notify_sent_key(round_no: int) -> str:
@@ -325,6 +338,7 @@ def page_tabla() -> None:
     elif refresh_requested:
         st.success("Datos de liga recargados desde el estado compartido.")
     _render_flash_messages()
+    _render_sync_caption()
 
     _auto_notify_latest_closed_round()
     resend_round = _latest_closed_round()

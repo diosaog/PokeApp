@@ -47,6 +47,10 @@ def _supabase_enabled() -> bool:
     return bool(url and key)
 
 
+def storage_backend_name() -> str:
+    return "Supabase" if _supabase_enabled() else "SQLite local"
+
+
 def _sb() -> Any:
     global _SUPABASE
     if _SUPABASE is None:
@@ -973,6 +977,19 @@ def settings_set(key: str, value: str, *, strict_remote: bool = False) -> None:
                 {"key": key, "value": value},
                 on_conflict="key",
             ).execute()
+            if strict_remote:
+                verify = client.table("settings").select("value").eq("key", key).limit(1).execute()
+                rows = verify.data or []
+                if not rows:
+                    raise RuntimeError(
+                        "Supabase acepto el guardado, pero la fila no se puede leer. "
+                        "Revisa las politicas RLS de la tabla settings."
+                    )
+                stored = rows[0].get("value")
+                if stored != value:
+                    raise RuntimeError(
+                        "Supabase devolvio un valor distinto al guardado para settings."
+                    )
             _SETTINGS_CACHE.set(key, value)
             return
         except Exception as e:
