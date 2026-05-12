@@ -199,6 +199,15 @@ def _embed(*, title: str, description: str, color: int, fields: list[dict] | Non
     return data
 
 
+def _field_value(lines: list[str], *, code_block: bool = False, limit: int = 1000) -> str:
+    text = "\n".join(str(line) for line in lines if str(line).strip()).strip() or "-"
+    if len(text) > limit:
+        text = text[: max(0, limit - 16)].rstrip() + "\n... (recortado)"
+    if code_block:
+        return f"```text\n{text}\n```"
+    return text
+
+
 def notify_purchase(*, user: str, item: str, price: int, purchase_id: int | None = None) -> bool:
     price_value = int(price or 0)
     price_label = "Gratis" if price_value <= 0 else f"{price_value} monedas"
@@ -233,7 +242,13 @@ def notify_purchase_async(*, user: str, item: str, price: int, purchase_id: int 
     thread.start()
 
 
-def notify_league_round_finished(*, round_no: int, rows: list[dict]) -> bool:
+def notify_league_round_finished(
+    *,
+    round_no: int,
+    rows: list[dict],
+    round_results: list[dict] | None = None,
+    summary_lines: list[str] | None = None,
+) -> bool:
     lines = []
     for row in rows[:20]:
         pos = row.get("pos", "-")
@@ -242,31 +257,65 @@ def notify_league_round_finished(*, round_no: int, rows: list[dict]) -> bool:
         coins = int(row.get("coins") or 0)
         lines.append(f"{pos:>2}. {user:<14} {points:>5} pts | {coins:>3} monedas")
 
-    table = "\n".join(lines) if lines else "Sin datos."
+    fields: list[dict] = []
+    if summary_lines:
+        fields.append(
+            {
+                "name": "Resumen",
+                "value": _field_value(summary_lines),
+                "inline": False,
+            }
+        )
+
+    for group in round_results or []:
+        division = str(group.get("division") or "Resultados")
+        result_lines = [f"- {line}" for line in group.get("lines") or []]
+        if result_lines:
+            fields.append(
+                {
+                    "name": f"Resultados {division}",
+                    "value": _field_value(result_lines),
+                    "inline": False,
+                }
+            )
+
+    fields.append(
+        {
+            "name": "Posiciones, puntos y monedas",
+            "value": _field_value(lines or ["Sin datos."], code_block=True),
+            "inline": False,
+        }
+    )
+
     return _post_webhook(
         {
             "embeds": [
                 _embed(
                     title=f"Jornada {int(round_no)} finalizada",
-                    description="Tabla general actualizada:",
+                    description="Resultados y tabla general actualizados.",
                     color=0xE67E22,
-                    fields=[
-                        {
-                            "name": "Posiciones, puntos y monedas",
-                            "value": f"```text\n{table}\n```",
-                            "inline": False,
-                        }
-                    ],
+                    fields=fields,
                 )
             ]
         }
     )
 
 
-def notify_league_round_finished_async(*, round_no: int, rows: list[dict]) -> None:
+def notify_league_round_finished_async(
+    *,
+    round_no: int,
+    rows: list[dict],
+    round_results: list[dict] | None = None,
+    summary_lines: list[str] | None = None,
+) -> None:
     thread = threading.Thread(
         target=notify_league_round_finished,
-        kwargs={"round_no": round_no, "rows": rows},
+        kwargs={
+            "round_no": round_no,
+            "rows": rows,
+            "round_results": round_results,
+            "summary_lines": summary_lines,
+        },
         daemon=True,
     )
     thread.start()

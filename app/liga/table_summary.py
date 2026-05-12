@@ -40,6 +40,53 @@ def league_table_notification_rows(table: list[tuple[str, float]]) -> list[dict]
     ]
 
 
+def league_round_result_groups(round_data: dict) -> list[dict]:
+    groups: list[dict] = []
+    for div_key, div_label in (("A", "Liga A"), ("B", "Liga B")):
+        lines: list[str] = []
+        for (p1, p2), winner in (round_data.get(div_key, {}) or {}).items():
+            if winner in (p1, p2):
+                loser = p2 if winner == p1 else p1
+                lines.append(f"{winner} gano a {loser}")
+            else:
+                lines.append(f"{p1} vs {p2}: sin resultado")
+        if lines:
+            groups.append({"division": div_label, "lines": lines})
+    return groups
+
+
+def league_round_summary_lines(
+    *,
+    table: list[tuple[str, float]],
+    movements: dict | None = None,
+    podium: list[tuple[str, float]] | None = None,
+) -> list[str]:
+    lines: list[str] = []
+    if podium:
+        labels = ["Ganador", "Segundo puesto", "Tercer puesto"]
+        for idx, (user, pts) in enumerate(podium[:3]):
+            label = labels[idx] if idx < len(labels) else f"Puesto {idx + 1}"
+            lines.append(f"{label}: {user} ({fmt_points(pts)} pts)")
+        return lines
+
+    top = table[:3]
+    if top:
+        top_label = " | ".join(
+            f"{idx}. {user} ({fmt_points(pts)} pts)"
+            for idx, (user, pts) in enumerate(top, start=1)
+        )
+        lines.append(f"Top general: {top_label}")
+
+    movements = movements or {}
+    up = [str(u) for u in movements.get("up") or [] if u]
+    down = [str(u) for u in movements.get("down") or [] if u]
+    if up:
+        lines.append(f"Suben a Liga A: {', '.join(up)}")
+    if down:
+        lines.append(f"Bajan a Liga B: {', '.join(down)}")
+    return lines
+
+
 def league_table_rows(table: list[tuple[str, float]], *, include_coins: bool = False) -> list[dict]:
     rows: list[dict] = []
     for i, (user, pts) in enumerate(table, start=1):

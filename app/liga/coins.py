@@ -9,6 +9,12 @@ COINS_BY_POSITION = {
 
 
 def coins_from_league(user: str) -> int:
+    try:
+        from app.liga.state import restore_state
+
+        restore_state()
+    except Exception:
+        pass
     if "league_results" not in st.session_state or not st.session_state.get("league_results"):
         try:
             import json

@@ -1,11 +1,15 @@
 from __future__ import annotations
 
 from typing import Dict
+import hashlib
 import json
 import streamlit as st
 
 from storage import settings_get, settings_set
 from utils import USERS
+
+
+_LEAGUE_STATE_HASH_KEY = "_league_state_hash"
 
 
 def _sanitize_divisions(divs: dict) -> dict:
@@ -54,7 +58,38 @@ def _serialize_state() -> dict:
     }
 
 
-def restore_state() -> None:
+def _state_hash(raw: str) -> str:
+    return hashlib.sha256(raw.encode("utf-8")).hexdigest()
+
+
+def _apply_serialized_state(obj: dict) -> None:
+    st.session_state.league_tramo = int(obj.get("tramo", 1))
+    st.session_state.league_active = bool(obj.get("active", False))
+    st.session_state.league_divisions = _sanitize_divisions(obj.get("divisions", {"A": [], "B": []}))
+
+    res_in = obj.get("results", {})
+    st.session_state.league_results = {
+        u: {int(k): int(v) for k, v in mp.items()} for u, mp in res_in.items()
+    }
+
+    mat_in = obj.get("matches", {})
+    mat_out: Dict[int, Dict[str, Dict[tuple, str | None]]] = {}
+    for tkey, divs in mat_in.items():
+        t = int(tkey)
+        mat_out[t] = {"A": {}, "B": {}}
+        for d in ("A", "B"):
+            for m in divs.get(d, []) or []:
+                mat_out[t][d][(m.get("p1"), m.get("p2"))] = m.get("winner")
+    st.session_state.league_matches = mat_out
+
+    mov = obj.get("movements", {})
+    if isinstance(mov, dict):
+        st.session_state.league_movements = {int(k): v for k, v in mov.items()}
+    else:
+        st.session_state.league_movements = {}
+
+
+def restore_state() -> bool:
     required = (
         "league_tramo",
         "league_active",
@@ -63,46 +98,28 @@ def restore_state() -> None:
         "league_matches",
         "league_movements",
     )
-    if all(key in st.session_state for key in required):
-        return
+    has_local_state = all(key in st.session_state for key in required)
     try:
         raw = settings_get("league_state")
         if not raw:
-            return
+            return False
+        raw_hash = _state_hash(raw)
+        if has_local_state and st.session_state.get(_LEAGUE_STATE_HASH_KEY) == raw_hash:
+            return False
+
         obj = json.loads(raw)
-        if "league_tramo" not in st.session_state:
-            st.session_state.league_tramo = int(obj.get("tramo", 1))
-        if "league_active" not in st.session_state:
-            st.session_state.league_active = bool(obj.get("active", False))
-        if "league_divisions" not in st.session_state:
-            st.session_state.league_divisions = obj.get("divisions", {"A": [], "B": []})
-        if "league_divisions" in st.session_state:
-            st.session_state.league_divisions = _sanitize_divisions(st.session_state.league_divisions)
-        if "league_results" not in st.session_state:
-            res_in = obj.get("results", {})
-            st.session_state.league_results = {
-                u: {int(k): int(v) for k, v in mp.items()} for u, mp in res_in.items()
-            }
-        if "league_matches" not in st.session_state:
-            mat_in = obj.get("matches", {})
-            mat_out: Dict[int, Dict[str, Dict[tuple, str | None]]] = {}
-            for tkey, divs in mat_in.items():
-                t = int(tkey)
-                mat_out[t] = {"A": {}, "B": {}}
-                for d in ("A", "B"):
-                    for m in divs.get(d, []) or []:
-                        mat_out[t][d][(m.get("p1"), m.get("p2"))] = m.get("winner")
-            st.session_state.league_matches = mat_out
-        mov = obj.get("movements", {})
-        if isinstance(mov, dict):
-            st.session_state.league_movements = {int(k): v for k, v in mov.items()}
+        _apply_serialized_state(obj)
+        st.session_state[_LEAGUE_STATE_HASH_KEY] = raw_hash
+        return True
     except Exception:
-        pass
+        return False
 
 
 def persist_state() -> None:
     try:
-        settings_set("league_state", json.dumps(_serialize_state(), ensure_ascii=False))
+        raw = json.dumps(_serialize_state(), ensure_ascii=False)
+        settings_set("league_state", raw)
+        st.session_state[_LEAGUE_STATE_HASH_KEY] = _state_hash(raw)
     except Exception:
         try:
             st.error("No se pudo guardar el estado de la liga (settings).")

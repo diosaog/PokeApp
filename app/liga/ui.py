@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import streamlit as st
 
-from app.discord_notify import notify_league_round_finished_async
+from app.discord_notify import notify_league_round_finished
 from app.liga.ranking import (
     MAX_JORNADAS,
     all_filled,
@@ -16,6 +16,8 @@ from app.liga.ranking import (
 from app.liga.state import ensure_state, persist_state, restore_state
 from app.liga.table_summary import (
     fmt_points as _fmt_points,
+    league_round_result_groups as _league_round_result_groups,
+    league_round_summary_lines as _league_round_summary_lines,
     league_table_notification_rows as _league_table_notification_rows,
     league_table_rows as _league_table_rows,
     players_from_match_map as _players_from_match_map,
@@ -125,8 +127,11 @@ def _render_previous_round_editor(*, prev_tramo: int, current_tramo: int) -> Non
 
 
 def page_tabla() -> None:
-    restore_state()
+    state_reloaded = restore_state()
     ensure_state()
+    if state_reloaded:
+        clear_money_caches()
+        clear_ranking_caches()
     st.session_state.setdefault("league_prev_edit_active", False)
     if st.session_state.get("league_active"):
         st.session_state["league_prev_edit_active"] = False
@@ -152,14 +157,26 @@ def page_tabla() -> None:
             with c1:
                 if st.button("Finalizar jornada", use_container_width=True):
                     try:
+                        round_results = _league_round_result_groups(get_matches_for(tramo))
                         finalize(tramo)
                         clear_money_caches()
-                        notify_league_round_finished_async(
-                            round_no=tramo,
-                            rows=_league_table_notification_rows(general_table_sorted()),
+                        clear_ranking_caches()
+                        tabla_actualizada = general_table_sorted()
+                        podium = tabla_actualizada[:3] if tramo >= MAX_JORNADAS else None
+                        summary_lines = _league_round_summary_lines(
+                            table=tabla_actualizada,
+                            movements=st.session_state.get("league_movements", {}).get(tramo, {}),
+                            podium=podium,
                         )
+                        notified = notify_league_round_finished(
+                            round_no=tramo,
+                            rows=_league_table_notification_rows(tabla_actualizada),
+                            round_results=round_results,
+                            summary_lines=summary_lines,
+                        )
+                        if not notified:
+                            st.warning("Jornada cerrada, pero Aaron Avisa no pudo enviar el mensaje a Discord.")
                         if tramo >= MAX_JORNADAS:
-                            podium = final_podium()
                             if podium:
                                 labels = ["Ganador", "Segundo puesto", "Tercer puesto"]
                                 summary = " | ".join(
