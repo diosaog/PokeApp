@@ -33,6 +33,8 @@ from utils import USERS
 
 _NOTIFY_SENT_KEY_PREFIX = "league_round_notify_sent"
 _NOTIFY_STATUS_KEY_PREFIX = "league_round_notify_status"
+_FLASH_MESSAGES_KEY = "_league_flash_messages"
+_CLEAR_EDIT_BUFFERS_NEXT_KEY = "_league_clear_edit_buffers_next"
 
 
 def _clear_league_page_caches() -> None:
@@ -45,22 +47,30 @@ def _clear_league_page_caches() -> None:
     clear_ranking_caches()
 
 
-def _clear_local_league_state() -> None:
+def _queue_flash(kind: str, message: str) -> None:
+    messages = st.session_state.setdefault(_FLASH_MESSAGES_KEY, [])
+    messages.append((str(kind or "info"), str(message or "")))
+
+
+def _render_flash_messages() -> None:
+    messages = st.session_state.pop(_FLASH_MESSAGES_KEY, [])
+    for kind, message in messages:
+        if not message:
+            continue
+        fn = getattr(st, kind, st.info)
+        try:
+            fn(message)
+        except Exception:
+            st.info(message)
+
+
+def _clear_league_edit_buffers() -> None:
     for key in (
-        "league_tramo",
-        "league_active",
-        "league_divisions",
-        "league_results",
-        "league_matches",
-        "league_movements",
-        "league_temp_order",
         "league_tmp",
         "league_tmp_prev",
         "league_prev_edit_active",
         "league_div_A",
         "league_div_B",
-        "_league_state_hash",
-        "_league_state_error",
     ):
         st.session_state.pop(key, None)
 
@@ -74,6 +84,26 @@ def _clear_local_league_state() -> None:
             or key_s.startswith("_league_round_notify_attempted_")
         ):
             st.session_state.pop(key, None)
+
+
+def _schedule_clear_league_edit_buffers() -> None:
+    st.session_state[_CLEAR_EDIT_BUFFERS_NEXT_KEY] = True
+
+
+def _clear_local_league_state() -> None:
+    for key in (
+        "league_tramo",
+        "league_active",
+        "league_divisions",
+        "league_results",
+        "league_matches",
+        "league_movements",
+        "league_temp_order",
+        "_league_state_hash",
+        "_league_state_error",
+    ):
+        st.session_state.pop(key, None)
+    _clear_league_edit_buffers()
 
 
 def _current_user_can_resend_summary() -> bool:
@@ -269,6 +299,9 @@ def _render_previous_round_editor(*, prev_tramo: int, current_tramo: int) -> Non
 
 
 def page_tabla() -> None:
+    if st.session_state.pop(_CLEAR_EDIT_BUFFERS_NEXT_KEY, False):
+        _clear_league_edit_buffers()
+
     st.header("Liga A/B - Jornada")
     refresh_requested = st.button("Actualizar datos de liga", use_container_width=True, key="refresh_league_table")
     if refresh_requested:
@@ -287,8 +320,11 @@ def page_tabla() -> None:
 
     if st.session_state.get("_league_state_error"):
         st.error(f"No se pudo leer el estado compartido de la liga: {st.session_state.get('_league_state_error')}")
+        st.info("No se muestran controles de liga para evitar guardar encima con una copia antigua.")
+        return
     elif refresh_requested:
         st.success("Datos de liga recargados desde el estado compartido.")
+    _render_flash_messages()
 
     _auto_notify_latest_closed_round()
     resend_round = _latest_closed_round()
@@ -327,29 +363,32 @@ def page_tabla() -> None:
             with c1:
                 if st.button("Finalizar jornada", use_container_width=True):
                     try:
-                        get_matches_for(tramo)
-                        finalize(tramo)
+                        closing_tramo = int(tramo)
+                        get_matches_for(closing_tramo)
+                        finalize(closing_tramo)
                         clear_money_caches()
                         clear_ranking_caches()
                         tabla_actualizada = general_table_sorted()
-                        podium = tabla_actualizada[:3] if tramo >= MAX_JORNADAS else None
-                        notified, notify_message = _send_league_round_notification(tramo, force=True)
+                        podium = tabla_actualizada[:3] if closing_tramo >= MAX_JORNADAS else None
+                        notified, notify_message = _send_league_round_notification(closing_tramo, force=True)
                         if notified:
-                            st.success("Aaron Avisa ha enviado el resumen de la jornada a Discord.")
+                            _queue_flash("success", "Aaron Avisa ha enviado el resumen de la jornada a Discord.")
                         else:
-                            st.error(f"Jornada cerrada, pero Aaron Avisa no pudo enviar a Discord: {notify_message}")
-                        if tramo >= MAX_JORNADAS:
+                            _queue_flash("error", f"Jornada cerrada, pero Aaron Avisa no pudo enviar a Discord: {notify_message}")
+                        if closing_tramo >= MAX_JORNADAS:
                             if podium:
                                 labels = ["Ganador", "Segundo puesto", "Tercer puesto"]
                                 summary = " | ".join(
                                     f"{labels[i]}: {user}"
                                     for i, (user, _pts) in enumerate(podium)
                                 )
-                                st.success(f"Jornada final cerrada. {summary}.")
+                                _queue_flash("success", f"Jornada final cerrada. {summary}.")
                             else:
-                                st.success("Jornada final cerrada. La liga ha terminado.")
+                                _queue_flash("success", "Jornada final cerrada. La liga ha terminado.")
                         else:
-                            st.success("Jornada cerrada: rankings calculados y ascensos/descensos aplicados.")
+                            _queue_flash("success", "Jornada cerrada: rankings calculados y ascensos/descensos aplicados.")
+                        _schedule_clear_league_edit_buffers()
+                        st.rerun()
                     except Exception as e:
                         st.error(str(e))
             with c2:
@@ -359,7 +398,9 @@ def page_tabla() -> None:
                         del st.session_state.league_matches[tramo]
                     persist_state()
                     clear_money_caches()
-                    st.info("Edicion cancelada. No se guardara ningun resultado.")
+                    _queue_flash("info", "Edicion cancelada. No se guardara ningun resultado.")
+                    _schedule_clear_league_edit_buffers()
+                    st.rerun()
         else:
             c1, c2 = st.columns(2)
             with c1:
@@ -371,6 +412,8 @@ def page_tabla() -> None:
                         st.session_state.league_active = True
                         get_matches_for(tramo)
                         persist_state()
+                        _schedule_clear_league_edit_buffers()
+                        st.rerun()
             with c2:
                 prev_label = (
                     f"Cerrar edicion tramo {prev_tramo}"
@@ -427,10 +470,12 @@ def page_tabla() -> None:
                 st.session_state.league_matches = {}
                 st.session_state.league_results = {}
                 st.session_state.league_movements = {}
-                st.success("Divisiones actualizadas.")
                 persist_state()
                 clear_money_caches()
                 clear_ranking_caches()
+                _queue_flash("success", "Divisiones actualizadas.")
+                _schedule_clear_league_edit_buffers()
+                st.rerun()
             else:
                 st.error("Selecciona exactamente 5 en A y 5 en B.")
 
@@ -608,6 +653,8 @@ def page_tabla() -> None:
             persist_state()
             clear_money_caches()
             clear_ranking_caches()
-            st.success("Liga reiniciada.")
+            _queue_flash("success", "Liga reiniciada.")
+            _schedule_clear_league_edit_buffers()
+            st.rerun()
         else:
             st.info("Operacion cancelada. La liga sigue igual.")
