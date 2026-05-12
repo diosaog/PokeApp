@@ -166,6 +166,12 @@ def _record_position(tramo: int, user: str, pos: int) -> None:
     st.session_state.league_results.setdefault(user, {})[tramo] = pos
 
 
+def _persist_state() -> None:
+    from app.liga.state import persist_state
+
+    persist_state()
+
+
 def finalize(tramo: int) -> None:
     data = get_matches_for(tramo)
     A_players = st.session_state.league_divisions["A"]
@@ -206,7 +212,7 @@ def finalize(tramo: int) -> None:
             pass
     st.session_state.league_active = False
     st.session_state.league_tramo = tramo + 1
-    persist_state()
+    _persist_state()
 
 
 def recompute_round(tramo: int, *, apply_divisions_from_round: bool = False) -> None:
@@ -259,7 +265,7 @@ def recompute_round(tramo: int, *, apply_divisions_from_round: bool = False) -> 
         nueva_B = rankA[2:5] + rankB[3:5]
         st.session_state.league_divisions = {"A": nueva_A, "B": nueva_B}
 
-    persist_state()
+    _persist_state()
 
 
 POINTS_BY_POSITION = {1: 9, 2: 8, 3: 7, 4: 6, 5: 5, 6: 5, 7: 4, 8: 3, 9: 2, 10: 1}
