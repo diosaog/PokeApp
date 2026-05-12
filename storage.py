@@ -19,11 +19,62 @@ DATA_DIR = BASE_DIR / "data"
 SAVES_DIR = DATA_DIR / "saves"
 DB_PATH = DATA_DIR / "app.db"
 _SUPABASE: Any | None = None
-_SUPABASE_BUCKET = os.environ.get("SUPABASE_BUCKET", "saves")
 _SETTINGS_CACHE = ExpiringCache(float(os.environ.get("SETTINGS_MEM_TTL", "10")))
 _TOTAL_SPENT_CACHE = ExpiringCache(float(os.environ.get("TOTAL_SPENT_MEM_TTL", "10")))
 _LIST_PURCHASES_CACHE = ExpiringCache(float(os.environ.get("LIST_PURCHASES_MEM_TTL", "10")))
 _LIST_INVENTORY_CACHE = ExpiringCache(float(os.environ.get("LIST_INVENTORY_MEM_TTL", "10")))
+
+
+def _config_value(*names: str, default: str = "") -> str:
+    for name in names:
+        value = os.environ.get(name)
+        if value not in (None, ""):
+            return str(value).strip()
+
+    if st is not None:
+        try:
+            for name in names:
+                value = st.secrets.get(name, "")
+                if value not in (None, ""):
+                    return str(value).strip()
+        except Exception:
+            pass
+
+        try:
+            section = st.secrets.get("supabase", {})
+            section_names = []
+            for name in names:
+                low = name.lower()
+                section_names.append(low)
+                if low.startswith("supabase_"):
+                    section_names.append(low.removeprefix("supabase_"))
+            for name in section_names:
+                value = section.get(name, "") if hasattr(section, "get") else ""
+                if value not in (None, ""):
+                    return str(value).strip()
+        except Exception:
+            pass
+
+    return str(default or "").strip()
+
+
+def _supabase_url() -> str:
+    return _config_value("SUPABASE_URL", "supabase_url")
+
+
+def _supabase_key() -> str:
+    return _config_value(
+        "SUPABASE_KEY",
+        "SUPABASE_ANON_KEY",
+        "SUPABASE_SERVICE_ROLE_KEY",
+        "supabase_key",
+        "supabase_anon_key",
+        "supabase_service_role_key",
+    )
+
+
+def _supabase_bucket() -> str:
+    return _config_value("SUPABASE_BUCKET", "supabase_bucket", default="saves") or "saves"
 
 
 def _cache_data(ttl: int = 15):
@@ -42,13 +93,9 @@ def _invalidate_purchase_caches(user: str | None = None) -> None:
 
 
 def _supabase_enabled() -> bool:
-    url = os.environ.get("SUPABASE_URL", "").strip()
-    key = os.environ.get("SUPABASE_KEY", "").strip()
+    url = _supabase_url()
+    key = _supabase_key()
     return bool(url and key)
-
-
-def storage_backend_name() -> str:
-    return "Supabase" if _supabase_enabled() else "SQLite local"
 
 
 def _sb() -> Any:
@@ -56,8 +103,8 @@ def _sb() -> Any:
     if _SUPABASE is None:
         from supabase import create_client
 
-        url = os.environ.get("SUPABASE_URL", "").strip()
-        key = os.environ.get("SUPABASE_KEY", "").strip()
+        url = _supabase_url()
+        key = _supabase_key()
         if not url or not key:
             raise RuntimeError("Supabase no configurado")
         _SUPABASE = create_client(url, key)
@@ -65,7 +112,7 @@ def _sb() -> Any:
 
 
 def _bucket_name() -> str:
-    return _SUPABASE_BUCKET or "saves"
+    return _supabase_bucket()
 
 
 def _now_iso() -> str:
@@ -977,24 +1024,13 @@ def settings_set(key: str, value: str, *, strict_remote: bool = False) -> None:
                 {"key": key, "value": value},
                 on_conflict="key",
             ).execute()
-            if strict_remote:
-                verify = client.table("settings").select("value").eq("key", key).limit(1).execute()
-                rows = verify.data or []
-                if not rows:
-                    raise RuntimeError(
-                        "Supabase acepto el guardado, pero la fila no se puede leer. "
-                        "Revisa las politicas RLS de la tabla settings."
-                    )
-                stored = rows[0].get("value")
-                if stored != value:
-                    raise RuntimeError(
-                        "Supabase devolvio un valor distinto al guardado para settings."
-                    )
             _SETTINGS_CACHE.set(key, value)
             return
         except Exception as e:
             if strict_remote:
                 raise RuntimeError(f"Supabase settings_set failed for {key}: {e}") from e
+    elif strict_remote:
+        raise RuntimeError(f"Supabase no configurado para guardar settings:{key}")
     with _conn() as cx:
         _ensure_settings_table(cx)
         cx.execute(
@@ -1027,6 +1063,8 @@ def settings_get(key: str, *, bypass_cache: bool = False, strict_remote: bool = 
             _SETTINGS_CACHE.clear(key)
             if strict_remote:
                 raise RuntimeError(f"Supabase settings_get failed for {key}: {e}") from e
+    elif strict_remote:
+        raise RuntimeError(f"Supabase no configurado para leer settings:{key}")
     with _conn() as cx:
         try:
             _ensure_settings_table(cx)

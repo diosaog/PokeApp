@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 from typing import Dict
-from datetime import datetime, timezone
 import hashlib
 import json
 import streamlit as st
@@ -50,14 +49,7 @@ def _serialize_state() -> dict:
                 out[d].append({"p1": p1, "p2": p2, "winner": w})
         matches[tkey] = out
     results = {u: {str(k): int(v) for k, v in mp.items()} for u, mp in (S.get("league_results") or {}).items()}
-    try:
-        revision = int(S.get("league_revision") or 0) + 1
-    except Exception:
-        revision = 1
     return {
-        "revision": revision,
-        "updated_at": datetime.now(timezone.utc).isoformat(),
-        "updated_by": str(S.get("user") or ""),
         "tramo": int(S.get("league_tramo", 1)),
         "active": bool(S.get("league_active", False)),
         "divisions": S.get("league_divisions", {"A": [], "B": []}),
@@ -72,9 +64,6 @@ def _state_hash(raw: str) -> str:
 
 
 def _apply_serialized_state(obj: dict) -> None:
-    st.session_state.league_revision = int(obj.get("revision") or 0)
-    st.session_state.league_updated_at = str(obj.get("updated_at") or "")
-    st.session_state.league_updated_by = str(obj.get("updated_by") or "")
     st.session_state.league_tramo = int(obj.get("tramo", 1))
     st.session_state.league_active = bool(obj.get("active", False))
     st.session_state.league_divisions = _sanitize_divisions(obj.get("divisions", {"A": [], "B": []}))
@@ -109,15 +98,20 @@ def restore_state() -> bool:
         "league_results",
         "league_matches",
         "league_movements",
-        "league_revision",
-        "league_updated_at",
-        "league_updated_by",
     )
     has_local_state = all(key in st.session_state for key in required)
     try:
         raw = settings_get_uncached("league_state", strict_remote=True)
         if not raw:
-            st.session_state.pop(_LEAGUE_STATE_ERROR_KEY, None)
+            if has_local_state:
+                # If this session still has the league in memory but Supabase lost the
+                # shared row, push it back instead of silently falling back to defaults.
+                persist_state()
+                return False
+            st.session_state[_LEAGUE_STATE_ERROR_KEY] = (
+                "No existe la fila settings.key='league_state' en Supabase. "
+                "La liga no esta guardada en la nube."
+            )
             return False
         raw_hash = _state_hash(raw)
         if has_local_state and st.session_state.get(_LEAGUE_STATE_HASH_KEY) == raw_hash:
@@ -136,12 +130,8 @@ def restore_state() -> bool:
 
 def persist_state() -> None:
     try:
-        obj = _serialize_state()
-        raw = json.dumps(obj, ensure_ascii=False)
+        raw = json.dumps(_serialize_state(), ensure_ascii=False)
         settings_set("league_state", raw, strict_remote=True)
-        st.session_state.league_revision = int(obj.get("revision") or 0)
-        st.session_state.league_updated_at = str(obj.get("updated_at") or "")
-        st.session_state.league_updated_by = str(obj.get("updated_by") or "")
         st.session_state[_LEAGUE_STATE_HASH_KEY] = _state_hash(raw)
         st.session_state.pop(_LEAGUE_STATE_ERROR_KEY, None)
     except Exception:
@@ -168,9 +158,3 @@ def ensure_state() -> None:
         st.session_state.league_matches = {}
     if "league_movements" not in st.session_state:
         st.session_state.league_movements = {}
-    if "league_revision" not in st.session_state:
-        st.session_state.league_revision = 0
-    if "league_updated_at" not in st.session_state:
-        st.session_state.league_updated_at = ""
-    if "league_updated_by" not in st.session_state:
-        st.session_state.league_updated_by = ""
