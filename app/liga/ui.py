@@ -45,6 +45,37 @@ def _clear_league_page_caches() -> None:
     clear_ranking_caches()
 
 
+def _clear_local_league_state() -> None:
+    for key in (
+        "league_tramo",
+        "league_active",
+        "league_divisions",
+        "league_results",
+        "league_matches",
+        "league_movements",
+        "league_temp_order",
+        "league_tmp",
+        "league_tmp_prev",
+        "league_prev_edit_active",
+        "league_div_A",
+        "league_div_B",
+        "_league_state_hash",
+        "_league_state_error",
+    ):
+        st.session_state.pop(key, None)
+
+    for key in list(st.session_state.keys()):
+        key_s = str(key)
+        if (
+            key_s.startswith("A_")
+            or key_s.startswith("B_")
+            or key_s.startswith("PREV_A_")
+            or key_s.startswith("PREV_B_")
+            or key_s.startswith("_league_round_notify_attempted_")
+        ):
+            st.session_state.pop(key, None)
+
+
 def _current_user_can_resend_summary() -> bool:
     return str(st.session_state.get("user") or "").strip().lower() == "anto"
 
@@ -238,6 +269,12 @@ def _render_previous_round_editor(*, prev_tramo: int, current_tramo: int) -> Non
 
 
 def page_tabla() -> None:
+    st.header("Liga A/B - Jornada")
+    refresh_requested = st.button("Actualizar datos de liga", use_container_width=True, key="refresh_league_table")
+    if refresh_requested:
+        _clear_league_page_caches()
+        _clear_local_league_state()
+
     _clear_league_page_caches()
     state_reloaded = restore_state()
     ensure_state()
@@ -248,13 +285,10 @@ def page_tabla() -> None:
     if st.session_state.get("league_active"):
         st.session_state["league_prev_edit_active"] = False
 
-    st.header("Liga A/B - Jornada")
     if st.session_state.get("_league_state_error"):
         st.error(f"No se pudo leer el estado compartido de la liga: {st.session_state.get('_league_state_error')}")
-    if st.button("Actualizar datos de liga", use_container_width=True, key="refresh_league_table"):
-        _clear_league_page_caches()
-        st.session_state.pop("_league_state_hash", None)
-        st.rerun()
+    elif refresh_requested:
+        st.success("Datos de liga recargados desde el estado compartido.")
 
     _auto_notify_latest_closed_round()
     resend_round = _latest_closed_round()
