@@ -616,9 +616,6 @@ def page_tabla() -> None:
                 tramos |= set(mp.keys())
         for t in sorted(tramos):
             st.markdown(f"**Tramo {t}**")
-            mv = st.session_state.get("league_movements", {}).get(t, {})
-            up_set = set(mv.get("up") or [])
-            down_set = set(mv.get("down") or [])
             entries = []
             for u, mp in lr.items():
                 try:
@@ -636,9 +633,14 @@ def page_tabla() -> None:
             b_len = len(st.session_state.league_divisions.get("B", [])) if isinstance(st.session_state.league_divisions, dict) else 0
             b_start = a_len + 1
             b_end = b_start + b_len - 1 if b_len else b_start - 1
+            show_movement_tags = int(t) < MAX_JORNADAS
             rowsA, rowsB = [], []
             for u, pos in entries:
-                tag = "UP " if u in up_set else ("DOWN " if u in down_set else "")
+                tag = ""
+                if show_movement_tags and pos <= a_len and pos > max(a_len - 3, 0):
+                    tag = "📉 "
+                elif show_movement_tags and b_start <= pos < b_start + 3:
+                    tag = "📈 "
                 row = {"Pos": pos, "Jugador": f"{tag}{u}"}
                 if pos <= a_len:
                     rowsA.append(row)
