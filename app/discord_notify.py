@@ -377,6 +377,92 @@ def notify_league_round_finished_async(
     thread.start()
 
 
+def league_match_result_payload(
+    *,
+    round_no: int,
+    division: str,
+    player1: str,
+    player2: str,
+    winner: str,
+) -> dict:
+    loser = player2 if winner == player1 else player1
+    return {
+        "embeds": [
+            _embed(
+                title=f"Resultado guardado - Jornada {int(round_no)}",
+                description=f"{winner} ha ganado a {loser}.",
+                color=0x2ECC71,
+                fields=[
+                    {"name": "Liga", "value": division or "-", "inline": True},
+                    {"name": "Enfrentamiento", "value": f"{player1} vs {player2}", "inline": True},
+                    {"name": "Ganador", "value": winner or "-", "inline": True},
+                ],
+            )
+        ]
+    }
+
+
+def notify_league_match_result_detail(
+    *,
+    round_no: int,
+    division: str,
+    player1: str,
+    player2: str,
+    winner: str,
+) -> tuple[bool, str]:
+    return _post_webhook_detail(
+        league_match_result_payload(
+            round_no=round_no,
+            division=division,
+            player1=player1,
+            player2=player2,
+            winner=winner,
+        )
+    )
+
+
+def notify_league_match_result(
+    *,
+    round_no: int,
+    division: str,
+    player1: str,
+    player2: str,
+    winner: str,
+) -> bool:
+    ok, _message = notify_league_match_result_detail(
+        round_no=round_no,
+        division=division,
+        player1=player1,
+        player2=player2,
+        winner=winner,
+    )
+    return ok
+
+
+def _notify_league_match_results_batch(results: list[dict]) -> None:
+    for idx, result in enumerate(results):
+        notify_league_match_result(
+            round_no=int(result.get("round_no") or 0),
+            division=str(result.get("division") or "-"),
+            player1=str(result.get("player1") or "-"),
+            player2=str(result.get("player2") or "-"),
+            winner=str(result.get("winner") or "-"),
+        )
+        if idx < len(results) - 1:
+            time.sleep(0.35)
+
+
+def notify_league_match_results_async(results: list[dict]) -> None:
+    if not results:
+        return
+    thread = threading.Thread(
+        target=_notify_league_match_results_batch,
+        kwargs={"results": list(results)},
+        daemon=True,
+    )
+    thread.start()
+
+
 def discord_webhook_configured() -> bool:
     return not bool(_webhook_validation_error())
 

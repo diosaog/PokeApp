@@ -5,7 +5,7 @@ from datetime import datetime, timezone
 
 import streamlit as st
 
-from app.discord_notify import notify_league_round_finished_detail
+from app.discord_notify import notify_league_match_results_async, notify_league_round_finished_detail
 from app.liga.ranking import (
     MAX_JORNADAS,
     all_filled,
@@ -234,6 +234,26 @@ def _render_final_podium() -> None:
                 )
 
 
+def _changed_match_notifications(round_no: int, data: dict, tmp_divs: dict) -> list[dict]:
+    notifications: list[dict] = []
+    for div_key, div_label in (("A", "Liga A"), ("B", "Liga B")):
+        for (p1, p2), old_winner in (data.get(div_key, {}) or {}).items():
+            key = f"{p1} vs {p2}"
+            new_winner = (tmp_divs.get(div_key, {}) or {}).get(key)
+            if new_winner not in (p1, p2) or new_winner == old_winner:
+                continue
+            notifications.append(
+                {
+                    "round_no": int(round_no),
+                    "division": div_label,
+                    "player1": p1,
+                    "player2": p2,
+                    "winner": new_winner,
+                }
+            )
+    return notifications
+
+
 def _render_previous_round_editor(*, prev_tramo: int, current_tramo: int) -> None:
     data = st.session_state.get("league_matches", {}).get(prev_tramo)
     st.markdown("---")
@@ -279,6 +299,7 @@ def _render_previous_round_editor(*, prev_tramo: int, current_tramo: int) -> Non
 
         submitted = st.form_submit_button("Guardar cambios jornada anterior")
         if submitted:
+            match_notifications = _changed_match_notifications(prev_tramo, data, tmp_divs)
             for (p1, p2) in list(data.get("A", {}).keys()):
                 data["A"][(p1, p2)] = tmp_divs["A"].get(f"{p1} vs {p2}")
             for (p1, p2) in list(data.get("B", {}).keys()):
@@ -293,6 +314,7 @@ def _render_previous_round_editor(*, prev_tramo: int, current_tramo: int) -> Non
                         del current_matches[current_tramo]
                 persist_state()
                 clear_money_caches()
+                notify_league_match_results_async(match_notifications)
                 st.success("Jornada anterior actualizada. Puntos y monedas recalculados.")
                 st.rerun()
             except Exception as e:
@@ -546,6 +568,7 @@ def page_tabla() -> None:
 
             submitted = st.form_submit_button("Guardar resultados de la jornada")
             if submitted:
+                match_notifications = _changed_match_notifications(tramo, data, tmp_divs)
                 for (p1, p2) in list(data["A"].keys()):
                     k = f"{p1} vs {p2}"
                     data["A"][(p1, p2)] = tmp_divs["A"].get(k)
@@ -554,7 +577,11 @@ def page_tabla() -> None:
                     data["B"][(p1, p2)] = tmp_divs["B"].get(k)
                 persist_state()
                 clear_money_caches()
-                st.success("Resultados guardados.")
+                notify_league_match_results_async(match_notifications)
+                if match_notifications:
+                    st.success("Resultados guardados. Aaron Avisa notificara los enfrentamientos actualizados.")
+                else:
+                    st.success("Resultados guardados.")
 
         if all_filled(data["A"]) and all_filled(data["B"]):
             st.markdown("---")
