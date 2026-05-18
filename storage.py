@@ -830,6 +830,48 @@ def add_redemption(purchase_id: int, user: str, item: str, payload_json: str) ->
         return int(rid)
 
 
+def list_redemptions(user: str | None = None, limit: int = 500):
+    if _supabase_enabled():
+        try:
+            client = _sb()
+            query = (
+                client.table("redemptions")
+                .select("id,purchase_id,user,item,payload_json,created_at")
+                .order("id", desc=True)
+                .limit(limit)
+            )
+            if user:
+                query = query.eq("user", user)
+            res = query.execute()
+            out = []
+            for row in res.data or []:
+                out.append(
+                    (
+                        row.get("id"),
+                        row.get("purchase_id"),
+                        row.get("user"),
+                        row.get("item"),
+                        row.get("payload_json"),
+                        _iso_to_ts(row.get("created_at")),
+                    )
+                )
+            return out
+        except Exception:
+            pass
+    with _conn() as cx:
+        if user:
+            return cx.execute(
+                "SELECT id, purchase_id, user, item, payload_json, created_at "
+                "FROM redemptions WHERE user=? ORDER BY id DESC LIMIT ?",
+                (user, limit),
+            ).fetchall()
+        return cx.execute(
+            "SELECT id, purchase_id, user, item, payload_json, created_at "
+            "FROM redemptions ORDER BY id DESC LIMIT ?",
+            (limit,),
+        ).fetchall()
+
+
 def set_purchase_status(purchase_id: int, status: str) -> None:
     ts = int(time.time())
     if _supabase_enabled():

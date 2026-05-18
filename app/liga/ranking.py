@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 from typing import Dict
 import streamlit as st
 
@@ -9,7 +10,14 @@ from app.entrenadores.snapshot import clear_trainer_snapshot_runtime_caches, get
 from app.juicios.penalties import get_user_penalties
 from app.liga.eligibility import counts_for_league_reward
 from app.tienda.common import _eq_item
-from storage import add_purchase, get_current_save_for_user, list_inventory, load_save_bytes, settings_get
+from storage import (
+    add_purchase,
+    get_current_save_for_user,
+    list_inventory,
+    list_redemptions,
+    load_save_bytes,
+    settings_get,
+)
 from utils import USERS, ensure_user_dir, list_user_saves
 
 MAX_JORNADAS = 5
@@ -121,11 +129,41 @@ def _count_muertos_for_trainer(trainer: str, *, raw_dead_count: int | None = Non
 
 @_cache_data(ttl=15)
 def _used_revives_count(trainer: str) -> int:
+    redemptions_count = _revive_redemptions_count(trainer)
     try:
         used_items = list_inventory(trainer, status="used", limit=300)
-        return sum(1 for row in (used_items or []) if len(row) > 1 and _eq_item(row[1], "Revivir Pokemon"))
+        inventory_count = sum(
+            1
+            for row in (used_items or [])
+            if len(row) > 1 and _eq_item(row[1], "Revivir Pokemon")
+        )
+    except Exception:
+        inventory_count = 0
+    return max(redemptions_count, inventory_count)
+
+
+@_cache_data(ttl=15)
+def _revive_redemptions_count(trainer: str) -> int:
+    try:
+        redemptions = list_redemptions(trainer, limit=1000)
     except Exception:
         return 0
+
+    total = 0
+    for row in redemptions or []:
+        item = str(row[3] if len(row) > 3 else "")
+        payload_raw = row[4] if len(row) > 4 else None
+        payload_type = ""
+        if isinstance(payload_raw, str) and payload_raw.strip():
+            try:
+                payload = json.loads(payload_raw)
+                if isinstance(payload, dict):
+                    payload_type = str(payload.get("type") or "")
+            except Exception:
+                payload_type = ""
+        if _eq_item(item, "Revivir Pokemon") or payload_type == "revive":
+            total += 1
+    return total
 
 
 def _wins_losses(players: list[str], results: dict[tuple[str, str], str]) -> dict:
@@ -343,7 +381,13 @@ def final_podium() -> list[tuple[str, float]]:
 
 
 def clear_ranking_caches() -> None:
-    for func in (_latest_save_path, _muertos_from_save, _used_revives_count, cached_dead_count):
+    for func in (
+        _latest_save_path,
+        _muertos_from_save,
+        _used_revives_count,
+        _revive_redemptions_count,
+        cached_dead_count,
+    ):
         try:
             func.clear()
         except Exception:

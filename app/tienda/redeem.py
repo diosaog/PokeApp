@@ -288,6 +288,12 @@ def render_redeem_flow(ctx: dict, current_user: str) -> None:
                             upsert_pokemon_flags(current_user, fp_key, json.dumps(base, ensure_ascii=False))
                     except Exception:
                         pass
+                    try:
+                        from app.liga.ranking import clear_ranking_caches
+
+                        clear_ranking_caches()
+                    except Exception:
+                        pass
                     st.success("Revivir registrado (sin modificar el save).")
                     st.session_state.pop("redeem_ctx", None)
                     st.rerun()
