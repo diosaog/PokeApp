@@ -9,6 +9,7 @@ from app.entrenadores.cache import cached_dead_count
 from app.entrenadores.snapshot import clear_trainer_snapshot_runtime_caches, get_trainer_snapshot
 from app.juicios.penalties import get_user_penalties
 from app.liga.eligibility import counts_for_league_reward
+from app.liga.rewards import CURRENT_POINTS_BY_POSITION, points_for_league_position
 from app.tienda.common import _eq_item
 from storage import (
     add_purchase,
@@ -21,6 +22,7 @@ from storage import (
 from utils import USERS, ensure_user_dir, list_user_saves
 
 MAX_JORNADAS = 5
+POINTS_BY_POSITION = CURRENT_POINTS_BY_POSITION
 
 
 def _cache_data(ttl: int = 20):
@@ -319,21 +321,6 @@ def recompute_round(tramo: int, *, apply_divisions_from_round: bool = False) -> 
     _persist_state()
 
 
-POINTS_BY_POSITION = {
-    1: 9,
-    2: 8,
-    3: 7,
-    4: 6,
-    5: 5,
-    6: 6,
-    7: 5,
-    8: 4,
-    9: 3,
-    10: 2,
-    11: 1,
-}
-
-
 def points_from_league(user: str) -> int:
     lr = st.session_state.get("league_results", {})
     tramos = lr.get(user, {})
@@ -341,7 +328,7 @@ def points_from_league(user: str) -> int:
     for tramo, pos in tramos.items():
         if not counts_for_league_reward(user, int(tramo)):
             continue
-        total += POINTS_BY_POSITION.get(int(pos), 0)
+        total += points_for_league_position(int(tramo), int(pos))
     return total
 
 
