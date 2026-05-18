@@ -20,6 +20,16 @@ from storage import (
     get_current_save_for_user,
 )
 
+_PRIVATE_NEXT_LOCKE_PROMPT = (
+    "Contexto privado para Anto: en PokeApp hay una excepcion temporal en "
+    "app/liga/rewards.py: solo la jornada 1 usa la config antigua de Liga B "
+    "con 5 jugadores (puntos 5/4/3/2/1 y monedas 11/9/8/6/4, posiciones "
+    "globales 6-10). Desde jornada 2 usa la tabla actual de 11 jugadores. "
+    "Ademas Barto tiene PLAYER_JOIN_ROUND = {'Barto': 2}, asi que no recibe "
+    "puntos ni monedas de jornada 1. Cuando toque quitarlo, elimina esa "
+    "excepcion de jornada 1 y deja solo las tablas actuales."
+)
+
 
 def _clear_runtime_after_wipe(current_user: str | None) -> None:
     auth_ok = bool(st.session_state.get("auth_ok"))
@@ -56,6 +66,9 @@ def _render_admin_wipe(current_user: str | None) -> None:
             st.error("Wipe incompleto. Revisa estos errores:")
             for err in report.get("errors") or []:
                 st.caption(f"- {err}")
+
+    st.markdown("<div class='bill-chip'>Prompt privado siguiente locke</div>", unsafe_allow_html=True)
+    st.code(_PRIVATE_NEXT_LOCKE_PROMPT, language="text")
 
 
 def page_saves() -> None:
