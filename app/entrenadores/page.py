@@ -124,7 +124,12 @@ def page_entrenadores_view() -> None:
     st.markdown("---")
     col_stats, col_inv = st.columns([1.35, 1.1], gap="large")
     with col_stats:
-        trainer_summary_with_portrait_ui(sav_json, box_count, is_own_profile=is_own_profile)
+        trainer_summary_with_portrait_ui(
+            sav_json,
+            box_count,
+            is_own_profile=is_own_profile,
+            save_path=str(save_path),
+        )
     with col_inv:
         st.markdown(
             "<div style='display:inline-block; background:linear-gradient(180deg,var(--accent) 0%, var(--accent-dark) 100%);"

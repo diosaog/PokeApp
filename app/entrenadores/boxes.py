@@ -43,7 +43,7 @@ def boxes_grid_ui(
     st.subheader("PC (Cajas)")
     if pc_ok is None:
         try:
-            pc_ok = has_pc_data(sav_json)
+            pc_ok = has_pc_data(sav_json, save_path=save_path)
         except Exception:
             pc_ok = False
     if not pc_ok:

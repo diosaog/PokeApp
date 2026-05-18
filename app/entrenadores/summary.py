@@ -186,7 +186,13 @@ def _region_from_save(sav_json: dict, user: str) -> str:
     return "Unova"
 
 
-def trainer_summary_with_portrait_ui(sav_json: dict, box_count: int, *, is_own_profile: bool) -> None:
+def trainer_summary_with_portrait_ui(
+    sav_json: dict,
+    box_count: int,
+    *,
+    is_own_profile: bool,
+    save_path: str | None = None,
+) -> None:
     _ensure_trainer_css()
     try:
         medallas = count_badges(sav_json)
@@ -225,7 +231,11 @@ def trainer_summary_with_portrait_ui(sav_json: dict, box_count: int, *, is_own_p
 
     box_index_muertos = muertos_box_index(box_count)
     try:
-        muertos_list = extract_box(sav_json, box_index_muertos) if box_count > box_index_muertos else []
+        muertos_list = (
+            extract_box(sav_json, box_index_muertos, save_path=save_path)
+            if box_count > box_index_muertos
+            else []
+        )
     except Exception:
         muertos_list = []
     muertos = len(muertos_list)

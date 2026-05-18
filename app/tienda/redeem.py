@@ -76,7 +76,7 @@ def render_redeem_flow(ctx: dict, current_user: str) -> None:
                 spath = str(saves[0])
                 sav_json = open_sav_cached(spath)
                 if origin_kind == "Equipo":
-                    mons = extract_team(sav_json, save_path=spath)
+                    mons = extract_team(sav_json)
                 else:
                     idx = int(origin_kind.split()[-1]) - 1
                     mons = extract_box(sav_json, idx, save_path=spath)
@@ -142,7 +142,7 @@ def render_redeem_flow(ctx: dict, current_user: str) -> None:
             if saves:
                 spath = str(saves[0])
                 sav_json = open_sav_cached(spath)
-                team = extract_team(sav_json, save_path=spath) or []
+                team = extract_team(sav_json) or []
                 for i, m in enumerate(team):
                     fp_legacy, fp_stable = _fingerprints_for_mon(m)
                     labels.append((f"Equipo slot {i+1}: {m.get('species_name') or m.get('species')} Lv.{m.get('level','-')}", fp_legacy, fp_stable))
@@ -207,7 +207,7 @@ def render_redeem_flow(ctx: dict, current_user: str) -> None:
                 spath = str(saves[0])
                 sav_json = open_sav_cached(spath)
                 if origin_kind == "Equipo":
-                    mons = extract_team(sav_json, save_path=spath)
+                    mons = extract_team(sav_json)
                 else:
                     idx = int(origin_kind.split()[-1]) - 1
                     mons = extract_box(sav_json, idx, save_path=spath)

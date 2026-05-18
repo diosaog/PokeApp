@@ -17,7 +17,7 @@ if st is not None:
     def cached_team(save_path: str, mtime: float) -> List[dict]:
         try:
             sav_json = open_sav_cached(save_path)
-            return extract_team(sav_json, save_path=save_path) or []
+            return extract_team(sav_json) or []
         except Exception:
             return []
 
@@ -63,7 +63,7 @@ else:
     def cached_team(save_path: str, mtime: float) -> List[dict]:
         try:
             sav_json = open_sav_cached(save_path)
-            return extract_team(sav_json, save_path=save_path) or []
+            return extract_team(sav_json) or []
         except Exception:
             return []
 
