@@ -35,7 +35,7 @@ _NOTIFY_SENT_KEY_PREFIX = "league_round_notify_sent"
 _NOTIFY_STATUS_KEY_PREFIX = "league_round_notify_status"
 _FLASH_MESSAGES_KEY = "_league_flash_messages"
 _CLEAR_EDIT_BUFFERS_NEXT_KEY = "_league_clear_edit_buffers_next"
-GENERAL_TABLE_HEIGHT = 460
+GENERAL_TABLE_HEIGHT = 425
 
 
 def _clear_league_page_caches() -> None:
