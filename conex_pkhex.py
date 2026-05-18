@@ -209,20 +209,24 @@ def _ensure_last_sav_from_session() -> None:
     except Exception:
         pass
 
-def _run_bridge_for_box(box_index: int) -> Optional[Dict[str, Any]]:
-    """Ejecuta el bridge con --box N (y modo si procede) usando el último sav conocido."""
+def _run_bridge_for_box(box_index: int, save_path: str | Path | None = None) -> Optional[Dict[str, Any]]:
+    """Ejecuta el bridge con --box N (y modo si procede) usando el save indicado."""
     if _BRIDGE_PATH is None:
         raise RuntimeError("Bridge no cargado.")
-    _ensure_last_sav_from_session()
-    if not _LAST_SAV_PATH:
+    if save_path is not None:
+        current_sav_path = str(Path(save_path))
+    else:
+        _ensure_last_sav_from_session()
+        current_sav_path = _LAST_SAV_PATH or ""
+    if not current_sav_path:
         return None
 
-    args = [str(_BRIDGE_PATH), _LAST_SAV_PATH, "--box", str(int(box_index))]
+    args = [str(_BRIDGE_PATH), current_sav_path, "--box", str(int(box_index))]
     mode = _current_mode()
     if mode:
         args += ["--mode", mode]
     # caché por (sav, box, mode)
-    cache_key = (_LAST_SAV_PATH, int(box_index), mode)
+    cache_key = (current_sav_path, int(box_index), mode)
     if cache_key in _BOX_CACHE:
         return _BOX_CACHE[cache_key]
 
@@ -591,12 +595,14 @@ def _find_boxes_root(data: Dict[str, Any]) -> List[Any]:
 
 def has_pc_data(sav_json: Dict[str, Any], save_path: str | None = None) -> bool:
     """Verifica que el save tiene PC, aunque la primera caja este vacia."""
+    bridge_save_path = None
     if save_path:
         p = Path(save_path)
         if not p.exists():
             return False
+        bridge_save_path = p
         PKHeXRuntime.open_sav(p)
-    data0 = _run_bridge_for_box(0)
+    data0 = _run_bridge_for_box(0, bridge_save_path)
     if isinstance(data0, dict):
         boxes = data0.get("Boxes")
         if isinstance(boxes, list) and boxes:
@@ -628,16 +634,18 @@ def extract_team(sav_json: str | Dict[str, Any], save_path: str | None = None) -
 
 def get_box_meta(sav_json: Dict[str, Any], save_path: str | None = None) -> Tuple[int, List[str]]:
     """Devuelve la cantidad de cajas y sus nombres intentando leerlos directamente del bridge."""
+    bridge_save_path = None
     if save_path:
         p = Path(save_path)
         if p.exists():
+            bridge_save_path = p
             PKHeXRuntime.open_sav(p)
     names: List[str] = []
     ok_any = False
     total = _box_count_hint(sav_json)
     for i in range(total):
         nm = None
-        data_i = _run_bridge_for_box(i)
+        data_i = _run_bridge_for_box(i, bridge_save_path)
         if isinstance(data_i, dict):
             boxes = data_i.get("Boxes")
             if isinstance(boxes, list) and boxes:
@@ -667,16 +675,18 @@ def get_box_meta(sav_json: Dict[str, Any], save_path: str | None = None) -> Tupl
 def extract_box(sav_json: Dict[str, Any], box_index: int, save_path: str | None = None) -> List[Dict[str, Any]]:
     """Lee la caja directamente del ejecutable con --box N (como en las pruebas que funcionan).
        Si falla, intenta fallback a la lógica antigua contra el JSON recibido."""
+    bridge_save_path = None
     if save_path:
         p = Path(save_path)
         if p.exists():
+            bridge_save_path = p
             PKHeXRuntime.open_sav(p)
     total = _box_count_hint(sav_json)
     if not (0 <= box_index < total):
         return []
 
     # 1) Lectura per-box (preferida)
-    data_i = _run_bridge_for_box(box_index)
+    data_i = _run_bridge_for_box(box_index, bridge_save_path)
     if isinstance(data_i, dict):
         boxes = data_i.get("Boxes")
         if isinstance(boxes, list) and boxes:
@@ -733,10 +743,12 @@ def extract_box(sav_json: Dict[str, Any], box_index: int, save_path: str | None 
 
 def get_box_meta_quick(sav_json: Dict[str, Any], save_path: str | None = None, max_probe: int = 3) -> Tuple[int, List[str]]:
     """VersiИn rЗpida de get_box_meta: sЗlo sondea unas pocas cajas para nombrarlas."""
+    bridge_save_path = None
     if save_path:
         p = Path(save_path)
         if p.exists():
             try:
+                bridge_save_path = p
                 PKHeXRuntime.open_sav(p)
             except Exception:
                 pass
@@ -747,7 +759,7 @@ def get_box_meta_quick(sav_json: Dict[str, Any], save_path: str | None = None, m
     for i in range(total):
         nm = None
         if probe < max_probe:
-            data_i = _run_bridge_for_box(i)
+            data_i = _run_bridge_for_box(i, bridge_save_path)
             if isinstance(data_i, dict):
                 boxes = data_i.get("Boxes")
                 if isinstance(boxes, list) and boxes:

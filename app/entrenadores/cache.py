@@ -17,7 +17,7 @@ if st is not None:
     def cached_team(save_path: str, mtime: float) -> List[dict]:
         try:
             sav_json = open_sav_cached(save_path)
-            return extract_team(sav_json) or []
+            return extract_team(sav_json, save_path=save_path) or []
         except Exception:
             return []
 
@@ -25,7 +25,7 @@ if st is not None:
     def cached_box(save_path: str, mtime: float, box_index: int) -> List[dict]:
         try:
             sav_json = open_sav_cached(save_path)
-            return extract_box(sav_json, box_index) or []
+            return extract_box(sav_json, box_index, save_path=save_path) or []
         except Exception:
             return []
 
@@ -33,7 +33,7 @@ if st is not None:
     def cached_box_meta_quick(save_path: str, mtime: float, max_probe: int = 3) -> Tuple[int, List[str]]:
         try:
             sav_json = open_sav_cached(save_path)
-            return get_box_meta_quick(sav_json, max_probe=max_probe)
+            return get_box_meta_quick(sav_json, save_path=save_path, max_probe=max_probe)
         except Exception:
             return 0, []
 
@@ -41,7 +41,7 @@ if st is not None:
     def cached_has_pc_data(save_path: str, mtime: float) -> bool:
         try:
             sav_json = open_sav_cached(save_path)
-            return has_pc_data(sav_json)
+            return has_pc_data(sav_json, save_path=save_path)
         except Exception:
             return False
 
@@ -63,28 +63,28 @@ else:
     def cached_team(save_path: str, mtime: float) -> List[dict]:
         try:
             sav_json = open_sav_cached(save_path)
-            return extract_team(sav_json) or []
+            return extract_team(sav_json, save_path=save_path) or []
         except Exception:
             return []
 
     def cached_box(save_path: str, mtime: float, box_index: int) -> List[dict]:
         try:
             sav_json = open_sav_cached(save_path)
-            return extract_box(sav_json, box_index) or []
+            return extract_box(sav_json, box_index, save_path=save_path) or []
         except Exception:
             return []
 
     def cached_box_meta_quick(save_path: str, mtime: float, max_probe: int = 3) -> Tuple[int, List[str]]:
         try:
             sav_json = open_sav_cached(save_path)
-            return get_box_meta_quick(sav_json, max_probe=max_probe)
+            return get_box_meta_quick(sav_json, save_path=save_path, max_probe=max_probe)
         except Exception:
             return 0, []
 
     def cached_has_pc_data(save_path: str, mtime: float) -> bool:
         try:
             sav_json = open_sav_cached(save_path)
-            return has_pc_data(sav_json)
+            return has_pc_data(sav_json, save_path=save_path)
         except Exception:
             return False
 
