@@ -35,6 +35,9 @@ def _sanitize_divisions(divs: dict) -> dict:
     curA = _norm_list(divs.get("A", [])) if isinstance(divs, dict) else []
     curB = _norm_list(divs.get("B", [])) if isinstance(divs, dict) else []
     curB = [u for u in curB if u not in curA]
+    for u in players:
+        if u not in curA and u not in curB:
+            curB.append(u)
     return {"A": curA, "B": curB}
 
 
@@ -151,7 +154,7 @@ def ensure_state() -> None:
         st.session_state.league_results = {}
     if "league_divisions" not in st.session_state:
         players = list(USERS.keys())
-        st.session_state.league_divisions = {"A": players[:5], "B": players[5:10]}
+        st.session_state.league_divisions = {"A": players[:5], "B": players[5:]}
     else:
         st.session_state.league_divisions = _sanitize_divisions(st.session_state.league_divisions)
     if "league_matches" not in st.session_state:

@@ -24,6 +24,7 @@ USERS: Dict[str, str] = {
     "Aaron": "a31",
     "Miguel": "m77",
     "Mario": "m10",
+    "Barto": "b66",
 }
 
 SECTIONS = ["Normativa", "Liga y Tabla", "Previa Combate", "Entrenadores", "Copa", "Juicios", "Tienda", "Saves"]

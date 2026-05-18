@@ -440,7 +440,7 @@ def page_tabla() -> None:
 
     st.markdown("---")
     st.subheader("Editar divisiones")
-    with st.expander("Divisiones (5 y 5)", expanded=False):
+    with st.expander("Divisiones (5 y 6)", expanded=False):
         players = list(USERS.keys())
         cur_divs = (
             st.session_state.league_divisions
@@ -472,10 +472,10 @@ def page_tabla() -> None:
             st.session_state[key_B] = _normalize_players(st.session_state.get(key_B))
             st.session_state[key_B] = [p for p in st.session_state[key_B] if p in remaining]
 
-        default_B = [p for p in _normalize_players(cur_divs.get("B", [])) if p in remaining][:5]
-        sel_B = st.multiselect("Liga B (5 jugadores)", remaining, default=default_B, max_selections=5, key=key_B)
+        default_B = [p for p in _normalize_players(cur_divs.get("B", [])) if p in remaining][:6]
+        sel_B = st.multiselect("Liga B (6 jugadores)", remaining, default=default_B, max_selections=6, key=key_B)
         if st.button("Guardar divisiones"):
-            if len(sel_A) == 5 and len(sel_B) == 5:
+            if len(sel_A) == 5 and len(sel_B) == 6:
                 st.session_state.league_divisions = {"A": sel_A, "B": sel_B}
                 st.session_state.league_tramo = 1
                 st.session_state.league_active = False
@@ -489,7 +489,7 @@ def page_tabla() -> None:
                 _schedule_clear_league_edit_buffers()
                 st.rerun()
             else:
-                st.error("Selecciona exactamente 5 en A y 5 en B.")
+                st.error("Selecciona exactamente 5 en A y 6 en B.")
 
     if st.session_state.get("league_prev_edit_active") and prev_tramo:
         _render_previous_round_editor(prev_tramo=prev_tramo, current_tramo=tramo)
@@ -656,7 +656,7 @@ def page_tabla() -> None:
             st.session_state.league_results = {}
             st.session_state.league_matches = {}
             st.session_state.league_temp_order = {"A": [], "B": []}
-            st.session_state.league_divisions = {"A": players[:5], "B": players[5:10]}
+            st.session_state.league_divisions = {"A": players[:5], "B": players[5:]}
             st.session_state.league_movements = {}
             try:
                 clear_purchases()

@@ -7,6 +7,7 @@ from app.entrenadores.constants import DEAD_BOX_INDEX
 from app.entrenadores.cache import cached_dead_count
 from app.entrenadores.snapshot import clear_trainer_snapshot_runtime_caches, get_trainer_snapshot
 from app.juicios.penalties import get_user_penalties
+from app.liga.eligibility import counts_for_league_reward
 from app.tienda.common import _eq_item
 from storage import add_purchase, get_current_save_for_user, list_inventory, load_save_bytes, settings_get
 from utils import USERS, ensure_user_dir, list_user_saves
@@ -30,6 +31,18 @@ def _gen_pairs(players: list[str]) -> list[tuple[str, str]]:
     return res
 
 
+def _sync_match_map(
+    players: list[str],
+    existing: dict[tuple[str, str], str | None] | None,
+) -> dict[tuple[str, str], str | None]:
+    existing = existing or {}
+    synced: dict[tuple[str, str], str | None] = {}
+    for pair in _gen_pairs(players):
+        rev = (pair[1], pair[0])
+        synced[pair] = existing.get(pair, existing.get(rev))
+    return synced
+
+
 def _players_from_matches(results: dict[tuple[str, str], str | None]) -> list[str]:
     players: list[str] = []
     for p1, p2 in results.keys():
@@ -41,13 +54,13 @@ def _players_from_matches(results: dict[tuple[str, str], str | None]) -> list[st
 
 
 def get_matches_for(tramo: int) -> dict:
-    if tramo not in st.session_state.league_matches:
-        A = st.session_state.league_divisions["A"]
-        B = st.session_state.league_divisions["B"]
-        st.session_state.league_matches[tramo] = {
-            "A": {pair: None for pair in _gen_pairs(A)},
-            "B": {pair: None for pair in _gen_pairs(B)},
-        }
+    A = st.session_state.league_divisions["A"]
+    B = st.session_state.league_divisions["B"]
+    current = st.session_state.league_matches.get(tramo, {})
+    st.session_state.league_matches[tramo] = {
+        "A": _sync_match_map(A, current.get("A", {})),
+        "B": _sync_match_map(B, current.get("B", {})),
+    }
     return st.session_state.league_matches[tramo]
 
 
@@ -199,10 +212,10 @@ def finalize(tramo: int) -> None:
 
     if tramo < MAX_JORNADAS:
         nueva_A = rankA[:2] + rankB[:3]
-        nueva_B = rankA[2:5] + rankB[3:5]
+        nueva_B = rankA[2:5] + rankB[3:]
         st.session_state.league_divisions = {"A": nueva_A, "B": nueva_B}
         try:
-            st.session_state.league_movements[tramo] = {"up": [rankB[0], rankB[1]], "down": [rankA[2], rankA[3]]}
+            st.session_state.league_movements[tramo] = {"up": rankB[:3], "down": rankA[2:5]}
         except Exception:
             pass
     else:
@@ -249,8 +262,8 @@ def recompute_round(tramo: int, *, apply_divisions_from_round: bool = False) -> 
         try:
             st.session_state.setdefault("league_movements", {})
             st.session_state.league_movements[tramo] = {
-                "up": [rankB[0], rankB[1]],
-                "down": [rankA[2], rankA[3]],
+                "up": rankB[:3],
+                "down": rankA[2:5],
             }
         except Exception:
             pass
@@ -262,20 +275,34 @@ def recompute_round(tramo: int, *, apply_divisions_from_round: bool = False) -> 
 
     if apply_divisions_from_round and tramo < MAX_JORNADAS:
         nueva_A = rankA[:2] + rankB[:3]
-        nueva_B = rankA[2:5] + rankB[3:5]
+        nueva_B = rankA[2:5] + rankB[3:]
         st.session_state.league_divisions = {"A": nueva_A, "B": nueva_B}
 
     _persist_state()
 
 
-POINTS_BY_POSITION = {1: 9, 2: 8, 3: 7, 4: 6, 5: 5, 6: 5, 7: 4, 8: 3, 9: 2, 10: 1}
+POINTS_BY_POSITION = {
+    1: 9,
+    2: 8,
+    3: 7,
+    4: 6,
+    5: 5,
+    6: 6,
+    7: 5,
+    8: 4,
+    9: 3,
+    10: 2,
+    11: 1,
+}
 
 
 def points_from_league(user: str) -> int:
     lr = st.session_state.get("league_results", {})
     tramos = lr.get(user, {})
     total = 0
-    for pos in tramos.values():
+    for tramo, pos in tramos.items():
+        if not counts_for_league_reward(user, int(tramo)):
+            continue
         total += POINTS_BY_POSITION.get(int(pos), 0)
     return total
 

@@ -2,9 +2,11 @@ from __future__ import annotations
 
 import streamlit as st
 
+from app.liga.eligibility import counts_for_league_reward
+
 COINS_BY_POSITION = {
     1: 15, 2: 14, 3: 12, 4: 11, 5: 10,
-    6: 11, 7: 9, 8: 8, 9: 6, 10: 4,
+    6: 11, 7: 10, 8: 9, 9: 8, 10: 7, 11: 3,
 }
 
 
@@ -30,4 +32,8 @@ def coins_from_league(user: str) -> int:
             pass
     lr = st.session_state.get("league_results", {})
     user_map = lr.get(user, {})
-    return sum(COINS_BY_POSITION.get(pos, 0) for pos in user_map.values())
+    return sum(
+        COINS_BY_POSITION.get(int(pos), 0)
+        for tramo, pos in user_map.items()
+        if counts_for_league_reward(user, int(tramo))
+    )
