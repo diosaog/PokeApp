@@ -20,13 +20,33 @@ from storage import (
     get_current_save_for_user,
 )
 
-_PRIVATE_NEXT_LOCKE_PROMPT = (
-    "Contexto privado para Anto: la jornada 2 sigue con 11 jugadores y las "
-    "tablas antiguas de puntos y monedas. Al cerrarla, Mario deja de estar "
-    "activo y desde jornada 3 la liga pasa a dos divisiones de 5 con las "
-    "nuevas tablas de 10 posiciones. Barto mantiene PLAYER_JOIN_ROUND = "
-    "{'Barto': 2}, asi que no recibe puntos ni monedas de la jornada 1."
-)
+_PRIVATE_NEXT_LOCKE_PROMPT = """Ya se ha hecho el WIPE y empieza una temporada nueva. Ajusta PokeApp para que la liga nazca
+directamente con 10 jugadores, sin Mario, sin compatibilidad temporal con las jornadas 1/2
+de la temporada anterior y con dos divisiones de 5 desde la jornada 1.
+
+Mantener desde la jornada 1 estas tablas definitivas:
+MONEDAS: 1=15, 2=14, 3=12, 4=11, 5=10, 6=11, 7=9, 8=8, 9=6, 10=4.
+PUNTOS: 1=9, 2=8, 3=7, 4=6, 5=5, 6=5, 7=4, 8=3, 9=2, 10=1.
+
+Retira de una vez toda la transicion que se puso para terminar la jornada 2 antigua:
+- Elimina definitivamente a Mario de USERS y cualquier asset o referencia estatica suya.
+- En utils.py elimina ROSTER_DEPARTURE_AFTER_ROUND y la logica de roster por jornada/salida
+  de Mario; deja los selectores funcionando con el roster fijo de 10.
+- En app/liga/state.py elimina roster_transition_complete /
+  league_roster_transition_complete y la normalizacion creada solo para retirar a Mario.
+- En app/liga/ranking.py elimina la marca de transicion y el clear_user_app_data("Mario")
+  al finalizar la jornada 2; en storage.py elimina ese helper si ya no tiene otros usos.
+- En app/liga/rewards.py elimina LEGACY_* y FIRST_ROUND_B_* junto con sus condiciones:
+  desde la jornada 1 solo deben aplicarse las tablas definitivas de 10 posiciones.
+- En app/liga/eligibility.py elimina PLAYER_JOIN_ROUND de Barto: en esta temporada Barto
+  participa y cobra desde la jornada 1.
+- Revisa liga, login, entrenadores, copa, juicios, tienda, normativa y este prompt para que
+  no queden menciones funcionales a Mario, a 11 jugadores, a la jornada 2 transitoria ni
+  al alta tardia de Barto.
+
+El WIPE ya elimina estados y datos generados, asi que no hace falta migrar resultados
+historicos: simplifica el codigo para el roster fijo de 10, ejecuta pruebas/compilacion,
+comprueba que tenga sentido y funcione, y haz commit y push."""
 
 
 def _clear_runtime_after_wipe(current_user: str | None) -> None:
