@@ -28,7 +28,7 @@ from app.liga.table_summary import (
 from app.juicios.penalties import clear_penalty_caches
 from app.tienda.money import clear_money_caches
 from storage import clear_purchases, settings_clear_cache, settings_get_uncached, settings_set
-from utils import USERS
+from utils import active_users
 
 
 _NOTIFY_SENT_KEY_PREFIX = "league_round_notify_sent"
@@ -379,6 +379,8 @@ def page_tabla() -> None:
                     st.error(f"No se pudo enviar el resumen de jornada {resend_round}: {message}")
 
     tramo = st.session_state.league_tramo
+    league_players = list(active_users().keys())
+    division_b_size = max(len(league_players) - 5, 0)
     liga_finalizada = tramo > MAX_JORNADAS
     prev_tramo = tramo - 1 if tramo > 1 else None
     has_prev_closed = bool(prev_tramo and prev_tramo in st.session_state.get("league_matches", {}))
@@ -463,8 +465,8 @@ def page_tabla() -> None:
 
     st.markdown("---")
     st.subheader("Editar divisiones")
-    with st.expander("Divisiones (5 y 6)", expanded=False):
-        players = list(USERS.keys())
+    with st.expander(f"Divisiones (5 y {division_b_size})", expanded=False):
+        players = league_players
         cur_divs = (
             st.session_state.league_divisions
             if isinstance(st.session_state.league_divisions, dict)
@@ -495,10 +497,16 @@ def page_tabla() -> None:
             st.session_state[key_B] = _normalize_players(st.session_state.get(key_B))
             st.session_state[key_B] = [p for p in st.session_state[key_B] if p in remaining]
 
-        default_B = [p for p in _normalize_players(cur_divs.get("B", [])) if p in remaining][:6]
-        sel_B = st.multiselect("Liga B (6 jugadores)", remaining, default=default_B, max_selections=6, key=key_B)
+        default_B = [p for p in _normalize_players(cur_divs.get("B", [])) if p in remaining][:division_b_size]
+        sel_B = st.multiselect(
+            f"Liga B ({division_b_size} jugadores)",
+            remaining,
+            default=default_B,
+            max_selections=division_b_size,
+            key=key_B,
+        )
         if st.button("Guardar divisiones"):
-            if len(sel_A) == 5 and len(sel_B) == 6:
+            if len(sel_A) == 5 and len(sel_B) == division_b_size:
                 st.session_state.league_divisions = {"A": sel_A, "B": sel_B}
                 st.session_state.league_tramo = 1
                 st.session_state.league_active = False
@@ -512,7 +520,7 @@ def page_tabla() -> None:
                 _schedule_clear_league_edit_buffers()
                 st.rerun()
             else:
-                st.error("Selecciona exactamente 5 en A y 6 en B.")
+                st.error(f"Selecciona exactamente 5 en A y {division_b_size} en B.")
 
     if st.session_state.get("league_prev_edit_active") and prev_tramo:
         _render_previous_round_editor(prev_tramo=prev_tramo, current_tramo=tramo)
@@ -686,7 +694,7 @@ def page_tabla() -> None:
     confirm = st.selectbox("Seguro que quieres reiniciar la Liga?", ["No", "Si"], key="reset_league_ligatabla")
     if st.button("Reiniciar liga", help="Borra jornadas, resultados y divisiones", key="btn_reset_league_ligatabla"):
         if confirm == "Si":
-            players = list(USERS.keys())
+            players = list(active_users().keys())
             st.session_state.league_tramo = 1
             st.session_state.league_active = False
             st.session_state.league_results = {}

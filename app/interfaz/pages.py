@@ -37,9 +37,9 @@ def page_tabla() -> None:
 def page_previa_combate() -> None:
     try:
         from app.liga.matchup import render_matchup_preview
-        from utils import USERS
+        from utils import active_users
 
-        render_matchup_preview(list(USERS.keys()))
+        render_matchup_preview(list(active_users().keys()))
     except Exception as e:
         st.error(f"No se pudo cargar la previa de combate: {e}")
 

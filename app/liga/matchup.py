@@ -14,7 +14,7 @@ from app.juicios.penalties import get_user_penalties
 from app.tienda.money import money_breakdown_from_parts
 from dexdata import item_name_es
 from showdown_sprites import showdown_sprite_url
-from utils import USERS
+from utils import active_users
 
 
 def _cache_data(ttl: int = 20):
@@ -455,7 +455,8 @@ def render_matchup_preview(players: list[str] | None = None) -> None:
         st.warning("No se ha podido cargar el Bridge para leer los saves. La previa necesita acceso al lector DS.")
         return
 
-    available = [player for player in (players or list(USERS.keys())) if player in USERS]
+    users = active_users()
+    available = [player for player in (players or list(users.keys())) if player in users]
     if len(available) < 2:
         st.info("No hay suficientes jugadores para generar una previa.")
         return

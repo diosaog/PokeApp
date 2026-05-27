@@ -16,7 +16,7 @@ from storage import (
 )
 from conex_pkhex import extract_box, extract_team, open_sav_cached
 from pkmmeta import pokemon_fingerprint, pokemon_fingerprint_stable
-from utils import USERS, list_user_saves
+from utils import active_users, list_user_saves
 
 
 def _fingerprints_for_mon(m: dict) -> tuple[str | None, str | None]:
@@ -66,7 +66,7 @@ def render_redeem_flow(ctx: dict, current_user: str) -> None:
     st.subheader(f"Usar: {item} (#{pid})")
 
     if _eq_item(item, "Robar Pokemon"):
-        players = [u for u in USERS.keys() if u != current_user]
+        players = [u for u in active_users().keys() if u != current_user]
         target = st.selectbox("Jugador objetivo", players, key="rob_target")
         origin_kind = st.selectbox("Origen", ["Equipo"] + [f"Caja {i+1}" for i in range(TOTAL_BOXES) if i != DEAD_BOX_INDEX], key="rob_origin")
         mons: List[dict] = []

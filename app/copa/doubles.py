@@ -7,7 +7,7 @@ import streamlit as st
 from app.copa.logos import LOGO_DIR_REL, ensure_logo_dir, logo_data_uri_for_team
 from app.interfaz.theme import apply_platinum_ui
 from storage import settings_get, settings_set
-from utils import USERS
+from utils import active_users
 
 RESULT_LABELS = {
     "Sin jugar": (None, None),
@@ -525,7 +525,7 @@ def _render_team_card(team: dict, *, compact: bool = False) -> None:
 
 
 def _render_configurator(S: dict) -> None:
-    all_players = list(USERS.keys())
+    all_players = list(active_users().keys())
     max_teams = max(2, len(all_players) // 2)
     current_count = int(S.get("team_count") or min(5, max_teams))
     current_count = max(2, min(current_count, max_teams))

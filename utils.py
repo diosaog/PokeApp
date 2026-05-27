@@ -3,6 +3,7 @@ from pathlib import Path
 from typing import Dict, List
 from datetime import datetime
 import hashlib
+import json
 try:
     import streamlit as st  # type: ignore
 except Exception:
@@ -27,6 +28,10 @@ USERS: Dict[str, str] = {
     "Barto": "b66",
 }
 
+ROSTER_DEPARTURE_AFTER_ROUND = {
+    "Mario": 2,
+}
+
 SECTIONS = ["Normativa", "Liga y Tabla", "Previa Combate", "Entrenadores", "Copa", "Juicios", "Tienda", "Saves"]
 
 
@@ -46,6 +51,47 @@ def init_session_state() -> None:
 def sections_for_user(user: str | None) -> list[str]:
     _ = user
     return list(SECTIONS)
+
+
+def league_users_for_round(round_no: int, *, roster_transition_complete: bool = False) -> Dict[str, str]:
+    current_round = max(int(round_no), 1)
+    return {
+        user: code
+        for user, code in USERS.items()
+        if not (
+            roster_transition_complete and user in ROSTER_DEPARTURE_AFTER_ROUND
+        )
+        and current_round <= int(ROSTER_DEPARTURE_AFTER_ROUND.get(user, current_round))
+    }
+
+
+def active_users() -> Dict[str, str]:
+    current_round = 1
+    roster_transition_complete = False
+    try:
+        if st is not None and st.session_state.get("league_tramo"):
+            return league_users_for_round(
+                int(st.session_state.league_tramo),
+                roster_transition_complete=bool(
+                    st.session_state.get("league_roster_transition_complete", False)
+                ),
+            )
+    except Exception:
+        pass
+    try:
+        from storage import settings_get
+
+        raw = settings_get("league_state")
+        if raw:
+            state = json.loads(raw)
+            current_round = max(int(state.get("tramo") or 1), 1)
+            roster_transition_complete = bool(state.get("roster_transition_complete", False))
+    except Exception:
+        current_round = 1
+    return league_users_for_round(
+        current_round,
+        roster_transition_complete=roster_transition_complete,
+    )
 
 
 def ensure_user_dir(u: str) -> Path:

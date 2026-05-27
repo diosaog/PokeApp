@@ -3,7 +3,7 @@ from __future__ import annotations
 import streamlit as st
 
 from storage import get_current_save_for_user, list_saves_by_user, load_save_bytes, set_current_save_for_user
-from utils import USERS, ensure_user_dir, list_user_saves
+from utils import active_users, ensure_user_dir, list_user_saves
 
 _BOOTSTRAP_ALL_DONE = False
 
@@ -51,7 +51,7 @@ def bootstrap_all_saves() -> None:
     if _BOOTSTRAP_ALL_DONE:
         return
     try:
-        users = list(USERS.keys())
+        users = list(active_users().keys())
     except Exception:
         return
     for user in users:

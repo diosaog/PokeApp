@@ -21,13 +21,11 @@ from storage import (
 )
 
 _PRIVATE_NEXT_LOCKE_PROMPT = (
-    "Contexto privado para Anto: en PokeApp hay una excepcion temporal en "
-    "app/liga/rewards.py: solo la jornada 1 usa la config antigua de Liga B "
-    "con 5 jugadores (puntos 5/4/3/2/1 y monedas 11/9/8/6/4, posiciones "
-    "globales 6-10). Desde jornada 2 usa la tabla actual de 11 jugadores. "
-    "Ademas Barto tiene PLAYER_JOIN_ROUND = {'Barto': 2}, asi que no recibe "
-    "puntos ni monedas de jornada 1. Cuando toque quitarlo, elimina esa "
-    "excepcion de jornada 1 y deja solo las tablas actuales."
+    "Contexto privado para Anto: la jornada 2 sigue con 11 jugadores y las "
+    "tablas antiguas de puntos y monedas. Al cerrarla, Mario deja de estar "
+    "activo y desde jornada 3 la liga pasa a dos divisiones de 5 con las "
+    "nuevas tablas de 10 posiciones. Barto mantiene PLAYER_JOIN_ROUND = "
+    "{'Barto': 2}, asi que no recibe puntos ni monedas de la jornada 1."
 )
 
 

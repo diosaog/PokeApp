@@ -14,7 +14,7 @@ from app.entrenadores.boxes import boxes_grid_ui
 from app.ui.team_grid import team_grid_ui
 from app.interfaz.theme import apply_platinum_ui
 from conex_pkhex import PKHeXRuntime, extract_team, get_bridge_path, open_sav_cached
-from utils import USERS, DEFAULT_DLL_HINT, list_user_saves
+from utils import DEFAULT_DLL_HINT, active_users, list_user_saves
 
 
 INVENTORY_TABS_CSS = """
@@ -176,7 +176,7 @@ def page_entrenadores() -> None:
     st.title("Entrenadores")
     st.caption("Se alimenta del ultimo .sav o .dsv del entrenador seleccionado.")
 
-    users = list(USERS.keys())
+    users = list(active_users().keys())
     try:
         active = st.session_state.get("user")
         cur = st.session_state.get("trainer_selected")

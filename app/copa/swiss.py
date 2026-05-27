@@ -4,7 +4,7 @@ import json
 import random
 import streamlit as st
 
-from utils import USERS
+from utils import active_users
 from storage import settings_get, settings_set
 from dexdata import item_name_es
 
@@ -329,7 +329,7 @@ def page_copa() -> None:
 
     if not S.get("configured"):
         st.subheader("Configurar Copa (Liga suiza)")
-        all_players = list(USERS.keys())
+        all_players = list(active_users().keys())
         if not all_players:
             st.error("No hay jugadores registrados.")
             return
@@ -427,7 +427,7 @@ def page_copa() -> None:
     if S["manual"]:
         st.markdown("---")
         st.subheader("Edicion manual")
-        players_all = list(USERS.keys())
+        players_all = list(active_users().keys())
         sel = st.multiselect("Jugadores participantes", players_all, default=S["players"])
         if st.button("Aplicar jugadores"):
             S["players"] = sel

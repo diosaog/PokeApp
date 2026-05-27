@@ -1,12 +1,12 @@
 from __future__ import annotations
 import random
 import streamlit as st
-from utils import USERS
+from utils import active_users
 
 
 def _ensure_swiss_state():
     if "swiss" not in st.session_state:
-        players = list(USERS.keys())
+        players = list(active_users().keys())
         st.session_state.swiss = {
             "players": players[:8],
             "round": 1,
@@ -110,7 +110,7 @@ def page_copa() -> None:
 
     # Configuracion
     with st.expander("Configurar", expanded=False):
-        all_players = list(USERS.keys())
+        all_players = list(active_users().keys())
         sel = st.multiselect("Jugadores", all_players, default=S.get("players", []))
         if st.button("Aplicar jugadores"):
             S["players"] = sel

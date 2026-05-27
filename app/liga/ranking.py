@@ -13,16 +13,21 @@ from app.liga.rewards import CURRENT_POINTS_BY_POSITION, points_for_league_posit
 from app.tienda.common import _eq_item
 from storage import (
     add_purchase,
+    clear_user_app_data,
     get_current_save_for_user,
     list_inventory,
     list_redemptions,
     load_save_bytes,
     settings_get,
 )
-from utils import USERS, ensure_user_dir, list_user_saves
+from utils import active_users, ensure_user_dir, list_user_saves
 
 MAX_JORNADAS = 5
 POINTS_BY_POSITION = CURRENT_POINTS_BY_POSITION
+
+
+def _visible_league_users() -> dict[str, str]:
+    return active_users()
 
 
 def _cache_data(ttl: int = 20):
@@ -263,9 +268,16 @@ def finalize(tramo: int) -> None:
             st.session_state.setdefault("league_movements", {}).pop(tramo, None)
         except Exception:
             pass
+    if tramo == 2:
+        st.session_state.league_roster_transition_complete = True
     st.session_state.league_active = False
     st.session_state.league_tramo = tramo + 1
     _persist_state()
+    if tramo == 2:
+        try:
+            clear_user_app_data("Mario")
+        except Exception as e:
+            st.warning(f"Jornada cerrada, pero no se pudieron limpiar todos los datos de Mario: {e}")
 
 
 def recompute_round(tramo: int, *, apply_divisions_from_round: bool = False) -> None:
@@ -322,6 +334,8 @@ def recompute_round(tramo: int, *, apply_divisions_from_round: bool = False) -> 
 
 
 def points_from_league(user: str) -> int:
+    if user not in _visible_league_users():
+        return 0
     lr = st.session_state.get("league_results", {})
     tramos = lr.get(user, {})
     total = 0
@@ -343,6 +357,8 @@ def current_points_total(
     raw_dead_count: int | None = None,
     penalties: dict | None = None,
 ) -> float:
+    if user not in _visible_league_users():
+        return 0.0
     base = points_from_league(user)
     muertos = _count_muertos_for_trainer(user, raw_dead_count=raw_dead_count)
     penalties = penalties if penalties is not None else get_user_penalties(user)
@@ -353,7 +369,7 @@ def current_points_total(
 
 def general_table_sorted() -> list[tuple[str, float]]:
     rows: list[tuple[str, float]] = []
-    for user in USERS.keys():
+    for user in _visible_league_users().keys():
         try:
             snapshot = get_trainer_snapshot(user)
             raw_dead_count = int(snapshot.get("dead_count") or 0)
