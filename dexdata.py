@@ -1,4 +1,5 @@
 from __future__ import annotations
+
 """
 Carga ligera de datos de Showdown con caché local para:
 - Tipos por especie/forma
@@ -82,6 +83,7 @@ def _write_json(path: Path, obj: Dict[str, Any]) -> None:
 def _fetch_json(url: str) -> Optional[Dict[str, Any]]:
     try:
         import urllib.request
+
         with urllib.request.urlopen(url, timeout=10) as resp:
             data = resp.read().decode("utf-8")
             return json.loads(data)
@@ -92,7 +94,17 @@ def _fetch_json(url: str) -> Optional[Dict[str, Any]]:
 # ---------- PokeAPI helpers (ES names) ----------
 def _slugify(name: str) -> str:
     s = name.strip().lower()
-    repl = {" ": "-", "'": "", "": "", ".": "", ",": "", ":": "", "!": "", "?": "", "_": "-"}
+    repl = {
+        " ": "-",
+        "'": "",
+        '"': "",
+        ".": "",
+        ",": "",
+        ":": "",
+        "!": "",
+        "?": "",
+        "_": "-",
+    }
     for k, v in repl.items():
         s = s.replace(k, v)
     s = s.replace("--", "-")
@@ -119,14 +131,21 @@ ABILITIES_ES_CACHE_MEM: Dict[str, str] = {}
 ABILITY_DESC_ES_CACHE_MEM: Dict[str, str] = {}
 ITEMS_ES_CACHE_MEM: Dict[str, str] = {}
 ITEMS_ID_ES_CACHE_MEM: Dict[str, str] = {}
+MOVE_DESC_ES_CACHE_MEM: Dict[str, str] = {}
 
 
-def _cached_lookup(cache_file: Path, key: str, fetch_fn, *, mem_cache: Dict[str, str]) -> Optional[str]:
+def _cached_lookup(
+    cache_file: Path, key: str, fetch_fn, *, mem_cache: Dict[str, str]
+) -> Optional[str]:
     # Memoria primero
     if key in mem_cache:
         return mem_cache.get(key) or None
     try:
-        cache = json.loads(cache_file.read_text(encoding="utf-8")) if cache_file.exists() else {}
+        cache = (
+            json.loads(cache_file.read_text(encoding="utf-8"))
+            if cache_file.exists()
+            else {}
+        )
     except Exception:
         cache = {}
     if key in cache:
@@ -184,6 +203,7 @@ def move_name_es(name_en: str) -> str:
         try:
             import urllib.request
             import json as _json
+
             with urllib.request.urlopen(url, timeout=10) as resp:
                 data = _json.loads(resp.read().decode("utf-8"))
             for n in data.get("names", []):
@@ -195,6 +215,67 @@ def move_name_es(name_en: str) -> str:
 
     val = _cached_lookup(cache_file, slug, fetch, mem_cache=MOVES_ES_CACHE_MEM)
     return _to_ascii(val or name_en)
+
+
+def move_desc_es(name_en: str, *, move_id: Optional[int] = None) -> str:
+    if not name_en and move_id is None:
+        return ""
+
+    slug = _slugify(name_en or "")
+    cache_key = str(move_id or slug)
+    cache_file = DATA_DIR / "moves_desc_es_cache.json"
+
+    def fetch(key: str) -> Optional[str]:
+        endpoint = key if key.isdigit() else slug
+        if not endpoint:
+            return None
+        url = f"https://pokeapi.co/api/v2/move/{endpoint}/"
+        try:
+            import urllib.request
+            import json as _json
+
+            req = urllib.request.Request(url, headers={"User-Agent": "PokeApp/1.0"})
+            with urllib.request.urlopen(req, timeout=10) as resp:
+                data = _json.loads(resp.read().decode("utf-8"))
+            entries = data.get("flavor_text_entries") or []
+            preferred_versions = {
+                "scarlet-violet",
+                "sword-shield",
+                "ultra-sun-ultra-moon",
+                "black-2-white-2",
+                "black-white",
+            }
+            fallback = ""
+            for entry in entries:
+                if not entry or entry.get("language", {}).get("name") != "es":
+                    continue
+                text = (
+                    str(entry.get("flavor_text") or "")
+                    .replace("\n", " ")
+                    .replace("\f", " ")
+                    .strip()
+                )
+                if not text:
+                    continue
+                fallback = fallback or text
+                version_group = entry.get("version_group", {}).get("name")
+                if version_group in preferred_versions:
+                    return text
+            if fallback:
+                return fallback
+            for entry in data.get("effect_entries") or []:
+                if entry and entry.get("language", {}).get("name") == "es":
+                    text = str(
+                        entry.get("short_effect") or entry.get("effect") or ""
+                    ).strip()
+                    if text:
+                        return text.replace("\n", " ").replace("\f", " ")
+        except Exception:
+            return None
+        return None
+
+    val = _cached_lookup(cache_file, cache_key, fetch, mem_cache=MOVE_DESC_ES_CACHE_MEM)
+    return _to_ascii(val or "")
 
 
 FALLBACK_ABILITIES_ES = {
@@ -222,6 +303,7 @@ def ability_name_es(name_en: str) -> str:
         try:
             import urllib.request
             import json as _json
+
             with urllib.request.urlopen(url, timeout=10) as resp:
                 data = _json.loads(resp.read().decode("utf-8"))
             for n in data.get("names", []):
@@ -246,6 +328,7 @@ def ability_desc_es(name_en: str) -> str:
         try:
             import urllib.request
             import json as _json
+
             with urllib.request.urlopen(url, timeout=10) as resp:
                 data = _json.loads(resp.read().decode("utf-8"))
             for entry in data.get("flavor_text_entries", []):
@@ -300,6 +383,7 @@ def item_name_es(name_or_id: str) -> str:
         try:
             import urllib.request
             import json as _json
+
             with urllib.request.urlopen(url, timeout=10) as resp:
                 data = _json.loads(resp.read().decode("utf-8"))
             for n in data.get("names", []):
@@ -458,12 +542,13 @@ def _load_moves_es_id_map() -> Dict[str, int]:
     try:
         import csv
         import urllib.request
+
         url = "https://raw.githubusercontent.com/PokeAPI/pokeapi/master/data/v2/csv/move_names.csv"
         req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
         with urllib.request.urlopen(req, timeout=20) as resp:
             data = resp.read().decode("utf-8", errors="replace")
         reader = csv.reader(data.splitlines())
-        header = next(reader, None)
+        next(reader, None)
         # Expected: move_id, local_language_id, name
         for row in reader:
             if len(row) < 3:
@@ -491,7 +576,9 @@ def _load_moves_es_id_map() -> Dict[str, int]:
         mapping.setdefault(k, v)
 
     try:
-        (DATA_DIR / "moves_es_id.json").write_text(json.dumps(mapping, ensure_ascii=True), encoding="utf-8")
+        (DATA_DIR / "moves_es_id.json").write_text(
+            json.dumps(mapping, ensure_ascii=True), encoding="utf-8"
+        )
     except Exception:
         pass
     _MOVES_ES_ID_MAP = mapping
@@ -533,6 +620,7 @@ def pokedex_entry(
     entry = {}
     if species_name:
         from showdown_sprites import showdown_id  # evitar ciclos en import
+
         sid = showdown_id(
             species_name=species_name,
             form_index=form_index,
@@ -590,7 +678,9 @@ def species_types(
 
 
 @lru_cache(maxsize=8192)
-def move_info(move_name: str, *, move_id: Optional[int] = None) -> Optional[Dict[str, Any]]:
+def move_info(
+    move_name: str, *, move_id: Optional[int] = None
+) -> Optional[Dict[str, Any]]:
     if not move_name and move_id is None:
         return None
     dex = _dex_index()
@@ -605,6 +695,7 @@ def move_info(move_name: str, *, move_id: Optional[int] = None) -> Optional[Dict
         entry = dex.get("moves", {}).get(key) or dex.get("moves_by_key", {}).get(key)
         if not entry:
             import re as _re
+
             m = _re.search(r"\d+", str(move_name))
             if m:
                 try:
@@ -633,7 +724,6 @@ def type_color(t: str) -> str:
     return TYPE_COLORS.get(str(t).title(), "#999999")
 
 
-
 def showdown_export(
     team: List[Dict[str, Any]],
     *,
@@ -647,7 +737,9 @@ def showdown_export(
     for p in team:
         species = p.get("species_name") or p.get("species") or "?"
         nickname = p.get("nickname") or ""
-        title = f"{nickname} ({species})" if nickname and nickname != species else species
+        title = (
+            f"{nickname} ({species})" if nickname and nickname != species else species
+        )
         item = p.get("held_item") or p.get("item")
         if item:
             title += f" @ {item}"
@@ -662,22 +754,36 @@ def showdown_export(
             lines.append(f"{nat} Nature")
         if include_evs:
             evs = p.get("evs") or {}
-            order = [("hp","HP"),("atk","Atk"),("def","Def"),("spa","SpA"),("spd","SpD"),("spe","Spe")]
-            parts=[]
-            for k,label in order:
+            order = [
+                ("hp", "HP"),
+                ("atk", "Atk"),
+                ("def", "Def"),
+                ("spa", "SpA"),
+                ("spd", "SpD"),
+                ("spe", "Spe"),
+            ]
+            parts = []
+            for k, label in order:
                 try:
-                    v=int(evs.get(k) or 0)
+                    v = int(evs.get(k) or 0)
                 except Exception:
-                    v=0
+                    v = 0
                 if v:
                     parts.append(f"{v} {label}")
             if parts:
-                lines.append("EVs: "+" / ".join(parts))
+                lines.append("EVs: " + " / ".join(parts))
         if include_ivs:
             ivs = p.get("ivs") or {}
-            order = [("hp","HP"),("atk","Atk"),("def","Def"),("spa","SpA"),("spd","SpD"),("spe","Spe")]
-            parts=[]
-            for k,label in order:
+            order = [
+                ("hp", "HP"),
+                ("atk", "Atk"),
+                ("def", "Def"),
+                ("spa", "SpA"),
+                ("spd", "SpD"),
+                ("spe", "Spe"),
+            ]
+            parts = []
+            for k, label in order:
                 v = ivs.get(k)
                 try:
                     v = int(v)
@@ -686,7 +792,7 @@ def showdown_export(
                 if v is not None and v != 31:
                     parts.append(f"{v} {label}")
             if parts:
-                lines.append("IVs: "+" / ".join(parts))
+                lines.append("IVs: " + " / ".join(parts))
         # Moves
         moves = p.get("moves") or []
         for mv in moves:
@@ -695,12 +801,3 @@ def showdown_export(
             lines.append(f"- {mv}")
         lines.append("")
     return "\n".join(lines).strip()
-
-
-
-
-
-
-
-
-

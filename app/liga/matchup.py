@@ -2,8 +2,10 @@ from __future__ import annotations
 
 import base64
 import mimetypes
+from dataclasses import dataclass
 from html import escape
 from pathlib import Path
+from urllib.parse import quote, unquote
 
 import streamlit as st
 
@@ -12,9 +14,25 @@ from app.entrenadores.profile import find_trainer_image
 from app.entrenadores.snapshot import get_trainer_snapshot
 from app.juicios.penalties import get_user_penalties
 from app.tienda.money import money_breakdown_from_parts
-from dexdata import item_name_es
+from dexdata import item_name_es, move_desc_es, move_info, species_types, type_color
+from i18n import translate_type_es
 from showdown_sprites import showdown_sprite_url
 from utils import active_users
+
+
+MOVE_QUERY_PARAM = "battle_move"
+
+
+@dataclass(frozen=True)
+class MovePreview:
+    name: str
+    raw_name: str
+    move_id: int | None
+    type_name: str
+    category: str
+    power: str
+    accuracy: str
+    pp: str
 
 
 def _cache_data(ttl: int = 20):
@@ -84,9 +102,170 @@ def _move_names(mon: dict) -> list[str]:
     return detailed[:4]
 
 
+def _safe_int(value) -> int | None:
+    try:
+        if value is None or value == "":
+            return None
+        return int(value)
+    except Exception:
+        return None
+
+
+def _move_id_from_detail(detail: dict | None) -> int | None:
+    if not isinstance(detail, dict):
+        return None
+    for key in ("id", "MoveId", "move_id"):
+        move_id = _safe_int(detail.get(key))
+        if move_id:
+            return move_id
+    return None
+
+
+def _fmt_power(value) -> str:
+    power = _safe_int(value)
+    return str(power) if power and power > 0 else "-"
+
+
+def _fmt_accuracy(value) -> str:
+    if value is True:
+        return "-"
+    accuracy = _safe_int(value)
+    return f"{accuracy}%" if accuracy is not None else "-"
+
+
+def _fmt_pp(total, current=None) -> str:
+    pp_total = _safe_int(total)
+    pp_current = _safe_int(current)
+    if pp_total is None:
+        return "-"
+    if pp_current is None:
+        return str(pp_total)
+    return f"{pp_current}/{pp_total}"
+
+
+def _category_es(category: str | None) -> str:
+    return {
+        "Physical": "Fisico",
+        "Special": "Especial",
+        "Status": "Estado",
+    }.get(str(category or ""), str(category or "-"))
+
+
+def _move_entries(mon: dict) -> list[MovePreview]:
+    raw_names = _move_names(mon)
+    details = [d for d in list(mon.get("moves_detail") or []) if isinstance(d, dict)]
+    count = min(4, max(len(raw_names), len(details)))
+    entries: list[MovePreview] = []
+
+    for idx in range(count):
+        detail = details[idx] if idx < len(details) else {}
+        raw = (
+            raw_names[idx]
+            if idx < len(raw_names)
+            else str(detail.get("name") or "").strip()
+        )
+        move_id = _move_id_from_detail(detail)
+        info = move_info(raw, move_id=move_id) or {}
+        display_name = str(info.get("name") or raw or "Movimiento").strip()
+        pp_current = detail.get("pp") if isinstance(detail, dict) else None
+        entries.append(
+            MovePreview(
+                name=display_name,
+                raw_name=raw or display_name,
+                move_id=move_id,
+                type_name=str(info.get("type") or "Normal").title(),
+                category=str(info.get("category") or "-"),
+                power=_fmt_power(info.get("power")),
+                accuracy=_fmt_accuracy(info.get("accuracy")),
+                pp=_fmt_pp(info.get("pp"), pp_current),
+            )
+        )
+    return entries
+
+
+def _pokemon_types(mon: dict) -> list[str]:
+    species = str(mon.get("species_name") or mon.get("species") or "")
+    try:
+        return species_types(
+            species_name=species,
+            form_index=mon.get("form_index"),
+            form_name=mon.get("form_name"),
+            gender=mon.get("gender"),
+            dex_id=mon.get("dex_id"),
+        )
+    except Exception:
+        return []
+
+
+def _text_color(hex_color: str) -> str:
+    try:
+        if not hex_color or not hex_color.startswith("#") or len(hex_color) != 7:
+            return "#ffffff"
+        r = int(hex_color[1:3], 16)
+        g = int(hex_color[3:5], 16)
+        b = int(hex_color[5:7], 16)
+        lum = (r * 299 + g * 587 + b * 114) / 1000
+        return "#10141a" if lum > 150 else "#ffffff"
+    except Exception:
+        return "#ffffff"
+
+
+def _type_dot_html(type_name: str | None) -> str:
+    t = str(type_name or "Normal").title()
+    color = type_color(t)
+    label = translate_type_es(t)
+    return (
+        f"<span class='battle-type-dot' title='{escape(label)}' "
+        f"style='background:{color}; color:{_text_color(color)}'>{escape(label[:2].upper())}</span>"
+    )
+
+
+def _gender_html(gender: str | None) -> str:
+    g = str(gender or "").strip().upper()
+    if g.startswith("M"):
+        return "<span class='battle-gender battle-gender-m'>M</span>"
+    if g.startswith("F"):
+        return "<span class='battle-gender battle-gender-f'>F</span>"
+    return ""
+
+
+def _move_token(player: str, mon_idx: int, move_idx: int) -> str:
+    return f"{player}|{mon_idx}|{move_idx}"
+
+
+def _move_href(token: str) -> str:
+    return f"?{MOVE_QUERY_PARAM}={quote(token)}#battle-move-detail"
+
+
+def _selected_move_token() -> str:
+    try:
+        value = st.query_params.get(MOVE_QUERY_PARAM)
+        if isinstance(value, list):
+            value = value[0] if value else ""
+        return unquote(str(value or ""))
+    except Exception:
+        pass
+    try:
+        params = st.experimental_get_query_params()
+        value = params.get(MOVE_QUERY_PARAM)
+        if isinstance(value, list):
+            value = value[0] if value else ""
+        return unquote(str(value or ""))
+    except Exception:
+        return ""
+
+
 def _held_item_name(mon: dict) -> str:
     found_numeric_item = False
-    no_item_names = {"-", "0", "#0", "none", "no item", "(ningun objeto)", "(ningún objeto)"}
+    no_item_names = {
+        "-",
+        "0",
+        "#0",
+        "none",
+        "no item",
+        "(ningun objeto)",
+        "(ningún objeto)",
+    }
     for raw in (
         mon.get("held_item_id"),
         mon.get("ItemId"),
@@ -138,7 +317,9 @@ def _summary_snapshot(player: str) -> dict:
     return {
         "player": player,
         "division": _division_for_player(player),
-        "points": current_points_total(player, raw_dead_count=raw_dead_count, penalties=penalties),
+        "points": current_points_total(
+            player, raw_dead_count=raw_dead_count, penalties=penalties
+        ),
         "coins": int(breakdown.get("available") or 0),
         "badges": badges,
         "dead_count": raw_dead_count,
@@ -198,10 +379,18 @@ def _team_card_html(snapshot: dict) -> str:
             prefer_animated=False,
         )
         item = _held_item_name(mon)
-        moves = _move_names(mon)
-        moves_html = "".join(
-            f"<div class='matchup-move'>{escape(move)}</div>"
-            for move in (moves or ["(sin movimientos visibles)"])
+        moves = _move_entries(mon)
+        moves_html = (
+            "".join(
+                (
+                    "<div class='matchup-move'>"
+                    f"{_type_dot_html(move.type_name)}"
+                    f"<span>{escape(move.name)}</span>"
+                    "</div>"
+                )
+                for move in moves
+            )
+            or "<div class='matchup-move matchup-move-empty'>(sin movimientos visibles)</div>"
         )
         mons_html.append(
             "<div class='matchup-mon'>"
@@ -227,9 +416,134 @@ def _team_card_html(snapshot: dict) -> str:
             "</div>"
         )
 
+    return f"<div class='matchup-team-grid'>{''.join(mons_html)}</div>"
+
+
+def _battle_team_html(snapshot: dict, selected_token: str) -> str:
+    player = str(snapshot.get("player") or "")
+    team = list(snapshot.get("team") or [])[:6]
+    cards: list[str] = []
+
+    for idx in range(6):
+        if idx >= len(team):
+            cards.append(
+                "<div class='battle-mon-card battle-empty-card'>"
+                f"<div class='battle-slot-mark'>{idx + 1}</div>"
+                "<div class='battle-empty-title'>Slot vacio</div>"
+                "<div class='battle-empty-sub'>Sin Pokemon detectado</div>"
+                "</div>"
+            )
+            continue
+
+        mon = team[idx]
+        species = str(mon.get("species_name") or mon.get("species") or "Pokemon")
+        nickname = str(mon.get("nickname") or "").strip()
+        title = nickname or species
+        sprite = showdown_sprite_url(
+            species_name=species,
+            form_index=mon.get("form_index"),
+            form_name=mon.get("form_name"),
+            is_shiny=bool(mon.get("is_shiny")),
+            gender=mon.get("gender"),
+            prefer_animated=False,
+        )
+        types_html = "".join(_type_dot_html(t) for t in _pokemon_types(mon))
+        item = _held_item_name(mon)
+        level = escape(str(mon.get("level") or "-"))
+        moves_html: list[str] = []
+        for move_idx, move in enumerate(_move_entries(mon)):
+            token = _move_token(player, idx, move_idx)
+            active = " is-active" if token == selected_token else ""
+            moves_html.append(
+                f"<a class='battle-move-link{active}' href='{_move_href(token)}' target='_self'>"
+                f"{_type_dot_html(move.type_name)}"
+                f"<span>{escape(move.name)}</span>"
+                "</a>"
+            )
+        moves_block = (
+            "".join(moves_html)
+            or "<div class='battle-no-move'>Sin movimientos visibles</div>"
+        )
+
+        subtitle = (
+            f"<div class='battle-species'>{escape(species)}</div>" if nickname else ""
+        )
+        cards.append(
+            "<div class='battle-mon-card'>"
+            f"<div class='battle-slot-mark'>{idx + 1}</div>"
+            "<div class='battle-card-left'>"
+            "<div class='battle-name-row'>"
+            f"<span class='battle-mon-name'>{escape(title)}</span>"
+            f"<span class='battle-types'>{types_html}</span>"
+            "</div>"
+            f"{subtitle}"
+            f"<div class='battle-level'>Lv. {level} {_gender_html(mon.get('gender'))}</div>"
+            f"<div class='battle-item'>Item: {escape(item)}</div>"
+            "</div>"
+            "<div class='battle-sprite-wrap'>"
+            f"<img class='battle-sprite' src='{sprite}' alt='{escape(species)}'/>"
+            "</div>"
+            f"<div class='battle-moves'>{moves_block}</div>"
+            "</div>"
+        )
+
     return (
-        "<div class='matchup-team-grid'>"
-        f"{''.join(mons_html)}"
+        "<div class='battle-board'>"
+        "<div class='battle-board-top'>"
+        f"<div><span>Rival</span><strong>{escape(player)}</strong></div>"
+        f"<div><span>Save</span><strong>{escape(str(snapshot.get('save_name') or 'Sin save'))}</strong></div>"
+        "</div>"
+        "<div class='battle-team-grid'>"
+        f"{''.join(cards)}"
+        "</div>"
+        "</div>"
+    )
+
+
+def _selected_move(
+    snapshot: dict, selected_token: str
+) -> tuple[dict, MovePreview] | None:
+    if not selected_token:
+        return None
+    parts = selected_token.split("|")
+    if len(parts) != 3 or parts[0] != str(snapshot.get("player") or ""):
+        return None
+    mon_idx = _safe_int(parts[1])
+    move_idx = _safe_int(parts[2])
+    team = list(snapshot.get("team") or [])[:6]
+    if mon_idx is None or move_idx is None or not (0 <= mon_idx < len(team)):
+        return None
+    mon = team[mon_idx]
+    moves = _move_entries(mon)
+    if not (0 <= move_idx < len(moves)):
+        return None
+    return mon, moves[move_idx]
+
+
+def _move_detail_html(mon: dict, move: MovePreview, player: str) -> str:
+    species = str(mon.get("species_name") or mon.get("species") or "Pokemon")
+    nickname = str(mon.get("nickname") or "").strip()
+    owner = escape(player)
+    mon_name = escape(nickname or species)
+    type_label = translate_type_es(move.type_name)
+    desc = move_desc_es(move.raw_name or move.name, move_id=move.move_id)
+    if not desc:
+        desc = "Descripcion no disponible en espanol."
+    return (
+        "<div id='battle-move-detail' class='battle-move-detail'>"
+        "<div class='battle-detail-kicker'>Movimiento seleccionado</div>"
+        "<div class='battle-detail-head'>"
+        f"<div><strong>{escape(move.name)}</strong><span>{mon_name} | {owner}</span></div>"
+        f"{_type_dot_html(move.type_name)}"
+        "</div>"
+        "<div class='battle-detail-stats'>"
+        f"<div><span>Tipo</span><strong>{escape(type_label)}</strong></div>"
+        f"<div><span>Clase</span><strong>{escape(_category_es(move.category))}</strong></div>"
+        f"<div><span>Potencia</span><strong>{escape(move.power)}</strong></div>"
+        f"<div><span>Precision</span><strong>{escape(move.accuracy)}</strong></div>"
+        f"<div><span>PP</span><strong>{escape(move.pp)}</strong></div>"
+        "</div>"
+        f"<div class='battle-detail-desc'>{escape(desc)}</div>"
         "</div>"
     )
 
@@ -411,6 +725,9 @@ def _ensure_matchup_css() -> None:
           margin-top: 10px;
         }
         .matchup-move {
+          display: flex;
+          align-items: center;
+          gap: 7px;
           padding: 7px 8px;
           border: 1px solid rgba(255,255,255,0.08);
           background: linear-gradient(180deg, var(--bw2-screen-2) 0%, var(--bw2-screen) 100%);
@@ -418,6 +735,10 @@ def _ensure_matchup_css() -> None:
           font-family: var(--font-ui);
           font-size: 19px;
           line-height: 1.05;
+        }
+        .matchup-move span:last-child {
+          color: #ffffff;
+          overflow-wrap: anywhere;
         }
         .matchup-versus {
           margin-bottom: 12px;
@@ -432,38 +753,341 @@ def _ensure_matchup_css() -> None:
         .matchup-versus strong {
           font-size: 12px;
         }
+        div[data-testid="stRadio"] div[role="radiogroup"] {
+          gap: 8px;
+          margin-bottom: 12px;
+        }
+        div[data-testid="stRadio"] div[role="radiogroup"] label {
+          min-height: 38px;
+          padding: 8px 12px;
+          border: 1px solid var(--bw2-edge);
+          background: linear-gradient(180deg, var(--bw2-panel-2) 0%, var(--bw2-panel) 100%);
+          box-shadow: inset 0 1px 0 rgba(255,255,255,0.08);
+        }
+        div[data-testid="stRadio"] div[role="radiogroup"] label:has(input:checked) {
+          border-color: var(--bw2-edge-strong);
+          background: linear-gradient(180deg, var(--accent) 0%, var(--accent-dark) 100%);
+        }
+        div[data-testid="stRadio"] div[role="radiogroup"] label p {
+          color: #ffffff !important;
+          font-family: var(--font-pixel) !important;
+          font-size: 10px !important;
+          text-transform: uppercase;
+        }
+        .battle-type-dot {
+          width: 22px;
+          height: 22px;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          flex: 0 0 22px;
+          border-radius: 50%;
+          border: 1px solid rgba(255,255,255,0.55);
+          box-shadow: inset 0 1px 0 rgba(255,255,255,0.35), 0 1px 3px rgba(0,0,0,0.35);
+          font-family: var(--font-pixel);
+          font-size: 7px;
+          line-height: 1;
+          text-transform: uppercase;
+        }
+        .battle-board {
+          margin-top: 8px;
+          border: 1px solid var(--bw2-edge);
+          background:
+            linear-gradient(120deg, rgba(121,185,245,0.08) 0 24%, transparent 24% 100%),
+            linear-gradient(180deg, var(--bw2-screen-2) 0%, var(--bw2-screen) 100%);
+          box-shadow: inset 0 1px 0 rgba(255,255,255,0.07), 0 0 0 1px rgba(0,0,0,0.35);
+          padding: 10px;
+        }
+        .battle-board-top {
+          display: grid;
+          grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+          gap: 10px;
+          margin-bottom: 10px;
+        }
+        .battle-board-top div {
+          min-width: 0;
+          padding: 8px 10px;
+          border-left: 3px solid var(--accent);
+          background: rgba(0,0,0,0.22);
+        }
+        .battle-board-top span,
+        .battle-detail-kicker {
+          display: block;
+          color: var(--bw2-text-soft);
+          font-family: var(--font-pixel);
+          font-size: 9px;
+          text-transform: uppercase;
+        }
+        .battle-board-top strong {
+          display: block;
+          margin-top: 4px;
+          color: #ffffff;
+          font-family: var(--font-pixel);
+          font-size: 12px;
+          overflow-wrap: anywhere;
+          text-transform: uppercase;
+        }
+        .battle-team-grid {
+          display: grid;
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+          gap: 10px;
+        }
+        .battle-mon-card {
+          position: relative;
+          min-height: 166px;
+          display: grid;
+          grid-template-columns: minmax(126px, .95fr) 88px minmax(168px, 1.15fr);
+          gap: 8px;
+          align-items: center;
+          overflow: hidden;
+          border: 1px solid rgba(178,219,255,0.34);
+          background:
+            linear-gradient(110deg, rgba(63,152,210,0.18) 0 38%, transparent 38% 100%),
+            linear-gradient(180deg, rgba(37,71,103,0.92) 0%, rgba(19,43,62,0.92) 100%);
+          box-shadow: inset 0 1px 0 rgba(255,255,255,0.13), 0 5px 14px rgba(0,0,0,0.25);
+          padding: 10px;
+        }
+        .battle-mon-card::before {
+          content: "";
+          position: absolute;
+          inset: 0;
+          pointer-events: none;
+          background:
+            linear-gradient(180deg, rgba(255,255,255,0.06) 0 1px, transparent 1px 100%) 0 0 / 100% 18px,
+            linear-gradient(90deg, rgba(255,255,255,0.05) 0 1px, transparent 1px 100%) 0 0 / 24px 100%;
+          opacity: .55;
+        }
+        .battle-empty-card {
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
+          min-height: 128px;
+          background: linear-gradient(180deg, rgba(38,45,55,0.86) 0%, rgba(21,25,32,0.86) 100%);
+        }
+        .battle-slot-mark {
+          position: absolute;
+          right: 12px;
+          bottom: 0;
+          color: rgba(255,255,255,0.13);
+          font-family: var(--font-pixel);
+          font-size: 42px;
+          line-height: 1;
+        }
+        .battle-card-left,
+        .battle-sprite-wrap,
+        .battle-moves,
+        .battle-empty-title,
+        .battle-empty-sub {
+          position: relative;
+          z-index: 1;
+        }
+        .battle-name-row {
+          display: flex;
+          align-items: center;
+          gap: 7px;
+          min-width: 0;
+        }
+        .battle-mon-name {
+          color: #ffffff;
+          font-family: var(--font-pixel);
+          font-size: 11px;
+          line-height: 1.3;
+          text-transform: uppercase;
+          overflow-wrap: anywhere;
+        }
+        .battle-types {
+          display: inline-flex;
+          align-items: center;
+          gap: 4px;
+          flex-wrap: wrap;
+        }
+        .battle-species,
+        .battle-level,
+        .battle-item,
+        .battle-empty-sub {
+          color: var(--bw2-text-soft);
+          font-family: var(--font-ui);
+          font-size: 18px;
+          line-height: 1.08;
+        }
+        .battle-species,
+        .battle-level,
+        .battle-item {
+          margin-top: 7px;
+        }
+        .battle-item {
+          overflow-wrap: anywhere;
+        }
+        .battle-gender {
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          width: 18px;
+          height: 18px;
+          margin-left: 4px;
+          border-radius: 50%;
+          color: #ffffff;
+          font-family: var(--font-pixel);
+          font-size: 8px;
+          vertical-align: middle;
+        }
+        .battle-gender-m { background: #2f6ad9; }
+        .battle-gender-f { background: #d6447a; }
+        .battle-sprite-wrap {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          min-width: 0;
+        }
+        .battle-sprite {
+          width: 84px;
+          height: 84px;
+          object-fit: contain;
+          image-rendering: pixelated;
+          filter: drop-shadow(0 4px 7px rgba(0,0,0,0.45));
+        }
+        .battle-moves {
+          display: grid;
+          gap: 6px;
+          min-width: 0;
+        }
+        .battle-move-link,
+        .battle-no-move {
+          display: flex;
+          align-items: center;
+          gap: 7px;
+          min-height: 28px;
+          padding: 4px 7px;
+          border: 1px solid rgba(255,255,255,0.18);
+          background: rgba(9,15,22,0.56);
+          color: #ffffff;
+          font-family: var(--font-ui);
+          font-size: 19px;
+          line-height: 1.05;
+          text-decoration: none;
+          box-shadow: inset 0 1px 0 rgba(255,255,255,0.07);
+        }
+        .battle-move-link span:last-child {
+          color: #ffffff;
+          overflow-wrap: anywhere;
+        }
+        .battle-move-link:hover,
+        .battle-move-link.is-active {
+          border-color: var(--accent-soft);
+          background: linear-gradient(180deg, rgba(245,125,49,0.35) 0%, rgba(104,52,24,0.62) 100%);
+          color: #ffffff;
+        }
+        .battle-empty-title {
+          color: #ffffff;
+          font-family: var(--font-pixel);
+          font-size: 11px;
+          text-align: center;
+          text-transform: uppercase;
+        }
+        .battle-empty-sub {
+          margin-top: 8px;
+          text-align: center;
+        }
+        .battle-move-detail {
+          margin-top: 12px;
+          border: 1px solid var(--bw2-edge);
+          background: linear-gradient(180deg, var(--bw2-panel-2) 0%, var(--bw2-panel) 100%);
+          box-shadow: inset 0 1px 0 rgba(255,255,255,0.08), 0 0 0 1px rgba(0,0,0,0.28);
+          padding: 12px;
+        }
+        .battle-detail-head {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 10px;
+          margin-top: 6px;
+        }
+        .battle-detail-head strong {
+          display: block;
+          color: #ffffff;
+          font-family: var(--font-pixel);
+          font-size: 14px;
+          text-transform: uppercase;
+        }
+        .battle-detail-head span {
+          display: block;
+          margin-top: 5px;
+          color: var(--bw2-text-soft);
+          font-family: var(--font-ui);
+          font-size: 19px;
+        }
+        .battle-detail-stats {
+          display: grid;
+          grid-template-columns: repeat(5, minmax(0, 1fr));
+          gap: 8px;
+          margin-top: 10px;
+        }
+        .battle-detail-stats div {
+          min-width: 0;
+          padding: 7px 8px;
+          border: 1px solid rgba(255,255,255,0.08);
+          background: linear-gradient(180deg, var(--bw2-screen-2) 0%, var(--bw2-screen) 100%);
+        }
+        .battle-detail-stats span {
+          display: block;
+          color: var(--bw2-text-soft);
+          font-family: var(--font-pixel);
+          font-size: 8px;
+          text-transform: uppercase;
+        }
+        .battle-detail-stats strong {
+          display: block;
+          margin-top: 5px;
+          color: #ffffff;
+          font-family: var(--font-ui);
+          font-size: 18px;
+          overflow-wrap: anywhere;
+        }
+        .battle-detail-desc {
+          margin-top: 10px;
+          color: var(--bw2-text);
+          font-family: var(--font-ui);
+          font-size: 21px;
+          line-height: 1.15;
+        }
+        @media (max-width: 1100px) {
+          .battle-team-grid,
+          .matchup-team-grid {
+            grid-template-columns: 1fr;
+          }
+        }
+        @media (max-width: 720px) {
+          .matchup-summary-head {
+            grid-template-columns: 86px 1fr;
+          }
+          .matchup-avatar {
+            width: 86px;
+            height: 86px;
+          }
+          .matchup-metric-grid,
+          .battle-board-top,
+          .battle-detail-stats {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+          }
+          .battle-mon-card {
+            grid-template-columns: 1fr 82px;
+          }
+          .battle-moves {
+            grid-column: 1 / -1;
+          }
+        }
         </style>
         """,
         unsafe_allow_html=True,
     )
 
 
-def render_matchup_preview(players: list[str] | None = None) -> None:
-    _ensure_matchup_css()
-    st.markdown("<div class='matchup-shell'>Previa de enfrentamiento</div>", unsafe_allow_html=True)
-    st.markdown(
-        (
-            "<div class='matchup-note'>"
-            "Selecciona dos entrenadores para ver, a la vez, sus datos de liga, "
-            "el save detectado y los movimientos de todo el equipo actual."
-            "</div>"
-        ),
-        unsafe_allow_html=True,
-    )
-
-    if not try_auto_load_bridge():
-        st.warning("No se ha podido cargar el Bridge para leer los saves. La previa necesita acceso al lector DS.")
-        return
-
-    users = active_users()
-    available = [player for player in (players or list(users.keys())) if player in users]
-    if len(available) < 2:
-        st.info("No hay suficientes jugadores para generar una previa.")
-        return
-
+def _render_spectator_tab(available: list[str]) -> None:
     current_user = st.session_state.get("user")
     left_default = current_user if current_user in available else available[0]
-    right_default = next((player for player in available if player != left_default), available[1])
+    right_default = next(
+        (player for player in available if player != left_default), available[1]
+    )
 
     col_left, col_right = st.columns(2)
     with col_left:
@@ -478,7 +1102,9 @@ def render_matchup_preview(players: list[str] | None = None) -> None:
         right_player = st.selectbox(
             "Entrenador B",
             right_choices,
-            index=right_choices.index(right_default) if right_default in right_choices else 0,
+            index=right_choices.index(right_default)
+            if right_default in right_choices
+            else 0,
             key="matchup_right_player",
         )
 
@@ -502,3 +1128,62 @@ def render_matchup_preview(players: list[str] | None = None) -> None:
     with summary_right:
         st.markdown(_summary_card_html(right_snapshot), unsafe_allow_html=True)
         st.markdown(_team_card_html(right_snapshot), unsafe_allow_html=True)
+
+
+def _render_battle_tab(available: list[str]) -> None:
+    current_user = st.session_state.get("user")
+    rivals = [player for player in available if player != current_user] or available
+    previous_rival = st.session_state.get("matchup_right_player")
+    default_rival = previous_rival if previous_rival in rivals else rivals[0]
+
+    rival_player = st.selectbox(
+        "Rival",
+        rivals,
+        index=rivals.index(default_rival),
+        key="battle_rival_player",
+    )
+    snapshot = _summary_snapshot(rival_player)
+    selected_token = _selected_move_token()
+    st.markdown(_battle_team_html(snapshot, selected_token), unsafe_allow_html=True)
+    selected = _selected_move(snapshot, selected_token)
+    if selected:
+        mon, move = selected
+        st.markdown(_move_detail_html(mon, move, rival_player), unsafe_allow_html=True)
+
+
+def render_matchup_preview(players: list[str] | None = None) -> None:
+    _ensure_matchup_css()
+    st.markdown(
+        "<div class='matchup-shell'>Preview de equipo</div>", unsafe_allow_html=True
+    )
+
+    if not try_auto_load_bridge():
+        st.warning(
+            "No se ha podido cargar el Bridge para leer los saves. La previa necesita acceso al lector DS."
+        )
+        return
+
+    users = active_users()
+    available = [
+        player for player in (players or list(users.keys())) if player in users
+    ]
+    if len(available) < 2:
+        st.info("No hay suficientes jugadores para generar una previa.")
+        return
+
+    mode_options = ["Espectador", "Combate"]
+    if "matchup_preview_mode" not in st.session_state:
+        st.session_state.matchup_preview_mode = (
+            "Combate" if _selected_move_token() else "Espectador"
+        )
+    mode = st.radio(
+        "Modo de preview",
+        mode_options,
+        horizontal=True,
+        key="matchup_preview_mode",
+        label_visibility="collapsed",
+    )
+    if mode == "Espectador":
+        _render_spectator_tab(available)
+    else:
+        _render_battle_tab(available)
