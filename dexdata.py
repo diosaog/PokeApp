@@ -22,6 +22,9 @@ except Exception:  # pragma: no cover - disponible sólo en runtime de app
     st = None  # type: ignore
 
 BASE_URL = "https://play.pokemonshowdown.com/data"
+GEN5_MAX_MOVE_ID = 559
+GEN5_MOVE_OVERRIDES_URL = "https://raw.githubusercontent.com/smogon/pokemon-showdown/master/data/mods/gen5/moves.ts"
+MOVE_DESC_ES_VERSION_GROUPS = ("x-y", "omega-ruby-alpha-sapphire")
 
 # Carpeta de datos persistentes (alineada con storage.py)
 _BASE_DIR = Path(__file__).resolve().parent
@@ -134,6 +137,16 @@ ITEMS_ID_ES_CACHE_MEM: Dict[str, str] = {}
 MOVE_DESC_ES_CACHE_MEM: Dict[str, str] = {}
 
 
+def _clean_flavor_text(value: Any) -> str:
+    return (
+        str(value or "")
+        .replace("\n", " ")
+        .replace("\f", " ")
+        .replace("\u00ad", "")
+        .strip()
+    )
+
+
 def _cached_lookup(
     cache_file: Path, key: str, fetch_fn, *, mem_cache: Dict[str, str]
 ) -> Optional[str]:
@@ -221,12 +234,22 @@ def move_desc_es(name_en: str, *, move_id: Optional[int] = None) -> str:
     if not name_en and move_id is None:
         return ""
 
-    slug = _slugify(name_en or "")
-    cache_key = str(move_id or slug)
-    cache_file = DATA_DIR / "moves_desc_es_cache.json"
+    info = move_info(name_en or "", move_id=move_id)
+    if not info:
+        return ""
+
+    lookup_name = str(info.get("name") or name_en or "")
+    slug = _slugify(lookup_name)
+    desc_slug = (
+        "hidden-power" if _norm_key(lookup_name).startswith("hiddenpower") else slug
+    )
+
+    cache_key = f"xy:{move_id or desc_slug}"
+    cache_file = DATA_DIR / "moves_desc_es_xy_cache.json"
 
     def fetch(key: str) -> Optional[str]:
-        endpoint = key if key.isdigit() else slug
+        lookup = key.removeprefix("xy:")
+        endpoint = lookup if lookup.isdigit() else desc_slug
         if not endpoint:
             return None
         url = f"https://pokeapi.co/api/v2/move/{endpoint}/"
@@ -238,38 +261,24 @@ def move_desc_es(name_en: str, *, move_id: Optional[int] = None) -> str:
             with urllib.request.urlopen(req, timeout=10) as resp:
                 data = _json.loads(resp.read().decode("utf-8"))
             entries = data.get("flavor_text_entries") or []
-            preferred_versions = {
-                "scarlet-violet",
-                "sword-shield",
-                "ultra-sun-ultra-moon",
-                "black-2-white-2",
-                "black-white",
-            }
-            fallback = ""
+            for version in MOVE_DESC_ES_VERSION_GROUPS:
+                for entry in entries:
+                    if not entry or entry.get("language", {}).get("name") != "es":
+                        continue
+                    if entry.get("version_group", {}).get("name") != version:
+                        continue
+                    text = _clean_flavor_text(entry.get("flavor_text"))
+                    if text:
+                        return text
+
+            # Las descripciones son texto de apoyo; los datos jugables se leen
+            # siempre del indice mecanico de quinta generacion.
             for entry in entries:
                 if not entry or entry.get("language", {}).get("name") != "es":
                     continue
-                text = (
-                    str(entry.get("flavor_text") or "")
-                    .replace("\n", " ")
-                    .replace("\f", " ")
-                    .strip()
-                )
-                if not text:
-                    continue
-                fallback = fallback or text
-                version_group = entry.get("version_group", {}).get("name")
-                if version_group in preferred_versions:
+                text = _clean_flavor_text(entry.get("flavor_text"))
+                if text:
                     return text
-            if fallback:
-                return fallback
-            for entry in data.get("effect_entries") or []:
-                if entry and entry.get("language", {}).get("name") == "es":
-                    text = str(
-                        entry.get("short_effect") or entry.get("effect") or ""
-                    ).strip()
-                    if text:
-                        return text.replace("\n", " ").replace("\f", " ")
         except Exception:
             return None
         return None
@@ -470,6 +479,8 @@ def _load_dataset(name: str) -> Dict[str, Any]:
 
 
 _DEX_INDEX: Optional[Dict[str, Any]] = None
+_GEN5_MOVE_OVERRIDES: Optional[Dict[str, Dict[str, Any]]] = None
+_GEN5_DEX_INDEX: Optional[Dict[str, Any]] = None
 
 
 def _build_dex_index() -> Dict[str, Any]:
@@ -514,6 +525,170 @@ def _dex_index() -> Dict[str, Any]:
     if _DEX_INDEX is None:
         _DEX_INDEX = _build_dex_index()
     return _DEX_INDEX
+
+
+def _parse_ts_scalar(value: str) -> Any:
+    raw = value.split("//", 1)[0].strip().rstrip(",").strip()
+    if not raw:
+        return None
+    if raw in {"true", "false"}:
+        return raw == "true"
+    if raw in {"undefined", "null"}:
+        return None
+    if (raw.startswith('"') and raw.endswith('"')) or (
+        raw.startswith("'") and raw.endswith("'")
+    ):
+        return raw[1:-1]
+    try:
+        return int(raw)
+    except Exception:
+        return None
+
+
+def _parse_gen5_move_overrides(source: str) -> Dict[str, Dict[str, Any]]:
+    import re
+
+    out: Dict[str, Dict[str, Any]] = {}
+    current_key = ""
+    block: list[str] = []
+    depth = 0
+
+    for line in source.splitlines():
+        if not current_key:
+            match = re.match(r"^\t([A-Za-z0-9_]+): \{", line)
+            if not match:
+                continue
+            current_key = match.group(1)
+            block = [line]
+            depth = line.count("{") - line.count("}")
+            continue
+
+        block.append(line)
+        depth += line.count("{") - line.count("}")
+        if depth > 0:
+            continue
+
+        fields: Dict[str, Any] = {}
+        for block_line in block:
+            field_match = re.match(
+                r"^\t\t(basePower|accuracy|pp|type|category):\s*(.+)$",
+                block_line,
+            )
+            if not field_match:
+                continue
+            value = _parse_ts_scalar(field_match.group(2))
+            if value is not None:
+                fields[field_match.group(1)] = value
+        if fields:
+            out[current_key] = fields
+        current_key = ""
+        block = []
+        depth = 0
+
+    return out
+
+
+def _load_gen5_move_overrides() -> Dict[str, Dict[str, Any]]:
+    global _GEN5_MOVE_OVERRIDES
+    if _GEN5_MOVE_OVERRIDES is not None:
+        return _GEN5_MOVE_OVERRIDES
+
+    cache_file = DATA_DIR / "ps_gen5_move_overrides.json"
+    stamp_file = DATA_DIR / "ps_gen5_move_overrides.stamp"
+
+    def expired() -> bool:
+        try:
+            ts = int(stamp_file.read_text())
+            return (_now() - ts) > CACHE_TTL
+        except Exception:
+            return True
+
+    if cache_file.exists() and not expired():
+        cached = _read_json(cache_file) or {}
+        if isinstance(cached, dict) and cached:
+            _GEN5_MOVE_OVERRIDES = {
+                str(key): dict(value)
+                for key, value in cached.items()
+                if isinstance(value, dict)
+            }
+            return _GEN5_MOVE_OVERRIDES
+
+    parsed: Dict[str, Dict[str, Any]] = {}
+    try:
+        import urllib.request
+
+        req = urllib.request.Request(
+            GEN5_MOVE_OVERRIDES_URL,
+            headers={"User-Agent": "PokeApp/1.0"},
+        )
+        with urllib.request.urlopen(req, timeout=12) as resp:
+            text = resp.read().decode("utf-8", errors="replace")
+        parsed = _parse_gen5_move_overrides(text)
+    except Exception:
+        parsed = {}
+
+    if parsed:
+        _write_json(cache_file, parsed)
+        try:
+            stamp_file.write_text(str(_now()))
+        except Exception:
+            pass
+        _GEN5_MOVE_OVERRIDES = parsed
+        return _GEN5_MOVE_OVERRIDES
+
+    cached = _read_json(cache_file) or {}
+    _GEN5_MOVE_OVERRIDES = {
+        str(key): dict(value)
+        for key, value in cached.items()
+        if isinstance(value, dict)
+    }
+    return _GEN5_MOVE_OVERRIDES
+
+
+def _build_gen5_moves_index() -> Dict[str, Any]:
+    base = _dex_index()
+    moves = base.get("moves") or {}
+    overrides = _load_gen5_move_overrides()
+
+    gen5_moves: Dict[str, Dict[str, Any]] = {}
+    moves_by_num: Dict[int, Dict[str, Any]] = {}
+    moves_by_key: Dict[str, Dict[str, Any]] = {}
+
+    for key, entry in moves.items():
+        if not isinstance(entry, dict):
+            continue
+        try:
+            num = int(entry.get("num"))
+        except Exception:
+            continue
+        if not (1 <= num <= GEN5_MAX_MOVE_ID):
+            continue
+
+        merged = dict(entry)
+        override = overrides.get(str(key)) or overrides.get(_norm_key(str(key))) or {}
+        if isinstance(override, dict):
+            merged.update(override)
+
+        gen5_moves[str(key)] = merged
+        if num not in moves_by_num or not merged.get("realMove"):
+            moves_by_num[num] = merged
+        name = merged.get("name")
+        if isinstance(name, str) and name:
+            moves_by_key[_norm_key(name)] = merged
+        moves_by_key.setdefault(_norm_key(str(key)), merged)
+
+    return {
+        "moves": gen5_moves,
+        "moves_by_num": moves_by_num,
+        "moves_by_key": moves_by_key,
+    }
+
+
+def _gen5_moves_index() -> Dict[str, Any]:
+    global _GEN5_DEX_INDEX
+    if _GEN5_DEX_INDEX is None:
+        _GEN5_DEX_INDEX = _build_gen5_moves_index()
+    return _GEN5_DEX_INDEX
 
 
 _MOVES_ES_ID_MAP: Optional[Dict[str, int]] = None
@@ -683,29 +858,41 @@ def move_info(
 ) -> Optional[Dict[str, Any]]:
     if not move_name and move_id is None:
         return None
-    dex = _dex_index()
+    dex = _gen5_moves_index()
     entry = None
-    if move_id is not None:
-        try:
-            entry = dex.get("moves_by_num", {}).get(int(move_id))
-        except Exception:
-            entry = None
-    if not entry and move_name:
+
+    if move_name:
         key = _norm_key(move_name)
         entry = dex.get("moves", {}).get(key) or dex.get("moves_by_key", {}).get(key)
-        if not entry:
-            import re as _re
 
-            m = _re.search(r"\d+", str(move_name))
-            if m:
-                try:
-                    entry = dex.get("moves_by_num", {}).get(int(m.group(0)))
-                except Exception:
-                    entry = None
+    if not entry and move_id is not None:
+        try:
+            move_num = int(move_id)
+            if 1 <= move_num <= GEN5_MAX_MOVE_ID:
+                entry = dex.get("moves_by_num", {}).get(move_num)
+        except Exception:
+            entry = None
+
+    if not entry and move_name:
+        import re as _re
+
+        m = _re.fullmatch(r"\s*(?:move\s*#?|#)\s*(\d+)\s*", str(move_name), _re.I)
+        if m:
+            try:
+                move_num = int(m.group(1))
+                if 1 <= move_num <= GEN5_MAX_MOVE_ID:
+                    entry = dex.get("moves_by_num", {}).get(move_num)
+            except Exception:
+                entry = None
     if not entry and move_name:
         mid = _move_id_from_es(move_name)
         if mid is not None:
-            entry = dex.get("moves_by_num", {}).get(int(mid))
+            try:
+                move_num = int(mid)
+            except Exception:
+                move_num = 0
+            if 1 <= move_num <= GEN5_MAX_MOVE_ID:
+                entry = dex.get("moves_by_num", {}).get(move_num)
     if not entry:
         return None
     # Normaliza campos
