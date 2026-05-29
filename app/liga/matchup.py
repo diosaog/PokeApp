@@ -5,7 +5,6 @@ import mimetypes
 from dataclasses import dataclass
 from html import escape
 from pathlib import Path
-from urllib.parse import quote, unquote
 
 import streamlit as st
 
@@ -18,9 +17,6 @@ from dexdata import item_name_es, move_desc_es, move_info, species_types, type_c
 from i18n import translate_type_es
 from showdown_sprites import showdown_sprite_url
 from utils import active_users
-
-
-MOVE_QUERY_PARAM = "battle_move"
 
 
 @dataclass(frozen=True)
@@ -229,32 +225,6 @@ def _gender_html(gender: str | None) -> str:
     return ""
 
 
-def _move_token(player: str, mon_idx: int, move_idx: int) -> str:
-    return f"{player}|{mon_idx}|{move_idx}"
-
-
-def _move_href(token: str) -> str:
-    return f"?{MOVE_QUERY_PARAM}={quote(token)}#battle-move-detail"
-
-
-def _selected_move_token() -> str:
-    try:
-        value = st.query_params.get(MOVE_QUERY_PARAM)
-        if isinstance(value, list):
-            value = value[0] if value else ""
-        return unquote(str(value or ""))
-    except Exception:
-        pass
-    try:
-        params = st.experimental_get_query_params()
-        value = params.get(MOVE_QUERY_PARAM)
-        if isinstance(value, list):
-            value = value[0] if value else ""
-        return unquote(str(value or ""))
-    except Exception:
-        return ""
-
-
 def _held_item_name(mon: dict) -> str:
     found_numeric_item = False
     no_item_names = {
@@ -419,7 +389,7 @@ def _team_card_html(snapshot: dict) -> str:
     return f"<div class='matchup-team-grid'>{''.join(mons_html)}</div>"
 
 
-def _battle_team_html(snapshot: dict, selected_token: str) -> str:
+def _battle_team_html(snapshot: dict) -> str:
     player = str(snapshot.get("player") or "")
     team = list(snapshot.get("team") or [])[:6]
     cards: list[str] = []
@@ -452,13 +422,14 @@ def _battle_team_html(snapshot: dict, selected_token: str) -> str:
         level = escape(str(mon.get("level") or "-"))
         moves_html: list[str] = []
         for move_idx, move in enumerate(_move_entries(mon)):
-            token = _move_token(player, idx, move_idx)
-            active = " is-active" if token == selected_token else ""
             moves_html.append(
-                f"<a class='battle-move-link{active}' href='{_move_href(token)}' target='_self'>"
+                "<details class='battle-move-row'>"
+                "<summary class='battle-move-link'>"
                 f"{_type_dot_html(move.type_name)}"
                 f"<span>{escape(move.name)}</span>"
-                "</a>"
+                "</summary>"
+                f"{_move_detail_html(mon, move, player, inline=True)}"
+                "</details>"
             )
         moves_block = (
             "".join(moves_html)
@@ -500,27 +471,9 @@ def _battle_team_html(snapshot: dict, selected_token: str) -> str:
     )
 
 
-def _selected_move(
-    snapshot: dict, selected_token: str
-) -> tuple[dict, MovePreview] | None:
-    if not selected_token:
-        return None
-    parts = selected_token.split("|")
-    if len(parts) != 3 or parts[0] != str(snapshot.get("player") or ""):
-        return None
-    mon_idx = _safe_int(parts[1])
-    move_idx = _safe_int(parts[2])
-    team = list(snapshot.get("team") or [])[:6]
-    if mon_idx is None or move_idx is None or not (0 <= mon_idx < len(team)):
-        return None
-    mon = team[mon_idx]
-    moves = _move_entries(mon)
-    if not (0 <= move_idx < len(moves)):
-        return None
-    return mon, moves[move_idx]
-
-
-def _move_detail_html(mon: dict, move: MovePreview, player: str) -> str:
+def _move_detail_html(
+    mon: dict, move: MovePreview, player: str, *, inline: bool = False
+) -> str:
     species = str(mon.get("species_name") or mon.get("species") or "Pokemon")
     nickname = str(mon.get("nickname") or "").strip()
     owner = escape(player)
@@ -529,8 +482,9 @@ def _move_detail_html(mon: dict, move: MovePreview, player: str) -> str:
     desc = move_desc_es(move.raw_name or move.name, move_id=move.move_id)
     if not desc:
         desc = "Descripcion no disponible en espanol."
+    extra_class = " battle-move-detail-inline" if inline else ""
     return (
-        "<div id='battle-move-detail' class='battle-move-detail'>"
+        f"<div class='battle-move-detail{extra_class}'>"
         "<div class='battle-detail-kicker'>Movimiento seleccionado</div>"
         "<div class='battle-detail-head'>"
         f"<div><strong>{escape(move.name)}</strong><span>{mon_name} | {owner}</span></div>"
@@ -956,6 +910,7 @@ def _ensure_matchup_css() -> None:
           display: flex;
           align-items: center;
           gap: 7px;
+          width: 100%;
           min-height: 28px;
           padding: 4px 7px;
           border: 1px solid rgba(255,255,255,0.18);
@@ -967,12 +922,23 @@ def _ensure_matchup_css() -> None:
           text-decoration: none;
           box-shadow: inset 0 1px 0 rgba(255,255,255,0.07);
         }
+        .battle-move-row {
+          min-width: 0;
+        }
+        .battle-move-row > summary {
+          cursor: pointer;
+          list-style: none;
+        }
+        .battle-move-row > summary::-webkit-details-marker {
+          display: none;
+        }
         .battle-move-link span:last-child {
           color: #ffffff;
           overflow-wrap: anywhere;
         }
         .battle-move-link:hover,
-        .battle-move-link.is-active {
+        .battle-move-link.is-active,
+        .battle-move-row[open] > .battle-move-link {
           border-color: var(--accent-soft);
           background: linear-gradient(180deg, rgba(245,125,49,0.35) 0%, rgba(104,52,24,0.62) 100%);
           color: #ffffff;
@@ -1049,6 +1015,33 @@ def _ensure_matchup_css() -> None:
           font-family: var(--font-ui);
           font-size: 21px;
           line-height: 1.15;
+        }
+        .battle-move-detail-inline {
+          margin-top: 6px;
+          padding: 8px;
+          background: linear-gradient(180deg, rgba(28,33,41,0.98) 0%, rgba(18,24,32,0.98) 100%);
+        }
+        .battle-move-detail-inline .battle-detail-kicker {
+          display: none;
+        }
+        .battle-move-detail-inline .battle-detail-head {
+          margin-top: 0;
+        }
+        .battle-move-detail-inline .battle-detail-head strong {
+          font-size: 10px;
+        }
+        .battle-move-detail-inline .battle-detail-head span {
+          display: none;
+        }
+        .battle-move-detail-inline .battle-detail-stats {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+          gap: 6px;
+        }
+        .battle-move-detail-inline .battle-detail-stats div {
+          padding: 5px 6px;
+        }
+        .battle-move-detail-inline .battle-detail-desc {
+          font-size: 18px;
         }
         @media (max-width: 1100px) {
           .battle-team-grid,
@@ -1143,12 +1136,7 @@ def _render_battle_tab(available: list[str]) -> None:
         key="battle_rival_player",
     )
     snapshot = _summary_snapshot(rival_player)
-    selected_token = _selected_move_token()
-    st.markdown(_battle_team_html(snapshot, selected_token), unsafe_allow_html=True)
-    selected = _selected_move(snapshot, selected_token)
-    if selected:
-        mon, move = selected
-        st.markdown(_move_detail_html(mon, move, rival_player), unsafe_allow_html=True)
+    st.markdown(_battle_team_html(snapshot), unsafe_allow_html=True)
 
 
 def render_matchup_preview(players: list[str] | None = None) -> None:
@@ -1173,9 +1161,7 @@ def render_matchup_preview(players: list[str] | None = None) -> None:
 
     mode_options = ["Espectador", "Combate"]
     if "matchup_preview_mode" not in st.session_state:
-        st.session_state.matchup_preview_mode = (
-            "Combate" if _selected_move_token() else "Espectador"
-        )
+        st.session_state.matchup_preview_mode = "Espectador"
     mode = st.radio(
         "Modo de preview",
         mode_options,
