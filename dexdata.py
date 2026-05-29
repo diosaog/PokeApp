@@ -23,7 +23,8 @@ except Exception:  # pragma: no cover - disponible sólo en runtime de app
 
 BASE_URL = "https://play.pokemonshowdown.com/data"
 GEN5_MAX_MOVE_ID = 559
-GEN5_MOVE_OVERRIDES_URL = "https://raw.githubusercontent.com/smogon/pokemon-showdown/master/data/mods/gen5/moves.ts"
+SHOWDOWN_MOVE_MOD_URL = "https://raw.githubusercontent.com/smogon/pokemon-showdown/master/data/mods/{mod}/moves.ts"
+GEN5_MOVE_MODS = ("gen8", "gen7", "gen6", "gen5")
 MOVE_DESC_ES_VERSION_GROUPS = ("x-y", "omega-ruby-alpha-sapphire")
 
 # Carpeta de datos persistentes (alineada con storage.py)
@@ -593,8 +594,8 @@ def _load_gen5_move_overrides() -> Dict[str, Dict[str, Any]]:
     if _GEN5_MOVE_OVERRIDES is not None:
         return _GEN5_MOVE_OVERRIDES
 
-    cache_file = DATA_DIR / "ps_gen5_move_overrides.json"
-    stamp_file = DATA_DIR / "ps_gen5_move_overrides.stamp"
+    cache_file = DATA_DIR / "ps_gen5_move_mod_chain.json"
+    stamp_file = DATA_DIR / "ps_gen5_move_mod_chain.stamp"
 
     def expired() -> bool:
         try:
@@ -617,13 +618,15 @@ def _load_gen5_move_overrides() -> Dict[str, Dict[str, Any]]:
     try:
         import urllib.request
 
-        req = urllib.request.Request(
-            GEN5_MOVE_OVERRIDES_URL,
-            headers={"User-Agent": "PokeApp/1.0"},
-        )
-        with urllib.request.urlopen(req, timeout=12) as resp:
-            text = resp.read().decode("utf-8", errors="replace")
-        parsed = _parse_gen5_move_overrides(text)
+        for mod in GEN5_MOVE_MODS:
+            req = urllib.request.Request(
+                SHOWDOWN_MOVE_MOD_URL.format(mod=mod),
+                headers={"User-Agent": "PokeApp/1.0"},
+            )
+            with urllib.request.urlopen(req, timeout=12) as resp:
+                text = resp.read().decode("utf-8", errors="replace")
+            for key, fields in _parse_gen5_move_overrides(text).items():
+                parsed.setdefault(key, {}).update(fields)
     except Exception:
         parsed = {}
 
