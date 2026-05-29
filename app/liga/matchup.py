@@ -147,6 +147,17 @@ def _category_es(category: str | None) -> str:
     }.get(str(category or ""), str(category or "-"))
 
 
+def _category_key(category: str | None) -> str:
+    raw = str(category or "").strip().lower()
+    if raw.startswith("phys"):
+        return "physical"
+    if raw.startswith("spec"):
+        return "special"
+    if raw.startswith("stat"):
+        return "status"
+    return "unknown"
+
+
 def _move_entries(mon: dict) -> list[MovePreview]:
     raw_names = _move_names(mon)
     details = [d for d in list(mon.get("moves_detail") or []) if isinstance(d, dict)]
@@ -213,6 +224,27 @@ def _type_dot_html(type_name: str | None) -> str:
     return (
         f"<span class='battle-type-dot' title='{escape(label)}' "
         f"style='background:{color}; color:{_text_color(color)}'>{escape(label[:2].upper())}</span>"
+    )
+
+
+def _type_badge_html(type_name: str | None) -> str:
+    t = str(type_name or "Normal").title()
+    color = type_color(t)
+    label = translate_type_es(t)
+    return (
+        f"<span class='battle-type-pill' style='background:{color}; "
+        f"border-color:{color}; color:{_text_color(color)}'>{escape(label)}</span>"
+    )
+
+
+def _category_badge_html(category: str | None) -> str:
+    key = _category_key(category)
+    label = _category_es(category)
+    return (
+        f"<span class='battle-category-value battle-category-value-{key}'>"
+        f"<span class='battle-category-icon battle-category-icon-{key}' aria-hidden='true'></span>"
+        f"<span class='battle-category-text'>{escape(label)}</span>"
+        "</span>"
     )
 
 
@@ -478,7 +510,6 @@ def _move_detail_html(
     nickname = str(mon.get("nickname") or "").strip()
     owner = escape(player)
     mon_name = escape(nickname or species)
-    type_label = translate_type_es(move.type_name)
     desc = move_desc_es(move.raw_name or move.name, move_id=move.move_id)
     if not desc:
         desc = "Descripcion no disponible en espanol."
@@ -488,11 +519,10 @@ def _move_detail_html(
         "<div class='battle-detail-kicker'>Movimiento seleccionado</div>"
         "<div class='battle-detail-head'>"
         f"<div><strong>{escape(move.name)}</strong><span>{mon_name} | {owner}</span></div>"
-        f"{_type_dot_html(move.type_name)}"
         "</div>"
         "<div class='battle-detail-stats'>"
-        f"<div><span>Tipo</span><strong>{escape(type_label)}</strong></div>"
-        f"<div><span>Clase</span><strong>{escape(_category_es(move.category))}</strong></div>"
+        f"<div><span>Tipo</span><strong>{_type_badge_html(move.type_name)}</strong></div>"
+        f"<div><span>Clase</span><strong>{_category_badge_html(move.category)}</strong></div>"
         f"<div><span>Potencia</span><strong>{escape(move.power)}</strong></div>"
         f"<div><span>Precision</span><strong>{escape(move.accuracy)}</strong></div>"
         f"<div><span>PP</span><strong>{escape(move.pp)}</strong></div>"
@@ -994,20 +1024,111 @@ def _ensure_matchup_css() -> None:
           border: 1px solid rgba(255,255,255,0.08);
           background: linear-gradient(180deg, var(--bw2-screen-2) 0%, var(--bw2-screen) 100%);
         }
-        .battle-detail-stats span {
+        .battle-detail-stats > div > span {
           display: block;
           color: var(--bw2-text-soft);
           font-family: var(--font-pixel);
           font-size: 8px;
           text-transform: uppercase;
         }
-        .battle-detail-stats strong {
+        .battle-detail-stats > div > strong {
           display: block;
           margin-top: 5px;
           color: #ffffff;
           font-family: var(--font-ui);
           font-size: 18px;
           overflow-wrap: anywhere;
+        }
+        .battle-type-pill {
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          min-width: 96px;
+          min-height: 27px;
+          padding: 4px 12px;
+          border: 2px solid;
+          border-radius: 0;
+          box-shadow: inset 0 1px 0 rgba(255,255,255,0.26), inset 0 -2px 0 rgba(0,0,0,0.25), 0 2px 0 rgba(0,0,0,0.35);
+          font-family: var(--font-pixel);
+          font-size: 9px;
+          line-height: 1;
+          text-transform: uppercase;
+          text-shadow: 0 1px 0 rgba(0,0,0,0.45);
+        }
+        .battle-category-value {
+          display: inline-flex;
+          align-items: center;
+          gap: 10px;
+          color: #ffffff;
+        }
+        .battle-category-icon {
+          position: relative;
+          width: 48px;
+          height: 28px;
+          flex: 0 0 48px;
+          border: 2px solid rgba(0,0,0,0.45);
+          box-shadow: inset 0 1px 0 rgba(255,255,255,0.22), inset 0 -2px 0 rgba(0,0,0,0.24), 0 2px 0 rgba(0,0,0,0.35);
+        }
+        .battle-category-text {
+          color: #ffffff;
+          font-family: var(--font-ui);
+          font-size: 18px;
+          line-height: 1;
+        }
+        .battle-category-icon-physical {
+          background: linear-gradient(180deg, #f46a3c 0%, #b63826 100%);
+        }
+        .battle-category-icon-physical::before {
+          content: "";
+          position: absolute;
+          left: 50%;
+          top: 50%;
+          width: 22px;
+          height: 22px;
+          transform: translate(-50%, -50%);
+          background: #21130f;
+          clip-path: polygon(50% 0%, 59% 30%, 86% 13%, 70% 41%, 100% 50%, 70% 59%, 86% 87%, 59% 70%, 50% 100%, 41% 70%, 14% 87%, 30% 59%, 0% 50%, 30% 41%, 14% 13%, 41% 30%);
+          opacity: .9;
+        }
+        .battle-category-icon-special {
+          background: linear-gradient(180deg, #6f8fc5 0%, #435f92 100%);
+        }
+        .battle-category-icon-special::before {
+          content: "";
+          position: absolute;
+          inset: 5px 14px;
+          border-radius: 50%;
+          border: 3px double rgba(24,32,48,0.95);
+          box-shadow: 0 0 0 3px rgba(226,235,255,0.35), inset 0 0 0 2px rgba(226,235,255,0.28);
+        }
+        .battle-category-icon-special::after {
+          content: "";
+          position: absolute;
+          left: 50%;
+          top: 50%;
+          width: 5px;
+          height: 5px;
+          transform: translate(-50%, -50%);
+          border-radius: 50%;
+          background: rgba(24,32,48,0.95);
+        }
+        .battle-category-icon-status {
+          background: linear-gradient(180deg, #b8b29b 0%, #77715f 100%);
+        }
+        .battle-category-icon-status::before {
+          content: "";
+          position: absolute;
+          left: 50%;
+          top: 50%;
+          width: 23px;
+          height: 23px;
+          transform: translate(-50%, -50%);
+          border-radius: 50%;
+          background:
+            radial-gradient(circle at 50% 28%, #ffffff 0 3px, transparent 4px),
+            radial-gradient(circle at 50% 72%, #6b6658 0 3px, transparent 4px),
+            linear-gradient(90deg, #ffffff 0 50%, #6b6658 50% 100%);
+          border: 2px solid rgba(32,34,36,0.65);
         }
         .battle-detail-desc {
           margin-top: 10px;
