@@ -10,6 +10,7 @@ from app.tienda.common import _eq_item
 from storage import (
     add_purchase,
     add_redemption,
+    get_purchase,
     get_flags_by_fingerprints,
     set_purchase_status,
     upsert_pokemon_flags,
@@ -58,12 +59,41 @@ def _load_flags_for_fps(legacy: str | None, stable: str | None, *, owner: str | 
     return flags, fp_key
 
 
+def _redeem_purchase_belongs_to_user(pid, item: str, current_user: str) -> bool:
+    try:
+        purchase_id = int(pid)
+    except Exception:
+        return False
+    if not current_user or current_user == "-":
+        return False
+    try:
+        purchase = get_purchase(purchase_id)
+    except Exception:
+        return False
+    if not purchase:
+        return False
+    try:
+        _row_id, owner, row_item, _price, _created_at, status, _redeemed_at = purchase
+    except Exception:
+        return False
+    if str(owner or "").strip() != str(current_user or "").strip():
+        return False
+    if str(status or "").strip().lower() == "used":
+        return False
+    return _eq_item(str(row_item), str(item))
+
+
 def render_redeem_flow(ctx: dict, current_user: str) -> None:
     item = ctx.get("item")
     pid = ctx.get("pid")
     _ = int(ctx.get("step") or 1)
     st.markdown("---")
     st.subheader(f"Usar: {item} (#{pid})")
+
+    if not _redeem_purchase_belongs_to_user(pid, str(item or ""), current_user):
+        st.error("No puedes usar comodines que no pertenezcan a tu usuario.")
+        st.session_state.pop("redeem_ctx", None)
+        return
 
     if _eq_item(item, "Robar Pokemon"):
         players = [u for u in active_users().keys() if u != current_user]

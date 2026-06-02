@@ -1427,28 +1427,32 @@ def _render_battle_tab(available: list[str]) -> None:
         (player for player in available if player.lower() == current_user.lower()),
         "",
     )
-    rivals = [player for player in available if player != own_player] or available
-    previous_rival = st.session_state.get("matchup_right_player")
-    default_rival = previous_rival if previous_rival in rivals else rivals[0]
-
-    rival_player = st.selectbox(
-        "Rival",
-        rivals,
-        index=rivals.index(default_rival),
-        key="battle_rival_player",
+    previous_player = (
+        st.session_state.get("battle_player")
+        or st.session_state.get("battle_rival_player")
+        or st.session_state.get("matchup_right_player")
     )
-    if own_player:
-        own_snapshot = _summary_snapshot(own_player)
-        st.markdown(
-            _battle_team_html(
-                own_snapshot, board_label="Tu equipo", reveal_private=True
-            ),
-            unsafe_allow_html=True,
-        )
+    default_player = (
+        previous_player
+        if previous_player in available
+        else (own_player if own_player else available[0])
+    )
 
-    rival_snapshot = _summary_snapshot(rival_player)
+    selected_player = st.selectbox(
+        "Entrenador",
+        available,
+        index=available.index(default_player),
+        key="battle_player",
+    )
+
+    is_own_selection = bool(own_player) and selected_player == own_player
+    snapshot = _summary_snapshot(selected_player)
     st.markdown(
-        _battle_team_html(rival_snapshot, board_label="Rival", reveal_private=False),
+        _battle_team_html(
+            snapshot,
+            board_label="Tu equipo" if is_own_selection else "Rival",
+            reveal_private=is_own_selection,
+        ),
         unsafe_allow_html=True,
     )
 

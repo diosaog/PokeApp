@@ -145,7 +145,14 @@ def page_entrenadores_view() -> None:
         with tab_como:
             inv = _inventory_cached(trainer or "")
             comos = [r for r in inv if _category_for_item(r[1]) == "Comodines"] if inv else []
-            _render_purchase_cards(comos, "Comodines", key_prefix="comos", allow_use=True)
+            if not is_own_profile:
+                st.caption("Solo el propietario puede usar sus comodines.")
+            _render_purchase_cards(
+                comos,
+                "Comodines",
+                key_prefix="comos",
+                allow_use=is_own_profile,
+            )
 
         ctx = st.session_state.get("redeem_ctx")
         if ctx:

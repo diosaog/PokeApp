@@ -750,6 +750,39 @@ def list_purchases(user: str | None = None, limit: int = 100):
         return rows
 
 
+def get_purchase(purchase_id: int):
+    if _supabase_enabled():
+        try:
+            client = _sb()
+            res = (
+                client.table("purchases")
+                .select("*")
+                .eq("id", int(purchase_id))
+                .limit(1)
+                .execute()
+            )
+            data = res.data or []
+            if not data:
+                return None
+            row = data[0]
+            return (
+                row.get("id"),
+                row.get("user"),
+                row.get("item"),
+                row.get("price"),
+                _iso_to_ts(row.get("created_at")),
+                row.get("status"),
+                _iso_to_ts(row.get("redeemed_at")),
+            )
+        except Exception:
+            pass
+    with _conn() as cx:
+        return cx.execute(
+            "SELECT id, user, item, price, created_at, status, redeemed_at FROM purchases WHERE id=?",
+            (int(purchase_id),),
+        ).fetchone()
+
+
 def list_inventory(user: str, *, status: str | None = None, limit: int = 200):
     cache_key = (user, status, int(limit))
     hit, cached = _LIST_INVENTORY_CACHE.get(cache_key)
