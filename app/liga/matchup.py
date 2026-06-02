@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import base64
 import mimetypes
+import re
 from dataclasses import dataclass
 from html import escape
 from pathlib import Path
@@ -13,10 +14,28 @@ from app.entrenadores.profile import find_trainer_image
 from app.entrenadores.snapshot import get_trainer_snapshot
 from app.juicios.penalties import get_user_penalties
 from app.tienda.money import money_breakdown_from_parts
-from dexdata import item_name_es, move_desc_es, move_info, species_types, type_color
-from i18n import translate_type_es
+from dexdata import (
+    ability_desc_es,
+    ability_name_es,
+    item_name_es,
+    move_desc_es,
+    move_info,
+    species_types,
+    type_color,
+)
+from i18n import nature_display_es, translate_type_es
 from showdown_sprites import showdown_sprite_url
 from utils import active_users
+
+
+IV_LABELS: tuple[tuple[str, str], ...] = (
+    ("hp", "PS"),
+    ("atk", "Atk"),
+    ("def", "Def"),
+    ("spa", "At. Esp"),
+    ("spd", "Def. Esp"),
+    ("spe", "Vel"),
+)
 
 
 @dataclass(frozen=True)
@@ -295,6 +314,88 @@ def _held_item_name(mon: dict) -> str:
     return "Objeto desconocido" if found_numeric_item else "-"
 
 
+def _mon_ability(mon: dict) -> str:
+    for key in ("ability", "Ability"):
+        raw = mon.get(key)
+        if raw is None:
+            continue
+        ability = str(raw).strip()
+        if ability:
+            return ability
+    return ""
+
+
+def _ability_display_es(name: str) -> str:
+    if not name:
+        return "-"
+    resolved = ability_name_es(name)
+    if resolved and resolved != name:
+        return resolved
+    spaced = re.sub(r"(?<!^)(?=[A-Z])", " ", name).replace("_", " ").strip()
+    if spaced and spaced != name:
+        resolved_spaced = ability_name_es(spaced)
+        if resolved_spaced and resolved_spaced != spaced:
+            return resolved_spaced
+    return resolved or name
+
+
+def _fmt_iv(value) -> str:
+    try:
+        return str(int(value))
+    except Exception:
+        return "-"
+
+
+def _private_mon_info_html(mon: dict) -> str:
+    ability = _mon_ability(mon)
+    ability_name = _ability_display_es(ability) if ability else "-"
+    ability_html = (
+        "<div class='battle-private-line'>"
+        "<span>Habilidad</span>"
+        "<strong>-</strong>"
+        "</div>"
+    )
+    if ability:
+        ability_desc = ability_desc_es(ability)
+        if not ability_desc:
+            ability_desc = "Descripcion no disponible en espanol."
+        ability_html = (
+            "<details class='battle-ability-row'>"
+            "<summary>"
+            "<span>Habilidad</span>"
+            f"<strong>{escape(ability_name)}</strong>"
+            "</summary>"
+            f"<div class='battle-ability-desc'>{escape(ability_desc)}</div>"
+            "</details>"
+        )
+
+    nature = nature_display_es(mon.get("nature") or mon.get("Nature") or "") or "-"
+    ivs = mon.get("ivs") if isinstance(mon.get("ivs"), dict) else {}
+    ivs_html = "".join(
+        (
+            "<div class='battle-iv'>"
+            f"<span>{escape(label)}</span>"
+            f"<strong>{escape(_fmt_iv(ivs.get(key)))}</strong>"
+            "</div>"
+        )
+        for key, label in IV_LABELS
+    )
+
+    return (
+        "<div class='battle-private-info'>"
+        f"{ability_html}"
+        "<div class='battle-private-line'>"
+        "<span>Naturaleza</span>"
+        f"<strong>{escape(nature)}</strong>"
+        "</div>"
+        "<div class='battle-ivs'>"
+        "<span>IVs</span>"
+        f"<div class='battle-ivs-grid'>{ivs_html}</div>"
+        "</div>"
+        "</div>"
+    )
+
+
 def _summary_snapshot(player: str) -> dict:
     from app.liga.ranking import current_points_total
 
@@ -421,7 +522,9 @@ def _team_card_html(snapshot: dict) -> str:
     return f"<div class='matchup-team-grid'>{''.join(mons_html)}</div>"
 
 
-def _battle_team_html(snapshot: dict) -> str:
+def _battle_team_html(
+    snapshot: dict, *, board_label: str = "Rival", reveal_private: bool = False
+) -> str:
     player = str(snapshot.get("player") or "")
     team = list(snapshot.get("team") or [])[:6]
     cards: list[str] = []
@@ -471,6 +574,7 @@ def _battle_team_html(snapshot: dict) -> str:
         subtitle = (
             f"<div class='battle-species'>{escape(species)}</div>" if nickname else ""
         )
+        private_html = _private_mon_info_html(mon) if reveal_private else ""
         cards.append(
             "<div class='battle-mon-card'>"
             f"<div class='battle-slot-mark'>{idx + 1}</div>"
@@ -482,6 +586,7 @@ def _battle_team_html(snapshot: dict) -> str:
             f"{subtitle}"
             f"<div class='battle-level'>Lv. {level} {_gender_html(mon.get('gender'))}</div>"
             f"<div class='battle-item'>Item: {escape(item)}</div>"
+            f"{private_html}"
             "</div>"
             "<div class='battle-sprite-wrap'>"
             f"<img class='battle-sprite' src='{sprite}' alt='{escape(species)}'/>"
@@ -493,7 +598,7 @@ def _battle_team_html(snapshot: dict) -> str:
     return (
         "<div class='battle-board'>"
         "<div class='battle-board-top'>"
-        f"<div><span>Rival</span><strong>{escape(player)}</strong></div>"
+        f"<div><span>{escape(board_label)}</span><strong>{escape(player)}</strong></div>"
         f"<div><span>Save</span><strong>{escape(str(snapshot.get('save_name') or 'Sin save'))}</strong></div>"
         "</div>"
         "<div class='battle-team-grid'>"
@@ -902,6 +1007,78 @@ def _ensure_matchup_css() -> None:
         .battle-item {
           overflow-wrap: anywhere;
         }
+        .battle-private-info {
+          display: grid;
+          gap: 6px;
+          margin-top: 9px;
+        }
+        .battle-ability-row,
+        .battle-private-line,
+        .battle-ivs {
+          min-width: 0;
+          border: 1px solid rgba(255,255,255,0.13);
+          background: rgba(9,15,22,0.44);
+          box-shadow: inset 0 1px 0 rgba(255,255,255,0.06);
+        }
+        .battle-ability-row > summary,
+        .battle-private-line,
+        .battle-ivs {
+          padding: 6px 7px;
+        }
+        .battle-ability-row > summary {
+          cursor: pointer;
+          list-style: none;
+        }
+        .battle-ability-row > summary::-webkit-details-marker {
+          display: none;
+        }
+        .battle-ability-row span,
+        .battle-private-line span,
+        .battle-ivs > span,
+        .battle-iv span {
+          display: block;
+          color: var(--bw2-text-soft);
+          font-family: var(--font-pixel);
+          font-size: 8px;
+          line-height: 1.15;
+          text-transform: uppercase;
+        }
+        .battle-ability-row strong,
+        .battle-private-line strong,
+        .battle-iv strong {
+          display: block;
+          margin-top: 4px;
+          color: #ffffff;
+          font-family: var(--font-ui);
+          font-size: 17px;
+          line-height: 1.05;
+          overflow-wrap: anywhere;
+        }
+        .battle-ability-row[open] {
+          border-color: var(--accent-soft);
+        }
+        .battle-ability-desc {
+          padding: 0 7px 7px;
+          color: var(--bw2-text);
+          font-family: var(--font-ui);
+          font-size: 17px;
+          line-height: 1.12;
+        }
+        .battle-ivs-grid {
+          display: grid;
+          grid-template-columns: repeat(3, minmax(0, 1fr));
+          gap: 5px;
+          margin-top: 6px;
+        }
+        .battle-iv {
+          min-width: 0;
+          padding: 4px 5px;
+          border: 1px solid rgba(255,255,255,0.08);
+          background: rgba(255,255,255,0.04);
+        }
+        .battle-iv strong {
+          font-size: 16px;
+        }
         .battle-gender {
           display: inline-flex;
           align-items: center;
@@ -1245,8 +1422,12 @@ def _render_spectator_tab(available: list[str]) -> None:
 
 
 def _render_battle_tab(available: list[str]) -> None:
-    current_user = st.session_state.get("user")
-    rivals = [player for player in available if player != current_user] or available
+    current_user = str(st.session_state.get("user") or "").strip()
+    own_player = next(
+        (player for player in available if player.lower() == current_user.lower()),
+        "",
+    )
+    rivals = [player for player in available if player != own_player] or available
     previous_rival = st.session_state.get("matchup_right_player")
     default_rival = previous_rival if previous_rival in rivals else rivals[0]
 
@@ -1256,8 +1437,20 @@ def _render_battle_tab(available: list[str]) -> None:
         index=rivals.index(default_rival),
         key="battle_rival_player",
     )
-    snapshot = _summary_snapshot(rival_player)
-    st.markdown(_battle_team_html(snapshot), unsafe_allow_html=True)
+    if own_player:
+        own_snapshot = _summary_snapshot(own_player)
+        st.markdown(
+            _battle_team_html(
+                own_snapshot, board_label="Tu equipo", reveal_private=True
+            ),
+            unsafe_allow_html=True,
+        )
+
+    rival_snapshot = _summary_snapshot(rival_player)
+    st.markdown(
+        _battle_team_html(rival_snapshot, board_label="Rival", reveal_private=False),
+        unsafe_allow_html=True,
+    )
 
 
 def render_matchup_preview(players: list[str] | None = None) -> None:
