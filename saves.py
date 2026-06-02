@@ -34,6 +34,12 @@ Retira de una vez toda la transicion que se puso para terminar la jornada 2 anti
   de Mario; deja los selectores funcionando con el roster fijo de 10.
 - En app/liga/state.py elimina roster_transition_complete /
   league_roster_transition_complete y la normalizacion creada solo para retirar a Mario.
+  Elimina tambien el parche historico creado solo para esta temporada que fuerza a Mario
+  como puesto 5 del tramo 2 y desplaza una posicion la Liga B; en concreto limpia cualquier
+  helper tipo _forced_historical_positions, _insert_forced_positions o reparacion especial
+  de resultados desde matches que solo exista para conservar las jornadas antiguas.
+- En app/liga/ui.py elimina la excepcion visual del historial que trata el tramo 2 con
+  Mario en posicion 5 para recalcular el rango de Liga A/B.
 - En app/liga/ranking.py elimina la marca de transicion y el clear_user_app_data("Mario")
   al finalizar la jornada 2; en storage.py elimina ese helper si ya no tiene otros usos.
 - En app/liga/rewards.py elimina LEGACY_* y FIRST_ROUND_B_* junto con sus condiciones:
