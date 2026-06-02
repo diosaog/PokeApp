@@ -26,6 +26,7 @@ GEN5_MAX_MOVE_ID = 559
 SHOWDOWN_MOVE_MOD_URL = "https://raw.githubusercontent.com/smogon/pokemon-showdown/master/data/mods/{mod}/moves.ts"
 GEN5_MOVE_MODS = ("gen8", "gen7", "gen6", "gen5")
 MOVE_DESC_ES_VERSION_GROUPS = ("x-y", "omega-ruby-alpha-sapphire")
+ABILITY_DESC_ES_VERSION_GROUPS = ("x-y", "omega-ruby-alpha-sapphire")
 
 # Carpeta de datos persistentes (alineada con storage.py)
 _BASE_DIR = Path(__file__).resolve().parent
@@ -331,25 +332,43 @@ def ability_desc_es(name_en: str) -> str:
     if not name_en:
         return ""
     slug = _slugify(name_en)
-    cache_file = DATA_DIR / "abilities_desc_es_cache.json"
+    cache_key = f"xy:{slug}"
+    cache_file = DATA_DIR / "abilities_desc_es_xy_cache.json"
 
-    def fetch(slug_: str) -> Optional[str]:
-        url = f"https://pokeapi.co/api/v2/ability/{slug_}/"
+    def fetch(key: str) -> Optional[str]:
+        lookup = key.removeprefix("xy:")
+        if not lookup:
+            return None
+        url = f"https://pokeapi.co/api/v2/ability/{lookup}/"
         try:
             import urllib.request
             import json as _json
 
-            with urllib.request.urlopen(url, timeout=10) as resp:
+            req = urllib.request.Request(url, headers={"User-Agent": "PokeApp/1.0"})
+            with urllib.request.urlopen(req, timeout=10) as resp:
                 data = _json.loads(resp.read().decode("utf-8"))
-            for entry in data.get("flavor_text_entries", []):
-                if entry and entry.get("language", {}).get("name") == "es":
-                    text = entry.get("flavor_text") or ""
-                    return text.replace("\n", " ").replace("\f", " ").strip()
+            entries = data.get("flavor_text_entries") or []
+            for version in ABILITY_DESC_ES_VERSION_GROUPS:
+                for entry in entries:
+                    if not entry or entry.get("language", {}).get("name") != "es":
+                        continue
+                    if entry.get("version_group", {}).get("name") != version:
+                        continue
+                    text = _clean_flavor_text(entry.get("flavor_text"))
+                    if text:
+                        return text
+
+            for entry in entries:
+                if not entry or entry.get("language", {}).get("name") != "es":
+                    continue
+                text = _clean_flavor_text(entry.get("flavor_text"))
+                if text:
+                    return text
         except Exception:
             return None
         return None
 
-    val = _cached_lookup(cache_file, slug, fetch, mem_cache=ABILITY_DESC_ES_CACHE_MEM)
+    val = _cached_lookup(cache_file, cache_key, fetch, mem_cache=ABILITY_DESC_ES_CACHE_MEM)
     return _to_ascii(val or "")
 
 
