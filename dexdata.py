@@ -116,6 +116,17 @@ def _slugify(name: str) -> str:
     return s
 
 
+def _ability_slug_candidates(name: str) -> list[str]:
+    raw = str(name or "").strip()
+    spaced = re.sub(r"(?<!^)(?=[A-Z])", " ", raw).replace("_", " ").strip()
+    candidates: list[str] = []
+    for candidate in (raw, spaced):
+        slug = _slugify(candidate)
+        if slug and slug not in candidates:
+            candidates.append(slug)
+    return candidates
+
+
 def _to_ascii(text: str) -> str:
     if not text:
         return ""
@@ -304,9 +315,10 @@ FALLBACK_ABILITIES_ES = {
 def ability_name_es(name_en: str) -> str:
     if not name_en:
         return "-"
-    slug = _slugify(name_en)
-    if slug in FALLBACK_ABILITIES_ES:
-        return FALLBACK_ABILITIES_ES[slug]
+    slugs = _ability_slug_candidates(name_en)
+    for slug in slugs:
+        if slug in FALLBACK_ABILITIES_ES:
+            return FALLBACK_ABILITIES_ES[slug]
     cache_file = DATA_DIR / "abilities_es_cache.json"
 
     def fetch(slug_: str) -> Optional[str]:
@@ -324,15 +336,17 @@ def ability_name_es(name_en: str) -> str:
             return None
         return None
 
-    val = _cached_lookup(cache_file, slug, fetch, mem_cache=ABILITIES_ES_CACHE_MEM)
-    return _to_ascii(val or name_en)
+    for slug in slugs:
+        val = _cached_lookup(cache_file, slug, fetch, mem_cache=ABILITIES_ES_CACHE_MEM)
+        if val:
+            return _to_ascii(val)
+    return _to_ascii(name_en)
 
 
 def ability_desc_es(name_en: str) -> str:
     if not name_en:
         return ""
-    slug = _slugify(name_en)
-    cache_key = f"xy:{slug}"
+    slugs = _ability_slug_candidates(name_en)
     cache_file = DATA_DIR / "abilities_desc_es_xy_cache.json"
 
     def fetch(key: str) -> Optional[str]:
@@ -368,8 +382,12 @@ def ability_desc_es(name_en: str) -> str:
             return None
         return None
 
-    val = _cached_lookup(cache_file, cache_key, fetch, mem_cache=ABILITY_DESC_ES_CACHE_MEM)
-    return _to_ascii(val or "")
+    for slug in slugs:
+        cache_key = f"xy:{slug}"
+        val = _cached_lookup(cache_file, cache_key, fetch, mem_cache=ABILITY_DESC_ES_CACHE_MEM)
+        if val:
+            return _to_ascii(val)
+    return ""
 
 
 def item_name_es(name_or_id: str) -> str:
