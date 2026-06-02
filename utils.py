@@ -4,6 +4,7 @@ from typing import Dict, List
 from datetime import datetime
 import hashlib
 import json
+
 try:
     import streamlit as st  # type: ignore
 except Exception:
@@ -28,11 +29,24 @@ USERS: Dict[str, str] = {
     "Barto": "b66",
 }
 
+ROSTER_JOIN_ROUND = {
+    "Barto": 2,
+}
+
 ROSTER_DEPARTURE_AFTER_ROUND = {
     "Mario": 2,
 }
 
-SECTIONS = ["Normativa", "Liga y Tabla", "Previa Combate", "Entrenadores", "Copa", "Juicios", "Tienda", "Saves"]
+SECTIONS = [
+    "Normativa",
+    "Liga y Tabla",
+    "Previa Combate",
+    "Entrenadores",
+    "Copa",
+    "Juicios",
+    "Tienda",
+    "Saves",
+]
 
 
 def init_session_state() -> None:
@@ -53,16 +67,21 @@ def sections_for_user(user: str | None) -> list[str]:
     return list(SECTIONS)
 
 
-def league_users_for_round(round_no: int, *, roster_transition_complete: bool = False) -> Dict[str, str]:
+def league_users_for_round(
+    round_no: int, *, roster_transition_complete: bool = False
+) -> Dict[str, str]:
     current_round = max(int(round_no), 1)
-    return {
-        user: code
-        for user, code in USERS.items()
-        if not (
-            roster_transition_complete and user in ROSTER_DEPARTURE_AFTER_ROUND
-        )
-        and current_round <= int(ROSTER_DEPARTURE_AFTER_ROUND.get(user, current_round))
-    }
+    _ = roster_transition_complete
+    out: Dict[str, str] = {}
+    for user, code in USERS.items():
+        join_round = int(ROSTER_JOIN_ROUND.get(user, 1))
+        departure_round = ROSTER_DEPARTURE_AFTER_ROUND.get(user)
+        if current_round < join_round:
+            continue
+        if departure_round is not None and current_round > int(departure_round):
+            continue
+        out[user] = code
+    return out
 
 
 def active_users() -> Dict[str, str]:
@@ -85,7 +104,9 @@ def active_users() -> Dict[str, str]:
         if raw:
             state = json.loads(raw)
             current_round = max(int(state.get("tramo") or 1), 1)
-            roster_transition_complete = bool(state.get("roster_transition_complete", False))
+            roster_transition_complete = bool(
+                state.get("roster_transition_complete", False)
+            )
     except Exception:
         current_round = 1
     return league_users_for_round(
@@ -107,6 +128,7 @@ def _list_user_saves_uncached(u: str) -> List[Path]:
 
 
 if st is not None:
+
     @st.cache_data(ttl=10, show_spinner=False)
     def _list_user_saves_cached(u: str) -> List[Path]:
         return _list_user_saves_uncached(u)
@@ -114,6 +136,7 @@ if st is not None:
     def list_user_saves(u: str) -> List[Path]:
         return _list_user_saves_cached(u)
 else:
+
     def list_user_saves(u: str) -> List[Path]:
         return _list_user_saves_uncached(u)
 
@@ -122,8 +145,8 @@ def format_bytes(n: int) -> str:
     if n < 1024:
         return f"{n} B"
     if n < 1024 * 1024:
-        return f"{n/1024:.1f} KB"
-    return f"{n/1024/1024:.2f} MB"
+        return f"{n / 1024:.1f} KB"
+    return f"{n / 1024 / 1024:.2f} MB"
 
 
 def sha256_hex(data: bytes) -> str:

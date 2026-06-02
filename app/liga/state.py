@@ -14,7 +14,9 @@ _LEAGUE_STATE_ERROR_KEY = "_league_state_error"
 _DIVISION_A_SIZE = 5
 
 
-def _player_canon(round_no: int, roster_transition_complete: bool = False) -> dict[str, str]:
+def _player_canon(
+    round_no: int, roster_transition_complete: bool = False
+) -> dict[str, str]:
     return {
         str(user).strip().lower(): user
         for user in league_users_for_round(
@@ -24,11 +26,17 @@ def _player_canon(round_no: int, roster_transition_complete: bool = False) -> di
     }
 
 
-def _normalize_player(value, round_no: int, roster_transition_complete: bool = False) -> str | None:
-    return _player_canon(round_no, roster_transition_complete).get(str(value).strip().lower())
+def _normalize_player(
+    value, round_no: int, roster_transition_complete: bool = False
+) -> str | None:
+    return _player_canon(round_no, roster_transition_complete).get(
+        str(value).strip().lower()
+    )
 
 
-def _sanitize_divisions(divs: dict, round_no: int, roster_transition_complete: bool = False) -> dict:
+def _sanitize_divisions(
+    divs: dict, round_no: int, roster_transition_complete: bool = False
+) -> dict:
     players = list(
         league_users_for_round(
             round_no,
@@ -59,29 +67,39 @@ def _sanitize_results(
     round_no: int,
     roster_transition_complete: bool = False,
 ) -> dict[str, dict[int, int]]:
-    active_round = int(round_no)
+    _ = round_no
     entries_by_round: Dict[int, list[tuple[int, str | None]]] = {}
     for raw_user, round_map in (results or {}).items():
         if not isinstance(round_map, dict):
             continue
-        user = _normalize_player(raw_user, active_round, roster_transition_complete)
         for raw_round, raw_position in round_map.items():
             try:
                 result_round = int(raw_round)
                 position = int(raw_position)
             except Exception:
                 continue
+            user = _normalize_player(
+                raw_user,
+                result_round,
+                roster_transition_complete,
+            )
             entries_by_round.setdefault(result_round, []).append((position, user))
 
     clean: dict[str, dict[int, int]] = {}
     for result_round, entries in entries_by_round.items():
-        removed_positions = sorted(position for position, user in entries if user is None)
+        removed_positions = sorted(
+            position for position, user in entries if user is None
+        )
         kept = sorted(
             ((position, user) for position, user in entries if user),
             key=lambda item: (item[0], item[1]),
         )
         for position, user in kept:
-            shift = sum(1 for removed_position in removed_positions if removed_position < position)
+            shift = sum(
+                1
+                for removed_position in removed_positions
+                if removed_position < position
+            )
             clean.setdefault(user, {})[result_round] = position - shift
     return clean
 
@@ -98,7 +116,9 @@ def _sanitize_match(
     if not player1 or not player2 or player1 == player2:
         return None
     normalized_winner = (
-        _normalize_player(winner, round_no, roster_transition_complete) if winner else None
+        _normalize_player(winner, round_no, roster_transition_complete)
+        if winner
+        else None
     )
     if normalized_winner not in (player1, player2):
         normalized_winner = None
@@ -110,7 +130,7 @@ def _sanitize_movements(
     round_no: int,
     roster_transition_complete: bool = False,
 ) -> dict[int, dict[str, list[str]]]:
-    active_round = int(round_no)
+    _ = round_no
     clean: dict[int, dict[str, list[str]]] = {}
     for raw_round, movement in (movements or {}).items():
         try:
@@ -125,7 +145,7 @@ def _sanitize_movements(
                 if (
                     player := _normalize_player(
                         raw_player,
-                        active_round,
+                        movement_round,
                         roster_transition_complete,
                     )
                 )
@@ -135,19 +155,86 @@ def _sanitize_movements(
     return clean
 
 
+def _players_from_match_map(results: dict[tuple, str | None]) -> list[str]:
+    players: list[str] = []
+    for p1, p2 in (results or {}).keys():
+        if p1 and p1 not in players:
+            players.append(p1)
+        if p2 and p2 not in players:
+            players.append(p2)
+    return players
+
+
+def _repair_results_from_matches(
+    results: dict[str, dict[int, int]],
+    matches: Dict[int, Dict[str, Dict[tuple, str | None]]],
+) -> dict[str, dict[int, int]]:
+    try:
+        from app.liga.ranking import _rank
+    except Exception:
+        return results
+
+    repaired = {user: dict(rounds) for user, rounds in (results or {}).items()}
+    for tramo, divs in (matches or {}).items():
+        data_a = divs.get("A", {}) or {}
+        data_b = divs.get("B", {}) or {}
+        if not data_a or not data_b:
+            continue
+        if any(winner is None for winner in data_a.values()) or any(
+            winner is None for winner in data_b.values()
+        ):
+            continue
+
+        players_a = _players_from_match_map(data_a)
+        players_b = _players_from_match_map(data_b)
+        if not players_a or not players_b:
+            continue
+
+        expected_players = set(players_a + players_b)
+        current_positions = {
+            user: int(rounds.get(int(tramo)))
+            for user, rounds in repaired.items()
+            if int(tramo) in rounds
+        }
+        expected_positions = set(range(1, len(expected_players) + 1))
+        if (
+            set(current_positions) == expected_players
+            and set(current_positions.values()) == expected_positions
+        ):
+            continue
+
+        rank_a = _rank(players_a, data_a)
+        rank_b = _rank(players_b, data_b)
+
+        for user_map in repaired.values():
+            user_map.pop(int(tramo), None)
+        for pos, user in enumerate(rank_a, start=1):
+            repaired.setdefault(user, {})[int(tramo)] = pos
+        for pos, user in enumerate(rank_b, start=len(rank_a) + 1):
+            repaired.setdefault(user, {})[int(tramo)] = pos
+
+    return {user: rounds for user, rounds in repaired.items() if rounds}
+
+
 def _serialize_state() -> dict:
     S = st.session_state
     current_round = int(S.get("league_tramo", 1))
-    roster_transition_complete = bool(
-        S.get("league_roster_transition_complete", False)
-    ) or current_round > 2
+    roster_transition_complete = (
+        bool(S.get("league_roster_transition_complete", False)) or current_round > 2
+    )
     matches: Dict[str, Dict[str, list[dict]]] = {}
     for tramo, divs in (S.get("league_matches") or {}).items():
         tkey = str(tramo)
         out = {"A": [], "B": []}
         for d in ("A", "B"):
             for (p1, p2), w in divs.get(d, {}).items():
-                match = _sanitize_match(p1, p2, w, current_round, roster_transition_complete)
+                match = _sanitize_match(
+                    p1,
+                    p2,
+                    w,
+                    int(tramo),
+                    roster_transition_complete,
+                )
                 if match:
                     player1, player2, winner = match
                     out[d].append({"p1": player1, "p2": player2, "winner": winner})
@@ -157,7 +244,13 @@ def _serialize_state() -> dict:
         current_round,
         roster_transition_complete,
     )
-    results = {u: {str(k): int(v) for k, v in mp.items()} for u, mp in clean_results.items()}
+    clean_results = _repair_results_from_matches(
+        clean_results,
+        S.get("league_matches") or {},
+    )
+    results = {
+        u: {str(k): int(v) for k, v in mp.items()} for u, mp in clean_results.items()
+    }
     return {
         "tramo": int(S.get("league_tramo", 1)),
         "active": bool(S.get("league_active", False)),
@@ -183,9 +276,9 @@ def _state_hash(raw: str) -> str:
 
 def _apply_serialized_state(obj: dict) -> None:
     current_round = int(obj.get("tramo", 1))
-    roster_transition_complete = bool(
-        obj.get("roster_transition_complete", False)
-    ) or current_round > 2
+    roster_transition_complete = (
+        bool(obj.get("roster_transition_complete", False)) or current_round > 2
+    )
     st.session_state.league_tramo = current_round
     st.session_state.league_active = bool(obj.get("active", False))
     st.session_state.league_roster_transition_complete = roster_transition_complete
@@ -212,13 +305,17 @@ def _apply_serialized_state(obj: dict) -> None:
                     m.get("p1"),
                     m.get("p2"),
                     m.get("winner"),
-                    current_round,
+                    t,
                     roster_transition_complete,
                 )
                 if match:
                     player1, player2, winner = match
                     mat_out[t][d][(player1, player2)] = winner
     st.session_state.league_matches = mat_out
+    st.session_state.league_results = _repair_results_from_matches(
+        st.session_state.league_results,
+        mat_out,
+    )
 
     st.session_state.league_movements = _sanitize_movements(
         obj.get("movements", {}),
@@ -293,9 +390,10 @@ def ensure_state() -> None:
     if "league_results" not in st.session_state:
         st.session_state.league_results = {}
     current_round = int(st.session_state.league_tramo)
-    roster_transition_complete = bool(
-        st.session_state.get("league_roster_transition_complete", False)
-    ) or current_round > 2
+    roster_transition_complete = (
+        bool(st.session_state.get("league_roster_transition_complete", False))
+        or current_round > 2
+    )
     st.session_state.league_roster_transition_complete = roster_transition_complete
     if "league_divisions" not in st.session_state:
         players = list(
