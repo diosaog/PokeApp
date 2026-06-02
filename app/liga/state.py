@@ -165,6 +165,36 @@ def _players_from_match_map(results: dict[tuple, str | None]) -> list[str]:
     return players
 
 
+def _forced_historical_positions(
+    tramo: int,
+    players_a: list[str],
+    players_b: list[str],
+) -> dict[str, int]:
+    players = set(players_a + players_b)
+    if int(tramo) == 2 and "Mario" not in players:
+        return {"Mario": 5}
+    return {}
+
+
+def _insert_forced_positions(
+    rank_a: list[str],
+    rank_b: list[str],
+    forced_positions: dict[str, int],
+) -> tuple[list[str], list[str]]:
+    out_a = list(rank_a)
+    out_b = list(rank_b)
+    known = set(out_a + out_b)
+    for user, position in sorted(forced_positions.items(), key=lambda item: item[1]):
+        if user in known:
+            continue
+        if int(position) <= len(out_a) + 1:
+            out_a.insert(max(int(position) - 1, 0), user)
+        else:
+            out_b.insert(max(int(position) - len(out_a) - 1, 0), user)
+        known.add(user)
+    return out_a, out_b
+
+
 def _repair_results_from_matches(
     results: dict[str, dict[int, int]],
     matches: Dict[int, Dict[str, Dict[tuple, str | None]]],
@@ -190,7 +220,12 @@ def _repair_results_from_matches(
         if not players_a or not players_b:
             continue
 
-        expected_players = set(players_a + players_b)
+        forced_positions = _forced_historical_positions(
+            int(tramo),
+            players_a,
+            players_b,
+        )
+        expected_players = set(players_a + players_b) | set(forced_positions)
         current_positions = {
             user: int(rounds.get(int(tramo)))
             for user, rounds in repaired.items()
@@ -203,8 +238,33 @@ def _repair_results_from_matches(
         ):
             continue
 
+        if forced_positions and set(current_positions) == (
+            expected_players - set(forced_positions)
+        ):
+            shifted_positions = dict(current_positions)
+            for forced_user, forced_pos in sorted(
+                forced_positions.items(),
+                key=lambda item: item[1],
+            ):
+                shifted_positions = {
+                    user: pos + (1 if pos >= int(forced_pos) else 0)
+                    for user, pos in shifted_positions.items()
+                }
+                shifted_positions[forced_user] = int(forced_pos)
+
+            for user_map in repaired.values():
+                user_map.pop(int(tramo), None)
+            for user, pos in shifted_positions.items():
+                repaired.setdefault(user, {})[int(tramo)] = pos
+            continue
+
         rank_a = _rank(players_a, data_a)
         rank_b = _rank(players_b, data_b)
+        rank_a, rank_b = _insert_forced_positions(
+            rank_a,
+            rank_b,
+            forced_positions,
+        )
 
         for user_map in repaired.values():
             user_map.pop(int(tramo), None)
