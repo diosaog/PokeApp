@@ -48,7 +48,7 @@ def render_shop_header() -> None:
             "<div class='mart-hero-right'>"
             "<div class='mart-led'>Terminal online</div>"
             f"<div class='mart-pill'>Cliente: {user}</div>"
-            "<div class='mart-pill'>Stock por pasillos</div>"
+            "<div class='mart-pill'>Stock por categorias</div>"
             "</div>"
             "</div>"
         ),
@@ -157,18 +157,18 @@ def render_shop_catalog(*, penalties: dict, store_locked: bool, current_user: st
 
     st.markdown(DIVIDER_HTML, unsafe_allow_html=True)
 
-    tab_com, tab_bay, tab_comp, tab_bred = st.tabs(["Pasillo 01", "Pasillo 02", "Pasillo 03", "Pasillo 04"])
+    tab_com, tab_bay, tab_comp, tab_bred = st.tabs(["Comodines", "Bayas", "Competitivos", "Crianza"])
     with tab_com:
-        _render_aisle_header("Pasillo 01", "Comodines", catalog["comodines"], discounts)
+        _render_aisle_header("Categoria", "Comodines", catalog["comodines"], discounts)
         _render_shop_items(catalog["comodines"], "comodines", available=available if current_user != "-" else None, discounts=discounts)
     with tab_bay:
-        _render_aisle_header("Pasillo 02", "Bayas", catalog["bayas"], discounts)
+        _render_aisle_header("Categoria", "Bayas", catalog["bayas"], discounts)
         _render_shop_items(catalog["bayas"], "bayas", available=available if current_user != "-" else None, discounts=discounts)
     with tab_comp:
-        _render_aisle_header("Pasillo 03", "Competitivo", catalog["competitivos"], discounts)
+        _render_aisle_header("Categoria", "Competitivos", catalog["competitivos"], discounts)
         _render_shop_items(catalog["competitivos"], "competitivos", available=available if current_user != "-" else None, discounts=discounts)
     with tab_bred:
-        _render_aisle_header("Pasillo 04", "Crianza", catalog["crianza"], discounts)
+        _render_aisle_header("Categoria", "Crianza", catalog["crianza"], discounts)
         _render_shop_items(catalog["crianza"], "crianza", available=available if current_user != "-" else None, discounts=discounts)
 
 

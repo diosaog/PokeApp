@@ -27,7 +27,7 @@ def render_shop_styles() -> None:
         .main button[data-baseweb="tab"] *,
         .main button[role="tab"] * {
           font-family: var(--font-pixel) !important;
-          font-size: 9px !important;
+          font-size: 10px !important;
           font-weight: 700 !important;
         }
         .main div[data-testid="stTabs"] div[data-baseweb="tab-list"],
@@ -44,11 +44,11 @@ def render_shop_styles() -> None:
         }
         .main div[data-testid="stTabs"] button[data-baseweb="tab"],
         .main div[data-testid="stTabs"] button[role="tab"] {
-          flex: 0 0 156px !important;
-          width: 156px !important;
-          min-width: 156px !important;
+          flex: 0 0 178px !important;
+          width: 178px !important;
+          min-width: 178px !important;
           justify-content: center !important;
-          min-height: 40px !important;
+          min-height: 44px !important;
           padding-left: 12px !important;
           padding-right: 12px !important;
           border: 1px solid rgba(216,223,232,0.22) !important;
@@ -389,6 +389,21 @@ def render_shop_styles() -> None:
         }
         .shop-missing {
           color: #ffaba7;
+        }
+        .main .shop-price {
+          gap: 8px;
+          padding: 8px 10px;
+          font-size: 13px;
+          line-height: 1.2;
+        }
+        .main .shop-discount-badge {
+          min-height: 26px;
+          padding: 4px 7px;
+        }
+        .main .shop-stock,
+        .main .shop-missing {
+          font-size: 10px;
+          line-height: 1.25;
         }
         .mart-confirm-card {
           margin: 12px 0;
