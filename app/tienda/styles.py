@@ -27,7 +27,7 @@ def render_shop_styles() -> None:
         .main button[data-baseweb="tab"] *,
         .main button[role="tab"] * {
           font-family: var(--font-pixel) !important;
-          font-size: 9px !important;
+          font-size: 10px !important;
           font-weight: 700 !important;
         }
         .main div[data-testid="stTabs"] div[data-baseweb="tab-list"],
@@ -44,11 +44,11 @@ def render_shop_styles() -> None:
         }
         .main div[data-testid="stTabs"] button[data-baseweb="tab"],
         .main div[data-testid="stTabs"] button[role="tab"] {
-          flex: 0 0 156px !important;
-          width: 156px !important;
-          min-width: 156px !important;
+          flex: 0 0 174px !important;
+          width: 174px !important;
+          min-width: 174px !important;
           justify-content: center !important;
-          min-height: 40px !important;
+          min-height: 44px !important;
           padding-left: 12px !important;
           padding-right: 12px !important;
           border: 1px solid rgba(216,223,232,0.22) !important;
@@ -246,10 +246,10 @@ def render_shop_styles() -> None:
           gap: 7px;
         }
 
-        .shop-card {
+        .main .shop-card {
           position: relative;
           overflow: hidden;
-          min-height: 218px;
+          min-height: 196px;
           margin-bottom: 8px;
           border: 1px solid rgba(216,223,232,0.22);
           background:
@@ -258,7 +258,7 @@ def render_shop_styles() -> None:
           color: var(--bw2-text-soft);
           box-shadow: inset 0 1px 0 rgba(255,255,255,0.09), 0 6px 16px rgba(0,0,0,0.22);
         }
-        .shop-card::before {
+        .main .shop-card::before {
           content: "";
           position: absolute;
           left: 0;
@@ -268,126 +268,127 @@ def render_shop_styles() -> None:
           background: linear-gradient(180deg, #39424f 0%, #151b24 100%);
           border-top: 1px solid rgba(216,223,232,0.18);
         }
-        .shop-card.is-sale {
+        .main .shop-card.is-sale {
           border-color: rgba(255,210,109,0.72);
           box-shadow: inset 0 1px 0 rgba(255,255,255,0.11), 0 0 0 1px rgba(239,194,87,0.2), 0 8px 20px rgba(0,0,0,0.26);
         }
-        .shop-card.is-poor {
+        .main .shop-card.is-poor {
           filter: saturate(.72);
         }
-        .shop-head {
+        .main .shop-head {
           position: relative;
           z-index: 1;
           display: flex;
           justify-content: space-between;
           gap: 8px;
-          min-height: 44px;
-          padding: 9px 10px 8px;
+          min-height: 48px;
+          padding: 10px 12px 9px;
           border-bottom: 1px solid rgba(216,223,232,0.18);
           background:
             linear-gradient(90deg, var(--accent) 0 4px, transparent 4px 100%),
             linear-gradient(180deg, rgba(18,25,34,0.96) 0%, rgba(10,15,22,0.96) 100%);
         }
-        .shop-name {
+        .main .shop-name {
           color: #ffffff;
           font-family: var(--font-pixel);
-          font-size: 10px;
-          line-height: 1.25;
+          font-size: 11px;
+          line-height: 1.3;
           text-transform: uppercase;
           overflow-wrap: anywhere;
         }
-        .shop-sku {
+        .main .shop-sku {
           flex: 0 0 auto;
           color: var(--bw2-text-dim);
-          font-size: 7px;
+          font-size: 8px;
         }
-        .shop-body {
+        .main .shop-body {
           position: relative;
           z-index: 1;
           display: grid;
-          grid-template-columns: 76px minmax(0, 1fr);
-          gap: 10px;
-          padding: 11px 10px 12px;
+          grid-template-columns: 92px minmax(0, 1fr);
+          gap: 12px;
+          padding: 12px 12px 14px;
+          min-height: 126px;
         }
-        .shop-icon-slot {
+        .main .shop-icon-slot {
           display: flex;
           align-items: center;
           justify-content: center;
-          width: 76px;
-          height: 76px;
+          width: 92px;
+          height: 92px;
           border: 1px solid rgba(216,223,232,0.2);
           background:
             radial-gradient(circle at 50% 42%, rgba(255,255,255,0.12), transparent 38px),
             linear-gradient(180deg, #1c2735 0%, #101720 100%);
         }
-        .shop-icon {
-          width: 58px;
-          height: 58px;
+        .main .shop-icon {
+          width: 70px;
+          height: 70px;
           object-fit: contain;
           image-rendering: pixelated;
           filter: drop-shadow(0 4px 6px rgba(0,0,0,0.42));
         }
-        .shop-info {
+        .main .shop-info {
           min-width: 0;
           display: grid;
           align-content: start;
-          gap: 8px;
+          gap: 10px;
         }
-        .shop-desc {
+        .main .shop-desc {
           color: var(--bw2-text-soft);
           font-family: var(--font-ui);
-          font-size: 18px;
+          font-size: 21px;
           line-height: 1.12;
           overflow-wrap: anywhere;
         }
-        .shop-price {
+        .main .shop-price {
           display: flex;
           flex-wrap: wrap;
           align-items: center;
-          gap: 6px;
+          gap: 8px;
           width: fit-content;
           max-width: 100%;
           box-sizing: border-box;
-          padding: 6px 8px;
+          padding: 8px 10px;
           border: 1px solid rgba(255,255,255,0.14);
           background: linear-gradient(180deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.03) 100%);
           color: #ffffff;
           font-family: var(--font-pixel);
-          font-size: 10px;
+          font-size: 13px;
           line-height: 1.2;
         }
-        .shop-main-price {
+        .main .shop-main-price {
           color: #ffffff;
         }
-        .shop-discount-badge {
+        .main .shop-discount-badge {
           display: inline-flex;
           align-items: center;
-          min-height: 22px;
-          padding: 3px 6px;
+          min-height: 26px;
+          padding: 4px 7px;
           border: 1px solid rgba(255,255,255,0.24);
           background: linear-gradient(180deg, #f26f3d 0%, #8d2f20 100%);
           color: #ffffff;
         }
-        .shop-old-price {
+        .main .shop-old-price {
           color: #c6ccd4;
           text-decoration: line-through;
           text-decoration-thickness: 2px;
         }
-        .shop-arrow {
+        .main .shop-arrow {
           color: #f6c15b;
         }
-        .shop-stock,
-        .shop-missing {
+        .main .shop-stock,
+        .main .shop-missing {
           display: block;
           width: 100%;
           font-family: var(--font-pixel);
-          font-size: 8px;
+          font-size: 10px;
           line-height: 1.2;
         }
-        .shop-stock {
+        .main .shop-stock {
           color: var(--bw2-text-soft);
         }
-        .shop-missing {
+        .main .shop-missing {
           color: #ffaba7;
         }
         .mart-confirm-card {
@@ -428,14 +429,14 @@ def render_shop_styles() -> None:
           }
         }
         @media (max-width: 560px) {
-          .shop-body {
+          .main .shop-body {
             grid-template-columns: 64px minmax(0, 1fr);
           }
-          .shop-icon-slot {
+          .main .shop-icon-slot {
             width: 64px;
             height: 64px;
           }
-          .shop-icon {
+          .main .shop-icon {
             width: 50px;
             height: 50px;
           }

@@ -6,7 +6,7 @@ import os
 import streamlit as st
 
 _SECTION_META = {
-    "Team Preview": ("TP", "Combates"),
+    "Team Preview": ("⚔️", "Combates"),
     "Normativa": ("📜", "Reglas y avisos"),
     "Liga y Tabla": ("🏆", "Clasificacion"),
     "Previa Combate": ("⚔️", "Duelo"),
