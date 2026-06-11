@@ -458,6 +458,63 @@ def render_shop_styles() -> None:
             font-size: 20px;
           }
         }
+
+        div[data-testid="stTabs"] div[data-baseweb="tab-list"],
+        div[data-testid="stTabs"] [role="tablist"] {
+          display: flex !important;
+          gap: 10px !important;
+          flex-wrap: wrap !important;
+          align-items: stretch !important;
+          width: 100% !important;
+          padding: 8px !important;
+        }
+        div[data-testid="stTabs"] button[data-baseweb="tab"],
+        div[data-testid="stTabs"] button[role="tab"] {
+          flex: 1 1 180px !important;
+          width: auto !important;
+          min-width: 174px !important;
+          max-width: none !important;
+          min-height: 48px !important;
+          padding: 0 16px !important;
+        }
+        div[data-testid="stTabs"] button[data-baseweb="tab"] *,
+        div[data-testid="stTabs"] button[role="tab"] * {
+          width: 100% !important;
+          font-size: 10px !important;
+          line-height: 1.2 !important;
+          text-align: center !important;
+          white-space: nowrap !important;
+        }
+        .main .shop-price,
+        .shop-price {
+          display: inline-flex !important;
+          align-items: center !important;
+          gap: 10px !important;
+          padding: 9px 12px !important;
+          font-size: 16px !important;
+          line-height: 1.15 !important;
+          width: fit-content !important;
+          max-width: 100% !important;
+        }
+        .main .shop-price *,
+        .shop-price * {
+          font-size: inherit !important;
+          line-height: inherit !important;
+        }
+        .main .shop-discount-badge,
+        .shop-discount-badge {
+          min-height: 28px !important;
+          padding: 5px 8px !important;
+          font-size: 12px !important;
+        }
+        .main .shop-stock,
+        .main .shop-missing,
+        .shop-stock,
+        .shop-missing {
+          margin-top: 4px !important;
+          font-size: 12px !important;
+          line-height: 1.25 !important;
+        }
         </style>
         """,
         unsafe_allow_html=True,
