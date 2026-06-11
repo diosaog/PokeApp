@@ -11,9 +11,12 @@ from app.entrenadores.pokepaste import ensure_pokepaste_state
 from app.entrenadores.state import ensure_local_save_for
 from app.entrenadores.summary import trainer_summary_with_portrait_ui
 from app.entrenadores.boxes import boxes_grid_ui
+from app.discord_notify import notify_team_locked_async
 from app.ui.team_grid import team_grid_ui
 from app.interfaz.theme import apply_platinum_ui
+from app.liga.context import current_jornada
 from conex_pkhex import PKHeXRuntime, extract_team, get_bridge_path, open_sav_cached
+from storage import get_current_save_for_user, get_team_lock, list_saves_by_user, upsert_team_lock
 from utils import DEFAULT_DLL_HINT, active_users, list_user_saves
 
 
@@ -43,6 +46,83 @@ div[data-testid="stTabs"] [role="tablist"] [role="tab"]:first-of-type * {
 }
 </style>
 """
+
+
+def _save_meta_for_lock(user: str, save_path: Path | None) -> tuple[int | None, str | None]:
+    if not user or not save_path:
+        return None, None
+    try:
+        current = get_current_save_for_user(user)
+        if current and str(current[1]) == save_path.name:
+            return int(current[0]), str(current[3] or "")
+    except Exception:
+        pass
+    try:
+        for row in list_saves_by_user(user, limit=20):
+            if str(row[1]) == save_path.name:
+                return int(row[0]), str(row[3] or "")
+    except Exception:
+        pass
+    return None, None
+
+
+def _fmt_lock_time(ts: int) -> str:
+    if not ts:
+        return "-"
+    try:
+        from datetime import datetime
+
+        return datetime.fromtimestamp(int(ts)).strftime("%Y-%m-%d %H:%M")
+    except Exception:
+        return "-"
+
+
+def _render_team_lock_controls(
+    *,
+    team: list[dict],
+    current_user: str,
+    save_path: Path | None,
+) -> None:
+    jornada = current_jornada()
+    lock = get_team_lock(jornada, current_user)
+    if lock:
+        status = "Fijado tarde" if lock.get("is_late") else "Fijado"
+        st.caption(
+            f"Equipo fijado para Jornada {jornada}: {status} | "
+            f"{_fmt_lock_time(int(lock.get('locked_at') or 0))}"
+        )
+    else:
+        st.caption(f"Equipo fijado para Jornada {jornada}: Sin fijar")
+
+    disabled = len(team) != 6
+    if disabled:
+        st.warning("Necesitas 6 Pokemon en el equipo para fijarlo para combates.")
+
+    if st.button(
+        f"Fijar Equipo Para la Jornada {jornada}",
+        disabled=disabled,
+        use_container_width=True,
+        key=f"lock_team_{current_user}_{jornada}",
+    ):
+        save_id, save_sha = _save_meta_for_lock(current_user, save_path)
+        is_late = bool(st.session_state.get("league_active"))
+        saved = upsert_team_lock(
+            jornada=jornada,
+            user=current_user,
+            team=list(team)[:6],
+            save_id=save_id,
+            save_sha256=save_sha,
+            is_late=is_late,
+        )
+        if not saved:
+            st.error("No se pudo fijar el equipo. Revisa Supabase o vuelve a intentarlo.")
+            return
+        notify_team_locked_async(user=current_user, jornada=jornada, is_late=is_late)
+        st.success(
+            f"Equipo fijado para Jornada {jornada}"
+            + (" (tarde)." if is_late else ".")
+        )
+        st.rerun()
 
 
 def page_entrenadores_setup() -> None:
@@ -171,6 +251,12 @@ def page_entrenadores_view() -> None:
             team = extract_team(sav_json) or []
     except Exception:
         team = []
+    if is_own_profile:
+        _render_team_lock_controls(
+            team=list(team or [])[:6],
+            current_user=str(current_user or ""),
+            save_path=Path(save_path) if save_path else None,
+        )
     team_grid_ui(team)
     detail_slot = st.empty()
     boxes_grid_ui(sav_json, box_count, box_names, save_path=str(save_path), pc_ok=pc_ok, mtime=mtime)
@@ -187,7 +273,11 @@ def page_entrenadores() -> None:
     try:
         active = st.session_state.get("user")
         cur = st.session_state.get("trainer_selected")
-        if cur not in users:
+        last_login_user = st.session_state.get("_trainer_login_user")
+        if active in users and last_login_user != active:
+            st.session_state.trainer_selected = active
+            st.session_state["_trainer_login_user"] = active
+        elif cur not in users:
             st.session_state.trainer_selected = active if active in users else (users[0] if users else None)
     except Exception:
         pass

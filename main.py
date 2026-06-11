@@ -11,10 +11,10 @@ st.set_page_config(
 )
 
 # Import after config to avoid warnings
-from app.interfaz.auth import login_gate
-from app.interfaz.sidebar import render_sidebar
-from app.interfaz.theme import apply_css
-from app.startup import preload_datasets
+from app.interfaz.auth import login_gate  # noqa: E402
+from app.interfaz.sidebar import render_sidebar  # noqa: E402
+from app.interfaz.theme import apply_css  # noqa: E402
+from app.startup import preload_datasets  # noqa: E402
 
 
 def router(section: str) -> None:
@@ -22,7 +22,7 @@ def router(section: str) -> None:
         from app.interfaz.pages import page_inicio as page
     elif section == "Liga y Tabla":
         from app.interfaz.pages import page_tabla as page
-    elif section == "Previa Combate":
+    elif section in ("Team Preview", "Previa Combate"):
         from app.interfaz.pages import page_previa_combate as page
     elif section == "Entrenadores":
         from app.interfaz.pages import page_entrenadores as page

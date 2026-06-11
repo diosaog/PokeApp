@@ -20,6 +20,8 @@ try:
 except Exception:
     st = None  # type: ignore
 
+from app.common import COIN
+
 
 _NORMATIVA_HASH_KEY = "discord_notify:normativa_hash"
 _NORMATIVA_SECTION_HASHES_KEY = "discord_notify:normativa_section_hashes"
@@ -262,6 +264,176 @@ def notify_purchase_async(*, user: str, item: str, price: int, purchase_id: int 
     thread = threading.Thread(
         target=notify_purchase,
         kwargs={"user": user, "item": item, "price": price, "purchase_id": purchase_id},
+        daemon=True,
+    )
+    thread.start()
+
+
+def _coin_label(value: int) -> str:
+    return f"{int(value)} {COIN}"
+
+
+def notify_shop_discounts_created(*, jornada: int, discounts: list[dict]) -> bool:
+    if not discounts:
+        return False
+    lines = []
+    for discount in discounts[:20]:
+        label = "🔥 Mega Rebaja" if str(discount.get("discount_kind")) == "mega" else "🔥 Rebaja"
+        lines.append(
+            f"- {label}: {discount.get('item') or '-'}: "
+            f"{_coin_label(int(discount.get('base_price') or 0))} -> "
+            f"{_coin_label(int(discount.get('discount_price') or 0))}"
+        )
+    return _post_webhook(
+        {
+            "embeds": [
+                _embed(
+                    title=f"Rebajas activas - Jornada {int(jornada)}",
+                    description="Aaron ha actualizado la tienda.",
+                    color=0xF39C12,
+                    fields=[
+                        {
+                            "name": "Objetos con descuento",
+                            "value": _field_value(lines),
+                            "inline": False,
+                        }
+                    ],
+                )
+            ]
+        }
+    )
+
+
+def notify_shop_discounts_created_async(*, jornada: int, discounts: list[dict]) -> None:
+    if not discounts:
+        return
+    thread = threading.Thread(
+        target=notify_shop_discounts_created,
+        kwargs={"jornada": jornada, "discounts": list(discounts)},
+        daemon=True,
+    )
+    thread.start()
+
+
+def notify_discount_purchase(
+    *,
+    user: str,
+    item: str,
+    base_price: int,
+    discount_price: int,
+    discount_kind: str,
+    purchase_id: int | None = None,
+) -> bool:
+    label = "🔥 Mega Rebaja" if str(discount_kind) == "mega" else "🔥 Rebaja"
+    fields = [
+        {"name": "Jugador", "value": user or "-", "inline": True},
+        {"name": "Objeto", "value": item or "-", "inline": True},
+        {
+            "name": "Precio",
+            "value": f"{_coin_label(int(base_price))} -> {_coin_label(int(discount_price))}",
+            "inline": True,
+        },
+    ]
+    if purchase_id is not None:
+        fields.append({"name": "Compra", "value": f"#{int(purchase_id)}", "inline": True})
+    return _post_webhook(
+        {
+            "embeds": [
+                _embed(
+                    title=f"Compra con {label}",
+                    description=f"{user} ha comprado {item} en rebaja.",
+                    color=0xE67E22,
+                    fields=fields,
+                )
+            ]
+        }
+    )
+
+
+def notify_discount_purchase_async(
+    *,
+    user: str,
+    item: str,
+    base_price: int,
+    discount_price: int,
+    discount_kind: str,
+    purchase_id: int | None = None,
+) -> None:
+    thread = threading.Thread(
+        target=notify_discount_purchase,
+        kwargs={
+            "user": user,
+            "item": item,
+            "base_price": int(base_price),
+            "discount_price": int(discount_price),
+            "discount_kind": discount_kind,
+            "purchase_id": purchase_id,
+        },
+        daemon=True,
+    )
+    thread.start()
+
+
+def notify_team_locked(
+    *,
+    user: str,
+    jornada: int,
+    is_late: bool,
+) -> bool:
+    suffix = " tarde" if is_late else ""
+    return _post_webhook(
+        {
+            "embeds": [
+                _embed(
+                    title=f"Equipo fijado - Jornada {int(jornada)}",
+                    description=f"{user} ha fijado su equipo{suffix} para la jornada {int(jornada)}.",
+                    color=0x2ECC71 if not is_late else 0xE67E22,
+                    fields=[
+                        {"name": "Entrenador", "value": user or "-", "inline": True},
+                        {"name": "Estado", "value": "Fijado tarde" if is_late else "Fijado", "inline": True},
+                    ],
+                )
+            ]
+        }
+    )
+
+
+def notify_team_locked_async(*, user: str, jornada: int, is_late: bool) -> None:
+    thread = threading.Thread(
+        target=notify_team_locked,
+        kwargs={"user": user, "jornada": int(jornada), "is_late": bool(is_late)},
+        daemon=True,
+    )
+    thread.start()
+
+
+def notify_missing_team_locks(*, jornada: int, missing: list[str]) -> bool:
+    if not missing:
+        description = f"Todos han fijado equipo para la jornada {int(jornada)}."
+        fields = None
+        color = 0x2ECC71
+    else:
+        description = f"Faltan equipos por fijar para la jornada {int(jornada)}."
+        fields = [{"name": "Faltan", "value": _field_value([f"- {u}" for u in missing]), "inline": False}]
+        color = 0xE74C3C
+    return _post_webhook(
+        {
+            "embeds": [
+                _embed(
+                    title=f"Team Preview - Jornada {int(jornada)}",
+                    description=description,
+                    color=color,
+                    fields=fields,
+                )
+            ]
+        }
+    )
+
+
+def notify_missing_team_locks_async(*, jornada: int, missing: list[str]) -> None:
+    thread = threading.Thread(
+        target=notify_missing_team_locks,
+        kwargs={"jornada": int(jornada), "missing": list(missing)},
         daemon=True,
     )
     thread.start()

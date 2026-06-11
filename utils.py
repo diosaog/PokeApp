@@ -40,7 +40,7 @@ ROSTER_DEPARTURE_AFTER_ROUND = {
 SECTIONS = [
     "Normativa",
     "Liga y Tabla",
-    "Previa Combate",
+    "Team Preview",
     "Entrenadores",
     "Copa",
     "Juicios",

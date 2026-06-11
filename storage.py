@@ -4,6 +4,7 @@ import shutil
 import sqlite3
 import hashlib
 import time
+import json
 from pathlib import Path
 from typing import Optional, List, Tuple, Any
 import datetime
@@ -23,6 +24,8 @@ _SETTINGS_CACHE = ExpiringCache(float(os.environ.get("SETTINGS_MEM_TTL", "10")))
 _TOTAL_SPENT_CACHE = ExpiringCache(float(os.environ.get("TOTAL_SPENT_MEM_TTL", "10")))
 _LIST_PURCHASES_CACHE = ExpiringCache(float(os.environ.get("LIST_PURCHASES_MEM_TTL", "10")))
 _LIST_INVENTORY_CACHE = ExpiringCache(float(os.environ.get("LIST_INVENTORY_MEM_TTL", "10")))
+_SHOP_DISCOUNTS_CACHE = ExpiringCache(float(os.environ.get("SHOP_DISCOUNTS_MEM_TTL", "10")))
+_TEAM_LOCKS_CACHE = ExpiringCache(float(os.environ.get("TEAM_LOCKS_MEM_TTL", "10")))
 
 
 def _config_value(*names: str, default: str = "") -> str:
@@ -90,6 +93,14 @@ def _invalidate_purchase_caches(user: str | None = None) -> None:
     else:
         _LIST_INVENTORY_CACHE.clear_where(lambda key: isinstance(key, tuple) and key[0] == user)
     _LIST_PURCHASES_CACHE.clear()
+
+
+def _invalidate_shop_discount_caches() -> None:
+    _SHOP_DISCOUNTS_CACHE.clear()
+
+
+def _invalidate_team_lock_caches() -> None:
+    _TEAM_LOCKS_CACHE.clear()
 
 
 def _supabase_enabled() -> bool:
@@ -169,7 +180,10 @@ def init_storage():
             price INTEGER NOT NULL,
             created_at INTEGER NOT NULL,
             status TEXT,
-            redeemed_at INTEGER
+            redeemed_at INTEGER,
+            discount_id INTEGER,
+            base_price INTEGER,
+            jornada INTEGER
         )""")
         # Migraciones ligeras: columnas nuevas si faltan
         try:
@@ -178,8 +192,39 @@ def init_storage():
                 cx.execute("ALTER TABLE purchases ADD COLUMN status TEXT")
             if 'redeemed_at' not in cols:
                 cx.execute("ALTER TABLE purchases ADD COLUMN redeemed_at INTEGER")
+            if 'discount_id' not in cols:
+                cx.execute("ALTER TABLE purchases ADD COLUMN discount_id INTEGER")
+            if 'base_price' not in cols:
+                cx.execute("ALTER TABLE purchases ADD COLUMN base_price INTEGER")
+            if 'jornada' not in cols:
+                cx.execute("ALTER TABLE purchases ADD COLUMN jornada INTEGER")
         except Exception:
             pass
+        cx.execute("""CREATE TABLE IF NOT EXISTS shop_discounts (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            item TEXT NOT NULL,
+            base_price INTEGER NOT NULL,
+            discount_price INTEGER NOT NULL,
+            stock_total INTEGER NOT NULL,
+            stock_used INTEGER NOT NULL DEFAULT 0,
+            discount_kind TEXT NOT NULL DEFAULT 'normal',
+            jornada INTEGER,
+            active INTEGER NOT NULL DEFAULT 1,
+            created_at INTEGER NOT NULL,
+            exhausted_at INTEGER
+        )""")
+        cx.execute("""CREATE TABLE IF NOT EXISTS team_locks (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            jornada INTEGER NOT NULL,
+            user TEXT NOT NULL,
+            team_json TEXT NOT NULL,
+            save_id INTEGER,
+            save_sha256 TEXT,
+            locked_at INTEGER NOT NULL,
+            deadline_at INTEGER,
+            is_late INTEGER NOT NULL DEFAULT 0,
+            UNIQUE(jornada, user)
+        )""")
         cx.execute("""CREATE TABLE IF NOT EXISTS redemptions (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             purchase_id INTEGER NOT NULL,
@@ -204,6 +249,10 @@ def init_storage():
         try:
             cx.execute("CREATE INDEX IF NOT EXISTS idx_purchases_user ON purchases(user)")
             cx.execute("CREATE INDEX IF NOT EXISTS idx_purchases_created ON purchases(created_at)")
+            cx.execute("CREATE INDEX IF NOT EXISTS idx_purchases_jornada_item ON purchases(jornada, item)")
+            cx.execute("CREATE INDEX IF NOT EXISTS idx_shop_discounts_active_item ON shop_discounts(active, item)")
+            cx.execute("CREATE INDEX IF NOT EXISTS idx_shop_discounts_jornada ON shop_discounts(jornada)")
+            cx.execute("CREATE INDEX IF NOT EXISTS idx_team_locks_jornada_user ON team_locks(jornada, user)")
         except Exception:
             pass
         cx.commit()
@@ -214,6 +263,8 @@ def _clear_storage_caches() -> None:
     _TOTAL_SPENT_CACHE.clear()
     _LIST_PURCHASES_CACHE.clear()
     _LIST_INVENTORY_CACHE.clear()
+    _SHOP_DISCOUNTS_CACHE.clear()
+    _TEAM_LOCKS_CACHE.clear()
     for func in (_fetch_save_by_id, list_saves, list_saves_by_user):
         try:
             func.clear()
@@ -254,7 +305,15 @@ def _wipe_local_sqlite() -> None:
     if not _db_path().exists():
         return
     with _conn() as cx:
-        for table in ("redemptions", "pokemon_flags", "purchases", "saves", "settings"):
+        for table in (
+            "team_locks",
+            "shop_discounts",
+            "redemptions",
+            "pokemon_flags",
+            "purchases",
+            "saves",
+            "settings",
+        ):
             try:
                 cx.execute(f"DELETE FROM {table}")
             except Exception:
@@ -262,7 +321,7 @@ def _wipe_local_sqlite() -> None:
         try:
             cx.execute(
                 "DELETE FROM sqlite_sequence WHERE name IN "
-                "('redemptions','pokemon_flags','purchases','saves')"
+                "('team_locks','shop_discounts','redemptions','pokemon_flags','purchases','saves')"
             )
         except Exception:
             pass
@@ -281,6 +340,8 @@ def wipe_all_app_data() -> dict[str, Any]:
         try:
             client = _sb()
             for table, column, sentinel in (
+                ("team_locks", "id", -1),
+                ("shop_discounts", "id", -1),
                 ("redemptions", "id", -1),
                 ("pokemon_flags", "fingerprint", "__pokeapp_keep__"),
                 ("purchases", "id", -1),
@@ -611,41 +672,587 @@ def _notify_purchase_inserted(user: str, item: str, price: int, purchase_id: int
         pass
 
 
-def add_purchase(user: str, item: str, price: int) -> int:
+def add_purchase(
+    user: str,
+    item: str,
+    price: int,
+    *,
+    jornada: int | None = None,
+    discount_id: int | None = None,
+    base_price: int | None = None,
+    notify: bool = True,
+) -> int:
     ts = int(time.time())
     if _supabase_enabled():
         try:
             client = _sb()
-            res = client.table("purchases").insert(
-                {
-                    "user": user,
-                    "item": item,
-                    "price": int(price),
-                    "created_at": _now_iso(),
-                    "status": "pending",
-                    "redeemed_at": None,
-                }
-            ).execute()
+            base_payload = {
+                "user": user,
+                "item": item,
+                "price": int(price),
+                "created_at": _now_iso(),
+                "status": "pending",
+                "redeemed_at": None,
+            }
+            payload = dict(base_payload)
+            if jornada is not None:
+                payload["jornada"] = int(jornada)
+            if discount_id is not None:
+                payload["discount_id"] = int(discount_id)
+            if base_price is not None:
+                payload["base_price"] = int(base_price)
+            try:
+                res = client.table("purchases").insert(payload).execute()
+            except Exception:
+                if payload == base_payload:
+                    raise
+                res = client.table("purchases").insert(base_payload).execute()
             data = res.data or []
             if data:
                 pid = int(data[0].get("id") or 0)
                 _invalidate_purchase_caches(user)
-                _notify_purchase_inserted(user, item, int(price), pid)
+                if notify:
+                    _notify_purchase_inserted(user, item, int(price), pid)
                 return pid
         except Exception as e:
             # Supabase estÃ¡ configurado pero fallÃ³: no hacemos fallback silencioso
             raise RuntimeError(f"Supabase add_purchase failed: {e}")
     with _conn() as cx:
         cx.execute(
-            "INSERT INTO purchases(user, item, price, created_at, status) VALUES(?,?,?,?,?)",
-            (user, item, int(price), ts, 'pending')
+            """
+            INSERT INTO purchases(user, item, price, created_at, status, discount_id, base_price, jornada)
+            VALUES(?,?,?,?,?,?,?,?)
+            """,
+            (
+                user,
+                item,
+                int(price),
+                ts,
+                "pending",
+                int(discount_id) if discount_id is not None else None,
+                int(base_price) if base_price is not None else None,
+                int(jornada) if jornada is not None else None,
+            ),
         )
         rowid = cx.execute("SELECT last_insert_rowid()").fetchone()[0]
         cx.commit()
         _invalidate_purchase_caches(user)
         pid = int(rowid)
-        _notify_purchase_inserted(user, item, int(price), pid)
+        if notify:
+            _notify_purchase_inserted(user, item, int(price), pid)
         return pid
+
+
+def _discount_row_from_mapping(row: dict) -> dict[str, Any]:
+    return {
+        "id": int(row.get("id") or 0),
+        "item": str(row.get("item") or ""),
+        "base_price": int(row.get("base_price") or 0),
+        "discount_price": int(row.get("discount_price") or 0),
+        "stock_total": int(row.get("stock_total") or 0),
+        "stock_used": int(row.get("stock_used") or 0),
+        "discount_kind": str(row.get("discount_kind") or "normal"),
+        "jornada": int(row.get("jornada") or 0),
+        "active": bool(row.get("active")),
+        "created_at": _iso_to_ts(row.get("created_at")),
+        "exhausted_at": _iso_to_ts(row.get("exhausted_at")),
+    }
+
+
+def _discount_row_from_tuple(row: tuple) -> dict[str, Any]:
+    (
+        discount_id,
+        item,
+        base_price,
+        discount_price,
+        stock_total,
+        stock_used,
+        discount_kind,
+        jornada,
+        active,
+        created_at,
+        exhausted_at,
+    ) = row
+    return {
+        "id": int(discount_id or 0),
+        "item": str(item or ""),
+        "base_price": int(base_price or 0),
+        "discount_price": int(discount_price or 0),
+        "stock_total": int(stock_total or 0),
+        "stock_used": int(stock_used or 0),
+        "discount_kind": str(discount_kind or "normal"),
+        "jornada": int(jornada or 0),
+        "active": bool(active),
+        "created_at": int(created_at or 0),
+        "exhausted_at": int(exhausted_at or 0),
+    }
+
+
+def list_shop_discounts(
+    *, jornada: int | None = None, active_only: bool | None = None
+) -> list[dict[str, Any]]:
+    cache_key = (jornada, active_only)
+    hit, cached = _SHOP_DISCOUNTS_CACHE.get(cache_key)
+    if hit:
+        return list(cached)
+
+    if _supabase_enabled():
+        try:
+            query = _sb().table("shop_discounts").select("*").order("id", desc=True)
+            if jornada is not None:
+                query = query.eq("jornada", int(jornada))
+            if active_only is not None:
+                query = query.eq("active", bool(active_only))
+            res = query.execute()
+            out = [_discount_row_from_mapping(row) for row in (res.data or [])]
+            _SHOP_DISCOUNTS_CACHE.set(cache_key, list(out))
+            return out
+        except Exception:
+            return []
+
+    clauses: list[str] = []
+    params: list[Any] = []
+    if jornada is not None:
+        clauses.append("jornada=?")
+        params.append(int(jornada))
+    if active_only is not None:
+        clauses.append("active=?")
+        params.append(1 if active_only else 0)
+    where = " WHERE " + " AND ".join(clauses) if clauses else ""
+    with _conn() as cx:
+        rows = cx.execute(
+            """
+            SELECT id, item, base_price, discount_price, stock_total, stock_used,
+                   discount_kind, jornada, active, created_at, exhausted_at
+            FROM shop_discounts
+            """
+            + where
+            + " ORDER BY id DESC",
+            tuple(params),
+        ).fetchall()
+    out = [_discount_row_from_tuple(row) for row in rows]
+    _SHOP_DISCOUNTS_CACHE.set(cache_key, list(out))
+    return out
+
+
+def create_shop_discount(
+    *,
+    item: str,
+    base_price: int,
+    discount_price: int,
+    stock_total: int,
+    discount_kind: str,
+    jornada: int,
+) -> dict[str, Any] | None:
+    payload = {
+        "item": item,
+        "base_price": int(base_price),
+        "discount_price": int(discount_price),
+        "stock_total": int(stock_total),
+        "stock_used": 0,
+        "discount_kind": str(discount_kind or "normal"),
+        "jornada": int(jornada),
+        "active": True,
+        "created_at": _now_iso(),
+        "exhausted_at": None,
+    }
+    if _supabase_enabled():
+        try:
+            res = _sb().table("shop_discounts").insert(payload).execute()
+            data = res.data or []
+            _invalidate_shop_discount_caches()
+            return _discount_row_from_mapping(data[0]) if data else None
+        except Exception:
+            return None
+
+    ts = int(time.time())
+    with _conn() as cx:
+        cx.execute(
+            """
+            INSERT INTO shop_discounts(
+                item, base_price, discount_price, stock_total, stock_used,
+                discount_kind, jornada, active, created_at, exhausted_at
+            ) VALUES(?,?,?,?,?,?,?,?,?,?)
+            """,
+            (
+                item,
+                int(base_price),
+                int(discount_price),
+                int(stock_total),
+                0,
+                str(discount_kind or "normal"),
+                int(jornada),
+                1,
+                ts,
+                None,
+            ),
+        )
+        rowid = cx.execute("SELECT last_insert_rowid()").fetchone()[0]
+        cx.commit()
+    _invalidate_shop_discount_caches()
+    return {
+        "id": int(rowid),
+        "item": item,
+        "base_price": int(base_price),
+        "discount_price": int(discount_price),
+        "stock_total": int(stock_total),
+        "stock_used": 0,
+        "discount_kind": str(discount_kind or "normal"),
+        "jornada": int(jornada),
+        "active": True,
+        "created_at": ts,
+        "exhausted_at": 0,
+    }
+
+
+def purchase_counts_by_item_for_jornadas(jornadas: list[int]) -> dict[int, dict[str, int]]:
+    rounds = sorted({int(j) for j in jornadas if int(j) > 0})
+    if not rounds:
+        return {}
+    cache_key = ("purchase_counts", tuple(rounds))
+    hit, cached = _SHOP_DISCOUNTS_CACHE.get(cache_key)
+    if hit:
+        return dict(cached)
+
+    out: dict[int, dict[str, int]] = {j: {} for j in rounds}
+    if _supabase_enabled():
+        try:
+            res = (
+                _sb()
+                .table("purchases")
+                .select("item,jornada")
+                .in_("jornada", rounds)
+                .execute()
+            )
+            for row in res.data or []:
+                jornada = int(row.get("jornada") or 0)
+                item = str(row.get("item") or "")
+                if jornada in out and item:
+                    out[jornada][item] = out[jornada].get(item, 0) + 1
+            _SHOP_DISCOUNTS_CACHE.set(cache_key, dict(out))
+            return out
+        except Exception:
+            return out
+
+    qmarks = ",".join(["?"] * len(rounds))
+    with _conn() as cx:
+        rows = cx.execute(
+            f"SELECT item, jornada FROM purchases WHERE jornada IN ({qmarks})",
+            tuple(rounds),
+        ).fetchall()
+    for item, jornada in rows:
+        j = int(jornada or 0)
+        item_s = str(item or "")
+        if j in out and item_s:
+            out[j][item_s] = out[j].get(item_s, 0) + 1
+    _SHOP_DISCOUNTS_CACHE.set(cache_key, dict(out))
+    return out
+
+
+def claim_shop_discount(discount_id: int) -> dict[str, Any]:
+    if _supabase_enabled():
+        try:
+            res = _sb().rpc(
+                "rpc_claim_shop_discount",
+                {"p_discount_id": int(discount_id)},
+            ).execute()
+            data = res.data or []
+            row = data[0] if isinstance(data, list) and data else data
+            _invalidate_shop_discount_caches()
+            if isinstance(row, dict):
+                return {
+                    "claimed": bool(row.get("claimed")),
+                    "discount_id": int(row.get("discount_id") or 0),
+                    "item": str(row.get("item") or ""),
+                    "base_price": int(row.get("base_price") or 0),
+                    "discount_price": int(row.get("discount_price") or 0),
+                    "stock_total": int(row.get("stock_total") or 0),
+                    "stock_used": int(row.get("stock_used") or 0),
+                    "discount_kind": str(row.get("discount_kind") or "normal"),
+                    "exhausted_at": _iso_to_ts(row.get("exhausted_at")),
+                }
+        except Exception:
+            pass
+        return {"claimed": False, "discount_id": int(discount_id)}
+
+    ts = int(time.time())
+    with _conn() as cx:
+        try:
+            cx.execute("BEGIN IMMEDIATE")
+        except Exception:
+            pass
+        row = cx.execute(
+            """
+            SELECT id, item, base_price, discount_price, stock_total, stock_used,
+                   discount_kind, jornada, active, created_at, exhausted_at
+            FROM shop_discounts
+            WHERE id=? AND active=1
+            """,
+            (int(discount_id),),
+        ).fetchone()
+        if not row:
+            cx.commit()
+            return {"claimed": False, "discount_id": int(discount_id)}
+        discount = _discount_row_from_tuple(row)
+        if int(discount["stock_used"]) >= int(discount["stock_total"]):
+            cx.commit()
+            return {"claimed": False, **discount}
+        next_used = int(discount["stock_used"]) + 1
+        exhausted_at = ts if next_used >= int(discount["stock_total"]) else int(discount.get("exhausted_at") or 0)
+        active = 0 if next_used >= int(discount["stock_total"]) else 1
+        cx.execute(
+            "UPDATE shop_discounts SET stock_used=?, exhausted_at=?, active=? WHERE id=?",
+            (next_used, exhausted_at or None, active, int(discount_id)),
+        )
+        cx.commit()
+    _invalidate_shop_discount_caches()
+    discount.update(
+        {
+            "claimed": True,
+            "discount_id": int(discount_id),
+            "stock_used": next_used,
+            "active": bool(active),
+            "exhausted_at": exhausted_at,
+        }
+    )
+    return discount
+
+
+def recently_exhausted_discount(item: str, *, seconds: int = 900) -> dict[str, Any] | None:
+    if _supabase_enabled():
+        try:
+            res = _sb().rpc("rpc_recently_exhausted_discount", {"p_item": item}).execute()
+            data = res.data or []
+            row = data[0] if isinstance(data, list) and data else data
+            if isinstance(row, dict) and row.get("discount_id"):
+                return {
+                    "discount_id": int(row.get("discount_id") or 0),
+                    "item": str(row.get("item") or ""),
+                    "base_price": int(row.get("base_price") or 0),
+                    "discount_price": int(row.get("discount_price") or 0),
+                    "discount_kind": str(row.get("discount_kind") or "normal"),
+                    "exhausted_at": _iso_to_ts(row.get("exhausted_at")),
+                    "seconds_since_exhausted": int(row.get("seconds_since_exhausted") or 0),
+                }
+        except Exception:
+            return None
+        return None
+
+    threshold = int(time.time()) - int(seconds)
+    with _conn() as cx:
+        row = cx.execute(
+            """
+            SELECT id, item, base_price, discount_price, stock_total, stock_used,
+                   discount_kind, jornada, active, created_at, exhausted_at
+            FROM shop_discounts
+            WHERE item=? AND exhausted_at IS NOT NULL AND exhausted_at>=?
+            ORDER BY exhausted_at DESC
+            LIMIT 1
+            """,
+            (item, threshold),
+        ).fetchone()
+    if not row:
+        return None
+    discount = _discount_row_from_tuple(row)
+    discount["discount_id"] = int(discount["id"])
+    discount["seconds_since_exhausted"] = max(
+        int(time.time()) - int(discount.get("exhausted_at") or 0),
+        0,
+    )
+    return discount
+
+
+def _team_lock_from_mapping(row: dict) -> dict[str, Any]:
+    team = row.get("team_json") or []
+    if isinstance(team, str):
+        try:
+            team = json.loads(team)
+        except Exception:
+            team = []
+    return {
+        "id": int(row.get("id") or 0),
+        "jornada": int(row.get("jornada") or 0),
+        "user": str(row.get("user") or ""),
+        "team": list(team) if isinstance(team, list) else [],
+        "save_id": row.get("save_id"),
+        "save_sha256": row.get("save_sha256"),
+        "locked_at": _iso_to_ts(row.get("locked_at")),
+        "deadline_at": _iso_to_ts(row.get("deadline_at")),
+        "is_late": bool(row.get("is_late")),
+    }
+
+
+def _team_lock_from_tuple(row: tuple) -> dict[str, Any]:
+    (
+        lock_id,
+        jornada,
+        user,
+        team_json,
+        save_id,
+        save_sha256,
+        locked_at,
+        deadline_at,
+        is_late,
+    ) = row
+    try:
+        team = json.loads(team_json or "[]")
+    except Exception:
+        team = []
+    return {
+        "id": int(lock_id or 0),
+        "jornada": int(jornada or 0),
+        "user": str(user or ""),
+        "team": list(team) if isinstance(team, list) else [],
+        "save_id": save_id,
+        "save_sha256": save_sha256,
+        "locked_at": int(locked_at or 0),
+        "deadline_at": int(deadline_at or 0),
+        "is_late": bool(is_late),
+    }
+
+
+def get_team_lock(jornada: int, user: str) -> dict[str, Any] | None:
+    cache_key = ("team_lock", int(jornada), str(user))
+    hit, cached = _TEAM_LOCKS_CACHE.get(cache_key)
+    if hit:
+        return dict(cached) if cached else None
+
+    if _supabase_enabled():
+        try:
+            res = (
+                _sb()
+                .table("team_locks")
+                .select("*")
+                .eq("jornada", int(jornada))
+                .eq("user", user)
+                .limit(1)
+                .execute()
+            )
+            data = res.data or []
+            lock = _team_lock_from_mapping(data[0]) if data else None
+            _TEAM_LOCKS_CACHE.set(cache_key, lock)
+            return lock
+        except Exception:
+            return None
+
+    with _conn() as cx:
+        row = cx.execute(
+            """
+            SELECT id, jornada, user, team_json, save_id, save_sha256, locked_at, deadline_at, is_late
+            FROM team_locks
+            WHERE jornada=? AND user=?
+            LIMIT 1
+            """,
+            (int(jornada), user),
+        ).fetchone()
+    lock = _team_lock_from_tuple(row) if row else None
+    _TEAM_LOCKS_CACHE.set(cache_key, lock)
+    return lock
+
+
+def list_team_locks(jornada: int) -> list[dict[str, Any]]:
+    cache_key = ("team_locks", int(jornada))
+    hit, cached = _TEAM_LOCKS_CACHE.get(cache_key)
+    if hit:
+        return list(cached)
+
+    if _supabase_enabled():
+        try:
+            res = (
+                _sb()
+                .table("team_locks")
+                .select("*")
+                .eq("jornada", int(jornada))
+                .execute()
+            )
+            out = [_team_lock_from_mapping(row) for row in (res.data or [])]
+            _TEAM_LOCKS_CACHE.set(cache_key, list(out))
+            return out
+        except Exception:
+            return []
+
+    with _conn() as cx:
+        rows = cx.execute(
+            """
+            SELECT id, jornada, user, team_json, save_id, save_sha256, locked_at, deadline_at, is_late
+            FROM team_locks
+            WHERE jornada=?
+            """,
+            (int(jornada),),
+        ).fetchall()
+    out = [_team_lock_from_tuple(row) for row in rows]
+    _TEAM_LOCKS_CACHE.set(cache_key, list(out))
+    return out
+
+
+def upsert_team_lock(
+    *,
+    jornada: int,
+    user: str,
+    team: list[dict],
+    save_id: int | None = None,
+    save_sha256: str | None = None,
+    is_late: bool = False,
+) -> dict[str, Any] | None:
+    deadline_at = "2000-01-01T00:00:00Z" if is_late else None
+    if _supabase_enabled():
+        try:
+            res = _sb().rpc(
+                "rpc_upsert_team_lock",
+                {
+                    "p_jornada": int(jornada),
+                    "p_user": user,
+                    "p_team_json": team,
+                    "p_save_id": int(save_id) if save_id is not None else None,
+                    "p_save_sha256": save_sha256,
+                    "p_deadline_at": deadline_at,
+                },
+            ).execute()
+            data = res.data
+            row = data[0] if isinstance(data, list) and data else data
+            _invalidate_team_lock_caches()
+            return _team_lock_from_mapping(row) if isinstance(row, dict) else None
+        except Exception:
+            return None
+
+    ts = int(time.time())
+    with _conn() as cx:
+        cx.execute(
+            """
+            INSERT INTO team_locks(
+                jornada, user, team_json, save_id, save_sha256, locked_at, deadline_at, is_late
+            ) VALUES(?,?,?,?,?,?,?,?)
+            ON CONFLICT(jornada, user) DO UPDATE SET
+                team_json=excluded.team_json,
+                save_id=excluded.save_id,
+                save_sha256=excluded.save_sha256,
+                locked_at=excluded.locked_at,
+                deadline_at=excluded.deadline_at,
+                is_late=excluded.is_late
+            """,
+            (
+                int(jornada),
+                user,
+                json.dumps(team, ensure_ascii=False, default=str),
+                int(save_id) if save_id is not None else None,
+                save_sha256,
+                ts,
+                1 if is_late else None,
+                1 if is_late else 0,
+            ),
+        )
+        row = cx.execute(
+            """
+            SELECT id, jornada, user, team_json, save_id, save_sha256, locked_at, deadline_at, is_late
+            FROM team_locks
+            WHERE jornada=? AND user=?
+            LIMIT 1
+            """,
+            (int(jornada), user),
+        ).fetchone()
+        cx.commit()
+    _invalidate_team_lock_caches()
+    return _team_lock_from_tuple(row) if row else None
 
 
 def total_spent(user: str) -> int:
@@ -1111,6 +1718,7 @@ def clear_user_app_data(user: str) -> None:
                 if row.get("filename")
             )
             for table, column in (
+                ("team_locks", "user"),
                 ("redemptions", "user"),
                 ("pokemon_flags", "owner"),
                 ("purchases", "user"),
@@ -1128,6 +1736,7 @@ def clear_user_app_data(user: str) -> None:
             with _conn() as cx:
                 rows = cx.execute("SELECT filename FROM saves WHERE uploader=?", (user,)).fetchall()
                 saved_files.update(str(row[0]) for row in rows if row and row[0])
+                cx.execute("DELETE FROM team_locks WHERE user=?", (user,))
                 cx.execute("DELETE FROM redemptions WHERE user=?", (user,))
                 cx.execute("DELETE FROM pokemon_flags WHERE owner=?", (user,))
                 cx.execute("DELETE FROM purchases WHERE user=?", (user,))

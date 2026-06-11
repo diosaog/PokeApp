@@ -1,106 +1,175 @@
 from __future__ import annotations
 
 from datetime import datetime as _dt
+import html as _html
 
 import streamlit as st
 
 from app.common import COIN
-from app.discord_notify import discord_webhook_configured, discord_webhook_status, send_test_notification
+from app.discord_notify import (
+    discord_webhook_configured,
+    discord_webhook_status,
+    notify_discount_purchase_async,
+    send_test_notification,
+)
 from app.juicios.penalties import get_user_penalties
+from app.liga.context import current_jornada
 from app.tienda.catalog import _render_shop_items, get_catalog
+from app.tienda.discounts import active_discounts_by_item, ensure_shop_discounts
 from app.tienda.money import clear_money_caches, money_breakdown
-from storage import add_purchase, clear_all_pokemon_flags, clear_pokemon_flags_for_owner, list_purchases
-
-SHOP_PAGE_CSS = (
-    "<style>"
-    ".stButton>button, .stButton>button *{font-family:var(--font-pixel) !important; font-size:11px !important; "
-    "font-weight:700 !important; color:#ffffff !important; -webkit-text-fill-color:#ffffff !important; opacity:1 !important;}"
-    ".stButton>button:disabled, .stButton>button:disabled *{opacity:1 !important; color:#cbd1d9 !important; -webkit-text-fill-color:#cbd1d9 !important;}"
-    "button[data-baseweb='tab'], button[role='tab'], button[data-baseweb='tab'] *, button[role='tab'] *{font-family:var(--font-pixel) !important; font-size:10px !important; font-weight:700 !important;}"
-    "div[data-testid='stTabs'] div[data-baseweb='tab-list'], div[data-testid='stTabs'] [role='tablist']{gap:8px !important; flex-wrap:wrap !important; align-items:stretch !important;}"
-    "div[data-testid='stTabs'] button[data-baseweb='tab'], div[data-testid='stTabs'] button[role='tab']{flex:0 0 136px !important; width:136px !important; min-width:136px !important; justify-content:center !important; padding-left:14px !important; padding-right:14px !important; white-space:nowrap !important;}"
-    "div[data-testid='stTabs'] button[data-baseweb='tab'] *, div[data-testid='stTabs'] button[role='tab'] *{width:100%; text-align:center; white-space:nowrap !important;}"
-    "div[data-testid='stTabs'] button[data-baseweb='tab']:nth-of-type(3), div[data-testid='stTabs'] button[role='tab']:nth-of-type(3){flex-basis:160px !important; width:160px !important; min-width:160px !important;}"
-    "</style>"
+from app.tienda.styles import render_shop_styles
+from storage import (
+    add_purchase,
+    claim_shop_discount,
+    clear_all_pokemon_flags,
+    clear_pokemon_flags_for_owner,
+    list_purchases,
+    recently_exhausted_discount,
 )
 DIVIDER_HTML = "<div style='height:2px; background:linear-gradient(90deg, transparent 0%, var(--accent) 22%, var(--accent) 78%, transparent 100%); margin:10px 0 14px;'></div>"
 
 
 def render_shop_header() -> None:
-    st.markdown(SHOP_PAGE_CSS, unsafe_allow_html=True)
+    render_shop_styles()
+    user = _html.escape(str(st.session_state.get("user") or "-"))
+    jornada = current_jornada()
     st.markdown(
-        "<div style='display:inline-block; background:linear-gradient(180deg,var(--accent) 0%, var(--accent-dark) 100%);"
-        " border:1px solid var(--bw2-edge-strong); border-radius:0; padding:9px 12px; color:#ffffff;"
-        " font-family:var(--font-pixel); font-weight:700; font-size:12px; text-transform:uppercase;"
-        " clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px);'>Poke Mart</div>",
+        (
+            "<div class='mart-hero'>"
+            "<div class='mart-hero-left'>"
+            "<div class='mart-kicker'>Unova Market System</div>"
+            "<div class='mart-title'>Supermercado Pokemon</div>"
+            "<div class='mart-subrow'>"
+            f"<span class='mart-pill'>Jornada {int(jornada)}</span>"
+            "<span class='mart-pill'>Poke Mart BW2</span>"
+            "<span class='mart-pill'>Linea de caja</span>"
+            "</div>"
+            "</div>"
+            "<div class='mart-hero-right'>"
+            "<div class='mart-led'>Terminal online</div>"
+            f"<div class='mart-pill'>Cliente: {user}</div>"
+            "<div class='mart-pill'>Stock por pasillos</div>"
+            "</div>"
+            "</div>"
+        ),
         unsafe_allow_html=True,
     )
-    st.markdown(DIVIDER_HTML, unsafe_allow_html=True)
 
 
 def render_money_panel(current_user: str) -> tuple[dict, bool, int | None]:
     penalties = get_user_penalties(current_user if current_user != "-" else "")
     store_locked = bool(penalties.get("store_blocked"))
     available = None
-    _, colR = st.columns([5, 2])
-    with colR:
-        if current_user != "-":
-            try:
-                breakdown = money_breakdown(current_user)
-            except Exception:
-                breakdown = {"base": 0, "spent": 0, "coins_reduction": 0, "available": 0}
-            base = int(breakdown.get("base") or 0)
-            spent = int(breakdown.get("spent") or 0)
-            extra_reduction = int(breakdown.get("coins_reduction") or 0)
-            available = int(breakdown.get("available") or 0)
-            st.markdown(
-                "<div style='background:linear-gradient(180deg,var(--bw2-panel-2) 0%, var(--bw2-panel) 100%); border:1px solid var(--bw2-edge); border-radius:0; "
-                "padding:10px 12px; color:var(--bw2-text); font-family:var(--font-ui); box-shadow: inset 0 1px 0 rgba(255,255,255,0.08), 0 0 0 1px rgba(0,0,0,0.28);'>"
-                "<div style='font-size:10px; color:#fff; font-family:var(--font-pixel); font-weight:700; letter-spacing:0.05em; text-transform:uppercase;'>Disponible</div>"
-                f"<div style='font-size:28px; margin-top:8px; color:#ffffff;'>{COIN} {available}</div>"
-                f"<div style='font-size:18px; color:var(--bw2-text-soft); margin-top:8px; line-height:1.35;'>Base: {COIN} {base} | Gastado: {COIN} {spent} | Castigo: {COIN} {extra_reduction}</div>"
-                "</div>",
-                unsafe_allow_html=True,
-            )
-        else:
-            st.markdown(
-                "<div style='background:linear-gradient(180deg,var(--bw2-panel-2) 0%, var(--bw2-panel) 100%); border:1px solid var(--bw2-edge); border-radius:0; "
-                "padding:10px 12px; color:var(--bw2-text); font-family:var(--font-ui);'>"
-                "<div style='font-size:10px; color:#fff; font-family:var(--font-pixel); font-weight:700; text-transform:uppercase;'>Disponible</div>"
-                f"<div style='font-size:28px; margin-top:8px; color:#ffffff;'>{COIN} 0</div>"
-                "</div>",
-                unsafe_allow_html=True,
-            )
+    if current_user != "-":
+        try:
+            breakdown = money_breakdown(current_user)
+        except Exception:
+            breakdown = {"base": 0, "spent": 0, "coins_reduction": 0, "available": 0}
+        base = int(breakdown.get("base") or 0)
+        spent = int(breakdown.get("spent") or 0)
+        extra_reduction = int(breakdown.get("coins_reduction") or 0)
+        available = int(breakdown.get("available") or 0)
+    else:
+        base = spent = extra_reduction = 0
+        available = 0
+
+    status = "Bloqueada" if store_locked else "Abierta"
+    status_value = "Juicio" if store_locked else "OK"
+    st.markdown(
+        (
+            "<div class='mart-register-grid'>"
+            "<div class='mart-register-card is-main'>"
+            "<div class='mart-label'>Disponible</div>"
+            f"<div class='mart-value'>{COIN} {available}</div>"
+            "</div>"
+            "<div class='mart-register-card'>"
+            "<div class='mart-label'>Base</div>"
+            f"<div class='mart-value'>{COIN} {base}</div>"
+            "</div>"
+            "<div class='mart-register-card'>"
+            "<div class='mart-label'>Gastado</div>"
+            f"<div class='mart-value'>{COIN} {spent}</div>"
+            "</div>"
+            "<div class='mart-register-card'>"
+            f"<div class='mart-label'>Caja {status}</div>"
+            f"<div class='mart-value'>{status_value}"
+            + (f" -{COIN} {extra_reduction}" if extra_reduction else "")
+            + "</div>"
+            "</div>"
+            "</div>"
+        ),
+        unsafe_allow_html=True,
+    )
     return penalties, store_locked, available
 
 
-def render_shop_catalog(*, penalties: dict, store_locked: bool, current_user: str, available: int | None) -> None:
+def _render_locked_notice(penalties: dict) -> None:
+    tramos = list(penalties.get("store_ban_tramos") or [])
+    src = list(penalties.get("sources") or [])
+    detail = []
+    if tramos:
+        detail.append("Tramo: " + ", ".join(str(t) for t in tramos))
+    if src:
+        detail.append("Origen: " + " | ".join(str(s) for s in src))
     st.markdown(
-        "<div style='display:inline-block; background:linear-gradient(180deg,var(--bw2-panel-3) 0%, var(--bw2-panel) 100%); border:1px solid var(--bw2-edge); border-radius:0; "
-        "padding:8px 10px; font-size:10px; color:#ffffff; font-family:var(--font-pixel); "
-        "font-weight:700; text-transform:uppercase;'>Catalogo</div>",
+        (
+            "<div class='mart-alert'>"
+            "<strong>Tienda bloqueada</strong>"
+            f"<span>{_html.escape(' | '.join(detail) if detail else 'No puedes gastar monedas.')}</span>"
+            "</div>"
+        ),
         unsafe_allow_html=True,
     )
+
+
+def _discount_count(items: list[dict], discounts: dict[str, dict]) -> int:
+    names = {str(item.get("name") or "") for item in items}
+    return sum(1 for name in names if name in discounts)
+
+
+def _render_aisle_header(code: str, title: str, items: list[dict], discounts: dict[str, dict]) -> None:
+    discount_total = _discount_count(items, discounts)
+    st.markdown(
+        (
+            "<div class='mart-aisle-head'>"
+            "<div>"
+            f"<div class='mart-aisle-code'>{_html.escape(code)}</div>"
+            f"<div class='mart-aisle-title'>{_html.escape(title)}</div>"
+            "</div>"
+            "<div class='mart-aisle-meta'>"
+            f"<span class='mart-pill'>{len(items)} productos</span>"
+            f"<span class='mart-pill'>{discount_total} rebajas</span>"
+            "</div>"
+            "</div>"
+        ),
+        unsafe_allow_html=True,
+    )
+
+
+def render_shop_catalog(*, penalties: dict, store_locked: bool, current_user: str, available: int | None) -> None:
+    catalog = get_catalog()
+    jornada = current_jornada()
+    ensure_shop_discounts(catalog, jornada)
+    discounts = active_discounts_by_item(jornada)
+
     if store_locked:
-        st.error("Tienda bloqueada por castigo de Juicio. No puedes gastar monedas.")
-        tramos = list(penalties.get("store_ban_tramos") or [])
-        if tramos:
-            st.caption("Tramo de bloqueo: " + ", ".join(tramos))
-        src = penalties.get("sources") or []
-        if src:
-            st.caption("Origen: " + " | ".join(src))
+        _render_locked_notice(penalties)
+
     st.markdown(DIVIDER_HTML, unsafe_allow_html=True)
 
-    catalog = get_catalog()
-    tab_com, tab_bay, tab_comp, tab_bred = st.tabs(["Comodines", "Bayas", "Competitivos", "Crianza"])
+    tab_com, tab_bay, tab_comp, tab_bred = st.tabs(["Pasillo 01", "Pasillo 02", "Pasillo 03", "Pasillo 04"])
     with tab_com:
-        _render_shop_items(catalog["comodines"], "comodines", available=available if current_user != "-" else None)
+        _render_aisle_header("Pasillo 01", "Comodines", catalog["comodines"], discounts)
+        _render_shop_items(catalog["comodines"], "comodines", available=available if current_user != "-" else None, discounts=discounts)
     with tab_bay:
-        _render_shop_items(catalog["bayas"], "bayas", available=available if current_user != "-" else None)
+        _render_aisle_header("Pasillo 02", "Bayas", catalog["bayas"], discounts)
+        _render_shop_items(catalog["bayas"], "bayas", available=available if current_user != "-" else None, discounts=discounts)
     with tab_comp:
-        _render_shop_items(catalog["competitivos"], "competitivos", available=available if current_user != "-" else None)
+        _render_aisle_header("Pasillo 03", "Competitivo", catalog["competitivos"], discounts)
+        _render_shop_items(catalog["competitivos"], "competitivos", available=available if current_user != "-" else None, discounts=discounts)
     with tab_bred:
-        _render_shop_items(catalog["crianza"], "crianza", available=available if current_user != "-" else None)
+        _render_aisle_header("Pasillo 04", "Crianza", catalog["crianza"], discounts)
+        _render_shop_items(catalog["crianza"], "crianza", available=available if current_user != "-" else None, discounts=discounts)
 
 
 def render_pending_purchase(current_user: str, *, store_locked: bool) -> None:
@@ -114,16 +183,94 @@ def render_pending_purchase(current_user: str, *, store_locked: bool) -> None:
 
     nombre = pending.get("name")
     precio = int(pending.get("price") or 0)
+    base_price = int(pending.get("base_price") or precio)
+    discount_id = pending.get("discount_id")
+    discount_kind = str(pending.get("discount_kind") or "normal")
+    force_base = bool(pending.get("force_base_price"))
+    jornada = current_jornada()
+    display_price = base_price if force_base else precio
+    nombre_html = _html.escape(str(nombre or ""))
+    if discount_id and not force_base:
+        desc = (
+            f"Comprar '<em>{nombre_html}</em>' en rebaja por {COIN} {precio} "
+            f"(precio original {COIN} {base_price})?"
+        )
+    elif force_base:
+        desc = (
+            f"La rebaja de '<em>{nombre_html}</em>' se acaba de agotar. "
+            f"Comprar igualmente por {COIN} {base_price}?"
+        )
+    else:
+        desc = f"Comprar '<em>{nombre_html}</em>' por {COIN} {precio}?"
     st.markdown(
-        f"<div class='panel-dashed'><strong>Confirmacion</strong><br/>Comprar '<em>{nombre}</em>' por {COIN} {precio}?</div>",
+        (
+            "<div class='mart-confirm-card'>"
+            "<div class='mart-confirm-title'>Ticket de caja</div>"
+            f"<div class='mart-confirm-line'>{desc}</div>"
+            f"<div class='mart-confirm-price'>{COIN} {display_price}</div>"
+            "</div>"
+        ),
         unsafe_allow_html=True,
     )
-    st.info(f"Comprar '{nombre}' por {COIN} {precio}?")
+    try:
+        available_now = int(money_breakdown(current_user).get("available") or 0)
+    except Exception:
+        available_now = None
+    confirm_disabled = (
+        available_now is not None
+        and int(display_price) > int(available_now)
+    )
+    if confirm_disabled:
+        st.error(f"No tienes monedas suficientes para comprarlo por {COIN} {display_price}.")
     c1, c2 = st.columns(2)
     with c1:
-        if st.button("Confirmar compra", use_container_width=True):
+        if st.button("Confirmar compra", disabled=confirm_disabled, use_container_width=True):
             try:
-                pid = add_purchase(current_user, nombre, precio)
+                if discount_id and not force_base:
+                    claimed = claim_shop_discount(int(discount_id))
+                    if not claimed.get("claimed"):
+                        recent = recently_exhausted_discount(str(nombre))
+                        if recent:
+                            pending["force_base_price"] = True
+                            pending["price"] = int(base_price)
+                            st.session_state["shop_pending"] = pending
+                            st.warning(
+                                "La rebaja se acaba de agotar hace menos de 15 minutos. "
+                                "Confirma si quieres comprar al precio base."
+                            )
+                            st.rerun()
+                        st.error("La rebaja ya no esta disponible.")
+                        st.session_state.pop("shop_pending", None)
+                        st.rerun()
+
+                    price_paid = int(claimed.get("discount_price") or precio)
+                    original_price = int(claimed.get("base_price") or base_price)
+                    kind = str(claimed.get("discount_kind") or discount_kind)
+                    pid = add_purchase(
+                        current_user,
+                        nombre,
+                        price_paid,
+                        jornada=jornada,
+                        discount_id=int(discount_id),
+                        base_price=original_price,
+                        notify=False,
+                    )
+                    notify_discount_purchase_async(
+                        user=current_user,
+                        item=str(nombre),
+                        base_price=original_price,
+                        discount_price=price_paid,
+                        discount_kind=kind,
+                        purchase_id=pid,
+                    )
+                else:
+                    pid = add_purchase(
+                        current_user,
+                        nombre,
+                        display_price,
+                        jornada=jornada,
+                        base_price=base_price if force_base else None,
+                    )
                 clear_money_caches()
                 try:
                     from app.entrenadores.inventory import _inventory_cached

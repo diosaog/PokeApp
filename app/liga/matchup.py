@@ -13,6 +13,7 @@ from app.entrenadores.bridge import try_auto_load_bridge
 from app.entrenadores.profile import find_trainer_image
 from app.entrenadores.snapshot import get_trainer_snapshot
 from app.juicios.penalties import get_user_penalties
+from app.liga.context import current_jornada
 from app.tienda.money import money_breakdown_from_parts
 from dexdata import (
     ability_desc_es,
@@ -25,6 +26,7 @@ from dexdata import (
 )
 from i18n import nature_display_es, translate_type_es
 from showdown_sprites import showdown_sprite_url
+from storage import get_team_lock
 from utils import active_users
 
 
@@ -400,6 +402,9 @@ def _summary_snapshot(player: str) -> dict:
     from app.liga.ranking import current_points_total
 
     snapshot = get_trainer_snapshot(player)
+    jornada = current_jornada()
+    team_lock = get_team_lock(jornada, player)
+    locked_team = list(team_lock.get("team") or []) if team_lock else []
 
     penalties = get_user_penalties(player)
     raw_dead_count = int(snapshot.get("dead_count") or 0)
@@ -426,8 +431,10 @@ def _summary_snapshot(player: str) -> dict:
         "coins": int(breakdown.get("available") or 0),
         "badges": badges,
         "dead_count": raw_dead_count,
-        "team": list(snapshot.get("team") or []),
+        "team": locked_team or list(snapshot.get("team") or []),
         "save_name": str(snapshot.get("save_name") or "Sin save"),
+        "team_lock": team_lock,
+        "team_lock_jornada": jornada,
         "store_blocked": bool(penalties.get("store_blocked")),
         "portrait_uri": _img_uri(portrait, portrait_mtime) if portrait else "",
     }
@@ -444,6 +451,15 @@ def _summary_card_html(snapshot: dict) -> str:
         if snapshot.get("store_blocked")
         else "<span class='matchup-ok'>Sin castigos de tienda</span>"
     )
+    lock = snapshot.get("team_lock")
+    if lock:
+        lock_chip = (
+            "<span class='matchup-alert'>Fijado tarde</span>"
+            if lock.get("is_late")
+            else "<span class='matchup-ok'>Equipo fijado</span>"
+        )
+    else:
+        lock_chip = "<span class='matchup-alert'>Sin fijar</span>"
     return (
         "<div class='matchup-summary'>"
         "<div class='matchup-summary-head'>"
@@ -452,7 +468,7 @@ def _summary_card_html(snapshot: dict) -> str:
         f"<div class='matchup-player'>{escape(snapshot['player'])}</div>"
         f"<div class='matchup-division'>{escape(snapshot['division'])}</div>"
         f"<div class='matchup-save'>{escape(snapshot['save_name'])}</div>"
-        f"<div class='matchup-status-row'>{status_chip}</div>"
+        f"<div class='matchup-status-row'>{status_chip} {lock_chip}</div>"
         "</div>"
         "</div>"
         "<div class='matchup-metric-grid'>"
@@ -526,6 +542,11 @@ def _battle_team_html(
     snapshot: dict, *, board_label: str = "Rival", reveal_private: bool = False
 ) -> str:
     player = str(snapshot.get("player") or "")
+    lock = snapshot.get("team_lock")
+    lock_label = "Sin fijar"
+    if lock:
+        lock_label = "Fijado tarde" if lock.get("is_late") else "Equipo fijado"
+    jornada = int(snapshot.get("team_lock_jornada") or current_jornada())
     team = list(snapshot.get("team") or [])[:6]
     cards: list[str] = []
 
@@ -599,7 +620,7 @@ def _battle_team_html(
         "<div class='battle-board'>"
         "<div class='battle-board-top'>"
         f"<div><span>{escape(board_label)}</span><strong>{escape(player)}</strong></div>"
-        f"<div><span>Save</span><strong>{escape(str(snapshot.get('save_name') or 'Sin save'))}</strong></div>"
+        f"<div><span>Jornada {jornada}</span><strong>{escape(lock_label)}</strong></div>"
         "</div>"
         "<div class='battle-team-grid'>"
         f"{''.join(cards)}"
@@ -1460,7 +1481,7 @@ def _render_battle_tab(available: list[str]) -> None:
 def render_matchup_preview(players: list[str] | None = None) -> None:
     _ensure_matchup_css()
     st.markdown(
-        "<div class='matchup-shell'>Preview de equipo</div>", unsafe_allow_html=True
+        "<div class='matchup-shell'>Team Preview</div>", unsafe_allow_html=True
     )
 
     if not try_auto_load_bridge():
@@ -1481,7 +1502,7 @@ def render_matchup_preview(players: list[str] | None = None) -> None:
     if "matchup_preview_mode" not in st.session_state:
         st.session_state.matchup_preview_mode = "Espectador"
     mode = st.radio(
-        "Modo de preview",
+        "Modo de Team Preview",
         mode_options,
         horizontal=True,
         key="matchup_preview_mode",

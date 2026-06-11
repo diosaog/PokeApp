@@ -8,6 +8,7 @@ import streamlit as st
 from app.discord_notify import (
     notify_league_match_results_async,
     notify_league_round_finished_detail,
+    notify_missing_team_locks_async,
 )
 from app.liga.ranking import (
     MAX_JORNADAS,
@@ -32,6 +33,8 @@ from app.juicios.penalties import clear_penalty_caches
 from app.tienda.money import clear_money_caches
 from storage import (
     clear_purchases,
+    list_team_locks,
+    settings_get,
     settings_clear_cache,
     settings_get_uncached,
     settings_set,
@@ -43,6 +46,7 @@ _NOTIFY_SENT_KEY_PREFIX = "league_round_notify_sent"
 _NOTIFY_STATUS_KEY_PREFIX = "league_round_notify_status"
 _FLASH_MESSAGES_KEY = "_league_flash_messages"
 _CLEAR_EDIT_BUFFERS_NEXT_KEY = "_league_clear_edit_buffers_next"
+_TEAM_LOCKS_MISSING_NOTIFY_PREFIX = "team_locks_missing_notify"
 GENERAL_TABLE_HEIGHT = 425
 
 
@@ -117,6 +121,31 @@ def _clear_local_league_state() -> None:
 
 def _current_user_can_resend_summary() -> bool:
     return str(st.session_state.get("user") or "").strip().lower() == "anto"
+
+
+def _notify_missing_team_locks_once(round_no: int) -> None:
+    key = f"{_TEAM_LOCKS_MISSING_NOTIFY_PREFIX}:{int(round_no)}"
+    try:
+        if settings_get(key):
+            return
+    except Exception:
+        pass
+    locks = list_team_locks(int(round_no))
+    locked_users = {
+        str(lock.get("user") or "")
+        for lock in locks
+        if lock.get("team")
+    }
+    missing = [
+        user
+        for user in active_users().keys()
+        if user not in locked_users
+    ]
+    notify_missing_team_locks_async(jornada=int(round_no), missing=missing)
+    try:
+        settings_set(key, "1")
+    except Exception:
+        pass
 
 
 def _notify_sent_key(round_no: int) -> str:
@@ -516,6 +545,7 @@ def page_tabla() -> None:
                         st.session_state.league_active = True
                         get_matches_for(tramo)
                         persist_state()
+                        _notify_missing_team_locks_once(int(tramo))
                         _schedule_clear_league_edit_buffers()
                         st.rerun()
             with c2:

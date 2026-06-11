@@ -41,7 +41,7 @@ def page_previa_combate() -> None:
 
         render_matchup_preview(list(active_users().keys()))
     except Exception as e:
-        st.error(f"No se pudo cargar la previa de combate: {e}")
+        st.error(f"No se pudo cargar Team Preview: {e}")
 
 
 def page_copa() -> None:
