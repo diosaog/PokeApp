@@ -359,6 +359,9 @@ def render_shop_styles() -> None:
         .shop-main-price {
           color: #ffffff;
         }
+        .shop-future-price {
+          color: #8fd7ff;
+        }
         .shop-discount-badge {
           display: inline-flex;
           align-items: center;
@@ -367,6 +370,29 @@ def render_shop_styles() -> None:
           border: 1px solid rgba(255,255,255,0.24);
           background: linear-gradient(180deg, #f26f3d 0%, #8d2f20 100%);
           color: #ffffff;
+        }
+        .shop-discount-badge.is-pending {
+          border-color: rgba(117, 203, 255, 0.65);
+          background: linear-gradient(180deg, #347fa8 0%, #1c4e70 100%);
+        }
+        .shop-discount-badge.is-used {
+          border-color: rgba(255,255,255,0.16);
+          background: linear-gradient(180deg, #5a626d 0%, #343a42 100%);
+        }
+        .shop-card.is-pending-sale {
+          border-color: rgba(94, 188, 242, 0.62);
+          box-shadow: inset 3px 0 0 #4db9f2;
+        }
+        .shop-card.is-delivery-locked {
+          background:
+            repeating-linear-gradient(
+              -45deg,
+              rgba(71, 151, 196, 0.05) 0,
+              rgba(71, 151, 196, 0.05) 8px,
+              transparent 8px,
+              transparent 16px
+            ),
+            linear-gradient(180deg, var(--bw2-panel-2) 0%, var(--bw2-panel) 100%);
         }
         .shop-old-price {
           color: #c6ccd4;

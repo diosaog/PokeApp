@@ -202,6 +202,7 @@ def init_storage():
         cx.execute("""CREATE TABLE IF NOT EXISTS shop_discounts (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             item TEXT NOT NULL,
+            category TEXT NOT NULL DEFAULT '',
             base_price INTEGER NOT NULL,
             discount_price INTEGER NOT NULL,
             stock_total INTEGER NOT NULL,
@@ -210,8 +211,32 @@ def init_storage():
             jornada INTEGER,
             active INTEGER NOT NULL DEFAULT 1,
             created_at INTEGER NOT NULL,
+            announced_at INTEGER,
+            activates_at INTEGER,
             exhausted_at INTEGER
         )""")
+        try:
+            discount_cols = {
+                r[1] for r in cx.execute("PRAGMA table_info(shop_discounts)").fetchall()
+            }
+            if "category" not in discount_cols:
+                cx.execute(
+                    "ALTER TABLE shop_discounts ADD COLUMN category TEXT NOT NULL DEFAULT ''"
+                )
+            if "announced_at" not in discount_cols:
+                cx.execute("ALTER TABLE shop_discounts ADD COLUMN announced_at INTEGER")
+            if "activates_at" not in discount_cols:
+                cx.execute("ALTER TABLE shop_discounts ADD COLUMN activates_at INTEGER")
+            cx.execute(
+                "UPDATE shop_discounts SET announced_at=created_at "
+                "WHERE announced_at IS NULL"
+            )
+            cx.execute(
+                "UPDATE shop_discounts SET activates_at=created_at "
+                "WHERE activates_at IS NULL"
+            )
+        except Exception:
+            pass
         cx.execute("""CREATE TABLE IF NOT EXISTS team_locks (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             jornada INTEGER NOT NULL,
@@ -251,6 +276,8 @@ def init_storage():
             cx.execute("CREATE INDEX IF NOT EXISTS idx_purchases_jornada_item ON purchases(jornada, item)")
             cx.execute("CREATE INDEX IF NOT EXISTS idx_shop_discounts_active_item ON shop_discounts(active, item)")
             cx.execute("CREATE INDEX IF NOT EXISTS idx_shop_discounts_jornada ON shop_discounts(jornada)")
+            cx.execute("CREATE INDEX IF NOT EXISTS idx_shop_discounts_activation ON shop_discounts(active, activates_at)")
+            cx.execute("CREATE INDEX IF NOT EXISTS idx_purchases_user_discount ON purchases(user, discount_id)")
             cx.execute("CREATE INDEX IF NOT EXISTS idx_team_locks_jornada_user ON team_locks(jornada, user)")
         except Exception:
             pass
@@ -677,6 +704,15 @@ def create_shop_discount(*args, **kwargs):
 
 def purchase_counts_by_item_for_jornadas(*args, **kwargs):
     return _storage_shop().purchase_counts_by_item_for_jornadas(*args, **kwargs)
+
+def expire_shop_discounts_through_jornada(*args, **kwargs):
+    return _storage_shop().expire_shop_discounts_through_jornada(*args, **kwargs)
+
+def claimed_shop_discount_ids(*args, **kwargs):
+    return _storage_shop().claimed_shop_discount_ids(*args, **kwargs)
+
+def purchase_shop_discount(*args, **kwargs):
+    return _storage_shop().purchase_shop_discount(*args, **kwargs)
 
 def claim_shop_discount(*args, **kwargs):
     return _storage_shop().claim_shop_discount(*args, **kwargs)

@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import time
+from datetime import datetime, timezone
 from typing import Any
 
 from storage import (
@@ -22,6 +23,10 @@ from storage import (
 
 
 # Tienda
+
+
+def _timestamp_iso(value: int | float) -> str:
+    return datetime.fromtimestamp(float(value), tz=timezone.utc).isoformat()
 
 
 def _notify_purchase_inserted(user: str, item: str, price: int, purchase_id: int) -> None:
@@ -108,6 +113,7 @@ def _discount_row_from_mapping(row: dict) -> dict[str, Any]:
     return {
         "id": int(row.get("id") or 0),
         "item": str(row.get("item") or ""),
+        "category": str(row.get("category") or ""),
         "base_price": int(row.get("base_price") or 0),
         "discount_price": int(row.get("discount_price") or 0),
         "stock_total": int(row.get("stock_total") or 0),
@@ -116,6 +122,8 @@ def _discount_row_from_mapping(row: dict) -> dict[str, Any]:
         "jornada": int(row.get("jornada") or 0),
         "active": bool(row.get("active")),
         "created_at": _iso_to_ts(row.get("created_at")),
+        "announced_at": _iso_to_ts(row.get("announced_at") or row.get("created_at")),
+        "activates_at": _iso_to_ts(row.get("activates_at") or row.get("created_at")),
         "exhausted_at": _iso_to_ts(row.get("exhausted_at")),
     }
 
@@ -124,6 +132,7 @@ def _discount_row_from_tuple(row: tuple) -> dict[str, Any]:
     (
         discount_id,
         item,
+        category,
         base_price,
         discount_price,
         stock_total,
@@ -132,11 +141,14 @@ def _discount_row_from_tuple(row: tuple) -> dict[str, Any]:
         jornada,
         active,
         created_at,
+        announced_at,
+        activates_at,
         exhausted_at,
     ) = row
     return {
         "id": int(discount_id or 0),
         "item": str(item or ""),
+        "category": str(category or ""),
         "base_price": int(base_price or 0),
         "discount_price": int(discount_price or 0),
         "stock_total": int(stock_total or 0),
@@ -145,6 +157,8 @@ def _discount_row_from_tuple(row: tuple) -> dict[str, Any]:
         "jornada": int(jornada or 0),
         "active": bool(active),
         "created_at": int(created_at or 0),
+        "announced_at": int(announced_at or created_at or 0),
+        "activates_at": int(activates_at or created_at or 0),
         "exhausted_at": int(exhausted_at or 0),
     }
 
@@ -183,8 +197,9 @@ def list_shop_discounts(
     with _conn() as cx:
         rows = cx.execute(
             """
-            SELECT id, item, base_price, discount_price, stock_total, stock_used,
-                   discount_kind, jornada, active, created_at, exhausted_at
+            SELECT id, item, category, base_price, discount_price, stock_total,
+                   stock_used, discount_kind, jornada, active, created_at,
+                   announced_at, activates_at, exhausted_at
             FROM shop_discounts
             """
             + where
@@ -199,14 +214,18 @@ def list_shop_discounts(
 def create_shop_discount(
     *,
     item: str,
+    category: str,
     base_price: int,
     discount_price: int,
     stock_total: int,
     discount_kind: str,
     jornada: int,
+    announced_at: int,
+    activates_at: int,
 ) -> dict[str, Any] | None:
     payload = {
         "item": item,
+        "category": str(category or ""),
         "base_price": int(base_price),
         "discount_price": int(discount_price),
         "stock_total": int(stock_total),
@@ -215,6 +234,8 @@ def create_shop_discount(
         "jornada": int(jornada),
         "active": True,
         "created_at": _now_iso(),
+        "announced_at": _timestamp_iso(announced_at),
+        "activates_at": _timestamp_iso(activates_at),
         "exhausted_at": None,
     }
     if _supabase_enabled():
@@ -231,12 +252,14 @@ def create_shop_discount(
         cx.execute(
             """
             INSERT INTO shop_discounts(
-                item, base_price, discount_price, stock_total, stock_used,
-                discount_kind, jornada, active, created_at, exhausted_at
-            ) VALUES(?,?,?,?,?,?,?,?,?,?)
+                item, category, base_price, discount_price, stock_total, stock_used,
+                discount_kind, jornada, active, created_at, announced_at,
+                activates_at, exhausted_at
+            ) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?)
             """,
             (
                 item,
+                str(category or ""),
                 int(base_price),
                 int(discount_price),
                 int(stock_total),
@@ -245,6 +268,8 @@ def create_shop_discount(
                 int(jornada),
                 1,
                 ts,
+                int(announced_at),
+                int(activates_at),
                 None,
             ),
         )
@@ -254,6 +279,7 @@ def create_shop_discount(
     return {
         "id": int(rowid),
         "item": item,
+        "category": str(category or ""),
         "base_price": int(base_price),
         "discount_price": int(discount_price),
         "stock_total": int(stock_total),
@@ -262,6 +288,8 @@ def create_shop_discount(
         "jornada": int(jornada),
         "active": True,
         "created_at": ts,
+        "announced_at": int(announced_at),
+        "activates_at": int(activates_at),
         "exhausted_at": 0,
     }
 
@@ -310,6 +338,198 @@ def purchase_counts_by_item_for_jornadas(jornadas: list[int]) -> dict[int, dict[
     return out
 
 
+def expire_shop_discounts_through_jornada(jornada: int) -> None:
+    round_no = int(jornada)
+    if _supabase_enabled():
+        try:
+            (
+                _sb()
+                .table("shop_discounts")
+                .update({"active": False})
+                .eq("active", True)
+                .lte("jornada", round_no)
+                .execute()
+            )
+            _invalidate_shop_discount_caches()
+            return
+        except Exception as e:
+            raise RuntimeError(f"Supabase expire_shop_discounts failed: {e}")
+    with _conn() as cx:
+        cx.execute(
+            "UPDATE shop_discounts SET active=0 WHERE active=1 AND jornada<=?",
+            (round_no,),
+        )
+        cx.commit()
+    _invalidate_shop_discount_caches()
+
+
+def claimed_shop_discount_ids(user: str, discount_ids: list[int]) -> set[int]:
+    ids = sorted({int(value) for value in discount_ids if int(value) > 0})
+    if not user or not ids:
+        return set()
+    if _supabase_enabled():
+        try:
+            res = (
+                _sb()
+                .table("purchases")
+                .select("discount_id")
+                .eq("user", user)
+                .in_("discount_id", ids)
+                .execute()
+            )
+            return {
+                int(row.get("discount_id") or 0)
+                for row in (res.data or [])
+                if int(row.get("discount_id") or 0) > 0
+            }
+        except Exception:
+            return set()
+    qmarks = ",".join("?" for _ in ids)
+    with _conn() as cx:
+        rows = cx.execute(
+            f"SELECT DISTINCT discount_id FROM purchases "
+            f"WHERE user=? AND discount_id IN ({qmarks})",
+            (user, *ids),
+        ).fetchall()
+    return {int(row[0]) for row in rows if row and row[0] is not None}
+
+
+def purchase_shop_discount(
+    *, user: str, discount_id: int, jornada: int
+) -> dict[str, Any]:
+    if _supabase_enabled():
+        try:
+            res = _sb().rpc(
+                "rpc_purchase_shop_discount",
+                {
+                    "p_discount_id": int(discount_id),
+                    "p_user": str(user),
+                    "p_jornada": int(jornada),
+                },
+            ).execute()
+            data = res.data or []
+            row = data[0] if isinstance(data, list) and data else data
+            _invalidate_shop_discount_caches()
+            _invalidate_purchase_caches(user)
+            if isinstance(row, dict):
+                return {
+                    "purchased": bool(row.get("purchased")),
+                    "reason": str(row.get("reason") or ""),
+                    "purchase_id": int(row.get("purchase_id") or 0),
+                    "discount_id": int(row.get("discount_id") or discount_id),
+                    "item": str(row.get("item") or ""),
+                    "base_price": int(row.get("base_price") or 0),
+                    "discount_price": int(row.get("discount_price") or 0),
+                    "stock_total": int(row.get("stock_total") or 0),
+                    "stock_used": int(row.get("stock_used") or 0),
+                    "discount_kind": str(row.get("discount_kind") or "normal"),
+                }
+        except Exception as e:
+            raise RuntimeError(
+                "Supabase no tiene instalada la migracion de promociones: "
+                f"{e}"
+            )
+        return {
+            "purchased": False,
+            "reason": "unavailable",
+            "discount_id": int(discount_id),
+        }
+
+    ts = int(time.time())
+    with _conn() as cx:
+        cx.execute("BEGIN IMMEDIATE")
+        row = cx.execute(
+            """
+            SELECT id, item, category, base_price, discount_price, stock_total,
+                   stock_used, discount_kind, jornada, active, created_at,
+                   announced_at, activates_at, exhausted_at
+            FROM shop_discounts
+            WHERE id=?
+            """,
+            (int(discount_id),),
+        ).fetchone()
+        if not row:
+            cx.commit()
+            return {
+                "purchased": False,
+                "reason": "unavailable",
+                "discount_id": int(discount_id),
+            }
+        discount = _discount_row_from_tuple(row)
+        if int(discount.get("jornada") or 0) != int(jornada):
+            cx.commit()
+            return {"purchased": False, "reason": "expired", **discount}
+        if not bool(discount.get("active")):
+            cx.commit()
+            return {"purchased": False, "reason": "exhausted", **discount}
+        if ts < int(discount.get("activates_at") or 0):
+            cx.commit()
+            return {"purchased": False, "reason": "pending", **discount}
+        previous = cx.execute(
+            "SELECT id FROM purchases WHERE user=? AND discount_id=? LIMIT 1",
+            (str(user), int(discount_id)),
+        ).fetchone()
+        if previous:
+            cx.commit()
+            return {"purchased": False, "reason": "already_claimed", **discount}
+        if int(discount["stock_used"]) >= int(discount["stock_total"]):
+            cx.execute(
+                "UPDATE shop_discounts SET active=0 WHERE id=?",
+                (int(discount_id),),
+            )
+            cx.commit()
+            _invalidate_shop_discount_caches()
+            return {"purchased": False, "reason": "exhausted", **discount}
+
+        next_used = int(discount["stock_used"]) + 1
+        exhausted = next_used >= int(discount["stock_total"])
+        exhausted_at = ts if exhausted else None
+        cx.execute(
+            """
+            INSERT INTO purchases(
+                user, item, price, created_at, status, redeemed_at,
+                discount_id, base_price, jornada
+            ) VALUES(?,?,?,?,?,?,?,?,?)
+            """,
+            (
+                str(user),
+                str(discount["item"]),
+                int(discount["discount_price"]),
+                ts,
+                "pending",
+                None,
+                int(discount_id),
+                int(discount["base_price"]),
+                int(jornada),
+            ),
+        )
+        purchase_id = int(cx.execute("SELECT last_insert_rowid()").fetchone()[0])
+        cx.execute(
+            """
+            UPDATE shop_discounts
+            SET stock_used=?, active=?, exhausted_at=?
+            WHERE id=?
+            """,
+            (next_used, 0 if exhausted else 1, exhausted_at, int(discount_id)),
+        )
+        cx.commit()
+
+    _invalidate_shop_discount_caches()
+    _invalidate_purchase_caches(user)
+    return {
+        "purchased": True,
+        "reason": "ok",
+        "purchase_id": purchase_id,
+        "discount_id": int(discount_id),
+        "item": str(discount["item"]),
+        "base_price": int(discount["base_price"]),
+        "discount_price": int(discount["discount_price"]),
+        "stock_total": int(discount["stock_total"]),
+        "stock_used": next_used,
+        "discount_kind": str(discount["discount_kind"]),
+    }
+
+
 def claim_shop_discount(discount_id: int) -> dict[str, Any]:
     if _supabase_enabled():
         try:
@@ -344,12 +564,13 @@ def claim_shop_discount(discount_id: int) -> dict[str, Any]:
             pass
         row = cx.execute(
             """
-            SELECT id, item, base_price, discount_price, stock_total, stock_used,
-                   discount_kind, jornada, active, created_at, exhausted_at
+            SELECT id, item, category, base_price, discount_price, stock_total,
+                   stock_used, discount_kind, jornada, active, created_at,
+                   announced_at, activates_at, exhausted_at
             FROM shop_discounts
-            WHERE id=? AND active=1
+            WHERE id=? AND active=1 AND COALESCE(activates_at, created_at)<=?
             """,
-            (int(discount_id),),
+            (int(discount_id), ts),
         ).fetchone()
         if not row:
             cx.commit()
@@ -403,8 +624,9 @@ def recently_exhausted_discount(item: str, *, seconds: int = 900) -> dict[str, A
     with _conn() as cx:
         row = cx.execute(
             """
-            SELECT id, item, base_price, discount_price, stock_total, stock_used,
-                   discount_kind, jornada, active, created_at, exhausted_at
+            SELECT id, item, category, base_price, discount_price, stock_total,
+                   stock_used, discount_kind, jornada, active, created_at,
+                   announced_at, activates_at, exhausted_at
             FROM shop_discounts
             WHERE item=? AND exhausted_at IS NOT NULL AND exhausted_at>=?
             ORDER BY exhausted_at DESC

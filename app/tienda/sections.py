@@ -15,16 +15,16 @@ from app.discord_notify import (
 from app.juicios.penalties import get_user_penalties
 from app.liga.context import current_jornada
 from app.tienda.catalog import _render_shop_items, get_catalog
-from app.tienda.discounts import active_discounts_by_item, ensure_shop_discounts
+from app.tienda.discounts import shop_promotions_by_item
 from app.tienda.money import clear_money_caches, money_breakdown
 from app.tienda.styles import render_shop_styles
 from storage import (
     add_purchase,
-    claim_shop_discount,
+    claimed_shop_discount_ids,
     clear_all_pokemon_flags,
     clear_pokemon_flags_for_owner,
     list_purchases,
-    recently_exhausted_discount,
+    purchase_shop_discount,
 )
 DIVIDER_HTML = "<div style='height:2px; background:linear-gradient(90deg, transparent 0%, var(--accent) 22%, var(--accent) 78%, transparent 100%); margin:10px 0 14px;'></div>"
 
@@ -149,8 +149,18 @@ def _render_aisle_header(code: str, title: str, items: list[dict], discounts: di
 def render_shop_catalog(*, penalties: dict, store_locked: bool, current_user: str, available: int | None) -> None:
     catalog = get_catalog()
     jornada = current_jornada()
-    ensure_shop_discounts(catalog, jornada)
-    discounts = active_discounts_by_item(jornada)
+    discounts = shop_promotions_by_item(jornada)
+    claimed_ids = claimed_shop_discount_ids(
+        current_user,
+        [int(discount.get("id") or 0) for discount in discounts.values()],
+    )
+    discounts = {
+        item: {
+            **discount,
+            "user_claimed": int(discount.get("id") or 0) in claimed_ids,
+        }
+        for item, discount in discounts.items()
+    }
 
     if store_locked:
         _render_locked_notice(penalties)
@@ -227,34 +237,39 @@ def render_pending_purchase(current_user: str, *, store_locked: bool) -> None:
         if st.button("Confirmar compra", disabled=confirm_disabled, use_container_width=True):
             try:
                 if discount_id and not force_base:
-                    claimed = claim_shop_discount(int(discount_id))
-                    if not claimed.get("claimed"):
-                        recent = recently_exhausted_discount(str(nombre))
-                        if recent:
+                    claimed = purchase_shop_discount(
+                        user=current_user,
+                        discount_id=int(discount_id),
+                        jornada=jornada,
+                    )
+                    if not claimed.get("purchased"):
+                        reason = str(claimed.get("reason") or "")
+                        if reason in {"exhausted", "already_claimed", "expired"}:
                             pending["force_base_price"] = True
                             pending["price"] = int(base_price)
                             st.session_state["shop_pending"] = pending
-                            st.warning(
-                                "La rebaja se acaba de agotar hace menos de 15 minutos. "
-                                "Confirma si quieres comprar al precio base."
-                            )
+                            if reason == "already_claimed":
+                                st.warning(
+                                    "Ya aprovechaste una unidad de esta promoción. "
+                                    "Puedes comprar otra al precio normal."
+                                )
+                            else:
+                                st.warning(
+                                    "La promoción ya no está disponible. "
+                                    "Confirma si quieres comprar al precio normal."
+                                )
                             st.rerun()
-                        st.error("La rebaja ya no esta disponible.")
+                        if reason == "pending":
+                            st.error("La promoción todavía está en traslado.")
+                        else:
+                            st.error("La promoción ya no está disponible.")
                         st.session_state.pop("shop_pending", None)
                         st.rerun()
 
                     price_paid = int(claimed.get("discount_price") or precio)
                     original_price = int(claimed.get("base_price") or base_price)
                     kind = str(claimed.get("discount_kind") or discount_kind)
-                    pid = add_purchase(
-                        current_user,
-                        nombre,
-                        price_paid,
-                        jornada=jornada,
-                        discount_id=int(discount_id),
-                        base_price=original_price,
-                        notify=False,
-                    )
+                    pid = int(claimed.get("purchase_id") or 0)
                     notify_discount_purchase_async(
                         user=current_user,
                         item=str(nombre),

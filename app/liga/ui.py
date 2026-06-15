@@ -30,9 +30,12 @@ from app.liga.table_summary import (
     players_from_match_map as _players_from_match_map,
 )
 from app.juicios.penalties import clear_penalty_caches
+from app.tienda.catalog import get_catalog
+from app.tienda.discounts import schedule_shop_promotions
 from app.tienda.money import clear_money_caches
 from storage import (
     clear_purchases,
+    expire_shop_discounts_through_jornada,
     list_team_locks,
     settings_get,
     settings_clear_cache,
@@ -477,6 +480,24 @@ def page_tabla() -> None:
                         closing_tramo = int(tramo)
                         get_matches_for(closing_tramo)
                         finalize(closing_tramo)
+                        try:
+                            expire_shop_discounts_through_jornada(closing_tramo)
+                            if closing_tramo < MAX_JORNADAS:
+                                promotions = schedule_shop_promotions(
+                                    get_catalog(), closed_round=closing_tramo
+                                )
+                                if promotions:
+                                    _queue_flash(
+                                        "success",
+                                        f"Aaron ha anunciado {len(promotions)} promociones "
+                                        "para la próxima jornada.",
+                                    )
+                        except Exception as promotion_error:
+                            _queue_flash(
+                                "error",
+                                "La jornada se cerró, pero no se pudieron preparar "
+                                f"las promociones: {promotion_error}",
+                            )
                         clear_money_caches()
                         clear_ranking_caches()
                         tabla_actualizada = general_table_sorted()

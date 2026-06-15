@@ -273,43 +273,73 @@ def _coin_label(value: int) -> str:
     return f"{int(value)} {COIN}"
 
 
-def notify_shop_discounts_created(*, jornada: int, discounts: list[dict]) -> bool:
+def notify_shop_discounts_created(
+    *, jornada: int, discounts: list[dict], activates_at: int
+) -> bool:
     if not discounts:
         return False
-    lines = []
-    for discount in discounts[:20]:
-        label = "🔥 Mega Rebaja" if str(discount.get("discount_kind")) == "mega" else "🔥 Rebaja"
-        lines.append(
-            f"- {label}: {discount.get('item') or '-'}: "
+    category_labels = {
+        "comodines": "Comodines",
+        "competitivos": "Objetos",
+        "crianza": "Crianza",
+    }
+    grouped: dict[tuple[str, str], list[str]] = {}
+    for discount in discounts:
+        category = str(discount.get("category") or "competitivos")
+        kind = str(discount.get("discount_kind") or "normal")
+        grouped.setdefault((category, kind), []).append(
+            f"{discount.get('item') or '-'}: "
             f"{_coin_label(int(discount.get('base_price') or 0))} -> "
             f"{_coin_label(int(discount.get('discount_price') or 0))}"
         )
+    fields = []
+    for category in ("comodines", "competitivos", "crianza"):
+        for kind in ("normal", "mega"):
+            lines = grouped.get((category, kind), [])
+            if not lines:
+                continue
+            label = "Mega Rebajas" if kind == "mega" else "Rebajas"
+            fields.append(
+                {
+                    "name": f"{category_labels[category]} · {label}",
+                    "value": _field_value([f"- {line}" for line in lines]),
+                    "inline": False,
+                }
+            )
+    activation = int(activates_at)
     return _post_webhook(
         {
             "embeds": [
                 _embed(
-                    title=f"Rebajas activas - Jornada {int(jornada)}",
-                    description="Aaron ha actualizado la tienda.",
+                    title="El Poké Mart prepara una nueva remesa",
+                    description=(
+                        f"Los proveedores de Teselia están preparando las promociones "
+                        f"de la Jornada {int(jornada)}.\n\n"
+                        f"**Apertura:** <t:{activation}:F> · <t:{activation}:R>\n"
+                        "Hasta entonces, Objetos y Crianza estarán marcados como "
+                        "**stock en traslado**. Los Comodines seguirán disponibles "
+                        "a su precio habitual."
+                    ),
                     color=0xF39C12,
-                    fields=[
-                        {
-                            "name": "Objetos con descuento",
-                            "value": _field_value(lines),
-                            "inline": False,
-                        }
-                    ],
+                    fields=fields,
                 )
             ]
         }
     )
 
 
-def notify_shop_discounts_created_async(*, jornada: int, discounts: list[dict]) -> None:
+def notify_shop_discounts_created_async(
+    *, jornada: int, discounts: list[dict], activates_at: int
+) -> None:
     if not discounts:
         return
     thread = threading.Thread(
         target=notify_shop_discounts_created,
-        kwargs={"jornada": jornada, "discounts": list(discounts)},
+        kwargs={
+            "jornada": jornada,
+            "discounts": list(discounts),
+            "activates_at": int(activates_at),
+        },
         daemon=True,
     )
     thread.start()
