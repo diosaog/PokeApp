@@ -92,6 +92,11 @@ def _invalidate_purchase_caches(user: str | None = None) -> None:
     else:
         _LIST_INVENTORY_CACHE.clear_where(lambda key: isinstance(key, tuple) and key[0] == user)
     _LIST_PURCHASES_CACHE.clear()
+    _SHOP_DISCOUNTS_CACHE.clear_where(
+        lambda key: isinstance(key, tuple)
+        and bool(key)
+        and key[0] in {"all_purchased_items", "purchase_counts"}
+    )
 
 
 def _invalidate_shop_discount_caches() -> None:
@@ -704,6 +709,9 @@ def create_shop_discount(*args, **kwargs):
 
 def purchase_counts_by_item_for_jornadas(*args, **kwargs):
     return _storage_shop().purchase_counts_by_item_for_jornadas(*args, **kwargs)
+
+def all_purchased_items(*args, **kwargs):
+    return _storage_shop().all_purchased_items(*args, **kwargs)
 
 def expire_shop_discounts_through_jornada(*args, **kwargs):
     return _storage_shop().expire_shop_discounts_through_jornada(*args, **kwargs)

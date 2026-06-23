@@ -76,6 +76,25 @@ class ShopPromotionTests(unittest.TestCase):
             )
         )
 
+    def test_historical_purchases_are_excluded(self) -> None:
+        selected = select_shop_promotions(
+            get_catalog(),
+            closed_round=3,
+            purchase_counts={1: {}, 2: {}, 3: {}},
+            discount_history=[],
+            purchased_items={
+                "Blindar Pokemon",
+                "gemas elementales",
+                "Menta de Naturaleza",
+            },
+            rng=random.Random(1),
+        )
+
+        selected_names = {str(item["name"]) for item in selected}
+        self.assertNotIn("Blindar Pokemon", selected_names)
+        self.assertNotIn("Gemas Elementales", selected_names)
+        self.assertNotIn("Menta de Naturaleza", selected_names)
+
 
 if __name__ == "__main__":
     unittest.main()

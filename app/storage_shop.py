@@ -338,6 +338,48 @@ def purchase_counts_by_item_for_jornadas(jornadas: list[int]) -> dict[int, dict[
     return out
 
 
+def all_purchased_items() -> set[str]:
+    cache_key = ("all_purchased_items",)
+    hit, cached = _SHOP_DISCOUNTS_CACHE.get(cache_key)
+    if hit:
+        return set(cached)
+
+    out: set[str] = set()
+    if _supabase_enabled():
+        try:
+            client = _sb()
+            chunk_size = 1000
+            offset = 0
+            while True:
+                res = (
+                    client.table("purchases")
+                    .select("item")
+                    .range(offset, offset + chunk_size - 1)
+                    .execute()
+                )
+                rows = res.data or []
+                out.update(
+                    str(row.get("item") or "").strip()
+                    for row in rows
+                    if str(row.get("item") or "").strip()
+                )
+                if len(rows) < chunk_size:
+                    break
+                offset += chunk_size
+            _SHOP_DISCOUNTS_CACHE.set(cache_key, set(out))
+            return out
+        except Exception:
+            return set()
+
+    with _conn() as cx:
+        rows = cx.execute(
+            "SELECT DISTINCT item FROM purchases WHERE item IS NOT NULL AND item<>''"
+        ).fetchall()
+    out = {str(row[0] or "").strip() for row in rows if str(row[0] or "").strip()}
+    _SHOP_DISCOUNTS_CACHE.set(cache_key, set(out))
+    return out
+
+
 def expire_shop_discounts_through_jornada(jornada: int) -> None:
     round_no = int(jornada)
     if _supabase_enabled():

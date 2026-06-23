@@ -11,6 +11,7 @@ from zoneinfo import ZoneInfo
 from app.discord_notify import notify_shop_discounts_created_async
 from app.liga.context import current_jornada
 from storage import (
+    all_purchased_items,
     create_shop_discount,
     list_shop_discounts,
     purchase_counts_by_item_for_jornadas,
@@ -45,6 +46,10 @@ def _catalog_items(catalog: dict[str, list[dict]]) -> list[dict[str, Any]]:
             if name and price > 1:
                 out.append({**item, "category": category})
     return out
+
+
+def _item_key(name: Any) -> str:
+    return str(name or "").strip().casefold()
 
 
 def _discount_price(base_price: int, kind: str, *, item: str = "") -> int:
@@ -179,9 +184,11 @@ def select_shop_promotions(
     closed_round: int,
     purchase_counts: dict[int, dict[str, int]],
     discount_history: list[dict[str, Any]],
+    purchased_items: set[str] | None = None,
     rng: random.Random | None = None,
 ) -> list[dict[str, Any]]:
     generator = rng or random.SystemRandom()
+    purchased_names = {_item_key(item) for item in (purchased_items or set())}
     items = _catalog_items(catalog)
     item_category = {
         str(item.get("name") or ""): str(item.get("category") or "")
@@ -202,7 +209,10 @@ def select_shop_promotions(
     used_names: set[str] = set()
     for category, quotas in CATEGORY_RULES.items():
         category_items = [
-            item for item in items if item_category.get(str(item.get("name") or "")) == category
+            item
+            for item in items
+            if item_category.get(str(item.get("name") or "")) == category
+            and _item_key(item.get("name")) not in purchased_names
         ]
         normal_candidates = [
             item
@@ -277,12 +287,14 @@ def schedule_shop_promotions(
 
     rounds = list(range(1, int(closed_round) + 1))
     counts = purchase_counts_by_item_for_jornadas(rounds)
+    purchased = all_purchased_items()
     history = list_shop_discounts(active_only=None)
     selected = select_shop_promotions(
         catalog,
         closed_round=int(closed_round),
         purchase_counts=counts,
         discount_history=history,
+        purchased_items=purchased,
     )
     announced_at = int(time.time())
     activates_at = announced_at + PROMOTION_DELAY_SECONDS
