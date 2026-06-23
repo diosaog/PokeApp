@@ -86,6 +86,7 @@ where not exists (
     from public.purchases p
     where lower(trim(p.item)) = lower(trim(c.item))
   )
+  and c.item <> 'Chapa Dorada'
   and not exists (
     select 1
     from _old_shop_promos oldp
@@ -190,8 +191,6 @@ with inserted as (
     s.category,
     s.base_price,
     case
-      when s.item = 'Chapa Dorada' and s.discount_kind = 'mega' then 12
-      when s.item = 'Chapa Dorada' then 13
       when s.discount_kind = 'mega' and s.base_price = 12 then 8
       when s.discount_kind = 'mega' then greatest(1, ceil(s.base_price * 0.5)::integer)
       when s.base_price >= 6 then s.base_price - 2

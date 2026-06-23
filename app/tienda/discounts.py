@@ -23,6 +23,7 @@ PROMOTION_DELAY_SECONDS = 24 * 60 * 60
 MADRID_TZ = ZoneInfo("Europe/Madrid")
 GOLD_BOTTLE_CAP = "Chapa Dorada"
 EVOLUTION_ITEM = "Objeto Evolutivo"
+DISCOUNT_BLOCKLIST = {GOLD_BOTTLE_CAP}
 
 CATEGORY_RULES: dict[str, dict[str, int]] = {
     "comodines": {"normal": 1, "mega": 1},
@@ -54,8 +55,8 @@ def _item_key(name: Any) -> str:
 
 def _discount_price(base_price: int, kind: str, *, item: str = "") -> int:
     price = int(base_price)
-    if item == GOLD_BOTTLE_CAP:
-        return 12 if kind == "mega" else 13
+    if item in DISCOUNT_BLOCKLIST:
+        return price
     if kind == "mega":
         if price == 12:
             return 8
@@ -213,6 +214,7 @@ def select_shop_promotions(
             for item in items
             if item_category.get(str(item.get("name") or "")) == category
             and _item_key(item.get("name")) not in purchased_names
+            and str(item.get("name") or "") not in DISCOUNT_BLOCKLIST
         ]
         normal_candidates = [
             item

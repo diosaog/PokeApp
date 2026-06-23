@@ -1,7 +1,7 @@
--- Recoloca las promociones activas de Crianza de la jornada actual.
--- Resultado deseado:
--- - Chapa Dorada como Rebaja normal: 15 -> 13, stock 2.
--- - Capsula Habilidad como Mega Rebaja: 8 -> 4, stock 1.
+-- Corrige las promociones activas de Crianza de la jornada actual.
+-- Regla actual:
+-- - Chapa Dorada no puede aparecer ni en Rebaja ni en Mega Rebaja.
+-- - Si no existe ya, Capsula Habilidad queda como Mega Rebaja: 8 -> 4.
 --
 -- Uso:
 -- 1) Ejecutar en Supabase SQL Editor.
@@ -21,40 +21,8 @@ update public.shop_discounts
 set active = false,
     exhausted_at = coalesce(exhausted_at, now())
 where active = true
-  and category = 'crianza'
+  and item = 'Chapa Dorada'
   and jornada = (select jornada from _current_shop_round);
-
-insert into public.shop_discounts (
-  item,
-  category,
-  base_price,
-  discount_price,
-  stock_total,
-  stock_used,
-  discount_kind,
-  jornada,
-  active,
-  created_at,
-  announced_at,
-  activates_at,
-  exhausted_at
-)
-select
-  'Chapa Dorada',
-  'crianza',
-  15,
-  13,
-  2,
-  0,
-  'normal',
-  jornada,
-  true,
-  now(),
-  announced_at,
-  activates_at,
-  null::timestamptz
-from _current_shop_round
-where jornada is not null;
 
 insert into public.shop_discounts (
   item,
@@ -85,8 +53,20 @@ select
   announced_at,
   activates_at,
   null::timestamptz
-from _current_shop_round
-where jornada is not null;
+from _current_shop_round ctx
+where ctx.jornada is not null
+  and not exists (
+    select 1
+    from public.shop_discounts d
+    where d.active = true
+      and d.jornada = ctx.jornada
+      and d.item = 'Capsula Habilidad'
+  )
+  and not exists (
+    select 1
+    from public.purchases p
+    where lower(trim(p.item)) = lower('Capsula Habilidad')
+  );
 
 commit;
 

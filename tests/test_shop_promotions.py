@@ -46,8 +46,9 @@ class ShopPromotionTests(unittest.TestCase):
                 for item in selected
             )
         )
-        self.assertEqual(_discount_price(15, "normal", item="Chapa Dorada"), 13)
-        self.assertEqual(_discount_price(15, "mega", item="Chapa Dorada"), 12)
+        self.assertFalse(any(item["name"] == "Chapa Dorada" for item in selected))
+        self.assertEqual(_discount_price(15, "normal", item="Chapa Dorada"), 15)
+        self.assertEqual(_discount_price(15, "mega", item="Chapa Dorada"), 15)
         self.assertEqual(_discount_price(12, "mega", item="Revivir Pokemon"), 8)
 
     def test_rotation_avoids_previous_round_when_possible(self) -> None:

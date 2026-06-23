@@ -1,13 +1,11 @@
--- Corrige la Mega Rebaja activa de Chapa Dorada a 12 monedas.
--- Uso:
--- 1) Ejecutar en Supabase SQL Editor.
--- 2) Copiar el resultado final si quieres verificarlo.
+-- Elimina Chapa Dorada de las promociones activas de la jornada actual.
+-- No toca el resto de rebajas.
 
 update public.shop_discounts
-set discount_price = 12
+set active = false,
+    exhausted_at = coalesce(exhausted_at, now())
 where active = true
   and item = 'Chapa Dorada'
-  and discount_kind = 'mega'
   and jornada = (
     select max(jornada)
     from public.shop_discounts
