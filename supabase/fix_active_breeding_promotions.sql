@@ -7,22 +7,16 @@
 -- 1) Ejecutar en Supabase SQL Editor.
 -- 2) Copiar el resultado final para verificar/anunciar la remesa corregida.
 
-begin;
-
-create temporary table _current_shop_round on commit drop as
-select
-  max(jornada)::integer as jornada,
-  coalesce(max(announced_at), now()) as announced_at,
-  coalesce(max(activates_at), now() + interval '24 hours') as activates_at
-from public.shop_discounts
-where active = true;
-
 update public.shop_discounts
 set active = false,
     exhausted_at = coalesce(exhausted_at, now())
 where active = true
   and item = 'Chapa Dorada'
-  and jornada = (select jornada from _current_shop_round);
+  and jornada = (
+    select max(jornada)
+    from public.shop_discounts
+    where active = true
+  );
 
 insert into public.shop_discounts (
   item,
@@ -53,7 +47,14 @@ select
   announced_at,
   activates_at,
   null::timestamptz
-from _current_shop_round ctx
+from (
+  select
+    max(jornada)::integer as jornada,
+    coalesce(max(announced_at), now()) as announced_at,
+    coalesce(max(activates_at), now() + interval '24 hours') as activates_at
+  from public.shop_discounts
+  where active = true
+) ctx
 where ctx.jornada is not null
   and not exists (
     select 1
@@ -67,8 +68,6 @@ where ctx.jornada is not null
     from public.purchases p
     where lower(trim(p.item)) = lower('Capsula Habilidad')
   );
-
-commit;
 
 select
   jornada,
