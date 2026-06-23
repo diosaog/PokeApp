@@ -190,7 +190,7 @@ with inserted as (
     s.category,
     s.base_price,
     case
-      when s.item = 'Chapa Dorada' and s.discount_kind = 'mega' then 10
+      when s.item = 'Chapa Dorada' and s.discount_kind = 'mega' then 12
       when s.item = 'Chapa Dorada' then 13
       when s.discount_kind = 'mega' and s.base_price = 12 then 8
       when s.discount_kind = 'mega' then greatest(1, ceil(s.base_price * 0.5)::integer)

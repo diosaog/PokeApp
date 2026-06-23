@@ -55,7 +55,7 @@ def _item_key(name: Any) -> str:
 def _discount_price(base_price: int, kind: str, *, item: str = "") -> int:
     price = int(base_price)
     if item == GOLD_BOTTLE_CAP:
-        return 10 if kind == "mega" else 13
+        return 12 if kind == "mega" else 13
     if kind == "mega":
         if price == 12:
             return 8
