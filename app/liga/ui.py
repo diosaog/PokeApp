@@ -26,8 +26,8 @@ from app.liga.table_summary import (
     fmt_points as _fmt_points,
     league_round_result_groups as _league_round_result_groups,
     league_round_summary_lines as _league_round_summary_lines,
+    league_table_html as _league_table_html,
     league_table_notification_rows as _league_table_notification_rows,
-    league_table_rows as _league_table_rows,
     players_from_match_map as _players_from_match_map,
 )
 from app.juicios.penalties import clear_penalty_caches
@@ -51,9 +51,6 @@ _NOTIFY_STATUS_KEY_PREFIX = "league_round_notify_status"
 _FLASH_MESSAGES_KEY = "_league_flash_messages"
 _CLEAR_EDIT_BUFFERS_NEXT_KEY = "_league_clear_edit_buffers_next"
 _TEAM_LOCKS_MISSING_NOTIFY_PREFIX = "team_locks_missing_notify"
-GENERAL_TABLE_HEIGHT = 425
-
-
 def _clear_league_page_caches() -> None:
     try:
         settings_clear_cache("league_state")
@@ -795,19 +792,15 @@ def page_tabla() -> None:
         _render_final_podium()
     if st.session_state.league_active:
         st.subheader("Tabla general")
-        st.dataframe(
-            _league_table_rows(tabla),
-            use_container_width=True,
-            hide_index=True,
-            height=GENERAL_TABLE_HEIGHT,
+        st.markdown(
+            _league_table_html(tabla),
+            unsafe_allow_html=True,
         )
     else:
         st.subheader("Tabla general (con monedas)")
-        st.dataframe(
-            _league_table_rows(tabla, include_coins=True),
-            use_container_width=True,
-            hide_index=True,
-            height=GENERAL_TABLE_HEIGHT,
+        st.markdown(
+            _league_table_html(tabla, include_coins=True),
+            unsafe_allow_html=True,
         )
 
     if st.session_state.get("league_movements") or st.session_state.get(

@@ -271,7 +271,7 @@ def status_labels_for(trainer: str | None) -> list[str]:
 def format_trainer_with_flags(trainer: str | None) -> str:
     name = str(trainer or "").strip()
     labels = status_labels_for(name)
-    return name if not labels else f"{name} [{' | '.join(labels)}]"
+    return name if not labels else f"{name} · {' · '.join(labels)}"
 
 
 def set_trainer_retired(trainer: str, *, by_user: str | None = None) -> None:
