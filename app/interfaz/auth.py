@@ -4,7 +4,7 @@ import streamlit as st
 
 from app.interfaz.bootstrap import bootstrap_latest_save_for_user
 from storage import init_storage, settings_get
-from utils import USERS
+from utils import USERS, users_with_retired_last
 
 
 def login_gate() -> None:
@@ -24,7 +24,8 @@ def login_gate() -> None:
     st.header("Inicio de sesion")
     col1, col2 = st.columns(2)
     with col1:
-        user = st.selectbox("Usuario", list(users.keys()), index=0)
+        user_options = users_with_retired_last(users)
+        user = st.selectbox("Usuario", user_options, index=0)
     with col2:
         pwd = st.text_input("PIN / Codigo de acceso", type="password", max_chars=8)
     ok = st.button("Entrar", type="primary")

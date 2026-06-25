@@ -23,7 +23,7 @@ from storage import (
 )
 from conex_pkhex import extract_box, extract_team, open_sav_cached
 from pkmmeta import pokemon_fingerprint, pokemon_fingerprint_stable
-from utils import active_users, list_user_saves
+from utils import active_users, list_user_saves, users_with_retired_last
 
 
 def _fingerprints_for_mon(m: dict) -> tuple[str | None, str | None]:
@@ -102,7 +102,7 @@ def render_redeem_flow(ctx: dict, current_user: str) -> None:
         return
 
     if _eq_item(item, "Robar Pokemon"):
-        active_trainers = list(active_users().keys())
+        active_trainers = users_with_retired_last(active_users())
         sync_trainer_robbed_flags_from_history(active_trainers)
         reset_robbed_cycle_if_complete(active_trainers)
         players = [

@@ -32,7 +32,7 @@ from storage import (
     settings_get,
     upsert_team_lock,
 )
-from utils import DEFAULT_DLL_HINT, USERS, active_users, list_user_saves
+from utils import DEFAULT_DLL_HINT, USERS, active_users, list_user_saves, users_with_retired_last
 
 
 INVENTORY_TABS_CSS = """
@@ -398,7 +398,7 @@ def page_entrenadores() -> None:
     except Exception:
         pass
 
-    users = list(USERS.keys())
+    users = users_with_retired_last(USERS)
     try:
         active = st.session_state.get("user")
         cur = st.session_state.get("trainer_selected")

@@ -5,7 +5,7 @@ import random
 import json
 import streamlit as st
 
-from utils import active_users
+from utils import active_users, users_with_retired_last
 from storage import settings_get, settings_set
 
 
@@ -175,7 +175,7 @@ def page_copa() -> None:
 
     if not S.get("rounds"):
         st.subheader("Configurar torneo")
-        all_players = list(active_users().keys())
+        all_players = users_with_retired_last(active_users())
         default_sel = all_players[:8] if len(all_players) >= 8 else all_players
         sel = st.multiselect("Participantes", all_players, default=default_sel)
         shuffle = st.toggle("Sorteo aleatorio", value=True)

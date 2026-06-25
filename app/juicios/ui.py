@@ -27,7 +27,7 @@ from app.juicios.repo import (
 )
 from app.interfaz.theme import apply_section_theme
 from app.tienda.money import clear_money_caches
-from utils import active_users
+from utils import active_users, users_with_retired_last
 
 
 def _clear_cache() -> None:
@@ -246,7 +246,7 @@ def _render_jury_vote_controls(case: dict, current_user: str) -> None:
     st.caption("Votacion del jurado (cierre automatico por mayoria)")
 
     can_proxy_vote = can_edit_case(case, current_user)
-    jury_options = list(active_users().keys())
+    jury_options = users_with_retired_last(active_users())
     default_jury = current_user if current_user in jury_options else (jury_options[0] if jury_options else "")
 
     if can_proxy_vote and jury_options:

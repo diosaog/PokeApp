@@ -28,7 +28,7 @@ from dexdata import (
 from i18n import nature_display_es, translate_type_es
 from showdown_sprites import showdown_sprite_url
 from storage import get_team_lock
-from utils import active_users
+from utils import USERS, users_with_retired_last
 
 
 IV_LABELS: tuple[tuple[str, str], ...] = (
@@ -755,9 +755,11 @@ def render_matchup_preview(players: list[str] | None = None) -> None:
         )
         return
 
-    users = active_users()
+    known_users = set(USERS.keys())
     available = [
-        player for player in (players or list(users.keys())) if player in users
+        player
+        for player in users_with_retired_last(players or list(USERS.keys()))
+        if player in known_users
     ]
     if len(available) < 2:
         st.info("No hay suficientes jugadores para generar una previa.")

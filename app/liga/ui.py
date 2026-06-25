@@ -43,7 +43,7 @@ from storage import (
     settings_get_uncached,
     settings_set,
 )
-from utils import active_users
+from utils import active_users, users_with_retired_last
 
 
 _NOTIFY_SENT_KEY_PREFIX = "league_round_notify_sent"
@@ -460,7 +460,7 @@ def page_tabla() -> None:
                     )
 
     tramo = st.session_state.league_tramo
-    league_players = list(active_users().keys())
+    league_players = users_with_retired_last(active_users())
     division_b_size = max(len(league_players) - 5, 0)
     liga_finalizada = tramo > MAX_JORNADAS
     prev_tramo = tramo - 1 if tramo > 1 else None
@@ -881,7 +881,7 @@ def page_tabla() -> None:
         disabled=read_only,
     ):
         if confirm == "Si":
-            players = list(active_users().keys())
+            players = users_with_retired_last(active_users())
             st.session_state.league_tramo = 1
             st.session_state.league_active = False
             st.session_state.league_results = {}

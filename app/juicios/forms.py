@@ -15,7 +15,7 @@ from app.juicios.constants import (
     PENALTY_STORE_BAN,
     PENALTY_TEMPLATES,
 )
-from utils import active_users
+from utils import active_users, users_with_retired_last
 
 
 def _penalty_defaults(penalties: list[dict[str, Any]]) -> dict[str, dict[str, Any]]:
@@ -106,7 +106,7 @@ def render_case_details_form(
     submit_label: str,
 ) -> tuple[bool, dict[str, Any] | None]:
     base = dict(initial or {})
-    users = list(active_users().keys())
+    users = users_with_retired_last(active_users())
     default_accused = str(base.get("accused") or (users[0] if users else ""))
     if default_accused not in users and users:
         default_accused = users[0]

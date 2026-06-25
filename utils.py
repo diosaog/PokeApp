@@ -130,6 +130,21 @@ def active_users() -> Dict[str, str]:
     )
 
 
+def users_with_retired_last(users: List[str] | tuple[str, ...] | dict) -> List[str]:
+    values = list(users.keys()) if isinstance(users, dict) else list(users)
+    order = {str(user): idx for idx, user in enumerate(values)}
+    try:
+        from app.entrenadores.trainer_flags import retired_trainers
+
+        retired = retired_trainers()
+    except Exception:
+        retired = set()
+    return sorted(
+        [str(user) for user in values],
+        key=lambda user: (user in retired, order.get(user, 0)),
+    )
+
+
 def ensure_user_dir(u: str) -> Path:
     p = BASE_SAVES_DIR / u
     p.mkdir(parents=True, exist_ok=True)
