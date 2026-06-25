@@ -3,10 +3,14 @@ from __future__ import annotations
 import unittest
 
 from app.liga.divisions import division_a_size_for_count, next_divisions_from_rankings
+from app.liga.ranking import MAX_JORNADAS
 from app.liga.rewards import coins_for_league_position, points_for_league_position
 
 
 class LigaRewardsTests(unittest.TestCase):
+    def test_current_season_ends_after_round_four(self) -> None:
+        self.assertEqual(MAX_JORNADAS, 4)
+
     def test_eight_player_rewards_start_on_round_four(self) -> None:
         self.assertEqual(points_for_league_position(1, 1, field_size=10), 9)
         self.assertEqual(points_for_league_position(1, 6, field_size=10), 5)

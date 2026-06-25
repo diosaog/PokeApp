@@ -28,7 +28,7 @@ from storage import (
 )
 from utils import USERS, active_users, ensure_user_dir, list_user_saves
 
-MAX_JORNADAS = 5
+MAX_JORNADAS = 4
 POINTS_BY_POSITION = CURRENT_POINTS_BY_POSITION
 
 
