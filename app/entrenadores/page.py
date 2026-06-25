@@ -18,7 +18,7 @@ from app.entrenadores.trainer_flags import (
     set_trainer_retired,
 )
 from app.entrenadores.boxes import boxes_grid_ui
-from app.discord_notify import notify_team_locked_async, notify_trainer_retired_async
+from app.discord_notify import notify_team_locked_async
 from app.ui.team_grid import team_grid_ui
 from app.interfaz.theme import apply_platinum_ui
 from app.liga.context import current_jornada
@@ -61,6 +61,52 @@ div[data-testid="stTabs"] [role="tablist"] [role="tab"]:first-of-type * {
 }
 </style>
 """
+
+
+def _notify_trainer_retired_async(trainer: str, by_user: str | None = None) -> None:
+    try:
+        from app import discord_notify
+
+        existing = getattr(discord_notify, "notify_trainer_retired_async", None)
+        if callable(existing):
+            existing(trainer=trainer, by_user=by_user)
+            return
+
+        import threading
+
+        def _send() -> None:
+            try:
+                fields = []
+                if by_user:
+                    fields.append(
+                        {
+                            "name": "Registrado por",
+                            "value": str(by_user),
+                            "inline": True,
+                        }
+                    )
+                discord_notify._post_webhook(
+                    {
+                        "embeds": [
+                            discord_notify._embed(
+                                title="Entrenador retirado",
+                                description=(
+                                    f"{trainer} se ha retirado de la liga. "
+                                    "Sus resultados anteriores se conservan, pero deja de contar "
+                                    "para jornadas, puntos, monedas y sistemas activos."
+                                ),
+                                color=0x95A5A6,
+                                fields=fields,
+                            )
+                        ]
+                    }
+                )
+            except Exception:
+                pass
+
+        threading.Thread(target=_send, daemon=True).start()
+    except Exception:
+        pass
 
 
 def _save_meta_for_lock(user: str, save_path: Path | None) -> tuple[int | None, str | None]:
@@ -337,7 +383,7 @@ def _render_retirement_admin() -> None:
                 set_trainer_retired(str(target), by_user=current_user)
                 clear_money_caches()
                 clear_ranking_caches()
-                notify_trainer_retired_async(str(target), by_user=current_user)
+                _notify_trainer_retired_async(str(target), by_user=current_user)
                 st.success(f"{target} marcado como retirado.")
                 st.rerun()
             except Exception as e:
