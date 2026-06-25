@@ -16,6 +16,7 @@ from app.entrenadores.trainer_flags import (
     is_trainer_retired,
     is_trainer_robbed,
     set_trainer_retired,
+    sync_trainer_robbed_flags_from_history,
 )
 from app.entrenadores.boxes import boxes_grid_ui
 from app.discord_notify import notify_team_locked_async
@@ -32,7 +33,7 @@ from storage import (
     settings_get,
     upsert_team_lock,
 )
-from utils import DEFAULT_DLL_HINT, USERS, list_user_saves
+from utils import DEFAULT_DLL_HINT, USERS, active_users, list_user_saves
 
 
 INVENTORY_TABS_CSS = """
@@ -394,6 +395,11 @@ def page_entrenadores() -> None:
     apply_platinum_ui("Entrenadores")
     st.title("Entrenadores")
     st.caption("Se alimenta del ultimo .sav o .dsv del entrenador seleccionado.")
+
+    try:
+        sync_trainer_robbed_flags_from_history(list(active_users().keys()))
+    except Exception:
+        pass
 
     users = list(USERS.keys())
     try:

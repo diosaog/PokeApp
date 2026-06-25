@@ -10,6 +10,7 @@ from app.entrenadores.trainer_flags import (
     is_trainer_robbed,
     mark_trainer_robbed,
     reset_robbed_cycle_if_complete,
+    sync_trainer_robbed_flags_from_history,
 )
 from app.tienda.common import _eq_item
 from storage import (
@@ -102,6 +103,7 @@ def render_redeem_flow(ctx: dict, current_user: str) -> None:
 
     if _eq_item(item, "Robar Pokemon"):
         active_trainers = list(active_users().keys())
+        sync_trainer_robbed_flags_from_history(active_trainers)
         reset_robbed_cycle_if_complete(active_trainers)
         players = [
             u

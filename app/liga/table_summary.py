@@ -1,7 +1,10 @@
 from __future__ import annotations
 
 from app.common import COIN
-from app.entrenadores.trainer_flags import format_trainer_with_flags
+from app.entrenadores.trainer_flags import (
+    format_trainer_with_flags,
+    sync_trainer_robbed_flags_from_history,
+)
 from app.tienda.money import _money_available
 
 
@@ -30,6 +33,7 @@ def fmt_points(value) -> str:
 
 
 def league_table_notification_rows(table: list[tuple[str, float]]) -> list[dict]:
+    sync_trainer_robbed_flags_from_history([user for user, _ in table])
     return [
         {
             "pos": i,
@@ -89,6 +93,7 @@ def league_round_summary_lines(
 
 
 def league_table_rows(table: list[tuple[str, float]], *, include_coins: bool = False) -> list[dict]:
+    sync_trainer_robbed_flags_from_history([user for user, _ in table])
     rows: list[dict] = []
     for i, (user, pts) in enumerate(table, start=1):
         row = {
