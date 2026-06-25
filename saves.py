@@ -45,6 +45,11 @@ Retira de una vez toda la transicion que se puso para terminar la jornada 2 anti
   al finalizar la jornada 2; en storage.py elimina ese helper si ya no tiene otros usos.
 - En app/liga/rewards.py elimina LEGACY_* y FIRST_ROUND_B_* junto con sus condiciones:
   desde la jornada 1 solo deben aplicarse las tablas definitivas de 10 posiciones.
+- Elimina tambien la regla transitoria creada en esta temporada para aplicar formato de
+  8 jugadores solo desde la jornada 4: division 4/4, ascensos/descensos 2/2 y tablas
+  EIGHT_PLAYER_* de puntos/monedas. Tras el wipe no debe quedar ninguna condicion especial
+  por "jornada 4"; si el nuevo locke empieza con 10 jugadores, todo va con 5/5 desde
+  la jornada 1.
 - En app/liga/eligibility.py elimina PLAYER_JOIN_ROUND de Barto: en esta temporada Barto
   participa y cobra desde la jornada 1.
 - Revisa liga, login, entrenadores, copa, juicios, tienda, normativa y este prompt para que

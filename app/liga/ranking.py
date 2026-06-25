@@ -7,9 +7,14 @@ import streamlit as st
 from app.entrenadores.constants import DEAD_BOX_INDEX
 from app.entrenadores.cache import cached_dead_count
 from app.entrenadores.snapshot import clear_trainer_snapshot_runtime_caches, get_trainer_snapshot
+from app.liga.divisions import next_divisions_from_rankings
 from app.juicios.penalties import get_user_penalties
 from app.liga.eligibility import counts_for_league_reward
-from app.liga.rewards import CURRENT_POINTS_BY_POSITION, points_for_league_position
+from app.liga.rewards import (
+    CURRENT_POINTS_BY_POSITION,
+    field_size_for_round_results,
+    points_for_league_position,
+)
 from app.tienda.common import _eq_item
 from app.entrenadores.trainer_flags import retired_trainers
 from storage import (
@@ -257,11 +262,14 @@ def finalize(tramo: int) -> None:
         pass
 
     if tramo < MAX_JORNADAS:
-        nueva_A = rankA[:2] + rankB[:3]
-        nueva_B = rankA[2:5] + rankB[3:]
+        nueva_A, nueva_B, up, down = next_divisions_from_rankings(
+            rankA,
+            rankB,
+            round_no=tramo,
+        )
         st.session_state.league_divisions = {"A": nueva_A, "B": nueva_B}
         try:
-            st.session_state.league_movements[tramo] = {"up": rankB[:3], "down": rankA[2:5]}
+            st.session_state.league_movements[tramo] = {"up": up, "down": down}
         except Exception:
             pass
     else:
@@ -313,10 +321,15 @@ def recompute_round(tramo: int, *, apply_divisions_from_round: bool = False) -> 
 
     if tramo < MAX_JORNADAS:
         try:
+            _nueva_A, _nueva_B, up, down = next_divisions_from_rankings(
+                rankA,
+                rankB,
+                round_no=tramo,
+            )
             st.session_state.setdefault("league_movements", {})
             st.session_state.league_movements[tramo] = {
-                "up": rankB[:3],
-                "down": rankA[2:5],
+                "up": up,
+                "down": down,
             }
         except Exception:
             pass
@@ -327,8 +340,11 @@ def recompute_round(tramo: int, *, apply_divisions_from_round: bool = False) -> 
             pass
 
     if apply_divisions_from_round and tramo < MAX_JORNADAS:
-        nueva_A = rankA[:2] + rankB[:3]
-        nueva_B = rankA[2:5] + rankB[3:]
+        nueva_A, nueva_B, _up, _down = next_divisions_from_rankings(
+            rankA,
+            rankB,
+            round_no=tramo,
+        )
         st.session_state.league_divisions = {"A": nueva_A, "B": nueva_B}
 
     _persist_state()
@@ -343,7 +359,12 @@ def points_from_league(user: str) -> int:
     for tramo, pos in tramos.items():
         if not counts_for_league_reward(user, int(tramo)):
             continue
-        total += points_for_league_position(int(tramo), int(pos))
+        field_size = field_size_for_round_results(lr, int(tramo))
+        total += points_for_league_position(
+            int(tramo),
+            int(pos),
+            field_size=field_size,
+        )
     return total
 
 

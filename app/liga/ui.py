@@ -11,6 +11,7 @@ from app.discord_notify import (
     notify_missing_team_locks_async,
 )
 from app.entrenadores.trainer_flags import is_trainer_retired
+from app.liga.divisions import division_a_size_for_count
 from app.liga.ranking import (
     MAX_JORNADAS,
     all_filled,
@@ -461,7 +462,8 @@ def page_tabla() -> None:
 
     tramo = st.session_state.league_tramo
     league_players = users_with_retired_last(active_users())
-    division_b_size = max(len(league_players) - 5, 0)
+    division_a_size = division_a_size_for_count(len(league_players), int(tramo))
+    division_b_size = max(len(league_players) - division_a_size, 0)
     liga_finalizada = tramo > MAX_JORNADAS
     prev_tramo = tramo - 1 if tramo > 1 else None
     has_prev_closed = bool(
@@ -607,7 +609,10 @@ def page_tabla() -> None:
 
     st.markdown("---")
     st.subheader("Editar divisiones")
-    with st.expander(f"Divisiones (5 y {division_b_size})", expanded=False):
+    with st.expander(
+        f"Divisiones ({division_a_size} y {division_b_size})",
+        expanded=False,
+    ):
         players = league_players
         cur_divs = (
             st.session_state.league_divisions
@@ -631,12 +636,12 @@ def page_tabla() -> None:
         if key_A in st.session_state:
             st.session_state[key_A] = _normalize_players(st.session_state.get(key_A))
 
-        default_A = _normalize_players(cur_divs.get("A", []))[:5]
+        default_A = _normalize_players(cur_divs.get("A", []))[:division_a_size]
         sel_A = st.multiselect(
-            "Liga A (5 jugadores)",
+            f"Liga A ({division_a_size} jugadores)",
             players,
             default=default_A,
-            max_selections=5,
+            max_selections=division_a_size,
             key=key_A,
         )
         remaining = [p for p in players if p not in sel_A]
@@ -658,7 +663,7 @@ def page_tabla() -> None:
             key=key_B,
         )
         if st.button("Guardar divisiones", disabled=read_only):
-            if len(sel_A) == 5 and len(sel_B) == division_b_size:
+            if len(sel_A) == division_a_size and len(sel_B) == division_b_size:
                 st.session_state.league_divisions = {"A": sel_A, "B": sel_B}
                 st.session_state.league_tramo = 1
                 st.session_state.league_active = False
@@ -672,7 +677,10 @@ def page_tabla() -> None:
                 _schedule_clear_league_edit_buffers()
                 st.rerun()
             else:
-                st.error(f"Selecciona exactamente 5 en A y {division_b_size} en B.")
+                st.error(
+                    f"Selecciona exactamente {division_a_size} en A "
+                    f"y {division_b_size} en B."
+                )
 
     if st.session_state.get("league_prev_edit_active") and prev_tramo:
         _render_previous_round_editor(
@@ -705,7 +713,7 @@ def page_tabla() -> None:
         with st.form(f"form_results_{tramo}"):
             cA, cB = st.columns(2)
             with cA:
-                st.markdown("**Liga A (posiciones 1-5)**")
+                st.markdown(f"**Liga A (posiciones 1-{len(A)})**")
                 for (p1, p2), winner in data["A"].items():
                     key = f"{p1} vs {p2}"
                     current = tmp_divs["A"].get(key)
@@ -882,12 +890,16 @@ def page_tabla() -> None:
     ):
         if confirm == "Si":
             players = users_with_retired_last(active_users())
+            division_a_size = division_a_size_for_count(len(players), 1)
             st.session_state.league_tramo = 1
             st.session_state.league_active = False
             st.session_state.league_results = {}
             st.session_state.league_matches = {}
             st.session_state.league_temp_order = {"A": [], "B": []}
-            st.session_state.league_divisions = {"A": players[:5], "B": players[5:]}
+            st.session_state.league_divisions = {
+                "A": players[:division_a_size],
+                "B": players[division_a_size:],
+            }
             st.session_state.league_movements = {}
             try:
                 clear_purchases()

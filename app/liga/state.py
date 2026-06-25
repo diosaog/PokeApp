@@ -5,13 +5,13 @@ import hashlib
 import json
 import streamlit as st
 
+from app.liga.divisions import division_a_size_for_count
 from storage import settings_get_uncached, settings_set
 from utils import league_users_for_round
 
 
 _LEAGUE_STATE_HASH_KEY = "_league_state_hash"
 _LEAGUE_STATE_ERROR_KEY = "_league_state_error"
-_DIVISION_A_SIZE = 5
 
 
 def _player_canon(
@@ -60,7 +60,8 @@ def _sanitize_divisions(
     for u in players:
         if u not in ordered:
             ordered.append(u)
-    return {"A": ordered[:_DIVISION_A_SIZE], "B": ordered[_DIVISION_A_SIZE:]}
+    division_a_size = division_a_size_for_count(len(players), round_no)
+    return {"A": ordered[:division_a_size], "B": ordered[division_a_size:]}
 
 
 def _sanitize_results(
@@ -464,7 +465,11 @@ def ensure_state() -> None:
                 include_retired=False,
             ).keys()
         )
-        st.session_state.league_divisions = {"A": players[:5], "B": players[5:]}
+        division_a_size = division_a_size_for_count(len(players), current_round)
+        st.session_state.league_divisions = {
+            "A": players[:division_a_size],
+            "B": players[division_a_size:],
+        }
     else:
         st.session_state.league_divisions = _sanitize_divisions(
             st.session_state.league_divisions,
