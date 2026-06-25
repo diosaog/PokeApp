@@ -68,12 +68,25 @@ def sections_for_user(user: str | None) -> list[str]:
 
 
 def league_users_for_round(
-    round_no: int, *, roster_transition_complete: bool = False
+    round_no: int,
+    *,
+    roster_transition_complete: bool = False,
+    include_retired: bool = True,
 ) -> Dict[str, str]:
     current_round = max(int(round_no), 1)
     _ = roster_transition_complete
     out: Dict[str, str] = {}
+    retired: set[str] = set()
+    if not include_retired:
+        try:
+            from app.entrenadores.trainer_flags import retired_trainers
+
+            retired = retired_trainers()
+        except Exception:
+            retired = set()
     for user, code in USERS.items():
+        if user in retired:
+            continue
         join_round = int(ROSTER_JOIN_ROUND.get(user, 1))
         departure_round = ROSTER_DEPARTURE_AFTER_ROUND.get(user)
         if current_round < join_round:
@@ -94,6 +107,7 @@ def active_users() -> Dict[str, str]:
                 roster_transition_complete=bool(
                     st.session_state.get("league_roster_transition_complete", False)
                 ),
+                include_retired=False,
             )
     except Exception:
         pass
@@ -112,6 +126,7 @@ def active_users() -> Dict[str, str]:
     return league_users_for_round(
         current_round,
         roster_transition_complete=roster_transition_complete,
+        include_retired=False,
     )
 
 

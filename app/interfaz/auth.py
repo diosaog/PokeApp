@@ -4,12 +4,12 @@ import streamlit as st
 
 from app.interfaz.bootstrap import bootstrap_latest_save_for_user
 from storage import init_storage, settings_get
-from utils import active_users
+from utils import USERS
 
 
 def login_gate() -> None:
     init_storage()
-    users = active_users()
+    users = USERS
     if st.session_state.get("auth_ok"):
         if st.session_state.get("user") not in users:
             st.session_state.auth_ok = False

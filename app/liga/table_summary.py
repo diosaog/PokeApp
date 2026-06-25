@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from app.common import COIN
+from app.entrenadores.trainer_flags import format_trainer_with_flags
 from app.tienda.money import _money_available
 
 
@@ -32,7 +33,7 @@ def league_table_notification_rows(table: list[tuple[str, float]]) -> list[dict]
     return [
         {
             "pos": i,
-            "user": user,
+            "user": format_trainer_with_flags(user),
             "points": fmt_points(pts),
             "coins": coins_for_user(user),
         }
@@ -90,7 +91,11 @@ def league_round_summary_lines(
 def league_table_rows(table: list[tuple[str, float]], *, include_coins: bool = False) -> list[dict]:
     rows: list[dict] = []
     for i, (user, pts) in enumerate(table, start=1):
-        row = {"Pos": i, "Jugador": user, "Puntos": fmt_points(pts)}
+        row = {
+            "Pos": i,
+            "Jugador": format_trainer_with_flags(user),
+            "Puntos": fmt_points(pts),
+        }
         if include_coins:
             row["Monedas"] = f"{COIN} {coins_for_user(user)}"
         rows.append(row)

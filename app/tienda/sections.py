@@ -12,6 +12,7 @@ from app.discord_notify import (
     notify_discount_purchase_async,
     send_test_notification,
 )
+from app.entrenadores.trainer_flags import is_trainer_retired
 from app.juicios.penalties import get_user_penalties
 from app.liga.context import current_jornada
 from app.tienda.catalog import _render_shop_items, get_catalog
@@ -58,7 +59,8 @@ def render_shop_header() -> None:
 
 def render_money_panel(current_user: str) -> tuple[dict, bool, int | None]:
     penalties = get_user_penalties(current_user if current_user != "-" else "")
-    store_locked = bool(penalties.get("store_blocked"))
+    retired = is_trainer_retired(current_user)
+    store_locked = bool(penalties.get("store_blocked")) or retired
     available = None
     if current_user != "-":
         try:
@@ -74,7 +76,7 @@ def render_money_panel(current_user: str) -> tuple[dict, bool, int | None]:
         available = 0
 
     status = "Bloqueada" if store_locked else "Abierta"
-    status_value = "Juicio" if store_locked else "OK"
+    status_value = "Retirado" if retired else ("Juicio" if store_locked else "OK")
     st.markdown(
         (
             "<div class='mart-register-grid'>"
@@ -100,6 +102,8 @@ def render_money_panel(current_user: str) -> tuple[dict, bool, int | None]:
         ),
         unsafe_allow_html=True,
     )
+    if retired:
+        st.warning("Este entrenador esta retirado. Puede mirar la tienda, pero no comprar.")
     return penalties, store_locked, available
 
 
@@ -184,6 +188,10 @@ def render_shop_catalog(*, penalties: dict, store_locked: bool, current_user: st
 
 def render_pending_purchase(current_user: str, *, store_locked: bool) -> None:
     pending = st.session_state.get("shop_pending")
+    if pending and is_trainer_retired(current_user):
+        st.session_state.pop("shop_pending", None)
+        st.warning("No se puede completar la compra: este entrenador esta retirado.")
+        return
     if pending and store_locked:
         st.session_state.pop("shop_pending", None)
         st.warning("No se puede completar la compra: la tienda esta bloqueada por castigo.")
@@ -350,6 +358,9 @@ def render_discord_panel() -> None:
 
 
 def render_flags_reset(current_user: str) -> None:
+    if is_trainer_retired(current_user):
+        st.caption("Entrenador retirado: no puede reiniciar flags de Pokemon.")
+        return
     with st.expander("Reiniciar flags de Pokemon (Blindado/Robado)"):
         st.caption("Esto borra estados guardados en la base de datos; no modifica archivos .sav.")
         colA, colB = st.columns(2)

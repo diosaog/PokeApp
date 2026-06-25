@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 from pathlib import Path
 import streamlit as st
 
@@ -10,14 +11,28 @@ from app.entrenadores.inventory import _purchases_inventory_ui, _inventory_cache
 from app.entrenadores.pokepaste import ensure_pokepaste_state
 from app.entrenadores.state import ensure_local_save_for
 from app.entrenadores.summary import trainer_summary_with_portrait_ui
+from app.entrenadores.trainer_flags import (
+    format_trainer_with_flags,
+    is_trainer_retired,
+    is_trainer_robbed,
+    set_trainer_retired,
+)
 from app.entrenadores.boxes import boxes_grid_ui
-from app.discord_notify import notify_team_locked_async
+from app.discord_notify import notify_team_locked_async, notify_trainer_retired_async
 from app.ui.team_grid import team_grid_ui
 from app.interfaz.theme import apply_platinum_ui
 from app.liga.context import current_jornada
+from app.liga.ranking import clear_ranking_caches
+from app.tienda.money import clear_money_caches
 from conex_pkhex import PKHeXRuntime, extract_team, get_bridge_path, open_sav_cached
-from storage import get_current_save_for_user, get_team_lock, list_saves_by_user, upsert_team_lock
-from utils import DEFAULT_DLL_HINT, active_users, list_user_saves
+from storage import (
+    get_current_save_for_user,
+    get_team_lock,
+    list_saves_by_user,
+    settings_get,
+    upsert_team_lock,
+)
+from utils import DEFAULT_DLL_HINT, USERS, list_user_saves
 
 
 INVENTORY_TABS_CSS = """
@@ -151,9 +166,17 @@ def page_entrenadores_view() -> None:
     trainer = st.session_state.get("trainer_selected")
     current_user = st.session_state.get("user")
     is_own_profile = trainer == current_user
+    current_user_retired = is_trainer_retired(current_user)
     ensure_pokepaste_state()
 
     ensure_local_save_for(trainer or "")
+
+    if is_trainer_retired(trainer):
+        st.warning(
+            "Este entrenador esta retirado. Se mantiene visible, pero no participa en sistemas activos."
+        )
+    elif is_trainer_robbed(trainer):
+        st.info("Este entrenador ya ha sido robado en la ronda actual.")
 
     saves = list_user_saves(trainer) if trainer else []
     active_path = saves[0] if saves else None
@@ -227,20 +250,25 @@ def page_entrenadores_view() -> None:
             comos = [r for r in inv if _category_for_item(r[1]) == "Comodines"] if inv else []
             if not is_own_profile:
                 st.caption("Solo el propietario puede usar sus comodines.")
+            elif current_user_retired:
+                st.caption("Los entrenadores retirados no pueden usar comodines.")
             _render_purchase_cards(
                 comos,
                 "Comodines",
                 key_prefix="comos",
-                allow_use=is_own_profile,
+                allow_use=is_own_profile and not current_user_retired,
             )
 
         ctx = st.session_state.get("redeem_ctx")
-        if ctx:
+        if ctx and not current_user_retired:
             try:
                 from tienda2 import _render_redeem_flow  # wrapper keeps API
                 _render_redeem_flow(ctx, current_user)
             except Exception:
                 st.error("No se pudo cargar el flujo de uso de comodines. Ve a la pestana Tienda.")
+        elif ctx and current_user_retired:
+            st.session_state.pop("redeem_ctx", None)
+            st.warning("Los entrenadores retirados no pueden usar comodines.")
 
     st.markdown("---")
     try:
@@ -251,12 +279,14 @@ def page_entrenadores_view() -> None:
             team = extract_team(sav_json) or []
     except Exception:
         team = []
-    if is_own_profile:
+    if is_own_profile and not current_user_retired:
         _render_team_lock_controls(
             team=list(team or [])[:6],
             current_user=str(current_user or ""),
             save_path=Path(save_path) if save_path else None,
         )
+    elif is_own_profile and current_user_retired:
+        st.caption("Entrenador retirado: no puede fijar equipo para jornadas.")
     team_grid_ui(team)
     detail_slot = st.empty()
     boxes_grid_ui(sav_json, box_count, box_names, save_path=str(save_path), pc_ok=pc_ok, mtime=mtime)
@@ -264,12 +294,62 @@ def page_entrenadores_view() -> None:
         pokemon_detail_panel()
 
 
+def _render_retirement_admin() -> None:
+    current_user = str(st.session_state.get("user") or "")
+    if current_user.strip().lower() != "anto":
+        return
+
+    st.markdown("---")
+    with st.expander("Gestion de abandonos", expanded=False):
+        st.caption("Solo Anto puede marcar un abandono. Es permanente desde la app.")
+        league_active = False
+        try:
+            raw_state = settings_get("league_state")
+            if raw_state:
+                league_active = bool(json.loads(raw_state).get("active"))
+        except Exception:
+            league_active = bool(st.session_state.get("league_active"))
+        if league_active:
+            st.warning(
+                "Hay una jornada en edicion. Cierra esa jornada antes de marcar un abandono."
+            )
+        candidates = [user for user in USERS.keys() if not is_trainer_retired(user)]
+        if not candidates:
+            st.caption("No quedan entrenadores disponibles para retirar.")
+            return
+        target = st.selectbox(
+            "Entrenador que abandona",
+            candidates,
+            format_func=format_trainer_with_flags,
+            key="retirement_target",
+        )
+        confirm = st.text_input(
+            "Escribe RETIRAR para confirmar",
+            key="retirement_confirm",
+        )
+        if st.button(
+            "Marcar abandono",
+            disabled=(confirm != "RETIRAR") or league_active,
+            use_container_width=True,
+            key="retirement_submit",
+        ):
+            try:
+                set_trainer_retired(str(target), by_user=current_user)
+                clear_money_caches()
+                clear_ranking_caches()
+                notify_trainer_retired_async(str(target), by_user=current_user)
+                st.success(f"{target} marcado como retirado.")
+                st.rerun()
+            except Exception as e:
+                st.error(f"No se pudo marcar el abandono: {e}")
+
+
 def page_entrenadores() -> None:
     apply_platinum_ui("Entrenadores")
     st.title("Entrenadores")
     st.caption("Se alimenta del ultimo .sav o .dsv del entrenador seleccionado.")
 
-    users = list(active_users().keys())
+    users = list(USERS.keys())
     try:
         active = st.session_state.get("user")
         cur = st.session_state.get("trainer_selected")
@@ -282,7 +362,12 @@ def page_entrenadores() -> None:
     except Exception:
         pass
     prev = st.session_state.get("_trainer_selected_last")
-    sel = st.selectbox("Elige un entrenador", users, key="trainer_selected")
+    sel = st.selectbox(
+        "Elige un entrenador",
+        users,
+        key="trainer_selected",
+        format_func=format_trainer_with_flags,
+    )
     if prev is None:
         st.session_state["_trainer_selected_last"] = sel
     elif sel != prev:
@@ -292,3 +377,4 @@ def page_entrenadores() -> None:
     try_auto_load_bridge()
 
     page_entrenadores_view()
+    _render_retirement_admin()

@@ -41,6 +41,7 @@ def _sanitize_divisions(
         league_users_for_round(
             round_no,
             roster_transition_complete=roster_transition_complete,
+            include_retired=False,
         ).keys()
     )
 
@@ -460,6 +461,7 @@ def ensure_state() -> None:
             league_users_for_round(
                 current_round,
                 roster_transition_complete=roster_transition_complete,
+                include_retired=False,
             ).keys()
         )
         st.session_state.league_divisions = {"A": players[:5], "B": players[5:]}

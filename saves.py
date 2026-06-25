@@ -2,6 +2,7 @@ from __future__ import annotations
 from datetime import datetime
 import streamlit as st
 
+from app.entrenadores.trainer_flags import is_trainer_retired
 from app.interfaz.theme import apply_platinum_ui
 from app.saves_support import (
     SAVES_PAGE_CSS,
@@ -111,12 +112,23 @@ def page_saves() -> None:
         st.success("Reset / Wipe completado. La temporada queda limpia para empezar otro juego.")
 
     bootstrap_latest_save(current_user)
+    user_retired = is_trainer_retired(current_user)
+    if user_retired:
+        st.warning("Entrenador retirado: puedes consultar saves, pero no subir ni cambiar el actual.")
 
-    file = st.file_uploader("Sube un archivo .sav o .dsv", type=["sav", "dsv"])
+    file = st.file_uploader(
+        "Sube un archivo .sav o .dsv",
+        type=["sav", "dsv"],
+        disabled=user_retired,
+    )
 
     col1, col2 = st.columns(2)
     with col1:
-        subir = st.button("Subir y marcar como save actual", use_container_width=True)
+        subir = st.button(
+            "Subir y marcar como save actual",
+            use_container_width=True,
+            disabled=user_retired,
+        )
     with col2:
         _ = st.button("Refrescar", use_container_width=True)
 
@@ -153,7 +165,11 @@ def page_saves() -> None:
                 st.caption(f"Por {up or '-'} - {datetime.fromtimestamp(ts)} - SHA {sha[:8]}")
                 c1, c2 = st.columns(2)
                 with c1:
-                    if st.button("Establecer como actual", key=f"set_{id_}"):
+                    if st.button(
+                        "Establecer como actual",
+                        key=f"set_{id_}",
+                        disabled=user_retired,
+                    ):
                         set_current_save_for_user(current_user, id_)
                         clear_save_related_caches()
                         refresh_save_snapshot(current_user)

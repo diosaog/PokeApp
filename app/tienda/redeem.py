@@ -6,6 +6,11 @@ from typing import List
 import streamlit as st
 
 from app.entrenadores.constants import DEAD_BOX_INDEX, DEAD_BOX_LABEL, TOTAL_BOXES
+from app.entrenadores.trainer_flags import (
+    is_trainer_robbed,
+    mark_trainer_robbed,
+    reset_robbed_cycle_if_complete,
+)
 from app.tienda.common import _eq_item
 from storage import (
     add_purchase,
@@ -96,7 +101,16 @@ def render_redeem_flow(ctx: dict, current_user: str) -> None:
         return
 
     if _eq_item(item, "Robar Pokemon"):
-        players = [u for u in active_users().keys() if u != current_user]
+        active_trainers = list(active_users().keys())
+        reset_robbed_cycle_if_complete(active_trainers)
+        players = [
+            u
+            for u in active_trainers
+            if u != current_user and not is_trainer_robbed(u)
+        ]
+        if not players:
+            st.warning("No hay objetivos disponibles para robar en este momento.")
+            return
         target = st.selectbox("Jugador objetivo", players, key="rob_target")
         origin_kind = st.selectbox("Origen", ["Equipo"] + [f"Caja {i+1}" for i in range(TOTAL_BOXES) if i != DEAD_BOX_INDEX], key="rob_origin")
         mons: List[dict] = []
@@ -127,6 +141,9 @@ def render_redeem_flow(ctx: dict, current_user: str) -> None:
 
         if choice_lbl:
             idx, fp_legacy, fp_stable = label_to_idx[choice_lbl]
+            if is_trainer_robbed(target):
+                st.error("Este entrenador ya ha sido robado en la ronda actual.")
+                return
             flags, fp_key = _load_flags_for_fps(fp_legacy, fp_stable, owner=target)
             if flags.get("blindado"):
                 st.error("Este Pokemon esta blindado. No se puede robar.")
@@ -147,6 +164,11 @@ def render_redeem_flow(ctx: dict, current_user: str) -> None:
                     add_redemption(int(pid), current_user, item, json.dumps(payload, ensure_ascii=False))
                     set_purchase_status(int(pid), "used")
                     add_purchase(current_user, "Comodin de Blindaje por Robo", 0)
+                    trainer_flag_result = mark_trainer_robbed(
+                        target,
+                        by_user=current_user,
+                        active_trainers=active_trainers,
+                    )
                     try:
                         if fp_key:
                             base = dict(flags)
@@ -158,6 +180,11 @@ def render_redeem_flow(ctx: dict, current_user: str) -> None:
                     except Exception:
                         pass
                     st.success("Robo registrado (sin modificar el save).")
+                    if trainer_flag_result.get("cycle_reset"):
+                        st.info(
+                            "Todos los entrenadores activos han sido robados. "
+                            "La ronda de marcas de robado se ha reiniciado."
+                        )
                     st.session_state.pop("redeem_ctx", None)
                     st.rerun()
                 except Exception as e:

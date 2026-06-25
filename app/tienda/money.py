@@ -3,6 +3,7 @@ from __future__ import annotations
 from pathlib import Path
 
 from app.liga.coins import coins_from_league
+from app.entrenadores.trainer_flags import is_trainer_retired
 from app.entrenadores.cache import cached_badge_count
 from app.entrenadores.snapshot import clear_trainer_snapshot_runtime_caches, get_trainer_snapshot
 from app.interfaz.badges import coins_from_badges
@@ -135,6 +136,14 @@ def money_breakdown_from_parts(
 ) -> dict[str, int | bool]:
     if not user:
         return {"base": 0, "spent": 0, "coins_reduction": 0, "store_blocked": False, "available": 0}
+    if is_trainer_retired(user):
+        return {
+            "base": 0,
+            "spent": 0,
+            "coins_reduction": 0,
+            "store_blocked": True,
+            "available": 0,
+        }
 
     penalties = penalties if penalties is not None else get_user_penalties(user)
     if badge_coins is None:

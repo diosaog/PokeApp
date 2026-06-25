@@ -11,6 +11,7 @@ from app.juicios.penalties import get_user_penalties
 from app.liga.eligibility import counts_for_league_reward
 from app.liga.rewards import CURRENT_POINTS_BY_POSITION, points_for_league_position
 from app.tienda.common import _eq_item
+from app.entrenadores.trainer_flags import retired_trainers
 from storage import (
     add_purchase,
     clear_user_app_data,
@@ -20,7 +21,7 @@ from storage import (
     load_save_bytes,
     settings_get,
 )
-from utils import active_users, ensure_user_dir, list_user_saves
+from utils import USERS, active_users, ensure_user_dir, list_user_saves
 
 MAX_JORNADAS = 5
 POINTS_BY_POSITION = CURRENT_POINTS_BY_POSITION
@@ -369,14 +370,21 @@ def current_points_total(
 
 def general_table_sorted() -> list[tuple[str, float]]:
     rows: list[tuple[str, float]] = []
-    for user in _visible_league_users().keys():
+    active_names = set(_visible_league_users().keys())
+    for user in active_names:
         try:
             snapshot = get_trainer_snapshot(user)
             raw_dead_count = int(snapshot.get("dead_count") or 0)
         except Exception:
             raw_dead_count = None
         rows.append((user, current_points_total(user, raw_dead_count=raw_dead_count)))
-    return sorted(rows, key=lambda x: (-x[1], x[0]))
+    active_rows = sorted(rows, key=lambda x: (-x[1], x[0]))
+    retired_rows = [
+        (user, 0.0)
+        for user in USERS.keys()
+        if user not in active_names and user in retired_trainers()
+    ]
+    return active_rows + retired_rows
 
 
 def final_podium() -> list[tuple[str, float]]:

@@ -665,6 +665,37 @@ def notify_league_match_results_async(results: list[dict]) -> None:
     thread.start()
 
 
+def notify_trainer_retired(*, trainer: str, by_user: str | None = None) -> bool:
+    fields = []
+    if by_user:
+        fields.append({"name": "Registrado por", "value": str(by_user), "inline": True})
+    return _post_webhook(
+        {
+            "embeds": [
+                _embed(
+                    title="Entrenador retirado",
+                    description=(
+                        f"{trainer} se ha retirado de la liga. "
+                        "Sus resultados anteriores se conservan, pero deja de contar "
+                        "para jornadas, puntos, monedas y sistemas activos."
+                    ),
+                    color=0x95A5A6,
+                    fields=fields,
+                )
+            ]
+        }
+    )
+
+
+def notify_trainer_retired_async(*, trainer: str, by_user: str | None = None) -> None:
+    thread = threading.Thread(
+        target=notify_trainer_retired,
+        kwargs={"trainer": trainer, "by_user": by_user},
+        daemon=True,
+    )
+    thread.start()
+
+
 def discord_webhook_configured() -> bool:
     return not bool(_webhook_validation_error())
 

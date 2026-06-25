@@ -5,10 +5,12 @@ import mimetypes
 import os
 import streamlit as st
 
+from conex_pkhex import extract_box
 from app.entrenadores.badges import UNOVA_BW2_BADGE_NAMES, count_badges
 from app.entrenadores.boxes import muertos_box_index
 from app.entrenadores.constants import DEAD_BOX_LABEL
 from app.entrenadores.profile import find_trainer_image
+from app.entrenadores.trainer_flags import is_trainer_retired
 from app.juicios.penalties import get_user_penalties
 from app.tienda.money import (
     LEAGUE_FINISHED_COINS,
@@ -25,7 +27,6 @@ def _cache_data(ttl: int = 30):
         return st.cache_data(ttl=ttl, show_spinner=False)
     except Exception:
         return lambda f: f
-from conex_pkhex import extract_box
 
 
 _UNOVA_BW2_BADGE_COLORS = (
@@ -200,6 +201,7 @@ def trainer_summary_with_portrait_ui(
         medallas = 0
 
     jugador = st.session_state.get("trainer_selected") or st.session_state.get("user")
+    retired = is_trainer_retired(jugador)
     _persist_badges_count(jugador or "", medallas)
 
     try:
@@ -218,7 +220,7 @@ def trainer_summary_with_portrait_ui(
         spent = 0
     penalties = get_user_penalties(jugador or "")
     coins_reduction = int(penalties.get("coins_reduction") or 0)
-    if penalties.get("store_blocked"):
+    if retired or penalties.get("store_blocked"):
         monedas = 0
     else:
         monedas = max(bruto - spent - coins_reduction, 0)
@@ -227,6 +229,8 @@ def trainer_summary_with_portrait_ui(
         from app.liga.ranking import current_points_total
         puntos = current_points_total(jugador or "")
     except Exception:
+        puntos = 0.0
+    if retired:
         puntos = 0.0
 
     box_index_muertos = muertos_box_index(box_count)
@@ -286,7 +290,7 @@ def trainer_summary_with_portrait_ui(
     )
 
     st.markdown(panel_html, unsafe_allow_html=True)
-    if is_own_profile:
+    if is_own_profile and not retired:
         rev_col1, rev_col2 = st.columns([2, 1.2])
         with rev_col1:
             rev_count = st.number_input(
@@ -328,3 +332,5 @@ def trainer_summary_with_portrait_ui(
             st.caption("La recompensa Liga Finalizada se desbloquea con las 8 medallas.")
         else:
             st.caption(f"Pulsa el boton para reclamar +{LEAGUE_FINISHED_COINS} monedas.")
+    elif is_own_profile and retired:
+        st.caption("Entrenador retirado: no puede registrar revividos ni reclamar recompensas.")

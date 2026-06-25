@@ -10,6 +10,7 @@ from app.discord_notify import (
     notify_league_round_finished_detail,
     notify_missing_team_locks_async,
 )
+from app.entrenadores.trainer_flags import is_trainer_retired
 from app.liga.ranking import (
     MAX_JORNADAS,
     all_filled,
@@ -302,7 +303,9 @@ def _changed_match_notifications(
     return notifications
 
 
-def _render_previous_round_editor(*, prev_tramo: int, current_tramo: int) -> None:
+def _render_previous_round_editor(
+    *, prev_tramo: int, current_tramo: int, read_only: bool = False
+) -> None:
     data = st.session_state.get("league_matches", {}).get(prev_tramo)
     st.markdown("---")
     st.subheader(f"Modificar jornada anterior (Tramo {prev_tramo})")
@@ -349,7 +352,10 @@ def _render_previous_round_editor(*, prev_tramo: int, current_tramo: int) -> Non
                 )
                 tmp_divs["B"][key] = pick
 
-        submitted = st.form_submit_button("Guardar cambios jornada anterior")
+        submitted = st.form_submit_button(
+            "Guardar cambios jornada anterior",
+            disabled=read_only,
+        )
         if submitted:
             match_notifications = _changed_match_notifications(
                 prev_tramo, data, tmp_divs
@@ -433,6 +439,9 @@ def page_tabla() -> None:
     elif refresh_requested:
         st.success("Datos de liga recargados desde el estado compartido.")
     _render_flash_messages()
+    read_only = is_trainer_retired(st.session_state.get("user"))
+    if read_only:
+        st.info("Entrenador retirado: puedes consultar la liga, pero no editar sistemas activos.")
 
     _auto_notify_latest_closed_round()
     resend_round = _latest_closed_round()
@@ -475,7 +484,11 @@ def page_tabla() -> None:
         if st.session_state.league_active:
             c1, c2 = st.columns(2)
             with c1:
-                if st.button("Finalizar jornada", use_container_width=True):
+                if st.button(
+                    "Finalizar jornada",
+                    use_container_width=True,
+                    disabled=read_only,
+                ):
                     try:
                         closing_tramo = int(tramo)
                         get_matches_for(closing_tramo)
@@ -544,7 +557,11 @@ def page_tabla() -> None:
                     except Exception as e:
                         st.error(str(e))
             with c2:
-                if st.button("Cancelar jornada", use_container_width=True):
+                if st.button(
+                    "Cancelar jornada",
+                    use_container_width=True,
+                    disabled=read_only,
+                ):
                     st.session_state.league_active = False
                     if tramo in st.session_state.league_matches:
                         del st.session_state.league_matches[tramo]
@@ -561,7 +578,11 @@ def page_tabla() -> None:
                 if liga_finalizada:
                     st.info("La liga ha finalizado. No se pueden crear mas jornadas.")
                 else:
-                    if st.button("Editar jornada", use_container_width=True):
+                    if st.button(
+                        "Editar jornada",
+                        use_container_width=True,
+                        disabled=read_only,
+                    ):
                         st.session_state.league_prev_edit_active = False
                         st.session_state.league_active = True
                         get_matches_for(tramo)
@@ -576,7 +597,9 @@ def page_tabla() -> None:
                     else "Modificar jornada anterior"
                 )
                 if st.button(
-                    prev_label, use_container_width=True, disabled=not has_prev_closed
+                    prev_label,
+                    use_container_width=True,
+                    disabled=(not has_prev_closed) or read_only,
                 ):
                     st.session_state.league_prev_edit_active = not st.session_state.get(
                         "league_prev_edit_active", False
@@ -637,7 +660,7 @@ def page_tabla() -> None:
             max_selections=division_b_size,
             key=key_B,
         )
-        if st.button("Guardar divisiones"):
+        if st.button("Guardar divisiones", disabled=read_only):
             if len(sel_A) == 5 and len(sel_B) == division_b_size:
                 st.session_state.league_divisions = {"A": sel_A, "B": sel_B}
                 st.session_state.league_tramo = 1
@@ -655,7 +678,11 @@ def page_tabla() -> None:
                 st.error(f"Selecciona exactamente 5 en A y {division_b_size} en B.")
 
     if st.session_state.get("league_prev_edit_active") and prev_tramo:
-        _render_previous_round_editor(prev_tramo=prev_tramo, current_tramo=tramo)
+        _render_previous_round_editor(
+            prev_tramo=prev_tramo,
+            current_tramo=tramo,
+            read_only=read_only,
+        )
 
     st.markdown("---")
     A = st.session_state.league_divisions["A"]
@@ -710,7 +737,10 @@ def page_tabla() -> None:
                     pick = st.selectbox(key, opts, index=idx, key=f"B_{p1}_{p2}")
                     tmp_divs["B"][key] = None if pick == "(sin marcar)" else pick
 
-            submitted = st.form_submit_button("Guardar resultados de la jornada")
+            submitted = st.form_submit_button(
+                "Guardar resultados de la jornada",
+                disabled=read_only,
+            )
             if submitted:
                 match_notifications = _changed_match_notifications(
                     tramo, data, tmp_divs
@@ -855,6 +885,7 @@ def page_tabla() -> None:
         "Reiniciar liga",
         help="Borra jornadas, resultados y divisiones",
         key="btn_reset_league_ligatabla",
+        disabled=read_only,
     ):
         if confirm == "Si":
             players = list(active_users().keys())
