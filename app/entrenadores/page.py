@@ -14,7 +14,6 @@ from app.entrenadores.summary import trainer_summary_with_portrait_ui
 from app.entrenadores.trainer_flags import (
     format_trainer_with_flags,
     is_trainer_retired,
-    is_trainer_robbed,
     set_trainer_retired,
     sync_trainer_robbed_flags_from_history,
 )
@@ -222,8 +221,6 @@ def page_entrenadores_view() -> None:
         st.warning(
             "Este entrenador esta retirado. Se mantiene visible, pero no participa en sistemas activos."
         )
-    elif is_trainer_robbed(trainer):
-        st.info("Este entrenador ya ha sido robado en la ronda actual.")
 
     saves = list_user_saves(trainer) if trainer else []
     active_path = saves[0] if saves else None
