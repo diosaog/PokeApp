@@ -61,9 +61,34 @@ def page_previa_combate() -> None:
 
 def page_copa() -> None:
     try:
-        st.subheader("Copa")
-        fmt = st.radio("Formato", ["Copa", "Torneo", "Copa Dobles"], horizontal=True)
-        st.markdown("---")
+        from app.copa.styles import (
+            MODE_INFO,
+            render_copa_header,
+            render_copa_mode_cards,
+            render_copa_styles,
+        )
+        from app.interfaz.theme import apply_platinum_ui
+
+        apply_platinum_ui("Copa")
+        render_copa_styles()
+        mode_keys = ["Copa", "Torneo", "Copa Dobles"]
+        labels = [MODE_INFO[key]["label"] for key in mode_keys]
+        current_label = st.session_state.get("copa_mode_selector", labels[0])
+        if current_label not in labels:
+            current_label = labels[0]
+        fmt = mode_keys[labels.index(current_label)]
+        render_copa_header(fmt)
+        selected_label = st.radio(
+            "Formato",
+            labels,
+            horizontal=True,
+            index=labels.index(current_label),
+            key="copa_mode_selector",
+            label_visibility="collapsed",
+        )
+        fmt = mode_keys[labels.index(selected_label)]
+        render_copa_header(fmt)
+        render_copa_mode_cards(fmt)
         if fmt == "Torneo":
             import copa2 as _selected
         elif fmt == "Copa Dobles":

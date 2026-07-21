@@ -1,10 +1,13 @@
 from __future__ import annotations
 
-from typing import List, Optional
-import random
+import html as _html
 import json
+import random
+from typing import List, Optional
+
 import streamlit as st
 
+from app.copa.styles import render_copa_metrics, render_copa_section, render_copa_styles
 from utils import active_users, users_with_retired_last
 from storage import settings_get, settings_set
 
@@ -88,43 +91,40 @@ def _restore_elim_state() -> None:
         pass
 
 
+def _player_row_html(player: str, score: str, *, winner: bool) -> str:
+    cls = "cup-player is-winner" if winner else "cup-player"
+    return (
+        f"<div class='{cls}'>"
+        f"<span>{_html.escape(str(player or '-'))}</span>"
+        f"<span class='cup-score'>{_html.escape(str(score or ''))}</span>"
+        "</div>"
+    )
+
+
 def _render_bracket(state) -> None:
     rounds: List[List[dict]] = state.get("rounds", [])
     if not rounds:
         return
-    css = """
-    <style>
-    .bracket { display:flex; gap:22px; align-items:flex-start; overflow-x:auto; padding: 6px 0 2px; }
-    .round-col { display:flex; flex-direction:column; gap:18px; }
-    .round-title { font-weight:700; opacity:.95; margin: 4px 0 6px; }
-    .match { width: 260px; padding:10px 12px; border-radius:12px; border:1px solid rgba(255,255,255,0.12);
-             background: rgba(255,255,255,0.03); position:relative; }
-    .player { display:flex; justify-content:space-between; align-items:center; padding:4px 0; }
-    .player.w { font-weight:700; color:#e6edf3; }
-    .score { opacity:.8; font-variant-numeric: tabular-nums; }
-    .match:after { content:""; position:absolute; right:-22px; top:50%; width:22px; height:2px; background: rgba(255,255,255,0.2); }
-    </style>
-    """
-    st.markdown(css, unsafe_allow_html=True)
 
     cols = st.columns(len(rounds))
     for idx, col in enumerate(cols):
         with col:
             title = {0: "Octavos", 1: "Cuartos", 2: "Semifinal", 3: "Final"}.get(idx, f"Ronda {idx+1}")
-            st.markdown(f"<div class='round-title'>{title}</div>", unsafe_allow_html=True)
-            st.markdown("<div class='round-col'>", unsafe_allow_html=True)
+            safe_title = _html.escape(title)
+            st.markdown(f"<div class='cup-round-title'>{safe_title}</div>", unsafe_allow_html=True)
+            st.markdown("<div class='cup-round-col'>", unsafe_allow_html=True)
             for mi, m in enumerate(rounds[idx]):
                 p1 = m.get("p1") or "-"
                 p2 = m.get("p2") or "-"
                 w = m.get("winner")
                 score = m.get("score") or ""
-                st.markdown("<div class='match'>", unsafe_allow_html=True)
+                st.markdown("<div class='cup-match'>", unsafe_allow_html=True)
                 st.markdown(
-                    f"<div class='player {'w' if w == p1 else ''}'><span>{p1}</span><span class='score'>{(score if w==p1 else '')}</span></div>",
+                    _player_row_html(p1, score if w == p1 else "", winner=w == p1),
                     unsafe_allow_html=True,
                 )
                 st.markdown(
-                    f"<div class='player {'w' if w == p2 else ''}'><span>{p2}</span><span class='score'>{(score if w==p2 else '')}</span></div>",
+                    _player_row_html(p2, score if w == p2 else "", winner=w == p2),
                     unsafe_allow_html=True,
                 )
                 if (m.get("p1") and m.get("p2")):
@@ -168,13 +168,14 @@ def _all_reported(round_matches: List[dict]) -> bool:
 
 
 def page_copa() -> None:
-    st.header("Copa - Torneo (Bo3)")
+    render_copa_styles()
+    render_copa_section("Eliminatoria Bo3", "Bracket directo con resultados editables y avance por ronda.")
     _restore_elim_state()
     _ensure_elim_state()
     S = st.session_state.elim
 
     if not S.get("rounds"):
-        st.subheader("Configurar torneo")
+        render_copa_section("Configurar torneo", "Selecciona participantes y crea el bracket.")
         all_players = users_with_retired_last(active_users())
         default_sel = all_players[:8] if len(all_players) >= 8 else all_players
         sel = st.multiselect("Participantes", all_players, default=default_sel)
@@ -208,6 +209,15 @@ def page_copa() -> None:
             st.rerun()
     with colB:
         st.caption(f"Rondas: {len(S['rounds'])}")
+
+    render_copa_metrics(
+        [
+            ("Participantes", str(len(S.get("players") or [])), None),
+            ("Rondas", str(len(S.get("rounds") or [])), None),
+            ("Ronda activa", str(int(S.get("current_round", 0)) + 1), None),
+            ("Formato", "Bo3", None),
+        ]
+    )
 
     _render_bracket(S)
 

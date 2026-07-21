@@ -1,9 +1,17 @@
 from __future__ import annotations
 
+import html as _html
 import json
 import random
+
 import streamlit as st
 
+from app.copa.styles import (
+    render_copa_metrics,
+    render_copa_section,
+    render_copa_styles,
+    render_vs_card,
+)
 from utils import active_users, users_with_retired_last
 from storage import settings_get, settings_set
 from dexdata import item_name_es
@@ -257,12 +265,14 @@ def _display_item_name(item: str | None) -> str:
 
 
 def _view_paste_card(player: str) -> None:
-    st.markdown(f"**{player}**")
+    safe_player = _html.escape(str(player or "-"))
+    st.markdown(f"<div class='cup-paste-name'>{safe_player}</div>", unsafe_allow_html=True)
     paste = _get_pokepaste(player or "")
     if not paste or not paste.get("team"):
-        st.caption("Sin Pokepaste guardado.")
+        st.markdown("<div class='cup-paste-meta'>Sin Pokepaste guardado.</div>", unsafe_allow_html=True)
         return
-    st.caption(f"URL: {paste.get('url')}")
+    paste_url = _html.escape(str(paste.get("url") or ""))
+    st.markdown(f"<div class='cup-paste-meta'>URL: {paste_url}</div>", unsafe_allow_html=True)
     try:
         from app.entrenadores.pokepaste import sanitize_mon
     except Exception:
@@ -292,7 +302,7 @@ def _view_paste_card(player: str) -> None:
 
 
 def _render_matchups_tab(S) -> None:
-    st.subheader("Enfrentamientos y equipos")
+    render_copa_section("Enfrentamientos y equipos", "Consulta pairings anteriores y equipos guardados.")
     history = []
     for rnd, matches in sorted(S.get("results", {}).items()):
         history.append((f"Ronda {rnd}", matches))
@@ -305,7 +315,7 @@ def _render_matchups_tab(S) -> None:
         return
 
     for title, matches in history:
-        st.markdown(f"### {title}")
+        render_copa_section(title)
         for m in matches:
             a, b = m.get("p1"), m.get("p2")
             if not a and not b:
@@ -322,13 +332,14 @@ def _render_matchups_tab(S) -> None:
 
 
 def page_copa() -> None:
+    render_copa_styles()
     _restore_swiss_state()
     _ensure_swiss_state()
-    st.header("Copa")
+    render_copa_section("Liga suiza", "Rondas suizas con clasificacion, eliminados y top cut final.")
     S = st.session_state.swiss
 
     if not S.get("configured"):
-        st.subheader("Configurar Copa (Liga suiza)")
+        render_copa_section("Configurar Copa", "Elige participantes y arranca la liga suiza.")
         all_players = users_with_retired_last(active_users())
         if not all_players:
             st.error("No hay jugadores registrados.")
@@ -363,7 +374,16 @@ def page_copa() -> None:
                 st.rerun()
         return
 
-    colA, colB, colC, colD = st.columns(4)
+    render_copa_metrics(
+        [
+            ("Ronda actual", f"{S['round']} / {S['max_rounds']}", None),
+            ("Clasificados", f"{len(S['qualified'])}/4", None),
+            ("Participantes", str(len(S.get("players") or [])), None),
+            ("Modo manual", "Activo" if S.get("manual", False) else "Cerrado", None),
+        ]
+    )
+
+    colA, colB = st.columns(2)
     with colA:
         if st.button("Resetear copa"):
             del st.session_state.swiss
@@ -373,10 +393,6 @@ def page_copa() -> None:
             st.rerun()
     with colB:
         S["manual"] = st.toggle("Edicion manual", value=S.get("manual", False))
-    with colC:
-        st.write(f"Ronda actual: {S['round']} / {S['max_rounds']}")
-    with colD:
-        st.write(f"Clasificados: {len(S['qualified'])}/4")
 
     wins, losses = S["wins"], S["losses"]
     bh = _swiss_buchholz(S)
@@ -390,7 +406,7 @@ def page_copa() -> None:
     } for p in tabla]
     st.dataframe(rows, use_container_width=True)
 
-    st.subheader("Emparejamientos de la ronda")
+    render_copa_section("Emparejamientos de la ronda")
     if not S["current"]["pairs"] and (S.get("topcut") is None) and S["round"] <= S["max_rounds"] and len(S["qualified"]) < 4:
         pairs, bye = _swiss_generate_pairings(S)
         S["current"] = {"pairs": pairs, "bye": bye}
@@ -401,10 +417,7 @@ def page_copa() -> None:
         winners = []
         for idx, (a, b) in enumerate(cur["pairs"], start=1):
             with st.container(border=True):
-                st.markdown(
-                    f"<div class='vs-card'><div class='p'>{a}</div><div class='vs'>VS</div><div class='p'>{b}</div></div>",
-                    unsafe_allow_html=True,
-                )
+                render_vs_card(a, b)
                 pick = st.radio("Ganador", options=[a, b], horizontal=True, key=f"swiss_pick_{S['round']}_{idx}")
                 winners.append(pick)
         if cur["bye"]:
@@ -426,7 +439,7 @@ def page_copa() -> None:
 
     if S["manual"]:
         st.markdown("---")
-        st.subheader("Edicion manual")
+        render_copa_section("Edicion manual")
         players_all = users_with_retired_last(active_users())
         sel = st.multiselect("Jugadores participantes", players_all, default=S["players"])
         if st.button("Aplicar jugadores"):
@@ -488,23 +501,23 @@ def page_copa() -> None:
 
     if S.get("topcut"):
         st.markdown("---")
-        st.subheader("Top Cut (Semifinales y Final)")
+        render_copa_section("Top Cut", "Semifinales y final de la Copa.")
         tc = S["topcut"]
         if not tc["semi_winners"] and tc["semis"]:
             a1, b1 = tc["semis"][0]
-            st.markdown(f"<div class='vs-card'><div class='p'>{a1}</div><div class='vs'>VS</div><div class='p'>{b1}</div></div>", unsafe_allow_html=True)
+            render_vs_card(a1, b1)
             w1 = st.radio("Semifinal 1 - ganador", options=[a1, b1], horizontal=True)
             a2, b2 = tc["semis"][1]
-            st.markdown(f"<div class='vs-card'><div class='p'>{a2}</div><div class='vs'>VS</div><div class='p'>{b2}</div></div>", unsafe_allow_html=True)
+            render_vs_card(a2, b2)
             w2 = st.radio("Semifinal 2 - ganador", options=[a2, b2], horizontal=True)
-        if st.button("Registrar semifinales"):
-            tc["semi_winners"] = [w1, w2]
-            tc["final"] = (w1, w2)
-            _persist_swiss_state()
-            st.rerun()
+            if st.button("Registrar semifinales"):
+                tc["semi_winners"] = [w1, w2]
+                tc["final"] = (w1, w2)
+                _persist_swiss_state()
+                st.rerun()
         elif tc["final"] and not tc.get("champion"):
             a, b = tc["final"]
-            st.markdown(f"<div class='vs-card'><div class='p'>{a}</div><div class='vs'>VS</div><div class='p'>{b}</div></div>", unsafe_allow_html=True)
+            render_vs_card(a, b)
             champ = st.radio("Final - campeon", options=[a, b], horizontal=True)
             if st.button("Registrar campeon"):
                 tc["champion"] = champ
@@ -516,28 +529,25 @@ def page_copa() -> None:
     if S.get("topcut"):
         tc = S["topcut"]
         st.markdown("---")
-        st.subheader("Historial Top Cut")
+        render_copa_section("Historial Top Cut")
         with st.container(border=True):
             if tc.get("semis"):
                 sw = tc.get("semi_winners") or []
                 for i, (a, b) in enumerate(tc["semis"], start=1):
                     ganador = sw[i - 1] if i - 1 < len(sw) else ""
-                    st.markdown(
-                        f"<div class='vs-card'><div class='p'>Semifinal {i}</div><div class='vs'>VS</div><div class='p'></div></div>",
-                        unsafe_allow_html=True,
-                    )
+                    render_vs_card(f"Semifinal {i}", "")
                     st.write(f"{a} vs {b}   Ganador: {ganador}")
             if tc.get("final"):
                 a, b = tc["final"]
                 champ = tc.get("champion") or ""
-                st.markdown("<div class='vs-card'><div class='p'>Final</div><div class='vs'>VS</div><div class='p'></div></div>", unsafe_allow_html=True)
+                render_vs_card("Final", "")
                 st.write(f"{a} vs {b}   Ganador: {champ}")
             if tc.get("champion"):
                 st.success(f"Campeon: {tc['champion']}")
 
     if S.get("results"):
         st.markdown("---")
-        st.subheader("Historial de rondas")
+        render_copa_section("Historial de rondas")
         for rnd in sorted(S["results"].keys()):
             with st.container(border=True):
                 st.markdown(f"**Ronda {rnd}**")
