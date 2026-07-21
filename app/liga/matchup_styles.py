@@ -696,6 +696,19 @@ def ensure_matchup_css() -> None:
           font-size: 18px;
           overflow-wrap: anywhere;
         }
+        .battle-detail-stat-type {
+          padding: 0;
+          border: 0;
+          background: transparent;
+          box-shadow: none;
+        }
+        .battle-detail-stat-type > span {
+          display: none;
+        }
+        .battle-detail-stat-type > strong {
+          margin-top: 0;
+          line-height: 0;
+        }
         .battle-type-pill {
           display: inline-flex;
           align-items: center;

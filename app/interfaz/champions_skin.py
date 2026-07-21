@@ -2102,6 +2102,35 @@ section[data-testid="stSidebar"] .poke-type-full-img {
   margin-left: -1px !important;
 }
 
+.main .battle-detail-stats .battle-detail-stat-type,
+.main .battle-move-detail-inline .battle-detail-stats .battle-detail-stat-type {
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  align-self: center !important;
+}
+
+.main .battle-detail-stats .battle-detail-stat-type > span,
+.main .battle-move-detail-inline .battle-detail-stats .battle-detail-stat-type > span {
+  display: none !important;
+}
+
+.main .battle-detail-stats .battle-detail-stat-type > strong,
+.main .battle-move-detail-inline .battle-detail-stats .battle-detail-stat-type > strong {
+  margin: 0 !important;
+  line-height: 0 !important;
+}
+
+.main .battle-detail-stats .battle-detail-stat-type .battle-type-pill.poke-type-chip.asset-full,
+.main .battle-move-detail-inline .battle-detail-stats .battle-detail-stat-type .battle-type-pill.poke-type-chip.asset-full {
+  width: 120px !important;
+  min-width: 120px !important;
+  height: 24px !important;
+  min-height: 24px !important;
+}
+
 .stApp .material-symbols-rounded,
 .stApp .material-symbols-outlined,
 .stApp .material-icons,
