@@ -3,6 +3,7 @@ from __future__ import annotations
 import html as _html
 import json
 import random
+import time
 
 import streamlit as st
 
@@ -34,6 +35,7 @@ def _ensure_swiss_state():
             "manual": False,
             "topcut": None,
             "configured": False,
+            "hall_run_id": None,
         }
 
 
@@ -62,6 +64,7 @@ def _persist_swiss_state():
             "manual": bool(S.get("manual", False)),
             "topcut": S.get("topcut"),
             "configured": bool(S.get("configured", False)),
+            "hall_run_id": S.get("hall_run_id"),
         }
         settings_set("copa_swiss_state", json.dumps(data, ensure_ascii=False))
     except Exception:
@@ -95,8 +98,22 @@ def _restore_swiss_state():
             "manual": bool(obj.get("manual", False)),
             "topcut": obj.get("topcut"),
             "configured": bool(obj.get("configured", False)),
+            "hall_run_id": obj.get("hall_run_id"),
         }
         st.session_state.swiss = S
+    except Exception:
+        pass
+
+
+def _new_hall_run_id() -> str:
+    return f"swiss:{int(time.time() * 1000)}"
+
+
+def _sync_hall_of_fame_silent() -> None:
+    try:
+        from app.interfaz.hall_of_fame import sync_hall_of_fame_from_sources
+
+        sync_hall_of_fame_from_sources()
     except Exception:
         pass
 
@@ -369,6 +386,7 @@ def page_copa() -> None:
                 S["current"] = {"pairs": [], "bye": None}
                 S["topcut"] = None
                 S["configured"] = True
+                S["hall_run_id"] = _new_hall_run_id()
                 _persist_swiss_state()
                 st.success("Copa creada.")
                 st.rerun()
@@ -521,8 +539,9 @@ def page_copa() -> None:
             champ = st.radio("Final - campeon", options=[a, b], horizontal=True)
             if st.button("Registrar campeon"):
                 tc["champion"] = champ
-                st.success(f"Campeon: {champ}")
                 _persist_swiss_state()
+                _sync_hall_of_fame_silent()
+                st.success(f"Campeon: {champ}")
         elif tc.get("champion"):
             st.success(f"Campeon: {tc['champion']}")
 

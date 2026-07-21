@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import time
 
 import streamlit as st
 
@@ -25,6 +26,7 @@ def _empty_state() -> dict:
         "teams": [],
         "rounds": [],
         "final": {"team_a": None, "team_b": None, "score_a": None, "score_b": None},
+        "hall_run_id": None,
     }
 
 
@@ -37,6 +39,7 @@ def _ensure_state() -> None:
     S.setdefault("teams", [])
     S.setdefault("rounds", [])
     S.setdefault("final", {"team_a": None, "team_b": None, "score_a": None, "score_b": None})
+    S.setdefault("hall_run_id", None)
 
 
 def _persist_state() -> None:
@@ -54,6 +57,19 @@ def _restore_state() -> None:
         obj = json.loads(raw)
         if isinstance(obj, dict):
             st.session_state.copa_dobles = obj
+    except Exception:
+        pass
+
+
+def _new_hall_run_id() -> str:
+    return f"doubles:{int(time.time() * 1000)}"
+
+
+def _sync_hall_of_fame_silent() -> None:
+    try:
+        from app.interfaz.hall_of_fame import sync_hall_of_fame_from_sources
+
+        sync_hall_of_fame_from_sources()
     except Exception:
         pass
 
@@ -604,6 +620,7 @@ def _render_configurator(S: dict) -> None:
             S["teams"] = [{"id": team["id"], "name": str(team["name"]).strip(), "members": list(team["members"])} for team in team_rows]
             S["rounds"] = _generate_round_robin(team_ids)
             S["final"] = {"team_a": None, "team_b": None, "score_a": None, "score_b": None}
+            S["hall_run_id"] = _new_hall_run_id()
             _persist_state()
             st.success("Copa Dobles creada.")
             st.rerun()
@@ -780,6 +797,8 @@ def page_copa() -> None:
             S["final"]["score_a"] = score_a
             S["final"]["score_b"] = score_b
             _persist_state()
+            if _valid_bo3(score_a, score_b):
+                _sync_hall_of_fame_silent()
             st.success("Final guardada.")
             st.rerun()
 

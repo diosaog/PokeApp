@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import hashlib
 from html import escape
 import json
 import time
@@ -11,15 +12,9 @@ from app.entrenadores.snapshot import get_trainer_snapshot
 from app.season.config import current_season_version
 from showdown_sprites import showdown_sprite_url
 from storage import settings_get, settings_set
-from utils import USERS
 
 
 HALL_OF_FAME_KEY = "hall_of_fame_v1"
-COMPETITION_TYPES = ("Liga", "Copa", "Torneo", "Copa Dobles", "Otro")
-
-
-def _is_anto() -> bool:
-    return str(st.session_state.get("user") or "").strip().lower() == "anto"
 
 
 def _clean_text(value: Any, fallback: str = "") -> str:
@@ -96,6 +91,233 @@ def _save_entries(entries: list[dict[str, Any]]) -> None:
     cleaned = [_coerce_entry(entry) for entry in entries]
     payload = [entry for entry in cleaned if entry]
     settings_set(HALL_OF_FAME_KEY, json.dumps(payload, ensure_ascii=False))
+
+
+def _load_json_setting(key: str) -> Any:
+    try:
+        raw = settings_get(key)
+        return json.loads(raw) if raw else None
+    except Exception:
+        return None
+
+
+def _stable_digest(value: Any) -> str:
+    raw = json.dumps(value, ensure_ascii=False, sort_keys=True, default=str)
+    return hashlib.sha1(raw.encode("utf-8")).hexdigest()[:12]
+
+
+def _auto_entry(
+    *,
+    source_id: str,
+    competition: str,
+    title: str,
+    season: str,
+    champion: str,
+    runner_up: str = "",
+    team: list[str] | None = None,
+    notes: str = "",
+) -> dict[str, Any] | None:
+    champion = _clean_text(champion)
+    if not champion:
+        return None
+    return {
+        "id": f"auto:{source_id}",
+        "competition": competition,
+        "title": title,
+        "season": season,
+        "champion": champion,
+        "runner_up": runner_up,
+        "team": _clean_team(team if team is not None else _current_team_for(champion)),
+        "notes": notes,
+        "created_at": int(time.time()),
+    }
+
+
+def _league_auto_entry() -> dict[str, Any] | None:
+    try:
+        from app.liga.ranking import final_podium, max_jornadas
+        from app.liga.state import ensure_state, restore_state
+
+        restore_state()
+        ensure_state()
+        current_round = int(st.session_state.get("league_tramo") or 1)
+        closed_round = max(1, current_round - 1)
+        max_round = int(max_jornadas(closed_round))
+        if closed_round < max_round:
+            return None
+        podium = final_podium()
+        if not podium:
+            return None
+        version = current_season_version(closed_round)
+        champion, points = podium[0]
+        runner_up = podium[1][0] if len(podium) > 1 else ""
+        podium_text = " | ".join(
+            f"{idx}. {user} ({float(score):.1f} pts)"
+            for idx, (user, score) in enumerate(podium[:3], start=1)
+        )
+        return _auto_entry(
+            source_id=f"liga:{version.id}:{max_round}",
+            competition="Liga",
+            title=f"{version.name} - Liga",
+            season=version.name,
+            champion=champion,
+            runner_up=runner_up,
+            notes=f"{float(points):.1f} pts. Podio: {podium_text}",
+        )
+    except Exception:
+        return None
+
+
+def _swiss_auto_entry() -> dict[str, Any] | None:
+    data = _load_json_setting("copa_swiss_state")
+    if not isinstance(data, dict):
+        return None
+    topcut = data.get("topcut") if isinstance(data.get("topcut"), dict) else {}
+    champion = _clean_text(topcut.get("champion"))
+    if not champion:
+        return None
+    final = topcut.get("final") if isinstance(topcut.get("final"), list) else []
+    runner_up = ""
+    if len(final) == 2 and champion in final:
+        runner_up = str(final[1] if champion == final[0] else final[0])
+    version = current_season_version()
+    source = _clean_text(data.get("hall_run_id")) or _stable_digest(
+        {
+            "players": data.get("players"),
+            "max_rounds": data.get("max_rounds"),
+        }
+    )
+    return _auto_entry(
+        source_id=f"copa-swiss:{source}",
+        competition="Copa",
+        title="Copa Suiza",
+        season=version.name,
+        champion=champion,
+        runner_up=runner_up,
+        notes="Campeon del top cut.",
+    )
+
+
+def _elim_auto_entry() -> dict[str, Any] | None:
+    data = _load_json_setting("copa_elim_state")
+    if not isinstance(data, dict):
+        return None
+    rounds = data.get("rounds") if isinstance(data.get("rounds"), list) else []
+    if not rounds:
+        return None
+    last_round = rounds[-1] if isinstance(rounds[-1], list) else []
+    if len(last_round) != 1 or not isinstance(last_round[0], dict):
+        return None
+    final = last_round[0]
+    champion = _clean_text(final.get("winner"))
+    if not champion:
+        return None
+    p1 = _clean_text(final.get("p1"))
+    p2 = _clean_text(final.get("p2"))
+    runner_up = p2 if champion == p1 else p1
+    version = current_season_version()
+    source = _clean_text(data.get("hall_run_id")) or _stable_digest(
+        {
+            "players": data.get("players"),
+            "round_count": len(rounds),
+        }
+    )
+    return _auto_entry(
+        source_id=f"copa-elim:{source}",
+        competition="Torneo",
+        title="Eliminatoria Bo3",
+        season=version.name,
+        champion=champion,
+        runner_up=runner_up,
+        notes=f"Resultado final: {_clean_text(final.get('score'), '-')}",
+    )
+
+
+def _valid_bo3(score_a: Any, score_b: Any) -> bool:
+    try:
+        return (int(score_a), int(score_b)) in {(2, 0), (2, 1), (1, 2), (0, 2)}
+    except Exception:
+        return False
+
+
+def _doubles_auto_entry() -> dict[str, Any] | None:
+    data = _load_json_setting("copa_dobles_state")
+    if not isinstance(data, dict):
+        return None
+    final = data.get("final") if isinstance(data.get("final"), dict) else {}
+    if not _valid_bo3(final.get("score_a"), final.get("score_b")):
+        return None
+    teams = {
+        str(team.get("id")): team
+        for team in data.get("teams", [])
+        if isinstance(team, dict) and team.get("id")
+    }
+    team_a = teams.get(str(final.get("team_a")))
+    team_b = teams.get(str(final.get("team_b")))
+    if not team_a or not team_b:
+        return None
+    score_a = int(final.get("score_a"))
+    score_b = int(final.get("score_b"))
+    champion_team = team_a if score_a > score_b else team_b
+    runner_team = team_b if champion_team is team_a else team_a
+    members = " + ".join(str(member) for member in champion_team.get("members") or [])
+    source = _clean_text(data.get("hall_run_id")) or _stable_digest(
+        {
+            "teams": data.get("teams"),
+            "round_count": len(data.get("rounds") or []),
+        }
+    )
+    version = current_season_version()
+    return _auto_entry(
+        source_id=f"copa-dobles:{source}",
+        competition="Copa Dobles",
+        title="Copa Dobles",
+        season=version.name,
+        champion=_clean_text(champion_team.get("name"), "Equipo campeon"),
+        runner_up=_clean_text(runner_team.get("name")),
+        team=[],
+        notes=f"Integrantes: {members or '-'} | Final {score_a}-{score_b}",
+    )
+
+
+def _automatic_entries() -> list[dict[str, Any]]:
+    entries = [
+        _league_auto_entry(),
+        _swiss_auto_entry(),
+        _elim_auto_entry(),
+        _doubles_auto_entry(),
+    ]
+    return [entry for entry in entries if entry]
+
+
+def _merge_entries(
+    saved_entries: list[dict[str, Any]],
+    automatic_entries: list[dict[str, Any]],
+) -> list[dict[str, Any]]:
+    merged = {str(entry.get("id")): dict(entry) for entry in saved_entries}
+    for entry in automatic_entries:
+        entry_id = str(entry.get("id") or "")
+        if not entry_id:
+            continue
+        existing = merged.get(entry_id)
+        if existing:
+            entry["created_at"] = int(existing.get("created_at") or entry["created_at"])
+        merged[entry_id] = dict(entry)
+    clean = [_coerce_entry(entry) for entry in merged.values()]
+    out = [entry for entry in clean if entry]
+    return sorted(out, key=lambda item: int(item.get("created_at") or 0), reverse=True)
+
+
+def sync_hall_of_fame_from_sources() -> list[dict[str, Any]]:
+    saved = _load_entries()
+    merged = _merge_entries(saved, _automatic_entries())
+    if json.dumps(saved, ensure_ascii=False, sort_keys=True) != json.dumps(
+        merged,
+        ensure_ascii=False,
+        sort_keys=True,
+    ):
+        _save_entries(merged)
+    return merged
 
 
 def _render_css() -> None:
@@ -406,7 +628,7 @@ def _render_entries(entries: list[dict[str, Any]]) -> None:
             (
                 "<div class='hof-empty'>"
                 "Todavia no hay campeones archivados. Cuando termine una liga o copa, "
-                "Anto puede guardar aqui el campeon y su equipo."
+                "aparecera aqui automaticamente."
                 "</div>"
             ),
             unsafe_allow_html=True,
@@ -420,76 +642,8 @@ def _render_entries(entries: list[dict[str, Any]]) -> None:
     st.markdown(html, unsafe_allow_html=True)
 
 
-def _render_admin(entries: list[dict[str, Any]]) -> None:
-    if not _is_anto():
-        return
-    st.markdown("<div class='hof-section-title'>Archivo Anto</div>", unsafe_allow_html=True)
-    current_version = current_season_version()
-    with st.form("hall_of_fame_add_entry"):
-        c1, c2 = st.columns(2)
-        with c1:
-            competition = st.selectbox("Tipo", COMPETITION_TYPES)
-            title = st.text_input("Titulo", value=current_version.name)
-            season = st.text_input("Temporada", value=current_version.name)
-            champion = st.selectbox("Campeon", list(USERS.keys()))
-        with c2:
-            runner_up = st.text_input("Finalista / segundo", value="")
-            team_raw = st.text_area(
-                "Equipo campeon",
-                value="",
-                placeholder="Uno por linea. Si lo dejas vacio, intenta usar el equipo actual guardado.",
-                height=148,
-            )
-            notes = st.text_area("Notas", value="", height=80)
-
-        submitted = st.form_submit_button("Guardar entrada", use_container_width=True)
-        if submitted:
-            team = _clean_team(team_raw)
-            if not team:
-                team = _current_team_for(champion)
-            if not _clean_text(champion):
-                st.error("El campeon es obligatorio.")
-                return
-            entry_id = str(int(time.time() * 1000))
-            entries.insert(
-                0,
-                {
-                    "id": entry_id,
-                    "competition": competition,
-                    "title": title,
-                    "season": season,
-                    "champion": champion,
-                    "runner_up": runner_up,
-                    "team": team,
-                    "notes": notes,
-                    "created_at": int(time.time()),
-                },
-            )
-            _save_entries(entries)
-            st.success("Entrada guardada en el Hall of Fame.")
-            st.rerun()
-
-    if entries:
-        with st.expander("Eliminar entrada", expanded=False):
-            labels = [
-                f"{entry.get('competition')} - {entry.get('champion')} - {entry.get('title')}"
-                for entry in entries
-            ]
-            selected = st.selectbox(
-                "Entrada",
-                list(range(len(entries))),
-                format_func=lambda i: labels[i],
-            )
-            if st.button("Eliminar entrada seleccionada", use_container_width=True):
-                entries.pop(int(selected))
-                _save_entries(entries)
-                st.success("Entrada eliminada.")
-                st.rerun()
-
-
 def render_hall_of_fame() -> None:
     _render_css()
-    entries = _load_entries()
+    entries = sync_hall_of_fame_from_sources()
     st.markdown(_hero_html(entries), unsafe_allow_html=True)
     _render_entries(entries)
-    _render_admin(entries)

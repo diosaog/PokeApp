@@ -124,6 +124,15 @@ def _clear_local_league_state() -> None:
     _clear_league_edit_buffers()
 
 
+def _sync_hall_of_fame_silent() -> None:
+    try:
+        from app.interfaz.hall_of_fame import sync_hall_of_fame_from_sources
+
+        sync_hall_of_fame_from_sources()
+    except Exception:
+        pass
+
+
 def _current_user_can_resend_summary() -> bool:
     return str(st.session_state.get("user") or "").strip().lower() == "anto"
 
@@ -596,6 +605,8 @@ def _render_previous_round_editor(
                         del current_matches[current_tramo]
                 persist_state()
                 clear_money_caches()
+                if prev_tramo >= max_jornadas(prev_tramo):
+                    _sync_hall_of_fame_silent()
                 if discord_notifications_enabled():
                     notify_league_match_results_async(match_notifications)
                 st.success(
@@ -765,6 +776,8 @@ def page_tabla() -> None:
                             if closing_tramo >= max_jornadas(closing_tramo)
                             else None
                         )
+                        if closing_tramo >= max_jornadas(closing_tramo):
+                            _sync_hall_of_fame_silent()
                         if discord_notifications_enabled():
                             notified, notify_message = _send_league_round_notification(
                                 closing_tramo, force=True

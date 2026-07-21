@@ -3,6 +3,7 @@ from __future__ import annotations
 import html as _html
 import json
 import random
+import time
 from typing import List, Optional
 
 import streamlit as st
@@ -58,7 +59,9 @@ def _ensure_elim_state() -> None:
             "players": [],
             "rounds": [],
             "current_round": 0,
+            "hall_run_id": None,
         }
+    st.session_state.elim.setdefault("hall_run_id", None)
 
 
 def _persist_elim_state() -> None:
@@ -70,6 +73,7 @@ def _persist_elim_state() -> None:
             "players": S.get("players", []),
             "rounds": S.get("rounds", []),
             "current_round": S.get("current_round", 0),
+            "hall_run_id": S.get("hall_run_id"),
         }
         settings_set("copa_elim_state", json.dumps(data, ensure_ascii=False))
     except Exception:
@@ -86,7 +90,21 @@ def _restore_elim_state() -> None:
             "players": obj.get("players", []),
             "rounds": obj.get("rounds", []),
             "current_round": obj.get("current_round", 0),
+            "hall_run_id": obj.get("hall_run_id"),
         }
+    except Exception:
+        pass
+
+
+def _new_hall_run_id() -> str:
+    return f"elim:{int(time.time() * 1000)}"
+
+
+def _sync_hall_of_fame_silent() -> None:
+    try:
+        from app.interfaz.hall_of_fame import sync_hall_of_fame_from_sources
+
+        sync_hall_of_fame_from_sources()
     except Exception:
         pass
 
@@ -191,19 +209,31 @@ def page_copa() -> None:
                     S["players"] = sel
                     S["rounds"] = [first_round]
                     S["current_round"] = 0
+                    S["hall_run_id"] = _new_hall_run_id()
                     _persist_elim_state()
                     st.success("Bracket creado.")
                     st.rerun()
         with c2:
             if st.button("Resetear configuracion"):
-                st.session_state.pop("elim")
+                st.session_state.elim = {
+                    "players": [],
+                    "rounds": [],
+                    "current_round": 0,
+                    "hall_run_id": None,
+                }
+                _persist_elim_state()
                 st.rerun()
         return
 
     colA, colB = st.columns([1, 1])
     with colA:
         if st.button("Resetear torneo"):
-            st.session_state.pop("elim")
+            st.session_state.elim = {
+                "players": [],
+                "rounds": [],
+                "current_round": 0,
+                "hall_run_id": None,
+            }
             _persist_elim_state()
             st.success("Torneo reiniciado.")
             st.rerun()
@@ -239,6 +269,8 @@ def page_copa() -> None:
             remaining = [p for p in next_players if p]
             if len(remaining) <= 1:
                 S["current_round"] = rnd_idx + 1
+                _persist_elim_state()
+                _sync_hall_of_fame_silent()
                 st.rerun()
             else:
                 nxt = _round_from_players(next_players)
