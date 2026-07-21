@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-import base64
-import mimetypes
 import os
 import streamlit as st
 
@@ -11,6 +9,7 @@ from app.entrenadores.boxes import muertos_box_index
 from app.entrenadores.constants import DEAD_BOX_LABEL
 from app.entrenadores.profile import find_trainer_image
 from app.entrenadores.trainer_flags import is_trainer_retired
+from app.interfaz.media import image_data_uri
 from app.juicios.penalties import get_user_penalties
 from app.tienda.money import (
     LEAGUE_FINISHED_COINS,
@@ -42,20 +41,6 @@ _UNOVA_BW2_BADGE_COLORS = (
 
 
 @_cache_data(ttl=120)
-def _img_uri(path: str, mtime: float | None = None) -> str:
-    try:
-        if not path:
-            return ""
-        mt = mimetypes.guess_type(path)[0] or "image/png"
-        with open(path, "rb") as f:
-            b64 = base64.b64encode(f.read()).decode("ascii")
-        uri = f"data:{mt};base64,{b64}"
-        return uri
-    except Exception:
-        return ""
-
-
-@_cache_data(ttl=120)
 def _medals_html(count: int) -> str:
     try:
         n = max(0, min(int(count or 0), 8))
@@ -73,7 +58,7 @@ def _medals_html(count: int) -> str:
             "<span title='Medalla "
             f"{name}' style='display:inline-flex; align-items:center; justify-content:center; min-width:56px; padding:4px 6px; "
             f"background:{bg}; border:1px solid {border}; color:{fg}; box-shadow:{shadow}; "
-            "font-family:var(--font-pixel); font-size:8px; text-transform:uppercase; letter-spacing:0.02em;'>"
+            "font-family:var(--font-pixel); font-size:8px; text-transform:uppercase; letter-spacing:0;'>"
             f"{name}</span>"
         )
     return "<div style='display:flex; gap:5px; align-items:center; flex-wrap:wrap;'>" + "".join(chips) + "</div>"
@@ -91,7 +76,7 @@ def _ensure_trainer_css() -> None:
     css = """
     <style>
     .trainer-panel { border:1px solid var(--bw2-edge); background:linear-gradient(180deg,var(--bw2-panel-2) 0%, var(--bw2-panel) 100%); border-radius:0; padding:10px; box-shadow: inset 0 1px 0 rgba(255,255,255,0.08), 0 0 0 1px rgba(0,0,0,0.28); }
-    .trainer-head { background:linear-gradient(180deg,var(--accent) 0%, var(--accent-dark) 100%); border:1px solid var(--bw2-edge-strong); border-radius:0; padding:7px 9px; font-weight:700; color:#ffffff; font-family:var(--font-pixel); font-size:10px; text-transform:uppercase; letter-spacing:0.04em; clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px); }
+    .trainer-head { background:linear-gradient(180deg,var(--accent) 0%, var(--accent-dark) 100%); border:1px solid var(--bw2-edge-strong); border-radius:0; padding:7px 9px; font-weight:700; color:#ffffff; font-family:var(--font-pixel); font-size:10px; text-transform:uppercase; letter-spacing:0; clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px); }
     .trainer-grid { display:grid; grid-template-columns: 150px 1fr; gap:10px; margin-top:8px; }
     .trainer-portrait { background:linear-gradient(180deg,var(--bw2-screen-2) 0%, var(--bw2-screen) 100%); border:1px solid var(--bw2-edge); border-radius:0; padding:8px; display:flex; align-items:center; justify-content:center; box-shadow: inset 0 1px 0 rgba(255,255,255,0.06); }
     .trainer-portrait img { width:120px; height:auto; image-rendering:pixelated; }
@@ -253,7 +238,7 @@ def trainer_summary_with_portrait_ui(
             img_mtime = os.path.getmtime(img)
     except Exception:
         img_mtime = None
-    img_uri = _img_uri(img, img_mtime) if img else ""
+    img_uri = image_data_uri(img, img_mtime, min_bytes=256) if img else ""
     region = _region_from_save(sav_json, jugador or "")
 
     coins_pct = _hp_bar("Monedas", monedas, 20, "#ffd54f")

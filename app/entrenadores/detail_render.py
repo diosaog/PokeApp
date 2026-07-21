@@ -2,8 +2,6 @@ from __future__ import annotations
 
 import html as _html
 import re
-from typing import Any, Dict
-
 from app.entrenadores.sprites import sprite_url_from_p
 from dexdata import ability_desc_es, ability_name_es, item_name_es, move_info, move_name_es, type_color
 from i18n import translate_type_es

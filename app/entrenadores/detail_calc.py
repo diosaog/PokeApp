@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-from typing import Optional
-
 from dexdata import pokedex_entry
 from i18n import NATURES_ES
 

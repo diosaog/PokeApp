@@ -1,13 +1,12 @@
 from __future__ import annotations
 
-import base64
 from html import escape
-import mimetypes
 import os
 
 import streamlit as st
 
 from app.interfaz.bootstrap import bootstrap_latest_save_for_user
+from app.interfaz.media import image_data_uri
 from storage import init_storage, settings_get
 from utils import USERS, users_with_retired_last
 
@@ -17,19 +16,6 @@ def _cache_data(ttl: int = 60):
         return st.cache_data(ttl=ttl, show_spinner=False)
     except Exception:
         return lambda f: f
-
-
-@_cache_data(ttl=60)
-def _img_uri(path: str, mtime: float | None = None) -> str:
-    _ = mtime
-    try:
-        if not path or os.path.getsize(path) < 256:
-            return ""
-        media_type = mimetypes.guess_type(path)[0] or "image/png"
-        with open(path, "rb") as fh:
-            return f"data:{media_type};base64,{base64.b64encode(fh.read()).decode('ascii')}"
-    except Exception:
-        return ""
 
 
 def _trainer_image_uri(user: str) -> str:
@@ -43,7 +29,7 @@ def _trainer_image_uri(user: str) -> str:
             mtime = os.path.getmtime(path)
         except Exception:
             mtime = None
-        return _img_uri(path, mtime)
+        return image_data_uri(path, mtime, min_bytes=256)
     except Exception:
         return ""
 
