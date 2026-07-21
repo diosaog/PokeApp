@@ -10,61 +10,61 @@ CHAMPIONS_SKIN_CSS = """
 :root {
   --font-ui: "Nunito Sans", "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   --font-pixel: "Oxanium", "Nunito Sans", "Trebuchet MS", system-ui, sans-serif;
-  --champ-bg-0: #f7e9ff;
-  --champ-bg-1: #dfccff;
-  --champ-bg-2: #c6ddff;
-  --champ-panel: rgba(102, 85, 211, 0.84);
-  --champ-panel-2: rgba(134, 108, 238, 0.86);
-  --champ-panel-3: rgba(88, 73, 190, 0.92);
-  --champ-panel-deep: rgba(62, 52, 160, 0.88);
-  --champ-list: rgba(250, 248, 255, 0.95);
-  --champ-list-2: rgba(238, 233, 255, 0.95);
-  --champ-text: #35447f;
-  --champ-text-soft: #5f6b9d;
-  --champ-muted: #7982ad;
-  --champ-lime: #c8ff1f;
-  --champ-lime-2: #9ee600;
-  --champ-yellow: #ffe636;
+  --champ-bg-0: #2f235d;
+  --champ-bg-1: #473789;
+  --champ-bg-2: #315b9d;
+  --champ-panel: rgba(86, 70, 190, 0.9);
+  --champ-panel-2: rgba(111, 91, 216, 0.9);
+  --champ-panel-3: rgba(78, 64, 176, 0.95);
+  --champ-panel-deep: rgba(48, 40, 132, 0.94);
+  --champ-list: rgba(222, 216, 248, 0.94);
+  --champ-list-2: rgba(199, 192, 230, 0.94);
+  --champ-text: #263566;
+  --champ-text-soft: #4d5789;
+  --champ-muted: #6d75a0;
+  --champ-lime: #b7ee32;
+  --champ-lime-2: #8fd10b;
+  --champ-yellow: #f6d83b;
   --champ-pink: #ff75dd;
   --champ-cyan: #45d1ff;
   --champ-orange: #ffb35c;
   --champ-red: #f24d67;
-  --champ-white-edge: rgba(255, 255, 255, 0.72);
-  --champ-panel-edge: rgba(255, 255, 255, 0.36);
+  --champ-white-edge: rgba(238, 233, 255, 0.58);
+  --champ-panel-edge: rgba(238, 233, 255, 0.28);
   --accent: #8069ff;
   --accent-dark: #5c45d6;
-  --accent-soft: #e7ddff;
+  --accent-soft: #d8cbff;
   --accent-ghost: rgba(128, 105, 255, 0.22);
-  --bw2-bg-0: #f7e9ff;
-  --bw2-bg-1: #dfccff;
-  --bw2-bg-2: #c6ddff;
-  --bw2-panel: rgba(102, 85, 211, 0.84);
-  --bw2-panel-2: rgba(134, 108, 238, 0.86);
-  --bw2-panel-3: rgba(161, 132, 252, 0.92);
-  --bw2-screen: rgba(74, 62, 174, 0.78);
-  --bw2-screen-2: rgba(111, 91, 216, 0.78);
-  --bw2-edge: rgba(255, 255, 255, 0.36);
-  --bw2-edge-strong: rgba(255, 255, 255, 0.86);
+  --bw2-bg-0: #2f235d;
+  --bw2-bg-1: #473789;
+  --bw2-bg-2: #315b9d;
+  --bw2-panel: rgba(86, 70, 190, 0.9);
+  --bw2-panel-2: rgba(111, 91, 216, 0.9);
+  --bw2-panel-3: rgba(132, 107, 238, 0.94);
+  --bw2-screen: rgba(59, 49, 150, 0.82);
+  --bw2-screen-2: rgba(92, 75, 202, 0.82);
+  --bw2-edge: rgba(238, 233, 255, 0.28);
+  --bw2-edge-strong: rgba(248, 245, 255, 0.72);
   --bw2-text: #ffffff;
   --bw2-text-soft: #f1edff;
   --bw2-text-dim: #d6d0ff;
-  --bw2-shadow: rgba(65, 56, 148, 0.24);
+  --bw2-shadow: rgba(24, 18, 70, 0.32);
   --poke-radius-sm: 10px;
   --poke-radius: 14px;
   --poke-radius-xl: 18px;
-  --poke-shadow-soft: 0 18px 38px rgba(82, 62, 160, 0.18);
-  --poke-shadow-card: 0 10px 22px rgba(82, 62, 160, 0.16);
-  --poke-surface-glow: inset 0 1px 0 rgba(255, 255, 255, 0.34);
+  --poke-shadow-soft: 0 18px 38px rgba(18, 14, 54, 0.28);
+  --poke-shadow-card: 0 10px 22px rgba(18, 14, 54, 0.22);
+  --poke-surface-glow: inset 0 1px 0 rgba(255, 255, 255, 0.2);
 }
 
 .stApp {
   min-height: 100vh !important;
   color: var(--bw2-text) !important;
   background:
-    linear-gradient(128deg, rgba(255,255,255,0.34) 0 12%, transparent 12% 100%) 0 76px / 420px 260px,
-    linear-gradient(38deg, rgba(255,255,255,0.24) 0 10%, transparent 10% 100%) 100% 120px / 360px 240px,
-    linear-gradient(110deg, rgba(255,117,221,0.22), transparent 28%),
-    linear-gradient(250deg, rgba(69,209,255,0.28), transparent 36%),
+    linear-gradient(128deg, rgba(255,255,255,0.12) 0 12%, transparent 12% 100%) 0 76px / 420px 260px,
+    linear-gradient(38deg, rgba(255,255,255,0.08) 0 10%, transparent 10% 100%) 100% 120px / 360px 240px,
+    linear-gradient(110deg, rgba(255,117,221,0.14), transparent 30%),
+    linear-gradient(250deg, rgba(69,209,255,0.16), transparent 38%),
     linear-gradient(180deg, var(--champ-bg-0) 0%, var(--champ-bg-1) 44%, var(--champ-bg-2) 100%) !important;
 }
 
@@ -72,8 +72,8 @@ CHAMPIONS_SKIN_CSS = """
   height: 46px !important;
   background:
     linear-gradient(90deg, rgba(96,80,215,0.96) 0%, rgba(81,151,245,0.96) 48%, rgba(255,117,221,0.9) 73%, rgba(255,230,54,0.9) 100%) !important;
-  border-bottom: 1px solid rgba(255,255,255,0.76) !important;
-  box-shadow: 0 12px 28px rgba(85,70,180,0.22) !important;
+  border-bottom: 1px solid rgba(238,233,255,0.46) !important;
+  box-shadow: 0 12px 28px rgba(18,14,54,0.28) !important;
 }
 
 .stApp::after {
@@ -86,11 +86,11 @@ CHAMPIONS_SKIN_CSS = """
 
 .main::before {
   background:
-    linear-gradient(30deg, transparent 0 68%, rgba(255,255,255,0.18) 68% 69%, transparent 69% 100%) 0 0 / 180px 180px,
-    linear-gradient(150deg, transparent 0 58%, rgba(255,255,255,0.12) 58% 59%, transparent 59% 100%) 0 0 / 220px 220px,
-    radial-gradient(circle at 20% 30%, rgba(255,255,255,0.28), transparent 170px),
-    radial-gradient(circle at 78% 18%, rgba(255,255,255,0.22), transparent 190px),
-    linear-gradient(180deg, rgba(255,255,255,0.22), transparent 48%) !important;
+    linear-gradient(30deg, transparent 0 68%, rgba(255,255,255,0.08) 68% 69%, transparent 69% 100%) 0 0 / 180px 180px,
+    linear-gradient(150deg, transparent 0 58%, rgba(255,255,255,0.06) 58% 59%, transparent 59% 100%) 0 0 / 220px 220px,
+    radial-gradient(circle at 20% 30%, rgba(255,255,255,0.12), transparent 170px),
+    radial-gradient(circle at 78% 18%, rgba(255,255,255,0.1), transparent 190px),
+    linear-gradient(180deg, rgba(255,255,255,0.08), transparent 48%) !important;
 }
 
 .main .block-container {
@@ -128,10 +128,10 @@ html, body, [class*="css"],
 
 section[data-testid="stSidebar"] {
   background:
-    linear-gradient(150deg, rgba(255,255,255,0.17) 0 18%, transparent 18% 100%) 0 84px / 260px 190px,
-    linear-gradient(180deg, rgba(111,91,216,0.96), rgba(82,70,195,0.92) 58%, rgba(71,113,218,0.92)) !important;
-  border-right: 1px solid rgba(255,255,255,0.5) !important;
-  box-shadow: 12px 0 34px rgba(82,62,160,0.2) !important;
+    linear-gradient(150deg, rgba(255,255,255,0.09) 0 18%, transparent 18% 100%) 0 84px / 260px 190px,
+    linear-gradient(180deg, rgba(80,66,186,0.96), rgba(57,48,154,0.94) 58%, rgba(47,92,176,0.94)) !important;
+  border-right: 1px solid rgba(238,233,255,0.34) !important;
+  box-shadow: 12px 0 34px rgba(18,14,54,0.28) !important;
 }
 
 section[data-testid="stSidebar"] .block-container {
@@ -140,13 +140,13 @@ section[data-testid="stSidebar"] .block-container {
 
 section[data-testid="stSidebar"]::before {
   top: 10px !important;
-  border: 1px solid rgba(255,255,255,0.58) !important;
+  border: 1px solid rgba(238,233,255,0.42) !important;
   border-radius: 999px !important;
   background:
-    linear-gradient(180deg, rgba(255,255,255,0.3), rgba(255,255,255,0.1)),
-    rgba(84, 69, 198, 0.86) !important;
+    linear-gradient(180deg, rgba(255,255,255,0.18), rgba(255,255,255,0.06)),
+    rgba(64, 53, 170, 0.88) !important;
   color: #ffffff !important;
-  box-shadow: inset 0 1px 0 rgba(255,255,255,0.38), 0 10px 22px rgba(59,47,142,0.2) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.22), 0 10px 22px rgba(18,14,54,0.22) !important;
 }
 
 .main .home-hero,
@@ -162,13 +162,13 @@ section[data-testid="stSidebar"]::before {
 .main .norma-hero,
 .main .saves-hero {
   overflow: hidden !important;
-  border: 1px solid rgba(255,255,255,0.56) !important;
+  border: 1px solid rgba(238,233,255,0.42) !important;
   border-radius: var(--poke-radius-xl) !important;
   background:
-    linear-gradient(126deg, rgba(255,255,255,0.2) 0 21%, transparent 21% 100%),
-    linear-gradient(302deg, rgba(255,117,221,0.22), transparent 42%),
-    linear-gradient(180deg, rgba(137,113,238,0.9), rgba(83,73,190,0.88)) !important;
-  box-shadow: var(--poke-surface-glow), 0 22px 44px rgba(82,62,160,0.18) !important;
+    linear-gradient(126deg, rgba(255,255,255,0.11) 0 21%, transparent 21% 100%),
+    linear-gradient(302deg, rgba(255,117,221,0.16), transparent 44%),
+    linear-gradient(180deg, rgba(111,91,216,0.92), rgba(57,48,154,0.9)) !important;
+  box-shadow: var(--poke-surface-glow), 0 22px 44px rgba(18,14,54,0.26) !important;
   backdrop-filter: blur(14px);
 }
 
@@ -239,13 +239,13 @@ section[data-testid="stSidebar"]::before {
 .main .cup-pill,
 .main .matchup-hero-pill,
 .main .season-pill {
-  border: 1px solid rgba(255,255,255,0.5) !important;
+  border: 1px solid rgba(238,233,255,0.34) !important;
   border-radius: 999px !important;
   background:
-    linear-gradient(180deg, rgba(255,255,255,0.34), rgba(255,255,255,0.12)),
-    rgba(91, 74, 205, 0.74) !important;
+    linear-gradient(180deg, rgba(255,255,255,0.2), rgba(255,255,255,0.07)),
+    rgba(72, 59, 182, 0.78) !important;
   color: #ffffff !important;
-  box-shadow: inset 0 1px 0 rgba(255,255,255,0.34), 0 8px 18px rgba(75,60,165,0.15) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.22), 0 8px 18px rgba(18,14,54,0.2) !important;
 }
 
 .main .home-card,
@@ -297,10 +297,10 @@ section[data-testid="stSidebar"]::before {
 .main .trainer-panel,
 section[data-testid="stSidebar"] .profile-card,
 section[data-testid="stSidebar"] .app-notice {
-  border: 1px solid rgba(255,255,255,0.42) !important;
+  border: 1px solid rgba(238,233,255,0.3) !important;
   border-radius: var(--poke-radius) !important;
   background:
-    linear-gradient(130deg, rgba(255,255,255,0.17) 0 24%, transparent 24% 100%),
+    linear-gradient(130deg, rgba(255,255,255,0.1) 0 24%, transparent 24% 100%),
     linear-gradient(180deg, var(--champ-panel-2), var(--champ-panel-deep)) !important;
   box-shadow: var(--poke-surface-glow), var(--poke-shadow-card) !important;
   color: #ffffff !important;
@@ -350,13 +350,13 @@ section[data-testid="stSidebar"] .app-notice {
   align-items: center !important;
   gap: 8px !important;
   padding: 8px 13px !important;
-  border: 1px solid rgba(255,255,255,0.6) !important;
+  border: 1px solid rgba(238,233,255,0.44) !important;
   border-radius: 999px !important;
   background:
-    linear-gradient(90deg, rgba(255,255,255,0.28), transparent 72%),
+    linear-gradient(90deg, rgba(255,255,255,0.18), transparent 72%),
     linear-gradient(180deg, var(--accent), var(--accent-dark)) !important;
   color: #ffffff !important;
-  box-shadow: inset 0 1px 0 rgba(255,255,255,0.34), 0 10px 22px rgba(82,62,160,0.16) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.24), 0 10px 22px rgba(18,14,54,0.22) !important;
 }
 
 .main .home-action-card,
@@ -388,12 +388,12 @@ section[data-testid="stSidebar"] .stPopover > div > button,
   position: relative !important;
   overflow: hidden !important;
   clip-path: none !important;
-  border: 1px solid rgba(105, 89, 202, 0.28) !important;
+  border: 1px solid rgba(238, 233, 255, 0.3) !important;
   border-radius: 14px !important;
   background:
-    linear-gradient(136deg, transparent 0 70%, rgba(255,117,221,0.28) 70% 82%, rgba(69,209,255,0.28) 82% 100%),
+    linear-gradient(136deg, transparent 0 70%, rgba(255,117,221,0.18) 70% 82%, rgba(69,209,255,0.18) 82% 100%),
     linear-gradient(180deg, var(--champ-list), var(--champ-list-2)) !important;
-  box-shadow: inset 0 1px 0 rgba(255,255,255,0.86), 0 9px 20px rgba(82,62,160,0.14) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.46), 0 9px 20px rgba(18,14,54,0.2) !important;
   color: var(--champ-text) !important;
 }
 
@@ -496,11 +496,11 @@ section[data-testid="stSidebar"] div[role="radiogroup"] label:has(input:checked)
 .main .battle-move-row[open] > .battle-move-link,
 .main .stButton > button[kind="primary"],
 section[data-testid="stSidebar"] div.stButton > button[kind="primary"] {
-  border-color: rgba(255,255,255,0.88) !important;
+  border-color: rgba(248,245,255,0.78) !important;
   background:
-    linear-gradient(136deg, transparent 0 68%, rgba(255,255,255,0.34) 68% 100%),
+    linear-gradient(136deg, transparent 0 68%, rgba(255,255,255,0.22) 68% 100%),
     linear-gradient(180deg, var(--champ-lime), var(--champ-lime-2)) !important;
-  box-shadow: inset 0 1px 0 rgba(255,255,255,0.84), 0 9px 18px rgba(110, 160, 0, 0.22), 0 0 0 3px rgba(255,230,54,0.2) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.48), 0 9px 18px rgba(35, 58, 0, 0.24), 0 0 0 3px rgba(246,216,59,0.18) !important;
   color: var(--champ-text) !important;
 }
 
@@ -530,12 +530,12 @@ section[data-testid="stSidebar"] div[role="radiogroup"] label:has(input:checked)
 .main div[data-baseweb="tab-list"] {
   gap: 10px !important;
   padding: 10px !important;
-  border: 1px solid rgba(255,255,255,0.42) !important;
+  border: 1px solid rgba(238,233,255,0.32) !important;
   border-radius: 16px !important;
   background:
-    linear-gradient(180deg, rgba(255,255,255,0.2), rgba(255,255,255,0.08)),
-    rgba(99, 82, 207, 0.72) !important;
-  box-shadow: var(--poke-surface-glow), 0 12px 24px rgba(82,62,160,0.14) !important;
+    linear-gradient(180deg, rgba(255,255,255,0.14), rgba(255,255,255,0.05)),
+    rgba(77, 63, 186, 0.78) !important;
+  box-shadow: var(--poke-surface-glow), 0 12px 24px rgba(18,14,54,0.22) !important;
 }
 
 .main div[data-testid="stTabs"] button[data-baseweb="tab"],
@@ -574,12 +574,12 @@ section[data-testid="stSidebar"] div[role="radiogroup"] label:has(input:checked)
 .main .stMultiSelect [data-baseweb="select"],
 .main .stDateInput input {
   min-height: 42px !important;
-  border: 1px solid rgba(105,89,202,0.32) !important;
+  border: 1px solid rgba(238,233,255,0.3) !important;
   border-radius: 13px !important;
   background:
-    linear-gradient(180deg, rgba(255,255,255,0.95), rgba(239,235,255,0.96)) !important;
+    linear-gradient(180deg, rgba(222,216,248,0.96), rgba(199,192,230,0.96)) !important;
   color: var(--champ-text) !important;
-  box-shadow: inset 0 1px 0 rgba(255,255,255,0.82), 0 8px 18px rgba(82,62,160,0.08) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.36), 0 8px 18px rgba(18,14,54,0.18) !important;
 }
 
 .main .stTextInput input *,
@@ -596,11 +596,11 @@ section[data-testid="stSidebar"] div[role="radiogroup"] label:has(input:checked)
 .main table,
 .main .league-status-table,
 .main .season-table {
-  border: 1px solid rgba(255,255,255,0.44) !important;
+  border: 1px solid rgba(238,233,255,0.32) !important;
   border-radius: var(--poke-radius) !important;
   overflow: hidden !important;
   background:
-    linear-gradient(180deg, rgba(116,94,224,0.86), rgba(74,62,174,0.82)) !important;
+    linear-gradient(180deg, rgba(92,75,202,0.88), rgba(53,44,142,0.86)) !important;
   color: #ffffff !important;
   box-shadow: var(--poke-surface-glow), var(--poke-shadow-card) !important;
 }
@@ -608,7 +608,7 @@ section[data-testid="stSidebar"] div[role="radiogroup"] label:has(input:checked)
 .main table th,
 .main .league-status-table th,
 .main .season-table th {
-  background: rgba(255,255,255,0.14) !important;
+  background: rgba(255,255,255,0.09) !important;
   color: #ffffff !important;
   font-family: var(--font-pixel) !important;
 }
@@ -651,20 +651,20 @@ section[data-testid="stSidebar"] div[role="radiogroup"] label:has(input:checked)
 .main .matchup-avatar,
 .main .battle-sprite-wrap,
 section[data-testid="stSidebar"] .mini-mon {
-  border: 1px solid rgba(105,89,202,0.26) !important;
+  border: 1px solid rgba(238,233,255,0.26) !important;
   border-radius: 14px !important;
   background:
-    radial-gradient(circle at 48% 42%, rgba(255,255,255,0.8), rgba(255,255,255,0.14) 58%, transparent 59%),
-    linear-gradient(180deg, rgba(248,246,255,0.96), rgba(223,215,255,0.9)) !important;
-  box-shadow: inset 0 1px 0 rgba(255,255,255,0.88), 0 8px 16px rgba(82,62,160,0.12) !important;
+    radial-gradient(circle at 48% 42%, rgba(255,255,255,0.45), rgba(255,255,255,0.08) 58%, transparent 59%),
+    linear-gradient(180deg, rgba(214,207,244,0.94), rgba(178,170,218,0.9)) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.42), 0 8px 16px rgba(18,14,54,0.2) !important;
 }
 
 .main .shop-price,
 .main .shop-coin-value {
-  border: 1px solid rgba(105,89,202,0.26) !important;
+  border: 1px solid rgba(238,233,255,0.26) !important;
   border-radius: 10px !important;
   background:
-    linear-gradient(180deg, rgba(255,255,255,0.9), rgba(240,236,255,0.9)) !important;
+    linear-gradient(180deg, rgba(222,216,248,0.92), rgba(199,192,230,0.92)) !important;
   color: var(--champ-text) !important;
 }
 
@@ -714,7 +714,7 @@ section[data-testid="stSidebar"] .mini-mon {
 
 .main .shop-card.is-sale {
   border-color: rgba(255,230,54,0.9) !important;
-  box-shadow: inset 0 1px 0 rgba(255,255,255,0.86), 0 0 0 3px rgba(255,230,54,0.18), 0 12px 26px rgba(82,62,160,0.18) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.42), 0 0 0 3px rgba(246,216,59,0.16), 0 12px 26px rgba(18,14,54,0.24) !important;
 }
 
 .main .battle-board {
@@ -737,8 +737,8 @@ section[data-testid="stSidebar"] .mini-mon {
   padding: 6px 9px !important;
   border-radius: 12px !important;
   background:
-    linear-gradient(136deg, transparent 0 74%, rgba(255,117,221,0.22) 74% 100%),
-    linear-gradient(180deg, rgba(255,255,255,0.96), rgba(238,233,255,0.94)) !important;
+    linear-gradient(136deg, transparent 0 74%, rgba(255,117,221,0.16) 74% 100%),
+    linear-gradient(180deg, rgba(222,216,248,0.94), rgba(199,192,230,0.94)) !important;
 }
 
 .main .battle-move-row[open] > .battle-move-link span:last-child,
@@ -748,10 +748,10 @@ section[data-testid="stSidebar"] .mini-mon {
 }
 
 .main .battle-move-detail {
-  border: 1px solid rgba(255,255,255,0.42) !important;
+  border: 1px solid rgba(238,233,255,0.3) !important;
   border-radius: var(--poke-radius) !important;
   background:
-    linear-gradient(130deg, rgba(255,255,255,0.16) 0 26%, transparent 26% 100%),
+    linear-gradient(130deg, rgba(255,255,255,0.1) 0 26%, transparent 26% 100%),
     linear-gradient(180deg, var(--champ-panel-2), var(--champ-panel-deep)) !important;
   box-shadow: var(--poke-surface-glow), var(--poke-shadow-card) !important;
 }
@@ -763,7 +763,7 @@ section[data-testid="stSidebar"] .mini-mon {
 .main .battle-iv {
   border: 1px solid rgba(255,255,255,0.22) !important;
   border-radius: 10px !important;
-  background: rgba(255,255,255,0.12) !important;
+  background: rgba(255,255,255,0.08) !important;
 }
 
 .main .battle-type-pill {
@@ -785,11 +785,11 @@ section[data-testid="stSidebar"] .mini-mon {
   border: 1px solid rgba(114, 96, 212, 0.34) !important;
   border-radius: 16px !important;
   background:
-    linear-gradient(138deg, transparent 0 66%, rgba(255,117,221,0.22) 66% 82%, rgba(69,209,255,0.24) 82% 100%),
-    linear-gradient(180deg, rgba(255,255,255,0.98), rgba(237,232,255,0.97)) !important;
+    linear-gradient(138deg, transparent 0 66%, rgba(255,117,221,0.16) 66% 82%, rgba(69,209,255,0.16) 82% 100%),
+    linear-gradient(180deg, rgba(222,216,248,0.94), rgba(199,192,230,0.94)) !important;
   box-shadow:
-    inset 0 1px 0 rgba(255,255,255,0.92),
-    0 8px 18px rgba(82,62,160,0.13) !important;
+    inset 0 1px 0 rgba(255,255,255,0.46),
+    0 8px 18px rgba(18,14,54,0.22) !important;
 }
 
 .main .slot::before {
@@ -804,7 +804,7 @@ section[data-testid="stSidebar"] .mini-mon {
     linear-gradient(180deg, var(--champ-red) 0 48%, #3b3e58 48% 54%, #ffffff 54% 100%) !important;
   border: 1px solid rgba(57,68,127,0.42) !important;
   opacity: 0.88 !important;
-  box-shadow: inset 0 1px 0 rgba(255,255,255,0.75) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.38) !important;
   pointer-events: none !important;
 }
 
@@ -820,10 +820,10 @@ section[data-testid="stSidebar"] .mini-mon {
   border-radius: 999px !important;
   background:
     linear-gradient(180deg, rgba(142,122,245,0.96), rgba(90,74,206,0.96)) !important;
-  border: 1px solid rgba(255,255,255,0.82) !important;
+  border: 1px solid rgba(238,233,255,0.64) !important;
   color: #ffffff !important;
   -webkit-text-fill-color: #ffffff !important;
-  box-shadow: inset 0 1px 0 rgba(255,255,255,0.36), 0 4px 8px rgba(82,62,160,0.12) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.28), 0 4px 8px rgba(18,14,54,0.18) !important;
 }
 
 .main .slot .gender-m {
@@ -878,8 +878,8 @@ section[data-testid="stSidebar"] .mini-mon {
   -webkit-text-fill-color: rgba(53,68,127,0.58) !important;
   border-style: dashed !important;
   background:
-    linear-gradient(138deg, transparent 0 66%, rgba(255,255,255,0.28) 66% 100%),
-    rgba(248,246,255,0.58) !important;
+    linear-gradient(138deg, transparent 0 66%, rgba(255,255,255,0.12) 66% 100%),
+    rgba(190,183,222,0.42) !important;
 }
 
 .main .slot-empty *,
@@ -893,7 +893,7 @@ section[data-testid="stSidebar"] .mini-mon {
   padding: 12px !important;
   border-radius: 18px !important;
   background:
-    linear-gradient(130deg, rgba(255,255,255,0.18) 0 30%, transparent 30% 100%),
+    linear-gradient(130deg, rgba(255,255,255,0.1) 0 30%, transparent 30% 100%),
     linear-gradient(180deg, rgba(132,107,238,0.9), rgba(77,65,178,0.88)) !important;
 }
 
@@ -902,7 +902,7 @@ section[data-testid="stSidebar"] .mini-mon {
   justify-content: space-between !important;
   border-radius: 999px !important;
   background:
-    linear-gradient(180deg, rgba(255,255,255,0.26), rgba(255,255,255,0.08)),
+    linear-gradient(180deg, rgba(255,255,255,0.16), rgba(255,255,255,0.05)),
     rgba(82,70,195,0.78) !important;
 }
 
@@ -915,8 +915,8 @@ section[data-testid="stSidebar"] .mini-mon {
   min-height: 186px !important;
   border-radius: 18px !important;
   background:
-    radial-gradient(circle at 50% 48%, rgba(255,255,255,0.78), rgba(255,255,255,0.12) 58%, transparent 59%),
-    linear-gradient(180deg, rgba(250,248,255,0.96), rgba(226,218,255,0.92)) !important;
+    radial-gradient(circle at 50% 48%, rgba(255,255,255,0.44), rgba(255,255,255,0.08) 58%, transparent 59%),
+    linear-gradient(180deg, rgba(214,207,244,0.94), rgba(178,170,218,0.9)) !important;
 }
 
 .main .trainer-portrait img {
@@ -933,7 +933,7 @@ section[data-testid="stSidebar"] .mini-mon {
   padding: 7px 8px !important;
   border: 1px solid rgba(255,255,255,0.22) !important;
   border-radius: 999px !important;
-  background: rgba(255,255,255,0.12) !important;
+  background: rgba(255,255,255,0.08) !important;
 }
 
 .main .tbar-label {
@@ -954,10 +954,10 @@ section[data-testid="stSidebar"] .mini-mon {
 
 .main .tbar-value,
 .main .trainer-kia {
-  border: 1px solid rgba(105,89,202,0.26) !important;
+  border: 1px solid rgba(238,233,255,0.26) !important;
   border-radius: 12px !important;
   background:
-    linear-gradient(180deg, rgba(255,255,255,0.95), rgba(238,233,255,0.93)) !important;
+    linear-gradient(180deg, rgba(222,216,248,0.92), rgba(199,192,230,0.92)) !important;
   color: var(--champ-text) !important;
   -webkit-text-fill-color: var(--champ-text) !important;
 }
@@ -977,7 +977,7 @@ section[data-testid="stSidebar"] .mini-mon {
   padding: 12px !important;
   border-radius: 20px !important;
   background:
-    linear-gradient(128deg, rgba(255,255,255,0.16) 0 21%, transparent 21% 100%),
+    linear-gradient(128deg, rgba(255,255,255,0.09) 0 21%, transparent 21% 100%),
     linear-gradient(180deg, rgba(130,105,238,0.86), rgba(75,64,176,0.8)) !important;
 }
 
@@ -988,10 +988,10 @@ section[data-testid="stSidebar"] .mini-mon {
 .main .battle-board-top > div {
   min-height: 46px !important;
   padding: 8px 12px !important;
-  border: 1px solid rgba(255,255,255,0.42) !important;
+  border: 1px solid rgba(238,233,255,0.3) !important;
   border-radius: 999px !important;
   background:
-    linear-gradient(180deg, rgba(255,255,255,0.28), rgba(255,255,255,0.08)),
+    linear-gradient(180deg, rgba(255,255,255,0.16), rgba(255,255,255,0.05)),
     rgba(86,72,198,0.74) !important;
 }
 
@@ -1011,9 +1011,9 @@ section[data-testid="stSidebar"] .mini-mon {
   gap: 12px !important;
   padding: 12px !important;
   border-radius: 18px !important;
-  border: 1px solid rgba(255,255,255,0.46) !important;
+  border: 1px solid rgba(238,233,255,0.34) !important;
   background:
-    linear-gradient(112deg, rgba(255,255,255,0.18) 0 35%, rgba(255,255,255,0.05) 35% 100%),
+    linear-gradient(112deg, rgba(255,255,255,0.1) 0 35%, rgba(255,255,255,0.03) 35% 100%),
     linear-gradient(180deg, rgba(129,104,236,0.9), rgba(82,70,190,0.9)) !important;
 }
 
@@ -1021,7 +1021,7 @@ section[data-testid="stSidebar"] .mini-mon {
   min-width: 0 !important;
   padding: 8px 9px !important;
   border-radius: 14px !important;
-  background: rgba(255,255,255,0.12) !important;
+  background: rgba(255,255,255,0.07) !important;
 }
 
 .main .battle-mon-name {
@@ -1056,8 +1056,8 @@ section[data-testid="stSidebar"] .mini-mon {
   height: 25px !important;
   flex-basis: 25px !important;
   border-radius: 7px !important;
-  border: 1px solid rgba(255,255,255,0.8) !important;
-  box-shadow: inset 0 1px 0 rgba(255,255,255,0.42), 0 3px 6px rgba(55,45,130,0.18) !important;
+  border: 1px solid rgba(238,233,255,0.62) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.28), 0 3px 6px rgba(18,14,54,0.22) !important;
 }
 
 .main .battle-move-link,
@@ -1086,14 +1086,14 @@ section[data-testid="stSidebar"] .mini-mon {
   margin: 7px 0 1px 14px !important;
   border-radius: 14px !important;
   background:
-    linear-gradient(130deg, rgba(255,255,255,0.14) 0 28%, transparent 28% 100%),
+    linear-gradient(130deg, rgba(255,255,255,0.09) 0 28%, transparent 28% 100%),
     linear-gradient(180deg, rgba(92,75,202,0.96), rgba(62,52,160,0.96)) !important;
 }
 
 .main .battle-move-detail-inline .battle-detail-stats div {
   border-radius: 12px !important;
   background:
-    linear-gradient(180deg, rgba(255,255,255,0.96), rgba(238,233,255,0.93)) !important;
+    linear-gradient(180deg, rgba(222,216,248,0.92), rgba(199,192,230,0.92)) !important;
 }
 
 .main .battle-move-detail-inline .battle-detail-stats div span,
@@ -1135,8 +1135,8 @@ section[data-testid="stSidebar"] .mini-mon {
   padding: 4px !important;
   border-radius: 16px !important;
   background:
-    radial-gradient(circle at 50% 46%, rgba(255,255,255,0.74), rgba(255,255,255,0.12) 60%, transparent 61%),
-    rgba(248,246,255,0.92) !important;
+    radial-gradient(circle at 50% 46%, rgba(255,255,255,0.42), rgba(255,255,255,0.08) 60%, transparent 61%),
+    rgba(214,207,244,0.88) !important;
 }
 
 .main .matchup-move-list {
@@ -1157,21 +1157,21 @@ section[data-testid="stSidebar"] .mini-mon {
 .main .champ-detail-card {
   min-width: 0 !important;
   padding: 10px !important;
-  border: 1px solid rgba(255,255,255,0.44) !important;
+  border: 1px solid rgba(238,233,255,0.32) !important;
   border-radius: 18px !important;
   background:
-    linear-gradient(130deg, rgba(255,255,255,0.17) 0 28%, transparent 28% 100%),
+    linear-gradient(130deg, rgba(255,255,255,0.1) 0 28%, transparent 28% 100%),
     linear-gradient(180deg, rgba(132,107,238,0.9), rgba(77,65,178,0.88)) !important;
   color: #ffffff !important;
   box-shadow: var(--poke-surface-glow), var(--poke-shadow-card) !important;
 }
 
 .main .champ-detail-header {
-  border: 1px solid rgba(255,255,255,0.58) !important;
+  border: 1px solid rgba(238,233,255,0.42) !important;
   border-radius: 999px !important;
   clip-path: none !important;
   background:
-    linear-gradient(180deg, rgba(255,255,255,0.28), rgba(255,255,255,0.08)),
+    linear-gradient(180deg, rgba(255,255,255,0.16), rgba(255,255,255,0.05)),
     rgba(84,70,196,0.78) !important;
   color: #ffffff !important;
 }
@@ -1188,22 +1188,22 @@ section[data-testid="stSidebar"] .mini-mon {
 .main .champ-detail-stat-value,
 .main .champ-detail-private-value,
 .main .champ-detail-move-pp {
-  border: 1px solid rgba(105,89,202,0.26) !important;
+  border: 1px solid rgba(238,233,255,0.26) !important;
   border-radius: 999px !important;
   background:
-    linear-gradient(180deg, rgba(255,255,255,0.96), rgba(238,233,255,0.94)) !important;
+    linear-gradient(180deg, rgba(222,216,248,0.92), rgba(199,192,230,0.92)) !important;
   color: var(--champ-text) !important;
   -webkit-text-fill-color: var(--champ-text) !important;
-  box-shadow: inset 0 1px 0 rgba(255,255,255,0.86) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.42) !important;
 }
 
 .main .champ-detail-sprite-stage {
   min-height: 206px !important;
-  border: 1px solid rgba(105,89,202,0.26) !important;
+  border: 1px solid rgba(238,233,255,0.26) !important;
   border-radius: 18px !important;
   background:
-    radial-gradient(circle at 50% 46%, rgba(255,255,255,0.82), rgba(255,255,255,0.12) 60%, transparent 61%),
-    linear-gradient(180deg, rgba(248,246,255,0.97), rgba(226,218,255,0.92)) !important;
+    radial-gradient(circle at 50% 46%, rgba(255,255,255,0.44), rgba(255,255,255,0.08) 60%, transparent 61%),
+    linear-gradient(180deg, rgba(214,207,244,0.94), rgba(178,170,218,0.9)) !important;
 }
 
 .main .champ-detail-sprite-stage img {
@@ -1213,13 +1213,13 @@ section[data-testid="stSidebar"] .mini-mon {
 }
 
 .main .champ-detail-item-box {
-  border: 1px solid rgba(255,255,255,0.34) !important;
+  border: 1px solid rgba(238,233,255,0.28) !important;
   border-radius: 16px !important;
   overflow: hidden !important;
 }
 
 .main .champ-detail-item-label {
-  border-bottom: 1px solid rgba(255,255,255,0.28) !important;
+  border-bottom: 1px solid rgba(238,233,255,0.24) !important;
   background:
     linear-gradient(90deg, var(--accent) 0 6px, transparent 6px),
     linear-gradient(180deg, rgba(104,86,211,0.96), rgba(70,58,172,0.94)) !important;
@@ -1234,13 +1234,13 @@ section[data-testid="stSidebar"] .mini-mon {
 .main .champ-detail-tab {
   width: 22px !important;
   height: 20px !important;
-  border: 1px solid rgba(255,255,255,0.72) !important;
+  border: 1px solid rgba(238,233,255,0.5) !important;
   border-radius: 6px !important;
-  box-shadow: inset 0 1px 0 rgba(255,255,255,0.46), 0 4px 8px rgba(64,52,150,0.12) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.3), 0 4px 8px rgba(18,14,54,0.18) !important;
 }
 
 .main .champ-detail-screen {
-  border: 1px solid rgba(255,255,255,0.36) !important;
+  border: 1px solid rgba(238,233,255,0.28) !important;
   border-radius: 16px !important;
   padding: 7px !important;
   background:
@@ -1253,9 +1253,9 @@ section[data-testid="stSidebar"] .mini-mon {
 .main .champ-detail-private-row {
   margin-bottom: 7px !important;
   padding: 7px 8px !important;
-  border: 1px solid rgba(255,255,255,0.24) !important;
+  border: 1px solid rgba(238,233,255,0.22) !important;
   border-radius: 14px !important;
-  background: rgba(255,255,255,0.12) !important;
+  background: rgba(255,255,255,0.07) !important;
   color: #ffffff !important;
 }
 
@@ -1271,20 +1271,20 @@ section[data-testid="stSidebar"] .mini-mon {
 .main .champ-detail-bar {
   height: 12px !important;
   border-radius: 999px !important;
-  border: 1px solid rgba(255,255,255,0.26) !important;
+  border: 1px solid rgba(238,233,255,0.22) !important;
   background: rgba(52,44,133,0.42) !important;
 }
 
 .main .champ-detail-bar > div {
   border-radius: 999px !important;
-  box-shadow: inset 0 1px 0 rgba(255,255,255,0.6) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.36) !important;
 }
 
 .main .champ-detail-ability-desc {
   margin-bottom: 7px !important;
-  border: 1px solid rgba(255,255,255,0.18) !important;
+  border: 1px solid rgba(238,233,255,0.18) !important;
   border-radius: 14px !important;
-  background: rgba(255,255,255,0.09) !important;
+  background: rgba(255,255,255,0.06) !important;
   color: rgba(255,255,255,0.88) !important;
   -webkit-text-fill-color: rgba(255,255,255,0.88) !important;
 }
@@ -1298,19 +1298,19 @@ section[data-testid="stSidebar"] .mini-mon {
   grid-template-columns: minmax(78px, auto) minmax(0, 1fr) auto !important;
   gap: 9px !important;
   padding: 6px 8px !important;
-  border: 1px solid rgba(105,89,202,0.28) !important;
+  border: 1px solid rgba(238,233,255,0.28) !important;
   border-radius: 999px !important;
   background:
-    linear-gradient(136deg, transparent 0 73%, rgba(255,117,221,0.18) 73% 100%),
-    linear-gradient(180deg, rgba(255,255,255,0.96), rgba(238,233,255,0.94)) !important;
+    linear-gradient(136deg, transparent 0 73%, rgba(255,117,221,0.14) 73% 100%),
+    linear-gradient(180deg, rgba(222,216,248,0.94), rgba(199,192,230,0.94)) !important;
   color: var(--champ-text) !important;
 }
 
 .main .champ-detail-move-type {
   min-width: 72px !important;
   border-radius: 8px !important;
-  border: 1px solid rgba(255,255,255,0.82) !important;
-  box-shadow: inset 0 1px 0 rgba(255,255,255,0.42), 0 3px 6px rgba(55,45,130,0.16) !important;
+  border: 1px solid rgba(238,233,255,0.62) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.28), 0 3px 6px rgba(18,14,54,0.2) !important;
 }
 
 .main .champ-detail-move-name {
@@ -1339,8 +1339,8 @@ section[data-testid="stSidebar"] .mini-mon {
 
 .main .app-notice {
   background:
-    linear-gradient(136deg, transparent 0 72%, rgba(255,117,221,0.24) 72% 100%),
-    linear-gradient(180deg, rgba(255,255,255,0.94), rgba(238,233,255,0.94)) !important;
+    linear-gradient(136deg, transparent 0 72%, rgba(255,117,221,0.14) 72% 100%),
+    linear-gradient(180deg, rgba(222,216,248,0.92), rgba(199,192,230,0.92)) !important;
 }
 
 .main .app-notice-title,
@@ -1352,8 +1352,8 @@ section[data-testid="stSidebar"] .mini-mon {
 
 section[data-testid="stSidebar"] .app-notice {
   background:
-    linear-gradient(136deg, transparent 0 72%, rgba(255,117,221,0.22) 72% 100%),
-    linear-gradient(180deg, rgba(255,255,255,0.95), rgba(238,233,255,0.93)) !important;
+    linear-gradient(136deg, transparent 0 72%, rgba(255,117,221,0.14) 72% 100%),
+    linear-gradient(180deg, rgba(222,216,248,0.92), rgba(199,192,230,0.92)) !important;
 }
 
 section[data-testid="stSidebar"] .app-notice *,
@@ -1366,9 +1366,9 @@ section[data-testid="stSidebar"] .profile-sub {
 
 section[data-testid="stSidebar"] .profile-card {
   background:
-    linear-gradient(130deg, rgba(255,255,255,0.2) 0 28%, transparent 28% 100%),
-    linear-gradient(180deg, rgba(255,255,255,0.22), rgba(255,255,255,0.1)),
-    rgba(104, 86, 211, 0.74) !important;
+    linear-gradient(130deg, rgba(255,255,255,0.11) 0 28%, transparent 28% 100%),
+    linear-gradient(180deg, rgba(255,255,255,0.14), rgba(255,255,255,0.06)),
+    rgba(72, 59, 182, 0.82) !important;
 }
 
 section[data-testid="stSidebar"] .profile-card *,
