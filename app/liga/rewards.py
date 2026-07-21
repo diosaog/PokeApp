@@ -1,30 +1,14 @@
 from __future__ import annotations
 
-CURRENT_POINTS_BY_POSITION = {
-    1: 9,
-    2: 8,
-    3: 7,
-    4: 6,
-    5: 5,
-    6: 5,
-    7: 4,
-    8: 3,
-    9: 2,
-    10: 1,
-}
+from app.season.config import (
+    DEFAULT_COINS_BY_POSITION,
+    DEFAULT_POINTS_BY_POSITION,
+    coins_for_position,
+    points_for_position,
+)
 
-CURRENT_COINS_BY_POSITION = {
-    1: 15,
-    2: 14,
-    3: 12,
-    4: 11,
-    5: 10,
-    6: 11,
-    7: 9,
-    8: 8,
-    9: 6,
-    10: 4,
-}
+CURRENT_POINTS_BY_POSITION = DEFAULT_POINTS_BY_POSITION
+CURRENT_COINS_BY_POSITION = DEFAULT_COINS_BY_POSITION
 
 
 def points_for_league_position(
@@ -33,8 +17,8 @@ def points_for_league_position(
     *,
     field_size: int | None = None,
 ) -> int:
-    _ = tramo, field_size
-    return CURRENT_POINTS_BY_POSITION.get(int(pos), 0)
+    _ = field_size
+    return points_for_position(int(tramo), int(pos))
 
 
 def coins_for_league_position(
@@ -43,5 +27,5 @@ def coins_for_league_position(
     *,
     field_size: int | None = None,
 ) -> int:
-    _ = tramo, field_size
-    return CURRENT_COINS_BY_POSITION.get(int(pos), 0)
+    _ = field_size
+    return coins_for_position(int(tramo), int(pos))

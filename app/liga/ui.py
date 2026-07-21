@@ -6,6 +6,7 @@ from datetime import datetime, timezone
 import streamlit as st
 
 from app.discord_notify import (
+    discord_notifications_enabled,
     notify_league_match_results_async,
     notify_league_round_finished_detail,
     notify_missing_team_locks_async,
@@ -13,13 +14,13 @@ from app.discord_notify import (
 from app.entrenadores.trainer_flags import is_trainer_retired
 from app.liga.divisions import division_a_size_for_count
 from app.liga.ranking import (
-    MAX_JORNADAS,
     all_filled,
     clear_ranking_caches,
     final_podium,
     finalize,
     general_table_sorted,
     get_matches_for,
+    max_jornadas,
     recompute_round,
 )
 from app.liga.state import ensure_state, persist_state, restore_state
@@ -126,6 +127,8 @@ def _current_user_can_resend_summary() -> bool:
 
 
 def _notify_missing_team_locks_once(round_no: int) -> None:
+    if not discord_notifications_enabled():
+        return
     key = f"{_TEAM_LOCKS_MISSING_NOTIFY_PREFIX}:{int(round_no)}"
     try:
         if settings_get(key):
@@ -213,7 +216,7 @@ def _send_league_round_notification(
         return False, "No hay datos de enfrentamientos para esa jornada."
 
     table = general_table_sorted()
-    podium = table[:3] if int(round_no) >= MAX_JORNADAS else None
+    podium = table[:3] if int(round_no) >= max_jornadas(round_no) else None
     ok, message = notify_league_round_finished_detail(
         round_no=int(round_no),
         rows=_league_table_notification_rows(table),
@@ -231,6 +234,8 @@ def _send_league_round_notification(
 
 
 def _auto_notify_latest_closed_round() -> None:
+    if not discord_notifications_enabled():
+        return
     round_no = _latest_closed_round()
     if round_no is None:
         return
@@ -365,7 +370,8 @@ def _render_previous_round_editor(
 
             try:
                 is_immediate_previous = (
-                    prev_tramo == (current_tramo - 1) and current_tramo <= MAX_JORNADAS
+                    prev_tramo == (current_tramo - 1)
+                    and current_tramo <= max_jornadas(current_tramo)
                 )
                 recompute_round(
                     prev_tramo, apply_divisions_from_round=is_immediate_previous
@@ -376,7 +382,8 @@ def _render_previous_round_editor(
                         del current_matches[current_tramo]
                 persist_state()
                 clear_money_caches()
-                notify_league_match_results_async(match_notifications)
+                if discord_notifications_enabled():
+                    notify_league_match_results_async(match_notifications)
                 st.success(
                     "Jornada anterior actualizada. Puntos y monedas recalculados."
                 )
@@ -443,7 +450,11 @@ def page_tabla() -> None:
 
     _auto_notify_latest_closed_round()
     resend_round = _latest_closed_round()
-    if resend_round is not None and _current_user_can_resend_summary():
+    if (
+        resend_round is not None
+        and _current_user_can_resend_summary()
+        and discord_notifications_enabled()
+    ):
         if st.button(
             f"Reenviar resumen jornada {resend_round} a Discord",
             use_container_width=True,
@@ -464,7 +475,8 @@ def page_tabla() -> None:
     league_players = users_with_retired_last(active_users())
     division_a_size = division_a_size_for_count(len(league_players), int(tramo))
     division_b_size = max(len(league_players) - division_a_size, 0)
-    liga_finalizada = tramo > MAX_JORNADAS
+    current_max_jornadas = max_jornadas(int(tramo))
+    liga_finalizada = tramo > current_max_jornadas
     prev_tramo = tramo - 1 if tramo > 1 else None
     has_prev_closed = bool(
         prev_tramo and prev_tramo in st.session_state.get("league_matches", {})
@@ -494,11 +506,11 @@ def page_tabla() -> None:
                         finalize(closing_tramo)
                         try:
                             expire_shop_discounts_through_jornada(closing_tramo)
-                            if closing_tramo < MAX_JORNADAS:
+                            if closing_tramo < max_jornadas(closing_tramo):
                                 promotions = schedule_shop_promotions(
                                     get_catalog(), closed_round=closing_tramo
                                 )
-                                if promotions:
+                                if promotions and discord_notifications_enabled():
                                     _queue_flash(
                                         "success",
                                         f"Aaron ha anunciado {len(promotions)} promociones "
@@ -515,23 +527,29 @@ def page_tabla() -> None:
                         tabla_actualizada = general_table_sorted()
                         podium = (
                             tabla_actualizada[:3]
-                            if closing_tramo >= MAX_JORNADAS
+                            if closing_tramo >= max_jornadas(closing_tramo)
                             else None
                         )
-                        notified, notify_message = _send_league_round_notification(
-                            closing_tramo, force=True
-                        )
-                        if notified:
-                            _queue_flash(
-                                "success",
-                                "Aaron Avisa ha enviado el resumen de la jornada a Discord.",
+                        if discord_notifications_enabled():
+                            notified, notify_message = _send_league_round_notification(
+                                closing_tramo, force=True
                             )
+                            if notified:
+                                _queue_flash(
+                                    "success",
+                                    "Aaron Avisa ha enviado el resumen de la jornada a Discord.",
+                                )
+                            else:
+                                _queue_flash(
+                                    "error",
+                                    f"Jornada cerrada, pero Aaron Avisa no pudo enviar a Discord: {notify_message}",
+                                )
                         else:
                             _queue_flash(
-                                "error",
-                                f"Jornada cerrada, pero Aaron Avisa no pudo enviar a Discord: {notify_message}",
+                                "info",
+                                "Jornada cerrada sin aviso de Discord: Aaron Avisa esta silenciado.",
                             )
-                        if closing_tramo >= MAX_JORNADAS:
+                        if closing_tramo >= max_jornadas(closing_tramo):
                             if podium:
                                 labels = ["Ganador", "Segundo puesto", "Tercer puesto"]
                                 summary = " | ".join(
@@ -758,11 +776,15 @@ def page_tabla() -> None:
                     data["B"][(p1, p2)] = tmp_divs["B"].get(k)
                 persist_state()
                 clear_money_caches()
-                notify_league_match_results_async(match_notifications)
+                if discord_notifications_enabled():
+                    notify_league_match_results_async(match_notifications)
                 if match_notifications:
-                    st.success(
-                        "Resultados guardados. Aaron Avisa notificara los enfrentamientos actualizados."
-                    )
+                    if discord_notifications_enabled():
+                        st.success(
+                            "Resultados guardados. Aaron Avisa notificara los enfrentamientos actualizados."
+                        )
+                    else:
+                        st.success("Resultados guardados. Discord esta silenciado.")
                 else:
                     st.success("Resultados guardados.")
 
@@ -852,7 +874,7 @@ def page_tabla() -> None:
                 if b_positions
                 else (b_start + b_len - 1 if b_len else b_start - 1)
             )
-            show_movement_tags = int(t) < MAX_JORNADAS
+            show_movement_tags = int(t) < max_jornadas(int(t))
             rowsA, rowsB = [], []
             for u, pos in entries:
                 tag = ""

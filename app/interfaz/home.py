@@ -10,6 +10,7 @@ import streamlit as st
 from app.common import COIN
 from app.entrenadores.trainer_flags import is_trainer_retired
 from app.liga.context import current_jornada
+from app.season.config import max_rounds
 from app.tienda.discounts import (
     discount_label,
     promotion_opens_label,
@@ -450,7 +451,11 @@ def render_home() -> None:
     st.markdown(
         (
             "<div class='home-grid'>"
-            + _card("Jornada", f"Tramo {int(league.get('tramo') or jornada)}", "En edicion" if league.get("active") else "Cerrada")
+            + _card(
+                "Jornada",
+                f"Tramo {int(league.get('tramo') or jornada)}/{max_rounds(int(league.get('tramo') or jornada))}",
+                "En edicion" if league.get("active") else "Cerrada",
+            )
             + _card("Equipo fijado", lock["title"], lock["detail"])
             + _card("Save actual", save["title"], save["detail"])
             + _card("Tienda", promo_title, promo_detail)

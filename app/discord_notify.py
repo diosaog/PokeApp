@@ -25,6 +25,7 @@ from app.common import COIN
 
 _NORMATIVA_HASH_KEY = "discord_notify:normativa_hash"
 _NORMATIVA_SECTION_HASHES_KEY = "discord_notify:normativa_section_hashes"
+_DISCORD_NOTIFICATIONS_ENABLED_KEY = "discord_notifications_enabled"
 _WEBHOOK_TIMEOUT_SECONDS = float(os.environ.get("DISCORD_WEBHOOK_TIMEOUT_SECONDS", "8"))
 _WEBHOOK_RETRIES = max(1, int(os.environ.get("DISCORD_WEBHOOK_RETRIES", "3")))
 
@@ -147,7 +148,24 @@ def _webhook_username() -> str:
     return _secret("DISCORD_WEBHOOK_USERNAME") or "PokeApp"
 
 
+def discord_notifications_enabled() -> bool:
+    env_value = os.environ.get("DISCORD_NOTIFICATIONS_ENABLED")
+    if env_value not in (None, ""):
+        return str(env_value).strip().lower() in {"1", "true", "yes", "on", "si", "sí"}
+
+    try:
+        from storage import settings_get
+
+        raw_value = settings_get(_DISCORD_NOTIFICATIONS_ENABLED_KEY)
+    except Exception:
+        raw_value = None
+    return str(raw_value or "").strip().lower() in {"1", "true", "yes", "on", "si", "sí"}
+
+
 def _webhook_validation_error() -> str:
+    if not discord_notifications_enabled():
+        return "Aaron Avisa esta silenciado para preparar la 2.0."
+
     url = _webhook_url()
     if not url:
         return "Falta DISCORD_WEBHOOK_URL en los secrets."

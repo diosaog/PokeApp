@@ -1,9 +1,10 @@
 from __future__ import annotations
 
+from app.season.config import division_a_size, movement_count
+
 
 def division_a_size_for_count(player_count: int, round_no: int | None = None) -> int:
-    _ = round_no
-    return min(5, max(0, int(player_count or 0)))
+    return division_a_size(int(player_count or 0), round_no)
 
 
 def movement_count_for_divisions(
@@ -11,10 +12,7 @@ def movement_count_for_divisions(
     b_size: int,
     round_no: int | None = None,
 ) -> int:
-    _ = round_no
-    if a_size <= 0 or b_size <= 0:
-        return 0
-    return min(3, int(a_size), int(b_size))
+    return movement_count(int(a_size), int(b_size), round_no)
 
 
 def next_divisions_from_rankings(

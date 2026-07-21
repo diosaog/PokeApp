@@ -14,6 +14,7 @@ from app.liga.rewards import (
     CURRENT_POINTS_BY_POSITION,
     points_for_league_position,
 )
+from app.season.config import DEFAULT_MAX_ROUNDS, max_rounds
 from app.tienda.common import _eq_item
 from app.entrenadores.trainer_flags import retired_trainers
 from storage import (
@@ -26,8 +27,12 @@ from storage import (
 )
 from utils import USERS, active_users, ensure_user_dir, list_user_saves
 
-MAX_JORNADAS = 4
+MAX_JORNADAS = DEFAULT_MAX_ROUNDS
 POINTS_BY_POSITION = CURRENT_POINTS_BY_POSITION
+
+
+def max_jornadas(round_no: int | None = None) -> int:
+    return max_rounds(round_no)
 
 
 def _visible_league_users() -> dict[str, str]:
@@ -259,7 +264,7 @@ def finalize(tramo: int) -> None:
     except Exception:
         pass
 
-    if tramo < MAX_JORNADAS:
+    if tramo < max_jornadas(tramo):
         nueva_A, nueva_B, up, down = next_divisions_from_rankings(
             rankA,
             rankB,
@@ -310,7 +315,7 @@ def recompute_round(tramo: int, *, apply_divisions_from_round: bool = False) -> 
     for j, u in enumerate(rankB, start=start_b):
         _record_position(tramo, u, j)
 
-    if tramo < MAX_JORNADAS:
+    if tramo < max_jornadas(tramo):
         try:
             _nueva_A, _nueva_B, up, down = next_divisions_from_rankings(
                 rankA,
@@ -330,7 +335,7 @@ def recompute_round(tramo: int, *, apply_divisions_from_round: bool = False) -> 
         except Exception:
             pass
 
-    if apply_divisions_from_round and tramo < MAX_JORNADAS:
+    if apply_divisions_from_round and tramo < max_jornadas(tramo):
         nueva_A, nueva_B, _up, _down = next_divisions_from_rankings(
             rankA,
             rankB,

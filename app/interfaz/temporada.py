@@ -6,8 +6,14 @@ from typing import Any
 
 import streamlit as st
 
-from app.liga.ranking import MAX_JORNADAS
-from app.liga.rewards import CURRENT_COINS_BY_POSITION, CURRENT_POINTS_BY_POSITION
+from app.season.config import (
+    SeasonVersion,
+    current_season_version,
+    load_season_document,
+    save_season_version,
+    season_version_for_round,
+    season_version_to_dict,
+)
 from storage import settings_get
 from utils import active_users
 
@@ -133,14 +139,24 @@ def _card(label: str, value: str, detail: str) -> str:
     )
 
 
-def _reward_table_html() -> str:
+def _version_for_current_round() -> tuple[dict[str, Any], SeasonVersion, int]:
+    state = _league_state()
+    tramo = max(int(state.get("tramo") or 1), 1)
+    document = load_season_document(players=list(active_users().keys()))
+    return document, season_version_for_round(document, tramo), tramo
+
+
+def _reward_table_html(version: SeasonVersion) -> str:
+    positions = sorted(
+        set(version.points_by_position.keys()) | set(version.coins_by_position.keys())
+    )
     rows = []
-    for pos in sorted(CURRENT_POINTS_BY_POSITION):
+    for pos in positions:
         rows.append(
             "<tr>"
             f"<td>{pos}</td>"
-            f"<td>{CURRENT_POINTS_BY_POSITION.get(pos, 0)}</td>"
-            f"<td>{CURRENT_COINS_BY_POSITION.get(pos, 0)}</td>"
+            f"<td>{version.points_by_position.get(pos, 0)}</td>"
+            f"<td>{version.coins_by_position.get(pos, 0)}</td>"
             "</tr>"
         )
     return (
@@ -155,22 +171,66 @@ def _division_label(players: list[str]) -> str:
     return ", ".join(str(player) for player in players) if players else "-"
 
 
+def _format_reward_lines(values: dict[int, int]) -> str:
+    return "\n".join(f"{pos}={values[pos]}" for pos in sorted(values))
+
+
+def _parse_reward_lines(raw: str, fallback: dict[int, int]) -> dict[int, int]:
+    parsed: dict[int, int] = {}
+    for line in str(raw or "").replace(",", "\n").splitlines():
+        text = line.strip()
+        if not text:
+            continue
+        if "=" in text:
+            left, right = text.split("=", 1)
+        elif ":" in text:
+            left, right = text.split(":", 1)
+        else:
+            parts = text.split()
+            if len(parts) != 2:
+                continue
+            left, right = parts
+        try:
+            pos = int(left.strip())
+            value = int(right.strip())
+        except Exception:
+            continue
+        if pos > 0:
+            parsed[pos] = max(0, value)
+    return dict(sorted((parsed or fallback).items()))
+
+
+def _parse_division_sizes(raw: str, fallback: list[int], division_count: int) -> list[int]:
+    numbers: list[int] = []
+    for chunk in str(raw or "").replace("\n", ",").split(","):
+        try:
+            value = int(chunk.strip())
+        except Exception:
+            continue
+        numbers.append(max(0, value))
+    if not numbers:
+        numbers = list(fallback)
+    if len(numbers) < division_count:
+        numbers += [0] * (division_count - len(numbers))
+    return numbers[:division_count]
+
+
 def _render_current_config() -> None:
+    _document, version, tramo = _version_for_current_round()
     state = _league_state()
     users = list(active_users().keys())
     divisions = state.get("divisions") if isinstance(state.get("divisions"), dict) else {}
-    div_a = list((divisions or {}).get("A") or users[:5])
-    div_b = list((divisions or {}).get("B") or users[5:])
-    tramo = max(int(state.get("tramo") or 1), 1)
+    div_a = list((divisions or {}).get("A") or users[: version.division_sizes[0]])
+    div_b = list((divisions or {}).get("B") or users[len(div_a) :])
     active = bool(state.get("active"))
 
     st.markdown(
         (
             "<div class='season-grid'>"
-            + _card("Jornada actual", f"Tramo {tramo}", "En edicion" if active else "Cerrada")
+            + _card("Jornada actual", f"Tramo {tramo}/{version.max_rounds}", "En edicion" if active else "Cerrada")
             + _card("Jugadores activos", str(len(users)), _division_label(users))
-            + _card("Divisiones", "Liga A / Liga B", f"{len(div_a)} y {len(div_b)} jugadores")
-            + _card("Duracion", f"{MAX_JORNADAS} jornadas", "Configurable en 2.0")
+            + _card("Divisiones", f"{version.division_count} liga(s)", " / ".join(str(v) for v in version.division_sizes))
+            + _card("Version reglas", version.name, f"Desde tramo {version.effective_round}")
             + "</div>"
         ),
         unsafe_allow_html=True,
@@ -184,56 +244,125 @@ def _render_current_config() -> None:
         st.markdown("<div class='season-section-title'>Liga B</div>", unsafe_allow_html=True)
         st.markdown(_card("Roster", f"{len(div_b)} jugadores", _division_label(div_b)), unsafe_allow_html=True)
 
-    st.markdown("<div class='season-section-title'>Recompensas actuales</div>", unsafe_allow_html=True)
-    st.markdown(_reward_table_html(), unsafe_allow_html=True)
+    st.markdown("<div class='season-section-title'>Recompensas de esta version</div>", unsafe_allow_html=True)
+    st.markdown(_reward_table_html(version), unsafe_allow_html=True)
 
 
-def _render_draft_builder() -> None:
-    st.markdown("<div class='season-section-title'>Borrador 2.0</div>", unsafe_allow_html=True)
-    with st.form("season_draft_builder"):
+def _render_config_editor() -> None:
+    document, version, tramo = _version_for_current_round()
+    players_default = version.players or list(active_users().keys())
+    st.markdown("<div class='season-section-title'>Guardar version de reglas</div>", unsafe_allow_html=True)
+    with st.form("season_config_editor"):
         c1, c2, c3 = st.columns(3)
         with c1:
-            name = st.text_input("Nombre temporada", value="Temporada 2.0")
-            rounds = st.number_input("Jornadas", min_value=1, max_value=12, value=int(MAX_JORNADAS), step=1)
+            name = st.text_input("Nombre temporada", value=version.name)
+            effective_round = st.number_input(
+                "Aplicar desde tramo",
+                min_value=tramo,
+                max_value=12,
+                value=tramo,
+                step=1,
+            )
+            rounds = st.number_input(
+                "Jornadas",
+                min_value=1,
+                max_value=12,
+                value=int(version.max_rounds),
+                step=1,
+            )
         with c2:
-            division_count = st.number_input("Divisiones", min_value=1, max_value=4, value=2, step=1)
-            promote_count = st.number_input("Ascensos/descensos", min_value=0, max_value=5, value=3, step=1)
+            division_count = st.number_input(
+                "Divisiones",
+                min_value=2,
+                max_value=2,
+                value=2,
+                step=1,
+                disabled=True,
+            )
+            division_sizes_text = st.text_input(
+                "Jugadores por liga",
+                value=", ".join(str(v) for v in version.division_sizes),
+            )
+            movement = st.number_input(
+                "Ascensos/descensos",
+                min_value=0,
+                max_value=10,
+                value=int(version.movement_count),
+                step=1,
+            )
         with c3:
             players_text = st.text_area(
                 "Jugadores",
-                value="\n".join(active_users().keys()),
+                value="\n".join(players_default),
                 height=126,
             )
-        submitted = st.form_submit_button("Generar borrador local", use_container_width=True)
+
+        r1, r2 = st.columns(2)
+        with r1:
+            points_text = st.text_area(
+                "Puntos por posicion",
+                value=_format_reward_lines(version.points_by_position),
+                height=150,
+            )
+        with r2:
+            coins_text = st.text_area(
+                "Monedas por posicion",
+                value=_format_reward_lines(version.coins_by_position),
+                height=150,
+            )
+
+        submitted = st.form_submit_button("Guardar configuracion", use_container_width=True)
 
     if submitted:
         players = [line.strip() for line in players_text.splitlines() if line.strip()]
-        draft = {
-            "name": name.strip() or "Temporada",
-            "rounds": int(rounds),
-            "division_count": int(division_count),
-            "movement_count": int(promote_count),
-            "players": players,
-            "points": CURRENT_POINTS_BY_POSITION,
-            "coins": CURRENT_COINS_BY_POSITION,
-            "saved": False,
-        }
-        st.session_state["season_draft_v2"] = draft
+        division_count_i = int(division_count)
+        new_version = SeasonVersion(
+            id=version.id,
+            name=name.strip() or "Temporada",
+            effective_round=int(effective_round),
+            max_rounds=int(rounds),
+            players=players,
+            division_count=division_count_i,
+            division_sizes=_parse_division_sizes(
+                division_sizes_text,
+                version.division_sizes,
+                division_count_i,
+            ),
+            movement_count=int(movement),
+            points_by_position=_parse_reward_lines(points_text, version.points_by_position),
+            coins_by_position=_parse_reward_lines(coins_text, version.coins_by_position),
+            rules=dict(version.rules),
+        )
+        saved = save_season_version(new_version, effective_round=int(effective_round))
+        try:
+            from app.liga.ranking import clear_ranking_caches
+            from app.tienda.money import clear_money_caches
 
-    draft = st.session_state.get("season_draft_v2")
-    if isinstance(draft, dict):
-        st.success("Borrador generado solo en esta sesion. No modifica la liga todavia.")
-        st.json(draft)
+            clear_money_caches()
+            clear_ranking_caches()
+        except Exception:
+            pass
+        st.success("Configuracion guardada en settings. No se ha enviado nada a Discord.")
+        st.session_state["season_last_saved_v2"] = saved
+
+    st.caption(
+        "Las versiones nuevas solo afectan desde el tramo elegido. Las jornadas anteriores "
+        "conservan la version que les correspondia."
+    )
+    if isinstance(st.session_state.get("season_last_saved_v2"), dict):
+        with st.expander("Ultima configuracion guardada", expanded=False):
+            st.json(st.session_state["season_last_saved_v2"])
     else:
-        st.info("Este bloque prepara el modelo 2.0 sin guardar nada en Supabase todavia.")
+        with st.expander("Documento de temporada actual", expanded=False):
+            st.json(document)
 
 
 def _render_future_flags() -> None:
-    st.markdown("<div class='season-section-title'>Reglas que desbloquea este panel</div>", unsafe_allow_html=True)
+    st.markdown("<div class='season-section-title'>Siguiente capa 2.0</div>", unsafe_allow_html=True)
     rows = [
-        ("Cambios desde ahora", "Las modificaciones futuras no tocaran jornadas ya cerradas."),
-        ("Aaron Avisa", "Cada publicacion o cambio importante tendra mensaje en Discord."),
-        ("Sin SQL aun", "La persistencia final se decide cuando cerremos Supabase o migracion."),
+        ("Cambios desde ahora", "Las modificaciones no recalculan tramos cerrados."),
+        ("Aaron Avisa", "Silenciado durante el desarrollo para no spoilear la update."),
+        ("Sin SQL nuevo", "Esta fase usa settings; la base de datos grande se decide al final."),
         ("Copa separada", "La copa mantiene su propio sistema y no depende de esta config."),
     ]
     html = "<table class='season-table'><thead><tr><th>Sistema</th><th>Decision</th></tr></thead><tbody>"
@@ -252,19 +381,23 @@ def render_temporada() -> None:
         return
 
     _render_css()
+    current_version = current_season_version()
     st.markdown(
-        """
-        <div class='season-hero'>
-          <div class='season-kicker'>Panel Admin</div>
-          <div class='season-title'>Temporada y configuracion 2.0</div>
-          <div class='season-subtitle'>
-            Estado actual de la liga y primer borrador para convertir las reglas en configuracion real.
-          </div>
-        </div>
-        """,
+        (
+            "<div class='season-hero'>"
+            "<div class='season-kicker'>Panel Admin</div>"
+            "<div class='season-title'>Temporada y configuracion 2.0</div>"
+            "<div class='season-subtitle'>"
+            f"Version activa: {escape(current_version.name)}. "
+            "Reglas editables por tramo sin tocar lo ya cerrado."
+            "</div>"
+            "</div>"
+        ),
         unsafe_allow_html=True,
     )
 
     _render_current_config()
-    _render_draft_builder()
+    _render_config_editor()
     _render_future_flags()
+    with st.expander("Version activa en bruto", expanded=False):
+        st.json(season_version_to_dict(current_version))

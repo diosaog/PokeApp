@@ -67,8 +67,19 @@ def league_users_for_round(
     *,
     include_retired: bool = True,
 ) -> Dict[str, str]:
-    _ = max(int(round_no), 1)
+    round_i = max(int(round_no), 1)
     out: Dict[str, str] = {}
+    try:
+        from app.season.config import load_season_document, season_version_for_round
+
+        document = load_season_document(players=list(USERS.keys()))
+        configured = season_version_for_round(document, round_i).players
+        roster = [name for name in configured if name in USERS]
+    except Exception:
+        roster = []
+    if not roster:
+        roster = list(USERS.keys())
+
     retired: set[str] = set()
     if not include_retired:
         try:
@@ -77,10 +88,10 @@ def league_users_for_round(
             retired = retired_trainers()
         except Exception:
             retired = set()
-    for user, code in USERS.items():
+    for user in roster:
         if user in retired:
             continue
-        out[user] = code
+        out[user] = USERS[user]
     return out
 
 
