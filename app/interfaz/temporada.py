@@ -14,6 +14,11 @@ from app.season.config import (
     season_version_for_round,
     season_version_to_dict,
 )
+from app.season.validation import (
+    has_blocking_issues,
+    season_version_changes,
+    validate_season_version,
+)
 from storage import settings_get
 from utils import active_users
 
@@ -98,6 +103,77 @@ def _render_css() -> None:
           font-size: 13px;
           text-transform: uppercase;
         }
+        .season-split {
+          display: grid;
+          grid-template-columns: minmax(0, 1fr) minmax(280px, 0.72fr);
+          gap: 10px;
+          margin: 10px 0 14px;
+        }
+        .season-alert {
+          min-height: 74px;
+          padding: 10px 11px;
+          margin-bottom: 8px;
+          border: 1px solid rgba(216,223,232,0.18);
+          background: linear-gradient(180deg, var(--bw2-screen-2), var(--bw2-screen));
+        }
+        .season-alert-title {
+          color: #fff;
+          font-family: var(--font-pixel);
+          font-size: 10px;
+          line-height: 1.15;
+          text-transform: uppercase;
+        }
+        .season-alert-body {
+          margin-top: 6px;
+          color: var(--bw2-text-soft);
+          font-size: 18px;
+          line-height: 1.08;
+        }
+        .season-alert--error { border-left: 4px solid #ef5e68; }
+        .season-alert--warn { border-left: 4px solid #efc257; }
+        .season-alert--ok { border-left: 4px solid #58d18e; }
+        .season-alert--info { border-left: 4px solid #6ea8ff; }
+        .season-version-list {
+          display: grid;
+          gap: 8px;
+          margin-top: 8px;
+        }
+        .season-version-row {
+          display: grid;
+          grid-template-columns: minmax(0, 1fr) auto;
+          gap: 10px;
+          align-items: center;
+          padding: 10px 11px;
+          border: 1px solid rgba(216,223,232,0.18);
+          background: linear-gradient(180deg, var(--bw2-screen-2), var(--bw2-screen));
+        }
+        .season-version-name {
+          color: #fff;
+          font-family: var(--font-pixel);
+          font-size: 10px;
+          line-height: 1.15;
+          text-transform: uppercase;
+          overflow-wrap: anywhere;
+        }
+        .season-version-meta {
+          margin-top: 5px;
+          color: var(--bw2-text-soft);
+          font-size: 17px;
+          line-height: 1.08;
+        }
+        .season-pill {
+          display: inline-flex;
+          align-items: center;
+          min-height: 26px;
+          padding: 4px 8px;
+          border: 1px solid rgba(216,223,232,0.2);
+          background: rgba(8,12,18,0.46);
+          color: #fff;
+          font-family: var(--font-pixel);
+          font-size: 8px;
+          text-transform: uppercase;
+          white-space: nowrap;
+        }
         .season-table {
           width: 100%;
           border-collapse: collapse;
@@ -119,6 +195,7 @@ def _render_css() -> None:
         }
         @media (max-width: 980px) {
           .season-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+          .season-split { grid-template-columns: 1fr; }
         }
         @media (max-width: 640px) {
           .season-grid { grid-template-columns: 1fr; }
@@ -165,6 +242,84 @@ def _reward_table_html(version: SeasonVersion) -> str:
         f"<tbody>{''.join(rows)}</tbody>"
         "</table>"
     )
+
+
+def _issues_html(issues: list[dict[str, str]]) -> str:
+    rows: list[str] = []
+    for issue in issues:
+        level = str(issue.get("level") or "info")
+        title = str(issue.get("title") or "Aviso")
+        body = str(issue.get("body") or "")
+        rows.append(
+            f"<div class='season-alert season-alert--{escape(level)}'>"
+            f"<div class='season-alert-title'>{escape(title)}</div>"
+            f"<div class='season-alert-body'>{escape(body)}</div>"
+            "</div>"
+        )
+    return "".join(rows)
+
+
+def _changes_table_html(changes: list[tuple[str, str, str]]) -> str:
+    if not changes:
+        return (
+            "<div class='season-alert season-alert--info'>"
+            "<div class='season-alert-title'>Sin cambios</div>"
+            "<div class='season-alert-body'>La version propuesta coincide con la activa.</div>"
+            "</div>"
+        )
+    rows = []
+    for label, before, after in changes:
+        rows.append(
+            "<tr>"
+            f"<td>{escape(label)}</td>"
+            f"<td>{escape(before)}</td>"
+            f"<td>{escape(after)}</td>"
+            "</tr>"
+        )
+    return (
+        "<table class='season-table'>"
+        "<thead><tr><th>Campo</th><th>Actual</th><th>Nuevo</th></tr></thead>"
+        f"<tbody>{''.join(rows)}</tbody>"
+        "</table>"
+    )
+
+
+def _versions_from_document(document: dict[str, Any]) -> list[SeasonVersion]:
+    return [
+        season_version_for_round({"versions": [item], "active_version_id": item.get("id")})
+        for item in document.get("versions", [])
+        if isinstance(item, dict)
+    ]
+
+
+def _version_history_html(document: dict[str, Any]) -> str:
+    versions = _versions_from_document(document)
+    if not versions:
+        return (
+            "<div class='season-alert season-alert--info'>"
+            "<div class='season-alert-title'>Sin historial</div>"
+            "<div class='season-alert-body'>Todavia no hay versiones guardadas.</div>"
+            "</div>"
+        )
+    active_id = str(document.get("active_version_id") or "")
+    rows: list[str] = []
+    for version in sorted(versions, key=lambda item: (item.effective_round, item.id), reverse=True):
+        active = "Activa" if version.id == active_id else "Archivada"
+        rows.append(
+            "<div class='season-version-row'>"
+            "<div>"
+            f"<div class='season-version-name'>{escape(version.name)}</div>"
+            "<div class='season-version-meta'>"
+            f"Desde tramo {int(version.effective_round)} - "
+            f"{int(version.max_rounds)} jornadas - "
+            f"{len(version.players)} jugadores - "
+            f"divisiones {' / '.join(str(size) for size in version.division_sizes)}"
+            "</div>"
+            "</div>"
+            f"<span class='season-pill'>{escape(active)}</span>"
+            "</div>"
+        )
+    return "<div class='season-version-list'>" + "".join(rows) + "</div>"
 
 
 def _division_label(players: list[str]) -> str:
@@ -313,27 +468,44 @@ def _render_config_editor() -> None:
 
         submitted = st.form_submit_button("Guardar configuracion", use_container_width=True)
 
+    players = [line.strip() for line in players_text.splitlines() if line.strip()]
+    division_count_i = int(division_count)
+    proposed_version = SeasonVersion(
+        id=version.id,
+        name=name.strip() or "Temporada",
+        effective_round=int(effective_round),
+        max_rounds=int(rounds),
+        players=players,
+        division_count=division_count_i,
+        division_sizes=_parse_division_sizes(
+            division_sizes_text,
+            version.division_sizes,
+            division_count_i,
+        ),
+        movement_count=int(movement),
+        points_by_position=_parse_reward_lines(points_text, version.points_by_position),
+        coins_by_position=_parse_reward_lines(coins_text, version.coins_by_position),
+        rules=dict(version.rules),
+    )
+    issues = validate_season_version(proposed_version)
+    changes = season_version_changes(version, proposed_version)
+
+    st.markdown("<div class='season-section-title'>Revision antes de guardar</div>", unsafe_allow_html=True)
+    st.markdown(
+        (
+            "<div class='season-split'>"
+            f"<div>{_issues_html(issues)}</div>"
+            f"<div>{_changes_table_html(changes)}</div>"
+            "</div>"
+        ),
+        unsafe_allow_html=True,
+    )
+
     if submitted:
-        players = [line.strip() for line in players_text.splitlines() if line.strip()]
-        division_count_i = int(division_count)
-        new_version = SeasonVersion(
-            id=version.id,
-            name=name.strip() or "Temporada",
-            effective_round=int(effective_round),
-            max_rounds=int(rounds),
-            players=players,
-            division_count=division_count_i,
-            division_sizes=_parse_division_sizes(
-                division_sizes_text,
-                version.division_sizes,
-                division_count_i,
-            ),
-            movement_count=int(movement),
-            points_by_position=_parse_reward_lines(points_text, version.points_by_position),
-            coins_by_position=_parse_reward_lines(coins_text, version.coins_by_position),
-            rules=dict(version.rules),
-        )
-        saved = save_season_version(new_version, effective_round=int(effective_round))
+        if has_blocking_issues(issues):
+            st.error("No se ha guardado: hay errores de configuracion que corregir.")
+            return
+        saved = save_season_version(proposed_version, effective_round=int(effective_round))
         try:
             from app.liga.ranking import clear_ranking_caches
             from app.tienda.money import clear_money_caches
@@ -344,6 +516,7 @@ def _render_config_editor() -> None:
             pass
         st.success("Configuracion guardada en settings. No se ha enviado nada a Discord.")
         st.session_state["season_last_saved_v2"] = saved
+        document = saved
 
     st.caption(
         "Las versiones nuevas solo afectan desde el tramo elegido. Las jornadas anteriores "
@@ -356,9 +529,12 @@ def _render_config_editor() -> None:
         with st.expander("Documento de temporada actual", expanded=False):
             st.json(document)
 
+    st.markdown("<div class='season-section-title'>Historial de versiones</div>", unsafe_allow_html=True)
+    st.markdown(_version_history_html(document), unsafe_allow_html=True)
+
 
 def _render_future_flags() -> None:
-    st.markdown("<div class='season-section-title'>Siguiente capa 2.0</div>", unsafe_allow_html=True)
+    st.markdown("<div class='season-section-title'>Guardarrailes activos</div>", unsafe_allow_html=True)
     rows = [
         ("Cambios desde ahora", "Las modificaciones no recalculan tramos cerrados."),
         ("Aaron Avisa", "Silenciado durante el desarrollo para no spoilear la update."),
