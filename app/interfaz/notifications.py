@@ -279,10 +279,14 @@ def render_notification_styles(container: Any = None) -> None:
         """
         <style>
         .app-notice {
-          padding: 10px 11px;
+          padding: 11px 12px;
           margin-bottom: 8px;
-          border: 1px solid rgba(216,223,232,0.18);
-          background: #101720;
+          border: 1px solid rgba(248,251,255,0.22);
+          border-radius: var(--poke-radius);
+          background:
+            linear-gradient(90deg, rgba(255,255,255,0.08), transparent 62%),
+            linear-gradient(180deg, var(--bw2-screen-2), var(--bw2-screen));
+          box-shadow: inset 0 1px 0 rgba(255,255,255,0.14), 0 6px 14px rgba(2,18,46,0.18);
         }
         .app-notice-title {
           color: #fff;
@@ -311,10 +315,11 @@ def render_notification_styles(container: Any = None) -> None:
           width: 100%;
           min-height: 42px;
           justify-content: flex-start;
-          border-color: rgba(216,223,232,0.32);
+          border-color: rgba(248,251,255,0.24);
+          border-radius: var(--poke-radius);
           background:
-            linear-gradient(90deg, rgba(255,255,255,0.08), transparent 62%),
-            linear-gradient(180deg, #252a33, #151a22);
+            linear-gradient(90deg, rgba(255,255,255,0.09), transparent 62%),
+            linear-gradient(180deg, var(--bw2-panel-2), var(--bw2-panel));
           color: #fff;
         }
         </style>

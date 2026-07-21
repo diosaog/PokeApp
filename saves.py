@@ -109,7 +109,7 @@ def _render_admin_wipe(current_user: str | None) -> None:
             for err in report.get("errors") or []:
                 st.caption(f"- {err}")
 
-    st.markdown("<div class='saves-section-title'>Notas privadas PokeApp 2.0</div>", unsafe_allow_html=True)
+    st.markdown("<div class='saves-section-title'>Notas privadas de temporada</div>", unsafe_allow_html=True)
     st.code(_PRIVATE_NEXT_LOCKE_PROMPT, language="text")
 
 

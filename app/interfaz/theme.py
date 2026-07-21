@@ -6,35 +6,46 @@ import streamlit as st
 def apply_css() -> None:
     css = """
     <style>
-    @import url('https://fonts.googleapis.com/css2?family=Silkscreen:wght@400;700&family=VT323&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@400;600;700;800&family=Oxanium:wght@600;700;800&display=swap');
 
     :root {
-      --font-ui: "VT323", monospace;
-      --font-pixel: "Silkscreen", "Press Start 2P", monospace;
-      --accent: #f57d31;
-      --accent-dark: #a94818;
-      --accent-soft: #ffc08f;
-      --accent-ghost: rgba(245, 125, 49, 0.18);
-      --bw2-bg-0: #07090d;
-      --bw2-bg-1: #0f1217;
-      --bw2-bg-2: #161a20;
-      --bw2-panel: #1c2129;
-      --bw2-panel-2: #252a33;
-      --bw2-panel-3: #2c333d;
-      --bw2-screen: #121820;
-      --bw2-screen-2: #18222d;
-      --bw2-screen-line: #79b9f5;
-      --bw2-edge: #636d7b;
-      --bw2-edge-strong: #d8dfe8;
-      --bw2-text: #f3f7fb;
-      --bw2-text-soft: #b8c1cd;
-      --bw2-text-dim: #8892a0;
-      --bw2-ok: #58d18e;
-      --bw2-warn: #f26b61;
-      --bw2-gold: #e5bc56;
-      --bw2-shadow: rgba(0, 0, 0, 0.42);
-      --divider: rgba(216, 223, 232, 0.18);
-      --ball-color: #f57d31;
+      --font-ui: "Nunito Sans", "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      --font-pixel: "Oxanium", "Trebuchet MS", system-ui, sans-serif;
+      --accent: #2f80ed;
+      --accent-dark: #1452bf;
+      --accent-soft: #8fd0ff;
+      --accent-ghost: rgba(47, 128, 237, 0.18);
+      --champion-red: #ef3f56;
+      --champion-yellow: #ffd447;
+      --champion-cyan: #45c7ff;
+      --champion-blue: #2f80ed;
+      --champion-navy: #071936;
+      --bw2-bg-0: #06142e;
+      --bw2-bg-1: #0c2b5a;
+      --bw2-bg-2: #123f7a;
+      --bw2-panel: #102b50;
+      --bw2-panel-2: #173d6e;
+      --bw2-panel-3: #245f9d;
+      --bw2-screen: #081f3f;
+      --bw2-screen-2: #0e315f;
+      --bw2-screen-line: #8fd0ff;
+      --bw2-edge: rgba(170, 211, 255, 0.42);
+      --bw2-edge-strong: rgba(247, 251, 255, 0.9);
+      --bw2-text: #f8fbff;
+      --bw2-text-soft: #dcecff;
+      --bw2-text-dim: #a9bedc;
+      --bw2-ok: #2ed18a;
+      --bw2-warn: #ef3f56;
+      --bw2-gold: #ffd447;
+      --bw2-shadow: rgba(3, 18, 43, 0.42);
+      --divider: rgba(248, 251, 255, 0.18);
+      --ball-color: #ef3f56;
+      --poke-radius-sm: 6px;
+      --poke-radius: 8px;
+      --poke-radius-xl: 8px;
+      --poke-shadow-soft: 0 14px 34px rgba(2, 18, 46, 0.24);
+      --poke-shadow-card: 0 10px 24px rgba(2, 18, 46, 0.2);
+      --poke-surface-glow: inset 0 1px 0 rgba(255,255,255,0.2);
       --section-label: "NORMATIVA";
     }
 
@@ -43,7 +54,11 @@ def apply_css() -> None:
     }
 
     .stApp {
-      background: linear-gradient(180deg, #08090c 0%, #0f1217 48%, #090b0f 100%);
+      background:
+        linear-gradient(180deg, rgba(255,255,255,0.06) 0 1px, transparent 1px 100%) 0 44px / 100% 32px,
+        linear-gradient(90deg, rgba(255,255,255,0.045) 0 1px, transparent 1px 100%) 0 44px / 32px 100%,
+        linear-gradient(135deg, rgba(69,199,255,0.18) 0 18%, transparent 18% 54%, rgba(255,212,71,0.1) 54% 62%, transparent 62%),
+        linear-gradient(180deg, #071936 0%, #0c2b5a 45%, #081936 100%);
       color: var(--bw2-text);
     }
 
@@ -51,29 +66,29 @@ def apply_css() -> None:
       content: "";
       position: fixed;
       inset: 0 0 auto 0;
-      height: 44px;
+      height: 52px;
       background:
-        linear-gradient(180deg, rgba(255,255,255,0.07) 0, rgba(255,255,255,0.03) 1px, transparent 1px),
-        linear-gradient(180deg, #252a31 0%, #171b22 100%);
-      border-bottom: 1px solid rgba(216,223,232,0.18);
-      box-shadow: 0 1px 0 rgba(255,255,255,0.05), 0 8px 20px rgba(0,0,0,0.28);
+        linear-gradient(90deg, var(--champion-red) 0 23%, #f8fbff 23% 27%, var(--champion-blue) 27% 100%),
+        linear-gradient(180deg, rgba(255,255,255,0.2), transparent);
+      border-bottom: 1px solid rgba(248,251,255,0.34);
+      box-shadow: 0 1px 0 rgba(255,255,255,0.15), 0 12px 26px rgba(2,18,46,0.24);
       z-index: 1000;
       pointer-events: none;
     }
 
     .stApp::after {
-      content: "POKEAPP 2.0   LIGA PRIVADA";
+      content: "POKEAPP LEAGUE CENTER";
       position: fixed;
-      top: 10px;
+      top: 14px;
       left: 50%;
       transform: translateX(-50%);
-      color: #8c929c;
+      color: #ffffff;
       font-family: var(--font-pixel);
-      font-size: 10px;
+      font-size: 12px;
       letter-spacing: 0;
       z-index: 1001;
       pointer-events: none;
-      text-shadow: 0 1px 0 rgba(0,0,0,0.65);
+      text-shadow: 0 2px 8px rgba(0,0,0,0.32);
     }
 
     .main { position: relative; }
@@ -84,13 +99,10 @@ def apply_css() -> None:
       z-index: -1;
       pointer-events: none;
       background:
-        linear-gradient(180deg, rgba(255,255,255,0.035) 0 1px, transparent 1px 100%) 0 44px / 100% 28px,
-        linear-gradient(90deg, rgba(255,255,255,0.03) 0 1px, transparent 1px 100%) 0 44px / 28px 100%,
-        linear-gradient(135deg, rgba(245,125,49,0.22) 0 14%, transparent 14%) calc(100% - 36px) calc(100% - 36px) / 420px 220px no-repeat,
-        linear-gradient(315deg, rgba(100,185,255,0.13) 0 12%, transparent 12%) 0 0 / 380px 240px no-repeat,
-        radial-gradient(circle at 18% 10%, rgba(121,185,245,0.12) 0 110px, transparent 170px),
-        radial-gradient(circle at 80% 84%, rgba(245,125,49,0.08) 0 100px, transparent 170px),
-        linear-gradient(180deg, var(--bw2-bg-0) 0%, var(--bw2-bg-1) 36%, #0b0d11 100%);
+        linear-gradient(120deg, transparent 0 12%, rgba(255,255,255,0.05) 12% 13%, transparent 13% 100%) 0 0 / 560px 300px,
+        linear-gradient(240deg, transparent 0 18%, rgba(255,212,71,0.08) 18% 20%, transparent 20% 100%) 100% 100% / 620px 360px no-repeat,
+        linear-gradient(180deg, rgba(255,255,255,0.04), transparent 42%),
+        linear-gradient(180deg, var(--bw2-bg-0) 0%, var(--bw2-bg-1) 46%, #071936 100%);
     }
 
     .block-container {
@@ -107,9 +119,9 @@ def apply_css() -> None:
     h1, h2, h3, h4, h5, h6 {
       font-family: var(--font-pixel);
       color: var(--bw2-text);
-      letter-spacing: 0.04em;
+      letter-spacing: 0;
       text-transform: uppercase;
-      text-shadow: 0 1px 0 rgba(0,0,0,0.55);
+      text-shadow: 0 2px 10px rgba(0,0,0,0.22);
     }
 
     p, span, div, label, li, caption {
@@ -145,11 +157,11 @@ def apply_css() -> None:
     section[data-testid="stSidebar"] {
       position: relative;
       background:
-        linear-gradient(180deg, rgba(255,255,255,0.05) 0 1px, transparent 1px 100%) 0 0 / 100% 24px,
-        linear-gradient(90deg, rgba(255,255,255,0.04) 0 1px, transparent 1px 100%) 0 0 / 24px 100%,
-        linear-gradient(180deg, #12151b 0%, #0b0d11 100%);
-      border-right: 1px solid rgba(216,223,232,0.15);
-      box-shadow: inset -1px 0 0 rgba(255,255,255,0.04);
+        linear-gradient(180deg, rgba(255,255,255,0.08) 0 1px, transparent 1px 100%) 0 0 / 100% 28px,
+        linear-gradient(135deg, rgba(69,199,255,0.12), transparent 42%),
+        linear-gradient(180deg, #0b2a58 0%, #071936 100%);
+      border-right: 1px solid rgba(248,251,255,0.18);
+      box-shadow: inset -1px 0 0 rgba(255,255,255,0.08), 10px 0 26px rgba(2,18,46,0.24);
     }
 
     section[data-testid="stSidebar"] .block-container {
@@ -163,32 +175,35 @@ def apply_css() -> None:
       left: 18px;
       right: 18px;
       z-index: 2;
-      padding: 7px 12px;
+      padding: 9px 12px;
       color: #ffffff;
-      background: linear-gradient(180deg, var(--accent) 0%, var(--accent-dark) 100%);
+      background:
+        linear-gradient(90deg, rgba(255,255,255,0.18), transparent 64%),
+        linear-gradient(180deg, var(--accent) 0%, var(--accent-dark) 100%);
       border: 1px solid var(--bw2-edge-strong);
-      box-shadow: inset 0 1px 0 rgba(255,255,255,0.2), 0 4px 12px rgba(0,0,0,0.26);
+      border-radius: var(--poke-radius);
+      box-shadow: var(--poke-surface-glow), var(--poke-shadow-card);
       font-family: var(--font-pixel);
-      font-size: 10px;
-      letter-spacing: 0.08em;
+      font-size: 11px;
+      letter-spacing: 0;
       text-align: center;
-      clip-path: polygon(12px 0, 100% 0, 100% calc(100% - 12px), calc(100% - 12px) 100%, 0 100%, 0 12px);
     }
 
     .stButton > button,
     .stDownloadButton > button {
       min-height: 42px;
       padding: 0.65rem 1rem;
-      border-radius: 0;
+      border-radius: var(--poke-radius);
       border: 1px solid var(--bw2-edge-strong);
-      background: linear-gradient(180deg, var(--accent) 0%, var(--accent-dark) 100%);
+      background:
+        linear-gradient(90deg, rgba(255,255,255,0.2), transparent 68%),
+        linear-gradient(180deg, var(--accent) 0%, var(--accent-dark) 100%);
       color: #ffffff;
       font-family: var(--font-pixel);
       font-size: 11px;
-      letter-spacing: 0.04em;
+      letter-spacing: 0;
       text-transform: uppercase;
-      box-shadow: inset 0 1px 0 rgba(255,255,255,0.24), 0 6px 16px rgba(0,0,0,0.28);
-      clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px);
+      box-shadow: var(--poke-surface-glow), var(--poke-shadow-card);
       transition: transform .12s ease, filter .12s ease;
     }
 
@@ -206,7 +221,7 @@ def apply_css() -> None:
 
     .stButton > button:disabled,
     .stDownloadButton > button:disabled {
-      background: linear-gradient(180deg, #555d68 0%, #353b45 100%);
+      background: linear-gradient(180deg, #6d809c 0%, #42516b 100%);
       color: #cbd1d9;
       border-color: #aab2bd;
       box-shadow: none;
@@ -218,14 +233,14 @@ def apply_css() -> None:
     .stTextArea textarea,
     .stDateInput input,
     .stTimeInput input {
-      background: linear-gradient(180deg, #0f151d 0%, #151c25 100%) !important;
+      background: linear-gradient(180deg, rgba(255,255,255,0.12) 0%, rgba(255,255,255,0.06) 100%) !important;
       color: var(--bw2-text) !important;
       border: 1px solid var(--bw2-edge) !important;
-      border-radius: 0 !important;
-      box-shadow: inset 0 1px 0 rgba(255,255,255,0.08), 0 0 0 1px rgba(0,0,0,0.36) !important;
+      border-radius: var(--poke-radius) !important;
+      box-shadow: var(--poke-surface-glow), 0 0 0 1px rgba(2,18,46,0.22) !important;
       font-family: var(--font-ui) !important;
-      font-size: 1.15rem !important;
-      letter-spacing: 0.03em;
+      font-size: 1rem !important;
+      letter-spacing: 0;
     }
 
     .stTextInput label,
@@ -239,20 +254,20 @@ def apply_css() -> None:
       color: var(--bw2-text) !important;
       font-family: var(--font-pixel) !important;
       font-size: 10px !important;
-      letter-spacing: 0.04em;
+      letter-spacing: 0;
       text-transform: uppercase;
     }
 
     .stSelectbox div[data-baseweb="select"] > div,
     .stMultiSelect div[data-baseweb="select"] > div {
-      background: linear-gradient(180deg, #0f151d 0%, #151c25 100%) !important;
+      background: linear-gradient(180deg, rgba(255,255,255,0.12) 0%, rgba(255,255,255,0.06) 100%) !important;
       border: 1px solid var(--bw2-edge) !important;
-      border-radius: 0 !important;
-      box-shadow: inset 0 1px 0 rgba(255,255,255,0.08), 0 0 0 1px rgba(0,0,0,0.36) !important;
+      border-radius: var(--poke-radius) !important;
+      box-shadow: var(--poke-surface-glow), 0 0 0 1px rgba(2,18,46,0.22) !important;
       min-height: 44px;
       color: var(--bw2-text) !important;
       font-family: var(--font-ui) !important;
-      font-size: 1.15rem !important;
+      font-size: 1rem !important;
     }
 
     div[data-baseweb="popover"] div[role="listbox"] {
@@ -267,36 +282,37 @@ def apply_css() -> None:
       background: var(--accent-ghost) !important;
       color: var(--bw2-text) !important;
       border: 1px solid rgba(255,255,255,0.12) !important;
-      border-radius: 0 !important;
+      border-radius: var(--poke-radius-sm) !important;
       font-family: var(--font-ui) !important;
-      font-size: 1.05rem !important;
+      font-size: 0.95rem !important;
     }
 
     div[data-baseweb="tab-list"] {
-      background: linear-gradient(180deg, #252a32 0%, #191d24 100%) !important;
+      background: linear-gradient(180deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.05) 100%) !important;
       border: 1px solid var(--bw2-edge) !important;
-      border-radius: 0 !important;
+      border-radius: var(--poke-radius) !important;
       padding: 4px !important;
       gap: 4px !important;
-      box-shadow: inset 0 1px 0 rgba(255,255,255,0.08), 0 0 0 1px rgba(0,0,0,0.32);
+      box-shadow: var(--poke-surface-glow), 0 0 0 1px rgba(2,18,46,0.2);
     }
 
     button[data-baseweb="tab"],
     button[role="tab"] {
-      background: linear-gradient(180deg, #1a1f27 0%, #11161c 100%) !important;
+      background: linear-gradient(180deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.04) 100%) !important;
       color: var(--bw2-text-soft) !important;
       border: 1px solid var(--bw2-edge) !important;
-      border-radius: 0 !important;
+      border-radius: var(--poke-radius-sm) !important;
       font-family: var(--font-pixel) !important;
       font-size: 10px !important;
-      letter-spacing: 0.04em;
+      letter-spacing: 0;
       text-transform: uppercase;
-      clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px);
     }
 
     button[data-baseweb="tab"][aria-selected="true"],
     button[role="tab"][aria-selected="true"] {
-      background: linear-gradient(180deg, var(--accent) 0%, var(--accent-dark) 100%) !important;
+      background:
+        linear-gradient(90deg, rgba(255,255,255,0.2), transparent 68%),
+        linear-gradient(180deg, var(--accent) 0%, var(--accent-dark) 100%) !important;
       color: #ffffff !important;
       border-color: var(--bw2-edge-strong) !important;
       box-shadow: inset 0 1px 0 rgba(255,255,255,0.22);
@@ -308,10 +324,10 @@ def apply_css() -> None:
     div[data-testid="stAlert"],
     div[data-baseweb="notification"],
     div[data-testid="stForm"] {
-      background: linear-gradient(180deg, rgba(255,255,255,0.03) 0%, transparent 100%), linear-gradient(180deg, var(--bw2-panel-2) 0%, var(--bw2-panel) 100%) !important;
+      background: linear-gradient(180deg, rgba(255,255,255,0.08) 0%, transparent 100%), linear-gradient(180deg, var(--bw2-panel-2) 0%, var(--bw2-panel) 100%) !important;
       border: 1px solid var(--bw2-edge) !important;
-      border-radius: 0 !important;
-      box-shadow: inset 0 1px 0 rgba(255,255,255,0.08), 0 0 0 1px rgba(0,0,0,0.32) !important;
+      border-radius: var(--poke-radius) !important;
+      box-shadow: var(--poke-surface-glow), var(--poke-shadow-card) !important;
       color: var(--bw2-text-soft) !important;
     }
 
@@ -321,7 +337,7 @@ def apply_css() -> None:
       color: var(--bw2-text) !important;
       font-family: var(--font-pixel) !important;
       font-size: 10px !important;
-      letter-spacing: 0.04em;
+      letter-spacing: 0;
       text-transform: uppercase;
     }
 
@@ -348,9 +364,9 @@ def apply_css() -> None:
     }
 
     div[data-testid="stFileUploaderDropzone"] {
-      background: linear-gradient(180deg, #10161d 0%, #151d26 100%) !important;
+      background: linear-gradient(180deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.05) 100%) !important;
       border: 1px dashed var(--bw2-edge) !important;
-      border-radius: 0 !important;
+      border-radius: var(--poke-radius) !important;
     }
 
     div[data-testid="stFileUploaderDropzone"] * {
@@ -632,6 +648,246 @@ def apply_css() -> None:
       image-rendering: -webkit-optimize-contrast;
       filter: drop-shadow(0 0 2px rgba(0,0,0,0.4));
     }
+
+    .stApp * {
+      letter-spacing: 0 !important;
+    }
+
+    .main .block-container {
+      max-width: 1440px;
+    }
+
+    .main .home-hero,
+    .main .auth-hero,
+    .main .trainers-hero,
+    .main .league-hero,
+    .main .matchup-hero,
+    .main .mart-hero,
+    .main .cup-hero,
+    .main .ju-hero,
+    .main .hof-hero,
+    .main .season-hero,
+    .main .norma-hero,
+    .main .saves-hero {
+      border-radius: var(--poke-radius-xl) !important;
+      clip-path: none !important;
+      border: 1px solid rgba(248,251,255,0.28) !important;
+      background:
+        linear-gradient(110deg, rgba(69,199,255,0.26), transparent 36%),
+        linear-gradient(300deg, rgba(255,212,71,0.16), transparent 42%),
+        linear-gradient(180deg, rgba(36,95,157,0.98), rgba(16,43,80,0.98)) !important;
+      box-shadow: var(--poke-surface-glow), var(--poke-shadow-soft) !important;
+    }
+
+    .main .home-hero::before,
+    .main .trainers-hero::before,
+    .main .league-hero::before,
+    .main .matchup-hero::before,
+    .main .mart-hero::before,
+    .main .cup-hero::before,
+    .main .ju-hero::before,
+    .main .hof-hero::before,
+    .main .norma-hero::before,
+    .main .saves-hero::before {
+      opacity: 0.5 !important;
+    }
+
+    .main .home-hero::after,
+    .main .auth-hero::before,
+    .main .trainers-hero::after,
+    .main .norma-hero::after {
+      opacity: 0.32 !important;
+    }
+
+    .main .home-card,
+    .main .home-action-card,
+    .main .auth-panel,
+    .main .auth-trainer-card,
+    .main .auth-status,
+    .main .profile-card,
+    .main .trainers-picker,
+    .main .trainers-stat,
+    .main .trainers-lock-panel,
+    .main .league-card,
+    .main .league-status-card,
+    .main .league-division-card,
+    .main .league-history-card,
+    .main .league-section,
+    .main .league-table-shell,
+    .main .matchup-shell,
+    .main .matchup-mode-card,
+    .main .matchup-summary,
+    .main .matchup-metric,
+    .main .matchup-mon,
+    .main .matchup-move,
+    .main .battle-card,
+    .main .battle-mon-card,
+    .main .battle-empty-card,
+    .main .battle-slot,
+    .main .mart-register-card,
+    .main .mart-confirm-card,
+    .main .shop-card,
+    .main .cup-mode-card,
+    .main .cup-metric,
+    .main .cup-section,
+    .main .cup-vs-card,
+    .main .cup-paste-card,
+    .main .cup-match,
+    .main .doubles-card,
+    .main .doubles-metric,
+    .main .doubles-section,
+    .main .ju-action-card,
+    .main .ju-metric,
+    .main .ju-penalty-card,
+    .main .hof-card,
+    .main .season-card,
+    .main .season-version-row,
+    .main .norma-summary,
+    .main .norma-list-item,
+    .main .norma-row-card,
+    .main .saves-current-card,
+    .main .saves-history-card,
+    .main .saves-admin-panel,
+    .main .saves-stat,
+    .main .pl-card,
+    .main .pt-metric,
+    .main .pt-section,
+    .main .pokedex-card,
+    .main .trainer-panel,
+    .slot,
+    .slot-empty,
+    .pokedex-card,
+    .panel-dashed,
+    .panel-ghost,
+    section[data-testid="stSidebar"] .profile-card,
+    section[data-testid="stSidebar"] .profile-avatar,
+    section[data-testid="stSidebar"] .mini-mon {
+      border-radius: var(--poke-radius) !important;
+      clip-path: none !important;
+      border-color: var(--bw2-edge) !important;
+      background:
+        linear-gradient(180deg, rgba(255,255,255,0.09), rgba(255,255,255,0.03)),
+        linear-gradient(180deg, var(--bw2-panel-2) 0%, var(--bw2-panel) 100%) !important;
+      box-shadow: var(--poke-surface-glow), var(--poke-shadow-card) !important;
+    }
+
+    .main .home-card,
+    .main .trainers-stat,
+    .main .league-status-card,
+    .main .matchup-metric,
+    .main .season-card,
+    .main .saves-stat,
+    .main .auth-status {
+      background:
+        linear-gradient(90deg, rgba(255,212,71,0.12), transparent 44%),
+        linear-gradient(180deg, var(--bw2-screen-2), var(--bw2-screen)) !important;
+    }
+
+    .main .home-section-title,
+    .main .trainers-section-title,
+    .main .league-section-title,
+    .main .cup-section-title,
+    .main .hof-section-title,
+    .main .season-section-title,
+    .main .saves-section-title,
+    .main .mart-aisle-title,
+    .main .pt-title,
+    .main .pt-section,
+    .main .trainer-head {
+      display: inline-flex !important;
+      align-items: center !important;
+      gap: 8px !important;
+      padding: 8px 12px !important;
+      border-radius: var(--poke-radius-sm) !important;
+      clip-path: none !important;
+      border: 1px solid var(--bw2-edge-strong) !important;
+      background:
+        linear-gradient(90deg, rgba(255,255,255,0.2), transparent 70%),
+        linear-gradient(180deg, var(--accent) 0%, var(--accent-dark) 100%) !important;
+      color: #ffffff !important;
+      box-shadow: var(--poke-surface-glow), 0 8px 18px rgba(2,18,46,0.18) !important;
+    }
+
+    .main .home-title,
+    .main .auth-title,
+    .main .trainers-title,
+    .main .league-title,
+    .main .matchup-title,
+    .main .mart-title,
+    .main .cup-title,
+    .main .ju-hero-title,
+    .main .hof-title,
+    .main .season-title,
+    .main .norma-title,
+    .main .saves-title {
+      font-size: clamp(24px, 3vw, 38px) !important;
+      line-height: 1.05 !important;
+      text-shadow: 0 3px 16px rgba(2,18,46,0.28) !important;
+    }
+
+    .main .home-kicker,
+    .main .auth-kicker,
+    .main .matchup-kicker,
+    .main .cup-kicker,
+    .main .ju-hero-chip,
+    .main .mart-pill,
+    .main .cup-pill,
+    .main .matchup-hero-pill,
+    .main .season-pill,
+    .main .norma-chip,
+    .main .trainers-chip,
+    .main .hof-team-pill,
+    .main .saves-card-badge {
+      border-radius: 999px !important;
+      clip-path: none !important;
+      border: 1px solid rgba(248,251,255,0.3) !important;
+      background:
+        linear-gradient(90deg, rgba(255,255,255,0.18), transparent 72%),
+        rgba(8,31,63,0.74) !important;
+      color: var(--bw2-text) !important;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.16) !important;
+    }
+
+    .main .shop-head,
+    .main .mart-register-card.is-main,
+    .main .cup-round-title,
+    .main .league-history-title,
+    .main .app-notice-title {
+      border-radius: var(--poke-radius-sm) !important;
+      clip-path: none !important;
+    }
+
+    .main img,
+    section[data-testid="stSidebar"] img {
+      image-rendering: auto;
+    }
+
+    .pokeball-mini,
+    .trainers-pokeball,
+    .auth-pokeball {
+      background: linear-gradient(180deg, var(--champion-red) 0 48%, #111c2f 48% 52%, #f8fbff 52% 100%) !important;
+      border-color: #111c2f !important;
+    }
+
+    .main [style*="clip-path"] {
+      clip-path: none !important;
+    }
+
+    .main [style*="border-radius:0"],
+    .main [style*="border-radius: 0"] {
+      border-radius: var(--poke-radius) !important;
+    }
+
+    .main .shop-price,
+    .main .shop-price-row,
+    .main .battle-type-pill,
+    .main .type-chip,
+    .main .shield-chip,
+    .main .rob-chip,
+    .status-badge {
+      border-radius: 999px !important;
+      clip-path: none !important;
+    }
     </style>
     """
     st.markdown(css, unsafe_allow_html=True)
@@ -643,26 +899,28 @@ def render_poke_separator() -> None:
 
 def apply_section_theme(section: str) -> None:
     palette = {
-        "Inicio": ("#6ea8ff", "#29548f"),
-        "Normativa": ("#6ea8ff", "#29548f"),
-        "Entrenadores": ("#62c8ff", "#1d679c"),
-        "Liga y Tabla": ("#f58b3c", "#9f431f"),
-        "Hall of Fame": ("#e9bf56", "#8a5a1e"),
-        "Temporada": ("#8fd66b", "#357c36"),
-        "Team Preview": ("#ff6f61", "#8e2d2f"),
-        "Previa Combate": ("#ff6f61", "#8e2d2f"),
-        "Copa": ("#cf74ff", "#74389f"),
-        "Juicios": ("#ef5e68", "#962d37"),
-        "Tienda": ("#efc257", "#a86f1f"),
-        "Saves": ("#4fd399", "#1f7e5e"),
+        "Inicio": ("#2f80ed", "#1452bf", "#9dd3ff"),
+        "Normativa": ("#3b82f6", "#1d4ed8", "#b6dcff"),
+        "Entrenadores": ("#20b8ff", "#0876bd", "#9be7ff"),
+        "Liga y Tabla": ("#ffb72f", "#c97800", "#ffe38a"),
+        "Hall of Fame": ("#f5c84b", "#a66c00", "#fff0a3"),
+        "Temporada": ("#2ed18a", "#13865e", "#a9f4cd"),
+        "Team Preview": ("#ef3f56", "#b91c1c", "#ffabb7"),
+        "Previa Combate": ("#ef3f56", "#b91c1c", "#ffabb7"),
+        "Copa": ("#a875ff", "#6d28d9", "#d8c0ff"),
+        "Juicios": ("#f43f5e", "#be123c", "#ffb1bf"),
+        "Tienda": ("#ffd447", "#d97706", "#fff0a3"),
+        "Saves": ("#22c55e", "#15803d", "#a9f4cd"),
     }
-    accent, accent_dark = palette.get(section, ("#f57d31", "#a94818"))
+    accent, accent_dark, accent_soft = palette.get(section, ("#2f80ed", "#1452bf", "#9dd3ff"))
     label = section.upper().replace('"', "")
     st.markdown(
         (
             "<style>:root{"
             f"--accent:{accent};"
             f"--accent-dark:{accent_dark};"
+            f"--accent-soft:{accent_soft};"
+            f"--accent-ghost:{accent}2e;"
             f"--ball-color:{accent};"
             f'--section-label:"{label}";'
             "}</style>"

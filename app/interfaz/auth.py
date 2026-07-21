@@ -48,20 +48,20 @@ def _render_login_css() -> None:
           padding-bottom: 3rem;
         }
         .stApp::after {
-          content: "POKEAPP 2.0   LIGA PRIVADA";
+          content: "POKEAPP LEAGUE CENTER";
         }
         .auth-hero {
           position: relative;
           min-height: 430px;
           padding: 24px;
           overflow: hidden;
-          border: 1px solid rgba(216,223,232,0.24);
+          border: 1px solid rgba(248,251,255,0.28);
+          border-radius: var(--poke-radius-xl);
           background:
-            linear-gradient(135deg, rgba(111,197,255,0.22), transparent 32%),
-            linear-gradient(315deg, rgba(255,198,88,0.16), transparent 40%),
-            linear-gradient(180deg, rgba(39,46,57,0.96), rgba(17,22,30,0.98));
-          box-shadow: inset 0 1px 0 rgba(255,255,255,0.1), 0 18px 42px rgba(0,0,0,0.34);
-          clip-path: polygon(18px 0, 100% 0, 100% calc(100% - 18px), calc(100% - 18px) 100%, 0 100%, 0 18px);
+            linear-gradient(110deg, rgba(69,199,255,0.28), transparent 36%),
+            linear-gradient(300deg, rgba(255,212,71,0.18), transparent 42%),
+            linear-gradient(180deg, rgba(36,95,157,0.98), rgba(16,43,80,0.98));
+          box-shadow: var(--poke-surface-glow), var(--poke-shadow-soft);
         }
         .auth-hero::before {
           content: "";
@@ -81,8 +81,11 @@ def _render_login_css() -> None:
           align-items: center;
           gap: 8px;
           padding: 7px 10px;
-          border: 1px solid rgba(216,223,232,0.32);
-          background: rgba(255,255,255,0.06);
+          border: 1px solid rgba(248,251,255,0.3);
+          border-radius: 999px;
+          background:
+            linear-gradient(90deg, rgba(255,255,255,0.18), transparent 72%),
+            rgba(8,31,63,0.64);
           color: #fff;
           font-family: var(--font-pixel);
           font-size: 10px;
@@ -94,8 +97,8 @@ def _render_login_css() -> None:
           margin-top: 22px;
           color: #fff;
           font-family: var(--font-pixel);
-          font-size: 34px;
-          line-height: 1.16;
+          font-size: 38px;
+          line-height: 1.05;
           text-transform: uppercase;
           letter-spacing: 0;
         }
@@ -137,12 +140,13 @@ def _render_login_css() -> None:
         }
         .auth-panel {
           padding: 18px;
-          border: 1px solid rgba(216,223,232,0.24);
+          border: 1px solid rgba(248,251,255,0.26);
+          border-radius: var(--poke-radius-xl);
           background:
-            linear-gradient(180deg, rgba(255,255,255,0.06), transparent 42%),
+            linear-gradient(90deg, rgba(255,212,71,0.1), transparent 54%),
+            linear-gradient(180deg, rgba(255,255,255,0.09), transparent 42%),
             linear-gradient(180deg, var(--bw2-panel-2), var(--bw2-panel));
-          box-shadow: inset 0 1px 0 rgba(255,255,255,0.1), 0 18px 42px rgba(0,0,0,0.3);
-          clip-path: polygon(16px 0, 100% 0, 100% calc(100% - 16px), calc(100% - 16px) 100%, 0 100%, 0 16px);
+          box-shadow: var(--poke-surface-glow), var(--poke-shadow-card);
         }
         .auth-panel-title {
           color: #fff;
@@ -164,7 +168,8 @@ def _render_login_css() -> None:
           grid-template-columns: 96px minmax(0, 1fr);
           gap: 14px;
           align-items: center;
-          border: 1px solid rgba(216,223,232,0.2);
+          border: 1px solid rgba(248,251,255,0.24);
+          border-radius: var(--poke-radius);
           background: linear-gradient(180deg, var(--bw2-screen-2), var(--bw2-screen));
         }
         .auth-avatar {
@@ -173,7 +178,8 @@ def _render_login_css() -> None:
           display: grid;
           place-items: center;
           overflow: hidden;
-          border: 1px solid rgba(216,223,232,0.32);
+          border: 1px solid rgba(248,251,255,0.32);
+          border-radius: var(--poke-radius);
           background:
             linear-gradient(180deg, rgba(255,255,255,0.06), transparent),
             #0e141c;
@@ -320,8 +326,8 @@ def login_gate() -> None:
         st.markdown(
             (
                 "<div class='auth-hero'>"
-                "<div class='auth-kicker'>PokeApp 2.0</div>"
-                "<div class='auth-title'>Liga privada de entrenadores</div>"
+                "<div class='auth-kicker'>PokeApp League</div>"
+                "<div class='auth-title'>Centro de entrenadores</div>"
                 "<div class='auth-subtitle'>"
                 "Entra con tu entrenador para revisar equipo, jornada, tienda y combates."
                 "</div>"

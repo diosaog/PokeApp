@@ -218,7 +218,7 @@ def _matchup_header_html(mode: str, *, jornada: int, current_user: str) -> str:
     return (
         "<div class='matchup-hero'>"
         "<div class='matchup-hero-main'>"
-        "<div class='matchup-kicker'>PokeApp 2.0</div>"
+        "<div class='matchup-kicker'>PokeApp League</div>"
         "<div class='matchup-title'>Team Preview</div>"
         "<div class='matchup-subtitle'>"
         f"Jornada {int(jornada)} | {escape(mode_label)}"

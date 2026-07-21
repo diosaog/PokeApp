@@ -316,7 +316,7 @@ def render_copa_header(selected_mode: str) -> None:
         (
             "<div class='cup-hero'>"
             "<div class='cup-hero-main'>"
-            "<div class='cup-kicker'>PokeApp 2.0</div>"
+            "<div class='cup-kicker'>PokeApp League</div>"
             "<div class='cup-title'>Copa</div>"
             f"<div class='cup-sub'>{detail}</div>"
             "</div>"

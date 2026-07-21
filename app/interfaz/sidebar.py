@@ -219,12 +219,15 @@ def _render_nav_css() -> None:
         <style>
         section[data-testid="stSidebar"] .sidebar-nav-title {
           margin: 0 0 8px;
-          padding: 7px 9px;
-          border: 1px solid rgba(216,223,232,0.14);
-          background: linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02));
+          padding: 9px 11px;
+          border: 1px solid rgba(248,251,255,0.22);
+          border-radius: var(--poke-radius);
+          background:
+            linear-gradient(90deg, rgba(255,212,71,0.16), transparent 66%),
+            linear-gradient(180deg, rgba(255,255,255,0.1), rgba(255,255,255,0.04));
           color: var(--bw2-text-soft);
           font-family: var(--font-pixel);
-          font-size: 9px;
+          font-size: 10px;
           text-transform: uppercase;
           letter-spacing: 0;
         }
@@ -234,20 +237,22 @@ def _render_nav_css() -> None:
         }
         section[data-testid="stSidebar"] div[role="radiogroup"] label {
           width: 100%;
-          min-height: 46px;
-          padding: 0.58rem 0.72rem;
-          border: 1px solid rgba(216,223,232,0.34);
+          min-height: 48px;
+          padding: 0.6rem 0.78rem;
+          border: 1px solid rgba(248,251,255,0.24);
+          border-radius: var(--poke-radius);
           background:
-            linear-gradient(90deg, rgba(255,255,255,0.07), transparent 58%),
-            linear-gradient(180deg, #252a33 0%, #151a22 100%);
-          box-shadow: inset 0 1px 0 rgba(255,255,255,0.12), 0 4px 10px rgba(0,0,0,0.22);
-          clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px);
+            linear-gradient(90deg, rgba(255,255,255,0.09), transparent 62%),
+            linear-gradient(180deg, rgba(23,61,110,0.96) 0%, rgba(8,31,63,0.98) 100%);
+          box-shadow: inset 0 1px 0 rgba(255,255,255,0.16), 0 6px 14px rgba(2,18,46,0.2);
+          transition: transform .12s ease, filter .12s ease, border-color .12s ease;
         }
         section[data-testid="stSidebar"] div[role="radiogroup"] label:has(input:checked) {
           border-color: var(--bw2-edge-strong);
           background:
-            linear-gradient(90deg, rgba(255,255,255,0.16), transparent 58%),
+            linear-gradient(90deg, rgba(255,255,255,0.24), rgba(255,212,71,0.14) 64%, transparent),
             linear-gradient(180deg, var(--accent) 0%, var(--accent-dark) 100%);
+          box-shadow: inset 0 1px 0 rgba(255,255,255,0.24), 0 8px 20px rgba(2,18,46,0.24);
         }
         section[data-testid="stSidebar"] div[role="radiogroup"] label p {
           color: #fff;
@@ -273,11 +278,12 @@ def _render_nav_css() -> None:
           min-height: 46px;
           margin-bottom: 5px;
           padding-left: 0.85rem;
-          border-color: rgba(216,223,232,0.34);
+          border-color: rgba(248,251,255,0.24);
+          border-radius: var(--poke-radius);
           background:
-            linear-gradient(90deg, rgba(255,255,255,0.07), transparent 58%),
-            linear-gradient(180deg, #252a33 0%, #151a22 100%);
-          box-shadow: inset 0 1px 0 rgba(255,255,255,0.12), 0 4px 10px rgba(0,0,0,0.22);
+            linear-gradient(90deg, rgba(255,255,255,0.09), transparent 62%),
+            linear-gradient(180deg, rgba(23,61,110,0.96) 0%, rgba(8,31,63,0.98) 100%);
+          box-shadow: inset 0 1px 0 rgba(255,255,255,0.16), 0 6px 14px rgba(2,18,46,0.2);
         }
         section[data-testid="stSidebar"] div.stButton > button[kind="primary"] {
           border-color: var(--bw2-edge-strong);
