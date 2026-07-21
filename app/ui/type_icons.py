@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import base64
 from html import escape
 import unicodedata
 
@@ -9,38 +10,57 @@ from i18n import translate_type_es
 
 _TYPE_ALIASES = {
     "normal": "Normal",
+    "no": "Normal",
+    "nor": "Normal",
     "fuego": "Fire",
+    "fu": "Fire",
     "fire": "Fire",
     "agua": "Water",
+    "ag": "Water",
     "water": "Water",
     "electrico": "Electric",
+    "el": "Electric",
     "electric": "Electric",
     "planta": "Grass",
+    "pl": "Grass",
     "grass": "Grass",
     "hielo": "Ice",
+    "hi": "Ice",
     "ice": "Ice",
     "lucha": "Fighting",
+    "lu": "Fighting",
     "fighting": "Fighting",
     "veneno": "Poison",
+    "ve": "Poison",
     "poison": "Poison",
     "tierra": "Ground",
+    "ti": "Ground",
     "ground": "Ground",
     "volador": "Flying",
+    "vo": "Flying",
     "flying": "Flying",
     "psiquico": "Psychic",
+    "ps": "Psychic",
     "psychic": "Psychic",
     "bicho": "Bug",
+    "bi": "Bug",
     "bug": "Bug",
     "roca": "Rock",
+    "ro": "Rock",
     "rock": "Rock",
     "fantasma": "Ghost",
+    "fa": "Ghost",
     "ghost": "Ghost",
     "dragon": "Dragon",
+    "dr": "Dragon",
     "siniestro": "Dark",
+    "si": "Dark",
     "dark": "Dark",
     "acero": "Steel",
+    "ac": "Steel",
     "steel": "Steel",
     "hada": "Fairy",
+    "ha": "Fairy",
     "fairy": "Fairy",
 }
 
@@ -92,6 +112,18 @@ def _text_color(hex_color: str) -> str:
         return "#ffffff"
 
 
+def _icon_data_uri(svg: str, fg: str) -> str:
+    safe_fg = fg if fg.startswith("#") and len(fg) in {4, 7} else "#ffffff"
+    document = (
+        "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' "
+        f"fill='{safe_fg}' stroke='{safe_fg}' stroke-linejoin='round' style='color:{safe_fg}'>"
+        f"{svg}"
+        "</svg>"
+    )
+    payload = base64.b64encode(document.encode("utf-8")).decode("ascii")
+    return f"data:image/svg+xml;base64,{payload}"
+
+
 def type_icon_html(
     type_name: str | None,
     *,
@@ -112,11 +144,12 @@ def type_icon_html(
     class_attr = " ".join(part for part in classes if part)
     label_html = f"<span class='poke-type-label'>{escape(label_es.upper())}</span>" if label else ""
     svg = _TYPE_SVG.get(resolved, _TYPE_SVG["Normal"])
+    icon_src = _icon_data_uri(svg, _text_color(color))
     return (
         f"<span class='{class_attr}' title='{escape(label_es)}' "
         f"style='--type-color:{color};--type-fg:{_text_color(color)}'>"
         "<span class='poke-type-icon' aria-hidden='true'>"
-        f"<svg viewBox='0 0 24 24' focusable='false'>{svg}</svg>"
+        f"<img class='poke-type-icon-img' src='{icon_src}' alt='' loading='lazy'/>"
         "</span>"
         f"{label_html}"
         "</span>"

@@ -1627,10 +1627,17 @@ section[data-testid="stSidebar"] .poke-type-icon {
 }
 
 .main .poke-type-icon svg,
-section[data-testid="stSidebar"] .poke-type-icon svg {
+section[data-testid="stSidebar"] .poke-type-icon svg,
+.main .poke-type-icon-img,
+section[data-testid="stSidebar"] .poke-type-icon-img {
   display: block !important;
   width: 17px !important;
   height: 17px !important;
+  object-fit: contain !important;
+}
+
+.main .poke-type-icon svg,
+section[data-testid="stSidebar"] .poke-type-icon svg {
   fill: currentColor !important;
   stroke: currentColor !important;
 }
