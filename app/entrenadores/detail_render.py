@@ -3,8 +3,8 @@ from __future__ import annotations
 import html as _html
 import re
 from app.entrenadores.sprites import sprite_url_from_p
-from dexdata import ability_desc_es, ability_name_es, item_name_es, move_info, move_name_es, type_color
-from i18n import translate_type_es
+from app.ui.type_icons import type_icon_html
+from dexdata import ability_desc_es, ability_name_es, item_name_es, move_info, move_name_es
 
 
 def _move_es(name: str) -> str:
@@ -137,18 +137,6 @@ def render_detail_html(
 
     def _style(*parts):
         return "; ".join(part.strip().rstrip(";") for part in parts if part)
-
-    def _text_color(hex_color: str) -> str:
-        try:
-            if not hex_color or not hex_color.startswith("#") or len(hex_color) != 7:
-                return "#1f1f1f"
-            r = int(hex_color[1:3], 16)
-            g = int(hex_color[3:5], 16)
-            b = int(hex_color[5:7], 16)
-            lum = (r * 299 + g * 587 + b * 114) / 1000
-            return "#1f1f1f" if lum > 140 else "#f7f7f7"
-        except Exception:
-            return "#1f1f1f"
 
     species = str(p.get("species_name") or p.get("species") or "?").strip()
     nickname = str(p.get("nickname") or "").strip()
@@ -502,9 +490,7 @@ def render_detail_html(
                     move_id = None
             info = move_info(str(mv), move_id=move_id) or {}
             t = info.get("type")
-            t_es = translate_type_es(t).upper() if t else "---"
-            color = type_color(t) if t else "#cfcfcf"
-            text_color = _text_color(color)
+            t_es = type_icon_html(t, label=True, compact=True, class_name="champ-detail-type-chip") if t else "---"
             pp_tot = info.get("pp") or 0
             pp_cur = None
             if idx < len(mdet) and isinstance(mdet[idx], dict):
@@ -515,8 +501,6 @@ def render_detail_html(
         else:
             mv_es = "---"
             t_es = "---"
-            color = "#cfcfcf"
-            text_color = _text_color(color)
             pp_text = "--/--"
         move_row_style = _style(
             "display:grid",
@@ -524,19 +508,17 @@ def render_detail_html(
             "align-items:center",
             "gap:8px",
             "padding:8px",
-        "border-bottom:1px solid rgba(255,255,255,0.08)",
-        "background:rgba(242,107,97,0.16)",
-    )
+            "border-bottom:1px solid rgba(255,255,255,0.08)",
+            "background:rgba(242,107,97,0.16)",
+        )
         move_type_style = _style(
-            f"background:{color}",
-            f"color:{text_color}",
-            "border:1px solid var(--bw2-edge)",
-            "border-radius:0",
-            "padding:4px 6px",
-            "font-size:10px",
-            "text-transform:uppercase",
-            "min-width:70px",
-            "text-align:center",
+            "display:flex",
+            "align-items:center",
+            "justify-content:center",
+            "background:transparent",
+            "border:0",
+            "padding:0",
+            "min-width:84px",
         )
         move_name_style = _style("font-size:16px", "color:var(--bw2-text)")
         move_pp_style = _style(

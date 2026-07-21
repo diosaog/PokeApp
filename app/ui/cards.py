@@ -2,8 +2,7 @@ from __future__ import annotations
 
 import streamlit as st
 
-from dexdata import type_color
-from i18n import translate_types_es
+from app.ui.type_icons import type_icon_html
 
 
 TEAM_IMG_W = 88
@@ -40,10 +39,9 @@ def slot_card_html(
     badges = badge_row(level, bool(is_shiny), gender)
     types_html = ""
     if types:
-        labels = translate_types_es(types)
         chips = " ".join(
-            f"<span class='type-chip' style='background:{type_color(t)}'>{labels[i]}</span>"
-            for i, t in enumerate(types[:2])
+            type_icon_html(t, label=True, compact=True, class_name="type-chip")
+            for t in types[:2]
         )
         types_html = f"<div class='types'>{chips}</div>"
     chips_html = ""

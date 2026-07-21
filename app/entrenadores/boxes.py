@@ -24,6 +24,13 @@ def _box_tile_html(*, img_url: str, title: str, box_index: int, slot_index: int)
     )
 
 
+def _empty_box_tile_html(slot_index: int) -> str:
+    return (
+        "<div class='champ-box-tile champ-box-tile-empty' "
+        f"title='Slot {int(slot_index) + 1}'></div>"
+    )
+
+
 def _select_box_pokemon(p: dict, *, box_index: int, slot_index: int, title: str) -> None:
     st.session_state.selected_pokemon = {
         "from": "box",
@@ -130,26 +137,32 @@ def boxes_grid_ui(
     except Exception:
         pass
 
-    rows, cols = 5, 6
-    idx = 0
-    for _ in range(rows):
-        row_cols = st.columns(cols)
-        for cell in row_cols:
-            with cell:
-                if idx < len(box_list):
-                    p = box_list[idx]
-                    img_url = sprite_url_from_p(p, prefer_animated=False)
-                    title = p.get("species_name") or p.get("species")
-                    html = _box_tile_html(
-                        img_url=img_url,
-                        title=str(title or "Pokemon"),
-                        box_index=int(box_index),
-                        slot_index=int(idx),
-                    )
-                    st.markdown(html, unsafe_allow_html=True)
-                else:
-                    st.markdown(
-                        f"<div class='champ-box-tile champ-box-tile-empty' title='Slot {idx + 1}'></div>",
-                        unsafe_allow_html=True,
-                    )
-                idx += 1
+    tiles: list[str] = []
+    for idx in range(30):
+        if idx < len(box_list):
+            p = box_list[idx]
+            img_url = sprite_url_from_p(p, prefer_animated=False)
+            title = p.get("species_name") or p.get("species")
+            tiles.append(
+                _box_tile_html(
+                    img_url=img_url,
+                    title=str(title or "Pokemon"),
+                    box_index=int(box_index),
+                    slot_index=int(idx),
+                )
+            )
+        else:
+            tiles.append(_empty_box_tile_html(idx))
+
+    st.markdown(
+        "<div class='champ-box-grid-shell'>"
+        "<div class='champ-box-grid-toolbar'>"
+        f"<span>ZL</span><strong>{escape(str(virtual_names[int(box_index)]))}</strong>"
+        "<span>ZR</span><strong>Sin filtros</strong>"
+        "</div>"
+        "<div class='champ-box-grid'>"
+        f"{''.join(tiles)}"
+        "</div>"
+        "</div>",
+        unsafe_allow_html=True,
+    )

@@ -991,6 +991,242 @@ def ensure_matchup_css() -> None:
           -webkit-text-fill-color: var(--champ-text) !important;
         }
 
+        .battle-types,
+        .matchup-types {
+          display: inline-flex;
+          align-items: center;
+          flex-wrap: wrap;
+          gap: 5px;
+        }
+
+        .battle-types .poke-type-chip.has-label.battle-type-dot {
+          width: auto !important;
+          min-width: 78px !important;
+          padding: 4px 8px !important;
+        }
+
+        .battle-type-pill.poke-type-chip {
+          width: auto !important;
+          min-width: 94px !important;
+          height: 28px !important;
+          padding: 4px 10px !important;
+          border-radius: 5px !important;
+        }
+
+        .battle-mon-card-private {
+          grid-template-columns: minmax(280px, .98fr) 130px minmax(236px, 1fr) !important;
+          align-items: stretch !important;
+        }
+
+        .battle-mon-card-public {
+          grid-template-columns: minmax(220px, .94fr) 116px minmax(210px, 1.05fr) !important;
+          min-height: 156px !important;
+          padding: 10px !important;
+        }
+
+        .battle-mon-card-public .battle-card-left {
+          display: grid;
+          align-content: center;
+          gap: 6px;
+          padding: 7px 8px !important;
+          border: 0 !important;
+          background: transparent !important;
+          box-shadow: none !important;
+        }
+
+        .battle-mon-card-private .battle-card-left {
+          display: grid;
+          gap: 7px;
+          padding: 9px !important;
+        }
+
+        .battle-mon-card-private .battle-name-row {
+          min-height: 34px;
+          padding: 5px 7px;
+          border-radius: 10px;
+          background:
+            linear-gradient(180deg, rgba(255,255,255,0.16), rgba(255,255,255,0.06)),
+            rgba(96,80,205,0.74);
+        }
+
+        .battle-item-row {
+          display: inline-flex;
+          align-items: center;
+          gap: 7px;
+          min-width: 0;
+          color: rgba(255,255,255,0.86);
+          -webkit-text-fill-color: rgba(255,255,255,0.86);
+          font-family: var(--font-ui);
+          font-size: 16px;
+          line-height: 1.05;
+        }
+
+        .battle-item-row.is-compact {
+          font-size: 15px;
+        }
+
+        .battle-item-row > span:last-child {
+          min-width: 0;
+          overflow-wrap: anywhere;
+        }
+
+        .battle-item-icon {
+          width: 28px;
+          height: 28px;
+          flex: 0 0 28px;
+          display: inline-grid;
+          place-items: center;
+          border-radius: 50%;
+          border: 1px solid rgba(238,233,255,0.36);
+          background:
+            radial-gradient(circle at 50% 42%, rgba(255,255,255,0.55), rgba(255,255,255,0.08) 62%, transparent 63%),
+            linear-gradient(180deg, rgba(238,233,255,0.94), rgba(199,192,230,0.9));
+          box-shadow: inset 0 1px 0 rgba(255,255,255,0.45), 0 4px 8px rgba(18,14,54,0.22);
+        }
+
+        .battle-item-icon img {
+          width: 23px;
+          height: 23px;
+          object-fit: contain;
+          image-rendering: pixelated;
+          filter: drop-shadow(0 2px 3px rgba(18,14,54,0.2));
+        }
+
+        .battle-item-icon-empty::before {
+          content: "";
+          width: 13px;
+          height: 13px;
+          border-radius: 50%;
+          background:
+            radial-gradient(circle at 50% 50%, #f8fbff 0 22%, transparent 23%),
+            linear-gradient(#ef3f56 0 48%, #202436 48% 54%, #f8fbff 54% 100%);
+          border: 1px solid #202436;
+        }
+
+        .battle-private-info {
+          display: grid;
+          gap: 7px;
+          margin-top: 0;
+        }
+
+        .battle-stat-stack {
+          display: grid;
+          gap: 5px;
+          padding: 7px;
+          border: 1px solid rgba(238,233,255,0.18);
+          border-radius: 13px;
+          background:
+            linear-gradient(126deg, rgba(255,255,255,0.07) 0 32%, transparent 32% 100%),
+            rgba(55,45,148,0.36);
+        }
+
+        .battle-stat-row {
+          display: grid;
+          grid-template-columns: 18px minmax(62px, .72fr) minmax(76px, 1fr) 28px;
+          gap: 6px;
+          align-items: center;
+          min-height: 24px;
+          padding: 3px 5px;
+          border-radius: 999px;
+          background: rgba(255,255,255,0.08);
+        }
+
+        .battle-stat-symbol {
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          width: 18px;
+          height: 18px;
+          color: #ffffff;
+          -webkit-text-fill-color: #ffffff;
+          font-family: var(--font-ui);
+          font-size: 14px;
+          line-height: 1;
+          filter: drop-shadow(0 1px 0 rgba(0,0,0,0.24));
+        }
+
+        .battle-stat-symbol-heart::before { content: "♥"; }
+        .battle-stat-symbol-burst::before { content: "✹"; }
+        .battle-stat-symbol-shield::before { content: "✦"; }
+        .battle-stat-symbol-eye::before { content: "◎"; }
+        .battle-stat-symbol-hex::before { content: "⬢"; }
+        .battle-stat-symbol-wind::before { content: "≋"; }
+
+        .battle-stat-label {
+          color: rgba(255,255,255,0.88);
+          -webkit-text-fill-color: rgba(255,255,255,0.88);
+          font-family: var(--font-ui);
+          font-size: 12px;
+          font-weight: 800;
+          line-height: 1;
+        }
+
+        .battle-stat-bar {
+          position: relative;
+          height: 7px;
+          overflow: hidden;
+          border-radius: 999px;
+          background: rgba(38,32,112,0.66);
+          box-shadow: inset 0 1px 2px rgba(0,0,0,0.24);
+        }
+
+        .battle-stat-bar > span {
+          display: block;
+          height: 100%;
+          border-radius: 999px;
+          background: linear-gradient(90deg, #ffb35c, #f6d83b);
+          box-shadow: inset 0 1px 0 rgba(255,255,255,0.4);
+        }
+
+        .battle-stat-row strong {
+          color: #ffffff !important;
+          -webkit-text-fill-color: #ffffff !important;
+          font-family: var(--font-ui);
+          font-size: 13px;
+          font-weight: 900;
+          text-align: right;
+        }
+
+        .battle-mon-card-public .battle-moves,
+        .matchup-move-list {
+          gap: 3px !important;
+        }
+
+        .battle-mon-card-public .battle-move-link,
+        .battle-mon-card-public .battle-no-move,
+        .matchup-move {
+          min-height: 27px !important;
+          padding: 3px 5px !important;
+          border: 0 !important;
+          border-radius: 7px !important;
+          background: rgba(255,255,255,0.08) !important;
+          box-shadow: none !important;
+        }
+
+        .battle-mon-card-public .battle-move-link:hover,
+        .battle-mon-card-public .battle-move-row[open] > .battle-move-link {
+          background:
+            linear-gradient(136deg, transparent 0 70%, rgba(255,255,255,0.22) 70% 100%),
+            linear-gradient(180deg, var(--champ-lime), var(--champ-lime-2)) !important;
+        }
+
+        .battle-mon-card-private .battle-move-link {
+          min-height: 35px !important;
+          border-radius: 12px !important;
+        }
+
+        .matchup-name-row {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 8px;
+          min-width: 0;
+        }
+
+        .matchup-mon-item .battle-item-row {
+          margin-top: 3px;
+        }
+
         @media (max-width: 1100px) {
           .battle-team-grid,
           .matchup-team-grid {
@@ -1021,10 +1257,13 @@ def ensure_matchup_css() -> None:
             grid-template-columns: repeat(2, minmax(0, 1fr));
           }
           .battle-mon-card {
-            grid-template-columns: 1fr 82px;
+            grid-template-columns: 1fr !important;
           }
           .battle-moves {
             grid-column: 1 / -1;
+          }
+          .battle-stat-row {
+            grid-template-columns: 18px minmax(64px, .72fr) minmax(72px, 1fr) 28px;
           }
         }
         </style>

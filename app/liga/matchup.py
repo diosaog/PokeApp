@@ -15,7 +15,10 @@ from app.entrenadores.snapshot import get_trainer_snapshot
 from app.juicios.penalties import get_user_penalties
 from app.liga.context import current_jornada
 from app.liga.matchup_styles import ensure_matchup_css
+from app.tienda.catalog_data import get_catalog
+from app.tienda.common import _resolve_img_src
 from app.tienda.money import money_breakdown_from_parts
+from app.ui.type_icons import type_icon_html, type_icons_html
 from dexdata import (
     ability_desc_es,
     ability_name_es,
@@ -23,22 +26,11 @@ from dexdata import (
     move_desc_es,
     move_info,
     species_types,
-    type_color,
 )
-from i18n import nature_display_es, translate_type_es
+from i18n import nature_display_es
 from showdown_sprites import showdown_sprite_url
 from storage import get_team_lock
 from utils import USERS, users_with_retired_last
-
-
-IV_LABELS: tuple[tuple[str, str], ...] = (
-    ("hp", "PS"),
-    ("atk", "Atk"),
-    ("def", "Def"),
-    ("spa", "At. Esp"),
-    ("spd", "Def. Esp"),
-    ("spe", "Vel"),
-)
 
 
 @dataclass(frozen=True)
@@ -137,6 +129,37 @@ def _move_id_from_detail(detail: dict | None) -> int | None:
         if move_id:
             return move_id
     return None
+
+
+def _norm_text(value: str) -> str:
+    text = str(value or "").strip().lower()
+    replacements = str.maketrans(
+        {
+            "á": "a",
+            "é": "e",
+            "í": "i",
+            "ó": "o",
+            "ú": "u",
+            "ü": "u",
+            "ñ": "n",
+        }
+    )
+    return text.translate(replacements)
+
+
+@_cache_data(ttl=600)
+def _catalog_item_images() -> dict[str, str]:
+    images: dict[str, str] = {}
+    try:
+        for items in get_catalog().values():
+            for item in list(items or []):
+                name = str(item.get("name") or "").strip()
+                img = str(item.get("img") or "").strip()
+                if name and img:
+                    images[_norm_text(name)] = _resolve_img_src(img)
+    except Exception:
+        pass
+    return images
 
 
 def _fmt_power(value) -> str:
@@ -271,37 +294,12 @@ def _pokemon_types(mon: dict) -> list[str]:
         return []
 
 
-def _text_color(hex_color: str) -> str:
-    try:
-        if not hex_color or not hex_color.startswith("#") or len(hex_color) != 7:
-            return "#ffffff"
-        r = int(hex_color[1:3], 16)
-        g = int(hex_color[3:5], 16)
-        b = int(hex_color[5:7], 16)
-        lum = (r * 299 + g * 587 + b * 114) / 1000
-        return "#10141a" if lum > 150 else "#ffffff"
-    except Exception:
-        return "#ffffff"
-
-
 def _type_dot_html(type_name: str | None) -> str:
-    t = str(type_name or "Normal").title()
-    color = type_color(t)
-    label = translate_type_es(t)
-    return (
-        f"<span class='battle-type-dot' title='{escape(label)}' "
-        f"style='background:{color}; color:{_text_color(color)}'>{escape(label[:2].upper())}</span>"
-    )
+    return type_icon_html(type_name, compact=True, class_name="battle-type-dot")
 
 
 def _type_badge_html(type_name: str | None) -> str:
-    t = str(type_name or "Normal").title()
-    color = type_color(t)
-    label = translate_type_es(t)
-    return (
-        f"<span class='battle-type-pill' style='background:{color}; "
-        f"border-color:{color}; color:{_text_color(color)}'>{escape(label)}</span>"
-    )
+    return type_icon_html(type_name, label=True, compact=True, class_name="battle-type-pill")
 
 
 def _category_badge_html(category: str | None) -> str:
@@ -362,6 +360,30 @@ def _held_item_name(mon: dict) -> str:
     return "Objeto desconocido" if found_numeric_item else "-"
 
 
+def _item_icon_html(item_name: str) -> str:
+    name = str(item_name or "").strip()
+    if not name or name == "-":
+        return "<span class='battle-item-icon battle-item-icon-empty'></span>"
+    img = _catalog_item_images().get(_norm_text(name), "")
+    if img:
+        return (
+            "<span class='battle-item-icon'>"
+            f"<img src='{escape(img, quote=True)}' alt='{escape(name)}'/>"
+            "</span>"
+        )
+    return "<span class='battle-item-icon battle-item-icon-empty'></span>"
+
+
+def _item_row_html(item_name: str, *, compact: bool = False) -> str:
+    extra = " is-compact" if compact else ""
+    return (
+        f"<div class='battle-item-row{extra}'>"
+        f"{_item_icon_html(item_name)}"
+        f"<span>{escape(str(item_name or '-'))}</span>"
+        "</div>"
+    )
+
+
 def _mon_ability(mon: dict) -> str:
     for key in ("ability", "Ability"):
         raw = mon.get(key)
@@ -387,11 +409,48 @@ def _ability_display_es(name: str) -> str:
     return resolved or name
 
 
-def _fmt_iv(value) -> str:
-    try:
-        return str(int(value))
-    except Exception:
-        return "-"
+def _iv_value(ivs: dict, key: str) -> int | None:
+    aliases = {
+        "hp": ("hp", "HP", "ps", "PS"),
+        "atk": ("atk", "Atk", "attack", "Attack"),
+        "def": ("def", "Def", "defense", "Defense"),
+        "spa": ("spa", "SpA", "sp_atk", "special_attack", "At. Esp"),
+        "spd": ("spd", "SpD", "sp_def", "special_defense", "Def. Esp"),
+        "spe": ("spe", "Spe", "speed", "Vel"),
+    }
+    for alias in aliases.get(key, (key,)):
+        value = _safe_int(ivs.get(alias))
+        if value is not None:
+            return max(0, min(31, value))
+    return None
+
+
+def _iv_rows_html(mon: dict) -> str:
+    ivs = mon.get("ivs") if isinstance(mon.get("ivs"), dict) else {}
+    rows: list[str] = []
+    stat_meta = [
+        ("hp", "PS", "heart"),
+        ("atk", "Ataque", "burst"),
+        ("def", "Defensa", "shield"),
+        ("spa", "At. Esp", "eye"),
+        ("spd", "Def. Esp", "hex"),
+        ("spe", "Velocidad", "wind"),
+    ]
+    for key, label, icon in stat_meta:
+        value = _iv_value(ivs, key)
+        width = 0 if value is None else round((value / 31) * 100, 2)
+        value_txt = "-" if value is None else str(value)
+        rows.append(
+            "<div class='battle-stat-row'>"
+            f"<span class='battle-stat-symbol battle-stat-symbol-{icon}' aria-hidden='true'></span>"
+            f"<span class='battle-stat-label'>{escape(label)}</span>"
+            "<span class='battle-stat-bar'>"
+            f"<span style='width:{width}%'></span>"
+            "</span>"
+            f"<strong>{escape(value_txt)}</strong>"
+            "</div>"
+        )
+    return "<div class='battle-stat-stack'>" + "".join(rows) + "</div>"
 
 
 def _private_mon_info_html(mon: dict) -> str:
@@ -418,27 +477,13 @@ def _private_mon_info_html(mon: dict) -> str:
         )
 
     nature = nature_display_es(mon.get("nature") or mon.get("Nature") or "") or "-"
-    ivs = mon.get("ivs") if isinstance(mon.get("ivs"), dict) else {}
-    ivs_html = "".join(
-        (
-            "<div class='battle-iv'>"
-            f"<span>{escape(label)}</span>"
-            f"<strong>{escape(_fmt_iv(ivs.get(key)))}</strong>"
-            "</div>"
-        )
-        for key, label in IV_LABELS
-    )
-
     return (
         "<div class='battle-private-info'>"
+        f"{_iv_rows_html(mon)}"
         f"{ability_html}"
         "<div class='battle-private-line'>"
         "<span>Naturaleza</span>"
         f"<strong>{escape(nature)}</strong>"
-        "</div>"
-        "<div class='battle-ivs'>"
-        "<span>IVs</span>"
-        f"<div class='battle-ivs-grid'>{ivs_html}</div>"
         "</div>"
         "</div>"
     )
@@ -541,7 +586,12 @@ def _team_card_html(snapshot: dict) -> str:
             form_name=mon.get("form_name"),
             is_shiny=bool(mon.get("is_shiny")),
             gender=mon.get("gender"),
-            prefer_animated=False,
+            prefer_animated=True,
+        )
+        types_html = type_icons_html(
+            _pokemon_types(mon),
+            compact=True,
+            class_name="matchup-type-dot",
         )
         item = _held_item_name(mon)
         moves = _move_entries(mon)
@@ -562,9 +612,12 @@ def _team_card_html(snapshot: dict) -> str:
             "<div class='matchup-mon-head'>"
             f"<img class='matchup-sprite' src='{sprite}' alt='{escape(species)}'/>"
             "<div class='matchup-mon-meta'>"
+            "<div class='matchup-name-row'>"
             f"<div class='matchup-mon-title'>{escape(title)}</div>"
+            f"<div class='matchup-types'>{types_html}</div>"
+            "</div>"
             f"<div class='matchup-mon-sub'>{escape(subtitle)}</div>"
-            f"<div class='matchup-mon-extra matchup-mon-item'>Objeto: {escape(item)}</div>"
+            f"<div class='matchup-mon-extra matchup-mon-item'>{_item_row_html(item, compact=True)}</div>"
             "</div>"
             "</div>"
             "<div class='matchup-move-list'>"
@@ -617,16 +670,22 @@ def _battle_team_html(
             form_name=mon.get("form_name"),
             is_shiny=bool(mon.get("is_shiny")),
             gender=mon.get("gender"),
-            prefer_animated=False,
+            prefer_animated=True,
         )
-        types_html = "".join(_type_dot_html(t) for t in _pokemon_types(mon))
+        types_html = type_icons_html(
+            _pokemon_types(mon),
+            compact=True,
+            label=reveal_private,
+            class_name="battle-type-dot",
+        )
         item = _held_item_name(mon)
         level = escape(str(mon.get("level") or "-"))
         moves_html: list[str] = []
-        for move_idx, move in enumerate(_move_entries(mon)):
+        for move in _move_entries(mon):
+            move_class = "battle-private-move" if reveal_private else "battle-public-move"
             moves_html.append(
                 "<details class='battle-move-row'>"
-                "<summary class='battle-move-link'>"
+                f"<summary class='battle-move-link {move_class}'>"
                 f"{_type_dot_html(move.type_name)}"
                 f"<span>{escape(move.name)}</span>"
                 "</summary>"
@@ -642,8 +701,13 @@ def _battle_team_html(
             f"<div class='battle-species'>{escape(species)}</div>" if nickname else ""
         )
         private_html = _private_mon_info_html(mon) if reveal_private else ""
+        card_class = (
+            "battle-mon-card battle-mon-card-private"
+            if reveal_private
+            else "battle-mon-card battle-mon-card-public"
+        )
         cards.append(
-            "<div class='battle-mon-card'>"
+            f"<div class='{card_class}'>"
             f"<div class='battle-slot-mark'>{idx + 1}</div>"
             "<div class='battle-card-left'>"
             "<div class='battle-name-row'>"
@@ -652,7 +716,7 @@ def _battle_team_html(
             "</div>"
             f"{subtitle}"
             f"<div class='battle-level'>Lv. {level} {_gender_html(mon.get('gender'))}</div>"
-            f"<div class='battle-item'>Item: {escape(item)}</div>"
+            f"<div class='battle-item'>{_item_row_html(item, compact=not reveal_private)}</div>"
             f"{private_html}"
             "</div>"
             "<div class='battle-sprite-wrap'>"

@@ -1577,6 +1577,76 @@ section[data-testid="stSidebar"] .mini-mon img {
   image-rendering: pixelated !important;
 }
 
+.main .poke-type-chip,
+section[data-testid="stSidebar"] .poke-type-chip {
+  --type-color: #999999;
+  --type-fg: #ffffff;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 5px !important;
+  min-width: 28px !important;
+  min-height: 25px !important;
+  padding: 3px 7px !important;
+  border: 1px solid rgba(255,255,255,0.58) !important;
+  border-radius: 5px !important;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.24), rgba(0,0,0,0.18)),
+    var(--type-color) !important;
+  color: var(--type-fg) !important;
+  -webkit-text-fill-color: var(--type-fg) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.28), inset 0 -2px 0 rgba(0,0,0,0.18), 0 3px 6px rgba(18,14,54,0.22) !important;
+  vertical-align: middle !important;
+}
+
+.main .poke-type-chip.is-compact,
+section[data-testid="stSidebar"] .poke-type-chip.is-compact {
+  width: 26px !important;
+  min-width: 26px !important;
+  height: 26px !important;
+  min-height: 26px !important;
+  padding: 0 !important;
+}
+
+.main .poke-type-chip.has-label,
+section[data-testid="stSidebar"] .poke-type-chip.has-label {
+  width: auto !important;
+  min-width: 74px !important;
+  padding: 4px 8px !important;
+}
+
+.main .poke-type-icon,
+section[data-testid="stSidebar"] .poke-type-icon {
+  display: inline-grid !important;
+  place-items: center !important;
+  width: 18px !important;
+  height: 18px !important;
+  color: var(--type-fg) !important;
+  -webkit-text-fill-color: var(--type-fg) !important;
+  filter: drop-shadow(0 1px 0 rgba(0,0,0,0.28)) !important;
+}
+
+.main .poke-type-icon svg,
+section[data-testid="stSidebar"] .poke-type-icon svg {
+  display: block !important;
+  width: 17px !important;
+  height: 17px !important;
+  fill: currentColor !important;
+  stroke: currentColor !important;
+}
+
+.main .poke-type-label,
+section[data-testid="stSidebar"] .poke-type-label {
+  color: var(--type-fg) !important;
+  -webkit-text-fill-color: var(--type-fg) !important;
+  font-family: var(--font-pixel) !important;
+  font-size: 8px !important;
+  font-weight: 800 !important;
+  line-height: 1 !important;
+  text-transform: uppercase !important;
+  text-shadow: 0 1px 0 rgba(0,0,0,0.28) !important;
+}
+
 /* Final Champions pass: sidebar controls, PC box, detail sheet and team preview */
 section[data-testid="stSidebar"] .stPopover > div > button,
 section[data-testid="stSidebar"] div[data-testid="stExpander"] details,
@@ -1656,6 +1726,58 @@ section[data-testid="stSidebar"] .mini-mon {
 
 section[data-testid="stSidebar"] .mini-mon img {
   transform: scale(1.42) !important;
+}
+
+.main .champ-box-grid-shell {
+  margin-top: 10px !important;
+  padding: 12px !important;
+  border: 1px solid rgba(238,233,255,0.34) !important;
+  border-radius: 20px !important;
+  background:
+    linear-gradient(126deg, rgba(255,255,255,0.1) 0 24%, transparent 24% 100%),
+    linear-gradient(180deg, rgba(125,101,232,0.82), rgba(73,62,171,0.78)) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.22), 0 12px 26px rgba(18,14,54,0.22) !important;
+}
+
+.main .champ-box-grid-toolbar {
+  display: grid !important;
+  grid-template-columns: auto minmax(130px, 1fr) auto minmax(130px, 1fr) !important;
+  gap: 8px !important;
+  align-items: center !important;
+  margin-bottom: 11px !important;
+}
+
+.main .champ-box-grid-toolbar span,
+.main .champ-box-grid-toolbar strong {
+  min-height: 34px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  border-radius: 999px !important;
+  border: 1px solid rgba(238,233,255,0.36) !important;
+  background:
+    linear-gradient(136deg, transparent 0 72%, rgba(255,117,221,0.14) 72% 100%),
+    linear-gradient(180deg, rgba(238,233,255,0.95), rgba(211,204,237,0.94)) !important;
+  color: var(--champ-text) !important;
+  -webkit-text-fill-color: var(--champ-text) !important;
+  font-family: var(--font-ui) !important;
+  font-weight: 900 !important;
+  font-size: 12px !important;
+}
+
+.main .champ-box-grid-toolbar span {
+  min-width: 42px !important;
+  font-family: var(--font-pixel) !important;
+  background:
+    linear-gradient(180deg, rgba(96,80,215,0.96), rgba(62,52,160,0.96)) !important;
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+}
+
+.main .champ-box-grid {
+  display: grid !important;
+  grid-template-columns: repeat(6, minmax(70px, 1fr)) !important;
+  gap: 10px !important;
 }
 
 .main .champ-box-tile-link {
@@ -1811,7 +1933,16 @@ section[data-testid="stSidebar"] .mini-mon img {
 }
 
 .main .champ-detail-move-type {
-  border-radius: 4px !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.main .champ-detail-type-chip.poke-type-chip {
+  min-width: 82px !important;
+  height: 27px !important;
+  border-radius: 5px !important;
 }
 
 .main .battle-board {
@@ -1882,6 +2013,13 @@ section[data-testid="stSidebar"] .mini-mon img {
   transform: scale(1.08) !important;
 }
 
+.main .battle-types .poke-type-chip.has-label.battle-type-dot,
+.main .battle-type-pill.poke-type-chip {
+  width: auto !important;
+  min-width: 78px !important;
+  padding: 4px 8px !important;
+}
+
 .stApp .material-symbols-rounded,
 .stApp .material-symbols-outlined,
 .stApp .material-icons,
@@ -1908,6 +2046,16 @@ section[data-testid="stSidebar"] .mini-mon img {
   }
   .main .battle-mon-card {
     grid-template-columns: minmax(0, 1fr) !important;
+  }
+  .main .champ-box-grid {
+    grid-template-columns: repeat(5, minmax(54px, 1fr)) !important;
+    gap: 8px !important;
+  }
+  .main .champ-box-tile {
+    min-height: 58px !important;
+  }
+  .main .champ-box-grid-toolbar {
+    grid-template-columns: auto minmax(0, 1fr) !important;
   }
 }
 </style>
