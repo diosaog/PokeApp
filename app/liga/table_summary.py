@@ -161,36 +161,48 @@ def league_table_html(table: list[tuple[str, float]], *, include_coins: bool = F
 <style>
 .league-table-shell {{
   width: 100%;
-  max-height: 425px;
+  max-height: 520px;
   overflow: auto;
-  border: 1px solid rgba(128, 148, 170, 0.72);
-  background: #080c12;
-  box-shadow: inset 0 1px 0 rgba(255,255,255,0.06), 0 10px 26px rgba(0,0,0,0.22);
+  border: 1px solid var(--bw2-edge);
+  background:
+    linear-gradient(120deg, rgba(245,139,60,0.08) 0 22%, transparent 22% 100%),
+    #080c12;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.07), 0 10px 26px rgba(0,0,0,0.24);
 }}
 .league-status-table {{
   width: 100%;
   border-collapse: collapse;
   table-layout: fixed;
   color: #e9f0f6;
-  font-size: 14px;
+  font-family: var(--font-ui);
+  font-size: 18px;
 }}
 .league-status-table th {{
-  height: 38px;
-  padding: 0 10px;
-  border-bottom: 1px solid rgba(128, 148, 170, 0.34);
-  border-right: 1px solid rgba(128, 148, 170, 0.22);
-  background: #181c24;
-  color: #c7cdd5;
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  height: 42px;
+  padding: 0 12px;
+  border-bottom: 1px solid rgba(216, 223, 232, 0.24);
+  border-right: 1px solid rgba(216, 223, 232, 0.14);
+  background: linear-gradient(180deg, #252a33 0%, #181d25 100%);
+  color: var(--bw2-text-soft);
+  font-family: var(--font-pixel);
+  font-size: 9px;
   text-align: left;
-  font-weight: 700;
+  font-weight: 400;
+  text-transform: uppercase;
 }}
 .league-status-table td {{
-  height: 35px;
-  padding: 0 10px;
-  border-bottom: 1px solid rgba(128, 148, 170, 0.18);
-  border-right: 1px solid rgba(128, 148, 170, 0.16);
-  background: #0c1016;
+  height: 42px;
+  padding: 0 12px;
+  border-bottom: 1px solid rgba(216, 223, 232, 0.13);
+  border-right: 1px solid rgba(216, 223, 232, 0.1);
+  background: rgba(12, 16, 22, 0.82);
   vertical-align: middle;
+}}
+.league-status-table tr:nth-child(even) td {{
+  background: rgba(18, 23, 31, 0.82);
 }}
 .league-status-table tr:last-child td {{
   border-bottom: 0;
@@ -208,8 +220,11 @@ def league_table_html(table: list[tuple[str, float]], *, include_coins: bool = F
 }}
 .league-player-name {{
   color: #ffffff;
-  font-weight: 800;
-  white-space: nowrap;
+  font-family: var(--font-pixel);
+  font-size: 10px;
+  font-weight: 400;
+  white-space: normal;
+  overflow-wrap: anywhere;
 }}
 .league-trainer-badges {{
   display: inline-flex;
@@ -243,6 +258,7 @@ def league_table_html(table: list[tuple[str, float]], *, include_coins: bool = F
 }}
 .league-table-coins {{
   color: #fff4bd;
+  font-size: 20px;
   font-weight: 800;
 }}
 .league-table-empty {{

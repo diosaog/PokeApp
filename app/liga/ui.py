@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 from datetime import datetime, timezone
+from html import escape
 
 import streamlit as st
 
@@ -12,7 +13,8 @@ from app.discord_notify import (
     notify_missing_team_locks_async,
 )
 from app.entrenadores.trainer_flags import is_trainer_retired
-from app.liga.divisions import division_a_size_for_count
+from app.liga.divisions import division_a_size_for_count, movement_count_for_divisions
+from app.liga.league_styles import ensure_league_css
 from app.liga.ranking import (
     all_filled,
     clear_ranking_caches,
@@ -254,8 +256,10 @@ def _render_final_podium() -> None:
     podium = final_podium()
     if not podium:
         return
-    st.markdown("---")
-    st.subheader("Clasificacion final")
+    st.markdown(
+        _section_heading_html("Clasificacion final"),
+        unsafe_allow_html=True,
+    )
     labels = ["Ganador", "Segundo puesto", "Tercer puesto"]
     cols = st.columns(3)
     for idx, col in enumerate(cols):
@@ -284,6 +288,211 @@ def _render_final_podium() -> None:
                 )
 
 
+def _league_header_html(
+    *,
+    tramo: int,
+    max_rounds: int,
+    player_count: int,
+    division_a_size: int,
+    division_b_size: int,
+    is_active: bool,
+    read_only: bool,
+    finalized: bool,
+) -> str:
+    status = "Finalizada" if finalized else ("En edicion" if is_active else "Lista")
+    if read_only:
+        status = "Consulta"
+    status_cls = " is-live" if is_active else ""
+    visible_round = min(int(tramo), int(max_rounds)) if max_rounds else int(tramo)
+    return f"""
+<div class="league-hero">
+  <div class="league-hero-main">
+    <div class="league-kicker">Liga privada</div>
+    <div class="league-title">Liga y Tabla</div>
+    <div class="league-subtitle">Jornada {int(visible_round)} de {int(max_rounds)}</div>
+  </div>
+  <div class="league-hero-grid">
+    <div class="league-status-card{status_cls}">
+      <span>Estado</span>
+      <strong>{escape(status)}</strong>
+    </div>
+    <div class="league-status-card">
+      <span>Entrenadores activos</span>
+      <strong>{int(player_count)}</strong>
+    </div>
+    <div class="league-status-card">
+      <span>Liga A</span>
+      <strong>{int(division_a_size)} plazas</strong>
+    </div>
+    <div class="league-status-card">
+      <span>Liga B</span>
+      <strong>{int(division_b_size)} plazas</strong>
+    </div>
+  </div>
+</div>
+"""
+
+
+def _section_heading_html(title: str, subtitle: str = "") -> str:
+    subtitle_html = (
+        f"<div class='league-section-sub'>{escape(subtitle)}</div>"
+        if subtitle
+        else ""
+    )
+    return (
+        f"<div class='league-section-title'>{escape(title)}</div>"
+        f"{subtitle_html}"
+    )
+
+
+def _division_card_html(
+    title: str,
+    players: list[str],
+    *,
+    start_pos: int = 1,
+    range_label: str | None = None,
+    variant: str = "a",
+    badges: dict[str, str] | None = None,
+) -> str:
+    badges = badges or {}
+    rows: list[str] = []
+    for offset, user in enumerate(players):
+        pos = start_pos + offset
+        badge = badges.get(str(user), "")
+        badge_html = ""
+        if badge:
+            badge_cls = "up" if badge.lower() == "sube" else "down"
+            badge_html = (
+                "<span class='league-movement-badge "
+                f"league-movement-badge--{badge_cls}'>"
+                f"{escape(badge)}"
+                "</span>"
+            )
+        rows.append(
+            "<div class='league-card-player'>"
+            f"<div class='league-card-pos'>{int(pos)}</div>"
+            f"<div class='league-card-player-name'>{escape(str(user))}</div>"
+            f"{badge_html}"
+            "</div>"
+        )
+
+    if not rows:
+        rows.append("<div class='league-card-empty'>Sin jugadores</div>")
+
+    safe_range = range_label or f"{start_pos}-{start_pos + len(players) - 1}"
+    return (
+        f"<div class='league-division-card is-{escape(variant)}'>"
+        "<div class='league-division-head'>"
+        f"<div class='league-division-name'>{escape(title)}</div>"
+        f"<div class='league-division-range'>{escape(safe_range)}</div>"
+        "</div>"
+        "<div class='league-card-list'>"
+        + "".join(rows)
+        + "</div></div>"
+    )
+
+
+def _division_grid_html(
+    players_a: list[str],
+    players_b: list[str],
+    *,
+    start_b: int,
+    title_a: str = "Liga A",
+    title_b: str = "Liga B",
+    badges_a: dict[str, str] | None = None,
+    badges_b: dict[str, str] | None = None,
+) -> str:
+    end_a = len(players_a)
+    end_b = start_b + len(players_b) - 1 if players_b else start_b - 1
+    return (
+        "<div class='league-division-grid'>"
+        + _division_card_html(
+            title_a,
+            players_a,
+            start_pos=1,
+            range_label=f"1-{end_a}" if end_a else "Sin plazas",
+            variant="a",
+            badges=badges_a,
+        )
+        + _division_card_html(
+            title_b,
+            players_b,
+            start_pos=start_b,
+            range_label=f"{start_b}-{end_b}" if players_b else "Sin plazas",
+            variant="b",
+            badges=badges_b,
+        )
+        + "</div>"
+    )
+
+
+def _history_round_html(
+    *,
+    round_no: int,
+    rows_a: list[tuple[str, int, str]],
+    rows_b: list[tuple[str, int, str]],
+    a_len: int,
+    b_start: int,
+    b_end: int,
+) -> str:
+    def _history_card(
+        title: str,
+        rows: list[tuple[str, int, str]],
+        *,
+        range_label: str,
+        variant: str,
+    ) -> str:
+        row_html: list[str] = []
+        for user, pos, movement in rows:
+            badge_html = ""
+            if movement:
+                cls = "up" if movement == "Sube" else "down"
+                badge_html = (
+                    "<span class='league-movement-badge "
+                    f"league-movement-badge--{cls}'>"
+                    f"{escape(movement)}"
+                    "</span>"
+                )
+            row_html.append(
+                "<div class='league-card-player'>"
+                f"<div class='league-card-pos'>{int(pos)}</div>"
+                f"<div class='league-card-player-name'>{escape(str(user))}</div>"
+                f"{badge_html}"
+                "</div>"
+            )
+        if not row_html:
+            row_html.append("<div class='league-card-empty'>Sin jugadores</div>")
+        return (
+            f"<div class='league-division-card is-{escape(variant)}'>"
+            "<div class='league-division-head'>"
+            f"<div class='league-division-name'>{escape(title)}</div>"
+            f"<div class='league-division-range'>{escape(range_label)}</div>"
+            "</div>"
+            "<div class='league-card-list'>"
+            + "".join(row_html)
+            + "</div></div>"
+        )
+
+    card_a = _history_card(
+        "Liga A",
+        rows_a,
+        range_label=f"1-{int(a_len)}",
+        variant="a",
+    )
+    card_b = _history_card(
+        "Liga B",
+        rows_b,
+        range_label=f"{int(b_start)}-{int(b_end)}" if rows_b else "Sin plazas",
+        variant="b",
+    )
+    return (
+        f"<div class='league-history-title'>Tramo {int(round_no)}</div>"
+        "<div class='league-history-grid'>"
+        f"{card_a}{card_b}"
+        "</div>"
+    )
+
+
 def _changed_match_notifications(
     round_no: int, data: dict, tmp_divs: dict
 ) -> list[dict]:
@@ -310,8 +519,13 @@ def _render_previous_round_editor(
     *, prev_tramo: int, current_tramo: int, read_only: bool = False
 ) -> None:
     data = st.session_state.get("league_matches", {}).get(prev_tramo)
-    st.markdown("---")
-    st.subheader(f"Modificar jornada anterior (Tramo {prev_tramo})")
+    st.markdown(
+        _section_heading_html(
+            f"Modificar jornada anterior (Tramo {prev_tramo})",
+            "Recalcula puntos, monedas y divisiones desde ese cierre.",
+        ),
+        unsafe_allow_html=True,
+    )
     if not data:
         st.info("No hay datos guardados para la jornada anterior.")
         return
@@ -393,16 +607,9 @@ def _render_previous_round_editor(
 
 
 def page_tabla() -> None:
+    ensure_league_css()
     if st.session_state.pop(_CLEAR_EDIT_BUFFERS_NEXT_KEY, False):
         _clear_league_edit_buffers()
-
-    st.header("Liga A/B - Jornada")
-    refresh_requested = st.button(
-        "Actualizar datos de liga", use_container_width=True, key="refresh_league_table"
-    )
-    if refresh_requested:
-        _clear_league_page_caches()
-        _clear_local_league_state()
 
     _clear_league_page_caches()
     state_reloaded = restore_state()
@@ -441,8 +648,6 @@ def page_tabla() -> None:
                 "No se muestran controles de liga para evitar guardar encima con una copia antigua."
             )
         return
-    elif refresh_requested:
-        st.success("Datos de liga recargados desde el estado compartido.")
     _render_flash_messages()
     read_only = is_trainer_retired(st.session_state.get("user"))
     if read_only:
@@ -482,6 +687,36 @@ def page_tabla() -> None:
         prev_tramo and prev_tramo in st.session_state.get("league_matches", {})
     )
 
+    st.markdown(
+        _league_header_html(
+            tramo=int(tramo),
+            max_rounds=int(current_max_jornadas),
+            player_count=len(league_players),
+            division_a_size=int(division_a_size),
+            division_b_size=int(division_b_size),
+            is_active=bool(st.session_state.league_active),
+            read_only=bool(read_only),
+            finalized=bool(liga_finalizada),
+        ),
+        unsafe_allow_html=True,
+    )
+    if st.button(
+        "Actualizar datos de liga",
+        use_container_width=True,
+        key="refresh_league_table",
+    ):
+        _clear_league_page_caches()
+        _clear_local_league_state()
+        _queue_flash("success", "Datos de liga recargados desde el estado compartido.")
+        st.rerun()
+
+    st.markdown(
+        _section_heading_html(
+            "Control de jornada",
+            "Abre, modifica o cierra resultados de la jornada activa.",
+        ),
+        unsafe_allow_html=True,
+    )
     colA, colB = st.columns([2, 2])
     with colA:
         estado = "En edicion" if st.session_state.league_active else "Cerrado"
@@ -625,8 +860,13 @@ def page_tabla() -> None:
                 if not has_prev_closed:
                     st.caption("No hay jornada anterior cerrada para editar.")
 
-    st.markdown("---")
-    st.subheader("Editar divisiones")
+    st.markdown(
+        _section_heading_html(
+            "Gestion de divisiones",
+            "Ajusta los grupos activos antes de abrir una jornada.",
+        ),
+        unsafe_allow_html=True,
+    )
     with st.expander(
         f"Divisiones ({division_a_size} y {division_b_size})",
         expanded=False,
@@ -707,14 +947,19 @@ def page_tabla() -> None:
             read_only=read_only,
         )
 
-    st.markdown("---")
     A = st.session_state.league_divisions["A"]
     B = st.session_state.league_divisions["B"]
     pos_b_start = len(A) + 1
     pos_b_end = pos_b_start + len(B) - 1 if B else pos_b_start - 1
 
     if st.session_state.league_active:
-        st.subheader("Resultados - marca el ganador de cada enfrentamiento")
+        st.markdown(
+            _section_heading_html(
+                "Resultados",
+                "Marca ganadores y guarda antes de cerrar la jornada.",
+            ),
+            unsafe_allow_html=True,
+        )
         data = get_matches_for(tramo)
 
         def _ensure_tmp_results():
@@ -789,45 +1034,64 @@ def page_tabla() -> None:
                     st.success("Resultados guardados.")
 
         if all_filled(data["A"]) and all_filled(data["B"]):
-            st.markdown("---")
-            st.subheader("Previa ranking estimado")
+            st.markdown(
+                _section_heading_html(
+                    "Ranking estimado",
+                    "Previsualizacion antes de finalizar la jornada.",
+                ),
+                unsafe_allow_html=True,
+            )
             from app.liga.ranking import _rank
 
             rankA = _rank(A, data["A"])
             rankB = _rank(B, data["B"])
-            ca, cb = st.columns(2)
-            with ca:
-                st.markdown("**Liga A**")
-                for i, u in enumerate(rankA, start=1):
-                    st.write(f"{i}. {u}")
-            with cb:
-                st.markdown("**Liga B**")
-                for j, u in enumerate(rankB, start=pos_b_start):
-                    st.write(f"{j}. {u}")
+            movement_count = movement_count_for_divisions(
+                len(rankA),
+                len(rankB),
+                int(tramo),
+            )
+            badges_a = {user: "Baja" for user in rankA[-movement_count:]} if movement_count else {}
+            badges_b = {user: "Sube" for user in rankB[:movement_count]} if movement_count else {}
+            st.markdown(
+                _division_grid_html(
+                    rankA,
+                    rankB,
+                    start_b=pos_b_start,
+                    badges_a=badges_a,
+                    badges_b=badges_b,
+                ),
+                unsafe_allow_html=True,
+            )
     else:
-        st.subheader("Divisiones actuales")
-        c1, c2 = st.columns(2)
-        with c1:
-            st.markdown("**Liga A**")
-            for i, u in enumerate(A, start=1):
-                st.write(f"{i}. {u}")
-        with c2:
-            st.markdown("**Liga B**")
-            for j, u in enumerate(B, start=pos_b_start):
-                st.write(f"{j}. {u}")
+        st.markdown(
+            _section_heading_html(
+                "Divisiones actuales",
+                "Orden vigente para los emparejamientos de la proxima jornada.",
+            ),
+            unsafe_allow_html=True,
+        )
+        st.markdown(
+            _division_grid_html(A, B, start_b=pos_b_start),
+            unsafe_allow_html=True,
+        )
 
-    st.markdown("---")
     tabla = general_table_sorted()
     if liga_finalizada and not st.session_state.league_active:
         _render_final_podium()
     if st.session_state.league_active:
-        st.subheader("Tabla general")
+        st.markdown(
+            _section_heading_html("Tabla general"),
+            unsafe_allow_html=True,
+        )
         st.markdown(
             _league_table_html(tabla),
             unsafe_allow_html=True,
         )
     else:
-        st.subheader("Tabla general (con monedas)")
+        st.markdown(
+            _section_heading_html("Tabla general", "Incluye monedas actuales."),
+            unsafe_allow_html=True,
+        )
         st.markdown(
             _league_table_html(tabla, include_coins=True),
             unsafe_allow_html=True,
@@ -836,8 +1100,13 @@ def page_tabla() -> None:
     if st.session_state.get("league_movements") or st.session_state.get(
         "league_results"
     ):
-        st.markdown("---")
-        st.subheader("Historial")
+        st.markdown(
+            _section_heading_html(
+                "Historial",
+                "Cierres anteriores con marcas de ascenso y descenso.",
+            ),
+            unsafe_allow_html=True,
+        )
         lr = st.session_state.get("league_results", {})
         tramos = set()
         for _u, mp in lr.items():
@@ -846,7 +1115,6 @@ def page_tabla() -> None:
             except Exception:
                 tramos |= set(mp.keys())
         for t in sorted(tramos):
-            st.markdown(f"**Tramo {t}**")
             entries = []
             for u, mp in lr.items():
                 try:
@@ -874,29 +1142,43 @@ def page_tabla() -> None:
                 if b_positions
                 else (b_start + b_len - 1 if b_len else b_start - 1)
             )
-            show_movement_tags = int(t) < max_jornadas(int(t))
+            movement_count = movement_count_for_divisions(a_len, b_len, int(t))
+            show_movement_tags = int(t) < max_jornadas(int(t)) and movement_count > 0
             rowsA, rowsB = [], []
             for u, pos in entries:
-                tag = ""
-                if show_movement_tags and pos <= a_len and pos > max(a_len - 3, 0):
-                    tag = "📉 "
-                elif show_movement_tags and b_start <= pos < b_start + 3:
-                    tag = "📈 "
-                row = {"Pos": pos, "Jugador": f"{tag}{u}"}
+                movement = ""
+                if (
+                    show_movement_tags
+                    and pos <= a_len
+                    and pos > max(a_len - movement_count, 0)
+                ):
+                    movement = "Baja"
+                elif show_movement_tags and b_start <= pos < b_start + movement_count:
+                    movement = "Sube"
+                row = (u, pos, movement)
                 if pos <= a_len:
                     rowsA.append(row)
                 else:
                     rowsB.append(row)
-            c1, c2 = st.columns(2)
-            with c1:
-                st.caption(f"Liga A (1-{a_len})")
-                st.dataframe(rowsA or [], use_container_width=True)
-            with c2:
-                st.caption(f"Liga B ({b_start}-{b_end})")
-                st.dataframe(rowsB or [], use_container_width=True)
+            st.markdown(
+                _history_round_html(
+                    round_no=int(t),
+                    rows_a=rowsA,
+                    rows_b=rowsB,
+                    a_len=int(a_len),
+                    b_start=int(b_start),
+                    b_end=int(b_end),
+                ),
+                unsafe_allow_html=True,
+            )
 
-    st.markdown("---")
-    st.subheader("Reiniciar Liga")
+    st.markdown(
+        _section_heading_html(
+            "Zona critica",
+            "Reinicia solo cuando quieras borrar el progreso de liga actual.",
+        ),
+        unsafe_allow_html=True,
+    )
     confirm = st.selectbox(
         "Seguro que quieres reiniciar la Liga?",
         ["No", "Si"],
