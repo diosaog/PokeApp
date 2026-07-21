@@ -6,9 +6,11 @@ import os
 import streamlit as st
 
 _SECTION_META = {
+    "Inicio": ("🏠", "Centro"),
     "Team Preview": ("⚔️", "Combates"),
     "Normativa": ("📜", "Reglas y avisos"),
     "Liga y Tabla": ("🏆", "Clasificacion"),
+    "Temporada": ("🛡️", "Admin"),
     "Previa Combate": ("⚔️", "Duelo"),
     "Entrenadores": ("🎒", "Equipos"),
     "Copa": ("🥇", "Torneos"),
@@ -159,11 +161,9 @@ def _render_change_pin_form() -> None:
 
 
 def _normalize_section(section: str | None) -> str:
-    if section == "Inicio":
-        return "Normativa"
     if section == "Previa Combate":
         return "Team Preview"
-    return str(section or "Normativa")
+    return str(section or "Inicio")
 
 
 def _normalized_sections(sections: list[str]) -> list[str]:
@@ -172,7 +172,7 @@ def _normalized_sections(sections: list[str]) -> list[str]:
         normalized = _normalize_section(section)
         if normalized not in out:
             out.append(normalized)
-    return out or ["Normativa"]
+    return out or ["Inicio"]
 
 
 def _render_nav_css() -> None:

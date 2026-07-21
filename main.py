@@ -18,10 +18,14 @@ from app.startup import preload_datasets  # noqa: E402
 
 
 def router(section: str) -> None:
-    if section in ("Inicio", "Normativa"):
+    if section == "Inicio":
         from app.interfaz.pages import page_inicio as page
+    elif section == "Normativa":
+        from app.interfaz.pages import page_normativa as page
     elif section == "Liga y Tabla":
         from app.interfaz.pages import page_tabla as page
+    elif section == "Temporada":
+        from app.interfaz.pages import page_temporada as page
     elif section in ("Team Preview", "Previa Combate"):
         from app.interfaz.pages import page_previa_combate as page
     elif section == "Entrenadores":

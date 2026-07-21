@@ -647,6 +647,7 @@ def apply_section_theme(section: str) -> None:
         "Normativa": ("#6ea8ff", "#29548f"),
         "Entrenadores": ("#62c8ff", "#1d679c"),
         "Liga y Tabla": ("#f58b3c", "#9f431f"),
+        "Temporada": ("#8fd66b", "#357c36"),
         "Team Preview": ("#ff6f61", "#8e2d2f"),
         "Previa Combate": ("#ff6f61", "#8e2d2f"),
         "Copa": ("#cf74ff", "#74389f"),

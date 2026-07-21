@@ -6,6 +6,12 @@ from app.interfaz.normativa import NORMATIVA_MD, get_normativa_section_payloads,
 
 
 def page_inicio() -> None:
+    from app.interfaz.home import render_home
+
+    render_home()
+
+
+def page_normativa() -> None:
     st.header("Normativa")
 
     try:
@@ -32,6 +38,15 @@ def page_tabla() -> None:
         _lt.page_tabla()
     except Exception as e:
         st.error(f"No se pudo cargar la tabla: {e}")
+
+
+def page_temporada() -> None:
+    try:
+        from app.interfaz.temporada import render_temporada
+
+        render_temporada()
+    except Exception as e:
+        st.error(f"No se pudo cargar Temporada: {e}")
 
 
 def page_previa_combate() -> None:

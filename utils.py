@@ -29,8 +29,10 @@ USERS: Dict[str, str] = {
 }
 
 SECTIONS = [
+    "Inicio",
     "Normativa",
     "Liga y Tabla",
+    "Temporada",
     "Team Preview",
     "Entrenadores",
     "Copa",
@@ -54,8 +56,10 @@ def init_session_state() -> None:
 
 
 def sections_for_user(user: str | None) -> list[str]:
-    _ = user
-    return list(SECTIONS)
+    sections = list(SECTIONS)
+    if str(user or "").strip().lower() != "anto":
+        sections = [section for section in sections if section != "Temporada"]
+    return sections
 
 
 def league_users_for_round(
