@@ -262,9 +262,9 @@ def render_detail_html(
     tab_wrap_style = _style("display:flex", "gap:4px", "margin-bottom:6px")
     tab_base_style = _style("width:18px", "height:18px", "border:1px solid var(--bw2-edge-strong)", "border-radius:0", "display:inline-block")
     tab_colors = ["#58d18e", "#79b9f5", "#66d1ff", "#f26b61", "#cf74ff", "#e5bc56"]
-    tabs_html = "<div style='{}'>".format(tab_wrap_style)
+    tabs_html = "<div class='champ-detail-tabs' style='{}'>".format(tab_wrap_style)
     for color in tab_colors:
-        tabs_html += "<div style='{}; background:{};'></div>".format(tab_base_style, color)
+        tabs_html += "<div class='champ-detail-tab' style='{}; background:{};'></div>".format(tab_base_style, color)
     tabs_html += "</div>"
 
     stats_screen_style = _style(
@@ -333,7 +333,7 @@ def render_detail_html(
             "font-size:16px",
         )
         stat_rows.append(
-            "<div style='{}'><div style='font-size:11px;'>{}</div><div style='{}'>{}</div></div>".format(
+            "<div class='champ-detail-stat-row' style='{}'><div style='font-size:11px;'>{}</div><div class='champ-detail-stat-value' style='{}'>{}</div></div>".format(
                 row_style,
                 label,
                 val_style,
@@ -410,16 +410,16 @@ def render_detail_html(
     ivs_txt = _stat_line(ivs_display)
     evs_txt = _stat_line(evs_display)
     ivs_html = (
-        "<div style='padding:8px; background:rgba(121,185,245,0.14); border-top:1px solid rgba(255,255,255,0.08);'>"
+        "<div class='champ-detail-private-row' style='padding:8px; background:rgba(121,185,245,0.14); border-top:1px solid rgba(255,255,255,0.08);'>"
         "<div style='font-size:11px; margin-bottom:6px; color:#f7f8ff; font-family:var(--font-pixel);'>IVs</div>"
-        "<div style='background:linear-gradient(180deg,var(--bw2-panel-3) 0%, var(--bw2-panel) 100%); color:var(--bw2-text); padding:6px 8px; border:1px solid var(--bw2-edge); border-radius:0; font-size:15px;'>"
+        "<div class='champ-detail-private-value' style='background:linear-gradient(180deg,var(--bw2-panel-3) 0%, var(--bw2-panel) 100%); color:var(--bw2-text); padding:6px 8px; border:1px solid var(--bw2-edge); border-radius:0; font-size:15px;'>"
         f"{_html.escape(ivs_txt)}</div>"
         "</div>"
     )
     evs_html = (
-        "<div style='padding:8px; background:rgba(121,185,245,0.14); border-top:1px solid rgba(255,255,255,0.08);'>"
+        "<div class='champ-detail-private-row' style='padding:8px; background:rgba(121,185,245,0.14); border-top:1px solid rgba(255,255,255,0.08);'>"
         "<div style='font-size:11px; margin-bottom:6px; color:#f7f8ff; font-family:var(--font-pixel);'>EVs</div>"
-        "<div style='background:linear-gradient(180deg,var(--bw2-panel-3) 0%, var(--bw2-panel) 100%); color:var(--bw2-text); padding:6px 8px; border:1px solid var(--bw2-edge); border-radius:0; font-size:15px;'>"
+        "<div class='champ-detail-private-value' style='background:linear-gradient(180deg,var(--bw2-panel-3) 0%, var(--bw2-panel) 100%); color:var(--bw2-text); padding:6px 8px; border:1px solid var(--bw2-edge); border-radius:0; font-size:15px;'>"
         f"{_html.escape(evs_txt)}</div>"
         "</div>"
     )
@@ -437,22 +437,22 @@ def render_detail_html(
     )
     gender_html = f"<div style='{gender_style}'>{gender_txt}</div>" if gender_txt else ""
     left_html = (
-        f"<div style='{left_style}'>"
-        f"<div style='{header_style}'>"
+        f"<div class='champ-detail-card champ-detail-main' style='{left_style}'>"
+        f"<div class='champ-detail-header' style='{header_style}'>"
         f"<div style='{name_style}'>{pokeball_html}<span>{display_name}</span></div>"
         f"{gender_html}</div>"
-        f"<div style='{level_style}'>{level_txt}</div>"
-        f"<div style='{sprite_style}'><img src='{_html.escape(str(img_url))}' "
+        f"<div class='champ-detail-level' style='{level_style}'>{level_txt}</div>"
+        f"<div class='champ-detail-sprite-stage' style='{sprite_style}'><img src='{_html.escape(str(img_url))}' "
         f"style='image-rendering:pixelated; width:140px; height:auto;' alt='sprite'></div>"
-        f"<div style='{item_box_style}'>"
-        f"<div style='{item_label_style}'>Objeto</div>"
-        f"<div style='{item_value_style}'>{_html.escape(str(item))}</div>"
+        f"<div class='champ-detail-item-box' style='{item_box_style}'>"
+        f"<div class='champ-detail-item-label' style='{item_label_style}'>Objeto</div>"
+        f"<div class='champ-detail-item-value' style='{item_value_style}'>{_html.escape(str(item))}</div>"
         "</div></div>"
     )
 
     nature_row = ""
     if is_own:
-        nature_row = "<div style='{}'><div style='{}'>Naturaleza</div><div style='{}'>{}</div></div>".format(
+        nature_row = "<div class='champ-detail-stat-row' style='{}'><div style='{}'>Naturaleza</div><div class='champ-detail-stat-value' style='{}'>{}</div></div>".format(
             nature_row_style,
             nature_label_style,
             nature_value_style,
@@ -460,22 +460,22 @@ def render_detail_html(
         )
 
     stats_html = (
-        f"<div>{tabs_html}"
-        f"<div style='{stats_screen_style}'>"
-        f"<div style='{ps_row_style}'>"
+        f"<div class='champ-detail-card champ-detail-stats'>{tabs_html}"
+        f"<div class='champ-detail-screen' style='{stats_screen_style}'>"
+        f"<div class='champ-detail-ps-row' style='{ps_row_style}'>"
         f"<div style='{ps_label_style}'>PS</div>"
-        f"<div style='{ps_value_style}'>{hp_text}</div>"
-        f"<div style='{ps_bar_style}'><div style='{ps_fill_style}; width:{hp_pct}%;'></div></div>"
+        f"<div class='champ-detail-stat-value' style='{ps_value_style}'>{hp_text}</div>"
+        f"<div class='champ-detail-bar' style='{ps_bar_style}'><div style='{ps_fill_style}; width:{hp_pct}%;'></div></div>"
         "</div>"
         + "".join(stat_rows)
         + nature_row
-        + "<div style='{}'><div style='{}'>Habilid.</div><div style='{}'>{}</div></div>".format(
+        + "<div class='champ-detail-stat-row champ-detail-ability-row' style='{}'><div style='{}'>Habilid.</div><div class='champ-detail-stat-value' style='{}'>{}</div></div>".format(
             ability_row_style,
             ability_label_style,
             ability_name_style,
             ability_name_text,
         )
-        + "<div style='{}'>{}</div>".format(ability_desc_style, ability_desc_text)
+        + "<div class='champ-detail-ability-desc' style='{}'>{}</div>".format(ability_desc_style, ability_desc_text)
         + ivs_html
         + evs_html
         + "</div></div>"
@@ -551,8 +551,8 @@ def render_detail_html(
             "color:var(--bw2-text)",
         )
         mv_rows.append(
-            "<div style='{}'><div style='{}'>{}</div><div style='{}'>{}</div>"
-            "<div style='{}'><span>PP</span><span>{}</span></div></div>".format(
+            "<div class='champ-detail-move-row' style='{}'><div class='champ-detail-move-type' style='{}'>{}</div><div class='champ-detail-move-name' style='{}'>{}</div>"
+            "<div class='champ-detail-move-pp' style='{}'><span>PP</span><span>{}</span></div></div>".format(
                 move_row_style,
                 move_type_style,
                 t_es,
@@ -570,8 +570,8 @@ def render_detail_html(
         "background:linear-gradient(180deg,var(--bw2-screen-2) 0%, var(--bw2-screen) 100%)",
         "box-shadow: inset 0 1px 0 rgba(255,255,255,0.06)",
     )
-    moves_html = f"<div>{tabs_html}<div style='{moves_screen_style}'>" + "".join(mv_rows) + "</div></div>"
+    moves_html = f"<div class='champ-detail-card champ-detail-moves'>{tabs_html}<div class='champ-detail-screen champ-detail-move-screen' style='{moves_screen_style}'>" + "".join(mv_rows) + "</div></div>"
 
-    detail_html = f"<div style='{root_style}'>{left_html}{stats_html}{moves_html}</div>"
+    detail_html = f"<div class='champ-detail-layout' style='{root_style}'>{left_html}{stats_html}{moves_html}</div>"
     return detail_html
 
