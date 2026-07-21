@@ -180,13 +180,7 @@ def render_home() -> None:
     save = save_snapshot(user)
     money = money_snapshot(user)
     promos = promo_snapshot(jornada)
-    notices = collect_notifications(
-        user=user,
-        jornada=jornada,
-        lock=lock,
-        save=save,
-        promos=promos,
-    )
+    notices = collect_notifications(user=user, jornada=jornada)
     status = "Modo espectador" if is_trainer_retired(user) else "Entrenador activo"
 
     st.markdown(
