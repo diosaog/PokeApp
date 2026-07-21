@@ -10,7 +10,7 @@ def render_shop_styles() -> None:
         .main .stButton > button,
         .main .stButton > button * {
           font-family: var(--font-pixel) !important;
-          font-size: 10px !important;
+          font-size: 11px !important;
           font-weight: 700 !important;
           color: #ffffff !important;
           -webkit-text-fill-color: #ffffff !important;
@@ -27,15 +27,15 @@ def render_shop_styles() -> None:
         .main button[data-baseweb="tab"] *,
         .main button[role="tab"] * {
           font-family: var(--font-pixel) !important;
-          font-size: 10px !important;
+          font-size: 11px !important;
           font-weight: 700 !important;
         }
         .main div[data-testid="stTabs"] div[data-baseweb="tab-list"],
         .main div[data-testid="stTabs"] [role="tablist"] {
-          gap: 8px !important;
+          gap: 10px !important;
           flex-wrap: wrap !important;
           align-items: stretch !important;
-          padding: 6px;
+          padding: 8px;
           border: 1px solid rgba(216,223,232,0.16);
           background:
             linear-gradient(90deg, rgba(255,255,255,0.05), transparent 58%),
@@ -44,13 +44,13 @@ def render_shop_styles() -> None:
         }
         .main div[data-testid="stTabs"] button[data-baseweb="tab"],
         .main div[data-testid="stTabs"] button[role="tab"] {
-          flex: 0 0 178px !important;
-          width: 178px !important;
-          min-width: 178px !important;
+          flex: 1 1 170px !important;
+          width: auto !important;
+          min-width: 158px !important;
           justify-content: center !important;
-          min-height: 44px !important;
-          padding-left: 12px !important;
-          padding-right: 12px !important;
+          min-height: 50px !important;
+          padding-left: 18px !important;
+          padding-right: 18px !important;
           border: 1px solid rgba(216,223,232,0.22) !important;
           background: linear-gradient(180deg, #252d38 0%, #151b24 100%) !important;
           clip-path: polygon(9px 0, 100% 0, 100% calc(100% - 9px), calc(100% - 9px) 100%, 0 100%, 0 9px);
@@ -239,6 +239,13 @@ def render_shop_styles() -> None:
           font-size: 14px;
           text-transform: uppercase;
         }
+        .mart-aisle-note {
+          margin-top: 6px;
+          color: var(--bw2-text-soft);
+          font-family: var(--font-ui);
+          font-size: 17px;
+          line-height: 1.15;
+        }
         .mart-aisle-meta {
           display: flex;
           flex-wrap: wrap;
@@ -249,8 +256,8 @@ def render_shop_styles() -> None:
         .shop-card {
           position: relative;
           overflow: hidden;
-          min-height: 218px;
-          margin-bottom: 8px;
+          min-height: 244px;
+          margin-bottom: 10px;
           border: 1px solid rgba(216,223,232,0.22);
           background:
             linear-gradient(180deg, rgba(255,255,255,0.05) 0 1px, transparent 1px 100%) 0 0 / 100% 20px,
@@ -280,9 +287,9 @@ def render_shop_styles() -> None:
           z-index: 1;
           display: flex;
           justify-content: space-between;
-          gap: 8px;
-          min-height: 44px;
-          padding: 9px 10px 8px;
+          gap: 10px;
+          min-height: 48px;
+          padding: 10px 12px 9px;
           border-bottom: 1px solid rgba(216,223,232,0.18);
           background:
             linear-gradient(90deg, var(--accent) 0 4px, transparent 4px 100%),
@@ -306,8 +313,8 @@ def render_shop_styles() -> None:
           z-index: 1;
           display: grid;
           grid-template-columns: 76px minmax(0, 1fr);
-          gap: 10px;
-          padding: 11px 10px 12px;
+          gap: 12px;
+          padding: 12px 12px 14px;
         }
         .shop-icon-slot {
           display: flex;
@@ -331,7 +338,7 @@ def render_shop_styles() -> None:
           min-width: 0;
           display: grid;
           align-content: start;
-          gap: 8px;
+          gap: 10px;
         }
         .shop-desc {
           color: var(--bw2-text-soft);
@@ -341,35 +348,75 @@ def render_shop_styles() -> None:
           overflow-wrap: anywhere;
         }
         .shop-price {
-          display: flex;
-          flex-wrap: wrap;
-          align-items: center;
-          gap: 6px;
-          width: fit-content;
+          display: grid;
+          gap: 7px;
+          width: 100%;
           max-width: 100%;
           box-sizing: border-box;
-          padding: 6px 8px;
+          padding: 8px 10px;
           border: 1px solid rgba(255,255,255,0.14);
           background: linear-gradient(180deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.03) 100%);
           color: #ffffff;
           font-family: var(--font-pixel);
-          font-size: 10px;
+          font-size: 12px;
           line-height: 1.2;
         }
+        .shop-price-row,
+        .shop-price-flow {
+          display: flex;
+          flex-wrap: wrap;
+          align-items: center;
+          gap: 8px;
+          min-width: 0;
+        }
+        .shop-price-flow {
+          gap: 6px;
+        }
+        .shop-coin-value {
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          gap: 6px;
+          min-height: 32px;
+          min-width: 58px;
+          padding: 5px 8px;
+          border: 1px solid rgba(255,255,255,0.2);
+          background:
+            linear-gradient(180deg, rgba(255,255,255,0.12), rgba(255,255,255,0.03)),
+            rgba(7, 11, 17, 0.46);
+          color: #ffffff;
+          box-sizing: border-box;
+        }
+        .shop-coin {
+          font-family: "Segoe UI Emoji", "Apple Color Emoji", "Noto Color Emoji", sans-serif;
+          font-size: 18px;
+          line-height: 1;
+        }
+        .shop-amount {
+          font-family: var(--font-pixel);
+          font-size: 15px;
+          line-height: 1;
+        }
         .shop-main-price {
+          border-color: rgba(255, 220, 120, 0.52);
+          background:
+            linear-gradient(180deg, rgba(255,217,126,0.16), rgba(255,217,126,0.04)),
+            rgba(12, 15, 20, 0.58);
           color: #ffffff;
         }
         .shop-future-price {
+          border-color: rgba(143, 215, 255, 0.5);
           color: #8fd7ff;
         }
         .shop-discount-badge {
           display: inline-flex;
           align-items: center;
-          min-height: 22px;
-          padding: 3px 6px;
+          min-height: 30px;
+          padding: 5px 8px;
           border: 1px solid rgba(255,255,255,0.24);
           background: linear-gradient(180deg, #f26f3d 0%, #8d2f20 100%);
           color: #ffffff;
+          line-height: 1.1;
         }
         .shop-discount-badge.is-pending {
           border-color: rgba(117, 203, 255, 0.65);
@@ -401,34 +448,53 @@ def render_shop_styles() -> None:
         }
         .shop-arrow {
           color: #f6c15b;
+          font-size: 14px;
         }
         .shop-stock,
         .shop-missing {
-          display: block;
+          display: flex;
+          flex-wrap: wrap;
+          align-items: center;
+          gap: 8px;
           width: 100%;
           font-family: var(--font-pixel);
-          font-size: 8px;
+          font-size: 11px;
           line-height: 1.2;
         }
         .shop-stock {
           color: var(--bw2-text-soft);
         }
         .shop-missing {
+          width: fit-content;
+          max-width: 100%;
+          margin-top: -2px;
+          padding: 7px 9px;
+          border: 1px solid rgba(242, 107, 97, 0.32);
+          background: rgba(95, 28, 28, 0.22);
           color: #ffaba7;
+        }
+        .shop-missing-label {
+          text-transform: uppercase;
+        }
+        .shop-missing-price {
+          min-height: 28px;
+          min-width: 48px;
+          padding: 4px 7px;
+          border-color: rgba(255, 171, 167, 0.42);
         }
         .main .shop-price {
           gap: 8px;
-          padding: 8px 10px;
+          padding: 9px 11px;
           font-size: 13px;
           line-height: 1.2;
         }
         .main .shop-discount-badge {
-          min-height: 26px;
-          padding: 4px 7px;
+          min-height: 31px;
+          padding: 5px 9px;
         }
         .main .shop-stock,
         .main .shop-missing {
-          font-size: 10px;
+          font-size: 11px;
           line-height: 1.25;
         }
         .mart-confirm-card {
@@ -496,41 +562,54 @@ def render_shop_styles() -> None:
         }
         div[data-testid="stTabs"] button[data-baseweb="tab"],
         div[data-testid="stTabs"] button[role="tab"] {
-          flex: 1 1 180px !important;
+          flex: 1 1 170px !important;
           width: auto !important;
-          min-width: 174px !important;
+          min-width: 158px !important;
           max-width: none !important;
-          min-height: 48px !important;
-          padding: 0 16px !important;
+          min-height: 50px !important;
+          padding: 0 18px !important;
         }
         div[data-testid="stTabs"] button[data-baseweb="tab"] *,
         div[data-testid="stTabs"] button[role="tab"] * {
           width: 100% !important;
-          font-size: 10px !important;
+          font-size: 11px !important;
           line-height: 1.2 !important;
           text-align: center !important;
           white-space: nowrap !important;
         }
         .main .shop-price,
         .shop-price {
-          display: inline-flex !important;
-          align-items: center !important;
-          gap: 10px !important;
-          padding: 9px 12px !important;
-          font-size: 16px !important;
-          line-height: 1.15 !important;
-          width: fit-content !important;
+          display: grid !important;
+          gap: 8px !important;
+          padding: 9px 11px !important;
+          font-size: 13px !important;
+          line-height: 1.2 !important;
+          width: 100% !important;
           max-width: 100% !important;
         }
-        .main .shop-price *,
-        .shop-price * {
-          font-size: inherit !important;
-          line-height: inherit !important;
+        .main .shop-price-row,
+        .shop-price-row,
+        .main .shop-price-flow,
+        .shop-price-flow {
+          display: flex !important;
+          align-items: center !important;
+          flex-wrap: wrap !important;
+          gap: 8px !important;
+        }
+        .main .shop-coin,
+        .shop-coin {
+          font-size: 18px !important;
+          line-height: 1 !important;
+        }
+        .main .shop-amount,
+        .shop-amount {
+          font-size: 15px !important;
+          line-height: 1 !important;
         }
         .main .shop-discount-badge,
         .shop-discount-badge {
-          min-height: 28px !important;
-          padding: 5px 8px !important;
+          min-height: 31px !important;
+          padding: 5px 9px !important;
           font-size: 12px !important;
         }
         .main .shop-stock,

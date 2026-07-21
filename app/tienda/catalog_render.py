@@ -16,6 +16,18 @@ from app.tienda.discounts import discount_label, promotion_opens_label
 from app.tienda.money import _money_available
 
 
+def _coin_value(value: int, *, extra_class: str = "") -> str:
+    classes = "shop-coin-value"
+    if extra_class:
+        classes += f" {extra_class}"
+    return (
+        f"<span class='{classes}'>"
+        f"<span class='shop-coin'>{COIN}</span>"
+        f"<span class='shop-amount'>{int(value)}</span>"
+        "</span>"
+    )
+
+
 def _render_item_card(
     item: dict,
     idx_key: str,
@@ -78,16 +90,20 @@ def _render_item_card(
         future_price = int(discount.get("discount_price") or price)
         opens = _html.escape(promotion_opens_label(discount))
         availability = (
-            "Comodín disponible ahora a precio normal"
+            "Comodin disponible ahora a precio normal"
             if category_key == "comodines"
             else "Stock en traslado"
         )
         price_html = (
-            f"<span class='shop-discount-badge is-pending'>Próxima {label}</span>"
-            f"<span class='shop-old-price'>{COIN} {base_price}</span>"
-            f"<span class='shop-arrow'>-&gt;</span>"
-            f"<span class='shop-future-price'>{COIN} {future_price}</span>"
-            f"<span class='shop-stock'>{availability} · {opens}</span>"
+            "<div class='shop-price-row'>"
+            f"<span class='shop-discount-badge is-pending'>Proxima {label}</span>"
+            "<span class='shop-price-flow'>"
+            f"{_coin_value(base_price, extra_class='shop-old-price')}"
+            "<span class='shop-arrow'>-&gt;</span>"
+            f"{_coin_value(future_price, extra_class='shop-future-price')}"
+            "</span>"
+            "</div>"
+            f"<div class='shop-stock'>{availability} &middot; {opens}</div>"
         )
     elif active_promotion:
         label = discount_label(str(discount.get("discount_kind") or "normal"))
@@ -97,26 +113,39 @@ def _render_item_card(
             0,
         )
         price_html = (
-            f"<span class='shop-discount-badge'>🔥 {label}</span>"
-            f"<span class='shop-old-price'>{COIN} {base_price}</span>"
-            f"<span class='shop-arrow'>-&gt;</span>"
-            f"<span class='shop-main-price'>{COIN} {effective_price}</span>"
-            f"<span class='shop-stock'>Quedan {left}</span>"
+            "<div class='shop-price-row'>"
+            f"<span class='shop-discount-badge'>&#128293; {label}</span>"
+            "<span class='shop-price-flow'>"
+            f"{_coin_value(base_price, extra_class='shop-old-price')}"
+            "<span class='shop-arrow'>-&gt;</span>"
+            f"{_coin_value(effective_price, extra_class='shop-main-price')}"
+            "</span>"
+            "</div>"
+            f"<div class='shop-stock'>Quedan {left}</div>"
         )
     elif discount and already_claimed:
         price_html = (
-            "<span class='shop-discount-badge is-used'>Promoción ya utilizada</span>"
-            f"<span class='shop-main-price'>{COIN} {price}</span>"
-            "<span class='shop-stock'>Ya aprovechaste una unidad de esta oferta</span>"
+            "<div class='shop-price-row'>"
+            "<span class='shop-discount-badge is-used'>Promocion ya utilizada</span>"
+            f"{_coin_value(price, extra_class='shop-main-price')}"
+            "</div>"
+            "<div class='shop-stock'>Ya aprovechaste una unidad de esta oferta</div>"
         )
     else:
-        price_html = f"<span class='shop-main-price'>{COIN} {price}</span>"
+        price_html = (
+            "<div class='shop-price-row'>"
+            f"{_coin_value(price, extra_class='shop-main-price')}"
+            "</div>"
+        )
 
     missing_html = ""
     if available is not None and not afford and effective_price > 0:
+        missing_amount = effective_price - available
         missing_html = (
-            f"<div class='shop-missing'>Faltan {COIN} "
-            f"{effective_price - available}</div>"
+            "<div class='shop-missing'>"
+            "<span class='shop-missing-label'>Faltan</span>"
+            f"{_coin_value(missing_amount, extra_class='shop-missing-price')}"
+            "</div>"
         )
 
     info_html = f"<div class='shop-desc'>{desc_html}</div>" if desc_html else ""

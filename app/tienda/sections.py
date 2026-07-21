@@ -29,6 +29,27 @@ from storage import (
 )
 DIVIDER_HTML = "<div style='height:2px; background:linear-gradient(90deg, transparent 0%, var(--accent) 22%, var(--accent) 78%, transparent 100%); margin:10px 0 14px;'></div>"
 
+CATEGORY_ORDER = ("comodines", "bayas", "competitivos", "crianza")
+
+CATEGORY_META = {
+    "comodines": {
+        "label": "Comodines",
+        "note": "Ventajas especiales y recursos de jornada.",
+    },
+    "bayas": {
+        "label": "Bayas",
+        "note": "Consumibles baratos para preparar combates concretos.",
+    },
+    "competitivos": {
+        "label": "Competitivos",
+        "note": "Objetos clave para sets, roles y techs de combate.",
+    },
+    "crianza": {
+        "label": "Crianza",
+        "note": "Mejoras de naturaleza, habilidad e IVs.",
+    },
+}
+
 
 def render_shop_header() -> None:
     render_shop_styles()
@@ -38,18 +59,18 @@ def render_shop_header() -> None:
         (
             "<div class='mart-hero'>"
             "<div class='mart-hero-left'>"
-            "<div class='mart-kicker'>Unova Market System</div>"
-            "<div class='mart-title'>Supermercado Pokemon</div>"
+            "<div class='mart-kicker'>Poke Mart League System</div>"
+            "<div class='mart-title'>Tienda de Liga</div>"
             "<div class='mart-subrow'>"
             f"<span class='mart-pill'>Jornada {int(jornada)}</span>"
-            "<span class='mart-pill'>Poke Mart BW2</span>"
-            "<span class='mart-pill'>Linea de caja</span>"
+            "<span class='mart-pill'>Stock rotativo</span>"
+            "<span class='mart-pill'>Rebajas por jornada</span>"
             "</div>"
             "</div>"
             "<div class='mart-hero-right'>"
-            "<div class='mart-led'>Terminal online</div>"
+            "<div class='mart-led'>Caja online</div>"
             f"<div class='mart-pill'>Cliente: {user}</div>"
-            "<div class='mart-pill'>Stock por categorias</div>"
+            "<div class='mart-pill'>Catalogo competitivo</div>"
             "</div>"
             "</div>"
         ),
@@ -131,14 +152,16 @@ def _discount_count(items: list[dict], discounts: dict[str, dict]) -> int:
     return sum(1 for name in names if name in discounts)
 
 
-def _render_aisle_header(code: str, title: str, items: list[dict], discounts: dict[str, dict]) -> None:
+def _render_aisle_header(category_key: str, items: list[dict], discounts: dict[str, dict]) -> None:
+    meta = CATEGORY_META[category_key]
     discount_total = _discount_count(items, discounts)
     st.markdown(
         (
             "<div class='mart-aisle-head'>"
             "<div>"
-            f"<div class='mart-aisle-code'>{_html.escape(code)}</div>"
-            f"<div class='mart-aisle-title'>{_html.escape(title)}</div>"
+            "<div class='mart-aisle-code'>Categoria</div>"
+            f"<div class='mart-aisle-title'>{_html.escape(meta['label'])}</div>"
+            f"<div class='mart-aisle-note'>{_html.escape(meta['note'])}</div>"
             "</div>"
             "<div class='mart-aisle-meta'>"
             f"<span class='mart-pill'>{len(items)} productos</span>"
@@ -171,19 +194,16 @@ def render_shop_catalog(*, penalties: dict, store_locked: bool, current_user: st
 
     st.markdown(DIVIDER_HTML, unsafe_allow_html=True)
 
-    tab_com, tab_bay, tab_comp, tab_bred = st.tabs(["Comodines", "Bayas", "Competitivos", "Crianza"])
-    with tab_com:
-        _render_aisle_header("Categoria", "Comodines", catalog["comodines"], discounts)
-        _render_shop_items(catalog["comodines"], "comodines", available=available if current_user != "-" else None, discounts=discounts)
-    with tab_bay:
-        _render_aisle_header("Categoria", "Bayas", catalog["bayas"], discounts)
-        _render_shop_items(catalog["bayas"], "bayas", available=available if current_user != "-" else None, discounts=discounts)
-    with tab_comp:
-        _render_aisle_header("Categoria", "Competitivos", catalog["competitivos"], discounts)
-        _render_shop_items(catalog["competitivos"], "competitivos", available=available if current_user != "-" else None, discounts=discounts)
-    with tab_bred:
-        _render_aisle_header("Categoria", "Crianza", catalog["crianza"], discounts)
-        _render_shop_items(catalog["crianza"], "crianza", available=available if current_user != "-" else None, discounts=discounts)
+    tabs = st.tabs([CATEGORY_META[key]["label"] for key in CATEGORY_ORDER])
+    for tab, category_key in zip(tabs, CATEGORY_ORDER, strict=True):
+        with tab:
+            _render_aisle_header(category_key, catalog[category_key], discounts)
+            _render_shop_items(
+                catalog[category_key],
+                category_key,
+                available=available if current_user != "-" else None,
+                discounts=discounts,
+            )
 
 
 def render_pending_purchase(current_user: str, *, store_locked: bool) -> None:

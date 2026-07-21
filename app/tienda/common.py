@@ -5,8 +5,6 @@ import mimetypes
 import unicodedata
 from pathlib import Path
 
-from app.common import COIN
-
 
 def _pokeapi_item_png(slug: str) -> str:
     return f"https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/{slug}.png"
