@@ -2,6 +2,8 @@ from __future__ import annotations
 
 import streamlit as st
 
+from app.interfaz.champions_skin import apply_champions_skin
+
 
 def apply_css() -> None:
     css = """
@@ -891,6 +893,7 @@ def apply_css() -> None:
     </style>
     """
     st.markdown(css, unsafe_allow_html=True)
+    apply_champions_skin()
 
 
 def render_poke_separator() -> None:
@@ -899,18 +902,18 @@ def render_poke_separator() -> None:
 
 def apply_section_theme(section: str) -> None:
     palette = {
-        "Inicio": ("#2f80ed", "#1452bf", "#9dd3ff"),
-        "Normativa": ("#3b82f6", "#1d4ed8", "#b6dcff"),
-        "Entrenadores": ("#20b8ff", "#0876bd", "#9be7ff"),
-        "Liga y Tabla": ("#ffb72f", "#c97800", "#ffe38a"),
-        "Hall of Fame": ("#f5c84b", "#a66c00", "#fff0a3"),
-        "Temporada": ("#2ed18a", "#13865e", "#a9f4cd"),
-        "Team Preview": ("#ef3f56", "#b91c1c", "#ffabb7"),
-        "Previa Combate": ("#ef3f56", "#b91c1c", "#ffabb7"),
-        "Copa": ("#a875ff", "#6d28d9", "#d8c0ff"),
-        "Juicios": ("#f43f5e", "#be123c", "#ffb1bf"),
-        "Tienda": ("#ffd447", "#d97706", "#fff0a3"),
-        "Saves": ("#22c55e", "#15803d", "#a9f4cd"),
+        "Inicio": ("#8069ff", "#5c45d6", "#e7ddff"),
+        "Normativa": ("#8a74ff", "#604bd6", "#eee4ff"),
+        "Entrenadores": ("#45d1ff", "#218ed9", "#d7f6ff"),
+        "Liga y Tabla": ("#ffcf4d", "#d58b15", "#fff0ad"),
+        "Hall of Fame": ("#ffe25c", "#c89416", "#fff3b9"),
+        "Temporada": ("#4fdf9a", "#24a86a", "#d8ffe8"),
+        "Team Preview": ("#ff75dd", "#c946a9", "#ffe3f8"),
+        "Previa Combate": ("#ff75dd", "#c946a9", "#ffe3f8"),
+        "Copa": ("#9b7bff", "#684bd8", "#eee4ff"),
+        "Juicios": ("#ff6f86", "#c6465b", "#ffe0e7"),
+        "Tienda": ("#ffbd5c", "#d47a21", "#ffe8bd"),
+        "Saves": ("#45d1ff", "#218ed9", "#d7f6ff"),
     }
     accent, accent_dark, accent_soft = palette.get(section, ("#2f80ed", "#1452bf", "#9dd3ff"))
     label = section.upper().replace('"', "")
