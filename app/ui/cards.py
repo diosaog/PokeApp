@@ -40,7 +40,7 @@ def slot_card_html(
     types_html = ""
     if types:
         chips = " ".join(
-            type_icon_html(t, label=True, compact=True, class_name="type-chip")
+            type_icon_html(t, label=True, compact=True, class_name="slot-type-badge")
             for t in types[:2]
         )
         types_html = f"<div class='types'>{chips}</div>"

@@ -2027,6 +2027,81 @@ section[data-testid="stSidebar"] .mini-mon img {
   padding: 4px 8px !important;
 }
 
+.main .poke-type-chip.uses-asset,
+section[data-testid="stSidebar"] .poke-type-chip.uses-asset {
+  width: auto !important;
+  min-width: 0 !important;
+  height: auto !important;
+  min-height: 0 !important;
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  line-height: 0 !important;
+  overflow: visible !important;
+}
+
+.main .poke-type-chip.asset-icon,
+section[data-testid="stSidebar"] .poke-type-chip.asset-icon,
+.main .battle-type-dot.asset-icon {
+  width: 26px !important;
+  min-width: 26px !important;
+  height: 26px !important;
+  min-height: 26px !important;
+  flex: 0 0 26px !important;
+}
+
+.main .poke-type-icon-img,
+section[data-testid="stSidebar"] .poke-type-icon-img {
+  display: block !important;
+  width: 26px !important;
+  height: 26px !important;
+  object-fit: contain !important;
+  border-radius: 5px !important;
+  image-rendering: auto !important;
+  filter: drop-shadow(0 2px 3px rgba(18,14,54,0.28)) !important;
+}
+
+.main .poke-type-chip.asset-full,
+section[data-testid="stSidebar"] .poke-type-chip.asset-full,
+.main .battle-type-pill.poke-type-chip.asset-full,
+.main .champ-detail-type-chip.poke-type-chip.asset-full {
+  width: 82px !important;
+  min-width: 82px !important;
+  height: 17px !important;
+  min-height: 17px !important;
+  flex: 0 0 auto !important;
+}
+
+.main .battle-type-pill.poke-type-chip.asset-full,
+.main .champ-detail-type-chip.poke-type-chip.asset-full {
+  width: 96px !important;
+  min-width: 96px !important;
+  height: 19px !important;
+  min-height: 19px !important;
+}
+
+.main .poke-type-full-img,
+section[data-testid="stSidebar"] .poke-type-full-img {
+  display: block !important;
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: contain !important;
+  image-rendering: auto !important;
+  filter: drop-shadow(0 2px 3px rgba(18,14,54,0.22)) !important;
+}
+
+.main .slot .types {
+  align-items: center !important;
+  gap: 6px !important;
+}
+
+.main .battle-move-link .poke-type-chip.asset-icon,
+.main .matchup-move .poke-type-chip.asset-icon {
+  margin-left: -1px !important;
+}
+
 .stApp .material-symbols-rounded,
 .stApp .material-symbols-outlined,
 .stApp .material-icons,
