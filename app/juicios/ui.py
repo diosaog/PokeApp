@@ -1,5 +1,8 @@
 from __future__ import annotations
 
+from datetime import datetime
+import html as _html
+
 import streamlit as st
 
 from app.juicios.constants import (
@@ -15,7 +18,7 @@ from app.juicios.constants import (
 from app.juicios.forms import render_case_details_form, render_resolution_form
 from app.juicios.penalties import clear_penalty_caches
 from app.juicios.penalties import get_user_penalties
-from app.juicios.render import case_header, render_case_info
+from app.juicios.render import render_case_info
 from app.juicios.repo import (
     can_edit_case,
     create_case,
@@ -28,6 +31,13 @@ from app.juicios.repo import (
 from app.interfaz.theme import apply_section_theme
 from app.tienda.money import clear_money_caches
 from utils import active_users, users_with_retired_last
+
+
+STATUS_BADGE_LABELS = {
+    STATUS_PROPOSED: "Propuesto",
+    STATUS_IN_PROGRESS: "En proceso",
+    STATUS_FINISHED: "Archivado",
+}
 
 
 def _clear_cache() -> None:
@@ -61,7 +71,7 @@ def _apply_juicio_theme() -> None:
         }
         .ju-hero-title{
           font-family:var(--font-pixel);
-          font-size:12px;
+          font-size:clamp(16px, 2.4vw, 26px);
           line-height:1.3;
           margin-bottom:8px;
           color:#ffffff;
@@ -88,6 +98,66 @@ def _apply_juicio_theme() -> None:
           padding:4px 8px;
           text-transform:uppercase;
         }
+        .ju-metric-grid{
+          display:grid;
+          grid-template-columns:repeat(4,minmax(0,1fr));
+          gap:10px;
+          margin:10px 0 14px;
+        }
+        .ju-metric{
+          min-height:82px;
+          background:linear-gradient(180deg,var(--bw2-panel-2) 0%, var(--bw2-panel) 100%);
+          border:1px solid var(--bw2-edge);
+          border-radius:0;
+          padding:10px 12px;
+          color:var(--bw2-text);
+          box-shadow:inset 0 1px 0 rgba(255,255,255,.08),0 0 0 1px rgba(0,0,0,.28);
+        }
+        .ju-metric-label,
+        .ju-metric-value,
+        .ju-action-title,
+        .ju-status-badge{
+          font-family:var(--font-pixel);
+          text-transform:uppercase;
+        }
+        .ju-metric-label{
+          color:var(--bw2-text-soft);
+          font-size:8px;
+        }
+        .ju-metric-value{
+          margin-top:9px;
+          color:#ffffff;
+          font-size:16px;
+          line-height:1.15;
+        }
+        .ju-action-grid{
+          display:grid;
+          grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);
+          gap:10px;
+          margin:10px 0 12px;
+        }
+        .ju-action-card,
+        .ju-penalty-card{
+          background:linear-gradient(180deg,var(--bw2-panel-2) 0%, var(--bw2-panel) 100%);
+          border:1px solid var(--bw2-edge);
+          border-radius:0;
+          padding:12px;
+          color:var(--bw2-text-soft);
+          box-shadow:inset 0 1px 0 rgba(255,255,255,.08),0 0 0 1px rgba(0,0,0,.28);
+        }
+        .ju-action-title{
+          color:#ffffff;
+          font-size:11px;
+          line-height:1.25;
+        }
+        .ju-action-sub,
+        .ju-penalty-line{
+          margin-top:8px;
+          color:var(--bw2-text-soft);
+          font-family:var(--font-ui);
+          font-size:18px;
+          line-height:1.2;
+        }
         .ju-toolbar{
           background:linear-gradient(180deg,var(--bw2-panel-3) 0%, var(--bw2-panel) 100%);
           border:1px solid var(--bw2-edge);
@@ -110,6 +180,12 @@ def _apply_juicio_theme() -> None:
           height:2px;
           background:linear-gradient(90deg,transparent 0,var(--accent) 20%,var(--accent) 80%,transparent 100%);
           margin:10px 0 12px;
+        }
+        .ju-filter-grid{
+          display:grid;
+          grid-template-columns:repeat(2,minmax(0,1fr));
+          gap:10px;
+          margin:10px 0;
         }
         .ju-stage-wrap{
           display:flex;
@@ -169,6 +245,27 @@ def _apply_juicio_theme() -> None:
         .ju-v-guilty{ background:linear-gradient(180deg,#ef5e68 0%, #962d37 100%); border-color:#ffd6da; color:#ffffff; }
         .ju-v-not-guilty{ background:linear-gradient(180deg,#58d18e 0%, #2a8d5c 100%); border-color:#d8ffee; color:#ffffff; }
         .ju-v-pending{ background:linear-gradient(180deg,var(--accent) 0%, var(--accent-dark) 100%); border-color:#ffe1ca; color:#ffffff; }
+        .ju-status-badge{
+          display:inline-flex;
+          align-items:center;
+          min-height:24px;
+          padding:4px 8px;
+          border:1px solid var(--bw2-edge);
+          background:linear-gradient(180deg,var(--bw2-panel-3) 0%, var(--bw2-panel) 100%);
+          color:#ffffff;
+          font-size:8px;
+        }
+        .ju-status-badge.is-active{
+          border-color:var(--bw2-edge-strong);
+          background:linear-gradient(180deg,var(--accent) 0%, var(--accent-dark) 100%);
+        }
+        @media (max-width: 900px){
+          .ju-metric-grid,
+          .ju-action-grid,
+          .ju-filter-grid{
+            grid-template-columns:1fr;
+          }
+        }
         </style>
         """,
         unsafe_allow_html=True,
@@ -179,13 +276,12 @@ def _render_juicio_hero() -> None:
     st.markdown(
         """
         <div class='ju-hero'>
-          <div class='ju-hero-title'>TRIBUNAL POKEMON</div>
-          <div class='ju-hero-sub'>Sala de Audiencias: registro de casos, jurado, veredicto y sanciones.</div>
+          <div class='ju-hero-title'>Tribunal Pokemon</div>
+          <div class='ju-hero-sub'>Expedientes, votos y sanciones en una vista mas directa.</div>
           <div class='ju-hero-chips'>
-            <span class='ju-chip'>Expedientes</span>
+            <span class='ju-chip'>Casos</span>
             <span class='ju-chip'>Jurado</span>
-            <span class='ju-chip'>Veredicto</span>
-            <span class='ju-chip'>Castigos</span>
+            <span class='ju-chip'>Sanciones</span>
           </div>
         </div>
         """,
@@ -193,30 +289,124 @@ def _render_juicio_hero() -> None:
     )
 
 
+def _fmt_case_ts(value: object) -> str:
+    if not value:
+        return "-"
+    try:
+        return datetime.fromtimestamp(int(value)).strftime("%Y-%m-%d %H:%M")
+    except Exception:
+        return "-"
+
+
+def _case_status(case: dict) -> str:
+    status = str(case.get("status") or STATUS_PROPOSED)
+    if status in STATUS_BADGE_LABELS:
+        return status
+    return STATUS_PROPOSED
+
+
+def _render_metric(label: str, value: str) -> str:
+    return (
+        "<div class='ju-metric'>"
+        f"<div class='ju-metric-label'>{_html.escape(label)}</div>"
+        f"<div class='ju-metric-value'>{_html.escape(value)}</div>"
+        "</div>"
+    )
+
+
+def _render_case_metrics(cases: list[dict], current_user: str) -> None:
+    total = len(cases)
+    proposed = sum(1 for case in cases if _case_status(case) == STATUS_PROPOSED)
+    progress = sum(1 for case in cases if _case_status(case) == STATUS_IN_PROGRESS)
+    mine = sum(1 for case in cases if str(case.get("creator") or "") == str(current_user))
+    html = "".join(
+        [
+            _render_metric("Expedientes", str(total)),
+            _render_metric("Propuestos", str(proposed)),
+            _render_metric("En proceso", str(progress)),
+            _render_metric("Mios", str(mine)),
+        ]
+    )
+    st.markdown(f"<div class='ju-metric-grid'>{html}</div>", unsafe_allow_html=True)
+
+
+def _status_badge_html(status: str) -> str:
+    label = STATUS_BADGE_LABELS.get(status, status)
+    active = " is-active" if status != STATUS_FINISHED else ""
+    return f"<span class='ju-status-badge{active}'>{_html.escape(label)}</span>"
+
+
+def _case_summary_rows(cases: list[dict]) -> list[dict[str, object]]:
+    rows: list[dict[str, object]] = []
+    for case in cases:
+        status = _case_status(case)
+        rows.append(
+            {
+                "#": int(case.get("case_no") or 0),
+                "Estado": STATUS_BADGE_LABELS.get(status, status),
+                "Titulo": str(case.get("title") or "Sin titulo"),
+                "Acusado": str(case.get("accused") or "-"),
+                "Prioridad": str(case.get("priority") or "-"),
+                "Fecha": str(case.get("hearing_date") or "-"),
+                "Actualizado": _fmt_case_ts(case.get("updated_at")),
+            }
+        )
+    return rows
+
+
+def _case_option_label(case: dict) -> str:
+    status = STATUS_BADGE_LABELS.get(_case_status(case), "-")
+    case_no = int(case.get("case_no") or 0)
+    title = str(case.get("title") or "Sin titulo").strip()
+    accused = str(case.get("accused") or "-")
+    return f"#{case_no} | {status} | {accused} | {title}"
+
+
 def _show_active_penalties(user: str) -> None:
     pen = get_user_penalties(user)
     if not pen.get("sources"):
         return
-    st.warning("Tienes castigos activos derivados de juicios.")
+    lines = ["Tienes castigos activos derivados de juicios."]
     if pen.get("store_blocked"):
-        st.caption("- Tienda y monedas bloqueadas.")
+        lines.append("Tienda y monedas bloqueadas.")
         tramos = list(pen.get("store_ban_tramos") or [])
         if tramos:
-            st.caption(f"- Bloqueo por tramo: {', '.join(tramos)}")
+            tramos_text = ", ".join(str(tramo) for tramo in tramos)
+            lines.append(f"Bloqueo por tramo: {tramos_text}.")
     if pen.get("coins_reduction"):
-        st.caption(f"- Reduccion de monedas aplicada: {pen.get('coins_reduction')}")
+        lines.append(f"Reduccion de monedas: {pen.get('coins_reduction')}.")
     if pen.get("points_reduction"):
-        st.caption(f"- Reduccion de puntos aplicada: {pen.get('points_reduction')}")
+        lines.append(f"Reduccion de puntos: {pen.get('points_reduction')}.")
     for txt in pen.get("pokemon_release_notes") or []:
-        st.caption(f"- Liberacion/Muerte de Pokemon: {txt}")
+        lines.append(f"Liberacion/Muerte de Pokemon: {txt}")
     for txt in pen.get("other_notes") or []:
-        st.caption(f"- Otro castigo: {txt}")
+        lines.append(f"Otro castigo: {txt}")
+    body = "".join(
+        f"<div class='ju-penalty-line'>{_html.escape(str(line))}</div>"
+        for line in lines
+    )
+    st.markdown(
+        (
+            "<div class='ju-penalty-card'>"
+            "<div class='ju-action-title'>Sanciones activas</div>"
+            f"{body}"
+            "</div>"
+        ),
+        unsafe_allow_html=True,
+    )
     st.markdown("<div class='ju-sep'></div>", unsafe_allow_html=True)
 
 
 def _render_create_case(current_user: str) -> None:
-    st.markdown("---")
-    st.subheader("Nuevo juicio")
+    st.markdown(
+        (
+            "<div class='ju-action-card'>"
+            "<div class='ju-action-title'>Nuevo expediente</div>"
+            "<div class='ju-action-sub'>Define acusado, motivo, pruebas y jurado.</div>"
+            "</div>"
+        ),
+        unsafe_allow_html=True,
+    )
     sent, payload = render_case_details_form(
         form_key="juicio_new_form",
         case_no=next_case_number(),
@@ -428,12 +618,14 @@ def _render_delete_case_controls(case: dict, current_user: str) -> None:
 
 
 def _render_case_list(current_user: str) -> None:
-    st.markdown("---")
-    st.subheader("Juicios")
+    st.markdown("<div class='ju-sep'></div>", unsafe_allow_html=True)
     st.markdown(
-        "<div class='ju-toolbar'>Archivo judicial: filtra expedientes por visibilidad y estado.</div>",
+        "<div class='ju-toolbar'>Bandeja judicial: filtra, revisa y abre un expediente.</div>",
         unsafe_allow_html=True,
     )
+
+    all_cases = list_cases_for_user(current_user)
+    _render_case_metrics(all_cases, current_user)
 
     c1, c2 = st.columns(2)
     with c1:
@@ -451,7 +643,7 @@ def _render_case_list(current_user: str) -> None:
             index=0,
         )
 
-    cases = list_cases_for_user(current_user)
+    cases = list(all_cases)
     if scope == "Solo publicos":
         cases = [c for c in cases if bool(c.get("is_public"))]
     elif scope == "Solo mios":
@@ -466,26 +658,64 @@ def _render_case_list(current_user: str) -> None:
         st.info("No hay juicios para mostrar.")
         return
 
-    for case in cases:
-        with st.expander(case_header(case), expanded=False):
-            render_case_info(case)
+    cases.sort(
+        key=lambda case: (
+            _case_status(case) == STATUS_FINISHED,
+            -int(case.get("updated_at") or case.get("created_at") or 0),
+            int(case.get("case_no") or 0),
+        )
+    )
+    rows = _case_summary_rows(cases)
+    st.dataframe(rows, use_container_width=True, hide_index=True)
 
-            _render_jury_vote_controls(case, current_user)
+    case_by_id = {int(case.get("id") or 0): case for case in cases}
+    case_ids = [cid for cid in case_by_id if cid]
+    if not case_ids:
+        st.info("No se encontro ningun expediente valido.")
+        return
+    previous_id = int(st.session_state.get("juicio_selected_case_id") or 0)
+    if previous_id not in case_ids:
+        st.session_state["juicio_selected_case_id"] = case_ids[0]
+        previous_id = case_ids[0]
+    selected_index = case_ids.index(previous_id)
+    selected_id = st.selectbox(
+        "Abrir expediente",
+        options=case_ids,
+        index=selected_index,
+        format_func=lambda cid: _case_option_label(case_by_id[int(cid)]),
+        key="juicio_selected_case_id",
+    )
+    case = case_by_id[int(selected_id)]
+    status = _case_status(case)
+    title = _html.escape(_case_option_label(case))
+    st.markdown(
+        (
+            "<div class='ju-action-card'>"
+            f"{_status_badge_html(status)}"
+            f"<div class='ju-action-title' style='margin-top:10px;'>{title}</div>"
+            "</div>"
+        ),
+        unsafe_allow_html=True,
+    )
 
-            if not can_edit_case(case, current_user):
-                st.caption("Solo el creador puede editar este juicio.")
-                continue
+    with st.container(border=True):
+        render_case_info(case)
 
-            status = str(case.get("status") or STATUS_PROPOSED)
-            if status == STATUS_PROPOSED:
-                _render_proposed_controls(case, current_user)
-            elif status == STATUS_IN_PROGRESS:
-                _render_in_progress_controls(case, current_user)
-            else:
-                st.markdown("---")
-                st.caption("Juicio finalizado (archivado).")
+        _render_jury_vote_controls(case, current_user)
 
-            _render_delete_case_controls(case, current_user)
+        if not can_edit_case(case, current_user):
+            st.caption("Solo el creador puede editar este juicio.")
+            return
+
+        if status == STATUS_PROPOSED:
+            _render_proposed_controls(case, current_user)
+        elif status == STATUS_IN_PROGRESS:
+            _render_in_progress_controls(case, current_user)
+        else:
+            st.markdown("---")
+            st.caption("Juicio finalizado (archivado).")
+
+        _render_delete_case_controls(case, current_user)
 
 
 def page_juicios() -> None:
@@ -500,7 +730,28 @@ def page_juicios() -> None:
     _show_active_penalties(current_user)
 
     show_new = bool(st.session_state.get("juicio_show_new_form", False))
-    label = "Cerrar formulario" if show_new else "Hacer un Juicio"
+    action_title = "Cerrar nuevo expediente" if show_new else "Nuevo expediente"
+    action_sub = (
+        "El formulario esta abierto."
+        if show_new
+        else "Crea un caso y dejalo en etapa Propuesto."
+    )
+    st.markdown(
+        (
+            "<div class='ju-action-grid'>"
+            "<div class='ju-action-card'>"
+            f"<div class='ju-action-title'>{action_title}</div>"
+            f"<div class='ju-action-sub'>{action_sub}</div>"
+            "</div>"
+            "<div class='ju-action-card'>"
+            "<div class='ju-action-title'>Flujo</div>"
+            "<div class='ju-action-sub'>Propuesto -> En proceso -> Archivado.</div>"
+            "</div>"
+            "</div>"
+        ),
+        unsafe_allow_html=True,
+    )
+    label = "Cerrar formulario" if show_new else "Abrir nuevo juicio"
     if st.button(label, type="primary", use_container_width=True):
         st.session_state["juicio_show_new_form"] = not show_new
         st.rerun()

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from datetime import datetime
+import html as _html
 from typing import Any
 
 import streamlit as st
@@ -46,7 +47,7 @@ def _stage_boxes_html(status: str) -> str:
             "<div class='ju-stage{reached}' style='--stage-color:{color};'>{label}</div>".format(
                 reached=reached_cls,
                 color=color,
-                label=label,
+                label=_html.escape(label),
             )
         )
     return "<div class='ju-stage-wrap'>{}</div>".format("".join(boxes))
@@ -71,8 +72,8 @@ def case_header(case: dict[str, Any]) -> str:
 def render_case_info(case: dict[str, Any]) -> None:
     status = _normalize_status(case.get("status"))
     case_no = int(case.get("case_no") or 0)
-    title = str(case.get("title") or "Sin titulo").strip()
-    verdict = VERDICT_LABELS.get(str(case.get("verdict") or ""), "Pendiente")
+    title = _html.escape(str(case.get("title") or "Sin titulo").strip())
+    verdict = _html.escape(VERDICT_LABELS.get(str(case.get("verdict") or ""), "Pendiente"))
     verdict_cls = _verdict_css_class(case.get("verdict"))
     st.markdown(
         (
