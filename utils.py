@@ -32,6 +32,7 @@ SECTIONS = [
     "Inicio",
     "Normativa",
     "Liga y Tabla",
+    "Hall of Fame",
     "Temporada",
     "Team Preview",
     "Entrenadores",

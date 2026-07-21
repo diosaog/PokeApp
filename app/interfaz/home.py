@@ -477,12 +477,13 @@ def render_home() -> None:
     )
 
     st.markdown("<div class='home-section-title'>Accesos rapidos</div>", unsafe_allow_html=True)
-    cols = st.columns(4)
+    cols = st.columns(5)
     actions = [
         ("Fijar equipo", "Revisa tu perfil y guarda el equipo de la jornada.", "Entrenadores", "home_go_trainers"),
         ("Team Preview", "Consulta equipos fijados y prepara el combate.", "Team Preview", "home_go_preview"),
         ("Tienda", "Mira monedas, rebajas y objetos disponibles.", "Tienda", "home_go_shop"),
         ("Liga y Tabla", "Resultados, divisiones e historial competitivo.", "Liga y Tabla", "home_go_league"),
+        ("Hall of Fame", "Campeones archivados, copas y equipos historicos.", "Hall of Fame", "home_go_hall"),
     ]
     for col, action in zip(cols, actions):
         with col:

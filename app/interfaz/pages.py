@@ -40,6 +40,15 @@ def page_tabla() -> None:
         st.error(f"No se pudo cargar la tabla: {e}")
 
 
+def page_hall_of_fame() -> None:
+    try:
+        from app.interfaz.hall_of_fame import render_hall_of_fame
+
+        render_hall_of_fame()
+    except Exception as e:
+        st.error(f"No se pudo cargar Hall of Fame: {e}")
+
+
 def page_temporada() -> None:
     try:
         from app.interfaz.temporada import render_temporada

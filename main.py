@@ -24,6 +24,8 @@ def router(section: str) -> None:
         from app.interfaz.pages import page_normativa as page
     elif section == "Liga y Tabla":
         from app.interfaz.pages import page_tabla as page
+    elif section == "Hall of Fame":
+        from app.interfaz.pages import page_hall_of_fame as page
     elif section == "Temporada":
         from app.interfaz.pages import page_temporada as page
     elif section in ("Team Preview", "Previa Combate"):

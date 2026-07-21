@@ -12,6 +12,7 @@ _SECTION_META = {
     "Team Preview": ("\u2694\ufe0f", "Combates"),
     "Normativa": ("\U0001f4dc", "Reglas"),
     "Liga y Tabla": ("\U0001f3c6", "Clasificacion"),
+    "Hall of Fame": ("\U0001f3db\ufe0f", "Historico"),
     "Temporada": ("\U0001f6e1\ufe0f", "Admin"),
     "Previa Combate": ("\u2694\ufe0f", "Duelo"),
     "Entrenadores": ("\U0001f392", "Equipos"),
