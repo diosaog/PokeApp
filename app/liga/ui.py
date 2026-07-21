@@ -343,15 +343,7 @@ def _league_header_html(
 
 
 def _section_heading_html(title: str, subtitle: str = "") -> str:
-    subtitle_html = (
-        f"<div class='league-section-sub'>{escape(subtitle)}</div>"
-        if subtitle
-        else ""
-    )
-    return (
-        f"<div class='league-section-title'>{escape(title)}</div>"
-        f"{subtitle_html}"
-    )
+    return f"<div class='league-section-title'>{escape(title)}</div>"
 
 
 def _division_card_html(
@@ -662,7 +654,7 @@ def page_tabla() -> None:
     _render_flash_messages()
     read_only = is_trainer_retired(st.session_state.get("user"))
     if read_only:
-        st.info("Entrenador retirado: puedes consultar la liga, pero no editar sistemas activos.")
+        st.info("Entrenador retirado.")
 
     _auto_notify_latest_closed_round()
     resend_round = _latest_closed_round()
@@ -1199,7 +1191,6 @@ def page_tabla() -> None:
     )
     if st.button(
         "Reiniciar liga",
-        help="Borra jornadas, resultados y divisiones",
         key="btn_reset_league_ligatabla",
         disabled=read_only,
     ):

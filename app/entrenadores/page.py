@@ -298,11 +298,14 @@ def _chip(label: str, *, ok: bool = True) -> str:
 
 
 def _stat(label: str, value: str, detail: str) -> str:
+    detail_html = (
+        f"<div class='trainers-stat-detail'>{escape(detail)}</div>" if detail else ""
+    )
     return (
         "<div class='trainers-stat'>"
         f"<div class='trainers-stat-label'>{escape(label)}</div>"
         f"<div class='trainers-stat-value'>{escape(value)}</div>"
-        f"<div class='trainers-stat-detail'>{escape(detail)}</div>"
+        f"{detail_html}"
         "</div>"
     )
 
@@ -375,7 +378,6 @@ def _render_trainer_header(
             f"<div class='trainers-portrait-xl'>{avatar}</div>"
             "<div>"
             f"<div class='trainers-title'>{escape(trainer or '-')}</div>"
-            "<div class='trainers-subtitle'>Perfil competitivo, equipo actual, inventario y cajas del save.</div>"
             f"<div class='trainers-chip-row'>{''.join(chips)}</div>"
             "</div>"
             "</div>"
@@ -410,14 +412,12 @@ def _render_quick_status(
             + _stat(
                 "Permisos",
                 "Completo" if own and not retired else "Lectura",
-                "Puedes usar sistemas activos" if own and not retired else "Solo consulta",
+                "",
             )
             + "</div>"
         ),
         unsafe_allow_html=True,
     )
-    if active_path and not locked and own and not retired:
-        st.caption("Puedes fijar tu equipo para la jornada desde el bloque Equipo actual.")
 
 
 def _notify_trainer_retired_async(trainer: str, by_user: str | None = None) -> None:
@@ -591,16 +591,10 @@ def page_entrenadores_view() -> None:
     ensure_local_save_for(trainer or "")
 
     if is_trainer_retired(trainer):
-        st.warning(
-            "Este entrenador esta retirado. Se mantiene visible, pero no participa en sistemas activos."
-        )
+        st.warning("Entrenador retirado.")
 
     saves = list_user_saves(trainer) if trainer else []
     active_path = saves[0] if saves else None
-    st.caption(
-        f"Save activo: {Path(active_path).name if active_path else 'sin guardados'}"
-    )
-
     if not st.session_state.get("pkhex_loaded", False):
         if is_own_profile:
             st.warning("Configura el lector (bridge) para poder leer el save.")
@@ -663,10 +657,6 @@ def page_entrenadores_view() -> None:
         with tab_como:
             inv = _inventory_cached(trainer or "")
             comos = [r for r in inv if _category_for_item(r[1]) == "Comodines"] if inv else []
-            if not is_own_profile:
-                st.caption("Solo el propietario puede usar sus comodines.")
-            elif current_user_retired:
-                st.caption("Los entrenadores retirados no pueden usar comodines.")
             _render_purchase_cards(
                 comos,
                 "Comodines",
@@ -700,8 +690,6 @@ def page_entrenadores_view() -> None:
             current_user=str(current_user or ""),
             save_path=Path(save_path) if save_path else None,
         )
-    elif is_own_profile and current_user_retired:
-        st.caption("Entrenador retirado: no puede fijar equipo para jornadas.")
     team_grid_ui(team)
     detail_slot = st.empty()
     boxes_grid_ui(sav_json, box_count, box_names, save_path=str(save_path), pc_ok=pc_ok, mtime=mtime)
@@ -716,7 +704,6 @@ def _render_retirement_admin() -> None:
 
     st.markdown("---")
     with st.expander("Gestion de abandonos", expanded=False):
-        st.caption("Solo Anto puede marcar un abandono. Es permanente desde la app.")
         league_active = False
         try:
             raw_state = settings_get("league_state")
@@ -725,9 +712,7 @@ def _render_retirement_admin() -> None:
         except Exception:
             league_active = bool(st.session_state.get("league_active"))
         if league_active:
-            st.warning(
-                "Hay una jornada en edicion. Cierra esa jornada antes de marcar un abandono."
-            )
+            st.warning("Cierra la jornada antes de marcar un abandono.")
         candidates = [user for user in USERS.keys() if not is_trainer_retired(user)]
         if not candidates:
             st.caption("No quedan entrenadores disponibles para retirar.")
@@ -787,7 +772,6 @@ def page_entrenadores() -> None:
             """
             <div class='trainers-picker'>
               <div class='trainers-panel-label'>Entrenadores</div>
-              <div class='trainers-panel-copy'>El perfil propio abre acciones; el resto queda en modo consulta.</div>
             </div>
             """,
             unsafe_allow_html=True,

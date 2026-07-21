@@ -514,14 +514,10 @@ def _render_config_editor() -> None:
             clear_ranking_caches()
         except Exception:
             pass
-        st.success("Configuracion guardada en settings. No se ha enviado nada a Discord.")
+        st.success("Configuracion guardada.")
         st.session_state["season_last_saved_v2"] = saved
         document = saved
 
-    st.caption(
-        "Las versiones nuevas solo afectan desde el tramo elegido. Las jornadas anteriores "
-        "conservan la version que les correspondia."
-    )
     if isinstance(st.session_state.get("season_last_saved_v2"), dict):
         with st.expander("Ultima configuracion guardada", expanded=False):
             st.json(st.session_state["season_last_saved_v2"])
@@ -531,23 +527,6 @@ def _render_config_editor() -> None:
 
     st.markdown("<div class='season-section-title'>Historial de versiones</div>", unsafe_allow_html=True)
     st.markdown(_version_history_html(document), unsafe_allow_html=True)
-
-
-def _render_future_flags() -> None:
-    st.markdown("<div class='season-section-title'>Guardarrailes activos</div>", unsafe_allow_html=True)
-    rows = [
-        ("Cambios desde ahora", "Las modificaciones no recalculan tramos cerrados."),
-        ("Aaron Avisa", "Silenciado durante el desarrollo para no spoilear la update."),
-        ("Sin SQL nuevo", "Esta fase usa settings; la base de datos grande se decide al final."),
-        ("Copa separada", "La copa mantiene su propio sistema y no depende de esta config."),
-    ]
-    html = "<table class='season-table'><thead><tr><th>Sistema</th><th>Decision</th></tr></thead><tbody>"
-    html += "".join(
-        f"<tr><td>{escape(title)}</td><td>{escape(body)}</td></tr>"
-        for title, body in rows
-    )
-    html += "</tbody></table>"
-    st.markdown(html, unsafe_allow_html=True)
 
 
 def render_temporada() -> None:
@@ -563,10 +542,6 @@ def render_temporada() -> None:
             "<div class='season-hero'>"
             "<div class='season-kicker'>Panel Admin</div>"
             "<div class='season-title'>Temporada y configuracion 2.0</div>"
-            "<div class='season-subtitle'>"
-            f"Version activa: {escape(current_version.name)}. "
-            "Reglas editables por tramo sin tocar lo ya cerrado."
-            "</div>"
             "</div>"
         ),
         unsafe_allow_html=True,
@@ -574,6 +549,5 @@ def render_temporada() -> None:
 
     _render_current_config()
     _render_config_editor()
-    _render_future_flags()
     with st.expander("Version activa en bruto", expanded=False):
         st.json(season_version_to_dict(current_version))

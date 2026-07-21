@@ -597,7 +597,6 @@ def _hero_html(entries: list[dict[str, Any]]) -> str:
   <div class="hof-hero-main">
     <div class="hof-kicker">Archivo historico</div>
     <div class="hof-title">Hall of Fame</div>
-    <div class="hof-subtitle">Campeones de ligas y copas con el equipo que quedo registrado.</div>
   </div>
   <div class="hof-stat-grid">
     <div class="hof-stat">
@@ -627,8 +626,7 @@ def _render_entries(entries: list[dict[str, Any]]) -> None:
         st.markdown(
             (
                 "<div class='hof-empty'>"
-                "Todavia no hay campeones archivados. Cuando termine una liga o copa, "
-                "aparecera aqui automaticamente."
+                "Sin campeones archivados."
                 "</div>"
             ),
             unsafe_allow_html=True,

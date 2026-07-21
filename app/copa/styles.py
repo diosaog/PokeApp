@@ -311,19 +311,14 @@ def render_copa_styles() -> None:
 def render_copa_header(selected_mode: str) -> None:
     info = MODE_INFO.get(selected_mode, MODE_INFO["Copa"])
     label = _html.escape(info["label"])
-    detail = _html.escape(info["detail"])
     st.markdown(
         (
             "<div class='cup-hero'>"
             "<div class='cup-hero-main'>"
-            "<div class='cup-kicker'>PokeApp League</div>"
             "<div class='cup-title'>Copa</div>"
-            f"<div class='cup-sub'>{detail}</div>"
             "</div>"
             "<div class='cup-hero-side'>"
             f"<span class='cup-pill'>{label}</span>"
-            "<span class='cup-pill'>Modo torneo</span>"
-            "<span class='cup-pill'>Estado guardado</span>"
             "</div>"
             "</div>"
         ),
@@ -339,7 +334,6 @@ def render_copa_mode_cards(selected_mode: str) -> None:
             "<div class='cup-mode-card"
             f"{active}'>"
             f"<div class='cup-card-label'>{_html.escape(info['label'])}</div>"
-            f"<div class='cup-card-sub'>{_html.escape(info['detail'])}</div>"
             "</div>"
         )
     st.markdown(
@@ -349,16 +343,10 @@ def render_copa_mode_cards(selected_mode: str) -> None:
 
 
 def render_copa_section(title: str, subtitle: str | None = None) -> None:
-    subtitle_html = (
-        f"<div class='cup-section-sub'>{_html.escape(subtitle)}</div>"
-        if subtitle
-        else ""
-    )
     st.markdown(
         (
             "<div class='cup-section'>"
             f"<div class='cup-section-title'>{_html.escape(title)}</div>"
-            f"{subtitle_html}"
             "</div>"
         ),
         unsafe_allow_html=True,

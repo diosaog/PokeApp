@@ -81,7 +81,7 @@ def add_purchase(
                     _notify_purchase_inserted(user, item, int(price), pid)
                 return pid
         except Exception as e:
-            # Supabase estÃ¡ configurado pero fallÃ³: no hacemos fallback silencioso
+            # Supabase esta configurado pero fallo: no hacemos fallback silencioso
             raise RuntimeError(f"Supabase add_purchase failed: {e}")
     with _conn() as cx:
         cx.execute(

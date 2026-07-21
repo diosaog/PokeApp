@@ -201,7 +201,7 @@ def render_resolution_form(
     with st.form(form_key):
         st.markdown("**Castigos predefinidos**")
         penalties_selected = st.multiselect(
-            "Puedes aplicar uno o mas castigos",
+            "Castigos",
             options=PENALTY_ORDER,
             default=penalty_selected_default,
             format_func=lambda x: PENALTY_LABELS.get(x, x),

@@ -115,7 +115,7 @@ def _render_css() -> None:
           text-transform: uppercase;
         }
         .home-action-card {
-          min-height: 122px;
+          min-height: 62px;
           padding: 12px;
           margin-bottom: 8px;
           border: 1px solid rgba(216,223,232,0.2);
@@ -126,13 +126,6 @@ def _render_css() -> None:
           font-family: var(--font-pixel);
           font-size: 12px;
           text-transform: uppercase;
-        }
-        .home-action-body {
-          margin-top: 8px;
-          min-height: 44px;
-          color: var(--bw2-text-soft);
-          font-size: 19px;
-          line-height: 1.08;
         }
         @media (max-width: 980px) {
           .home-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
@@ -157,12 +150,11 @@ def _card(label: str, value: str, detail: str) -> str:
     )
 
 
-def _render_action(title: str, body: str, target: str, key: str) -> None:
+def _render_action(title: str, target: str, key: str) -> None:
     st.markdown(
         (
             "<div class='home-action-card'>"
             f"<div class='home-action-title'>{escape(title)}</div>"
-            f"<div class='home-action-body'>{escape(body)}</div>"
             "</div>"
         ),
         unsafe_allow_html=True,
@@ -188,9 +180,6 @@ def render_home() -> None:
             "<div class='home-hero'>"
             f"<div class='home-kicker'>{escape(status)}</div>"
             f"<div class='home-title'>Centro de entrenador - {escape(user or '-')}</div>"
-            "<div class='home-subtitle'>"
-            "Resumen rapido de jornada, equipo, save, tienda y avisos importantes."
-            "</div>"
             "</div>"
         ),
         unsafe_allow_html=True,
@@ -240,11 +229,11 @@ def render_home() -> None:
     st.markdown("<div class='home-section-title'>Accesos rapidos</div>", unsafe_allow_html=True)
     cols = st.columns(5)
     actions = [
-        ("Fijar equipo", "Revisa tu perfil y guarda el equipo de la jornada.", "Entrenadores", "home_go_trainers"),
-        ("Team Preview", "Consulta equipos fijados y prepara el combate.", "Team Preview", "home_go_preview"),
-        ("Tienda", "Mira monedas, rebajas y objetos disponibles.", "Tienda", "home_go_shop"),
-        ("Liga y Tabla", "Resultados, divisiones e historial competitivo.", "Liga y Tabla", "home_go_league"),
-        ("Hall of Fame", "Campeones archivados, copas y equipos historicos.", "Hall of Fame", "home_go_hall"),
+        ("Fijar equipo", "Entrenadores", "home_go_trainers"),
+        ("Team Preview", "Team Preview", "home_go_preview"),
+        ("Tienda", "Tienda", "home_go_shop"),
+        ("Liga y Tabla", "Liga y Tabla", "home_go_league"),
+        ("Hall of Fame", "Hall of Fame", "home_go_hall"),
     ]
     for col, action in zip(cols, actions):
         with col:
@@ -256,14 +245,12 @@ def render_home() -> None:
         with c1:
             _render_action(
                 "Temporada",
-                "Borrador de configuracion 2.0 y estado actual.",
                 "Temporada",
                 "home_go_season",
             )
         with c2:
             _render_action(
                 "Saves",
-                "Subidas, wipe y notas privadas de temporada.",
                 "Saves",
                 "home_go_saves",
             )

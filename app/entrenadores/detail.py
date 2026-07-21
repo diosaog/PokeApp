@@ -12,7 +12,7 @@ def pokemon_detail_panel() -> None:
     p = st.session_state.get("selected_pokemon")
     if not p:
         st.markdown(
-            "<div class='panel-dashed'>Selecciona un Pokemon del equipo o de una caja para ver sus datos.</div>",
+            "<div class='panel-dashed'>Selecciona un Pokemon.</div>",
             unsafe_allow_html=True,
         )
         return

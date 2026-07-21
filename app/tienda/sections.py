@@ -34,7 +34,7 @@ CATEGORY_ORDER = ("comodines", "bayas", "competitivos", "crianza")
 CATEGORY_META = {
     "comodines": {
         "label": "Comodines",
-        "note": "Ventajas especiales y recursos de jornada.",
+        "note": "",
     },
     "bayas": {
         "label": "Bayas",
@@ -59,18 +59,13 @@ def render_shop_header() -> None:
         (
             "<div class='mart-hero'>"
             "<div class='mart-hero-left'>"
-            "<div class='mart-kicker'>Poke Mart League System</div>"
             "<div class='mart-title'>Tienda de Liga</div>"
             "<div class='mart-subrow'>"
             f"<span class='mart-pill'>Jornada {int(jornada)}</span>"
-            "<span class='mart-pill'>Stock rotativo</span>"
-            "<span class='mart-pill'>Rebajas por jornada</span>"
             "</div>"
             "</div>"
             "<div class='mart-hero-right'>"
-            "<div class='mart-led'>Caja online</div>"
             f"<div class='mart-pill'>Cliente: {user}</div>"
-            "<div class='mart-pill'>Catalogo competitivo</div>"
             "</div>"
             "</div>"
         ),
@@ -124,7 +119,7 @@ def render_money_panel(current_user: str) -> tuple[dict, bool, int | None]:
         unsafe_allow_html=True,
     )
     if retired:
-        st.warning("Este entrenador esta retirado. Puede mirar la tienda, pero no comprar.")
+        st.warning("Entrenador retirado.")
     return penalties, store_locked, available
 
 
@@ -159,9 +154,7 @@ def _render_aisle_header(category_key: str, items: list[dict], discounts: dict[s
         (
             "<div class='mart-aisle-head'>"
             "<div>"
-            "<div class='mart-aisle-code'>Categoria</div>"
             f"<div class='mart-aisle-title'>{_html.escape(meta['label'])}</div>"
-            f"<div class='mart-aisle-note'>{_html.escape(meta['note'])}</div>"
             "</div>"
             "<div class='mart-aisle-meta'>"
             f"<span class='mart-pill'>{len(items)} productos</span>"
@@ -277,20 +270,14 @@ def render_pending_purchase(current_user: str, *, store_locked: bool) -> None:
                             pending["price"] = int(base_price)
                             st.session_state["shop_pending"] = pending
                             if reason == "already_claimed":
-                                st.warning(
-                                    "Ya aprovechaste una unidad de esta promoción. "
-                                    "Puedes comprar otra al precio normal."
-                                )
+                                st.warning("Ya usaste esta promocion. Precio normal disponible.")
                             else:
-                                st.warning(
-                                    "La promoción ya no está disponible. "
-                                    "Confirma si quieres comprar al precio normal."
-                                )
+                                st.warning("Promocion agotada. Confirma el precio normal.")
                             st.rerun()
                         if reason == "pending":
-                            st.error("La promoción todavía está en traslado.")
+                            st.error("Promocion en traslado.")
                         else:
-                            st.error("La promoción ya no está disponible.")
+                            st.error("Promocion agotada.")
                         st.session_state.pop("shop_pending", None)
                         st.rerun()
 
@@ -379,7 +366,7 @@ def render_discord_panel() -> None:
 
 def render_flags_reset(current_user: str) -> None:
     if is_trainer_retired(current_user):
-        st.caption("Entrenador retirado: no puede reiniciar flags de Pokemon.")
+        st.caption("Entrenador retirado.")
         return
     with st.expander("Reiniciar flags de Pokemon (Blindado/Robado)"):
         st.caption("Esto borra estados guardados en la base de datos; no modifica archivos .sav.")

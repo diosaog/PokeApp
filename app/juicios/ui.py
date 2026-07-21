@@ -277,12 +277,6 @@ def _render_juicio_hero() -> None:
         """
         <div class='ju-hero'>
           <div class='ju-hero-title'>Tribunal Pokemon</div>
-          <div class='ju-hero-sub'>Expedientes, votos y sanciones en una vista mas directa.</div>
-          <div class='ju-hero-chips'>
-            <span class='ju-chip'>Casos</span>
-            <span class='ju-chip'>Jurado</span>
-            <span class='ju-chip'>Sanciones</span>
-          </div>
         </div>
         """,
         unsafe_allow_html=True,
@@ -402,7 +396,6 @@ def _render_create_case(current_user: str) -> None:
         (
             "<div class='ju-action-card'>"
             "<div class='ju-action-title'>Nuevo expediente</div>"
-            "<div class='ju-action-sub'>Define acusado, motivo, pruebas y jurado.</div>"
             "</div>"
         ),
         unsafe_allow_html=True,
@@ -416,7 +409,7 @@ def _render_create_case(current_user: str) -> None:
     )
     if sent and payload:
         create_case(current_user, payload)
-        st.success("Juicio creado en etapa Propuesto.")
+        st.success("Juicio creado.")
         st.session_state["juicio_show_new_form"] = False
         _clear_cache()
         st.rerun()
@@ -433,7 +426,7 @@ def _render_jury_vote_controls(case: dict, current_user: str) -> None:
 
     cid = int(case.get("id") or 0)
     st.markdown("---")
-    st.caption("Votacion del jurado (cierre automatico por mayoria)")
+    st.caption("Votacion del jurado")
 
     can_proxy_vote = can_edit_case(case, current_user)
     jury_options = users_with_retired_last(active_users())
@@ -478,7 +471,6 @@ def _render_proposed_controls(case: dict, current_user: str) -> None:
     edit_key = f"juicio_edit_details_{cid}"
 
     st.markdown("---")
-    st.caption("Etapa Propuesto: completa o ajusta la informacion del caso.")
     if not st.session_state.get(edit_key, False):
         if st.button("Editar informacion", key=f"juicio_edit_btn_{cid}"):
             st.session_state[edit_key] = True
@@ -496,8 +488,6 @@ def _render_proposed_controls(case: dict, current_user: str) -> None:
             if st.button("Cerrar editor", key=f"juicio_close_edit_{cid}"):
                 st.session_state[edit_key] = False
                 st.rerun()
-        with c2:
-            st.caption("Guarda desde el boton del formulario.")
 
         if sent and payload:
             try:
@@ -511,7 +501,7 @@ def _render_proposed_controls(case: dict, current_user: str) -> None:
     if st.button("Comienza el Juicio", key=f"juicio_start_{cid}", type="primary"):
         try:
             _save_case_update(cid, current_user, {"status": STATUS_IN_PROGRESS})
-            st.success("El juicio paso a etapa En proceso.")
+            st.success("Juicio iniciado.")
             st.rerun()
         except Exception as e:
             st.error(str(e))
@@ -523,7 +513,6 @@ def _render_in_progress_controls(case: dict, current_user: str) -> None:
     template_key = f"juicio_penalty_template_{cid}"
 
     st.markdown("---")
-    st.caption("Etapa En proceso: define castigos propuestos antes de finalizar.")
 
     t1, t2, t3, t4 = st.columns(4)
     with t1:
@@ -564,8 +553,6 @@ def _render_in_progress_controls(case: dict, current_user: str) -> None:
             if st.button("Cerrar castigos", key=f"juicio_close_penalties_{cid}"):
                 st.session_state[edit_key] = False
                 st.rerun()
-        with c2:
-            st.caption("Guarda desde el boton del formulario.")
 
         if sent and payload:
             try:
@@ -620,7 +607,7 @@ def _render_delete_case_controls(case: dict, current_user: str) -> None:
 def _render_case_list(current_user: str) -> None:
     st.markdown("<div class='ju-sep'></div>", unsafe_allow_html=True)
     st.markdown(
-        "<div class='ju-toolbar'>Bandeja judicial: filtra, revisa y abre un expediente.</div>",
+        "<div class='ju-toolbar'>Bandeja judicial</div>",
         unsafe_allow_html=True,
     )
 
@@ -713,7 +700,7 @@ def _render_case_list(current_user: str) -> None:
             _render_in_progress_controls(case, current_user)
         else:
             st.markdown("---")
-            st.caption("Juicio finalizado (archivado).")
+            st.caption("Juicio finalizado.")
 
         _render_delete_case_controls(case, current_user)
 
@@ -731,22 +718,10 @@ def page_juicios() -> None:
 
     show_new = bool(st.session_state.get("juicio_show_new_form", False))
     action_title = "Cerrar nuevo expediente" if show_new else "Nuevo expediente"
-    action_sub = (
-        "El formulario esta abierto."
-        if show_new
-        else "Crea un caso y dejalo en etapa Propuesto."
-    )
     st.markdown(
         (
-            "<div class='ju-action-grid'>"
             "<div class='ju-action-card'>"
             f"<div class='ju-action-title'>{action_title}</div>"
-            f"<div class='ju-action-sub'>{action_sub}</div>"
-            "</div>"
-            "<div class='ju-action-card'>"
-            "<div class='ju-action-title'>Flujo</div>"
-            "<div class='ju-action-sub'>Propuesto -> En proceso -> Archivado.</div>"
-            "</div>"
             "</div>"
         ),
         unsafe_allow_html=True,

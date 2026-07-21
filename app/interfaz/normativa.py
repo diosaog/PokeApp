@@ -637,13 +637,6 @@ def _render_rows_block(block: dict) -> None:
 
 
 def _render_section(section: dict) -> None:
-    st.markdown(
-        (
-            f"<div class='norma-eyebrow'>{escape(str(section.get('eyebrow') or 'Seccion'))}</div>"
-            f"<div class='norma-summary'>{escape(str(section.get('summary') or ''))}</div>"
-        ),
-        unsafe_allow_html=True,
-    )
     blocks = list(section.get("visual_blocks") or [])
     if not blocks:
         return
@@ -664,17 +657,7 @@ def render_normativa_home() -> None:
         """
         <div class='norma-hero'>
           <div class='norma-kicker'>Normativa ChampionsLocke</div>
-          <div class='norma-title'>Panel reglamentario de temporada</div>
-          <div class='norma-subtitle'>
-            Todo el reglamento de la liga concentrado en una portada mas legible,
-            visual y alineada con la interfaz de PokeApp.
-          </div>
-          <div class='norma-chip-row'>
-            <div class='norma-chip'>7 bloques clave</div>
-            <div class='norma-chip'>8 gimnasios + liga final</div>
-            <div class='norma-chip'>Sistema A/B, puntos y monedas</div>
-            <div class='norma-chip'>Comodines, castigos y disciplina</div>
-          </div>
+          <div class='norma-title'>Normativa</div>
         </div>
         """,
         unsafe_allow_html=True,

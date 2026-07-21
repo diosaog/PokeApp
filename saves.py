@@ -54,7 +54,6 @@ def _render_header(current_user: str | None, retired: bool) -> None:
             "<div class='saves-hero'>"
             f"<div class='saves-kicker'>{mode} - {user_label}</div>"
             "<div class='saves-title'>Gestor de Saves</div>"
-            "<div class='saves-subtitle'>Subidas, save actual, historial personal y reset privado de temporada.</div>"
             "</div>"
         ),
         unsafe_allow_html=True,
@@ -76,18 +75,6 @@ def _render_admin_wipe(current_user: str | None) -> None:
 
     st.markdown("---")
     st.markdown("<div class='saves-section-title'>Admin Reset / Wipe</div>", unsafe_allow_html=True)
-    st.markdown(
-        (
-            "<div class='saves-admin-panel'>"
-            "<div class='saves-admin-title'>Zona privada de Anto</div>"
-            "<div class='saves-admin-body'>"
-            "Borra datos de temporada y deja la app lista para empezar otro juego. "
-            "No toca codigo ni assets del proyecto."
-            "</div>"
-            "</div>"
-        ),
-        unsafe_allow_html=True,
-    )
     st.warning(
         "Esto borra todos los datos de temporada: saves, compras, inventarios, flags, liga, copas, "
         "juicios, ajustes y copias locales. No borra codigo ni assets."
@@ -105,7 +92,7 @@ def _render_admin_wipe(current_user: str | None) -> None:
             _clear_runtime_after_wipe(current_user)
             st.rerun()
         else:
-            st.error("Wipe incompleto. Revisa estos errores:")
+            st.error("Wipe incompleto.")
             for err in report.get("errors") or []:
                 st.caption(f"- {err}")
 
@@ -177,14 +164,14 @@ def _render_current_save(current_user: str | None, current: tuple | None) -> Non
     if owner and current_user and current_user == owner:
         _render_download(current, label="Descargar save actual", key=f"dl_current_{save_row_id(current)}")
     else:
-        st.caption("Descarga no disponible: solo quien subio el save puede descargarlo.")
+        st.caption("Solo puede descargarlo quien lo subio.")
 
 
 def _render_history(current_user: str | None, history: list[tuple], current: tuple | None, *, disabled: bool) -> None:
     current_id = save_row_id(current)
     st.markdown("<div class='saves-section-title'>Historial personal</div>", unsafe_allow_html=True)
     if not history:
-        st.info("Todavia no hay saves subidos por este entrenador.")
+        st.info("Sin saves subidos.")
         return
 
     prepared_key = "saves_download_ready_id"
@@ -214,7 +201,7 @@ def _render_history(current_user: str | None, history: list[tuple], current: tup
                     if st.session_state.get(prepared_key) == row_id:
                         _render_download(row, label="Descargar", key=f"dl_{row_key}")
                 else:
-                    st.caption("Solo el autor puede descargar este save.")
+                    st.caption("Solo el autor puede descargarlo.")
 
 
 def page_saves() -> None:
@@ -223,13 +210,13 @@ def page_saves() -> None:
 
     current_user = st.session_state.get("user")
     if st.session_state.pop("_wipe_done", False):
-        st.success("Reset / Wipe completado. La temporada queda limpia para empezar otro juego.")
+        st.success("Reset / Wipe completado.")
 
     bootstrap_latest_save(current_user)
     user_retired = is_trainer_retired(current_user)
     _render_header(current_user, user_retired)
     if user_retired:
-        st.warning("Entrenador retirado: puedes consultar saves, pero no subir ni cambiar el actual.")
+        st.warning("Entrenador retirado.")
 
     cur = get_current_save_for_user(current_user)
     history = list_saves_by_user(current_user, limit=20) if current_user else []

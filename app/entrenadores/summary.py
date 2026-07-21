@@ -282,11 +282,10 @@ def trainer_summary_with_portrait_ui(
                 "Revividos tras wipe (penaliza -0.4 c/u)",
                 min_value=0,
                 max_value=30,
-                step=1,
-                value=revividos,
-                key=f"revives_wipe_{jugador}",
-                help="Usa esta casilla para anotar los revividos tras un wipe.",
-            )
+            step=1,
+            value=revividos,
+            key=f"revives_wipe_{jugador}",
+        )
         with rev_col2:
             if st.button("Guardar revividos", key=f"save_revives_{jugador}"):
                 _set_revives(jugador or "", rev_count)
@@ -297,13 +296,6 @@ def trainer_summary_with_portrait_ui(
             "Liga Finalizada",
             key=f"league_finished_{jugador}",
             disabled=not can_claim_league_bonus,
-            help=(
-                "Reclama 12 monedas por completar la liga."
-                if can_claim_league_bonus
-                else "Necesitas las 8 medallas para reclamarlo."
-                if medallas < 8
-                else "Ya has reclamado esta recompensa."
-            ),
         ):
             if mark_league_finished_claimed(jugador or ""):
                 clear_money_caches()
@@ -311,11 +303,3 @@ def trainer_summary_with_portrait_ui(
                 st.rerun()
             else:
                 st.error("No se pudo guardar la recompensa de liga.")
-        if already_claimed:
-            st.caption(f"Recompensa de liga reclamada: +{LEAGUE_FINISHED_COINS} monedas.")
-        elif medallas < 8:
-            st.caption("La recompensa Liga Finalizada se desbloquea con las 8 medallas.")
-        else:
-            st.caption(f"Pulsa el boton para reclamar +{LEAGUE_FINISHED_COINS} monedas.")
-    elif is_own_profile and retired:
-        st.caption("Entrenador retirado: no puede registrar revividos ni reclamar recompensas.")

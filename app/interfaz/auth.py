@@ -102,65 +102,6 @@ def _render_login_css() -> None:
           text-transform: uppercase;
           letter-spacing: 0;
         }
-        .auth-subtitle {
-          max-width: 720px;
-          margin-top: 12px;
-          color: var(--bw2-text-soft);
-          font-size: 24px;
-          line-height: 1.12;
-        }
-        .auth-status-grid {
-          display: grid;
-          grid-template-columns: repeat(3, minmax(0, 1fr));
-          gap: 10px;
-          margin-top: 28px;
-          max-width: 760px;
-        }
-        .auth-status {
-          min-height: 86px;
-          padding: 11px;
-          border: 1px solid rgba(216,223,232,0.18);
-          background: rgba(9,13,19,0.44);
-          box-shadow: inset 0 1px 0 rgba(255,255,255,0.06);
-        }
-        .auth-status-label {
-          color: var(--bw2-text-dim);
-          font-family: var(--font-pixel);
-          font-size: 9px;
-          text-transform: uppercase;
-          letter-spacing: 0;
-        }
-        .auth-status-value {
-          margin-top: 11px;
-          color: #fff;
-          font-family: var(--font-pixel);
-          font-size: 12px;
-          line-height: 1.22;
-          letter-spacing: 0;
-        }
-        .auth-panel {
-          padding: 18px;
-          border: 1px solid rgba(248,251,255,0.26);
-          border-radius: var(--poke-radius-xl);
-          background:
-            linear-gradient(90deg, rgba(255,212,71,0.1), transparent 54%),
-            linear-gradient(180deg, rgba(255,255,255,0.09), transparent 42%),
-            linear-gradient(180deg, var(--bw2-panel-2), var(--bw2-panel));
-          box-shadow: var(--poke-surface-glow), var(--poke-shadow-card);
-        }
-        .auth-panel-title {
-          color: #fff;
-          font-family: var(--font-pixel);
-          font-size: 15px;
-          text-transform: uppercase;
-          letter-spacing: 0;
-        }
-        .auth-panel-sub {
-          margin-top: 7px;
-          color: var(--bw2-text-soft);
-          font-size: 19px;
-          line-height: 1.1;
-        }
         .auth-trainer-card {
           margin: 14px 0 12px;
           padding: 12px;
@@ -219,35 +160,13 @@ def _render_login_css() -> None:
           line-height: 1.25;
           letter-spacing: 0;
         }
-        .auth-trainer-meta {
-          margin-top: 7px;
-          color: var(--bw2-text-soft);
-          font-size: 19px;
-          line-height: 1.08;
-        }
-        .auth-footnote {
-          margin-top: 12px;
-          color: var(--bw2-text-dim);
-          font-size: 17px;
-          line-height: 1.1;
-        }
         @media (max-width: 900px) {
           .auth-title { font-size: 24px; }
-          .auth-status-grid { grid-template-columns: 1fr; }
           .auth-hero { min-height: 0; }
         }
         </style>
         """,
         unsafe_allow_html=True,
-    )
-
-
-def _status_card(label: str, value: str) -> str:
-    return (
-        "<div class='auth-status'>"
-        f"<div class='auth-status-label'>{escape(label)}</div>"
-        f"<div class='auth-status-value'>{escape(value)}</div>"
-        "</div>"
     )
 
 
@@ -263,7 +182,6 @@ def _trainer_card(user: str) -> str:
         f"<div class='auth-avatar'>{avatar}</div>"
         "<div>"
         f"<div class='auth-trainer-name'>{escape(user)}</div>"
-        "<div class='auth-trainer-meta'>Acceso privado de entrenador</div>"
         "</div>"
         "</div>"
     )
@@ -328,29 +246,12 @@ def login_gate() -> None:
                 "<div class='auth-hero'>"
                 "<div class='auth-kicker'>PokeApp League</div>"
                 "<div class='auth-title'>Centro de entrenadores</div>"
-                "<div class='auth-subtitle'>"
-                "Entra con tu entrenador para revisar equipo, jornada, tienda y combates."
-                "</div>"
-                "<div class='auth-status-grid'>"
-                + _status_card("Liga", "Temporada activa")
-                + _status_card("Acceso", "PIN privado")
-                + _status_card("Modo", "Competitivo")
-                + "</div>"
                 "</div>"
             ),
             unsafe_allow_html=True,
         )
 
     with panel:
-        st.markdown(
-            """
-            <div class='auth-panel'>
-              <div class='auth-panel-title'>Acceso entrenador</div>
-              <div class='auth-panel-sub'>Selecciona perfil y confirma tu PIN.</div>
-            </div>
-            """,
-            unsafe_allow_html=True,
-        )
         selected_default = st.session_state.get("login_user")
         selected_index = (
             user_options.index(selected_default)
@@ -379,10 +280,5 @@ def login_gate() -> None:
                 st.success(f"Bienvenido, {user}")
                 st.rerun()
             st.error("Usuario o codigo/PIN incorrecto")
-
-        st.markdown(
-            "<div class='auth-footnote'>Los entrenadores retirados pueden entrar en modo consulta.</div>",
-            unsafe_allow_html=True,
-        )
 
     st.stop()

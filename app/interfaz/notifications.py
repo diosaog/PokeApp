@@ -261,8 +261,8 @@ def collect_notifications(
         {
             "kind": "ok",
             "source": "empty",
-            "title": "Sin actividad reciente",
-            "body": "Cuando se fijen equipos, se compre o se suba un save, aparecera aqui.",
+            "title": "Sin avisos",
+            "body": "",
             "time": "",
             "ts": "0",
         }
@@ -378,6 +378,8 @@ def render_notification_styles(container: Any = None) -> None:
 def notice_html(item: dict[str, str]) -> str:
     kind = escape(str(item.get("kind") or "info"))
     time_text = str(item.get("time") or "").strip()
+    body_text = str(item.get("body") or "").strip()
+    body_html = f"<div class='app-notice-body'>{escape(body_text)}</div>" if body_text else ""
     time_html = (
         f"<div class='app-notice-time'>{escape(time_text)}</div>"
         if time_text and time_text != "-"
@@ -386,7 +388,7 @@ def notice_html(item: dict[str, str]) -> str:
     return (
         f"<div class='app-notice app-notice--{kind}'>"
         f"<div class='app-notice-title'>{escape(str(item.get('title') or 'Aviso'))}</div>"
-        f"<div class='app-notice-body'>{escape(str(item.get('body') or ''))}</div>"
+        f"{body_html}"
         f"{time_html}"
         "</div>"
     )
