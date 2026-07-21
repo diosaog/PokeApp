@@ -177,10 +177,7 @@ def _team_lock_activity(round_no: int) -> list[dict[str, str]]:
             _activity_item(
                 source=f"lock:{round_no}:{user}",
                 title="Equipo fijado",
-                body=(
-                    f"{user} fijo {len(team)}/6 Pokemon para la Jornada "
-                    f"{int(round_no)}{late}."
-                ),
+                body=f"{user} ha fijado equipo{late}.",
                 timestamp=lock.get("locked_at"),
             )
         )
@@ -209,7 +206,7 @@ def _purchase_activity(limit: int) -> list[dict[str, str]]:
             _activity_item(
                 source=f"purchase:{pid}",
                 title="Compra",
-                body=f"{buyer} compro {item_name} por {COIN} {price_i}.",
+                body=f"{buyer} ha comprado {item_name}.",
                 timestamp=ts,
             )
         )
@@ -232,7 +229,7 @@ def _save_activity(limit: int) -> list[dict[str, str]]:
             _activity_item(
                 source=f"save:{save_id}",
                 title="Save subido",
-                body=f"{trainer} subio {save_name}.",
+                body=f"{trainer} ha subido {save_name}.",
                 timestamp=ts,
             )
         )

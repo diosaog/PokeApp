@@ -60,8 +60,10 @@ class NotificationTests(unittest.TestCase):
 
         self.assertEqual(len(items), 5)
         self.assertEqual(items[0]["title"], "Save subido")
-        self.assertIn("Sergio", items[0]["body"])
+        self.assertEqual(items[0]["body"], "Sergio ha subido ROM SERGIO.sav.")
         self.assertTrue(any(item["title"] == "Compra" for item in items))
+        self.assertTrue(any(item["body"] == "Samu ha comprado Restos." for item in items))
+        self.assertFalse(any("por" in item["body"] for item in items))
         self.assertFalse(any("Robar Pokemon" in item["body"] for item in items))
 
     @patch.object(notifications, "list_saves", return_value=[])
