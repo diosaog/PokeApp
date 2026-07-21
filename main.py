@@ -12,6 +12,7 @@ st.set_page_config(
 
 # Import after config to avoid warnings
 from app.interfaz.auth import login_gate  # noqa: E402
+from app.interfaz.champions_skin import apply_champions_skin  # noqa: E402
 from app.interfaz.sidebar import render_sidebar  # noqa: E402
 from app.interfaz.theme import apply_css  # noqa: E402
 from app.startup import preload_datasets  # noqa: E402
@@ -54,6 +55,7 @@ def main() -> None:
     section = render_sidebar(sections_for_user(user))
     preload_datasets(section)
     router(section)
+    apply_champions_skin()
 
 
 if __name__ == "__main__":

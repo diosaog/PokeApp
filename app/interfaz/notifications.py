@@ -311,6 +311,53 @@ def render_notification_styles(container: Any = None) -> None:
         .app-notice--warn { border-left: 4px solid #efc257; }
         .app-notice--ok { border-left: 4px solid #58d18e; }
         .app-notice--info { border-left: 4px solid #6ea8ff; }
+        .app-notice-menu {
+          width: 100%;
+          margin: 8px 0;
+        }
+        .app-notice-menu summary {
+          min-height: 42px;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 10px;
+          padding: 10px 14px;
+          list-style: none;
+          cursor: pointer;
+          border: 1px solid rgba(248,251,255,0.24);
+          border-radius: var(--poke-radius);
+          background:
+            linear-gradient(118deg, rgba(255,255,255,0.92) 0 58%, rgba(255,188,239,0.9) 58% 73%, rgba(157,219,255,0.9) 73% 100%);
+          color: #344069;
+          font-weight: 800;
+          box-shadow: inset 0 1px 0 rgba(255,255,255,0.34), 0 8px 18px rgba(17,15,60,0.18);
+        }
+        .app-notice-menu summary::-webkit-details-marker {
+          display: none;
+        }
+        .app-notice-menu summary::marker {
+          content: "";
+        }
+        .app-notice-menu-panel {
+          margin-top: 8px;
+          padding: 8px;
+          border: 1px solid rgba(248,251,255,0.18);
+          border-radius: var(--poke-radius);
+          background: rgba(38, 31, 120, 0.72);
+          box-shadow: inset 0 1px 0 rgba(255,255,255,0.1);
+        }
+        .app-notice-chevron {
+          width: 9px;
+          height: 9px;
+          flex: 0 0 9px;
+          border: solid currentColor;
+          border-width: 0 2px 2px 0;
+          transform: rotate(45deg);
+          transition: transform 150ms ease;
+        }
+        .app-notice-menu[open] .app-notice-chevron {
+          transform: rotate(225deg);
+        }
         section[data-testid="stSidebar"] .stPopover button {
           width: 100%;
           min-height: 42px;
@@ -356,11 +403,14 @@ def render_notifications_popover(
     render_notification_styles(target)
     pending = notification_count(items)
     title = f"{label} ({pending})" if pending else label
-    if hasattr(target, "popover"):
-        with target.popover(title, use_container_width=use_container_width):
-            for item in items:
-                st.markdown(notice_html(item), unsafe_allow_html=True)
-    else:
-        with target.expander(title, expanded=False):
-            for item in items:
-                st.markdown(notice_html(item), unsafe_allow_html=True)
+    width_class = " app-notice-menu--wide" if use_container_width else ""
+    notices = "\n".join(notice_html(item) for item in items)
+    target.markdown(
+        (
+            f"<details class='app-notice-menu{width_class}'>"
+            f"<summary><span>{escape(title)}</span><span class='app-notice-chevron'></span></summary>"
+            f"<div class='app-notice-menu-panel'>{notices}</div>"
+            "</details>"
+        ),
+        unsafe_allow_html=True,
+    )
