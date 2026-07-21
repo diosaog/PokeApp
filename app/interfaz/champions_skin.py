@@ -7,6 +7,8 @@ import streamlit as st
 
 CHAMPIONS_SKIN_CSS = """
 <style>
+@import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,400,0,0&display=swap');
+
 :root {
   --font-ui: "Nunito Sans", "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   --font-pixel: "Oxanium", "Nunito Sans", "Trebuchet MS", system-ui, sans-serif;
@@ -107,6 +109,31 @@ html, body, [class*="css"],
 .stApp caption {
   font-family: var(--font-ui) !important;
   letter-spacing: 0 !important;
+}
+
+.stApp .material-symbols-rounded,
+.stApp .material-symbols-outlined,
+.stApp .material-icons,
+.stApp [class*="material-symbols"],
+.stApp [class*="material-icons"],
+.stApp span[data-testid="stIconMaterial"],
+section[data-testid="stSidebar"] .material-symbols-rounded,
+section[data-testid="stSidebar"] .material-symbols-outlined,
+section[data-testid="stSidebar"] [class*="material-symbols"],
+section[data-testid="stSidebar"] span[data-testid="stIconMaterial"] {
+  font-family: "Material Symbols Rounded", "Material Symbols Outlined", "Material Icons" !important;
+  font-weight: 400 !important;
+  font-style: normal !important;
+  font-size: 20px !important;
+  line-height: 1 !important;
+  letter-spacing: normal !important;
+  text-transform: none !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  font-feature-settings: "liga" !important;
+  -webkit-font-feature-settings: "liga" !important;
+  -webkit-font-smoothing: antialiased !important;
 }
 
 .stApp h1,
@@ -469,8 +496,37 @@ section[data-testid="stSidebar"] div[role="radiogroup"] {
 
 section[data-testid="stSidebar"] div[role="radiogroup"] label {
   min-height: 52px !important;
-  padding: 0.62rem 0.82rem 0.62rem 1.02rem !important;
+  padding: 0.62rem 0.9rem 0.62rem 1.12rem !important;
   transform: translateX(0);
+}
+
+section[data-testid="stSidebar"] div[role="radiogroup"] label > div:first-child {
+  display: none !important;
+}
+
+section[data-testid="stSidebar"] div[role="radiogroup"] label p {
+  margin: 0 !important;
+  width: 100% !important;
+  font-family: var(--font-ui) !important;
+  font-size: 12px !important;
+  font-weight: 800 !important;
+  line-height: 1.1 !important;
+  text-transform: uppercase !important;
+  color: var(--champ-text) !important;
+  -webkit-text-fill-color: var(--champ-text) !important;
+}
+
+section[data-testid="stSidebar"] div[role="radiogroup"] label::after,
+section[data-testid="stSidebar"] div.stButton > button::after,
+.main div[data-testid="stTabs"] button[data-baseweb="tab"]::after,
+.main div[data-testid="stTabs"] button[role="tab"]::after {
+  content: "" !important;
+  position: absolute !important;
+  inset: 0 0 0 auto !important;
+  width: 44% !important;
+  pointer-events: none !important;
+  background:
+    linear-gradient(135deg, transparent 0 38%, rgba(255,117,221,0.18) 38% 58%, rgba(69,209,255,0.18) 58% 78%, transparent 78% 100%) !important;
 }
 
 section[data-testid="stSidebar"] div[role="radiogroup"] label:hover,
@@ -502,6 +558,11 @@ section[data-testid="stSidebar"] div.stButton > button[kind="primary"] {
     linear-gradient(180deg, var(--champ-lime), var(--champ-lime-2)) !important;
   box-shadow: inset 0 1px 0 rgba(255,255,255,0.48), 0 9px 18px rgba(35, 58, 0, 0.24), 0 0 0 3px rgba(246,216,59,0.18) !important;
   color: var(--champ-text) !important;
+}
+
+section[data-testid="stSidebar"] div[role="radiogroup"] label:has(input:checked) p {
+  color: #21416d !important;
+  -webkit-text-fill-color: #21416d !important;
 }
 
 section[data-testid="stSidebar"] div[role="radiogroup"] label:has(input:checked)::before,
@@ -580,6 +641,60 @@ section[data-testid="stSidebar"] div[role="radiogroup"] label:has(input:checked)
     linear-gradient(180deg, rgba(222,216,248,0.96), rgba(199,192,230,0.96)) !important;
   color: var(--champ-text) !important;
   box-shadow: inset 0 1px 0 rgba(255,255,255,0.36), 0 8px 18px rgba(18,14,54,0.18) !important;
+}
+
+.main .stSelectbox [data-baseweb="select"] > div,
+.main .stMultiSelect [data-baseweb="select"] > div {
+  color: var(--champ-text) !important;
+  -webkit-text-fill-color: var(--champ-text) !important;
+  font-family: var(--font-pixel) !important;
+  font-size: 12px !important;
+  text-transform: uppercase !important;
+}
+
+.main .stSelectbox [data-baseweb="select"] svg,
+.main .stMultiSelect [data-baseweb="select"] svg {
+  color: var(--accent-dark) !important;
+  fill: var(--accent-dark) !important;
+}
+
+div[data-baseweb="popover"] {
+  border-radius: 16px !important;
+  overflow: hidden !important;
+  border: 1px solid rgba(238,233,255,0.34) !important;
+  background:
+    linear-gradient(180deg, rgba(88,72,198,0.98), rgba(48,40,132,0.98)) !important;
+  box-shadow: 0 18px 34px rgba(18,14,54,0.34) !important;
+}
+
+div[data-baseweb="popover"] ul,
+div[data-baseweb="menu"] {
+  padding: 8px !important;
+  background:
+    linear-gradient(180deg, rgba(88,72,198,0.98), rgba(48,40,132,0.98)) !important;
+}
+
+div[data-baseweb="popover"] li,
+div[data-baseweb="menu"] li,
+div[role="option"] {
+  min-height: 40px !important;
+  margin: 3px 0 !important;
+  border-radius: 12px !important;
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+  font-family: var(--font-ui) !important;
+  font-weight: 800 !important;
+}
+
+div[data-baseweb="popover"] li:hover,
+div[data-baseweb="menu"] li:hover,
+div[role="option"]:hover,
+div[aria-selected="true"][role="option"] {
+  background:
+    linear-gradient(136deg, transparent 0 68%, rgba(255,255,255,0.22) 68% 100%),
+    linear-gradient(180deg, var(--champ-lime), var(--champ-lime-2)) !important;
+  color: var(--champ-text) !important;
+  -webkit-text-fill-color: var(--champ-text) !important;
 }
 
 .main .stTextInput input *,
@@ -1371,6 +1486,66 @@ section[data-testid="stSidebar"] .profile-card {
     rgba(72, 59, 182, 0.82) !important;
 }
 
+section[data-testid="stSidebar"] .profile-head {
+  gap: 12px !important;
+  align-items: center !important;
+}
+
+section[data-testid="stSidebar"] .profile-avatar {
+  width: 76px !important;
+  height: 76px !important;
+  flex: 0 0 76px !important;
+  border-radius: 18px !important;
+  background:
+    radial-gradient(circle at 50% 48%, rgba(255,255,255,0.46), rgba(255,255,255,0.08) 58%, transparent 59%),
+    linear-gradient(180deg, rgba(229,222,252,0.94), rgba(179,171,222,0.9)) !important;
+}
+
+section[data-testid="stSidebar"] .profile-avatar img {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+}
+
+section[data-testid="stSidebar"] .profile-name {
+  font-size: 14px !important;
+  line-height: 1.08 !important;
+}
+
+section[data-testid="stSidebar"] .profile-sub {
+  margin-top: 4px !important;
+  font-size: 15px !important;
+  line-height: 1.08 !important;
+}
+
+section[data-testid="stSidebar"] .mini-team {
+  display: grid !important;
+  grid-template-columns: repeat(6, minmax(0, 1fr)) !important;
+  gap: 7px !important;
+  margin-top: 12px !important;
+}
+
+section[data-testid="stSidebar"] .mini-mon {
+  width: 100% !important;
+  aspect-ratio: 1 / 1 !important;
+  height: auto !important;
+  min-height: 36px !important;
+  padding: 2px !important;
+  border-radius: 12px !important;
+  background:
+    linear-gradient(140deg, transparent 0 62%, rgba(255,117,221,0.16) 62% 78%, rgba(69,209,255,0.14) 78% 100%),
+    linear-gradient(180deg, rgba(222,216,248,0.96), rgba(188,180,225,0.94)) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.42), 0 5px 10px rgba(18,14,54,0.22) !important;
+}
+
+section[data-testid="stSidebar"] .mini-mon img {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: contain !important;
+  transform: scale(1.28) !important;
+  filter: drop-shadow(0 3px 4px rgba(18,14,54,0.28)) !important;
+}
+
 section[data-testid="stSidebar"] .profile-card *,
 section[data-testid="stSidebar"] .sidebar-nav-title {
   color: #ffffff !important;
@@ -1400,6 +1575,325 @@ section[data-testid="stSidebar"] img {
 .main .mini-mon img,
 section[data-testid="stSidebar"] .mini-mon img {
   image-rendering: pixelated !important;
+}
+
+/* Final Champions pass: sidebar controls, PC box, detail sheet and team preview */
+section[data-testid="stSidebar"] .stPopover > div > button,
+section[data-testid="stSidebar"] div[data-testid="stExpander"] details,
+section[data-testid="stSidebar"] div[data-testid="stExpander"] summary {
+  position: relative !important;
+  overflow: hidden !important;
+  border: 1px solid rgba(238,233,255,0.34) !important;
+  border-radius: 14px !important;
+  background:
+    linear-gradient(136deg, transparent 0 70%, rgba(255,117,221,0.18) 70% 82%, rgba(69,209,255,0.18) 82% 100%),
+    linear-gradient(180deg, rgba(222,216,248,0.96), rgba(199,192,230,0.95)) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.46), 0 9px 20px rgba(18,14,54,0.18) !important;
+}
+
+section[data-testid="stSidebar"] .stPopover > div > button {
+  min-height: 45px !important;
+  justify-content: flex-start !important;
+}
+
+section[data-testid="stSidebar"] .stPopover > div > button *,
+section[data-testid="stSidebar"] div[data-testid="stExpander"] summary *,
+section[data-testid="stSidebar"] div[data-testid="stExpander"] details * {
+  color: var(--champ-text) !important;
+  -webkit-text-fill-color: var(--champ-text) !important;
+}
+
+section[data-testid="stSidebar"] .stPopover > div > button [data-testid="stIconMaterial"],
+section[data-testid="stSidebar"] .stPopover > div > button [class*="material-symbol"],
+section[data-testid="stSidebar"] div[data-testid="stExpander"] summary [data-testid="stIconMaterial"],
+section[data-testid="stSidebar"] div[data-testid="stExpander"] summary [class*="material-symbol"] {
+  display: none !important;
+}
+
+section[data-testid="stSidebar"] div[data-testid="stExpander"] details {
+  padding: 0 !important;
+}
+
+section[data-testid="stSidebar"] div[data-testid="stExpander"] summary {
+  min-height: 42px !important;
+  padding: 10px 14px !important;
+  font-family: var(--font-ui) !important;
+  font-size: 12px !important;
+  font-weight: 800 !important;
+  text-transform: uppercase !important;
+}
+
+section[data-testid="stSidebar"] div[data-testid="stExpander"] div[data-testid="stExpanderDetails"] {
+  border: 0 !important;
+  background: rgba(48,40,132,0.42) !important;
+}
+
+section[data-testid="stSidebar"] .profile-card {
+  padding: 14px !important;
+  border-radius: 18px !important;
+  background:
+    linear-gradient(126deg, rgba(255,255,255,0.12) 0 34%, transparent 34% 100%),
+    linear-gradient(180deg, rgba(125,101,232,0.9), rgba(75,64,174,0.88)) !important;
+}
+
+section[data-testid="stSidebar"] .profile-avatar {
+  width: 84px !important;
+  height: 84px !important;
+  flex-basis: 84px !important;
+  border-radius: 18px !important;
+}
+
+section[data-testid="stSidebar"] .mini-team {
+  grid-template-columns: repeat(6, minmax(34px, 1fr)) !important;
+  justify-content: stretch !important;
+  gap: 7px !important;
+}
+
+section[data-testid="stSidebar"] .mini-mon {
+  min-height: 40px !important;
+  border-radius: 12px !important;
+}
+
+section[data-testid="stSidebar"] .mini-mon img {
+  transform: scale(1.42) !important;
+}
+
+.main .champ-box-tile-link {
+  display: block !important;
+  width: 100% !important;
+  text-decoration: none !important;
+  outline: none !important;
+}
+
+.main .champ-box-tile {
+  position: relative !important;
+  display: grid !important;
+  place-items: center !important;
+  min-height: 84px !important;
+  aspect-ratio: 1 / 1 !important;
+  overflow: hidden !important;
+  border: 1px solid rgba(238,233,255,0.4) !important;
+  border-radius: 13px !important;
+  background:
+    linear-gradient(142deg, rgba(255,255,255,0.14) 0 34%, transparent 34% 100%),
+    linear-gradient(180deg, rgba(224,219,249,0.96), rgba(190,183,225,0.96)) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.5), 0 8px 17px rgba(18,14,54,0.18) !important;
+  transition: transform .13s ease, border-color .13s ease, filter .13s ease, box-shadow .13s ease !important;
+}
+
+.main .champ-box-tile::before {
+  content: "" !important;
+  position: absolute !important;
+  inset: 5px !important;
+  border-radius: 10px !important;
+  border: 1px solid rgba(255,255,255,0.18) !important;
+  background:
+    linear-gradient(136deg, transparent 0 68%, rgba(255,117,221,0.16) 68% 82%, rgba(69,209,255,0.16) 82% 100%) !important;
+  pointer-events: none !important;
+}
+
+.main .champ-box-tile img {
+  position: relative !important;
+  z-index: 1 !important;
+  width: 86% !important;
+  height: 86% !important;
+  object-fit: contain !important;
+  image-rendering: pixelated !important;
+  transform: scale(1.14) !important;
+  filter: drop-shadow(0 5px 8px rgba(18,14,54,0.26)) !important;
+}
+
+.main .champ-box-tile-link:hover .champ-box-tile,
+.main .champ-box-tile-link:focus-visible .champ-box-tile {
+  transform: translateY(-2px) !important;
+  border-color: rgba(246,216,59,0.95) !important;
+  background:
+    linear-gradient(136deg, transparent 0 70%, rgba(255,255,255,0.25) 70% 100%),
+    linear-gradient(180deg, var(--champ-lime), var(--champ-lime-2)) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.52), 0 0 0 3px rgba(246,216,59,0.18), 0 12px 23px rgba(18,14,54,0.24) !important;
+}
+
+.main .champ-box-tile-link:hover .champ-box-tile::after,
+.main .champ-box-tile-link:focus-visible .champ-box-tile::after {
+  content: "" !important;
+  position: absolute !important;
+  left: 5px !important;
+  top: 50% !important;
+  transform: translateY(-50%) !important;
+  width: 0 !important;
+  height: 0 !important;
+  border-top: 9px solid transparent !important;
+  border-bottom: 9px solid transparent !important;
+  border-left: 0 !important;
+  border-right: 14px solid var(--champ-yellow) !important;
+  z-index: 2 !important;
+}
+
+.main .champ-box-tile-empty {
+  opacity: .42 !important;
+  border-style: dashed !important;
+  background:
+    linear-gradient(142deg, rgba(255,255,255,0.08) 0 34%, transparent 34% 100%),
+    rgba(190,183,225,0.42) !important;
+}
+
+.main .champ-detail-layout {
+  grid-template-columns: minmax(310px, .78fr) minmax(330px, 1fr) minmax(330px, 1fr) !important;
+  gap: 18px !important;
+}
+
+.main .champ-detail-card {
+  border-radius: 18px !important;
+  border-color: rgba(238,233,255,0.34) !important;
+  background:
+    linear-gradient(126deg, rgba(255,255,255,0.12) 0 33%, transparent 33% 100%),
+    linear-gradient(180deg, rgba(125,101,232,0.9), rgba(73,62,171,0.9)) !important;
+}
+
+.main .champ-detail-main {
+  max-width: 430px !important;
+}
+
+.main .champ-detail-header {
+  min-height: 38px !important;
+  border-radius: 12px !important;
+  background:
+    linear-gradient(180deg, var(--champ-cyan), #249bdb) !important;
+}
+
+.main .champ-detail-level,
+.main .champ-detail-item-value,
+.main .champ-detail-stat-value,
+.main .champ-detail-private-value,
+.main .champ-detail-move-pp {
+  border-radius: 9px !important;
+  background:
+    linear-gradient(180deg, rgba(238,233,255,0.95), rgba(207,199,235,0.94)) !important;
+}
+
+.main .champ-detail-sprite-stage {
+  min-height: 238px !important;
+  border-radius: 14px !important;
+  background:
+    repeating-linear-gradient(0deg, rgba(255,255,255,0.08) 0 2px, transparent 2px 5px),
+    radial-gradient(circle at 50% 54%, rgba(255,255,255,0.38), rgba(255,255,255,0.06) 48%, transparent 49%),
+    linear-gradient(180deg, rgba(95,80,205,0.88), rgba(69,58,170,0.88)) !important;
+}
+
+.main .champ-detail-sprite-stage img {
+  width: 190px !important;
+  max-height: 210px !important;
+  object-fit: contain !important;
+  transform: scale(1.08) !important;
+}
+
+.main .champ-detail-screen {
+  border-radius: 16px !important;
+  background:
+    linear-gradient(126deg, rgba(255,255,255,0.09) 0 31%, transparent 31% 100%),
+    linear-gradient(180deg, rgba(96,80,205,0.82), rgba(69,58,170,0.82)) !important;
+}
+
+.main .champ-detail-ps-row,
+.main .champ-detail-stat-row,
+.main .champ-detail-private-row {
+  border-radius: 12px !important;
+  background: rgba(255,255,255,0.09) !important;
+}
+
+.main .champ-detail-move-row {
+  min-height: 48px !important;
+  grid-template-columns: minmax(82px, auto) minmax(0, 1fr) auto !important;
+  border-radius: 13px !important;
+  background:
+    linear-gradient(136deg, transparent 0 74%, rgba(255,117,221,0.13) 74% 100%),
+    linear-gradient(180deg, rgba(238,233,255,0.96), rgba(211,204,237,0.96)) !important;
+}
+
+.main .champ-detail-move-type {
+  border-radius: 4px !important;
+}
+
+.main .battle-board {
+  border-radius: 20px !important;
+  border-color: rgba(238,233,255,0.36) !important;
+  background:
+    linear-gradient(126deg, rgba(255,255,255,0.1) 0 22%, transparent 22% 100%),
+    linear-gradient(180deg, rgba(120,98,232,0.88), rgba(68,58,166,0.88)) !important;
+}
+
+.main .battle-board-top > div {
+  border-radius: 14px !important;
+  border-left: 0 !important;
+  background:
+    linear-gradient(136deg, transparent 0 74%, rgba(255,117,221,0.14) 74% 100%),
+    linear-gradient(180deg, rgba(238,233,255,0.18), rgba(238,233,255,0.06)) !important;
+}
+
+.main .battle-mon-card {
+  min-height: 180px !important;
+  border-radius: 16px !important;
+  background:
+    linear-gradient(116deg, rgba(255,255,255,0.1) 0 35%, transparent 35% 100%),
+    linear-gradient(180deg, rgba(119,98,229,0.9), rgba(72,62,172,0.9)) !important;
+}
+
+.main .battle-card-left {
+  border-radius: 14px !important;
+  background: rgba(255,255,255,0.08) !important;
+}
+
+.main .battle-sprite-wrap {
+  min-height: 120px !important;
+  border-radius: 16px !important;
+}
+
+.main .battle-sprite {
+  width: 116px !important;
+  height: 116px !important;
+}
+
+.main .battle-move-link,
+.main .battle-no-move,
+.main .matchup-move {
+  border-radius: 14px !important;
+  background:
+    linear-gradient(136deg, transparent 0 74%, rgba(255,117,221,0.14) 74% 100%),
+    linear-gradient(180deg, rgba(238,233,255,0.96), rgba(211,204,237,0.96)) !important;
+}
+
+.main .battle-move-row[open] > .battle-move-link,
+.main .battle-move-link:hover {
+  background:
+    linear-gradient(136deg, transparent 0 70%, rgba(255,255,255,0.22) 70% 100%),
+    linear-gradient(180deg, var(--champ-lime), var(--champ-lime-2)) !important;
+}
+
+.main .matchup-mon {
+  border-radius: 16px !important;
+  background:
+    linear-gradient(116deg, rgba(255,255,255,0.1) 0 35%, transparent 35% 100%),
+    linear-gradient(180deg, rgba(119,98,229,0.9), rgba(72,62,172,0.9)) !important;
+}
+
+.main .matchup-sprite {
+  width: 108px !important;
+  height: 108px !important;
+  transform: scale(1.08) !important;
+}
+
+.stApp .material-symbols-rounded,
+.stApp .material-symbols-outlined,
+.stApp .material-icons,
+.stApp [class*="material-symbols"],
+.stApp [class*="material-icons"],
+.stApp span[data-testid="stIconMaterial"] {
+  font-family: "Material Symbols Rounded", "Material Symbols Outlined", "Material Icons" !important;
+  font-feature-settings: "liga" !important;
+  -webkit-font-feature-settings: "liga" !important;
+  letter-spacing: normal !important;
+  text-transform: none !important;
+  white-space: nowrap !important;
 }
 
 @media (max-width: 980px) {

@@ -821,6 +821,176 @@ def ensure_matchup_css() -> None:
         .battle-move-detail-inline .battle-detail-desc {
           font-size: 18px;
         }
+
+        /* Champions pass */
+        .matchup-shell,
+        .matchup-hero,
+        .matchup-summary,
+        .battle-board {
+          border-color: rgba(238,233,255,0.34) !important;
+          border-radius: 20px !important;
+          background:
+            linear-gradient(126deg, rgba(255,255,255,0.11) 0 24%, transparent 24% 100%),
+            linear-gradient(180deg, rgba(125,101,232,0.9), rgba(73,62,171,0.88)) !important;
+          box-shadow: inset 0 1px 0 rgba(255,255,255,0.22), 0 12px 26px rgba(18,14,54,0.24) !important;
+        }
+
+        .matchup-hero {
+          min-height: 128px;
+          overflow: hidden;
+        }
+
+        .matchup-hero-side,
+        .matchup-hero-pill,
+        .matchup-metric,
+        .battle-board-top div,
+        .battle-card-left,
+        .battle-ability-row,
+        .battle-private-line,
+        .battle-ivs,
+        .battle-detail-stats div {
+          border-color: rgba(238,233,255,0.24) !important;
+          border-radius: 14px !important;
+          background:
+            linear-gradient(136deg, transparent 0 74%, rgba(255,117,221,0.12) 74% 100%),
+            rgba(255,255,255,0.08) !important;
+          box-shadow: inset 0 1px 0 rgba(255,255,255,0.12) !important;
+        }
+
+        .matchup-mode-card,
+        .matchup-move,
+        .battle-move-link,
+        .battle-no-move {
+          border: 1px solid rgba(238,233,255,0.34) !important;
+          border-radius: 14px !important;
+          background:
+            linear-gradient(136deg, transparent 0 74%, rgba(255,117,221,0.14) 74% 87%, rgba(69,209,255,0.14) 87% 100%),
+            linear-gradient(180deg, rgba(238,233,255,0.96), rgba(211,204,237,0.96)) !important;
+          box-shadow: inset 0 1px 0 rgba(255,255,255,0.5), 0 8px 17px rgba(18,14,54,0.18) !important;
+          color: var(--champ-text) !important;
+        }
+
+        .matchup-mode-card *,
+        .matchup-move span:last-child,
+        .battle-move-link span:last-child,
+        .battle-no-move {
+          color: var(--champ-text) !important;
+          -webkit-text-fill-color: var(--champ-text) !important;
+        }
+
+        .matchup-mode-card.is-active,
+        .battle-move-link:hover,
+        .battle-move-row[open] > .battle-move-link {
+          border-color: rgba(246,216,59,0.95) !important;
+          background:
+            linear-gradient(136deg, transparent 0 70%, rgba(255,255,255,0.22) 70% 100%),
+            linear-gradient(180deg, var(--champ-lime), var(--champ-lime-2)) !important;
+          box-shadow: inset 0 1px 0 rgba(255,255,255,0.52), 0 0 0 3px rgba(246,216,59,0.16), 0 12px 23px rgba(18,14,54,0.22) !important;
+        }
+
+        .battle-team-grid,
+        .matchup-team-grid {
+          gap: 12px !important;
+        }
+
+        .battle-mon-card,
+        .matchup-mon {
+          border-color: rgba(238,233,255,0.34) !important;
+          border-radius: 18px !important;
+          background:
+            linear-gradient(116deg, rgba(255,255,255,0.1) 0 35%, transparent 35% 100%),
+            linear-gradient(180deg, rgba(119,98,229,0.9), rgba(72,62,172,0.9)) !important;
+          box-shadow: inset 0 1px 0 rgba(255,255,255,0.18), 0 10px 22px rgba(18,14,54,0.2) !important;
+        }
+
+        .battle-mon-card {
+          grid-template-columns: minmax(150px, .92fr) 124px minmax(214px, 1.16fr) !important;
+          min-height: 188px !important;
+        }
+
+        .battle-mon-card::before,
+        .matchup-hero::before {
+          background:
+            linear-gradient(180deg, rgba(255,255,255,0.07) 0 1px, transparent 1px 100%) 0 0 / 100% 20px,
+            linear-gradient(90deg, rgba(255,255,255,0.05) 0 1px, transparent 1px 100%) 0 0 / 24px 100% !important;
+          opacity: .42 !important;
+        }
+
+        .battle-slot-mark {
+          right: 12px;
+          bottom: -3px;
+          color: rgba(255,255,255,0.16) !important;
+          font-size: 48px !important;
+        }
+
+        .battle-mon-name,
+        .matchup-mon-title,
+        .matchup-player,
+        .matchup-title {
+          color: #ffffff !important;
+          -webkit-text-fill-color: #ffffff !important;
+        }
+
+        .battle-species,
+        .battle-level,
+        .battle-item,
+        .matchup-mon-sub,
+        .matchup-mon-extra,
+        .matchup-subtitle,
+        .matchup-division,
+        .matchup-save {
+          color: rgba(255,255,255,0.84) !important;
+          -webkit-text-fill-color: rgba(255,255,255,0.84) !important;
+        }
+
+        .battle-sprite-wrap,
+        .matchup-sprite {
+          border-radius: 16px !important;
+          background:
+            radial-gradient(circle at 50% 46%, rgba(255,255,255,0.42), rgba(255,255,255,0.08) 60%, transparent 61%),
+            linear-gradient(180deg, rgba(224,219,249,0.92), rgba(190,183,225,0.9)) !important;
+        }
+
+        .battle-sprite {
+          width: 116px !important;
+          height: 116px !important;
+        }
+
+        .matchup-sprite {
+          width: 108px !important;
+          height: 108px !important;
+          padding: 5px !important;
+        }
+
+        .battle-type-dot {
+          width: 25px !important;
+          height: 25px !important;
+          flex-basis: 25px !important;
+          border-radius: 7px !important;
+        }
+
+        .battle-move-detail,
+        .battle-move-detail-inline {
+          border-color: rgba(238,233,255,0.3) !important;
+          border-radius: 16px !important;
+          background:
+            linear-gradient(130deg, rgba(255,255,255,0.09) 0 28%, transparent 28% 100%),
+            linear-gradient(180deg, rgba(92,75,202,0.96), rgba(62,52,160,0.96)) !important;
+          box-shadow: inset 0 1px 0 rgba(255,255,255,0.16), 0 8px 18px rgba(18,14,54,0.18) !important;
+        }
+
+        .battle-move-detail-inline .battle-detail-stats div,
+        .battle-detail-stats div {
+          background:
+            linear-gradient(180deg, rgba(238,233,255,0.95), rgba(211,204,237,0.95)) !important;
+        }
+
+        .battle-detail-stats div span,
+        .battle-detail-stats div strong {
+          color: var(--champ-text) !important;
+          -webkit-text-fill-color: var(--champ-text) !important;
+        }
+
         @media (max-width: 1100px) {
           .battle-team-grid,
           .matchup-team-grid {

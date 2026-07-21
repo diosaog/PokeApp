@@ -219,45 +219,68 @@ def _render_nav_css() -> None:
         <style>
         section[data-testid="stSidebar"] .sidebar-nav-title {
           margin: 0 0 8px;
-          padding: 9px 11px;
-          border: 1px solid rgba(248,251,255,0.22);
-          border-radius: var(--poke-radius);
+          padding: 9px 12px;
+          border: 1px solid rgba(238,233,255,0.38);
+          border-radius: 999px;
           background:
-            linear-gradient(90deg, rgba(255,212,71,0.16), transparent 66%),
-            linear-gradient(180deg, rgba(255,255,255,0.1), rgba(255,255,255,0.04));
-          color: var(--bw2-text-soft);
+            linear-gradient(90deg, rgba(255,255,255,0.18), transparent 72%),
+            linear-gradient(180deg, var(--accent), var(--accent-dark));
+          color: #ffffff;
           font-family: var(--font-pixel);
           font-size: 10px;
           text-transform: uppercase;
           letter-spacing: 0;
+          box-shadow: inset 0 1px 0 rgba(255,255,255,0.24), 0 10px 22px rgba(18,14,54,0.2);
         }
         section[data-testid="stSidebar"] div[role="radiogroup"] {
           display: grid;
-          gap: 5px;
+          gap: 8px;
         }
         section[data-testid="stSidebar"] div[role="radiogroup"] label {
+          position: relative;
+          overflow: hidden;
           width: 100%;
-          min-height: 48px;
-          padding: 0.6rem 0.78rem;
-          border: 1px solid rgba(248,251,255,0.24);
-          border-radius: var(--poke-radius);
+          min-height: 52px;
+          padding: 0.64rem 0.95rem 0.64rem 1.14rem;
+          border: 1px solid rgba(238,233,255,0.3);
+          border-radius: 14px;
           background:
-            linear-gradient(90deg, rgba(255,255,255,0.09), transparent 62%),
-            linear-gradient(180deg, rgba(23,61,110,0.96) 0%, rgba(8,31,63,0.98) 100%);
-          box-shadow: inset 0 1px 0 rgba(255,255,255,0.16), 0 6px 14px rgba(2,18,46,0.2);
+            linear-gradient(136deg, transparent 0 70%, rgba(255,117,221,0.18) 70% 82%, rgba(69,209,255,0.18) 82% 100%),
+            linear-gradient(180deg, rgba(222,216,248,0.96), rgba(199,192,230,0.95));
+          box-shadow: inset 0 1px 0 rgba(255,255,255,0.46), 0 9px 20px rgba(18,14,54,0.18);
           transition: transform .12s ease, filter .12s ease, border-color .12s ease;
         }
+        section[data-testid="stSidebar"] div[role="radiogroup"] label::before {
+          content: "";
+          position: absolute;
+          left: 10px;
+          top: 50%;
+          width: 12px;
+          height: 12px;
+          transform: translateY(-50%);
+          border-radius: 50%;
+          background: #202436;
+          box-shadow: inset 0 1px 0 rgba(255,255,255,0.28);
+        }
         section[data-testid="stSidebar"] div[role="radiogroup"] label:has(input:checked) {
-          border-color: var(--bw2-edge-strong);
+          border-color: rgba(246,216,59,0.9);
           background:
-            linear-gradient(90deg, rgba(255,255,255,0.24), rgba(255,212,71,0.14) 64%, transparent),
-            linear-gradient(180deg, var(--accent) 0%, var(--accent-dark) 100%);
-          box-shadow: inset 0 1px 0 rgba(255,255,255,0.24), 0 8px 20px rgba(2,18,46,0.24);
+            linear-gradient(136deg, transparent 0 68%, rgba(255,255,255,0.22) 68% 100%),
+            linear-gradient(180deg, var(--champ-lime), var(--champ-lime-2));
+          box-shadow: inset 0 1px 0 rgba(255,255,255,0.48), 0 0 0 3px rgba(246,216,59,0.16), 0 12px 24px rgba(18,14,54,0.24);
+        }
+        section[data-testid="stSidebar"] div[role="radiogroup"] label:has(input:checked)::before {
+          background:
+            radial-gradient(circle at 50% 50%, #f8fbff 0 25%, transparent 26%),
+            linear-gradient(#ef3f56 0 48%, #202436 48% 54%, #f8fbff 54% 100%);
+          border: 1px solid #202436;
         }
         section[data-testid="stSidebar"] div[role="radiogroup"] label p {
-          color: #fff;
-          font-family: var(--font-pixel);
-          font-size: 10px;
+          margin-left: 20px !important;
+          color: var(--champ-text) !important;
+          font-family: var(--font-ui) !important;
+          font-size: 12px !important;
+          font-weight: 800 !important;
           line-height: 1.18;
           text-transform: uppercase;
         }
@@ -266,7 +289,7 @@ def _render_nav_css() -> None:
           transform: translateY(-1px);
         }
         section[data-testid="stSidebar"] div[role="radiogroup"] label > div:first-child {
-          margin-right: 8px;
+          display: none;
         }
         section[data-testid="stSidebar"] div[role="radiogroup"] label:has(input:checked) > div:first-child {
           color: #ffffff;
@@ -278,21 +301,23 @@ def _render_nav_css() -> None:
           min-height: 46px;
           margin-bottom: 5px;
           padding-left: 0.85rem;
-          border-color: rgba(248,251,255,0.24);
-          border-radius: var(--poke-radius);
+          border-color: rgba(238,233,255,0.3);
+          border-radius: 14px;
           background:
-            linear-gradient(90deg, rgba(255,255,255,0.09), transparent 62%),
-            linear-gradient(180deg, rgba(23,61,110,0.96) 0%, rgba(8,31,63,0.98) 100%);
-          box-shadow: inset 0 1px 0 rgba(255,255,255,0.16), 0 6px 14px rgba(2,18,46,0.2);
+            linear-gradient(136deg, transparent 0 70%, rgba(255,117,221,0.18) 70% 82%, rgba(69,209,255,0.18) 82% 100%),
+            linear-gradient(180deg, rgba(222,216,248,0.96), rgba(199,192,230,0.95));
+          box-shadow: inset 0 1px 0 rgba(255,255,255,0.46), 0 9px 20px rgba(18,14,54,0.18);
         }
         section[data-testid="stSidebar"] div.stButton > button[kind="primary"] {
-          border-color: var(--bw2-edge-strong);
+          border-color: rgba(246,216,59,0.9);
           background:
-            linear-gradient(90deg, rgba(255,255,255,0.16), transparent 58%),
-            linear-gradient(180deg, var(--accent) 0%, var(--accent-dark) 100%);
+            linear-gradient(136deg, transparent 0 68%, rgba(255,255,255,0.22) 68% 100%),
+            linear-gradient(180deg, var(--champ-lime), var(--champ-lime-2));
         }
         section[data-testid="stSidebar"] div.stButton > button p {
-          font-size: 10px;
+          color: var(--champ-text) !important;
+          font-size: 12px;
+          font-weight: 800;
           line-height: 1.15;
         }
         </style>
