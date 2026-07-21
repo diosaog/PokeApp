@@ -19,6 +19,120 @@ def ensure_matchup_css() -> None:
           clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px);
           margin-bottom: 10px;
         }
+        .matchup-hero {
+          position: relative;
+          overflow: hidden;
+          display: grid;
+          grid-template-columns: minmax(0, 1fr) auto;
+          gap: 18px;
+          align-items: stretch;
+          min-height: 136px;
+          margin-bottom: 12px;
+          padding: 16px;
+          border: 1px solid var(--bw2-edge);
+          background:
+            linear-gradient(116deg, rgba(255,111,97,0.16) 0 30%, transparent 30% 100%),
+            linear-gradient(180deg, rgba(43,52,64,0.96) 0%, rgba(17,24,33,0.96) 100%);
+          box-shadow: inset 0 1px 0 rgba(255,255,255,0.09), 0 10px 26px rgba(0,0,0,0.24);
+        }
+        .matchup-hero::before {
+          content: "";
+          position: absolute;
+          inset: 0;
+          pointer-events: none;
+          background:
+            linear-gradient(180deg, rgba(255,255,255,0.05) 0 1px, transparent 1px 100%) 0 0 / 100% 22px,
+            linear-gradient(90deg, rgba(255,255,255,0.04) 0 1px, transparent 1px 100%) 0 0 / 26px 100%;
+          opacity: .5;
+        }
+        .matchup-hero-main,
+        .matchup-hero-side {
+          position: relative;
+          z-index: 1;
+        }
+        .matchup-kicker,
+        .matchup-title,
+        .matchup-hero-pill,
+        .matchup-mode-title {
+          font-family: var(--font-pixel);
+          text-transform: uppercase;
+        }
+        .matchup-kicker {
+          display: inline-block;
+          padding: 5px 8px;
+          border-left: 3px solid var(--accent);
+          background: rgba(0,0,0,0.28);
+          color: var(--bw2-text-soft);
+          font-size: 9px;
+        }
+        .matchup-title {
+          margin-top: 12px;
+          color: #ffffff;
+          font-size: 32px;
+          line-height: 1.05;
+          text-shadow: 0 2px 0 rgba(0,0,0,0.5);
+        }
+        .matchup-subtitle {
+          margin-top: 10px;
+          color: var(--bw2-text-soft);
+          font-family: var(--font-ui);
+          font-size: 19px;
+          line-height: 1.18;
+        }
+        .matchup-hero-side {
+          min-width: 230px;
+          display: grid;
+          align-content: center;
+          gap: 8px;
+          padding: 12px;
+          border: 1px solid rgba(216,223,232,0.18);
+          background: linear-gradient(180deg, rgba(10,15,22,0.68) 0%, rgba(9,12,17,0.9) 100%);
+        }
+        .matchup-hero-pill {
+          display: inline-flex;
+          align-items: center;
+          min-height: 29px;
+          padding: 6px 9px;
+          border: 1px solid rgba(216,223,232,0.16);
+          background: linear-gradient(180deg, rgba(255,255,255,0.07), rgba(255,255,255,0.02));
+          color: #ffffff;
+          font-size: 9px;
+        }
+        .matchup-mode-grid {
+          display: grid;
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+          gap: 10px;
+          margin: 0 0 14px;
+        }
+        .matchup-mode-card {
+          min-height: 82px;
+          padding: 11px 12px;
+          border: 1px solid var(--bw2-edge);
+          border-left: 4px solid rgba(216,223,232,0.24);
+          background:
+            linear-gradient(90deg, rgba(255,255,255,0.05), transparent 62%),
+            linear-gradient(180deg, var(--bw2-panel-2) 0%, var(--bw2-panel) 100%);
+          box-shadow: inset 0 1px 0 rgba(255,255,255,0.08), 0 0 0 1px rgba(0,0,0,0.28);
+        }
+        .matchup-mode-card.is-active {
+          border-color: var(--bw2-edge-strong);
+          border-left-color: var(--accent);
+          background:
+            linear-gradient(116deg, rgba(255,111,97,0.18) 0 35%, transparent 35% 100%),
+            linear-gradient(180deg, #2b3340 0%, #171f2a 100%);
+        }
+        .matchup-mode-title {
+          color: #ffffff;
+          font-size: 10px;
+          line-height: 1.2;
+        }
+        .matchup-mode-sub {
+          margin-top: 8px;
+          color: var(--bw2-text-soft);
+          font-family: var(--font-ui);
+          font-size: 18px;
+          line-height: 1.18;
+        }
         .matchup-note {
           margin-bottom: 12px;
           padding: 10px 12px;
@@ -248,7 +362,7 @@ def ensure_matchup_css() -> None:
           margin-top: 8px;
           border: 1px solid var(--bw2-edge);
           background:
-            linear-gradient(120deg, rgba(121,185,245,0.08) 0 24%, transparent 24% 100%),
+            linear-gradient(120deg, rgba(255,111,97,0.1) 0 24%, transparent 24% 100%),
             linear-gradient(180deg, var(--bw2-screen-2) 0%, var(--bw2-screen) 100%);
           box-shadow: inset 0 1px 0 rgba(255,255,255,0.07), 0 0 0 1px rgba(0,0,0,0.35);
           padding: 10px;
@@ -289,18 +403,18 @@ def ensure_matchup_css() -> None:
         }
         .battle-mon-card {
           position: relative;
-          min-height: 166px;
+          min-height: 178px;
           display: grid;
-          grid-template-columns: minmax(126px, .95fr) 88px minmax(168px, 1.15fr);
-          gap: 8px;
+          grid-template-columns: minmax(138px, .95fr) 94px minmax(178px, 1.15fr);
+          gap: 10px;
           align-items: center;
           overflow: hidden;
-          border: 1px solid rgba(178,219,255,0.34);
+          border: 1px solid rgba(216,223,232,0.24);
           background:
-            linear-gradient(110deg, rgba(63,152,210,0.18) 0 38%, transparent 38% 100%),
-            linear-gradient(180deg, rgba(37,71,103,0.92) 0%, rgba(19,43,62,0.92) 100%);
+            linear-gradient(110deg, rgba(255,111,97,0.14) 0 35%, transparent 35% 100%),
+            linear-gradient(180deg, rgba(43,52,64,0.94) 0%, rgba(17,24,33,0.94) 100%);
           box-shadow: inset 0 1px 0 rgba(255,255,255,0.13), 0 5px 14px rgba(0,0,0,0.25);
-          padding: 10px;
+          padding: 12px;
         }
         .battle-mon-card::before {
           content: "";
@@ -467,8 +581,8 @@ def ensure_matchup_css() -> None:
           min-width: 0;
         }
         .battle-sprite {
-          width: 84px;
-          height: 84px;
+          width: 88px;
+          height: 88px;
           object-fit: contain;
           image-rendering: pixelated;
           filter: drop-shadow(0 4px 7px rgba(0,0,0,0.45));
@@ -484,8 +598,8 @@ def ensure_matchup_css() -> None:
           align-items: center;
           gap: 7px;
           width: 100%;
-          min-height: 28px;
-          padding: 4px 7px;
+          min-height: 31px;
+          padding: 5px 8px;
           border: 1px solid rgba(255,255,255,0.18);
           background: rgba(9,15,22,0.56);
           color: #ffffff;
@@ -681,8 +795,8 @@ def ensure_matchup_css() -> None:
           line-height: 1.15;
         }
         .battle-move-detail-inline {
-          margin-top: 6px;
-          padding: 8px;
+          margin-top: 7px;
+          padding: 9px;
           background: linear-gradient(180deg, rgba(28,33,41,0.98) 0%, rgba(18,24,32,0.98) 100%);
         }
         .battle-move-detail-inline .battle-detail-kicker {
@@ -714,6 +828,16 @@ def ensure_matchup_css() -> None:
           }
         }
         @media (max-width: 720px) {
+          .matchup-hero,
+          .matchup-mode-grid {
+            grid-template-columns: 1fr;
+          }
+          .matchup-hero-side {
+            min-width: 0;
+          }
+          .matchup-title {
+            font-size: 24px;
+          }
           .matchup-summary-head {
             grid-template-columns: 86px 1fr;
           }

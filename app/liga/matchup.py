@@ -212,6 +212,51 @@ def _move_entries(mon: dict) -> list[MovePreview]:
     return entries
 
 
+def _matchup_header_html(mode: str, *, jornada: int, current_user: str) -> str:
+    mode_label = "Vista espectador" if mode == "Espectador" else "Vista combate"
+    user_label = current_user or "Sin sesion"
+    return (
+        "<div class='matchup-hero'>"
+        "<div class='matchup-hero-main'>"
+        "<div class='matchup-kicker'>PokeApp 2.0</div>"
+        "<div class='matchup-title'>Team Preview</div>"
+        "<div class='matchup-subtitle'>"
+        f"Jornada {int(jornada)} | {escape(mode_label)}"
+        "</div>"
+        "</div>"
+        "<div class='matchup-hero-side'>"
+        f"<span class='matchup-hero-pill'>Entrenador: {escape(user_label)}</span>"
+        "<span class='matchup-hero-pill'>Equipos fijados</span>"
+        "<span class='matchup-hero-pill'>Movimientos Gen 5</span>"
+        "</div>"
+        "</div>"
+    )
+
+
+def _mode_cards_html(mode: str) -> str:
+    cards = [
+        (
+            "Espectador",
+            "Tu entrenador contra rival",
+        ),
+        (
+            "Combate",
+            "Equipo seleccionado",
+        ),
+    ]
+    html = []
+    for key, subtitle in cards:
+        active = " is-active" if key == mode else ""
+        html.append(
+            "<div class='matchup-mode-card"
+            f"{active}'>"
+            f"<div class='matchup-mode-title'>{escape(key)}</div>"
+            f"<div class='matchup-mode-sub'>{escape(subtitle)}</div>"
+            "</div>"
+        )
+    return "<div class='matchup-mode-grid'>" + "".join(html) + "</div>"
+
+
 def _pokemon_types(mon: dict) -> list[str]:
     species = str(mon.get("species_name") or mon.get("species") or "")
     try:
@@ -745,9 +790,6 @@ def _render_battle_tab(available: list[str]) -> None:
 
 def render_matchup_preview(players: list[str] | None = None) -> None:
     ensure_matchup_css()
-    st.markdown(
-        "<div class='matchup-shell'>Team Preview</div>", unsafe_allow_html=True
-    )
 
     if not try_auto_load_bridge():
         st.warning(
@@ -768,13 +810,27 @@ def render_matchup_preview(players: list[str] | None = None) -> None:
     mode_options = ["Espectador", "Combate"]
     if "matchup_preview_mode" not in st.session_state:
         st.session_state.matchup_preview_mode = "Espectador"
+    current_mode = st.session_state.matchup_preview_mode
+    if current_mode not in mode_options:
+        current_mode = "Espectador"
+        st.session_state.matchup_preview_mode = current_mode
+    st.markdown(
+        _matchup_header_html(
+            current_mode,
+            jornada=current_jornada(),
+            current_user=str(st.session_state.get("user") or ""),
+        ),
+        unsafe_allow_html=True,
+    )
     mode = st.radio(
         "Modo de Team Preview",
         mode_options,
         horizontal=True,
+        index=mode_options.index(current_mode),
         key="matchup_preview_mode",
         label_visibility="collapsed",
     )
+    st.markdown(_mode_cards_html(mode), unsafe_allow_html=True)
     if mode == "Espectador":
         _render_spectator_tab(available)
     else:
