@@ -25,16 +25,7 @@ USERS: Dict[str, str] = {
     "Iker": "i09",
     "Aaron": "a31",
     "Miguel": "m77",
-    "Mario": "m10",
     "Barto": "b66",
-}
-
-ROSTER_JOIN_ROUND = {
-    "Barto": 2,
-}
-
-ROSTER_DEPARTURE_AFTER_ROUND = {
-    "Mario": 2,
 }
 
 SECTIONS = [
@@ -70,11 +61,9 @@ def sections_for_user(user: str | None) -> list[str]:
 def league_users_for_round(
     round_no: int,
     *,
-    roster_transition_complete: bool = False,
     include_retired: bool = True,
 ) -> Dict[str, str]:
-    current_round = max(int(round_no), 1)
-    _ = roster_transition_complete
+    _ = max(int(round_no), 1)
     out: Dict[str, str] = {}
     retired: set[str] = set()
     if not include_retired:
@@ -87,26 +76,16 @@ def league_users_for_round(
     for user, code in USERS.items():
         if user in retired:
             continue
-        join_round = int(ROSTER_JOIN_ROUND.get(user, 1))
-        departure_round = ROSTER_DEPARTURE_AFTER_ROUND.get(user)
-        if current_round < join_round:
-            continue
-        if departure_round is not None and current_round > int(departure_round):
-            continue
         out[user] = code
     return out
 
 
 def active_users() -> Dict[str, str]:
     current_round = 1
-    roster_transition_complete = False
     try:
         if st is not None and st.session_state.get("league_tramo"):
             return league_users_for_round(
                 int(st.session_state.league_tramo),
-                roster_transition_complete=bool(
-                    st.session_state.get("league_roster_transition_complete", False)
-                ),
                 include_retired=False,
             )
     except Exception:
@@ -118,14 +97,10 @@ def active_users() -> Dict[str, str]:
         if raw:
             state = json.loads(raw)
             current_round = max(int(state.get("tramo") or 1), 1)
-            roster_transition_complete = bool(
-                state.get("roster_transition_complete", False)
-            )
     except Exception:
         current_round = 1
     return league_users_for_round(
         current_round,
-        roster_transition_complete=roster_transition_complete,
         include_retired=False,
     )
 

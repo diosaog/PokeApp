@@ -12,14 +12,12 @@ from app.juicios.penalties import get_user_penalties
 from app.liga.eligibility import counts_for_league_reward
 from app.liga.rewards import (
     CURRENT_POINTS_BY_POSITION,
-    field_size_for_round_results,
     points_for_league_position,
 )
 from app.tienda.common import _eq_item
 from app.entrenadores.trainer_flags import retired_trainers
 from storage import (
     add_purchase,
-    clear_user_app_data,
     get_current_save_for_user,
     list_inventory,
     list_redemptions,
@@ -277,16 +275,9 @@ def finalize(tramo: int) -> None:
             st.session_state.setdefault("league_movements", {}).pop(tramo, None)
         except Exception:
             pass
-    if tramo == 2:
-        st.session_state.league_roster_transition_complete = True
     st.session_state.league_active = False
     st.session_state.league_tramo = tramo + 1
     _persist_state()
-    if tramo == 2:
-        try:
-            clear_user_app_data("Mario")
-        except Exception as e:
-            st.warning(f"Jornada cerrada, pero no se pudieron limpiar todos los datos de Mario: {e}")
 
 
 def recompute_round(tramo: int, *, apply_divisions_from_round: bool = False) -> None:
@@ -359,12 +350,7 @@ def points_from_league(user: str) -> int:
     for tramo, pos in tramos.items():
         if not counts_for_league_reward(user, int(tramo)):
             continue
-        field_size = field_size_for_round_results(lr, int(tramo))
-        total += points_for_league_position(
-            int(tramo),
-            int(pos),
-            field_size=field_size,
-        )
+        total += points_for_league_position(int(tramo), int(pos))
     return total
 
 

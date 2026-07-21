@@ -1,27 +1,9 @@
 from __future__ import annotations
 
 
-def uses_eight_player_league_rules(round_no: int | None, player_count: int | None = None) -> bool:
-    try:
-        if int(round_no or 0) < 4:
-            return False
-    except Exception:
-        return False
-    if player_count is None:
-        return True
-    try:
-        return int(player_count or 0) <= 8
-    except Exception:
-        return False
-
-
 def division_a_size_for_count(player_count: int, round_no: int | None = None) -> int:
-    total = max(0, int(player_count or 0))
-    if total <= 0:
-        return 0
-    if uses_eight_player_league_rules(round_no, total):
-        return min(4, total)
-    return min(5, total)
+    _ = round_no
+    return min(5, max(0, int(player_count or 0)))
 
 
 def movement_count_for_divisions(
@@ -29,10 +11,10 @@ def movement_count_for_divisions(
     b_size: int,
     round_no: int | None = None,
 ) -> int:
+    _ = round_no
     if a_size <= 0 or b_size <= 0:
         return 0
-    base = 2 if uses_eight_player_league_rules(round_no, a_size + b_size) else 3
-    return min(base, a_size, b_size)
+    return min(3, int(a_size), int(b_size))
 
 
 def next_divisions_from_rankings(

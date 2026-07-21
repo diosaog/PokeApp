@@ -842,8 +842,6 @@ def page_tabla() -> None:
             )
             if a_len <= 0:
                 a_len = 5
-            if int(t) == 2 and any(u == "Mario" and pos == 5 for u, pos in entries):
-                a_len = max(a_len, 5)
             b_len = len(
                 _players_from_match_map((round_matches or {}).get("B", {}) or {})
             )

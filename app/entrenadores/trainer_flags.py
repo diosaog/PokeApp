@@ -9,18 +9,9 @@ from storage import settings_get, settings_set
 
 TRAINER_FLAGS_KEY = "trainer_flags"
 TRAINER_ROBBED_HISTORY_WATERMARK_KEY = "trainer_robbed_history_watermark"
-TRAINER_ROBBED_MANUAL_SEEDS_KEY = "trainer_robbed_manual_seed_ids"
 _HISTORY_SYNC_TTL_SECONDS = 15
 _history_sync_at = 0.0
 _history_sync_key = ""
-
-_MANUAL_ROBBED_SEEDS: dict[str, dict[str, Any]] = {
-    "aaron_crobat_robbery": {
-        "trainer": "Aaron",
-        "robbed_source": "manual",
-        "robbed_note": "Crobat robado antes de registrar flags de entrenador",
-    },
-}
 
 
 def _now() -> int:
@@ -93,55 +84,6 @@ def _set_history_watermark(value: int) -> None:
         pass
 
 
-def _manual_seed_ids() -> set[str]:
-    return {str(seed_id) for seed_id in _MANUAL_ROBBED_SEEDS.keys()}
-
-
-def _consumed_manual_seed_ids() -> set[str]:
-    try:
-        raw = settings_get(TRAINER_ROBBED_MANUAL_SEEDS_KEY)
-        parsed = json.loads(raw or "[]")
-    except Exception:
-        return set()
-    if not isinstance(parsed, list):
-        return set()
-    return {str(seed_id) for seed_id in parsed if str(seed_id).strip()}
-
-
-def _consume_manual_seed_ids(seed_ids: set[str]) -> None:
-    clean = {str(seed_id) for seed_id in seed_ids if str(seed_id).strip()}
-    if not clean:
-        return
-    consumed = _consumed_manual_seed_ids()
-    updated = consumed | clean
-    if updated == consumed:
-        return
-    try:
-        settings_set(
-            TRAINER_ROBBED_MANUAL_SEEDS_KEY,
-            json.dumps(sorted(updated), ensure_ascii=False),
-        )
-    except Exception:
-        pass
-
-
-def _manual_robbed_sources() -> dict[str, dict[str, Any]]:
-    consumed = _consumed_manual_seed_ids()
-    sources: dict[str, dict[str, Any]] = {}
-    for seed_id, seed in _MANUAL_ROBBED_SEEDS.items():
-        if seed_id in consumed:
-            continue
-        trainer = str(seed.get("trainer") or "").strip()
-        if not trainer:
-            continue
-        sources[trainer] = {
-            "robbed_source": str(seed.get("robbed_source") or "manual"),
-            "robbed_seed_id": str(seed_id),
-            "robbed_note": str(seed.get("robbed_note") or "").strip(),
-        }
-    return sources
-
-
 def _active_filter(
     active_trainers: list[str] | tuple[str, ...] | set[str] | None,
 ) -> tuple[set[str], bool]:
@@ -199,7 +141,7 @@ def _redemption_rows(limit: int = 2000) -> list[Any]:
 def _historical_robbed_sources(limit: int = 2000) -> dict[str, dict[str, Any]]:
     rows = _redemption_rows(limit=limit)
     if not rows:
-        return _manual_robbed_sources()
+        return {}
 
     sources: dict[str, dict[str, Any]] = {}
     watermark = _history_watermark()
@@ -213,8 +155,6 @@ def _historical_robbed_sources(limit: int = 2000) -> dict[str, dict[str, Any]]:
         if target in sources:
             continue
         sources[target] = meta
-    for trainer, meta in _manual_robbed_sources().items():
-        sources.setdefault(trainer, meta)
     return sources
 
 
@@ -407,7 +347,6 @@ def reset_robbed_cycle_if_complete(active_trainers: list[str] | tuple[str, ...])
         flags[trainer] = data
     _save_raw(flags)
     _set_history_watermark(_latest_robbery_redemption_id())
-    _consume_manual_seed_ids(_manual_seed_ids())
     return True
 
 
