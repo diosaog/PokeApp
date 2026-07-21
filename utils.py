@@ -11,7 +11,7 @@ except Exception:
     st = None  # type: ignore
 
 APP_TITLE = "Liga Pokemon"
-APP_ICON = ""
+APP_ICON = "\u2694\ufe0f"
 BASE_SAVES_DIR = Path("./saves")
 DEFAULT_DLL_HINT = "Bridge/PKHeXBridge/bin/Release/net9.0/linux-x64/publish/PKHeXBridge"
 

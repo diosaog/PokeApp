@@ -1,22 +1,24 @@
 from __future__ import annotations
 
 import base64
+from html import escape
 import mimetypes
 import os
+
 import streamlit as st
 
 _SECTION_META = {
-    "Inicio": ("🏠", "Centro"),
-    "Team Preview": ("⚔️", "Combates"),
-    "Normativa": ("📜", "Reglas y avisos"),
-    "Liga y Tabla": ("🏆", "Clasificacion"),
-    "Temporada": ("🛡️", "Admin"),
-    "Previa Combate": ("⚔️", "Duelo"),
-    "Entrenadores": ("🎒", "Equipos"),
-    "Copa": ("🥇", "Torneos"),
-    "Juicios": ("⚖️", "Sanciones"),
-    "Tienda": ("🛒", "Compras"),
-    "Saves": ("💾", "Archivos"),
+    "Inicio": ("\U0001f3e0", "Centro"),
+    "Team Preview": ("\u2694\ufe0f", "Combates"),
+    "Normativa": ("\U0001f4dc", "Reglas"),
+    "Liga y Tabla": ("\U0001f3c6", "Clasificacion"),
+    "Temporada": ("\U0001f6e1\ufe0f", "Admin"),
+    "Previa Combate": ("\u2694\ufe0f", "Duelo"),
+    "Entrenadores": ("\U0001f392", "Equipos"),
+    "Copa": ("\U0001f947", "Torneos"),
+    "Juicios": ("\u2696\ufe0f", "Sanciones"),
+    "Tienda": ("\U0001f6d2", "Compras"),
+    "Saves": ("\U0001f4be", "Archivos"),
 }
 
 
@@ -28,21 +30,22 @@ def _cache_data(ttl: int = 30):
 
 
 @_cache_data(ttl=60)
-def _img_uri(p: str, mtime: float | None = None) -> str:
+def _img_uri(path: str, mtime: float | None = None) -> str:
+    _ = mtime
     try:
-        if not p:
+        if not path or os.path.getsize(path) < 256:
             return ""
-        mt = mimetypes.guess_type(p)[0] or "image/png"
-        with open(p, "rb") as f:
-            b64 = base64.b64encode(f.read()).decode("ascii")
-        uri = f"data:{mt};base64,{b64}"
-        return uri
+        media_type = mimetypes.guess_type(path)[0] or "image/png"
+        with open(path, "rb") as fh:
+            encoded = base64.b64encode(fh.read()).decode("ascii")
+        return f"data:{media_type};base64,{encoded}"
     except Exception:
         return ""
 
 
 @_cache_data(ttl=30)
 def _get_team_sprite_urls(user: str, mtime: float | None = None) -> list[str]:
+    _ = mtime
     urls: list[str] = []
     try:
         if not user or user == "-":
@@ -52,19 +55,19 @@ def _get_team_sprite_urls(user: str, mtime: float | None = None) -> list[str]:
 
         snapshot = get_trainer_snapshot(user)
         mons = list(snapshot.get("team") or [])
-        prefer_anim = False
-        for m in mons[:6]:
+        for mon in mons[:6]:
             try:
-                sp = m.get("species_name") or m.get("species") or "?"
-                url = showdown_sprite_url(
-                    species_name=str(sp),
-                    form_index=m.get("form_index"),
-                    form_name=m.get("form_name"),
-                    is_shiny=bool(m.get("is_shiny")),
-                    gender=m.get("gender"),
-                    prefer_animated=prefer_anim,
+                species = mon.get("species_name") or mon.get("species") or "?"
+                urls.append(
+                    showdown_sprite_url(
+                        species_name=str(species),
+                        form_index=mon.get("form_index"),
+                        form_name=mon.get("form_name"),
+                        is_shiny=bool(mon.get("is_shiny")),
+                        gender=mon.get("gender"),
+                        prefer_animated=False,
+                    )
                 )
-                urls.append(url)
             except Exception:
                 continue
     except Exception:
@@ -74,6 +77,7 @@ def _get_team_sprite_urls(user: str, mtime: float | None = None) -> list[str]:
 
 @_cache_data(ttl=30)
 def _get_badges_count(user: str, mtime: float | None = None) -> int:
+    _ = mtime
     try:
         if not user or user == "-":
             return 0
@@ -86,78 +90,105 @@ def _get_badges_count(user: str, mtime: float | None = None) -> int:
 
 
 def _render_sidebar_profile() -> None:
-    usr = st.session_state.get("user") or ""
-    if not usr or usr == "-":
+    user = str(st.session_state.get("user") or "")
+    if not user or user == "-":
         return
-    from app.entrenadores.profile import find_trainer_image
 
-    img = find_trainer_image(usr)
-    mtime = None
+    from app.entrenadores.profile import find_trainer_image
+    from app.entrenadores.trainer_flags import is_trainer_retired
+
+    image_path = find_trainer_image(user)
     try:
-        if img:
-            mtime = os.path.getmtime(img)
+        mtime = os.path.getmtime(image_path) if image_path else None
     except Exception:
         mtime = None
-    team_urls = _get_team_sprite_urls(usr, mtime)
-    badges = max(0, min(8, _get_badges_count(usr, mtime)))
-    dots = "".join([f"<span class='badge-dot{' badge-on' if i < badges else ''}'></span>" for i in range(8)])
-    badges_html = f"<div class='badges-row'>{dots}</div>"
-    if team_urls:
-        team_html = "".join([f"<span class='mini-mon'><img src='{u}' alt='pkm'/></span>" for u in team_urls])
-        bottom = badges_html + f"<div class='mini-team'>{team_html}</div>"
-    else:
-        bottom = badges_html + "<div class='mini-team'>" + ("<span class='mini-mon'><div class='pokeball-mini'></div></span>" * 6) + "</div>"
 
-    html = f"""
-    <div class='profile-card'>
-      <div class='profile-head'>
-        <div class='profile-avatar'>
-          {f"<img src='{_img_uri(img, mtime)}' alt='trainer'/>" if img else "<div class='pokeball-mini'></div>"}
-          <div class='glint'></div>
+    team_urls = _get_team_sprite_urls(user, mtime)
+    badges = max(0, min(8, _get_badges_count(user, mtime)))
+    badge_dots = "".join(
+        f"<span class='badge-dot{' badge-on' if index < badges else ''}'></span>"
+        for index in range(8)
+    )
+    badges_html = f"<div class='badges-row'>{badge_dots}</div>"
+    if team_urls:
+        team_html = "".join(
+            f"<span class='mini-mon'><img src='{escape(url)}' alt='pkm'/></span>"
+            for url in team_urls
+        )
+    else:
+        team_html = "<span class='mini-mon'><div class='pokeball-mini'></div></span>" * 6
+    portrait = _img_uri(str(image_path or ""), mtime)
+    avatar = (
+        f"<img src='{portrait}' alt='Retrato de {escape(user)}'/>"
+        if portrait
+        else "<div class='pokeball-mini'></div>"
+    )
+    status = "Modo consulta" if is_trainer_retired(user) else "Entrenador activo"
+
+    st.sidebar.markdown(
+        f"""
+        <div class='profile-card'>
+          <div class='profile-head'>
+            <div class='profile-avatar'>
+              {avatar}
+              <div class='glint'></div>
+            </div>
+            <div class='profile-meta'>
+              <div class='profile-name'>{escape(user)}</div>
+              <div class='profile-sub'>{escape(status)}</div>
+            </div>
+          </div>
+          {badges_html}
+          <div class='mini-team'>{team_html}</div>
         </div>
-        <div class='profile-meta'>
-          <div class='profile-name'>{usr}</div>
-          <div class='profile-sub'>Entrenador activo</div>
-        </div>
-      </div>
-      {bottom}
-    </div>
-    """
-    st.sidebar.markdown(html, unsafe_allow_html=True)
+        """,
+        unsafe_allow_html=True,
+    )
 
 
 def _render_change_pin_form() -> None:
-    usr = st.session_state.get("user") or ""
-    if not usr or usr == "-":
+    user = str(st.session_state.get("user") or "")
+    if not user or user == "-":
         return
+
     from storage import settings_get, settings_set
 
-    with st.sidebar.expander("Cambiar PIN (4 digitos)", expanded=False):
-        def _get_pin(u: str) -> str | None:
-            try:
-                val = settings_get(f"pin:{u}")
-                if val and len(str(val).strip()) == 4 and str(val).strip().isdigit():
-                    return str(val).strip()
-            except Exception:
-                return None
+    def _get_pin(name: str) -> str | None:
+        try:
+            value = settings_get(f"pin:{name}")
+            pin = str(value or "").strip()
+            if len(pin) == 4 and pin.isdigit():
+                return pin
+        except Exception:
             return None
+        return None
 
-        current_pin = _get_pin(usr)
-        cur_in = st.text_input("PIN actual", type="password", max_chars=4, value="") if current_pin else None
-        new_in = st.text_input("PIN nuevo (4 digitos)", type="password", max_chars=4, value="")
+    with st.sidebar.expander("Cambiar PIN (4 digitos)", expanded=False):
+        current_pin = _get_pin(user)
+        current_input = (
+            st.text_input("PIN actual", type="password", max_chars=4, value="")
+            if current_pin
+            else None
+        )
+        new_input = st.text_input(
+            "PIN nuevo (4 digitos)",
+            type="password",
+            max_chars=4,
+            value="",
+        )
         if st.button("Guardar PIN", use_container_width=True):
-            if current_pin:
-                if not cur_in or cur_in.strip() != current_pin:
-                    st.error("PIN actual incorrecto.")
-                    return
-            if not new_in or len(new_in.strip()) != 4 or (not new_in.strip().isdigit()):
+            if current_pin and (not current_input or current_input.strip() != current_pin):
+                st.error("PIN actual incorrecto.")
+                return
+            new_pin = str(new_input or "").strip()
+            if len(new_pin) != 4 or not new_pin.isdigit():
                 st.error("El PIN debe tener 4 digitos.")
                 return
             try:
-                settings_set(f"pin:{usr}", new_in.strip())
+                settings_set(f"pin:{user}", new_pin)
                 st.success("PIN actualizado.")
-            except Exception as e:
-                st.error(f"No se pudo guardar el PIN: {e}")
+            except Exception as exc:
+                st.error(f"No se pudo guardar el PIN: {exc}")
 
 
 def _normalize_section(section: str | None) -> str:
@@ -188,7 +219,7 @@ def _render_nav_css() -> None:
           font-family: var(--font-pixel);
           font-size: 9px;
           text-transform: uppercase;
-          letter-spacing: 0.06em;
+          letter-spacing: 0;
         }
         section[data-testid="stSidebar"] div[role="radiogroup"] {
           display: grid;
@@ -270,8 +301,8 @@ def _render_section_nav(sections: list[str]) -> str:
     st.sidebar.markdown("<div class='sidebar-nav-title'>Menu principal</div>", unsafe_allow_html=True)
 
     def _label(section: str) -> str:
-        icon, help_text = _SECTION_META.get(section, ("◈", section))
-        return f"{icon} {section} · {help_text}"
+        icon, help_text = _SECTION_META.get(section, ("\u25c8", section))
+        return f"{icon} {section} - {help_text}"
 
     choice = st.sidebar.radio(
         "Menu principal",
@@ -294,4 +325,10 @@ def render_sidebar(sections: list[str]) -> str:
 
     apply_section_theme(section)
     st.sidebar.markdown("---")
+    if st.sidebar.button("Cerrar sesion", use_container_width=True, key="logout_button"):
+        st.session_state.auth_ok = False
+        st.session_state.user = None
+        st.session_state.selected_section = "Inicio"
+        st.session_state.selected_section_radio = "Inicio"
+        st.rerun()
     return section

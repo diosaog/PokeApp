@@ -62,7 +62,7 @@ def apply_css() -> None:
     }
 
     .stApp::after {
-      content: "IR   ONLINE   WIRELESS";
+      content: "POKEAPP 2.0   LIGA PRIVADA";
       position: fixed;
       top: 10px;
       left: 50%;
@@ -70,7 +70,7 @@ def apply_css() -> None:
       color: #8c929c;
       font-family: var(--font-pixel);
       font-size: 10px;
-      letter-spacing: 0.18em;
+      letter-spacing: 0;
       z-index: 1001;
       pointer-events: none;
       text-shadow: 0 1px 0 rgba(0,0,0,0.65);
