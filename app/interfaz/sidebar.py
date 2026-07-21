@@ -133,6 +133,26 @@ def _render_sidebar_profile() -> None:
     )
 
 
+def _render_sidebar_notifications() -> None:
+    user = str(st.session_state.get("user") or "").strip()
+    if not user or user == "-":
+        return
+    try:
+        from app.interfaz.notifications import (
+            collect_notifications,
+            render_notifications_popover,
+        )
+
+        render_notifications_popover(
+            collect_notifications(user=user),
+            container=st.sidebar,
+            label="\U0001f514 Notificaciones",
+            use_container_width=True,
+        )
+    except Exception:
+        pass
+
+
 def _render_change_pin_form() -> None:
     user = str(st.session_state.get("user") or "")
     if not user or user == "-":
@@ -305,6 +325,7 @@ def _render_section_nav(sections: list[str]) -> str:
 
 def render_sidebar(sections: list[str]) -> str:
     _render_sidebar_profile()
+    _render_sidebar_notifications()
     _render_change_pin_form()
     st.sidebar.markdown("---")
     section = _render_section_nav(sections)

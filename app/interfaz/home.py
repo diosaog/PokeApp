@@ -1,216 +1,28 @@
 from __future__ import annotations
 
-import json
-from datetime import datetime
 from html import escape
-from typing import Any
 
 import streamlit as st
 
-from app.common import COIN
 from app.entrenadores.trainer_flags import is_trainer_retired
+from app.interfaz.notifications import (
+    collect_notifications,
+    league_state_snapshot,
+    money_snapshot,
+    promo_snapshot,
+    render_notifications_popover,
+    save_snapshot,
+    team_lock_snapshot,
+)
 from app.liga.context import current_jornada
 from app.season.config import max_rounds
-from app.tienda.discounts import (
-    discount_label,
-    promotion_opens_label,
-    promotion_state,
-    shop_promotions_by_item,
-)
-from app.tienda.money import _money_available
-from storage import get_current_save_for_user, get_team_lock, list_team_locks, settings_get
 from utils import active_users
-
-
-def _cache_data(ttl: int = 20):
-    try:
-        return st.cache_data(ttl=ttl, show_spinner=False)
-    except Exception:
-        return lambda f: f
 
 
 def _go_to(section: str) -> None:
     st.session_state["selected_section"] = section
     st.session_state["selected_section_radio"] = section
     st.rerun()
-
-
-def _fmt_ts(value: Any) -> str:
-    try:
-        ts = int(value or 0)
-        if ts <= 0:
-            return "-"
-        return datetime.fromtimestamp(ts).strftime("%d/%m/%Y %H:%M")
-    except Exception:
-        return "-"
-
-
-@_cache_data(ttl=10)
-def _league_state_snapshot() -> dict[str, Any]:
-    try:
-        raw = settings_get("league_state")
-        data = json.loads(raw or "{}")
-    except Exception:
-        data = {}
-    divisions = data.get("divisions") if isinstance(data, dict) else {}
-    if not isinstance(divisions, dict):
-        divisions = {}
-    return {
-        "tramo": max(int((data or {}).get("tramo") or 1), 1),
-        "active": bool((data or {}).get("active")),
-        "division_a": list(divisions.get("A") or []),
-        "division_b": list(divisions.get("B") or []),
-    }
-
-
-@_cache_data(ttl=15)
-def _save_snapshot(user: str | None) -> dict[str, str]:
-    if not user:
-        return {"title": "Sin entrenador", "detail": "-"}
-    try:
-        cur = get_current_save_for_user(str(user))
-    except Exception:
-        cur = None
-    if not cur:
-        return {"title": "Sin save actual", "detail": "Sube un save"}
-    original = str(cur[2] or cur[1] or "Save actual")
-    return {"title": original, "detail": _fmt_ts(cur[5] if len(cur) > 5 else 0)}
-
-
-@_cache_data(ttl=10)
-def _team_lock_snapshot(user: str | None, jornada: int) -> dict[str, str]:
-    if not user:
-        return {"title": "Sin fijar", "detail": "-"}
-    try:
-        lock = get_team_lock(int(jornada), str(user))
-    except Exception:
-        lock = None
-    if not lock or not lock.get("team"):
-        return {"title": "Sin fijar", "detail": f"Jornada {int(jornada)}"}
-    total = len(lock.get("team") or [])
-    suffix = " tarde" if lock.get("is_late") else ""
-    return {
-        "title": f"Fijado{suffix}",
-        "detail": f"{total}/6 Pokemon - {_fmt_ts(lock.get('locked_at'))}",
-    }
-
-
-@_cache_data(ttl=10)
-def _money_snapshot(user: str | None) -> dict[str, str]:
-    if not user:
-        return {"title": f"{COIN} 0", "detail": "-"}
-    try:
-        coins = int(_money_available(str(user)))
-    except Exception:
-        coins = 0
-    return {"title": f"{COIN} {coins}", "detail": "Monedas disponibles"}
-
-
-@_cache_data(ttl=15)
-def _promo_snapshot(jornada: int) -> dict[str, Any]:
-    try:
-        promos = list(shop_promotions_by_item(int(jornada)).values())
-    except Exception:
-        promos = []
-    active = [p for p in promos if promotion_state(p) == "active"]
-    pending = [p for p in promos if promotion_state(p) == "pending"]
-    sample = active[:3] or pending[:3]
-    return {
-        "active": len(active),
-        "pending": len(pending),
-        "sample": [
-            {
-                "item": str(p.get("item") or ""),
-                "kind": discount_label(str(p.get("discount_kind") or "normal")),
-                "opens": promotion_opens_label(p),
-            }
-            for p in sample
-        ],
-    }
-
-
-@_cache_data(ttl=10)
-def _team_lock_counts(jornada: int) -> tuple[int, int]:
-    users = list(active_users().keys())
-    try:
-        locks = list_team_locks(int(jornada))
-    except Exception:
-        locks = []
-    locked = {
-        str(lock.get("user") or "")
-        for lock in locks
-        if lock.get("team")
-    }
-    return len(locked & set(users)), len(users)
-
-
-def _notifications(
-    *,
-    user: str | None,
-    jornada: int,
-    lock: dict[str, str],
-    save: dict[str, str],
-    promos: dict[str, Any],
-) -> list[dict[str, str]]:
-    items: list[dict[str, str]] = []
-    if user and is_trainer_retired(user):
-        items.append(
-            {
-                "kind": "warn",
-                "title": "Modo espectador",
-                "body": "Puedes cotillear, pero no usar sistemas activos.",
-            }
-        )
-    if lock["title"].startswith("Sin fijar"):
-        items.append(
-            {
-                "kind": "danger",
-                "title": "Equipo sin fijar",
-                "body": f"Falta fijar equipo para la jornada {int(jornada)}.",
-            }
-        )
-    if save["title"].startswith("Sin save"):
-        items.append(
-            {
-                "kind": "danger",
-                "title": "Save pendiente",
-                "body": "No hay save actual marcado para tu entrenador.",
-            }
-        )
-    if int(promos.get("active") or 0) > 0:
-        items.append(
-            {
-                "kind": "ok",
-                "title": "Rebajas activas",
-                "body": f"{int(promos.get('active') or 0)} objeto(s) con descuento.",
-            }
-        )
-    elif int(promos.get("pending") or 0) > 0:
-        items.append(
-            {
-                "kind": "info",
-                "title": "Rebajas en camino",
-                "body": f"{int(promos.get('pending') or 0)} promocion(es) anunciadas.",
-            }
-        )
-    locked, total = _team_lock_counts(int(jornada))
-    if total and locked < total:
-        items.append(
-            {
-                "kind": "info",
-                "title": "Equipos fijados",
-                "body": f"{locked}/{total} entrenadores han fijado equipo.",
-            }
-        )
-    if not items:
-        items.append(
-            {
-                "kind": "ok",
-                "title": "Todo en orden",
-                "body": "No hay avisos importantes ahora mismo.",
-            }
-        )
-    return items
 
 
 def _render_css() -> None:
@@ -322,28 +134,6 @@ def _render_css() -> None:
           font-size: 19px;
           line-height: 1.08;
         }
-        .home-notice {
-          padding: 10px 11px;
-          margin-bottom: 8px;
-          border: 1px solid rgba(216,223,232,0.18);
-          background: #101720;
-        }
-        .home-notice-title {
-          color: #fff;
-          font-family: var(--font-pixel);
-          font-size: 10px;
-          text-transform: uppercase;
-        }
-        .home-notice-body {
-          margin-top: 5px;
-          color: var(--bw2-text-soft);
-          font-size: 18px;
-          line-height: 1.08;
-        }
-        .home-notice--danger { border-left: 4px solid #ef5e68; }
-        .home-notice--warn { border-left: 4px solid #efc257; }
-        .home-notice--ok { border-left: 4px solid #58d18e; }
-        .home-notice--info { border-left: 4px solid #6ea8ff; }
         @media (max-width: 980px) {
           .home-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
         }
@@ -367,29 +157,6 @@ def _card(label: str, value: str, detail: str) -> str:
     )
 
 
-def _notice_html(item: dict[str, str]) -> str:
-    kind = escape(str(item.get("kind") or "info"))
-    return (
-        f"<div class='home-notice home-notice--{kind}'>"
-        f"<div class='home-notice-title'>{escape(str(item.get('title') or 'Aviso'))}</div>"
-        f"<div class='home-notice-body'>{escape(str(item.get('body') or ''))}</div>"
-        "</div>"
-    )
-
-
-def _render_notifications(items: list[dict[str, str]]) -> None:
-    pending = sum(1 for item in items if item.get("kind") in {"danger", "warn", "info"})
-    label = f"Notificaciones ({pending})" if pending else "Notificaciones"
-    if hasattr(st, "popover"):
-        with st.popover(label, use_container_width=True):
-            for item in items:
-                st.markdown(_notice_html(item), unsafe_allow_html=True)
-    else:
-        with st.expander(label, expanded=False):
-            for item in items:
-                st.markdown(_notice_html(item), unsafe_allow_html=True)
-
-
 def _render_action(title: str, body: str, target: str, key: str) -> None:
     st.markdown(
         (
@@ -408,12 +175,12 @@ def render_home() -> None:
     _render_css()
     user = str(st.session_state.get("user") or "")
     jornada = current_jornada()
-    league = _league_state_snapshot()
-    lock = _team_lock_snapshot(user, jornada)
-    save = _save_snapshot(user)
-    money = _money_snapshot(user)
-    promos = _promo_snapshot(jornada)
-    notices = _notifications(
+    league = league_state_snapshot()
+    lock = team_lock_snapshot(user, jornada)
+    save = save_snapshot(user)
+    money = money_snapshot(user)
+    promos = promo_snapshot(jornada)
+    notices = collect_notifications(
         user=user,
         jornada=jornada,
         lock=lock,
@@ -435,7 +202,7 @@ def render_home() -> None:
         unsafe_allow_html=True,
     )
 
-    _render_notifications(notices)
+    render_notifications_popover(notices)
 
     promo_title = "Sin rebajas"
     promo_detail = "Tienda a precio base"
