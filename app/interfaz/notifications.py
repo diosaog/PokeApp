@@ -279,33 +279,34 @@ def render_notification_styles(container: Any = None) -> None:
         """
         <style>
         .app-notice {
-          padding: 11px 12px;
+          padding: 10px 12px;
           margin-bottom: 8px;
-          border: 1px solid rgba(248,251,255,0.22);
-          border-radius: var(--poke-radius);
-          background:
-            linear-gradient(90deg, rgba(255,255,255,0.08), transparent 62%),
-            linear-gradient(180deg, var(--bw2-screen-2), var(--bw2-screen));
-          box-shadow: inset 0 1px 0 rgba(255,255,255,0.14), 0 6px 14px rgba(2,18,46,0.18);
+          border: 1px solid var(--border-soft, rgba(255,255,255,0.06));
+          border-radius: var(--radius-card, 14px);
+          background: var(--surface-2, #172033);
+          box-shadow: 0 4px 16px rgba(0,0,0,0.18);
         }
         .app-notice-title {
-          color: #fff;
-          font-family: var(--font-pixel);
-          font-size: 10px;
-          text-transform: uppercase;
+          color: var(--text-primary, #f5f7fa);
+          font-family: var(--font-ui);
+          font-size: 12px;
+          font-weight: 850;
+          line-height: 1.2;
+          text-transform: none;
         }
         .app-notice-body {
           margin-top: 5px;
-          color: var(--bw2-text-soft);
-          font-size: 18px;
-          line-height: 1.08;
+          color: var(--text-secondary, #aab4c5);
+          font-size: 13px;
+          line-height: 1.35;
         }
         .app-notice-time {
           margin-top: 7px;
-          color: var(--bw2-text-dim);
-          font-family: var(--font-pixel);
-          font-size: 8px;
-          text-transform: uppercase;
+          color: var(--text-muted, #6f7b8f);
+          font-family: var(--font-ui);
+          font-size: 11px;
+          font-weight: 700;
+          text-transform: none;
         }
         .app-notice--danger { border-left: 4px solid #ef5e68; }
         .app-notice--warn { border-left: 4px solid #efc257; }
@@ -324,13 +325,12 @@ def render_notification_styles(container: Any = None) -> None:
           padding: 10px 14px;
           list-style: none;
           cursor: pointer;
-          border: 1px solid rgba(248,251,255,0.24);
-          border-radius: var(--poke-radius);
-          background:
-            linear-gradient(118deg, rgba(255,255,255,0.92) 0 58%, rgba(255,188,239,0.9) 58% 73%, rgba(157,219,255,0.9) 73% 100%);
-          color: #344069;
+          border: 1px solid var(--border-soft, rgba(255,255,255,0.06));
+          border-radius: var(--radius-input, 10px);
+          background: var(--surface-2, #172033);
+          color: var(--text-primary, #f5f7fa);
           font-weight: 800;
-          box-shadow: inset 0 1px 0 rgba(255,255,255,0.34), 0 8px 18px rgba(17,15,60,0.18);
+          box-shadow: none;
         }
         .app-notice-menu summary::-webkit-details-marker {
           display: none;
@@ -341,10 +341,10 @@ def render_notification_styles(container: Any = None) -> None:
         .app-notice-menu-panel {
           margin-top: 8px;
           padding: 8px;
-          border: 1px solid rgba(248,251,255,0.18);
-          border-radius: var(--poke-radius);
-          background: rgba(38, 31, 120, 0.72);
-          box-shadow: inset 0 1px 0 rgba(255,255,255,0.1);
+          border: 1px solid var(--border-soft, rgba(255,255,255,0.06));
+          border-radius: var(--radius-card, 14px);
+          background: var(--surface-1, #111827);
+          box-shadow: 0 4px 16px rgba(0,0,0,0.18);
         }
         .app-notice-chevron {
           width: 9px;
@@ -362,12 +362,10 @@ def render_notification_styles(container: Any = None) -> None:
           width: 100%;
           min-height: 42px;
           justify-content: flex-start;
-          border-color: rgba(248,251,255,0.24);
-          border-radius: var(--poke-radius);
-          background:
-            linear-gradient(90deg, rgba(255,255,255,0.09), transparent 62%),
-            linear-gradient(180deg, var(--bw2-panel-2), var(--bw2-panel));
-          color: #fff;
+          border-color: var(--border-soft, rgba(255,255,255,0.06));
+          border-radius: var(--radius-input, 10px);
+          background: var(--surface-2, #172033);
+          color: var(--text-primary, #f5f7fa);
         }
         </style>
         """,

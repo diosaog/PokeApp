@@ -2757,6 +2757,971 @@ section[data-testid="stSidebar"] .poke-type-chip.uses-fallback * {
     grid-template-columns: auto minmax(0, 1fr) !important;
   }
 }
+
+/* PokeApp 2.0 Phase 1: dark competitive client foundation */
+:root {
+  --font-ui: "Inter", "Manrope", "Nunito Sans", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-pixel: "Inter", "Manrope", "Nunito Sans", system-ui, sans-serif;
+
+  --bg-main: #080b14;
+  --bg-secondary: #0d1220;
+  --bg-tertiary: #111827;
+  --bg-elevated: #151d2e;
+
+  --surface-1: #111827;
+  --surface-2: #172033;
+  --surface-3: #1c2740;
+  --surface-hover: #202c46;
+  --surface-glass: rgba(17, 24, 39, 0.84);
+
+  --border-soft: rgba(255,255,255,0.06);
+  --border-normal: rgba(255,255,255,0.1);
+  --border-hover: rgba(255,255,255,0.18);
+
+  --text-primary: #f5f7fa;
+  --text-secondary: #aab4c5;
+  --text-muted: #6f7b8f;
+  --text-inverse: #101827;
+
+  --primary: #4d8dff;
+  --primary-hover: #6aa0ff;
+  --primary-soft: rgba(77,141,255,0.13);
+  --pokemon-yellow: #ffcb3b;
+  --pokemon-yellow-soft: rgba(255,203,59,0.14);
+  --accent-purple: #785df6;
+  --success: #43d17c;
+  --warning: #ffb84a;
+  --danger: #ff5263;
+  --info: #4db8ff;
+
+  --radius-input: 10px;
+  --radius-card: 14px;
+  --radius-large: 18px;
+  --radius-modal: 20px;
+  --shadow-card: 0 4px 16px rgba(0,0,0,0.18);
+  --shadow-hero: 0 12px 32px rgba(0,0,0,0.24);
+  --transition-fast: 160ms ease;
+
+  --champ-bg-0: var(--bg-main);
+  --champ-bg-1: var(--bg-secondary);
+  --champ-bg-2: var(--bg-tertiary);
+  --champ-panel: var(--surface-1);
+  --champ-panel-2: var(--surface-2);
+  --champ-panel-3: var(--surface-3);
+  --champ-panel-deep: var(--bg-secondary);
+  --champ-list: var(--surface-2);
+  --champ-list-2: var(--surface-3);
+  --champ-text: var(--text-primary);
+  --champ-text-soft: var(--text-secondary);
+  --champ-muted: var(--text-muted);
+  --champ-lime: var(--primary);
+  --champ-lime-2: #2f6fff;
+  --champ-yellow: var(--pokemon-yellow);
+  --champ-pink: var(--accent-purple);
+  --champ-cyan: var(--info);
+
+  --accent: var(--primary);
+  --accent-dark: #2f6fff;
+  --accent-soft: var(--primary-hover);
+  --accent-ghost: var(--primary-soft);
+  --bw2-bg-0: var(--bg-main);
+  --bw2-bg-1: var(--bg-secondary);
+  --bw2-bg-2: var(--bg-tertiary);
+  --bw2-panel: var(--surface-1);
+  --bw2-panel-2: var(--surface-2);
+  --bw2-panel-3: var(--surface-3);
+  --bw2-screen: var(--surface-1);
+  --bw2-screen-2: var(--surface-2);
+  --bw2-edge: var(--border-normal);
+  --bw2-edge-strong: var(--border-hover);
+  --bw2-text: var(--text-primary);
+  --bw2-text-soft: var(--text-secondary);
+  --bw2-text-dim: var(--text-muted);
+  --poke-radius-sm: var(--radius-input);
+  --poke-radius: var(--radius-card);
+  --poke-radius-xl: var(--radius-large);
+  --poke-shadow-soft: var(--shadow-hero);
+  --poke-shadow-card: var(--shadow-card);
+  --poke-surface-glow: inset 0 1px 0 rgba(255,255,255,0.04);
+}
+
+#MainMenu,
+footer,
+header[data-testid="stHeader"] {
+  visibility: hidden !important;
+}
+
+html,
+body,
+.stApp {
+  background: var(--bg-main) !important;
+}
+
+.stApp {
+  color: var(--text-primary) !important;
+  background:
+    radial-gradient(circle at 78% -8%, rgba(77,141,255,0.12), transparent 340px),
+    radial-gradient(circle at 12% 12%, rgba(255,203,59,0.055), transparent 280px),
+    linear-gradient(120deg, transparent 0 88%, rgba(255,255,255,0.018) 88% 89%, transparent 89% 100%) 0 0 / 320px 220px,
+    linear-gradient(180deg, var(--bg-main) 0%, #0c1220 45%, #10192b 100%) !important;
+}
+
+.stApp::before,
+.stApp::after,
+.main::before {
+  display: none !important;
+  content: "" !important;
+}
+
+html, body, [class*="css"],
+.stApp p,
+.stApp span,
+.stApp div,
+.stApp label,
+.stApp li,
+.stApp caption {
+  font-family: var(--font-ui) !important;
+  letter-spacing: 0 !important;
+}
+
+.main .block-container {
+  max-width: 1600px !important;
+  padding: 32px 32px 56px !important;
+  margin: 0 auto !important;
+}
+
+.stApp h1,
+.stApp h2,
+.stApp h3,
+.stApp h4,
+.stApp h5,
+.stApp h6 {
+  color: var(--text-primary) !important;
+  -webkit-text-fill-color: var(--text-primary) !important;
+  font-family: var(--font-ui) !important;
+  font-weight: 800 !important;
+  letter-spacing: 0 !important;
+  text-transform: none !important;
+  text-shadow: none !important;
+}
+
+.stApp p,
+.stApp li,
+.stApp label,
+.stApp caption {
+  color: var(--text-secondary) !important;
+}
+
+.stApp strong,
+.stApp b {
+  color: var(--text-primary) !important;
+}
+
+.stApp hr {
+  height: 1px !important;
+  margin: 24px 0 !important;
+  background: var(--border-soft) !important;
+}
+
+section[data-testid="stSidebar"] {
+  width: 248px !important;
+  min-width: 248px !important;
+  max-width: 248px !important;
+  background:
+    linear-gradient(180deg, rgba(77,141,255,0.06), transparent 36%),
+    var(--bg-secondary) !important;
+  border-right: 1px solid var(--border-soft) !important;
+  box-shadow: none !important;
+}
+
+section[data-testid="stSidebar"] .block-container {
+  padding: 24px 14px !important;
+}
+
+section[data-testid="stSidebar"]::before {
+  display: block !important;
+  content: "POKEAPP\\A LEAGUE" !important;
+  white-space: pre !important;
+  position: static !important;
+  margin: 0 0 18px !important;
+  padding: 0 4px 18px !important;
+  border: 0 !important;
+  border-bottom: 1px solid var(--border-soft) !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  color: var(--text-primary) !important;
+  -webkit-text-fill-color: var(--text-primary) !important;
+  font-family: var(--font-ui) !important;
+  font-size: 18px !important;
+  font-weight: 900 !important;
+  line-height: 1.05 !important;
+  letter-spacing: 0.02em !important;
+  text-align: left !important;
+  box-shadow: none !important;
+}
+
+section[data-testid="stSidebar"] .profile-card {
+  margin: 0 0 18px !important;
+  padding: 12px !important;
+  border: 1px solid var(--border-soft) !important;
+  border-radius: var(--radius-large) !important;
+  background: rgba(255,255,255,0.025) !important;
+  box-shadow: none !important;
+}
+
+section[data-testid="stSidebar"] .profile-head {
+  display: grid !important;
+  grid-template-columns: 54px minmax(0, 1fr) !important;
+  gap: 10px !important;
+  align-items: center !important;
+}
+
+section[data-testid="stSidebar"] .profile-avatar {
+  width: 54px !important;
+  height: 54px !important;
+  flex-basis: 54px !important;
+  border-radius: 14px !important;
+  border: 1px solid var(--border-normal) !important;
+  background: var(--surface-2) !important;
+  box-shadow: none !important;
+}
+
+section[data-testid="stSidebar"] .profile-avatar img {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+}
+
+section[data-testid="stSidebar"] .profile-name {
+  color: var(--text-primary) !important;
+  -webkit-text-fill-color: var(--text-primary) !important;
+  font-size: 15px !important;
+  font-weight: 800 !important;
+  line-height: 1.15 !important;
+  text-transform: none !important;
+}
+
+section[data-testid="stSidebar"] .profile-sub {
+  margin-top: 3px !important;
+  color: var(--success) !important;
+  -webkit-text-fill-color: var(--success) !important;
+  font-size: 12px !important;
+  line-height: 1.2 !important;
+}
+
+section[data-testid="stSidebar"] .badges-row {
+  display: none !important;
+}
+
+section[data-testid="stSidebar"] .mini-team {
+  display: grid !important;
+  grid-template-columns: repeat(6, minmax(0, 1fr)) !important;
+  gap: 6px !important;
+  margin-top: 12px !important;
+}
+
+section[data-testid="stSidebar"] .mini-mon {
+  width: 100% !important;
+  min-height: 30px !important;
+  aspect-ratio: 1 / 1 !important;
+  border: 0 !important;
+  border-radius: 8px !important;
+  background: rgba(255,255,255,0.045) !important;
+  box-shadow: none !important;
+}
+
+section[data-testid="stSidebar"] .mini-mon img {
+  width: 120% !important;
+  height: 120% !important;
+  object-fit: contain !important;
+  transform: scale(1) !important;
+  filter: drop-shadow(0 3px 4px rgba(0,0,0,0.32)) !important;
+}
+
+section[data-testid="stSidebar"] .sidebar-nav-title {
+  margin: 16px 0 8px !important;
+  padding: 0 4px !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  color: var(--text-muted) !important;
+  -webkit-text-fill-color: var(--text-muted) !important;
+  font-size: 11px !important;
+  font-weight: 800 !important;
+  text-transform: uppercase !important;
+}
+
+section[data-testid="stSidebar"] div[role="radiogroup"] {
+  display: grid !important;
+  gap: 4px !important;
+  overflow: visible !important;
+}
+
+section[data-testid="stSidebar"] div[role="radiogroup"] label,
+section[data-testid="stSidebar"] div.stButton > button,
+section[data-testid="stSidebar"] .stPopover > div > button,
+section[data-testid="stSidebar"] div[data-testid="stExpander"] summary {
+  position: relative !important;
+  min-height: 42px !important;
+  padding: 9px 10px 9px 12px !important;
+  border: 1px solid transparent !important;
+  border-radius: var(--radius-input) !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  color: var(--text-secondary) !important;
+  -webkit-text-fill-color: var(--text-secondary) !important;
+  transition: background-color var(--transition-fast), border-color var(--transition-fast), transform var(--transition-fast), color var(--transition-fast) !important;
+}
+
+section[data-testid="stSidebar"] div[role="radiogroup"] label::before,
+section[data-testid="stSidebar"] div[role="radiogroup"] label::after {
+  display: none !important;
+}
+
+section[data-testid="stSidebar"] div[role="radiogroup"] label p,
+section[data-testid="stSidebar"] div.stButton > button p,
+section[data-testid="stSidebar"] .stPopover > div > button *,
+section[data-testid="stSidebar"] div[data-testid="stExpander"] summary * {
+  margin: 0 !important;
+  color: var(--text-secondary) !important;
+  -webkit-text-fill-color: var(--text-secondary) !important;
+  font-size: 13px !important;
+  font-weight: 700 !important;
+  line-height: 1.15 !important;
+  text-transform: none !important;
+}
+
+section[data-testid="stSidebar"] div[role="radiogroup"] label:hover,
+section[data-testid="stSidebar"] div.stButton > button:hover {
+  background: rgba(255,255,255,0.045) !important;
+  border-color: var(--border-soft) !important;
+  transform: translateY(-1px) !important;
+}
+
+section[data-testid="stSidebar"] div[role="radiogroup"] label:has(input:checked),
+section[data-testid="stSidebar"] div.stButton > button[kind="primary"] {
+  background: var(--primary-soft) !important;
+  border-color: rgba(77,141,255,0.3) !important;
+  border-left: 3px solid var(--primary) !important;
+  color: var(--text-primary) !important;
+  -webkit-text-fill-color: var(--text-primary) !important;
+  box-shadow: none !important;
+}
+
+section[data-testid="stSidebar"] div[role="radiogroup"] label:has(input:checked) p,
+section[data-testid="stSidebar"] div.stButton > button[kind="primary"] p {
+  color: var(--text-primary) !important;
+  -webkit-text-fill-color: var(--text-primary) !important;
+}
+
+.main .home-hero,
+.main .auth-hero,
+.main .trainers-hero,
+.main .league-hero,
+.main .matchup-hero,
+.main .mart-hero,
+.main .cup-hero,
+.main .ju-hero,
+.main .hof-hero,
+.main .season-hero,
+.main .norma-hero,
+.main .saves-hero {
+  padding: 20px !important;
+  border: 1px solid var(--border-soft) !important;
+  border-radius: var(--radius-large) !important;
+  background: linear-gradient(180deg, rgba(255,255,255,0.035), rgba(255,255,255,0.015)), var(--surface-1) !important;
+  box-shadow: var(--shadow-card) !important;
+}
+
+.main .home-title,
+.main .auth-title,
+.main .trainers-title,
+.main .league-title,
+.main .matchup-title,
+.main .mart-title,
+.main .cup-title,
+.main .ju-hero-title,
+.main .hof-title,
+.main .season-title,
+.main .norma-title,
+.main .saves-title {
+  color: var(--text-primary) !important;
+  -webkit-text-fill-color: var(--text-primary) !important;
+  font-size: clamp(28px, 2.8vw, 36px) !important;
+  font-weight: 850 !important;
+  line-height: 1.08 !important;
+  text-transform: none !important;
+  text-shadow: none !important;
+}
+
+.main .home-kicker,
+.main .auth-kicker,
+.main .matchup-kicker,
+.main .cup-kicker,
+.main .mart-kicker,
+.main .league-kicker,
+.main .season-kicker,
+.main .saves-kicker,
+.main .mart-pill,
+.main .cup-pill,
+.main .season-pill,
+.main .trainers-chip,
+.main .hof-team-pill,
+.main .saves-card-badge {
+  border: 1px solid var(--border-soft) !important;
+  border-radius: 999px !important;
+  background: rgba(77,141,255,0.08) !important;
+  color: var(--text-secondary) !important;
+  -webkit-text-fill-color: var(--text-secondary) !important;
+  box-shadow: none !important;
+}
+
+.main .home-section-title,
+.main .trainers-section-title,
+.main .league-section-title,
+.main .cup-section-title,
+.main .hof-section-title,
+.main .season-section-title,
+.main .saves-section-title,
+.main .mart-aisle-title,
+.main .pt-title,
+.main .trainer-head {
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  color: var(--text-primary) !important;
+  -webkit-text-fill-color: var(--text-primary) !important;
+  font-size: 18px !important;
+  font-weight: 850 !important;
+  text-transform: none !important;
+}
+
+.main .home-card,
+.main .profile-card,
+.main .trainers-picker,
+.main .trainers-stat,
+.main .trainers-lock-panel,
+.main .league-card,
+.main .league-status-card,
+.main .league-division-card,
+.main .league-history-card,
+.main .league-section,
+.main .league-table-shell,
+.main .matchup-shell,
+.main .matchup-summary,
+.main .matchup-metric,
+.main .battle-board,
+.main .mart-register-card,
+.main .mart-confirm-card,
+.main .cup-metric,
+.main .cup-section,
+.main .cup-vs-card,
+.main .cup-paste-card,
+.main .cup-match,
+.main .doubles-card,
+.main .doubles-metric,
+.main .doubles-section,
+.main .ju-action-card,
+.main .ju-metric,
+.main .ju-penalty-card,
+.main .hof-card,
+.main .season-card,
+.main .season-alert,
+.main .season-table,
+.main .saves-current-card,
+.main .saves-stat,
+.main .pl-card,
+.main .pt-metric,
+.main .pt-section,
+.main .trainer-panel,
+.main .shop-card,
+.main .champ-detail-card,
+.main .battle-mon-card,
+.main .matchup-mon {
+  border: 1px solid var(--border-soft) !important;
+  border-radius: var(--radius-card) !important;
+  background: linear-gradient(180deg, rgba(255,255,255,0.035), rgba(255,255,255,0.015)), var(--surface-1) !important;
+  box-shadow: var(--shadow-card) !important;
+  color: var(--text-primary) !important;
+}
+
+.main .home-action-card,
+.main .auth-trainer-card,
+.main .matchup-mode-card,
+.main .cup-mode-card,
+.main .season-version-row,
+.main .norma-list-item,
+.main .app-notice,
+.main .saves-history-card,
+.main .pokedex-card,
+.main .slot,
+.main .slot-empty,
+.main .matchup-move,
+.main .battle-move-link,
+.main .battle-no-move,
+.main .champ-detail-move-row {
+  border: 1px solid var(--border-soft) !important;
+  border-radius: var(--radius-card) !important;
+  background: var(--surface-2) !important;
+  color: var(--text-primary) !important;
+  -webkit-text-fill-color: var(--text-primary) !important;
+  box-shadow: var(--shadow-card) !important;
+  transition: border-color var(--transition-fast), background-color var(--transition-fast), transform var(--transition-fast), box-shadow var(--transition-fast) !important;
+}
+
+.main .home-action-card *,
+.main .auth-trainer-card *,
+.main .matchup-mode-card *,
+.main .cup-mode-card *,
+.main .season-version-row *,
+.main .norma-list-item *,
+.main .saves-history-card *,
+.main .pokedex-card *,
+.main .slot *,
+.main .slot-empty *,
+.main .shop-card *,
+.main .matchup-move span:last-child,
+.main .battle-move-link span:last-child {
+  color: var(--text-primary) !important;
+  -webkit-text-fill-color: var(--text-primary) !important;
+}
+
+.main .home-action-card:hover,
+.main .matchup-mode-card:hover,
+.main .cup-mode-card:hover,
+.main .pokedex-card:hover,
+.main .slot:hover,
+.main .shop-card:hover,
+.main .champ-box-tile-link:hover .champ-box-tile {
+  transform: translateY(-3px) !important;
+  border-color: rgba(77,141,255,0.45) !important;
+  background: var(--surface-hover) !important;
+}
+
+.main .stButton > button,
+.main .stDownloadButton > button,
+.main form button {
+  min-height: 44px !important;
+  padding: 0 16px !important;
+  border: 1px solid var(--border-normal) !important;
+  border-radius: var(--radius-input) !important;
+  background: var(--surface-3) !important;
+  color: var(--text-primary) !important;
+  -webkit-text-fill-color: var(--text-primary) !important;
+  font-family: var(--font-ui) !important;
+  font-size: 13px !important;
+  font-weight: 800 !important;
+  text-transform: none !important;
+  box-shadow: none !important;
+  transition: background-color var(--transition-fast), border-color var(--transition-fast), transform var(--transition-fast) !important;
+}
+
+.main .stButton > button:hover,
+.main .stDownloadButton > button:hover,
+.main form button:hover {
+  background: var(--surface-hover) !important;
+  border-color: var(--border-hover) !important;
+  transform: translateY(-1px) !important;
+}
+
+.main .stButton > button:active,
+.main .stDownloadButton > button:active,
+.main form button:active {
+  transform: scale(0.98) !important;
+}
+
+.main .stButton > button[kind="primary"],
+.main form button[kind="primary"] {
+  border-color: transparent !important;
+  background: var(--primary) !important;
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+}
+
+.main .stButton > button[kind="primary"]:hover,
+.main form button[kind="primary"]:hover {
+  background: var(--primary-hover) !important;
+}
+
+.main .stTextInput input,
+.main .stNumberInput input,
+.main .stTextArea textarea,
+.main .stSelectbox [data-baseweb="select"],
+.main .stMultiSelect [data-baseweb="select"],
+.main .stDateInput input {
+  min-height: 44px !important;
+  border: 1px solid var(--border-normal) !important;
+  border-radius: var(--radius-input) !important;
+  background: #0e1524 !important;
+  color: var(--text-primary) !important;
+  -webkit-text-fill-color: var(--text-primary) !important;
+  box-shadow: none !important;
+}
+
+.main .stTextInput input:focus,
+.main .stNumberInput input:focus,
+.main .stTextArea textarea:focus {
+  border-color: var(--primary) !important;
+  outline: 2px solid rgba(77,141,255,0.35) !important;
+  outline-offset: 2px !important;
+}
+
+.main .stSelectbox [data-baseweb="select"] *,
+.main .stMultiSelect [data-baseweb="select"] * {
+  color: var(--text-primary) !important;
+  -webkit-text-fill-color: var(--text-primary) !important;
+  font-size: 14px !important;
+  text-transform: none !important;
+}
+
+div[data-baseweb="popover"],
+div[data-baseweb="popover"] ul,
+div[data-baseweb="menu"] {
+  border: 1px solid var(--border-normal) !important;
+  border-radius: var(--radius-card) !important;
+  background: var(--surface-1) !important;
+  box-shadow: var(--shadow-hero) !important;
+}
+
+div[data-baseweb="popover"] li,
+div[data-baseweb="menu"] li,
+div[role="option"] {
+  min-height: 40px !important;
+  border-radius: var(--radius-input) !important;
+  color: var(--text-primary) !important;
+  -webkit-text-fill-color: var(--text-primary) !important;
+}
+
+div[data-baseweb="popover"] li:hover,
+div[data-baseweb="menu"] li:hover,
+div[role="option"]:hover,
+div[aria-selected="true"][role="option"] {
+  background: var(--primary-soft) !important;
+}
+
+.main div[data-testid="stTabs"] div[data-baseweb="tab-list"],
+.main div[data-testid="stTabs"] [role="tablist"],
+.main div[data-baseweb="tab-list"] {
+  gap: 6px !important;
+  padding: 0 !important;
+  border: 0 !important;
+  border-bottom: 1px solid var(--border-soft) !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.main div[data-testid="stTabs"] button[data-baseweb="tab"],
+.main div[data-testid="stTabs"] button[role="tab"] {
+  min-height: 42px !important;
+  padding: 0 12px !important;
+  border: 0 !important;
+  border-bottom: 2px solid transparent !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  color: var(--text-secondary) !important;
+  -webkit-text-fill-color: var(--text-secondary) !important;
+  box-shadow: none !important;
+}
+
+.main div[data-testid="stTabs"] button[aria-selected="true"],
+.main button[data-baseweb="tab"][aria-selected="true"],
+.main button[role="tab"][aria-selected="true"] {
+  border-bottom-color: var(--primary) !important;
+  background: transparent !important;
+  color: var(--text-primary) !important;
+  -webkit-text-fill-color: var(--text-primary) !important;
+  box-shadow: none !important;
+}
+
+.main .slot {
+  min-height: 184px !important;
+  padding: 12px !important;
+  background:
+    radial-gradient(circle at 50% 34%, rgba(77,141,255,0.1), transparent 48%),
+    var(--surface-2) !important;
+}
+
+.main .slot::before {
+  display: none !important;
+}
+
+.main .slot img {
+  width: min(100%, 124px) !important;
+  height: 94px !important;
+  object-fit: contain !important;
+  transform: none !important;
+  filter: drop-shadow(0 8px 12px rgba(0,0,0,0.35)) !important;
+}
+
+.main .slot .badges {
+  padding-left: 0 !important;
+}
+
+.main .slot .title {
+  color: var(--text-primary) !important;
+  -webkit-text-fill-color: var(--text-primary) !important;
+  font-size: 11px !important;
+  font-weight: 850 !important;
+}
+
+.main .slot .sub {
+  color: var(--text-secondary) !important;
+  -webkit-text-fill-color: var(--text-secondary) !important;
+  font-size: 14px !important;
+}
+
+.main .champ-box-grid-shell {
+  width: 100% !important;
+  margin-top: 12px !important;
+  padding: 14px !important;
+  border: 1px solid var(--border-soft) !important;
+  border-radius: var(--radius-large) !important;
+  background: var(--surface-1) !important;
+  box-shadow: var(--shadow-card) !important;
+}
+
+.main .champ-box-grid-toolbar {
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  gap: 10px !important;
+  align-items: center !important;
+  margin-bottom: 14px !important;
+}
+
+.main .champ-box-control {
+  min-width: 0 !important;
+  display: grid !important;
+  grid-template-columns: 42px minmax(0, 1fr) !important;
+  gap: 8px !important;
+  align-items: center !important;
+}
+
+.main .champ-box-grid-toolbar span,
+.main .champ-box-grid-toolbar strong {
+  min-height: 34px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  border: 1px solid var(--border-soft) !important;
+  border-radius: var(--radius-input) !important;
+  background: var(--surface-2) !important;
+  color: var(--text-primary) !important;
+  -webkit-text-fill-color: var(--text-primary) !important;
+  font-size: 13px !important;
+  font-weight: 800 !important;
+  line-height: 1 !important;
+  min-width: 0 !important;
+}
+
+.main .champ-box-grid-toolbar span {
+  color: var(--primary-hover) !important;
+  -webkit-text-fill-color: var(--primary-hover) !important;
+}
+
+.main .champ-box-grid-toolbar strong {
+  justify-content: flex-start !important;
+  padding: 0 12px !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+}
+
+.main .champ-box-grid {
+  display: grid !important;
+  grid-template-columns: repeat(6, minmax(76px, 1fr)) !important;
+  gap: 10px !important;
+  width: 100% !important;
+}
+
+.main .champ-box-tile-link {
+  display: block !important;
+  width: 100% !important;
+  text-decoration: none !important;
+}
+
+.main .champ-box-tile {
+  position: relative !important;
+  display: grid !important;
+  place-items: center !important;
+  aspect-ratio: 1 / 1 !important;
+  min-height: 76px !important;
+  overflow: hidden !important;
+  border: 1px solid var(--border-soft) !important;
+  border-radius: 12px !important;
+  background:
+    radial-gradient(circle at 50% 38%, rgba(77,141,255,0.11), transparent 54%),
+    var(--surface-2) !important;
+  box-shadow: none !important;
+}
+
+.main .champ-box-tile::before,
+.main .champ-box-tile::after {
+  display: none !important;
+}
+
+.main .champ-box-tile img {
+  position: relative !important;
+  width: 86% !important;
+  height: 86% !important;
+  object-fit: contain !important;
+  transform: none !important;
+  filter: drop-shadow(0 6px 8px rgba(0,0,0,0.35)) !important;
+}
+
+.main .champ-box-tile-empty {
+  opacity: 0.35 !important;
+  border-style: dashed !important;
+}
+
+.main .battle-board,
+.main .battle-mon-card,
+.main .matchup-mon {
+  background:
+    radial-gradient(circle at 50% 24%, rgba(77,141,255,0.08), transparent 46%),
+    var(--surface-1) !important;
+}
+
+.main .battle-mon-card {
+  grid-template-columns: minmax(180px, .9fr) 136px minmax(260px, 1.18fr) !important;
+}
+
+.main .battle-sprite-wrap,
+.main .matchup-sprite,
+.main .champ-detail-sprite-stage,
+.main .auth-avatar,
+.main .trainers-portrait-xl {
+  border: 1px solid var(--border-soft) !important;
+  background:
+    radial-gradient(circle at 50% 48%, rgba(77,141,255,0.18), transparent 58%),
+    var(--surface-2) !important;
+  box-shadow: none !important;
+}
+
+.main .battle-sprite {
+  width: 128px !important;
+  height: 128px !important;
+}
+
+.main .matchup-sprite {
+  width: 112px !important;
+  height: 112px !important;
+}
+
+.main .shop-card {
+  min-height: 228px !important;
+}
+
+.main .shop-head {
+  background: var(--surface-2) !important;
+  border-bottom: 1px solid var(--border-soft) !important;
+}
+
+.main .shop-icon-slot {
+  width: 76px !important;
+  height: 76px !important;
+  background: var(--surface-2) !important;
+}
+
+.main .shop-body {
+  grid-template-columns: 78px minmax(0, 1fr) !important;
+}
+
+.main .shop-price,
+.main .shop-coin-value,
+.main .champ-detail-level,
+.main .champ-detail-item-value,
+.main .champ-detail-stat-value,
+.main .champ-detail-private-value,
+.main .champ-detail-move-pp {
+  background: var(--surface-3) !important;
+  border-color: var(--border-soft) !important;
+  color: var(--text-primary) !important;
+  -webkit-text-fill-color: var(--text-primary) !important;
+}
+
+.main .shop-coin,
+.main .shop-amount,
+.main .mart-confirm-price {
+  color: var(--pokemon-yellow) !important;
+  -webkit-text-fill-color: var(--pokemon-yellow) !important;
+}
+
+.main .app-notice-menu summary {
+  min-height: 42px !important;
+  border: 1px solid var(--border-soft) !important;
+  border-radius: var(--radius-input) !important;
+  background: var(--surface-2) !important;
+  color: var(--text-primary) !important;
+  -webkit-text-fill-color: var(--text-primary) !important;
+}
+
+.main .app-notice-menu-panel {
+  border: 1px solid var(--border-soft) !important;
+  background: var(--surface-1) !important;
+}
+
+.main .poke-type-chip.uses-asset,
+section[data-testid="stSidebar"] .poke-type-chip.uses-asset {
+  background: transparent !important;
+}
+
+.main .poke-type-icon-img,
+section[data-testid="stSidebar"] .poke-type-icon-img {
+  width: 26px !important;
+  height: 26px !important;
+}
+
+.main .poke-type-chip.asset-full,
+section[data-testid="stSidebar"] .poke-type-chip.asset-full {
+  width: 86px !important;
+  min-width: 86px !important;
+  height: 18px !important;
+  min-height: 18px !important;
+}
+
+.main .battle-type-pill.poke-type-chip.asset-full,
+.main .champ-detail-type-chip.poke-type-chip.asset-full {
+  width: 112px !important;
+  min-width: 112px !important;
+  height: 23px !important;
+  min-height: 23px !important;
+}
+
+@media (max-width: 980px) {
+  .main .block-container {
+    padding: 24px 16px 48px !important;
+  }
+  section[data-testid="stSidebar"] {
+    width: 230px !important;
+    min-width: 230px !important;
+    max-width: 230px !important;
+  }
+  .main .battle-mon-card {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+  .main .champ-box-grid {
+    grid-template-columns: repeat(4, minmax(58px, 1fr)) !important;
+  }
+  .main .champ-box-grid-toolbar {
+    grid-template-columns: 1fr !important;
+  }
+  .main .champ-box-control {
+    grid-template-columns: 38px minmax(0, 1fr) !important;
+  }
+}
+
+@media (max-width: 560px) {
+  .main .slot {
+    min-height: 168px !important;
+  }
+  .main .champ-box-grid {
+    grid-template-columns: repeat(3, minmax(54px, 1fr)) !important;
+  }
+}
 </style>
 """
 

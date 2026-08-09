@@ -8,18 +8,18 @@ import streamlit as st
 from app.interfaz.media import image_data_uri
 
 _SECTION_META = {
-    "Inicio": ("\U0001f3e0", "Centro"),
-    "Team Preview": ("\u2694\ufe0f", "Combates"),
-    "Normativa": ("\U0001f4dc", "Reglas"),
-    "Liga y Tabla": ("\U0001f3c6", "Clasificacion"),
-    "Hall of Fame": ("\U0001f3db\ufe0f", "Historico"),
-    "Temporada": ("\U0001f6e1\ufe0f", "Admin"),
-    "Previa Combate": ("\u2694\ufe0f", "Duelo"),
-    "Entrenadores": ("\U0001f392", "Equipos"),
-    "Copa": ("\U0001f947", "Torneos"),
-    "Juicios": ("\u2696\ufe0f", "Sanciones"),
-    "Tienda": ("\U0001f6d2", "Compras"),
-    "Saves": ("\U0001f4be", "Archivos"),
+    "Inicio": ("home", "Centro"),
+    "Team Preview": ("swords", "Combates"),
+    "Normativa": ("file_text", "Reglas"),
+    "Liga y Tabla": ("trophy", "Clasificacion"),
+    "Hall of Fame": ("crown", "Historico"),
+    "Temporada": ("shield", "Admin"),
+    "Previa Combate": ("swords", "Duelo"),
+    "Entrenadores": ("users", "Equipos"),
+    "Copa": ("medal", "Torneos"),
+    "Juicios": ("gavel", "Sanciones"),
+    "Tienda": ("shopping_bag", "Compras"),
+    "Saves": ("database", "Archivos"),
 }
 
 
@@ -146,7 +146,7 @@ def _render_sidebar_notifications() -> None:
         render_notifications_popover(
             collect_notifications(user=user),
             container=st.sidebar,
-            label="\U0001f514 Notificaciones",
+            label="Notificaciones",
             use_container_width=True,
         )
     except Exception:
@@ -218,104 +218,74 @@ def _render_nav_css() -> None:
         """
         <style>
         section[data-testid="stSidebar"] .sidebar-nav-title {
-          margin: 0 0 8px;
-          padding: 9px 12px;
-          border: 1px solid rgba(238,233,255,0.38);
-          border-radius: 999px;
-          background:
-            linear-gradient(90deg, rgba(255,255,255,0.18), transparent 72%),
-            linear-gradient(180deg, var(--accent), var(--accent-dark));
-          color: #ffffff;
-          font-family: var(--font-pixel);
-          font-size: 10px;
+          margin: 16px 0 8px;
+          padding: 0 4px;
+          color: var(--text-muted, #6f7b8f);
+          font-size: 11px;
+          font-weight: 800;
           text-transform: uppercase;
           letter-spacing: 0;
-          box-shadow: inset 0 1px 0 rgba(255,255,255,0.24), 0 10px 22px rgba(18,14,54,0.2);
         }
         section[data-testid="stSidebar"] div[role="radiogroup"] {
           display: grid;
-          gap: 8px;
+          gap: 4px;
         }
         section[data-testid="stSidebar"] div[role="radiogroup"] label {
           position: relative;
           overflow: hidden;
           width: 100%;
-          min-height: 52px;
-          padding: 0.64rem 0.95rem 0.64rem 1.14rem;
-          border: 1px solid rgba(238,233,255,0.3);
-          border-radius: 14px;
-          background:
-            linear-gradient(136deg, transparent 0 70%, rgba(255,117,221,0.18) 70% 82%, rgba(69,209,255,0.18) 82% 100%),
-            linear-gradient(180deg, rgba(222,216,248,0.96), rgba(199,192,230,0.95));
-          box-shadow: inset 0 1px 0 rgba(255,255,255,0.46), 0 9px 20px rgba(18,14,54,0.18);
-          transition: transform .12s ease, filter .12s ease, border-color .12s ease;
+          min-height: 42px;
+          padding: 9px 10px 9px 12px;
+          border: 1px solid transparent;
+          border-radius: var(--radius-input, 10px);
+          background: transparent;
+          box-shadow: none;
+          transition: transform .12s ease, background-color .12s ease, border-color .12s ease;
         }
         section[data-testid="stSidebar"] div[role="radiogroup"] label::before {
-          content: "";
-          position: absolute;
-          left: 10px;
-          top: 50%;
-          width: 12px;
-          height: 12px;
-          transform: translateY(-50%);
-          border-radius: 50%;
-          background: #202436;
-          box-shadow: inset 0 1px 0 rgba(255,255,255,0.28);
+          display: none;
         }
         section[data-testid="stSidebar"] div[role="radiogroup"] label:has(input:checked) {
-          border-color: rgba(246,216,59,0.9);
-          background:
-            linear-gradient(136deg, transparent 0 68%, rgba(255,255,255,0.22) 68% 100%),
-            linear-gradient(180deg, var(--champ-lime), var(--champ-lime-2));
-          box-shadow: inset 0 1px 0 rgba(255,255,255,0.48), 0 0 0 3px rgba(246,216,59,0.16), 0 12px 24px rgba(18,14,54,0.24);
-        }
-        section[data-testid="stSidebar"] div[role="radiogroup"] label:has(input:checked)::before {
-          background:
-            radial-gradient(circle at 50% 50%, #f8fbff 0 25%, transparent 26%),
-            linear-gradient(#ef3f56 0 48%, #202436 48% 54%, #f8fbff 54% 100%);
-          border: 1px solid #202436;
+          border-color: rgba(77,141,255,0.3);
+          background: var(--primary-soft, rgba(77,141,255,0.12));
+          box-shadow: inset 3px 0 0 var(--primary, #4d8dff);
         }
         section[data-testid="stSidebar"] div[role="radiogroup"] label p {
-          margin-left: 20px !important;
-          color: var(--champ-text) !important;
+          margin: 0 !important;
+          color: var(--text-secondary, #aab4c5) !important;
           font-family: var(--font-ui) !important;
-          font-size: 12px !important;
-          font-weight: 800 !important;
-          line-height: 1.18;
-          text-transform: uppercase;
+          font-size: 13px !important;
+          font-weight: 700 !important;
+          line-height: 1.15;
+          text-transform: none;
         }
-        section[data-testid="stSidebar"] div[role="radiogroup"] label:hover {
-          filter: brightness(1.06);
-          transform: translateY(-1px);
+        section[data-testid="stSidebar"] div[role="radiogroup"] label:has(input:checked) p {
+          color: var(--text-primary, #f5f7fa) !important;
+          font-weight: 800 !important;
         }
         section[data-testid="stSidebar"] div[role="radiogroup"] label > div:first-child {
           display: none;
         }
-        section[data-testid="stSidebar"] div[role="radiogroup"] label:has(input:checked) > div:first-child {
-          color: #ffffff;
+        section[data-testid="stSidebar"] div[role="radiogroup"] label:hover {
+          border-color: var(--border-soft, rgba(255,255,255,0.06));
+          background: rgba(255,255,255,0.045);
+          transform: translateY(-1px);
         }
         section[data-testid="stSidebar"] div.stButton > button {
           width: 100%;
-          justify-content: flex-start;
-          text-align: left;
-          min-height: 46px;
+          min-height: 42px;
           margin-bottom: 5px;
-          padding-left: 0.85rem;
-          border-color: rgba(238,233,255,0.3);
-          border-radius: 14px;
-          background:
-            linear-gradient(136deg, transparent 0 70%, rgba(255,117,221,0.18) 70% 82%, rgba(69,209,255,0.18) 82% 100%),
-            linear-gradient(180deg, rgba(222,216,248,0.96), rgba(199,192,230,0.95));
-          box-shadow: inset 0 1px 0 rgba(255,255,255,0.46), 0 9px 20px rgba(18,14,54,0.18);
+          border: 1px solid var(--border-soft, rgba(255,255,255,0.06));
+          border-radius: var(--radius-input, 10px);
+          background: var(--surface-2, #172033);
+          box-shadow: none;
         }
         section[data-testid="stSidebar"] div.stButton > button[kind="primary"] {
-          border-color: rgba(246,216,59,0.9);
-          background:
-            linear-gradient(136deg, transparent 0 68%, rgba(255,255,255,0.22) 68% 100%),
-            linear-gradient(180deg, var(--champ-lime), var(--champ-lime-2));
+          border-color: rgba(77,141,255,0.3);
+          background: var(--primary-soft, rgba(77,141,255,0.12));
         }
         section[data-testid="stSidebar"] div.stButton > button p {
-          color: var(--champ-text) !important;
+          color: var(--text-primary, #f5f7fa) !important;
           font-size: 12px;
           font-weight: 800;
           line-height: 1.15;
@@ -339,8 +309,7 @@ def _render_section_nav(sections: list[str]) -> str:
     st.sidebar.markdown("<div class='sidebar-nav-title'>Menu principal</div>", unsafe_allow_html=True)
 
     def _label(section: str) -> str:
-        icon, help_text = _SECTION_META.get(section, ("\u25c8", section))
-        return f"{icon} {section} - {help_text}"
+        return section
 
     choice = st.sidebar.radio(
         "Menu principal",

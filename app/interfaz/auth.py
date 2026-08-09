@@ -43,87 +43,96 @@ def _render_login_css() -> None:
           display: none !important;
         }
         .main .block-container {
-          max-width: 1180px;
-          padding-top: 5.2rem;
+          max-width: 500px;
+          min-height: 100vh;
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
+          padding-top: 32px;
           padding-bottom: 3rem;
         }
         .stApp::after {
-          content: "POKEAPP LEAGUE CENTER";
+          display: none !important;
+          content: "" !important;
         }
         .auth-hero {
           position: relative;
-          min-height: 430px;
-          padding: 24px;
+          min-height: 0;
+          margin-bottom: 18px;
+          padding: 0;
           overflow: hidden;
-          border: 1px solid rgba(248,251,255,0.28);
-          border-radius: var(--poke-radius-xl);
-          background:
-            linear-gradient(110deg, rgba(69,199,255,0.28), transparent 36%),
-            linear-gradient(300deg, rgba(255,212,71,0.18), transparent 42%),
-            linear-gradient(180deg, rgba(36,95,157,0.98), rgba(16,43,80,0.98));
-          box-shadow: var(--poke-surface-glow), var(--poke-shadow-soft);
+          border: 0;
+          border-radius: 0;
+          background: transparent;
+          box-shadow: none;
+          text-align: center;
         }
         .auth-hero::before {
           content: "";
           position: absolute;
-          right: -82px;
-          bottom: -98px;
-          width: 300px;
-          height: 300px;
+          left: 50%;
+          top: -92px;
+          width: 260px;
+          height: 260px;
+          transform: translateX(-50%);
           border-radius: 50%;
-          border: 34px solid rgba(255,255,255,0.08);
+          border: 30px solid rgba(255,255,255,0.025);
           box-shadow:
-            inset 0 0 0 28px rgba(0,0,0,0.16),
-            inset 0 0 0 30px rgba(255,255,255,0.06);
+            inset 0 0 0 24px rgba(0,0,0,0.18),
+            inset 0 0 0 26px rgba(255,255,255,0.025);
+          pointer-events: none;
         }
         .auth-kicker {
           display: inline-flex;
           align-items: center;
           gap: 8px;
-          padding: 7px 10px;
-          border: 1px solid rgba(248,251,255,0.3);
+          padding: 7px 11px;
+          border: 1px solid var(--border-soft);
           border-radius: 999px;
-          background:
-            linear-gradient(90deg, rgba(255,255,255,0.18), transparent 72%),
-            rgba(8,31,63,0.64);
-          color: #fff;
-          font-family: var(--font-pixel);
-          font-size: 10px;
+          background: rgba(77,141,255,0.09);
+          color: var(--text-secondary);
+          font-family: var(--font-ui);
+          font-size: 12px;
+          font-weight: 800;
           text-transform: uppercase;
           letter-spacing: 0;
         }
         .auth-title {
-          max-width: 720px;
-          margin-top: 22px;
-          color: #fff;
-          font-family: var(--font-pixel);
-          font-size: 38px;
-          line-height: 1.05;
-          text-transform: uppercase;
+          max-width: 460px;
+          margin: 14px auto 0;
+          color: var(--text-primary);
+          font-family: var(--font-ui);
+          font-size: 34px;
+          font-weight: 900;
+          line-height: 1.06;
+          text-transform: none;
           letter-spacing: 0;
         }
         .auth-trainer-card {
-          margin: 14px 0 12px;
-          padding: 12px;
+          margin: 14px 0 16px;
+          padding: 18px;
           display: grid;
-          grid-template-columns: 96px minmax(0, 1fr);
-          gap: 14px;
+          grid-template-columns: 104px minmax(0, 1fr);
+          gap: 16px;
           align-items: center;
-          border: 1px solid rgba(248,251,255,0.24);
-          border-radius: var(--poke-radius);
-          background: linear-gradient(180deg, var(--bw2-screen-2), var(--bw2-screen));
+          border: 1px solid var(--border-soft);
+          border-radius: var(--radius-large);
+          background:
+            linear-gradient(180deg, rgba(255,255,255,0.035), rgba(255,255,255,0.015)),
+            var(--surface-1);
+          box-shadow: var(--shadow-card);
         }
         .auth-avatar {
-          width: 96px;
-          height: 96px;
+          width: 104px;
+          height: 104px;
           display: grid;
           place-items: center;
           overflow: hidden;
-          border: 1px solid rgba(248,251,255,0.32);
-          border-radius: var(--poke-radius);
+          border: 1px solid var(--border-normal);
+          border-radius: var(--radius-card);
           background:
-            linear-gradient(180deg, rgba(255,255,255,0.06), transparent),
-            #0e141c;
+            radial-gradient(circle at 50% 42%, rgba(77,141,255,0.18), transparent 58%),
+            var(--surface-2);
         }
         .auth-avatar img {
           width: 100%;
@@ -153,16 +162,56 @@ def _render_login_css() -> None:
           border: 3px solid #131820;
         }
         .auth-trainer-name {
-          color: #fff;
-          font-family: var(--font-pixel);
-          font-size: 14px;
-          text-transform: uppercase;
+          color: var(--text-primary);
+          font-family: var(--font-ui);
+          font-size: 18px;
+          font-weight: 900;
+          text-transform: none;
           line-height: 1.25;
           letter-spacing: 0;
         }
+        .auth-trainer-role {
+          margin-top: 4px;
+          color: var(--text-secondary);
+          font-size: 13px;
+          font-weight: 700;
+        }
+        .main .stSelectbox,
+        .main div[data-testid="stForm"] {
+          padding: 16px;
+          border: 1px solid var(--border-soft);
+          border-radius: var(--radius-large);
+          background:
+            linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.012)),
+            var(--surface-1);
+          box-shadow: var(--shadow-card);
+        }
+        .main .stSelectbox {
+          margin-bottom: 12px;
+        }
+        .main div[data-testid="stForm"] {
+          margin-top: 0;
+        }
+        .main .stForm label,
+        .main .stSelectbox label {
+          color: var(--text-secondary) !important;
+          font-size: 12px !important;
+          font-weight: 800 !important;
+          text-transform: uppercase !important;
+        }
         @media (max-width: 900px) {
           .auth-title { font-size: 24px; }
-          .auth-hero { min-height: 0; }
+          .main .block-container {
+            max-width: 100%;
+            padding: 24px 16px 44px;
+          }
+          .auth-trainer-card {
+            grid-template-columns: 86px minmax(0, 1fr);
+          }
+          .auth-avatar {
+            width: 86px;
+            height: 86px;
+          }
         }
         </style>
         """,
@@ -182,6 +231,7 @@ def _trainer_card(user: str) -> str:
         f"<div class='auth-avatar'>{avatar}</div>"
         "<div>"
         f"<div class='auth-trainer-name'>{escape(user)}</div>"
+        "<div class='auth-trainer-role'>Entrenador</div>"
         "</div>"
         "</div>"
     )
@@ -239,46 +289,43 @@ def login_gate() -> None:
         st.error("No hay entrenadores configurados.")
         st.stop()
 
-    hero, panel = st.columns([1.12, 0.88], gap="large")
-    with hero:
-        st.markdown(
-            (
-                "<div class='auth-hero'>"
-                "<div class='auth-kicker'>PokeApp League</div>"
-                "<div class='auth-title'>Centro de entrenadores</div>"
-                "</div>"
-            ),
-            unsafe_allow_html=True,
-        )
+    st.markdown(
+        (
+            "<div class='auth-hero'>"
+            "<div class='auth-kicker'>PokeApp League</div>"
+            "<div class='auth-title'>Centro de entrenadores</div>"
+            "</div>"
+        ),
+        unsafe_allow_html=True,
+    )
 
-    with panel:
-        selected_default = st.session_state.get("login_user")
-        selected_index = (
-            user_options.index(selected_default)
-            if selected_default in user_options
-            else 0
-        )
-        user = st.selectbox(
-            "Entrenador",
-            user_options,
-            index=selected_index,
-            key="login_user",
-        )
-        st.markdown(_trainer_card(user), unsafe_allow_html=True)
+    selected_default = st.session_state.get("login_user")
+    selected_index = (
+        user_options.index(selected_default)
+        if selected_default in user_options
+        else 0
+    )
+    user = st.selectbox(
+        "Entrenador",
+        user_options,
+        index=selected_index,
+        key="login_user",
+    )
+    st.markdown(_trainer_card(user), unsafe_allow_html=True)
 
-        with st.form("login_form", clear_on_submit=False):
-            password = st.text_input(
-                "PIN / Codigo de acceso",
-                type="password",
-                max_chars=8,
-                placeholder="PIN",
-            )
-            submitted = st.form_submit_button("Entrar", use_container_width=True)
+    with st.form("login_form", clear_on_submit=False):
+        password = st.text_input(
+            "PIN",
+            type="password",
+            max_chars=8,
+            placeholder="PIN",
+        )
+        submitted = st.form_submit_button("Entrar", type="primary", use_container_width=True)
 
-        if submitted:
-            if _authenticate(user, password, users):
-                st.success(f"Bienvenido, {user}")
-                st.rerun()
-            st.error("Usuario o codigo/PIN incorrecto")
+    if submitted:
+        if _authenticate(user, password, users):
+            st.success(f"Bienvenido, {user}")
+            st.rerun()
+        st.error("Usuario o codigo/PIN incorrecto")
 
     st.stop()
