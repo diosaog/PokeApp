@@ -2131,6 +2131,594 @@ section[data-testid="stSidebar"] .poke-type-full-img {
   min-height: 24px !important;
 }
 
+/* Final Champions polish: calmer premium shell, clearer menu surfaces and stronger Pokemon focus */
+:root {
+  --champ-bg-0: #151234;
+  --champ-bg-1: #2d2577;
+  --champ-bg-2: #17649d;
+  --champ-panel: rgba(73, 62, 177, 0.86);
+  --champ-panel-2: rgba(105, 86, 216, 0.88);
+  --champ-panel-3: rgba(126, 104, 236, 0.9);
+  --champ-panel-deep: rgba(40, 34, 122, 0.94);
+  --champ-list: rgba(241, 238, 255, 0.96);
+  --champ-list-2: rgba(213, 207, 239, 0.96);
+  --champ-text: #273869;
+  --champ-text-soft: #53608f;
+  --champ-muted: #777fa8;
+  --champ-lime: #b9ef32;
+  --champ-lime-2: #91d909;
+  --champ-yellow: #ffe14a;
+  --champ-pink: #ff8ee3;
+  --champ-cyan: #4fd6ff;
+  --champ-coral: #ff7d70;
+  --poke-radius-sm: 12px;
+  --poke-radius: 16px;
+  --poke-radius-xl: 22px;
+  --poke-shadow-soft: 0 24px 54px rgba(14, 11, 48, 0.32);
+  --poke-shadow-card: 0 14px 30px rgba(14, 11, 48, 0.24);
+}
+
+.stApp {
+  background:
+    linear-gradient(126deg, rgba(255,255,255,0.075) 0 11%, transparent 11% 100%) 0 86px / 430px 270px,
+    linear-gradient(38deg, rgba(255,255,255,0.055) 0 9%, transparent 9% 100%) 100% 180px / 390px 260px,
+    radial-gradient(circle at 12% 6%, rgba(255,142,227,0.18), transparent 330px),
+    radial-gradient(circle at 88% 10%, rgba(79,214,255,0.18), transparent 360px),
+    linear-gradient(180deg, var(--champ-bg-0) 0%, var(--champ-bg-1) 48%, var(--champ-bg-2) 100%) !important;
+}
+
+.stApp::before {
+  height: 42px !important;
+  background:
+    linear-gradient(90deg, rgba(255,225,74,0.96) 0 7%, rgba(116,97,232,0.98) 7% 54%, rgba(79,214,255,0.96) 54% 78%, rgba(255,142,227,0.96) 78% 100%) !important;
+  border-bottom: 1px solid rgba(246, 242, 255, 0.42) !important;
+  box-shadow: 0 12px 28px rgba(14, 11, 48, 0.32) !important;
+}
+
+.stApp::after {
+  display: none !important;
+  content: "" !important;
+}
+
+.main .block-container {
+  max-width: 1500px !important;
+  padding-top: 4.25rem !important;
+}
+
+section[data-testid="stSidebar"] {
+  background:
+    linear-gradient(128deg, rgba(255,255,255,0.08) 0 17%, transparent 17% 100%) 0 90px / 280px 210px,
+    radial-gradient(circle at 50% 0%, rgba(79,214,255,0.16), transparent 250px),
+    linear-gradient(180deg, rgba(54, 45, 154, 0.98), rgba(38, 32, 124, 0.97) 58%, rgba(24, 80, 145, 0.96)) !important;
+  border-right: 1px solid rgba(246,242,255,0.34) !important;
+}
+
+section[data-testid="stSidebar"]::before {
+  display: none !important;
+}
+
+section[data-testid="stSidebar"] .block-container {
+  padding-top: 1.55rem !important;
+}
+
+.main .home-hero,
+.main .auth-hero,
+.main .trainers-hero,
+.main .league-hero,
+.main .matchup-hero,
+.main .mart-hero,
+.main .cup-hero,
+.main .ju-hero,
+.main .hof-hero,
+.main .season-hero,
+.main .norma-hero,
+.main .saves-hero {
+  border-radius: 24px !important;
+  border: 1px solid rgba(246,242,255,0.38) !important;
+  background:
+    linear-gradient(126deg, rgba(255,255,255,0.12) 0 24%, transparent 24% 100%),
+    linear-gradient(300deg, rgba(255,142,227,0.16), transparent 48%),
+    linear-gradient(180deg, rgba(113, 92, 223, 0.88), rgba(52, 44, 148, 0.9)) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.25), 0 24px 50px rgba(14,11,48,0.3) !important;
+}
+
+.main .home-title,
+.main .auth-title,
+.main .trainers-title,
+.main .league-title,
+.main .matchup-title,
+.main .mart-title,
+.main .cup-title,
+.main .ju-hero-title,
+.main .hof-title,
+.main .season-title,
+.main .norma-title,
+.main .saves-title {
+  font-size: clamp(27px, 3vw, 42px) !important;
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+  text-shadow: 0 5px 18px rgba(27, 22, 92, 0.36) !important;
+}
+
+.main .home-kicker,
+.main .auth-kicker,
+.main .matchup-kicker,
+.main .cup-kicker,
+.main .mart-kicker,
+.main .league-kicker,
+.main .season-kicker,
+.main .saves-kicker,
+.main .mart-pill,
+.main .cup-pill,
+.main .season-pill,
+.main .trainers-chip,
+.main .hof-team-pill,
+.main .saves-card-badge {
+  border: 1px solid rgba(246,242,255,0.42) !important;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.2), rgba(255,255,255,0.06)),
+    rgba(59, 50, 165, 0.72) !important;
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+}
+
+.main .home-section-title,
+.main .trainers-section-title,
+.main .league-section-title,
+.main .cup-section-title,
+.main .hof-section-title,
+.main .season-section-title,
+.main .saves-section-title,
+.main .mart-aisle-title,
+.main .pt-title,
+.main .trainer-head {
+  border-radius: 999px !important;
+  padding: 9px 15px !important;
+  background:
+    linear-gradient(100deg, rgba(255,255,255,0.24), transparent 72%),
+    linear-gradient(180deg, rgba(101,86,218,0.98), rgba(69,58,178,0.96)) !important;
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+}
+
+.main .home-card,
+.main .profile-card,
+.main .trainers-picker,
+.main .trainers-stat,
+.main .trainers-lock-panel,
+.main .league-card,
+.main .league-status-card,
+.main .league-division-card,
+.main .league-history-card,
+.main .league-section,
+.main .league-table-shell,
+.main .matchup-shell,
+.main .matchup-summary,
+.main .matchup-metric,
+.main .battle-board,
+.main .mart-register-card,
+.main .mart-confirm-card,
+.main .cup-metric,
+.main .cup-section,
+.main .cup-vs-card,
+.main .cup-paste-card,
+.main .cup-match,
+.main .doubles-card,
+.main .doubles-metric,
+.main .doubles-section,
+.main .ju-action-card,
+.main .ju-metric,
+.main .ju-penalty-card,
+.main .hof-card,
+.main .season-card,
+.main .season-alert,
+.main .season-table,
+.main .saves-current-card,
+.main .saves-stat,
+.main .pl-card,
+.main .pt-metric,
+.main .pt-section,
+.main .trainer-panel {
+  border: 1px solid rgba(246,242,255,0.3) !important;
+  border-radius: 20px !important;
+  background:
+    linear-gradient(126deg, rgba(255,255,255,0.1) 0 26%, transparent 26% 100%),
+    linear-gradient(180deg, rgba(103, 85, 216, 0.78), rgba(48, 41, 139, 0.76)) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.18), 0 16px 34px rgba(14,11,48,0.22) !important;
+}
+
+.main .home-action-card,
+.main .auth-trainer-card,
+.main .matchup-mode-card,
+.main .cup-mode-card,
+.main .season-version-row,
+.main .norma-list-item,
+.main .app-notice,
+.main .saves-history-card,
+.main .pokedex-card,
+.main .slot,
+.main .slot-empty,
+.main .shop-card,
+.main .matchup-move,
+.main .battle-move-link,
+.main .battle-no-move,
+.main div[data-testid="stTabs"] button[data-baseweb="tab"],
+.main div[data-testid="stTabs"] button[role="tab"],
+section[data-testid="stSidebar"] div[role="radiogroup"] label,
+section[data-testid="stSidebar"] .stPopover > div > button,
+section[data-testid="stSidebar"] div[data-testid="stExpander"] summary {
+  border: 1px solid rgba(246,242,255,0.48) !important;
+  border-radius: 16px !important;
+  background:
+    linear-gradient(136deg, transparent 0 70%, rgba(255,142,227,0.16) 70% 84%, rgba(79,214,255,0.16) 84% 100%),
+    linear-gradient(180deg, var(--champ-list), var(--champ-list-2)) !important;
+  color: var(--champ-text) !important;
+  -webkit-text-fill-color: var(--champ-text) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.54), 0 10px 22px rgba(14,11,48,0.18) !important;
+}
+
+.main .home-action-card *,
+.main .auth-trainer-card *,
+.main .matchup-mode-card *,
+.main .cup-mode-card *,
+.main .season-version-row *,
+.main .norma-list-item *,
+.main .saves-history-card *,
+.main .pokedex-card *,
+.main .slot *,
+.main .slot-empty *,
+.main .shop-card *,
+.main .matchup-move span:last-child,
+.main .battle-move-link span:last-child,
+section[data-testid="stSidebar"] div[role="radiogroup"] label *,
+section[data-testid="stSidebar"] .stPopover > div > button *,
+section[data-testid="stSidebar"] div[data-testid="stExpander"] summary * {
+  color: var(--champ-text) !important;
+  -webkit-text-fill-color: var(--champ-text) !important;
+}
+
+section[data-testid="stSidebar"] .profile-card {
+  margin-bottom: 14px !important;
+  border: 1px solid rgba(246,242,255,0.34) !important;
+  border-radius: 22px !important;
+  background:
+    linear-gradient(126deg, rgba(255,255,255,0.12) 0 31%, transparent 31% 100%),
+    linear-gradient(180deg, rgba(113,92,223,0.86), rgba(48,41,139,0.84)) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.2), 0 15px 31px rgba(14,11,48,0.24) !important;
+}
+
+section[data-testid="stSidebar"] .profile-card *,
+section[data-testid="stSidebar"] .sidebar-nav-title {
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+}
+
+section[data-testid="stSidebar"] .profile-avatar {
+  width: 92px !important;
+  height: 92px !important;
+  flex-basis: 92px !important;
+  border-radius: 20px !important;
+}
+
+section[data-testid="stSidebar"] .mini-team {
+  grid-template-columns: repeat(6, minmax(36px, 1fr)) !important;
+}
+
+section[data-testid="stSidebar"] .mini-mon {
+  min-height: 42px !important;
+  border-radius: 13px !important;
+}
+
+section[data-testid="stSidebar"] .mini-mon img {
+  transform: scale(1.48) !important;
+}
+
+section[data-testid="stSidebar"] .sidebar-nav-title {
+  margin: 8px 0 10px !important;
+  background:
+    linear-gradient(90deg, rgba(255,255,255,0.18), transparent 72%),
+    rgba(48, 41, 139, 0.62) !important;
+}
+
+section[data-testid="stSidebar"] div[role="radiogroup"] {
+  gap: 9px !important;
+  overflow: visible !important;
+}
+
+section[data-testid="stSidebar"] div[role="radiogroup"] label {
+  min-height: 50px !important;
+  padding: 0.7rem 0.95rem 0.7rem 1.05rem !important;
+  overflow: visible !important;
+}
+
+section[data-testid="stSidebar"] div[role="radiogroup"] label::before {
+  opacity: 0 !important;
+  left: -18px !important;
+  width: 0 !important;
+  height: 0 !important;
+  border-top: 14px solid transparent !important;
+  border-bottom: 14px solid transparent !important;
+  border-left: 0 !important;
+  border-right: 19px solid var(--champ-yellow) !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+section[data-testid="stSidebar"] div[role="radiogroup"] label:has(input:checked)::before {
+  opacity: 1 !important;
+}
+
+section[data-testid="stSidebar"] div[role="radiogroup"] label:has(input:checked),
+.main div[data-testid="stTabs"] button[aria-selected="true"],
+.main button[data-baseweb="tab"][aria-selected="true"],
+.main button[role="tab"][aria-selected="true"],
+.main .matchup-mode-card.is-active,
+.main .cup-mode-card.is-active,
+.main .battle-move-row[open] > .battle-move-link,
+.main .battle-move-link:hover,
+.main .stButton > button[kind="primary"],
+section[data-testid="stSidebar"] div.stButton > button[kind="primary"] {
+  border-color: rgba(255,225,74,0.95) !important;
+  background:
+    linear-gradient(136deg, transparent 0 70%, rgba(255,255,255,0.24) 70% 100%),
+    linear-gradient(180deg, var(--champ-lime), var(--champ-lime-2)) !important;
+  color: #243c68 !important;
+  -webkit-text-fill-color: #243c68 !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.58), 0 0 0 3px rgba(255,225,74,0.18), 0 13px 25px rgba(14,11,48,0.24) !important;
+}
+
+.main .stButton > button,
+.main .stDownloadButton > button,
+.main form button {
+  border-radius: 16px !important;
+  min-height: 46px !important;
+}
+
+.main .stTextInput input,
+.main .stNumberInput input,
+.main .stTextArea textarea,
+.main .stSelectbox [data-baseweb="select"],
+.main .stMultiSelect [data-baseweb="select"],
+.main .stDateInput input {
+  border-radius: 16px !important;
+  background:
+    linear-gradient(136deg, transparent 0 72%, rgba(255,142,227,0.12) 72% 100%),
+    linear-gradient(180deg, rgba(248,246,255,0.97), rgba(218,212,242,0.96)) !important;
+}
+
+div[data-baseweb="popover"],
+div[data-baseweb="popover"] ul,
+div[data-baseweb="menu"] {
+  border-radius: 18px !important;
+  background:
+    linear-gradient(180deg, rgba(86,72,198,0.98), rgba(36,31,116,0.98)) !important;
+}
+
+div[data-baseweb="popover"] li,
+div[data-baseweb="menu"] li,
+div[role="option"] {
+  border-radius: 14px !important;
+}
+
+.main div[data-testid="stTabs"] div[data-baseweb="tab-list"],
+.main div[data-testid="stTabs"] [role="tablist"],
+.main div[data-baseweb="tab-list"] {
+  border-radius: 20px !important;
+  padding: 10px !important;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.13), rgba(255,255,255,0.05)),
+    rgba(50, 43, 150, 0.72) !important;
+}
+
+.main div[data-testid="stTabs"] button[data-baseweb="tab"],
+.main div[data-testid="stTabs"] button[role="tab"] {
+  min-height: 50px !important;
+  padding: 0 22px !important;
+}
+
+.main .slot,
+.main .slot-empty {
+  min-height: 210px !important;
+  padding: 10px !important;
+  border-radius: 18px !important;
+}
+
+.main .slot img {
+  width: min(100%, 122px) !important;
+  height: 96px !important;
+  transform: scale(1.08) !important;
+  filter: drop-shadow(0 8px 10px rgba(54,44,130,0.28)) !important;
+}
+
+.main .slot .title {
+  font-size: 10.5px !important;
+}
+
+.main .slot .sub {
+  font-size: 16px !important;
+}
+
+.main .champ-box-grid-shell {
+  border-radius: 22px !important;
+  background:
+    linear-gradient(126deg, rgba(255,255,255,0.1) 0 24%, transparent 24% 100%),
+    linear-gradient(180deg, rgba(113,92,223,0.8), rgba(48,41,139,0.78)) !important;
+}
+
+.main .champ-box-grid {
+  grid-template-columns: repeat(6, minmax(78px, 1fr)) !important;
+  gap: 11px !important;
+}
+
+.main .champ-box-tile {
+  min-height: 92px !important;
+  border-radius: 16px !important;
+}
+
+.main .champ-box-tile img {
+  width: 90% !important;
+  height: 90% !important;
+  transform: scale(1.18) !important;
+}
+
+.main .champ-detail-card,
+.main .battle-mon-card,
+.main .matchup-mon {
+  border-radius: 20px !important;
+  border-color: rgba(246,242,255,0.36) !important;
+  background:
+    linear-gradient(124deg, rgba(255,255,255,0.12) 0 32%, transparent 32% 100%),
+    linear-gradient(180deg, rgba(112,92,223,0.88), rgba(50,43,150,0.86)) !important;
+}
+
+.main .champ-detail-sprite-stage,
+.main .battle-sprite-wrap,
+.main .matchup-sprite,
+.main .auth-avatar,
+.main .trainers-portrait-xl,
+.main .profile-avatar {
+  background:
+    radial-gradient(circle at 50% 48%, rgba(255,255,255,0.52), rgba(255,255,255,0.12) 58%, transparent 59%),
+    linear-gradient(180deg, rgba(232,227,252,0.96), rgba(184,176,223,0.93)) !important;
+}
+
+.main .battle-mon-card {
+  grid-template-columns: minmax(170px, .9fr) 132px minmax(250px, 1.18fr) !important;
+}
+
+.main .battle-sprite {
+  width: 126px !important;
+  height: 126px !important;
+}
+
+.main .matchup-sprite {
+  width: 116px !important;
+  height: 116px !important;
+}
+
+.main .battle-move-link,
+.main .battle-no-move,
+.main .matchup-move,
+.main .champ-detail-move-row {
+  min-height: 42px !important;
+}
+
+.main .battle-type-dot.asset-icon,
+.main .matchup-move .poke-type-chip.asset-icon,
+.main .battle-move-link .poke-type-chip.asset-icon {
+  width: 28px !important;
+  min-width: 28px !important;
+  height: 28px !important;
+  min-height: 28px !important;
+}
+
+.main .poke-type-icon-img,
+section[data-testid="stSidebar"] .poke-type-icon-img {
+  width: 28px !important;
+  height: 28px !important;
+}
+
+.main .poke-type-chip.asset-full,
+section[data-testid="stSidebar"] .poke-type-chip.asset-full {
+  width: 92px !important;
+  min-width: 92px !important;
+  height: 19px !important;
+  min-height: 19px !important;
+}
+
+.main .battle-type-pill.poke-type-chip.asset-full,
+.main .champ-detail-type-chip.poke-type-chip.asset-full {
+  width: 124px !important;
+  min-width: 124px !important;
+  height: 25px !important;
+  min-height: 25px !important;
+}
+
+.main .shop-card {
+  min-height: 250px !important;
+  border-radius: 18px !important;
+}
+
+.main .shop-icon-slot {
+  width: 84px !important;
+  height: 84px !important;
+}
+
+.main .shop-body {
+  grid-template-columns: 86px minmax(0, 1fr) !important;
+  gap: 12px !important;
+}
+
+.main .shop-price {
+  border-radius: 14px !important;
+}
+
+.main .shop-coin {
+  font-size: 22px !important;
+}
+
+.main .shop-amount {
+  font-size: 17px !important;
+}
+
+.main .app-notice-menu summary {
+  border-radius: 16px !important;
+  background:
+    linear-gradient(136deg, transparent 0 70%, rgba(255,142,227,0.16) 70% 84%, rgba(79,214,255,0.16) 84% 100%),
+    linear-gradient(180deg, var(--champ-list), var(--champ-list-2)) !important;
+  color: var(--champ-text) !important;
+  -webkit-text-fill-color: var(--champ-text) !important;
+}
+
+.main .app-notice-menu-panel {
+  border-radius: 18px !important;
+  background: rgba(36, 31, 116, 0.72) !important;
+}
+
+.main .shop-discount-badge,
+.main .shop-discount-badge *,
+.main .slot .shield-chip,
+.main .slot .rob-chip,
+.main .slot .pill,
+.main .pokedex-card .shield-chip,
+.main .pokedex-card .rob-chip,
+.main .pokedex-card .pill,
+.main .poke-type-chip.uses-fallback,
+.main .poke-type-chip.uses-fallback *,
+section[data-testid="stSidebar"] .poke-type-chip.uses-fallback,
+section[data-testid="stSidebar"] .poke-type-chip.uses-fallback * {
+  color: var(--type-fg, #ffffff) !important;
+  -webkit-text-fill-color: var(--type-fg, #ffffff) !important;
+}
+
+.main .shop-discount-badge,
+.main .shop-discount-badge * {
+  --type-fg: #ffffff;
+  text-shadow: 0 1px 0 rgba(0,0,0,0.24) !important;
+}
+
+.main .slot .pill-shiny,
+.main .pokedex-card .pill-shiny {
+  color: #1d1610 !important;
+  -webkit-text-fill-color: #1d1610 !important;
+}
+
+@media (max-width: 980px) {
+  .main .battle-mon-card {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+  .main .champ-box-grid {
+    grid-template-columns: repeat(5, minmax(58px, 1fr)) !important;
+  }
+  .main .champ-box-tile {
+    min-height: 64px !important;
+  }
+  .main .slot {
+    min-height: 190px !important;
+  }
+}
+
 .stApp .material-symbols-rounded,
 .stApp .material-symbols-outlined,
 .stApp .material-icons,
