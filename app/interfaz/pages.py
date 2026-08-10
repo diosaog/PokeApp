@@ -86,7 +86,6 @@ def page_copa() -> None:
         if current_label not in labels:
             current_label = labels[0]
         fmt = mode_keys[labels.index(current_label)]
-        render_copa_header(fmt)
         selected_label = st.radio(
             "Formato",
             labels,

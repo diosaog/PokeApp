@@ -37,32 +37,47 @@ def _render_css() -> None:
         """
         <style>
         .season-hero {
-          padding: 18px;
+          position: relative;
+          overflow: hidden;
+          padding: 15px 16px;
           border: 1px solid var(--bw2-edge);
+          border-left: 4px solid var(--accent);
+          border-radius: 16px;
           background:
-            linear-gradient(135deg, rgba(143,214,107,0.18), transparent 38%),
-            linear-gradient(180deg, var(--bw2-panel-2), var(--bw2-panel));
+            linear-gradient(118deg, rgba(77,141,255,0.12) 0 32%, transparent 32% 100%),
+            linear-gradient(180deg, rgba(18,30,49,0.96), rgba(8,14,26,0.98));
           box-shadow: inset 0 1px 0 rgba(255,255,255,0.08), 0 12px 30px rgba(0,0,0,0.2);
+          margin-bottom: 12px;
+        }
+        .season-hero:after {
+          content: "";
+          position: absolute;
+          right: -48px;
+          top: -36px;
+          width: 210px;
+          height: 140px;
+          background: linear-gradient(135deg, rgba(255,255,255,0.07), transparent 58%);
+          transform: skewX(-24deg);
         }
         .season-kicker {
           color: var(--accent-soft);
           font-family: var(--font-pixel);
-          font-size: 10px;
+          font-size: 9px;
           text-transform: uppercase;
         }
         .season-title {
-          margin-top: 10px;
+          margin-top: 8px;
           color: #fff;
           font-family: var(--font-pixel);
-          font-size: 21px;
-          line-height: 1.25;
+          font-size: clamp(22px, 2.1vw, 30px);
+          line-height: 1.12;
           text-transform: uppercase;
         }
         .season-subtitle {
-          margin-top: 8px;
+          margin-top: 7px;
           color: var(--bw2-text-soft);
-          font-size: 21px;
-          line-height: 1.14;
+          font-size: 14px;
+          line-height: 1.3;
         }
         .season-grid {
           display: grid;
@@ -72,9 +87,11 @@ def _render_css() -> None:
         }
         .season-card {
           min-height: 106px;
-          padding: 12px;
+          padding: 10px 12px;
           border: 1px solid rgba(216,223,232,0.2);
+          border-radius: 12px;
           background: linear-gradient(180deg, var(--bw2-screen-2), var(--bw2-screen));
+          box-shadow: inset 0 1px 0 rgba(255,255,255,0.06);
         }
         .season-label {
           color: var(--bw2-text-dim);
@@ -83,21 +100,26 @@ def _render_css() -> None:
           text-transform: uppercase;
         }
         .season-value {
-          margin-top: 11px;
+          margin-top: 8px;
           color: #fff;
           font-family: var(--font-pixel);
-          font-size: 14px;
+          font-size: 15px;
           line-height: 1.24;
         }
         .season-detail {
           margin-top: 7px;
           color: var(--bw2-text-soft);
-          font-size: 18px;
-          line-height: 1.08;
+          font-size: 13px;
+          line-height: 1.25;
           overflow-wrap: anywhere;
         }
         .season-section-title {
-          margin: 18px 0 8px;
+          margin: 18px 0 9px;
+          padding: 9px 11px;
+          border: 1px solid rgba(216,223,232,0.16);
+          border-left: 4px solid var(--accent);
+          border-radius: 12px;
+          background: linear-gradient(180deg, var(--bw2-panel-3), var(--bw2-panel));
           color: #fff;
           font-family: var(--font-pixel);
           font-size: 13px;
@@ -114,6 +136,7 @@ def _render_css() -> None:
           padding: 10px 11px;
           margin-bottom: 8px;
           border: 1px solid rgba(216,223,232,0.18);
+          border-radius: 12px;
           background: linear-gradient(180deg, var(--bw2-screen-2), var(--bw2-screen));
         }
         .season-alert-title {
@@ -126,8 +149,8 @@ def _render_css() -> None:
         .season-alert-body {
           margin-top: 6px;
           color: var(--bw2-text-soft);
-          font-size: 18px;
-          line-height: 1.08;
+          font-size: 13px;
+          line-height: 1.25;
         }
         .season-alert--error { border-left: 4px solid #ef5e68; }
         .season-alert--warn { border-left: 4px solid #efc257; }
@@ -145,6 +168,7 @@ def _render_css() -> None:
           align-items: center;
           padding: 10px 11px;
           border: 1px solid rgba(216,223,232,0.18);
+          border-radius: 12px;
           background: linear-gradient(180deg, var(--bw2-screen-2), var(--bw2-screen));
         }
         .season-version-name {
@@ -158,8 +182,8 @@ def _render_css() -> None:
         .season-version-meta {
           margin-top: 5px;
           color: var(--bw2-text-soft);
-          font-size: 17px;
-          line-height: 1.08;
+          font-size: 13px;
+          line-height: 1.25;
         }
         .season-pill {
           display: inline-flex;
@@ -167,6 +191,7 @@ def _render_css() -> None:
           min-height: 26px;
           padding: 4px 8px;
           border: 1px solid rgba(216,223,232,0.2);
+          border-radius: 999px;
           background: rgba(8,12,18,0.46);
           color: #fff;
           font-family: var(--font-pixel);
@@ -179,6 +204,8 @@ def _render_css() -> None:
           border-collapse: collapse;
           background: #101720;
           border: 1px solid rgba(216,223,232,0.2);
+          border-radius: 12px;
+          overflow: hidden;
         }
         .season-table th,
         .season-table td {
@@ -192,6 +219,15 @@ def _render_css() -> None:
           font-family: var(--font-pixel);
           font-size: 9px;
           text-transform: uppercase;
+        }
+        div[data-testid="stForm"] {
+          border: 1px solid rgba(216,223,232,0.16);
+          border-radius: 14px;
+          background:
+            linear-gradient(135deg, rgba(77,141,255,0.045), transparent 42%),
+            rgba(8,14,26,0.9);
+          padding: 14px 14px 10px;
+          box-shadow: inset 0 1px 0 rgba(255,255,255,0.06);
         }
         @media (max-width: 980px) {
           .season-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
@@ -541,13 +577,16 @@ def render_temporada() -> None:
         (
             "<div class='season-hero'>"
             "<div class='season-kicker'>Panel Admin</div>"
-            "<div class='season-title'>Temporada y configuracion 2.0</div>"
+            "<div class='season-title'>Temporada</div>"
+            "<div class='season-subtitle'>Configuracion activa, recompensas y versiones de reglas.</div>"
             "</div>"
         ),
         unsafe_allow_html=True,
     )
 
+    st.markdown("<div class='season-section-title'>Estado actual</div>", unsafe_allow_html=True)
     _render_current_config()
+    st.markdown("<div class='season-section-title'>Editor</div>", unsafe_allow_html=True)
     _render_config_editor()
     with st.expander("Version activa en bruto", expanded=False):
         st.json(season_version_to_dict(current_version))

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import html as _html
 import json
 import time
 
@@ -243,19 +244,23 @@ def _ensure_doubles_css() -> None:
         """
         <style>
         .doubles-banner {
-          background: linear-gradient(180deg, var(--accent) 0%, var(--accent-dark) 100%);
-          border: 1px solid var(--bw2-edge-strong);
-          border-radius: 0;
-          padding: 10px 12px;
-          display: inline-block;
-          margin-bottom: 10px;
+          position: relative;
+          overflow: hidden;
+          background:
+            linear-gradient(116deg, rgba(77,141,255,0.14) 0 30%, transparent 30% 100%),
+            linear-gradient(180deg, rgba(18,30,49,0.96) 0%, rgba(8,14,26,0.98) 100%);
+          border: 1px solid var(--bw2-edge);
+          border-left: 4px solid var(--accent);
+          border-radius: 14px;
+          padding: 12px 14px;
+          display: block;
+          margin-bottom: 8px;
           color: #ffffff;
           font-family: var(--font-pixel);
           font-size: 12px;
           font-weight: 700;
-          letter-spacing: 0.3px;
           text-transform: uppercase;
-          clip-path: polygon(12px 0, 100% 0, 100% calc(100% - 12px), calc(100% - 12px) 100%, 0 100%, 0 12px);
+          box-shadow: inset 0 1px 0 rgba(255,255,255,0.08), 0 10px 24px rgba(0,0,0,0.2);
         }
         .doubles-strip {
           height: 2px;
@@ -266,27 +271,29 @@ def _ensure_doubles_css() -> None:
           height: 22px;
         }
         .doubles-section {
-          display: inline-block;
+          display: block;
           background: linear-gradient(180deg, var(--bw2-panel-3) 0%, var(--bw2-panel) 100%);
           border: 1px solid var(--bw2-edge);
-          border-radius: 0;
-          padding: 8px 10px;
+          border-left: 4px solid var(--accent);
+          border-radius: 12px;
+          padding: 10px 12px;
+          margin: 4px 0 10px;
           color: #ffffff;
           font-family: var(--font-pixel);
-          font-size: 10px;
+          font-size: 11px;
           font-weight: 700;
           text-transform: uppercase;
         }
         .doubles-note {
-          display:inline-block;
+          display:block;
           margin-top: 10px;
           background: linear-gradient(180deg, var(--bw2-panel-2) 0%, var(--bw2-panel) 100%);
           border: 1px solid var(--bw2-edge);
-          border-radius: 0;
+          border-radius: 12px;
           padding: 8px 10px;
           color: var(--bw2-text-soft);
           font-family: var(--font-ui);
-          font-size: 18px;
+          font-size: 14px;
           line-height: 1.35;
           box-shadow: inset 0 1px 0 rgba(255,255,255,0.08), 0 0 0 1px rgba(0,0,0,0.28);
         }
@@ -297,16 +304,16 @@ def _ensure_doubles_css() -> None:
         .doubles-metric {
           background:linear-gradient(180deg,var(--bw2-panel-2) 0%, var(--bw2-panel) 100%);
           border:1px solid var(--bw2-edge);
-          border-radius:0;
+          border-radius:12px;
           padding:10px 12px;
           color:var(--bw2-text);
           box-shadow: inset 0 1px 0 rgba(255,255,255,0.08), 0 0 0 1px rgba(0,0,0,0.28);
-          min-height: 86px;
+          min-height: 72px;
         }
         .doubles-metric-label {
           color:#ffffff;
           font-family:var(--font-pixel);
-          font-size:10px;
+          font-size:9px;
           font-weight:700;
           line-height:1.45;
           text-transform:uppercase;
@@ -315,7 +322,7 @@ def _ensure_doubles_css() -> None:
           margin-top:8px;
           color:#ffffff;
           font-family:var(--font-pixel);
-          font-size:12px;
+          font-size:14px;
           font-weight:700;
           line-height:1.3;
         }
@@ -323,20 +330,21 @@ def _ensure_doubles_css() -> None:
           margin-top:8px;
           color:var(--bw2-text-soft);
           font-family:var(--font-ui);
-          font-size:18px;
+          font-size:13px;
           line-height:1.3;
         }
         .doubles-card {
           background:linear-gradient(180deg,var(--bw2-panel-2) 0%, var(--bw2-panel) 100%);
           border:1px solid var(--bw2-edge);
-          border-radius:0;
+          border-radius:14px;
           overflow:hidden;
           box-shadow: inset 0 1px 0 rgba(255,255,255,0.08), 0 0 0 1px rgba(0,0,0,0.28);
           margin-bottom: 10px;
         }
         .doubles-card-head {
-          background:linear-gradient(180deg,var(--accent) 0%, var(--accent-dark) 100%);
-          border-bottom:1px solid var(--bw2-edge-strong);
+          background:rgba(255,255,255,0.04);
+          border-bottom:1px solid rgba(216,223,232,0.12);
+          border-left:3px solid var(--accent);
           padding:8px 10px;
           color:#ffffff;
           font-family:var(--font-pixel);
@@ -359,15 +367,15 @@ def _ensure_doubles_css() -> None:
           margin-top:8px;
           color:var(--bw2-text-soft);
           font-family:var(--font-ui);
-          font-size:18px;
-          line-height:1.2;
+          font-size:14px;
+          line-height:1.25;
         }
         .doubles-logo-hint {
           margin-top:10px;
           color:var(--bw2-text-dim);
           font-family:var(--font-ui);
-          font-size:17px;
-          line-height:1.6;
+          font-size:13px;
+          line-height:1.45;
           word-break: break-word;
         }
         .doubles-logo-wrap {
@@ -377,7 +385,7 @@ def _ensure_doubles_css() -> None:
           align-items:center;
           justify-content:center;
           margin: 0 auto;
-          border-radius: 0;
+          border-radius: 14px;
           background: linear-gradient(180deg, var(--bw2-screen-2) 0%, var(--bw2-screen) 100%);
           border: 1px solid var(--bw2-edge);
           box-shadow: inset 0 1px 0 rgba(255,255,255,0.06);
@@ -402,18 +410,23 @@ def _ensure_doubles_css() -> None:
           display:flex;
           align-items:center;
           justify-content:center;
-          min-height:100%;
+          min-height:58px;
           color:#ffffff;
           font-family:var(--font-pixel);
           font-size:12px;
           font-weight:700;
+          border:1px solid rgba(216,223,232,0.14);
+          border-radius:12px;
+          background:rgba(255,255,255,0.035);
         }
         .doubles-champion {
-          background:linear-gradient(180deg,var(--accent) 0%, var(--accent-dark) 100%);
-          border:1px solid var(--bw2-edge-strong);
-          border-radius:0;
-          padding:10px 12px;
-          color:#ffffff;
+          background:
+            linear-gradient(90deg, rgba(255,210,77,0.14), transparent 56%),
+            linear-gradient(180deg,var(--bw2-panel-2) 0%, var(--bw2-panel) 100%);
+          border:1px solid rgba(255,210,77,0.34);
+          border-radius:14px;
+          padding:12px 14px;
+          color:#ffe08b;
           font-family:var(--font-pixel);
           font-size:10px;
           font-weight:700;
@@ -421,11 +434,12 @@ def _ensure_doubles_css() -> None:
           text-transform:uppercase;
         }
         .doubles-round-head {
-          background:linear-gradient(180deg,var(--accent) 0%, var(--accent-dark) 100%);
-          border:1px solid var(--bw2-edge-strong);
+          background:linear-gradient(180deg,var(--bw2-panel-3) 0%, var(--bw2-panel) 100%);
+          border:1px solid var(--bw2-edge);
+          border-left:4px solid var(--accent);
           border-bottom:none;
-          border-radius:0;
-          padding:8px 10px;
+          border-radius:12px 12px 0 0;
+          padding:9px 11px;
           margin-top:12px;
           color:#ffffff;
           font-family:var(--font-pixel);
@@ -436,7 +450,7 @@ def _ensure_doubles_css() -> None:
         div[data-testid="stForm"] {
           background:linear-gradient(180deg,var(--bw2-panel-2) 0%, var(--bw2-panel) 100%);
           border:1px solid var(--bw2-edge);
-          border-radius:0;
+          border-radius:14px;
           padding:14px 14px 8px;
           box-shadow: inset 0 1px 0 rgba(255,255,255,0.08), 0 0 0 1px rgba(0,0,0,0.28);
         }
@@ -452,7 +466,7 @@ def _ensure_doubles_css() -> None:
           margin-top:8px;
           color:var(--bw2-text-soft);
           font-family:var(--font-ui);
-          font-size:18px;
+          font-size:14px;
           font-weight:400;
           line-height:1.2;
         }
@@ -468,22 +482,35 @@ def _ensure_doubles_css() -> None:
 
 
 def _pt_banner(title: str, subtitle: str | None = None) -> None:
-    st.markdown(f"<div class='doubles-banner'>{title}</div>", unsafe_allow_html=True)
+    st.markdown(
+        f"<div class='doubles-banner'>{_html.escape(str(title))}</div>",
+        unsafe_allow_html=True,
+    )
     if subtitle:
-        st.markdown(f"<div class='doubles-note'>{subtitle}</div>", unsafe_allow_html=True)
+        st.markdown(
+            f"<div class='doubles-note'>{_html.escape(str(subtitle))}</div>",
+            unsafe_allow_html=True,
+        )
 
 
 def _pt_section(title: str) -> None:
-    st.markdown(f"<div class='doubles-section'>{title}</div>", unsafe_allow_html=True)
+    st.markdown(
+        f"<div class='doubles-section'>{_html.escape(str(title))}</div>",
+        unsafe_allow_html=True,
+    )
 
 
 def _pt_metric(label: str, value: str, sub: str | None = None) -> None:
-    sub_html = f"<div class='doubles-metric-sub'>{sub}</div>" if sub else ""
+    sub_html = (
+        f"<div class='doubles-metric-sub'>{_html.escape(str(sub))}</div>"
+        if sub
+        else ""
+    )
     st.markdown(
         (
             "<div class='doubles-metric'>"
-            f"<div class='doubles-metric-label'>{label}</div>"
-            f"<div class='doubles-metric-value'>{value}</div>"
+            f"<div class='doubles-metric-label'>{_html.escape(str(label))}</div>"
+            f"<div class='doubles-metric-value'>{_html.escape(str(value))}</div>"
             f"{sub_html}"
             "</div>"
         ),
@@ -494,10 +521,14 @@ def _pt_metric(label: str, value: str, sub: str | None = None) -> None:
 def _render_team_card(team: dict, *, compact: bool = False) -> None:
     name = team.get("name") or "-"
     members = list(team.get("members") or [])
+    safe_name = _html.escape(str(name))
+    safe_alt = _html.escape(str(name), quote=True)
+    safe_members_slash = _html.escape(" / ".join(str(member) for member in members) if members else "Sin miembros")
+    safe_members_plus = _html.escape(" + ".join(str(member) for member in members) if members else "Sin miembros")
     logo_uri = logo_data_uri_for_team(name)
     if compact:
         logo_html = (
-            f"<img class='doubles-logo-img' src='{logo_uri}' alt='logo {name}'/>"
+            f"<img class='doubles-logo-img' src='{logo_uri}' alt='logo {safe_alt}'/>"
             if logo_uri
             else "<div class='doubles-team-meta'>Sin logo</div>"
         )
@@ -507,15 +538,15 @@ def _render_team_card(team: dict, *, compact: bool = False) -> None:
                 "<div class='doubles-logo-wrap compact'>"
                 f"{logo_html}"
                 "</div>"
-                f"<div class='doubles-team-name' style='margin-top:8px; text-align:center;'>{name}</div>"
-                f"<div class='doubles-team-meta' style='text-align:center;'>{' / '.join(members) if members else 'Sin miembros'}</div>"
+                f"<div class='doubles-team-name' style='margin-top:8px; text-align:center;'>{safe_name}</div>"
+                f"<div class='doubles-team-meta' style='text-align:center;'>{safe_members_slash}</div>"
                 "</div>"
             ),
             unsafe_allow_html=True,
         )
         return
     logo_html = (
-        f"<img class='doubles-logo-img' src='{logo_uri}' alt='logo {name}'/>"
+        f"<img class='doubles-logo-img' src='{logo_uri}' alt='logo {safe_alt}'/>"
         if logo_uri
         else "<div class='doubles-team-meta'>Sin logo</div>"
     )
@@ -530,8 +561,8 @@ def _render_team_card(team: dict, *, compact: bool = False) -> None:
             "</div>"
             "</div>"
             "<div>"
-            f"<div class='doubles-team-name'>{name}</div>"
-            f"<div class='doubles-team-meta'>{' + '.join(members) if members else 'Sin miembros'}</div>"
+            f"<div class='doubles-team-name'>{safe_name}</div>"
+            f"<div class='doubles-team-meta'>{safe_members_plus}</div>"
             "</div>"
             "</div>"
             "</div>"
@@ -553,7 +584,7 @@ def _render_configurator(S: dict) -> None:
             "<div class='doubles-note'>"
             "Crea equipos de 2 jugadores. El logo se carga automaticamente desde la carpeta indicada, "
             "segun el nombre exacto normalizado del equipo."
-            f"<br/><br/>Carpeta de logos: {LOGO_DIR_REL}"
+            f"<br/><br/>Carpeta de logos: {_html.escape(LOGO_DIR_REL)}"
             "</div>"
         ),
         unsafe_allow_html=True,
@@ -689,15 +720,19 @@ def page_copa() -> None:
             for match_idx, match in enumerate(round_data.get("matches", [])):
                 team_a = teams_by_id.get(str(match.get("team_a")), {"name": match.get("team_a")})
                 team_b = teams_by_id.get(str(match.get("team_b")), {"name": match.get("team_b")})
+                team_a_name = _html.escape(str(team_a.get("name") or "-"))
+                team_b_name = _html.escape(str(team_b.get("name") or "-"))
+                team_a_members = _html.escape(" + ".join(str(member) for member in team_a.get("members") or []))
+                team_b_members = _html.escape(" + ".join(str(member) for member in team_b.get("members") or []))
                 current_label = _label_for_score(match.get("score_a"), match.get("score_b"))
                 cols = st.columns([2, 1, 2])
                 with cols[0]:
                     st.markdown(
-                        f"<div class='doubles-round-team-name'>{team_a.get('name') or '-'}</div>",
+                        f"<div class='doubles-round-team-name'>{team_a_name}</div>",
                         unsafe_allow_html=True,
                     )
                     st.markdown(
-                        f"<div class='doubles-round-team-meta'>{' + '.join(team_a.get('members') or [])}</div>",
+                        f"<div class='doubles-round-team-meta'>{team_a_members}</div>",
                         unsafe_allow_html=True,
                     )
                 with cols[1]:
@@ -710,11 +745,11 @@ def page_copa() -> None:
                     )
                 with cols[2]:
                     st.markdown(
-                        f"<div class='doubles-round-team-name'>{team_b.get('name') or '-'}</div>",
+                        f"<div class='doubles-round-team-name'>{team_b_name}</div>",
                         unsafe_allow_html=True,
                     )
                     st.markdown(
-                        f"<div class='doubles-round-team-meta'>{' + '.join(team_b.get('members') or [])}</div>",
+                        f"<div class='doubles-round-team-meta'>{team_b_members}</div>",
                         unsafe_allow_html=True,
                     )
                 if match_idx < len(round_data.get("matches", [])) - 1:
@@ -804,7 +839,8 @@ def page_copa() -> None:
 
     if _valid_bo3(final.get("score_a"), final.get("score_b")):
         champion = final_a if int(final["score_a"]) > int(final["score_b"]) else final_b
+        champion_name = _html.escape(str(champion.get("name") or "-"))
         st.markdown(
-            f"<div class='doubles-champion'>Campeon de la Copa Dobles: {champion.get('name')}</div>",
+            f"<div class='doubles-champion'>Campeon de la Copa Dobles: {champion_name}</div>",
             unsafe_allow_html=True,
         )

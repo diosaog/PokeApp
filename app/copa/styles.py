@@ -32,13 +32,13 @@ def render_copa_styles() -> None:
           grid-template-columns: minmax(0, 1fr) auto;
           gap: 18px;
           align-items: stretch;
-          min-height: 136px;
+          min-height: 104px;
           margin-bottom: 12px;
-          padding: 16px;
+          padding: 15px;
           border: 1px solid var(--bw2-edge);
           background:
-            linear-gradient(116deg, rgba(207,116,255,0.16) 0 30%, transparent 30% 100%),
-            linear-gradient(180deg, rgba(43,52,64,0.96) 0%, rgba(17,24,33,0.96) 100%);
+            linear-gradient(116deg, rgba(155,123,255,0.13) 0 28%, transparent 28% 100%),
+            linear-gradient(180deg, rgba(21,29,44,0.96) 0%, rgba(8,14,25,0.98) 100%);
           box-shadow: inset 0 1px 0 rgba(255,255,255,0.09), 0 10px 26px rgba(0,0,0,0.24);
         }
         .cup-hero::before {
@@ -78,19 +78,19 @@ def render_copa_styles() -> None:
           text-transform: uppercase;
         }
         .cup-title {
-          margin-top: 12px;
+          margin-top: 9px;
           color: #ffffff;
-          font-size: clamp(21px, 3vw, 34px);
+          font-size: clamp(22px, 2.3vw, 31px);
           line-height: 1.05;
           text-transform: uppercase;
           text-shadow: 0 2px 0 rgba(0,0,0,0.5);
         }
         .cup-sub {
-          margin-top: 10px;
+          margin-top: 8px;
           color: var(--bw2-text-soft);
           font-family: var(--font-ui);
-          font-size: 19px;
-          line-height: 1.18;
+          font-size: 14px;
+          line-height: 1.3;
         }
         .cup-hero-side {
           min-width: 230px;
@@ -131,13 +131,14 @@ def render_copa_styles() -> None:
         .cup-paste-card,
         .cup-match {
           border: 1px solid var(--bw2-edge);
+          border-radius: 14px;
           background:
             linear-gradient(90deg, rgba(255,255,255,0.05), transparent 62%),
             linear-gradient(180deg, var(--bw2-panel-2) 0%, var(--bw2-panel) 100%);
           box-shadow: inset 0 1px 0 rgba(255,255,255,0.08), 0 0 0 1px rgba(0,0,0,0.28);
         }
         .cup-mode-card {
-          min-height: 94px;
+          min-height: 78px;
           padding: 12px;
           border-left: 4px solid rgba(216,223,232,0.24);
         }
@@ -155,15 +156,16 @@ def render_copa_styles() -> None:
           text-transform: uppercase;
         }
         .cup-card-sub {
-          margin-top: 8px;
+          margin-top: 7px;
           color: var(--bw2-text-soft);
           font-family: var(--font-ui);
-          font-size: 18px;
-          line-height: 1.18;
+          font-size: 13px;
+          line-height: 1.28;
         }
         .cup-section {
-          margin: 12px 0 10px;
-          padding: 12px;
+          margin: 13px 0 10px;
+          padding: 10px 12px;
+          border-left: 4px solid var(--accent);
         }
         .cup-section-title {
           color: #ffffff;
@@ -172,18 +174,18 @@ def render_copa_styles() -> None:
           text-transform: uppercase;
         }
         .cup-section-sub {
-          margin-top: 7px;
+          margin-top: 6px;
           color: var(--bw2-text-soft);
           font-family: var(--font-ui);
-          font-size: 18px;
-          line-height: 1.18;
+          font-size: 13px;
+          line-height: 1.3;
         }
         .cup-metric {
-          min-height: 82px;
+          min-height: 72px;
           padding: 10px 12px;
         }
         .cup-card-value {
-          margin-top: 9px;
+          margin-top: 7px;
           color: #ffffff;
           font-size: 15px;
           line-height: 1.15;
@@ -192,8 +194,9 @@ def render_copa_styles() -> None:
           display: grid;
           grid-template-columns: minmax(0, 1fr) 62px minmax(0, 1fr);
           align-items: stretch;
-          min-height: 58px;
+          min-height: 56px;
           overflow: hidden;
+          margin-bottom: 8px;
         }
         .cup-vs-player {
           display: flex;
@@ -263,7 +266,7 @@ def render_copa_styles() -> None:
           font-size: 9px;
         }
         .cup-paste-card {
-          min-height: 116px;
+          min-height: 96px;
           padding: 10px;
           margin-bottom: 10px;
         }
@@ -277,8 +280,8 @@ def render_copa_styles() -> None:
           margin-top: 8px;
           color: var(--bw2-text-soft);
           font-family: var(--font-ui);
-          font-size: 17px;
-          line-height: 1.2;
+          font-size: 13px;
+          line-height: 1.3;
         }
         @media (max-width: 980px) {
           .cup-hero,
@@ -311,14 +314,18 @@ def render_copa_styles() -> None:
 def render_copa_header(selected_mode: str) -> None:
     info = MODE_INFO.get(selected_mode, MODE_INFO["Copa"])
     label = _html.escape(info["label"])
+    detail = _html.escape(info["detail"])
     st.markdown(
         (
             "<div class='cup-hero'>"
             "<div class='cup-hero-main'>"
+            "<div class='cup-kicker'>Match Center</div>"
             "<div class='cup-title'>Copa</div>"
+            "<div class='cup-sub'>Torneo, rondas y enfrentamientos activos.</div>"
             "</div>"
             "<div class='cup-hero-side'>"
             f"<span class='cup-pill'>{label}</span>"
+            f"<div class='cup-sub'>{detail}</div>"
             "</div>"
             "</div>"
         ),
@@ -334,6 +341,7 @@ def render_copa_mode_cards(selected_mode: str) -> None:
             "<div class='cup-mode-card"
             f"{active}'>"
             f"<div class='cup-card-label'>{_html.escape(info['label'])}</div>"
+            f"<div class='cup-card-sub'>{_html.escape(info['detail'])}</div>"
             "</div>"
         )
     st.markdown(
@@ -343,10 +351,16 @@ def render_copa_mode_cards(selected_mode: str) -> None:
 
 
 def render_copa_section(title: str, subtitle: str | None = None) -> None:
+    sub_html = (
+        f"<div class='cup-section-sub'>{_html.escape(subtitle)}</div>"
+        if subtitle
+        else ""
+    )
     st.markdown(
         (
             "<div class='cup-section'>"
             f"<div class='cup-section-title'>{_html.escape(title)}</div>"
+            f"{sub_html}"
             "</div>"
         ),
         unsafe_allow_html=True,

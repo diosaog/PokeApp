@@ -378,56 +378,91 @@ def _render_normativa_css() -> None:
         .norma-hero {
           position: relative;
           overflow: hidden;
+          display: grid;
+          grid-template-columns: minmax(0, 1fr) auto;
+          gap: 12px;
+          align-items: end;
           border: 1px solid var(--bw2-edge);
           background:
-            radial-gradient(circle at top right, rgba(110,168,255,0.24) 0 110px, transparent 170px),
-            radial-gradient(circle at bottom left, rgba(245,125,49,0.18) 0 120px, transparent 180px),
-            linear-gradient(135deg, var(--bw2-panel-2) 0%, var(--bw2-panel) 62%, #10151b 100%);
+            linear-gradient(90deg, rgba(110,168,255,0.08), transparent 46%),
+            linear-gradient(180deg, rgba(21,31,46,0.96), rgba(8,14,25,0.98));
           box-shadow: inset 0 1px 0 rgba(255,255,255,0.08), 0 0 0 1px rgba(0,0,0,0.32);
-          padding: 18px 18px 16px;
+          padding: 16px;
           margin-bottom: 14px;
+        }
+        .norma-hero:before {
+          content: "";
+          position: absolute;
+          inset: 0;
+          pointer-events: none;
+          background:
+            linear-gradient(90deg, rgba(255,255,255,0.025) 0 1px, transparent 1px 100%) 0 0 / 28px 100%,
+            linear-gradient(180deg, rgba(255,255,255,0.025) 0 1px, transparent 1px 100%) 0 0 / 100% 24px;
+          opacity: .5;
         }
         .norma-hero:after {
           content: "";
           position: absolute;
-          width: 128px;
-          height: 128px;
-          right: -26px;
-          top: -30px;
-          border-radius: 50%;
+          right: 22px;
+          top: 14px;
+          width: 120px;
+          height: 72px;
           background:
-            radial-gradient(circle at center, rgba(255,255,255,0.78) 0 10px, rgba(255,255,255,0.16) 11px 26px, transparent 27px),
-            radial-gradient(circle at center, rgba(245,125,49,0.5) 0 44px, rgba(245,125,49,0.14) 45px 60px, transparent 61px);
-          opacity: 0.72;
-          transform: rotate(-16deg);
+            linear-gradient(135deg, transparent 0 56%, rgba(110,168,255,0.11) 56% 100%),
+            linear-gradient(180deg, rgba(255,255,255,0.05), transparent);
+          border: 1px solid rgba(216,223,232,0.12);
+          opacity: .45;
+          transform: skewX(-14deg);
+        }
+        .norma-hero-main,
+        .norma-document-meta {
+          position: relative;
+          z-index: 1;
         }
         .norma-kicker {
           display: inline-block;
-          padding: 6px 10px;
-          border: 1px solid var(--bw2-edge-strong);
-          background: linear-gradient(180deg, var(--accent) 0%, var(--accent-dark) 100%);
-          color: #ffffff;
+          padding: 5px 9px;
+          border: 1px solid rgba(216,223,232,0.18);
+          border-left: 3px solid var(--accent);
+          background: rgba(255,255,255,0.045);
+          color: var(--bw2-text-soft);
           font-family: var(--font-pixel);
           font-size: 10px;
           font-weight: 700;
           text-transform: uppercase;
-          clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px);
         }
         .norma-title {
-          margin-top: 14px;
+          margin-top: 10px;
           color: #ffffff;
           font-family: var(--font-pixel);
-          font-size: 18px;
-          line-height: 1.45;
+          font-size: clamp(22px, 2.2vw, 30px);
+          line-height: 1.1;
           text-transform: uppercase;
         }
         .norma-subtitle {
-          margin-top: 10px;
+          margin-top: 8px;
           max-width: 920px;
           color: var(--bw2-text-soft);
           font-family: var(--font-ui);
-          font-size: 22px;
-          line-height: 1.25;
+          font-size: 14px;
+          line-height: 1.35;
+        }
+        .norma-document-meta {
+          display: grid;
+          gap: 7px;
+          justify-items: end;
+          min-width: 220px;
+        }
+        .norma-doc-chip {
+          min-width: 168px;
+          padding: 7px 10px;
+          border: 1px solid rgba(216,223,232,0.16);
+          background: rgba(0,0,0,0.16);
+          color: var(--bw2-text-soft);
+          font-family: var(--font-pixel);
+          font-size: 9px;
+          text-transform: uppercase;
+          text-align: right;
         }
         .norma-chip-row {
           display: flex;
@@ -506,13 +541,16 @@ def _render_normativa_css() -> None:
         }
         .norma-summary {
           margin-bottom: 12px;
-          padding: 10px 12px;
+          padding: 11px 12px;
           border: 1px solid var(--bw2-edge);
-          background: linear-gradient(180deg, var(--bw2-screen-2) 0%, var(--bw2-screen) 100%);
+          border-left: 4px solid var(--accent);
+          background:
+            linear-gradient(90deg, rgba(110,168,255,0.07), transparent 58%),
+            linear-gradient(180deg, var(--bw2-screen-2) 0%, var(--bw2-screen) 100%);
           color: var(--bw2-text-soft);
           font-family: var(--font-ui);
-          font-size: 20px;
-          line-height: 1.25;
+          font-size: 14px;
+          line-height: 1.35;
           box-shadow: inset 0 1px 0 rgba(255,255,255,0.07);
         }
         .norma-eyebrow {
@@ -530,10 +568,16 @@ def _render_normativa_css() -> None:
           height: 100%;
           margin-bottom: 12px;
           border: 1px solid var(--bw2-edge);
-          background: linear-gradient(180deg, var(--bw2-panel-2) 0%, var(--bw2-panel) 100%);
+          background:
+            linear-gradient(135deg, rgba(255,255,255,0.04), transparent 42%),
+            linear-gradient(180deg, var(--bw2-panel-2) 0%, var(--bw2-panel) 100%);
           box-shadow: inset 0 1px 0 rgba(255,255,255,0.08), 0 0 0 1px rgba(0,0,0,0.28);
         }
         .norma-block-head {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 12px;
           padding: 8px 10px;
           border-bottom: 1px solid rgba(255,255,255,0.08);
           background: linear-gradient(180deg, rgba(255,255,255,0.06) 0%, rgba(0,0,0,0.03) 100%);
@@ -547,22 +591,29 @@ def _render_normativa_css() -> None:
         }
         .norma-list {
           display: grid;
-          gap: 8px;
+          gap: 7px;
         }
         .norma-list-item {
           display: grid;
-          grid-template-columns: 16px 1fr;
-          gap: 10px;
+          grid-template-columns: 68px 1fr;
+          gap: 11px;
+          align-items: start;
+          min-height: 36px;
+          padding: 8px 9px;
+          border: 1px solid rgba(216,223,232,0.09);
+          background: rgba(255,255,255,0.025);
           color: var(--bw2-text-soft);
           font-family: var(--font-ui);
-          font-size: 20px;
-          line-height: 1.15;
+          font-size: 14px;
+          line-height: 1.35;
         }
         .norma-list-bullet {
           color: var(--accent-soft);
           font-family: var(--font-pixel);
-          font-size: 12px;
-          line-height: 1.7;
+          font-size: 9px;
+          line-height: 1.4;
+          text-transform: uppercase;
+          white-space: nowrap;
         }
         .norma-row-grid {
           display: grid;
@@ -570,7 +621,7 @@ def _render_normativa_css() -> None:
           gap: 8px;
         }
         .norma-row-card {
-          padding: 10px 10px 8px;
+          padding: 10px;
           border: 1px solid rgba(255,255,255,0.08);
           background: linear-gradient(180deg, var(--bw2-screen-2) 0%, var(--bw2-screen) 100%);
           box-shadow: inset 0 1px 0 rgba(255,255,255,0.05);
@@ -588,21 +639,37 @@ def _render_normativa_css() -> None:
           font-family: var(--font-pixel);
           font-size: 12px;
         }
+        @media (max-width: 720px) {
+          .norma-hero {
+            grid-template-columns: 1fr;
+          }
+          .norma-document-meta {
+            justify-items: start;
+            min-width: 0;
+          }
+          .norma-doc-chip {
+            min-width: 0;
+            text-align: left;
+          }
+          .norma-list-item {
+            grid-template-columns: 58px 1fr;
+          }
+        }
         </style>
         """,
         unsafe_allow_html=True,
     )
 
 
-def _render_list_block(block: dict) -> None:
+def _render_list_block(block: dict, *, start_at: int = 1) -> None:
     items_html = "".join(
         (
             "<div class='norma-list-item'>"
-            "<div class='norma-list-bullet'>>></div>"
+            f"<div class='norma-list-bullet'>ART. {start_at + idx:02d}</div>"
             f"<div>{escape(item)}</div>"
             "</div>"
         )
-        for item in block.get("items") or []
+        for idx, item in enumerate(block.get("items") or [])
     )
     st.markdown(
         (
@@ -640,6 +707,13 @@ def _render_section(section: dict) -> None:
     blocks = list(section.get("visual_blocks") or [])
     if not blocks:
         return
+    summary = str(section.get("summary") or "").strip()
+    if summary:
+        st.markdown(
+            f"<div class='norma-summary'>{escape(summary)}</div>",
+            unsafe_allow_html=True,
+        )
+    article_no = 1
     for idx in range(0, len(blocks), 2):
         pair = blocks[idx: idx + 2]
         cols = st.columns(len(pair))
@@ -648,7 +722,8 @@ def _render_section(section: dict) -> None:
                 if block.get("rows"):
                     _render_rows_block(block)
                 else:
-                    _render_list_block(block)
+                    _render_list_block(block, start_at=article_no)
+                    article_no += len(block.get("items") or [])
 
 
 def render_normativa_home() -> None:
@@ -656,8 +731,16 @@ def render_normativa_home() -> None:
     st.markdown(
         """
         <div class='norma-hero'>
-          <div class='norma-kicker'>Normativa ChampionsLocke</div>
-          <div class='norma-title'>Normativa</div>
+          <div class='norma-hero-main'>
+            <div class='norma-kicker'>Manual oficial</div>
+            <div class='norma-title'>Normativa oficial</div>
+            <div class='norma-subtitle'>Archivo tecnico de reglas vigentes para la temporada actual.</div>
+          </div>
+          <div class='norma-document-meta'>
+            <div class='norma-doc-chip'>Reglamento vigente</div>
+            <div class='norma-doc-chip'>ChampionsLocke</div>
+            <div class='norma-doc-chip'>Documento de liga</div>
+          </div>
         </div>
         """,
         unsafe_allow_html=True,

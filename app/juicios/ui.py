@@ -51,10 +51,14 @@ def _apply_juicio_theme() -> None:
         <style>
         .ju-hero{
           position:relative;
-          background:linear-gradient(135deg,var(--bw2-panel-2) 0%, var(--bw2-panel) 68%, #12161c 100%);
+          overflow:hidden;
+          background:
+            linear-gradient(118deg, rgba(77,141,255,0.13) 0 32%, transparent 32% 100%),
+            linear-gradient(180deg, rgba(18,30,49,0.96) 0%, rgba(8,14,26,0.98) 100%);
           border:1px solid var(--bw2-edge);
-          border-radius:0;
-          padding:14px 16px;
+          border-left:4px solid var(--accent);
+          border-radius:16px;
+          padding:14px 16px 15px;
           color:var(--bw2-text);
           box-shadow:0 8px 20px rgba(0,0,0,.32), inset 0 1px 0 rgba(255,255,255,.08);
           margin-bottom:12px;
@@ -62,24 +66,23 @@ def _apply_juicio_theme() -> None:
         .ju-hero:after{
           content:"";
           position:absolute;
-          right:14px; top:10px;
-          width:20px; height:20px;
-          background:linear-gradient(135deg,var(--accent) 0%, var(--accent-dark) 100%);
-          border:1px solid var(--bw2-edge-strong);
-          box-shadow:0 0 0 2px rgba(0,0,0,.18);
-          transform:rotate(45deg);
+          right:-44px; top:-34px;
+          width:200px; height:130px;
+          background:linear-gradient(135deg, rgba(255,255,255,0.08), transparent 58%);
+          transform:skewX(-24deg);
         }
         .ju-hero-title{
           font-family:var(--font-pixel);
-          font-size:clamp(16px, 2.4vw, 26px);
-          line-height:1.3;
-          margin-bottom:8px;
+          font-size:clamp(22px, 2.2vw, 30px);
+          line-height:1.12;
+          margin-bottom:7px;
           color:#ffffff;
           text-transform:uppercase;
         }
         .ju-hero-sub{
-          font-size:18px;
+          font-size:14px;
           color:var(--bw2-text-soft);
+          line-height:1.3;
         }
         .ju-hero-chips{
           display:flex;
@@ -94,7 +97,7 @@ def _apply_juicio_theme() -> None:
           color:#ffffff;
           background:linear-gradient(180deg,var(--accent) 0%, var(--accent-dark) 100%);
           border:1px solid var(--bw2-edge-strong);
-          border-radius:0;
+          border-radius:999px;
           padding:4px 8px;
           text-transform:uppercase;
         }
@@ -105,10 +108,10 @@ def _apply_juicio_theme() -> None:
           margin:10px 0 14px;
         }
         .ju-metric{
-          min-height:82px;
+          min-height:72px;
           background:linear-gradient(180deg,var(--bw2-panel-2) 0%, var(--bw2-panel) 100%);
           border:1px solid var(--bw2-edge);
-          border-radius:0;
+          border-radius:12px;
           padding:10px 12px;
           color:var(--bw2-text);
           box-shadow:inset 0 1px 0 rgba(255,255,255,.08),0 0 0 1px rgba(0,0,0,.28);
@@ -122,12 +125,12 @@ def _apply_juicio_theme() -> None:
         }
         .ju-metric-label{
           color:var(--bw2-text-soft);
-          font-size:8px;
+          font-size:9px;
         }
         .ju-metric-value{
-          margin-top:9px;
+          margin-top:7px;
           color:#ffffff;
-          font-size:16px;
+          font-size:15px;
           line-height:1.15;
         }
         .ju-action-grid{
@@ -140,7 +143,7 @@ def _apply_juicio_theme() -> None:
         .ju-penalty-card{
           background:linear-gradient(180deg,var(--bw2-panel-2) 0%, var(--bw2-panel) 100%);
           border:1px solid var(--bw2-edge);
-          border-radius:0;
+          border-radius:14px;
           padding:12px;
           color:var(--bw2-text-soft);
           box-shadow:inset 0 1px 0 rgba(255,255,255,.08),0 0 0 1px rgba(0,0,0,.28);
@@ -155,26 +158,27 @@ def _apply_juicio_theme() -> None:
           margin-top:8px;
           color:var(--bw2-text-soft);
           font-family:var(--font-ui);
-          font-size:18px;
+          font-size:14px;
           line-height:1.2;
         }
         .ju-toolbar{
           background:linear-gradient(180deg,var(--bw2-panel-3) 0%, var(--bw2-panel) 100%);
           border:1px solid var(--bw2-edge);
-          border-radius:0;
+          border-left:4px solid var(--accent);
+          border-radius:12px;
           padding:8px 10px;
           margin:8px 0 10px 0;
           color:var(--bw2-text-soft);
-          font-size:18px;
+          font-size:14px;
           font-weight:400;
         }
         .ju-note{
           background:linear-gradient(180deg,var(--bw2-panel-2) 0%, var(--bw2-panel) 100%);
           border:1px dashed var(--bw2-edge);
-          border-radius:0;
+          border-radius:12px;
           padding:8px 10px;
           color:var(--bw2-text-soft);
-          font-size:18px;
+          font-size:14px;
         }
         .ju-sep{
           height:2px;
@@ -196,13 +200,13 @@ def _apply_juicio_theme() -> None:
           flex:1;
           min-width:0;
           border:1px solid var(--bw2-edge);
-          border-radius:0;
+          border-radius:999px;
           text-align:center;
           padding:6px 8px;
           background:linear-gradient(180deg,var(--bw2-panel-3) 0%, var(--bw2-panel) 100%);
           color:var(--bw2-text-soft);
           font-weight:400;
-          font-size:18px;
+          font-size:13px;
           box-shadow:inset 0 1px 0 rgba(255,255,255,.08);
         }
         .ju-stage-on{
@@ -213,7 +217,7 @@ def _apply_juicio_theme() -> None:
         .ju-docket{
           background:linear-gradient(180deg,var(--bw2-panel-2) 0%, var(--bw2-panel) 100%);
           border:1px solid var(--bw2-edge);
-          border-radius:0;
+          border-radius:14px;
           padding:8px 10px;
           margin-bottom:8px;
           color:var(--bw2-text);
@@ -226,13 +230,13 @@ def _apply_juicio_theme() -> None:
           text-transform:uppercase;
         }
         .ju-docket-sub{
-          font-size:18px;
+          font-size:14px;
           color:var(--bw2-text-soft);
         }
         .ju-verdict{
           display:inline-block;
           padding:3px 8px;
-          border-radius:0;
+          border-radius:999px;
           font-size:10px;
           font-weight:700;
           font-family:var(--font-pixel);
@@ -254,15 +258,148 @@ def _apply_juicio_theme() -> None:
           background:linear-gradient(180deg,var(--bw2-panel-3) 0%, var(--bw2-panel) 100%);
           color:#ffffff;
           font-size:8px;
+          border-radius:999px;
         }
         .ju-status-badge.is-active{
           border-color:var(--bw2-edge-strong);
           background:linear-gradient(180deg,var(--accent) 0%, var(--accent-dark) 100%);
         }
+        .ju-empty{
+          min-height:86px;
+          display:grid;
+          align-content:center;
+          gap:4px;
+          margin:10px 0 12px;
+          padding:14px 16px;
+          border:1px dashed rgba(216,223,232,0.18);
+          border-radius:14px;
+          background:rgba(8,14,26,0.82);
+          color:var(--bw2-text-soft);
+          font-size:14px;
+        }
+        .ju-empty strong{
+          color:#ffffff;
+          font-family:var(--font-pixel);
+          font-size:11px;
+          text-transform:uppercase;
+        }
+        .ju-case-list{
+          display:grid;
+          gap:8px;
+          margin:10px 0 12px;
+        }
+        .ju-case-card{
+          display:grid;
+          grid-template-columns:76px minmax(0,1fr) auto;
+          gap:12px;
+          align-items:center;
+          min-height:72px;
+          padding:10px 12px;
+          border:1px solid rgba(216,223,232,0.16);
+          border-radius:14px;
+          background:
+            linear-gradient(100deg, rgba(255,255,255,0.045), transparent 58%),
+            linear-gradient(180deg,var(--bw2-panel-2) 0%, var(--bw2-panel) 100%);
+          box-shadow:inset 0 1px 0 rgba(255,255,255,.08);
+        }
+        .ju-case-no,
+        .ju-case-title,
+        .ju-case-kv span{
+          font-family:var(--font-pixel);
+          text-transform:uppercase;
+        }
+        .ju-case-no{
+          display:grid;
+          place-items:center;
+          min-height:44px;
+          border:1px solid rgba(216,223,232,0.16);
+          border-radius:12px;
+          background:rgba(255,255,255,0.04);
+          color:#ffffff;
+          font-size:10px;
+        }
+        .ju-case-main{
+          min-width:0;
+        }
+        .ju-case-title{
+          color:#ffffff;
+          font-size:11px;
+          line-height:1.25;
+          overflow-wrap:anywhere;
+        }
+        .ju-case-meta{
+          display:flex;
+          flex-wrap:wrap;
+          gap:6px;
+          margin-top:7px;
+        }
+        .ju-case-kv{
+          display:inline-flex;
+          gap:5px;
+          align-items:center;
+          min-height:24px;
+          padding:3px 7px;
+          border:1px solid rgba(216,223,232,0.12);
+          border-radius:999px;
+          background:rgba(255,255,255,0.035);
+          color:var(--bw2-text-soft);
+          font-size:12px;
+          line-height:1;
+        }
+        .ju-case-kv span{
+          color:var(--bw2-text-dim);
+          font-size:8px;
+        }
+        .ju-docket-meta{
+          display:grid;
+          grid-template-columns:repeat(3,minmax(0,1fr));
+          gap:8px;
+          margin:8px 0 10px;
+        }
+        .ju-docket-cell,
+        .ju-detail-block{
+          border:1px solid rgba(216,223,232,0.14);
+          border-radius:12px;
+          background:rgba(255,255,255,0.035);
+          padding:9px 10px;
+          color:var(--bw2-text-soft);
+          font-size:13px;
+          line-height:1.3;
+          overflow-wrap:anywhere;
+        }
+        .ju-detail-block{
+          white-space:pre-wrap;
+        }
+        .ju-docket-cell span,
+        .ju-detail-block span{
+          display:block;
+          margin-bottom:5px;
+          color:var(--bw2-text-dim);
+          font-family:var(--font-pixel);
+          font-size:8px;
+          text-transform:uppercase;
+        }
+        .ju-docket-cell strong{
+          display:block;
+          color:#ffffff;
+          font-size:14px;
+          font-weight:850;
+        }
+        .ju-detail-grid{
+          display:grid;
+          grid-template-columns:repeat(2,minmax(0,1fr));
+          gap:8px;
+          margin:8px 0;
+        }
         @media (max-width: 900px){
           .ju-metric-grid,
           .ju-action-grid,
-          .ju-filter-grid{
+          .ju-filter-grid,
+          .ju-docket-meta,
+          .ju-detail-grid{
+            grid-template-columns:1fr;
+          }
+          .ju-case-card{
             grid-template-columns:1fr;
           }
         }
@@ -276,7 +413,8 @@ def _render_juicio_hero() -> None:
     st.markdown(
         """
         <div class='ju-hero'>
-          <div class='ju-hero-title'>Tribunal Pokemon</div>
+          <div class='ju-hero-title'>Juicios</div>
+          <div class='ju-hero-sub'>Expedientes disciplinarios de liga.</div>
         </div>
         """,
         unsafe_allow_html=True,
@@ -330,22 +468,32 @@ def _status_badge_html(status: str) -> str:
     return f"<span class='ju-status-badge{active}'>{_html.escape(label)}</span>"
 
 
-def _case_summary_rows(cases: list[dict]) -> list[dict[str, object]]:
-    rows: list[dict[str, object]] = []
+def _case_summary_cards_html(cases: list[dict]) -> str:
+    cards: list[str] = []
     for case in cases:
         status = _case_status(case)
-        rows.append(
-            {
-                "#": int(case.get("case_no") or 0),
-                "Estado": STATUS_BADGE_LABELS.get(status, status),
-                "Titulo": str(case.get("title") or "Sin titulo"),
-                "Acusado": str(case.get("accused") or "-"),
-                "Prioridad": str(case.get("priority") or "-"),
-                "Fecha": str(case.get("hearing_date") or "-"),
-                "Actualizado": _fmt_case_ts(case.get("updated_at")),
-            }
+        case_no = int(case.get("case_no") or 0)
+        title = str(case.get("title") or "Sin titulo").strip()
+        accused = str(case.get("accused") or "-")
+        priority = str(case.get("priority") or "-")
+        hearing = str(case.get("hearing_date") or "-")
+        updated = _fmt_case_ts(case.get("updated_at"))
+        cards.append(
+            "<div class='ju-case-card'>"
+            f"<div class='ju-case-no'>#{case_no}</div>"
+            "<div class='ju-case-main'>"
+            f"<div class='ju-case-title'>{_html.escape(title)}</div>"
+            "<div class='ju-case-meta'>"
+            f"<div class='ju-case-kv'><span>Acusado</span>{_html.escape(accused)}</div>"
+            f"<div class='ju-case-kv'><span>Prioridad</span>{_html.escape(priority)}</div>"
+            f"<div class='ju-case-kv'><span>Fecha</span>{_html.escape(hearing)}</div>"
+            f"<div class='ju-case-kv'><span>Actualizado</span>{_html.escape(updated)}</div>"
+            "</div>"
+            "</div>"
+            f"<div>{_status_badge_html(status)}</div>"
+            "</div>"
         )
-    return rows
+    return "<div class='ju-case-list'>" + "".join(cards) + "</div>"
 
 
 def _case_option_label(case: dict) -> str:
@@ -642,7 +790,15 @@ def _render_case_list(current_user: str) -> None:
         cases = [c for c in cases if str(c.get("status") or "") == STATUS_FINISHED]
 
     if not cases:
-        st.info("No hay juicios para mostrar.")
+        st.markdown(
+            (
+                "<div class='ju-empty'>"
+                "<strong>Sin expedientes</strong>"
+                "<div>No hay juicios para mostrar con estos filtros.</div>"
+                "</div>"
+            ),
+            unsafe_allow_html=True,
+        )
         return
 
     cases.sort(
@@ -652,13 +808,20 @@ def _render_case_list(current_user: str) -> None:
             int(case.get("case_no") or 0),
         )
     )
-    rows = _case_summary_rows(cases)
-    st.dataframe(rows, use_container_width=True, hide_index=True)
+    st.markdown(_case_summary_cards_html(cases), unsafe_allow_html=True)
 
     case_by_id = {int(case.get("id") or 0): case for case in cases}
     case_ids = [cid for cid in case_by_id if cid]
     if not case_ids:
-        st.info("No se encontro ningun expediente valido.")
+        st.markdown(
+            (
+                "<div class='ju-empty'>"
+                "<strong>Sin expediente valido</strong>"
+                "<div>No se encontro ningun expediente seleccionable.</div>"
+                "</div>"
+            ),
+            unsafe_allow_html=True,
+        )
         return
     previous_id = int(st.session_state.get("juicio_selected_case_id") or 0)
     if previous_id not in case_ids:
@@ -685,7 +848,7 @@ def _render_case_list(current_user: str) -> None:
         unsafe_allow_html=True,
     )
 
-    with st.container(border=True):
+    with st.container():
         render_case_info(case)
 
         _render_jury_vote_controls(case, current_user)

@@ -1704,6 +1704,213 @@ div[data-testid="stFileUploaderDropzone"] {
   font-size: 16px !important;
 }
 
+/* Secondary pages 1E */
+.norma-hero,
+.cup-hero,
+.ju-hero,
+.season-hero {
+  border-color: var(--border-normal) !important;
+  border-left: 4px solid var(--primary) !important;
+  border-radius: 16px !important;
+  clip-path: none !important;
+  background:
+    linear-gradient(118deg, rgba(77,141,255,0.12) 0 32%, transparent 32% 100%),
+    linear-gradient(180deg, rgba(18,30,49,0.96), rgba(8,14,26,0.98)) !important;
+  box-shadow: var(--poke-shadow-card) !important;
+}
+
+.hof-hero {
+  border-left: 4px solid var(--pokemon-yellow) !important;
+  background:
+    linear-gradient(118deg, rgba(255,210,77,0.11) 0 32%, transparent 32% 100%),
+    linear-gradient(180deg, rgba(18,30,49,0.96), rgba(8,14,26,0.98)) !important;
+}
+
+.norma-title,
+.cup-title,
+.ju-hero-title,
+.season-title {
+  color: var(--text-primary) !important;
+  -webkit-text-fill-color: var(--text-primary) !important;
+  font-size: clamp(22px, 2.2vw, 30px) !important;
+  text-shadow: none !important;
+}
+
+.norma-subtitle,
+.norma-summary,
+.cup-sub,
+.ju-hero-sub,
+.season-subtitle {
+  color: var(--text-secondary) !important;
+  -webkit-text-fill-color: var(--text-secondary) !important;
+  font-size: 14px !important;
+  line-height: 1.3 !important;
+}
+
+.norma-kicker,
+.cup-kicker,
+.season-kicker,
+.norma-doc-chip,
+.cup-pill,
+.season-pill,
+.ju-chip,
+.ju-status-badge {
+  border-radius: 999px !important;
+  clip-path: none !important;
+}
+
+.norma-kicker,
+.cup-kicker,
+.season-kicker {
+  display: inline-flex !important;
+  align-items: center !important;
+  min-height: 24px !important;
+  padding: 4px 8px !important;
+}
+
+.norma-kicker,
+.cup-kicker,
+.season-kicker,
+.norma-block-head,
+.cup-section,
+.doubles-section,
+.ju-toolbar,
+.season-section-title {
+  border-color: var(--border-normal) !important;
+  border-left: 4px solid var(--primary) !important;
+  border-radius: 12px !important;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.045), rgba(255,255,255,0.015)),
+    rgba(11,19,32,0.94) !important;
+  color: var(--text-primary) !important;
+  -webkit-text-fill-color: var(--text-primary) !important;
+}
+
+.hof-kicker,
+.hof-section-title {
+  border-left-color: var(--pokemon-yellow) !important;
+  color: var(--pokemon-yellow) !important;
+  -webkit-text-fill-color: var(--pokemon-yellow) !important;
+}
+
+.norma-block,
+.norma-list-item,
+.cup-mode-card,
+.cup-metric,
+.cup-vs-card,
+.cup-paste-card,
+.cup-match,
+.doubles-card,
+.doubles-metric,
+.doubles-note,
+.doubles-logo-wrap,
+.ju-action-card,
+.ju-penalty-card,
+.ju-case-card,
+.ju-docket,
+.ju-docket-cell,
+.ju-detail-block,
+.ju-empty,
+.season-card,
+.season-alert,
+.season-version-row {
+  border-color: var(--border-normal) !important;
+  border-radius: 14px !important;
+  background:
+    linear-gradient(135deg, rgba(77,141,255,0.055), transparent 42%),
+    rgba(10,17,29,0.94) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.055) !important;
+}
+
+.norma-list-bullet,
+.ju-case-no {
+  border-color: rgba(114,185,255,0.28) !important;
+  border-radius: 12px !important;
+  background: rgba(77,141,255,0.1) !important;
+  color: var(--primary-hover) !important;
+  -webkit-text-fill-color: var(--primary-hover) !important;
+}
+
+.cup-mode-card.is-active {
+  border-color: rgba(114,185,255,0.42) !important;
+  border-left-color: var(--primary) !important;
+  background:
+    linear-gradient(116deg, rgba(77,141,255,0.16) 0 35%, transparent 35% 100%),
+    rgba(12,25,43,0.94) !important;
+}
+
+.doubles-banner,
+.doubles-round-head,
+.doubles-card-head {
+  border-color: var(--border-normal) !important;
+  border-left: 4px solid var(--primary) !important;
+  border-radius: 12px !important;
+  clip-path: none !important;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.045), rgba(255,255,255,0.015)),
+    rgba(11,19,32,0.94) !important;
+}
+
+.doubles-champion {
+  border-color: rgba(255,210,77,0.34) !important;
+  border-radius: 14px !important;
+  background:
+    linear-gradient(90deg, rgba(255,210,77,0.14), transparent 56%),
+    rgba(11,19,32,0.94) !important;
+  color: var(--pokemon-yellow) !important;
+  -webkit-text-fill-color: var(--pokemon-yellow) !important;
+}
+
+.ju-case-title,
+.ju-docket-title,
+.season-value,
+.cup-card-value,
+.doubles-team-name {
+  color: var(--text-primary) !important;
+  -webkit-text-fill-color: var(--text-primary) !important;
+}
+
+.ju-case-kv,
+.ju-docket-cell,
+.ju-detail-block,
+.season-detail,
+.season-alert-body,
+.season-version-meta,
+.doubles-team-meta,
+.doubles-round-team-meta {
+  color: var(--text-secondary) !important;
+  -webkit-text-fill-color: var(--text-secondary) !important;
+  font-size: 13px !important;
+  line-height: 1.3 !important;
+}
+
+.hof-empty {
+  position: relative !important;
+  min-height: 126px !important;
+  padding: 18px 18px 18px 74px !important;
+  border-style: dashed !important;
+  border-color: rgba(255,210,77,0.24) !important;
+}
+
+.hof-empty:before {
+  content: "HF" !important;
+  position: absolute !important;
+  left: 22px !important;
+  top: 50% !important;
+  width: 34px !important;
+  height: 34px !important;
+  display: grid !important;
+  place-items: center !important;
+  border: 1px solid rgba(255,210,77,0.3) !important;
+  border-radius: 999px !important;
+  background: rgba(255,210,77,0.1) !important;
+  color: var(--pokemon-yellow) !important;
+  -webkit-text-fill-color: var(--pokemon-yellow) !important;
+  font-family: var(--font-pixel) !important;
+  font-size: 9px !important;
+  transform: translateY(-50%) !important;
+}
+
 /* Notifications */
 .app-notice-menu summary {
   min-height: 38px !important;

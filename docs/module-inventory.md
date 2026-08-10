@@ -35,6 +35,16 @@ extraiga dominio o repositories.
 | `ui.py` | STREAMLIT | Pantalla pesada de gestion liga; el render de divisiones consume puntos/monedas/badges para la vista deportiva 1D. |
 | `matchup.py` | STREAMLIT/MIXED | Team Preview con UI, snapshots y detalle de ataques. |
 
+## app/copa
+
+| Modulo | Tipo | Nota |
+| --- | --- | --- |
+| `styles.py` | STREAMLIT/CSS | Shell visual de Copa suiza/eliminatoria; pulido 1E como match center, pendiente extraer componentes visuales. |
+| `swiss.py` | STREAMLIT/MIXED | Gestion de rondas, clasificacion, equipos y Top Cut. |
+| `elim.py` | STREAMLIT/MIXED | Eliminatoria Bo3 con bracket editable. |
+| `doubles.py` | STREAMLIT/MIXED | Copa Dobles mantiene estado en settings; CSS local pulido 1E, pendiente converger con `styles.py`. |
+| `logos.py` | ASSET HELPER | Resolucion local de logos de equipos. |
+
 ## app/tienda
 
 | Modulo | Tipo | Nota |
@@ -60,6 +70,16 @@ extraiga dominio o repositories.
 | `summary.py` | STREAMLIT/MIXED | Resumen, monedas, puntos, medallas. |
 | `inventory.py` | STREAMLIT/MIXED | Inventario y canjes. |
 
+## app/juicios
+
+| Modulo | Tipo | Nota |
+| --- | --- | --- |
+| `ui.py` | STREAMLIT/MIXED | Bandeja, filtros, formularios y acciones de expedientes; CSS local 1E con cards de expediente. |
+| `render.py` | STREAMLIT/HTML | Detalle de expediente y castigos; presentacion refinada 1E sin tocar reglas de voto. |
+| `repo.py` | STORAGE/MIXED | Persistencia y permisos de juicios. |
+| `forms.py` | STREAMLIT | Formularios de alta, edicion y resolucion. |
+| `penalties.py` | MIXED | Lectura de sanciones activas y efectos en tienda/monedas. |
+
 ## app/interfaz
 
 | Modulo | Tipo | Nota |
@@ -67,13 +87,14 @@ extraiga dominio o repositories.
 | `theme.py` | STREAMLIT/CSS | Base visual y aplica capas posteriores. |
 | `champions_skin.py` | STREAMLIT/CSS | Capa principal estilo Champions. |
 | `premium_phase2.py` | STREAMLIT/CSS | Capa visual 2.0 acumulada. |
-| `final_polish.py` | STREAMLIT/CSS | Parches visuales finales. |
+| `final_polish.py` | STREAMLIT/CSS | Parches visuales finales; incluye capa 1E para pantallas secundarias. |
 | `auth.py` | STREAMLIT/STORAGE | Login y PIN via settings. |
 | `sidebar.py` | STREAMLIT/STORAGE | Navegacion, PIN, perfil mini. |
 | `home.py` | STREAMLIT/MIXED | Menu principal y resumen. |
 | `notifications.py` | MIXED | Actividad reciente desde saves, compras y locks. |
-| `temporada.py` | STREAMLIT/MIXED | Editor admin sobre season config. |
-| `hall_of_fame.py` | MIXED | Logica y UI de historico. |
+| `normativa.py` | STREAMLIT/CONTENT | Manual oficial con render por articulos 1E; texto funcional conservado. |
+| `temporada.py` | STREAMLIT/MIXED | Editor admin sobre season config; pulido 1E como consola tecnica compacta. |
+| `hall_of_fame.py` | MIXED | Logica y UI de historico; archivo sobrio con auto-sync de campeones. |
 
 ## app/storage_*
 

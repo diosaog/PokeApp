@@ -331,13 +331,14 @@ def _render_css() -> None:
           grid-template-columns: minmax(0, 1fr) minmax(260px, 0.55fr);
           gap: 14px;
           align-items: stretch;
-          min-height: 140px;
+          min-height: 118px;
           margin-bottom: 14px;
-          padding: 16px;
+          padding: 15px;
           border: 1px solid var(--bw2-edge);
           background:
-            linear-gradient(118deg, rgba(233,191,86,0.18) 0 32%, transparent 32% 100%),
-            linear-gradient(180deg, rgba(43,52,64,0.97) 0%, rgba(16,22,30,0.97) 100%);
+            radial-gradient(circle at 14% 12%, rgba(255,210,109,0.12), transparent 280px),
+            linear-gradient(118deg, rgba(233,191,86,0.12) 0 28%, transparent 28% 100%),
+            linear-gradient(180deg, rgba(28,32,42,0.98) 0%, rgba(7,12,22,0.98) 100%);
           box-shadow: inset 0 1px 0 rgba(255,255,255,0.09), 0 10px 26px rgba(0,0,0,0.24);
         }
         .hof-hero::before,
@@ -372,15 +373,15 @@ def _render_css() -> None:
         .hof-kicker {
           display: inline-block;
           padding: 5px 8px;
-          border-left: 3px solid var(--accent);
+          border-left: 3px solid #e7bf55;
           background: rgba(0,0,0,0.28);
-          color: var(--bw2-text-soft);
+          color: #ffe9ad;
           font-size: 9px;
         }
         .hof-title {
-          margin-top: 12px;
+          margin-top: 10px;
           color: #ffffff;
-          font-size: 31px;
+          font-size: 29px;
           line-height: 1.05;
           text-shadow: 0 2px 0 rgba(0,0,0,0.5);
         }
@@ -398,10 +399,12 @@ def _render_css() -> None:
         }
         .hof-stat {
           min-width: 0;
-          min-height: 62px;
+          min-height: 56px;
           padding: 9px 10px;
           border: 1px solid rgba(216,223,232,0.16);
-          background: linear-gradient(180deg, rgba(9,15,22,0.64), rgba(8,12,18,0.88));
+          background:
+            linear-gradient(90deg, rgba(233,191,86,0.08), transparent 65%),
+            linear-gradient(180deg, rgba(9,15,22,0.64), rgba(8,12,18,0.88));
           box-shadow: inset 0 1px 0 rgba(255,255,255,0.06);
         }
         .hof-stat span {
@@ -413,7 +416,7 @@ def _render_css() -> None:
         .hof-stat strong {
           display: block;
           margin-top: 6px;
-          color: #ffffff;
+          color: #fff2bf;
           font-size: 12px;
           line-height: 1.15;
           overflow-wrap: anywhere;
@@ -421,8 +424,8 @@ def _render_css() -> None:
         .hof-section-title {
           margin: 16px 0 8px;
           padding: 8px 10px;
-          border-left: 4px solid var(--accent);
-          background: linear-gradient(90deg, rgba(255,255,255,0.07), transparent 64%);
+          border-left: 4px solid #e7bf55;
+          background: linear-gradient(90deg, rgba(233,191,86,0.1), transparent 64%);
           color: #ffffff;
           font-size: 11px;
           line-height: 1.2;
@@ -436,11 +439,11 @@ def _render_css() -> None:
           position: relative;
           overflow: hidden;
           min-width: 0;
-          min-height: 210px;
+          min-height: 198px;
           padding: 12px;
           border: 1px solid var(--bw2-edge);
           background:
-            linear-gradient(112deg, rgba(233,191,86,0.13) 0 35%, transparent 35% 100%),
+            linear-gradient(112deg, rgba(233,191,86,0.11) 0 34%, transparent 34% 100%),
             linear-gradient(180deg, var(--bw2-panel-2) 0%, var(--bw2-panel) 100%);
           box-shadow: inset 0 1px 0 rgba(255,255,255,0.08), 0 0 0 1px rgba(0,0,0,0.28);
         }
@@ -473,10 +476,19 @@ def _render_css() -> None:
         }
         .hof-card-champion {
           margin-top: 12px;
-          color: #ffffff;
+          color: #fff2bf;
           font-size: 16px;
           line-height: 1.15;
           overflow-wrap: anywhere;
+        }
+        .hof-card-champion:before {
+          content: "Campeon";
+          display: block;
+          margin-bottom: 5px;
+          color: var(--bw2-text-dim);
+          font-family: var(--font-pixel);
+          font-size: 8px;
+          text-transform: uppercase;
         }
         .hof-card-runner,
         .hof-card-notes {
@@ -512,13 +524,30 @@ def _render_css() -> None:
           image-rendering: pixelated;
         }
         .hof-empty {
-          padding: 18px;
-          border: 1px dashed rgba(216,223,232,0.32);
-          background: linear-gradient(180deg, var(--bw2-panel-2), var(--bw2-panel));
+          position: relative;
+          min-height: 126px;
+          padding: 18px 18px 18px 74px;
+          border: 1px dashed rgba(233,191,86,0.34);
+          background:
+            linear-gradient(90deg, rgba(233,191,86,0.09), transparent 48%),
+            linear-gradient(180deg, var(--bw2-panel-2), var(--bw2-panel));
           color: var(--bw2-text-soft);
           font-family: var(--font-ui);
-          font-size: 20px;
-          line-height: 1.15;
+          font-size: 15px;
+          line-height: 1.35;
+        }
+        .hof-empty:before {
+          content: "";
+          position: absolute;
+          left: 18px;
+          top: 22px;
+          width: 36px;
+          height: 36px;
+          border-radius: 50%;
+          border: 1px solid rgba(233,191,86,0.46);
+          background:
+            radial-gradient(circle at 50% 35%, #ffe7a6 0 5px, transparent 6px),
+            linear-gradient(180deg, rgba(233,191,86,0.24), rgba(233,191,86,0.08));
         }
         @media (max-width: 980px) {
           .hof-hero,
@@ -597,6 +626,7 @@ def _hero_html(entries: list[dict[str, Any]]) -> str:
   <div class="hof-hero-main">
     <div class="hof-kicker">Archivo historico</div>
     <div class="hof-title">Hall of Fame</div>
+    <div class="hof-subtitle">Vitrina oficial de campeones y equipos archivados.</div>
   </div>
   <div class="hof-stat-grid">
     <div class="hof-stat">
