@@ -20,10 +20,6 @@ from app.season.config import max_rounds
 def _go_to(section: str) -> None:
     st.session_state["selected_section"] = section
     st.session_state["selected_section_radio"] = section
-    try:
-        st.query_params["section"] = section
-    except Exception:
-        pass
     st.rerun()
 
 

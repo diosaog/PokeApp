@@ -180,7 +180,7 @@ def _render_item_card(
         button_label,
         key=f"buy_{idx_key}",
         disabled=delivery_locked or not afford or effective_price <= 0,
-        use_container_width=True,
+        use_container_width=False,
     ):
         st.session_state.pop("shop_error", None)
         pending = {

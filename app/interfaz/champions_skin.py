@@ -3201,68 +3201,6 @@ section[data-testid="stSidebar"] .sidebar-nav-title {
   text-transform: uppercase !important;
 }
 
-section[data-testid="stSidebar"] .sidebar-nav {
-  display: grid !important;
-  gap: 2px !important;
-}
-
-section[data-testid="stSidebar"] .sidebar-nav-group {
-  display: grid !important;
-  gap: 4px !important;
-}
-
-section[data-testid="stSidebar"] .sidebar-nav-links {
-  display: grid !important;
-  gap: 3px !important;
-}
-
-section[data-testid="stSidebar"] .sidebar-nav-link {
-  min-height: 40px !important;
-  padding: 0 10px 0 12px !important;
-  display: grid !important;
-  grid-template-columns: 22px minmax(0, 1fr) !important;
-  gap: 10px !important;
-  align-items: center !important;
-  border: 1px solid transparent !important;
-  border-radius: var(--radius-input) !important;
-  color: var(--text-secondary) !important;
-  -webkit-text-fill-color: var(--text-secondary) !important;
-  text-decoration: none !important;
-  transition: background-color var(--transition-fast), border-color var(--transition-fast), color var(--transition-fast), transform var(--transition-fast) !important;
-}
-
-section[data-testid="stSidebar"] .sidebar-nav-link span {
-  overflow: hidden !important;
-  text-overflow: ellipsis !important;
-  white-space: nowrap !important;
-  color: inherit !important;
-  -webkit-text-fill-color: currentColor !important;
-  font-size: 13px !important;
-  font-weight: 750 !important;
-}
-
-section[data-testid="stSidebar"] .sidebar-nav-icon {
-  width: 19px !important;
-  height: 19px !important;
-  fill: currentColor !important;
-}
-
-section[data-testid="stSidebar"] .sidebar-nav-link:hover {
-  background: rgba(255,255,255,0.045) !important;
-  border-color: var(--border-soft) !important;
-  color: var(--text-primary) !important;
-  -webkit-text-fill-color: var(--text-primary) !important;
-  transform: translateY(-1px) !important;
-}
-
-section[data-testid="stSidebar"] .sidebar-nav-link.is-active {
-  background: var(--primary-soft) !important;
-  border-color: rgba(77,141,255,0.3) !important;
-  box-shadow: inset 3px 0 0 var(--primary) !important;
-  color: var(--primary-hover) !important;
-  -webkit-text-fill-color: var(--primary-hover) !important;
-}
-
 section[data-testid="stSidebar"] div[role="radiogroup"] {
   display: grid !important;
   gap: 4px !important;
@@ -3276,6 +3214,9 @@ section[data-testid="stSidebar"] div[data-testid="stExpander"] summary {
   position: relative !important;
   min-height: 42px !important;
   padding: 9px 10px 9px 12px !important;
+  justify-content: flex-start !important;
+  text-align: left !important;
+  gap: 10px !important;
   border: 1px solid transparent !important;
   border-radius: var(--radius-input) !important;
   background: transparent !important;
@@ -3805,8 +3746,8 @@ div[aria-selected="true"][role="option"] {
 }
 
 .main .champ-box-grid-toolbar {
-  display: grid !important;
-  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  display: flex !important;
+  justify-content: flex-start !important;
   gap: 10px !important;
   align-items: center !important;
   margin-bottom: 14px !important;
@@ -3814,18 +3755,18 @@ div[aria-selected="true"][role="option"] {
 
 .main .champ-box-control {
   min-width: 0 !important;
-  display: grid !important;
-  grid-template-columns: 42px minmax(0, 1fr) !important;
+  display: inline-flex !important;
+  width: min(360px, 100%) !important;
   gap: 8px !important;
   align-items: center !important;
 }
 
-.main .champ-box-grid-toolbar span,
 .main .champ-box-grid-toolbar strong {
   min-height: 34px !important;
   display: inline-flex !important;
   align-items: center !important;
-  justify-content: center !important;
+  justify-content: flex-start !important;
+  width: 100% !important;
   border: 1px solid var(--border-soft) !important;
   border-radius: var(--radius-input) !important;
   background: var(--surface-2) !important;
@@ -3835,15 +3776,6 @@ div[aria-selected="true"][role="option"] {
   font-weight: 800 !important;
   line-height: 1 !important;
   min-width: 0 !important;
-}
-
-.main .champ-box-grid-toolbar span {
-  color: var(--primary-hover) !important;
-  -webkit-text-fill-color: var(--primary-hover) !important;
-}
-
-.main .champ-box-grid-toolbar strong {
-  justify-content: flex-start !important;
   padding: 0 12px !important;
   overflow: hidden !important;
   text-overflow: ellipsis !important;
@@ -4079,10 +4011,10 @@ section[data-testid="stSidebar"] .poke-type-chip.asset-full {
     grid-template-columns: repeat(4, minmax(58px, 1fr)) !important;
   }
   .main .champ-box-grid-toolbar {
-    grid-template-columns: 1fr !important;
+    display: block !important;
   }
   .main .champ-box-control {
-    grid-template-columns: 38px minmax(0, 1fr) !important;
+    width: 100% !important;
   }
 }
 

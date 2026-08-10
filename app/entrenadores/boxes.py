@@ -156,14 +156,9 @@ def boxes_grid_ui(
 
     st.markdown(
         "<div class='champ-box-grid-shell'>"
-        "<div class='champ-box-grid-toolbar'>"
-        "<div class='champ-box-control'>"
-        "<span>ZL</span>"
+        "<div class='champ-box-grid-toolbar champ-box-grid-toolbar-single'>"
+        "<div class='champ-box-control champ-box-control-wide'>"
         f"<strong>{escape(str(virtual_names[int(box_index)]))}</strong>"
-        "</div>"
-        "<div class='champ-box-control'>"
-        "<span>ZR</span>"
-        "<strong>Sin filtros</strong>"
         "</div>"
         "</div>"
         "<div class='champ-box-grid'>"
