@@ -2,8 +2,6 @@ from __future__ import annotations
 
 import streamlit as st
 
-from app.interfaz.champions_skin import apply_champions_skin
-
 
 def render_shop_styles() -> None:
     st.markdown(
@@ -626,4 +624,3 @@ def render_shop_styles() -> None:
         """,
         unsafe_allow_html=True,
     )
-    apply_champions_skin()

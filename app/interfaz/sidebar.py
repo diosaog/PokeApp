@@ -224,7 +224,7 @@ def _render_change_pin_form() -> None:
             return None
         return None
 
-    with st.sidebar.expander("Cambiar PIN (4 digitos)", expanded=False):
+    with st.sidebar.expander("Cambiar PIN", expanded=False):
         current_pin = _get_pin(user)
         current_input = (
             st.text_input("PIN actual", type="password", max_chars=4, value="")

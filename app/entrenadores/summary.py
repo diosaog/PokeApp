@@ -80,12 +80,11 @@ def _ensure_trainer_css() -> None:
     .trainer-grid { display:grid; grid-template-columns: 150px 1fr; gap:10px; margin-top:8px; }
     .trainer-portrait { background:linear-gradient(180deg,var(--bw2-screen-2) 0%, var(--bw2-screen) 100%); border:1px solid var(--bw2-edge); border-radius:0; padding:8px; display:flex; align-items:center; justify-content:center; box-shadow: inset 0 1px 0 rgba(255,255,255,0.06); }
     .trainer-portrait img { width:120px; height:auto; image-rendering:pixelated; }
-    .trainer-bars { display:flex; flex-direction:column; gap:8px; }
-    .tbar-row { display:grid; grid-template-columns: 110px 1fr 70px; align-items:center; gap:8px; }
-    .tbar-label { font-size:10px; font-weight:700; color:var(--bw2-text); font-family:var(--font-pixel); text-transform:uppercase; }
-    .tbar-track { height:10px; background:#0d1217; border:1px solid var(--bw2-edge); border-radius:0; overflow:hidden; }
-    .tbar-fill { height:100%; border-radius:4px; }
-    .tbar-value { background:linear-gradient(180deg,var(--bw2-panel-3) 0%, var(--bw2-panel) 100%); border:1px solid var(--bw2-edge); border-radius:0; padding:2px 6px; font-size:1rem; text-align:right; color:var(--bw2-text); }
+    .trainer-content { display:grid; gap:8px; align-content:start; }
+    .trainer-metrics { display:grid; grid-template-columns:repeat(3, minmax(0, 1fr)); gap:8px; }
+    .trainer-metric { min-height:60px; padding:8px; border:1px solid rgba(216,223,232,0.14); background:rgba(0,0,0,0.16); }
+    .trainer-metric span { display:block; color:var(--bw2-text-dim); font-family:var(--font-pixel); font-size:8px; text-transform:uppercase; }
+    .trainer-metric strong { display:block; margin-top:6px; color:var(--bw2-text); font-family:var(--font-pixel); font-size:14px; font-variant-numeric:tabular-nums; }
     .trainer-medals { margin-top:6px; }
     .trainer-kia { margin-top:8px; background:linear-gradient(180deg,var(--bw2-panel-3) 0%, var(--bw2-panel) 100%); border:1px solid var(--bw2-edge); border-radius:0; padding:8px; font-size:1rem; color:var(--bw2-text); box-shadow: inset 0 1px 0 rgba(255,255,255,0.06); }
     .trainer-kia strong { font-family:var(--font-pixel); font-size:10px; color:#ffffff; }
@@ -241,8 +240,6 @@ def trainer_summary_with_portrait_ui(
     img_uri = image_data_uri(img, img_mtime, min_bytes=256) if img else ""
     region = _region_from_save(sav_json, jugador or "")
 
-    coins_pct = _hp_bar("Monedas", monedas, 20, "#ffd54f")
-    points_pct = _hp_bar("Puntos", puntos, 30, "#4fc3f7")
     medals_html = _medals_html(medallas)
 
     portrait_html = (
@@ -255,21 +252,14 @@ def trainer_summary_with_portrait_ui(
         f"<div class='trainer-head'>Entrenador: {trainer}  Region: {region}</div>"
         "<div class='trainer-grid'>"
         f"<div class='trainer-portrait'>{portrait_html}</div>"
-        "<div class='trainer-bars'>"
-        "<div class='tbar-row'>"
-        "<div class='tbar-label'>Monedas</div>"
-        "<div class='tbar-track'><div class='tbar-fill' style='width:"
-        f"{coins_pct}%; background:#ffd54f;'></div></div>"
-        f"<div class='tbar-value'>{monedas}</div>"
-        "</div>"
-        "<div class='tbar-row'>"
-        "<div class='tbar-label'>Puntos</div>"
-        "<div class='tbar-track'><div class='tbar-fill' style='width:"
-        f"{points_pct}%; background:#4fc3f7;'></div></div>"
-        f"<div class='tbar-value'>{puntos}</div>"
+        "<div class='trainer-content'>"
+        "<div class='trainer-metrics'>"
+        f"<div class='trainer-metric'><span>Monedas</span><strong>{monedas}</strong></div>"
+        f"<div class='trainer-metric'><span>Puntos</span><strong>{puntos}</strong></div>"
+        f"<div class='trainer-metric'><span>Muertos</span><strong>{muertos}</strong></div>"
         "</div>"
         f"<div class='trainer-medals'>{medals_html}</div>"
-        f"<div class='trainer-kia'>Muertos ({DEAD_BOX_LABEL})<br/><strong>{muertos}</strong></div>"
+        f"<div class='trainer-kia'>{DEAD_BOX_LABEL}<br/><strong>{muertos} muertos</strong></div>"
         f"<div class='trainer-note'>Revividos tras wipe: {revividos}</div>"
         "</div></div></div>"
     )

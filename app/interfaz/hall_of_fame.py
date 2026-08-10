@@ -626,7 +626,8 @@ def _render_entries(entries: list[dict[str, Any]]) -> None:
         st.markdown(
             (
                 "<div class='hof-empty'>"
-                "Sin campeones archivados."
+                "<strong>Aun no hay campeones archivados.</strong>"
+                "<span>Los campeones apareceran aqui al finalizar una temporada.</span>"
                 "</div>"
             ),
             unsafe_allow_html=True,

@@ -3,6 +3,7 @@ from __future__ import annotations
 import streamlit as st
 
 from app.interfaz.champions_skin import apply_champions_skin
+from app.interfaz.final_polish import apply_final_polish
 
 
 def apply_css() -> None:
@@ -894,6 +895,7 @@ def apply_css() -> None:
     """
     st.markdown(css, unsafe_allow_html=True)
     apply_champions_skin()
+    apply_final_polish()
 
 
 def render_poke_separator() -> None:
@@ -902,14 +904,14 @@ def render_poke_separator() -> None:
 
 def apply_section_theme(section: str) -> None:
     palette = {
-        "Inicio": ("#8069ff", "#5c45d6", "#e7ddff"),
+        "Inicio": ("#4d8dff", "#2f6fff", "#a7d6ff"),
         "Normativa": ("#8a74ff", "#604bd6", "#eee4ff"),
         "Entrenadores": ("#45d1ff", "#218ed9", "#d7f6ff"),
         "Liga y Tabla": ("#ffcf4d", "#d58b15", "#fff0ad"),
         "Hall of Fame": ("#ffe25c", "#c89416", "#fff3b9"),
         "Temporada": ("#4fdf9a", "#24a86a", "#d8ffe8"),
-        "Team Preview": ("#ff75dd", "#c946a9", "#ffe3f8"),
-        "Previa Combate": ("#ff75dd", "#c946a9", "#ffe3f8"),
+        "Team Preview": ("#45d1ff", "#2f6fff", "#c9efff"),
+        "Previa Combate": ("#45d1ff", "#2f6fff", "#c9efff"),
         "Copa": ("#9b7bff", "#684bd8", "#eee4ff"),
         "Juicios": ("#ff6f86", "#c6465b", "#ffe0e7"),
         "Tienda": ("#ffbd5c", "#d47a21", "#ffe8bd"),
