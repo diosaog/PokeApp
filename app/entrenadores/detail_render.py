@@ -2,9 +2,36 @@ from __future__ import annotations
 
 import html as _html
 import re
+
 from app.entrenadores.sprites import sprite_url_from_p
-from app.ui.type_icons import type_icon_html
-from dexdata import ability_desc_es, ability_name_es, item_name_es, move_info, move_name_es
+from app.ui.type_icons import type_icon_html, type_icons_html
+from dexdata import (
+    ability_desc_es,
+    ability_name_es,
+    item_name_es,
+    move_info,
+    move_name_es,
+    species_types,
+)
+
+
+STAT_ORDER = (
+    ("hp", "PS"),
+    ("atk", "Ataque"),
+    ("def", "Defensa"),
+    ("spa", "At. Esp."),
+    ("spd", "Def. Esp."),
+    ("spe", "Velocidad"),
+)
+
+SPREAD_ORDER = (
+    ("hp", "HP"),
+    ("atk", "Atk"),
+    ("def", "Def"),
+    ("spa", "SpA"),
+    ("spd", "SpD"),
+    ("spe", "Spe"),
+)
 
 
 def _move_es(name: str) -> str:
@@ -117,6 +144,212 @@ def _fmt_stat(stx: dict, key: str) -> str:
         return "-"
 
 
+def _as_int(val) -> int | None:
+    try:
+        return int(val)
+    except Exception:
+        return None
+
+
+def _bar_pct(value: object, *, cap: int = 255) -> int:
+    number = _as_int(value)
+    if number is None:
+        return 0
+    return max(4, min(100, int(round(number * 100 / cap))))
+
+
+def _pokemon_types(p: dict) -> list[str]:
+    species = str(p.get("species_name") or p.get("species") or "").strip()
+    if not species:
+        return []
+    try:
+        return species_types(
+            species_name=species,
+            form_index=p.get("form_index"),
+            form_name=p.get("form_name"),
+            gender=p.get("gender"),
+            dex_id=p.get("dex_id"),
+        )
+    except Exception:
+        return []
+
+
+def _gender_parts(raw_gender: object) -> tuple[str, str]:
+    raw = str(raw_gender or "").strip().upper()
+    if raw.startswith("F"):
+        return "&#9792;", "is-female"
+    if raw.startswith("M"):
+        return "&#9794;", "is-male"
+    return "", ""
+
+
+def _spread_grid(vals: dict) -> str:
+    cells: list[str] = []
+    for key, label in SPREAD_ORDER:
+        value = _as_int(vals.get(key))
+        text = str(value if value is not None else 0)
+        cells.append(
+            "<span class='pokemon-inspector-spread-cell'>"
+            f"<b>{_html.escape(label)}</b><strong>{_html.escape(text)}</strong>"
+            "</span>"
+        )
+    return "<div class='pokemon-inspector-spread'>" + "".join(cells) + "</div>"
+
+
+def _section(title: str, content: str, *, extra_class: str = "") -> str:
+    classes = "pokemon-inspector-panel"
+    if extra_class:
+        classes += f" {extra_class}"
+    return (
+        f"<section class='{classes}'>"
+        f"<div class='pokemon-inspector-panel-title'>{_html.escape(title)}</div>"
+        f"{content}"
+        "</section>"
+    )
+
+
+def _move_type(move_name: str, move_id: object | None) -> tuple[str | None, dict]:
+    try:
+        info = move_info(str(move_name), move_id=_as_int(move_id)) or {}
+    except Exception:
+        info = {}
+    move_type = info.get("type")
+    return (str(move_type) if move_type else None), info
+
+
+def _move_id_from_detail(move: object, detail: dict | None) -> object | None:
+    if isinstance(detail, dict):
+        found = detail.get("id") or detail.get("MoveId") or detail.get("move_id")
+        if found is not None:
+            return found
+    try:
+        match = re.search(r"\d+", str(move))
+        if match and str(move).lower().startswith("move"):
+            return int(match.group(0))
+    except Exception:
+        pass
+    return None
+
+
+def _moves_html(p: dict) -> str:
+    moves = list(p.get("moves", []) or [])[:4]
+    while len(moves) < 4:
+        moves.append(None)
+    details = p.get("moves_detail") or []
+
+    rows: list[str] = []
+    for idx, move in enumerate(moves):
+        if not move:
+            rows.append(
+                "<div class='pokemon-inspector-move-row is-empty'>"
+                "<span class='pokemon-inspector-move-type'>---</span>"
+                "<span class='pokemon-inspector-move-name'>---</span>"
+                "<span class='pokemon-inspector-move-pp'>PP --/--</span>"
+                "</div>"
+            )
+            continue
+
+        detail = details[idx] if idx < len(details) and isinstance(details[idx], dict) else None
+        move_id = _move_id_from_detail(move, detail)
+        move_type, info = _move_type(str(move), move_id)
+        type_html = (
+            type_icon_html(
+                move_type,
+                label=True,
+                compact=True,
+                class_name="move-type-badge--micro",
+            )
+            if move_type
+            else "<span class='pokemon-inspector-move-type-fallback'>---</span>"
+        )
+        pp_total = _as_int(info.get("pp")) or 0
+        pp_current = _as_int(detail.get("pp")) if detail else None
+        if pp_current is None:
+            pp_current = pp_total
+        pp_text = f"{pp_current}/{pp_total}" if pp_total else "--/--"
+        rows.append(
+            "<div class='pokemon-inspector-move-row'>"
+            f"<span class='pokemon-inspector-move-type'>{type_html}</span>"
+            f"<span class='pokemon-inspector-move-name'>{_html.escape(_move_es(str(move)))}</span>"
+            f"<span class='pokemon-inspector-move-pp'>PP { _html.escape(pp_text) }</span>"
+            "</div>"
+        )
+    return _section("Movimientos", "".join(rows), extra_class="pokemon-inspector-moves")
+
+
+def _stats_html(
+    *,
+    stx: dict,
+    hp_text: str,
+    hp_pct: int,
+    up_key: str | None,
+    down_key: str | None,
+) -> str:
+    rows: list[str] = []
+    for key, label in STAT_ORDER:
+        value = _fmt_stat(stx, key)
+        classes = "pokemon-inspector-stat-row"
+        if key == "hp":
+            classes += " is-hp"
+            pct = hp_pct
+            value_text = hp_text
+        else:
+            pct = _bar_pct(value)
+            value_text = value
+        if up_key and key == up_key:
+            classes += " is-boosted"
+        if down_key and key == down_key:
+            classes += " is-lowered"
+        rows.append(
+            f"<div class='{classes}'>"
+            f"<span class='pokemon-inspector-stat-label'>{_html.escape(label)}</span>"
+            "<span class='pokemon-inspector-stat-bar'>"
+            f"<span style='width:{pct}%;'></span>"
+            "</span>"
+            f"<span class='pokemon-inspector-stat-value'>{_html.escape(value_text)}</span>"
+            "</div>"
+        )
+    return _section("Estadisticas", "".join(rows), extra_class="pokemon-inspector-stats")
+
+
+def _competitive_html(
+    *,
+    ability: str | None,
+    ability_desc: str,
+    nature_txt: str,
+    ivs_display: dict,
+    evs_display: dict,
+) -> str:
+    ability_name = _ability_es(str(ability)) if ability else "-"
+    desc_html = (
+        f"<p class='pokemon-inspector-ability-desc'>{_html.escape(str(ability_desc))}</p>"
+        if ability_desc
+        else ""
+    )
+    content = (
+        "<div class='pokemon-inspector-data-grid'>"
+        "<div class='pokemon-inspector-data-item'>"
+        "<span>Naturaleza</span>"
+        f"<strong>{_html.escape(str(nature_txt or '-'))}</strong>"
+        "</div>"
+        "<div class='pokemon-inspector-data-item'>"
+        "<span>Habilidad</span>"
+        f"<strong>{_html.escape(str(ability_name or '-'))}</strong>"
+        f"{desc_html}"
+        "</div>"
+        "</div>"
+        "<div class='pokemon-inspector-spread-block'>"
+        "<span>IVs</span>"
+        f"{_spread_grid(ivs_display)}"
+        "</div>"
+        "<div class='pokemon-inspector-spread-block'>"
+        "<span>EVs</span>"
+        f"{_spread_grid(evs_display)}"
+        "</div>"
+    )
+    return _section("Datos competitivos", content, extra_class="pokemon-inspector-data")
+
+
 def render_detail_html(
     *,
     p: dict,
@@ -129,431 +362,98 @@ def render_detail_html(
     ivs_display: dict,
     evs_display: dict,
 ) -> str:
-    def _as_int(val):
-        try:
-            return int(val)
-        except Exception:
-            return None
+    species_raw = str(p.get("species_name") or p.get("species") or "?").strip()
+    nickname_raw = str(p.get("nickname") or "").strip()
+    display_raw = (
+        nickname_raw
+        if nickname_raw and nickname_raw.lower() != species_raw.lower()
+        else species_raw
+    )
+    species_line = species_raw if nickname_raw and nickname_raw.lower() != species_raw.lower() else ""
+    display_name = _html.escape(display_raw or "?")
+    species_name = _html.escape(species_line)
 
-    def _style(*parts):
-        return "; ".join(part.strip().rstrip(";") for part in parts if part)
+    gender_html, gender_cls = _gender_parts(p.get("gender"))
+    gender_badge = (
+        f"<span class='pokemon-inspector-gender {gender_cls}'>{gender_html}</span>"
+        if gender_html
+        else ""
+    )
 
-    species = str(p.get("species_name") or p.get("species") or "?").strip()
-    nickname = str(p.get("nickname") or "").strip()
-    display_name = nickname if nickname and nickname.lower() != species.lower() else species
-    display_name = _html.escape(display_name or "?")
-
-    gender_raw = str(p.get("gender") or "").strip().upper()
-    if gender_raw.startswith("F"):
-        gender_txt = "F"
-        gender_cls = "f"
-    elif gender_raw.startswith("M"):
-        gender_txt = "M"
-        gender_cls = "m"
-    else:
-        gender_txt = ""
-        gender_cls = ""
-
-    level_txt = "Nv.--"
     level_raw = _as_int(p.get("level"))
-    if level_raw is not None:
-        level_txt = f"Nv.{level_raw}"
-
+    level_txt = f"Nv.{level_raw}" if level_raw is not None else "Nv.--"
     img_url = sprite_url_from_p(p, prefer_animated=True)
-    raw_item = p.get("held_item") or p.get("item") or "-"
-    item = _item_name_es(raw_item)
-    ability_txt = _ability_es(str(ability)) if ability else ""
-    ability_desc = ability_desc_es(str(ability)) if ability else ""
+    item = _item_name_es(p.get("held_item") or p.get("item") or "-")
+    types_html = type_icons_html(
+        _pokemon_types(p),
+        label=True,
+        compact=True,
+        class_name="pokemon-type-badge type-badge--compact",
+    )
 
     ps = _fmt_stat(stx, "hp")
     hp_max = _as_int(ps)
-    hp_cur = _as_int(p.get("hp_current") or p.get("current_hp") or p.get("hp")) or hp_max
-    if hp_max and hp_cur is not None:
-        hp_pct = int(max(0, min(100, round(100 * hp_cur / hp_max))))
-        hp_text = f"{hp_cur}/{hp_max}"
+    hp_current = _as_int(p.get("hp_current") or p.get("current_hp") or p.get("hp")) or hp_max
+    if hp_max and hp_current is not None:
+        hp_pct = int(max(0, min(100, round(100 * hp_current / hp_max))))
+        hp_text = f"{hp_current}/{hp_max}"
     else:
         hp_pct = 100
         hp_text = "--/--"
 
-    font_base = 'font-family:var(--font-ui); font-size:19px; line-height:1.1; font-weight:400;'
-    root_style = _style(font_base, "display:grid", "grid-template-columns:1.05fr 1fr 1fr", "gap:16px", "align-items:start")
+    ability_desc = ability_desc_es(str(ability)) if ability else ""
+    header_subtitle = (
+        f"<div class='pokemon-inspector-species'>{species_name}</div>"
+        if species_name
+        else ""
+    )
+    private_badge = "Privado" if is_own else "Vista publica"
+    root_class = "pokemon-inspector is-own" if is_own else "pokemon-inspector is-public"
 
-    left_style = _style(
-        "background:linear-gradient(180deg,var(--bw2-panel-2) 0%, var(--bw2-panel) 100%)",
-        "border:1px solid var(--bw2-edge)",
-        "border-radius:0",
-        "padding:8px",
-        "color:var(--bw2-text-soft)",
-        "box-shadow: inset 0 1px 0 rgba(255,255,255,0.08), 0 0 0 1px rgba(0,0,0,0.28)",
-    )
-    header_style = _style(
-        "background:linear-gradient(180deg,var(--accent) 0%, var(--accent-dark) 100%)",
-        "border:1px solid var(--bw2-edge-strong)",
-        "border-radius:0",
-        "padding:7px 9px",
-        "display:flex",
-        "align-items:center",
-        "justify-content:space-between",
-        "color:#ffffff",
-        "font-family:var(--font-pixel)",
-        "font-size:10px",
-        "text-transform:uppercase",
-        "clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px)",
-    )
-    name_style = _style("display:flex", "align-items:center", "gap:6px", "font-size:10px", "color:#ffffff")
-    gender_color = "#d6447a" if gender_cls == "f" else "#2f6ad9"
-    gender_style = _style(
-        "font-size:12px",
-        "padding:2px 6px",
-        "border:1px solid var(--bw2-edge-strong)",
-        "border-radius:0",
-        f"background:linear-gradient(180deg,{gender_color} 0%, rgba(0,0,0,0.35) 100%)",
-        "color:#ffffff",
-    )
-    level_style = _style(
-        "margin-top:6px",
-        "background:linear-gradient(180deg,var(--bw2-panel-3) 0%, var(--bw2-panel) 100%)",
-        "border:1px solid var(--bw2-edge)",
-        "border-radius:0",
-        "padding:4px 6px",
-        "font-size:17px",
-        "color:var(--bw2-text)",
-    )
-    sprite_style = _style(
-        "margin-top:8px",
-        "background:repeating-linear-gradient(0deg, rgba(121,185,245,0.06) 0 4px, transparent 4px 8px), linear-gradient(180deg,var(--bw2-screen-2) 0%, var(--bw2-screen) 100%)",
-        "border:1px solid var(--bw2-edge)",
-        "border-radius:0",
-        "padding:10px",
-        "display:flex",
-        "align-items:center",
-        "justify-content:center",
-        "min-height:180px",
-    )
-    item_box_style = _style("margin-top:8px", "border:1px solid var(--bw2-edge)", "border-radius:0", "overflow:hidden")
-    item_label_style = _style(
-        "background:linear-gradient(180deg,var(--accent) 0%, var(--accent-dark) 100%)",
-        "border-bottom:1px solid var(--bw2-edge-strong)",
-        "padding:6px 8px",
-        "font-size:10px",
-        "font-family:var(--font-pixel)",
-        "color:#ffffff",
-        "text-transform:uppercase",
-    )
-    item_value_style = _style(
-        "background:linear-gradient(180deg,var(--bw2-panel-3) 0%, var(--bw2-panel) 100%)",
-        "padding:6px 8px",
-        "font-size:17px",
-        "color:var(--bw2-text)",
+    hero_html = (
+        "<div class='pokemon-inspector-hero'>"
+        "<div class='pokemon-inspector-identity'>"
+        "<div class='pokemon-inspector-kicker'>Revision Pokemon</div>"
+        f"<div class='pokemon-inspector-name'>{display_name}</div>"
+        f"{header_subtitle}"
+        "<div class='pokemon-inspector-meta-row'>"
+        f"<span class='pokemon-inspector-level'>{_html.escape(level_txt)}</span>"
+        f"{gender_badge}"
+        f"<span class='pokemon-inspector-visibility'>{private_badge}</span>"
+        "</div>"
+        f"<div class='pokemon-inspector-types'>{types_html}</div>"
+        "<div class='pokemon-inspector-item'>"
+        "<span>Objeto</span>"
+        f"<strong>{_html.escape(str(item))}</strong>"
+        "</div>"
+        "</div>"
+        "<div class='pokemon-inspector-sprite'>"
+        f"<img src='{_html.escape(str(img_url), quote=True)}' alt='{display_name}'/>"
+        "</div>"
+        "</div>"
     )
 
-    tab_wrap_style = _style("display:flex", "gap:4px", "margin-bottom:6px")
-    tab_base_style = _style("width:18px", "height:18px", "border:1px solid var(--bw2-edge-strong)", "border-radius:0", "display:inline-block")
-    tab_colors = ["#58d18e", "#79b9f5", "#66d1ff", "#f26b61", "#cf74ff", "#e5bc56"]
-    tabs_html = "<div class='champ-detail-tabs' style='{}'>".format(tab_wrap_style)
-    for color in tab_colors:
-        tabs_html += "<div class='champ-detail-tab' style='{}; background:{};'></div>".format(tab_base_style, color)
-    tabs_html += "</div>"
-
-    stats_screen_style = _style(
-        "border:1px solid var(--bw2-edge)",
-        "border-radius:0",
-        "overflow:hidden",
-        "background:linear-gradient(180deg,var(--bw2-screen-2) 0%, var(--bw2-screen) 100%)",
-        "color:#f7f8ff",
-        "box-shadow: inset 0 1px 0 rgba(255,255,255,0.06)",
-    )
-    ps_row_style = _style(
-        "padding:8px",
-        "background:rgba(121,185,245,0.16)",
-        "border-bottom:1px solid rgba(255,255,255,0.08)",
-        "display:grid",
-        "grid-template-columns:auto 1fr",
-        "gap:8px",
-        "align-items:center",
-    )
-    ps_label_style = _style("font-size:11px", "color:#f7f8ff")
-    ps_value_style = _style(
-        "justify-self:end",
-        "background:linear-gradient(180deg,var(--bw2-panel-3) 0%, var(--bw2-panel) 100%)",
-        "color:var(--bw2-text)",
-        "padding:4px 6px",
-        "border:1px solid var(--bw2-edge)",
-        "border-radius:0",
-        "font-size:16px",
-    )
-    ps_bar_style = _style(
-        "grid-column:1 / -1",
-        "height:10px",
-        "background:#090d11",
-        "border:1px solid var(--bw2-edge)",
-        "border-radius:0",
-        "overflow:hidden",
-    )
-    ps_fill_style = _style("height:100%", "background:linear-gradient(90deg,#7be16f,#3ecf5b)")
-
-    labels = [("atk", "Ataque"), ("def", "Defensa"), ("spa", "At. Esp."), ("spd", "Def. Esp."), ("spe", "Veloc.")]
-    stat_rows = []
-    for idx, (key, label) in enumerate(labels):
-        row_bg = "rgba(121,185,245,0.16)" if idx % 2 == 0 else "rgba(121,185,245,0.10)"
-        row_style = _style(
-            "display:grid",
-            "grid-template-columns:1fr auto",
-            "align-items:center",
-            "padding:6px 8px",
-            f"background:{row_bg}",
-            "border-bottom:2px solid #6d73bd",
-            "color:#f7f8ff",
+    body_html = (
+        "<div class='pokemon-inspector-body'>"
+        + _stats_html(
+            stx=stx,
+            hp_text=hp_text,
+            hp_pct=hp_pct,
+            up_key=up_key,
+            down_key=down_key,
         )
-        val_bg = "linear-gradient(180deg,var(--bw2-panel-3) 0%, var(--bw2-panel) 100%)"
-        if up_key and key == up_key:
-            val_bg = "linear-gradient(180deg,#f6e39c 0%, #b68a28 100%)"
-        if down_key and key == down_key:
-            val_bg = "linear-gradient(180deg,#79b9f5 0%, #376c96 100%)"
-        val_style = _style(
-            f"background:{val_bg}",
-            "border:1px solid var(--bw2-edge)",
-            "border-radius:0",
-            "padding:4px 6px",
-            "min-width:64px",
-            "text-align:right",
-            "color:#ffffff",
-            "font-size:16px",
-        )
-        stat_rows.append(
-            "<div class='champ-detail-stat-row' style='{}'><div style='font-size:11px;'>{}</div><div class='champ-detail-stat-value' style='{}'>{}</div></div>".format(
-                row_style,
-                label,
-                val_style,
-                _fmt_stat(stx, key),
+        + (
+            _competitive_html(
+                ability=ability,
+                ability_desc=ability_desc,
+                nature_txt=nature_txt,
+                ivs_display=ivs_display,
+                evs_display=evs_display,
             )
+            if is_own
+            else ""
         )
-
-    nature_row_style = _style(
-        "padding:8px",
-        "background:rgba(121,185,245,0.14)",
-        "border-top:1px solid rgba(255,255,255,0.08)",
-        "display:grid",
-        "grid-template-columns:auto 1fr",
-        "gap:8px",
-        "align-items:center",
-        "color:#f7f8ff",
+        + _moves_html(p)
+        + "</div>"
     )
-    nature_label_style = _style("font-size:11px")
-    nature_value_style = _style(
-        "background:linear-gradient(180deg,var(--bw2-panel-3) 0%, var(--bw2-panel) 100%)",
-        "color:var(--bw2-text)",
-        "padding:4px 6px",
-        "border:1px solid var(--bw2-edge)",
-        "border-radius:0",
-        "font-size:16px",
-    )
-
-    ability_row_style = _style(
-        "padding:8px",
-        "background:rgba(121,185,245,0.14)",
-        "border-top:1px solid rgba(255,255,255,0.08)",
-        "display:grid",
-        "grid-template-columns:auto 1fr",
-        "gap:8px",
-        "align-items:center",
-        "color:#f7f8ff",
-    )
-    ability_label_style = _style("font-size:11px")
-    ability_name_style = _style(
-        "background:linear-gradient(180deg,var(--bw2-panel-3) 0%, var(--bw2-panel) 100%)",
-        "color:var(--bw2-text)",
-        "padding:4px 6px",
-        "border:1px solid var(--bw2-edge)",
-        "border-radius:0",
-        "font-size:16px",
-    )
-    ability_desc_style = _style(
-        "background:rgba(255,255,255,0.05)",
-        "border-top:1px solid rgba(255,255,255,0.08)",
-        "padding:8px",
-        "color:var(--bw2-text-soft)",
-        "font-size:16px",
-        "line-height:1.2",
-        "min-height:40px",
-        "white-space:normal",
-        "word-break:break-word",
-    )
-
-    ability_name_text = _html.escape(ability_txt) if ability_txt else "-"
-    ability_desc_text = _html.escape(ability_desc) if ability_desc else "-"
-    nature_value_text = _html.escape(str(nature_txt or "-"))
-
-    order = [("hp", "HP"), ("atk", "Atk"), ("def", "Def"), ("spa", "SpA"), ("spd", "SpD"), ("spe", "Spe")]
-
-    def _stat_line(vals: dict) -> str:
-        parts = []
-        for k, label in order:
-            v = _as_int(vals.get(k))
-            if v is None:
-                v = 0
-            parts.append(f"{label}:{v}")
-        return " ".join(parts) if parts else "-"
-
-    ivs_txt = _stat_line(ivs_display)
-    evs_txt = _stat_line(evs_display)
-    ivs_html = (
-        "<div class='champ-detail-private-row' style='padding:8px; background:rgba(121,185,245,0.14); border-top:1px solid rgba(255,255,255,0.08);'>"
-        "<div style='font-size:11px; margin-bottom:6px; color:#f7f8ff; font-family:var(--font-pixel);'>IVs</div>"
-        "<div class='champ-detail-private-value' style='background:linear-gradient(180deg,var(--bw2-panel-3) 0%, var(--bw2-panel) 100%); color:var(--bw2-text); padding:6px 8px; border:1px solid var(--bw2-edge); border-radius:0; font-size:15px;'>"
-        f"{_html.escape(ivs_txt)}</div>"
-        "</div>"
-    )
-    evs_html = (
-        "<div class='champ-detail-private-row' style='padding:8px; background:rgba(121,185,245,0.14); border-top:1px solid rgba(255,255,255,0.08);'>"
-        "<div style='font-size:11px; margin-bottom:6px; color:#f7f8ff; font-family:var(--font-pixel);'>EVs</div>"
-        "<div class='champ-detail-private-value' style='background:linear-gradient(180deg,var(--bw2-panel-3) 0%, var(--bw2-panel) 100%); color:var(--bw2-text); padding:6px 8px; border:1px solid var(--bw2-edge); border-radius:0; font-size:15px;'>"
-        f"{_html.escape(evs_txt)}</div>"
-        "</div>"
-    )
-    if not is_own:
-        ivs_html = ""
-        evs_html = ""
-
-    pokeball_html = (
-        "<span style='display:inline-block; width:14px; height:14px; border:2px solid #2a2a2a; "
-        "border-radius:50%; background:linear-gradient(#d94134 0 50%, #f5f5f5 50% 100%); "
-        "position:relative;'>"
-        "<span style='position:absolute; left:50%; top:50%; transform:translate(-50%, -50%); "
-        "width:4px; height:4px; border:2px solid #2a2a2a; border-radius:50%; background:#f5f5f5;'></span>"
-        "</span>"
-    )
-    gender_html = f"<div style='{gender_style}'>{gender_txt}</div>" if gender_txt else ""
-    left_html = (
-        f"<div class='champ-detail-card champ-detail-main' style='{left_style}'>"
-        f"<div class='champ-detail-header' style='{header_style}'>"
-        f"<div style='{name_style}'>{pokeball_html}<span>{display_name}</span></div>"
-        f"{gender_html}</div>"
-        f"<div class='champ-detail-level' style='{level_style}'>{level_txt}</div>"
-        f"<div class='champ-detail-sprite-stage' style='{sprite_style}'><img src='{_html.escape(str(img_url))}' "
-        f"style='image-rendering:pixelated; width:140px; height:auto;' alt='sprite'></div>"
-        f"<div class='champ-detail-item-box' style='{item_box_style}'>"
-        f"<div class='champ-detail-item-label' style='{item_label_style}'>Objeto</div>"
-        f"<div class='champ-detail-item-value' style='{item_value_style}'>{_html.escape(str(item))}</div>"
-        "</div></div>"
-    )
-
-    nature_row = ""
-    if is_own:
-        nature_row = "<div class='champ-detail-stat-row' style='{}'><div style='{}'>Naturaleza</div><div class='champ-detail-stat-value' style='{}'>{}</div></div>".format(
-            nature_row_style,
-            nature_label_style,
-            nature_value_style,
-            nature_value_text,
-        )
-
-    stats_html = (
-        f"<div class='champ-detail-card champ-detail-stats'>{tabs_html}"
-        f"<div class='champ-detail-screen' style='{stats_screen_style}'>"
-        f"<div class='champ-detail-ps-row' style='{ps_row_style}'>"
-        f"<div style='{ps_label_style}'>PS</div>"
-        f"<div class='champ-detail-stat-value' style='{ps_value_style}'>{hp_text}</div>"
-        f"<div class='champ-detail-bar' style='{ps_bar_style}'><div style='{ps_fill_style}; width:{hp_pct}%;'></div></div>"
-        "</div>"
-        + "".join(stat_rows)
-        + nature_row
-        + "<div class='champ-detail-stat-row champ-detail-ability-row' style='{}'><div style='{}'>Habilid.</div><div class='champ-detail-stat-value' style='{}'>{}</div></div>".format(
-            ability_row_style,
-            ability_label_style,
-            ability_name_style,
-            ability_name_text,
-        )
-        + "<div class='champ-detail-ability-desc' style='{}'>{}</div>".format(ability_desc_style, ability_desc_text)
-        + ivs_html
-        + evs_html
-        + "</div></div>"
-    )
-
-    moves = list(p.get("moves", []) or [])
-    moves = moves[:4]
-    while len(moves) < 4:
-        moves.append(None)
-    mdet = p.get("moves_detail") or []
-    mv_rows = []
-    for idx, mv in enumerate(moves):
-        if mv:
-            mv_es = _move_es(str(mv))
-            move_id = None
-            if idx < len(mdet) and isinstance(mdet[idx], dict):
-                move_id = mdet[idx].get("id") or mdet[idx].get("MoveId") or mdet[idx].get("move_id")
-            if move_id is None:
-                try:
-                    m = re.search(r"\d+", str(mv))
-                    if m and str(mv).lower().startswith("move"):
-                        move_id = int(m.group(0))
-                except Exception:
-                    move_id = None
-            info = move_info(str(mv), move_id=move_id) or {}
-            t = info.get("type")
-            t_es = type_icon_html(t, label=True, compact=True, class_name="champ-detail-type-chip") if t else "---"
-            pp_tot = info.get("pp") or 0
-            pp_cur = None
-            if idx < len(mdet) and isinstance(mdet[idx], dict):
-                pp_cur = mdet[idx].get("pp")
-            if pp_cur is None:
-                pp_cur = pp_tot
-            pp_text = f"{pp_cur}/{pp_tot}" if pp_tot else "--/--"
-        else:
-            mv_es = "---"
-            t_es = "---"
-            pp_text = "--/--"
-        move_row_style = _style(
-            "display:grid",
-            "grid-template-columns:auto 1fr auto",
-            "align-items:center",
-            "gap:8px",
-            "padding:8px",
-            "border-bottom:1px solid rgba(255,255,255,0.08)",
-            "background:rgba(242,107,97,0.16)",
-        )
-        move_type_style = _style(
-            "display:flex",
-            "align-items:center",
-            "justify-content:center",
-            "background:transparent",
-            "border:0",
-            "padding:0",
-            "min-width:84px",
-        )
-        move_name_style = _style("font-size:16px", "color:var(--bw2-text)")
-        move_pp_style = _style(
-            "display:flex",
-            "align-items:center",
-            "gap:6px",
-            "background:linear-gradient(180deg,var(--bw2-panel-3) 0%, var(--bw2-panel) 100%)",
-            "border:1px solid var(--bw2-edge)",
-            "border-radius:0",
-            "padding:4px 6px",
-            "font-size:14px",
-            "color:var(--bw2-text)",
-        )
-        mv_rows.append(
-            "<div class='champ-detail-move-row' style='{}'><div class='champ-detail-move-type' style='{}'>{}</div><div class='champ-detail-move-name' style='{}'>{}</div>"
-            "<div class='champ-detail-move-pp' style='{}'><span>PP</span><span>{}</span></div></div>".format(
-                move_row_style,
-                move_type_style,
-                t_es,
-                move_name_style,
-                _html.escape(str(mv_es)),
-                move_pp_style,
-                pp_text,
-            )
-        )
-
-    moves_screen_style = _style(
-        "border:1px solid var(--bw2-edge)",
-        "border-radius:0",
-        "overflow:hidden",
-        "background:linear-gradient(180deg,var(--bw2-screen-2) 0%, var(--bw2-screen) 100%)",
-        "box-shadow: inset 0 1px 0 rgba(255,255,255,0.06)",
-    )
-    moves_html = f"<div class='champ-detail-card champ-detail-moves'>{tabs_html}<div class='champ-detail-screen champ-detail-move-screen' style='{moves_screen_style}'>" + "".join(mv_rows) + "</div></div>"
-
-    detail_html = f"<div class='champ-detail-layout' style='{root_style}'>{left_html}{stats_html}{moves_html}</div>"
-    return detail_html
-
+    return f"<div class='{root_class}'>{hero_html}{body_html}</div>"

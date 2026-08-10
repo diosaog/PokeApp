@@ -8,11 +8,15 @@ from i18n import nature_display_es
 
 
 def pokemon_detail_panel() -> None:
-    st.subheader("Detalle del Pokemon")
     p = st.session_state.get("selected_pokemon")
     if not p:
         st.markdown(
-            "<div class='panel-dashed'>Selecciona un Pokemon.</div>",
+            (
+                "<div class='pokemon-detail-empty'>"
+                "<strong>Pokemon seleccionado</strong>"
+                "<span>Selecciona un Pokemon del equipo o la caja.</span>"
+                "</div>"
+            ),
             unsafe_allow_html=True,
         )
         return
