@@ -41,8 +41,8 @@ extraiga dominio o repositories.
 | --- | --- | --- |
 | `discounts.py` | PURE-ish/MIXED | Seleccion de promociones reutilizable; persiste y avisa Discord. |
 | `catalog_data.py` | PURE-ish | Catalogo estatico con assets. |
-| `catalog_render.py` | STREAMLIT/HTML | Render de cards. |
-| `sections.py` | STREAMLIT | Vista tienda y flujo de compra. |
+| `catalog_render.py` | STREAMLIT/HTML | Render de cards; el CTA usa `st.button` fuera del HTML de la card y se integra visualmente con CSS hasta extraer `ShopItemCard`. |
+| `sections.py` | STREAMLIT | Vista tienda y flujo de compra; confirmacion y compra siguen acopladas a `st.session_state`. |
 | `redeem.py` | MIXED | Canje de objetos, flags, saves y UI. |
 | `money.py` | MIXED | Calculo monedas con snapshots, medallas y compras. |
 | `styles.py` | STREAMLIT/CSS | Estilos tienda. |
@@ -94,4 +94,3 @@ extraiga dominio o repositories.
 | `test_liga_rewards.py` | Recompensas y divisiones actuales. |
 | `test_hall_of_fame.py` | Coercion/merge de historico. |
 | `test_saves_support.py` | HTML de saves. |
-

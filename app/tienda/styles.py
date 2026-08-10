@@ -620,6 +620,493 @@ def render_shop_styles() -> None:
           font-size: 12px !important;
           line-height: 1.25 !important;
         }
+
+        /* Phase 1B: final Poke Mart visual reference. */
+        .main .mart-hero,
+        .mart-hero {
+          min-height: 92px !important;
+          grid-template-columns: minmax(0, 1fr) auto !important;
+          gap: 14px !important;
+          align-items: center !important;
+          margin-bottom: 10px !important;
+          padding: 14px 16px !important;
+          border: 1px solid rgba(139,171,216,0.18) !important;
+          border-radius: 14px !important;
+          clip-path: none !important;
+          background:
+            linear-gradient(135deg, rgba(255,189,92,0.11), transparent 36%),
+            linear-gradient(180deg, rgba(18,30,49,0.96), rgba(8,14,26,0.98)) !important;
+          box-shadow: inset 0 1px 0 rgba(255,255,255,0.05), 0 14px 28px rgba(0,0,0,0.22) !important;
+        }
+
+        .main .mart-hero::before,
+        .mart-hero::before {
+          opacity: 0.18 !important;
+        }
+
+        .main .mart-title,
+        .mart-title {
+          margin-top: 7px !important;
+          color: var(--text-primary, #f6f9ff) !important;
+          -webkit-text-fill-color: var(--text-primary, #f6f9ff) !important;
+          font-size: clamp(24px, 2.2vw, 30px) !important;
+          line-height: 1.04 !important;
+          text-shadow: none !important;
+        }
+
+        .main .mart-kicker,
+        .mart-kicker {
+          padding: 4px 8px !important;
+          border: 1px solid rgba(255,189,92,0.22) !important;
+          border-left: 3px solid var(--accent, #ffbd5c) !important;
+          border-radius: 8px !important;
+          background: rgba(255,189,92,0.08) !important;
+          color: var(--text-secondary, #b8c7dc) !important;
+          -webkit-text-fill-color: var(--text-secondary, #b8c7dc) !important;
+          letter-spacing: 0 !important;
+        }
+
+        .main .mart-hero-right,
+        .mart-hero-right {
+          min-width: 164px !important;
+          padding: 0 !important;
+          border: 0 !important;
+          background: transparent !important;
+        }
+
+        .mart-balance-card {
+          min-width: 164px;
+          padding: 10px 12px;
+          border: 1px solid rgba(255,210,109,0.26);
+          border-radius: 12px;
+          background:
+            radial-gradient(circle at 100% 0%, rgba(255,210,109,0.13), transparent 54%),
+            rgba(255,255,255,0.035);
+        }
+
+        .mart-balance-card span {
+          display: block;
+          color: var(--text-muted, #77879e);
+          -webkit-text-fill-color: var(--text-muted, #77879e);
+          font-family: var(--font-pixel);
+          font-size: 9px;
+          font-weight: 900;
+          text-transform: uppercase;
+        }
+
+        .mart-balance-card strong {
+          display: block;
+          margin-top: 4px;
+          color: var(--pokemon-yellow, #ffd24d);
+          -webkit-text-fill-color: var(--pokemon-yellow, #ffd24d);
+          font-family: var(--font-pixel);
+          font-size: 22px;
+          line-height: 1;
+          font-variant-numeric: tabular-nums;
+        }
+
+        .main .mart-register-grid,
+        .mart-register-grid {
+          grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+          gap: 8px !important;
+          margin: 10px 0 12px !important;
+        }
+
+        .main .mart-register-card,
+        .mart-register-card {
+          min-height: 58px !important;
+          padding: 9px 10px !important;
+          border: 1px solid rgba(139,171,216,0.13) !important;
+          border-radius: 12px !important;
+          background: rgba(255,255,255,0.032) !important;
+          box-shadow: none !important;
+        }
+
+        .main .mart-register-card.is-main,
+        .mart-register-card.is-main {
+          border-color: rgba(255,210,109,0.3) !important;
+          background:
+            radial-gradient(circle at 100% 0%, rgba(255,210,109,0.12), transparent 56%),
+            rgba(255,255,255,0.04) !important;
+          box-shadow: inset 3px 0 0 var(--pokemon-yellow, #ffd24d) !important;
+        }
+
+        .main .mart-label,
+        .mart-label {
+          color: var(--text-muted, #77879e) !important;
+          -webkit-text-fill-color: var(--text-muted, #77879e) !important;
+          font-size: 9px !important;
+          letter-spacing: 0 !important;
+        }
+
+        .main .mart-value,
+        .mart-value {
+          margin-top: 5px !important;
+          color: var(--text-primary, #f6f9ff) !important;
+          -webkit-text-fill-color: var(--text-primary, #f6f9ff) !important;
+          font-size: 16px !important;
+          font-variant-numeric: tabular-nums !important;
+        }
+
+        .main .mart-register-card.is-main .mart-value,
+        .mart-register-card.is-main .mart-value {
+          color: var(--pokemon-yellow, #ffd24d) !important;
+          -webkit-text-fill-color: var(--pokemon-yellow, #ffd24d) !important;
+          font-size: 20px !important;
+        }
+
+        .main div[data-testid="stTabs"] [role="tablist"],
+        div[data-testid="stTabs"] [role="tablist"] {
+          gap: 8px !important;
+          padding: 0 0 10px !important;
+          border: 0 !important;
+          border-bottom: 1px solid rgba(215,230,255,0.08) !important;
+          background: transparent !important;
+          box-shadow: none !important;
+        }
+
+        .main div[data-testid="stTabs"] button[role="tab"],
+        div[data-testid="stTabs"] button[role="tab"] {
+          flex: 0 1 auto !important;
+          min-width: 132px !important;
+          min-height: 38px !important;
+          padding: 0 14px !important;
+          border: 1px solid rgba(215,230,255,0.08) !important;
+          border-radius: 10px !important;
+          clip-path: none !important;
+          background: rgba(255,255,255,0.035) !important;
+        }
+
+        .main div[data-testid="stTabs"] button[aria-selected="true"],
+        div[data-testid="stTabs"] button[aria-selected="true"] {
+          border-color: rgba(255,189,92,0.48) !important;
+          background:
+            linear-gradient(180deg, rgba(255,189,92,0.18), rgba(255,189,92,0.08)),
+            rgba(15,25,42,0.96) !important;
+          box-shadow: inset 0 -2px 0 var(--accent, #ffbd5c) !important;
+        }
+
+        .main .mart-aisle-head,
+        .mart-aisle-head {
+          margin: 12px 0 10px !important;
+          padding: 10px 12px !important;
+          border: 1px solid rgba(139,171,216,0.14) !important;
+          border-radius: 12px !important;
+          background: rgba(255,255,255,0.03) !important;
+          box-shadow: none !important;
+        }
+
+        .main .mart-aisle-title,
+        .mart-aisle-title {
+          margin: 0 !important;
+          color: var(--text-primary, #f6f9ff) !important;
+          -webkit-text-fill-color: var(--text-primary, #f6f9ff) !important;
+          font-size: 15px !important;
+          line-height: 1.1 !important;
+          text-shadow: none !important;
+        }
+
+        .main .shop-card,
+        .shop-card {
+          min-height: 196px !important;
+          margin-bottom: 6px !important;
+          border: 1px solid rgba(139,171,216,0.15) !important;
+          border-radius: 14px !important;
+          background:
+            radial-gradient(circle at 18% 22%, rgba(255,189,92,0.09), transparent 44%),
+            linear-gradient(180deg, rgba(18,30,49,0.96), rgba(10,17,29,0.98)) !important;
+          box-shadow: inset 0 1px 0 rgba(255,255,255,0.05), 0 10px 22px rgba(0,0,0,0.18) !important;
+        }
+
+        .main .shop-card:hover,
+        .shop-card:hover {
+          border-color: rgba(255,189,92,0.28) !important;
+          transform: translateY(-1px);
+        }
+
+        .main .shop-card::before,
+        .shop-card::before {
+          display: none !important;
+        }
+
+        .main .shop-card.is-sale,
+        .shop-card.is-sale {
+          border-color: rgba(255,210,109,0.45) !important;
+          box-shadow: inset 3px 0 0 var(--pokemon-yellow, #ffd24d), 0 10px 22px rgba(0,0,0,0.2) !important;
+        }
+
+        .main .shop-card.is-pending-sale,
+        .shop-card.is-pending-sale {
+          border-color: rgba(69,209,255,0.36) !important;
+          box-shadow: inset 3px 0 0 var(--info, #45d1ff), 0 10px 22px rgba(0,0,0,0.18) !important;
+        }
+
+        .main .shop-card.is-delivery-locked,
+        .shop-card.is-delivery-locked {
+          opacity: 0.82 !important;
+        }
+
+        .main .shop-head,
+        .shop-head {
+          min-height: 48px !important;
+          display: flex !important;
+          align-items: flex-start !important;
+          justify-content: space-between !important;
+          gap: 10px !important;
+          padding: 10px 11px 8px !important;
+          border-bottom: 1px solid rgba(215,230,255,0.08) !important;
+          background: rgba(6,12,22,0.54) !important;
+        }
+
+        .shop-title-block {
+          min-width: 0;
+          display: grid;
+          gap: 5px;
+        }
+
+        .main .shop-name,
+        .shop-name {
+          color: var(--text-primary, #f6f9ff) !important;
+          -webkit-text-fill-color: var(--text-primary, #f6f9ff) !important;
+          font-size: 12px !important;
+          font-weight: 950 !important;
+          line-height: 1.14 !important;
+        }
+
+        .shop-category-badge,
+        .shop-state-badge,
+        .shop-discount-badge {
+          display: inline-flex;
+          width: fit-content;
+          max-width: 100%;
+          align-items: center;
+          min-height: 22px;
+          padding: 3px 7px;
+          border: 1px solid rgba(139,171,216,0.16);
+          border-radius: 999px;
+          background: rgba(255,255,255,0.04);
+          color: var(--text-secondary, #b8c7dc);
+          -webkit-text-fill-color: var(--text-secondary, #b8c7dc);
+          font-family: var(--font-pixel);
+          font-size: 9px;
+          font-weight: 900;
+          line-height: 1;
+          text-transform: uppercase;
+          white-space: nowrap;
+        }
+
+        .shop-state-row {
+          flex: 0 0 auto;
+          display: flex;
+          justify-content: flex-end;
+        }
+
+        .shop-state-badge.is-sale,
+        .shop-discount-badge {
+          border-color: rgba(255,210,109,0.35) !important;
+          background: rgba(255,210,109,0.1) !important;
+          color: var(--pokemon-yellow, #ffd24d) !important;
+          -webkit-text-fill-color: var(--pokemon-yellow, #ffd24d) !important;
+        }
+
+        .shop-state-badge.is-locked,
+        .shop-discount-badge.is-pending {
+          border-color: rgba(69,209,255,0.3) !important;
+          background: rgba(69,209,255,0.085) !important;
+          color: #8fdcff !important;
+          -webkit-text-fill-color: #8fdcff !important;
+        }
+
+        .shop-state-badge.is-poor,
+        .shop-state-badge.is-used,
+        .shop-discount-badge.is-used {
+          border-color: rgba(139,171,216,0.15) !important;
+          background: rgba(255,255,255,0.035) !important;
+          color: var(--text-muted, #77879e) !important;
+          -webkit-text-fill-color: var(--text-muted, #77879e) !important;
+        }
+
+        .main .shop-body,
+        .shop-body {
+          display: grid !important;
+          grid-template-columns: 74px minmax(0, 1fr) !important;
+          gap: 12px !important;
+          padding: 12px 11px 13px !important;
+        }
+
+        .main .shop-icon-slot,
+        .shop-icon-slot {
+          width: 72px !important;
+          height: 72px !important;
+          border: 1px solid rgba(139,171,216,0.14) !important;
+          border-radius: 12px !important;
+          background:
+            radial-gradient(circle at 50% 42%, rgba(255,210,109,0.11), transparent 54%),
+            rgba(255,255,255,0.032) !important;
+        }
+
+        .main .shop-icon,
+        .shop-icon {
+          width: 58px !important;
+          height: 58px !important;
+          max-width: 58px !important;
+          max-height: 58px !important;
+          object-fit: contain !important;
+          filter: drop-shadow(0 5px 7px rgba(0,0,0,0.35)) !important;
+        }
+
+        .main .shop-info,
+        .shop-info {
+          min-width: 0 !important;
+          display: grid !important;
+          align-content: start !important;
+          gap: 8px !important;
+        }
+
+        .main .shop-desc,
+        .shop-desc {
+          color: var(--text-secondary, #b8c7dc) !important;
+          -webkit-text-fill-color: var(--text-secondary, #b8c7dc) !important;
+          font-size: 13px !important;
+          line-height: 1.28 !important;
+        }
+
+        .main .shop-price,
+        .shop-price {
+          display: grid !important;
+          gap: 6px !important;
+          padding: 0 !important;
+          border: 0 !important;
+          border-radius: 0 !important;
+          background: transparent !important;
+        }
+
+        .main .shop-price-row,
+        .shop-price-row,
+        .main .shop-price-flow,
+        .shop-price-flow {
+          gap: 6px !important;
+        }
+
+        .main .shop-coin-value,
+        .shop-coin-value {
+          min-height: 30px !important;
+          min-width: 60px !important;
+          padding: 4px 8px !important;
+          border: 1px solid rgba(255,210,109,0.26) !important;
+          border-radius: 9px !important;
+          background: rgba(255,210,109,0.08) !important;
+          color: var(--pokemon-yellow, #ffd24d) !important;
+          -webkit-text-fill-color: var(--pokemon-yellow, #ffd24d) !important;
+        }
+
+        .main .shop-old-price,
+        .shop-old-price {
+          opacity: 0.7 !important;
+          border-color: rgba(139,171,216,0.14) !important;
+          background: rgba(255,255,255,0.025) !important;
+          color: var(--text-muted, #77879e) !important;
+          -webkit-text-fill-color: var(--text-muted, #77879e) !important;
+        }
+
+        .main .shop-coin,
+        .shop-coin {
+          font-size: 18px !important;
+        }
+
+        .main .shop-amount,
+        .shop-amount {
+          color: inherit !important;
+          -webkit-text-fill-color: currentColor !important;
+          font-size: 17px !important;
+          font-weight: 950 !important;
+          font-variant-numeric: tabular-nums !important;
+        }
+
+        .main .shop-stock,
+        .shop-stock {
+          color: var(--text-secondary, #b8c7dc) !important;
+          -webkit-text-fill-color: var(--text-secondary, #b8c7dc) !important;
+          font-size: 11px !important;
+          font-weight: 800 !important;
+        }
+
+        .main .shop-missing,
+        .shop-missing {
+          width: fit-content !important;
+          margin-top: 0 !important;
+          padding: 5px 7px !important;
+          border: 1px solid rgba(255,82,99,0.24) !important;
+          border-radius: 9px !important;
+          background: rgba(255,82,99,0.075) !important;
+          color: #ffb3bd !important;
+          -webkit-text-fill-color: #ffb3bd !important;
+        }
+
+        div[data-testid="column"]:has(.shop-card) .stButton {
+          display: flex !important;
+          justify-content: flex-end !important;
+          margin: -2px 0 12px !important;
+        }
+
+        div[data-testid="column"]:has(.shop-card) .stButton > button {
+          width: auto !important;
+          min-width: 104px !important;
+          min-height: 32px !important;
+          padding: 0 13px !important;
+          border-radius: 10px !important;
+          border-color: rgba(77,141,255,0.42) !important;
+          background: linear-gradient(180deg, #5aa6ff, #2f6fff) !important;
+          box-shadow: none !important;
+        }
+
+        div[data-testid="column"]:has(.shop-card) .stButton > button:disabled {
+          border-color: rgba(139,171,216,0.09) !important;
+          background: rgba(255,255,255,0.035) !important;
+          color: rgba(184,199,220,0.55) !important;
+          -webkit-text-fill-color: rgba(184,199,220,0.55) !important;
+        }
+
+        div[data-testid="column"]:has(.shop-card) .stButton > button p {
+          font-size: 11px !important;
+          font-weight: 900 !important;
+          white-space: nowrap !important;
+        }
+
+        @media (max-width: 980px) {
+          .main .mart-register-grid,
+          .mart-register-grid {
+            grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+          }
+        }
+
+        @media (max-width: 640px) {
+          .main .mart-hero,
+          .mart-hero {
+            grid-template-columns: 1fr !important;
+          }
+          .mart-balance-card {
+            min-width: 0;
+          }
+          .main .mart-register-grid,
+          .mart-register-grid {
+            grid-template-columns: 1fr !important;
+          }
+          .main .shop-body,
+          .shop-body {
+            grid-template-columns: 64px minmax(0, 1fr) !important;
+          }
+          .main .shop-icon-slot,
+          .shop-icon-slot {
+            width: 62px !important;
+            height: 62px !important;
+          }
+          .main .shop-icon,
+          .shop-icon {
+            width: 50px !important;
+            height: 50px !important;
+          }
+        }
         </style>
         """,
         unsafe_allow_html=True,

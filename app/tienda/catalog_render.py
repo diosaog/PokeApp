@@ -16,6 +16,14 @@ from app.tienda.discounts import discount_label, promotion_opens_label
 from app.tienda.money import _money_available
 
 
+_CATEGORY_LABELS = {
+    "comodines": "Comodin",
+    "bayas": "Baya",
+    "competitivos": "Competitivo",
+    "crianza": "Crianza",
+}
+
+
 def _coin_value(value: int, *, extra_class: str = "") -> str:
     classes = "shop-coin-value"
     if extra_class:
@@ -96,7 +104,7 @@ def _render_item_card(
         )
         price_html = (
             "<div class='shop-price-row'>"
-            f"<span class='shop-discount-badge is-pending'>Proxima {label}</span>"
+            f"<span class='shop-discount-badge is-pending'>{label} pronto</span>"
             "<span class='shop-price-flow'>"
             f"{_coin_value(base_price, extra_class='shop-old-price')}"
             "<span class='shop-arrow'>-&gt;</span>"
@@ -114,7 +122,7 @@ def _render_item_card(
         )
         price_html = (
             "<div class='shop-price-row'>"
-            f"<span class='shop-discount-badge'>&#128293; {label}</span>"
+            f"<span class='shop-discount-badge'>{label}</span>"
             "<span class='shop-price-flow'>"
             f"{_coin_value(base_price, extra_class='shop-old-price')}"
             "<span class='shop-arrow'>-&gt;</span>"
@@ -162,11 +170,25 @@ def _render_item_card(
     if not afford:
         card_classes.append("is-poor")
 
+    category_label = _CATEGORY_LABELS.get(category_key, category_key.title())
+    state_badge = ""
+    if delivery_locked:
+        state_badge = "<span class='shop-state-badge is-locked'>En traslado</span>"
+    elif active_promotion:
+        state_badge = "<span class='shop-state-badge is-sale'>Oferta activa</span>"
+    elif already_claimed:
+        state_badge = "<span class='shop-state-badge is-used'>Oferta usada</span>"
+    elif not afford:
+        state_badge = "<span class='shop-state-badge is-poor'>Saldo insuficiente</span>"
+
     st.markdown(
         f"<div class='{' '.join(card_classes)}'>"
         "<div class='shop-head'>"
+        "<div class='shop-title-block'>"
         f"<span class='shop-name'>{name_html}</span>"
-        f"<span class='shop-sku'>{idx_key.split('_')[0]}-{idx_key.split('_')[-1]}</span>"
+        f"<span class='shop-category-badge'>{_html.escape(category_label)}</span>"
+        "</div>"
+        f"<div class='shop-state-row'>{state_badge}</div>"
         "</div>"
         "<div class='shop-body'>"
         f"<div class='shop-icon-slot'>{img_html}</div>"
@@ -258,9 +280,10 @@ def _render_shop_items(
         except Exception:
             pass
 
-    cols = st.columns(3)
+    column_count = 4 if category_key == "bayas" else 3
+    cols = st.columns(column_count)
     for idx, item in enumerate(items):
-        with cols[idx % 3]:
+        with cols[idx % column_count]:
             item_name = str(item.get("name") or "")
             _render_item_card(
                 item,

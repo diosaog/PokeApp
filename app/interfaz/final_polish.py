@@ -1135,14 +1135,47 @@ div[data-testid="column"]:has(.slot.team-slot-card) .stButton > button {
 /* Shop */
 .mart-hero {
   grid-template-columns: minmax(0, 1fr) auto !important;
+  min-height: 92px !important;
   margin-bottom: 10px !important;
+  padding: 14px 16px !important;
 }
 
 .mart-hero-right {
-  min-width: 180px !important;
-  border-color: var(--border-soft) !important;
+  min-width: 164px !important;
+  padding: 0 !important;
+  border: 0 !important;
+  background: transparent !important;
+}
+
+.mart-balance-card {
+  min-width: 164px !important;
+  padding: 10px 12px !important;
+  border: 1px solid rgba(255,210,109,0.26) !important;
   border-radius: 12px !important;
-  background: rgba(255,255,255,0.035) !important;
+  background:
+    radial-gradient(circle at 100% 0%, rgba(255,210,109,0.13), transparent 54%),
+    rgba(255,255,255,0.035) !important;
+}
+
+.mart-balance-card span {
+  display: block !important;
+  color: var(--text-muted) !important;
+  -webkit-text-fill-color: var(--text-muted) !important;
+  font-family: var(--font-pixel) !important;
+  font-size: 9px !important;
+  font-weight: 900 !important;
+  text-transform: uppercase !important;
+}
+
+.mart-balance-card strong {
+  display: block !important;
+  margin-top: 4px !important;
+  color: var(--pokemon-yellow) !important;
+  -webkit-text-fill-color: var(--pokemon-yellow) !important;
+  font-family: var(--font-pixel) !important;
+  font-size: 22px !important;
+  line-height: 1 !important;
+  font-variant-numeric: tabular-nums !important;
 }
 
 .mart-pill {
@@ -1156,16 +1189,61 @@ div[data-testid="column"]:has(.slot.team-slot-card) .stButton > button {
 
 .mart-register-grid {
   grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+  gap: 8px !important;
+  margin: 10px 0 12px !important;
+}
+
+.mart-register-card {
+  min-height: 58px !important;
+  padding: 9px 10px !important;
+}
+
+.mart-register-card.is-main {
+  border-color: rgba(255,210,109,0.3) !important;
+  background:
+    radial-gradient(circle at 100% 0%, rgba(255,210,109,0.12), transparent 56%),
+    rgba(255,255,255,0.04) !important;
+  box-shadow: inset 3px 0 0 var(--pokemon-yellow) !important;
+}
+
+.mart-label {
+  font-size: 9px !important;
+}
+
+.mart-value {
+  margin-top: 5px !important;
+  font-size: 16px !important;
+}
+
+.mart-register-card.is-main .mart-value {
+  color: var(--pokemon-yellow) !important;
+  -webkit-text-fill-color: var(--pokemon-yellow) !important;
+  font-size: 20px !important;
+}
+
+.mart-aisle-head {
+  margin: 12px 0 10px !important;
+  padding: 10px 12px !important;
+  border-color: rgba(139,171,216,0.14) !important;
+  border-radius: 12px !important;
+  background: rgba(255,255,255,0.03) !important;
+  box-shadow: none !important;
+}
+
+.mart-aisle-title {
+  margin: 0 !important;
+  font-size: 15px !important;
+  line-height: 1.1 !important;
 }
 
 .shop-card {
-  min-height: 184px !important;
-  margin-bottom: 4px !important;
-  border-color: rgba(215,230,255,0.12) !important;
+  min-height: 196px !important;
+  margin-bottom: 6px !important;
+  border-color: rgba(139,171,216,0.15) !important;
   border-radius: 14px !important;
   background:
-    linear-gradient(135deg, rgba(255,255,255,0.045), transparent 42%),
-    rgba(12, 20, 34, 0.96) !important;
+    radial-gradient(circle at 18% 22%, rgba(255,189,92,0.09), transparent 44%),
+    linear-gradient(180deg, rgba(18,30,49,0.96), rgba(10,17,29,0.98)) !important;
   box-shadow: inset 0 1px 0 rgba(255,255,255,0.055), 0 10px 22px rgba(0,0,0,0.18) !important;
 }
 
@@ -1174,49 +1252,116 @@ div[data-testid="column"]:has(.slot.team-slot-card) .stButton > button {
 }
 
 .shop-card.is-sale {
-  border-color: rgba(255,210,109,0.55) !important;
+  border-color: rgba(255,210,109,0.45) !important;
   box-shadow: inset 3px 0 0 var(--pokemon-yellow), 0 10px 22px rgba(0,0,0,0.2) !important;
 }
 
+.shop-card.is-pending-sale {
+  border-color: rgba(69,209,255,0.36) !important;
+  box-shadow: inset 3px 0 0 var(--info), 0 10px 22px rgba(0,0,0,0.18) !important;
+}
+
+.shop-card.is-delivery-locked {
+  opacity: 0.82 !important;
+}
+
 .shop-head {
-  min-height: 42px !important;
-  padding: 9px 11px !important;
+  min-height: 48px !important;
+  display: flex !important;
+  align-items: flex-start !important;
+  justify-content: space-between !important;
+  gap: 10px !important;
+  padding: 10px 11px 8px !important;
   border-bottom-color: var(--border-soft) !important;
-  background:
-    linear-gradient(90deg, var(--accent) 0 3px, transparent 3px 100%),
-    rgba(6, 12, 22, 0.74) !important;
+  background: rgba(6, 12, 22, 0.54) !important;
+}
+
+.shop-title-block {
+  min-width: 0 !important;
+  display: grid !important;
+  gap: 5px !important;
 }
 
 .shop-name {
-  font-size: 11px !important;
-  line-height: 1.18 !important;
+  font-size: 12px !important;
+  font-weight: 950 !important;
+  line-height: 1.14 !important;
 }
 
-.shop-sku {
-  font-size: 8px !important;
+.shop-category-badge,
+.shop-state-badge,
+.shop-discount-badge {
+  display: inline-flex !important;
+  width: fit-content !important;
+  max-width: 100% !important;
+  align-items: center !important;
+  min-height: 22px !important;
+  padding: 3px 7px !important;
+  border: 1px solid rgba(139,171,216,0.16) !important;
+  border-radius: 999px !important;
+  background: rgba(255,255,255,0.04) !important;
+  color: var(--text-secondary) !important;
+  -webkit-text-fill-color: var(--text-secondary) !important;
+  font-family: var(--font-pixel) !important;
+  font-size: 9px !important;
+  font-weight: 900 !important;
+  line-height: 1 !important;
+  text-transform: uppercase !important;
+  white-space: nowrap !important;
+}
+
+.shop-state-row {
+  flex: 0 0 auto !important;
+  display: flex !important;
+  justify-content: flex-end !important;
+}
+
+.shop-state-badge.is-sale,
+.shop-discount-badge {
+  border-color: rgba(255,210,109,0.35) !important;
+  background: rgba(255,210,109,0.1) !important;
+  color: var(--pokemon-yellow) !important;
+  -webkit-text-fill-color: var(--pokemon-yellow) !important;
+}
+
+.shop-state-badge.is-locked,
+.shop-discount-badge.is-pending {
+  border-color: rgba(69,209,255,0.3) !important;
+  background: rgba(69,209,255,0.085) !important;
+  color: #8fdcff !important;
+  -webkit-text-fill-color: #8fdcff !important;
+}
+
+.shop-state-badge.is-poor,
+.shop-state-badge.is-used,
+.shop-discount-badge.is-used {
+  border-color: rgba(139,171,216,0.15) !important;
+  background: rgba(255,255,255,0.035) !important;
   color: var(--text-muted) !important;
   -webkit-text-fill-color: var(--text-muted) !important;
 }
 
 .shop-body {
-  grid-template-columns: 70px minmax(0, 1fr) !important;
-  gap: 11px !important;
-  padding: 11px 11px 12px !important;
+  grid-template-columns: 74px minmax(0, 1fr) !important;
+  gap: 12px !important;
+  padding: 12px 11px 13px !important;
 }
 
 .shop-icon-slot {
-  width: 70px !important;
-  height: 70px !important;
+  width: 72px !important;
+  height: 72px !important;
   border-color: var(--border-soft) !important;
   border-radius: 12px !important;
   background:
-    radial-gradient(circle at 50% 42%, rgba(77,141,255,0.16), transparent 42px),
+    radial-gradient(circle at 50% 42%, rgba(255,210,109,0.11), transparent 54%),
     rgba(255,255,255,0.035) !important;
 }
 
 .shop-icon {
-  width: 56px !important;
-  height: 56px !important;
+  width: 58px !important;
+  height: 58px !important;
+  max-width: 58px !important;
+  max-height: 58px !important;
 }
 
 .shop-desc {
@@ -1227,17 +1372,31 @@ div[data-testid="column"]:has(.slot.team-slot-card) .stButton > button {
 }
 
 .shop-price {
-  padding: 7px 8px !important;
-  border-color: var(--border-soft) !important;
-  border-radius: 11px !important;
-  background: rgba(255,255,255,0.035) !important;
+  display: grid !important;
+  gap: 6px !important;
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
 }
 
 .shop-coin-value {
   min-height: 30px !important;
-  min-width: 54px !important;
-  border-color: rgba(255,210,109,0.28) !important;
+  min-width: 60px !important;
+  padding: 4px 8px !important;
+  border-color: rgba(255,210,109,0.26) !important;
   border-radius: 9px !important;
+  background: rgba(255,210,109,0.08) !important;
+  color: var(--pokemon-yellow) !important;
+  -webkit-text-fill-color: var(--pokemon-yellow) !important;
+}
+
+.shop-old-price {
+  opacity: 0.7 !important;
+  border-color: rgba(139,171,216,0.14) !important;
+  background: rgba(255,255,255,0.025) !important;
+  color: var(--text-muted) !important;
+  -webkit-text-fill-color: var(--text-muted) !important;
 }
 
 .shop-coin {
@@ -1245,23 +1404,21 @@ div[data-testid="column"]:has(.slot.team-slot-card) .stButton > button {
 }
 
 .shop-amount {
-  font-size: 16px !important;
+  color: inherit !important;
+  -webkit-text-fill-color: currentColor !important;
+  font-size: 17px !important;
   font-weight: 950 !important;
 }
 
 .shop-missing {
   margin-top: 0 !important;
+  padding: 5px 7px !important;
   border-radius: 10px !important;
 }
 
-.shop-discount-badge {
-  min-height: 24px !important;
-  padding: 4px 7px !important;
-  border-radius: 999px !important;
-  font-size: 10px !important;
-}
-
 div[data-testid="column"]:has(.shop-card) .stButton {
+  display: flex !important;
+  justify-content: flex-end !important;
   margin-top: -2px !important;
   margin-bottom: 12px !important;
 }
@@ -1272,6 +1429,15 @@ div[data-testid="column"]:has(.shop-card) .stButton > button {
   min-height: 32px !important;
   padding: 0 13px !important;
   border-radius: 10px !important;
+  border-color: rgba(77,141,255,0.42) !important;
+  background: linear-gradient(180deg, #5aa6ff, #2f6fff) !important;
+}
+
+div[data-testid="column"]:has(.shop-card) .stButton > button:disabled {
+  border-color: rgba(139,171,216,0.09) !important;
+  background: rgba(255,255,255,0.035) !important;
+  color: rgba(184,199,220,0.55) !important;
+  -webkit-text-fill-color: rgba(184,199,220,0.55) !important;
 }
 
 div[data-testid="column"]:has(.shop-card) .stButton > button p {

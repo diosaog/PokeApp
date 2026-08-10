@@ -53,19 +53,27 @@ CATEGORY_META = {
 
 def render_shop_header() -> None:
     render_shop_styles()
-    user = _html.escape(str(st.session_state.get("user") or "-"))
+    current_user = str(st.session_state.get("user") or "-")
+    try:
+        available = int(money_breakdown(current_user).get("available") or 0)
+    except Exception:
+        available = 0
     jornada = current_jornada()
     st.markdown(
         (
             "<div class='mart-hero'>"
             "<div class='mart-hero-left'>"
-            "<div class='mart-title'>Tienda de Liga</div>"
+            "<div class='mart-kicker'>Poke Mart</div>"
+            "<div class='mart-title'>Tienda</div>"
             "<div class='mart-subrow'>"
             f"<span class='mart-pill'>Jornada {int(jornada)}</span>"
             "</div>"
             "</div>"
             "<div class='mart-hero-right'>"
-            f"<div class='mart-pill'>Cliente: {user}</div>"
+            "<div class='mart-balance-card'>"
+            "<span>Saldo</span>"
+            f"<strong>{COIN} {available}</strong>"
+            "</div>"
             "</div>"
             "</div>"
         ),
@@ -109,7 +117,7 @@ def render_money_panel(current_user: str) -> tuple[dict, bool, int | None]:
             f"<div class='mart-value'>{COIN} {spent}</div>"
             "</div>"
             "<div class='mart-register-card'>"
-            f"<div class='mart-label'>Caja {status}</div>"
+            f"<div class='mart-label'>Tienda {status}</div>"
             f"<div class='mart-value'>{status_value}"
             + (f" -{COIN} {extra_reduction}" if extra_reduction else "")
             + "</div>"
@@ -236,7 +244,7 @@ def render_pending_purchase(current_user: str, *, store_locked: bool) -> None:
     st.markdown(
         (
             "<div class='mart-confirm-card'>"
-            "<div class='mart-confirm-title'>Ticket de caja</div>"
+            "<div class='mart-confirm-title'>Confirmar compra</div>"
             f"<div class='mart-confirm-line'>{desc}</div>"
             f"<div class='mart-confirm-price'>{COIN} {display_price}</div>"
             "</div>"
