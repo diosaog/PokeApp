@@ -2966,7 +2966,46 @@ html, body, [class*="css"],
 .main .poke-topbar-icon {
   width: 17px !important;
   height: 17px !important;
+  position: relative !important;
+  flex: 0 0 17px !important;
+  display: inline-block !important;
+  overflow: visible !important;
+  color: var(--pokemon-yellow) !important;
+  -webkit-text-fill-color: var(--pokemon-yellow) !important;
   fill: currentColor !important;
+}
+
+.main .poke-topbar-bell {
+  width: 17px !important;
+  height: 17px !important;
+  border-radius: 9px 9px 6px 6px !important;
+  background: linear-gradient(180deg, #ffe47a, #f2b733) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.45), 0 2px 5px rgba(18,14,54,0.22) !important;
+}
+
+.main .poke-topbar-bell::before {
+  content: "" !important;
+  position: absolute !important;
+  left: 50% !important;
+  top: -3px !important;
+  width: 7px !important;
+  height: 5px !important;
+  transform: translateX(-50%) !important;
+  border-radius: 999px 999px 0 0 !important;
+  background: #ffe47a !important;
+}
+
+.main .poke-topbar-bell::after {
+  content: "" !important;
+  position: absolute !important;
+  left: 50% !important;
+  bottom: -4px !important;
+  width: 7px !important;
+  height: 7px !important;
+  transform: translateX(-50%) !important;
+  border-radius: 50% !important;
+  background: #f7f2ff !important;
+  box-shadow: 0 0 0 2px rgba(18,14,54,0.28) !important;
 }
 
 .main .poke-coin-mark {
@@ -3970,6 +4009,166 @@ section[data-testid="stSidebar"] .poke-type-chip.asset-full {
   min-width: 112px !important;
   height: 23px !important;
   min-height: 23px !important;
+}
+
+/* New Champions final pass: remove old dark BW2 surfaces from active controls. */
+:root {
+  --champ-final-list: rgba(222,216,248,0.96);
+  --champ-final-list-2: rgba(199,192,230,0.95);
+  --champ-final-text: #263566;
+  --champ-final-lime: #b7ee32;
+  --champ-final-lime-2: #8fd10b;
+}
+
+section[data-testid="stSidebar"] div[data-testid="stExpander"] details,
+section[data-testid="stSidebar"] div[data-testid="stExpander"] summary,
+section[data-testid="stSidebar"] .app-notice-menu summary {
+  border: 1px solid rgba(246,242,255,0.48) !important;
+  border-radius: 16px !important;
+  background:
+    linear-gradient(136deg, transparent 0 70%, rgba(255,142,227,0.16) 70% 84%, rgba(79,214,255,0.16) 84% 100%),
+    linear-gradient(180deg, var(--champ-final-list), var(--champ-final-list-2)) !important;
+  color: var(--champ-final-text) !important;
+  -webkit-text-fill-color: var(--champ-final-text) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.54), 0 10px 22px rgba(14,11,48,0.18) !important;
+}
+
+section[data-testid="stSidebar"] div[data-testid="stExpander"] summary *,
+section[data-testid="stSidebar"] div[data-testid="stExpander"] details *,
+section[data-testid="stSidebar"] .app-notice-menu summary * {
+  color: var(--champ-final-text) !important;
+  -webkit-text-fill-color: var(--champ-final-text) !important;
+}
+
+section[data-testid="stSidebar"] div[data-testid="stExpander"] div[data-testid="stExpanderDetails"],
+section[data-testid="stSidebar"] .app-notice-menu-panel {
+  border: 1px solid rgba(246,242,255,0.24) !important;
+  border-radius: 18px !important;
+  background:
+    linear-gradient(126deg, rgba(255,255,255,0.08) 0 30%, transparent 30% 100%),
+    rgba(48,40,132,0.68) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.12) !important;
+}
+
+section[data-testid="stSidebar"] div[data-testid="stExpander"] input {
+  min-height: 38px !important;
+  border: 1px solid rgba(246,242,255,0.34) !important;
+  border-radius: 12px !important;
+  background: rgba(247,244,255,0.92) !important;
+  color: var(--champ-final-text) !important;
+  -webkit-text-fill-color: var(--champ-final-text) !important;
+}
+
+.main .matchup-hero,
+.main .matchup-shell,
+.main .matchup-summary,
+.main .battle-board {
+  border: 1px solid rgba(246,242,255,0.36) !important;
+  border-radius: 22px !important;
+  background:
+    linear-gradient(126deg, rgba(255,255,255,0.11) 0 24%, transparent 24% 100%),
+    linear-gradient(302deg, rgba(255,142,227,0.12), transparent 44%),
+    linear-gradient(180deg, rgba(100,82,212,0.92), rgba(48,40,132,0.9)) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.2), 0 18px 38px rgba(14,11,48,0.26) !important;
+}
+
+.main .matchup-mode-card,
+.main .matchup-move,
+.main .battle-move-link,
+.main .battle-no-move,
+.main .battle-board-top > div {
+  border: 1px solid rgba(246,242,255,0.46) !important;
+  border-radius: 16px !important;
+  background:
+    linear-gradient(136deg, transparent 0 70%, rgba(255,142,227,0.16) 70% 84%, rgba(79,214,255,0.16) 84% 100%),
+    linear-gradient(180deg, var(--champ-final-list), var(--champ-final-list-2)) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.54), 0 8px 18px rgba(14,11,48,0.18) !important;
+  color: var(--champ-final-text) !important;
+  -webkit-text-fill-color: var(--champ-final-text) !important;
+}
+
+.main .matchup-mode-card *,
+.main .matchup-move span:last-child,
+.main .battle-move-link span:last-child,
+.main .battle-no-move *,
+.main .battle-board-top > div * {
+  color: var(--champ-final-text) !important;
+  -webkit-text-fill-color: var(--champ-final-text) !important;
+}
+
+.main .matchup-mode-card.is-active,
+.main .battle-move-link:hover,
+.main .battle-move-link.is-active,
+.main .battle-move-row[open] > .battle-move-link {
+  border-color: rgba(246,216,59,0.95) !important;
+  background:
+    linear-gradient(136deg, transparent 0 70%, rgba(255,255,255,0.22) 70% 100%),
+    linear-gradient(180deg, var(--champ-final-lime), var(--champ-final-lime-2)) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.52), 0 0 0 3px rgba(246,216,59,0.18), 0 12px 23px rgba(18,14,54,0.24) !important;
+}
+
+.main .battle-mon-card,
+.main .matchup-mon {
+  border: 1px solid rgba(246,242,255,0.34) !important;
+  border-radius: 20px !important;
+  background:
+    linear-gradient(116deg, rgba(255,255,255,0.1) 0 35%, transparent 35% 100%),
+    linear-gradient(180deg, rgba(119,98,229,0.9), rgba(72,62,172,0.9)) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.18), 0 12px 26px rgba(18,14,54,0.2) !important;
+}
+
+.main .battle-card-left,
+.main .battle-ability-row,
+.main .battle-private-line,
+.main .battle-ivs,
+.main .battle-stat-stack,
+.main .battle-detail-stats div,
+.main .battle-move-detail,
+.main .battle-move-detail-inline,
+.main .matchup-metric {
+  border: 1px solid rgba(246,242,255,0.24) !important;
+  border-radius: 16px !important;
+  background:
+    linear-gradient(136deg, transparent 0 74%, rgba(255,142,227,0.12) 74% 100%),
+    rgba(255,255,255,0.08) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.12) !important;
+}
+
+.main .battle-sprite-wrap,
+.main .matchup-sprite {
+  border: 1px solid rgba(246,242,255,0.4) !important;
+  border-radius: 18px !important;
+  background:
+    radial-gradient(circle at 50% 46%, rgba(255,255,255,0.42), rgba(255,255,255,0.08) 60%, transparent 61%),
+    linear-gradient(180deg, rgba(224,219,249,0.92), rgba(190,183,225,0.9)) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.28), 0 8px 18px rgba(18,14,54,0.18) !important;
+}
+
+.main .battle-mon-name,
+.main .matchup-mon-title,
+.main .matchup-player,
+.main .matchup-title,
+.main .battle-stat-row strong,
+.main .battle-ability-row strong,
+.main .battle-private-line strong,
+.main .battle-iv strong {
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+}
+
+.main .battle-species,
+.main .battle-level,
+.main .battle-item,
+.main .matchup-mon-sub,
+.main .matchup-mon-extra,
+.main .matchup-subtitle,
+.main .matchup-division,
+.main .matchup-save,
+.main .battle-ability-desc,
+.main .battle-detail-desc,
+.main .battle-stat-label {
+  color: rgba(255,255,255,0.88) !important;
+  -webkit-text-fill-color: rgba(255,255,255,0.88) !important;
 }
 
 @media (max-width: 980px) {

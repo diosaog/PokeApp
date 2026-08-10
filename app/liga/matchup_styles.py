@@ -1158,12 +1158,12 @@ def ensure_matchup_css() -> None:
           filter: drop-shadow(0 1px 0 rgba(0,0,0,0.24));
         }
 
-        .battle-stat-symbol-heart::before { content: "♥"; }
-        .battle-stat-symbol-burst::before { content: "✹"; }
-        .battle-stat-symbol-shield::before { content: "✦"; }
-        .battle-stat-symbol-eye::before { content: "◎"; }
-        .battle-stat-symbol-hex::before { content: "⬢"; }
-        .battle-stat-symbol-wind::before { content: "≋"; }
+        .battle-stat-symbol-heart::before { content: "\\2665"; }
+        .battle-stat-symbol-burst::before { content: "\\2739"; }
+        .battle-stat-symbol-shield::before { content: "\\2726"; }
+        .battle-stat-symbol-eye::before { content: "\\25CE"; }
+        .battle-stat-symbol-hex::before { content: "\\2B22"; }
+        .battle-stat-symbol-wind::before { content: "\\224B"; }
 
         .battle-stat-label {
           color: rgba(255,255,255,0.88);
