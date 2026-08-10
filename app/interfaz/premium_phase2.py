@@ -181,6 +181,49 @@ div[data-testid="stDecoration"] {
   background: transparent !important;
 }
 
+div[data-testid="collapsedControl"] {
+  display: flex !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  pointer-events: auto !important;
+  position: fixed !important;
+  top: 12px !important;
+  left: 12px !important;
+  z-index: 2147483000 !important;
+}
+
+div[data-testid="collapsedControl"] * {
+  pointer-events: auto !important;
+}
+
+div[data-testid="collapsedControl"] button {
+  width: 42px !important;
+  height: 42px !important;
+  min-width: 42px !important;
+  min-height: 42px !important;
+  border: 1px solid rgba(228, 238, 255, 0.2) !important;
+  border-radius: 14px !important;
+  background:
+    linear-gradient(180deg, rgba(93,162,255,0.18), rgba(47,120,230,0.08)),
+    rgba(16, 24, 39, 0.94) !important;
+  color: var(--p2-text) !important;
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.28) !important;
+  backdrop-filter: blur(12px) !important;
+}
+
+div[data-testid="collapsedControl"] button:hover {
+  transform: translateY(-1px) !important;
+  border-color: rgba(93, 162, 255, 0.55) !important;
+  background:
+    linear-gradient(180deg, rgba(93,162,255,0.28), rgba(47,120,230,0.14)),
+    rgba(16, 24, 39, 0.98) !important;
+}
+
+div[data-testid="collapsedControl"] button svg {
+  color: var(--p2-text) !important;
+  fill: var(--p2-text) !important;
+}
+
 .main .stButton > button,
 section[data-testid="stSidebar"] .stButton > button {
   min-height: 38px !important;
