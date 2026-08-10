@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from html import escape
 import os
+from urllib.parse import quote
 
 import streamlit as st
 
@@ -20,6 +21,27 @@ _SECTION_META = {
     "Juicios": ("gavel", "Sanciones"),
     "Tienda": ("shopping_bag", "Compras"),
     "Saves": ("database", "Archivos"),
+}
+
+_NAV_GROUPS = (
+    ("Competicion", ("Inicio", "Liga y Tabla", "Team Preview", "Copa")),
+    ("Entrenador", ("Entrenadores", "Tienda", "Saves")),
+    ("Informacion", ("Normativa", "Hall of Fame")),
+    ("Admin", ("Temporada", "Juicios")),
+)
+
+_ICON_PATHS = {
+    "home": "M3 10.5 12 3l9 7.5V21h-6v-6H9v6H3V10.5z",
+    "trophy": "M7 4h10v3h3v2a5 5 0 0 1-5 5h-.5A5.5 5.5 0 0 1 13 16.2V19h4v2H7v-2h4v-2.8A5.5 5.5 0 0 1 9.5 14H9a5 5 0 0 1-5-5V7h3V4zm0 5H6a3 3 0 0 0 3 3h.2A7.4 7.4 0 0 1 7 9zm10 0a7.4 7.4 0 0 1-2.2 3H15a3 3 0 0 0 3-3h-1z",
+    "swords": "M14.7 4.3 20 2l-2.3 5.3-8.1 8.1 1.9 1.9-1.4 1.4-2-2L5.4 21 3 18.6l4.3-2.7-2-2 1.4-1.4 1.9 1.9 6.1-6.1zm-5.4 0L15.4 10 14 11.4 11.6 9 4 16.6 2.6 15.2 10.2 7.6 7.8 5.2z",
+    "medal": "M8 2h8l-2.2 5.2a6 6 0 1 1-3.6 0L8 2zm4 8a3 3 0 1 0 0 6 3 3 0 0 0 0-6z",
+    "users": "M8 11a4 4 0 1 1 0-8 4 4 0 0 1 0 8zm8-1a3 3 0 1 1 0-6 3 3 0 0 1 0 6zM2 20a6 6 0 0 1 12 0v1H2v-1zm12.5 1a8 8 0 0 0-2.1-5.4A5 5 0 0 1 22 18v3h-7.5z",
+    "shopping_bag": "M6 7V6a6 6 0 0 1 12 0v1h2v14H4V7h2zm2 0h8V6a4 4 0 0 0-8 0v1z",
+    "database": "M12 3c5 0 8 1.4 8 3v12c0 1.6-3 3-8 3s-8-1.4-8-3V6c0-1.6 3-3 8-3zm0 2C8.1 5 6 5.8 6 6s2.1 1 6 1 6-.8 6-1-2.1-1-6-1zm6 4.1c-1.4.8-3.5 1.2-6 1.2s-4.6-.4-6-1.2V12c0 .2 2.1 1 6 1s6-.8 6-1V9.1zm0 6c-1.4.8-3.5 1.2-6 1.2s-4.6-.4-6-1.2V18c0 .2 2.1 1 6 1s6-.8 6-1v-2.9z",
+    "file_text": "M5 3h10l4 4v14H5V3zm9 1.5V8h3.5M8 12h8M8 16h8M8 8h4",
+    "crown": "M3 8l4.5 3L12 5l4.5 6L21 8l-2 11H5L3 8z",
+    "gavel": "M13 4l7 7-2 2-1.4-1.4-3.2 3.2 4.2 4.2-2 2-11-11 2-2 4.2 4.2 3.2-3.2L11 6l2-2zM4 21h8v2H4v-2z",
+    "shield": "M12 2l8 3v6c0 5-3.4 9.4-8 11-4.6-1.6-8-6-8-11V5l8-3z",
 }
 
 
@@ -62,6 +84,33 @@ def _get_team_sprite_urls(user: str, mtime: float | None = None) -> list[str]:
     return urls
 
 
+def _icon_svg(name: str) -> str:
+    path = _ICON_PATHS.get(str(name or ""), _ICON_PATHS["home"])
+    return (
+        "<svg class='sidebar-nav-icon' viewBox='0 0 24 24' aria-hidden='true' "
+        "focusable='false'>"
+        f"<path d='{path}'></path>"
+        "</svg>"
+    )
+
+
+def _render_sidebar_brand() -> None:
+    st.sidebar.markdown(
+        """
+        <div class='sidebar-brand'>
+          <div class='sidebar-brand-mark' aria-hidden='true'>
+            <span></span>
+          </div>
+          <div>
+            <div class='sidebar-brand-name'>PokeApp</div>
+            <div class='sidebar-brand-sub'>League</div>
+          </div>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+
+
 @_cache_data(ttl=30)
 def _get_badges_count(user: str, mtime: float | None = None) -> int:
     _ = mtime
@@ -74,6 +123,20 @@ def _get_badges_count(user: str, mtime: float | None = None) -> int:
         return int(snapshot.get("badge_count") or 0)
     except Exception:
         return 0
+
+
+def _division_label(user: str) -> str:
+    try:
+        from app.interfaz.notifications import league_state_snapshot
+
+        league = league_state_snapshot()
+        if user in (league.get("division_a") or []):
+            return "Division A"
+        if user in (league.get("division_b") or []):
+            return "Division B"
+    except Exception:
+        pass
+    return "Liga"
 
 
 def _render_sidebar_profile() -> None:
@@ -110,7 +173,9 @@ def _render_sidebar_profile() -> None:
         if portrait
         else "<div class='pokeball-mini'></div>"
     )
-    status = "Modo consulta" if is_trainer_retired(user) else "Entrenador activo"
+    retired = is_trainer_retired(user)
+    status = "Consulta" if retired else "Activo"
+    context = f"{_division_label(user)} · {status}"
 
     st.sidebar.markdown(
         f"""
@@ -122,7 +187,7 @@ def _render_sidebar_profile() -> None:
             </div>
             <div class='profile-meta'>
               <div class='profile-name'>{escape(user)}</div>
-              <div class='profile-sub'>{escape(status)}</div>
+              <div class='profile-sub'>{escape(context)}</div>
             </div>
           </div>
           {badges_html}
@@ -213,6 +278,17 @@ def _normalized_sections(sections: list[str]) -> list[str]:
     return out or ["Inicio"]
 
 
+def _query_selected_section(nav_sections: list[str]) -> str | None:
+    try:
+        raw = st.query_params.get("section")
+        if isinstance(raw, list):
+            raw = raw[0] if raw else None
+        selected = _normalize_section(str(raw or ""))
+        return selected if selected in nav_sections else None
+    except Exception:
+        return None
+
+
 def _render_nav_css() -> None:
     st.sidebar.markdown(
         """
@@ -298,7 +374,9 @@ def _render_nav_css() -> None:
 
 def _render_section_nav(sections: list[str]) -> str:
     nav_sections = _normalized_sections(sections)
-    selected = _normalize_section(st.session_state.get("selected_section") or nav_sections[0])
+    selected = _query_selected_section(nav_sections)
+    if selected is None:
+        selected = _normalize_section(st.session_state.get("selected_section") or nav_sections[0])
     if selected not in nav_sections:
         selected = nav_sections[0]
     st.session_state["selected_section"] = selected
@@ -306,24 +384,42 @@ def _render_section_nav(sections: list[str]) -> str:
         st.session_state["selected_section_radio"] = selected
 
     _render_nav_css()
-    st.sidebar.markdown("<div class='sidebar-nav-title'>Menu principal</div>", unsafe_allow_html=True)
-
-    def _label(section: str) -> str:
-        return section
-
-    choice = st.sidebar.radio(
-        "Menu principal",
-        nav_sections,
-        index=nav_sections.index(selected),
-        format_func=_label,
-        key="selected_section_radio",
-        label_visibility="collapsed",
+    blocks: list[str] = []
+    for group_title, group_sections in _NAV_GROUPS:
+        links: list[str] = []
+        for section in group_sections:
+            if section not in nav_sections:
+                continue
+            icon, _help = _SECTION_META.get(section, ("home", section))
+            display = "Liga" if section == "Liga y Tabla" else section
+            active = " is-active" if section == selected else ""
+            href = f"?section={quote(section)}"
+            links.append(
+                "<a class='sidebar-nav-link"
+                f"{active}' href='{href}' target='_self' title='{escape(display)}'>"
+                f"{_icon_svg(icon)}"
+                f"<span>{escape(display)}</span>"
+                "</a>"
+            )
+        if links:
+            blocks.append(
+                "<div class='sidebar-nav-group'>"
+                f"<div class='sidebar-nav-title'>{escape(group_title)}</div>"
+                "<div class='sidebar-nav-links'>"
+                + "".join(links)
+                + "</div></div>"
+            )
+    st.sidebar.markdown(
+        "<nav class='sidebar-nav' aria-label='Menu principal'>"
+        + "".join(blocks)
+        + "</nav>",
+        unsafe_allow_html=True,
     )
-    st.session_state["selected_section"] = _normalize_section(choice)
     return str(st.session_state["selected_section"])
 
 
 def render_sidebar(sections: list[str]) -> str:
+    _render_sidebar_brand()
     _render_sidebar_profile()
     _render_sidebar_notifications()
     _render_change_pin_form()
@@ -338,5 +434,9 @@ def render_sidebar(sections: list[str]) -> str:
         st.session_state.user = None
         st.session_state.selected_section = "Inicio"
         st.session_state.selected_section_radio = "Inicio"
+        try:
+            st.query_params.clear()
+        except Exception:
+            pass
         st.rerun()
     return section

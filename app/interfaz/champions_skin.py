@@ -2779,8 +2779,8 @@ section[data-testid="stSidebar"] .poke-type-chip.uses-fallback * {
   --border-hover: rgba(255,255,255,0.18);
 
   --text-primary: #f5f7fa;
-  --text-secondary: #aab4c5;
-  --text-muted: #6f7b8f;
+  --text-secondary: #b5c0d3;
+  --text-muted: #7b879a;
   --text-inverse: #101827;
 
   --primary: #4d8dff;
@@ -2860,9 +2860,9 @@ body,
 .stApp {
   color: var(--text-primary) !important;
   background:
-    radial-gradient(circle at 78% -8%, rgba(77,141,255,0.12), transparent 340px),
-    radial-gradient(circle at 12% 12%, rgba(255,203,59,0.055), transparent 280px),
-    linear-gradient(120deg, transparent 0 88%, rgba(255,255,255,0.018) 88% 89%, transparent 89% 100%) 0 0 / 320px 220px,
+    radial-gradient(circle at 78% -8%, rgba(77,141,255,0.08), transparent 340px),
+    radial-gradient(circle at 12% 12%, rgba(255,203,59,0.032), transparent 280px),
+    linear-gradient(120deg, transparent 0 88%, rgba(255,255,255,0.008) 88% 89%, transparent 89% 100%) 0 0 / 360px 250px,
     linear-gradient(180deg, var(--bg-main) 0%, #0c1220 45%, #10192b 100%) !important;
 }
 
@@ -2885,9 +2885,98 @@ html, body, [class*="css"],
 }
 
 .main .block-container {
-  max-width: 1600px !important;
-  padding: 32px 32px 56px !important;
+  max-width: 1500px !important;
+  padding: 24px 32px 56px !important;
   margin: 0 auto !important;
+}
+
+.main .poke-topbar {
+  position: sticky !important;
+  top: 0 !important;
+  z-index: 50 !important;
+  min-height: 52px !important;
+  margin: 0 0 22px !important;
+  padding: 9px 12px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 14px !important;
+  border: 1px solid var(--border-soft) !important;
+  border-radius: var(--radius-card) !important;
+  background: rgba(13,18,32,0.88) !important;
+  box-shadow: 0 10px 28px rgba(0,0,0,0.2) !important;
+  backdrop-filter: blur(16px) !important;
+}
+
+.main .poke-topbar-left,
+.main .poke-topbar-right {
+  min-width: 0 !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 10px !important;
+  color: var(--text-secondary) !important;
+  -webkit-text-fill-color: var(--text-secondary) !important;
+  font-size: 13px !important;
+  font-weight: 800 !important;
+}
+
+.main .poke-topbar-right {
+  justify-content: flex-end !important;
+}
+
+.main .poke-topbar-round {
+  color: var(--text-primary) !important;
+  -webkit-text-fill-color: var(--text-primary) !important;
+}
+
+.main .poke-topbar-dot {
+  width: 4px !important;
+  height: 4px !important;
+  border-radius: 50% !important;
+  background: var(--border-hover) !important;
+}
+
+.main .poke-topbar-pill,
+.main .poke-topbar-user {
+  min-height: 34px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  padding: 0 10px !important;
+  border: 1px solid var(--border-soft) !important;
+  border-radius: 999px !important;
+  background: var(--surface-1) !important;
+  color: var(--text-primary) !important;
+  -webkit-text-fill-color: var(--text-primary) !important;
+}
+
+.main .poke-topbar-user span {
+  width: 24px !important;
+  height: 24px !important;
+  display: inline-grid !important;
+  place-items: center !important;
+  border-radius: 50% !important;
+  background: var(--primary-soft) !important;
+  color: var(--primary-hover) !important;
+  -webkit-text-fill-color: var(--primary-hover) !important;
+  font-size: 10px !important;
+  font-weight: 900 !important;
+}
+
+.main .poke-topbar-icon {
+  width: 17px !important;
+  height: 17px !important;
+  fill: currentColor !important;
+}
+
+.main .poke-coin-mark {
+  width: 18px !important;
+  height: 18px !important;
+  border-radius: 50% !important;
+  background:
+    radial-gradient(circle at 35% 30%, rgba(255,255,255,0.9), transparent 18%),
+    linear-gradient(180deg, #ffe078, #d99b1f) !important;
+  box-shadow: inset 0 0 0 2px rgba(100,64,0,0.28) !important;
 }
 
 .stApp h1,
@@ -2939,7 +3028,7 @@ section[data-testid="stSidebar"] .block-container {
 }
 
 section[data-testid="stSidebar"]::before {
-  display: block !important;
+  display: none !important;
   content: "POKEAPP\\A LEAGUE" !important;
   white-space: pre !important;
   position: static !important;
@@ -2958,6 +3047,66 @@ section[data-testid="stSidebar"]::before {
   letter-spacing: 0.02em !important;
   text-align: left !important;
   box-shadow: none !important;
+}
+
+section[data-testid="stSidebar"] .sidebar-brand {
+  margin: 0 0 18px !important;
+  padding: 18px 4px 20px !important;
+  display: grid !important;
+  grid-template-columns: 44px minmax(0, 1fr) !important;
+  gap: 10px !important;
+  align-items: center !important;
+  border-bottom: 1px solid var(--border-soft) !important;
+}
+
+section[data-testid="stSidebar"] .sidebar-brand-mark {
+  width: 42px !important;
+  height: 42px !important;
+  position: relative !important;
+  display: grid !important;
+  place-items: center !important;
+  border: 1px solid var(--border-normal) !important;
+  border-radius: 50% !important;
+  background:
+    linear-gradient(#ff5263 0 46%, #0b1020 46% 54%, #f5f7fa 54% 100%) !important;
+  box-shadow: 0 8px 18px rgba(0,0,0,0.28) !important;
+}
+
+section[data-testid="stSidebar"] .sidebar-brand-mark::before {
+  content: "" !important;
+  position: absolute !important;
+  left: 0 !important;
+  right: 0 !important;
+  top: calc(50% - 2px) !important;
+  height: 4px !important;
+  background: #0b1020 !important;
+}
+
+section[data-testid="stSidebar"] .sidebar-brand-mark span {
+  position: relative !important;
+  z-index: 1 !important;
+  width: 14px !important;
+  height: 14px !important;
+  border: 3px solid #0b1020 !important;
+  border-radius: 50% !important;
+  background: #f5f7fa !important;
+}
+
+section[data-testid="stSidebar"] .sidebar-brand-name {
+  color: var(--text-primary) !important;
+  -webkit-text-fill-color: var(--text-primary) !important;
+  font-size: 20px !important;
+  font-weight: 950 !important;
+  line-height: 1 !important;
+}
+
+section[data-testid="stSidebar"] .sidebar-brand-sub {
+  margin-top: 2px !important;
+  color: var(--text-muted) !important;
+  -webkit-text-fill-color: var(--text-muted) !important;
+  font-size: 11px !important;
+  font-weight: 850 !important;
+  text-transform: uppercase !important;
 }
 
 section[data-testid="stSidebar"] .profile-card {
@@ -3039,7 +3188,7 @@ section[data-testid="stSidebar"] .mini-mon img {
 }
 
 section[data-testid="stSidebar"] .sidebar-nav-title {
-  margin: 16px 0 8px !important;
+  margin: 16px 0 7px !important;
   padding: 0 4px !important;
   border: 0 !important;
   border-radius: 0 !important;
@@ -3050,6 +3199,68 @@ section[data-testid="stSidebar"] .sidebar-nav-title {
   font-size: 11px !important;
   font-weight: 800 !important;
   text-transform: uppercase !important;
+}
+
+section[data-testid="stSidebar"] .sidebar-nav {
+  display: grid !important;
+  gap: 2px !important;
+}
+
+section[data-testid="stSidebar"] .sidebar-nav-group {
+  display: grid !important;
+  gap: 4px !important;
+}
+
+section[data-testid="stSidebar"] .sidebar-nav-links {
+  display: grid !important;
+  gap: 3px !important;
+}
+
+section[data-testid="stSidebar"] .sidebar-nav-link {
+  min-height: 40px !important;
+  padding: 0 10px 0 12px !important;
+  display: grid !important;
+  grid-template-columns: 22px minmax(0, 1fr) !important;
+  gap: 10px !important;
+  align-items: center !important;
+  border: 1px solid transparent !important;
+  border-radius: var(--radius-input) !important;
+  color: var(--text-secondary) !important;
+  -webkit-text-fill-color: var(--text-secondary) !important;
+  text-decoration: none !important;
+  transition: background-color var(--transition-fast), border-color var(--transition-fast), color var(--transition-fast), transform var(--transition-fast) !important;
+}
+
+section[data-testid="stSidebar"] .sidebar-nav-link span {
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+  color: inherit !important;
+  -webkit-text-fill-color: currentColor !important;
+  font-size: 13px !important;
+  font-weight: 750 !important;
+}
+
+section[data-testid="stSidebar"] .sidebar-nav-icon {
+  width: 19px !important;
+  height: 19px !important;
+  fill: currentColor !important;
+}
+
+section[data-testid="stSidebar"] .sidebar-nav-link:hover {
+  background: rgba(255,255,255,0.045) !important;
+  border-color: var(--border-soft) !important;
+  color: var(--text-primary) !important;
+  -webkit-text-fill-color: var(--text-primary) !important;
+  transform: translateY(-1px) !important;
+}
+
+section[data-testid="stSidebar"] .sidebar-nav-link.is-active {
+  background: var(--primary-soft) !important;
+  border-color: rgba(77,141,255,0.3) !important;
+  box-shadow: inset 3px 0 0 var(--primary) !important;
+  color: var(--primary-hover) !important;
+  -webkit-text-fill-color: var(--primary-hover) !important;
 }
 
 section[data-testid="stSidebar"] div[role="radiogroup"] {
@@ -3115,6 +3326,28 @@ section[data-testid="stSidebar"] div.stButton > button[kind="primary"] p {
   -webkit-text-fill-color: var(--text-primary) !important;
 }
 
+section[data-testid="stSidebar"] .app-notice-menu {
+  margin: 8px 0 12px !important;
+}
+
+section[data-testid="stSidebar"] .app-notice-menu summary {
+  min-height: 38px !important;
+  padding: 8px 10px !important;
+  border-color: transparent !important;
+  background: rgba(255,255,255,0.025) !important;
+}
+
+section[data-testid="stSidebar"] .app-notice-menu-panel {
+  max-height: 260px !important;
+  overflow: auto !important;
+}
+
+section[data-testid="stSidebar"] .app-notice {
+  padding: 8px 9px !important;
+  margin-bottom: 6px !important;
+  box-shadow: none !important;
+}
+
 .main .home-hero,
 .main .auth-hero,
 .main .trainers-hero,
@@ -3175,6 +3408,84 @@ section[data-testid="stSidebar"] div.stButton > button[kind="primary"] p {
   color: var(--text-secondary) !important;
   -webkit-text-fill-color: var(--text-secondary) !important;
   box-shadow: none !important;
+}
+
+.main .home-hero {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr) !important;
+  gap: 22px !important;
+  align-items: center !important;
+  min-height: 188px !important;
+  padding: 24px !important;
+  background:
+    radial-gradient(circle at 50% 0, rgba(77,141,255,0.12), transparent 42%),
+    linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.015)),
+    var(--surface-1) !important;
+  box-shadow: var(--shadow-hero) !important;
+}
+
+.main .home-hero .home-title {
+  font-size: clamp(28px, 4vw, 44px) !important;
+  font-weight: 950 !important;
+  line-height: 1.02 !important;
+}
+
+.main .home-hero .home-kicker {
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  color: var(--text-secondary) !important;
+  -webkit-text-fill-color: var(--text-secondary) !important;
+  font-size: 12px !important;
+}
+
+.main .home-versus {
+  width: 86px !important;
+  height: 86px !important;
+  display: grid !important;
+  place-items: center !important;
+  border: 1px solid var(--border-normal) !important;
+  border-radius: 50% !important;
+  background: var(--surface-2) !important;
+  color: var(--pokemon-yellow) !important;
+  -webkit-text-fill-color: var(--pokemon-yellow) !important;
+  font-weight: 950 !important;
+}
+
+.main .home-side.home-right {
+  text-align: right !important;
+}
+
+.main .home-card,
+.main .home-context-card {
+  min-height: 112px !important;
+  padding: 15px !important;
+}
+
+.main .home-card-value {
+  font-size: 20px !important;
+  font-weight: 900 !important;
+}
+
+.main .home-card-detail {
+  color: var(--text-secondary) !important;
+  -webkit-text-fill-color: var(--text-secondary) !important;
+  font-size: 13px !important;
+}
+
+.main .home-context-grid,
+.main .home-activity {
+  display: grid !important;
+  gap: 12px !important;
+}
+
+.main .home-context-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+}
+
+.main .home-activity-row {
+  border-color: var(--border-soft) !important;
+  background: rgba(255,255,255,0.025) !important;
 }
 
 .main .home-section-title,
@@ -3331,6 +3642,15 @@ section[data-testid="stSidebar"] div.stButton > button[kind="primary"] p {
 .main .stDownloadButton > button:active,
 .main form button:active {
   transform: scale(0.98) !important;
+}
+
+.main .stButton > button:disabled,
+.main .stDownloadButton > button:disabled,
+.main form button:disabled {
+  opacity: 0.45 !important;
+  cursor: not-allowed !important;
+  transform: none !important;
+  filter: grayscale(0.22) !important;
 }
 
 .main .stButton > button[kind="primary"],
@@ -3585,6 +3905,35 @@ div[aria-selected="true"][role="option"] {
     var(--surface-1) !important;
 }
 
+.main .matchup-mon-empty,
+.main .battle-empty-card {
+  min-height: 138px !important;
+  display: grid !important;
+  place-items: center !important;
+  border-style: dashed !important;
+  border-color: rgba(181,192,211,0.2) !important;
+  background: rgba(255,255,255,0.018) !important;
+  color: var(--text-muted) !important;
+  -webkit-text-fill-color: var(--text-muted) !important;
+  box-shadow: none !important;
+  opacity: 0.72 !important;
+}
+
+.main .matchup-mon-empty .matchup-mon-title,
+.main .battle-empty-card .battle-empty-title {
+  color: var(--text-secondary) !important;
+  -webkit-text-fill-color: var(--text-secondary) !important;
+  font-size: 13px !important;
+  font-weight: 800 !important;
+}
+
+.main .matchup-mon-empty .matchup-mon-sub,
+.main .battle-empty-card .battle-empty-sub {
+  color: var(--text-muted) !important;
+  -webkit-text-fill-color: var(--text-muted) !important;
+  font-size: 12px !important;
+}
+
 .main .battle-mon-card {
   grid-template-columns: minmax(180px, .9fr) 136px minmax(260px, 1.18fr) !important;
 }
@@ -3695,6 +4044,29 @@ section[data-testid="stSidebar"] .poke-type-chip.asset-full {
   .main .block-container {
     padding: 24px 16px 48px !important;
   }
+  .main .poke-topbar {
+    align-items: flex-start !important;
+    flex-direction: column !important;
+  }
+  .main .poke-topbar-right {
+    width: 100% !important;
+    justify-content: flex-start !important;
+    flex-wrap: wrap !important;
+  }
+  .main .home-hero {
+    grid-template-columns: 1fr !important;
+    min-height: 0 !important;
+  }
+  .main .home-side.home-right {
+    text-align: left !important;
+  }
+  .main .home-versus {
+    width: 64px !important;
+    height: 64px !important;
+  }
+  .main .home-context-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
   section[data-testid="stSidebar"] {
     width: 230px !important;
     min-width: 230px !important;
@@ -3720,6 +4092,9 @@ section[data-testid="stSidebar"] .poke-type-chip.asset-full {
   }
   .main .champ-box-grid {
     grid-template-columns: repeat(3, minmax(54px, 1fr)) !important;
+  }
+  .main .home-context-grid {
+    grid-template-columns: 1fr !important;
   }
 }
 </style>

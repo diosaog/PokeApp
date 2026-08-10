@@ -58,6 +58,7 @@ def league_state_snapshot() -> dict[str, Any]:
     divisions = data.get("divisions") if isinstance(data, dict) else {}
     if not isinstance(divisions, dict):
         divisions = {}
+    matches = data.get("matches") if isinstance(data.get("matches"), dict) else {}
     try:
         tramo = max(int(data.get("tramo") or 1), 1)
     except Exception:
@@ -67,6 +68,7 @@ def league_state_snapshot() -> dict[str, Any]:
         "active": bool(data.get("active")),
         "division_a": list(divisions.get("A") or []),
         "division_b": list(divisions.get("B") or []),
+        "matches": matches,
     }
 
 
