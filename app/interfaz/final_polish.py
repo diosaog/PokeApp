@@ -1446,13 +1446,52 @@ div[data-testid="column"]:has(.shop-card) .stButton > button p {
 }
 
 /* Saves */
+.main .saves-hero {
+  min-height: 86px !important;
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) auto !important;
+  align-items: end !important;
+  padding: 14px 16px !important;
+}
+
+.main .saves-hero-side {
+  border: 1px solid var(--border-normal) !important;
+  border-radius: 999px !important;
+  background: rgba(255,255,255,0.055) !important;
+  color: var(--text-secondary) !important;
+  -webkit-text-fill-color: var(--text-secondary) !important;
+  font-size: 13px !important;
+}
+
+.main .saves-status-grid {
+  gap: 8px !important;
+  margin: 10px 0 14px !important;
+}
+
+.main .saves-stat {
+  min-height: 72px !important;
+  padding: 10px !important;
+}
+
+.main .saves-stat-value {
+  font-size: 13px !important;
+}
+
+.main .saves-stat-detail {
+  font-size: 13px !important;
+}
+
 .saves-current-card,
 .saves-history-card,
 .saves-admin-panel,
+.saves-upload-panel,
+.saves-empty-state,
 .bill-save-meta {
   border-color: var(--border-normal) !important;
   border-radius: 14px !important;
-  background: rgba(11, 19, 32, 0.94) !important;
+  background:
+    linear-gradient(135deg, rgba(77,141,255,0.045), transparent 42%),
+    rgba(11, 19, 32, 0.94) !important;
   box-shadow: none !important;
 }
 
@@ -1475,11 +1514,31 @@ div[data-testid="column"]:has(.shop-card) .stButton > button p {
   font-size: 13px !important;
 }
 
+.main .saves-meta-cell.is-technical .saves-meta-value {
+  color: var(--text-muted) !important;
+  -webkit-text-fill-color: var(--text-muted) !important;
+  font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace !important;
+  font-size: 12px !important;
+}
+
 .saves-admin-panel {
   border-left-color: var(--danger) !important;
   background:
     linear-gradient(90deg, rgba(255,82,99,0.1), transparent 50%),
     rgba(11, 19, 32, 0.94) !important;
+}
+
+.main .saves-empty-state {
+  border-style: dashed !important;
+  color: var(--text-secondary) !important;
+  -webkit-text-fill-color: var(--text-secondary) !important;
+}
+
+.main .saves-empty-state strong {
+  display: block !important;
+  color: var(--text-primary) !important;
+  -webkit-text-fill-color: var(--text-primary) !important;
+  font-size: 13px !important;
 }
 
 div[data-testid="stFileUploaderDropzone"] {
@@ -1490,6 +1549,47 @@ div[data-testid="stFileUploaderDropzone"] {
 }
 
 /* League and tables */
+.main .league-hero {
+  min-height: 92px !important;
+  padding: 14px 16px !important;
+  grid-template-columns: minmax(0, 1fr) minmax(320px, .72fr) !important;
+}
+
+.main .league-title {
+  font-size: clamp(22px, 2.1vw, 30px) !important;
+}
+
+.main .league-subtitle {
+  margin-top: 7px !important;
+  font-size: 13px !important;
+}
+
+.main .league-hero-grid {
+  gap: 8px !important;
+}
+
+.main .league-status-card {
+  min-height: 50px !important;
+  padding: 8px 10px !important;
+}
+
+.main .league-status-card strong {
+  margin-top: 4px !important;
+  font-size: 14px !important;
+}
+
+.main .league-section-heading {
+  margin: 16px 0 8px !important;
+}
+
+.main .league-section-copy {
+  margin: 5px 0 0 12px !important;
+  color: var(--text-secondary) !important;
+  -webkit-text-fill-color: var(--text-secondary) !important;
+  font-size: 13px !important;
+  line-height: 1.25 !important;
+}
+
 .league-division-card,
 .league-history-card,
 .league-status-table,
@@ -1504,10 +1604,67 @@ div[data-testid="stFileUploaderDropzone"] {
 }
 
 .league-card-player {
-  min-height: 38px !important;
+  grid-template-columns: 38px minmax(0, 1fr) auto auto auto !important;
+  min-height: 42px !important;
   border-color: var(--border-soft) !important;
   border-radius: 10px !important;
   background: rgba(255,255,255,0.035) !important;
+}
+
+.main .league-card-player.is-history-row {
+  grid-template-columns: 38px minmax(0, 1fr) auto !important;
+}
+
+.main .league-card-main {
+  min-width: 0 !important;
+}
+
+.main .league-card-score,
+.main .league-card-coins {
+  display: grid !important;
+  justify-items: end !important;
+  min-width: 54px !important;
+  line-height: 1 !important;
+}
+
+.main .league-card-score strong,
+.main .league-card-coins strong {
+  color: var(--text-primary) !important;
+  -webkit-text-fill-color: var(--text-primary) !important;
+  font-size: 16px !important;
+  font-weight: 950 !important;
+}
+
+.main .league-card-coins strong {
+  color: var(--pokemon-yellow) !important;
+  -webkit-text-fill-color: var(--pokemon-yellow) !important;
+}
+
+.main .league-card-score span,
+.main .league-card-coins span {
+  color: var(--text-muted) !important;
+  -webkit-text-fill-color: var(--text-muted) !important;
+  font-size: 10px !important;
+  font-weight: 850 !important;
+  text-transform: uppercase !important;
+}
+
+.main .league-card-player.is-current-player,
+.main .league-status-table tr.is-current-player td {
+  border-color: rgba(69,209,255,0.34) !important;
+  background:
+    linear-gradient(90deg, rgba(69,209,255,0.11), transparent 58%),
+    rgba(12, 25, 43, 0.9) !important;
+}
+
+.main .league-card-player.is-current-player,
+.main .league-status-table tr.is-current-player td:first-child {
+  box-shadow: inset 3px 0 0 var(--accent) !important;
+}
+
+.main .league-card-player.is-retired-player,
+.main .league-status-table tr.is-retired-player td {
+  opacity: .72 !important;
 }
 
 .league-card-player:hover {
@@ -1591,6 +1748,10 @@ div[data-testid="stFileUploaderDropzone"] {
 }
 
 @media (max-width: 980px) {
+  .main .league-hero,
+  .main .saves-hero {
+    grid-template-columns: 1fr !important;
+  }
   .mart-register-grid,
   .trainers-status-grid,
   .saves-status-grid {
@@ -1631,6 +1792,21 @@ div[data-testid="stFileUploaderDropzone"] {
   }
   .champ-box-grid {
     grid-template-columns: repeat(3, minmax(76px, 1fr)) !important;
+  }
+  .main .league-card-player {
+    grid-template-columns: 32px minmax(0, 1fr) auto auto !important;
+  }
+  .main .league-card-score,
+  .main .league-card-coins {
+    min-width: 42px !important;
+  }
+  .main .league-movement-badge {
+    grid-column: 2 / -1 !important;
+    justify-self: start !important;
+  }
+  .main .saves-hero-side {
+    justify-self: start !important;
+    white-space: normal !important;
   }
 }
 </style>

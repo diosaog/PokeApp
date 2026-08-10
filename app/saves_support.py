@@ -19,8 +19,12 @@ SAVES_PAGE_CSS = """
 .saves-hero {
   position:relative;
   overflow:hidden;
-  padding:18px 18px 16px;
-  margin-bottom:14px;
+  display:grid;
+  grid-template-columns:minmax(0, 1fr) auto;
+  gap:12px;
+  align-items:end;
+  padding:14px 16px;
+  margin-bottom:12px;
   border:1px solid var(--bw2-edge);
   background:
     linear-gradient(120deg, rgba(110,168,255,0.24), transparent 36%),
@@ -34,12 +38,26 @@ SAVES_PAGE_CSS = """
   text-transform:uppercase;
 }
 .saves-title {
-  margin-top:10px;
+  margin-top:8px;
   color:#fff;
   font-family:var(--font-pixel);
   font-size:22px;
   line-height:1.22;
   text-transform:uppercase;
+}
+.saves-hero-side {
+  justify-self:end;
+  align-self:end;
+  padding:7px 10px;
+  border:1px solid rgba(216,223,232,0.18);
+  background:rgba(0,0,0,0.16);
+  color:var(--bw2-text-soft);
+  font-family:var(--font-ui);
+  font-size:14px;
+  font-weight:800;
+  line-height:1;
+  text-align:right;
+  white-space:nowrap;
 }
 .saves-subtitle {
   margin-top:8px;
@@ -72,12 +90,12 @@ SAVES_PAGE_CSS = """
 .saves-status-grid {
   display:grid;
   grid-template-columns:repeat(4, minmax(0, 1fr));
-  gap:10px;
-  margin:12px 0 16px;
+  gap:8px;
+  margin:10px 0 14px;
 }
 .saves-stat {
-  min-height:96px;
-  padding:12px;
+  min-height:76px;
+  padding:10px;
   border:1px solid rgba(216,223,232,0.2);
   background:
     linear-gradient(90deg, rgba(255,255,255,0.06), transparent 58%),
@@ -91,23 +109,25 @@ SAVES_PAGE_CSS = """
   text-transform:uppercase;
 }
 .saves-stat-value {
-  margin-top:10px;
+  margin-top:8px;
   color:#fff;
   font-family:var(--font-pixel);
-  font-size:14px;
+  font-size:13px;
   line-height:1.22;
   overflow-wrap:anywhere;
 }
 .saves-stat-detail {
-  margin-top:7px;
+  margin-top:6px;
   color:var(--bw2-text-soft);
-  font-size:18px;
-  line-height:1.08;
+  font-size:15px;
+  line-height:1.12;
   overflow-wrap:anywhere;
 }
 .bill-save-meta,
 .saves-current-card,
 .saves-history-card,
+.saves-upload-panel,
+.saves-empty-state,
 .saves-admin-panel {
   margin-top:8px;
   background:
@@ -139,7 +159,7 @@ SAVES_PAGE_CSS = """
 .saves-card-title {
   color:#fff;
   font-family:var(--font-pixel);
-  font-size:12px;
+  font-size:13px;
   line-height:1.24;
   text-transform:uppercase;
   overflow-wrap:anywhere;
@@ -163,10 +183,10 @@ SAVES_PAGE_CSS = """
   margin-top:10px;
   display:grid;
   grid-template-columns:repeat(4, minmax(0, 1fr));
-  gap:8px;
+  gap:7px;
 }
 .saves-meta-cell {
-  min-height:52px;
+  min-height:46px;
   padding:8px;
   border:1px solid rgba(216,223,232,0.12);
   background:rgba(0,0,0,0.14);
@@ -180,13 +200,21 @@ SAVES_PAGE_CSS = """
 .saves-meta-value {
   margin-top:5px;
   color:var(--bw2-text-soft);
-  font-size:17px;
+  font-size:15px;
   line-height:1.02;
   overflow-wrap:anywhere;
 }
+.saves-meta-cell.is-technical .saves-meta-value {
+  color:var(--bw2-text-dim);
+  font-family:"SFMono-Regular", Consolas, "Liberation Mono", monospace;
+  font-size:12px;
+}
 .bill-save-meta b { color:#fff; font-weight:700; font-family:var(--font-pixel); font-size:10px; }
 .saves-admin-panel {
-  border-left:4px solid var(--bw2-warn);
+  border-left:4px solid var(--danger, #ff5263);
+  background:
+    linear-gradient(90deg, rgba(255,82,99,0.12), transparent 48%),
+    linear-gradient(180deg,var(--bw2-screen-2) 0%, var(--bw2-screen) 100%);
 }
 .saves-admin-title {
   color:#fff;
@@ -199,6 +227,23 @@ SAVES_PAGE_CSS = """
   color:var(--bw2-text-soft);
   font-size:18px;
   line-height:1.1;
+}
+.saves-empty-state {
+  border-style:dashed;
+  color:var(--bw2-text-dim);
+}
+.saves-empty-state strong {
+  display:block;
+  color:#fff;
+  font-family:var(--font-pixel);
+  font-size:12px;
+  text-transform:uppercase;
+}
+.saves-empty-state span {
+  display:block;
+  margin-top:6px;
+  color:var(--bw2-text-soft);
+  font-size:15px;
 }
 div[data-testid="stFileUploaderDropzone"] {
   background:linear-gradient(180deg,var(--bw2-screen-2) 0%, var(--bw2-screen) 100%) !important;
@@ -231,6 +276,12 @@ details[data-testid="stExpander"] > summary {
 @media (max-width: 640px) {
   .saves-status-grid,
   .saves-card-meta { grid-template-columns:1fr; }
+  .saves-hero { grid-template-columns:1fr; }
+  .saves-hero-side {
+    justify-self:start;
+    text-align:left;
+    white-space:normal;
+  }
   .saves-title { font-size:18px; }
   .saves-subtitle { font-size:20px; }
 }
@@ -238,9 +289,10 @@ details[data-testid="stExpander"] > summary {
 """
 
 
-def _cell(label: str, value: str) -> str:
+def _cell(label: str, value: str, *, technical: bool = False) -> str:
+    class_name = "saves-meta-cell is-technical" if technical else "saves-meta-cell"
     return (
-        "<div class='saves-meta-cell'>"
+        f"<div class='{class_name}'>"
         f"<div class='saves-meta-label'>{_html.escape(label)}</div>"
         f"<div class='saves-meta-value'>{_html.escape(value)}</div>"
         "</div>"
@@ -337,8 +389,8 @@ def save_card_html(row: tuple, *, current_id: int | None = None) -> str:
         "<div class='saves-card-meta'>"
         + _cell("Subido por", save_owner_label(row))
         + _cell("Fecha", save_timestamp_label(row[5]))
-        + _cell("SHA", save_sha_label(row))
-        + _cell("Archivo", save_row_filename(row) or "-")
+        + _cell("SHA", save_sha_label(row), technical=True)
+        + _cell("Archivo", save_row_filename(row) or "-", technical=True)
         + "</div>"
         "</div>"
     )
@@ -355,7 +407,7 @@ def current_save_meta_html(row: tuple) -> str:
         + _cell("ID", str(save_row_id(row) or "-"))
         + _cell("Subido por", save_owner_label(row))
         + _cell("Fecha", save_timestamp_label(row[5]))
-        + _cell("SHA", save_sha_label(row))
+        + _cell("SHA", save_sha_label(row), technical=True)
         + "</div>"
         "</div>"
     )

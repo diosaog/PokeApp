@@ -12,7 +12,7 @@ extraiga dominio o repositories.
 | `storage.py` | STORAGE/LEGACY | Fachada de Supabase/SQLite/settings/saves/wipe. |
 | `conex_pkhex.py` | MIXED | Bridge/parser PKHeX, cache y normalizacion a UI. |
 | `dexdata.py` | MIXED | Datos Pokemon, cache local y traducciones. |
-| `saves.py` | STREAMLIT | UI de subida/historial/wipe de saves. |
+| `saves.py` | STREAMLIT | UI de subida/historial/wipe de saves; render apoyado en `app/saves_support.py` para cards y CSS 1D. |
 | `tienda2.py` | LEGACY WRAPPER | Wrapper a `app.tienda.ui`. |
 | `liga_tabla.py` | LEGACY WRAPPER | Wrapper de liga/tabla. |
 | `entrenadores.py` | LEGACY WRAPPER | Wrapper a entrenadores. |
@@ -32,7 +32,7 @@ extraiga dominio o repositories.
 | `state.py` | STREAMLIT/STORAGE | Serializa `st.session_state` a `settings.league_state`. |
 | `rewards.py` | PURE-ish | Delegacion simple a season config. |
 | `divisions.py` | PURE-ish | Ascensos/descensos, portable si se inyecta config. |
-| `ui.py` | STREAMLIT | Pantalla pesada de gestion liga. |
+| `ui.py` | STREAMLIT | Pantalla pesada de gestion liga; el render de divisiones consume puntos/monedas/badges para la vista deportiva 1D. |
 | `matchup.py` | STREAMLIT/MIXED | Team Preview con UI, snapshots y detalle de ataques. |
 
 ## app/tienda

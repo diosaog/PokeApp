@@ -14,9 +14,9 @@ def ensure_league_css() -> None:
           grid-template-columns: minmax(0, 1fr) minmax(270px, 0.65fr);
           gap: 14px;
           align-items: stretch;
-          min-height: 142px;
+          min-height: 112px;
           margin-bottom: 14px;
-          padding: 16px;
+          padding: 14px;
           border: 1px solid var(--bw2-edge);
           background:
             linear-gradient(118deg, rgba(245,139,60,0.18) 0 32%, transparent 32% 100%),
@@ -64,9 +64,9 @@ def ensure_league_css() -> None:
           font-size: 9px;
         }
         .league-title {
-          margin-top: 12px;
+          margin-top: 9px;
           color: #ffffff;
-          font-size: 31px;
+          font-size: 26px;
           line-height: 1.05;
           text-shadow: 0 2px 0 rgba(0,0,0,0.5);
         }
@@ -84,8 +84,8 @@ def ensure_league_css() -> None:
         }
         .league-status-card {
           min-width: 0;
-          min-height: 62px;
-          padding: 9px 10px;
+          min-height: 54px;
+          padding: 8px 10px;
           border: 1px solid rgba(216,223,232,0.16);
           background: linear-gradient(180deg, rgba(9,15,22,0.64), rgba(8,12,18,0.88));
           box-shadow: inset 0 1px 0 rgba(255,255,255,0.06);
@@ -184,7 +184,7 @@ def ensure_league_css() -> None:
         }
         .league-card-player {
           display: grid;
-          grid-template-columns: 38px minmax(0, 1fr) auto;
+          grid-template-columns: 38px minmax(0, 1fr) auto auto auto;
           gap: 8px;
           align-items: center;
           min-height: 36px;
@@ -203,6 +203,78 @@ def ensure_league_css() -> None:
           font-size: 10px;
           line-height: 1.2;
           overflow-wrap: anywhere;
+        }
+        .league-card-main {
+          min-width: 0;
+          display: grid;
+          gap: 4px;
+        }
+        .league-card-score,
+        .league-card-coins {
+          display: grid;
+          justify-items: end;
+          min-width: 54px;
+          font-family: var(--font-ui);
+          line-height: 1;
+        }
+        .league-card-score strong,
+        .league-card-coins strong {
+          color: #fff;
+          font-size: 18px;
+          font-weight: 900;
+        }
+        .league-card-score span,
+        .league-card-coins span {
+          margin-top: 3px;
+          color: var(--bw2-text-dim);
+          font-size: 10px;
+          font-weight: 800;
+          text-transform: uppercase;
+        }
+        .league-card-coins strong {
+          color: #fff4bd;
+        }
+        .league-trainer-badges {
+          display: inline-flex;
+          align-items: center;
+          gap: 5px;
+          flex-wrap: wrap;
+        }
+        .league-trainer-badge {
+          display: inline-flex;
+          align-items: center;
+          min-height: 20px;
+          padding: 2px 7px 3px;
+          border: 1px solid rgba(255,255,255,0.18);
+          border-radius: 999px;
+          color: #fff;
+          font-size: 9px;
+          font-weight: 900;
+          line-height: 1;
+          text-transform: uppercase;
+        }
+        .league-trainer-badge--robado {
+          border-color: rgba(255,97,114,0.48);
+          background: rgba(255,97,114,0.16);
+          color: #ffd2d8;
+        }
+        .league-trainer-badge--retirado {
+          border-color: rgba(179,189,205,0.3);
+          background: rgba(179,189,205,0.12);
+          color: var(--bw2-text-soft);
+        }
+        .league-card-player.is-current-player {
+          border-color: rgba(69, 209, 255, 0.42);
+          background:
+            linear-gradient(90deg, rgba(69,209,255,0.14), transparent 56%),
+            rgba(8,12,18,0.55);
+          box-shadow: inset 3px 0 0 var(--accent);
+        }
+        .league-card-player.is-retired-player {
+          opacity: .72;
+        }
+        .league-card-player.is-history-row {
+          grid-template-columns: 38px minmax(0, 1fr) auto;
         }
         .league-movement-badge {
           min-width: 48px;
@@ -246,7 +318,11 @@ def ensure_league_css() -> None:
             grid-template-columns: 1fr;
           }
           .league-card-player {
-            grid-template-columns: 32px minmax(0, 1fr);
+            grid-template-columns: 32px minmax(0, 1fr) auto auto;
+          }
+          .league-card-score,
+          .league-card-coins {
+            min-width: 44px;
           }
           .league-movement-badge {
             grid-column: 2;

@@ -52,8 +52,11 @@ def _render_header(current_user: str | None, retired: bool) -> None:
     st.markdown(
         (
             "<div class='saves-hero'>"
+            "<div>"
             f"<div class='saves-kicker'>{mode} - {user_label}</div>"
-            "<div class='saves-title'>Gestor de Saves</div>"
+            "<div class='saves-title'>Saves</div>"
+            "</div>"
+            "<div class='saves-hero-side'>Archivo actual e historial</div>"
             "</div>"
         ),
         unsafe_allow_html=True,
@@ -74,10 +77,15 @@ def _render_admin_wipe(current_user: str | None) -> None:
         return
 
     st.markdown("---")
-    st.markdown("<div class='saves-section-title'>Admin Reset / Wipe</div>", unsafe_allow_html=True)
-    st.warning(
-        "Esto borra todos los datos de temporada: saves, compras, inventarios, flags, liga, copas, "
-        "juicios, ajustes y copias locales. No borra codigo ni assets."
+    st.markdown("<div class='saves-section-title'>Zona de riesgo</div>", unsafe_allow_html=True)
+    st.markdown(
+        (
+            "<div class='saves-admin-panel'>"
+            "<div class='saves-admin-title'>Reset / Wipe</div>"
+            "<div class='saves-admin-body'>Borra datos de temporada. No borra codigo ni assets.</div>"
+            "</div>"
+        ),
+        unsafe_allow_html=True,
     )
     confirm = st.text_input("Escribe WIPE para confirmar", key="admin_wipe_confirm")
     if st.button(
@@ -101,7 +109,7 @@ def _render_admin_wipe(current_user: str | None) -> None:
 
 
 def _render_upload_panel(current_user: str | None, *, disabled: bool) -> None:
-    st.markdown("<div class='saves-section-title'>Subir save</div>", unsafe_allow_html=True)
+    st.markdown("<div class='saves-section-title'>Subir nuevo save</div>", unsafe_allow_html=True)
     file = st.file_uploader(
         "Archivo .sav o .dsv",
         type=["sav", "dsv"],
@@ -111,7 +119,7 @@ def _render_upload_panel(current_user: str | None, *, disabled: bool) -> None:
     col1, col2 = st.columns([3, 1])
     with col1:
         subir = st.button(
-            "Subir y marcar como save actual",
+            "Subir y marcar actual",
             use_container_width=True,
             disabled=disabled or file is None,
         )
@@ -156,7 +164,15 @@ def _render_download(row: tuple, *, label: str, key: str) -> None:
 def _render_current_save(current_user: str | None, current: tuple | None) -> None:
     st.markdown("<div class='saves-section-title'>Save actual</div>", unsafe_allow_html=True)
     if not current:
-        st.warning("No hay save actual establecido.")
+        st.markdown(
+            (
+                "<div class='saves-empty-state'>"
+                "<strong>Sin save actual</strong>"
+                "<span>Sube un .sav o .dsv para marcarlo como archivo activo.</span>"
+                "</div>"
+            ),
+            unsafe_allow_html=True,
+        )
         return
 
     st.markdown(current_save_meta_html(current), unsafe_allow_html=True)
@@ -169,13 +185,21 @@ def _render_current_save(current_user: str | None, current: tuple | None) -> Non
 
 def _render_history(current_user: str | None, history: list[tuple], current: tuple | None, *, disabled: bool) -> None:
     current_id = save_row_id(current)
-    st.markdown("<div class='saves-section-title'>Historial personal</div>", unsafe_allow_html=True)
+    st.markdown("<div class='saves-section-title'>Historial</div>", unsafe_allow_html=True)
     if not history:
-        st.info("Sin saves subidos.")
+        st.markdown(
+            (
+                "<div class='saves-empty-state'>"
+                "<strong>Sin historial</strong>"
+                "<span>Aun no hay archivos subidos para este entrenador.</span>"
+                "</div>"
+            ),
+            unsafe_allow_html=True,
+        )
         return
 
     prepared_key = "saves_download_ready_id"
-    with st.expander("Ultimos 20 saves", expanded=True):
+    with st.expander("Ultimos saves", expanded=True):
         for idx, row in enumerate(history):
             row_id = save_row_id(row)
             row_key = row_id if row_id is not None else f"row_{idx}"
@@ -222,9 +246,9 @@ def page_saves() -> None:
     history = list_saves_by_user(current_user, limit=20) if current_user else []
     st.markdown(saves_summary_html(current_user, cur, history, retired=user_retired), unsafe_allow_html=True)
 
+    _render_current_save(current_user, cur)
     _render_upload_panel(current_user, disabled=user_retired or not bool(current_user))
     st.markdown("<div class='saves-divider'></div>", unsafe_allow_html=True)
-    _render_current_save(current_user, cur)
     _render_history(current_user, history, cur, disabled=user_retired or not bool(current_user))
 
     _render_admin_wipe(current_user)

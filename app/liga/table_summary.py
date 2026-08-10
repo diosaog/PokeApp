@@ -110,8 +110,8 @@ def league_table_rows(table: list[tuple[str, float]], *, include_coins: bool = F
     return rows
 
 
-def _trainer_status_badges_html(user: str) -> str:
-    labels = status_labels_for(user)
+def _trainer_status_badges_html(user: str, labels: list[str] | None = None) -> str:
+    labels = labels if labels is not None else status_labels_for(user)
     if not labels:
         return ""
     badges: list[str] = []
@@ -126,7 +126,12 @@ def _trainer_status_badges_html(user: str) -> str:
     return "<span class='league-trainer-badges'>" + "".join(badges) + "</span>"
 
 
-def league_table_html(table: list[tuple[str, float]], *, include_coins: bool = False) -> str:
+def league_table_html(
+    table: list[tuple[str, float]],
+    *,
+    include_coins: bool = False,
+    current_user: str | None = None,
+) -> str:
     sync_trainer_robbed_flags_from_history([user for user, _ in table])
     headers = ["Pos", "Jugador", "Puntos"]
     if include_coins:
@@ -134,14 +139,26 @@ def league_table_html(table: list[tuple[str, float]], *, include_coins: bool = F
 
     head = "".join(f"<th>{html.escape(label)}</th>" for label in headers)
     body_rows: list[str] = []
+    current_key = str(current_user or "").strip().lower()
     for pos, (user, pts) in enumerate(table, start=1):
         safe_user = html.escape(str(user))
+        user_key = str(user).strip().lower()
+        labels = status_labels_for(str(user))
+        label_keys = {str(label or "").strip().lower() for label in labels}
+        row_classes = []
+        if current_key and user_key == current_key:
+            row_classes.append("is-current-player")
+        if "retirado" in label_keys:
+            row_classes.append("is-retired-player")
+        if "robado" in label_keys:
+            row_classes.append("is-robbed-player")
+        row_class = f" class='{' '.join(row_classes)}'" if row_classes else ""
         cells = [
             f"<td class='league-table-pos'>{pos}</td>",
             (
                 "<td class='league-table-player'>"
                 f"<span class='league-player-name'>{safe_user}</span>"
-                f"{_trainer_status_badges_html(str(user))}"
+                f"{_trainer_status_badges_html(str(user), labels)}"
                 "</td>"
             ),
             f"<td>{html.escape(fmt_points(pts))}</td>",
@@ -152,7 +169,7 @@ def league_table_html(table: list[tuple[str, float]], *, include_coins: bool = F
                 f"<span>{html.escape(COIN)}</span> {coins_for_user(str(user))}"
                 "</td>"
             )
-        body_rows.append("<tr>" + "".join(cells) + "</tr>")
+        body_rows.append(f"<tr{row_class}>" + "".join(cells) + "</tr>")
 
     body = "".join(body_rows) or (
         f"<tr><td colspan='{len(headers)}' class='league-table-empty'>Sin datos</td></tr>"
@@ -203,6 +220,18 @@ def league_table_html(table: list[tuple[str, float]], *, include_coins: bool = F
 }}
 .league-status-table tr:nth-child(even) td {{
   background: rgba(18, 23, 31, 0.82);
+}}
+.league-status-table tr.is-current-player td {{
+  background:
+    linear-gradient(90deg, rgba(69, 209, 255, 0.13), transparent 54%),
+    rgba(13, 25, 43, 0.92);
+}}
+.league-status-table tr.is-current-player td:first-child {{
+  box-shadow: inset 3px 0 0 var(--accent);
+}}
+.league-status-table tr.is-retired-player td {{
+  color: rgba(233, 240, 246, 0.62);
+  opacity: .74;
 }}
 .league-status-table tr:last-child td {{
   border-bottom: 0;

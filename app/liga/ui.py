@@ -12,7 +12,7 @@ from app.discord_notify import (
     notify_league_round_finished_detail,
     notify_missing_team_locks_async,
 )
-from app.entrenadores.trainer_flags import is_trainer_retired
+from app.entrenadores.trainer_flags import is_trainer_retired, status_labels_for
 from app.liga.divisions import division_a_size_for_count, movement_count_for_divisions
 from app.liga.league_styles import ensure_league_css
 from app.liga.ranking import (
@@ -27,6 +27,7 @@ from app.liga.ranking import (
 )
 from app.liga.state import ensure_state, persist_state, restore_state
 from app.liga.table_summary import (
+    coins_for_user as _coins_for_user,
     fmt_points as _fmt_points,
     league_round_result_groups as _league_round_result_groups,
     league_round_summary_lines as _league_round_summary_lines,
@@ -316,9 +317,9 @@ def _league_header_html(
     return f"""
 <div class="league-hero">
   <div class="league-hero-main">
-    <div class="league-kicker">Liga privada</div>
-    <div class="league-title">Liga y Tabla</div>
-    <div class="league-subtitle">Jornada {int(visible_round)} de {int(max_rounds)}</div>
+    <div class="league-kicker">Competicion</div>
+    <div class="league-title">Liga</div>
+    <div class="league-subtitle">Jornada {int(visible_round)} de {int(max_rounds)} - {escape(status)}</div>
   </div>
   <div class="league-hero-grid">
     <div class="league-status-card{status_cls}">
@@ -343,7 +344,31 @@ def _league_header_html(
 
 
 def _section_heading_html(title: str, subtitle: str = "") -> str:
-    return f"<div class='league-section-title'>{escape(title)}</div>"
+    subtitle_html = (
+        f"<div class='league-section-copy'>{escape(subtitle)}</div>" if subtitle else ""
+    )
+    return (
+        "<div class='league-section-heading'>"
+        f"<div class='league-section-title'>{escape(title)}</div>"
+        f"{subtitle_html}"
+        "</div>"
+    )
+
+
+def _league_status_badges_html(user: str) -> str:
+    labels = status_labels_for(user)
+    if not labels:
+        return ""
+    badges = []
+    for label in labels:
+        slug = str(label or "").strip().lower()
+        badges.append(
+            "<span class='league-trainer-badge "
+            f"league-trainer-badge--{escape(slug)}'>"
+            f"{escape(str(label))}"
+            "</span>"
+        )
+    return "<span class='league-trainer-badges'>" + "".join(badges) + "</span>"
 
 
 def _division_card_html(
@@ -354,11 +379,19 @@ def _division_card_html(
     range_label: str | None = None,
     variant: str = "a",
     badges: dict[str, str] | None = None,
+    points_by_user: dict[str, str] | None = None,
+    coins_by_user: dict[str, int] | None = None,
+    current_user: str | None = None,
 ) -> str:
     badges = badges or {}
+    points_by_user = points_by_user or {}
+    coins_by_user = coins_by_user or {}
+    current_key = str(current_user or "").strip().lower()
     rows: list[str] = []
     for offset, user in enumerate(players):
         pos = start_pos + offset
+        user_text = str(user)
+        user_key = user_text.strip().lower()
         badge = badges.get(str(user), "")
         badge_html = ""
         if badge:
@@ -369,10 +402,29 @@ def _division_card_html(
                 f"{escape(badge)}"
                 "</span>"
             )
+        row_classes = ["league-card-player"]
+        if current_key and user_key == current_key:
+            row_classes.append("is-current-player")
+        labels = [str(label).strip().lower() for label in status_labels_for(user_text)]
+        if "retirado" in labels:
+            row_classes.append("is-retired-player")
+        if "robado" in labels:
+            row_classes.append("is-robbed-player")
+        points = points_by_user.get(user_text, "0.0")
+        coins = coins_by_user.get(user_text, 0)
         rows.append(
-            "<div class='league-card-player'>"
+            f"<div class='{' '.join(row_classes)}'>"
             f"<div class='league-card-pos'>{int(pos)}</div>"
-            f"<div class='league-card-player-name'>{escape(str(user))}</div>"
+            "<div class='league-card-main'>"
+            f"<div class='league-card-player-name'>{escape(user_text)}</div>"
+            f"{_league_status_badges_html(user_text)}"
+            "</div>"
+            "<div class='league-card-score'>"
+            f"<strong>{escape(points)}</strong><span>pts</span>"
+            "</div>"
+            "<div class='league-card-coins'>"
+            f"<strong>{int(coins)}</strong><span>mon</span>"
+            "</div>"
             f"{badge_html}"
             "</div>"
         )
@@ -402,6 +454,9 @@ def _division_grid_html(
     title_b: str = "Liga B",
     badges_a: dict[str, str] | None = None,
     badges_b: dict[str, str] | None = None,
+    points_by_user: dict[str, str] | None = None,
+    coins_by_user: dict[str, int] | None = None,
+    current_user: str | None = None,
 ) -> str:
     end_a = len(players_a)
     end_b = start_b + len(players_b) - 1 if players_b else start_b - 1
@@ -414,6 +469,9 @@ def _division_grid_html(
             range_label=f"1-{end_a}" if end_a else "Sin plazas",
             variant="a",
             badges=badges_a,
+            points_by_user=points_by_user,
+            coins_by_user=coins_by_user,
+            current_user=current_user,
         )
         + _division_card_html(
             title_b,
@@ -422,6 +480,9 @@ def _division_grid_html(
             range_label=f"{start_b}-{end_b}" if players_b else "Sin plazas",
             variant="b",
             badges=badges_b,
+            points_by_user=points_by_user,
+            coins_by_user=coins_by_user,
+            current_user=current_user,
         )
         + "</div>"
     )
@@ -455,7 +516,7 @@ def _history_round_html(
                     "</span>"
                 )
             row_html.append(
-                "<div class='league-card-player'>"
+                "<div class='league-card-player is-history-row'>"
                 f"<div class='league-card-pos'>{int(pos)}</div>"
                 f"<div class='league-card-player-name'>{escape(str(user))}</div>"
                 f"{badge_html}"
@@ -956,6 +1017,11 @@ def page_tabla() -> None:
     B = st.session_state.league_divisions["B"]
     pos_b_start = len(A) + 1
     pos_b_end = pos_b_start + len(B) - 1 if B else pos_b_start - 1
+    tabla = general_table_sorted()
+    current_user = st.session_state.get("user")
+    points_by_user = {str(user): _fmt_points(pts) for user, pts in tabla}
+    division_players = [str(user) for user in (A + B)]
+    coins_by_user = {user: _coins_for_user(user) for user in division_players}
 
     if st.session_state.league_active:
         st.markdown(
@@ -1064,6 +1130,9 @@ def page_tabla() -> None:
                     start_b=pos_b_start,
                     badges_a=badges_a,
                     badges_b=badges_b,
+                    points_by_user=points_by_user,
+                    coins_by_user=coins_by_user,
+                    current_user=current_user,
                 ),
                 unsafe_allow_html=True,
             )
@@ -1076,11 +1145,17 @@ def page_tabla() -> None:
             unsafe_allow_html=True,
         )
         st.markdown(
-            _division_grid_html(A, B, start_b=pos_b_start),
+            _division_grid_html(
+                A,
+                B,
+                start_b=pos_b_start,
+                points_by_user=points_by_user,
+                coins_by_user=coins_by_user,
+                current_user=current_user,
+            ),
             unsafe_allow_html=True,
         )
 
-    tabla = general_table_sorted()
     if liga_finalizada and not st.session_state.league_active:
         _render_final_podium()
     if st.session_state.league_active:
@@ -1089,7 +1164,7 @@ def page_tabla() -> None:
             unsafe_allow_html=True,
         )
         st.markdown(
-            _league_table_html(tabla),
+            _league_table_html(tabla, current_user=current_user),
             unsafe_allow_html=True,
         )
     else:
@@ -1098,7 +1173,11 @@ def page_tabla() -> None:
             unsafe_allow_html=True,
         )
         st.markdown(
-            _league_table_html(tabla, include_coins=True),
+            _league_table_html(
+                tabla,
+                include_coins=True,
+                current_user=current_user,
+            ),
             unsafe_allow_html=True,
         )
 
