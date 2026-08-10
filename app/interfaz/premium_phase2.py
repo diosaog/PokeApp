@@ -2401,6 +2401,270 @@ section[data-testid="stSidebar"] .poke-type-full-img {
   font-variant-numeric: tabular-nums !important;
 }
 
+/* Trainers page: current team and PC box cleanup */
+.main .team-slot-card {
+  min-height: 224px !important;
+  padding: 10px 10px 12px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+}
+
+.main .team-slot-card .badges {
+  width: 100% !important;
+  height: 24px !important;
+  margin-bottom: 4px !important;
+}
+
+.main .team-slot-card .pill {
+  min-height: 18px !important;
+  padding: 2px 6px !important;
+  border-radius: 999px !important;
+  font-family: var(--font-ui) !important;
+  font-size: 10px !important;
+  font-weight: 800 !important;
+  line-height: 1 !important;
+}
+
+.main .team-slot-card img {
+  width: min(100%, 142px) !important;
+  height: 118px !important;
+  margin: 4px auto 8px !important;
+  object-fit: contain !important;
+}
+
+.main .team-slot-card .title {
+  width: 100% !important;
+  margin-top: 0 !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+  font-size: 11px !important;
+  line-height: 1.12 !important;
+}
+
+.main .team-slot-card .sub {
+  width: 100% !important;
+  min-height: 19px !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+  font-size: 15px !important;
+  line-height: 1.18 !important;
+}
+
+.main .team-slot-card .types {
+  width: 100% !important;
+  min-height: 24px !important;
+  margin-top: 8px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 6px !important;
+  flex-wrap: nowrap !important;
+  overflow: hidden !important;
+}
+
+.main .team-slot-card .slot-type-badge.poke-type-chip.asset-full {
+  width: fit-content !important;
+  min-width: 0 !important;
+  max-width: 96px !important;
+  height: 23px !important;
+  min-height: 23px !important;
+  flex: 0 1 auto !important;
+  border-radius: 999px !important;
+  background: transparent !important;
+}
+
+.main .team-slot-card .slot-type-badge .poke-type-full-img {
+  width: auto !important;
+  max-width: 96px !important;
+  height: 23px !important;
+  max-height: 23px !important;
+  display: block !important;
+  object-fit: contain !important;
+}
+
+.main .team-slot-card .slot-type-badge.poke-type-chip.uses-fallback {
+  width: fit-content !important;
+  min-width: 0 !important;
+  max-width: 96px !important;
+  min-height: 22px !important;
+  padding: 0 9px !important;
+  border-radius: 999px !important;
+}
+
+.main .team-slot-card .slot-type-badge .poke-type-fallback {
+  font-family: var(--font-ui) !important;
+  font-size: 10px !important;
+  font-weight: 750 !important;
+  letter-spacing: 0.02em !important;
+}
+
+.main .team-slot-card .shield-chip,
+.main .team-slot-card .rob-chip {
+  min-height: 20px !important;
+  padding: 0 8px !important;
+  border-radius: 999px !important;
+  font-family: var(--font-ui) !important;
+  font-size: 10px !important;
+  font-weight: 800 !important;
+}
+
+.main div[data-testid="column"]:has(.team-slot-card) .stButton {
+  display: flex !important;
+  justify-content: center !important;
+  margin-top: 8px !important;
+}
+
+.main div[data-testid="column"]:has(.team-slot-card) .stButton > button {
+  width: auto !important;
+  min-width: 0 !important;
+  min-height: 34px !important;
+  padding: 0 13px !important;
+  border-radius: 999px !important;
+}
+
+.main div[data-testid="column"]:has(.team-slot-card) .stButton > button p {
+  font-size: 11px !important;
+  font-weight: 800 !important;
+}
+
+.main .champ-box-page-head {
+  min-height: 40px !important;
+  display: flex !important;
+  align-items: center !important;
+}
+
+.main .champ-box-page-head h3 {
+  margin: 0 !important;
+  color: var(--p2-text) !important;
+  -webkit-text-fill-color: var(--p2-text) !important;
+  font-size: 22px !important;
+  font-weight: 900 !important;
+}
+
+.main .champ-box-grid-shell {
+  margin-top: 8px !important;
+  padding: 12px !important;
+}
+
+.main .champ-box-grid-shell::before {
+  font-size: 58px !important;
+  top: 2px !important;
+}
+
+.main .champ-box-grid-toolbar {
+  margin-bottom: 8px !important;
+}
+
+.main .champ-box-grid-toolbar strong {
+  font-size: 16px !important;
+}
+
+.main .champ-box-meta span {
+  min-height: 23px !important;
+  padding: 0 8px !important;
+  font-size: 10px !important;
+}
+
+.main .champ-box-occupancy {
+  grid-template-columns: 1fr !important;
+  gap: 0 !important;
+  margin-bottom: 10px !important;
+}
+
+.main .champ-box-occupancy-dots,
+.main .champ-box-types,
+.main .champ-box-species {
+  display: none !important;
+}
+
+.main .champ-box-grid {
+  display: grid !important;
+  grid-template-columns: repeat(6, minmax(82px, 1fr)) !important;
+  gap: 8px !important;
+}
+
+.main .champ-box-tile {
+  min-height: 98px !important;
+  aspect-ratio: 1 / 0.85 !important;
+  grid-template-rows: 16px minmax(48px, 1fr) auto 4px !important;
+  gap: 2px !important;
+  padding: 7px 6px 6px !important;
+  border-radius: 11px !important;
+}
+
+.main .champ-box-tile::before {
+  inset: 4px !important;
+  border-radius: 8px !important;
+}
+
+.main .champ-box-tile::after {
+  top: 57% !important;
+  width: 42px !important;
+  height: 8px !important;
+  filter: blur(4px) !important;
+}
+
+.main .champ-box-slot-no {
+  top: 6px !important;
+  right: 7px !important;
+  font-size: 9px !important;
+}
+
+.main .champ-box-level {
+  min-height: 15px !important;
+  padding: 0 5px !important;
+  border-radius: 999px !important;
+  font-size: 9px !important;
+}
+
+.main .champ-box-sprite-stage {
+  min-height: 50px !important;
+}
+
+.main .champ-box-tile img {
+  width: 64px !important;
+  height: 58px !important;
+  max-width: 64px !important;
+  max-height: 58px !important;
+}
+
+.main .champ-box-name {
+  font-size: 11px !important;
+  font-weight: 850 !important;
+  line-height: 1.1 !important;
+}
+
+.main .champ-box-type-rails {
+  width: min(54px, 80%) !important;
+  height: 4px !important;
+  margin-top: 1px !important;
+}
+
+.main .champ-box-type-rails span {
+  height: 3px !important;
+}
+
+.main .champ-box-tile-empty {
+  opacity: 0.42 !important;
+  border-style: dashed !important;
+  border-color: rgba(255,255,255,0.07) !important;
+  background:
+    radial-gradient(circle at 50% 50%, rgba(255,255,255,0.025), transparent 42%),
+    rgba(255,255,255,0.012) !important;
+}
+
+.main .champ-box-empty-mark {
+  width: 8px !important;
+  height: 8px !important;
+  border: 0 !important;
+  background: rgba(255,255,255,0.18) !important;
+  box-shadow: none !important;
+}
+
 /* Responsive */
 @media (min-width: 1600px) {
   .main .block-container {
@@ -2409,6 +2673,10 @@ section[data-testid="stSidebar"] .poke-type-full-img {
 }
 
 @media (max-width: 1180px) {
+  .main .champ-box-grid {
+    grid-template-columns: repeat(5, minmax(76px, 1fr)) !important;
+  }
+
   .main .battle-team-grid,
   .main .matchup-team-grid {
     grid-template-columns: 1fr !important;

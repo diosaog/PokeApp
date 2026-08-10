@@ -5,7 +5,7 @@ import streamlit as st
 from app.ui.type_icons import type_icon_html
 
 
-TEAM_IMG_W = 88
+TEAM_IMG_W = 104
 
 
 def badge_row(level, is_shiny: bool, gender: str | None) -> str:
@@ -52,7 +52,7 @@ def slot_card_html(
     if chips_html:
         chips_html = f"<div class='types'>{chips_html}</div>"
     return (
-        "<div class='slot'>"
+        "<div class='slot team-slot-card'>"
         f"{badges}"
         f"<img src='{img_url}' width='{img_w}' alt='{title}'>"
         f"<div class='title'>{title}</div>"

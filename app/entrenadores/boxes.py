@@ -7,7 +7,6 @@ import streamlit as st
 from app.entrenadores.cache import cached_box
 from app.entrenadores.constants import DEAD_BOX_INDEX, TOTAL_BOXES
 from app.entrenadores.sprites import sprite_url_from_p
-from app.ui.type_icons import type_icons_html
 from conex_pkhex import extract_box, has_pc_data
 from dexdata import species_types, type_color
 
@@ -25,6 +24,63 @@ def _pokemon_types(p: dict) -> list[str]:
         )
     except Exception:
         return []
+
+
+def _raw_slot_index_from_mon(p: dict) -> int | None:
+    raw = p.get("slot_index")
+    if raw is None:
+        raw = p.get("SlotIndex")
+    if raw is None:
+        raw = p.get("slot")
+    if raw is None:
+        raw = p.get("Slot")
+    try:
+        return int(raw)
+    except Exception:
+        return None
+
+
+def _slot_index_from_raw(raw: int | None, *, one_based: bool = False) -> int | None:
+    if raw is None:
+        return None
+    idx = int(raw)
+    if one_based:
+        if 1 <= idx <= 30:
+            return idx - 1
+        return None
+    if 0 <= idx < 30:
+        return idx
+    if idx == 30:
+        return 29
+    return None
+
+
+def _box_slot_map(box_list: list[dict]) -> list[dict | None]:
+    slots: list[dict | None] = [None] * 30
+    without_slot: list[dict] = []
+    raw_indices = [
+        raw
+        for raw in (_raw_slot_index_from_mon(p) for p in box_list[:30] if isinstance(p, dict))
+        if raw is not None
+    ]
+    one_based = bool(raw_indices) and 0 not in raw_indices and 30 in raw_indices
+    for p in box_list[:30]:
+        if not isinstance(p, dict):
+            continue
+        idx = _slot_index_from_raw(_raw_slot_index_from_mon(p), one_based=one_based)
+        if idx is None or slots[idx] is not None:
+            without_slot.append(p)
+            continue
+        slots[idx] = p
+
+    next_free = 0
+    for p in without_slot:
+        while next_free < 30 and slots[next_free] is not None:
+            next_free += 1
+        if next_free >= 30:
+            break
+        slots[next_free] = p
+    return slots
 
 
 def _box_tile_html(
@@ -49,7 +105,6 @@ def _box_tile_html(
         f"{title or 'Pokemon'} | Lv.{level_txt} | {type_labels}",
         quote=True,
     )
-    type_html = type_icons_html(type_list, compact=True, label=False, class_name="champ-box-type")
     type_rails = "".join(
         f"<span style='--rail-color:{escape(type_color(t), quote=True)}'></span>"
         for t in type_list
@@ -74,7 +129,6 @@ def _box_tile_html(
         "</span>"
         f"<span class='champ-box-name'>{safe_title}</span>"
         f"<span class='champ-box-species'>{safe_subtitle}</span>"
-        f"<span class='champ-box-types'>{type_html}</span>"
         f"<span class='champ-box-type-rails'>{type_rails}</span>"
         "</div>"
         "</a>"
@@ -139,7 +193,6 @@ def boxes_grid_ui(
     pc_ok: bool | None = None,
     mtime: float | None = None,
 ) -> None:
-    st.subheader("PC (Cajas)")
     if pc_ok is None:
         try:
             pc_ok = has_pc_data(sav_json, save_path=save_path)
@@ -155,12 +208,17 @@ def boxes_grid_ui(
         start = len(virtual_names)
         virtual_names += [f"Caja {i+1}" for i in range(start, total_boxes)]
 
-    box_index = st.selectbox(
-        "Caja",
-        options=list(range(total_boxes)),
-        index=0,
-        format_func=lambda i: virtual_names[i] if i < len(virtual_names) else f"Caja {i+1}",
-    )
+    head_col, select_col = st.columns([1, 0.28])
+    with head_col:
+        st.markdown("<div class='champ-box-page-head'><h3>PC / Cajas</h3></div>", unsafe_allow_html=True)
+    with select_col:
+        box_index = st.selectbox(
+            "Caja",
+            options=list(range(total_boxes)),
+            index=0,
+            format_func=lambda i: virtual_names[i] if i < len(virtual_names) else f"Caja {i+1}",
+            label_visibility="collapsed",
+        )
 
     try:
         if save_path and st is not None:
@@ -181,8 +239,11 @@ def boxes_grid_ui(
         box_raw, slot_raw = str(raw_pick or "").split("-", 1)
         picked_box = int(box_raw)
         picked_slot = int(slot_raw)
-        if picked_box == int(box_index) and 0 <= picked_slot < len(box_list):
-            p = box_list[picked_slot]
+        slot_map = _box_slot_map(list(box_list or []))
+        if picked_box == int(box_index) and 0 <= picked_slot < len(slot_map):
+            p = slot_map[picked_slot]
+            if not p:
+                raise ValueError("Empty slot")
             title = str(p.get("species_name") or p.get("species") or "Pokemon")
             _select_box_pokemon(
                 p,
@@ -205,10 +266,11 @@ def boxes_grid_ui(
         selected_box = -1
         selected_slot = -1
 
+    slot_map = _box_slot_map(list(box_list or []))
     tiles: list[str] = []
     for idx in range(30):
-        if idx < len(box_list):
-            p = box_list[idx]
+        p = slot_map[idx]
+        if p:
             img_url = sprite_url_from_p(p, prefer_animated=False)
             species = str(p.get("species_name") or p.get("species") or "Pokemon")
             nickname = str(p.get("nickname") or "").strip()
@@ -231,15 +293,11 @@ def boxes_grid_ui(
         else:
             tiles.append(_empty_box_tile_html(idx))
 
-    occupied = min(len(box_list), 30)
+    occupied = sum(1 for p in slot_map if p)
     free = max(0, 30 - occupied)
     box_name = str(virtual_names[int(box_index)])
     is_dead_box = int(box_index) == muertos_box_index(total_boxes)
     occupancy_pct = int(round((occupied / 30) * 100)) if occupied else 0
-    dot_html = "".join(
-        f"<span class='{'is-filled' if i < occupied else ''}'></span>"
-        for i in range(30)
-    )
     shell_classes = "champ-box-grid-shell"
     if is_dead_box:
         shell_classes += " is-dead-box"
@@ -248,7 +306,6 @@ def boxes_grid_ui(
         f"<div class='{shell_classes}' style='--box-fill:{occupancy_pct}%'>"
         "<div class='champ-box-grid-toolbar champ-box-grid-toolbar-single'>"
         "<div class='champ-box-control champ-box-control-wide'>"
-        "<span class='champ-box-kicker'>PC / Cajas</span>"
         f"<strong>{escape(box_name)}</strong>"
         "</div>"
         "<div class='champ-box-meta'>"
@@ -258,7 +315,6 @@ def boxes_grid_ui(
         "</div>"
         "<div class='champ-box-occupancy'>"
         "<div class='champ-box-occupancy-bar'><span></span></div>"
-        f"<div class='champ-box-occupancy-dots'>{dot_html}</div>"
         "</div>"
         "<div class='champ-box-grid'>"
         f"{''.join(tiles)}"
