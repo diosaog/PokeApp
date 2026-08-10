@@ -96,6 +96,18 @@ extraiga dominio o repositories.
 | `temporada.py` | STREAMLIT/MIXED | Editor admin sobre season config; pulido 1E como consola tecnica compacta. |
 | `hall_of_fame.py` | MIXED | Logica y UI de historico; archivo sobrio con auto-sync de campeones. |
 
+### Auditoria visual 1F
+
+| Zona | Estado | Nota |
+| --- | --- | --- |
+| Cascada global | DEUDA | `theme.py`, `champions_skin.py`, `premium_phase2.py` y `final_polish.py` siguen conviviendo. La deuda principal no es falta de clases, sino selectores antiguos con `.main` + `!important` que pueden ganar a parches finales mas nuevos. |
+| Normativa | CORREGIDO | La capa 1E existia, pero `theme.py`/`champions_skin.py` ganaban por especificidad. `final_polish.py` ahora usa `.main .norma-*` y se elimino el `st.header` duplicado de la pagina. |
+| Team Preview | CORREGIDO | Los overrides finales de board, cartas, ataques, sprites y detalle de movimiento pasan a `.main .battle-*` / `.main .matchup-*` para no caer en el estilo Champions antiguo claro/morado. |
+| Tienda | CORREGIDO | El pulido final de cards, precios, rebajas y cabecera se refuerza con `.main` para ganar a `app/tienda/styles.py` sin tocar logica de compra ni promociones. |
+| Entrenadores / PC | CORREGIDO | Equipo actual, chips y tiles de PC quedan protegidos por selectores finales con `.main`; queda pendiente extraer `TrainerCard` y `BoxTile` al futuro sistema de componentes. |
+| Liga / Hall / Saves | CORREGIDO | Superficies, tablas, badges y estados vacios quedan bajo selectores finales con `.main`. |
+| Pendiente React/Cloudflare | DIFERIDO | Retirar las capas CSS acumuladas y mover estos patrones a componentes/tokens reales antes de optimizar render y routing. |
+
 ## app/storage_*
 
 | Modulo | Tipo | Nota |

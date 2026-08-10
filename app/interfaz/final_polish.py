@@ -430,15 +430,26 @@ section[data-testid="stSidebar"] div[data-testid="stExpander"] summary [data-tes
 }
 
 section[data-testid="stSidebar"] summary [data-testid="stIconMaterial"],
+section[data-testid="stSidebar"] summary [data-testid="stIconMaterial"] *,
 section[data-testid="stSidebar"] summary .material-symbols-rounded,
-section[data-testid="stSidebar"] summary .material-icons {
+section[data-testid="stSidebar"] summary .material-symbols-outlined,
+section[data-testid="stSidebar"] summary .material-icons,
+section[data-testid="stSidebar"] summary [class*="material-symbols"],
+section[data-testid="stSidebar"] summary [class*="material-icons"],
+section[data-testid="stSidebar"] summary [aria-hidden="true"]:has(svg),
+section[data-testid="stSidebar"] summary svg {
   width: 0 !important;
   min-width: 0 !important;
   max-width: 0 !important;
+  height: 0 !important;
+  min-height: 0 !important;
+  max-height: 0 !important;
   overflow: hidden !important;
   font-size: 0 !important;
   color: transparent !important;
   -webkit-text-fill-color: transparent !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
 }
 
 section[data-testid="stSidebar"] div[data-testid="stExpander"] div[data-testid="stExpanderDetails"],
@@ -489,13 +500,13 @@ section[data-testid="stSidebar"] div[data-testid="stExpander"] div.stButton > bu
 }
 
 /* Shared page surfaces */
-.home-hero,
-.trainers-hero,
-.league-hero,
-.matchup-hero,
-.mart-hero,
-.hof-hero,
-.saves-hero {
+.main .home-hero,
+.main .trainers-hero,
+.main .league-hero,
+.main .matchup-hero,
+.main .mart-hero,
+.main .hof-hero,
+.main .saves-hero {
   border-color: var(--border-normal) !important;
   border-radius: 16px !important;
   clip-path: none !important;
@@ -506,66 +517,66 @@ section[data-testid="stSidebar"] div[data-testid="stExpander"] div.stButton > bu
   box-shadow: var(--poke-shadow-card) !important;
 }
 
-.league-hero,
-.mart-hero,
-.saves-hero,
-.hof-hero {
+.main .league-hero,
+.main .mart-hero,
+.main .saves-hero,
+.main .hof-hero {
   min-height: 104px !important;
   padding: 14px !important;
 }
 
-.trainers-hero {
+.main .trainers-hero {
   min-height: 132px !important;
   padding: 14px !important;
 }
 
-.trainers-hero:after {
+.main .trainers-hero:after {
   opacity: 0.24 !important;
 }
 
-.league-title,
-.mart-title,
-.saves-title,
-.hof-title,
-.matchup-title,
-.trainers-title {
+.main .league-title,
+.main .mart-title,
+.main .saves-title,
+.main .hof-title,
+.main .matchup-title,
+.main .trainers-title {
   color: var(--text-primary) !important;
   -webkit-text-fill-color: var(--text-primary) !important;
   text-shadow: none !important;
 }
 
-.league-title,
-.hof-title,
-.matchup-title {
+.main .league-title,
+.main .hof-title,
+.main .matchup-title {
   font-size: clamp(24px, 2.2vw, 31px) !important;
 }
 
-.mart-title,
-.saves-title {
+.main .mart-title,
+.main .saves-title {
   font-size: clamp(20px, 1.8vw, 26px) !important;
 }
 
-.league-subtitle,
-.saves-subtitle,
-.hof-subtitle,
-.trainers-subtitle,
-.mart-led,
-.league-section-sub {
+.main .league-subtitle,
+.main .saves-subtitle,
+.main .hof-subtitle,
+.main .trainers-subtitle,
+.main .mart-led,
+.main .league-section-sub {
   color: var(--text-secondary) !important;
   -webkit-text-fill-color: var(--text-secondary) !important;
   font-size: 14px !important;
   line-height: 1.25 !important;
 }
 
-.league-kicker,
-.hof-kicker,
-.saves-kicker,
-.mart-kicker,
-.trainers-panel-label,
-.league-section-title,
-.hof-section-title,
-.saves-section-title,
-.trainers-section-title {
+.main .league-kicker,
+.main .hof-kicker,
+.main .saves-kicker,
+.main .mart-kicker,
+.main .trainers-panel-label,
+.main .league-section-title,
+.main .hof-section-title,
+.main .saves-section-title,
+.main .trainers-section-title {
   border-color: var(--border-normal) !important;
   border-left-color: var(--accent) !important;
   border-radius: 10px !important;
@@ -638,9 +649,9 @@ section[data-testid="stSidebar"] div[data-testid="stExpander"] div.stButton > bu
 }
 
 /* Team Preview */
-.matchup-shell,
-.matchup-summary,
-.battle-board {
+.main .matchup-shell,
+.main .matchup-summary,
+.main .battle-board {
   border: 1px solid var(--border-normal) !important;
   border-radius: 16px !important;
   background:
@@ -650,30 +661,30 @@ section[data-testid="stSidebar"] div[data-testid="stExpander"] div.stButton > bu
   box-shadow: var(--poke-shadow-card) !important;
 }
 
-.matchup-hero {
+.main .matchup-hero {
   min-height: 98px !important;
   grid-template-columns: minmax(0, 1fr) auto !important;
 }
 
-.matchup-hero-side,
-.matchup-hero-pill,
-.matchup-metric,
-.battle-board-top > div,
-.battle-card-left,
-.battle-ability-row,
-.battle-private-line,
-.battle-ivs,
-.battle-detail-stats div {
+.main .matchup-hero-side,
+.main .matchup-hero-pill,
+.main .matchup-metric,
+.main .battle-board-top > div,
+.main .battle-card-left,
+.main .battle-ability-row,
+.main .battle-private-line,
+.main .battle-ivs,
+.main .battle-detail-stats div {
   border-color: var(--border-soft) !important;
   border-radius: 12px !important;
   background: rgba(255,255,255,0.04) !important;
   box-shadow: none !important;
 }
 
-.matchup-mode-card,
-.matchup-move,
-.battle-move-link,
-.battle-no-move {
+.main .matchup-mode-card,
+.main .matchup-move,
+.main .battle-move-link,
+.main .battle-no-move {
   border: 1px solid rgba(215,230,255,0.12) !important;
   border-radius: 10px !important;
   background: rgba(11, 19, 32, 0.82) !important;
@@ -682,18 +693,18 @@ section[data-testid="stSidebar"] div[data-testid="stExpander"] div.stButton > bu
   -webkit-text-fill-color: var(--text-primary) !important;
 }
 
-.matchup-mode-card *,
-.matchup-move span:last-child,
-.battle-move-link span:last-child,
-.battle-no-move,
-.battle-no-move * {
+.main .matchup-mode-card *,
+.main .matchup-move span:last-child,
+.main .battle-move-link span:last-child,
+.main .battle-no-move,
+.main .battle-no-move * {
   color: var(--text-primary) !important;
   -webkit-text-fill-color: var(--text-primary) !important;
 }
 
-.matchup-mode-card.is-active,
-.battle-move-link:hover,
-.battle-move-row[open] > .battle-move-link {
+.main .matchup-mode-card.is-active,
+.main .battle-move-link:hover,
+.main .battle-move-row[open] > .battle-move-link {
   border-color: rgba(114,185,255,0.62) !important;
   background:
     linear-gradient(180deg, rgba(77,141,255,0.18), rgba(77,141,255,0.08)),
@@ -701,8 +712,8 @@ section[data-testid="stSidebar"] div[data-testid="stExpander"] div.stButton > bu
   box-shadow: inset 3px 0 0 var(--primary) !important;
 }
 
-.battle-mon-card,
-.matchup-mon {
+.main .battle-mon-card,
+.main .matchup-mon {
   border: 1px solid rgba(215,230,255,0.13) !important;
   border-radius: 15px !important;
   background:
@@ -712,41 +723,41 @@ section[data-testid="stSidebar"] div[data-testid="stExpander"] div.stButton > bu
   box-shadow: inset 0 1px 0 rgba(255,255,255,0.055), 0 10px 20px rgba(0,0,0,0.18) !important;
 }
 
-.battle-mon-card {
+.main .battle-mon-card {
   min-height: 166px !important;
   padding: 11px !important;
 }
 
-.battle-mon-card-public {
+.main .battle-mon-card-public {
   min-height: 144px !important;
 }
 
-.battle-sprite-wrap,
-.matchup-sprite {
+.main .battle-sprite-wrap,
+.main .matchup-sprite {
   border-radius: 13px !important;
   background:
     radial-gradient(circle at 50% 48%, rgba(77,141,255,0.18), transparent 58%),
     rgba(255,255,255,0.035) !important;
 }
 
-.battle-sprite {
+.main .battle-sprite {
   width: 110px !important;
   height: 110px !important;
 }
 
-.matchup-sprite {
+.main .matchup-sprite {
   width: 96px !important;
   height: 96px !important;
 }
 
-.battle-slot-mark {
+.main .battle-slot-mark {
   color: rgba(255,255,255,0.09) !important;
   -webkit-text-fill-color: rgba(255,255,255,0.09) !important;
   font-size: 42px !important;
 }
 
-.battle-move-detail,
-.battle-move-detail-inline {
+.main .battle-move-detail,
+.main .battle-move-detail-inline {
   border: 1px solid rgba(215,230,255,0.14) !important;
   border-radius: 14px !important;
   background:
@@ -755,33 +766,33 @@ section[data-testid="stSidebar"] div[data-testid="stExpander"] div.stButton > bu
   box-shadow: none !important;
 }
 
-.battle-detail-stats div {
+.main .battle-detail-stats div {
   background: rgba(255,255,255,0.04) !important;
 }
 
-.battle-detail-stats div span {
+.main .battle-detail-stats div span {
   color: var(--text-muted) !important;
   -webkit-text-fill-color: var(--text-muted) !important;
 }
 
-.battle-detail-stats div strong {
+.main .battle-detail-stats div strong {
   color: var(--text-primary) !important;
   -webkit-text-fill-color: var(--text-primary) !important;
 }
 
-.battle-detail-stat-type {
+.main .battle-detail-stat-type {
   padding: 0 !important;
   border: 0 !important;
   background: transparent !important;
   box-shadow: none !important;
 }
 
-.battle-detail-stat-type > span {
+.main .battle-detail-stat-type > span {
   display: none !important;
 }
 
-.battle-type-pill.poke-type-chip.asset-full,
-.champ-detail-type-chip.poke-type-chip.asset-full {
+.main .battle-type-pill.poke-type-chip.asset-full,
+.main .champ-detail-type-chip.poke-type-chip.asset-full {
   width: 104px !important;
   min-width: 104px !important;
   max-width: 104px !important;
@@ -790,17 +801,17 @@ section[data-testid="stSidebar"] div[data-testid="stExpander"] div.stButton > bu
   max-height: 22px !important;
 }
 
-.battle-type-pill.poke-type-chip.asset-full img,
-.champ-detail-type-chip.poke-type-chip.asset-full img {
+.main .battle-type-pill.poke-type-chip.asset-full img,
+.main .champ-detail-type-chip.poke-type-chip.asset-full img {
   width: 104px !important;
   height: 22px !important;
   max-width: 104px !important;
   max-height: 22px !important;
 }
 
-.battle-move-link .battle-type-dot.poke-type-chip.asset-icon,
-.matchup-move .battle-type-dot.poke-type-chip.asset-icon,
-.battle-type-dot.poke-type-chip.asset-icon {
+.main .battle-move-link .battle-type-dot.poke-type-chip.asset-icon,
+.main .matchup-move .battle-type-dot.poke-type-chip.asset-icon,
+.main .battle-type-dot.poke-type-chip.asset-icon {
   width: 20px !important;
   min-width: 20px !important;
   max-width: 20px !important;
@@ -810,28 +821,28 @@ section[data-testid="stSidebar"] div[data-testid="stExpander"] div.stButton > bu
   flex-basis: 20px !important;
 }
 
-.battle-move-link .battle-type-dot.poke-type-chip.asset-icon img,
-.matchup-move .battle-type-dot.poke-type-chip.asset-icon img,
-.battle-type-dot.poke-type-chip.asset-icon img {
+.main .battle-move-link .battle-type-dot.poke-type-chip.asset-icon img,
+.main .matchup-move .battle-type-dot.poke-type-chip.asset-icon img,
+.main .battle-type-dot.poke-type-chip.asset-icon img {
   width: 20px !important;
   height: 20px !important;
   max-width: 20px !important;
   max-height: 20px !important;
 }
 
-.battle-stat-stack {
+.main .battle-stat-stack {
   gap: 5px !important;
   border-color: rgba(215,230,255,0.1) !important;
   border-radius: 12px !important;
   background: rgba(255,255,255,0.035) !important;
 }
 
-.battle-stat-row {
+.main .battle-stat-row {
   min-height: 23px !important;
   background: rgba(255,255,255,0.035) !important;
 }
 
-.battle-stat-bar {
+.main .battle-stat-bar {
   height: 5px !important;
   background: rgba(0,0,0,0.34) !important;
 }
@@ -946,28 +957,28 @@ section[data-testid="stSidebar"] div[data-testid="stExpander"] div.stButton > bu
 }
 
 /* Trainers */
-.trainers-portrait-xl {
+.main .trainers-portrait-xl {
   width: 104px !important;
   height: 104px !important;
   border-radius: 14px !important;
   background: rgba(255,255,255,0.04) !important;
 }
 
-.trainers-hero-grid {
+.main .trainers-hero-grid {
   grid-template-columns: 104px minmax(0, 1fr) !important;
 }
 
-.trainers-status-grid,
-.saves-status-grid,
-.mart-register-grid {
+.main .trainers-status-grid,
+.main .saves-status-grid,
+.main .mart-register-grid {
   gap: 9px !important;
 }
 
-.trainers-stat,
-.saves-stat,
-.mart-register-card,
-.league-status-card,
-.hof-stat {
+.main .trainers-stat,
+.main .saves-stat,
+.main .mart-register-card,
+.main .league-status-card,
+.main .hof-stat {
   min-height: 70px !important;
   border-color: var(--border-soft) !important;
   border-radius: 12px !important;
@@ -975,15 +986,15 @@ section[data-testid="stSidebar"] div[data-testid="stExpander"] div.stButton > bu
   box-shadow: none !important;
 }
 
-.trainers-stat-detail,
-.saves-stat-detail,
-.mart-value,
-.league-status-card strong,
-.hof-stat strong {
+.main .trainers-stat-detail,
+.main .saves-stat-detail,
+.main .mart-value,
+.main .league-status-card strong,
+.main .hof-stat strong {
   font-size: 16px !important;
 }
 
-.trainer-panel {
+.main .trainer-panel {
   border-color: var(--border-normal) !important;
   border-radius: 16px !important;
   background:
@@ -992,7 +1003,7 @@ section[data-testid="stSidebar"] div[data-testid="stExpander"] div.stButton > bu
   box-shadow: var(--poke-shadow-card) !important;
 }
 
-.trainer-head {
+.main .trainer-head {
   border: 0 !important;
   border-left: 3px solid var(--accent) !important;
   border-radius: 10px !important;
@@ -1002,27 +1013,27 @@ section[data-testid="stSidebar"] div[data-testid="stExpander"] div.stButton > bu
   -webkit-text-fill-color: var(--text-secondary) !important;
 }
 
-.trainer-grid {
+.main .trainer-grid {
   grid-template-columns: 124px minmax(0, 1fr) !important;
 }
 
-.trainer-portrait {
+.main .trainer-portrait {
   border-color: var(--border-soft) !important;
   border-radius: 14px !important;
   background: rgba(255,255,255,0.035) !important;
 }
 
-.trainer-portrait img {
+.main .trainer-portrait img {
   width: 106px !important;
 }
 
-.trainer-metrics {
+.main .trainer-metrics {
   display: grid !important;
   grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
   gap: 8px !important;
 }
 
-.trainer-metric {
+.main .trainer-metric {
   min-height: 66px !important;
   padding: 9px 10px !important;
   border: 1px solid var(--border-soft) !important;
@@ -1030,7 +1041,7 @@ section[data-testid="stSidebar"] div[data-testid="stExpander"] div.stButton > bu
   background: rgba(255,255,255,0.035) !important;
 }
 
-.trainer-metric span {
+.main .trainer-metric span {
   display: block !important;
   color: var(--text-muted) !important;
   -webkit-text-fill-color: var(--text-muted) !important;
@@ -1039,7 +1050,7 @@ section[data-testid="stSidebar"] div[data-testid="stExpander"] div.stButton > bu
   text-transform: uppercase !important;
 }
 
-.trainer-metric strong {
+.main .trainer-metric strong {
   display: block !important;
   margin-top: 6px !important;
   color: var(--text-primary) !important;
@@ -1048,19 +1059,19 @@ section[data-testid="stSidebar"] div[data-testid="stExpander"] div.stButton > bu
   font-weight: 950 !important;
 }
 
-.trainer-medals {
+.main .trainer-medals {
   margin-top: 9px !important;
 }
 
-.trainer-kia,
-.trainer-note {
+.main .trainer-kia,
+.main .trainer-note {
   border-color: var(--border-soft) !important;
   border-radius: 12px !important;
   background: rgba(255,255,255,0.035) !important;
 }
 
 /* Current team and PC */
-.slot.team-slot-card {
+.main .slot.team-slot-card {
   min-height: 190px !important;
   border-radius: 14px !important;
   background:
@@ -1068,27 +1079,27 @@ section[data-testid="stSidebar"] div[data-testid="stExpander"] div.stButton > bu
     rgba(13, 22, 36, 0.95) !important;
 }
 
-.slot.team-slot-card > img {
+.main .slot.team-slot-card > img {
   width: min(100%, 126px) !important;
   height: 104px !important;
   margin: 2px auto 6px !important;
 }
 
-.slot.team-slot-card .title {
+.main .slot.team-slot-card .title {
   font-size: 10px !important;
 }
 
-.slot.team-slot-card .sub {
+.main .slot.team-slot-card .sub {
   font-size: 14px !important;
 }
 
-.slot.team-slot-card .types {
+.main .slot.team-slot-card .types {
   min-height: 17px !important;
   margin-top: 6px !important;
   gap: 4px !important;
 }
 
-.slot.team-slot-card .slot-type-badge.poke-type-chip.asset-full {
+.main .slot.team-slot-card .slot-type-badge.poke-type-chip.asset-full {
   width: 72px !important;
   min-width: 72px !important;
   max-width: 72px !important;
@@ -1097,8 +1108,8 @@ section[data-testid="stSidebar"] div[data-testid="stExpander"] div.stButton > bu
   max-height: 15px !important;
 }
 
-.slot.team-slot-card .slot-type-badge.poke-type-chip.asset-full img,
-.slot.team-slot-card .slot-type-badge .poke-type-full-img {
+.main .slot.team-slot-card .slot-type-badge.poke-type-chip.asset-full img,
+.main .slot.team-slot-card .slot-type-badge .poke-type-full-img {
   width: 72px !important;
   height: 15px !important;
   max-width: 72px !important;
@@ -1110,14 +1121,14 @@ div[data-testid="column"]:has(.slot.team-slot-card) .stButton > button {
   padding: 0 12px !important;
 }
 
-.champ-box-grid-shell {
+.main .champ-box-grid-shell {
   border-color: var(--border-normal) !important;
   background:
     linear-gradient(135deg, rgba(77,141,255,0.075), transparent 40%),
     rgba(8, 14, 26, 0.96) !important;
 }
 
-.champ-box-tile {
+.main .champ-box-tile {
   min-height: 118px !important;
   border-color: rgba(215,230,255,0.12) !important;
   background:
@@ -1125,7 +1136,7 @@ div[data-testid="column"]:has(.slot.team-slot-card) .stButton > button {
     rgba(15, 26, 43, 0.96) !important;
 }
 
-.champ-box-tile img {
+.main .champ-box-tile img {
   width: 90px !important;
   height: 80px !important;
   max-width: 90px !important;
@@ -1133,21 +1144,21 @@ div[data-testid="column"]:has(.slot.team-slot-card) .stButton > button {
 }
 
 /* Shop */
-.mart-hero {
+.main .mart-hero {
   grid-template-columns: minmax(0, 1fr) auto !important;
   min-height: 92px !important;
   margin-bottom: 10px !important;
   padding: 14px 16px !important;
 }
 
-.mart-hero-right {
+.main .mart-hero-right {
   min-width: 164px !important;
   padding: 0 !important;
   border: 0 !important;
   background: transparent !important;
 }
 
-.mart-balance-card {
+.main .mart-balance-card {
   min-width: 164px !important;
   padding: 10px 12px !important;
   border: 1px solid rgba(255,210,109,0.26) !important;
@@ -1157,7 +1168,7 @@ div[data-testid="column"]:has(.slot.team-slot-card) .stButton > button {
     rgba(255,255,255,0.035) !important;
 }
 
-.mart-balance-card span {
+.main .mart-balance-card span {
   display: block !important;
   color: var(--text-muted) !important;
   -webkit-text-fill-color: var(--text-muted) !important;
@@ -1167,7 +1178,7 @@ div[data-testid="column"]:has(.slot.team-slot-card) .stButton > button {
   text-transform: uppercase !important;
 }
 
-.mart-balance-card strong {
+.main .mart-balance-card strong {
   display: block !important;
   margin-top: 4px !important;
   color: var(--pokemon-yellow) !important;
@@ -1178,7 +1189,7 @@ div[data-testid="column"]:has(.slot.team-slot-card) .stButton > button {
   font-variant-numeric: tabular-nums !important;
 }
 
-.mart-pill {
+.main .mart-pill {
   min-height: 26px !important;
   border-color: var(--border-soft) !important;
   border-radius: 999px !important;
@@ -1187,18 +1198,18 @@ div[data-testid="column"]:has(.slot.team-slot-card) .stButton > button {
   -webkit-text-fill-color: var(--text-secondary) !important;
 }
 
-.mart-register-grid {
+.main .mart-register-grid {
   grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
   gap: 8px !important;
   margin: 10px 0 12px !important;
 }
 
-.mart-register-card {
+.main .mart-register-card {
   min-height: 58px !important;
   padding: 9px 10px !important;
 }
 
-.mart-register-card.is-main {
+.main .mart-register-card.is-main {
   border-color: rgba(255,210,109,0.3) !important;
   background:
     radial-gradient(circle at 100% 0%, rgba(255,210,109,0.12), transparent 56%),
@@ -1206,22 +1217,22 @@ div[data-testid="column"]:has(.slot.team-slot-card) .stButton > button {
   box-shadow: inset 3px 0 0 var(--pokemon-yellow) !important;
 }
 
-.mart-label {
+.main .mart-label {
   font-size: 9px !important;
 }
 
-.mart-value {
+.main .mart-value {
   margin-top: 5px !important;
   font-size: 16px !important;
 }
 
-.mart-register-card.is-main .mart-value {
+.main .mart-register-card.is-main .mart-value {
   color: var(--pokemon-yellow) !important;
   -webkit-text-fill-color: var(--pokemon-yellow) !important;
   font-size: 20px !important;
 }
 
-.mart-aisle-head {
+.main .mart-aisle-head {
   margin: 12px 0 10px !important;
   padding: 10px 12px !important;
   border-color: rgba(139,171,216,0.14) !important;
@@ -1230,13 +1241,13 @@ div[data-testid="column"]:has(.slot.team-slot-card) .stButton > button {
   box-shadow: none !important;
 }
 
-.mart-aisle-title {
+.main .mart-aisle-title {
   margin: 0 !important;
   font-size: 15px !important;
   line-height: 1.1 !important;
 }
 
-.shop-card {
+.main .shop-card {
   min-height: 196px !important;
   margin-bottom: 6px !important;
   border-color: rgba(139,171,216,0.15) !important;
@@ -1247,25 +1258,25 @@ div[data-testid="column"]:has(.slot.team-slot-card) .stButton > button {
   box-shadow: inset 0 1px 0 rgba(255,255,255,0.055), 0 10px 22px rgba(0,0,0,0.18) !important;
 }
 
-.shop-card::before {
+.main .shop-card::before {
   display: none !important;
 }
 
-.shop-card.is-sale {
+.main .shop-card.is-sale {
   border-color: rgba(255,210,109,0.45) !important;
   box-shadow: inset 3px 0 0 var(--pokemon-yellow), 0 10px 22px rgba(0,0,0,0.2) !important;
 }
 
-.shop-card.is-pending-sale {
+.main .shop-card.is-pending-sale {
   border-color: rgba(69,209,255,0.36) !important;
   box-shadow: inset 3px 0 0 var(--info), 0 10px 22px rgba(0,0,0,0.18) !important;
 }
 
-.shop-card.is-delivery-locked {
+.main .shop-card.is-delivery-locked {
   opacity: 0.82 !important;
 }
 
-.shop-head {
+.main .shop-head {
   min-height: 48px !important;
   display: flex !important;
   align-items: flex-start !important;
@@ -1276,21 +1287,21 @@ div[data-testid="column"]:has(.slot.team-slot-card) .stButton > button {
   background: rgba(6, 12, 22, 0.54) !important;
 }
 
-.shop-title-block {
+.main .shop-title-block {
   min-width: 0 !important;
   display: grid !important;
   gap: 5px !important;
 }
 
-.shop-name {
+.main .shop-name {
   font-size: 12px !important;
   font-weight: 950 !important;
   line-height: 1.14 !important;
 }
 
-.shop-category-badge,
-.shop-state-badge,
-.shop-discount-badge {
+.main .shop-category-badge,
+.main .shop-state-badge,
+.main .shop-discount-badge {
   display: inline-flex !important;
   width: fit-content !important;
   max-width: 100% !important;
@@ -1310,44 +1321,44 @@ div[data-testid="column"]:has(.slot.team-slot-card) .stButton > button {
   white-space: nowrap !important;
 }
 
-.shop-state-row {
+.main .shop-state-row {
   flex: 0 0 auto !important;
   display: flex !important;
   justify-content: flex-end !important;
 }
 
-.shop-state-badge.is-sale,
-.shop-discount-badge {
+.main .shop-state-badge.is-sale,
+.main .shop-discount-badge {
   border-color: rgba(255,210,109,0.35) !important;
   background: rgba(255,210,109,0.1) !important;
   color: var(--pokemon-yellow) !important;
   -webkit-text-fill-color: var(--pokemon-yellow) !important;
 }
 
-.shop-state-badge.is-locked,
-.shop-discount-badge.is-pending {
+.main .shop-state-badge.is-locked,
+.main .shop-discount-badge.is-pending {
   border-color: rgba(69,209,255,0.3) !important;
   background: rgba(69,209,255,0.085) !important;
   color: #8fdcff !important;
   -webkit-text-fill-color: #8fdcff !important;
 }
 
-.shop-state-badge.is-poor,
-.shop-state-badge.is-used,
-.shop-discount-badge.is-used {
+.main .shop-state-badge.is-poor,
+.main .shop-state-badge.is-used,
+.main .shop-discount-badge.is-used {
   border-color: rgba(139,171,216,0.15) !important;
   background: rgba(255,255,255,0.035) !important;
   color: var(--text-muted) !important;
   -webkit-text-fill-color: var(--text-muted) !important;
 }
 
-.shop-body {
+.main .shop-body {
   grid-template-columns: 74px minmax(0, 1fr) !important;
   gap: 12px !important;
   padding: 12px 11px 13px !important;
 }
 
-.shop-icon-slot {
+.main .shop-icon-slot {
   width: 72px !important;
   height: 72px !important;
   border-color: var(--border-soft) !important;
@@ -1357,21 +1368,21 @@ div[data-testid="column"]:has(.slot.team-slot-card) .stButton > button {
     rgba(255,255,255,0.035) !important;
 }
 
-.shop-icon {
+.main .shop-icon {
   width: 58px !important;
   height: 58px !important;
   max-width: 58px !important;
   max-height: 58px !important;
 }
 
-.shop-desc {
+.main .shop-desc {
   color: var(--text-secondary) !important;
   -webkit-text-fill-color: var(--text-secondary) !important;
   font-size: 14px !important;
   line-height: 1.25 !important;
 }
 
-.shop-price {
+.main .shop-price {
   display: grid !important;
   gap: 6px !important;
   padding: 0 !important;
@@ -1380,7 +1391,7 @@ div[data-testid="column"]:has(.slot.team-slot-card) .stButton > button {
   background: transparent !important;
 }
 
-.shop-coin-value {
+.main .shop-coin-value {
   min-height: 30px !important;
   min-width: 60px !important;
   padding: 4px 8px !important;
@@ -1391,7 +1402,7 @@ div[data-testid="column"]:has(.slot.team-slot-card) .stButton > button {
   -webkit-text-fill-color: var(--pokemon-yellow) !important;
 }
 
-.shop-old-price {
+.main .shop-old-price {
   opacity: 0.7 !important;
   border-color: rgba(139,171,216,0.14) !important;
   background: rgba(255,255,255,0.025) !important;
@@ -1399,18 +1410,18 @@ div[data-testid="column"]:has(.slot.team-slot-card) .stButton > button {
   -webkit-text-fill-color: var(--text-muted) !important;
 }
 
-.shop-coin {
+.main .shop-coin {
   font-size: 18px !important;
 }
 
-.shop-amount {
+.main .shop-amount {
   color: inherit !important;
   -webkit-text-fill-color: currentColor !important;
   font-size: 17px !important;
   font-weight: 950 !important;
 }
 
-.shop-missing {
+.main .shop-missing {
   margin-top: 0 !important;
   padding: 5px 7px !important;
   border-radius: 10px !important;
@@ -1481,12 +1492,12 @@ div[data-testid="column"]:has(.shop-card) .stButton > button p {
   font-size: 13px !important;
 }
 
-.saves-current-card,
-.saves-history-card,
-.saves-admin-panel,
-.saves-upload-panel,
-.saves-empty-state,
-.bill-save-meta {
+.main .saves-current-card,
+.main .saves-history-card,
+.main .saves-admin-panel,
+.main .saves-upload-panel,
+.main .saves-empty-state,
+.main .bill-save-meta {
   border-color: var(--border-normal) !important;
   border-radius: 14px !important;
   background:
@@ -1495,22 +1506,22 @@ div[data-testid="column"]:has(.shop-card) .stButton > button p {
   box-shadow: none !important;
 }
 
-.saves-current-card {
+.main .saves-current-card {
   border-left-color: var(--accent) !important;
 }
 
-.saves-card-meta {
+.main .saves-card-meta {
   gap: 7px !important;
 }
 
-.saves-meta-cell {
+.main .saves-meta-cell {
   min-height: 44px !important;
   border-color: var(--border-soft) !important;
   border-radius: 10px !important;
   background: rgba(255,255,255,0.035) !important;
 }
 
-.saves-meta-value {
+.main .saves-meta-value {
   font-size: 13px !important;
 }
 
@@ -1521,7 +1532,7 @@ div[data-testid="column"]:has(.shop-card) .stButton > button p {
   font-size: 12px !important;
 }
 
-.saves-admin-panel {
+.main .saves-admin-panel {
   border-left-color: var(--danger) !important;
   background:
     linear-gradient(90deg, rgba(255,82,99,0.1), transparent 50%),
@@ -1590,11 +1601,11 @@ div[data-testid="stFileUploaderDropzone"] {
   line-height: 1.25 !important;
 }
 
-.league-division-card,
-.league-history-card,
-.league-status-table,
-.league-table-shell,
-.hof-card {
+.main .league-division-card,
+.main .league-history-card,
+.main .league-status-table,
+.main .league-table-shell,
+.main .hof-card {
   border-color: var(--border-normal) !important;
   border-radius: 14px !important;
   background:
@@ -1603,7 +1614,7 @@ div[data-testid="stFileUploaderDropzone"] {
   box-shadow: none !important;
 }
 
-.league-card-player {
+.main .league-card-player {
   grid-template-columns: 38px minmax(0, 1fr) auto auto auto !important;
   min-height: 42px !important;
   border-color: var(--border-soft) !important;
@@ -1667,24 +1678,24 @@ div[data-testid="stFileUploaderDropzone"] {
   opacity: .72 !important;
 }
 
-.league-card-player:hover {
+.main .league-card-player:hover {
   border-color: rgba(114,185,255,0.25) !important;
 }
 
-.league-status-table th {
+.main .league-status-table th {
   background: rgba(255,255,255,0.045) !important;
 }
 
-.league-status-table td {
+.main .league-status-table td {
   background: rgba(7, 12, 22, 0.86) !important;
 }
 
-.league-trainer-badge {
+.main .league-trainer-badge {
   border-radius: 999px !important;
 }
 
 /* Hall of Fame */
-.hof-empty {
+.main .hof-empty {
   display: grid !important;
   gap: 4px !important;
   padding: 18px !important;
@@ -1698,17 +1709,19 @@ div[data-testid="stFileUploaderDropzone"] {
   font-size: 14px !important;
 }
 
-.hof-empty strong {
+.main .hof-empty strong {
   color: var(--text-primary) !important;
   -webkit-text-fill-color: var(--text-primary) !important;
   font-size: 16px !important;
 }
 
-/* Secondary pages 1E */
-.norma-hero,
-.cup-hero,
-.ju-hero,
-.season-hero {
+/* Secondary pages 1F: same visual intent, selector specificity fixed */
+.main .norma-hero,
+.main .cup-hero,
+.main .ju-hero,
+.main .season-hero {
+  min-height: 104px !important;
+  padding: 15px 16px !important;
   border-color: var(--border-normal) !important;
   border-left: 4px solid var(--primary) !important;
   border-radius: 16px !important;
@@ -1719,63 +1732,90 @@ div[data-testid="stFileUploaderDropzone"] {
   box-shadow: var(--poke-shadow-card) !important;
 }
 
-.hof-hero {
+.main .norma-hero::before {
+  content: "" !important;
+  position: absolute !important;
+  inset: 0 !important;
+  pointer-events: none !important;
+  background:
+    linear-gradient(90deg, rgba(255,255,255,0.025) 0 1px, transparent 1px 100%) 0 0 / 28px 100%,
+    linear-gradient(180deg, rgba(255,255,255,0.025) 0 1px, transparent 1px 100%) 0 0 / 100% 24px !important;
+  opacity: .42 !important;
+}
+
+.main .norma-hero::after {
+  content: "" !important;
+  position: absolute !important;
+  right: 22px !important;
+  top: 14px !important;
+  width: 120px !important;
+  height: 72px !important;
+  border: 1px solid rgba(216,223,232,0.12) !important;
+  border-radius: 0 !important;
+  background:
+    linear-gradient(135deg, transparent 0 56%, rgba(110,168,255,0.11) 56% 100%),
+    linear-gradient(180deg, rgba(255,255,255,0.05), transparent) !important;
+  opacity: .45 !important;
+  transform: skewX(-14deg) !important;
+}
+
+.main .hof-hero {
   border-left: 4px solid var(--pokemon-yellow) !important;
   background:
     linear-gradient(118deg, rgba(255,210,77,0.11) 0 32%, transparent 32% 100%),
     linear-gradient(180deg, rgba(18,30,49,0.96), rgba(8,14,26,0.98)) !important;
 }
 
-.norma-title,
-.cup-title,
-.ju-hero-title,
-.season-title {
+.main .norma-title,
+.main .cup-title,
+.main .ju-hero-title,
+.main .season-title {
   color: var(--text-primary) !important;
   -webkit-text-fill-color: var(--text-primary) !important;
   font-size: clamp(22px, 2.2vw, 30px) !important;
   text-shadow: none !important;
 }
 
-.norma-subtitle,
-.norma-summary,
-.cup-sub,
-.ju-hero-sub,
-.season-subtitle {
+.main .norma-subtitle,
+.main .norma-summary,
+.main .cup-sub,
+.main .ju-hero-sub,
+.main .season-subtitle {
   color: var(--text-secondary) !important;
   -webkit-text-fill-color: var(--text-secondary) !important;
   font-size: 14px !important;
   line-height: 1.3 !important;
 }
 
-.norma-kicker,
-.cup-kicker,
-.season-kicker,
-.norma-doc-chip,
-.cup-pill,
-.season-pill,
-.ju-chip,
-.ju-status-badge {
+.main .norma-kicker,
+.main .cup-kicker,
+.main .season-kicker,
+.main .norma-doc-chip,
+.main .cup-pill,
+.main .season-pill,
+.main .ju-chip,
+.main .ju-status-badge {
   border-radius: 999px !important;
   clip-path: none !important;
 }
 
-.norma-kicker,
-.cup-kicker,
-.season-kicker {
+.main .norma-kicker,
+.main .cup-kicker,
+.main .season-kicker {
   display: inline-flex !important;
   align-items: center !important;
   min-height: 24px !important;
   padding: 4px 8px !important;
 }
 
-.norma-kicker,
-.cup-kicker,
-.season-kicker,
-.norma-block-head,
-.cup-section,
-.doubles-section,
-.ju-toolbar,
-.season-section-title {
+.main .norma-kicker,
+.main .cup-kicker,
+.main .season-kicker,
+.main .norma-block-head,
+.main .cup-section,
+.main .doubles-section,
+.main .ju-toolbar,
+.main .season-section-title {
   border-color: var(--border-normal) !important;
   border-left: 4px solid var(--primary) !important;
   border-radius: 12px !important;
@@ -1786,34 +1826,34 @@ div[data-testid="stFileUploaderDropzone"] {
   -webkit-text-fill-color: var(--text-primary) !important;
 }
 
-.hof-kicker,
-.hof-section-title {
+.main .hof-kicker,
+.main .hof-section-title {
   border-left-color: var(--pokemon-yellow) !important;
   color: var(--pokemon-yellow) !important;
   -webkit-text-fill-color: var(--pokemon-yellow) !important;
 }
 
-.norma-block,
-.norma-list-item,
-.cup-mode-card,
-.cup-metric,
-.cup-vs-card,
-.cup-paste-card,
-.cup-match,
-.doubles-card,
-.doubles-metric,
-.doubles-note,
-.doubles-logo-wrap,
-.ju-action-card,
-.ju-penalty-card,
-.ju-case-card,
-.ju-docket,
-.ju-docket-cell,
-.ju-detail-block,
-.ju-empty,
-.season-card,
-.season-alert,
-.season-version-row {
+.main .norma-block,
+.main .norma-list-item,
+.main .cup-mode-card,
+.main .cup-metric,
+.main .cup-vs-card,
+.main .cup-paste-card,
+.main .cup-match,
+.main .doubles-card,
+.main .doubles-metric,
+.main .doubles-note,
+.main .doubles-logo-wrap,
+.main .ju-action-card,
+.main .ju-penalty-card,
+.main .ju-case-card,
+.main .ju-docket,
+.main .ju-docket-cell,
+.main .ju-detail-block,
+.main .ju-empty,
+.main .season-card,
+.main .season-alert,
+.main .season-version-row {
   border-color: var(--border-normal) !important;
   border-radius: 14px !important;
   background:
@@ -1822,8 +1862,8 @@ div[data-testid="stFileUploaderDropzone"] {
   box-shadow: inset 0 1px 0 rgba(255,255,255,0.055) !important;
 }
 
-.norma-list-bullet,
-.ju-case-no {
+.main .norma-list-bullet,
+.main .ju-case-no {
   border-color: rgba(114,185,255,0.28) !important;
   border-radius: 12px !important;
   background: rgba(77,141,255,0.1) !important;
@@ -1831,7 +1871,7 @@ div[data-testid="stFileUploaderDropzone"] {
   -webkit-text-fill-color: var(--primary-hover) !important;
 }
 
-.cup-mode-card.is-active {
+.main .cup-mode-card.is-active {
   border-color: rgba(114,185,255,0.42) !important;
   border-left-color: var(--primary) !important;
   background:
@@ -1839,9 +1879,9 @@ div[data-testid="stFileUploaderDropzone"] {
     rgba(12,25,43,0.94) !important;
 }
 
-.doubles-banner,
-.doubles-round-head,
-.doubles-card-head {
+.main .doubles-banner,
+.main .doubles-round-head,
+.main .doubles-card-head {
   border-color: var(--border-normal) !important;
   border-left: 4px solid var(--primary) !important;
   border-radius: 12px !important;
@@ -1851,7 +1891,7 @@ div[data-testid="stFileUploaderDropzone"] {
     rgba(11,19,32,0.94) !important;
 }
 
-.doubles-champion {
+.main .doubles-champion {
   border-color: rgba(255,210,77,0.34) !important;
   border-radius: 14px !important;
   background:
@@ -1861,30 +1901,30 @@ div[data-testid="stFileUploaderDropzone"] {
   -webkit-text-fill-color: var(--pokemon-yellow) !important;
 }
 
-.ju-case-title,
-.ju-docket-title,
-.season-value,
-.cup-card-value,
-.doubles-team-name {
+.main .ju-case-title,
+.main .ju-docket-title,
+.main .season-value,
+.main .cup-card-value,
+.main .doubles-team-name {
   color: var(--text-primary) !important;
   -webkit-text-fill-color: var(--text-primary) !important;
 }
 
-.ju-case-kv,
-.ju-docket-cell,
-.ju-detail-block,
-.season-detail,
-.season-alert-body,
-.season-version-meta,
-.doubles-team-meta,
-.doubles-round-team-meta {
+.main .ju-case-kv,
+.main .ju-docket-cell,
+.main .ju-detail-block,
+.main .season-detail,
+.main .season-alert-body,
+.main .season-version-meta,
+.main .doubles-team-meta,
+.main .doubles-round-team-meta {
   color: var(--text-secondary) !important;
   -webkit-text-fill-color: var(--text-secondary) !important;
   font-size: 13px !important;
   line-height: 1.3 !important;
 }
 
-.hof-empty {
+.main .hof-empty {
   position: relative !important;
   min-height: 126px !important;
   padding: 18px 18px 18px 74px !important;
@@ -1892,7 +1932,7 @@ div[data-testid="stFileUploaderDropzone"] {
   border-color: rgba(255,210,77,0.24) !important;
 }
 
-.hof-empty:before {
+.main .hof-empty:before {
   content: "HF" !important;
   position: absolute !important;
   left: 22px !important;
@@ -1959,45 +1999,45 @@ div[data-testid="stFileUploaderDropzone"] {
   .main .saves-hero {
     grid-template-columns: 1fr !important;
   }
-  .mart-register-grid,
-  .trainers-status-grid,
-  .saves-status-grid {
+  .main .mart-register-grid,
+  .main .trainers-status-grid,
+  .main .saves-status-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
   }
-  .trainer-grid {
+  .main .trainer-grid {
     grid-template-columns: 1fr !important;
   }
-  .trainer-metrics {
+  .main .trainer-metrics {
     grid-template-columns: 1fr !important;
   }
 }
 
 @media (max-width: 640px) {
-  .league-hero,
-  .mart-hero,
-  .saves-hero,
-  .hof-hero,
-  .matchup-hero {
+  .main .league-hero,
+  .main .mart-hero,
+  .main .saves-hero,
+  .main .hof-hero,
+  .main .matchup-hero {
     grid-template-columns: 1fr !important;
     padding: 12px !important;
   }
-  .mart-register-grid,
-  .trainers-status-grid,
-  .saves-status-grid {
+  .main .mart-register-grid,
+  .main .trainers-status-grid,
+  .main .saves-status-grid {
     grid-template-columns: 1fr !important;
   }
-  .shop-body {
+  .main .shop-body {
     grid-template-columns: 62px minmax(0, 1fr) !important;
   }
-  .shop-icon-slot {
+  .main .shop-icon-slot {
     width: 62px !important;
     height: 62px !important;
   }
-  .shop-icon {
+  .main .shop-icon {
     width: 50px !important;
     height: 50px !important;
   }
-  .champ-box-grid {
+  .main .champ-box-grid {
     grid-template-columns: repeat(3, minmax(76px, 1fr)) !important;
   }
   .main .league-card-player {

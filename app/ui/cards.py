@@ -87,7 +87,7 @@ def ensure_type_css() -> None:
             ".type-chip { display:inline-block; padding:2px 6px; border-radius:0; color:#fff; font-family:var(--font-pixel); font-weight:700; font-size:0.55rem; border:1px solid rgba(255,255,255,0.16); }"
             ".types { margin-top:6px; display:flex; justify-content:center; gap:6px; flex-wrap:wrap; }"
             ".shield-chip { display:inline-block; padding:2px 6px; border-radius:0; color:#ffffff; font-family:var(--font-pixel); font-weight:700; font-size:0.55rem; border:1px solid #d8dfe8; background:linear-gradient(180deg,#79b9f5 0%, #376c96 100%); }"
-            ".rob-chip { display:inline-block; padding:2px 6px; border-radius:0; color:#ffffff; font-family:var(--font-pixel); font-weight:700; font-size:0.55rem; border:1px solid #ecd8ff; background:linear-gradient(180deg,#cf74ff 0%, #74389f 100%); }"
+            ".rob-chip { display:inline-block; padding:2px 6px; border-radius:999px; color:#ffd2d8; font-family:var(--font-pixel); font-weight:700; font-size:0.55rem; border:1px solid rgba(255,97,114,0.48); background:rgba(255,97,114,0.16); }"
             ".slot-empty { border:1px dashed var(--bw2-edge); background:linear-gradient(180deg,var(--bw2-panel-2) 0%, var(--bw2-panel) 100%); height:120px; display:flex; align-items:center; "
             "justify-content:center; color:var(--bw2-text-dim); border-radius:0; font-family:var(--font-pixel); font-size:0.58rem; text-transform:uppercase; }"
             "</style>"

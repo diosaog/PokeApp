@@ -12,8 +12,6 @@ def page_inicio() -> None:
 
 
 def page_normativa() -> None:
-    st.header("Normativa")
-
     try:
         from app.discord_notify import sync_normativa_notification
 
