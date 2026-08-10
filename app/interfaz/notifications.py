@@ -263,7 +263,7 @@ def collect_notifications(
         {
             "kind": "ok",
             "source": "empty",
-            "title": "Sin avisos",
+            "title": "Sin actividad reciente",
             "body": "",
             "time": "",
             "ts": "0",
