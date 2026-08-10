@@ -915,8 +915,23 @@ def apply_section_theme(section: str) -> None:
         "Tienda": ("#ffbd5c", "#d47a21", "#ffe8bd"),
         "Saves": ("#45d1ff", "#218ed9", "#d7f6ff"),
     }
+    watermarks = {
+        "Inicio": "POKEAPP",
+        "Normativa": "RULES",
+        "Entrenadores": "TRAINER",
+        "Liga y Tabla": "LEAGUE",
+        "Hall of Fame": "CHAMPION",
+        "Temporada": "SEASON",
+        "Team Preview": "VS",
+        "Previa Combate": "VS",
+        "Copa": "CUP",
+        "Juicios": "CASE",
+        "Tienda": "MART",
+        "Saves": "SAVE",
+    }
     accent, accent_dark, accent_soft = palette.get(section, ("#2f80ed", "#1452bf", "#9dd3ff"))
     label = section.upper().replace('"', "")
+    watermark = watermarks.get(section, "POKEAPP").replace('"', "")
     st.markdown(
         (
             "<style>:root{"
@@ -926,6 +941,7 @@ def apply_section_theme(section: str) -> None:
             f"--accent-ghost:{accent}2e;"
             f"--ball-color:{accent};"
             f'--section-label:"{label}";'
+            f'--section-watermark:"{watermark}";'
             "}</style>"
         ),
         unsafe_allow_html=True,

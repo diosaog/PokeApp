@@ -4235,3 +4235,6 @@ section[data-testid="stSidebar"] div[data-testid="stExpander"] input {
 def apply_champions_skin(container: Any = None) -> None:
     target = container or st
     target.markdown(CHAMPIONS_SKIN_CSS, unsafe_allow_html=True)
+    from app.interfaz.premium_phase2 import apply_phase2_skin
+
+    apply_phase2_skin(target)
