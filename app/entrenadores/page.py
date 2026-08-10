@@ -26,7 +26,7 @@ from app.ui.team_grid import team_grid_ui
 from app.interfaz.theme import apply_platinum_ui
 from app.liga.context import current_jornada
 from app.liga.ranking import clear_ranking_caches
-from app.tienda.money import clear_money_caches
+from app.tienda.money import clear_money_caches, money_breakdown
 from conex_pkhex import PKHeXRuntime, extract_team, get_bridge_path, open_sav_cached
 from storage import (
     get_current_save_for_user,
@@ -873,6 +873,13 @@ TRAINERS_INSPECTOR_CSS = """
   border-radius: 12px !important;
   background: rgba(255,255,255,0.04) !important;
 }
+.pokemon-inspector-item-icon {
+  width: 24px !important;
+  height: 24px !important;
+  object-fit: contain !important;
+  image-rendering: pixelated !important;
+  filter: drop-shadow(0 3px 4px rgba(0,0,0,0.28)) !important;
+}
 .pokemon-inspector-item span {
   color: var(--bw2-text-dim) !important;
   -webkit-text-fill-color: var(--bw2-text-dim) !important;
@@ -1171,11 +1178,651 @@ TRAINERS_INSPECTOR_CSS = """
 </style>
 """
 
+TRAINERS_PHASE_1C_CSS = """
+<style>
+/* Phase 1C: Entrenadores final visual pass. */
+.trainers-page-top {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) minmax(220px, 360px) !important;
+  gap: 12px !important;
+  align-items: end !important;
+  margin: 0 0 12px !important;
+}
+.trainers-page-title {
+  display: grid !important;
+  gap: 3px !important;
+}
+.trainers-page-title span,
+.trainers-select-frame span,
+.trainers-profile-kicker,
+.trainers-profile-chip,
+.trainers-profile-metric span,
+.trainers-admin-heading,
+.trainer-inventory-group-title,
+.trainer-inventory-meta,
+.trainer-inventory-status {
+  font-family: var(--font-pixel) !important;
+  font-size: 10px !important;
+  font-weight: 900 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0 !important;
+}
+.trainers-page-title span {
+  color: var(--text-muted, #77879e) !important;
+  -webkit-text-fill-color: var(--text-muted, #77879e) !important;
+}
+.trainers-page-title strong {
+  color: var(--text-primary, #f6f9ff) !important;
+  -webkit-text-fill-color: var(--text-primary, #f6f9ff) !important;
+  font-size: clamp(26px, 2.6vw, 34px) !important;
+  font-weight: 950 !important;
+  line-height: 1 !important;
+}
+.trainers-select-frame {
+  margin-bottom: 5px !important;
+  padding: 9px 11px !important;
+  border: 1px solid rgba(139,171,216,0.16) !important;
+  border-radius: 12px !important;
+  background: rgba(11,19,32,0.84) !important;
+}
+.trainers-select-frame span {
+  display: block !important;
+  color: var(--text-secondary, #b8c7dc) !important;
+  -webkit-text-fill-color: var(--text-secondary, #b8c7dc) !important;
+}
+.trainers-profile-card,
+.trainer-panel,
+.trainers-lock-panel,
+.trainers-admin-shell,
+.trainer-inventory-card {
+  border: 1px solid rgba(139,171,216,0.16) !important;
+  border-radius: 16px !important;
+  background:
+    linear-gradient(135deg, rgba(77,141,255,0.065), transparent 36%),
+    linear-gradient(180deg, rgba(18,30,49,0.94), rgba(8,14,26,0.97)) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.05), 0 10px 24px rgba(0,0,0,0.18) !important;
+}
+.trainers-hero {
+  min-height: 0 !important;
+  margin: 0 0 12px !important;
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  clip-path: none !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+.trainers-hero::after {
+  display: none !important;
+}
+.trainers-profile-card {
+  position: relative !important;
+  overflow: hidden !important;
+  min-height: 132px !important;
+  padding: 14px !important;
+  display: grid !important;
+  grid-template-columns: 112px minmax(0, 1fr) minmax(300px, 0.95fr) !important;
+  gap: 14px !important;
+  align-items: center !important;
+}
+.trainers-profile-card::before {
+  content: "" !important;
+  position: absolute !important;
+  inset: 0 !important;
+  pointer-events: none !important;
+  background:
+    radial-gradient(circle at 8% 20%, rgba(69,209,255,0.12), transparent 22%),
+    linear-gradient(135deg, transparent 0 63%, rgba(255,255,255,0.035) 63% 73%, transparent 73%) !important;
+}
+.trainers-profile-card > * {
+  position: relative !important;
+  z-index: 1 !important;
+}
+.trainers-profile-avatar {
+  width: 104px !important;
+  height: 104px !important;
+  display: grid !important;
+  place-items: center !important;
+  overflow: hidden !important;
+  border: 1px solid rgba(139,171,216,0.2) !important;
+  border-radius: 16px !important;
+  background:
+    radial-gradient(circle at 50% 42%, rgba(255,210,109,0.11), transparent 54%),
+    rgba(255,255,255,0.045) !important;
+}
+.trainers-profile-avatar img {
+  width: 100% !important;
+  height: 100% !important;
+  display: block !important;
+  object-fit: cover !important;
+  image-rendering: pixelated !important;
+}
+.trainers-profile-main {
+  min-width: 0 !important;
+}
+.trainers-profile-kicker {
+  color: var(--text-muted, #77879e) !important;
+  -webkit-text-fill-color: var(--text-muted, #77879e) !important;
+}
+.trainers-title {
+  margin-top: 4px !important;
+  color: var(--text-primary, #f6f9ff) !important;
+  -webkit-text-fill-color: var(--text-primary, #f6f9ff) !important;
+  font-size: clamp(24px, 2.2vw, 32px) !important;
+  font-weight: 950 !important;
+  line-height: 1.05 !important;
+  text-shadow: none !important;
+}
+.trainers-profile-meta {
+  margin-top: 6px !important;
+  color: var(--text-secondary, #b8c7dc) !important;
+  -webkit-text-fill-color: var(--text-secondary, #b8c7dc) !important;
+  font-size: 14px !important;
+  font-weight: 750 !important;
+}
+.trainers-chip-row {
+  margin-top: 10px !important;
+  gap: 6px !important;
+}
+.trainers-profile-chip,
+.trainers-chip {
+  min-height: 23px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  width: fit-content !important;
+  max-width: 100% !important;
+  padding: 0 8px !important;
+  border: 1px solid rgba(139,171,216,0.16) !important;
+  border-radius: 999px !important;
+  background: rgba(255,255,255,0.04) !important;
+  color: var(--text-secondary, #b8c7dc) !important;
+  -webkit-text-fill-color: var(--text-secondary, #b8c7dc) !important;
+  white-space: nowrap !important;
+}
+.trainers-chip--ok,
+.trainers-profile-chip.is-ok {
+  border-color: rgba(88,209,142,0.34) !important;
+  background: rgba(88,209,142,0.085) !important;
+  color: #aaf0c8 !important;
+  -webkit-text-fill-color: #aaf0c8 !important;
+}
+.trainers-chip--warn,
+.trainers-profile-chip.is-warn {
+  border-color: rgba(255,82,99,0.28) !important;
+  background: rgba(255,82,99,0.08) !important;
+  color: #ffb3bd !important;
+  -webkit-text-fill-color: #ffb3bd !important;
+}
+.trainers-profile-metrics {
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  gap: 8px !important;
+}
+.trainers-profile-metric {
+  min-height: 58px !important;
+  min-width: 0 !important;
+  padding: 9px 10px !important;
+  border: 1px solid rgba(139,171,216,0.12) !important;
+  border-radius: 12px !important;
+  background: rgba(255,255,255,0.035) !important;
+}
+.trainers-profile-metric span {
+  display: block !important;
+  color: var(--text-muted, #77879e) !important;
+  -webkit-text-fill-color: var(--text-muted, #77879e) !important;
+}
+.trainers-profile-metric strong {
+  display: block !important;
+  margin-top: 5px !important;
+  overflow: hidden !important;
+  color: var(--text-primary, #f6f9ff) !important;
+  -webkit-text-fill-color: var(--text-primary, #f6f9ff) !important;
+  font-size: 19px !important;
+  font-weight: 950 !important;
+  line-height: 1 !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+  font-variant-numeric: tabular-nums !important;
+}
+.trainers-profile-metric.is-money strong {
+  color: var(--pokemon-yellow, #ffd24d) !important;
+  -webkit-text-fill-color: var(--pokemon-yellow, #ffd24d) !important;
+}
+.trainers-status-grid {
+  display: none !important;
+}
+.trainer-panel {
+  padding: 12px !important;
+}
+.trainer-head {
+  padding: 0 0 10px !important;
+  border: 0 !important;
+  border-bottom: 1px solid rgba(139,171,216,0.12) !important;
+  border-radius: 0 !important;
+  clip-path: none !important;
+  background: transparent !important;
+  color: var(--text-primary, #f6f9ff) !important;
+  -webkit-text-fill-color: var(--text-primary, #f6f9ff) !important;
+  font-size: 12px !important;
+}
+.trainer-grid {
+  grid-template-columns: 104px minmax(0, 1fr) !important;
+  gap: 12px !important;
+  margin-top: 12px !important;
+}
+.trainer-portrait {
+  min-height: 112px !important;
+  padding: 8px !important;
+  border-radius: 14px !important;
+  border-color: rgba(139,171,216,0.14) !important;
+  background:
+    radial-gradient(circle at 50% 44%, rgba(69,209,255,0.1), transparent 54%),
+    rgba(255,255,255,0.035) !important;
+}
+.trainer-portrait img {
+  width: 88px !important;
+  max-height: 104px !important;
+  object-fit: contain !important;
+}
+.trainer-metrics {
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  gap: 8px !important;
+}
+.trainer-metric {
+  min-height: 58px !important;
+  padding: 9px !important;
+  border-color: rgba(139,171,216,0.12) !important;
+  border-radius: 12px !important;
+  background: rgba(255,255,255,0.035) !important;
+}
+.trainer-metric span {
+  color: var(--text-muted, #77879e) !important;
+  -webkit-text-fill-color: var(--text-muted, #77879e) !important;
+  font-size: 9px !important;
+}
+.trainer-metric strong {
+  margin-top: 5px !important;
+  color: var(--text-primary, #f6f9ff) !important;
+  -webkit-text-fill-color: var(--text-primary, #f6f9ff) !important;
+  font-size: 20px !important;
+  line-height: 1 !important;
+}
+.trainer-medals {
+  margin-top: 8px !important;
+}
+.trainer-kia,
+.trainer-note {
+  margin-top: 8px !important;
+  padding: 8px 9px !important;
+  border: 1px solid rgba(139,171,216,0.1) !important;
+  border-radius: 12px !important;
+  background: rgba(255,255,255,0.026) !important;
+  color: var(--text-secondary, #b8c7dc) !important;
+  -webkit-text-fill-color: var(--text-secondary, #b8c7dc) !important;
+  font-size: 13px !important;
+}
+.trainers-section-title,
+.trainers-admin-heading {
+  margin: 14px 0 10px !important;
+  padding: 0 !important;
+  border: 0 !important;
+  clip-path: none !important;
+  background: transparent !important;
+  color: var(--text-primary, #f6f9ff) !important;
+  -webkit-text-fill-color: var(--text-primary, #f6f9ff) !important;
+  font-size: 16px !important;
+  font-weight: 950 !important;
+}
+.trainers-section-title::before,
+.trainers-admin-heading::before {
+  content: "" !important;
+  display: inline-block !important;
+  width: 3px !important;
+  height: 15px !important;
+  margin-right: 8px !important;
+  border-radius: 999px !important;
+  background: var(--accent, #4d8dff) !important;
+  vertical-align: -2px !important;
+}
+.trainers-lock-panel {
+  margin: 2px 0 10px !important;
+  padding: 11px 12px !important;
+}
+.trainers-lock-main {
+  color: var(--text-primary, #f6f9ff) !important;
+  -webkit-text-fill-color: var(--text-primary, #f6f9ff) !important;
+  font-size: 11px !important;
+}
+.trainers-lock-sub {
+  margin-top: 5px !important;
+  color: var(--text-secondary, #b8c7dc) !important;
+  -webkit-text-fill-color: var(--text-secondary, #b8c7dc) !important;
+  font-size: 13px !important;
+  line-height: 1.25 !important;
+}
+.trainers-admin-heading {
+  color: #ffb3bd !important;
+  -webkit-text-fill-color: #ffb3bd !important;
+}
+.trainers-admin-heading::before {
+  background: var(--danger, #ff5263) !important;
+}
+
+/* Equipo actual */
+.slot.team-slot-card {
+  min-height: 198px !important;
+  padding: 10px 10px 11px !important;
+  border-radius: 14px !important;
+  border-color: rgba(139,171,216,0.15) !important;
+  background:
+    radial-gradient(circle at 50% 38%, rgba(69,209,255,0.095), transparent 48%),
+    linear-gradient(180deg, rgba(18,30,49,0.94), rgba(9,15,27,0.98)) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.05), 0 8px 20px rgba(0,0,0,0.16) !important;
+}
+.slot.team-slot-card > img {
+  width: min(100%, 132px) !important;
+  height: 108px !important;
+  margin: 3px auto 7px !important;
+}
+.slot.team-slot-card .title {
+  font-size: 10px !important;
+  letter-spacing: 0 !important;
+}
+.slot.team-slot-card .sub {
+  min-height: 17px !important;
+  color: var(--text-secondary, #b8c7dc) !important;
+  -webkit-text-fill-color: var(--text-secondary, #b8c7dc) !important;
+  font-size: 14px !important;
+}
+.slot.team-slot-card .types {
+  min-height: 20px !important;
+  margin-top: 6px !important;
+}
+.slot.team-slot-card .slot-type-badge.poke-type-chip,
+.slot.team-slot-card .slot-type-badge.poke-type-chip img,
+.slot.team-slot-card .slot-type-badge .poke-type-full-img,
+.slot.team-slot-card .slot-type-badge .poke-type-icon-img {
+  width: 76px !important;
+  max-width: 76px !important;
+  height: 16px !important;
+  max-height: 16px !important;
+}
+.slot.team-slot-card .slot-type-badge.poke-type-chip.uses-fallback {
+  padding: 0 7px !important;
+}
+div[data-testid="column"]:has(.slot.team-slot-card) .stButton > button {
+  min-height: 32px !important;
+  padding: 0 12px !important;
+  border-radius: 10px !important;
+}
+
+/* PC / Cajas polish: structure stays unchanged. */
+.champ-box-grid-shell {
+  padding: 13px !important;
+  border-radius: 16px !important;
+}
+.champ-box-grid {
+  grid-template-columns: repeat(6, minmax(98px, 1fr)) !important;
+  gap: 10px !important;
+}
+.champ-box-tile {
+  min-height: 126px !important;
+  padding: 8px 8px 7px !important;
+  grid-template-rows: 16px minmax(76px, 1fr) auto 4px !important;
+  border-color: rgba(139,171,216,0.14) !important;
+  background:
+    radial-gradient(circle at 50% 44%, color-mix(in srgb, var(--box-glow, var(--accent)) 20%, transparent), transparent 57%),
+    linear-gradient(135deg, rgba(255,255,255,0.05) 0 48%, rgba(255,255,255,0.018) 48% 100%),
+    rgba(15,26,43,0.96) !important;
+}
+.champ-box-sprite-stage {
+  min-height: 78px !important;
+}
+.champ-box-tile img {
+  width: 98px !important;
+  height: 88px !important;
+  max-width: 98px !important;
+  max-height: 88px !important;
+}
+.champ-box-tile-link:hover .champ-box-tile {
+  transform: translateY(-1px) !important;
+  border-color: rgba(69,209,255,0.38) !important;
+  background:
+    radial-gradient(circle at 50% 44%, color-mix(in srgb, var(--box-glow, var(--accent)) 24%, transparent), transparent 57%),
+    linear-gradient(135deg, rgba(255,255,255,0.06) 0 48%, rgba(255,255,255,0.02) 48% 100%),
+    rgba(17,29,48,0.97) !important;
+}
+.champ-box-tile-link:hover .champ-box-tile img,
+.champ-box-tile.is-selected img {
+  transform: translateY(-2px) !important;
+}
+.champ-box-tile.is-selected {
+  border-color: rgba(77,141,255,0.78) !important;
+  box-shadow: inset 3px 0 0 var(--accent, #4d8dff), 0 0 0 2px rgba(77,141,255,0.12) !important;
+}
+.champ-box-name {
+  font-size: 13px !important;
+}
+.champ-box-level,
+.champ-box-slot-no {
+  font-size: 9px !important;
+}
+.champ-box-tile-empty {
+  opacity: 0.34 !important;
+}
+
+/* Pokemon Inspector */
+.pokemon-detail-empty {
+  border-color: rgba(139,171,216,0.14) !important;
+  border-radius: 14px !important;
+  background: rgba(11,19,32,0.86) !important;
+}
+.pokemon-inspector {
+  border-radius: 16px !important;
+  background:
+    radial-gradient(circle at 88% 10%, rgba(69,209,255,0.12), transparent 25%),
+    linear-gradient(180deg, rgba(18,30,49,0.94), rgba(8,14,26,0.98)) !important;
+}
+.pokemon-inspector-hero {
+  grid-template-columns: minmax(0, 1fr) 210px !important;
+}
+.pokemon-inspector-identity,
+.pokemon-inspector-sprite,
+.pokemon-inspector-panel {
+  border-color: rgba(139,171,216,0.14) !important;
+  border-radius: 14px !important;
+  background: rgba(255,255,255,0.035) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.045) !important;
+}
+.pokemon-inspector-sprite {
+  min-height: 176px !important;
+}
+.pokemon-inspector-sprite img {
+  width: 178px !important;
+  height: 164px !important;
+}
+.pokemon-inspector-name {
+  font-size: clamp(25px, 2.2vw, 33px) !important;
+}
+.pokemon-inspector-body {
+  grid-template-columns: minmax(250px, 0.9fr) minmax(300px, 1fr) minmax(320px, 1.1fr) !important;
+}
+.pokemon-inspector-stat-row {
+  min-height: 31px !important;
+  grid-template-columns: 82px minmax(80px, 1fr) 58px !important;
+  padding: 4px 0 !important;
+}
+.pokemon-inspector-stat-bar {
+  height: 4px !important;
+}
+.pokemon-inspector-stat-value {
+  min-height: 22px !important;
+  padding: 0 7px !important;
+  border: 0 !important;
+  background: transparent !important;
+  font-size: 13px !important;
+}
+.pokemon-inspector-spread {
+  grid-template-columns: repeat(6, minmax(0, 1fr)) !important;
+  gap: 5px !important;
+}
+.pokemon-inspector-spread-cell {
+  min-height: 34px !important;
+  padding: 5px 6px !important;
+  display: grid !important;
+  justify-items: center !important;
+  gap: 3px !important;
+}
+.pokemon-inspector-move-row {
+  min-height: 34px !important;
+  grid-template-columns: 76px minmax(0, 1fr) 58px !important;
+  gap: 8px !important;
+}
+.pokemon-inspector .move-type-badge--micro.poke-type-chip,
+.pokemon-inspector .move-type-badge--micro .poke-type-full-img,
+.pokemon-inspector .move-type-badge--micro img {
+  width: 70px !important;
+  max-width: 70px !important;
+  height: 15px !important;
+  max-height: 15px !important;
+}
+.pokemon-inspector-move-name {
+  font-size: 14px !important;
+}
+.pokemon-inspector-move-pp {
+  min-height: 22px !important;
+  border-radius: 8px !important;
+}
+
+/* Inventario */
+.trainer-inventory-group-title {
+  margin: 10px 0 7px !important;
+  color: var(--text-secondary, #b8c7dc) !important;
+  -webkit-text-fill-color: var(--text-secondary, #b8c7dc) !important;
+}
+.trainer-inventory-card {
+  min-height: 70px !important;
+  margin-bottom: 7px !important;
+  padding: 9px !important;
+  display: grid !important;
+  grid-template-columns: 42px minmax(0, 1fr) auto !important;
+  gap: 9px !important;
+  align-items: center !important;
+}
+.trainer-inventory-icon {
+  width: 42px !important;
+  height: 42px !important;
+  display: grid !important;
+  place-items: center !important;
+  border: 1px solid rgba(139,171,216,0.12) !important;
+  border-radius: 10px !important;
+  background: rgba(255,255,255,0.04) !important;
+}
+.trainer-inventory-icon img {
+  width: 34px !important;
+  height: 34px !important;
+  object-fit: contain !important;
+  image-rendering: pixelated !important;
+}
+.trainer-inventory-name {
+  overflow: hidden !important;
+  color: var(--text-primary, #f6f9ff) !important;
+  -webkit-text-fill-color: var(--text-primary, #f6f9ff) !important;
+  font-size: 13px !important;
+  font-weight: 900 !important;
+  line-height: 1.15 !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+}
+.trainer-inventory-meta {
+  margin-top: 4px !important;
+  color: var(--pokemon-yellow, #ffd24d) !important;
+  -webkit-text-fill-color: var(--pokemon-yellow, #ffd24d) !important;
+  font-size: 10px !important;
+}
+.trainer-inventory-status {
+  min-height: 23px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  padding: 0 7px !important;
+  border: 1px solid rgba(88,209,142,0.28) !important;
+  border-radius: 999px !important;
+  background: rgba(88,209,142,0.08) !important;
+  color: #aaf0c8 !important;
+  -webkit-text-fill-color: #aaf0c8 !important;
+  font-size: 9px !important;
+  white-space: nowrap !important;
+}
+.trainer-inventory-card.is-used .trainer-inventory-status {
+  border-color: rgba(139,171,216,0.15) !important;
+  background: rgba(255,255,255,0.035) !important;
+  color: var(--text-muted, #77879e) !important;
+  -webkit-text-fill-color: var(--text-muted, #77879e) !important;
+}
+div[data-testid="column"]:has(.trainer-inventory-card) .stButton {
+  display: flex !important;
+  justify-content: flex-end !important;
+  margin: -2px 0 8px !important;
+}
+div[data-testid="column"]:has(.trainer-inventory-card) .stButton > button {
+  width: auto !important;
+  min-height: 30px !important;
+  padding: 0 11px !important;
+  border-radius: 9px !important;
+}
+
+@media (max-width: 1180px) {
+  .trainers-profile-card {
+    grid-template-columns: 98px minmax(0, 1fr) !important;
+  }
+  .trainers-profile-metrics {
+    grid-column: 1 / -1 !important;
+    grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+  }
+  .pokemon-inspector-spread {
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  }
+}
+@media (max-width: 960px) {
+  .trainers-page-top {
+    grid-template-columns: 1fr !important;
+  }
+  .champ-box-grid {
+    grid-template-columns: repeat(4, minmax(88px, 1fr)) !important;
+  }
+}
+@media (max-width: 680px) {
+  .trainers-profile-card {
+    grid-template-columns: 1fr !important;
+  }
+  .trainers-profile-avatar {
+    width: 88px !important;
+    height: 88px !important;
+  }
+  .trainers-profile-metrics {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+  .champ-box-grid {
+    grid-template-columns: repeat(3, minmax(76px, 1fr)) !important;
+  }
+  .champ-box-tile img {
+    width: 82px !important;
+    height: 74px !important;
+  }
+  .pokemon-inspector-hero,
+  .pokemon-inspector-body {
+    grid-template-columns: 1fr !important;
+  }
+}
+</style>
+"""
+
 
 def _render_trainers_page_css() -> None:
     st.markdown(TRAINERS_PAGE_CSS, unsafe_allow_html=True)
     st.markdown(TRAINERS_STORAGE_CSS, unsafe_allow_html=True)
     st.markdown(TRAINERS_INSPECTOR_CSS, unsafe_allow_html=True)
+    st.markdown(TRAINERS_PHASE_1C_CSS, unsafe_allow_html=True)
 
 
 def _safe_mtime(path: str | Path | None) -> float | None:
@@ -1197,6 +1844,23 @@ def _pokeball_placeholder() -> str:
 def _chip(label: str, *, ok: bool = True) -> str:
     cls = "trainers-chip--ok" if ok else "trainers-chip--warn"
     return f"<span class='trainers-chip {cls}'>{escape(label)}</span>"
+
+
+def _profile_chip(label: str, *, ok: bool = True) -> str:
+    cls = "is-ok" if ok else "is-warn"
+    return f"<span class='trainers-profile-chip {cls}'>{escape(label)}</span>"
+
+
+def _profile_metric(label: str, value: str, *, extra_class: str = "") -> str:
+    classes = "trainers-profile-metric"
+    if extra_class:
+        classes += f" {extra_class}"
+    return (
+        f"<div class='{classes}'>"
+        f"<span>{escape(label)}</span>"
+        f"<strong>{escape(str(value))}</strong>"
+        "</div>"
+    )
 
 
 def _stat(label: str, value: str, detail: str) -> str:
@@ -1253,6 +1917,36 @@ def _inventory_snapshot(trainer: str) -> tuple[str, str]:
     return f"{len(available)} activos", f"{len(comodines)} comodines"
 
 
+def _trainer_division_label(trainer: str) -> str:
+    try:
+        divisions = st.session_state.get("league_divisions") or {}
+        if trainer in (divisions.get("A") or []):
+            return "Division A"
+        if trainer in (divisions.get("B") or []):
+            return "Division B"
+    except Exception:
+        pass
+    return "Sin division"
+
+
+def _trainer_points_label(trainer: str, *, retired: bool) -> str:
+    if retired:
+        return "0"
+    try:
+        from app.liga.ranking import current_points_total
+
+        return f"{float(current_points_total(trainer)):.1f}"
+    except Exception:
+        return "-"
+
+
+def _trainer_money_label(trainer: str) -> str:
+    try:
+        return str(int(money_breakdown(trainer).get("available") or 0))
+    except Exception:
+        return "0"
+
+
 def _render_trainer_header(
     *,
     trainer: str,
@@ -1268,20 +1962,34 @@ def _render_trainer_header(
     own_profile = trainer == current_user
     retired = is_trainer_retired(trainer)
     save_label = Path(active_path).name if active_path else "Sin save local"
+    division = _trainer_division_label(trainer)
+    lock_value, _lock_detail, locked = _team_lock_snapshot(trainer)
+    inv_value, _inv_detail = _inventory_snapshot(trainer)
+    status_label = "Retirado" if retired else "Activo"
+    status_ok = not retired
     chips = [
-        _chip("Tu perfil" if own_profile else "Consulta", ok=True),
-        _chip("Retirado" if retired else "Activo", ok=not retired),
-        _chip(save_label, ok=bool(active_path)),
+        _profile_chip("Tu perfil" if own_profile else "Consulta", ok=True),
+        _profile_chip(status_label, ok=status_ok),
+        _profile_chip(save_label, ok=bool(active_path)),
     ]
+    metrics = (
+        _profile_metric("Monedas", _trainer_money_label(trainer), extra_class="is-money")
+        + _profile_metric("Puntos", _trainer_points_label(trainer, retired=retired))
+        + _profile_metric("Equipo", lock_value if locked else "Sin fijar")
+        + _profile_metric("Inventario", inv_value)
+    )
     st.markdown(
         (
             "<div class='trainers-hero'>"
-            "<div class='trainers-hero-grid'>"
-            f"<div class='trainers-portrait-xl'>{avatar}</div>"
-            "<div>"
+            "<div class='trainers-profile-card'>"
+            f"<div class='trainers-profile-avatar'>{avatar}</div>"
+            "<div class='trainers-profile-main'>"
+            "<div class='trainers-profile-kicker'>Perfil competitivo</div>"
             f"<div class='trainers-title'>{escape(trainer or '-')}</div>"
+            f"<div class='trainers-profile-meta'>{escape(division)} &middot; {escape(status_label)}</div>"
             f"<div class='trainers-chip-row'>{''.join(chips)}</div>"
             "</div>"
+            f"<div class='trainers-profile-metrics'>{metrics}</div>"
             "</div>"
             "</div>"
         ),
@@ -1605,6 +2313,10 @@ def _render_retirement_admin() -> None:
         return
 
     st.markdown("---")
+    st.markdown(
+        "<div class='trainers-admin-heading'>Administracion</div>",
+        unsafe_allow_html=True,
+    )
     with st.expander("Gestion de abandonos", expanded=False):
         league_active = False
         try:
@@ -1668,21 +2380,34 @@ def page_entrenadores() -> None:
     except Exception:
         pass
     prev = st.session_state.get("_trainer_selected_last")
-    picker_col, hero_col = st.columns([0.34, 0.66], gap="large")
+    title_col, picker_col = st.columns([0.62, 0.38], gap="large")
+    with title_col:
+        st.markdown(
+            (
+                "<div class='trainers-page-top-title'>"
+                "<div class='trainers-page-title'>"
+                "<span>Perfil competitivo</span>"
+                "<strong>Entrenadores</strong>"
+                "</div>"
+                "</div>"
+            ),
+            unsafe_allow_html=True,
+        )
     with picker_col:
         st.markdown(
             """
-            <div class='trainers-picker'>
-              <div class='trainers-panel-label'>Entrenadores</div>
+            <div class='trainers-select-frame'>
+              <span>Entrenador</span>
             </div>
             """,
             unsafe_allow_html=True,
         )
         sel = st.selectbox(
-            "Elige un entrenador",
+            "Entrenador",
             users,
             key="trainer_selected",
             format_func=format_trainer_with_flags,
+            label_visibility="collapsed",
         )
     if prev is None:
         st.session_state["_trainer_selected_last"] = sel
@@ -1691,13 +2416,7 @@ def page_entrenadores() -> None:
         st.session_state.pop("selected_pokemon", None)
 
     _save_label, _save_detail, active_path = _save_snapshot(str(sel or ""))
-    with hero_col:
-        _render_trainer_header(
-            trainer=str(sel or ""),
-            current_user=str(st.session_state.get("user") or ""),
-            active_path=active_path,
-        )
-    _render_quick_status(
+    _render_trainer_header(
         trainer=str(sel or ""),
         current_user=str(st.session_state.get("user") or ""),
         active_path=active_path,

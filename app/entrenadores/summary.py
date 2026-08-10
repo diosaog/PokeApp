@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import os
+from html import escape
 import streamlit as st
 
 from conex_pkhex import extract_box
@@ -249,7 +250,7 @@ def trainer_summary_with_portrait_ui(
 
     panel_html = (
         "<div class='trainer-panel'>"
-        f"<div class='trainer-head'>Entrenador: {trainer}  Region: {region}</div>"
+        f"<div class='trainer-head'>Resumen competitivo - {escape(str(trainer))} - {escape(str(region))}</div>"
         "<div class='trainer-grid'>"
         f"<div class='trainer-portrait'>{portrait_html}</div>"
         "<div class='trainer-content'>"

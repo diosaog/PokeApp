@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import unicodedata
+from html import escape
 import streamlit as st
 
 from app.common import COIN
@@ -176,23 +177,28 @@ def _render_purchase_cards(
         status = (row[4] if len(row) > 4 else None) or "pendiente"
         show_status = _is_usable_item(item)
         status_label = "Disponible" if status != "used" else "Usado"
-        badge_cls = "status-ok" if status != "used" else "status-warn"
+        used_cls = " is-used" if status == "used" else ""
         icon = _item_icon_url(item)
         col = cols[idx % 3]
         with col:
+            item_html = escape(str(item))
             icon_html = ""
             if icon:
                 icon_html = (
                     f"<img src='{icon}' alt='' "
-                    "style='width:36px; height:36px; object-fit:contain; image-rendering:pixelated; "
-                    "flex:0 0 auto;' onerror=\"this.style.display='none'\"/>"
+                    "onerror=\"this.style.display='none'\"/>"
                 )
-            status_html = f"<span class='status-badge {badge_cls}'>{status_label}</span>" if show_status else ""
+            status_html = (
+                f"<span class='trainer-inventory-status'>{status_label}</span>"
+                if show_status
+                else ""
+            )
             st.markdown(
-                "<div class='pl-card'>"
-                "<div class='pl-row'>"
-                f"{icon_html}"
-                f"<div><div class='pl-title'>{item}</div><div class='pl-muted'>{COIN} {price}</div></div>"
+                f"<div class='trainer-inventory-card{used_cls}'>"
+                f"<div class='trainer-inventory-icon'>{icon_html}</div>"
+                "<div class='trainer-inventory-info'>"
+                f"<div class='trainer-inventory-name'>{item_html}</div>"
+                f"<div class='trainer-inventory-meta'>{COIN} {price}</div>"
                 "</div>"
                 f"{status_html}"
                 "</div>",
@@ -220,7 +226,10 @@ def _purchases_inventory_ui(user: str, *, allow_use: bool = True) -> None:
         by_cat.setdefault(cat, []).append(r)
     for cat in ("Comodines", "Bayas", "Competitivos", "Crianza", "Otros"):
         if cat in by_cat:
-            st.markdown(f"**{cat}**")
+            st.markdown(
+                f"<div class='trainer-inventory-group-title'>{cat}</div>",
+                unsafe_allow_html=True,
+            )
             _render_purchase_cards(by_cat[cat], cat, key_prefix=cat, allow_use=allow_use)
     if used:
         with st.expander("Usados"):

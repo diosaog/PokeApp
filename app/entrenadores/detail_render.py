@@ -4,6 +4,7 @@ import html as _html
 import re
 
 from app.entrenadores.sprites import sprite_url_from_p
+from app.entrenadores.inventory import _item_icon_url
 from app.ui.type_icons import type_icon_html, type_icons_html
 from dexdata import (
     ability_desc_es,
@@ -383,7 +384,15 @@ def render_detail_html(
     level_raw = _as_int(p.get("level"))
     level_txt = f"Nv.{level_raw}" if level_raw is not None else "Nv.--"
     img_url = sprite_url_from_p(p, prefer_animated=True)
-    item = _item_name_es(p.get("held_item") or p.get("item") or "-")
+    raw_item = p.get("held_item") or p.get("item") or "-"
+    item = _item_name_es(raw_item)
+    item_icon = _item_icon_url(str(raw_item or item))
+    item_icon_html = (
+        "<img class='pokemon-inspector-item-icon' "
+        f"src='{_html.escape(str(item_icon), quote=True)}' alt=''/>"
+        if item_icon
+        else ""
+    )
     types_html = type_icons_html(
         _pokemon_types(p),
         label=True,
@@ -423,6 +432,7 @@ def render_detail_html(
         "</div>"
         f"<div class='pokemon-inspector-types'>{types_html}</div>"
         "<div class='pokemon-inspector-item'>"
+        f"{item_icon_html}"
         "<span>Objeto</span>"
         f"<strong>{_html.escape(str(item))}</strong>"
         "</div>"

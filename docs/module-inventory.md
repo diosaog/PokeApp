@@ -51,12 +51,12 @@ extraiga dominio o repositories.
 
 | Modulo | Tipo | Nota |
 | --- | --- | --- |
-| `page.py` | STREAMLIT | Pantalla principal grande. |
-| `boxes.py` | STREAMLIT/MIXED | PC/Cajas, seleccion y mapping de slots. |
+| `page.py` | STREAMLIT | Pantalla principal grande; concentra CSS local de Entrenadores/PC/Inspector hasta extraer design system. |
+| `boxes.py` | STREAMLIT/MIXED | PC/Cajas, seleccion y mapping de slots; el orden real del save esta acoplado al render. |
 | `snapshot.py` | MIXED/STORAGE | Snapshot derivado de save, guardado en settings. |
 | `trainer_flags.py` | MIXED/STORAGE | Robado/retirado sobre settings + redemptions. |
 | `cache.py` | MIXED | Cache del parser PKHeX. |
-| `detail_render.py` | STREAMLIT/HTML | Inspector visual. |
+| `detail_render.py` | STREAMLIT/HTML | Inspector visual; reutiliza resolver de iconos de inventario temporalmente. |
 | `summary.py` | STREAMLIT/MIXED | Resumen, monedas, puntos, medallas. |
 | `inventory.py` | STREAMLIT/MIXED | Inventario y canjes. |
 
