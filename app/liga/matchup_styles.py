@@ -1240,6 +1240,243 @@ def ensure_matchup_css() -> None:
           margin-top: 3px;
         }
 
+        /* Phase 1A: competitive dark reference for Team Preview. */
+        .matchup-hero,
+        .matchup-shell,
+        .matchup-summary,
+        .battle-board,
+        .matchup-competition-bar {
+          border: 1px solid rgba(139, 171, 216, 0.2) !important;
+          border-radius: 14px !important;
+          background:
+            linear-gradient(135deg, rgba(61, 131, 255, 0.1), transparent 36%),
+            linear-gradient(180deg, rgba(18, 30, 49, 0.96), rgba(8, 14, 26, 0.96)) !important;
+          box-shadow: inset 0 1px 0 rgba(255,255,255,0.055), 0 16px 34px rgba(0,0,0,0.24) !important;
+        }
+
+        .matchup-hero {
+          min-height: 92px !important;
+          padding: 14px 16px !important;
+        }
+
+        .matchup-title {
+          margin-top: 8px !important;
+          font-size: 26px !important;
+          text-shadow: none !important;
+        }
+
+        .matchup-subtitle {
+          margin-top: 6px !important;
+          color: rgba(206, 220, 241, 0.82) !important;
+          -webkit-text-fill-color: rgba(206, 220, 241, 0.82) !important;
+          font-size: 14px !important;
+        }
+
+        .matchup-kicker,
+        .battle-board-top > div,
+        .matchup-metric,
+        .battle-card-left,
+        .battle-ability-row,
+        .battle-private-line,
+        .battle-stat-stack,
+        .battle-detail-stats div {
+          border-color: rgba(139, 171, 216, 0.14) !important;
+          border-radius: 10px !important;
+          background: rgba(255,255,255,0.035) !important;
+          box-shadow: none !important;
+        }
+
+        .matchup-competition-bar {
+          position: relative;
+          display: grid;
+          grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+          gap: 14px;
+          align-items: center;
+          margin: 6px 0 14px;
+          padding: 12px 14px;
+        }
+
+        .matchup-competitor {
+          min-width: 0;
+          display: grid;
+          gap: 4px;
+        }
+
+        .matchup-competitor-right {
+          text-align: right;
+        }
+
+        .matchup-competitor span,
+        .matchup-pair-record {
+          color: rgba(184,199,220,0.82);
+          -webkit-text-fill-color: rgba(184,199,220,0.82);
+          font-family: var(--font-ui);
+          font-size: 12px;
+          font-weight: 800;
+        }
+
+        .matchup-competitor strong {
+          color: #f6f9ff;
+          -webkit-text-fill-color: #f6f9ff;
+          font-family: var(--font-pixel);
+          font-size: 18px;
+          line-height: 1.05;
+          text-transform: uppercase;
+          overflow-wrap: anywhere;
+        }
+
+        .matchup-vs-mark {
+          width: 48px;
+          height: 48px;
+          display: grid;
+          place-items: center;
+          border: 1px solid rgba(69,209,255,0.28);
+          border-radius: 50%;
+          background: rgba(69,209,255,0.08);
+          color: #8fdcff;
+          -webkit-text-fill-color: #8fdcff;
+          font-family: var(--font-pixel);
+          font-size: 15px;
+          box-shadow: 0 0 0 5px rgba(69,209,255,0.035);
+        }
+
+        .matchup-pair-record {
+          grid-column: 1 / -1;
+          padding-top: 8px;
+          border-top: 1px solid rgba(139,171,216,0.11);
+          text-align: center;
+        }
+
+        .battle-mon-card,
+        .matchup-mon {
+          border-color: rgba(139,171,216,0.18) !important;
+          border-radius: 13px !important;
+          background:
+            radial-gradient(circle at 50% 0%, color-mix(in srgb, var(--type-color, #4d8dff) 16%, transparent), transparent 42%),
+            linear-gradient(180deg, rgba(18, 30, 49, 0.96), rgba(10, 17, 29, 0.96)) !important;
+          box-shadow: inset 0 1px 0 rgba(255,255,255,0.055), 0 10px 20px rgba(0,0,0,0.2) !important;
+        }
+
+        .battle-mon-card {
+          grid-template-columns: minmax(190px, .9fr) 112px minmax(230px, 1.1fr) !important;
+          min-height: 158px !important;
+          padding: 10px !important;
+        }
+
+        .battle-mon-card-private {
+          grid-template-columns: minmax(275px, .98fr) 120px minmax(240px, 1fr) !important;
+        }
+
+        .battle-mon-card-public {
+          grid-template-columns: minmax(210px, .95fr) 110px minmax(220px, 1.05fr) !important;
+        }
+
+        .battle-sprite-wrap,
+        .matchup-sprite {
+          border: 1px solid color-mix(in srgb, var(--type-color, #4d8dff) 22%, rgba(139,171,216,0.14)) !important;
+          border-radius: 12px !important;
+          background:
+            radial-gradient(circle at 50% 50%, color-mix(in srgb, var(--type-color, #4d8dff) 16%, transparent), transparent 58%),
+            rgba(255,255,255,0.028) !important;
+          box-shadow: none !important;
+        }
+
+        .battle-sprite {
+          width: 106px !important;
+          height: 106px !important;
+        }
+
+        .matchup-sprite {
+          width: 92px !important;
+          height: 92px !important;
+          padding: 4px !important;
+        }
+
+        .battle-move-link,
+        .matchup-move,
+        .battle-no-move {
+          display: grid !important;
+          grid-template-columns: auto minmax(0, 1fr) auto !important;
+          align-items: center !important;
+          gap: 8px !important;
+          min-height: 30px !important;
+          padding: 5px 8px !important;
+          border: 1px solid rgba(139,171,216,0.14) !important;
+          border-radius: 8px !important;
+          background: rgba(6, 12, 22, 0.66) !important;
+          box-shadow: none !important;
+          color: #edf5ff !important;
+          -webkit-text-fill-color: #edf5ff !important;
+        }
+
+        .battle-move-link:hover,
+        .battle-move-row[open] > .battle-move-link {
+          border-color: rgba(69,209,255,0.42) !important;
+          background: rgba(38, 73, 115, 0.55) !important;
+          box-shadow: inset 3px 0 0 #45d1ff !important;
+        }
+
+        .battle-move-name {
+          min-width: 0;
+          overflow: hidden;
+          color: #edf5ff !important;
+          -webkit-text-fill-color: #edf5ff !important;
+          font-size: 15px !important;
+          font-weight: 850 !important;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+        }
+
+        .battle-move-pp {
+          justify-self: end;
+          color: rgba(184,199,220,0.82) !important;
+          -webkit-text-fill-color: rgba(184,199,220,0.82) !important;
+          font-size: 11px !important;
+          font-weight: 900 !important;
+          font-variant-numeric: tabular-nums;
+          white-space: nowrap;
+        }
+
+        .battle-type-dot.poke-type-chip.asset-icon,
+        .matchup-type-dot.poke-type-chip.asset-icon {
+          width: 18px !important;
+          min-width: 18px !important;
+          max-width: 18px !important;
+          height: 18px !important;
+          min-height: 18px !important;
+          max-height: 18px !important;
+          border-radius: 5px !important;
+          flex-basis: 18px !important;
+        }
+
+        .battle-type-dot.poke-type-chip.asset-icon img,
+        .matchup-type-dot.poke-type-chip.asset-icon img {
+          width: 18px !important;
+          height: 18px !important;
+          max-width: 18px !important;
+          max-height: 18px !important;
+        }
+
+        .battle-empty-card,
+        .matchup-mon-empty {
+          border-style: dashed !important;
+          background: rgba(6, 12, 22, 0.42) !important;
+          box-shadow: none !important;
+        }
+
+        .battle-empty-title,
+        .matchup-mon-empty .matchup-mon-title {
+          color: rgba(246,249,255,0.72) !important;
+          -webkit-text-fill-color: rgba(246,249,255,0.72) !important;
+        }
+
+        .battle-empty-sub,
+        .matchup-mon-empty .matchup-mon-sub {
+          color: rgba(184,199,220,0.62) !important;
+          -webkit-text-fill-color: rgba(184,199,220,0.62) !important;
+          font-size: 13px !important;
+        }
+
         @media (max-width: 1100px) {
           .battle-team-grid,
           .matchup-team-grid {

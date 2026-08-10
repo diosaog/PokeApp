@@ -26,6 +26,7 @@ from dexdata import (
     move_desc_es,
     move_info,
     species_types,
+    type_color,
 )
 from i18n import nature_display_es
 from showdown_sprites import showdown_sprite_url
@@ -241,6 +242,7 @@ def _matchup_header_html(*, jornada: int) -> str:
         "<div class='matchup-hero-main'>"
         f"<div class='matchup-kicker'>Jornada {int(jornada)}</div>"
         "<div class='matchup-title'>Team Preview</div>"
+        "<div class='matchup-subtitle'>Vista competitiva de equipos fijados</div>"
         "</div>"
         "</div>"
     )
@@ -258,6 +260,44 @@ def _pokemon_types(mon: dict) -> list[str]:
         )
     except Exception:
         return []
+
+
+def _type_accent_style(mon: dict) -> str:
+    types = _pokemon_types(mon)
+    color = type_color(types[0]) if types else "#4d8dff"
+    return f" style='--type-color:{escape(color, quote=True)}'"
+
+
+def _competition_pair_html(
+    *,
+    left_player: str,
+    right_player: str,
+    left_division: str,
+    right_division: str,
+    wins_left: int | None = None,
+    wins_right: int | None = None,
+) -> str:
+    record = ""
+    if wins_left is not None and wins_right is not None:
+        record = (
+            "<div class='matchup-pair-record'>"
+            f"Duelo directo {int(wins_left)} - {int(wins_right)}"
+            "</div>"
+        )
+    return (
+        "<div class='matchup-competition-bar'>"
+        "<div class='matchup-competitor'>"
+        f"<span>{escape(left_division or '-')}</span>"
+        f"<strong>{escape(left_player)}</strong>"
+        "</div>"
+        "<div class='matchup-vs-mark'>VS</div>"
+        "<div class='matchup-competitor matchup-competitor-right'>"
+        f"<span>{escape(right_division or '-')}</span>"
+        f"<strong>{escape(right_player)}</strong>"
+        "</div>"
+        f"{record}"
+        "</div>"
+    )
 
 
 def _type_dot_html(type_name: str | None) -> str:
@@ -566,7 +606,8 @@ def _team_card_html(snapshot: dict) -> str:
                 (
                     "<div class='matchup-move'>"
                     f"{_type_dot_html(move.type_name)}"
-                    f"<span>{escape(move.name)}</span>"
+                    f"<span class='battle-move-name'>{escape(move.name)}</span>"
+                    f"<span class='battle-move-pp'>PP {escape(move.pp)}</span>"
                     "</div>"
                 )
                 for move in moves
@@ -574,7 +615,7 @@ def _team_card_html(snapshot: dict) -> str:
             or "<div class='matchup-move matchup-move-empty'>(sin movimientos visibles)</div>"
         )
         mons_html.append(
-            "<div class='matchup-mon'>"
+            f"<div class='matchup-mon'{_type_accent_style(mon)}>"
             "<div class='matchup-mon-head'>"
             f"<img class='matchup-sprite' src='{sprite}' alt='{escape(species)}'/>"
             "<div class='matchup-mon-meta'>"
@@ -653,7 +694,8 @@ def _battle_team_html(
                 "<details class='battle-move-row'>"
                 f"<summary class='battle-move-link {move_class}'>"
                 f"{_type_dot_html(move.type_name)}"
-                f"<span>{escape(move.name)}</span>"
+                f"<span class='battle-move-name'>{escape(move.name)}</span>"
+                f"<span class='battle-move-pp'>PP {escape(move.pp)}</span>"
                 "</summary>"
                 f"{_move_detail_html(mon, move, player, inline=True)}"
                 "</details>"
@@ -673,7 +715,7 @@ def _battle_team_html(
             else "battle-mon-card battle-mon-card-public"
         )
         cards.append(
-            f"<div class='{card_class}'>"
+            f"<div class='{card_class}'{_type_accent_style(mon)}>"
             f"<div class='battle-slot-mark'>{idx + 1}</div>"
             "<div class='battle-card-left'>"
             "<div class='battle-name-row'>"
@@ -764,11 +806,13 @@ def _render_spectator_tab(available: list[str]) -> None:
     right_snapshot = _summary_snapshot(right_player)
     wins_left, wins_right = _head_to_head(left_player, right_player)
     st.markdown(
-        (
-            "<div class='matchup-versus'>"
-            f"<strong>{escape(left_player)}</strong> vs <strong>{escape(right_player)}</strong>"
-            f" | Duelo directo en liga: {wins_left} - {wins_right}"
-            "</div>"
+        _competition_pair_html(
+            left_player=left_player,
+            right_player=right_player,
+            left_division=str(left_snapshot.get("division") or "-"),
+            right_division=str(right_snapshot.get("division") or "-"),
+            wins_left=wins_left,
+            wins_right=wins_right,
         ),
         unsafe_allow_html=True,
     )
@@ -808,6 +852,15 @@ def _render_battle_tab(available: list[str]) -> None:
 
     is_own_selection = bool(own_player) and selected_player == own_player
     snapshot = _summary_snapshot(selected_player)
+    st.markdown(
+        _competition_pair_html(
+            left_player=current_user or "Entrenador",
+            right_player=selected_player,
+            left_division=_division_for_player(current_user) if current_user else "-",
+            right_division=str(snapshot.get("division") or "-"),
+        ),
+        unsafe_allow_html=True,
+    )
     st.markdown(
         _battle_team_html(
             snapshot,

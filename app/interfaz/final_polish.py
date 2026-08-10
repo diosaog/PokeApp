@@ -119,9 +119,9 @@ section[data-testid="stSidebar"] {
   min-height: 46px !important;
   margin: 0 0 18px !important;
   padding: 8px 12px !important;
-  display: flex !important;
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr) !important;
   align-items: center !important;
-  justify-content: space-between !important;
   gap: 12px !important;
   overflow: hidden !important;
   border: 1px solid var(--border-soft) !important;
@@ -134,6 +134,7 @@ section[data-testid="stSidebar"] {
 }
 
 .poke-topbar-left,
+.poke-topbar-center,
 .poke-topbar-right {
   min-width: 0 !important;
   display: flex !important;
@@ -143,11 +144,31 @@ section[data-testid="stSidebar"] {
 }
 
 .poke-topbar-left {
+  justify-self: start !important;
   overflow: hidden !important;
   color: var(--text-secondary) !important;
 }
 
-.poke-topbar-left > span:not(.poke-topbar-sep),
+.poke-topbar-center {
+  max-width: 360px !important;
+  min-width: 0 !important;
+  justify-self: center !important;
+  justify-content: center !important;
+  color: var(--text-muted) !important;
+  -webkit-text-fill-color: var(--text-muted) !important;
+  font-size: 11px !important;
+  font-weight: 900 !important;
+  text-transform: uppercase !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
+
+.poke-topbar-right {
+  justify-self: end !important;
+}
+
+.poke-topbar-left > span,
+.poke-topbar-center,
 .poke-topbar-pill,
 .poke-topbar-user {
   color: var(--text-secondary) !important;
@@ -159,6 +180,13 @@ section[data-testid="stSidebar"] {
 .poke-topbar-round {
   color: var(--text-primary) !important;
   -webkit-text-fill-color: var(--text-primary) !important;
+}
+
+.poke-topbar-division::before {
+  content: "\\00b7";
+  margin: 0 8px 0 1px;
+  color: rgba(184,199,220,0.58);
+  -webkit-text-fill-color: rgba(184,199,220,0.58);
 }
 
 .poke-topbar-sep,
@@ -199,45 +227,40 @@ section[data-testid="stSidebar"] {
 }
 
 .poke-topbar-icon,
-.poke-topbar-bell {
-  position: relative !important;
-  display: inline-block !important;
-  width: 14px !important;
-  height: 14px !important;
-  min-width: 14px !important;
-  max-width: 14px !important;
-  min-height: 14px !important;
-  max-height: 14px !important;
-  flex: 0 0 14px !important;
-  overflow: visible !important;
-  border-radius: 7px 7px 5px 5px !important;
-  background: linear-gradient(180deg, #ffe57a, #d99b1f) !important;
-  box-shadow: inset 0 1px 0 rgba(255,255,255,0.44) !important;
+.poke-topbar-bell,
+.main .poke-topbar-icon,
+.main .poke-topbar-bell {
+  display: none !important;
+  width: 0 !important;
+  min-width: 0 !important;
+  max-width: 0 !important;
+  height: 0 !important;
+  min-height: 0 !important;
+  max-height: 0 !important;
+  flex-basis: 0 !important;
+  overflow: hidden !important;
+  background: transparent !important;
+  box-shadow: none !important;
 }
 
-.poke-topbar-bell::before {
+.poke-topbar-bell::before,
+.main .poke-topbar-bell::before {
   content: "" !important;
-  position: absolute !important;
-  left: 50% !important;
-  top: -3px !important;
-  width: 6px !important;
-  height: 4px !important;
-  transform: translateX(-50%) !important;
-  border-radius: 999px 999px 0 0 !important;
-  background: #ffe57a !important;
+  display: none !important;
 }
 
-.poke-topbar-bell::after {
+.poke-topbar-bell::after,
+.main .poke-topbar-bell::after {
   content: "" !important;
-  position: absolute !important;
-  left: 50% !important;
-  bottom: -3px !important;
-  width: 5px !important;
-  height: 5px !important;
-  transform: translateX(-50%) !important;
-  border-radius: 50% !important;
-  background: #f7faff !important;
-  box-shadow: 0 0 0 1px rgba(0,0,0,0.35) !important;
+  display: none !important;
+}
+
+.poke-topbar-label {
+  color: var(--text-muted) !important;
+  -webkit-text-fill-color: var(--text-muted) !important;
+  font-size: 10px !important;
+  font-weight: 900 !important;
+  text-transform: uppercase !important;
 }
 
 .poke-coin-mark {
@@ -248,14 +271,17 @@ section[data-testid="stSidebar"] {
 
 @media (max-width: 720px) {
   .poke-topbar {
+    grid-template-columns: 1fr !important;
     align-items: flex-start !important;
-    flex-direction: column !important;
     gap: 7px !important;
   }
   .poke-topbar-left,
+  .poke-topbar-center,
   .poke-topbar-right {
     width: 100% !important;
     flex-wrap: wrap !important;
+    justify-self: start !important;
+    justify-content: flex-start !important;
   }
   .poke-topbar-right {
     justify-content: flex-start !important;
@@ -403,6 +429,18 @@ section[data-testid="stSidebar"] div[data-testid="stExpander"] summary [data-tes
   font-size: 0 !important;
 }
 
+section[data-testid="stSidebar"] summary [data-testid="stIconMaterial"],
+section[data-testid="stSidebar"] summary .material-symbols-rounded,
+section[data-testid="stSidebar"] summary .material-icons {
+  width: 0 !important;
+  min-width: 0 !important;
+  max-width: 0 !important;
+  overflow: hidden !important;
+  font-size: 0 !important;
+  color: transparent !important;
+  -webkit-text-fill-color: transparent !important;
+}
+
 section[data-testid="stSidebar"] div[data-testid="stExpander"] div[data-testid="stExpanderDetails"],
 section[data-testid="stSidebar"] .app-notice-menu-panel {
   border: 1px solid var(--border-soft) !important;
@@ -417,6 +455,37 @@ section[data-testid="stSidebar"] div[data-testid="stExpander"] input {
   background: rgba(5, 10, 19, 0.96) !important;
   color: var(--text-primary) !important;
   -webkit-text-fill-color: var(--text-primary) !important;
+}
+
+section[data-testid="stSidebar"] .pin-form-title {
+  margin: 0 0 10px !important;
+  padding: 8px 10px !important;
+  border: 1px solid rgba(114,185,255,0.18) !important;
+  border-left: 3px solid var(--primary) !important;
+  border-radius: 10px !important;
+  background: rgba(77,141,255,0.08) !important;
+  color: var(--text-primary) !important;
+  -webkit-text-fill-color: var(--text-primary) !important;
+  font-family: var(--font-pixel) !important;
+  font-size: 11px !important;
+  font-weight: 900 !important;
+  text-transform: uppercase !important;
+}
+
+section[data-testid="stSidebar"] div[data-testid="stExpander"] label p {
+  color: var(--text-secondary) !important;
+  -webkit-text-fill-color: var(--text-secondary) !important;
+  font-size: 12px !important;
+  font-weight: 850 !important;
+}
+
+section[data-testid="stSidebar"] div[data-testid="stExpander"] div.stButton > button {
+  justify-content: center !important;
+  border-color: rgba(77,141,255,0.4) !important;
+  background:
+    linear-gradient(180deg, rgba(77,141,255,0.95), rgba(47,111,255,0.95)) !important;
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
 }
 
 /* Shared page surfaces */
@@ -765,6 +834,115 @@ section[data-testid="stSidebar"] div[data-testid="stExpander"] input {
 .battle-stat-bar {
   height: 5px !important;
   background: rgba(0,0,0,0.34) !important;
+}
+
+/* Phase 1A final Team Preview overrides. Keep this short: base lives in matchup_styles. */
+.main .matchup-competition-bar {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr) !important;
+  gap: 14px !important;
+  align-items: center !important;
+  margin: 8px 0 14px !important;
+  padding: 12px 14px !important;
+  border: 1px solid rgba(139,171,216,0.18) !important;
+  border-radius: 14px !important;
+  background:
+    linear-gradient(135deg, rgba(77,141,255,0.075), transparent 36%),
+    linear-gradient(180deg, rgba(18,30,49,0.96), rgba(8,14,26,0.98)) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.05), 0 14px 28px rgba(0,0,0,0.22) !important;
+}
+
+.main .matchup-competitor {
+  min-width: 0 !important;
+  display: grid !important;
+  gap: 4px !important;
+}
+
+.main .matchup-competitor-right {
+  text-align: right !important;
+}
+
+.main .matchup-competitor span,
+.main .matchup-pair-record {
+  color: var(--text-secondary) !important;
+  -webkit-text-fill-color: var(--text-secondary) !important;
+  font-size: 12px !important;
+  font-weight: 850 !important;
+}
+
+.main .matchup-competitor strong {
+  color: var(--text-primary) !important;
+  -webkit-text-fill-color: var(--text-primary) !important;
+  font-family: var(--font-pixel) !important;
+  font-size: clamp(15px, 1.35vw, 18px) !important;
+  line-height: 1.08 !important;
+  overflow-wrap: anywhere !important;
+  text-transform: uppercase !important;
+}
+
+.main .matchup-vs-mark {
+  width: 48px !important;
+  height: 48px !important;
+  display: grid !important;
+  place-items: center !important;
+  border: 1px solid rgba(69,209,255,0.32) !important;
+  border-radius: 50% !important;
+  background: rgba(69,209,255,0.08) !important;
+  color: #8fdcff !important;
+  -webkit-text-fill-color: #8fdcff !important;
+  font-family: var(--font-pixel) !important;
+  font-size: 15px !important;
+}
+
+.main .matchup-pair-record {
+  grid-column: 1 / -1 !important;
+  padding-top: 8px !important;
+  border-top: 1px solid rgba(139,171,216,0.11) !important;
+  text-align: center !important;
+}
+
+.main .battle-move-link,
+.main .matchup-move,
+.main .battle-no-move {
+  display: grid !important;
+  grid-template-columns: auto minmax(0, 1fr) auto !important;
+  align-items: center !important;
+  gap: 8px !important;
+  border-color: rgba(139,171,216,0.14) !important;
+  background: rgba(6,12,22,0.68) !important;
+}
+
+.main .battle-move-name {
+  min-width: 0 !important;
+  overflow: hidden !important;
+  color: var(--text-primary) !important;
+  -webkit-text-fill-color: var(--text-primary) !important;
+  font-size: 14px !important;
+  font-weight: 850 !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+}
+
+.main .battle-move-pp {
+  justify-self: end !important;
+  color: var(--text-secondary) !important;
+  -webkit-text-fill-color: var(--text-secondary) !important;
+  font-size: 11px !important;
+  font-weight: 900 !important;
+  font-variant-numeric: tabular-nums !important;
+  white-space: nowrap !important;
+}
+
+.main .battle-detail-stat-type,
+.main .battle-detail-stat-type.battle-detail-stat {
+  padding: 0 !important;
+  border: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.main .battle-detail-stat-type > span {
+  display: none !important;
 }
 
 /* Trainers */
@@ -1206,6 +1384,27 @@ div[data-testid="stFileUploaderDropzone"] {
 /* Notifications */
 .app-notice-menu summary {
   min-height: 38px !important;
+  overflow: hidden !important;
+  color: transparent !important;
+  -webkit-text-fill-color: transparent !important;
+  font-size: 0 !important;
+}
+
+.app-notice-menu summary > span:first-child {
+  min-width: 0 !important;
+  overflow: hidden !important;
+  color: var(--text-primary) !important;
+  -webkit-text-fill-color: var(--text-primary) !important;
+  font-size: 12px !important;
+  font-weight: 850 !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+}
+
+.app-notice-chevron {
+  color: var(--text-secondary) !important;
+  -webkit-text-fill-color: var(--text-secondary) !important;
+  font-size: 0 !important;
 }
 
 .app-notice,

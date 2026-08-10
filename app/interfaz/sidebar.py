@@ -225,6 +225,10 @@ def _render_change_pin_form() -> None:
         return None
 
     with st.sidebar.expander("Cambiar PIN", expanded=False):
+        st.markdown(
+            "<div class='pin-form-title'>Cambiar PIN</div>",
+            unsafe_allow_html=True,
+        )
         current_pin = _get_pin(user)
         current_input = (
             st.text_input("PIN actual", type="password", max_chars=4, value="")
@@ -232,12 +236,12 @@ def _render_change_pin_form() -> None:
             else None
         )
         new_input = st.text_input(
-            "PIN nuevo (4 digitos)",
+            "Nuevo PIN",
             type="password",
             max_chars=4,
             value="",
         )
-        if st.button("Guardar PIN", use_container_width=True):
+        if st.button("Guardar cambios", use_container_width=True):
             if current_pin and (not current_input or current_input.strip() != current_pin):
                 st.error("PIN actual incorrecto.")
                 return
