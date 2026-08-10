@@ -181,47 +181,22 @@ div[data-testid="stDecoration"] {
   background: transparent !important;
 }
 
-div[data-testid="collapsedControl"] {
-  display: flex !important;
-  visibility: visible !important;
-  opacity: 1 !important;
-  pointer-events: auto !important;
-  position: fixed !important;
-  top: 12px !important;
-  left: 12px !important;
-  z-index: 2147483000 !important;
-}
-
-div[data-testid="collapsedControl"] * {
-  pointer-events: auto !important;
-}
-
-div[data-testid="collapsedControl"] button {
-  width: 42px !important;
-  height: 42px !important;
-  min-width: 42px !important;
-  min-height: 42px !important;
-  border: 1px solid rgba(228, 238, 255, 0.2) !important;
-  border-radius: 14px !important;
-  background:
-    linear-gradient(180deg, rgba(93,162,255,0.18), rgba(47,120,230,0.08)),
-    rgba(16, 24, 39, 0.94) !important;
-  color: var(--p2-text) !important;
-  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.28) !important;
-  backdrop-filter: blur(12px) !important;
-}
-
-div[data-testid="collapsedControl"] button:hover {
-  transform: translateY(-1px) !important;
-  border-color: rgba(93, 162, 255, 0.55) !important;
-  background:
-    linear-gradient(180deg, rgba(93,162,255,0.28), rgba(47,120,230,0.14)),
-    rgba(16, 24, 39, 0.98) !important;
-}
-
-div[data-testid="collapsedControl"] button svg {
-  color: var(--p2-text) !important;
-  fill: var(--p2-text) !important;
+div[data-testid="collapsedControl"],
+header[data-testid="stHeader"] button[aria-label*="sidebar" i],
+header[data-testid="stHeader"] button[title*="sidebar" i],
+header[data-testid="stHeader"] button[aria-label*="barra lateral" i],
+header[data-testid="stHeader"] button[title*="barra lateral" i],
+section[data-testid="stSidebar"] button[aria-label*="sidebar" i],
+section[data-testid="stSidebar"] button[title*="sidebar" i],
+section[data-testid="stSidebar"] button[aria-label*="barra lateral" i],
+section[data-testid="stSidebar"] button[title*="barra lateral" i],
+section[data-testid="stSidebar"] button[kind="header"],
+section[data-testid="stSidebar"] button[data-testid="stBaseButton-header"],
+section[data-testid="stSidebarCollapseButton"] {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
 }
 
 .main .stButton > button,
@@ -391,15 +366,35 @@ section[data-testid="stSidebar"] div[data-testid="stExpander"] summary .material
 
 /* Sidebar */
 section[data-testid="stSidebar"] {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  position: relative !important;
+  left: 0 !important;
   width: 236px !important;
   min-width: 236px !important;
   max-width: 236px !important;
+  flex: 0 0 236px !important;
+  transform: translateX(0) !important;
+  margin-left: 0 !important;
+  pointer-events: auto !important;
+  z-index: 1000 !important;
   border-right: 1px solid rgba(228, 238, 255, 0.1) !important;
   background:
     linear-gradient(180deg, rgba(255,255,255,0.018) 1px, transparent 1px) 0 0 / 100% 34px,
     linear-gradient(145deg, rgba(93,162,255,0.08), transparent 36%),
     linear-gradient(180deg, #0a101d 0%, #090d17 100%) !important;
   box-shadow: 10px 0 28px rgba(0, 0, 0, 0.22) !important;
+}
+
+section[data-testid="stSidebar"] > div,
+section[data-testid="stSidebar"][aria-expanded="false"],
+section[data-testid="stSidebar"][aria-hidden="true"] {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  transform: translateX(0) !important;
+  pointer-events: auto !important;
 }
 
 section[data-testid="stSidebar"]::before {
@@ -2438,6 +2433,7 @@ section[data-testid="stSidebar"] .poke-type-full-img {
     width: 232px !important;
     min-width: 232px !important;
     max-width: 232px !important;
+    flex-basis: 232px !important;
   }
 
   .main .block-container {
