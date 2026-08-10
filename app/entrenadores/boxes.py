@@ -7,18 +7,75 @@ import streamlit as st
 from app.entrenadores.cache import cached_box
 from app.entrenadores.constants import DEAD_BOX_INDEX, TOTAL_BOXES
 from app.entrenadores.sprites import sprite_url_from_p
+from app.ui.type_icons import type_icons_html
 from conex_pkhex import extract_box, has_pc_data
+from dexdata import species_types, type_color
 
 
-def _box_tile_html(*, img_url: str, title: str, box_index: int, slot_index: int) -> str:
+def _pokemon_types(p: dict) -> list[str]:
+    species = str(p.get("species_name") or p.get("species") or "")
+    if not species:
+        return []
+    try:
+        return species_types(
+            species_name=species,
+            form_index=p.get("form_index"),
+            form_name=p.get("form_name"),
+            gender=p.get("gender"),
+        )
+    except Exception:
+        return []
+
+
+def _box_tile_html(
+    *,
+    img_url: str,
+    title: str,
+    subtitle: str,
+    level: object,
+    types: list[str],
+    box_index: int,
+    slot_index: int,
+    selected: bool = False,
+    shiny: bool = False,
+) -> str:
     safe_title = escape(str(title or "Pokemon"))
+    safe_subtitle = escape(str(subtitle or ""))
     safe_url = escape(str(img_url or ""), quote=True)
+    level_txt = "-" if level in (None, "") else str(level)
+    type_list = [str(t) for t in (types or [])[:2] if str(t or "").strip()]
+    type_labels = ", ".join(type_list) if type_list else "Tipo desconocido"
+    title_attr = escape(
+        f"{title or 'Pokemon'} | Lv.{level_txt} | {type_labels}",
+        quote=True,
+    )
+    type_html = type_icons_html(type_list, compact=True, label=False, class_name="champ-box-type")
+    type_rails = "".join(
+        f"<span style='--rail-color:{escape(type_color(t), quote=True)}'></span>"
+        for t in type_list
+    )
+    if not type_rails:
+        type_rails = "<span></span>"
+    glow = type_color(type_list[0]) if type_list else "#5da2ff"
+    classes = ["champ-box-tile"]
+    if selected:
+        classes.append("is-selected")
+    if shiny:
+        classes.append("is-shiny")
     href = f"?box_pick={int(box_index)}-{int(slot_index)}"
     return (
         f"<a class='champ-box-tile-link' href='{href}' target='_self' "
-        f"title='Ver {safe_title}'>"
-        "<div class='champ-box-tile'>"
+        f"title='{title_attr}'>"
+        f"<div class='{' '.join(classes)}' style='--box-glow:{escape(glow, quote=True)}'>"
+        f"<span class='champ-box-slot-no'>{int(slot_index) + 1:02d}</span>"
+        f"<span class='champ-box-level'>Lv.{escape(level_txt)}</span>"
+        "<span class='champ-box-sprite-stage'>"
         f"<img src='{safe_url}' alt='{safe_title}'/>"
+        "</span>"
+        f"<span class='champ-box-name'>{safe_title}</span>"
+        f"<span class='champ-box-species'>{safe_subtitle}</span>"
+        f"<span class='champ-box-types'>{type_html}</span>"
+        f"<span class='champ-box-type-rails'>{type_rails}</span>"
         "</div>"
         "</a>"
     )
@@ -27,7 +84,10 @@ def _box_tile_html(*, img_url: str, title: str, box_index: int, slot_index: int)
 def _empty_box_tile_html(slot_index: int) -> str:
     return (
         "<div class='champ-box-tile champ-box-tile-empty' "
-        f"title='Slot {int(slot_index) + 1}'></div>"
+        f"title='Slot {int(slot_index) + 1}'>"
+        f"<span class='champ-box-slot-no'>{int(slot_index) + 1:02d}</span>"
+        "<span class='champ-box-empty-mark'></span>"
+        "</div>"
     )
 
 
@@ -137,29 +197,68 @@ def boxes_grid_ui(
     except Exception:
         pass
 
+    selected_ref = st.session_state.get("selected_pokemon") or {}
+    try:
+        selected_box = int(selected_ref.get("box"))
+        selected_slot = int(selected_ref.get("slot")) - 1
+    except Exception:
+        selected_box = -1
+        selected_slot = -1
+
     tiles: list[str] = []
     for idx in range(30):
         if idx < len(box_list):
             p = box_list[idx]
             img_url = sprite_url_from_p(p, prefer_animated=False)
-            title = p.get("species_name") or p.get("species")
+            species = str(p.get("species_name") or p.get("species") or "Pokemon")
+            nickname = str(p.get("nickname") or "").strip()
+            title = nickname or species
+            subtitle = species if nickname and nickname.lower() != species.lower() else ""
+            types = _pokemon_types(p)
             tiles.append(
                 _box_tile_html(
                     img_url=img_url,
                     title=str(title or "Pokemon"),
+                    subtitle=subtitle,
+                    level=p.get("level", "-"),
+                    types=types,
                     box_index=int(box_index),
                     slot_index=int(idx),
+                    selected=(int(box_index) == selected_box and int(idx) == selected_slot),
+                    shiny=bool(p.get("is_shiny", False)),
                 )
             )
         else:
             tiles.append(_empty_box_tile_html(idx))
 
+    occupied = min(len(box_list), 30)
+    free = max(0, 30 - occupied)
+    box_name = str(virtual_names[int(box_index)])
+    is_dead_box = int(box_index) == muertos_box_index(total_boxes)
+    occupancy_pct = int(round((occupied / 30) * 100)) if occupied else 0
+    dot_html = "".join(
+        f"<span class='{'is-filled' if i < occupied else ''}'></span>"
+        for i in range(30)
+    )
+    shell_classes = "champ-box-grid-shell"
+    if is_dead_box:
+        shell_classes += " is-dead-box"
+
     st.markdown(
-        "<div class='champ-box-grid-shell'>"
+        f"<div class='{shell_classes}' style='--box-fill:{occupancy_pct}%'>"
         "<div class='champ-box-grid-toolbar champ-box-grid-toolbar-single'>"
         "<div class='champ-box-control champ-box-control-wide'>"
-        f"<strong>{escape(str(virtual_names[int(box_index)]))}</strong>"
+        "<span class='champ-box-kicker'>PC / Cajas</span>"
+        f"<strong>{escape(box_name)}</strong>"
         "</div>"
+        "<div class='champ-box-meta'>"
+        f"<span>{occupied}/30 Pokemon</span>"
+        f"<span>{free} libres</span>"
+        "</div>"
+        "</div>"
+        "<div class='champ-box-occupancy'>"
+        "<div class='champ-box-occupancy-bar'><span></span></div>"
+        f"<div class='champ-box-occupancy-dots'>{dot_html}</div>"
         "</div>"
         "<div class='champ-box-grid'>"
         f"{''.join(tiles)}"

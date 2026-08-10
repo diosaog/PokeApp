@@ -101,9 +101,9 @@ body,
   pointer-events: none !important;
   opacity: 1 !important;
   background:
-    linear-gradient(120deg, transparent 0 20%, rgba(255, 255, 255, 0.018) 20% 20.7%, transparent 20.7% 100%) 0 0 / 620px 340px,
-    linear-gradient(90deg, rgba(255,255,255,0.015) 1px, transparent 1px) 0 0 / 36px 36px,
-    linear-gradient(180deg, rgba(255,255,255,0.016) 1px, transparent 1px) 0 0 / 36px 36px,
+    linear-gradient(120deg, transparent 0 20%, rgba(255, 255, 255, 0.011) 20% 20.55%, transparent 20.55% 100%) 0 0 / 680px 380px,
+    linear-gradient(90deg, rgba(255,255,255,0.01) 1px, transparent 1px) 0 0 / 40px 40px,
+    linear-gradient(180deg, rgba(255,255,255,0.011) 1px, transparent 1px) 0 0 / 40px 40px,
     linear-gradient(180deg, rgba(14, 23, 40, 0.4), rgba(7, 11, 20, 0.9)) !important;
 }
 
@@ -210,9 +210,9 @@ section[data-testid="stSidebar"] .stButton > button:active {
 
 .main .stButton > button[kind="primary"],
 section[data-testid="stSidebar"] .stButton > button[kind="primary"] {
-  border-color: rgba(93, 162, 255, 0.52) !important;
+  border-color: rgba(93, 162, 255, 0.42) !important;
   background:
-    linear-gradient(180deg, rgba(93,162,255,0.28), rgba(47,120,230,0.18)),
+    linear-gradient(180deg, rgba(93,162,255,0.2), rgba(47,120,230,0.11)),
     var(--p2-surface-2) !important;
   box-shadow: inset 3px 0 0 var(--p2-primary) !important;
 }
@@ -374,8 +374,8 @@ section[data-testid="stSidebar"] .sidebar-brand {
   grid-template-columns: 42px minmax(0, 1fr) !important;
   gap: 10px !important;
   align-items: center !important;
-  margin: 0 0 12px !important;
-  padding: 10px !important;
+  margin: 0 0 10px !important;
+  padding: 9px !important;
   border: 1px solid var(--p2-border) !important;
   border-radius: var(--p2-radius) !important;
   background:
@@ -429,7 +429,7 @@ section[data-testid="stSidebar"] .sidebar-brand-sub {
 
 section[data-testid="stSidebar"] .profile-card {
   margin: 0 0 10px !important;
-  padding: 10px !important;
+  padding: 9px !important;
   border: 1px solid var(--p2-border) !important;
   border-radius: var(--p2-radius) !important;
   background:
@@ -510,13 +510,18 @@ section[data-testid="stSidebar"] .mini-mon img {
 }
 
 section[data-testid="stSidebar"] .sidebar-nav-title {
-  margin: 14px 0 7px !important;
+  margin: 15px 0 7px !important;
   padding: 0 2px !important;
   color: var(--p2-muted) !important;
   -webkit-text-fill-color: var(--p2-muted) !important;
   font-size: 10px !important;
   font-weight: 900 !important;
   text-transform: uppercase !important;
+}
+
+section[data-testid="stSidebar"] .sidebar-nav-title:not(:first-of-type) {
+  padding-top: 10px !important;
+  border-top: 1px solid rgba(228,238,255,0.055) !important;
 }
 
 section[data-testid="stSidebar"] div.stButton > button {
@@ -548,6 +553,7 @@ section[data-testid="stSidebar"] div.stButton > button[kind="primary"] {
     linear-gradient(90deg, rgba(93,162,255,0.15), rgba(93,162,255,0.035)),
     rgba(255,255,255,0.018) !important;
   box-shadow: inset 3px 0 0 var(--p2-primary) !important;
+  clip-path: var(--p2-cut) !important;
 }
 
 section[data-testid="stSidebar"] div.stButton > button[kind="primary"]::after {
@@ -638,11 +644,11 @@ section[data-testid="stSidebar"] hr {
 /* Topbar */
 .main .poke-topbar {
   position: sticky !important;
-  top: 8px !important;
+  top: 6px !important;
   z-index: 20 !important;
-  min-height: 50px !important;
-  margin: 0 0 18px !important;
-  padding: 9px 12px !important;
+  min-height: 46px !important;
+  margin: 0 0 16px !important;
+  padding: 8px 11px !important;
   border: 1px solid var(--p2-border) !important;
   border-radius: var(--p2-radius) !important;
   background:
@@ -673,7 +679,7 @@ section[data-testid="stSidebar"] hr {
 
 .main .poke-topbar-pill,
 .main .poke-topbar-user {
-  min-height: 30px !important;
+  min-height: 28px !important;
   border: 1px solid var(--p2-border) !important;
   border-radius: 999px !important;
   background: rgba(255,255,255,0.035) !important;
@@ -844,9 +850,27 @@ section[data-testid="stSidebar"] hr {
 .main .matchup-metric,
 .main .trainers-stat,
 .main .mart-register-card {
+  position: relative !important;
+  overflow: hidden !important;
   min-height: 0 !important;
   padding: 12px 14px !important;
   border-radius: var(--p2-radius-sm) !important;
+}
+
+.main .home-card::before,
+.main .home-context-card::before,
+.main .league-status-card::before,
+.main .trainers-stat::before,
+.main .mart-register-card::before {
+  content: "" !important;
+  position: absolute !important;
+  left: 0 !important;
+  top: 0 !important;
+  bottom: 0 !important;
+  width: 3px !important;
+  background: linear-gradient(180deg, var(--accent, var(--p2-primary)), transparent) !important;
+  opacity: 0.82 !important;
+  pointer-events: none !important;
 }
 
 .main .home-card-label,
@@ -882,6 +906,58 @@ section[data-testid="stSidebar"] hr {
   -webkit-text-fill-color: var(--p2-text-2) !important;
   font-size: 12px !important;
   line-height: 1.35 !important;
+}
+
+.main .home-activity {
+  position: relative !important;
+  gap: 7px !important;
+  margin-top: 12px !important;
+}
+
+.main .home-activity::before {
+  content: "" !important;
+  position: absolute !important;
+  left: 7px !important;
+  top: 8px !important;
+  bottom: 8px !important;
+  width: 1px !important;
+  background: linear-gradient(180deg, rgba(93,162,255,0.35), transparent) !important;
+  pointer-events: none !important;
+}
+
+.main .home-activity-row {
+  position: relative !important;
+  min-height: 38px !important;
+  padding: 8px 10px 8px 24px !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.main .home-activity-row::before {
+  content: "" !important;
+  position: absolute !important;
+  left: 3px !important;
+  top: 15px !important;
+  width: 9px !important;
+  height: 9px !important;
+  border-radius: 50% !important;
+  background: var(--p2-primary) !important;
+  box-shadow: 0 0 0 4px rgba(93,162,255,0.1) !important;
+}
+
+.main .home-activity-row strong {
+  color: var(--p2-text) !important;
+  -webkit-text-fill-color: var(--p2-text) !important;
+  font-size: 13px !important;
+}
+
+.main .home-activity-row span {
+  color: var(--p2-muted) !important;
+  -webkit-text-fill-color: var(--p2-muted) !important;
+  font-size: 11px !important;
+  font-variant-numeric: tabular-nums !important;
 }
 
 .main .home-section-title,
@@ -1085,36 +1161,165 @@ section[data-testid="stSidebar"] .poke-type-full-img {
 
 .main .champ-box-grid-shell {
   margin-top: 14px !important;
+  position: relative !important;
+  overflow: hidden !important;
   padding: 14px !important;
   border-radius: var(--p2-radius-lg) !important;
+  border-left: 3px solid var(--p2-cyan) !important;
+  background:
+    linear-gradient(90deg, rgba(88,214,255,0.09), transparent 42%),
+    linear-gradient(180deg, rgba(255,255,255,0.032), rgba(255,255,255,0.012)),
+    var(--p2-surface) !important;
+}
+
+.main .champ-box-grid-shell::before {
+  content: "PC" !important;
+  position: absolute !important;
+  right: 18px !important;
+  top: 4px !important;
+  color: rgba(255,255,255,0.035) !important;
+  -webkit-text-fill-color: rgba(255,255,255,0.035) !important;
+  font-family: var(--font-pixel) !important;
+  font-size: 74px !important;
+  font-weight: 950 !important;
+  line-height: 1 !important;
+  pointer-events: none !important;
+}
+
+.main .champ-box-grid-shell.is-dead-box {
+  border-left-color: rgba(255,97,114,0.72) !important;
+  background:
+    linear-gradient(90deg, rgba(255,97,114,0.075), transparent 42%),
+    linear-gradient(180deg, rgba(255,255,255,0.026), rgba(255,255,255,0.01)),
+    var(--p2-surface) !important;
 }
 
 .main .champ-box-grid-toolbar {
+  position: relative !important;
+  z-index: 1 !important;
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) auto !important;
+  gap: 12px !important;
+  align-items: center !important;
   margin-bottom: 12px !important;
 }
 
 .main .champ-box-grid-toolbar strong {
-  min-height: 32px !important;
+  display: block !important;
+  width: auto !important;
+  min-height: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  padding: 0 !important;
+  color: var(--p2-text) !important;
+  -webkit-text-fill-color: var(--p2-text) !important;
+  font-size: 18px !important;
+  font-weight: 950 !important;
+  line-height: 1.05 !important;
+}
+
+.main .champ-box-kicker {
+  display: block !important;
+  margin-bottom: 4px !important;
+  color: var(--p2-cyan) !important;
+  -webkit-text-fill-color: var(--p2-cyan) !important;
+  font-size: 10px !important;
+  font-weight: 900 !important;
+  text-transform: uppercase !important;
+}
+
+.main .champ-box-meta {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: flex-end !important;
+  gap: 7px !important;
+  flex-wrap: wrap !important;
+}
+
+.main .champ-box-meta span {
+  min-height: 27px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  padding: 0 9px !important;
+  border: 1px solid var(--p2-border) !important;
   border-color: var(--p2-border) !important;
   border-radius: 999px !important;
   background: rgba(255,255,255,0.035) !important;
   color: var(--p2-text-2) !important;
   -webkit-text-fill-color: var(--p2-text-2) !important;
-  font-size: 12px !important;
+  font-size: 11px !important;
   font-weight: 850 !important;
+  font-variant-numeric: tabular-nums !important;
+}
+
+.main .champ-box-occupancy {
+  position: relative !important;
+  z-index: 1 !important;
+  display: grid !important;
+  grid-template-columns: minmax(120px, 1fr) auto !important;
+  gap: 12px !important;
+  align-items: center !important;
+  margin: 0 0 12px !important;
+}
+
+.main .champ-box-occupancy-bar {
+  height: 4px !important;
+  overflow: hidden !important;
+  border-radius: 999px !important;
+  background: rgba(255,255,255,0.08) !important;
+}
+
+.main .champ-box-occupancy-bar span {
+  display: block !important;
+  width: var(--box-fill, 0%) !important;
+  height: 100% !important;
+  border-radius: inherit !important;
+  background: linear-gradient(90deg, var(--p2-primary), var(--p2-cyan)) !important;
+}
+
+.main .champ-box-grid-shell.is-dead-box .champ-box-occupancy-bar span {
+  background: linear-gradient(90deg, #963446, var(--p2-red)) !important;
+}
+
+.main .champ-box-occupancy-dots {
+  display: grid !important;
+  grid-template-columns: repeat(30, 4px) !important;
+  gap: 3px !important;
+}
+
+.main .champ-box-occupancy-dots span {
+  width: 4px !important;
+  height: 4px !important;
+  border-radius: 50% !important;
+  background: rgba(255,255,255,0.11) !important;
+}
+
+.main .champ-box-occupancy-dots span.is-filled {
+  background: var(--p2-cyan) !important;
 }
 
 .main .champ-box-grid {
-  grid-template-columns: repeat(6, minmax(74px, 1fr)) !important;
-  gap: 9px !important;
+  position: relative !important;
+  z-index: 1 !important;
+  grid-template-columns: repeat(6, minmax(96px, 1fr)) !important;
+  gap: 10px !important;
 }
 
 .main .champ-box-tile {
-  min-height: 76px !important;
-  border-radius: 13px !important;
+  position: relative !important;
+  display: grid !important;
+  grid-template-rows: 20px minmax(62px, 1fr) auto auto 5px !important;
+  align-items: center !important;
+  justify-items: center !important;
+  gap: 3px !important;
+  min-height: 126px !important;
+  aspect-ratio: 1 / 0.94 !important;
+  padding: 8px 8px 7px !important;
+  border-radius: 14px !important;
   border-color: var(--p2-border) !important;
   background:
-    radial-gradient(circle at 50% 44%, rgba(93,162,255,0.12), transparent 58%),
+    radial-gradient(circle at 50% 45%, color-mix(in srgb, var(--box-glow, var(--p2-primary)) 18%, transparent), transparent 57%),
     linear-gradient(135deg, rgba(255,255,255,0.055) 0 45%, rgba(255,255,255,0.02) 45% 100%),
     var(--p2-surface-2) !important;
 }
@@ -1130,22 +1335,190 @@ section[data-testid="stSidebar"] .poke-type-full-img {
 }
 
 .main .champ-box-tile::after {
-  display: none !important;
+  display: block !important;
+  content: "" !important;
+  position: absolute !important;
+  left: 50% !important;
+  top: 58% !important;
+  width: 58px !important;
+  height: 10px !important;
+  transform: translate(-50%, -50%) !important;
+  border-radius: 50% !important;
+  background: rgba(0,0,0,0.22) !important;
+  filter: blur(4px) !important;
+  z-index: 0 !important;
+  pointer-events: none !important;
+}
+
+.main .champ-box-tile.is-selected {
+  border-color: rgba(93,162,255,0.72) !important;
+  background:
+    radial-gradient(circle at 50% 45%, color-mix(in srgb, var(--box-glow, var(--p2-primary)) 24%, transparent), transparent 58%),
+    linear-gradient(180deg, rgba(93,162,255,0.13), rgba(93,162,255,0.035)),
+    var(--p2-surface-2) !important;
+  box-shadow: inset 0 0 0 1px rgba(93,162,255,0.36), 0 0 0 3px rgba(93,162,255,0.08) !important;
+}
+
+.main .champ-box-tile.is-selected::before {
+  border-color: rgba(93,162,255,0.16) !important;
+}
+
+.main .champ-box-tile.is-selected .champ-box-slot-no {
+  color: var(--p2-primary) !important;
+  -webkit-text-fill-color: var(--p2-primary) !important;
+}
+
+.main .champ-box-tile.is-shiny .champ-box-slot-no::after {
+  content: "*" !important;
+  margin-left: 3px !important;
+  color: var(--p2-gold) !important;
+  -webkit-text-fill-color: var(--p2-gold) !important;
+}
+
+.main .champ-box-slot-no,
+.main .champ-box-level,
+.main .champ-box-name,
+.main .champ-box-species,
+.main .champ-box-types,
+.main .champ-box-type-rails,
+.main .champ-box-sprite-stage,
+.main .champ-box-empty-mark {
+  position: relative !important;
+  z-index: 1 !important;
+}
+
+.main .champ-box-slot-no {
+  position: absolute !important;
+  top: 7px !important;
+  right: 8px !important;
+  color: rgba(255,255,255,0.28) !important;
+  -webkit-text-fill-color: rgba(255,255,255,0.28) !important;
+  font-family: var(--font-pixel) !important;
+  font-size: 10px !important;
+  font-weight: 950 !important;
+  font-variant-numeric: tabular-nums !important;
+}
+
+.main .champ-box-level {
+  justify-self: start !important;
+  min-height: 18px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  padding: 0 6px !important;
+  border-radius: 6px !important;
+  background: rgba(93,162,255,0.14) !important;
+  color: var(--p2-text) !important;
+  -webkit-text-fill-color: var(--p2-text) !important;
+  font-size: 10px !important;
+  font-weight: 900 !important;
+  font-variant-numeric: tabular-nums !important;
+}
+
+.main .champ-box-sprite-stage {
+  width: 100% !important;
+  min-height: 64px !important;
+  display: grid !important;
+  place-items: center !important;
 }
 
 .main .champ-box-tile img {
-  width: 84% !important;
-  height: 84% !important;
-  max-width: 76px !important;
-  max-height: 76px !important;
+  width: 90% !important;
+  height: 90% !important;
+  max-width: 86px !important;
+  max-height: 78px !important;
   object-fit: contain !important;
   image-rendering: pixelated !important;
   filter: drop-shadow(0 7px 8px rgba(0,0,0,0.34)) !important;
+  transition: transform 150ms ease, filter 150ms ease !important;
+}
+
+.main .champ-box-tile-link:hover .champ-box-tile img,
+.main .champ-box-tile.is-selected img {
+  transform: translateY(-2px) scale(1.03) !important;
+  filter: drop-shadow(0 10px 10px rgba(0,0,0,0.38)) !important;
+}
+
+.main .champ-box-name,
+.main .champ-box-species {
+  display: block !important;
+  width: 100% !important;
+  overflow: hidden !important;
+  text-align: center !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+}
+
+.main .champ-box-name {
+  color: var(--p2-text) !important;
+  -webkit-text-fill-color: var(--p2-text) !important;
+  font-size: 11px !important;
+  font-weight: 950 !important;
+  line-height: 1.05 !important;
+}
+
+.main .champ-box-species {
+  min-height: 12px !important;
+  color: var(--p2-muted) !important;
+  -webkit-text-fill-color: var(--p2-muted) !important;
+  font-size: 10px !important;
+  font-weight: 750 !important;
+  line-height: 1.05 !important;
+}
+
+.main .champ-box-types {
+  min-height: 22px !important;
+  display: inline-flex !important;
+  gap: 4px !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+.main .champ-box-types .poke-type-chip.asset-icon {
+  width: 18px !important;
+  min-width: 18px !important;
+  height: 18px !important;
+  border-radius: 5px !important;
+  background: rgba(255,255,255,0.055) !important;
+}
+
+.main .champ-box-types .poke-type-icon-img {
+  width: 18px !important;
+  height: 18px !important;
+}
+
+.main .champ-box-type-rails {
+  width: 100% !important;
+  display: grid !important;
+  grid-template-columns: repeat(auto-fit, minmax(0, 1fr)) !important;
+  gap: 3px !important;
+}
+
+.main .champ-box-type-rails span {
+  height: 3px !important;
+  border-radius: 999px !important;
+  background: var(--rail-color, rgba(255,255,255,0.12)) !important;
 }
 
 .main .champ-box-tile-empty {
   opacity: 0.36 !important;
   border-style: dashed !important;
+  grid-template-rows: 1fr !important;
+}
+
+.main .champ-box-tile-empty::after {
+  display: none !important;
+}
+
+.main .champ-box-empty-mark {
+  width: 34px !important;
+  height: 34px !important;
+  border-radius: 50% !important;
+  border: 7px solid rgba(255,255,255,0.035) !important;
+  box-shadow: inset 0 0 0 5px rgba(0,0,0,0.16) !important;
+}
+
+.main .champ-box-grid-shell.is-dead-box .champ-box-tile:not(.champ-box-tile-empty) img {
+  filter: saturate(0.68) drop-shadow(0 7px 8px rgba(0,0,0,0.34)) !important;
 }
 
 /* Pokemon detail */
@@ -1325,9 +1698,9 @@ section[data-testid="stSidebar"] .poke-type-full-img {
 .main .battle-mon-card {
   position: relative !important;
   overflow: hidden !important;
-  min-height: 206px !important;
+  min-height: 214px !important;
   padding: 12px !important;
-  grid-template-columns: minmax(190px, 0.9fr) 132px minmax(250px, 1.1fr) !important;
+  grid-template-columns: minmax(190px, 0.9fr) 148px minmax(250px, 1.1fr) !important;
   align-items: center !important;
   border-radius: var(--p2-radius) !important;
   background:
@@ -1337,7 +1710,7 @@ section[data-testid="stSidebar"] .poke-type-full-img {
 }
 
 .main .battle-mon-card-public {
-  grid-template-columns: minmax(180px, 0.82fr) 128px minmax(240px, 1.12fr) !important;
+  grid-template-columns: minmax(180px, 0.82fr) 146px minmax(240px, 1.12fr) !important;
 }
 
 .main .battle-slot-mark,
@@ -1387,8 +1760,8 @@ section[data-testid="stSidebar"] .poke-type-full-img {
 
 .main .battle-sprite-wrap {
   position: relative !important;
-  width: 126px !important;
-  height: 132px !important;
+  width: 144px !important;
+  height: 148px !important;
   border: 1px solid var(--p2-border) !important;
   border-radius: var(--p2-radius) !important;
   background:
@@ -1399,8 +1772,8 @@ section[data-testid="stSidebar"] .poke-type-full-img {
 }
 
 .main .battle-sprite {
-  width: 128px !important;
-  height: 128px !important;
+  width: 144px !important;
+  height: 144px !important;
   object-fit: contain !important;
   image-rendering: pixelated !important;
 }
@@ -1415,9 +1788,11 @@ section[data-testid="stSidebar"] .poke-type-full-img {
 .main .matchup-move {
   min-height: 38px !important;
   padding: 7px 9px !important;
-  border: 1px solid var(--p2-border) !important;
+  border: 1px solid rgba(228,238,255,0.09) !important;
   border-radius: 11px !important;
-  background: rgba(255,255,255,0.035) !important;
+  background:
+    linear-gradient(90deg, rgba(255,255,255,0.035), rgba(255,255,255,0.014)),
+    #0d1422 !important;
   color: var(--p2-text) !important;
   -webkit-text-fill-color: var(--p2-text) !important;
   box-shadow: none !important;
@@ -1429,6 +1804,12 @@ section[data-testid="stSidebar"] .poke-type-full-img {
   transform: translateX(2px) !important;
   border-color: rgba(93,162,255,0.32) !important;
   background: rgba(93,162,255,0.095) !important;
+}
+
+.main .battle-private-move {
+  background:
+    linear-gradient(90deg, rgba(93,162,255,0.07), rgba(255,255,255,0.012)),
+    #0d1422 !important;
 }
 
 .main .battle-move-link span:last-child,
@@ -1464,7 +1845,7 @@ section[data-testid="stSidebar"] .poke-type-full-img {
 }
 
 .main .battle-stat-bar {
-  height: 4px !important;
+  height: 3px !important;
   border: 0 !important;
   border-radius: 999px !important;
   background: rgba(255,255,255,0.12) !important;
@@ -1600,8 +1981,8 @@ section[data-testid="stSidebar"] .poke-type-full-img {
 }
 
 .main .matchup-sprite {
-  width: 96px !important;
-  height: 96px !important;
+  width: 104px !important;
+  height: 104px !important;
   border: 0 !important;
   border-radius: 0 !important;
   background: transparent !important;
@@ -1636,7 +2017,7 @@ section[data-testid="stSidebar"] .poke-type-full-img {
 .main .shop-card {
   position: relative !important;
   overflow: hidden !important;
-  min-height: 206px !important;
+  min-height: 212px !important;
   margin-bottom: 9px !important;
   border-radius: var(--p2-radius) !important;
   background:
@@ -1659,7 +2040,7 @@ section[data-testid="stSidebar"] .poke-type-full-img {
 }
 
 .main .shop-head {
-  min-height: 40px !important;
+  min-height: 44px !important;
   padding: 10px 12px !important;
   border-bottom: 1px solid var(--p2-border) !important;
   background: rgba(255,255,255,0.018) !important;
@@ -1668,19 +2049,19 @@ section[data-testid="stSidebar"] .poke-type-full-img {
 .main .shop-name {
   color: var(--p2-text) !important;
   -webkit-text-fill-color: var(--p2-text) !important;
-  font-size: 12px !important;
+  font-size: 13px !important;
   font-weight: 950 !important;
 }
 
 .main .shop-body {
-  grid-template-columns: 78px minmax(0, 1fr) !important;
-  gap: 12px !important;
+  grid-template-columns: 88px minmax(0, 1fr) !important;
+  gap: 14px !important;
   padding: 12px !important;
 }
 
 .main .shop-icon-slot {
-  width: 72px !important;
-  height: 72px !important;
+  width: 84px !important;
+  height: 84px !important;
   border-radius: 12px !important;
   border-color: var(--p2-border) !important;
   background:
@@ -1689,8 +2070,8 @@ section[data-testid="stSidebar"] .poke-type-full-img {
 }
 
 .main .shop-icon {
-  width: 56px !important;
-  height: 56px !important;
+  width: 64px !important;
+  height: 64px !important;
   filter: drop-shadow(0 7px 8px rgba(0,0,0,0.36)) !important;
 }
 
@@ -1707,14 +2088,14 @@ section[data-testid="stSidebar"] .poke-type-full-img {
   justify-content: space-between !important;
   flex-wrap: wrap !important;
   gap: 8px !important;
-  padding: 8px 9px !important;
+  padding: 9px 10px !important;
   border-radius: 10px !important;
   background: rgba(255,255,255,0.035) !important;
 }
 
 .main .shop-coin-value {
-  min-height: 30px !important;
-  min-width: 58px !important;
+  min-height: 32px !important;
+  min-width: 62px !important;
   padding: 4px 8px !important;
   border-radius: 9px !important;
   background: rgba(244,200,74,0.095) !important;
@@ -1728,7 +2109,7 @@ section[data-testid="stSidebar"] .poke-type-full-img {
 .main .shop-amount {
   color: var(--p2-text) !important;
   -webkit-text-fill-color: var(--p2-text) !important;
-  font-size: 18px !important;
+  font-size: 19px !important;
   font-weight: 950 !important;
   font-variant-numeric: tabular-nums !important;
 }
