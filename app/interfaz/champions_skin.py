@@ -186,7 +186,6 @@ section[data-testid="stSidebar"]::before {
 .main .ju-hero,
 .main .hof-hero,
 .main .season-hero,
-.main .norma-hero,
 .main .saves-hero {
   overflow: hidden !important;
   border: 1px solid rgba(238,233,255,0.42) !important;
@@ -210,7 +209,6 @@ section[data-testid="stSidebar"]::before {
 .main .cup-hero::before,
 .main .ju-hero::before,
 .main .hof-hero::before,
-.main .norma-hero::after,
 .main .saves-hero::before {
   opacity: 0.28 !important;
 }
@@ -225,7 +223,6 @@ section[data-testid="stSidebar"]::before {
 .main .ju-hero-title,
 .main .hof-title,
 .main .season-title,
-.main .norma-title,
 .main .saves-title {
   color: #ffffff !important;
   font-size: clamp(25px, 3.2vw, 40px) !important;
@@ -243,7 +240,6 @@ section[data-testid="stSidebar"]::before {
 .main .ju-hero-sub,
 .main .hof-subtitle,
 .main .season-subtitle,
-.main .norma-subtitle,
 .main .saves-subtitle {
   color: rgba(255,255,255,0.88) !important;
   font-size: 20px !important;
@@ -258,7 +254,6 @@ section[data-testid="stSidebar"]::before {
 .main .ju-hero-chip,
 .main .league-kicker,
 .main .season-kicker,
-.main .norma-chip,
 .main .trainers-chip,
 .main .hof-team-pill,
 .main .saves-card-badge,
@@ -313,8 +308,6 @@ section[data-testid="stSidebar"]::before {
 .main .season-card,
 .main .season-alert,
 .main .season-table,
-.main .norma-summary,
-.main .norma-row-card,
 .main .saves-current-card,
 .main .saves-admin-panel,
 .main .saves-stat,
@@ -391,7 +384,6 @@ section[data-testid="stSidebar"] .app-notice {
 .main .matchup-mode-card,
 .main .cup-mode-card,
 .main .season-version-row,
-.main .norma-list-item,
 .main .app-notice,
 .main .saves-history-card,
 .main .pokedex-card,
@@ -429,7 +421,6 @@ section[data-testid="stSidebar"] .stPopover > div > button,
 .main .matchup-mode-card *,
 .main .cup-mode-card *,
 .main .season-version-row *,
-.main .norma-list-item *,
 .main .saves-history-card *,
 .main .pokedex-card *,
 .main .slot *,
@@ -2211,7 +2202,6 @@ section[data-testid="stSidebar"] .block-container {
 .main .ju-hero,
 .main .hof-hero,
 .main .season-hero,
-.main .norma-hero,
 .main .saves-hero {
   border-radius: 24px !important;
   border: 1px solid rgba(246,242,255,0.38) !important;
@@ -2232,7 +2222,6 @@ section[data-testid="stSidebar"] .block-container {
 .main .ju-hero-title,
 .main .hof-title,
 .main .season-title,
-.main .norma-title,
 .main .saves-title {
   font-size: clamp(27px, 3vw, 42px) !important;
   color: #ffffff !important;
@@ -2332,7 +2321,6 @@ section[data-testid="stSidebar"] .block-container {
 .main .matchup-mode-card,
 .main .cup-mode-card,
 .main .season-version-row,
-.main .norma-list-item,
 .main .app-notice,
 .main .saves-history-card,
 .main .pokedex-card,
@@ -2362,7 +2350,6 @@ section[data-testid="stSidebar"] div[data-testid="stExpander"] summary {
 .main .matchup-mode-card *,
 .main .cup-mode-card *,
 .main .season-version-row *,
-.main .norma-list-item *,
 .main .saves-history-card *,
 .main .pokedex-card *,
 .main .slot *,
@@ -3338,7 +3325,6 @@ section[data-testid="stSidebar"] .app-notice {
 .main .ju-hero,
 .main .hof-hero,
 .main .season-hero,
-.main .norma-hero,
 .main .saves-hero {
   padding: 20px !important;
   border: 1px solid var(--border-soft) !important;
@@ -3357,7 +3343,6 @@ section[data-testid="stSidebar"] .app-notice {
 .main .ju-hero-title,
 .main .hof-title,
 .main .season-title,
-.main .norma-title,
 .main .saves-title {
   color: var(--text-primary) !important;
   -webkit-text-fill-color: var(--text-primary) !important;
@@ -3544,7 +3529,6 @@ section[data-testid="stSidebar"] .app-notice {
 .main .matchup-mode-card,
 .main .cup-mode-card,
 .main .season-version-row,
-.main .norma-list-item,
 .main .app-notice,
 .main .saves-history-card,
 .main .pokedex-card,
@@ -3568,7 +3552,6 @@ section[data-testid="stSidebar"] .app-notice {
 .main .matchup-mode-card *,
 .main .cup-mode-card *,
 .main .season-version-row *,
-.main .norma-list-item *,
 .main .saves-history-card *,
 .main .pokedex-card *,
 .main .slot *,

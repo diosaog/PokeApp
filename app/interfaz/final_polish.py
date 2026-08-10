@@ -1716,7 +1716,6 @@ div[data-testid="stFileUploaderDropzone"] {
 }
 
 /* Secondary pages 1F: same visual intent, selector specificity fixed */
-.main .norma-hero,
 .main .cup-hero,
 .main .ju-hero,
 .main .season-hero {
@@ -1732,33 +1731,6 @@ div[data-testid="stFileUploaderDropzone"] {
   box-shadow: var(--poke-shadow-card) !important;
 }
 
-.main .norma-hero::before {
-  content: "" !important;
-  position: absolute !important;
-  inset: 0 !important;
-  pointer-events: none !important;
-  background:
-    linear-gradient(90deg, rgba(255,255,255,0.025) 0 1px, transparent 1px 100%) 0 0 / 28px 100%,
-    linear-gradient(180deg, rgba(255,255,255,0.025) 0 1px, transparent 1px 100%) 0 0 / 100% 24px !important;
-  opacity: .42 !important;
-}
-
-.main .norma-hero::after {
-  content: "" !important;
-  position: absolute !important;
-  right: 22px !important;
-  top: 14px !important;
-  width: 120px !important;
-  height: 72px !important;
-  border: 1px solid rgba(216,223,232,0.12) !important;
-  border-radius: 0 !important;
-  background:
-    linear-gradient(135deg, transparent 0 56%, rgba(110,168,255,0.11) 56% 100%),
-    linear-gradient(180deg, rgba(255,255,255,0.05), transparent) !important;
-  opacity: .45 !important;
-  transform: skewX(-14deg) !important;
-}
-
 .main .hof-hero {
   border-left: 4px solid var(--pokemon-yellow) !important;
   background:
@@ -1766,7 +1738,6 @@ div[data-testid="stFileUploaderDropzone"] {
     linear-gradient(180deg, rgba(18,30,49,0.96), rgba(8,14,26,0.98)) !important;
 }
 
-.main .norma-title,
 .main .cup-title,
 .main .ju-hero-title,
 .main .season-title {
@@ -1776,8 +1747,6 @@ div[data-testid="stFileUploaderDropzone"] {
   text-shadow: none !important;
 }
 
-.main .norma-subtitle,
-.main .norma-summary,
 .main .cup-sub,
 .main .ju-hero-sub,
 .main .season-subtitle {
@@ -1787,10 +1756,8 @@ div[data-testid="stFileUploaderDropzone"] {
   line-height: 1.3 !important;
 }
 
-.main .norma-kicker,
 .main .cup-kicker,
 .main .season-kicker,
-.main .norma-doc-chip,
 .main .cup-pill,
 .main .season-pill,
 .main .ju-chip,
@@ -1799,7 +1766,6 @@ div[data-testid="stFileUploaderDropzone"] {
   clip-path: none !important;
 }
 
-.main .norma-kicker,
 .main .cup-kicker,
 .main .season-kicker {
   display: inline-flex !important;
@@ -1808,10 +1774,8 @@ div[data-testid="stFileUploaderDropzone"] {
   padding: 4px 8px !important;
 }
 
-.main .norma-kicker,
 .main .cup-kicker,
 .main .season-kicker,
-.main .norma-block-head,
 .main .cup-section,
 .main .doubles-section,
 .main .ju-toolbar,
@@ -1833,8 +1797,6 @@ div[data-testid="stFileUploaderDropzone"] {
   -webkit-text-fill-color: var(--pokemon-yellow) !important;
 }
 
-.main .norma-block,
-.main .norma-list-item,
 .main .cup-mode-card,
 .main .cup-metric,
 .main .cup-vs-card,
@@ -1862,7 +1824,6 @@ div[data-testid="stFileUploaderDropzone"] {
   box-shadow: inset 0 1px 0 rgba(255,255,255,0.055) !important;
 }
 
-.main .norma-list-bullet,
 .main .ju-case-no {
   border-color: rgba(114,185,255,0.28) !important;
   border-radius: 12px !important;

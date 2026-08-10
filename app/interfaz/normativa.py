@@ -375,284 +375,368 @@ def _render_normativa_css() -> None:
     st.markdown(
         """
         <style>
-        .norma-hero {
+        .main .rulebook-hero {
           position: relative;
           overflow: hidden;
-          display: grid;
-          grid-template-columns: minmax(0, 1fr) auto;
-          gap: 12px;
-          align-items: end;
-          border: 1px solid var(--bw2-edge);
+          min-height: 170px;
+          margin: 0 0 16px;
+          padding: 22px;
+          border: 1px solid rgba(139,171,216,0.20);
+          border-left: 5px solid var(--primary, #4d8dff);
+          border-radius: 18px;
           background:
-            linear-gradient(90deg, rgba(110,168,255,0.08), transparent 46%),
-            linear-gradient(180deg, rgba(21,31,46,0.96), rgba(8,14,25,0.98));
-          box-shadow: inset 0 1px 0 rgba(255,255,255,0.08), 0 0 0 1px rgba(0,0,0,0.32);
-          padding: 16px;
-          margin-bottom: 14px;
+            linear-gradient(118deg, rgba(77,141,255,0.18) 0 34%, transparent 34% 100%),
+            linear-gradient(300deg, rgba(255,210,77,0.10), transparent 46%),
+            linear-gradient(180deg, rgba(18,30,49,0.98), rgba(7,12,22,0.99));
+          box-shadow: var(--poke-shadow-card, 0 14px 30px rgba(0,0,0,0.24));
         }
-        .norma-hero:before {
+        .main .rulebook-hero::before {
           content: "";
           position: absolute;
           inset: 0;
           pointer-events: none;
           background:
-            linear-gradient(90deg, rgba(255,255,255,0.025) 0 1px, transparent 1px 100%) 0 0 / 28px 100%,
-            linear-gradient(180deg, rgba(255,255,255,0.025) 0 1px, transparent 1px 100%) 0 0 / 100% 24px;
-          opacity: .5;
+            linear-gradient(90deg, rgba(255,255,255,0.026) 0 1px, transparent 1px 100%) 0 0 / 30px 100%,
+            linear-gradient(180deg, rgba(255,255,255,0.022) 0 1px, transparent 1px 100%) 0 0 / 100% 26px;
+          opacity: .62;
         }
-        .norma-hero:after {
-          content: "";
+        .main .rulebook-hero::after {
+          content: "RULEBOOK";
           position: absolute;
           right: 22px;
-          top: 14px;
-          width: 120px;
-          height: 72px;
-          background:
-            linear-gradient(135deg, transparent 0 56%, rgba(110,168,255,0.11) 56% 100%),
-            linear-gradient(180deg, rgba(255,255,255,0.05), transparent);
-          border: 1px solid rgba(216,223,232,0.12);
-          opacity: .45;
-          transform: skewX(-14deg);
+          bottom: -8px;
+          color: rgba(255,255,255,0.045);
+          font-family: var(--font-ui);
+          font-size: clamp(46px, 8vw, 106px);
+          font-weight: 950;
+          line-height: 1;
+          letter-spacing: 0;
+          pointer-events: none;
         }
-        .norma-hero-main,
-        .norma-document-meta {
+        .main .rulebook-hero-content {
+          position: relative;
+          z-index: 1;
+          max-width: 920px;
+        }
+        .main .rulebook-kicker-row,
+        .main .rulebook-metric-row,
+        .main .rulebook-section-meta {
+          display: flex;
+          flex-wrap: wrap;
+          align-items: center;
+          gap: 8px;
+        }
+        .main .rulebook-kicker,
+        .main .rulebook-chip,
+        .main .rulebook-section-code,
+        .main .rulebook-block-code {
+          display: inline-flex;
+          align-items: center;
+          min-height: 24px;
+          padding: 4px 9px;
+          border: 1px solid rgba(139,171,216,0.18);
+          border-radius: 999px;
+          background: rgba(255,255,255,0.045);
+          color: var(--text-secondary, #b8c7dc);
+          -webkit-text-fill-color: var(--text-secondary, #b8c7dc);
+          font-family: var(--font-pixel);
+          font-size: 9px;
+          font-weight: 900;
+          text-transform: uppercase;
+        }
+        .main .rulebook-kicker {
+          border-color: rgba(114,185,255,0.30);
+          background: rgba(77,141,255,0.11);
+          color: var(--primary-hover, #72b9ff);
+          -webkit-text-fill-color: var(--primary-hover, #72b9ff);
+        }
+        .main .rulebook-title {
+          margin: 14px 0 8px;
+          color: var(--text-primary, #f6f9ff);
+          -webkit-text-fill-color: var(--text-primary, #f6f9ff);
+          font-family: var(--font-ui);
+          font-size: clamp(30px, 4.8vw, 56px);
+          font-weight: 950;
+          line-height: .98;
+          letter-spacing: 0;
+          text-transform: none;
+        }
+        .main .rulebook-subtitle {
+          max-width: 760px;
+          margin: 0;
+          color: var(--text-secondary, #b8c7dc);
+          -webkit-text-fill-color: var(--text-secondary, #b8c7dc);
+          font-size: 15px;
+          font-weight: 650;
+          line-height: 1.42;
+        }
+        .main .rulebook-metric-row {
+          margin-top: 16px;
+        }
+        .main .rulebook-metric {
+          min-width: 116px;
+          padding: 9px 11px;
+          border: 1px solid rgba(139,171,216,0.14);
+          border-radius: 13px;
+          background: rgba(255,255,255,0.04);
+        }
+        .main .rulebook-metric span {
+          display: block;
+          color: var(--text-muted, #77879e);
+          -webkit-text-fill-color: var(--text-muted, #77879e);
+          font-size: 10px;
+          font-weight: 900;
+          text-transform: uppercase;
+        }
+        .main .rulebook-metric strong {
+          display: block;
+          margin-top: 5px;
+          color: var(--text-primary, #f6f9ff);
+          -webkit-text-fill-color: var(--text-primary, #f6f9ff);
+          font-size: 18px;
+          font-weight: 950;
+          font-variant-numeric: tabular-nums;
+        }
+        .main .rulebook-index {
+          margin: 0 0 14px;
+          padding: 14px;
+          border: 1px solid rgba(139,171,216,0.16);
+          border-radius: 16px;
+          background:
+            linear-gradient(135deg, rgba(77,141,255,0.075), transparent 44%),
+            rgba(10,17,29,0.95);
+        }
+        .main .rulebook-index-title {
+          color: var(--text-primary, #f6f9ff);
+          -webkit-text-fill-color: var(--text-primary, #f6f9ff);
+          font-size: 16px;
+          font-weight: 950;
+        }
+        .main .rulebook-index-copy {
+          margin-top: 3px;
+          color: var(--text-muted, #77879e);
+          -webkit-text-fill-color: var(--text-muted, #77879e);
+          font-size: 13px;
+          font-weight: 700;
+        }
+        .main .rulebook-nav-slot {
+          display: none;
+        }
+        .main div[data-testid="column"]:has(.rulebook-nav-slot) div.stButton > button {
+          min-height: 46px !important;
+          justify-content: flex-start !important;
+          padding: 0 13px !important;
+          border: 1px solid rgba(139,171,216,0.16) !important;
+          border-radius: 13px !important;
+          background:
+            linear-gradient(135deg, rgba(255,255,255,0.045), transparent 58%),
+            rgba(11,19,32,0.92) !important;
+          box-shadow: inset 0 1px 0 rgba(255,255,255,0.045) !important;
+        }
+        .main div[data-testid="column"]:has(.rulebook-nav-slot) div.stButton > button p {
+          color: var(--text-secondary, #b8c7dc) !important;
+          -webkit-text-fill-color: var(--text-secondary, #b8c7dc) !important;
+          font-size: 12px !important;
+          font-weight: 900 !important;
+          line-height: 1.12 !important;
+          text-align: left !important;
+        }
+        .main div[data-testid="column"]:has(.rulebook-nav-slot.is-active) div.stButton > button {
+          border-color: rgba(114,185,255,0.55) !important;
+          background:
+            linear-gradient(90deg, rgba(77,141,255,0.20), transparent 62%),
+            rgba(13,27,49,0.98) !important;
+          box-shadow: inset 4px 0 0 var(--primary, #4d8dff), inset 0 1px 0 rgba(255,255,255,0.08) !important;
+        }
+        .main div[data-testid="column"]:has(.rulebook-nav-slot.is-active) div.stButton > button p {
+          color: var(--text-primary, #f6f9ff) !important;
+          -webkit-text-fill-color: var(--text-primary, #f6f9ff) !important;
+        }
+        .main .rulebook-document {
+          position: relative;
+          overflow: hidden;
+          margin-top: 16px;
+          padding: 18px;
+          border: 1px solid rgba(139,171,216,0.18);
+          border-radius: 18px;
+          background:
+            linear-gradient(135deg, rgba(77,141,255,0.09), transparent 42%),
+            linear-gradient(180deg, rgba(18,30,49,0.96), rgba(7,12,22,0.98));
+          box-shadow: var(--poke-shadow-card, 0 14px 30px rgba(0,0,0,0.24));
+        }
+        .main .rulebook-document::before {
+          content: "";
+          position: absolute;
+          inset: 0;
+          pointer-events: none;
+          background:
+            linear-gradient(90deg, rgba(255,255,255,0.018) 0 1px, transparent 1px 100%) 0 0 / 34px 100%,
+            linear-gradient(180deg, rgba(255,255,255,0.018) 0 1px, transparent 1px 100%) 0 0 / 100% 28px;
+          opacity: .55;
+        }
+        .main .rulebook-document > * {
           position: relative;
           z-index: 1;
         }
-        .norma-kicker {
-          display: inline-block;
-          padding: 5px 9px;
-          border: 1px solid rgba(216,223,232,0.18);
-          border-left: 3px solid var(--accent);
-          background: rgba(255,255,255,0.045);
-          color: var(--bw2-text-soft);
-          font-family: var(--font-pixel);
-          font-size: 10px;
-          font-weight: 700;
-          text-transform: uppercase;
-        }
-        .norma-title {
-          margin-top: 10px;
-          color: #ffffff;
-          font-family: var(--font-pixel);
-          font-size: clamp(22px, 2.2vw, 30px);
-          line-height: 1.1;
-          text-transform: uppercase;
-        }
-        .norma-subtitle {
-          margin-top: 8px;
-          max-width: 920px;
-          color: var(--bw2-text-soft);
-          font-family: var(--font-ui);
-          font-size: 14px;
-          line-height: 1.35;
-        }
-        .norma-document-meta {
+        .main .rulebook-section-head {
           display: grid;
-          gap: 7px;
-          justify-items: end;
-          min-width: 220px;
+          grid-template-columns: minmax(0, 1fr) auto;
+          gap: 14px;
+          align-items: end;
+          padding: 0 0 14px;
+          border-bottom: 1px solid rgba(139,171,216,0.14);
         }
-        .norma-doc-chip {
-          min-width: 168px;
-          padding: 7px 10px;
-          border: 1px solid rgba(216,223,232,0.16);
-          background: rgba(0,0,0,0.16);
-          color: var(--bw2-text-soft);
-          font-family: var(--font-pixel);
-          font-size: 9px;
-          text-transform: uppercase;
-          text-align: right;
+        .main .rulebook-section-code {
+          width: fit-content;
+          border-color: rgba(255,210,77,0.32);
+          background: rgba(255,210,77,0.10);
+          color: var(--pokemon-yellow, #ffd24d);
+          -webkit-text-fill-color: var(--pokemon-yellow, #ffd24d);
         }
-        .norma-chip-row {
-          display: flex;
-          flex-wrap: wrap;
-          gap: 8px;
+        .main .rulebook-section-title {
+          margin-top: 10px;
+          color: var(--text-primary, #f6f9ff);
+          -webkit-text-fill-color: var(--text-primary, #f6f9ff);
+          font-size: clamp(24px, 3vw, 38px);
+          font-weight: 950;
+          line-height: 1.04;
+        }
+        .main .rulebook-section-summary {
+          max-width: 780px;
+          margin-top: 8px;
+          color: var(--text-secondary, #b8c7dc);
+          -webkit-text-fill-color: var(--text-secondary, #b8c7dc);
+          font-size: 15px;
+          line-height: 1.42;
+        }
+        .main .rulebook-section-meta {
+          justify-content: flex-end;
+        }
+        .main .rulebook-block-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+          gap: 12px;
           margin-top: 14px;
         }
-        .norma-chip {
-          padding: 6px 10px;
-          border: 1px solid rgba(255,255,255,0.14);
-          background: linear-gradient(180deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.02) 100%);
-          color: #ffffff;
-          font-family: var(--font-pixel);
-          font-size: 9px;
-          text-transform: uppercase;
-        }
-        div[data-testid="stTabs"] div[data-baseweb="tab-list"],
-        div[data-testid="stTabs"] [role="tablist"],
-        div[data-baseweb="tab-list"] {
-          gap: 8px !important;
-          flex-wrap: wrap !important;
-          align-items: stretch !important;
-        }
-        div[data-testid="stTabs"] {
-          overflow: visible !important;
-        }
-        div[data-testid="stTabs"] > div {
-          overflow: visible !important;
-        }
-        div[data-testid="stTabs"] div[data-baseweb="tab-list"] > * {
-          flex: 0 0 auto !important;
-        }
-        div[data-testid="stTabs"] [data-baseweb="tab-border"] {
-          display: none !important;
-        }
-        div[data-testid="stTabs"] [data-baseweb="tab-highlight"] {
-          display: none !important;
-        }
-        div[data-testid="stTabs"] button,
-        div[data-testid="stTabs"] [role="tab"],
-        div[data-baseweb="tab-list"] button[data-baseweb="tab"],
-        div[data-baseweb="tab-list"] button[role="tab"] {
-          flex: 0 0 132px !important;
-          width: 132px !important;
-          min-width: 132px !important;
-          justify-content: center !important;
-          padding-left: 14px !important;
-          padding-right: 14px !important;
-          white-space: nowrap !important;
-        }
-        div[data-testid="stTabs"] div[data-baseweb="tab-list"] button:first-of-type,
-        div[data-testid="stTabs"] [role="tablist"] [role="tab"]:first-of-type,
-        div[data-baseweb="tab-list"] button[data-baseweb="tab"]:first-of-type,
-        div[data-baseweb="tab-list"] button[role="tab"]:first-of-type {
-          flex-basis: 176px !important;
-          width: 176px !important;
-          min-width: 176px !important;
-        }
-        div[data-testid="stTabs"] button *,
-        div[data-testid="stTabs"] [role="tab"] *,
-        div[data-baseweb="tab-list"] button[data-baseweb="tab"] p,
-        div[data-baseweb="tab-list"] button[role="tab"] p {
-          width: 100%;
-          text-align: center;
-          white-space: nowrap !important;
-        }
-        @media (max-width: 720px) {
-          div[data-testid="stTabs"] button,
-          div[data-testid="stTabs"] [role="tab"],
-          div[data-baseweb="tab-list"] button[data-baseweb="tab"],
-          div[data-baseweb="tab-list"] button[role="tab"] {
-            flex: 1 1 calc(50% - 8px);
-            width: auto !important;
-            min-width: 112px !important;
-          }
-        }
-        .norma-summary {
-          margin-bottom: 12px;
-          padding: 11px 12px;
-          border: 1px solid var(--bw2-edge);
-          border-left: 4px solid var(--accent);
+        .main .rulebook-block {
+          overflow: hidden;
+          border: 1px solid rgba(139,171,216,0.15);
+          border-radius: 15px;
           background:
-            linear-gradient(90deg, rgba(110,168,255,0.07), transparent 58%),
-            linear-gradient(180deg, var(--bw2-screen-2) 0%, var(--bw2-screen) 100%);
-          color: var(--bw2-text-soft);
-          font-family: var(--font-ui);
-          font-size: 14px;
-          line-height: 1.35;
-          box-shadow: inset 0 1px 0 rgba(255,255,255,0.07);
+            linear-gradient(135deg, rgba(255,255,255,0.045), transparent 44%),
+            rgba(8,14,26,0.78);
+          box-shadow: inset 0 1px 0 rgba(255,255,255,0.055);
         }
-        .norma-eyebrow {
-          display: inline-block;
-          margin-bottom: 10px;
-          padding: 5px 9px;
-          border: 1px solid var(--bw2-edge);
-          background: linear-gradient(180deg, var(--bw2-panel-3) 0%, var(--bw2-panel) 100%);
-          color: #ffffff;
-          font-family: var(--font-pixel);
-          font-size: 9px;
-          text-transform: uppercase;
-        }
-        .norma-block {
-          height: 100%;
-          margin-bottom: 12px;
-          border: 1px solid var(--bw2-edge);
-          background:
-            linear-gradient(135deg, rgba(255,255,255,0.04), transparent 42%),
-            linear-gradient(180deg, var(--bw2-panel-2) 0%, var(--bw2-panel) 100%);
-          box-shadow: inset 0 1px 0 rgba(255,255,255,0.08), 0 0 0 1px rgba(0,0,0,0.28);
-        }
-        .norma-block-head {
+        .main .rulebook-block-head {
           display: flex;
           align-items: center;
           justify-content: space-between;
-          gap: 12px;
-          padding: 8px 10px;
-          border-bottom: 1px solid rgba(255,255,255,0.08);
-          background: linear-gradient(180deg, rgba(255,255,255,0.06) 0%, rgba(0,0,0,0.03) 100%);
-          color: #ffffff;
-          font-family: var(--font-pixel);
-          font-size: 10px;
-          text-transform: uppercase;
+          gap: 10px;
+          min-height: 42px;
+          padding: 10px 12px;
+          border-bottom: 1px solid rgba(139,171,216,0.12);
+          background: rgba(255,255,255,0.035);
         }
-        .norma-block-body {
-          padding: 12px;
+        .main .rulebook-block-title {
+          min-width: 0;
+          color: var(--text-primary, #f6f9ff);
+          -webkit-text-fill-color: var(--text-primary, #f6f9ff);
+          font-size: 14px;
+          font-weight: 950;
+          line-height: 1.15;
         }
-        .norma-list {
+        .main .rulebook-block-code {
+          flex: 0 0 auto;
+          min-height: 22px;
+          padding: 3px 7px;
+          color: var(--primary-hover, #72b9ff);
+          -webkit-text-fill-color: var(--primary-hover, #72b9ff);
+        }
+        .main .rulebook-article-list {
           display: grid;
           gap: 7px;
+          padding: 12px;
         }
-        .norma-list-item {
+        .main .rulebook-article {
           display: grid;
-          grid-template-columns: 68px 1fr;
-          gap: 11px;
+          grid-template-columns: 76px minmax(0, 1fr);
+          gap: 10px;
           align-items: start;
-          min-height: 36px;
-          padding: 8px 9px;
-          border: 1px solid rgba(216,223,232,0.09);
-          background: rgba(255,255,255,0.025);
-          color: var(--bw2-text-soft);
-          font-family: var(--font-ui);
-          font-size: 14px;
-          line-height: 1.35;
+          min-height: 42px;
+          padding: 9px 10px;
+          border: 1px solid rgba(139,171,216,0.11);
+          border-radius: 12px;
+          background: rgba(255,255,255,0.032);
         }
-        .norma-list-bullet {
-          color: var(--accent-soft);
+        .main .rulebook-article-no {
+          color: var(--primary-hover, #72b9ff);
+          -webkit-text-fill-color: var(--primary-hover, #72b9ff);
           font-family: var(--font-pixel);
           font-size: 9px;
-          line-height: 1.4;
+          font-weight: 900;
+          line-height: 1.5;
           text-transform: uppercase;
           white-space: nowrap;
         }
-        .norma-row-grid {
+        .main .rulebook-article-text {
+          color: var(--text-secondary, #b8c7dc);
+          -webkit-text-fill-color: var(--text-secondary, #b8c7dc);
+          font-size: 14px;
+          font-weight: 650;
+          line-height: 1.38;
+        }
+        .main .rulebook-table-grid {
           display: grid;
-          grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+          grid-template-columns: repeat(auto-fit, minmax(92px, 1fr));
           gap: 8px;
+          padding: 12px;
         }
-        .norma-row-card {
-          padding: 10px;
-          border: 1px solid rgba(255,255,255,0.08);
-          background: linear-gradient(180deg, var(--bw2-screen-2) 0%, var(--bw2-screen) 100%);
-          box-shadow: inset 0 1px 0 rgba(255,255,255,0.05);
-          text-align: center;
+        .main .rulebook-row-card {
+          min-height: 66px;
+          padding: 9px 10px;
+          border: 1px solid rgba(139,171,216,0.12);
+          border-radius: 12px;
+          background:
+            radial-gradient(circle at 100% 0%, rgba(255,210,77,0.10), transparent 58%),
+            rgba(255,255,255,0.035);
         }
-        .norma-row-label {
-          color: var(--bw2-text-soft);
-          font-family: var(--font-pixel);
-          font-size: 9px;
+        .main .rulebook-row-card span {
+          display: block;
+          color: var(--text-muted, #77879e);
+          -webkit-text-fill-color: var(--text-muted, #77879e);
+          font-size: 10px;
+          font-weight: 900;
           text-transform: uppercase;
         }
-        .norma-row-value {
-          margin-top: 7px;
-          color: #ffffff;
-          font-family: var(--font-pixel);
-          font-size: 12px;
+        .main .rulebook-row-card strong {
+          display: block;
+          margin-top: 8px;
+          color: var(--text-primary, #f6f9ff);
+          -webkit-text-fill-color: var(--text-primary, #f6f9ff);
+          font-size: 20px;
+          font-weight: 950;
+          font-variant-numeric: tabular-nums;
         }
-        @media (max-width: 720px) {
-          .norma-hero {
+        @media (max-width: 980px) {
+          .main .rulebook-section-head {
             grid-template-columns: 1fr;
           }
-          .norma-document-meta {
-            justify-items: start;
-            min-width: 0;
+          .main .rulebook-section-meta {
+            justify-content: flex-start;
           }
-          .norma-doc-chip {
-            min-width: 0;
-            text-align: left;
+        }
+        @media (max-width: 720px) {
+          .main .rulebook-hero,
+          .main .rulebook-document,
+          .main .rulebook-index {
+            border-radius: 14px;
+            padding: 14px;
           }
-          .norma-list-item {
-            grid-template-columns: 58px 1fr;
+          .main .rulebook-block-grid {
+            grid-template-columns: 1fr;
+          }
+          .main .rulebook-article {
+            grid-template-columns: 1fr;
           }
         }
         </style>
@@ -661,95 +745,182 @@ def _render_normativa_css() -> None:
     )
 
 
-def _render_list_block(block: dict, *, start_at: int = 1) -> None:
-    items_html = "".join(
-        (
-            "<div class='norma-list-item'>"
-            f"<div class='norma-list-bullet'>ART. {start_at + idx:02d}</div>"
-            f"<div>{escape(item)}</div>"
-            "</div>"
-        )
-        for idx, item in enumerate(block.get("items") or [])
-    )
-    st.markdown(
-        (
-            "<div class='norma-block'>"
-            f"<div class='norma-block-head'>{escape(str(block.get('title') or 'Bloque'))}</div>"
-            f"<div class='norma-block-body'><div class='norma-list'>{items_html}</div></div>"
-            "</div>"
-        ),
-        unsafe_allow_html=True,
+def _section_title(section: dict) -> str:
+    return str(
+        section.get("tab_label")
+        or section.get("tab")
+        or section.get("bot_title")
+        or section.get("id")
+        or "Seccion"
     )
 
 
-def _render_rows_block(block: dict) -> None:
-    rows_html = "".join(
-        (
-            "<div class='norma-row-card'>"
-            f"<div class='norma-row-label'>{escape(str(label))}</div>"
-            f"<div class='norma-row-value'>{escape(str(value))}</div>"
-            "</div>"
-        )
-        for label, value in (block.get("rows") or [])
-    )
-    st.markdown(
-        (
-            "<div class='norma-block'>"
-            f"<div class='norma-block-head'>{escape(str(block.get('title') or 'Valores'))}</div>"
-            f"<div class='norma-block-body'><div class='norma-row-grid'>{rows_html}</div></div>"
-            "</div>"
-        ),
-        unsafe_allow_html=True,
-    )
+def _article_count(section: dict) -> int:
+    return sum(len(block.get("items") or []) for block in section.get("visual_blocks") or [])
 
 
-def _render_section(section: dict) -> None:
-    blocks = list(section.get("visual_blocks") or [])
-    if not blocks:
-        return
-    summary = str(section.get("summary") or "").strip()
-    if summary:
-        st.markdown(
-            f"<div class='norma-summary'>{escape(summary)}</div>",
-            unsafe_allow_html=True,
-        )
-    article_no = 1
-    for idx in range(0, len(blocks), 2):
-        pair = blocks[idx: idx + 2]
-        cols = st.columns(len(pair))
-        for col, block in zip(cols, pair):
-            with col:
-                if block.get("rows"):
-                    _render_rows_block(block)
-                else:
-                    _render_list_block(block, start_at=article_no)
-                    article_no += len(block.get("items") or [])
+def _table_count(section: dict) -> int:
+    return sum(len(block.get("rows") or []) for block in section.get("visual_blocks") or [])
 
 
-def render_normativa_home() -> None:
-    _render_normativa_css()
+def _total_articles() -> int:
+    return sum(_article_count(section) for section in NORMATIVA_SECTIONS)
+
+
+def _active_section() -> tuple[int, dict]:
+    first_id = str(NORMATIVA_SECTIONS[0]["id"])
+    active_id = str(st.session_state.get("normativa_rulebook_section") or first_id)
+    for index, section in enumerate(NORMATIVA_SECTIONS):
+        if str(section.get("id")) == active_id:
+            return index, section
+    st.session_state["normativa_rulebook_section"] = first_id
+    return 0, NORMATIVA_SECTIONS[0]
+
+
+def _render_rulebook_nav(active_id: str) -> None:
     st.markdown(
         """
-        <div class='norma-hero'>
-          <div class='norma-hero-main'>
-            <div class='norma-kicker'>Manual oficial</div>
-            <div class='norma-title'>Normativa oficial</div>
-            <div class='norma-subtitle'>Archivo tecnico de reglas vigentes para la temporada actual.</div>
-          </div>
-          <div class='norma-document-meta'>
-            <div class='norma-doc-chip'>Reglamento vigente</div>
-            <div class='norma-doc-chip'>ChampionsLocke</div>
-            <div class='norma-doc-chip'>Documento de liga</div>
-          </div>
+        <div class='rulebook-index'>
+          <div class='rulebook-index-title'>Indice del reglamento</div>
+          <div class='rulebook-index-copy'>Selecciona un capitulo para consultar sus articulos oficiales.</div>
         </div>
         """,
         unsafe_allow_html=True,
     )
+    for row_start in range(0, len(NORMATIVA_SECTIONS), 4):
+        row_sections = NORMATIVA_SECTIONS[row_start: row_start + 4]
+        cols = st.columns(4)
+        for offset, col in enumerate(cols):
+            if offset >= len(row_sections):
+                continue
+            section = row_sections[offset]
+            section_index = row_start + offset
+            section_id = str(section.get("id"))
+            active = section_id == active_id
+            label = f"CAP. {section_index + 1:02d} - {_section_title(section)}"
+            with col:
+                st.markdown(
+                    f"<span class='rulebook-nav-slot{' is-active' if active else ''}'></span>",
+                    unsafe_allow_html=True,
+                )
+                if st.button(
+                    label,
+                    key=f"normativa_rulebook_nav_{section_id}",
+                    type="primary" if active else "secondary",
+                    use_container_width=True,
+                ):
+                    st.session_state["normativa_rulebook_section"] = section_id
+                    st.rerun()
 
-    tabs = st.tabs([str(section.get("tab_label") or section.get("tab") or section.get("bot_title") or section["id"]) for section in NORMATIVA_SECTIONS])
-    for tab, section in zip(tabs, NORMATIVA_SECTIONS):
-        with tab:
-            _render_section(section)
+
+def _render_list_block_html(block: dict, *, block_no: int, start_at: int) -> tuple[str, int]:
+    items = list(block.get("items") or [])
+    articles_html = "".join(
+        (
+            "<div class='rulebook-article'>"
+            f"<span class='rulebook-article-no'>ART. {start_at + idx:02d}</span>"
+            f"<span class='rulebook-article-text'>{escape(str(item))}</span>"
+            "</div>"
+        )
+        for idx, item in enumerate(items)
+    )
+    return (
+        (
+            "<article class='rulebook-block'>"
+            "<div class='rulebook-block-head'>"
+            f"<div class='rulebook-block-title'>{escape(str(block.get('title') or 'Bloque'))}</div>"
+            f"<span class='rulebook-block-code'>B{block_no:02d}</span>"
+            "</div>"
+            f"<div class='rulebook-article-list'>{articles_html}</div>"
+            "</article>"
+        ),
+        start_at + len(items),
+    )
+
+
+def _render_rows_block_html(block: dict, *, block_no: int) -> str:
+    rows_html = "".join(
+        (
+            "<div class='rulebook-row-card'>"
+            f"<span>{escape(str(label))}</span>"
+            f"<strong>{escape(str(value))}</strong>"
+            "</div>"
+        )
+        for label, value in (block.get("rows") or [])
+    )
+    return (
+        "<article class='rulebook-block rulebook-block-table'>"
+        "<div class='rulebook-block-head'>"
+        f"<div class='rulebook-block-title'>{escape(str(block.get('title') or 'Valores'))}</div>"
+        f"<span class='rulebook-block-code'>T{block_no:02d}</span>"
+        "</div>"
+        f"<div class='rulebook-table-grid'>{rows_html}</div>"
+        "</article>"
+    )
+
+
+def _render_section(section: dict, *, index: int) -> None:
+    blocks = list(section.get("visual_blocks") or [])
+    block_html: list[str] = []
+    article_no = 1
+    for block_no, block in enumerate(blocks, start=1):
+        if block.get("rows"):
+            block_html.append(_render_rows_block_html(block, block_no=block_no))
+        else:
+            html, article_no = _render_list_block_html(
+                block,
+                block_no=block_no,
+                start_at=article_no,
+            )
+            block_html.append(html)
+    st.markdown(
+        (
+            "<section class='rulebook-document'>"
+            "<div class='rulebook-section-head'>"
+            "<div>"
+            f"<span class='rulebook-section-code'>CAP. {index + 1:02d}</span>"
+            f"<div class='rulebook-section-title'>{escape(_section_title(section))}</div>"
+            f"<div class='rulebook-section-summary'>{escape(str(section.get('summary') or ''))}</div>"
+            "</div>"
+            "<div class='rulebook-section-meta'>"
+            f"<span class='rulebook-chip'>{len(blocks)} bloques</span>"
+            f"<span class='rulebook-chip'>{_article_count(section)} articulos</span>"
+            f"<span class='rulebook-chip'>{_table_count(section)} valores</span>"
+            "</div>"
+            "</div>"
+            f"<div class='rulebook-block-grid'>{''.join(block_html)}</div>"
+            "</section>"
+        ),
+        unsafe_allow_html=True,
+    )
+
+
+def render_normativa_home() -> None:
+    _render_normativa_css()
+    active_index, active = _active_section()
+    st.markdown(
+        (
+            "<section class='rulebook-hero'>"
+            "<div class='rulebook-hero-content'>"
+            "<div class='rulebook-kicker-row'>"
+            "<span class='rulebook-kicker'>Manual oficial</span>"
+            "<span class='rulebook-chip'>Competicion Pokemon</span>"
+            "<span class='rulebook-chip'>Temporada vigente</span>"
+            "</div>"
+            "<div class='rulebook-title'>Normativa oficial</div>"
+            "<p class='rulebook-subtitle'>Reglamento de liga organizado por capitulos, articulos y tablas de valores. Pensado para consultar rapido sin perder el tono premium de PokeApp 2.0.</p>"
+            "<div class='rulebook-metric-row'>"
+            f"<div class='rulebook-metric'><span>Capitulos</span><strong>{len(NORMATIVA_SECTIONS)}</strong></div>"
+            f"<div class='rulebook-metric'><span>Articulos</span><strong>{_total_articles()}</strong></div>"
+            "<div class='rulebook-metric'><span>Formato</span><strong>Oficial</strong></div>"
+            "</div>"
+            "</div>"
+            "</section>"
+        ),
+        unsafe_allow_html=True,
+    )
+    _render_rulebook_nav(str(active.get("id")))
+    _render_section(active, index=active_index)
 
 
 NORMATIVA_MD = get_normativa_text()

@@ -670,7 +670,6 @@ def apply_css() -> None:
     .main .ju-hero,
     .main .hof-hero,
     .main .season-hero,
-    .main .norma-hero,
     .main .saves-hero {
       border-radius: var(--poke-radius-xl) !important;
       clip-path: none !important;
@@ -690,15 +689,13 @@ def apply_css() -> None:
     .main .cup-hero::before,
     .main .ju-hero::before,
     .main .hof-hero::before,
-    .main .norma-hero::before,
     .main .saves-hero::before {
       opacity: 0.5 !important;
     }
 
     .main .home-hero::after,
     .main .auth-hero::before,
-    .main .trainers-hero::after,
-    .main .norma-hero::after {
+    .main .trainers-hero::after {
       opacity: 0.32 !important;
     }
 
@@ -745,9 +742,6 @@ def apply_css() -> None:
     .main .hof-card,
     .main .season-card,
     .main .season-version-row,
-    .main .norma-summary,
-    .main .norma-list-item,
-    .main .norma-row-card,
     .main .saves-current-card,
     .main .saves-history-card,
     .main .saves-admin-panel,
@@ -821,7 +815,6 @@ def apply_css() -> None:
     .main .ju-hero-title,
     .main .hof-title,
     .main .season-title,
-    .main .norma-title,
     .main .saves-title {
       font-size: clamp(24px, 3vw, 38px) !important;
       line-height: 1.05 !important;
@@ -837,7 +830,6 @@ def apply_css() -> None:
     .main .cup-pill,
     .main .matchup-hero-pill,
     .main .season-pill,
-    .main .norma-chip,
     .main .trainers-chip,
     .main .hof-team-pill,
     .main .saves-card-badge {
