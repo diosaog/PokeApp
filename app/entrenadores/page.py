@@ -272,8 +272,414 @@ TRAINERS_PAGE_CSS = """
 """
 
 
+TRAINERS_STORAGE_CSS = """
+<style>
+.slot.team-slot-card {
+  min-height: 222px !important;
+  margin: 6px 0 8px !important;
+  padding: 10px 10px 12px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+  overflow: hidden !important;
+}
+.slot.team-slot-card .badges {
+  width: 100% !important;
+  height: 22px !important;
+  margin: 0 0 5px !important;
+}
+.slot.team-slot-card .pill {
+  min-height: 18px !important;
+  padding: 2px 6px !important;
+  border-radius: 999px !important;
+  font-family: var(--font-ui) !important;
+  font-size: 10px !important;
+  font-weight: 800 !important;
+  line-height: 1 !important;
+}
+.slot.team-slot-card > img {
+  width: min(100%, 142px) !important;
+  height: 118px !important;
+  margin: 4px auto 8px !important;
+  display: block !important;
+  object-fit: contain !important;
+  image-rendering: pixelated !important;
+}
+.slot.team-slot-card .title,
+.slot.team-slot-card .sub {
+  width: 100% !important;
+  overflow: hidden !important;
+  text-align: center !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+}
+.slot.team-slot-card .title {
+  margin-top: 0 !important;
+  font-size: 11px !important;
+  line-height: 1.12 !important;
+}
+.slot.team-slot-card .sub {
+  min-height: 18px !important;
+  margin-top: 2px !important;
+  font-size: 15px !important;
+  line-height: 1.16 !important;
+}
+.slot.team-slot-card .types {
+  width: 100% !important;
+  min-height: 22px !important;
+  margin-top: 8px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 6px !important;
+  flex-wrap: nowrap !important;
+  overflow: hidden !important;
+}
+.slot.team-slot-card .slot-type-badge.poke-type-chip {
+  width: 94px !important;
+  min-width: 0 !important;
+  max-width: 94px !important;
+  height: 19px !important;
+  min-height: 19px !important;
+  flex: 0 1 94px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  overflow: hidden !important;
+  border: 0 !important;
+  border-radius: 999px !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+.slot.team-slot-card .slot-type-badge.poke-type-chip img,
+.slot.team-slot-card .slot-type-badge .poke-type-full-img,
+.slot.team-slot-card .slot-type-badge .poke-type-icon-img {
+  width: 94px !important;
+  max-width: 94px !important;
+  height: 19px !important;
+  max-height: 19px !important;
+  margin: 0 !important;
+  display: block !important;
+  object-fit: contain !important;
+  image-rendering: auto !important;
+  filter: none !important;
+}
+.slot.team-slot-card .slot-type-badge.poke-type-chip.uses-fallback {
+  width: fit-content !important;
+  padding: 0 9px !important;
+  border: 1px solid color-mix(in srgb, var(--type-color) 48%, transparent) !important;
+  background: color-mix(in srgb, var(--type-color) 22%, transparent) !important;
+}
+.slot.team-slot-card .slot-type-badge .poke-type-fallback {
+  font-family: var(--font-ui) !important;
+  font-size: 10px !important;
+  font-weight: 750 !important;
+  letter-spacing: 0.02em !important;
+}
+.slot.team-slot-card .shield-chip,
+.slot.team-slot-card .rob-chip {
+  min-height: 20px !important;
+  padding: 0 8px !important;
+  border-radius: 999px !important;
+  font-family: var(--font-ui) !important;
+  font-size: 10px !important;
+  font-weight: 800 !important;
+}
+div[data-testid="column"]:has(.slot.team-slot-card) .stButton {
+  display: flex !important;
+  justify-content: center !important;
+  margin-top: 7px !important;
+}
+div[data-testid="column"]:has(.slot.team-slot-card) .stButton > button {
+  width: auto !important;
+  min-width: 0 !important;
+  min-height: 34px !important;
+  padding: 0 13px !important;
+  border-radius: 999px !important;
+}
+div[data-testid="column"]:has(.slot.team-slot-card) .stButton > button p {
+  font-size: 11px !important;
+  font-weight: 800 !important;
+}
+.champ-box-page-head {
+  min-height: 40px !important;
+  display: flex !important;
+  align-items: center !important;
+}
+.champ-box-page-head h3 {
+  margin: 0 !important;
+  color: var(--bw2-text) !important;
+  -webkit-text-fill-color: var(--bw2-text) !important;
+  font-size: 22px !important;
+  font-weight: 900 !important;
+}
+.champ-box-grid-shell {
+  margin-top: 8px !important;
+  position: relative !important;
+  overflow: hidden !important;
+  padding: 12px !important;
+  border: 1px solid rgba(216,223,232,0.18) !important;
+  border-radius: 16px !important;
+  background:
+    linear-gradient(135deg, rgba(69,209,255,0.08), transparent 42%),
+    linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.015)),
+    rgba(10,16,29,0.94) !important;
+}
+.champ-box-grid-shell::before {
+  content: "PC" !important;
+  position: absolute !important;
+  right: 16px !important;
+  top: 2px !important;
+  color: rgba(255,255,255,0.035) !important;
+  -webkit-text-fill-color: rgba(255,255,255,0.035) !important;
+  font-size: 58px !important;
+  font-weight: 950 !important;
+  line-height: 1 !important;
+  pointer-events: none !important;
+}
+.champ-box-grid-toolbar {
+  position: relative !important;
+  z-index: 1 !important;
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) auto !important;
+  gap: 10px !important;
+  align-items: center !important;
+  margin-bottom: 8px !important;
+}
+.champ-box-grid-toolbar strong {
+  display: block !important;
+  color: var(--bw2-text) !important;
+  -webkit-text-fill-color: var(--bw2-text) !important;
+  font-size: 16px !important;
+  font-weight: 900 !important;
+  line-height: 1.1 !important;
+}
+.champ-box-meta {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: flex-end !important;
+  gap: 7px !important;
+  flex-wrap: wrap !important;
+}
+.champ-box-meta span {
+  min-height: 23px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  padding: 0 8px !important;
+  border: 1px solid rgba(216,223,232,0.12) !important;
+  border-radius: 999px !important;
+  background: rgba(255,255,255,0.035) !important;
+  color: var(--bw2-text-soft) !important;
+  -webkit-text-fill-color: var(--bw2-text-soft) !important;
+  font-size: 10px !important;
+  font-weight: 800 !important;
+  font-variant-numeric: tabular-nums !important;
+}
+.champ-box-occupancy {
+  position: relative !important;
+  z-index: 1 !important;
+  display: grid !important;
+  grid-template-columns: 1fr !important;
+  margin: 0 0 10px !important;
+}
+.champ-box-occupancy-bar {
+  height: 4px !important;
+  overflow: hidden !important;
+  border-radius: 999px !important;
+  background: rgba(255,255,255,0.08) !important;
+}
+.champ-box-occupancy-bar span {
+  display: block !important;
+  width: var(--box-fill, 0%) !important;
+  height: 100% !important;
+  border-radius: inherit !important;
+  background: linear-gradient(90deg, var(--accent), var(--champion-cyan)) !important;
+}
+.champ-box-occupancy-dots,
+.champ-box-types,
+.champ-box-species {
+  display: none !important;
+}
+.champ-box-grid {
+  position: relative !important;
+  z-index: 1 !important;
+  display: grid !important;
+  grid-template-columns: repeat(6, minmax(82px, 1fr)) !important;
+  gap: 8px !important;
+  align-items: stretch !important;
+}
+.champ-box-tile-link {
+  display: block !important;
+  min-width: 0 !important;
+  color: inherit !important;
+  text-decoration: none !important;
+}
+.champ-box-tile {
+  position: relative !important;
+  min-height: 98px !important;
+  aspect-ratio: 1 / 0.85 !important;
+  padding: 7px 6px 6px !important;
+  display: grid !important;
+  grid-template-rows: 16px minmax(48px, 1fr) auto 4px !important;
+  gap: 2px !important;
+  align-items: center !important;
+  justify-items: center !important;
+  overflow: hidden !important;
+  border: 1px solid rgba(216,223,232,0.14) !important;
+  border-radius: 11px !important;
+  background:
+    radial-gradient(circle at 50% 45%, color-mix(in srgb, var(--box-glow, var(--accent)) 18%, transparent), transparent 58%),
+    linear-gradient(135deg, rgba(255,255,255,0.055) 0 45%, rgba(255,255,255,0.018) 45% 100%),
+    rgba(17,27,44,0.96) !important;
+  transition: transform 160ms ease, border-color 160ms ease, background 160ms ease !important;
+}
+.champ-box-tile-link:hover .champ-box-tile {
+  transform: translateY(-2px) !important;
+  border-color: rgba(69,209,255,0.42) !important;
+}
+.champ-box-tile::before {
+  content: "" !important;
+  position: absolute !important;
+  inset: 4px !important;
+  z-index: 0 !important;
+  border: 1px solid rgba(255,255,255,0.035) !important;
+  border-radius: 8px !important;
+  background: linear-gradient(135deg, transparent 0 62%, rgba(255,255,255,0.045) 62% 100%) !important;
+  pointer-events: none !important;
+}
+.champ-box-tile::after {
+  content: "" !important;
+  position: absolute !important;
+  left: 50% !important;
+  top: 57% !important;
+  z-index: 0 !important;
+  width: 42px !important;
+  height: 8px !important;
+  transform: translate(-50%, -50%) !important;
+  border-radius: 50% !important;
+  background: rgba(0,0,0,0.22) !important;
+  filter: blur(4px) !important;
+  pointer-events: none !important;
+}
+.champ-box-slot-no,
+.champ-box-level,
+.champ-box-name,
+.champ-box-type-rails,
+.champ-box-sprite-stage,
+.champ-box-empty-mark {
+  position: relative !important;
+  z-index: 1 !important;
+}
+.champ-box-slot-no {
+  position: absolute !important;
+  top: 6px !important;
+  right: 7px !important;
+  color: rgba(255,255,255,0.28) !important;
+  -webkit-text-fill-color: rgba(255,255,255,0.28) !important;
+  font-size: 9px !important;
+  font-weight: 900 !important;
+  font-variant-numeric: tabular-nums !important;
+}
+.champ-box-level {
+  justify-self: start !important;
+  min-height: 15px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  padding: 0 5px !important;
+  border-radius: 999px !important;
+  background: rgba(69,209,255,0.14) !important;
+  color: var(--bw2-text) !important;
+  -webkit-text-fill-color: var(--bw2-text) !important;
+  font-size: 9px !important;
+  font-weight: 850 !important;
+  font-variant-numeric: tabular-nums !important;
+}
+.champ-box-sprite-stage {
+  width: 100% !important;
+  min-height: 50px !important;
+  display: grid !important;
+  place-items: center !important;
+}
+.champ-box-tile img {
+  width: 64px !important;
+  height: 58px !important;
+  max-width: 64px !important;
+  max-height: 58px !important;
+  margin: 0 !important;
+  display: block !important;
+  object-fit: contain !important;
+  image-rendering: pixelated !important;
+  filter: drop-shadow(0 6px 7px rgba(0,0,0,0.34)) !important;
+  transition: transform 150ms ease, filter 150ms ease !important;
+}
+.champ-box-tile-link:hover .champ-box-tile img,
+.champ-box-tile.is-selected img {
+  transform: translateY(-2px) scale(1.03) !important;
+}
+.champ-box-name {
+  width: 100% !important;
+  display: block !important;
+  overflow: hidden !important;
+  color: var(--bw2-text) !important;
+  -webkit-text-fill-color: var(--bw2-text) !important;
+  font-size: 11px !important;
+  font-weight: 850 !important;
+  line-height: 1.1 !important;
+  text-align: center !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+}
+.champ-box-type-rails {
+  width: min(54px, 80%) !important;
+  height: 4px !important;
+  margin-top: 1px !important;
+  display: grid !important;
+  grid-template-columns: repeat(auto-fit, minmax(0, 1fr)) !important;
+  gap: 3px !important;
+}
+.champ-box-type-rails span {
+  height: 3px !important;
+  border-radius: 999px !important;
+  background: var(--rail-color, rgba(255,255,255,0.12)) !important;
+}
+.champ-box-tile.is-selected {
+  border-color: rgba(69,209,255,0.74) !important;
+  box-shadow: inset 0 0 0 1px rgba(69,209,255,0.34), 0 0 0 3px rgba(69,209,255,0.1) !important;
+}
+.champ-box-tile-empty {
+  opacity: 0.42 !important;
+  border-style: dashed !important;
+  border-color: rgba(255,255,255,0.07) !important;
+  background:
+    radial-gradient(circle at 50% 50%, rgba(255,255,255,0.025), transparent 42%),
+    rgba(255,255,255,0.012) !important;
+}
+.champ-box-tile-empty::after {
+  display: none !important;
+}
+.champ-box-empty-mark {
+  width: 8px !important;
+  height: 8px !important;
+  border: 0 !important;
+  border-radius: 50% !important;
+  background: rgba(255,255,255,0.18) !important;
+  box-shadow: none !important;
+}
+@media (max-width: 960px) {
+  .champ-box-grid { grid-template-columns: repeat(4, minmax(72px, 1fr)) !important; }
+  .slot.team-slot-card .types { flex-wrap: wrap !important; }
+}
+@media (max-width: 680px) {
+  .champ-box-grid { grid-template-columns: repeat(3, minmax(64px, 1fr)) !important; }
+}
+</style>
+"""
+
+
 def _render_trainers_page_css() -> None:
     st.markdown(TRAINERS_PAGE_CSS, unsafe_allow_html=True)
+    st.markdown(TRAINERS_STORAGE_CSS, unsafe_allow_html=True)
 
 
 def _safe_mtime(path: str | Path | None) -> float | None:
