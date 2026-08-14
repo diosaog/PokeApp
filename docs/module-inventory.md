@@ -92,7 +92,7 @@ extraiga dominio o repositories.
 | `sidebar.py` | STREAMLIT/STORAGE | Navegacion, PIN, perfil mini. |
 | `home.py` | STREAMLIT/MIXED | Menu principal y resumen. |
 | `notifications.py` | MIXED | Actividad reciente desde saves, compras y locks. |
-| `normativa.py` | STREAMLIT/CONTENT | Manual oficial con render `rulebook-*`; evita `st.tabs` para que no parezca pantalla legacy con CSS encima. |
+| `normativa.py` | STREAMLIT/CONTENT | Manual oficial `rulebook-*` V2: portada documental, indice compacto, articulos alineados, tablas de caps/recompensas y fichas de comodines sin `st.tabs`. |
 | `temporada.py` | STREAMLIT/MIXED | Editor admin sobre season config; pulido 1E como consola tecnica compacta. |
 | `hall_of_fame.py` | MIXED | Logica y UI de historico; archivo sobrio con auto-sync de campeones. |
 
@@ -101,7 +101,7 @@ extraiga dominio o repositories.
 | Zona | Estado | Nota |
 | --- | --- | --- |
 | Cascada global | DEUDA | `theme.py`, `champions_skin.py`, `premium_phase2.py` y `final_polish.py` siguen conviviendo. La deuda principal no es falta de clases, sino selectores antiguos con `.main` + `!important` que pueden ganar a parches finales mas nuevos. |
-| Normativa | CORREGIDO | La causa real era doble: la ruta era correcta, pero el render seguia usando `st.tabs` y bloques `norma-*` heredados. Ahora se pinta con markup propio `rulebook-*`, navegacion por capitulos y documento/articulos sin depender de `final_polish.py`. |
+| Normativa | CORREGIDO | Tras eliminar el legacy, la V2 corrige la composicion plana: el markup `rulebook-*` separa labels/valores, usa chapter index compacto, ArticleRow, DataTable, matriz de recompensas y ToolCards para comodines. |
 | Team Preview | CORREGIDO | Los overrides finales de board, cartas, ataques, sprites y detalle de movimiento pasan a `.main .battle-*` / `.main .matchup-*` para no caer en el estilo Champions antiguo claro/morado. |
 | Tienda | CORREGIDO | El pulido final de cards, precios, rebajas y cabecera se refuerza con `.main` para ganar a `app/tienda/styles.py` sin tocar logica de compra ni promociones. |
 | Entrenadores / PC | CORREGIDO | Equipo actual, chips y tiles de PC quedan protegidos por selectores finales con `.main`; queda pendiente extraer `TrainerCard` y `BoxTile` al futuro sistema de componentes. |

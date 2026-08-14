@@ -375,64 +375,64 @@ def _render_normativa_css() -> None:
     st.markdown(
         """
         <style>
-        .main .rulebook-hero {
+        .rulebook-hero,
+        .rulebook-index,
+        .rulebook-document {
+          width: min(100%, 1160px);
+          margin-left: auto;
+          margin-right: auto;
+        }
+        .rulebook-hero {
           position: relative;
           overflow: hidden;
-          min-height: 170px;
-          margin: 0 0 16px;
-          padding: 22px;
-          border: 1px solid rgba(139,171,216,0.20);
+          display: grid;
+          grid-template-columns: minmax(0, 1fr) 180px;
+          gap: 18px;
+          align-items: stretch;
+          margin-bottom: 14px;
+          padding: 18px;
+          border: 1px solid rgba(139,171,216,0.22);
           border-left: 5px solid var(--primary, #4d8dff);
           border-radius: 18px;
           background:
-            linear-gradient(118deg, rgba(77,141,255,0.18) 0 34%, transparent 34% 100%),
-            linear-gradient(300deg, rgba(255,210,77,0.10), transparent 46%),
+            linear-gradient(118deg, rgba(77,141,255,0.15) 0 32%, transparent 32% 100%),
+            linear-gradient(300deg, rgba(255,210,77,0.08), transparent 50%),
             linear-gradient(180deg, rgba(18,30,49,0.98), rgba(7,12,22,0.99));
           box-shadow: var(--poke-shadow-card, 0 14px 30px rgba(0,0,0,0.24));
         }
-        .main .rulebook-hero::before {
+        .rulebook-hero::before,
+        .rulebook-document::before {
           content: "";
           position: absolute;
           inset: 0;
           pointer-events: none;
           background:
-            linear-gradient(90deg, rgba(255,255,255,0.026) 0 1px, transparent 1px 100%) 0 0 / 30px 100%,
-            linear-gradient(180deg, rgba(255,255,255,0.022) 0 1px, transparent 1px 100%) 0 0 / 100% 26px;
-          opacity: .62;
+            linear-gradient(90deg, rgba(255,255,255,0.024) 0 1px, transparent 1px 100%) 0 0 / 30px 100%,
+            linear-gradient(180deg, rgba(255,255,255,0.020) 0 1px, transparent 1px 100%) 0 0 / 100% 26px;
+          opacity: .55;
         }
-        .main .rulebook-hero::after {
-          content: "RULEBOOK";
-          position: absolute;
-          right: 22px;
-          bottom: -8px;
-          color: rgba(255,255,255,0.045);
-          font-family: var(--font-ui);
-          font-size: clamp(46px, 8vw, 106px);
-          font-weight: 950;
-          line-height: 1;
-          letter-spacing: 0;
-          pointer-events: none;
-        }
-        .main .rulebook-hero-content {
+        .rulebook-hero-content,
+        .rulebook-hero-seal,
+        .rulebook-document > * {
           position: relative;
           z-index: 1;
-          max-width: 920px;
         }
-        .main .rulebook-kicker-row,
-        .main .rulebook-metric-row,
-        .main .rulebook-section-meta {
+        .rulebook-eyebrow-row,
+        .rulebook-chapter-facts {
           display: flex;
           flex-wrap: wrap;
           align-items: center;
           gap: 8px;
         }
-        .main .rulebook-kicker,
-        .main .rulebook-chip,
-        .main .rulebook-section-code,
-        .main .rulebook-block-code {
+        .rulebook-eyebrow,
+        .rulebook-chip,
+        .rulebook-chapter-code,
+        .rulebook-block-code,
+        .rulebook-table-code {
           display: inline-flex;
           align-items: center;
-          min-height: 24px;
+          width: fit-content;
+          min-height: 22px;
           padding: 4px 9px;
           border: 1px solid rgba(139,171,216,0.18);
           border-radius: 999px;
@@ -440,29 +440,30 @@ def _render_normativa_css() -> None:
           color: var(--text-secondary, #b8c7dc);
           -webkit-text-fill-color: var(--text-secondary, #b8c7dc);
           font-family: var(--font-pixel);
-          font-size: 9px;
+          font-size: 8.5px;
           font-weight: 900;
           text-transform: uppercase;
         }
-        .main .rulebook-kicker {
+        .rulebook-eyebrow,
+        .rulebook-chapter-code {
           border-color: rgba(114,185,255,0.30);
           background: rgba(77,141,255,0.11);
           color: var(--primary-hover, #72b9ff);
           -webkit-text-fill-color: var(--primary-hover, #72b9ff);
         }
-        .main .rulebook-title {
-          margin: 14px 0 8px;
+        .rulebook-title {
+          margin: 12px 0 8px;
           color: var(--text-primary, #f6f9ff);
           -webkit-text-fill-color: var(--text-primary, #f6f9ff);
           font-family: var(--font-ui);
-          font-size: clamp(30px, 4.8vw, 56px);
+          font-size: clamp(32px, 4.2vw, 52px);
           font-weight: 950;
-          line-height: .98;
+          line-height: 1;
           letter-spacing: 0;
           text-transform: none;
         }
-        .main .rulebook-subtitle {
-          max-width: 760px;
+        .rulebook-subtitle {
+          max-width: 700px;
           margin: 0;
           color: var(--text-secondary, #b8c7dc);
           -webkit-text-fill-color: var(--text-secondary, #b8c7dc);
@@ -470,17 +471,25 @@ def _render_normativa_css() -> None:
           font-weight: 650;
           line-height: 1.42;
         }
-        .main .rulebook-metric-row {
+        .rulebook-meta-grid {
+          display: grid;
+          grid-template-columns: repeat(3, minmax(118px, 1fr));
+          gap: 9px;
+          max-width: 540px;
           margin-top: 16px;
         }
-        .main .rulebook-metric {
-          min-width: 116px;
-          padding: 9px 11px;
+        .rulebook-meta-card {
+          min-height: 62px;
+          padding: 10px 12px;
           border: 1px solid rgba(139,171,216,0.14);
           border-radius: 13px;
-          background: rgba(255,255,255,0.04);
+          background:
+            linear-gradient(135deg, rgba(255,255,255,0.055), transparent 62%),
+            rgba(255,255,255,0.032);
+          box-shadow: inset 0 1px 0 rgba(255,255,255,0.045);
         }
-        .main .rulebook-metric span {
+        .rulebook-meta-card span,
+        .rulebook-chapter-fact span {
           display: block;
           color: var(--text-muted, #77879e);
           -webkit-text-fill-color: var(--text-muted, #77879e);
@@ -488,112 +497,160 @@ def _render_normativa_css() -> None:
           font-weight: 900;
           text-transform: uppercase;
         }
-        .main .rulebook-metric strong {
+        .rulebook-meta-card strong,
+        .rulebook-chapter-fact strong {
           display: block;
           margin-top: 5px;
           color: var(--text-primary, #f6f9ff);
           -webkit-text-fill-color: var(--text-primary, #f6f9ff);
-          font-size: 18px;
+          font-size: 19px;
           font-weight: 950;
           font-variant-numeric: tabular-nums;
         }
-        .main .rulebook-index {
+        .rulebook-hero-seal {
+          display: grid;
+          align-content: center;
+          justify-items: center;
+          min-height: 150px;
+          border: 1px solid rgba(139,171,216,0.16);
+          border-radius: 16px;
+          background:
+            radial-gradient(circle at 50% 32%, rgba(255,255,255,0.12), transparent 38%),
+            linear-gradient(135deg, rgba(77,141,255,0.10), rgba(255,210,77,0.06)),
+            rgba(255,255,255,0.032);
+        }
+        .rulebook-seal-mark {
+          display: grid;
+          place-items: center;
+          width: 72px;
+          height: 72px;
+          border: 2px solid rgba(246,249,255,0.28);
+          border-radius: 50%;
+          color: rgba(246,249,255,0.92);
+          -webkit-text-fill-color: rgba(246,249,255,0.92);
+          font-size: 34px;
+          font-weight: 950;
+          box-shadow: inset 0 -20px 0 rgba(255,255,255,0.055);
+        }
+        .rulebook-seal-text {
+          margin-top: 10px;
+          color: var(--text-secondary, #b8c7dc);
+          -webkit-text-fill-color: var(--text-secondary, #b8c7dc);
+          font-family: var(--font-pixel);
+          font-size: 9px;
+          font-weight: 900;
+          text-align: center;
+          text-transform: uppercase;
+        }
+        .rulebook-index {
           margin: 0 0 14px;
-          padding: 14px;
+          padding: 13px 14px 12px;
           border: 1px solid rgba(139,171,216,0.16);
           border-radius: 16px;
           background:
             linear-gradient(135deg, rgba(77,141,255,0.075), transparent 44%),
             rgba(10,17,29,0.95);
         }
-        .main .rulebook-index-title {
+        .rulebook-index-head {
+          display: flex;
+          align-items: end;
+          justify-content: space-between;
+          gap: 12px;
+          margin-bottom: 10px;
+          padding-bottom: 10px;
+          border-bottom: 1px solid rgba(139,171,216,0.12);
+        }
+        .rulebook-index-title {
           color: var(--text-primary, #f6f9ff);
           -webkit-text-fill-color: var(--text-primary, #f6f9ff);
-          font-size: 16px;
+          font-size: 17px;
           font-weight: 950;
         }
-        .main .rulebook-index-copy {
+        .rulebook-index-copy {
           margin-top: 3px;
           color: var(--text-muted, #77879e);
           -webkit-text-fill-color: var(--text-muted, #77879e);
           font-size: 13px;
           font-weight: 700;
         }
-        .main .rulebook-nav-slot {
+        .rulebook-index-badge {
+          flex: 0 0 auto;
+          color: var(--pokemon-yellow, #ffd24d);
+          -webkit-text-fill-color: var(--pokemon-yellow, #ffd24d);
+          font-family: var(--font-pixel);
+          font-size: 9px;
+          font-weight: 900;
+          text-transform: uppercase;
+        }
+        .rulebook-chapter-slot {
           display: none;
         }
-        .main div[data-testid="column"]:has(.rulebook-nav-slot) div.stButton > button {
-          min-height: 46px !important;
-          justify-content: flex-start !important;
-          padding: 0 13px !important;
-          border: 1px solid rgba(139,171,216,0.16) !important;
-          border-radius: 13px !important;
-          background:
-            linear-gradient(135deg, rgba(255,255,255,0.045), transparent 58%),
-            rgba(11,19,32,0.92) !important;
-          box-shadow: inset 0 1px 0 rgba(255,255,255,0.045) !important;
+        div[data-testid="column"]:has(.rulebook-chapter-slot) {
+          min-width: 0 !important;
         }
-        .main div[data-testid="column"]:has(.rulebook-nav-slot) div.stButton > button p {
+        div[data-testid="column"]:has(.rulebook-chapter-slot) div.stButton > button {
+          min-height: 42px !important;
+          justify-content: flex-start !important;
+          padding: 0 11px !important;
+          border: 1px solid rgba(139,171,216,0.16) !important;
+          border-radius: 12px !important;
+          background:
+            linear-gradient(135deg, rgba(255,255,255,0.04), transparent 58%),
+            rgba(12,21,36,0.94) !important;
+          box-shadow: inset 0 1px 0 rgba(255,255,255,0.04) !important;
+        }
+        div[data-testid="column"]:has(.rulebook-chapter-slot) div.stButton > button p {
           color: var(--text-secondary, #b8c7dc) !important;
           -webkit-text-fill-color: var(--text-secondary, #b8c7dc) !important;
-          font-size: 12px !important;
+          font-size: 11.5px !important;
           font-weight: 900 !important;
-          line-height: 1.12 !important;
+          line-height: 1.15 !important;
           text-align: left !important;
+          white-space: normal !important;
         }
-        .main div[data-testid="column"]:has(.rulebook-nav-slot.is-active) div.stButton > button {
+        div[data-testid="column"]:has(.rulebook-chapter-slot.is-active) div.stButton > button {
           border-color: rgba(114,185,255,0.55) !important;
           background:
-            linear-gradient(90deg, rgba(77,141,255,0.20), transparent 62%),
+            linear-gradient(90deg, rgba(77,141,255,0.18), transparent 68%),
             rgba(13,27,49,0.98) !important;
-          box-shadow: inset 4px 0 0 var(--primary, #4d8dff), inset 0 1px 0 rgba(255,255,255,0.08) !important;
+          box-shadow:
+            inset 4px 0 0 var(--primary, #4d8dff),
+            inset 0 1px 0 rgba(255,255,255,0.08) !important;
         }
-        .main div[data-testid="column"]:has(.rulebook-nav-slot.is-active) div.stButton > button p {
+        div[data-testid="column"]:has(.rulebook-chapter-slot.is-active) div.stButton > button p {
           color: var(--text-primary, #f6f9ff) !important;
           -webkit-text-fill-color: var(--text-primary, #f6f9ff) !important;
         }
-        .main .rulebook-document {
+        .rulebook-document {
           position: relative;
           overflow: hidden;
-          margin-top: 16px;
+          margin-top: 14px;
           padding: 18px;
           border: 1px solid rgba(139,171,216,0.18);
           border-radius: 18px;
           background:
-            linear-gradient(135deg, rgba(77,141,255,0.09), transparent 42%),
-            linear-gradient(180deg, rgba(18,30,49,0.96), rgba(7,12,22,0.98));
+            linear-gradient(135deg, rgba(77,141,255,0.075), transparent 42%),
+            linear-gradient(180deg, rgba(14,24,39,0.98), rgba(7,12,22,0.99));
           box-shadow: var(--poke-shadow-card, 0 14px 30px rgba(0,0,0,0.24));
         }
-        .main .rulebook-document::before {
-          content: "";
-          position: absolute;
-          inset: 0;
-          pointer-events: none;
-          background:
-            linear-gradient(90deg, rgba(255,255,255,0.018) 0 1px, transparent 1px 100%) 0 0 / 34px 100%,
-            linear-gradient(180deg, rgba(255,255,255,0.018) 0 1px, transparent 1px 100%) 0 0 / 100% 28px;
-          opacity: .55;
-        }
-        .main .rulebook-document > * {
-          position: relative;
-          z-index: 1;
-        }
-        .main .rulebook-section-head {
+        .rulebook-chapter-head {
           display: grid;
           grid-template-columns: minmax(0, 1fr) auto;
           gap: 14px;
           align-items: end;
-          padding: 0 0 14px;
+          padding-bottom: 14px;
           border-bottom: 1px solid rgba(139,171,216,0.14);
         }
-        .main .rulebook-section-code {
-          width: fit-content;
-          border-color: rgba(255,210,77,0.32);
-          background: rgba(255,210,77,0.10);
-          color: var(--pokemon-yellow, #ffd24d);
-          -webkit-text-fill-color: var(--pokemon-yellow, #ffd24d);
+        .rulebook-chapter-eyebrow {
+          margin-top: 7px;
+          color: var(--text-muted, #77879e);
+          -webkit-text-fill-color: var(--text-muted, #77879e);
+          font-family: var(--font-pixel);
+          font-size: 9px;
+          font-weight: 900;
+          text-transform: uppercase;
         }
-        .main .rulebook-section-title {
+        .rulebook-chapter-title {
           margin-top: 10px;
           color: var(--text-primary, #f6f9ff);
           -webkit-text-fill-color: var(--text-primary, #f6f9ff);
@@ -601,7 +658,7 @@ def _render_normativa_css() -> None:
           font-weight: 950;
           line-height: 1.04;
         }
-        .main .rulebook-section-summary {
+        .rulebook-chapter-summary {
           max-width: 780px;
           margin-top: 8px;
           color: var(--text-secondary, #b8c7dc);
@@ -609,35 +666,46 @@ def _render_normativa_css() -> None:
           font-size: 15px;
           line-height: 1.42;
         }
-        .main .rulebook-section-meta {
+        .rulebook-chapter-facts {
           justify-content: flex-end;
+          max-width: 330px;
         }
-        .main .rulebook-block-grid {
+        .rulebook-chapter-fact {
+          min-width: 92px;
+          padding: 8px 10px;
+          border: 1px solid rgba(139,171,216,0.13);
+          border-radius: 12px;
+          background: rgba(255,255,255,0.035);
+        }
+        .rulebook-content-grid {
           display: grid;
-          grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
-          gap: 12px;
-          margin-top: 14px;
+          grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+          gap: 14px;
+          margin-top: 16px;
         }
-        .main .rulebook-block {
+        .rulebook-section-card {
           overflow: hidden;
-          border: 1px solid rgba(139,171,216,0.15);
-          border-radius: 15px;
+          border: 1px solid rgba(139,171,216,0.16);
+          border-radius: 16px;
           background:
-            linear-gradient(135deg, rgba(255,255,255,0.045), transparent 44%),
-            rgba(8,14,26,0.78);
+            linear-gradient(135deg, rgba(255,255,255,0.045), transparent 48%),
+            rgba(8,14,26,0.84);
           box-shadow: inset 0 1px 0 rgba(255,255,255,0.055);
         }
-        .main .rulebook-block-head {
+        .rulebook-section-card.is-wide {
+          grid-column: 1 / -1;
+        }
+        .rulebook-block-head {
           display: flex;
           align-items: center;
           justify-content: space-between;
           gap: 10px;
-          min-height: 42px;
-          padding: 10px 12px;
+          min-height: 44px;
+          padding: 11px 13px;
           border-bottom: 1px solid rgba(139,171,216,0.12);
           background: rgba(255,255,255,0.035);
         }
-        .main .rulebook-block-title {
+        .rulebook-block-title {
           min-width: 0;
           color: var(--text-primary, #f6f9ff);
           -webkit-text-fill-color: var(--text-primary, #f6f9ff);
@@ -645,98 +713,212 @@ def _render_normativa_css() -> None:
           font-weight: 950;
           line-height: 1.15;
         }
-        .main .rulebook-block-code {
+        .rulebook-block-code,
+        .rulebook-table-code {
           flex: 0 0 auto;
-          min-height: 22px;
-          padding: 3px 7px;
           color: var(--primary-hover, #72b9ff);
           -webkit-text-fill-color: var(--primary-hover, #72b9ff);
         }
-        .main .rulebook-article-list {
+        .rulebook-article-list {
           display: grid;
-          gap: 7px;
-          padding: 12px;
+          padding: 8px 13px 10px;
         }
-        .main .rulebook-article {
+        .rulebook-article {
           display: grid;
-          grid-template-columns: 76px minmax(0, 1fr);
-          gap: 10px;
+          grid-template-columns: 78px minmax(0, 1fr);
+          gap: 14px;
           align-items: start;
-          min-height: 42px;
-          padding: 9px 10px;
-          border: 1px solid rgba(139,171,216,0.11);
-          border-radius: 12px;
-          background: rgba(255,255,255,0.032);
+          padding: 10px 0;
+          border-bottom: 1px solid rgba(139,171,216,0.10);
         }
-        .main .rulebook-article-no {
+        .rulebook-article:last-child {
+          border-bottom: 0;
+        }
+        .rulebook-article-no {
           color: var(--primary-hover, #72b9ff);
           -webkit-text-fill-color: var(--primary-hover, #72b9ff);
           font-family: var(--font-pixel);
           font-size: 9px;
           font-weight: 900;
-          line-height: 1.5;
+          line-height: 1.65;
           text-transform: uppercase;
           white-space: nowrap;
         }
-        .main .rulebook-article-text {
+        .rulebook-article-text {
           color: var(--text-secondary, #b8c7dc);
           -webkit-text-fill-color: var(--text-secondary, #b8c7dc);
           font-size: 14px;
           font-weight: 650;
-          line-height: 1.38;
+          line-height: 1.48;
         }
-        .main .rulebook-table-grid {
-          display: grid;
-          grid-template-columns: repeat(auto-fit, minmax(92px, 1fr));
-          gap: 8px;
-          padding: 12px;
+        .rulebook-data-table-wrap {
+          padding: 12px 13px 13px;
         }
-        .main .rulebook-row-card {
-          min-height: 66px;
-          padding: 9px 10px;
+        .rulebook-data-table {
+          width: 100%;
+          border-collapse: collapse;
+          table-layout: fixed;
+          overflow: hidden;
           border: 1px solid rgba(139,171,216,0.12);
           border-radius: 12px;
-          background:
-            radial-gradient(circle at 100% 0%, rgba(255,210,77,0.10), transparent 58%),
-            rgba(255,255,255,0.035);
+          background: rgba(255,255,255,0.025);
         }
-        .main .rulebook-row-card span {
-          display: block;
+        .rulebook-data-table th,
+        .rulebook-data-table td {
+          padding: 10px 12px;
+          border-bottom: 1px solid rgba(139,171,216,0.10);
+          color: var(--text-secondary, #b8c7dc);
+          -webkit-text-fill-color: var(--text-secondary, #b8c7dc);
+          font-size: 13px;
+          font-weight: 750;
+        }
+        .rulebook-data-table tr:last-child td {
+          border-bottom: 0;
+        }
+        .rulebook-data-table th {
           color: var(--text-muted, #77879e);
           -webkit-text-fill-color: var(--text-muted, #77879e);
           font-size: 10px;
           font-weight: 900;
+          text-align: left;
           text-transform: uppercase;
         }
-        .main .rulebook-row-card strong {
-          display: block;
-          margin-top: 8px;
+        .rulebook-data-table td:last-child,
+        .rulebook-data-table th:last-child {
+          text-align: right;
+        }
+        .rulebook-data-table td:last-child {
           color: var(--text-primary, #f6f9ff);
           -webkit-text-fill-color: var(--text-primary, #f6f9ff);
-          font-size: 20px;
           font-weight: 950;
           font-variant-numeric: tabular-nums;
         }
+        .rulebook-score-matrix th:nth-child(1),
+        .rulebook-score-matrix td:nth-child(1) {
+          width: 34%;
+        }
+        .rulebook-score-matrix th:nth-child(2),
+        .rulebook-score-matrix td:nth-child(2),
+        .rulebook-score-matrix th:nth-child(3),
+        .rulebook-score-matrix td:nth-child(3) {
+          text-align: right;
+        }
+        .rulebook-league-flow {
+          display: grid;
+          grid-template-columns: minmax(0, 1fr) 58px minmax(0, 1fr);
+          gap: 10px;
+          padding: 13px;
+          border-bottom: 1px solid rgba(139,171,216,0.10);
+        }
+        .rulebook-league-node {
+          min-height: 112px;
+          padding: 13px;
+          border: 1px solid rgba(139,171,216,0.14);
+          border-radius: 14px;
+          background:
+            linear-gradient(135deg, rgba(77,141,255,0.08), transparent 58%),
+            rgba(255,255,255,0.032);
+        }
+        .rulebook-league-node span,
+        .rulebook-transfer-label,
+        .rulebook-tool-code {
+          display: block;
+          color: var(--text-muted, #77879e);
+          -webkit-text-fill-color: var(--text-muted, #77879e);
+          font-family: var(--font-pixel);
+          font-size: 9px;
+          font-weight: 900;
+          text-transform: uppercase;
+        }
+        .rulebook-league-node strong {
+          display: block;
+          margin-top: 7px;
+          color: var(--text-primary, #f6f9ff);
+          -webkit-text-fill-color: var(--text-primary, #f6f9ff);
+          font-size: 22px;
+          font-weight: 950;
+        }
+        .rulebook-league-node em {
+          display: block;
+          margin-top: 8px;
+          color: var(--text-secondary, #b8c7dc);
+          -webkit-text-fill-color: var(--text-secondary, #b8c7dc);
+          font-size: 13px;
+          font-style: normal;
+          font-weight: 700;
+          line-height: 1.35;
+        }
+        .rulebook-league-transfer {
+          display: grid;
+          place-items: center;
+          color: var(--pokemon-yellow, #ffd24d);
+          -webkit-text-fill-color: var(--pokemon-yellow, #ffd24d);
+          font-size: 26px;
+          font-weight: 950;
+        }
+        .rulebook-tool-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+          gap: 10px;
+          padding: 13px;
+        }
+        .rulebook-tool-card {
+          min-height: 128px;
+          padding: 12px;
+          border: 1px solid rgba(139,171,216,0.13);
+          border-radius: 14px;
+          background:
+            radial-gradient(circle at 100% 0%, rgba(255,210,77,0.08), transparent 54%),
+            rgba(255,255,255,0.032);
+        }
+        .rulebook-tool-card strong {
+          display: block;
+          margin-top: 7px;
+          color: var(--text-primary, #f6f9ff);
+          -webkit-text-fill-color: var(--text-primary, #f6f9ff);
+          font-size: 15px;
+          font-weight: 950;
+        }
+        .rulebook-tool-card p {
+          margin: 7px 0 0;
+          color: var(--text-secondary, #b8c7dc);
+          -webkit-text-fill-color: var(--text-secondary, #b8c7dc);
+          font-size: 13px;
+          font-weight: 650;
+          line-height: 1.42;
+        }
         @media (max-width: 980px) {
-          .main .rulebook-section-head {
+          .rulebook-hero,
+          .rulebook-chapter-head {
             grid-template-columns: 1fr;
           }
-          .main .rulebook-section-meta {
+          .rulebook-hero-seal {
+            min-height: 96px;
+          }
+          .rulebook-chapter-facts {
             justify-content: flex-start;
+            max-width: none;
           }
         }
         @media (max-width: 720px) {
-          .main .rulebook-hero,
-          .main .rulebook-document,
-          .main .rulebook-index {
+          .rulebook-hero,
+          .rulebook-document,
+          .rulebook-index {
             border-radius: 14px;
             padding: 14px;
           }
-          .main .rulebook-block-grid {
+          .rulebook-meta-grid,
+          .rulebook-content-grid,
+          .rulebook-league-flow {
             grid-template-columns: 1fr;
           }
-          .main .rulebook-article {
+          .rulebook-article {
             grid-template-columns: 1fr;
+            gap: 4px;
+          }
+          .rulebook-league-transfer {
+            min-height: 34px;
+            transform: rotate(90deg);
           }
         }
         </style>
@@ -760,7 +942,7 @@ def _article_count(section: dict) -> int:
 
 
 def _table_count(section: dict) -> int:
-    return sum(len(block.get("rows") or []) for block in section.get("visual_blocks") or [])
+    return sum(1 for block in section.get("visual_blocks") or [] if block.get("rows"))
 
 
 def _total_articles() -> int:
@@ -779,10 +961,15 @@ def _active_section() -> tuple[int, dict]:
 
 def _render_rulebook_nav(active_id: str) -> None:
     st.markdown(
-        """
+        f"""
         <div class='rulebook-index'>
-          <div class='rulebook-index-title'>Indice del reglamento</div>
-          <div class='rulebook-index-copy'>Selecciona un capitulo para consultar sus articulos oficiales.</div>
+          <div class='rulebook-index-head'>
+            <div>
+              <div class='rulebook-index-title'>Indice del reglamento</div>
+              <div class='rulebook-index-copy'>Selecciona un capitulo para consultar reglas, tablas y criterios oficiales.</div>
+            </div>
+            <div class='rulebook-index-badge'>{len(NORMATIVA_SECTIONS)} capitulos</div>
+          </div>
         </div>
         """,
         unsafe_allow_html=True,
@@ -797,40 +984,53 @@ def _render_rulebook_nav(active_id: str) -> None:
             section_index = row_start + offset
             section_id = str(section.get("id"))
             active = section_id == active_id
-            label = f"CAP. {section_index + 1:02d} - {_section_title(section)}"
+            label = f"{section_index + 1:02d}  {_section_title(section)}"
             with col:
                 st.markdown(
-                    f"<span class='rulebook-nav-slot{' is-active' if active else ''}'></span>",
+                    f"<span class='rulebook-chapter-slot{' is-active' if active else ''}'></span>",
                     unsafe_allow_html=True,
                 )
                 if st.button(
                     label,
                     key=f"normativa_rulebook_nav_{section_id}",
-                    type="primary" if active else "secondary",
+                    type="secondary",
                     use_container_width=True,
                 ):
                     st.session_state["normativa_rulebook_section"] = section_id
                     st.rerun()
 
 
-def _render_list_block_html(block: dict, *, block_no: int, start_at: int) -> tuple[str, int]:
-    items = list(block.get("items") or [])
-    articles_html = "".join(
+def _article_rows_html(items: list[str], *, start_at: int) -> str:
+    return "".join(
         (
             "<div class='rulebook-article'>"
-            f"<span class='rulebook-article-no'>ART. {start_at + idx:02d}</span>"
+            f"<span class='rulebook-article-no'>ART. {start_at + idx:02d}</span> "
             f"<span class='rulebook-article-text'>{escape(str(item))}</span>"
             "</div>"
         )
         for idx, item in enumerate(items)
     )
+
+
+def _render_list_block_html(
+    block: dict,
+    *,
+    block_no: int,
+    start_at: int,
+    intro_html: str = "",
+    wide: bool = False,
+) -> tuple[str, int]:
+    items = list(block.get("items") or [])
+    articles_html = _article_rows_html([str(item) for item in items], start_at=start_at)
+    wide_class = " is-wide" if wide else ""
     return (
         (
-            "<article class='rulebook-block'>"
+            f"<article class='rulebook-section-card{wide_class}'>"
             "<div class='rulebook-block-head'>"
             f"<div class='rulebook-block-title'>{escape(str(block.get('title') or 'Bloque'))}</div>"
             f"<span class='rulebook-block-code'>B{block_no:02d}</span>"
             "</div>"
+            f"{intro_html}"
             f"<div class='rulebook-article-list'>{articles_html}</div>"
             "</article>"
         ),
@@ -838,23 +1038,141 @@ def _render_list_block_html(block: dict, *, block_no: int, start_at: int) -> tup
     )
 
 
-def _render_rows_block_html(block: dict, *, block_no: int) -> str:
+def _render_rows_block_html(block: dict, *, block_no: int, section_id: str) -> str:
+    rows = list(block.get("rows") or [])
+    if section_id == "caps":
+        left_header = "Entrenador"
+        right_header = "Level Cap"
+        table_class = " rulebook-level-table"
+    else:
+        left_header = "Etiqueta"
+        right_header = "Valor"
+        table_class = ""
     rows_html = "".join(
         (
-            "<div class='rulebook-row-card'>"
-            f"<span>{escape(str(label))}</span>"
-            f"<strong>{escape(str(value))}</strong>"
-            "</div>"
+            "<tr>"
+            f"<td>{escape(str(label))}</td>"
+            f"<td>{escape(str(value))}</td>"
+            "</tr>"
         )
-        for label, value in (block.get("rows") or [])
+        for label, value in rows
     )
     return (
-        "<article class='rulebook-block rulebook-block-table'>"
+        "<article class='rulebook-section-card rulebook-block-table'>"
         "<div class='rulebook-block-head'>"
         f"<div class='rulebook-block-title'>{escape(str(block.get('title') or 'Valores'))}</div>"
-        f"<span class='rulebook-block-code'>T{block_no:02d}</span>"
+        f"<span class='rulebook-table-code'>T{block_no:02d}</span>"
         "</div>"
-        f"<div class='rulebook-table-grid'>{rows_html}</div>"
+        "<div class='rulebook-data-table-wrap'>"
+        f"<table class='rulebook-data-table{table_class}'>"
+        "<thead><tr>"
+        f"<th>{escape(left_header)}</th>"
+        f"<th>{escape(right_header)}</th>"
+        "</tr></thead>"
+        f"<tbody>{rows_html}</tbody>"
+        "</table>"
+        "</div>"
+        "</article>"
+    )
+
+
+def _split_named_rule(item: str) -> tuple[str, str]:
+    if ":" not in item:
+        return item, ""
+    title, body = item.split(":", 1)
+    return title.strip(), body.strip()
+
+
+def _render_tool_block_html(block: dict, *, block_no: int, start_at: int) -> tuple[str, int]:
+    items = [str(item) for item in (block.get("items") or [])]
+    cards_html = ""
+    for idx, item in enumerate(items):
+        title, body = _split_named_rule(item)
+        fallback_body = item if not body else body
+        cards_html += (
+            "<div class='rulebook-tool-card'>"
+            f"<span class='rulebook-tool-code'>ART. {start_at + idx:02d}</span>"
+            f"<strong>{escape(title)}</strong>"
+            f"<p>{escape(fallback_body)}</p>"
+            "</div>"
+        )
+    return (
+        (
+            "<article class='rulebook-section-card is-wide'>"
+            "<div class='rulebook-block-head'>"
+            f"<div class='rulebook-block-title'>{escape(str(block.get('title') or 'Comodines'))}</div>"
+            f"<span class='rulebook-block-code'>B{block_no:02d}</span>"
+            "</div>"
+            f"<div class='rulebook-tool-grid'>{cards_html}</div>"
+            "</article>"
+        ),
+        start_at + len(items),
+    )
+
+
+def _render_league_flow_html() -> str:
+    return (
+        "<div class='rulebook-league-flow'>"
+        "<div class='rulebook-league-node'>"
+        "<span>Liga A</span>"
+        "<strong>5 jugadores</strong>"
+        "<em>Los 3 ultimos descienden al cierre del tramo.</em>"
+        "</div>"
+        "<div class='rulebook-league-transfer'>"
+        "<div><span class='rulebook-transfer-label'>Rotacion</span><strong>&#8645;</strong></div>"
+        "</div>"
+        "<div class='rulebook-league-node'>"
+        "<span>Liga B</span>"
+        "<strong>5 jugadores</strong>"
+        "<em>Los 3 primeros ascienden al cierre del tramo.</em>"
+        "</div>"
+        "</div>"
+    )
+
+
+def _find_block(blocks: list[dict], title: str) -> dict | None:
+    for block in blocks:
+        if str(block.get("title") or "").lower() == title.lower():
+            return block
+    return None
+
+
+def _render_score_matrix_html(blocks: list[dict], *, block_no: int) -> str:
+    points_block = _find_block(blocks, "Puntos Oficiales")
+    coins_block = _find_block(blocks, "Monedas Oficiales")
+    if not points_block or not coins_block:
+        return ""
+    points = {str(label): str(value) for label, value in (points_block.get("rows") or [])}
+    coins = {str(label): str(value) for label, value in (coins_block.get("rows") or [])}
+
+    def _sort_key(value: str) -> tuple[int, str]:
+        try:
+            return int(value), value
+        except ValueError:
+            return 999, value
+
+    rows_html = "".join(
+        (
+            "<tr>"
+            f"<td>Pos. {escape(position)}</td>"
+            f"<td>{escape(points.get(position, '-'))}</td>"
+            f"<td>{escape(coins.get(position, '-'))}</td>"
+            "</tr>"
+        )
+        for position in sorted(set(points) | set(coins), key=_sort_key)
+    )
+    return (
+        "<article class='rulebook-section-card is-wide rulebook-block-table'>"
+        "<div class='rulebook-block-head'>"
+        "<div class='rulebook-block-title'>Puntos y monedas oficiales</div>"
+        f"<span class='rulebook-table-code'>T{block_no:02d}</span>"
+        "</div>"
+        "<div class='rulebook-data-table-wrap'>"
+        "<table class='rulebook-data-table rulebook-score-matrix'>"
+        "<thead><tr><th>Posicion</th><th>Puntos</th><th>Monedas</th></tr></thead>"
+        f"<tbody>{rows_html}</tbody>"
+        "</table>"
+        "</div>"
         "</article>"
     )
 
@@ -863,32 +1181,52 @@ def _render_section(section: dict, *, index: int) -> None:
     blocks = list(section.get("visual_blocks") or [])
     block_html: list[str] = []
     article_no = 1
+    section_id = str(section.get("id") or "")
     for block_no, block in enumerate(blocks, start=1):
-        if block.get("rows"):
-            block_html.append(_render_rows_block_html(block, block_no=block_no))
-        else:
-            html, article_no = _render_list_block_html(
+        block_title = str(block.get("title") or "")
+        if section_id == "liga" and block_title == "Puntos Oficiales":
+            score_html = _render_score_matrix_html(blocks, block_no=block_no)
+            if score_html:
+                block_html.append(score_html)
+            continue
+        if section_id == "liga" and block_title == "Monedas Oficiales":
+            continue
+        if section_id == "comodines" and block_title == "Catalogo de Comodines":
+            html, article_no = _render_tool_block_html(
                 block,
                 block_no=block_no,
                 start_at=article_no,
             )
             block_html.append(html)
+        elif block.get("rows"):
+            block_html.append(_render_rows_block_html(block, block_no=block_no, section_id=section_id))
+        else:
+            intro_html = _render_league_flow_html() if section_id == "liga" and block_title == "Divisiones" else ""
+            html, article_no = _render_list_block_html(
+                block,
+                block_no=block_no,
+                start_at=article_no,
+                intro_html=intro_html,
+                wide=bool(intro_html),
+            )
+            block_html.append(html)
     st.markdown(
         (
             "<section class='rulebook-document'>"
-            "<div class='rulebook-section-head'>"
+            "<div class='rulebook-chapter-head'>"
             "<div>"
-            f"<span class='rulebook-section-code'>CAP. {index + 1:02d}</span>"
-            f"<div class='rulebook-section-title'>{escape(_section_title(section))}</div>"
-            f"<div class='rulebook-section-summary'>{escape(str(section.get('summary') or ''))}</div>"
+            f"<span class='rulebook-chapter-code'>CAP. {index + 1:02d}</span>"
+            f"<div class='rulebook-chapter-eyebrow'>{escape(str(section.get('eyebrow') or 'Documento oficial'))}</div>"
+            f"<div class='rulebook-chapter-title'>{escape(_section_title(section))}</div>"
+            f"<div class='rulebook-chapter-summary'>{escape(str(section.get('summary') or ''))}</div>"
             "</div>"
-            "<div class='rulebook-section-meta'>"
-            f"<span class='rulebook-chip'>{len(blocks)} bloques</span>"
-            f"<span class='rulebook-chip'>{_article_count(section)} articulos</span>"
-            f"<span class='rulebook-chip'>{_table_count(section)} valores</span>"
+            "<div class='rulebook-chapter-facts'>"
+            f"<div class='rulebook-chapter-fact'><span>Bloques</span> <strong>{len(blocks)}</strong></div>"
+            f"<div class='rulebook-chapter-fact'><span>Articulos</span> <strong>{_article_count(section)}</strong></div>"
+            f"<div class='rulebook-chapter-fact'><span>Tablas</span> <strong>{_table_count(section)}</strong></div>"
             "</div>"
             "</div>"
-            f"<div class='rulebook-block-grid'>{''.join(block_html)}</div>"
+            f"<div class='rulebook-content-grid'>{''.join(block_html)}</div>"
             "</section>"
         ),
         unsafe_allow_html=True,
@@ -902,19 +1240,23 @@ def render_normativa_home() -> None:
         (
             "<section class='rulebook-hero'>"
             "<div class='rulebook-hero-content'>"
-            "<div class='rulebook-kicker-row'>"
-            "<span class='rulebook-kicker'>Manual oficial</span>"
-            "<span class='rulebook-chip'>Competicion Pokemon</span>"
+            "<div class='rulebook-eyebrow-row'>"
+            "<span class='rulebook-eyebrow'>Manual oficial</span> "
+            "<span class='rulebook-chip'>Competicion Pokemon</span> "
             "<span class='rulebook-chip'>Temporada vigente</span>"
             "</div>"
-            "<div class='rulebook-title'>Normativa oficial</div>"
-            "<p class='rulebook-subtitle'>Reglamento de liga organizado por capitulos, articulos y tablas de valores. Pensado para consultar rapido sin perder el tono premium de PokeApp 2.0.</p>"
-            "<div class='rulebook-metric-row'>"
-            f"<div class='rulebook-metric'><span>Capitulos</span><strong>{len(NORMATIVA_SECTIONS)}</strong></div>"
-            f"<div class='rulebook-metric'><span>Articulos</span><strong>{_total_articles()}</strong></div>"
-            "<div class='rulebook-metric'><span>Formato</span><strong>Oficial</strong></div>"
+            "<div class='rulebook-title'>Normativa de Liga</div>"
+            "<p class='rulebook-subtitle'>Reglamento vigente de PokeApp, organizado como dossier tecnico para encontrar rapido caps, divisiones, comodines y normas clave.</p>"
+            "<div class='rulebook-meta-grid'>"
+            f"<div class='rulebook-meta-card'><span>Capitulos</span> <strong>{len(NORMATIVA_SECTIONS)}</strong></div>"
+            f"<div class='rulebook-meta-card'><span>Articulos</span> <strong>{_total_articles()}</strong></div>"
+            "<div class='rulebook-meta-card'><span>Formato</span> <strong>Oficial</strong></div>"
             "</div>"
             "</div>"
+            "<aside class='rulebook-hero-seal'>"
+            "<div class='rulebook-seal-mark'>P</div>"
+            "<div class='rulebook-seal-text'>PokeApp League<br>Rulebook</div>"
+            "</aside>"
             "</section>"
         ),
         unsafe_allow_html=True,
