@@ -7,8 +7,11 @@ from typing import Any
 import streamlit as st
 
 from app.season.config import (
+    RULE_DEFINITIONS,
     SeasonVersion,
+    SUPPORTED_DIVISION_COUNT,
     current_season_version,
+    latest_closed_round_from_league_state,
     load_season_document,
     save_season_version,
     season_version_for_round,
@@ -20,7 +23,7 @@ from app.season.validation import (
     validate_season_version,
 )
 from storage import settings_get
-from utils import active_users
+from utils import USERS, active_users
 
 
 def _league_state() -> dict[str, Any]:
@@ -406,6 +409,39 @@ def _parse_division_sizes(raw: str, fallback: list[int], division_count: int) ->
     return numbers[:division_count]
 
 
+def _rules_summary_html(version: SeasonVersion) -> str:
+    rows: list[str] = []
+    rules = version.rules if isinstance(version.rules, dict) else {}
+    for rule_id, definition in RULE_DEFINITIONS.items():
+        enabled = bool(rules.get(rule_id))
+        functional = bool(definition.get("functional"))
+        state = "Activa" if enabled else "Inactiva"
+        kind = "Funcional" if functional else "Normativa"
+        rows.append(
+            "<div class='season-alert season-alert--info'>"
+            f"<div class='season-alert-title'>{escape(str(definition.get('label') or rule_id))}</div>"
+            f"<div class='season-alert-body'>{state} - {kind}</div>"
+            "</div>"
+        )
+    return "".join(rows)
+
+
+def _rule_editor_fields(version: SeasonVersion) -> dict[str, Any]:
+    current_rules = version.rules if isinstance(version.rules, dict) else {}
+    next_rules = dict(current_rules)
+    st.markdown("<div class='season-section-title'>Reglas funcionales</div>", unsafe_allow_html=True)
+    cols = st.columns(3)
+    for idx, (rule_id, definition) in enumerate(RULE_DEFINITIONS.items()):
+        with cols[idx % 3]:
+            next_rules[rule_id] = st.checkbox(
+                str(definition.get("label") or rule_id),
+                value=bool(current_rules.get(rule_id)),
+                help=str(definition.get("description") or ""),
+                key=f"season_rule_{rule_id}",
+            )
+    return next_rules
+
+
 def _render_current_config() -> None:
     _document, version, tramo = _version_for_current_round()
     state = _league_state()
@@ -437,11 +473,19 @@ def _render_current_config() -> None:
 
     st.markdown("<div class='season-section-title'>Recompensas de esta version</div>", unsafe_allow_html=True)
     st.markdown(_reward_table_html(version), unsafe_allow_html=True)
+    st.markdown("<div class='season-section-title'>Reglas activas</div>", unsafe_allow_html=True)
+    st.markdown(_rules_summary_html(version), unsafe_allow_html=True)
 
 
 def _render_config_editor() -> None:
     document, version, tramo = _version_for_current_round()
     players_default = version.players or list(active_users().keys())
+    closed_round = latest_closed_round_from_league_state()
+    state = _league_state()
+    min_active_round = int(tramo) + 1 if bool(state.get("active")) else int(tramo)
+    min_effective_round = max(min_active_round, int(closed_round) + 1, 1)
+    max_effective_round = max(12, min_effective_round)
+    current_user = str(st.session_state.get("user") or "")
     st.markdown("<div class='season-section-title'>Guardar version de reglas</div>", unsafe_allow_html=True)
     with st.form("season_config_editor"):
         c1, c2, c3 = st.columns(3)
@@ -449,9 +493,9 @@ def _render_config_editor() -> None:
             name = st.text_input("Nombre temporada", value=version.name)
             effective_round = st.number_input(
                 "Aplicar desde tramo",
-                min_value=tramo,
-                max_value=12,
-                value=tramo,
+                min_value=min_effective_round,
+                max_value=max_effective_round,
+                value=min_effective_round,
                 step=1,
             )
             rounds = st.number_input(
@@ -464,9 +508,9 @@ def _render_config_editor() -> None:
         with c2:
             division_count = st.number_input(
                 "Divisiones",
-                min_value=2,
-                max_value=2,
-                value=2,
+                min_value=SUPPORTED_DIVISION_COUNT,
+                max_value=SUPPORTED_DIVISION_COUNT,
+                value=SUPPORTED_DIVISION_COUNT,
                 step=1,
                 disabled=True,
             )
@@ -487,6 +531,8 @@ def _render_config_editor() -> None:
                 value="\n".join(players_default),
                 height=126,
             )
+
+        rules = _rule_editor_fields(version)
 
         r1, r2 = st.columns(2)
         with r1:
@@ -521,9 +567,9 @@ def _render_config_editor() -> None:
         movement_count=int(movement),
         points_by_position=_parse_reward_lines(points_text, version.points_by_position),
         coins_by_position=_parse_reward_lines(coins_text, version.coins_by_position),
-        rules=dict(version.rules),
+        rules=rules,
     )
-    issues = validate_season_version(proposed_version)
+    issues = validate_season_version(proposed_version, known_players=list(USERS.keys()))
     changes = season_version_changes(version, proposed_version)
 
     st.markdown("<div class='season-section-title'>Revision antes de guardar</div>", unsafe_allow_html=True)
@@ -541,18 +587,25 @@ def _render_config_editor() -> None:
         if has_blocking_issues(issues):
             st.error("No se ha guardado: hay errores de configuracion que corregir.")
             return
-        saved = save_season_version(proposed_version, effective_round=int(effective_round))
         try:
-            from app.liga.ranking import clear_ranking_caches
-            from app.tienda.money import clear_money_caches
+            saved = save_season_version(
+                proposed_version,
+                effective_round=int(effective_round),
+                admin_user=current_user,
+            )
+            try:
+                from app.liga.ranking import clear_ranking_caches
+                from app.tienda.money import clear_money_caches
 
-            clear_money_caches()
-            clear_ranking_caches()
-        except Exception:
-            pass
-        st.success("Configuracion guardada.")
-        st.session_state["season_last_saved_v2"] = saved
-        document = saved
+                clear_money_caches()
+                clear_ranking_caches()
+            except Exception:
+                pass
+            st.success("Configuracion guardada.")
+            st.session_state["season_last_saved_v2"] = saved
+            document = saved
+        except Exception as exc:
+            st.error(str(exc))
 
     if isinstance(st.session_state.get("season_last_saved_v2"), dict):
         with st.expander("Ultima configuracion guardada", expanded=False):

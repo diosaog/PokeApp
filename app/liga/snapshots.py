@@ -222,6 +222,30 @@ def snapshot_awards_for_user(
     return out
 
 
+def latest_snapshot_penalties_for_user(
+    round_snapshots: Any,
+    user: str,
+) -> dict[str, Any] | None:
+    key = str(user or "").strip()
+    if not key:
+        return None
+    for _round_no, snapshot in sorted(
+        normalize_round_snapshots(round_snapshots).items(),
+        reverse=True,
+    ):
+        penalties = snapshot.get("penalties") if isinstance(snapshot.get("penalties"), dict) else {}
+        raw = penalties.get(key) if isinstance(penalties, dict) else None
+        if isinstance(raw, dict):
+            return _clean_penalty(raw)
+        for row in snapshot.get("standings") or []:
+            if not isinstance(row, dict) or str(row.get("user") or "") != key:
+                continue
+            row_penalties = row.get("penalties")
+            if isinstance(row_penalties, dict):
+                return _clean_penalty(row_penalties)
+    return None
+
+
 def snapshot_standings(
     round_snapshots: Any,
     round_no: int,

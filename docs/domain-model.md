@@ -81,6 +81,14 @@ Representa reglas aplicables desde una jornada concreta.
 
 Esto permite cambiar reglas desde una jornada sin alterar resultados antiguos.
 
+Estado Streamlit 2.2:
+
+- `season_config_v2` ya versiona estos campos en `settings`.
+- Las jornadas cerradas usan `round_snapshots` como fuente historica.
+- La implementacion Streamlit soporta oficialmente dos divisiones, A/B. N
+  divisiones requiere el contrato `Division`/`Matchday` real antes de migrar a
+  API.
+
 ### Division
 
 - `season_id`
@@ -201,4 +209,3 @@ Esto permite cambiar reglas desde una jornada sin alterar resultados antiguos.
 - `penalties`
 - `created_at`
 - `resolved_at`
-

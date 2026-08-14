@@ -98,29 +98,32 @@ The real default includes all 10 positions:
 | `effective_round` | Yes | Chooses config for a requested round. |
 | `max_rounds` | Yes | Used by `max_jornadas()` / final league detection. |
 | `players` | Yes | Filters `utils.USERS`; cannot create fully new trainers alone. |
-| `division_count` | Weak | Stored/validated, but UI and league logic are locked to two divisions. |
-| `division_sizes` | Partly | Only first size is used for Liga A; remainder becomes Liga B. |
+| `division_count` | Yes/blocked | Streamlit 2.0 officially supports `2`; other values are rejected. |
+| `division_sizes` | Yes | First size drives Liga A and second size drives Liga B. |
 | `movement_count` | Yes | Used for A/B ascents and descents. |
 | `points_by_position` | Yes | Used dynamically by rewards. |
 | `coins_by_position` | Yes | Used dynamically by rewards. |
-| `rules` | Mostly dead | Stored, but key rules are not consistently enforced by league code. |
+| `rules` | Partly functional | `team_lock_required` and `last_b_gets_steal` affect behavior; `cup_is_separate` is metadata. |
 
 ### Hardcoded Values Still Present
 
 - `utils.USERS` remains the real trainer registry and credentials source.
 - `SECTIONS` is static in `utils.py`.
 - Liga supports `A` and `B` only in `league_state`, UI, ranking and history.
-- `app/interfaz/temporada.py` disables `division_count` and forces `2`.
-- Last Liga B reward `Robar Pokemon` is hardcoded in `app/liga/ranking.py`,
-  independent of `rules["last_b_gets_steal"]`.
+  This is now an explicit 2.2 product decision, not hidden configurability.
+- `app/interfaz/temporada.py` disables `division_count` and forces `2` because
+  N divisions are deferred to the domain/API phase.
+- Last Liga B reward `Robar Pokemon` now depends on
+  `rules["last_b_gets_steal"]`.
 - Team lock requirement is notification-based, not a hard blocker.
 - Static aliases remain: `MAX_JORNADAS`, `CURRENT_POINTS_BY_POSITION`,
   `CURRENT_COINS_BY_POSITION`; they now mirror defaults but can mislead future work.
 
 ### Versioning
 
-`save_season_version()` appends a new version and sets it active. The UI only lets
-Anto save a version from the current tramo onward.
+`save_season_version()` appends a new version and sets it active. The function is
+admin-only and rejects versions that would start on closed jornadas or the
+current open jornada.
 
 `season_version_for_round(document, round_no)` selects the latest version whose
 `effective_round <= round_no`. This is the correct base for future immutability,
@@ -586,12 +589,12 @@ Current coverage:
 
 Tests missing for Phase 2 close:
 
-- Closing a jornada writes a complete immutable round snapshot.
-- Points/coins use stored round snapshots after config changes.
-- Editing previous round intentionally replaces only that round snapshot.
-- Division movement uses historical movement count.
-- `division_count > 2` is either blocked explicitly or fully supported.
-- Liga controls require Anto where intended.
+- Closing a jornada writes a complete immutable round snapshot. Covered in 2.1.
+- Points/coins use stored round snapshots after config changes. Covered in 2.1/2.2.
+- Editing previous round intentionally replaces only that round snapshot. Covered in 2.1.
+- Division movement uses historical/configured movement count. Covered in 2.2.
+- `division_count > 2` is blocked explicitly. Covered in 2.2.
+- Liga controls require Anto where intended. Covered in 2.1/2.2.
 - Retired trainer:
   - excluded from future rounds
   - old snapshot points remain visible if that becomes the rule
@@ -635,8 +638,8 @@ Tests missing for Phase 2 close:
 - Add immutable `round_snapshots` before relying on configurable seasons.
 - Restrict Liga admin actions to Anto or a formal admin permission.
 - Decide whether `abandono` is just retired or a separate status.
-- Either block `division_count != 2` clearly or implement N divisions end-to-end.
-- Make `rules` operational or remove from editable expectations.
+- `division_count != 2` is now blocked explicitly in Streamlit 2.0.
+- Functional `rules` are now wired where they affect current behavior.
 - Persist Hall of Fame team snapshots from final/locked data.
 - Introduce `ActivityEvent` concept before expanding notifications.
 - Move `trainer_flags` out of generic settings in Supabase V2.
@@ -646,7 +649,8 @@ Tests missing for Phase 2 close:
 
 - Changing active roster can sanitize old results unexpectedly.
 - Retiring a trainer can make old totals disappear from the general table.
-- Direct edits to `season_config_v2` can alter old scoring.
+- Direct manual edits to `season_config_v2` can still bypass app guards; normal
+  app edits no longer alter closed snapshot scoring.
 - League reset clears purchases through `clear_purchases()`, which is broader than
   a league-only reset.
 - Wipe deletes all settings and generated data globally, not per season.
@@ -674,13 +678,13 @@ Tests missing for Phase 2 close:
    - Points/coins/history/Hall should read closed snapshots when present and only
      use dynamic config for open/current previews.
 
-5. Make SeasonVersion rules real or intentionally hidden.
-   - `last_b_gets_steal`, `team_lock_required`, and future rules should be used by
-     close/open flows or removed from UI expectations.
+5. Make SeasonVersion rules real or intentionally hidden. Completed in 2.2 for
+   existing rules.
+   - `last_b_gets_steal` and `team_lock_required` are functional.
+   - `cup_is_separate` remains metadata because Copa is already separate.
 
-6. Decide the division scope for 2.0 Streamlit.
-   - Conservative option: officially support exactly 2 divisions until React/API.
-   - Larger option: implement N divisions fully before feature freeze.
+6. Decide the division scope for 2.0 Streamlit. Completed in 2.2.
+   - Streamlit 2.0 officially supports exactly 2 divisions until domain/API work.
 
 7. Finalize Hall of Fame immutability.
    - Build entries from final snapshots and locked teams; keep merge idempotency.
@@ -769,9 +773,9 @@ The implementation lives in `app/liga/snapshots.py`. It freezes:
 
 Current known limitation:
 
-- `current_points_total()` still applies current dead/penalty deductions on top of
-  the league base. The snapshot stores the close-time penalty metadata for future
-  interpretation, but the complete penalty model remains a Phase 2.2/2.3 concern.
+- Shop/economy sanctions (`coins_reduction`, `store_blocked`) remain live because
+  they are active administrative sanctions, not closed league awards. League coins
+  awarded by position are snapshot-first.
 
 ### Backward Compatibility
 
@@ -826,11 +830,149 @@ Read-only league views remain available to normal trainers.
 - non-admin cannot finalize;
 - Anto passes the admin guard.
 
-### Remaining Debt For 2.2
+## Phase 2.2 - Configurable Season Closure
 
-- Make `SeasonVersion.rules` operational or intentionally hide/remove unused rule
-  fields.
-- Decide whether the complete penalty model should become per-round snapshot-first
-  or remain current/live.
-- Keep Liga officially A/B for Streamlit or implement N divisions end-to-end.
-- Add explicit season lifecycle operations before Supabase V2.
+Phase 2.2 closes `season_config_v2` as the functional season config for the
+current Streamlit architecture.
+
+### Decision: A/B Only In Streamlit 2.0
+
+The audit measured the blast radius of N divisions. Current production code is
+modelled around exactly two divisions:
+
+- `league_state.divisions` stores `A` and `B`;
+- `league_state.matches` stores `A` and `B`;
+- result editing, ranking, movements and history render `A` and `B`;
+- Home, sidebar, topbar, Team Preview and Discord summaries read A/B labels.
+
+Supporting 3+ divisions would require changing state shape, match generation,
+ranking, historical rendering, multiple UIs and notifications together. That is
+a major domain/API phase, not a safe 2.2 patch.
+
+Therefore Streamlit 2.0 officially supports Liga A and Liga B only. This is no
+longer false configurability: `division_count != 2` is rejected by validation,
+while A/B sizes and movement count remain configurable.
+
+### Season Config Fields Now Consolidated
+
+`SeasonVersion` remains the versioned source for:
+
+- active players;
+- `effective_round`;
+- `max_rounds`;
+- A/B `division_sizes`;
+- `movement_count`;
+- `points_by_position`;
+- `coins_by_position`;
+- `rules`.
+
+Version selection stays round-based: closed snapshots keep their frozen config,
+and open/future rounds use `season_version_for_round()`.
+
+### Config Mutation Policy
+
+`save_season_version()` is now protected by the Anto admin guard.
+
+It appends a new version and refuses to create versions that apply to:
+
+- any closed jornada detected in `league_state.round_snapshots` or legacy
+  `league_state.results`;
+- the currently open jornada when `league_state.active == true`.
+
+This prevents future config edits from mutating closed official history.
+
+### Operational Rules
+
+Known rules are completed with defaults for legacy configs:
+
+- `team_lock_required`: functional. If false, opening a jornada does not trigger
+  the missing team lock Discord warning.
+- `last_b_gets_steal`: functional. If false, the last trainer in Liga B does not
+  receive the free `Robar Pokemon` purchase on close.
+- `cup_is_separate`: retained as normative/product metadata. The Copa code was
+  already separate and is not refactored in this phase.
+
+### Participants
+
+`utils.league_users_for_round()` uses the explicit player list from
+`season_config_v2` and still filters against the global `USERS` credential
+registry. Unknown names are rejected by the admin panel validation instead of
+being silently treated as participants.
+
+Team Preview now receives the configured roster for the current jornada instead
+of `USERS` global.
+
+### Rewards, Rounds And Movements
+
+- `points_for_league_position()` and `coins_for_league_position()` continue to
+  delegate to `SeasonVersion`.
+- `max_jornadas()` delegates to configured `max_rounds`.
+- `division_a_size_for_count()` and `next_divisions_from_rankings()` use
+  configured A/B sizes and movement count.
+- Closed snapshots remain the source of truth for historical standings, points
+  and league coins.
+
+### Penalties Snapshot-First
+
+`current_points_total()` now uses the latest closed snapshot penalty metadata
+for a trainer when snapshots exist. This freezes dead-count and point-reduction
+effects for the official closed table without consulting mutable save/juicio
+state afterward.
+
+Legacy/open rounds keep the old live fallback.
+
+### Admin Panel
+
+`app/interfaz/temporada.py` now exposes:
+
+- participants;
+- A/B sizes;
+- total jornadas;
+- points;
+- coins;
+- movement count;
+- rules;
+- version history.
+
+The UI keeps divisions locked to `2` and validates against the supported A/B
+model.
+
+### Normativa
+
+Normativa is not redesigned in 2.2, but its Liga chapter is generated from the
+active season config for:
+
+- player count;
+- A/B sizes;
+- total jornadas;
+- ascensos/descensos;
+- last-B Robar Pokemon rule;
+- points and coins tables.
+
+The logic does not depend on Normativa strings.
+
+### Tests Added
+
+2.2 extends coverage for:
+
+- legacy rule defaults;
+- admin-only season save;
+- blocked config edits for closed/open jornadas;
+- explicit season roster;
+- two-division support decision;
+- unknown trainer validation;
+- rule boolean validation;
+- configured `max_rounds`;
+- configured A/B sizes and movement count;
+- configurable last-B steal reward;
+- snapshot-first point penalties.
+
+### Remaining Debt After 2.2
+
+- True N-division support belongs to a larger domain/API phase.
+- `cup_is_separate` remains metadata because Copa is already separated but not
+  driven by a formal season contract.
+- Explicit season lifecycle (`draft/active/finished/archived`) still belongs to
+  Supabase V2/domain work.
+- Economy sanctions remain live administrative state; league coin awards are
+  snapshot-first.

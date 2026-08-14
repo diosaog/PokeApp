@@ -21,8 +21,8 @@ extraiga dominio o repositories.
 
 | Modulo | Tipo | Nota |
 | --- | --- | --- |
-| `config.py` | MIXED | Buen inicio de SeasonVersion, pero lee/escribe `settings`. |
-| `validation.py` | PURE | Validaciones casi portables a dominio. |
+| `config.py` | MIXED | SeasonVersion funcional: versionado por jornada, reglas, guard admin-only y bloqueo de cambios sobre jornadas cerradas/abiertas; aun lee/escribe `settings`. |
+| `validation.py` | PURE | Validaciones casi portables a dominio; Streamlit 2.0 valida A/B oficialmente y rechaza N divisiones. |
 
 ## app/liga
 
@@ -121,9 +121,10 @@ extraiga dominio o repositories.
 | Test | Cobertura |
 | --- | --- |
 | `test_shop_promotions.py` | Rebajas, exclusiones y rotacion. |
-| `test_season_config.py` | Versionado de temporada. |
-| `test_season_validation.py` | Validacion de temporada. |
+| `test_season_config.py` | Versionado, permisos, bloqueo historico y roster explicito. |
+| `test_season_validation.py` | Validacion de temporada, A/B oficial, jugadores y reglas. |
 | `test_notifications.py` | Actividad reciente y limite visible. |
-| `test_liga_rewards.py` | Recompensas y divisiones actuales. |
+| `test_liga_rewards.py` | Recompensas, jornadas y movimientos desde config. |
+| `test_liga_snapshots.py` | Snapshots oficiales, permisos, reglas y penalizacion de puntos snapshot-first. |
 | `test_hall_of_fame.py` | Coercion/merge de historico. |
 | `test_saves_support.py` | HTML de saves. |

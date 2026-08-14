@@ -185,6 +185,56 @@ class LigaSnapshotTests(unittest.TestCase):
         with self.assertRaises(LeaguePermissionError):
             require_league_admin("Samu")
 
+    def test_last_b_steal_rule_controls_free_purchase(self) -> None:
+        session = Session(
+            {
+                "league_divisions": {"A": ["Anto"], "B": ["Victor"]},
+                "league_matches": {},
+                "league_results": {},
+                "league_movements": {},
+                ROUND_SNAPSHOTS_STATE_KEY: {},
+                "league_active": True,
+                "league_tramo": 1,
+            }
+        )
+
+        with (
+            patch.object(
+                ranking,
+                "st",
+                SimpleNamespace(session_state=session, toast=lambda *_args, **_kwargs: None),
+            ),
+            patch.object(ranking, "current_season_version", return_value=_season("v1", points={1: 9, 2: 8}, coins_={1: 15, 2: 14})),
+            patch.object(ranking, "_penalties_for_snapshot", return_value={}),
+            patch.object(ranking, "season_rule_enabled", return_value=False),
+            patch.object(ranking, "_persist_state", return_value=None),
+            patch.object(ranking, "add_purchase") as add_purchase,
+        ):
+            ranking.finalize(1, admin_user="Anto")
+
+        add_purchase.assert_not_called()
+
+    def test_current_points_total_uses_latest_snapshot_penalties(self) -> None:
+        session = Session(
+            {
+                "league_results": {"Anto": {1: 1}},
+                ROUND_SNAPSHOTS_STATE_KEY: {1: _snapshot()},
+            }
+        )
+
+        with (
+            patch.object(ranking, "st", SimpleNamespace(session_state=session)),
+            patch.object(
+                ranking,
+                "_visible_league_users",
+                return_value={"Anto": "a07", "Victor": "v42"},
+            ),
+            patch.object(ranking, "points_from_league", return_value=9),
+            patch.object(ranking, "_count_muertos_for_trainer", return_value=99),
+            patch.object(ranking, "get_user_penalties", return_value={"points_reduction": 99}),
+        ):
+            self.assertEqual(ranking.current_points_total("Anto"), 7.1)
+
 
 if __name__ == "__main__":
     unittest.main()

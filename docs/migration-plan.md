@@ -45,7 +45,9 @@ Limite:
 
 Cerrar mecanicas que afectan modelo:
 
-- Temporada configurable definitiva.
+- Temporada configurable definitiva. Cerrada en Streamlit como A/B oficial:
+  jugadores, jornadas, tamanos, ascensos/descensos, puntos, monedas y reglas
+  funcionales desde `season_config_v2`.
 - Hall of Fame automatico.
 - Retirados, robados y abandonos.
 - Notificaciones y tipos de evento.
@@ -79,6 +81,11 @@ Definir contratos estables:
 - HallOfFameEntry
 - Cup
 - Trial / Case
+
+Nota de alcance:
+
+- N divisiones reales no se implementan sobre el estado Streamlit A/B. Deben
+  definirse aqui como contrato de dominio antes de pasar a repositories/API.
 
 ## Fase 4 - Dominio Puro
 

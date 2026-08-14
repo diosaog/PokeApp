@@ -31,6 +31,7 @@ from app.liga.snapshots import (
     snapshot_for_round,
     snapshot_standings,
 )
+from app.season.config import season_rule_enabled
 from app.liga.state import ensure_state, persist_state, restore_state
 from app.liga.table_summary import (
     coins_for_user as _coins_for_user,
@@ -158,6 +159,8 @@ def _require_league_admin_ui() -> bool:
 
 def _notify_missing_team_locks_once(round_no: int) -> None:
     if not discord_notifications_enabled():
+        return
+    if not season_rule_enabled("team_lock_required", int(round_no)):
         return
     key = f"{_TEAM_LOCKS_MISSING_NOTIFY_PREFIX}:{int(round_no)}"
     try:

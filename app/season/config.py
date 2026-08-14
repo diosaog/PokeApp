@@ -18,6 +18,32 @@ DEFAULT_MAX_ROUNDS = 4
 DEFAULT_DIVISION_COUNT = 2
 DEFAULT_DIVISION_SIZES = [5, 5]
 DEFAULT_MOVEMENT_COUNT = 3
+SUPPORTED_DIVISION_COUNT = 2
+SUPPORTED_DIVISION_LABELS = ("A", "B")
+
+DEFAULT_RULES: dict[str, bool] = {
+    "team_lock_required": True,
+    "last_b_gets_steal": True,
+    "cup_is_separate": True,
+}
+
+RULE_DEFINITIONS: dict[str, dict[str, str | bool]] = {
+    "team_lock_required": {
+        "label": "Equipos fijados",
+        "description": "Aaron avisa de entrenadores sin equipo fijado al abrir jornada.",
+        "functional": True,
+    },
+    "last_b_gets_steal": {
+        "label": "Robar Pokemon al ultimo de Liga B",
+        "description": "El ultimo de Liga B recibe Robar Pokemon al cerrar jornada.",
+        "functional": True,
+    },
+    "cup_is_separate": {
+        "label": "Copa separada",
+        "description": "La Copa se gestiona fuera de la clasificacion de Liga.",
+        "functional": False,
+    },
+}
 
 DEFAULT_POINTS_BY_POSITION = {
     1: 9,
@@ -77,6 +103,17 @@ def _as_int(value: Any, default: int = 0) -> int:
         return int(default)
 
 
+def _as_bool(value: Any, default: bool = False) -> bool:
+    if isinstance(value, bool):
+        return value
+    text = str(value).strip().lower()
+    if text in {"1", "true", "yes", "si", "on"}:
+        return True
+    if text in {"0", "false", "no", "off", ""}:
+        return False
+    return bool(default)
+
+
 def _clean_players(values: Any, fallback: list[str] | tuple[str, ...] | None = None) -> list[str]:
     out: list[str] = []
     source = values if isinstance(values, list) else list(fallback or [])
@@ -106,6 +143,22 @@ def _clean_int_list(values: Any, fallback: list[int]) -> list[int]:
     return out or list(fallback)
 
 
+def _clean_rules(values: Any, fallback: dict[str, Any] | None = None) -> dict[str, Any]:
+    source = values if isinstance(values, dict) else {}
+    out: dict[str, Any] = dict(DEFAULT_RULES)
+    if isinstance(fallback, dict):
+        out.update(fallback)
+    for key, value in source.items():
+        rule_key = str(key or "").strip()
+        if not rule_key:
+            continue
+        if rule_key in DEFAULT_RULES:
+            out[rule_key] = _as_bool(value, bool(DEFAULT_RULES[rule_key]))
+        else:
+            out[rule_key] = value
+    return out
+
+
 def default_season_version(
     *,
     players: list[str] | tuple[str, ...] | None = None,
@@ -122,11 +175,7 @@ def default_season_version(
         movement_count=DEFAULT_MOVEMENT_COUNT,
         points_by_position=dict(DEFAULT_POINTS_BY_POSITION),
         coins_by_position=dict(DEFAULT_COINS_BY_POSITION),
-        rules={
-            "team_lock_required": True,
-            "last_b_gets_steal": True,
-            "cup_is_separate": True,
-        },
+        rules=dict(DEFAULT_RULES),
     )
 
 
@@ -141,7 +190,7 @@ def _season_version_from_mapping(
     division_sizes = _clean_int_list(data.get("division_sizes"), fallback.division_sizes)
     if len(division_sizes) < division_count:
         division_sizes = division_sizes + [0] * (division_count - len(division_sizes))
-    rules = data.get("rules") if isinstance(data.get("rules"), dict) else fallback.rules
+    rules = _clean_rules(data.get("rules"), fallback.rules)
     return SeasonVersion(
         id=str(data.get("id") or fallback.id),
         name=str(data.get("name") or fallback.name),
@@ -277,6 +326,14 @@ def current_season_version(round_no: int | None = None) -> SeasonVersion:
     return season_version_for_round(load_season_document(), round_no)
 
 
+def season_rules(round_no: int | None = None) -> dict[str, Any]:
+    return _clean_rules(current_season_version(round_no).rules)
+
+
+def season_rule_enabled(rule_id: str, round_no: int | None = None) -> bool:
+    return bool(season_rules(round_no).get(str(rule_id), False))
+
+
 def max_rounds(round_no: int | None = None) -> int:
     return int(current_season_version(round_no).max_rounds)
 
@@ -305,18 +362,101 @@ def coins_for_position(round_no: int, pos: int) -> int:
     return current_season_version(round_no).coins_by_position.get(int(pos), 0)
 
 
+def _current_actor() -> str | None:
+    try:
+        if st is not None:
+            return st.session_state.get("user")
+    except Exception:
+        return None
+    return None
+
+
+def _closed_rounds_from_league_state() -> set[int]:
+    try:
+        raw = settings_get("league_state")
+        obj = json.loads(raw or "{}")
+    except Exception:
+        obj = {}
+    if not isinstance(obj, dict):
+        return set()
+
+    closed: set[int] = set()
+    for snapshots_key in ("round_snapshots", "league_round_snapshots"):
+        snapshots = obj.get(snapshots_key)
+        if not isinstance(snapshots, dict):
+            continue
+        for raw_round in snapshots.keys():
+            try:
+                round_no = int(raw_round)
+            except Exception:
+                continue
+            if round_no > 0:
+                closed.add(round_no)
+
+    results = obj.get("results")
+    if isinstance(results, dict):
+        for round_map in results.values():
+            if not isinstance(round_map, dict):
+                continue
+            for raw_round in round_map.keys():
+                try:
+                    round_no = int(raw_round)
+                except Exception:
+                    continue
+                if round_no > 0:
+                    closed.add(round_no)
+    return closed
+
+
+def latest_closed_round_from_league_state() -> int:
+    closed = _closed_rounds_from_league_state()
+    return max(closed) if closed else 0
+
+
+def _league_state_round_status() -> tuple[int, bool]:
+    try:
+        raw = settings_get("league_state")
+        obj = json.loads(raw or "{}")
+    except Exception:
+        obj = {}
+    if not isinstance(obj, dict):
+        return 1, False
+    try:
+        round_no = max(int(obj.get("tramo") or 1), 1)
+    except Exception:
+        round_no = 1
+    return round_no, bool(obj.get("active"))
+
+
 def save_season_version(
     version: SeasonVersion,
     *,
     effective_round: int,
+    admin_user: str | None = None,
 ) -> dict[str, Any]:
+    from app.liga.permissions import require_league_admin
+
+    require_league_admin(admin_user if admin_user is not None else _current_actor())
+    effective_round_i = max(1, int(effective_round or 1))
+    closed_round = latest_closed_round_from_league_state()
+    if closed_round and effective_round_i <= closed_round:
+        raise ValueError(
+            "No se puede crear una version desde una jornada ya cerrada. "
+            f"Ultima jornada cerrada: {closed_round}."
+        )
+    current_round, is_active = _league_state_round_status()
+    if is_active and effective_round_i <= current_round:
+        raise ValueError(
+            "No se puede cambiar la configuracion de una jornada abierta. "
+            f"Aplicala desde la jornada {current_round + 1} o cierra/cancela la actual."
+        )
     document = load_season_document(players=version.players)
     version_data = season_version_to_dict(
         SeasonVersion(
             **{
                 **asdict(version),
                 "id": f"v{int(time.time() * 1000)}",
-                "effective_round": max(1, int(effective_round or 1)),
+                "effective_round": effective_round_i,
             }
         )
     )

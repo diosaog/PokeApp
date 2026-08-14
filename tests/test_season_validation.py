@@ -65,6 +65,50 @@ class SeasonValidationTests(unittest.TestCase):
 
         self.assertEqual([change[0] for change in changes], ["Jornadas", "Ascensos/descensos"])
 
+    def test_streamlit_season_supports_only_two_divisions(self) -> None:
+        version = replace(
+            default_season_version(players=["Anto", "Victor", "Samu"]),
+            division_count=3,
+            division_sizes=[1, 1, 1],
+            movement_count=1,
+            points_by_position={1: 9, 2: 8, 3: 7},
+            coins_by_position={1: 15, 2: 14, 3: 12},
+        )
+
+        issues = validate_season_version(version)
+
+        self.assertTrue(has_blocking_issues(issues))
+        self.assertTrue(any(issue["title"] == "Divisiones no soportadas" for issue in issues))
+
+    def test_unknown_players_are_rejected_when_registry_is_provided(self) -> None:
+        version = replace(
+            default_season_version(players=["Anto", "Nuevo"]),
+            division_sizes=[1, 1],
+            points_by_position={1: 9, 2: 8},
+            coins_by_position={1: 15, 2: 14},
+            movement_count=1,
+        )
+
+        issues = validate_season_version(version, known_players=["Anto"])
+
+        self.assertTrue(has_blocking_issues(issues))
+        self.assertTrue(any(issue["title"] == "Jugadores no registrados" for issue in issues))
+
+    def test_rules_must_be_boolean_for_known_rule_ids(self) -> None:
+        version = replace(
+            default_season_version(players=["Anto", "Victor"]),
+            division_sizes=[1, 1],
+            points_by_position={1: 9, 2: 8},
+            coins_by_position={1: 15, 2: 14},
+            movement_count=1,
+            rules={"team_lock_required": "yes"},
+        )
+
+        issues = validate_season_version(version)
+
+        self.assertTrue(has_blocking_issues(issues))
+        self.assertTrue(any(issue["title"] == "Regla invalida" for issue in issues))
+
 
 if __name__ == "__main__":
     unittest.main()

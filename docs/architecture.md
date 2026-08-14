@@ -42,6 +42,13 @@ Estos snapshots congelan config aplicada, divisiones, standings, puntos y moneda
 otorgadas. Es una solucion compatible con la arquitectura actual, previa a tablas
 Supabase V2.
 
+Desde Fase 2.2, `season_config_v2` es la fuente funcional para temporada Streamlit:
+jugadores participantes, jornadas, tamanos A/B, ascensos/descensos, puntos,
+monedas y reglas funcionales. La decision documentada para Streamlit 2.0 es
+soportar oficialmente dos divisiones, Liga A y Liga B; N divisiones queda para el
+dominio/API futuro porque requiere cambiar estado, ranking, UI e historico a la
+vez.
+
 ## Problema Principal
 
 La deuda mas importante no es Supabase. Es que entidades centrales de competicion

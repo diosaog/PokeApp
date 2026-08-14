@@ -18,10 +18,11 @@ from app.liga.rewards import (
 from app.liga.snapshots import (
     ROUND_SNAPSHOTS_STATE_KEY,
     build_matchday_snapshot,
+    latest_snapshot_penalties_for_user,
     snapshot_awards_for_user,
     snapshot_for_round,
 )
-from app.season.config import current_season_version
+from app.season.config import current_season_version, season_rule_enabled
 from app.season.config import DEFAULT_MAX_ROUNDS, max_rounds
 from app.tienda.common import _eq_item
 from app.entrenadores.trainer_flags import retired_trainers
@@ -344,7 +345,7 @@ def finalize(tramo: int, *, admin_user: str | None = None) -> None:
     )
 
     try:
-        if rankB:
+        if rankB and season_rule_enabled("last_b_gets_steal", int(tramo)):
             last_user = rankB[-1]
             add_purchase(last_user, "Robar Pokemon", 0)
             try:
@@ -495,6 +496,16 @@ def current_points_total(
     if user not in _visible_league_users():
         return 0.0
     base = points_from_league(user)
+    snapshot_penalties = latest_snapshot_penalties_for_user(
+        st.session_state.get(ROUND_SNAPSHOTS_STATE_KEY, {}),
+        user,
+    )
+    if snapshot_penalties is not None:
+        dead_points_penalty = float(snapshot_penalties.get("dead_points_penalty") or 0.0)
+        points_reduction = float(snapshot_penalties.get("points_reduction") or 0.0)
+        total = base - dead_points_penalty - points_reduction
+        return _one_decimal(total)
+
     muertos = _count_muertos_for_trainer(user, raw_dead_count=raw_dead_count)
     penalties = penalties if penalties is not None else get_user_penalties(user)
     points_reduction = float(penalties.get("points_reduction") or 0.0)

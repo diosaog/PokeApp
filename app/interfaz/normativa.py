@@ -1,8 +1,11 @@
 from __future__ import annotations
 
+from copy import deepcopy
 from html import escape
 
 import streamlit as st
+
+from app.season.config import current_season_version
 
 
 NORMATIVA_SECTIONS = [
@@ -356,14 +359,132 @@ def _section_text(section: dict) -> str:
     return "\n".join(section.get("text_lines") or []).strip()
 
 
+def _configured_structure_section(section: dict) -> dict:
+    try:
+        version = current_season_version()
+    except Exception:
+        return section
+    round_count = int(version.max_rounds)
+    section = dict(section)
+    section["text_lines"] = [
+        "3. Estructura por tramos",
+        f"- La partida se divide en {round_count} tramos mas una Liga Pokemon final.",
+        "- Cada tramo finaliza tras superar determinados gimnasios.",
+        "- Al cierre de cada tramo se disputa una liga competitiva entre jugadores.",
+        "",
+        "4. Combates entre jugadores",
+        "- Liga: combates 1 vs 1, formato Bo1.",
+        "- Copa: se juega tras completar la Liga Pokemon. Formato eliminatorio, Bo3.",
+        "- En combates contra jugadores se aplican Item Clause y Sleep Clause.",
+    ]
+    visual_blocks = []
+    for block in section.get("visual_blocks") or []:
+        block = dict(block)
+        if str(block.get("title") or "") == "Estructura del Recorrido":
+            block["items"] = [
+                f"La partida se divide en {round_count} tramos mas una Liga Pokemon final.",
+                "Cada tramo finaliza tras superar determinados gimnasios.",
+                "Al cierre de cada tramo se disputa una liga competitiva entre jugadores.",
+            ]
+        visual_blocks.append(block)
+    section["visual_blocks"] = visual_blocks
+    return section
+
+
+def _configured_liga_section(section: dict) -> dict:
+    try:
+        version = current_season_version()
+    except Exception:
+        return section
+
+    sizes = list(version.division_sizes or [5, 5])
+    while len(sizes) < 2:
+        sizes.append(0)
+    a_size, b_size = int(sizes[0]), int(sizes[1])
+    player_count = len(version.players)
+    movement = min(max(int(version.movement_count or 0), 0), a_size, b_size)
+    steal_enabled = bool((version.rules or {}).get("last_b_gets_steal"))
+    steal_line = (
+        "El ultimo de Liga B recibe Robar Pokemon."
+        if steal_enabled
+        else "El ultimo de Liga B no recibe Robar Pokemon en esta version."
+    )
+    point_rows = [
+        (str(pos), str(value))
+        for pos, value in sorted(version.points_by_position.items())
+        if 1 <= int(pos) <= max(player_count, 1)
+    ]
+    coin_rows = [
+        (str(pos), str(value))
+        for pos, value in sorted(version.coins_by_position.items())
+        if 1 <= int(pos) <= max(player_count, 1)
+    ]
+    section = dict(section)
+    section["summary"] = "Distribucion de divisiones, scoring global y economia oficial de la temporada activa."
+    section["text_lines"] = [
+        "6. Divisiones (Liga A / B)",
+        f"- La temporada tiene {player_count} jugadores activos configurados.",
+        f"- Liga A tiene {a_size} jugadores y Liga B tiene {b_size} jugadores.",
+        "- Los jugadores solo se enfrentan contra rivales de su propia division.",
+        f"- Descienden los {movement} ultimos de Liga A y ascienden los {movement} primeros de Liga B.",
+        f"- {steal_line}",
+        f"- La Liga A/B de esta temporada finaliza al cerrar la jornada {int(version.max_rounds)}.",
+        "- Puntos oficiales por posicion",
+        "",
+        *[f"{pos}: {value} /" for pos, value in point_rows],
+        "",
+        "- Monedas oficiales por posicion",
+        "",
+        *[f"{pos}: {value} /" for pos, value in coin_rows],
+        "",
+        "7. Monedas",
+        "- Medallas: 4 monedas por cada medalla (max 8).",
+        "- Saldo total = medallas*4 + monedas de liga - monedas gastadas.",
+    ]
+    section["visual_blocks"] = [
+        {
+            "title": "Divisiones",
+            "items": [
+                f"La temporada tiene {player_count} jugadores activos configurados.",
+                f"Liga A tiene {a_size} jugadores y Liga B tiene {b_size} jugadores.",
+                "Los jugadores solo se enfrentan contra rivales de su propia division.",
+                f"Descienden los {movement} ultimos de Liga A y ascienden los {movement} primeros de Liga B.",
+                steal_line,
+                f"La Liga A/B de esta temporada finaliza al cerrar la jornada {int(version.max_rounds)}.",
+            ],
+        },
+        {"title": "Puntos Oficiales", "rows": point_rows},
+        {"title": "Monedas Oficiales", "rows": coin_rows},
+        {
+            "title": "Economia Base",
+            "items": [
+                "Medallas: 4 monedas por cada medalla (max 8).",
+                "Saldo total = medallas*4 + monedas de liga - monedas gastadas.",
+            ],
+        },
+    ]
+    return section
+
+
+def normativa_sections() -> list[dict]:
+    sections = deepcopy(NORMATIVA_SECTIONS)
+    for index, section in enumerate(sections):
+        section_id = str(section.get("id"))
+        if section_id == "estructura":
+            sections[index] = _configured_structure_section(section)
+        elif section_id == "liga":
+            sections[index] = _configured_liga_section(section)
+    return sections
+
+
 def get_normativa_text() -> str:
-    body = "\n\n".join(_section_text(section) for section in NORMATIVA_SECTIONS).strip()
+    body = "\n\n".join(_section_text(section) for section in normativa_sections()).strip()
     return f"Normativa ChampionsLocke\n\n{body}".strip()
 
 
 def get_normativa_section_payloads() -> dict[str, dict[str, str]]:
     payloads: dict[str, dict[str, str]] = {}
-    for section in NORMATIVA_SECTIONS:
+    for section in normativa_sections():
         payloads[str(section["id"])] = {
             "title": str(section.get("bot_title") or section.get("tab") or section["id"]),
             "text": _section_text(section),
@@ -945,21 +1066,21 @@ def _table_count(section: dict) -> int:
     return sum(1 for block in section.get("visual_blocks") or [] if block.get("rows"))
 
 
-def _total_articles() -> int:
-    return sum(_article_count(section) for section in NORMATIVA_SECTIONS)
+def _total_articles(sections: list[dict]) -> int:
+    return sum(_article_count(section) for section in sections)
 
 
-def _active_section() -> tuple[int, dict]:
-    first_id = str(NORMATIVA_SECTIONS[0]["id"])
+def _active_section(sections: list[dict]) -> tuple[int, dict]:
+    first_id = str(sections[0]["id"])
     active_id = str(st.session_state.get("normativa_rulebook_section") or first_id)
-    for index, section in enumerate(NORMATIVA_SECTIONS):
+    for index, section in enumerate(sections):
         if str(section.get("id")) == active_id:
             return index, section
     st.session_state["normativa_rulebook_section"] = first_id
-    return 0, NORMATIVA_SECTIONS[0]
+    return 0, sections[0]
 
 
-def _render_rulebook_nav(active_id: str) -> None:
+def _render_rulebook_nav(active_id: str, sections: list[dict]) -> None:
     st.markdown(
         f"""
         <div class='rulebook-index'>
@@ -968,14 +1089,14 @@ def _render_rulebook_nav(active_id: str) -> None:
               <div class='rulebook-index-title'>Indice del reglamento</div>
               <div class='rulebook-index-copy'>Selecciona un capitulo para consultar reglas, tablas y criterios oficiales.</div>
             </div>
-            <div class='rulebook-index-badge'>{len(NORMATIVA_SECTIONS)} capitulos</div>
+            <div class='rulebook-index-badge'>{len(sections)} capitulos</div>
           </div>
         </div>
         """,
         unsafe_allow_html=True,
     )
-    for row_start in range(0, len(NORMATIVA_SECTIONS), 4):
-        row_sections = NORMATIVA_SECTIONS[row_start: row_start + 4]
+    for row_start in range(0, len(sections), 4):
+        row_sections = sections[row_start: row_start + 4]
         cols = st.columns(4)
         for offset, col in enumerate(cols):
             if offset >= len(row_sections):
@@ -1111,20 +1232,29 @@ def _render_tool_block_html(block: dict, *, block_no: int, start_at: int) -> tup
 
 
 def _render_league_flow_html() -> str:
+    try:
+        version = current_season_version()
+        sizes = list(version.division_sizes or [5, 5])
+        while len(sizes) < 2:
+            sizes.append(0)
+        a_size, b_size = int(sizes[0]), int(sizes[1])
+        movement = min(max(int(version.movement_count or 0), 0), a_size, b_size)
+    except Exception:
+        a_size, b_size, movement = 5, 5, 3
     return (
         "<div class='rulebook-league-flow'>"
         "<div class='rulebook-league-node'>"
         "<span>Liga A</span>"
-        "<strong>5 jugadores</strong>"
-        "<em>Los 3 ultimos descienden al cierre del tramo.</em>"
+        f"<strong>{int(a_size)} jugadores</strong>"
+        f"<em>Los {int(movement)} ultimos descienden al cierre del tramo.</em>"
         "</div>"
         "<div class='rulebook-league-transfer'>"
         "<div><span class='rulebook-transfer-label'>Rotacion</span><strong>&#8645;</strong></div>"
         "</div>"
         "<div class='rulebook-league-node'>"
         "<span>Liga B</span>"
-        "<strong>5 jugadores</strong>"
-        "<em>Los 3 primeros ascienden al cierre del tramo.</em>"
+        f"<strong>{int(b_size)} jugadores</strong>"
+        f"<em>Los {int(movement)} primeros ascienden al cierre del tramo.</em>"
         "</div>"
         "</div>"
     )
@@ -1235,7 +1365,8 @@ def _render_section(section: dict, *, index: int) -> None:
 
 def render_normativa_home() -> None:
     _render_normativa_css()
-    active_index, active = _active_section()
+    sections = normativa_sections()
+    active_index, active = _active_section(sections)
     st.markdown(
         (
             "<section class='rulebook-hero'>"
@@ -1248,8 +1379,8 @@ def render_normativa_home() -> None:
             "<div class='rulebook-title'>Normativa de Liga</div>"
             "<p class='rulebook-subtitle'>Reglamento vigente de PokeApp, organizado como dossier tecnico para encontrar rapido caps, divisiones, comodines y normas clave.</p>"
             "<div class='rulebook-meta-grid'>"
-            f"<div class='rulebook-meta-card'><span>Capitulos</span> <strong>{len(NORMATIVA_SECTIONS)}</strong></div>"
-            f"<div class='rulebook-meta-card'><span>Articulos</span> <strong>{_total_articles()}</strong></div>"
+            f"<div class='rulebook-meta-card'><span>Capitulos</span> <strong>{len(sections)}</strong></div>"
+            f"<div class='rulebook-meta-card'><span>Articulos</span> <strong>{_total_articles(sections)}</strong></div>"
             "<div class='rulebook-meta-card'><span>Formato</span> <strong>Oficial</strong></div>"
             "</div>"
             "</div>"
@@ -1261,8 +1392,5 @@ def render_normativa_home() -> None:
         ),
         unsafe_allow_html=True,
     )
-    _render_rulebook_nav(str(active.get("id")))
+    _render_rulebook_nav(str(active.get("id")), sections)
     _render_section(active, index=active_index)
-
-
-NORMATIVA_MD = get_normativa_text()

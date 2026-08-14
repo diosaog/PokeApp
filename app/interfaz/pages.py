@@ -2,7 +2,11 @@ from __future__ import annotations
 
 import streamlit as st
 
-from app.interfaz.normativa import NORMATIVA_MD, get_normativa_section_payloads, render_normativa_home
+from app.interfaz.normativa import (
+    get_normativa_section_payloads,
+    get_normativa_text,
+    render_normativa_home,
+)
 
 
 def page_inicio() -> None:
@@ -15,7 +19,7 @@ def page_normativa() -> None:
     try:
         from app.discord_notify import sync_normativa_notification
 
-        sync_normativa_notification(NORMATIVA_MD, get_normativa_section_payloads())
+        sync_normativa_notification(get_normativa_text(), get_normativa_section_payloads())
     except Exception:
         pass
     render_normativa_home()
@@ -59,9 +63,12 @@ def page_temporada() -> None:
 def page_previa_combate() -> None:
     try:
         from app.liga.matchup import render_matchup_preview
-        from utils import USERS
+        from app.liga.context import current_jornada
+        from utils import league_users_for_round, users_with_retired_last
 
-        render_matchup_preview(list(USERS.keys()))
+        jornada = current_jornada()
+        players = users_with_retired_last(league_users_for_round(jornada).keys())
+        render_matchup_preview(players)
     except Exception as e:
         st.error(f"No se pudo cargar Team Preview: {e}")
 
