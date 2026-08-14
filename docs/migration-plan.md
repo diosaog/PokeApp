@@ -53,6 +53,10 @@ Cerrar mecanicas que afectan modelo:
 
 Al terminar esta fase se declara feature freeze funcional para 2.0.
 
+Auditoria base:
+
+- `docs/phase2-functional-audit.md`
+
 ## Fase 3 - Contratos De Dominio
 
 Definir contratos estables:
@@ -236,4 +240,3 @@ Optimizar solo con datos reales.
 - Nueva PokeApp como principal.
 - Streamlit como fallback temporal.
 - Archivo final de Streamlit cuando la nueva este estable.
-
