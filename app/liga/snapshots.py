@@ -54,12 +54,21 @@ def _clean_penalty(raw: Any) -> dict[str, Any]:
     dead_count = max(_as_int(data.get("dead_count"), 0), 0)
     points_reduction = _as_float(data.get("points_reduction"), 0.0)
     coins_reduction = _as_int(data.get("coins_reduction"), 0)
+    trainer_status = str(data.get("trainer_status") or "active").strip().lower()
+    labels_raw = data.get("trainer_status_labels")
+    labels = [
+        str(label)
+        for label in (labels_raw if isinstance(labels_raw, list) else [])
+        if str(label).strip()
+    ]
     return {
         "dead_count": dead_count,
         "dead_points_penalty": round(0.2 * dead_count, 1),
         "points_reduction": points_reduction,
         "coins_reduction": coins_reduction,
         "store_blocked": bool(data.get("store_blocked")),
+        "trainer_status": trainer_status or "active",
+        "trainer_status_labels": labels,
     }
 
 

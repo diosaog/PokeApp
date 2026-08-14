@@ -695,7 +695,7 @@ def _render_previous_round_editor(
                 st.error(str(e))
 
 
-def page_tabla() -> None:
+def page_tabla(*, admin_mode: bool = False) -> None:
     ensure_league_css()
     if st.session_state.pop(_CLEAR_EDIT_BUFFERS_NEXT_KEY, False):
         _clear_league_edit_buffers()
@@ -720,7 +720,7 @@ def page_tabla() -> None:
             st.info(
                 "No hay estado de liga en Supabase. Anto puede crear uno inicial en la nube."
             )
-            if st.button(
+            if admin_mode and st.button(
                 "Crear estado inicial de liga en Supabase", use_container_width=True
             ):
                 try:
@@ -740,16 +740,18 @@ def page_tabla() -> None:
     _render_flash_messages()
     current_user = st.session_state.get("user")
     read_only = is_trainer_retired(current_user)
-    can_manage_league = is_league_admin(current_user) and not read_only
+    can_manage_league = is_league_admin(current_user) and not read_only and bool(admin_mode)
     if read_only:
         st.info("Entrenador retirado.")
 
-    _auto_notify_latest_closed_round()
+    if admin_mode:
+        _auto_notify_latest_closed_round()
     resend_round = _latest_closed_round()
     if (
         resend_round is not None
         and _current_user_can_resend_summary()
         and discord_notifications_enabled()
+        and admin_mode
     ):
         if st.button(
             f"Reenviar resumen jornada {resend_round} a Discord",
@@ -801,255 +803,256 @@ def page_tabla() -> None:
         _queue_flash("success", "Datos de liga recargados desde el estado compartido.")
         st.rerun()
 
-    st.markdown(
-        _section_heading_html(
-            "Control de jornada",
-            "Abre, modifica o cierra resultados de la jornada activa.",
-        ),
-        unsafe_allow_html=True,
-    )
-    colA, colB = st.columns([2, 2])
-    with colA:
-        estado = "En edicion" if st.session_state.league_active else "Cerrado"
-        badge_cls = "status-warn" if st.session_state.league_active else "status-ok"
+    if admin_mode:
         st.markdown(
-            f"Tramo actual: <strong>{tramo}</strong> "
-            f"<span class='status-badge {badge_cls}'>{estado}</span>",
+            _section_heading_html(
+                "Control de jornada",
+                "Abre, modifica o cierra resultados de la jornada activa.",
+            ),
             unsafe_allow_html=True,
         )
-    with colB:
-        if st.session_state.league_active:
-            c1, c2 = st.columns(2)
-            with c1:
-                if st.button(
-                    "Finalizar jornada",
-                    use_container_width=True,
-                    disabled=not can_manage_league,
-                ):
-                    try:
-                        if not _require_league_admin_ui():
-                            return
-                        closing_tramo = int(tramo)
-                        get_matches_for(closing_tramo)
-                        finalize(closing_tramo, admin_user=str(current_user or ""))
+        colA, colB = st.columns([2, 2])
+        with colA:
+            estado = "En edicion" if st.session_state.league_active else "Cerrado"
+            badge_cls = "status-warn" if st.session_state.league_active else "status-ok"
+            st.markdown(
+                f"Tramo actual: <strong>{tramo}</strong> "
+                f"<span class='status-badge {badge_cls}'>{estado}</span>",
+                unsafe_allow_html=True,
+            )
+        with colB:
+            if st.session_state.league_active:
+                c1, c2 = st.columns(2)
+                with c1:
+                    if st.button(
+                        "Finalizar jornada",
+                        use_container_width=True,
+                        disabled=not can_manage_league,
+                    ):
                         try:
-                            expire_shop_discounts_through_jornada(closing_tramo)
-                            if closing_tramo < max_jornadas(closing_tramo):
-                                promotions = schedule_shop_promotions(
-                                    get_catalog(), closed_round=closing_tramo
-                                )
-                                if promotions and discord_notifications_enabled():
-                                    _queue_flash(
-                                        "success",
-                                        f"Aaron ha anunciado {len(promotions)} promociones "
-                                        "para la próxima jornada.",
+                            if not _require_league_admin_ui():
+                                return
+                            closing_tramo = int(tramo)
+                            get_matches_for(closing_tramo)
+                            finalize(closing_tramo, admin_user=str(current_user or ""))
+                            try:
+                                expire_shop_discounts_through_jornada(closing_tramo)
+                                if closing_tramo < max_jornadas(closing_tramo):
+                                    promotions = schedule_shop_promotions(
+                                        get_catalog(), closed_round=closing_tramo
                                     )
-                        except Exception as promotion_error:
-                            _queue_flash(
-                                "error",
-                                "La jornada se cerró, pero no se pudieron preparar "
-                                f"las promociones: {promotion_error}",
-                            )
-                        clear_money_caches()
-                        clear_ranking_caches()
-                        tabla_actualizada = general_table_sorted()
-                        podium = (
-                            tabla_actualizada[:3]
-                            if closing_tramo >= max_jornadas(closing_tramo)
-                            else None
-                        )
-                        if closing_tramo >= max_jornadas(closing_tramo):
-                            _sync_hall_of_fame_silent()
-                        if discord_notifications_enabled():
-                            notified, notify_message = _send_league_round_notification(
-                                closing_tramo, force=True
-                            )
-                            if notified:
-                                _queue_flash(
-                                    "success",
-                                    "Aaron Avisa ha enviado el resumen de la jornada a Discord.",
-                                )
-                            else:
+                                    if promotions and discord_notifications_enabled():
+                                        _queue_flash(
+                                            "success",
+                                            f"Aaron ha anunciado {len(promotions)} promociones "
+                                            "para la próxima jornada.",
+                                        )
+                            except Exception as promotion_error:
                                 _queue_flash(
                                     "error",
-                                    f"Jornada cerrada, pero Aaron Avisa no pudo enviar a Discord: {notify_message}",
+                                    "La jornada se cerró, pero no se pudieron preparar "
+                                    f"las promociones: {promotion_error}",
                                 )
-                        else:
-                            _queue_flash(
-                                "info",
-                                "Jornada cerrada sin aviso de Discord: Aaron Avisa esta silenciado.",
+                            clear_money_caches()
+                            clear_ranking_caches()
+                            tabla_actualizada = general_table_sorted()
+                            podium = (
+                                tabla_actualizada[:3]
+                                if closing_tramo >= max_jornadas(closing_tramo)
+                                else None
                             )
-                        if closing_tramo >= max_jornadas(closing_tramo):
-                            if podium:
-                                labels = ["Ganador", "Segundo puesto", "Tercer puesto"]
-                                summary = " | ".join(
-                                    f"{labels[i]}: {user}"
-                                    for i, (user, _pts) in enumerate(podium)
+                            if closing_tramo >= max_jornadas(closing_tramo):
+                                _sync_hall_of_fame_silent()
+                            if discord_notifications_enabled():
+                                notified, notify_message = _send_league_round_notification(
+                                    closing_tramo, force=True
                                 )
+                                if notified:
+                                    _queue_flash(
+                                        "success",
+                                        "Aaron Avisa ha enviado el resumen de la jornada a Discord.",
+                                    )
+                                else:
+                                    _queue_flash(
+                                        "error",
+                                        f"Jornada cerrada, pero Aaron Avisa no pudo enviar a Discord: {notify_message}",
+                                    )
+                            else:
                                 _queue_flash(
-                                    "success", f"Jornada final cerrada. {summary}."
+                                    "info",
+                                    "Jornada cerrada sin aviso de Discord: Aaron Avisa esta silenciado.",
                                 )
+                            if closing_tramo >= max_jornadas(closing_tramo):
+                                if podium:
+                                    labels = ["Ganador", "Segundo puesto", "Tercer puesto"]
+                                    summary = " | ".join(
+                                        f"{labels[i]}: {user}"
+                                        for i, (user, _pts) in enumerate(podium)
+                                    )
+                                    _queue_flash(
+                                        "success", f"Jornada final cerrada. {summary}."
+                                    )
+                                else:
+                                    _queue_flash(
+                                        "success",
+                                        "Jornada final cerrada. La liga ha terminado.",
+                                    )
                             else:
                                 _queue_flash(
                                     "success",
-                                    "Jornada final cerrada. La liga ha terminado.",
+                                    "Jornada cerrada: rankings calculados y ascensos/descensos aplicados.",
                                 )
-                        else:
-                            _queue_flash(
-                                "success",
-                                "Jornada cerrada: rankings calculados y ascensos/descensos aplicados.",
-                            )
-                        _schedule_clear_league_edit_buffers()
-                        st.rerun()
-                    except Exception as e:
-                        st.error(str(e))
-            with c2:
-                if st.button(
-                    "Cancelar jornada",
-                    use_container_width=True,
-                    disabled=not can_manage_league,
-                ):
-                    if not _require_league_admin_ui():
-                        return
-                    st.session_state.league_active = False
-                    if tramo in st.session_state.league_matches:
-                        del st.session_state.league_matches[tramo]
-                    persist_state()
-                    clear_money_caches()
-                    _queue_flash(
-                        "info", "Edicion cancelada. No se guardara ningun resultado."
-                    )
-                    _schedule_clear_league_edit_buffers()
-                    st.rerun()
-        else:
-            c1, c2 = st.columns(2)
-            with c1:
-                if liga_finalizada:
-                    st.info("La liga ha finalizado. No se pueden crear mas jornadas.")
-                else:
+                            _schedule_clear_league_edit_buffers()
+                            st.rerun()
+                        except Exception as e:
+                            st.error(str(e))
+                with c2:
                     if st.button(
-                        "Editar jornada",
+                        "Cancelar jornada",
                         use_container_width=True,
                         disabled=not can_manage_league,
                     ):
                         if not _require_league_admin_ui():
                             return
-                        st.session_state.league_prev_edit_active = False
-                        st.session_state.league_active = True
-                        get_matches_for(tramo)
+                        st.session_state.league_active = False
+                        if tramo in st.session_state.league_matches:
+                            del st.session_state.league_matches[tramo]
                         persist_state()
-                        _notify_missing_team_locks_once(int(tramo))
+                        clear_money_caches()
+                        _queue_flash(
+                            "info", "Edicion cancelada. No se guardara ningun resultado."
+                        )
                         _schedule_clear_league_edit_buffers()
                         st.rerun()
-            with c2:
-                prev_label = (
-                    f"Cerrar edicion tramo {prev_tramo}"
-                    if st.session_state.get("league_prev_edit_active") and prev_tramo
-                    else "Modificar jornada anterior"
-                )
-                if st.button(
-                    prev_label,
-                    use_container_width=True,
-                    disabled=(not has_prev_closed) or not can_manage_league,
-                ):
-                    if not _require_league_admin_ui():
-                        return
-                    st.session_state.league_prev_edit_active = not st.session_state.get(
-                        "league_prev_edit_active", False
-                    )
-                    st.rerun()
-                if not has_prev_closed:
-                    st.caption("No hay jornada anterior cerrada para editar.")
-
-    st.markdown(
-        _section_heading_html(
-            "Gestion de divisiones",
-            "Ajusta los grupos activos antes de abrir una jornada.",
-        ),
-        unsafe_allow_html=True,
-    )
-    with st.expander(
-        f"Divisiones ({division_a_size} y {division_b_size})",
-        expanded=False,
-    ):
-        players = league_players
-        cur_divs = (
-            st.session_state.league_divisions
-            if isinstance(st.session_state.league_divisions, dict)
-            else {"A": [], "B": []}
-        )
-
-        def _normalize_players(values: list) -> list[str]:
-            canon = {str(u).strip().lower(): u for u in players}
-            out: list[str] = []
-            for v in values or []:
-                key = str(v).strip().lower()
-                if not key:
-                    continue
-                name = canon.get(key)
-                if name and name not in out:
-                    out.append(name)
-            return out
-
-        key_A = "league_div_A"
-        if key_A in st.session_state:
-            st.session_state[key_A] = _normalize_players(st.session_state.get(key_A))
-
-        default_A = _normalize_players(cur_divs.get("A", []))[:division_a_size]
-        sel_A = st.multiselect(
-            f"Liga A ({division_a_size} jugadores)",
-            players,
-            default=default_A,
-            max_selections=division_a_size,
-            key=key_A,
-        )
-        remaining = [p for p in players if p not in sel_A]
-        key_B = "league_div_B"
-        if key_B in st.session_state:
-            st.session_state[key_B] = _normalize_players(st.session_state.get(key_B))
-            st.session_state[key_B] = [
-                p for p in st.session_state[key_B] if p in remaining
-            ]
-
-        default_B = [
-            p for p in _normalize_players(cur_divs.get("B", [])) if p in remaining
-        ][:division_b_size]
-        sel_B = st.multiselect(
-            f"Liga B ({division_b_size} jugadores)",
-            remaining,
-            default=default_B,
-            max_selections=division_b_size,
-            key=key_B,
-        )
-        if st.button("Guardar divisiones", disabled=not can_manage_league):
-            if not _require_league_admin_ui():
-                return
-            if len(sel_A) == division_a_size and len(sel_B) == division_b_size:
-                st.session_state.league_divisions = {"A": sel_A, "B": sel_B}
-                st.session_state.league_tramo = 1
-                st.session_state.league_active = False
-                st.session_state.league_matches = {}
-                st.session_state.league_results = {}
-                st.session_state.league_movements = {}
-                st.session_state[ROUND_SNAPSHOTS_STATE_KEY] = {}
-                persist_state()
-                clear_money_caches()
-                clear_ranking_caches()
-                _queue_flash("success", "Divisiones actualizadas.")
-                _schedule_clear_league_edit_buffers()
-                st.rerun()
             else:
-                st.error(
-                    f"Selecciona exactamente {division_a_size} en A "
-                    f"y {division_b_size} en B."
-                )
+                c1, c2 = st.columns(2)
+                with c1:
+                    if liga_finalizada:
+                        st.info("La liga ha finalizado. No se pueden crear mas jornadas.")
+                    else:
+                        if st.button(
+                            "Editar jornada",
+                            use_container_width=True,
+                            disabled=not can_manage_league,
+                        ):
+                            if not _require_league_admin_ui():
+                                return
+                            st.session_state.league_prev_edit_active = False
+                            st.session_state.league_active = True
+                            get_matches_for(tramo)
+                            persist_state()
+                            _notify_missing_team_locks_once(int(tramo))
+                            _schedule_clear_league_edit_buffers()
+                            st.rerun()
+                with c2:
+                    prev_label = (
+                        f"Cerrar edicion tramo {prev_tramo}"
+                        if st.session_state.get("league_prev_edit_active") and prev_tramo
+                        else "Modificar jornada anterior"
+                    )
+                    if st.button(
+                        prev_label,
+                        use_container_width=True,
+                        disabled=(not has_prev_closed) or not can_manage_league,
+                    ):
+                        if not _require_league_admin_ui():
+                            return
+                        st.session_state.league_prev_edit_active = not st.session_state.get(
+                            "league_prev_edit_active", False
+                        )
+                        st.rerun()
+                    if not has_prev_closed:
+                        st.caption("No hay jornada anterior cerrada para editar.")
 
-    if st.session_state.get("league_prev_edit_active") and prev_tramo:
-        _render_previous_round_editor(
-            prev_tramo=prev_tramo,
-            current_tramo=tramo,
-            read_only=not can_manage_league,
+        st.markdown(
+            _section_heading_html(
+                "Gestion de divisiones",
+                "Ajusta los grupos activos antes de abrir una jornada.",
+            ),
+            unsafe_allow_html=True,
         )
+        with st.expander(
+            f"Divisiones ({division_a_size} y {division_b_size})",
+            expanded=False,
+        ):
+            players = league_players
+            cur_divs = (
+                st.session_state.league_divisions
+                if isinstance(st.session_state.league_divisions, dict)
+                else {"A": [], "B": []}
+            )
+
+            def _normalize_players(values: list) -> list[str]:
+                canon = {str(u).strip().lower(): u for u in players}
+                out: list[str] = []
+                for v in values or []:
+                    key = str(v).strip().lower()
+                    if not key:
+                        continue
+                    name = canon.get(key)
+                    if name and name not in out:
+                        out.append(name)
+                return out
+
+            key_A = "league_div_A"
+            if key_A in st.session_state:
+                st.session_state[key_A] = _normalize_players(st.session_state.get(key_A))
+
+            default_A = _normalize_players(cur_divs.get("A", []))[:division_a_size]
+            sel_A = st.multiselect(
+                f"Liga A ({division_a_size} jugadores)",
+                players,
+                default=default_A,
+                max_selections=division_a_size,
+                key=key_A,
+            )
+            remaining = [p for p in players if p not in sel_A]
+            key_B = "league_div_B"
+            if key_B in st.session_state:
+                st.session_state[key_B] = _normalize_players(st.session_state.get(key_B))
+                st.session_state[key_B] = [
+                    p for p in st.session_state[key_B] if p in remaining
+                ]
+
+            default_B = [
+                p for p in _normalize_players(cur_divs.get("B", [])) if p in remaining
+            ][:division_b_size]
+            sel_B = st.multiselect(
+                f"Liga B ({division_b_size} jugadores)",
+                remaining,
+                default=default_B,
+                max_selections=division_b_size,
+                key=key_B,
+            )
+            if st.button("Guardar divisiones", disabled=not can_manage_league):
+                if not _require_league_admin_ui():
+                    return
+                if len(sel_A) == division_a_size and len(sel_B) == division_b_size:
+                    st.session_state.league_divisions = {"A": sel_A, "B": sel_B}
+                    st.session_state.league_tramo = 1
+                    st.session_state.league_active = False
+                    st.session_state.league_matches = {}
+                    st.session_state.league_results = {}
+                    st.session_state.league_movements = {}
+                    st.session_state[ROUND_SNAPSHOTS_STATE_KEY] = {}
+                    persist_state()
+                    clear_money_caches()
+                    clear_ranking_caches()
+                    _queue_flash("success", "Divisiones actualizadas.")
+                    _schedule_clear_league_edit_buffers()
+                    st.rerun()
+                else:
+                    st.error(
+                        f"Selecciona exactamente {division_a_size} en A "
+                        f"y {division_b_size} en B."
+                    )
+
+        if st.session_state.get("league_prev_edit_active") and prev_tramo:
+            _render_previous_round_editor(
+                prev_tramo=prev_tramo,
+                current_tramo=tramo,
+                read_only=not can_manage_league,
+            )
 
     A = st.session_state.league_divisions["A"]
     B = st.session_state.league_divisions["B"]
@@ -1061,7 +1064,7 @@ def page_tabla() -> None:
     division_players = [str(user) for user in (A + B)]
     coins_by_user = {user: _coins_for_user(user) for user in division_players}
 
-    if st.session_state.league_active:
+    if st.session_state.league_active and admin_mode:
         st.markdown(
             _section_heading_html(
                 "Resultados",
@@ -1327,48 +1330,49 @@ def page_tabla() -> None:
                 unsafe_allow_html=True,
             )
 
-    st.markdown(
-        _section_heading_html(
-            "Zona critica",
-            "Reinicia solo cuando quieras borrar el progreso de liga actual.",
-        ),
-        unsafe_allow_html=True,
-    )
-    confirm = st.selectbox(
-        "Seguro que quieres reiniciar la Liga?",
-        ["No", "Si"],
-        key="reset_league_ligatabla",
-    )
-    if st.button(
-        "Reiniciar liga",
-        key="btn_reset_league_ligatabla",
-        disabled=not can_manage_league,
-    ):
-        if not _require_league_admin_ui():
-            return
-        if confirm == "Si":
-            players = users_with_retired_last(active_users())
-            division_a_size = division_a_size_for_count(len(players), 1)
-            st.session_state.league_tramo = 1
-            st.session_state.league_active = False
-            st.session_state.league_results = {}
-            st.session_state.league_matches = {}
-            st.session_state.league_temp_order = {"A": [], "B": []}
-            st.session_state.league_divisions = {
-                "A": players[:division_a_size],
-                "B": players[division_a_size:],
-            }
-            st.session_state.league_movements = {}
-            st.session_state[ROUND_SNAPSHOTS_STATE_KEY] = {}
-            try:
-                clear_purchases()
-            except Exception:
-                pass
-            persist_state()
-            clear_money_caches()
-            clear_ranking_caches()
-            _queue_flash("success", "Liga reiniciada.")
-            _schedule_clear_league_edit_buffers()
-            st.rerun()
-        else:
-            st.info("Operacion cancelada. La liga sigue igual.")
+    if admin_mode:
+        st.markdown(
+            _section_heading_html(
+                "Zona critica",
+                "Reinicia solo cuando quieras borrar el progreso de liga actual.",
+            ),
+            unsafe_allow_html=True,
+        )
+        confirm = st.selectbox(
+            "Seguro que quieres reiniciar la Liga?",
+            ["No", "Si"],
+            key="reset_league_ligatabla",
+        )
+        if st.button(
+            "Reiniciar liga",
+            key="btn_reset_league_ligatabla",
+            disabled=not can_manage_league,
+        ):
+            if not _require_league_admin_ui():
+                return
+            if confirm == "Si":
+                players = users_with_retired_last(active_users())
+                division_a_size = division_a_size_for_count(len(players), 1)
+                st.session_state.league_tramo = 1
+                st.session_state.league_active = False
+                st.session_state.league_results = {}
+                st.session_state.league_matches = {}
+                st.session_state.league_temp_order = {"A": [], "B": []}
+                st.session_state.league_divisions = {
+                    "A": players[:division_a_size],
+                    "B": players[division_a_size:],
+                }
+                st.session_state.league_movements = {}
+                st.session_state[ROUND_SNAPSHOTS_STATE_KEY] = {}
+                try:
+                    clear_purchases()
+                except Exception:
+                    pass
+                persist_state()
+                clear_money_caches()
+                clear_ranking_caches()
+                _queue_flash("success", "Liga reiniciada.")
+                _schedule_clear_league_edit_buffers()
+                st.rerun()
+            else:
+                st.info("Operacion cancelada. La liga sigue igual.")

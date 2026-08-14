@@ -25,7 +25,11 @@ from app.liga.snapshots import (
 from app.season.config import current_season_version, season_rule_enabled
 from app.season.config import DEFAULT_MAX_ROUNDS, max_rounds
 from app.tienda.common import _eq_item
-from app.entrenadores.trainer_flags import retired_trainers
+from app.entrenadores.trainer_flags import (
+    retired_trainers,
+    status_labels_for,
+    trainer_status,
+)
 from storage import (
     add_purchase,
     get_current_save_for_user,
@@ -273,6 +277,8 @@ def _penalties_for_snapshot(players: list[str]) -> dict[str, dict]:
             "points_reduction": float(penalties.get("points_reduction") or 0.0),
             "coins_reduction": int(penalties.get("coins_reduction") or 0),
             "store_blocked": bool(penalties.get("store_blocked")),
+            "trainer_status": trainer_status(player),
+            "trainer_status_labels": status_labels_for(player),
         }
     return out
 

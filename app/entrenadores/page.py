@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import json
 from pathlib import Path
 from html import escape
 import streamlit as st
@@ -16,7 +15,6 @@ from app.entrenadores.summary import trainer_summary_with_portrait_ui
 from app.entrenadores.trainer_flags import (
     format_trainer_with_flags,
     is_trainer_retired,
-    set_trainer_retired,
     sync_trainer_robbed_flags_from_history,
 )
 from app.entrenadores.boxes import boxes_grid_ui
@@ -25,14 +23,12 @@ from app.interfaz.media import image_data_uri
 from app.ui.team_grid import team_grid_ui
 from app.interfaz.theme import apply_platinum_ui
 from app.liga.context import current_jornada
-from app.liga.ranking import clear_ranking_caches
-from app.tienda.money import clear_money_caches, money_breakdown
+from app.tienda.money import money_breakdown
 from conex_pkhex import PKHeXRuntime, extract_team, get_bridge_path, open_sav_cached
 from storage import (
     get_current_save_for_user,
     get_team_lock,
     list_saves_by_user,
-    settings_get,
     upsert_team_lock,
 )
 from utils import DEFAULT_DLL_HINT, USERS, active_users, list_user_saves, users_with_retired_last
@@ -2030,56 +2026,6 @@ def _render_quick_status(
     )
 
 
-def _notify_trainer_retired_async(trainer: str, by_user: str | None = None) -> None:
-    try:
-        from app import discord_notify
-
-        enabled = getattr(discord_notify, "discord_notifications_enabled", None)
-        if callable(enabled) and not enabled():
-            return
-
-        existing = getattr(discord_notify, "notify_trainer_retired_async", None)
-        if callable(existing):
-            existing(trainer=trainer, by_user=by_user)
-            return
-
-        import threading
-
-        def _send() -> None:
-            try:
-                fields = []
-                if by_user:
-                    fields.append(
-                        {
-                            "name": "Registrado por",
-                            "value": str(by_user),
-                            "inline": True,
-                        }
-                    )
-                discord_notify._post_webhook(
-                    {
-                        "embeds": [
-                            discord_notify._embed(
-                                title="Entrenador retirado",
-                                description=(
-                                    f"{trainer} se ha retirado de la liga. "
-                                    "Sus resultados anteriores se conservan, pero deja de contar "
-                                    "para jornadas, puntos, monedas y sistemas activos."
-                                ),
-                                color=0x95A5A6,
-                                fields=fields,
-                            )
-                        ]
-                    }
-                )
-            except Exception:
-                pass
-
-        threading.Thread(target=_send, daemon=True).start()
-    except Exception:
-        pass
-
-
 def _save_meta_for_lock(user: str, save_path: Path | None) -> tuple[int | None, str | None]:
     if not user or not save_path:
         return None, None
@@ -2307,57 +2253,6 @@ def page_entrenadores_view() -> None:
         pokemon_detail_panel()
 
 
-def _render_retirement_admin() -> None:
-    current_user = str(st.session_state.get("user") or "")
-    if current_user.strip().lower() != "anto":
-        return
-
-    st.markdown("---")
-    st.markdown(
-        "<div class='trainers-admin-heading'>Administracion</div>",
-        unsafe_allow_html=True,
-    )
-    with st.expander("Gestion de abandonos", expanded=False):
-        league_active = False
-        try:
-            raw_state = settings_get("league_state")
-            if raw_state:
-                league_active = bool(json.loads(raw_state).get("active"))
-        except Exception:
-            league_active = bool(st.session_state.get("league_active"))
-        if league_active:
-            st.warning("Cierra la jornada antes de marcar un abandono.")
-        candidates = [user for user in USERS.keys() if not is_trainer_retired(user)]
-        if not candidates:
-            st.caption("No quedan entrenadores disponibles para retirar.")
-            return
-        target = st.selectbox(
-            "Entrenador que abandona",
-            candidates,
-            format_func=format_trainer_with_flags,
-            key="retirement_target",
-        )
-        confirm = st.text_input(
-            "Escribe RETIRAR para confirmar",
-            key="retirement_confirm",
-        )
-        if st.button(
-            "Marcar abandono",
-            disabled=(confirm != "RETIRAR") or league_active,
-            use_container_width=True,
-            key="retirement_submit",
-        ):
-            try:
-                set_trainer_retired(str(target), by_user=current_user)
-                clear_money_caches()
-                clear_ranking_caches()
-                _notify_trainer_retired_async(str(target), by_user=current_user)
-                st.success(f"{target} marcado como retirado.")
-                st.rerun()
-            except Exception as e:
-                st.error(f"No se pudo marcar el abandono: {e}")
-
-
 def page_entrenadores() -> None:
     apply_platinum_ui("Entrenadores")
     _render_trainers_page_css()
@@ -2426,4 +2321,3 @@ def page_entrenadores() -> None:
     page_entrenadores_setup()
 
     page_entrenadores_view()
-    _render_retirement_admin()

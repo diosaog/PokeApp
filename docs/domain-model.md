@@ -10,10 +10,21 @@ consumidos por tests, API, React o cualquier cliente futuro.
 - `id`
 - `name`
 - `pin_hash` o credencial equivalente
-- `status`: active, retired
-- `flags`: robbed, retired, penalties
+- `status`: active, retired, abandoned, disqualified
+- `flags`: robbed, penalties, cosmetic/status markers that do not remove the
+  trainer from competition by themselves
 - `current_save_id`
 - `season_memberships`
+
+Estado Streamlit 2.3:
+
+- `trainer_flags` sigue viviendo como JSON en `settings`.
+- `retired`, `abandoned` y `disqualified` son TrainerStatus administrativos.
+- `robbed` sigue siendo TrainerFlag funcional de tienda/redemptions.
+- La app mantiene `is_trainer_retired()` como compatibilidad, pero semánticamente
+  significa "entrenador inactivo".
+- No existe reactivacion automatica: los estados inactivos son permanentes para
+  las reglas actuales.
 
 ### Pokemon
 
@@ -62,6 +73,15 @@ mantiene este contrato.
 - `started_at`
 - `finished_at`
 - `active_version_id`
+
+Estado Streamlit 2.3:
+
+- No hay `season_id` real todavía.
+- El ciclo objetivo queda documentado como `active -> finished -> archived ->
+  nueva draft/active`.
+- El reset global se expone como "descartar temporada" en Admin, con decision y
+  confirmacion textual. "Guardar en historial" queda bloqueado hasta implementar
+  archivo completo en la siguiente fase.
 
 ### SeasonVersion
 
@@ -181,7 +201,7 @@ Estado Streamlit 2.2:
 
 - `id`
 - `season_id`
-- `type`: save_uploaded, purchase, team_locked, season_changed, retired, round_closed
+- `type`: save_uploaded, purchase, team_locked, season_changed, trainer_status_changed, round_closed
 - `actor`
 - `target`
 - `summary`

@@ -59,6 +59,16 @@ Auditoria base:
 
 - `docs/phase2-functional-audit.md`
 
+Estado 2.3:
+
+- `Temporada/Admin` centraliza estado, configuracion, gestion de entrenadores,
+  consola de Liga, historial conceptual y zona de riesgo.
+- `TrainerStatus` ya distingue `retired`, `abandoned` y `disqualified`.
+- `TrainerFlags` conserva `robbed` separado del estado competitivo.
+- El reset global pasa a "descartar temporada" con doble confirmacion.
+- Guardar temporadas completas en historial queda diferido a 2.4 porque necesita
+  archivo verificable antes de reiniciar.
+
 ## Fase 3 - Contratos De Dominio
 
 Definir contratos estables:

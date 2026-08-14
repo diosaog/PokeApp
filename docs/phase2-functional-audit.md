@@ -5,6 +5,111 @@ Audit date: 2026-08-14
 Scope: functional audit only. No runtime behavior, rules, data, Supabase schema,
 Discord behavior, scoring or UI flow was changed by this document.
 
+## 2.3 Update - Trainer Status And Admin Centralization
+
+Update date: 2026-08-15
+
+Principle adopted:
+
+- Normal pages show and let trainers use PokeApp.
+- `Temporada/Admin` changes official PokeApp state.
+
+### Admin Control Inventory
+
+| Page | Controls found | Classification | 2.3 outcome |
+| --- | --- | --- | --- |
+| Entrenadores | Mark abandonment/retirement | Official admin mutation | Moved to `Temporada/Admin > Entrenadores`. |
+| Entrenadores | Team lock, bridge load, inventory use | Normal trainer actions | Kept in Entrenadores. |
+| Saves | Global `Reset / Wipe` | Danger/admin | Removed from Saves and moved conceptually to `Temporada/Admin > Riesgo`. |
+| Saves | Upload, set current, history, download | Normal save actions | Kept in Saves. |
+| Liga | Open jornada, close jornada, cancel, edit previous round, divisions, reset Liga | Official competition/admin mutations | Render only with `admin_mode=True`, reached from `Temporada/Admin > Competicion`. |
+| Liga | Refresh, standings, divisions, history, podium | Consultation/competition view | Kept in Liga normal. |
+| Temporada/Admin | Season config editor | Official admin mutation | Kept and organized under Configuracion. |
+| Temporada/Admin | Trainer status changes | Official admin mutation | Added under Gestion de entrenadores. |
+| Temporada/Admin | Pokemon flag maintenance | Danger/admin maintenance | Added under Zona de riesgo. |
+| Temporada/Admin | Discard active season | Danger/admin | Added with explicit decision and textual confirmation. |
+| Tienda | Purchase, confirm purchase, redemption flows | Normal trainer/shop actions | Kept in Tienda. |
+| Tienda | Reset Pokemon flags | Danger/admin maintenance | Removed from normal Tienda page and moved to Admin. |
+| Copa | Create/reset/advance cup rounds | Competition-specific official mutations | Kept for now because Copa is separate from Liga and out of scope for this mini-phase. Future Admin unification should revisit it. |
+| Juicios | Start/edit/vote/finish/cancel cases | Domain workflow mutations | Kept in Juicios because sanctions have their own flow. Future Admin/API should harden permissions. |
+| Hall of Fame | Auto-sync historical display | Derived historical view | Not touched in 2.3. |
+
+### TrainerStatus
+
+`app/entrenadores/trainer_flags.py` now formalizes:
+
+- `active`: can participate normally.
+- `retired`: administrative retirement; old results remain, future active systems ignore the trainer.
+- `abandoned`: abandonment of the active season; same competitive effect as retired, but historically distinct.
+- `disqualified`: administrative inactive state, implemented with the same inactive effect because it is low-risk and useful for Admin.
+
+Existing code still calls `is_trainer_retired()` in many places. In 2.3 that
+function is kept as compatibility and means "inactive trainer" internally.
+
+Inactive effects:
+
+- Ranking: active players rank normally; inactive players are appended at the bottom with `0.0`.
+- Points/coins: inactive users do not receive active league rewards.
+- Divisions: inactive users are excluded from sanitized active divisions.
+- Team Preview: active roster sources exclude inactive trainers where season roster is used.
+- Tienda: inactive users cannot use active shop/comodin flows.
+- Saves: inactive users can consult but not upload as active competitors.
+- History: previous closed snapshots remain stored and are not rewritten.
+
+No reactivation button was added because current product rules treat these states
+as permanent.
+
+### TrainerFlags
+
+`robbed` remains a flag, not a status.
+
+- It can coexist only with active trainers.
+- It is cleared when a trainer becomes inactive.
+- Historical redemption sync still seeds robbed flags, skipping inactive trainers.
+- Robbed-cycle reset still works against active trainers.
+
+### Admin Back Office
+
+`Temporada/Admin` now has these areas:
+
+- Estado
+- Configuracion
+- Entrenadores
+- Competicion
+- Historial
+- Riesgo
+
+The Liga console is loaded from Admin with `page_tabla(admin_mode=True)`.
+The normal Liga page does not render official controls.
+
+### Wipe / Reset
+
+The old Saves wipe is no longer exposed there. The current safe model is:
+
+- "Guardar en historial": visible but blocked until a complete archive flow exists.
+- "Descartar temporada": allowed only for Anto, requires explicit decision and
+  typing `DESCARTAR`, then calls the legacy wipe function.
+
+This prepares the desired lifecycle:
+
+```text
+ACTIVE -> FINISHED -> ARCHIVED -> nueva DRAFT/ACTIVE
+```
+
+No `season_id` or archive tables were added in 2.3.
+
+### Historial vs Hall Of Fame
+
+- Historial de temporadas: future complete technical archive of one season.
+- Hall of Fame: prestige/summary view of champions and achievements.
+
+Hall may derive from season archives later, but it is not the archive itself.
+
+### Snapshot Rule
+
+Closed round snapshots now keep trainer status metadata inside penalty/status data.
+Changing a trainer status later does not rewrite an already closed jornada.
+
 ## Executive Summary
 
 Phase 2 is partially implemented, but it is not feature-freeze ready yet.
@@ -14,7 +119,7 @@ The strongest pieces already in place are:
 - `season_config_v2` as a versioned JSON setting with `effective_round`.
 - A real Anto-only season editor in `app/interfaz/temporada.py`.
 - Dynamic league rewards through `app/liga/rewards.py`.
-- Trainer flags for `retired` and `robbed`.
+- Trainer status/flags for inactive trainers and `robbed`.
 - Team locks, shop discounts and purchases in dedicated tables.
 - Hall of Fame auto-sync from Liga and Copa sources.
 - Recent notifications derived from saves, purchases and team locks.
@@ -24,8 +129,10 @@ The largest gaps before Phase 2 can close are:
 - Historic league results are not immutable enough. Positions are stored, but
   points/coins/config snapshots are not.
 - The league implementation is still hard-wired to two divisions, A and B.
-- Some admin-grade league controls are still available to any active trainer.
-- `abandono` is a UI concept mapped to `retired`; it is not a separate state.
+- Phase 2.3 moved the highest-risk admin controls into `Temporada/Admin`; Copa
+  and Juicios still keep their domain workflows in-place until a later pass.
+- `abandono` is now a distinct TrainerStatus (`abandoned`) with the same current
+  competitive effect as retired.
 - Hall of Fame entries are automatic-ish, but their team snapshot can drift
   because it reads the current trainer snapshot instead of the locked/final team.
 - Notifications are not first-class `ActivityEvent` rows; they are derived views.
@@ -140,8 +247,8 @@ version/snapshot.
 3. Anto can save a new season config version to `settings.season_config_v2`.
 4. Liga state is restored from `settings.league_state` using strict Supabase mode.
 5. `ensure_state()` initializes missing league data from active users.
-6. Divisions can be manually adjusted in Liga.
-7. A jornada is opened with `Editar jornada`.
+6. Divisions can be manually adjusted from `Temporada/Admin > Competicion`.
+7. A jornada is opened with `Editar jornada` from the Admin Liga console.
 8. Opening a jornada creates round-robin pairings for current A/B divisions.
 9. Opening a jornada triggers one missing team-lock Discord warning per round.
 10. Trainers can lock their own current 6 Pokemon from `Entrenadores`.
@@ -156,14 +263,14 @@ version/snapshot.
 ### Manual Actions
 
 - Configure season version.
-- Adjust divisions.
-- Open jornada.
-- Mark winners.
-- Save results.
-- Finalize jornada.
-- Edit previous jornada.
-- Reset Liga.
-- Mark trainer abandonment/retirement.
+- Adjust divisions from Admin.
+- Open jornada from Admin.
+- Mark winners from Admin.
+- Save results from Admin.
+- Finalize jornada from Admin.
+- Edit previous jornada from Admin.
+- Reset Liga from Admin.
+- Mark trainer retired/abandoned/disqualified from Admin.
 - Upload saves.
 - Lock team.
 
@@ -188,7 +295,7 @@ version/snapshot.
 - `purchases`: bought items and rewards.
 - `shop_discounts`: promotions.
 - `redemptions`: item usage events.
-- `trainer_flags` in `settings`: retired/robbed flags.
+- `trainer_flags` in `settings`: trainer status plus robbed flag.
 - `hall_of_fame_v1` in `settings`: historical entries.
 - `saves`: save metadata; bytes in Supabase Storage or local files.
 
@@ -292,8 +399,7 @@ Then:
 
 ### Admin-Grade Controls Not Fully Restricted
 
-These Liga controls are currently disabled only for retired users, not restricted
-to Anto:
+Before 2.3, these Liga controls were visible in the normal Liga page:
 
 - open/edit jornada
 - finalize jornada
@@ -302,7 +408,9 @@ to Anto:
 - save divisions
 - reset Liga
 
-This is a high-priority Phase 2 permission gap.
+In 2.3 they render only through `page_tabla(admin_mode=True)`, which is opened
+from `Temporada/Admin > Competicion`. Backend functions such as `finalize()` and
+`recompute_round()` already require Anto.
 
 ### Missing Or Partial Admin Goals
 
@@ -312,53 +420,63 @@ This is a high-priority Phase 2 permission gap.
 - `division_count` is not actually configurable beyond 2.
 - Adding new trainer names in season config does not create credentials, portrait
   assets or trainer registry entries.
-- `rules` can be stored but not edited in UI and not consistently used.
+- `rules` are editable in Admin config; current functional rules are
+  `team_lock_required` and `last_b_gets_steal`.
 - No Discord notification is attached to season config changes yet.
 
 ## 2E - Trainer States
 
-### Retired
+### Status Model
 
 Storage:
 
 - `settings.trainer_flags`
-- Shape per trainer includes `retired`, `retired_at`, optional `retired_by`.
+- Shape per trainer includes `status`, `inactive_reason`, legacy `retired`, and
+  optional audit fields such as `inactive_at`, `inactive_by`, `abandoned_at` or
+  `disqualified_at`.
 - Module: `app/entrenadores/trainer_flags.py`
+
+Statuses:
+
+- `active`
+- `retired`
+- `abandoned`
+- `disqualified`
 
 Activation:
 
-- UI: `Entrenadores -> Administracion -> Gestion de abandonos`
+- UI: `Temporada/Admin -> Entrenadores`
 - Only Anto can access it.
-- Disabled while a league round is active.
+- Disabled while a league round is active to avoid mutating the open round.
 
 Effects:
 
-- `active_users()` excludes retired trainers.
-- Liga divisions are sanitized without retired trainers.
-- Ranking appends retired users at the bottom with `0.0`.
-- `points_from_league()` and `coins_from_league()` return 0 for retired users.
+- `active_users()` excludes inactive trainers.
+- Liga divisions are sanitized without inactive trainers.
+- Ranking appends inactive users at the bottom with `0.0`.
+- `points_from_league()` and `coins_from_league()` return 0 for inactive users.
 - Money breakdown returns 0 and `store_blocked=True`.
-- Saves upload is disabled for retired users.
-- Redeem/comodin flow is blocked for retired users.
-- League page is read-only for a retired logged-in user.
+- Saves upload is disabled for inactive users.
+- Redeem/comodin flow is blocked for inactive users.
+- League page is read-only for an inactive logged-in user.
 
 Visuals:
 
 - Sidebar status shows `Consulta`.
-- Liga/table can show a `Retirado` badge.
-- Entrenadores profile shows `Retirado`.
+- Liga/table can show the specific inactive badge.
+- Entrenadores profile shows the specific inactive status.
 - Saves summary says consultation mode.
 
 Reversibility:
 
-- No UI exists to unretire.
-- It can only be reversed manually by editing `trainer_flags`.
+- No UI exists to reactivate.
+- Current product rules treat inactive statuses as permanent.
 
 Risk:
 
-- Old results remain in `league_results`, but totals become 0 because scoring
-  rejects users not in `active_users()`. If the desired rule is "historical
-  points remain visible but no new points accrue", this needs a snapshot fix.
+- Old results remain in `league_results`. Closed snapshots now keep status
+  metadata and awards, so historical closed jornadas are not rewritten by later
+  status changes.
 
 ### Robbed
 
@@ -401,7 +519,7 @@ Cleanup:
   robbed flags when every active trainer has been robbed.
 - It sets `trainer_robbed_history_watermark` to avoid historical redemptions
   re-triggering old cycle flags.
-- Retiring a trainer removes robbed metadata from that trainer.
+- Making a trainer inactive removes robbed metadata from that trainer.
 
 Dependencies:
 
@@ -413,18 +531,10 @@ Dependencies:
 
 ### Abandono
 
-There is no separate `abandono` entity/state today.
+`abandono` is now `status="abandoned"`.
 
-Current behavior:
-
-- UI calls it "Gestion de abandonos" / "Marcar abandono".
-- Implementation calls `set_trainer_retired()`.
-- Therefore today `abandono == retired` functionally.
-
-If 2.0 needs `retirado != abandono`, a new field is required, for example:
-
-- `status: active | retired | abandoned`
-- or separate booleans with clear precedence.
+It shares the same current competitive effect as retired, but remains
+historically distinguishable in `trainer_flags` and snapshots.
 
 ## 2F - Hall Of Fame
 
@@ -524,20 +634,20 @@ Recommended future direction:
 | Current section | `st.session_state` | Pure UI state. |
 | Season config | `settings.season_config_v2` | No season id/status. |
 | League official state | `settings.league_state` mirrored in `st.session_state` | Session can be stale; strict Supabase mitigates some risk. |
-| Matches/results | `league_state` JSON | No immutable standings snapshot. |
-| Points/coins from league | Dynamic functions over `league_results` + season config | Old totals can change if config changes. |
+| Matches/results | `league_state` JSON + `round_snapshots` | Legacy paths still exist, but closed jornadas prefer snapshots. |
+| Points/coins from league | Snapshot-first, dynamic fallback for open/legacy rounds | Manual DB edits can still bypass app guards. |
 | Money available | Derived from league coins + badges + bonuses - purchases - penalties | Depends on snapshots/saves and purchases. |
 | Purchases | `purchases` table | Supabase primary, SQLite fallback. |
 | Redemptions | `redemptions` table | Used as event history for robberies/revives. |
 | Pokemon flags | `pokemon_flags` table | Fingerprint stability matters. |
-| Trainer flags | `settings.trainer_flags` | Should become entity/table later. |
+| Trainer status/flags | `settings.trainer_flags` | Should become entity/table later. |
 | Team locks | `team_locks` table | Good candidate for V2 with `season_id`. |
 | Saves metadata | `saves` table | Bytes are in Supabase Storage/local files. |
 | Save parsed snapshots | `settings.trainer_snapshot:*` | Derived cache, not official source. |
 | Shop promotions | `shop_discounts` table | Good candidate for V2 with `season_id`. |
 | Hall of Fame | `settings.hall_of_fame_v1` | Auto-derived, but not fully immutable. |
 | Notifications | Derived from tables | No persistent activity log. |
-| Wipe | `storage.wipe_all_app_data()` | Deletes settings and data; not season-scoped. |
+| Discard season | `app.admin.actions.discard_active_season()` -> legacy wipe | Gated in Admin but not season-scoped yet. |
 
 ## 2I - SQLite
 
@@ -635,25 +745,28 @@ Tests missing for Phase 2 close:
 
 ## Pieces Needing Modification
 
-- Add immutable `round_snapshots` before relying on configurable seasons.
-- Restrict Liga admin actions to Anto or a formal admin permission.
-- Decide whether `abandono` is just retired or a separate status.
+- Move Copa/Juicios official workflows into Admin or formalize why they remain
+  domain-owned before API migration.
+- Implement complete season archive before allowing "Guardar en historial" reset.
 - `division_count != 2` is now blocked explicitly in Streamlit 2.0.
 - Functional `rules` are now wired where they affect current behavior.
 - Persist Hall of Fame team snapshots from final/locked data.
 - Introduce `ActivityEvent` concept before expanding notifications.
 - Move `trainer_flags` out of generic settings in Supabase V2.
-- Replace dynamic historical scoring with stored awards.
+- Continue replacing dynamic historical reads with stored snapshot data where
+  legacy paths remain.
 
 ## Regression Risks
 
 - Changing active roster can sanitize old results unexpectedly.
-- Retiring a trainer can make old totals disappear from the general table.
+- Making a trainer inactive can still make live totals disappear outside closed
+  snapshot views.
 - Direct manual edits to `season_config_v2` can still bypass app guards; normal
   app edits no longer alter closed snapshot scoring.
 - League reset clears purchases through `clear_purchases()`, which is broader than
   a league-only reset.
-- Wipe deletes all settings and generated data globally, not per season.
+- Discard season still calls the legacy global wipe internally; it is now gated
+  in Admin but not season-scoped.
 - Hall of Fame can duplicate Liga entries if source id changes after config edits.
 - Any move toward multiple divisions touches Liga UI, pairing, ranking, history,
   Discord summaries and rewards.
@@ -663,16 +776,14 @@ Tests missing for Phase 2 close:
 ## Recommended Phase 2 Implementation Order
 
 1. Lock down permissions.
-   - Restrict Liga admin-grade actions to Anto first. This prevents accidental
-     state corruption while implementing deeper changes.
+   - Completed for the main Liga/Trainer/Saves/Tienda danger controls in 2.3.
 
 2. Define trainer status semantics.
-   - Decide if `abandono` remains an alias of `retired` or becomes its own status.
-     This affects active roster, ranking, money, saves, shop and robbery cycles.
+   - Completed in 2.3 with `active`, `retired`, `abandoned` and
+     `disqualified`.
 
 3. Add immutable round snapshots inside current `league_state`.
-   - This is the highest leverage fix and does not require Supabase V2 yet.
-   - Store version id, config subset, positions, points and coins on close.
+   - Completed in 2.1 and extended in 2.3 with trainer status metadata.
 
 4. Refactor scoring reads to prefer snapshots.
    - Points/coins/history/Hall should read closed snapshots when present and only

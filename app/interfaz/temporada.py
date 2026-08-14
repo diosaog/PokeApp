@@ -6,6 +6,25 @@ from typing import Any
 
 import streamlit as st
 
+from app.admin.actions import (
+    SEASON_ARCHIVE_DECISION,
+    SEASON_DISCARD_CONFIRMATION,
+    SEASON_DISCARD_DECISION,
+    discard_active_season,
+)
+from app.entrenadores.trainer_flags import (
+    INACTIVE_TRAINER_STATUSES,
+    TRAINER_STATUS_ABANDONED,
+    TRAINER_STATUS_ACTIVE,
+    TRAINER_STATUS_DISQUALIFIED,
+    TRAINER_STATUS_LABELS,
+    TRAINER_STATUS_RETIRED,
+    all_trainer_flags,
+    is_trainer_robbed,
+    set_trainer_status,
+    status_labels_for,
+    trainer_status,
+)
 from app.season.config import (
     RULE_DEFINITIONS,
     SeasonVersion,
@@ -22,8 +41,27 @@ from app.season.validation import (
     season_version_changes,
     validate_season_version,
 )
-from storage import settings_get
-from utils import USERS, active_users
+from storage import clear_all_pokemon_flags, clear_pokemon_flags_for_owner, settings_get
+from utils import USERS, active_users, users_with_retired_last
+
+
+_PRIVATE_NEXT_LOCKE_PROMPT = """PokeApp 2.0 - notas privadas de temporada
+
+La temporada actual nace limpia con 10 jugadores activos, dos divisiones de 5 y reglas
+definitivas desde la jornada 1.
+
+MONEDAS: 1=15, 2=14, 3=12, 4=11, 5=10, 6=11, 7=9, 8=8, 9=6, 10=4.
+PUNTOS: 1=9, 2=8, 3=7, 4=6, 5=5, 6=5, 7=4, 8=3, 9=2, 10=1.
+
+Siguiente objetivo grande:
+- Crear sistema de temporadas configurable solo para Anto.
+- Permitir configurar jugadores, numero de jornadas, divisiones, ascensos, descensos,
+  puntos y monedas.
+- Aplicar cambios de configuracion solo desde el momento en que se guardan.
+- Enviar aviso de Aaron cuando se publique o modifique la configuracion de temporada.
+- Rework visual 2.0: menu principal, login premium ligero, entrenadores, tienda, copa,
+  juicios simplificados, Hall of Fame y panel admin.
+- Optimizar al final: snapshots, caches, menos recalculos y consultas mas concretas."""
 
 
 def _league_state() -> dict[str, Any]:
@@ -222,6 +260,50 @@ def _render_css() -> None:
           font-family: var(--font-pixel);
           font-size: 9px;
           text-transform: uppercase;
+        }
+        .season-admin-strip {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 8px;
+          margin: 8px 0 12px;
+        }
+        .season-status-token {
+          display: inline-flex;
+          align-items: center;
+          gap: 6px;
+          min-height: 28px;
+          padding: 5px 9px;
+          border: 1px solid rgba(216,223,232,0.2);
+          border-radius: 999px;
+          background: rgba(8,12,18,0.5);
+          color: #fff;
+          font-family: var(--font-pixel);
+          font-size: 8px;
+          text-transform: uppercase;
+        }
+        .season-status-token.is-active { border-color: rgba(88,209,142,0.55); }
+        .season-status-token.is-inactive { border-color: rgba(239,94,104,0.58); }
+        .season-status-token.is-flag { border-color: rgba(239,194,87,0.62); }
+        .season-danger-panel {
+          padding: 12px;
+          border: 1px solid rgba(239,94,104,0.42);
+          border-left: 4px solid #ef5e68;
+          border-radius: 14px;
+          background:
+            linear-gradient(135deg, rgba(239,94,104,0.12), transparent 45%),
+            rgba(8,14,26,0.94);
+        }
+        .season-danger-title {
+          color: #fff;
+          font-family: var(--font-pixel);
+          font-size: 12px;
+          text-transform: uppercase;
+        }
+        .season-danger-body {
+          margin-top: 7px;
+          color: var(--bw2-text-soft);
+          font-size: 13px;
+          line-height: 1.35;
         }
         div[data-testid="stForm"] {
           border: 1px solid rgba(216,223,232,0.16);
@@ -618,6 +700,255 @@ def _render_config_editor() -> None:
     st.markdown(_version_history_html(document), unsafe_allow_html=True)
 
 
+def _status_tokens_html(trainer: str) -> str:
+    status = trainer_status(trainer)
+    status_label = TRAINER_STATUS_LABELS.get(status, "Activo")
+    status_class = "is-active" if status == TRAINER_STATUS_ACTIVE else "is-inactive"
+    tokens = [
+        f"<span class='season-status-token {status_class}'>{escape(status_label)}</span>"
+    ]
+    if is_trainer_robbed(trainer) and status == TRAINER_STATUS_ACTIVE:
+        tokens.append("<span class='season-status-token is-flag'>Robado</span>")
+    return "<div class='season-admin-strip'>" + "".join(tokens) + "</div>"
+
+
+def _trainer_status_rows_html() -> str:
+    rows: list[str] = []
+    flags = all_trainer_flags()
+    for trainer in users_with_retired_last(USERS):
+        status = trainer_status(trainer)
+        labels = status_labels_for(trainer)
+        raw_flags = flags.get(trainer, {})
+        rows.append(
+            "<tr>"
+            f"<td>{escape(str(trainer))}</td>"
+            f"<td>{escape(TRAINER_STATUS_LABELS.get(status, 'Activo'))}</td>"
+            f"<td>{escape(', '.join(labels) if labels else '-')}</td>"
+            f"<td>{escape(str(raw_flags.get('inactive_by') or raw_flags.get('retired_by') or '-'))}</td>"
+            "</tr>"
+        )
+    return (
+        "<table class='season-table'>"
+        "<thead><tr><th>Entrenador</th><th>Status</th><th>Flags visibles</th><th>Admin</th></tr></thead>"
+        f"<tbody>{''.join(rows)}</tbody>"
+        "</table>"
+    )
+
+
+def _clear_runtime_after_season_discard(current_user: str | None) -> None:
+    auth_ok = bool(st.session_state.get("auth_ok"))
+    for key in list(st.session_state.keys()):
+        st.session_state.pop(key, None)
+    st.session_state["auth_ok"] = auth_ok
+    st.session_state["user"] = current_user
+    st.session_state["selected_section"] = "Inicio"
+    st.session_state["_season_discard_done"] = True
+
+
+def _render_trainer_management(current_user: str) -> None:
+    st.markdown("<div class='season-section-title'>Estado oficial de entrenadores</div>", unsafe_allow_html=True)
+    st.markdown(_trainer_status_rows_html(), unsafe_allow_html=True)
+
+    league_active = bool(_league_state().get("active"))
+    if league_active:
+        st.warning("Hay una jornada abierta. Cierra o cancela la jornada antes de cambiar estados.")
+
+    options = users_with_retired_last(USERS)
+    if not options:
+        st.info("No hay entrenadores configurados.")
+        return
+
+    with st.form("season_trainer_status_form"):
+        target = st.selectbox(
+            "Entrenador",
+            options,
+            format_func=lambda name: f"{name} - {TRAINER_STATUS_LABELS.get(trainer_status(name), 'Activo')}",
+        )
+        status = trainer_status(str(target))
+        st.markdown(_status_tokens_html(str(target)), unsafe_allow_html=True)
+
+        if status in INACTIVE_TRAINER_STATUSES:
+            st.info("No hay reactivacion automatica: los estados inactivos son permanentes en las reglas actuales.")
+            action = ""
+        else:
+            action = st.radio(
+                "Nuevo estado",
+                ["Abandono", "Retirado", "Descalificado"],
+                horizontal=True,
+            )
+        note = st.text_input("Nota interna", value="")
+        confirm = st.text_input("Escribe el nombre exacto del entrenador")
+        submitted = st.form_submit_button(
+            "Aplicar estado oficial",
+            disabled=league_active or status in INACTIVE_TRAINER_STATUSES,
+            use_container_width=True,
+        )
+
+    if not submitted:
+        return
+    if confirm.strip() != str(target):
+        st.error("La confirmacion no coincide con el entrenador seleccionado.")
+        return
+    status_map = {
+        "Abandono": TRAINER_STATUS_ABANDONED,
+        "Retirado": TRAINER_STATUS_RETIRED,
+        "Descalificado": TRAINER_STATUS_DISQUALIFIED,
+    }
+    try:
+        set_trainer_status(
+            str(target),
+            status_map.get(action, TRAINER_STATUS_ABANDONED),
+            by_user=current_user,
+            note=note.strip() or None,
+        )
+        try:
+            from app.liga.ranking import clear_ranking_caches
+            from app.tienda.money import clear_money_caches
+
+            clear_money_caches()
+            clear_ranking_caches()
+        except Exception:
+            pass
+        st.success(f"Estado actualizado para {target}.")
+        st.rerun()
+    except Exception as exc:
+        st.error(str(exc))
+
+
+def _render_competition_management() -> None:
+    st.markdown("<div class='season-section-title'>Consola oficial de Liga</div>", unsafe_allow_html=True)
+    st.markdown(
+        (
+            "<div class='season-alert season-alert--info'>"
+            "<div class='season-alert-title'>Mutaciones oficiales centralizadas</div>"
+            "<div class='season-alert-body'>Abrir jornadas, guardar resultados, modificar cierres y reiniciar Liga se gestionan desde aqui.</div>"
+            "</div>"
+        ),
+        unsafe_allow_html=True,
+    )
+    open_console = st.toggle(
+        "Abrir consola de Liga",
+        value=False,
+        key="season_open_league_admin_console",
+    )
+    if not open_console:
+        return
+    try:
+        from app.liga.ui import page_tabla as render_league_admin
+
+        render_league_admin(admin_mode=True)
+    except Exception as exc:
+        st.error(f"No se pudo cargar la consola de Liga: {exc}")
+
+
+def _render_history_placeholder() -> None:
+    st.markdown("<div class='season-section-title'>Historial de temporadas</div>", unsafe_allow_html=True)
+    st.markdown(
+        (
+            "<div class='season-alert season-alert--info'>"
+            "<div class='season-alert-title'>Preparado para Fase 2.4</div>"
+            "<div class='season-alert-body'>El historial de temporadas guardara el archivo completo de una temporada. Hall of Fame seguira siendo una vista de campeones y logros, no el archivo tecnico.</div>"
+            "</div>"
+        ),
+        unsafe_allow_html=True,
+    )
+
+
+def _render_pokemon_flags_maintenance() -> None:
+    st.markdown("<div class='season-section-title'>Mantenimiento de flags Pokemon</div>", unsafe_allow_html=True)
+    with st.form("season_pokemon_flags_reset_form"):
+        scope = st.radio(
+            "Alcance",
+            ["Un entrenador", "Todos"],
+            horizontal=True,
+            key="season_flags_reset_scope",
+        )
+        target = None
+        if scope == "Un entrenador":
+            target = st.selectbox(
+                "Entrenador",
+                users_with_retired_last(USERS),
+                key="season_flags_reset_target",
+            )
+            expected = str(target or "")
+        else:
+            expected = "RESET FLAGS"
+        confirm = st.text_input(f"Escribe {expected} para confirmar")
+        submitted = st.form_submit_button(
+            "Reiniciar flags",
+            disabled=confirm.strip() != expected,
+            use_container_width=True,
+        )
+    if not submitted:
+        return
+    try:
+        if scope == "Todos":
+            clear_all_pokemon_flags()
+            st.success("Todos los flags de Pokemon se han reiniciado.")
+        else:
+            clear_pokemon_flags_for_owner(str(target or ""))
+            st.success(f"Flags de Pokemon reiniciados para {target}.")
+    except Exception as exc:
+        st.error(str(exc))
+
+
+def _render_risk_zone(current_user: str) -> None:
+    st.markdown("<div class='season-section-title'>Zona de riesgo</div>", unsafe_allow_html=True)
+    _render_pokemon_flags_maintenance()
+    st.markdown(
+        (
+            "<div class='season-danger-panel'>"
+            "<div class='season-danger-title'>Cerrar / reiniciar temporada</div>"
+            "<div class='season-danger-body'>Reset ya no significa borrar sin mas. Primero hay que elegir si se archivara o si se descarta definitivamente.</div>"
+            "</div>"
+        ),
+        unsafe_allow_html=True,
+    )
+    decision = st.radio(
+        "Decision previa",
+        [SEASON_ARCHIVE_DECISION, SEASON_DISCARD_DECISION],
+        format_func=lambda value: "Guardar en historial" if value == SEASON_ARCHIVE_DECISION else "Descartar temporada",
+        horizontal=True,
+        key="season_reset_decision",
+    )
+    if decision == SEASON_ARCHIVE_DECISION:
+        st.info("El archivado completo se implementara en la siguiente mini-fase. No se puede reiniciar guardando hasta que exista verificacion de archivo.")
+        return
+
+    st.warning("Descartar borra datos activos de temporada. No crea archivo historico.")
+    confirm = st.text_input(
+        f"Escribe {SEASON_DISCARD_CONFIRMATION} para confirmar",
+        key="season_discard_confirm",
+    )
+    if st.button(
+        "Descartar temporada activa",
+        type="primary",
+        disabled=confirm.strip() != SEASON_DISCARD_CONFIRMATION,
+        use_container_width=True,
+        key="season_discard_button",
+    ):
+        try:
+            report = discard_active_season(
+                admin_user=current_user,
+                decision=decision,
+                confirmation=confirm,
+            )
+            if report.get("ok"):
+                _clear_runtime_after_season_discard(current_user)
+                st.rerun()
+            else:
+                st.error("Descarte incompleto.")
+                for err in report.get("errors") or []:
+                    st.caption(f"- {err}")
+        except Exception as exc:
+            st.error(str(exc))
+
+
+def _render_private_notes() -> None:
+    st.markdown("<div class='season-section-title'>Notas privadas de temporada</div>", unsafe_allow_html=True)
+    st.code(_PRIVATE_NEXT_LOCKE_PROMPT, language="text")
+
+
 def render_temporada() -> None:
     current_user = str(st.session_state.get("user") or "")
     if current_user.lower() != "anto":
@@ -626,20 +957,43 @@ def render_temporada() -> None:
 
     _render_css()
     current_version = current_season_version()
+    if st.session_state.pop("_season_discard_done", False):
+        st.success("Temporada descartada.")
     st.markdown(
         (
             "<div class='season-hero'>"
             "<div class='season-kicker'>Panel Admin</div>"
             "<div class='season-title'>Temporada</div>"
-            "<div class='season-subtitle'>Configuracion activa, recompensas y versiones de reglas.</div>"
+            "<div class='season-subtitle'>Back office oficial: estado, reglas, entrenadores, Liga y acciones de riesgo.</div>"
             "</div>"
         ),
         unsafe_allow_html=True,
     )
 
-    st.markdown("<div class='season-section-title'>Estado actual</div>", unsafe_allow_html=True)
-    _render_current_config()
-    st.markdown("<div class='season-section-title'>Editor</div>", unsafe_allow_html=True)
-    _render_config_editor()
-    with st.expander("Version activa en bruto", expanded=False):
-        st.json(season_version_to_dict(current_version))
+    tabs = st.tabs(
+        [
+            "Estado",
+            "Configuracion",
+            "Entrenadores",
+            "Competicion",
+            "Historial",
+            "Riesgo",
+        ]
+    )
+    with tabs[0]:
+        st.markdown("<div class='season-section-title'>Estado actual</div>", unsafe_allow_html=True)
+        _render_current_config()
+    with tabs[1]:
+        st.markdown("<div class='season-section-title'>Editor</div>", unsafe_allow_html=True)
+        _render_config_editor()
+        with st.expander("Version activa en bruto", expanded=False):
+            st.json(season_version_to_dict(current_version))
+    with tabs[2]:
+        _render_trainer_management(current_user)
+    with tabs[3]:
+        _render_competition_management()
+    with tabs[4]:
+        _render_history_placeholder()
+        _render_private_notes()
+    with tabs[5]:
+        _render_risk_zone(current_user)

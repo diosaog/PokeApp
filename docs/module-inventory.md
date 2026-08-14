@@ -12,7 +12,7 @@ extraiga dominio o repositories.
 | `storage.py` | STORAGE/LEGACY | Fachada de Supabase/SQLite/settings/saves/wipe. |
 | `conex_pkhex.py` | MIXED | Bridge/parser PKHeX, cache y normalizacion a UI. |
 | `dexdata.py` | MIXED | Datos Pokemon, cache local y traducciones. |
-| `saves.py` | STREAMLIT | UI de subida/historial/wipe de saves; render apoyado en `app/saves_support.py` para cards y CSS 1D. |
+| `saves.py` | STREAMLIT | UI de subida, save actual, historial y descarga; el wipe global se movio a `Temporada/Admin` en 2.3. |
 | `tienda2.py` | LEGACY WRAPPER | Wrapper a `app.tienda.ui`. |
 | `liga_tabla.py` | LEGACY WRAPPER | Wrapper de liga/tabla. |
 | `entrenadores.py` | LEGACY WRAPPER | Wrapper a entrenadores. |
@@ -24,6 +24,12 @@ extraiga dominio o repositories.
 | `config.py` | MIXED | SeasonVersion funcional: versionado por jornada, reglas, guard admin-only y bloqueo de cambios sobre jornadas cerradas/abiertas; aun lee/escribe `settings`. |
 | `validation.py` | PURE | Validaciones casi portables a dominio; Streamlit 2.0 valida A/B oficialmente y rechaza N divisiones. |
 
+## app/admin
+
+| Modulo | Tipo | Nota |
+| --- | --- | --- |
+| `actions.py` | MIXED/ADMIN | Acciones peligrosas protegidas Anto-only; `discard_active_season()` exige decision y confirmacion textual antes de llamar al wipe legacy. |
+
 ## app/liga
 
 | Modulo | Tipo | Nota |
@@ -32,7 +38,7 @@ extraiga dominio o repositories.
 | `state.py` | STREAMLIT/STORAGE | Serializa `st.session_state` a `settings.league_state`. |
 | `rewards.py` | PURE-ish | Delegacion simple a season config. |
 | `divisions.py` | PURE-ish | Ascensos/descensos, portable si se inyecta config. |
-| `ui.py` | STREAMLIT | Pantalla pesada de gestion liga; el render de divisiones consume puntos/monedas/badges para la vista deportiva 1D. |
+| `ui.py` | STREAMLIT | Vista de Liga y consola oficial; los controles de jornada/divisiones/reset solo renderizan con `admin_mode=True` desde `Temporada/Admin`. |
 | `matchup.py` | STREAMLIT/MIXED | Team Preview con UI, snapshots y detalle de ataques. |
 
 ## app/copa
@@ -52,7 +58,7 @@ extraiga dominio o repositories.
 | `discounts.py` | PURE-ish/MIXED | Seleccion de promociones reutilizable; persiste y avisa Discord. |
 | `catalog_data.py` | PURE-ish | Catalogo estatico con assets. |
 | `catalog_render.py` | STREAMLIT/HTML | Render de cards; el CTA usa `st.button` fuera del HTML de la card y se integra visualmente con CSS hasta extraer `ShopItemCard`. |
-| `sections.py` | STREAMLIT | Vista tienda y flujo de compra; confirmacion y compra siguen acopladas a `st.session_state`. |
+| `sections.py` | STREAMLIT | Vista tienda y flujo de compra; confirmacion y compra siguen acopladas a `st.session_state`; el reset de flags queda como helper legacy no montado en la pagina normal. |
 | `redeem.py` | MIXED | Canje de objetos, flags, saves y UI. |
 | `money.py` | MIXED | Calculo monedas con snapshots, medallas y compras. |
 | `styles.py` | STREAMLIT/CSS | Estilos tienda. |
@@ -64,7 +70,7 @@ extraiga dominio o repositories.
 | `page.py` | STREAMLIT | Pantalla principal grande; concentra CSS local de Entrenadores/PC/Inspector hasta extraer design system. |
 | `boxes.py` | STREAMLIT/MIXED | PC/Cajas, seleccion y mapping de slots; el orden real del save esta acoplado al render. |
 | `snapshot.py` | MIXED/STORAGE | Snapshot derivado de save, guardado en settings. |
-| `trainer_flags.py` | MIXED/STORAGE | Robado/retirado sobre settings + redemptions. |
+| `trainer_flags.py` | MIXED/STORAGE | TrainerStatus (`active`, `retired`, `abandoned`, `disqualified`) y TrainerFlags (`robbed`) sobre settings + redemptions; mutaciones de status protegidas Anto-only. |
 | `cache.py` | MIXED | Cache del parser PKHeX. |
 | `detail_render.py` | STREAMLIT/HTML | Inspector visual; reutiliza resolver de iconos de inventario temporalmente. |
 | `summary.py` | STREAMLIT/MIXED | Resumen, monedas, puntos, medallas. |
@@ -93,7 +99,7 @@ extraiga dominio o repositories.
 | `home.py` | STREAMLIT/MIXED | Menu principal y resumen. |
 | `notifications.py` | MIXED | Actividad reciente desde saves, compras y locks. |
 | `normativa.py` | STREAMLIT/CONTENT | Manual oficial `rulebook-*` V2: portada documental, indice compacto, articulos alineados, tablas de caps/recompensas y fichas de comodines sin `st.tabs`. |
-| `temporada.py` | STREAMLIT/MIXED | Editor admin sobre season config; pulido 1E como consola tecnica compacta. |
+| `temporada.py` | STREAMLIT/MIXED | Back office Admin 2.3: estado, configuracion, gestion de entrenadores, consola Liga, historial placeholder y zona de riesgo. |
 | `hall_of_fame.py` | MIXED | Logica y UI de historico; archivo sobrio con auto-sync de campeones. |
 
 ### Auditoria visual 1F
@@ -126,5 +132,6 @@ extraiga dominio o repositories.
 | `test_notifications.py` | Actividad reciente y limite visible. |
 | `test_liga_rewards.py` | Recompensas, jornadas y movimientos desde config. |
 | `test_liga_snapshots.py` | Snapshots oficiales, permisos, reglas y penalizacion de puntos snapshot-first. |
+| `test_trainer_status.py` | Estados de entrenador, flag robado separado, descarte de temporada y reubicacion de controles peligrosos. |
 | `test_hall_of_fame.py` | Coercion/merge de historico. |
 | `test_saves_support.py` | HTML de saves. |

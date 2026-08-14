@@ -19,31 +19,12 @@ from app.saves_support import (
     write_uploaded_save_copy,
 )
 from storage import (
-    wipe_all_app_data,
     save_upload,
     load_save_bytes,
     list_saves_by_user,
     set_current_save_for_user,
     get_current_save_for_user,
 )
-
-_PRIVATE_NEXT_LOCKE_PROMPT = """PokeApp 2.0 - notas privadas de temporada
-
-La temporada actual nace limpia con 10 jugadores activos, dos divisiones de 5 y reglas
-definitivas desde la jornada 1.
-
-MONEDAS: 1=15, 2=14, 3=12, 4=11, 5=10, 6=11, 7=9, 8=8, 9=6, 10=4.
-PUNTOS: 1=9, 2=8, 3=7, 4=6, 5=5, 6=5, 7=4, 8=3, 9=2, 10=1.
-
-Siguiente objetivo grande:
-- Crear sistema de temporadas configurable solo para Anto.
-- Permitir configurar jugadores, numero de jornadas, divisiones, ascensos, descensos,
-  puntos y monedas.
-- Aplicar cambios de configuracion solo desde el momento en que se guardan.
-- Enviar aviso de Aaron cuando se publique o modifique la configuracion de temporada.
-- Rework visual 2.0: menu principal, login premium ligero, entrenadores, tienda, copa,
-  juicios simplificados, Hall of Fame y panel admin.
-- Optimizar al final: snapshots, caches, menos recalculos y consultas mas concretas."""
 
 
 def _render_header(current_user: str | None, retired: bool) -> None:
@@ -61,51 +42,6 @@ def _render_header(current_user: str | None, retired: bool) -> None:
         ),
         unsafe_allow_html=True,
     )
-
-
-def _clear_runtime_after_wipe(current_user: str | None) -> None:
-    auth_ok = bool(st.session_state.get("auth_ok"))
-    for key in list(st.session_state.keys()):
-        st.session_state.pop(key, None)
-    st.session_state["auth_ok"] = auth_ok
-    st.session_state["user"] = current_user
-    st.session_state["_wipe_done"] = True
-
-
-def _render_admin_wipe(current_user: str | None) -> None:
-    if current_user != "Anto":
-        return
-
-    st.markdown("---")
-    st.markdown("<div class='saves-section-title'>Zona de riesgo</div>", unsafe_allow_html=True)
-    st.markdown(
-        (
-            "<div class='saves-admin-panel'>"
-            "<div class='saves-admin-title'>Reset / Wipe</div>"
-            "<div class='saves-admin-body'>Borra datos de temporada. No borra codigo ni assets.</div>"
-            "</div>"
-        ),
-        unsafe_allow_html=True,
-    )
-    confirm = st.text_input("Escribe WIPE para confirmar", key="admin_wipe_confirm")
-    if st.button(
-        "Reset / Wipe",
-        key="admin_wipe_button",
-        type="primary",
-        disabled=confirm != "WIPE",
-        use_container_width=True,
-    ):
-        report = wipe_all_app_data()
-        if report.get("ok"):
-            _clear_runtime_after_wipe(current_user)
-            st.rerun()
-        else:
-            st.error("Wipe incompleto.")
-            for err in report.get("errors") or []:
-                st.caption(f"- {err}")
-
-    st.markdown("<div class='saves-section-title'>Notas privadas de temporada</div>", unsafe_allow_html=True)
-    st.code(_PRIVATE_NEXT_LOCKE_PROMPT, language="text")
 
 
 def _render_upload_panel(current_user: str | None, *, disabled: bool) -> None:
@@ -233,8 +169,6 @@ def page_saves() -> None:
     st.markdown(SAVES_PAGE_CSS, unsafe_allow_html=True)
 
     current_user = st.session_state.get("user")
-    if st.session_state.pop("_wipe_done", False):
-        st.success("Reset / Wipe completado.")
 
     bootstrap_latest_save(current_user)
     user_retired = is_trainer_retired(current_user)
@@ -250,5 +184,3 @@ def page_saves() -> None:
     _render_upload_panel(current_user, disabled=user_retired or not bool(current_user))
     st.markdown("<div class='saves-divider'></div>", unsafe_allow_html=True)
     _render_history(current_user, history, cur, disabled=user_retired or not bool(current_user))
-
-    _render_admin_wipe(current_user)

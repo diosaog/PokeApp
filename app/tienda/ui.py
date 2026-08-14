@@ -4,7 +4,6 @@ import streamlit as st
 
 from app.interfaz.theme import apply_platinum_ui
 from app.tienda.sections import (
-    render_flags_reset,
     render_money_panel,
     render_pending_purchase,
     render_purchase_history,
@@ -29,6 +28,3 @@ def page_tienda() -> None:
         from app.tienda.redeem import render_redeem_flow
 
         render_redeem_flow(ctx, current_user)
-
-    st.markdown("---")
-    render_flags_reset(current_user)

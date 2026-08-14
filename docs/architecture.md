@@ -49,6 +49,25 @@ soportar oficialmente dos divisiones, Liga A y Liga B; N divisiones queda para e
 dominio/API futuro porque requiere cambiar estado, ranking, UI e historico a la
 vez.
 
+Desde Fase 2.3, `Temporada/Admin` es el back office funcional. Las paginas
+normales deben mostrar y permitir uso, pero no gobernar estado oficial:
+
+- `Entrenadores` ya no contiene controles para abandono/retirada/descalificacion.
+- `Saves` ya no contiene wipe/reset global.
+- `Liga` renderiza controles oficiales solo cuando se abre desde Admin con
+  `admin_mode=True`.
+- `Tienda` ya no expone reset global de flags de Pokemon; el mantenimiento queda
+  en Admin.
+- Las mutaciones de TrainerStatus pasan por `trainer_flags.set_trainer_status()`
+  y validan Anto-only por debajo de la UI.
+- El descarte de temporada pasa por `app.admin.actions.discard_active_season()`,
+  tambien protegido por permiso, decision explicita y confirmacion textual.
+
+`trainer_flags` separa ahora TrainerStatus (`active`, `retired`, `abandoned`,
+`disqualified`) de TrainerFlags (`robbed`). El helper legacy
+`is_trainer_retired()` sigue existiendo como compatibilidad, pero representa
+inactividad competitiva.
+
 ## Problema Principal
 
 La deuda mas importante no es Supabase. Es que entidades centrales de competicion
