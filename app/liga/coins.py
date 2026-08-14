@@ -7,6 +7,7 @@ from app.liga.rewards import (
     CURRENT_COINS_BY_POSITION,
     coins_for_league_position,
 )
+from app.liga.snapshots import ROUND_SNAPSHOTS_STATE_KEY, snapshot_awards_for_user
 from utils import active_users
 
 COINS_BY_POSITION = CURRENT_COINS_BY_POSITION
@@ -41,8 +42,22 @@ def coins_from_league(user: str) -> int:
             pass
     lr = st.session_state.get("league_results", {})
     user_map = lr.get(user, {})
-    return sum(
-        coins_for_league_position(int(tramo), int(pos))
-        for tramo, pos in user_map.items()
-        if counts_for_league_reward(user, int(tramo))
+    total = 0
+    snapshot_awards = snapshot_awards_for_user(
+        st.session_state.get(ROUND_SNAPSHOTS_STATE_KEY, {}),
+        user,
+        "coins_awarded",
     )
+    covered_rounds: set[int] = set()
+    for tramo, coins in snapshot_awards.items():
+        if not counts_for_league_reward(user, int(tramo)):
+            continue
+        total += int(coins)
+        covered_rounds.add(int(tramo))
+    for tramo, pos in user_map.items():
+        if int(tramo) in covered_rounds:
+            continue
+        if not counts_for_league_reward(user, int(tramo)):
+            continue
+        total += coins_for_league_position(int(tramo), int(pos))
+    return total

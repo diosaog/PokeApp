@@ -6,6 +6,12 @@ import json
 import streamlit as st
 
 from app.liga.divisions import division_a_size_for_count
+from app.liga.snapshots import (
+    ROUND_SNAPSHOTS_SERIALIZED_KEY,
+    ROUND_SNAPSHOTS_STATE_KEY,
+    normalize_round_snapshots,
+    serialize_round_snapshots,
+)
 from storage import settings_get_uncached, settings_set
 from utils import league_users_for_round
 
@@ -167,6 +173,9 @@ def _serialize_state() -> dict:
             S.get("league_movements", {}),
             current_round,
         ),
+        ROUND_SNAPSHOTS_SERIALIZED_KEY: serialize_round_snapshots(
+            S.get(ROUND_SNAPSHOTS_STATE_KEY, {})
+        ),
     }
 
 
@@ -209,6 +218,11 @@ def _apply_serialized_state(obj: dict) -> None:
     st.session_state.league_movements = _sanitize_movements(
         obj.get("movements", {}),
         current_round,
+    )
+    st.session_state[ROUND_SNAPSHOTS_STATE_KEY] = normalize_round_snapshots(
+        obj.get(ROUND_SNAPSHOTS_SERIALIZED_KEY)
+        or obj.get(ROUND_SNAPSHOTS_STATE_KEY)
+        or {}
     )
 
 
@@ -299,3 +313,5 @@ def ensure_state() -> None:
         st.session_state.league_matches = {}
     if "league_movements" not in st.session_state:
         st.session_state.league_movements = {}
+    if ROUND_SNAPSHOTS_STATE_KEY not in st.session_state:
+        st.session_state[ROUND_SNAPSHOTS_STATE_KEY] = {}

@@ -10,10 +10,18 @@ from app.entrenadores.snapshot import clear_trainer_snapshot_runtime_caches, get
 from app.liga.divisions import next_divisions_from_rankings
 from app.juicios.penalties import get_user_penalties
 from app.liga.eligibility import counts_for_league_reward
+from app.liga.permissions import require_league_admin
 from app.liga.rewards import (
     CURRENT_POINTS_BY_POSITION,
     points_for_league_position,
 )
+from app.liga.snapshots import (
+    ROUND_SNAPSHOTS_STATE_KEY,
+    build_matchday_snapshot,
+    snapshot_awards_for_user,
+    snapshot_for_round,
+)
+from app.season.config import current_season_version
 from app.season.config import DEFAULT_MAX_ROUNDS, max_rounds
 from app.tienda.common import _eq_item
 from app.entrenadores.trainer_flags import retired_trainers
@@ -239,10 +247,84 @@ def _persist_state() -> None:
     persist_state()
 
 
-def finalize(tramo: int) -> None:
+def _current_actor(admin_user: str | None = None) -> str | None:
+    if admin_user is not None:
+        return admin_user
+    try:
+        return st.session_state.get("user")
+    except Exception:
+        return None
+
+
+def _penalties_for_snapshot(players: list[str]) -> dict[str, dict]:
+    out: dict[str, dict] = {}
+    for player in players:
+        try:
+            dead_count = _count_muertos_for_trainer(player)
+        except Exception:
+            dead_count = 0
+        try:
+            penalties = get_user_penalties(player)
+        except Exception:
+            penalties = {}
+        out[player] = {
+            "dead_count": dead_count,
+            "points_reduction": float(penalties.get("points_reduction") or 0.0),
+            "coins_reduction": int(penalties.get("coins_reduction") or 0),
+            "store_blocked": bool(penalties.get("store_blocked")),
+        }
+    return out
+
+
+def _store_round_snapshot(
+    *,
+    tramo: int,
+    division_snapshot: dict[str, list[str]],
+    rank_a: list[str],
+    rank_b: list[str],
+    source: str,
+    previous_snapshot: dict | None = None,
+) -> dict:
+    players = list(rank_a) + list(rank_b)
+    snapshot = build_matchday_snapshot(
+        round_no=int(tramo),
+        division_snapshot=division_snapshot,
+        rank_a=list(rank_a),
+        rank_b=list(rank_b),
+        season_version=current_season_version(int(tramo)),
+        penalties_by_user=_penalties_for_snapshot(players),
+        previous_snapshot=previous_snapshot,
+        source=source,
+    )
+    snapshots = dict(st.session_state.get(ROUND_SNAPSHOTS_STATE_KEY, {}) or {})
+    snapshots[int(tramo)] = snapshot
+    st.session_state[ROUND_SNAPSHOTS_STATE_KEY] = snapshots
+    return snapshot
+
+
+def _round_has_recorded_results(tramo: int) -> bool:
+    for round_map in (st.session_state.get("league_results", {}) or {}).values():
+        if not isinstance(round_map, dict):
+            continue
+        try:
+            if int(tramo) in {int(key) for key in round_map.keys()}:
+                return True
+        except Exception:
+            continue
+    return False
+
+
+def finalize(tramo: int, *, admin_user: str | None = None) -> None:
+    require_league_admin(_current_actor(admin_user))
+    if snapshot_for_round(st.session_state.get(ROUND_SNAPSHOTS_STATE_KEY, {}), tramo):
+        raise ValueError("Esta jornada ya tiene snapshot oficial cerrado.")
+    if _round_has_recorded_results(int(tramo)):
+        raise ValueError(
+            "Esta jornada ya tiene resultados oficiales. Usa modificar jornada anterior."
+        )
     data = get_matches_for(tramo)
-    A_players = st.session_state.league_divisions["A"]
-    B_players = st.session_state.league_divisions["B"]
+    A_players = list(st.session_state.league_divisions["A"])
+    B_players = list(st.session_state.league_divisions["B"])
     if not all_filled(data["A"]) or not all_filled(data["B"]):
         raise ValueError("Faltan resultados por marcar en A o B.")
     rankA = _rank(A_players, data["A"])
@@ -252,6 +334,14 @@ def finalize(tramo: int) -> None:
         _record_position(tramo, u, i)
     for j, u in enumerate(rankB, start=start_b):
         _record_position(tramo, u, j)
+
+    _store_round_snapshot(
+        tramo=int(tramo),
+        division_snapshot={"A": A_players, "B": B_players},
+        rank_a=rankA,
+        rank_b=rankB,
+        source="finalize",
+    )
 
     try:
         if rankB:
@@ -285,7 +375,13 @@ def finalize(tramo: int) -> None:
     _persist_state()
 
 
-def recompute_round(tramo: int, *, apply_divisions_from_round: bool = False) -> None:
+def recompute_round(
+    tramo: int,
+    *,
+    apply_divisions_from_round: bool = False,
+    admin_user: str | None = None,
+) -> None:
+    require_league_admin(_current_actor(admin_user))
     data = st.session_state.get("league_matches", {}).get(tramo)
     if not data:
         raise ValueError("No hay resultados guardados para esa jornada.")
@@ -314,6 +410,19 @@ def recompute_round(tramo: int, *, apply_divisions_from_round: bool = False) -> 
         _record_position(tramo, u, i)
     for j, u in enumerate(rankB, start=start_b):
         _record_position(tramo, u, j)
+
+    previous_snapshot = snapshot_for_round(
+        st.session_state.get(ROUND_SNAPSHOTS_STATE_KEY, {}),
+        int(tramo),
+    )
+    _store_round_snapshot(
+        tramo=int(tramo),
+        division_snapshot={"A": A_players, "B": B_players},
+        rank_a=rankA,
+        rank_b=rankB,
+        source="recompute_round",
+        previous_snapshot=previous_snapshot,
+    )
 
     if tramo < max_jornadas(tramo):
         try:
@@ -352,7 +461,20 @@ def points_from_league(user: str) -> int:
     lr = st.session_state.get("league_results", {})
     tramos = lr.get(user, {})
     total = 0
+    snapshot_awards = snapshot_awards_for_user(
+        st.session_state.get(ROUND_SNAPSHOTS_STATE_KEY, {}),
+        user,
+        "points_awarded",
+    )
+    covered_rounds: set[int] = set()
+    for tramo, points in snapshot_awards.items():
+        if not counts_for_league_reward(user, int(tramo)):
+            continue
+        total += int(points)
+        covered_rounds.add(int(tramo))
     for tramo, pos in tramos.items():
+        if int(tramo) in covered_rounds:
+            continue
         if not counts_for_league_reward(user, int(tramo)):
             continue
         total += points_for_league_position(int(tramo), int(pos))

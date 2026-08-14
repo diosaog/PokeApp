@@ -701,3 +701,136 @@ PokeApp already has the skeleton needed for Phase 2, but it should not enter
 feature freeze until historical scoring, permissions, trainer status semantics,
 Hall snapshots and activity events are closed. The safest next implementation is
 not more UI: it is locking admin actions and making closed rounds immutable.
+
+## Phase 2.1 Implementation Notes
+
+Status: implemented on top of the current Streamlit/settings architecture.
+
+### Cause Fixed
+
+Before 2.1, `league_state.results` stored positions only. Points and coins were
+reconstructed later through `season_config_v2`, so a future config change could
+reinterpret a closed round.
+
+### Snapshot Structure
+
+Closed matchdays now persist snapshots in `settings.league_state` under:
+
+```json
+{
+  "round_snapshots": {
+    "1": {
+      "schema_version": 1,
+      "round_no": 1,
+      "closed_at": 1780000000,
+      "season_config_version": {},
+      "division_snapshot": {"A": [], "B": []},
+      "standings": [],
+      "points_awarded": {},
+      "coins_awarded": {},
+      "penalties": {},
+      "metadata": {
+        "source": "finalize",
+        "config_version_id": "default",
+        "snapshot_schema_version": 1
+      }
+    }
+  }
+}
+```
+
+The implementation lives in `app/liga/snapshots.py`. It freezes:
+
+- round number;
+- close timestamp;
+- applied season config copy and config id;
+- A/B division composition at close time;
+- official standings;
+- league points awarded by trainer;
+- league coins awarded by trainer;
+- relevant penalty metadata at close time: dead count, dead point penalty,
+  point reduction, coin reduction and store block state.
+
+### Creation Policy
+
+- `app/liga/ranking.finalize()` creates a snapshot when Anto closes a jornada.
+- `app/liga/ranking.recompute_round()` regenerates the snapshot when Anto edits a
+  closed previous jornada.
+- Recompute preserves the previous snapshot config if it exists. Therefore editing
+  official results can change history, but changing future config does not
+  indirectly alter older awards.
+
+### Snapshot-First Reads
+
+- `points_from_league()` reads `round_snapshots` first.
+- `coins_from_league()` reads `round_snapshots` first.
+- Liga history UI reads closed standings from the snapshot when present.
+- Legacy fallback remains for old `league_state` data without snapshots.
+
+Current known limitation:
+
+- `current_points_total()` still applies current dead/penalty deductions on top of
+  the league base. The snapshot stores the close-time penalty metadata for future
+  interpretation, but the complete penalty model remains a Phase 2.2/2.3 concern.
+
+### Backward Compatibility
+
+Legacy `league_state` without `round_snapshots` still loads. The app adds an empty
+snapshot map when serializing state, but does not invent historic awards for old
+rounds.
+
+### Idempotency
+
+`finalize()` now refuses to close a round if:
+
+- the round already has a snapshot; or
+- legacy official results already exist for that round.
+
+Official edits must go through `recompute_round()`.
+
+### League Permissions
+
+Added `app/liga/permissions.py`.
+
+Admin user for Phase 2.1 is still the current real admin: `Anto`.
+
+Critical Liga mutations are restricted in UI and critical backend functions:
+
+- finalize jornada;
+- save results;
+- cancel jornada;
+- open/edit jornada;
+- modify previous jornada;
+- save divisions;
+- reset Liga;
+- `finalize()`;
+- `recompute_round()`.
+
+Read-only league views remain available to normal trainers.
+
+### Tests Added
+
+`tests/test_liga_snapshots.py` covers:
+
+- snapshot freezes config version;
+- snapshot freezes points;
+- snapshot freezes coins;
+- snapshot stores penalty metadata;
+- snapshot-first points ignore later dynamic config;
+- snapshot-first coins ignore later dynamic config;
+- closed standings are read from snapshot;
+- open/legacy rounds keep dynamic fallback behavior;
+- legacy state without snapshots loads without error;
+- finalize rejects existing snapshots;
+- finalize rejects legacy recorded results without snapshot;
+- non-admin cannot finalize;
+- Anto passes the admin guard.
+
+### Remaining Debt For 2.2
+
+- Make `SeasonVersion.rules` operational or intentionally hide/remove unused rule
+  fields.
+- Decide whether the complete penalty model should become per-round snapshot-first
+  or remain current/live.
+- Keep Liga officially A/B for Streamlit or implement N divisions end-to-end.
+- Add explicit season lifecycle operations before Supabase V2.

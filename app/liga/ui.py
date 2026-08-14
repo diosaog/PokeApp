@@ -15,6 +15,7 @@ from app.discord_notify import (
 from app.entrenadores.trainer_flags import is_trainer_retired, status_labels_for
 from app.liga.divisions import division_a_size_for_count, movement_count_for_divisions
 from app.liga.league_styles import ensure_league_css
+from app.liga.permissions import is_league_admin
 from app.liga.ranking import (
     all_filled,
     clear_ranking_caches,
@@ -24,6 +25,11 @@ from app.liga.ranking import (
     get_matches_for,
     max_jornadas,
     recompute_round,
+)
+from app.liga.snapshots import (
+    ROUND_SNAPSHOTS_STATE_KEY,
+    snapshot_for_round,
+    snapshot_standings,
 )
 from app.liga.state import ensure_state, persist_state, restore_state
 from app.liga.table_summary import (
@@ -117,6 +123,7 @@ def _clear_local_league_state() -> None:
         "league_results",
         "league_matches",
         "league_movements",
+        "league_round_snapshots",
         "league_temp_order",
         "_league_state_hash",
         "_league_state_error",
@@ -136,6 +143,17 @@ def _sync_hall_of_fame_silent() -> None:
 
 def _current_user_can_resend_summary() -> bool:
     return str(st.session_state.get("user") or "").strip().lower() == "anto"
+
+
+def _current_user_can_manage_league() -> bool:
+    return is_league_admin(st.session_state.get("user"))
+
+
+def _require_league_admin_ui() -> bool:
+    if _current_user_can_manage_league():
+        return True
+    st.error("Solo Anto puede modificar el estado oficial de Liga.")
+    return False
 
 
 def _notify_missing_team_locks_once(round_no: int) -> None:
@@ -636,6 +654,8 @@ def _render_previous_round_editor(
             disabled=read_only,
         )
         if submitted:
+            if read_only or not _require_league_admin_ui():
+                return
             match_notifications = _changed_match_notifications(
                 prev_tramo, data, tmp_divs
             )
@@ -650,7 +670,9 @@ def _render_previous_round_editor(
                     and current_tramo <= max_jornadas(current_tramo)
                 )
                 recompute_round(
-                    prev_tramo, apply_divisions_from_round=is_immediate_previous
+                    prev_tramo,
+                    apply_divisions_from_round=is_immediate_previous,
+                    admin_user=str(st.session_state.get("user") or ""),
                 )
                 if is_immediate_previous:
                     current_matches = st.session_state.get("league_matches", {})
@@ -713,7 +735,9 @@ def page_tabla() -> None:
             )
         return
     _render_flash_messages()
-    read_only = is_trainer_retired(st.session_state.get("user"))
+    current_user = st.session_state.get("user")
+    read_only = is_trainer_retired(current_user)
+    can_manage_league = is_league_admin(current_user) and not read_only
     if read_only:
         st.info("Entrenador retirado.")
 
@@ -797,12 +821,14 @@ def page_tabla() -> None:
                 if st.button(
                     "Finalizar jornada",
                     use_container_width=True,
-                    disabled=read_only,
+                    disabled=not can_manage_league,
                 ):
                     try:
+                        if not _require_league_admin_ui():
+                            return
                         closing_tramo = int(tramo)
                         get_matches_for(closing_tramo)
-                        finalize(closing_tramo)
+                        finalize(closing_tramo, admin_user=str(current_user or ""))
                         try:
                             expire_shop_discounts_through_jornada(closing_tramo)
                             if closing_tramo < max_jornadas(closing_tramo):
@@ -878,8 +904,10 @@ def page_tabla() -> None:
                 if st.button(
                     "Cancelar jornada",
                     use_container_width=True,
-                    disabled=read_only,
+                    disabled=not can_manage_league,
                 ):
+                    if not _require_league_admin_ui():
+                        return
                     st.session_state.league_active = False
                     if tramo in st.session_state.league_matches:
                         del st.session_state.league_matches[tramo]
@@ -899,8 +927,10 @@ def page_tabla() -> None:
                     if st.button(
                         "Editar jornada",
                         use_container_width=True,
-                        disabled=read_only,
+                        disabled=not can_manage_league,
                     ):
+                        if not _require_league_admin_ui():
+                            return
                         st.session_state.league_prev_edit_active = False
                         st.session_state.league_active = True
                         get_matches_for(tramo)
@@ -917,8 +947,10 @@ def page_tabla() -> None:
                 if st.button(
                     prev_label,
                     use_container_width=True,
-                    disabled=(not has_prev_closed) or read_only,
+                    disabled=(not has_prev_closed) or not can_manage_league,
                 ):
+                    if not _require_league_admin_ui():
+                        return
                     st.session_state.league_prev_edit_active = not st.session_state.get(
                         "league_prev_edit_active", False
                     )
@@ -986,7 +1018,9 @@ def page_tabla() -> None:
             max_selections=division_b_size,
             key=key_B,
         )
-        if st.button("Guardar divisiones", disabled=read_only):
+        if st.button("Guardar divisiones", disabled=not can_manage_league):
+            if not _require_league_admin_ui():
+                return
             if len(sel_A) == division_a_size and len(sel_B) == division_b_size:
                 st.session_state.league_divisions = {"A": sel_A, "B": sel_B}
                 st.session_state.league_tramo = 1
@@ -994,6 +1028,7 @@ def page_tabla() -> None:
                 st.session_state.league_matches = {}
                 st.session_state.league_results = {}
                 st.session_state.league_movements = {}
+                st.session_state[ROUND_SNAPSHOTS_STATE_KEY] = {}
                 persist_state()
                 clear_money_caches()
                 clear_ranking_caches()
@@ -1010,7 +1045,7 @@ def page_tabla() -> None:
         _render_previous_round_editor(
             prev_tramo=prev_tramo,
             current_tramo=tramo,
-            read_only=read_only,
+            read_only=not can_manage_league,
         )
 
     A = st.session_state.league_divisions["A"]
@@ -1078,9 +1113,11 @@ def page_tabla() -> None:
 
             submitted = st.form_submit_button(
                 "Guardar resultados de la jornada",
-                disabled=read_only,
+                disabled=not can_manage_league,
             )
             if submitted:
+                if not _require_league_admin_ui():
+                    return
                 match_notifications = _changed_match_notifications(
                     tramo, data, tmp_divs
                 )
@@ -1181,8 +1218,11 @@ def page_tabla() -> None:
             unsafe_allow_html=True,
         )
 
-    if st.session_state.get("league_movements") or st.session_state.get(
-        "league_results"
+    round_snapshots = st.session_state.get(ROUND_SNAPSHOTS_STATE_KEY, {})
+    if (
+        st.session_state.get("league_movements")
+        or st.session_state.get("league_results")
+        or round_snapshots
     ):
         st.markdown(
             _section_heading_html(
@@ -1198,27 +1238,56 @@ def page_tabla() -> None:
                 tramos.update(int(k) for k in mp.keys())
             except Exception:
                 tramos |= set(mp.keys())
+        try:
+            tramos.update(int(k) for k in (round_snapshots or {}).keys())
+        except Exception:
+            pass
         for t in sorted(tramos):
-            entries = []
-            for u, mp in lr.items():
-                try:
-                    pos = mp.get(t)
-                    if pos is not None:
-                        entries.append((u, int(pos)))
-                except Exception:
+            snapshot = snapshot_for_round(round_snapshots, int(t))
+            snapshot_rows = snapshot_standings(round_snapshots, int(t)) if snapshot else []
+            if snapshot_rows:
+                entries = [
+                    (str(row.get("user") or ""), int(row.get("position") or 0))
+                    for row in snapshot_rows
+                    if str(row.get("user") or "").strip()
+                ]
+                division_snapshot = (
+                    snapshot.get("division_snapshot")
+                    if isinstance(snapshot.get("division_snapshot"), dict)
+                    else {}
+                )
+                a_len = len(division_snapshot.get("A") or [])
+                b_len = len(division_snapshot.get("B") or [])
+                if a_len <= 0:
+                    a_len = len([row for row in snapshot_rows if row.get("division") == "A"])
+                config_snapshot = (
+                    snapshot.get("season_config_version")
+                    if isinstance(snapshot.get("season_config_version"), dict)
+                    else {}
+                )
+                movement_count = int(config_snapshot.get("movement_count") or 0)
+            else:
+                entries = []
+                for u, mp in lr.items():
+                    try:
+                        pos = mp.get(t)
+                        if pos is not None:
+                            entries.append((u, int(pos)))
+                    except Exception:
+                        continue
+                if not entries:
                     continue
-            if not entries:
-                continue
-            entries.sort(key=lambda x: x[1])
-            round_matches = (st.session_state.get("league_matches") or {}).get(t, {})
-            a_len = len(
-                _players_from_match_map((round_matches or {}).get("A", {}) or {})
-            )
-            if a_len <= 0:
-                a_len = 5
-            b_len = len(
-                _players_from_match_map((round_matches or {}).get("B", {}) or {})
-            )
+                entries.sort(key=lambda x: x[1])
+                round_matches = (st.session_state.get("league_matches") or {}).get(t, {})
+                a_len = len(
+                    _players_from_match_map((round_matches or {}).get("A", {}) or {})
+                )
+                if a_len <= 0:
+                    a_len = 5
+                b_len = len(
+                    _players_from_match_map((round_matches or {}).get("B", {}) or {})
+                )
+                movement_count = movement_count_for_divisions(a_len, b_len, int(t))
             b_start = a_len + 1
             b_positions = [pos for _u, pos in entries if pos >= b_start]
             b_end = (
@@ -1226,7 +1295,6 @@ def page_tabla() -> None:
                 if b_positions
                 else (b_start + b_len - 1 if b_len else b_start - 1)
             )
-            movement_count = movement_count_for_divisions(a_len, b_len, int(t))
             show_movement_tags = int(t) < max_jornadas(int(t)) and movement_count > 0
             rowsA, rowsB = [], []
             for u, pos in entries:
@@ -1271,8 +1339,10 @@ def page_tabla() -> None:
     if st.button(
         "Reiniciar liga",
         key="btn_reset_league_ligatabla",
-        disabled=read_only,
+        disabled=not can_manage_league,
     ):
+        if not _require_league_admin_ui():
+            return
         if confirm == "Si":
             players = users_with_retired_last(active_users())
             division_a_size = division_a_size_for_count(len(players), 1)
@@ -1286,6 +1356,7 @@ def page_tabla() -> None:
                 "B": players[division_a_size:],
             }
             st.session_state.league_movements = {}
+            st.session_state[ROUND_SNAPSHOTS_STATE_KEY] = {}
             try:
                 clear_purchases()
             except Exception:

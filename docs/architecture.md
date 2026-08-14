@@ -37,6 +37,11 @@ Claves importantes guardadas en `settings`:
 - `badges_count:*`
 - marcadores de avisos, promociones y recompensas
 
+Desde Fase 2.1, `league_state` incluye `round_snapshots` para jornadas cerradas.
+Estos snapshots congelan config aplicada, divisiones, standings, puntos y monedas
+otorgadas. Es una solucion compatible con la arquitectura actual, previa a tablas
+Supabase V2.
+
 ## Problema Principal
 
 La deuda mas importante no es Supabase. Es que entidades centrales de competicion
@@ -93,4 +98,3 @@ Minimo antes de avanzar:
 
 - `py -m compileall -q .`
 - `py -m unittest discover -s tests`
-
