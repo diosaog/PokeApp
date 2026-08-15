@@ -82,9 +82,10 @@ as permanent.
 The Liga console is loaded from Admin with `page_tabla(admin_mode=True)`.
 The normal Liga page does not render official controls.
 
-### Wipe / Reset
+### Wipe / Reset Baseline
 
-The old Saves wipe is no longer exposed there. The current safe model is:
+The old Saves wipe is no longer exposed there. In 2.3, before the complete
+archive lifecycle existed, the temporary safe model was:
 
 - "Guardar en historial": visible but blocked until a complete archive flow exists.
 - "Descartar temporada": allowed only for Anto, requires explicit decision and
@@ -96,7 +97,8 @@ This prepares the desired lifecycle:
 ACTIVE -> FINISHED -> ARCHIVED -> nueva DRAFT/ACTIVE
 ```
 
-No `season_id` or archive tables were added in 2.3.
+No `season_id` or archive tables were added in 2.3. This temporary model is
+superseded by the 2.4 lifecycle documented below.
 
 ### Historial vs Hall Of Fame
 
@@ -109,6 +111,180 @@ Hall may derive from season archives later, but it is not the archive itself.
 
 Closed round snapshots now keep trainer status metadata inside penalty/status data.
 Changing a trainer status later does not rewrite an already closed jornada.
+
+## 2.4 Update - Season Archives And Final Hall Of Fame
+
+Update date: 2026-08-15
+
+### Detailed Audit Result
+
+Before 2.4:
+
+- Hall lived in `settings.hall_of_fame_v1`.
+- `sync_hall_of_fame_from_sources()` merged manual/saved entries with automatic
+  live entries from Liga and Copa.
+- Liga Hall entry used `final_podium()` from current ranking state.
+- Copa Hall entries read current `copa_swiss_state`, `copa_elim_state` and
+  `copa_dobles_state`.
+- Champion team came from `_current_team_for(champion)`, which reads
+  `get_trainer_snapshot(... allow_rebuild=False)`.
+- Therefore the Hall team could drift when a champion uploaded or selected a new
+  save after winning.
+- The 2.3 discard path still called a legacy wipe-like concept unless injected,
+  and the storage wipe could delete settings and saves broadly.
+
+What could be reconstructed before 2.4:
+
+- `league_state.round_snapshots` had closed jornada standings, awards, config and
+  status metadata.
+- `team_locks` had official locked teams by jornada.
+- `season_config_v2` had current versioned season config.
+- Copa state keys had enough data to identify finished champions, but not a
+  normalized immutable competition archive.
+
+What would be lost by old discard/wipe:
+
+- active league state;
+- team locks;
+- purchases/promotions/redemptions;
+- Pokemon/trainer active flags;
+- saves if the full legacy wipe was used;
+- Hall/settings if settings were deleted.
+
+### Implemented Lifecycle
+
+`app/season/archive.py` now stores lifecycle in `settings.season_lifecycle_v1`:
+
+```text
+draft -> active -> finished -> archived
+discarded
+```
+
+Current Streamlit flow:
+
+- `ACTIVE`: Anto can finalize from `Temporada/Admin`.
+- `FINISHED`: data remains reviewable; Liga controls are blocked; Anto can archive.
+- `ARCHIVED`: a SeasonArchive exists; Anto can prepare the next active season.
+- `DISCARDED`: no archive/Hall is created; Anto can prepare the next active season.
+
+`Liga` admin controls now check lifecycle and only mutate while state is `active`.
+
+### SeasonArchive Legacy Format
+
+Archives are stored temporarily in `settings.season_archives_v1`.
+
+This is pre-V2 persistence, not the final database model.
+
+Each archive contains:
+
+- stable `id`;
+- label;
+- lifecycle timestamps;
+- participants;
+- final TrainerStatus/robbed snapshot;
+- full `season_config` document copy;
+- version used;
+- max rounds;
+- league metadata;
+- final standings;
+- final points;
+- awarded coins;
+- movements;
+- round snapshots;
+- final divisions/results/matches;
+- champion and runner-up when known;
+- team locks by round;
+- frozen public champion team;
+- Copa state snapshots;
+- Hall entries derived from the archive.
+
+Deliberately not archived:
+
+- PINs/credentials;
+- current saves bytes;
+- current live trainer snapshots;
+- IVs/EVs/nature/ability private data in Hall team snapshots;
+- global catalog/assets;
+- unrelated settings.
+
+### Hall Of Fame After 2.4
+
+Hall still reads legacy `hall_of_fame_v1`, but sync now merges:
+
+1. live automatic entries for legacy compatibility;
+2. archive-derived entries from `season_archives_v1`.
+
+Archive-derived entries are applied last, so a frozen archive wins over a live
+auto entry with the same id.
+
+Champion team source priority implemented for Liga:
+
+1. final round `team_locks`;
+2. latest available team lock for that champion;
+3. legacy current trainer snapshot only when no lock exists.
+
+The frozen Hall team keeps public fields only:
+
+- species;
+- nickname;
+- level;
+- gender;
+- item;
+- types;
+- moves.
+
+It excludes IVs, EVs, nature and ability.
+
+### Copa In 2.4
+
+Copa is included in SeasonArchive as a state snapshot and as Hall entries when
+the existing legacy state has a reliable champion.
+
+Still legacy/debt:
+
+- Copa does not yet have normalized matchday snapshots.
+- Copa team snapshots for single-player formats are not as strong as Liga final
+  team locks.
+- No large Copa refactor was done in 2.4 by design.
+
+### New Season Preparation
+
+`prepare_new_active_season()` clears active competitive data and keeps history:
+
+Cleared/reset:
+
+- league state;
+- trainer flags;
+- robbery watermark;
+- purchases;
+- redemptions;
+- shop discounts;
+- Pokemon flags;
+- team locks;
+- Copa active states;
+- active season config reset to default roster document.
+
+Preserved:
+
+- users;
+- Hall of Fame;
+- season archives;
+- saves metadata/files;
+- catalog/assets;
+- global credentials/settings outside the explicit active-season keys.
+
+### Discard After 2.4
+
+`discard_active_season()` now defaults to `mark_season_discarded()` instead of
+the broad legacy wipe.
+
+It still requires:
+
+- Anto;
+- explicit discard decision;
+- textual `DESCARTAR` confirmation.
+
+Discard creates no archive and no Hall entry.
 
 ## Executive Summary
 
@@ -645,9 +821,9 @@ Recommended future direction:
 | Saves metadata | `saves` table | Bytes are in Supabase Storage/local files. |
 | Save parsed snapshots | `settings.trainer_snapshot:*` | Derived cache, not official source. |
 | Shop promotions | `shop_discounts` table | Good candidate for V2 with `season_id`. |
-| Hall of Fame | `settings.hall_of_fame_v1` | Auto-derived, but not fully immutable. |
+| Hall of Fame | `settings.hall_of_fame_v1` + `settings.season_archives_v1` | Archive-derived entries are immutable; live auto entries remain only as active preview. |
 | Notifications | Derived from tables | No persistent activity log. |
-| Discard season | `app.admin.actions.discard_active_season()` -> legacy wipe | Gated in Admin but not season-scoped yet. |
+| Discard season | `app.admin.actions.discard_active_season()` -> `mark_season_discarded()` | Gated in Admin and season-scoped; legacy wipe remains only as old storage helper. |
 
 ## 2I - SQLite
 
@@ -747,10 +923,12 @@ Tests missing for Phase 2 close:
 
 - Move Copa/Juicios official workflows into Admin or formalize why they remain
   domain-owned before API migration.
-- Implement complete season archive before allowing "Guardar en historial" reset.
+- Complete season archive lifecycle is implemented in 2.4; remaining work is
+  moving the legacy JSON store to real Supabase tables in V2.
 - `division_count != 2` is now blocked explicitly in Streamlit 2.0.
 - Functional `rules` are now wired where they affect current behavior.
-- Persist Hall of Fame team snapshots from final/locked data.
+- Persist Hall of Fame team snapshots from final/locked data. Completed in 2.4
+  for archived seasons.
 - Introduce `ActivityEvent` concept before expanding notifications.
 - Move `trainer_flags` out of generic settings in Supabase V2.
 - Continue replacing dynamic historical reads with stored snapshot data where
@@ -765,9 +943,10 @@ Tests missing for Phase 2 close:
   app edits no longer alter closed snapshot scoring.
 - League reset clears purchases through `clear_purchases()`, which is broader than
   a league-only reset.
-- Discard season still calls the legacy global wipe internally; it is now gated
-  in Admin but not season-scoped.
-- Hall of Fame can duplicate Liga entries if source id changes after config edits.
+- The legacy global wipe still exists for old code paths, but normal Admin
+  discard uses season-scoped active cleanup after 2.4.
+- Hall of Fame live auto entries can still move with active data before archive;
+  archived entries override them once the season is archived.
 - Any move toward multiple divisions touches Liga UI, pairing, ranking, history,
   Discord summaries and rewards.
 - Supabase RPCs are required for atomic shop discount/team lock behavior in remote

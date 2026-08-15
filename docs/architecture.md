@@ -68,6 +68,22 @@ normales deben mostrar y permitir uso, pero no gobernar estado oficial:
 `is_trainer_retired()` sigue existiendo como compatibilidad, pero representa
 inactividad competitiva.
 
+Desde Fase 2.4, el ciclo de temporada ya no depende de un wipe tecnico:
+
+- `settings.season_lifecycle_v1` guarda `active`, `finished`, `archived` o
+  `discarded`.
+- `settings.season_archives_v1` guarda `SeasonArchive` legacy.
+- `Temporada/Admin` expone Finalizar, Archivar, Preparar nueva temporada y
+  Descartar como acciones separadas.
+- `Hall of Fame` prefiere entradas derivadas de archivos, de forma que el equipo
+  campeon no cambia si se sube otro save.
+- `discard_active_season()` usa limpieza activa quirurgica por defecto, no el
+  wipe global legacy.
+
+La limpieza activa conserva archivos historicos, Hall, archives, usuarios,
+catalogo y saves. Solo resetea estado competitivo activo: Liga, Copa activa,
+compras/promos/redenciones, flags, team locks y config activa.
+
 ## Problema Principal
 
 La deuda mas importante no es Supabase. Es que entidades centrales de competicion
@@ -114,6 +130,8 @@ Hay que decidir y documentar una fuente de verdad por dato:
 - Saves: metadatos en DB, bytes en storage.
 - Snapshots: derivados cacheables, nunca sustituyen al save.
 - Hall of Fame: derivado al finalizar temporada/copa, persistido como historico.
+- SeasonArchive: fuente historica autosuficiente desde 2.4; en V2 deberia pasar
+  a tablas o documentos versionados con `season_id`.
 - Flags de entrenador: entidad propia, no texto decorativo.
 
 ## Criterios De Salida Por Fase

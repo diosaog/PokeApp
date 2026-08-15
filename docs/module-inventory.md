@@ -22,13 +22,14 @@ extraiga dominio o repositories.
 | Modulo | Tipo | Nota |
 | --- | --- | --- |
 | `config.py` | MIXED | SeasonVersion funcional: versionado por jornada, reglas, guard admin-only y bloqueo de cambios sobre jornadas cerradas/abiertas; aun lee/escribe `settings`. |
+| `archive.py` | MIXED/STORAGE | Fase 2.4: lifecycle (`draft`, `active`, `finished`, `archived`, `discarded`), SeasonArchive inmutable, Hall snapshot-safe y preparacion limpia de temporada nueva. |
 | `validation.py` | PURE | Validaciones casi portables a dominio; Streamlit 2.0 valida A/B oficialmente y rechaza N divisiones. |
 
 ## app/admin
 
 | Modulo | Tipo | Nota |
 | --- | --- | --- |
-| `actions.py` | MIXED/ADMIN | Acciones peligrosas protegidas Anto-only; `discard_active_season()` exige decision y confirmacion textual antes de llamar al wipe legacy. |
+| `actions.py` | MIXED/ADMIN | Acciones peligrosas protegidas Anto-only; `discard_active_season()` exige decision y confirmacion textual y descarta la temporada activa sin destruir archivos/Hall. |
 
 ## app/liga
 
@@ -99,8 +100,8 @@ extraiga dominio o repositories.
 | `home.py` | STREAMLIT/MIXED | Menu principal y resumen. |
 | `notifications.py` | MIXED | Actividad reciente desde saves, compras y locks. |
 | `normativa.py` | STREAMLIT/CONTENT | Manual oficial `rulebook-*` V2: portada documental, indice compacto, articulos alineados, tablas de caps/recompensas y fichas de comodines sin `st.tabs`. |
-| `temporada.py` | STREAMLIT/MIXED | Back office Admin 2.3: estado, configuracion, gestion de entrenadores, consola Liga, historial placeholder y zona de riesgo. |
-| `hall_of_fame.py` | MIXED | Logica y UI de historico; archivo sobrio con auto-sync de campeones. |
+| `temporada.py` | STREAMLIT/MIXED | Back office Admin 2.4: estado, ciclo de temporada, configuracion, gestion de entrenadores, consola Liga, historial real y zona de descarte. |
+| `hall_of_fame.py` | MIXED | Logica y UI de historico; auto-sync de campeones desde fuentes vivas y archivos inmutables con equipos congelados. |
 
 ### Auditoria visual 1F
 
@@ -134,4 +135,5 @@ extraiga dominio o repositories.
 | `test_liga_snapshots.py` | Snapshots oficiales, permisos, reglas y penalizacion de puntos snapshot-first. |
 | `test_trainer_status.py` | Estados de entrenador, flag robado separado, descarte de temporada y reubicacion de controles peligrosos. |
 | `test_hall_of_fame.py` | Coercion/merge de historico. |
+| `test_season_archive.py` | Lifecycle, archivado idempotente, Hall congelado, descarte y nueva temporada preservando archivos. |
 | `test_saves_support.py` | HTML de saves. |

@@ -68,20 +68,49 @@ mantiene este contrato.
 
 - `season_id`
 - `name`
-- `status`: draft, active, finished, archived
+- `status`: draft, active, finished, archived, discarded
 - `created_at`
 - `started_at`
 - `finished_at`
 - `active_version_id`
 
-Estado Streamlit 2.3:
+Estado Streamlit 2.4:
 
 - No hay `season_id` real todavía.
-- El ciclo objetivo queda documentado como `active -> finished -> archived ->
-  nueva draft/active`.
-- El reset global se expone como "descartar temporada" en Admin, con decision y
-  confirmacion textual. "Guardar en historial" queda bloqueado hasta implementar
-  archivo completo en la siguiente fase.
+- El lifecycle se guarda en `settings.season_lifecycle_v1`.
+- El ciclo funcional es `active -> finished -> archived -> nueva active`, con
+  `discarded` como salida sin archivo.
+- `finished` permite revisar antes de archivar.
+- `archived` exige un `SeasonArchive`.
+
+### SeasonArchive
+
+Snapshot historico autosuficiente de una temporada cerrada.
+
+- `id`
+- `label`
+- `state`
+- `started_at`
+- `finished_at`
+- `archived_at`
+- `participants`
+- `trainer_statuses`
+- `season_config`
+- `season_version_used`
+- `max_rounds`
+- `league`
+- `team_locks`
+- `champion_team`
+- `cup`
+- `hall_entries`
+- `metadata`
+
+Estado Streamlit 2.4:
+
+- Se persiste en `settings.season_archives_v1`.
+- Es temporal pre-Supabase V2, pero explicito e inmutable por defecto.
+- No copia todo `settings`; solo datos competitivos necesarios.
+- Hall of Fame puede derivar de `hall_entries` archivadas.
 
 ### SeasonVersion
 
@@ -218,6 +247,14 @@ Estado Streamlit 2.2:
 - `team`
 - `created_at`
 - `source`
+
+Estado Streamlit 2.4:
+
+- Legacy sigue en `settings.hall_of_fame_v1`.
+- Las entradas nuevas pueden venir de `SeasonArchive`.
+- El equipo campeon se congela como snapshot publico: species, nickname, level,
+  gender, item, types y moves.
+- No se guardan IVs, EVs, naturaleza ni habilidad privada en Hall.
 
 ### Trial / Case
 

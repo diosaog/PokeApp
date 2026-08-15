@@ -69,6 +69,16 @@ Estado 2.3:
 - Guardar temporadas completas en historial queda diferido a 2.4 porque necesita
   archivo verificable antes de reiniciar.
 
+Estado 2.4:
+
+- Lifecycle legacy activo en `settings.season_lifecycle_v1`.
+- `SeasonArchive` legacy en `settings.season_archives_v1`.
+- Hall of Fame prefiere entradas congeladas desde archive.
+- Nueva temporada se prepara con limpieza activa quirurgica, preservando Hall,
+  archivos, saves, usuarios y catalogo.
+- Copa queda incluida como snapshot de estado legacy, pendiente de normalizacion
+  futura.
+
 ## Fase 3 - Contratos De Dominio
 
 Definir contratos estables:
@@ -134,6 +144,7 @@ Modelo conceptual:
 - `seasons`
 - `season_versions`
 - `season_players`
+- `season_archives`
 - `divisions`
 - `division_players`
 - `matchdays`

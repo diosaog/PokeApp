@@ -443,6 +443,60 @@ def wipe_all_app_data() -> dict[str, Any]:
     }
 
 
+def clear_active_competition_rows() -> dict[str, Any]:
+    """Clear active-season rows while preserving saves, settings and archives."""
+
+    errors: list[str] = []
+    remote_done = False
+    tables = (
+        ("team_locks", "id", -1),
+        ("shop_discounts", "id", -1),
+        ("redemptions", "id", -1),
+        ("pokemon_flags", "fingerprint", "__pokeapp_keep__"),
+        ("purchases", "id", -1),
+    )
+    if _supabase_enabled():
+        try:
+            client = _sb()
+            for table, column, sentinel in tables:
+                try:
+                    client.table(table).delete().neq(column, sentinel).execute()
+                except Exception as e:
+                    errors.append(f"Supabase {table}: {e}")
+            remote_done = True
+        except Exception as e:
+            errors.append(f"Supabase clear active data: {e}")
+
+    try:
+        if not _supabase_enabled():
+            init_storage()
+        with _conn() as cx:
+            for table, _column, _sentinel in tables:
+                try:
+                    cx.execute(f"DELETE FROM {table}")
+                except Exception as e:
+                    errors.append(f"SQLite {table}: {e}")
+            try:
+                cx.execute(
+                    "DELETE FROM sqlite_sequence WHERE name IN "
+                    "('team_locks','shop_discounts','redemptions','pokemon_flags','purchases')"
+                )
+            except Exception:
+                pass
+            cx.commit()
+    except Exception as e:
+        errors.append(f"SQLite clear active data: {e}")
+
+    _clear_storage_caches()
+    try:
+        if st is not None:
+            st.cache_data.clear()
+    except Exception:
+        pass
+
+    return {"ok": not errors, "errors": errors, "remote": remote_done}
+
+
 def _sha256(b: bytes) -> str:
     h = hashlib.sha256()
     h.update(b)

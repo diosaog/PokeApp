@@ -35,6 +35,47 @@ def _clean_team(values: Any) -> list[str]:
     return out[:6]
 
 
+def _clean_team_snapshot(values: Any) -> list[dict[str, Any]]:
+    source = values if isinstance(values, list) else []
+    out: list[dict[str, Any]] = []
+    for raw in source[:6]:
+        if not isinstance(raw, dict):
+            continue
+        species = _clean_text(raw.get("species") or raw.get("species_name"))
+        if not species:
+            continue
+        moves = [
+            _clean_text(move)
+            for move in (raw.get("moves") if isinstance(raw.get("moves"), list) else [])
+            if _clean_text(move)
+        ][:4]
+        types = [
+            _clean_text(type_name)
+            for type_name in (raw.get("types") if isinstance(raw.get("types"), list) else [])
+            if _clean_text(type_name)
+        ][:2]
+        out.append(
+            {
+                "species": species,
+                "nickname": _clean_text(raw.get("nickname")),
+                "level": int(raw.get("level") or 0) if str(raw.get("level") or "").isdigit() else 0,
+                "gender": _clean_text(raw.get("gender")),
+                "item": _clean_text(raw.get("item")),
+                "types": types,
+                "moves": moves,
+            }
+        )
+    return out
+
+
+def _team_names_from_snapshot(snapshot: list[dict[str, Any]]) -> list[str]:
+    return [
+        _clean_text(mon.get("species"))
+        for mon in snapshot[:6]
+        if _clean_text(mon.get("species"))
+    ]
+
+
 def _safe_timestamp(value: Any) -> int:
     try:
         return max(0, int(value))
@@ -69,7 +110,11 @@ def _coerce_entry(raw: Any) -> dict[str, Any] | None:
         "season": _clean_text(raw.get("season"), "Temporada"),
         "champion": champion,
         "runner_up": _clean_text(raw.get("runner_up")),
-        "team": _clean_team(raw.get("team")),
+        "team": _clean_team(raw.get("team"))
+        or _team_names_from_snapshot(_clean_team_snapshot(raw.get("team_snapshot"))),
+        "team_snapshot": _clean_team_snapshot(raw.get("team_snapshot")),
+        "team_source": _clean_text(raw.get("team_source")),
+        "archive_id": _clean_text(raw.get("archive_id")),
         "notes": _clean_text(raw.get("notes")),
         "created_at": created_at,
     }
@@ -116,6 +161,9 @@ def _auto_entry(
     runner_up: str = "",
     team: list[str] | None = None,
     notes: str = "",
+    team_snapshot: list[dict[str, Any]] | None = None,
+    team_source: str = "",
+    archive_id: str = "",
 ) -> dict[str, Any] | None:
     champion = _clean_text(champion)
     if not champion:
@@ -128,6 +176,9 @@ def _auto_entry(
         "champion": champion,
         "runner_up": runner_up,
         "team": _clean_team(team if team is not None else _current_team_for(champion)),
+        "team_snapshot": _clean_team_snapshot(team_snapshot),
+        "team_source": _clean_text(team_source),
+        "archive_id": _clean_text(archive_id),
         "notes": notes,
         "created_at": int(time.time()),
     }
@@ -290,6 +341,15 @@ def _automatic_entries() -> list[dict[str, Any]]:
     return [entry for entry in entries if entry]
 
 
+def _archive_entries() -> list[dict[str, Any]]:
+    try:
+        from app.season.archive import hall_entries_from_archives
+
+        return hall_entries_from_archives()
+    except Exception:
+        return []
+
+
 def _merge_entries(
     saved_entries: list[dict[str, Any]],
     automatic_entries: list[dict[str, Any]],
@@ -310,7 +370,7 @@ def _merge_entries(
 
 def sync_hall_of_fame_from_sources() -> list[dict[str, Any]]:
     saved = _load_entries()
-    merged = _merge_entries(saved, _automatic_entries())
+    merged = _merge_entries(saved, _automatic_entries() + _archive_entries())
     if json.dumps(saved, ensure_ascii=False, sort_keys=True) != json.dumps(
         merged,
         ensure_ascii=False,
@@ -572,12 +632,15 @@ def _render_css() -> None:
     )
 
 
-def _team_html(team: list[str]) -> str:
-    if not team:
+def _team_html(entry: dict[str, Any]) -> str:
+    team_snapshot = _clean_team_snapshot(entry.get("team_snapshot"))
+    team = _clean_team(entry.get("team")) or _team_names_from_snapshot(team_snapshot)
+    if not team and not team_snapshot:
         return "<div class='hof-card-notes'>Equipo sin registrar.</div>"
     parts: list[str] = []
-    for species in team[:6]:
-        name = _clean_text(species)
+    display_rows = team_snapshot or [{"species": species} for species in team[:6]]
+    for mon in display_rows[:6]:
+        name = _clean_text(mon.get("species"))
         if not name:
             continue
         try:
@@ -611,7 +674,7 @@ def _entry_html(entry: dict[str, Any]) -> str:
   </div>
   <div class="hof-card-champion">{escape(_clean_text(entry.get("champion")))}</div>
   {runner_html}
-  {_team_html(_clean_team(entry.get("team")))}
+  {_team_html(entry)}
   {notes_html}
 </div>
 """

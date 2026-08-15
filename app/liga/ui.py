@@ -32,6 +32,7 @@ from app.liga.snapshots import (
     snapshot_standings,
 )
 from app.season.config import season_rule_enabled
+from app.season.archive import SEASON_STATE_ACTIVE, load_season_lifecycle
 from app.liga.state import ensure_state, persist_state, restore_state
 from app.liga.table_summary import (
     coins_for_user as _coins_for_user,
@@ -740,9 +741,18 @@ def page_tabla(*, admin_mode: bool = False) -> None:
     _render_flash_messages()
     current_user = st.session_state.get("user")
     read_only = is_trainer_retired(current_user)
-    can_manage_league = is_league_admin(current_user) and not read_only and bool(admin_mode)
+    season_lifecycle = load_season_lifecycle()
+    season_is_active = str(season_lifecycle.get("state") or SEASON_STATE_ACTIVE).lower() == SEASON_STATE_ACTIVE
+    can_manage_league = (
+        is_league_admin(current_user)
+        and not read_only
+        and bool(admin_mode)
+        and season_is_active
+    )
     if read_only:
         st.info("Entrenador retirado.")
+    if admin_mode and not season_is_active:
+        st.info("La temporada no esta ACTIVE. Revisa o archiva desde Temporada/Admin.")
 
     if admin_mode:
         _auto_notify_latest_closed_round()

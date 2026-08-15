@@ -4,11 +4,9 @@ from collections.abc import Callable
 from typing import Any
 
 from app.liga.permissions import require_league_admin
-from storage import wipe_all_app_data
 
 
 SEASON_DISCARD_DECISION = "discard"
-SEASON_ARCHIVE_DECISION = "archive"
 SEASON_DISCARD_CONFIRMATION = "DESCARTAR"
 
 
@@ -26,7 +24,12 @@ def discard_active_season(
         raise ValueError("Elige explicitamente descartar temporada antes de reiniciar.")
     if str(confirmation or "").strip() != SEASON_DISCARD_CONFIRMATION:
         raise ValueError("La confirmacion textual no coincide.")
-    runner = wipe_fn or wipe_all_app_data
+    if wipe_fn is None:
+        from app.season.archive import mark_season_discarded
+
+        runner = lambda: mark_season_discarded(admin_user=admin_user)
+    else:
+        runner = wipe_fn
     report = runner()
     if not isinstance(report, dict):
         return {"ok": False, "errors": ["La accion de descarte no devolvio un informe valido."]}

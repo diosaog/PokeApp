@@ -7,7 +7,6 @@ from typing import Any
 import streamlit as st
 
 from app.admin.actions import (
-    SEASON_ARCHIVE_DECISION,
     SEASON_DISCARD_CONFIRMATION,
     SEASON_DISCARD_DECISION,
     discard_active_season,
@@ -35,6 +34,17 @@ from app.season.config import (
     save_season_version,
     season_version_for_round,
     season_version_to_dict,
+)
+from app.season.archive import (
+    SEASON_STATE_ACTIVE,
+    SEASON_STATE_ARCHIVED,
+    SEASON_STATE_DISCARDED,
+    SEASON_STATE_FINISHED,
+    archive_current_season,
+    finish_active_season,
+    load_season_archives,
+    load_season_lifecycle,
+    prepare_new_active_season,
 )
 from app.season.validation import (
     has_blocking_issues,
@@ -508,6 +518,101 @@ def _rules_summary_html(version: SeasonVersion) -> str:
     return "".join(rows)
 
 
+def _fmt_ts(value: Any) -> str:
+    try:
+        ts = int(value or 0)
+    except Exception:
+        ts = 0
+    if ts <= 0:
+        return "-"
+    try:
+        from datetime import datetime
+
+        return datetime.fromtimestamp(ts).strftime("%Y-%m-%d %H:%M")
+    except Exception:
+        return str(ts)
+
+
+def _lifecycle_label(state: str) -> str:
+    return {
+        SEASON_STATE_ACTIVE: "ACTIVE",
+        SEASON_STATE_FINISHED: "FINISHED",
+        SEASON_STATE_ARCHIVED: "ARCHIVED",
+        SEASON_STATE_DISCARDED: "DISCARDED",
+    }.get(str(state or "").lower(), str(state or "ACTIVE").upper())
+
+
+def _render_lifecycle_panel(current_user: str) -> None:
+    lifecycle = load_season_lifecycle()
+    state = str(lifecycle.get("state") or SEASON_STATE_ACTIVE).lower()
+    archives = load_season_archives()
+    latest_archive = archives[0] if archives else {}
+    st.markdown("<div class='season-section-title'>Ciclo de temporada</div>", unsafe_allow_html=True)
+    st.markdown(
+        (
+            "<div class='season-grid'>"
+            + _card("Estado", _lifecycle_label(state), f"Actualizado: {_fmt_ts(lifecycle.get('updated_at'))}")
+            + _card("Finalizada", _fmt_ts(lifecycle.get("finished_at")), "Revision antes de archivar")
+            + _card("Archivada", _fmt_ts(lifecycle.get("archived_at")), str(lifecycle.get("archive_id") or "-"))
+            + _card("Archivos", str(len(archives)), str(latest_archive.get("label") or "Sin historial"))
+            + "</div>"
+        ),
+        unsafe_allow_html=True,
+    )
+
+    if state == SEASON_STATE_ACTIVE:
+        st.info("Finalizar congela la temporada para revision. No borra datos.")
+        if st.button("Finalizar temporada", use_container_width=True, key="season_finish_button"):
+            try:
+                finish_active_season(admin_user=current_user)
+                st.success("Temporada finalizada. Revisa los datos antes de archivar.")
+                st.rerun()
+            except Exception as exc:
+                st.error(str(exc))
+    elif state == SEASON_STATE_FINISHED:
+        st.info("La temporada esta finalizada. Puedes revisar Liga/Hall y archivarla cuando este todo correcto.")
+        label = st.text_input(
+            "Nombre del archivo",
+            value=current_season_version().name,
+            key="season_archive_label",
+        )
+        if st.button("Archivar temporada", use_container_width=True, key="season_archive_button"):
+            try:
+                archive = archive_current_season(admin_user=current_user, label=label)
+                st.success(f"Temporada archivada: {archive.get('id')}")
+                st.rerun()
+            except Exception as exc:
+                st.error(str(exc))
+    elif state == SEASON_STATE_ARCHIVED:
+        st.success("Temporada archivada. El historial y Hall of Fame ya pueden leerse sin datos vivos.")
+        if st.button("Preparar nueva temporada", use_container_width=True, key="season_prepare_new_button"):
+            try:
+                report = prepare_new_active_season(admin_user=current_user)
+                if report.get("ok"):
+                    st.success("Nueva temporada preparada.")
+                    st.rerun()
+                else:
+                    st.error("No se pudo preparar la nueva temporada.")
+                    for err in report.get("errors") or []:
+                        st.caption(f"- {err}")
+            except Exception as exc:
+                st.error(str(exc))
+    elif state == SEASON_STATE_DISCARDED:
+        st.warning("La temporada activa fue descartada sin archivo.")
+        if st.button("Preparar nueva temporada", use_container_width=True, key="season_prepare_after_discard_button"):
+            try:
+                report = prepare_new_active_season(admin_user=current_user)
+                if report.get("ok"):
+                    st.success("Nueva temporada preparada.")
+                    st.rerun()
+                else:
+                    st.error("No se pudo preparar la nueva temporada.")
+                    for err in report.get("errors") or []:
+                        st.caption(f"- {err}")
+            except Exception as exc:
+                st.error(str(exc))
+
+
 def _rule_editor_fields(version: SeasonVersion) -> dict[str, Any]:
     current_rules = version.rules if isinstance(version.rules, dict) else {}
     next_rules = dict(current_rules)
@@ -843,15 +948,61 @@ def _render_competition_management() -> None:
 
 def _render_history_placeholder() -> None:
     st.markdown("<div class='season-section-title'>Historial de temporadas</div>", unsafe_allow_html=True)
+    archives = load_season_archives()
+    if not archives:
+        st.markdown(
+            (
+                "<div class='season-alert season-alert--info'>"
+                "<div class='season-alert-title'>Sin archivos</div>"
+                "<div class='season-alert-body'>Cuando archives una temporada aparecera aqui como snapshot historico independiente del estado vivo.</div>"
+                "</div>"
+            ),
+            unsafe_allow_html=True,
+        )
+        return
+    rows: list[str] = []
+    for archive in archives:
+        league = archive.get("league") if isinstance(archive.get("league"), dict) else {}
+        participants = archive.get("participants") if isinstance(archive.get("participants"), list) else []
+        rows.append(
+            "<tr>"
+            f"<td>{escape(str(archive.get('label') or archive.get('id') or '-'))}</td>"
+            f"<td>{escape(_fmt_ts(archive.get('archived_at')))}</td>"
+            f"<td>{escape(str(league.get('champion') or '-'))}</td>"
+            f"<td>{len(participants)}</td>"
+            f"<td>{escape(str(league.get('final_round') or 0))}</td>"
+            f"<td>{escape(str(archive.get('state') or '-'))}</td>"
+            "</tr>"
+        )
     st.markdown(
         (
-            "<div class='season-alert season-alert--info'>"
-            "<div class='season-alert-title'>Preparado para Fase 2.4</div>"
-            "<div class='season-alert-body'>El historial de temporadas guardara el archivo completo de una temporada. Hall of Fame seguira siendo una vista de campeones y logros, no el archivo tecnico.</div>"
-            "</div>"
+            "<table class='season-table'>"
+            "<thead><tr><th>Temporada</th><th>Archivada</th><th>Campeon Liga</th><th>Jugadores</th><th>Jornadas</th><th>Estado</th></tr></thead>"
+            f"<tbody>{''.join(rows)}</tbody>"
+            "</table>"
         ),
         unsafe_allow_html=True,
     )
+    selected = st.selectbox(
+        "Abrir resumen",
+        archives,
+        format_func=lambda archive: str(archive.get("label") or archive.get("id") or "-"),
+        key="season_archive_detail_select",
+    )
+    if isinstance(selected, dict):
+        league = selected.get("league") if isinstance(selected.get("league"), dict) else {}
+        hall_entries = selected.get("hall_entries") if isinstance(selected.get("hall_entries"), list) else []
+        st.markdown(
+            (
+                "<div class='season-split'>"
+                + _card("Campeon Liga", str(league.get("champion") or "-"), f"Finalista: {league.get('runner_up') or '-'}")
+                + _card("Hall entries", str(len(hall_entries)), "Entradas derivadas del archivo")
+                + "</div>"
+            ),
+            unsafe_allow_html=True,
+        )
+        with st.expander("Archivo en bruto", expanded=False):
+            st.json(selected)
 
 
 def _render_pokemon_flags_maintenance() -> None:
@@ -898,23 +1049,12 @@ def _render_risk_zone(current_user: str) -> None:
     st.markdown(
         (
             "<div class='season-danger-panel'>"
-            "<div class='season-danger-title'>Cerrar / reiniciar temporada</div>"
-            "<div class='season-danger-body'>Reset ya no significa borrar sin mas. Primero hay que elegir si se archivara o si se descarta definitivamente.</div>"
+            "<div class='season-danger-title'>Descartar temporada</div>"
+            "<div class='season-danger-body'>Descartar no crea archivo historico ni Hall. Para guardar la temporada usa Ciclo de temporada: Finalizar y Archivar.</div>"
             "</div>"
         ),
         unsafe_allow_html=True,
     )
-    decision = st.radio(
-        "Decision previa",
-        [SEASON_ARCHIVE_DECISION, SEASON_DISCARD_DECISION],
-        format_func=lambda value: "Guardar en historial" if value == SEASON_ARCHIVE_DECISION else "Descartar temporada",
-        horizontal=True,
-        key="season_reset_decision",
-    )
-    if decision == SEASON_ARCHIVE_DECISION:
-        st.info("El archivado completo se implementara en la siguiente mini-fase. No se puede reiniciar guardando hasta que exista verificacion de archivo.")
-        return
-
     st.warning("Descartar borra datos activos de temporada. No crea archivo historico.")
     confirm = st.text_input(
         f"Escribe {SEASON_DISCARD_CONFIRMATION} para confirmar",
@@ -930,7 +1070,7 @@ def _render_risk_zone(current_user: str) -> None:
         try:
             report = discard_active_season(
                 admin_user=current_user,
-                decision=decision,
+                decision=SEASON_DISCARD_DECISION,
                 confirmation=confirm,
             )
             if report.get("ok"):
@@ -981,6 +1121,7 @@ def render_temporada() -> None:
         ]
     )
     with tabs[0]:
+        _render_lifecycle_panel(current_user)
         st.markdown("<div class='season-section-title'>Estado actual</div>", unsafe_allow_html=True)
         _render_current_config()
     with tabs[1]:
