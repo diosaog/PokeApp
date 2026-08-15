@@ -154,6 +154,25 @@ Extraer funciones que no dependan de Streamlit:
 
 Debe poder ejecutarse desde tests, shell, Streamlit o API.
 
+Estado 4:
+
+- Servicios puros creados en `app/domain/services/`.
+- Documento central creado en `docs/pure-domain.md`.
+- Ranking, pares, H2H, desempates, total con penalizaciones y movimientos A/B
+  tienen implementacion pura.
+- Rewards construye `LeagueStanding` desde `SeasonVersion`.
+- Season resolution/validation existe para contratos de dominio.
+- Shop pricing, seleccion de promociones, estado de promo y decision de compra
+  promocionada son puros con `now`/RNG explicitos.
+- TrainerStatus y TrainerFlags tienen mutaciones puras; el wrapper legacy sigue
+  leyendo/escribiendo flags.
+- TeamLock, MatchdaySnapshot, ActivityEvent, SeasonArchive, Hall y reglas
+  pequenas de Juicios tienen builders/decisiones puros.
+- Runtime Streamlit sigue funcionando mediante wrappers legacy; no se migraron
+  repositories, SQL, API, React, Discord ni parser.
+- Copa, redemptions, money y save parsing quedan como mixed principal para fases
+  posteriores.
+
 ## Fase 5 - Repositories
 
 Separar intencion de persistencia:

@@ -58,11 +58,11 @@ class DomainContractTests(unittest.TestCase):
             "conex_pkhex",
         )
         domain_root = Path(__file__).resolve().parents[1] / "app" / "domain"
-        for path in domain_root.glob("*.py"):
+        for path in domain_root.rglob("*.py"):
             source = path.read_text(encoding="utf-8")
             lowered = source.lower()
             for needle in forbidden:
-                self.assertNotIn(needle, lowered, msg=f"{path.name} imports {needle}")
+                self.assertNotIn(needle, lowered, msg=f"{path.relative_to(domain_root)} imports {needle}")
 
     def test_season_contracts_are_json_safe(self) -> None:
         season = Season(

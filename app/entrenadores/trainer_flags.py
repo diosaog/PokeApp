@@ -5,6 +5,7 @@ import time
 import unicodedata
 from typing import Any
 
+from app.domain.services import trainers as trainer_domain
 from app.liga.permissions import require_league_admin
 from storage import settings_get, settings_set
 
@@ -214,20 +215,7 @@ def trainer_flags_for(trainer: str | None) -> dict[str, Any]:
 
 
 def _status_from_flags(flags: dict[str, Any] | None) -> str:
-    data = flags if isinstance(flags, dict) else {}
-    raw_status = str(data.get("status") or "").strip().lower()
-    if raw_status in TRAINER_STATUSES:
-        return raw_status
-    raw_reason = str(data.get("inactive_reason") or "").strip().lower()
-    if raw_reason in INACTIVE_TRAINER_STATUSES:
-        return raw_reason
-    if data.get("abandoned"):
-        return TRAINER_STATUS_ABANDONED
-    if data.get("disqualified"):
-        return TRAINER_STATUS_DISQUALIFIED
-    if data.get("retired"):
-        return TRAINER_STATUS_RETIRED
-    return TRAINER_STATUS_ACTIVE
+    return trainer_domain.status_from_flags(flags).value
 
 
 def trainer_status(trainer: str | None) -> str:
@@ -334,13 +322,7 @@ def sync_trainer_robbed_flags_from_history(
 
 def status_labels_for(trainer: str | None) -> list[str]:
     flags = trainer_flags_for(trainer)
-    labels: list[str] = []
-    status = _status_from_flags(flags)
-    if status != TRAINER_STATUS_ACTIVE:
-        labels.append(TRAINER_STATUS_LABELS.get(status, "Inactivo"))
-    if flags.get("robbed") and status == TRAINER_STATUS_ACTIVE:
-        labels.append("Robado")
-    return labels
+    return list(trainer_domain.status_labels_for_flags(flags))
 
 
 def format_trainer_with_flags(trainer: str | None) -> str:
@@ -352,8 +334,9 @@ def format_trainer_with_flags(trainer: str | None) -> str:
 
 
 def _clear_robbed_flag(data: dict[str, Any]) -> None:
-    for key in ROBBED_FLAG_KEYS:
-        data.pop(key, None)
+    cleaned = trainer_domain.clear_robbed_flag(data)
+    data.clear()
+    data.update(cleaned)
 
 
 def set_trainer_status(
@@ -373,30 +356,14 @@ def set_trainer_status(
     if normalized not in INACTIVE_TRAINER_STATUSES:
         raise ValueError("Estado de entrenador no valido.")
     flags = _load_raw()
-    data = dict(flags.get(name, {}))
     now = _now()
-    data["status"] = normalized
-    data["inactive"] = True
-    data["inactive_reason"] = normalized
-    data["inactive_at"] = now
-    data["inactive_by"] = str(by_user or "")
-    if note:
-        data["inactive_note"] = str(note)
-    data["retired"] = True
-    data.setdefault("retired_at", now)
-    if by_user:
-        data.setdefault("retired_by", str(by_user))
-    if normalized == TRAINER_STATUS_ABANDONED:
-        data["abandoned"] = True
-        data["abandoned_at"] = now
-        if by_user:
-            data["abandoned_by"] = str(by_user)
-    elif normalized == TRAINER_STATUS_DISQUALIFIED:
-        data["disqualified"] = True
-        data["disqualified_at"] = now
-        if by_user:
-            data["disqualified_by"] = str(by_user)
-    _clear_robbed_flag(data)
+    data = trainer_domain.apply_status_transition(
+        flags.get(name, {}),
+        normalized,
+        by_user=str(by_user or ""),
+        note=str(note or ""),
+        now=now,
+    )
     flags[name] = data
     _save_raw(flags)
 
@@ -438,7 +405,7 @@ def clear_active_robbed_flags(active_trainers: list[str] | tuple[str, ...]) -> N
     for trainer in active:
         data = dict(flags.get(trainer, {}))
         if data.get("robbed"):
-            _clear_robbed_flag(data)
+            data = trainer_domain.clear_robbed_flag(data)
             flags[trainer] = data
             changed = True
     if changed:
@@ -454,12 +421,9 @@ def reset_robbed_cycle_if_complete(active_trainers: list[str] | tuple[str, ...])
     if not active:
         return False
     flags = _load_raw()
-    if not all(bool(flags.get(trainer, {}).get("robbed")) for trainer in active):
+    flags, cycle_reset = trainer_domain.reset_robbed_cycle_if_complete(flags, active)
+    if not cycle_reset:
         return False
-    for trainer in active:
-        data = dict(flags.get(trainer, {}))
-        _clear_robbed_flag(data)
-        flags[trainer] = data
     _save_raw(flags)
     _set_history_watermark(_latest_robbery_redemption_id())
     return True
@@ -476,19 +440,19 @@ def mark_trainer_robbed(
         return {"marked": False, "already_robbed": False, "cycle_reset": False}
 
     flags = _load_raw()
-    current = dict(flags.get(name, {}))
-    if _status_from_flags(current) != TRAINER_STATUS_ACTIVE:
-        return {"marked": False, "already_robbed": False, "cycle_reset": False}
-    if current.get("robbed"):
-        return {"marked": False, "already_robbed": True, "cycle_reset": False}
-
-    current["robbed"] = True
-    current["robbed_at"] = _now()
-    current["robbed_source"] = "live"
-    if by_user:
-        current["robbed_by"] = str(by_user)
-    flags[name] = current
-    _save_raw(flags)
-
-    cycle_reset = reset_robbed_cycle_if_complete(active_trainers)
-    return {"marked": True, "already_robbed": False, "cycle_reset": cycle_reset}
+    result = trainer_domain.mark_trainer_robbed(
+        flags,
+        name,
+        by_user=str(by_user or ""),
+        active_trainers=active_trainers,
+        now=_now(),
+    )
+    if result.marked or result.cycle_reset:
+        _save_raw(result.flags_by_trainer)
+    if result.cycle_reset:
+        _set_history_watermark(_latest_robbery_redemption_id())
+    return {
+        "marked": result.marked,
+        "already_robbed": result.already_robbed,
+        "cycle_reset": result.cycle_reset,
+    }

@@ -2,10 +2,18 @@
 
 Checkpoint date: 2026-08-15
 
-Base HEAD before this checkpoint documentation:
+Base HEAD before original checkpoint documentation:
 `f6d8fc179f8c9e021bdf6b4fa1e2687e2d7e8b2a`
 
-The commit containing this file is the functional freeze checkpoint commit.
+The original commit containing this file was the functional freeze checkpoint.
+Later architecture checkpoints are tracked below.
+
+Latest architecture state:
+
+- Fase 3 closed: dependency-free domain contracts in `app/domain/`.
+- Fase 4 closed: pure domain services in `app/domain/services/`.
+- Runtime remains Streamlit legacy through wrappers.
+- Next exact phase: Fase 5 - repositories.
 
 ## Current State
 
@@ -21,6 +29,8 @@ Closed phases:
 - Fase 2.4: season lifecycle, SeasonArchive and stable Hall of Fame.
 - Fase 2.5: ActivityEvents and NotificationView.
 - Fase 2.6: final audit, backlog, checkpoint and functional freeze.
+- Fase 3: domain contracts.
+- Fase 4: pure domain services.
 
 Validation at this checkpoint:
 
@@ -28,7 +38,7 @@ Validation at this checkpoint:
 - `py -m unittest discover -s tests`
 - `git diff --check`
 
-Verified current suite: 72 tests.
+Verified current suite after Fase 4: 94 tests.
 
 ## What Works
 
@@ -65,6 +75,8 @@ Entry:
 
 Important layers:
 
+- `app/domain/*`: dependency-free contracts.
+- `app/domain/services/*`: pure business decisions.
 - `storage.py`: Supabase/SQLite/settings facade.
 - `utils.py`: roster/session/save helpers and static user registry.
 - `app/liga/*`: ranking, state, snapshots, rewards, divisions and UI.
@@ -75,6 +87,13 @@ Important layers:
 - `app/juicios/*`: cases, forms, repo, penalties and rendering.
 - `app/interfaz/*`: shell, theme, home, notifications, normativa, admin and Hall.
 - `app/activity/events.py`: ActivityEvent legacy store.
+
+Fase 4 wrappers currently delegate selected logic into domain services:
+
+- ranking helpers and points-with-penalties;
+- division movements;
+- shop promotion selection/pricing/state;
+- trainer status and robbed flag mutations.
 
 Persistence:
 
@@ -101,33 +120,11 @@ Persistence:
 Next exact phase:
 
 ```text
-Fase 3 - Contratos de Dominio
+Fase 5 - Repositories
 ```
 
-Do not code repositories, SQL, API or React in Fase 3. Define contracts first.
-
-Domain contracts to define:
-
-- Pokemon
-- PublicPokemon
-- PrivatePokemon
-- Trainer
-- Season
-- SeasonVersion
-- Division
-- Matchday
-- Match
-- LeagueStanding
-- ShopItem
-- ShopPromotion
-- Purchase
-- ParsedSave
-- TeamLock
-- TrainerFlags
-- ActivityEvent
-- HallOfFameEntry
-- Cup
-- Trial / Case
+Do not code SQL, API or React in Fase 5. First define repository interfaces and
+application orchestration boundaries around the domain services.
 
 ## Do Not Do When Resuming
 
@@ -142,9 +139,9 @@ Domain contracts to define:
 
 ## Remaining Planning
 
-- Fase 3: domain contracts.
-- Fase 4: pure domain extraction.
-- Fase 5: repositories.
+- Fase 3: domain contracts. Closed.
+- Fase 4: pure domain extraction. Closed.
+- Fase 5: repositories. Next.
 - Fase 6: Supabase V2 design.
 - Fase 7: RLS and security.
 - Fase 8: API for critical operations.

@@ -95,6 +95,22 @@ Desde Fase 2.5, la actividad reciente deja de depender solo de vistas derivadas:
 - Si no hay eventos nuevos, la UI usa fallback legacy desde `saves`,
   `purchases` y `team_locks` para no romper la app durante la transicion.
 
+Desde Fase 3, `app/domain/` contiene contratos dependency-free para las entidades
+centrales. Desde Fase 4, `app/domain/services/` contiene comportamiento puro para
+las reglas que deben sobrevivir a Streamlit:
+
+- season resolution/validation;
+- ranking, standings, rewards y movimientos;
+- shop promotions/pricing/purchase decision;
+- trainer status/flags;
+- team locks;
+- snapshots/archive/Hall builders;
+- ActivityEvent construction/dedupe;
+- pequenas reglas de Juicios.
+
+Los wrappers legacy pueden leer datos, llamar dominio y despues persistir, pero
+el dominio no decide permisos, no persiste y no renderiza.
+
 ## Problema Principal
 
 La deuda mas importante no es Supabase. Es que entidades centrales de competicion

@@ -1,13 +1,13 @@
 from __future__ import annotations
 
 import json
-import math
 import random
 import time
 from datetime import datetime
 from typing import Any
 from zoneinfo import ZoneInfo
 
+from app.domain.services import shop as shop_domain
 from app.discord_notify import notify_shop_discounts_created_async
 from app.liga.context import current_jornada
 from storage import (
@@ -23,13 +23,8 @@ PROMOTION_DELAY_SECONDS = 24 * 60 * 60
 MADRID_TZ = ZoneInfo("Europe/Madrid")
 GOLD_BOTTLE_CAP = "Chapa Dorada"
 EVOLUTION_ITEM = "Objeto Evolutivo"
-DISCOUNT_BLOCKLIST = {GOLD_BOTTLE_CAP}
-
-CATEGORY_RULES: dict[str, dict[str, int]] = {
-    "comodines": {"normal": 1, "mega": 1},
-    "competitivos": {"normal": 4, "mega": 2},
-    "crianza": {"normal": 1, "mega": 1},
-}
+DISCOUNT_BLOCKLIST = shop_domain.DISCOUNT_BLOCKLIST
+CATEGORY_RULES = shop_domain.CATEGORY_RULES
 
 
 def _generation_key(target_round: int) -> str:
@@ -37,49 +32,25 @@ def _generation_key(target_round: int) -> str:
 
 
 def _catalog_items(catalog: dict[str, list[dict]]) -> list[dict[str, Any]]:
-    out: list[dict[str, Any]] = []
-    for category, items in catalog.items():
-        if category not in CATEGORY_RULES:
-            continue
-        for item in items:
-            name = str(item.get("name") or "").strip()
-            price = int(item.get("price") or 0)
-            if name and price > 1:
-                out.append({**item, "category": category})
-    return out
+    return shop_domain.catalog_items(catalog)
 
 
 def _item_key(name: Any) -> str:
-    return str(name or "").strip().casefold()
+    return shop_domain.item_key(name)
 
 
 def _discount_price(base_price: int, kind: str, *, item: str = "") -> int:
-    price = int(base_price)
-    if item in DISCOUNT_BLOCKLIST:
-        return price
-    if kind == "mega":
-        if price == 12:
-            return 8
-        return max(1, math.ceil(price * 0.5))
-    step = 2 if price >= 6 else 1
-    return max(1, price - step)
+    return shop_domain.discount_price(base_price, kind, item=item)
 
 
 def _mega_allowed(item: dict[str, Any]) -> bool:
-    name = str(item.get("name") or "")
-    price = int(item.get("price") or 0)
-    return price > 4 and name != EVOLUTION_ITEM
+    return shop_domain.mega_allowed(item)
 
 
 def _consecutive_zero_rounds(
     item: str, closed_round: int, counts: dict[int, dict[str, int]]
 ) -> int:
-    streak = 0
-    for round_no in range(int(closed_round), 0, -1):
-        if int(counts.get(round_no, {}).get(item, 0)) > 0:
-            break
-        streak += 1
-    return streak
+    return shop_domain.consecutive_zero_rounds(item, closed_round, counts)
 
 
 def _priority_score(
@@ -89,17 +60,11 @@ def _priority_score(
     counts: dict[int, dict[str, int]],
     last_seen: dict[str, int],
 ) -> float:
-    name = str(item.get("name") or "")
-    streak = _consecutive_zero_rounds(name, closed_round, counts)
-    total_purchases = sum(
-        int(round_counts.get(name, 0)) for round_counts in counts.values()
-    )
-    seen_round = int(last_seen.get(name, 0))
-    rounds_since_offer = max(int(closed_round) + 1 - seen_round, 1)
-    return (
-        float(streak * 4)
-        + float(rounds_since_offer * 2)
-        + float(max(4 - total_purchases, 0))
+    return shop_domain.priority_score(
+        item,
+        closed_round=closed_round,
+        counts=counts,
+        last_seen=last_seen,
     )
 
 
@@ -112,28 +77,14 @@ def _weighted_pick(
     last_seen: dict[str, int],
     rng: random.Random,
 ) -> list[dict[str, Any]]:
-    pool = list(candidates)
-    selected: list[dict[str, Any]] = []
-    while pool and len(selected) < int(amount):
-        priorities = [
-            _priority_score(
-                item,
-                closed_round=closed_round,
-                counts=counts,
-                last_seen=last_seen,
-            )
-            for item in pool
-        ]
-        low = min(priorities)
-        high = max(priorities)
-        spread = max(high - low, 1.0)
-        scores = [
-            0.70 * ((priority - low) / spread) + 0.30 * rng.random()
-            for priority in priorities
-        ]
-        index = max(range(len(pool)), key=lambda idx: scores[idx])
-        selected.append(pool.pop(index))
-    return selected
+    return shop_domain.weighted_pick(
+        candidates,
+        amount,
+        closed_round=closed_round,
+        counts=counts,
+        last_seen=last_seen,
+        rng=rng,
+    )
 
 
 def _pick_avoiding_previous(
@@ -146,37 +97,15 @@ def _pick_avoiding_previous(
     last_seen: dict[str, int],
     rng: random.Random,
 ) -> list[dict[str, Any]]:
-    fresh = [
-        item for item in candidates if str(item.get("name") or "") not in previous_items
-    ]
-    selected = _weighted_pick(
-        fresh,
+    return shop_domain.pick_avoiding_previous(
+        candidates,
         amount,
+        previous_items=previous_items,
         closed_round=closed_round,
         counts=counts,
         last_seen=last_seen,
         rng=rng,
     )
-    remaining = int(amount) - len(selected)
-    if remaining <= 0:
-        return selected
-    selected_names = {str(item.get("name") or "") for item in selected}
-    repeats = [
-        item
-        for item in candidates
-        if str(item.get("name") or "") not in selected_names
-    ]
-    selected.extend(
-        _weighted_pick(
-            repeats,
-            remaining,
-            closed_round=closed_round,
-            counts=counts,
-            last_seen=last_seen,
-            rng=rng,
-        )
-    )
-    return selected
 
 
 def select_shop_promotions(
@@ -189,89 +118,14 @@ def select_shop_promotions(
     rng: random.Random | None = None,
 ) -> list[dict[str, Any]]:
     generator = rng or random.SystemRandom()
-    purchased_names = {_item_key(item) for item in (purchased_items or set())}
-    items = _catalog_items(catalog)
-    item_category = {
-        str(item.get("name") or ""): str(item.get("category") or "")
-        for item in items
-    }
-    last_seen: dict[str, int] = {}
-    previous_items: set[str] = set()
-    for discount in discount_history:
-        name = str(discount.get("item") or "")
-        round_no = int(discount.get("jornada") or 0)
-        if not name:
-            continue
-        last_seen[name] = max(last_seen.get(name, 0), round_no)
-        if round_no == int(closed_round):
-            previous_items.add(name)
-
-    selected: list[dict[str, Any]] = []
-    used_names: set[str] = set()
-    for category, quotas in CATEGORY_RULES.items():
-        category_items = [
-            item
-            for item in items
-            if item_category.get(str(item.get("name") or "")) == category
-            and _item_key(item.get("name")) not in purchased_names
-            and str(item.get("name") or "") not in DISCOUNT_BLOCKLIST
-        ]
-        normal_candidates = [
-            item
-            for item in category_items
-            if int(
-                purchase_counts.get(int(closed_round), {}).get(
-                    str(item.get("name") or ""), 0
-                )
-            )
-            == 0
-        ]
-        mega_candidates = [
-            item
-            for item in normal_candidates
-            if int(closed_round) >= 2
-            and int(
-                purchase_counts.get(int(closed_round) - 1, {}).get(
-                    str(item.get("name") or ""), 0
-                )
-            )
-            == 0
-            and _mega_allowed(item)
-        ]
-
-        mega = _pick_avoiding_previous(
-            mega_candidates,
-            int(quotas["mega"]),
-            previous_items=previous_items,
-            closed_round=closed_round,
-            counts=purchase_counts,
-            last_seen=last_seen,
-            rng=generator,
-        )
-        for item in mega:
-            name = str(item.get("name") or "")
-            selected.append({**item, "discount_kind": "mega"})
-            used_names.add(name)
-
-        normal_pool = [
-            item
-            for item in normal_candidates
-            if str(item.get("name") or "") not in used_names
-        ]
-        normal = _pick_avoiding_previous(
-            normal_pool,
-            int(quotas["normal"]),
-            previous_items=previous_items,
-            closed_round=closed_round,
-            counts=purchase_counts,
-            last_seen=last_seen,
-            rng=generator,
-        )
-        for item in normal:
-            name = str(item.get("name") or "")
-            selected.append({**item, "discount_kind": "normal"})
-            used_names.add(name)
-    return selected
+    return shop_domain.select_shop_promotions(
+        catalog,
+        closed_round=closed_round,
+        purchase_counts=purchase_counts,
+        discount_history=discount_history,
+        purchased_items=purchased_items,
+        rng=generator,
+    )
 
 
 def schedule_shop_promotions(
@@ -348,14 +202,8 @@ def schedule_shop_promotions(
 
 
 def promotion_state(discount: dict[str, Any], *, now: int | None = None) -> str:
-    if not bool(discount.get("active")):
-        return "ended"
-    if int(discount.get("stock_used") or 0) >= int(discount.get("stock_total") or 0):
-        return "ended"
     current = int(now if now is not None else time.time())
-    if current < int(discount.get("activates_at") or 0):
-        return "pending"
-    return "active"
+    return shop_domain.promotion_state(discount, now=current).value
 
 
 def promotion_opens_label(discount: dict[str, Any]) -> str:

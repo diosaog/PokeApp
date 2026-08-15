@@ -1,9 +1,19 @@
 from __future__ import annotations
 
 import json
-from typing import Dict
 import streamlit as st
 
+from app.domain.services.league import (
+    all_matches_filled as domain_all_matches_filled,
+    generate_pairs,
+    head_to_head,
+    one_decimal,
+    players_from_matches,
+    rank_division,
+    sync_match_map,
+    total_points_with_penalties,
+    wins_losses,
+)
 from app.entrenadores.constants import DEAD_BOX_INDEX
 from app.entrenadores.cache import cached_dead_count
 from app.entrenadores.snapshot import clear_trainer_snapshot_runtime_caches, get_trainer_snapshot
@@ -60,34 +70,18 @@ def _cache_data(ttl: int = 20):
 
 
 def _gen_pairs(players: list[str]) -> list[tuple[str, str]]:
-    res = []
-    n = len(players)
-    for i in range(n):
-        for j in range(i + 1, n):
-            res.append((players[i], players[j]))
-    return res
+    return generate_pairs(players)
 
 
 def _sync_match_map(
     players: list[str],
     existing: dict[tuple[str, str], str | None] | None,
 ) -> dict[tuple[str, str], str | None]:
-    existing = existing or {}
-    synced: dict[tuple[str, str], str | None] = {}
-    for pair in _gen_pairs(players):
-        rev = (pair[1], pair[0])
-        synced[pair] = existing.get(pair, existing.get(rev))
-    return synced
+    return sync_match_map(players, existing)
 
 
 def _players_from_matches(results: dict[tuple[str, str], str | None]) -> list[str]:
-    players: list[str] = []
-    for p1, p2 in results.keys():
-        if p1 and p1 not in players:
-            players.append(p1)
-        if p2 and p2 not in players:
-            players.append(p2)
-    return players
+    return players_from_matches(results)
 
 
 def get_matches_for(tramo: int) -> dict:
@@ -196,50 +190,21 @@ def _revive_redemptions_count(trainer: str) -> int:
 
 
 def _wins_losses(players: list[str], results: dict[tuple[str, str], str]) -> dict:
-    table = {p: {"W": 0, "L": 0} for p in players}
-    for (p1, p2), w in results.items():
-        if w is None:
-            continue
-        loser = p2 if w == p1 else p1
-        table[w]["W"] += 1
-        table[loser]["L"] += 1
-    return table
+    records = wins_losses(players, results)
+    return {player: {"W": record.wins, "L": record.losses} for player, record in records.items()}
 
 
 def _h2h(p1: str, p2: str, results: dict[tuple[str, str], str]) -> str | None:
-    key = (p1, p2) if (p1, p2) in results else (p2, p1)
-    if key in results and results[key] in (p1, p2):
-        return results[key]
-    return None
+    return head_to_head(p1, p2, results)
 
 
 def _rank(players: list[str], results: dict[tuple[str, str], str]) -> list[str]:
-    wl = _wins_losses(players, results)
-    groups: Dict[int, list[str]] = {}
-    for p in players:
-        groups.setdefault(wl[p]["W"], []).append(p)
-    ranking: list[str] = []
-    for wins in sorted(groups.keys(), reverse=True):
-        group = groups[wins]
-        if len(group) == 1:
-            ranking += group
-            continue
-        if len(group) == 2:
-            p1, p2 = group
-            h2h = _h2h(p1, p2, results)
-            if h2h is not None:
-                ranking += [h2h, p2 if h2h == p1 else p1]
-            else:
-                ranking += sorted(group)
-        else:
-            muertos = {p: _count_muertos_for_trainer(p) for p in group}
-            group_sorted = sorted(group, key=lambda x: (muertos[x], x))
-            ranking += group_sorted
-    return ranking
+    dead_counts = {player: _count_muertos_for_trainer(player) for player in players}
+    return rank_division(players, results, dead_counts=dead_counts)
 
 
 def all_filled(md: dict[tuple[str, str], str | None]) -> bool:
-    return all(w is not None for w in md.values())
+    return domain_all_matches_filled(md)
 
 
 def _record_position(tramo: int, user: str, pos: int) -> None:
@@ -489,8 +454,7 @@ def points_from_league(user: str) -> int:
 
 
 def _one_decimal(x: float) -> float:
-    from decimal import Decimal, ROUND_HALF_UP
-    return float(Decimal(str(x)).quantize(Decimal("0.0"), rounding=ROUND_HALF_UP))
+    return one_decimal(x)
 
 
 def current_points_total(
@@ -515,8 +479,11 @@ def current_points_total(
     muertos = _count_muertos_for_trainer(user, raw_dead_count=raw_dead_count)
     penalties = penalties if penalties is not None else get_user_penalties(user)
     points_reduction = float(penalties.get("points_reduction") or 0.0)
-    total = base - 0.2 * muertos - points_reduction
-    return _one_decimal(total)
+    return total_points_with_penalties(
+        base,
+        dead_count=muertos,
+        points_reduction=points_reduction,
+    )
 
 
 def general_table_sorted() -> list[tuple[str, float]]:

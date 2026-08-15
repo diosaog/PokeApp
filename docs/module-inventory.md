@@ -56,14 +56,30 @@ extraiga dominio o repositories.
 | `archives.py` | DOMAIN CONTRACT | `SeasonArchive` congelado. |
 | `legacy.py` | DOMAIN ADAPTER | Adaptadores pequenos dict legacy -> contratos, sin imports de infraestructura. |
 
+### app/domain/services
+
+| Modulo | Tipo | Nota |
+| --- | --- | --- |
+| `season.py` | DOMAIN SERVICE | Resolucion de version, ventana de aplicacion, validacion estructural y diff de versiones. |
+| `league.py` | DOMAIN SERVICE | Pares, match maps, records, H2H, ranking, movimientos A/B, award intent y puntos con penalizaciones. |
+| `rewards.py` | DOMAIN SERVICE | Puntos/monedas por posicion y construccion de `LeagueStanding`. |
+| `shop.py` | DOMAIN SERVICE | Candidatos, precios, mega eligibility, rotacion, estado de promocion y decision pura de compra. |
+| `trainers.py` | DOMAIN SERVICE | Semantica de status, labels, transiciones, flag robado y reset de ciclo. |
+| `team_locks.py` | DOMAIN SERVICE | Validacion y construccion de `TeamLock`. |
+| `snapshots.py` | DOMAIN SERVICE | Construccion contractual de `MatchdaySnapshot`. |
+| `activity.py` | DOMAIN SERVICE | Construccion, dedupe y visibilidad de `ActivityEvent`. |
+| `hall_of_fame.py` | DOMAIN SERVICE | Entrada de Hall desde datos congelados. |
+| `archives.py` | DOMAIN SERVICE | Construccion de `SeasonArchive` desde inputs explicitos. |
+| `trials.py` | DOMAIN SERVICE | Mayoria, recuento, veredicto y transiciones de caso. |
+
 ## app/liga
 
 | Modulo | Tipo | Nota |
 | --- | --- | --- |
-| `ranking.py` | MIXED | Logica valiosa, pero depende de Streamlit, saves y storage. |
+| `ranking.py` | MIXED WRAPPER | Sigue cerrando jornadas via Streamlit/storage, pero pares, ranking, H2H y total con penalizaciones delegan a dominio puro. |
 | `state.py` | STREAMLIT/STORAGE | Serializa `st.session_state` a `settings.league_state`. |
-| `rewards.py` | PURE-ish | Delegacion simple a season config. |
-| `divisions.py` | PURE-ish | Ascensos/descensos, portable si se inyecta config. |
+| `rewards.py` | PURE-ish WRAPPER | Delegacion simple a season config; dominio puro vive en `app/domain/services/rewards.py`. |
+| `divisions.py` | PURE-ish WRAPPER | Lee movement_count desde config legacy y delega el calculo A/B a dominio. |
 | `ui.py` | STREAMLIT | Vista de Liga y consola oficial; los controles de jornada/divisiones/reset solo renderizan con `admin_mode=True` desde `Temporada/Admin`. |
 | `matchup.py` | STREAMLIT/MIXED | Team Preview con UI, snapshots y detalle de ataques. |
 
@@ -81,7 +97,7 @@ extraiga dominio o repositories.
 
 | Modulo | Tipo | Nota |
 | --- | --- | --- |
-| `discounts.py` | PURE-ish/MIXED | Seleccion de promociones reutilizable; persiste y avisa Discord. |
+| `discounts.py` | MIXED WRAPPER | Seleccion/precio/estado delegan a dominio; scheduling, persistencia y avisos siguen legacy. |
 | `catalog_data.py` | PURE-ish | Catalogo estatico con assets. |
 | `catalog_render.py` | STREAMLIT/HTML | Render de cards; el CTA usa `st.button` fuera del HTML de la card y se integra visualmente con CSS hasta extraer `ShopItemCard`. |
 | `sections.py` | STREAMLIT | Vista tienda y flujo de compra; confirmacion y compra siguen acopladas a `st.session_state`; el reset de flags queda como helper legacy no montado en la pagina normal. |
@@ -96,7 +112,7 @@ extraiga dominio o repositories.
 | `page.py` | STREAMLIT | Pantalla principal grande; concentra CSS local de Entrenadores/PC/Inspector hasta extraer design system. |
 | `boxes.py` | STREAMLIT/MIXED | PC/Cajas, seleccion y mapping de slots; el orden real del save esta acoplado al render. |
 | `snapshot.py` | MIXED/STORAGE | Snapshot derivado de save, guardado en settings. |
-| `trainer_flags.py` | MIXED/STORAGE | TrainerStatus (`active`, `retired`, `abandoned`, `disqualified`) y TrainerFlags (`robbed`) sobre settings + redemptions; mutaciones de status protegidas Anto-only. |
+| `trainer_flags.py` | MIXED WRAPPER | Lee/escribe flags y sync historico, pero status, labels, mutaciones y ciclo robado delegan a dominio puro. |
 | `cache.py` | MIXED | Cache del parser PKHeX. |
 | `detail_render.py` | STREAMLIT/HTML | Inspector visual; reutiliza resolver de iconos de inventario temporalmente. |
 | `summary.py` | STREAMLIT/MIXED | Resumen, monedas, puntos, medallas. |
@@ -153,6 +169,8 @@ extraiga dominio o repositories.
 | Test | Cobertura |
 | --- | --- |
 | `test_activity_events.py` | ActivityEvent legacy, dedupe, visibilidad y hooks de save/compra/team lock. |
+| `test_domain_contracts.py` | Contratos de dominio, JSON-safe, privacidad, adaptadores legacy y regla arquitectonica recursiva. |
+| `test_domain_services.py` | Servicios puros de Fase 4: season, ranking, rewards, shop, flags, team locks, snapshots, activity, Hall/archive y juicios. |
 | `test_shop_promotions.py` | Rebajas, exclusiones y rotacion. |
 | `test_season_config.py` | Versionado, permisos, bloqueo historico y roster explicito. |
 | `test_season_validation.py` | Validacion de temporada, A/B oficial, jugadores y reglas. |
