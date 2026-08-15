@@ -8,6 +8,12 @@ from typing import Any
 import streamlit as st
 
 from app.common import COIN
+from app.activity.events import (
+    EVENT_PURCHASE_COMPLETED,
+    EVENT_SAVE_UPLOADED,
+    EVENT_TEAM_LOCKED,
+    recent_activity_events,
+)
 from app.liga.context import current_jornada
 from app.tienda.discounts import (
     discount_label,
@@ -163,6 +169,76 @@ def _activity_item(
     }
 
 
+def _activity_event_item(event: dict[str, Any]) -> dict[str, str] | None:
+    event_type = str(event.get("type") or "").upper()
+    payload = event.get("payload") if isinstance(event.get("payload"), dict) else {}
+    context = event.get("context") if isinstance(event.get("context"), dict) else {}
+    trainer = str(event.get("trainer") or event.get("actor") or "Entrenador").strip() or "Entrenador"
+    created_at = event.get("created_at")
+    source = str(event.get("id") or event.get("dedupe_key") or event_type)
+
+    if event_type == EVENT_SAVE_UPLOADED:
+        save_name = str(
+            payload.get("original_name")
+            or payload.get("filename")
+            or "save"
+        ).strip() or "save"
+        return _activity_item(
+            source=source,
+            title="Save subido",
+            body=f"{trainer} ha subido {save_name}.",
+            timestamp=created_at,
+        )
+
+    if event_type == EVENT_PURCHASE_COMPLETED:
+        price = _safe_int(payload.get("price"))
+        if price <= 0:
+            return None
+        item_name = str(payload.get("item") or "objeto").strip() or "objeto"
+        return _activity_item(
+            source=source,
+            title="Compra",
+            body=f"{trainer} ha comprado {item_name}.",
+            timestamp=created_at,
+        )
+
+    if event_type == EVENT_TEAM_LOCKED:
+        jornada = _safe_int(context.get("jornada") or payload.get("jornada"))
+        late = " tarde" if payload.get("is_late") else ""
+        round_suffix = f" para J{jornada}" if jornada > 0 else ""
+        return _activity_item(
+            source=source,
+            title="Equipo fijado",
+            body=f"{trainer} ha fijado equipo{late}{round_suffix}.",
+            timestamp=created_at,
+        )
+
+    return None
+
+
+def _activity_event_items(*, user: str | None, limit: int) -> tuple[bool, list[dict[str, str]]]:
+    try:
+        events = recent_activity_events(
+            limit=max(int(limit) * 8, 20),
+            viewer=user,
+            ui_only=True,
+        )
+    except Exception:
+        events = []
+    if not events:
+        return False, []
+    items = [
+        item
+        for item in (_activity_event_item(event) for event in events)
+        if item is not None
+    ]
+    items.sort(
+        key=lambda item: (_safe_int(item.get("ts")), str(item.get("source") or "")),
+        reverse=True,
+    )
+    return True, items[: max(1, int(limit))]
+
+
 def _team_lock_activity(round_no: int) -> list[dict[str, str]]:
     try:
         locks = list_team_locks(int(round_no))
@@ -247,6 +323,20 @@ def collect_notifications(
     _ = user
     round_no = int(jornada or current_jornada())
     cap = max(1, int(limit or MAX_VISIBLE_NOTIFICATIONS))
+    has_events, event_items = _activity_event_items(user=user, limit=cap)
+    if has_events:
+        if event_items:
+            return event_items
+        return [
+            {
+                "kind": "ok",
+                "source": "empty-events",
+                "title": "Sin actividad reciente",
+                "body": "",
+                "time": "",
+                "ts": "0",
+            }
+        ]
     items = [
         *_team_lock_activity(round_no),
         *_purchase_activity(cap),

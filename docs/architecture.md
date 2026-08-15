@@ -84,6 +84,17 @@ La limpieza activa conserva archivos historicos, Hall, archives, usuarios,
 catalogo y saves. Solo resetea estado competitivo activo: Liga, Copa activa,
 compras/promos/redenciones, flags, team locks y config activa.
 
+Desde Fase 2.5, la actividad reciente deja de depender solo de vistas derivadas:
+
+- `settings.activity_events_v1` guarda `ActivityEvent` legacy.
+- Un `ActivityEvent` representa un hecho estructurado, no una frase renderizada.
+- `NotificationView` es una decision de UI: transforma eventos recientes en
+  mensajes breves.
+- Los eventos prioritarios implementados son `SAVE_UPLOADED`,
+  `PURCHASE_COMPLETED` y `TEAM_LOCKED`.
+- Si no hay eventos nuevos, la UI usa fallback legacy desde `saves`,
+  `purchases` y `team_locks` para no romper la app durante la transicion.
+
 ## Problema Principal
 
 La deuda mas importante no es Supabase. Es que entidades centrales de competicion
@@ -132,6 +143,9 @@ Hay que decidir y documentar una fuente de verdad por dato:
 - Hall of Fame: derivado al finalizar temporada/copa, persistido como historico.
 - SeasonArchive: fuente historica autosuficiente desde 2.4; en V2 deberia pasar
   a tablas o documentos versionados con `season_id`.
+- ActivityEvent: hechos append-only de producto; hoy viven en
+  `settings.activity_events_v1`, pero en V2 deben pasar a tabla
+  `activity_events`.
 - Flags de entrenador: entidad propia, no texto decorativo.
 
 ## Criterios De Salida Por Fase

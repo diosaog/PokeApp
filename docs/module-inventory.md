@@ -9,7 +9,7 @@ extraiga dominio o repositories.
 | --- | --- | --- |
 | `main.py` | STREAMLIT | Configuracion, shell, login, sidebar, topbar y router. |
 | `utils.py` | MIXED | Roster, secciones, session_state, saves locales y helpers. |
-| `storage.py` | STORAGE/LEGACY | Fachada de Supabase/SQLite/settings/saves/wipe. |
+| `storage.py` | STORAGE/LEGACY | Fachada de Supabase/SQLite/settings/saves/wipe; `save_upload()` emite ActivityEvent cuando el save queda registrado. |
 | `conex_pkhex.py` | MIXED | Bridge/parser PKHeX, cache y normalizacion a UI. |
 | `dexdata.py` | MIXED | Datos Pokemon, cache local y traducciones. |
 | `saves.py` | STREAMLIT | UI de subida, save actual, historial y descarga; el wipe global se movio a `Temporada/Admin` en 2.3. |
@@ -30,6 +30,12 @@ extraiga dominio o repositories.
 | Modulo | Tipo | Nota |
 | --- | --- | --- |
 | `actions.py` | MIXED/ADMIN | Acciones peligrosas protegidas Anto-only; `discard_active_season()` exige decision y confirmacion textual y descarta la temporada activa sin destruir archivos/Hall. |
+
+## app/activity
+
+| Modulo | Tipo | Nota |
+| --- | --- | --- |
+| `events.py` | MIXED/STORAGE | Fase 2.5: ActivityEvent legacy en `settings.activity_events_v1`, dedupe, visibilidad y emisores para save, compra y team lock. |
 
 ## app/liga
 
@@ -98,7 +104,7 @@ extraiga dominio o repositories.
 | `auth.py` | STREAMLIT/STORAGE | Login y PIN via settings. |
 | `sidebar.py` | STREAMLIT/STORAGE | Navegacion, PIN, perfil mini. |
 | `home.py` | STREAMLIT/MIXED | Menu principal y resumen. |
-| `notifications.py` | MIXED | Actividad reciente desde saves, compras y locks. |
+| `notifications.py` | MIXED | NotificationView: muestra maximo 5 ActivityEvents recientes; fallback legacy desde saves, compras y locks si no existen eventos nuevos. |
 | `normativa.py` | STREAMLIT/CONTENT | Manual oficial `rulebook-*` V2: portada documental, indice compacto, articulos alineados, tablas de caps/recompensas y fichas de comodines sin `st.tabs`. |
 | `temporada.py` | STREAMLIT/MIXED | Back office Admin 2.4: estado, ciclo de temporada, configuracion, gestion de entrenadores, consola Liga, historial real y zona de descarte. |
 | `hall_of_fame.py` | MIXED | Logica y UI de historico; auto-sync de campeones desde fuentes vivas y archivos inmutables con equipos congelados. |
@@ -119,7 +125,7 @@ extraiga dominio o repositories.
 
 | Modulo | Tipo | Nota |
 | --- | --- | --- |
-| `storage_shop.py` | STORAGE | Compras, promociones, locks, inventario, redenciones. |
+| `storage_shop.py` | STORAGE | Compras, promociones, locks, inventario, redenciones; desde 2.5 emite ActivityEvents tras compras y team locks exitosos. |
 | `storage_flags.py` | STORAGE | Flags de Pokemon y limpieza. |
 | `storage_cache.py` | STORAGE | Cache simple en memoria. |
 
@@ -127,6 +133,7 @@ extraiga dominio o repositories.
 
 | Test | Cobertura |
 | --- | --- |
+| `test_activity_events.py` | ActivityEvent legacy, dedupe, visibilidad y hooks de save/compra/team lock. |
 | `test_shop_promotions.py` | Rebajas, exclusiones y rotacion. |
 | `test_season_config.py` | Versionado, permisos, bloqueo historico y roster explicito. |
 | `test_season_validation.py` | Validacion de temporada, A/B oficial, jugadores y reglas. |

@@ -580,6 +580,20 @@ def save_upload(content: bytes, original_name: str, uploader: str|None=None) -> 
                     new_id = data[0].get("id")
             except Exception:
                 new_id = None
+            if new_id is not None:
+                try:
+                    from app.activity.events import emit_save_uploaded
+
+                    emit_save_uploaded(
+                        trainer=str(uploader or ""),
+                        save_id=int(new_id),
+                        filename=safe_name,
+                        original_name=original_name,
+                        sha256=sha,
+                        created_at=ts,
+                    )
+                except Exception:
+                    pass
             return {
                 "id": new_id,
                 "filename": safe_name,
@@ -599,6 +613,19 @@ def save_upload(content: bytes, original_name: str, uploader: str|None=None) -> 
         )
         rowid = cx.execute("SELECT last_insert_rowid()").fetchone()[0]
         cx.commit()
+    try:
+        from app.activity.events import emit_save_uploaded
+
+        emit_save_uploaded(
+            trainer=str(uploader or ""),
+            save_id=int(rowid),
+            filename=safe_name,
+            original_name=original_name,
+            sha256=sha,
+            created_at=ts,
+        )
+    except Exception:
+        pass
     return {"id": rowid, "filename": safe_name, "sha256": sha, "created_at": ts}
 
 

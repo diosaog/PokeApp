@@ -286,6 +286,158 @@ It still requires:
 
 Discard creates no archive and no Hall entry.
 
+## 2.5 Update - ActivityEvent And Notifications
+
+Update date: 2026-08-15
+
+### Notification Audit Before 2.5
+
+`app/interfaz/notifications.py` built recent activity as a view derived from
+three operational sources:
+
+| Source | Data read | Timestamp | Duplicate risk | Reset/archive behavior | Meaning |
+| --- | --- | --- | --- | --- | --- |
+| Team locks | `list_team_locks(current_jornada)` | `locked_at` real | Re-saving lock can rewrite the row; the notification is recomputed from current row only. | Active cleanup deletes `team_locks`, so the feed entry disappears. | Important official fact. |
+| Purchases | `list_purchases()` | `created_at` real | Each purchase row has id; UI could duplicate with future event feed if mixed. Price 0 rows were filtered out. | Active cleanup deletes `purchases`, so entries disappear. | Important economy fact when price > 0. |
+| Saves | `list_saves()` | `created_at` real | Re-upload of same file creates another save row; old UI showed another item. | Saves are preserved after 2.4, so entries remained. | Important operational fact. |
+
+Other activity-like sources existed but were not part of the small UI feed:
+
+- Discord markers for league summaries and missing team locks.
+- Shop promotion rows and Discord discount announcements.
+- Redemptions for item usage/robbery/shields.
+- Trainer status stored in `settings.trainer_flags`.
+- Season lifecycle and archive in `settings.season_lifecycle_v1` /
+  `settings.season_archives_v1`.
+- Hall of Fame entries from live/archived sources.
+
+Problems found:
+
+- Notification UI mixed "fact discovery" with "message rendering".
+- Purchases and team locks disappeared from the feed when active season data was
+  cleaned.
+- Team lock display only looked at the current jornada.
+- Save re-upload had no explicit dedupe concept.
+- Future React/API would have no stable event contract.
+
+### ActivityEvent Legacy Contract
+
+`app/activity/events.py` now introduces `ActivityEvent`.
+
+Legacy persistence:
+
+- key: `settings.activity_events_v1`;
+- storage shape: JSON list;
+- current cap: 1000 events to avoid unbounded `settings` growth during legacy;
+- no SQL table yet.
+
+Core fields:
+
+- `id`;
+- `type`;
+- `created_at`;
+- `actor`;
+- `trainer`;
+- `context`;
+- `payload`;
+- `visibility`;
+- `dedupe_key`.
+
+The event stores structured data. It does not store only the final Spanish copy
+shown by the UI.
+
+### Implemented Event Types
+
+Implemented in 2.5:
+
+- `SAVE_UPLOADED`
+  - emitted after `save_upload()` has persisted metadata successfully;
+  - dedupe: trainer + save hash;
+  - payload: save id, filename, original name, sha256.
+- `PURCHASE_COMPLETED`
+  - emitted after purchase insert/RPC succeeds;
+  - normal shop purchase and discount purchase are covered;
+  - failed discount claims do not emit;
+  - dedupe: purchase id;
+  - payload: item, quantity, effective price, purchase id, base price and
+    discount data when present.
+- `TEAM_LOCKED`
+  - emitted after `upsert_team_lock()` returns a persisted lock;
+  - dedupe: jornada + trainer;
+  - payload: lock id, jornada, late flag, save reference/hash.
+
+Visibility:
+
+- all three priority events are currently `public`, matching previous behavior
+  where any logged-in trainer could see recent saves, purchases and locks.
+- `trainer-only` and `admin-only` are already represented in the contract and
+  tested, but not used by the three visible events yet.
+
+### Deferred Event Types
+
+Deferred deliberately:
+
+- `TRAINER_STATUS_CHANGED`: valuable for admin audit, but not needed in the
+  public notification chip. Should be emitted server-side or from an Admin
+  service when the repository layer exists.
+- `MATCHDAY_CLOSED`: relevant, but Liga already has Discord/idempotency markers.
+  Adding it now would require careful interaction with existing round close
+  flows.
+- `SEASON_FINISHED` / `SEASON_ARCHIVED`: historically useful, but 2.4 already
+  persists lifecycle/archive. Event emission should come from the future season
+  service, not from extra UI glue.
+- `PROMOTION_APPLIED`: shop discounts already announce through Discord and rows.
+  UI feed would become noisy.
+- `REDEMPTION_USED`: useful for audit, but many redemptions may be private or
+  tactical. Needs a stronger visibility policy first.
+
+### NotificationView After 2.5
+
+`NotificationView` remains in `app/interfaz/notifications.py`.
+
+Behavior:
+
+- Reads recent `ActivityEvent` items first.
+- Converts only UI-relevant event types to short messages.
+- Keeps the visible maximum at 5.
+- Orders by event timestamp.
+- Filters price 0 purchase events out of the small public feed, matching legacy
+  UI behavior.
+- If there are no ActivityEvents yet, falls back to legacy derivation from
+  `team_locks`, `purchases` and `saves`.
+- If ActivityEvents exist, it does not mix fallback rows, avoiding duplicate
+  messages.
+
+Empty state remains:
+
+```text
+Sin actividad reciente
+```
+
+### Archive, Discard And Future API
+
+Events are global legacy settings data. They are not cleared by
+`clear_active_competition_rows()` because that function preserves settings.
+
+Tradeoff:
+
+- archived/discarded seasons keep audit events;
+- current UI only shows recent visible events and does not become a full social
+  feed;
+- legacy cap means this is not final archival storage.
+
+Future API/server-side operations should emit events for:
+
+- purchase completed;
+- team lock confirmed;
+- save accepted;
+- matchday closed;
+- trainer status changed;
+- season archived.
+
+The future React UI should not create official events by itself. It should read
+events created by server-side operations.
+
 ## Executive Summary
 
 Phase 2 is partially implemented, but it is not feature-freeze ready yet.
@@ -297,21 +449,17 @@ The strongest pieces already in place are:
 - Dynamic league rewards through `app/liga/rewards.py`.
 - Trainer status/flags for inactive trainers and `robbed`.
 - Team locks, shop discounts and purchases in dedicated tables.
-- Hall of Fame auto-sync from Liga and Copa sources.
-- Recent notifications derived from saves, purchases and team locks.
+- Hall of Fame auto-sync from Liga/Copa plus archived snapshot-safe entries.
+- ActivityEvent legacy for saves, purchases and team locks.
 
 The largest gaps before Phase 2 can close are:
 
-- Historic league results are not immutable enough. Positions are stored, but
-  points/coins/config snapshots are not.
 - The league implementation is still hard-wired to two divisions, A and B.
 - Phase 2.3 moved the highest-risk admin controls into `Temporada/Admin`; Copa
   and Juicios still keep their domain workflows in-place until a later pass.
-- `abandono` is now a distinct TrainerStatus (`abandoned`) with the same current
-  competitive effect as retired.
-- Hall of Fame entries are automatic-ish, but their team snapshot can drift
-  because it reads the current trainer snapshot instead of the locked/final team.
-- Notifications are not first-class `ActivityEvent` rows; they are derived views.
+- ActivityEvents still live in `settings` and need a real V2 table/repository.
+- Trainer status, season lifecycle and matchday closed events are defined as
+  candidates but not emitted yet.
 - SQLite is a fallback/dev store, not an official synchronized replica.
 
 ## 2A - Current Season Configuration
@@ -822,7 +970,7 @@ Recommended future direction:
 | Save parsed snapshots | `settings.trainer_snapshot:*` | Derived cache, not official source. |
 | Shop promotions | `shop_discounts` table | Good candidate for V2 with `season_id`. |
 | Hall of Fame | `settings.hall_of_fame_v1` + `settings.season_archives_v1` | Archive-derived entries are immutable; live auto entries remain only as active preview. |
-| Notifications | Derived from tables | No persistent activity log. |
+| Notifications | `settings.activity_events_v1` first, legacy derived fallback | Persistent legacy event log exists; future table still pending. |
 | Discard season | `app.admin.actions.discard_active_season()` -> `mark_season_discarded()` | Gated in Admin and season-scoped; legacy wipe remains only as old storage helper. |
 
 ## 2I - SQLite
@@ -929,7 +1077,8 @@ Tests missing for Phase 2 close:
 - Functional `rules` are now wired where they affect current behavior.
 - Persist Hall of Fame team snapshots from final/locked data. Completed in 2.4
   for archived seasons.
-- Introduce `ActivityEvent` concept before expanding notifications.
+- ActivityEvent legacy exists in 2.5; remaining work is moving it to real
+  table/repository and expanding event types carefully.
 - Move `trainer_flags` out of generic settings in Supabase V2.
 - Continue replacing dynamic historical reads with stored snapshot data where
   legacy paths remain.
@@ -977,11 +1126,11 @@ Tests missing for Phase 2 close:
    - Streamlit 2.0 officially supports exactly 2 divisions until domain/API work.
 
 7. Finalize Hall of Fame immutability.
-   - Build entries from final snapshots and locked teams; keep merge idempotency.
+   - Completed in 2.4 for archived seasons.
 
 8. Introduce ActivityEvent abstraction.
-   - Start with save uploaded, purchase completed, team locked.
-   - Then add trainer retired, round closed and season changed.
+   - Completed in 2.5 for save uploaded, purchase completed and team locked.
+   - Trainer status, round closed and season changed remain future event types.
 
 9. Expand tests around the closed mechanics.
    - Especially immutable scoring after config changes and permissions.
@@ -991,10 +1140,12 @@ Tests missing for Phase 2 close:
 
 ## Bottom Line
 
-PokeApp already has the skeleton needed for Phase 2, but it should not enter
-feature freeze until historical scoring, permissions, trainer status semantics,
-Hall snapshots and activity events are closed. The safest next implementation is
-not more UI: it is locking admin actions and making closed rounds immutable.
+PokeApp now has the Phase 2 core skeleton for Streamlit 2.0: immutable matchday
+snapshots, guarded admin controls, trainer status semantics, season archives,
+snapshot-safe Hall entries and ActivityEvents for the three high-value recent
+activity sources. The remaining feature-freeze work is mostly consolidation:
+avoid adding noisy event types, finish any product-critical polish, and then move
+these contracts toward V2 tables/repositories/API.
 
 ## Phase 2.1 Implementation Notes
 

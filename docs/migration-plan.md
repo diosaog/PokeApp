@@ -79,6 +79,15 @@ Estado 2.4:
 - Copa queda incluida como snapshot de estado legacy, pendiente de normalizacion
   futura.
 
+Estado 2.5:
+
+- `ActivityEvent` legacy activo en `settings.activity_events_v1`.
+- Notificaciones principales leen eventos y solo caen a derivacion legacy si no
+  existen eventos nuevos.
+- Eventos implementados: save subido, compra completada y equipo fijado.
+- Eventos diferidos: cambios de estado, cierre de jornada, ciclo de temporada,
+  promociones y redenciones, hasta tener una capa server-side mas formal.
+
 ## Fase 3 - Contratos De Dominio
 
 Definir contratos estables:
@@ -161,6 +170,16 @@ Modelo conceptual:
 - `hall_of_fame_team`
 
 `season_id` debe estar en todo dato competitivo relevante.
+
+En V2, `activity_events` debe emitirse desde operaciones server-side, no desde la
+UI:
+
+- purchase completada;
+- team lock confirmado;
+- save aceptado;
+- jornada cerrada;
+- cambio de estado de entrenador;
+- temporada archivada.
 
 ## Fase 7 - RLS Y Seguridad
 

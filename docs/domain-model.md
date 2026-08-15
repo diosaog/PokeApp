@@ -230,12 +230,40 @@ Estado Streamlit 2.2:
 
 - `id`
 - `season_id`
-- `type`: save_uploaded, purchase, team_locked, season_changed, trainer_status_changed, round_closed
-- `actor`
-- `target`
-- `summary`
-- `metadata`
+- `type`: save_uploaded, purchase_completed, team_locked, season_finished, season_archived, trainer_status_changed, round_closed
 - `created_at`
+- `actor`
+- `trainer`
+- `context`: season/archive/round references
+- `payload`
+- `visibility`: public, trainer-only, admin-only
+- `dedupe_key`
+
+Estado Streamlit 2.5:
+
+- Legacy vive en `settings.activity_events_v1`.
+- No hay tabla SQL todavia.
+- Los eventos implementados son `SAVE_UPLOADED`, `PURCHASE_COMPLETED` y
+  `TEAM_LOCKED`.
+- El evento no guarda la frase final de UI. Guarda datos estructurados para que
+  `NotificationView` o una futura API puedan renderizarlo de otra forma.
+- Dedupe es obligatorio para los eventos oficiales:
+  - save: entrenador + hash del save.
+  - compra: purchase id.
+  - equipo fijado: jornada + entrenador.
+- `visibility` existe ya en el contrato legacy, aunque los tres eventos visibles
+  iniciales son publicos para mantener el comportamiento actual.
+
+### NotificationView
+
+Proyeccion de UI para actividad reciente.
+
+- lee ActivityEvents recientes;
+- aplica visibilidad;
+- transforma payload estructurado en copy breve;
+- limita la zona visible a 5 elementos;
+- si no hay ActivityEvents nuevos, usa fallback legacy desde saves, compras y
+  team locks para no romper la transicion.
 
 ### HallOfFameEntry
 

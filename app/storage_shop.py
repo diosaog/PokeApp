@@ -38,6 +38,55 @@ def _notify_purchase_inserted(user: str, item: str, price: int, purchase_id: int
         pass
 
 
+def _emit_purchase_event(
+    *,
+    user: str,
+    item: str,
+    price: int,
+    purchase_id: int,
+    created_at: int | None = None,
+    jornada: int | None = None,
+    discount_id: int | None = None,
+    base_price: int | None = None,
+    discount_kind: str | None = None,
+) -> None:
+    try:
+        from app.activity.events import emit_purchase_completed
+
+        emit_purchase_completed(
+            trainer=str(user),
+            item=str(item),
+            price=int(price),
+            purchase_id=int(purchase_id),
+            created_at=created_at,
+            jornada=jornada,
+            discount_id=discount_id,
+            base_price=base_price,
+            discount_kind=discount_kind,
+        )
+    except Exception:
+        pass
+
+
+def _emit_team_lock_event(lock: dict[str, Any] | None) -> None:
+    if not lock:
+        return
+    try:
+        from app.activity.events import emit_team_locked
+
+        emit_team_locked(
+            trainer=str(lock.get("user") or ""),
+            jornada=int(lock.get("jornada") or 0),
+            lock_id=int(lock.get("id") or 0) if lock.get("id") is not None else None,
+            locked_at=int(lock.get("locked_at") or 0) or None,
+            is_late=bool(lock.get("is_late")),
+            save_id=int(lock.get("save_id") or 0) if lock.get("save_id") is not None else None,
+            save_sha256=str(lock.get("save_sha256") or ""),
+        )
+    except Exception:
+        pass
+
+
 def add_purchase(
     user: str,
     item: str,
@@ -77,6 +126,16 @@ def add_purchase(
             if data:
                 pid = int(data[0].get("id") or 0)
                 _invalidate_purchase_caches(user)
+                _emit_purchase_event(
+                    user=user,
+                    item=item,
+                    price=int(price),
+                    purchase_id=pid,
+                    created_at=ts,
+                    jornada=jornada,
+                    discount_id=discount_id,
+                    base_price=base_price,
+                )
                 if notify:
                     _notify_purchase_inserted(user, item, int(price), pid)
                 return pid
@@ -104,6 +163,16 @@ def add_purchase(
         cx.commit()
         _invalidate_purchase_caches(user)
         pid = int(rowid)
+        _emit_purchase_event(
+            user=user,
+            item=item,
+            price=int(price),
+            purchase_id=pid,
+            created_at=ts,
+            jornada=jornada,
+            discount_id=discount_id,
+            base_price=base_price,
+        )
         if notify:
             _notify_purchase_inserted(user, item, int(price), pid)
         return pid
@@ -454,7 +523,7 @@ def purchase_shop_discount(
             _invalidate_shop_discount_caches()
             _invalidate_purchase_caches(user)
             if isinstance(row, dict):
-                return {
+                out = {
                     "purchased": bool(row.get("purchased")),
                     "reason": str(row.get("reason") or ""),
                     "purchase_id": int(row.get("purchase_id") or 0),
@@ -466,6 +535,19 @@ def purchase_shop_discount(
                     "stock_used": int(row.get("stock_used") or 0),
                     "discount_kind": str(row.get("discount_kind") or "normal"),
                 }
+                if out["purchased"]:
+                    _emit_purchase_event(
+                        user=str(user),
+                        item=str(out.get("item") or ""),
+                        price=int(out.get("discount_price") or 0),
+                        purchase_id=int(out.get("purchase_id") or 0),
+                        created_at=int(time.time()),
+                        jornada=int(jornada),
+                        discount_id=int(out.get("discount_id") or discount_id),
+                        base_price=int(out.get("base_price") or 0),
+                        discount_kind=str(out.get("discount_kind") or "normal"),
+                    )
+                return out
         except Exception as e:
             raise RuntimeError(
                 "Supabase no tiene instalada la migracion de promociones: "
@@ -558,6 +640,17 @@ def purchase_shop_discount(
 
     _invalidate_shop_discount_caches()
     _invalidate_purchase_caches(user)
+    _emit_purchase_event(
+        user=str(user),
+        item=str(discount["item"]),
+        price=int(discount["discount_price"]),
+        purchase_id=int(purchase_id),
+        created_at=ts,
+        jornada=int(jornada),
+        discount_id=int(discount_id),
+        base_price=int(discount["base_price"]),
+        discount_kind=str(discount["discount_kind"]),
+    )
     return {
         "purchased": True,
         "reason": "ok",
@@ -836,7 +929,9 @@ def upsert_team_lock(
             data = res.data
             row = data[0] if isinstance(data, list) and data else data
             _invalidate_team_lock_caches()
-            return _team_lock_from_mapping(row) if isinstance(row, dict) else None
+            lock = _team_lock_from_mapping(row) if isinstance(row, dict) else None
+            _emit_team_lock_event(lock)
+            return lock
         except Exception:
             return None
 
@@ -877,7 +972,9 @@ def upsert_team_lock(
         ).fetchone()
         cx.commit()
     _invalidate_team_lock_caches()
-    return _team_lock_from_tuple(row) if row else None
+    lock = _team_lock_from_tuple(row) if row else None
+    _emit_team_lock_event(lock)
+    return lock
 
 
 def total_spent(user: str) -> int:
