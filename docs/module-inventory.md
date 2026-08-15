@@ -37,6 +37,25 @@ extraiga dominio o repositories.
 | --- | --- | --- |
 | `events.py` | MIXED/STORAGE | Fase 2.5: ActivityEvent legacy en `settings.activity_events_v1`, dedupe, visibilidad y emisores para save, compra y team lock. |
 
+## app/domain
+
+| Modulo | Tipo | Nota |
+| --- | --- | --- |
+| `common.py` | DOMAIN CONTRACT | IDs, enums comunes, timestamps conceptuales y serializacion JSON-safe. |
+| `trainers.py` | DOMAIN CONTRACT | `Trainer`, `TrainerStatus` y `TrainerFlags`; identidad separada de participacion. |
+| `pokemon.py` | DOMAIN CONTRACT | `PublicPokemon`, `PrivatePokemon`, movimientos, spreads y flags Pokemon. |
+| `seasons.py` | DOMAIN CONTRACT | `Season`, lifecycle, `SeasonVersion`, rules, metadata, `Division` y `SeasonPlayer`. |
+| `league.py` | DOMAIN CONTRACT | `Matchday`, `Match`, `LeagueStanding`, `PenaltySummary` y `MatchdaySnapshot`. |
+| `saves.py` | DOMAIN CONTRACT | `SaveRecord`, `ParsedSave`, slots de party/caja, cajas e inventario. |
+| `shop.py` | DOMAIN CONTRACT | `ShopItem`, `ShopPromotion`, `Purchase` y `Redemption`. |
+| `team_locks.py` | DOMAIN CONTRACT | `TeamLock` con equipo publico congelado y referencia de save. |
+| `activity.py` | DOMAIN CONTRACT | `ActivityEvent` y tipos visibles actuales. |
+| `hall_of_fame.py` | DOMAIN CONTRACT | `HallOfFameEntry` con equipo publico congelado. |
+| `cup.py` | DOMAIN CONTRACT | Contrato minimo de Copa y matches. |
+| `trials.py` | DOMAIN CONTRACT | `TrialCase`, votos y `Penalty` como value object. |
+| `archives.py` | DOMAIN CONTRACT | `SeasonArchive` congelado. |
+| `legacy.py` | DOMAIN ADAPTER | Adaptadores pequenos dict legacy -> contratos, sin imports de infraestructura. |
+
 ## app/liga
 
 | Modulo | Tipo | Nota |

@@ -127,6 +127,18 @@ Nota de alcance:
 - N divisiones reales no se implementan sobre el estado Streamlit A/B. Deben
   definirse aqui como contrato de dominio antes de pasar a repositories/API.
 
+Estado 3:
+
+- Contratos creados en `app/domain/`.
+- Documento central creado en `docs/domain-contracts.md`.
+- Los contratos son dataclasses/enums dependency-free y JSON-safe.
+- No se migro runtime Streamlit, storage, parser, SQL, API ni UI.
+- `Division` queda generico para no bloquear N divisiones futuras, pero la app
+  actual sigue A/B.
+- `NotificationView` queda clasificado como view model fuera de domain.
+- `TeamLock` queda como contrato propio con equipo publico congelado y referencia
+  de save.
+
 ## Fase 4 - Dominio Puro
 
 Extraer funciones que no dependan de Streamlit:
