@@ -88,6 +88,17 @@ Estado 2.5:
 - Eventos diferidos: cambios de estado, cierre de jornada, ciclo de temporada,
   promociones y redenciones, hasta tener una capa server-side mas formal.
 
+Estado 2.6:
+
+- Auditoria final cerrada en `docs/phase2-freeze-audit.md`.
+- Checkpoint de pausa creado en `docs/project-checkpoint.md`.
+- Backlog post-2.0 creado en `docs/post-2.0-backlog.md`.
+- PokeApp 2.0 queda en feature freeze funcional: no nuevas mecanicas antes de
+  la migracion arquitectonica.
+- Deuda aceptada principal: `settings` JSON, Streamlit/session coupling,
+  seguridad sin RLS/API final, Copa/Juicios como islas legacy y helpers antiguos
+  dormidos.
+
 ## Fase 3 - Contratos De Dominio
 
 Definir contratos estables:

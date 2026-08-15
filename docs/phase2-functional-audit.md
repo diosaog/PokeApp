@@ -1417,3 +1417,23 @@ The logic does not depend on Normativa strings.
   Supabase V2/domain work.
 - Economy sanctions remain live administrative state; league coin awards are
   snapshot-first.
+
+## Phase 2.6 - Functional Freeze
+
+Phase 2.6 closes the Streamlit product phase with a final audit and checkpoint.
+
+Canonical documents:
+
+- `docs/phase2-freeze-audit.md`
+- `docs/project-checkpoint.md`
+- `docs/post-2.0-backlog.md`
+
+Decision:
+
+```text
+FEATURE FREEZE FUNCIONAL POKEAPP 2.0
+```
+
+No new mechanics should be added before the architectural migration path. Work
+after this point should be limited to bugs, security, migration, architecture,
+equivalence and stability.
