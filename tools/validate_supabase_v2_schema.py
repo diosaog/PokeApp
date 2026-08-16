@@ -15,6 +15,27 @@ RESET_SQL = ROOT / "supabase" / "v2" / "reset_dev.sql"
 SEED_SQL = ROOT / "supabase" / "v2" / "migrations" / "009_seed.sql"
 
 
+SUPABASE_ROLE_MOCK_SQL = r"""
+do $$
+begin
+  if not exists (select 1 from pg_roles where rolname = 'anon') then
+    create role anon nologin;
+  end if;
+
+  if not exists (select 1 from pg_roles where rolname = 'authenticated') then
+    create role authenticated nologin;
+  end if;
+
+  if not exists (select 1 from pg_roles where rolname = 'service_role') then
+    create role service_role nologin bypassrls;
+  else
+    alter role service_role bypassrls;
+  end if;
+end;
+$$;
+"""
+
+
 EXPECTED_TABLES = [
     "activity_events",
     "app_settings",
@@ -72,6 +93,7 @@ $$;
 do $$
 declare
   missing text[];
+  missing_rls text[];
   actual_count integer;
 begin
   select array_agg(t order by t)
@@ -96,6 +118,24 @@ begin
 
   if actual_count <> __EXPECTED_COUNT__ then
     raise exception 'Expected % V2 tables, found %', __EXPECTED_COUNT__, actual_count;
+  end if;
+
+  select array_agg(expected.t order by expected.t)
+  into missing_rls
+  from unnest(array[__EXPECTED_TABLES__]) as expected(t)
+  where not exists (
+    select 1
+    from pg_class as c
+    join pg_namespace as n
+      on n.oid = c.relnamespace
+    where n.nspname = 'public'
+      and c.relname = expected.t
+      and c.relkind = 'r'
+      and c.relrowsecurity = true
+  );
+
+  if missing_rls is not null then
+    raise exception 'V2 tables without RLS enabled: %', missing_rls;
   end if;
 end;
 $$;
@@ -174,6 +214,7 @@ do $fixture$
 declare
   anto uuid;
   victor uuid;
+  admin uuid;
   season uuid;
   season_two uuid;
   cfg uuid;
@@ -195,15 +236,17 @@ declare
   cnt integer;
   json_value text;
 begin
-  insert into public.trainers (display_name, slug, auth_user_id)
+  insert into public.trainers (display_name, slug, auth_user_id, is_admin)
   values
-    ('Validation Anto', 'validation_anto', '00000000-0000-0000-0000-000000000101'),
-    ('Validation Victor', 'validation_victor', '00000000-0000-0000-0000-000000000102');
+    ('Validation Anto', 'validation_anto', '00000000-0000-0000-0000-000000000101', false),
+    ('Validation Victor', 'validation_victor', '00000000-0000-0000-0000-000000000102', false),
+    ('Validation Admin', 'validation_admin', '00000000-0000-0000-0000-000000000103', true);
 
   select id into anto from public.trainers where slug = 'validation_anto';
   select id into victor from public.trainers where slug = 'validation_victor';
+  select id into admin from public.trainers where slug = 'validation_admin';
 
-  if anto is null or victor is null then
+  if anto is null or victor is null or admin is null then
     raise exception 'UUID default/insert failed for trainers';
   end if;
 
@@ -399,6 +442,9 @@ begin
   values (season, anto, sp_anto, shop_item, promo, 1, 5)
   returning id into purchase_id;
 
+  insert into public.purchases (season_id, trainer_id, season_player_id, shop_item_id, quantity, unit_price)
+  values (season, victor, sp_victor, shop_item, 1, 5);
+
   perform public.__pokeapp_expect_failure(
     format(
       'insert into public.purchases (season_id, trainer_id, season_player_id, shop_item_id, quantity, unit_price)
@@ -464,6 +510,9 @@ begin
   values (save_anto, 'validator', '{"party": [{"species": "Milotic"}], "boxes": []}'::jsonb)
   returning id into parsed_id;
 
+  insert into public.parsed_saves (save_file_id, parser_version, payload)
+  values (save_victor, 'validator', '{"party": [{"species": "Crobat"}], "boxes": []}'::jsonb);
+
   perform public.__pokeapp_expect_failure(
     format('insert into public.parsed_saves (save_file_id, parser_version, payload) values (%L, ''validator'', ''{}''::jsonb)', save_anto),
     'parsed save duplicate parser version'
@@ -492,6 +541,31 @@ begin
     now() + interval '1 day',
     '{"team": [{"species": "Milotic"}]}'::jsonb,
     '{"ivs": {"hp": 31}}'::jsonb
+  );
+
+  insert into public.team_locks (
+    season_id,
+    matchday_id,
+    trainer_id,
+    season_player_id,
+    save_file_id,
+    save_sha256,
+    locked_at,
+    deadline_at,
+    public_team_snapshot,
+    private_team_snapshot
+  )
+  values (
+    season,
+    matchday,
+    victor,
+    sp_victor,
+    save_victor,
+    'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb',
+    now(),
+    now() + interval '1 day',
+    '{"team": [{"species": "Crobat"}]}'::jsonb,
+    '{"ivs": {"speed": 31}}'::jsonb
   );
 
   perform public.__pokeapp_expect_failure(
@@ -642,6 +716,212 @@ drop function public.__pokeapp_expect_failure(text, text);
 """
 
 
+RLS_VALIDATION_SQL = r"""
+\set ON_ERROR_STOP on
+
+create or replace function public.__pokeapp_rls_expect_failure(p_sql text, p_label text)
+returns void
+language plpgsql
+as $$
+begin
+  execute p_sql;
+  raise exception 'Expected RLS failure did not happen: %', p_label;
+exception
+  when others then
+    if sqlstate = 'P0001' and sqlerrm like 'Expected RLS failure did not happen:%' then
+      raise;
+    end if;
+end;
+$$;
+
+reset role;
+set role authenticated;
+set request.jwt.claim.sub = '00000000-0000-0000-0000-000000000101';
+
+do $$
+declare
+  expected_trainer uuid;
+  visible_count integer;
+  changed_count integer;
+begin
+  select id into expected_trainer
+  from public.public_trainers
+  where slug = 'validation_anto';
+
+  if public.current_trainer_id() <> expected_trainer then
+    raise exception 'Trainer A identity resolution failed';
+  end if;
+
+  if public.is_current_user_admin() then
+    raise exception 'Trainer A must not be admin';
+  end if;
+
+  select count(*) into visible_count from public.parsed_saves;
+  if visible_count <> 1 then
+    raise exception 'Trainer A parsed_saves count expected 1, got %', visible_count;
+  end if;
+
+  select count(*) into visible_count from public.save_files;
+  if visible_count <> 1 then
+    raise exception 'Trainer A save_files count expected 1, got %', visible_count;
+  end if;
+
+  select count(*) into visible_count from public.team_locks;
+  if visible_count <> 1 then
+    raise exception 'Trainer A direct team_locks count expected 1, got %', visible_count;
+  end if;
+
+  select count(*) into visible_count from public.public_team_locks;
+  if visible_count <> 2 then
+    raise exception 'Trainer A public_team_locks count expected 2, got %', visible_count;
+  end if;
+
+  select count(*) into visible_count
+  from public.current_team_locks
+  where private_team_snapshot is not null;
+  if visible_count <> 1 then
+    raise exception 'Trainer A current_team_locks private count expected 1, got %', visible_count;
+  end if;
+
+  select count(*) into visible_count from public.purchases;
+  if visible_count <> 1 then
+    raise exception 'Trainer A purchases count expected 1, got %', visible_count;
+  end if;
+
+  select count(*) into visible_count from public.public_coin_balances;
+  if visible_count < 1 then
+    raise exception 'Trainer A should see public coin balance aggregates';
+  end if;
+
+  update public.seasons
+  set name = 'RLS HACK'
+  where id in (
+    select id
+    from public.public_seasons
+    where name = 'Validation Season'
+  );
+  get diagnostics changed_count = row_count;
+  if changed_count <> 0 then
+    raise exception 'Trainer A updated seasons unexpectedly';
+  end if;
+end;
+$$;
+
+select public.__pokeapp_rls_expect_failure(
+  $$insert into public.coin_transactions (season_id, trainer_id, season_player_id, amount, transaction_type)
+    select season_id, trainer_id, id, 1, 'admin_adjustment'
+    from public.season_players
+    where trainer_id = public.current_trainer_id()
+    limit 1$$,
+  'Trainer A cannot insert coin ledger'
+);
+
+reset role;
+set role authenticated;
+set request.jwt.claim.sub = '00000000-0000-0000-0000-000000000102';
+
+do $$
+declare
+  expected_trainer uuid;
+  visible_count integer;
+begin
+  select id into expected_trainer
+  from public.public_trainers
+  where slug = 'validation_victor';
+
+  if public.current_trainer_id() <> expected_trainer then
+    raise exception 'Trainer B identity resolution failed';
+  end if;
+
+  select count(*) into visible_count from public.parsed_saves;
+  if visible_count <> 1 then
+    raise exception 'Trainer B parsed_saves count expected 1, got %', visible_count;
+  end if;
+
+  select count(*) into visible_count from public.purchases;
+  if visible_count <> 1 then
+    raise exception 'Trainer B purchases count expected 1, got %', visible_count;
+  end if;
+
+  select count(*) into visible_count
+  from public.current_team_locks
+  where private_team_snapshot is not null;
+  if visible_count <> 1 then
+    raise exception 'Trainer B private team lock count expected 1, got %', visible_count;
+  end if;
+end;
+$$;
+
+reset role;
+set role authenticated;
+set request.jwt.claim.sub = '00000000-0000-0000-0000-000000000103';
+
+do $$
+declare
+  visible_count integer;
+  changed_count integer;
+begin
+  if not public.is_current_user_admin() then
+    raise exception 'Validation admin identity failed';
+  end if;
+
+  select count(*) into visible_count from public.parsed_saves;
+  if visible_count <> 2 then
+    raise exception 'Admin parsed_saves count expected 2, got %', visible_count;
+  end if;
+
+  select count(*) into visible_count from public.purchases;
+  if visible_count <> 2 then
+    raise exception 'Admin purchases count expected 2, got %', visible_count;
+  end if;
+
+  update public.seasons
+  set name = name
+  where name = 'Validation Season';
+  get diagnostics changed_count = row_count;
+  if changed_count <> 1 then
+    raise exception 'Admin seasons update expected 1 row, got %', changed_count;
+  end if;
+end;
+$$;
+
+select public.__pokeapp_rls_expect_failure(
+  $$insert into public.coin_transactions (season_id, trainer_id, season_player_id, amount, transaction_type)
+    select season_id, trainer_id, id, 1, 'admin_adjustment'
+    from public.season_players
+    limit 1$$,
+  'Admin direct ledger insert remains server-only'
+);
+
+reset role;
+set role anon;
+set request.jwt.claim.sub = '';
+
+select public.__pokeapp_rls_expect_failure(
+  $$select count(*) from public.public_trainers$$,
+  'Anon cannot read public app projections before login'
+);
+
+reset role;
+set role service_role;
+set request.jwt.claim.sub = '';
+
+do $$
+declare
+  visible_count integer;
+begin
+  select count(*) into visible_count from public.parsed_saves;
+  if visible_count <> 2 then
+    raise exception 'service_role bypass expected 2 parsed_saves, got %', visible_count;
+  end if;
+end;
+$$;
+
+reset role;
+drop function public.__pokeapp_rls_expect_failure(text, text);
+"""
+
+
 def _run(command: list[str], *, env: dict[str, str]) -> None:
     print("+", " ".join(command))
     subprocess.run(command, cwd=ROOT, env=env, check=True)
@@ -669,6 +949,16 @@ def _psql(args: argparse.Namespace, sql_file: Path) -> None:
     _run(command, env=env)
 
 
+def _psql_text(args: argparse.Namespace, sql: str) -> None:
+    with tempfile.NamedTemporaryFile("w", suffix=".sql", delete=False, encoding="utf-8") as tmp:
+        tmp.write(sql)
+        sql_path = Path(tmp.name)
+    try:
+        _psql(args, sql_path)
+    finally:
+        sql_path.unlink(missing_ok=True)
+
+
 def _safe_database_name(name: str) -> None:
     allowed = {"pokeapp_v2_validation", "postgres"}
     if name in allowed or name.startswith("pokeapp_v2_validation"):
@@ -693,6 +983,10 @@ def _build_schema(args: argparse.Namespace) -> None:
         _apply_bootstrap(args)
         return
     _apply_migrations(args)
+
+
+def _prepare_supabase_role_mocks(args: argparse.Namespace) -> None:
+    _psql_text(args, SUPABASE_ROLE_MOCK_SQL)
 
 
 def _render_validation_sql() -> str:
@@ -728,6 +1022,9 @@ def main() -> int:
         raise SystemExit("--allow-destructive-reset is required for this validation.")
     _safe_database_name(args.database)
 
+    print("== Prepare Supabase role mocks ==")
+    _prepare_supabase_role_mocks(args)
+
     print("== Reset empty V2 state ==")
     _psql(args, RESET_SQL)
 
@@ -751,6 +1048,9 @@ def main() -> int:
         _psql(args, validation_path)
     finally:
         validation_path.unlink(missing_ok=True)
+
+    print("== Real RLS/auth fixtures ==")
+    _psql_text(args, RLS_VALIDATION_SQL)
 
     print("Supabase V2 schema validation completed against real Postgres.")
     return 0

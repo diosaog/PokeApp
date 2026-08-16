@@ -1,0 +1,2 @@
+supabase/v2/*.sql text eol=lf
+supabase/v2/migrations/*.sql text eol=lf

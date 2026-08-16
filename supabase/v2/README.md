@@ -4,7 +4,7 @@ Este directorio contiene el schema SQL-first de PokeApp 2.0.
 
 Las migrations separadas de `supabase/v2/migrations/` son la fuente de verdad.
 `bootstrap.sql` es solo una comodidad para levantar V2 desde el SQL Editor de
-Supabase sin copiar nueve archivos a mano.
+Supabase sin copiar todos los archivos a mano.
 
 ## A) Crear V2 En Supabase Vacia
 
@@ -20,7 +20,8 @@ Usa esto solo en una base limpia de Supabase V2. No lo ejecutes sobre V1.
 Resultado esperado:
 
 - Se crea el schema publico V2 completo.
-- Se crean las tablas, constraints, funciones, indexes y seeds iniciales.
+- Se crean las tablas, constraints, funciones, RLS, vistas seguras, storage
+  policies, indexes y seeds iniciales.
 - Aparecen 10 entrenadores base.
 - Aparecen los objetos base de tienda.
 - Si el proyecto es Supabase real, queda preparado el bucket privado `raw-saves`.
@@ -96,13 +97,37 @@ Es normal que `seasons`, `season_players`, `matchdays`, `purchases` y
 `coin_transactions` esten a 0 justo despues del bootstrap. Las tablas existen,
 pero la temporada real y sus datos los insertara la app cuando toque.
 
+Comprobaciones de seguridad:
+
+```sql
+select relname, relrowsecurity
+from pg_class
+where relnamespace = 'public'::regnamespace
+  and relkind = 'r'
+order by relname;
+```
+
+Todas las tablas de aplicacion deben devolver `relrowsecurity = true`.
+
+Tambien deberias ver vistas de lectura como:
+
+```sql
+select table_name
+from information_schema.views
+where table_schema = 'public'
+  and (table_name like 'public_%' or table_name like 'current_%')
+order by table_name;
+```
+
 ## C) Storage
 
 V2 usa un bucket privado llamado `raw-saves` para guardar los archivos `.sav`.
 La tabla `save_files` guarda metadatos y rutas; los bytes reales van al bucket.
 
 `bootstrap.sql` incluye el bloque Supabase de `009_seed.sql` que intenta crear o
-actualizar el bucket si existe el schema `storage`:
+actualizar el bucket si existe el schema `storage`. Tambien incluye
+`013_storage_policies.sql`, que protege `storage.objects` cuando Supabase expone
+esa tabla:
 
 ```sql
 select id, name, public
@@ -140,10 +165,27 @@ comportamiento de la app. La migracion/cutover real se decidira mas adelante.
 
 ## F) RLS
 
-Despues de ejecutar `bootstrap.sql`, la seguridad final no esta terminada.
+Despues de ejecutar `bootstrap.sql`, las tablas V2 ya tienen RLS activo y vistas
+seguras.
 
-Fase 7 anadira RLS y policies. Hasta entonces, V2 es un schema funcional para
-validacion, staging y preparacion, no el cierre definitivo de seguridad.
+Modelo resumido:
+
+- `anon` no tiene lecturas de app.
+- `authenticated` usa vistas `public_*` y `current_*`.
+- los datos privados de saves, parsed saves, team locks privados, compras,
+  redenciones y ledger solo son owner/admin.
+- admin se controla con `trainers.is_admin`.
+- `service_role` queda solo para backend/API/parser.
+
+Documento de detalle:
+
+```text
+docs/security-rls.md
+```
+
+Fase 8 todavia debe implementar las operaciones criticas API/RPC. No uses el
+cliente de navegador para escribir compras, ledger, parsed saves o team locks
+directamente.
 
 ## Migrations Y Bootstrap
 
@@ -158,8 +200,12 @@ Orden oficial de migrations:
 7. `007_competitions.sql`
 8. `008_indexes.sql`
 9. `009_seed.sql`
+10. `010_security_helpers.sql`
+11. `011_rls_policies.sql`
+12. `012_security_views.sql`
+13. `013_storage_policies.sql`
 
-Si cambia alguna migration 001-009, regenera el bootstrap:
+Si cambia alguna migration 001-013, regenera el bootstrap:
 
 ```powershell
 py tools\generate_supabase_v2_bootstrap.py

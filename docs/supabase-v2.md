@@ -13,8 +13,8 @@ esta fase, no hay cutover y no se borra la base real actual.
 - `season_id` aparece en todo dato competitivo relevante.
 - Relacional donde importa consultar/permisar; JSONB solo para snapshots,
   payloads y config flexible versionada.
-- RLS se implementara en Fase 7, pero el modelo ya incluye `trainer_id`,
-  `auth_user_id`, `season_id` y `visibility`.
+- RLS esta implementado desde Fase 7: identity helpers, default-deny policies,
+  vistas seguras y storage policies para `raw-saves`.
 - Produccion futura: Supabase/Postgres sera la unica source of truth. SQLite solo
   queda para dev/test explicito si sigue aportando.
 
@@ -32,6 +32,10 @@ supabase/v2/
     007_competitions.sql
     008_indexes.sql
     009_seed.sql
+    010_security_helpers.sql
+    011_rls_policies.sql
+    012_security_views.sql
+    013_storage_policies.sql
   reset_dev.sql
 ```
 
@@ -88,8 +92,8 @@ erDiagram
 
 Decision Auth: `trainers.auth_user_id` es `uuid unique` sin FK directa a
 `auth.users`. Motivo: Supabase Auth es un schema gestionado y asi el SQL tambien
-puede validarse en Postgres local. Fase 7 podra usar `auth.uid()` contra esta
-columna o anadir una FK especifica de Supabase si se decide.
+puede validarse en Postgres local. Fase 7 usa `auth.uid()` contra esta columna
+mediante `current_trainer_id()`.
 
 ### Temporadas
 
@@ -262,13 +266,31 @@ Clasificacion inicial:
 | Raw save storage paths, parser payload completo sensible, credentials | SERVER ONLY |
 | Activity events | Segun `visibility` |
 
-Fase 7 debe escribir policies concretas usando:
+Fase 7 materializo esta clasificacion en SQL:
 
-- `trainers.auth_user_id`;
-- `trainer_id`;
-- `season_id`;
-- `visibility`;
-- admin mapping de Anto o rol backend.
+- `010_security_helpers.sql` anade `trainers.is_admin` y helpers
+  `current_auth_uid()`, `current_trainer_id()`, `is_current_user_admin()` y
+  `current_user_owns_trainer(uuid)`.
+- `011_rls_policies.sql` activa RLS en las 32 tablas V2, revoca acceso anon y
+  aplica policies de owner/admin/default-deny.
+- `012_security_views.sql` crea las vistas `public_*` y `current_*` que debe usar
+  el cliente autenticado.
+- `013_storage_policies.sql` protege `storage.objects` para el bucket privado
+  `raw-saves` con rutas por `trainer_id`.
+
+Regla operativa:
+
+- el cliente debe leer desde vistas;
+- las escrituras criticas de compras, ledger, redenciones, saves parseados,
+  team locks y activity events quedan para API/RPC de Fase 8;
+- `service_role` es solo backend/server;
+- admin es `trainers.is_admin`, no un nombre hardcodeado.
+
+Documento completo:
+
+```text
+docs/security-rls.md
+```
 
 ## Transaction Candidates
 
@@ -347,12 +369,12 @@ Validacion incluida:
   IDs, season scoping, constraints criticas, ausencia de blobs V1 y reset
   destructivo separado.
 - `tools/validate_supabase_v2_schema.py` ejecuta validacion real contra Postgres:
-  reset V2, migrations 001-009, seed idempotente, reset, rebuild y fixtures de
-  introspeccion/constraints.
+  reset V2, migrations 001-013, seed idempotente, reset, rebuild, fixtures de
+  introspeccion/constraints y checks RLS con roles tipo Supabase.
 
 ### Real Database Validation
 
-Fase 6.1 ejecuto el schema contra una base real local aislada:
+Fase 6.1 ejecuto el schema base contra una base real local aislada:
 
 - Entorno: PostgreSQL 17.11 portable para Windows, descargado desde binarios EDB.
 - Host: `127.0.0.1`.
@@ -428,6 +450,37 @@ Storage:
 - `009_seed.sql` omitio limpiamente la creacion del bucket `raw-saves` sin fallar.
 - En Supabase local/staging, el mismo bloque comprobara/creara `storage.buckets`
   con `public=false`.
+
+### Fase 7 Real Security Validation
+
+Fase 7 se valido en PostgreSQL 17.11 local aislado usando roles mock de Supabase:
+
+- `anon`;
+- `authenticated`;
+- `service_role` con `bypassrls`.
+
+Resultado:
+
+- migrations 001-013 aplican en orden;
+- `bootstrap.sql` se regenera desde las mismas migrations;
+- RLS queda activo en las 32 tablas publicas V2;
+- un entrenador autenticado ve sus filas privadas de saves, parsed saves,
+  compras y team locks, pero no las de otro entrenador;
+- `public_team_locks` expone solo snapshot publico;
+- `current_team_locks` conserva snapshot privado solo owner/admin;
+- admin via `trainers.is_admin` puede leer datos privados y cambiar estado
+  administrado;
+- ni entrenador normal ni admin pueden insertar directamente en
+  `coin_transactions`;
+- anon no puede leer proyecciones de app;
+- service_role ve datos privados como ruta server-side.
+
+Pendiente de Supabase real antes de cutover:
+
+- probar `auth.uid()` con usuarios reales;
+- confirmar policies sobre `storage.objects`;
+- asignar `is_admin=true` al trainer administrativo real;
+- mantener la service key fuera del navegador.
 
 ## Decision Log
 

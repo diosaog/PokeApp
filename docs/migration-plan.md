@@ -262,16 +262,26 @@ Estado 6.1:
 
 ## Fase 7 - RLS Y Seguridad
 
-Antes de React:
+Estado 7:
 
-- Definir campos publicos y privados.
-- IVs/EVs/naturaleza privada solo para propietario/admin.
-- Admin solo Anto.
-- Operaciones criticas solo API/RPC.
+- RLS activo en las 32 tablas publicas de Supabase V2.
+- Identidad por `trainers.auth_user_id`.
+- Admin explicito por `trainers.is_admin`.
+- Helpers seguros: `current_auth_uid()`, `current_trainer_id()`,
+  `is_current_user_admin()` y `current_user_owns_trainer(uuid)`.
+- Vistas seguras `public_*` y `current_*` para lecturas cliente.
+- `public_team_locks` expone solo `public_team_snapshot`.
+- `current_team_locks` expone `private_team_snapshot` solo owner/admin.
+- Saves, parsed saves, compras, redenciones y ledger detallado son owner/admin.
+- Escrituras criticas quedan server/API only para Fase 8.
+- Bucket `raw-saves` privado con policies sobre `storage.objects` cuando existe
+  Supabase Storage.
+- Validado contra PostgreSQL 17.11 real con roles mock de Supabase y fixtures
+  RLS.
 
-Regla:
+Documento:
 
-- Si un usuario no debe verlo, tampoco debe poder pedirlo a la base.
+- `docs/security-rls.md`
 
 ## Fase 8 - API
 

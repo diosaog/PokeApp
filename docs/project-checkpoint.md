@@ -18,8 +18,10 @@ Latest architecture state:
   with reset/dev docs and static schema tests.
 - Fase 6.1 closed: schema V2 executed against real PostgreSQL 17.11, including
   reset/rebuild and fixture introspection.
+- Fase 7 closed: Supabase V2 RLS/security layer with identity helpers, safe
+  projections, private storage policies and real PostgreSQL RLS validation.
 - Runtime remains Streamlit legacy through wrappers.
-- Next exact phase: Fase 7 - RLS and security.
+- Next exact phase: Fase 8 - API for critical operations.
 
 ## Current State
 
@@ -40,6 +42,7 @@ Closed phases:
 - Fase 5: repositories.
 - Fase 6: Supabase V2 greenfield schema.
 - Fase 6.1: real Postgres validation of Supabase V2 SQL.
+- Fase 7: RLS and security.
 
 Validation at this checkpoint:
 
@@ -128,7 +131,7 @@ Fase 6 adds a future persistence target but does not connect runtime:
 - `settings` blobs are not carried forward as source of truth.
 - Core competitive data is season-scoped.
 - `coin_transactions` is the future money source.
-- RLS/API/React/Cloudflare remain future phases.
+- API/React/Cloudflare remain future phases.
 
 Fase 6.1 validates that target for real:
 
@@ -141,6 +144,18 @@ Fase 6.1 validates that target for real:
   archive preservation and delete restrictions.
 - `reset_dev.sql` was corrected to drop `trainer_flags` and `pokemon_flags`.
 
+Fase 7 secures that target:
+
+- every V2 public application table has RLS enabled;
+- `trainers.auth_user_id` resolves current trainer identity;
+- `trainers.is_admin` controls explicit admin permission;
+- safe `public_*` and `current_*` views define client read surfaces;
+- private save payloads, private team locks, purchases/redemptions and ledger
+  details are owner/admin only;
+- direct writes for critical flows remain server/API only;
+- `raw-saves` storage policies are prepared for Supabase storage paths by
+  `trainer_id`.
+
 Persistence:
 
 - Supabase is the remote store when configured.
@@ -152,8 +167,8 @@ Persistence:
 
 - Many official entities still live in generic `settings` JSON.
 - Streamlit UI and business rules are still coupled in several modules.
-- Supabase schema is V1 and not yet normalized by `season_id`.
-- RLS/API is not the final security model yet.
+- Runtime Streamlit still uses legacy/V1 persistence; V2 is not connected yet.
+- API/RPC is not implemented yet; Fase 7 only defines database security.
 - ActivityEvents are stored in settings, not an append-only table.
 - Copa and Juicios are functional legacy islands and need contracts later.
 - Parser bridge is treated as a black box but not fully isolated.
@@ -166,11 +181,11 @@ Persistence:
 Next exact phase:
 
 ```text
-Fase 7 - RLS Y Seguridad
+Fase 8 - API for critical operations
 ```
 
-Do not start API or React before privacy/RLS decisions are written against the
-V2 model. Do not cut over Streamlit or delete V1 without explicit approval.
+Do not start React before API boundaries exist for writes. Do not cut over
+Streamlit or delete V1 without explicit approval.
 
 ## Do Not Do When Resuming
 
@@ -189,7 +204,7 @@ V2 model. Do not cut over Streamlit or delete V1 without explicit approval.
 - Fase 4: pure domain extraction. Closed.
 - Fase 5: repositories. Closed.
 - Fase 6: Supabase V2 greenfield schema. Closed.
-- Fase 7: RLS and security.
+- Fase 7: RLS and security. Closed.
 - Fase 8: API for critical operations.
 - Fase 9: parser boundary.
 - Fase 10: React / Cloudflare frontend.

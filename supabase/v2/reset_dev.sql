@@ -40,6 +40,10 @@ drop table if exists public.seasons cascade;
 drop table if exists public.trainers cascade;
 drop table if exists public.app_settings cascade;
 
+drop function if exists public.current_user_owns_trainer(uuid) cascade;
+drop function if exists public.is_current_user_admin() cascade;
+drop function if exists public.current_trainer_id() cascade;
+drop function if exists public.current_auth_uid() cascade;
 drop function if exists public.set_updated_at() cascade;
 
 commit;

@@ -146,6 +146,19 @@ Desde Fase 6.1, ese SQL se ha ejecutado contra PostgreSQL 17.11 local aislado:
 - el unico cambio SQL fue corregir `reset_dev.sql` para eliminar
   `trainer_flags` y `pokemon_flags`.
 
+Desde Fase 7, Supabase V2 tiene una capa de seguridad real:
+
+- RLS activo en todas las tablas de aplicacion V2.
+- `trainers.auth_user_id` resuelve el trainer autenticado.
+- `trainers.is_admin` define admin de forma explicita.
+- Las lecturas cliente pasan por vistas `public_*` y `current_*`.
+- Datos privados de saves, parsed saves, team locks privados, compras,
+  redenciones y ledger quedan owner/admin.
+- `raw-saves` queda como bucket privado con policies por path de `trainer_id` en
+  Supabase Storage.
+- Compras, ledger, redenciones, parsed saves, team locks y activity events
+  siguen esperando API/RPC server-side en Fase 8.
+
 ## Problema Principal
 
 La deuda mas importante no es Supabase. Es que entidades centrales de competicion

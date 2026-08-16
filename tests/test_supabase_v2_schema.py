@@ -37,6 +37,10 @@ class SupabaseV2SchemaTests(unittest.TestCase):
                 "007_competitions.sql",
                 "008_indexes.sql",
                 "009_seed.sql",
+                "010_security_helpers.sql",
+                "011_rls_policies.sql",
+                "012_security_views.sql",
+                "013_storage_policies.sql",
             ],
         )
         for path in _migration_files():
@@ -145,6 +149,17 @@ class SupabaseV2SchemaTests(unittest.TestCase):
         sql = _all_sql().lower()
 
         for token in [
+            "is_admin boolean not null default false",
+            "create or replace function public.current_auth_uid()",
+            "create or replace function public.current_trainer_id()",
+            "create or replace function public.is_current_user_admin()",
+            "create policy trainers_self_admin_read",
+            "create or replace view public.public_trainers",
+            "create or replace view public.public_team_locks",
+            "create or replace view public.current_team_locks",
+            "create or replace view public.public_coin_balances",
+            "raw_saves_select_own_or_admin",
+            "bucket_id = 'raw-saves'",
             "auth_user_id uuid unique",
             "visibility text not null default 'public'",
             "private_team_snapshot jsonb",
@@ -168,6 +183,9 @@ class SupabaseV2SchemaTests(unittest.TestCase):
         self.assertIn("drop table if exists public.trainer_flags", reset)
         self.assertIn("drop table if exists public.pokemon_flags", reset)
         self.assertIn("drop table if exists public.trainers", reset)
+        self.assertIn("drop function if exists public.current_auth_uid()", reset)
+        self.assertIn("drop function if exists public.current_trainer_id()", reset)
+        self.assertIn("drop function if exists public.is_current_user_admin()", reset)
         self.assertNotIn("drop schema public", reset)
 
     def test_bootstrap_is_generated_from_migrations_without_reset_sql(self) -> None:
@@ -176,7 +194,7 @@ class SupabaseV2SchemaTests(unittest.TestCase):
 
         self.assertTrue(bootstrap.startswith("-- ONLY FOR EMPTY POKEAPP V2 DATABASE."))
         self.assertEqual(bootstrap, render_bootstrap())
-        self.assertIn("Source of truth: supabase/v2/migrations/001_core.sql through 009_seed.sql", bootstrap)
+        self.assertIn("Source of truth: supabase/v2/migrations/001_core.sql through 013_storage_policies.sql", bootstrap)
         self.assertNotIn("drop table", lowered)
         self.assertNotIn("drop schema", lowered)
         self.assertNotIn("reset_dev.sql", lowered)
@@ -192,6 +210,16 @@ class SupabaseV2SchemaTests(unittest.TestCase):
             self.assertGreater(end_position, begin_position, path.name)
             self.assertIn(path.read_text(encoding="utf-8").strip(), bootstrap, path.name)
             last_position = end_position
+
+    def test_security_layer_enables_rls_on_every_v2_table(self) -> None:
+        security_sql = _all_sql().lower()
+        tables = set(re.findall(r"create table public\.([a-z_]+)", security_sql))
+
+        for table in sorted(tables):
+            self.assertIn(f"'{table}'", security_sql, table)
+
+        self.assertEqual(security_sql.count("enable row level security"), 2)
+        self.assertIn("alter table public.%i enable row level security", security_sql)
 
 
 if __name__ == "__main__":

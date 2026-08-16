@@ -204,13 +204,17 @@ extraiga dominio o repositories.
 | `migrations/007_competitions.sql` | SQL V2 | Copa generica, juicios/votos y penalizaciones. |
 | `migrations/008_indexes.sql` | SQL V2 | Indices y uniques parciales para queries reales. |
 | `migrations/009_seed.sql` | SQL V2 | Seed minimo de trainers/catalogo y bucket `raw-saves` si existe Supabase Storage. |
+| `migrations/010_security_helpers.sql` | SQL V2 SECURITY | `trainers.is_admin` y helpers de identidad/admin para RLS. |
+| `migrations/011_rls_policies.sql` | SQL V2 SECURITY | RLS default-deny en las 32 tablas V2 y policies owner/admin/server-only. |
+| `migrations/012_security_views.sql` | SQL V2 SECURITY | Proyecciones `public_*` y `current_*` para cliente autenticado. |
+| `migrations/013_storage_policies.sql` | SQL V2 SECURITY | Policies de `storage.objects` para bucket privado `raw-saves`. |
 | `reset_dev.sql` | SQL V2 DESTRUCTIVE | Reset separado para development/staging. No production/V1. |
 
 ## tools
 
 | Archivo | Tipo | Nota |
 | --- | --- | --- |
-| `validate_supabase_v2_schema.py` | VALIDATION | Ejecuta reset/build/rebuild real de Supabase V2 contra Postgres mediante `psql` y valida fixtures de Fase 6.1. |
+| `validate_supabase_v2_schema.py` | VALIDATION | Ejecuta reset/build/rebuild real de Supabase V2 contra Postgres mediante `psql` y valida fixtures de schema/RLS. |
 
 ## Tests Actuales
 
