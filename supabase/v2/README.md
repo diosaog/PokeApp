@@ -1,13 +1,153 @@
 # PokeApp Supabase V2
 
-This folder contains the greenfield SQL-first schema for PokeApp 2.0.
+Este directorio contiene el schema SQL-first de PokeApp 2.0.
 
-Use it only on an empty development/staging Supabase/Postgres database until the
-cutover is explicitly approved.
+Las migrations separadas de `supabase/v2/migrations/` son la fuente de verdad.
+`bootstrap.sql` es solo una comodidad para levantar V2 desde el SQL Editor de
+Supabase sin copiar nueve archivos a mano.
 
-## Apply Order
+## A) Crear V2 En Supabase Vacia
 
-Run the files in `migrations/` lexicographic order:
+Usa esto solo en una base limpia de Supabase V2. No lo ejecutes sobre V1.
+
+1. Entra en Supabase y abre el proyecto nuevo/limpio donde vas a preparar V2.
+2. Ve a `SQL Editor`.
+3. Pulsa `New query`.
+4. Abre o copia el contenido de `supabase/v2/bootstrap.sql`.
+5. Pegalo entero en la query.
+6. Pulsa `Run`.
+
+Resultado esperado:
+
+- Se crea el schema publico V2 completo.
+- Se crean las tablas, constraints, funciones, indexes y seeds iniciales.
+- Aparecen 10 entrenadores base.
+- Aparecen los objetos base de tienda.
+- Si el proyecto es Supabase real, queda preparado el bucket privado `raw-saves`.
+
+El archivo esta marcado como:
+
+```sql
+-- ONLY FOR EMPTY POKEAPP V2 DATABASE.
+```
+
+## B) Comprobar Que Funciono
+
+Despues de ejecutar `bootstrap.sql`, en Supabase abre `Table Editor` y deberias
+ver tablas como estas:
+
+- `trainers`
+- `seasons`
+- `season_players`
+- `season_config_versions`
+- `divisions`
+- `matchdays`
+- `matches`
+- `team_locks`
+- `save_files`
+- `parsed_saves`
+- `shop_items`
+- `shop_promotions`
+- `purchases`
+- `redemptions`
+- `coin_transactions`
+- `activity_events`
+- `hall_of_fame_entries`
+- `cups`
+- `trial_cases`
+- `penalties`
+
+Comprobaciones rapidas desde `SQL Editor`:
+
+```sql
+select table_name
+from information_schema.tables
+where table_schema = 'public'
+order by table_name;
+```
+
+```sql
+select slug, display_name, globally_enabled
+from public.trainers
+order by slug;
+```
+
+```sql
+select count(*) as trainers_seeded
+from public.trainers
+where metadata ->> 'seeded' = 'true';
+```
+
+```sql
+select count(*) as shop_items_seeded
+from public.shop_items
+where metadata ->> 'seeded' = 'true';
+```
+
+```sql
+select count(*) from public.seasons;
+select count(*) from public.season_players;
+select count(*) from public.matchdays;
+select count(*) from public.purchases;
+select count(*) from public.coin_transactions;
+```
+
+Es normal que `seasons`, `season_players`, `matchdays`, `purchases` y
+`coin_transactions` esten a 0 justo despues del bootstrap. Las tablas existen,
+pero la temporada real y sus datos los insertara la app cuando toque.
+
+## C) Storage
+
+V2 usa un bucket privado llamado `raw-saves` para guardar los archivos `.sav`.
+La tabla `save_files` guarda metadatos y rutas; los bytes reales van al bucket.
+
+`bootstrap.sql` incluye el bloque Supabase de `009_seed.sql` que intenta crear o
+actualizar el bucket si existe el schema `storage`:
+
+```sql
+select id, name, public
+from storage.buckets
+where id = 'raw-saves';
+```
+
+En Supabase real deberia devolver una fila con `public = false`.
+
+Si Supabase bloquease esa insercion por permisos del proyecto, crea el bucket a
+mano:
+
+1. Ve a `Storage`.
+2. Pulsa `New bucket`.
+3. Nombre/id: `raw-saves`.
+4. `Public bucket`: desactivado.
+5. Guarda.
+
+## D) Reset
+
+`supabase/v2/reset_dev.sql` es DESTRUCTIVO.
+
+Sirve solo para borrar el schema V2 en una base local, de desarrollo o staging y
+volver a aplicar migrations. No esta incluido en `bootstrap.sql`.
+
+No ejecutes `reset_dev.sql` sobre Supabase V1 ni sobre ninguna base que quieras
+conservar.
+
+## E) V1
+
+No borres Supabase V1 todavia.
+
+Primero levanta V2 en un entorno limpio, verifica tablas, seeds, storage y
+comportamiento de la app. La migracion/cutover real se decidira mas adelante.
+
+## F) RLS
+
+Despues de ejecutar `bootstrap.sql`, la seguridad final no esta terminada.
+
+Fase 7 anadira RLS y policies. Hasta entonces, V2 es un schema funcional para
+validacion, staging y preparacion, no el cierre definitivo de seguridad.
+
+## Migrations Y Bootstrap
+
+Orden oficial de migrations:
 
 1. `001_core.sql`
 2. `002_seasons.sql`
@@ -19,22 +159,15 @@ Run the files in `migrations/` lexicographic order:
 8. `008_indexes.sql`
 9. `009_seed.sql`
 
-## Development Reset
+Si cambia alguna migration 001-009, regenera el bootstrap:
 
-`reset_dev.sql` is destructive. It drops V2 tables/functions so the migrations
-can be reapplied from scratch in development/staging.
+```powershell
+py tools\generate_supabase_v2_bootstrap.py
+```
 
-Do not run it against production or the current V1 database.
+## Validacion Real
 
-## Runtime Status
-
-The current Streamlit runtime does not use these tables yet. V2 repositories,
-RLS, API and cutover are later phases.
-
-## Real Validation
-
-`tools/validate_supabase_v2_schema.py` can validate these migrations against a
-real isolated PostgreSQL database through `psql`:
+Validar migrations contra PostgreSQL real:
 
 ```powershell
 py tools\validate_supabase_v2_schema.py `
@@ -46,6 +179,19 @@ py tools\validate_supabase_v2_schema.py `
   --allow-destructive-reset
 ```
 
-The database name must be `pokeapp_v2_validation` or start with that prefix. The
-script intentionally refuses arbitrary database names because it runs the
-destructive V2 development reset.
+Validar el bootstrap contra PostgreSQL real:
+
+```powershell
+py tools\validate_supabase_v2_schema.py `
+  --psql "C:\path\to\psql.exe" `
+  --host 127.0.0.1 `
+  --port 5432 `
+  --user postgres `
+  --database pokeapp_v2_validation_bootstrap `
+  --allow-destructive-reset `
+  --build-source bootstrap
+```
+
+La base debe llamarse `pokeapp_v2_validation` o empezar por ese prefijo. El
+validador se niega a usar otros nombres porque ejecuta el reset destructivo de
+desarrollo.

@@ -10,6 +10,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 MIGRATIONS = sorted((ROOT / "supabase" / "v2" / "migrations").glob("*.sql"))
+BOOTSTRAP_SQL = ROOT / "supabase" / "v2" / "bootstrap.sql"
 RESET_SQL = ROOT / "supabase" / "v2" / "reset_dev.sql"
 SEED_SQL = ROOT / "supabase" / "v2" / "migrations" / "009_seed.sql"
 
@@ -683,6 +684,17 @@ def _apply_migrations(args: argparse.Namespace) -> None:
         _psql(args, migration)
 
 
+def _apply_bootstrap(args: argparse.Namespace) -> None:
+    _psql(args, BOOTSTRAP_SQL)
+
+
+def _build_schema(args: argparse.Namespace) -> None:
+    if args.build_source == "bootstrap":
+        _apply_bootstrap(args)
+        return
+    _apply_migrations(args)
+
+
 def _render_validation_sql() -> str:
     quoted_tables = ", ".join("'" + table + "'" for table in EXPECTED_TABLES)
     return (
@@ -704,6 +716,12 @@ def main() -> int:
         action="store_true",
         help="Required. Runs supabase/v2/reset_dev.sql against the target database.",
     )
+    parser.add_argument(
+        "--build-source",
+        choices=["migrations", "bootstrap"],
+        default="migrations",
+        help="SQL source used after each reset. Defaults to separate migrations.",
+    )
     args = parser.parse_args()
 
     if not args.allow_destructive_reset:
@@ -713,8 +731,8 @@ def main() -> int:
     print("== Reset empty V2 state ==")
     _psql(args, RESET_SQL)
 
-    print("== First migration build ==")
-    _apply_migrations(args)
+    print(f"== First {args.build_source} build ==")
+    _build_schema(args)
 
     print("== Seed idempotence check ==")
     _psql(args, SEED_SQL)
@@ -722,8 +740,8 @@ def main() -> int:
     print("== Reset after first build ==")
     _psql(args, RESET_SQL)
 
-    print("== Second migration build ==")
-    _apply_migrations(args)
+    print(f"== Second {args.build_source} build ==")
+    _build_schema(args)
 
     print("== Real schema fixtures and introspection ==")
     with tempfile.NamedTemporaryFile("w", suffix=".sql", delete=False, encoding="utf-8") as tmp:

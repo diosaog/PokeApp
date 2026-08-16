@@ -4,10 +4,13 @@ import re
 from pathlib import Path
 import unittest
 
+from tools.generate_supabase_v2_bootstrap import render_bootstrap
+
 
 ROOT = Path(__file__).resolve().parents[1]
 V2_DIR = ROOT / "supabase" / "v2"
 MIGRATIONS_DIR = V2_DIR / "migrations"
+BOOTSTRAP_SQL = V2_DIR / "bootstrap.sql"
 
 
 def _migration_files() -> list[Path]:
@@ -166,6 +169,29 @@ class SupabaseV2SchemaTests(unittest.TestCase):
         self.assertIn("drop table if exists public.pokemon_flags", reset)
         self.assertIn("drop table if exists public.trainers", reset)
         self.assertNotIn("drop schema public", reset)
+
+    def test_bootstrap_is_generated_from_migrations_without_reset_sql(self) -> None:
+        bootstrap = BOOTSTRAP_SQL.read_text(encoding="utf-8")
+        lowered = bootstrap.lower()
+
+        self.assertTrue(bootstrap.startswith("-- ONLY FOR EMPTY POKEAPP V2 DATABASE."))
+        self.assertEqual(bootstrap, render_bootstrap())
+        self.assertIn("Source of truth: supabase/v2/migrations/001_core.sql through 009_seed.sql", bootstrap)
+        self.assertNotIn("drop table", lowered)
+        self.assertNotIn("drop schema", lowered)
+        self.assertNotIn("reset_dev.sql", lowered)
+
+        last_position = -1
+        for path in _migration_files():
+            begin_marker = f"-- BEGIN {path.name}"
+            end_marker = f"-- END {path.name}"
+            begin_position = bootstrap.index(begin_marker)
+            end_position = bootstrap.index(end_marker)
+
+            self.assertGreater(begin_position, last_position, path.name)
+            self.assertGreater(end_position, begin_position, path.name)
+            self.assertIn(path.read_text(encoding="utf-8").strip(), bootstrap, path.name)
+            last_position = end_position
 
 
 if __name__ == "__main__":
