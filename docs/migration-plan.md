@@ -240,8 +240,25 @@ Decisiones clave:
 
 Limitacion:
 
-- El entorno local no tiene `psql` ni Supabase CLI, asi que la validacion real
-  contra Postgres/Supabase queda para staging/herramientas instaladas.
+- Cerrada en Fase 6.1: el schema se ejecuto contra PostgreSQL 17.11 local
+  aislado con build, reset y rebuild reales.
+
+## Fase 6.1 - Validacion Real Del Schema V2
+
+Estado 6.1:
+
+- PostgreSQL 17.11 portable local usado como entorno real de validacion.
+- Base temporal: `pokeapp_v2_validation`.
+- `001_core.sql` -> `009_seed.sql`: OK.
+- `009_seed.sql` reejecutado: OK, sin duplicados.
+- `reset_dev.sql`: OK tras correccion.
+- Rebuild completo `001_core.sql` -> `009_seed.sql`: OK.
+- Introspeccion real: 32 tablas publicas V2, 75 FKs y 92 indices.
+- Fixtures reales: UUIDs, timestamps, JSONB, current save ownership, uniques,
+  checks, coin ledger, archive preservation y delete policy.
+- Problema real corregido: `reset_dev.sql` no borraba `trainer_flags` ni
+  `pokemon_flags`.
+- No se toco Supabase V1, no hubo RLS, API, React ni cutover.
 
 ## Fase 7 - RLS Y Seguridad
 

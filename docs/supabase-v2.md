@@ -346,12 +346,88 @@ Validacion incluida:
 - `tests/test_supabase_v2_schema.py` comprueba migrations esperadas, tablas,
   IDs, season scoping, constraints criticas, ausencia de blobs V1 y reset
   destructivo separado.
+- `tools/validate_supabase_v2_schema.py` ejecuta validacion real contra Postgres:
+  reset V2, migrations 001-009, seed idempotente, reset, rebuild y fixtures de
+  introspeccion/constraints.
 
-Limitacion local actual:
+### Real Database Validation
 
-- No hay `psql` ni Supabase CLI disponibles en este entorno, asi que la validacion
-  real contra Postgres/Supabase debe hacerse en staging cuando se instalen esas
-  herramientas o se proporcione una base limpia.
+Fase 6.1 ejecuto el schema contra una base real local aislada:
+
+- Entorno: PostgreSQL 17.11 portable para Windows, descargado desde binarios EDB.
+- Host: `127.0.0.1`.
+- Puerto local: `55432`.
+- Base temporal: `pokeapp_v2_validation`.
+- Usuario: `postgres`.
+- No se conecto a Supabase V1, no se ejecuto nada contra produccion y no se uso
+  `reset_dev.sql` fuera de la base temporal.
+
+Comando reproducible usado:
+
+```powershell
+py tools\validate_supabase_v2_schema.py `
+  --psql "$env:TEMP\pokeapp_pg17_validation\pgsql\pgsql\bin\psql.exe" `
+  --host 127.0.0.1 `
+  --port 55432 `
+  --user postgres `
+  --database pokeapp_v2_validation `
+  --allow-destructive-reset
+```
+
+Resultado:
+
+- `reset_dev.sql` sobre base temporal: OK.
+- Primera ejecucion `001_core.sql` -> `009_seed.sql`: OK.
+- Segunda ejecucion de `009_seed.sql`: OK, sin duplicar seed.
+- Segundo `reset_dev.sql`: OK.
+- Segunda ejecucion completa `001_core.sql` -> `009_seed.sql`: OK.
+- Fixtures/introspeccion reales: OK.
+- Tablas publicas V2 creadas: 32.
+- Foreign keys reales en schema public: 75.
+- Indices reales en schema public: 92.
+
+Problema real encontrado:
+
+- `reset_dev.sql` no borraba `trainer_flags` ni `pokemon_flags`. Al reconstruir,
+  PostgreSQL fallo con `relation "trainer_flags" already exists`.
+- Correccion aplicada: `reset_dev.sql` ahora elimina `pokemon_flags` y
+  `trainer_flags` antes de `season_players`.
+
+Problemas no funcionales del script:
+
+- El validador inicial uso delimitadores `$$` anidados dentro de un `DO $$`; se
+  corrigio usando `$fixture$` para el bloque grande de fixtures. No afectaba al
+  schema.
+
+Validaciones reales cubiertas por fixtures:
+
+- tablas esperadas;
+- constraints/indices criticos;
+- tipos `timestamptz`;
+- generacion de UUID por `gen_random_uuid()`;
+- `trainers.auth_user_id` unique;
+- una sola season active;
+- no duplicar trainer por season;
+- no duplicar matchday por season;
+- no duplicar team lock por trainer/matchday;
+- no duplicar Hall por season/competition;
+- dedupe de `activity_events`;
+- unique `save_file_id + parser_version`;
+- checks de matchday number, quantity, price, stock, winner y status;
+- JSONB roundtrip en config, snapshot, parsed save, team lock, activity, Hall y
+  archive snapshot;
+- ownership de `season_players.current_save_file_id`;
+- coin ledger con `+15 -5 +2 = 12`;
+- archive `active -> finished -> archived` sin perder datos relacionados;
+- delete policy restrict para trainer con historia, season con datos y save
+  referenciado por team lock.
+
+Storage:
+
+- En PostgreSQL local no existe schema `storage`.
+- `009_seed.sql` omitio limpiamente la creacion del bucket `raw-saves` sin fallar.
+- En Supabase local/staging, el mismo bloque comprobara/creara `storage.buckets`
+  con `public=false`.
 
 ## Decision Log
 

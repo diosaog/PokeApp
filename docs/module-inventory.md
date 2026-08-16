@@ -206,6 +206,12 @@ extraiga dominio o repositories.
 | `migrations/009_seed.sql` | SQL V2 | Seed minimo de trainers/catalogo y bucket `raw-saves` si existe Supabase Storage. |
 | `reset_dev.sql` | SQL V2 DESTRUCTIVE | Reset separado para development/staging. No production/V1. |
 
+## tools
+
+| Archivo | Tipo | Nota |
+| --- | --- | --- |
+| `validate_supabase_v2_schema.py` | VALIDATION | Ejecuta reset/build/rebuild real de Supabase V2 contra Postgres mediante `psql` y valida fixtures de Fase 6.1. |
+
 ## Tests Actuales
 
 | Test | Cobertura |

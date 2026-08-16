@@ -30,3 +30,22 @@ Do not run it against production or the current V1 database.
 
 The current Streamlit runtime does not use these tables yet. V2 repositories,
 RLS, API and cutover are later phases.
+
+## Real Validation
+
+`tools/validate_supabase_v2_schema.py` can validate these migrations against a
+real isolated PostgreSQL database through `psql`:
+
+```powershell
+py tools\validate_supabase_v2_schema.py `
+  --psql "C:\path\to\psql.exe" `
+  --host 127.0.0.1 `
+  --port 5432 `
+  --user postgres `
+  --database pokeapp_v2_validation `
+  --allow-destructive-reset
+```
+
+The database name must be `pokeapp_v2_validation` or start with that prefix. The
+script intentionally refuses arbitrary database names because it runs the
+destructive V2 development reset.

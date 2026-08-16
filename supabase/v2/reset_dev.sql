@@ -32,6 +32,8 @@ drop table if exists public.division_memberships cascade;
 drop table if exists public.matchdays cascade;
 drop table if exists public.divisions cascade;
 drop table if exists public.season_config_versions cascade;
+drop table if exists public.pokemon_flags cascade;
+drop table if exists public.trainer_flags cascade;
 drop table if exists public.season_player_stats cascade;
 drop table if exists public.season_players cascade;
 drop table if exists public.seasons cascade;

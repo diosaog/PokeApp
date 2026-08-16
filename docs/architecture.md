@@ -137,6 +137,15 @@ Desde Fase 6, Supabase V2 queda disenado como greenfield SQL-first:
 - No hay cutover, no se borra V1 y el runtime Streamlit sigue usando legacy.
 - La siguiente fase debe ser RLS/seguridad sobre este modelo, antes de API/React.
 
+Desde Fase 6.1, ese SQL se ha ejecutado contra PostgreSQL 17.11 local aislado:
+
+- reset/build/rebuild reales pasan;
+- introspeccion confirma 32 tablas, 75 FKs y 92 indices en `public`;
+- fixtures validan constraints, ownership de current save, JSONB, ledger,
+  archive y delete policy;
+- el unico cambio SQL fue corregir `reset_dev.sql` para eliminar
+  `trainer_flags` y `pokemon_flags`.
+
 ## Problema Principal
 
 La deuda mas importante no es Supabase. Es que entidades centrales de competicion

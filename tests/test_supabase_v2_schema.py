@@ -162,6 +162,8 @@ class SupabaseV2SchemaTests(unittest.TestCase):
         self.assertIn("destructive development reset", reset)
         self.assertIn("do not run this against production", reset)
         self.assertIn("drop table if exists public.team_locks", reset)
+        self.assertIn("drop table if exists public.trainer_flags", reset)
+        self.assertIn("drop table if exists public.pokemon_flags", reset)
         self.assertIn("drop table if exists public.trainers", reset)
         self.assertNotIn("drop schema public", reset)
 

@@ -12,7 +12,7 @@ stability fixes are allowed; new mechanics are not.
 | --- | --- | --- |
 | True N divisions | Current Streamlit product is officially A/B. N divisions need new domain contracts, state shape, history and UI. | Fase 3+ |
 | Setup wizard for new seasons | Current config/admin is enough for 2.0; a polished draft/start flow belongs after contracts. | Fase 3+ |
-| Supabase V2 staging validation | Schema SQL exists; it still needs real Postgres/Supabase staging validation before cutover. | Fase 7+ |
+| Supabase Storage/RLS staging validation | SQL already passed real Postgres validation; Supabase-specific Storage/RLS behavior still needs staging before cutover. | Fase 7+ |
 | RLS and API hardening | Requires V2 schema and critical operation design. | Fase 7/8 |
 | React / Cloudflare app | Should be built after contracts, domain, repositories, V2 schema, RLS/API and parser boundary. | Fase 10 |
 | Copa as typed domain | Current Copa works as legacy settings state, but migration needs `Cup` entities. | Fase 3+ |

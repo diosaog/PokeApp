@@ -16,6 +16,8 @@ Latest architecture state:
   in-memory fakes in `app/repositories/`.
 - Fase 6 closed: Supabase V2 greenfield SQL schema in `supabase/v2/migrations`
   with reset/dev docs and static schema tests.
+- Fase 6.1 closed: schema V2 executed against real PostgreSQL 17.11, including
+  reset/rebuild and fixture introspection.
 - Runtime remains Streamlit legacy through wrappers.
 - Next exact phase: Fase 7 - RLS and security.
 
@@ -37,6 +39,7 @@ Closed phases:
 - Fase 4: pure domain services.
 - Fase 5: repositories.
 - Fase 6: Supabase V2 greenfield schema.
+- Fase 6.1: real Postgres validation of Supabase V2 SQL.
 
 Validation at this checkpoint:
 
@@ -126,6 +129,17 @@ Fase 6 adds a future persistence target but does not connect runtime:
 - Core competitive data is season-scoped.
 - `coin_transactions` is the future money source.
 - RLS/API/React/Cloudflare remain future phases.
+
+Fase 6.1 validates that target for real:
+
+- PostgreSQL 17.11 portable local validation database:
+  `pokeapp_v2_validation`.
+- `001_core.sql` through `009_seed.sql` applied successfully.
+- `reset_dev.sql` then full rebuild applied successfully.
+- Real introspection confirmed 32 public V2 tables, 75 FKs and 92 indexes.
+- Fixtures validated current save ownership, uniques, checks, JSONB, ledger,
+  archive preservation and delete restrictions.
+- `reset_dev.sql` was corrected to drop `trainer_flags` and `pokemon_flags`.
 
 Persistence:
 
