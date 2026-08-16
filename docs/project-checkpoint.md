@@ -1,6 +1,6 @@
 # PokeApp 2.0 Project Checkpoint
 
-Checkpoint date: 2026-08-15
+Checkpoint date: 2026-08-16
 
 Base HEAD before original checkpoint documentation:
 `f6d8fc179f8c9e021bdf6b4fa1e2687e2d7e8b2a`
@@ -12,8 +12,10 @@ Latest architecture state:
 
 - Fase 3 closed: dependency-free domain contracts in `app/domain/`.
 - Fase 4 closed: pure domain services in `app/domain/services/`.
+- Fase 5 closed: repository protocols, legacy implementations, mappers and
+  in-memory fakes in `app/repositories/`.
 - Runtime remains Streamlit legacy through wrappers.
-- Next exact phase: Fase 5 - repositories.
+- Next exact phase: Fase 6 - Supabase V2 design.
 
 ## Current State
 
@@ -31,6 +33,7 @@ Closed phases:
 - Fase 2.6: final audit, backlog, checkpoint and functional freeze.
 - Fase 3: domain contracts.
 - Fase 4: pure domain services.
+- Fase 5: repositories.
 
 Validation at this checkpoint:
 
@@ -38,7 +41,7 @@ Validation at this checkpoint:
 - `py -m unittest discover -s tests`
 - `git diff --check`
 
-Verified current suite after Fase 4: 94 tests.
+Verified current suite after Fase 5: 102 tests.
 
 ## What Works
 
@@ -77,6 +80,10 @@ Important layers:
 
 - `app/domain/*`: dependency-free contracts.
 - `app/domain/services/*`: pure business decisions.
+- `app/repositories/*`: protocols, mappers, legacy repositories and in-memory
+  fakes.
+- `app/application/*`: first small use cases coordinating repositories and
+  domain services.
 - `storage.py`: Supabase/SQLite/settings facade.
 - `utils.py`: roster/session/save helpers and static user registry.
 - `app/liga/*`: ranking, state, snapshots, rewards, divisions and UI.
@@ -94,6 +101,17 @@ Fase 4 wrappers currently delegate selected logic into domain services:
 - division movements;
 - shop promotion selection/pricing/state;
 - trainer status and robbed flag mutations.
+
+Fase 5 wrappers currently delegate selected persistence into repositories:
+
+- `app/entrenadores/trainer_flags.py` loads/saves trainer flags through
+  `LegacyTrainerRepository`.
+- `app/activity/events.py` stores ActivityEvents through
+  `LegacyActivityRepository` while preserving legacy dict output.
+- `app/tienda/discounts.py` reads/writes promotion scheduling through
+  `LegacyShopRepository` and `LegacySettingsStore`.
+- `app/interfaz/hall_of_fame.py` loads/saves entries through
+  `LegacyHallOfFameRepository`.
 
 Persistence:
 
@@ -141,7 +159,7 @@ application orchestration boundaries around the domain services.
 
 - Fase 3: domain contracts. Closed.
 - Fase 4: pure domain extraction. Closed.
-- Fase 5: repositories. Next.
+- Fase 5: repositories. Closed.
 - Fase 6: Supabase V2 design.
 - Fase 7: RLS and security.
 - Fase 8: API for critical operations.

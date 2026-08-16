@@ -5,6 +5,9 @@ import json
 import time
 from typing import Any
 
+from app.repositories import mappers
+from app.repositories.legacy.activity import LegacyActivityRepository
+from app.repositories.legacy.settings_store import LegacySettingsStore
 from storage import settings_get, settings_set
 
 
@@ -129,26 +132,48 @@ def _coerce_event(raw: Any) -> dict[str, Any] | None:
     }
 
 
+def _repository() -> LegacyActivityRepository:
+    return LegacyActivityRepository(
+        settings=LegacySettingsStore(
+            getter=settings_get,
+            setter=lambda key, value: settings_set(key, value),
+        )
+    )
+
+
 def _load_events() -> list[dict[str, Any]]:
-    raw = _json_loads(settings_get(ACTIVITY_EVENTS_KEY), [])
-    source = raw if isinstance(raw, list) else []
-    events = [event for event in (_coerce_event(item) for item in source) if event]
-    events.sort(key=lambda item: (_safe_int(item.get("created_at")), str(item.get("id") or "")), reverse=True)
-    return events
+    try:
+        events = [
+            _coerce_event(mappers.activity_event_to_legacy(event))
+            for event in _repository().list_all()
+        ]
+        return [event for event in events if event]
+    except Exception:
+        raw = _json_loads(settings_get(ACTIVITY_EVENTS_KEY), [])
+        source = raw if isinstance(raw, list) else []
+        events = [event for event in (_coerce_event(item) for item in source) if event]
+        events.sort(key=lambda item: (_safe_int(item.get("created_at")), str(item.get("id") or "")), reverse=True)
+        return events
 
 
 def _save_events(events: list[dict[str, Any]]) -> None:
-    by_key: dict[str, dict[str, Any]] = {}
+    domain_events = []
     for event in events:
         coerced = _coerce_event(event)
         if not coerced:
             continue
-        by_key[str(coerced["dedupe_key"])] = coerced
-    out = sorted(
-        by_key.values(),
-        key=lambda item: (_safe_int(item.get("created_at")), str(item.get("id") or "")),
-        reverse=True,
-    )[:ACTIVITY_EVENT_STORAGE_LIMIT]
+        mapped = mappers.activity_event_from_any(coerced)
+        if mapped:
+            domain_events.append(mapped)
+    try:
+        _repository().replace_all(tuple(domain_events))
+        return
+    except Exception:
+        pass
+    out = [
+        mappers.activity_event_to_legacy(event)
+        for event in domain_events[:ACTIVITY_EVENT_STORAGE_LIMIT]
+    ]
     settings_set(ACTIVITY_EVENTS_KEY, json.dumps(out, ensure_ascii=False))
 
 

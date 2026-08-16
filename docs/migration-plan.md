@@ -186,6 +186,21 @@ Separar intencion de persistencia:
 
 El dominio no debe llamar a `supabase.table(...)`.
 
+Estado 5:
+
+- Protocols creados en `app/repositories/protocols.py`.
+- Legacy repositories creados para Season, League, Trainer, Shop, Save,
+  TeamLock, Activity, Hall of Fame y Competition.
+- `app/repositories/mappers.py` centraliza conversion legacy <-> contratos de
+  dominio.
+- Repos in-memory creados para tests y futuros use cases.
+- `app/application/` arranca con use cases pequenos para activity, compra con
+  descuento y team lock.
+- Consumers conectados sin cambio funcional: trainer flags, activity events,
+  shop discounts y Hall of Fame.
+- Auditoria y source-of-truth matrix documentadas en `docs/repositories.md`.
+- No se creo SQL, API, React, Workers ni parser refactor.
+
 ## Fase 6 - Supabase V2
 
 Disenar, no migrar todavia.

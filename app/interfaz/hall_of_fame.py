@@ -9,6 +9,9 @@ from typing import Any
 import streamlit as st
 
 from app.entrenadores.snapshot import get_trainer_snapshot
+from app.repositories import mappers
+from app.repositories.legacy.hall_of_fame import LegacyHallOfFameRepository
+from app.repositories.legacy.settings_store import LegacySettingsStore
 from app.season.config import current_season_version
 from showdown_sprites import showdown_sprite_url
 from storage import settings_get, settings_set
@@ -122,8 +125,13 @@ def _coerce_entry(raw: Any) -> dict[str, Any] | None:
 
 def _load_entries() -> list[dict[str, Any]]:
     try:
-        raw = settings_get(HALL_OF_FAME_KEY)
-        parsed = json.loads(raw) if raw else []
+        repo = LegacyHallOfFameRepository(
+            settings=LegacySettingsStore(
+                getter=settings_get,
+                setter=lambda key, value: settings_set(key, value),
+            )
+        )
+        parsed = [mappers.hall_entry_to_legacy(entry) for entry in repo.list_entries()]
     except Exception:
         parsed = []
     source = parsed if isinstance(parsed, list) else []
@@ -135,7 +143,18 @@ def _load_entries() -> list[dict[str, Any]]:
 def _save_entries(entries: list[dict[str, Any]]) -> None:
     cleaned = [_coerce_entry(entry) for entry in entries]
     payload = [entry for entry in cleaned if entry]
-    settings_set(HALL_OF_FAME_KEY, json.dumps(payload, ensure_ascii=False))
+    repo = LegacyHallOfFameRepository(
+        settings=LegacySettingsStore(
+            getter=settings_get,
+            setter=lambda key, value: settings_set(key, value),
+        )
+    )
+    mapped = tuple(
+        entry
+        for entry in (mappers.hall_entry_from_legacy(item) for item in payload)
+        if entry
+    )
+    repo.save_entries(mapped)
 
 
 def _load_json_setting(key: str) -> Any:

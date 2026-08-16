@@ -7,6 +7,8 @@ from typing import Any
 
 from app.domain.services import trainers as trainer_domain
 from app.liga.permissions import require_league_admin
+from app.repositories.legacy.settings_store import LegacySettingsStore
+from app.repositories.legacy.trainers import LegacyTrainerRepository
 from storage import settings_get, settings_set
 
 TRAINER_FLAGS_KEY = "trainer_flags"
@@ -52,22 +54,20 @@ def _now() -> int:
     return int(time.time())
 
 
+def _repository() -> LegacyTrainerRepository:
+    return LegacyTrainerRepository(
+        settings=LegacySettingsStore(
+            getter=settings_get,
+            setter=lambda key, value: settings_set(key, value),
+        )
+    )
+
+
 def _load_raw() -> dict[str, dict[str, Any]]:
     try:
-        raw = settings_get(TRAINER_FLAGS_KEY)
-        data = json.loads(raw or "{}")
+        return _repository().load_flag_map()
     except Exception:
         return {}
-    if not isinstance(data, dict):
-        return {}
-
-    out: dict[str, dict[str, Any]] = {}
-    for trainer, flags in data.items():
-        name = str(trainer or "").strip()
-        if not name or not isinstance(flags, dict):
-            continue
-        out[name] = dict(flags)
-    return out
 
 
 def _save_raw(flags: dict[str, dict[str, Any]]) -> None:
@@ -76,7 +76,7 @@ def _save_raw(flags: dict[str, dict[str, Any]]) -> None:
         for trainer, values in flags.items()
         if str(trainer).strip() and isinstance(values, dict) and values
     }
-    settings_set(TRAINER_FLAGS_KEY, json.dumps(clean, ensure_ascii=False))
+    _repository().save_flag_map(clean)
 
 
 def _row_value(row: Any, index: int, key: str) -> Any:

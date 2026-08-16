@@ -7,17 +7,13 @@ from datetime import datetime
 from typing import Any
 from zoneinfo import ZoneInfo
 
+from app.domain.shop import PromotionKind, PromotionState, ShopPromotion
 from app.domain.services import shop as shop_domain
 from app.discord_notify import notify_shop_discounts_created_async
 from app.liga.context import current_jornada
-from storage import (
-    all_purchased_items,
-    create_shop_discount,
-    list_shop_discounts,
-    purchase_counts_by_item_for_jornadas,
-    settings_get,
-    settings_set,
-)
+from app.repositories import mappers
+from app.repositories.legacy.settings_store import LegacySettingsStore
+from app.repositories.legacy.shop import LegacyShopRepository
 
 PROMOTION_DELAY_SECONDS = 24 * 60 * 60
 MADRID_TZ = ZoneInfo("Europe/Madrid")
@@ -25,6 +21,28 @@ GOLD_BOTTLE_CAP = "Chapa Dorada"
 EVOLUTION_ITEM = "Objeto Evolutivo"
 DISCOUNT_BLOCKLIST = shop_domain.DISCOUNT_BLOCKLIST
 CATEGORY_RULES = shop_domain.CATEGORY_RULES
+
+
+def _settings() -> LegacySettingsStore:
+    return LegacySettingsStore()
+
+
+def _shop_repository() -> LegacyShopRepository:
+    return LegacyShopRepository()
+
+
+def _legacy_promotions(
+    *,
+    jornada: int | None = None,
+    active_only: bool | None = None,
+) -> list[dict[str, Any]]:
+    return [
+        mappers.promotion_to_legacy_payload(promo)
+        for promo in _shop_repository().list_promotions(
+            matchday_number=jornada,
+            active_only=active_only,
+        )
+    ]
 
 
 def _generation_key(target_round: int) -> str:
@@ -133,18 +151,20 @@ def schedule_shop_promotions(
 ) -> list[dict[str, Any]]:
     target_round = int(closed_round) + 1
     marker_key = _generation_key(target_round)
-    if settings_get(marker_key):
-        return list_shop_discounts(jornada=target_round, active_only=None)
+    settings = _settings()
+    shop_repository = _shop_repository()
+    if settings.get(marker_key):
+        return _legacy_promotions(jornada=target_round, active_only=None)
 
-    existing = list_shop_discounts(jornada=target_round, active_only=None)
+    existing = _legacy_promotions(jornada=target_round, active_only=None)
     if existing:
-        settings_set(marker_key, json.dumps({"existing": True, "count": len(existing)}))
+        settings.set(marker_key, json.dumps({"existing": True, "count": len(existing)}))
         return existing
 
     rounds = list(range(1, int(closed_round) + 1))
-    counts = purchase_counts_by_item_for_jornadas(rounds)
-    purchased = all_purchased_items()
-    history = list_shop_discounts(active_only=None)
+    counts = shop_repository.purchase_counts_by_matchday(tuple(rounds))
+    purchased = shop_repository.all_purchased_item_names()
+    history = _legacy_promotions(active_only=None)
     selected = select_shop_promotions(
         catalog,
         closed_round=int(closed_round),
@@ -162,24 +182,32 @@ def schedule_shop_promotions(
         discount_price = _discount_price(base_price, kind, item=name)
         if discount_price >= base_price:
             continue
-        discount = create_shop_discount(
-            item=name,
-            category=str(item.get("category") or ""),
-            base_price=base_price,
-            discount_price=discount_price,
-            stock_total=1 if kind == "mega" else 2,
-            discount_kind=kind,
-            jornada=target_round,
-            announced_at=announced_at,
-            activates_at=activates_at,
+        promotion = shop_repository.create_promotion(
+            ShopPromotion(
+                id=f"pending:{target_round}:{_item_key(name)}:{kind}",
+                item_id=_item_key(name),
+                matchday_number=target_round,
+                kind=PromotionKind.MEGA if kind == "mega" else PromotionKind.NORMAL,
+                base_price=base_price,
+                discount_price=discount_price,
+                stock_total=1 if kind == "mega" else 2,
+                stock_used=0,
+                announced_at=mappers.utc_iso(announced_at),
+                activates_at=mappers.utc_iso(activates_at),
+                state=PromotionState.PENDING,
+                metadata={
+                    "item_name": name,
+                    "category": str(item.get("category") or ""),
+                },
+            )
         )
-        if not discount:
+        if not promotion:
             raise RuntimeError(
                 "No se pudieron guardar las promociones. Revisa la migracion de Supabase."
             )
-        created.append(discount)
+        created.append(mappers.promotion_to_legacy_payload(promotion))
 
-    settings_set(
+    settings.set(
         marker_key,
         json.dumps(
             {
@@ -218,7 +246,7 @@ def promotion_opens_label(discount: dict[str, Any]) -> str:
 def shop_promotions_by_item(jornada: int | None = None) -> dict[str, dict[str, Any]]:
     round_no = int(jornada or current_jornada())
     out: dict[str, dict[str, Any]] = {}
-    for discount in list_shop_discounts(jornada=round_no, active_only=True):
+    for discount in _legacy_promotions(jornada=round_no, active_only=True):
         state = promotion_state(discount)
         if state == "ended":
             continue

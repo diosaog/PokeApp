@@ -111,6 +111,22 @@ las reglas que deben sobrevivir a Streamlit:
 Los wrappers legacy pueden leer datos, llamar dominio y despues persistir, pero
 el dominio no decide permisos, no persiste y no renderiza.
 
+Desde Fase 5, `app/repositories/` separa la intencion de persistencia de la
+implementacion legacy:
+
+- `app/repositories/protocols.py` define interfaces con `typing.Protocol`.
+- `app/repositories/mappers.py` centraliza conversiones legacy dict/row/json <->
+  contratos de dominio.
+- `app/repositories/legacy/` encapsula settings, `storage.py`, Supabase V1 y
+  SQLite fallback actuales.
+- `app/repositories/memory/` ofrece fakes ligeros para tests de application.
+- `app/application/` empieza a contener use cases pequenos que coordinan
+  repository -> domain service -> repository.
+
+Los consumers conectados de bajo riesgo son `trainer_flags`, `activity.events`,
+`tienda.discounts` y `hall_of_fame`. El resto de accesos directos quedan
+inventariados en `docs/repositories.md` para Fase 6.
+
 ## Problema Principal
 
 La deuda mas importante no es Supabase. Es que entidades centrales de competicion

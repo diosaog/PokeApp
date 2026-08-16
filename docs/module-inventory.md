@@ -35,7 +35,7 @@ extraiga dominio o repositories.
 
 | Modulo | Tipo | Nota |
 | --- | --- | --- |
-| `events.py` | MIXED/STORAGE | Fase 2.5: ActivityEvent legacy en `settings.activity_events_v1`, dedupe, visibilidad y emisores para save, compra y team lock. |
+| `events.py` | MIXED WRAPPER | Fase 5: API legacy igual para UI/hooks, pero carga/guardado interno pasa por `LegacyActivityRepository`. |
 
 ## app/domain
 
@@ -55,6 +55,33 @@ extraiga dominio o repositories.
 | `trials.py` | DOMAIN CONTRACT | `TrialCase`, votos y `Penalty` como value object. |
 | `archives.py` | DOMAIN CONTRACT | `SeasonArchive` congelado. |
 | `legacy.py` | DOMAIN ADAPTER | Adaptadores pequenos dict legacy -> contratos, sin imports de infraestructura. |
+
+## app/repositories
+
+| Modulo | Tipo | Nota |
+| --- | --- | --- |
+| `protocols.py` | REPOSITORY CONTRACT | Interfaces `typing.Protocol` para Season, League, Trainer, Shop, Save, TeamLock, Activity, Hall y Competition. |
+| `mappers.py` | REPOSITORY MAPPER | Conversion legacy dict/row/json <-> contratos de dominio; frontera de serializacion. |
+| `errors.py` | REPOSITORY CONTRACT | Errores simples: `RepositoryError`, `NotFoundError`, `ConflictError`, `PersistenceError`. |
+| `legacy/settings_store.py` | INFRA ADAPTER | Wrapper pequeno para `settings_get/settings_set` con inyeccion para tests. |
+| `legacy/season.py` | LEGACY REPOSITORY | Encapsula `season_config_v2`, lifecycle y archives. |
+| `legacy/league.py` | LEGACY REPOSITORY | Encapsula `league_state` y snapshots. |
+| `legacy/trainers.py` | LEGACY REPOSITORY | Encapsula `trainer_flags` y lista de entrenadores desde `utils.USERS`. |
+| `legacy/shop.py` | LEGACY REPOSITORY | Encapsula catalogo, promociones, purchases y redemptions sobre storage actual. |
+| `legacy/saves.py` | LEGACY REPOSITORY | Encapsula metadata/bytes de saves sobre `storage.py`. |
+| `legacy/team_locks.py` | LEGACY REPOSITORY | Encapsula `team_locks` legacy. |
+| `legacy/activity.py` | LEGACY REPOSITORY | Encapsula `settings.activity_events_v1`. |
+| `legacy/hall_of_fame.py` | LEGACY REPOSITORY | Encapsula `settings.hall_of_fame_v1`. |
+| `legacy/competitions.py` | LEGACY REPOSITORY | Encapsula blobs de Copa y Juicios. |
+| `memory/repositories.py` | TEST INFRA | Repositories in-memory ligeros para application tests. |
+
+## app/application
+
+| Modulo | Tipo | Nota |
+| --- | --- | --- |
+| `activity.py` | APPLICATION | Caso de uso pequeno para construir y persistir ActivityEvent via repository. |
+| `shop.py` | APPLICATION | Preflight dominio + purchase promocionada via repository. |
+| `team_locks.py` | APPLICATION | Validacion dominio + upsert de TeamLock via repository. |
 
 ### app/domain/services
 
@@ -97,7 +124,7 @@ extraiga dominio o repositories.
 
 | Modulo | Tipo | Nota |
 | --- | --- | --- |
-| `discounts.py` | MIXED WRAPPER | Seleccion/precio/estado delegan a dominio; scheduling, persistencia y avisos siguen legacy. |
+| `discounts.py` | MIXED WRAPPER | Seleccion/precio/estado delegan a dominio; scheduling lee/escribe promociones mediante `LegacyShopRepository` y marker via `LegacySettingsStore`. |
 | `catalog_data.py` | PURE-ish | Catalogo estatico con assets. |
 | `catalog_render.py` | STREAMLIT/HTML | Render de cards; el CTA usa `st.button` fuera del HTML de la card y se integra visualmente con CSS hasta extraer `ShopItemCard`. |
 | `sections.py` | STREAMLIT | Vista tienda y flujo de compra; confirmacion y compra siguen acopladas a `st.session_state`; el reset de flags queda como helper legacy no montado en la pagina normal. |
@@ -112,7 +139,7 @@ extraiga dominio o repositories.
 | `page.py` | STREAMLIT | Pantalla principal grande; concentra CSS local de Entrenadores/PC/Inspector hasta extraer design system. |
 | `boxes.py` | STREAMLIT/MIXED | PC/Cajas, seleccion y mapping de slots; el orden real del save esta acoplado al render. |
 | `snapshot.py` | MIXED/STORAGE | Snapshot derivado de save, guardado en settings. |
-| `trainer_flags.py` | MIXED WRAPPER | Lee/escribe flags y sync historico, pero status, labels, mutaciones y ciclo robado delegan a dominio puro. |
+| `trainer_flags.py` | MIXED WRAPPER | Fase 5: carga/guardado de flags via `LegacyTrainerRepository`; status, labels, mutaciones y ciclo robado delegan a dominio puro. |
 | `cache.py` | MIXED | Cache del parser PKHeX. |
 | `detail_render.py` | STREAMLIT/HTML | Inspector visual; reutiliza resolver de iconos de inventario temporalmente. |
 | `summary.py` | STREAMLIT/MIXED | Resumen, monedas, puntos, medallas. |
@@ -142,7 +169,7 @@ extraiga dominio o repositories.
 | `notifications.py` | MIXED | NotificationView: muestra maximo 5 ActivityEvents recientes; fallback legacy desde saves, compras y locks si no existen eventos nuevos. |
 | `normativa.py` | STREAMLIT/CONTENT | Manual oficial `rulebook-*` V2: portada documental, indice compacto, articulos alineados, tablas de caps/recompensas y fichas de comodines sin `st.tabs`. |
 | `temporada.py` | STREAMLIT/MIXED | Back office Admin 2.4: estado, ciclo de temporada, configuracion, gestion de entrenadores, consola Liga, historial real y zona de descarte. |
-| `hall_of_fame.py` | MIXED | Logica y UI de historico; auto-sync de campeones desde fuentes vivas y archivos inmutables con equipos congelados. |
+| `hall_of_fame.py` | MIXED WRAPPER | Carga/guardado de entradas mediante `LegacyHallOfFameRepository`; auto-sync de campeones desde fuentes vivas y archivos sigue legacy. |
 
 ### Auditoria visual 1F
 
@@ -171,6 +198,7 @@ extraiga dominio o repositories.
 | `test_activity_events.py` | ActivityEvent legacy, dedupe, visibilidad y hooks de save/compra/team lock. |
 | `test_domain_contracts.py` | Contratos de dominio, JSON-safe, privacidad, adaptadores legacy y regla arquitectonica recursiva. |
 | `test_domain_services.py` | Servicios puros de Fase 4: season, ranking, rewards, shop, flags, team locks, snapshots, activity, Hall/archive y juicios. |
+| `test_repositories.py` | Fase 5: dependency direction, mappings legacy, repos in-memory y application use cases. |
 | `test_shop_promotions.py` | Rebajas, exclusiones y rotacion. |
 | `test_season_config.py` | Versionado, permisos, bloqueo historico y roster explicito. |
 | `test_season_validation.py` | Validacion de temporada, A/B oficial, jugadores y reglas. |
