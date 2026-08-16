@@ -108,6 +108,17 @@ revoke all on function public.current_user_owns_trainer(uuid) from public;
 
 do $$
 begin
+  if exists (select 1 from pg_roles where rolname = 'anon') then
+    revoke all on function public.current_auth_uid() from anon;
+    revoke all on function public.current_trainer_id() from anon;
+    revoke all on function public.is_current_user_admin() from anon;
+    revoke all on function public.current_user_owns_trainer(uuid) from anon;
+  end if;
+end;
+$$;
+
+do $$
+begin
   if exists (select 1 from pg_roles where rolname = 'authenticated') then
     grant execute on function public.current_auth_uid() to authenticated;
     grant execute on function public.current_trainer_id() to authenticated;

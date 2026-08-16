@@ -20,8 +20,9 @@ Latest architecture state:
   reset/rebuild and fixture introspection.
 - Fase 7 closed: Supabase V2 RLS/security layer with identity helpers, safe
   projections, private storage policies and real PostgreSQL RLS validation.
-- Fase 7.1 tooling prepared: real Supabase JWT/Storage validator exists, but it
-  still needs a clean staging project and local credentials to run.
+- Fase 7.1 in progress: real Supabase staging `Pokeapp 2.0` has public RLS and
+  safe views applied. Full JWT/Storage validator still needs service-role
+  credentials and Storage policies applied through SQL Editor.
 - Runtime remains Streamlit legacy through wrappers.
 - Next exact phase: Fase 7.1 - run real Supabase staging validation.
 
@@ -45,8 +46,8 @@ Closed phases:
 - Fase 6: Supabase V2 greenfield schema.
 - Fase 6.1: real Postgres validation of Supabase V2 SQL.
 - Fase 7: RLS and security.
-- Fase 7.1: real Supabase staging validation tooling prepared, execution
-  pending credentials.
+- Fase 7.1: real Supabase staging validation in progress; SQL-level public RLS
+  checks pass, full JWT/Storage execution pending credentials and Storage SQL.
 
 Validation at this checkpoint:
 
@@ -162,13 +163,19 @@ Fase 7 secures that target:
 - `raw-saves` storage policies are prepared for Supabase storage paths by
   `trainer_id`.
 
-Fase 7.1 prepares real staging validation:
+Fase 7.1 prepares and starts real staging validation:
 
 - `tools/validate_supabase_v2_rls.py` validates Supabase Auth JWTs, PostgREST
   RLS and Storage policies against a real staging project.
 - `.env.supabase-v2-rls.example` documents required credentials without secrets.
-- Execution is pending because no staging Supabase URL/anon/service-role keys are
-  present in this workspace.
+- Real staging project `Pokeapp 2.0` has migrations 010, 011, 012 and 014
+  applied through the Supabase connector.
+- SQL-level checks confirmed 32 public tables, 32 RLS-enabled public tables, 82
+  public policies, 37 safe views and 37 `security_invoker` views.
+- Storage migration 013 is pending in staging because the Supabase connector
+  rejects DDL on `storage.objects`; run it from Supabase SQL Editor.
+- Full validator execution is pending because the service-role key is not present
+  in this workspace.
 
 Persistence:
 
@@ -219,7 +226,8 @@ cut over Streamlit or delete V1 without explicit approval.
 - Fase 5: repositories. Closed.
 - Fase 6: Supabase V2 greenfield schema. Closed.
 - Fase 7: RLS and security. Closed.
-- Fase 7.1: real Supabase staging validation. Tooling ready, execution pending.
+- Fase 7.1: real Supabase staging validation. SQL-level checks partially passed;
+  full JWT/Storage execution pending.
 - Fase 8: API for critical operations.
 - Fase 9: parser boundary.
 - Fase 10: React / Cloudflare frontend.

@@ -137,6 +137,12 @@ where id = 'raw-saves';
 
 En Supabase real deberia devolver una fila con `public = false`.
 
+Nota operativa: el conector MCP de Supabase puede rechazar DDL sobre
+`storage.objects` con `INVALID_ARGUMENT`. Si ocurre en una base ya creada, abre
+el SQL Editor de Supabase y ejecuta manualmente
+`supabase/v2/migrations/013_storage_policies.sql`. En una base vacia,
+`bootstrap.sql` ya incluye ese bloque.
+
 Si Supabase bloquease esa insercion por permisos del proyecto, crea el bucket a
 mano:
 
@@ -166,7 +172,8 @@ comportamiento de la app. La migracion/cutover real se decidira mas adelante.
 ## F) RLS
 
 Despues de ejecutar `bootstrap.sql`, las tablas V2 ya tienen RLS activo y vistas
-seguras.
+seguras con `security_invoker`, para que se aplique la RLS del usuario que
+consulta.
 
 Modelo resumido:
 
@@ -204,8 +211,9 @@ Orden oficial de migrations:
 11. `011_rls_policies.sql`
 12. `012_security_views.sql`
 13. `013_storage_policies.sql`
+14. `014_security_invoker_hardening.sql`
 
-Si cambia alguna migration 001-013, regenera el bootstrap:
+Si cambia alguna migration 001-014, regenera el bootstrap:
 
 ```powershell
 py tools\generate_supabase_v2_bootstrap.py

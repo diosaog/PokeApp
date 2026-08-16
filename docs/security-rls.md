@@ -36,7 +36,7 @@ Migration `010_security_helpers.sql` adds:
 Security notes:
 
 - The SECURITY DEFINER functions use fixed `search_path`.
-- Helper execution is revoked from `public` and granted only to
+- Helper execution is revoked from `public` and `anon`, then granted only to
   `authenticated`/`service_role` when those roles exist.
 - The helpers only expose identity booleans/ids. They do not expose raw table
   payloads.
@@ -44,6 +44,9 @@ Security notes:
 ## Read Surfaces
 
 Use these views from the future frontend/API when possible:
+
+All client views use `security_invoker` plus `security_barrier`, so PostgreSQL
+applies the querying user's RLS instead of the view owner's privileges.
 
 - Public authenticated projections: `public_trainers`, `public_seasons`,
   `public_season_players`, `public_season_player_stats`,
@@ -146,6 +149,10 @@ Migration `009_seed.sql` creates or updates the bucket when Supabase `storage`
 schema exists. Migration `013_storage_policies.sql` adds storage object policies
 when `storage.objects` exists.
 
+Operational note: the Supabase MCP connector can reject DDL against
+`storage.objects` with `INVALID_ARGUMENT`. If that happens, run
+`supabase/v2/migrations/013_storage_policies.sql` from the Supabase SQL Editor.
+
 Path convention:
 
 ```text
@@ -168,7 +175,7 @@ cutover.
 
 Validated against PostgreSQL 17.11 local with Supabase role mocks:
 
-- migrations 001-013 apply in order;
+- migrations 001-014 apply in order;
 - `bootstrap.sql` applies as a single SQL Editor artifact;
 - reset/build/rebuild works;
 - all 32 public V2 tables have RLS enabled;
@@ -247,7 +254,13 @@ Real test matrix covered by the validator:
 Status as of this checkpoint:
 
 - Validator implemented locally.
-- Real Supabase execution is pending because staging credentials are not present
-  in the Codex environment.
+- Real Supabase staging `Pokeapp 2.0` has public RLS and `security_invoker`
+  views applied through migrations 010, 011, 012 and 014.
+- SQL-level staging checks confirmed 32 public tables, 32 RLS-enabled public
+  tables, 82 public policies, 37 views and 37 `security_invoker` views.
+- Storage policies from 013 are still pending in staging because the connector
+  rejects DDL on `storage.objects`.
+- Full real validator execution is pending because the service-role key is not
+  present in the Codex environment.
 - Do not mark Fase 7.1 as approved until this validator has passed against a
   real clean Supabase staging project.

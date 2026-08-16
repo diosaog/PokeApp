@@ -4,7 +4,7 @@
 begin;
 
 create or replace view public.public_trainers
-with (security_barrier = true)
+with (security_invoker = true, security_barrier = true)
 as
 select
   id,
@@ -17,7 +17,7 @@ from public.trainers
 where globally_enabled = true;
 
 create or replace view public.current_trainer_profile
-with (security_barrier = true)
+with (security_invoker = true, security_barrier = true)
 as
 select
   id,
@@ -34,7 +34,7 @@ where id = public.current_trainer_id()
    or public.is_current_user_admin();
 
 create or replace view public.public_seasons
-with (security_barrier = true)
+with (security_invoker = true, security_barrier = true)
 as
 select
   id,
@@ -50,7 +50,7 @@ from public.seasons
 where status <> 'discarded';
 
 create or replace view public.public_season_players
-with (security_barrier = true)
+with (security_invoker = true, security_barrier = true)
 as
 select
   id,
@@ -65,7 +65,7 @@ select
 from public.season_players;
 
 create or replace view public.public_season_player_stats
-with (security_barrier = true)
+with (security_invoker = true, security_barrier = true)
 as
 select
   season_player_id,
@@ -76,7 +76,7 @@ select
 from public.season_player_stats;
 
 create or replace view public.public_trainer_flags
-with (security_barrier = true)
+with (security_invoker = true, security_barrier = true)
 as
 select
   id,
@@ -92,7 +92,7 @@ where flag_type = 'robbed'
   and flag_value = true;
 
 create or replace view public.current_trainer_flags
-with (security_barrier = true)
+with (security_invoker = true, security_barrier = true)
 as
 select *
 from public.trainer_flags
@@ -100,7 +100,7 @@ where trainer_id = public.current_trainer_id()
    or public.is_current_user_admin();
 
 create or replace view public.current_pokemon_flags
-with (security_barrier = true)
+with (security_invoker = true, security_barrier = true)
 as
 select *
 from public.pokemon_flags
@@ -108,7 +108,7 @@ where trainer_id = public.current_trainer_id()
    or public.is_current_user_admin();
 
 create or replace view public.public_season_config_versions
-with (security_barrier = true)
+with (security_invoker = true, security_barrier = true)
 as
 select
   id,
@@ -127,7 +127,7 @@ select
 from public.season_config_versions;
 
 create or replace view public.public_divisions
-with (security_barrier = true)
+with (security_invoker = true, security_barrier = true)
 as
 select
   id,
@@ -139,7 +139,7 @@ select
 from public.divisions;
 
 create or replace view public.public_division_memberships
-with (security_barrier = true)
+with (security_invoker = true, security_barrier = true)
 as
 select
   id,
@@ -154,7 +154,7 @@ select
 from public.division_memberships;
 
 create or replace view public.public_matchdays
-with (security_barrier = true)
+with (security_invoker = true, security_barrier = true)
 as
 select
   id,
@@ -169,7 +169,7 @@ select
 from public.matchdays;
 
 create or replace view public.public_matches
-with (security_barrier = true)
+with (security_invoker = true, security_barrier = true)
 as
 select
   id,
@@ -186,7 +186,7 @@ select
 from public.matches;
 
 create or replace view public.public_matchday_snapshots
-with (security_barrier = true)
+with (security_invoker = true, security_barrier = true)
 as
 select
   id,
@@ -202,7 +202,7 @@ select
 from public.matchday_snapshots;
 
 create or replace view public.public_matchday_movements
-with (security_barrier = true)
+with (security_invoker = true, security_barrier = true)
 as
 select
   id,
@@ -217,7 +217,7 @@ select
 from public.matchday_movements;
 
 create or replace view public.public_shop_items
-with (security_barrier = true)
+with (security_invoker = true, security_barrier = true)
 as
 select
   id,
@@ -234,7 +234,7 @@ from public.shop_items
 where enabled = true;
 
 create or replace view public.public_shop_promotions
-with (security_barrier = true)
+with (security_invoker = true, security_barrier = true)
 as
 select
   id,
@@ -258,7 +258,7 @@ where status in ('active', 'exhausted', 'ended')
   and (activates_at is null or activates_at <= now());
 
 create or replace view public.current_purchases
-with (security_barrier = true)
+with (security_invoker = true, security_barrier = true)
 as
 select *
 from public.purchases
@@ -266,7 +266,7 @@ where trainer_id = public.current_trainer_id()
    or public.is_current_user_admin();
 
 create or replace view public.current_redemptions
-with (security_barrier = true)
+with (security_invoker = true, security_barrier = true)
 as
 select *
 from public.redemptions
@@ -274,7 +274,7 @@ where trainer_id = public.current_trainer_id()
    or public.is_current_user_admin();
 
 create or replace view public.current_coin_transactions
-with (security_barrier = true)
+with (security_invoker = true, security_barrier = true)
 as
 select *
 from public.coin_transactions
@@ -282,7 +282,7 @@ where trainer_id = public.current_trainer_id()
    or public.is_current_user_admin();
 
 create or replace view public.public_coin_balances
-with (security_barrier = true)
+with (security_invoker = true, security_barrier = true)
 as
 select
   season_id,
@@ -292,7 +292,7 @@ from public.coin_transactions
 group by season_id, trainer_id;
 
 create or replace view public.current_save_files
-with (security_barrier = true)
+with (security_invoker = true, security_barrier = true)
 as
 select *
 from public.save_files
@@ -300,7 +300,7 @@ where trainer_id = public.current_trainer_id()
    or public.is_current_user_admin();
 
 create or replace view public.current_parsed_saves
-with (security_barrier = true)
+with (security_invoker = true, security_barrier = true)
 as
 select ps.*
 from public.parsed_saves as ps
@@ -310,7 +310,7 @@ where sf.trainer_id = public.current_trainer_id()
    or public.is_current_user_admin();
 
 create or replace view public.public_team_locks
-with (security_barrier = true)
+with (security_invoker = true, security_barrier = true)
 as
 select
   id,
@@ -327,7 +327,7 @@ select
 from public.team_locks;
 
 create or replace view public.current_team_locks
-with (security_barrier = true)
+with (security_invoker = true, security_barrier = true)
 as
 select *
 from public.team_locks
@@ -335,7 +335,7 @@ where trainer_id = public.current_trainer_id()
    or public.is_current_user_admin();
 
 create or replace view public.public_activity_events
-with (security_barrier = true)
+with (security_invoker = true, security_barrier = true)
 as
 select
   id,
@@ -352,7 +352,7 @@ from public.activity_events
 where visibility = 'public';
 
 create or replace view public.current_activity_events
-with (security_barrier = true)
+with (security_invoker = true, security_barrier = true)
 as
 select *
 from public.activity_events
@@ -364,7 +364,7 @@ where visibility = 'public'
    );
 
 create or replace view public.public_hall_of_fame
-with (security_barrier = true)
+with (security_invoker = true, security_barrier = true)
 as
 select
   id,
@@ -378,7 +378,7 @@ select
 from public.hall_of_fame_entries;
 
 create or replace view public.public_cups
-with (security_barrier = true)
+with (security_invoker = true, security_barrier = true)
 as
 select
   id,
@@ -395,7 +395,7 @@ from public.cups
 where status <> 'discarded';
 
 create or replace view public.public_cup_participants
-with (security_barrier = true)
+with (security_invoker = true, security_barrier = true)
 as
 select
   id,
@@ -408,7 +408,7 @@ select
 from public.cup_participants;
 
 create or replace view public.public_cup_matches
-with (security_barrier = true)
+with (security_invoker = true, security_barrier = true)
 as
 select
   id,
@@ -425,7 +425,7 @@ select
 from public.cup_matches;
 
 create or replace view public.public_cup_standings
-with (security_barrier = true)
+with (security_invoker = true, security_barrier = true)
 as
 select
   id,
@@ -439,7 +439,7 @@ select
 from public.cup_standings;
 
 create or replace view public.public_trial_cases
-with (security_barrier = true)
+with (security_invoker = true, security_barrier = true)
 as
 select
   id,
@@ -461,7 +461,7 @@ where status <> 'cancelled'
   );
 
 create or replace view public.current_trial_cases
-with (security_barrier = true)
+with (security_invoker = true, security_barrier = true)
 as
 select *
 from public.trial_cases
@@ -474,7 +474,7 @@ where public.is_current_user_admin()
    );
 
 create or replace view public.current_trial_votes
-with (security_barrier = true)
+with (security_invoker = true, security_barrier = true)
 as
 select *
 from public.trial_votes
@@ -482,7 +482,7 @@ where voter_trainer_id = public.current_trainer_id()
    or public.is_current_user_admin();
 
 create or replace view public.public_penalties
-with (security_barrier = true)
+with (security_invoker = true, security_barrier = true)
 as
 select
   id,
@@ -497,7 +497,7 @@ select
 from public.penalties;
 
 create or replace view public.current_penalties
-with (security_barrier = true)
+with (security_invoker = true, security_barrier = true)
 as
 select *
 from public.penalties

@@ -41,6 +41,7 @@ class SupabaseV2SchemaTests(unittest.TestCase):
                 "011_rls_policies.sql",
                 "012_security_views.sql",
                 "013_storage_policies.sql",
+                "014_security_invoker_hardening.sql",
             ],
         )
         for path in _migration_files():
@@ -158,6 +159,8 @@ class SupabaseV2SchemaTests(unittest.TestCase):
             "create or replace view public.public_team_locks",
             "create or replace view public.current_team_locks",
             "create or replace view public.public_coin_balances",
+            "security_invoker = true",
+            "revoke all on function public.current_trainer_id() from anon",
             "raw_saves_select_own_or_admin",
             "bucket_id = 'raw-saves'",
             "auth_user_id uuid unique",
@@ -194,7 +197,10 @@ class SupabaseV2SchemaTests(unittest.TestCase):
 
         self.assertTrue(bootstrap.startswith("-- ONLY FOR EMPTY POKEAPP V2 DATABASE."))
         self.assertEqual(bootstrap, render_bootstrap())
-        self.assertIn("Source of truth: supabase/v2/migrations/001_core.sql through 013_storage_policies.sql", bootstrap)
+        self.assertIn(
+            "Source of truth: supabase/v2/migrations/001_core.sql through 014_security_invoker_hardening.sql",
+            bootstrap,
+        )
         self.assertNotIn("drop table", lowered)
         self.assertNotIn("drop schema", lowered)
         self.assertNotIn("reset_dev.sql", lowered)

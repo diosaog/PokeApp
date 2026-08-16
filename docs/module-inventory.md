@@ -208,6 +208,7 @@ extraiga dominio o repositories.
 | `migrations/011_rls_policies.sql` | SQL V2 SECURITY | RLS default-deny en las 32 tablas V2 y policies owner/admin/server-only. |
 | `migrations/012_security_views.sql` | SQL V2 SECURITY | Proyecciones `public_*` y `current_*` para cliente autenticado. |
 | `migrations/013_storage_policies.sql` | SQL V2 SECURITY | Policies de `storage.objects` para bucket privado `raw-saves`. |
+| `migrations/014_security_invoker_hardening.sql` | SQL V2 SECURITY | Endurece vistas `security_invoker` y revoca acceso `anon` a helpers de identidad. |
 | `reset_dev.sql` | SQL V2 DESTRUCTIVE | Reset separado para development/staging. No production/V1. |
 
 ## tools
