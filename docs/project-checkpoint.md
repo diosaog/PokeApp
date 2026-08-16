@@ -14,8 +14,10 @@ Latest architecture state:
 - Fase 4 closed: pure domain services in `app/domain/services/`.
 - Fase 5 closed: repository protocols, legacy implementations, mappers and
   in-memory fakes in `app/repositories/`.
+- Fase 6 closed: Supabase V2 greenfield SQL schema in `supabase/v2/migrations`
+  with reset/dev docs and static schema tests.
 - Runtime remains Streamlit legacy through wrappers.
-- Next exact phase: Fase 6 - Supabase V2 design.
+- Next exact phase: Fase 7 - RLS and security.
 
 ## Current State
 
@@ -34,6 +36,7 @@ Closed phases:
 - Fase 3: domain contracts.
 - Fase 4: pure domain services.
 - Fase 5: repositories.
+- Fase 6: Supabase V2 greenfield schema.
 
 Validation at this checkpoint:
 
@@ -41,7 +44,7 @@ Validation at this checkpoint:
 - `py -m unittest discover -s tests`
 - `git diff --check`
 
-Verified current suite after Fase 5: 102 tests.
+Verified current suite after Fase 6: 108 tests.
 
 ## What Works
 
@@ -84,6 +87,8 @@ Important layers:
   fakes.
 - `app/application/*`: first small use cases coordinating repositories and
   domain services.
+- `supabase/v2/migrations/*`: greenfield SQL-first Supabase V2 schema.
+- `supabase/v2/reset_dev.sql`: destructive development/staging reset for V2 only.
 - `storage.py`: Supabase/SQLite/settings facade.
 - `utils.py`: roster/session/save helpers and static user registry.
 - `app/liga/*`: ranking, state, snapshots, rewards, divisions and UI.
@@ -113,6 +118,15 @@ Fase 5 wrappers currently delegate selected persistence into repositories:
 - `app/interfaz/hall_of_fame.py` loads/saves entries through
   `LegacyHallOfFameRepository`.
 
+Fase 6 adds a future persistence target but does not connect runtime:
+
+- V2 is greenfield and reproducible from SQL.
+- V1 is not patched and not deleted.
+- `settings` blobs are not carried forward as source of truth.
+- Core competitive data is season-scoped.
+- `coin_transactions` is the future money source.
+- RLS/API/React/Cloudflare remain future phases.
+
 Persistence:
 
 - Supabase is the remote store when configured.
@@ -138,11 +152,11 @@ Persistence:
 Next exact phase:
 
 ```text
-Fase 5 - Repositories
+Fase 7 - RLS Y Seguridad
 ```
 
-Do not code SQL, API or React in Fase 5. First define repository interfaces and
-application orchestration boundaries around the domain services.
+Do not start API or React before privacy/RLS decisions are written against the
+V2 model. Do not cut over Streamlit or delete V1 without explicit approval.
 
 ## Do Not Do When Resuming
 
@@ -160,7 +174,7 @@ application orchestration boundaries around the domain services.
 - Fase 3: domain contracts. Closed.
 - Fase 4: pure domain extraction. Closed.
 - Fase 5: repositories. Closed.
-- Fase 6: Supabase V2 design.
+- Fase 6: Supabase V2 greenfield schema. Closed.
 - Fase 7: RLS and security.
 - Fase 8: API for critical operations.
 - Fase 9: parser boundary.

@@ -203,40 +203,45 @@ Estado 5:
 
 ## Fase 6 - Supabase V2
 
-Disenar, no migrar todavia.
+Estado 6:
 
-Modelo conceptual:
+- Decision definitiva: Supabase V2 es greenfield. V1 no se evoluciona con una
+  cadena de `ALTER TABLE`.
+- SQL reproducible creado en `supabase/v2/migrations`.
+- Reset destructivo separado creado en `supabase/v2/reset_dev.sql`.
+- Documentacion central creada en `docs/supabase-v2.md`.
+- Tests estaticos de schema creados en `tests/test_supabase_v2_schema.py`.
+- No se conecto Streamlit a V2, no hay cutover, no se borra V1 y no hay
+  migracion de datos legacy asumida.
 
-- `seasons`
-- `season_versions`
-- `season_players`
-- `season_archives`
-- `divisions`
-- `division_players`
-- `matchdays`
-- `matches`
-- `trainer_flags`
-- `team_locks`
-- `shop_items`
-- `shop_promotions`
-- `purchases`
-- `redemptions`
-- `saves`
-- `activity_events`
-- `hall_of_fame`
-- `hall_of_fame_team`
+Modelo V2 principal:
 
-`season_id` debe estar en todo dato competitivo relevante.
+- `trainers`, `seasons`, `season_players`, `season_config_versions`;
+- `divisions`, `division_memberships`, `matchdays`, `matches`,
+  `matchday_snapshots`, `matchday_movements`;
+- `shop_items`, `shop_promotions`, `purchases`, `redemptions`,
+  `coin_transactions`;
+- `save_files`, `parsed_saves`, `team_locks`;
+- `trainer_flags`, `pokemon_flags`, `activity_events`, `hall_of_fame_entries`;
+- `season_archive_snapshots`, `cups`, `cup_participants`, `cup_matches`,
+  `cup_standings`, `trial_cases`, `trial_votes`, `penalties`;
+- `app_settings` solo para settings tecnicas pequenas.
 
-En V2, `activity_events` debe emitirse desde operaciones server-side, no desde la
-UI:
+Decisiones clave:
 
-- purchase completada;
-- team lock confirmado;
-- save aceptado;
-- jornada cerrada;
-- cambio de estado de entrenador;
-- temporada archivada.
+- UUID para entidades principales.
+- `season_id` en todo dato competitivo relevante.
+- `TrainerStatus` vive en `season_players.status`.
+- Monedas viven en ledger (`coin_transactions`), no en saldo mutable.
+- Hall y team locks usan snapshots congelados.
+- Archive es `seasons.status = archived` mas snapshot opcional, no copia de media
+  base.
+- SQLite no sera fallback silencioso en produccion V2.
+
+Limitacion:
+
+- El entorno local no tiene `psql` ni Supabase CLI, asi que la validacion real
+  contra Postgres/Supabase queda para staging/herramientas instaladas.
 
 ## Fase 7 - RLS Y Seguridad
 

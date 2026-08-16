@@ -127,6 +127,16 @@ Los consumers conectados de bajo riesgo son `trainer_flags`, `activity.events`,
 `tienda.discounts` y `hall_of_fame`. El resto de accesos directos quedan
 inventariados en `docs/repositories.md` para Fase 6.
 
+Desde Fase 6, Supabase V2 queda disenado como greenfield SQL-first:
+
+- V1 se trata como referencia de comportamiento y anti-patterns, no como esquema
+  a evolucionar.
+- `supabase/v2/migrations` contiene el schema reproducible desde una base vacia.
+- `docs/supabase-v2.md` documenta modelo, decisiones, RLS readiness, storage,
+  delete policy, ledger y reset destructivo.
+- No hay cutover, no se borra V1 y el runtime Streamlit sigue usando legacy.
+- La siguiente fase debe ser RLS/seguridad sobre este modelo, antes de API/React.
+
 ## Problema Principal
 
 La deuda mas importante no es Supabase. Es que entidades centrales de competicion
@@ -179,6 +189,15 @@ Hay que decidir y documentar una fuente de verdad por dato:
   `settings.activity_events_v1`, pero en V2 deben pasar a tabla
   `activity_events`.
 - Flags de entrenador: entidad propia, no texto decorativo.
+
+Supabase V2 greenfield fija la direccion futura:
+
+- `settings` deja de ser fuente de verdad para temporada, liga, Hall, snapshots,
+  flags o saves.
+- Todo dato competitivo relevante queda scopeado por `season_id`.
+- Archive no duplica media base: `seasons.status = archived` conserva las
+  relaciones y `season_archive_snapshots` queda como auditoria/export opcional.
+- Monedas pasan a ledger (`coin_transactions`) y no a saldo mutable unico.
 
 ## Criterios De Salida Por Fase
 

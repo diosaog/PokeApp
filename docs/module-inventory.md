@@ -191,6 +191,21 @@ extraiga dominio o repositories.
 | `storage_flags.py` | STORAGE | Flags de Pokemon y limpieza. |
 | `storage_cache.py` | STORAGE | Cache simple en memoria. |
 
+## supabase/v2
+
+| Archivo | Tipo | Nota |
+| --- | --- | --- |
+| `migrations/001_core.sql` | SQL V2 | Extension UUID, helper `updated_at`, `app_settings`, `trainers`, `seasons`. |
+| `migrations/002_seasons.sql` | SQL V2 | `season_players`, stats, trainer/Pokemon flags, config versions y divisions. |
+| `migrations/003_league.sql` | SQL V2 | Matchdays, matches, division history, snapshots y movements. |
+| `migrations/004_shop.sql` | SQL V2 | Catalogo, promociones, compras, redenciones y coin ledger. |
+| `migrations/005_saves.sql` | SQL V2 | Save metadata, parsed saves, current save y team locks. |
+| `migrations/006_activity_hall.sql` | SQL V2 | ActivityEvents, Hall entries y archive snapshot opcional. |
+| `migrations/007_competitions.sql` | SQL V2 | Copa generica, juicios/votos y penalizaciones. |
+| `migrations/008_indexes.sql` | SQL V2 | Indices y uniques parciales para queries reales. |
+| `migrations/009_seed.sql` | SQL V2 | Seed minimo de trainers/catalogo y bucket `raw-saves` si existe Supabase Storage. |
+| `reset_dev.sql` | SQL V2 DESTRUCTIVE | Reset separado para development/staging. No production/V1. |
+
 ## Tests Actuales
 
 | Test | Cobertura |
@@ -199,6 +214,7 @@ extraiga dominio o repositories.
 | `test_domain_contracts.py` | Contratos de dominio, JSON-safe, privacidad, adaptadores legacy y regla arquitectonica recursiva. |
 | `test_domain_services.py` | Servicios puros de Fase 4: season, ranking, rewards, shop, flags, team locks, snapshots, activity, Hall/archive y juicios. |
 | `test_repositories.py` | Fase 5: dependency direction, mappings legacy, repos in-memory y application use cases. |
+| `test_supabase_v2_schema.py` | Fase 6: contrato estatico del schema V2, migrations, tablas, IDs, constraints y reset. |
 | `test_shop_promotions.py` | Rebajas, exclusiones y rotacion. |
 | `test_season_config.py` | Versionado, permisos, bloqueo historico y roster explicito. |
 | `test_season_validation.py` | Validacion de temporada, A/B oficial, jugadores y reglas. |

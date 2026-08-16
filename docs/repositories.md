@@ -373,3 +373,33 @@ Fase 6 puede disenar Supabase V2 contra conceptos, no contra llamadas dispersas:
 
 Fase 6 no debe empezar a borrar storage legacy. Debe disenar schema V2 y plan de
 compatibilidad usando esta matriz.
+
+## Estado Tras Fase 6
+
+Supabase V2 ya esta disenado como greenfield SQL-first en
+`supabase/v2/migrations` y documentado en `docs/supabase-v2.md`.
+
+Esto no cambia las implementaciones legacy:
+
+- `Legacy*Repository` sigue leyendo/escribiendo V1/settings/SQLite.
+- Streamlit no usa tablas V2 todavia.
+- No se hizo cutover ni migracion de datos.
+- Los future repositories V2 deberan implementar estos mismos `Protocol` contra
+  las tablas nuevas.
+
+Destino conceptual actualizado:
+
+- `SeasonRepository`: `seasons`, `season_config_versions`,
+  `season_archive_snapshots`.
+- `LeagueRepository`: `matchdays`, `matches`, `division_memberships`,
+  `matchday_snapshots`, `matchday_movements`.
+- `TrainerRepository`: `trainers`, `season_players`, `trainer_flags`.
+- `ShopRepository`: `shop_items`, `shop_promotions`, `purchases`,
+  `redemptions`, `coin_transactions`.
+- `SaveRepository`: `save_files`, `parsed_saves`, current save en
+  `season_players`.
+- `TeamLockRepository`: `team_locks`.
+- `ActivityRepository`: `activity_events`.
+- `HallOfFameRepository`: `hall_of_fame_entries`.
+- `CompetitionRepository`: `cups`, `cup_participants`, `cup_matches`,
+  `cup_standings`, `trial_cases`, `trial_votes`, `penalties`.
