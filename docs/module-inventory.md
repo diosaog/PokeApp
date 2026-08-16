@@ -215,6 +215,7 @@ extraiga dominio o repositories.
 | Archivo | Tipo | Nota |
 | --- | --- | --- |
 | `validate_supabase_v2_schema.py` | VALIDATION | Ejecuta reset/build/rebuild real de Supabase V2 contra Postgres mediante `psql` y valida fixtures de schema/RLS. |
+| `validate_supabase_v2_rls.py` | VALIDATION | Valida Supabase V2 staging real con JWT Auth, PostgREST RLS y Storage `raw-saves`; requiere env local sin secretos commiteados. |
 
 ## Tests Actuales
 
@@ -225,6 +226,7 @@ extraiga dominio o repositories.
 | `test_domain_services.py` | Servicios puros de Fase 4: season, ranking, rewards, shop, flags, team locks, snapshots, activity, Hall/archive y juicios. |
 | `test_repositories.py` | Fase 5: dependency direction, mappings legacy, repos in-memory y application use cases. |
 | `test_supabase_v2_schema.py` | Fase 6: contrato estatico del schema V2, migrations, tablas, IDs, constraints y reset. |
+| `test_supabase_v2_rls_validator.py` | Fase 7.1: contrato estatico del validador real Supabase sin secretos. |
 | `test_shop_promotions.py` | Rebajas, exclusiones y rotacion. |
 | `test_season_config.py` | Versionado, permisos, bloqueo historico y roster explicito. |
 | `test_season_validation.py` | Validacion de temporada, A/B oficial, jugadores y reglas. |

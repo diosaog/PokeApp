@@ -283,6 +283,24 @@ Documento:
 
 - `docs/security-rls.md`
 
+## Fase 7.1 - Validacion Real En Supabase
+
+Estado 7.1:
+
+- `tools/validate_supabase_v2_rls.py` creado para validar una Supabase V2 staging
+  real con JWT reales y Storage real.
+- `.env.supabase-v2-rls.example` creado como plantilla sin secretos.
+- El validador cubre Auth users A/B/Admin/orphan, `auth.uid()`, mapping trainer,
+  vistas publicas/privadas, aislamiento ParsedSave/TeamLock/economia, activity
+  visibility, mutaciones directas bloqueadas, service role y bucket `raw-saves`.
+- No toca V1, no conecta Streamlit, no inicia React y no implementa API.
+- Ejecucion real pendiente hasta tener URL/anon key/service role key de un
+  proyecto Supabase V2 staging limpio.
+
+Regla:
+
+- No empezar Fase 8 hasta que Fase 7.1 pase contra Supabase real.
+
 ## Fase 8 - API
 
 API pequena para operaciones criticas:

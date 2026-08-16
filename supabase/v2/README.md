@@ -241,3 +241,33 @@ py tools\validate_supabase_v2_schema.py `
 La base debe llamarse `pokeapp_v2_validation` o empezar por ese prefijo. El
 validador se niega a usar otros nombres porque ejecuta el reset destructivo de
 desarrollo.
+
+## Validacion Real En Supabase Staging
+
+Despues de crear una Supabase V2 limpia con `bootstrap.sql`, prepara un archivo
+local no commiteado:
+
+```powershell
+Copy-Item .env.supabase-v2-rls.example .env.supabase-v2-rls.local
+```
+
+Rellena:
+
+```text
+POKEAPP_V2_SUPABASE_URL
+POKEAPP_V2_SUPABASE_ANON_KEY
+POKEAPP_V2_SUPABASE_SERVICE_ROLE_KEY
+```
+
+Ejecuta:
+
+```powershell
+py tools\validate_supabase_v2_rls.py --env-file .env.supabase-v2-rls.local
+```
+
+El script crea usuarios Auth temporales, fixtures de Trainer A/B/Admin, valida
+JWT reales, vistas, RLS, escrituras bloqueadas y Storage `raw-saves`. Limpia los
+fixtures al terminar salvo que uses `--keep-fixtures`.
+
+No uses credenciales de V1. No pegues la service role key en frontend ni la
+commitees.

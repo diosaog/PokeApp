@@ -187,3 +187,67 @@ Pending before production cutover:
 - confirm `storage.objects` policies in Supabase storage;
 - set the real admin trainer row with `is_admin = true`;
 - keep the service role key exclusively server-side.
+
+## Real Supabase Validation
+
+Fase 7.1 adds an automated validator for a real clean Supabase staging project:
+
+```powershell
+py tools\validate_supabase_v2_rls.py --env-file .env.supabase-v2-rls.local
+```
+
+Local env template:
+
+```text
+.env.supabase-v2-rls.example
+```
+
+Required variables:
+
+- `POKEAPP_V2_SUPABASE_URL`
+- `POKEAPP_V2_SUPABASE_ANON_KEY`
+- `POKEAPP_V2_SUPABASE_SERVICE_ROLE_KEY`
+
+Optional:
+
+- `POKEAPP_V2_TEST_EMAIL_DOMAIN`
+
+The validator does not print passwords or tokens. It creates temporary Auth
+users and fixture rows with a unique `run_id`, runs real JWT requests through
+Supabase Auth/PostgREST/Storage, and cleans up by default.
+
+Real test matrix covered by the validator:
+
+- Auth users: Trainer A, Trainer B, Admin and authenticated user without trainer.
+- `auth.uid()` through real JWT requests.
+- `current_trainer_id()` mapping for Trainer A/B.
+- `is_current_user_admin()` true only for Admin.
+- `anon` cannot read authenticated app projections.
+- `public_trainers` hides `auth_user_id`, `metadata` and `is_admin`.
+- Trainer A/B can read public league/shop surfaces.
+- Trainer A cannot read Trainer B save metadata, parsed saves, purchases,
+  redemptions, ledger rows or private TeamLock.
+- `public_team_locks` exposes public snapshots without private snapshot columns.
+- `current_team_locks` exposes private snapshot only to owner/admin.
+- public coin balance view exposes aggregate balances only.
+- Activity visibility: public + own owner events for normal trainers, admin sees
+  all.
+- Normal trainers cannot directly mutate matches, matchdays, official snapshots,
+  purchases, redemptions, coin ledger or promotion stock.
+- Admin can read private rows and update admin-managed season state.
+- Admin still cannot directly insert API-only economy rows such as
+  `coin_transactions` and `purchases`.
+- `service_role` can perform backend-only fixture operations.
+- `raw-saves` bucket is private.
+- Trainer A can upload/read only inside its own storage namespace.
+- Trainer A cannot upload/list/read Trainer B storage namespace.
+- Anon cannot read raw saves.
+- Service role can read backend storage objects.
+
+Status as of this checkpoint:
+
+- Validator implemented locally.
+- Real Supabase execution is pending because staging credentials are not present
+  in the Codex environment.
+- Do not mark Fase 7.1 as approved until this validator has passed against a
+  real clean Supabase staging project.

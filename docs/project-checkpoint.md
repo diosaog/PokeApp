@@ -20,8 +20,10 @@ Latest architecture state:
   reset/rebuild and fixture introspection.
 - Fase 7 closed: Supabase V2 RLS/security layer with identity helpers, safe
   projections, private storage policies and real PostgreSQL RLS validation.
+- Fase 7.1 tooling prepared: real Supabase JWT/Storage validator exists, but it
+  still needs a clean staging project and local credentials to run.
 - Runtime remains Streamlit legacy through wrappers.
-- Next exact phase: Fase 8 - API for critical operations.
+- Next exact phase: Fase 7.1 - run real Supabase staging validation.
 
 ## Current State
 
@@ -43,14 +45,18 @@ Closed phases:
 - Fase 6: Supabase V2 greenfield schema.
 - Fase 6.1: real Postgres validation of Supabase V2 SQL.
 - Fase 7: RLS and security.
+- Fase 7.1: real Supabase staging validation tooling prepared, execution
+  pending credentials.
 
 Validation at this checkpoint:
 
 - `py -m compileall -q .`
 - `py -m unittest discover -s tests`
 - `git diff --check`
+- `py tools\validate_supabase_v2_rls.py` without env fails safely and requests
+  staging credentials.
 
-Verified current suite after Fase 6: 108 tests.
+Verified current suite after Fase 7.1 tooling: 112 tests.
 
 ## What Works
 
@@ -156,6 +162,14 @@ Fase 7 secures that target:
 - `raw-saves` storage policies are prepared for Supabase storage paths by
   `trainer_id`.
 
+Fase 7.1 prepares real staging validation:
+
+- `tools/validate_supabase_v2_rls.py` validates Supabase Auth JWTs, PostgREST
+  RLS and Storage policies against a real staging project.
+- `.env.supabase-v2-rls.example` documents required credentials without secrets.
+- Execution is pending because no staging Supabase URL/anon/service-role keys are
+  present in this workspace.
+
 Persistence:
 
 - Supabase is the remote store when configured.
@@ -181,11 +195,11 @@ Persistence:
 Next exact phase:
 
 ```text
-Fase 8 - API for critical operations
+Fase 7.1 - run real Supabase staging validation
 ```
 
-Do not start React before API boundaries exist for writes. Do not cut over
-Streamlit or delete V1 without explicit approval.
+Do not start Fase 8 before Fase 7.1 passes against real Supabase staging. Do not
+cut over Streamlit or delete V1 without explicit approval.
 
 ## Do Not Do When Resuming
 
@@ -205,6 +219,7 @@ Streamlit or delete V1 without explicit approval.
 - Fase 5: repositories. Closed.
 - Fase 6: Supabase V2 greenfield schema. Closed.
 - Fase 7: RLS and security. Closed.
+- Fase 7.1: real Supabase staging validation. Tooling ready, execution pending.
 - Fase 8: API for critical operations.
 - Fase 9: parser boundary.
 - Fase 10: React / Cloudflare frontend.
