@@ -490,12 +490,12 @@ Pendiente de Supabase real antes de cutover:
 
 Estado staging real actual:
 
-- Proyecto `Pokeapp 2.0` tiene migrations 010, 011, 012 y 014 aplicadas desde el
-  conector Supabase.
+- Proyecto `Pokeapp 2.0` tiene migrations 010, 011, 012, 013 y 014 aplicadas
+  desde el conector Supabase.
 - Checks SQL reales confirmaron 32 tablas publicas, 32 con RLS, 82 policies
   publicas, 37 vistas y 37 vistas con `security_invoker`.
-- Migration 013 sigue pendiente en staging porque el conector rechaza DDL sobre
-  `storage.objects`; debe ejecutarse desde SQL Editor.
+- Migration 013 ya está aplicada en staging con policies Cloud-safe sobre
+  `storage.objects`.
 - El validador JWT/Storage completo sigue pendiente de service-role key local.
 
 ## Decision Log

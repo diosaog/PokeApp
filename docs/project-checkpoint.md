@@ -22,11 +22,12 @@ Latest architecture state:
   projections, private storage policies and real PostgreSQL RLS validation.
 - Fase 7.1 in progress: real Supabase staging `Pokeapp 2.0` has public RLS and
   safe views applied. Full JWT/Storage validator still needs service-role
-  credentials and Storage policies applied through SQL Editor.
-- Fase 7.2 in progress: Storage compatibility fix is making `013_storage_policies`
-  Cloud-safe and idempotent.
+  credentials in this workspace.
+- Fase 7.2 closed: `013_storage_policies` is Cloud-safe, idempotent and already
+  applied in the real Supabase staging project.
 - Runtime remains Streamlit legacy through wrappers.
-- Next exact phase: Fase 7.2 - finish Storage compatibility, then rerun real staging validation.
+- Next exact phase: finish the real staging validator once the local env file
+  has the staging credentials.
 
 ## Current State
 
@@ -174,8 +175,8 @@ Fase 7.1 prepares and starts real staging validation:
   applied through the Supabase connector.
 - SQL-level checks confirmed 32 public tables, 32 RLS-enabled public tables, 82
   public policies, 37 safe views and 37 `security_invoker` views.
-- Storage migration 013 is pending in staging because the Supabase connector
-  rejects DDL on `storage.objects`; run it from Supabase SQL Editor.
+- Storage migration 013 is now policy-only, Cloud-safe and already applied in
+  staging.
 - Full validator execution is pending because the service-role key is not present
   in this workspace.
 
@@ -230,7 +231,7 @@ cut over Streamlit or delete V1 without explicit approval.
 - Fase 7: RLS and security. Closed.
 - Fase 7.1: real Supabase staging validation. SQL-level checks partially passed;
   full JWT/Storage execution pending.
-- Fase 7.2: Supabase Storage compatibility fix in progress.
+- Fase 7.2: Supabase Storage compatibility fix completed and applied.
 - Fase 8: API for critical operations.
 - Fase 9: parser boundary.
 - Fase 10: React / Cloudflare frontend.

@@ -255,8 +255,8 @@ Status as of this checkpoint:
   views applied through migrations 010, 011, 012 and 014.
 - SQL-level staging checks confirmed 32 public tables, 32 RLS-enabled public
   tables, 82 public policies, 37 views and 37 `security_invoker` views.
-- Storage policies from 013 are still pending in staging because the connector
-  rejects DDL on `storage.objects`.
+- Storage policies from 013 are now policy-only, Cloud-safe and already applied
+  in the real staging project.
 - Full real validator execution is pending because the service-role key is not
   present in the Codex environment.
 - Do not mark Fase 7.1 as approved until this validator has passed against a
