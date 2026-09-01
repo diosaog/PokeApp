@@ -126,8 +126,8 @@ La tabla `save_files` guarda metadatos y rutas; los bytes reales van al bucket.
 
 `bootstrap.sql` incluye el bloque Supabase de `009_seed.sql` que intenta crear o
 actualizar el bucket si existe el schema `storage`. Tambien incluye
-`013_storage_policies.sql`, que protege `storage.objects` cuando Supabase expone
-esa tabla:
+`013_storage_policies.sql`, que protege `storage.objects` con policies
+compatibles con Supabase Cloud y no toca ownership ni el RLS base de Storage:
 
 ```sql
 select id, name, public
@@ -136,12 +136,6 @@ where id = 'raw-saves';
 ```
 
 En Supabase real deberia devolver una fila con `public = false`.
-
-Nota operativa: el conector MCP de Supabase puede rechazar DDL sobre
-`storage.objects` con `INVALID_ARGUMENT`. Si ocurre en una base ya creada, abre
-el SQL Editor de Supabase y ejecuta manualmente
-`supabase/v2/migrations/013_storage_policies.sql`. En una base vacia,
-`bootstrap.sql` ya incluye ese bloque.
 
 Si Supabase bloquease esa insercion por permisos del proyecto, crea el bucket a
 mano:

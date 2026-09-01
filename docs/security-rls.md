@@ -146,12 +146,9 @@ Bucket:
 - private (`public = false`)
 
 Migration `009_seed.sql` creates or updates the bucket when Supabase `storage`
-schema exists. Migration `013_storage_policies.sql` adds storage object policies
-when `storage.objects` exists.
-
-Operational note: the Supabase MCP connector can reject DDL against
-`storage.objects` with `INVALID_ARGUMENT`. If that happens, run
-`supabase/v2/migrations/013_storage_policies.sql` from the Supabase SQL Editor.
+schema exists. Migration `013_storage_policies.sql` is policy-only and
+compatible with Supabase Cloud; it does not try to change ownership or toggle
+RLS on `storage.objects`.
 
 Path convention:
 

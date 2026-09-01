@@ -2562,6 +2562,7 @@ commit;
 -- ============================================================================
 -- PokeApp Supabase V2 security layer.
 -- 013_storage_policies: private raw-saves bucket access rules.
+-- Supabase Cloud already owns storage.objects; keep this migration policy-only.
 
 begin;
 
@@ -2573,24 +2574,16 @@ begin
     where table_schema = 'storage'
       and table_name = 'objects'
   ) then
-    execute 'alter table storage.objects enable row level security';
-
-    if exists (select 1 from pg_roles where rolname = 'anon') then
-      execute 'revoke all on table storage.objects from anon';
-    end if;
-
-    if exists (select 1 from pg_roles where rolname = 'authenticated') then
-      execute 'grant select, insert, update, delete on table storage.objects to authenticated';
-    end if;
-
-    if exists (select 1 from pg_roles where rolname = 'service_role') then
-      execute 'grant all privileges on table storage.objects to service_role';
-    end if;
+    execute 'drop policy if exists raw_saves_select_own_or_admin on storage.objects';
+    execute 'drop policy if exists raw_saves_insert_own_or_admin on storage.objects';
+    execute 'drop policy if exists raw_saves_update_own_or_admin on storage.objects';
+    execute 'drop policy if exists raw_saves_delete_own_or_admin on storage.objects';
 
     execute $policy$
       create policy raw_saves_select_own_or_admin
       on storage.objects
       for select
+      to authenticated
       using (
         bucket_id = 'raw-saves'
         and (
@@ -2604,6 +2597,7 @@ begin
       create policy raw_saves_insert_own_or_admin
       on storage.objects
       for insert
+      to authenticated
       with check (
         bucket_id = 'raw-saves'
         and (
@@ -2617,6 +2611,7 @@ begin
       create policy raw_saves_update_own_or_admin
       on storage.objects
       for update
+      to authenticated
       using (
         bucket_id = 'raw-saves'
         and (
@@ -2637,6 +2632,7 @@ begin
       create policy raw_saves_delete_own_or_admin
       on storage.objects
       for delete
+      to authenticated
       using (
         bucket_id = 'raw-saves'
         and (

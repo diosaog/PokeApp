@@ -278,7 +278,8 @@ Fase 7 materializo esta clasificacion en SQL:
   el cliente autenticado. Estas vistas usan `security_invoker` para aplicar la
   RLS del usuario que consulta.
 - `013_storage_policies.sql` protege `storage.objects` para el bucket privado
-  `raw-saves` con rutas por `trainer_id`.
+  `raw-saves` con rutas por `trainer_id` y ya no intenta cambiar ownership ni
+  activar RLS de Storage.
 - `014_security_invoker_hardening.sql` corrige instalaciones que ya aplicaron
   012 antes del endurecimiento, reafirma `security_invoker` y revoca `anon` de
   los helpers de identidad.

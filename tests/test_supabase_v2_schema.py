@@ -177,6 +177,34 @@ class SupabaseV2SchemaTests(unittest.TestCase):
         self.assertIn("'chapa_dorada'", sql)
         self.assertIn('"promotion_blocked": true', sql)
 
+    def test_storage_policies_are_policy_only_and_cloud_compatible(self) -> None:
+        storage_sql = (V2_DIR / "migrations/013_storage_policies.sql").read_text(encoding="utf-8").lower()
+        bootstrap = BOOTSTRAP_SQL.read_text(encoding="utf-8").lower()
+
+        for token in [
+            "drop policy if exists raw_saves_select_own_or_admin on storage.objects",
+            "drop policy if exists raw_saves_insert_own_or_admin on storage.objects",
+            "drop policy if exists raw_saves_update_own_or_admin on storage.objects",
+            "drop policy if exists raw_saves_delete_own_or_admin on storage.objects",
+            "create policy raw_saves_select_own_or_admin",
+            "create policy raw_saves_insert_own_or_admin",
+            "create policy raw_saves_update_own_or_admin",
+            "create policy raw_saves_delete_own_or_admin",
+            "to authenticated",
+            "bucket_id = 'raw-saves'",
+        ]:
+            self.assertIn(token, storage_sql)
+            self.assertIn(token, bootstrap)
+
+        for token in [
+            "alter table storage.objects enable row level security",
+            "grant select, insert, update, delete on table storage.objects",
+            "grant all privileges on table storage.objects",
+            "revoke all on table storage.objects from anon",
+        ]:
+            self.assertNotIn(token, storage_sql)
+            self.assertNotIn(token, bootstrap)
+
     def test_reset_dev_is_destructive_and_separate(self) -> None:
         reset = (V2_DIR / "reset_dev.sql").read_text(encoding="utf-8").lower()
 
@@ -224,7 +252,7 @@ class SupabaseV2SchemaTests(unittest.TestCase):
         for table in sorted(tables):
             self.assertIn(f"'{table}'", security_sql, table)
 
-        self.assertEqual(security_sql.count("enable row level security"), 2)
+        self.assertEqual(security_sql.count("enable row level security"), 1)
         self.assertIn("alter table public.%i enable row level security", security_sql)
 
 

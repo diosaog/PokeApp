@@ -275,7 +275,8 @@ Estado 7:
 - Saves, parsed saves, compras, redenciones y ledger detallado son owner/admin.
 - Escrituras criticas quedan server/API only para Fase 8.
 - Bucket `raw-saves` privado con policies sobre `storage.objects` cuando existe
-  Supabase Storage.
+  Supabase Storage, sin cambios de ownership ni `ALTER TABLE` sobre Storage en
+  Cloud.
 - Validado contra PostgreSQL 17.11 real con roles mock de Supabase y fixtures
   RLS.
 

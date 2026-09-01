@@ -23,8 +23,10 @@ Latest architecture state:
 - Fase 7.1 in progress: real Supabase staging `Pokeapp 2.0` has public RLS and
   safe views applied. Full JWT/Storage validator still needs service-role
   credentials and Storage policies applied through SQL Editor.
+- Fase 7.2 in progress: Storage compatibility fix is making `013_storage_policies`
+  Cloud-safe and idempotent.
 - Runtime remains Streamlit legacy through wrappers.
-- Next exact phase: Fase 7.1 - run real Supabase staging validation.
+- Next exact phase: Fase 7.2 - finish Storage compatibility, then rerun real staging validation.
 
 ## Current State
 
@@ -228,6 +230,7 @@ cut over Streamlit or delete V1 without explicit approval.
 - Fase 7: RLS and security. Closed.
 - Fase 7.1: real Supabase staging validation. SQL-level checks partially passed;
   full JWT/Storage execution pending.
+- Fase 7.2: Supabase Storage compatibility fix in progress.
 - Fase 8: API for critical operations.
 - Fase 9: parser boundary.
 - Fase 10: React / Cloudflare frontend.
