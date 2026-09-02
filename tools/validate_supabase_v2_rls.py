@@ -142,7 +142,8 @@ class SupabaseHttp:
         )
 
     def rpc(self, name: str, *, auth: str) -> Any:
-        result = self.rest("POST", f"rpc/{name}", auth=auth, body={})
+        url = f"{self.rest_url}/rpc/{urllib.parse.quote(name, safe='')}"
+        result = self.request("POST", url, auth=auth, body={})
         return result.data
 
     def auth_create_user(self, email: str, password: str) -> str:

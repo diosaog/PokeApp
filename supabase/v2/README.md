@@ -127,7 +127,12 @@ La tabla `save_files` guarda metadatos y rutas; los bytes reales van al bucket.
 `bootstrap.sql` incluye el bloque Supabase de `009_seed.sql` que intenta crear o
 actualizar el bucket si existe el schema `storage`. Tambien incluye
 `013_storage_policies.sql`, que protege `storage.objects` con policies
-compatibles con Supabase Cloud y no toca ownership ni el RLS base de Storage:
+compatibles con Supabase Cloud y no toca ownership ni el RLS base de Storage.
+Las migrations `015_public_trainers_visibility.sql`,
+`016_public_team_locks_visibility.sql`,
+`017_public_coin_balances_visibility.sql` y
+`018_public_views_visibility.sql` reabren de forma segura las proyecciones
+públicas que el validador necesita:
 
 ```sql
 select id, name, public
@@ -165,9 +170,9 @@ comportamiento de la app. La migracion/cutover real se decidira mas adelante.
 
 ## F) RLS
 
-Despues de ejecutar `bootstrap.sql`, las tablas V2 ya tienen RLS activo y vistas
-seguras con `security_invoker`, para que se aplique la RLS del usuario que
-consulta.
+Despues de ejecutar `bootstrap.sql`, las tablas V2 ya tienen RLS activo.
+Las vistas privadas usan `security_invoker` y las proyecciones publicas se
+mantienen legibles sin abrir las tablas privadas.
 
 Modelo resumido:
 
@@ -206,8 +211,12 @@ Orden oficial de migrations:
 12. `012_security_views.sql`
 13. `013_storage_policies.sql`
 14. `014_security_invoker_hardening.sql`
+15. `015_public_trainers_visibility.sql`
+16. `016_public_team_locks_visibility.sql`
+17. `017_public_coin_balances_visibility.sql`
+18. `018_public_views_visibility.sql`
 
-Si cambia alguna migration 001-014, regenera el bootstrap:
+Si cambia alguna migration 001-018, regenera el bootstrap:
 
 ```powershell
 py tools\generate_supabase_v2_bootstrap.py

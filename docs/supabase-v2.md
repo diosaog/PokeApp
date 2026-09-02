@@ -275,14 +275,19 @@ Fase 7 materializo esta clasificacion en SQL:
 - `011_rls_policies.sql` activa RLS en las 32 tablas V2, revoca acceso anon y
   aplica policies de owner/admin/default-deny.
 - `012_security_views.sql` crea las vistas `public_*` y `current_*` que debe usar
-  el cliente autenticado. Estas vistas usan `security_invoker` para aplicar la
-  RLS del usuario que consulta.
+  el cliente autenticado. Las vistas `current_*` usan `security_invoker`; las
+  proyecciones `public_*` se reabren como vistas seguras donde hace falta para
+  mantener visibles los listados públicos.
 - `013_storage_policies.sql` protege `storage.objects` para el bucket privado
   `raw-saves` con rutas por `trainer_id` y ya no intenta cambiar ownership ni
   activar RLS de Storage.
 - `014_security_invoker_hardening.sql` corrige instalaciones que ya aplicaron
-  012 antes del endurecimiento, reafirma `security_invoker` y revoca `anon` de
-  los helpers de identidad.
+  012 antes del endurecimiento, reafirma `security_invoker` en las vistas
+  privadas y revoca `anon` de los helpers de identidad.
+- `015_public_trainers_visibility.sql`, `016_public_team_locks_visibility.sql`,
+  `017_public_coin_balances_visibility.sql` y `018_public_views_visibility.sql`
+  hacen visibles las proyecciones públicas necesarias sin abrir las tablas
+  privadas.
 
 Regla operativa:
 
@@ -375,7 +380,7 @@ Validacion incluida:
   IDs, season scoping, constraints criticas, ausencia de blobs V1 y reset
   destructivo separado.
 - `tools/validate_supabase_v2_schema.py` ejecuta validacion real contra Postgres:
-  reset V2, migrations 001-014, seed idempotente, reset, rebuild, fixtures de
+  reset V2, migrations 001-018, seed idempotente, reset, rebuild, fixtures de
   introspeccion/constraints y checks RLS con roles tipo Supabase.
 
 ### Real Database Validation
@@ -467,7 +472,7 @@ Fase 7 se valido en PostgreSQL 17.11 local aislado usando roles mock de Supabase
 
 Resultado:
 
-- migrations 001-014 aplican en orden;
+- migrations 001-018 aplican en orden;
 - `bootstrap.sql` se regenera desde las mismas migrations;
 - RLS queda activo en las 32 tablas publicas V2;
 - un entrenador autenticado ve sus filas privadas de saves, parsed saves,
@@ -490,13 +495,14 @@ Pendiente de Supabase real antes de cutover:
 
 Estado staging real actual:
 
-- Proyecto `Pokeapp 2.0` tiene migrations 010, 011, 012, 013 y 014 aplicadas
-  desde el conector Supabase.
+- Proyecto `Pokeapp 2.0` tiene migrations 010, 011, 012, 013, 014, 015, 016,
+  017 y 018 aplicadas desde el conector Supabase.
 - Checks SQL reales confirmaron 32 tablas publicas, 32 con RLS, 82 policies
-  publicas, 37 vistas y 37 vistas con `security_invoker`.
+  publicas, 37 vistas, 13 vistas con `security_invoker` y 24 proyecciones
+  publicas seguras con `security_definer`.
 - Migration 013 ya está aplicada en staging con policies Cloud-safe sobre
   `storage.objects`.
-- El validador JWT/Storage completo sigue pendiente de service-role key local.
+- El validador JWT/Storage completo ya pasó contra el staging real.
 
 ## Decision Log
 

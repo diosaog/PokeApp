@@ -42,6 +42,10 @@ class SupabaseV2SchemaTests(unittest.TestCase):
                 "012_security_views.sql",
                 "013_storage_policies.sql",
                 "014_security_invoker_hardening.sql",
+                "015_public_trainers_visibility.sql",
+                "016_public_team_locks_visibility.sql",
+                "017_public_coin_balances_visibility.sql",
+                "018_public_views_visibility.sql",
             ],
         )
         for path in _migration_files():
@@ -205,6 +209,30 @@ class SupabaseV2SchemaTests(unittest.TestCase):
             self.assertNotIn(token, storage_sql)
             self.assertNotIn(token, bootstrap)
 
+    def test_public_trainers_is_published_as_the_public_exception(self) -> None:
+        bootstrap = BOOTSTRAP_SQL.read_text(encoding="utf-8").lower()
+
+        self.assertIn("alter view public.public_trainers", bootstrap)
+        self.assertIn("security_invoker = false", bootstrap)
+        self.assertIn("security_barrier = true", bootstrap)
+        self.assertNotIn("alter view public.public_trainers set (security_invoker = true", bootstrap)
+
+    def test_public_team_locks_is_published_as_the_public_exception(self) -> None:
+        bootstrap = BOOTSTRAP_SQL.read_text(encoding="utf-8").lower()
+
+        self.assertIn("alter view public.public_team_locks", bootstrap)
+        self.assertIn("security_invoker = false", bootstrap)
+        self.assertIn("security_barrier = true", bootstrap)
+        self.assertNotIn("alter view public.public_team_locks set (security_invoker = true", bootstrap)
+
+    def test_public_coin_balances_is_published_as_the_public_exception(self) -> None:
+        bootstrap = BOOTSTRAP_SQL.read_text(encoding="utf-8").lower()
+
+        self.assertIn("alter view public.public_coin_balances", bootstrap)
+        self.assertIn("security_invoker = false", bootstrap)
+        self.assertIn("security_barrier = true", bootstrap)
+        self.assertNotIn("alter view public.public_coin_balances set (security_invoker = true", bootstrap)
+
     def test_reset_dev_is_destructive_and_separate(self) -> None:
         reset = (V2_DIR / "reset_dev.sql").read_text(encoding="utf-8").lower()
 
@@ -226,7 +254,7 @@ class SupabaseV2SchemaTests(unittest.TestCase):
         self.assertTrue(bootstrap.startswith("-- ONLY FOR EMPTY POKEAPP V2 DATABASE."))
         self.assertEqual(bootstrap, render_bootstrap())
         self.assertIn(
-            "Source of truth: supabase/v2/migrations/001_core.sql through 014_security_invoker_hardening.sql",
+            "Source of truth: supabase/v2/migrations/001_core.sql through 018_public_views_visibility.sql",
             bootstrap,
         )
         self.assertNotIn("drop table", lowered)

@@ -20,14 +20,12 @@ Latest architecture state:
   reset/rebuild and fixture introspection.
 - Fase 7 closed: Supabase V2 RLS/security layer with identity helpers, safe
   projections, private storage policies and real PostgreSQL RLS validation.
-- Fase 7.1 in progress: real Supabase staging `Pokeapp 2.0` has public RLS and
-  safe views applied. Full JWT/Storage validator still needs service-role
-  credentials in this workspace.
+- Fase 7.1 closed: real Supabase staging validator passed against
+  `Pokeapp 2.0`.
 - Fase 7.2 closed: `013_storage_policies` is Cloud-safe, idempotent and already
   applied in the real Supabase staging project.
 - Runtime remains Streamlit legacy through wrappers.
-- Next exact phase: finish the real staging validator once the local env file
-  has the staging credentials.
+- Next exact phase: Fase 8 - API pequeña para operaciones criticas.
 
 ## Current State
 
@@ -171,14 +169,14 @@ Fase 7.1 prepares and starts real staging validation:
 - `tools/validate_supabase_v2_rls.py` validates Supabase Auth JWTs, PostgREST
   RLS and Storage policies against a real staging project.
 - `.env.supabase-v2-rls.example` documents required credentials without secrets.
-- Real staging project `Pokeapp 2.0` has migrations 010, 011, 012 and 014
-  applied through the Supabase connector.
+- Real staging project `Pokeapp 2.0` has migrations 010, 011, 012, 013, 014,
+  015, 016, 017 and 018 applied through the Supabase connector.
 - SQL-level checks confirmed 32 public tables, 32 RLS-enabled public tables, 82
-  public policies, 37 safe views and 37 `security_invoker` views.
+  public policies, 37 safe views, 13 `security_invoker` views and 24 public
+  definer projections.
 - Storage migration 013 is now policy-only, Cloud-safe and already applied in
   staging.
-- Full validator execution is pending because the service-role key is not present
-  in this workspace.
+- Full validator execution passed against the real staging project.
 
 Persistence:
 
@@ -229,8 +227,7 @@ cut over Streamlit or delete V1 without explicit approval.
 - Fase 5: repositories. Closed.
 - Fase 6: Supabase V2 greenfield schema. Closed.
 - Fase 7: RLS and security. Closed.
-- Fase 7.1: real Supabase staging validation. SQL-level checks partially passed;
-  full JWT/Storage execution pending.
+- Fase 7.1: real Supabase staging validation complete.
 - Fase 7.2: Supabase Storage compatibility fix completed and applied.
 - Fase 8: API for critical operations.
 - Fase 9: parser boundary.

@@ -45,8 +45,10 @@ Security notes:
 
 Use these views from the future frontend/API when possible:
 
-All client views use `security_invoker` plus `security_barrier`, so PostgreSQL
-applies the querying user's RLS instead of the view owner's privileges.
+Current/private client views use `security_invoker` plus `security_barrier`, so
+PostgreSQL applies the querying user's RLS instead of the view owner's
+privileges. Public projections are explicit safe exceptions that stay readable
+by design.
 
 - Public authenticated projections: `public_trainers`, `public_seasons`,
   `public_season_players`, `public_season_player_stats`,
@@ -62,6 +64,9 @@ applies the querying user's RLS instead of the view owner's privileges.
   `current_coin_transactions`, `current_save_files`, `current_parsed_saves`,
   `current_team_locks`, `current_activity_events`, `current_trial_cases`,
   `current_trial_votes`, `current_penalties`.
+
+Public projections stay safe by shape and are reopened with definer semantics
+where the validator and product need full public listing visibility.
 
 Important column protections:
 
@@ -172,7 +177,7 @@ cutover.
 
 Validated against PostgreSQL 17.11 local with Supabase role mocks:
 
-- migrations 001-014 apply in order;
+- migrations 001-018 apply in order;
 - `bootstrap.sql` applies as a single SQL Editor artifact;
 - reset/build/rebuild works;
 - all 32 public V2 tables have RLS enabled;
@@ -251,13 +256,13 @@ Real test matrix covered by the validator:
 Status as of this checkpoint:
 
 - Validator implemented locally.
-- Real Supabase staging `Pokeapp 2.0` has public RLS and `security_invoker`
-  views applied through migrations 010, 011, 012 and 014.
+- Real Supabase staging `Pokeapp 2.0` has migrations 010, 011, 012, 013, 014,
+  015, 016, 017 and 018 applied through the Supabase connector.
 - SQL-level staging checks confirmed 32 public tables, 32 RLS-enabled public
-  tables, 82 public policies, 37 views and 37 `security_invoker` views.
-- Storage policies from 013 are now policy-only, Cloud-safe and already applied
-  in the real staging project.
-- Full real validator execution is pending because the service-role key is not
-  present in the Codex environment.
+  tables, 82 public policies, 37 views, 13 `security_invoker` views and 24 safe
+  public definer views.
+- Storage policies from 013 are policy-only, Cloud-safe and already applied in
+  the real staging project.
+- The real validator already passed against the live staging project.
 - Do not mark Fase 7.1 as approved until this validator has passed against a
   real clean Supabase staging project.
