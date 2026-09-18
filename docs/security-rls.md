@@ -56,9 +56,34 @@ Provisioning is explicit and admin-only:
 
 The bridge distinguishes the normal Auth client from the privileged admin Auth
 client. `service_role` remains server-only and must not be exposed to frontend
-code. Phase 8B must add HTTP rate limiting before public PIN login is exposed;
-the rate limit must account for source IP, trainer/account identifier and time
-window instead of relying only on Supabase token endpoint limits.
+code. Phase 8B adds HTTP PIN-login rate limiting at the API boundary; the rate
+limit accounts for source IP, trainer/account identifier and time window instead
+of relying only on Supabase token endpoint limits.
+
+## Phase 8B HTTP Auth API
+
+FastAPI is the Python transport for the first API slice. It is isolated from the
+legacy Streamlit runtime and does not migrate business mutations yet.
+
+Public surface:
+
+- `GET /health`: unauthenticated minimal status only.
+- `POST /v1/auth/pin-login`: PIN in JSON body only; never query/path/header.
+- `POST /v1/auth/refresh`: refresh token in JSON body.
+- `GET /v1/me`: bearer access token required.
+
+Security behavior:
+
+- PIN login runs through a rate limiter before calling `PinAuthBridge`.
+- Normal login failures map to stable `401 INVALID_CREDENTIALS`, without
+  revealing trainer existence, disabled state, bad PIN or missing provisioning.
+- Refresh and bearer failures map to stable `401 INVALID_SESSION`, without
+  exposing Supabase exception text.
+- `/v1/me` never trusts an unverified JWT payload. It calls Supabase Auth
+  `get_user(access_token)` through a port/adapter and uses the verified user id.
+- `/v1/me` returns trainer id, display name, `is_admin` and `globally_enabled`
+  only. The client must not become the authority for admin decisions.
+- The API may use `service_role` only server-side for trainer lookup/mapping.
 
 ## Helper Functions
 

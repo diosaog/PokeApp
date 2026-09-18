@@ -24,8 +24,11 @@ Latest architecture state:
   `Pokeapp 2.0`.
 - Fase 7.2 closed: `013_storage_policies` is Cloud-safe, idempotent and already
   applied in the real Supabase staging project.
+- Fase 8A.1 closed: PIN UX to Supabase Auth identity bridge core.
+- Fase 8B closed: isolated FastAPI skeleton for health, PIN login, refresh and
+  `/v1/me` bearer identity lookup.
 - Runtime remains Streamlit legacy through wrappers.
-- Next exact phase: Fase 8 - API pequeña para operaciones criticas.
+- Next exact phase: Fase 8C - Team Lock V2 API mutation.
 
 ## Current State
 
@@ -50,6 +53,8 @@ Closed phases:
 - Fase 7.1: real Supabase staging validation complete; full JWT/PostgREST/
   Storage validator passed with `RESULT ok checks=13`.
 - Fase 7.2: Supabase Storage Cloud compatibility fix completed and applied.
+- Fase 8A.1: PIN auth bridge core.
+- Fase 8B: FastAPI skeleton, JWT verification and PIN-login rate limiting.
 
 Validation at this checkpoint:
 
@@ -59,7 +64,7 @@ Validation at this checkpoint:
 - `py tools\validate_supabase_v2_rls.py` passed against real staging with
   `RESULT ok checks=13`.
 
-Verified current suite after Fase 7.2 tooling: 117 tests.
+Verified current suite after Fase 8B tooling: 146 tests.
 
 ## What Works
 
@@ -98,6 +103,8 @@ Important layers:
 
 - `app/domain/*`: dependency-free contracts.
 - `app/domain/services/*`: pure business decisions.
+- `app/auth/*`: PIN UX to Supabase Auth identity bridge and provisioning core.
+- `app/api/*`: isolated FastAPI transport skeleton for Phase 8.
 - `app/repositories/*`: protocols, mappers, legacy repositories and in-memory
   fakes.
 - `app/application/*`: first small use cases coordinating repositories and
@@ -192,7 +199,8 @@ Persistence:
 - Many official entities still live in generic `settings` JSON.
 - Streamlit UI and business rules are still coupled in several modules.
 - Runtime Streamlit still uses legacy/V1 persistence; V2 is not connected yet.
-- API/RPC is not implemented yet; Fase 7 only defines database security.
+- Business mutation API/RPC is not implemented yet; Fase 8B only exposes auth
+  and identity endpoints.
 - ActivityEvents are stored in settings, not an append-only table.
 - Copa and Juicios are functional legacy islands and need contracts later.
 - Parser bridge is treated as a black box but not fully isolated.
@@ -205,12 +213,12 @@ Persistence:
 Next exact phase:
 
 ```text
-Fase 8A - authentication identity bridge design
+Fase 8C - Team Lock V2 API mutation
 ```
 
-Fase 7.1 and Fase 7.2 are closed. Start Fase 8 with authentication identity
-bridge design before implementing endpoints. Do not cut over Streamlit or delete
-V1 without explicit approval.
+Fase 7.1, Fase 7.2, Fase 8A.1 and Fase 8B are closed. Continue with Team Lock
+V2 API mutation design/implementation. Do not cut over Streamlit or delete V1
+without explicit approval.
 
 ## Do Not Do When Resuming
 
@@ -232,7 +240,10 @@ V1 without explicit approval.
 - Fase 7: RLS and security. Closed.
 - Fase 7.1: real Supabase staging validation complete.
 - Fase 7.2: Supabase Storage compatibility fix completed and applied.
-- Fase 8: API for critical operations.
+- Fase 8A.1: PIN auth bridge core. Closed.
+- Fase 8B: FastAPI skeleton, JWT verification and PIN-login rate limiting.
+  Closed.
+- Fase 8C: Team Lock V2 API mutation.
 - Fase 9: parser boundary.
 - Fase 10: React / Cloudflare frontend.
 - Fase 11: data migration.

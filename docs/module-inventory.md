@@ -37,6 +37,21 @@ extraiga dominio o repositories.
 | --- | --- | --- |
 | `events.py` | MIXED WRAPPER | Fase 5: API legacy igual para UI/hooks, pero carga/guardado interno pasa por `LegacyActivityRepository`. |
 
+## app/api
+
+| Modulo | Tipo | Nota |
+| --- | --- | --- |
+| `main.py` | API TRANSPORT | FastAPI app factory `create_app(...)` y `app` para Uvicorn; no arranca servidor en import. |
+| `config.py` | API CONFIG | Lee config server-side de Supabase/Auth/rate limit sin secretos hardcodeados. |
+| `schemas.py` | API DTO | Request/response models para health, PIN login, refresh y `/v1/me`. |
+| `errors.py` | API TRANSPORT | Mapeo HTTP-safe de errores auth a codigos publicos estables. |
+| `dependencies.py` | API WIRING | Contenedor inyectable para tests y wiring lazy de adapters reales. |
+| `security.py` | API SECURITY | Bearer auth; verifica tokens via puerto Supabase, no decodifica JWT localmente. |
+| `rate_limit.py` | API SECURITY | Rate limiter de ventana en memoria para dev/test; Phase 8B boundary anti brute-force. |
+| `supabase_repository.py` | API INFRA ADAPTER | Lookup/mapping server-side de trainers V2 usando service role en API. |
+| `routes/auth.py` | API ROUTES | `pin-login`, `refresh` y `/v1/me`; transporte fino sobre servicios/puertos. |
+| `routes/system.py` | API ROUTES | `GET /health` minimo y publico. |
+
 ## app/auth
 
 | Modulo | Tipo | Nota |
@@ -245,6 +260,7 @@ extraiga dominio o repositories.
 | `test_supabase_v2_schema.py` | Fase 6: contrato estatico del schema V2, migrations, tablas, IDs, constraints y reset. |
 | `test_supabase_v2_rls_validator.py` | Fase 7.1: contrato estatico del validador real Supabase sin secretos. |
 | `test_auth_bridge.py` | Fase 8A.1: credenciales HMAC, puente PIN -> Supabase Auth, provisioning mock y anti-leakage. |
+| `test_api_phase8b.py` | Fase 8B: FastAPI health/auth/refresh/me, bearer verification, rate limit y anti-leakage. |
 | `test_shop_promotions.py` | Rebajas, exclusiones y rotacion. |
 | `test_season_config.py` | Versionado, permisos, bloqueo historico y roster explicito. |
 | `test_season_validation.py` | Validacion de temporada, A/B oficial, jugadores y reglas. |

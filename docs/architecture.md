@@ -174,10 +174,32 @@ login actual sin usar el PIN como password real de Supabase:
   coincidir exactamente con `trainers.auth_user_id`.
 - El provisioning de Auth existe como servicio admin separado y nunca ocurre
   silenciosamente durante login.
-- No hay HTTP API todavia, no hay cutover de Streamlit y V2 no es source of
-  truth del runtime actual.
+- En Fase 8A.1 aun no habia HTTP API; no habia cutover de Streamlit y V2 no era
+  source of truth del runtime actual.
 - Antes de exponer login por HTTP en Fase 8B, la API debe aplicar rate limiting
   por IP, identificador de trainer y ventana temporal.
+
+Desde Fase 8B, existe el primer esqueleto HTTP en FastAPI, aislado del runtime
+Streamlit legacy:
+
+- `app/api/main.py` expone `create_app(...)` para tests/inyeccion y
+  `app = create_app()` para Uvicorn.
+- Ejecucion local prevista:
+
+```powershell
+uvicorn app.api.main:app --reload
+```
+
+- `GET /health` es publico y devuelve solo estado minimo.
+- `POST /v1/auth/pin-login` acepta trainer identifier + PIN solo en body, aplica
+  rate limit y delega en `PinAuthBridge`.
+- `POST /v1/auth/refresh` acepta refresh token en body y delega refresh a
+  Supabase Auth.
+- `GET /v1/me` exige `Authorization: Bearer <access_token>`, verifica el token
+  con Supabase Auth `get_user` a traves de adapter/puerto y resuelve el trainer.
+- Las rutas son transporte fino: no contienen reglas de negocio de Liga/Tienda.
+- Fase 8B no migra mutaciones de producto; la primera mutacion real queda para
+  Fase 8C: Team Lock V2.
 
 ## Problema Principal
 
