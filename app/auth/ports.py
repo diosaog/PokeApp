@@ -18,6 +18,16 @@ class SupabaseAuthPort(Protocol):
         ...
 
 
+class SupabaseSessionRefreshPort(Protocol):
+    def refresh_session(self, *, refresh_token: str) -> SupabaseAuthSession:
+        ...
+
+
+class SupabaseAccessTokenVerifierPort(Protocol):
+    def get_user(self, *, access_token: str) -> SupabaseAuthUser:
+        ...
+
+
 class SupabaseAdminAuthPort(Protocol):
     def create_user(self, *, email: str, password: str) -> SupabaseAuthUser:
         ...

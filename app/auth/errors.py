@@ -25,6 +25,14 @@ class InvalidCredentialsError(AuthError):
         super().__init__("Invalid credentials.")
 
 
+class InvalidSessionError(AuthError):
+    code = "INVALID_SESSION"
+    public_code = "INVALID_SESSION"
+
+    def __init__(self) -> None:
+        super().__init__("Invalid session.")
+
+
 class AuthNotProvisionedError(AuthError):
     code = "AUTH_NOT_PROVISIONED"
     public_code = "INVALID_CREDENTIALS"
