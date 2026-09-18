@@ -47,18 +47,19 @@ Closed phases:
 - Fase 6: Supabase V2 greenfield schema.
 - Fase 6.1: real Postgres validation of Supabase V2 SQL.
 - Fase 7: RLS and security.
-- Fase 7.1: real Supabase staging validation in progress; SQL-level public RLS
-  checks pass, full JWT/Storage execution pending credentials and Storage SQL.
+- Fase 7.1: real Supabase staging validation complete; full JWT/PostgREST/
+  Storage validator passed with `RESULT ok checks=13`.
+- Fase 7.2: Supabase Storage Cloud compatibility fix completed and applied.
 
 Validation at this checkpoint:
 
 - `py -m compileall -q .`
 - `py -m unittest discover -s tests`
 - `git diff --check`
-- `py tools\validate_supabase_v2_rls.py` without env fails safely and requests
-  staging credentials.
+- `py tools\validate_supabase_v2_rls.py` passed against real staging with
+  `RESULT ok checks=13`.
 
-Verified current suite after Fase 7.1 tooling: 112 tests.
+Verified current suite after Fase 7.2 tooling: 117 tests.
 
 ## What Works
 
@@ -164,7 +165,7 @@ Fase 7 secures that target:
 - `raw-saves` storage policies are prepared for Supabase storage paths by
   `trainer_id`.
 
-Fase 7.1 prepares and starts real staging validation:
+Fase 7.1 completed real staging validation:
 
 - `tools/validate_supabase_v2_rls.py` validates Supabase Auth JWTs, PostgREST
   RLS and Storage policies against a real staging project.
@@ -176,7 +177,8 @@ Fase 7.1 prepares and starts real staging validation:
   definer projections.
 - Storage migration 013 is now policy-only, Cloud-safe and already applied in
   staging.
-- Full validator execution passed against the real staging project.
+- Full validator execution passed against the real staging project with
+  `RESULT ok checks=13`.
 
 Persistence:
 
@@ -203,11 +205,12 @@ Persistence:
 Next exact phase:
 
 ```text
-Fase 7.1 - run real Supabase staging validation
+Fase 8A - authentication identity bridge design
 ```
 
-Do not start Fase 8 before Fase 7.1 passes against real Supabase staging. Do not
-cut over Streamlit or delete V1 without explicit approval.
+Fase 7.1 and Fase 7.2 are closed. Start Fase 8 with authentication identity
+bridge design before implementing endpoints. Do not cut over Streamlit or delete
+V1 without explicit approval.
 
 ## Do Not Do When Resuming
 

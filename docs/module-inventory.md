@@ -209,6 +209,10 @@ extraiga dominio o repositories.
 | `migrations/012_security_views.sql` | SQL V2 SECURITY | Proyecciones `public_*` y `current_*` para cliente autenticado. |
 | `migrations/013_storage_policies.sql` | SQL V2 SECURITY | Policies de `storage.objects` para bucket privado `raw-saves`. |
 | `migrations/014_security_invoker_hardening.sql` | SQL V2 SECURITY | Endurece vistas `security_invoker` y revoca acceso `anon` a helpers de identidad. |
+| `migrations/015_public_trainers_visibility.sql` | SQL V2 SECURITY | Reabre de forma segura `public_trainers` para listados autenticados. |
+| `migrations/016_public_team_locks_visibility.sql` | SQL V2 SECURITY | Reabre de forma segura `public_team_locks` sin exponer snapshots privados. |
+| `migrations/017_public_coin_balances_visibility.sql` | SQL V2 SECURITY | Reabre agregados publicos de balances sin exponer ledger privado. |
+| `migrations/018_public_views_visibility.sql` | SQL V2 SECURITY | Alinea visibilidad de proyecciones publicas necesarias tras el endurecimiento. |
 | `reset_dev.sql` | SQL V2 DESTRUCTIVE | Reset separado para development/staging. No production/V1. |
 
 ## tools

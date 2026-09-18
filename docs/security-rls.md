@@ -263,6 +263,8 @@ Status as of this checkpoint:
   public definer views.
 - Storage policies from 013 are policy-only, Cloud-safe and already applied in
   the real staging project.
-- The real validator already passed against the live staging project.
-- Do not mark Fase 7.1 as approved until this validator has passed against a
-  real clean Supabase staging project.
+- The real validator passed against the live staging project with
+  `RESULT ok checks=13`.
+- Fase 7.1 and Fase 7.2 are closed. Fase 8 is the next phase and must start
+  with the authentication identity bridge design; runtime remains Streamlit
+  legacy and Supabase V2 is not runtime source of truth yet.

@@ -37,6 +37,10 @@ supabase/v2/
     012_security_views.sql
     013_storage_policies.sql
     014_security_invoker_hardening.sql
+    015_public_trainers_visibility.sql
+    016_public_team_locks_visibility.sql
+    017_public_coin_balances_visibility.sql
+    018_public_views_visibility.sql
   reset_dev.sql
 ```
 
@@ -502,7 +506,11 @@ Estado staging real actual:
   publicas seguras con `security_definer`.
 - Migration 013 ya está aplicada en staging con policies Cloud-safe sobre
   `storage.objects`.
-- El validador JWT/Storage completo ya pasó contra el staging real.
+- El validador JWT/Storage completo ya pasó contra el staging real con
+  `RESULT ok checks=13`.
+- Fase 7.1 y Fase 7.2 quedan cerradas. Fase 8 es la siguiente fase; el runtime
+  sigue siendo Streamlit legacy, Supabase V2 todavia no es source of truth de
+  runtime y V1 no se ha eliminado.
 
 ## Decision Log
 
