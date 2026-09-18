@@ -135,7 +135,7 @@ Desde Fase 6, Supabase V2 queda disenado como greenfield SQL-first:
 - `docs/supabase-v2.md` documenta modelo, decisiones, RLS readiness, storage,
   delete policy, ledger y reset destructivo.
 - No hay cutover, no se borra V1 y el runtime Streamlit sigue usando legacy.
-- La siguiente fase debe ser RLS/seguridad sobre este modelo, antes de API/React.
+- La fase siguiente fue RLS/seguridad sobre este modelo, antes de API/React.
 
 Desde Fase 6.1, ese SQL se ha ejecutado contra PostgreSQL 17.11 local aislado:
 
@@ -158,6 +158,26 @@ Desde Fase 7, Supabase V2 tiene una capa de seguridad real:
   Supabase Storage.
 - Compras, ledger, redenciones, parsed saves, team locks y activity events
   siguen esperando API/RPC server-side en Fase 8.
+
+Desde Fase 8A.1, existe el nucleo del puente de identidad para mantener la UX de
+login actual sin usar el PIN como password real de Supabase:
+
+- La experiencia de producto sigue siendo entrenador + PIN.
+- El PIN se trata como string y conserva ceros iniciales.
+- `app/auth/credentials.py` deriva una password interna con HMAC-SHA256,
+  `POKEAPP_AUTH_PIN_PEPPER` server-only y contexto `pokeapp-v2-auth`.
+- El identificador interno de Supabase Auth es deterministico y sale del UUID
+  estable del trainer: `trainer-<uuid>@auth.pokeapp.invalid`.
+- `app/auth/service.py` exige que el trainer exista, este habilitado y ya tenga
+  `trainers.auth_user_id` provisionado antes de iniciar sesion.
+- Supabase Auth sigue siendo quien emite la sesion real; el `sub` del JWT debe
+  coincidir exactamente con `trainers.auth_user_id`.
+- El provisioning de Auth existe como servicio admin separado y nunca ocurre
+  silenciosamente durante login.
+- No hay HTTP API todavia, no hay cutover de Streamlit y V2 no es source of
+  truth del runtime actual.
+- Antes de exponer login por HTTP en Fase 8B, la API debe aplicar rate limiting
+  por IP, identificador de trainer y ventana temporal.
 
 ## Problema Principal
 

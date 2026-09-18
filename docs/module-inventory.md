@@ -37,6 +37,18 @@ extraiga dominio o repositories.
 | --- | --- | --- |
 | `events.py` | MIXED WRAPPER | Fase 5: API legacy igual para UI/hooks, pero carga/guardado interno pasa por `LegacyActivityRepository`. |
 
+## app/auth
+
+| Modulo | Tipo | Nota |
+| --- | --- | --- |
+| `credentials.py` | AUTH PURE | Derivacion HMAC-SHA256 de password interna y email sintetico desde UUID estable del trainer. |
+| `config.py` | AUTH CONFIG | Lectura explicita de `POKEAPP_AUTH_PIN_PEPPER`; falla cerrado si falta. |
+| `models.py` | AUTH CONTRACT | Contratos inmutables para identidad auth, sesion Supabase y resultado de provisioning sin exponer secretos en repr. |
+| `errors.py` | AUTH CONTRACT | Errores tipados para login, provisioning, mismatch de identidad y configuracion. |
+| `ports.py` | AUTH PORTS | Protocolos para lookup/mapping de trainer y operaciones Supabase Auth normal/admin. |
+| `service.py` | AUTH APPLICATION | `PinAuthBridge` y provisioning admin-only; no toca Streamlit ni provisiona real por si solo. |
+| `supabase_adapter.py` | AUTH INFRA ADAPTER | Adapter lazy para Supabase Python client existente: sign-in password y create-user admin. |
+
 ## app/domain
 
 | Modulo | Tipo | Nota |
@@ -232,6 +244,7 @@ extraiga dominio o repositories.
 | `test_repositories.py` | Fase 5: dependency direction, mappings legacy, repos in-memory y application use cases. |
 | `test_supabase_v2_schema.py` | Fase 6: contrato estatico del schema V2, migrations, tablas, IDs, constraints y reset. |
 | `test_supabase_v2_rls_validator.py` | Fase 7.1: contrato estatico del validador real Supabase sin secretos. |
+| `test_auth_bridge.py` | Fase 8A.1: credenciales HMAC, puente PIN -> Supabase Auth, provisioning mock y anti-leakage. |
 | `test_shop_promotions.py` | Rebajas, exclusiones y rotacion. |
 | `test_season_config.py` | Versionado, permisos, bloqueo historico y roster explicito. |
 | `test_season_validation.py` | Validacion de temporada, A/B oficial, jugadores y reglas. |

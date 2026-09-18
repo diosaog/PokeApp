@@ -1,6 +1,6 @@
 # Supabase V2 Security And RLS
 
-Checkpoint: Fase 7.
+Checkpoint: Fase 8A.1.
 
 This document is the security contract for the greenfield Supabase V2 schema. It
 does not connect Streamlit, React or API runtime yet. It defines what the future
@@ -21,6 +21,44 @@ client/API may read or mutate.
   `display_name`, `slug` or the name Anto.
 - Trainer identity is explicit: `trainers.auth_user_id` maps Supabase Auth users
   to PokeApp trainers.
+
+## PIN Auth Bridge
+
+PokeApp keeps the existing login UX: trainer + PIN. The PIN is not the Supabase
+Auth password and is never stored by the new auth bridge.
+
+The server-side bridge derives the hidden Supabase credential with HMAC-SHA256:
+
+- pepper: `POKEAPP_AUTH_PIN_PEPPER`, server-only, never committed and never
+  logged;
+- context/domain separator: `pokeapp-v2-auth`;
+- identity anchor: stable trainer UUID, not display name, slug, email or PIN;
+- PIN input: string, preserving leading zeros.
+
+The synthetic Supabase Auth email is deterministic and non-deliverable:
+
+```text
+trainer-<trainer_uuid>@auth.pokeapp.invalid
+```
+
+Login requires an already provisioned trainer row. If `trainers.auth_user_id` is
+missing, login fails with an internal `AUTH_NOT_PROVISIONED` category; the future
+HTTP layer must still map normal public failures to generic
+`INVALID_CREDENTIALS` semantics to avoid account enumeration.
+
+Provisioning is explicit and admin-only:
+
+- create the Supabase Auth user server-side with the derived hidden credential;
+- persist the created Auth UUID to `trainers.auth_user_id`;
+- verify the mapping;
+- if Auth creation succeeds but DB mapping fails, surface a recoverable partial
+  provisioning error for operator repair.
+
+The bridge distinguishes the normal Auth client from the privileged admin Auth
+client. `service_role` remains server-only and must not be exposed to frontend
+code. Phase 8B must add HTTP rate limiting before public PIN login is exposed;
+the rate limit must account for source IP, trainer/account identifier and time
+window instead of relying only on Supabase token endpoint limits.
 
 ## Helper Functions
 
