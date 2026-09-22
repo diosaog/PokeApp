@@ -32,9 +32,9 @@ Latest architecture state:
 - Fase 8C DONE local + Supabase V2 staging validated: self-service Team Lock
   API, authoritative ParsedSave snapshots and atomic lock/activity RPC in 019.
 - Runtime remains Streamlit legacy through wrappers.
-- Phase 8D legacy audit complete; implementation BLOCKED on the V2 current-
-  jornada/store-ban contract. Next: Phase 8D.0 to settle that contract, preserving
-  legacy eligibility. No purchase API or migration 020 was created.
+- Phase 8D.0 contract approved and DONE local: migration 020, explicit same-season
+  current-matchday pointer and typed inclusive Store Ban windows. Staging pending.
+  The historical audit blocker is resolved. Purchase/021 not yet implemented.
   Evidence and recommendation: [Phase 8D audit](phase8d-purchases.md).
 
 ## Current State
@@ -73,7 +73,7 @@ Historical staging validation (Phase 7, not rerun in this task):
 - `py tools\validate_supabase_v2_rls.py` passed against real staging with
   `RESULT ok checks=13`.
 
-Current validation: 208 tests passed, zero failed/skipped, using
+Current validation: 224 tests passed, zero failed/skipped, using
 `.venv-api\Scripts\python.exe tools/run_unit_tests.py`. Compileall and diff-check
 passed. PostgreSQL 17.11 local passed both migrations 001-019 and bootstrap,
 including real RPC replacement, dedupe, rollback, roles and concurrent writes.

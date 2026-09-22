@@ -115,10 +115,11 @@ Direct UPDATE can return HTTP 200 with zero rows under RLS; the validator also
 verifies unchanged stored rows. No policies were relaxed. Forced post-write
 rollback is local-only. See [Phase 8C report](phase8c-team-lock.md).
 
-The subsequent 8D legacy audit is blocked before implementation: current-jornada
-and store-ban eligibility lack an executable V2 contract. Do not substitute
-"active participant + enough coins" for all legacy permissions or bypass store
-sanctions. No purchase write policies/RPC were added. [Audit](phase8d-purchases.md).
+Approved 8D.0 resolves the shop-eligibility blocker. Migration 020 adds the
+explicit same-season current pointer and typed ban windows, plus backend-only
+SECURITY INVOKER helpers with fixed search_path. NULL/cancelled pointer fails
+closed; resolved cases and inclusive/missing-window semantics govern bans.
+No existing RLS is relaxed. DONE local; staging pending. [Contract](phase8d-purchases.md).
 
 ## Helper Functions
 

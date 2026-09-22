@@ -1070,6 +1070,11 @@ def main() -> int:
     _psql(args, ROOT / "supabase/v2/migrations/019_team_lock_api.sql")
     _validate_team_lock_api(args)
 
+    print("== Current jornada / store-ban contract ==")
+    _psql(args, ROOT / "supabase/v2/migrations/020_current_matchday_store_ban_contract.sql")
+    _psql_text(args, "begin;\n" + (ROOT / "tests/sql/shop_context_setup.sql").read_text(encoding="utf-8")
+               + (ROOT / "tests/sql/shop_context_checks.sql").read_text(encoding="utf-8") + "\nrollback;")
+
     print("== Real schema fixtures and introspection ==")
     with tempfile.NamedTemporaryFile("w", suffix=".sql", delete=False, encoding="utf-8") as tmp:
         tmp.write(_render_validation_sql())

@@ -9,6 +9,7 @@ from app.domain.league import MatchdaySnapshot
 from app.domain.saves import SaveRecord
 from app.domain.seasons import Season, SeasonVersion
 from app.domain.shop import Purchase, Redemption, ShopItem, ShopPromotion
+from app.domain.shop_eligibility import CompetitiveMatchday
 from app.domain.team_locks import TeamLock, TeamLockMutation, TeamLockRecord, TeamLockSource
 from app.domain.trainers import Trainer, TrainerFlags, TrainerStatus
 from app.domain.trials import TrialCase
@@ -68,6 +69,14 @@ class TrainerRepository(Protocol):
         ...
 
     def set_flags(self, flags: TrainerFlags) -> TrainerFlags:
+        ...
+
+
+class ShopEligibilityRepository(Protocol):
+    def resolve_current_matchday(self, season_id: str) -> "CompetitiveMatchday":
+        ...
+
+    def is_store_banned(self, season_id: str, trainer_id: str, current_matchday_number: int) -> bool:
         ...
 
 

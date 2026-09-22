@@ -226,10 +226,11 @@ Migration 019 y bootstrap pasan PostgreSQL local. 019 tambien esta aplicada y
 validada incrementalmente en Supabase V2 staging; no se ejecuto bootstrap remoto
 ni se desplego FastAPI. Contrato, limites y reproduccion: [Phase 8C](phase8c-team-lock.md).
 
-La auditoria posterior de compras 8D detecta que la elegibilidad legacy depende
-de jornada vigente y sanciones con ventana. Su equivalente ejecutable V2 aun no
-esta definido; 8D queda bloqueada antes de crear API/020. No se ha elegido por
-heuristica una jornada ni omitido sanciones. [Auditoria 8D](phase8d-purchases.md).
+El contrato aprobado 8D.0 resuelve la auditoria: `seasons.current_matchday_id`
+es autoridad explicita con FK misma temporada; las ventanas de Store Ban son
+tipadas/inclusivas y requieren expediente `resolved`. Helpers SQL backend-only
+y contratos de dominio/repositorio reutilizables, sin heuristicas ni cambio de
+runtime. 020 DONE local; staging pendiente. [Contrato 8D](phase8d-purchases.md).
 
 ## Problema Principal
 

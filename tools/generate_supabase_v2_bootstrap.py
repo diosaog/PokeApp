@@ -28,6 +28,7 @@ EXPECTED_MIGRATIONS = [
     "017_public_coin_balances_visibility.sql",
     "018_public_views_visibility.sql",
     "019_team_lock_api.sql",
+    "020_current_matchday_store_ban_contract.sql",
 ]
 
 FORBIDDEN_TOKENS = [

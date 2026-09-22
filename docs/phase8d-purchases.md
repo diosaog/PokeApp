@@ -1,6 +1,35 @@
 # Phase 8D: Legacy Purchase Audit And Blocking Contract
 
-Date: 2026-09-22. Status: AUDIT COMPLETE; IMPLEMENTATION BLOCKED.
+Date: 2026-09-22. Current status: 8D.0 DONE local, staging pending; 8D purchase pending.
+The subsequent approved 8D.0 + 8D macro resolves the historical audit blocker.
+The audit below is preserved as historical evidence, not the current stop state.
+
+## Approved 8D.0 Contract
+
+Migration 020 adds nullable `seasons.current_matchday_id`, with a composite FK
+to `(matchdays.id, matchdays.season_id)`, and nullable positive inclusive
+`penalties.start_matchday_number/end_matchday_number` with ordered bounds.
+No backfill, no row-order heuristics, no changes to 001-019 or existing RLS.
+Future season creation initializes the pointer; future close/advance moves it
+transactionally. Purchase will not advance it. NULL/cancelled conflict; scheduled,
+open and a temporarily closed pointer remain authoritative.
+
+Backend-only SECURITY INVOKER helpers `api_resolve_current_matchday` and
+`api_is_store_banned`, their repository port/adapter and pure domain contracts
+make the rules reusable outside HTTP. V2 finished cases use status `resolved`
+(not the domain/legacy spelling `finished`). Ban code is existing `store_ban`.
+Case identity/accused and season are checked; a global case can support a
+season-scoped penalty. Either missing boundary preserves active compatibility.
+`resolved_at` alone is not expiry. The legacy-window mapper normalizes missing,
+invalid/nonpositive bounds without inventing dates; reversed complete windows
+are rejected as invalid typed input, not silently imported.
+
+Local validation: 224 unit tests PASS, PostgreSQL 17.11 migrations/bootstrap
+paths PASS, including same-season FK, windows, helper permissions and replaying
+020. Compileall/diff checks are required before commit. Staging remains pending
+until 020 is applied incrementally and its isolated validator passes.
+
+## Historical Audit (Superseded Blocker)
 Phase 8C is DONE + Supabase V2 staging validated. This document does not claim a
 purchase endpoint, migration 020, purchase test suite or purchase deployment.
 

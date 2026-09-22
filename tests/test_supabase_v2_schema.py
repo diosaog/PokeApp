@@ -82,6 +82,7 @@ class SupabaseV2SchemaTests(unittest.TestCase):
                 "017_public_coin_balances_visibility.sql",
                 "018_public_views_visibility.sql",
                 "019_team_lock_api.sql",
+                "020_current_matchday_store_ban_contract.sql",
             ],
         )
         for path in _migration_files():
@@ -290,7 +291,7 @@ class SupabaseV2SchemaTests(unittest.TestCase):
         self.assertTrue(bootstrap.startswith("-- ONLY FOR EMPTY POKEAPP V2 DATABASE."))
         self.assertEqual(bootstrap, render_bootstrap())
         self.assertIn(
-            "Source of truth: supabase/v2/migrations/001_core.sql through 019_team_lock_api.sql",
+        "Source of truth: supabase/v2/migrations/001_core.sql through 020_current_matchday_store_ban_contract.sql",
             bootstrap,
         )
         self.assertNotIn("drop table", lowered)

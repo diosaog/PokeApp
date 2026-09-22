@@ -322,9 +322,9 @@ Estado 2026-09-22:
 - 8C: primera mutacion Team Lock V2, DONE local + staging validado el 2026-09-22;
   019 aplicada incrementalmente, 13 checks remotos y fixtures limpiadas.
   Sin dual-write ni conexion Streamlit V2. Rollback forzado validado localmente.
-- Auditoria 8D completa; implementacion bloqueada por el contrato V2 de jornada
-  vigente/sanciones temporales de tienda. Siguiente: 8D.0, cerrar ese contrato
-  antes de compra + ledger + evento atomicos. No existe 020 ni API de compras.
+- Contrato 8D.0 aprobado e implementado en 020, DONE local; staging pendiente.
+  Resuelve jornada vigente/sanciones sin heuristicas. Tras el gate remoto de 020,
+  continuar automaticamente compra + ledger + evento atomicos en 021.
   Evidencia: [auditoria 8D](phase8d-purchases.md).
   Los endpoints restantes de la lista siguen pendientes: 8C no cierra toda la API.
 - React/Cloudflare, migracion de datos, shadow mode y cutover no han empezado.
