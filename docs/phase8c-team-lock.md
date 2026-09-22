@@ -369,3 +369,8 @@ Full unit suite: 208 passed, 0 failed/skipped (203 previous + 5 validator safety
 tests). Compileall and diff-check passed. Existing Streamlit bare-mode warnings
 and Starlette TestClient deprecation remain warnings, not suppressed failures.
 V1, runtime Streamlit, parser, mechanics and Discord remain untouched.
+
+The subsequent authorized shop audit reached a product-contract stop before
+any 8D implementation. See [Phase 8D audit](phase8d-purchases.md): current-jornada
+and store-ban eligibility must be defined for V2 before creating purchase RPC
+020. This does not reopen or invalidate the completed Phase 8C gate.

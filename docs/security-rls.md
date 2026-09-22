@@ -115,6 +115,11 @@ Direct UPDATE can return HTTP 200 with zero rows under RLS; the validator also
 verifies unchanged stored rows. No policies were relaxed. Forced post-write
 rollback is local-only. See [Phase 8C report](phase8c-team-lock.md).
 
+The subsequent 8D legacy audit is blocked before implementation: current-jornada
+and store-ban eligibility lack an executable V2 contract. Do not substitute
+"active participant + enough coins" for all legacy permissions or bypass store
+sanctions. No purchase write policies/RPC were added. [Audit](phase8d-purchases.md).
+
 ## Helper Functions
 
 Migration `010_security_helpers.sql` adds:

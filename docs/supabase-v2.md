@@ -347,6 +347,11 @@ paso 13 checks con Auth/JWT reales y limpieza completa; rollback forzado sigue
 cubierto localmente, sin triggers de fallo en staging.
 Detalles: [Phase 8C](phase8c-team-lock.md).
 
+Auditoria 8D posterior: no se ha creado 020. La compra normal necesita primero
+el contrato V2 de jornada vigente y vigencia de sanciones de tienda, ausente en
+el schema/implementacion actual. No se reinterpretaron campos genericos ni se
+cambiaron migrations existentes. [Evidencia y siguiente paso](phase8d-purchases.md).
+
 ## Indexes And Constraints
 
 `008_indexes.sql` anade indices por queries reales:

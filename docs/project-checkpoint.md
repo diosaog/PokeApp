@@ -32,8 +32,10 @@ Latest architecture state:
 - Fase 8C DONE local + Supabase V2 staging validated: self-service Team Lock
   API, authoritative ParsedSave snapshots and atomic lock/activity RPC in 019.
 - Runtime remains Streamlit legacy through wrappers.
-- Next: Phase 8D normal purchase + coin ledger + activity, after auditing legacy
-  shop semantics. No purchase API or migration 020 exists at this checkpoint.
+- Phase 8D legacy audit complete; implementation BLOCKED on the V2 current-
+  jornada/store-ban contract. Next: Phase 8D.0 to settle that contract, preserving
+  legacy eligibility. No purchase API or migration 020 was created.
+  Evidence and recommendation: [Phase 8D audit](phase8d-purchases.md).
 
 ## Current State
 
