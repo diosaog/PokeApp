@@ -230,7 +230,12 @@ El contrato aprobado 8D.0 resuelve la auditoria: `seasons.current_matchday_id`
 es autoridad explicita con FK misma temporada; las ventanas de Store Ban son
 tipadas/inclusivas y requieren expediente `resolved`. Helpers SQL backend-only
 y contratos de dominio/repositorio reutilizables, sin heuristicas ni cambio de
-runtime. 020 DONE local; staging pendiente. [Contrato 8D](phase8d-purchases.md).
+runtime. 020 DONE local + staging (5 checks, cleanup PASS).
+021 implementa compra normal: route estricta -> application/port -> una RPC
+atomica SECURITY INVOKER. Saldo SUM ledger bajo lock season_players; precio,
+jornada y elegibilidad promocional server-side; receipt historico idempotente.
+Compra pending + debit + PURCHASE_COMPLETED publico se confirman juntos.
+DONE local, staging 021 pendiente. [Contrato 8D](phase8d-purchases.md).
 
 ## Problema Principal
 

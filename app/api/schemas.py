@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from datetime import datetime
-from typing import Any
+from typing import Any, Literal
 from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field
@@ -54,6 +54,31 @@ class TeamLockRequest(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     save_file_id: UUID
+
+
+class NormalPurchaseBody(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    item_id: UUID
+    confirm_base_price: bool = Field(default=False, strict=True)
+
+
+class NormalPurchaseResponse(BaseModel):
+    id: UUID
+    season_id: UUID
+    trainer_id: UUID
+    season_player_id: UUID
+    item_id: UUID
+    quantity: Literal[1]
+    unit_price: int = Field(gt=0)
+    total_price: int = Field(gt=0)
+    status: Literal["pending"]
+    purchased_at: datetime
+    balance_after: int = Field(ge=0)
+    ledger_id: UUID
+    event_id: UUID
+    matchday_id: UUID
+    matchday_number: int = Field(gt=0)
 
 
 class TeamLockResponse(BaseModel):

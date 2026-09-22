@@ -9,7 +9,7 @@ from app.api.ports import AccessTokenVerifierPort, SessionRefreshPort, TrainerPr
 from app.api.rate_limit import InMemoryWindowRateLimiter, RateLimiter
 from app.auth.ports import TrainerAuthRepository
 from app.auth.service import PinAuthBridge
-from app.repositories.protocols import TeamLockMutationRepository
+from app.repositories.protocols import NormalPurchaseRepository, TeamLockMutationRepository
 
 
 @dataclass(frozen=True)
@@ -21,6 +21,7 @@ class ApiContainer:
     principal_repository: TrainerPrincipalRepository | None = None
     rate_limiter: RateLimiter | None = None
     team_lock_repository: TeamLockMutationRepository | None = None
+    purchase_repository: NormalPurchaseRepository | None = None
 
 
 def get_api_container(request: Request) -> ApiContainer:
@@ -36,6 +37,7 @@ def create_default_container(config: APIConfig | None = None) -> ApiContainer:
     auth_client = None
     trainer_repo = None
     team_lock_repo = None
+    purchase_repo = None
 
     if config.supabase_url and config.supabase_anon_key:
         from app.auth.supabase_adapter import SupabaseAuthClient
@@ -54,6 +56,11 @@ def create_default_container(config: APIConfig | None = None) -> ApiContainer:
         team_lock_repo = SupabaseTeamLockRepository.from_url_key(
             config.supabase_url, config.supabase_service_role_key,
         )
+        from app.repositories.supabase.normal_purchases import SupabaseNormalPurchaseRepository
+
+        purchase_repo = SupabaseNormalPurchaseRepository.from_url_key(
+            config.supabase_url, config.supabase_service_role_key,
+        )
 
     auth_bridge = None
     if auth_client is not None and trainer_repo is not None and config.auth_pin_pepper:
@@ -67,4 +74,5 @@ def create_default_container(config: APIConfig | None = None) -> ApiContainer:
         principal_repository=trainer_repo,
         rate_limiter=rate_limiter,
         team_lock_repository=team_lock_repo,
+        purchase_repository=purchase_repo,
     )

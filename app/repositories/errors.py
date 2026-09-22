@@ -19,3 +19,12 @@ class ConflictError(RepositoryError):
 
 class PersistenceError(RepositoryError):
     """Raised when the underlying backend cannot complete the operation."""
+
+
+class PurchaseRejectedError(RepositoryError):
+    """A whitelisted business rejection, never a raw database exception."""
+
+    def __init__(self, code: str, status: int):
+        super().__init__(code)
+        self.code = code
+        self.status = status

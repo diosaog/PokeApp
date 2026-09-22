@@ -1,6 +1,6 @@
-# Phase 8D: Legacy Purchase Audit And Blocking Contract
+# Phase 8D: Current Matchday, Store Ban And Atomic Normal Purchase
 
-Date: 2026-09-22. Current status: 8D.0 DONE local, staging pending; 8D purchase pending.
+Date: 2026-09-22. Current status: 8D.0 DONE local + staging; 8D DONE local, staging pending.
 The subsequent approved 8D.0 + 8D macro resolves the historical audit blocker.
 The audit below is preserved as historical evidence, not the current stop state.
 
@@ -24,10 +24,131 @@ season-scoped penalty. Either missing boundary preserves active compatibility.
 invalid/nonpositive bounds without inventing dates; reversed complete windows
 are rejected as invalid typed input, not silently imported.
 
-Local validation: 224 unit tests PASS, PostgreSQL 17.11 migrations/bootstrap
-paths PASS, including same-season FK, windows, helper permissions and replaying
-020. Compileall/diff checks are required before commit. Staging remains pending
-until 020 is applied incrementally and its isolated validator passes.
+8D.0 validation: 224 unit tests PASS and PostgreSQL 17.11 migrations/bootstrap
+paths PASS. Commit `fd108aa` pushed before incremental migration 020 in V2
+staging. Remote context validator: `RESULT ok checks=5`, `CLEANUP PASS`.
+Run: `phase8d0_validation_bd23a7aa987f43be99f4743e508d513b`.
+The pointer is backend-owned even for browser administrators: 020 preserves
+their prior column write grants but does not grant INSERT/UPDATE on the pointer.
+
+## Normal Purchase Contract
+
+`POST /v1/seasons/{season_id}/shop/purchases`, verified Bearer token and required
+`Idempotency-Key` (1-128 visible ASCII characters, no whitespace).
+Body: `{"item_id":"UUID","confirm_base_price":false}`. Extra fields and coerced
+non-boolean confirmations are rejected (422). Identity is always the verified
+principal, including administrators; this is not a purchase-on-behalf endpoint.
+
+HTTP 200 for both creation and replay. Receipt: purchase `id`, `season_id`,
+`trainer_id`, `season_player_id`, `item_id`, quantity=1, `unit_price`, `total_price`,
+initial status=`pending`, `purchased_at`, historical `balance_after`, `ledger_id`,
+`event_id`, `matchday_id`, `matchday_number`. No secrets or arbitrary metadata.
+API/application use a dedicated repository port and one RPC, not separate
+eligibility reads followed by non-atomic writes. Legacy runtime is unchanged.
+
+Migration 021 creates backend-only `api_create_normal_purchase`, SECURITY
+INVOKER and empty search_path. PUBLIC/anon/authenticated cannot execute it;
+service_role can. It does not relax any table RLS policy or grant browser writes.
+
+Transaction sequence:
+1. Validate request, enabled trainer, season identity and active membership.
+2. Lock `season_players` FOR UPDATE, serializing the season/trainer wallet.
+3. Replay an existing same-key receipt or reject an incompatible item/relevant
+   confirmation with `IDEMPOTENCY_CONFLICT` (409).
+4. For a new charge, require active season, official current matchday and no
+   effective Store Ban. NULL/cancelled pointer is a 409; Store Ban is a 403.
+5. Lock/read enabled catalog item; base_price must be positive. Quantity is one.
+6. Read promotions for this exact season/item/current matchday, using status,
+   activation/expiry time, stock and prior purchases to decide eligibility.
+7. Sum only that season/trainer's coin ledger; insufficient funds is a 409.
+8. Insert pending purchase, negative `purchase` ledger movement referencing it,
+   and public `PURCHASE_COMPLETED` with purchase-id dedupe. Any failure rolls
+   back all three. Return the persisted receipt, not a post-commit balance read.
+
+Promotion decisions:
+- Pending non-comodin: `PROMOTION_PENDING` (409).
+- Pending `comodines`: normal base purchase allowed.
+- Active, valid stock, unclaimed: `PROMOTION_AVAILABLE` (409), even with confirmation.
+- Previously claimed by this trainer: normal base purchase allowed.
+- Governing exhausted/ended/time-expired offer: `BASE_PRICE_CONFIRMATION_REQUIRED`
+  (409), unless explicitly confirmed. No automatic more-expensive fallback.
+- Cancelled and other-matchday offers do not govern the current purchase.
+- A pending row whose activates_at elapsed is evaluated as active; a future
+  activates_at is still pending. NULL activates_at on pending remains pending.
+- No stock is claimed or altered by this endpoint. Phase 8E owns that mutation.
+
+Idempotency is unique per `(season_id, trainer_id, idempotency_key)`. Nullable
+`base_price_confirmed` records only a materially relevant fallback confirmation;
+otherwise true/false are equivalent. Catalog, promotion and ledger changes do not
+change a retry receipt. Global enablement and active membership still gate access
+to replay; a replay is not a new charge, so does not re-evaluate season/ban/price.
+`balance_after` is an immutable historical receipt snapshot, not a mutable wallet.
+Receipt status remains initial `pending`; future redemption has its own resource.
+
+Future economic mutations MUST acquire the same season_players lock before
+changing that wallet, including rewards, monetary penalties, refunds and claims.
+Administrative lifecycle/eligibility mutations must coordinate their own source
+locks; this phase does not promise serialization against arbitrary privileged SQL.
+Purchase locks trainer/season/item/current matchday and existing promotion rows;
+no invented automatic advancement, expiry job or new economy mechanic is added.
+
+## Validation And Reproduction
+
+Local state before remote 021: DONE. Full suite: 239 tests PASS, zero skipped.
+PostgreSQL 17.11: 001-021 migration build and generated bootstrap build PASS,
+including seed/migration idempotence, prior RLS fixtures, purchase failures at
+each of the three writes, historical price/balance and four concurrent sessions.
+Different keys with money for one yield one charge; same concurrent key replays
+one receipt in all sessions. Compileall and diff-check PASS.
+Warnings retained: Streamlit bare-mode/cache, Starlette/httpx deprecation and
+Git LF/CRLF notices. None are test failures.
+
+Coverage mapping (test IDs are requirements, not claimed unit-test counts):
+- SB01-SB14: `test_shop_eligibility.py`, `shop_context_checks.sql` and context staging.
+- P01-P03/P18/P19/P48/P50: `test_api_purchases.py` real ASGI + PostgREST builder,
+  simulated backend transport, existing auth suite; SQL independently rechecks enablement.
+- P04-P17/P20-P27: `purchase_checks.sql` plus context FK checks; strict API error mapping.
+- P28-P30: local real PostgreSQL triggers force purchase, ledger and event failures.
+- P31-P35/P49: SQL receipt/history/conflicts and multi-session validator.
+- P36-P38: source boundary assertions, ledger sum, zero redemption/save rows.
+- P39-P45: actual SQL promotion decisions, including claimed and time transitions.
+- P46-P47: function privileges, actual role denial and existing full RLS fixtures.
+
+```powershell
+.\.venv-api\Scripts\python.exe tools/run_unit_tests.py
+.\.venv-api\Scripts\python.exe -m compileall -q -x '[\\/](\.venv[^\\/]*|\.git|node_modules)[\\/]' .
+.\.venv-api\Scripts\python.exe tools/generate_supabase_v2_bootstrap.py
+git diff --check
+```
+
+SQL validator: `tools/validate_supabase_v2_schema.py --psql <psql.exe> --host
+127.0.0.1 --port 55439 --database pokeapp_v2_validation_phase8c
+--allow-destructive-reset`, repeated with `--build-source bootstrap`. The host
+and database-name guards prevent remote/destructive use outside a local test DB.
+
+Staging target ONLY `https://uwleqeuzsveqlugugzba.supabase.co`. After commit/push,
+apply only new migration 021, never remote bootstrap/reset. Then:
+
+```powershell
+.\.venv-api\Scripts\python.exe tools/validate_supabase_v2_purchases.py --env-file .env.supabase-v2-rls.local --allow-staging-writes --suite purchase
+```
+
+This uses local FastAPI TestClient with real Supabase Auth/JWT, PostgREST and
+service-only RPC, not a deployed API. The purchase suite includes five context
+groups plus R01-R24, temporary Auth users and explicit cleanup. Refuses a project
+that already has an active season. Deep failure injection is local-only.
+Remote 021 is pending at this checkpoint; do not label 8D globally DONE yet.
+
+## Boundaries And Next Step
+
+No V1/Streamlit changes, real saves, parser/PKHeX, Discord sends, dual-write,
+data import, React, Cloudflare or Companion. No reset/bootstrap in staging.
+001-019 remain unchanged. User's untracked product guide is untouched.
+Discord delivery, if later implemented, must be post-commit/event-driven.
+Next after the remote gate: **Phase 8E promotional purchase atomic stock claim**,
+not implemented here. Redemption, close/advance/rewards/snapshots, season/admin
+mutations, trainer flags/status, saves/parser write boundary and archive/Hall
+remain separate future operations. Phase 8 as a whole is not complete.
 
 ## Historical Audit (Superseded Blocker)
 Phase 8C is DONE + Supabase V2 staging validated. This document does not claim a

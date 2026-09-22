@@ -1,6 +1,6 @@
 # PokeApp 2.0 Project Checkpoint
 
-Checkpoint date: 2026-09-22 (Phase 8C Supabase V2 staging validation).
+Checkpoint date: 2026-09-22 (Phase 8D.0 staging + Phase 8D local implementation).
 
 Base HEAD before original checkpoint documentation:
 `f6d8fc179f8c9e021bdf6b4fa1e2687e2d7e8b2a`
@@ -32,10 +32,11 @@ Latest architecture state:
 - Fase 8C DONE local + Supabase V2 staging validated: self-service Team Lock
   API, authoritative ParsedSave snapshots and atomic lock/activity RPC in 019.
 - Runtime remains Streamlit legacy through wrappers.
-- Phase 8D.0 contract approved and DONE local: migration 020, explicit same-season
-  current-matchday pointer and typed inclusive Store Ban windows. Staging pending.
-  The historical audit blocker is resolved. Purchase/021 not yet implemented.
-  Evidence and recommendation: [Phase 8D audit](phase8d-purchases.md).
+- Phase 8D.0 DONE local + staging: 020 explicit same-season pointer, inclusive
+  Store Ban windows, five remote check groups and cleanup PASS.
+- Phase 8D normal purchase DONE local: 021 atomic purchase/ledger/event,
+  idempotency, promotion eligibility and wallet serialization. Remote 021 pending.
+  Historical blocker resolved; [contract and evidence](phase8d-purchases.md).
 
 ## Current State
 
@@ -73,10 +74,10 @@ Historical staging validation (Phase 7, not rerun in this task):
 - `py tools\validate_supabase_v2_rls.py` passed against real staging with
   `RESULT ok checks=13`.
 
-Current validation: 224 tests passed, zero failed/skipped, using
+Current validation: 239 tests passed, zero failed/skipped, using
 `.venv-api\Scripts\python.exe tools/run_unit_tests.py`. Compileall and diff-check
-passed. PostgreSQL 17.11 local passed both migrations 001-019 and bootstrap,
-including real RPC replacement, dedupe, rollback, roles and concurrent writes.
+passed. PostgreSQL 17.11 local passed both migrations 001-021 and bootstrap,
+including Store Ban, purchase receipt, promotions, rollback, roles and concurrency.
 The runner uses disposable SQLite data, not V1. See
 [Phase 8C report](phase8c-team-lock.md) for exact commands and environment.
 

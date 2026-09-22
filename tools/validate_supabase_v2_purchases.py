@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import argparse
+from concurrent.futures import ThreadPoolExecutor
 from dataclasses import replace
 from datetime import datetime, timezone
 from pathlib import Path
@@ -128,28 +129,189 @@ class PurchaseValidation(TeamLockValidation):
                 except Exception:
                     remaining.append(table + ":" + next(iter(params.values())))
         for season_id in self.rows.get("seasons", []):
-            result = self.http.rest("PATCH", "seasons", auth="service", params={"id": "eq." + season_id},
-                                    body={"current_matchday_id": None}, raise_on_error=False)
-            if not result.ok:
+            try:
+                result = self.http.rest("PATCH", "seasons", auth="service", params={"id": "eq." + season_id},
+                                        body={"current_matchday_id": None}, raise_on_error=False)
+                if not result.ok:
+                    remaining.append("season pointer:" + season_id)
+            except Exception:
                 remaining.append("season pointer:" + season_id)
         return remaining + super().cleanup()
+
+    def validate_purchases(self):
+        from fastapi.testclient import TestClient
+        from app.api.config import APIConfig
+        from app.api.main import create_app
+
+        owner, other, admin = (self.actors[x] for x in ("owner", "other", "admin"))
+        self.set_day(2)
+        item = self.insert("shop_items", {"code": self.config.run_id + "_item", "name": "Validation Berry",
+                                         "category": "bayas", "base_price": 10})
+        comodin = self.insert("shop_items", {"code": self.config.run_id + "_comodin", "name": "Validation Comodin",
+                                            "category": "comodines", "base_price": 10})
+        for actor, amount in ((owner, 1000), (other, 10), (admin, 10)):
+            self.insert("coin_transactions", {"season_id": self.season_id, "trainer_id": actor["trainer"]["id"],
+                "season_player_id": actor["player"]["id"], "amount": amount, "transaction_type": "admin_adjustment"})
+        config = APIConfig(supabase_url=self.config.url, supabase_anon_key=self.config.anon_key,
+                           supabase_service_role_key=self.config.service_role_key)
+        path = f"/v1/seasons/{self.season_id}/shop/purchases"
+
+        def counts():
+            return tuple(len(self.read(t, season_id=self.season_id)) for t in ("purchases", "coin_transactions", "activity_events"))
+
+        with TestClient(create_app(config=config)) as client:
+            def buy(key=None, actor=owner, selected=item, confirm=False):
+                return client.post(path, headers={"Authorization": "Bearer " + actor["token"],
+                    "Idempotency-Key": key or uuid4().hex}, json={"item_id": selected["id"], "confirm_base_price": confirm})
+
+            def accepted(*args, **kwargs):
+                result = buy(*args, **kwargs)
+                require(result.status_code == 200, f"Purchase expected success, HTTP {result.status_code}")
+                return result.json()
+
+            def rejected(code, status=409, **kwargs):
+                before = counts()
+                result = buy(**kwargs)
+                require(result.status_code == status and result.json().get("detail", {}).get("code") == code,
+                        f"Expected {status} {code}; got HTTP {result.status_code}")
+                require(counts() == before, "Rejected purchase created partial effects")
+
+            initial = accepted("initial")
+            require(initial["trainer_id"] == owner["trainer"]["id"], "R01 verified identity")
+            self.passed("R01 real JWT API normal purchase")
+            purchase = self.read("purchases", id=initial["id"])[0]
+            require(purchase["quantity"] == 1 and purchase["status"] == "pending" and purchase["unit_price"] == 10, "R02 pending row")
+            self.passed("R02 pending single-unit authoritative price")
+            debit = self.read("coin_transactions", id=initial["ledger_id"])[0]
+            require(debit["amount"] == -10 and debit["reference_id"] == purchase["id"] and debit["transaction_type"] == "purchase", "R03 debit")
+            self.passed("R03 exact linked debit")
+            event = self.read("public_activity_events", auth=other["token"], id=initial["event_id"])[0]
+            require(event["type"] == "PURCHASE_COMPLETED" and event["payload"]["purchase_id"] == purchase["id"], "R04 public event")
+            self.passed("R04 public purchase event")
+            require(initial["balance_after"] == purchase["balance_after"] == 990, "R05 balance snapshot")
+            self.passed("R05 balance_after snapshot")
+            require(accepted(actor=admin)["balance_after"] == 0, "R06 exact balance")
+            self.passed("R06 exact balance zero")
+            rejected("INSUFFICIENT_FUNDS", actor=admin)
+            self.passed("R07 insufficient funds has no effects")
+            accepted("second")
+            self.patch("shop_items", item["id"], {"base_price": 20})
+            before = counts()
+            require(accepted("initial", confirm=True) == initial and counts() == before, "R08 stable original receipt")
+            require(self.read("purchases", id=initial["id"])[0]["unit_price"] == 10, "R08 historical price")
+            self.patch("shop_items", item["id"], {"base_price": 10})
+            self.passed("R08 idempotent retry preserves price and original balance")
+            rejected("IDEMPOTENCY_CONFLICT", key="initial", selected=comodin)
+            self.passed("R09 conflicting item rejected")
+
+            # Separate API containers/HTTP clients and a barrier ensure actual overlap.
+            from threading import Barrier
+            barrier = Barrier(2)
+
+            def concurrent_buy(n):
+                with TestClient(create_app(config=config)) as concurrent_client:
+                    barrier.wait(timeout=30)
+                    response = concurrent_client.post(path, headers={"Authorization": "Bearer " + other["token"],
+                        "Idempotency-Key": f"race-{n}"}, json={"item_id": item["id"]})
+                    return response.status_code, response.json()
+
+            with ThreadPoolExecutor(max_workers=2) as pool:
+                results = list(pool.map(concurrent_buy, range(2)))
+            require(sorted(x[0] for x in results) == [200, 409], "R10 exactly one concurrent success")
+            require(next(x[1] for x in results if x[0] == 409)["detail"]["code"] == "INSUFFICIENT_FUNDS", "R10 insufficient loser")
+            require(len(self.read("purchases", season_id=self.season_id, trainer_id=other["trainer"]["id"])) == 1, "R10 one purchase")
+            require(sum(x["amount"] for x in self.read("coin_transactions", season_id=self.season_id, trainer_id=other["trainer"]["id"])) == 0, "R10 no overspend")
+            self.passed("R10 concurrent double-spend prevented")
+
+            self.patch("penalties", self.penalty["id"], {"penalty_type": "store_ban", "start_matchday_number": 3, "end_matchday_number": 4})
+            self.set_day(3)
+            rejected("STORE_BANNED", 403)
+            self.set_day(4)
+            rejected("STORE_BANNED", 403)
+            self.passed("R11 inclusive Store Ban boundaries")
+            self.set_day(5)
+            accepted()
+            self.passed("R12 outside ban window allowed")
+            self.patch("penalties", self.penalty["id"], {"start_matchday_number": None, "end_matchday_number": None})
+            rejected("STORE_BANNED", 403)
+            self.passed("R13 no-window Store Ban active")
+            self.patch("trial_cases", self.case["id"], {"status": "open"})
+            accepted()
+            self.passed("R14 unfinished case does not ban")
+            self.patch("penalties", self.penalty["id"], {"penalty_type": "coins_reduction"})
+            self.set_day(2)
+            promo_body = {"season_id": self.season_id, "matchday_id": self.days[2]["id"], "shop_item_id": item["id"],
+                          "promotion_type": "normal", "status": "pending", "base_price": 10, "effective_price": 5, "stock_total": 2}
+            promo = self.insert("shop_promotions", promo_body)
+            rejected("PROMOTION_PENDING")
+            self.passed("R15 pending non-comodin blocked")
+            self.insert("shop_promotions", {**promo_body, "shop_item_id": comodin["id"]})
+            accepted(selected=comodin)
+            self.passed("R16 pending comodin base purchase allowed")
+            self.patch("shop_promotions", promo["id"], {"status": "active"})
+            rejected("PROMOTION_AVAILABLE", confirm=True)
+            self.passed("R17 active unclaimed promotion cannot be bypassed")
+            for status in ("exhausted", "ended"):
+                self.patch("shop_promotions", promo["id"], {"status": status})
+                rejected("BASE_PRICE_CONFIRMATION_REQUIRED")
+            self.passed("R18 exhausted/expired requires confirmation")
+            accepted("confirmed", confirm=True)
+            rejected("IDEMPOTENCY_CONFLICT", key="confirmed", confirm=False)
+            self.passed("R19 explicit fallback and relevant idempotency semantics")
+
+        args = {"p_season_id": self.season_id, "p_trainer_id": owner["trainer"]["id"], "p_item_id": item["id"],
+                "p_idempotency_key": "direct", "p_confirm_base_price": False}
+        for actor in (owner, admin):
+            require(self.rpc_call("api_create_normal_purchase", args, actor["token"]).status == 403, "R20 direct RPC denied")
+        self.passed("R20 owner/admin direct RPC denied")
+        for table, row, forbidden_field, value in (("purchases", purchase, "unit_price", 1),
+                                                  ("coin_transactions", debit, "amount", 999)):
+            for actor in (owner, admin):
+                original = self.read(table, id=row["id"])
+                insert = {k: v for k, v in row.items() if k not in ("id", "total_price", "created_at", "purchased_at")}
+                for method, body, params in (("POST", insert, None),
+                                             ("PATCH", {forbidden_field: value}, {"id": "eq." + row["id"]})):
+                    result = self.http.rest(method, table, auth=actor["token"], body=body, params=params, raise_on_error=False)
+                    require(direct_write_denied(method, result), "R21 direct write denied")
+                    require(self.read(table, id=row["id"]) == original, "R21 unchanged row")
+        self.passed("R21 owner/admin direct purchase and ledger writes denied")
+        for relation, row_id in (("purchases", initial["id"]), ("current_purchases", initial["id"]),
+                                  ("coin_transactions", initial["ledger_id"]), ("current_coin_transactions", initial["ledger_id"])):
+            for actor in (owner, admin):
+                require(len(self.read(relation, auth=actor["token"], id=row_id)) == 1, "R22 owner/admin read")
+            require(self.read(relation, auth=other["token"], id=row_id) == [], "R22 trainer isolation")
+        self.passed("R22 private owner/admin reads and other-trainer isolation")
+        balances = self.read("public_coin_balances", auth=other["token"], season_id=self.season_id, trainer_id=owner["trainer"]["id"])
+        actual = sum(x["amount"] for x in self.read("coin_transactions", season_id=self.season_id, trainer_id=owner["trainer"]["id"]))
+        require(len(balances) == 1 and balances[0]["balance"] == actual, "R23 public balance projection")
+        self.passed("R23 public balance agrees with ledger")
+        require(self.rpc_call("api_create_normal_purchase", args, "anon").status in (401, 403), "R24 anon RPC")
+        for table in ("purchases", "coin_transactions", "public_coin_balances", "public_activity_events"):
+            result = self.http.rest("GET", table, auth="anon", params={"select": "*", "limit": "1"}, raise_on_error=False)
+            require(result.status in (401, 403), "R24 anon read denied")
+        self.passed("R24 anon denied")
+        print("Deep write-failure injection: local PostgreSQL only; no intrusive staging DDL.", flush=True)
 
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--env-file", type=Path, required=True)
     parser.add_argument("--allow-staging-writes", action="store_true")
+    parser.add_argument("--suite", choices=("context", "purchase"), default="context")
     args = parser.parse_args()
     validation = None
     failure = None
     remaining = []
     try:
         config = staging_config(args.env_file, args.allow_staging_writes)
-        config = replace(config, run_id="phase8d0_validation_" + uuid4().hex)
+        prefix = "phase8d0_validation_" if args.suite == "context" else "phase8d_validation_"
+        config = replace(config, run_id=prefix + uuid4().hex)
         validation = PurchaseValidation(config)
         print(f"V2 staging={config.url}\nrun_id={config.run_id}\nsecrets=redacted", flush=True)
         validation.setup_context()
         validation.validate_context()
+        if args.suite == "purchase":
+            validation.validate_purchases()
     except Exception as exc:
         failure = str(exc) if isinstance(exc, ValidationError) and not str(exc).startswith("HTTP ") else type(exc).__name__
     finally:

@@ -42,6 +42,8 @@ supabase/v2/
     017_public_coin_balances_visibility.sql
     018_public_views_visibility.sql
     019_team_lock_api.sql
+    020_current_matchday_store_ban_contract.sql
+    021_normal_purchase_api.sql
   bootstrap.sql
   reset_dev.sql
 ```
@@ -299,7 +301,8 @@ Regla operativa:
 
 - el cliente debe leer desde vistas;
 - las escrituras criticas quedan server-only; Team Lock + activity tienen RPC
-  en 019 (DONE + staging validado); compras, ledger, redenciones y saves siguen pendientes;
+  en 019 (DONE + staging); compra normal/ledger/evento en 021 (DONE local,
+  staging pendiente); claim promocional, redenciones y saves siguen pendientes;
 - `service_role` es solo backend/server;
 - admin es `trainers.is_admin`, no un nombre hardcodeado.
 
@@ -314,7 +317,7 @@ docs/security-rls.md
 Preparadas para API/RPC de Fase 8:
 
 - promotional purchase stock claim;
-- normal purchase + ledger + activity event;
+- normal purchase + ledger + activity event: 021 DONE local, staging pendiente;
 - redemption + purchase status + effect flags;
 - team lock upsert + activity event: implementado en 019, validado local y staging;
 - close matchday + rewards + ledger + snapshot + movements;
@@ -350,7 +353,12 @@ Detalles: [Phase 8C](phase8c-team-lock.md).
 020_current_matchday_store_ban_contract.sql implementa el contrato aprobado:
 puntero explicito `seasons.current_matchday_id`, FK misma season, ventanas
 inclusivas tipadas en penalties y helpers backend-only. Sin backfill ni cambios
-a 001-019. Validada localmente con migrations/bootstrap; staging pendiente.
+a 001-019. DONE local + staging: 5 checks y cleanup PASS.
+021_normal_purchase_api.sql anade idempotency_key, balance_after historico,
+confirmacion relevante y RPC atomica backend-only de compra normal. Saldo SUM
+ledger; lock season_players; precio/jornada/promociones resueltos por servidor.
+Sin stock claim ni redencion. DONE local (239 tests, PostgreSQL migrations y
+bootstrap); pendiente gate staging 021. Nunca aplicar bootstrap sobre staging existente.
 [Evidencia y siguiente paso](phase8d-purchases.md).
 
 ## Indexes And Constraints
@@ -413,7 +421,7 @@ Validacion incluida:
   IDs, season scoping, constraints criticas, ausencia de blobs V1 y reset
   destructivo separado.
 - `tools/validate_supabase_v2_schema.py` ejecuta validacion real contra Postgres:
-  reset V2 local, migrations 001-019, seed idempotente, reset, rebuild, fixtures de
+  reset V2 local, migrations 001-021, seed idempotente, reset, rebuild, fixtures de
   introspeccion/constraints y checks RLS con roles tipo Supabase.
 
 ### Real Database Validation
@@ -505,7 +513,7 @@ Fase 7 se valido en PostgreSQL 17.11 local aislado usando roles mock de Supabase
 
 Resultado:
 
-- migrations 001-019 aplican en orden (019 tambien validada en V2 staging);
+- migrations 001-021 aplican en orden (019-020 tambien validadas en V2 staging);
 - `bootstrap.sql` se regenera desde las mismas migrations;
 - RLS queda activo en las 32 tablas publicas V2;
 - un entrenador autenticado ve sus filas privadas de saves, parsed saves,

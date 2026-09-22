@@ -4,7 +4,8 @@ Checkpoint: Phase 8B-H DONE; Phase 8C DONE + staging validated (2026-09-22).
 
 This document is the security contract for the greenfield Supabase V2 schema. It
 does not connect Streamlit or React to V2. The isolated API now implements Auth
-and the Team Lock mutation; migration 019 is applied in V2 staging only.
+and Team Lock/normal purchase mutations. 019-020 are applied in V2 staging;
+021 normal purchase is locally validated, remote gate pending.
 
 ## Security Model
 
@@ -119,7 +120,13 @@ Approved 8D.0 resolves the shop-eligibility blocker. Migration 020 adds the
 explicit same-season current pointer and typed ban windows, plus backend-only
 SECURITY INVOKER helpers with fixed search_path. NULL/cancelled pointer fails
 closed; resolved cases and inclusive/missing-window semantics govern bans.
-No existing RLS is relaxed. DONE local; staging pending. [Contract](phase8d-purchases.md).
+No existing RLS is relaxed. DONE local + staging (5 checks and cleanup PASS).
+The new pointer is server-owned even for browser admins; existing column grants
+are preserved. 021 normal purchase is service-role-only, SECURITY INVOKER with
+empty search_path. Purchase/ledger/event share one transaction and wallet lock;
+strict input, verified enabled identity, whitelist-only business errors and
+private receipts. RLS/direct write restrictions are unchanged. DONE local;
+021 staging pending. [Contract](phase8d-purchases.md).
 
 ## Helper Functions
 
@@ -276,7 +283,7 @@ cutover.
 
 Validated against PostgreSQL 17.11 local with Supabase role mocks:
 
-- migrations 001-019 apply in order (019 added and validated locally in 8C);
+- migrations 001-021 apply in order (purchase/ban checks added in 8D);
 - `bootstrap.sql` applies as a single SQL Editor artifact;
 - reset/build/rebuild works;
 - all 32 public V2 tables have RLS enabled;

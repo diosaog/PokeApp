@@ -993,6 +993,40 @@ select pokeapp_team_lock_test.assert_true((select count(*)=1 from public.activit
         _psql_text(args, "begin;\n" + cleanup + "\ncommit;")
 
 
+def _validate_purchase_api(args: argparse.Namespace) -> None:
+    fixtures = ROOT / "tests/sql"
+    setup = (fixtures / "shop_context_setup.sql").read_text(encoding="utf-8") + (fixtures / "purchase_setup.sql").read_text(encoding="utf-8")
+    checks = (fixtures / "purchase_checks.sql").read_text(encoding="utf-8")
+    cleanup = (fixtures / "purchase_cleanup.sql").read_text(encoding="utf-8")
+    _psql_text(args, "begin;\n" + setup + checks + "\nrollback;")
+    print("== Purchase concurrent double-spend and idempotent first writes ==")
+    _psql_text(args, "begin;\n" + setup + "update public.coin_transactions set amount=10;\ncommit;")
+    try:
+        # Each successful RPC holds the wallet row until its session commits.
+        for same_key in (False, True):
+            if same_key:
+                _psql_text(args, "delete from public.activity_events; delete from public.coin_transactions where transaction_type='purchase'; delete from public.purchases;")
+            with ThreadPoolExecutor(max_workers=4) as pool:
+                sql = """do $$ begin
+                  perform pokeapp_shop_test.buy('%s'); perform pg_sleep(0.2);
+                  exception when sqlstate 'PT409' then
+                    if sqlerrm <> 'insufficient_funds' then raise; end if;
+                  end; $$;"""
+                if same_key:
+                    sql = "select pokeapp_shop_test.buy('%s'); select pg_sleep(0.2);"
+                futures = [pool.submit(_psql_text, args, "begin; set local role service_role; " +
+                           (sql % ("retry" if same_key else f"race-{n}")) + " commit;") for n in range(4)]
+                for future in futures:
+                    future.result()
+            _psql_text(args, """
+select pokeapp_shop_test.assert_true((select count(*)=1 from public.purchases), 'P35 single purchase');
+select pokeapp_shop_test.assert_true((select sum(amount)=0 from public.coin_transactions), 'P35 no double spend');
+select pokeapp_shop_test.assert_true((select count(*)=1 from public.activity_events), 'P35 single event');
+""")
+    finally:
+        _psql_text(args, "begin;\n" + cleanup + "\ncommit;")
+
+
 def _apply_migrations(args: argparse.Namespace) -> None:
     for migration in MIGRATIONS:
         _psql(args, migration)
@@ -1074,6 +1108,10 @@ def main() -> int:
     _psql(args, ROOT / "supabase/v2/migrations/020_current_matchday_store_ban_contract.sql")
     _psql_text(args, "begin;\n" + (ROOT / "tests/sql/shop_context_setup.sql").read_text(encoding="utf-8")
                + (ROOT / "tests/sql/shop_context_checks.sql").read_text(encoding="utf-8") + "\nrollback;")
+
+    print("== Normal purchase migration idempotence and atomic fixtures ==")
+    _psql(args, ROOT / "supabase/v2/migrations/021_normal_purchase_api.sql")
+    _validate_purchase_api(args)
 
     print("== Real schema fixtures and introspection ==")
     with tempfile.NamedTemporaryFile("w", suffix=".sql", delete=False, encoding="utf-8") as tmp:
