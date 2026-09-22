@@ -4,8 +4,8 @@ Checkpoint: Phase 8B-H DONE; Phase 8C DONE + staging validated (2026-09-22).
 
 This document is the security contract for the greenfield Supabase V2 schema. It
 does not connect Streamlit or React to V2. The isolated API now implements Auth
-and Team Lock/normal purchase mutations. 019-020 are applied in V2 staging;
-021 normal purchase is locally validated, remote gate pending.
+and Team Lock/normal purchase mutations. 019-021 are applied and validated in V2
+staging; the API has not been deployed or connected to the legacy runtime.
 
 ## Security Model
 
@@ -125,8 +125,11 @@ The new pointer is server-owned even for browser admins; existing column grants
 are preserved. 021 normal purchase is service-role-only, SECURITY INVOKER with
 empty search_path. Purchase/ledger/event share one transaction and wallet lock;
 strict input, verified enabled identity, whitelist-only business errors and
-private receipts. RLS/direct write restrictions are unchanged. DONE local;
-021 staging pending. [Contract](phase8d-purchases.md).
+private receipts. RLS/direct write restrictions are unchanged. DONE local +
+021 staging: 29 checks (5 context + R01-R24), cleanup and independent SQL PASS.
+Owner/admin direct RPC and purchase/ledger INSERT/UPDATE remain denied; another
+trainer cannot read private receipts/ledger. Public balances/events remain
+readable as designed, anon denied. [Contract](phase8d-purchases.md).
 
 ## Helper Functions
 

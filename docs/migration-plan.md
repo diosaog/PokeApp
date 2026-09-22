@@ -325,7 +325,7 @@ Estado 2026-09-22:
 - Contrato 8D.0 en 020 DONE local + staging (5 checks y cleanup PASS).
   Resuelve jornada vigente/sanciones sin heuristicas.
 - 8D compra normal + ledger + evento atomicos en 021 DONE local (239 tests,
-  PostgreSQL migrations/bootstrap); staging 021 pendiente. Despues: 8E claim
+  PostgreSQL migrations/bootstrap) + staging (29 checks, cleanup PASS). Despues: 8E claim
   promocional atomico, no implementado aqui. [Contrato 8D](phase8d-purchases.md).
   Los endpoints restantes de la lista siguen pendientes: 8C no cierra toda la API.
 - React/Cloudflare, migracion de datos, shadow mode y cutover no han empezado.

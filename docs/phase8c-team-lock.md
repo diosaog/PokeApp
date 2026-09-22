@@ -370,7 +370,7 @@ tests). Compileall and diff-check passed. Existing Streamlit bare-mode warnings
 and Starlette TestClient deprecation remain warnings, not suppressed failures.
 V1, runtime Streamlit, parser, mechanics and Discord remain untouched.
 
-The subsequent authorized shop audit reached a product-contract stop before
-any 8D implementation. See [Phase 8D audit](phase8d-purchases.md): current-jornada
-and store-ban eligibility must be defined for V2 before creating purchase RPC
-020. This does not reopen or invalidate the completed Phase 8C gate.
+The subsequent shop audit initially stopped on current-matchday/Store Ban
+contracts. The approved 8D.0 macro resolved them in 020; normal purchase is 021.
+Both are now DONE local + staging. See [Phase 8D](phase8d-purchases.md).
+This does not reopen or invalidate the completed Phase 8C gate.

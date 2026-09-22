@@ -191,7 +191,7 @@ docs/security-rls.md
 
 Phase 8C implementa Team Lock + actividad via RPC backend-only (019), validada
 localmente y en V2 staging. 020 (jornada/sanciones) tambien esta validada en staging.
-021 compra normal atomica esta DONE local, pendiente de validacion staging. No uses el
+021 compra normal atomica esta DONE local + staging (29 checks, cleanup PASS). No uses el
 navegador para escribir compras, ledger, parsed saves o team locks directamente.
 Una base V2 existente necesita solo las migrations nuevas que falten, en orden,
 con autorizacion y validacion, nunca bootstrap ni reset. No se ha desplegado la API.

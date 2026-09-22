@@ -235,7 +235,8 @@ runtime. 020 DONE local + staging (5 checks, cleanup PASS).
 atomica SECURITY INVOKER. Saldo SUM ledger bajo lock season_players; precio,
 jornada y elegibilidad promocional server-side; receipt historico idempotente.
 Compra pending + debit + PURCHASE_COMPLETED publico se confirman juntos.
-DONE local, staging 021 pendiente. [Contrato 8D](phase8d-purchases.md).
+DONE local + staging 021 (29 checks con contexto, cleanup PASS). API probada
+localmente contra Supabase real, no desplegada. [Contrato 8D](phase8d-purchases.md).
 
 ## Problema Principal
 

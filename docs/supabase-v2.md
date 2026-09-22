@@ -301,8 +301,8 @@ Regla operativa:
 
 - el cliente debe leer desde vistas;
 - las escrituras criticas quedan server-only; Team Lock + activity tienen RPC
-  en 019 (DONE + staging); compra normal/ledger/evento en 021 (DONE local,
-  staging pendiente); claim promocional, redenciones y saves siguen pendientes;
+  en 019 (DONE + staging); compra normal/ledger/evento en 021 (DONE + staging);
+  claim promocional, redenciones y saves siguen pendientes;
 - `service_role` es solo backend/server;
 - admin es `trainers.is_admin`, no un nombre hardcodeado.
 
@@ -317,7 +317,7 @@ docs/security-rls.md
 Preparadas para API/RPC de Fase 8:
 
 - promotional purchase stock claim;
-- normal purchase + ledger + activity event: 021 DONE local, staging pendiente;
+- normal purchase + ledger + activity event: 021 DONE local + staging;
 - redemption + purchase status + effect flags;
 - team lock upsert + activity event: implementado en 019, validado local y staging;
 - close matchday + rewards + ledger + snapshot + movements;
@@ -358,7 +358,8 @@ a 001-019. DONE local + staging: 5 checks y cleanup PASS.
 confirmacion relevante y RPC atomica backend-only de compra normal. Saldo SUM
 ledger; lock season_players; precio/jornada/promociones resueltos por servidor.
 Sin stock claim ni redencion. DONE local (239 tests, PostgreSQL migrations y
-bootstrap); pendiente gate staging 021. Nunca aplicar bootstrap sobre staging existente.
+bootstrap) + staging 021: 29 checks, cleanup PASS e inventario 32 tablas RLS/37
+vistas intacto. Nunca aplicar bootstrap sobre staging existente.
 [Evidencia y siguiente paso](phase8d-purchases.md).
 
 ## Indexes And Constraints
@@ -513,7 +514,7 @@ Fase 7 se valido en PostgreSQL 17.11 local aislado usando roles mock de Supabase
 
 Resultado:
 
-- migrations 001-021 aplican en orden (019-020 tambien validadas en V2 staging);
+- migrations 001-021 aplican en orden (019-021 tambien validadas en V2 staging);
 - `bootstrap.sql` se regenera desde las mismas migrations;
 - RLS queda activo en las 32 tablas publicas V2;
 - un entrenador autenticado ve sus filas privadas de saves, parsed saves,

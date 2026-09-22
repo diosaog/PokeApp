@@ -1,6 +1,6 @@
 # Phase 8D: Current Matchday, Store Ban And Atomic Normal Purchase
 
-Date: 2026-09-22. Current status: 8D.0 DONE local + staging; 8D DONE local, staging pending.
+Date: 2026-09-22. Current status: 8D.0 and 8D DONE local + Supabase V2 staging validated.
 The subsequent approved 8D.0 + 8D macro resolves the historical audit blocker.
 The audit below is preserved as historical evidence, not the current stop state.
 
@@ -137,7 +137,30 @@ This uses local FastAPI TestClient with real Supabase Auth/JWT, PostgREST and
 service-only RPC, not a deployed API. The purchase suite includes five context
 groups plus R01-R24, temporary Auth users and explicit cleanup. Refuses a project
 that already has an active season. Deep failure injection is local-only.
-Remote 021 is pending at this checkpoint; do not label 8D globally DONE yet.
+Remote 021 gate completed after commit/push `0a61a7a`: `RESULT ok checks=29`,
+`CLEANUP PASS`, run `phase8d_validation_1a88417454f045e5bdc5dbcc773dc8a3`.
+Five context groups and all R01-R24 passed. Independent SQL confirmed zero
+remaining temporary Auth users, trainers, seasons, matchdays, season_players,
+items, promotions, cases, penalties, purchases, ledger movements and events.
+Cloud inventory remains 32 public tables, all 32 with RLS, and 37 views.
+Function privileges independently verified: invoker, empty search_path,
+anon/authenticated denied, service_role allowed. Remote 021 function body matches
+the committed migration (MD5 comparison: `af6c9b572b498cbf5d60d1096d4231b1`).
+No staging policy/schema weakening or remote failure triggers were needed.
+
+## Completed Checkpoint
+
+Start: main `3217f55`, origin/main 0/0, only the user's untracked guide.
+Implementation commits, pushed before their respective remote gates:
+- `fd108aa supabase: define current matchday and store ban contract`.
+- `0a61a7a api: add atomic v2 normal purchase` (includes focused tests/docs).
+
+Closing documentation commit records remote evidence; its hash is provided in
+the final delivery. The only permitted untracked file remains
+`docs/pokeapp-guia-completa-pestanas-y-producto.md`; SHA256 unchanged:
+`6FA3E82B6D3FDF82ACB0E95DA6715397574ACE7A134F68C2F69864909F2B934E`.
+Last completed: 8D.0 + 8D normal purchase, local and staging. No blocking issue.
+Full delivery report: [Phase 8D completion report](phase8d-completion-report.md).
 
 ## Boundaries And Next Step
 
@@ -151,10 +174,11 @@ mutations, trainer flags/status, saves/parser write boundary and archive/Hall
 remain separate future operations. Phase 8 as a whole is not complete.
 
 ## Historical Audit (Superseded Blocker)
-Phase 8C is DONE + Supabase V2 staging validated. This document does not claim a
-purchase endpoint, migration 020, purchase test suite or purchase deployment.
+The remainder is the frozen audit at `3217f55`, before the approved macro.
+Its pending/blocked statements describe that historical checkpoint ONLY; the
+current implemented and validated state is recorded above.
 
-## Why The Macro Stopped
+### Why The Macro Stopped
 
 The authorized macro requires preserving actual shop eligibility and prohibits
 inventing business rules. Legacy ordinary purchases depend on the current
@@ -168,7 +192,7 @@ This is not a SQL naming, locking or DTO question. It affects whether an actual
 trainer is allowed to spend coins. Per the macro's product-rule stop condition,
 no purchase implementation or migration 020 was created.
 
-## Audited Surface
+### Audited Surface
 
 - `app/tienda/sections.py`, `catalog_render.py`, `catalog_data.py`, `discounts.py`,
   `money.py`, `redeem.py`: purchase confirmation, availability, pricing, promotion
@@ -186,7 +210,7 @@ no purchase implementation or migration 020 was created.
 - Existing shop-promotion, domain, repository and activity tests; full existing
   suite remains green. No new purchase behavior was tested or asserted as done.
 
-## Actual Legacy Purchase Semantics
+### Actual Legacy Purchase Semantics
 
 | Concern | Evidence and current behavior |
 | --- | --- |
@@ -216,7 +240,7 @@ Relevant implementation anchors:
 - `app/storage_shop.py:980`: spending aggregation.
 - `app/activity/events.py:297`: public PURCHASE_COMPLETED payload/dedupe.
 
-## Coins And V2 Integrity
+### Coins And V2 Integrity
 
 Legacy `money_breakdown_from_parts` derives available coins from league rewards,
 four coins per badge and the claimed 12-coin league-finished bonus, minus all
@@ -254,7 +278,7 @@ eligibility contract is settled. The proposed implementation remains:
 
 These are proposed implementation choices, NOT shipped code.
 
-## Promotions Are A Separate Mutation, Not Irrelevant To Eligibility
+### Promotions Are A Separate Mutation, Not Irrelevant To Eligibility
 
 Ordinary and promotional persistence paths are distinguishable:
 `add_purchase` versus `purchase_shop_discount`. No need to implement stock claim
@@ -277,7 +301,7 @@ next slice. But that read needs the authoritative current-jornada contract.
 The public promotion view currently omits pending/future offers; backend
 eligibility cannot rely on that sanitized view alone.
 
-## Missing Temporal And Sanction Contract
+### Missing Temporal And Sanction Contract
 
 1. Legacy current jornada comes from session `league_tramo`, then persisted
    `settings.league_state.tramo`, default 1 (`app/liga/context.py:13`). Store
@@ -302,7 +326,7 @@ unresolved penalty forever can keep it active after 4. Looking only for one
 `open` row can leave the store undefined before opening/between rounds. These
 are different product outcomes, not equivalent implementations.
 
-## Decision Needed And Recommendation
+### Decision Needed And Recommendation
 
 Next subphase only: **Phase 8D.0 - authoritative current-jornada and store-ban
 contract**, preserving existing rules. No implementation in this audit.
@@ -322,7 +346,7 @@ After approval: implement 020 and the API with tests for future/current/expired
 bans, pending commodity/non-commodity offers, price authority, no double-spend,
 idempotency and rollback. Then run the authorized local-to-staging gates.
 
-## Macro Result At This Stop
+### Macro Result At This Stop
 
 - START: `main`, `931db66`, origin divergence 0/0, only protected user guide.
 - 8C remote: PASS; 019 applied by MCP as `20260922162954_019_team_lock_api`.
