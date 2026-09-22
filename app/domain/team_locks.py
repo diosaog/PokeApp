@@ -53,3 +53,48 @@ class TeamLock:
         object.__setattr__(self, "save_record_id", optional_id(self.save_record_id))
         object.__setattr__(self, "save_sha256", clean_text(self.save_sha256))
         object.__setattr__(self, "deadline_at", clean_text(self.deadline_at))
+
+
+@dataclass(frozen=True)
+class TeamLockSource:
+    """Server-side rows needed for the V2 mutation, never browser-supplied."""
+
+    season: JsonObject | None
+    matchday: JsonObject | None
+    participant: JsonObject | None
+    save: JsonObject | None
+    parsed: JsonObject | None
+
+
+@dataclass(frozen=True)
+class TeamLockMutation:
+    season_id: str
+    matchday_id: str
+    trainer_id: str
+    season_player_id: str
+    save_file_id: str
+    save_sha256: str
+    parsed_save_id: str
+    parsed_payload: JsonObject
+    public_team_snapshot: list[JsonObject]
+    private_team_snapshot: list[JsonObject]
+
+
+@dataclass(frozen=True)
+class TeamLockRecord:
+    """Persisted V2 receipt; the legacy public-only TeamLock stays compatible."""
+
+    id: str
+    season_id: str
+    matchday_id: str
+    trainer_id: str
+    season_player_id: str
+    save_file_id: str
+    save_sha256: str
+    locked_at: str
+    deadline_at: str | None
+    is_late: bool
+    public_team_snapshot: list[JsonObject]
+    private_team_snapshot: list[JsonObject]
+    created_at: str
+    updated_at: str

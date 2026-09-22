@@ -220,7 +220,7 @@ class DomainServiceTests(unittest.TestCase):
             trainer_id="Anto",
             participant_ids=version.participant_ids,
             matchday_number=1,
-            team=(milotic,),
+            team=(milotic,) * 6,
             rules=version.rules,
         )
         locked = team_locks.build_team_lock(

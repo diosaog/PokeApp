@@ -1,5 +1,9 @@
 from __future__ import annotations
 
+from datetime import datetime
+from typing import Any
+from uuid import UUID
+
 from pydantic import BaseModel, ConfigDict, Field
 
 
@@ -44,3 +48,26 @@ class MeResponse(BaseModel):
     display_name: str
     is_admin: bool
     globally_enabled: bool
+
+
+class TeamLockRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    save_file_id: UUID
+
+
+class TeamLockResponse(BaseModel):
+    id: UUID
+    season_id: UUID
+    matchday_id: UUID
+    trainer_id: UUID
+    season_player_id: UUID
+    save_file_id: UUID
+    save_sha256: str = Field(pattern=r"^[a-f0-9]{64}$")
+    locked_at: datetime
+    deadline_at: datetime | None
+    is_late: bool
+    public_team_snapshot: list[dict[str, Any]] = Field(min_length=6, max_length=6)
+    private_team_snapshot: list[dict[str, Any]] = Field(min_length=6, max_length=6)
+    created_at: datetime
+    updated_at: datetime

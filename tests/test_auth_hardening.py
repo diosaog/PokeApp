@@ -90,7 +90,7 @@ class AuthHardeningTests(unittest.TestCase):
 
     def test_h09_backend_errors_are_typed_chained_and_not_exposed(self):
         secret = "dummy-private-backend-detail"
-        repo = self.repository({"code": "22P02", "message": secret}, status=400)
+        repo = self.repository({"code": "22P02", "message": secret, "hint": None, "details": None}, status=400)
         with self.assertRaises(AuthBackendError) as caught:
             repo.find_for_login("anto")
         self.assertIsNotNone(caught.exception.__cause__)
@@ -110,7 +110,7 @@ class AuthHardeningTests(unittest.TestCase):
                 self.assertNotIn(value, response.text)
 
     def test_update_failure_is_chained_backend_error(self):
-        repo = self.repository({"code": "23505", "message": "dummy SQL detail"}, status=409)
+        repo = self.repository({"code": "23505", "message": "dummy SQL detail", "hint": None, "details": None}, status=409)
         with self.assertRaises(AuthBackendError) as caught:
             repo.set_auth_user_id(TRAINER_ID, AUTH_USER_ID)
         self.assertIsNotNone(caught.exception.__cause__)

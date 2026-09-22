@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+from concurrent.futures import ThreadPoolExecutor
 import os
 import subprocess
 import sys
@@ -960,13 +961,36 @@ def _psql_text(args: argparse.Namespace, sql: str) -> None:
 
 
 def _safe_database_name(name: str) -> None:
-    allowed = {"pokeapp_v2_validation", "postgres"}
-    if name in allowed or name.startswith("pokeapp_v2_validation"):
+    if name.startswith("pokeapp_v2_validation"):
         return
     raise SystemExit(
         "Refusing destructive validation against database "
         f"{name!r}. Use a database named pokeapp_v2_validation*."
     )
+
+
+def _validate_team_lock_api(args: argparse.Namespace) -> None:
+    fixture_dir = ROOT / "tests" / "sql"
+    setup = (fixture_dir / "team_lock_setup.sql").read_text(encoding="utf-8")
+    checks = (fixture_dir / "team_lock_checks.sql").read_text(encoding="utf-8")
+    cleanup = (fixture_dir / "team_lock_cleanup.sql").read_text(encoding="utf-8")
+    print("== Team Lock RPC, roles, snapshots, replacement and rollback ==")
+    _psql_text(args, "begin;\n" + setup + checks + "\nrollback;")
+    print("== Team Lock concurrent first writes ==")
+    _psql_text(args, "begin;\n" + setup + "\ncommit;")
+    try:
+        with ThreadPoolExecutor(max_workers=4) as pool:
+            futures = [pool.submit(_psql_text, args,
+                "begin; set local role service_role; select id from pokeapp_team_lock_test.run(); select pg_sleep(0.2); commit;"
+            ) for _ in range(4)]
+            for future in futures:
+                future.result()
+        _psql_text(args, """
+select pokeapp_team_lock_test.assert_true((select count(*)=1 from public.team_locks), 'concurrent unique lock');
+select pokeapp_team_lock_test.assert_true((select count(*)=1 from public.activity_events), 'concurrent event dedupe');
+""")
+    finally:
+        _psql_text(args, "begin;\n" + cleanup + "\ncommit;")
 
 
 def _apply_migrations(args: argparse.Namespace) -> None:
@@ -1021,6 +1045,8 @@ def main() -> int:
     if not args.allow_destructive_reset:
         raise SystemExit("--allow-destructive-reset is required for this validation.")
     _safe_database_name(args.database)
+    if args.host not in {"127.0.0.1", "localhost", "::1"}:
+        raise SystemExit("Refusing schema reset outside a local validation server.")
 
     print("== Prepare Supabase role mocks ==")
     _prepare_supabase_role_mocks(args)
@@ -1039,6 +1065,10 @@ def main() -> int:
 
     print(f"== Second {args.build_source} build ==")
     _build_schema(args)
+
+    print("== Team Lock migration idempotence ==")
+    _psql(args, ROOT / "supabase/v2/migrations/019_team_lock_api.sql")
+    _validate_team_lock_api(args)
 
     print("== Real schema fixtures and introspection ==")
     with tempfile.NamedTemporaryFile("w", suffix=".sql", delete=False, encoding="utf-8") as tmp:

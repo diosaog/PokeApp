@@ -9,6 +9,10 @@ class NotFoundError(RepositoryError):
     """Raised when a requested persisted object does not exist."""
 
 
+class PermissionDeniedError(RepositoryError):
+    """Raised when an authenticated principal is not eligible for an operation."""
+
+
 class ConflictError(RepositoryError):
     """Raised when persisted state conflicts with the requested operation."""
 

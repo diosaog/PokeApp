@@ -1,0 +1,8 @@
+# Isolated API/test environment. Does not change the legacy runtime requirements.
+-r requirements.txt
+supabase==2.27.2
+postgrest==2.27.2
+fastapi==0.141.1
+starlette==1.6.0
+httpx==0.28.1
+uvicorn==0.53.0

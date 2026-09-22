@@ -9,6 +9,7 @@ from app.api.ports import AccessTokenVerifierPort, SessionRefreshPort, TrainerPr
 from app.api.rate_limit import InMemoryWindowRateLimiter, RateLimiter
 from app.auth.ports import TrainerAuthRepository
 from app.auth.service import PinAuthBridge
+from app.repositories.protocols import TeamLockMutationRepository
 
 
 @dataclass(frozen=True)
@@ -19,6 +20,7 @@ class ApiContainer:
     trainer_repository: TrainerAuthRepository | None = None
     principal_repository: TrainerPrincipalRepository | None = None
     rate_limiter: RateLimiter | None = None
+    team_lock_repository: TeamLockMutationRepository | None = None
 
 
 def get_api_container(request: Request) -> ApiContainer:
@@ -33,6 +35,7 @@ def create_default_container(config: APIConfig | None = None) -> ApiContainer:
     )
     auth_client = None
     trainer_repo = None
+    team_lock_repo = None
 
     if config.supabase_url and config.supabase_anon_key:
         from app.auth.supabase_adapter import SupabaseAuthClient
@@ -46,6 +49,11 @@ def create_default_container(config: APIConfig | None = None) -> ApiContainer:
             config.supabase_url,
             config.supabase_service_role_key,
         )
+        from app.repositories.supabase.team_locks import SupabaseTeamLockRepository
+
+        team_lock_repo = SupabaseTeamLockRepository.from_url_key(
+            config.supabase_url, config.supabase_service_role_key,
+        )
 
     auth_bridge = None
     if auth_client is not None and trainer_repo is not None and config.auth_pin_pepper:
@@ -58,4 +66,5 @@ def create_default_container(config: APIConfig | None = None) -> ApiContainer:
         trainer_repository=trainer_repo,
         principal_repository=trainer_repo,
         rate_limiter=rate_limiter,
+        team_lock_repository=team_lock_repo,
     )

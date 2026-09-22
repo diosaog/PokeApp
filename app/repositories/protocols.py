@@ -9,7 +9,7 @@ from app.domain.league import MatchdaySnapshot
 from app.domain.saves import SaveRecord
 from app.domain.seasons import Season, SeasonVersion
 from app.domain.shop import Purchase, Redemption, ShopItem, ShopPromotion
-from app.domain.team_locks import TeamLock
+from app.domain.team_locks import TeamLock, TeamLockMutation, TeamLockRecord, TeamLockSource
 from app.domain.trainers import Trainer, TrainerFlags, TrainerStatus
 from app.domain.trials import TrialCase
 
@@ -146,6 +146,16 @@ class TeamLockRepository(Protocol):
         ...
 
     def upsert_team_lock(self, lock: TeamLock) -> TeamLock | None:
+        ...
+
+
+class TeamLockMutationRepository(Protocol):
+    def load_source(
+        self, *, season_id: str, matchday_id: str, trainer_id: str, save_file_id: str,
+    ) -> TeamLockSource:
+        ...
+
+    def upsert_with_activity(self, mutation: TeamLockMutation) -> TeamLockRecord:
         ...
 
 

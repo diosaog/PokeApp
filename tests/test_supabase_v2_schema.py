@@ -22,6 +22,41 @@ def _all_sql() -> str:
 
 
 class SupabaseV2SchemaTests(unittest.TestCase):
+    def test_team_lock_rpc_contract_is_backend_only_and_atomic(self) -> None:
+        sql = (MIGRATIONS_DIR / "019_team_lock_api.sql").read_text(encoding="utf-8").lower()
+        signature = "public.api_upsert_team_lock(uuid, uuid, uuid, uuid, uuid, text, uuid, jsonb, jsonb, jsonb)"
+        function = sql.split("as $$", 1)[1].split("$$;", 1)[0]
+        for role in ("public", "anon", "authenticated"):
+            self.assertIn(f"revoke all on function {signature} from {role}", sql)
+        self.assertIn(f"grant execute on function {signature} to service_role", sql)
+        self.assertIn("security invoker", sql)
+        self.assertIn("set search_path = ''", sql)
+        self.assertIn("returns setof public.team_locks", sql)
+        self.assertIn("on conflict on constraint uq_team_locks_matchday_trainer do update", function)
+        self.assertIn("on conflict (dedupe_key) where dedupe_key is not null and dedupe_key <> '' do nothing", function)
+        self.assertLess(function.index("insert into public.team_locks"), function.index("insert into public.activity_events"))
+        self.assertLess(function.index("insert into public.activity_events"), function.index("return next lock_row"))
+        self.assertNotIn("exception when", function)
+        self.assertNotIn("commit;", function)
+        self.assertGreaterEqual(function.count("for share"), 6)
+        for invariant in ("save_row.sha256 is distinct from p_save_sha256", "parsed_row.payload is distinct from p_parsed_payload",
+                          "trainer_row.globally_enabled", "player_row.status <> 'active'", "matchday_row.status not in ('scheduled', 'open')",
+                          "jsonb_array_length(p_private_team_snapshot) <> 6", "season_id = p_season_id and trainer_id = p_trainer_id"):
+            self.assertIn(invariant, function)
+        for forbidden in ("create policy", "alter view", "drop table", "public.saves", "public.settings", "http", "dblink"):
+            self.assertNotIn(forbidden, sql)
+
+    def test_team_lock_real_sql_fixtures_cover_permissions_and_rollback(self) -> None:
+        fixtures = (ROOT / "tests/sql/team_lock_checks.sql").read_text(encoding="utf-8")
+        for check in ("RPC grants are backend-only", "one logical lock", "replacement receipt", "replacement keeps first event",
+                      "snapshot independence", "owner private read", "other trainer private denied", "admin private read",
+                      "replacement rollback", "insert rollback", "no orphan event", "authenticated direct update denied"):
+            self.assertIn(check, fixtures)
+        runner = (ROOT / "tools/validate_supabase_v2_schema.py").read_text(encoding="utf-8")
+        self.assertIn("ThreadPoolExecutor(max_workers=4)", runner)
+        self.assertIn("concurrent unique lock", runner)
+        self.assertIn("concurrent event dedupe", runner)
+
     def test_expected_migration_set_is_versioned_and_ordered(self) -> None:
         names = [path.name for path in _migration_files()]
 
@@ -46,6 +81,7 @@ class SupabaseV2SchemaTests(unittest.TestCase):
                 "016_public_team_locks_visibility.sql",
                 "017_public_coin_balances_visibility.sql",
                 "018_public_views_visibility.sql",
+                "019_team_lock_api.sql",
             ],
         )
         for path in _migration_files():
@@ -254,7 +290,7 @@ class SupabaseV2SchemaTests(unittest.TestCase):
         self.assertTrue(bootstrap.startswith("-- ONLY FOR EMPTY POKEAPP V2 DATABASE."))
         self.assertEqual(bootstrap, render_bootstrap())
         self.assertIn(
-            "Source of truth: supabase/v2/migrations/001_core.sql through 018_public_views_visibility.sql",
+            "Source of truth: supabase/v2/migrations/001_core.sql through 019_team_lock_api.sql",
             bootstrap,
         )
         self.assertNotIn("drop table", lowered)

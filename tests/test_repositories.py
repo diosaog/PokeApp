@@ -223,7 +223,7 @@ class RepositoryTests(unittest.TestCase):
             trainer_id="Anto",
             locked_at="2026-01-01T00:00:00Z",
             matchday_number=1,
-            team=(PublicPokemon(species="Milotic"),),
+            team=(PublicPokemon(species="Milotic"),) * 6,
             participant_ids=("Anto",),
             rules=SeasonRules(team_lock_required=True),
         )
