@@ -189,9 +189,11 @@ Documento de detalle:
 docs/security-rls.md
 ```
 
-Fase 8 todavia debe implementar las operaciones criticas API/RPC. No uses el
-cliente de navegador para escribir compras, ledger, parsed saves o team locks
-directamente.
+Phase 8C implementa Team Lock + actividad via RPC backend-only (019), validada
+localmente. Las demas operaciones criticas API/RPC siguen pendientes. No uses el
+navegador para escribir compras, ledger, parsed saves o team locks directamente.
+019 NO se ha aplicado en Supabase real durante esta fase. Una base V2 existente
+necesitara solo esa migration tras autorizacion, no bootstrap ni reset.
 
 ## Migrations Y Bootstrap
 
@@ -215,8 +217,9 @@ Orden oficial de migrations:
 16. `016_public_team_locks_visibility.sql`
 17. `017_public_coin_balances_visibility.sql`
 18. `018_public_views_visibility.sql`
+19. `019_team_lock_api.sql`
 
-Si cambia alguna migration 001-018, regenera el bootstrap:
+Si cambia alguna migration 001-019, regenera el bootstrap:
 
 ```powershell
 py tools\generate_supabase_v2_bootstrap.py

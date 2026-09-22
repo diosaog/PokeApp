@@ -1,10 +1,10 @@
 # Supabase V2 Security And RLS
 
-Checkpoint: Fase 8A.1.
+Checkpoint: Phase 8B-H DONE; Phase 8C DONE local (2026-09-22).
 
 This document is the security contract for the greenfield Supabase V2 schema. It
-does not connect Streamlit, React or API runtime yet. It defines what the future
-client/API may read or mutate.
+does not connect Streamlit or React to V2. The isolated API now implements Auth
+and the Team Lock mutation; migration 019 has NOT been applied remotely.
 
 ## Security Model
 
@@ -63,7 +63,7 @@ of relying only on Supabase token endpoint limits.
 ## Phase 8B HTTP Auth API
 
 FastAPI is the Python transport for the first API slice. It is isolated from the
-legacy Streamlit runtime and does not migrate business mutations yet.
+legacy Streamlit runtime. Team Lock is implemented separately in Phase 8C below.
 
 Public surface:
 
@@ -83,7 +83,34 @@ Security behavior:
   `get_user(access_token)` through a port/adapter and uses the verified user id.
 - `/v1/me` returns trainer id, display name, `is_admin` and `globally_enabled`
   only. The client must not become the authority for admin decisions.
-- The API may use `service_role` only server-side for trainer lookup/mapping.
+- The API may use `service_role` only server-side for lookup/mapping and the
+  explicitly authorized Team Lock repository/RPC, never as a browser credential.
+
+## Phase 8B-H And 8C Boundaries
+
+- UUID vs slug is decided locally, not by an invalid UUID database query.
+- Auth mapping updates verify exactly one matching trainer/Auth UUID receipt.
+- `require_enabled_principal` rejects disabled principals for mutations, including
+  admins. `/v1/me` still describes a verified disabled principal.
+- Team Lock PUT is self-service: identity comes from verified JWT mapping. Even
+  an admin cannot use this endpoint to lock another trainer's team.
+- The body permits only `save_file_id`. Client identity, hash, snapshots,
+  deadlines and late flags are rejected as extra fields.
+- Application validates season/matchday/membership, own parsed non-deleted save
+  and exactly six Pokemon. The SQL transaction rechecks eligibility and the
+  parsed payload to prevent source changes between read and write.
+- Migration 019 adds `api_upsert_team_lock`, SECURITY INVOKER with fixed empty
+  search_path. EXECUTE is revoked from PUBLIC/anon/authenticated and granted to
+  service_role. Existing table/view grants and RLS policies are unchanged.
+- The trusted backend supplies DTO-derived snapshots. The RPC checks their
+  structure and source version, not a second independent privacy projection.
+- Lock upsert and deduplicated TEAM_LOCKED event commit or roll back together.
+  Failures return stable API errors without backend SQL/credential details.
+- Public snapshots omit ability, nature, IVs, EVs, original trainer and arbitrary
+  metadata. Private snapshots remain owner/admin through existing views/RLS.
+
+PostgreSQL local role/rollback/concurrency checks passed; real Supabase 019
+validation is NOT RUN. See [Phase 8C report](phase8c-team-lock.md).
 
 ## Helper Functions
 
@@ -200,7 +227,7 @@ Critical future API operations:
 - redeem purchase + flags/effect + activity event;
 - upload save metadata + storage write + parse queue;
 - write parsed save from parser;
-- lock team for matchday;
+- lock team for matchday: implemented locally in Phase 8C via backend-only RPC;
 - close matchday + rewards + snapshot + movements;
 - create/update season config;
 - retire/abandon/disqualify trainer;
@@ -240,7 +267,7 @@ cutover.
 
 Validated against PostgreSQL 17.11 local with Supabase role mocks:
 
-- migrations 001-018 apply in order;
+- migrations 001-019 apply in order (019 added and validated locally in 8C);
 - `bootstrap.sql` applies as a single SQL Editor artifact;
 - reset/build/rebuild works;
 - all 32 public V2 tables have RLS enabled;
@@ -251,6 +278,8 @@ Validated against PostgreSQL 17.11 local with Supabase role mocks:
 - admin cannot directly insert into the server-only coin ledger;
 - anon cannot read authenticated app projections;
 - service_role bypass sees private rows as expected.
+- Migration 019 permissions, replacement, frozen snapshots, event dedupe,
+  real rollback on event failure and four concurrent writes pass locally.
 
 Pending before production cutover:
 
@@ -328,6 +357,6 @@ Status as of this checkpoint:
   the real staging project.
 - The real validator passed against the live staging project with
   `RESULT ok checks=13`.
-- Fase 7.1 and Fase 7.2 are closed. Fase 8 is the next phase and must start
-  with the authentication identity bridge design; runtime remains Streamlit
-  legacy and Supabase V2 is not runtime source of truth yet.
+- Fase 7.1 and Fase 7.2 are closed. Auth bridge/API and 8B-H are implemented;
+  Phase 8C is DONE local. Migration 019 is NOT APPLIED remotely in this task.
+  Runtime remains Streamlit legacy and V2 is not its source of truth.

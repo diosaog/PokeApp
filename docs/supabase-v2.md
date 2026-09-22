@@ -41,6 +41,8 @@ supabase/v2/
     016_public_team_locks_visibility.sql
     017_public_coin_balances_visibility.sql
     018_public_views_visibility.sql
+    019_team_lock_api.sql
+  bootstrap.sql
   reset_dev.sql
 ```
 
@@ -296,8 +298,8 @@ Fase 7 materializo esta clasificacion en SQL:
 Regla operativa:
 
 - el cliente debe leer desde vistas;
-- las escrituras criticas de compras, ledger, redenciones, saves parseados,
-  team locks y activity events quedan para API/RPC de Fase 8;
+- las escrituras criticas quedan server-only; Team Lock + activity tienen RPC
+  en 019 (DONE local); compras, ledger, redenciones y saves siguen pendientes;
 - `service_role` es solo backend/server;
 - admin es `trainers.is_admin`, no un nombre hardcodeado.
 
@@ -314,7 +316,7 @@ Preparadas para API/RPC de Fase 8:
 - promotional purchase stock claim;
 - normal purchase + ledger + activity event;
 - redemption + purchase status + effect flags;
-- team lock upsert;
+- team lock upsert + activity event: implementado en 019, validado localmente;
 - close matchday + rewards + ledger + snapshot + movements;
 - config version creation;
 - trainer status change + activity event;
@@ -323,6 +325,25 @@ Preparadas para API/RPC de Fase 8:
 
 Fase 6 no mete todo el domain Python en PL/pgSQL. Las funciones SQL solo deben
 existir cuando protejan integridad o atomicidad que no puede confiarse al cliente.
+
+## Phase 8C Team Lock
+
+`019_team_lock_api.sql` anade la RPC backend-only `api_upsert_team_lock`.
+Revalida entrenador, temporada activa, jornada scheduled/open, participante
+activo y save propio parseado. Bloquea las filas fuente, compara payload/hash,
+reemplaza sobre `uq_team_locks_matchday_trainer` e inserta TEAM_LOCKED con dedupe
+en la misma transaccion. Si falla el evento, se revierte el lock.
+
+No cambia tablas, constraints, policies, vistas ni migrations 001-018. Public y
+private snapshots son seis DTOs derivados por el servidor del ParsedSave; no
+entra el parser raw en el endpoint. `deadline_at=NULL`, `is_late=false` hasta
+disponer de una fuente temporal V2 autoritativa; no se importa el sentinel V1.
+
+019 esta incluida en el bootstrap generado y pasa PostgreSQL 17.11 local en ambos
+modos (migrations/bootstrap), con permisos, rollback y concurrencia. NO aplicada
+en Supabase real. Para una V2 ya instalada, el futuro gate remoto aplicara solo
+019 con autorizacion expresa, nunca reset/bootstrap sobre la base existente.
+Detalles: [Phase 8C](phase8c-team-lock.md).
 
 ## Indexes And Constraints
 
@@ -384,7 +405,7 @@ Validacion incluida:
   IDs, season scoping, constraints criticas, ausencia de blobs V1 y reset
   destructivo separado.
 - `tools/validate_supabase_v2_schema.py` ejecuta validacion real contra Postgres:
-  reset V2, migrations 001-018, seed idempotente, reset, rebuild, fixtures de
+  reset V2 local, migrations 001-019, seed idempotente, reset, rebuild, fixtures de
   introspeccion/constraints y checks RLS con roles tipo Supabase.
 
 ### Real Database Validation
@@ -476,7 +497,7 @@ Fase 7 se valido en PostgreSQL 17.11 local aislado usando roles mock de Supabase
 
 Resultado:
 
-- migrations 001-018 aplican en orden;
+- migrations 001-019 aplican en orden (019 validada solo localmente);
 - `bootstrap.sql` se regenera desde las mismas migrations;
 - RLS queda activo en las 32 tablas publicas V2;
 - un entrenador autenticado ve sus filas privadas de saves, parsed saves,
@@ -508,9 +529,9 @@ Estado staging real actual:
   `storage.objects`.
 - El validador JWT/Storage completo ya pasó contra el staging real con
   `RESULT ok checks=13`.
-- Fase 7.1 y Fase 7.2 quedan cerradas. Fase 8 es la siguiente fase; el runtime
-  sigue siendo Streamlit legacy, Supabase V2 todavia no es source of truth de
-  runtime y V1 no se ha eliminado.
+- Fase 7.1 y Fase 7.2 quedan cerradas. 8B-H esta DONE y 8C DONE local; 019 NO
+  aplicada remotamente. El runtime sigue siendo Streamlit legacy; Supabase V2
+  no es su source of truth y V1 no se ha eliminado.
 
 ## Decision Log
 

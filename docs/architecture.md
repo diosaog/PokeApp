@@ -156,8 +156,8 @@ Desde Fase 7, Supabase V2 tiene una capa de seguridad real:
   redenciones y ledger quedan owner/admin.
 - `raw-saves` queda como bucket privado con policies por path de `trainer_id` en
   Supabase Storage.
-- Compras, ledger, redenciones, parsed saves, team locks y activity events
-  siguen esperando API/RPC server-side en Fase 8.
+- Compras, ledger, redenciones y parsed saves siguen esperando API/RPC
+  server-side. Team Lock + ActivityEvent ya tienen la ruta local de Fase 8C.
 
 Desde Fase 8A.1, existe el nucleo del puente de identidad para mantener la UX de
 login actual sin usar el PIN como password real de Supabase:
@@ -200,6 +200,30 @@ uvicorn app.api.main:app --reload
 - Las rutas son transporte fino: no contienen reglas de negocio de Liga/Tienda.
 - Fase 8B no migra mutaciones de producto; la primera mutacion real queda para
   Fase 8C: Team Lock V2.
+
+Desde Fase 8B-H, el adapter de Auth usa el builder real PostgREST 2.27.2:
+update/eq/execute y comprobacion de la fila devuelta. UUID y slug se distinguen
+antes de consultar; las mutaciones exigen `require_enabled_principal`, sin
+impedir que `/v1/me` describa un trainer deshabilitado con sesion valida.
+
+Desde Fase 8C (DONE local), la primera mutacion de producto es:
+
+```text
+PUT /v1/seasons/{season_id}/matchdays/{matchday_id}/team-lock
+Bearer verificado -> trainer habilitado -> application.lock_team_v2
+  -> lecturas V2 acotadas -> PrivatePokemon / PublicPokemon (exactamente 6)
+  -> SupabaseTeamLockRepository -> api_upsert_team_lock
+  -> upsert team_locks + TEAM_LOCKED en una transaccion PostgreSQL
+```
+
+El cliente solo envia `save_file_id`. Los snapshots y el hash proceden de filas
+servidor, no del body. La RPC revalida las filas bajo bloqueo y compara el payload
+parseado para rechazar cambios concurrentes. El dominio no importa SDK, FastAPI,
+Streamlit ni parser; la proyeccion reutiliza DTOs y normalizacion ya existentes.
+La RPC es SECURITY INVOKER, con search_path fijo y EXECUTE solo para service_role.
+No se modifica el runtime Streamlit, V1, el parser ni Discord. No hay dual-write.
+Migration 019 y bootstrap se han validado solo localmente. Contrato, limites y
+reproduccion: [Phase 8C](phase8c-team-lock.md).
 
 ## Problema Principal
 
@@ -269,5 +293,10 @@ Ninguna fase debe terminar con la suite previamente verde en rojo.
 
 Minimo antes de avanzar:
 
-- `py -m compileall -q .`
-- `py -m unittest discover -s tests`
+- `.venv-api\Scripts\python.exe -m compileall -q -x '[\\/](\.venv[^\\/]*|\.git|node_modules)[\\/]' .`
+- `.venv-api\Scripts\python.exe tools/run_unit_tests.py`
+- `git diff --check`
+
+Desde 8C, la suite usa SQLite temporal y no hereda credenciales reales. El runner
+ejecuta unittest normal; no sustituye errores de persistencia por respuestas
+vacias. Entorno y comandos SQL locales: `docs/phase8c-team-lock.md`.

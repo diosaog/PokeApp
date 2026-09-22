@@ -1,6 +1,6 @@
 # PokeApp 2.0 Project Checkpoint
 
-Checkpoint date: 2026-08-16
+Checkpoint date: 2026-09-22 (macro 8B-H + 8C, local validation).
 
 Base HEAD before original checkpoint documentation:
 `f6d8fc179f8c9e021bdf6b4fa1e2687e2d7e8b2a`
@@ -27,8 +27,13 @@ Latest architecture state:
 - Fase 8A.1 closed: PIN UX to Supabase Auth identity bridge core.
 - Fase 8B closed: isolated FastAPI skeleton for health, PIN login, refresh and
   `/v1/me` bearer identity lookup.
+- Fase 8B-H closed: real SDK-compatible auth mapping, UUID/slug lookup and
+  globally enabled mutation guard; `/v1/me` remains readable when disabled.
+- Fase 8C DONE local: self-service Team Lock API, authoritative ParsedSave
+  snapshots and atomic lock/activity RPC in migration 019.
 - Runtime remains Streamlit legacy through wrappers.
-- Next exact phase: Fase 8C - Team Lock V2 API mutation.
+- Next gate: explicitly authorized Supabase validation of 019. Then continue
+  remaining critical Phase 8 API operations, starting with shop purchase.
 
 ## Current State
 
@@ -55,8 +60,10 @@ Closed phases:
 - Fase 7.2: Supabase Storage Cloud compatibility fix completed and applied.
 - Fase 8A.1: PIN auth bridge core.
 - Fase 8B: FastAPI skeleton, JWT verification and PIN-login rate limiting.
+- Fase 8B-H: authentication hardening. DONE.
+- Fase 8C: Team Lock V2 API mutation. DONE local; 019 NOT APPLIED remotely.
 
-Validation at this checkpoint:
+Historical staging validation (Phase 7, not rerun in this task):
 
 - `py -m compileall -q .`
 - `py -m unittest discover -s tests`
@@ -64,7 +71,12 @@ Validation at this checkpoint:
 - `py tools\validate_supabase_v2_rls.py` passed against real staging with
   `RESULT ok checks=13`.
 
-Verified current suite after Fase 8B tooling: 146 tests.
+Current validation: 203 tests passed, zero failed/skipped, using
+`.venv-api\Scripts\python.exe tools/run_unit_tests.py`. Compileall and diff-check
+passed. PostgreSQL 17.11 local passed both migrations 001-019 and bootstrap,
+including real RPC replacement, dedupe, rollback, roles and concurrent writes.
+The runner uses disposable SQLite data, not V1. See
+[Phase 8C report](phase8c-team-lock.md) for exact commands and environment.
 
 ## What Works
 
@@ -199,9 +211,10 @@ Persistence:
 - Many official entities still live in generic `settings` JSON.
 - Streamlit UI and business rules are still coupled in several modules.
 - Runtime Streamlit still uses legacy/V1 persistence; V2 is not connected yet.
-- Business mutation API/RPC is not implemented yet; Fase 8B only exposes auth
-  and identity endpoints.
-- ActivityEvents are stored in settings, not an append-only table.
+- Team Lock is the first isolated V2 business mutation; the other critical
+  Phase 8 APIs remain pending. Migration 019 has not been applied remotely.
+- Legacy ActivityEvents remain in settings; the new V2 lock/event transaction
+  writes V2 tables only, without dual-write or Discord delivery.
 - Copa and Juicios are functional legacy islands and need contracts later.
 - Parser bridge is treated as a black box but not fully isolated.
 - Some legacy helper names remain, especially around wipe/revive wording.
@@ -213,12 +226,13 @@ Persistence:
 Next exact phase:
 
 ```text
-Fase 8C - Team Lock V2 API mutation
+Phase 8C remote validation gate (requires explicit authorization)
+Then Phase 8: next critical mutation, shop purchase + ledger + activity
 ```
 
-Fase 7.1, Fase 7.2, Fase 8A.1 and Fase 8B are closed. Continue with Team Lock
-V2 API mutation design/implementation. Do not cut over Streamlit or delete V1
-without explicit approval.
+Fase 7.1, Fase 7.2, Fase 8A.1, Fase 8B and 8B-H are closed. Fase 8C is DONE
+local. Do not infer that all Phase 8 APIs or remote deployment are complete.
+Do not cut over Streamlit or delete V1 without explicit approval.
 
 ## Do Not Do When Resuming
 
@@ -243,7 +257,9 @@ without explicit approval.
 - Fase 8A.1: PIN auth bridge core. Closed.
 - Fase 8B: FastAPI skeleton, JWT verification and PIN-login rate limiting.
   Closed.
-- Fase 8C: Team Lock V2 API mutation.
+- Fase 8B-H: auth hardening. Closed.
+- Fase 8C: Team Lock V2 API mutation. DONE local; remote gate pending.
+- Fase 8 remaining: shop, league/season/admin/trials/Hall critical API operations.
 - Fase 9: parser boundary.
 - Fase 10: React / Cloudflare frontend.
 - Fase 11: data migration.
