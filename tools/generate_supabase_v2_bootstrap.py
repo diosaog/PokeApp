@@ -30,6 +30,7 @@ EXPECTED_MIGRATIONS = [
     "019_team_lock_api.sql",
     "020_current_matchday_store_ban_contract.sql",
     "021_normal_purchase_api.sql",
+    "022_promotional_purchase_api.sql",
 ]
 
 FORBIDDEN_TOKENS = [

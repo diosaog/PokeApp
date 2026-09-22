@@ -1,6 +1,6 @@
 # PokeApp 2.0 Project Checkpoint
 
-Checkpoint date: 2026-09-22 (Phase 8D.0 + 8D Supabase V2 staging validation).
+Checkpoint date: 2026-09-22 (Phase 8E local validation; staging pending).
 
 Base HEAD before original checkpoint documentation:
 `f6d8fc179f8c9e021bdf6b4fa1e2687e2d7e8b2a`
@@ -36,8 +36,12 @@ Latest architecture state:
   Store Ban windows, five remote check groups and cleanup PASS.
 - Phase 8D normal purchase DONE local + staging: 021 atomic purchase/ledger/event,
   idempotency, promotion eligibility and wallet serialization. 29 remote checks
-  (5 context + R01-R24) and cleanup PASS. Next: 8E promotional purchase claim.
+  (5 context + R01-R24) and cleanup PASS.
   Historical blocker resolved; [contract and evidence](phase8d-purchases.md).
+- Phase 8E DONE locally: 022 atomic promotional purchase, wallet-before-stock
+  locking, unique trainer claim and historical idempotent receipt. Staging pending.
+  [Contract and validation](phase8e-promotional-purchases.md). Next after staging:
+  8F redemption/effect boundary, not implemented.
 
 ## Current State
 
@@ -67,7 +71,8 @@ Closed phases:
 - Fase 8B-H: authentication hardening. DONE.
 - Fase 8C: Team Lock V2 API mutation. DONE + Supabase V2 staging validated.
 - Fase 8D.0: current matchday and Store Ban contract. DONE local + staging.
-- Fase 8D: atomic normal purchase. DONE local + staging; 8E not started.
+- Fase 8D: atomic normal purchase. DONE local + staging.
+- Fase 8E: atomic promotional purchase. DONE local; staging pending.
 
 Historical staging validation (Phase 7, not rerun in this task):
 
@@ -77,10 +82,11 @@ Historical staging validation (Phase 7, not rerun in this task):
 - `py tools\validate_supabase_v2_rls.py` passed against real staging with
   `RESULT ok checks=13`.
 
-Current validation: 239 tests passed, zero failed/skipped, using
+Current validation: 255 tests passed, zero failed/skipped, using
 `.venv-api\Scripts\python.exe tools/run_unit_tests.py`. Compileall and diff-check
-passed. PostgreSQL 17.11 local passed both migrations 001-021 and bootstrap,
+passed. PostgreSQL 17.11 local passed both migrations 001-022 and bootstrap,
 including Store Ban, purchase receipt, promotions, rollback, roles and concurrency.
+Phase 8E adds seven multi-connection stock/wallet/idempotency race scenarios.
 The runner uses disposable SQLite data, not V1. See
 [Phase 8C report](phase8c-team-lock.md) for exact commands and environment.
 

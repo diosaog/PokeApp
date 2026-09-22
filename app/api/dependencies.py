@@ -9,7 +9,7 @@ from app.api.ports import AccessTokenVerifierPort, SessionRefreshPort, TrainerPr
 from app.api.rate_limit import InMemoryWindowRateLimiter, RateLimiter
 from app.auth.ports import TrainerAuthRepository
 from app.auth.service import PinAuthBridge
-from app.repositories.protocols import NormalPurchaseRepository, TeamLockMutationRepository
+from app.repositories.protocols import NormalPurchaseRepository, PromotionalPurchaseRepository, TeamLockMutationRepository
 
 
 @dataclass(frozen=True)
@@ -22,6 +22,7 @@ class ApiContainer:
     rate_limiter: RateLimiter | None = None
     team_lock_repository: TeamLockMutationRepository | None = None
     purchase_repository: NormalPurchaseRepository | None = None
+    promotional_purchase_repository: PromotionalPurchaseRepository | None = None
 
 
 def get_api_container(request: Request) -> ApiContainer:
@@ -75,4 +76,5 @@ def create_default_container(config: APIConfig | None = None) -> ApiContainer:
         rate_limiter=rate_limiter,
         team_lock_repository=team_lock_repo,
         purchase_repository=purchase_repo,
+        promotional_purchase_repository=purchase_repo,
     )

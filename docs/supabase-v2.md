@@ -44,6 +44,7 @@ supabase/v2/
     019_team_lock_api.sql
     020_current_matchday_store_ban_contract.sql
     021_normal_purchase_api.sql
+    022_promotional_purchase_api.sql
   bootstrap.sql
   reset_dev.sql
 ```
@@ -302,7 +303,7 @@ Regla operativa:
 - el cliente debe leer desde vistas;
 - las escrituras criticas quedan server-only; Team Lock + activity tienen RPC
   en 019 (DONE + staging); compra normal/ledger/evento en 021 (DONE + staging);
-  claim promocional, redenciones y saves siguen pendientes;
+  claim promocional en 022 DONE local, staging pendiente; redenciones y saves pendientes;
 - `service_role` es solo backend/server;
 - admin es `trainers.is_admin`, no un nombre hardcodeado.
 
@@ -316,7 +317,7 @@ docs/security-rls.md
 
 Preparadas para API/RPC de Fase 8:
 
-- promotional purchase stock claim;
+- promotional purchase stock claim: 022 DONE local; staging pendiente;
 - normal purchase + ledger + activity event: 021 DONE local + staging;
 - redemption + purchase status + effect flags;
 - team lock upsert + activity event: implementado en 019, validado local y staging;
@@ -361,6 +362,15 @@ Sin stock claim ni redencion. DONE local (239 tests, PostgreSQL migrations y
 bootstrap) + staging 021: 29 checks, cleanup PASS e inventario 32 tablas RLS/37
 vistas intacto. Nunca aplicar bootstrap sobre staging existente.
 [Evidencia y siguiente paso](phase8d-purchases.md).
+
+022_promotional_purchase_api.sql: claim promocional atomica con stock existente,
+unique parcial por promotion/trainer, purchase pending + ledger + evento, y
+replay historico. Reutiliza columnas de idempotencia 021 y helpers 020. El cuerpo
+original de compra normal se conserva con nombre `_8d`; wrapper backend-only
+rechaza replays cruzados. `stock_used` ya no es editable desde navegador admin.
+001-021 intactas, bootstrap generado 001-022. DONE local (255 tests y PostgreSQL
+migrations/bootstrap); staging pendiente. En staging existente aplicar SOLO 022,
+nunca bootstrap/reset. [Contrato 8E](phase8e-promotional-purchases.md).
 
 ## Indexes And Constraints
 
@@ -422,7 +432,7 @@ Validacion incluida:
   IDs, season scoping, constraints criticas, ausencia de blobs V1 y reset
   destructivo separado.
 - `tools/validate_supabase_v2_schema.py` ejecuta validacion real contra Postgres:
-  reset V2 local, migrations 001-021, seed idempotente, reset, rebuild, fixtures de
+  reset V2 local, migrations 001-022, seed idempotente, reset, rebuild, fixtures de
   introspeccion/constraints y checks RLS con roles tipo Supabase.
 
 ### Real Database Validation
@@ -514,7 +524,7 @@ Fase 7 se valido en PostgreSQL 17.11 local aislado usando roles mock de Supabase
 
 Resultado:
 
-- migrations 001-021 aplican en orden (019-021 tambien validadas en V2 staging);
+- migrations 001-022 aplican en orden (019-021 validadas en V2 staging; 022 pendiente);
 - `bootstrap.sql` se regenera desde las mismas migrations;
 - RLS queda activo en las 32 tablas publicas V2;
 - un entrenador autenticado ve sus filas privadas de saves, parsed saves,

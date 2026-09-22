@@ -238,6 +238,17 @@ Compra pending + debit + PURCHASE_COMPLETED publico se confirman juntos.
 DONE local + staging 021 (29 checks con contexto, cleanup PASS). API probada
 localmente contra Supabase real, no desplegada. [Contrato 8D](phase8d-purchases.md).
 
+022 extiende la misma infraestructura con compra promocionada: body vacio `{}`,
+promocion/item/precio autoritativos, una claim por trainer/promo mediante indice
+unico y una transaccion stock + purchase pending + ledger + PURCHASE_COMPLETED.
+Orden compartido: trainer/season -> season_player wallet -> day -> item -> promo.
+Reutiliza auth/guard, helpers 020, idempotency parsing, DTO base y error mapping.
+El cuerpo SQL 8D se conserva como `api_create_normal_purchase_8d`; un wrapper en
+el nombre anterior solo rechaza replays cruzados normal/promocion. No redisenia
+su contrato ni elegibilidad. `stock_used` queda reservado al backend, incluso
+frente a admin via navegador. DONE local; staging pendiente. Sin redencion,
+dual-write ni runtime nuevo. [Contrato 8E](phase8e-promotional-purchases.md).
+
 ## Problema Principal
 
 La deuda mas importante no es Supabase. Es que entidades centrales de competicion

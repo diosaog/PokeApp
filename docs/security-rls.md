@@ -1,11 +1,22 @@
 # Supabase V2 Security And RLS
 
-Checkpoint: Phase 8B-H DONE; Phase 8C DONE + staging validated (2026-09-22).
+Checkpoint: Phase 8D DONE + staging; Phase 8E local DONE, staging pending (2026-09-22).
 
 This document is the security contract for the greenfield Supabase V2 schema. It
 does not connect Streamlit or React to V2. The isolated API now implements Auth
-and Team Lock/normal purchase mutations. 019-021 are applied and validated in V2
+and Team Lock/normal/promotional purchase mutations. 019-021 are applied and validated in V2
 staging; the API has not been deployed or connected to the legacy runtime.
+
+022 adds a SECURITY INVOKER, fixed-empty-search-path promotional purchase RPC,
+EXECUTE only for service_role, plus a partial unique (promotion_id, trainer_id)
+purchase index. The normal-purchase core remains unchanged under its `_8d` name;
+its original name wraps it to reject cross-operation idempotency replays. Both
+functions are backend-only. No new browser write policy or SECURITY DEFINER.
+Authenticated column grants exclude `shop_promotions.stock_used` for both INSERT
+and UPDATE, including browser admins. Other promotion grants/RLS remain as before.
+Wallet and stock are locked before atomic purchase/debit/public activity writes.
+Local rollback/concurrency/security pass; remote 022 checks pending. Details:
+[Phase 8E](phase8e-promotional-purchases.md).
 
 ## Security Model
 
@@ -286,7 +297,7 @@ cutover.
 
 Validated against PostgreSQL 17.11 local with Supabase role mocks:
 
-- migrations 001-021 apply in order (purchase/ban checks added in 8D);
+- migrations 001-022 apply in order (normal/promotional purchase and ban checks);
 - `bootstrap.sql` applies as a single SQL Editor artifact;
 - reset/build/rebuild works;
 - all 32 public V2 tables have RLS enabled;

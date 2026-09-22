@@ -4,6 +4,7 @@ from dataclasses import asdict, fields
 from typing import Any
 
 from app.domain.normal_purchases import NormalPurchaseReceipt, NormalPurchaseRequest
+from app.domain.promotional_purchases import PromotionalPurchaseReceipt, PromotionalPurchaseRequest
 from app.repositories.errors import PersistenceError, PurchaseRejectedError
 
 
@@ -15,6 +16,10 @@ REJECTIONS = {
     "promotion_pending": 409, "promotion_available": 409,
     "base_price_confirmation_required": 409, "insufficient_funds": 409,
     "idempotency_conflict": 409, "invalid_purchase_request": 409,
+    "promotion_not_found": 404, "promotion_not_current": 409,
+    "promotion_changed": 409, "promotion_expired": 409,
+    "promotion_exhausted": 409, "promotion_already_claimed": 409,
+    "promotion_price_invalid": 409,
 }
 
 
@@ -29,8 +34,16 @@ class SupabaseNormalPurchaseRepository:
         return cls(create_client(url, service_role_key))
 
     def create_normal_purchase(self, request: NormalPurchaseRequest) -> NormalPurchaseReceipt:
+        return self._execute_purchase(request, "api_create_normal_purchase", NormalPurchaseReceipt,
+                                      ("season_id", "trainer_id", "item_id"))
+
+    def create_promotional_purchase(self, request: PromotionalPurchaseRequest) -> PromotionalPurchaseReceipt:
+        return self._execute_purchase(request, "api_create_promotional_purchase", PromotionalPurchaseReceipt,
+                                      ("season_id", "trainer_id", "promotion_id"))
+
+    def _execute_purchase(self, request, rpc_name, receipt_type, identity_fields):
         try:
-            data = self._client.rpc("api_create_normal_purchase", {
+            data = self._client.rpc(rpc_name, {
                 "p_" + key: value for key, value in asdict(request).items()
             }).execute().data
         except Exception as exc:
@@ -40,8 +53,8 @@ class SupabaseNormalPurchaseRepository:
                 raise PurchaseRejectedError(code.upper(), status) from exc
             raise PersistenceError("Purchase backend is unavailable.") from exc
         try:
-            receipt = NormalPurchaseReceipt(**{f.name: data[f.name] for f in fields(NormalPurchaseReceipt)})
-            if any(getattr(receipt, key) != getattr(request, key) for key in ("season_id", "trainer_id", "item_id")):
+            receipt = receipt_type(**{f.name: data[f.name] for f in fields(receipt_type)})
+            if any(getattr(receipt, key) != getattr(request, key) for key in identity_fields):
                 raise ValueError("Mismatched purchase receipt")
             return receipt
         except (KeyError, TypeError, ValueError, AttributeError) as exc:

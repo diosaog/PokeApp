@@ -10,6 +10,7 @@ from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT))
 MIGRATIONS = sorted((ROOT / "supabase" / "v2" / "migrations").glob("*.sql"))
 BOOTSTRAP_SQL = ROOT / "supabase" / "v2" / "bootstrap.sql"
 RESET_SQL = ROOT / "supabase" / "v2" / "reset_dev.sql"
@@ -1111,7 +1112,15 @@ def main() -> int:
 
     print("== Normal purchase migration idempotence and atomic fixtures ==")
     _psql(args, ROOT / "supabase/v2/migrations/021_normal_purchase_api.sql")
+    # Reapplying 021 restores the original function; 022 reattaches its replay guard.
+    _psql(args, ROOT / "supabase/v2/migrations/022_promotional_purchase_api.sql")
     _validate_purchase_api(args)
+
+    print("== Promotional purchase, stock, rollback and concurrency ==")
+    from tools.validate_supabase_v2_promotional_sql import validate_promotional_purchase
+
+    _psql(args, ROOT / "supabase/v2/migrations/022_promotional_purchase_api.sql")
+    validate_promotional_purchase(args, _psql_text, ROOT)
 
     print("== Real schema fixtures and introspection ==")
     with tempfile.NamedTemporaryFile("w", suffix=".sql", delete=False, encoding="utf-8") as tmp:

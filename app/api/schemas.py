@@ -63,6 +63,10 @@ class NormalPurchaseBody(BaseModel):
     confirm_base_price: bool = Field(default=False, strict=True)
 
 
+class PromotionalPurchaseBody(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+
 class NormalPurchaseResponse(BaseModel):
     id: UUID
     season_id: UUID
@@ -79,6 +83,13 @@ class NormalPurchaseResponse(BaseModel):
     event_id: UUID
     matchday_id: UUID
     matchday_number: int = Field(gt=0)
+
+
+class PromotionalPurchaseResponse(NormalPurchaseResponse):
+    promotion_id: UUID
+    base_price: int = Field(gt=0)
+    promotion_kind: Literal["normal", "mega"]
+    remaining_stock: int = Field(ge=0)
 
 
 class TeamLockResponse(BaseModel):

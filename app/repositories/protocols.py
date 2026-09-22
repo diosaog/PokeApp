@@ -4,6 +4,7 @@ from typing import Any, Protocol
 
 from app.domain.activity import ActivityEvent
 from app.domain.normal_purchases import NormalPurchaseReceipt, NormalPurchaseRequest
+from app.domain.promotional_purchases import PromotionalPurchaseReceipt, PromotionalPurchaseRequest
 from app.domain.archives import SeasonArchive
 from app.domain.hall_of_fame import HallOfFameEntry
 from app.domain.league import MatchdaySnapshot
@@ -70,6 +71,11 @@ class TrainerRepository(Protocol):
         ...
 
     def set_flags(self, flags: TrainerFlags) -> TrainerFlags:
+        ...
+
+
+class PromotionalPurchaseRepository(Protocol):
+    def create_promotional_purchase(self, request: PromotionalPurchaseRequest) -> PromotionalPurchaseReceipt:
         ...
 
 

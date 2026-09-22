@@ -5,6 +5,11 @@ from datetime import datetime
 from uuid import UUID
 
 
+def validate_idempotency_key(value: str) -> None:
+    if not 1 <= len(value) <= 128 or any(not 33 <= ord(c) <= 126 for c in value):
+        raise ValueError("invalid_idempotency_key")
+
+
 @dataclass(frozen=True)
 class NormalPurchaseRequest:
     season_id: str
@@ -16,8 +21,7 @@ class NormalPurchaseRequest:
     def __post_init__(self):
         for value in (self.season_id, self.trainer_id, self.item_id):
             UUID(value)
-        if not 1 <= len(self.idempotency_key) <= 128 or any(not 33 <= ord(c) <= 126 for c in self.idempotency_key):
-            raise ValueError("invalid_idempotency_key")
+        validate_idempotency_key(self.idempotency_key)
         if type(self.confirm_base_price) is not bool:
             raise ValueError("invalid_confirmation")
 
