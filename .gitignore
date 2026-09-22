@@ -1,5 +1,6 @@
 ﻿# Python / venv
 .venv/
+.venv-api/
 __pycache__/
 *.pyc
 .ruff_cache/

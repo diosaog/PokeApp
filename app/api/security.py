@@ -4,7 +4,7 @@ from fastapi import Depends
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 
 from app.api.dependencies import ApiContainer, get_api_container
-from app.api.errors import invalid_session_error, unavailable_error
+from app.api.errors import api_error, invalid_session_error, unavailable_error
 from app.api.models import AuthenticatedPrincipal
 from app.auth.errors import AuthError
 
@@ -31,7 +31,18 @@ def require_principal(
         from app.api.errors import map_session_error
 
         raise map_session_error(exc) from exc
-    trainer = container.principal_repository.find_by_auth_user_id(user.user_id)
+    try:
+        trainer = container.principal_repository.find_by_auth_user_id(user.user_id)
+    except AuthError as exc:
+        raise unavailable_error() from exc
     if trainer is None:
         raise invalid_session_error()
     return AuthenticatedPrincipal.from_trainer(trainer)
+
+
+def require_enabled_principal(
+    principal: AuthenticatedPrincipal = Depends(require_principal),
+) -> AuthenticatedPrincipal:
+    if not principal.globally_enabled:
+        raise api_error(403, "TRAINER_DISABLED", "Trainer is disabled.")
+    return principal
