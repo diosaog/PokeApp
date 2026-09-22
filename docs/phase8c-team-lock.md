@@ -1,6 +1,6 @@
-# Phase 8B-H + 8C: Local Implementation Report
+# Phase 8B-H + 8C: Implementation And Staging Report
 
-Date: 2026-09-22. RESULT: DONE local.
+Date: 2026-09-22. RESULT: DONE local + Supabase V2 staging validated.
 
 ## Checkpoint And Scope
 
@@ -8,14 +8,15 @@ Date: 2026-09-22. RESULT: DONE local.
 - Starting HEAD: `de485f773e0969882083437ed5c222c9958fbe92`.
 - Starting working tree: only the user's untracked
   `docs/pokeapp-guia-completa-pestanas-y-producto.md`.
-- Phase 8B-H: DONE. Phase 8C: DONE local, not deployed.
-- Migration 019: implemented and tested locally, NOT APPLIED in Supabase real.
+- Phase 8B-H: DONE. Phase 8C: DONE local + staging validated; API not deployed.
+- Migration 019: applied incrementally to Supabase V2 staging on 2026-09-22.
 - Streamlit remains the real legacy runtime. V1 is untouched and has not been
   removed. V2 is not Streamlit's source of truth. No dual-write.
 - No React, data migration, parser changes, real Discord or next-phase work.
 
-This report records local evidence, not a claim of a live deployment. Historical
-Phase 7 staging `RESULT ok checks=13` remains historical; it was not rerun here.
+The original local evidence below is preserved; the staging section adds real
+remote results. Historical Phase 7 `RESULT ok checks=13` was not rerun here;
+the new Team Lock validator independently reports 13 checks.
 
 ## Phase 8B-H
 
@@ -218,7 +219,7 @@ git diff --check
 | Compileall, project excluding venv/vendor/Git directories | PASS |
 | Generated bootstrap equality | PASS |
 | Git diff-check | PASS |
-| Real Supabase / remote 019 | NOT RUN / NOT APPLIED |
+| Real Supabase / remote 019 | PASS, see staging section |
 | Real Discord | NOT RUN |
 
 Warnings retained: Streamlit bare-mode/cache/session-state warnings, Starlette's
@@ -291,15 +292,15 @@ staged. Its baseline SHA-256 is
 
 ## Limitations And Next
 
-- No blocker for DONE local. Remote behavior of 019 is not yet verified.
+- No blocker for DONE local or the completed remote gate for 019.
 - Snapshots support current schema v1 only. Raw parsing and parser upgrades are
   outside this endpoint and remain the Phase 9 boundary work.
 - Actual deadlines/late adjudication need an authoritative V2 temporal contract
   before cutover; no legacy sentinel was silently mapped to a timestamp.
 - Existing Auth in-memory rate limiting and credential lifecycle/deployment
   hardening remain separate operational concerns, not redesigned in this slice.
-- Next gate: explicit authorization to apply/test 019 in Supabase V2 staging.
-- Then continue the existing Phase 8 roadmap with purchase + ledger + activity
+- Remote gate completed under the authorized 8C-staging + 8D macro.
+- Next: continue the existing Phase 8 roadmap with purchase + ledger + activity
   atomic API work. League/season/admin/trials/Hall APIs remain pending. Only then
   advance through parser boundary, React/Cloudflare, migration, shadow and cutover.
 - No next-phase implementation is included in this checkpoint.
@@ -311,5 +312,60 @@ staged. Its baseline SHA-256 is
 - Companion documentation checkpoint: `docs: close phase 8c` (contains this
   report; obtain its hash with `git log -1 --oneline` at this checkpoint).
 
-No push is performed by this task. Tracked changes are committed; the only
-remaining untracked file is the original user guide, deliberately preserved.
+The original three commits were pushed to origin/main before remote validation.
+The original user guide remains deliberately untracked and unmodified.
+
+## Supabase V2 Staging Validation
+
+Date: 2026-09-22. Authorized target: `Pokeapp 2.0`, project ref
+`uwleqeuzsveqlugugzba`. MCP `get_project_url`, local V2 env URL and service-role
+REST preflight agreed. The existing RPC was absent; only 019 was applied through
+MCP `apply_migration`, not bootstrap/reset. Function body MD5
+`5cd4280a83ba20f53f9e45e89ef702cd` matches the local migration. Catalog checks
+confirmed SECURITY INVOKER, empty search_path, no PUBLIC/anon/authenticated
+EXECUTE and service_role EXECUTE. Migrations 001-019 were not edited.
+
+```powershell
+.\.venv-api\Scripts\python.exe tools/validate_supabase_v2_team_lock.py --env-file .env.supabase-v2-rls.local --allow-staging-writes
+```
+
+This opt-in tool refuses every host except the approved V2 staging URL. It uses
+the real FastAPI application in-process, real Auth JWT verification and real
+Supabase adapters/PostgREST. No mocked API repositories or deployed web server.
+Three temporary Auth users (owner/other/admin) and uniquely marked DB fixtures
+are created. No save bytes are uploaded/modified and no Discord message is sent.
+
+| Remote check | Result |
+| --- | --- |
+| TL01 first authenticated API lock / service RPC | PASS |
+| TL02 exactly six; five rejected | PASS |
+| TL03 replacement, same lock ID, one logical row | PASS |
+| TL04 TEAM_LOCKED referencing the new lock | PASS |
+| TL05 retry/replacement preserve one immutable first event | PASS |
+| TL06 other user/forged trainer ID rejected by API | PASS |
+| TL07 foreign save rejected | PASS |
+| TL08 wrong season/matchday rejected | PASS |
+| TL09 anon/authenticated direct RPC denied | PASS |
+| TL10 owner/admin direct INSERT/UPDATE cannot change rows | PASS |
+| TL11 owner/admin private and current reads | PASS |
+| TL12 other/public projection, no private fields; anon denied | PASS |
+| TL13 stale parsed payload/hash rejected, lock/event unchanged | PASS |
+| TL14 forced failure after write | LOCAL PASS; NOT RUN remotely |
+
+The first run stopped because the new validator incorrectly required HTTP 403
+for UPDATE. Existing RLS filters that UPDATE to zero rows (HTTP 200, `[]`). The
+validator was corrected, not RLS; it now also verifies the whole stored lock is
+unchanged after each denied operation. Both runs cleaned up successfully.
+Forced post-write rollback needs intrusive failure injection; existing real
+local PostgreSQL insert/replacement rollback tests cover it instead.
+
+Final run: `phase8c_validation_3e973bd632e04bd4bcd33abc5004af1e`:
+`RESULT ok checks=13; TL14=local-only`, `CLEANUP PASS`. Cleanup deletes only
+recorded fixture UUIDs / the unique fixture season's generated locks/events and
+verifies absence, including Auth users. Independent SQL confirmed zero remaining
+`phase8c_validation_*` trainers, seasons, save records and Auth users.
+
+Full unit suite: 208 passed, 0 failed/skipped (203 previous + 5 validator safety
+tests). Compileall and diff-check passed. Existing Streamlit bare-mode warnings
+and Starlette TestClient deprecation remain warnings, not suppressed failures.
+V1, runtime Streamlit, parser, mechanics and Discord remain untouched.

@@ -296,7 +296,8 @@ Estado 7.1:
   visibility, mutaciones directas bloqueadas, service role y bucket `raw-saves`.
 - No toca V1, no conecta Streamlit, no inicia React y no implementa API.
 - Ejecucion real completada en Fase 7.1: `RESULT ok checks=13`. Fase 7.2 Storage
-  Cloud aplicada. No se ha repetido ni conectado staging durante 8B-H/8C.
+  Cloud aplicada. Ese validador completo no se ha repetido durante 8B-H/8C;
+  la mutacion 019 tiene una validacion remota independiente de 13 checks.
 
 Regla:
 
@@ -307,7 +308,7 @@ Regla:
 API pequena para operaciones criticas:
 
 - `POST /shop/purchase`
-- `PUT /v1/seasons/{season_id}/matchdays/{matchday_id}/team-lock` (8C DONE local)
+- `PUT /v1/seasons/{season_id}/matchdays/{matchday_id}/team-lock` (8C DONE + staging)
 - `POST /league/close-matchday`
 - `POST /season/config`
 - `POST /admin/trainer-flags`
@@ -318,10 +319,10 @@ Estado 2026-09-22:
 
 - 8A.1: bridge PIN -> Supabase Auth, cerrado.
 - 8B: FastAPI Auth/me, cerrado. 8B-H: SDK, UUID/slug y guard de habilitado, DONE.
-- 8C: primera mutacion Team Lock V2, DONE local; migration 019, bootstrap y
-  pruebas SQL reales locales completos. Sin dual-write ni conexion Streamlit V2.
-- Proximo gate: validacion Supabase de 019, solo con autorizacion expresa.
-- Despues continuar Fase 8, empezando por compra + ledger + evento atomicos.
+- 8C: primera mutacion Team Lock V2, DONE local + staging validado el 2026-09-22;
+  019 aplicada incrementalmente, 13 checks remotos y fixtures limpiadas.
+  Sin dual-write ni conexion Streamlit V2. Rollback forzado validado localmente.
+- Proximo gate: 8D, auditoria de compra legacy y compra + ledger + evento atomicos.
   Los endpoints restantes de la lista siguen pendientes: 8C no cierra toda la API.
 - React/Cloudflare, migracion de datos, shadow mode y cutover no han empezado.
 

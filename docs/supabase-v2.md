@@ -299,7 +299,7 @@ Regla operativa:
 
 - el cliente debe leer desde vistas;
 - las escrituras criticas quedan server-only; Team Lock + activity tienen RPC
-  en 019 (DONE local); compras, ledger, redenciones y saves siguen pendientes;
+  en 019 (DONE + staging validado); compras, ledger, redenciones y saves siguen pendientes;
 - `service_role` es solo backend/server;
 - admin es `trainers.is_admin`, no un nombre hardcodeado.
 
@@ -316,7 +316,7 @@ Preparadas para API/RPC de Fase 8:
 - promotional purchase stock claim;
 - normal purchase + ledger + activity event;
 - redemption + purchase status + effect flags;
-- team lock upsert + activity event: implementado en 019, validado localmente;
+- team lock upsert + activity event: implementado en 019, validado local y staging;
 - close matchday + rewards + ledger + snapshot + movements;
 - config version creation;
 - trainer status change + activity event;
@@ -340,9 +340,11 @@ entra el parser raw en el endpoint. `deadline_at=NULL`, `is_late=false` hasta
 disponer de una fuente temporal V2 autoritativa; no se importa el sentinel V1.
 
 019 esta incluida en el bootstrap generado y pasa PostgreSQL 17.11 local en ambos
-modos (migrations/bootstrap), con permisos, rollback y concurrencia. NO aplicada
-en Supabase real. Para una V2 ya instalada, el futuro gate remoto aplicara solo
-019 con autorizacion expresa, nunca reset/bootstrap sobre la base existente.
+modos (migrations/bootstrap), con permisos, rollback y concurrencia. Aplicada el
+2026-09-22 por MCP exclusivamente en `uwleqeuzsveqlugugzba` (V2 staging), sin
+reset/bootstrap. Su cuerpo coincide con el archivo local. El validador remoto
+paso 13 checks con Auth/JWT reales y limpieza completa; rollback forzado sigue
+cubierto localmente, sin triggers de fallo en staging.
 Detalles: [Phase 8C](phase8c-team-lock.md).
 
 ## Indexes And Constraints
@@ -497,7 +499,7 @@ Fase 7 se valido en PostgreSQL 17.11 local aislado usando roles mock de Supabase
 
 Resultado:
 
-- migrations 001-019 aplican en orden (019 validada solo localmente);
+- migrations 001-019 aplican en orden (019 tambien validada en V2 staging);
 - `bootstrap.sql` se regenera desde las mismas migrations;
 - RLS queda activo en las 32 tablas publicas V2;
 - un entrenador autenticado ve sus filas privadas de saves, parsed saves,
@@ -529,8 +531,8 @@ Estado staging real actual:
   `storage.objects`.
 - El validador JWT/Storage completo ya pasó contra el staging real con
   `RESULT ok checks=13`.
-- Fase 7.1 y Fase 7.2 quedan cerradas. 8B-H esta DONE y 8C DONE local; 019 NO
-  aplicada remotamente. El runtime sigue siendo Streamlit legacy; Supabase V2
+- Fase 7.1 y Fase 7.2 quedan cerradas. 8B-H esta DONE y 8C DONE + staging
+  validado, incluida 019. El runtime sigue siendo Streamlit legacy; Supabase V2
   no es su source of truth y V1 no se ha eliminado.
 
 ## Decision Log

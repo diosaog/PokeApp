@@ -157,7 +157,7 @@ Desde Fase 7, Supabase V2 tiene una capa de seguridad real:
 - `raw-saves` queda como bucket privado con policies por path de `trainer_id` en
   Supabase Storage.
 - Compras, ledger, redenciones y parsed saves siguen esperando API/RPC
-  server-side. Team Lock + ActivityEvent ya tienen la ruta local de Fase 8C.
+  server-side. Team Lock + ActivityEvent ya tienen la ruta de Fase 8C validada en staging.
 
 Desde Fase 8A.1, existe el nucleo del puente de identidad para mantener la UX de
 login actual sin usar el PIN como password real de Supabase:
@@ -206,7 +206,7 @@ update/eq/execute y comprobacion de la fila devuelta. UUID y slug se distinguen
 antes de consultar; las mutaciones exigen `require_enabled_principal`, sin
 impedir que `/v1/me` describa un trainer deshabilitado con sesion valida.
 
-Desde Fase 8C (DONE local), la primera mutacion de producto es:
+Desde Fase 8C (DONE local + staging validado), la primera mutacion de producto es:
 
 ```text
 PUT /v1/seasons/{season_id}/matchdays/{matchday_id}/team-lock
@@ -222,8 +222,9 @@ parseado para rechazar cambios concurrentes. El dominio no importa SDK, FastAPI,
 Streamlit ni parser; la proyeccion reutiliza DTOs y normalizacion ya existentes.
 La RPC es SECURITY INVOKER, con search_path fijo y EXECUTE solo para service_role.
 No se modifica el runtime Streamlit, V1, el parser ni Discord. No hay dual-write.
-Migration 019 y bootstrap se han validado solo localmente. Contrato, limites y
-reproduccion: [Phase 8C](phase8c-team-lock.md).
+Migration 019 y bootstrap pasan PostgreSQL local. 019 tambien esta aplicada y
+validada incrementalmente en Supabase V2 staging; no se ejecuto bootstrap remoto
+ni se desplego FastAPI. Contrato, limites y reproduccion: [Phase 8C](phase8c-team-lock.md).
 
 ## Problema Principal
 

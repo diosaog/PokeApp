@@ -1,10 +1,10 @@
 # Supabase V2 Security And RLS
 
-Checkpoint: Phase 8B-H DONE; Phase 8C DONE local (2026-09-22).
+Checkpoint: Phase 8B-H DONE; Phase 8C DONE + staging validated (2026-09-22).
 
 This document is the security contract for the greenfield Supabase V2 schema. It
 does not connect Streamlit or React to V2. The isolated API now implements Auth
-and the Team Lock mutation; migration 019 has NOT been applied remotely.
+and the Team Lock mutation; migration 019 is applied in V2 staging only.
 
 ## Security Model
 
@@ -109,8 +109,11 @@ Security behavior:
 - Public snapshots omit ability, nature, IVs, EVs, original trainer and arbitrary
   metadata. Private snapshots remain owner/admin through existing views/RLS.
 
-PostgreSQL local role/rollback/concurrency checks passed; real Supabase 019
-validation is NOT RUN. See [Phase 8C report](phase8c-team-lock.md).
+PostgreSQL local role/rollback/concurrency checks passed. Real Supabase 019
+validation passed 13 checks with temporary Auth users and complete cleanup.
+Direct UPDATE can return HTTP 200 with zero rows under RLS; the validator also
+verifies unchanged stored rows. No policies were relaxed. Forced post-write
+rollback is local-only. See [Phase 8C report](phase8c-team-lock.md).
 
 ## Helper Functions
 
@@ -227,7 +230,7 @@ Critical future API operations:
 - redeem purchase + flags/effect + activity event;
 - upload save metadata + storage write + parse queue;
 - write parsed save from parser;
-- lock team for matchday: implemented locally in Phase 8C via backend-only RPC;
+- lock team for matchday: implemented and staging-validated in Phase 8C via backend-only RPC;
 - close matchday + rewards + snapshot + movements;
 - create/update season config;
 - retire/abandon/disqualify trainer;
@@ -358,5 +361,5 @@ Status as of this checkpoint:
 - The real validator passed against the live staging project with
   `RESULT ok checks=13`.
 - Fase 7.1 and Fase 7.2 are closed. Auth bridge/API and 8B-H are implemented;
-  Phase 8C is DONE local. Migration 019 is NOT APPLIED remotely in this task.
+  Phase 8C is DONE and migration 019 is applied/validated in V2 staging.
   Runtime remains Streamlit legacy and V2 is not its source of truth.
