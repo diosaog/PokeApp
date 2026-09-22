@@ -1,6 +1,6 @@
 # PokeApp 2.0 Project Checkpoint
 
-Checkpoint date: 2026-09-22 (Phase 8E local validation; staging pending).
+Checkpoint date: 2026-09-22 (Phase 8E DONE local + Supabase V2 staging).
 
 Base HEAD before original checkpoint documentation:
 `f6d8fc179f8c9e021bdf6b4fa1e2687e2d7e8b2a`
@@ -38,9 +38,10 @@ Latest architecture state:
   idempotency, promotion eligibility and wallet serialization. 29 remote checks
   (5 context + R01-R24) and cleanup PASS.
   Historical blocker resolved; [contract and evidence](phase8d-purchases.md).
-- Phase 8E DONE locally: 022 atomic promotional purchase, wallet-before-stock
-  locking, unique trainer claim and historical idempotent receipt. Staging pending.
-  [Contract and validation](phase8e-promotional-purchases.md). Next after staging:
+- Phase 8E DONE local + staging: 022 atomic promotional purchase, wallet-before-stock
+  locking, unique trainer claim and historical idempotent receipt. 27 real checks,
+  29 8D regression checks and cleanup PASS. [Report](phase8e-completion-report.md).
+  [Contract and validation](phase8e-promotional-purchases.md). Next:
   8F redemption/effect boundary, not implemented.
 
 ## Current State
@@ -72,7 +73,7 @@ Closed phases:
 - Fase 8C: Team Lock V2 API mutation. DONE + Supabase V2 staging validated.
 - Fase 8D.0: current matchday and Store Ban contract. DONE local + staging.
 - Fase 8D: atomic normal purchase. DONE local + staging.
-- Fase 8E: atomic promotional purchase. DONE local; staging pending.
+- Fase 8E: atomic promotional purchase. DONE local + staging.
 
 Historical staging validation (Phase 7, not rerun in this task):
 
@@ -229,8 +230,8 @@ Persistence:
 - Many official entities still live in generic `settings` JSON.
 - Streamlit UI and business rules are still coupled in several modules.
 - Runtime Streamlit still uses legacy/V1 persistence; V2 is not connected yet.
-- Team Lock and normal purchase are isolated V2 mutations, validated locally
-  and in staging. Migrations 019-021 are applied; other critical APIs remain.
+- Team Lock, normal and promotional purchase are isolated V2 mutations, validated
+  locally and in staging. Migrations 019-022 are applied; other critical APIs remain.
 - Legacy ActivityEvents remain in settings; new V2 lock/purchase transactions
   writes V2 tables only, without dual-write or Discord delivery.
 - Copa and Juicios are functional legacy islands and need contracts later.
@@ -244,11 +245,11 @@ Persistence:
 Next exact phase:
 
 ```text
-Phase 8E: promotional purchase atomic stock claim (not implemented)
+Phase 8F: redemption/effect boundary (not implemented)
 ```
 
-Fase 7.1, Fase 7.2, Fase 8A.1, Fase 8B and 8B-H are closed. Fases 8C, 8D.0
-and 8D are DONE local + staging. Do not infer that all APIs or deployment are complete.
+Fase 7.1, Fase 7.2, Fase 8A.1, Fase 8B and 8B-H are closed. Fases 8C, 8D.0,
+8D and 8E are DONE local + staging. Do not infer that all APIs or deployment are complete.
 Do not cut over Streamlit or delete V1 without explicit approval.
 
 ## Do Not Do When Resuming
@@ -277,7 +278,8 @@ Do not cut over Streamlit or delete V1 without explicit approval.
 - Fase 8B-H: auth hardening. Closed.
 - Fase 8C: Team Lock V2 API mutation. DONE local + staging.
 - Fase 8D.0 + 8D: current matchday, Store Ban and normal purchase. DONE local + staging.
-- Fase 8 remaining: promotional claim/redemption, league/season/admin/trials/Hall operations.
+- Fase 8E: promotional claim. DONE local + staging; 27 checks and 8D regression PASS.
+- Fase 8 remaining: redemption/effects, league/season/admin/trials/Hall operations.
 - Fase 9: parser boundary.
 - Fase 10: React / Cloudflare frontend.
 - Fase 11: data migration.

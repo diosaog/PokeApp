@@ -327,10 +327,11 @@ Estado 2026-09-22:
 - 8D compra normal + ledger + evento atomicos en 021 DONE local (239 tests,
   PostgreSQL migrations/bootstrap) + staging (29 checks, cleanup PASS).
   [Contrato 8D](phase8d-purchases.md).
-- 8E claim promocional atomica en 022 DONE local: 255 tests, PostgreSQL 17.11
-  migrations/bootstrap, rollback y siete carreras stock/wallet/retry. Staging
-  pendiente. [Contrato 8E](phase8e-promotional-purchases.md).
-  Siguiente tras staging: 8F redemption/effect boundary, no implementado.
+- 8E claim promocional atomica en 022 DONE local + staging: 255 tests, PostgreSQL
+  17.11 migrations/bootstrap, rollback y siete carreras stock/wallet/retry;
+  27 checks reales, regresion 8D de 29 checks y limpieza PASS.
+  [Contrato 8E](phase8e-promotional-purchases.md).
+  Siguiente: 8F redemption/effect boundary, no implementado.
   Los endpoints restantes de la lista siguen pendientes: 8C no cierra toda la API.
 - React/Cloudflare, migracion de datos, shadow mode y cutover no han empezado.
 

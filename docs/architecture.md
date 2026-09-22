@@ -246,7 +246,8 @@ Reutiliza auth/guard, helpers 020, idempotency parsing, DTO base y error mapping
 El cuerpo SQL 8D se conserva como `api_create_normal_purchase_8d`; un wrapper en
 el nombre anterior solo rechaza replays cruzados normal/promocion. No redisenia
 su contrato ni elegibilidad. `stock_used` queda reservado al backend, incluso
-frente a admin via navegador. DONE local; staging pendiente. Sin redencion,
+frente a admin via navegador. DONE local + staging (27 checks, 8D regression 29,
+cleanup PASS, cuerpos SQL verificados). API no desplegada. Sin redencion,
 dual-write ni runtime nuevo. [Contrato 8E](phase8e-promotional-purchases.md).
 
 ## Problema Principal

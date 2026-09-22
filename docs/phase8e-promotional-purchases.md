@@ -1,8 +1,9 @@
 # Phase 8E: Atomic Promotional Purchase
 
 Date: 2026-09-22. Base: `f2d2100`, main, origin/main 0/0.
-Local DONE: 255 tests, PostgreSQL 17.11 migrations/bootstrap, seven concurrent
-scenarios, forced rollback. Remote 022/RE checks pending at this local checkpoint.
+DONE local + staging: 255 tests, PostgreSQL 17.11 migrations/bootstrap, seven
+concurrent scenarios, forced rollback. Remote 022: 27 checks and cleanup PASS;
+8D revalidation after 022: 29 checks and cleanup PASS. Implementation: `498b6b8`.
 User guide `docs/pokeapp-guia-completa-pestanas-y-producto.md` is untouched/untracked.
 
 ## Legacy Evidence And Contract
@@ -180,5 +181,34 @@ rows and temporary Auth users, then verifies removal. No remote failure triggers
 No runtime cutover, V1 changes, dual-write, frontend/React/Cloudflare/Companion,
 promotion scheduling/admin UI, Discord or redemption implementation. Service
 credentials remain server-only and outside Git. Runtime remains legacy Streamlit.
-Next after staging gate: Phase 8F redemption/effect boundary design and scoped
+Next: Phase 8F redemption/effect boundary design and scoped
 implementation, NOT part of this task.
+
+## Real Staging Evidence
+
+Applied only 022 by MCP to `https://uwleqeuzsveqlugugzba.supabase.co` on 2026-09-22;
+remote migration version `20260922174842`, name `022_promotional_purchase_api`.
+Before apply: no active season or duplicate promotion/trainer claim groups.
+Implementation/local-validation commit `498b6b8` was pushed before remote changes.
+
+- 8E run `phase8e_validation_08f577dd23d6452ba0871c9b70fbf4d7`:
+  `RESULT ok checks=27`, `CLEANUP PASS`.
+- 8D rerun `phase8d_validation_c1e993b6594a4672b8de48ff328fed52`:
+  `RESULT ok checks=29`, `CLEANUP PASS`.
+- RPC prosrc MD5 matches local: promotional
+  `fde0f5a7019b33b2f144113d7219f31f`; normal wrapper
+  `2a80fdc553c7ccb18c3b8406a114cb80`.
+- Original 8D core MD5 before/after rename identical:
+  `af6c9b572b498cbf5d60d1096d4231b1`.
+- 32 public tables / 32 RLS tables / 37 views unchanged. New RPC/wrapper are
+  SECURITY INVOKER, fixed empty search_path, anon/authenticated EXECUTE=false,
+  service EXECUTE=true; authenticated stock_used INSERT/UPDATE=false.
+- Partial unique claim index independently inspected. HTTP assertions verified
+  browser-admin as well as owner denials, private owner/admin reads, other-trainer
+  isolation, public balance/event accuracy and anon denial.
+- Cleanup was also queried independently via MCP: zero run-prefixed users,
+  trainers, seasons/items and zero residual promotion/purchase/ledger/event rows.
+  No V1 changes, remote bootstrap/reset, injected remote failure triggers or API
+  deployment occurred.
+
+Full closure report: [phase8e-completion-report.md](phase8e-completion-report.md).

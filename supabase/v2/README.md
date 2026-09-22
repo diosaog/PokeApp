@@ -193,6 +193,9 @@ Phase 8C implementa Team Lock + actividad via RPC backend-only (019), validada
 localmente y en V2 staging. 020 (jornada/sanciones) tambien esta validada en staging.
 021 compra normal atomica esta DONE local + staging (29 checks, cleanup PASS). No uses el
 navegador para escribir compras, ledger, parsed saves o team locks directamente.
+022 compra promocionada atomica DONE local + staging (27 checks, regresion 8D
+29 checks y cleanup PASS). `stock_used` tambien es server-only. Compra queda
+pending, sin redencion. Detalles: `docs/phase8e-promotional-purchases.md`.
 Una base V2 existente necesita solo las migrations nuevas que falten, en orden,
 con autorizacion y validacion, nunca bootstrap ni reset. No se ha desplegado la API.
 
@@ -221,6 +224,7 @@ Orden oficial de migrations:
 19. `019_team_lock_api.sql`
 20. `020_current_matchday_store_ban_contract.sql`
 21. `021_normal_purchase_api.sql`
+22. `022_promotional_purchase_api.sql`
 
 Al anadir una migration, regenera el bootstrap sin reescribir las ya aplicadas:
 

@@ -1,10 +1,10 @@
 # Supabase V2 Security And RLS
 
-Checkpoint: Phase 8D DONE + staging; Phase 8E local DONE, staging pending (2026-09-22).
+Checkpoint: Phase 8D + 8E DONE local and staging validated (2026-09-22).
 
 This document is the security contract for the greenfield Supabase V2 schema. It
 does not connect Streamlit or React to V2. The isolated API now implements Auth
-and Team Lock/normal/promotional purchase mutations. 019-021 are applied and validated in V2
+and Team Lock/normal/promotional purchase mutations. 019-022 are applied and validated in V2
 staging; the API has not been deployed or connected to the legacy runtime.
 
 022 adds a SECURITY INVOKER, fixed-empty-search-path promotional purchase RPC,
@@ -15,7 +15,10 @@ functions are backend-only. No new browser write policy or SECURITY DEFINER.
 Authenticated column grants exclude `shop_promotions.stock_used` for both INSERT
 and UPDATE, including browser admins. Other promotion grants/RLS remain as before.
 Wallet and stock are locked before atomic purchase/debit/public activity writes.
-Local rollback/concurrency/security pass; remote 022 checks pending. Details:
+Local rollback/concurrency/security pass; remote 022 passed 27 checks and 29 prior
+8D checks after migration. Cleanup independently confirmed; 32/32 tables have RLS,
+37 views preserved, RPC definitions match local and original 8D body is unchanged.
+No remote failure triggers or deployed API. Details:
 [Phase 8E](phase8e-promotional-purchases.md).
 
 ## Security Model

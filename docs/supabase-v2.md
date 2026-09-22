@@ -303,7 +303,7 @@ Regla operativa:
 - el cliente debe leer desde vistas;
 - las escrituras criticas quedan server-only; Team Lock + activity tienen RPC
   en 019 (DONE + staging); compra normal/ledger/evento en 021 (DONE + staging);
-  claim promocional en 022 DONE local, staging pendiente; redenciones y saves pendientes;
+  claim promocional en 022 DONE local + staging; redenciones y saves pendientes;
 - `service_role` es solo backend/server;
 - admin es `trainers.is_admin`, no un nombre hardcodeado.
 
@@ -317,7 +317,7 @@ docs/security-rls.md
 
 Preparadas para API/RPC de Fase 8:
 
-- promotional purchase stock claim: 022 DONE local; staging pendiente;
+- promotional purchase stock claim: 022 DONE local + staging;
 - normal purchase + ledger + activity event: 021 DONE local + staging;
 - redemption + purchase status + effect flags;
 - team lock upsert + activity event: implementado en 019, validado local y staging;
@@ -369,7 +369,8 @@ replay historico. Reutiliza columnas de idempotencia 021 y helpers 020. El cuerp
 original de compra normal se conserva con nombre `_8d`; wrapper backend-only
 rechaza replays cruzados. `stock_used` ya no es editable desde navegador admin.
 001-021 intactas, bootstrap generado 001-022. DONE local (255 tests y PostgreSQL
-migrations/bootstrap); staging pendiente. En staging existente aplicar SOLO 022,
+migrations/bootstrap) + staging (27 checks y regresion 8D 29 checks, cleanup PASS).
+022 aplicada incrementalmente, definiciones verificadas. En staging existente aplicar SOLO 022,
 nunca bootstrap/reset. [Contrato 8E](phase8e-promotional-purchases.md).
 
 ## Indexes And Constraints
@@ -524,7 +525,7 @@ Fase 7 se valido en PostgreSQL 17.11 local aislado usando roles mock de Supabase
 
 Resultado:
 
-- migrations 001-022 aplican en orden (019-021 validadas en V2 staging; 022 pendiente);
+- migrations 001-022 aplican en orden (019-022 tambien validadas en V2 staging);
 - `bootstrap.sql` se regenera desde las mismas migrations;
 - RLS queda activo en las 32 tablas publicas V2;
 - un entrenador autenticado ve sus filas privadas de saves, parsed saves,
