@@ -24,8 +24,11 @@ class RedemptionTests(unittest.TestCase):
             '2026-09-23T12:00:00+00:00','2026-09-23T12:00:00+00:00',None,str(uuid4()),None)
         self.rpc_status, self.rpc_body = 200, asdict(self.receipt)
         self.requests, self.heads = [], [{'id':self.head}]
+        self.target_owner = TRAINER_ID
         def respond(request):
             self.requests.append(request)
+            if request.url.path.endswith('/pokemon_entities'):
+                return httpx.Response(200,json=[{'owner_trainer_id':self.target_owner}])
             if request.method == 'GET': return httpx.Response(200,json=self.heads)
             return httpx.Response(self.rpc_status,json=self.rpc_body)
         pg = SyncPostgrestClient('https://example.invalid/rest/v1')
@@ -131,6 +134,28 @@ class RedemptionTests(unittest.TestCase):
         with TestClient(create_app(container=replace(self.container,redemption_repository=None))) as client:
             self.assertEqual(client.post(self.path,json={'pokemon_entity_id':self.entity},
                 headers={'Authorization':'Bearer dummy','Idempotency-Key':'x'}).status_code,503)
+
+    def test_robbery_resolves_victim_head_server_side(self):
+        self.target_owner = str(uuid4())
+        self.rpc_body = asdict(replace(self.receipt,effect_code='steal',physical_effect_status='pending',
+            target_owner_trainer_id=self.target_owner,gift_purchase_id=str(uuid4())))
+        response = self.post()
+        self.assertEqual(response.status_code,200,response.text)
+        self.assertEqual(response.json()['gift_purchase_id'],self.rpc_body['gift_purchase_id'])
+        self.assertEqual(self.requests[-2].url.params['trainer_id'],'eq.'+self.target_owner)
+        self.assertEqual(json.loads(self.requests[-1].content)['p_trainer_id'],TRAINER_ID)
+
+    def test_voucher_receipt_no_gift_or_physical_effect(self):
+        self.rpc_body = asdict(replace(self.receipt,effect_code='robbery_shield'))
+        self.assertEqual(self.post().status_code,200)
+
+    def test_robbery_receipt_requires_foreign_owner_and_gift(self):
+        for changes in ({'gift_purchase_id':None},{'gift_purchase_id':'invalid'},
+                        {'target_owner_trainer_id':TRAINER_ID},{'physical_effect_status':'not_required'}):
+            body=dict(asdict(self.receipt),effect_code='steal',physical_effect_status='pending',
+                      target_owner_trainer_id=str(uuid4()),gift_purchase_id=str(uuid4()))
+            self.rpc_body=dict(body,**changes)
+            self.assertEqual(self.post().status_code,503)
 
     def test_domain_validation(self):
         for key in ('','bad key','x'*129):

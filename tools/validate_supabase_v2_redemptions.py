@@ -11,14 +11,17 @@ sys.path.insert(0,str(ROOT))
 from tools.validate_supabase_v2_team_lock import staging_config
 from tools.validate_supabase_v2_rls import SupabaseHttp
 from tools.validate_redemption_fixtures import RedemptionFixtures
+from tools.validate_robbery_fixtures import RobberyFixtures
 
 
 def main():
     parser=argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--env-file',type=Path,required=True)
     parser.add_argument('--allow-staging-writes',action='store_true')
+    parser.add_argument('--robbery',action='store_true',help='Run Phase 8F.1 canonical robbery/voucher fixtures')
     args=parser.parse_args()
-    config=replace(staging_config(args.env_file,args.allow_staging_writes),run_id='phase8f_validation_'+uuid4().hex)
+    prefix='phase8f1_validation_' if args.robbery else 'phase8f_validation_'
+    config=replace(staging_config(args.env_file,args.allow_staging_writes),run_id=prefix+uuid4().hex)
     from supabase import create_client
     http=SupabaseHttp(config)
     users,readers,fixture,failure={},{},None,None
@@ -31,7 +34,8 @@ def main():
             readers[role]=create_client(config.url,config.anon_key)
             readers[role].postgrest.auth(token)
         readers['anon']=create_client(config.url,config.anon_key)
-        fixture=RedemptionFixtures(create_client(config.url,config.service_role_key),readers,users,run_id=config.run_id)
+        fixture_type=RobberyFixtures if args.robbery else RedemptionFixtures
+        fixture=fixture_type(create_client(config.url,config.service_role_key),readers,users,run_id=config.run_id)
         fixture.run()
     except Exception as exc:
         failure=str(exc) if isinstance(exc,AssertionError) else type(exc).__name__
@@ -51,7 +55,7 @@ def main():
     if failure:
         print('RESULT failed: '+failure,flush=True)
         return 1
-    print(f'RESULT ok checks={len(fixture.checks)}; Auth cleanup PASS; robbery/voucher NOT SUPPORTED',flush=True)
+    print(f'RESULT ok checks={len(fixture.checks)}; Auth cleanup PASS; suite={"robbery/voucher" if args.robbery else "shield/revive"}',flush=True)
     return 0
 
 

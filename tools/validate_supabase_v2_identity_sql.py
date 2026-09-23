@@ -47,7 +47,8 @@ class LocalClient:
                + 'set local request.jwt.claim.sub='+literal(self.user_id or '')+'; '+sql+'; commit;')
         env = dict(os.environ, PGPASSWORD=args.password)
         process = subprocess.run([args.psql,'-h',args.host,'-p',str(args.port),'-U',args.user,'-d',args.database,
-            '-X','-qAt','-v','ON_ERROR_STOP=1','-v','VERBOSITY=verbose','-c',sql],capture_output=True,text=True,env=env)
+            '-X','-qAt','-v','ON_ERROR_STOP=1','-v','VERBOSITY=verbose','-f','-'],
+            input=sql,capture_output=True,text=True,encoding='utf-8',env=env)
         if process.returncode:
             code = re.search(r'(?:ERROR|FATAL):\s+([A-Z0-9]{5}):',process.stderr)
             if not code: raise RuntimeError(process.stderr)

@@ -227,6 +227,12 @@ Orden oficial de migrations:
 22. `022_promotional_purchase_api.sql`
 23. `023_pokemon_identity.sql`
 24. `024_redemption_effect_boundary.sql`
+25. `025_robbery_voucher_and_redemption.sql`
+
+025 anade el comodin canonico reward-only, origen unico de regalos y canje de robo
+con ciclo persistente. [Contrato](../../docs/phase8f1-robbery-voucher.md).
+En V2 existente con 024, aplicar SOLO 025 tras validacion local; nunca bootstrap/reset.
+El [informe](../../docs/phase8f-completion-report.md) registra la version remota y gates.
 
 024 incorpora canjes atomicos de Blindar/Revivir con identidad autoritativa y
 eventos privados. Robo y su comodin siguen pendientes de un contrato de catalogo.

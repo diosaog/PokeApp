@@ -268,7 +268,13 @@ fiable, no un contador basado en la llegada HTTP. [Contrato](phase8f0-pokemon-id
 
 ## Problema Principal
 
-Phase 8F adds an isolated JWT self-service redemption route -> typed application
+Phase 8F.1 extends the isolated redemption route with the approved canonical
+reward-only voucher and atomic robbery/cycle/gift in migration 025. Entity ownership
+is resolved server-side; no physical transfer occurs. See the authoritative
+[four-effect contract and lock order](phase8f1-robbery-voucher.md). Final validation
+is recorded in [delivery](phase8f-completion-report.md); no API deployment.
+
+Historical 024 checkpoint: Phase 8F adds an isolated JWT self-service redemption route -> typed application
 request -> Supabase repository -> backend-only atomic RPC (024). Only exact item
 codes for shield/revive are supported. Identity head/owner/location are revalidated
 under the same participant lock used by reconciliation. Entitlement consumption

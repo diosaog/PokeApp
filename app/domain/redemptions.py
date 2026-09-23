@@ -36,7 +36,7 @@ class RedemptionReceipt:
     redeemed_at: str
     physical_effect_completed_at: None
     activity_event_id: str
-    gift_purchase_id: None
+    gift_purchase_id: str | None
 
     def __post_init__(self):
         for key in ('redemption_id','purchase_id','season_id','trainer_id','shop_item_id',
@@ -47,7 +47,13 @@ class RedemptionReceipt:
                 raise ValueError('invalid_redemption_date')
         if (self.purchase_status != 'used' or self.redemption_status != 'applied'
                 or (self.effect_code, self.physical_effect_status) not in
-                    (('shield','not_required'), ('revive','pending'))
-                or self.physical_effect_completed_at is not None or self.gift_purchase_id is not None
-                or self.target_owner_trainer_id != self.trainer_id):
+                    (('shield','not_required'), ('revive','pending'),
+                     ('robbery_shield','not_required'), ('steal','pending'))
+                or self.physical_effect_completed_at is not None):
+            raise ValueError('invalid_redemption_receipt')
+        if self.effect_code == 'steal':
+            if not self.gift_purchase_id or self.target_owner_trainer_id == self.trainer_id:
+                raise ValueError('invalid_robbery_receipt')
+            UUID(self.gift_purchase_id)
+        elif self.gift_purchase_id is not None or self.target_owner_trainer_id != self.trainer_id:
             raise ValueError('invalid_redemption_receipt')

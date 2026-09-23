@@ -341,12 +341,16 @@ Estado 2026-09-22:
   runtime, dual-write ni escritura de saves. [Contrato y validacion](phase8f0-pokemon-identity.md).
   [Auditoria y limites](phase8f-redemption-effects.md).
   Los endpoints restantes de la lista siguen pendientes: 8C no cierra toda la API.
-  8F actual PARTIAL: Blindar/Revivir DONE local + staging, 024 `20260923172957`,
+  Checkpoint historico 024 PARTIAL: Blindar/Revivir DONE local + staging, 024 `20260923172957`,
   311 tests y 19 grupos remotos PASS; limpieza independiente PASS.
   Compra usada = derecho consumido, no save modificado. Revive queda fisicamente
   pending. Robo Y su comodin no soportados: falta el ShopItem/codigo canonico del
   regalo. No inventado. Siguiente: 8F.1 contrato de catalogo
-  del comodin por robo. [Contrato actual](phase8f-redemption-effects.md).
+  del comodin por robo.
+  8F.1 implementa ahora ese contrato aprobado, robo/ciclo/comodin atomicos en 025.
+  [Contrato actual y gates](phase8f1-robbery-voucher.md).
+  Tras cerrar validacion: Phase 8G, auditoria del contrato API de administracion
+  temporada/liga. No implementada en esta entrega.
 - React/Cloudflare, migracion de datos, shadow mode y cutover no han empezado.
 
 Contrato y evidencias: [Phase 8C](phase8c-team-lock.md).

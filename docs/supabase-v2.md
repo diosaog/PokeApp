@@ -47,6 +47,7 @@ supabase/v2/
     022_promotional_purchase_api.sql
     023_pokemon_identity.sql
     024_redemption_effect_boundary.sql
+    025_robbery_voucher_and_redemption.sql
   bootstrap.sql
   reset_dev.sql
 ```
@@ -402,7 +403,11 @@ y evento privado atomico. Revoca escrituras browser de las superficies de efecto
 001-023 no cambian. SOLO 024 aplicada via MCP tras commit/push `a36b713`, version
 `20260923172957`: 19 grupos de checks remotos PASS y limpieza independiente PASS.
 No repetir 024 ni bootstrap en ese proyecto. 311 tests y PostgreSQL local verdes.
-Robo y su comodin siguen bloqueados por ausencia de codigo canonico del regalo.
+Este era el cierre parcial de 024. 025 implementa el codigo aprobado
+`robbery_shield_voucher`, recompensas de precio cero con origen unico, ciclo persistente,
+canje de comodin y robo atomico. 001-024 intactas; 61 items anteriores conservados.
+37 tablas V2 con RLS tras 025, 62 items de catalogo (61 comprables + 1 recompensa).
+La aplicacion incremental y validacion final se registran en el informe de cierre.
 [Contrato y estado real](phase8f-redemption-effects.md).
 
 `008_indexes.sql` anade indices por queries reales:
@@ -463,7 +468,7 @@ Validacion incluida:
   IDs, season scoping, constraints criticas, ausencia de blobs V1 y reset
   destructivo separado.
 - `tools/validate_supabase_v2_schema.py` ejecuta validacion real contra Postgres:
-  reset V2 local, migrations 001-024, seed idempotente, reset, rebuild, fixtures de
+  reset V2 local, migrations 001-025, seed idempotente, reset, rebuild, fixtures de
   introspeccion/constraints y checks RLS con roles tipo Supabase.
 
 ### Real Database Validation
@@ -555,7 +560,7 @@ Fase 7 se valido en PostgreSQL 17.11 local aislado usando roles mock de Supabase
 
 Resultado:
 
-- migrations 001-024 aplican en orden (estado remoto de 024 en informe 8F);
+- migrations 001-025 aplican en orden (estado remoto exacto en informe 8F);
 - `bootstrap.sql` se regenera desde las mismas migrations;
 - RLS queda activo en las 36 tablas publicas V2 despues de 023;
 - un entrenador autenticado ve sus filas privadas de saves, parsed saves,

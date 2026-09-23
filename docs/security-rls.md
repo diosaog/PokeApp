@@ -1,6 +1,13 @@
 # Supabase V2 Security And RLS
 
-Checkpoint: 8F.0 DONE; 8F shield/revive subset staging validated, overall PARTIAL (2026-09-23).
+Checkpoint: 8F.0 DONE; 8F.1 implemented, final gates in the [delivery report](phase8f-completion-report.md).
+
+025 adds backend-only RLS `robbery_cycles` without browser grants or policies.
+The redemption RPC remains SECURITY INVOKER, empty search_path, service_role-only.
+The purchase-origin trigger is likewise invoker and not browser-executable.
+Reward-only CHECKs prevent normal/promotional buying; unique origin and cycle/victim
+indexes enforce provenance and cycle isolation. Browser effect writes remain denied.
+No existing view/auth helper is changed. [Current contract](phase8f1-robbery-voucher.md).
 
 This document is the security contract for the greenfield Supabase V2 schema. It
 does not connect Streamlit or React to V2. The isolated API now implements Auth

@@ -62,6 +62,7 @@ EXPECTED_TABLES = [
     "pokemon_entity_flags",
     "purchases",
     "redemptions",
+    "robbery_cycles",
     "save_files",
     "season_archive_snapshots",
     "season_config_versions",
@@ -1133,6 +1134,10 @@ def main() -> int:
     print("== Redemption: private effects, identity, concurrency and rollback ==")
     from tools.validate_supabase_v2_redemption_sql import validate_redemptions
     validate_redemptions(args, _psql_text)
+
+    print("== Robbery/voucher: cycle, provenance, concurrency and rollback ==")
+    from tools.validate_supabase_v2_robbery_sql import validate_robbery
+    validate_robbery(args, _psql_text)
 
     print("== Real schema fixtures and introspection ==")
     with tempfile.NamedTemporaryFile("w", suffix=".sql", delete=False, encoding="utf-8") as tmp:

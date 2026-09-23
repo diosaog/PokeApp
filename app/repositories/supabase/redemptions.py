@@ -13,6 +13,9 @@ REJECTIONS = {
     'pokemon_identity_ambiguous':409, 'pokemon_target_stale':409,
     'pokemon_not_revivable':409, 'pokemon_already_shielded':409,
     'invalid_pokemon_target':409,
+    'steal_self_target':409, 'steal_target_shielded':409,
+    'steal_target_ineligible':409, 'steal_victim_ineligible':409,
+    'steal_victim_already_robbed':409, 'steal_cycle_conflict':409,
 }
 
 
@@ -28,9 +31,13 @@ class SupabaseRedemptionRepository:
     def redeem_purchase(self, request: RedemptionRequest) -> RedemptionReceipt:
         try:
             # Only a server-observed version is sent. SQL rechecks it under the identity lock.
-            rows = self._client.table('pokemon_identity_revisions').select('id').eq(
-                'season_id', request.season_id).eq('trainer_id', request.trainer_id).order(
-                'revision_number', desc=True).limit(1).execute().data
+            entities = self._client.table('pokemon_entities').select('owner_trainer_id').eq(
+                'season_id', request.season_id).eq('id', request.pokemon_entity_id).execute().data
+            rows = []
+            if entities:
+                rows = self._client.table('pokemon_identity_revisions').select('id').eq(
+                    'season_id', request.season_id).eq('trainer_id', entities[0]['owner_trainer_id']).order(
+                    'revision_number', desc=True).limit(1).execute().data
             args = {'p_' + key:value for key,value in asdict(request).items()}
             args['p_expected_revision_id'] = rows[0]['id'] if rows else None
             data = self._client.rpc('api_redeem_purchase', args).execute().data

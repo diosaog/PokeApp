@@ -1,6 +1,14 @@
 # Phase 8F: Redemption / Effect Boundary
 
-## Current Implementation: 2026-09-23
+## Current Extension: Phase 8F.1
+
+The canonical `robbery_shield_voucher` is now approved and implemented in 025,
+including voucher use, robbery, unique gift provenance and durable robbery cycles.
+See [current full contract](phase8f1-robbery-voucher.md) and
+[validation/closure report](phase8f-completion-report.md). Staging gate pending.
+The two-effect status below is the preserved 024 checkpoint, not a current blocker.
+
+## Historical Implementation: 024 / 2026-09-23
 
 Resume checkpoint: `main`, `b3cabf3`, origin/main 0/0; protected guide untouched.
 **PARTIAL: shield + revive DONE local + V2 staging; robbery AND its voucher are

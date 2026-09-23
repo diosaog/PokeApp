@@ -103,7 +103,7 @@ class RedemptionResponse(BaseModel):
     season_id: UUID
     trainer_id: UUID
     shop_item_id: UUID
-    effect_code: Literal['shield', 'revive']
+    effect_code: Literal['shield', 'revive', 'robbery_shield', 'steal']
     target_pokemon_entity_id: UUID
     target_owner_trainer_id: UUID
     purchase_status: Literal['used']
@@ -113,7 +113,7 @@ class RedemptionResponse(BaseModel):
     redeemed_at: datetime
     physical_effect_completed_at: None
     activity_event_id: UUID
-    gift_purchase_id: None
+    gift_purchase_id: UUID | None
 
 
 class TeamLockResponse(BaseModel):

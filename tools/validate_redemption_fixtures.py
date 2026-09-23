@@ -111,11 +111,11 @@ class RedemptionFixtures(IdentityFixtures):
         for status in ('used','cancelled','refunded'):
             self.reject(lambda s=status:self.redeem(self.purchase(status=s),self.party[2]),'PURCHASE_NOT_REDEEMABLE')
         self.reject(lambda:self.redeem(self.purchase(quantity=2),self.party[2]),'PURCHASE_NOT_REDEEMABLE')
-        for code in ('captura_extra','robar_pokemon','fosil','baya_aranja'):
+        for code in ('captura_extra','fosil','baya_aranja'):
             p=self.purchase(code)
             self.reject(lambda:self.redeem(p,self.party[2]),'REDEMPTION_NOT_SUPPORTED')
             require(self.select('purchases',id=p['id'])[0]['status']=='pending','unsupported consumed')
-        self.passed('F08/F10/F13/F15 scoped purchase, unsupported robbery/catalog and invalid states unchanged')
+        self.passed('F08/F10/F13/F15 scoped purchase, unsupported catalog and invalid states unchanged')
 
         other_season=self.insert('seasons',dict(name=self.run_id+'_other',status='draft'))
         other_player=self.insert('season_players',dict(season_id=other_season['id'],trainer_id=self.owner['id']))

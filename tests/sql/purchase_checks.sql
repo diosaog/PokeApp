@@ -42,13 +42,13 @@ do $$ declare first jsonb; retried jsonb; second jsonb; begin
    from public.activity_events where id=(first->>'event_id')::uuid), 'P27 public event');
  second := pokeapp_shop_test.buy('second');
  perform pokeapp_shop_test.assert_true(second->>'balance_after'='80' and second->>'id'<>first->>'id', 'P34 distinct keys');
- update public.shop_items set base_price=30;
+ update public.shop_items set base_price=30 where code in ('purchase_test_item','purchase_test_other');
  retried := pokeapp_shop_test.buy('receipt',true);
  perform pokeapp_shop_test.assert_true(first=retried, 'P24 P25 P31 P49 historical price balance and irrelevant confirmation');
  perform pokeapp_shop_test.assert_true((select count(*)=2 from public.purchases), 'P31 no duplicates');
  perform pokeapp_shop_test.expect_failure($q$select pokeapp_shop_test.buy('receipt',false,'00000000-0000-4000-8000-000000008d61')$q$,'PT409');
  perform pokeapp_shop_test.expect_failure($q$select pokeapp_shop_test.buy('missing',false,'00000000-0000-4000-8000-000000008d99')$q$,'PT404');
- update public.shop_items set base_price=10;
+ update public.shop_items set base_price=10 where code in ('purchase_test_item','purchase_test_other');
  perform pokeapp_shop_test.promo('exhausted');
  first := pokeapp_shop_test.buy('confirmed',true);
  perform pokeapp_shop_test.expect_failure($q$select pokeapp_shop_test.buy('confirmed',false)$q$,'PT409');

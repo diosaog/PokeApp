@@ -37,7 +37,7 @@ do $$ declare first jsonb; second jsonb; before_state jsonb; begin
  second := pokeapp_shop_test.claim('second','00000000-0000-4000-8000-000000008d70','00000000-0000-4000-8000-000000008d02');
  perform pokeapp_shop_test.assert_true(second->>'remaining_stock'='0','E30 E31 two distinct claims');
  update public.shop_promotions set effective_price=9 where promotion_type='normal';
- update public.shop_items set base_price=20;
+ update public.shop_items set base_price=20 where code in ('purchase_test_item','purchase_test_other');
  before_state := pokeapp_shop_test.promo_state();
  perform pokeapp_shop_test.assert_true(pokeapp_shop_test.claim('receipt')=first,'E22 original price balance stock snapshot');
  perform pokeapp_shop_test.assert_true(before_state=pokeapp_shop_test.promo_state(),'E23-E26 no repeat effects');
