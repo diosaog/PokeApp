@@ -164,6 +164,15 @@ class SeasonAdminApiTests(unittest.TestCase):
 
 
 class SeasonAdminAdapterTests(unittest.TestCase):
+    def test_staging_transport_distinguishes_schema_422_from_business_error(self):
+        from tools.validate_supabase_v2_season_admin import ApiTransport
+        response=SimpleNamespace(status_code=422,json=lambda:{'detail':[{'type':'missing','loc':['body','name']}]})
+        client=SimpleNamespace(request=lambda *a,**k:response)
+        transport=ApiTransport(lambda:client,{TRAINER_ID:'synthetic-test-token'})
+        with self.assertRaises(SeasonAdminRejected) as exc:
+            transport.execute('create',{'actor_trainer_id':TRAINER_ID,'body':{}})
+        self.assertEqual((exc.exception.code,exc.exception.status),('INVALID_REQUEST',422))
+
     def test_each_operation_has_separate_rpc(self):
         self.assertEqual(len(set(RPCS.values())), 10)
         calls = []

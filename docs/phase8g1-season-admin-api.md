@@ -182,7 +182,7 @@ No raw save bytes or Storage objects are created by these setup fixtures.
 
 Local gates PASS, 2026-09-23:
 
-- 342 unit tests (318 baseline preserved + 24 API/adapter contract tests).
+- 343 unit tests (318 baseline preserved + 25 API/adapter/validator contract tests).
 - `py -m compileall -q .` and `git diff --check` PASS. Existing Streamlit cache,
   Starlette TestClient deprecation and Git LF/CRLF warnings are not concealed.
 - PostgreSQL 17.11, loopback 127.0.0.1:55439, disposable database
@@ -195,3 +195,10 @@ Local gates PASS, 2026-09-23:
 
 Incremental staging validation is pending. Phase 8G.1 is not DONE yet.
 Global completed-project estimate remains about 57% until closure.
+
+026 was applied after push `178cc41`, as `20260923192300`, only on the pinned V2
+project. Initial remote run stopped at a validator TypeError: FastAPI schema
+errors use a 422 detail list, not the business error object. The harness now
+asserts that distinction explicitly, with a regression test; no migration/API
+behavior was changed. That attempt cleaned all fixtures/Auth users, independently
+confirmed by SQL (zero seasons/receipts/temp users, ten original trainers).

@@ -4,6 +4,7 @@ from dataclasses import replace
 from pathlib import Path
 import secrets
 import sys
+import traceback
 from threading import local
 from uuid import uuid4
 
@@ -46,7 +47,10 @@ class ApiTransport:
         if 'idempotency_key' in r: headers['Idempotency-Key']=r['idempotency_key']
         response=self.worker.client.request(method,path,headers=headers,json=r.get('body'))
         if response.status_code in (403,404,409,422):
-            raise SeasonAdminRejected(response.json()['detail']['code'],response.status_code)
+            detail=response.json()['detail']
+            if response.status_code==422 and isinstance(detail,list):
+                raise SeasonAdminRejected('INVALID_REQUEST',422)
+            raise SeasonAdminRejected(detail['code'],response.status_code)
         require(response.status_code==200,'API operation '+op+' HTTP '+str(response.status_code))
         return response.json()
 
@@ -82,6 +86,7 @@ def main():
         class ApiFixtures(SeasonAdminFixtures):
             def setup(self):
                 super().setup()
+                self.validates_request_schema=True
                 self.repo=ApiTransport(api,{self.admin['id']:tokens['admin'],self.admin2['id']:tokens['other'],self.owner['id']:tokens['owner']})
         fixture=ApiFixtures(WorkerClient(lambda:client(config.service_role_key)),readers,users,config.run_id)
         fixture.run()
@@ -103,6 +108,8 @@ def main():
     except Exception as exc:
         failure=str(exc) if isinstance(exc,AssertionError) else type(exc).__name__
         if exc.__cause__: failure+=' cause='+type(exc.__cause__).__name__+' code='+str(getattr(exc.__cause__,'code',None))
+        frames=traceback.extract_tb(exc.__traceback__)
+        if frames: failure+=' at '+Path(frames[-1].filename).name+':'+str(frames[-1].lineno)
     finally:
         if fixture and not fixture_cleaned:
             try: fixture.cleanup()

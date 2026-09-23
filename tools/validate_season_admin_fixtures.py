@@ -24,6 +24,7 @@ class SeasonAdminFixtures:
         self.run_id = run_id or "phase8g1_validation_"+uuid4().hex
         self.repo = SupabaseSeasonAdminRepository(client)
         self.seasons, self.trainers, self.checks = [], [], []
+        self.validates_request_schema=False
 
     def passed(self, label):
         self.checks.append(label)
@@ -149,7 +150,11 @@ class SeasonAdminFixtures:
         self.passed('D clean removal and different roster edits CAS')
         main=self.roster(); cfg=self.config(main)
         for changed,code in (({'division_sizes':{'A':1,'B':2}},'INVALID_CONFIG'),({'scoring':{'1':1}},'INVALID_REWARDS'),
-                             ({'coin_rewards':{'1':-1}},'INVALID_REWARDS'),({'rules':{'other':True}},'INVALID_CONFIG')):
+                             ({'coin_rewards':{'1':0}},'INVALID_REWARDS')):
+            self.reject(lambda changed=changed:self.call('create_config',main,{**cfg,**changed}),code)
+        for changed,sql_code in (({'coin_rewards':{'1':-1}},'INVALID_REWARDS'),({'rules':{'other':True}},'INVALID_CONFIG')):
+            # The HTTP boundary rejects malformed shapes before the business RPC.
+            code='INVALID_REQUEST' if self.validates_request_schema else sql_code
             self.reject(lambda changed=changed:self.call('create_config',main,{**cfg,**changed}),code)
         key=uuid4().hex
         c=self.call('create_config',main,cfg,key=key)
