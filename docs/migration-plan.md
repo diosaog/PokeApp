@@ -1,12 +1,19 @@
 # PokeApp 2.0 Migration Plan
 
-## Current 8H Scope
+## Current 8I Scope
+
+Implement permanent participant retirement/abandonment/disqualification, scheduled
+pair reconciliation and cycle consequences in additive 028. No 8J implementation.
+[Contract](phase8i-participant-status.md); [executed gates](phase8i-completion-report.md).
+Before full local/staging closure, completed-project estimate remains about 62%.
+
+## Completed 8H Scope
 
 Competitive operations and safe correction implement D4-D6=A, with additive 027.
 DONE local + real V2 staging (027 `20260923210625`), including 376 tests, full SQL
 gates, 20 remote groups, previous API regressions and independent zero cleanup.
 [8H delivery](phase8h-completion-report.md). Weighted completion ~59% -> ~62%.
-Next 8I; not implemented here. No runtime switch, dual-write or deployment.
+8I follows as above. No runtime switch, dual-write or deployment.
 
 ## Completed 8G.1 Scope
 

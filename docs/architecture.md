@@ -1,5 +1,16 @@
 # PokeApp Architecture
 
+## Phase 8I Participant Boundary
+
+Three explicit enabled-admin operations reuse 026 receipts/CAS and 025 season/player
+locks. SQL 028 atomically commits the permanent status, typed exclusive membership
+boundary, scheduled pair removal, mutable robbed projection/cycle consequence,
+revisions, private event and receipt. No historical/economy/save deletion.
+027 helpers now understand effective eligibility and empty divisions; two safe
+public projections and admin setup reads expose the round cutoff, not private reasons.
+[Contract](phase8i-participant-status.md); [executed gates](phase8i-completion-report.md).
+Runtime remains Streamlit/V1; no deployment, dual write, reactivation or 8J.
+
 ## Phase 8H Competitive Boundary
 
 Six additional admin routes expose safe day state and open/results/cancel/close/

@@ -230,10 +230,18 @@ Orden oficial de migrations:
 25. `025_robbery_voucher_and_redemption.sql`
 26. `026_season_admin_setup_api.sql`
 27. `027_competitive_matchdays.sql`
+28. `028_participant_status_admin.sql`
+
+028 incorpora bajas competitivas permanentes y efectivas por jornada, conservando
+historial, economia, saves y equipos fijados. Bootstrap contiene ahora 001-028,
+solo para BASE VACIA. En staging existente aplicar solo 028 comprometida despues
+de validar local y hacer push. No repetir migrations previas ni reset/bootstrap.
+[Contrato](../../docs/phase8i-participant-status.md) y
+[estado de validacion](../../docs/phase8i-completion-report.md).
 
 027 anade apertura/resultados/cancelacion/cierre atomico de jornadas, historial
 inmutable, recompensas y correccion acotada. [Contrato](../../docs/phase8h-matchday-operations.md)
-e [informe/gates](../../docs/phase8h-completion-report.md). Bootstrap generado 001-027
+e [informe/gates](../../docs/phase8h-completion-report.md). En ese checkpoint, bootstrap 001-027
 solo para una base vacia. En Pokeapp 2.0 se aplico SOLO 027 como `20260923210625`
 tras gates locales y push `bef5c4d`; validacion remota y limpieza independiente PASS.
 No repetir 027, bootstrap/reset ni migrations previas en ese staging.

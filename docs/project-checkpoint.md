@@ -1,11 +1,17 @@
 # PokeApp 2.0 Project Checkpoint
 
-Checkpoint date: 2026-09-23 (8H DONE, local + real V2 staging).
+Checkpoint date: 2026-09-24 (8I local PASS; staging pending).
+
+Phase 8I adds the participant-status boundary in 028. Three permanent statuses,
+scheduled-day reconciliation, typed historical cutoff, robbery cycle adjustment,
+admin JWT/CAS/receipts. [Contract](phase8i-participant-status.md) and
+[current delivery gates](phase8i-completion-report.md). 001-027 remain unchanged.
+8J is not implemented and may start only after 8I local + staging gates close.
 
 Phase 8H implements approved D4=A/D5=A/D6=A in additive 027: open/results/cancel,
 atomic close/rewards/movement/next day and restricted revisioned correction.
 [Contract](phase8h-matchday-operations.md) and [delivery gates](phase8h-completion-report.md).
-8G.1 remains DONE local + staging. 8I/8J are not implemented; D8 remains deferred.
+8G.1/8H remain DONE local + staging. D8 remains deferred.
 No Streamlit/V1 change, deployment, dual-write or cutover.
 
 Base HEAD before original checkpoint documentation:
@@ -69,6 +75,11 @@ Latest architecture state:
   Existing Advisor findings are documented, not falsely reported as cleared.
 
 ## Current State
+
+8I local PASS: 403 unit tests, compileall/diff-check, migrations/bootstrap,
+8,268-line schema parity, 24 shared groups + eight exact rollback injections,
+all previous regressions. Staging is pending; 8H remains the last fully completed
+checkpoint until the 8I report records committed 028, staging and cleanup.
 
 8H: 376 unit tests PASS (343 baseline + 33 focused tests). SQL migrations/bootstrap
 PASS, 8,076-line schema parity, 20 groups and 17 exact rollback points. Committed
@@ -315,7 +326,7 @@ Persistence:
 Next exact phase:
 
 ```text
-Phase 8I: participant status / lifecycle administration
+Complete Phase 8I gates; then Phase 8J: finish/archive/Hall (not implemented)
 ```
 
 8G audit and 8G.1 local/staging implementation are complete. D1-D6 are approved.

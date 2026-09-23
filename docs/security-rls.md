@@ -1,5 +1,16 @@
 # Supabase V2 Security And RLS
 
+## Phase 8I Delta (028)
+
+No new tables or RLS policies. The status RPC and eligibility/immutability helpers
+are invoker with fixed search_path, service-only EXECUTE. Existing 026 browser
+write revokes remain in force, including new columns. API verifies enabled admin
+and filters/validates receipt scope, actor and destination; events are ADMIN only.
+Public participant/membership views append round cutoff fields only, retaining
+018 safe-by-shape security options. Reasons/actors are not public projections.
+40 public RLS tables / 37 views; the two changed view definitions are intentional,
+not a claim that all 37 hashes remain identical. [Gates](phase8i-completion-report.md).
+
 ## Phase 8H Delta (027, DONE Local + Staging)
 
 `matchday_snapshot_revisions` is a new backend-only RLS table. 027 functions are

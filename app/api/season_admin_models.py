@@ -107,6 +107,7 @@ class ParticipantSummary(StrictBody):
     status: Literal["active", "retired", "abandoned", "disqualified"]
     seed_order: int | None
     stats_ready: bool
+    status_effective_matchday_number: int | None = None
 
 
 class ConfigSummary(StrictBody):
@@ -137,6 +138,7 @@ class MembershipSummary(StrictBody):
     effective_from_matchday: int
     effective_to_matchday: int | None
     reason: str
+    eligibility_ends_before_matchday_number: int | None = None
 
 
 class FirstMatchdaySummary(StrictBody):

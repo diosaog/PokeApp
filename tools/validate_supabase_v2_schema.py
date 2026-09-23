@@ -1135,6 +1135,9 @@ def main() -> int:
     print("== Competitive matchdays, corrections and exact rollback ==", flush=True)
     from tools.validate_supabase_v2_matchdays_sql import validate_matchdays
     validate_matchdays(args, _psql_text)
+    print("== Participant status, eligibility and exact rollback ==", flush=True)
+    from tools.validate_supabase_v2_participant_status_sql import validate_participant_status
+    validate_participant_status(args, _psql_text)
 
     print("== Real schema fixtures and introspection ==")
     with tempfile.NamedTemporaryFile("w", suffix=".sql", delete=False, encoding="utf-8") as tmp:

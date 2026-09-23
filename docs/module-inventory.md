@@ -3,6 +3,15 @@
 Clasificacion inicial tras auditoria. Esta lista debe actualizarse cuando se
 extraiga dominio o repositories.
 
+## Phase 8I Additions
+
+| Module | Type | Responsibility |
+| --- | --- | --- |
+| `app/api/routes/participant_status.py`, `participant_status_models.py` | API | Three explicit admin status commands; strict body and safe receipt. |
+| `app/repositories/supabase/participant_status.py` | V2 REPOSITORY | Single atomic backend RPC, stable sanitized errors, no retry. |
+| `supabase/v2/migrations/028_participant_status_admin.sql` | V2 SQL | Effective eligibility, safe scheduled reconciliation, cycle/flags, CAS/event/receipt. |
+| `tools/validate_participant_status_fixtures.py`, `validate_supabase_v2_participant_status*.py` | VALIDATION | Shared real database scenarios/races, local rollback and opt-in JWT/API staging gates. |
+
 ## Phase 8H Additions
 
 | Module | Type | Responsibility |

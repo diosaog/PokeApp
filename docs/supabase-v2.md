@@ -1,11 +1,20 @@
 # Supabase V2 Greenfield Schema
 
+## Phase 8I Additive Schema (028)
+
+`028_participant_status_admin.sql` adds typed effective status and membership
+cutoffs, the service-only status operation, eligibility-aware competitive helpers
+and safe read boundary fields. No new table, historical rewrite or change to
+001-027. Bootstrap now contains 001-028 and remains EMPTY DATABASE ONLY.
+[Contract](phase8i-participant-status.md); [validation status](phase8i-completion-report.md).
+Existing V2 receives ONLY committed 028 after local gates/push; never reset/bootstrap.
+
 ## Phase 8H Additive Schema (027, DONE Local + Staging)
 
 001-026 remain unchanged. 027 adds day/results revisions, immutable snapshot
 revision history, constrained matchday reward provenance/dedupe, movement uniqueness,
 the backend wipe-revive counter required by ranking and competitive admin RPCs.
-Bootstrap is generated from 001-027 for empty databases only. Current schema has
+At the 8H checkpoint bootstrap contained 001-027 for empty databases only. Schema has
 40 public tables with RLS and the same 37 views. Incremental staging application
 `20260923210625`, real validation and independent cleanup PASS:
 [8H report](phase8h-completion-report.md). Exact schema parity: 8,076 dump lines.
@@ -74,6 +83,7 @@ supabase/v2/
     025_robbery_voucher_and_redemption.sql
     026_season_admin_setup_api.sql
     027_competitive_matchdays.sql
+    028_participant_status_admin.sql
   bootstrap.sql
   reset_dev.sql
 ```
