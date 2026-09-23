@@ -137,6 +137,30 @@ class LifecycleApiTests(unittest.TestCase):
 
 
 class LifecycleAdapterTests(unittest.TestCase):
+    def test_finished_denial_fixtures_reach_business_guards(self):
+        from app.api.matchday_models import OpenDayBody, ResultsBody, CloseDayBody, CorrectDayBody
+        from tools.validate_season_lifecycle_fixtures import SeasonLifecycleFixtures
+        fixture=SeasonLifecycleFixtures.__new__(SeasonLifecycleFixtures)
+        fixture.rows=Mock(return_value=[dict(id=DID,winner_id=TRAINER_ID)])
+        fixture.correction=Mock(return_value=dict(expected_snapshot_revision=1,reason='Review',
+            results=[dict(match_id=DID,winner_season_player_id=TRAINER_ID)]))
+        bodies={'open':OpenDayBody,'results':ResultsBody,'close':CloseDayBody,'correct':CorrectDayBody}
+        seen=[]
+        def md(op,sid,did,body):
+            bodies[op].model_validate(body)
+            seen.append(op)
+            raise SeasonAdminRejected('SEASON_NOT_ACTIVE',409)
+        fixture.md=md
+        fixture.players=Mock(return_value=[dict(id=TRAINER_ID)])
+        fixture.change=Mock(side_effect=SeasonAdminRejected('SEASON_NOT_ACTIVE',409))
+        fixture.config=Mock(return_value={}); fixture.divisions_body=Mock(return_value={})
+        def call(op,*args):
+            raise SeasonAdminRejected('CONFIG_WINDOW_CLOSED' if op=='create_config' else 'SEASON_NOT_DRAFT',409)
+        fixture.call=call; fixture.passed=Mock()
+        fixture.finished_denials(SID,DID)
+        self.assertEqual(seen,['open','results','close','correct'])
+        fixture.passed.assert_called_once()
+
     def test_single_rpc(self):
         c=Mock(); c.rpc.return_value.execute.return_value.data={'safe':True}
         self.assertEqual(SupabaseSeasonLifecycleRepository(c).execute('finish',{'season_id':SID}),{'safe':True})

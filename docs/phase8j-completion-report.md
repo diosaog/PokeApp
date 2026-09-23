@@ -8,13 +8,15 @@ document until executed evidence is recorded below. [Contract](phase8j-season-fi
 ## RESULT
 
 Local implementation, unit, full SQL/regression, rollback and schema parity PASS.
-PENDING real staging gates. No staging 029 applied yet.
+029 applied; PENDING completion of real staging validation and final cleanup.
 
 ## START / END / GIT
 
 Start main, `e2628c5`, origin/main 0/0, clean tracked tree. Protected untracked
 guide SHA256 `6FA3E82B6D3FDF82ACB0E95DA6715397574ACE7A134F68C2F69864909F2B934E`.
-Implementation and closure commits will be recorded after execution.
+Implementation `5f77a48595a93525a8236599ee5c7352778a9803`,
+`api: add atomic season finalization and archive`, pushed before staging changes.
+Documentation closure will be recorded after real validation.
 
 ## FINISH CONTRACT
 
@@ -105,7 +107,7 @@ routes exited 0 with all 019-028 regressions and the same 19 groups / ten rollba
 Existing SQL totals: identity 19, redemption 19, robbery 17, setup 17 plus nine
 rollbacks, matchdays 20 plus seventeen rollbacks, participant status 24 plus eight
 rollbacks. All 019/020/021/022 contracts and their concurrency/rollback gates PASS.
-430 unit tests PASS (403 baseline + 27 new), final run 27.538 seconds;
+431 unit tests PASS (403 baseline + 28 new), final run 23.419 seconds;
 `py -m compileall -q .`, exact ordered 001-029 bootstrap and `git diff --check`
 PASS. Existing Streamlit/TestClient/LF-CRLF warnings retained.
 Exact ordered `pg_dump --schema-only` parity: **8,987 identical lines**, including
@@ -142,15 +144,39 @@ existing matchday API was not changed. Full gates rerun with the corrected fixtu
 
 ## STAGING
 
-NOT APPLIED. Only after full local green and implementation push. Exact target
-`https://uwleqeuzsveqlugugzba.supabase.co`, prior 028 `20260923220301`.
-Apply ONLY committed 029; no remote reset/bootstrap/V1. Synthetic prefix
-`phase8j_validation_<uuid>`; real JWT/API/PostgREST, 027/028 and prior regressions.
+Applied ONLY exact committed 029 from `5f77a48` after full local green and push,
+as **`20260923232516`** (2026-09-23 UTC / 2026-09-24 Madrid).
+Exact target `https://uwleqeuzsveqlugugzba.supabase.co`, prior 028 `20260923220301`
+verified. No remote reset/bootstrap/V1. **DO NOT REAPPLY 029.**
+Synthetic prefix `phase8j_validation_<uuid>`; real JWT/API/PostgREST, 027/028 and
+prior regressions are now running, not yet declared complete.
+
+```powershell
+.\.venv-api\Scripts\python.exe tools/validate_supabase_v2_season_lifecycle.py --env-file .env.supabase-v2-rls.local --allow-staging-writes
+```
+
+Log `%TEMP%/phase8j-staging.log`; secrets redacted; intrusive rollback remains local.
+
+First remote attempt `phase8j_validation_068c218da980417b996f561d2fed4b98`
+stopped in the fixture's finished-results denial: it sent an empty result batch,
+so HTTP DTO validation correctly returned INVALID_REQUEST before the lifecycle
+guard. The fixture now sends a valid historical match/winner. One new unit test
+validates all four denial payloads against the actual HTTP models. No API/SQL
+change or migration reapplication. Independent MCP check after that attempt:
+all 40 public-table contents/counts and real-data fingerprints equal baseline;
+Auth users/identities/sessions/refresh_tokens all zero. Corrected fixture rerun:
+19 SQL groups and ten rollback cases PASS, with 431 unit tests and compile/diff
+gates PASS; product SQL/API unchanged. Corrected remote validation pending.
 
 ## SECURITY / ADVISOR
 
-40 RLS tables / 37 views expected, service-only fixed-path invoker functions.
-Before/after Advisor and independent checks still pending. No global-clean claim.
+Independent post-DDL checks PASS: 40/40 RLS tables, 37 views, all six new function
+definitions match local MD5, fixed-path invoker and service-only EXECUTE. All old
+function bodies/security unchanged. Exactly 21 public views gain parent filters;
+all 37 match local definitions and preserve options/grants. Browser table/column
+artifact DML is denied. Existing data hashes/counts unchanged by DDL.
+Advisor before: 24 ERROR / 4 WARN / 4 INFO; final comparison pending.
+No global-clean claim.
 
 ## CLEANUP
 

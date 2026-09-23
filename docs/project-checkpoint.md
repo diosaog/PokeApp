@@ -4,7 +4,8 @@ Checkpoint date: 2026-09-24 (8I DONE; 8J implementation/validation in progress).
 
 Phase 8J adds explicit finish/archive/logical discard in 029. No V1/runtime change,
 automatic 12-coin bonus, Cup winner inference or Phase 9. [Contract](phase8j-season-finalization.md)
-and [current gates](phase8j-completion-report.md). Staging 029 has NOT been applied.
+and [current gates](phase8j-completion-report.md). Staging 029 is applied as
+`20260923232516`; real API validation is not yet complete. Do not reapply it.
 
 Phase 8I adds the participant-status boundary in 028. Three permanent statuses,
 scheduled-day reconciliation, typed historical cutoff, robbery cycle adjustment,

@@ -91,7 +91,9 @@ class SeasonLifecycleFixtures(ParticipantStatusFixtures):
         self.redemptions_preserved()
 
     def finished_denials(self,sid,did):
-        for op,body in (('open',{'expected_revision':0}),('results',{'expected_results_revision':0,'results':[]}),
+        match=self.rows('matches',matchday_id=did)[0]
+        results=[dict(match_id=match['id'],winner_season_player_id=match['winner_id'])]
+        for op,body in (('open',{'expected_revision':0}),('results',{'expected_results_revision':0,'results':results}),
             ('close',{'expected_results_revision':0}),('correct',self.correction(sid,did))):
             self.reject(lambda:self.md(op,sid,did,body),'SEASON_NOT_ACTIVE')
         self.reject(lambda:self.change(sid,self.players(sid)[0]['id']),'SEASON_NOT_ACTIVE')

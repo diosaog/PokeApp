@@ -146,7 +146,7 @@ service-role maintenance is not equivalent to browser/admin API access.
 
 ## Validation And Remaining Work
 
-27 new unit tests preserve the earlier 403 and extend the admin route inventory
+28 new unit tests preserve the earlier 403 and extend the admin route inventory
 19 -> 22 without removing authorization assertions. Shared PostgreSQL/staging
 fixtures cover real transitions/races/privacy/denials and artifact preservation.
 Ten local rollback injections cover all required stages plus receipt failure for
