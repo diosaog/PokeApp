@@ -1,5 +1,15 @@
 # Supabase V2 Security And RLS
 
+## Phase 8H Delta (027)
+
+`matchday_snapshot_revisions` is a new backend-only RLS table. 027 functions are
+SECURITY INVOKER with fixed search_path and service-only EXECUTE, including the
+two-phase planning context. Browser admins cannot supply plans or directly mutate
+snapshots, movements or ledger; table and column grants are revoked. Existing
+read policies/projections are preserved. New events remain ADMIN private.
+Local/staging evidence and unchanged Advisor findings are recorded in
+[8H completion](phase8h-completion-report.md). No security-global-clean claim.
+
 ## Phase 8G.1 Delta (026, DONE Local + Staging)
 
 `require_admin_principal`: verified JWT -> mapped enabled trainer -> is_admin,

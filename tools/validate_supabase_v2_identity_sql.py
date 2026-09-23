@@ -36,9 +36,11 @@ class LocalClient:
         if 'p_request' in args:
             values = literal(json.dumps(args['p_request']))+'::jsonb'
         else:
-            values = ','.join(identifier(key)+' => '+('NULL' if value is None else literal(value))
+            values = ','.join(identifier(key)+' => '+('NULL' if value is None else literal(json.dumps(value) if isinstance(value,(dict,list)) else value))
                               for key,value in args.items())
-        return SimpleNamespace(execute=lambda:self.execute('select public.'+identifier(name)+'('+values+')'))
+        call='public.'+identifier(name)+'('+values+')'
+        query=("select coalesce(jsonb_agg(to_jsonb(r)),'[]'::jsonb) from "+call+' r') if name=='api_upsert_team_lock' else 'select '+call
+        return SimpleNamespace(execute=lambda:self.execute(query))
 
     def execute(self, sql):
         args = self.args

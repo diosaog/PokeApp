@@ -1,11 +1,12 @@
 # PokeApp 2.0 Project Checkpoint
 
-Checkpoint date: 2026-09-23 (8G.1 DONE, local + real V2 staging).
+Checkpoint date: 2026-09-23 (8H local gates PASS; staging pending).
 
-Phase 8G.1 now implements the approved D1=A/D2=A/D3=B core admin boundary in
-additive migration 026 and `/v1/admin`. Local/staging closure evidence belongs to
-[the completion report](phase8g1-completion-report.md). D4-D7=A are
-future direction; D8 deferred. No 8H implementation, Streamlit/V1 change or cutover.
+Phase 8H implements approved D4=A/D5=A/D6=A in additive 027: open/results/cancel,
+atomic close/rewards/movement/next day and restricted revisioned correction.
+[Contract](phase8h-matchday-operations.md) and [delivery gates](phase8h-completion-report.md).
+8G.1 remains DONE local + staging. 8I/8J are not implemented; D8 remains deferred.
+No Streamlit/V1 change, deployment, dual-write or cutover.
 
 Base HEAD before original checkpoint documentation:
 `f6d8fc179f8c9e021bdf6b4fa1e2687e2d7e8b2a`
@@ -69,6 +70,13 @@ Latest architecture state:
 
 ## Current State
 
+8H: 376 unit tests PASS (343 baseline + 33 focused tests). SQL migrations/bootstrap
+PASS, 8,076-line schema parity, 20 groups and 17 exact rollback points. Staging
+validation is pending; do not treat 027 as remotely applied yet.
+Global completed-project estimate remains ~59% until those gates close.
+
+Previous completed checkpoint:
+
 Phase 8G.1 core setup/admin implementation follows the completed
 [8G audit](phase8g-season-league-admin-audit.md) at `089b8d6` and approved D1=A,
 D2=A, D3=B. It adds migration 026, ten `/v1/admin` routes, durable revisions/
@@ -81,7 +89,7 @@ passed 17 setup groups, Team Lock 13 checks, purchase/context 29 checks and
 redemption/robbery 17 groups. Independent SQL confirms zero fixture/Auth residue,
 39/39 public tables with RLS, 37 views and unchanged real trainer/catalog/Storage
 fingerprints. Existing Advisor findings remain documented, not cleared.
-Weighted complete-project estimate: about 57% -> 59%; next Phase 8H, not started.
+Weighted complete-project estimate at that checkpoint: about 57% -> 59%.
 
 Phase 8F.1 adds the approved canonical reward-only voucher and complete atomic
 robbery/cycle/gift handling in 025, staged as `20260923180416` after `4cf21bf`.
@@ -303,12 +311,12 @@ Persistence:
 Next exact phase:
 
 ```text
-Phase 8H: competitive matchday administration, close and advancement
+Phase 8H: complete staging validation, then Phase 8I participant status
 ```
 
-8G audit and 8G.1 local/staging implementation are complete. D1-D3 are approved.
-Competitive close/rewards/pointer advance, participant status and
-final archive/Hall remain separate proposed subphases, not completed APIs.
+8G audit and 8G.1 local/staging implementation are complete. D1-D6 are approved.
+8H competitive operations are implemented with gates tracked in their report.
+Participant status and final archive/Hall remain separate, not completed APIs.
 
 Fase 7.1, Fase 7.2, Fase 8A.1, Fase 8B and 8B-H are closed. Fases 8C, 8D.0,
 8D, 8E and 8F.0 are DONE local + staging. Phase 8F.1 resolves the catalog blocker

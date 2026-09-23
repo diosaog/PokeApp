@@ -229,6 +229,13 @@ Orden oficial de migrations:
 24. `024_redemption_effect_boundary.sql`
 25. `025_robbery_voucher_and_redemption.sql`
 26. `026_season_admin_setup_api.sql`
+27. `027_competitive_matchdays.sql`
+
+027 anade apertura/resultados/cancelacion/cierre atomico de jornadas, historial
+inmutable, recompensas y correccion acotada. [Contrato](../../docs/phase8h-matchday-operations.md)
+e [informe/gates](../../docs/phase8h-completion-report.md). Bootstrap generado 001-027
+solo para una base vacia. En staging existente, aplicar exclusivamente 027 despues
+de gates locales y commit/push; no usar bootstrap/reset ni repetir migrations previas.
 
 026 incorpora administracion inicial de temporada, revisiones/recibos, divisiones
 A/B, primera jornada y activacion validada. Revoca las escrituras directas del

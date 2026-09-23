@@ -3,6 +3,16 @@
 Clasificacion inicial tras auditoria. Esta lista debe actualizarse cuando se
 extraiga dominio o repositories.
 
+## Phase 8H Additions
+
+| Module | Type | Responsibility |
+| --- | --- | --- |
+| `app/api/routes/matchdays.py`, `matchday_models.py` | API | Enabled-admin commands, safe state/receipts, strict CAS DTOs. |
+| `app/application/matchdays.py` | PURE APPLICATION | Close/correction planning using existing domain ranking/reward/movement/shop services. |
+| `app/repositories/supabase/matchdays.py` | V2 REPOSITORY | Backend context/plan fingerprint handshake and atomic SQL commands. |
+| `supabase/v2/migrations/027_competitive_matchdays.sql` | V2 SQL | Authoritative close/correction, immutable revisions, economy/membership/pointer transaction. |
+| `tools/validate_matchday_fixtures.py`, `validate_supabase_v2_matchdays*.py` | VALIDATION | Shared races, local exact rollback and opt-in real JWT/API staging checks. |
+
 ## Root
 
 | Modulo | Tipo | Nota |

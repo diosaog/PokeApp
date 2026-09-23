@@ -89,6 +89,7 @@ class SupabaseV2SchemaTests(unittest.TestCase):
                 "024_redemption_effect_boundary.sql",
                 "025_robbery_voucher_and_redemption.sql",
                 "026_season_admin_setup_api.sql",
+                "027_competitive_matchdays.sql",
             ],
         )
         for path in _migration_files():
@@ -297,7 +298,7 @@ class SupabaseV2SchemaTests(unittest.TestCase):
         self.assertTrue(bootstrap.startswith("-- ONLY FOR EMPTY POKEAPP V2 DATABASE."))
         self.assertEqual(bootstrap, render_bootstrap())
         self.assertIn(
-        "Source of truth: supabase/v2/migrations/001_core.sql through 026_season_admin_setup_api.sql",
+        "Source of truth: supabase/v2/migrations/001_core.sql through 027_competitive_matchdays.sql",
             bootstrap,
         )
         self.assertNotIn("drop table", lowered)
@@ -321,7 +322,7 @@ class SupabaseV2SchemaTests(unittest.TestCase):
         tables = set(re.findall(r"create table public\.([a-z_]+)", security_sql))
 
         for table in sorted(tables):
-            if table in ('admin_operation_receipts', 'season_admin_state'):
+            if table in ('admin_operation_receipts', 'season_admin_state', 'matchday_snapshot_revisions'):
                 self.assertIn(f'alter table public.{table} enable row level security', security_sql)
                 continue
             if table == 'robbery_cycles':
@@ -330,7 +331,7 @@ class SupabaseV2SchemaTests(unittest.TestCase):
             else:
                 self.assertIn(f"'{table}'", security_sql, table)
 
-        self.assertEqual(security_sql.count("enable row level security"), 5)
+        self.assertEqual(security_sql.count("enable row level security"), 6)
         self.assertIn("alter table public.%i enable row level security", security_sql)
 
 

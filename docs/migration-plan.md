@@ -1,6 +1,13 @@
 # PokeApp 2.0 Migration Plan
 
-## Current 8G.1 Scope
+## Current 8H Scope
+
+Competitive operations and safe correction implement D4-D6=A, with additive 027.
+Local gates PASS; real staging is pending. Do not advance
+to 8I until [8H delivery](phase8h-completion-report.md) is DONE. Current weighted
+completion remains ~59% pending those gates; no runtime switch or deployment.
+
+## Completed 8G.1 Scope
 
 D1=A, D2=A and D3=B approved: DRAFT setup, initial roster, correctable unused
 configuration, exact A/B, first scheduled round and explicit ready activation.
@@ -8,7 +15,7 @@ Implementation is DONE local + real V2 staging, including incremental 026 and
 independent cleanup. Weighted completed-project estimate: about 57% -> 59% for
 this delivered setup boundary, not the whole league API.
 [Evidence](phase8g1-completion-report.md).
-Future D4-D7=A are recorded only, D8 deferred. 8H is next and not started;
+8H now implements D4-D6=A; D7 remains future direction and D8 deferred;
 8I statuses, 8J lifecycle/Hall, React/Cloudflare, shadow/cutover and Companion
 remain separate. No V1 dual writes or current runtime migration in this phase.
 
@@ -365,7 +372,7 @@ Estado 2026-09-22:
   Auditoria 8G completada; 8G.1 DONE local + staging: setup/admin aprobado,
   026 `20260923192300`, 343 tests, concurrencia/rollback y regresiones PASS.
   Limpieza independiente sin residuos ni cambios en datos reales.
-  Cierre/avance competitivo queda para 8H, no iniciado.
+  Cierre/avance competitivo y correccion segura: implementacion 8H, gates en su informe.
 - React/Cloudflare, migracion de datos, shadow mode y cutover no han empezado.
 
 Contrato y evidencias: [Phase 8C](phase8c-team-lock.md).

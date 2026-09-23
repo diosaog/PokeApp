@@ -1,12 +1,22 @@
 # Supabase V2 Greenfield Schema
 
+## Phase 8H Additive Schema (027)
+
+001-026 remain unchanged. 027 adds day/results revisions, immutable snapshot
+revision history, constrained matchday reward provenance/dedupe, movement uniqueness,
+the backend wipe-revive counter required by ranking and competitive admin RPCs.
+Bootstrap is generated from 001-027 for empty databases only. Current schema has
+40 public tables with RLS and the same 37 views. Incremental staging application
+and verification status: [8H report](phase8h-completion-report.md).
+Do not run bootstrap/reset on existing V2 or V1.
+
 ## Phase 8G.1 Additive Schema (DONE Local + Staging)
 
 001-025 are unchanged. `026_season_admin_setup_api.sql` adds two backend-only RLS
 tables for revisions/receipts, typed A/B capacities and roster association on
 configurations, immutable-used config/receipt guards, unordered match uniqueness,
-separate admin RPCs and direct browser write hardening. Bootstrap is regenerated
-from 001-026 for empty databases only. Only committed 026 was applied to V2
+separate admin RPCs and direct browser write hardening. At that checkpoint bootstrap
+was generated from 001-026. Only committed 026 was applied to V2
 staging after local gates and push, as `20260923192300`. Do not reapply it there.
 39/39 public tables have RLS; 37 existing views remain. Local schema dumps match
 including grants/ownership. Real JWT/API/PostgREST fixtures, previous mutation
@@ -62,6 +72,7 @@ supabase/v2/
     024_redemption_effect_boundary.sql
     025_robbery_voucher_and_redemption.sql
     026_season_admin_setup_api.sql
+    027_competitive_matchdays.sql
   bootstrap.sql
   reset_dev.sql
 ```

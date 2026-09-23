@@ -1,5 +1,16 @@
 # PokeApp Architecture
 
+## Phase 8H Competitive Boundary
+
+Six additional admin routes expose safe day state and open/results/cancel/close/
+correct commands. Existing domain services build close plans from locked backend
+inputs; SQL 027 rechecks their fingerprint and commits snapshots, economy,
+movements, next round, pointer, private event and receipt atomically. Browser plans
+are never accepted. Immutable history and append-only compensation support only
+the safe most-recent-round correction window. Final close leaves ACTIVE for 8J.
+[Contract](phase8h-matchday-operations.md); [validation status](phase8h-completion-report.md).
+API remains isolated, not deployed or wired into Streamlit/V1.
+
 ## Phase 8G.1 Administration Boundary
 
 The isolated API now has `/v1/admin` setup operations, verified enabled-admin
