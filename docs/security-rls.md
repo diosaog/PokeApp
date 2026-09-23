@@ -1,5 +1,14 @@
 # Supabase V2 Security And RLS
 
+## Phase 8J Delta (029)
+
+Lifecycle RPC/helpers are fixed-path invoker and service-only. Browser archive/Hall
+table/column writes revoked; artifacts reject UPDATE. Existing safe public views
+gain discarded-parent filters; restrictive readable-base policies preserve owner
+access through public parent projections. No new public views or private team fields.
+[Security/Advisor and real validation](phase8j-completion-report.md) remain the
+authority for completion, not this architectural description.
+
 ## Phase 8I Delta (028, DONE Local + Staging)
 
 No new tables or RLS policies. The status RPC and eligibility/immutability helpers

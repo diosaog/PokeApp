@@ -1,12 +1,16 @@
 # PokeApp 2.0 Project Checkpoint
 
-Checkpoint date: 2026-09-24 (8I DONE local + real Supabase V2 staging).
+Checkpoint date: 2026-09-24 (8I DONE; 8J implementation/validation in progress).
+
+Phase 8J adds explicit finish/archive/logical discard in 029. No V1/runtime change,
+automatic 12-coin bonus, Cup winner inference or Phase 9. [Contract](phase8j-season-finalization.md)
+and [current gates](phase8j-completion-report.md). Staging 029 has NOT been applied.
 
 Phase 8I adds the participant-status boundary in 028. Three permanent statuses,
 scheduled-day reconciliation, typed historical cutoff, robbery cycle adjustment,
 admin JWT/CAS/receipts. [Contract](phase8i-participant-status.md) and
 [current delivery gates](phase8i-completion-report.md). 001-027 remain unchanged.
-8I gates are closed; 8J finish/archive/Hall is next and is not implemented.
+8I gates are closed; 8J is being validated, not yet a closed checkpoint.
 
 Phase 8H implements approved D4=A/D5=A/D6=A in additive 027: open/results/cancel,
 atomic close/rewards/movement/next day and restricted revisioned correction.
@@ -333,13 +337,13 @@ Persistence:
 Next exact phase:
 
 ```text
-Phase 8J: finish/archive/Hall (not implemented)
+Phase 8J: finish/archive/Hall (implemented, final validation pending)
 ```
 
 8G audit and 8G.1 local/staging implementation are complete. D1-D6 are approved.
 8H competitive operations and 8I participant status are DONE local + staging,
-with gates tracked in their respective reports. Final archive/Hall remains a
-separate, not-yet-implemented API boundary.
+with gates tracked in their respective reports. The separate archive/Hall
+boundary is implemented in 029; its local/staging gates are tracked above.
 
 Fase 7.1, Fase 7.2, Fase 8A.1, Fase 8B and 8B-H are closed. Fases 8C, 8D.0,
 8D, 8E and 8F.0 are DONE local + staging. Phase 8F.1 resolves the catalog blocker

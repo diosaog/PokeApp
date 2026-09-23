@@ -1138,6 +1138,9 @@ def main() -> int:
     print("== Participant status, eligibility and exact rollback ==", flush=True)
     from tools.validate_supabase_v2_participant_status_sql import validate_participant_status
     validate_participant_status(args, _psql_text)
+    print("== Season lifecycle, safe archive/Hall and exact rollback ==", flush=True)
+    from tools.validate_supabase_v2_season_lifecycle_sql import validate_season_lifecycle
+    validate_season_lifecycle(args, _psql_text)
 
     print("== Real schema fixtures and introspection ==")
     with tempfile.NamedTemporaryFile("w", suffix=".sql", delete=False, encoding="utf-8") as tmp:

@@ -37,6 +37,7 @@ EXPECTED_MIGRATIONS = [
     "026_season_admin_setup_api.sql",
     "027_competitive_matchdays.sql",
     "028_participant_status_admin.sql",
+    "029_season_finalization_archive_hall.sql",
 ]
 
 FORBIDDEN_TOKENS = [

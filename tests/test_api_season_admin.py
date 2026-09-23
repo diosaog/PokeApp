@@ -153,13 +153,15 @@ class SeasonAdminApiTests(unittest.TestCase):
     def test_all_admin_routes_have_auth_dependency(self):
         schema = self.client.get("/openapi.json").json()
         routes = [(path, method) for path, ops in schema["paths"].items() if path.startswith("/v1/admin") for method in ops]
-        self.assertEqual(len(routes), 19)
+        self.assertEqual(len(routes), 22)
         for path, method in routes:
             self.assertIn("security", schema["paths"][path][method])
 
-    def test_no_future_lifecycle_or_generic_patch(self):
+    def test_explicit_lifecycle_without_generic_season_mutation(self):
         paths = self.client.get("/openapi.json").json()["paths"]
-        for suffix in ("finish", "archive", "discard", "retire", "close"):
+        for suffix in ("finish", "archive", "discard"):
+            self.assertIn(f"/v1/admin/seasons/{{season_id}}/{suffix}", paths)
+        for suffix in ("reopen", "retire", "close"):
             self.assertNotIn(f"/v1/admin/seasons/{{season_id}}/{suffix}", paths)
 
 

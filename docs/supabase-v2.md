@@ -1,11 +1,19 @@
 # Supabase V2 Greenfield Schema
 
+## Phase 8J Additive Schema (029)
+
+`029_season_finalization_archive_hall.sql` adds lifecycle RPCs, archive/Hall typed
+provenance and immutable updates, plus discarded visibility guards. No new tables
+and no changes to 001-028. Bootstrap is generated from 001-029, EMPTY DATABASE ONLY.
+[Contract](phase8j-season-finalization.md); [executed gates](phase8j-completion-report.md).
+No remote reset/bootstrap; only committed 029 after local gates and implementation push.
+
 ## Phase 8I Additive Schema (028, DONE Local + Staging)
 
 `028_participant_status_admin.sql` adds typed effective status and membership
 cutoffs, the service-only status operation, eligibility-aware competitive helpers
 and safe read boundary fields. No new table, historical rewrite or change to
-001-027. Bootstrap now contains 001-028 and remains EMPTY DATABASE ONLY.
+001-027. At the 8I checkpoint bootstrap contained 001-028, EMPTY DATABASE ONLY.
 [Contract](phase8i-participant-status.md); [validation status](phase8i-completion-report.md).
 Existing V2 received ONLY committed 028 after local gates/push `baecb8a`, as
 `20260923220301`. 403 unit tests, full SQL gates, 24 new groups, eight local rollback
@@ -88,6 +96,7 @@ supabase/v2/
     026_season_admin_setup_api.sql
     027_competitive_matchdays.sql
     028_participant_status_admin.sql
+    029_season_finalization_archive_hall.sql
   bootstrap.sql
   reset_dev.sql
 ```

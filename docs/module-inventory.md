@@ -3,6 +3,15 @@
 Clasificacion inicial tras auditoria. Esta lista debe actualizarse cuando se
 extraiga dominio o repositories.
 
+## Phase 8J Additions
+
+| Module | Type | Responsibility |
+| --- | --- | --- |
+| `app/api/routes/season_lifecycle.py`, `season_lifecycle_models.py` | API | Explicit enabled-admin finish/archive/discard, strict CAS and safe receipt. |
+| `app/repositories/supabase/season_lifecycle.py` | V2 REPOSITORY | Atomic backend RPC, mapped business rejections, no retry. |
+| `supabase/v2/migrations/029_season_finalization_archive_hall.sql` | V2 SQL | Completion proof, frozen archive/League Hall, logical discard/visibility. |
+| `tools/validate_season_lifecycle_fixtures.py`, `validate_supabase_v2_season_lifecycle*.py` | VALIDATION | Shared real DB cases, concurrency, whole-state rollback and opt-in JWT/API staging. |
+
 ## Phase 8I Additions
 
 | Module | Type | Responsibility |

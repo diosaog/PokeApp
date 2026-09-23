@@ -231,10 +231,17 @@ Orden oficial de migrations:
 26. `026_season_admin_setup_api.sql`
 27. `027_competitive_matchdays.sql`
 28. `028_participant_status_admin.sql`
+29. `029_season_finalization_archive_hall.sql`
+
+029 incorpora finish/archive/discard explicitos, archivo y Hall de Liga atomicos,
+procedencia historica y visibilidad de borradores descartados. Bootstrap 001-029
+es SOLO PARA BASE VACIA. [Contrato](../../docs/phase8j-season-finalization.md) e
+[informe de validacion](../../docs/phase8j-completion-report.md). En staging no aplicar
+nada hasta gates locales y push; despues SOLO 029 comprometida, nunca reset/bootstrap.
 
 028 incorpora bajas competitivas permanentes y efectivas por jornada, conservando
-historial, economia, saves y equipos fijados. Bootstrap contiene ahora 001-028,
-solo para BASE VACIA. En Pokeapp 2.0 YA ESTA APLICADA solo la 028 como
+historial, economia, saves y equipos fijados. En el checkpoint 8I bootstrap contenia
+001-028, solo para BASE VACIA. En Pokeapp 2.0 YA ESTA APLICADA solo la 028 como
 `20260923220301`, tras validacion local y push `baecb8a`. Validacion real y limpieza
 independiente PASS. No repetir 028, migrations previas ni reset/bootstrap alli.
 [Contrato](../../docs/phase8i-participant-status.md) y

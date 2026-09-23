@@ -13,6 +13,7 @@ from app.repositories.protocols import NormalPurchaseRepository, PromotionalPurc
 from app.repositories.supabase.season_admin import SeasonAdminRepository
 from app.repositories.supabase.matchdays import MatchdayRepository
 from app.repositories.supabase.participant_status import ParticipantStatusRepository
+from app.repositories.supabase.season_lifecycle import SeasonLifecycleRepository
 
 
 @dataclass(frozen=True)
@@ -30,6 +31,7 @@ class ApiContainer:
     season_admin_repository: SeasonAdminRepository | None = None
     matchday_repository: MatchdayRepository | None = None
     participant_status_repository: ParticipantStatusRepository | None = None
+    season_lifecycle_repository: SeasonLifecycleRepository | None = None
 
 
 def get_api_container(request: Request) -> ApiContainer:
@@ -50,6 +52,7 @@ def create_default_container(config: APIConfig | None = None) -> ApiContainer:
     season_admin_repo = None
     matchday_repo = None
     participant_status_repo = None
+    season_lifecycle_repo = None
 
     if config.supabase_url and config.supabase_anon_key:
         from app.auth.supabase_adapter import SupabaseAuthClient
@@ -88,6 +91,8 @@ def create_default_container(config: APIConfig | None = None) -> ApiContainer:
         matchday_repo = SupabaseMatchdayRepository.from_url_key(config.supabase_url, config.supabase_service_role_key)
         from app.repositories.supabase.participant_status import SupabaseParticipantStatusRepository
         participant_status_repo = SupabaseParticipantStatusRepository.from_url_key(config.supabase_url, config.supabase_service_role_key)
+        from app.repositories.supabase.season_lifecycle import SupabaseSeasonLifecycleRepository
+        season_lifecycle_repo = SupabaseSeasonLifecycleRepository.from_url_key(config.supabase_url, config.supabase_service_role_key)
 
     auth_bridge = None
     if auth_client is not None and trainer_repo is not None and config.auth_pin_pepper:
@@ -107,4 +112,5 @@ def create_default_container(config: APIConfig | None = None) -> ApiContainer:
         season_admin_repository=season_admin_repo,
         matchday_repository=matchday_repo,
         participant_status_repository=participant_status_repo,
+        season_lifecycle_repository=season_lifecycle_repo,
     )

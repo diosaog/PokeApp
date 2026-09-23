@@ -1,5 +1,14 @@
 # PokeApp Architecture
 
+## Phase 8J Lifecycle Boundary
+
+Three explicit enabled-admin finish/archive/discard commands reuse 026 receipts
+and revision locking. Additive 029 preserves final pointer/relational history,
+freezes a safe archive and League Hall together, and hides logically discarded
+drafts. No auto rewards, next season, Cup winner inference or runtime change.
+[Contract](phase8j-season-finalization.md); [executed gates](phase8j-completion-report.md).
+Full local/staging completion must be read from that report, not assumed.
+
 ## Phase 8I Participant Boundary
 
 Three explicit enabled-admin operations reuse 026 receipts/CAS and 025 season/player

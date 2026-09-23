@@ -1,14 +1,22 @@
 # PokeApp 2.0 Migration Plan
 
+## Current 8J Scope
+
+Explicit finish, frozen relational archive/League Hall and conservative logical
+draft discard. D6/D7=A, D8 deferred. [Contract](phase8j-season-finalization.md)
+and [gates](phase8j-completion-report.md). Still validating; estimate remains ~64%.
+After completion, examine remaining Juicios/sanctions and Cup finalization API
+contracts before Phase 9. No parser/frontend/runtime migration in this work.
+
 ## Completed 8I Scope
 
 Implemented permanent participant retirement/abandonment/disqualification, scheduled
-pair reconciliation and cycle consequences in additive 028. No 8J implementation.
+pair reconciliation and cycle consequences in additive 028. That phase excluded 8J.
 [Contract](phase8i-participant-status.md); [executed gates](phase8i-completion-report.md).
 DONE local + staging: 403 tests, migrations/bootstrap parity, 24 shared groups,
 eight local rollback points, prior API regressions and independent zero residue.
 028 is already applied as `20260923220301`. Completed-project estimate ~62% -> ~64%.
-Next: 8J finish/archive/Hall only, not started. No runtime switch or deployment.
+Its next boundary was 8J finish/archive/Hall, now tracked above. No runtime switch or deployment.
 
 ## Completed 8H Scope
 
@@ -26,9 +34,9 @@ Implementation is DONE local + real V2 staging, including incremental 026 and
 independent cleanup. Weighted completed-project estimate: about 57% -> 59% for
 this delivered setup boundary, not the whole league API.
 [Evidence](phase8g1-completion-report.md).
-8H now implements D4-D6=A; D7 remains future direction and D8 deferred;
-8I statuses are complete. 8J lifecycle/Hall, React/Cloudflare, shadow/cutover and
-Companion remain separate future work. No V1 dual writes or runtime migration.
+8H now implements D4-D6=A; D7=A is implemented in the current 8J scope, D8 deferred.
+8I statuses are complete. 8J lifecycle/Hall gates are tracked above. React/Cloudflare,
+shadow/cutover and Companion remain future work. No V1 dual writes or runtime migration.
 
 ## Principios
 
