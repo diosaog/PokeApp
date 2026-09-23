@@ -1,10 +1,10 @@
 # Supabase V2 Security And RLS
 
-Checkpoint: Phase 8D + 8E DONE local and staging validated (2026-09-22).
+Checkpoint: Phase 8F.0 DONE local and staging validated (2026-09-23).
 
 This document is the security contract for the greenfield Supabase V2 schema. It
 does not connect Streamlit or React to V2. The isolated API now implements Auth
-and Team Lock/normal/promotional purchase mutations. 019-022 are applied and validated in V2
+and Team Lock/normal/promotional purchase mutations. 019-023 are applied and validated in V2
 staging; the API has not been deployed or connected to the legacy runtime.
 
 022 adds a SECURITY INVOKER, fixed-empty-search-path promotional purchase RPC,
@@ -36,6 +36,12 @@ Current-observation resolution rejects stale/ambiguous targets; future effect RP
 must recheck under the same player lock. Local/staging evidence and limitations:
 [8F.0 identity](phase8f0-pokemon-identity.md). The earlier 32-table inventory is the
 8E historical checkpoint; 023 expands the application schema to 36 RLS tables.
+023 was applied via MCP as `20260923165532`; the original remote validator passed
+19 checks, including RI01-RI12 and concurrent processing. Independent SQL confirmed
+zero fixture/Auth residue, both function checksums and unchanged existing views/functions.
+The report retains intermittent Windows transport failures and existing Advisor
+findings (24 public definer projections, mutable `set_updated_at` search_path,
+three authenticated definer helpers); this is not an Advisor-clean claim.
 
 ## Security Model
 

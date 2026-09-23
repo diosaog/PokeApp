@@ -1,6 +1,6 @@
 # PokeApp 2.0 Project Checkpoint
 
-Checkpoint date: 2026-09-23 (Phase 8F.0 LOCAL DONE; remote SQL approval/session gate blocked).
+Checkpoint date: 2026-09-23 (Phase 8F.0 DONE local + V2 staging; Phase 8F unblocked, not implemented).
 
 Base HEAD before original checkpoint documentation:
 `f6d8fc179f8c9e021bdf6b4fa1e2687e2d7e8b2a`
@@ -52,11 +52,15 @@ Latest architecture state:
   and staging completion are tracked in [identity contract](phase8f0-pokemon-identity.md).
   No redemption endpoint, runtime connection, dual-write or physical save modification.
   295 tests PASS, PostgreSQL migrations/bootstrap PASS (19 identity checks each),
-  schema dumps including grants identical. Staging 023 has NOT been applied by this
-  task. OAuth was renewed and a fresh MCP client confirmed V2/latest 022, but SQL
-  preflight was denied by its approval policy. Original conversation client also
-  retains stale authorization state. Implementation `9aef9ac` is pushed; do not
-  repeat local work. Do not mark 8F.0 fully DONE until remote validation.
+  schema dumps including grants identical. Staging-only resume from `158fc1b`
+  applied exact committed 023 via MCP as `20260923165532`: 19 remote checks PASS,
+  including RI01-RI12, both concurrency cases and independently verified cleanup.
+  36/36 public tables have RLS; 37 views and all pre-existing functions are unchanged.
+  Both new function checksums/grants match the contract. Earlier failed attempts
+  and an intermittent Windows HTTP `ReadError / WinError 10035` are recorded in the
+  identity report, not hidden; transport reliability was not changed or fixed.
+  Implementation `9aef9ac` remains unchanged; local tests/bridge were not repeated.
+  Existing Advisor findings are documented, not falsely reported as cleared.
 
 ## Current State
 
@@ -259,11 +263,12 @@ Persistence:
 Next exact phase:
 
 ```text
-Close Phase 8F.0 staging gate, then resume Phase 8F using pokemon_entity_id
+Resume Phase 8F Redemption / Effect Boundary using pokemon_entity_id
 ```
 
 Fase 7.1, Fase 7.2, Fase 8A.1, Fase 8B and 8B-H are closed. Fases 8C, 8D.0,
-8D and 8E are DONE local + staging. Do not infer that all APIs or deployment are complete.
+8D, 8E and 8F.0 are DONE local + staging. Phase 8F is not implemented.
+Do not infer that all APIs or deployment are complete.
 Do not cut over Streamlit or delete V1 without explicit approval.
 The 2026-09-23 audit reproduced identity collisions without running the bridge.
 The 255 baseline tests are retained alongside new identity tests. 023 is dedicated

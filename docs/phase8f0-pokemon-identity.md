@@ -1,7 +1,8 @@
 # Phase 8F.0: Authoritative Pokemon Individual Identity
 
 Date: 2026-09-23. Starting checkpoint: `main`, `7207014`, origin divergence 0/0.
-Status: LOCAL DONE / overall PARTIAL; staging SQL blocked by MCP session/approval gate.
+Status: DONE local + V2 staging (2026-09-23). Phase 8F is unblocked, NOT implemented.
+Staging-only resume started at `158fc1b`, `main`, origin divergence 0/0.
 Implementation commit: `9aef9ac feat: add authoritative Pokemon identity and reconciliation`,
 pushed to origin/main before any attempted staging SQL. No redemption implementation.
 Protected user guide: `docs/pokeapp-guia-completa-pestanas-y-producto.md`, untouched/untracked.
@@ -231,7 +232,10 @@ absence. Independent MCP inspection must confirm zero residue and SQL definition
   Starlette/httpx deprecation and Git LF/CRLF notices; not suppressed as test failures.
   The probe's initial MSBuild output-path warning was fixed using Directory.Build.props.
 
-## Staging Resume Checkpoint
+## Historical Staging Resume Blocker
+
+The following describes the earlier blocked session, before the successful resume
+below. It is not the current remote state.
 
 No local validation was repeated after the user's request to resume staging only.
 Initial MCP calls failed with `OAuth token refresh failed: Failed to parse server response`.
@@ -252,28 +256,126 @@ No attempt was made to bypass that gate. **023 was NOT applied.** Catalog counts
 remote function checksums, RI01-RI12 execution and independent cleanup verification
 remain pending. No remote fixture/Auth user/raw save was created by this task.
 
-Resume from this exact boundary in a freshly authorized MCP session permitting the
-required SQL tool approval. Verify target and preflight, apply ONLY committed 023,
-run the prepared real fixture validator, verify definitions/checksums and zero residue,
-then publish a documentation-only closure. Do NOT rerun local implementation/tests,
-bootstrap/reset remotely, touch V1 or start redemption while this gate remains open.
+## Staging Closure: 2026-09-23
 
-Expected local function prosrc MD5 for remote comparison:
-`commit_pokemon_identity`: `adf1eb39d43f2daaab1350a58c016b02`;
-`check_pokemon_entity_flag`: `c1b2d4a8db2294ba43362d187bdc919d`.
-Both must be SECURITY INVOKER with fixed empty search_path. Expected post-023
-inventory: 36 public tables, all RLS enabled; 37 views unchanged.
-Until these gates pass, overall 8F.0 remains PARTIAL, not DONE.
+The restored direct MCP connection confirmed **Pokeapp 2.0**, exactly
+`https://uwleqeuzsveqlugugzba.supabase.co`. Git matched the approved resume:
+`main`, HEAD `158fc1bf49aa369801d71c5c2a64c63f41e62327`, upstream `origin/main`,
+0/0 divergence, no tracked modifications. The protected untracked guide remained
+untouched. No local tests, bridge build or implementation were repeated.
+
+SQL preflight found 32 public tables, all 32 with RLS, 37 views, no identity tables
+and latest migration `022_promotional_purchase_api` / `20260922174842`.
+Only the exact SQL read from `git show HEAD:supabase/v2/migrations/023_pokemon_identity.sql`
+was submitted to MCP `apply_migration`; success was returned. The recorded migration
+is **023_pokemon_identity / 20260923165532**. No bootstrap, reset or migration edit.
+Remote PostgreSQL reports 17.6. Do NOT apply 023 a second time on this project.
+
+### Remote Validation
+
+The unchanged prepared command above completed with exit 0 and:
+`RESULT ok checks=19; Auth cleanup PASS`.
+Authoritative successful run: `phase8f0_validation_b9d33942af06432e820972d67dcb9f19`.
+
+| Check | Observed result |
+| --- | --- |
+| RI01 | PASS: backend creates three distinct entities, including two clones |
+| RI02 | PASS: observations and entity/location bindings persisted |
+| RI03 | PASS: same-save replay returns the same receipt |
+| RI04 | PASS: owner/admin read permitted private rows |
+| RI05 | PASS: anon reads denied |
+| RI06 | PASS: other trainer sees no private identity evidence |
+| RI07 | PASS: direct browser writes and RPC denied, including admin |
+| RI08 | PASS: service-role backend write path works |
+| RI09 | PASS: unique legacy flag linked without copying its value |
+| RI10 | PASS: colliding legacy flag retained and unresolved |
+| RI11 | PASS: four concurrent workers, one initial revision/receipt |
+| RI12 | PASS: all fixture rows removed and verified; Auth cleanup also PASS |
+
+The other seven reported checks cover single-clone flags/uniqueness, observation
+uniqueness, unchanged reparse, movement/evolution/ambiguity/stale-target rejection,
+missing/return, out-of-order capture rejection and two competing saves producing
+one CAS winner with no partial loser. Ambiguous observations have no arbitrary
+entity binding. Only synthetic JSON was used, with no raw-save bytes or Storage upload.
+
+**Intermittent transport failure, not hidden:** five staging attempts were made.
+The first (`31f892e26e954775bdc1220912cb675d`) stopped before RI01 with
+`PersistenceError`; the third (`aa5fae1a8a244b51ae651e7d944b79fd`) stopped during
+the distinct-save race. Their underlying causes were not captured. Both cleaned up.
+A diagnostic-only invocation (`012fa1a214d24cbf9ebb1aa6efea7d2a`) passed all 19;
+another (`c0348ea83fdc444381bd792c0d3f8a8a`) captured `load_context` failing with
+`httpx.ReadError: [WinError 10035]` during concurrent socket reads, then cleaned up.
+The final invocation above used the original command without instrumentation and
+passed all 19. No method semantics, SQL, assertions, worker counts or dependencies
+were changed; diagnostic wrappers only printed redacted exception causes and re-raised.
+Do not claim that the earlier failures were definitely schema-cache errors or that
+transport reliability has been fixed. Environment: Windows, Python 3.14.3,
+supabase/postgrest 2.27.2, httpx 0.28.1, httpcore 1.0.9, h2 4.4.1.
+
+### Independent Security And Cleanup
+
+MCP catalog checks confirm **36 public tables / 36 RLS / 37 unchanged views**.
+Both new functions are SECURITY INVOKER, `search_path=''`, EXECUTE for service_role
+and SQL owner only; PUBLIC, anon and authenticated cannot execute them.
+
+| Function | Remote prosrc MD5 (matches committed/local contract) |
+| --- | --- |
+| commit_pokemon_identity | `adf1eb39d43f2daaab1350a58c016b02` |
+| check_pokemon_entity_flag | `c1b2d4a8db2294ba43362d187bdc919d` |
+
+All four new tables grant authenticated SELECT only, constrained by the existing
+owner/admin helpers. Anon has no read/write grant; authenticated has no
+INSERT/UPDATE/DELETE/TRUNCATE grant. Service-role writes remain available.
+No new public projection exposes identity evidence. The existing 13 invoker views
+and 24 explicit public definer projections retain their definitions/options.
+
+Before/after aggregate checksums, independently queried through MCP:
+
+| Surface | Identical MD5 before and after |
+| --- | --- |
+| 37 view definitions | `d4da4cee7449e34f3ab16eeb74819c3d` |
+| View options | `f2e46b68fdda3bd9634844906522fbda` |
+| All pre-023 public function definitions | `306de6e6dbcb892857f1a6b22f5aecff` |
+| Storage bucket records | `a1bad2c31b4a666ab2a70cd1519f5a69` |
+
+Independent SQL after the final run found zero `phase8f0_validation_` Auth users,
+trainers, seasons or save keys. Full counts were zero for seasons, season_players,
+save_files, parsed_saves, pokemon_flags, all four identity tables and Auth users.
+Purchases, redemptions, coin_transactions, activity_events, team_locks, Auth
+identities and sessions were also zero. The pre-existing 10 trainers remain;
+Storage still has 3 objects and identical bucket records. Baseline counts for the
+pre-existing fixture-related tables were restored. No real trainer/save was used.
+
+Security Advisor was **not warning-free**: it reports the existing 24 public
+definer projections, the existing mutable search_path on `set_updated_at`, and
+three authenticated identity-helper SECURITY DEFINER functions. Public projections
+and helpers are documented existing design exceptions, not new permissions from
+023. The mutable-path warning is a retained hardening concern, not fixed here.
+The matching view/function baselines confirm that none was introduced by 023.
+References: [definer views](https://supabase.com/docs/guides/database/database-linter?lint=0010_security_definer_view),
+[mutable search_path](https://supabase.com/docs/guides/database/database-linter?lint=0011_function_search_path_mutable),
+[authenticated definer functions](https://supabase.com/docs/guides/database/database-linter?lint=0029_authenticated_security_definer_function_executable).
+Log inspection was unavailable with the current OAuth scope (`Insufficient scope`);
+no authorization bypass or key change was attempted.
+
+The closure change is documentation-only. Migrations 001-023, validators, bridge,
+runtime, V1 and redemption remain unchanged. Protected guide SHA256 remains
+`6FA3E82B6D3FDF82ACB0E95DA6715397574ACE7A134F68C2F69864909F2B934E`.
+Closure checks: `git diff --check` PASS (existing LF/CRLF notices retained);
+`git diff --exit-code -- . ':(exclude)docs/**'` PASS. Only five documentation
+files changed; the original 295-test local result was not rerun or replaced.
 
 ## Progress And Next
 
-Weighted global estimate: ~52% before, ~54% now with local implementation (+2 points),
-~55% after the full local+staging gate. This is an estimate, not a measured burn-down.
+Weighted global estimate: ~54% before this staging-only resume, **~55% after**
+(+1 point). Local implementation previously moved ~52% to ~54%.
+This is an estimate, not a measured burn-down.
 This is identity infrastructure for API safety AND future Companion cross-save actions,
 not a phase-count percentage. Remaining work still includes 8F/remaining API, parser
 boundary, React/Cloudflare, data migration, shadow, staging/performance/cutover and full
 Launcher/Companion automation with safe physical save operations.
 
-Next: resume Phase 8F using current authoritative pokemon_entity_id or explicit
-AMBIGUOUS rejection. Do NOT implement redemption in this task. V1, Streamlit, economy,
+8F.0 is DONE and Phase 8F is unblocked. Next: resume Phase 8F using current
+authoritative pokemon_entity_id or explicit AMBIGUOUS rejection.
+Do NOT implement redemption in this task. V1, Streamlit, economy,
 Discord, UI, legacy physical write operations and historical Team Locks remain intact.

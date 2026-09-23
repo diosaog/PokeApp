@@ -334,8 +334,10 @@ Estado 2026-09-22:
   Siguiente: 8F redemption/effect boundary, no implementado.
   Actualizacion 2026-09-23: auditoria 8F BLOCKED, fingerprints colisionan y los
   cuatro canjes existentes requieren Pokemon individual. No 023 ni API nueva.
-  8F.0 implementa el contrato de identidad en 023 y el export read-only; completar
-  su gate staging antes de retomar canjes con pokemon_entity_id. Sin endpoint nuevo,
+  8F.0 DONE local + staging (2026-09-23): 023 aplicada como `20260923165532`,
+  19 checks reales PASS, 36/36 tablas RLS, 37 vistas intactas y limpieza independiente
+  PASS. Fallos intermitentes de transporte y avisos existentes registrados en el informe.
+  Retomar 8F con pokemon_entity_id; no implementado en este cierre. Sin endpoint nuevo,
   runtime, dual-write ni escritura de saves. [Contrato y validacion](phase8f0-pokemon-identity.md).
   [Auditoria y limites](phase8f-redemption-effects.md).
   Los endpoints restantes de la lista siguen pendientes: 8C no cierra toda la API.

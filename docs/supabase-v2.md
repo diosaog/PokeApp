@@ -385,8 +385,12 @@ staging en esta auditoria. [Detalle](phase8f-redemption-effects.md).
 y pokemon_entity_flags (36 tablas RLS en total, vistas publicas sin cambios).
 Fingerprint y flags legacy se conservan; enlazar solo candidatos inequivocos.
 RPC backend-only atomica, cadena CAS/orden de captura fiable, clones ambiguos sin
-binding. Bootstrap generado 001-023; 001-022 intactas. En staging aplicar SOLO 023,
-nunca bootstrap/reset. No redencion nueva ni cambio del runtime.
+binding. Bootstrap generado 001-023; 001-022 intactas. Staging validado el
+2026-09-23: SOLO 023 aplicada via MCP como `20260923165532`; 19 checks reales PASS,
+36/36 tablas RLS, 37 vistas preservadas, checksums y limpieza independiente PASS.
+023 ya esta aplicada en V2: no repetirla ni ejecutar bootstrap/reset remoto.
+Los fallos intermitentes de transporte Windows y avisos Advisor existentes quedan
+documentados en el informe. No redencion nueva ni cambio del runtime.
 [Diseno, pruebas y estado staging](phase8f0-pokemon-identity.md).
 
 ## Indexes And Constraints
