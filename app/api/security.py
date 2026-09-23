@@ -46,3 +46,11 @@ def require_enabled_principal(
     if not principal.globally_enabled:
         raise api_error(403, "TRAINER_DISABLED", "Trainer is disabled.")
     return principal
+
+
+def require_admin_principal(
+    principal: AuthenticatedPrincipal = Depends(require_enabled_principal),
+) -> AuthenticatedPrincipal:
+    if not principal.is_admin:
+        raise api_error(403, "ADMIN_REQUIRED", "Administrator access is required.")
+    return principal

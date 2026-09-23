@@ -1,5 +1,15 @@
 # PokeApp 2.0 Migration Plan
 
+## Current 8G.1 Scope
+
+D1=A, D2=A and D3=B approved: DRAFT setup, initial roster, correctable unused
+configuration, exact A/B, first scheduled round and explicit ready activation.
+Implementation is in local/staging validation; completed-project estimate stays
+about 57% until closure. [Evidence](phase8g1-season-admin-api.md).
+Future D4-D7=A are recorded only, D8 deferred. 8H follows only when 8G.1 is DONE;
+8I statuses, 8J lifecycle/Hall, React/Cloudflare, shadow/cutover and Companion
+remain separate. No V1 dual writes or current runtime migration in this phase.
+
 ## Principios
 
 - No empezar React hasta cerrar producto, visual y mecanicas base.
@@ -350,8 +360,8 @@ Estado 2026-09-22:
   8F.1 DONE local + staging: contrato aprobado, robo/ciclo/comodin atomicos en 025
   `20260923180416`; 318 tests, 17+19 grupos remotos y limpieza independiente PASS.
   [Contrato actual y gates](phase8f1-robbery-voucher.md).
-  Siguiente: Phase 8G, auditoria del contrato API de administracion
-  temporada/liga. No implementada en esta entrega.
+  Auditoria 8G completada; 8G.1 implementa ahora el setup/admin aprobado y esta
+  en validacion local/staging. Cierre/avance competitivo queda para 8H.
 - React/Cloudflare, migracion de datos, shadow mode y cutover no han empezado.
 
 Contrato y evidencias: [Phase 8C](phase8c-team-lock.md).

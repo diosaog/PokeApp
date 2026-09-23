@@ -39,6 +39,8 @@ $$;
 
 
 EXPECTED_TABLES = [
+    "admin_operation_receipts",
+    "season_admin_state",
     "activity_events",
     "app_settings",
     "coin_transactions",
@@ -800,17 +802,8 @@ begin
     raise exception 'Trainer A should see public coin balance aggregates';
   end if;
 
-  update public.seasons
-  set name = 'RLS HACK'
-  where id in (
-    select id
-    from public.public_seasons
-    where name = 'Validation Season'
-  );
-  get diagnostics changed_count = row_count;
-  if changed_count <> 0 then
-    raise exception 'Trainer A updated seasons unexpectedly';
-  end if;
+  perform public.__pokeapp_rls_expect_failure(
+    'update public.seasons set name=''RLS HACK''', '026 denies trainer setup writes');
 end;
 $$;
 
@@ -882,13 +875,8 @@ begin
     raise exception 'Admin purchases count expected 2, got %', visible_count;
   end if;
 
-  update public.seasons
-  set name = name
-  where name = 'Validation Season';
-  get diagnostics changed_count = row_count;
-  if changed_count <> 1 then
-    raise exception 'Admin seasons update expected 1 row, got %', changed_count;
-  end if;
+  perform public.__pokeapp_rls_expect_failure(
+    'update public.seasons set name=name', '026 admin direct setup writes denied');
 end;
 $$;
 
@@ -1111,7 +1099,7 @@ def main() -> int:
     _validate_team_lock_api(args)
 
     print("== Current jornada / store-ban contract ==")
-    _psql(args, ROOT / "supabase/v2/migrations/020_current_matchday_store_ban_contract.sql")
+    # Do not replay older grants over the final 026 hardening.
     _psql_text(args, "begin;\n" + (ROOT / "tests/sql/shop_context_setup.sql").read_text(encoding="utf-8")
                + (ROOT / "tests/sql/shop_context_checks.sql").read_text(encoding="utf-8") + "\nrollback;")
 
@@ -1138,6 +1126,10 @@ def main() -> int:
     print("== Robbery/voucher: cycle, provenance, concurrency and rollback ==")
     from tools.validate_supabase_v2_robbery_sql import validate_robbery
     validate_robbery(args, _psql_text)
+
+    print("== Season admin setup, real concurrency and exact rollback ==", flush=True)
+    from tools.validate_supabase_v2_season_admin_sql import validate_season_admin
+    validate_season_admin(args, _psql_text)
 
     print("== Real schema fixtures and introspection ==")
     with tempfile.NamedTemporaryFile("w", suffix=".sql", delete=False, encoding="utf-8") as tmp:

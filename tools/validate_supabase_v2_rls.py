@@ -958,7 +958,7 @@ def _run_checks(api: SupabaseHttp, config: Config, fixtures: dict[str, Any], sta
         body={"name": fixtures["season"]["name"]},
         raise_on_error=False,
     )
-    _assert(admin_season_update.ok, "Admin could not update admin-managed season state")
+    _expect_write_blocked(admin_season_update, "026 admin season setup is API-only")
     _expect_write_blocked(
         api.rest("POST", "coin_transactions", auth=token_admin, body={
             "season_id": season_id,

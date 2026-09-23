@@ -1,5 +1,16 @@
 # Supabase V2 Security And RLS
 
+## Phase 8G.1 Delta (026, Validation In Progress)
+
+`require_admin_principal`: verified JWT -> mapped enabled trainer -> is_admin,
+independent of participant membership. All admin RPCs recheck it in SQL.
+Two new RLS tables, `season_admin_state` and `admin_operation_receipts`, are
+backend-only; no browser grants/policies are intentional. New fixed-search-path
+invoker functions revoke EXECUTE from PUBLIC, anon and authenticated.
+Direct browser INSERT/UPDATE/DELETE on the eight authoritative setup tables is
+revoked, including 020 column-level season grants; existing SELECT is preserved.
+Audit events use visibility `admin`. [Security/race evidence](phase8g1-season-admin-api.md).
+
 Checkpoint: 8F.0 and full 8F/8F.1 DONE local + staging; gates in the [delivery report](phase8f-completion-report.md).
 
 025 adds backend-only RLS `robbery_cycles` without browser grants or policies.

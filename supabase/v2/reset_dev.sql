@@ -5,6 +5,16 @@
 
 begin;
 
+-- Local validation only: remove the additive 026 backend helpers and state.
+do $$ declare f regprocedure; begin
+  for f in select p.oid::regprocedure from pg_proc p join pg_namespace n on n.oid=p.pronamespace
+    where n.nspname='public' and (p.proname like 'admin_setup_%' or p.proname like 'api_admin_%') loop
+    execute format('drop function if exists %s cascade',f);
+  end loop;
+end $$;
+drop table if exists public.admin_operation_receipts cascade;
+drop table if exists public.season_admin_state cascade;
+
 drop function if exists public.api_redeem_purchase(uuid,uuid,uuid,uuid,text,uuid);
 drop table if exists public.robbery_cycles cascade;
 drop function if exists public.check_purchase_acquisition() cascade;

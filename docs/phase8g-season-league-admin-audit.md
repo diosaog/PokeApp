@@ -834,7 +834,13 @@ la suite completa por un cambio solo documental. Tampoco PostgreSQL, RLS staging
 fixtures, PKHeX o saves. No se afirma un nuevo PASS de 318 tests ni de 8G endpoints.
 Los resultados ejecutados y cierre Git se entregan junto al commit de esta auditoria.
 
-## 21. PRODUCT OWNER DECISIONS REQUIRED
+## 21. Product Decisions: Approved After This Audit
+
+2026-09-23 Phase 8G.1 instruction supersedes the pending labels below:
+**D1=A, D2=A, D3=B** approved for implementation. **D4=A, D5=A, D6=A,
+D7=A** approved future direction, NOT implemented by 8G.1. **D8=DEFERRED**.
+The original alternatives and audit evidence are retained below as history.
+Current implementation contract: [Phase 8G.1](phase8g1-season-admin-api.md).
 
 Estas preguntas no cuestionan contratos terminados. Proponen como cerrar huecos
 sin reinterpretar el runtime accidentalmente. No hay respuestas asumidas.

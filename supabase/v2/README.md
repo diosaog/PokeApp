@@ -228,6 +228,14 @@ Orden oficial de migrations:
 23. `023_pokemon_identity.sql`
 24. `024_redemption_effect_boundary.sql`
 25. `025_robbery_voucher_and_redemption.sql`
+26. `026_season_admin_setup_api.sql`
+
+026 incorpora administracion inicial de temporada, revisiones/recibos, divisiones
+A/B, primera jornada y activacion validada. Revoca las escrituras directas del
+navegador sobre las ocho tablas de preparacion; las lecturas siguen disponibles.
+Validacion en curso: [contrato y evidencia](../../docs/phase8g1-season-admin-api.md).
+En V2 existente se aplica SOLO 026, despues de validacion local y commit/push;
+nunca bootstrap ni reset sobre staging para esta actualizacion.
 
 025 anade el comodin canonico reward-only, origen unico de regalos y canje de robo
 con ciclo persistente. [Contrato](../../docs/phase8f1-robbery-voucher.md).

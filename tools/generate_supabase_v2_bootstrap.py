@@ -34,6 +34,7 @@ EXPECTED_MIGRATIONS = [
     "023_pokemon_identity.sql",
     "024_redemption_effect_boundary.sql",
     "025_robbery_voucher_and_redemption.sql",
+    "026_season_admin_setup_api.sql",
 ]
 
 FORBIDDEN_TOKENS = [

@@ -1,5 +1,16 @@
 # PokeApp Architecture
 
+## Phase 8G.1 Administration Boundary
+
+The isolated API now has `/v1/admin` setup operations, verified enabled-admin
+identity (no participant requirement), typed revisions and durable receipts.
+Migration 026 serializes each business transaction with season/participant locks;
+the first-day preparation RPC owns initial pointer assignment. Activation requires
+server-computed readiness and never finishes another season. Browser direct setup
+writes are revoked, including old column grants. Existing V2 self-service RPCs
+remain backend-only. [Contract and validation](phase8g1-season-admin-api.md).
+Validation is in progress; legacy Streamlit is still the production runtime.
+
 Este documento es la fuente tecnica viva para la migracion 2.0. La regla base es
 conservadora: no tirar la app actual, sino separar el cerebro util que ya existe
 del cuerpo de Streamlit.

@@ -1,5 +1,14 @@
 # Supabase V2 Greenfield Schema
 
+## Phase 8G.1 Additive Schema (Validation In Progress)
+
+001-025 are unchanged. `026_season_admin_setup_api.sql` adds two backend-only RLS
+tables for revisions/receipts, typed A/B capacities and roster association on
+configurations, immutable-used config/receipt guards, unordered match uniqueness,
+separate admin RPCs and direct browser write hardening. Bootstrap is regenerated
+from 001-026 for empty databases only. Staging receives only committed 026, after
+local gates and push. [Full contract/evidence](phase8g1-season-admin-api.md).
+
 Fase 6 disena PokeApp V2 como una base nueva. V1 queda solo como referencia de
 comportamiento y lista de anti-patterns. No hay migracion general V1 -> V2 en
 esta fase, no hay cutover y no se borra la base real actual.
@@ -48,6 +57,7 @@ supabase/v2/
     023_pokemon_identity.sql
     024_redemption_effect_boundary.sql
     025_robbery_voucher_and_redemption.sql
+    026_season_admin_setup_api.sql
   bootstrap.sql
   reset_dev.sql
 ```

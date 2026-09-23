@@ -35,4 +35,4 @@ reset role;
 select pokeapp_shop_test.assert_true(
  not has_column_privilege('authenticated','public.seasons','current_matchday_id','UPDATE')
  and not has_column_privilege('authenticated','public.seasons','current_matchday_id','INSERT')
- and has_column_privilege('authenticated','public.seasons','name','UPDATE'), 'new pointer server-only, prior admin columns preserved');
+ and not has_column_privilege('authenticated','public.seasons','name','UPDATE'), '026 also hardens prior direct admin setup columns');

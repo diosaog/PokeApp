@@ -10,6 +10,7 @@ from app.api.rate_limit import InMemoryWindowRateLimiter, RateLimiter
 from app.auth.ports import TrainerAuthRepository
 from app.auth.service import PinAuthBridge
 from app.repositories.protocols import NormalPurchaseRepository, PromotionalPurchaseRepository, TeamLockMutationRepository, RedemptionMutationRepository
+from app.repositories.supabase.season_admin import SeasonAdminRepository
 
 
 @dataclass(frozen=True)
@@ -24,6 +25,7 @@ class ApiContainer:
     purchase_repository: NormalPurchaseRepository | None = None
     promotional_purchase_repository: PromotionalPurchaseRepository | None = None
     redemption_repository: RedemptionMutationRepository | None = None
+    season_admin_repository: SeasonAdminRepository | None = None
 
 
 def get_api_container(request: Request) -> ApiContainer:
@@ -41,6 +43,7 @@ def create_default_container(config: APIConfig | None = None) -> ApiContainer:
     team_lock_repo = None
     purchase_repo = None
     redemption_repo = None
+    season_admin_repo = None
 
     if config.supabase_url and config.supabase_anon_key:
         from app.auth.supabase_adapter import SupabaseAuthClient
@@ -69,6 +72,11 @@ def create_default_container(config: APIConfig | None = None) -> ApiContainer:
         redemption_repo = SupabaseRedemptionRepository.from_url_key(
             config.supabase_url, config.supabase_service_role_key,
         )
+        from app.repositories.supabase.season_admin import SupabaseSeasonAdminRepository
+
+        season_admin_repo = SupabaseSeasonAdminRepository.from_url_key(
+            config.supabase_url, config.supabase_service_role_key,
+        )
 
     auth_bridge = None
     if auth_client is not None and trainer_repo is not None and config.auth_pin_pepper:
@@ -85,4 +93,5 @@ def create_default_container(config: APIConfig | None = None) -> ApiContainer:
         purchase_repository=purchase_repo,
         promotional_purchase_repository=purchase_repo,
         redemption_repository=redemption_repo,
+        season_admin_repository=season_admin_repo,
     )
