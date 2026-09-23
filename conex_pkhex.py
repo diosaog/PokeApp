@@ -483,6 +483,9 @@ def _pkm_to_ui(p: Dict[str, Any]) -> Dict[str, Any]:
         out["level"] = level
     if nature is not None:
         out["nature"] = nature
+    if isinstance(p.get("IdentityEvidence"), dict):
+        from copy import deepcopy
+        out["identity_evidence"] = deepcopy(p["IdentityEvidence"])
     return out
 
 # ====== Fallbacks de detección (se mantienen por compatibilidad) ======

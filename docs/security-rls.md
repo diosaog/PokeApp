@@ -28,6 +28,15 @@ added; 001-022 and staging are untouched. Existing redemptions reads remain
 owner/admin; absence of a browser write policy is not an implemented redemption
 contract. See [identity evidence](phase8f-redemption-effects.md).
 
+Phase 8F.0 supersedes that identity blocker with migration 023: four private RLS
+tables, owner/admin SELECT only, no browser writes even for admins. Backend-only
+SECURITY INVOKER RPC/trigger function, fixed empty search_path, no new public views.
+Raw PID/OT/IV evidence is an explicit private DTO field, omitted from public Pokemon.
+Current-observation resolution rejects stale/ambiguous targets; future effect RPCs
+must recheck under the same player lock. Local/staging evidence and limitations:
+[8F.0 identity](phase8f0-pokemon-identity.md). The earlier 32-table inventory is the
+8E historical checkpoint; 023 expands the application schema to 36 RLS tables.
+
 ## Security Model
 
 - Every PokeApp V2 application table in `public` has RLS enabled.
@@ -307,7 +316,7 @@ cutover.
 
 Validated against PostgreSQL 17.11 local with Supabase role mocks:
 
-- migrations 001-022 apply in order (normal/promotional purchase and ban checks);
+- migrations 001-023 apply in order (purchases, ban checks and private Pokemon identity);
 - `bootstrap.sql` applies as a single SQL Editor artifact;
 - reset/build/rebuild works;
 - all 32 public V2 tables have RLS enabled;

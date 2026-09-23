@@ -1,6 +1,6 @@
 # PokeApp 2.0 Project Checkpoint
 
-Checkpoint date: 2026-09-23 (Phase 8E remains DONE; 8F audit blocked before implementation).
+Checkpoint date: 2026-09-23 (Phase 8F.0 LOCAL DONE; remote gate blocked by MCP OAuth).
 
 Base HEAD before original checkpoint documentation:
 `f6d8fc179f8c9e021bdf6b4fa1e2687e2d7e8b2a`
@@ -43,10 +43,17 @@ Latest architecture state:
   29 8D regression checks and cleanup PASS. [Report](phase8e-completion-report.md).
   [Contract and validation](phase8e-promotional-purchases.md). Next:
   8F redemption/effect boundary, not implemented.
-- Phase 8F audit BLOCKED: all four implemented redemption effects require Pokemon
+- Historical Phase 8F audit BLOCKED: all four implemented redemption effects require Pokemon
   identity; existing fingerprints collide for distinct individuals and normalized
   DTO IDs can be empty. No safe legacy target-free use flow found. No 023/API or
   staging work. [Evidence and effect map](phase8f-redemption-effects.md).
+- Phase 8F.0 adds authoritative entities/observations, read-only PKHeX evidence,
+  conservative reconciliation and safe legacy flag links in 023. Local validation
+  and staging completion are tracked in [identity contract](phase8f0-pokemon-identity.md).
+  No redemption endpoint, runtime connection, dual-write or physical save modification.
+  295 tests PASS, PostgreSQL migrations/bootstrap PASS (19 identity checks each),
+  schema dumps including grants identical. Staging 023 has NOT been applied by this
+  task: MCP OAuth refresh failed. Do not mark 8F.0 fully DONE until remote validation.
 
 ## Current State
 
@@ -87,7 +94,7 @@ Historical staging validation (Phase 7, not rerun in this task):
 - `py tools\validate_supabase_v2_rls.py` passed against real staging with
   `RESULT ok checks=13`.
 
-Current validation: 255 tests passed, zero failed/skipped, using
+Phase 8E baseline validation: 255 tests passed, zero failed/skipped, using
 `.venv-api\Scripts\python.exe tools/run_unit_tests.py`. Compileall and diff-check
 passed. PostgreSQL 17.11 local passed both migrations 001-022 and bootstrap,
 including Store Ban, purchase receipt, promotions, rollback, roles and concurrency.
@@ -249,14 +256,15 @@ Persistence:
 Next exact phase:
 
 ```text
-Phase 8F.0: authoritative Pokemon identity contract (8F implementation blocked)
+Close Phase 8F.0 staging gate, then resume Phase 8F using pokemon_entity_id
 ```
 
 Fase 7.1, Fase 7.2, Fase 8A.1, Fase 8B and 8B-H are closed. Fases 8C, 8D.0,
 8D and 8E are DONE local + staging. Do not infer that all APIs or deployment are complete.
 Do not cut over Streamlit or delete V1 without explicit approval.
 The 2026-09-23 audit reproduced identity collisions without running the bridge.
-255 baseline tests still pass; no 8F runtime/schema behavior has been delivered.
+The 255 baseline tests are retained alongside new identity tests. 023 is dedicated
+to identity, not redemption. See the 8F.0 report for current validation counts.
 
 ## Do Not Do When Resuming
 
@@ -285,7 +293,7 @@ The 2026-09-23 audit reproduced identity collisions without running the bridge.
 - Fase 8C: Team Lock V2 API mutation. DONE local + staging.
 - Fase 8D.0 + 8D: current matchday, Store Ban and normal purchase. DONE local + staging.
 - Fase 8E: promotional claim. DONE local + staging; 27 checks and 8D regression PASS.
-- Fase 8F: redemption audit blocked on target identity; next is 8F.0 identity contract.
+- Fase 8F: redemption not implemented; 8F.0 identity supplies the prerequisite boundary.
 - Fase 8 remaining: redemption/effects, league/season/admin/trials/Hall operations.
 - Fase 9: parser boundary.
 - Fase 10: React / Cloudflare frontend.

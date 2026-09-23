@@ -1,6 +1,8 @@
 # Phase 8F: Redemption / Effect Boundary Audit
 
 Date: 2026-09-23. RESULT: **BLOCKED before implementation**.
+Historical audit: [Phase 8F.0](phase8f0-pokemon-identity.md) now implements the
+identity prerequisite. This audit remains unchanged as evidence of the original blocker.
 Verified starting checkpoint: main, `2102682`, origin/main divergence 0/0.
 Only pre-existing untracked file is the user-owned guide, untouched.
 

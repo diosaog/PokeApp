@@ -225,6 +225,11 @@ Orden oficial de migrations:
 20. `020_current_matchday_store_ban_contract.sql`
 21. `021_normal_purchase_api.sql`
 22. `022_promotional_purchase_api.sql`
+23. `023_pokemon_identity.sql`
+
+023 incorpora identidad privada por individuo, observaciones, reconciliacion y
+enlaces seguros de flags legacy. No implementa canjes ni conecta el runtime.
+Su estado local/remoto y comandos estan en `docs/phase8f0-pokemon-identity.md`.
 
 Al anadir una migration, regenera el bootstrap sin reescribir las ya aplicadas:
 

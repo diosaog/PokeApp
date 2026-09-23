@@ -5,6 +5,13 @@
 
 begin;
 
+drop function if exists public.commit_pokemon_identity(jsonb);
+drop table if exists public.pokemon_entity_flags cascade;
+drop table if exists public.pokemon_observations cascade;
+drop table if exists public.pokemon_identity_revisions cascade;
+drop table if exists public.pokemon_entities cascade;
+drop function if exists public.check_pokemon_entity_flag();
+
 drop table if exists public.penalties cascade;
 drop table if exists public.trial_votes cascade;
 drop table if exists public.trial_cases cascade;

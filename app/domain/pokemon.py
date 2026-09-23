@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
+from app.domain.pokemon_identity import PokemonIdentityEvidence
 
 from app.domain.common import (
     JsonObject,
@@ -103,12 +104,17 @@ class PrivatePokemon(PublicPokemon):
     ivs: StatSpread | None = None
     evs: StatSpread | None = None
     original_trainer: str = ""
+    identity_evidence: PokemonIdentityEvidence | None = None
 
     def __post_init__(self) -> None:
         super().__post_init__()
         object.__setattr__(self, "ability", clean_text(self.ability))
         object.__setattr__(self, "nature", clean_text(self.nature))
         object.__setattr__(self, "original_trainer", clean_text(self.original_trainer))
+        if isinstance(self.identity_evidence, dict):
+            object.__setattr__(self, "identity_evidence", PokemonIdentityEvidence(**self.identity_evidence))
+        elif self.identity_evidence is not None and not isinstance(self.identity_evidence, PokemonIdentityEvidence):
+            raise ValueError("invalid_identity_evidence")
 
     def to_public(self) -> PublicPokemon:
         return PublicPokemon(

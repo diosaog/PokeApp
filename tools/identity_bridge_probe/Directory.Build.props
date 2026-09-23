@@ -1,0 +1,5 @@
+<Project>
+  <PropertyGroup>
+    <BaseIntermediateOutputPath>$(MSBuildThisFileDirectory)../../.dotnet-sdk/identity-probe/obj/</BaseIntermediateOutputPath>
+  </PropertyGroup>
+</Project>

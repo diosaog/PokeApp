@@ -250,13 +250,21 @@ frente a admin via navegador. DONE local + staging (27 checks, 8D regression 29,
 cleanup PASS, cuerpos SQL verificados). API no desplegada. Sin redencion,
 dual-write ni runtime nuevo. [Contrato 8E](phase8e-promotional-purchases.md).
 
-Auditoria 8F (2026-09-23): BLOCKED antes de implementar. Los cuatro canjes legacy
+Auditoria historica 8F (2026-09-23): BLOCKED antes de implementar. Los cuatro canjes legacy
 usan una huella Pokemon que puede coincidir entre individuos distintos; bridge
 y DTO normalizado no aportan identidad individual suficiente. No se sustituye
 por especie/nombre/slot ni se consumen compras para efectos ambiguos. No hay flujo
 legacy de canje sin target seguro para portar como subconjunto. 8F.0 debe cerrar
 identidad individual y reconciliacion antes de retomar el boundary. Sin 023/API
-nueva ni ejecucion PKHeX. [Auditoria](phase8f-redemption-effects.md).
+nueva ni ejecucion PKHeX en aquella auditoria. [Auditoria](phase8f-redemption-effects.md).
+
+8F.0 implementa ahora identidad individual separada de evidencia PKHeX: entidades,
+observaciones, revisiones CAS y enlaces de flags en 023. Reconciliador puro en
+`app/domain/pokemon_identity.py`, boundary opt-in en `app/application/pokemon_identity.py`
+y adapter Supabase backend-only. PID es evidencia, no UUID; clones ambiguos no se
+asignan. El bridge solo enriquece lectura. No runtime/dual-write/canje nuevo.
+Capturas sin orden fiable no se promocionan; Companion debera aportar una cadena
+fiable, no un contador basado en la llegada HTTP. [Contrato](phase8f0-pokemon-identity.md).
 
 ## Problema Principal
 

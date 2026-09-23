@@ -221,6 +221,32 @@ namespace PKHeXBridgeApp
             return null;
         }
 
+        static Dictionary<string, object?>? IdentityEvidence(object pkm)
+        {
+            var format = Ref.Get(pkm, "Format");
+            if (format == null || Convert.ToInt32(format) < 3 || Convert.ToInt32(format) > 5) return null;
+            var evidence = new Dictionary<string, object?> { ["schema_version"] = 1, ["format"] = Convert.ToInt32(format) };
+            foreach (var pair in new Dictionary<string, string> {
+                ["pid"] = "PID", ["ot_tid"] = "TID16", ["ot_sid"] = "SID16", ["origin_version"] = "Version",
+                ["language"] = "Language", ["ot_gender"] = "OriginalTrainerGender",
+                ["met_location"] = "MetLocation", ["met_level"] = "MetLevel",
+            })
+            {
+                var value = Ref.Get(pkm, pair.Value);
+                if (value == null) return null;
+                evidence[pair.Key] = Convert.ToInt64(value);
+            }
+            evidence["ot_name"] = Ref.Get(pkm, "OriginalTrainerName") as string;
+            // PK3/4/5 EC is PID's alias; PK3 egg location is a stub, not stored evidence.
+            evidence["encryption_constant"] = null;
+            evidence["egg_location"] = Convert.ToInt32(format) == 3 ? null : Ref.Get(pkm, "EggLocation");
+            evidence["met_date"] = (Ref.Get(pkm, "MetDate") as DateOnly?)?.ToString("yyyy-MM-dd");
+            evidence["egg_date"] = (Ref.Get(pkm, "EggMetDate") as DateOnly?)?.ToString("yyyy-MM-dd");
+            evidence["ivs"] = new[] { "HP", "ATK", "DEF", "SPA", "SPD", "SPE" }
+                .Select(stat => Convert.ToInt32(Ref.Get(pkm, "IV_" + stat))).ToArray();
+            return evidence;
+        }
+
         static Dictionary<string, object?> PkmToDto(Assembly core, object pkm, int boxIndex, int slotIndex, string sourceTag)
         {
             int Species = Convert.ToInt32(Ref.Get(pkm, "Species") ?? 0);
@@ -305,6 +331,7 @@ namespace PKHeXBridgeApp
                 ["OT_TID"] = OT_TID,
                 ["OT_SID"] = OT_SID,
                 ["OT_Name"] = OT_Name,
+                ["IdentityEvidence"] = IdentityEvidence(pkm),
             };
         }
 

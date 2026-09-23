@@ -45,6 +45,7 @@ supabase/v2/
     020_current_matchday_store_ban_contract.sql
     021_normal_purchase_api.sql
     022_promotional_purchase_api.sql
+    023_pokemon_identity.sql
   bootstrap.sql
   reset_dev.sql
 ```
@@ -373,12 +374,20 @@ migrations/bootstrap) + staging (27 checks y regresion 8D 29 checks, cleanup PAS
 022 aplicada incrementalmente, definiciones verificadas. En staging existente aplicar SOLO 022,
 nunca bootstrap/reset. [Contrato 8E](phase8e-promotional-purchases.md).
 
-Auditoria 8F (2026-09-23) BLOCKED por identidad Pokemon insuficiente en todos los
-canjes legacy implementados. No existe 023 ni RPC de redencion; migrations 001-022
-y bootstrap siguen intactos. `redemptions` permite applied/reverted/cancelled,
+Auditoria historica 8F (2026-09-23) BLOCKED por identidad Pokemon insuficiente en todos los
+canjes legacy implementados. En aquella auditoria no existia 023 ni RPC de redencion.
+`redemptions` permite applied/reverted/cancelled,
 sin estado externo pendiente ni idempotencia propios todavia. La representacion
 aditiva es posible, pero no resuelve la ambiguedad de targets. No se accedio a
 staging en esta auditoria. [Detalle](phase8f-redemption-effects.md).
+
+8F.0: 023 anade pokemon_entities, pokemon_identity_revisions, pokemon_observations
+y pokemon_entity_flags (36 tablas RLS en total, vistas publicas sin cambios).
+Fingerprint y flags legacy se conservan; enlazar solo candidatos inequivocos.
+RPC backend-only atomica, cadena CAS/orden de captura fiable, clones ambiguos sin
+binding. Bootstrap generado 001-023; 001-022 intactas. En staging aplicar SOLO 023,
+nunca bootstrap/reset. No redencion nueva ni cambio del runtime.
+[Diseno, pruebas y estado staging](phase8f0-pokemon-identity.md).
 
 ## Indexes And Constraints
 
@@ -440,7 +449,7 @@ Validacion incluida:
   IDs, season scoping, constraints criticas, ausencia de blobs V1 y reset
   destructivo separado.
 - `tools/validate_supabase_v2_schema.py` ejecuta validacion real contra Postgres:
-  reset V2 local, migrations 001-022, seed idempotente, reset, rebuild, fixtures de
+  reset V2 local, migrations 001-023, seed idempotente, reset, rebuild, fixtures de
   introspeccion/constraints y checks RLS con roles tipo Supabase.
 
 ### Real Database Validation
@@ -532,9 +541,9 @@ Fase 7 se valido en PostgreSQL 17.11 local aislado usando roles mock de Supabase
 
 Resultado:
 
-- migrations 001-022 aplican en orden (019-022 tambien validadas en V2 staging);
+- migrations 001-023 aplican en orden (estado remoto de 023 en informe 8F.0);
 - `bootstrap.sql` se regenera desde las mismas migrations;
-- RLS queda activo en las 32 tablas publicas V2;
+- RLS queda activo en las 36 tablas publicas V2 despues de 023;
 - un entrenador autenticado ve sus filas privadas de saves, parsed saves,
   compras y team locks, pero no las de otro entrenador;
 - `public_team_locks` expone solo snapshot publico;

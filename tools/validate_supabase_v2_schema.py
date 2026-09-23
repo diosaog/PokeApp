@@ -56,6 +56,10 @@ EXPECTED_TABLES = [
     "parsed_saves",
     "penalties",
     "pokemon_flags",
+    "pokemon_entities",
+    "pokemon_identity_revisions",
+    "pokemon_observations",
+    "pokemon_entity_flags",
     "purchases",
     "redemptions",
     "save_files",
@@ -1121,6 +1125,10 @@ def main() -> int:
 
     _psql(args, ROOT / "supabase/v2/migrations/022_promotional_purchase_api.sql")
     validate_promotional_purchase(args, _psql_text, ROOT)
+
+    print("== Pokemon identity: RLS, clones, flags, chronology and concurrency ==")
+    from tools.validate_supabase_v2_identity_sql import validate_identity
+    validate_identity(args)
 
     print("== Real schema fixtures and introspection ==")
     with tempfile.NamedTemporaryFile("w", suffix=".sql", delete=False, encoding="utf-8") as tmp:
