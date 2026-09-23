@@ -1,6 +1,6 @@
 # Supabase V2 Security And RLS
 
-## Phase 8G.1 Delta (026, Validation In Progress)
+## Phase 8G.1 Delta (026, DONE Local + Staging)
 
 `require_admin_principal`: verified JWT -> mapped enabled trainer -> is_admin,
 independent of participant membership. All admin RPCs recheck it in SQL.
@@ -10,6 +10,20 @@ invoker functions revoke EXECUTE from PUBLIC, anon and authenticated.
 Direct browser INSERT/UPDATE/DELETE on the eight authoritative setup tables is
 revoked, including 020 column-level season grants; existing SELECT is preserved.
 Audit events use visibility `admin`. [Security/race evidence](phase8g1-season-admin-api.md).
+
+026 applied as `20260923192300`: 39/39 public tables have RLS, 37 views remain.
+All 23 new helpers/RPCs have fixed search_path, SECURITY INVOKER and service-only
+EXECUTE. Independent SQL verifies both table and column write grants are absent
+for authenticated on all eight setup tables. Real admin/non-admin/anon denials,
+previous mutation regressions and zero-residue cleanup PASS.
+
+Advisor is NOT clean: the existing 24 public definer projection findings,
+`set_updated_at` search_path warning and three authenticated identity-helper
+definer warnings remain. The two new backend-only tables add expected RLS/no-policy
+INFOs (three with robbery_cycles); this does not grant browser access. An Auth
+leaked-password-protection warning appeared in an intermediate response but not
+the final database response; no Auth setting was changed or claimed fixed.
+Counts, remediation links and scope limits: [closure](phase8g1-completion-report.md).
 
 Checkpoint: 8F.0 and full 8F/8F.1 DONE local + staging; gates in the [delivery report](phase8f-completion-report.md).
 
@@ -266,16 +280,18 @@ safe-by-shape: if a column is private, it should not appear in the view.
 | --- | --- | --- | --- |
 | `app_settings` | Admin | base table admin only | admin/server |
 | `trainers` | Private identity + public profile | `public_trainers`, `current_trainer_profile` | admin/server |
-| `seasons` | Public competition metadata | `public_seasons` | admin/server |
-| `season_players` | Public participation + private admin fields | `public_season_players`, own/admin base | admin/server |
-| `season_player_stats` | Public season stats | `public_season_player_stats` | admin/server |
+| `seasons` | Public competition metadata | `public_seasons` | server/admin API only (026) |
+| `season_players` | Public participation + private admin fields | `public_season_players`, own/admin base | server/admin API only (026) |
+| `season_player_stats` | Public season stats | `public_season_player_stats` | server/admin API only (026) |
 | `trainer_flags` | Public only for robbed=true, otherwise owner/admin | `public_trainer_flags`, `current_trainer_flags` | admin/server |
 | `pokemon_flags` | Owner/admin | `current_pokemon_flags` | admin/server |
-| `season_config_versions` | Public rules once created | `public_season_config_versions` | admin/server |
-| `divisions` | Public competition structure | `public_divisions` | admin/server |
-| `division_memberships` | Public competition structure | `public_division_memberships` | admin/server |
-| `matchdays` | Public schedule/status | `public_matchdays` | admin/server |
-| `matches` | Public results | `public_matches` | admin/server |
+| `season_config_versions` | Public rules once created | `public_season_config_versions` | server/admin API only (026) |
+| `divisions` | Public competition structure | `public_divisions` | server/admin API only (026) |
+| `division_memberships` | Public competition structure | `public_division_memberships` | server/admin API only (026) |
+| `matchdays` | Public schedule/status | `public_matchdays` | server/admin API only (026) |
+| `matches` | Public results | `public_matches` | server/admin API only (026) |
+| `season_admin_state` | Backend revision state | admin setup API only | server/admin API only (026) |
+| `admin_operation_receipts` | Private backend receipts | sanitized API receipt only | server/admin API only (026) |
 | `matchday_snapshots` | Public official snapshot | `public_matchday_snapshots` | admin/server |
 | `matchday_movements` | Public movement history | `public_matchday_movements` | admin/server |
 | `shop_items` | Public catalog | `public_shop_items` | admin/server |

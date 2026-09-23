@@ -2,6 +2,12 @@
 
 Fecha: 2026-09-23. **AUDIT ONLY. DONE como auditoria, no como implementacion.**
 
+Actualizacion posterior: D1-D3 aprobadas y aplicadas en 8G.1, DONE local + staging.
+El contenido observado de este audit conserva su checkpoint 001-025; no describe
+las nuevas restricciones de 026. Ver [contrato actual](phase8g1-season-admin-api.md)
+y [cierre de implementacion](phase8g1-completion-report.md). D4-D7=A siguen como
+direccion futura aprobada; D8 diferida. No se ha implementado 8H.
+
 Base comprobada: `main`, HEAD `34207a9`, upstream `origin/main`, ahead/behind
 `0/0`, arbol versionado limpio. Unico untracked permitido:
 `docs/pokeapp-guia-completa-pestanas-y-producto.md`, conservado sin cambios.

@@ -9,7 +9,9 @@ the first-day preparation RPC owns initial pointer assignment. Activation requir
 server-computed readiness and never finishes another season. Browser direct setup
 writes are revoked, including old column grants. Existing V2 self-service RPCs
 remain backend-only. [Contract and validation](phase8g1-season-admin-api.md).
-Validation is in progress; legacy Streamlit is still the production runtime.
+DONE local + real V2 staging: 343 tests, migrations/bootstrap parity, concurrency,
+rollback and prior API regressions PASS. [Closure](phase8g1-completion-report.md).
+Legacy Streamlit is still the production runtime; the API is not deployed.
 
 Este documento es la fuente tecnica viva para la migracion 2.0. La regla base es
 conservadora: no tirar la app actual, sino separar el cerebro util que ya existe

@@ -1,10 +1,10 @@
 # PokeApp 2.0 Project Checkpoint
 
-Checkpoint date: 2026-09-23 (8G.1 implementation in validation; not yet closed).
+Checkpoint date: 2026-09-23 (8G.1 DONE, local + real V2 staging).
 
 Phase 8G.1 now implements the approved D1=A/D2=A/D3=B core admin boundary in
 additive migration 026 and `/v1/admin`. Local/staging closure evidence belongs to
-[the season administration report](phase8g1-season-admin-api.md). D4-D7=A are
+[the completion report](phase8g1-completion-report.md). D4-D7=A are
 future direction; D8 deferred. No 8H implementation, Streamlit/V1 change or cutover.
 
 Base HEAD before original checkpoint documentation:
@@ -72,9 +72,16 @@ Latest architecture state:
 Phase 8G.1 core setup/admin implementation follows the completed
 [8G audit](phase8g-season-league-admin-audit.md) at `089b8d6` and approved D1=A,
 D2=A, D3=B. It adds migration 026, ten `/v1/admin` routes, durable revisions/
-receipts, first-round preparation and readiness-gated activation. Validation is
-in progress; the unit suite is 342 PASS (318 preserved + 24 new). Staging closure
-and progress will be recorded only after the remaining gates pass.
+receipts, first-round preparation and readiness-gated activation. DONE: 343 tests
+PASS (318 preserved + 25 new); PostgreSQL migrations/bootstrap schema parity;
+17 setup groups and nine exact-state rollback points. Staging 026 was applied
+as `20260923192300`, after implementation push `178cc41`; validator fix `c6afcde`
+distinguishes malformed 422 requests from business conflicts. The completed run
+passed 17 setup groups, Team Lock 13 checks, purchase/context 29 checks and
+redemption/robbery 17 groups. Independent SQL confirms zero fixture/Auth residue,
+39/39 public tables with RLS, 37 views and unchanged real trainer/catalog/Storage
+fingerprints. Existing Advisor findings remain documented, not cleared.
+Weighted complete-project estimate: about 57% -> 59%; next Phase 8H, not started.
 
 Phase 8F.1 adds the approved canonical reward-only voucher and complete atomic
 robbery/cycle/gift handling in 025, staged as `20260923180416` after `4cf21bf`.
@@ -296,10 +303,11 @@ Persistence:
 Next exact phase:
 
 ```text
-Phase 8G.1: complete local + staging validation, then Phase 8H
+Phase 8H: competitive matchday administration, close and advancement
 ```
 
-8G audit is complete and D1-D3 approved. Competitive close/rewards/pointer advance, participant status and
+8G audit and 8G.1 local/staging implementation are complete. D1-D3 are approved.
+Competitive close/rewards/pointer advance, participant status and
 final archive/Hall remain separate proposed subphases, not completed APIs.
 
 Fase 7.1, Fase 7.2, Fase 8A.1, Fase 8B and 8B-H are closed. Fases 8C, 8D.0,
@@ -340,7 +348,7 @@ to identity, not redemption. See the 8F.0 report for current validation counts.
 - Fase 8E: promotional claim. DONE local + staging; 27 checks and 8D regression PASS.
 - Fase 8F: all four effects DONE local + staging; physical save execution remains future Companion work.
 - Fase 8G: season/league administration contract audit DONE, documentation only.
-- Fase 8G.1: core setup/admin implemented; local/staging validation in progress.
+- Fase 8G.1: core setup/admin DONE local + staging; 026 applied, cleanup PASS.
 - Fase 8 remaining: league/season/admin/trials/Hall operations.
 - Fase 9: parser boundary.
 - Fase 10: React / Cloudflare frontend.

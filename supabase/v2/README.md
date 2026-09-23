@@ -233,9 +233,11 @@ Orden oficial de migrations:
 026 incorpora administracion inicial de temporada, revisiones/recibos, divisiones
 A/B, primera jornada y activacion validada. Revoca las escrituras directas del
 navegador sobre las ocho tablas de preparacion; las lecturas siguen disponibles.
-Validacion en curso: [contrato y evidencia](../../docs/phase8g1-season-admin-api.md).
-En V2 existente se aplica SOLO 026, despues de validacion local y commit/push;
-nunca bootstrap ni reset sobre staging para esta actualizacion.
+DONE local + staging: [contrato](../../docs/phase8g1-season-admin-api.md) e
+[informe de cierre](../../docs/phase8g1-completion-report.md).
+En Pokeapp 2.0 ya se aplico SOLO 026 como `20260923192300`, despues de validacion
+local y commit/push. Validacion remota y limpieza independiente PASS.
+No repetir 026, bootstrap ni reset en ese staging.
 
 025 anade el comodin canonico reward-only, origen unico de regalos y canje de robo
 con ciclo persistente. [Contrato](../../docs/phase8f1-robbery-voucher.md).

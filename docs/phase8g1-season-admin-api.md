@@ -1,7 +1,8 @@
 # Phase 8G.1: Core Season Administration
 
-Implementation checkpoint: based on `089b8d6`, 2026-09-23. Local/staging closure
-evidence is recorded below after the validation gates, not inferred from code.
+DONE local + real V2 staging, 2026-09-23; implementation based on `089b8d6`.
+Local/staging closure evidence is recorded below and in the
+[complete delivery report](phase8g1-completion-report.md), not inferred from code.
 The existing Streamlit runtime and V1 remain unchanged. No dual write or deployment.
 
 ## Approved Product Contract
@@ -190,11 +191,12 @@ Local gates PASS, 2026-09-23:
   cleanly, each running existing 019-025 regressions and RLS/schema checks.
 - Both routes pass 17 admin fixture groups, A-K races, and nine exact-state
   rollback points. Included actual FK introspection and 2/3-division all-vs-all.
-- Full `pg_dump --schema-only` comparison (including grants/ownership) is checked
-  before implementation push; only random dump restrict tokens are normalized.
+- Full `pg_dump --schema-only` comparison (including grants/ownership) PASS:
+  7,381 lines identical; only random dump restrict tokens are normalized.
 
-Incremental staging validation is pending. Phase 8G.1 is not DONE yet.
-Global completed-project estimate remains about 57% until closure.
+Incremental staging validation PASS. Phase 8G.1 is DONE.
+Weighted completed-project estimate moves about 57% -> 59%; 8H is next,
+not implemented. This is not a whole-API or production-release completion claim.
 
 026 was applied after push `178cc41`, as `20260923192300`, only on the pinned V2
 project. Initial remote run stopped at a validator TypeError: FastAPI schema
@@ -202,3 +204,23 @@ errors use a 422 detail list, not the business error object. The harness now
 asserts that distinction explicitly, with a regression test; no migration/API
 behavior was changed. That attempt cleaned all fixtures/Auth users, independently
 confirmed by SQL (zero seasons/receipts/temp users, ten original trainers).
+
+Harness correction pushed as `c6afcde`. The completed run was
+`phase8g1_validation_ec1accfdab004e189f9b424346812523`:
+
+- `RESULT ok groups=17; real JWT/API/PostgREST; Auth cleanup PASS`.
+- Core RG01-RG18/RG22 and A-K cases covered by 17 shared fixture groups.
+- RG19: Team Lock regression, 13 checks PASS.
+- RG20: current-day/Store Ban and normal purchase regression, 29 checks PASS.
+- RG21: authoritative identity/redemption/robbery/voucher regression, 17 groups PASS.
+- No remote failure-injection DDL and no automatic mutation retry. Per-worker
+  sessions are isolated; no claim of a general Windows/httpx transport fix.
+- Independent MCP SQL confirms zero fixture users, identities, sessions, seasons,
+  players, stats, configs, divisions, memberships, days, matches, events, admin
+  state and receipts; regression economy/identity/save/effect tables also empty.
+- Existing ten trainers, 62 catalog items, three Storage objects and bucket
+  definitions retain exactly their pre-run row-content fingerprints.
+- 39/39 public tables with RLS, 37 views, all 23 admin functions invoker with fixed
+  search_path and service-only EXECUTE; eight tables have no authenticated table
+  or column writes. Advisor findings and remediation links are in the delivery
+  report; the project is not advertised as Advisor-clean.
