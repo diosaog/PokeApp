@@ -1,6 +1,6 @@
 # PokeApp 2.0 Project Checkpoint
 
-Checkpoint date: 2026-09-23 (Phase 8F.0 LOCAL DONE; remote gate blocked by MCP OAuth).
+Checkpoint date: 2026-09-23 (Phase 8F.0 LOCAL DONE; remote SQL approval/session gate blocked).
 
 Base HEAD before original checkpoint documentation:
 `f6d8fc179f8c9e021bdf6b4fa1e2687e2d7e8b2a`
@@ -53,7 +53,10 @@ Latest architecture state:
   No redemption endpoint, runtime connection, dual-write or physical save modification.
   295 tests PASS, PostgreSQL migrations/bootstrap PASS (19 identity checks each),
   schema dumps including grants identical. Staging 023 has NOT been applied by this
-  task: MCP OAuth refresh failed. Do not mark 8F.0 fully DONE until remote validation.
+  task. OAuth was renewed and a fresh MCP client confirmed V2/latest 022, but SQL
+  preflight was denied by its approval policy. Original conversation client also
+  retains stale authorization state. Implementation `9aef9ac` is pushed; do not
+  repeat local work. Do not mark 8F.0 fully DONE until remote validation.
 
 ## Current State
 

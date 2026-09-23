@@ -1,7 +1,9 @@
 # Phase 8F.0: Authoritative Pokemon Individual Identity
 
 Date: 2026-09-23. Starting checkpoint: `main`, `7207014`, origin divergence 0/0.
-Status: LOCAL DONE; staging gate blocked by MCP OAuth refresh failure. No redemption implementation.
+Status: LOCAL DONE / overall PARTIAL; staging SQL blocked by MCP session/approval gate.
+Implementation commit: `9aef9ac feat: add authoritative Pokemon identity and reconciliation`,
+pushed to origin/main before any attempted staging SQL. No redemption implementation.
 Protected user guide: `docs/pokeapp-guia-completa-pestanas-y-producto.md`, untouched/untracked.
 
 ## Root Cause
@@ -227,11 +229,39 @@ absence. Independent MCP inspection must confirm zero residue and SQL definition
   Starlette/httpx deprecation and Git LF/CRLF notices; not suppressed as test failures.
   The probe's initial MSBuild output-path warning was fixed using Directory.Build.props.
 
-Remote: MCP `get_project_url` and `list_migrations` failed before any remote write:
-`OAuth token refresh failed: Failed to parse server response`. Reconnect supabase-v2,
-then verify the exact target, apply only committed 023 and run the prepared validator.
-No remote fixture has been created by this task and remote PASS is NOT claimed.
-Until that gate passes, overall 8F.0 remains PARTIAL, not DONE.
+## Staging Resume Checkpoint
+
+No local validation was repeated after the user's request to resume staging only.
+Initial MCP calls failed with `OAuth token refresh failed: Failed to parse server response`.
+Default CLI OAuth registration also failed because the server rejected advertised
+scopes. A login with explicit `organizations:read,projects:read,database:read,database:write`
+completed successfully after the user authorized it. No API keys were changed/exposed.
+
+The original conversation's tool client still returned `OAuth authorization required`
+after the user restarted the connector. A fresh, ephemeral MCP client DID confirm:
+
+- exact project URL: `https://uwleqeuzsveqlugugzba.supabase.co`;
+- latest migration: `022_promotional_purchase_api`, version `20260922174842`;
+- independent service REST read access works; that probe performed no writes.
+
+However, its read-only SQL catalog preflight was refused by the client:
+`MCP tool call requires approval, but approval policy is never`.
+No attempt was made to bypass that gate. **023 was NOT applied.** Catalog counts,
+remote function checksums, RI01-RI12 execution and independent cleanup verification
+remain pending. No remote fixture/Auth user/raw save was created by this task.
+
+Resume from this exact boundary in a freshly authorized MCP session permitting the
+required SQL tool approval. Verify target and preflight, apply ONLY committed 023,
+run the prepared real fixture validator, verify definitions/checksums and zero residue,
+then publish a documentation-only closure. Do NOT rerun local implementation/tests,
+bootstrap/reset remotely, touch V1 or start redemption while this gate remains open.
+
+Expected local function prosrc MD5 for remote comparison:
+`commit_pokemon_identity`: `adf1eb39d43f2daaab1350a58c016b02`;
+`check_pokemon_entity_flag`: `c1b2d4a8db2294ba43362d187bdc919d`.
+Both must be SECURITY INVOKER with fixed empty search_path. Expected post-023
+inventory: 36 public tables, all RLS enabled; 37 views unchanged.
+Until these gates pass, overall 8F.0 remains PARTIAL, not DONE.
 
 ## Progress And Next
 
