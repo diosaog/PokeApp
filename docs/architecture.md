@@ -250,6 +250,14 @@ frente a admin via navegador. DONE local + staging (27 checks, 8D regression 29,
 cleanup PASS, cuerpos SQL verificados). API no desplegada. Sin redencion,
 dual-write ni runtime nuevo. [Contrato 8E](phase8e-promotional-purchases.md).
 
+Auditoria 8F (2026-09-23): BLOCKED antes de implementar. Los cuatro canjes legacy
+usan una huella Pokemon que puede coincidir entre individuos distintos; bridge
+y DTO normalizado no aportan identidad individual suficiente. No se sustituye
+por especie/nombre/slot ni se consumen compras para efectos ambiguos. No hay flujo
+legacy de canje sin target seguro para portar como subconjunto. 8F.0 debe cerrar
+identidad individual y reconciliacion antes de retomar el boundary. Sin 023/API
+nueva ni ejecucion PKHeX. [Auditoria](phase8f-redemption-effects.md).
+
 ## Problema Principal
 
 La deuda mas importante no es Supabase. Es que entidades centrales de competicion

@@ -21,6 +21,13 @@ Local rollback/concurrency/security pass; remote 022 passed 27 checks and 29 pri
 No remote failure triggers or deployed API. Details:
 [Phase 8E](phase8e-promotional-purchases.md).
 
+Phase 8F audit (2026-09-23) stopped before implementation: legacy Pokemon
+fingerprints conflate distinct individuals. Ownership/RLS cannot disambiguate two
+targets belonging to the same trainer. No redemption RPC, grants or policies were
+added; 001-022 and staging are untouched. Existing redemptions reads remain
+owner/admin; absence of a browser write policy is not an implemented redemption
+contract. See [identity evidence](phase8f-redemption-effects.md).
+
 ## Security Model
 
 - Every PokeApp V2 application table in `public` has RLS enabled.

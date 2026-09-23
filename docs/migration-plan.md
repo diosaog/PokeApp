@@ -332,6 +332,10 @@ Estado 2026-09-22:
   27 checks reales, regresion 8D de 29 checks y limpieza PASS.
   [Contrato 8E](phase8e-promotional-purchases.md).
   Siguiente: 8F redemption/effect boundary, no implementado.
+  Actualizacion 2026-09-23: auditoria 8F BLOCKED, fingerprints colisionan y los
+  cuatro canjes existentes requieren Pokemon individual. No 023 ni API nueva.
+  Paso inmediato: 8F.0 contrato de identidad Pokemon; despues retomar canjes.
+  [Auditoria y limites](phase8f-redemption-effects.md).
   Los endpoints restantes de la lista siguen pendientes: 8C no cierra toda la API.
 - React/Cloudflare, migracion de datos, shadow mode y cutover no han empezado.
 

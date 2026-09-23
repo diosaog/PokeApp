@@ -373,6 +373,13 @@ migrations/bootstrap) + staging (27 checks y regresion 8D 29 checks, cleanup PAS
 022 aplicada incrementalmente, definiciones verificadas. En staging existente aplicar SOLO 022,
 nunca bootstrap/reset. [Contrato 8E](phase8e-promotional-purchases.md).
 
+Auditoria 8F (2026-09-23) BLOCKED por identidad Pokemon insuficiente en todos los
+canjes legacy implementados. No existe 023 ni RPC de redencion; migrations 001-022
+y bootstrap siguen intactos. `redemptions` permite applied/reverted/cancelled,
+sin estado externo pendiente ni idempotencia propios todavia. La representacion
+aditiva es posible, pero no resuelve la ambiguedad de targets. No se accedio a
+staging en esta auditoria. [Detalle](phase8f-redemption-effects.md).
+
 ## Indexes And Constraints
 
 `008_indexes.sql` anade indices por queries reales:

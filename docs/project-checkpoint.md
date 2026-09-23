@@ -1,6 +1,6 @@
 # PokeApp 2.0 Project Checkpoint
 
-Checkpoint date: 2026-09-22 (Phase 8E DONE local + Supabase V2 staging).
+Checkpoint date: 2026-09-23 (Phase 8E remains DONE; 8F audit blocked before implementation).
 
 Base HEAD before original checkpoint documentation:
 `f6d8fc179f8c9e021bdf6b4fa1e2687e2d7e8b2a`
@@ -43,6 +43,10 @@ Latest architecture state:
   29 8D regression checks and cleanup PASS. [Report](phase8e-completion-report.md).
   [Contract and validation](phase8e-promotional-purchases.md). Next:
   8F redemption/effect boundary, not implemented.
+- Phase 8F audit BLOCKED: all four implemented redemption effects require Pokemon
+  identity; existing fingerprints collide for distinct individuals and normalized
+  DTO IDs can be empty. No safe legacy target-free use flow found. No 023/API or
+  staging work. [Evidence and effect map](phase8f-redemption-effects.md).
 
 ## Current State
 
@@ -245,12 +249,14 @@ Persistence:
 Next exact phase:
 
 ```text
-Phase 8F: redemption/effect boundary (not implemented)
+Phase 8F.0: authoritative Pokemon identity contract (8F implementation blocked)
 ```
 
 Fase 7.1, Fase 7.2, Fase 8A.1, Fase 8B and 8B-H are closed. Fases 8C, 8D.0,
 8D and 8E are DONE local + staging. Do not infer that all APIs or deployment are complete.
 Do not cut over Streamlit or delete V1 without explicit approval.
+The 2026-09-23 audit reproduced identity collisions without running the bridge.
+255 baseline tests still pass; no 8F runtime/schema behavior has been delivered.
 
 ## Do Not Do When Resuming
 
@@ -279,6 +285,7 @@ Do not cut over Streamlit or delete V1 without explicit approval.
 - Fase 8C: Team Lock V2 API mutation. DONE local + staging.
 - Fase 8D.0 + 8D: current matchday, Store Ban and normal purchase. DONE local + staging.
 - Fase 8E: promotional claim. DONE local + staging; 27 checks and 8D regression PASS.
+- Fase 8F: redemption audit blocked on target identity; next is 8F.0 identity contract.
 - Fase 8 remaining: redemption/effects, league/season/admin/trials/Hall operations.
 - Fase 9: parser boundary.
 - Fase 10: React / Cloudflare frontend.
