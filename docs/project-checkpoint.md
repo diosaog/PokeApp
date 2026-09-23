@@ -1,6 +1,6 @@
 # PokeApp 2.0 Project Checkpoint
 
-Checkpoint date: 2026-09-23 (8F.0 DONE; full 8F / 8F.1 DONE local + staging).
+Checkpoint date: 2026-09-23 (full 8F / 8F.1 DONE; 8G contract audit DONE, documentation only).
 
 Base HEAD before original checkpoint documentation:
 `f6d8fc179f8c9e021bdf6b4fa1e2687e2d7e8b2a`
@@ -63,6 +63,15 @@ Latest architecture state:
   Existing Advisor findings are documented, not falsely reported as cleared.
 
 ## Current State
+
+Phase 8G season/league administration contract audit is DONE (documentation only),
+from clean versioned HEAD `34207a9`. No migration 026, API implementation, staging
+write or runtime change. The [audit](phase8g-season-league-admin-audit.md) separates
+initial setup/configuration from competitive close/advance, participant status and
+finish/archive/Hall. It records legacy/SQL gaps and eight product decisions; D1,
+D2 initial-roster scope and D3 future-config editing must be resolved for 8G.1.
+Recommended next: 8G.1 core season setup/admin API, not started or approved by this
+audit. Global progress remains ~57%; the last full unit baseline is 318 PASS.
 
 Phase 8F.1 adds the approved canonical reward-only voucher and complete atomic
 robbery/cycle/gift handling in 025, staged as `20260923180416` after `4cf21bf`.
@@ -284,8 +293,12 @@ Persistence:
 Next exact phase:
 
 ```text
-Phase 8G: season/league administration API contract audit
+Phase 8G.1: core season setup/admin API (after product decisions D1-D3)
 ```
+
+8G audit is complete; use its source-backed contract and open decisions before
+implementing. Competitive close/rewards/pointer advance, participant status and
+final archive/Hall remain separate proposed subphases, not completed APIs.
 
 Fase 7.1, Fase 7.2, Fase 8A.1, Fase 8B and 8B-H are closed. Fases 8C, 8D.0,
 8D, 8E and 8F.0 are DONE local + staging. Phase 8F.1 resolves the catalog blocker
@@ -324,6 +337,8 @@ to identity, not redemption. See the 8F.0 report for current validation counts.
 - Fase 8D.0 + 8D: current matchday, Store Ban and normal purchase. DONE local + staging.
 - Fase 8E: promotional claim. DONE local + staging; 27 checks and 8D regression PASS.
 - Fase 8F: all four effects DONE local + staging; physical save execution remains future Companion work.
+- Fase 8G: season/league administration contract audit DONE, documentation only.
+- Fase 8G.1: proposed core setup/admin API; product decisions pending, not implemented.
 - Fase 8 remaining: league/season/admin/trials/Hall operations.
 - Fase 9: parser boundary.
 - Fase 10: React / Cloudflare frontend.
