@@ -407,7 +407,9 @@ Este era el cierre parcial de 024. 025 implementa el codigo aprobado
 `robbery_shield_voucher`, recompensas de precio cero con origen unico, ciclo persistente,
 canje de comodin y robo atomico. 001-024 intactas; 61 items anteriores conservados.
 37 tablas V2 con RLS tras 025, 62 items de catalogo (61 comprables + 1 recompensa).
-La aplicacion incremental y validacion final se registran en el informe de cierre.
+025 aplicada incrementalmente como `20260923180416`, tras commit/push `4cf21bf`.
+318 tests, PostgreSQL migrations/bootstrap, 17 grupos robo/comodin y 19 regresion
+remotos PASS; limpieza independiente sin residuos. Fase 8F completa a nivel interno.
 [Contrato y estado real](phase8f-redemption-effects.md).
 
 `008_indexes.sql` anade indices por queries reales:

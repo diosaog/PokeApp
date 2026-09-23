@@ -1,6 +1,6 @@
 # PokeApp 2.0 Project Checkpoint
 
-Checkpoint date: 2026-09-23 (8F.0 DONE; 8F.1 implemented, final validation pending).
+Checkpoint date: 2026-09-23 (8F.0 DONE; full 8F / 8F.1 DONE local + staging).
 
 Base HEAD before original checkpoint documentation:
 `f6d8fc179f8c9e021bdf6b4fa1e2687e2d7e8b2a`
@@ -65,7 +65,10 @@ Latest architecture state:
 ## Current State
 
 Phase 8F.1 adds the approved canonical reward-only voucher and complete atomic
-robbery/cycle/gift handling in 025. Local/staging gates are tracked in the
+robbery/cycle/gift handling in 025, staged as `20260923180416` after `4cf21bf`.
+318 tests PASS; migrations/bootstrap schemas identical; staging robbery 17 groups
+and shield/revive regression 19 groups PASS. Independent cleanup zero residue.
+Validator transport isolation follow-up `d356bc1` also pushed. Local/staging gates are tracked in the
 [full contract](phase8f1-robbery-voucher.md) and [delivery](phase8f-completion-report.md).
 Runtime remains legacy Streamlit/V1; no physical save automation or API deployment.
 
@@ -281,12 +284,12 @@ Persistence:
 Next exact phase:
 
 ```text
-Phase 8F.1: finish validation; then Phase 8G season/league administration API contract audit
+Phase 8G: season/league administration API contract audit
 ```
 
 Fase 7.1, Fase 7.2, Fase 8A.1, Fase 8B and 8B-H are closed. Fases 8C, 8D.0,
 8D, 8E and 8F.0 are DONE local + staging. Phase 8F.1 resolves the catalog blocker
-and implements the remaining effects; its final validation status is in the delivery report.
+and closes all four internal effects locally and in staging; evidence is in the delivery report.
 Do not infer that all APIs or deployment are complete.
 Do not cut over Streamlit or delete V1 without explicit approval.
 The 2026-09-23 audit reproduced identity collisions without running the bridge.
@@ -320,8 +323,8 @@ to identity, not redemption. See the 8F.0 report for current validation counts.
 - Fase 8C: Team Lock V2 API mutation. DONE local + staging.
 - Fase 8D.0 + 8D: current matchday, Store Ban and normal purchase. DONE local + staging.
 - Fase 8E: promotional claim. DONE local + staging; 27 checks and 8D regression PASS.
-- Fase 8F: all four effects implemented; 8F.1 validation gates tracked in delivery report.
-- Fase 8 remaining: redemption/effects, league/season/admin/trials/Hall operations.
+- Fase 8F: all four effects DONE local + staging; physical save execution remains future Companion work.
+- Fase 8 remaining: league/season/admin/trials/Hall operations.
 - Fase 9: parser boundary.
 - Fase 10: React / Cloudflare frontend.
 - Fase 11: data migration.

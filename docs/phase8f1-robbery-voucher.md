@@ -3,14 +3,15 @@
 ## Status
 
 Implementation from `main` / `2bd0365`, origin/main 0/0, protected guide unchanged.
-Local verification PASS (migrations/bootstrap, real races and rollback);
+DONE local + staging. Local verification PASS (318 tests, migrations/bootstrap, real races and rollback);
 025 applied as `20260923180416` after implementation push `4cf21bf`.
 First concurrent staging run hit a transport ReadError; independent SQL confirmed
 zero fixture/Auth residue. A validator-only per-worker HTTP/1.1 session isolates
 connections without retrying mutations or altering production transport.
-Staging success remains pending. The missing catalog
+Staging: 17 robbery/voucher groups and 19 shield/revive groups PASS, Auth cleanup
+and independent zero-residue SQL PASS. The missing catalog
 decision is now explicitly approved, not an unresolved product question.
-The completion report records final gates; do not infer DONE from implementation.
+The completion report records run IDs, remote version, checksums and all final gates.
 
 ## Approved Catalog Contract
 
@@ -123,5 +124,5 @@ Independent remote SQL checks counts, catalog, views, Storage and zero fixture r
 No V1, Streamlit, auth, React, Discord, physical bridge or migration cutover change.
 No dual write. Next proposal: Phase 8G - season/league administration API contract
 audit. It is NOT implemented by 8F.1. Full-project progress only rises from ~56% to
-~57% once staging and all other gates close; parser/frontend/shadow/cutover and
+~57% with staging and all other gates closed; parser/frontend/shadow/cutover and
 full safe Companion automation remain outstanding.

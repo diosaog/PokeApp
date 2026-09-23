@@ -347,9 +347,10 @@ Estado 2026-09-22:
   pending. Robo Y su comodin no soportados: falta el ShopItem/codigo canonico del
   regalo. No inventado. Siguiente: 8F.1 contrato de catalogo
   del comodin por robo.
-  8F.1 implementa ahora ese contrato aprobado, robo/ciclo/comodin atomicos en 025.
+  8F.1 DONE local + staging: contrato aprobado, robo/ciclo/comodin atomicos en 025
+  `20260923180416`; 318 tests, 17+19 grupos remotos y limpieza independiente PASS.
   [Contrato actual y gates](phase8f1-robbery-voucher.md).
-  Tras cerrar validacion: Phase 8G, auditoria del contrato API de administracion
+  Siguiente: Phase 8G, auditoria del contrato API de administracion
   temporada/liga. No implementada en esta entrega.
 - React/Cloudflare, migracion de datos, shadow mode y cutover no han empezado.
 

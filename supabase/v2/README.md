@@ -233,6 +233,8 @@ Orden oficial de migrations:
 con ciclo persistente. [Contrato](../../docs/phase8f1-robbery-voucher.md).
 En V2 existente con 024, aplicar SOLO 025 tras validacion local; nunca bootstrap/reset.
 El [informe](../../docs/phase8f-completion-report.md) registra la version remota y gates.
+En Pokeapp 2.0 ya esta aplicada como `20260923180416`, validada y limpiada;
+no repetir 025 ni bootstrap. Fase 8F DONE: 17 grupos robo/comodin + 19 regresion PASS.
 
 024 incorpora canjes atomicos de Blindar/Revivir con identidad autoritativa y
 eventos privados. Robo y su comodin siguen pendientes de un contrato de catalogo.

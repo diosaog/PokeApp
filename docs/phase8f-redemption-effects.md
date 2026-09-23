@@ -5,7 +5,9 @@
 The canonical `robbery_shield_voucher` is now approved and implemented in 025,
 including voucher use, robbery, unique gift provenance and durable robbery cycles.
 See [current full contract](phase8f1-robbery-voucher.md) and
-[validation/closure report](phase8f-completion-report.md). Staging gate pending.
+[validation/closure report](phase8f-completion-report.md). Full Phase 8F DONE:
+318 tests, local SQL/bootstrap, staging robbery 17 groups + regression 19 groups,
+independent cleanup PASS. Remote 025: `20260923180416`.
 The two-effect status below is the preserved 024 checkpoint, not a current blocker.
 
 ## Historical Implementation: 024 / 2026-09-23
