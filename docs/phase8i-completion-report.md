@@ -1,21 +1,28 @@
 # Phase 8I: Participant Status Delivery
 
-Local validation completed, 2026-09-24; staging still pending. No secrets are included.
+Local and real Supabase V2 staging validation completed, 2026-09-24 (Madrid).
+No secrets are included.
 Authoritative behavior: [participant status contract](phase8i-participant-status.md).
 
 === POKEAPP PHASE 8I ===
 
 ## RESULT
 
-Implementation and all local gates PASS. Staging still PENDING.
-Only after implementation push may committed 028 be applied remotely.
+DONE. Implementation, local SQL/unit gates, real JWT/API/PostgREST staging,
+independent security and zero-residue checks PASS. Existing Advisor findings
+remain documented below; this does not declare the whole project security-clean.
 
 ## START / END / GIT
 
 Start: main, `b34bd54`, origin/main 0/0, clean tracked tree. The sole untracked
 protected guide is untouched, SHA256
 `6FA3E82B6D3FDF82ACB0E95DA6715397574ACE7A134F68C2F69864909F2B934E`.
-End/implementation/closure commits recorded only after execution.
+Implementation: `baecb8ad702cce40cc71b078f24b8a327f8ec309`,
+`api: add atomic participant status administration`, pushed to origin/main before
+any staging mutation. Documentation closure is the following docs-only commit,
+`docs: close phase 8i staging validation`; its hash is recorded in Git/final delivery
+rather than embedded in its own contents. Final push must leave origin/main 0/0
+and the tracked tree clean, with only the protected untracked guide remaining.
 
 ## STATUS CONTRACT
 
@@ -149,10 +156,30 @@ no old regression removed. Existing Streamlit/TestClient/LF-CRLF warnings retain
 
 ## STAGING
 
-NOT YET APPLIED. Only allowed target Pokeapp 2.0,
-`https://uwleqeuzsveqlugugzba.supabase.co`, expected latest 027 `20260923210625`.
-After local gates and implementation push: apply only committed 028, run synthetic
-real JWT/API/PostgREST fixtures and independent cleanup checks. No reset/bootstrap.
+Applied ONLY exact committed 028 from `baecb8a` after local gates/push, as
+**`20260923220301`** (2026-09-23 UTC / 2026-09-24 Madrid). Pinned Pokeapp 2.0,
+`https://uwleqeuzsveqlugugzba.supabase.co`; prior 027 `20260923210625` verified.
+No reset/bootstrap/V1. DO NOT REAPPLY 028.
+
+Real JWT/API/PostgREST run completed with exit code 0:
+`phase8i_validation_fa87843e10cc4fb08dac9310fc4c20dd`.
+24 new groups PASS (23 scenario entries plus fixture cleanup). Regressions:
+027 matchdays 20 groups, 026 setup 17 groups, 019 Team Lock 13 checks,
+020/021 purchases/context 29 checks, 024/025 redemption/robbery 17 groups PASS.
+Status-vs-promotional-purchase and post-inactivity 022 checks also passed in the
+new shared scenarios. Temporary Auth users and all synthetic data were removed.
+
+```powershell
+.\.venv-api\Scripts\python.exe tools/validate_supabase_v2_participant_status.py --env-file .env.supabase-v2-rls.local --allow-staging-writes
+```
+
+Final literal:
+`RESULT ok groups=24; real JWT/API/PostgREST; regressions PASS; Auth cleanup PASS`
+
+Log `%TEMP%/phase8i-staging.log`; no secrets printed. First remote run passed;
+no remote reset, bootstrap, failure-injection DDL or automatic retry was used.
+Intrusive rollback injection remained local; this is explicitly reported by the
+remote Team Lock/purchase regression runners, not miscounted as a remote check.
 
 ## SECURITY
 
@@ -160,18 +187,58 @@ Enabled admin JWT guard, backend recheck, strict DTOs, sanitized errors and safe
 receipts. New functions invoker/fixed path/service EXECUTE only. Browser admins
 cannot direct-write status/cutoffs. Existing Advisor findings not claimed resolved.
 
+Independent MCP checks already confirm 40/40 public tables with RLS, all eight
+new/replaced function bodies matching local MD5, invoker/fixed search_path,
+no anon/authenticated EXECUTE, and service_role EXECUTE. Nine affected tables have
+neither browser table nor column INSERT/UPDATE/DELETE privileges. The two public
+views preserve 018 security_invoker=false/security_barrier=true options.
+
+Advisor before `2026-09-23T22:02:42.134Z` and after
+`2026-09-23T22:17:54.762Z`: identical finding names, severities, counts and objects.
+No finding introduced or cleared by 028. Existing findings:
+
+- 24 ERROR [security_definer_view](https://supabase.com/docs/guides/database/database-linter?lint=0010_security_definer_view): the existing 018 public safe-by-shape projections, not new definer RPCs.
+- 1 WARN [function_search_path_mutable](https://supabase.com/docs/guides/database/database-linter?lint=0011_function_search_path_mutable): `set_updated_at`.
+- 3 WARN [authenticated_security_definer_function_executable](https://supabase.com/docs/guides/database/database-linter?lint=0029_authenticated_security_definer_function_executable): existing `current_trainer_id`, `current_user_owns_trainer`, `is_current_user_admin` identity helpers.
+- 4 INFO [rls_enabled_no_policy](https://supabase.com/docs/guides/database/database-linter?lint=0008_rls_enabled_no_policy): intentional backend-only `admin_operation_receipts`, `matchday_snapshot_revisions`, `robbery_cycles`, `season_admin_state`.
+
+These previous decisions/findings are not silently fixed in participant-status
+work. The intermittently reported leaked-password-protection warning was not
+returned in either observation; no Auth setting was changed or claimed fixed.
+
 ## CLEANUP
 
-Protected guide hash unchanged. Local fixture cleanup verified by runners;
-independent real staging/Auth/content fingerprints still pending.
+Protected guide hash unchanged. Local and remote runners verify fixture cleanup.
+Independent MCP SQL after the runner also confirms all 40 public-table counts
+exactly equal the pre-run baseline: 10 trainers, 62 catalog items, 2 app_settings
+and zero rows in every other public table. Auth users, identities, sessions and
+refresh_tokens are each zero. No synthetic fixture or Auth residue remains.
+
+Exact before/after content fingerprints are equal:
+
+| Existing data | MD5 before = after |
+| --- | --- |
+| 10 real trainers | `99db01fe5335bad3bd3fa7466b44e8d4` |
+| 62 catalog items | `76d1c1d5137e6288f508d62786a6d312` |
+| 3 Storage object rows | `744470d4653ef586ffd402c7abbc7691` |
+| Storage buckets | `391ce69bf761cb4c199bbe89b510082a` |
+
+No Storage bytes were read/written by this phase. Of 37 view definitions, 35 are
+unchanged and exactly two have the intended append-only boundary changes; both
+match the locally validated definitions: `public_season_players`
+`1bf473eccdbd1b811a9a177edb269a6e` and `public_division_memberships`
+`721dfea46ad66bf4b4183ba26ba1af7b`. Added columns match committed 028.
+Portable local PostgreSQL was stopped cleanly after the local gates.
 
 ## PROGRESS BEFORE / AFTER
 
-Before ~62%. Do not award completion progress until all staging gates PASS.
+Before ~62%; after approximately ~64%, a planning estimate for the complete
+project, not a test-derived percentage. Credit is limited to this now-validated
+participant boundary; deployment/runtime migration and remaining APIs are not done.
 
 ## NEXT
 
-8J only when 8I DONE. No 8J, Streamlit/V1, React, Companion, physical save writes,
+Next: 8J finish/archive/Hall, not started. No 8J, Streamlit/V1, React, Companion, physical save writes,
 Discord, deployment or runtime cutover included.
 
 === END REPORT ===

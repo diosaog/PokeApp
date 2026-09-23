@@ -1,11 +1,14 @@
 # PokeApp 2.0 Migration Plan
 
-## Current 8I Scope
+## Completed 8I Scope
 
-Implement permanent participant retirement/abandonment/disqualification, scheduled
+Implemented permanent participant retirement/abandonment/disqualification, scheduled
 pair reconciliation and cycle consequences in additive 028. No 8J implementation.
 [Contract](phase8i-participant-status.md); [executed gates](phase8i-completion-report.md).
-Before full local/staging closure, completed-project estimate remains about 62%.
+DONE local + staging: 403 tests, migrations/bootstrap parity, 24 shared groups,
+eight local rollback points, prior API regressions and independent zero residue.
+028 is already applied as `20260923220301`. Completed-project estimate ~62% -> ~64%.
+Next: 8J finish/archive/Hall only, not started. No runtime switch or deployment.
 
 ## Completed 8H Scope
 
@@ -13,7 +16,7 @@ Competitive operations and safe correction implement D4-D6=A, with additive 027.
 DONE local + real V2 staging (027 `20260923210625`), including 376 tests, full SQL
 gates, 20 remote groups, previous API regressions and independent zero cleanup.
 [8H delivery](phase8h-completion-report.md). Weighted completion ~59% -> ~62%.
-8I follows as above. No runtime switch, dual-write or deployment.
+8I is now complete as above. No runtime switch, dual-write or deployment.
 
 ## Completed 8G.1 Scope
 
@@ -24,8 +27,8 @@ independent cleanup. Weighted completed-project estimate: about 57% -> 59% for
 this delivered setup boundary, not the whole league API.
 [Evidence](phase8g1-completion-report.md).
 8H now implements D4-D6=A; D7 remains future direction and D8 deferred;
-8I statuses, 8J lifecycle/Hall, React/Cloudflare, shadow/cutover and Companion
-remain separate. No V1 dual writes or current runtime migration in this phase.
+8I statuses are complete. 8J lifecycle/Hall, React/Cloudflare, shadow/cutover and
+Companion remain separate future work. No V1 dual writes or runtime migration.
 
 ## Principios
 

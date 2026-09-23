@@ -1,12 +1,12 @@
 # PokeApp 2.0 Project Checkpoint
 
-Checkpoint date: 2026-09-24 (8I local PASS; staging pending).
+Checkpoint date: 2026-09-24 (8I DONE local + real Supabase V2 staging).
 
 Phase 8I adds the participant-status boundary in 028. Three permanent statuses,
 scheduled-day reconciliation, typed historical cutoff, robbery cycle adjustment,
 admin JWT/CAS/receipts. [Contract](phase8i-participant-status.md) and
 [current delivery gates](phase8i-completion-report.md). 001-027 remain unchanged.
-8J is not implemented and may start only after 8I local + staging gates close.
+8I gates are closed; 8J finish/archive/Hall is next and is not implemented.
 
 Phase 8H implements approved D4=A/D5=A/D6=A in additive 027: open/results/cancel,
 atomic close/rewards/movement/next day and restricted revisioned correction.
@@ -76,12 +76,19 @@ Latest architecture state:
 
 ## Current State
 
-8I local PASS: 403 unit tests, compileall/diff-check, migrations/bootstrap,
+8I DONE: 403 unit tests, compileall/diff-check, migrations/bootstrap,
 8,268-line schema parity, 24 shared groups + eight exact rollback injections,
-all previous regressions. Staging is pending; 8H remains the last fully completed
-checkpoint until the 8I report records committed 028, staging and cleanup.
+all previous regressions. Implementation `baecb8a` pushed. ONLY committed 028
+applied to V2 as `20260923220301`. Real JWT/API/PostgREST: 24 participant groups,
+027 matchdays 20, 026 setup 17, Team Lock 13, purchases 29, redemption/robbery 17
+PASS. Independent SQL confirms zero DB/Auth residue, 40/40 RLS, 37 views (only
+the two intended boundary projections changed), eight function checksums/grants
+and unchanged real trainer/catalog/Storage fingerprints. Advisor unchanged:
+24 existing ERROR, 4 WARN, 4 backend-only INFO; no global-security-clean claim.
+Do not reapply 028 or reset/bootstrap staging. Estimated project progress ~62% -> ~64%.
+Exact run ID, commands and evidence: [8I report](phase8i-completion-report.md).
 
-8H: 376 unit tests PASS (343 baseline + 33 focused tests). SQL migrations/bootstrap
+Previous 8H checkpoint: 376 unit tests PASS (343 baseline + 33 focused tests). SQL migrations/bootstrap
 PASS, 8,076-line schema parity, 20 groups and 17 exact rollback points. Committed
 027 was applied after push `bef5c4d` as `20260923210625`. Real JWT/API/PostgREST:
 20 8H groups, 17 setup groups, Team Lock 13, purchases 29, redemption/robbery 17
@@ -326,12 +333,13 @@ Persistence:
 Next exact phase:
 
 ```text
-Complete Phase 8I gates; then Phase 8J: finish/archive/Hall (not implemented)
+Phase 8J: finish/archive/Hall (not implemented)
 ```
 
 8G audit and 8G.1 local/staging implementation are complete. D1-D6 are approved.
-8H competitive operations are DONE local + staging, with gates tracked in their report.
-Participant status and final archive/Hall remain separate, not completed APIs.
+8H competitive operations and 8I participant status are DONE local + staging,
+with gates tracked in their respective reports. Final archive/Hall remains a
+separate, not-yet-implemented API boundary.
 
 Fase 7.1, Fase 7.2, Fase 8A.1, Fase 8B and 8B-H are closed. Fases 8C, 8D.0,
 8D, 8E and 8F.0 are DONE local + staging. Phase 8F.1 resolves the catalog blocker

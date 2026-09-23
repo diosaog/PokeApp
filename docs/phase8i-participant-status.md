@@ -1,9 +1,10 @@
 # Phase 8I: Participant Status Administration
 
-Implementation follows the approved 8G audit and 8I instruction, starting from
-`b34bd54`. Validation/commit/staging evidence belongs in the
-[completion report](phase8i-completion-report.md). This document defines behavior,
-not a claim that an unexecuted gate has passed.
+DONE local + real Supabase V2 staging, 2026-09-24. Implementation follows the
+approved 8G audit and 8I instruction, starting from `b34bd54`. 403 unit tests,
+24 shared groups, eight local rollback points and full regressions PASS.
+Validation/commit/staging evidence is in the [completion report](phase8i-completion-report.md).
+028 is already applied as `20260923220301`; do not reapply it on this staging.
 
 ## Product Boundary
 
@@ -162,8 +163,9 @@ Staging runner: `tools/validate_supabase_v2_participant_status.py --env-file
 `phase8i_validation_<uuid>` data and temporary Auth users, real JWT -> API ->
 PostgREST. 027 regression plus earlier setup/Team Lock/purchase/robbery gates follow.
 No failure triggers, reset/bootstrap, real trainer changes or save bytes remotely.
-Only apply committed 028 after full local green and implementation push. Verify
-cleanup independently; do not declare staging DONE merely because local SQL passed.
+028 was applied after full local green and implementation push `baecb8a`.
+Real validation and independent cleanup passed; no real trainer/catalog/Storage
+change and no new Advisor findings. Do not repeat 028 or bootstrap/reset staging.
 
 The legacy Streamlit/V1 runtime is unchanged. No deployment, cutover or dual write.
-8J may be next ONLY after 8I is fully DONE; no 8J implementation is included.
+8J finish/archive/Hall is next; no 8J implementation is included.

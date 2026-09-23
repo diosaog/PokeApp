@@ -1,13 +1,17 @@
 # Supabase V2 Greenfield Schema
 
-## Phase 8I Additive Schema (028)
+## Phase 8I Additive Schema (028, DONE Local + Staging)
 
 `028_participant_status_admin.sql` adds typed effective status and membership
 cutoffs, the service-only status operation, eligibility-aware competitive helpers
 and safe read boundary fields. No new table, historical rewrite or change to
 001-027. Bootstrap now contains 001-028 and remains EMPTY DATABASE ONLY.
 [Contract](phase8i-participant-status.md); [validation status](phase8i-completion-report.md).
-Existing V2 receives ONLY committed 028 after local gates/push; never reset/bootstrap.
+Existing V2 received ONLY committed 028 after local gates/push `baecb8a`, as
+`20260923220301`. 403 unit tests, full SQL gates, 24 new groups, eight local rollback
+points and real API regressions PASS. Migrations/bootstrap parity: 8,268 dump
+lines including grants/ownership. Independent DB/Auth cleanup and real-data
+fingerprints PASS. Do not reapply 028 or reset/bootstrap this staging.
 
 ## Phase 8H Additive Schema (027, DONE Local + Staging)
 

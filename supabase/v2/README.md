@@ -234,8 +234,9 @@ Orden oficial de migrations:
 
 028 incorpora bajas competitivas permanentes y efectivas por jornada, conservando
 historial, economia, saves y equipos fijados. Bootstrap contiene ahora 001-028,
-solo para BASE VACIA. En staging existente aplicar solo 028 comprometida despues
-de validar local y hacer push. No repetir migrations previas ni reset/bootstrap.
+solo para BASE VACIA. En Pokeapp 2.0 YA ESTA APLICADA solo la 028 como
+`20260923220301`, tras validacion local y push `baecb8a`. Validacion real y limpieza
+independiente PASS. No repetir 028, migrations previas ni reset/bootstrap alli.
 [Contrato](../../docs/phase8i-participant-status.md) y
 [estado de validacion](../../docs/phase8i-completion-report.md).
 

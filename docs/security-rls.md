@@ -1,6 +1,6 @@
 # Supabase V2 Security And RLS
 
-## Phase 8I Delta (028)
+## Phase 8I Delta (028, DONE Local + Staging)
 
 No new tables or RLS policies. The status RPC and eligibility/immutability helpers
 are invoker with fixed search_path, service-only EXECUTE. Existing 026 browser
@@ -10,6 +10,12 @@ Public participant/membership views append round cutoff fields only, retaining
 018 safe-by-shape security options. Reasons/actors are not public projections.
 40 public RLS tables / 37 views; the two changed view definitions are intentional,
 not a claim that all 37 hashes remain identical. [Gates](phase8i-completion-report.md).
+028 `20260923220301`: real admin/browser denials and regressions PASS, zero
+independently verified fixture/Auth residue. All eight affected function bodies
+match local SQL, invoker/fixed-path/service-only; nine affected tables have no
+browser table/column write privileges. 35 unchanged views plus two intended
+append-only boundary projections match the local definitions. Advisor exactly
+unchanged: 24 existing ERROR / 4 WARN / 4 INFO, not globally security-clean.
 
 ## Phase 8H Delta (027, DONE Local + Staging)
 

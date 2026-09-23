@@ -9,6 +9,9 @@ revisions, private event and receipt. No historical/economy/save deletion.
 027 helpers now understand effective eligibility and empty divisions; two safe
 public projections and admin setup reads expose the round cutoff, not private reasons.
 [Contract](phase8i-participant-status.md); [executed gates](phase8i-completion-report.md).
+DONE local + staging: 403 unit tests, 24 groups, eight rollback points, exact
+migrations/bootstrap parity and prior API regressions PASS. Committed 028 applied
+as `20260923220301`; independent cleanup and unchanged real-data hashes verified.
 Runtime remains Streamlit/V1; no deployment, dual write, reactivation or 8J.
 
 ## Phase 8H Competitive Boundary
