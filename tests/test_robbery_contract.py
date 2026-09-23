@@ -1,7 +1,10 @@
 from pathlib import Path
+from concurrent.futures import ThreadPoolExecutor
+from threading import Barrier
 import unittest
 
 from tools.generate_supabase_v2_bootstrap import BOOTSTRAP_SQL, render_bootstrap
+from tools.validate_supabase_v2_redemptions import WorkerClient
 
 
 class RobberyContractTests(unittest.TestCase):
@@ -15,6 +18,24 @@ class RobberyContractTests(unittest.TestCase):
                          "acquisition_type='reward' and unit_price=0 and quantity=1 and promotion_id is null",
                          "v_origin.gift_purchase_id is distinct from new.id"):
             self.assertIn(fragment,self.sql)
+
+    def test_fixture_workers_keep_independent_sessions_without_retries(self):
+        clients=[]
+        def factory():
+            client=object()
+            clients.append(client)
+            return client
+        wrapper=WorkerClient(factory)
+        barrier=Barrier(4)
+        def call(_):
+            first=wrapper.client()
+            barrier.wait(timeout=5)
+            self.assertIs(first,wrapper.client())
+            return first
+        with ThreadPoolExecutor(max_workers=4) as pool:
+            results=list(pool.map(call,range(4)))
+        self.assertEqual(len(clients),4)
+        self.assertEqual(len({id(c) for c in results}),4)
 
     def test_lock_order_and_backend_only_cycle(self):
         body=self.sql.split('create or replace function public.api_redeem_purchase',1)[1]

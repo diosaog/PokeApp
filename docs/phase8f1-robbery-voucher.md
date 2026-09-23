@@ -3,8 +3,12 @@
 ## Status
 
 Implementation from `main` / `2bd0365`, origin/main 0/0, protected guide unchanged.
-Local verification PASS (317 tests, migrations/bootstrap, real races and rollback);
-staging 025 NOT applied yet. The missing catalog
+Local verification PASS (migrations/bootstrap, real races and rollback);
+025 applied as `20260923180416` after implementation push `4cf21bf`.
+First concurrent staging run hit a transport ReadError; independent SQL confirmed
+zero fixture/Auth residue. A validator-only per-worker HTTP/1.1 session isolates
+connections without retrying mutations or altering production transport.
+Staging success remains pending. The missing catalog
 decision is now explicitly approved, not an unresolved product question.
 The completion report records final gates; do not infer DONE from implementation.
 

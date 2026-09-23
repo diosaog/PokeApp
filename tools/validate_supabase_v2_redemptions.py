@@ -4,6 +4,7 @@ from dataclasses import replace
 from pathlib import Path
 import secrets
 import sys
+from threading import local
 from uuid import uuid4
 
 ROOT=Path(__file__).resolve().parents[1]
@@ -12,6 +13,20 @@ from tools.validate_supabase_v2_team_lock import staging_config
 from tools.validate_supabase_v2_rls import SupabaseHttp
 from tools.validate_redemption_fixtures import RedemptionFixtures
 from tools.validate_robbery_fixtures import RobberyFixtures
+
+
+class WorkerClient:
+    """Each concurrent fixture worker owns its HTTP session; never retry mutations."""
+    def __init__(self, factory):
+        self.factory, self.worker = factory, local()
+
+    def client(self):
+        if not hasattr(self.worker,'client'):
+            self.worker.client=self.factory()
+        return self.worker.client
+
+    def table(self, name): return self.client().table(name)
+    def rpc(self, name, args): return self.client().rpc(name,args)
 
 
 def main():
@@ -23,6 +38,13 @@ def main():
     prefix='phase8f1_validation_' if args.robbery else 'phase8f_validation_'
     config=replace(staging_config(args.env_file,args.allow_staging_writes),run_id=prefix+uuid4().hex)
     from supabase import create_client
+    from supabase.lib.client_options import SyncClientOptions
+    import httpx
+    transports=[]
+    def make_client(key):
+        transport=httpx.Client(http2=False,timeout=60)
+        transports.append(transport)
+        return create_client(config.url,key,options=SyncClientOptions(httpx_client=transport))
     http=SupabaseHttp(config)
     users,readers,fixture,failure={},{},None,None
     print('V2 staging='+config.url+'\nrun_id='+config.run_id+'\nsecrets=redacted',flush=True)
@@ -31,11 +53,11 @@ def main():
             email,password=config.run_id+'_'+role+'@'+config.email_domain,secrets.token_urlsafe(32)
             users[role]=http.auth_create_user(email,password)
             token=http.auth_sign_in(email,password)
-            readers[role]=create_client(config.url,config.anon_key)
+            readers[role]=make_client(config.anon_key)
             readers[role].postgrest.auth(token)
-        readers['anon']=create_client(config.url,config.anon_key)
+        readers['anon']=make_client(config.anon_key)
         fixture_type=RobberyFixtures if args.robbery else RedemptionFixtures
-        fixture=fixture_type(create_client(config.url,config.service_role_key),readers,users,run_id=config.run_id)
+        fixture=fixture_type(WorkerClient(lambda:make_client(config.service_role_key)),readers,users,run_id=config.run_id)
         fixture.run()
     except Exception as exc:
         failure=str(exc) if isinstance(exc,AssertionError) else type(exc).__name__
@@ -52,6 +74,7 @@ def main():
                 if http.request('GET',http.auth_url+'/admin/users/'+uid,auth='service',raise_on_error=False).status!=404:
                     failure='Auth cleanup verification failed'
             except Exception: failure='Auth cleanup failed'
+        for transport in transports: transport.close()
     if failure:
         print('RESULT failed: '+failure,flush=True)
         return 1

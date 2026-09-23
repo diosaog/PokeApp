@@ -87,7 +87,13 @@ Bootstrap generated from 001-025. Reset used ONLY on disposable loopback Postgre
 
 Verified target https://uwleqeuzsveqlugugzba.supabase.co, Pokeapp 2.0.
 Latest preflight migration 024 `20260923172957`: 61 items, 10 trainers, 3 Storage
-objects, zero seasons/purchases/redemptions/Auth users. 025 NOT applied yet.
+objects, zero seasons/purchases/redemptions/Auth users. 025 applied as
+`20260923180416` after implementation commit/push `4cf21bf`.
+First run `phase8f1_validation_f630a20aac7d4c16abf1c277bb3e89a7` failed on ReadError
+at the first concurrent redemption. Cleanup succeeded; independent SQL confirmed
+zero seasons/purchases/redemptions/cycles/Auth users and the original 10 trainers.
+Validator now isolates worker sessions with HTTP/1.1, no business retries or
+production transport changes. A dedicated unit test proves per-worker isolation.
 Apply ONLY committed/pushed 025, no bootstrap/reset/V1.
 Run `tools/validate_supabase_v2_redemptions.py --env-file .env.supabase-v2-rls.local --allow-staging-writes --robbery`;
 then the same without --robbery for shield/revive regression.
@@ -103,7 +109,8 @@ informational notice must be documented and direct access denial verified.
 
 ## Git And Progress
 
-Commit/push pending local gates. Closure evidence will be committed separately.
+Implementation `4cf21bf` committed/pushed before 025. Validator transport follow-up
+and final closure evidence are separate commits; no migration reapplication.
 Global before ~56%; after remains ~56% until all gates pass, then ~57%.
 Remaining scope includes API, parser, React/Cloudflare, migration/shadow/cutover,
 performance, full Launcher/Companion and safe physical save automation.
