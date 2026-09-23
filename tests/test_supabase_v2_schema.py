@@ -86,6 +86,7 @@ class SupabaseV2SchemaTests(unittest.TestCase):
                 "021_normal_purchase_api.sql",
                 "022_promotional_purchase_api.sql",
                 "023_pokemon_identity.sql",
+                "024_redemption_effect_boundary.sql",
             ],
         )
         for path in _migration_files():
@@ -294,7 +295,7 @@ class SupabaseV2SchemaTests(unittest.TestCase):
         self.assertTrue(bootstrap.startswith("-- ONLY FOR EMPTY POKEAPP V2 DATABASE."))
         self.assertEqual(bootstrap, render_bootstrap())
         self.assertIn(
-        "Source of truth: supabase/v2/migrations/001_core.sql through 023_pokemon_identity.sql",
+        "Source of truth: supabase/v2/migrations/001_core.sql through 024_redemption_effect_boundary.sql",
             bootstrap,
         )
         self.assertNotIn("drop table", lowered)

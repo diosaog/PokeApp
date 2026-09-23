@@ -28,3 +28,11 @@ class PurchaseRejectedError(RepositoryError):
         super().__init__(code)
         self.code = code
         self.status = status
+
+
+class RedemptionRejectedError(RepositoryError):
+    """Whitelisted redemption rejection, safe to expose without SQL details."""
+
+    def __init__(self, code: str, status: int):
+        super().__init__(code)
+        self.code, self.status = code, status

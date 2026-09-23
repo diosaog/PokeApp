@@ -1130,6 +1130,10 @@ def main() -> int:
     from tools.validate_supabase_v2_identity_sql import validate_identity
     validate_identity(args)
 
+    print("== Redemption: private effects, identity, concurrency and rollback ==")
+    from tools.validate_supabase_v2_redemption_sql import validate_redemptions
+    validate_redemptions(args, _psql_text)
+
     print("== Real schema fixtures and introspection ==")
     with tempfile.NamedTemporaryFile("w", suffix=".sql", delete=False, encoding="utf-8") as tmp:
         tmp.write(_render_validation_sql())

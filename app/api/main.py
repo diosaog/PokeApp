@@ -4,7 +4,7 @@ from fastapi import FastAPI
 
 from app.api.config import APIConfig
 from app.api.dependencies import ApiContainer, create_default_container
-from app.api.routes import auth, purchases, system, team_locks
+from app.api.routes import auth, purchases, redemptions, system, team_locks
 
 
 def create_app(
@@ -24,6 +24,7 @@ def create_app(
     api.include_router(auth.me_router)
     api.include_router(team_locks.router)
     api.include_router(purchases.router)
+    api.include_router(redemptions.router)
     return api
 
 

@@ -4,6 +4,7 @@ from typing import Any, Protocol
 
 from app.domain.activity import ActivityEvent
 from app.domain.normal_purchases import NormalPurchaseReceipt, NormalPurchaseRequest
+from app.domain.redemptions import RedemptionReceipt, RedemptionRequest
 from app.domain.promotional_purchases import PromotionalPurchaseReceipt, PromotionalPurchaseRequest
 from app.domain.archives import SeasonArchive
 from app.domain.hall_of_fame import HallOfFameEntry
@@ -15,6 +16,10 @@ from app.domain.shop_eligibility import CompetitiveMatchday
 from app.domain.team_locks import TeamLock, TeamLockMutation, TeamLockRecord, TeamLockSource
 from app.domain.trainers import Trainer, TrainerFlags, TrainerStatus
 from app.domain.trials import TrialCase
+
+
+class RedemptionMutationRepository(Protocol):
+    def redeem_purchase(self, request: RedemptionRequest) -> RedemptionReceipt: ...
 
 
 class SeasonRepository(Protocol):

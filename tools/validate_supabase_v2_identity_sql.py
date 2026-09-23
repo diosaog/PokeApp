@@ -19,8 +19,9 @@ def literal(value):
 
 
 class SqlError(Exception):
-    def __init__(self, code):
+    def __init__(self, code, message=''):
         self.code = code
+        self.message = message
         super().__init__('Local SQL rejected: '+code)
 
 
@@ -31,8 +32,13 @@ class LocalClient:
         self.args, self.role, self.user_id = args, role, user_id
 
     def table(self, table): return Query(self, table)
-    def rpc(self, name, args): return SimpleNamespace(execute=lambda:self.execute(
-        'select public.'+identifier(name)+'('+literal(json.dumps(args['p_request']))+'::jsonb)'))
+    def rpc(self, name, args):
+        if 'p_request' in args:
+            values = literal(json.dumps(args['p_request']))+'::jsonb'
+        else:
+            values = ','.join(identifier(key)+' => '+('NULL' if value is None else literal(value))
+                              for key,value in args.items())
+        return SimpleNamespace(execute=lambda:self.execute('select public.'+identifier(name)+'('+values+')'))
 
     def execute(self, sql):
         args = self.args
@@ -45,7 +51,8 @@ class LocalClient:
         if process.returncode:
             code = re.search(r'(?:ERROR|FATAL):\s+([A-Z0-9]{5}):',process.stderr)
             if not code: raise RuntimeError(process.stderr)
-            raise SqlError(code.group(1))
+            message = process.stderr[code.end():].splitlines()[0].strip()
+            raise SqlError(code.group(1), message)
         return SimpleNamespace(data=json.loads(process.stdout))
 
 

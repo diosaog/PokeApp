@@ -1,6 +1,6 @@
 # PokeApp 2.0 Project Checkpoint
 
-Checkpoint date: 2026-09-23 (Phase 8F.0 DONE local + V2 staging; Phase 8F unblocked, not implemented).
+Checkpoint date: 2026-09-23 (8F.0 DONE; 8F shield/revive subset implemented, staging pending).
 
 Base HEAD before original checkpoint documentation:
 `f6d8fc179f8c9e021bdf6b4fa1e2687e2d7e8b2a`
@@ -63,6 +63,13 @@ Latest architecture state:
   Existing Advisor findings are documented, not falsely reported as cleared.
 
 ## Current State
+
+Phase 8F is PARTIAL: 024 + self-service redemption API implement Blindar/Revivir,
+authoritative Entity targets, private events, atomic used/internal-applied and
+physical pending for revive. No Store Ban/current-day/lifecycle-active requirement.
+Robbery AND its shield voucher remain unsupported: no canonical V2 gift ShopItem
+code exists; none is invented. No physical operations or runtime changes.
+[Current contract and remaining blocker](phase8f-redemption-effects.md).
 
 PokeApp 2.0 has reached functional freeze.
 
@@ -263,11 +270,12 @@ Persistence:
 Next exact phase:
 
 ```text
-Resume Phase 8F Redemption / Effect Boundary using pokemon_entity_id
+Validate 024 safe subset in staging, then 8F.1 canonical robbery-voucher catalog contract
 ```
 
 Fase 7.1, Fase 7.2, Fase 8A.1, Fase 8B and 8B-H are closed. Fases 8C, 8D.0,
-8D, 8E and 8F.0 are DONE local + staging. Phase 8F is not implemented.
+8D, 8E and 8F.0 are DONE local + staging. Phase 8F has a safe two-effect subset;
+its staging gate is pending, and voucher/theft remain blocked by the catalog contract.
 Do not infer that all APIs or deployment are complete.
 Do not cut over Streamlit or delete V1 without explicit approval.
 The 2026-09-23 audit reproduced identity collisions without running the bridge.
@@ -301,7 +309,7 @@ to identity, not redemption. See the 8F.0 report for current validation counts.
 - Fase 8C: Team Lock V2 API mutation. DONE local + staging.
 - Fase 8D.0 + 8D: current matchday, Store Ban and normal purchase. DONE local + staging.
 - Fase 8E: promotional claim. DONE local + staging; 27 checks and 8D regression PASS.
-- Fase 8F: redemption not implemented; 8F.0 identity supplies the prerequisite boundary.
+- Fase 8F: shield/revive subset implemented; voucher/theft pending canonical gift item.
 - Fase 8 remaining: redemption/effects, league/season/admin/trials/Hall operations.
 - Fase 9: parser boundary.
 - Fase 10: React / Cloudflare frontend.

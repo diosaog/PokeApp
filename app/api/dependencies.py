@@ -9,7 +9,7 @@ from app.api.ports import AccessTokenVerifierPort, SessionRefreshPort, TrainerPr
 from app.api.rate_limit import InMemoryWindowRateLimiter, RateLimiter
 from app.auth.ports import TrainerAuthRepository
 from app.auth.service import PinAuthBridge
-from app.repositories.protocols import NormalPurchaseRepository, PromotionalPurchaseRepository, TeamLockMutationRepository
+from app.repositories.protocols import NormalPurchaseRepository, PromotionalPurchaseRepository, TeamLockMutationRepository, RedemptionMutationRepository
 
 
 @dataclass(frozen=True)
@@ -23,6 +23,7 @@ class ApiContainer:
     team_lock_repository: TeamLockMutationRepository | None = None
     purchase_repository: NormalPurchaseRepository | None = None
     promotional_purchase_repository: PromotionalPurchaseRepository | None = None
+    redemption_repository: RedemptionMutationRepository | None = None
 
 
 def get_api_container(request: Request) -> ApiContainer:
@@ -39,6 +40,7 @@ def create_default_container(config: APIConfig | None = None) -> ApiContainer:
     trainer_repo = None
     team_lock_repo = None
     purchase_repo = None
+    redemption_repo = None
 
     if config.supabase_url and config.supabase_anon_key:
         from app.auth.supabase_adapter import SupabaseAuthClient
@@ -62,6 +64,11 @@ def create_default_container(config: APIConfig | None = None) -> ApiContainer:
         purchase_repo = SupabaseNormalPurchaseRepository.from_url_key(
             config.supabase_url, config.supabase_service_role_key,
         )
+        from app.repositories.supabase.redemptions import SupabaseRedemptionRepository
+
+        redemption_repo = SupabaseRedemptionRepository.from_url_key(
+            config.supabase_url, config.supabase_service_role_key,
+        )
 
     auth_bridge = None
     if auth_client is not None and trainer_repo is not None and config.auth_pin_pepper:
@@ -77,4 +84,5 @@ def create_default_container(config: APIConfig | None = None) -> ApiContainer:
         team_lock_repository=team_lock_repo,
         purchase_repository=purchase_repo,
         promotional_purchase_repository=purchase_repo,
+        redemption_repository=redemption_repo,
     )

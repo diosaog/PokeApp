@@ -45,6 +45,16 @@ three authenticated definer helpers); this is not an Advisor-clean claim.
 
 ## Security Model
 
+Phase 8F subset (024, staging pending): api_redeem_purchase is SECURITY INVOKER,
+empty search_path, backend-only EXECUTE. SQL derives effect from stable item code,
+locks participant/purchase/current Entity and rechecks identity head/ownership.
+REDEMPTION_USED is owner/admin-private, never a public strategic announcement.
+Authenticated browser writes, including admin, are revoked on purchases,
+redemptions, pokemon_entities, pokemon_observations, pokemon_entity_flags,
+trainer_flags and activity_events. In particular earlier admin trainer_flags write
+permissions no longer authorize browser DML; SELECT policies are unchanged.
+No V1 runtime is connected or modified. [Scope and checks](phase8f-redemption-effects.md).
+
 - Every PokeApp V2 application table in `public` has RLS enabled.
 - Base tables are not the normal client read surface. Client reads should use the
   `public_*` and `current_*` views created in `012_security_views.sql`.

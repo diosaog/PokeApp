@@ -226,6 +226,12 @@ Orden oficial de migrations:
 21. `021_normal_purchase_api.sql`
 22. `022_promotional_purchase_api.sql`
 23. `023_pokemon_identity.sql`
+24. `024_redemption_effect_boundary.sql`
+
+024 incorpora canjes atomicos de Blindar/Revivir con identidad autoritativa y
+eventos privados. Robo y su comodin siguen pendientes de un contrato de catalogo.
+No modifica saves ni ejecuta PKHeX. Para una V2 existente con 023, aplicar solo
+024 cuando este validada y autorizada: nunca volver a ejecutar el bootstrap.
 
 023 incorpora identidad privada por individuo, observaciones, reconciliacion y
 enlaces seguros de flags legacy. No implementa canjes ni conecta el runtime.

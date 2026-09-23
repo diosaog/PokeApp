@@ -5,6 +5,8 @@
 
 begin;
 
+drop function if exists public.api_redeem_purchase(uuid,uuid,uuid,uuid,text,uuid);
+
 drop function if exists public.commit_pokemon_identity(jsonb);
 drop table if exists public.pokemon_entity_flags cascade;
 drop table if exists public.pokemon_observations cascade;

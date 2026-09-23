@@ -1,4 +1,179 @@
-# Phase 8F: Redemption / Effect Boundary Audit
+# Phase 8F: Redemption / Effect Boundary
+
+## Current Implementation: 2026-09-23
+
+Resume checkpoint: `main`, `b3cabf3`, origin/main 0/0; protected guide untouched.
+**PARTIAL: shield + revive implemented; robbery AND its voucher are blocked by
+the absent canonical V2 gift item. Staging validation pending this implementation push.**
+8F.0 is DONE. Individual identity is no longer the blocker. The earlier audit is
+preserved below as historical evidence, not current implementation status.
+
+### Official Contract
+
+`POST /v1/seasons/{season_id}/shop/purchases/{purchase_id}/redemptions` uses the
+verified Bearer principal, `Idempotency-Key` (1-128 printable ASCII characters),
+and exactly `{"pokemon_entity_id":"<uuid>"}`. Extra fields are forbidden.
+The actor is JWT -> trainers.auth_user_id, never a body parameter. Even admins
+consume only their own purchases. Global enablement and an active same-season
+participant are required, including replay. The secondary legacy UI bypass is
+not preserved. Streamlit itself is not changed.
+
+The season must exist; no active lifecycle restriction is invented. Draft,
+finished, archived and discarded seasons with an active participant are tested.
+Store Ban blocks buying, NOT consuming existing entitlements. No current matchday
+is required. Redemption does not debit/refund, change the ledger or promotional
+stock. Normal/promotional purchases share one handler, even after a promotion ends.
+Only pending quantity-one purchases can be consumed. Unsupported items return
+`REDEMPTION_NOT_SUPPORTED` without consuming anything.
+
+Server-owned dispatch is exact SQL `shop_items.code` -> effect, not display names:
+
+| Legacy contract | Stable V2 code | Internal effect | Physical effect | Status |
+| --- | --- | --- | --- | --- |
+| Blindar Pokemon | blindar_pokemon | shield redemption, used purchase, blindado | not_required | Implemented |
+| Comodin de Blindaje por Robo | NONE in canonical 001-023 catalog | would require blindado + blindaje_por_robo | not_required | Blocked, no invented code |
+| Revivir Pokemon | revivir_pokemon | revive history, used purchase, blindado + revivido_at | pending | Implemented |
+| Robar Pokemon | robar_pokemon, but missing gift item | must also include cycle/history and zero-price voucher | pending transfer | Blocked, no partial theft |
+
+Shield accepts own current party or box 1-8, including Caja 8, and rejects an
+existing true blindado (including a safely linked legacy flag). Revive requires
+own CURRENT Caja 8 observation. The legacy revive branch has no already-shielded
+or once-ever revival prohibition; none is invented. It records a timestamp and
+sets blindado even if already shielded. Redemption history is the durable future
+ranking input; existing league/ranking/cache behavior is untouched.
+
+**Purchase `used` means the entitlement was consumed**, not that PKHeX changed
+anything. Redemption `applied` means internal competitive consequences committed.
+Revive has `physical_effect_status=pending`, completion timestamp NULL. Shield
+has `not_required`. No physical applied/failed transition, queue, poller or job
+table is shipped. A future Companion operation MUST originate at `redemption_id`,
+resolve the same individual in an authorized current save, then backup/write/
+validate/confirm separately. Species/nickname/slot are not operation identity.
+
+### Atomicity, Identity And Permissions
+
+The repository reads the current owner/season identity revision and passes its ID
+to backend-only `api_redeem_purchase`. This version is server-observed, not accepted
+from the browser. SQL rechecks Entity UUID, season, current ownership, unambiguous
+status, newest revision and an authoritative current observation inside the lock.
+Ambiguous/missing/unbound targets conflict without writes. A revision advancing
+after the server read gives `POKEMON_TARGET_STALE`, even if the target survives.
+
+Lock order follows existing mutation RPCs: actor trainer/season SHARE, then
+season_player UPDATE, purchase UPDATE, own Entity UPDATE, current revision and
+observation SHARE, then flag writes. Identity reconciliation uses the same player
+lock. Only own-target effects are enabled. Future robbery must lock ALL affected
+season_players sorted by UUID before purchases/entities/flags; no cross-player
+implementation or cycle simplification is included in this subset.
+
+Replay is checked after actor/participant/purchase scope but before mutable item
+or target validation. Same purchase/key/target returns the stored original receipt
+after moves/evolution/new heads. Same key/different target conflicts; another key
+for the consumed purchase conflicts. SQL enforces unique(purchase_id), independently
+of keys. Four simultaneous identical requests yield one receipt; two different keys
+yield one winner; two different shield purchases targeting one Entity yield one
+shield and one unconsumed loser. No Python business mutex or automatic retry.
+
+One transaction persists redemption, Entity flags, purchase used and exactly one
+`REDEMPTION_USED` event. Visibility is `owner`: actor and admin only, not other
+trainers or public activity projections. Receipt/event contain IDs, effect/status
+and timestamps, never identity evidence, parsed saves, moves, IVs, Auth or secrets.
+Deferred event FK permits redemption-before-event insertion but requires the event
+at commit. Fault injection at redemption, flag, purchase and event writes proves
+complete rollback locally; no failure trigger is deployed remotely.
+
+Migration **024_redemption_effect_boundary.sql** extends existing redemptions with
+idempotency/effect/Entity-owner/revision/physical-status/timestamp/event/receipt fields,
+same-season Entity FK, unique purchase and scoped idempotency index. Existing legacy
+rows can retain NULL boundary fields. Duplicate historical purchase redemptions would
+make the migration fail visibly; it never deletes or merges them to force acceptance.
+`pokemon_entity_flags.flag_timestamp` preserves revivido_at as a timestamp, not a
+fabricated boolean. The old value-shape check is extended for that exact flag;
+other booleans/legacy links remain valid. Applying a new explicit effect may replace
+an Entity flag's legacy link with a direct value; the legacy row itself is retained.
+Migrations 001-023 are byte-unchanged. Generated bootstrap now includes 001-024;
+reset_dev knows the new RPC and remains local-only/destructive.
+
+RPC: SECURITY INVOKER, fixed empty search_path, EXECUTE only service_role/SQL owner.
+024 revokes authenticated (including admin) INSERT/UPDATE/DELETE/TRUNCATE on purchases,
+redemptions, pokemon_entities, pokemon_observations, pokemon_entity_flags, trainer_flags
+and activity_events. Existing SELECT/RLS/view semantics remain intact. This deliberately
+tightens the earlier browser-admin trainer_flags write allowance; privileged backend
+administration remains possible. No service key reaches an API response or browser.
+
+Errors: 401 auth, 403 globally disabled/inactive actor, 404 scoped purchase/season,
+409 explicit business conflicts, 422 malformed inputs, 503 sanitized backend failure.
+Unexpected SQL/transport errors never count as a business/security-test success.
+
+### Demonstrated Remaining Blocker
+
+The canonical seed 009 includes `blindar_pokemon`, `revivir_pokemon`, `robar_pokemon`,
+but no `Comodin de Blindaje por Robo` code/item. Whole V2 migration/domain/repository
+inspection found no authoritative alternative. Legacy creates the gift by display
+name through `add_purchase(..., 0)`; V2 requires a ShopItem FK. This task explicitly
+forbids inventing that catalog entry or dispatching a made-up code by name.
+
+Consequently F40-F42 / RF12 (voucher) are NOT implemented or counted as passing;
+F52-F70 / RF21-RF27 (theft) are NOT implemented or counted as passing. This is narrower
+than the prompt's hoped-for three-effect subset and is reported explicitly. Shield
+and revive proceed under the instruction not to block safe effects on robbery.
+`robar_pokemon` and all unmapped codes fail closed without changing purchase/flags.
+
+The cycle audit read `app/entrenadores/trainer_flags.py`: history after a watermark,
+active-trainer filtering, reset when all relevant active trainers have been robbed,
+then watermark advancement to the latest robbery redemption. A single permanent
+robbed boolean would be incorrect. No cycle mutation or gift is half-implemented.
+Future theft must atomically persist that contract plus the zero-price quantity-one
+gift linked uniquely to originating redemption, with NO ledger debit. Entity owner
+must remain the victim pending the future physical transfer. No physical transfer
+or ownership mutation is performed by this implementation.
+
+### Validation And Next Gate
+
+Commands:
+
+```powershell
+.\.venv-api\Scripts\python.exe tools/run_unit_tests.py
+.\.venv-api\Scripts\python.exe -m compileall -q -x '[\\/](\.venv[^\\/]*|\.git|node_modules)[\\/]' .
+.\.venv-api\Scripts\python.exe tools/generate_supabase_v2_bootstrap.py
+# Same loopback-only PostgreSQL validator as 8F.0, with migrations and bootstrap builds.
+.\.venv-api\Scripts\python.exe tools/validate_supabase_v2_redemptions.py --env-file .env.supabase-v2-rls.local --allow-staging-writes
+git diff --check
+```
+
+New API tests cover auth, strict UUID-only body, server actor/head, sanitized errors,
+receipt validation/privacy and no legacy/physical dependencies. Shared SQL/staging
+fixtures exercise actual production repositories and RPCs, 19 reported check groups
+(some groups cover multiple F/RF identifiers), not 77 individually passing tests.
+They include same-key/different-key/same-target races and a deterministically paused
+production repository request overtaken by real identity reconciliation. Local SQL
+adds four forced-write rollback checks and all previous Team Lock/shop/RLS/identity
+regressions. Fixture prefix is `phase8f_validation_<uuid>`, synthetic only; existing
+seed item rows are read, never modified. No raw save or Storage write is required.
+Explicit staging URL guard and write opt-in apply; Auth and relational fixtures are
+removed in finally, with independent MCP zero-residue verification required.
+
+Observed local results: **311 tests PASS** (295 baseline + 16 API/redemption tests,
+no skips). PostgreSQL 17.11 migrations and generated-bootstrap builds PASS, each
+including prior Team Lock/normal purchase/promotion/RLS fixtures, 19 identity checks,
+19 redemption check groups and rollback injection at four critical writes.
+Compileall, bootstrap equality and diff-check PASS. Existing Streamlit bare-runtime,
+Starlette/httpx deprecation and Git LF/CRLF warnings were not suppressed. Initial
+PowerShell redirection reported wrapper exit 1 despite successful Python summaries;
+final explicit `$LASTEXITCODE` propagation confirmed exit 0 for suite and SQL builds.
+Local RPC prosrc MD5 for staging comparison: `66b07f2154ac0d0282f949d74284d9e9`.
+No original migration, protected runtime path or user guide changed.
+
+Next: commit/push locally validated subset, apply ONLY 024 incrementally to verified
+V2 staging, execute the prepared validator, verify grants/definitions/cleanup and
+publish closure evidence. Full 8F remains PARTIAL even if all enabled checks pass.
+After that, one next subphase: **8F.1 - approve the canonical robbery-voucher catalog
+contract**, before implementing the remaining voucher/theft flow. Do not implement
+that subphase in this task. Weighted estimate: ~55% before, ~56% only after the safe
+subset's staging gate closes; full-product scope still includes parser, React/Cloudflare,
+migration/shadow/performance/cutover and full Companion safe save automation.
+
+## Historical Pre-8F.0 Audit
 
 Date: 2026-09-23. RESULT: **BLOCKED before implementation**.
 Historical audit: [Phase 8F.0](phase8f0-pokemon-identity.md) now implements the

@@ -20,6 +20,7 @@ class ActivityEventType(StringEnum):
     SAVE_UPLOADED = "save_uploaded"
     PURCHASE_COMPLETED = "purchase_completed"
     TEAM_LOCKED = "team_locked"
+    REDEMPTION_USED = "redemption_used"
 
 
 @dataclass(frozen=True)

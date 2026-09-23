@@ -268,6 +268,16 @@ fiable, no un contador basado en la llegada HTTP. [Contrato](phase8f0-pokemon-id
 
 ## Problema Principal
 
+Phase 8F adds an isolated JWT self-service redemption route -> typed application
+request -> Supabase repository -> backend-only atomic RPC (024). Only exact item
+codes for shield/revive are supported. Identity head/owner/location are revalidated
+under the same participant lock used by reconciliation. Entitlement consumption
+and internal effects are distinct from pending physical work. Private event and
+receipt are atomic, without ledger or Storage changes. Browser effect writes,
+including admin writes, are revoked on the affected tables. Robbery/voucher remain
+blocked by the missing canonical gift item. Streamlit, V1 and physical bridge paths
+are untouched. [Contract](phase8f-redemption-effects.md).
+
 La deuda mas importante no es Supabase. Es que entidades centrales de competicion
 viven como JSON grandes dentro de `settings` o como estado de Streamlit.
 

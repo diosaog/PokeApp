@@ -46,6 +46,7 @@ supabase/v2/
     021_normal_purchase_api.sql
     022_promotional_purchase_api.sql
     023_pokemon_identity.sql
+    024_redemption_effect_boundary.sql
   bootstrap.sql
   reset_dev.sql
 ```
@@ -395,6 +396,13 @@ documentados en el informe. No redencion nueva ni cambio del runtime.
 
 ## Indexes And Constraints
 
+024 implementa el subconjunto Blindar/Revivir: canje unico por compra, idempotencia,
+Entity/revision autoritativa, flag timestamp para revivido_at, efecto fisico separado
+y evento privado atomico. Revoca escrituras browser de las superficies de efectos;
+001-023 no cambian. Staging pendiente de aplicar SOLO 024 tras commit/push local.
+Robo y su comodin siguen bloqueados por ausencia de codigo canonico del regalo.
+[Contrato y estado real](phase8f-redemption-effects.md).
+
 `008_indexes.sql` anade indices por queries reales:
 
 - active season;
@@ -453,7 +461,7 @@ Validacion incluida:
   IDs, season scoping, constraints criticas, ausencia de blobs V1 y reset
   destructivo separado.
 - `tools/validate_supabase_v2_schema.py` ejecuta validacion real contra Postgres:
-  reset V2 local, migrations 001-023, seed idempotente, reset, rebuild, fixtures de
+  reset V2 local, migrations 001-024, seed idempotente, reset, rebuild, fixtures de
   introspeccion/constraints y checks RLS con roles tipo Supabase.
 
 ### Real Database Validation
@@ -545,7 +553,7 @@ Fase 7 se valido en PostgreSQL 17.11 local aislado usando roles mock de Supabase
 
 Resultado:
 
-- migrations 001-023 aplican en orden (estado remoto de 023 en informe 8F.0);
+- migrations 001-024 aplican en orden (estado remoto de 024 en informe 8F);
 - `bootstrap.sql` se regenera desde las mismas migrations;
 - RLS queda activo en las 36 tablas publicas V2 despues de 023;
 - un entrenador autenticado ve sus filas privadas de saves, parsed saves,

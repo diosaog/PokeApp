@@ -92,6 +92,30 @@ class PromotionalPurchaseResponse(NormalPurchaseResponse):
     remaining_stock: int = Field(ge=0)
 
 
+class RedemptionBody(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    pokemon_entity_id: UUID
+
+
+class RedemptionResponse(BaseModel):
+    redemption_id: UUID
+    purchase_id: UUID
+    season_id: UUID
+    trainer_id: UUID
+    shop_item_id: UUID
+    effect_code: Literal['shield', 'revive']
+    target_pokemon_entity_id: UUID
+    target_owner_trainer_id: UUID
+    purchase_status: Literal['used']
+    redemption_status: Literal['applied']
+    physical_effect_status: Literal['not_required', 'pending']
+    requested_at: datetime
+    redeemed_at: datetime
+    physical_effect_completed_at: None
+    activity_event_id: UUID
+    gift_purchase_id: None
+
+
 class TeamLockResponse(BaseModel):
     id: UUID
     season_id: UUID
