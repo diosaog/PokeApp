@@ -9,6 +9,8 @@ movements, next round, pointer, private event and receipt atomically. Browser pl
 are never accepted. Immutable history and append-only compensation support only
 the safe most-recent-round correction window. Final close leaves ACTIVE for 8J.
 [Contract](phase8h-matchday-operations.md); [validation status](phase8h-completion-report.md).
+DONE local + staging: 376 tests, schema parity, 20 groups, 17 rollback points;
+027 `20260923210625`, previous API regressions and independent cleanup PASS.
 API remains isolated, not deployed or wired into Streamlit/V1.
 
 ## Phase 8G.1 Administration Boundary

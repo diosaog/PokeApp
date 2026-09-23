@@ -3,9 +3,10 @@
 ## Current 8H Scope
 
 Competitive operations and safe correction implement D4-D6=A, with additive 027.
-Local gates PASS; real staging is pending. Do not advance
-to 8I until [8H delivery](phase8h-completion-report.md) is DONE. Current weighted
-completion remains ~59% pending those gates; no runtime switch or deployment.
+DONE local + real V2 staging (027 `20260923210625`), including 376 tests, full SQL
+gates, 20 remote groups, previous API regressions and independent zero cleanup.
+[8H delivery](phase8h-completion-report.md). Weighted completion ~59% -> ~62%.
+Next 8I; not implemented here. No runtime switch, dual-write or deployment.
 
 ## Completed 8G.1 Scope
 
@@ -372,7 +373,8 @@ Estado 2026-09-22:
   Auditoria 8G completada; 8G.1 DONE local + staging: setup/admin aprobado,
   026 `20260923192300`, 343 tests, concurrencia/rollback y regresiones PASS.
   Limpieza independiente sin residuos ni cambios en datos reales.
-  Cierre/avance competitivo y correccion segura: implementacion 8H, gates en su informe.
+  Cierre/avance competitivo y correccion segura: 8H DONE local + staging,
+  027 `20260923210625`, 376 tests, 20 grupos remotos y cleanup independiente PASS.
 - React/Cloudflare, migracion de datos, shadow mode y cutover no han empezado.
 
 Contrato y evidencias: [Phase 8C](phase8c-team-lock.md).

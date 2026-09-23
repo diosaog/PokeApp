@@ -8,9 +8,9 @@ No credentials are included. No API deployment or Streamlit/V1 runtime switch.
 
 ## RESULT
 
-LOCAL PASS: implemented; 376 tests, migrations/bootstrap, schema parity,
-concurrency, 17 exact rollback points, compileall and diff-check PASS. Staging pending.
-Do not start 8I or treat 027 as applied remotely until this section is updated.
+DONE: implementation, 376 tests, migrations/bootstrap, schema parity, concurrency,
+17 exact rollback points, real V2 staging and independent zero-residue cleanup PASS.
+This is NOT API deployment, runtime cutover or globally clean launch security.
 
 ## START / END / GIT
 
@@ -19,7 +19,14 @@ Do not start 8I or treat 027 as applied remotely until this section is updated.
 - Baseline: 343 tests; 001-026; 8G.1 DONE local + staging.
 - Only original untracked file: protected `docs/pokeapp-guia-completa-pestanas-y-producto.md`.
 - Its SHA256: `6FA3E82B6D3FDF82ACB0E95DA6715397574ACE7A134F68C2F69864909F2B934E`.
-- End commits/upstream/guide verification: pending final gates.
+- Implementation commit pushed: `bef5c4d04fe68948c816aec5e275bec313fe064f`,
+  `api: add atomic matchday close and safe correction`.
+- Final report delivered in a subsequent documentation-only commit,
+  `docs: close phase 8h staging validation`. Its hash is reported at delivery,
+  avoiding a circular self-reference inside this file.
+- Normal commit/push, no amend/force; final target `main` / `origin/main` 0/0.
+- Tracked tree clean at delivery; only protected original untracked guide remains,
+  with the same SHA256. No migrations 001-026 or protected runtime files changed.
 
 ## OPEN
 
@@ -185,44 +192,84 @@ dumps from the final migrations rebuild and final bootstrap are identical.
 
 ## STAGING
 
-PENDING. Only after local gates + implementation commit/push: verify project
-`https://uwleqeuzsveqlugugzba.supabase.co`, expected latest 026 version
-`20260923192300`, then apply ONLY exact committed 027. No reset/bootstrap/V1.
+DONE. Verified exact V2 project
+`https://uwleqeuzsveqlugugzba.supabase.co` and latest 026 `20260923192300`.
+After local gates and push `bef5c4d`, applied ONLY its exact committed 027 via MCP
+as **20260923210625**. No reset/bootstrap/V1. Do not reapply 027.
+Run: `phase8h_validation_ba915696f7bb4e2684d9d7523a3740ca`.
+
+- 8H: **20 groups PASS**, including both supported and blocked corrections,
+  real races, exact-once economy/gift, final ACTIVE state and direct browser denials.
+- 026 setup regression: **17 groups PASS**.
+- 019 Team Lock regression: **13 checks PASS**.
+- 020/021 context/purchase regression: **29 checks PASS**.
+- Identity/redemption/robbery/voucher regression: **17 groups PASS**.
+- Literal result: `RESULT ok groups=20; real JWT/API/PostgREST; regressions PASS; Auth cleanup PASS`.
+- First remote run passed; no remote SQL patch/retry or failure injection needed.
+- Known prior Windows/httpx intermittency is not claimed generally fixed by this run.
 
 Validator: `.\.venv-api\Scripts\python.exe tools/validate_supabase_v2_matchdays.py
 --env-file .env.supabase-v2-rls.local --allow-staging-writes`.
 Real verified JWT -> FastAPI TestClient -> production adapters -> PostgREST.
 No API deployment. Per-worker transports; secret output redacted. Successful
-Auth/database cleanup and independent content comparisons required before DONE.
+Auth/database cleanup and independent content comparisons completed after exit 0.
 
 ## SECURITY
 
-40/40 public tables with RLS expected after 027; 37 existing views unchanged.
+Independent SQL confirms 40/40 public tables with RLS after 027.
+All ten 027 function bodies (nine new, one replacement) match local MD5 checksums;
+invoker, fixed search_path and service-only EXECUTE verified. No table/column
+browser writes on days/matches/snapshots/history/movements/ledger.
+The 37 existing view definitions are unchanged (aggregate MD5 below).
 New snapshot history is backend-only, without browser policies/grants. New
 helpers/RPCs are fixed-search-path invoker, service-only EXECUTE. Browser admin
 cannot bypass the API to write authoritative days/results/snapshots/movements/
 ledger or invoke privileged RPCs. Reads preserve existing privacy/projections.
 
-Advisor is NOT asserted globally clean. Pre-existing 018 definer-view findings,
-identity-helper warnings and mutable `set_updated_at` search_path are separate
-launch-hardening work. Expected new no-policy INFO is intentional backend-only
-history, not permission to add broad browser policies. Actual remote count pending.
+Advisor is NOT globally clean. Before/after comparison at 21:06 / 21:11 UTC:
+
+- **24 existing ERROR**: 018 public definer projections, unchanged.
+- **1 existing WARN**: mutable search_path in `set_updated_at`.
+- **3 existing WARN**: authenticated EXECUTE on definer identity helpers
+  `current_trainer_id`, `current_user_owns_trainer`, `is_current_user_admin`.
+- **INFO 3 -> 4**: backend-only tables without browser policies. The sole addition
+  is `matchday_snapshot_revisions`, alongside receipts, admin state and robbery cycles.
+  RLS plus revoked grants is intentional; do not add permissive policies to hide it.
+- No new definer/search_path/EXECUTE warning from 027. No Auth settings changed.
+  Previous intermittent leaked-password-protection warning is not claimed fixed.
+
+These existing findings remain separate launch-hardening work. See the
+[recorded advisor explanations/remediation links](phase8g1-completion-report.md#advisor-y-limites).
 
 ## CLEANUP
 
 Synthetic prefix `phase8h_validation_<uuid>`; no real trainer/catalog/Storage writes.
-Local fixtures have cleanup in finally; remote fixture/Auth cleanup and independent
-SQL zero residue/fingerprint checks pending. Protected guide remains excluded from git.
+Local fixtures have cleanup in finally. Independent MCP SQL checked ALL 40 public
+table counts against preflight: zero fixture residue. Only original 10 trainers,
+62 catalog items and 2 app_settings rows remain; other public tables are empty.
+Auth users, identities, sessions, refresh tokens and orphan sessions: **zero**.
+Real content fingerprints and all ten affected SQL function bodies match exactly.
+Protected guide remains excluded from git. Temporary local PostgreSQL was stopped.
+
+| Original Data | Same MD5 Before / After |
+| --- | --- |
+| trainers (10) | `99db01fe5335bad3bd3fa7466b44e8d4` |
+| shop_items (62) | `76d1c1d5137e6288f508d62786a6d312` |
+| storage.objects (3) | `744470d4653ef586ffd402c7abbc7691` |
+| storage.buckets | `391ce69bf761cb4c199bbe89b510082a` |
+| public view definitions (37) | `7298ac90ff441476b6efd0ea28160361` |
 
 ## PROGRESS BEFORE / AFTER
 
-Before: ~59%. Until staging closes, delivered-project estimate remains ~59%.
-Expected completed 8H contribution roughly +2 to +3 percentage points, not an
-endpoint/test count. React/Cloudflare, migration/shadow/cutover, Companion/physical
+Before: **~59%**. After full local/staging closure: **~62%**, approximately +3
+percentage points. This is a weighted estimate of delivered product/architecture,
+not an endpoint/test count: the competitive round transaction and safe correction
+boundary are now proven end-to-end. React/Cloudflare, migration/shadow/cutover, Companion/physical
 automation, 8I/8J and remaining APIs/security are still separate work.
 
 ## NEXT
 
-8I only after 8H DONE. No 8I implementation in this task.
+**Phase 8I: participant status / lifecycle administration** can be scoped next.
+8H is DONE; no 8I implementation in this task. 8J still owns finish/archive/Hall.
 
 === END REPORT ===

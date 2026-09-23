@@ -1,6 +1,6 @@
 # PokeApp 2.0 Project Checkpoint
 
-Checkpoint date: 2026-09-23 (8H local gates PASS; staging pending).
+Checkpoint date: 2026-09-23 (8H DONE, local + real V2 staging).
 
 Phase 8H implements approved D4=A/D5=A/D6=A in additive 027: open/results/cancel,
 atomic close/rewards/movement/next day and restricted revisioned correction.
@@ -71,9 +71,13 @@ Latest architecture state:
 ## Current State
 
 8H: 376 unit tests PASS (343 baseline + 33 focused tests). SQL migrations/bootstrap
-PASS, 8,076-line schema parity, 20 groups and 17 exact rollback points. Staging
-validation is pending; do not treat 027 as remotely applied yet.
-Global completed-project estimate remains ~59% until those gates close.
+PASS, 8,076-line schema parity, 20 groups and 17 exact rollback points. Committed
+027 was applied after push `bef5c4d` as `20260923210625`. Real JWT/API/PostgREST:
+20 8H groups, 17 setup groups, Team Lock 13, purchases 29, redemption/robbery 17
+PASS. Independent SQL verifies zero DB/Auth residue, 40/40 RLS, 37 unchanged views,
+restricted function grants/checksums and unchanged real trainer/catalog/Storage.
+Advisor existing findings remain; only one expected backend no-policy INFO added.
+Do not repeat 027, bootstrap or reset on staging. Global estimate ~59% -> ~62%.
 
 Previous completed checkpoint:
 
@@ -311,11 +315,11 @@ Persistence:
 Next exact phase:
 
 ```text
-Phase 8H: complete staging validation, then Phase 8I participant status
+Phase 8I: participant status / lifecycle administration
 ```
 
 8G audit and 8G.1 local/staging implementation are complete. D1-D6 are approved.
-8H competitive operations are implemented with gates tracked in their report.
+8H competitive operations are DONE local + staging, with gates tracked in their report.
 Participant status and final archive/Hall remain separate, not completed APIs.
 
 Fase 7.1, Fase 7.2, Fase 8A.1, Fase 8B and 8B-H are closed. Fases 8C, 8D.0,

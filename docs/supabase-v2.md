@@ -1,13 +1,14 @@
 # Supabase V2 Greenfield Schema
 
-## Phase 8H Additive Schema (027)
+## Phase 8H Additive Schema (027, DONE Local + Staging)
 
 001-026 remain unchanged. 027 adds day/results revisions, immutable snapshot
 revision history, constrained matchday reward provenance/dedupe, movement uniqueness,
 the backend wipe-revive counter required by ranking and competitive admin RPCs.
 Bootstrap is generated from 001-027 for empty databases only. Current schema has
 40 public tables with RLS and the same 37 views. Incremental staging application
-and verification status: [8H report](phase8h-completion-report.md).
+`20260923210625`, real validation and independent cleanup PASS:
+[8H report](phase8h-completion-report.md). Exact schema parity: 8,076 dump lines.
 Do not run bootstrap/reset on existing V2 or V1.
 
 ## Phase 8G.1 Additive Schema (DONE Local + Staging)
