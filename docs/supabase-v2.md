@@ -1,12 +1,16 @@
 # Supabase V2 Greenfield Schema
 
-## Phase 8J Additive Schema (029)
+## Phase 8J Additive Schema (029, DONE Local + Staging)
 
 `029_season_finalization_archive_hall.sql` adds lifecycle RPCs, archive/Hall typed
 provenance and immutable updates, plus discarded visibility guards. No new tables
 and no changes to 001-028. Bootstrap is generated from 001-029, EMPTY DATABASE ONLY.
 [Contract](phase8j-season-finalization.md); [executed gates](phase8j-completion-report.md).
-No remote reset/bootstrap; only committed 029 after local gates and implementation push.
+Only committed 029 from `5f77a48` was applied after local gates/push, as
+`20260923232516`. Do not reapply it or run remote reset/bootstrap. 431 unit tests,
+full SQL gates, exact 8,987-line schema parity, 19 remote groups, prior regressions
+and independent cleanup/security checks PASS. Same 40 RLS tables and 37 views;
+21 parent-filter changes, old security options/grants retained. No new Advisor finding.
 
 ## Phase 8I Additive Schema (028, DONE Local + Staging)
 

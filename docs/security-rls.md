@@ -1,13 +1,18 @@
 # Supabase V2 Security And RLS
 
-## Phase 8J Delta (029)
+## Phase 8J Delta (029, DONE Local + Staging)
 
 Lifecycle RPC/helpers are fixed-path invoker and service-only. Browser archive/Hall
 table/column writes revoked; artifacts reject UPDATE. Existing safe public views
 gain discarded-parent filters; restrictive readable-base policies preserve owner
 access through public parent projections. No new public views or private team fields.
 [Security/Advisor and real validation](phase8j-completion-report.md) remain the
-authority for completion, not this architectural description.
+authority for completion. 029 `20260923232516`: real JWT/API/PostgREST denials,
+19 lifecycle groups and prior regressions PASS, independent zero residue.
+Six new invoker/fixed-path/service-only function bodies match local; 40/40 RLS
+tables, 37 views, ten restrictive discard policies. Exactly 21 view definitions
+change, with all old grants/options preserved. Advisor before/after is identical:
+24 ERROR / 4 WARN / 4 INFO, no new finding and no global security-clean claim.
 
 ## Phase 8I Delta (028, DONE Local + Staging)
 

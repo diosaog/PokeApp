@@ -152,7 +152,10 @@ fixtures cover real transitions/races/privacy/denials and artifact preservation.
 Ten local rollback injections cover all required stages plus receipt failure for
 EACH command, comparing all public-table contents. No failure triggers on staging.
 Full 019-028 regressions, migrations/bootstrap schema parity, unit/compile/diff
-checks precede implementation push and application of ONLY committed 029.
+checks preceded implementation push and application of ONLY committed 029.
+Local and real JWT/API/PostgREST gates are DONE; see the exact commands, first
+remote fixture correction, final run and independent cleanup/Advisor comparison
+in [the completion report](phase8j-completion-report.md). Do not reapply 029.
 
 After 8J completion, remaining critical API work before Phase 9 includes Juicios/
 sanctions (authoritative verdict and penalty/economy effects) and Cup finalization

@@ -1,11 +1,13 @@
 # PokeApp 2.0 Migration Plan
 
-## Current 8J Scope
+## Completed 8J Scope
 
 Explicit finish, frozen relational archive/League Hall and conservative logical
 draft discard. D6/D7=A, D8 deferred. [Contract](phase8j-season-finalization.md)
-and [gates](phase8j-completion-report.md). Still validating; estimate remains ~64%.
-After completion, examine remaining Juicios/sanctions and Cup finalization API
+and [gates](phase8j-completion-report.md). DONE local + real staging: 431 tests,
+19 remote groups, ten local rollback cases, complete prior regressions and
+independent zero residue. 029 is applied as `20260923232516`; do not reapply.
+Overall estimate ~64% -> ~66%. Next, examine remaining Juicios/sanctions and Cup finalization API
 contracts before Phase 9. No parser/frontend/runtime migration in this work.
 
 ## Completed 8I Scope

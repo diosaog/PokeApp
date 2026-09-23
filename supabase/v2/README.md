@@ -236,8 +236,11 @@ Orden oficial de migrations:
 029 incorpora finish/archive/discard explicitos, archivo y Hall de Liga atomicos,
 procedencia historica y visibilidad de borradores descartados. Bootstrap 001-029
 es SOLO PARA BASE VACIA. [Contrato](../../docs/phase8j-season-finalization.md) e
-[informe de validacion](../../docs/phase8j-completion-report.md). En staging no aplicar
-nada hasta gates locales y push; despues SOLO 029 comprometida, nunca reset/bootstrap.
+[informe de validacion](../../docs/phase8j-completion-report.md). En Pokeapp 2.0
+YA ESTA APLICADA la 029 de `5f77a48` como `20260923232516`, tras gates locales y
+push. No repetir 029 ni reset/bootstrap. Validacion local y real completada:
+431 tests, 19 grupos remotos, regresiones previas y limpieza independiente PASS.
+No cambio de runtime ni borrado de V1. Hall de Copa pendiente de su propio contrato.
 
 028 incorpora bajas competitivas permanentes y efectivas por jornada, conservando
 historial, economia, saves y equipos fijados. En el checkpoint 8I bootstrap contenia

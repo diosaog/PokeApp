@@ -1,17 +1,20 @@
 # PokeApp 2.0 Project Checkpoint
 
-Checkpoint date: 2026-09-24 (8I DONE; 8J implementation/validation in progress).
+Checkpoint date: 2026-09-24 (8J DONE local + real V2 staging).
 
 Phase 8J adds explicit finish/archive/logical discard in 029. No V1/runtime change,
 automatic 12-coin bonus, Cup winner inference or Phase 9. [Contract](phase8j-season-finalization.md)
 and [current gates](phase8j-completion-report.md). Staging 029 is applied as
-`20260923232516`; real API validation is not yet complete. Do not reapply it.
+`20260923232516`; 431 unit tests, migrations/bootstrap parity (8,987 lines),
+19 new remote groups, previous regressions and independent zero residue PASS.
+Implementation `5f77a48`, validator follow-up `d46d8a7`, both pushed. Do not reapply
+029 or run reset/bootstrap on staging. Estimated overall progress ~64% -> ~66%.
 
 Phase 8I adds the participant-status boundary in 028. Three permanent statuses,
 scheduled-day reconciliation, typed historical cutoff, robbery cycle adjustment,
 admin JWT/CAS/receipts. [Contract](phase8i-participant-status.md) and
 [current delivery gates](phase8i-completion-report.md). 001-027 remain unchanged.
-8I gates are closed; 8J is being validated, not yet a closed checkpoint.
+8I and 8J gates are closed. Cup Hall integration and Juicios/sanctions APIs remain pending.
 
 Phase 8H implements approved D4=A/D5=A/D6=A in additive 027: open/results/cancel,
 atomic close/rewards/movement/next day and restricted revisioned correction.
@@ -338,13 +341,15 @@ Persistence:
 Next exact phase:
 
 ```text
-Phase 8J: finish/archive/Hall (implemented, final validation pending)
+Scoped contract audit: remaining Juicios/sanctions and Cup-finalization APIs before Phase 9
 ```
 
-8G audit and 8G.1 local/staging implementation are complete. D1-D6 are approved.
+8G audit and 8G.1 local/staging implementation are complete. D1-D7 are approved; D8 deferred.
 8H competitive operations and 8I participant status are DONE local + staging,
-with gates tracked in their respective reports. The separate archive/Hall
-boundary is implemented in 029; its local/staging gates are tracked above.
+with gates tracked in their respective reports. 8J lifecycle/archive/League Hall
+is also DONE, including real staging. Remaining critical API gaps need their own
+contract audit: Juicios verdict/penalty/economy effects and certified Cup winners/
+Hall synchronization. Do not begin Phase 9 automatically.
 
 Fase 7.1, Fase 7.2, Fase 8A.1, Fase 8B and 8B-H are closed. Fases 8C, 8D.0,
 8D, 8E and 8F.0 are DONE local + staging. Phase 8F.1 resolves the catalog blocker

@@ -7,7 +7,8 @@ and revision locking. Additive 029 preserves final pointer/relational history,
 freezes a safe archive and League Hall together, and hides logically discarded
 drafts. No auto rewards, next season, Cup winner inference or runtime change.
 [Contract](phase8j-season-finalization.md); [executed gates](phase8j-completion-report.md).
-Full local/staging completion must be read from that report, not assumed.
+DONE local + real staging; execution evidence and unchanged Advisor findings are
+recorded in that report. Runtime cutover and remaining API contracts are not done.
 
 ## Phase 8I Participant Boundary
 
