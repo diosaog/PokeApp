@@ -186,8 +186,10 @@ git diff --check
 
 Set `POKEAPP_DOTNET` to a .NET 9 SDK executable if not on PATH. This environment uses
 a temporary Microsoft SDK 9.0.318 ZIP verified against the release SHA512. Probe
-outputs live under ignored `.dotnet-sdk/identity-probe`; no tracked bridge binaries
-are replaced or deployed. Source builds must be regenerated when V2 parser is wired.
+outputs live under ignored `.dotnet-sdk/identity-probe`; no manual binary replacement
+or deployment was performed. Existing repository CI rebuilt the Linux publish binary
+after the source push (`27f1865 Bridge: rebuild linux publish binary [skip ci]`).
+That generated commit is preserved/integrated; no write-operation source was changed.
 
 Real PostgreSQL 17.11 validator: loopback only, database `pokeapp_v2_validation*`,
 explicit `--allow-destructive-reset`. Run `tools/validate_supabase_v2_schema.py` with
