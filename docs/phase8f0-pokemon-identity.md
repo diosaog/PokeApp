@@ -2,6 +2,9 @@
 
 Date: 2026-09-23. Starting checkpoint: `main`, `7207014`, origin divergence 0/0.
 Status: DONE local + V2 staging (2026-09-23). Phase 8F is unblocked, NOT implemented.
+Subsequent checkpoint: [8F delivery](phase8f-completion-report.md) now implements
+and stages shield/revive; voucher/theft remain blocked. This 8F.0 report records
+the earlier identity-only closure, not the later redemption implementation.
 Staging-only resume started at `158fc1b`, `main`, origin divergence 0/0.
 Implementation commit: `9aef9ac feat: add authoritative Pokemon identity and reconciliation`,
 pushed to origin/main before any attempted staging SQL. No redemption implementation.

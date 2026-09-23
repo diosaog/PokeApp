@@ -399,7 +399,9 @@ documentados en el informe. No redencion nueva ni cambio del runtime.
 024 implementa el subconjunto Blindar/Revivir: canje unico por compra, idempotencia,
 Entity/revision autoritativa, flag timestamp para revivido_at, efecto fisico separado
 y evento privado atomico. Revoca escrituras browser de las superficies de efectos;
-001-023 no cambian. Staging pendiente de aplicar SOLO 024 tras commit/push local.
+001-023 no cambian. SOLO 024 aplicada via MCP tras commit/push `a36b713`, version
+`20260923172957`: 19 grupos de checks remotos PASS y limpieza independiente PASS.
+No repetir 024 ni bootstrap en ese proyecto. 311 tests y PostgreSQL local verdes.
 Robo y su comodin siguen bloqueados por ausencia de codigo canonico del regalo.
 [Contrato y estado real](phase8f-redemption-effects.md).
 

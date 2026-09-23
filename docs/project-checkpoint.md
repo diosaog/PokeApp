@@ -1,6 +1,6 @@
 # PokeApp 2.0 Project Checkpoint
 
-Checkpoint date: 2026-09-23 (8F.0 DONE; 8F shield/revive subset implemented, staging pending).
+Checkpoint date: 2026-09-23 (8F.0 DONE; 8F PARTIAL, shield/revive DONE local + staging).
 
 Base HEAD before original checkpoint documentation:
 `f6d8fc179f8c9e021bdf6b4fa1e2687e2d7e8b2a`
@@ -70,6 +70,11 @@ physical pending for revive. No Store Ban/current-day/lifecycle-active requireme
 Robbery AND its shield voucher remain unsupported: no canonical V2 gift ShopItem
 code exists; none is invented. No physical operations or runtime changes.
 [Current contract and remaining blocker](phase8f-redemption-effects.md).
+Implementation `a36b713` pushed before 024 staging version `20260923172957`.
+311 tests PASS, PostgreSQL migrations/bootstrap PASS, 19 remote check groups PASS,
+independent zero-residue cleanup PASS. RF12/voucher and RF21-RF27/theft not implemented.
+36/36 RLS, 37 preserved views, RPC checksum matched. No transport failure this run;
+no claim that prior intermittency is fixed. [Delivery](phase8f-completion-report.md).
 
 PokeApp 2.0 has reached functional freeze.
 
@@ -270,12 +275,12 @@ Persistence:
 Next exact phase:
 
 ```text
-Validate 024 safe subset in staging, then 8F.1 canonical robbery-voucher catalog contract
+Phase 8F.1: approve the canonical robbery-voucher catalog contract
 ```
 
 Fase 7.1, Fase 7.2, Fase 8A.1, Fase 8B and 8B-H are closed. Fases 8C, 8D.0,
 8D, 8E and 8F.0 are DONE local + staging. Phase 8F has a safe two-effect subset;
-its staging gate is pending, and voucher/theft remain blocked by the catalog contract.
+its staging gate passed, and voucher/theft remain blocked by the catalog contract.
 Do not infer that all APIs or deployment are complete.
 Do not cut over Streamlit or delete V1 without explicit approval.
 The 2026-09-23 audit reproduced identity collisions without running the bridge.

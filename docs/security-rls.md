@@ -1,10 +1,10 @@
 # Supabase V2 Security And RLS
 
-Checkpoint: Phase 8F.0 DONE local and staging validated (2026-09-23).
+Checkpoint: 8F.0 DONE; 8F shield/revive subset staging validated, overall PARTIAL (2026-09-23).
 
 This document is the security contract for the greenfield Supabase V2 schema. It
 does not connect Streamlit or React to V2. The isolated API now implements Auth
-and Team Lock/normal/promotional purchase mutations. 019-023 are applied and validated in V2
+and Team Lock/normal/promotional purchase plus shield/revive mutations. 019-024 are applied and validated in V2
 staging; the API has not been deployed or connected to the legacy runtime.
 
 022 adds a SECURITY INVOKER, fixed-empty-search-path promotional purchase RPC,
@@ -45,7 +45,7 @@ three authenticated definer helpers); this is not an Advisor-clean claim.
 
 ## Security Model
 
-Phase 8F subset (024, staging pending): api_redeem_purchase is SECURITY INVOKER,
+Phase 8F subset (024, staging `20260923172957`): api_redeem_purchase is SECURITY INVOKER,
 empty search_path, backend-only EXECUTE. SQL derives effect from stable item code,
 locks participant/purchase/current Entity and rechecks identity head/ownership.
 REDEMPTION_USED is owner/admin-private, never a public strategic announcement.
@@ -54,6 +54,9 @@ redemptions, pokemon_entities, pokemon_observations, pokemon_entity_flags,
 trainer_flags and activity_events. In particular earlier admin trainer_flags write
 permissions no longer authorize browser DML; SELECT policies are unchanged.
 No V1 runtime is connected or modified. [Scope and checks](phase8f-redemption-effects.md).
+19 remote check groups passed; independent cleanup and unchanged prior function/view
+checksums confirmed. 36/36 RLS and 37 views retained. RPC body MD5:
+`66b07f2154ac0d0282f949d74284d9e9`. Existing Advisor findings remain, with none new in 024.
 
 - Every PokeApp V2 application table in `public` has RLS enabled.
 - Base tables are not the normal client read surface. Client reads should use the

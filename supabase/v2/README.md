@@ -232,6 +232,8 @@ Orden oficial de migrations:
 eventos privados. Robo y su comodin siguen pendientes de un contrato de catalogo.
 No modifica saves ni ejecuta PKHeX. Para una V2 existente con 023, aplicar solo
 024 cuando este validada y autorizada: nunca volver a ejecutar el bootstrap.
+En el staging Pokeapp 2.0 ya se aplico como `20260923172957` y paso la validacion
+de Blindar/Revivir: no repetirla alli. [Estado de 8F](../../docs/phase8f-redemption-effects.md).
 
 023 incorpora identidad privada por individuo, observaciones, reconciliacion y
 enlaces seguros de flags legacy. No implementa canjes ni conecta el runtime.

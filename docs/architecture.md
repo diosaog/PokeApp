@@ -277,6 +277,9 @@ receipt are atomic, without ledger or Storage changes. Browser effect writes,
 including admin writes, are revoked on the affected tables. Robbery/voucher remain
 blocked by the missing canonical gift item. Streamlit, V1 and physical bridge paths
 are untouched. [Contract](phase8f-redemption-effects.md).
+The safe subset is validated locally and in V2 staging (024 `20260923172957`),
+not deployed as an API. Overall 8F stays PARTIAL until the gift catalog/remaining
+effects contract is completed. [Delivery](phase8f-completion-report.md).
 
 La deuda mas importante no es Supabase. Es que entidades centrales de competicion
 viven como JSON grandes dentro de `settings` o como estado de Streamlit.

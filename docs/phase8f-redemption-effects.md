@@ -3,8 +3,9 @@
 ## Current Implementation: 2026-09-23
 
 Resume checkpoint: `main`, `b3cabf3`, origin/main 0/0; protected guide untouched.
-**PARTIAL: shield + revive implemented; robbery AND its voucher are blocked by
-the absent canonical V2 gift item. Staging validation pending this implementation push.**
+**PARTIAL: shield + revive DONE local + V2 staging; robbery AND its voucher are
+blocked by the absent canonical V2 gift item.** Implementation: `a36b713`, pushed
+before any staging change. [Delivery report](phase8f-completion-report.md).
 8F.0 is DONE. Individual identity is no longer the blocker. The earlier audit is
 preserved below as historical evidence, not current implementation status.
 
@@ -164,13 +165,43 @@ final explicit `$LASTEXITCODE` propagation confirmed exit 0 for suite and SQL bu
 Local RPC prosrc MD5 for staging comparison: `66b07f2154ac0d0282f949d74284d9e9`.
 No original migration, protected runtime path or user guide changed.
 
-Next: commit/push locally validated subset, apply ONLY 024 incrementally to verified
-V2 staging, execute the prepared validator, verify grants/definitions/cleanup and
-publish closure evidence. Full 8F remains PARTIAL even if all enabled checks pass.
-After that, one next subphase: **8F.1 - approve the canonical robbery-voucher catalog
+### Observed Staging Results
+
+Verified exact V2 `https://uwleqeuzsveqlugugzba.supabase.co`, latest 023 before this
+task, no existing redemption RPC. Applied ONLY committed 024 through MCP as
+`20260923172957`. RPC MD5 `66b07f2154ac0d0282f949d74284d9e9` matches local; SECURITY
+INVOKER, fixed empty search_path, EXECUTE only backend/SQL owner. The seven affected
+tables deny browser writes to anon/authenticated, including browser admins.
+
+Unmodified staging validator exited 0 on its first invocation:
+`RESULT ok checks=19; Auth cleanup PASS; robbery/voucher NOT SUPPORTED`.
+Run: `phase8f_validation_6f90941346754e9aa1e2cd12902182c7`.
+RF01-RF11 and RF13-RF20 are covered; RF12 and RF21-RF27 remain blocked, NOT passing.
+No transport failure occurred in this run; previous Windows/httpx intermittency
+is not claimed fixed. Endpoint tests run locally; the RPC is staged. No API deployment.
+
+Independent MCP SQL found no fixture Auth/trainers/seasons and zero rows across
+season_players, purchases, redemptions, promotions, ledger, activity, saves/parses,
+entities/revisions/observations/entity flags, legacy flags and trainer flags.
+Auth users/identities/sessions all zero. Original 10 trainers, 61 items and 3 Storage
+objects remain. Catalog checksum `f1cbe1216934d72dd5a1096d939dbf7a`, bucket checksum
+`a1bad2c31b4a666ab2a70cd1519f5a69`, view checksum `d4da4cee7449e34f3ab16eeb74819c3d`
+and pre-024 function checksum `345ff0787fb03d61e710635715e284bb` all match preflight.
+36/36 public tables have RLS; 37 views preserved; both 023 function checksums unchanged.
+Real catalog audit also found only `blindar_pokemon` among shield/voucher candidates,
+confirming the missing gift representation without changing the catalog.
+
+Advisor retains existing findings: 24 intentional public definer projections,
+one mutable search_path (`set_updated_at`) and three authenticated identity-helper
+definer functions. No new 024 finding; this is NOT an Advisor-clean claim.
+See the accepted exceptions/remediation links in [8F.0](phase8f0-pokemon-identity.md).
+The disposable local PostgreSQL server was stopped after validation.
+
+Full 8F remains PARTIAL. One next subphase: **8F.1 - approve the canonical robbery-voucher catalog
 contract**, before implementing the remaining voucher/theft flow. Do not implement
-that subphase in this task. Weighted estimate: ~55% before, ~56% only after the safe
-subset's staging gate closes; full-product scope still includes parser, React/Cloudflare,
+that subphase in this task. Weighted estimate: ~55% before, **~56% after** (+1 point)
+for the safe subset and reusable atomic boundary, not the missing theft feature.
+Full-product scope still includes parser, React/Cloudflare,
 migration/shadow/performance/cutover and full Companion safe save automation.
 
 ## Historical Pre-8F.0 Audit
