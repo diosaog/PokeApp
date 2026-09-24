@@ -601,6 +601,7 @@ def trial_case_from_legacy(raw: Any, *, season_id: str = LEGACY_SEASON_ID) -> Tr
         "culpable": TrialVerdict.GUILTY,
         "guilty": TrialVerdict.GUILTY,
         "inocente": TrialVerdict.NOT_GUILTY,
+        "no_culpable": TrialVerdict.NOT_GUILTY,
         "not_guilty": TrialVerdict.NOT_GUILTY,
         "pending": TrialVerdict.PENDING,
         "pendiente": TrialVerdict.PENDING,
@@ -610,6 +611,7 @@ def trial_case_from_legacy(raw: Any, *, season_id: str = LEGACY_SEASON_ID) -> Tr
         "culpable": TrialVote.GUILTY,
         "not_guilty": TrialVote.NOT_GUILTY,
         "inocente": TrialVote.NOT_GUILTY,
+        "no_culpable": TrialVote.NOT_GUILTY,
     }
     penalty_map = {
         "store_ban": PenaltyType.STORE_BAN,

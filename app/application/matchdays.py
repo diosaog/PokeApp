@@ -48,6 +48,12 @@ def plan_close(context: dict, corrections: list[dict] | None = None) -> dict:
         points_reduction=p["points_reduction"], coins_reduction=p["coins_reduction"]) for p in players.values()}
     standings = [asdict(s) for s in build_standings_from_rankings(matchday_id=inputs["day_id"],
         rank_a=ranks["A"], rank_b=ranks["B"], version=version, penalties_by_trainer=penalties)]
+    # V2 SQL supplies decimal sanctions as text to preserve arbitrary cumulative
+    # precision through JSON. Rewards and the legacy domain remain unchanged.
+    for standing in standings:
+        value = players[standing['trainer_id']]['points_reduction']
+        if isinstance(value, str):
+            standing['penalties']['points_reduction'] = value
     final = inputs["number"] == cfg["total_matchdays"]
     movement = calculate_division_movements(ranks["A"], ranks["B"], 0 if final else cfg["promotion_relegation_count"])
     award = last_b_steal_award(ranks["B"], enabled=cfg["rules_json"]["last_b_gets_steal"])

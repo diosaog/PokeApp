@@ -39,6 +39,8 @@ $$;
 
 
 EXPECTED_TABLES = [
+    "trial_case_counters",
+    "trial_case_revisions",
     "matchday_snapshot_revisions",
     "admin_operation_receipts",
     "season_admin_state",
@@ -1141,6 +1143,10 @@ def main() -> int:
     print("== Season lifecycle, safe archive/Hall and exact rollback ==", flush=True)
     from tools.validate_supabase_v2_season_lifecycle_sql import validate_season_lifecycle
     validate_season_lifecycle(args, _psql_text)
+
+    print("== Manual trials, typed sanctions, races and exact rollback ==", flush=True)
+    from tools.validate_supabase_v2_trials_sql import validate_trials
+    validate_trials(args, _psql_text)
 
     print("== Real schema fixtures and introspection ==")
     with tempfile.NamedTemporaryFile("w", suffix=".sql", delete=False, encoding="utf-8") as tmp:

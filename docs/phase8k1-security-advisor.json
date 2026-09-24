@@ -1,0 +1,171 @@
+{
+  "project": "uwleqeuzsveqlugugzba",
+  "before": {
+    "ERROR": 24,
+    "WARN": 4,
+    "INFO": 4,
+    "findings": [
+      {
+        "object": "public.admin_operation_receipts",
+        "finding": "rls_enabled_no_policy",
+        "severity": "INFO"
+      },
+      {
+        "object": "public.matchday_snapshot_revisions",
+        "finding": "rls_enabled_no_policy",
+        "severity": "INFO"
+      },
+      {
+        "object": "public.robbery_cycles",
+        "finding": "rls_enabled_no_policy",
+        "severity": "INFO"
+      },
+      {
+        "object": "public.season_admin_state",
+        "finding": "rls_enabled_no_policy",
+        "severity": "INFO"
+      },
+      {
+        "object": "public.public_activity_events",
+        "finding": "security_definer_view",
+        "severity": "ERROR"
+      },
+      {
+        "object": "public.public_coin_balances",
+        "finding": "security_definer_view",
+        "severity": "ERROR"
+      },
+      {
+        "object": "public.public_cup_matches",
+        "finding": "security_definer_view",
+        "severity": "ERROR"
+      },
+      {
+        "object": "public.public_cup_participants",
+        "finding": "security_definer_view",
+        "severity": "ERROR"
+      },
+      {
+        "object": "public.public_cup_standings",
+        "finding": "security_definer_view",
+        "severity": "ERROR"
+      },
+      {
+        "object": "public.public_cups",
+        "finding": "security_definer_view",
+        "severity": "ERROR"
+      },
+      {
+        "object": "public.public_division_memberships",
+        "finding": "security_definer_view",
+        "severity": "ERROR"
+      },
+      {
+        "object": "public.public_divisions",
+        "finding": "security_definer_view",
+        "severity": "ERROR"
+      },
+      {
+        "object": "public.public_hall_of_fame",
+        "finding": "security_definer_view",
+        "severity": "ERROR"
+      },
+      {
+        "object": "public.public_matchday_movements",
+        "finding": "security_definer_view",
+        "severity": "ERROR"
+      },
+      {
+        "object": "public.public_matchday_snapshots",
+        "finding": "security_definer_view",
+        "severity": "ERROR"
+      },
+      {
+        "object": "public.public_matchdays",
+        "finding": "security_definer_view",
+        "severity": "ERROR"
+      },
+      {
+        "object": "public.public_matches",
+        "finding": "security_definer_view",
+        "severity": "ERROR"
+      },
+      {
+        "object": "public.public_penalties",
+        "finding": "security_definer_view",
+        "severity": "ERROR"
+      },
+      {
+        "object": "public.public_season_config_versions",
+        "finding": "security_definer_view",
+        "severity": "ERROR"
+      },
+      {
+        "object": "public.public_season_player_stats",
+        "finding": "security_definer_view",
+        "severity": "ERROR"
+      },
+      {
+        "object": "public.public_season_players",
+        "finding": "security_definer_view",
+        "severity": "ERROR"
+      },
+      {
+        "object": "public.public_seasons",
+        "finding": "security_definer_view",
+        "severity": "ERROR"
+      },
+      {
+        "object": "public.public_shop_items",
+        "finding": "security_definer_view",
+        "severity": "ERROR"
+      },
+      {
+        "object": "public.public_shop_promotions",
+        "finding": "security_definer_view",
+        "severity": "ERROR"
+      },
+      {
+        "object": "public.public_team_locks",
+        "finding": "security_definer_view",
+        "severity": "ERROR"
+      },
+      {
+        "object": "public.public_trainer_flags",
+        "finding": "security_definer_view",
+        "severity": "ERROR"
+      },
+      {
+        "object": "public.public_trainers",
+        "finding": "security_definer_view",
+        "severity": "ERROR"
+      },
+      {
+        "object": "public.public_trial_cases",
+        "finding": "security_definer_view",
+        "severity": "ERROR"
+      },
+      {
+        "object": "public.set_updated_at",
+        "finding": "function_search_path_mutable",
+        "severity": "WARN"
+      },
+      {
+        "object": "public.current_trainer_id",
+        "finding": "authenticated_security_definer_function_executable",
+        "severity": "WARN"
+      },
+      {
+        "object": "public.current_user_owns_trainer",
+        "finding": "authenticated_security_definer_function_executable",
+        "severity": "WARN"
+      },
+      {
+        "object": "public.is_current_user_admin",
+        "finding": "authenticated_security_definer_function_executable",
+        "severity": "WARN"
+      }
+    ]
+  },
+  "after": null
+}

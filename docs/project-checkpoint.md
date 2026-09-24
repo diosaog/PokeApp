@@ -1,6 +1,14 @@
 # PokeApp 2.0 Project Checkpoint
 
-Checkpoint date: 2026-09-24 (8J DONE local + real V2 staging).
+Checkpoint date: 2026-09-24 (8K.1 implementation; final gates in progress).
+
+Phase 8K.1 implements the approved manual Discord-result contract in additive 030.
+Any eligible enabled participant records/corrects; PokeApp has no voting engine or
+Discord integration. Typed sanctions, append-only correction and browser judicial
+write hardening are in [the contract](phase8k1-trials-sanctions.md); delivery gates
+are tracked in [the completion report](phase8k1-completion-report.md).
+466 unit tests pass; real staging is pending the implementation commit/push.
+Progress stays ~66% until all gates close. Do not reapply 029.
 
 Phase 8J adds explicit finish/archive/logical discard in 029. No V1/runtime change,
 automatic 12-coin bonus, Cup winner inference or Phase 9. [Contract](phase8j-season-finalization.md)
@@ -14,7 +22,7 @@ Phase 8I adds the participant-status boundary in 028. Three permanent statuses,
 scheduled-day reconciliation, typed historical cutoff, robbery cycle adjustment,
 admin JWT/CAS/receipts. [Contract](phase8i-participant-status.md) and
 [current delivery gates](phase8i-completion-report.md). 001-027 remain unchanged.
-8I and 8J gates are closed. Cup Hall integration and Juicios/sanctions APIs remain pending.
+8I and 8J gates are closed. Cup Hall integration remains pending; 8K.1 now implements Juicios/sanctions.
 
 Phase 8H implements approved D4=A/D5=A/D6=A in additive 027: open/results/cancel,
 atomic close/rewards/movement/next day and restricted revisioned correction.
@@ -341,18 +349,21 @@ Persistence:
 Next exact phase:
 
 ```text
-Resolve Phase 8K audit product decisions before Trials/Sanctions and Cup API implementation
+Complete Phase 8K.1 staging/delivery gates; then 8L Cup / Swiss / certification / Hall
 ```
 
 8G audit and 8G.1 local/staging implementation are complete. D1-D7 are approved; D8 deferred.
 8H competitive operations and 8I participant status are DONE local + staging,
 with gates tracked in their respective reports. 8J lifecycle/archive/League Hall
 is also DONE, including real staging. The [Phase 8K audit](phase8k-trials-cup-api-audit.md)
-is now DONE as documentation only: judicial authority/penalty effects and the full
-Cup operation/certification/Hall gaps are inventoried, with product decisions pending.
-Recommended implementation split: 8K.1 Trials/Sanctions, then 8L Cup/Hall; neither
-has started. Progress remains ~66%, baseline 431 tests, migrations 001-029 unchanged;
-no staging access or new migration in this audit. Do not begin Phase 9 automatically.
+is DONE as documentation only. Its proposed judicial T1–T5 decisions are superseded
+by the approved manual Discord-result contract in 8K.1. 8L remains unstarted and has
+the reduced scope recorded in that contract: practical Swiss/Top Cut, elimination,
+doubles, Bo3, byes, safe corrections/cancellation/disqualification, post-League play
+and separate certified champions/finalists/Hall for multiple Cups. Use focused
+tests and a small representative set of complete tournament simulations, not an
+exhaustive fuzz/property campaign. Visual polish is deferred to React. Do not begin
+8L or Phase 9 automatically.
 
 Fase 7.1, Fase 7.2, Fase 8A.1, Fase 8B and 8B-H are closed. Fases 8C, 8D.0,
 8D, 8E and 8F.0 are DONE local + staging. Phase 8F.1 resolves the catalog blocker

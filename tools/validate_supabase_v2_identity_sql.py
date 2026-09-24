@@ -39,7 +39,7 @@ class LocalClient:
             values = ','.join(identifier(key)+' => '+('NULL' if value is None else literal(json.dumps(value) if isinstance(value,(dict,list)) else value))
                               for key,value in args.items())
         call='public.'+identifier(name)+'('+values+')'
-        query=("select coalesce(jsonb_agg(to_jsonb(r)),'[]'::jsonb) from "+call+' r') if name=='api_upsert_team_lock' else 'select '+call
+        query=("select coalesce(jsonb_agg(to_jsonb(r)),'[]'::jsonb) from "+call+' r') if name=='api_upsert_team_lock' else 'select to_jsonb('+call+')'
         return SimpleNamespace(execute=lambda:self.execute(query))
 
     def execute(self, sql):

@@ -8,7 +8,7 @@ begin;
 -- Local validation only: remove the additive administration helpers and state.
 do $$ declare f regprocedure; begin
   for f in select p.oid::regprocedure from pg_proc p join pg_namespace n on n.oid=p.pronamespace
-    where n.nspname='public' and (p.proname like 'admin_setup_%' or p.proname like 'api_admin_%' or p.proname like 'matchday_%' or p.proname like 'participant_%' or p.proname like 'lifecycle_%') loop
+    where n.nspname='public' and (p.proname like 'admin_setup_%' or p.proname like 'api_admin_%' or p.proname like 'matchday_%' or p.proname like 'participant_%' or p.proname like 'lifecycle_%' or p.proname like 'trials_%' or p.proname like 'api_trial%') loop
     execute format('drop function if exists %s cascade',f);
   end loop;
 end $$;
@@ -28,6 +28,8 @@ drop table if exists public.pokemon_entities cascade;
 drop function if exists public.check_pokemon_entity_flag();
 
 drop table if exists public.penalties cascade;
+drop table if exists public.trial_case_revisions cascade;
+drop table if exists public.trial_case_counters cascade;
 drop table if exists public.trial_votes cascade;
 drop table if exists public.trial_cases cascade;
 drop table if exists public.cup_standings cascade;
