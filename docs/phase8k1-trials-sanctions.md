@@ -125,7 +125,8 @@ nominal history actors, receipts and audit event payloads are private. Creator,
 accused and admin can read appropriate detail. Private cases and their sanctions
 do not enter public projections. Old vote access is not broadened.
 
-Migration 030 revokes browser table and column DML on cases, votes and penalties.
+Migration 030 revokes browser table and column DML on cases, votes and penalties,
+including inherited TRUNCATE, which is not protected by RLS.
 All new business/helpers are service-role-only with fixed search paths. New history
 tables use RLS. Existing 018 definer views are retained with safe added columns;
 the new accumulated-points view is an invoker over existing safe projections.
