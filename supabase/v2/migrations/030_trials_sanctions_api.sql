@@ -75,7 +75,9 @@ grant select on public.trial_case_revisions to authenticated;
 create policy trial_history_parties_read on public.trial_case_revisions for select using (
   public.is_current_user_admin() or exists(select 1 from public.trial_cases c where c.id=case_id and
     (c.created_by_trainer_id=public.current_trainer_id() or c.accused_trainer_id=public.current_trainer_id())));
-revoke insert,update,delete on public.trial_cases,public.trial_votes,public.penalties from public,anon,authenticated;
+-- Supabase may retain TRUNCATE from pre-existing default ACLs; RLS does not
+-- protect TRUNCATE. Preserve SELECT while closing every row-mutation grant.
+revoke insert,update,delete,truncate on public.trial_cases,public.trial_votes,public.penalties from public,anon,authenticated;
 do $$ declare t text; cols text; begin
   foreach t in array array['trial_cases','trial_votes','penalties','trial_case_counters','trial_case_revisions','coin_transactions'] loop
     select string_agg(quote_ident(attname),',') into cols from pg_attribute

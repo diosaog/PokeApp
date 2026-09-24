@@ -25,6 +25,16 @@ def validate_trials(args, sql):
     ids={role:str(uuid4()) for role in ('admin','other','owner')}
     readers={r:LocalClient(args,'authenticated',u) for r,u in ids.items()}; readers['anon']=LocalClient(args,'anon')
     client=LocalClient(args); f=TrialsFixtures(client,readers,ids)
+    # Reproduce the managed project's inherited ACL (absent in fresh local roles).
+    # No TRUNCATE is executed; the exact committed 030 revoke must remove it.
+    from pathlib import Path
+    source=(Path(__file__).resolve().parents[1]/'supabase/v2/migrations/030_trials_sanctions_api.sql').read_text(encoding='utf-8')
+    revoke=next(line for line in source.splitlines() if line.startswith('revoke insert,update,delete,truncate on public.trial_cases'))
+    sql(args,"begin; grant truncate on public.trial_cases,public.trial_votes,public.penalties to authenticated; "+revoke+"""
+do $$ begin if exists(select 1 from (values('trial_cases'),('trial_votes'),('penalties')) t(name)
+  where has_table_privilege('authenticated','public.'||name,'TRUNCATE')) then raise exception 'Inherited TRUNCATE survived 030'; end if; end $$;
+rollback;
+""")
     require(client.execute(SECURITY_AUDIT_SQL).data==dict(unsafe_functions=0,browser_write_grants=0,rls_tables=2),'030 grant/RLS catalog audit')
     try: f.run()
     finally: f.cleanup()

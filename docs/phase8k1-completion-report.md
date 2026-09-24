@@ -79,6 +79,13 @@ search path and authenticated execution of `current_trainer_id`,
 outside scope; see [Advisor reference](https://supabase.com/docs/guides/database/database-linter).
 Object/finding/severity evidence: [Advisor inventory](phase8k1-security-advisor.json).
 
+Managed-environment ACL finding during staging: `authenticated` inherited TRUNCATE
+on `trial_cases`, `trial_votes`, `penalties`, unlike fresh local roles. 030 now
+explicitly revokes it as well as INSERT/UPDATE/DELETE. A local regression simulates
+the inherited grant and proves the exact migration revoke removes it. The committed
+ACL statement is applied as a narrow 030 completion, without replaying the schema
+migration or touching historical migrations/data. No TRUNCATE operation is executed.
+
 ## Scope and next step
 
 Protected `docs/pokeapp-guia-completa-pestanas-y-producto.md` has not been read,
