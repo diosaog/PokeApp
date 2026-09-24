@@ -341,15 +341,18 @@ Persistence:
 Next exact phase:
 
 ```text
-Scoped contract audit: remaining Juicios/sanctions and Cup-finalization APIs before Phase 9
+Resolve Phase 8K audit product decisions before Trials/Sanctions and Cup API implementation
 ```
 
 8G audit and 8G.1 local/staging implementation are complete. D1-D7 are approved; D8 deferred.
 8H competitive operations and 8I participant status are DONE local + staging,
 with gates tracked in their respective reports. 8J lifecycle/archive/League Hall
-is also DONE, including real staging. Remaining critical API gaps need their own
-contract audit: Juicios verdict/penalty/economy effects and certified Cup winners/
-Hall synchronization. Do not begin Phase 9 automatically.
+is also DONE, including real staging. The [Phase 8K audit](phase8k-trials-cup-api-audit.md)
+is now DONE as documentation only: judicial authority/penalty effects and the full
+Cup operation/certification/Hall gaps are inventoried, with product decisions pending.
+Recommended implementation split: 8K.1 Trials/Sanctions, then 8L Cup/Hall; neither
+has started. Progress remains ~66%, baseline 431 tests, migrations 001-029 unchanged;
+no staging access or new migration in this audit. Do not begin Phase 9 automatically.
 
 Fase 7.1, Fase 7.2, Fase 8A.1, Fase 8B and 8B-H are closed. Fases 8C, 8D.0,
 8D, 8E and 8F.0 are DONE local + staging. Phase 8F.1 resolves the catalog blocker
