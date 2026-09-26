@@ -1,5 +1,12 @@
 # Phase 8L — Cup engine and certification
 
+Approved behavior contract; not a deployment or completion claim. Read the
+[MultiIA continuity protocol](AI/PokeApp_Multi_AI_Continuity_Protocol.md).
+The [live handoff](work-in-progress/phase8l-live-handoff.md) maintains current
+operational state; the [delivery report](phase8l-completion-report.md) retains
+dated implementation and validation evidence. The rules below are unchanged by
+the 2026-09-26 documentation reconciliation.
+
 The supported contract is a small deterministic Cup backend: Swiss + Top 4,
 single elimination, and doubles round robin + Top 2 + final. It improves the
 legacy flows without claiming official competitive Pokemon tournament rules.

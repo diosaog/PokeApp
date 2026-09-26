@@ -1,6 +1,34 @@
 # PokeApp 2.0 Project Checkpoint
 
-Checkpoint date: 2026-09-24 (8K.1 DONE local + real V2 staging).
+Checkpoint reconciled: 2026-09-26. This file is the project index and historical
+milestone record; it does not maintain a second live phase-status ledger.
+
+## Current project position
+
+- Active phase: **8L — Cup engine / certification / Hall**. Implementation is
+  published and local validation evidence exists; delivery is **IN PROGRESS**.
+- Single operational record: [Phase 8L live handoff](work-in-progress/phase8l-live-handoff.md).
+  Consult it for Git, local changes, remote uncertainty and the next exact action.
+- Approved behavior: [Cup contract](phase8l-cup-engine.md). Dated technical evidence:
+  [8L delivery report](phase8l-completion-report.md), still open until delivery closes.
+- Last closed phase: 8K.1, local + real V2 staging, as recorded below.
+- Weighted complete-project estimate: **~68%**. No extra progress is credited for
+  this documentation reconciliation or for an unclosed 8L delivery.
+- Runtime remains Streamlit/V1; V2 has not replaced it. Phase 9 is not started.
+
+Read the canonical [MultiIA continuity protocol](AI/PokeApp_Multi_AI_Continuity_Protocol.md)
+and [master protocol](PokeApp_2.0_Protocolo_Maestro_MultiIA.md) before resuming.
+On 2026-09-26 the user authorized documentation reconciliation, then a
+documentation-only commit/push to `main`. No code, migration or staging operation
+is part of these tasks; publishing the memory does not close Phase 8L.
+
+## Historical delivery milestones — not current execution state
+
+The following counts, PASS results, next-step notes and remote versions belong to
+their named milestones. They are retained as evidence, not fresh verification of
+the current repository or remote database. Current 8L work is tracked above.
+
+### 2026-09-24 — 8K.1 DONE local + real V2 staging
 
 Phase 8K.1 implements the approved manual Discord-result contract in additive 030.
 Any eligible enabled participant records/corrects; PokeApp has no voting engine or
@@ -14,7 +42,8 @@ Advisor: 24 ERROR / 4 WARN / 5 INFO; no new ERROR/WARN, one expected counter INF
 Implementation `9e9ea65` and ACL follow-up `20f0362` pushed before their deployments.
 Staging 030 schema=`20260924102756`; narrow 030 ACL completion=`20260924103256`.
 Final source 030 contains both. Do not replay 029 or either 030 deployment, or run
-reset/bootstrap on staging. Overall progress ~66% → ~68%; no Cup implementation.
+reset/bootstrap on staging. Overall progress at that milestone ~66% → ~68%;
+Cup implementation had not started at that milestone.
 
 Phase 8J adds explicit finish/archive/logical discard in 029. No V1/runtime change,
 automatic 12-coin bonus, Cup winner inference or Phase 9. [Contract](phase8j-season-finalization.md)
@@ -28,7 +57,8 @@ Phase 8I adds the participant-status boundary in 028. Three permanent statuses,
 scheduled-day reconciliation, typed historical cutoff, robbery cycle adjustment,
 admin JWT/CAS/receipts. [Contract](phase8i-participant-status.md) and
 [current delivery gates](phase8i-completion-report.md). 001-027 remain unchanged.
-8I and 8J gates are closed. Cup Hall integration remains pending; 8K.1 now implements Juicios/sanctions.
+8I and 8J gates are closed. Cup Hall delivery belongs to the active 8L handoff;
+8K.1 implements Juicios/sanctions.
 
 Phase 8H implements approved D4=A/D5=A/D6=A in additive 027: open/results/cancel,
 atomic close/rewards/movement/next day and restricted revisioned correction.
@@ -42,7 +72,7 @@ Base HEAD before original checkpoint documentation:
 The original commit containing this file was the functional freeze checkpoint.
 Later architecture checkpoints are tracked below.
 
-Latest architecture state:
+Architecture milestones retained from earlier checkpoints:
 
 - Fase 3 closed: dependency-free domain contracts in `app/domain/`.
 - Fase 4 closed: pure domain services in `app/domain/services/`.
@@ -75,8 +105,8 @@ Latest architecture state:
 - Phase 8E DONE local + staging: 022 atomic promotional purchase, wallet-before-stock
   locking, unique trainer claim and historical idempotent receipt. 27 real checks,
   29 8D regression checks and cleanup PASS. [Report](phase8e-completion-report.md).
-  [Contract and validation](phase8e-promotional-purchases.md). Next:
-  8F redemption/effect boundary, not implemented.
+  [Contract and validation](phase8e-promotional-purchases.md). The next step at that
+  milestone was 8F redemption/effects, subsequently delivered below.
 - Historical Phase 8F audit BLOCKED: all four implemented redemption effects require Pokemon
   identity; existing fingerprints collide for distinct individuals and normalized
   DTO IDs can be empty. No safe legacy target-free use flow found. No 023/API or
@@ -96,7 +126,7 @@ Latest architecture state:
   Implementation `9aef9ac` remains unchanged; local tests/bridge were not repeated.
   Existing Advisor findings are documented, not falsely reported as cleared.
 
-## Current State
+## Historical validation ledger — 8I and earlier
 
 8I DONE: 403 unit tests, compileall/diff-check, migrations/bootstrap,
 8,268-line schema parity, 24 shared groups + eight exact rollback injections,
@@ -158,7 +188,7 @@ no claim that prior intermittency is fixed. [Delivery](phase8f-completion-report
 
 PokeApp 2.0 has reached functional freeze.
 
-Closed phases:
+Closed phases recorded at the earlier 8E milestone (not an exhaustive current list):
 
 - Fase 0: base green, initial docs and module inventory.
 - Fase 1: visual Streamlit reference mostly closed.
@@ -207,7 +237,7 @@ Remote 8C: migration 019 applied incrementally to `uwleqeuzsveqlugugzba`
 replacement and dedupe passed. All temporary DB/Auth fixtures were removed.
 Forced post-write rollback remains locally validated, not injected into staging.
 
-## What Works
+## What Works in the Legacy Runtime
 
 - Trainers log in with a PIN and see their own private data.
 - Saves can be uploaded, selected and parsed through the current bridge.
@@ -245,13 +275,14 @@ Important layers:
 - `app/domain/*`: dependency-free contracts.
 - `app/domain/services/*`: pure business decisions.
 - `app/auth/*`: PIN UX to Supabase Auth identity bridge and provisioning core.
-- `app/api/*`: isolated FastAPI transport skeleton for Phase 8.
+- `app/api/*`: isolated V2 FastAPI transport and Phase 8 routes; not a runtime cutover.
 - `app/repositories/*`: protocols, mappers, legacy repositories and in-memory
   fakes.
 - `app/application/*`: first small use cases coordinating repositories and
   domain services.
 - `supabase/v2/migrations/*`: greenfield SQL-first Supabase V2 schema.
-- `supabase/v2/reset_dev.sql`: destructive development/staging reset for V2 only.
+- `supabase/v2/reset_dev.sql`: destructive V2 development reset; never run on the
+  pinned staging project during an incremental phase delivery.
 - `storage.py`: Supabase/SQLite/settings facade.
 - `utils.py`: roster/session/save helpers and static user registry.
 - `app/liga/*`: ranking, state, snapshots, rewards, divisions and UI.
@@ -288,7 +319,8 @@ Fase 6 adds a future persistence target but does not connect runtime:
 - `settings` blobs are not carried forward as source of truth.
 - Core competitive data is season-scoped.
 - `coin_transactions` is the future money source.
-- API/React/Cloudflare remain future phases.
+- The isolated V2 API has progressed through Phase 8; React/Cloudflare deployment
+  and runtime cutover remain future work.
 
 Fase 6.1 validates that target for real:
 
@@ -340,11 +372,14 @@ Persistence:
 - Many official entities still live in generic `settings` JSON.
 - Streamlit UI and business rules are still coupled in several modules.
 - Runtime Streamlit still uses legacy/V1 persistence; V2 is not connected yet.
-- Team Lock, normal and promotional purchase are isolated V2 mutations, validated
-  locally and in staging. Migrations 019-022 are applied; other critical APIs remain.
+- V2 mutation deliveries through 030 are recorded in the historical phase reports.
+  Cup delivery in 031 remains governed by the active 8L handoff; do not infer its
+  remote state from the earlier applied migrations.
 - Legacy ActivityEvents remain in settings; new V2 lock/purchase transactions
   writes V2 tables only, without dual-write or Discord delivery.
-- Copa and Juicios are functional legacy islands and need contracts later.
+- Legacy Copa and Juicios remain in the runtime. Their V2 contracts now exist:
+  [Trials/sanctions](phase8k1-trials-sanctions.md) and [Cup engine](phase8l-cup-engine.md).
+  The latter's delivery is still open; neither implies a frontend cutover.
 - Parser bridge is treated as a black box but not fully isolated.
 - Some legacy helper names remain, especially around wipe/revive wording.
 - Visual CSS layers are acceptable for the reference app but should not be the
@@ -352,7 +387,7 @@ Persistence:
 
 ## Next Step
 
-Next exact phase:
+Continue the current phase according to its single operational record:
 
 ```text
 Phase 8L Cup / Swiss / certification / Hall — reduced approved scope
@@ -364,13 +399,12 @@ with gates tracked in their respective reports. 8J lifecycle/archive/League Hall
 is also DONE, including real staging. The [Phase 8K audit](phase8k-trials-cup-api-audit.md)
 is DONE as documentation only. Its proposed judicial T1–T5 decisions are superseded
 by the approved manual Discord-result contract in 8K.1, now DONE local + staging.
-8L remains unstarted and has
-the reduced scope recorded in that contract: practical Swiss/Top Cut, elimination,
-doubles, Bo3, byes, safe corrections/cancellation/disqualification, post-League play
-and separate certified champions/finalists/Hall for multiple Cups. Use focused
-tests and a small representative set of complete tournament simulations, not an
-exhaustive fuzz/property campaign. Visual polish is deferred to React. Do not begin
-8L or Phase 9 automatically.
+8L is implemented and its delivery is still open. Follow the
+[live handoff](work-in-progress/phase8l-live-handoff.md#next-exact-step) before any
+resumption. Its [contract](phase8l-cup-engine.md) retains the approved reduced
+scope and focused tests; visual polish remains deferred to React. Reconcile
+evidence and verify remote state before deciding whether 031 needs applying.
+Do not start Phase 9 automatically.
 
 Fase 7.1, Fase 7.2, Fase 8A.1, Fase 8B and 8B-H are closed. Fases 8C, 8D.0,
 8D, 8E and 8F.0 are DONE local + staging. Phase 8F.1 resolves the catalog blocker
@@ -411,7 +445,10 @@ to identity, not redemption. See the 8F.0 report for current validation counts.
 - Fase 8F: all four effects DONE local + staging; physical save execution remains future Companion work.
 - Fase 8G: season/league administration contract audit DONE, documentation only.
 - Fase 8G.1: core setup/admin DONE local + staging; 026 applied, cleanup PASS.
-- Fase 8 remaining: league/season/admin/trials/Hall operations.
+- Fases 8H, 8I, 8J and 8K.1: matchdays, participant status, lifecycle/League Hall
+  and trials/sanctions DONE local + staging; evidence is in their phase reports.
+- Fase 8L: Cup implementation published; finish the delivery documented in its
+  live handoff. Do not treat the whole Phase 8 API or product as deployed.
 - Fase 9: parser boundary.
 - Fase 10: React / Cloudflare frontend.
 - Fase 11: data migration.

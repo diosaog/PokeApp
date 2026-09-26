@@ -1,13 +1,26 @@
-# Phase 8L completion report — Cup engine / certification
+# Phase 8L delivery report — Cup engine / certification (open)
 
-Date: 2026-09-24. Starting HEAD `87a98f5`, branch `main`, origin 0/0.
+Started: 2026-09-24. Evidence reconciled: 2026-09-26.
+Starting HEAD `87a98f5`, branch `main`, origin 0/0 at phase start.
 Baseline: 466 unit tests, migrations 001–030, complete-project estimate ~68%.
 030 already deployed as `20260924102756` and `20260924103256`; never replayed.
 
+This existing file is the technical implementation/evidence report, retained at
+its original path for continuity. Its filename is not a DONE claim. The
+[live handoff](work-in-progress/phase8l-live-handoff.md) alone maintains current
+operational state, Git changes and the next action. Follow the canonical
+[MultiIA protocol](AI/PokeApp_Multi_AI_Continuity_Protocol.md).
+
 ## Delivery status
 
-Implementation complete; final local regression gate running. **Staging has not
-been modified. This is not yet a DONE delivery claim.**
+At the 2026-09-26 reconciliation, implementation was published in `d38b871` and
+unchanged by subsequent commits through `bc419ba`. Local passing evidence is
+recorded below. **Delivery remains IN PROGRESS, not DONE.**
+
+Earlier reports say 031 was not applied to staging. No independent remote query
+was performed during the context audit or this documentation reconciliation, so
+that assertion remains historical/reported, not a fresh verification of absence.
+No code, migration or staging change is part of this documentation task.
 
 Authoritative contract: [Cup engine](phase8l-cup-engine.md). The reduced scope is
 Swiss + Top 4, elimination and doubles RR + Top 2/Bo3 final, with focused tests.
@@ -35,14 +48,32 @@ Browser table/column DML and inherited TRUNCATE are revoked, including view path
 
 ## Validation ledger
 
-- Focused pure-engine/API tests and full baseline suite: final count pending.
-- Compileall: PASS; final diff check pending documentation closure.
-- Migrations 001–031 and bootstrap rebuilt twice: PASS.
-- Exact schema/grants/ownership parity: **10,515 identical normalized dump lines**.
-- Simulated inherited browser grants before 031: revoked successfully.
-- Final relevant 026–030 regression and Cup SQL run: running.
-- Nine Cup rollback boundaries: development pass; final release repeat running.
-- Real staging JWT/API/PostgREST: pending; no API deployment claimed.
+These are dated local observations, not new executions during the documentation
+task and not a current staging certification.
+
+| Check | Evidence inspected on 2026-09-26 | Result / limit |
+|---|---|---|
+| Unit suite, baseline plus focused engine/API coverage | `%TEMP%/pokeapp-general-review-unit.log`, 2026-09-26; `tools/run_unit_tests.py` | **501 tests, OK**, exit 0 recorded in preceding context review; no skipped tests reported |
+| Compile | Preceding context review: `py -m compileall -q app tests tools` | PASS; not rerun for these document edits |
+| Local PostgreSQL release | `%TEMP%/phase8l-release.log`, 2026-09-24 | Ends `Cup release RESULT ok; final local gate complete`; historical evidence, not a newly executed gate |
+| Migrations 001–031 / bootstrap | Release log and preserved schema dumps | Rebuild and **10,515 normalized lines** of schema/grants/ownership parity recorded; current copies of both dump files have identical SHA256 |
+| Inherited browser grants | Release log | Revocation checks PASS locally |
+| 026–030 regressions | Release log | Setup 17, matchdays 20, participant status 24, lifecycle 19, trials 8 groups PASS |
+| Cup flows and concurrency | Release log | L01–L06 and ten race families PASS in that run |
+| Cup rollback | Release log | Nine all-public-state rollback boundaries and fixture cleanup PASS in that run |
+| Real staging JWT/API/PostgREST, cleanup and Advisor delta | No 8L completion evidence available | Pending verification/delivery; no deployed public API claim |
+
+Source provenance: implementation commit `d38b871`; inspected repository HEAD
+`bc419ba`. Cup implementation/test/validator/migration paths have no intervening
+diff between these commits. However, the SQL release log predates that commit and
+does not record its source commit or complete working-tree fingerprint. Preserve
+its PASS evidence without claiming a freshly reproduced gate against current HEAD.
+The next executor must reconcile any relevant source/harness changes before
+reusing a result; rerun only checks justified by an evidence gap or change.
+
+The context audit found trailing whitespace in the handoff, so its earlier
+`git diff --check` PASS was stale. The document-only reconciliation removes that
+defect; its final document checks belong in the live handoff, not in the SQL ledger.
 
 Ten race families: starts; results/results; results/close; closes; correction/close;
 correction/finalize; DQ/results; discard/finalize; finalizes; Cup finalize/League
@@ -54,11 +85,26 @@ full ordered rows. No failure DDL is sent to staging.
 
 ## Staging and independent cleanup
 
-Pending final local gate and pushed implementation. Apply only committed 031 to
-the pinned V2 project, with fresh public/Auth/Storage baseline and Advisor inventory.
+Implementation and 031 are already published; the previous instruction to wait
+for their push is obsolete. Use the live handoff's next action, not an unconditional
+instruction to apply 031. Before any authorized write, independently confirm the
+pinned project and migration history, reconcile the committed source and validation
+evidence, and obtain a fresh public/Auth/Storage baseline and Advisor inventory.
+
+If 031 is absent, apply only its committed SQL through an available supported
+migration mechanism. If already present, verify the recorded migration/schema and
+continue validation without replaying it. Record remote version and validation
+status immediately after application, then real API/JWT/PostgREST results,
+independent cleanup and Advisor differences. Historical 8K.1 Advisor totals are
+24 ERROR / 4 WARN / 5 INFO; they are not a fresh 8L preflight inventory.
+
 No reset/bootstrap, historical migration replay, V1, runtime change or cutover.
 
 ## Reproducible checks
+
+Reference commands for a later authorized validation task; this section does not
+instruct a documentation-only task to run them. The release reset is local only.
+The staging command is allowed only after the staging preflight described above.
 
 ```powershell
 .venv-api\Scripts\python.exe tools/run_unit_tests.py
@@ -69,9 +115,12 @@ py -m compileall -q .
 git diff --check
 ```
 
-Local evidence is under `%TEMP%/phase8l-{release,cups-dev,unit-final}.log` and
-`%TEMP%/phase8l-{migrations,bootstrap}-schema.sql`. Only random pg_dump restrict keys
-are removed when comparing dumps; ownership and grants remain included.
+Local evidence is under `%TEMP%/phase8l-{release,cups-dev,unit-final}.log`, the recent
+unit log named above, and `%TEMP%/phase8l-{migrations,bootstrap}-schema.sql`.
+Only random pg_dump restrict keys are removed when comparing dumps; ownership
+and grants remain included. These raw files are machine-local and may be absent
+in another checkout. The ledger above preserves their inspected result summary;
+it does not manufacture missing commit/run provenance.
 
 ## Small Phase 8 closure inventory
 
@@ -91,7 +140,9 @@ scope. This is a small closure inventory, not a new broad audit or a claim that 
 whole product is deployed. React consumption/polish, deployment/cutover, Companion,
 save writes and deferred D8 remain outside this phase. Phase 9 is not started.
 
-Protected `docs/pokeapp-guia-completa-pestanas-y-producto.md` has not been read,
-modified, staged, renamed or deleted. It remains untracked. Migrations 001–030 and
-Streamlit/V1 are unchanged. Weighted project progress remains ~68% until delivery;
-the expected increment for fully validated 8L is about two percentage points.
+The 2026-09-26 context/documentation work did not read, modify, stage, rename or
+delete the protected `docs/pokeapp-guia-completa-pestanas-y-producto.md`. Its local
+untracked state is recorded in the handoff. Migrations 001–030 and Streamlit/V1
+were unchanged by 8L implementation. Global progress is maintained in the
+[project checkpoint](project-checkpoint.md), with no increment credited by this
+documentation task. Any increment after 8L closes requires actual delivery evidence.

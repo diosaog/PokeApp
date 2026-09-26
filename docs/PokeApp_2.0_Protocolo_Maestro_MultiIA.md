@@ -14,7 +14,7 @@ Este documento existe para que el proyecto no dependa de la memoria de un chat c
 
 Antes de empezar cualquier trabajo, el agente activo debe:
 
-1. Leer este protocolo.
+1. Leer el [protocolo de continuidad MultiIA](AI/PokeApp_Multi_AI_Continuity_Protocol.md) y este protocolo maestro.
 2. Comprobar el estado real de Git.
 3. Leer `docs/project-checkpoint.md`.
 4. Leer el contrato de la fase actual.
@@ -24,6 +24,10 @@ Antes de empezar cualquier trabajo, el agente activo debe:
 8. Solo entonces continuar desde el siguiente paso exacto.
 
 **Si existe contradicción, manda la evidencia verificable del repositorio.** Git, migraciones realmente aplicadas, SQL, tests y datos remotos tienen prioridad sobre una explicación antigua de chat.
+
+La [memoria compartida](AI/PokeApp_Multi_AI_Continuity_Protocol.md#shared-memory-map) define qué documento mantiene cada información. El maestro conserva reglas y roadmap; el [checkpoint](project-checkpoint.md) identifica la fase activa; su live handoff mantiene el estado operativo único. Los informes conservan evidencias fechadas, no copias del estado vivo.
+
+El alcance de la instrucción actual del usuario prevalece: una revisión de contexto o una tarea exclusivamente documental no inicia desarrollo ni staging.
 
 No volver a leer meses de historial por defecto. El objetivo de este manual es precisamente evitarlo.
 
@@ -64,7 +68,7 @@ Flujo habitual:
 
 ## 1.3 Codex y Gemini
 
-Codex y Gemini son **agentes ejecutores equivalentes a efectos de continuidad**.
+Codex, Gemini, Antigravity y cualquier IA que retome la ejecución son **instancias sucesivas del mismo desarrollador a efectos de continuidad**. Cada una conserva la responsabilidad completa y audita el trabajo previo; no se reparten tareas pendientes por nombre de modelo. Las capacidades se comprueban en cada sesión.
 
 No existe "código de Codex" y "código de Gemini". Existe un solo proyecto, una sola historia Git y un solo conjunto de contratos.
 
@@ -77,7 +81,7 @@ El agente activo puede tomar decisiones técnicas internas siempre que:
 
 ## 1.4 Regla fundamental de alternancia
 
-**Codex y Gemini nunca trabajan simultáneamente sobre la misma fase/repositorio.**
+**Las IAs ejecutoras nunca trabajan simultáneamente sobre la misma fase/repositorio.**
 
 El modelo de trabajo es secuencial:
 
@@ -200,26 +204,24 @@ Este principio tiene prioridad sobre la comodidad de implementación.
 
 # 6. Estado y roadmap global
 
-## 6.1 Snapshot conocido de referencia
+## 6.1 Dónde consultar el estado vigente
 
-Último checkpoint plenamente cerrado antes de Phase 8L:
+El [checkpoint](project-checkpoint.md) identifica la fase activa y el progreso global.
+Para Phase 8L, consultar el [live handoff](work-in-progress/phase8l-live-handoff.md)
+para Git, estado local/remoto y siguiente acción, y el
+[informe de entrega](phase8l-completion-report.md) para evidencia técnica fechada.
+Este protocolo no mantiene otra copia de esas observaciones.
 
-- `main` HEAD: `87a98f5`.
-- `origin/main`: 0/0.
-- 466 tests PASS.
-- Migraciones 001-030.
-- Phase 8K.1 DONE.
-- Progreso global estimado: ~68%.
-- Phase 9 aún no iniciada.
-
-030 se desplegó en V2 mediante dos registros remotos ya aplicados:
+Antecedente histórico de seguridad: 030 se desplegó en V2 mediante dos registros:
 
 - `20260924102756` - `030_trials_sanctions_api`
 - `20260924103256` - `030_trials_sanctions_acl_completion`
 
 **No reaplicar ninguno.**
 
-Este snapshot puede quedar obsoleto. Si `docs/project-checkpoint.md`, Git o el live handoff muestran un estado posterior, ese estado posterior manda.
+Ningún documento demuestra por sí mismo el estado remoto actual. Verificar el
+proyecto y su historial antes de una operación remota; aplicar el criterio de
+evidencia de la sección 25.3.
 
 ## 6.2 Roadmap macro
 
@@ -1189,6 +1191,9 @@ IN PROGRESS / BLOCKED / READY FOR STAGING / DONE
 LAST UPDATED
 <timestamp local>
 
+MEMORY REFERENCES
+<protocolo canónico / checkpoint / contrato / informe de evidencia>
+
 CURRENT GIT
 branch:
 HEAD:
@@ -1203,7 +1208,8 @@ COMPLETED
 - ...
 
 VALIDATED
-- test/comando: resultado
+- fecha / commit / diff relevante / entorno / comando / resultado y exit code / evidencia
+- distinguir VERIFIED, HISTORICAL/REPORTED y UNKNOWN
 - ...
 
 NOT YET VALIDATED
@@ -1215,15 +1221,19 @@ MIGRATIONS
 - committed: YES/NO
 - pushed: YES/NO
 - applied local: YES/NO
-- applied staging: YES/NO
+- applied staging: YES/NO/UNKNOWN, con fecha y evidencia
 - exact remote version(s), if any:
 - DO NOT REAPPLY:
 
 STAGING STATE
-- untouched / preflight done / migration applied / validation pending / validated
+- STAGING_UNVERIFIED hasta confirmar un estado de la sección 27
 - exact project verified:
 - fixture prefix:
 - cleanup status:
+
+ACTIVE / INTERRUPTED OPERATIONS
+- proceso/PID o run ID, operación, fixture prefix, último resultado confirmado
+- NONE verificado / UNKNOWN si no se ha inspeccionado
 
 FILES / AREAS CHANGED
 - ...
@@ -1303,14 +1313,16 @@ No adivinar.
 
 Parar la implementación y reconciliar evidencia.
 
-Prioridad:
+Usar el [criterio único de evidencia](AI/PokeApp_Multi_AI_Continuity_Protocol.md#documentation-rules):
 
-1. Git real;
-2. migration history real;
-3. DB/staging real;
-4. tests reproducibles;
-5. docs;
-6. chat.
+- Contenido y publicación: archivos reales, diff, commits y referencias remotas.
+- Comportamiento implementado: código y tests reproducibles ligados a esa fuente y entorno.
+- Despliegue: proyecto identificado, historial remoto, schema, grants y validación real.
+- Comportamiento deseado y alcance: instrucción vigente del usuario y contrato aprobado.
+
+La evidencia directa y fechada prevalece sobre informes/chat antiguos para hechos
+observados. Un commit no prueba un despliegue, y un bug no modifica un contrato
+aprobado. Si no se puede comprobar un dato, registrar UNKNOWN; no inventar PASS.
 
 ---
 
@@ -1360,7 +1372,11 @@ Primero verificar si ya está aplicada.
 
 Staging es el punto más peligroso de un handoff.
 
-El live handoff debe distinguir exactamente uno de estos estados:
+Si el estado remoto no se ha verificado, registrar `STAGING_UNVERIFIED` y conservar
+por separado el último estado histórico reportado, con fecha y fuente. No equivale
+a `STAGING_UNTOUCHED` ni autoriza aplicar la migración.
+
+Cuando exista evidencia suficiente, el live handoff debe distinguir exactamente uno de estos estados:
 
 1. `STAGING_UNTOUCHED`
 2. `STAGING_PREFLIGHT_COMPLETE`
@@ -1787,4 +1803,3 @@ Ninguna IA debe necesitar "recordar" lo que hizo la anterior si el protocolo se 
 # 46. Regla final para todos los agentes
 
 > Construye solo lo que está autorizado, conserva lo que ya está demostrado, registra lo que haces mientras lo haces, y deja el proyecto en un estado que otro agente pueda continuar sin adivinar nada.
-
