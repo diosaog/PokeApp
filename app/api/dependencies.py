@@ -15,6 +15,7 @@ from app.repositories.supabase.matchdays import MatchdayRepository
 from app.repositories.supabase.participant_status import ParticipantStatusRepository
 from app.repositories.supabase.season_lifecycle import SeasonLifecycleRepository
 from app.repositories.supabase.trials import TrialRepository
+from app.repositories.supabase.cups import CupRepository
 
 
 @dataclass(frozen=True)
@@ -34,6 +35,7 @@ class ApiContainer:
     participant_status_repository: ParticipantStatusRepository | None = None
     season_lifecycle_repository: SeasonLifecycleRepository | None = None
     trial_repository: TrialRepository | None = None
+    cup_repository: CupRepository | None = None
 
 
 def get_api_container(request: Request) -> ApiContainer:
@@ -56,6 +58,7 @@ def create_default_container(config: APIConfig | None = None) -> ApiContainer:
     participant_status_repo = None
     season_lifecycle_repo = None
     trial_repo = None
+    cup_repo = None
 
     if config.supabase_url and config.supabase_anon_key:
         from app.auth.supabase_adapter import SupabaseAuthClient
@@ -98,6 +101,8 @@ def create_default_container(config: APIConfig | None = None) -> ApiContainer:
         season_lifecycle_repo = SupabaseSeasonLifecycleRepository.from_url_key(config.supabase_url, config.supabase_service_role_key)
         from app.repositories.supabase.trials import SupabaseTrialRepository
         trial_repo = SupabaseTrialRepository.from_url_key(config.supabase_url, config.supabase_service_role_key)
+        from app.repositories.supabase.cups import SupabaseCupRepository
+        cup_repo = SupabaseCupRepository.from_url_key(config.supabase_url, config.supabase_service_role_key)
 
     auth_bridge = None
     if auth_client is not None and trainer_repo is not None and config.auth_pin_pepper:
@@ -119,4 +124,5 @@ def create_default_container(config: APIConfig | None = None) -> ApiContainer:
         participant_status_repository=participant_status_repo,
         season_lifecycle_repository=season_lifecycle_repo,
         trial_repository=trial_repo,
+        cup_repository=cup_repo,
     )

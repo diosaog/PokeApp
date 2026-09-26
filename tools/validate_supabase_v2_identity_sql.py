@@ -33,7 +33,7 @@ class LocalClient:
 
     def table(self, table): return Query(self, table)
     def rpc(self, name, args):
-        if 'p_request' in args:
+        if 'p_request' in args and len(args)==1:
             values = literal(json.dumps(args['p_request']))+'::jsonb'
         else:
             values = ','.join(identifier(key)+' => '+('NULL' if value is None else literal(json.dumps(value) if isinstance(value,(dict,list)) else value))

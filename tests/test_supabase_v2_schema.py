@@ -93,6 +93,7 @@ class SupabaseV2SchemaTests(unittest.TestCase):
                 "028_participant_status_admin.sql",
                 "029_season_finalization_archive_hall.sql",
                 "030_trials_sanctions_api.sql",
+                "031_cup_engine_certification.sql",
             ],
         )
         for path in _migration_files():
@@ -301,7 +302,7 @@ class SupabaseV2SchemaTests(unittest.TestCase):
         self.assertTrue(bootstrap.startswith("-- ONLY FOR EMPTY POKEAPP V2 DATABASE."))
         self.assertEqual(bootstrap, render_bootstrap())
         self.assertIn(
-        "Source of truth: supabase/v2/migrations/001_core.sql through 030_trials_sanctions_api.sql",
+        "Source of truth: supabase/v2/migrations/001_core.sql through 031_cup_engine_certification.sql",
             bootstrap,
         )
         self.assertNotIn("drop table", lowered)
@@ -334,7 +335,7 @@ class SupabaseV2SchemaTests(unittest.TestCase):
             else:
                 self.assertIn(f"'{table}'", security_sql, table)
 
-        self.assertEqual(security_sql.count("enable row level security"), 8)
+        self.assertEqual(security_sql.count("enable row level security"), 12)
         self.assertIn("alter table public.%i enable row level security", security_sql)
 
 
