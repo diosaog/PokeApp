@@ -209,6 +209,7 @@ def validate(cup):
     working = deepcopy(cup)
     working['rounds'] = []
     eligible = {s['id'] for s in sides}
+    current_eligible = {s['id'] for s in active(cup)}
     for i, r in enumerate(cup['rounds'], 1):
         require(r['number'] == i and r['status'] == 'closed', 'COMPETITION_INCOMPLETE')
         next_eligible = set(r['eligible_side_ids'])
@@ -220,9 +221,17 @@ def validate(cup):
         require(expected is not None and expected['phase'] == r['phase'], 'INVALID_ADVANCEMENT')
         require([(m['a'], m['b'], m['position']) for m in expected['matches']] ==
                 [(m['a'], m['b'], m['position']) for m in r['matches']], 'INVALID_ADVANCEMENT')
-        for m in r['matches']:
+        # Close prepares the next draw atomically. A later DQ cannot justify an
+        # automatic result in a round whose successor still included that side.
+        # A correction may rebuild an unplayed successor after a DQ, so do not
+        # force historical results to equal the current automatic outcome.
+        after_round = set(cup['rounds'][i]['eligible_side_ids']) if i < len(cup['rounds']) else current_eligible
+        for m, drawn in zip(r['matches'], expected['matches']):
             require(m['status'] in ('completed', 'bye', 'forfeit', 'void'), 'COMPETITION_INCOMPLETE')
             if m['status'] == 'completed':
+                # Both entrants must have been eligible at this draw, even if
+                # either was disqualified after playing a valid match.
+                require(drawn['status'] == 'scheduled', 'INVALID_RESULTS')
                 test = dict(r, matches=[dict(m)])
                 result = dict(match_id=m['id'], winner_side_id=m['winner'] if r['phase']=='swiss' else None,
                               score_a=m['score_a'], score_b=m['score_b'])
@@ -230,13 +239,16 @@ def validate(cup):
                 require(test['matches'][0] == m, 'INVALID_RESULTS')
             else:
                 require(m['score_a'] is None and m['score_b'] is None, 'INVALID_RESULTS')
-                require(m['winner'] in (m['a'], m['b']) if m['status'] != 'void' else m['winner'] is None, 'INVALID_RESULTS')
-                require(m['status'] != 'bye' or ((m['a'] is None) != (m['b'] is None)), 'INVALID_RESULTS')
-                require(m['status'] != 'bye' or m['winner'] in next_eligible, 'INVALID_RESULTS')
-                require(m['status'] != 'forfeit' or (m['a'] and m['b'] and any(s['id'] in (m['a'],m['b']) and s['id']!=m['winner'] and s['status']=='disqualified' for s in sides)), 'INVALID_RESULTS')
-                require(m['status'] != 'void' or not any(s['id'] in (m['a'],m['b']) and s['status']=='active' for s in sides), 'INVALID_RESULTS')
+                entrants = {m['a'], m['b']} - {None}
+                if m['status'] == 'void':
+                    require(m['winner'] is None and not entrants & after_round, 'INVALID_RESULTS')
+                else:
+                    require(m['winner'] in entrants & next_eligible, 'INVALID_RESULTS')
+                    require(len(entrants) == (1 if m['status']=='bye' else 2), 'INVALID_RESULTS')
+                    require(not (entrants - {m['winner']}) & after_round, 'INVALID_RESULTS')
         working['rounds'].append(deepcopy(r))
     require(cup['rounds'] and cup['rounds'][-1]['phase'] == 'final', 'COMPETITION_INCOMPLETE')
+    require(current_eligible <= eligible, 'INVALID_ROSTER')
     final = cup['rounds'][-1]['matches']
     require(len(final) == 1 and final[0]['winner'] in {s['id'] for s in active(cup)}, 'INVALID_FINAL')
     m = final[0]

@@ -1,6 +1,7 @@
 # Phase 8L delivery report — Cup engine / certification (open)
 
 Started: 2026-09-24. Evidence reconciled: 2026-09-26.
+Technical audit and local finalization correction: 2026-09-28; remote delivery remains open.
 Starting HEAD `87a98f5`, branch `main`, origin 0/0 at phase start.
 Baseline: 466 unit tests, migrations 001–030, complete-project estimate ~68%.
 030 already deployed as `20260924102756` and `20260924103256`; never replayed.
@@ -13,14 +14,18 @@ operational state, Git changes and the next action. Follow the canonical
 
 ## Delivery status
 
-At the 2026-09-26 reconciliation, implementation was published in `d38b871` and
-unchanged by subsequent commits through `bc419ba`. Local passing evidence is
-recorded below. **Delivery remains IN PROGRESS, not DONE.**
+The 2026-09-28 finalization task corrects A8L-01 and related historical eligibility
+gaps. The focused 45-test suite, general 511-test suite and current local SQL
+validation pass. The fresh release rebuild and resumed regressions are complete,
+including final schema/security/cleanup checks. **Local gates are complete;
+delivery is READY FOR STAGING, not DONE.** Management access is the remaining
+blocker to remote preflight and validation. No historical migration is changed.
 
-Earlier reports say 031 was not applied to staging. No independent remote query
-was performed during the context audit or this documentation reconciliation, so
-that assertion remains historical/reported, not a fresh verification of absence.
-No code, migration or staging change is part of this documentation task.
+A fresh read-only request to the pinned V2 PostgREST endpoint returns HTTP 200,
+but its exposed schema contains neither the 031 tables nor its Cup RPCs. This is
+not migration-history, schema/grants or Advisor verification. Management access
+is unavailable; the Supabase integration has been suggested but is not confirmed
+connected. No remote writes, migrations or fixtures were started by this task.
 
 Authoritative contract: [Cup engine](phase8l-cup-engine.md). The reduced scope is
 Swiss + Top 4, elimination and doubles RR + Top 2/Bo3 final, with focused tests.
@@ -82,6 +87,202 @@ finish plus consistent certificate read. Separate DB sessions/HTTP clients.
 Local rollback after initial pairings, standings, successor round, DQ status,
 DQ advancement, certificate, Hall, event and receipt compares every public table's
 full ordered rows. No failure DDL is sent to staging.
+
+## Technical audit 2026-09-28
+
+Audited HEAD: `73f8453668a7eae6d4f7cfc400f80b15f8b147b2`, matching remote
+`main` when checked on 2026-09-28. Implementation, tests, tools and SQL are unchanged
+from `d38b871`. The audit began on 2026-09-26 and resumed on 2026-09-28 after an
+interruption. No implementation or migration source was changed; no staging
+operation was performed. **At audit completion one important integrity defect
+remained open; its subsequent correction is recorded in the finalization section.**
+
+### Audit evidence
+
+| Check | Result and scope |
+|---|---|
+| Focused unit/API suite, 2026-09-26 | `tools/run_unit_tests.py --pattern 'test*cup*.py'`: 35 PASS; `%TEMP%/phase8l-technical-audit-unit.log` |
+| Representative in-memory scenarios, 2026-09-26 | 15 completions PASS: Swiss 5/6, elimination 5, doubles 3/4, each with DQ before round 1, after round 1, and after round 1 plus correction |
+| Current SQL fixture suite, 2026-09-28 | `tools.validate_supabase_v2_cups_sql` against loopback-only `pokeapp_v2_validation_phase8l_audit_20260926`: L00–L06, ten race families and nine rollback boundaries PASS, exit 0; `%TEMP%/phase8l-technical-audit-sql.log` |
+| Additional Cup/sanction concurrency | Finalize versus coin reduction + Store Ban: both committed once; Cup standings unchanged, one certificate, exact -10 ledger and active ban; `%TEMP%/phase8l-audit-sanctions-race.json` |
+| Certification corruption probe | Confirmed defect A8L-01 through the production adapter and real local SQL; `%TEMP%/phase8l-audit-certification-repro.json` |
+| Local cleanup / schema | All 46 public tables have the same row counts and full-row content hashes as before audit fixtures. Normalized public schema/grants/ownership also match the preserved release dump; `%TEMP%/phase8l-audit-cleanup.json` |
+| Deployment probes | TestClient with an empty container: `/health` returns 200/OK; cross-origin OPTIONS returns 405 without an allow-origin header. These are deployment limitations, not evidence of a deployed API; `%TEMP%/phase8l-audit-deployment-probes.json` |
+
+The SQL database was cloned from the existing local validation database after
+checking its schema against the preserved release dump. This was a focused run
+against the current harness, not a fresh full migration/bootstrap rebuild or a
+real Supabase JWT/PostgREST run. The local PostgreSQL server was stopped afterward.
+No final 8L delivery or fresh full 501-test run is claimed.
+
+The additional combined sanction probe initially failed cleanup with FK error
+23503 because it used the Cup-only cleanup chain for judicial rows. The audit
+recovered using the existing judicial dependency order, scoped to that probe's
+exact season/trainer identities, then independently verified the full baseline.
+This was a probe-cleanup error, not a failed concurrent business operation; no
+fixture residue or product change remains. The SQL log is PowerShell UTF-16.
+
+### A8L-01 — important: certification accepts impossible eligibility
+
+Reproduction in the isolated local database:
+
+1. Create and play an ordinary four-player elimination Cup through its closed final.
+2. Before certification, inject inconsistent data locally by setting only the final
+   round's `eligible_side_ids` to `[]`. Keep the completed Bo3 and its two entrants.
+3. Call the normal `finalize` operation through `SupabaseCupRepository`.
+4. Observed: state becomes `finished`, a certificate and Hall entry are created,
+   and the certificate snapshot retains the empty final eligibility array.
+
+Expected: reject the inconsistent graph and create neither artifact.
+
+Cause: [engine validation](../app/domain/services/cup_engine.py) reconstructs
+pairings/positions but does not require the participants of a `completed` match
+to belong to that round's frozen eligible set. It can accept a completed match
+where reconstruction would produce an automatic result. The
+[031 finalize check](../supabase/v2/migrations/031_cup_engine_certification.sql)
+checks the closed final and winner/finalist relationship, without closing this gap.
+The existing corruption tests cover advancement and standings, not this invariant.
+
+Impact: a corrupt/imported/backend-written graph can acquire an official Cup
+certificate and Hall entry. The reproduction requires privileged/local data
+corruption; no path from ordinary allowed HTTP commands or browser grants was
+found. This is an integrity validation defect, not a demonstrated privilege bypass.
+
+Before final delivery, add the narrow eligibility validation and focused negative
+tests through the engine and SQL/adapter path. Preserve legitimate DQ after draw:
+an already played match must be checked against eligibility at that round's draw,
+not against the player's final/current status. Review the SQL final check for the
+same invariant. No fix was applied during this audit.
+
+### Integration and future boundaries
+
+- League/archive/Hall: the local flows preserve frozen League data after finish
+  and archive, retain the archive's pending-Cup marker, and create separate Hall
+  entries for multiple Cups and both doubles members. Rollback covers Hall and
+  certificate atomicity. A8L-01 is the remaining certification-integrity defect.
+- Participants/identity: same-Cup/season/player FKs and explicit entry/start checks
+  are present. The conservative 028 doubles dependency is deliberately retained;
+  it can block League withdrawal for players outside a live doubles Cup. That is
+  approved behavior, not newly classified as a Cup defect.
+- Sanctions: the additional concurrent coin/Store Ban test passes. Cup ranking
+  intentionally does not consume League point penalties or shop bans.
+- Team Lock/Pokemon identity: inspected boundaries do not invent Cup Pokemon
+  teams or perform save writes. Cup Hall team snapshots remain empty. No new
+  Cup-versus-Team-Lock/identity-worker race was executed in this audit.
+- Future React/Launcher consumers must use the 8L side/member identities. The
+  older `app/domain/cup.py` uses `single_elimination`, whereas the new API uses
+  `elimination`; the older Hall DTO requires a single trainer champion, whereas
+  doubles Hall uses a side and nullable `champion_trainer_id`. Do not reuse those
+  legacy DTOs without an explicit adapter. No current 8L route uses them.
+- Deployment: configure CORS if frontend/API use different origins, and verify
+  migration/backend readiness independently of the current liveness-only health
+  endpoint. API deployment and real staging verification remain pending.
+- Optional later optimization: the Cup list SQL builds full Cup documents before
+  stripping rounds/sides/standings. A lightweight summary query or pagination can
+  be added when actual usage warrants it; it is not a blocker for this small Cup.
+
+## Finalization correction and evidence — 2026-09-28
+
+Entry HEAD was `73f8453668a7eae6d4f7cfc400f80b15f8b147b2`, independently matching
+remote main. The audit edits to this report and the live handoff were preserved.
+The following results were executed against that source plus the correction in
+this delivery, on Windows with `.venv-api/Scripts/python.exe` and local PostgreSQL
+17.11 at `127.0.0.1:55439`. `%TEMP%/phase8l-finalization-source.json` records SHA256
+for the engine, tests, validators and unchanged 031 source. Commands below are
+repository-relative; all local databases use the `pokeapp_v2_validation` prefix.
+
+### Integrity correction
+
+- **A8L-01 fixed:** a completed match must reconstruct as `scheduled` at that
+  round's frozen draw. An automatic bye/forfeit/void cannot be certified as a
+  played match. Both finalists, and every earlier completed match, are checked.
+- Related automatic-result gaps fixed: a bye/forfeit winner must be eligible at
+  its draw; a forfeiting/void side cannot still be eligible at the next persisted
+  draw. A DQ several rounds later can no longer justify an earlier invented
+  automatic result. Current active sides must remain a subset of the final draw.
+- Completed matches use their historical draw eligibility, never current player
+  status. A later DQ preserves played results, including the final loser. Closed
+  automatic results are also preserved when their winner is disqualified later.
+- Corrections can recreate an unplayed successor after DQ. Its eligible set is a
+  bound on historical eligibility, not a command to recompute earlier results
+  using current status. Pairings, scores, advancement, identities, final and
+  standings continue to be reconstructed and checked under the existing rules.
+- API rejection is HTTP 409 `INVALID_RESULTS` (or the existing roster/graph
+  rejection for its respective invariant). The adapter does not call the commit
+  RPC after rejection. The supplied authoritative context is not mutated.
+
+No other delivery-blocking defect was found in the bounded review of finalize,
+Hall derivation, cancellation, corrections, multiple Cups, doubles and post-League
+operation. No new feature, DTO rule, endpoint or tournament format was introduced.
+
+### SQL / migration decision
+
+**031 and all historical migrations remain byte-for-byte unchanged; no new
+migration is needed for this correction.** The approved 027/031 boundary places
+full graph reconstruction in the trusted backend planner. HTTP bodies cannot
+supply plans; browser roles cannot call the context/commit helpers or write Cup
+sources. `api_admin_cup` calls `cup_begin`, takes the shared locks, rechecks the
+complete context fingerprint and revision, then checks final provenance and
+atomically writes certificate, Hall, history, event and receipt. A graph changed
+between validation and commit is rejected as stale; production does not retry.
+
+The old SQL final check alone is not a complete graph validator. It is sufficient
+in combination with the corrected mandatory application validator for the
+approved API. Arbitrary plans submitted directly with privileged service-role
+credentials are outside that boundary; service-role holders already have direct
+table write authority. This is not a claim that SQL independently reconstructs
+the whole competition. The real adapter/SQL rejection, browser ACL checks,
+concurrency and rollback checks exercise the actual combined boundary.
+
+### Current validation ledger
+
+All observations in this table are from **2026-09-28**. `psql` below means
+`%TEMP%/pokeapp_pg17_phase8c_20260922/portable/pgsql/bin/psql.exe`.
+
+| Command / check | Result | Evidence under `%TEMP%` |
+|---|---|---|
+| New focused regressions against the old engine, `tools/run_unit_tests.py --pattern 'test*cup*.py'` | Expected failure (exit 1); demonstrated missing eligibility and automatic-result checks before implementation | `phase8l-finalization-red.log` |
+| Isolated original-engine SQL reproduction through `SupabaseCupRepository` | A8L-01 accepted: FINISHED, one certificate, one Hall. Exact cleanup across all 46 public tables PASS, exit 0 | `phase8l-finalization-sql-red.json` |
+| `tools/run_unit_tests.py --pattern 'test*cup*.py'` after correction | **45 tests PASS**, exit 0 | `phase8l-finalization-unit.log` |
+| `tools/run_unit_tests.py` | **511 tests PASS**, no skipped tests, exit 0 | `phase8l-finalization-full-unit.log` |
+| `-m compileall -q app tests tools` | PASS, exit 0, repeated before publication | `phase8l-finalization-static-checks.json` |
+| `-m tools.validate_supabase_v2_cups_sql --psql <psql> --database pokeapp_v2_validation_phase8l_finalization_probe` | **L00–L08, ten race families, nine exact rollback boundaries PASS**, exit 0. All 46 public tables exactly equal to baseline after cleanup | `phase8l-finalization-sql.log` |
+| `-m tools.validate_supabase_v2_cup_release --psql <psql> --database pokeapp_v2_validation_phase8l_finalization --allow-destructive-reset` | Both migration/bootstrap rebuilds twice, catalog/RLS and 10,515-line schema/grants/ownership parity PASS. Setup 17 and matchdays 20 groups PASS. Interrupted during participant regression; no final exit/result from this attempt | `phase8l-finalization-release.log` |
+| Interruption recovery using `ParticipantStatusFixtures.cleanup` scoped to the exact run | Two seasons / seven trainers removed; all other full rows in all 46 public tables unchanged, schema parity and catalog rechecked, exit 0 | `phase8l-finalization-interruption-cleanup.json` |
+| `%TEMP%/phase8l-finalization-resume.py` invoking the unchanged release fixture classes and final catalog/parity checks | **PASS, exit 0**: participant 24, lifecycle 19, trials 8 groups; Cup L00–L08, ten races, nine rollback boundaries; final catalog/schema parity and all 46 public tables exactly unchanged | `phase8l-finalization-release-resumed.log`, `phase8l-finalization-release-resumed.exit` |
+| `git diff --check`; unchanged `supabase/v2` against entry HEAD | PASS, exit 0, repeated before publication | `phase8l-finalization-static-checks.json` |
+| Relative document links/anchors across six continuity documents | 59 checked, none missing; protected guide contents not read | Tool execution, exit 0 |
+| Pinned-project GET `/rest/v1/` with existing backend credentials | HTTP 200; Cup 031 tables/RPCs absent from exposed schema. No writes. Migration history, actual schema/grants and Advisor remain UNKNOWN | `phase8l-finalization-remote-read.json` |
+
+L07 injects empty eligibility and each one-sided final eligibility into a synthetic
+Cup, rejects all three, checks no certificate/Hall and exact unchanged Cup source,
+revision/history/event/receipt state, then restores the valid graph and certifies.
+L08 covers elimination, Swiss and doubles with valid completed results, later DQ,
+correction of the closed round and eventual certification. Existing cancellation,
+multiple-Hall, post-FINISHED/post-ARCHIVED, concurrency and rollback tests remain.
+All corruption and failure injection performed so far is confined to disposable
+local databases. Shared L07 uses only fixture-scoped row updates, not failure DDL.
+
+The first full release execution and local PostgreSQL process were interrupted
+before completion (last full groups: setup 17, matchdays 20; then participant I01).
+On resumption no worker remained. PostgreSQL recovered its local WAL; startup took
+longer than the initial 15-second launcher wait, then reached ready state. The
+interrupted run `phase8i_validation_e3e8f4f7d42442cdaf53edf8facf1c50` was identified
+from its stored fixtures, cleaned using the existing dependency order, and all
+nonfixture rows compared exactly before/after. Rebuild/parity was not replayed:
+the resume runner verifies the source hashes and resumes at participant status,
+then lifecycle, trials, Cups and final catalog/schema/data checks. This interruption
+is an execution limitation, not a product defect. The resumed process completed
+with exit 0 and its final result marker. All required local gates are now covered
+by the two logs; the interrupted first process itself has no successful exit claim.
+The local PostgreSQL server was then stopped after verifying no other client
+sessions. The three disposable task databases remain, with no fixture residue.
+
+Real staging JWT/FastAPI/PostgREST, public/Auth/Storage baseline and independent
+cleanup, migration/source/grants verification and fresh Advisor delta are still
+required. The integration search found Supabase available but not installed;
+connection was suggested. Local credentials provide PostgREST/Auth access, not a
+management token or SQL connection. No remote PASS is inferred from local results.
 
 ## Staging and independent cleanup
 

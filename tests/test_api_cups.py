@@ -1,4 +1,5 @@
 from dataclasses import replace
+from copy import deepcopy
 import unittest
 from unittest.mock import Mock
 from uuid import uuid4
@@ -12,6 +13,7 @@ from app.repositories.errors import PersistenceError
 from app.repositories.supabase.cups import ERRORS, SupabaseCupRepository
 from app.repositories.supabase.season_admin import SeasonAdminRejected
 from test_api_phase8b import FakePrincipalRepository, FakeTokenVerifier, TRAINER_ID
+from test_cup_engine import fixture, play
 
 SID,CID=str(uuid4()),str(uuid4())
 
@@ -80,6 +82,24 @@ class CupApiTests(unittest.TestCase):
         self.assertEqual(self.post('finalize').status_code,503)
         self.receipt.update(certificate_id=str(uuid4()),hall_id=str(uuid4()))
         self.assertEqual(self.post('finalize').status_code,200)
+
+    def test_invalid_eligibility_returns_conflict_without_commit_rpc(self):
+        context=fixture('elimination',4)
+        play(context); play(context)
+        context['cup']['rounds'][-1]['eligible_side_ids']=[]
+        before=deepcopy(context)
+        backend=Mock()
+        backend.rpc.return_value.execute.return_value.data=dict(context=context,fingerprint='locked-context')
+        repository=SupabaseCupRepository(backend)
+        with TestClient(create_app(container=ApiContainer(token_verifier=self.tokens,
+                principal_repository=self.principals,cup_repository=repository))) as client:
+            response=client.post(self.base+'/finalize',headers=self.headers,
+                                 json=dict(expected_revision=context['cup']['revision']))
+        self.assertEqual(response.status_code,409)
+        self.assertEqual(response.json()['detail']['code'],'INVALID_RESULTS')
+        self.assertEqual(backend.rpc.call_count,1)
+        self.assertEqual(backend.rpc.call_args.args[0],'api_cup_context')
+        self.assertEqual(context,before)
 
     def test_errors_stable_and_backend_sanitized(self):
         for code,status in ERRORS.items():

@@ -1,12 +1,13 @@
 # PokeApp 2.0 Project Checkpoint
 
-Checkpoint reconciled: 2026-09-26. This file is the project index and historical
+Checkpoint reconciled: 2026-09-28. This file is the project index and historical
 milestone record; it does not maintain a second live phase-status ledger.
 
 ## Current project position
 
-- Active phase: **8L — Cup engine / certification / Hall**. Implementation is
-  published and local validation evidence exists; delivery is **IN PROGRESS**.
+- Active phase: **8L — Cup engine / certification / Hall**. A8L-01 and related
+  historical eligibility gaps are corrected and locally validated. Delivery is
+  **IN PROGRESS** until the real staging gates close; see the live handoff.
 - Single operational record: [Phase 8L live handoff](work-in-progress/phase8l-live-handoff.md).
   Consult it for Git, local changes, remote uncertainty and the next exact action.
 - Approved behavior: [Cup contract](phase8l-cup-engine.md). Dated technical evidence:
@@ -20,7 +21,9 @@ Read the canonical [MultiIA continuity protocol](AI/PokeApp_Multi_AI_Continuity_
 and [master protocol](PokeApp_2.0_Protocolo_Maestro_MultiIA.md) before resuming.
 On 2026-09-26 the user authorized documentation reconciliation, then a
 documentation-only commit/push to `main`. No code, migration or staging operation
-is part of these tasks; publishing the memory does not close Phase 8L.
+was part of those historical tasks. On 2026-09-28 the user authorized full 8L
+finalization, focused fixes, validation and Git publication. Publishing the fix
+does not substitute for the remaining staging evidence or start Phase 9.
 
 ## Historical delivery milestones — not current execution state
 

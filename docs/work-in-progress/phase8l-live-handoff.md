@@ -1,183 +1,148 @@
-# Phase 8L — Live Handoff
+# Phase 8L - Live Handoff
 
-This is the **single maintained operational record** for Phase 8L. It is shared
-memory for the next instance of the same responsible developer, not a task
-assignment to another model. Verify observations before acting on them.
+This is the single maintained operational record for Phase 8L. Documentation is
+memory, not authority; verify Git, source, processes and remote state on entry.
 
 ## Memory references
 
-- [Canonical MultiIA continuity protocol](../AI/PokeApp_Multi_AI_Continuity_Protocol.md).
+- [Canonical MultiIA protocol](../AI/PokeApp_Multi_AI_Continuity_Protocol.md).
 - [Master project protocol](../PokeApp_2.0_Protocolo_Maestro_MultiIA.md).
-- [Project checkpoint and progress](../project-checkpoint.md).
-- [Approved Cup behavior contract](../phase8l-cup-engine.md).
-- [Technical/delivery report and dated validation ledger](../phase8l-completion-report.md).
+- [Project checkpoint](../project-checkpoint.md).
+- [Approved Cup contract](../phase8l-cup-engine.md).
+- [Delivery report and dated evidence](../phase8l-completion-report.md).
 
 ## Status
 
-**IN PROGRESS — implementation published; local passing evidence available;
-remote delivery not independently established. Not DONE.**
+**READY FOR STAGING - A8L-01 corrected; all local gates PASS. Delivery is blocked
+by missing Supabase management access for remote preflight. Not DONE.**
 
 ## Last updated
 
-2026-09-26 (Europe/Madrid) — documentation reconciliation and authorized Git sync.
-This publication checkpoint closes documentation work only; Phase 8L remains open.
-
-## Current Git
-
-- Branch: `main`. Before this documentation commit, local HEAD and freshly queried
-  remote `main` were `bc419bac717357e76c631ed30258f59ce2a84003` (0/0 divergence).
-- Documentation sync: the commit containing this update includes the six documents
-  listed below. Obtain its hash from Git, rather than treating the preceding HEAD
-  as current: `git log -1 --format="%H %s" -- docs/work-in-progress/phase8l-live-handoff.md`.
-  Confirm publication against `git ls-remote origin refs/heads/main` when resuming.
-- Implementation: `d38b871`; no Cup source/test/validator/migration changes in the
-  later commits through `bc419ba`. Those later commits are not new Cup features.
-- The user explicitly authorized a documentation-only commit and push to `main`.
-  The reconciled documents are included together; no implementation edits are
-  carried by this checkpoint. The protected guide remains intentionally untracked.
-- Recheck Git on entry; this observation does not predict future commits or pushes.
+2026-09-28 (Europe/Madrid), after successful local finalization and resumed release.
 
 ## Current objective and authorized scope
 
-Publish the reconciled project memory through a documentation-only commit and
-push to `main`, then verify remote alignment and the tracked working tree.
-The current instruction authorizes no implementation, migrations or staging operations.
-Future development should finish 8L delivery within its existing reduced scope.
+Complete Phase 8L within the approved Cup engine / certification / Hall scope.
+The current user instruction authorizes implementation, tests, necessary staging
+validation, commit and push. It supersedes the earlier audit-only restriction.
+No React, Launcher, Companion, PKHeX, visual work, rule changes or Phase 9.
 
-## Completed / evidence available
+## Current Git
 
-- Cup engine, eleven API routes, adapter, migration 031 and focused tests are
-  present in the published implementation.
-- The report records the recent 501-test PASS and compile result, historical local
-  SQL release PASS, schema parity, 026–030 regressions, ten race families and nine
-  rollback boundaries. These are completed runs, not tests currently executing.
-- Read the [validation ledger](../phase8l-completion-report.md#validation-ledger)
-  for dates, paths and provenance limits. The historical SQL run is not bound to
-  the published commit by a recorded source fingerprint; do not relabel it as a
-  newly reproduced gate against current HEAD.
-- Continuity protocol moved to its canonical `docs/AI/` path; checkpoint, master,
-  contract navigation and report reconciled. Product rules were preserved.
+- Branch `main`; entry HEAD `73f8453668a7eae6d4f7cfc400f80b15f8b147b2` matched
+  freshly queried remote main on 2026-09-28.
+- The inherited audit edits to this handoff and the delivery report are preserved
+  in the dated report. Current source/test/validator/document edits are ready for
+  publication; all local checks have passed. Verify the actual commit/ref after push.
+- The protected guide remains pre-existing and untracked. Never add, delete,
+  move or hide it to manufacture an entirely clean working tree.
 
-## Document checks for this reconciliation
+## Completed / verified
 
-- PASS: read-only document checker inspected 57 relative links/anchors across
-  the six reconciled documents; no missing file or heading target.
-- PASS: exactly one continuity protocol at the official `docs/AI/` path; old
-  path absent. Stale active-state/tool-assignment assertions were removed.
-- PASS: `git diff --check` (exit 0); the sync covers only the six documents listed
-  below, including the new canonical protocol. No code/migration changes.
-- PASS: `git diff --exit-code d38b871 bc419ba -- app tests tools supabase/v2
-  docs/phase8l-cup-engine.md docs/phase8l-completion-report.md` (exit 0), confirming
-  no intervening changes in those implementation/evidence paths between commits.
-- No unit, SQL, staging or failure-injection run is started by this task.
-
-## Not yet validated / remaining delivery
-
-- Reconcile current relevant source/harness with historical local SQL evidence;
-  rerun checks only where a change or evidence gap justifies it.
-- Independently verify remote 031 state and its actual schema/grants.
-- Complete the fresh preflight, any necessary migration application, real
-  JWT/API/PostgREST validation, independent cleanup and Advisor comparison.
-- Close the delivery report/checkpoint only when those phase gates actually pass.
-  Publishing this memory does not complete 8L delivery.
-- Phase 9 is not started automatically.
+- Corrected completed-match eligibility using each round's frozen draw. Completed
+  matches must reconstruct as scheduled, not an automatic result.
+- Related checks reject an ineligible forfeit winner, retroactive forfeits/voids
+  justified only by a later DQ, and reactivation after the final draw.
+- Preserved valid historical results, late final-loser DQ, doubles members,
+  correction/recreated successor behavior, byes and post-League operations.
+- Before-fix real SQL reproduction: empty final eligibility still created one
+  certificate/Hall. All 46 public tables returned exactly to baseline afterward.
+- 45 focused engine/API tests and 511 general tests PASS; compileall PASS.
+- Focused real SQL: L00-L08, ten race families, nine exact rollback boundaries,
+  all-public cleanup (46 tables) PASS. L07 checks rejection without partial writes;
+  L08 certifies elimination/Swiss/doubles after played results, DQ and correction.
+- Fresh migration/bootstrap rebuild twice each, inherited ACL/RLS/catalog checks,
+  exact 10,515-line schema/grants/ownership parity PASS. Setup 17 and matchday 20
+  regression groups PASS before interruption. Resumed participant 24, lifecycle
+  19 and trials 8 groups PASS with exact all-public cleanup. Rebuilt-database Cup
+  L00-L08, ten races, nine rollback points and final catalog/schema/data checks
+  PASS. Resumed process exit 0; all required local gates are covered by the logs.
+- 59 document links/anchors checked; compileall, diff-check and unchanged
+  historical migrations confirmed. Source fingerprints match the tested files.
+- Source SHA256 and exact commands/results/limitations are in the
+  [finalization evidence](../phase8l-completion-report.md#finalization-correction-and-evidence--2026-09-28).
+  Raw logs use `%TEMP%/phase8l-finalization-*`; do not confuse them with old logs.
 
 ## Migrations
 
-Next phase migration: `supabase/v2/migrations/031_cup_engine_certification.sql`.
-
-- Local file, committed and pushed: YES, in `d38b871`.
-- Local validation: historical PASS evidence, with provenance limits in the report.
-- Applied to staging: **UNKNOWN in this audit**. Earlier handoff reported NO;
-  that report was not independently rechecked against the remote project.
-- Exact remote version for 031: UNKNOWN; no confirmed deployment receipt available.
+- **No new migration required. 001-031 and bootstrap are unchanged.**
+- Full graph validation belongs to the trusted application planner; 031 rechecks
+  fingerprint/CAS and final provenance under locks before the atomic commit.
+  The report records why this combined defense closes A8L-01 without duplicating
+  the engine in SQL. SQL alone does not validate arbitrary privileged plans.
+- 031 remains committed/published from `d38b871`.
+- Remote 031 application/version: **UNKNOWN**. Do not infer absence or replay it
+  from a missing exposed REST table alone.
 - Historical DO NOT REAPPLY: 029=`20260923232516`;
   030 schema=`20260924102756`; 030 ACL completion=`20260924103256`.
-- Never replay 031 if remote inspection shows it already applied. Validate the
-  history/source/schema and resume from the actual state instead.
 
 ## Staging / security / cleanup state
 
-- **STAGING_UNVERIFIED**. This means unknown current remote state, not confirmed
-  absence of 031. No staging operation was made in the context/documentation task.
-- Pinned project from the contract: `https://uwleqeuzsveqlugugzba.supabase.co`.
-  Its identity and migration history still require a fresh remote preflight.
-- Fresh public/Auth/Storage baseline for 8L resumption: not captured in this task.
-- Historical Advisor after 8K.1: 24 ERROR / 4 WARN / 5 INFO. This is not a fresh
-  preflight result; the 8L before/after inventory and delta remain unverified.
-- Confirmed 8L staging fixture prefix/run ID: none recorded in the inspected
-  evidence. Any remote residue and cleanup state are UNKNOWN until inspected.
-- Supabase MCP tools were not exposed in the audit session. Discover actual
-  capabilities in the next session; do not infer `apply_migration` availability
-  from whether the current model is Codex, Gemini or Antigravity.
+- **STAGING_UNVERIFIED**. No remote write or fixture was started by this task.
+- Fresh read-only HTTP 200 from pinned V2
+  `https://uwleqeuzsveqlugugzba.supabase.co/rest/v1/`; neither Cup 031 tables nor
+  its RPCs appear in the exposed schema. This is only REST visibility evidence,
+  not migration/source/grants verification.
+- No Supabase management tools are exposed in this session. Plugin discovery
+  found Supabase available but not installed; installation/connection was
+  suggested and is not confirmed. Existing local credentials cover Auth/REST,
+  not management SQL or Advisor. Never print or commit them.
+- Fresh migration inventory, public/Auth/Storage baseline, Advisor inventory,
+  real JWT/FastAPI/PostgREST validation and independent cleanup remain pending.
+- Historical Advisor 24 ERROR / 4 WARN / 5 INFO is not a fresh preflight result.
+  Previously existing remote residue remains UNKNOWN until independent inspection.
 
 ## Active / interrupted operations
 
-No worker, test or remote operation was started by this documentation task.
-Inherited process/database-server state was not inspected: UNKNOWN. Before
-resuming validation, check relevant processes and logs for an unfinished prior
-run; preserve its run/fixture identity and resolve its outcome before retrying.
+- First full release attempt was interrupted during participant-status fixtures;
+  its worker and PostgreSQL were no longer running on resumption. The log has no
+  final result/exit code; do not label that whole attempt PASS.
+- Local PostgreSQL recovered WAL and reached ready state after a startup wait
+  timeout. Scoped recovery removed two seasons and seven trainers from exact run
+  `phase8i_validation_e3e8f4f7d42442cdaf53edf8facf1c50`. Every nonfixture public row
+  was verified unchanged; schema/grants/catalog still match bootstrap.
+- Resumed worker `%TEMP%/phase8l-finalization-resume.py` completed with exit 0;
+  log `%TEMP%/phase8l-finalization-release-resumed.log`, matching `.exit` file.
+  Participant, lifecycle, trials, Cups and final parity/cleanup are complete.
+- **No active worker remains.** Local PostgreSQL was stopped after checking no
+  other client sessions. Do not assume it is running on a future entry.
+- Local cluster `%TEMP%/pokeapp_pg17_phase8c_20260922/cluster`, loopback `55439`.
+  Task databases: `pokeapp_v2_validation_phase8l_finalization`, its `_bootstrap`,
+  and `pokeapp_v2_validation_phase8l_finalization_probe`. No staging run IDs exist.
 
-## Documents included in this sync
+## Files / areas changed
 
-The documentation-only commit includes:
+- `app/domain/services/cup_engine.py`: historical certification invariants.
+- `tests/test_cup_engine.py`, `tests/test_api_cups.py`: targeted regressions.
+- `tools/validate_cup_fixtures.py`: shared L07/L08 integrity and valid DQ fixtures.
+- `tools/validate_supabase_v2_cups_sql.py`: independent all-public cleanup check.
+- This handoff, delivery report and checkpoint: evidence and actual remaining work.
 
-- `docs/PokeApp_2.0_Protocolo_Maestro_MultiIA.md`: canonical links, evidence rules,
-  unknown staging state and removal of the duplicate operational snapshot.
-- `docs/project-checkpoint.md`: active-phase index, historical labels and obsolete
-  8L/contract/backlog statements corrected.
-- `docs/phase8l-completion-report.md`: dated evidence, provenance limits and open delivery.
-- `docs/phase8l-cup-engine.md`: navigation only; Cup rules unchanged.
-- This handoff: reconciled operational record.
-- `docs/AI/PokeApp_Multi_AI_Continuity_Protocol.md`: sole canonical copy, moved
-  from the previous untracked `docs/` location and versioned in this sync.
+## Protected file
 
-## Uncommitted work and protected file
+`docs/pokeapp-guia-completa-pestanas-y-producto.md` was not read, changed or staged.
+Entry metadata: 72,079 bytes, last write UTC 2026-09-22 10:13:27. It must remain
+untracked. Clean tracked state and that intentional exception are reported separately.
 
-No implementation work is left uncommitted by this documentation checkpoint.
-Check `git status` for actual state after publication and on every resumption.
-The only expected residual entry is the pre-existing untracked
-`docs/pokeapp-guia-completa-pestanas-y-producto.md`. It was not read or changed;
-file metadata is checked before/after sync without reading contents. Never stage,
-delete, move or hide this file to manufacture a completely clean status.
+## Not yet validated / remaining delivery
 
-## Problems reconciled and remaining uncertainty
-
-- Obsolete claims (8L unstarted, tests still running, old HEAD, clean working
-  tree, tools assigned to a named AI) were replaced by evidence and explicit limits.
-- The unconditional instruction to apply 031 was removed. Remote preflight must
-  resolve UNKNOWN first; missing proof of deployment is not proof of absence.
-- Raw validation logs live in `%TEMP%` and may not survive a machine change.
-  Their inspected summaries are preserved in the report; missing provenance is
-  explicit. No new technical report is needed to duplicate those summaries.
-- No failing code test was identified in the inspected evidence. This is a context
-  reconciliation, not a new exhaustive implementation or security certification.
+1. Publish the coherent fix/tests/evidence and confirm origin/main alignment.
+2. Establish management access to the pinned project and run the full remote
+   preflight; apply committed 031 only if verified absent, never replay it blindly.
+3. Complete real JWT/API/PostgREST checks, independent zero-residue cleanup and
+   fresh Advisor delta, then update report/checkpoint and close 8L.
 
 ## Next exact step
 
-The current task ends after the documentation commit/push and Git verification.
-It does not resume Phase 8L. On a later development task within the user's scope:
-
-1. Read the memory references above; verify actual Git, local changes, available
-   tools, active operations and relevant source against the evidence ledger.
-2. Perform a **read-only remote preflight**: confirm the pinned project, actual
-   migration history and 031 source/schema state. Resolve any discrepancy before
-   deciding whether a migration needs application; record the verified state here.
-3. Before authorized writes, obtain the required fresh baseline and Advisor
-   inventory and resolve any local validation evidence gap. If 031 is absent,
-   apply only the committed migration; if present, continue without replaying it.
-4. Record the exact version/state immediately, then run focused real staging
-   validation, independently verify cleanup and Advisor delta, and close the
-   delivery documents only after the required gates pass.
+Publish the verified local fix and confirm Git. When Supabase management access
+is available, verify the pinned project, migration history/source/schema/grants,
+fresh public/Auth/Storage baseline and Advisor inventory. Apply 031 only if proven
+absent, otherwise validate without replay. Run the existing staging validator with
+the fixed engine and L07/L08, independently verify cleanup/Advisor delta, then close
+the report/checkpoint. Do not repeat local gates without a source change or evidence
+gap. Phase 9 remains unstarted.
 
 ## Do not do
 
-Do not modify code or staging for this documentation task; do not replay historical
-migrations, reset/bootstrap staging, inject failure DDL remotely, touch V1 or the
-protected guide, expand Cup scope, implement visual polish, or start Phase 9.
-
-## Handoff confidence
-
-Repository state and available local evidence were inspected. Remote delivery and
-inherited active operations were not independently established. The next AI must
-verify those unknowns and retain full responsibility for completing the phase.
+No staging reset/bootstrap, historical migration replay, remote failure DDL,
+V1 changes, protected-guide operations, scope expansion or Phase 9 work.

@@ -7,10 +7,18 @@ from tools.validate_supabase_v2_schema import _psql_text
 from app.repositories.errors import PersistenceError
 
 
+def public_snapshot(client):
+    tables=client.execute("select jsonb_agg(tablename order by tablename) from pg_tables where schemaname='public'").data
+    query='select jsonb_object_agg(name,rows) from ('+' union all '.join(
+        'select '+literal(t)+' as name,coalesce(jsonb_agg(to_jsonb(x) order by to_jsonb(x)::text),\'[]\') as rows from public.'+identifier(t)+' x' for t in tables)+') q'
+    return client.execute(query).data
+
+
 def validate_cups(args, sql=_psql_text, rollback=True):
     ids={r:str(uuid4()) for r in ('admin','other','owner')}
     readers={r:LocalClient(args,'authenticated',uid) for r,uid in ids.items()}
     readers['anon']=LocalClient(args,'anon'); client=LocalClient(args)
+    baseline=public_snapshot(client)
     f=CupFixtures(client,readers,ids)
     try: f.run()
     finally: f.cleanup()
@@ -23,10 +31,7 @@ def validate_cups(args, sql=_psql_text, rollback=True):
             f.cup('results',sid,closing,f.result_body(c),round_number=1)
             dq=f.create_cup(sid,'elimination',4)
             final=f.create_cup(sid,'elimination',2); f.finish_cup(sid,final,False)
-            tables=client.execute("select jsonb_agg(tablename order by tablename) from pg_tables where schemaname='public'").data
-            query='select jsonb_object_agg(name,rows) from ('+' union all '.join(
-                'select '+literal(t)+' as name,coalesce(jsonb_agg(to_jsonb(x) order by to_jsonb(x)::text),\'[]\') as rows from public.'+identifier(t)+' x' for t in tables)+') q'
-            def snapshot(): return client.execute(query).data
+            def snapshot(): return public_snapshot(client)
             points=[('start',draft,'cup_matches',None),('close',closing,'cup_standings',1),('close',closing,'cup_rounds',2),
                 ('disqualify',dq,'cup_participants',None),('disqualify',dq,'cup_matches',None),
                 ('finalize',final,'cup_certificates',None),('finalize',final,'hall_of_fame_entries',None),
@@ -47,6 +52,8 @@ def validate_cups(args, sql=_psql_text, rollback=True):
                 finally: sql(args,f'drop trigger phase8l_failure on public.{table}; drop function public.__phase8l_fail();')
                 print('PASS exact all-public rollback '+op+'/'+table,flush=True)
         finally: f.cleanup()
+    require(public_snapshot(client)==baseline,'Cup validation left public data residue')
+    print('PASS independent all-public cleanup tables='+str(len(baseline)),flush=True)
     print('Cup PostgreSQL RESULT ok',flush=True)
 
 

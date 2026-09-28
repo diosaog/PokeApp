@@ -163,6 +163,45 @@ class CupFixtures(SeasonLifecycleFixtures):
         self.passed('L05 FINISHED and ARCHIVED Cups with exact League snapshots/rewards/movements/Hall/archive preservation')
         self.permissions(sid,cid)
         self.races(sid)
+        self.certification_integrity(sid)
+        self.historical_dq(sid)
+
+    def certification_integrity(self,sid):
+        cid=self.create_cup(sid,'elimination',4)
+        c=self.finish_cup(sid,cid,False); final=c['rounds'][-1]
+        def snapshot():
+            tables=('cup_participants','cup_side_members','cup_rounds','cup_matches',
+                    'cup_standings','cup_history','cup_certificates','hall_of_fame_entries')
+            data={t:self.rows(t,cup_id=cid) for t in tables}
+            data['cups']=self.rows('cups',id=cid)
+            for t in ('activity_events','admin_operation_receipts'):
+                data[t]=self.rows(t,season_id=sid)
+            return {t:sorted(rows,key=lambda row:str(sorted(row.items()))) for t,rows in data.items()}
+        for eligible in ([],[final['matches'][0]['a']],[final['matches'][0]['b']]):
+            self.client.table('cup_rounds').update({'eligible_side_ids':eligible}).eq('cup_id',cid).eq('number',final['number']).execute()
+            before=snapshot()
+            self.reject(lambda:self.cup('finalize',sid,cid),'INVALID_RESULTS')
+            require(not self.rows('cup_certificates',cup_id=cid),'Corrupt Cup certified')
+            require(not self.rows('hall_of_fame_entries',cup_id=cid),'Corrupt Cup entered Hall')
+            require(snapshot()==before,'Rejected certification partially changed state')
+        self.client.table('cup_rounds').update({'eligible_side_ids':final['eligible_side_ids']}).eq('cup_id',cid).eq('number',final['number']).execute()
+        self.cup('finalize',sid,cid)
+        self.passed('L07 A8L-01 empty/one-sided eligibility rejected; no certificate/Hall or partial state; restored graph certifies')
+
+    def historical_dq(self,sid):
+        for fmt,n in (('elimination',5),('swiss',5),('doubles',3)):
+            cid=self.create_cup(sid,fmt,n); self.play_round(sid,cid)
+            c=self.document(sid,cid); first=deepcopy(c['rounds'][0])
+            side=next(m['b'] for m in first['matches'] if m['status']=='completed')
+            self.cup('disqualify',sid,cid,dict(expected_revision=c['revision'],reason='DQ after valid match'),side_id=side)
+            c=self.document(sid,cid)
+            require(c['rounds'][0]==first,'DQ rewrote a closed round')
+            body=self.result_body(c,1,True,True); body['reason']='Correct before unplayed successor'
+            self.cup('correct',sid,cid,body,round_number=1)
+            self.finish_cup(sid,cid)
+            c=self.document(sid,cid)
+            require(c['champion_side_id']!=side and c['certificate_id'],'Historical DQ prevented certification')
+        self.passed('L08 elimination/Swiss/doubles preserve completed results through later DQ, correction and certification')
 
     def draft_checks(self,sid):
         cid=self.create_cup(sid,'elimination',4,start=False)

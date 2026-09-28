@@ -160,6 +160,114 @@ class CupEngineTests(unittest.TestCase):
         c=self.finish(fixture()); c['standings'][0]['wins']+=1
         with self.assertRaisesRegex(CupRejected,'INVALID_STANDINGS'): validate(c)
 
+    def test_finalize_rejects_completed_final_without_draw_eligibility(self):
+        ctx = fixture('elimination', 4)
+        self.finish(ctx)  # Leaves the context active, with the final closed.
+        original = deepcopy(ctx)
+        final = ctx['cup']['rounds'][-1]
+        for eligible in ([], [final['matches'][0]['a']], [final['matches'][0]['b']]):
+            with self.subTest(eligible=eligible):
+                broken = deepcopy(original)
+                broken['cup']['rounds'][-1]['eligible_side_ids'] = eligible
+                before = deepcopy(broken)
+                with self.assertRaisesRegex(CupRejected, 'INVALID_RESULTS'):
+                    plan(broken, dict(operation='finalize', body={}))
+                self.assertEqual(broken, before)
+
+    def test_certification_rejects_completed_doubles_match_drawn_as_automatic(self):
+        ctx = fixture('doubles', 4)
+        side = ctx['cup']['rounds'][0]['matches'][0]['b']
+        ctx['cup'] = plan(ctx, dict(operation='disqualify', side_id=side, body={}))
+        play(ctx)
+        c = self.finish(ctx)
+        r = c['rounds'][1]
+        m = next(m for m in r['matches'] if side in (m['a'], m['b']))
+        m.update(status='completed', score_a=2 if m['winner']==m['a'] else 0,
+                 score_b=2 if m['winner']==m['b'] else 0)
+        c['standings'] = standings(c)
+        with self.assertRaisesRegex(CupRejected, 'INVALID_RESULTS'):
+            validate(c)
+
+    def test_certification_rejects_ineligible_forfeit_winner(self):
+        ctx = fixture('elimination', 4)
+        play(ctx)
+        m = ctx['cup']['rounds'][-1]['matches'][0]
+        ctx['cup'] = plan(ctx, dict(operation='disqualify', side_id=m['b'], body={}))
+        c = self.finish(ctx)
+        # The final winner must have been eligible when the final was drawn.
+        c['rounds'][-1]['eligible_side_ids'] = [m['b']]
+        with self.assertRaisesRegex(CupRejected, 'INVALID_RESULTS'):
+            validate(c)
+
+    def test_certification_rejects_retroactive_forfeit_from_later_dq(self):
+        ctx = fixture('elimination', 8)
+        play(ctx)
+        first = ctx['cup']['rounds'][0]['matches'][0]
+        ctx['cup'] = plan(ctx, dict(operation='disqualify', side_id=first['b'], body={}))
+        c = self.finish(ctx)
+        c['rounds'][0]['matches'][0].update(status='forfeit', score_a=None, score_b=None)
+        with self.assertRaisesRegex(CupRejected, 'INVALID_RESULTS'):
+            validate(c)
+
+    def test_certification_rejects_retroactive_void_from_later_dq(self):
+        ctx = fixture('doubles', 4)
+        play(ctx)
+        first = ctx['cup']['rounds'][0]['matches'][0]
+        for side in (first['a'], first['b']):
+            ctx['cup'] = plan(ctx, dict(operation='disqualify', side_id=side, body={}))
+        c = self.finish(ctx)
+        c['rounds'][0]['matches'][0].update(status='void', winner=None, score_a=None, score_b=None)
+        c['standings'] = standings(c)
+        with self.assertRaisesRegex(CupRejected, 'INVALID_RESULTS'):
+            validate(c)
+
+    def test_certification_rejects_side_reactivated_after_final_draw(self):
+        ctx = fixture('elimination', 4)
+        side = ctx['cup']['rounds'][0]['matches'][0]['b']
+        c = self.finish(ctx)
+        c['rounds'][-1]['eligible_side_ids'].remove(side)
+        with self.assertRaisesRegex(CupRejected, 'INVALID_ROSTER'):
+            validate(c)
+
+    def test_completed_results_survive_later_dq_and_correction(self):
+        for fmt, n in (('elimination', 5), ('swiss', 5), ('doubles', 4)):
+            for timing in ('open', 'closed', 'corrected'):
+                with self.subTest(fmt=fmt, timing=timing):
+                    ctx = fixture(fmt, n)
+                    r = ctx['cup']['rounds'][0]
+                    ctx['cup'] = plan(ctx, dict(operation='results', round_number=1,
+                                              body=dict(results=scores(r))))
+                    if timing != 'open':
+                        ctx['cup'] = plan(ctx, dict(operation='close', round_number=1, body={}))
+                    before = deepcopy(ctx['cup']['rounds'][0]['matches'])
+                    side = next(m['b'] for m in before if m['status']=='completed')
+                    ctx['cup'] = plan(ctx, dict(operation='disqualify', side_id=side, body={}))
+                    self.assertEqual(ctx['cup']['rounds'][0]['matches'], before)
+                    if timing == 'corrected':
+                        ctx['cup'] = plan(ctx, dict(operation='correct', round_number=1,
+                                                  body=dict(results=scores(ctx['cup']['rounds'][0], True))))
+                    c = self.finish(ctx)
+                    self.assertEqual(c['status'], 'finished')
+                    self.assertNotEqual(c['champion_side_id'], side)
+
+    def test_automatic_results_survive_dq_after_round_closed(self):
+        ctx = fixture('elimination', 5)
+        r = ctx['cup']['rounds'][0]
+        bye = next(m for m in r['matches'] if m['status']=='bye')
+        play(ctx)
+        ctx['cup'] = plan(ctx, dict(operation='disqualify', side_id=bye['winner'], body={}))
+        c = self.finish(ctx)
+        self.assertEqual(next(m for m in c['rounds'][0]['matches'] if m['id']==bye['id']), bye)
+
+    def test_final_loser_can_be_disqualified_after_valid_match(self):
+        ctx = fixture('elimination', 2)
+        play(ctx)
+        final = deepcopy(ctx['cup']['rounds'][0]['matches'][0])
+        ctx['cup'] = plan(ctx, dict(operation='disqualify', side_id=final['b'], body={}))
+        c = self.finish(ctx)
+        self.assertEqual(c['rounds'][0]['matches'][0], final)
+        self.assertEqual(c['finalist_side_id'], final['b'])
+
     def test_certification_requires_explicit_final_close(self):
         ctx=fixture('elimination',2)
         with self.assertRaisesRegex(CupRejected,'COMPETITION_INCOMPLETE'): plan(ctx,dict(operation='finalize',body={}))
