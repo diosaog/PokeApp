@@ -1,4 +1,4 @@
-"""Final 8L local gate: reproducible 001-031/bootstrap and relevant 026-030 regressions.
+"""Final 8L local gate: reproducible 001-032/bootstrap and relevant 026-030 regressions.
 
 Only disposable loopback databases are accepted. Never use on staging.
 """
@@ -27,6 +27,13 @@ grant update(name),insert(name) on public.public_cups to authenticated;
 
 CATALOG = """
 do $$ declare bad integer; begin
+ if to_regclass('public.cup_player_identity') is not null then
+   raise exception 'Redundant Cup player identity index'; end if;
+ if not exists(select 1 from pg_constraint where contype='f'
+   and conrelid='public.cup_side_members'::regclass
+   and confrelid='public.season_players'::regclass
+   and conindid='public.uq_season_players_id_season_trainer'::regclass) then
+   raise exception 'Cup member identity FK must retain the existing unique key'; end if;
  select count(*) into bad from information_schema.role_table_grants where table_schema='public'
    and grantee in ('PUBLIC','anon','authenticated') and privilege_type in ('INSERT','UPDATE','DELETE','TRUNCATE')
    and table_name in ('cups','cup_participants','cup_side_members','cup_matches','cup_standings','cup_rounds','cup_history','cup_certificates',

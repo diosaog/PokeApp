@@ -99,7 +99,10 @@ class CupFixtures(SeasonLifecycleFixtures):
         byes=[m['winner'] for r in swiss['rounds'] if r['phase']=='swiss' for m in r['matches'] if m['status']=='bye']
         require(len(byes)==len(set(byes))==3,'Swiss repeated avoidable bye')
         require([r['phase'] for r in swiss['rounds']]==['swiss']*3+['semifinal','final'],'Wrong Swiss phases')
-        require(self.rows('season_players',season_id=sid)==original_players,'Cup changed League participation')
+        current_players=self.rows('season_players',season_id=sid)
+        # PostgREST does not promise row order without an explicit ordering.
+        require(sorted(current_players,key=lambda p:p['id'])==sorted(original_players,key=lambda p:p['id']),
+            'Cup changed League participation')
         for table,filters,change in (
             ('cups',{'id':cid},{'name':'forged'}),
             ('cup_certificates',{'cup_id':cid},{'checksum':'0'*64}),

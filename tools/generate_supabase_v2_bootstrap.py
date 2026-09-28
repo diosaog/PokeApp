@@ -40,6 +40,7 @@ EXPECTED_MIGRATIONS = [
     "029_season_finalization_archive_hall.sql",
     "030_trials_sanctions_api.sql",
     "031_cup_engine_certification.sql",
+    "032_cup_player_identity_index.sql",
 ]
 
 FORBIDDEN_TOKENS = [

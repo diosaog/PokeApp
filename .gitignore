@@ -30,3 +30,6 @@ desktop/
 !.env.example
 !.env.*.example
 !*.env.example
+
+# Supabase CLI local link/cache (may contain connection details)
+/supabase/.temp/
