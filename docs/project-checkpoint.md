@@ -5,29 +5,37 @@ milestone record; it does not maintain a second live phase-status ledger.
 
 ## Current project position
 
-- Active phase: **9 - parser boundary + Launcher/Companion base**, authorized
-  2026-09-28. [Contract](phase9-parser-launcher.md),
-  [operational handoff](work-in-progress/phase9-live-handoff.md),
-  [delivery evidence](phase9-completion-report.md).
-- Last closed phase: **8L - Cup engine / certification / Hall, DONE local + real V2 staging**.
-  Approved **Phase 8 backend scope CLOSED**.
-- Durable evidence: [8L delivery report](phase8l-completion-report.md).
-  [8L live handoff](work-in-progress/phase8l-live-handoff.md) is DONE / superseded.
-- Approved behavior: [Cup contract](phase8l-cup-engine.md).
-- Weighted complete-project estimate: **~70%**, from ~68% after actual remote
-  delivery, cleanup and Advisor closure. This is not whole-product deployment.
+- Last closed phase: **9 - parser boundary + Launcher/Companion base, DONE**.
+  [Contract](phase9-parser-launcher.md), [delivery evidence](phase9-completion-report.md),
+  [closed handoff](work-in-progress/phase9-live-handoff.md).
+- Phase 8/8L backend closure remains intact: [8L report](phase8l-completion-report.md).
+- Weighted complete-project estimate: **~73%**, from ~70% after delivery of the
+  functional local parser/Launcher foundation. This is not whole-product deployment.
 - Runtime remains Streamlit/V1; Phase 9 is isolated local work, with no cutover.
+  **Phase 10 has not started**. Cloud save ingestion/current-state promotion,
+  physical save operations and final Launcher distribution remain later work.
 
 Read the [continuity protocol](AI/PokeApp_Multi_AI_Continuity_Protocol.md) and
 [master protocol](PokeApp_2.0_Protocolo_Maestro_MultiIA.md) before future work.
-The user subsequently authorized Phase 9 implementation, tests, documentation and
-Git publication. No Phase 10, V1/V2 cutover or physical save mutation.
+The user authorized Phase 9 implementation, tests, documentation and Git publication.
+No Phase 10, V1/V2 cutover or physical save mutation.
 
 ## Historical delivery milestones — not current execution state
 
 The following counts, PASS results, next-step notes and remote versions belong to
 their named milestones. They are retained as evidence, not fresh verification of
-the current repository or remote database. Final 8L closure is indexed above.
+the current repository or remote database. Current project position is indexed above.
+
+### 2026-09-28 — Phase 9 local parser / Launcher foundation DONE
+
+`5474460` establishes the isolated read-only parser; `f2158ed` delivers local sync,
+auth/session, queue, backup preparation, CLI and Windows read-error handling.
+543 Python tests (511 + 32), 24 .NET assertions, six real binary/Launcher integration
+groups and static checks pass on published `f2158ed`. Neutral DTOs reuse typed 023
+identity evidence but never invent CaptureOrder or promote competitive state.
+No endpoints/migration 033/staging work; 001–032 and backend/V1 unchanged.
+Local sync is explicitly observed-state journaling, not a cloud upload. Progress
+~70% -> ~73%. [Report](phase9-completion-report.md) and [evidence](phase9-validation-evidence.json).
 
 ### 2026-09-28 - 8L DONE; approved Phase 8 backend CLOSED
 

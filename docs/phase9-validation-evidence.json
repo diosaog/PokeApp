@@ -1,0 +1,234 @@
+{
+  "schema_version": 1,
+  "observed_utc": "2026-09-28T12:23:02.934738+00:00",
+  "entry_commit": "30d670a50a990b92d37620d90290463e594dcd78",
+  "validated_commit": "f2158ed2c4888857adb90ef5092a6e8a0af5feb0",
+  "environment": {
+    "os": "Windows-11-10.0.26200-SP0",
+    "python": "3.14.3",
+    "dotnet_sdk": "8.0.425",
+    "ruff": "0.15.14"
+  },
+  "unit": {
+    "command": [
+      ".venv-api/Scripts/python.exe",
+      "tools/run_unit_tests.py"
+    ],
+    "exit_code": 0,
+    "count": 543,
+    "skipped": 0,
+    "log": "%TEMP%/phase9-final/unit.log",
+    "log_sha256": "136f4699f860908a8937b112cd879c2b577b7cdf4389ce66a6094df596e3d780"
+  },
+  "integration": {
+    "command": [
+      ".venv-api/Scripts/python.exe",
+      "tools/validate_phase9_launcher.py",
+      "--dotnet",
+      "<SDK dotnet.exe>"
+    ],
+    "exit_code": 0,
+    "dotnet_assertions": 24,
+    "groups": [
+      "Gen3/4/5 real byte IPC and DTO",
+      "Local sync/restart/watch/backup/error recovery",
+      "Multiple candidate discovery",
+      "Real Windows exclusive lock and recovery",
+      "CLI and Unicode paths",
+      "Synthetic input hashes and temporary cleanup"
+    ],
+    "log": "%TEMP%/phase9-final/integration.log",
+    "log_sha256": "9408a108c97acea9dad745555f27528bba1f1af0bf726b8a62b9f20b742ef3ff"
+  },
+  "static_checks": [
+    {
+      "name": "compile",
+      "command": [
+        ".venv-api/Scripts/python.exe",
+        "-m",
+        "compileall",
+        "-q",
+        "app",
+        "tests",
+        "tools"
+      ],
+      "exit_code": 0
+    },
+    {
+      "name": "lint",
+      "command": [
+        "py",
+        "-m",
+        "ruff",
+        "check",
+        "app/save_parser",
+        "app/launcher",
+        "tests/phase9_fixtures.py",
+        "tests/test_phase9_parser.py",
+        "tests/test_phase9_launcher.py",
+        "tools/validate_phase9_launcher.py"
+      ],
+      "exit_code": 0
+    },
+    {
+      "name": "format",
+      "command": [
+        "py",
+        "-m",
+        "ruff",
+        "format",
+        "--check",
+        "app/save_parser",
+        "app/launcher",
+        "tests/phase9_fixtures.py",
+        "tests/test_phase9_parser.py",
+        "tests/test_phase9_launcher.py",
+        "tools/validate_phase9_launcher.py"
+      ],
+      "exit_code": 0
+    },
+    {
+      "name": "protected_scope_diff",
+      "command": [
+        "git",
+        "diff",
+        "30d670a",
+        "--exit-code",
+        "--",
+        "supabase/v2",
+        "app/api",
+        "app/domain",
+        "app/application",
+        "app/repositories",
+        "Bridge",
+        "conex_pkhex.py"
+      ],
+      "exit_code": 0
+    },
+    {
+      "name": "diff_check",
+      "command": [
+        "git",
+        "diff",
+        "--check"
+      ],
+      "exit_code": 0
+    }
+  ],
+  "source": {
+    "app/launcher/__init__.py": {
+      "sha256": "9ef3c04e418b97cd8d2b4e9944956d81ebbd7eb8ef3e8bedb4fec076dbcfe2ad",
+      "normalized_lf_sha256": "9ef3c04e418b97cd8d2b4e9944956d81ebbd7eb8ef3e8bedb4fec076dbcfe2ad"
+    },
+    "app/launcher/__main__.py": {
+      "sha256": "afea127072bc776b0d794f3b949e11c3edb561fa6b3c8e67b0983829b1c1cbac",
+      "normalized_lf_sha256": "afea127072bc776b0d794f3b949e11c3edb561fa6b3c8e67b0983829b1c1cbac"
+    },
+    "app/launcher/backend.py": {
+      "sha256": "b6e181fcba2a3f06d761f6ad1f96933fa8dbf6b8327335985619e643347faf88",
+      "normalized_lf_sha256": "b6e181fcba2a3f06d761f6ad1f96933fa8dbf6b8327335985619e643347faf88"
+    },
+    "app/launcher/backup.py": {
+      "sha256": "f6cc4108c6fdb3e49c4c90c71d8fd34017a81cc814eac30107f3ece803f33676",
+      "normalized_lf_sha256": "f6cc4108c6fdb3e49c4c90c71d8fd34017a81cc814eac30107f3ece803f33676"
+    },
+    "app/launcher/config.py": {
+      "sha256": "eb1b1e7de02f63ac02561d0f1450f41e2bfecf4793523dfa6648b318210a6d0f",
+      "normalized_lf_sha256": "eb1b1e7de02f63ac02561d0f1450f41e2bfecf4793523dfa6648b318210a6d0f"
+    },
+    "app/launcher/core.py": {
+      "sha256": "fc9286fa31bdee13c8e55519a5860dd80a57e68c18728f879fd6919e4ea31861",
+      "normalized_lf_sha256": "fc9286fa31bdee13c8e55519a5860dd80a57e68c18728f879fd6919e4ea31861"
+    },
+    "app/launcher/discovery.py": {
+      "sha256": "f3f90c95733240c799b3b7282dde44d65a5cbe6912aa1754bb4edd254a3f6cc2",
+      "normalized_lf_sha256": "f3f90c95733240c799b3b7282dde44d65a5cbe6912aa1754bb4edd254a3f6cc2"
+    },
+    "app/launcher/journal.py": {
+      "sha256": "ea68ec3beaab0f8a761cff13a5399735f4d948fb26a2c6b99dc5f3b0d1a423fb",
+      "normalized_lf_sha256": "ea68ec3beaab0f8a761cff13a5399735f4d948fb26a2c6b99dc5f3b0d1a423fb"
+    },
+    "app/launcher/sync.py": {
+      "sha256": "972ed0467ac1bf0d8144ccfc6bb0b1a5174213e5d5d6e46fb9255b0878196b45",
+      "normalized_lf_sha256": "972ed0467ac1bf0d8144ccfc6bb0b1a5174213e5d5d6e46fb9255b0878196b45"
+    },
+    "app/save_parser/__init__.py": {
+      "sha256": "50ce2e9fc8df56bf07ffede8a7e28acf15ae3d04ce3589f2cad6dfa98f60f7fc",
+      "normalized_lf_sha256": "50ce2e9fc8df56bf07ffede8a7e28acf15ae3d04ce3589f2cad6dfa98f60f7fc"
+    },
+    "app/save_parser/adapter.py": {
+      "sha256": "049ac98ada41bcaf9cc119c2b6ee0cf0100cd737ab22cc90c2159568ec9c8e60",
+      "normalized_lf_sha256": "049ac98ada41bcaf9cc119c2b6ee0cf0100cd737ab22cc90c2159568ec9c8e60"
+    },
+    "app/save_parser/files.py": {
+      "sha256": "b5ae75513fefb8fb3d047c655688f23e82df9fb1085ca0712dcfd32f6046f01f",
+      "normalized_lf_sha256": "b5ae75513fefb8fb3d047c655688f23e82df9fb1085ca0712dcfd32f6046f01f"
+    },
+    "app/save_parser/models.py": {
+      "sha256": "61001cf3a9db6e449371a8c075b1f868d897930f92bbb83ed2080c94003100ef",
+      "normalized_lf_sha256": "61001cf3a9db6e449371a8c075b1f868d897930f92bbb83ed2080c94003100ef"
+    },
+    "companion/parser/PokeApp.Parser/Inspection.cs": {
+      "sha256": "ab2c4e2797029daac45ee6ae56f2d9daefe603b7619fa8df5a5e66ece58093f5",
+      "normalized_lf_sha256": "ab2c4e2797029daac45ee6ae56f2d9daefe603b7619fa8df5a5e66ece58093f5"
+    },
+    "companion/parser/PokeApp.Parser/packages.lock.json": {
+      "sha256": "8e9ba12e0cfa17eda8d8d6a7e8de8cfcd65608e0cd09fc8b9e24995ba2fb6d74",
+      "normalized_lf_sha256": "c0f4ee02947a549cea3a093524dd80456c73a7c60d37ba5110d3d02070b76139"
+    },
+    "companion/parser/PokeApp.Parser/PokeApp.Parser.csproj": {
+      "sha256": "9f95df468dc7b29982d5ff883ba55ebadb83306cd7270d7ab34a79487bea61ab",
+      "normalized_lf_sha256": "9f95df468dc7b29982d5ff883ba55ebadb83306cd7270d7ab34a79487bea61ab"
+    },
+    "companion/parser/PokeApp.Parser/Program.cs": {
+      "sha256": "5465aa8209e3099d55e0e83f72a1f22cd703d1dc5593b80ba9e8f9de08672535",
+      "normalized_lf_sha256": "5465aa8209e3099d55e0e83f72a1f22cd703d1dc5593b80ba9e8f9de08672535"
+    },
+    "companion/parser/PokeApp.Parser.Checks/packages.lock.json": {
+      "sha256": "ae3e0f3bea175b83a993e58f13a017cc682ce73acc581447e672d212eeeb43eb",
+      "normalized_lf_sha256": "299b4a5292bc90185e7e3b36f8e1f2f520c3eae5bafe724f81c84530c0c1a511"
+    },
+    "companion/parser/PokeApp.Parser.Checks/PokeApp.Parser.Checks.csproj": {
+      "sha256": "9a72db336758a0f57e21df496ac261f704f6a78720c16f2e96ae01cc3c6f6284",
+      "normalized_lf_sha256": "9a72db336758a0f57e21df496ac261f704f6a78720c16f2e96ae01cc3c6f6284"
+    },
+    "companion/parser/PokeApp.Parser.Checks/Program.cs": {
+      "sha256": "55e1334599945002480172d290ad946471acc64a58b8bacc1501d07bc3d5499f",
+      "normalized_lf_sha256": "55e1334599945002480172d290ad946471acc64a58b8bacc1501d07bc3d5499f"
+    },
+    "requirements-launcher.txt": {
+      "sha256": "8bbc46ffd0996710cf24c1b8d42b4f405fa165a4142cc9bc32d50833a35515a3",
+      "normalized_lf_sha256": "8bbc46ffd0996710cf24c1b8d42b4f405fa165a4142cc9bc32d50833a35515a3"
+    },
+    "tests/phase9_fixtures.py": {
+      "sha256": "9695ada28cd93b8c7de10e6940681f386bde6c1c3a204da01c02b7467af6dd53",
+      "normalized_lf_sha256": "9695ada28cd93b8c7de10e6940681f386bde6c1c3a204da01c02b7467af6dd53"
+    },
+    "tests/test_phase9_launcher.py": {
+      "sha256": "919e1dd6b3a6688895b37848afa358d119e2c28c746e250c448c5a37ac7d68c6",
+      "normalized_lf_sha256": "919e1dd6b3a6688895b37848afa358d119e2c28c746e250c448c5a37ac7d68c6"
+    },
+    "tests/test_phase9_parser.py": {
+      "sha256": "3d6584eee3e84cd350c28ec7eb4d72b9fb326c4ec2e5a68d37d99e42f287e8f4",
+      "normalized_lf_sha256": "3d6584eee3e84cd350c28ec7eb4d72b9fb326c4ec2e5a68d37d99e42f287e8f4"
+    },
+    "tools/validate_phase9_launcher.py": {
+      "sha256": "d2aa22ae3c81219c5b8fe45edad93c9136b14aac93e3305b50e75f8ea009b710",
+      "normalized_lf_sha256": "d2aa22ae3c81219c5b8fe45edad93c9136b14aac93e3305b50e75f8ea009b710"
+    }
+  },
+  "scope": {
+    "remote_writes": false,
+    "new_api": false,
+    "new_migration": false,
+    "historical_001_032_unchanged": true,
+    "sync_destination": "LOCAL_OBSERVATION_JOURNAL",
+    "competitive_current_promotion": false,
+    "physical_save_mutations": false
+  },
+  "protected_file_metadata": {
+    "size": 72079,
+    "mtime_utc": "2026-09-22T10:13:27.537137+00:00",
+    "contents_read": false
+  }
+}

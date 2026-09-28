@@ -207,9 +207,8 @@ Este principio tiene prioridad sobre la comodidad de implementación.
 ## 6.1 Dónde consultar el estado vigente
 
 El [checkpoint](project-checkpoint.md) identifica la fase activa y el progreso global.
-Para Phase 8L, consultar el [live handoff](work-in-progress/phase8l-live-handoff.md)
-para Git, estado local/remoto y siguiente acción, y el
-[informe de entrega](phase8l-completion-report.md) para evidencia técnica fechada.
+Consultar el live handoff y el informe de entrega enlazados desde el checkpoint
+para el estado operativo y la evidencia técnica fechada de la fase correspondiente.
 Este protocolo no mantiene otra copia de esas observaciones.
 
 Antecedente histórico de seguridad: 030 se desplegó en V2 mediante dos registros:
