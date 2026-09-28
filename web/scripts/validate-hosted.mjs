@@ -42,7 +42,8 @@ try {
   await doneDialog(() => page.getByRole('button', { name: 'Confirmar mi equipo' }).click());
   await nav('Tienda');
   await page.getByRole('button', { name: 'Comprar', exact: true }).first().click();
-  await page.getByRole('checkbox').check();
+  const basePrice = page.getByRole('dialog').getByRole('checkbox');
+  if (await basePrice.count()) await basePrice.check();
   await doneDialog(() => page.getByRole('button', { name: 'Confirmar compra' }).click());
   await nav('Copa');
   await page.locator(`a[href="/copa/${input.cup}"]`).click();

@@ -209,6 +209,15 @@ def main():
         sid = fixtures.draft()
         report['seasons'] = fixtures.seasons
         save()
+        # Renaming is a draft-only command; exercise its CAS before activation.
+        key = uuid4().hex
+        setup = fixtures.state(sid)
+        body = dict(name=cfg.run_id+' renamed', expected_revision=setup['setup_revision'])
+        first = fixtures.call('rename', sid, body, key=key)
+        replay = fixtures.call('rename', sid, body, key=key)
+        require(first['operation_id'] == replay['operation_id'], 'Hosted idempotency replay')
+        request('PUT', f'/v1/admin/seasons/{sid}/name', body, actor=admin, key=uuid4().hex, status=409)
+        passed('Real admin authority, durable idempotency replay and stale revision conflict')
         for trainer in fixtures.trainers[:4]:
             fixtures.add(sid, trainer['id'])
         config = fixtures.config(sid)
@@ -250,15 +259,6 @@ def main():
         own_pc = request('GET', f'/v1/read/seasons/{sid}/pc', actor=owner)
         require(all(p['pokemon']['nickname'] == 'Synthetic 2' for p in own_pc['pokemon']) and len(own_pc['pokemon']) == 6, 'Private PC owner scope')
         passed('Typed overview/shop/inventory and real private PC owner isolation')
-        # An authoritative mutation followed by replay and stale CAS rejection.
-        key = uuid4().hex
-        setup = fixtures.state(sid)
-        body = dict(name=cfg.run_id+' renamed', expected_revision=setup['setup_revision'])
-        first = fixtures.call('rename', sid, body, key=key)
-        replay = fixtures.call('rename', sid, body, key=key)
-        require(first['operation_id'] == replay['operation_id'], 'Hosted idempotency replay')
-        request('PUT', f'/v1/admin/seasons/{sid}/name', body, actor=admin, key=uuid4().hex, status=409)
-        passed('Real admin authority, durable idempotency replay and stale revision conflict')
         doubles = fixtures.create_cup(sid, fmt='doubles', n=2)
         fixtures.finish_cup(sid, doubles)
         cup = fixtures.create_cup(sid, fmt='elimination', n=4)
