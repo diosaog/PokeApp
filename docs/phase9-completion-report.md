@@ -27,3 +27,19 @@ Initial synthetic Gen3/4 builders lacked serialization headers; fixed builders,
 not parser checks. A real Windows stat/fstat ctime discrepancy initially rejected
 stable files; removed ctime from the portable comparison while preserving inode,
 device, size, nanosecond mtime and a second complete content hash.
+
+## Launcher block — 2026-09-28
+
+32 focused Python tests pass; `tools/validate_phase9_launcher.py --dotnet <SDK>`
+passes the 24 .NET checks and real byte IPC/DTO, local sync/restart/watch/backups,
+CLI and Windows sharing-violation recovery. An initial Windows check returned
+ACCESS_DENIED because Python CRT open discarded native error 32; the bounded
+reader now preserves CreateFileW errors and uses read-only shared handles.
+This fixes error classification without hiding locked files or disabling hashes.
+
+Implemented local config/discovery, content-verified polling/debounce, SQLite
+observation receipts with CAS, atomic operation claims/recovery, prepared/verified
+backups and explicit physical-write refusal. Single-profile OS lease is held by
+the CLI. Auth uses existing PIN/refresh/me HTTP contracts, rejects redirects and
+disabled/mismatched accounts, keeps tokens only in memory and sanitizes errors.
+No backend path request exists. No server capture attestation is fabricated.

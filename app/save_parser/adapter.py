@@ -1,4 +1,5 @@
 """Trusted, locally configured worker executable. Bytes in, neutral DTO out."""
+
 from __future__ import annotations
 
 from dataclasses import dataclass
@@ -7,8 +8,19 @@ import subprocess
 
 from pydantic import ValidationError
 
-from app.save_parser.files import MAX_SAVE_BYTES, SaveSnapshot, SaveSource, SnapshotReader
-from app.save_parser.models import ErrorCode, ObservedSave, ParserResponse, SaveError, SaveParser
+from app.save_parser.files import (
+    MAX_SAVE_BYTES,
+    SaveSnapshot,
+    SaveSource,
+    SnapshotReader,
+)
+from app.save_parser.models import (
+    ErrorCode,
+    ObservedSave,
+    ParserResponse,
+    SaveError,
+    SaveParser,
+)
 
 
 class PkhexProcessParser:
@@ -26,8 +38,14 @@ class PkhexProcessParser:
         if len(data) > MAX_SAVE_BYTES:
             raise SaveError(ErrorCode.UNSUPPORTED_VERSION)
         try:
-            result = subprocess.run([str(self.executable)], input=data, capture_output=True,
-                timeout=self.timeout, shell=False, creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0))
+            result = subprocess.run(
+                [str(self.executable)],
+                input=data,
+                capture_output=True,
+                timeout=self.timeout,
+                shell=False,
+                creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0),
+            )
             if result.returncode != 0 or len(result.stdout) > 4 * 1024 * 1024:
                 raise SaveError(ErrorCode.PARSER_FAILURE)
             parsed = ParserResponse.model_validate_json(result.stdout)
@@ -52,13 +70,19 @@ class SaveInspector:
     def __init__(self, parser: SaveParser, reader: SnapshotReader | None = None):
         self.parser, self.reader = parser, reader or SnapshotReader()
 
-    def inspect(self, source: SaveSource, snapshot: SaveSnapshot | None = None) -> ParseResult:
+    def inspect(
+        self, source: SaveSource, snapshot: SaveSnapshot | None = None
+    ) -> ParseResult:
         snapshot = snapshot or self.reader.read(source)
+        if snapshot.source != source:
+            raise SaveError(ErrorCode.INVALID_PATH)
         try:
             observation = self.parser.parse(snapshot.data)
         except SaveError:
             raise
         except Exception:
             raise SaveError(ErrorCode.PARSER_FAILURE) from None
+        if not isinstance(observation, ObservedSave):
+            raise SaveError(ErrorCode.PARSER_FAILURE)
         self.reader.verify(snapshot)
         return ParseResult(snapshot, observation, self.parser.version)

@@ -1,4 +1,5 @@
 """Small, versioned wire models; no PKHeX names, local paths or app identity claims."""
+
 from __future__ import annotations
 
 from collections import defaultdict
@@ -8,7 +9,11 @@ from typing import Literal, Protocol
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
-from app.domain.pokemon_identity import PokemonIdentityEvidence, PokemonLocation, ParsedPokemonObservation
+from app.domain.pokemon_identity import (
+    PokemonIdentityEvidence,
+    PokemonLocation,
+    ParsedPokemonObservation,
+)
 
 
 class ErrorCode(StrEnum):
@@ -76,7 +81,9 @@ class ParsedPokemon(WireModel):
 
     @model_validator(mode="after")
     def validate_stats(self):
-        if any(not 0 <= v <= 31 for v in self.ivs) or any(not 0 <= v <= 255 for v in self.evs):
+        if any(not 0 <= v <= 31 for v in self.ivs) or any(
+            not 0 <= v <= 255 for v in self.evs
+        ):
             raise ValueError("invalid_stats")
         if self.ivs != self.identity.ivs:
             raise ValueError("inconsistent_identity_ivs")
@@ -114,7 +121,10 @@ class ObservedSave(WireModel):
 
     def identity_observations(self) -> tuple[ParsedPokemonObservation, ...]:
         """Inputs compatible with 023, WITHOUT allocating or binding authoritative IDs."""
-        return tuple(ParsedPokemonObservation(location, p.identity) for location, p in self.occupied())
+        return tuple(
+            ParsedPokemonObservation(location, p.identity)
+            for location, p in self.occupied()
+        )
 
 
 class ParserResponse(WireModel):
@@ -143,7 +153,9 @@ class PokemonChange:
     after: tuple[PokemonLocation, ...]
 
 
-def compare_observations(before: ObservedSave | None, after: ObservedSave) -> tuple[PokemonChange, ...]:
+def compare_observations(
+    before: ObservedSave | None, after: ObservedSave
+) -> tuple[PokemonChange, ...]:
     """Local hints only. Same-PID collisions/core changes remain ambiguous, as in 023."""
     old, new = defaultdict(list), defaultdict(list)
     for location, p in before.occupied() if before else ():
@@ -165,5 +177,7 @@ def compare_observations(before: ObservedSave | None, after: ObservedSave) -> tu
             status = "CHANGED"
         else:
             status = "MOVED" if a[0][0] != b[0][0] else "UNCHANGED"
-        changes.append(PokemonChange(status, tuple(x[0] for x in a), tuple(x[0] for x in b)))
+        changes.append(
+            PokemonChange(status, tuple(x[0] for x in a), tuple(x[0] for x in b))
+        )
     return tuple(changes)
