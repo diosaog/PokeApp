@@ -64,3 +64,25 @@ visual convenience, physical save writes, V1 migration or Phase 11.
 Local Workers/dry-run and intercepted browser tests are separate evidence from
 public deployment and real authenticated flows. Missing account/API configuration
 keeps the phase open until those delivery checks can be completed.
+
+## Explicit temporary owner access - 2026-09-28
+
+The owner authorized provisioning the unique existing enabled Anto trainer via
+the supported PIN/Auth bridge for manual inspection of the public V2 deployment.
+This is **OWNER_TEMP_STAGING_AUTH**, retained across fixture cleanup. Do not store
+the temporary credential in Git, documentation, logs or evidence. Preserve other
+trainer attributes/identities and all competition data. The owner identity is not
+a fixture to delete when validation ends.
+
+Release blocker: **TEMP_STAGING_AUTH_MUST_BE_REMOVED_OR_RESET_BEFORE_RELEASE**.
+Final users require individual identities/credentials through the approved secure
+provisioning flow; no universal or predictable production default. This temporary
+access does not block Phase 10 DONE once public validation and cleanup pass.
+
+The owner also explicitly authorized **OWNER_TEMP_STAGING_ADMIN** on this same
+identity in the current staging/development environment. Authority uses the existing
+`trainers.is_admin` field, verified by FastAPI and the administration SQL functions;
+it is not a UI bypass, an Auth duplication or a name-based production rule. Keep
+the current PIN and mapping. Review/revoke this temporary role alongside credential
+reset and definitive onboarding/roles before release. Never propagate it by seed or
+migration into production.

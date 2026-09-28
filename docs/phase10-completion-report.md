@@ -1,11 +1,13 @@
-# Phase 10 delivery report — React / Cloudflare
+# Phase 10 delivery report - React / public Cloudflare + Railway
 
-Observed 2026-09-28. **IN PROGRESS: local delivery validated and published;
-public deployment blocked by missing Cloudflare authentication and backend URL.**
-This is not a Phase 10 closure or a live authenticated staging PASS.
-Current operational record: [live handoff](work-in-progress/phase10-live-handoff.md).
-[Contract](phase10-react-cloudflare.md), [durable evidence](phase10-validation-evidence.json),
-[run/deploy instructions](../web/README.md).
+Validated 2026-09-28 UTC; documentation closed 2026-09-29 Europe/Madrid.
+**DONE: public React/FastAPI, real authenticated gates, owner admin, independent
+cleanup and Git publication.** The earlier missing-account/API
+blocker is resolved. Current operational record:
+[live handoff](work-in-progress/phase10-live-handoff.md).
+[Contract](phase10-react-cloudflare.md), [local evidence](phase10-validation-evidence.json),
+[public evidence](phase10-public-evidence.json),
+[web runbook](../web/README.md), [backend runbook](../deploy/README.md).
 
 ## Entry and inherited result
 
@@ -82,7 +84,7 @@ explicit Authorization/Content-Type/Idempotency-Key headers, no wildcard credent
 All `/v1/` responses include `Cache-Control: no-store`. Backend privileges remain
 server-enforced; hiding an admin link is not authorization.
 
-## Validation evidence and limits
+## Historical local validation and limits
 
 | Gate | Result / provenance |
 |---|---|
@@ -122,44 +124,159 @@ peer range, so 5.9.3 was pinned; Node tooling types were added for Vite config.
 The Browser skill found no available integrated browser; Chromium CDN downloads
 timed out. The Playwright suite used installed Edge in fresh isolated contexts.
 
-## Cloudflare / backend / database
+## Public infrastructure and deployed source
 
-Workers static assets config provides
-[SPA navigation](https://developers.cloudflare.com/workers/static-assets/routing/single-page-application/).
-Build-generated [headers](https://developers.cloudflare.com/workers/static-assets/headers/)
-include a CSP constrained to the configured API origin. Missing/invalid
-build URLs fail; the deployment command rejects a localhost build. No temporary
-account, domain, public URL or live backend was invented.
+Railway project **PokeApp V2** `f5c4666a-508f-4e5a-8aae-a54581814f29`, service
+**pokeapp-api** `9a78e086-c927-471f-8bb9-befe62c77de7`, environment
+`production` `d05ccec3-7a85-4eeb-9b01-c0f8d2111896`. That is Railway's default label;
+the database remains isolated V2 staging. Existing URL:
+https://pokeapp-api-production.up.railway.app.
+Deployment `03e8c858-e036-44b9-8b46-ee659db175f1`, source `6d2c66a`, SUCCESS/RUNNING.
+Docker starts `python -m app.api.serve`, non-root user 10001, one Uvicorn process/
+replica on port 8000. Required config fails closed. Secrets remain server-side.
+The committed-source bundle excludes docs, protected/untracked files, saves,
+credentials, local builds and tests. No migration runs at build/start.
 
-`wrangler whoami`: **not authenticated**. No public deployment took place.
-No existing Railway deployment was found. API origin remains hosting-independent;
-`/health` remains liveness only. The owner was asked for the intended public API
-URL and Cloudflare account/domain while local work continued; no answer is recorded.
+Cloudflare account `a8e089ff4da821ed3dbd24701437514c`, Worker **pokeapp-web**:
+https://pokeapp-web.pokeapp-v2.workers.dev.
+Final version `06479b87-7adb-4965-a5d8-b1d07ef783c1`, deployment
+`6f6cb9d6-cb0c-4fa1-82f6-92f69222c8b1`, 100%, source `3c83a16`.
+Initial public version `c3ce7902-8c42-4301-b27e-829d7f507e53` was superseded only to
+fix long unbroken names; the backend did not change or redeploy.
+Final build: JS gzip 112.90 kB, CSS gzip 6.31 kB. Served asset SHA256 equals the
+local final build; production API URL, deep SPA route, MIME/CSP/security headers
+and exact allowed/rejected CORS PASS. No wildcard credentials. `/health` proves
+liveness; real JWT/API/PostgREST flows below establish usability.
 
-Pinned project verified for read-only preflight:
-`https://uwleqeuzsveqlugugzba.supabase.co`. Final schema selections, including numeric
-casts, were accepted. Observed lists: zero seasons, zero Hall entries, ten public
-trainers. **No fixture, mutation, migration or Storage operation** occurred.
-No fresh Advisor/cleanup run is claimed because no DB security/schema/data change
-was performed. Historical 031=`20260928110301`, 032=`20260928111840` remain the closed
-8L records; do not reapply. Migrations 001–032 are unchanged; no 033.
+Anon/service keys and PIN pepper are absent from served JS/CSS. No configured
+loopback API endpoint exists. Two inert `http://localhost` URL-parsing bases from
+React Router remain in vendor code; they are not API targets. Browser verification
+checks actual request origins. Railway's PIN limiter stays single-process/in-memory;
+shared throttling is required before adding replicas. Runtime direct dependencies
+are pinned; the deployed image digest is retained, not a claim of a fully locked
+transitive Python dependency graph.
 
-## Publication and next action
+## Persistent owner access - staging only
 
-- `512d239`: safe reads/CORS, initial contract and continuity index; pushed.
-- `c940b33`: React features, generated contracts, tests and Cloudflare boundary; pushed.
-- `7a827ee`: admin recovery and exact numeric transport; pushed.
-- Documentation/evidence closure: the commit containing this finalized report.
+**OWNER_TEMP_STAGING_AUTH / OWNER_TEMP_STAGING_ADMIN**. Unique enabled Anto:
+trainer `507d9c56-04d8-4801-a9da-f1e53674efb5`, Auth
+`ac98932c-f713-43d1-8b20-600f0be3dadc`. The supported PIN provisioner mapped the
+existing trainer; no duplicate trainer/Auth identity. The same requested temporary
+PIN remains usable and is absent from repository docs/evidence.
 
-Protected `docs/pokeapp-guia-completa-pestanas-y-producto.md` remains untracked,
-unread and untouched (metadata still 72,079 bytes / 2026-09-22 10:13:27 UTC).
-No secrets or ignored build/browser artifacts were staged.
-Local validation servers were stopped; ports 8787/5173 have no listeners and no
-workspace web Node/Workers/browser process remains.
+On explicit owner authorization, a privileged, scope-checked update set the existing
+`trainers.is_admin` field true. This is the authority read by JWT principal lookup,
+`require_admin_principal`, SQL `admin_setup_principal` and existing RLS helpers.
+No name-based rule, client authority, production default or role migration was added.
+Public login/JWT/refresh, `/v1/me is_admin=true`, admin read, create/rename of a
+disposable empty draft and six actual React admin areas PASS. Initial non-admin
+request returned `ADMIN_REQUIRED`. Other trainer fields/identities unchanged except
+Anto's `is_admin` and audit timestamp; the draft fixture was removed and all 52
+baseline tables compared. Existing open React sessions need logout/login to refresh
+cached role presentation; backend checks the mapped row on every request.
 
-Weighted estimate **~73% → ~79%** for the delivered React/API work, with no credit
-for a public deployment or cutover. Phase 10 remains IN PROGRESS. Next: configure
-the owner-selected backend/origins and Cloudflare account, rebuild/deploy, and verify
-real authenticated flows in that environment. Follow the master staging procedure
-if fixtures are required; current read-only evidence does not authorize bypassing
-baseline/cleanup checks. Do not restart Phase 9/8L or begin Phase 11 automatically.
+**TEMP_STAGING_AUTH_MUST_BE_REMOVED_OR_RESET_BEFORE_RELEASE**: reset/remove this
+temporary credential, review/revoke the temporary staging role and establish
+individual secure onboarding/definitive roles before release. Keep access usable
+for current owner review; it is explicitly not fixture residue or a Phase 10 blocker.
+
+## Public validation, failures and scope of evidence
+
+The original 565-test Python suite also passed at `0095dac` (exit 0, 30.247 s).
+Its subjects are unchanged since; no repeated backend gate was needed for CSS or
+harness-only fixes. Final browser suite at `3c83a16`: **9 PASS**, exit 0, 25.6 s;
+11 regular screens/four breakpoints plus long-name desktop/mobile regression.
+The regression failed before the one-line wrapping fix and passed after it.
+TypeScript/production build, formatting and Workers dry run/deploy PASS.
+
+Real public fixture runs use Cloudflare React -> Railway FastAPI -> pinned V2;
+no intercepted API and no TestClient. The successful individual gates in runs 4/5
+cover four PIN/JWT/refresh identities, wrong PIN/disabled/mismatched identity denial,
+real admin setup/activation, idempotent replay/stale-body 409, four Team Locks,
+results/close/frozen history, typed overview/shop/inventory/private PC isolation,
+doubles Bo3/certification/Hall and judicial proposal. Real browser responses also
+confirm Team Lock, purchase, Cup results and judicial resolve HTTP 200; dialogs
+complete and show success. The separate owner-admin run is PASS.
+
+Do not relabel failed complete runners as PASS. All attempts are retained:
+
+| Attempt | Stop reason | Resolution / state |
+|---|---|---|
+| 1 | Day close lacked fixture identity revisions | Fixture uses existing identity reconciliation |
+| 2 | Rename attempted after activation | Check moved to draft window |
+| 3 | Identical rename replay returned correct 200 | Stale conflict now uses a different body |
+| 4 | Global network-idle timeout | Wait for application reads/loading; local antivirus long polling identified |
+| 5 | Long unbroken fixture name overflow on Inicio | One-line CSS wrap, red/green regression, frontend-only redeploy |
+| 6 | Owner had created an active season | Guard refused before creating fixtures; owner seasons preserved |
+
+All six attempts restored their fresh 52-table baseline and preserved migration
+history, with zero ERROR/WARN delta against their immediate Advisor baseline.
+The final attempt is an expected safety stop, not a product defect. The all-in-one
+runner's trailing direct purchase/judicial readback was not reached; public successful
+mutation receipts and earlier integrated backend tests are the mutation evidence.
+Completion is assessed from complementary gates, not a fictitious single green run.
+
+The final read-only browser check uses the existing owner's season and preserves
+all manual data. It covers all eleven screens at desktop/mobile with real API
+responses, admin visibility/reads and logout. The first read-only attempt passed
+all 22 screen checks but failed a blanket external-origin assertion: installed
+Kaspersky injects its own script/long polling. Raw served assets and app source
+contain no such script. The validator records that exact environment origin
+separately without disabling protection, intercepting API or accepting other origins.
+Final read-only result at `023442f`: **PASS**, 22 screen/viewport visits,
+zero API/page errors, no business writes, logout with no persisted credentials.
+Independent final SQL: **52/52 tables equal**, zero public fixture-prefix residue,
+24 unchanged migration records, Anto admin mapping still valid. Final screenshots
+were inspected: [desktop](evidence/phase10/public-desktop-saves.png) and
+[mobile](evidence/phase10/public-mobile-saves.png).
+
+## Database, cleanup and security
+
+Pinned V2 `uwleqeuzsveqlugugzba`. All 24 migration records preserved;
+031=`20260928110301`, 032=`20260928111840`. **Do not replay either.**
+Migrations 001-032 unchanged; no 033, remote bootstrap/reset, V1 mutation or cutover.
+
+Baselines compare counts plus ordered full-row content hashes for all 52 tables:
+46 public, Auth users/identities/sessions/refresh_tokens, Storage objects/buckets.
+All public rows include Anto's role and all owner-created seasons. Only the explicit
+owner Auth row/identity/session/refresh activity is excluded from later comparisons;
+fixture identities are still compared/deleted and deletion checked independently.
+No Storage bytes are touched. Preserve the owner's manual seasons, including the
+active one: do not rerun the activating fixture suite while it exists.
+
+Combined Advisor final baseline: **24 ERROR / 5 WARN / 122 INFO**. Zero new findings
+against immediate baselines. The original pre-owner inventory had four warnings;
+the added observed `auth_leaked_password_protection` is the previously documented
+intermittent Auth configuration warning, now present with owner access. No Auth
+setting changed; do not claim it fixed or pretend initial/final totals are identical.
+The [durable final inventory](phase10-public-security-advisor.json) retains finding/
+object/severity. The other four warnings and 24 security-definer-view errors are inherited. No new
+schema, grants, RPC privilege or RLS change occurred during public delivery.
+
+## Publication, limits and next step
+
+Implementation/publication commits: `512d239`, `c940b33`, `7a827ee` (React/API),
+`6d2c66a` (hosting), `18b93f4`, `0095dac`, `f74d445`, `6c60d99`, `7d68de2`
+(hosted harness/owner evidence), `3c83a16` (long-name fix), `8eb89fa`, `023442f`
+(read-only final validation and antivirus classification). All pushed before their
+respective deployments/runs. Final documentation/evidence uses its own commit.
+
+Raw local evidence: `%TEMP%/phase10-hosted-run1` through `run6`,
+`%TEMP%/phase10-owner-access`, `%TEMP%/phase10-owner-admin`,
+`%TEMP%/phase10-public-readonly` and `phase10-public-readonly-final`,
+`%TEMP%/phase10-hosting-final.json`, `%TEMP%/phase10-public-unit-final.log`.
+No token, credential or PIN is retained in durable repository evidence.
+
+Protected `docs/pokeapp-guia-completa-pestanas-y-producto.md` is unread/untouched/
+untracked; metadata remains 72,079 bytes / 2026-09-22 10:13:27 UTC. It is never staged.
+Remaining product limits: memory-only sessions/pending intents, no cloud ingestion,
+physical save writes, installer/auto-update, final polish/audio or V1 migration.
+Phase 11 is the next planned work and is **not started**.
+
+Final state: all validation processes finished; no pending fixture mutation or
+local validation server. Main is committed/pushed with no tracked changes; the
+protected guide remains the only untracked exception. Obtain the documentation
+closure hash from Git rather than maintaining a self-referential commit ID.
+Weighted complete-project estimate: **~79% -> ~80%** for verified public delivery
+and integration. No credit for V1 cutover, future Launcher/physical operations or
+release readiness. **Phase 10 DONE; Phase 11 not started.**

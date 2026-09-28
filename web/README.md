@@ -65,12 +65,16 @@ build; use a real HTTPS backend and rebuild first. `wrangler.jsonc` uses Workers
 static assets and SPA fallback. The build generates a CSP limited to the configured
 API origin plus security headers, and `build-config.json` with public configuration.
 No backend secret is an asset. Source maps are not published.
+Hosted backend configuration and committed-source upload instructions are in the
+[deployment runbook](../deploy/README.md). Live status and evidence are in the
+[Phase 10 handoff](../docs/work-in-progress/phase10-live-handoff.md).
 
-Cloudflare authentication and the intended account/domain must be configured by
-the owner. No temporary account or invented production URL is used. Once ready:
+The verified frontend is `https://pokeapp-web.pokeapp-v2.workers.dev`; its backend
+is `https://pokeapp-api-production.up.railway.app`. Reuse the pinned account and
+existing Worker. Deploy from a committed/pushed checkout:
 
 ```powershell
-$env:VITE_API_BASE_URL='https://<actual-fastapi-origin>'
+$env:VITE_API_BASE_URL='https://pokeapp-api-production.up.railway.app'
 npm run build
 npm run deploy:check
 npm run deploy
@@ -81,6 +85,31 @@ types/security headers, login/refresh/logout, actual CORS and private data acces
 Never call a dry run or intercepted browser fixture a real staging/deployment PASS.
 Official references: [SPA routing](https://developers.cloudflare.com/workers/static-assets/routing/single-page-application/)
 and [headers](https://developers.cloudflare.com/workers/static-assets/headers/).
+
+Anto has explicitly authorized temporary staging access for manual inspection.
+Its credential is not documented here. Keep it usable until the owner's review;
+**TEMP_STAGING_AUTH_MUST_BE_REMOVED_OR_RESET_BEFORE_RELEASE**. It is not a
+universal/default credential and must not be copied into future onboarding.
+The same owner identity now has the explicitly authorized temporary staging admin
+role through `trainers.is_admin`; backend authorization and the six React admin
+areas have been verified. Review/revoke that temporary role when resolving the
+release blocker. Re-login refreshes the role in an already open browser session.
+
+The opt-in real hosted validator is `tools.validate_phase10_hosted`, with
+`--allow-staging-writes`, a new evidence directory and the explicit owner Auth
+exception. It reads the deployed PIN pepper privately from its process environment,
+never from a command argument. Preserve the owner exception; all fixture Auth and
+public rows must return to their fresh baseline. This test runs the actual public
+web/API without request interception. Never run it over another active fixture run.
+It also refuses when an owner-created active season exists; preserve that guard
+and all manual data. To finish read/render checks in that situation, use
+`scripts/validate-public-readonly.mjs` from `web`, passing the actual web/API URLs,
+owner identifier, PIN, trainer ID and a fresh output directory through private
+stdin JSON. It performs no business writes and visits eleven screens on desktop
+and mobile. Surround it with fresh full-state/history/Advisor comparisons using
+the helper functions in `tools.validate_phase10_hosted`. Never put credentials in
+command arguments, logs or checked-in files. The known local antivirus injection
+origin is recorded separately; API traffic is never intercepted or simulated.
 
 ## Known product boundaries
 

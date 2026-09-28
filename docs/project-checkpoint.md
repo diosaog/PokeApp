@@ -1,32 +1,50 @@
 # PokeApp 2.0 Project Checkpoint
 
-Checkpoint reconciled: 2026-09-28. This file is the project index and historical
+Checkpoint reconciled: 2026-09-29. This file is the project index and historical
 milestone record; it does not maintain a second live phase-status ledger.
 
 ## Current project position
 
-- Last closed phase: **9 - parser boundary + Launcher/Companion base, DONE**.
-  [Contract](phase9-parser-launcher.md), [delivery evidence](phase9-completion-report.md),
-  [closed handoff](work-in-progress/phase9-live-handoff.md).
-- Phase 8/8L backend closure remains intact: [8L report](phase8l-completion-report.md).
-- Weighted complete-project estimate: **~79%**, from ~73% after the locally
-  validated React/API delivery. No credit for public deployment or cutover;
-  remaining deployment checks are tracked in the active handoff.
-- Runtime remains Streamlit/V1; Phase 9 is isolated local work, with no cutover.
-  **Phase 10 is IN PROGRESS**: [live handoff](work-in-progress/phase10-live-handoff.md),
-  [contract](phase10-react-cloudflare.md), [delivery report](phase10-completion-report.md). Cloud save ingestion/current-state promotion,
-  physical save operations and final Launcher distribution remain later work.
+- Last closed phase: **10 - React / public Cloudflare + Railway, DONE**.
+  [Contract](phase10-react-cloudflare.md), [delivery report](phase10-completion-report.md),
+  [public evidence](phase10-public-evidence.json),
+  [closed handoff](work-in-progress/phase10-live-handoff.md).
+- Backend 8L and parser/Launcher foundation 9 remain closed; no replay or restart.
+- Weighted complete-project estimate: **~80%**, from ~79% after verified public
+  hosting/auth/integration. This is not final release or V1/V2 cutover.
+- V1/Streamlit remains legacy/fallback. V2 public staging is available for inspection.
+  Cloud save ingestion/current-state promotion, physical save operations, final
+  Launcher distribution, onboarding/roles and release polish remain later work.
+- **Phase 11 is next, NOT STARTED.** No active development phase is automatically
+  authorized by this closure. Continue only under the next owner instruction.
+- Preserve **OWNER_TEMP_STAGING_AUTH / OWNER_TEMP_STAGING_ADMIN** for current review.
+  **TEMP_STAGING_AUTH_MUST_BE_REMOVED_OR_RESET_BEFORE_RELEASE** includes role review
+  and definitive secure onboarding. Do not copy a temporary staging policy to production.
 
-Read the [continuity protocol](AI/PokeApp_Multi_AI_Continuity_Protocol.md) and
+Read [continuity](AI/PokeApp_Multi_AI_Continuity_Protocol.md) and
 [master protocol](PokeApp_2.0_Protocolo_Maestro_MultiIA.md) before future work.
-The user authorized Phase 10 React/API delivery, validation and Git publication after
-verifying Phase 9 DONE. No V1/V2 cutover, physical save mutation or automatic Phase 11.
+The closed handoff records existing hosting resources, owner exception, manual
+season guard and resumption checks. Do not recreate infrastructure or reapply SQL.
 
 ## Historical delivery milestones — not current execution state
 
 The following counts, PASS results, next-step notes and remote versions belong to
 their named milestones. They are retained as evidence, not fresh verification of
 the current repository or remote database. Current project position is indexed above.
+
+### 2026-09-29 - Phase 10 public delivery CLOSED
+
+Existing Railway FastAPI and Cloudflare React verified with actual PIN/JWT/API/
+PostgREST. Anto retains his identity/PIN and explicitly authorized staging admin;
+backend admin create/read/rename and React administration PASS. Final frontend
+`3c83a16` corrects long-name wrapping, with nine browser tests PASS. Public business
+and mutation gates are retained from earlier fixture runs; final read-only public
+browser PASS covers eleven screens at desktop/mobile. Complementary gates are
+explicit: no failed all-in-one run is relabelled PASS. Owner-created active/manual
+seasons are preserved. Independent final 52-table comparison, zero fixture prefix
+residue, history and Advisor delta PASS. 001-032 unchanged, no 033 or cutover.
+Public URLs/IDs, warnings and all failed attempts are in the report/evidence.
+Progress ~79% -> ~80%; Phase 11 not started.
 
 ### 2026-09-28 - Phase 10 local React/API delivery; phase remains open
 

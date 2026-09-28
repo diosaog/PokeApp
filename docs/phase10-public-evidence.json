@@ -1,0 +1,1747 @@
+{
+  "observed_at": "2026-09-28T22:02:25.294286+00:00",
+  "validation_source_commit": "023442f9ced7d506b66b7d480cc41f8b7a590bb2",
+  "deployment_source_commits": {
+    "backend": "6d2c66a",
+    "frontend": "3c83a16"
+  },
+  "uncommitted_changes": "Documentation/evidence only; source checks committed/pushed",
+  "closure_basis": "Complementary public business/API gates (attempts 4/5), owner admin PASS, final read-only browser PASS and independent state comparison. No single all-in-one runner is relabelled PASS.",
+  "hosting": {
+    "observed_at": "2026-09-28T21:52:52.004765+00:00",
+    "railway": {
+      "project_id": "f5c4666a-508f-4e5a-8aae-a54581814f29",
+      "service_id": "9a78e086-c927-471f-8bb9-befe62c77de7",
+      "deployment_id": "03e8c858-e036-44b9-8b46-ee659db175f1",
+      "status": "SUCCESS",
+      "running": true,
+      "image_digest": "sha256:7fe7792f947711c11b6c5e0a1ac0d2bc88f83281f44745e62688819e55c268af",
+      "url": "https://pokeapp-api-production.up.railway.app",
+      "variables_verified_without_values": true,
+      "supabase_ref": "uwleqeuzsveqlugugzba",
+      "replicas": 1,
+      "liveness": 200
+    },
+    "cloudflare": {
+      "worker": "pokeapp-web",
+      "account": "a8e089ff4da821ed3dbd24701437514c",
+      "url": "https://pokeapp-web.pokeapp-v2.workers.dev",
+      "deployment_id": "6f6cb9d6-cb0c-4fa1-82f6-92f69222c8b1",
+      "versions": [
+        {
+          "version_id": "06479b87-7adb-4965-a5d8-b1d07ef783c1",
+          "percentage": 100
+        }
+      ],
+      "build_config": {
+        "api_base_url": "https://pokeapp-api-production.up.railway.app",
+        "mode": "production"
+      },
+      "assets": [
+        {
+          "path": "/assets/index-FOJt33Cb.js",
+          "sha256": "254d3b83bef66db7f7a4cd6da68099ccc8fc1c74881090ffc093637dc7780d78",
+          "mime": "text/javascript",
+          "matches_local_build": true,
+          "inert_vendor_localhost_literals": 2
+        },
+        {
+          "path": "/assets/index-Cn_VJTyG.css",
+          "sha256": "09f0684a608a3b4b13951898e792261052694975e673561e7bc77f6aef1deab7",
+          "mime": "text/css",
+          "matches_local_build": true,
+          "inert_vendor_localhost_literals": 0
+        }
+      ],
+      "spa_routing": true,
+      "security_headers": {
+        "Content-Security-Policy": "default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'self' https://pokeapp-api-production.up.railway.app; object-src 'none'; base-uri 'none'; frame-ancestors 'none'; form-action 'self'",
+        "X-Content-Type-Options": "nosniff",
+        "Referrer-Policy": "no-referrer",
+        "Permissions-Policy": "camera=(), microphone=(), geolocation=()",
+        "X-Frame-Options": "DENY"
+      }
+    },
+    "cors_allowed": true,
+    "cors_foreign_denied": true,
+    "secret_scan": "PASS: anon key, service key and PIN pepper absent from deployed JS/CSS; public API URL is Railway HTTPS",
+    "vendor_note": "Two React Router inert http://localhost URL parsing bases remain in the vendor bundle; neither is a configured API endpoint. Sources inspected in react-router/dist/production. No localhost:port or 127.0.0.1 API target.",
+    "status": "PASS"
+  },
+  "owner_access": {
+    "exception": "OWNER_TEMP_STAGING_AUTH",
+    "release_blocker": "TEMP_STAGING_AUTH_MUST_BE_REMOVED_OR_RESET_BEFORE_RELEASE",
+    "trainer_id": "507d9c56-04d8-4801-a9da-f1e53674efb5",
+    "auth_user_id": "ac98932c-f713-43d1-8b20-600f0be3dadc",
+    "trainer_count": 10,
+    "credential_recorded": false,
+    "login": "PASS",
+    "jwt_me": "PASS",
+    "refresh": "PASS",
+    "react_login_logout": "PASS",
+    "other_trainers_unchanged": true,
+    "changed_tables": [
+      "auth.identities",
+      "auth.refresh_tokens",
+      "auth.sessions",
+      "auth.users",
+      "public.trainers"
+    ]
+  },
+  "owner_admin": {
+    "started_at": "2026-09-28T16:00:59.293852+00:00",
+    "trainer_id": "507d9c56-04d8-4801-a9da-f1e53674efb5",
+    "auth_user_id": "ac98932c-f713-43d1-8b20-600f0be3dadc",
+    "marker": "OWNER_TEMP_STAGING_AUTH",
+    "admin_marker": "OWNER_TEMP_STAGING_ADMIN",
+    "release_blocker": "TEMP_STAGING_AUTH_MUST_BE_REMOVED_OR_RESET_BEFORE_RELEASE",
+    "credential_recorded": false,
+    "role_granted": true,
+    "status": "PASS",
+    "checks": [
+      "Initial non-admin API denied",
+      "Scoped existing trainer is_admin grant",
+      "Same PIN login and /v1/me is_admin=true",
+      "Only Anto is_admin/updated_at changed; all other trainers and tables preserved",
+      "Public admin create/read/rename persisted on disposable empty draft",
+      "Real React login/admin navigation/six admin areas/HTTP admin read/logout PASS"
+    ],
+    "fixture_season": "a5f9913d-7540-48d1-b353-215a5a25ca55",
+    "zero_fixture_residue": true,
+    "migration_history_unchanged": true,
+    "new_advisor_error_warn": [],
+    "failure": null,
+    "finished_at": "2026-09-28T16:02:03.764905+00:00"
+  },
+  "owner_admin_provenance": "Temporary privileged script; browser addition tested as local change over 6c60d99, committed as 7d68de2. Role change is data-only, not a production seed or migration.",
+  "attempts": [
+    {
+      "attempt": 1,
+      "result": {
+        "run_id": "phase10_hosted_3e8cf25b3d614a1981849b5165299f7f",
+        "started_at": "2026-09-28T15:37:03.257567+00:00",
+        "source_commit": "18b93f479f2618770a69e42fb222be53b55a1fd2",
+        "api": "https://pokeapp-api-production.up.railway.app",
+        "web": "https://pokeapp-web.pokeapp-v2.workers.dev",
+        "project_ref": "uwleqeuzsveqlugugzba",
+        "checks": [
+          "Hosted HTTPS, liveness, anonymous denial, exact allowed/rejected CORS and no-store",
+          "Four real PIN logins, refresh sessions and verified JWT trainer mapping"
+        ],
+        "status": "FAIL",
+        "users": [
+          "892e8367-88bc-4923-85c0-a15c39291437",
+          "68340e8d-e847-40e7-bcd1-28f722c7f95c",
+          "36b6e5a0-3475-4204-b20f-e294fec8bdd0",
+          "f451defb-d0e6-4ec6-86a1-6c5e7b383203"
+        ],
+        "trainers": [
+          "175db266-6e62-4afe-9f19-2025685e8c61",
+          "94b3e287-0bd0-477e-93b7-fb76233b2fbf",
+          "3824620c-b994-41b4-bd61-bca83ae22b55",
+          "281ad529-50cd-44a6-9f0e-2da0fd134eba",
+          "9f808fd5-0e23-4220-9476-d489db02ee4a",
+          "f0e2416b-0db0-450e-8eb0-287b0cfc8d1f",
+          "b5a744f2-1ad1-4d7e-bb5a-958df99fd5d3"
+        ],
+        "seasons": [
+          "d09316a9-30b4-4b51-9b78-e332cf46ce1b"
+        ],
+        "failure": "SeasonAdminRejected at validate_supabase_v2_matchdays.py:45",
+        "fixture_cleanup": "PASS",
+        "baseline_tables": 52,
+        "zero_residue": true,
+        "migration_history_unchanged": true,
+        "new_advisor_error_warn": [],
+        "finished_at": "2026-09-28T15:38:31.455189+00:00"
+      },
+      "advisor_before_counts": {
+        "INFO": 122,
+        "ERROR": 24,
+        "WARN": 4
+      },
+      "advisor_after_counts": {
+        "INFO": 122,
+        "ERROR": 24,
+        "WARN": 4
+      },
+      "baseline_equal": true,
+      "raw_evidence_location": "%TEMP%/phase10-hosted-run1"
+    },
+    {
+      "attempt": 2,
+      "result": {
+        "run_id": "phase10_hosted_5940a22e81fd45f3832c4134320daa65",
+        "started_at": "2026-09-28T15:49:05.295988+00:00",
+        "source_commit": "0095daca2b4d7550213dc25d9695a6e37a24443d",
+        "api": "https://pokeapp-api-production.up.railway.app",
+        "web": "https://pokeapp-web.pokeapp-v2.workers.dev",
+        "project_ref": "uwleqeuzsveqlugugzba",
+        "checks": [
+          "Hosted HTTPS, liveness, anonymous denial, exact allowed/rejected CORS and no-store",
+          "Four real PIN logins, refresh sessions and verified JWT trainer mapping",
+          "Wrong PIN, disabled trainer and mismatched Auth mapping all denied through public API",
+          "Hosted admin setup/activation, four Team Locks, day results/close and official history",
+          "Typed overview/shop/inventory and real private PC owner isolation"
+        ],
+        "status": "FAIL",
+        "users": [
+          "8bf58646-c178-4f54-97fd-0ca5f82cdcb2",
+          "293de231-1ee6-4902-842b-36e30ae14f22",
+          "a66f3f0a-2137-49a1-923e-3aabc3f2754a",
+          "947d3df6-0992-4c97-a425-698a50489eba"
+        ],
+        "trainers": [
+          "dfe29194-96ca-4385-a821-17e2a734fb2a",
+          "0b9523d2-bf18-4134-870d-2fccf22f63f5",
+          "e5425488-c93e-4208-9271-8ae94e5b4ce4",
+          "c9f5804d-a9a1-4a4c-8569-c4b8e54b8e33",
+          "fa437e21-2998-4bc1-9d5e-b990018cc9fc",
+          "c6511ba5-54ec-4975-98f6-ccf996a5e64d",
+          "65999434-8898-4762-8769-cdd85caf077b"
+        ],
+        "seasons": [
+          "12a29980-2102-457e-88bd-a426e609e2ee"
+        ],
+        "owner_exception": {
+          "marker": "OWNER_TEMP_STAGING_AUTH",
+          "auth_user_id": "ac98932c-f713-43d1-8b20-600f0be3dadc",
+          "excluded_from_comparison": "Only this owner Auth row/identities/sessions/refresh tokens; all public rows fully compared"
+        },
+        "failure": "SeasonAdminRejected at validate_supabase_v2_season_admin.py:53: SEASON_NOT_DRAFT",
+        "fixture_cleanup": "PASS",
+        "baseline_tables": 52,
+        "zero_residue": true,
+        "migration_history_unchanged": true,
+        "new_advisor_error_warn": [],
+        "finished_at": "2026-09-28T15:50:55.003869+00:00"
+      },
+      "advisor_before_counts": {
+        "INFO": 122,
+        "ERROR": 24,
+        "WARN": 5
+      },
+      "advisor_after_counts": {
+        "INFO": 122,
+        "ERROR": 24,
+        "WARN": 5
+      },
+      "baseline_equal": true,
+      "raw_evidence_location": "%TEMP%/phase10-hosted-run2"
+    },
+    {
+      "attempt": 3,
+      "result": {
+        "run_id": "phase10_hosted_d4b8a5c80fcd48eb82dbdc2ffdba2263",
+        "started_at": "2026-09-28T15:51:57.909311+00:00",
+        "source_commit": "f74d445db2b2c6cfe6b9fabcd38b3ad4cf72e046",
+        "api": "https://pokeapp-api-production.up.railway.app",
+        "web": "https://pokeapp-web.pokeapp-v2.workers.dev",
+        "project_ref": "uwleqeuzsveqlugugzba",
+        "checks": [
+          "Hosted HTTPS, liveness, anonymous denial, exact allowed/rejected CORS and no-store",
+          "Four real PIN logins, refresh sessions and verified JWT trainer mapping",
+          "Wrong PIN, disabled trainer and mismatched Auth mapping all denied through public API"
+        ],
+        "status": "FAIL",
+        "users": [
+          "a2c1c33f-7b81-4c56-bf9f-808963caa48b",
+          "814ce6b9-67bc-4fa6-8f15-5cb27d423721",
+          "ea588fed-3eb1-4b31-bb5f-12e9e06d4dbb",
+          "52cad550-fea1-4398-a2b0-8e0b12b24c27"
+        ],
+        "trainers": [
+          "b34ffdc9-7022-4674-b6d1-3a3643af8a2d",
+          "402328e9-77d8-4802-b5c2-986a9a4b8ce8",
+          "47a34628-38ed-4dc4-8bb8-410ef92360d3",
+          "df525a15-0391-4b24-b5ce-d608a1dab5c3",
+          "1b78a20b-a4c1-4256-833e-f94f8b37c7f8",
+          "9a7c3487-51b4-4aa6-9093-f1af17dab422",
+          "bc244e28-e3c9-4d9d-b7e3-a31ac27c4cf4"
+        ],
+        "seasons": [
+          "a2154f29-eed5-4bd7-94fc-e5e8da588d9a"
+        ],
+        "owner_exception": {
+          "marker": "OWNER_TEMP_STAGING_AUTH",
+          "auth_user_id": "ac98932c-f713-43d1-8b20-600f0be3dadc",
+          "excluded_from_comparison": "Only this owner Auth row/identities/sessions/refresh tokens; all public rows fully compared"
+        },
+        "failure": "AssertionError at validate_season_admin_fixtures.py:12: PUT /v1/admin/seasons/a2154f29-eed5-4bd7-94fc-e5e8da588d9a/name: HTTP 200, expected 409",
+        "fixture_cleanup": "PASS",
+        "baseline_tables": 52,
+        "zero_residue": true,
+        "migration_history_unchanged": true,
+        "new_advisor_error_warn": [],
+        "finished_at": "2026-09-28T15:53:02.555745+00:00"
+      },
+      "advisor_before_counts": {
+        "INFO": 122,
+        "ERROR": 24,
+        "WARN": 5
+      },
+      "advisor_after_counts": {
+        "INFO": 122,
+        "ERROR": 24,
+        "WARN": 5
+      },
+      "baseline_equal": true,
+      "raw_evidence_location": "%TEMP%/phase10-hosted-run3"
+    },
+    {
+      "attempt": 4,
+      "result": {
+        "run_id": "phase10_hosted_9cf926bd0c0b4b2f942af579d5e256de",
+        "started_at": "2026-09-28T15:54:01.570542+00:00",
+        "source_commit": "6c60d99b3439ded73f6ed13319f47dedbc67b8df",
+        "api": "https://pokeapp-api-production.up.railway.app",
+        "web": "https://pokeapp-web.pokeapp-v2.workers.dev",
+        "project_ref": "uwleqeuzsveqlugugzba",
+        "checks": [
+          "Hosted HTTPS, liveness, anonymous denial, exact allowed/rejected CORS and no-store",
+          "Four real PIN logins, refresh sessions and verified JWT trainer mapping",
+          "Wrong PIN, disabled trainer and mismatched Auth mapping all denied through public API",
+          "Real admin authority, durable idempotency replay and stale revision conflict",
+          "Hosted admin setup/activation, four Team Locks, day results/close and official history",
+          "Typed overview/shop/inventory and real private PC owner isolation",
+          "Hosted doubles Bo3/certification/Hall and manual judicial proposal"
+        ],
+        "status": "FAIL",
+        "users": [
+          "4fa004af-f641-443c-998c-4b4a1b94aaa6",
+          "309babb1-d49b-46a1-a082-d950505a44ab",
+          "ca6aa010-38b5-423e-ab55-256d157eb2ca",
+          "1f594e22-89a9-4642-a082-de4ec99c83eb"
+        ],
+        "trainers": [
+          "640ed88f-96b6-460a-95fa-dbc4f7133c69",
+          "c1fc52b4-1a45-4934-888d-04b9c94c007d",
+          "c479c9b4-aa8c-4a2d-ae29-d32ae9c76d8b",
+          "4fe31690-a05b-4335-93c9-a3d5d56dd173",
+          "ec5a04f4-1d4a-4c3a-9929-550b2e72ada1",
+          "aeecb6dc-4b33-4059-95a3-1066e84c2f17",
+          "5c7b75eb-dabc-4ee0-9a7c-c879d7c57484"
+        ],
+        "seasons": [
+          "a0f0b93a-e3ea-4b61-b4cb-a36c832dfe37"
+        ],
+        "owner_exception": {
+          "marker": "OWNER_TEMP_STAGING_AUTH",
+          "auth_user_id": "ac98932c-f713-43d1-8b20-600f0be3dadc",
+          "excluded_from_comparison": "Only this owner Auth row/identities/sessions/refresh tokens; all public rows fully compared"
+        },
+        "failure": "AssertionError at validate_season_admin_fixtures.py:12: Hosted browser validation failed; inspect sanitized browser.log",
+        "fixture_cleanup": "PASS",
+        "baseline_tables": 52,
+        "zero_residue": true,
+        "migration_history_unchanged": true,
+        "new_advisor_error_warn": [],
+        "finished_at": "2026-09-28T15:57:19.730285+00:00"
+      },
+      "advisor_before_counts": {
+        "INFO": 122,
+        "ERROR": 24,
+        "WARN": 5
+      },
+      "advisor_after_counts": {
+        "INFO": 122,
+        "ERROR": 24,
+        "WARN": 5
+      },
+      "baseline_equal": true,
+      "raw_evidence_location": "%TEMP%/phase10-hosted-run4",
+      "browser": {
+        "status": "FAIL",
+        "message": "page.waitForLoadState: Timeout 30000ms exceeded.",
+        "pageErrors": [],
+        "failures": [],
+        "mutations": [
+          {
+            "path": "/v1/auth/pin-login",
+            "status": 200
+          },
+          {
+            "path": "/v1/seasons/a0f0b93a-e3ea-4b61-b4cb-a36c832dfe37/matchdays/28acf350-f907-46eb-872f-8a734138d7da/team-lock",
+            "status": 200
+          },
+          {
+            "path": "/v1/seasons/a0f0b93a-e3ea-4b61-b4cb-a36c832dfe37/shop/purchases",
+            "status": 200
+          },
+          {
+            "path": "/v1/admin/seasons/a0f0b93a-e3ea-4b61-b4cb-a36c832dfe37/cups/022eff16-7f64-4317-9b16-fe2240ecc94f/rounds/1/results",
+            "status": 200
+          },
+          {
+            "path": "/v1/seasons/a0f0b93a-e3ea-4b61-b4cb-a36c832dfe37/trials/acf3e5fe-e563-4c28-acce-ae67d8e86edb/resolve",
+            "status": 200
+          }
+        ]
+      }
+    },
+    {
+      "attempt": 5,
+      "result": {
+        "run_id": "phase10_hosted_90e57201565543c9b1c07164cb40d29e",
+        "started_at": "2026-09-28T16:03:19.065973+00:00",
+        "source_commit": "7d68de293839ffeb5351f1410dbe0347e5cf0bd4",
+        "api": "https://pokeapp-api-production.up.railway.app",
+        "web": "https://pokeapp-web.pokeapp-v2.workers.dev",
+        "project_ref": "uwleqeuzsveqlugugzba",
+        "checks": [
+          "Hosted HTTPS, liveness, anonymous denial, exact allowed/rejected CORS and no-store",
+          "Four real PIN logins, refresh sessions and verified JWT trainer mapping",
+          "Wrong PIN, disabled trainer and mismatched Auth mapping all denied through public API",
+          "Real admin authority, durable idempotency replay and stale revision conflict",
+          "Hosted admin setup/activation, four Team Locks, day results/close and official history",
+          "Typed overview/shop/inventory and real private PC owner isolation",
+          "Hosted doubles Bo3/certification/Hall and manual judicial proposal"
+        ],
+        "status": "FAIL",
+        "users": [
+          "fc894787-85d6-4cfb-8233-d6aa9bcc2c71",
+          "e5122d0b-b091-4f0f-a122-87dc536888bc",
+          "8ea02731-a645-4f0e-9a65-4c2b43818968",
+          "c1c1249e-17c9-4b44-a945-e28208636f75"
+        ],
+        "trainers": [
+          "58c30171-3e1f-412a-a2d9-43ceb647ec07",
+          "9ea1c98a-5f4a-4d9a-b293-a8f8394a8196",
+          "eb55e3ca-d6d2-4373-84bf-0651df86b79c",
+          "69f0c9e0-9aeb-494c-8deb-15547360578f",
+          "53a756aa-deb8-4c88-b591-b293b69c8d9c",
+          "0da6116f-959b-4be3-b8bf-b5099157ff2f",
+          "65452819-e45e-42f4-85d6-7d7735b02f65"
+        ],
+        "seasons": [
+          "1879a572-5bb0-454c-a8aa-89425fcf6a69"
+        ],
+        "owner_exception": {
+          "marker": "OWNER_TEMP_STAGING_AUTH",
+          "auth_user_id": "ac98932c-f713-43d1-8b20-600f0be3dadc",
+          "excluded_from_comparison": "Only this owner Auth row/identities/sessions/refresh tokens; all public rows fully compared"
+        },
+        "failure": "AssertionError at validate_season_admin_fixtures.py:12: Hosted browser validation failed; inspect sanitized browser.log",
+        "fixture_cleanup": "PASS",
+        "baseline_tables": 52,
+        "zero_residue": true,
+        "migration_history_unchanged": true,
+        "new_advisor_error_warn": [],
+        "finished_at": "2026-09-28T16:06:13.625200+00:00"
+      },
+      "advisor_before_counts": {
+        "INFO": 122,
+        "ERROR": 24,
+        "WARN": 5
+      },
+      "advisor_after_counts": {
+        "INFO": 122,
+        "ERROR": 24,
+        "WARN": 5
+      },
+      "baseline_equal": true,
+      "raw_evidence_location": "%TEMP%/phase10-hosted-run5",
+      "browser": {
+        "status": "FAIL",
+        "step": "Inicio",
+        "message": "Overflow on Inicio",
+        "pageErrors": [],
+        "failures": [],
+        "mutations": [
+          {
+            "path": "/v1/auth/pin-login",
+            "status": 200
+          },
+          {
+            "path": "/v1/seasons/1879a572-5bb0-454c-a8aa-89425fcf6a69/matchdays/130a711f-aca4-40b4-803a-888003a31d96/team-lock",
+            "status": 200
+          },
+          {
+            "path": "/v1/seasons/1879a572-5bb0-454c-a8aa-89425fcf6a69/shop/purchases",
+            "status": 200
+          },
+          {
+            "path": "/v1/admin/seasons/1879a572-5bb0-454c-a8aa-89425fcf6a69/cups/4e701490-76f3-40ec-b7df-f496cb4ceef2/rounds/1/results",
+            "status": 200
+          },
+          {
+            "path": "/v1/seasons/1879a572-5bb0-454c-a8aa-89425fcf6a69/trials/42d0bf35-dea9-4faf-b1fa-b34561a09ecf/resolve",
+            "status": 200
+          }
+        ],
+        "screens": [],
+        "reads": [
+          {
+            "path": "/v1/me",
+            "ms": 883
+          },
+          {
+            "path": "/v1/read/seasons",
+            "ms": 978
+          },
+          {
+            "path": "/v1/read/seasons/1879a572-5bb0-454c-a8aa-89425fcf6a69/pc",
+            "ms": 2036
+          },
+          {
+            "path": "/v1/read/seasons/1879a572-5bb0-454c-a8aa-89425fcf6a69/overview",
+            "ms": 3451
+          },
+          {
+            "path": "/v1/read/seasons",
+            "ms": 1229
+          },
+          {
+            "path": "/v1/read/seasons/1879a572-5bb0-454c-a8aa-89425fcf6a69/pc",
+            "ms": 2732
+          },
+          {
+            "path": "/v1/read/seasons/1879a572-5bb0-454c-a8aa-89425fcf6a69/overview",
+            "ms": 3993
+          },
+          {
+            "path": "/v1/read/seasons/1879a572-5bb0-454c-a8aa-89425fcf6a69/shop",
+            "ms": 2462
+          },
+          {
+            "path": "/v1/read/seasons/1879a572-5bb0-454c-a8aa-89425fcf6a69/inventory",
+            "ms": 3088
+          },
+          {
+            "path": "/v1/read/seasons",
+            "ms": 1097
+          },
+          {
+            "path": "/v1/read/seasons/1879a572-5bb0-454c-a8aa-89425fcf6a69/shop",
+            "ms": 1969
+          },
+          {
+            "path": "/v1/read/seasons/1879a572-5bb0-454c-a8aa-89425fcf6a69/inventory",
+            "ms": 3687
+          },
+          {
+            "path": "/v1/read/seasons/1879a572-5bb0-454c-a8aa-89425fcf6a69/overview",
+            "ms": 4312
+          },
+          {
+            "path": "/v1/seasons/1879a572-5bb0-454c-a8aa-89425fcf6a69/cups",
+            "ms": 1080
+          },
+          {
+            "path": "/v1/seasons/1879a572-5bb0-454c-a8aa-89425fcf6a69/cups/4e701490-76f3-40ec-b7df-f496cb4ceef2",
+            "ms": 1021
+          },
+          {
+            "path": "/v1/read/seasons",
+            "ms": 1167
+          },
+          {
+            "path": "/v1/seasons/1879a572-5bb0-454c-a8aa-89425fcf6a69/trials",
+            "ms": 984
+          },
+          {
+            "path": "/v1/seasons/1879a572-5bb0-454c-a8aa-89425fcf6a69/trials/42d0bf35-dea9-4faf-b1fa-b34561a09ecf",
+            "ms": 960
+          },
+          {
+            "path": "/v1/seasons/1879a572-5bb0-454c-a8aa-89425fcf6a69/trials",
+            "ms": 1038
+          },
+          {
+            "path": "/v1/seasons/1879a572-5bb0-454c-a8aa-89425fcf6a69/trials/42d0bf35-dea9-4faf-b1fa-b34561a09ecf",
+            "ms": 1044
+          },
+          {
+            "path": "/v1/read/seasons",
+            "ms": 1049
+          },
+          {
+            "path": "/v1/read/seasons/1879a572-5bb0-454c-a8aa-89425fcf6a69/overview",
+            "ms": 4237
+          },
+          {
+            "path": "/v1/read/seasons/1879a572-5bb0-454c-a8aa-89425fcf6a69/pc",
+            "ms": 1965
+          }
+        ],
+        "pending": []
+      }
+    },
+    {
+      "attempt": 6,
+      "result": {
+        "run_id": "phase10_hosted_cf1ed8edda6d499487da8dbf0fca69ed",
+        "started_at": "2026-09-28T21:53:25.400125+00:00",
+        "source_commit": "3c83a16e0eb1b088132e3472c07d31ce9ca1acaa",
+        "api": "https://pokeapp-api-production.up.railway.app",
+        "web": "https://pokeapp-web.pokeapp-v2.workers.dev",
+        "project_ref": "uwleqeuzsveqlugugzba",
+        "checks": [
+          "Hosted HTTPS, liveness, anonymous denial, exact allowed/rejected CORS and no-store"
+        ],
+        "status": "FAIL",
+        "users": [],
+        "trainers": [],
+        "seasons": [],
+        "owner_exception": {
+          "marker": "OWNER_TEMP_STAGING_AUTH",
+          "auth_user_id": "ac98932c-f713-43d1-8b20-600f0be3dadc",
+          "excluded_from_comparison": "Only this owner Auth row/identities/sessions/refresh tokens; all public rows fully compared"
+        },
+        "failure": "AssertionError at validate_season_admin_fixtures.py:12: Active season exists; refusing activation fixtures",
+        "fixture_cleanup": "PASS",
+        "baseline_tables": 52,
+        "zero_residue": true,
+        "migration_history_unchanged": true,
+        "new_advisor_error_warn": [],
+        "finished_at": "2026-09-28T21:54:00.302129+00:00"
+      },
+      "advisor_before_counts": {
+        "INFO": 122,
+        "ERROR": 24,
+        "WARN": 5
+      },
+      "advisor_after_counts": {
+        "INFO": 122,
+        "ERROR": 24,
+        "WARN": 5
+      },
+      "baseline_equal": true,
+      "raw_evidence_location": "%TEMP%/phase10-hosted-run6"
+    }
+  ],
+  "readonly_initial_attempt": {
+    "result": {
+      "started_at": "2026-09-28T21:56:41.296050+00:00",
+      "source_commit": "8eb89fa8e1fb13e02b7393cdf8cad264169603cd",
+      "status": "FAIL",
+      "owner_trainer": "507d9c56-04d8-4801-a9da-f1e53674efb5",
+      "owner_auth_user": "ac98932c-f713-43d1-8b20-600f0be3dadc",
+      "owner_auth_exception": true,
+      "all_public_rows_compared": true,
+      "independent_run6_cleanup": true,
+      "business_writes": 0,
+      "checks": [
+        "Current unchanged PIN/JWT/refresh/me admin PASS"
+      ],
+      "baseline_tables": 52,
+      "zero_data_drift": true,
+      "migration_history_unchanged": true,
+      "new_advisor_error_warn": [],
+      "failure": "AssertionError: Public read-only browser failed",
+      "finished_at": "2026-09-28T21:57:39.661132+00:00"
+    },
+    "all_22_screen_checks_passed": true,
+    "failure_cause": "Installed antivirus injection counted as unexpected external traffic. No application API failure or business write; raw vendor session paths excluded from durable evidence."
+  },
+  "final_readonly": {
+    "started_at": "2026-09-28T21:58:41.156958+00:00",
+    "source_commit": "023442f9ced7d506b66b7d480cc41f8b7a590bb2",
+    "status": "PASS",
+    "owner_trainer": "507d9c56-04d8-4801-a9da-f1e53674efb5",
+    "owner_auth_user": "ac98932c-f713-43d1-8b20-600f0be3dadc",
+    "owner_auth_exception": true,
+    "all_public_rows_compared": true,
+    "independent_run6_cleanup": true,
+    "business_writes": 0,
+    "checks": [
+      "Current unchanged PIN/JWT/refresh/me admin PASS",
+      "Eleven public React screens at desktop/mobile, actual admin reads, logout and no local or unexpected external requests PASS; antivirus environment traffic recorded"
+    ],
+    "baseline_tables": 52,
+    "zero_data_drift": true,
+    "migration_history_unchanged": true,
+    "new_advisor_error_warn": [],
+    "failure": null,
+    "finished_at": "2026-09-28T21:59:37.843169+00:00"
+  },
+  "final_browser": {
+    "status": "PASS",
+    "api_interception": false,
+    "business_writes": 0,
+    "screens": [
+      "Inicio 1440",
+      "Liga 1440",
+      "Battle 1440",
+      "Entrenadores 1440",
+      "Mi PC 1440",
+      "Tienda 1440",
+      "Copa 1440",
+      "Hall de la Fama 1440",
+      "Juicios 1440",
+      "Administración 1440",
+      "Saves y Launcher 1440",
+      "Inicio 390",
+      "Liga 390",
+      "Battle 390",
+      "Entrenadores 390",
+      "Mi PC 390",
+      "Tienda 390",
+      "Copa 390",
+      "Hall de la Fama 390",
+      "Juicios 390",
+      "Administración 390",
+      "Saves y Launcher 390"
+    ],
+    "reads": [
+      {
+        "method": "POST",
+        "path": "/v1/auth/pin-login",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "path": "/v1/me",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "path": "/v1/read/seasons",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "path": "/v1/read/seasons/c6bcac5b-0b89-403f-8242-41ac58286ade/pc",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "path": "/v1/read/seasons/c6bcac5b-0b89-403f-8242-41ac58286ade/overview",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "path": "/v1/read/seasons/c6bcac5b-0b89-403f-8242-41ac58286ade/shop",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "path": "/v1/read/seasons/c6bcac5b-0b89-403f-8242-41ac58286ade/inventory",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "path": "/v1/seasons/c6bcac5b-0b89-403f-8242-41ac58286ade/cups",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "path": "/v1/read/hall",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "path": "/v1/read/trainers",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "path": "/v1/seasons/c6bcac5b-0b89-403f-8242-41ac58286ade/trials",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "path": "/v1/admin/seasons/c6bcac5b-0b89-403f-8242-41ac58286ade/setup",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "path": "/v1/read/seasons/c6bcac5b-0b89-403f-8242-41ac58286ade/pc",
+        "status": 200
+      }
+    ],
+    "errors": [],
+    "unexpected": [],
+    "environmentOrigins": {
+      "https://me.kis.v2.scr.kaspersky-labs.com": 21
+    }
+  },
+  "independent_final": {
+    "status": "PASS",
+    "tables_compared": 52,
+    "all_public_rows_compared": true,
+    "owner_auth_activity_only_excluded": true,
+    "public_fixture_prefix_residue": 0,
+    "migration_records": 24,
+    "migration_history_unchanged": true,
+    "owner_admin_verified": true,
+    "independent_of_fixture_runner": true
+  },
+  "final_baseline_before": [
+    {
+      "name": "auth.identities",
+      "rows": 0,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "name": "auth.refresh_tokens",
+      "rows": 0,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "name": "auth.sessions",
+      "rows": 0,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "name": "auth.users",
+      "rows": 0,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "name": "public.activity_events",
+      "rows": 40,
+      "sha256": "2d4c52813e81280605bb7dbe69c70ce464388a4b557e356fb520a27e6d1c3d8d"
+    },
+    {
+      "name": "public.admin_operation_receipts",
+      "rows": 40,
+      "sha256": "408bb1997eb7048bfabb8d1822a9c7a913f59704523cec2570e28c254df62473"
+    },
+    {
+      "name": "public.app_settings",
+      "rows": 2,
+      "sha256": "db6be94ca71c61c3eccaf4065fc4d8366ecdb94ba748a77574229ce57350ecf7"
+    },
+    {
+      "name": "public.coin_transactions",
+      "rows": 8,
+      "sha256": "9aebab7147e993554984ca726ebc0833980714fe22a63fe8b8560b59a2dfccdc"
+    },
+    {
+      "name": "public.cup_certificates",
+      "rows": 0,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "name": "public.cup_history",
+      "rows": 0,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "name": "public.cup_matches",
+      "rows": 0,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "name": "public.cup_participants",
+      "rows": 0,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "name": "public.cup_rounds",
+      "rows": 0,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "name": "public.cup_side_members",
+      "rows": 0,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "name": "public.cup_standings",
+      "rows": 0,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "name": "public.cups",
+      "rows": 0,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "name": "public.division_memberships",
+      "rows": 16,
+      "sha256": "34c644c53c4b244a112fb7deee4d9f7f76aed109b51ad0df3e3aa542f40c1f05"
+    },
+    {
+      "name": "public.divisions",
+      "rows": 2,
+      "sha256": "d08d36bc9489848216e3d1e67d11812430885dc4c092ce0cf442190bd7eadad0"
+    },
+    {
+      "name": "public.hall_of_fame_entries",
+      "rows": 0,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "name": "public.matchday_movements",
+      "rows": 8,
+      "sha256": "3ed603171f7a9d05ec526e9b336d71b1fadba51ea4d006a71836611b2f20a82e"
+    },
+    {
+      "name": "public.matchday_snapshot_revisions",
+      "rows": 1,
+      "sha256": "7c4b5d14f79362ba48a1183729142caf4db8393c9d8102a4e850a1a51968896b"
+    },
+    {
+      "name": "public.matchday_snapshots",
+      "rows": 1,
+      "sha256": "76713a33f22000cd04aebba85b64bc10253d93ae614b116cdc2f2a89e1ecb3de"
+    },
+    {
+      "name": "public.matchdays",
+      "rows": 2,
+      "sha256": "7d00b993dbffa51ee516d40bd6ae6a33d4cec42484d6880af9a7874482629970"
+    },
+    {
+      "name": "public.matches",
+      "rows": 24,
+      "sha256": "c51be625817d26fe8223dafdb99a9e9f0a9865f76846904fa7fcb252814fdf1c"
+    },
+    {
+      "name": "public.parsed_saves",
+      "rows": 0,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "name": "public.penalties",
+      "rows": 0,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "name": "public.pokemon_entities",
+      "rows": 0,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "name": "public.pokemon_entity_flags",
+      "rows": 0,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "name": "public.pokemon_flags",
+      "rows": 0,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "name": "public.pokemon_identity_revisions",
+      "rows": 0,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "name": "public.pokemon_observations",
+      "rows": 0,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "name": "public.purchases",
+      "rows": 1,
+      "sha256": "ea12cf66d1f2e4db607db4036daa9004f8e09b77a29813145fc87ab615720e0b"
+    },
+    {
+      "name": "public.redemptions",
+      "rows": 0,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "name": "public.robbery_cycles",
+      "rows": 0,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "name": "public.save_files",
+      "rows": 0,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "name": "public.season_admin_state",
+      "rows": 3,
+      "sha256": "5998b96b7f189959ec10f6f17f5b341d086d8a8528b7d6dd5987b959a8243e66"
+    },
+    {
+      "name": "public.season_archive_snapshots",
+      "rows": 0,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "name": "public.season_config_versions",
+      "rows": 2,
+      "sha256": "284b2e87e46a1d7d07481eee73a635f578e13d69a4fe5cd41f6bbd608903d2b1"
+    },
+    {
+      "name": "public.season_player_stats",
+      "rows": 24,
+      "sha256": "ccd348375dbbb8fdb23f84034e19ea392cb900ad212124253c137a183cf824dc"
+    },
+    {
+      "name": "public.season_players",
+      "rows": 24,
+      "sha256": "8cbb37a7f8282f07b40b89e84e384a5df813627bd3a8fdbb599a966f1ac8304a"
+    },
+    {
+      "name": "public.seasons",
+      "rows": 3,
+      "sha256": "4e08c1928a33da394e34f99a83d54350506c3db8743c042089d06ef29e565857"
+    },
+    {
+      "name": "public.shop_items",
+      "rows": 62,
+      "sha256": "bb16ddeab4618cd83ed9b0367621c01082fd77d51d60e4a8806e620942e54d24"
+    },
+    {
+      "name": "public.shop_promotions",
+      "rows": 6,
+      "sha256": "136c3569c6b551fe01fc20c1e0f3fc7ea23b6115dc47b8d97602c227cd7d4b7c"
+    },
+    {
+      "name": "public.team_locks",
+      "rows": 0,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "name": "public.trainer_flags",
+      "rows": 0,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "name": "public.trainers",
+      "rows": 10,
+      "sha256": "ee56b522883b1964e26f290f54c474c798cd1fc0eeb6fd3086cca5efc0ecce5b"
+    },
+    {
+      "name": "public.trial_case_counters",
+      "rows": 1,
+      "sha256": "478a9b01515e079a40de5c0ae54c2a0b632dd1e3840c90927b61237ab48543b6"
+    },
+    {
+      "name": "public.trial_case_revisions",
+      "rows": 2,
+      "sha256": "9261e7d1afafa74cfac5e311683248cd081feb13fd64849c93b627fc94390caf"
+    },
+    {
+      "name": "public.trial_cases",
+      "rows": 1,
+      "sha256": "c9dbc5b7a16c22c1a2222d5c9639034bfbb49fd24b6bb55ba08e1f31c1e737b9"
+    },
+    {
+      "name": "public.trial_votes",
+      "rows": 0,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "name": "storage.buckets",
+      "rows": 1,
+      "sha256": "050480b87c212eb0f3345beda3672a96db452ac869df8a17fef17c7161c1af6c"
+    },
+    {
+      "name": "storage.objects",
+      "rows": 3,
+      "sha256": "059b2a8b39bfe0eba8b15a18d8fe7ef37c130b1808fcf16adf04753466570c35"
+    }
+  ],
+  "final_baseline_after": [
+    {
+      "name": "auth.identities",
+      "rows": 0,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "name": "auth.refresh_tokens",
+      "rows": 0,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "name": "auth.sessions",
+      "rows": 0,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "name": "auth.users",
+      "rows": 0,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "name": "public.activity_events",
+      "rows": 40,
+      "sha256": "2d4c52813e81280605bb7dbe69c70ce464388a4b557e356fb520a27e6d1c3d8d"
+    },
+    {
+      "name": "public.admin_operation_receipts",
+      "rows": 40,
+      "sha256": "408bb1997eb7048bfabb8d1822a9c7a913f59704523cec2570e28c254df62473"
+    },
+    {
+      "name": "public.app_settings",
+      "rows": 2,
+      "sha256": "db6be94ca71c61c3eccaf4065fc4d8366ecdb94ba748a77574229ce57350ecf7"
+    },
+    {
+      "name": "public.coin_transactions",
+      "rows": 8,
+      "sha256": "9aebab7147e993554984ca726ebc0833980714fe22a63fe8b8560b59a2dfccdc"
+    },
+    {
+      "name": "public.cup_certificates",
+      "rows": 0,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "name": "public.cup_history",
+      "rows": 0,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "name": "public.cup_matches",
+      "rows": 0,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "name": "public.cup_participants",
+      "rows": 0,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "name": "public.cup_rounds",
+      "rows": 0,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "name": "public.cup_side_members",
+      "rows": 0,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "name": "public.cup_standings",
+      "rows": 0,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "name": "public.cups",
+      "rows": 0,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "name": "public.division_memberships",
+      "rows": 16,
+      "sha256": "34c644c53c4b244a112fb7deee4d9f7f76aed109b51ad0df3e3aa542f40c1f05"
+    },
+    {
+      "name": "public.divisions",
+      "rows": 2,
+      "sha256": "d08d36bc9489848216e3d1e67d11812430885dc4c092ce0cf442190bd7eadad0"
+    },
+    {
+      "name": "public.hall_of_fame_entries",
+      "rows": 0,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "name": "public.matchday_movements",
+      "rows": 8,
+      "sha256": "3ed603171f7a9d05ec526e9b336d71b1fadba51ea4d006a71836611b2f20a82e"
+    },
+    {
+      "name": "public.matchday_snapshot_revisions",
+      "rows": 1,
+      "sha256": "7c4b5d14f79362ba48a1183729142caf4db8393c9d8102a4e850a1a51968896b"
+    },
+    {
+      "name": "public.matchday_snapshots",
+      "rows": 1,
+      "sha256": "76713a33f22000cd04aebba85b64bc10253d93ae614b116cdc2f2a89e1ecb3de"
+    },
+    {
+      "name": "public.matchdays",
+      "rows": 2,
+      "sha256": "7d00b993dbffa51ee516d40bd6ae6a33d4cec42484d6880af9a7874482629970"
+    },
+    {
+      "name": "public.matches",
+      "rows": 24,
+      "sha256": "c51be625817d26fe8223dafdb99a9e9f0a9865f76846904fa7fcb252814fdf1c"
+    },
+    {
+      "name": "public.parsed_saves",
+      "rows": 0,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "name": "public.penalties",
+      "rows": 0,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "name": "public.pokemon_entities",
+      "rows": 0,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "name": "public.pokemon_entity_flags",
+      "rows": 0,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "name": "public.pokemon_flags",
+      "rows": 0,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "name": "public.pokemon_identity_revisions",
+      "rows": 0,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "name": "public.pokemon_observations",
+      "rows": 0,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "name": "public.purchases",
+      "rows": 1,
+      "sha256": "ea12cf66d1f2e4db607db4036daa9004f8e09b77a29813145fc87ab615720e0b"
+    },
+    {
+      "name": "public.redemptions",
+      "rows": 0,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "name": "public.robbery_cycles",
+      "rows": 0,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "name": "public.save_files",
+      "rows": 0,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "name": "public.season_admin_state",
+      "rows": 3,
+      "sha256": "5998b96b7f189959ec10f6f17f5b341d086d8a8528b7d6dd5987b959a8243e66"
+    },
+    {
+      "name": "public.season_archive_snapshots",
+      "rows": 0,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "name": "public.season_config_versions",
+      "rows": 2,
+      "sha256": "284b2e87e46a1d7d07481eee73a635f578e13d69a4fe5cd41f6bbd608903d2b1"
+    },
+    {
+      "name": "public.season_player_stats",
+      "rows": 24,
+      "sha256": "ccd348375dbbb8fdb23f84034e19ea392cb900ad212124253c137a183cf824dc"
+    },
+    {
+      "name": "public.season_players",
+      "rows": 24,
+      "sha256": "8cbb37a7f8282f07b40b89e84e384a5df813627bd3a8fdbb599a966f1ac8304a"
+    },
+    {
+      "name": "public.seasons",
+      "rows": 3,
+      "sha256": "4e08c1928a33da394e34f99a83d54350506c3db8743c042089d06ef29e565857"
+    },
+    {
+      "name": "public.shop_items",
+      "rows": 62,
+      "sha256": "bb16ddeab4618cd83ed9b0367621c01082fd77d51d60e4a8806e620942e54d24"
+    },
+    {
+      "name": "public.shop_promotions",
+      "rows": 6,
+      "sha256": "136c3569c6b551fe01fc20c1e0f3fc7ea23b6115dc47b8d97602c227cd7d4b7c"
+    },
+    {
+      "name": "public.team_locks",
+      "rows": 0,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "name": "public.trainer_flags",
+      "rows": 0,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "name": "public.trainers",
+      "rows": 10,
+      "sha256": "ee56b522883b1964e26f290f54c474c798cd1fc0eeb6fd3086cca5efc0ecce5b"
+    },
+    {
+      "name": "public.trial_case_counters",
+      "rows": 1,
+      "sha256": "478a9b01515e079a40de5c0ae54c2a0b632dd1e3840c90927b61237ab48543b6"
+    },
+    {
+      "name": "public.trial_case_revisions",
+      "rows": 2,
+      "sha256": "9261e7d1afafa74cfac5e311683248cd081feb13fd64849c93b627fc94390caf"
+    },
+    {
+      "name": "public.trial_cases",
+      "rows": 1,
+      "sha256": "c9dbc5b7a16c22c1a2222d5c9639034bfbb49fd24b6bb55ba08e1f31c1e737b9"
+    },
+    {
+      "name": "public.trial_votes",
+      "rows": 0,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "name": "storage.buckets",
+      "rows": 1,
+      "sha256": "050480b87c212eb0f3345beda3672a96db452ac869df8a17fef17c7161c1af6c"
+    },
+    {
+      "name": "storage.objects",
+      "rows": 3,
+      "sha256": "059b2a8b39bfe0eba8b15a18d8fe7ef37c130b1808fcf16adf04753466570c35"
+    }
+  ],
+  "independent_final_state": [
+    {
+      "name": "auth.identities",
+      "rows": 0,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "name": "auth.refresh_tokens",
+      "rows": 0,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "name": "auth.sessions",
+      "rows": 0,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "name": "auth.users",
+      "rows": 0,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "name": "public.activity_events",
+      "rows": 40,
+      "sha256": "2d4c52813e81280605bb7dbe69c70ce464388a4b557e356fb520a27e6d1c3d8d"
+    },
+    {
+      "name": "public.admin_operation_receipts",
+      "rows": 40,
+      "sha256": "408bb1997eb7048bfabb8d1822a9c7a913f59704523cec2570e28c254df62473"
+    },
+    {
+      "name": "public.app_settings",
+      "rows": 2,
+      "sha256": "db6be94ca71c61c3eccaf4065fc4d8366ecdb94ba748a77574229ce57350ecf7"
+    },
+    {
+      "name": "public.coin_transactions",
+      "rows": 8,
+      "sha256": "9aebab7147e993554984ca726ebc0833980714fe22a63fe8b8560b59a2dfccdc"
+    },
+    {
+      "name": "public.cup_certificates",
+      "rows": 0,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "name": "public.cup_history",
+      "rows": 0,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "name": "public.cup_matches",
+      "rows": 0,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "name": "public.cup_participants",
+      "rows": 0,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "name": "public.cup_rounds",
+      "rows": 0,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "name": "public.cup_side_members",
+      "rows": 0,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "name": "public.cup_standings",
+      "rows": 0,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "name": "public.cups",
+      "rows": 0,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "name": "public.division_memberships",
+      "rows": 16,
+      "sha256": "34c644c53c4b244a112fb7deee4d9f7f76aed109b51ad0df3e3aa542f40c1f05"
+    },
+    {
+      "name": "public.divisions",
+      "rows": 2,
+      "sha256": "d08d36bc9489848216e3d1e67d11812430885dc4c092ce0cf442190bd7eadad0"
+    },
+    {
+      "name": "public.hall_of_fame_entries",
+      "rows": 0,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "name": "public.matchday_movements",
+      "rows": 8,
+      "sha256": "3ed603171f7a9d05ec526e9b336d71b1fadba51ea4d006a71836611b2f20a82e"
+    },
+    {
+      "name": "public.matchday_snapshot_revisions",
+      "rows": 1,
+      "sha256": "7c4b5d14f79362ba48a1183729142caf4db8393c9d8102a4e850a1a51968896b"
+    },
+    {
+      "name": "public.matchday_snapshots",
+      "rows": 1,
+      "sha256": "76713a33f22000cd04aebba85b64bc10253d93ae614b116cdc2f2a89e1ecb3de"
+    },
+    {
+      "name": "public.matchdays",
+      "rows": 2,
+      "sha256": "7d00b993dbffa51ee516d40bd6ae6a33d4cec42484d6880af9a7874482629970"
+    },
+    {
+      "name": "public.matches",
+      "rows": 24,
+      "sha256": "c51be625817d26fe8223dafdb99a9e9f0a9865f76846904fa7fcb252814fdf1c"
+    },
+    {
+      "name": "public.parsed_saves",
+      "rows": 0,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "name": "public.penalties",
+      "rows": 0,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "name": "public.pokemon_entities",
+      "rows": 0,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "name": "public.pokemon_entity_flags",
+      "rows": 0,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "name": "public.pokemon_flags",
+      "rows": 0,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "name": "public.pokemon_identity_revisions",
+      "rows": 0,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "name": "public.pokemon_observations",
+      "rows": 0,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "name": "public.purchases",
+      "rows": 1,
+      "sha256": "ea12cf66d1f2e4db607db4036daa9004f8e09b77a29813145fc87ab615720e0b"
+    },
+    {
+      "name": "public.redemptions",
+      "rows": 0,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "name": "public.robbery_cycles",
+      "rows": 0,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "name": "public.save_files",
+      "rows": 0,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "name": "public.season_admin_state",
+      "rows": 3,
+      "sha256": "5998b96b7f189959ec10f6f17f5b341d086d8a8528b7d6dd5987b959a8243e66"
+    },
+    {
+      "name": "public.season_archive_snapshots",
+      "rows": 0,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "name": "public.season_config_versions",
+      "rows": 2,
+      "sha256": "284b2e87e46a1d7d07481eee73a635f578e13d69a4fe5cd41f6bbd608903d2b1"
+    },
+    {
+      "name": "public.season_player_stats",
+      "rows": 24,
+      "sha256": "ccd348375dbbb8fdb23f84034e19ea392cb900ad212124253c137a183cf824dc"
+    },
+    {
+      "name": "public.season_players",
+      "rows": 24,
+      "sha256": "8cbb37a7f8282f07b40b89e84e384a5df813627bd3a8fdbb599a966f1ac8304a"
+    },
+    {
+      "name": "public.seasons",
+      "rows": 3,
+      "sha256": "4e08c1928a33da394e34f99a83d54350506c3db8743c042089d06ef29e565857"
+    },
+    {
+      "name": "public.shop_items",
+      "rows": 62,
+      "sha256": "bb16ddeab4618cd83ed9b0367621c01082fd77d51d60e4a8806e620942e54d24"
+    },
+    {
+      "name": "public.shop_promotions",
+      "rows": 6,
+      "sha256": "136c3569c6b551fe01fc20c1e0f3fc7ea23b6115dc47b8d97602c227cd7d4b7c"
+    },
+    {
+      "name": "public.team_locks",
+      "rows": 0,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "name": "public.trainer_flags",
+      "rows": 0,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "name": "public.trainers",
+      "rows": 10,
+      "sha256": "ee56b522883b1964e26f290f54c474c798cd1fc0eeb6fd3086cca5efc0ecce5b"
+    },
+    {
+      "name": "public.trial_case_counters",
+      "rows": 1,
+      "sha256": "478a9b01515e079a40de5c0ae54c2a0b632dd1e3840c90927b61237ab48543b6"
+    },
+    {
+      "name": "public.trial_case_revisions",
+      "rows": 2,
+      "sha256": "9261e7d1afafa74cfac5e311683248cd081feb13fd64849c93b627fc94390caf"
+    },
+    {
+      "name": "public.trial_cases",
+      "rows": 1,
+      "sha256": "c9dbc5b7a16c22c1a2222d5c9639034bfbb49fd24b6bb55ba08e1f31c1e737b9"
+    },
+    {
+      "name": "public.trial_votes",
+      "rows": 0,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "name": "storage.buckets",
+      "rows": 1,
+      "sha256": "050480b87c212eb0f3345beda3672a96db452ac869df8a17fef17c7161c1af6c"
+    },
+    {
+      "name": "storage.objects",
+      "rows": 3,
+      "sha256": "059b2a8b39bfe0eba8b15a18d8fe7ef37c130b1808fcf16adf04753466570c35"
+    }
+  ],
+  "migration_history": [
+    {
+      "name": "010_security_helpers",
+      "record_hash": "cdf4f6b8c1a530e590b36f7948f40d4d",
+      "version": "20260816211949"
+    },
+    {
+      "name": "011_rls_policies",
+      "record_hash": "26e26d199777c265f0f90b15b887af63",
+      "version": "20260816212058"
+    },
+    {
+      "name": "012_security_views",
+      "record_hash": "9a8d77f5f9dd9df58ef3d52485495441",
+      "version": "20260816212336"
+    },
+    {
+      "name": "014_security_invoker_hardening",
+      "record_hash": "deab86b86f5f5bac5aa1ea550b09273e",
+      "version": "20260816213020"
+    },
+    {
+      "name": "013_storage_policies",
+      "record_hash": "2e22d0bc0682d569eefcda63e9758cca",
+      "version": "20260901190001"
+    },
+    {
+      "name": "015_public_trainers_visibility",
+      "record_hash": "aeec8bcc1215a8c62b8e43eb522b0c33",
+      "version": "20260901234808"
+    },
+    {
+      "name": "016_public_team_locks_visibility",
+      "record_hash": "d5751c21233bb2a2ce9994d5881171af",
+      "version": "20260901235030"
+    },
+    {
+      "name": "017_public_coin_balances_visibility",
+      "record_hash": "1d7d90e47aa02b5c243aea751dfadc81",
+      "version": "20260901235223"
+    },
+    {
+      "name": "018_public_views_visibility",
+      "record_hash": "16abbb89c61dabb5d372df6cf800f734",
+      "version": "20260901235520"
+    },
+    {
+      "name": "019_team_lock_api",
+      "record_hash": "b0b92e3f027cc444f5114b235a08efe5",
+      "version": "20260922162954"
+    },
+    {
+      "name": "020_current_matchday_store_ban_contract",
+      "record_hash": "de5439c08eb04ceffff425676d4605e8",
+      "version": "20260922165901"
+    },
+    {
+      "name": "021_normal_purchase_api",
+      "record_hash": "ce6134eca3eb185c7d7b5c56c3499da4",
+      "version": "20260922171752"
+    },
+    {
+      "name": "022_promotional_purchase_api",
+      "record_hash": "0f48392efd1550d8e1f4744c27351bcb",
+      "version": "20260922174842"
+    },
+    {
+      "name": "023_pokemon_identity",
+      "record_hash": "23603bc5d4a89bd740c71cc66d607f78",
+      "version": "20260923165532"
+    },
+    {
+      "name": "024_redemption_effect_boundary",
+      "record_hash": "3d99140a02af7caebc0c4b79feb50d46",
+      "version": "20260923172957"
+    },
+    {
+      "name": "025_robbery_voucher_and_redemption",
+      "record_hash": "8fad71ef19c1bf53a45c290e46376caf",
+      "version": "20260923180416"
+    },
+    {
+      "name": "026_season_admin_setup_api",
+      "record_hash": "ba025575e26ad8407e9bd4be2aaad57b",
+      "version": "20260923192300"
+    },
+    {
+      "name": "027_competitive_matchdays",
+      "record_hash": "8c640ce27d5b7e2f26c1a891954e6774",
+      "version": "20260923210625"
+    },
+    {
+      "name": "028_participant_status_admin",
+      "record_hash": "3acdeba2a541a83421bd4d7c52c94695",
+      "version": "20260923220301"
+    },
+    {
+      "name": "029_season_finalization_archive_hall",
+      "record_hash": "2348e8793b79ee71fbb0b8cfacb7f7f3",
+      "version": "20260923232516"
+    },
+    {
+      "name": "030_trials_sanctions_api",
+      "record_hash": "337435eb946360eeeee2222de644d6a2",
+      "version": "20260924102756"
+    },
+    {
+      "name": "030_trials_sanctions_acl_completion",
+      "record_hash": "69095ad4071d5460744883f39f5168d2",
+      "version": "20260924103256"
+    },
+    {
+      "name": "031_cup_engine_certification",
+      "record_hash": "bed0f8e542976aeaf277b61771d1038f",
+      "version": "20260928110301"
+    },
+    {
+      "name": "032_cup_player_identity_index",
+      "record_hash": "38afc3fd0c4ad981eac8f92f13ae9f20",
+      "version": "20260928111840"
+    }
+  ],
+  "advisor": {
+    "final_counts": {
+      "INFO": 122,
+      "ERROR": 24,
+      "WARN": 5
+    },
+    "new_error_warn_against_immediate_baseline": [],
+    "initial_to_final_observed_addition": "Previously documented intermittent auth_leaked_password_protection WARN; no Auth setting change. Initial pre-owner WARN=4; final WARN=5.",
+    "inventory": "phase10-public-security-advisor.json"
+  },
+  "tests": {
+    "python_full": {
+      "count": 565,
+      "status": "PASS",
+      "source_commit": "0095dac",
+      "exit_code": 0,
+      "log": "%TEMP%/phase10-public-unit-final.log"
+    },
+    "react_unit_component": {
+      "count": 11,
+      "status": "PASS",
+      "source_commit": "c940b33",
+      "subjects_unchanged": true
+    },
+    "browser_final": {
+      "count": 9,
+      "status": "PASS",
+      "source_commit": "3c83a16",
+      "exit_code": 0,
+      "seconds": 25.6,
+      "covers": "44 original screen/breakpoint visits plus 22 long-name visits"
+    },
+    "final_build_format_dry_run_deploy": "PASS at 3c83a16"
+  },
+  "source_hashes": {
+    "Dockerfile": "f265e1b37a4cabda4ab03a3f64d8748d37018267fdab80318788546d1e4ed9aa",
+    ".dockerignore": "39cb3db13e64376aee7b9bd42b086f5e9b2d72039ebcb14c47a82f6cf5a0d8e6",
+    "deploy/requirements-api.txt": "9cccb2c9e80b7e0c520305cba6adbe51e90c22bf85e4b9c94af37858ea3f1b19",
+    ".railway/railway.ts": "49e3d0281aa4ac139500b8d8b6920f9de5565eaee9108a0245b6f262ed60a600",
+    "app/api/serve.py": "3c14c6c198b35f014ede8f3bafb958fae74a03c4e56e6056eaf7c94308e712b7",
+    "web/src/styles.css": "019b3ac3d2e51e9c930c523c6fe2df3e65f690c724344f9385b6dd996fc03ccb",
+    "web/e2e/fixtures.ts": "cbcd925464a575c1147ad3c68470af4ff22d6be299ce3fbc22987b1e28a2c005",
+    "web/e2e/flows.spec.ts": "8a8cee9656a8fd4851a26e9c77f4cfacffd127de9bcf5c4a8af94adbcf33e9e1",
+    "web/scripts/validate-hosted.mjs": "97dc647bbc21833f0d509589b7b5f839d3acdeb71a79677bbb68cdc85ed23bff",
+    "web/scripts/validate-owner-access.mjs": "a38f54f4eb8ace76ff94ee5a0515146aac387cfd512cbee157df8038be9453d7",
+    "web/scripts/validate-public-readonly.mjs": "1b3efd0085c22d25dbaab4025e4388424d469ed2a492efc5d20d37f57ee516f0",
+    "tools/validate_phase10_hosted.py": "638f88d8916ab655f13a778e3568358267cc0a8732ac9b5ccc7523178a1b3b00",
+    "tools/build_api_deploy_bundle.py": "7a155bd67e59b547a7b5b4b4b48945e9d2333ac76b8caeeb0e3d8112647d6b0f"
+  },
+  "source_hash_encoding": "UTF-8 with LF",
+  "artifacts": [
+    {
+      "path": "docs/evidence/phase10/public-desktop-saves.png",
+      "sha256": "9239d506312ab70a6b434309a3b84702602f7e58f8eb14463cba7a586594d219",
+      "visually_inspected": true,
+      "real_public_data": true,
+      "credential_present": false
+    },
+    {
+      "path": "docs/evidence/phase10/public-mobile-saves.png",
+      "sha256": "25aaf740d8ce967485d25674e9b60c53db5b33173ed47a610e2c46a9a301c810",
+      "visually_inspected": true,
+      "real_public_data": true,
+      "credential_present": false
+    }
+  ],
+  "protected_guide": "Untracked/unread/untouched; metadata only verified: 72079 bytes; mtime UTC 2026-09-22T10:13:27",
+  "remaining_release_blocker": "TEMP_STAGING_AUTH_MUST_BE_REMOVED_OR_RESET_BEFORE_RELEASE, including temporary admin role review and definitive onboarding/roles",
+  "phase11_started": false
+}
