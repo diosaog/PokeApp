@@ -3,6 +3,7 @@ from __future__ import annotations
 import os
 from collections.abc import Mapping
 from dataclasses import dataclass
+from urllib.parse import urlsplit
 
 from app.auth.config import AUTH_PIN_PEPPER_ENV
 
@@ -15,6 +16,17 @@ class APIConfig:
     auth_pin_pepper: str = ""
     pin_login_limit: int = 8
     pin_login_window_seconds: int = 300
+    cors_origins: tuple[str, ...] = ()
+
+    def __post_init__(self):
+        for origin in self.cors_origins:
+            parsed = urlsplit(origin)
+            local = parsed.hostname in ('localhost', '127.0.0.1', '::1')
+            if (parsed.scheme not in ('http', 'https') or not parsed.hostname
+                    or (parsed.scheme == 'http' and not local) or parsed.path
+                    or parsed.query or parsed.fragment or parsed.username or parsed.password
+                    or '*' in origin):
+                raise ValueError('CORS requires explicit HTTPS origins (HTTP only for localhost).')
 
     @classmethod
     def from_env(cls, environ: Mapping[str, str] | None = None) -> "APIConfig":
@@ -30,6 +42,7 @@ class APIConfig:
             auth_pin_pepper=_first(source, AUTH_PIN_PEPPER_ENV),
             pin_login_limit=_int_value(source, "POKEAPP_API_PIN_LOGIN_LIMIT", 8),
             pin_login_window_seconds=_int_value(source, "POKEAPP_API_PIN_LOGIN_WINDOW_SECONDS", 300),
+            cors_origins=tuple(x.strip() for x in source.get('POKEAPP_API_CORS_ORIGINS', '').split(',') if x.strip()),
         )
 
 

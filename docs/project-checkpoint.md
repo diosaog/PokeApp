@@ -12,13 +12,14 @@ milestone record; it does not maintain a second live phase-status ledger.
 - Weighted complete-project estimate: **~73%**, from ~70% after delivery of the
   functional local parser/Launcher foundation. This is not whole-product deployment.
 - Runtime remains Streamlit/V1; Phase 9 is isolated local work, with no cutover.
-  **Phase 10 has not started**. Cloud save ingestion/current-state promotion,
+  **Phase 10 is IN PROGRESS**: [live handoff](work-in-progress/phase10-live-handoff.md),
+  [contract](phase10-react-cloudflare.md), [delivery report](phase10-completion-report.md). Cloud save ingestion/current-state promotion,
   physical save operations and final Launcher distribution remain later work.
 
 Read the [continuity protocol](AI/PokeApp_Multi_AI_Continuity_Protocol.md) and
 [master protocol](PokeApp_2.0_Protocolo_Maestro_MultiIA.md) before future work.
-The user authorized Phase 9 implementation, tests, documentation and Git publication.
-No Phase 10, V1/V2 cutover or physical save mutation.
+The user authorized Phase 10 React/API delivery, validation and Git publication after
+verifying Phase 9 DONE. No V1/V2 cutover, physical save mutation or automatic Phase 11.
 
 ## Historical delivery milestones — not current execution state
 

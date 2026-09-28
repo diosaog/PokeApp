@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 
 from app.api.config import APIConfig
 from app.api.dependencies import ApiContainer, create_default_container
@@ -8,6 +9,7 @@ from app.api.routes import auth, matchdays, participant_status, purchases, redem
 from app.api.routes import season_lifecycle
 from app.api.routes import trials
 from app.api.routes import cups
+from app.api.routes import reads
 
 
 def create_app(
@@ -15,6 +17,7 @@ def create_app(
     container: ApiContainer | None = None,
     config: APIConfig | None = None,
 ) -> FastAPI:
+    config = config or APIConfig.from_env()
     api = FastAPI(
         title="PokeApp API",
         docs_url="/docs",
@@ -22,6 +25,10 @@ def create_app(
         openapi_url="/openapi.json",
     )
     api.state.api_container = container or create_default_container(config)
+    if config.cors_origins:
+        api.add_middleware(CORSMiddleware, allow_origins=list(config.cors_origins),
+            allow_credentials=False, allow_methods=['GET','POST','PUT','OPTIONS'],
+            allow_headers=['Authorization','Content-Type','Idempotency-Key'], max_age=600)
     api.include_router(system.router)
     api.include_router(auth.router)
     api.include_router(auth.me_router)
@@ -34,6 +41,7 @@ def create_app(
     api.include_router(season_lifecycle.router)
     api.include_router(trials.router)
     api.include_router(cups.router)
+    api.include_router(reads.router)
     return api
 
 

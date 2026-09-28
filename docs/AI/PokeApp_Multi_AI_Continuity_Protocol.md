@@ -10,9 +10,9 @@ Reconciled: 2026-09-26. Keep one copy at this path.
 | How do AI instances continue the same work? | This protocol |
 | What are the project-wide constraints and roadmap? | [Master protocol](../PokeApp_2.0_Protocolo_Maestro_MultiIA.md) |
 | Which phase is active and where is its memory? | [Project checkpoint](../project-checkpoint.md) |
-| What is the current operational state and next action? | The active phase's live handoff, indexed by the checkpoint; [Phase 9](../work-in-progress/phase9-live-handoff.md) |
-| What behavior was approved? | The phase contract; [parser / Launcher](../phase9-parser-launcher.md) |
-| What was implemented and what evidence exists? | The phase technical/delivery report; [Phase 9 report](../phase9-completion-report.md) |
+| What is the current operational state and next action? | The active phase's live handoff, indexed by the checkpoint; [Phase 10](../work-in-progress/phase10-live-handoff.md) |
+| What behavior was approved? | The phase contract; [React / Cloudflare](../phase10-react-cloudflare.md) |
+| What was implemented and what evidence exists? | The phase technical/delivery report; [Phase 10 report](../phase10-completion-report.md) |
 
 The live handoff is the single maintained operational record for an active phase.
 Other documents link to it instead of maintaining competing live Git, test or
