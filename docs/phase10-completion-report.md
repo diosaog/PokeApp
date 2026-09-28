@@ -280,3 +280,9 @@ closure hash from Git rather than maintaining a self-referential commit ID.
 Weighted complete-project estimate: **~79% -> ~80%** for verified public delivery
 and integration. No credit for V1 cutover, future Launcher/physical operations or
 release readiness. **Phase 10 DONE; Phase 11 not started.**
+
+During final Git verification, the local loose `origin/main` tracking ref contained
+41 NUL bytes and normal fetch failed. GitHub's branch and local HEAD were separately
+verified at `cf99390`. The damaged tracking file was preserved in `%TEMP%`, then
+normal fetch rebuilt it; divergence returned 0/0. No branch/history rewrite, force
+push, source reset or protected-file access. Cause of local ref corruption unknown.
