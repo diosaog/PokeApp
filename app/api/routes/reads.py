@@ -11,6 +11,7 @@ from app.api.read_models import (
     SeasonPage,
     ShopRead,
     TrainerRead,
+    InventoryRead,
 )
 from app.application.frontend_reads import FrontendReads
 from app.repositories.errors import NotFoundError, PersistenceError
@@ -62,3 +63,8 @@ def shop(season_id: UUID, principal: Reader, container: Container):
 @router.get("/hall", response_model=HallPage)
 def hall(principal: Reader, container: Container, offset: Offset = 0):
     return read(container, "hall", offset)
+
+
+@router.get("/seasons/{season_id}/inventory", response_model=InventoryRead)
+def inventory(season_id: UUID, principal: Reader, container: Container):
+    return read(container, "inventory", str(season_id), str(principal.trainer_id))

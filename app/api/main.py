@@ -25,6 +25,13 @@ def create_app(
         openapi_url="/openapi.json",
     )
     api.state.api_container = container or create_default_container(config)
+
+    @api.middleware('http')
+    async def private_responses(request, call_next):
+        response = await call_next(request)
+        if request.url.path.startswith('/v1/'):
+            response.headers['Cache-Control'] = 'no-store'
+        return response
     if config.cors_origins:
         api.add_middleware(CORSMiddleware, allow_origins=list(config.cors_origins),
             allow_credentials=False, allow_methods=['GET','POST','PUT','OPTIONS'],

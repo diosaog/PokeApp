@@ -7,6 +7,7 @@ from app.api.read_models import (
     SeasonPage,
     ShopRead,
     TrainerRead,
+    InventoryRead,
 )
 from app.repositories.errors import NotFoundError, PersistenceError
 from app.repositories.supabase.frontend_reads import FrontendReadRepository
@@ -101,6 +102,11 @@ class FrontendReads:
             season=season,
             players=players,
             snapshots=snapshots,
+            points=self.rows(
+                "public_sanctioned_points",
+                "season_player_id,earned_points,points_reduction,dead_points_penalty,sanctioned_points,source_matchday_id",
+                season_id=sid,
+            ),
             days=self.rows("public_matchdays", "id,number,status", season_id=sid),
             matches=self.rows(
                 "public_matches",
@@ -168,8 +174,13 @@ class FrontendReads:
         party, boxes = payload.get("party", []), payload.get("boxes", [])
         if any("slot_number" not in s or "pokemon" not in s for s in party):
             return PCRead(save=save, status="unsupported_payload", pokemon=[])
+        entities = self.observed_entities(sid, tid, current)
         pokemon = [
-            dict(location=f"Equipo · {s['slot_number']}", pokemon=s["pokemon"])
+            dict(
+                location=f"Equipo · {s['slot_number']}",
+                pokemon=s["pokemon"],
+                pokemon_entity_id=entities.get(("party", 0, s["slot_number"])),
+            )
             for s in party
             if s.get("pokemon")
         ]
@@ -180,6 +191,9 @@ class FrontendReads:
                         dict(
                             location=f"Caja {box['box_number']} · {slot['slot_number']}",
                             pokemon=slot["pokemon"],
+                            pokemon_entity_id=entities.get(
+                                ("box", box["box_number"], slot["slot_number"])
+                            ),
                         )
                     )
         return PCRead(save=save, status="ready", pokemon=pokemon)
@@ -198,11 +212,95 @@ class FrontendReads:
         )
         return ShopRead(
             items=self.rows(
-                "public_shop_items", "id,name,category,description,base_price"
+                "public_shop_items", "id,code,name,category,description,base_price"
             ),
             promotions=promotions,
             balance=self.balance(sid, tid),
         )
+
+    def observed_entities(self, sid, tid, save):
+        # Look up recorded reconciliations, never manufacture identity from a slot.
+        observations = self.rows(
+            "pokemon_observations",
+            "pokemon_entity_id,source,box_number,slot_number,outcome",
+            season_id=sid,
+            trainer_id=tid,
+            save_file_id=save,
+        )
+        if not observations:
+            return {}
+        entities = {
+            r["id"]
+            for r in self.rows(
+                "pokemon_entities",
+                "id",
+                season_id=sid,
+                owner_trainer_id=tid,
+                identity_status="unambiguous",
+            )
+        }
+        return {
+            (o["source"], o["box_number"], o["slot_number"]): o["pokemon_entity_id"]
+            for o in observations
+            if o["outcome"] in ("NEW", "MATCHED") and o["pokemon_entity_id"] in entities
+        }
+
+    def inventory(self, sid, tid):
+        season = self.season(sid)
+        pc = self.pc(sid, tid)
+        targets = [
+            dict(
+                pokemon_entity_id=s.pokemon_entity_id,
+                trainer_id=tid,
+                location=s.location,
+                visibility="own",
+                pokemon=s.pokemon.model_dump(),
+            )
+            for s in pc.pokemon
+            if s.pokemon_entity_id
+        ]
+        # Rivals: only the already-public frozen team. Never read a rival parsed save,
+        # box contents, private snapshot, raw evidence, flags or candidate keys.
+        if season["current_matchday_id"]:
+            locks = self.rows(
+                "team_locks",
+                "trainer_id,save_file_id,public_team_snapshot",
+                season_id=sid,
+                matchday_id=season["current_matchday_id"],
+            )
+            for lock in locks:
+                if lock["trainer_id"] == tid:
+                    continue
+                entities = self.observed_entities(
+                    sid, lock["trainer_id"], lock["save_file_id"]
+                )
+                for index, pokemon in enumerate(lock["public_team_snapshot"], 1):
+                    entity = entities.get(("party", 0, index))
+                    if entity:
+                        targets.append(
+                            dict(
+                                pokemon_entity_id=entity,
+                                trainer_id=lock["trainer_id"],
+                                location=f"Equipo fijado · {index}",
+                                visibility="public_team_lock",
+                                pokemon=pokemon,
+                            )
+                        )
+        purchases = self.rows(
+            "purchases",
+            "id,shop_item_id,status,total_price,purchased_at",
+            season_id=sid,
+            trainer_id=tid,
+        )
+        catalog = (
+            {i["id"]: i for i in self.rows("shop_items", "id,code,name")}
+            if purchases
+            else {}
+        )
+        for purchase in purchases:
+            item = catalog[purchase["shop_item_id"]]
+            purchase.update(item_name=item["name"], item_code=item["code"])
+        return InventoryRead(purchases=purchases, targets=targets)
 
     def hall(self, offset=0):
         columns = "id,season_id,competition_type,champion_trainer_id,finalist_trainer_id,finalized_at,cup_id,cup_certificate_id,champion_side_id,finalist_side_id,cup_sides,cup_checksum"

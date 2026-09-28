@@ -38,3 +38,11 @@ desktop/
 companion/**/bin/
 companion/**/obj/
 .pokeapp-launcher/
+
+# React build/development artifacts
+web/node_modules/
+web/dist/
+web/.wrangler/
+web/test-results/
+web/playwright-report/
+web/*.tsbuildinfo

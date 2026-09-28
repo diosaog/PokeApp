@@ -120,6 +120,15 @@ class SnapshotRead(BaseModel):
     standings: list[StandingRead]
 
 
+class PointsRead(BaseModel):
+    season_player_id: UUID
+    earned_points: Decimal
+    points_reduction: Decimal
+    dead_points_penalty: Decimal
+    sanctioned_points: Decimal
+    source_matchday_id: UUID
+
+
 class OverviewRead(BaseModel):
     season: SeasonRead
     players: list[PlayerRead]
@@ -128,6 +137,7 @@ class OverviewRead(BaseModel):
     divisions: list[DivisionRead]
     memberships: list[MembershipRead]
     snapshots: list[SnapshotRead]
+    points: list[PointsRead]
     locks: list[LockRead]
     balance: int | None
 
@@ -141,6 +151,7 @@ class SaveRead(BaseModel):
 
 class SlotRead(BaseModel):
     location: str
+    pokemon_entity_id: UUID | None = None
     pokemon: PrivatePokemonRead
 
 
@@ -152,6 +163,7 @@ class PCRead(BaseModel):
 
 class ItemRead(BaseModel):
     id: UUID
+    code: str
     name: str
     category: str
     description: str
@@ -171,6 +183,29 @@ class ShopRead(BaseModel):
     items: list[ItemRead]
     promotions: list[PromotionRead]
     balance: int | None
+
+
+class PurchaseRead(BaseModel):
+    id: UUID
+    shop_item_id: UUID
+    status: str
+    total_price: int
+    purchased_at: datetime
+    item_name: str
+    item_code: str
+
+
+class TargetRead(BaseModel):
+    pokemon_entity_id: UUID
+    trainer_id: UUID
+    location: str
+    visibility: Literal["own", "public_team_lock"]
+    pokemon: PokemonRead
+
+
+class InventoryRead(BaseModel):
+    purchases: list[PurchaseRead]
+    targets: list[TargetRead]
 
 
 class HallRead(BaseModel):

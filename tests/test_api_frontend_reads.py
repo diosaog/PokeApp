@@ -5,6 +5,8 @@ from dataclasses import replace
 import unittest
 from unittest.mock import Mock
 from uuid import uuid4
+import httpx
+from postgrest import SyncPostgrestClient
 
 from fastapi.testclient import TestClient
 from app.api.config import APIConfig
@@ -309,8 +311,163 @@ class FrontendReadTests(unittest.TestCase):
         self.assertEqual(result.status_code, 503)
         self.assertNotIn("SECRET", result.text)
 
+    def test_sanctioned_points_use_exact_official_view_not_snapshot_score(self):
+        self.store.data["public_sanctioned_points"] = [
+            dict(
+                season_id=SID,
+                season_player_id=PID,
+                earned_points="3",
+                points_reduction="3.25",
+                dead_points_penalty="0.2",
+                sanctioned_points="-0.45",
+                source_matchday_id=DAY,
+            )
+        ]
+        result = self.get(f"seasons/{SID}/overview")
+        self.assertEqual(result.status_code, 200)
+        self.assertEqual(result.json()["points"][0]["sanctioned_points"], "-0.45")
+
+    def test_pc_identity_requires_explicit_unambiguous_observation(self):
+        entity = str(uuid4())
+        self.store.data["pokemon_observations"] = [
+            dict(
+                season_id=SID,
+                trainer_id=TRAINER_ID,
+                save_file_id=SAVE,
+                pokemon_entity_id=entity,
+                source="party",
+                box_number=0,
+                slot_number=1,
+                outcome="MATCHED",
+                evidence="SECRET",
+            )
+        ]
+        self.store.data["pokemon_entities"] = [
+            dict(
+                id=entity,
+                season_id=SID,
+                owner_trainer_id=TRAINER_ID,
+                identity_status="unambiguous",
+                initial_evidence="SECRET",
+            )
+        ]
+        result = self.get(f"seasons/{SID}/pc")
+        self.assertEqual(result.json()["pokemon"][0]["pokemon_entity_id"], entity)
+        self.assertNotIn("SECRET", result.text)
+        self.store.data["pokemon_entities"][0]["identity_status"] = "ambiguous"
+        self.assertIsNone(
+            self.get(f"seasons/{SID}/pc").json()["pokemon"][0]["pokemon_entity_id"]
+        )
+
+    def test_inventory_only_reads_rival_public_lock_and_never_rival_parsed_save(self):
+        rival, rival_save, entity = [str(uuid4()) for _ in range(3)]
+        self.store.data["team_locks"] = [
+            dict(
+                season_id=SID,
+                matchday_id=DAY,
+                trainer_id=rival,
+                save_file_id=rival_save,
+                public_team_snapshot=[dict(species="Eevee", ability="SECRET")],
+                private_team_snapshot="SECRET",
+            )
+        ]
+        self.store.data["pokemon_observations"] = [
+            dict(
+                season_id=SID,
+                trainer_id=rival,
+                save_file_id=rival_save,
+                pokemon_entity_id=entity,
+                source="party",
+                box_number=0,
+                slot_number=1,
+                outcome="MATCHED",
+                evidence="SECRET",
+            )
+        ]
+        self.store.data["pokemon_entities"] = [
+            dict(
+                id=entity,
+                season_id=SID,
+                owner_trainer_id=rival,
+                identity_status="unambiguous",
+            )
+        ]
+        result = self.get(f"seasons/{SID}/inventory")
+        self.assertEqual(result.status_code, 200)
+        target = result.json()["targets"][0]
+        self.assertEqual(target["pokemon_entity_id"], entity)
+        self.assertEqual(target["visibility"], "public_team_lock")
+        self.assertNotIn("SECRET", result.text)
+        for table, columns, filters, *_ in self.store.calls:
+            if table == "parsed_saves":
+                self.assertEqual(filters["save_file_id"], SAVE)
+            self.assertNotIn("evidence", columns)
+            self.assertNotIn("private_team_snapshot", columns)
+
+    def test_inventory_own_gift_visible_without_enabling_catalog_offer(self):
+        item, owned, foreign = [str(uuid4()) for _ in range(3)]
+        base = dict(
+            season_id=SID,
+            shop_item_id=item,
+            status="pending",
+            total_price=0,
+            purchased_at="2026-09-28T12:00:00Z",
+            metadata="SECRET",
+        )
+        self.store.data["purchases"] = [
+            dict(base, id=owned, trainer_id=TRAINER_ID),
+            dict(base, id=foreign, trainer_id=str(uuid4())),
+        ]
+        self.store.data["shop_items"] = [
+            dict(id=item, code="robar_pokemon", name="Vale de robo", enabled=False)
+        ]
+        result = self.get(f"seasons/{SID}/inventory")
+        self.assertEqual(result.status_code, 200)
+        self.assertEqual([p["id"] for p in result.json()["purchases"]], [owned])
+        self.assertEqual(result.json()["purchases"][0]["item_code"], "robar_pokemon")
+        self.assertNotIn("SECRET", result.text)
+
 
 class CorsTests(unittest.TestCase):
+    def test_private_success_and_errors_are_not_cacheable(self):
+        with TestClient(
+            create_app(container=ApiContainer(), config=APIConfig())
+        ) as client:
+            self.assertEqual(
+                client.get("/v1/read/seasons").headers["cache-control"], "no-store"
+            )
+            self.assertEqual(
+                client.post("/v1/auth/pin-login", json={}).headers["cache-control"],
+                "no-store",
+            )
+
+    def test_real_postgrest_transport_uses_filters_and_range(self):
+        requests = []
+
+        def respond(request):
+            requests.append(request)
+            return httpx.Response(200, json=[])
+
+        client = SyncPostgrestClient("https://example.invalid/rest/v1")
+        client.session = httpx.Client(transport=httpx.MockTransport(respond))
+        self.addCleanup(client.session.close)
+        repo = SupabaseFrontendReadRepository(client)
+        repo.rows(
+            "save_files",
+            "id,parser_status",
+            filters={"season_id": SID, "trainer_id": TRAINER_ID, "deleted_at": None},
+            offset=5,
+            limit=10,
+        )
+        self.assertEqual(len(requests), 1)
+        request = requests[0]
+        self.assertEqual(request.method, "GET")
+        self.assertEqual(request.url.params["trainer_id"], "eq." + TRAINER_ID)
+        self.assertEqual(request.url.params["season_id"], "eq." + SID)
+        self.assertEqual(request.url.params["deleted_at"], "is.null")
+        self.assertEqual(request.url.params["offset"], "5")
+        self.assertEqual(request.url.params["limit"], "10")
+
     def test_explicit_preflight_allows_jwt_and_idempotency(self):
         with TestClient(
             create_app(
