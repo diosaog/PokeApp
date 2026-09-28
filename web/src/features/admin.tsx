@@ -23,7 +23,9 @@ import { playerName } from "./core";
 type Setup = Model<"SeasonSetup">;
 function Configuration({ setup }: { setup: Setup }) {
   const { season } = useApp(),
-    cmd = useCommand();
+    cmd = useCommand(),
+    [replacement, setReplacement] = useState("");
+  const current = setup.config_versions.find((c) => c.id === replacement);
   return (
     <>
       <Card>
@@ -53,12 +55,28 @@ function Configuration({ setup }: { setup: Setup }) {
         </form>
       </Card>
       <Card>
-        <h2>Nueva versión de configuración</h2>
+        <h2>Configuración de competición</h2>
         <p>
           Los valores se validan frente a la plantilla actual. No se cambian
           resultados históricos.
         </p>
+        <Field label="Versión a configurar">
+          <select
+            value={replacement}
+            onChange={(event) => setReplacement(event.target.value)}
+          >
+            <option value="">Crear nueva versión</option>
+            {setup.config_versions
+              .filter((c) => !c.used)
+              .map((c) => (
+                <option key={c.id} value={c.id}>
+                  Reemplazar {c.name} (sin usar)
+                </option>
+              ))}
+          </select>
+        </Field>
         <form
+          key={replacement}
           onSubmit={(event) => {
             const data = form(event),
               scores = text(data, "points").split(",").map(Number),
@@ -81,14 +99,24 @@ function Configuration({ setup }: { setup: Setup }) {
               expected_roster_revision: setup.roster_revision,
             };
             void cmd.execute(
-              `/v1/admin/seasons/${season}/config-versions`,
-              body,
+              `/v1/admin/seasons/${season}/config-versions${replacement ? `/${replacement}/replace-unused` : ""}`,
+              replacement
+                ? ({
+                    ...body,
+                    reason: text(data, "reason"),
+                  } satisfies Model<"ReplaceConfigBody">)
+                : body,
             );
           }}
         >
           <div className="form-grid">
             <Field label="Nombre de versión">
-              <input name="name" required maxLength={120} />
+              <input
+                name="name"
+                required
+                maxLength={120}
+                defaultValue={current?.name}
+              />
             </Field>
             {[
               ["from", "Primera jornada", 1],
@@ -102,6 +130,17 @@ function Configuration({ setup }: { setup: Setup }) {
                   name={String(name)}
                   type="number"
                   min={Number(min)}
+                  defaultValue={
+                    (
+                      {
+                        from: current?.effective_from_matchday,
+                        total: current?.total_matchdays,
+                        a: current?.division_sizes?.A,
+                        b: current?.division_sizes?.B,
+                        movement: current?.movement_count,
+                      } as Record<string, number | undefined>
+                    )[String(name)]
+                  }
                   required
                 />
               </Field>
@@ -110,6 +149,13 @@ function Configuration({ setup }: { setup: Setup }) {
               <input
                 name="points"
                 placeholder="10,8,6,4"
+                defaultValue={
+                  current &&
+                  Object.entries(current.scoring)
+                    .sort((a, b) => Number(a[0]) - Number(b[0]))
+                    .map(([, v]) => v)
+                    .join(",")
+                }
                 pattern="[0-9]+(,[0-9]+)*"
                 required
               />
@@ -118,20 +164,42 @@ function Configuration({ setup }: { setup: Setup }) {
               <input
                 name="coins"
                 placeholder="8,6,4,2"
+                defaultValue={
+                  current &&
+                  Object.entries(current.coin_rewards)
+                    .sort((a, b) => Number(a[0]) - Number(b[0]))
+                    .map(([, v]) => v)
+                    .join(",")
+                }
                 pattern="[0-9]+(,[0-9]+)*"
                 required
               />
             </Field>
           </div>
           <label className="check">
-            <input type="checkbox" name="lock" defaultChecked />
+            <input
+              type="checkbox"
+              name="lock"
+              defaultChecked={current?.rules.team_lock_required ?? true}
+            />
             Team Lock obligatorio
           </label>
           <label className="check">
-            <input type="checkbox" name="steal" />
+            <input
+              type="checkbox"
+              name="steal"
+              defaultChecked={current?.rules.last_b_gets_steal ?? false}
+            />
             Último de B recibe robo
           </label>
-          <Submit pending={cmd.pending || cmd.uncertain}>Crear versión</Submit>
+          {replacement && (
+            <Field label="Motivo de reemplazo">
+              <textarea name="reason" maxLength={500} required />
+            </Field>
+          )}
+          <Submit pending={cmd.pending || cmd.uncertain}>
+            {replacement ? "Reemplazar versión sin usar" : "Crear versión"}
+          </Submit>
         </form>
       </Card>
       <CommandState command={cmd} />
@@ -259,7 +327,8 @@ function DayAdmin({ dayId }: { dayId: string }) {
     ),
     ov = useOverview(),
     cmd = useCommand(),
-    [confirm, setConfirm] = useState(false);
+    [confirm, setConfirm] = useState(false),
+    [cancel, setCancel] = useState(false);
   if (q.isPending) return <Loading />;
   if (q.error) return <Notice error={q.error} />;
   const day = q.data!,
@@ -339,9 +408,45 @@ function DayAdmin({ dayId }: { dayId: string }) {
         )}
       </form>
       {day.state === "open" && (
-        <button className="button primary" onClick={() => setConfirm(true)}>
-          Cerrar jornada
-        </button>
+        <div className="toolbar">
+          <button className="button primary" onClick={() => setConfirm(true)}>
+            Cerrar jornada
+          </button>
+          <button onClick={() => setCancel(true)}>Cancelar edición</button>
+        </div>
+      )}
+      {cancel && (
+        <Modal
+          title="Cancelar edición de jornada"
+          onClose={() => {
+            if (!cmd.pending && !cmd.uncertain) setCancel(false);
+          }}
+        >
+          <p>
+            Se descartarán los resultados provisionales y la jornada volverá al
+            estado programado.
+          </p>
+          <form
+            onSubmit={async (event) => {
+              const data = form(event);
+              if (
+                await cmd.execute(`${base}/cancel-editing`, {
+                  expected_revision: day.revision,
+                  reason: text(data, "reason"),
+                } satisfies Model<"CancelDayBody">)
+              )
+                setCancel(false);
+            }}
+          >
+            <Field label="Motivo de cancelación">
+              <textarea name="reason" required maxLength={500} />
+            </Field>
+            <CommandState command={cmd} />
+            <Submit pending={cmd.pending || cmd.uncertain}>
+              Confirmar cancelación de edición
+            </Submit>
+          </form>
+        </Modal>
       )}
       {confirm && (
         <Modal

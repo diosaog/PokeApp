@@ -98,6 +98,47 @@ test("conflicts stay visible without silent CAS retry", async ({ page }) => {
   );
   await expect(page.getByRole("dialog")).toBeVisible();
 });
+test("admin can repair unused configuration and cancel provisional editing with CAS", async ({
+  page,
+}) => {
+  const commands = await fixture(page);
+  await login(page);
+  await navigate(page, "Administración");
+  await page.getByRole("tab", { name: "Configuración", exact: true }).click();
+  await page.getByLabel("Versión a configurar").selectOption("config");
+  await page
+    .getByLabel("Nombre de versión", { exact: true })
+    .fill("Base corregida");
+  await page
+    .getByLabel("Motivo de reemplazo")
+    .fill("Ajustar el borrador antes de usarlo");
+  await page
+    .getByRole("button", { name: "Reemplazar versión sin usar" })
+    .click();
+  await expect(page.getByText("Cambio confirmado.")).toBeVisible();
+  expect(commands.at(-1)?.path).toContain("/config/replace-unused");
+  expect(commands.at(-1)?.body).toMatchObject({
+    expected_config_revision: 2,
+    expected_roster_revision: 3,
+    division_sizes: { A: 2, B: 2 },
+    reason: "Ajustar el borrador antes de usarlo",
+  });
+  await page.getByRole("tab", { name: "Competición", exact: true }).click();
+  await page
+    .getByRole("button", { name: "Cancelar edición", exact: true })
+    .click();
+  await page
+    .getByLabel("Motivo de cancelación")
+    .fill("Revisar los enfrentamientos");
+  await page
+    .getByRole("button", { name: "Confirmar cancelación de edición" })
+    .click();
+  await expect(page.getByRole("dialog")).toHaveCount(0);
+  expect(commands.at(-1)?.body).toEqual({
+    expected_revision: 2,
+    reason: "Revisar los enfrentamientos",
+  });
+});
 test("inventory redemption and manual Discord verdict preserve IDs, revision and decimal points", async ({
   page,
 }) => {

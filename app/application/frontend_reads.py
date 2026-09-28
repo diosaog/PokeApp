@@ -104,7 +104,7 @@ class FrontendReads:
             snapshots=snapshots,
             points=self.rows(
                 "public_sanctioned_points",
-                "season_player_id,earned_points,points_reduction,dead_points_penalty,sanctioned_points,source_matchday_id",
+                "season_player_id,earned_points::text,points_reduction::text,dead_points_penalty::text,sanctioned_points::text,source_matchday_id",
                 season_id=sid,
             ),
             days=self.rows("public_matchdays", "id,number,status", season_id=sid),

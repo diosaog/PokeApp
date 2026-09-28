@@ -326,6 +326,19 @@ class FrontendReadTests(unittest.TestCase):
         result = self.get(f"seasons/{SID}/overview")
         self.assertEqual(result.status_code, 200)
         self.assertEqual(result.json()["points"][0]["sanctioned_points"], "-0.45")
+        columns = next(
+            c[1] for c in self.store.calls if c[0] == "public_sanctioned_points"
+        )
+        self.assertIn("sanctioned_points::text", columns)
+        self.store.data["public_sanctioned_points"][0]["sanctioned_points"] = (
+            "-12345678901234567890.12"
+        )
+        self.assertEqual(
+            self.get(f"seasons/{SID}/overview").json()["points"][0][
+                "sanctioned_points"
+            ],
+            "-12345678901234567890.12",
+        )
 
     def test_pc_identity_requires_explicit_unambiguous_observation(self):
         entity = str(uuid4())
