@@ -179,7 +179,7 @@ export const cup = {
   finalist_side_id: null,
   checksum: null,
 };
-export async function fixture(page: Page) {
+export async function fixture(page: Page, longNames = false) {
   const commands: {
     path: string;
     body: Record<string, unknown>;
@@ -433,6 +433,16 @@ export async function fixture(page: Page) {
         headers,
         json: { detail: { code: "FIXTURE_NOT_FOUND" } },
       });
+    if (longNames) {
+      result = JSON.parse(
+        JSON.stringify(result, (key, value) =>
+          (key === "display_name" || key === "name") &&
+          typeof value === "string"
+            ? value.replaceAll(" ", "_") + "_" + "abcdefghijklmnop".repeat(4)
+            : value,
+        ),
+      );
+    }
     await route.fulfill({ status: 200, headers, json: result });
   });
   return commands;

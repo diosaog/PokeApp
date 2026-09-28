@@ -1,6 +1,45 @@
 import { test, expect } from "@playwright/test";
 import { fixture, login, navigate, sid, cid } from "./fixtures";
 
+test("long unbroken names fit desktop and mobile screens", async ({ page }) => {
+  await fixture(page, true);
+  await page.goto("/");
+  await page.getByLabel("Entrenador", { exact: true }).fill("Antonio");
+  await page.getByLabel("PIN", { exact: true }).fill("1234");
+  await page.getByRole("button", { name: "Entrar a PokeApp" }).click();
+  await expect(
+    page.getByRole("heading", { name: /^A por la siguiente/ }),
+  ).toBeVisible();
+  for (const viewport of [
+    { width: 1440, height: 1000 },
+    { width: 390, height: 844 },
+  ]) {
+    await page.setViewportSize(viewport);
+    for (const name of [
+      "Inicio",
+      "Liga",
+      "Battle",
+      "Entrenadores",
+      "Mi PC",
+      "Tienda",
+      "Copa",
+      "Hall de la Fama",
+      "Juicios",
+      "Administración",
+      "Saves y Launcher",
+    ]) {
+      await navigate(page, name);
+      await expect(page.locator("main .loading")).toHaveCount(0);
+      expect(
+        await page.evaluate(
+          () => document.documentElement.scrollWidth <= innerWidth + 1,
+        ),
+        `${name} at ${viewport.width}`,
+      ).toBe(true);
+    }
+  }
+});
+
 test("login, official league, Team Lock, PC dialog, purchase, admin CAS, Cup Bo3, Hall and logout", async ({
   page,
 }) => {
