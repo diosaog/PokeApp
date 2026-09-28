@@ -1,0 +1,189 @@
+{
+  "observed_at_utc": "2026-09-28T13:22:11.509007+00:00",
+  "implementation_commit": "7a827ee313c4bc7d90c233294d94fa58668ab4be",
+  "uncommitted_source_changes": false,
+  "phase_status": "IN_PROGRESS_DEPLOYMENT_BLOCKED",
+  "environment": {
+    "os": "Windows",
+    "node": "24.14.0",
+    "npm": "11.9.0",
+    "python": "3.14.3",
+    "edge": "154.0.4258.37",
+    "playwright": "1.63.0",
+    "wrangler": "4.142.0"
+  },
+  "validations": [
+    {
+      "name": "python_full",
+      "source_commit": "c940b33c9099399fdce1d74ba06ee59c53d7f6f8",
+      "command": ".venv-api/Scripts/python.exe tools/run_unit_tests.py",
+      "passed": 565,
+      "exit_code": 0,
+      "evidence_location": "%TEMP%/phase10-python-unit-final.log"
+    },
+    {
+      "name": "python_frontend_reads",
+      "source_commit": "7a827ee313c4bc7d90c233294d94fa58668ab4be",
+      "command": ".venv-api/Scripts/python.exe -m unittest discover -s tests -p test_api_frontend_reads.py",
+      "passed": 22,
+      "exit_code": 0
+    },
+    {
+      "name": "react_unit_component",
+      "source_commit": "c940b33c9099399fdce1d74ba06ee59c53d7f6f8",
+      "command": "npm run test (web)",
+      "passed": 11,
+      "exit_code": 0,
+      "source_changes_since": "Only admin controls/fixtures; transport and Hall test subjects unchanged"
+    },
+    {
+      "name": "browser_e2e",
+      "source_commit": "7a827ee313c4bc7d90c233294d94fa58668ab4be",
+      "command": "POKEAPP_E2E_BASE_URL=http://127.0.0.1:8787 npm run test:e2e (web)",
+      "passed": 8,
+      "exit_code": 0,
+      "api": "intercepted synthetic fixtures; not live JWT/PostgREST",
+      "asset_runtime": "actual local Cloudflare Workers assets"
+    },
+    {
+      "name": "typescript_production_build",
+      "source_commit": "7a827ee313c4bc7d90c233294d94fa58668ab4be",
+      "command": "VITE_API_BASE_URL=http://127.0.0.1:8000 npm run build (web)",
+      "exit_code": 0,
+      "js_gzip_kb": 112.88,
+      "css_gzip_kb": 6.3
+    },
+    {
+      "name": "cloudflare_dry_run",
+      "source_commit": "7a827ee313c4bc7d90c233294d94fa58668ab4be",
+      "command": "npm run deploy:check (web)",
+      "exit_code": 0
+    },
+    {
+      "name": "read_only_v2_schema",
+      "source_commit": "7a827ee313c4bc7d90c233294d94fa58668ab4be",
+      "command": ".venv-api/Scripts/python.exe -m tools.validate_phase10_read_contract --env-file .env.supabase-v2-rls.local",
+      "exit_code": 0,
+      "result": {
+        "project_ref": "uwleqeuzsveqlugugzba",
+        "read_only": true,
+        "static_selections": 24,
+        "tables": [
+          "parsed_saves",
+          "pokemon_entities",
+          "pokemon_observations",
+          "public_coin_balances",
+          "public_division_memberships",
+          "public_divisions",
+          "public_matchday_snapshots",
+          "public_matchdays",
+          "public_matches",
+          "public_sanctioned_points",
+          "public_season_player_stats",
+          "public_season_players",
+          "public_seasons",
+          "public_shop_items",
+          "public_shop_promotions",
+          "public_team_locks",
+          "public_trainers",
+          "purchases",
+          "save_files",
+          "season_players",
+          "seasons",
+          "shop_items",
+          "team_locks"
+        ],
+        "seasons": 0,
+        "hall": 0,
+        "trainers": 10,
+        "mutations": 0,
+        "fixtures": 0,
+        "storage_operations": 0
+      }
+    }
+  ],
+  "cloudflare": {
+    "public_deployed": false,
+    "whoami": "Not authenticated",
+    "spa_local_status": 200,
+    "security_headers": [
+      "Content-Security-Policy",
+      "X-Content-Type-Options",
+      "Referrer-Policy",
+      "Permissions-Policy",
+      "X-Frame-Options"
+    ]
+  },
+  "visual": {
+    "breakpoints": [
+      [
+        1440,
+        1000
+      ],
+      [
+        1280,
+        800
+      ],
+      [
+        768,
+        1024
+      ],
+      [
+        390,
+        844
+      ]
+    ],
+    "automated_pages_per_breakpoint": 11,
+    "horizontal_overflow": false,
+    "fixtures_only": true,
+    "representative_files": [
+      "docs/evidence/phase10/desktop-home.png",
+      "docs/evidence/phase10/laptop-battle.png",
+      "docs/evidence/phase10/mobile-hall.png",
+      "docs/evidence/phase10/tablet-league.png"
+    ]
+  },
+  "source_sha256": {
+    "app/api/config.py": "942da43d7accde2cb1d62f63e816b12329046b7449bff50e1a4f364d5e934fd2",
+    "app/api/dependencies.py": "fa9e52734484193cc06934dad7ecf9a242721bc15c00462adc7ae1ab5db072fd",
+    "app/api/main.py": "637a83e4566b9694f31621a2c2b21a212ea60e35e5724b5fe8ab37b9f28d2e3a",
+    "app/api/read_models.py": "3e48bd08548cb9359c16b727c149bf0ba83bc70f18b94fdd453b074698f8397d",
+    "app/api/routes/reads.py": "6a04103bd54ef61a2d3645b4139f92a8aa237fbcd2b2615783c049cf746ac791",
+    "app/application/frontend_reads.py": "d2a5bf41897e6358070784b30747e6c44d56fc400aa7d2ab221add98795f5c36",
+    "app/repositories/supabase/frontend_reads.py": "be077a2bfbb87f05dc00d951f03a08a8a13a0af9a8a8f7d45f4b883cf5d486d5",
+    "tests/test_api_frontend_reads.py": "8f0c619bda5d955616bd550735091937a06148ad836bf2e1ce158ec5d9b2a96b",
+    "tools/export_web_schema.py": "772563c887ea18f1d19f6f45b9fbdde549b5ccc206661c050bd14560b9e83964",
+    "tools/validate_phase10_read_contract.py": "38349d91261debe713791eb0d0ccb488b86e942956d52be47daa9289895a1b9b",
+    "web/.env.example": "52cc6dffd69ec3fc2f1c97ac1ee9cd3cffccfdfa1dda4918aad6d551a61615a7",
+    "web/e2e/fixtures.ts": "71f9c0cc0cab83fcba68b406ded89e37f032ad85815f630efc8c5a92b7484691",
+    "web/e2e/flows.spec.ts": "77b09c58b2476c1910e1cec256e68dc9c1cbdb2e5fb99fa39b519b711a484474",
+    "web/index.html": "39d23f089e761bdd20af143803f17aead21765489505cfc2f58a3deee5341a11",
+    "web/package-lock.json": "2d7961492a48e4e3999a98b609e67b0b465b56ff3bc2f7451c6a47281cd01c23",
+    "web/package.json": "d7e00b639d27e766913215f2f9e235962136a48640c01610ee994684da59f584",
+    "web/playwright.config.ts": "e24a0002a4e33aa26fb98631786b2f3cbc9e590f9063320bd3510d35d9c20ae4",
+    "web/public/favicon.svg": "4ffd6bcc9ae7a3c1a97132daf805f9609c390666b6ec84cb931cac63bc899bf5",
+    "web/scripts/check-deploy.mjs": "5837eb0fdb46c46c319c3f0fd7f352136a26925d28d6370a683222aba46b3605",
+    "web/src/App.tsx": "e4d8630defb572ad7a9354eb78b3c47c38aa8ea614631a5a682835ce18b89340",
+    "web/src/api/client.test.ts": "f9c2fd5a95941b17749d86ed97c94a5f7f901abaa1a7dbe0714b0a07b86cf497",
+    "web/src/api/client.ts": "4821275a55d0f55e594baf0e01b0484bd4554069d8ccaf9c1926441a3e3320da",
+    "web/src/api/schema.d.ts": "ea690d67662677acb3f4163d516dc6913f2f567c778f806367e715c797e458ff",
+    "web/src/api/types.ts": "40a7ef1c543393c838fce4c238ee1e72bf6b550199e9638e6221577a1e644212",
+    "web/src/features/admin.tsx": "d8968942903b0f64937e41228be0e89008e162668e9a4c3c3ab44ef8b5902ab2",
+    "web/src/features/core.tsx": "1b402c612af7090beaeedd7924489681fbb9873884ce92dd207b7978883c13ed",
+    "web/src/features/cups.tsx": "300b1db877a665f197d90551fb850a7349a2da49b35da66dac1e8cf23846d2f6",
+    "web/src/features/hall.test.tsx": "eb65a11653f3b3140f69bc0a7dcf952615e14449912cb10815e16c41d7c64af8",
+    "web/src/features/inventory.tsx": "9f14ec6c461d79e925871b5cd22d54a7040c26fd19dfdca1d2760c41e9409d11",
+    "web/src/features/trials.tsx": "d9b78550bee8973d9bd576806ea5e3e03f76db6db55c05d6e748252864530295",
+    "web/src/main.tsx": "13bdf845906a889c70ef69792292b396388b7079e29abfde87a1d76b42010da8",
+    "web/src/state.tsx": "5867cb297892a981340f29f4e241d5e8081736a24eedcdd376c3dd3c258fd54c",
+    "web/src/styles.css": "cbafad6af67d3ff721e506711fec6d87d0ca70646882c6188c0c88da402a3019",
+    "web/src/test-setup.ts": "9b328c4843431fa76d8de00008fc159e95f99a840211085ff3b8f25e53d14409",
+    "web/src/ui.tsx": "8969d84bbe6f0d277be7343f40c87cd7b8a9983518a33ee7557f47653ba52541",
+    "web/tsconfig.json": "3a0e82b445a7fddf07b75b3d52c20fe96801af5a5ca39774f16daced6c4c760e",
+    "web/vite.config.ts": "e80194d197d16872f67b8c523ce995646f5670eca53733b27f40b252dce1e2e6",
+    "web/wrangler.jsonc": "2020ebc22d965d96338275cbac23e3aff53466335e13a8aefcd5eb38694b48a4"
+  },
+  "migration_changes": [],
+  "remote_mutations": 0,
+  "source_hash_encoding": "sha256 of UTF-8 content with CRLF normalized to LF"
+}

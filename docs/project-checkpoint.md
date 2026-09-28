@@ -9,8 +9,9 @@ milestone record; it does not maintain a second live phase-status ledger.
   [Contract](phase9-parser-launcher.md), [delivery evidence](phase9-completion-report.md),
   [closed handoff](work-in-progress/phase9-live-handoff.md).
 - Phase 8/8L backend closure remains intact: [8L report](phase8l-completion-report.md).
-- Weighted complete-project estimate: **~73%**, from ~70% after delivery of the
-  functional local parser/Launcher foundation. This is not whole-product deployment.
+- Weighted complete-project estimate: **~79%**, from ~73% after the locally
+  validated React/API delivery. No credit for public deployment or cutover;
+  remaining deployment checks are tracked in the active handoff.
 - Runtime remains Streamlit/V1; Phase 9 is isolated local work, with no cutover.
   **Phase 10 is IN PROGRESS**: [live handoff](work-in-progress/phase10-live-handoff.md),
   [contract](phase10-react-cloudflare.md), [delivery report](phase10-completion-report.md). Cloud save ingestion/current-state promotion,
@@ -26,6 +27,17 @@ verifying Phase 9 DONE. No V1/V2 cutover, physical save mutation or automatic Ph
 The following counts, PASS results, next-step notes and remote versions belong to
 their named milestones. They are retained as evidence, not fresh verification of
 the current repository or remote database. Current project position is indexed above.
+
+### 2026-09-28 - Phase 10 local React/API delivery; phase remains open
+
+Published implementation `512d239`, `c940b33`, `7a827ee`: eleven React screens,
+typed frontend reads, explicit CORS, critical mutation integration and Workers
+assets delivery. 565 Python, 11 React and eight browser tests PASS with source
+provenance in the [report](phase10-completion-report.md) and
+[evidence](phase10-validation-evidence.json). Browser APIs use synthetic fixtures;
+real V2 checks were read-only. No migrations or staging writes. Public deployment
+and real authenticated environment validation remain pending account/API setup.
+Progress ~73% -> ~79%; Phase 10 is not DONE. Continue from its live handoff.
 
 ### 2026-09-28 — Phase 9 local parser / Launcher foundation DONE
 

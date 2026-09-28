@@ -27,6 +27,8 @@ as real product data. Test fixtures are restricted to tests/local validation.
 - Centralized requests/errors. Existing required idempotency keys and CAS revisions
   preserved; no silent stale-revision retry. 401/403/409/422/5xx have explicit UI.
   Disable duplicate submits and keep uncertain-outcome retries on the same key/body.
+  Pending intents survive route changes in memory, not browser reloads. After an
+  uncertain result followed by reload, inspect authoritative history before retrying.
 - Cup uses 8L format/side/member contracts. Hall handles nullable champion trainer
   and both doubles members; no unadapted legacy single-champion DTO.
 - CORS is an explicit configured origin allowlist; no wildcard credentials.
@@ -38,6 +40,12 @@ as real product data. Test fixtures are restricted to tests/local validation.
   any remote deployment. Never invent credentials, account, domain or deployed API.
 - Launcher 9 has no remote heartbeat, download installer or cloud ingestion.
   UI explains availability honestly; no fake connected/sync state or download URL.
+- Per-day awarded points and official cumulative sanctioned points are distinct.
+  Use frozen day facts and 030's public projection respectively; transport exact
+  decimals as strings, never infer cumulative points from snapshot `score`.
+- Redemption selection uses recorded own identities and already-public frozen
+  rival Team Locks. It does not authorize private rival PC browsing. Existing
+  mutations revalidate eligibility; recording an effect does not apply save writes.
 
 ## Flows and completion
 
@@ -53,3 +61,6 @@ breakpoints, production build, Cloudflare delivery-boundary validation, appropri
 backend regression, docs and Git push. Remote deploy status must be stated exactly;
 missing credentials are not a deployment PASS. No final audio/polish, schema for
 visual convenience, physical save writes, V1 migration or Phase 11.
+Local Workers/dry-run and intercepted browser tests are separate evidence from
+public deployment and real authenticated flows. Missing account/API configuration
+keeps the phase open until those delivery checks can be completed.
