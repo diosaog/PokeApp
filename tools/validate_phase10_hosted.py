@@ -216,7 +216,8 @@ def main():
         first = fixtures.call('rename', sid, body, key=key)
         replay = fixtures.call('rename', sid, body, key=key)
         require(first['operation_id'] == replay['operation_id'], 'Hosted idempotency replay')
-        request('PUT', f'/v1/admin/seasons/{sid}/name', body, actor=admin, key=uuid4().hex, status=409)
+        request('PUT', f'/v1/admin/seasons/{sid}/name', {**body, 'name': cfg.run_id+' stale'},
+                actor=admin, key=uuid4().hex, status=409)
         passed('Real admin authority, durable idempotency replay and stale revision conflict')
         for trainer in fixtures.trainers[:4]:
             fixtures.add(sid, trainer['id'])
