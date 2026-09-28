@@ -1,5 +1,5 @@
 // Invoked only by the explicit hosted fixture runner. No intercepted API or traces.
-import { chromium } from '@playwright/test';
+import { chromium, expect } from '@playwright/test';
 import { writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 
@@ -12,7 +12,17 @@ const browser = await chromium.launch({ channel: process.platform === 'win32' ? 
 const context = await browser.newContext({ viewport: { width: 1440, height: 1000 } });
 const page = await context.newPage();
 page.setDefaultTimeout(30000);
-const pageErrors = [], failures = [], mutations = [];
+const pageErrors = [], failures = [], mutations = [], screens = [], reads = [];
+const pending = new Map();
+let step = 'login';
+page.on('request', r => {
+  if (r.url().startsWith(input.api+'/v1/')) pending.set(r, Date.now());
+});
+page.on('requestfinished', r => {
+  if (pending.has(r) && r.method() === 'GET') reads.push({ path: new URL(r.url()).pathname, ms: Date.now()-pending.get(r) });
+  pending.delete(r);
+});
+page.on('requestfailed', r => pending.delete(r));
 page.on('pageerror', e => pageErrors.push(e.message));
 page.on('response', r => {
   if (!r.url().startsWith(input.api+'/v1/')) return;
@@ -21,6 +31,7 @@ page.on('response', r => {
 });
 const assert = (ok, message) => { if (!ok) throw new Error(message); };
 async function nav(name) {
+  step = name;
   await page.getByRole('navigation').getByRole('link', { name, exact: true }).click();
   await page.locator('main').waitFor();
 }
@@ -64,9 +75,13 @@ try {
   await page.keyboard.press('Escape');
   for (const name of ['Inicio', 'Liga', 'Entrenadores', 'Mi PC', 'Tienda', 'Copa', 'Hall de la Fama', 'Juicios', 'Administración', 'Saves y Launcher']) {
     await nav(name);
-    await page.waitForLoadState('networkidle');
+    // Assert the application has finished its own reads, independent of unrelated
+    // hosting/browser connections. Record pending API paths on failure.
+    await expect(page.locator('main .loading')).toHaveCount(0, { timeout: 60000 });
+    await expect.poll(() => pending.size, { timeout: 60000 }).toBe(0);
     assert(await page.getByRole('alert').count() === 0, 'UI alert on '+name);
     assert(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth+1), 'Overflow on '+name);
+    screens.push(name);
   }
   await nav('Hall de la Fama');
   await page.getByRole('link', { name: 'Ver esta Copa' }).waitFor();
@@ -80,10 +95,10 @@ try {
   assert(await page.evaluate(() => localStorage.length === 0 && sessionStorage.length === 0), 'Stored credentials');
   assert(pageErrors.length === 0, 'Browser page errors');
   assert(failures.length === 0, 'Hosted API returned an unexpected error');
-  await writeFile(join(input.output, 'browser-result.json'), JSON.stringify({ status:'PASS', api_interception:false, pageErrors, failures, mutations, desktop:[1440,1000], mobile:[390,844] }, null, 2));
+  await writeFile(join(input.output, 'browser-result.json'), JSON.stringify({ status:'PASS', api_interception:false, pageErrors, failures, mutations, screens, reads, desktop:[1440,1000], mobile:[390,844] }, null, 2));
   console.log('PASS real browser Cloudflare -> Railway -> V2; no mocked requests');
 } catch (e) {
-  await writeFile(join(input.output, 'browser-result.json'), JSON.stringify({ status:'FAIL', message:String(e.message).replaceAll(input.pin,'[REDACTED]'), pageErrors, failures, mutations }, null, 2));
+  await writeFile(join(input.output, 'browser-result.json'), JSON.stringify({ status:'FAIL', step, message:String(e.message).replaceAll(input.pin,'[REDACTED]'), pageErrors, failures, mutations, screens, reads, pending:[...pending.keys()].map(r => new URL(r.url()).pathname) }, null, 2));
   throw new Error(String(e.message).replaceAll(input.pin,'[REDACTED]'));
 } finally {
   await context.close();
