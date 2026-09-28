@@ -1,5 +1,42 @@
 # Phase 10 - live handoff
 
+## Public delivery continuation - 2026-09-28
+
+**IN PROGRESS: both public deployments healthy; authenticated fixture validation
+continues.** This section supersedes the earlier local-only checkpoint below.
+Railway project `PokeApp V2` / service `pokeapp-api`, deployment
+`03e8c858-e036-44b9-8b46-ee659db175f1`, source `6d2c66a`, SUCCESS.
+API: https://pokeapp-api-production.up.railway.app.
+Cloudflare `pokeapp-web`, version `c3ce7902-8c42-4301-b27e-829d7f507e53`:
+https://pokeapp-web.pokeapp-v2.workers.dev. Exact CORS allow/reject PASS.
+Reuse these resources; [deployment runbook](../../deploy/README.md).
+
+First public validation `phase10_hosted_3e8cf25b3d614a1981849b5165299f7f` ended
+FAIL at day close: the synthetic save setup lacked required identity revisions.
+Four real PIN/refresh/JWT flows and admin setup/Team Locks had passed.
+Runner exited; independent full comparison restored all 52 tables, no migration
+change or new Advisor ERROR/WARN. Evidence `%TEMP%/phase10-hosted-run1`.
+The fixture now uses the existing identity reconciliation boundary before close.
+No product rule or migration change was needed.
+
+**OWNER_TEMP_STAGING_AUTH**: the unique existing enabled trainer Anto
+`507d9c56-04d8-4801-a9da-f1e53674efb5` was provisioned through the supported bridge;
+Auth `ac98932c-f713-43d1-8b20-600f0be3dadc`. Public login/JWT/me/refresh and real
+React login/logout PASS. Other trainers, competition and Storage unchanged.
+Keep this owner access usable for manual inspection; it is not a cleanup fixture.
+Credential is deliberately absent from Git, logs and evidence.
+Release blocker: **TEMP_STAGING_AUTH_MUST_BE_REMOVED_OR_RESET_BEFORE_RELEASE**.
+No universal/default production credential or onboarding policy is introduced.
+Evidence `%TEMP%/phase10-owner-access`. Subsequent comparisons must retain all
+public rows and exclude only this explicit owner's Auth rows/session activity.
+
+Next: execute corrected `tools.validate_phase10_hosted` against the existing
+deployment with a fresh baseline and explicit owner Auth exception; inspect its
+result/active process before any repeat, then independent cleanup, docs/Git and
+Phase 10 DONE decision. Do not start Phase 11.
+
+## Historical local-only checkpoint (superseded above)
+
 2026-09-28. **IN PROGRESS: local delivery validated; public deployment blocked.**
 Implementation published on main through `7a827ee`; preceding commits `512d239`
 and `c940b33`. The documentation/evidence commit containing this handoff follows

@@ -6,7 +6,7 @@ Never reapplies migrations, alters grants, uploads saves or uses real data as fi
 from __future__ import annotations
 
 import argparse
-from dataclasses import replace
+from dataclasses import asdict, replace
 from datetime import datetime, timezone
 import hashlib
 import json
@@ -22,8 +22,11 @@ from supabase import create_client
 from supabase.lib.client_options import SyncClientOptions
 
 from app.auth.credentials import build_internal_auth_credential
+from app.application.pokemon_identity import reconcile_parsed_save
 from app.domain.common import to_jsonable
 from app.domain.pokemon import PrivatePokemon, PokemonMove
+from app.domain.pokemon_identity import PokemonIdentityEvidence, CaptureOrder
+from app.repositories.supabase.pokemon_identity import SupabasePokemonIdentityRepository
 from tools.validate_cup_fixtures import CupFixtures, require
 from tools.validate_supabase_v2_cups import CupApiTransport
 from tools.validate_supabase_v2_matchdays import MatchdayApiTransport
@@ -61,15 +64,21 @@ def query(out, name, sql):
     return rows
 
 
-def snapshot(out, name):
+def snapshot(out, name, owner_auth_user=None):
     tables = query(out, name+'-tables', TABLES)
     selects = []
     for table in tables:
         qualified = '.'.join('"'+table[k].replace('"', '""')+'"' for k in ('s', 't'))
         label = table['s']+'.'+table['t']
+        clause = ''
+        if owner_auth_user and table['s'] == 'auth':
+            from uuid import UUID
+            uid = str(UUID(owner_auth_user))
+            column = 'id' if table['t'] == 'users' else 'user_id'
+            clause = f" where {column}::text is distinct from '{uid}'"
         selects.append("select '"+label+"' as name,count(*) as rows,encode(sha256(convert_to("
                        "coalesce(jsonb_agg(to_jsonb(t) order by to_jsonb(t)::text)::text,'[]'),'UTF8')),"
-                       "'hex') as sha256 from "+qualified+' t')
+                       "'hex') as sha256 from "+qualified+' t'+clause)
     return query(out, name, '\nunion all\n'.join(selects)+'\norder by name')
 
 
@@ -91,6 +100,7 @@ def main():
     parser.add_argument('--env-file', type=Path, required=True)
     parser.add_argument('--output', type=Path, required=True)
     parser.add_argument('--allow-staging-writes', action='store_true')
+    parser.add_argument('--owner-auth-user', help='Explicit persistent owner staging Auth exception; never cleaned')
     args = parser.parse_args()
     out = args.output.resolve()
     require(not out.exists(), 'Use a new evidence directory')
@@ -102,12 +112,19 @@ def main():
     require(any(p['id'] == REF and p['linked'] for p in projects), 'Wrong linked V2 project')
     history = query(out, 'history-before', HISTORY)
     require(history[-2]['version'] == '20260928110301' and history[-1]['version'] == '20260928111840', 'Unexpected migration history')
-    before = snapshot(out, 'baseline-before')
-    require(next(x for x in before if x['name'] == 'auth.users')['rows'] == 0, 'Expected isolated V2 Auth baseline; investigate before fixtures')
+    before = snapshot(out, 'baseline-before', args.owner_auth_user)
+    require(next(x for x in before if x['name'] == 'auth.users')['rows'] == 0, 'Unexpected non-owner Auth identities; investigate before fixtures')
+    if args.owner_auth_user:
+        from uuid import UUID
+        uid = str(UUID(args.owner_auth_user))
+        owner = query(out, 'owner-exception', "select id,slug,globally_enabled,auth_user_id from public.trainers where auth_user_id='"+uid+"'::uuid")
+        require(len(owner) == 1 and owner[0]['slug'] == 'anto' and owner[0]['globally_enabled'], 'Owner exception identity mismatch')
     advisor_before = advisors(out, 'advisors-before')
     report = dict(run_id=cfg.run_id, started_at=datetime.now(timezone.utc).isoformat(),
                   source_commit=subprocess.check_output(['git', 'rev-parse', 'HEAD'], cwd=ROOT, text=True).strip(),
                   api=API, web=WEB, project_ref=REF, checks=[], status='RUNNING', users=[], trainers=[], seasons=[])
+    report['owner_exception'] = {'marker': 'OWNER_TEMP_STAGING_AUTH', 'auth_user_id': args.owner_auth_user,
+                                'excluded_from_comparison': 'Only this owner Auth row/identities/sessions/refresh tokens; all public rows fully compared'} if args.owner_auth_user else None
 
     def save():
         write(out/'result.json', report)
@@ -167,6 +184,23 @@ def main():
             require(request('GET', '/v1/me', actor=tid)['trainer_id'] == tid, 'JWT actor mapping')
         passed('Four real PIN logins, refresh sessions and verified JWT trainer mapping')
         admin, owner = fixtures.admin['id'], fixtures.owner['id']
+        wrong = str((int(pins[admin])+1) % 10000).zfill(4)
+        request('POST', '/v1/auth/pin-login', {'trainer_identifier': fixtures.admin['slug'], 'pin': wrong}, status=401)
+        disabled = fixtures.trainers[3]
+        client.table('trainers').update({'globally_enabled': False}).eq('id', disabled['id']).execute()
+        request('GET', '/v1/read/seasons', actor=disabled['id'], status=403)
+        request('POST', '/v1/auth/pin-login', {'trainer_identifier': disabled['slug'], 'pin': pins[disabled['id']]}, status=401)
+        client.table('trainers').update({'globally_enabled': True}).eq('id', disabled['id']).execute()
+        # Point one disposable trainer at another disposable Auth identity; its
+        # own correct PIN must not authenticate through the mismatched mapping.
+        mapped = fixtures.rows('trainers', id=disabled['id'])[0]['auth_user_id']
+        alternate = fixtures.rows('trainers', id=fixtures.admin2['id'])[0]['auth_user_id']
+        client.table('trainers').update({'auth_user_id': None}).eq('id', fixtures.admin2['id']).execute()
+        client.table('trainers').update({'auth_user_id': alternate}).eq('id', disabled['id']).execute()
+        request('POST', '/v1/auth/pin-login', {'trainer_identifier': disabled['slug'], 'pin': pins[disabled['id']]}, status=401)
+        client.table('trainers').update({'auth_user_id': mapped}).eq('id', disabled['id']).execute()
+        client.table('trainers').update({'auth_user_id': alternate}).eq('id', fixtures.admin2['id']).execute()
+        passed('Wrong PIN, disabled trainer and mismatched Auth mapping all denied through public API')
         fixtures.repo = ApiTransport(lambda: api, tokens)
         fixtures.matchdays = MatchdayApiTransport(lambda: api, tokens)
         fixtures.cups = CupApiTransport(lambda: api, tokens)
@@ -194,8 +228,14 @@ def main():
                 sha256=source_hash, parser_status='parsed', parser_version='phase10-fixture-v1'))
             pokemon = to_jsonable(PrivatePokemon(species='Milotic', nickname='Synthetic '+str(i), level=50,
                                   ability='Escama Especial', moves=(PokemonMove('Surf'),)))
-            payload = dict(party=[dict(slot_number=s, pokemon=pokemon) for s in range(1, 7)], boxes=[])
-            fixtures.insert('parsed_saves', dict(save_file_id=record['id'], parser_version='phase10-fixture-v1', payload=payload))
+            payload = dict(party=[dict(slot_number=s, pokemon={**pokemon, 'legacy_fingerprints': [],
+                'identity_evidence': asdict(PokemonIdentityEvidence(1, 5, i*100+s, 12345, 6789, 20, 2,
+                                                                   'Synthetic', 0, ivs=(0,)*6))}) for s in range(1, 7)], boxes=[])
+            parsed = fixtures.insert('parsed_saves', dict(save_file_id=record['id'], parser_version='phase10-fixture-v1', payload=payload))
+            # Synthetic trusted capture order in the fixture only. The production
+            # parser/Launcher still does not invent an upload or current pointer.
+            reconcile_parsed_save(SupabasePokemonIdentityRepository(client), season_id=sid, trainer_id=tid,
+                                  parsed_save_id=parsed['id'], capture_order=CaptureOrder(str(uuid4()), 1))
             client.table('season_players').update({'current_save_file_id': record['id']}).eq('id', player['id']).execute()
             fixtures.insert('coin_transactions', dict(season_id=sid, trainer_id=tid, season_player_id=player['id'],
                             amount=1000, transaction_type='admin_adjustment', metadata={'validation_run': cfg.run_id}))
@@ -249,6 +289,8 @@ def main():
         failure = type(exc).__name__+' at '+Path(last.filename).name+':'+str(last.lineno)
         if isinstance(exc, AssertionError):
             failure += ': '+str(exc)
+        elif hasattr(exc, 'code'):
+            failure += ': '+str(exc.code)
         report['failure'] = failure
         print('FAIL '+failure, flush=True)
     finally:
@@ -267,7 +309,7 @@ def main():
         api.close()
         transport.close()
         save()
-        after = snapshot(out, 'baseline-after')
+        after = snapshot(out, 'baseline-after', args.owner_auth_user)
         after_history = query(out, 'history-after', HISTORY)
         after_advisor = advisors(out, 'advisors-after')
         report['baseline_tables'] = len(before)
