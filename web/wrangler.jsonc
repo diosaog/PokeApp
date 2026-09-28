@@ -1,6 +1,7 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "pokeapp-web",
+  "account_id": "a8e089ff4da821ed3dbd24701437514c",
   "compatibility_date": "2026-09-28",
   "assets": {
     "directory": "./dist",

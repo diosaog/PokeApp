@@ -46,3 +46,4 @@ web/.wrangler/
 web/test-results/
 web/playwright-report/
 web/*.tsbuildinfo
+.railway/node_modules/
