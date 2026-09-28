@@ -7,7 +7,9 @@ milestone record; it does not maintain a second live phase-status ledger.
 
 - Active phase: **8L — Cup engine / certification / Hall**. A8L-01 and related
   historical eligibility gaps are corrected and locally validated. Delivery is
-  **IN PROGRESS** until the real staging gates close; see the live handoff.
+  **IN PROGRESS** until the real staging gates close. The final staging attempt
+  reconfirmed missing management access and classified remote 031 as UNKNOWN;
+  see the live handoff for the precise blocker and next action.
 - Single operational record: [Phase 8L live handoff](work-in-progress/phase8l-live-handoff.md).
   Consult it for Git, local changes, remote uncertainty and the next exact action.
 - Approved behavior: [Cup contract](phase8l-cup-engine.md). Dated technical evidence:

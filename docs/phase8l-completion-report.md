@@ -287,6 +287,64 @@ required. The integration search found Supabase available but not installed;
 connection was suggested. Local credentials provide PostgREST/Auth access, not a
 management token or SQL connection. No remote PASS is inferred from local results.
 
+## Final staging delivery attempt — 2026-09-28
+
+**BLOCKED at management capability preflight; remote 031 classification D
+(UNKNOWN / CANNOT VERIFY). No remote write or staging validation attempt started.**
+
+Entry branch `main`, HEAD and independently queried remote main both
+`6689402ac7e82f1522f98a7e2712f5053622f713`; fetched tracking ref has `0 0`
+divergence. Tracked tree was clean. Source/test/validator/SQL paths equal tested
+`39343ea`; 001–030 equal `87a98f5`, and 031 equals `d38b871`. Committed 031 and
+the working file both hash to SHA256
+`868efbca7a2ecb76138a2e12b37cd35b08cad7a849effa4fdf1dae7cfdcde362`
+(Git blob `08235141f249ee02d763a051cd619b0735da19b8`). Those Git/source checks
+passed with exit 0; no complete local suite was repeated.
+
+Actual session tool discovery exposes no Supabase management/MCP operations.
+Fresh integration discovery reports Supabase available but `installed=false`;
+installation/connection was requested through the normal authorized workflow,
+with no confirmed completed connection. The checked environment has no Supabase
+management token/database URL, executable CLI or CLI token file. Existing local
+configuration contains only the pinned URL, anon/service-role keys and fixture
+email domain; no credential values were printed or versioned.
+
+At **2026-09-28 10:41:21 UTC**, a read-only GET of the pinned V2 PostgREST schema
+returned HTTP 200. `/cup_rounds`, `/cup_certificates`, `/rpc/api_cup_context` and
+`/rpc/api_admin_cup` are not exposed. This does **not** establish that 031 is absent.
+Evidence: `%TEMP%/phase8l-final-staging-preflight.json`, command exit 0.
+
+Missing authoritative capabilities are project inventory/identity, migration
+history, SQL schema/function/ACL/RLS inspection, supported migration application
+and Security Advisor. Consequently:
+
+- 031 applied before this attempt: UNKNOWN; applied during it: NO; remote version:
+  UNKNOWN. No migration was applied or replayed, and no 032 was created.
+- Fresh public/Auth/Storage baseline and remote schema/grants: not obtained.
+- JWT/FastAPI/PostgREST staging validation and A8L-01 remote API boundary: not run.
+  The existing runner and pinned configuration guard were inspected only.
+- Fixture prefix/run ID: none. No Auth users, synthetic rows or Storage writes
+  were created. No cleanup operation was needed for this attempt; preexisting
+  remote residue and real-data integrity remain unverified.
+- Advisor BEFORE/AFTER and delta: not obtained; historical totals are not reused
+as fresh evidence. There was no failed migration/fixture execution to recover.
+- Protected guide metadata remains 72,079 bytes, UTC mtime 2026-09-22 10:13:27;
+  untracked and not read, modified, staged, moved or deleted.
+
+At 12:44 CEST, the final connection-state check still reports `installed=false`.
+The three updated continuity documents pass `git diff --check`; 59 relative
+links/anchors across the six continuity documents resolve. Implementation/tests/
+tools/migrations remain unchanged against task-entry `6689402` (exit 0). This
+documentation checkpoint records the blocked attempt, not a staging completion.
+
+Phase 8L remains locally READY FOR STAGING, not DONE. Approved Phase 8 backend
+scope is not yet closed; weighted progress remains approximately 68%. Phase 9
+has not started. Next action is to install/connect Supabase for the pinned V2
+project and verify its tools are callable, then perform the authorized remote
+preflight/baseline, migration decision, real validator, independent cleanup and
+Advisor comparison. CORS, liveness-only health and legacy DTO notes remain future
+deployment considerations, not new work in this task.
+
 ## Staging and independent cleanup
 
 Implementation and 031 are already published; the previous instruction to wait

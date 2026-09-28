@@ -18,26 +18,28 @@ by missing Supabase management access for remote preflight. Not DONE.**
 
 ## Last updated
 
-2026-09-28 (Europe/Madrid), after local finalization, resumed release and fix publication.
+2026-09-28 12:41 CEST, final staging delivery capability/source preflight.
 
 ## Current objective and authorized scope
 
-Complete Phase 8L within the approved Cup engine / certification / Hall scope.
-The current user instruction authorizes implementation, tests, necessary staging
-validation, commit and push. It supersedes the earlier audit-only restriction.
+Complete the remaining real V2 staging delivery within the approved Cup scope.
+The current instruction authorizes verified incremental migration, real validation,
+cleanup and Git delivery. Do not reopen completed local work unless remote evidence
+reveals a product defect; do not rerun the full local gates merely for reassurance.
 No React, Launcher, Companion, PKHeX, visual work, rule changes or Phase 9.
 
 ## Current Git
 
-- Branch `main`; entry HEAD `73f8453668a7eae6d4f7cfc400f80b15f8b147b2` matched
-  freshly queried remote main on 2026-09-28.
+- Final staging task entry: `main`, HEAD
+  `6689402ac7e82f1522f98a7e2712f5053622f713`, matching fresh remote main;
+  divergence `0 0`, tracked tree clean, only the protected guide untracked.
 - Fix and validation evidence published in
   `39343ea2add1591826d0809cd7c3c42ec814043c` (`fix: validate cup certification
   eligibility before hall creation`). Fresh remote main matched that full hash;
   `git rev-list --left-right --count HEAD...origin/main` returned `0 0` and the
   tracked tree was clean after push.
-- The commit containing this final documentation update records that verified
-  publication; it changes no tested source. Obtain the current documentation
+- The commit containing this staging-preflight update records the verified
+  entry and capability blocker; it changes no tested source. Obtain the current documentation
   commit from Git and compare remote refs on entry, rather than treating the
   fix hash as permanently current. The inherited audit notes remain in the report.
 - The protected guide remains pre-existing and untracked. Never add, delete,
@@ -77,26 +79,40 @@ No React, Launcher, Companion, PKHeX, visual work, rule changes or Phase 9.
   The report records why this combined defense closes A8L-01 without duplicating
   the engine in SQL. SQL alone does not validate arbitrary privileged plans.
 - 031 remains committed/published from `d38b871`.
-- Remote 031 application/version: **UNKNOWN**. Do not infer absence or replay it
-  from a missing exposed REST table alone.
+- Remote 031 classification: **D — UNKNOWN / CANNOT VERIFY**. Applied before this
+  task: UNKNOWN; applied during this task: NO; exact remote version: UNKNOWN.
+  Do not infer absence or replay it from missing exposed REST tables alone.
+- Source verified against published `d38b871`, and 001–030 against `87a98f5`;
+  no diff. Committed 031 and working file have identical SHA256
+  `868efbca7a2ecb76138a2e12b37cd35b08cad7a849effa4fdf1dae7cfdcde362`.
 - Historical DO NOT REAPPLY: 029=`20260923232516`;
   030 schema=`20260924102756`; 030 ACL completion=`20260924103256`.
 
 ## Staging / security / cleanup state
 
 - **STAGING_UNVERIFIED**. No remote write or fixture was started by this task.
-- Fresh read-only HTTP 200 from pinned V2
+- On 2026-09-28 at 10:41 UTC, fresh read-only HTTP 200 from pinned V2
   `https://uwleqeuzsveqlugugzba.supabase.co/rest/v1/`; neither Cup 031 tables nor
   its RPCs appear in the exposed schema. This is only REST visibility evidence,
   not migration/source/grants verification.
-- No Supabase management tools are exposed in this session. Plugin discovery
-  found Supabase available but not installed; installation/connection was
-  suggested and is not confirmed. Existing local credentials cover Auth/REST,
-  not management SQL or Advisor. Never print or commit them.
+- This final-delivery session again exposes no Supabase management/MCP operations.
+  Fresh integration discovery explicitly returns Supabase `installed=false`.
+  Installation/connection was requested through the normal workflow; no completed
+  connection is confirmed. No management-token/database-URL environment variable,
+  Supabase CLI executable or CLI token file is available in the checked locations.
+  Existing configured keys cover Auth/REST, not management SQL or Advisor.
+- Exact missing capabilities: authoritative project inventory, migration history,
+  SQL catalogs/function definitions/ACL/RLS, supported migration application, and
+  Security Advisor. The pinned endpoint responds, but management identity/schema
+  and migration state cannot be independently established.
 - Fresh migration inventory, public/Auth/Storage baseline, Advisor inventory,
   real JWT/FastAPI/PostgREST validation and independent cleanup remain pending.
 - Historical Advisor 24 ERROR / 4 WARN / 5 INFO is not a fresh preflight result.
   Previously existing remote residue remains UNKNOWN until independent inspection.
+- Evidence: `%TEMP%/phase8l-final-staging-preflight.json` (no secrets), plus tool
+  discovery and Git checks. Source equals the tested `39343ea`; local unit/SQL gates
+  were not rerun. The existing staging runner was inspected, not executed: it would
+  create Auth users and fixtures before the required management preflight is met.
 
 ## Active / interrupted operations
 
@@ -139,7 +155,10 @@ untracked. Clean tracked state and that intentional exception are reported separ
 
 ## Next exact step
 
-When Supabase management access is available, verify the pinned project,
+Install and connect Supabase with access to V2 `uwleqeuzsveqlugugzba`; confirm that
+its management operations are actually callable in this session. The user has
+already authorized delivery; no further generic deployment permission is needed.
+Then verify the pinned project,
 migration history/source/schema/grants,
 fresh public/Auth/Storage baseline and Advisor inventory. Apply 031 only if proven
 absent, otherwise validate without replay. Run the existing staging validator with
