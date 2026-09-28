@@ -12,11 +12,17 @@ const context = await browser.newContext({ viewport: { width: 1440, height: 1000
 const page = await context.newPage();
 page.setDefaultTimeout(60000);
 const pending = new Set(), reads = [], errors = [], unexpected = [], screens = [];
+const environmentOrigins = {};
 let step = 'login';
 page.on('pageerror', e => errors.push(e.message));
 page.on('request', r => {
   const u = new URL(r.url());
-  if (![input.web, input.api].includes(u.origin)) unexpected.push({ origin: u.origin, path: u.pathname });
+  // The installed antivirus injects this origin into Edge, including long polling.
+  // It is absent from the served app/assets. Record it without its session paths;
+  // do not disable protection, intercept requests or allow arbitrary third parties.
+  if (u.origin === 'https://me.kis.v2.scr.kaspersky-labs.com')
+    environmentOrigins[u.origin] = (environmentOrigins[u.origin] || 0) + 1;
+  else if (![input.web, input.api].includes(u.origin)) unexpected.push({ origin: u.origin, path: u.pathname });
   if (u.origin !== input.api) return;
   pending.add(r);
   if (r.method() !== 'GET' && u.pathname !== '/v1/auth/pin-login' && u.pathname !== '/v1/auth/refresh')
@@ -61,10 +67,10 @@ try {
   await page.getByRole('button', { name: 'Cerrar sesión' }).click();
   await page.getByRole('button', { name: 'Entrar a PokeApp' }).waitFor();
   expect(await page.evaluate(() => localStorage.length === 0 && sessionStorage.length === 0)).toBe(true);
-  await writeFile(join(input.output, 'browser-result.json'), JSON.stringify({ status: 'PASS', api_interception: false, business_writes: 0, screens, reads, errors, unexpected }, null, 2));
-  console.log('PASS owner real public reads: eleven screens desktop/mobile, admin, logout, zero business writes and no local/external requests');
+  await writeFile(join(input.output, 'browser-result.json'), JSON.stringify({ status: 'PASS', api_interception: false, business_writes: 0, screens, reads, errors, unexpected, environmentOrigins }, null, 2));
+  console.log('PASS owner real public reads: eleven screens desktop/mobile, admin, logout, zero business writes; local antivirus origin recorded separately');
 } catch (e) {
-  await writeFile(join(input.output, 'browser-result.json'), JSON.stringify({ status: 'FAIL', step, message: String(e.message).replaceAll(input.pin, '[REDACTED]'), screens, reads, errors, unexpected }, null, 2));
+  await writeFile(join(input.output, 'browser-result.json'), JSON.stringify({ status: 'FAIL', step, message: String(e.message).replaceAll(input.pin, '[REDACTED]'), screens, reads, errors, unexpected, environmentOrigins }, null, 2));
   throw new Error('Public read-only validation failed; credentials suppressed');
 } finally {
   await context.close();
