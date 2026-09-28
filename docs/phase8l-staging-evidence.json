@@ -1,0 +1,1983 @@
+{
+  "schema_version": 1,
+  "observed_utc": "2026-09-28T11:24:20.771832+00:00",
+  "project": {
+    "id": "uwleqeuzsveqlugugzba",
+    "name": "Pokeapp 2.0",
+    "region": "eu-central-1",
+    "status": "ACTIVE_HEALTHY",
+    "linked": true
+  },
+  "source": {
+    "entry_head": "bdaa7f7f5a429ebe20f5a17fefa7a66193ccb973",
+    "file": "supabase/v2/migrations/031_cup_engine_certification.sql",
+    "sha256": "868efbca7a2ecb76138a2e12b37cd35b08cad7a849effa4fdf1dae7cfdcde362",
+    "time_utc": "2026-09-28T11:00:07.227352+00:00"
+  },
+  "validation_source": {
+    "tools/validate_cup_fixtures.py": {
+      "sha256": "7b7ff616b94ba673e861b342bd70610f37eb57426d1d3c8ca7d44a2804672a90",
+      "normalized_lf_sha256": "7b7ff616b94ba673e861b342bd70610f37eb57426d1d3c8ca7d44a2804672a90"
+    },
+    "tools/validate_supabase_v2_cups.py": {
+      "sha256": "be6768a448d7619ee20b7b8509e80f0f8d4d5abe5643eb4754af356bf65f0dd7",
+      "normalized_lf_sha256": "be6768a448d7619ee20b7b8509e80f0f8d4d5abe5643eb4754af356bf65f0dd7"
+    },
+    "tools/validate_supabase_v2_cup_release.py": {
+      "sha256": "116c9468ee2e4e775ee2d886a4dec81eef1ded22171cc3e519eaf14fbac85920",
+      "normalized_lf_sha256": "116c9468ee2e4e775ee2d886a4dec81eef1ded22171cc3e519eaf14fbac85920"
+    },
+    "app/domain/services/cup_engine.py": {
+      "sha256": "b6de2f93b4f7ee85a51ffbce535a7dc1a97d7e732950927ae56ab13d35cf143d",
+      "normalized_lf_sha256": "b6de2f93b4f7ee85a51ffbce535a7dc1a97d7e732950927ae56ab13d35cf143d"
+    },
+    "supabase/v2/migrations/031_cup_engine_certification.sql": {
+      "sha256": "868efbca7a2ecb76138a2e12b37cd35b08cad7a849effa4fdf1dae7cfdcde362",
+      "normalized_lf_sha256": "868efbca7a2ecb76138a2e12b37cd35b08cad7a849effa4fdf1dae7cfdcde362"
+    },
+    "supabase/v2/migrations/032_cup_player_identity_index.sql": {
+      "sha256": "9a0e14b45451ba929f72420959939cad6d78fed8c25bcb6bb8b5ed3f5fde18e4",
+      "normalized_lf_sha256": "9a0e14b45451ba929f72420959939cad6d78fed8c25bcb6bb8b5ed3f5fde18e4"
+    },
+    "supabase/v2/bootstrap.sql": {
+      "sha256": "a42c752b1e45b783e2955fce412d83ef0e1945dc5e508ba821227ea85266c0ec",
+      "normalized_lf_sha256": "a42c752b1e45b783e2955fce412d83ef0e1945dc5e508ba821227ea85266c0ec"
+    }
+  },
+  "migration": {
+    "application": "POST /v1/projects/uwleqeuzsveqlugugzba/database/migrations",
+    "before": [
+      {
+        "name": "010_security_helpers",
+        "record_hash": "cdf4f6b8c1a530e590b36f7948f40d4d",
+        "version": "20260816211949"
+      },
+      {
+        "name": "011_rls_policies",
+        "record_hash": "26e26d199777c265f0f90b15b887af63",
+        "version": "20260816212058"
+      },
+      {
+        "name": "012_security_views",
+        "record_hash": "9a8d77f5f9dd9df58ef3d52485495441",
+        "version": "20260816212336"
+      },
+      {
+        "name": "014_security_invoker_hardening",
+        "record_hash": "deab86b86f5f5bac5aa1ea550b09273e",
+        "version": "20260816213020"
+      },
+      {
+        "name": "013_storage_policies",
+        "record_hash": "2e22d0bc0682d569eefcda63e9758cca",
+        "version": "20260901190001"
+      },
+      {
+        "name": "015_public_trainers_visibility",
+        "record_hash": "aeec8bcc1215a8c62b8e43eb522b0c33",
+        "version": "20260901234808"
+      },
+      {
+        "name": "016_public_team_locks_visibility",
+        "record_hash": "d5751c21233bb2a2ce9994d5881171af",
+        "version": "20260901235030"
+      },
+      {
+        "name": "017_public_coin_balances_visibility",
+        "record_hash": "1d7d90e47aa02b5c243aea751dfadc81",
+        "version": "20260901235223"
+      },
+      {
+        "name": "018_public_views_visibility",
+        "record_hash": "16abbb89c61dabb5d372df6cf800f734",
+        "version": "20260901235520"
+      },
+      {
+        "name": "019_team_lock_api",
+        "record_hash": "b0b92e3f027cc444f5114b235a08efe5",
+        "version": "20260922162954"
+      },
+      {
+        "name": "020_current_matchday_store_ban_contract",
+        "record_hash": "de5439c08eb04ceffff425676d4605e8",
+        "version": "20260922165901"
+      },
+      {
+        "name": "021_normal_purchase_api",
+        "record_hash": "ce6134eca3eb185c7d7b5c56c3499da4",
+        "version": "20260922171752"
+      },
+      {
+        "name": "022_promotional_purchase_api",
+        "record_hash": "0f48392efd1550d8e1f4744c27351bcb",
+        "version": "20260922174842"
+      },
+      {
+        "name": "023_pokemon_identity",
+        "record_hash": "23603bc5d4a89bd740c71cc66d607f78",
+        "version": "20260923165532"
+      },
+      {
+        "name": "024_redemption_effect_boundary",
+        "record_hash": "3d99140a02af7caebc0c4b79feb50d46",
+        "version": "20260923172957"
+      },
+      {
+        "name": "025_robbery_voucher_and_redemption",
+        "record_hash": "8fad71ef19c1bf53a45c290e46376caf",
+        "version": "20260923180416"
+      },
+      {
+        "name": "026_season_admin_setup_api",
+        "record_hash": "ba025575e26ad8407e9bd4be2aaad57b",
+        "version": "20260923192300"
+      },
+      {
+        "name": "027_competitive_matchdays",
+        "record_hash": "8c640ce27d5b7e2f26c1a891954e6774",
+        "version": "20260923210625"
+      },
+      {
+        "name": "028_participant_status_admin",
+        "record_hash": "3acdeba2a541a83421bd4d7c52c94695",
+        "version": "20260923220301"
+      },
+      {
+        "name": "029_season_finalization_archive_hall",
+        "record_hash": "2348e8793b79ee71fbb0b8cfacb7f7f3",
+        "version": "20260923232516"
+      },
+      {
+        "name": "030_trials_sanctions_api",
+        "record_hash": "337435eb946360eeeee2222de644d6a2",
+        "version": "20260924102756"
+      },
+      {
+        "name": "030_trials_sanctions_acl_completion",
+        "record_hash": "69095ad4071d5460744883f39f5168d2",
+        "version": "20260924103256"
+      }
+    ],
+    "applied": {
+      "name": "031_cup_engine_certification",
+      "record_hash": "bed0f8e542976aeaf277b61771d1038f",
+      "version": "20260928110301"
+    },
+    "old_records_unchanged": true,
+    "031_applied_once": true,
+    "completion_032": {
+      "name": "032_cup_player_identity_index",
+      "record_hash": "38afc3fd0c4ad981eac8f92f13ae9f20",
+      "version": "20260928111840"
+    },
+    "source_032": {
+      "file": "supabase/v2/migrations/032_cup_player_identity_index.sql",
+      "sha256": "9a0e14b45451ba929f72420959939cad6d78fed8c25bcb6bb8b5ed3f5fde18e4"
+    },
+    "completion_commit": "a87d3951cab15ca54eddd2ce3b8d6489cb703576",
+    "source_sha256": "868efbca7a2ecb76138a2e12b37cd35b08cad7a849effa4fdf1dae7cfdcde362"
+  },
+  "data": {
+    "algorithm": "Per table: row count and SHA256 of ordered full-row jsonb array text (empty = []); ordering to_jsonb(row)::text, UTF8",
+    "before_ddl": {
+      "auth.identities": {
+        "rows": 0,
+        "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "auth.refresh_tokens": {
+        "rows": 0,
+        "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "auth.sessions": {
+        "rows": 0,
+        "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "auth.users": {
+        "rows": 0,
+        "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "public.activity_events": {
+        "rows": 0,
+        "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "public.admin_operation_receipts": {
+        "rows": 0,
+        "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "public.app_settings": {
+        "rows": 2,
+        "sha256": "db6be94ca71c61c3eccaf4065fc4d8366ecdb94ba748a77574229ce57350ecf7"
+      },
+      "public.coin_transactions": {
+        "rows": 0,
+        "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "public.cup_matches": {
+        "rows": 0,
+        "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "public.cup_participants": {
+        "rows": 0,
+        "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "public.cup_standings": {
+        "rows": 0,
+        "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "public.cups": {
+        "rows": 0,
+        "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "public.division_memberships": {
+        "rows": 0,
+        "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "public.divisions": {
+        "rows": 0,
+        "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "public.hall_of_fame_entries": {
+        "rows": 0,
+        "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "public.matchday_movements": {
+        "rows": 0,
+        "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "public.matchday_snapshot_revisions": {
+        "rows": 0,
+        "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "public.matchday_snapshots": {
+        "rows": 0,
+        "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "public.matchdays": {
+        "rows": 0,
+        "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "public.matches": {
+        "rows": 0,
+        "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "public.parsed_saves": {
+        "rows": 0,
+        "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "public.penalties": {
+        "rows": 0,
+        "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "public.pokemon_entities": {
+        "rows": 0,
+        "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "public.pokemon_entity_flags": {
+        "rows": 0,
+        "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "public.pokemon_flags": {
+        "rows": 0,
+        "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "public.pokemon_identity_revisions": {
+        "rows": 0,
+        "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "public.pokemon_observations": {
+        "rows": 0,
+        "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "public.purchases": {
+        "rows": 0,
+        "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "public.redemptions": {
+        "rows": 0,
+        "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "public.robbery_cycles": {
+        "rows": 0,
+        "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "public.save_files": {
+        "rows": 0,
+        "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "public.season_admin_state": {
+        "rows": 0,
+        "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "public.season_archive_snapshots": {
+        "rows": 0,
+        "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "public.season_config_versions": {
+        "rows": 0,
+        "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "public.season_player_stats": {
+        "rows": 0,
+        "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "public.season_players": {
+        "rows": 0,
+        "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "public.seasons": {
+        "rows": 0,
+        "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "public.shop_items": {
+        "rows": 62,
+        "sha256": "bb16ddeab4618cd83ed9b0367621c01082fd77d51d60e4a8806e620942e54d24"
+      },
+      "public.shop_promotions": {
+        "rows": 0,
+        "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "public.team_locks": {
+        "rows": 0,
+        "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "public.trainer_flags": {
+        "rows": 0,
+        "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "public.trainers": {
+        "rows": 10,
+        "sha256": "19f1c1085432e5270f614e02720a52adc82cca23ee77a54b4e76fc17bd4994b0"
+      },
+      "public.trial_case_counters": {
+        "rows": 0,
+        "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "public.trial_case_revisions": {
+        "rows": 0,
+        "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "public.trial_cases": {
+        "rows": 0,
+        "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "public.trial_votes": {
+        "rows": 0,
+        "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "storage.buckets": {
+        "rows": 1,
+        "sha256": "050480b87c212eb0f3345beda3672a96db452ac869df8a17fef17c7161c1af6c"
+      },
+      "storage.objects": {
+        "rows": 3,
+        "sha256": "059b2a8b39bfe0eba8b15a18d8fe7ef37c130b1808fcf16adf04753466570c35"
+      }
+    },
+    "after_ddl_and_final": {
+      "auth.identities": {
+        "rows": 0,
+        "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "auth.refresh_tokens": {
+        "rows": 0,
+        "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "auth.sessions": {
+        "rows": 0,
+        "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "auth.users": {
+        "rows": 0,
+        "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "public.activity_events": {
+        "rows": 0,
+        "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "public.admin_operation_receipts": {
+        "rows": 0,
+        "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "public.app_settings": {
+        "rows": 2,
+        "sha256": "db6be94ca71c61c3eccaf4065fc4d8366ecdb94ba748a77574229ce57350ecf7"
+      },
+      "public.coin_transactions": {
+        "rows": 0,
+        "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "public.cup_certificates": {
+        "rows": 0,
+        "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "public.cup_history": {
+        "rows": 0,
+        "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "public.cup_matches": {
+        "rows": 0,
+        "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "public.cup_participants": {
+        "rows": 0,
+        "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "public.cup_rounds": {
+        "rows": 0,
+        "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "public.cup_side_members": {
+        "rows": 0,
+        "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "public.cup_standings": {
+        "rows": 0,
+        "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "public.cups": {
+        "rows": 0,
+        "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "public.division_memberships": {
+        "rows": 0,
+        "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "public.divisions": {
+        "rows": 0,
+        "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "public.hall_of_fame_entries": {
+        "rows": 0,
+        "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "public.matchday_movements": {
+        "rows": 0,
+        "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "public.matchday_snapshot_revisions": {
+        "rows": 0,
+        "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "public.matchday_snapshots": {
+        "rows": 0,
+        "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "public.matchdays": {
+        "rows": 0,
+        "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "public.matches": {
+        "rows": 0,
+        "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "public.parsed_saves": {
+        "rows": 0,
+        "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "public.penalties": {
+        "rows": 0,
+        "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "public.pokemon_entities": {
+        "rows": 0,
+        "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "public.pokemon_entity_flags": {
+        "rows": 0,
+        "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "public.pokemon_flags": {
+        "rows": 0,
+        "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "public.pokemon_identity_revisions": {
+        "rows": 0,
+        "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "public.pokemon_observations": {
+        "rows": 0,
+        "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "public.purchases": {
+        "rows": 0,
+        "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "public.redemptions": {
+        "rows": 0,
+        "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "public.robbery_cycles": {
+        "rows": 0,
+        "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "public.save_files": {
+        "rows": 0,
+        "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "public.season_admin_state": {
+        "rows": 0,
+        "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "public.season_archive_snapshots": {
+        "rows": 0,
+        "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "public.season_config_versions": {
+        "rows": 0,
+        "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "public.season_player_stats": {
+        "rows": 0,
+        "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "public.season_players": {
+        "rows": 0,
+        "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "public.seasons": {
+        "rows": 0,
+        "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "public.shop_items": {
+        "rows": 62,
+        "sha256": "bb16ddeab4618cd83ed9b0367621c01082fd77d51d60e4a8806e620942e54d24"
+      },
+      "public.shop_promotions": {
+        "rows": 0,
+        "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "public.team_locks": {
+        "rows": 0,
+        "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "public.trainer_flags": {
+        "rows": 0,
+        "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "public.trainers": {
+        "rows": 10,
+        "sha256": "19f1c1085432e5270f614e02720a52adc82cca23ee77a54b4e76fc17bd4994b0"
+      },
+      "public.trial_case_counters": {
+        "rows": 0,
+        "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "public.trial_case_revisions": {
+        "rows": 0,
+        "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "public.trial_cases": {
+        "rows": 0,
+        "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "public.trial_votes": {
+        "rows": 0,
+        "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "storage.buckets": {
+        "rows": 1,
+        "sha256": "050480b87c212eb0f3345beda3672a96db452ac869df8a17fef17c7161c1af6c"
+      },
+      "storage.objects": {
+        "rows": 3,
+        "sha256": "059b2a8b39bfe0eba8b15a18d8fe7ef37c130b1808fcf16adf04753466570c35"
+      }
+    },
+    "old_48_tables_unchanged_by_ddl": true,
+    "first_attempt_52_table_cleanup_exact": true,
+    "final_52_table_cleanup_exact": true
+  },
+  "catalog": {
+    "delta": {
+      "changed": [
+        [
+          "relation",
+          "cup_matches"
+        ],
+        [
+          "relation",
+          "cup_participants"
+        ],
+        [
+          "relation",
+          "cup_standings"
+        ],
+        [
+          "relation",
+          "cups"
+        ],
+        [
+          "relation",
+          "hall_of_fame_entries"
+        ],
+        [
+          "relation",
+          "public_cup_matches"
+        ],
+        [
+          "relation",
+          "public_cup_participants"
+        ],
+        [
+          "relation",
+          "public_cup_standings"
+        ],
+        [
+          "relation",
+          "public_cups"
+        ],
+        [
+          "relation",
+          "public_hall_of_fame"
+        ],
+        [
+          "relation",
+          "season_players"
+        ]
+      ],
+      "added": [
+        [
+          "function",
+          "api_admin_cup(jsonb,text,jsonb)"
+        ],
+        [
+          "function",
+          "api_cup_context(jsonb)"
+        ],
+        [
+          "function",
+          "api_cup_read(jsonb)"
+        ],
+        [
+          "function",
+          "cup_begin(jsonb)"
+        ],
+        [
+          "function",
+          "cup_context(jsonb)"
+        ],
+        [
+          "function",
+          "cup_document(uuid)"
+        ],
+        [
+          "function",
+          "cup_protect_certified()"
+        ],
+        [
+          "relation",
+          "cup_certificates"
+        ],
+        [
+          "relation",
+          "cup_history"
+        ],
+        [
+          "relation",
+          "cup_rounds"
+        ],
+        [
+          "relation",
+          "cup_side_members"
+        ],
+        [
+          "trigger",
+          "cup_certificates.cup_certificate_immutable"
+        ],
+        [
+          "trigger",
+          "cup_history.cup_history_immutable"
+        ],
+        [
+          "trigger",
+          "cup_matches.cup_certified_immutable"
+        ],
+        [
+          "trigger",
+          "cup_participants.cup_certified_immutable"
+        ],
+        [
+          "trigger",
+          "cup_rounds.cup_certified_immutable"
+        ],
+        [
+          "trigger",
+          "cup_side_members.cup_certified_immutable"
+        ],
+        [
+          "trigger",
+          "cup_standings.cup_certified_immutable"
+        ],
+        [
+          "trigger",
+          "cups.cup_certified_immutable"
+        ]
+      ],
+      "exact_source_functions": [
+        "cup_protect_certified",
+        "cup_document",
+        "cup_context",
+        "cup_begin",
+        "api_cup_context",
+        "api_admin_cup",
+        "api_cup_read"
+      ]
+    },
+    "local_structural_objects_compared": 30,
+    "local_structural_differences": 0,
+    "completion_032_delta": "Only season_players duplicate cup_player_identity unique constraint/index removed; existing FK/unique key preserved",
+    "cloud_acl_handling": "Default cloud ACLs differ from local mock roles; effective grants checked independently",
+    "before_digest": "a1c5c250220d8479d55f24cdd8898d8d69ae04062397ff553292a12f65443133",
+    "after_ddl_digest": "cfa818d4dfe61df8106ea57fdff010ff2ea09820af5047a7cbe374b948d4c630",
+    "after_032_digest": "14628b7f84fd8ebb69c60d2a227fbc994f740f0fb204e781980d75ec06aaf51d",
+    "final_digest": "14628b7f84fd8ebb69c60d2a227fbc994f740f0fb204e781980d75ec06aaf51d",
+    "function_source_sha256": {
+      "api_admin_cup(jsonb,text,jsonb)": "9639421a1208856b6eb3528dfb1ce42fcc56e8859bddf447cd02169879bb0821",
+      "api_cup_context(jsonb)": "9a7eed59a046e46fd17c4b568c914ed47d9cf9cc3f116d35f1c6d952a31a7546",
+      "api_cup_read(jsonb)": "cb28a561a3444ef6b1184131f485e48e98b028bca31ec7ed68672e03272e302b",
+      "cup_begin(jsonb)": "f0a4d70c82e80323168faef3c1e723f6a87d1d7fb5ec7462cfd8aa8893a16798",
+      "cup_context(jsonb)": "b02a15e12bf6c406610e9bdc4ec292f27153a3031b45ebb8759eff0b7f88fb35",
+      "cup_document(uuid)": "c4074a8a3df544301a839273b87633f4a60d4ff1afc5767ef5162662e41696ae",
+      "cup_protect_certified()": "962e635d336b7d15de3ce1aaceb3d25140215a91220bbabaa45e516d9b7f59ad"
+    },
+    "function_security": [
+      {
+        "anon_execute": false,
+        "authenticated_execute": false,
+        "name": "api_admin_cup(jsonb,text,jsonb)",
+        "proconfig": [
+          "search_path=pg_catalog, public"
+        ],
+        "prosecdef": false,
+        "public_execute": false,
+        "service_execute": true
+      },
+      {
+        "anon_execute": false,
+        "authenticated_execute": false,
+        "name": "api_cup_context(jsonb)",
+        "proconfig": [
+          "search_path=pg_catalog, public"
+        ],
+        "prosecdef": false,
+        "public_execute": false,
+        "service_execute": true
+      },
+      {
+        "anon_execute": false,
+        "authenticated_execute": false,
+        "name": "api_cup_read(jsonb)",
+        "proconfig": [
+          "search_path=pg_catalog, public"
+        ],
+        "prosecdef": false,
+        "public_execute": false,
+        "service_execute": true
+      },
+      {
+        "anon_execute": false,
+        "authenticated_execute": false,
+        "name": "cup_begin(jsonb)",
+        "proconfig": [
+          "search_path=pg_catalog, public"
+        ],
+        "prosecdef": false,
+        "public_execute": false,
+        "service_execute": true
+      },
+      {
+        "anon_execute": false,
+        "authenticated_execute": false,
+        "name": "cup_context(jsonb)",
+        "proconfig": [
+          "search_path=pg_catalog, public"
+        ],
+        "prosecdef": false,
+        "public_execute": false,
+        "service_execute": true
+      },
+      {
+        "anon_execute": false,
+        "authenticated_execute": false,
+        "name": "cup_document(uuid)",
+        "proconfig": [
+          "search_path=pg_catalog, public"
+        ],
+        "prosecdef": false,
+        "public_execute": false,
+        "service_execute": true
+      },
+      {
+        "anon_execute": false,
+        "authenticated_execute": false,
+        "name": "cup_protect_certified()",
+        "proconfig": [
+          "search_path=pg_catalog, public"
+        ],
+        "prosecdef": false,
+        "public_execute": false,
+        "service_execute": true
+      }
+    ],
+    "relation_security": [
+      {
+        "browser_column_write": false,
+        "browser_write": false,
+        "name": "cup_certificates",
+        "relkind": "r",
+        "reloptions": null,
+        "rls": true,
+        "role_name": "anon",
+        "service_access": true
+      },
+      {
+        "browser_column_write": false,
+        "browser_write": false,
+        "name": "cup_certificates",
+        "relkind": "r",
+        "reloptions": null,
+        "rls": true,
+        "role_name": "authenticated",
+        "service_access": true
+      },
+      {
+        "browser_column_write": false,
+        "browser_write": false,
+        "name": "cup_history",
+        "relkind": "r",
+        "reloptions": null,
+        "rls": true,
+        "role_name": "anon",
+        "service_access": true
+      },
+      {
+        "browser_column_write": false,
+        "browser_write": false,
+        "name": "cup_history",
+        "relkind": "r",
+        "reloptions": null,
+        "rls": true,
+        "role_name": "authenticated",
+        "service_access": true
+      },
+      {
+        "browser_column_write": false,
+        "browser_write": false,
+        "name": "cup_matches",
+        "relkind": "r",
+        "reloptions": null,
+        "rls": true,
+        "role_name": "anon",
+        "service_access": true
+      },
+      {
+        "browser_column_write": false,
+        "browser_write": false,
+        "name": "cup_matches",
+        "relkind": "r",
+        "reloptions": null,
+        "rls": true,
+        "role_name": "authenticated",
+        "service_access": true
+      },
+      {
+        "browser_column_write": false,
+        "browser_write": false,
+        "name": "cup_participants",
+        "relkind": "r",
+        "reloptions": null,
+        "rls": true,
+        "role_name": "anon",
+        "service_access": true
+      },
+      {
+        "browser_column_write": false,
+        "browser_write": false,
+        "name": "cup_participants",
+        "relkind": "r",
+        "reloptions": null,
+        "rls": true,
+        "role_name": "authenticated",
+        "service_access": true
+      },
+      {
+        "browser_column_write": false,
+        "browser_write": false,
+        "name": "cup_rounds",
+        "relkind": "r",
+        "reloptions": null,
+        "rls": true,
+        "role_name": "anon",
+        "service_access": true
+      },
+      {
+        "browser_column_write": false,
+        "browser_write": false,
+        "name": "cup_rounds",
+        "relkind": "r",
+        "reloptions": null,
+        "rls": true,
+        "role_name": "authenticated",
+        "service_access": true
+      },
+      {
+        "browser_column_write": false,
+        "browser_write": false,
+        "name": "cup_side_members",
+        "relkind": "r",
+        "reloptions": null,
+        "rls": true,
+        "role_name": "anon",
+        "service_access": true
+      },
+      {
+        "browser_column_write": false,
+        "browser_write": false,
+        "name": "cup_side_members",
+        "relkind": "r",
+        "reloptions": null,
+        "rls": true,
+        "role_name": "authenticated",
+        "service_access": true
+      },
+      {
+        "browser_column_write": false,
+        "browser_write": false,
+        "name": "cup_standings",
+        "relkind": "r",
+        "reloptions": null,
+        "rls": true,
+        "role_name": "anon",
+        "service_access": true
+      },
+      {
+        "browser_column_write": false,
+        "browser_write": false,
+        "name": "cup_standings",
+        "relkind": "r",
+        "reloptions": null,
+        "rls": true,
+        "role_name": "authenticated",
+        "service_access": true
+      },
+      {
+        "browser_column_write": false,
+        "browser_write": false,
+        "name": "cups",
+        "relkind": "r",
+        "reloptions": null,
+        "rls": true,
+        "role_name": "anon",
+        "service_access": true
+      },
+      {
+        "browser_column_write": false,
+        "browser_write": false,
+        "name": "cups",
+        "relkind": "r",
+        "reloptions": null,
+        "rls": true,
+        "role_name": "authenticated",
+        "service_access": true
+      },
+      {
+        "browser_column_write": false,
+        "browser_write": false,
+        "name": "hall_of_fame_entries",
+        "relkind": "r",
+        "reloptions": null,
+        "rls": true,
+        "role_name": "anon",
+        "service_access": true
+      },
+      {
+        "browser_column_write": false,
+        "browser_write": false,
+        "name": "hall_of_fame_entries",
+        "relkind": "r",
+        "reloptions": null,
+        "rls": true,
+        "role_name": "authenticated",
+        "service_access": true
+      },
+      {
+        "browser_column_write": false,
+        "browser_write": false,
+        "name": "public_cup_matches",
+        "relkind": "v",
+        "reloptions": [
+          "security_invoker=false",
+          "security_barrier=true"
+        ],
+        "rls": false,
+        "role_name": "anon",
+        "service_access": true
+      },
+      {
+        "browser_column_write": false,
+        "browser_write": false,
+        "name": "public_cup_matches",
+        "relkind": "v",
+        "reloptions": [
+          "security_invoker=false",
+          "security_barrier=true"
+        ],
+        "rls": false,
+        "role_name": "authenticated",
+        "service_access": true
+      },
+      {
+        "browser_column_write": false,
+        "browser_write": false,
+        "name": "public_cup_participants",
+        "relkind": "v",
+        "reloptions": [
+          "security_invoker=false",
+          "security_barrier=true"
+        ],
+        "rls": false,
+        "role_name": "anon",
+        "service_access": true
+      },
+      {
+        "browser_column_write": false,
+        "browser_write": false,
+        "name": "public_cup_participants",
+        "relkind": "v",
+        "reloptions": [
+          "security_invoker=false",
+          "security_barrier=true"
+        ],
+        "rls": false,
+        "role_name": "authenticated",
+        "service_access": true
+      },
+      {
+        "browser_column_write": false,
+        "browser_write": false,
+        "name": "public_cup_standings",
+        "relkind": "v",
+        "reloptions": [
+          "security_invoker=false",
+          "security_barrier=true"
+        ],
+        "rls": false,
+        "role_name": "anon",
+        "service_access": true
+      },
+      {
+        "browser_column_write": false,
+        "browser_write": false,
+        "name": "public_cup_standings",
+        "relkind": "v",
+        "reloptions": [
+          "security_invoker=false",
+          "security_barrier=true"
+        ],
+        "rls": false,
+        "role_name": "authenticated",
+        "service_access": true
+      },
+      {
+        "browser_column_write": false,
+        "browser_write": false,
+        "name": "public_cups",
+        "relkind": "v",
+        "reloptions": [
+          "security_invoker=false",
+          "security_barrier=true"
+        ],
+        "rls": false,
+        "role_name": "anon",
+        "service_access": true
+      },
+      {
+        "browser_column_write": false,
+        "browser_write": false,
+        "name": "public_cups",
+        "relkind": "v",
+        "reloptions": [
+          "security_invoker=false",
+          "security_barrier=true"
+        ],
+        "rls": false,
+        "role_name": "authenticated",
+        "service_access": true
+      },
+      {
+        "browser_column_write": false,
+        "browser_write": false,
+        "name": "public_hall_of_fame",
+        "relkind": "v",
+        "reloptions": [
+          "security_invoker=false",
+          "security_barrier=true"
+        ],
+        "rls": false,
+        "role_name": "anon",
+        "service_access": true
+      },
+      {
+        "browser_column_write": false,
+        "browser_write": false,
+        "name": "public_hall_of_fame",
+        "relkind": "v",
+        "reloptions": [
+          "security_invoker=false",
+          "security_barrier=true"
+        ],
+        "rls": false,
+        "role_name": "authenticated",
+        "service_access": true
+      }
+    ],
+    "final_local_structural_comparison": {
+      "objects": 29,
+      "differences": []
+    },
+    "retained_foreign_keys": [
+      {
+        "conname": "cup_side_members_season_player_id_season_id_trainer_id_fkey",
+        "contype": "f",
+        "definition": "FOREIGN KEY (season_player_id, season_id, trainer_id) REFERENCES season_players(id, season_id, trainer_id)",
+        "relation": "cup_side_members",
+        "supporting_index": "uq_season_players_id_season_trainer"
+      },
+      {
+        "conname": "fk_coin_transactions_player_same_owner",
+        "contype": "f",
+        "definition": "FOREIGN KEY (season_player_id, season_id, trainer_id) REFERENCES season_players(id, season_id, trainer_id) ON DELETE RESTRICT",
+        "relation": "coin_transactions",
+        "supporting_index": "uq_season_players_id_season_trainer"
+      },
+      {
+        "conname": "fk_pokemon_flags_player_same_owner",
+        "contype": "f",
+        "definition": "FOREIGN KEY (season_player_id, season_id, trainer_id) REFERENCES season_players(id, season_id, trainer_id) ON DELETE RESTRICT",
+        "relation": "pokemon_flags",
+        "supporting_index": "uq_season_players_id_season_trainer"
+      },
+      {
+        "conname": "fk_purchases_player_same_owner",
+        "contype": "f",
+        "definition": "FOREIGN KEY (season_player_id, season_id, trainer_id) REFERENCES season_players(id, season_id, trainer_id) ON DELETE RESTRICT",
+        "relation": "purchases",
+        "supporting_index": "uq_season_players_id_season_trainer"
+      },
+      {
+        "conname": "fk_redemptions_player_same_owner",
+        "contype": "f",
+        "definition": "FOREIGN KEY (season_player_id, season_id, trainer_id) REFERENCES season_players(id, season_id, trainer_id) ON DELETE RESTRICT",
+        "relation": "redemptions",
+        "supporting_index": "uq_season_players_id_season_trainer"
+      },
+      {
+        "conname": "fk_season_player_stats_player",
+        "contype": "f",
+        "definition": "FOREIGN KEY (season_player_id, season_id, trainer_id) REFERENCES season_players(id, season_id, trainer_id) ON DELETE RESTRICT",
+        "relation": "season_player_stats",
+        "supporting_index": "uq_season_players_id_season_trainer"
+      },
+      {
+        "conname": "fk_team_locks_player_same_owner",
+        "contype": "f",
+        "definition": "FOREIGN KEY (season_player_id, season_id, trainer_id) REFERENCES season_players(id, season_id, trainer_id) ON DELETE RESTRICT",
+        "relation": "team_locks",
+        "supporting_index": "uq_season_players_id_season_trainer"
+      },
+      {
+        "conname": "fk_trainer_flags_player_same_owner",
+        "contype": "f",
+        "definition": "FOREIGN KEY (season_player_id, season_id, trainer_id) REFERENCES season_players(id, season_id, trainer_id) ON DELETE RESTRICT",
+        "relation": "trainer_flags",
+        "supporting_index": "uq_season_players_id_season_trainer"
+      }
+    ]
+  },
+  "staging": {
+    "project": "uwleqeuzsveqlugugzba",
+    "time_utc": "2026-09-28T11:24:20.771832+00:00",
+    "run_id": "phase8l_validation_3e013eb7f78749ccbed2b792a1b5b118",
+    "staging_exit": 0,
+    "cup_groups": 20,
+    "races": 10,
+    "baseline_tables": 52,
+    "cleanup": true,
+    "catalog_unchanged": true,
+    "history_unchanged": true,
+    "new_advisor_error_warn": 0,
+    "completion_032": {
+      "name": "032_cup_player_identity_index",
+      "record_hash": "38afc3fd0c4ad981eac8f92f13ae9f20",
+      "version": "20260928111840"
+    },
+    "validation_commit": "a87d3951cab15ca54eddd2ce3b8d6489cb703576",
+    "after_031_success_run": "phase8l_validation_e460264209704a75b11f0449aff79dea",
+    "first_attempt": {
+      "run_id": "phase8l_validation_337ccf236dd8441cb7b5bab36ff7d960",
+      "exit": 1,
+      "assertion": "Cup changed League participation",
+      "cleanup_verified": true
+    },
+    "participation_comparison": {
+      "original_order_equal": true,
+      "full_sorted_rows_equal": true,
+      "before_sorted_sha256": "f456c2434536378ab8976bce83e85d14f0acc621b08da49e14c08fb56df80e6c",
+      "after_sorted_sha256": "f456c2434536378ab8976bce83e85d14f0acc621b08da49e14c08fb56df80e6c",
+      "before_order": [
+        "b381cec9-b9b8-417a-aa94-0e0d0b163cf7",
+        "ce69f635-867c-41c2-bdc9-6ff93cd26aa9",
+        "9970efef-2fff-41d6-91e0-e5495bb1a615",
+        "58b9eb53-697f-4eb0-be44-775a6a9bd9e9",
+        "b1d72c35-5a46-49d8-94d4-00a8b3fed2c7",
+        "5047a9c8-ec73-4d5b-8da3-f23d913590c1"
+      ],
+      "after_order": [
+        "b381cec9-b9b8-417a-aa94-0e0d0b163cf7",
+        "ce69f635-867c-41c2-bdc9-6ff93cd26aa9",
+        "9970efef-2fff-41d6-91e0-e5495bb1a615",
+        "58b9eb53-697f-4eb0-be44-775a6a9bd9e9",
+        "b1d72c35-5a46-49d8-94d4-00a8b3fed2c7",
+        "5047a9c8-ec73-4d5b-8da3-f23d913590c1"
+      ]
+    },
+    "transport": "FastAPI TestClient in-process; real Supabase Auth/JWT and production PostgREST; no public API deployment"
+  },
+  "advisor": {
+    "before": {
+      "INFO": 99,
+      "ERROR": 24,
+      "WARN": 4
+    },
+    "after": {
+      "INFO": 122,
+      "ERROR": 24,
+      "WARN": 4
+    },
+    "security_before": {
+      "INFO": 5,
+      "ERROR": 24,
+      "WARN": 4
+    },
+    "security_after": {
+      "INFO": 9,
+      "ERROR": 24,
+      "WARN": 4
+    },
+    "new_error_warn": 0,
+    "unchanged_error_warn_inventory": [
+      {
+        "level": "WARN",
+        "name": "authenticated_security_definer_function_executable",
+        "cache_key": "authenticated_security_definer_function_executable_public_current_trainer_id_",
+        "metadata": {
+          "name": "current_trainer_id",
+          "schema": "public"
+        }
+      },
+      {
+        "level": "WARN",
+        "name": "authenticated_security_definer_function_executable",
+        "cache_key": "authenticated_security_definer_function_executable_public_current_user_owns_trainer_p_trainer_id uuid",
+        "metadata": {
+          "name": "current_user_owns_trainer",
+          "schema": "public"
+        }
+      },
+      {
+        "level": "WARN",
+        "name": "authenticated_security_definer_function_executable",
+        "cache_key": "authenticated_security_definer_function_executable_public_is_current_user_admin_",
+        "metadata": {
+          "name": "is_current_user_admin",
+          "schema": "public"
+        }
+      },
+      {
+        "level": "WARN",
+        "name": "function_search_path_mutable",
+        "cache_key": "function_search_path_mutable_public_set_updated_at_204b9b9355e61b7541bc0633bbc9294c",
+        "metadata": {
+          "name": "set_updated_at",
+          "schema": "public",
+          "type": "function"
+        }
+      },
+      {
+        "level": "ERROR",
+        "name": "security_definer_view",
+        "cache_key": "security_definer_view_public_public_activity_events",
+        "metadata": {
+          "name": "public_activity_events",
+          "schema": "public",
+          "type": "view"
+        }
+      },
+      {
+        "level": "ERROR",
+        "name": "security_definer_view",
+        "cache_key": "security_definer_view_public_public_coin_balances",
+        "metadata": {
+          "name": "public_coin_balances",
+          "schema": "public",
+          "type": "view"
+        }
+      },
+      {
+        "level": "ERROR",
+        "name": "security_definer_view",
+        "cache_key": "security_definer_view_public_public_cup_matches",
+        "metadata": {
+          "name": "public_cup_matches",
+          "schema": "public",
+          "type": "view"
+        }
+      },
+      {
+        "level": "ERROR",
+        "name": "security_definer_view",
+        "cache_key": "security_definer_view_public_public_cup_participants",
+        "metadata": {
+          "name": "public_cup_participants",
+          "schema": "public",
+          "type": "view"
+        }
+      },
+      {
+        "level": "ERROR",
+        "name": "security_definer_view",
+        "cache_key": "security_definer_view_public_public_cup_standings",
+        "metadata": {
+          "name": "public_cup_standings",
+          "schema": "public",
+          "type": "view"
+        }
+      },
+      {
+        "level": "ERROR",
+        "name": "security_definer_view",
+        "cache_key": "security_definer_view_public_public_cups",
+        "metadata": {
+          "name": "public_cups",
+          "schema": "public",
+          "type": "view"
+        }
+      },
+      {
+        "level": "ERROR",
+        "name": "security_definer_view",
+        "cache_key": "security_definer_view_public_public_division_memberships",
+        "metadata": {
+          "name": "public_division_memberships",
+          "schema": "public",
+          "type": "view"
+        }
+      },
+      {
+        "level": "ERROR",
+        "name": "security_definer_view",
+        "cache_key": "security_definer_view_public_public_divisions",
+        "metadata": {
+          "name": "public_divisions",
+          "schema": "public",
+          "type": "view"
+        }
+      },
+      {
+        "level": "ERROR",
+        "name": "security_definer_view",
+        "cache_key": "security_definer_view_public_public_hall_of_fame",
+        "metadata": {
+          "name": "public_hall_of_fame",
+          "schema": "public",
+          "type": "view"
+        }
+      },
+      {
+        "level": "ERROR",
+        "name": "security_definer_view",
+        "cache_key": "security_definer_view_public_public_matchday_movements",
+        "metadata": {
+          "name": "public_matchday_movements",
+          "schema": "public",
+          "type": "view"
+        }
+      },
+      {
+        "level": "ERROR",
+        "name": "security_definer_view",
+        "cache_key": "security_definer_view_public_public_matchday_snapshots",
+        "metadata": {
+          "name": "public_matchday_snapshots",
+          "schema": "public",
+          "type": "view"
+        }
+      },
+      {
+        "level": "ERROR",
+        "name": "security_definer_view",
+        "cache_key": "security_definer_view_public_public_matchdays",
+        "metadata": {
+          "name": "public_matchdays",
+          "schema": "public",
+          "type": "view"
+        }
+      },
+      {
+        "level": "ERROR",
+        "name": "security_definer_view",
+        "cache_key": "security_definer_view_public_public_matches",
+        "metadata": {
+          "name": "public_matches",
+          "schema": "public",
+          "type": "view"
+        }
+      },
+      {
+        "level": "ERROR",
+        "name": "security_definer_view",
+        "cache_key": "security_definer_view_public_public_penalties",
+        "metadata": {
+          "name": "public_penalties",
+          "schema": "public",
+          "type": "view"
+        }
+      },
+      {
+        "level": "ERROR",
+        "name": "security_definer_view",
+        "cache_key": "security_definer_view_public_public_season_config_versions",
+        "metadata": {
+          "name": "public_season_config_versions",
+          "schema": "public",
+          "type": "view"
+        }
+      },
+      {
+        "level": "ERROR",
+        "name": "security_definer_view",
+        "cache_key": "security_definer_view_public_public_season_player_stats",
+        "metadata": {
+          "name": "public_season_player_stats",
+          "schema": "public",
+          "type": "view"
+        }
+      },
+      {
+        "level": "ERROR",
+        "name": "security_definer_view",
+        "cache_key": "security_definer_view_public_public_season_players",
+        "metadata": {
+          "name": "public_season_players",
+          "schema": "public",
+          "type": "view"
+        }
+      },
+      {
+        "level": "ERROR",
+        "name": "security_definer_view",
+        "cache_key": "security_definer_view_public_public_seasons",
+        "metadata": {
+          "name": "public_seasons",
+          "schema": "public",
+          "type": "view"
+        }
+      },
+      {
+        "level": "ERROR",
+        "name": "security_definer_view",
+        "cache_key": "security_definer_view_public_public_shop_items",
+        "metadata": {
+          "name": "public_shop_items",
+          "schema": "public",
+          "type": "view"
+        }
+      },
+      {
+        "level": "ERROR",
+        "name": "security_definer_view",
+        "cache_key": "security_definer_view_public_public_shop_promotions",
+        "metadata": {
+          "name": "public_shop_promotions",
+          "schema": "public",
+          "type": "view"
+        }
+      },
+      {
+        "level": "ERROR",
+        "name": "security_definer_view",
+        "cache_key": "security_definer_view_public_public_team_locks",
+        "metadata": {
+          "name": "public_team_locks",
+          "schema": "public",
+          "type": "view"
+        }
+      },
+      {
+        "level": "ERROR",
+        "name": "security_definer_view",
+        "cache_key": "security_definer_view_public_public_trainer_flags",
+        "metadata": {
+          "name": "public_trainer_flags",
+          "schema": "public",
+          "type": "view"
+        }
+      },
+      {
+        "level": "ERROR",
+        "name": "security_definer_view",
+        "cache_key": "security_definer_view_public_public_trainers",
+        "metadata": {
+          "name": "public_trainers",
+          "schema": "public",
+          "type": "view"
+        }
+      },
+      {
+        "level": "ERROR",
+        "name": "security_definer_view",
+        "cache_key": "security_definer_view_public_public_trial_cases",
+        "metadata": {
+          "name": "public_trial_cases",
+          "schema": "public",
+          "type": "view"
+        }
+      }
+    ],
+    "added": [
+      {
+        "level": "INFO",
+        "name": "unindexed_foreign_keys",
+        "cache_key": "unindexed_foreign_keys_public_hall_of_fame_entries_hall_cup_champion",
+        "metadata": {
+          "fkey_columns": [
+            15,
+            13
+          ],
+          "fkey_name": "hall_cup_champion",
+          "name": "hall_of_fame_entries",
+          "schema": "public",
+          "type": "table"
+        },
+        "categories": [
+          "PERFORMANCE"
+        ]
+      },
+      {
+        "level": "INFO",
+        "name": "unindexed_foreign_keys",
+        "cache_key": "unindexed_foreign_keys_public_hall_of_fame_entries_hall_cup_season",
+        "metadata": {
+          "fkey_columns": [
+            13,
+            2
+          ],
+          "fkey_name": "hall_cup_season",
+          "name": "hall_of_fame_entries",
+          "schema": "public",
+          "type": "table"
+        },
+        "categories": [
+          "PERFORMANCE"
+        ]
+      },
+      {
+        "level": "INFO",
+        "name": "unindexed_foreign_keys",
+        "cache_key": "unindexed_foreign_keys_public_cup_certificates_cup_certificates_cup_id_season_id_fkey",
+        "metadata": {
+          "fkey_columns": [
+            2,
+            3
+          ],
+          "fkey_name": "cup_certificates_cup_id_season_id_fkey",
+          "name": "cup_certificates",
+          "schema": "public",
+          "type": "table"
+        },
+        "categories": [
+          "PERFORMANCE"
+        ]
+      },
+      {
+        "level": "INFO",
+        "name": "unindexed_foreign_keys",
+        "cache_key": "unindexed_foreign_keys_public_cup_side_members_cup_side_members_side_id_cup_id_fkey",
+        "metadata": {
+          "fkey_columns": [
+            2,
+            1
+          ],
+          "fkey_name": "cup_side_members_side_id_cup_id_fkey",
+          "name": "cup_side_members",
+          "schema": "public",
+          "type": "table"
+        },
+        "categories": [
+          "PERFORMANCE"
+        ]
+      },
+      {
+        "level": "INFO",
+        "name": "rls_enabled_no_policy",
+        "cache_key": "rls_enabled_no_policy_public_cup_history",
+        "metadata": {
+          "name": "cup_history",
+          "schema": "public",
+          "type": "table"
+        },
+        "categories": [
+          "SECURITY"
+        ]
+      },
+      {
+        "level": "INFO",
+        "name": "rls_enabled_no_policy",
+        "cache_key": "rls_enabled_no_policy_public_cup_rounds",
+        "metadata": {
+          "name": "cup_rounds",
+          "schema": "public",
+          "type": "table"
+        },
+        "categories": [
+          "SECURITY"
+        ]
+      },
+      {
+        "level": "INFO",
+        "name": "unindexed_foreign_keys",
+        "cache_key": "unindexed_foreign_keys_public_hall_of_fame_entries_hall_cup_certificate",
+        "metadata": {
+          "fkey_columns": [
+            14,
+            13
+          ],
+          "fkey_name": "hall_cup_certificate",
+          "name": "hall_of_fame_entries",
+          "schema": "public",
+          "type": "table"
+        },
+        "categories": [
+          "PERFORMANCE"
+        ]
+      },
+      {
+        "level": "INFO",
+        "name": "unindexed_foreign_keys",
+        "cache_key": "unindexed_foreign_keys_public_cup_matches_cup_match_winner_scope",
+        "metadata": {
+          "fkey_columns": [
+            7,
+            2
+          ],
+          "fkey_name": "cup_match_winner_scope",
+          "name": "cup_matches",
+          "schema": "public",
+          "type": "table"
+        },
+        "categories": [
+          "PERFORMANCE"
+        ]
+      },
+      {
+        "level": "INFO",
+        "name": "rls_enabled_no_policy",
+        "cache_key": "rls_enabled_no_policy_public_cup_side_members",
+        "metadata": {
+          "name": "cup_side_members",
+          "schema": "public",
+          "type": "table"
+        },
+        "categories": [
+          "SECURITY"
+        ]
+      },
+      {
+        "level": "INFO",
+        "name": "unindexed_foreign_keys",
+        "cache_key": "unindexed_foreign_keys_public_cup_certificates_cup_certificates_finalist_side_id_cup_id_fkey",
+        "metadata": {
+          "fkey_columns": [
+            7,
+            2
+          ],
+          "fkey_name": "cup_certificates_finalist_side_id_cup_id_fkey",
+          "name": "cup_certificates",
+          "schema": "public",
+          "type": "table"
+        },
+        "categories": [
+          "PERFORMANCE"
+        ]
+      },
+      {
+        "level": "INFO",
+        "name": "unindexed_foreign_keys",
+        "cache_key": "unindexed_foreign_keys_public_cup_matches_cup_match_b_scope",
+        "metadata": {
+          "fkey_columns": [
+            6,
+            2
+          ],
+          "fkey_name": "cup_match_b_scope",
+          "name": "cup_matches",
+          "schema": "public",
+          "type": "table"
+        },
+        "categories": [
+          "PERFORMANCE"
+        ]
+      },
+      {
+        "level": "INFO",
+        "name": "unindexed_foreign_keys",
+        "cache_key": "unindexed_foreign_keys_public_hall_of_fame_entries_hall_cup_finalist",
+        "metadata": {
+          "fkey_columns": [
+            16,
+            13
+          ],
+          "fkey_name": "hall_cup_finalist",
+          "name": "hall_of_fame_entries",
+          "schema": "public",
+          "type": "table"
+        },
+        "categories": [
+          "PERFORMANCE"
+        ]
+      },
+      {
+        "level": "INFO",
+        "name": "unindexed_foreign_keys",
+        "cache_key": "unindexed_foreign_keys_public_cup_side_members_cup_side_members_cup_id_season_id_fkey",
+        "metadata": {
+          "fkey_columns": [
+            1,
+            3
+          ],
+          "fkey_name": "cup_side_members_cup_id_season_id_fkey",
+          "name": "cup_side_members",
+          "schema": "public",
+          "type": "table"
+        },
+        "categories": [
+          "PERFORMANCE"
+        ]
+      },
+      {
+        "level": "INFO",
+        "name": "unindexed_foreign_keys",
+        "cache_key": "unindexed_foreign_keys_public_cup_standings_cup_standing_scope",
+        "metadata": {
+          "fkey_columns": [
+            3,
+            2
+          ],
+          "fkey_name": "cup_standing_scope",
+          "name": "cup_standings",
+          "schema": "public",
+          "type": "table"
+        },
+        "categories": [
+          "PERFORMANCE"
+        ]
+      },
+      {
+        "level": "INFO",
+        "name": "unindexed_foreign_keys",
+        "cache_key": "unindexed_foreign_keys_public_cup_matches_cup_match_a_scope",
+        "metadata": {
+          "fkey_columns": [
+            5,
+            2
+          ],
+          "fkey_name": "cup_match_a_scope",
+          "name": "cup_matches",
+          "schema": "public",
+          "type": "table"
+        },
+        "categories": [
+          "PERFORMANCE"
+        ]
+      },
+      {
+        "level": "INFO",
+        "name": "unindexed_foreign_keys",
+        "cache_key": "unindexed_foreign_keys_public_cup_certificates_cup_certificates_season_id_fkey",
+        "metadata": {
+          "fkey_columns": [
+            3
+          ],
+          "fkey_name": "cup_certificates_season_id_fkey",
+          "name": "cup_certificates",
+          "schema": "public",
+          "type": "table"
+        },
+        "categories": [
+          "PERFORMANCE"
+        ]
+      },
+      {
+        "level": "INFO",
+        "name": "unindexed_foreign_keys",
+        "cache_key": "unindexed_foreign_keys_public_cup_side_members_cup_side_members_season_id_fkey",
+        "metadata": {
+          "fkey_columns": [
+            3
+          ],
+          "fkey_name": "cup_side_members_season_id_fkey",
+          "name": "cup_side_members",
+          "schema": "public",
+          "type": "table"
+        },
+        "categories": [
+          "PERFORMANCE"
+        ]
+      },
+      {
+        "level": "INFO",
+        "name": "unindexed_foreign_keys",
+        "cache_key": "unindexed_foreign_keys_public_cup_side_members_cup_side_members_season_player_id_season_id_trainer_id_fkey",
+        "metadata": {
+          "fkey_columns": [
+            4,
+            3,
+            5
+          ],
+          "fkey_name": "cup_side_members_season_player_id_season_id_trainer_id_fkey",
+          "name": "cup_side_members",
+          "schema": "public",
+          "type": "table"
+        },
+        "categories": [
+          "PERFORMANCE"
+        ]
+      },
+      {
+        "level": "INFO",
+        "name": "unindexed_foreign_keys",
+        "cache_key": "unindexed_foreign_keys_public_cup_certificates_cup_certificates_champion_side_id_cup_id_fkey",
+        "metadata": {
+          "fkey_columns": [
+            6,
+            2
+          ],
+          "fkey_name": "cup_certificates_champion_side_id_cup_id_fkey",
+          "name": "cup_certificates",
+          "schema": "public",
+          "type": "table"
+        },
+        "categories": [
+          "PERFORMANCE"
+        ]
+      },
+      {
+        "level": "INFO",
+        "name": "unindexed_foreign_keys",
+        "cache_key": "unindexed_foreign_keys_public_cup_history_cup_history_actor_trainer_id_fkey",
+        "metadata": {
+          "fkey_columns": [
+            4
+          ],
+          "fkey_name": "cup_history_actor_trainer_id_fkey",
+          "name": "cup_history",
+          "schema": "public",
+          "type": "table"
+        },
+        "categories": [
+          "PERFORMANCE"
+        ]
+      },
+      {
+        "level": "INFO",
+        "name": "unindexed_foreign_keys",
+        "cache_key": "unindexed_foreign_keys_public_cup_side_members_cup_side_members_trainer_id_fkey",
+        "metadata": {
+          "fkey_columns": [
+            5
+          ],
+          "fkey_name": "cup_side_members_trainer_id_fkey",
+          "name": "cup_side_members",
+          "schema": "public",
+          "type": "table"
+        },
+        "categories": [
+          "PERFORMANCE"
+        ]
+      },
+      {
+        "level": "INFO",
+        "name": "unindexed_foreign_keys",
+        "cache_key": "unindexed_foreign_keys_public_cup_certificates_cup_certificates_actor_trainer_id_fkey",
+        "metadata": {
+          "fkey_columns": [
+            10
+          ],
+          "fkey_name": "cup_certificates_actor_trainer_id_fkey",
+          "name": "cup_certificates",
+          "schema": "public",
+          "type": "table"
+        },
+        "categories": [
+          "PERFORMANCE"
+        ]
+      },
+      {
+        "level": "INFO",
+        "name": "rls_enabled_no_policy",
+        "cache_key": "rls_enabled_no_policy_public_cup_certificates",
+        "metadata": {
+          "name": "cup_certificates",
+          "schema": "public",
+          "type": "table"
+        },
+        "categories": [
+          "SECURITY"
+        ]
+      }
+    ],
+    "removed": [],
+    "intermediate_new_warn_resolved_by_032": [
+      {
+        "level": "WARN",
+        "name": "duplicate_index",
+        "cache_key": "duplicate_index_public_season_players_{cup_player_identity,uq_season_players_id_season_trainer}",
+        "metadata": {
+          "name": "season_players",
+          "schema": "public",
+          "type": "table"
+        },
+        "categories": [
+          "PERFORMANCE"
+        ]
+      }
+    ],
+    "before_inventory_digest": "c511dba71a53b5579846b7bdf17729e93a50eb978a1325d29fd0936080b0625c",
+    "after_inventory_digest": "4ee9282c7ad6b731fbd07e22c21b636ba383eb1a92f48bebf59af21980426e45"
+  },
+  "local_log_directory": "%TEMP%/phase8l-remote-20260928/",
+  "artifacts_sha256": {
+    "staging-first.log": "125ac5a3738912ded36330373d31429bb203ec9ef9934cb77af2f07f2b7cc368",
+    "staging-after031.log": "c3df2d18865841a1965fd9c41e1e863073be12876f8d6897f41c94d4df64a4a9",
+    "staging.log": "e554d0765f2bc1d64edfca957f1b28a0cf60002fb7e630f547be88cdf99880ee",
+    "032-release.log": "a2023b5cac5ec384ef9bacd0c8ae16edb0b20e6d1d8194c87e4c25753351dd2b",
+    "032-unit.log": "6c8078d121b0863b12ff7b4d5209e28620d0bef03970d77cca7a126b209e395f",
+    "history-before.json": "4d78693e5bd3fc364869a3e69960ae81182c5ee7a964edff23e35743717b5bf2",
+    "history-final.json": "5df4b3dac599fbff6986b67c7a851fbaa5d5a2353cdfc7d5912ed66a8366d10e",
+    "baseline-before.json": "c35cca3d2f9a63e73ab0154c706dd64bc16c51a20a77d5ae2d8f8fadc3cab207",
+    "baseline-final.json": "04c5744f385ba96b7d3a563c020fb2678b8c05d9c71caffc15664ebcbc370112",
+    "catalog-before.json": "3eb67d134e9cbdcc100753bfeb58f380aea91aca39e55aee291e8a7ff711f5cd",
+    "catalog-after-ddl.json": "af7132559495b4fa78c1b74cc2f52bedf8120cf9e4a516d33396eaf2228f631e",
+    "catalog-final.json": "e4224c688b728abdab13cd64535ceb0c04a0b5c9bee3a499871935eff7a18e37",
+    "advisors-before.json": "1806b40e59c20d0fb85ad4a466b61227a8aaea21fa075d21c067824efae53923",
+    "advisors-final.json": "69f7d3a2251b84663abf2754356efd3eb8bf094d54663b05dc2fe9af8f738b45"
+  },
+  "documentation_checks": {
+    "relative_links_checked": 66,
+    "missing": [],
+    "evidence_consistent": true,
+    "historical_001_031_unchanged": true,
+    "product_app_unchanged": true,
+    "protected_guide_size": 72079
+  }
+}

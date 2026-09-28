@@ -5,33 +5,46 @@ milestone record; it does not maintain a second live phase-status ledger.
 
 ## Current project position
 
-- Active phase: **8L — Cup engine / certification / Hall**. A8L-01 and related
-  historical eligibility gaps are corrected and locally validated. Delivery is
-  **IN PROGRESS** until the real staging gates close. The final staging attempt
-  reconfirmed missing management access and classified remote 031 as UNKNOWN;
-  see the live handoff for the precise blocker and next action.
-- Single operational record: [Phase 8L live handoff](work-in-progress/phase8l-live-handoff.md).
-  Consult it for Git, local changes, remote uncertainty and the next exact action.
-- Approved behavior: [Cup contract](phase8l-cup-engine.md). Dated technical evidence:
-  [8L delivery report](phase8l-completion-report.md), still open until delivery closes.
-- Last closed phase: 8K.1, local + real V2 staging, as recorded below.
-- Weighted complete-project estimate: **~68%**. No extra progress is credited for
-  this documentation reconciliation or for an unclosed 8L delivery.
-- Runtime remains Streamlit/V1; V2 has not replaced it. Phase 9 is not started.
+- Last closed phase: **8L - Cup engine / certification / Hall, DONE local + real V2 staging**.
+  Approved **Phase 8 backend scope CLOSED**; no next phase starts in this task.
+- Durable evidence: [8L delivery report](phase8l-completion-report.md).
+  [8L live handoff](work-in-progress/phase8l-live-handoff.md) is DONE / superseded.
+- Approved behavior: [Cup contract](phase8l-cup-engine.md).
+- Weighted complete-project estimate: **~70%**, from ~68% after actual remote
+  delivery, cleanup and Advisor closure. This is not whole-product deployment.
+- Runtime remains Streamlit/V1. **Phase 9 is not started**; parser boundary and
+  base Launcher/Companion remain planned next work only.
 
-Read the canonical [MultiIA continuity protocol](AI/PokeApp_Multi_AI_Continuity_Protocol.md)
-and [master protocol](PokeApp_2.0_Protocolo_Maestro_MultiIA.md) before resuming.
-On 2026-09-26 the user authorized documentation reconciliation, then a
-documentation-only commit/push to `main`. No code, migration or staging operation
-was part of those historical tasks. On 2026-09-28 the user authorized full 8L
-finalization, focused fixes, validation and Git publication. Publishing the fix
-does not substitute for the remaining staging evidence or start Phase 9.
+Read the [continuity protocol](AI/PokeApp_Multi_AI_Continuity_Protocol.md) and
+[master protocol](PokeApp_2.0_Protocolo_Maestro_MultiIA.md) before future work.
+The user authorized full 8L delivery, necessary post-031 correction in 032,
+validation, cleanup and Git publication; no Phase 9 or V1/V2 cutover.
 
 ## Historical delivery milestones — not current execution state
 
 The following counts, PASS results, next-step notes and remote versions belong to
 their named milestones. They are retained as evidence, not fresh verification of
-the current repository or remote database. Current 8L work is tracked above.
+the current repository or remote database. Final 8L closure is indexed above.
+
+### 2026-09-28 - 8L DONE; approved Phase 8 backend CLOSED
+
+CLI/linked SQL verified exact V2 project and all 22 original migration records.
+Canonical custom layout preserved; recorded Management API applied 031 once as
+`20260928110301` and the necessary 032 duplicate-index completion as `20260928111840`.
+All original history records and 001-031 source unchanged. **Do not reapply.**
+
+A8L-01 correction `39343ea`; final schema/fixture correction `a87d395`, pushed
+before 032 and final real run `phase8l_validation_3e013eb7f78749ccbed2b792a1b5b118` (exit 0). Twenty Cup/integrated groups,
+L00-L08/ten races and focused 030 regression PASS. All 52 public/Auth/Storage
+counts/full-row hashes restored; catalog/security/history unchanged by fixtures.
+Security Advisor 24 ERROR / 4 WARN / 9 INFO; combined 24 ERROR / 4 WARN / 122 INFO;
+zero new ERROR/WARN. Intermediate duplicate-index WARN removed by 032.
+
+511 unit tests, 001-032/bootstrap double rebuild, 10,507-line parity, Cup flows,
+races/nine rollback boundaries/all-public cleanup PASS. The report preserves the
+failed fixture attempt and both successful real runs. [Delivery report](phase8l-completion-report.md)
+and [sanitized evidence](phase8l-staging-evidence.json). No public API deployment.
+Progress ~68% -> ~70%; Phase 9 remains unstarted.
 
 ### 2026-09-24 — 8K.1 DONE local + real V2 staging
 
@@ -62,8 +75,8 @@ Phase 8I adds the participant-status boundary in 028. Three permanent statuses,
 scheduled-day reconciliation, typed historical cutoff, robbery cycle adjustment,
 admin JWT/CAS/receipts. [Contract](phase8i-participant-status.md) and
 [current delivery gates](phase8i-completion-report.md). 001-027 remain unchanged.
-8I and 8J gates are closed. Cup Hall delivery belongs to the active 8L handoff;
-8K.1 implements Juicios/sanctions.
+8I and 8J gates are closed. Cup Hall delivery subsequently closed in 8L, as
+recorded above; 8K.1 implements Juicios/sanctions.
 
 Phase 8H implements approved D4=A/D5=A/D6=A in additive 027: open/results/cancel,
 atomic close/rewards/movement/next day and restricted revisioned correction.
@@ -377,14 +390,14 @@ Persistence:
 - Many official entities still live in generic `settings` JSON.
 - Streamlit UI and business rules are still coupled in several modules.
 - Runtime Streamlit still uses legacy/V1 persistence; V2 is not connected yet.
-- V2 mutation deliveries through 030 are recorded in the historical phase reports.
-  Cup delivery in 031 remains governed by the active 8L handoff; do not infer its
-  remote state from the earlier applied migrations.
+- V2 mutation deliveries through 032 are recorded in the phase reports.
+  Cup delivery is closed in the 8L report; future remote actions still require
+  fresh verification of project, migration history and source.
 - Legacy ActivityEvents remain in settings; new V2 lock/purchase transactions
   writes V2 tables only, without dual-write or Discord delivery.
 - Legacy Copa and Juicios remain in the runtime. Their V2 contracts now exist:
   [Trials/sanctions](phase8k1-trials-sanctions.md) and [Cup engine](phase8l-cup-engine.md).
-  The latter's delivery is still open; neither implies a frontend cutover.
+  Both deliveries are closed; neither implies a frontend cutover.
 - Parser bridge is treated as a black box but not fully isolated.
 - Some legacy helper names remain, especially around wipe/revive wording.
 - Visual CSS layers are acceptable for the reference app but should not be the
@@ -392,33 +405,18 @@ Persistence:
 
 ## Next Step
 
-Continue the current phase according to its single operational record:
+Phase 8L and the approved Phase 8 backend inventory are closed. Consult the
+[completion report](phase8l-completion-report.md) for final evidence and the
+[closed handoff](work-in-progress/phase8l-live-handoff.md#next) for continuity.
+No delivery retry or migration replay is pending.
 
-```text
-Phase 8L Cup / Swiss / certification / Hall — reduced approved scope
-```
-
-8G audit and 8G.1 local/staging implementation are complete. D1-D7 are approved; D8 deferred.
-8H competitive operations and 8I participant status are DONE local + staging,
-with gates tracked in their respective reports. 8J lifecycle/archive/League Hall
-is also DONE, including real staging. The [Phase 8K audit](phase8k-trials-cup-api-audit.md)
-is DONE as documentation only. Its proposed judicial T1–T5 decisions are superseded
-by the approved manual Discord-result contract in 8K.1, now DONE local + staging.
-8L is implemented and its delivery is still open. Follow the
-[live handoff](work-in-progress/phase8l-live-handoff.md#next-exact-step) before any
-resumption. Its [contract](phase8l-cup-engine.md) retains the approved reduced
-scope and focused tests; visual polish remains deferred to React. Reconcile
-evidence and verify remote state before deciding whether 031 needs applying.
-Do not start Phase 9 automatically.
-
-Fase 7.1, Fase 7.2, Fase 8A.1, Fase 8B and 8B-H are closed. Fases 8C, 8D.0,
-8D, 8E and 8F.0 are DONE local + staging. Phase 8F.1 resolves the catalog blocker
-and closes all four internal effects locally and in staging; evidence is in the delivery report.
-Do not infer that all APIs or deployment are complete.
+Phase 9 (parser boundary and base Launcher/Companion) is planned next work only;
+**do not start it automatically**. Follow its separately authorized scope when
+requested. React/visual polish, deployment and V1/V2 cutover remain later work.
+D1-D7 remain approved and D8 deferred. The documentation-only Phase 8K audit's
+judicial T1-T5 proposals remain superseded by the approved manual Discord-result
+contract delivered in 8K.1. No new mechanics or physical save writes are implied.
 Do not cut over Streamlit or delete V1 without explicit approval.
-The 2026-09-23 audit reproduced identity collisions without running the bridge.
-The 255 baseline tests are retained alongside new identity tests. 023 is dedicated
-to identity, not redemption. See the 8F.0 report for current validation counts.
 
 ## Do Not Do When Resuming
 
@@ -452,8 +450,8 @@ to identity, not redemption. See the 8F.0 report for current validation counts.
 - Fase 8G.1: core setup/admin DONE local + staging; 026 applied, cleanup PASS.
 - Fases 8H, 8I, 8J and 8K.1: matchdays, participant status, lifecycle/League Hall
   and trials/sanctions DONE local + staging; evidence is in their phase reports.
-- Fase 8L: Cup implementation published; finish the delivery documented in its
-  live handoff. Do not treat the whole Phase 8 API or product as deployed.
+- Fase 8L: DONE local + real V2 staging; approved Phase 8 backend CLOSED.
+  In-process FastAPI with real Auth/PostgREST; no public API deployment.
 - Fase 9: parser boundary.
 - Fase 10: React / Cloudflare frontend.
 - Fase 11: data migration.

@@ -1,35 +1,29 @@
-# Phase 8L delivery report — Cup engine / certification (open)
+# Phase 8L delivery report — Cup engine / certification (DONE)
 
 Started: 2026-09-24. Evidence reconciled: 2026-09-26.
-Technical audit and local finalization correction: 2026-09-28; remote delivery remains open.
+Technical audit and local finalization correction: 2026-09-28; real staging closure: 2026-09-28.
 Starting HEAD `87a98f5`, branch `main`, origin 0/0 at phase start.
 Baseline: 466 unit tests, migrations 001–030, complete-project estimate ~68%.
 030 already deployed as `20260924102756` and `20260924103256`; never replayed.
 
-This existing file is the technical implementation/evidence report, retained at
-its original path for continuity. Its filename is not a DONE claim. The
-[live handoff](work-in-progress/phase8l-live-handoff.md) alone maintains current
-operational state, Git changes and the next action. Follow the canonical
+This is the durable technical and delivery record for completed Phase 8L.
+The [live handoff](work-in-progress/phase8l-live-handoff.md) is closed/superseded.
+Historical audit and blocked-attempt evidence below is dated and retained; the
+remote closure section supersedes its earlier pending/UNKNOWN states. Follow the
 [MultiIA protocol](AI/PokeApp_Multi_AI_Continuity_Protocol.md).
 
 ## Delivery status
 
-The 2026-09-28 finalization task corrects A8L-01 and related historical eligibility
-gaps. The focused 45-test suite, general 511-test suite and current local SQL
-validation pass. The fresh release rebuild and resumed regressions are complete,
-including final schema/security/cleanup checks. **Local gates are complete;
-delivery is READY FOR STAGING, not DONE.** Management access is the remaining
-blocker to remote preflight and validation. No historical migration is changed.
+**Phase 8L DONE; approved Phase 8 backend scope CLOSED.** A8L-01 is fixed and
+published; local and real V2 staging gates pass, with independent exact cleanup
+and zero new Advisor ERROR/WARN. 031 was applied once as `20260928110301`; the required
+narrow Advisor correction 032 once as `20260928111840`. **Do not reapply either.**
+001-031 remain unchanged.
 
-A fresh read-only request to the pinned V2 PostgREST endpoint returns HTTP 200,
-but its exposed schema contains neither the 031 tables nor its Cup RPCs. This is
-not migration-history, schema/grants or Advisor verification. Management access
-is unavailable; the Supabase integration has been suggested but is not confirmed
-connected. No remote writes, migrations or fixtures were started by this task.
-
-Authoritative contract: [Cup engine](phase8l-cup-engine.md). The reduced scope is
-Swiss + Top 4, elimination and doubles RR + Top 2/Bo3 final, with focused tests.
-No tournament framework, solver, Elo, extensive fuzzing, visual work or Phase 9.
+Authoritative contract: [Cup engine](phase8l-cup-engine.md). Approved scope remains
+Swiss + Top 4, elimination and doubles RR + Top 2/Bo3 final. No Phase 9 work,
+public API deployment, V1 runtime change or cutover. Weighted full-product estimate
+is ~70%, recorded in the [checkpoint](project-checkpoint.md).
 
 ## Implementation
 
@@ -51,7 +45,7 @@ archive JSON/checksum and the frozen pending-Cup marker. Ambiguous imports remai
 uncertified. Draft/active cancellation is logical; DQ never changes League status.
 Browser table/column DML and inherited TRUNCATE are revoked, including view paths.
 
-## Validation ledger
+## Historical validation ledger
 
 These are dated local observations, not new executions during the documentation
 task and not a current staging certification.
@@ -237,7 +231,7 @@ table write authority. This is not a claim that SQL independently reconstructs
 the whole competition. The real adapter/SQL rejection, browser ACL checks,
 concurrency and rollback checks exercise the actual combined boundary.
 
-### Current validation ledger
+### Local finalization validation ledger
 
 All observations in this table are from **2026-09-28**. `psql` below means
 `%TEMP%/pokeapp_pg17_phase8c_20260922/portable/pgsql/bin/psql.exe`.
@@ -281,15 +275,15 @@ by the two logs; the interrupted first process itself has no successful exit cla
 The local PostgreSQL server was then stopped after verifying no other client
 sessions. The three disposable task databases remain, with no fixture residue.
 
-Real staging JWT/FastAPI/PostgREST, public/Auth/Storage baseline and independent
-cleanup, migration/source/grants verification and fresh Advisor delta are still
-required. The integration search found Supabase available but not installed;
+At this earlier checkpoint, real staging, the baseline, independent cleanup,
+migration/source/grants and Advisor delta were still pending. The remote closure
+section below supersedes this historical access limitation. The integration search found Supabase available but not installed;
 connection was suggested. Local credentials provide PostgREST/Auth access, not a
 management token or SQL connection. No remote PASS is inferred from local results.
 
-## Final staging delivery attempt — 2026-09-28
+## Historical blocked staging delivery attempt (superseded) — 2026-09-28
 
-**BLOCKED at management capability preflight; remote 031 classification D
+**At this earlier attempt: BLOCKED at management capability preflight; remote 031 classification D
 (UNKNOWN / CANNOT VERIFY). No remote write or staging validation attempt started.**
 
 Entry branch `main`, HEAD and independently queried remote main both
@@ -345,28 +339,184 @@ preflight/baseline, migration decision, real validator, independent cleanup and
 Advisor comparison. CORS, liveness-only health and legacy DTO notes remain future
 deployment considerations, not new work in this task.
 
-## Staging and independent cleanup
+## Remote closure - 2026-09-28
 
-Implementation and 031 are already published; the previous instruction to wait
-for their push is obsolete. Use the live handoff's next action, not an unconditional
-instruction to apply 031. Before any authorized write, independently confirm the
-pinned project and migration history, reconcile the committed source and validation
-evidence, and obtain a fresh public/Auth/Storage baseline and Advisor inventory.
+### Verified preflight and historical mechanism
 
-If 031 is absent, apply only its committed SQL through an available supported
-migration mechanism. If already present, verify the recorded migration/schema and
-continue validation without replaying it. Record remote version and validation
-status immediately after application, then real API/JWT/PostgREST results,
-independent cleanup and Advisor differences. Historical 8K.1 Advisor totals are
-24 ERROR / 4 WARN / 5 INFO; they are not a fresh 8L preflight inventory.
+Entry: `main`, `bdaa7f7f5a429ebe20f5a17fefa7a66193ccb973`, matching fresh remote
+main. User login/link succeeded. Authenticated CLI **2.118.0**, linked SQL and
+Management API identify **Pokeapp 2.0**, `uwleqeuzsveqlugugzba`, eu-central-1,
+ACTIVE_HEALTHY. The CLI credential stayed in memory; no secrets were printed or
+versioned. Local CLI cache `supabase/.temp/` is explicitly ignored.
 
-No reset/bootstrap, historical migration replay, V1, runtime change or cutover.
+Authoritative SQL verified **031 NOT APPLIED**: no history entry, four new tables,
+seven helper/RPC functions or checked new columns. This supersedes earlier UNKNOWN
+REST-only observations. Committed and working 031 bytes matched SHA256
+`868efbca7a2ecb76138a2e12b37cd35b08cad7a849effa4fdf1dae7cfdcde362`.
+All **22 original migration rows** were hashed in full and remain unchanged:
+
+| Version | Name |
+|---|---|
+| `20260816211949` | `010_security_helpers` |
+| `20260816212058` | `011_rls_policies` |
+| `20260816212336` | `012_security_views` |
+| `20260816213020` | `014_security_invoker_hardening` |
+| `20260901190001` | `013_storage_policies` |
+| `20260901234808` | `015_public_trainers_visibility` |
+| `20260901235030` | `016_public_team_locks_visibility` |
+| `20260901235223` | `017_public_coin_balances_visibility` |
+| `20260901235520` | `018_public_views_visibility` |
+| `20260922162954` | `019_team_lock_api` |
+| `20260922165901` | `020_current_matchday_store_ban_contract` |
+| `20260922171752` | `021_normal_purchase_api` |
+| `20260922174842` | `022_promotional_purchase_api` |
+| `20260923165532` | `023_pokemon_identity` |
+| `20260923172957` | `024_redemption_effect_boundary` |
+| `20260923180416` | `025_robbery_voucher_and_redemption` |
+| `20260923192300` | `026_season_admin_setup_api` |
+| `20260923210625` | `027_competitive_matchdays` |
+| `20260923220301` | `028_participant_status_admin` |
+| `20260923232516` | `029_season_finalization_archive_hall` |
+| `20260924102756` | `030_trials_sanctions_api` |
+| `20260924103256` | `030_trials_sanctions_acl_completion` |
+
+The user's standard `db push --dry-run` failed because these timestamp versions
+have no counterparts in the CLI's standard directory. This is user-provided
+command evidence, not a rerun by this task. Canonical files remain under
+`supabase/v2/migrations/001_...032_...`. No db push, repair, reset, blind pull,
+fabricated timestamp history, renamed canonical migration or historical replay.
+
+The [029 report](phase8j-completion-report.md) and
+[030 report](phase8k1-completion-report.md) record versions but do not expressly
+identify the applying tool; that missing provenance is not invented. Explicit
+project precedents document MCP `apply_migration` in [019](phase8c-team-lock.md),
+[023](phase8f0-pokemon-identity.md) and [027](phase8h-completion-report.md).
+No project remote application script was found. This delivery used Supabase's
+supported [Management API apply-migration endpoint](https://supabase.com/docs/reference/api/v1-apply-a-migration),
+`POST /v1/projects/{ref}/database/migrations`, with exact committed SQL and canonical
+names, preserving the existing recorded history and custom layout.
+
+### Applications, schema and required Advisor correction
+
+| Source | Remote version / name | Result |
+|---|---|---|
+| Unchanged committed 031 | `20260928110301` / `031_cup_engine_certification` | Newly applied once, HTTP 200 |
+| Committed 032 from `a87d3951cab15ca54eddd2ce3b8d6489cb703576` | `20260928111840` / `032_cup_player_identity_index` | Applied once, HTTP 200 |
+
+Immediately after each application, history was queried and the live handoff
+updated with the version, validation-pending state and **DO NOT REAPPLY**. Final
+history has **24 records**: the original 22 plus 031 and 032.
+
+All seven Cup function bodies match committed SQL exactly: fixed search_path,
+invoker security, PUBLIC/anon/authenticated EXECUTE denial and service execution.
+Effective browser table/column INSERT/UPDATE/DELETE/TRUNCATE denial passes across
+nine tables and five views. New tables have RLS and no browser grants. Hall
+provenance/options, scores, immutable artifacts, constraints, indexes and triggers
+match local structure; old function bodies and policies are unchanged. The initial
+30 changed/new objects matched local catalog structure, with cloud ACLs checked
+independently from local mock-role grants.
+
+After the first complete passing remote run, combined Advisor detected one new
+`duplicate_index` WARN: 031's `cup_player_identity` duplicated existing
+`uq_season_players_id_season_trainer` on `(id, season_id, trainer_id)`.
+The Cup FK and seven historical FKs already used the retained index; none used
+the duplicate. Following the authorized post-031 correction rule, **032 drops only
+the redundant unique constraint/index with default RESTRICT**. No CASCADE, data
+change, FK removal, permission change or historical SQL edit.
+032 SHA256: `9a0e14b45451ba929f72420959939cad6d78fed8c25bcb6bb8b5ed3f5fde18e4`.
+
+The remote catalog delta is exactly that removal. All functions/security/FKs and
+52 data hashes remain unchanged. Final 29 changed/new objects match the final local
+catalog. The new catalog regression fails before 032 and passes after, including
+the Cup FK's retained existing unique key.
+
+### Runs, failures and validation
+
+Real runner: `.venv-api/Scripts/python.exe tools/validate_supabase_v2_cups.py
+--env-file .env.supabase-v2-rls.local --allow-staging-writes`. Real Auth users/JWT,
+FastAPI TestClient in-process and production PostgREST; no public API deployment.
+
+| Run | Result |
+|---|---|
+| `phase8l_validation_337ccf236dd8441cb7b5bab36ff7d960` | Exit 1 after L00 at `Cup changed League participation`; independent 52-table cleanup PASS |
+| `phase8l_validation_e460264209704a75b11f0449aff79dea` | Exit 0 after fixture correction; all Cup/030 gates PASS; exact cleanup PASS; subsequent Advisor check exposed duplicate index |
+| `phase8l_validation_3e013eb7f78749ccbed2b792a1b5b118` | **Final exit 0 on published `a87d395`, after 032**; all gates PASS |
+
+The first assertion compared unordered PostgREST row lists. The harness now sorts
+by immutable ID while comparing every field of every row. The first run did not
+retain both arrays, so its exact difference cannot be reconstructed. Read-only
+telemetry in the second run confirms complete before/after rows equal (also in
+order for that run), without replacing the assertion. No product mutation was
+observed. The final run used the ordinary runner without telemetry. 45 focused
+tests and compilation passed after the fixture correction.
+
+Final real suite: **20 Cup/integrated groups**, including L00-L08, ten race families
+and cleanup, plus focused 030 typed sanctions/replay/correction/archived-history
+regression. L07 rejects empty and each one-sided final eligibility through the real
+API without certificate/Hall or partial writes, restores the fixture graph and
+certifies. L08 certifies valid elimination/Swiss/doubles after later DQ and correction.
+No intrusive rollback/failure DDL was sent to staging.
+
+After adding 032, **511 unit tests** passed again. Fresh local
+`validate_supabase_v2_cup_release --skip-regressions` passed: 001-032 and bootstrap
+rebuilt twice each, **10,507 normalized schema/grants/ownership lines** identical,
+catalog/security, L00-L08, ten races, nine all-public rollback boundaries and exact
+46-table cleanup. Unchanged standalone 026-030 suites were not repeated; earlier
+evidence remains above, and the real runner covers integrated flows plus focused
+030 again. Compile/diff checks pass. Local PostgreSQL is stopped.
+
+### Independent cleanup and Advisor
+
+Fresh pre-DDL baseline: **42 public + four Auth + two Storage tables = 48**.
+After 031: **46 public + four Auth + two Storage = 52**. Independent linked SQL
+compared counts and deterministic SHA256 of ordered full-row JSONB arrays. All
+48 original tables were unchanged by DDL; the four new ones empty. After each
+attempt, after 032 and after the final run, all 52 tables exactly match baseline.
+Auth users/identities/sessions/refresh_tokens are zero. Nonempty data remains
+app_settings=2, shop_items=62, trainers=10, storage.buckets=1, storage.objects=3,
+with identical full-row hashes. No Storage bytes touched. Final catalog/ACL/RLS and
+migration history equal their post-032 snapshots. **STAGING_DONE_ZERO_RESIDUE.**
+
+| Advisor inventory | Fresh BEFORE | Final AFTER |
+|---|---|---|
+| Security | 24 ERROR / 4 WARN / 5 INFO | 24 ERROR / 4 WARN / 9 INFO |
+| Security + Performance | 24 ERROR / 4 WARN / 99 INFO | 24 ERROR / 4 WARN / 122 INFO |
+
+**Zero new ERROR/WARN**, comparing finding/object/severity identities, not only
+counts. 032 removed the intermediate duplicate-index WARN. Existing 24
+`security_definer_view` errors from 018 and four function warnings remain unchanged.
+Added INFO: four intentional backend-only RLS tables with no browser policies and
+19 unindexed foreign keys. No unrelated hardening or speculative indexing added.
+
+[Durable sanitized evidence](phase8l-staging-evidence.json) records migration
+history, full-row hashes/counts, function hashes, security checks, catalog digests,
+intermediate WARN and final Advisor delta. Raw logs/SQL remain in
+`%TEMP%/phase8l-remote-20260928/`: `staging-first.log`, `staging-after031.log`,
+`staging.log`, `032-unit.log`, `032-release.log`. No credentials or raw user rows
+are included in the durable evidence.
+
+### Git and scope closure
+
+A8L-01 product correction: `39343ea2add1591826d0809cd7c3c42ec814043c`.
+Final validated schema/fixture correction: `a87d3951cab15ca54eddd2ce3b8d6489cb703576`,
+pushed and independently matched to remote main before 032 and the final real run.
+The documentation closure commit contains this report, closed handoff, checkpoint
+and evidence; its own hash is obtained from Git. Delivery finishes with ordinary
+push, main/origin-main 0/0 and a clean tracked tree. Before publication, 66
+relative document links/anchors, JSON/source consistency, protected-file metadata,
+secret-pattern scan and `git diff --check` pass.
+
+Protected guide remains untracked, not read/modified/staged/moved/deleted/hidden:
+72,079 bytes, UTC mtime 2026-09-22 10:13:27. Only CLI cache is ignored. Historical
+001-031, V1/runtime and approved rules remain intact. CORS, liveness-only health,
+legacy DTO consumption and deferred D8 remain future notes. **8L DONE; approved
+Phase 8 backend CLOSED; full-project estimate ~68% -> ~70%; Phase 9 not started.**
 
 ## Reproducible checks
 
-Reference commands for a later authorized validation task; this section does not
-instruct a documentation-only task to run them. The release reset is local only.
-The staging command is allowed only after the staging preflight described above.
+Reference commands for future authorized validation; no execution remains pending
+for this delivery. Release reset is local only. Future staging requires a new
+preflight; never replay completed migrations.
 
 ```powershell
 .venv-api\Scripts\python.exe tools/run_unit_tests.py
@@ -395,7 +545,7 @@ Scoped inspection of registered routes and approved Phase 8 contracts:
 | League setup / operation / participation | 026–028 admin CAS and frozen-round contracts |
 | League finish / archive / Hall | 029 immutable source and historical package |
 | Trials / sanctions | 030 recorded Discord verdict, typed effects and compensation |
-| Cup / certification / Hall | 031 explicit engine and per-Cup authority; delivery gates above |
+| Cup / certification / Hall | 031 engine and per-Cup authority, 032 index completion; DONE |
 
 No additional critical mutation gap was identified within this approved backend
 scope. This is a small closure inventory, not a new broad audit or a claim that the
@@ -407,4 +557,5 @@ delete the protected `docs/pokeapp-guia-completa-pestanas-y-producto.md`. Its lo
 untracked state is recorded in the handoff. Migrations 001–030 and Streamlit/V1
 were unchanged by 8L implementation. Global progress is maintained in the
 [project checkpoint](project-checkpoint.md), with no increment credited by this
-documentation task. Any increment after 8L closes requires actual delivery evidence.
+historical documentation task. The remote closure above provides the subsequent
+delivery evidence and the checkpoint records the resulting increment.
