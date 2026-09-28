@@ -1,0 +1,18 @@
+{
+  "version": 1,
+  "dependencies": {
+    "net8.0": {
+      "PKHeX.Core": {
+        "type": "Transitive",
+        "resolved": "24.11.11",
+        "contentHash": "WMHvLsAarE5dENrfLIs8vRybHM9oS7U/pTLvKypKpAQndvLMoSpJ4Nscxp1auKD/Erbi4zgvCRCrUXU/outIrQ=="
+      },
+      "pokeapp.parser": {
+        "type": "Project",
+        "dependencies": {
+          "PKHeX.Core": "[24.11.11, 24.11.11]"
+        }
+      }
+    }
+  }
+}

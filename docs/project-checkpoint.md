@@ -5,20 +5,23 @@ milestone record; it does not maintain a second live phase-status ledger.
 
 ## Current project position
 
+- Active phase: **9 - parser boundary + Launcher/Companion base**, authorized
+  2026-09-28. [Contract](phase9-parser-launcher.md),
+  [operational handoff](work-in-progress/phase9-live-handoff.md),
+  [delivery evidence](phase9-completion-report.md).
 - Last closed phase: **8L - Cup engine / certification / Hall, DONE local + real V2 staging**.
-  Approved **Phase 8 backend scope CLOSED**; no next phase starts in this task.
+  Approved **Phase 8 backend scope CLOSED**.
 - Durable evidence: [8L delivery report](phase8l-completion-report.md).
   [8L live handoff](work-in-progress/phase8l-live-handoff.md) is DONE / superseded.
 - Approved behavior: [Cup contract](phase8l-cup-engine.md).
 - Weighted complete-project estimate: **~70%**, from ~68% after actual remote
   delivery, cleanup and Advisor closure. This is not whole-product deployment.
-- Runtime remains Streamlit/V1. **Phase 9 is not started**; parser boundary and
-  base Launcher/Companion remain planned next work only.
+- Runtime remains Streamlit/V1; Phase 9 is isolated local work, with no cutover.
 
 Read the [continuity protocol](AI/PokeApp_Multi_AI_Continuity_Protocol.md) and
 [master protocol](PokeApp_2.0_Protocolo_Maestro_MultiIA.md) before future work.
-The user authorized full 8L delivery, necessary post-031 correction in 032,
-validation, cleanup and Git publication; no Phase 9 or V1/V2 cutover.
+The user subsequently authorized Phase 9 implementation, tests, documentation and
+Git publication. No Phase 10, V1/V2 cutover or physical save mutation.
 
 ## Historical delivery milestones — not current execution state
 

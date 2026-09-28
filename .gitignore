@@ -33,3 +33,8 @@ desktop/
 
 # Supabase CLI local link/cache (may contain connection details)
 /supabase/.temp/
+
+# Isolated Companion builds and user state
+companion/**/bin/
+companion/**/obj/
+.pokeapp-launcher/
