@@ -18,7 +18,7 @@ by missing Supabase management access for remote preflight. Not DONE.**
 
 ## Last updated
 
-2026-09-28 (Europe/Madrid), after successful local finalization and resumed release.
+2026-09-28 (Europe/Madrid), after local finalization, resumed release and fix publication.
 
 ## Current objective and authorized scope
 
@@ -31,9 +31,15 @@ No React, Launcher, Companion, PKHeX, visual work, rule changes or Phase 9.
 
 - Branch `main`; entry HEAD `73f8453668a7eae6d4f7cfc400f80b15f8b147b2` matched
   freshly queried remote main on 2026-09-28.
-- The inherited audit edits to this handoff and the delivery report are preserved
-  in the dated report. Current source/test/validator/document edits are ready for
-  publication; all local checks have passed. Verify the actual commit/ref after push.
+- Fix and validation evidence published in
+  `39343ea2add1591826d0809cd7c3c42ec814043c` (`fix: validate cup certification
+  eligibility before hall creation`). Fresh remote main matched that full hash;
+  `git rev-list --left-right --count HEAD...origin/main` returned `0 0` and the
+  tracked tree was clean after push.
+- The commit containing this final documentation update records that verified
+  publication; it changes no tested source. Obtain the current documentation
+  commit from Git and compare remote refs on entry, rather than treating the
+  fix hash as permanently current. The inherited audit notes remain in the report.
 - The protected guide remains pre-existing and untracked. Never add, delete,
   move or hide it to manufacture an entirely clean working tree.
 
@@ -126,16 +132,15 @@ untracked. Clean tracked state and that intentional exception are reported separ
 
 ## Not yet validated / remaining delivery
 
-1. Publish the coherent fix/tests/evidence and confirm origin/main alignment.
-2. Establish management access to the pinned project and run the full remote
+1. Establish management access to the pinned project and run the full remote
    preflight; apply committed 031 only if verified absent, never replay it blindly.
-3. Complete real JWT/API/PostgREST checks, independent zero-residue cleanup and
+2. Complete real JWT/API/PostgREST checks, independent zero-residue cleanup and
    fresh Advisor delta, then update report/checkpoint and close 8L.
 
 ## Next exact step
 
-Publish the verified local fix and confirm Git. When Supabase management access
-is available, verify the pinned project, migration history/source/schema/grants,
+When Supabase management access is available, verify the pinned project,
+migration history/source/schema/grants,
 fresh public/Auth/Storage baseline and Advisor inventory. Apply 031 only if proven
 absent, otherwise validate without replay. Run the existing staging validator with
 the fixed engine and L07/L08, independently verify cleanup/Advisor delta, then close

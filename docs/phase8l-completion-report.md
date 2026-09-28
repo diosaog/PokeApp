@@ -185,6 +185,9 @@ same invariant. No fix was applied during this audit.
 
 Entry HEAD was `73f8453668a7eae6d4f7cfc400f80b15f8b147b2`, independently matching
 remote main. The audit edits to this report and the live handoff were preserved.
+The tested correction and evidence were committed and pushed as
+`39343ea2add1591826d0809cd7c3c42ec814043c`; fresh remote main matched and divergence
+was `0 0`. The final documentation follow-up changes no tested implementation.
 The following results were executed against that source plus the correction in
 this delivery, on Windows with `.venv-api/Scripts/python.exe` and local PostgreSQL
 17.11 at `127.0.0.1:55439`. `%TEMP%/phase8l-finalization-source.json` records SHA256
