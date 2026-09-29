@@ -1135,10 +1135,23 @@ tbody tr:last-child td {
   border-color: transparent;
   background: transparent;
 }
-.tabs button[aria-selected="true"] {
+.tabs button[aria-selected="true"],
+.tabs button[aria-pressed="true"] {
   color: var(--accent);
   background: #302820;
   border-color: #634d3d;
+}
+
+.standings-source {
+  display: block;
+}
+
+.league-standings {
+  min-width: 540px;
+}
+.league-standings td:nth-child(2),
+.league-standings td:nth-child(3) {
+  white-space: nowrap;
 }
 .risk {
   border-color: #6e3f34;

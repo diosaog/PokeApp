@@ -872,6 +872,23 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/v1/read/seasons/{season_id}/league": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** League General */
+    get: operations["league_general_v1_read_seasons__season_id__league_get"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/v1/read/seasons/{season_id}/shop": {
     parameters: {
       query?: never;
@@ -1761,6 +1778,46 @@ export interface components {
       description: string;
       /** Base Price */
       base_price: number;
+    };
+    /** LeagueGeneralRead */
+    LeagueGeneralRead: {
+      season: components["schemas"]["SeasonRead"];
+      /** Days */
+      days: components["schemas"]["DayRead"][];
+      /** Rows */
+      rows: components["schemas"]["LeagueStandingRead"][];
+    };
+    /** LeagueStandingRead */
+    LeagueStandingRead: {
+      /**
+       * Season Player Id
+       * Format: uuid
+       */
+      season_player_id: string;
+      /**
+       * Trainer Id
+       * Format: uuid
+       */
+      trainer_id: string;
+      /** Display Name */
+      display_name: string;
+      /** Status */
+      status: string;
+      /** Total Points */
+      total_points: string;
+      /** Points Source Matchday Id */
+      points_source_matchday_id: string | null;
+      /** Coin Balance */
+      coin_balance: string;
+      /** Dead Count */
+      dead_count: number | null;
+      /**
+       * Dead Count Source
+       * @enum {string}
+       */
+      dead_count_source: "observed_current_save" | "unknown";
+      /** Dead Count Observed At */
+      dead_count_observed_at: string | null;
     };
     /** LockRead */
     LockRead: {
@@ -4926,6 +4983,37 @@ export interface operations {
         };
         content: {
           "application/json": components["schemas"]["PCRead"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  league_general_v1_read_seasons__season_id__league_get: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        season_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["LeagueGeneralRead"];
         };
       };
       /** @description Validation Error */

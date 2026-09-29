@@ -41,6 +41,7 @@ EXPECTED_MIGRATIONS = [
     "030_trials_sanctions_api.sql",
     "031_cup_engine_certification.sql",
     "032_cup_player_identity_index.sql",
+    "033_league_general_read.sql",
 ]
 
 FORBIDDEN_TOKENS = [

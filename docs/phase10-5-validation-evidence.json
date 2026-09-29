@@ -1,0 +1,103 @@
+{
+  "phase": "10.5",
+  "status": "IN_PROGRESS",
+  "observed_date": "2026-09-29",
+  "block": "B",
+  "block_status": "GREEN_LOCAL_REMOTE_PENDING",
+  "entry_head": "9a8620db5324104e753bb5f63b408d7b140502e8",
+  "base_commit": "226ac7b",
+  "source_note": "Base plus the following B source hashes, published in the same commit as this evidence; LF-normalized SHA256. No remote use of this source is claimed.",
+  "source_sha256_lf": {
+    "app/api/read_models.py": "1f7e422a8b3d159442a083601d8e9c02775ebc4c521b80caf185e2f4a8037298",
+    "app/api/routes/reads.py": "c38ce3627c4517232b163a65a033a7a3bbbea6566e43b88ca819a5a4def306d9",
+    "app/application/frontend_reads.py": "bdfa1a30b4557af87750a27cf008a23aa5ba1d9810d2ae60247c81282b517bce",
+    "app/repositories/supabase/frontend_reads.py": "6925f7cf1d78a4591f37aac33e97971b22fd73b1213a44d85fb13d7506d02e5f",
+    "supabase/v2/migrations/033_league_general_read.sql": "58705e8d08c639534b338f3d9766e4947b3c052828c51653f7dd887b4f41961a",
+    "supabase/v2/bootstrap.sql": "53ec374fe559fca175a7110ee22be33abfe997460181e0e8ce677c6d23a62f2b",
+    "tools/generate_supabase_v2_bootstrap.py": "e26702c92549c101b4c504bf39a57d406ca4919934c0bdcf851b227b3ad366f1",
+    "tools/validate_phase10_5_league_sql.py": "b4ca7fb7da3a32cda0ad2efcc62fda3103a2f4efc6ad60ae61e4b02017f93a32",
+    "tests/test_api_league_general.py": "7573d4773eb2b46a6a780033f2069451ef9d4cf0fb2bd54d3c54a1d0bf00e759",
+    "tests/test_supabase_v2_schema.py": "4cab0f0bbc9b275bc69aab6c5c2053bf1b6edf3e3d2ac82837bd658eac64af9a",
+    "tests/sql/league_general_checks.sql": "e0c2d9311a1c421e51d77c248a80f54c71b77d71504b4a7be0f259bcf58be521",
+    "web/src/api/schema.d.ts": "fde40b4841c125789ae53c86653d89591d5414d111daa25e82ef3475071107b6",
+    "web/src/features/core.tsx": "d196b865a78fb28f203bd27fe4c1604e9b03734af5ef48735394d7bc1164f1bc",
+    "web/src/styles.css": "3cdb22b165dc01fa18b31616361bf65ec4bb9311d6df83416e7375dab9277698",
+    "web/e2e/fixtures.ts": "a3e61bbae3ce90c93a0f0884818cd29156e4b33f5608261957f077dce38e7109",
+    "web/e2e/flows.spec.ts": "753f9c63737588f18ce23a59582525732403c1d2e53872c378be47e6d9bbc867",
+    "web/e2e/league.spec.ts": "98f82a051e5f35a9f29bb99e46484dfdbe6d09bd0c560996e0e8f6a7d6a3fa37"
+  },
+  "gates": [
+    {
+      "command": ".venv-api/Scripts/python.exe tools/run_unit_tests.py",
+      "result": "PASS",
+      "exit_code": 0,
+      "tests": 571,
+      "seconds": 40.708,
+      "log": "%TEMP%/phase10-5b-unit-final.log"
+    },
+    {
+      "command": "npm --prefix web test",
+      "result": "PASS",
+      "exit_code": 0,
+      "tests": 11
+    },
+    {
+      "command": "npm --prefix web run test:e2e",
+      "result": "PASS",
+      "exit_code": 0,
+      "tests": 13,
+      "seconds": 32.9,
+      "scope": "Real local React, intercepted synthetic API fixtures, installed Edge; no hosted JWT claim",
+      "log": "%TEMP%/phase10-5b-browser-final.log"
+    },
+    {
+      "command": "npm --prefix web run build",
+      "environment": "VITE_API_BASE_URL=https://pokeapp-api-production.up.railway.app",
+      "result": "PASS",
+      "exit_code": 0,
+      "js_gzip_kb": 113.41,
+      "css_gzip_kb": 6.36
+    },
+    {
+      "command": ".venv-api/Scripts/python.exe -m tools.validate_phase10_5_league_sql --psql <local-psql.exe>",
+      "environment": "PostgreSQL 17, 127.0.0.1:55439, pokeapp_v2_validation_phase10_5b",
+      "result": "PASS",
+      "exit_code": 0,
+      "public_tables_restored": 46,
+      "concurrency": "Two sessions: uncommitted name/ledger hidden; both visible after commit"
+    },
+    {
+      "command": "_build_schema(migrations/bootstrap), _render_validation_sql(), RLS_VALIDATION_SQL; normalized pg_dump --schema-only --schema=public",
+      "result": "PASS",
+      "exit_code": 0,
+      "identical_lines": 10627,
+      "logs": [
+        "%TEMP%/phase10-5b-schema.log",
+        "%TEMP%/phase10-5b-bootstrap.log"
+      ]
+    },
+    {
+      "command": "py -m ruff check <changed Python>; compileall app tools tests; npm --prefix web run format:check; git diff --check",
+      "result": "PASS",
+      "exit_code": 0
+    }
+  ],
+  "remote": {
+    "pinned_project": "uwleqeuzsveqlugugzba",
+    "migration_history_read": "npx --yes supabase migration list --linked; exit 0; linked project-ref checked",
+    "migration_records": 24,
+    "latest": "20260928111840",
+    "new_migration_applied": false,
+    "new_api_ui_deployed": false,
+    "staging_validation": "NOT_RUN",
+    "advisor_baseline": "NOT_REFRESHED",
+    "owner_data_and_access": "No business/Auth/Storage writes in this block"
+  },
+  "limitations": [
+    "C-M still pending except B performance guard; no owner decision inferred",
+    "Final champion/initial A-B/ranking/participant-result repairs are not delivered yet",
+    "Existing daily overview/shop int32 balance limitation remains outside new aggregate",
+    "No production timing or real public behavior validation of B yet"
+  ],
+  "next": "Package C participant result authority, preserving separate admin closed-day correction; fresh target/history/baseline/Advisor before eventual remote delivery"
+}

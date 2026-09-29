@@ -12,6 +12,7 @@ from app.api.read_models import (
     ShopRead,
     TrainerRead,
     InventoryRead,
+    LeagueGeneralRead,
 )
 from app.application.frontend_reads import FrontendReads
 from app.repositories.errors import NotFoundError, PersistenceError
@@ -53,6 +54,11 @@ def overview(season_id: UUID, principal: Reader, container: Container):
 @router.get("/seasons/{season_id}/pc", response_model=PCRead)
 def pc(season_id: UUID, principal: Reader, container: Container):
     return read(container, "pc", str(season_id), str(principal.trainer_id))
+
+
+@router.get("/seasons/{season_id}/league", response_model=LeagueGeneralRead)
+def league_general(season_id: UUID, principal: Reader, container: Container):
+    return read(container, "league_general", str(season_id))
 
 
 @router.get("/seasons/{season_id}/shop", response_model=ShopRead)

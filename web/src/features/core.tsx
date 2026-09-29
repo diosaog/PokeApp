@@ -246,153 +246,250 @@ export function HomePage() {
     </>
   );
 }
+function LeagueState({
+  children,
+}: {
+  children: (data: Model<"LeagueGeneralRead">) => ReactNode;
+}) {
+  const { season } = useApp();
+  const query = useRead<Model<"LeagueGeneralRead">>(
+    `/v1/read/seasons/${season}/league`,
+    !!season,
+  );
+  return (
+    <WithSeason>
+      {query.isPending ? (
+        <Loading />
+      ) : query.error ? (
+        <Notice error={query.error} />
+      ) : (
+        query.data && children(query.data)
+      )}
+    </WithSeason>
+  );
+}
+function LeagueDay({ dayId }: { dayId: string }) {
+  return (
+    <OverviewState>
+      {(data) => {
+        const snapshot = data.snapshots.find((s) => s.matchday_id === dayId);
+        return (
+          <>
+            <Tag>
+              {snapshot
+                ? `Oficial · revisión ${snapshot.revision}`
+                : "Aún sin clasificación oficial"}
+            </Tag>
+            {snapshot ? (
+              <>
+                <div className="podium">
+                  {[...snapshot.standings]
+                    .sort((a, b) => a.position - b.position)
+                    .slice(0, 3)
+                    .map((s) => (
+                      <Card key={s.season_player_id}>
+                        <Trophy />
+                        <span className="eyebrow">POSICIÓN {s.position}</span>
+                        <h2>{playerName(data, s.season_player_id)}</h2>
+                        <strong>
+                          {s.points_awarded} <small>puntos de jornada</small>
+                        </strong>
+                      </Card>
+                    ))}
+                </div>
+                {["A", "B"].map((division) => (
+                  <Card key={division}>
+                    <h2>División {division}</h2>
+                    <div className="table-scroll">
+                      <table>
+                        <thead>
+                          <tr>
+                            <th>Pos.</th>
+                            <th>Entrenador</th>
+                            <th>Puntos de jornada</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {snapshot.standings
+                            .filter((s) => s.division === division)
+                            .sort(
+                              (a, b) =>
+                                a.division_position - b.division_position,
+                            )
+                            .map((s) => (
+                              <tr key={s.season_player_id}>
+                                <td>{s.division_position}</td>
+                                <td>{playerName(data, s.season_player_id)}</td>
+                                <td>{s.points_awarded}</td>
+                              </tr>
+                            ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </Card>
+                ))}
+              </>
+            ) : (
+              <Empty>
+                La clasificación aparecerá cuando se cierre esta jornada.
+              </Empty>
+            )}
+            <h2>Enfrentamientos</h2>
+            <div className="match-grid">
+              {data.matches
+                .filter((m) => m.matchday_id === dayId)
+                .map((m) => (
+                  <Card key={m.id}>
+                    <Tag>{m.status}</Tag>
+                    <h3>
+                      {playerName(data, m.player_a_id)}{" "}
+                      <span className="muted">vs</span>{" "}
+                      {playerName(data, m.player_b_id)}
+                    </h3>
+                    <p>
+                      {m.winner_id
+                        ? `Victoria de ${playerName(data, m.winner_id)}`
+                        : "Resultado pendiente"}
+                    </p>
+                  </Card>
+                ))}
+            </div>
+          </>
+        );
+      }}
+    </OverviewState>
+  );
+}
+function LeagueGeneral({ data }: { data: Model<"LeagueGeneralRead"> }) {
+  if (!data.rows.length) return <Empty>Aún no hay participantes.</Empty>;
+  const states: Record<string, string> = {
+    retired: "Retirado",
+    abandoned: "Abandono",
+    disqualified: "Descalificado",
+  };
+  return (
+    <Card>
+      <h2>Clasificación general</h2>
+      <p>
+        Puntos acumulados de las jornadas oficiales, con sus penalizaciones. Las
+        monedas son el saldo actual. El orden entre puntos iguales no resuelve
+        un desempate.
+      </p>
+      <div
+        className="table-scroll"
+        tabIndex={0}
+        aria-label="Clasificación general, tabla desplazable"
+      >
+        <table className="league-standings">
+          <thead>
+            <tr>
+              <th>Entrenador</th>
+              <th>Puntos totales</th>
+              <th>Monedas</th>
+              <th>Pokémon muertos</th>
+            </tr>
+          </thead>
+          <tbody>
+            {data.rows.map((row) => {
+              const source = data.days.find(
+                (d) => d.id === row.points_source_matchday_id,
+              );
+              return (
+                <tr key={row.season_player_id}>
+                  <td>
+                    {row.display_name}
+                    {states[row.status] && (
+                      <span className="muted"> · {states[row.status]}</span>
+                    )}
+                  </td>
+                  <td>
+                    {row.total_points}
+                    <small className="muted standings-source">
+                      {row.points_source_matchday_id
+                        ? source
+                          ? `Hasta J${source.number}`
+                          : "Captura oficial"
+                        : "Sin jornadas oficiales"}
+                    </small>
+                  </td>
+                  <td>{row.coin_balance}</td>
+                  <td>
+                    {row.dead_count ?? "Desconocido"}
+                    {row.dead_count_observed_at && (
+                      <small className="muted standings-source">
+                        {date(row.dead_count_observed_at)}
+                      </small>
+                    )}
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+      <p className="muted">
+        Muertos: ocupantes observados de la Caja 8 del save seleccionado. Sin
+        una observación completa, el recuento es desconocido. Esta columna no
+        incluye revividos ni modifica puntos ya cerrados.
+      </p>
+    </Card>
+  );
+}
 export function LeaguePage() {
-  const [selected, setSelected] = useState("");
+  const [selected, setSelected] = useState({ season: "", day: "" });
   return (
     <>
       <Heading eyebrow="LA CARRERA POR EL TÍTULO" title="Cada punto cuenta.">
         Resultados oficiales, congelados al cerrar cada jornada.
       </Heading>
-      <OverviewState>
+      <LeagueState>
         {(data) => {
-          const days = [...data.days].sort((a, b) => b.number - a.number),
-            day = days.find((d) => d.id === selected) || days[0],
-            snapshot = data.snapshots.find((s) => s.matchday_id === day?.id);
+          const days = data.days
+              .filter(
+                (d) =>
+                  d.status === "closed" ||
+                  d.id === data.season.current_matchday_id,
+              )
+              .sort((a, b) => a.number - b.number),
+            day =
+              selected.season === data.season.id
+                ? days.find((d) => d.id === selected.day)
+                : undefined;
+
           return (
             <>
-              <div className="toolbar">
-                <Field label="Jornada">
-                  <select
-                    value={day?.id || ""}
-                    onChange={(e) => setSelected(e.target.value)}
+              <nav className="tabs" aria-label="Vistas de Liga">
+                <button
+                  aria-pressed={!day}
+                  onClick={() =>
+                    setSelected({ season: data.season.id, day: "" })
+                  }
+                >
+                  GENERAL
+                </button>
+                {days.map((d) => (
+                  <button
+                    key={d.id}
+                    aria-pressed={day?.id === d.id}
+                    onClick={() =>
+                      setSelected({ season: data.season.id, day: d.id })
+                    }
                   >
-                    {days.map((d) => (
-                      <option key={d.id} value={d.id}>
-                        Jornada {d.number} · {d.status}
-                      </option>
-                    ))}
-                  </select>
-                </Field>
-                <Tag>
-                  {snapshot
-                    ? `Oficial · revisión ${snapshot.revision}`
-                    : "Aún sin clasificación oficial"}
-                </Tag>
-              </div>
-              {snapshot ? (
-                <>
-                  <div className="podium">
-                    {[...snapshot.standings]
-                      .sort((a, b) => a.position - b.position)
-                      .slice(0, 3)
-                      .map((s) => (
-                        <Card key={s.season_player_id}>
-                          <Trophy />
-                          <span className="eyebrow">POSICIÓN {s.position}</span>
-                          <h2>{playerName(data, s.season_player_id)}</h2>
-                          <strong>
-                            {s.points_awarded} <small>puntos de jornada</small>
-                          </strong>
-                        </Card>
-                      ))}
-                  </div>
-                  {["A", "B"].map((division) => (
-                    <Card key={division}>
-                      <h2>División {division}</h2>
-                      <div className="table-scroll">
-                        <table>
-                          <thead>
-                            <tr>
-                              <th>Pos.</th>
-                              <th>Entrenador</th>
-                              <th>Puntos de jornada</th>
-                            </tr>
-                          </thead>
-                          <tbody>
-                            {snapshot.standings
-                              .filter((s) => s.division === division)
-                              .sort(
-                                (a, b) =>
-                                  a.division_position - b.division_position,
-                              )
-                              .map((s) => (
-                                <tr key={s.season_player_id}>
-                                  <td>{s.division_position}</td>
-                                  <td>
-                                    {playerName(data, s.season_player_id)}
-                                  </td>
-                                  <td>{s.points_awarded}</td>
-                                </tr>
-                              ))}
-                          </tbody>
-                        </table>
-                      </div>
-                    </Card>
-                  ))}
-                </>
+                    J{d.number}
+                  </button>
+                ))}
+              </nav>
+              {!day ? (
+                <LeagueGeneral data={data} />
               ) : (
-                <Empty>
-                  La clasificación aparecerá cuando se cierre esta jornada.
-                </Empty>
+                <>
+                  <LeagueDay dayId={day.id} />
+                </>
               )}
-              {data.points.length > 0 && (
-                <Card>
-                  <h2>Acumulado oficial de temporada</h2>
-                  <p>
-                    Premios acumulados y penalizaciones de las últimas jornadas
-                    oficiales. Este saldo no altera las posiciones de cada
-                    jornada.
-                  </p>
-                  <div className="table-scroll">
-                    <table>
-                      <thead>
-                        <tr>
-                          <th>Entrenador</th>
-                          <th>Ganados</th>
-                          <th>Sanciones</th>
-                          <th>Bajas</th>
-                          <th>Neto</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {data.points.map((p) => (
-                          <tr key={p.season_player_id}>
-                            <td>{playerName(data, p.season_player_id)}</td>
-                            <td>{p.earned_points}</td>
-                            <td>{p.points_reduction}</td>
-                            <td>{p.dead_points_penalty}</td>
-                            <td>{p.sanctioned_points}</td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                </Card>
-              )}
-              <h2>Enfrentamientos</h2>
-              <div className="match-grid">
-                {data.matches
-                  .filter((m) => m.matchday_id === day?.id)
-                  .map((m) => (
-                    <Card key={m.id}>
-                      <Tag>{m.status}</Tag>
-                      <h3>
-                        {playerName(data, m.player_a_id)}{" "}
-                        <span className="muted">vs</span>{" "}
-                        {playerName(data, m.player_b_id)}
-                      </h3>
-                      <p>
-                        {m.winner_id
-                          ? `Victoria de ${playerName(data, m.winner_id)}`
-                          : "Resultado pendiente"}
-                      </p>
-                    </Card>
-                  ))}
-              </div>
             </>
           );
         }}
-      </OverviewState>
+      </LeagueState>
     </>
   );
 }

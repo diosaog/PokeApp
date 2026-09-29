@@ -142,6 +142,26 @@ class OverviewRead(BaseModel):
     balance: int | None
 
 
+class LeagueStandingRead(BaseModel):
+    season_player_id: UUID
+    trainer_id: UUID
+    display_name: str
+    status: str
+    total_points: Decimal = Field(allow_inf_nan=False)
+    points_source_matchday_id: UUID | None
+    coin_balance: str = Field(pattern=r"^-?(0|[1-9][0-9]*)$")
+    dead_count: int | None = Field(ge=0, le=30)
+    dead_count_source: Literal["observed_current_save", "unknown"]
+    dead_count_observed_at: datetime | None
+
+
+class LeagueGeneralRead(BaseModel):
+    season: SeasonRead
+    days: list[DayRead]
+    # Server ordering is presentation only; no sporting rank or inferred title.
+    rows: list[LeagueStandingRead] = Field(max_length=500)
+
+
 class SaveRead(BaseModel):
     id: UUID
     parser_status: str

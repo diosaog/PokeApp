@@ -5,6 +5,8 @@ from app.repositories.errors import PersistenceError
 
 
 class FrontendReadRepository(Protocol):
+    def league_general(self, season_id: str) -> dict | None: ...
+
     def rows(
         self,
         table: str,
@@ -45,3 +47,14 @@ class SupabaseFrontendReadRepository:
             return rows
         except Exception as exc:
             raise PersistenceError("Read backend unavailable") from exc
+
+    def league_general(self, season_id):
+        try:
+            data = self._client.rpc(
+                "league_general_read", {"p_season_id": season_id}
+            ).execute().data
+            if data is not None and not isinstance(data, dict):
+                raise ValueError("Invalid league read")
+            return data
+        except Exception as exc:
+            raise PersistenceError("League read backend unavailable") from exc

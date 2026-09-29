@@ -230,6 +230,23 @@ export async function fixture(page: Page, longNames = false) {
         display_name: p.display_name,
       }));
     else if (path.endsWith("/overview")) result = overview;
+    else if (path.endsWith("/league"))
+      result = {
+        season: overview.season,
+        days: overview.days,
+        rows: players.map((p, i) => ({
+          season_player_id: p.id,
+          trainer_id: p.trainer_id,
+          display_name: p.display_name,
+          status: p.status,
+          total_points: overview.points[i].sanctioned_points,
+          points_source_matchday_id: "old-day",
+          coin_balance: String(128 - i),
+          dead_count: null,
+          dead_count_source: "unknown",
+          dead_count_observed_at: null,
+        })),
+      };
     else if (path.endsWith("/pc"))
       result = {
         save: {

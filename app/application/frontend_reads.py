@@ -8,6 +8,7 @@ from app.api.read_models import (
     ShopRead,
     TrainerRead,
     InventoryRead,
+    LeagueGeneralRead,
 )
 from app.repositories.errors import NotFoundError, PersistenceError
 from app.repositories.supabase.frontend_reads import FrontendReadRepository
@@ -37,6 +38,15 @@ class FrontendReads:
             TrainerRead.model_validate(r)
             for r in self.rows("public_trainers", "id,display_name")
         ]
+
+    def league_general(self, sid):
+        result = self.repo.league_general(sid)
+        if result is None:
+            raise NotFoundError("Season not found")
+        data = LeagueGeneralRead.model_validate(result)
+        if str(data.season.id) != sid or data.season.status == "discarded":
+            raise PersistenceError("Invalid league scope")
+        return data
 
     def season(self, sid):
         rows = self.rows("seasons", "id,name,status,current_matchday_id", id=sid)

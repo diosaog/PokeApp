@@ -67,7 +67,11 @@ API origin plus security headers, and `build-config.json` with public configurat
 No backend secret is an asset. Source maps are not published.
 Hosted backend configuration and committed-source upload instructions are in the
 [deployment runbook](../deploy/README.md). Live status and evidence are in the
-[Phase 10 handoff](../docs/work-in-progress/phase10-live-handoff.md).
+[closed Phase 10 handoff](../docs/work-in-progress/phase10-live-handoff.md).
+Active alignment work and pending deployment order are recorded in the
+[Phase 10.5 handoff](../docs/work-in-progress/phase10-5-live-handoff.md).
+The new GENERAL screen requires migration 033 and the matching FastAPI source
+before frontend deployment; its local validation is not a public deployment.
 
 The verified frontend is `https://pokeapp-web.pokeapp-v2.workers.dev`; its backend
 is `https://pokeapp-api-production.up.railway.app`. Reuse the pinned account and
