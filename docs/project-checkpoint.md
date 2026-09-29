@@ -5,6 +5,11 @@ milestone record; it does not maintain a second live phase-status ledger.
 
 ## Current project position
 
+- Active phase: **10.5 — Functional product alignment and repair, IN PROGRESS**.
+  [Approved contract](phase10-5-functional-alignment.md),
+  [single live record](work-in-progress/phase10-5-live-handoff.md).
+  Owner authorized implementation on 2026-09-29 after the functional knowledge export.
+
 - Last closed phase: **10 - React / public Cloudflare + Railway, DONE**.
   [Contract](phase10-react-cloudflare.md), [delivery report](phase10-completion-report.md),
   [public evidence](phase10-public-evidence.json),
@@ -15,8 +20,8 @@ milestone record; it does not maintain a second live phase-status ledger.
 - V1/Streamlit remains legacy/fallback. V2 public staging is available for inspection.
   Cloud save ingestion/current-state promotion, physical save operations, final
   Launcher distribution, onboarding/roles and release polish remain later work.
-- **Phase 11 is next, NOT STARTED.** No active development phase is automatically
-  authorized by this closure. Continue only under the next owner instruction.
+- **Phase 11 NOT STARTED; gated by Phase 10.5 and subsequent owner + ChatGPT review.**
+  Do not start V1 migration or cutover during alignment.
 - Preserve **OWNER_TEMP_STAGING_AUTH / OWNER_TEMP_STAGING_ADMIN** for current review.
   **TEMP_STAGING_AUTH_MUST_BE_REMOVED_OR_RESET_BEFORE_RELEASE** includes role review
   and definitive secure onboarding. Do not copy a temporary staging policy to production.
