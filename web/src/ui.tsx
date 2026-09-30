@@ -126,7 +126,12 @@ export function Modal({
 }
 
 /** A retry with an unknown outcome reuses the exact request body and key. */
-export function useCommand() {
+export function useCommand(invalidatePaths?: readonly string[]) {
+  const refresh = () =>
+    queries.invalidateQueries({
+      predicate: (query) =>
+        !invalidatePaths || invalidatePaths.includes(String(query.queryKey[1])),
+    });
   const [pending, setPending] = useState(false),
     [error, setError] = useState<unknown>(null),
     [success, setSuccess] = useState(false);
@@ -177,7 +182,7 @@ export function useCommand() {
       request.current = null;
       setUncertain(false);
       setSuccess(true);
-      await queries.invalidateQueries();
+      await refresh();
       return true;
     } catch (err) {
       setError(err);
@@ -196,6 +201,7 @@ export function useCommand() {
     error,
     success,
     uncertain,
+    refresh,
     execute,
     retry: () =>
       request.current &&
@@ -217,7 +223,7 @@ export function CommandState({
       {command.error instanceof ApiError &&
         command.error.status === 409 &&
         !command.uncertain && (
-          <button onClick={() => void queries.invalidateQueries()}>
+          <button onClick={() => void command.refresh()}>
             Actualizar datos antes de continuar
           </button>
         )}

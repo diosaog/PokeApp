@@ -96,6 +96,7 @@ class SupabaseV2SchemaTests(unittest.TestCase):
                 "031_cup_engine_certification.sql",
                 "032_cup_player_identity_index.sql",
                 "033_league_general_read.sql",
+                "034_participant_matchday_results.sql",
             ],
         )
         for path in _migration_files():
@@ -304,7 +305,7 @@ class SupabaseV2SchemaTests(unittest.TestCase):
         self.assertTrue(bootstrap.startswith("-- ONLY FOR EMPTY POKEAPP V2 DATABASE."))
         self.assertEqual(bootstrap, render_bootstrap())
         self.assertIn(
-        "Source of truth: supabase/v2/migrations/001_core.sql through 033_league_general_read.sql",
+        "Source of truth: supabase/v2/migrations/001_core.sql through 034_participant_matchday_results.sql",
             bootstrap,
         )
         self.assertNotIn("drop table", lowered)

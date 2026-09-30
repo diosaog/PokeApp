@@ -1,0 +1,107 @@
+{
+  "phase": "10.5",
+  "block": "C",
+  "status": "GREEN_LOCAL_REMOTE_PENDING",
+  "date": "2026-09-30",
+  "entry_head": "d4ee903215853d4ef14c224da71c7f60542e756e",
+  "source_note": "Entry plus these LF-normalized source hashes; implementation published in same commit as evidence. No staging/deployment claimed.",
+  "source_sha256_lf": {
+    "app/api/main.py": "59ddc6b59f2de25fab2820116c8793d78101170fcfaebcf7f50f1c47ff2ac5fe",
+    "app/api/routes/matchdays.py": "40cb3f2db043156cb92fd6b73e3a4a9f4c2267d85c86a0b3f6e0d5e9568b66bc",
+    "app/repositories/supabase/matchdays.py": "9d71afcbf350f2c5e391480e5823603835c6df17ba78040e7e6519c6ebbea715",
+    "supabase/v2/migrations/034_participant_matchday_results.sql": "805daa915e93513f3cd36a6b66a6e3681f53e1a029d8311653a239d8bb0326b5",
+    "supabase/v2/reset_dev.sql": "02bbbfd70107a09749d85ae095f885995d463afcc841e0c10ccf3aa9cf562ccd",
+    "supabase/v2/bootstrap.sql": "35cd36e8144e4844888cb92218ef5c3c41d5a3b426c9b57c66e11dbcefd5e825",
+    "tests/test_supabase_v2_schema.py": "1cddd242ee04d7b8ac8a56294c9aa3dd8e94607622a3b9359cfa622a3f51037b",
+    "tests/test_api_participant_results.py": "51dd5941a2f364e0cc2681f400ab66426b261d805c55a354675a15cc40b08aa1",
+    "tools/generate_supabase_v2_bootstrap.py": "3875d18c0aaa1d97cc6be7a682286f4fde6fff4a52572d9bc4fd60850aa2a670",
+    "tools/validate_phase10_5_results_sql.py": "912d8a451b131ff2802b3d584f6c9e7be86a8e1a6b5a7a06f94545d507b0ad05",
+    "web/src/api/schema.d.ts": "1dffbd8b8a33f7054f55160e6093d1ff1953266d6c66218b46fbd2855fa21299",
+    "web/src/features/admin.tsx": "9874563b573f5f29eebef9b568b742e26da1bc9be565d5263b8883632fe9f7dd",
+    "web/src/features/core.tsx": "65d858aba7ce52324a6d14251c92fb384d926ced7586183f74a444ef8b501daa",
+    "web/src/features/league-results.tsx": "5aa10d5916bc82a8be952e032bfd63dffce0074b009dc733ab467d4530fd6451",
+    "web/src/ui.tsx": "5649b0995be57158871a0a81f71ce8cf7cdc8dddacc9a3fc52fd2c228ea0967e",
+    "web/e2e/participant-results.spec.ts": "7843cad9321a498e680d9f0d1b037ebe40f1167c2f88b72465eb62b9d9706cc1",
+    "web/scripts/validate-public-readonly.mjs": "43410220d9a5bc91dc0bc3d02250edba6455b5e5ef5bbe767e43167d0bea27e5",
+    "tools/validate_phase10_5_public_reads.py": "d6ed3cd668667071ef08ff8edb8c18db80b59c6d07c894ca93c4ac54f864731e",
+    "web/e2e/flows.spec.ts": "9144ecd6385732983311487e7d5137ff74219a153cf26241115dac7ff126b46e"
+  },
+  "gates": [
+    {
+      "command": ".venv-api/Scripts/python.exe tools/run_unit_tests.py",
+      "tests": 578,
+      "seconds": 36.708,
+      "exit_code": 0,
+      "log": "%TEMP%/phase10-5c-unit.log"
+    },
+    {
+      "command": ".venv-api/Scripts/python.exe tools/run_unit_tests.py --pattern test_api_participant_results.py",
+      "tests": 7,
+      "exit_code": 0,
+      "log": "%TEMP%/phase10-5c-api-final.log"
+    },
+    {
+      "command": "npm --prefix web test",
+      "tests": 11,
+      "exit_code": 0
+    },
+    {
+      "command": "npm --prefix web run test:e2e",
+      "tests": 17,
+      "seconds": 39.3,
+      "exit_code": 0,
+      "scope": "Real local React with intercepted synthetic API responses, Edge",
+      "log": "%TEMP%/phase10-5c-browser-final.log"
+    },
+    {
+      "command": "npm --prefix web run build",
+      "exit_code": 0,
+      "api_url": "https://pokeapp-api-production.up.railway.app",
+      "js_gzip_kb": 113.94,
+      "css_gzip_kb": 6.36
+    },
+    {
+      "command": "python -m tools.validate_phase10_5_results_sql --psql <local-psql.exe>",
+      "groups": 6,
+      "exit_code": 0,
+      "public_tables_restored": 46,
+      "log": "%TEMP%/phase10-5c-sql-final2.log"
+    },
+    {
+      "command": "Local MatchdayFixtures, ParticipantStatusFixtures, TrialsFixtures",
+      "groups": [
+        20,
+        24,
+        8
+      ],
+      "exit_code": 0,
+      "log": "%TEMP%/phase10-5c-regressions.log"
+    },
+    {
+      "command": "001-034 and generated-bootstrap build, schema/RLS/catalog; normalized pg_dump public schema/grants/ownership",
+      "exit_code": 0,
+      "identical_lines": 10725,
+      "log": "%TEMP%/phase10-5c-rebuild-final2.log"
+    },
+    {
+      "command": "ruff/compile/Prettier/node --check/git diff --check",
+      "exit_code": 0
+    }
+  ],
+  "local_postgres": {
+    "host": "127.0.0.1",
+    "port": 55439,
+    "database": "pokeapp_v2_validation_phase10_5c",
+    "bootstrap_database": "pokeapp_v2_validation_phase10_5c_bootstrap"
+  },
+  "limitations": [
+    "Positive non-admin and concurrency evidence is local; remote owner data will not be used as mutation fixtures.",
+    "No D implementation or Phase 11 start."
+  ],
+  "resolved_validation_failures": [
+    "Reset helper list omitted B/C functions; local reset list updated, rebuild passed.",
+    "Discarded fixture lacked mandatory timestamp; fixture corrected.",
+    "Direct unittest module invocation lacked test discovery path; supported runner passed.",
+    "Admin link initially used /league; corrected to existing /liga and browser navigation regression passed."
+  ]
+}

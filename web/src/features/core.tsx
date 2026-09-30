@@ -15,6 +15,7 @@ import {
 import type { Model, Overview } from "../api/types";
 import { useApp, useRead, useOverview, usePC } from "../state";
 import { Inventory } from "./inventory";
+import { ParticipantResults } from "./league-results";
 import {
   Card,
   CommandState,
@@ -269,10 +270,18 @@ function LeagueState({
   );
 }
 function LeagueDay({ dayId }: { dayId: string }) {
+  const { me } = useApp();
   return (
     <OverviewState>
       {(data) => {
         const snapshot = data.snapshots.find((s) => s.matchday_id === dayId);
+        const canRecord =
+          data.season.status === "active" &&
+          data.season.current_matchday_id === dayId &&
+          data.days.some((d) => d.id === dayId && d.status === "open") &&
+          data.players.some(
+            (p) => p.trainer_id === me?.trainer_id && p.status === "active",
+          );
         return (
           <>
             <Tag>
@@ -335,25 +344,35 @@ function LeagueDay({ dayId }: { dayId: string }) {
               </Empty>
             )}
             <h2>Enfrentamientos</h2>
-            <div className="match-grid">
-              {data.matches
-                .filter((m) => m.matchday_id === dayId)
-                .map((m) => (
-                  <Card key={m.id}>
-                    <Tag>{m.status}</Tag>
-                    <h3>
-                      {playerName(data, m.player_a_id)}{" "}
-                      <span className="muted">vs</span>{" "}
-                      {playerName(data, m.player_b_id)}
-                    </h3>
-                    <p>
-                      {m.winner_id
-                        ? `Victoria de ${playerName(data, m.winner_id)}`
-                        : "Resultado pendiente"}
-                    </p>
-                  </Card>
-                ))}
-            </div>
+            {canRecord ? (
+              <ParticipantResults
+                key={`${data.season.id}:${dayId}`}
+                data={data}
+                dayId={dayId}
+              />
+            ) : (
+              <>
+                <div className="match-grid">
+                  {data.matches
+                    .filter((m) => m.matchday_id === dayId)
+                    .map((m) => (
+                      <Card key={m.id}>
+                        <Tag>{m.status}</Tag>
+                        <h3>
+                          {playerName(data, m.player_a_id)}{" "}
+                          <span className="muted">vs</span>{" "}
+                          {playerName(data, m.player_b_id)}
+                        </h3>
+                        <p>
+                          {m.winner_id
+                            ? `Victoria de ${playerName(data, m.winner_id)}`
+                            : "Resultado pendiente"}
+                        </p>
+                      </Card>
+                    ))}
+                </div>
+              </>
+            )}
           </>
         );
       }}

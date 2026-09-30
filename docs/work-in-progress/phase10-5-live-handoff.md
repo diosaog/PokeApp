@@ -1,6 +1,6 @@
 # Phase 10.5 — live execution record
 
-Observation: 2026-09-29 Europe/Madrid. **IN PROGRESS; Phase 11 NOT STARTED.**
+Observation: 2026-09-30 Europe/Madrid. **IN PROGRESS; Phase 11 NOT STARTED.**
 [Contract](../phase10-5-functional-alignment.md),
 [continuity](../AI/PokeApp_Multi_AI_Continuity_Protocol.md),
 [checkpoint](../project-checkpoint.md),
@@ -14,7 +14,7 @@ the protected guide is untracked; never open/inspect/hash/stage/move/delete it.
 Local migrations 001–032 present at entry. No code, database or hosting changes in A.
 **A published as `226ac7b`**, main push successful before B implementation.
 
-Remote validation state: **STAGING_UNVERIFIED** for the new behavior. On 2026-09-29,
+Remote validation state: **STAGING_UNVERIFIED** for B/C until the delivery checkpoint below completes. On 2026-09-29,
 `npx --yes supabase migration list --linked` exited 0 and verified 24 records,
 031=`20260928110301`, latest 032=`20260928111840`; the linked project-ref is exactly
 `uwleqeuzsveqlugugzba`. No migration/schema/data write. Fresh baseline/Advisor and
@@ -37,7 +37,7 @@ Unrelated processes/remote operations not inspected: UNKNOWN.
 |---|---|---|
 | A: entry, contract, resumable memory | FIX NOW | DONE, published `226ac7b`. |
 | B: League lacked primary GENERAL; existing 030 points view is authoritative | FIX NOW | GREEN LOCAL, source publication in the B commit containing this update; remote application/deployment pending. |
-| C: ordinary results use admin routes/SQL authority | FIX NOW | Next implementation package. |
+| C: participant result entry with separate closed-day correction | FIX NOW | GREEN LOCAL; source publication in C commit, remote checkpoint below. |
 | D: two-way daily tie uses H2H before deaths; slug total order influences outcomes | FIX NOW | Pending C. |
 | E: 026 requires initial manual A/B before activation | FIX NOW | Pending D; manual readiness must remain explicit. |
 | F: 029 lifecycle reads final daily snapshot positions for title | FIX NOW | Pending E; structural Phase 11 blocker. |
@@ -152,7 +152,7 @@ All B test runners finished. Local PG was stopped cleanly before publication;
 restart that exact local data directory only after checking the port/process state.
 Durable source hashes and gate summaries: [B evidence](../phase10-5-validation-evidence.json).
 
-## Continuation and delivery order
+## Historical continuation after B
 
 After B is committed/pushed, next implementation is **C: participant result entry**.
 Read `app/api/routes/matchdays.py`, application/repository matchday boundaries,
@@ -172,6 +172,82 @@ M performance notes: GENERAL is one aggregate RPC, no per-player HTTP reads.
 Existing daily overview, broad mutation invalidation and auth mapping remain Phase 14
 candidates; no globally reduced request count or production timing is claimed.
 
-Exact next step after B publication: implement C under the bounds above. Maintain
-this record after each green atomic block. Project estimate remains ~80% pending
-verified public delivery; Phase 11 NOT READY and not authorized to start.
+## C implementation and evidence ? 2026-09-30
+
+Entry `d4ee903215853d4ef14c224da71c7f60542e756e`, main/origin 0/0 after fresh
+fetch; tracked clean, protected guide only untracked. Actual remote history remained
+24 records through 032; 033 pending. Infrastructure read preflight identified the
+existing Railway service and Cloudflare Worker, both still serving Phase 10 source.
+
+Any enabled, active, eligible season participant can record/edit/clear winners of
+any current open League match, including third-party matches. JWT determines the
+actor. No admin or opponent confirmation. New enabled-JWT routes:
+`GET /v1/seasons/{sid}/matchdays/{did}` and `PUT .../{did}/results`, strict existing
+DTOs, scoped whitelisted responses and service-only `api_participant_matchday`.
+New **034_participant_matchday_results.sql** uses the existing result helper,
+CAS revisions, actor/scope/key/body receipts and transactional before/after events.
+Existing admin open/close/cancel/correction paths remain unchanged.
+
+Locks follow principal, receipt, season, roster, day, matches, configuration.
+Current enabled/active/eligible authority is checked before replay. Identical
+receipt retrieval after close writes nothing; new edits after close/later day fail.
+Discarded seasons are unavailable to both read and mutation. Entire invalid
+batches and injected failures roll back. Ordinary clearing intentionally retains
+existing null-winner semantics. No browser table/column/RPC grant was added.
+
+League's current day contains ?Registrar resultados?; Admin links there for
+ordinary entry and retains its separate closed-day correction form. The form
+sends only changed matches, hides revisions, preserves unknown-outcome body/key,
+and requires explicit refresh after 409. Refresh/invalidation touches participant
+day state, overview and admin day state only; it does not refetch unrelated PC,
+shop or GENERAL (open result edits do not award official points).
+
+Validation source: entry plus C files, LF-normalized hashes retained in
+[C evidence](../phase10-5c-validation-evidence.json). Windows / PG 17 / Edge:
+
+- Full Python **578 PASS**, exit 0, 36.708 s; `%TEMP%/phase10-5c-unit.log`.
+- React **11 PASS** and browser **17 PASS**, exit 0, 39.3 s. Browser fixtures
+  intercept API; non-admin third-party entry/edit/clear, narrow reads, 409,
+  identical unknown retry and closed ordinary form. No public JWT claim here.
+- TypeScript/Vite production build PASS against the real existing API URL;
+  JS gzip 113.94 kB / CSS 6.36 kB. Ruff, compile, Prettier and diff checks PASS.
+- Existing integrated local SQL regressions: matchdays 20, participant status 24,
+  trials 8 groups PASS, including cleanup. `%TEMP%/phase10-5c-regressions.log`.
+- Final C SQL: **six groups PASS**, exit 0; authority matrix, separate-session
+  writes/replay/close races, four exact all-public-table rollback boundaries,
+  admin correction and browser denial. Exact **46 public tables** restored.
+  `%TEMP%/phase10-5c-sql-final2.log`. Final focused API: **7 PASS**, exit 0.
+- Final 001?034 and generated-bootstrap builds, schema/RLS/catalog PASS;
+  normalized public schema/grants/ownership **10,725 identical lines**. Only
+  random pg_dump restrict keys excluded. `%TEMP%/phase10-5c-rebuild-final2.log`
+  and `phase10-5c-{migrations,bootstrap}-schema.sql`.
+
+Resolved harness issues: rebuilding the same local DB exposed that `reset_dev.sql`
+did not remove new B/C helpers; its local reset list now includes them. Published
+001?033 unchanged; reset is never run remotely. The added discarded-season fixture
+initially lacked mandatory `discarded_at`; corrected fixture retains that constraint.
+A direct unittest module invocation lacked the discovery import path; use the
+repository runner below. The Admin-to-League link was corrected to the existing `/liga` route and verified
+by browser navigation. No product constraint was loosened to pass a test.
+
+Local databases: `pokeapp_v2_validation_phase10_5c` and `_bootstrap`,
+127.0.0.1:55439, same disposable PG data/binaries as B. Inspect recorded runner
+outcomes before resetting or stopping this server.
+
+## C delivery checkpoint / exact continuation
+
+B+C form a coherent deployment checkpoint: new read and participant command are
+compatible additive contracts. Apply only committed/pushed pending 033 then 034
+after fresh pinned target/history, full baseline and Advisor. Deploy compatible
+Railway backend, then Cloudflare frontend. Use real Anto auth/read/denial and
+read-only browser checks; do not mutate the owner's active/manual seasons.
+Non-admin positive mutations/concurrency remain proven locally, not by Anto's
+admin identity in public staging. Preserve PIN/role and all public owner rows.
+
+Remote checkpoint is not yet executed in this implementation commit. No claim
+of deployed B/C or remote PASS until subsequent evidence is recorded. Never infer
+missing migrations from a interrupted reply: inspect actual history first.
+
+Next after C green publication/delivery: **D, daily sorting and relevant unresolved
+ties**, under the approved contract, not Phase 11. No D code started in C.
+Whole Phase 10.5 remains IN PROGRESS, project ~80%, Phase 11 NOT READY.

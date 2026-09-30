@@ -44,6 +44,7 @@ def create_app(
     api.include_router(redemptions.router)
     api.include_router(season_admin.router)
     api.include_router(matchdays.router)
+    api.include_router(matchdays.participant_router)
     api.include_router(participant_status.router)
     api.include_router(season_lifecycle.router)
     api.include_router(trials.router)

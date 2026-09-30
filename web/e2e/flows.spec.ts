@@ -177,6 +177,14 @@ test("admin can repair unused configuration and cancel provisional editing with 
     expected_revision: 2,
     reason: "Revisar los enfrentamientos",
   });
+  await page
+    .locator("main")
+    .getByRole("link", { name: "Liga", exact: true })
+    .click();
+  await expect(page).toHaveURL(/\/liga$/);
+  await expect(
+    page.getByRole("button", { name: "GENERAL", exact: true }),
+  ).toBeVisible();
 });
 test("inventory redemption and manual Discord verdict preserve IDs, revision and decimal points", async ({
   page,

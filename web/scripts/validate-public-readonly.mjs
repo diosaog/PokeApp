@@ -53,6 +53,27 @@ try {
       await expect(page.locator('main .loading')).toHaveCount(0, { timeout: 60000 });
       await expect.poll(() => pending.size, { timeout: 60000 }).toBe(0);
       await expect(page.getByRole('alert')).toHaveCount(0);
+      if (name === 'Liga' && input.league_checks) {
+        const checks = input.league_checks;
+        const tabs = page.getByRole('navigation', { name: 'Vistas de Liga' });
+        await expect(tabs.getByRole('button', { name: 'GENERAL', exact: true })).toHaveAttribute('aria-pressed', 'true');
+        await expect(page.getByRole('heading', { name: 'Clasificación general', exact: true })).toBeVisible();
+        for (const title of ['Puntos totales', 'Monedas', 'Pokémon muertos'])
+          await expect(page.getByRole('columnheader', { name: title, exact: true })).toBeVisible();
+        await expect(page.locator('.league-standings tbody tr')).toHaveCount(checks.rows);
+        await expect(tabs.getByRole('button')).toHaveCount(checks.days.length + 1);
+        await page.screenshot({ path: join(input.output, 'public-general-'+viewport.width+'.png'), fullPage: true });
+        if (checks.current_day_number != null) {
+          await tabs.getByRole('button', { name: `J${checks.current_day_number}`, exact: true }).click();
+          await expect(page.locator('main .loading')).toHaveCount(0);
+          await expect.poll(() => pending.size).toBe(0);
+          await expect(page.getByRole('alert')).toHaveCount(0);
+          await expect(page.getByRole('heading', { name: 'Registrar resultados', exact: true })).toHaveCount(checks.can_record ? 1 : 0);
+          expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth+1)).toBe(true);
+          await page.screenshot({ path: join(input.output, 'public-current-day-'+viewport.width+'.png'), fullPage: true });
+        }
+        await tabs.getByRole('button', { name: 'GENERAL', exact: true }).click();
+      }
       expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth+1)).toBe(true);
       screens.push(step);
     }

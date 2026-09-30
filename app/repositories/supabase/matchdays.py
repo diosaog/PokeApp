@@ -7,7 +7,8 @@ from app.repositories.supabase.season_admin import REJECTIONS, SeasonAdminReject
 ERRORS = {**REJECTIONS, **dict.fromkeys(("season_not_active", "matchday_not_current", "matchday_not_scheduled",
     "matchday_not_open", "results_incomplete", "invalid_results", "config_mismatch", "ranking_inputs_unavailable",
     "dependent_data_exists", "already_closed", "correction_window_closed", "stale_inputs", "reward_item_unavailable"), 409),
-    "matchday_not_found":404}
+    "matchday_not_found":404,
+    **dict.fromkeys(("participant_required", "participant_inactive", "participant_ineligible"), 403)}
 
 
 class MatchdayRepository(Protocol):
@@ -37,6 +38,9 @@ class SupabaseMatchdayRepository:
         return data
 
     def execute(self, operation, request):
+        if operation in ("participant_state", "participant_results"):
+            return self.rpc("api_participant_matchday", dict(
+                operation=operation.removeprefix("participant_"), request=request))
         envelope = dict(operation=operation, request=request)
         if operation in ("close", "correct"):
             context = self.rpc("api_admin_matchday_context", envelope)

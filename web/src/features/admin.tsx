@@ -349,64 +349,74 @@ function DayAdmin({ dayId }: { dayId: string }) {
           Abrir jornada
         </button>
       )}
-      <form
-        key={`${day.revision}:${day.results_revision}`}
-        onSubmit={(event) => {
-          const data = form(event);
-          const results = day.matches.map((m) => ({
-            match_id: m.id,
-            winner_season_player_id: text(data, m.id) || null,
-          }));
-          void cmd.execute(
-            `${base}/${day.state === "closed" ? "correct" : "results"}`,
-            day.state === "closed"
-              ? ({
-                  expected_snapshot_revision: day.snapshot_revision,
-                  reason: text(data, "reason"),
-                  results,
-                } satisfies Model<"CorrectDayBody">)
-              : ({
-                  expected_results_revision: day.results_revision,
-                  results,
-                } satisfies Model<"ResultsBody">),
-            day.state === "closed" ? "POST" : "PUT",
-          );
-        }}
-      >
-        {day.matches.map((m) => (
-          <Field
-            key={m.id}
-            label={
-              ov.data
-                ? `${playerName(ov.data, m.player_a_id)} / ${playerName(ov.data, m.player_b_id)}`
-                : "Enfrentamiento"
-            }
-          >
-            <select
-              name={m.id}
-              defaultValue={m.winner_id || ""}
-              required={day.state === "closed"}
+      {day.state === "closed" && (
+        <form
+          key={`${day.revision}:${day.results_revision}`}
+          onSubmit={(event) => {
+            const data = form(event);
+            const results = day.matches.map((m) => ({
+              match_id: m.id,
+              winner_season_player_id: text(data, m.id) || null,
+            }));
+            void cmd.execute(
+              `${base}/${day.state === "closed" ? "correct" : "results"}`,
+              day.state === "closed"
+                ? ({
+                    expected_snapshot_revision: day.snapshot_revision,
+                    reason: text(data, "reason"),
+                    results,
+                  } satisfies Model<"CorrectDayBody">)
+                : ({
+                    expected_results_revision: day.results_revision,
+                    results,
+                  } satisfies Model<"ResultsBody">),
+              day.state === "closed" ? "POST" : "PUT",
+            );
+          }}
+        >
+          {day.matches.map((m) => (
+            <Field
+              key={m.id}
+              label={
+                ov.data
+                  ? `${playerName(ov.data, m.player_a_id)} / ${playerName(ov.data, m.player_b_id)}`
+                  : "Enfrentamiento"
+              }
             >
-              <option value="">Pendiente</option>
-              {[m.player_a_id, m.player_b_id].map((id) => (
-                <option key={id} value={id}>
-                  {ov.data ? playerName(ov.data, id) : id}
-                </option>
-              ))}
-            </select>
-          </Field>
-        ))}
-        {day.state === "closed" && (
-          <Field label="Motivo de corrección">
-            <textarea name="reason" required maxLength={500} />
-          </Field>
-        )}
-        {day.matches.length > 0 && ["open", "closed"].includes(day.state) && (
-          <Submit pending={cmd.pending || cmd.uncertain}>
-            {day.state === "closed" ? "Corregir jornada" : "Guardar resultados"}
-          </Submit>
-        )}
-      </form>
+              <select
+                name={m.id}
+                defaultValue={m.winner_id || ""}
+                required={day.state === "closed"}
+              >
+                <option value="">Pendiente</option>
+                {[m.player_a_id, m.player_b_id].map((id) => (
+                  <option key={id} value={id}>
+                    {ov.data ? playerName(ov.data, id) : id}
+                  </option>
+                ))}
+              </select>
+            </Field>
+          ))}
+          {day.state === "closed" && (
+            <Field label="Motivo de corrección">
+              <textarea name="reason" required maxLength={500} />
+            </Field>
+          )}
+          {day.matches.length > 0 && ["open", "closed"].includes(day.state) && (
+            <Submit pending={cmd.pending || cmd.uncertain}>
+              {day.state === "closed"
+                ? "Corregir jornada"
+                : "Guardar resultados"}
+            </Submit>
+          )}
+        </form>
+      )}
+      {day.state === "open" && (
+        <p>
+          Los resultados ordinarios se registran en <Link to="/liga">Liga</Link>
+          .
+        </p>
+      )}
       {day.state === "open" && (
         <div className="toolbar">
           <button className="button primary" onClick={() => setConfirm(true)}>
