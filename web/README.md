@@ -70,8 +70,9 @@ Hosted backend configuration and committed-source upload instructions are in the
 [closed Phase 10 handoff](../docs/work-in-progress/phase10-live-handoff.md).
 Active alignment work and pending deployment order are recorded in the
 [Phase 10.5 handoff](../docs/work-in-progress/phase10-5-live-handoff.md).
-The new GENERAL screen requires migration 033 and the matching FastAPI source
-before frontend deployment; its local validation is not a public deployment.
+GENERAL requires migration 033; participant result entry requires 034 and the
+matching FastAPI source. Apply pending committed SQL before backend and frontend
+deployment. Actual deployed versions and evidence belong in the active handoff.
 
 The verified frontend is `https://pokeapp-web.pokeapp-v2.workers.dev`; its backend
 is `https://pokeapp-api-production.up.railway.app`. Reuse the pinned account and
@@ -114,6 +115,14 @@ and mobile. Surround it with fresh full-state/history/Advisor comparisons using
 the helper functions in `tools.validate_phase10_hosted`. Never put credentials in
 command arguments, logs or checked-in files. The known local antivirus injection
 origin is recorded separately; API traffic is never intercepted or simulated.
+
+For the B/C contracts use `python -m tools.validate_phase10_5_public_reads --output
+<fresh-directory-outside-repo>` from the root with `{"pin":"..."}` supplied privately
+through stdin. It preserves owner manual data, checks current GENERAL/participant
+reads, guaranteed rejected writes and actual browser rendering. It never opens a
+day or submits a valid result to a manual season. Positive non-admin mutations and
+concurrency are covered by `tools.validate_phase10_5_results_sql` on disposable
+local PostgreSQL, not inferred from the owner's public admin session.
 
 ## Known product boundaries
 

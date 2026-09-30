@@ -1,0 +1,838 @@
+{
+  "phase": "10.5",
+  "packages": [
+    "B",
+    "C"
+  ],
+  "status": "DONE_PUBLIC_WITH_LOCAL_MUTATION_EVIDENCE",
+  "source_commit": "9be3d70f1aacf0a6ca37d9d3d690c24dd1268587",
+  "migrations": {
+    "status": "PASS",
+    "source_commit": "9be3d70f1aacf0a6ca37d9d3d690c24dd1268587",
+    "preserved_tables": 52,
+    "preserved_prior_migration_records": 24,
+    "history": [
+      {
+        "name": "033_league_general_read",
+        "record_hash": "f0a77c2aa988787991827e988030a0c7",
+        "version": "20260930113319"
+      },
+      {
+        "name": "034_participant_matchday_results",
+        "record_hash": "f3c985ee8eafa7fc8515b1c6453c2829",
+        "version": "20260930113328"
+      }
+    ],
+    "new_error_warn": 0,
+    "advisor_counts": {
+      "ERROR": 24,
+      "WARN": 5,
+      "INFO": 122
+    }
+  },
+  "migration_sources": [
+    {
+      "source_commit": "9be3d70f1aacf0a6ca37d9d3d690c24dd1268587",
+      "sha256": "58705e8d08c639534b338f3d9766e4947b3c052828c51653f7dd887b4f41961a",
+      "migration": {
+        "name": "033_league_general_read",
+        "record_hash": "f0a77c2aa988787991827e988030a0c7",
+        "version": "20260930113319"
+      }
+    },
+    {
+      "source_commit": "9be3d70f1aacf0a6ca37d9d3d690c24dd1268587",
+      "sha256": "805daa915e93513f3cd36a6b66a6e3681f53e1a029d8311653a239d8bb0326b5",
+      "migration": {
+        "name": "034_participant_matchday_results",
+        "record_hash": "f3c985ee8eafa7fc8515b1c6453c2829",
+        "version": "20260930113328"
+      }
+    }
+  ],
+  "hosting": {
+    "railway": {
+      "project_id": "f5c4666a-508f-4e5a-8aae-a54581814f29",
+      "service_id": "9a78e086-c927-471f-8bb9-befe62c77de7",
+      "deployment_id": "1b5aa59b-3262-44f4-b639-03e830117aca",
+      "status": "SUCCESS",
+      "image_digest": "sha256:697b36e0b4cffe25f4dbba708f28230c172ad6f936936a71746ddfcb9e822f83",
+      "source_commit": "9be3d70f1aacf0a6ca37d9d3d690c24dd1268587",
+      "bundle_files": 224
+    },
+    "cloudflare": {
+      "id": "275adc6f-cb8e-49d7-a83f-683ad78c75a0",
+      "versions": [
+        {
+          "version_id": "9bf8ac7d-0d31-494b-83a6-9223e34e9b6e",
+          "percentage": 100
+        }
+      ],
+      "created_on": "2026-09-30T11:36:14.987517Z"
+    },
+    "public_assets": {
+      "status": "PASS",
+      "source_commit": "9be3d70f1aacf0a6ca37d9d3d690c24dd1268587",
+      "web": "https://pokeapp-web.pokeapp-v2.workers.dev",
+      "api": "https://pokeapp-api-production.up.railway.app",
+      "deep_spa_pc": 200,
+      "security_headers": true,
+      "assets_sha256": {
+        "/assets/index-D4jYL9OH.js": "67c8b53de608892effd8f9230a92c8b6d5c742a5a987b7b41d115464812d02bb",
+        "/assets/index-Ce8Qi1M_.css": "fdd473f168f290c4c5a4f05543bb4987fb8eaaa43cc59b3763737e8aa3964ef4"
+      }
+    }
+  },
+  "public_validation": {
+    "run_id": "phase10_5_public_reads_1f893d43f4bc4b8e9b1d6e48422a28d3",
+    "started_at": "2026-09-30T11:36:39.973669+00:00",
+    "status": "PASS",
+    "source_commit": "9be3d70f1aacf0a6ca37d9d3d690c24dd1268587",
+    "project_ref": "uwleqeuzsveqlugugzba",
+    "api": "https://pokeapp-api-production.up.railway.app",
+    "web": "https://pokeapp-web.pokeapp-v2.workers.dev",
+    "owner_trainer": "507d9c56-04d8-4801-a9da-f1e53674efb5",
+    "owner_auth_user": "ac98932c-f713-43d1-8b20-600f0be3dadc",
+    "owner_season": "c6bcac5b-0b89-403f-8242-41ac58286ade",
+    "owner_auth_exception": "Only this owner's Auth activity; every public row compared",
+    "business_writes": 0,
+    "fixtures_created": 0,
+    "checks": [
+      "Pinned project, applied 033/034, fresh 52-table baseline and owner identity",
+      "Existing PIN login, real JWT refresh and same enabled admin principal",
+      "Real GENERAL/overview: exact strings, current roster, reached days and explicit unknown counts",
+      "Real eligible participant GET and existing matches without mutation",
+      "Anonymous/invalid JWT 401, extra actor 422 and absent-season RPC 404; no valid business write",
+      "Public React: GENERAL/current day, eleven screens desktop/mobile, admin and logout"
+    ],
+    "requests": [
+      {
+        "method": "POST",
+        "path": "/v1/auth/pin-login",
+        "status": 200,
+        "elapsed_ms": 1878.7
+      },
+      {
+        "method": "POST",
+        "path": "/v1/auth/refresh",
+        "status": 200,
+        "elapsed_ms": 708.62
+      },
+      {
+        "method": "GET",
+        "path": "/v1/me",
+        "status": 200,
+        "elapsed_ms": 895.47
+      },
+      {
+        "method": "GET",
+        "path": "/v1/read/seasons/c6bcac5b-0b89-403f-8242-41ac58286ade/league",
+        "status": 200,
+        "elapsed_ms": 1135.51
+      },
+      {
+        "method": "GET",
+        "path": "/v1/read/seasons/c6bcac5b-0b89-403f-8242-41ac58286ade/overview",
+        "status": 200,
+        "elapsed_ms": 4957.31
+      },
+      {
+        "method": "GET",
+        "path": "/v1/seasons/c6bcac5b-0b89-403f-8242-41ac58286ade/matchdays/3eb1cbd3-9a3b-4b1d-a2b5-d31a4c16ff08",
+        "status": 200,
+        "elapsed_ms": 1618.81
+      },
+      {
+        "method": "GET",
+        "path": "/v1/read/seasons/c6bcac5b-0b89-403f-8242-41ac58286ade/league",
+        "status": 401,
+        "elapsed_ms": 167.46
+      },
+      {
+        "method": "GET",
+        "path": "/v1/read/seasons/c6bcac5b-0b89-403f-8242-41ac58286ade/league",
+        "status": 401,
+        "elapsed_ms": 655.58
+      },
+      {
+        "method": "GET",
+        "path": "/v1/seasons/c6bcac5b-0b89-403f-8242-41ac58286ade/matchdays/3eb1cbd3-9a3b-4b1d-a2b5-d31a4c16ff08",
+        "status": 401,
+        "elapsed_ms": 194.9
+      },
+      {
+        "method": "GET",
+        "path": "/v1/seasons/c6bcac5b-0b89-403f-8242-41ac58286ade/matchdays/3eb1cbd3-9a3b-4b1d-a2b5-d31a4c16ff08",
+        "status": 401,
+        "elapsed_ms": 360.47
+      },
+      {
+        "method": "PUT",
+        "path": "/v1/seasons/c6bcac5b-0b89-403f-8242-41ac58286ade/matchdays/3eb1cbd3-9a3b-4b1d-a2b5-d31a4c16ff08/results",
+        "status": 401,
+        "elapsed_ms": 165.97
+      },
+      {
+        "method": "PUT",
+        "path": "/v1/seasons/c6bcac5b-0b89-403f-8242-41ac58286ade/matchdays/3eb1cbd3-9a3b-4b1d-a2b5-d31a4c16ff08/results",
+        "status": 401,
+        "elapsed_ms": 359.65
+      },
+      {
+        "method": "PUT",
+        "path": "/v1/seasons/c6bcac5b-0b89-403f-8242-41ac58286ade/matchdays/3eb1cbd3-9a3b-4b1d-a2b5-d31a4c16ff08/results",
+        "status": 422,
+        "elapsed_ms": 900.6
+      },
+      {
+        "method": "PUT",
+        "path": "/v1/seasons/92b70a44-ed98-4fee-a190-773d8982b301/matchdays/2a52ab2e-fb37-4879-98a1-6b2ed111baed/results",
+        "status": 404,
+        "elapsed_ms": 930.42
+      }
+    ],
+    "failures": [],
+    "limitations": [
+      "Owner is admin: no public positive non-admin result mutation is claimed.",
+      "No manual result changed; successful mutations, CAS and races use local C gates."
+    ],
+    "migrations": [
+      {
+        "name": "033_league_general_read",
+        "record_hash": "f0a77c2aa988787991827e988030a0c7",
+        "version": "20260930113319"
+      },
+      {
+        "name": "034_participant_matchday_results",
+        "record_hash": "f3c985ee8eafa7fc8515b1c6453c2829",
+        "version": "20260930113328"
+      }
+    ],
+    "general": {
+      "rows": 8,
+      "days": 2,
+      "unknown_dead_counts": 8,
+      "exact_string_amounts": true,
+      "private_fields_absent": true
+    },
+    "browser_exit_code": 0,
+    "browser": {
+      "status": "PASS",
+      "screen_visits": 22,
+      "business_writes": 0,
+      "api_interception": false
+    },
+    "baseline_comparison": true,
+    "migration_history_comparison": true,
+    "advisor_comparison": [],
+    "finished_at": "2026-09-30T11:38:52.172350+00:00"
+  },
+  "independent_postmigration": {
+    "original_auth_counts": {
+      "auth.identities": 1,
+      "auth.refresh_tokens": 100,
+      "auth.sessions": 16,
+      "auth.users": 1
+    },
+    "current_nonowner_auth_counts": {
+      "auth.identities": 0,
+      "auth.refresh_tokens": 0,
+      "auth.sessions": 0,
+      "auth.users": 0
+    },
+    "non_auth_tables_matching": 48,
+    "non_auth_table_count": 48,
+    "original_owner_excluded_hash_baseline_available": false,
+    "full_comparison_still": "49/52 equal; 3 Auth hashes changed",
+    "read_only": true
+  },
+  "independent_final": {
+    "observed_at": "2026-09-30T16:28:50.351335+00:00",
+    "target": "uwleqeuzsveqlugugzba",
+    "tables_before": 52,
+    "tables_after": 52,
+    "tables_identical": true,
+    "matching_tables": 52,
+    "owner_auth_excluded": true,
+    "owner_auth_exclusion_matches_baseline": true,
+    "history_before": 26,
+    "history_after": 26,
+    "history_identical": true,
+    "owner_mapping_enabled_admin_unchanged": true,
+    "new_error_warn_count": 0,
+    "removed_error_warn_count": 0,
+    "read_only": true,
+    "pass": true,
+    "owner_active_season_current_days": [
+      {
+        "matchday_number": 2,
+        "matchday_status": "scheduled",
+        "season_status": "active"
+      }
+    ],
+    "positive_public_result_submission_proven": false,
+    "public_result_form_limitation": "Current owner matchday is scheduled; no real positive mutation or active result form exercised publicly."
+  },
+  "baseline_method": "Ordered full-row content SHA256 and counts over 46 public + 4 Auth + 2 Storage tables; only explicit owner Auth excluded for public login checks. All public owner rows always included.",
+  "public_fixture_rows_created": 0,
+  "owner_role_or_pin_changes": 0,
+  "phase11": "NOT_STARTED_NOT_READY",
+  "public_baseline": [
+    {
+      "name": "auth.identities",
+      "rows": 0,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "name": "auth.refresh_tokens",
+      "rows": 0,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "name": "auth.sessions",
+      "rows": 0,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "name": "auth.users",
+      "rows": 0,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "name": "public.activity_events",
+      "rows": 42,
+      "sha256": "51809e3c29c6e59a2b4667590693ab7d3f031070367e4342aeaabbd594527f85"
+    },
+    {
+      "name": "public.admin_operation_receipts",
+      "rows": 42,
+      "sha256": "555b1595a3344a1c33282dc0228a42c31f33e88ec2bc4618caebbf21e2df7034"
+    },
+    {
+      "name": "public.app_settings",
+      "rows": 2,
+      "sha256": "db6be94ca71c61c3eccaf4065fc4d8366ecdb94ba748a77574229ce57350ecf7"
+    },
+    {
+      "name": "public.coin_transactions",
+      "rows": 8,
+      "sha256": "9aebab7147e993554984ca726ebc0833980714fe22a63fe8b8560b59a2dfccdc"
+    },
+    {
+      "name": "public.cup_certificates",
+      "rows": 0,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "name": "public.cup_history",
+      "rows": 2,
+      "sha256": "e7b83a22f58ccb1c8c2fddda346cbb19dc9a236681eb89917ef9d25d666e3364"
+    },
+    {
+      "name": "public.cup_matches",
+      "rows": 0,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "name": "public.cup_participants",
+      "rows": 4,
+      "sha256": "a7f335fe4c3f4d5375e08753a99d35e3f6097738d8786a12186ecac01b8fd2bf"
+    },
+    {
+      "name": "public.cup_rounds",
+      "rows": 0,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "name": "public.cup_side_members",
+      "rows": 4,
+      "sha256": "6ac399bf234f7b67038896a5c74e9b24d389b9b755b1ea01b5c2cd93bf97e748"
+    },
+    {
+      "name": "public.cup_standings",
+      "rows": 4,
+      "sha256": "1c98e1ca23163db69dadec3a33014b471de6f19d93225569633164cc98866c29"
+    },
+    {
+      "name": "public.cups",
+      "rows": 1,
+      "sha256": "10a6c0d0a6261eaa0e82954e2a30c469d599923833b9ec5b34e2d4cb59dc8b41"
+    },
+    {
+      "name": "public.division_memberships",
+      "rows": 16,
+      "sha256": "34c644c53c4b244a112fb7deee4d9f7f76aed109b51ad0df3e3aa542f40c1f05"
+    },
+    {
+      "name": "public.divisions",
+      "rows": 2,
+      "sha256": "d08d36bc9489848216e3d1e67d11812430885dc4c092ce0cf442190bd7eadad0"
+    },
+    {
+      "name": "public.hall_of_fame_entries",
+      "rows": 0,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "name": "public.matchday_movements",
+      "rows": 8,
+      "sha256": "3ed603171f7a9d05ec526e9b336d71b1fadba51ea4d006a71836611b2f20a82e"
+    },
+    {
+      "name": "public.matchday_snapshot_revisions",
+      "rows": 1,
+      "sha256": "7c4b5d14f79362ba48a1183729142caf4db8393c9d8102a4e850a1a51968896b"
+    },
+    {
+      "name": "public.matchday_snapshots",
+      "rows": 1,
+      "sha256": "76713a33f22000cd04aebba85b64bc10253d93ae614b116cdc2f2a89e1ecb3de"
+    },
+    {
+      "name": "public.matchdays",
+      "rows": 2,
+      "sha256": "7d00b993dbffa51ee516d40bd6ae6a33d4cec42484d6880af9a7874482629970"
+    },
+    {
+      "name": "public.matches",
+      "rows": 24,
+      "sha256": "c51be625817d26fe8223dafdb99a9e9f0a9865f76846904fa7fcb252814fdf1c"
+    },
+    {
+      "name": "public.parsed_saves",
+      "rows": 0,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "name": "public.penalties",
+      "rows": 0,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "name": "public.pokemon_entities",
+      "rows": 0,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "name": "public.pokemon_entity_flags",
+      "rows": 0,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "name": "public.pokemon_flags",
+      "rows": 0,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "name": "public.pokemon_identity_revisions",
+      "rows": 0,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "name": "public.pokemon_observations",
+      "rows": 0,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "name": "public.purchases",
+      "rows": 1,
+      "sha256": "ea12cf66d1f2e4db607db4036daa9004f8e09b77a29813145fc87ab615720e0b"
+    },
+    {
+      "name": "public.redemptions",
+      "rows": 0,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "name": "public.robbery_cycles",
+      "rows": 0,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "name": "public.save_files",
+      "rows": 0,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "name": "public.season_admin_state",
+      "rows": 3,
+      "sha256": "5998b96b7f189959ec10f6f17f5b341d086d8a8528b7d6dd5987b959a8243e66"
+    },
+    {
+      "name": "public.season_archive_snapshots",
+      "rows": 0,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "name": "public.season_config_versions",
+      "rows": 2,
+      "sha256": "284b2e87e46a1d7d07481eee73a635f578e13d69a4fe5cd41f6bbd608903d2b1"
+    },
+    {
+      "name": "public.season_player_stats",
+      "rows": 24,
+      "sha256": "ccd348375dbbb8fdb23f84034e19ea392cb900ad212124253c137a183cf824dc"
+    },
+    {
+      "name": "public.season_players",
+      "rows": 24,
+      "sha256": "8cbb37a7f8282f07b40b89e84e384a5df813627bd3a8fdbb599a966f1ac8304a"
+    },
+    {
+      "name": "public.seasons",
+      "rows": 3,
+      "sha256": "4e08c1928a33da394e34f99a83d54350506c3db8743c042089d06ef29e565857"
+    },
+    {
+      "name": "public.shop_items",
+      "rows": 62,
+      "sha256": "bb16ddeab4618cd83ed9b0367621c01082fd77d51d60e4a8806e620942e54d24"
+    },
+    {
+      "name": "public.shop_promotions",
+      "rows": 6,
+      "sha256": "136c3569c6b551fe01fc20c1e0f3fc7ea23b6115dc47b8d97602c227cd7d4b7c"
+    },
+    {
+      "name": "public.team_locks",
+      "rows": 0,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "name": "public.trainer_flags",
+      "rows": 0,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "name": "public.trainers",
+      "rows": 10,
+      "sha256": "ee56b522883b1964e26f290f54c474c798cd1fc0eeb6fd3086cca5efc0ecce5b"
+    },
+    {
+      "name": "public.trial_case_counters",
+      "rows": 1,
+      "sha256": "478a9b01515e079a40de5c0ae54c2a0b632dd1e3840c90927b61237ab48543b6"
+    },
+    {
+      "name": "public.trial_case_revisions",
+      "rows": 2,
+      "sha256": "9261e7d1afafa74cfac5e311683248cd081feb13fd64849c93b627fc94390caf"
+    },
+    {
+      "name": "public.trial_cases",
+      "rows": 1,
+      "sha256": "c9dbc5b7a16c22c1a2222d5c9639034bfbb49fd24b6bb55ba08e1f31c1e737b9"
+    },
+    {
+      "name": "public.trial_votes",
+      "rows": 0,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "name": "storage.buckets",
+      "rows": 1,
+      "sha256": "050480b87c212eb0f3345beda3672a96db452ac869df8a17fef17c7161c1af6c"
+    },
+    {
+      "name": "storage.objects",
+      "rows": 3,
+      "sha256": "059b2a8b39bfe0eba8b15a18d8fe7ef37c130b1808fcf16adf04753466570c35"
+    }
+  ],
+  "public_after": [
+    {
+      "name": "auth.identities",
+      "rows": 0,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "name": "auth.refresh_tokens",
+      "rows": 0,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "name": "auth.sessions",
+      "rows": 0,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "name": "auth.users",
+      "rows": 0,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "name": "public.activity_events",
+      "rows": 42,
+      "sha256": "51809e3c29c6e59a2b4667590693ab7d3f031070367e4342aeaabbd594527f85"
+    },
+    {
+      "name": "public.admin_operation_receipts",
+      "rows": 42,
+      "sha256": "555b1595a3344a1c33282dc0228a42c31f33e88ec2bc4618caebbf21e2df7034"
+    },
+    {
+      "name": "public.app_settings",
+      "rows": 2,
+      "sha256": "db6be94ca71c61c3eccaf4065fc4d8366ecdb94ba748a77574229ce57350ecf7"
+    },
+    {
+      "name": "public.coin_transactions",
+      "rows": 8,
+      "sha256": "9aebab7147e993554984ca726ebc0833980714fe22a63fe8b8560b59a2dfccdc"
+    },
+    {
+      "name": "public.cup_certificates",
+      "rows": 0,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "name": "public.cup_history",
+      "rows": 2,
+      "sha256": "e7b83a22f58ccb1c8c2fddda346cbb19dc9a236681eb89917ef9d25d666e3364"
+    },
+    {
+      "name": "public.cup_matches",
+      "rows": 0,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "name": "public.cup_participants",
+      "rows": 4,
+      "sha256": "a7f335fe4c3f4d5375e08753a99d35e3f6097738d8786a12186ecac01b8fd2bf"
+    },
+    {
+      "name": "public.cup_rounds",
+      "rows": 0,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "name": "public.cup_side_members",
+      "rows": 4,
+      "sha256": "6ac399bf234f7b67038896a5c74e9b24d389b9b755b1ea01b5c2cd93bf97e748"
+    },
+    {
+      "name": "public.cup_standings",
+      "rows": 4,
+      "sha256": "1c98e1ca23163db69dadec3a33014b471de6f19d93225569633164cc98866c29"
+    },
+    {
+      "name": "public.cups",
+      "rows": 1,
+      "sha256": "10a6c0d0a6261eaa0e82954e2a30c469d599923833b9ec5b34e2d4cb59dc8b41"
+    },
+    {
+      "name": "public.division_memberships",
+      "rows": 16,
+      "sha256": "34c644c53c4b244a112fb7deee4d9f7f76aed109b51ad0df3e3aa542f40c1f05"
+    },
+    {
+      "name": "public.divisions",
+      "rows": 2,
+      "sha256": "d08d36bc9489848216e3d1e67d11812430885dc4c092ce0cf442190bd7eadad0"
+    },
+    {
+      "name": "public.hall_of_fame_entries",
+      "rows": 0,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "name": "public.matchday_movements",
+      "rows": 8,
+      "sha256": "3ed603171f7a9d05ec526e9b336d71b1fadba51ea4d006a71836611b2f20a82e"
+    },
+    {
+      "name": "public.matchday_snapshot_revisions",
+      "rows": 1,
+      "sha256": "7c4b5d14f79362ba48a1183729142caf4db8393c9d8102a4e850a1a51968896b"
+    },
+    {
+      "name": "public.matchday_snapshots",
+      "rows": 1,
+      "sha256": "76713a33f22000cd04aebba85b64bc10253d93ae614b116cdc2f2a89e1ecb3de"
+    },
+    {
+      "name": "public.matchdays",
+      "rows": 2,
+      "sha256": "7d00b993dbffa51ee516d40bd6ae6a33d4cec42484d6880af9a7874482629970"
+    },
+    {
+      "name": "public.matches",
+      "rows": 24,
+      "sha256": "c51be625817d26fe8223dafdb99a9e9f0a9865f76846904fa7fcb252814fdf1c"
+    },
+    {
+      "name": "public.parsed_saves",
+      "rows": 0,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "name": "public.penalties",
+      "rows": 0,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "name": "public.pokemon_entities",
+      "rows": 0,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "name": "public.pokemon_entity_flags",
+      "rows": 0,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "name": "public.pokemon_flags",
+      "rows": 0,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "name": "public.pokemon_identity_revisions",
+      "rows": 0,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "name": "public.pokemon_observations",
+      "rows": 0,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "name": "public.purchases",
+      "rows": 1,
+      "sha256": "ea12cf66d1f2e4db607db4036daa9004f8e09b77a29813145fc87ab615720e0b"
+    },
+    {
+      "name": "public.redemptions",
+      "rows": 0,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "name": "public.robbery_cycles",
+      "rows": 0,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "name": "public.save_files",
+      "rows": 0,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "name": "public.season_admin_state",
+      "rows": 3,
+      "sha256": "5998b96b7f189959ec10f6f17f5b341d086d8a8528b7d6dd5987b959a8243e66"
+    },
+    {
+      "name": "public.season_archive_snapshots",
+      "rows": 0,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "name": "public.season_config_versions",
+      "rows": 2,
+      "sha256": "284b2e87e46a1d7d07481eee73a635f578e13d69a4fe5cd41f6bbd608903d2b1"
+    },
+    {
+      "name": "public.season_player_stats",
+      "rows": 24,
+      "sha256": "ccd348375dbbb8fdb23f84034e19ea392cb900ad212124253c137a183cf824dc"
+    },
+    {
+      "name": "public.season_players",
+      "rows": 24,
+      "sha256": "8cbb37a7f8282f07b40b89e84e384a5df813627bd3a8fdbb599a966f1ac8304a"
+    },
+    {
+      "name": "public.seasons",
+      "rows": 3,
+      "sha256": "4e08c1928a33da394e34f99a83d54350506c3db8743c042089d06ef29e565857"
+    },
+    {
+      "name": "public.shop_items",
+      "rows": 62,
+      "sha256": "bb16ddeab4618cd83ed9b0367621c01082fd77d51d60e4a8806e620942e54d24"
+    },
+    {
+      "name": "public.shop_promotions",
+      "rows": 6,
+      "sha256": "136c3569c6b551fe01fc20c1e0f3fc7ea23b6115dc47b8d97602c227cd7d4b7c"
+    },
+    {
+      "name": "public.team_locks",
+      "rows": 0,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "name": "public.trainer_flags",
+      "rows": 0,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "name": "public.trainers",
+      "rows": 10,
+      "sha256": "ee56b522883b1964e26f290f54c474c798cd1fc0eeb6fd3086cca5efc0ecce5b"
+    },
+    {
+      "name": "public.trial_case_counters",
+      "rows": 1,
+      "sha256": "478a9b01515e079a40de5c0ae54c2a0b632dd1e3840c90927b61237ab48543b6"
+    },
+    {
+      "name": "public.trial_case_revisions",
+      "rows": 2,
+      "sha256": "9261e7d1afafa74cfac5e311683248cd081feb13fd64849c93b627fc94390caf"
+    },
+    {
+      "name": "public.trial_cases",
+      "rows": 1,
+      "sha256": "c9dbc5b7a16c22c1a2222d5c9639034bfbb49fd24b6bb55ba08e1f31c1e737b9"
+    },
+    {
+      "name": "public.trial_votes",
+      "rows": 0,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "name": "storage.buckets",
+      "rows": 1,
+      "sha256": "050480b87c212eb0f3345beda3672a96db452ac869df8a17fef17c7161c1af6c"
+    },
+    {
+      "name": "storage.objects",
+      "rows": 3,
+      "sha256": "059b2a8b39bfe0eba8b15a18d8fe7ef37c130b1808fcf16adf04753466570c35"
+    }
+  ],
+  "browser_summary": {
+    "status": "PASS",
+    "screens": [
+      "Inicio 1440",
+      "Liga 1440",
+      "Battle 1440",
+      "Entrenadores 1440",
+      "Mi PC 1440",
+      "Tienda 1440",
+      "Copa 1440",
+      "Hall de la Fama 1440",
+      "Juicios 1440",
+      "Administración 1440",
+      "Saves y Launcher 1440",
+      "Inicio 390",
+      "Liga 390",
+      "Battle 390",
+      "Entrenadores 390",
+      "Mi PC 390",
+      "Tienda 390",
+      "Copa 390",
+      "Hall de la Fama 390",
+      "Juicios 390",
+      "Administración 390",
+      "Saves y Launcher 390"
+    ],
+    "errors": [],
+    "unexpected": [],
+    "environmentOrigins": {
+      "https://me.kis.v2.scr.kaspersky-labs.com": 23
+    },
+    "business_writes": 0,
+    "api_interception": false
+  }
+}
