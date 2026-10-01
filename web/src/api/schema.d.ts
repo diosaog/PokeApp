@@ -974,6 +974,40 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/v1/seasons/{season_id}/initial-assignment": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Read */
+    get: operations["read_v1_seasons__season_id__initial_assignment_get"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/admin/seasons/{season_id}/initial-assignment/finalize": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** Finalize */
+    post: operations["finalize_v1_admin_seasons__season_id__initial_assignment_finalize_post"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -1691,10 +1725,38 @@ export interface components {
       /** Tier Order */
       tier_order: number;
     };
+    /** FinalizeInitialAssignmentBody */
+    FinalizeInitialAssignmentBody: {
+      /**
+       * Config Version Id
+       * Format: uuid
+       */
+      config_version_id: string;
+      /** Expected Setup Revision */
+      expected_setup_revision: number;
+      /** Expected Roster Revision */
+      expected_roster_revision: number;
+      /** Input Hash */
+      input_hash: string;
+      tie_resolution?: components["schemas"]["TieResolution"] | null;
+    };
     /** FinishSeasonBody */
     FinishSeasonBody: {
       /** Expected Revision */
       expected_revision: number;
+    };
+    /** FirstLegReadinessChecks */
+    FirstLegReadinessChecks: {
+      /** Has Roster */
+      has_roster: boolean;
+      /** Has Valid Config */
+      has_valid_config: boolean;
+      /** No Other Active Season */
+      no_other_active_season: boolean;
+      /** Is Draft */
+      is_draft: boolean;
+      /** Initial Assignment Pending */
+      initial_assignment_pending: boolean;
     };
     /** FirstMatchdaySummary */
     FirstMatchdaySummary: {
@@ -1776,6 +1838,83 @@ export interface components {
       service: string;
       /** Status */
       status: string;
+    };
+    /** InitialAssignmentPlayer */
+    InitialAssignmentPlayer: {
+      /**
+       * Id
+       * Format: uuid
+       */
+      id: string;
+      /**
+       * Trainer Id
+       * Format: uuid
+       */
+      trainer_id: string;
+      /** Display Name */
+      display_name: string;
+      /**
+       * Progress State
+       * @enum {string}
+       */
+      progress_state: "observed" | "unknown";
+      /** Observed Badges */
+      observed_badges: number | null;
+      /** Cap Reached */
+      cap_reached: boolean;
+      /** Adjusted Deaths */
+      adjusted_deaths: number | null;
+      /** Proposed Division */
+      proposed_division?: ("A" | "B") | null;
+    };
+    /** InitialAssignmentRead */
+    InitialAssignmentRead: {
+      /**
+       * Season Id
+       * Format: uuid
+       */
+      season_id: string;
+      /** Rule */
+      rule: "observed_deaths_v1" | null;
+      /**
+       * State
+       * @enum {string}
+       */
+      state: "legacy" | "pending" | "assigned";
+      /** Config Version Id */
+      config_version_id: string | null;
+      division_sizes: components["schemas"]["DivisionSizes"] | null;
+      /** Setup Revision */
+      setup_revision: number;
+      /** Roster Revision */
+      roster_revision: number;
+      /** Input Hash */
+      input_hash: string;
+      /** Ready */
+      ready: boolean;
+      /** Blocking Reasons */
+      blocking_reasons: (
+        | "season_not_active"
+        | "invalid_roster"
+        | "config_not_effective"
+        | "progress_unobserved"
+        | "cap_not_reached"
+        | "death_inputs_unobserved"
+        | "initial_assignment_locked"
+        | "initial_assignment_legacy"
+      )[];
+      /** Players */
+      players: components["schemas"]["InitialAssignmentPlayer"][];
+      boundary_tie?: components["schemas"]["InitialBoundaryTie"] | null;
+    };
+    /** InitialBoundaryTie */
+    InitialBoundaryTie: {
+      /** Player Ids */
+      player_ids: string[];
+      /** Adjusted Deaths */
+      adjusted_deaths: number;
+      /** Places In A */
+      places_in_a: number;
     };
     /** InitialDivisionsBody */
     InitialDivisionsBody: {
@@ -2483,7 +2622,10 @@ export interface components {
     };
     /** Readiness */
     Readiness: {
-      checks: components["schemas"]["ReadinessChecks"];
+      /** Checks */
+      checks:
+        | components["schemas"]["ReadinessChecks"]
+        | components["schemas"]["FirstLegReadinessChecks"];
       /** Blocking Reasons */
       blocking_reasons: string[];
       /** Can Activate */
@@ -2784,9 +2926,13 @@ export interface components {
       status: string;
       /** Current Matchday Id */
       current_matchday_id?: string | null;
+      /** Initial Assignment Rule */
+      initial_assignment_rule?: "observed_deaths_v1" | null;
     };
     /** SeasonSetup */
     SeasonSetup: {
+      /** Initial Assignment Rule */
+      initial_assignment_rule?: "observed_deaths_v1" | null;
       season: components["schemas"]["SeasonSummary"];
       /** Setup Revision */
       setup_revision: number;
@@ -5291,6 +5437,74 @@ export interface operations {
         };
         content: {
           "application/json": components["schemas"]["InventoryRead"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  read_v1_seasons__season_id__initial_assignment_get: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        season_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["InitialAssignmentRead"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  finalize_v1_admin_seasons__season_id__initial_assignment_finalize_post: {
+    parameters: {
+      query?: never;
+      header: {
+        "idempotency-key": string;
+      };
+      path: {
+        season_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["FinalizeInitialAssignmentBody"];
+      };
+    };
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["AdminReceipt"];
         };
       };
       /** @description Validation Error */

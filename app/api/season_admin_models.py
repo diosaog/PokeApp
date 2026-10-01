@@ -161,13 +161,22 @@ class ReadinessChecks(StrictBody):
     is_draft: bool
 
 
+class FirstLegReadinessChecks(StrictBody):
+    has_roster: bool
+    has_valid_config: bool
+    no_other_active_season: bool
+    is_draft: bool
+    initial_assignment_pending: bool
+
+
 class Readiness(StrictBody):
-    checks: ReadinessChecks
+    checks: ReadinessChecks | FirstLegReadinessChecks
     blocking_reasons: list[str]
     can_activate: bool
 
 
 class SeasonSetup(StrictBody):
+    initial_assignment_rule: Literal["observed_deaths_v1"] | None = None
     season: SeasonSummary
     setup_revision: Revision
     roster_revision: Revision

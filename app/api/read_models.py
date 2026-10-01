@@ -14,6 +14,7 @@ class SeasonRead(BaseModel):
     name: str
     status: str
     current_matchday_id: UUID | None = None
+    initial_assignment_rule: Literal["observed_deaths_v1"] | None = None
 
 
 class SeasonPage(BaseModel):

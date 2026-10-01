@@ -39,6 +39,7 @@ $$;
 
 
 EXPECTED_TABLES = [
+    "initial_division_snapshots",
     "cup_side_members",
     "cup_rounds",
     "cup_history",

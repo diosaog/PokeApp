@@ -8,15 +8,20 @@ begin;
 -- Local validation only: remove the additive administration helpers and state.
 do $$ declare f regprocedure; begin
   for f in select p.oid::regprocedure from pg_proc p join pg_namespace n on n.oid=p.pronamespace
-    where n.nspname='public' and (p.proname like 'admin_setup_%' or p.proname like 'api_admin_%' or p.proname like 'matchday_%' or p.proname like 'participant_%' or p.proname like 'api_participant_%' or p.proname like 'league_%' or p.proname like 'lifecycle_%' or p.proname like 'trials_%' or p.proname like 'api_trial%' or p.proname like 'cup_%' or p.proname like 'api_cup_%') loop
+    where n.nspname='public' and (p.proname like 'initial_assignment_%' or p.proname like 'admin_setup_%' or p.proname like 'api_admin_%' or p.proname like 'matchday_%' or p.proname like 'participant_%' or p.proname like 'api_participant_%' or p.proname like 'league_%' or p.proname like 'lifecycle_%' or p.proname like 'trials_%' or p.proname like 'api_trial%' or p.proname like 'cup_%' or p.proname like 'api_cup_%') loop
     execute format('drop function if exists %s cascade',f);
   end loop;
 end $$;
+drop table if exists public.initial_division_snapshots cascade;
 drop table if exists public.admin_operation_receipts cascade;
 drop table if exists public.season_admin_state cascade;
 drop table if exists public.matchday_snapshot_revisions cascade;
 
 drop function if exists public.api_redeem_purchase(uuid,uuid,uuid,uuid,text,uuid);
+-- PL/pgSQL bodies do not depend on referenced tables in the catalog. Remove
+-- both 021/022 layers so repeated empty rebuilds retain the fresh comments too.
+drop function if exists public.api_create_normal_purchase(uuid,uuid,uuid,text,boolean);
+drop function if exists public.api_create_normal_purchase_8d(uuid,uuid,uuid,text,boolean);
 drop table if exists public.robbery_cycles cascade;
 drop function if exists public.check_purchase_acquisition() cascade;
 

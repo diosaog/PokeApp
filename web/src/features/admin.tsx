@@ -20,6 +20,7 @@ import {
 } from "../ui";
 import { playerName } from "./core";
 import { DailyTieFields, readTieResolution, tieReview } from "./daily-ties";
+import { InitialAssignment } from "./initial-assignment";
 
 type Setup = Model<"SeasonSetup">;
 function Configuration({ setup }: { setup: Setup }) {
@@ -492,79 +493,94 @@ function Competition({ setup }: { setup: Setup }) {
     [selected, setSelected] = useState(""),
     ov = useOverview();
   const day = selected || setup.current_matchday_id || "";
+  const observedInitial =
+    setup.initial_assignment_rule === "observed_deaths_v1";
   return (
     <>
+      {observedInitial && <InitialAssignment administrative />}
       <Card>
         <h2>Preparación de la Liga</h2>
-        <form
-          onSubmit={(event) => {
-            const data = form(event);
-            const assignments = { A: [] as string[], B: [] as string[] };
-            setup.participants.forEach((p) => {
-              const d = text(data, p.id);
-              if (d === "A" || d === "B") assignments[d].push(p.id);
-            });
-            void cmd.execute(
-              `/v1/admin/seasons/${season}/initial-divisions`,
-              {
-                config_version_id: text(data, "config"),
-                assignments,
-                expected_roster_revision: setup.roster_revision,
-                expected_setup_revision: setup.setup_revision,
-              } satisfies Model<"InitialDivisionsBody">,
-              "PUT",
-            );
-          }}
-        >
-          <Field label="Versión de configuración">
-            <select name="config" required>
-              <option value="">Seleccionar versión</option>
-              {setup.config_versions.map((c) => (
-                <option key={c.id} value={c.id}>
-                  {c.name}
-                </option>
-              ))}
-            </select>
-          </Field>
-          <div className="form-grid">
-            {setup.participants.map((p) => (
-              <Field key={p.id} label={p.display_name}>
-                <select name={p.id} required>
-                  <option value="">Seleccionar división</option>
-                  <option>A</option>
-                  <option>B</option>
-                </select>
-              </Field>
-            ))}
-          </div>
-          <Submit pending={cmd.pending || cmd.uncertain}>
-            Guardar divisiones iniciales
-          </Submit>
-        </form>
-        <div className="toolbar">
-          <button
-            disabled={cmd.pending || cmd.uncertain}
-            onClick={() =>
+        {!observedInitial && (
+          <form
+            onSubmit={(event) => {
+              const data = form(event);
+              const assignments = { A: [] as string[], B: [] as string[] };
+              setup.participants.forEach((p) => {
+                const d = text(data, p.id);
+                if (d === "A" || d === "B") assignments[d].push(p.id);
+              });
               void cmd.execute(
-                `/v1/admin/seasons/${season}/matchdays/prepare-current`,
-                { expected_setup_revision: setup.setup_revision },
-              )
-            }
+                `/v1/admin/seasons/${season}/initial-divisions`,
+                {
+                  config_version_id: text(data, "config"),
+                  assignments,
+                  expected_roster_revision: setup.roster_revision,
+                  expected_setup_revision: setup.setup_revision,
+                } satisfies Model<"InitialDivisionsBody">,
+                "PUT",
+              );
+            }}
           >
-            Preparar jornada
-          </button>
-          <button
-            disabled={
-              cmd.pending || cmd.uncertain || !setup.readiness.can_activate
-            }
-            onClick={() =>
-              void cmd.execute(`/v1/admin/seasons/${season}/activate`, {
-                expected_setup_revision: setup.setup_revision,
-              })
-            }
-          >
-            Activar Liga
-          </button>
+            <Field label="Versión de configuración">
+              <select name="config" required>
+                <option value="">Seleccionar versión</option>
+                {setup.config_versions.map((c) => (
+                  <option key={c.id} value={c.id}>
+                    {c.name}
+                  </option>
+                ))}
+              </select>
+            </Field>
+            <div className="form-grid">
+              {setup.participants.map((p) => (
+                <Field key={p.id} label={p.display_name}>
+                  <select name={p.id} required>
+                    <option value="">Seleccionar división</option>
+                    <option>A</option>
+                    <option>B</option>
+                  </select>
+                </Field>
+              ))}
+            </div>
+            <Submit pending={cmd.pending || cmd.uncertain}>
+              Guardar divisiones iniciales
+            </Submit>
+          </form>
+        )}
+        {observedInitial && setup.season.status === "draft" && (
+          <p>
+            Activa la Liga para comenzar el primer tramo. Las divisiones y la
+            primera jornada se prepararán al confirmar el reparto observado.
+          </p>
+        )}
+        <div className="toolbar">
+          {(!observedInitial || setup.current_matchday_id) && (
+            <button
+              disabled={cmd.pending || cmd.uncertain}
+              onClick={() =>
+                void cmd.execute(
+                  `/v1/admin/seasons/${season}/matchdays/prepare-current`,
+                  { expected_setup_revision: setup.setup_revision },
+                )
+              }
+            >
+              Preparar jornada
+            </button>
+          )}
+          {setup.season.status === "draft" && (
+            <button
+              disabled={
+                cmd.pending || cmd.uncertain || !setup.readiness.can_activate
+              }
+              onClick={() =>
+                void cmd.execute(`/v1/admin/seasons/${season}/activate`, {
+                  expected_setup_revision: setup.setup_revision,
+                })
+              }
+            >
+              Activar Liga
+            </button>
+          )}
           <Link className="button" to="/copa">
             Gestionar Copas →
           </Link>

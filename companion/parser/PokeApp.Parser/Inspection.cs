@@ -7,7 +7,7 @@ namespace PokeApp.Parser;
 public static class Inspection
 {
     public const int MaxBytes = 8 * 1024 * 1024;
-    public const string ParserVersion = "pokeapp-reader/1;pkhex/24.11.11";
+    public const string ParserVersion = "pokeapp-reader/2;pkhex/24.11.11";
     public static readonly JsonSerializerOptions Json = new()
     {
         PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower,
@@ -24,6 +24,11 @@ public static class Inspection
             if (save is not (SAV3RS or SAV3E or SAV3FRLG or SAV4DP or SAV4Pt or SAV4HGSS or SAV5BW or SAV5B2W2))
                 return Failure("UNSUPPORTED_GAME");
             if (!save.IsVersionValid()) return Failure("UNSUPPORTED_VERSION");
+            // This pinned library's Gen5 IsVersionValid inherits an unconditional
+            // true. Reject absent or mismatched trainer game IDs explicitly.
+            if (save is SAV5BW && save.Version is not (GameVersion.B or GameVersion.W)
+                || save is SAV5B2W2 && save.Version is not (GameVersion.B2 or GameVersion.W2))
+                return Failure("UNSUPPORTED_VERSION");
             if (!save.ChecksumsValid || save.PartyCount is < 0 or > 6)
                 return Failure("CORRUPT_SAVE");
             if (save.BoxSlotCount != 30 || save.BoxCount is < 1 or > 24)
@@ -36,6 +41,7 @@ public static class Inspection
                 Generation = save.Generation,
                 Trainer = new { Name = save.OT, Tid = save.TID16, Sid = save.SID16,
                     Gender = save.Gender, Language = save.Language < 0 ? (int?)null : save.Language },
+                Progress = Progress(save),
                 Party = Enumerable.Range(0, 6).Select(i => i < party.Count ? Pokemon(party[i]) : null).ToArray(),
                 Boxes = Enumerable.Range(0, save.BoxCount).Select(b => new
                 {
@@ -52,6 +58,29 @@ public static class Inspection
 
     public static object Failure(string code) => new
         { SchemaVersion = 1, ParserVersion, Observation = (object?)null, Error = code };
+
+    private static object BadgeRegion(string region, int flags) => new
+    {
+        Region = region,
+        BadgeFlags = Enumerable.Range(0, 8).Select(bit => (flags & (1 << bit)) != 0).ToArray(),
+    };
+
+    private static object Progress(SaveFile save)
+    {
+        // Read the pinned library's badge flags, never infer them from a count,
+        // playtime, party strength or another region's badges. HGSS's Badges16
+        // property is its separate second-region byte, not a sixteen-bit mask.
+        (string primary, object[] regions) = save switch
+        {
+            SAV3FRLG s => ("kanto", new[] { BadgeRegion("kanto", s.Badges) }),
+            SAV3 s => ("hoenn", new[] { BadgeRegion("hoenn", s.Badges) }),
+            SAV4HGSS s => ("johto", new[] { BadgeRegion("johto", s.Badges), BadgeRegion("kanto", s.Badges16) }),
+            SAV4 s => ("sinnoh", new[] { BadgeRegion("sinnoh", s.Badges) }),
+            SAV5 s => ("unova", new[] { BadgeRegion("unova", s.Misc.Badges) }),
+            _ => throw new InvalidOperationException(),
+        };
+        return new { SchemaVersion = 1, PrimaryRegion = primary, Regions = regions };
+    }
 
     private static object? Pokemon(PKM p)
     {

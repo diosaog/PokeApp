@@ -58,7 +58,12 @@ class SeasonAdminFixtures:
 
     def call(self, op, sid=None, body=None, resource=None, key=None, actor=None):
         r = self.request(op,sid,body,resource,key,actor)
-        result = self.repo.execute(op,r)
+        if op == 'create' and getattr(self.client, 'legacy_season_fixtures', False):
+            # Preserve genuine old initialization in local inherited regressions.
+            # Modern E fixtures call the public current RPC explicitly instead.
+            result = self.repo._rpc('api_admin_create_season_v035', r)
+        else:
+            result = self.repo.execute(op,r)
         if op=='setup': SeasonSetup.model_validate(result)
         else: AdminReceipt.model_validate(result)
         if op=='create' and result['season_id'] not in self.seasons: self.seasons.append(result['season_id'])

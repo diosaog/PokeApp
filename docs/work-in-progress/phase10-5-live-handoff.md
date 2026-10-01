@@ -38,14 +38,14 @@ Unrelated processes/remote operations not inspected: UNKNOWN.
 | B: League lacked primary GENERAL; existing 030 points view is authoritative | FIX NOW | DONE, source `d4ee903`, publicly delivered with C. |
 | C: participant result entry with separate closed-day correction | FIX NOW | DONE, source `9be3d70`, local gates and safe public checks PASS. |
 | D: daily wins/deaths and relevant unresolved ties | FIX NOW | DONE, source `2c8ad42`, 035 + public delivery verified below. |
-| E: 026 requires initial manual A/B before activation | FIX NOW | Entry reviewed; implementation awaits the provisional progress authority decision below. No E code/deployment. |
+| E: 026 requires initial manual A/B before activation | FIX NOW | IN PROGRESS; owner requires observed save progress only. Implementation and local gates PASS; public delivery pending. |
 | F: 029 lifecycle reads final daily snapshot positions for title | FIX NOW | Pending E; structural Phase 11 blocker. |
 | G: wipe counter exists in stats but lacks owned command/UI | FIX NOW | Pending F. |
 | H: Preview only selects scheduled match; missing-lock presentation insufficient | FIX NOW | Pending G. |
 | I: pending promotions hidden by public view; voucher canje absent in React; purchases require active season | FIX NOW | Pending H. |
 | J: Admin displays technical readiness keys | FIX NOW | Ordinary result UI moved in C; remaining wording pending I. |
 | K: minimal public projection from permitted published facts | FIX NOW | Pending J; wider scope blocked below. |
-| L: legacy exports badges; neutral Phase 9 parser lacks observed progress | FIX NOW | Minimal contract pending K. |
+| L: legacy exports badges; neutral Phase 9 parser lacks observed progress | FIX NOW | E provides the observed badge foundation; remaining L review pending K. |
 | M: overview has about 13 sequential reads; command invalidation is broad | FIX NOW | Guard every touched package; record Phase 14 work. |
 | Ten unresolved rules listed in contract | OWNER_DECISION_REQUIRED | No answers inferred; defer dependent branches only. |
 | Physical effects, cloud save ingestion, installer/updater | FUTURE LAUNCHER/CLOUD | Out of scope. |
@@ -397,8 +397,8 @@ new release. Verify tools in a future session; do not assume auth or deployment 
 
 ## E entry review - 2026-10-01
 
-**E AUTHORIZED, NOT IMPLEMENTED; waiting for one owner decision about provisional
-progress authority. A-D remain complete.** The explicit E continuation replaces
+**Historical entry: E implementation stopped for a progress-authority decision;
+resolved by the owner update below. A-D remain complete.** The E continuation replaces
 the preceding D stop instruction. This is an entry review, not an E validation PASS.
 
 Entry `58ef75f4aedab8d4ba394d9a8d172cafc2351e16`; fresh fetch succeeded,
@@ -468,11 +468,33 @@ two intended Markdown files changed, UTF-8 decoding/relative links/E anchor vali
 and `git diff --check` clean. Publication uses a documentation-only commit; obtain
 its hash and actual push state from Git.
 
+## E observed-progress implementation - owner decision 2026-10-01
+
+Entry `8e3d598205613d950e3c4851bd07fb0ffe15ba53`; fresh fetch and main/origin 0/0,
+tracked clean, protected guide excluded. The owner rejects both participant and
+admin manual medal attestation. Normal progress is reliable save/parser evidence;
+missing observations stay unknown and block initial assignment. The neutral parser
+may be extended now, without cloud ingestion or a final Launcher.
+
+Implementation in progress: optional versioned primary-region badge evidence,
+service-only observed-readiness/initial-split transition, boundary-only audited
+decisions, minimal React presentation. Existing seasons retain their recorded
+initialization; modern new seasons can begin gameplay before A/B exists. No new
+Team Lock prerequisite, manual progress button, F implementation or Phase 11.
+Only minimal E progress foundation overlaps the later L contract; no L completion
+is claimed. Source edits remain local/uncommitted until checks pass.
+
+Remote state is the read-only 11:39 UTC entry observation above, not a deployment
+of E. No E migration/deployment or fixture write has occurred. All previous SQL is
+immutable. Fresh pinned history/baselines and committed source are required before
+any eventual 036 write. Local gates PASS: 663 Python, 11 React, 24 Edge, parser 54 assertions/six integration groups, eight E SQL groups/twelve exact rollbacks, inherited 026-030/B/C/D and four-build parity (11,462 lines). See [E report](../phase10-5e-completion-report.md) and [evidence](../phase10-5e-validation-evidence.json). Local PG remains running; all completed fixture runners restored their baselines. Final deployment preflight is running; no migration attempt yet.
+
+The owner approved final title policy for future F: final accumulated points, external audited Bo3 for exactly two tied at the top; fewer authoritative adjusted deaths for exactly three, otherwise explicit owner exception if unresolved. See the contract. This is documentation only; F is not started.
+
 ## Exact next step
 
-Resolve the single E progress-authority question above, then implement only E
-under its approved contract. Do not infer an answer from elapsed time or another
-handoff. Preserve C participant results, D daily consequences and all existing
+Publish validated E source and deploy 036/API/React with fresh complete baselines, then safe public gates and independent comparison. Use observed save evidence only; the authority decision
+is resolved and must not be asked again. Preserve C participant results, D daily consequences and all existing
 manual seasons; do not reopen A-D, implement F, or start Phase 11.
 
 Before any necessary SQL, recheck actual history; **001-035 are immutable, next

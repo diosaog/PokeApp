@@ -26,6 +26,9 @@ class SqlError(Exception):
 
 
 class LocalClient:
+    # Existing competition fixtures deliberately represent pre-E seasons. The E
+    # validator exercises the current create RPC directly; no production bypass.
+    legacy_season_fixtures = True
     def __init__(self, args, role='service_role', user_id=None):
         if args.host not in ('localhost','127.0.0.1','::1') or not args.database.startswith('pokeapp_v2_validation'):
             raise ValueError('Identity SQL fixtures require an isolated loopback validation database')

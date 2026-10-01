@@ -20,14 +20,14 @@ commit before the next starts. Deploy at stable checkpoints, not every commit.
 | B | Server-authoritative GENERAL: trainer, exact accumulated official points, current coins, observed dead count or explicit unknown. Sort points descending; stable secondary display order never resolves a sporting tie. GENERAL/current/completed J tabs; preserve daily Top 3 and A/B. |
 | C | Any enabled, active, eligible season participant records/edits any editable current match, including matches between other participants. Verified JWT identity, season scope, CAS and stable idempotency; closed-day admin correction stays separate. Ordinary entry belongs in League/Battles. |
 | D | Daily wins descending then fewer adjusted deaths. No H2H-first two-way rule; no alphabetical sporting resolution. Auditable exceptional resolution where unresolved ties affect rewards/movement/cuts. |
-| E | First game segment before initial A/B. Explicit progress/death readiness, suggested split by fewer deaths, external resolution only for a relevant cut tie. Exact capacities and immutability once used; manual/provisional evidence clearly labelled until cloud observations exist. |
+| E | First game segment before initial A/B. Observed save progress/death readiness, suggested split by fewer deaths, external resolution only for a relevant cut tie. Exact capacities and immutable recorded assignment; missing observations block readiness. No manual medal attestation. |
 | F | Finish/Hall uses final accumulated official points, not final day's position. Unique champion/finalist supported; tied first or second blocks certification until an approved resolution exists. Existing frozen history never silently rewritten. |
 | G | Participant-owned nonnegative audited/idempotent wipe counter, current applicability only. Box 8 (legacy index 7) deaths cost 0.2 each without a cap; each wipe revival costs 0.4. Five visible dead plus one wipe revival costs 1.4. |
 | H | Strong missing-Team-Lock warning with ability to continue. Batallas / Team Preview: two distinct independent public selectors in Espectador; one selector including self in Batalla, own private detail permitted, rivals public only. |
 | I | Reconcile pending promotion visibility/time boundaries; expose existing robbery-shield voucher redemption without selling reward-only items; allow spending existing coins after League without generating new League rewards; preserve Store Ban. |
 | J | Human Spanish readiness/error wording in Admin; setup, supervision, exceptions, history and risk actions. Preserve server revisions/CAS. |
 | K | Safe explicit public scouting projection foundation, no private rival PC access. Do not assume live/box/dead-box publication. |
-| L | Minimal backward-compatible observed progress contract with game/version/provenance; manual, observed and unknown distinct. No invented League-completed flag or full cloud ingestion. |
+| L | Minimal backward-compatible observed progress contract with game/version/provenance; observed zero and unknown distinct. E includes the required badge foundation. No routine manual progress authority, invented League-completed flag or full cloud ingestion. |
 | M | Avoid new sequential N+1 reads; measure touched flows where useful and record Phase 14 candidates. No broad performance refactor. |
 
 Three distinct truths remain: real save state, competitive state and frozen
@@ -82,23 +82,40 @@ contracts, CAS, idempotency, safe unknown-outcome retries and historical rules.
 
 Every required participant must have evidence of reaching the first-leg cap before
 the split can become final. Missing evidence is unknown, not zero or ready. Until
-cloud ingestion exists, any registered/manual evidence must be explicitly labelled
-provisional. Do not add a new Team Lock prerequisite. Existing participant result
+cloud ingestion exists, absent save observations cannot enable the split. Neither
+participants nor administrators may manually attest medals. Do not add a new Team
+Lock prerequisite. Existing participant result
 authority from C remains unchanged. Later game/postgame milestone decisions remain
 outside E; no automatic progression beyond the approved evidence is inferred.
 
-An entry audit found no supported V2 command that records or attests this progress:
-the stats badge counter defaults to zero, browser writes are revoked, and the
-Phase 9 observation contract has no progress field. The unresolved authority for
-provisional progress must be decided before implementing such a command. The
-[live record](work-in-progress/phase10-5-live-handoff.md#e-entry-review---2026-10-01)
-records the exact question and evidence. This does not authorize another death
-counter, save ingestion, or reinterpretation of existing seasons.
+Owner decision (2026-10-01) resolves the entry question: only reliable save/parser
+observations establish normal progress. Extend the neutral `ObservedSave` contract
+with explicit badge evidence and game/region provenance. An observed zero remains
+distinct from absent/unsupported progress. Show missing evidence as "Progreso no
+observado / pendiente de sincronizar save". No self-attestation or routine admin
+approval command is authorized. This includes the minimal progress foundation
+needed by E, not full cloud ingestion or the final Launcher. Existing registered
+badge counters alone are not observation evidence. No alternate manual death
+counter or reinterpretation of existing seasons is authorized.
 
 After implementation, complete the full relevant local matrix and any necessary
 new migration/bootstrap parity before committing/pushing and public deployment.
 Public verification uses safe reads and absent-resource checks, preserving all
 manual owner data. Stop after E delivery; do not start F or Phase 11.
+
+## Approved championship decision for future Package F (2026-10-01)
+
+This records the owner's decision only; E must finish before F starts. The League
+title uses final accumulated official total points, never the last daily snapshot.
+Exactly two participants tied for the highest total play an external best of three:
+the explicitly recorded and audited winner is champion. Previous League results
+must not infer that winner. Exactly three tied for the highest total are ranked by
+fewer authoritative adjusted deaths. If that does not identify a unique champion,
+the title remains unresolved and requires explicit exceptional owner resolution.
+No H2H, daily position, name, slug, UUID or insertion order can decide it.
+These title rules are separate from D's daily ranking. Hall must use the resolved
+championship result. Four-or-more top ties and any still-ambiguous finalist position
+are not assigned an invented automatic rule by this decision.
 
 ## Owner decisions still required
 
@@ -108,7 +125,7 @@ Implement independent branches; never infer answers to these questions:
 2. Scope of the twelve-coin League-completion claim: season/reto, persistent save/game, or other.
 3. Whether eight badges suffice for that claim or actual Pokémon League completion is required.
 4. Normal OPEN/CLOSE/FINISH trigger and authority: automatic, participant, supervised, or combination.
-5. Final championship tie-break for exactly equal points.
+5. Residual championship exceptions outside the approved two/three-player rule above, including unresolved finalist placement where applicable.
 6. Additional purchased-revive penalty while physical application remains pending.
 7. Team Lock replacement cutoff after combat starts.
 8. Public scouting publication scope: live/snapshot, party, boxes and dead box.

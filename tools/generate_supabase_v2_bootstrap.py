@@ -44,6 +44,7 @@ EXPECTED_MIGRATIONS = [
     "033_league_general_read.sql",
     "034_participant_matchday_results.sql",
     "035_daily_sporting_ranking.sql",
+    "036_observed_initial_divisions.sql",
 ]
 
 FORBIDDEN_TOKENS = [

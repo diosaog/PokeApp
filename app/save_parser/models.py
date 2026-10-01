@@ -5,6 +5,7 @@ from __future__ import annotations
 from collections import defaultdict
 from dataclasses import dataclass
 from enum import StrEnum
+import re
 from typing import Literal, Protocol
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
@@ -95,12 +96,61 @@ class ParsedBox(WireModel):
     slots: tuple[ParsedPokemon | None, ...] = Field(min_length=30, max_length=30)
 
 
+ProgressRegion = Literal["hoenn", "kanto", "sinnoh", "johto", "unova"]
+
+
+class ObservedBadgeRegion(WireModel):
+    """Observed flags in the game's badge-bit order; false is observed absence."""
+
+    region: ProgressRegion
+    badge_flags: tuple[bool, ...] = Field(min_length=8, max_length=8)
+
+
+class ObservedProgress(WireModel):
+    """Save facts only: no competitive cap, admin approval or ownership claim."""
+
+    schema_version: Literal[1]
+    primary_region: ProgressRegion
+    regions: tuple[ObservedBadgeRegion, ...] = Field(min_length=1, max_length=2)
+
+    @field_validator("schema_version", mode="before")
+    @classmethod
+    def version_is_integer(cls, value):
+        if type(value) is not int:
+            raise ValueError("invalid_progress_version")
+        return value
+
+    @model_validator(mode="after")
+    def validate_regions(self):
+        names = tuple(region.region for region in self.regions)
+        if len(names) != len(set(names)) or names[0] != self.primary_region:
+            raise ValueError("invalid_progress_regions")
+        return self
+
+
+def progress_layout(game: str) -> tuple[int, tuple[str, ...]] | None:
+    """Native games supported by the worker, including PKHeX family labels."""
+    if game in {"R", "S", "RS", "E"}:
+        return 3, ("hoenn",)
+    if game in {"FR", "LG", "FRLG"}:
+        return 3, ("kanto",)
+    if game in {"D", "P", "DP", "Pt"}:
+        return 4, ("sinnoh",)
+    if game in {"HG", "SS", "HGSS"}:
+        return 4, ("johto", "kanto")
+    if game in {"B", "W", "BW", "B2", "W2", "B2W2"}:
+        return 5, ("unova",)
+    return None
+
+
 class ObservedSave(WireModel):
     game: str = Field(min_length=1, max_length=24)
     generation: Literal[3, 4, 5]
     trainer: ParsedTrainer
     party: tuple[ParsedPokemon | None, ...] = Field(min_length=6, max_length=6)
     boxes: tuple[ParsedBox, ...] = Field(min_length=1, max_length=24)
+    # Old neutral observations remain readable, without turning unknown into zero.
+    progress: ObservedProgress | None = None
 
     @model_validator(mode="after")
     def validate_layout(self):
@@ -108,6 +158,13 @@ class ObservedSave(WireModel):
             raise ValueError("invalid_box_layout")
         if any(p.identity.format != self.generation for _, p in self.occupied()):
             raise ValueError("invalid_native_format")
+        if self.progress is not None:
+            observed_layout = (
+                self.generation,
+                tuple(region.region for region in self.progress.regions),
+            )
+            if progress_layout(self.game) != observed_layout:
+                raise ValueError("invalid_progress_game")
         return self
 
     def occupied(self):
@@ -125,6 +182,30 @@ class ObservedSave(WireModel):
             ParsedPokemonObservation(location, p.identity)
             for location, p in self.occupied()
         )
+
+
+def progress_evidence(observation: ObservedSave, source_hash: str) -> dict:
+    """Neutral additive envelope for a future trusted 023 ingestion adapter.
+
+    Persist only alongside the same parsed save/identity binding. The envelope is
+    not a signature or an authorization; callers cannot promote client JSON into
+    trustworthy server facts merely by constructing this dictionary.
+    """
+    if not isinstance(observation, ObservedSave):
+        raise ValueError("invalid_observed_save")
+    if not isinstance(source_hash, str) or not re.fullmatch(
+        r"[0-9a-f]{64}", source_hash
+    ):
+        raise ValueError("invalid_source_hash")
+    return {
+        "schema_version": 1,
+        "game": observation.game,
+        "generation": observation.generation,
+        "source_hash": source_hash,
+        "progress": observation.progress.model_dump(mode="json")
+        if observation.progress is not None
+        else None,
+    }
 
 
 class ParserResponse(WireModel):

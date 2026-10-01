@@ -6,6 +6,7 @@ from app.repositories.errors import PersistenceError
 
 class FrontendReadRepository(Protocol):
     def league_general(self, season_id: str) -> dict | None: ...
+    def initial_observations(self, season_id: str) -> list[dict]: ...
 
     def rows(
         self,
@@ -58,3 +59,12 @@ class SupabaseFrontendReadRepository:
             return data
         except Exception as exc:
             raise PersistenceError("League read backend unavailable") from exc
+
+    def initial_observations(self, season_id):
+        try:
+            data = self._client.rpc("initial_assignment_observations", {"sid": season_id}).execute().data
+            if not isinstance(data, list):
+                raise ValueError("Invalid observed progress")
+            return data
+        except Exception as exc:
+            raise PersistenceError("Observed progress unavailable") from exc

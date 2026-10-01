@@ -1,0 +1,311 @@
+{
+  "date": "2026-10-01 Europe/Madrid",
+  "entry_commit": "8e3d598205613d950e3c4851bd07fb0ffe15ba53",
+  "source": "E implementation working tree, published with this evidence; LF-normalized hashes",
+  "status": "LOCAL_PASS",
+  "source_hashes": {
+    "app/api/initial_assignment_models.py": "24d43ccaf0587d0ce05f5041841c9e4a21278daa1c753e6b3b02e717aa1d8054",
+    "app/api/main.py": "59521c27f9454a97fddf10b77a52ff25396747e6c751cdacab2d27a8be6b05e5",
+    "app/api/read_models.py": "3d5ecbeca37962398bb3f86a72281cf80b746acdd38d33f4461291ae9ae5fc2c",
+    "app/api/routes/initial_assignment.py": "2911d864d2eea0617f152eeae97c048774875d0fbb9af781349e872924217814",
+    "app/api/season_admin_models.py": "9638f9ccbda9302495852562c2e67b6cab7138e6fe7a751a55a93dda63149904",
+    "app/application/frontend_reads.py": "5ca655b8a9399b1bafe0156be43839e706c021f403e7fd930fb4d128d7de5640",
+    "app/application/initial_assignment.py": "3b7b2da6f4b6282727aa78c6d80b565702e9c50248e7e32c3f7169c2ba18bfc0",
+    "app/repositories/supabase/frontend_reads.py": "9cf0f26f6f8fb5da16ad4fd72733e0f3be0af1d5298f77f9580e4f6f33338e7d",
+    "app/repositories/supabase/season_admin.py": "33a2273dc14a222db478cf8809923b181580392fb888083219c29677879d15cd",
+    "app/save_parser/adapter.py": "e9b3b40ca4230e6db00085225cf1f637d09da51600b9284c300024d9d5c543c3",
+    "app/save_parser/models.py": "48a16e295b3f7162e564eeda6133e5ee150cb4f19f30db9f77e0ffaf62b5659d",
+    "companion/parser/PokeApp.Parser.Checks/Program.cs": "9efd9d9ba11e2d5b4d0f079aa7873d5be54efa5812e467b403dcd0835ac0c894",
+    "companion/parser/PokeApp.Parser/Inspection.cs": "a15c5a005a660bb6cfe10d87366216245f170e46a12a83e0d7cc1561756417b4",
+    "supabase/v2/bootstrap.sql": "71b37384151fc995e4075e1231a108b10c2aba79f25285743eeac5743d26ca40",
+    "supabase/v2/migrations/036_observed_initial_divisions.sql": "e2ef27a4c669a4f118cbe14d09174a600dddd8e10d44ebf610297ede8363bbd1",
+    "supabase/v2/reset_dev.sql": "725a7d0f6bd3bf851d1d1e5f6ba0491d9ec83bfd82273b68545fc712bce69de4",
+    "tests/test_api_initial_assignment.py": "ecb5cf1b3cf4e74943bbe58fe446ff7ce2804ce25ce6eb1c8cdabf17771a63ab",
+    "tests/test_api_season_admin.py": "02e763bbbbd97097e30a73131c5c98ede7a71982c96313f328ca5a771fb2e759",
+    "tests/test_initial_assignment.py": "d676d3c4c956524e93e48a2bf48170da3099fd982d490dd559d5bab3c53a28f6",
+    "tests/test_phase10_5e_parser_progress.py": "ae16aa3b418fa787c71dfcacc51525005570491b322398e06b88581d200227f0",
+    "tests/test_supabase_v2_schema.py": "5012deb2e7b1983e4de64e54e03af6d32a092776d39df35e45715df7fd3346b6",
+    "tools/generate_supabase_v2_bootstrap.py": "f6ff8f26825365443e2402ebf7bd526eb341340a54187ad44021386c3f41d95d",
+    "tools/validate_phase10_5_initial_sql.py": "08568ebd32207db1696622bab581cd3bd4eb111797a2dc61cb628c39cd1ba2db",
+    "tools/validate_phase10_5_public_reads.py": "8b94bea95dc52d28d8f4100875abe44ee7da00aea25da930a6f37e30c8821ccc",
+    "tools/validate_phase9_launcher.py": "bde88cf70046ddc7d398fb56c1d6efcbb44cdb76e9cb34d962ac820dae626fa5",
+    "tools/validate_season_admin_fixtures.py": "217f0e617e2e5b4ea5317bba6a87059bb580a8eacd84cd2606e124b5b4e32e88",
+    "tools/validate_supabase_v2_identity_sql.py": "40831e11188223d8104d4f24608a0496580647b3835ea3218011fa25deb716e0",
+    "tools/validate_supabase_v2_schema.py": "f8b1ae6ce452daeaa251fdd5acf5fe3cb8e90e0201dc8576a852b437d224fc87",
+    "tools/validate_supabase_v2_season_admin_sql.py": "b326994615905adf92e41e6ab5ca05761fa896206ef3d13266f8385b8d3c845a",
+    "web/e2e/initial-assignment.spec.ts": "f05828e2e3a7b748c5eb44b1c1e141ab05b22b1c230f3099463304105fe4e90b",
+    "web/src/api/client.ts": "bba6b8d679ba1d68f5c29b80118c87cc8cfb34c5c35f0fc10f4798838493fc94",
+    "web/src/api/schema.d.ts": "d90123b370850bc9f8096e5c77d54028c1190a3193a506ac52bf9dd66532e262",
+    "web/src/features/admin.tsx": "ec4fdc7a3a9116186695a8fb594ffee280ead9b599603260022f18d53d58955e",
+    "web/src/features/core.tsx": "0c512c9298315e2445a50a5dfd4c501dbddeb2dba466b334cedf0a309ec0820b",
+    "web/src/features/initial-assignment.tsx": "47b0da52c211bb3aedf0c2f0b9c3c78395fa9de55ea9a9440bbd24e79e19b6c6"
+  },
+  "python": {
+    "tests": 663,
+    "exit_code": 0,
+    "log": "%TEMP%/phase10-5e-python-release.log"
+  },
+  "parser": {
+    "python": {
+      "command": [
+        "C:\\Users\\Antonio\\Desktop\\AntoPKMN\\PokeApp\\.venv-api\\Scripts\\python.exe",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tests",
+        "-p",
+        "test_phase9*.py",
+        "-v"
+      ],
+      "exit_code": 0,
+      "log": "C:\\Users\\Antonio\\AppData\\Local\\Temp\\phase10-5e-parser\\python.log"
+    },
+    "progress": {
+      "command": [
+        "C:\\Users\\Antonio\\Desktop\\AntoPKMN\\PokeApp\\.venv-api\\Scripts\\python.exe",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tests",
+        "-p",
+        "test_phase10_5e_parser_progress.py",
+        "-v"
+      ],
+      "exit_code": 0,
+      "log": "C:\\Users\\Antonio\\AppData\\Local\\Temp\\phase10-5e-parser\\progress.log"
+    },
+    "binary": {
+      "command": [
+        "C:\\Users\\Antonio\\Desktop\\AntoPKMN\\PokeApp\\.venv-api\\Scripts\\python.exe",
+        "tools/validate_phase9_launcher.py",
+        "--dotnet",
+        "C:\\Users\\Antonio\\AppData\\Local\\Temp\\pokeapp-phase9-tools\\dotnet\\dotnet.exe"
+      ],
+      "exit_code": 0,
+      "log": "C:\\Users\\Antonio\\AppData\\Local\\Temp\\phase10-5e-parser\\binary.log"
+    }
+  },
+  "react": {
+    "tests": 11,
+    "exit_code": 0
+  },
+  "edge": {
+    "complete_tests": 24,
+    "exit_code": 0,
+    "log": "%TEMP%/phase10-5e-browser-frontend.log",
+    "focused_followup_tests": 4,
+    "synthetic_api": true
+  },
+  "postgres_e": {
+    "groups": 8,
+    "rollback_boundaries": 12,
+    "public_tables_equal": 47,
+    "exit_code": 0,
+    "command": [
+      ".venv-api/Scripts/python.exe",
+      "-m",
+      "tools.validate_phase10_5_initial_sql",
+      "--psql",
+      "C:\\Users\\Antonio\\AppData\\Local\\Temp\\pokeapp_pg17_phase8c_20260922\\portable\\pgsql\\bin\\psql.exe",
+      "--database",
+      "pokeapp_v2_validation_phase10_5e_release"
+    ]
+  },
+  "inherited_postgres": {
+    "exit_code": 0,
+    "log": "C:\\Users\\Antonio\\AppData\\Local\\Temp\\phase10-5e-regressions.log"
+  },
+  "rebuild": {
+    "source_sha256": {
+      "supabase/v2/migrations/001_core.sql": "3e6083203fe43e51937751557ab7514de67c2cfae29f110e33ff1ffa9a69a862",
+      "supabase/v2/migrations/002_seasons.sql": "3b713a89c0af1b224556a803276f6cdd0682d712f4ef980cbf89bd7ce92110cc",
+      "supabase/v2/migrations/003_league.sql": "76ed470e8d345557e8e5965cf5f2d7aeede7aed265d9ae53fc7f2487730fc4dc",
+      "supabase/v2/migrations/004_shop.sql": "41f2dcce5a4b81f1ff4b710c36b2662af19a2ab8e7384f6fb8e5c74e9be946ab",
+      "supabase/v2/migrations/005_saves.sql": "10d97db7b3378ce92f6fdaac2120f03822560a36f40066ca3586e9d25efc3072",
+      "supabase/v2/migrations/006_activity_hall.sql": "ccf2c967fca741577bfea3cbe8c6567a857f9df59a1be4f41a8986f626955fde",
+      "supabase/v2/migrations/007_competitions.sql": "b6c9f32eaa1fe33709c452638272e93d9ef702019d901caec90f5479d1ff9f82",
+      "supabase/v2/migrations/008_indexes.sql": "fd4351693640a060ad44cddb43e3690f932d367c9cca73ab910243107eca6ed8",
+      "supabase/v2/migrations/009_seed.sql": "d2bf83cac17fc86d4c3d9f7dbc02a11a80068fa3c1decb9aa4ee624c2486a279",
+      "supabase/v2/migrations/010_security_helpers.sql": "2e6279ceb0cbc92c8822eefa5304614b84bfab484b9e7ecd32e3d32d30db60fb",
+      "supabase/v2/migrations/011_rls_policies.sql": "9e5fc9a5e83f5109d13618263cf57b0d04780c782d8b2ba9825a85bfc6ada919",
+      "supabase/v2/migrations/012_security_views.sql": "3f8cc2cdd4686b777bdf491de5d64e523b7f279f23999f68ea312e6460bd044d",
+      "supabase/v2/migrations/013_storage_policies.sql": "838b13d36f3a1c2d7ca017b9de4772f167a1ece3777f2a5c888e700adf74a9d6",
+      "supabase/v2/migrations/014_security_invoker_hardening.sql": "7dc5f74179f7dd00748ff46926aa8af1fbb7a1b44bf92f4fa7e207e06ac8a2a1",
+      "supabase/v2/migrations/015_public_trainers_visibility.sql": "ca230c7b51552235541ffdc0819c91a123f5c0bdc937020bf055acb71c958f30",
+      "supabase/v2/migrations/016_public_team_locks_visibility.sql": "2dd25e5a9d8ba4e304c1e726515b23c05b743815773d0eac2f156e53fe5a8401",
+      "supabase/v2/migrations/017_public_coin_balances_visibility.sql": "59ed1842a14ee02fd499d9585f91983ab1dfb48a3a6ddf3fb73e191236cac140",
+      "supabase/v2/migrations/018_public_views_visibility.sql": "84746e55fe615dbf6533f91e4692aae3203293e604084ec7107f392f699b010c",
+      "supabase/v2/migrations/019_team_lock_api.sql": "e020ab7af784a17e8deab1b99297087b6dfbe485fd2d04cbd40267c730a9b584",
+      "supabase/v2/migrations/020_current_matchday_store_ban_contract.sql": "af936162a304d271d3c169794c7701bd84e9f21f86ec140562df09e44ec8a700",
+      "supabase/v2/migrations/021_normal_purchase_api.sql": "fe6fa8619f993732129847832aa3f49a44dfa5fef96fbb5479a102ebb32fdf38",
+      "supabase/v2/migrations/022_promotional_purchase_api.sql": "9303cf5a2d60ed7ddef12ab4704afa9580fc39e8034fe529a7b7f916fc30ec07",
+      "supabase/v2/migrations/023_pokemon_identity.sql": "f3a4af2b2f2ad16895bb9abee87182a443df1bdc615d7f458543a21e506bc70f",
+      "supabase/v2/migrations/024_redemption_effect_boundary.sql": "9d12264d0038cea0953da23e50622708acb5d3e45d0658dc508ab1ed12c4cfff",
+      "supabase/v2/migrations/025_robbery_voucher_and_redemption.sql": "baf3679b200ac90030cb83ac9967ccff7d5e2c711c30f23bf615feae23f02b39",
+      "supabase/v2/migrations/026_season_admin_setup_api.sql": "ee9e1f597b1d8efcc5586f9b84068e8f16140f29659a50031c0052aa41549682",
+      "supabase/v2/migrations/027_competitive_matchdays.sql": "08b233bee9fe58311f68e92a6677d3eb0eed9093a5346402dc06f86cf8055565",
+      "supabase/v2/migrations/028_participant_status_admin.sql": "90b7c6781872b8f5111b7a6e1a8f8518f084fdc2fd4faa13b4e0eb4664a386d4",
+      "supabase/v2/migrations/029_season_finalization_archive_hall.sql": "c18e0c3a35007f42003842df82349bbbbb715f52f565f53287d360076c0ddc03",
+      "supabase/v2/migrations/030_trials_sanctions_api.sql": "642940a5951a02d09485b1ccec0c4f265f5e656f80077393d6b53956ae6fc0fc",
+      "supabase/v2/migrations/031_cup_engine_certification.sql": "868efbca7a2ecb76138a2e12b37cd35b08cad7a849effa4fdf1dae7cfdcde362",
+      "supabase/v2/migrations/032_cup_player_identity_index.sql": "9a0e14b45451ba929f72420959939cad6d78fed8c25bcb6bb8b5ed3f5fde18e4",
+      "supabase/v2/migrations/033_league_general_read.sql": "58705e8d08c639534b338f3d9766e4947b3c052828c51653f7dd887b4f41961a",
+      "supabase/v2/migrations/034_participant_matchday_results.sql": "805daa915e93513f3cd36a6b66a6e3681f53e1a029d8311653a239d8bb0326b5",
+      "supabase/v2/migrations/035_daily_sporting_ranking.sql": "b8ee7b8715c826a5cb43652e7621a12f41dc73e256ae02ea69a06e885f38cc53",
+      "supabase/v2/migrations/036_observed_initial_divisions.sql": "e2ef27a4c669a4f118cbe14d09174a600dddd8e10d44ebf610297ede8363bbd1",
+      "supabase/v2/bootstrap.sql": "71b37384151fc995e4075e1231a108b10c2aba79f25285743eeac5743d26ca40",
+      "supabase/v2/reset_dev.sql": "725a7d0f6bd3bf851d1d1e5f6ba0491d9ec83bfd82273b68545fc712bce69de4",
+      "tools/validate_supabase_v2_schema.py": "2ccf5b3b20c3664ed1b1cffde5dcdb3b959a2c3761f8d98680edcf95d258b62b"
+    },
+    "builds": [
+      {
+        "source": "migrations",
+        "iteration": 1,
+        "database": "pokeapp_v2_validation_phase10_5e_release",
+        "schema_catalog_rls": "PASS",
+        "normalized_dump": "C:\\Users\\Antonio\\AppData\\Local\\Temp\\phase10-5e-migrations-1-schema.sql",
+        "lines": 11462,
+        "sha256": "f13a6143eba5bf93c4fcd2e5913229d03e1be734d8fdf100ca3b056c137621a9"
+      },
+      {
+        "source": "migrations",
+        "iteration": 2,
+        "database": "pokeapp_v2_validation_phase10_5e_release",
+        "schema_catalog_rls": "PASS",
+        "normalized_dump": "C:\\Users\\Antonio\\AppData\\Local\\Temp\\phase10-5e-migrations-2-schema.sql",
+        "lines": 11462,
+        "sha256": "f13a6143eba5bf93c4fcd2e5913229d03e1be734d8fdf100ca3b056c137621a9"
+      },
+      {
+        "source": "bootstrap",
+        "iteration": 1,
+        "database": "pokeapp_v2_validation_phase10_5e_bootstrap",
+        "schema_catalog_rls": "PASS",
+        "normalized_dump": "C:\\Users\\Antonio\\AppData\\Local\\Temp\\phase10-5e-bootstrap-1-schema.sql",
+        "lines": 11462,
+        "sha256": "f13a6143eba5bf93c4fcd2e5913229d03e1be734d8fdf100ca3b056c137621a9"
+      },
+      {
+        "source": "bootstrap",
+        "iteration": 2,
+        "database": "pokeapp_v2_validation_phase10_5e_bootstrap",
+        "schema_catalog_rls": "PASS",
+        "normalized_dump": "C:\\Users\\Antonio\\AppData\\Local\\Temp\\phase10-5e-bootstrap-2-schema.sql",
+        "lines": 11462,
+        "sha256": "f13a6143eba5bf93c4fcd2e5913229d03e1be734d8fdf100ca3b056c137621a9"
+      }
+    ],
+    "parity": {
+      "status": "PASS",
+      "identical_builds": 4,
+      "identical_lines": 11462
+    },
+    "migrations_catalog": {
+      "rls": true,
+      "service_updates": false,
+      "unsafe_functions": 0,
+      "browser_table_or_column_grants": 0
+    },
+    "bootstrap_catalog": {
+      "rls": true,
+      "service_updates": false,
+      "unsafe_functions": 0,
+      "browser_table_or_column_grants": 0
+    },
+    "exit_code": 0
+  },
+  "static_checks": [
+    {
+      "command": [
+        ".venv-api/Scripts/python.exe",
+        "-m",
+        "compileall",
+        "-q",
+        "app",
+        "tools",
+        "tests"
+      ],
+      "exit_code": 0
+    },
+    {
+      "command": [
+        "git",
+        "diff",
+        "--check"
+      ],
+      "exit_code": 0
+    },
+    {
+      "command": [
+        ".venv-api/Scripts/python.exe",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tests",
+        "-p",
+        "test_supabase_v2_schema.py",
+        "-v"
+      ],
+      "exit_code": 0
+    },
+    {
+      "command": [
+        ".venv-api/Scripts/python.exe",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tests",
+        "-p",
+        "test_robbery_contract.py",
+        "-v"
+      ],
+      "exit_code": 0
+    }
+  ],
+  "lint_delta": {
+    "inherited": 86,
+    "current": 86,
+    "new": 0
+  },
+  "frontend_build": {
+    "source_head": "8e3d598205613d950e3c4851bd07fb0ffe15ba53",
+    "working_files_sha256": {
+      "web/src/features/initial-assignment.tsx": "47b0da52c211bb3aedf0c2f0b9c3c78395fa9de55ea9a9440bbd24e79e19b6c6",
+      "web/src/features/admin.tsx": "ec4fdc7a3a9116186695a8fb594ffee280ead9b599603260022f18d53d58955e",
+      "web/src/features/core.tsx": "0c512c9298315e2445a50a5dfd4c501dbddeb2dba466b334cedf0a309ec0820b",
+      "web/src/api/client.ts": "bba6b8d679ba1d68f5c29b80118c87cc8cfb34c5c35f0fc10f4798838493fc94",
+      "web/src/api/schema.d.ts": "0f39a796c76514dce628dbb7cc88bc257b0db82497214f8678346dca67b12d41",
+      "web/e2e/initial-assignment.spec.ts": "f05828e2e3a7b748c5eb44b1c1e141ab05b22b1c230f3099463304105fe4e90b"
+    },
+    "checks": [
+      {
+        "command": [
+          "npm.cmd",
+          "run",
+          "build"
+        ],
+        "exit_code": 0,
+        "log": "C:\\Users\\Antonio\\AppData\\Local\\Temp\\phase10-5e-build-frontend.log",
+        "note": "Direct child exit 0 retained in prior tool output; outer harness stdout failed cp1252 encoding after child completed."
+      },
+      {
+        "command": [
+          "npm.cmd",
+          "run",
+          "deploy:check"
+        ],
+        "exit_code": 0,
+        "log": "C:\\Users\\Antonio\\AppData\\Local\\Temp\\phase10-5e-worker-check-frontend.log"
+      }
+    ]
+  },
+  "limits": [
+    "No E remote write at this observation.",
+    "Positive modern tournament progression is local PostgreSQL evidence, not owner-season mutation.",
+    "No cloud ingestion or final Launcher; ordinary missing observations stay pending."
+  ]
+}

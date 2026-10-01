@@ -120,8 +120,20 @@ def main() -> int:
             parsed = inspector.inspect(SaveSource.enroll(path))
             assert parsed.observation.generation == generation
             assert len(parsed.observation.identity_observations()) == 2
+            assert parsed.observation.progress is not None
+            assert parsed.observation.progress.regions[0].badge_flags == (False,) * 8
         print(
             "PASS real byte IPC, strict neutral DTO and live-file verification Gen3/4/5"
+        )
+        regional = inspector.inspect(
+            SaveSource.enroll(fixtures / "progress/hgss-kanto-only.sav")
+        )
+        assert regional.observation.progress.primary_region == "johto"
+        assert regional.observation.progress.regions[0].badge_flags == (False,) * 8
+        assert regional.observation.progress.regions[1].badge_flags == (True,) * 8
+        assert regional.parser_version == "pokeapp-reader/2;pkhex/24.11.11"
+        print(
+            "PASS regional observed progress across real HGSS byte IPC; unknown never inferred"
         )
         local = temp / "Espacio Pokémon.sav"
         local.write_bytes((fixtures / "gen5.sav").read_bytes())

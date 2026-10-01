@@ -10,6 +10,7 @@ from app.api.routes import season_lifecycle
 from app.api.routes import trials
 from app.api.routes import cups
 from app.api.routes import reads
+from app.api.routes import initial_assignment
 
 
 def create_app(
@@ -50,6 +51,7 @@ def create_app(
     api.include_router(trials.router)
     api.include_router(cups.router)
     api.include_router(reads.router)
+    api.include_router(initial_assignment.router)
     return api
 
 

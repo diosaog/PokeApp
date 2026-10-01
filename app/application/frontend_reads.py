@@ -96,10 +96,13 @@ class FrontendReads:
         return data
 
     def season(self, sid):
-        rows = self.rows("seasons", "id,name,status,current_matchday_id", id=sid)
+        rows = self.rows("seasons", "id,name,status,current_matchday_id,metadata", id=sid)
         if not rows or rows[0]["status"] == "discarded":
             raise NotFoundError("Season not found")
-        return rows[0]
+        season = dict(rows[0])
+        metadata = season.pop("metadata", {})
+        season["initial_assignment_rule"] = metadata.get("initial_assignment_rule")
+        return season
 
     def balance(self, sid, tid):
         players = self.rows("season_players", "id", season_id=sid, trainer_id=tid)
@@ -116,14 +119,31 @@ class FrontendReads:
         players = self.rows(
             "public_season_players", "id,trainer_id,status", season_id=sid
         )
-        stats = {
-            r["season_player_id"]: r["badges_count"]
-            for r in self.rows(
-                "public_season_player_stats",
-                "season_player_id,badges_count",
-                season_id=sid,
-            )
-        }
+        if season["initial_assignment_rule"] == "observed_deaths_v1":
+            observed = self.repo.initial_observations(sid)
+            if (len(observed) > 500 or len(observed) != len(players)
+                or len({r["id"] for r in observed}) != len(observed)
+                or {r["id"] for r in observed} != {p["id"] for p in players}):
+                raise PersistenceError("Invalid observed roster")
+            stats = {}
+            for row in observed:
+                value = row["observed_badges"]
+                if row["progress_state"] not in ("observed", "unknown") or (
+                    value is not None and (type(value) is not int or not 0 <= value <= 8)
+                ) or (
+                    (row["progress_state"] == "unknown") != (value is None)
+                ):
+                    raise PersistenceError("Invalid observed progress")
+                stats[row["id"]] = value
+        else:
+            stats = {
+                r["season_player_id"]: r["badges_count"]
+                for r in self.rows(
+                    "public_season_player_stats",
+                    "season_player_id,badges_count",
+                    season_id=sid,
+                )
+            }
         for p in players:
             p.update(
                 display_name=trainers.get(p["trainer_id"], "Entrenador no disponible"),

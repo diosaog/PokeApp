@@ -84,6 +84,16 @@ export function errorText(error: unknown) {
     return "Los datos del empate han cambiado. Revisa los grupos actuales y registra de nuevo la decisión.";
   if (error.code === "INVALID_TIE_RESOLUTION")
     return "Revisa el orden y el motivo de cada empate pendiente.";
+  if (error.code === "INITIAL_ASSIGNMENT_REVIEW_STALE")
+    return "El progreso o las muertes han cambiado. Revisa el reparto actualizado y registra de nuevo cualquier decisión pendiente.";
+  if (error.code === "INITIAL_BOUNDARY_TIE_UNRESOLVED")
+    return "Hay un empate en el corte A/B. Registra la decisión deportiva externa y su motivo.";
+  if (error.code === "INITIAL_ASSIGNMENT_NOT_READY")
+    return "El reparto necesita progreso observado suficiente, muertes observadas y una temporada preparada.";
+  if (error.code === "INITIAL_ASSIGNMENT_REQUIRED")
+    return "Confirma el reparto inicial observado antes de abrir la jornada.";
+  if (error.code === "INITIAL_ASSIGNMENT_LOCKED")
+    return "El reparto inicial ya no puede modificarse en este estado.";
   const labels: Record<number, string> = {
     401: "La sesión ha caducado. Vuelve a entrar.",
     403: "No tienes permiso para esta acción.",

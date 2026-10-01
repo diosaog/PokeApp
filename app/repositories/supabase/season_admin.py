@@ -2,6 +2,7 @@
 from typing import Any, Protocol
 
 from app.repositories.errors import PersistenceError
+from app.application.initial_assignment import initial_assignment_review, plan_initial_assignment, InitialAssignmentRejected
 
 
 RPCS = {
@@ -19,6 +20,9 @@ REJECTIONS = {
         "invalid_roster", "invalid_config", "invalid_rewards", "effective_round_exists", "config_window_closed",
         "config_already_used", "initial_setup_locked", "division_capacity_mismatch", "matchday_already_prepared",
         "config_not_effective"), 409),
+    **dict.fromkeys(("initial_assignment_required", "initial_assignment_not_ready",
+        "initial_assignment_locked", "initial_assignment_review_stale", "stale_inputs",
+        "initial_boundary_tie_unresolved", "invalid_tie_resolution"), 409),
     "invalid_request": 422,
 }
 
@@ -43,8 +47,29 @@ class SupabaseSeasonAdminRepository:
         return cls(create_client(url, service_role_key))
 
     def execute(self, operation: str, request: dict) -> dict:
+        if operation in ("initial_state", "initial_finalize"):
+            envelope = dict(operation="read" if operation == "initial_state" else "finalize", request=request)
+            context = self._rpc("initial_assignment_context", envelope)
+            if "receipt" in context:
+                if operation != "initial_finalize":
+                    raise PersistenceError("Unexpected read receipt")
+                return context["receipt"]
+            try:
+                if operation == "initial_state":
+                    return initial_assignment_review(context)
+                plan = plan_initial_assignment(context, request["body"])
+            except InitialAssignmentRejected:
+                raise
+            except (ValueError, TypeError, KeyError) as exc:
+                raise PersistenceError("Invalid initial assignment context") from exc
+            return self._rpc("api_admin_finalize_initial_assignment", dict(
+                request=request, plan=plan, input_hash=context["input_hash"],
+            ))
+        return self._rpc(RPCS[operation], request)
+
+    def _rpc(self, name: str, request: dict) -> dict:
         try:
-            data = self._client.rpc(RPCS[operation], {"p_request": request}).execute().data
+            data = self._client.rpc(name, {"p_request": request}).execute().data
         except Exception as exc:
             message = str(getattr(exc, "message", ""))
             status = REJECTIONS.get(message)

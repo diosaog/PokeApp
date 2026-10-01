@@ -16,6 +16,7 @@ import type { Model, Overview } from "../api/types";
 import { useApp, useRead, useOverview, usePC } from "../state";
 import { Inventory } from "./inventory";
 import { ParticipantResults } from "./league-results";
+import { InitialAssignment } from "./initial-assignment";
 import {
   Card,
   CommandState,
@@ -487,6 +488,8 @@ export function LeaguePage() {
 
           return (
             <>
+              {data.season.initial_assignment_rule === "observed_deaths_v1" &&
+                !data.days.length && <InitialAssignment />}
               <nav className="tabs" aria-label="Vistas de Liga">
                 <button
                   aria-pressed={!day}
@@ -679,7 +682,7 @@ export function TrainersPage() {
                 <h2>{p.display_name}</h2>
                 <p>
                   {p.badges_count == null
-                    ? "Medallas aún no disponibles"
+                    ? "Progreso no observado / pendiente de sincronizar save"
                     : `${p.badges_count} medallas registradas`}
                 </p>
                 {p.badges_count != null && (

@@ -1,4 +1,4 @@
-"""Real B/C/D public reads and guaranteed denials, preserving manual staging data.
+"""Real B/C/D/E public reads and guaranteed denials, preserving manual staging data.
 
 Run as a module with --output <fresh directory outside the repository>. Supply
 {"pin": "..."} through private stdin, never a command argument. No fixture, valid
@@ -21,6 +21,7 @@ from uuid import uuid4
 import httpx
 
 from app.api.matchday_models import DayState
+from app.api.initial_assignment_models import InitialAssignmentRead
 from app.api.read_models import LeagueGeneralRead, LeagueStandingRead, OverviewRead
 from tools.validate_phase10_hosted import (
     API,
@@ -44,6 +45,7 @@ MIGRATIONS = (
     "033_league_general_read",
     "034_participant_matchday_results",
     "035_daily_sporting_ranking",
+    "036_observed_initial_divisions",
 )
 
 
@@ -56,7 +58,8 @@ def check_general(raw):
     data = LeagueGeneralRead.model_validate(raw)
     require(set(raw) == {"season", "days", "rows"}, "Unexpected GENERAL fields")
     require(
-        set(raw["season"]) == {"id", "name", "status", "current_matchday_id"},
+        set(raw["season"])
+        == {"id", "name", "status", "current_matchday_id", "initial_assignment_rule"},
         "Unexpected season fields",
     )
     fields = set(LeagueStandingRead.model_fields)
@@ -137,7 +140,8 @@ def main():
         "failures": [],
         "limitations": [
             "Owner is admin: no public positive non-admin result mutation is claimed.",
-            "No manual result changed; successful result/tie mutations, CAS and races use local C/D gates.",
+            "No manual result changed; successful result/tie/initial assignment mutations, CAS and races use local C/D/E gates.",
+            "No observed save is uploaded or invented; existing owner season remains legacy initialization.",
         ],
     }
     before = history = advisor_before = None
@@ -171,7 +175,7 @@ def main():
         )
         report["migrations"] = [row for row in history if row["name"] in MIGRATIONS]
         before = snapshot(out, "baseline-before", OWNER_AUTH)
-        require(len(before) == 52, "Unexpected baseline table set")
+        require(len(before) == 53, "Unexpected baseline table set")
         advisor_before = advisors(out, "advisors-before")
         owner = query(
             out,
@@ -293,6 +297,19 @@ def main():
             base = f"/v1/read/seasons/{OWNER_SEASON}"
             general = check_general(request("GET", base + "/league"))
             overview = OverviewRead.model_validate(request("GET", base + "/overview"))
+            initial = InitialAssignmentRead.model_validate(
+                request("GET", f"/v1/seasons/{OWNER_SEASON}/initial-assignment")
+            )
+            require(
+                str(initial.season_id) == OWNER_SEASON
+                and initial.state == "legacy"
+                and initial.rule is None
+                and not initial.ready,
+                "Existing owner initialization was reinterpreted",
+            )
+            passed(
+                "E real typed initial-assignment read preserves owner legacy initialization"
+            )
             require(
                 str(general.season.id) == OWNER_SEASON
                 and general.season == overview.season,
@@ -420,6 +437,46 @@ def main():
                 f"select not exists(select 1 from public.seasons where id='{absent}'::uuid) as absent",
             )
             require(absence == [{"absent": True}], "Absent-resource guard failed")
+            initial_path = f"/v1/admin/seasons/{absent}/initial-assignment/finalize"
+            initial_body = dict(
+                config_version_id=str(uuid4()),
+                expected_setup_revision=0,
+                expected_roster_revision=0,
+                input_hash="a" * 64,
+            )
+            request(
+                "GET",
+                f"/v1/seasons/{absent}/initial-assignment",
+                auth=False,
+                status=401,
+            )
+            request(
+                "GET",
+                f"/v1/seasons/{absent}/initial-assignment",
+                invalid=True,
+                status=401,
+            )
+            initial_denial = request(
+                "POST",
+                initial_path,
+                body=initial_body,
+                status=404,
+                key="phase10-5e-absent-" + uuid4().hex,
+            )
+            require(
+                initial_denial.get("detail", {}).get("code") == "SEASON_NOT_FOUND",
+                "E absent-season denial",
+            )
+            request(
+                "POST",
+                initial_path,
+                body=dict(initial_body, observed_badges=2),
+                status=422,
+                key="phase10-5e-forged-" + uuid4().hex,
+            )
+            passed(
+                "E typed finalize denies verified absent season and caller-supplied progress without writes"
+            )
             denial = request(
                 "PUT",
                 f"/v1/seasons/{absent}/matchdays/{uuid4()}/results",
