@@ -1,0 +1,110 @@
+{
+  "observed_date": "2026-10-01 Europe/Madrid",
+  "entry_commit": "92d9e5548fe028cda78a95ab41375e0dcea28184",
+  "source_commit": "Implementation commit containing these normalized source hashes",
+  "environment": "Windows; Python venv; PostgreSQL 17 at loopback:55439; isolated Edge",
+  "status": "LOCAL_PASS_REMOTE_PENDING",
+  "source_hashes": {
+    "app/api/matchday_models.py": "3774f14607206ba1094ef66943f010170443112662cc3ca52af6d6138eb5a9bc",
+    "app/api/read_models.py": "3517d4cfd58d6d4c1905c4b33966ef16157d82a80b99f97ecae25f4fd27a5a62",
+    "app/api/routes/matchdays.py": "07a2dda78abf8727ecbf718d15b09e95f77e737fbb28650951d8c74fe84b2ecf",
+    "app/application/daily_ranking.py": "2c69d3b35dcb6e8922b518baf5eb41f99984df9371cd1acd58fc91aeae084ba2",
+    "app/application/frontend_reads.py": "c055a253c48f5b61cb0b0a26628fee1655327eccb37f529f8c87933944f1c4e1",
+    "app/application/matchdays.py": "80fc5a8b17a78225018fcbd2b38db7e22fe8d5b33f13221968a7d8a16eb225f8",
+    "app/domain/services/league.py": "3d7b82b19a9d95958591236e53f2e7fd9a64584301a7f96e49f671e0e6c7a195",
+    "app/domain/services/legacy_league.py": "6d608c0bffa606b611f769ae462700ff10c0e4100c37296d4d27ea1285bd4330",
+    "app/liga/ranking.py": "bf56c1a47272714b31140e42be7c5d2039796295c8e5ebbc2be0a46366d719e9",
+    "app/repositories/supabase/matchdays.py": "f598801cc41f7766aadc5150b0aebb2b292857a02e60a3eca51eb83e9c19678d",
+    "supabase/v2/bootstrap.sql": "c2c61d17a56dfba6e0669d01099ddcf17b6ee05ec429e81d3fd1e59140b690d9",
+    "supabase/v2/migrations/035_daily_sporting_ranking.sql": "b8ee7b8715c826a5cb43652e7621a12f41dc73e256ae02ea69a06e885f38cc53",
+    "tests/test_api_daily_ranking.py": "a19641a14a7345321774ccceb5603125f6d3aec40fe9b83fc9071dcc3ff340cb",
+    "tests/test_api_daily_standings.py": "2d4dfe30f24c7e3eb1c868d479919338d125526ed2a96b2f0bacc908008fd640",
+    "tests/test_api_matchdays.py": "31fff2dfd400d5b5674def928876aeb68bc1cfa47a639981bd0da8c1b2146a6a",
+    "tests/test_daily_ranking.py": "35ee49bb7e5a091b986682619b8d8f47b8e5a0d461b8491ab160c4cb637bb55f",
+    "tests/test_domain_services.py": "6559aa70cf4c22eefb8c1d20bde317181e5abc444f9691a299356ef0fef291d8",
+    "tests/test_supabase_v2_schema.py": "44125b5fd13bba22f42e1fc573c50def4bf362858100b80115ae195b5481f1ca",
+    "tools/generate_supabase_v2_bootstrap.py": "efc0402cdddada97f6c83ac5fbb65a1226fd8180aee6c89532240eec38018647",
+    "tools/validate_phase10_5_public_reads.py": "22edd9173c5bb3452f871869610b85b5fadd2df68886451422f5e58f41ffc2c4",
+    "tools/validate_phase10_5_ranking_sql.py": "a4ae8b81284e99326a857148cadea4c5897b77163bde7d3b0dac14f94e3dd583",
+    "tools/validate_phase10_hosted.py": "9bc274287116590ebbade63c7dab8803c672b4010b6a235e4dc30198f638226b",
+    "web/e2e/daily-ranking.spec.ts": "7890152b8813ba4f1f093817ffd97e88c39d4de60d922860c09165d91913c22b",
+    "web/src/api/client.ts": "a2cc22a3e7a9070eb0d5db3b8e6aefe90c57a8d4abd0b167c00a7daf994ae1b5",
+    "web/src/api/schema.d.ts": "6131d249b3d8d7110ec1397e2c631914c0574baf9355f750ee57971669b4e76e",
+    "web/src/features/admin.tsx": "9404368c85d320f6e1d6cd4c6407c68deb52394a21bddfd3d517876be1016ac5",
+    "web/src/features/core.tsx": "87a3e1a9f7d4efdd0bcce0b75300c16da16d70a041eee4e5ff44aa98121b84fa",
+    "web/src/features/daily-ties.tsx": "59ba610c7fe4d956af8e0ba5a8f04535b8517c32bdc3cf3d81bba998b4c8d665"
+  },
+  "gates": {
+    "python": {
+      "tests": 623,
+      "exit_code": 0,
+      "command": ".venv-api/Scripts/python.exe tools/run_unit_tests.py",
+      "log": "%TEMP%/phase10-5d-python-final.log"
+    },
+    "react": {
+      "tests": 11,
+      "status": "PASS",
+      "command": "npm --prefix web run test"
+    },
+    "browser": {
+      "tests": 20,
+      "exit_code": 0,
+      "command": "npm --prefix web run test:e2e",
+      "log": "%TEMP%/phase10-5d-browser-final.log",
+      "limitations": "Synthetic HTTP fixtures; no public authentication claim"
+    },
+    "d_postgresql": {
+      "groups": 7,
+      "exact_rollback_boundaries": 4,
+      "restored_public_tables": 46,
+      "exit_code": 0,
+      "command": ".venv-api/Scripts/python.exe -m tools.validate_phase10_5_ranking_sql --psql <local-psql.exe>",
+      "log": "%TEMP%/phase10-5d-sql-second.log"
+    },
+    "rebuild": {
+      "sources": [
+        "001-035",
+        "generated bootstrap"
+      ],
+      "identical_normalized_schema_lines": 10834,
+      "schema_grants_ownership_rls": "PASS",
+      "log": "%TEMP%/phase10-5d-rebuild.log"
+    },
+    "regressions": {
+      "status": "PASS",
+      "groups": {
+        "matchdays": 20,
+        "participants": 24,
+        "lifecycle": 19,
+        "trials": 8,
+        "C_results": 6
+      },
+      "B_general": "PASS including separate-session read isolation and 46-table exact cleanup",
+      "log": "%TEMP%/phase10-5d-regressions.log",
+      "exit_provenance": "All groups and final cleanup assertions completed. PowerShell reports shell exit 1 on psql NOTICE redirection; direct child exit was not separately retained. No regression failure in log."
+    },
+    "static_build": {
+      "typescript_vite": "PASS",
+      "ruff_compile": "PASS",
+      "prettier": "PASS",
+      "workers_dry_run": "PASS",
+      "js_gzip_kb": 115.38,
+      "css_gzip_kb": 6.36
+    },
+    "independent_local_cleanup": {
+      "scanned_public_tables": 46,
+      "fixture_rows": 0,
+      "limitation": "Prefix scan is independent residue evidence, not a full-content baseline. D and C fixture suites each separately assert exact full-content before/after equality."
+    }
+  },
+  "remote": "Not yet applied/deployed; no remote business write",
+  "resolved_attempts": [
+    "Supabase unpinned npx resolved uncached 2.119.0; installed 2.118.0 explicit path works",
+    "Two old tests asserted superseded sporting fallback; updated approved rule assertions",
+    "First legacy fixture changed live stats before correction and correctly hit existing correction window guard",
+    "First browser neutral label assertion used wrong expected text",
+    "Initial build omitted mandatory API URL; final build uses existing HTTPS URL",
+    "PowerShell native stderr warnings produce shell exit 1 despite PASS; final direct subprocess exit codes captured",
+    "Additional cross-database data comparison is inapplicable: independently generated schema/RLS fixtures have different UUIDs/timestamps. No content equality between those two databases is claimed; schema parity and same-database before/after content assertions remain valid."
+  ]
+}

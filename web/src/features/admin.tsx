@@ -19,6 +19,7 @@ import {
   useCommand,
 } from "../ui";
 import { playerName } from "./core";
+import { DailyTieFields, readTieResolution, tieReview } from "./daily-ties";
 
 type Setup = Model<"SeasonSetup">;
 function Configuration({ setup }: { setup: Setup }) {
@@ -332,7 +333,9 @@ function DayAdmin({ dayId }: { dayId: string }) {
   if (q.isPending) return <Loading />;
   if (q.error) return <Notice error={q.error} />;
   const day = q.data!,
-    base = `/v1/admin/seasons/${season}/matchdays/${dayId}`;
+    base = `/v1/admin/seasons/${season}/matchdays/${dayId}`,
+    review = tieReview(cmd.error),
+    name = (id: string) => (ov.data ? playerName(ov.data, id) : id);
   return (
     <Card>
       <h2>Jornada · {day.state}</h2>
@@ -358,57 +361,45 @@ function DayAdmin({ dayId }: { dayId: string }) {
               match_id: m.id,
               winner_season_player_id: text(data, m.id) || null,
             }));
-            void cmd.execute(
-              `${base}/${day.state === "closed" ? "correct" : "results"}`,
-              day.state === "closed"
-                ? ({
-                    expected_snapshot_revision: day.snapshot_revision,
-                    reason: text(data, "reason"),
-                    results,
-                  } satisfies Model<"CorrectDayBody">)
-                : ({
-                    expected_results_revision: day.results_revision,
-                    results,
-                  } satisfies Model<"ResultsBody">),
-              day.state === "closed" ? "POST" : "PUT",
-            );
+            const resolution = readTieResolution(data, review);
+            void cmd.execute(`${base}/correct`, {
+              expected_snapshot_revision: day.snapshot_revision,
+              reason: text(data, "reason"),
+              results,
+              ...(resolution ? { tie_resolution: resolution } : {}),
+            } satisfies Model<"CorrectDayBody">);
           }}
         >
-          {day.matches.map((m) => (
-            <Field
-              key={m.id}
-              label={
-                ov.data
-                  ? `${playerName(ov.data, m.player_a_id)} / ${playerName(ov.data, m.player_b_id)}`
-                  : "Enfrentamiento"
-              }
-            >
-              <select
-                name={m.id}
-                defaultValue={m.winner_id || ""}
-                required={day.state === "closed"}
+          <fieldset disabled={cmd.pending || cmd.uncertain}>
+            {day.matches.map((m) => (
+              <Field
+                key={m.id}
+                label={
+                  ov.data
+                    ? `${playerName(ov.data, m.player_a_id)} / ${playerName(ov.data, m.player_b_id)}`
+                    : "Enfrentamiento"
+                }
               >
-                <option value="">Pendiente</option>
-                {[m.player_a_id, m.player_b_id].map((id) => (
-                  <option key={id} value={id}>
-                    {ov.data ? playerName(ov.data, id) : id}
-                  </option>
-                ))}
-              </select>
-            </Field>
-          ))}
-          {day.state === "closed" && (
+                <select name={m.id} defaultValue={m.winner_id || ""} required>
+                  <option value="">Pendiente</option>
+                  {[m.player_a_id, m.player_b_id].map((id) => (
+                    <option key={id} value={id}>
+                      {ov.data ? playerName(ov.data, id) : id}
+                    </option>
+                  ))}
+                </select>
+              </Field>
+            ))}
             <Field label="Motivo de corrección">
               <textarea name="reason" required maxLength={500} />
             </Field>
-          )}
-          {day.matches.length > 0 && ["open", "closed"].includes(day.state) && (
-            <Submit pending={cmd.pending || cmd.uncertain}>
-              {day.state === "closed"
-                ? "Corregir jornada"
-                : "Guardar resultados"}
-            </Submit>
-          )}
+            <DailyTieFields review={review} name={name} />
+            {day.matches.length > 0 && (
+              <Submit pending={cmd.pending || cmd.uncertain}>
+                Corregir jornada
+              </Submit>
+            )}
+          </fieldset>
         </form>
       )}
       {day.state === "open" && (
@@ -469,19 +460,26 @@ function DayAdmin({ dayId }: { dayId: string }) {
             Se congelarán los resultados y se aplicarán puntos, monedas y
             movimientos. Revisa todos los ganadores antes de continuar.
           </p>
-          <button
-            disabled={cmd.pending || cmd.uncertain}
-            onClick={async () => {
+          <form
+            onSubmit={async (event) => {
+              const data = form(event),
+                resolution = readTieResolution(data, review);
               if (
                 await cmd.execute(`${base}/close`, {
                   expected_results_revision: day.results_revision,
+                  ...(resolution ? { tie_resolution: resolution } : {}),
                 } satisfies Model<"CloseDayBody">)
               )
                 setConfirm(false);
             }}
           >
-            Confirmar cierre
-          </button>
+            <fieldset disabled={cmd.pending || cmd.uncertain}>
+              <DailyTieFields review={review} name={name} />
+              <Submit pending={cmd.pending || cmd.uncertain}>
+                Confirmar cierre
+              </Submit>
+            </fieldset>
+          </form>
           <CommandState command={cmd} />
         </Modal>
       )}

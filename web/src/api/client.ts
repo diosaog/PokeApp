@@ -1,9 +1,76 @@
 import type { Model, Session } from "./types";
 
+const rankingCodes = new Set([
+  "RANKING_TIE_UNRESOLVED",
+  "RANKING_REVIEW_STALE",
+  "INVALID_TIE_RESOLUTION",
+]);
+
+function rankingReview(value: unknown): Model<"RankingReview"> | undefined {
+  if (!value || typeof value !== "object") return;
+  const { input_hash, groups } = value as Record<string, unknown>;
+  if (
+    typeof input_hash !== "string" ||
+    !/^[a-f0-9]{64}$/.test(input_hash) ||
+    !Array.isArray(groups) ||
+    groups.length > 250
+  )
+    return;
+  const allowed = new Set([
+    "points",
+    "coins",
+    "podium",
+    "movement",
+    "last_b_reward",
+  ]);
+  const clean: Model<"TieGroup">[] = [];
+  for (const group of groups) {
+    if (!group || typeof group !== "object") return;
+    const {
+      division,
+      player_ids,
+      position,
+      position_end,
+      wins,
+      adjusted_deaths,
+      consequences,
+    } = group;
+    if (
+      !["A", "B"].includes(division) ||
+      !Array.isArray(player_ids) ||
+      player_ids.length < 2 ||
+      player_ids.length > 500 ||
+      player_ids.some((id: unknown) => typeof id !== "string" || !id) ||
+      new Set(player_ids).size !== player_ids.length ||
+      ![position, position_end, wins, adjusted_deaths].every(
+        Number.isSafeInteger,
+      ) ||
+      position < 1 ||
+      position_end < position ||
+      wins < 0 ||
+      adjusted_deaths < 0 ||
+      !Array.isArray(consequences) ||
+      consequences.some((effect: unknown) => !allowed.has(String(effect)))
+    )
+      return;
+    clean.push({
+      division,
+      player_ids: [...player_ids],
+      position,
+      position_end,
+      wins,
+      adjusted_deaths,
+      consequences: [...consequences],
+    });
+  }
+  return { input_hash, groups: clean };
+}
+
 export class ApiError extends Error {
   constructor(
     public status: number,
     public code: string,
+    public ranking?: Model<"RankingReview">,
   ) {
     super(code);
   }
@@ -11,6 +78,12 @@ export class ApiError extends Error {
 export function errorText(error: unknown) {
   if (!(error instanceof ApiError))
     return "No se pudo conectar. Comprueba la conexión y vuelve a intentarlo.";
+  if (error.code === "RANKING_TIE_UNRESOLVED")
+    return "Hay un empate que afecta al reparto de posiciones o recompensas. Registra la decisión externa antes de continuar.";
+  if (error.code === "RANKING_REVIEW_STALE")
+    return "Los datos del empate han cambiado. Revisa los grupos actuales y registra de nuevo la decisión.";
+  if (error.code === "INVALID_TIE_RESOLUTION")
+    return "Revisa el orden y el motivo de cada empate pendiente.";
   const labels: Record<number, string> = {
     401: "La sesión ha caducado. Vuelve a entrar.",
     403: "No tienes permiso para esta acción.",
@@ -65,13 +138,19 @@ export class ApiClient {
       throw new ApiError(0, "NETWORK_ERROR");
     }
     const data = await response.json().catch(() => null);
-    if (!response.ok)
-      throw new ApiError(
-        response.status,
+    if (!response.ok) {
+      const code =
         typeof data?.detail?.code === "string"
           ? data.detail.code
-          : `HTTP_${response.status}`,
+          : `HTTP_${response.status}`;
+      throw new ApiError(
+        response.status,
+        code,
+        response.status === 409 && rankingCodes.has(code)
+          ? rankingReview(data?.detail?.ranking)
+          : undefined,
       );
+    }
     return data as T;
   }
   private refresh() {

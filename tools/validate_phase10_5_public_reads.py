@@ -1,4 +1,4 @@
-"""Real B/C public reads and guaranteed denials, preserving manual staging data.
+"""Real B/C/D public reads and guaranteed denials, preserving manual staging data.
 
 Run as a module with --output <fresh directory outside the repository>. Supply
 {"pin": "..."} through private stdin, never a command argument. No fixture, valid
@@ -40,7 +40,11 @@ from tools.validate_phase10_hosted import (
 OWNER = "507d9c56-04d8-4801-a9da-f1e53674efb5"
 OWNER_AUTH = "ac98932c-f713-43d1-8b20-600f0be3dadc"
 OWNER_SEASON = "c6bcac5b-0b89-403f-8242-41ac58286ade"
-MIGRATIONS = ("033_league_general_read", "034_participant_matchday_results")
+MIGRATIONS = (
+    "033_league_general_read",
+    "034_participant_matchday_results",
+    "035_daily_sporting_ranking",
+)
 
 
 def now():
@@ -133,7 +137,7 @@ def main():
         "failures": [],
         "limitations": [
             "Owner is admin: no public positive non-admin result mutation is claimed.",
-            "No manual result changed; successful mutations, CAS and races use local C gates.",
+            "No manual result changed; successful result/tie mutations, CAS and races use local C/D gates.",
         ],
     }
     before = history = advisor_before = None
@@ -162,7 +166,7 @@ def main():
             rows = [row for row in history if row["name"] == name]
             require(len(rows) == 1, "Required migration absent or duplicated")
         require(
-            [row["name"] for row in history[-2:]] == list(MIGRATIONS),
+            [row["name"] for row in history[-len(MIGRATIONS) :]] == list(MIGRATIONS),
             "Unexpected latest migrations",
         )
         report["migrations"] = [row for row in history if row["name"] in MIGRATIONS]
@@ -426,6 +430,42 @@ def main():
             require(
                 denial.get("detail", {}).get("code") == "SEASON_NOT_FOUND",
                 "Unexpected missing-season denial",
+            )
+            # Exercise the new typed D contract only against a verified absent season.
+            # A valid decision must never be submitted against the owner's actual day.
+            tie_body = dict(
+                expected_results_revision=0,
+                tie_resolution=dict(
+                    input_hash="a" * 64,
+                    orders=[
+                        dict(
+                            player_ids=[str(uuid4()), str(uuid4())],
+                            reason="Absent-resource validation",
+                        )
+                    ],
+                ),
+            )
+            tie_path = f"/v1/admin/seasons/{absent}/matchdays/{uuid4()}/close"
+            tie_denial = request(
+                "POST",
+                tie_path,
+                body=tie_body,
+                status=404,
+                key="phase10-5d-absent-" + uuid4().hex,
+            )
+            require(
+                tie_denial.get("detail", {}).get("code") == "SEASON_NOT_FOUND",
+                "D close absent-season denial",
+            )
+            request(
+                "POST",
+                tie_path,
+                body=dict(tie_body, plan={}),
+                status=422,
+                key="phase10-5d-plan-" + uuid4().hex,
+            )
+            passed(
+                "Deployed D accepts typed tie decision, denies absent resource and injected plan without writes"
             )
             passed(
                 "Anonymous/invalid JWT 401, extra actor 422 and absent-season RPC 404; no valid business write"

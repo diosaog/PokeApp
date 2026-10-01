@@ -99,7 +99,7 @@ class DomainServiceTests(unittest.TestCase):
             dead_counts={"Anto": 3, "Victor": 1, "Samu": 2},
         )
 
-        self.assertEqual(ranked, ["Victor", "Samu", "Anto"])
+        self.assertEqual(ranked.unique_order(), ("Victor", "Samu", "Anto"))
         movement = league.calculate_division_movements(["A1", "A2"], ["B1", "B2"], 1)
         self.assertEqual(movement.new_a, ("A1", "B1"))
         self.assertEqual(movement.new_b, ("A2", "B2"))

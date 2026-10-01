@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from app.domain.services.legacy_league import legacy_rank_division as rank_division
+
 import json
 import streamlit as st
 
@@ -9,7 +11,6 @@ from app.domain.services.league import (
     head_to_head,
     one_decimal,
     players_from_matches,
-    rank_division,
     sync_match_map,
     total_points_with_penalties,
     wins_losses,

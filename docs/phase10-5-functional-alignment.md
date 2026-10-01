@@ -35,6 +35,35 @@ official history. A new save cannot rewrite closed results. A registered virtual
 revive/theft is not proof of a physical save mutation. Current judicial manual
 Discord verdicts and modern 8L Cup rules are intentional V2 improvements.
 
+## Package D contract detail (approved continuation, 2026-10-01)
+
+The same wins/adjusted-deaths rule applies to every group size. Adjusted deaths
+remain the existing 030 integer fact: Box 8 observations plus the greater of
+applied revivals and used revive purchases, plus twice the wipe-revival counter.
+The visible Box 8 count delivered by B is a separate fact.
+
+A residual daily tie requires external resolution only when group members would
+receive different position points, position coins, unique Top 3 places, movement
+outcomes or the last-B theft reward. Otherwise they share a sporting position;
+technical member order must not affect those consequences. An admin may record
+the externally agreed complete group order and reason, bound to current review
+inputs. This is an audited exception using existing close/correction authority,
+not an automated sporting tie-break. Initial A/B and final championship rules
+remain E/F and the unresolved owner decisions below.
+
+Existing schema-2 snapshots remain unchanged. Future closes identify
+`wins_adjusted_deaths_v1` in frozen inputs; corrections preserve that recorded rule.
+Pre-D snapshots retain `legacy_pre_10_5d` semantics on controlled correction.
+External decisions are append-only snapshot history with the existing actor,
+timestamp, revision and receipt. They are official history, not private messages;
+the typed frontend projection includes shared position/status only. Internal
+allocation slots prove completeness without claiming unique sporting places.
+
+Public verification must preserve manual owner seasons: positive tie mutations,
+rollback and concurrency are local evidence; hosted auth/reads and guaranteed
+absent-resource denials are separate evidence. Additive 035 is necessary for the
+rule/audit/lifecycle distinction; never replay 001–034.
+
 ## Owner decisions still required
 
 Implement independent branches; never infer answers to these questions:

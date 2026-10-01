@@ -269,6 +269,14 @@ function LeagueState({
     </WithSeason>
   );
 }
+function dailyPosition(row: Model<"StandingRead">, division = false) {
+  const start = division ? row.division_position : row.position;
+  if (row.tie_status === "unresolved_neutral" && row.position_end != null) {
+    const end = start + row.position_end - row.position;
+    return `${start}.º–${end}.º · empate`;
+  }
+  return String(start);
+}
 function LeagueDay({ dayId }: { dayId: string }) {
   const { me } = useApp();
   return (
@@ -294,11 +302,13 @@ function LeagueDay({ dayId }: { dayId: string }) {
                 <div className="podium">
                   {[...snapshot.standings]
                     .sort((a, b) => a.position - b.position)
-                    .slice(0, 3)
+                    .filter((s) => s.position <= 3)
                     .map((s) => (
                       <Card key={s.season_player_id}>
                         <Trophy />
-                        <span className="eyebrow">POSICIÓN {s.position}</span>
+                        <span className="eyebrow">
+                          POSICIÓN {dailyPosition(s)}
+                        </span>
                         <h2>{playerName(data, s.season_player_id)}</h2>
                         <strong>
                           {s.points_awarded} <small>puntos de jornada</small>
@@ -327,7 +337,7 @@ function LeagueDay({ dayId }: { dayId: string }) {
                             )
                             .map((s) => (
                               <tr key={s.season_player_id}>
-                                <td>{s.division_position}</td>
+                                <td>{dailyPosition(s, true)}</td>
                                 <td>{playerName(data, s.season_player_id)}</td>
                                 <td>{s.points_awarded}</td>
                               </tr>

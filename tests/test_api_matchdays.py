@@ -10,6 +10,7 @@ from app.api.dependencies import ApiContainer
 from app.api.main import create_app
 from app.api.matchday_models import ResultsBody, CorrectDayBody
 from app.application.matchdays import plan_close
+from app.application.daily_ranking import LEGACY_RULE, RankingDecisionRequired
 from app.auth.errors import InvalidSessionError
 from app.repositories.errors import PersistenceError
 from app.repositories.supabase.matchdays import ERRORS, SupabaseMatchdayRepository
@@ -245,15 +246,22 @@ class MatchdayPlannerTests(unittest.TestCase):
         ctx=domain_context(); ctx['inputs']['matches'][0]['winner_id']='p3'
         with self.assertRaises(ValueError): plan_close(ctx)
 
-    def test_duplicate_ranking_keys_rejected(self):
+    def test_modern_ranking_ignores_legacy_names_but_legacy_correction_requires_them(self):
         ctx=domain_context(); ctx['inputs']['players'][1]['ranking_key']='p1'
+        self.assertEqual([s['trainer_id'] for s in plan_close(ctx)['standings']],['p2','p1','p3','p4'])
+        ctx['ranking_rule']=LEGACY_RULE
         with self.assertRaises(ValueError): plan_close(ctx)
 
-    def test_three_way_tie_uses_adjusted_dead_count_then_stable_key(self):
+    def test_three_way_tie_uses_adjusted_deaths_then_explicit_podium_review(self):
         ctx=domain_context(); ctx['inputs']['config']['division_sizes']={'A':3,'B':1}
         ctx['inputs']['players'][2]['division']='A'
         ctx['inputs']['players'][0]['dead_count']=5
         ctx['inputs']['matches']=[dict(id='a',player_a_id='p1',player_b_id='p2',winner_id='p1',division='A'),
             dict(id='b',player_a_id='p2',player_b_id='p3',winner_id='p2',division='A'),
             dict(id='c',player_a_id='p1',player_b_id='p3',winner_id='p3',division='A')]
-        self.assertEqual([s['trainer_id'] for s in plan_close(ctx)['standings']],['p2','p3','p1','p4'])
+        with self.assertRaises(RankingDecisionRequired) as caught:
+            plan_close(ctx)
+        group=caught.exception.review['groups'][0]
+        self.assertEqual(group['player_ids'],['p2','p3'])
+        self.assertEqual(group['position'],1)
+        self.assertIn('podium',group['consequences'])

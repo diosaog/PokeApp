@@ -14,6 +14,53 @@ from app.repositories.errors import NotFoundError, PersistenceError
 from app.repositories.supabase.frontend_reads import FrontendReadRepository
 
 
+def public_daily_standing(snapshot, standing):
+    """Keep historical positions; expose only explicit modern sporting facts."""
+    result = dict(
+        season_player_id=standing["trainer_id"],
+        division=standing["division_id"],
+        **{
+            key: standing[key]
+            for key in ("position", "division_position", "points_awarded", "score")
+        },
+    )
+    inputs = snapshot.get("inputs")
+    ranking = inputs.get("ranking") if isinstance(inputs, dict) else None
+    if ranking is None:
+        return result
+    if not isinstance(ranking, dict):
+        raise PersistenceError("Unsupported official ranking")
+    rule = ranking.get("rule")
+    if rule == "legacy_pre_10_5d":
+        return result
+    if rule != "wins_adjusted_deaths_v1":
+        raise PersistenceError("Unsupported official ranking")
+    metadata = standing.get("metadata")
+    if not isinstance(metadata, dict) or metadata.get("ranking_rule") != rule:
+        raise PersistenceError("Missing official sporting position")
+    position, division_position = result["position"], result["division_position"]
+    end, size, status = (
+        metadata.get("position_end"),
+        metadata.get("tie_size"),
+        metadata.get("tie_status"),
+    )
+    if (
+        any(
+            type(value) is not int or value < 1
+            for value in (position, division_position, end, size)
+        )
+        or end < position
+        or status not in ("unique", "externally_resolved", "unresolved_neutral")
+        or (status == "unresolved_neutral" and (size < 2 or end - position + 1 != size))
+        or (status != "unresolved_neutral" and end != position)
+        or (status == "unique" and size != 1)
+        or (status == "externally_resolved" and size < 2)
+    ):
+        raise PersistenceError("Invalid official sporting position")
+    result.update(position_end=end, tie_status=status)
+    return result
+
+
 class FrontendReads:
     def __init__(self, repository: FrontendReadRepository):
         self.repo = repository
@@ -92,20 +139,7 @@ class FrontendReads:
             if snapshot.get("schema_version") != 2:
                 raise PersistenceError("Unsupported official snapshot")
             r["standings"] = [
-                dict(
-                    season_player_id=s["trainer_id"],
-                    division=s["division_id"],
-                    **{
-                        k: s[k]
-                        for k in (
-                            "position",
-                            "division_position",
-                            "points_awarded",
-                            "score",
-                        )
-                    },
-                )
-                for s in snapshot["standings"]
+                public_daily_standing(snapshot, s) for s in snapshot["standings"]
             ]
             snapshots.append(r)
         return OverviewRead(

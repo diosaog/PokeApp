@@ -111,6 +111,8 @@ class StandingRead(BaseModel):
     division_position: int
     points_awarded: int
     score: Decimal
+    position_end: int | None = Field(default=None, ge=1)
+    tie_status: Literal["unique", "externally_resolved", "unresolved_neutral"] | None = None
 
 
 class SnapshotRead(BaseModel):

@@ -1066,6 +1066,7 @@ export interface components {
     CloseDayBody: {
       /** Expected Results Revision */
       expected_results_revision: number;
+      tie_resolution?: components["schemas"]["TieResolution"] | null;
     };
     /** CoinsReduction */
     CoinsReduction: {
@@ -1147,6 +1148,7 @@ export interface components {
       reason: string;
       /** Results */
       results: components["schemas"]["MatchResult"][];
+      tie_resolution?: components["schemas"]["TieResolution"] | null;
     };
     /** CorrectTrialBody */
     CorrectTrialBody: {
@@ -2460,6 +2462,25 @@ export interface components {
       /** Item Code */
       item_code: string;
     };
+    /** RankingErrorDetail */
+    RankingErrorDetail: {
+      /** Code */
+      code: string;
+      /** Message */
+      message: string;
+      ranking?: components["schemas"]["RankingReview"] | null;
+    };
+    /** RankingErrorResponse */
+    RankingErrorResponse: {
+      detail: components["schemas"]["RankingErrorDetail"];
+    };
+    /** RankingReview */
+    RankingReview: {
+      /** Input Hash */
+      input_hash: string;
+      /** Groups */
+      groups: components["schemas"]["TieGroup"][];
+    };
     /** Readiness */
     Readiness: {
       checks: components["schemas"]["ReadinessChecks"];
@@ -2875,6 +2896,11 @@ export interface components {
       points_awarded: number;
       /** Score */
       score: string;
+      /** Position End */
+      position_end?: number | null;
+      /** Tie Status */
+      tie_status?:
+        ("unique" | "externally_resolved" | "unresolved_neutral") | null;
     };
     /** StatsRead */
     StatsRead: {
@@ -2991,6 +3017,42 @@ export interface components {
        * Format: date-time
        */
       updated_at: string;
+    };
+    /** TieGroup */
+    TieGroup: {
+      /**
+       * Division
+       * @enum {string}
+       */
+      division: "A" | "B";
+      /** Player Ids */
+      player_ids: string[];
+      /** Position */
+      position: number;
+      /** Position End */
+      position_end: number;
+      /** Wins */
+      wins: number;
+      /** Adjusted Deaths */
+      adjusted_deaths: number;
+      /** Consequences */
+      consequences: (
+        "points" | "coins" | "podium" | "movement" | "last_b_reward"
+      )[];
+    };
+    /** TieOrder */
+    TieOrder: {
+      /** Player Ids */
+      player_ids: string[];
+      /** Reason */
+      reason: string;
+    };
+    /** TieResolution */
+    TieResolution: {
+      /** Input Hash */
+      input_hash: string;
+      /** Orders */
+      orders: components["schemas"]["TieOrder"][];
     };
     /** TrainerRead */
     TrainerRead: {
@@ -3983,6 +4045,15 @@ export interface operations {
           "application/json": components["schemas"]["DayReceipt"];
         };
       };
+      /** @description Conflict */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["RankingErrorResponse"];
+        };
+      };
       /** @description Validation Error */
       422: {
         headers: {
@@ -4019,6 +4090,15 @@ export interface operations {
         };
         content: {
           "application/json": components["schemas"]["DayReceipt"];
+        };
+      };
+      /** @description Conflict */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["RankingErrorResponse"];
         };
       };
       /** @description Validation Error */

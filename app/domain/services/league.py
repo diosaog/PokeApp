@@ -15,6 +15,24 @@ class WinLossRecord:
 
 
 @dataclass(frozen=True)
+class SportingGroup:
+    wins: int
+    adjusted_deaths: int
+    # Within a group this is transport order, never a sporting decision.
+    display_members: tuple[str, ...]
+
+
+@dataclass(frozen=True)
+class DivisionRanking:
+    groups: tuple[SportingGroup, ...]
+
+    def unique_order(self) -> tuple[str, ...]:
+        if any(len(group.display_members) != 1 for group in self.groups):
+            raise ValueError("Unresolved sporting order")
+        return tuple(group.display_members[0] for group in self.groups)
+
+
+@dataclass(frozen=True)
 class DivisionMovement:
     new_a: tuple[str, ...]
     new_b: tuple[str, ...]
@@ -69,7 +87,9 @@ def all_matches_filled(results: MatchResults) -> bool:
     return all(winner is not None for winner in results.values())
 
 
-def wins_losses(players: list[str] | tuple[str, ...], results: MatchResults) -> dict[str, WinLossRecord]:
+def wins_losses(
+    players: list[str] | tuple[str, ...], results: MatchResults
+) -> dict[str, WinLossRecord]:
     raw = {str(player): {"wins": 0, "losses": 0} for player in players}
     for (player_a, player_b), winner in results.items():
         if winner is None or winner not in raw:
@@ -86,7 +106,11 @@ def wins_losses(players: list[str] | tuple[str, ...], results: MatchResults) -> 
 
 
 def head_to_head(player_a: str, player_b: str, results: MatchResults) -> str | None:
-    key = (player_a, player_b) if (player_a, player_b) in results else (player_b, player_a)
+    key = (
+        (player_a, player_b)
+        if (player_a, player_b) in results
+        else (player_b, player_a)
+    )
     winner = results.get(key)
     return winner if winner in {player_a, player_b} else None
 
@@ -95,30 +119,36 @@ def rank_division(
     players: list[str] | tuple[str, ...],
     results: MatchResults,
     *,
-    dead_counts: Mapping[str, int] | None = None,
-) -> list[str]:
-    records = wins_losses(players, results)
-    groups: dict[int, list[str]] = {}
-    for player in players:
-        groups.setdefault(records[str(player)].wins, []).append(str(player))
+    dead_counts: Mapping[str, int],
+) -> DivisionRanking:
+    """Sporting equivalence classes: wins descending, adjusted deaths ascending.
 
-    ranking: list[str] = []
-    dead = dead_counts or {}
-    for wins in sorted(groups.keys(), reverse=True):
-        group = groups[wins]
-        if len(group) == 1:
-            ranking.extend(group)
-            continue
-        if len(group) == 2:
-            first, second = group
-            winner = head_to_head(first, second, results)
-            if winner is not None:
-                ranking.extend([winner, second if winner == first else first])
-            else:
-                ranking.extend(sorted(group))
-            continue
-        ranking.extend(sorted(group, key=lambda player: (int(dead.get(player, 0)), player)))
-    return ranking
+    The returned object intentionally cannot be sliced as a uniquely ranked list.
+    Callers must resolve consequential ties before allocating outcomes.
+    """
+    if len(set(players)) != len(players):
+        raise ValueError("Duplicate participant")
+    for player in players:
+        value = dead_counts.get(player)
+        if type(value) is not int or value < 0:
+            raise ValueError(
+                "Adjusted deaths must be authoritative nonnegative integers"
+            )
+    for (a, b), winner in results.items():
+        if a == b or a not in players or b not in players or winner not in (a, b):
+            raise ValueError("Invalid sporting result")
+    records = wins_losses(players, results)
+    groups: dict[tuple[int, int], list[str]] = {}
+    for player in players:
+        groups.setdefault((-records[player].wins, dead_counts[player]), []).append(
+            player
+        )
+    return DivisionRanking(
+        tuple(
+            SportingGroup(-key[0], key[1], tuple(sorted(members)))
+            for key, members in sorted(groups.items())
+        )
+    )
 
 
 def calculate_division_movements(
@@ -161,5 +191,9 @@ def total_points_with_penalties(
     points_reduction: float = 0.0,
     dead_penalty_per_mon: float = 0.2,
 ) -> float:
-    total = float(base_points) - float(dead_penalty_per_mon) * max(0, int(dead_count)) - float(points_reduction)
+    total = (
+        float(base_points)
+        - float(dead_penalty_per_mon) * max(0, int(dead_count))
+        - float(points_reduction)
+    )
     return one_decimal(total)

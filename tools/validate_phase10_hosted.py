@@ -50,7 +50,11 @@ def write(path, value):
 
 
 def cli(args):
-    result = subprocess.run(['npx.cmd' if os.name == 'nt' else 'npx', '--no-install', 'supabase', *args],
+    executable = os.environ.get('POKEAPP_SUPABASE_CLI')
+    if executable:
+        require(Path(executable).is_absolute() and Path(executable).is_file(), 'Invalid explicit Supabase CLI path')
+    command = [executable] if executable else ['npx.cmd' if os.name == 'nt' else 'npx', '--no-install', 'supabase']
+    result = subprocess.run([*command, *args],
                             cwd=ROOT, capture_output=True, text=True, encoding='utf-8', timeout=180)
     require(result.returncode == 0, 'Supabase CLI failed; output suppressed')
     return json.loads(result.stdout)
