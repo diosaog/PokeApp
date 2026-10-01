@@ -206,7 +206,7 @@ def main():
             "Expected manual active season unavailable",
         )
         passed(
-            "Pinned project, applied 033/034, fresh 52-table baseline and owner identity"
+            "Pinned project, applied 033-036, fresh 53-table baseline and owner identity"
         )
         stage = "public API"
         with httpx.Client(

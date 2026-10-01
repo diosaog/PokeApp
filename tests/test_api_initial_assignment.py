@@ -283,6 +283,28 @@ class InitialAssignmentAdapterTests(unittest.TestCase):
 
 
 class ObservedOverviewTests(unittest.TestCase):
+    def test_transport_diagnostic_never_logs_exception_or_response_contents(self):
+        from app.repositories.supabase.frontend_reads import SupabaseFrontendReadRepository
+
+        class Client:
+            def table(self, *args):
+                raise RuntimeError("SECRET credential, SQL and private rows")
+
+            def rpc(self, *args):
+                raise RuntimeError("SECRET token and payload")
+
+        repo = SupabaseFrontendReadRepository(Client())
+        for operation in (
+            lambda: repo.rows("seasons", "id"),
+            lambda: repo.league_general(SID),
+            lambda: repo.initial_observations(SID),
+        ):
+            with self.assertLogs("app.repositories.supabase.frontend_reads") as log:
+                with self.assertRaises(PersistenceError):
+                    operation()
+            self.assertIn("cause=RuntimeError", str(log.output))
+            self.assertNotIn("SECRET", str(log.output))
+
     def store(self):
         from test_api_frontend_reads import ReadStore, SID as SEASON, PID
 

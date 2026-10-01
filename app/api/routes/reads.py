@@ -16,6 +16,7 @@ from app.api.read_models import (
 )
 from app.application.frontend_reads import FrontendReads
 from app.repositories.errors import NotFoundError, PersistenceError
+from app.repositories.supabase.frontend_reads import _report_failure
 
 router = APIRouter(prefix="/v1/read", tags=["frontend reads"])
 Offset = Annotated[int, Query(ge=0, le=100000)]
@@ -31,6 +32,8 @@ def read(container, operation, *args):
     except NotFoundError as exc:
         raise api_error(404, "NOT_FOUND", "Resource not found.") from exc
     except (PersistenceError, ValueError, TypeError, KeyError, AttributeError) as exc:
+        if exc.__cause__ is None:
+            _report_failure("projection", exc)
         raise api_error(
             503, "READ_UNAVAILABLE", "Data temporarily unavailable."
         ) from exc
