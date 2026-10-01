@@ -64,6 +64,42 @@ rollback and concurrency are local evidence; hosted auth/reads and guaranteed
 absent-resource denials are separate evidence. Additive 035 is necessary for the
 rule/audit/lifecycle distinction; never replay 001–034.
 
+## Package E contract detail (approved continuation, 2026-10-01)
+
+Jornada 1 covers the first game segment through Medal 2 inclusive, before its
+competitive battles. Initial A/B is a separate sporting transition: fewer existing
+authoritative adjusted deaths first, using the configured `division_sizes.A/B`.
+Do not use wins or point sanctions, invent capacities, or distribute ordinary daily
+points, coins, movement or gifts during the initial split. Preserve the 030/D death
+calculation and the existing later daily competition behavior.
+
+Only an equal-death block crossing the A/B cut requires an external decision.
+Ties wholly within either division remain neutral. The boundary decision uses
+existing admin authority, an explicit reason and exact current sporting inputs;
+technical serialization order never determines membership. Changed progression,
+deaths, roster or configuration invalidates an earlier review. Preserve typed
+contracts, CAS, idempotency, safe unknown-outcome retries and historical rules.
+
+Every required participant must have evidence of reaching the first-leg cap before
+the split can become final. Missing evidence is unknown, not zero or ready. Until
+cloud ingestion exists, any registered/manual evidence must be explicitly labelled
+provisional. Do not add a new Team Lock prerequisite. Existing participant result
+authority from C remains unchanged. Later game/postgame milestone decisions remain
+outside E; no automatic progression beyond the approved evidence is inferred.
+
+An entry audit found no supported V2 command that records or attests this progress:
+the stats badge counter defaults to zero, browser writes are revoked, and the
+Phase 9 observation contract has no progress field. The unresolved authority for
+provisional progress must be decided before implementing such a command. The
+[live record](work-in-progress/phase10-5-live-handoff.md#e-entry-review---2026-10-01)
+records the exact question and evidence. This does not authorize another death
+counter, save ingestion, or reinterpretation of existing seasons.
+
+After implementation, complete the full relevant local matrix and any necessary
+new migration/bootstrap parity before committing/pushing and public deployment.
+Public verification uses safe reads and absent-resource checks, preserving all
+manual owner data. Stop after E delivery; do not start F or Phase 11.
+
 ## Owner decisions still required
 
 Implement independent branches; never infer answers to these questions:

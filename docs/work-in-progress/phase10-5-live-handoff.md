@@ -38,7 +38,7 @@ Unrelated processes/remote operations not inspected: UNKNOWN.
 | B: League lacked primary GENERAL; existing 030 points view is authoritative | FIX NOW | DONE, source `d4ee903`, publicly delivered with C. |
 | C: participant result entry with separate closed-day correction | FIX NOW | DONE, source `9be3d70`, local gates and safe public checks PASS. |
 | D: daily wins/deaths and relevant unresolved ties | FIX NOW | DONE, source `2c8ad42`, 035 + public delivery verified below. |
-| E: 026 requires initial manual A/B before activation | FIX NOW | Next package, not started; manual readiness must remain explicit. |
+| E: 026 requires initial manual A/B before activation | FIX NOW | Entry reviewed; implementation awaits the provisional progress authority decision below. No E code/deployment. |
 | F: 029 lifecycle reads final daily snapshot positions for title | FIX NOW | Pending E; structural Phase 11 blocker. |
 | G: wipe counter exists in stats but lacks owned command/UI | FIX NOW | Pending F. |
 | H: Preview only selects scheduled match; missing-lock presentation insufficient | FIX NOW | Pending G. |
@@ -395,16 +395,90 @@ source/schema/exit artifacts and `phase10-5d-hosting-final.json`. Explicit insta
 CLI 2.118.0 path was used via `POKEAPP_SUPABASE_CLI`; unpinned npx tried an uncached
 new release. Verify tools in a future session; do not assume auth or deployment state.
 
+## E entry review - 2026-10-01
+
+**E AUTHORIZED, NOT IMPLEMENTED; waiting for one owner decision about provisional
+progress authority. A-D remain complete.** The explicit E continuation replaces
+the preceding D stop instruction. This is an entry review, not an E validation PASS.
+
+Entry `58ef75f4aedab8d4ba394d9a8d172cafc2351e16`; fresh fetch succeeded,
+`main`/`origin/main` 0/0, tracked clean, protected guide the only untracked path.
+The guide was not read, inspected, hashed or touched. This review changes only the
+contract and this live memory; no application, test, migration or hosting changes.
+
+Verified prerequisites against that source, with an independent read-only review:
+
+- The A/B cut already exists: `ConfigVersionBody.division_sizes` and SQL026
+  `admin_setup_validate_config` require positive A/B capacities whose sum equals
+  the roster. Unequal capacities and odd participant counts are supported. No new
+  numerical cut needs an owner decision.
+- The approved E prompt fixes J1 at Medal 2 inclusive. Current configuration has
+  no progression-cap field/guard. SQL026 `api_admin_initial_divisions` still accepts
+  manual draft assignments before J1 preparation/activation, without progress or
+  death-readiness checks; this is precisely the E behavior to replace for modern
+  initialization, while retaining existing memberships/history.
+- `season_player_stats.badges_count` defaults to 0 (002). Enrollment initializes
+  that default (026). Modern API/services only read badges; there is no supported
+  progress update/attestation command. SQL026/027 revoke browser stats writes.
+- `app/save_parser/models.py::ObservedSave` contains game/trainer/party/boxes, but
+  no badge/progress evidence. Legacy badge settings are a separate runtime.
+  Cloud ingestion remains absent; it cannot be claimed as an E prerequisite that
+  already works.
+- Reuse SQL030's authoritative adjusted deaths. Missing current save/observation
+  evidence must not be presented as observed zero; a new manual death override is
+  not authorized. Existing registered facts can support a provisional preview,
+  but relying on fixture/service-seeded data alone does not deliver the ordinary
+  new-season flow.
+
+The prior full 10.5 instruction allows explicitly provisional registered/manual
+evidence, but reserves ordinary admin intervention for the exceptional boundary
+tie. It does not choose who may attest qualifying progress. A new participant
+self-attestation and an admin attestation confer different sporting authority;
+neither is inferred from result-entry permission or external-tie authority.
+
+**Exact pending question:** until save ingestion exists, who may manually attest
+that each participant has completed Medal 2: that participant, an administrator,
+or no new writer (consume existing records and remain unready when evidence is
+absent)? Asked in this session; no answer received at this observation. Deaths
+continue to use the existing source/calculation, without a parallel manual total.
+The stop follows the E prompt's explicit instruction to stop for a genuine missing
+owner decision, not an inferred requirement for deployment approval.
+
+Fresh read-only public verification, 2026-10-01 11:39 UTC, exit 0:
+
+- Linked project `uwleqeuzsveqlugugzba` verified; 27 migration records, latest
+  035=`20261001111600`. No 036 exists in local source or the inspected history.
+- Same Anto trainer/Auth mapping, enabled and admin, verified by scoped SELECT.
+  No credential read/change/login was needed for this inspection.
+- Railway deployment `32c10fee-a30a-4c1c-8b5b-4bec9951f637` remains SUCCESS,
+  source message `Phase 10.5 D 2c8ad42`.
+- Cloudflare deployment `3d92653c-9336-4dad-90eb-0e522482a418` still serves version
+  `fc5ae861-dfa9-43bc-87b9-d4871642d682` at 100%.
+- Zero remote writes or fixtures. No positive sporting mutation or new deployment.
+  The D full-table equality/Advisor/browser gates above remain dated D evidence;
+  they were not rerun or relabelled as E tests. No E implementation tests were run.
+
+Raw evidence: `%TEMP%/phase10-5e-entry-rygsmvun/{history,owner,railway,cloudflare,
+entry-summary}.json`. The first read script completed Supabase reads but failed
+before launching Railway because Windows required the `.cmd` executable suffix.
+The corrected hosting read exited 0; no deployment/migration retry occurred.
+All review subprocesses finished; no E validation server or fixture was started.
+Unrelated process state remains UNKNOWN. Documentation checks passed: only these
+two intended Markdown files changed, UTF-8 decoding/relative links/E anchor valid,
+and `git diff --check` clean. Publication uses a documentation-only commit; obtain
+its hash and actual push state from Git.
+
 ## Exact next step
 
-**Stop after D. Next is E ? initial A/B after the first progression segment, ordered
-by fewer deaths, external resolution only when a tie crosses the A/B cut.**
-On authorization to continue E: check fresh Git/remote state, this record and the
-approved contract; inspect 026 readiness/configuration/division assignment and the
-new D sporting-group model without reopening completed A/B/C/D. Initial evidence
-must distinguish observed/manual/provisional/unknown; no invented cloud ingestion.
-Before any new SQL, verify actual history; **001?035 are immutable, next expected036**.
-Never reuse owner's active/manual data for destructive validation or replay 031?035.
+Resolve the single E progress-authority question above, then implement only E
+under its approved contract. Do not infer an answer from elapsed time or another
+handoff. Preserve C participant results, D daily consequences and all existing
+manual seasons; do not reopen A-D, implement F, or start Phase 11.
 
-Phase 10.5 retains independent E?L work and pending owner decisions. Whole-project
+Before any necessary SQL, recheck actual history; **001-035 are immutable, next
+expected 036**. Local gates, committed/pushed source and fresh complete remote
+baseline must precede any migration/deployment. Never replay 031-035 or use owner
+data for destructive validation.
+
+Phase 10.5 retains independent E-L work and pending owner decisions. Whole-project
 estimate remains **~80%**. Phase 11 **NOT READY / NOT STARTED**; no migration/cutover.
