@@ -1,6 +1,6 @@
 # PokeApp 2.0 Project Checkpoint
 
-Checkpoint reconciled: 2026-09-29. This file is the project index and historical
+Checkpoint reconciled: 2026-10-01. This file is the project index and historical
 milestone record; it does not maintain a second live phase-status ledger.
 
 ## Current project position
@@ -9,6 +9,8 @@ milestone record; it does not maintain a second live phase-status ledger.
   [Approved contract](phase10-5-functional-alignment.md),
   [single live record](work-in-progress/phase10-5-live-handoff.md).
   Owner authorized implementation on 2026-09-29 after the functional knowledge export.
+  Package D delivery/evidence: [daily sporting ranking](phase10-5d-completion-report.md).
+  Consult the live record for deployment and the active package.
 
 - Last closed phase: **10 - React / public Cloudflare + Railway, DONE**.
   [Contract](phase10-react-cloudflare.md), [delivery report](phase10-completion-report.md),

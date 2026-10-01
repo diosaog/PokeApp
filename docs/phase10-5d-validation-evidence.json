@@ -1,9 +1,9 @@
 {
   "observed_date": "2026-10-01 Europe/Madrid",
   "entry_commit": "92d9e5548fe028cda78a95ab41375e0dcea28184",
-  "source_commit": "Implementation commit containing these normalized source hashes",
+  "source_commit": "2c8ad428163ee21d8954b5fc70139805f1b87704",
   "environment": "Windows; Python venv; PostgreSQL 17 at loopback:55439; isolated Edge",
-  "status": "LOCAL_PASS_REMOTE_PENDING",
+  "status": "LOCAL_PASS",
   "source_hashes": {
     "app/api/matchday_models.py": "3774f14607206ba1094ef66943f010170443112662cc3ca52af6d6138eb5a9bc",
     "app/api/read_models.py": "3517d4cfd58d6d4c1905c4b33966ef16157d82a80b99f97ecae25f4fd27a5a62",
@@ -97,7 +97,7 @@
       "limitation": "Prefix scan is independent residue evidence, not a full-content baseline. D and C fixture suites each separately assert exact full-content before/after equality."
     }
   },
-  "remote": "Not yet applied/deployed; no remote business write",
+  "remote": "See phase10-5d-public-evidence.json and delivery report for separately verified public evidence",
   "resolved_attempts": [
     "Supabase unpinned npx resolved uncached 2.119.0; installed 2.118.0 explicit path works",
     "Two old tests asserted superseded sporting fallback; updated approved rule assertions",

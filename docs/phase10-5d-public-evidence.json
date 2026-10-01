@@ -1,0 +1,314 @@
+{
+  "status": "PASS",
+  "observed_date": "2026-10-01 Europe/Madrid",
+  "source_commit": "2c8ad428163ee21d8954b5fc70139805f1b87704",
+  "project_ref": "uwleqeuzsveqlugugzba",
+  "migration": {
+    "name": "035_daily_sporting_ranking",
+    "record_hash": "482b18eddf33ca8d71cc5468afdb96c9",
+    "version": "20261001111600",
+    "source": "supabase/v2/migrations/035_daily_sporting_ranking.sql",
+    "source_sha256": "b8ee7b8715c826a5cb43652e7621a12f41dc73e256ae02ea69a06e885f38cc53",
+    "applied_once": true,
+    "total_history_records": 27,
+    "prior_records_unchanged": 26
+  },
+  "railway": {
+    "project": "f5c4666a-508f-4e5a-8aae-a54581814f29",
+    "service": "9a78e086-c927-471f-8bb9-befe62c77de7",
+    "environment": "d05ccec3-7a85-4eeb-9b01-c0f8d2111896",
+    "deployment": "32c10fee-a30a-4c1c-8b5b-4bec9951f637",
+    "status": "SUCCESS",
+    "source_message": "Phase 10.5 D 2c8ad42",
+    "image_digest": "sha256:7c8a7051a791cfef1a1e598fbbb6a04a5cecc0af0becf5e2a775d49c6b86a9e9",
+    "replicas": 1,
+    "bundle_files": 226
+  },
+  "cloudflare": {
+    "deployment": "3d92653c-9336-4dad-90eb-0e522482a418",
+    "version": "fc5ae861-dfa9-43bc-87b9-d4871642d682",
+    "web": "https://pokeapp-web.pokeapp-v2.workers.dev",
+    "api": "https://pokeapp-api-production.up.railway.app",
+    "assets": [
+      {
+        "path": "/assets/index-D1CTZhZD.js",
+        "sha256": "5e10c1f203fd6e0162f97e5f645065c79633262e308db18c6b61f769279ac7e1",
+        "mime": "text/javascript"
+      },
+      {
+        "path": "/assets/index-Ce8Qi1M_.css",
+        "sha256": "fdd473f168f290c4c5a4f05543bb4987fb8eaaa43cc59b3763737e8aa3964ef4",
+        "mime": "text/css"
+      }
+    ],
+    "asset_hashes_csp_mime_deep_spa_cors": "PASS"
+  },
+  "migration_baseline": {
+    "tables": 52,
+    "scope": "All public and Storage rows; only existing owner Auth activity excluded",
+    "identical": true
+  },
+  "helper_catalog": [
+    {
+      "anon": false,
+      "authenticated": false,
+      "proconfig": [
+        "search_path=pg_catalog, public"
+      ],
+      "proname": "lifecycle_final_source",
+      "prosecdef": false,
+      "service": true
+    },
+    {
+      "anon": false,
+      "authenticated": false,
+      "proconfig": [
+        "search_path=pg_catalog, public"
+      ],
+      "proname": "lifecycle_standings",
+      "prosecdef": false,
+      "service": true
+    },
+    {
+      "anon": false,
+      "authenticated": false,
+      "proconfig": [
+        "search_path=pg_catalog, public"
+      ],
+      "proname": "matchday_commit_close",
+      "prosecdef": false,
+      "service": true
+    },
+    {
+      "anon": false,
+      "authenticated": false,
+      "proconfig": [
+        "search_path=pg_catalog, public"
+      ],
+      "proname": "matchday_commit_close_v034",
+      "prosecdef": false,
+      "service": true
+    },
+    {
+      "anon": false,
+      "authenticated": false,
+      "proconfig": [
+        "search_path=pg_catalog, public"
+      ],
+      "proname": "matchday_context",
+      "prosecdef": false,
+      "service": true
+    },
+    {
+      "anon": false,
+      "authenticated": false,
+      "proconfig": [
+        "search_path=pg_catalog, public"
+      ],
+      "proname": "matchday_context_v034",
+      "prosecdef": false,
+      "service": true
+    }
+  ],
+  "security": {
+    "before": {
+      "ERROR": 24,
+      "WARN": 5,
+      "INFO": 122
+    },
+    "after_migration": {
+      "ERROR": 24,
+      "WARN": 5,
+      "INFO": 122
+    },
+    "new_errors_warnings": 0,
+    "after_final": {
+      "INFO": 122,
+      "ERROR": 24,
+      "WARN": 5
+    },
+    "inventory": "phase10-5d-security-advisor.json"
+  },
+  "limitations": [
+    "No owner season/result mutated; positive tie close/correction/race evidence is local",
+    "Temporary owner staging PIN/admin preserved; definitive onboarding and role review remain before release",
+    "Final championship semantics and equal-points policy are not resolved by daily ranking D"
+  ],
+  "raw_evidence": [
+    "%TEMP%/phase10-5d-deployment-20261001",
+    "%TEMP%/phase10-5d-public-readonly",
+    "%TEMP%/phase10-5d-hosting-final.json",
+    "%TEMP%/phase10-5d-independent-final"
+  ],
+  "public_validation": {
+    "run_id": "phase10_5_public_reads_31caaaeee91b4177838879a89a1e06fe",
+    "started_at": "2026-10-01T11:19:34.158291+00:00",
+    "status": "PASS",
+    "source_commit": "2c8ad428163ee21d8954b5fc70139805f1b87704",
+    "project_ref": "uwleqeuzsveqlugugzba",
+    "api": "https://pokeapp-api-production.up.railway.app",
+    "web": "https://pokeapp-web.pokeapp-v2.workers.dev",
+    "owner_trainer": "507d9c56-04d8-4801-a9da-f1e53674efb5",
+    "owner_auth_user": "ac98932c-f713-43d1-8b20-600f0be3dadc",
+    "owner_season": "c6bcac5b-0b89-403f-8242-41ac58286ade",
+    "owner_auth_exception": "Only this owner's Auth activity; every public row compared",
+    "business_writes": 0,
+    "fixtures_created": 0,
+    "checks": [
+      "Pinned project, applied 033/034, fresh 52-table baseline and owner identity",
+      "Existing PIN login, real JWT refresh and same enabled admin principal",
+      "Real GENERAL/overview: exact strings, current roster, reached days and explicit unknown counts",
+      "Real eligible participant GET and existing matches without mutation",
+      "Deployed D accepts typed tie decision, denies absent resource and injected plan without writes",
+      "Anonymous/invalid JWT 401, extra actor 422 and absent-season RPC 404; no valid business write",
+      "Public React: GENERAL/current day, eleven screens desktop/mobile, admin and logout"
+    ],
+    "requests": [
+      {
+        "method": "POST",
+        "path": "/v1/auth/pin-login",
+        "status": 200,
+        "elapsed_ms": 2349.69
+      },
+      {
+        "method": "POST",
+        "path": "/v1/auth/refresh",
+        "status": 200,
+        "elapsed_ms": 679.22
+      },
+      {
+        "method": "GET",
+        "path": "/v1/me",
+        "status": 200,
+        "elapsed_ms": 1248.59
+      },
+      {
+        "method": "GET",
+        "path": "/v1/read/seasons/c6bcac5b-0b89-403f-8242-41ac58286ade/league",
+        "status": 200,
+        "elapsed_ms": 1991.8
+      },
+      {
+        "method": "GET",
+        "path": "/v1/read/seasons/c6bcac5b-0b89-403f-8242-41ac58286ade/overview",
+        "status": 200,
+        "elapsed_ms": 5196.98
+      },
+      {
+        "method": "GET",
+        "path": "/v1/seasons/c6bcac5b-0b89-403f-8242-41ac58286ade/matchdays/3eb1cbd3-9a3b-4b1d-a2b5-d31a4c16ff08",
+        "status": 200,
+        "elapsed_ms": 1335.79
+      },
+      {
+        "method": "GET",
+        "path": "/v1/read/seasons/c6bcac5b-0b89-403f-8242-41ac58286ade/league",
+        "status": 401,
+        "elapsed_ms": 208.56
+      },
+      {
+        "method": "GET",
+        "path": "/v1/read/seasons/c6bcac5b-0b89-403f-8242-41ac58286ade/league",
+        "status": 401,
+        "elapsed_ms": 695.67
+      },
+      {
+        "method": "GET",
+        "path": "/v1/seasons/c6bcac5b-0b89-403f-8242-41ac58286ade/matchdays/3eb1cbd3-9a3b-4b1d-a2b5-d31a4c16ff08",
+        "status": 401,
+        "elapsed_ms": 183.81
+      },
+      {
+        "method": "GET",
+        "path": "/v1/seasons/c6bcac5b-0b89-403f-8242-41ac58286ade/matchdays/3eb1cbd3-9a3b-4b1d-a2b5-d31a4c16ff08",
+        "status": 401,
+        "elapsed_ms": 680.16
+      },
+      {
+        "method": "PUT",
+        "path": "/v1/seasons/c6bcac5b-0b89-403f-8242-41ac58286ade/matchdays/3eb1cbd3-9a3b-4b1d-a2b5-d31a4c16ff08/results",
+        "status": 401,
+        "elapsed_ms": 184.95
+      },
+      {
+        "method": "PUT",
+        "path": "/v1/seasons/c6bcac5b-0b89-403f-8242-41ac58286ade/matchdays/3eb1cbd3-9a3b-4b1d-a2b5-d31a4c16ff08/results",
+        "status": 401,
+        "elapsed_ms": 674.96
+      },
+      {
+        "method": "PUT",
+        "path": "/v1/seasons/c6bcac5b-0b89-403f-8242-41ac58286ade/matchdays/3eb1cbd3-9a3b-4b1d-a2b5-d31a4c16ff08/results",
+        "status": 422,
+        "elapsed_ms": 573.1
+      },
+      {
+        "method": "PUT",
+        "path": "/v1/seasons/54c67e39-540f-4b80-a3a2-076891babba5/matchdays/739461a8-3434-4e62-8aac-8630be934fcf/results",
+        "status": 404,
+        "elapsed_ms": 943.45
+      },
+      {
+        "method": "POST",
+        "path": "/v1/admin/seasons/54c67e39-540f-4b80-a3a2-076891babba5/matchdays/8a97d287-741b-43e9-b54e-c765ab32d425/close",
+        "status": 404,
+        "elapsed_ms": 1090.37
+      },
+      {
+        "method": "POST",
+        "path": "/v1/admin/seasons/54c67e39-540f-4b80-a3a2-076891babba5/matchdays/8a97d287-741b-43e9-b54e-c765ab32d425/close",
+        "status": 422,
+        "elapsed_ms": 569.33
+      }
+    ],
+    "failures": [],
+    "limitations": [
+      "Owner is admin: no public positive non-admin result mutation is claimed.",
+      "No manual result changed; successful result/tie mutations, CAS and races use local C/D gates."
+    ],
+    "migrations": [
+      {
+        "name": "033_league_general_read",
+        "record_hash": "f0a77c2aa988787991827e988030a0c7",
+        "version": "20260930113319"
+      },
+      {
+        "name": "034_participant_matchday_results",
+        "record_hash": "f3c985ee8eafa7fc8515b1c6453c2829",
+        "version": "20260930113328"
+      },
+      {
+        "name": "035_daily_sporting_ranking",
+        "record_hash": "482b18eddf33ca8d71cc5468afdb96c9",
+        "version": "20261001111600"
+      }
+    ],
+    "general": {
+      "rows": 8,
+      "days": 2,
+      "unknown_dead_counts": 8,
+      "exact_string_amounts": true,
+      "private_fields_absent": true
+    },
+    "browser_exit_code": 0,
+    "browser": {
+      "status": "PASS",
+      "screen_visits": 22,
+      "business_writes": 0,
+      "api_interception": false
+    },
+    "baseline_comparison": true,
+    "migration_history_comparison": true,
+    "advisor_comparison": [],
+    "finished_at": "2026-10-01T11:22:14.979537+00:00"
+  },
+  "independent_final": {
+    "status": "PASS",
+    "observed_at": "2026-10-01T11:23:29.493810+00:00",
+    "tables_identical": 52,
+    "migration_records_identical": 27,
+    "owner_mapping": "UNCHANGED",
+    "advisor_added_errors_warnings": 0,
+    "advisor_removed_errors_warnings": 0
+  }
+}

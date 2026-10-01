@@ -17,8 +17,9 @@ Local migrations 001–032 present at entry. No code, database or hosting change
 Historical entry preflight (2026-09-29): pinned V2 `uwleqeuzsveqlugugzba`,
 24 records through 032=`20260928111840`; 031=`20260928110301`.
 Historical Phase 10 backend `6d2c66a` / frontend `3c83a16` were superseded by the
-verified B+C deployment below. **Current status: B and C DONE, publicly deployed.**
-Current migration history has 26 records through 034. Never replay 031-034.
+verified B+C deployment below. **Historical C closure: B and C DONE, publicly deployed.**
+That checkpoint had 26 migration records through 034. D below supersedes its
+hosting/history snapshot. Never replay 031?035.
 
 Preserve owner active season `c6bcac5b-0b89-403f-8242-41ac58286ade`, other manual
 seasons and Anto's current staging identity/PIN/admin. No fixture cleanup is
@@ -36,8 +37,8 @@ Unrelated processes/remote operations not inspected: UNKNOWN.
 | A: entry, contract, resumable memory | FIX NOW | DONE, published `226ac7b`. |
 | B: League lacked primary GENERAL; existing 030 points view is authoritative | FIX NOW | DONE, source `d4ee903`, publicly delivered with C. |
 | C: participant result entry with separate closed-day correction | FIX NOW | DONE, source `9be3d70`, local gates and safe public checks PASS. |
-| D: two-way daily tie uses H2H before deaths; slug total order influences outcomes | FIX NOW | IN PROGRESS locally; see current D record below. |
-| E: 026 requires initial manual A/B before activation | FIX NOW | Pending D; manual readiness must remain explicit. |
+| D: daily wins/deaths and relevant unresolved ties | FIX NOW | DONE, source `2c8ad42`, 035 + public delivery verified below. |
+| E: 026 requires initial manual A/B before activation | FIX NOW | Next package, not started; manual readiness must remain explicit. |
 | F: 029 lifecycle reads final daily snapshot positions for title | FIX NOW | Pending E; structural Phase 11 blocker. |
 | G: wipe counter exists in stats but lacks owned command/UI | FIX NOW | Pending F. |
 | H: Preview only selects scheduled match; missing-lock presentation insufficient | FIX NOW | Pending G. |
@@ -318,82 +319,92 @@ estimate ~80%; Phase 11 **NOT READY / NOT STARTED**. Final documentation is in i
 own commit; obtain its hash from Git. Check fresh status/refs before continuing.
 
 
-## Current D execution ? 2026-10-01
+## D delivery ? 2026-10-01
 
-**READY FOR PUBLIC CHECKPOINT; local gates PASS, not deployed.** Entry/main/origin
-`92d9e5548fe028cda78a95ab41375e0dcea28184`, last verified divergence 0/0.
-A/B/C remain DONE; E and Phase 11 not started. D files are uncommitted.
-No D remote write was attempted. The protected guide is untouched/untracked.
+**D DONE; Phase 10.5 IN PROGRESS. E and Phase 11 NOT STARTED.**
+[Delivery report](../phase10-5d-completion-report.md),
+[local evidence](../phase10-5d-validation-evidence.json),
+[public evidence](../phase10-5d-public-evidence.json),
+[Advisor inventory](../phase10-5d-security-advisor.json).
 
-Implemented: wins then exact integer adjusted deaths, immutable sporting groups,
-consequence review, audited external resolution, shared neutral positions, frozen
-legacy-rule corrections, strict admin close/correct DTOs, safe typed reads and
-React exception forms. Missing decisions return 409 with safe group review;
-changed inputs invalidate the human decision. Unknown retries preserve body/key.
-V1 uses the isolated original ranking helper; its runtime semantics are unchanged.
+Entry `92d9e5548fe028cda78a95ab41375e0dcea28184`, fresh main/origin 0/0,
+tracked clean. Source **2c8ad428163ee21d8954b5fc70139805f1b87704** committed/pushed
+before remote work. Documentation closure uses its own Git commit; do not invent
+a self-referential hash. The protected guide remains the only untracked exception.
 
-Additive **035_daily_sporting_ranking.sql** and generated bootstrap exist.
-001?034 unchanged. 035 is **locally rebuilt/tested, not committed/pushed/applied
-remotely**. No new tables. Frozen inputs record rule/groups/decisions; internal
-allocation slots permit lifecycle completeness checks while sporting ranks stay
-shared. Pre-D corrections retain the old rule. No championship tie policy invented.
+D uses wins descending then fewer authoritative adjusted deaths for all group sizes.
+No H2H/name/slug/UUID sporting fallback. Neutral groups share sporting positions;
+consequential groups block close/correction until an admin records the external
+complete order/reason against a current review hash. New forms have empty initial
+choices and preserve unknown-outcome body/key. Rule/groups/decisions are frozen in
+existing append-only snapshot history. Old corrections retain their recorded legacy
+rule and existing window guards. V1's isolated original helper has identical AST.
+The final title/accumulated-points defect remains F, and championship tie policy is
+still OWNER_DECISION_REQUIRED. D does not decide either.
 
-Local evidence, entry plus D working changes, Windows / PG17 / Edge:
-- Daily ranking: 25 PASS; existing matchday API/planner 33 PASS.
-- New API/read projection: 20 PASS, including admin/JWT, safe 409, malformed
-  review 503, legacy receipt bodies, scoped metadata and no mutation retry.
-- Full Python: 623 PASS in 34.250 s. A final subprocess capture is recording
-  direct child exit codes because PowerShell stderr redirection reports noisy
-  native-command errors even for successful unittest/browser output.
-- React unit: 11 PASS. Browser: 20 PASS; focused three new D flows also PASS
-  after the mobile/plural follow-up. Public API is synthetic in these tests.
-- TypeScript/Vite build, Workers dry run, Ruff, compile and formatting PASS.
-  Current build JS gzip 115.38 kB / CSS 6.36 kB.
-- D real PostgreSQL: seven groups PASS, exit 0, four exact rollback boundaries,
-  concurrent resolutions/replay, neutral close/finish/archive, old corrections,
-  six service-only helper ACLs; all 46 public tables restored exactly.
-- Independent 001?035 and bootstrap rebuild/catalog/RLS PASS; normalized public
-  schema/grants/ownership **10,834 identical lines**. Only random pg_dump restrict
-  keys excluded. Existing SQL regressions PASS: matchdays 20, participant status 24, lifecycle
-  19, trials 8, C results 6 and B GENERAL. D and C each restored all 46 public tables exactly against their own baseline.
-  Independent scan of all 46 public tables finds zero D/C/regression fixture
-  prefixes. Cross-database data hashes are not comparable because the schema/RLS
-  fixtures generate different UUIDs/timestamps; no cross-database content PASS
-  is claimed. Schema/grants parity is unaffected.
+Local gates at source above: **623 Python, 11 React, 20 browser PASS**. Browser
+fixtures are synthetic, not a public positive mutation claim. Seven real local PG
+D groups PASS, four exact rollback boundaries across all public tables, same/different
+key resolution races, stale inputs, neutral final lifecycle and old corrections.
+Existing SQL regressions: matchdays20 / participants24 / lifecycle19 / trials8 /
+C results6 and B GENERAL PASS. D/C each restore all 46 public tables exactly;
+independent final prefix scan has zero fixture rows. Schema/RLS/catalog rebuild of
+001?035 and independent bootstrap PASS, **10,834 identical normalized schema/grant/
+owner lines**. Formatting, compile/lint, TypeScript/build and Workers dry run PASS.
+Raw logs and resolved harness failures/provenance limits are in the report/evidence.
+Cross-database data hashes are not a valid cleanup baseline: independently generated
+schema/RLS fixture UUIDs/timestamps differ. No such content-equality PASS is claimed.
 
-Evidence: `%TEMP%/phase10-5d-{ranking-first,matchdays-second,api-read,unit-full,
-python-final,browser-full,browser-focused-final,browser-final,sql-second,rebuild,
-regressions,build-final,worker-check,prettier-final}.log`. Direct exit JSON is next
-to final Python/browser logs. SQL command:
-`.venv-api/Scripts/python.exe -m tools.validate_phase10_5_ranking_sql --psql <local-psql.exe>`.
-Local server was stopped after completed checks/cleanup. Address 127.0.0.1:55439, data `%TEMP%/pokeapp_phase10_5_pg`; D databases
-`pokeapp_v2_validation_phase10_5d` and `_bootstrap`. Verify active processes before
-reusing them. Runner `%TEMP%/phase10-5d-regressions.py` finished all groups and cleanup.
-Its shell exit 1 is a PowerShell psql NOTICE artifact; direct child exit not
-separately retained. Final Python/browser subprocess gates independently record
-exit 0 (623 / 20). No remote fixture prefix exists.
+**STAGING_DONE_ZERO_RESIDUE for D.** Pinned V2 `uwleqeuzsveqlugugzba`.
+**035 applied once as `20261001111600`; DO NOT REAPPLY.** Existing 26 records remain
+unchanged, 27 total. Fresh project/history/source/baselines/Advisor plus immediate
+checks preceded the only write: committed 035 via the supported migration API.
+No old migration edits/replays, remote reset/bootstrap/failure DDL or data mutation.
+Six changed helpers retain fixed search paths/invoker/service-only execution.
 
-Resolved harness observations: two old tests asserted superseded slug/H2H behavior;
-new rule assertions replace them. The legacy-correction fixture initially changed
-live stats before correction, correctly hitting CORRECTION_WINDOW_CLOSED. It now
-proves successful frozen correction first and unchanged history after the expected
-denial. Initial browser expectation used different shared-position wording. The
-first build omitted required API URL; final build uses the existing real HTTPS URL.
-Integrated Browser reports no available browser; isolated installed Edge is used.
+Existing Railway project/service, environment production (label; isolated V2 staging):
+D deployment **32c10fee-a30a-4c1c-8b5b-4bec9951f637**, SUCCESS, source `2c8ad42`,
+226-file committed bundle, one replica. Image
+`sha256:7c8a7051a791cfef1a1e598fbbb6a04a5cecc0af0becf5e2a775d49c6b86a9e9`.
+Existing Cloudflare Worker: version **fc5ae861-dfa9-43bc-87b9-d4871642d682**,
+deployment **3d92653c-9336-4dad-90eb-0e522482a418**, 100%, same source.
+URLs remain https://pokeapp-api-production.up.railway.app and
+https://pokeapp-web.pokeapp-v2.workers.dev. Backend deployed before frontend;
+secrets/origins unchanged. Served asset hashes, SPA/MIME/CSP and CORS PASS.
+JS gzip 115.38 kB / CSS 6.36 kB. No N+1 API loop introduced; existing overview/admin
+invalidation performance stays recorded for M/14, without broad repair here.
 
-Remote D read preflight (not the final write baseline): pinned V2 verified,
-**26 records through 034**, 033/034 each once, no 035. Existing Railway deployment
-and CF version still equal the C delivery above. State **STAGING_UNTOUCHED by D**;
-Fresh 52-table full/scoped baseline and Advisor 24 ERROR / 5 WARN / 122 INFO
-were captured at 11:10:30 UTC. Committed-source and immediate state rechecks
-remain mandatory before applying 035.
-The unpinned npx command began resolving uncached CLI 2.119.0; explicitly invoking
-installed 2.118.0 succeeded. `POKEAPP_SUPABASE_CLI` now supports an absolute existing
-CLI executable path without downloading or silently changing versions.
+Real public run **phase10_5_public_reads_31caaaeee91b4177838879a89a1e06fe**, exit0,
+PASS: existing Anto PIN/login/JWT refresh and enabled admin; exact GENERAL/overview,
+participant state, typed D absent-resource denial and injected-plan rejection;
+**22 real browser screen/viewport visits**, admin visibility/reads and logout.
+No intercepted API or business mutation. Positive close/tie/correction races remain
+local evidence. Anto and the active manual Prueba1.0/J2 scheduled season are preserved.
+No new identity, temporary credential reset, role change or competitive edit.
 
-**Exact next step:** commit/push the reviewed coherent D checkpoint with
-[durable local evidence](../phase10-5d-validation-evidence.json);
-then fresh pinned history/full baseline/Advisor, apply only committed 035 once,
-deploy compatible backend then frontend, run public auth/reads/absent-resource
-checks only and independently compare every owner/public row. Positive sporting
-mutations remain local. Close D documentation/Git and stop; next E, no Phase 11.
+Runner and independent final SQL at **11:23:29 UTC**: **52/52 full table contents
+identical**, 27/27 migration records unchanged, same owner mapping/enabled/admin,
+Advisor **24 ERROR / 5 WARN / 122 INFO**, zero added/removed ERROR/WARN. Scope excludes
+only the existing owner's Auth activity; every public/manual row and Storage metadata
+is included. No Storage bytes touched. Fixtures created: zero. All local test,
+browser/deployment processes finished; local PG stopped. Unrelated processes UNKNOWN.
+
+Raw evidence `%TEMP%/phase10-5d-{deployment-20261001,public-readonly,independent-final}`,
+`phase10-5d-{python-final,browser-final,sql-second,regressions,rebuild}.log`, matching
+source/schema/exit artifacts and `phase10-5d-hosting-final.json`. Explicit installed
+CLI 2.118.0 path was used via `POKEAPP_SUPABASE_CLI`; unpinned npx tried an uncached
+new release. Verify tools in a future session; do not assume auth or deployment state.
+
+## Exact next step
+
+**Stop after D. Next is E ? initial A/B after the first progression segment, ordered
+by fewer deaths, external resolution only when a tie crosses the A/B cut.**
+On authorization to continue E: check fresh Git/remote state, this record and the
+approved contract; inspect 026 readiness/configuration/division assignment and the
+new D sporting-group model without reopening completed A/B/C/D. Initial evidence
+must distinguish observed/manual/provisional/unknown; no invented cloud ingestion.
+Before any new SQL, verify actual history; **001?035 are immutable, next expected036**.
+Never reuse owner's active/manual data for destructive validation or replay 031?035.
+
+Phase 10.5 retains independent E?L work and pending owner decisions. Whole-project
+estimate remains **~80%**. Phase 11 **NOT READY / NOT STARTED**; no migration/cutover.
