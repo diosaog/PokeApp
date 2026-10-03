@@ -129,6 +129,10 @@ certification remains independent. Post-final League rewards are not generated b
 finish/archive; broader shop repairs belong to I. See the [F report](phase10-5f-completion-report.md)
 and live handoff for observed implementation/delivery state.
 
+F is delivered as of 2026-10-03: source `6b46666`, migration
+037=`20261003121543`, verified Railway/Cloudflare and preserved owner data. The
+current instruction ends here; do not begin G automatically or start Phase 11.
+
 ## Owner decisions still required
 
 Implement independent branches; never infer answers to these questions:

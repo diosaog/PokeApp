@@ -9,7 +9,8 @@ milestone record; it does not maintain a second live phase-status ledger.
   [Approved contract](phase10-5-functional-alignment.md),
   [single live record](work-in-progress/phase10-5-live-handoff.md).
   Owner authorized implementation on 2026-09-29 after the functional knowledge export.
-  Latest closed package: [E observed progress and initial divisions](phase10-5e-completion-report.md).
+  Latest closed package: [F final championship and frozen Hall](phase10-5f-completion-report.md).
+  [E observed progress and initial divisions](phase10-5e-completion-report.md) remains delivered.
   [D daily sporting ranking](phase10-5d-completion-report.md) remains delivered.
   Consult the live record for deployment and the active package.
 
@@ -39,6 +40,20 @@ season guard and resumption checks. Do not recreate infrastructure or reapply SQ
 The following counts, PASS results, next-step notes and remote versions belong to
 their named milestones. They are retained as evidence, not fresh verification of
 the current repository or remote database. Current project position is indexed above.
+
+### 2026-10-03 - Phase 10.5F CLOSED
+
+Champion derives from exact accumulated official points. Two tied leaders require
+audited external BO3; three use frozen authoritative adjusted deaths. Residual/4+
+ties remain unresolved. Finalist stays null pending owner decision without blocking
+a proven title. Finish freezes title/points/historical Team Lock; separate archive
+creates League Hall from that certificate. Existing history and modern Cup remain.
+Source `6b46666` pushed before 037=`20261003121543`, Railway then Cloudflare. 680
+Python, 14 React, 28 Edge, F and inherited real-PG gates PASS; 12,046-line four-build
+schema/grants/ownership parity. Public 29 API requests/22 browser visits PASS;
+55-table scoped preservation and zero new Advisor ERROR/WARN. Positive mutations
+were local only. Exact source/deployments/security/limitations in the [F report](phase10-5f-completion-report.md).
+Stop here; no automatic G and no Phase 11. Phase 11 remains NOT READY.
 
 ### 2026-10-03 - Phase 10.5E CLOSED
 

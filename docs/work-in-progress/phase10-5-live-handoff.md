@@ -1,6 +1,6 @@
 # Phase 10.5 — live execution record
 
-Observation: 2026-10-03 Europe/Madrid. **E DONE; Phase 10.5 IN PROGRESS; Phase 11 NOT STARTED.**
+Observation: 2026-10-03 Europe/Madrid. **E/F DONE; Phase 10.5 IN PROGRESS; Phase 11 NOT READY / NOT STARTED.**
 [Contract](../phase10-5-functional-alignment.md),
 [continuity](../AI/PokeApp_Multi_AI_Continuity_Protocol.md),
 [checkpoint](../project-checkpoint.md),
@@ -720,3 +720,94 @@ typed absent-resource denials and exact owner/manual data preservation. No posit
 remote title/BO3/finish/archive mutation is authorized for validation. No remote F
 writes have happened yet. See [F report](../phase10-5f-completion-report.md) and
 [local evidence](../phase10-5f-closure-evidence.json). Stop after F; no G or Phase 11.
+
+### F remote delivery in progress - 2026-10-03
+
+Source **6b466663edcf8e78922b956d7dd81b1408527fee** committed/pushed first, main/origin
+0/0, tracked tree clean at migration time. A fresh baseline confirmed the pinned
+V2 target, 28 prior records and 53 scoped tables. **037 applied once as
+20261003121543**, HTTP 200; 29 records, all prior records identical. All 53 original
+tables remain identical; the two new F tables are empty. Six helper and two private
+immutable-table security checks PASS; Advisor 24 ERROR / 5 WARN / 131 INFO,
+zero new ERROR/WARN. Owner stable Auth/credential facts and admin mapping match.
+Evidence: `%TEMP%/phase10-5f-deployment-20261003`.
+
+The committed-only 229-file API bundle was submitted to existing Railway as
+**99af4814-dcfd-4a95-9c95-10984cc2b2de**; readiness not yet observed. Cloudflare F
+deployment and public/final baseline gates remain pending. Never replay 037.
+All local runners have ended and local PostgreSQL was stopped after verifying
+zero other client sessions. The redundant old-process Cup marker assertion failed
+as predicted, with exact cleanup; the fresh final-source Cup suite passed.
+
+Railway **99af4814-dcfd-4a95-9c95-10984cc2b2de SUCCESS** subsequently observed,
+source `6b46666`, image
+`sha256:52760bc7fea074099c9be9c13050fbdeea6d0163085c79567e2477ac89c9cf08`.
+Health 200 and new championship route 401 without JWT PASS before frontend deploy.
+Cloudflare deployment **fba10b9a-60a9-4336-b1c2-17030d23b48a**, version
+**cf4e1f2d-141b-44f0-ba67-40f17dae840b**, 100%, source `6b46666` then delivered.
+Live asset equality, HTTPS/deep SPA/MIME/CSP/nosniff/CORS PASS. Safe authenticated
+public validation is running; its outcome and independent final baseline remain
+pending. Raw delivery metadata and public runner are under `%TEMP%/phase10-5f-*`.
+
+### F complete checkpoint - 2026-10-03
+
+**F DONE / STAGING_DONE_ZERO_RESIDUE.** This supersedes all earlier F pending
+states. [Report](../phase10-5f-completion-report.md),
+[closure evidence](../phase10-5f-closure-evidence.json),
+[public evidence](../phase10-5f-public-evidence.json),
+[security](../phase10-5f-security-advisor.json).
+
+Entry **dc326b38e8695af104745ef04b8cd1ec0e638c4f**; final application source
+**6b466663edcf8e78922b956d7dd81b1408527fee**, pushed before migration/deployments.
+Documentation/evidence closure is the subsequent commit carrying this checkpoint;
+get its exact HEAD from Git. Explicit staging only; protected guide untouched and
+untracked, no published-history rewrite. Existing migrations 001-036 unchanged.
+
+- Exact accumulated official points decide the title. Two leaders: audited external
+  BO3. Three: fewer frozen authoritative adjusted deaths. Unknown/residual/4+ ties
+  fail closed. Finalist null/OWNER_DECISION_REQUIRED does not block a proven title.
+- Finish freezes title, points, official sources and safe historical Team Lock.
+  Separate archive/Hall consumes the certificate. No live-save rewrite, invented
+  Pokemon, new rewards/penalties or Cup change. Pre-F finished history is not
+  reinterpreted; exact historical receipts still replay. Modern E history required,
+  without consulting newer progress observations at finish.
+- **680 Python / 14 React / 28 Edge PASS**. F eight PG groups and fifteen rollback
+  boundaries; 026-031 and B-E regression gates PASS on final source. Exact 49-table
+  restoration per family; four-build **12,046-line** schema/grant/ownership parity.
+  Compile, Ruff, formatting, public build and dry-run PASS. Known stale loaded
+  Cup assertion retained separately; fresh-source Cup proof is green.
+- **037=20261003121543 exactly once; 29 migration records**. Do not replay 031-037
+  or edit any applied migration. Two new private immutable tables remain empty.
+- Railway **99af4814-dcfd-4a95-9c95-10984cc2b2de SUCCESS** and Cloudflare deployment
+  **fba10b9a-60a9-4336-b1c2-17030d23b48a**, version
+  **cf4e1f2d-141b-44f0-ba67-40f17dae840b**, 100%, both source `6b46666`.
+- Public **phase10_5_public_reads_c802711156224562bcc86ecbd4a3b599 PASS**, exit 0:
+  29 API requests, 22 real browser visits, no errors/interception/business writes.
+  Owner championship is incomplete without a fabricated champion. Auth, read-only
+  review and absent-resource/forged-body denials pass. Positive mutations are local
+  evidence only. Live build assets and HTTPS/SPA/MIME/CSP/nosniff/CORS pass.
+- Independent final **55/55 scoped table contents identical**, original 53 intact,
+  **29/29 migration records unchanged** after apply. Owner identity/PIN/admin and
+  all seasons/participants/results/Team Locks/manual data preserved. Only owner's
+  Auth login/session activity excluded; full baselines plus separate stable
+  identity/credential hashes retained. Storage metadata included, no byte writes.
+- Advisor **24 ERROR / 5 WARN / 131 INFO**, zero added/removed ERROR/WARN. Six
+  informational additions: private RLS tables/no policies and unused new indexes.
+  Six helper/two-table ACL, RLS, fixed-path/invoker/immutability checks PASS.
+- All task runners ended; local PG stopped after zero remaining client sessions.
+  Public fixtures created: zero. Other unrelated processes remain UNKNOWN.
+
+Performance sample: incomplete championship review 0.87 s, GENERAL 1.44 s,
+overview 4.53 s. No per-player HTTP loop; Phase 14 retains overview latency and
+representative complete-title review measurement. Full Launcher/cloud ingestion,
+physical writes and broader shop repairs remain outside this package.
+
+Unresolved owner decisions remain in the approved contract: finalist, residual/4+
+championship ties, badge/completion rewards, normal lifecycle operator, future
+game milestones, purchased-revive penalty, Team Lock cutoff, scouting scope and
+League DQ/Cup eligibility. No unrelated package was started to resolve them.
+
+**EXACT NEXT STEP: STOP.** Report F and await the next explicit owner instruction.
+G is the next remaining package; do not begin it automatically. Phase 10.5 remains
+IN PROGRESS; **PHASE 11 READINESS: NOT READY / NOT STARTED**. No V1 migration,
+shadow mode or cutover work is authorized by this completed F continuation.

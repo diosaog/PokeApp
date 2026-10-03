@@ -1,0 +1,134 @@
+{
+  "time": "2026-10-03T12:24:00.385814+00:00",
+  "before": {
+    "INFO": 125,
+    "ERROR": 24,
+    "WARN": 5
+  },
+  "after": {
+    "INFO": 131,
+    "ERROR": 24,
+    "WARN": 5
+  },
+  "new_error_warn": 0,
+  "removed_error_warn": 0,
+  "info_delta": "Six informational findings for the two new private RLS tables without browser policies and four not-yet-used indexes; both tables are empty.",
+  "functions": [
+    {
+      "anon": false,
+      "authenticated": false,
+      "guarded_legacy": true,
+      "proconfig": [
+        "search_path=pg_catalog, public"
+      ],
+      "proname": "api_admin_championship_read",
+      "prosecdef": false,
+      "public_execute": false,
+      "service": true,
+      "signature": "api_admin_championship_read(jsonb)"
+    },
+    {
+      "anon": false,
+      "authenticated": false,
+      "guarded_legacy": true,
+      "proconfig": [
+        "search_path=pg_catalog, public"
+      ],
+      "proname": "api_admin_season_lifecycle",
+      "prosecdef": false,
+      "public_execute": false,
+      "service": true,
+      "signature": "api_admin_season_lifecycle(jsonb)"
+    },
+    {
+      "anon": false,
+      "authenticated": false,
+      "guarded_legacy": true,
+      "proconfig": [
+        "search_path=pg_catalog, public"
+      ],
+      "proname": "api_admin_season_lifecycle_v036",
+      "prosecdef": false,
+      "public_execute": false,
+      "service": true,
+      "signature": "api_admin_season_lifecycle_v036(jsonb)"
+    },
+    {
+      "anon": false,
+      "authenticated": false,
+      "guarded_legacy": true,
+      "proconfig": [
+        "search_path=pg_catalog, public"
+      ],
+      "proname": "championship_artifact",
+      "prosecdef": false,
+      "public_execute": false,
+      "service": true,
+      "signature": "championship_artifact(uuid,jsonb,timestamp with time zone)"
+    },
+    {
+      "anon": false,
+      "authenticated": false,
+      "guarded_legacy": true,
+      "proconfig": [
+        "search_path=pg_catalog, public"
+      ],
+      "proname": "championship_context",
+      "prosecdef": false,
+      "public_execute": false,
+      "service": true,
+      "signature": "championship_context(uuid)"
+    },
+    {
+      "anon": false,
+      "authenticated": false,
+      "guarded_legacy": true,
+      "proconfig": [
+        "search_path=pg_catalog, public"
+      ],
+      "proname": "championship_final_source",
+      "prosecdef": false,
+      "public_execute": false,
+      "service": true,
+      "signature": "championship_final_source(uuid)"
+    }
+  ],
+  "tables": [
+    {
+      "anon_column": false,
+      "anon_table": false,
+      "authenticated_column": false,
+      "authenticated_table": false,
+      "immutable_triggers": 1,
+      "policies": 0,
+      "public_column": false,
+      "public_table": false,
+      "relname": "league_championship_resolutions",
+      "rls": true,
+      "service_cleanup": true,
+      "service_insert": true,
+      "service_mutable": false,
+      "service_select": true
+    },
+    {
+      "anon_column": false,
+      "anon_table": false,
+      "authenticated_column": false,
+      "authenticated_table": false,
+      "immutable_triggers": 1,
+      "policies": 0,
+      "public_column": false,
+      "public_table": false,
+      "relname": "league_finalizations",
+      "rls": true,
+      "service_cleanup": true,
+      "service_insert": true,
+      "service_mutable": false,
+      "service_select": true
+    }
+  ],
+  "owner_mapping_admin_preserved": true,
+  "owner_stable_auth_credential_preserved": true,
+  "scope": "All 55 scoped tables including every public/manual row and Storage metadata; only explicit owner Auth activity excluded, separately full-captured and stable-credential-checked. No Storage bytes written.",
+  "raw_evidence": "%TEMP%/phase10-5f-deployment-20261003"
+}

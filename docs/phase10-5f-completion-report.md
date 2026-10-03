@@ -1,7 +1,9 @@
 # Phase 10.5F - League championship, finish and frozen Hall
 
-Implementation checkpoint, 2026-10-03. **LOCAL GREEN; public delivery pending.**
-This report will be superseded with observed remote closure evidence.
+Closed 2026-10-03. **F DONE / STAGING_DONE_ZERO_RESIDUE.**
+[Local closure](phase10-5f-closure-evidence.json),
+[public evidence](phase10-5f-public-evidence.json),
+[security comparison](phase10-5f-security-advisor.json).
 
 ## Entry and scope
 
@@ -72,17 +74,47 @@ of schema, grants and ownership. B/C/D/E and modern Cup regressions pass with
 49-table restoration per family. The complete relevant 026-030 regressions pass,
 including 17/20/24/19/8 scenario groups and 9/17/8/10/16 rollback boundaries,
 respectively. See [closure evidence](phase10-5f-closure-evidence.json).
-Remote positive finish/BO3/archive/Hall actions will not be tested on owner data;
-their proof is local only. Public delivery requires committed/pushed source, a
-fresh full baseline and Advisor baseline, migration 037 once, compatible Railway
-then Cloudflare, safe authenticated reads/absent-resource denials and final exact
-data comparisons. Current remote writes for F: **zero**.
+Positive finish/BO3/archive/Hall proof is local only. No owner season was finished,
+archived or mutated for validation. Application source
+**6b466663edcf8e78922b956d7dd81b1408527fee** was committed/pushed before every remote
+write. Fresh full/scoped baseline and Advisor evidence preceded **037**, applied
+once as **20261003121543**; all 28 prior migration records remain identical.
+
+Railway **99af4814-dcfd-4a95-9c95-10984cc2b2de SUCCESS**, same application source,
+image `sha256:52760bc7fea074099c9be9c13050fbdeea6d0163085c79567e2477ac89c9cf08`.
+Only 229 committed API inputs were uploaded. Backend health/new-route authentication
+were verified before Cloudflare deployment **fba10b9a-60a9-4336-b1c2-17030d23b48a**,
+version **cf4e1f2d-141b-44f0-ba67-40f17dae840b**, 100%, same source. Live assets
+match the local build; HTTPS/deep SPA/MIME/CSP/nosniff and exact CORS PASS.
+
+Public run **phase10_5_public_reads_c802711156224562bcc86ecbd4a3b599** PASS, exit 0:
+**29 API requests**, **22 real browser visits**, no API interception or browser
+errors. Existing PIN login/refresh and read-only owner championship review work;
+the incomplete owner season has no fabricated champion. F mutation denials used
+an independently verified absent season. Mobile screenshot reviewed for legibility.
+
+Independent final comparison: **55/55 scoped tables identical**, all original 53
+preserved, both new F tables empty, **29/29 migration records unchanged** after
+apply. Owner identity, PIN/credential facts, enabled/admin role, seasons, results,
+memberships and Team Locks are preserved. Full Auth baselines were also captured;
+only this owner's login/session/refresh activity is excluded from row equality,
+with stable credential/identity hashes compared separately. Storage metadata is
+included; no Storage bytes were touched. Remote business writes/fixtures: **zero**.
+
+Advisor **24 ERROR / 5 WARN / 131 INFO**, **zero new or removed ERROR/WARN**.
+The six added INFO findings concern the new private RLS tables and unused indexes.
+Six helper and two private-table security catalogs pass remotely. Local PostgreSQL
+is stopped after all runners ended. A redundant already-loaded runner retained an
+obsolete Cup test assertion and failed that assertion with exact cleanup; the fresh
+final-source Cup suite passed independently. Raw logs remain under `%TEMP%/phase10-5f-*`.
 
 ## Remaining work and performance
 
 No per-player HTTP loop or broad new query invalidation. Review uses one database
-RPC; frozen seasons return their stored certificate. Existing overview latency
-remains a Phase 14 candidate. Full cloud ingestion, physical save writes, shop
+RPC; frozen seasons return their stored certificate. One hosted sample measured
+incomplete championship review **0.87 s**, GENERAL **1.44 s**, overview **4.53 s**.
+This is not a representative final-season benchmark; overview and complete title
+review remain Phase 14 measurement candidates. Full cloud ingestion, physical save writes, shop
 repairs and visual redesign are outside F.
 
 Outstanding decisions retain their existing scope: residual championship ties,
@@ -90,5 +122,11 @@ Outstanding decisions retain their existing scope: residual championship ties,
 future game milestones, purchased revive, Team Lock cutoff, scouting and League
 DQ/Cup interaction. None is replaced with an invented rule.
 
+Entry HEAD is recorded above; final application HEAD is `6b466663edcf8e78922b956d7dd81b1408527fee`.
+Documentation closure is a separate subsequent commit carrying this report and
+the final handoff; obtain its exact HEAD from Git rather than a self-referential hash.
+Explicit staging only; the protected guide remains untouched and untracked.
+
 Phase 10.5 remains **IN PROGRESS**. Phase 11 **NOT READY / NOT STARTED**.
-Finish and document F, then STOP; do not start G automatically.
+**STOP after F.** G is the next remaining package, requiring the next explicit
+owner instruction; no G work or Phase 11 migration has started.

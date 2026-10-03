@@ -1,7 +1,7 @@
 {
   "recorded_at": "2026-10-03T12:12:26.975450+00:00",
   "entry_head": "dc326b38e8695af104745ef04b8cd1ec0e638c4f",
-  "status": "LOCAL_GREEN_PUBLIC_PENDING",
+  "status": "DONE_STAGING_DONE_ZERO_RESIDUE",
   "python": {
     "tests": 680,
     "exit_code": 0,
@@ -242,6 +242,53 @@
     "wrangler": "4.142.0",
     "supabase": "2.118.0"
   },
-  "remote_writes": 0,
-  "phase11": "NOT_READY_NOT_STARTED"
+  "remote_writes": {
+    "migrations": 1,
+    "business": 0,
+    "fixtures": 0
+  },
+  "phase11": "NOT_READY_NOT_STARTED",
+  "source_commit": "6b466663edcf8e78922b956d7dd81b1408527fee",
+  "deployments": {
+    "source_commit": "6b466663edcf8e78922b956d7dd81b1408527fee",
+    "railway": {
+      "id": "99af4814-dcfd-4a95-9c95-10984cc2b2de",
+      "status": "SUCCESS",
+      "image": "sha256:52760bc7fea074099c9be9c13050fbdeea6d0163085c79567e2477ac89c9cf08",
+      "source": "Phase 10.5F source 6b466663edcf8e78922b956d7dd81b1408527fee"
+    },
+    "cloudflare": {
+      "id": "fba10b9a-60a9-4336-b1c2-17030d23b48a",
+      "version": "cf4e1f2d-141b-44f0-ba67-40f17dae840b",
+      "percentage": 100,
+      "source": "Phase 10.5F source 6b466663edcf8e78922b956d7dd81b1408527fee"
+    }
+  },
+  "remote_final": {
+    "time": "2026-10-03T12:24:00.385814+00:00",
+    "tables_equal": 55,
+    "original_tables_equal": 53,
+    "migrations_equal": 29,
+    "owner_mapping_admin": true,
+    "owner_stable_auth_credential": true,
+    "new_tables_empty": true,
+    "helpers_verified": 6,
+    "immutable_private_tables_verified": 2,
+    "new_error_warn": 0,
+    "advisor": {
+      "INFO": 131,
+      "ERROR": 24,
+      "WARN": 5
+    },
+    "scope": "All 55 scoped tables including every public/manual row and Storage metadata; only explicit owner Auth activity excluded, separately full-captured and stable-credential-checked. No Storage bytes written."
+  },
+  "migration": {
+    "name": "037_league_championship",
+    "version": "20261003121543",
+    "applied_once": true,
+    "prior_records_unchanged": 28
+  },
+  "local_postgresql_stopped": true,
+  "final_source_tests": "All required final-source suites PASS. Redundant inherited wrapper had loaded its old Cup marker assertion before the fixture fix; that stale assertion failed with exact cleanup. Fresh final-source Cup suite PASS.",
+  "completed_at": "2026-10-03T12:25:25.576634+00:00"
 }
