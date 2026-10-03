@@ -21,6 +21,7 @@ import {
 import { playerName } from "./core";
 import { DailyTieFields, readTieResolution, tieReview } from "./daily-ties";
 import { InitialAssignment } from "./initial-assignment";
+import { ChampionshipReview } from "./championship";
 
 type Setup = Model<"SeasonSetup">;
 function Configuration({ setup }: { setup: Setup }) {
@@ -614,7 +615,6 @@ function Risk({ setup }: { setup: Setup }) {
       </p>
       <div className="toolbar">
         {[
-          ["finish", "Finalizar Liga"],
           ["archive", "Archivar temporada"],
           ["discard", "Descartar temporada"],
         ].map(([op, label]) => (
@@ -735,7 +735,10 @@ export function AdminPage() {
             ) : tab === "Competición" ? (
               <Competition setup={q.data} />
             ) : tab === "Zona de riesgo" ? (
-              <Risk setup={q.data} />
+              <>
+                <ChampionshipReview seasonName={q.data.season.name} />
+                <Risk setup={q.data} />
+              </>
             ) : (
               <Card>
                 <h2>Historia oficial</h2>

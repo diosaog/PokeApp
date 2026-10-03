@@ -39,7 +39,8 @@ class LifecycleApiTests(unittest.TestCase):
         self.headers={'Authorization':'Bearer validated','Idempotency-Key':'lifecycle-key'}
 
     def post(self,op='finish',body=None,headers=None):
-        return self.client.post(self.base+'/'+op,json={'expected_revision':9} if body is None else body,
+        default = {'expected_revision':9, **({'input_hash':'a'*64} if op=='finish' else {})}
+        return self.client.post(self.base+'/'+op,json=default if body is None else body,
             headers=self.headers if headers is None else headers)
 
     def test_missing_bearer(self):
@@ -64,6 +65,7 @@ class LifecycleApiTests(unittest.TestCase):
     def test_three_explicit_commands(self):
         for op,state in (('finish','finished'),('archive','archived'),('discard','discarded')):
             body={'expected_revision':9}
+            if op=='finish': body['input_hash']='a'*64
             self.repo.response.update(operation=op,state=state,archive_id=None,hall_id=None)
             if op=='archive': self.repo.response.update(archive_id=str(uuid4()),hall_id=str(uuid4()))
             if op=='discard': body.update(reason='Unused',confirmation='DISCARD')
@@ -76,11 +78,11 @@ class LifecycleApiTests(unittest.TestCase):
             self.assertEqual(self.post(headers=dict(self.headers,**{'Idempotency-Key':key})).status_code,422)
 
     def test_revision_strict(self):
-        for value in (True,-1,'9',9.5,None): self.assertEqual(self.post(body={'expected_revision':value}).status_code,422)
+        for value in (True,-1,'9',9.5,None): self.assertEqual(self.post(body={'expected_revision':value,'input_hash':'a'*64}).status_code,422)
 
     def test_extra_authority_and_status_rejected(self):
         for key in ('status','actor_trainer_id','is_admin','finished_at','current_matchday_id','champion','archive','reward'):
-            self.assertEqual(self.post(body={'expected_revision':9,key:'injected'}).status_code,422)
+            self.assertEqual(self.post(body={'expected_revision':9,'input_hash':'a'*64,key:'injected'}).status_code,422)
 
     def test_discard_confirmation_exact(self):
         for value in ('discard','DESCARTAR',None,True):

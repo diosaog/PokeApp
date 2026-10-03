@@ -2,7 +2,7 @@
 from dataclasses import replace
 from uuid import uuid4
 
-from app.api.season_lifecycle_models import SeasonLifecycleReceipt
+from app.api.season_lifecycle_models import ChampionshipRead, SeasonLifecycleReceipt
 from app.domain.normal_purchases import NormalPurchaseRequest
 from app.repositories.supabase.normal_purchases import SupabaseNormalPurchaseRepository
 from app.repositories.supabase.season_lifecycle import SupabaseSeasonLifecycleRepository
@@ -20,8 +20,18 @@ class SeasonLifecycleFixtures(ParticipantStatusFixtures):
             body=dict(expected_revision=self.state(sid)['setup_revision'])
             if op=='archive': body['label']=None
             if op=='discard': body.update(reason='Unused synthetic draft',confirmation='DISCARD')
+        if op=='finish' and 'input_hash' not in body:
+            # Bind inherited lifecycle tests to one explicit championship review.
+            # Keep it in the caller's body so retry and races use the same facts.
+            body['input_hash']=self.championship(sid)['input_hash'] or '0'*64
         result=self.lifecycle.execute(op,self.request(op,sid,body,key=key,actor=actor))
         SeasonLifecycleReceipt.model_validate(result)
+        return result
+
+    def championship(self, sid, actor=None):
+        result=self.rpc('api_admin_championship_read',{'p_request':dict(
+            actor_trainer_id=actor or self.admin['id'],season_id=sid)})
+        ChampionshipRead.model_validate(result)
         return result
 
     def complete(self,total=1):
@@ -70,9 +80,9 @@ class SeasonLifecycleFixtures(ParticipantStatusFixtures):
         archive=self.rows('season_archive_snapshots',season_id=sid); hall=self.rows('hall_of_fame_entries',season_id=sid)
         require(len(archive)==len(hall)==1,'Archive/Hall not exact once')
         require(hall[0]['team_snapshot']==[] and hall[0]['source_team_lock_id'] is None,'Missing team fabricated')
-        standings=self.rows('matchday_snapshots',matchday_id=did)[0]['snapshot']['standings']
-        first=min(standings,key=lambda x:x['position'])
-        require(hall[0]['champion_trainer_id']==self.rows('season_players',id=first['trainer_id'])[0]['trainer_id'],'Wrong champion')
+        certificate=self.rows('league_finalizations',season_id=sid)[0]
+        require(hall[0]['champion_trainer_id']==certificate['title']['champion_trainer_id'],'Wrong certified champion')
+        require(hall[0]['finalist_trainer_id'] is None,'Undefined finalist fabricated')
         require(hall[0]['archive_snapshot_id']==archive[0]['id'] and len(archive[0]['checksum'])==64,'Missing provenance')
         require(self.preserved(sid)==before,'Archive changed relational history')
         require({s['id'] for s in self.rows('seasons')}==existing_seasons,'Auto-created season')
@@ -145,10 +155,10 @@ class SeasonLifecycleFixtures(ParticipantStatusFixtures):
         self.passed('J18 future committed configuration cannot be silently skipped at finish')
         sid,did=self.season(1)
         for player in self.players(sid): self.change(sid,player['id'])
-        self.open(sid,did); self.close(sid,did); self.life('finish',sid)
-        self.reject(lambda:self.life('archive',sid),'HISTORICAL_SOURCE_INVALID')
+        self.open(sid,did); self.close(sid,did)
+        self.reject(lambda:self.life('finish',sid),'CHAMPIONSHIP_UNRESOLVED','HISTORICAL_SOURCE_INVALID')
         require(not self.rows('hall_of_fame_entries',season_id=sid),'Fabricated champion for empty competition')
-        self.passed('J19 empty final competition can finish, cannot fabricate required League champion')
+        self.passed('J19 empty final competition cannot finish or fabricate a League champion')
 
     def discards(self):
         sid=self.ready(); before=self.preserved(sid)
@@ -185,8 +195,10 @@ class SeasonLifecycleFixtures(ParticipantStatusFixtures):
         require(len(self.rows('hall_of_fame_entries',season_id=sid))==1,'Two Hall creators won')
         self.passed('J10 distinct finish/archive keys and Hall creators: single transition/event/artifact')
         sid,did=self.complete(); body={'expected_revision':self.state(sid)['setup_revision']}; correction=self.correction(sid,did)
+        body['input_hash']=self.championship(sid)['input_hash']
         outcome=self.race(lambda:self.life('finish',sid,body),lambda:self.md('correct',sid,did,correction))
-        require(isinstance(outcome[0],dict) and (isinstance(outcome[1],dict) or outcome[1]=='SEASON_NOT_ACTIVE'),'Finish/correction race')
+        self.one_winner(outcome,'SEASON_NOT_ACTIVE','CHAMPIONSHIP_REVIEW_STALE')
+        if not isinstance(outcome[0],dict): self.life('finish',sid)
         outcome=self.race(lambda:self.life('archive',sid),lambda:self.md('correct',sid,did,self.correction(sid,did)))
         require(isinstance(outcome[0],dict) and outcome[1]=='SEASON_NOT_ACTIVE','Late correction after archive')
         self.passed('J11 finish vs correction serialized; archive vs late correction denied')
@@ -244,4 +256,6 @@ class SeasonLifecycleFixtures(ParticipantStatusFixtures):
         for sid in self.seasons:
             self.client.table('hall_of_fame_entries').delete().eq('season_id',sid).execute()
             self.client.table('season_archive_snapshots').delete().eq('season_id',sid).execute()
+            self.client.table('league_finalizations').delete().eq('season_id',sid).execute()
+            self.client.table('league_championship_resolutions').delete().eq('season_id',sid).execute()
         super().cleanup()

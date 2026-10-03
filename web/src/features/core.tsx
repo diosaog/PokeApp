@@ -1018,12 +1018,14 @@ export function HallPage() {
                   </p>
                 )}
                 <div className="hall-line" />
-                <p>
-                  Finalista:{" "}
-                  {finalist
-                    ? finalist.members.map((m) => m.display_name).join(" & ")
-                    : name(h.finalist_trainer_id)}
-                </p>
+                {(h.competition_type !== "league" || h.finalist_trainer_id) && (
+                  <p>
+                    Finalista:{" "}
+                    {finalist
+                      ? finalist.members.map((m) => m.display_name).join(" & ")
+                      : name(h.finalist_trainer_id)}
+                  </p>
+                )}
                 <p className="caption">CERTIFICADO · {date(h.finalized_at)}</p>
                 {h.cup_id && (
                   <Link

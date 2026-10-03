@@ -39,6 +39,8 @@ $$;
 
 
 EXPECTED_TABLES = [
+    "league_championship_resolutions",
+    "league_finalizations",
     "initial_division_snapshots",
     "cup_side_members",
     "cup_rounds",

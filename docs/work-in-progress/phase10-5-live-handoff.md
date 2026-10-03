@@ -678,3 +678,45 @@ recreation. Do not start G automatically and **do not start Phase 11**.
 
 Phase 10.5 retains independent F-M work and pending owner decisions. Whole-project
 estimate remains **~80%**. Phase 11 **NOT READY / NOT STARTED**; no migration/cutover.
+
+## F implementation entry - 2026-10-03
+
+The new owner instruction authorizes one complete F package and then STOP. Entry
+HEAD `dc326b38e8695af104745ef04b8cd1ec0e638c4f`, main/origin 0/0; tracked tree clean.
+The protected untracked guide remains untouched. Fresh read-only remote evidence
+in `%TEMP%/phase10-5f-entry-20261003` confirms 28 migration records through
+036=`20261001165951`, owner identity/admin intact, 53 scoped tables captured,
+Advisor 24 ERROR / 5 WARN / 125 INFO, Railway `6aa70f72` SUCCESS and Cloudflare
+`3d829325` unchanged. No remote writes have occurred for F.
+
+F is IN PROGRESS. New forward migration 037 implements exact accumulated points,
+audited external BO3 for two tied leaders, fewer frozen adjusted deaths for three,
+and unresolved residual/4+ ties. Finish certifies immutable title and historical
+Team Lock; archive consumes that certificate separately. Existing historical
+seasons receive no backfill. Finalist remains null/OWNER_DECISION_REQUIRED, which
+does not block an otherwise proven champion. API/React focused tests pass;
+real local PostgreSQL, complete closure and remote delivery remain pending.
+Do not deploy this development checkpoint or start G/Phase 11.
+
+### F local closure checkpoint - 2026-10-03
+
+This supersedes the development-only gate above: **LOCAL GREEN / PUBLIC PENDING**.
+680 Python, 14 React and 28 Edge PASS; compile, Ruff, Prettier, public build and
+deployment dry-run PASS. New F PostgreSQL 17.11 runner: eight groups, fifteen
+exact all-public rollback boundaries, 49-table restoration. Includes exact points,
+unknown deaths, BO3 rights/replay/stale facts, correction/results/DQ/finish/archive
+races, pre-F successful receipt replay, modern missing initial history and RLS/ACL.
+Four fresh 001-037/bootstrap builds have 12,046 identical schema/grant/ownership
+lines. 026-031 and B/C/D/E relevant regressions PASS with exact per-family cleanup.
+Cup's old test marker was made schema-aware; no Cup production behavior changed.
+The original regression wrapper still has a redundant local tail running; its
+loaded pre-fix Cup assertion may fail and is not the final-source Cup evidence.
+Fresh separate-process Cup L00-L08, ten races and nine rollback boundaries PASS.
+
+Implementation and validators are ready for one explicit source commit/push.
+Then take a fresh pinned V2 full/scoped baseline and Advisor baseline, apply only
+committed 037 once, deploy Railway then Cloudflare and verify safe public reads,
+typed absent-resource denials and exact owner/manual data preservation. No positive
+remote title/BO3/finish/archive mutation is authorized for validation. No remote F
+writes have happened yet. See [F report](../phase10-5f-completion-report.md) and
+[local evidence](../phase10-5f-closure-evidence.json). Stop after F; no G or Phase 11.

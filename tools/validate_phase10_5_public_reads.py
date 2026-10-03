@@ -1,4 +1,4 @@
-"""Real B/C/D/E public reads and guaranteed denials, preserving manual staging data.
+"""Real B/C/D/E/F public reads and guaranteed denials, preserving manual staging data.
 
 Run as a module with --output <fresh directory outside the repository>. Supply
 {"pin": "..."} through private stdin, never a command argument. No fixture, valid
@@ -23,6 +23,7 @@ import httpx
 from app.api.matchday_models import DayState
 from app.api.initial_assignment_models import InitialAssignmentRead
 from app.api.read_models import LeagueGeneralRead, LeagueStandingRead, OverviewRead
+from app.api.season_lifecycle_models import ChampionshipRead
 from tools.validate_phase10_hosted import (
     API,
     HISTORY,
@@ -46,6 +47,7 @@ MIGRATIONS = (
     "034_participant_matchday_results",
     "035_daily_sporting_ranking",
     "036_observed_initial_divisions",
+    "037_league_championship",
 )
 
 
@@ -142,6 +144,7 @@ def main():
             "Owner is admin: no public positive non-admin result mutation is claimed.",
             "No manual result changed; successful result/tie/initial assignment mutations, CAS and races use local C/D/E gates.",
             "No observed save is uploaded or invented; existing owner season remains legacy initialization.",
+            "Positive championship, BO3, finish, archive, Hall, rollback and concurrency proof is local PostgreSQL only; the owner season is never finalized for validation.",
         ],
     }
     before = history = advisor_before = None
@@ -175,7 +178,7 @@ def main():
         )
         report["migrations"] = [row for row in history if row["name"] in MIGRATIONS]
         before = snapshot(out, "baseline-before", OWNER_AUTH)
-        require(len(before) == 53, "Unexpected baseline table set")
+        require(len(before) == 55, "Unexpected baseline table set")
         advisor_before = advisors(out, "advisors-before")
         owner = query(
             out,
@@ -206,7 +209,7 @@ def main():
             "Expected manual active season unavailable",
         )
         passed(
-            "Pinned project, applied 033-036, fresh 53-table baseline and owner identity"
+            "Pinned project, applied 033-037, fresh 55-table baseline and owner identity"
         )
         stage = "public API"
         with httpx.Client(
@@ -310,6 +313,23 @@ def main():
             passed(
                 "E real typed initial-assignment read preserves owner legacy initialization"
             )
+            championship_path = f"/v1/admin/seasons/{OWNER_SEASON}/championship"
+            championship_raw = request("GET", championship_path)
+            championship = ChampionshipRead.model_validate(championship_raw)
+            require(
+                set(championship_raw) == set(ChampionshipRead.model_fields)
+                and str(championship.season_id) == OWNER_SEASON
+                and championship.state == "incomplete"
+                and championship.champion_trainer_id is None
+                and championship.input_hash is None
+                and championship.resolution_type is None
+                and championship.players == []
+                and championship.tied_player_ids == [],
+                "Existing unfinished owner season must not have a fabricated title",
+            )
+            passed(
+                "F real typed championship read preserves incomplete owner season without a champion"
+            )
             require(
                 str(general.season.id) == OWNER_SEASON
                 and general.season == overview.season,
@@ -404,7 +424,7 @@ def main():
                     }
                 ],
             }
-            for path in (base + "/league", participant):
+            for path in (base + "/league", participant, championship_path):
                 request("GET", path, auth=False, status=401)
                 request("GET", path, invalid=True, status=401)
             request(
@@ -437,6 +457,45 @@ def main():
                 f"select not exists(select 1 from public.seasons where id='{absent}'::uuid) as absent",
             )
             require(absence == [{"absent": True}], "Absent-resource guard failed")
+            # Every well-formed F command targets this independently verified
+            # absent season. Never finish or resolve the owner's real season.
+            championship_absent = f"/v1/admin/seasons/{absent}/championship"
+            title_denial = request("GET", championship_absent, status=404)
+            require(
+                title_denial.get("detail", {}).get("code") == "SEASON_NOT_FOUND",
+                "F championship absent-season denial",
+            )
+            finish_body = dict(expected_revision=0, input_hash="a" * 64)
+            bo3_body = dict(
+                finish_body,
+                winner_season_player_id=str(uuid4()),
+                reason="Absent-resource validation",
+            )
+            for operation, path, body in (
+                ("finish", f"/v1/admin/seasons/{absent}/finish", finish_body),
+                ("bo3", championship_absent + "/bo3", bo3_body),
+            ):
+                title_denial = request(
+                    "POST",
+                    path,
+                    body=body,
+                    status=404,
+                    key=f"phase10-5f-{operation}-absent-" + uuid4().hex,
+                )
+                require(
+                    title_denial.get("detail", {}).get("code") == "SEASON_NOT_FOUND",
+                    "F command absent-season denial",
+                )
+                request(
+                    "POST",
+                    path,
+                    body=dict(body, champion_trainer_id=OWNER, total_points="999"),
+                    status=422,
+                    key=f"phase10-5f-{operation}-forged-" + uuid4().hex,
+                )
+            passed(
+                "F championship GET/finish/BO3 deny verified absent season; caller-supplied title/points rejected without writes"
+            )
             initial_path = f"/v1/admin/seasons/{absent}/initial-assignment/finalize"
             initial_body = dict(
                 config_version_id=str(uuid4()),
@@ -541,6 +600,10 @@ def main():
                 "current_day_number": current.number if current else None,
                 "can_record": bool(current and current.status == "open" and eligible),
             },
+            "championship_checks": {
+                "season_id": OWNER_SEASON,
+                "state": championship.state,
+            },
         }
         browser = subprocess.run(
             ["node", "scripts/validate-public-readonly.mjs"],
@@ -572,7 +635,7 @@ def main():
             "api_interception": False,
         }
         passed(
-            "Public React: GENERAL/current day, eleven screens desktop/mobile, admin and logout"
+            "Public React: GENERAL/current day, eleven screens desktop/mobile, read-only championship review and logout"
         )
     except BaseException as exc:
         # Exception text may contain tokens, request bodies or transport details.

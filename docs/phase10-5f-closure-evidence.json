@@ -1,0 +1,247 @@
+{
+  "recorded_at": "2026-10-03T12:12:26.975450+00:00",
+  "entry_head": "dc326b38e8695af104745ef04b8cd1ec0e638c4f",
+  "status": "LOCAL_GREEN_PUBLIC_PENDING",
+  "python": {
+    "tests": 680,
+    "exit_code": 0,
+    "log": "%TEMP%/phase10-5f-python-confirmed.log"
+  },
+  "react": {
+    "tests": 14,
+    "exit_code": 0
+  },
+  "edge": {
+    "tests": 28,
+    "exit_code": 0
+  },
+  "code_gates": {
+    "time": "2026-10-03T11:53:42.426889+00:00",
+    "commands": [
+      {
+        "name": "python-confirmed",
+        "exit_code": 0
+      },
+      {
+        "name": "compile",
+        "exit_code": 0
+      },
+      {
+        "name": "public-build",
+        "exit_code": 0
+      },
+      {
+        "name": "deploy-dry-run",
+        "exit_code": 0
+      }
+    ]
+  },
+  "postgresql": {
+    "version": "17.11",
+    "host": "127.0.0.1",
+    "port": 55439,
+    "public_tables_restored": 49,
+    "package_f": {
+      "groups": 8,
+      "rollback_boundaries": 15,
+      "exit_code": 0,
+      "log": "%TEMP%/phase10-5f-championship-sql-final.log"
+    },
+    "inherited": {
+      "026": {
+        "groups": 17,
+        "rollback_boundaries": 9,
+        "exact_49_table_restoration": true
+      },
+      "027": {
+        "groups": 20,
+        "rollback_boundaries": 17,
+        "exact_49_table_restoration": true
+      },
+      "028": {
+        "groups": 24,
+        "rollback_boundaries": 8,
+        "exact_49_table_restoration": true
+      },
+      "029": {
+        "groups": 19,
+        "rollback_boundaries": 10,
+        "exact_49_table_restoration": true
+      },
+      "030": {
+        "groups": 8,
+        "rollback_boundaries": 16,
+        "exact_49_table_restoration": true
+      }
+    },
+    "bcde": [
+      {
+        "family": "B",
+        "exit_code": 0,
+        "exact_49_table_restoration": true,
+        "scenario_codes": []
+      },
+      {
+        "family": "C",
+        "exit_code": 0,
+        "exact_49_table_restoration": true,
+        "scenario_codes": [
+          "C01",
+          "C02",
+          "C03",
+          "C04",
+          "C05",
+          "C06"
+        ]
+      },
+      {
+        "family": "D",
+        "exit_code": 0,
+        "exact_49_table_restoration": true,
+        "scenario_codes": [
+          "D01",
+          "D02",
+          "D03",
+          "D04",
+          "D05",
+          "D06",
+          "D07"
+        ]
+      },
+      {
+        "family": "E",
+        "exit_code": 0,
+        "exact_49_table_restoration": true,
+        "scenario_codes": [
+          "E01",
+          "E02",
+          "E03",
+          "E04",
+          "E05",
+          "E06",
+          "E07",
+          "E08"
+        ]
+      }
+    ],
+    "cup": {
+      "groups": 9,
+      "race_families": 10,
+      "rollback_boundaries": 9,
+      "exit_code": 0,
+      "exact_49_table_restoration": true
+    },
+    "rebuild": {
+      "parity": {
+        "status": "PASS",
+        "identical_builds": 4,
+        "identical_lines": 12046
+      },
+      "builds": [
+        {
+          "source": "migrations",
+          "iteration": 1,
+          "database": "pokeapp_v2_validation_phase10_5f_closure",
+          "schema_catalog_rls": "PASS",
+          "normalized_dump": "C:\\Users\\Antonio\\AppData\\Local\\Temp\\phase10-5f-closure-migrations-1-schema.sql",
+          "lines": 12046,
+          "sha256": "30e8edcb347c00396157dfe0297ddd3c924f3d08c43fdf8e07aae689b5bb0790"
+        },
+        {
+          "source": "migrations",
+          "iteration": 2,
+          "database": "pokeapp_v2_validation_phase10_5f_closure",
+          "schema_catalog_rls": "PASS",
+          "normalized_dump": "C:\\Users\\Antonio\\AppData\\Local\\Temp\\phase10-5f-closure-migrations-2-schema.sql",
+          "lines": 12046,
+          "sha256": "30e8edcb347c00396157dfe0297ddd3c924f3d08c43fdf8e07aae689b5bb0790"
+        },
+        {
+          "source": "bootstrap",
+          "iteration": 1,
+          "database": "pokeapp_v2_validation_phase10_5f_closure_bootstrap",
+          "schema_catalog_rls": "PASS",
+          "normalized_dump": "C:\\Users\\Antonio\\AppData\\Local\\Temp\\phase10-5f-closure-bootstrap-1-schema.sql",
+          "lines": 12046,
+          "sha256": "30e8edcb347c00396157dfe0297ddd3c924f3d08c43fdf8e07aae689b5bb0790"
+        },
+        {
+          "source": "bootstrap",
+          "iteration": 2,
+          "database": "pokeapp_v2_validation_phase10_5f_closure_bootstrap",
+          "schema_catalog_rls": "PASS",
+          "normalized_dump": "C:\\Users\\Antonio\\AppData\\Local\\Temp\\phase10-5f-closure-bootstrap-2-schema.sql",
+          "lines": 12046,
+          "sha256": "30e8edcb347c00396157dfe0297ddd3c924f3d08c43fdf8e07aae689b5bb0790"
+        }
+      ],
+      "exit_code": 0,
+      "source_sha256": {
+        "supabase/v2/migrations/001_core.sql": "3e6083203fe43e51937751557ab7514de67c2cfae29f110e33ff1ffa9a69a862",
+        "supabase/v2/migrations/002_seasons.sql": "3b713a89c0af1b224556a803276f6cdd0682d712f4ef980cbf89bd7ce92110cc",
+        "supabase/v2/migrations/003_league.sql": "76ed470e8d345557e8e5965cf5f2d7aeede7aed265d9ae53fc7f2487730fc4dc",
+        "supabase/v2/migrations/004_shop.sql": "41f2dcce5a4b81f1ff4b710c36b2662af19a2ab8e7384f6fb8e5c74e9be946ab",
+        "supabase/v2/migrations/005_saves.sql": "10d97db7b3378ce92f6fdaac2120f03822560a36f40066ca3586e9d25efc3072",
+        "supabase/v2/migrations/006_activity_hall.sql": "ccf2c967fca741577bfea3cbe8c6567a857f9df59a1be4f41a8986f626955fde",
+        "supabase/v2/migrations/007_competitions.sql": "b6c9f32eaa1fe33709c452638272e93d9ef702019d901caec90f5479d1ff9f82",
+        "supabase/v2/migrations/008_indexes.sql": "fd4351693640a060ad44cddb43e3690f932d367c9cca73ab910243107eca6ed8",
+        "supabase/v2/migrations/009_seed.sql": "d2bf83cac17fc86d4c3d9f7dbc02a11a80068fa3c1decb9aa4ee624c2486a279",
+        "supabase/v2/migrations/010_security_helpers.sql": "2e6279ceb0cbc92c8822eefa5304614b84bfab484b9e7ecd32e3d32d30db60fb",
+        "supabase/v2/migrations/011_rls_policies.sql": "9e5fc9a5e83f5109d13618263cf57b0d04780c782d8b2ba9825a85bfc6ada919",
+        "supabase/v2/migrations/012_security_views.sql": "3f8cc2cdd4686b777bdf491de5d64e523b7f279f23999f68ea312e6460bd044d",
+        "supabase/v2/migrations/013_storage_policies.sql": "838b13d36f3a1c2d7ca017b9de4772f167a1ece3777f2a5c888e700adf74a9d6",
+        "supabase/v2/migrations/014_security_invoker_hardening.sql": "7dc5f74179f7dd00748ff46926aa8af1fbb7a1b44bf92f4fa7e207e06ac8a2a1",
+        "supabase/v2/migrations/015_public_trainers_visibility.sql": "ca230c7b51552235541ffdc0819c91a123f5c0bdc937020bf055acb71c958f30",
+        "supabase/v2/migrations/016_public_team_locks_visibility.sql": "2dd25e5a9d8ba4e304c1e726515b23c05b743815773d0eac2f156e53fe5a8401",
+        "supabase/v2/migrations/017_public_coin_balances_visibility.sql": "59ed1842a14ee02fd499d9585f91983ab1dfb48a3a6ddf3fb73e191236cac140",
+        "supabase/v2/migrations/018_public_views_visibility.sql": "84746e55fe615dbf6533f91e4692aae3203293e604084ec7107f392f699b010c",
+        "supabase/v2/migrations/019_team_lock_api.sql": "e020ab7af784a17e8deab1b99297087b6dfbe485fd2d04cbd40267c730a9b584",
+        "supabase/v2/migrations/020_current_matchday_store_ban_contract.sql": "af936162a304d271d3c169794c7701bd84e9f21f86ec140562df09e44ec8a700",
+        "supabase/v2/migrations/021_normal_purchase_api.sql": "fe6fa8619f993732129847832aa3f49a44dfa5fef96fbb5479a102ebb32fdf38",
+        "supabase/v2/migrations/022_promotional_purchase_api.sql": "9303cf5a2d60ed7ddef12ab4704afa9580fc39e8034fe529a7b7f916fc30ec07",
+        "supabase/v2/migrations/023_pokemon_identity.sql": "f3a4af2b2f2ad16895bb9abee87182a443df1bdc615d7f458543a21e506bc70f",
+        "supabase/v2/migrations/024_redemption_effect_boundary.sql": "9d12264d0038cea0953da23e50622708acb5d3e45d0658dc508ab1ed12c4cfff",
+        "supabase/v2/migrations/025_robbery_voucher_and_redemption.sql": "baf3679b200ac90030cb83ac9967ccff7d5e2c711c30f23bf615feae23f02b39",
+        "supabase/v2/migrations/026_season_admin_setup_api.sql": "ee9e1f597b1d8efcc5586f9b84068e8f16140f29659a50031c0052aa41549682",
+        "supabase/v2/migrations/027_competitive_matchdays.sql": "08b233bee9fe58311f68e92a6677d3eb0eed9093a5346402dc06f86cf8055565",
+        "supabase/v2/migrations/028_participant_status_admin.sql": "90b7c6781872b8f5111b7a6e1a8f8518f084fdc2fd4faa13b4e0eb4664a386d4",
+        "supabase/v2/migrations/029_season_finalization_archive_hall.sql": "c18e0c3a35007f42003842df82349bbbbb715f52f565f53287d360076c0ddc03",
+        "supabase/v2/migrations/030_trials_sanctions_api.sql": "642940a5951a02d09485b1ccec0c4f265f5e656f80077393d6b53956ae6fc0fc",
+        "supabase/v2/migrations/031_cup_engine_certification.sql": "868efbca7a2ecb76138a2e12b37cd35b08cad7a849effa4fdf1dae7cfdcde362",
+        "supabase/v2/migrations/032_cup_player_identity_index.sql": "9a0e14b45451ba929f72420959939cad6d78fed8c25bcb6bb8b5ed3f5fde18e4",
+        "supabase/v2/migrations/033_league_general_read.sql": "58705e8d08c639534b338f3d9766e4947b3c052828c51653f7dd887b4f41961a",
+        "supabase/v2/migrations/034_participant_matchday_results.sql": "805daa915e93513f3cd36a6b66a6e3681f53e1a029d8311653a239d8bb0326b5",
+        "supabase/v2/migrations/035_daily_sporting_ranking.sql": "b8ee7b8715c826a5cb43652e7621a12f41dc73e256ae02ea69a06e885f38cc53",
+        "supabase/v2/migrations/036_observed_initial_divisions.sql": "e2ef27a4c669a4f118cbe14d09174a600dddd8e10d44ebf610297ede8363bbd1",
+        "supabase/v2/migrations/037_league_championship.sql": "bce209cf49a53643f03aa1a48067bd2d6d61a45847993b7c1e21ff10b69388f4",
+        "supabase/v2/bootstrap.sql": "b4bda5a424a250eb99a7d1775c23d4eeb99ed81fd8ab4b79bb8e59448d872967",
+        "supabase/v2/reset_dev.sql": "94e037257e1a5254980250a504c494f9eb10c7fc20da133b1ef0a27228822386",
+        "tools/validate_supabase_v2_schema.py": "57157ff63972a88c486ff5d99b22d52374d1898cc9e45646b56c6967f33de85d"
+      }
+    }
+  },
+  "limitations": [
+    "Positive championship/BO3/finish/archive/Hall proof is local only.",
+    "Existing owner season/manual data is never mutated for public validation."
+  ],
+  "remote_entry": {
+    "migration_records": 28,
+    "last_migration": "036_observed_initial_divisions",
+    "last_version": "20261001165951",
+    "tables": 53,
+    "advisor": {
+      "ERROR": 24,
+      "WARN": 5,
+      "INFO": 125
+    }
+  },
+  "tools": {
+    "python": "3.14.3",
+    "node": "24.14.0",
+    "railway": "5.63.0",
+    "wrangler": "4.142.0",
+    "supabase": "2.118.0"
+  },
+  "remote_writes": 0,
+  "phase11": "NOT_READY_NOT_STARTED"
+}

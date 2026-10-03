@@ -74,6 +74,18 @@ try {
         }
         await tabs.getByRole('button', { name: 'GENERAL', exact: true }).click();
       }
+      if (name.startsWith('Administraci') && input.championship_checks) {
+        // This tab only loads the review. Do not click any lifecycle or BO3 command.
+        expect(input.championship_checks.state).toBe('incomplete');
+        await page.getByRole('tab', { name: 'Zona de riesgo', exact: true }).click();
+        await expect(page.getByRole('heading', { name: 'Campeonato de Liga', exact: true })).toBeVisible();
+        await expect(page.getByText('Liga pendiente de completar', { exact: true })).toBeVisible();
+        await expect(page.getByRole('button', { name: 'Finalizar Liga', exact: true })).toHaveCount(0);
+        await expect(page.getByRole('button', { name: 'Registrar ganador del desempate', exact: true })).toHaveCount(0);
+        await expect.poll(() => pending.size).toBe(0);
+        await expect(page.getByRole('alert')).toHaveCount(0);
+        await page.screenshot({ path: join(input.output, 'public-championship-'+viewport.width+'.png'), fullPage: true });
+      }
       expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth+1)).toBe(true);
       screens.push(step);
     }
@@ -83,13 +95,15 @@ try {
   expect(unexpected).toEqual([]);
   expect(reads.filter(r => r.status >= 400)).toEqual([]);
   expect(reads.some(r => r.path.startsWith('/v1/admin/') && r.status === 200)).toBe(true);
+  if (input.championship_checks)
+    expect(reads.some(r => r.path === `/v1/admin/seasons/${input.championship_checks.season_id}/championship` && r.method === 'GET' && r.status === 200)).toBe(true);
   const menu = page.getByRole('button', { name: 'Abrir navegación' });
   if (await menu.isVisible()) await menu.click();
   await page.getByRole('button', { name: 'Cerrar sesión' }).click();
   await page.getByRole('button', { name: 'Entrar a PokeApp' }).waitFor();
   expect(await page.evaluate(() => localStorage.length === 0 && sessionStorage.length === 0)).toBe(true);
   await writeFile(join(input.output, 'browser-result.json'), JSON.stringify({ status: 'PASS', api_interception: false, business_writes: 0, screens, reads, errors, unexpected, environmentOrigins }, null, 2));
-  console.log('PASS owner real public reads: eleven screens desktop/mobile, admin, logout, zero business writes; local antivirus origin recorded separately');
+  console.log('PASS owner real public reads: eleven screens desktop/mobile, admin championship review, logout, zero business writes; local antivirus origin recorded separately');
 } catch (e) {
   await writeFile(join(input.output, 'browser-result.json'), JSON.stringify({ status: 'FAIL', step, message: String(e.message).replaceAll(input.pin, '[REDACTED]'), screens, reads, errors, unexpected, environmentOrigins }, null, 2));
   throw new Error('Public read-only validation failed; credentials suppressed');

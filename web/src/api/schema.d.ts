@@ -514,6 +514,40 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/v1/admin/seasons/{season_id}/championship": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Championship */
+    get: operations["championship_v1_admin_seasons__season_id__championship_get"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/admin/seasons/{season_id}/championship/bo3": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** Championship Bo3 */
+    post: operations["championship_bo3_v1_admin_seasons__season_id__championship_bo3_post"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/v1/admin/seasons/{season_id}/archive": {
     parameters: {
       query?: never;
@@ -1095,6 +1129,79 @@ export interface components {
       expected_case_revision: number;
       /** Reason */
       reason: string;
+    };
+    /** ChampionshipBo3Body */
+    ChampionshipBo3Body: {
+      /** Expected Revision */
+      expected_revision: number;
+      /** Input Hash */
+      input_hash: string;
+      /**
+       * Winner Season Player Id
+       * Format: uuid
+       */
+      winner_season_player_id: string;
+      /** Reason */
+      reason: string;
+    };
+    /** ChampionshipPlayer */
+    ChampionshipPlayer: {
+      /**
+       * Season Player Id
+       * Format: uuid
+       */
+      season_player_id: string;
+      /**
+       * Trainer Id
+       * Format: uuid
+       */
+      trainer_id: string;
+      /** Display Name */
+      display_name: string;
+      /** Total Points */
+      total_points: string;
+      /** Adjusted Deaths */
+      adjusted_deaths: number | null;
+    };
+    /** ChampionshipRead */
+    ChampionshipRead: {
+      /**
+       * Season Id
+       * Format: uuid
+       */
+      season_id: string;
+      /**
+       * State
+       * @enum {string}
+       */
+      state:
+        | "incomplete"
+        | "ready"
+        | "bo3_required"
+        | "owner_decision_required"
+        | "frozen"
+        | "legacy";
+      /** Setup Revision */
+      setup_revision: number;
+      /** Input Hash */
+      input_hash: string | null;
+      /** Players */
+      players: components["schemas"]["ChampionshipPlayer"][];
+      /** Tied Player Ids */
+      tied_player_ids: string[];
+      /** Champion Trainer Id */
+      champion_trainer_id: string | null;
+      /** Resolution Type */
+      resolution_type:
+        | ("unique_points" | "championship_bo3" | "triple_adjusted_deaths")
+        | null;
+      /**
+       * Finalist Status
+       * @constant
+       */
+      finalist_status: "OWNER_DECISION_REQUIRED";
+      /** Blocking Reason */
+      blocking_reason: string | null;
     };
     /** CloseDayBody */
     CloseDayBody: {
@@ -1744,6 +1851,8 @@ export interface components {
     FinishSeasonBody: {
       /** Expected Revision */
       expected_revision: number;
+      /** Input Hash */
+      input_hash?: string | null;
     };
     /** FirstLegReadinessChecks */
     FirstLegReadinessChecks: {
@@ -2879,12 +2988,12 @@ export interface components {
        * Operation
        * @enum {string}
        */
-      operation: "finish" | "archive" | "discard";
+      operation: "finish" | "archive" | "discard" | "championship_bo3";
       /**
        * State
        * @enum {string}
        */
-      state: "finished" | "archived" | "discarded";
+      state: "finished" | "archived" | "discarded" | "active";
       /**
        * Actor Trainer Id
        * Format: uuid
@@ -4456,6 +4565,74 @@ export interface operations {
     requestBody: {
       content: {
         "application/json": components["schemas"]["FinishSeasonBody"];
+      };
+    };
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["SeasonLifecycleReceipt"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  championship_v1_admin_seasons__season_id__championship_get: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        season_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ChampionshipRead"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  championship_bo3_v1_admin_seasons__season_id__championship_bo3_post: {
+    parameters: {
+      query?: never;
+      header: {
+        "idempotency-key": string;
+      };
+      path: {
+        season_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["ChampionshipBo3Body"];
       };
     };
     responses: {

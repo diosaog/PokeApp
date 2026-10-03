@@ -162,7 +162,9 @@ class CupFixtures(SeasonLifecycleFixtures):
         self.life('archive',sid); baseline=self.league_history(sid)
         late=self.create_cup(sid,'elimination',2); self.finish_cup(sid,late)
         require(self.league_history(sid)==baseline,'Post-League Cup rewrote historical data')
-        require(self.rows('season_archive_snapshots',season_id=sid)[0]['snapshot']['cup_hall_status']=='pending_cup_api','Archive marker rewritten')
+        archived=self.rows('season_archive_snapshots',season_id=sid)[0]['snapshot']
+        expected_cup_status='independent_cup_certification' if archived['schema_version']==2 else 'pending_cup_api'
+        require(archived['cup_hall_status']==expected_cup_status,'Archive marker rewritten')
         self.passed('L05 FINISHED and ARCHIVED Cups with exact League snapshots/rewards/movements/Hall/archive preservation')
         self.permissions(sid,cid)
         self.races(sid)

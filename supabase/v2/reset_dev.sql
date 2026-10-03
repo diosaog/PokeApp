@@ -8,10 +8,12 @@ begin;
 -- Local validation only: remove the additive administration helpers and state.
 do $$ declare f regprocedure; begin
   for f in select p.oid::regprocedure from pg_proc p join pg_namespace n on n.oid=p.pronamespace
-    where n.nspname='public' and (p.proname like 'initial_assignment_%' or p.proname like 'admin_setup_%' or p.proname like 'api_admin_%' or p.proname like 'matchday_%' or p.proname like 'participant_%' or p.proname like 'api_participant_%' or p.proname like 'league_%' or p.proname like 'lifecycle_%' or p.proname like 'trials_%' or p.proname like 'api_trial%' or p.proname like 'cup_%' or p.proname like 'api_cup_%') loop
+    where n.nspname='public' and (p.proname like 'championship_%' or p.proname like 'initial_assignment_%' or p.proname like 'admin_setup_%' or p.proname like 'api_admin_%' or p.proname like 'matchday_%' or p.proname like 'participant_%' or p.proname like 'api_participant_%' or p.proname like 'league_%' or p.proname like 'lifecycle_%' or p.proname like 'trials_%' or p.proname like 'api_trial%' or p.proname like 'cup_%' or p.proname like 'api_cup_%') loop
     execute format('drop function if exists %s cascade',f);
   end loop;
 end $$;
+drop table if exists public.league_championship_resolutions cascade;
+drop table if exists public.league_finalizations cascade;
 drop table if exists public.initial_division_snapshots cascade;
 drop table if exists public.admin_operation_receipts cascade;
 drop table if exists public.season_admin_state cascade;

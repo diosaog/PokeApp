@@ -94,6 +94,20 @@ export function errorText(error: unknown) {
     return "Confirma el reparto inicial observado antes de abrir la jornada.";
   if (error.code === "INITIAL_ASSIGNMENT_LOCKED")
     return "El reparto inicial ya no puede modificarse en este estado.";
+  if (error.code === "CHAMPIONSHIP_REVIEW_STALE")
+    return "Los datos del campeonato han cambiado. Revisa los puntos y el desempate antes de continuar.";
+  if (error.code === "STALE_REVISION")
+    return "La temporada ha cambiado. Actualiza los datos y revisa la operación antes de continuar.";
+  if (error.code === "CHAMPIONSHIP_BO3_REQUIRED")
+    return "Los dos líderes deben jugar un Mejor de 3. Registra su ganador antes de finalizar.";
+  if (error.code === "CHAMPIONSHIP_UNRESOLVED")
+    return "El campeonato sigue sin resolverse con las reglas aprobadas. Se necesita una decisión del propietario.";
+  if (error.code === "CHAMPIONSHIP_BO3_NOT_REQUIRED")
+    return "El estado actual del campeonato no permite registrar este desempate. Revisa los datos actualizados.";
+  if (error.code === "INVALID_CHAMPIONSHIP_WINNER")
+    return "El ganador debe ser uno de los dos participantes empatados por el campeonato.";
+  if (error.code === "LEGACY_TITLE_UNCERTIFIED")
+    return "Esta temporada anterior no tiene una certificación de título compatible. Su historia se conserva y requiere revisión.";
   const labels: Record<number, string> = {
     401: "La sesión ha caducado. Vuelve a entrar.",
     403: "No tienes permiso para esta acción.",
