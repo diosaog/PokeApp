@@ -1,6 +1,6 @@
 # PokeApp 2.0 Project Checkpoint
 
-Checkpoint reconciled: 2026-10-01. This file is the project index and historical
+Checkpoint reconciled: 2026-10-03. This file is the project index and historical
 milestone record; it does not maintain a second live phase-status ledger.
 
 ## Current project position
@@ -9,7 +9,8 @@ milestone record; it does not maintain a second live phase-status ledger.
   [Approved contract](phase10-5-functional-alignment.md),
   [single live record](work-in-progress/phase10-5-live-handoff.md).
   Owner authorized implementation on 2026-09-29 after the functional knowledge export.
-  Package D delivery/evidence: [daily sporting ranking](phase10-5d-completion-report.md).
+  Latest closed package: [E observed progress and initial divisions](phase10-5e-completion-report.md).
+  [D daily sporting ranking](phase10-5d-completion-report.md) remains delivered.
   Consult the live record for deployment and the active package.
 
 - Last closed phase: **10 - React / public Cloudflare + Railway, DONE**.
@@ -38,6 +39,20 @@ season guard and resumption checks. Do not recreate infrastructure or reapply SQ
 The following counts, PASS results, next-step notes and remote versions belong to
 their named milestones. They are retained as evidence, not fresh verification of
 the current repository or remote database. Current project position is indexed above.
+
+### 2026-10-03 - Phase 10.5E CLOSED
+
+Observed save progress distinguishes unknown from zero; J1 requires Medal 2 and
+authoritative adjusted deaths before server-derived A/B with configured capacities
+and boundary-only audited tie resolution. Existing manual seasons/history remain
+unchanged. Migration 036 was previously applied once; no replay. Final source
+`90a31fc` also recovers one dropped response for explicitly read-only frontend calls.
+670 Python PASS; unchanged-source React/browser/parser/real-PG/rebuild gates verified.
+Final public 21 API checks, 22 browser visits and 24 concurrent reads PASS; independent
+53-table scoped equality, 28 unchanged migration records and zero new Advisor
+ERROR/WARN. Full cloud save ingestion remains future work. F is the next authorized
+atomic package, unstarted; Phase 11 NOT READY. Exact evidence/deployments are in
+the [E report](phase10-5e-completion-report.md) and single live handoff.
 
 ### 2026-09-29 - Phase 10 public delivery CLOSED
 

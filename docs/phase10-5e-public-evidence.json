@@ -1,0 +1,2484 @@
+{
+  "date": "2026-10-03 Europe/Madrid",
+  "status": "PASS",
+  "evaluated_source": "90a31fc3b4220cefbe7c160902158084aea2569e",
+  "public_run": {
+    "run_id": "phase10_5_public_reads_d5d933292db242288543d89f52fb847a",
+    "started_at": "2026-10-03T11:13:41.830608+00:00",
+    "status": "PASS",
+    "source_commit": "90a31fc3b4220cefbe7c160902158084aea2569e",
+    "project_ref": "uwleqeuzsveqlugugzba",
+    "api": "https://pokeapp-api-production.up.railway.app",
+    "web": "https://pokeapp-web.pokeapp-v2.workers.dev",
+    "owner_trainer": "507d9c56-04d8-4801-a9da-f1e53674efb5",
+    "owner_auth_user": "ac98932c-f713-43d1-8b20-600f0be3dadc",
+    "owner_season": "c6bcac5b-0b89-403f-8242-41ac58286ade",
+    "owner_auth_exception": "Only this owner's Auth activity; every public row compared",
+    "business_writes": 0,
+    "fixtures_created": 0,
+    "checks": [
+      "Pinned project, applied 033-036, fresh 53-table baseline and owner identity",
+      "Existing PIN login, real JWT refresh and same enabled admin principal",
+      "E real typed initial-assignment read preserves owner legacy initialization",
+      "Real GENERAL/overview: exact strings, current roster, reached days and explicit unknown counts",
+      "Real eligible participant GET and existing matches without mutation",
+      "E typed finalize denies verified absent season and caller-supplied progress without writes",
+      "Deployed D accepts typed tie decision, denies absent resource and injected plan without writes",
+      "Anonymous/invalid JWT 401, extra actor 422 and absent-season RPC 404; no valid business write",
+      "Public React: GENERAL/current day, eleven screens desktop/mobile, admin and logout"
+    ],
+    "requests": [
+      {
+        "method": "POST",
+        "path": "/v1/auth/pin-login",
+        "status": 200,
+        "elapsed_ms": 1060.85
+      },
+      {
+        "method": "POST",
+        "path": "/v1/auth/refresh",
+        "status": 200,
+        "elapsed_ms": 361.83
+      },
+      {
+        "method": "GET",
+        "path": "/v1/me",
+        "status": 200,
+        "elapsed_ms": 598.95
+      },
+      {
+        "method": "GET",
+        "path": "/v1/read/seasons/c6bcac5b-0b89-403f-8242-41ac58286ade/league",
+        "status": 200,
+        "elapsed_ms": 847.69
+      },
+      {
+        "method": "GET",
+        "path": "/v1/read/seasons/c6bcac5b-0b89-403f-8242-41ac58286ade/overview",
+        "status": 200,
+        "elapsed_ms": 3356.6
+      },
+      {
+        "method": "GET",
+        "path": "/v1/seasons/c6bcac5b-0b89-403f-8242-41ac58286ade/initial-assignment",
+        "status": 200,
+        "elapsed_ms": 913.61
+      },
+      {
+        "method": "GET",
+        "path": "/v1/seasons/c6bcac5b-0b89-403f-8242-41ac58286ade/matchdays/3eb1cbd3-9a3b-4b1d-a2b5-d31a4c16ff08",
+        "status": 200,
+        "elapsed_ms": 1025.93
+      },
+      {
+        "method": "GET",
+        "path": "/v1/read/seasons/c6bcac5b-0b89-403f-8242-41ac58286ade/league",
+        "status": 401,
+        "elapsed_ms": 178.25
+      },
+      {
+        "method": "GET",
+        "path": "/v1/read/seasons/c6bcac5b-0b89-403f-8242-41ac58286ade/league",
+        "status": 401,
+        "elapsed_ms": 381.1
+      },
+      {
+        "method": "GET",
+        "path": "/v1/seasons/c6bcac5b-0b89-403f-8242-41ac58286ade/matchdays/3eb1cbd3-9a3b-4b1d-a2b5-d31a4c16ff08",
+        "status": 401,
+        "elapsed_ms": 176.05
+      },
+      {
+        "method": "GET",
+        "path": "/v1/seasons/c6bcac5b-0b89-403f-8242-41ac58286ade/matchdays/3eb1cbd3-9a3b-4b1d-a2b5-d31a4c16ff08",
+        "status": 401,
+        "elapsed_ms": 342.95
+      },
+      {
+        "method": "PUT",
+        "path": "/v1/seasons/c6bcac5b-0b89-403f-8242-41ac58286ade/matchdays/3eb1cbd3-9a3b-4b1d-a2b5-d31a4c16ff08/results",
+        "status": 401,
+        "elapsed_ms": 202.75
+      },
+      {
+        "method": "PUT",
+        "path": "/v1/seasons/c6bcac5b-0b89-403f-8242-41ac58286ade/matchdays/3eb1cbd3-9a3b-4b1d-a2b5-d31a4c16ff08/results",
+        "status": 401,
+        "elapsed_ms": 349.13
+      },
+      {
+        "method": "PUT",
+        "path": "/v1/seasons/c6bcac5b-0b89-403f-8242-41ac58286ade/matchdays/3eb1cbd3-9a3b-4b1d-a2b5-d31a4c16ff08/results",
+        "status": 422,
+        "elapsed_ms": 576.29
+      },
+      {
+        "method": "GET",
+        "path": "/v1/seasons/f8d2e817-1285-4fa4-a44e-122b37b69607/initial-assignment",
+        "status": 401,
+        "elapsed_ms": 319.09
+      },
+      {
+        "method": "GET",
+        "path": "/v1/seasons/f8d2e817-1285-4fa4-a44e-122b37b69607/initial-assignment",
+        "status": 401,
+        "elapsed_ms": 367.12
+      },
+      {
+        "method": "POST",
+        "path": "/v1/admin/seasons/f8d2e817-1285-4fa4-a44e-122b37b69607/initial-assignment/finalize",
+        "status": 404,
+        "elapsed_ms": 822.5
+      },
+      {
+        "method": "POST",
+        "path": "/v1/admin/seasons/f8d2e817-1285-4fa4-a44e-122b37b69607/initial-assignment/finalize",
+        "status": 422,
+        "elapsed_ms": 561.85
+      },
+      {
+        "method": "PUT",
+        "path": "/v1/seasons/f8d2e817-1285-4fa4-a44e-122b37b69607/matchdays/742b09ea-399a-4720-84c1-69a8056256df/results",
+        "status": 404,
+        "elapsed_ms": 780.89
+      },
+      {
+        "method": "POST",
+        "path": "/v1/admin/seasons/f8d2e817-1285-4fa4-a44e-122b37b69607/matchdays/5f7daa7d-ba67-465e-bfd6-6c6c729fc9b5/close",
+        "status": 404,
+        "elapsed_ms": 757.06
+      },
+      {
+        "method": "POST",
+        "path": "/v1/admin/seasons/f8d2e817-1285-4fa4-a44e-122b37b69607/matchdays/5f7daa7d-ba67-465e-bfd6-6c6c729fc9b5/close",
+        "status": 422,
+        "elapsed_ms": 539.64
+      }
+    ],
+    "failures": [],
+    "limitations": [
+      "Owner is admin: no public positive non-admin result mutation is claimed.",
+      "No manual result changed; successful result/tie/initial assignment mutations, CAS and races use local C/D/E gates.",
+      "No observed save is uploaded or invented; existing owner season remains legacy initialization."
+    ],
+    "migrations": [
+      {
+        "name": "033_league_general_read",
+        "record_hash": "f0a77c2aa988787991827e988030a0c7",
+        "version": "20260930113319"
+      },
+      {
+        "name": "034_participant_matchday_results",
+        "record_hash": "f3c985ee8eafa7fc8515b1c6453c2829",
+        "version": "20260930113328"
+      },
+      {
+        "name": "035_daily_sporting_ranking",
+        "record_hash": "482b18eddf33ca8d71cc5468afdb96c9",
+        "version": "20261001111600"
+      },
+      {
+        "name": "036_observed_initial_divisions",
+        "record_hash": "c932ad6c8c1a516d697f34c8af1e7f5b",
+        "version": "20261001165951"
+      }
+    ],
+    "general": {
+      "rows": 8,
+      "days": 2,
+      "unknown_dead_counts": 8,
+      "exact_string_amounts": true,
+      "private_fields_absent": true
+    },
+    "browser_exit_code": 0,
+    "browser": {
+      "status": "PASS",
+      "screen_visits": 22,
+      "business_writes": 0,
+      "api_interception": false
+    },
+    "baseline_comparison": true,
+    "migration_history_comparison": true,
+    "advisor_comparison": [],
+    "finished_at": "2026-10-03T11:15:45.963028+00:00"
+  },
+  "browser": {
+    "status": "PASS",
+    "api_interception": false,
+    "business_writes": 0,
+    "screens": [
+      "Inicio 1440",
+      "Liga 1440",
+      "Battle 1440",
+      "Entrenadores 1440",
+      "Mi PC 1440",
+      "Tienda 1440",
+      "Copa 1440",
+      "Hall de la Fama 1440",
+      "Juicios 1440",
+      "Administración 1440",
+      "Saves y Launcher 1440",
+      "Inicio 390",
+      "Liga 390",
+      "Battle 390",
+      "Entrenadores 390",
+      "Mi PC 390",
+      "Tienda 390",
+      "Copa 390",
+      "Hall de la Fama 390",
+      "Juicios 390",
+      "Administración 390",
+      "Saves y Launcher 390"
+    ],
+    "reads": [
+      {
+        "method": "POST",
+        "path": "/v1/auth/pin-login",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "path": "/v1/me",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "path": "/v1/read/seasons",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "path": "/v1/read/seasons/c6bcac5b-0b89-403f-8242-41ac58286ade/pc",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "path": "/v1/read/seasons/c6bcac5b-0b89-403f-8242-41ac58286ade/overview",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "path": "/v1/read/seasons/c6bcac5b-0b89-403f-8242-41ac58286ade/league",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "path": "/v1/read/seasons/c6bcac5b-0b89-403f-8242-41ac58286ade/inventory",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "path": "/v1/read/seasons/c6bcac5b-0b89-403f-8242-41ac58286ade/shop",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "path": "/v1/seasons/c6bcac5b-0b89-403f-8242-41ac58286ade/cups",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "path": "/v1/read/trainers",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "path": "/v1/read/hall",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "path": "/v1/seasons/c6bcac5b-0b89-403f-8242-41ac58286ade/trials",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "path": "/v1/admin/seasons/c6bcac5b-0b89-403f-8242-41ac58286ade/setup",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "path": "/v1/read/seasons/c6bcac5b-0b89-403f-8242-41ac58286ade/pc",
+        "status": 200
+      }
+    ],
+    "errors": [],
+    "unexpected": [],
+    "environmentOrigins": {
+      "https://me.kis.v2.scr.kaspersky-labs.com": 22
+    }
+  },
+  "concurrent_batches": [
+    {
+      "time": "2026-10-03T11:13:40.487074+00:00",
+      "results": [
+        {
+          "path": "overview",
+          "status": 200,
+          "seconds": 5.802,
+          "code": null
+        },
+        {
+          "path": "pc",
+          "status": 200,
+          "seconds": 2.446,
+          "code": null
+        },
+        {
+          "path": "shop",
+          "status": 200,
+          "seconds": 2.885,
+          "code": null
+        },
+        {
+          "path": "inventory",
+          "status": 200,
+          "seconds": 3.298,
+          "code": null
+        },
+        {
+          "path": "overview",
+          "status": 200,
+          "seconds": 4.384,
+          "code": null
+        },
+        {
+          "path": "pc",
+          "status": 200,
+          "seconds": 1.172,
+          "code": null
+        },
+        {
+          "path": "shop",
+          "status": 200,
+          "seconds": 1.929,
+          "code": null
+        },
+        {
+          "path": "inventory",
+          "status": 200,
+          "seconds": 1.946,
+          "code": null
+        },
+        {
+          "path": "overview",
+          "status": 200,
+          "seconds": 4.038,
+          "code": null
+        },
+        {
+          "path": "pc",
+          "status": 200,
+          "seconds": 1.214,
+          "code": null
+        },
+        {
+          "path": "shop",
+          "status": 200,
+          "seconds": 2.014,
+          "code": null
+        },
+        {
+          "path": "inventory",
+          "status": 200,
+          "seconds": 2.239,
+          "code": null
+        }
+      ],
+      "failures": 0
+    },
+    {
+      "time": "2026-10-03T11:17:46.550580+00:00",
+      "results": [
+        {
+          "path": "overview",
+          "status": 200,
+          "seconds": 3.935,
+          "code": null
+        },
+        {
+          "path": "pc",
+          "status": 200,
+          "seconds": 1.243,
+          "code": null
+        },
+        {
+          "path": "shop",
+          "status": 200,
+          "seconds": 2.605,
+          "code": null
+        },
+        {
+          "path": "inventory",
+          "status": 200,
+          "seconds": 1.83,
+          "code": null
+        },
+        {
+          "path": "overview",
+          "status": 200,
+          "seconds": 4.127,
+          "code": null
+        },
+        {
+          "path": "pc",
+          "status": 200,
+          "seconds": 1.049,
+          "code": null
+        },
+        {
+          "path": "shop",
+          "status": 200,
+          "seconds": 2.57,
+          "code": null
+        },
+        {
+          "path": "inventory",
+          "status": 200,
+          "seconds": 2.106,
+          "code": null
+        },
+        {
+          "path": "overview",
+          "status": 200,
+          "seconds": 3.709,
+          "code": null
+        },
+        {
+          "path": "pc",
+          "status": 200,
+          "seconds": 1.397,
+          "code": null
+        },
+        {
+          "path": "shop",
+          "status": 200,
+          "seconds": 1.679,
+          "code": null
+        },
+        {
+          "path": "inventory",
+          "status": 200,
+          "seconds": 1.676,
+          "code": null
+        }
+      ],
+      "failures": 0
+    }
+  ],
+  "independent_final": {
+    "time": "2026-10-03T11:18:42.264616+00:00",
+    "tables_equal": 53,
+    "migrations_equal": 28,
+    "owner_mapping_admin": true,
+    "advisor": {
+      "INFO": 125,
+      "ERROR": 24,
+      "WARN": 5
+    },
+    "new_error_warn": 0,
+    "removed_error_warn": 0,
+    "helpers": 20,
+    "private_snapshot_acl": "PASS",
+    "fixture_prefix_residue": 0,
+    "business_writes": 0,
+    "migration_writes": 0
+  },
+  "history": [
+    {
+      "name": "010_security_helpers",
+      "record_hash": "cdf4f6b8c1a530e590b36f7948f40d4d",
+      "version": "20260816211949"
+    },
+    {
+      "name": "011_rls_policies",
+      "record_hash": "26e26d199777c265f0f90b15b887af63",
+      "version": "20260816212058"
+    },
+    {
+      "name": "012_security_views",
+      "record_hash": "9a8d77f5f9dd9df58ef3d52485495441",
+      "version": "20260816212336"
+    },
+    {
+      "name": "014_security_invoker_hardening",
+      "record_hash": "deab86b86f5f5bac5aa1ea550b09273e",
+      "version": "20260816213020"
+    },
+    {
+      "name": "013_storage_policies",
+      "record_hash": "2e22d0bc0682d569eefcda63e9758cca",
+      "version": "20260901190001"
+    },
+    {
+      "name": "015_public_trainers_visibility",
+      "record_hash": "aeec8bcc1215a8c62b8e43eb522b0c33",
+      "version": "20260901234808"
+    },
+    {
+      "name": "016_public_team_locks_visibility",
+      "record_hash": "d5751c21233bb2a2ce9994d5881171af",
+      "version": "20260901235030"
+    },
+    {
+      "name": "017_public_coin_balances_visibility",
+      "record_hash": "1d7d90e47aa02b5c243aea751dfadc81",
+      "version": "20260901235223"
+    },
+    {
+      "name": "018_public_views_visibility",
+      "record_hash": "16abbb89c61dabb5d372df6cf800f734",
+      "version": "20260901235520"
+    },
+    {
+      "name": "019_team_lock_api",
+      "record_hash": "b0b92e3f027cc444f5114b235a08efe5",
+      "version": "20260922162954"
+    },
+    {
+      "name": "020_current_matchday_store_ban_contract",
+      "record_hash": "de5439c08eb04ceffff425676d4605e8",
+      "version": "20260922165901"
+    },
+    {
+      "name": "021_normal_purchase_api",
+      "record_hash": "ce6134eca3eb185c7d7b5c56c3499da4",
+      "version": "20260922171752"
+    },
+    {
+      "name": "022_promotional_purchase_api",
+      "record_hash": "0f48392efd1550d8e1f4744c27351bcb",
+      "version": "20260922174842"
+    },
+    {
+      "name": "023_pokemon_identity",
+      "record_hash": "23603bc5d4a89bd740c71cc66d607f78",
+      "version": "20260923165532"
+    },
+    {
+      "name": "024_redemption_effect_boundary",
+      "record_hash": "3d99140a02af7caebc0c4b79feb50d46",
+      "version": "20260923172957"
+    },
+    {
+      "name": "025_robbery_voucher_and_redemption",
+      "record_hash": "8fad71ef19c1bf53a45c290e46376caf",
+      "version": "20260923180416"
+    },
+    {
+      "name": "026_season_admin_setup_api",
+      "record_hash": "ba025575e26ad8407e9bd4be2aaad57b",
+      "version": "20260923192300"
+    },
+    {
+      "name": "027_competitive_matchdays",
+      "record_hash": "8c640ce27d5b7e2f26c1a891954e6774",
+      "version": "20260923210625"
+    },
+    {
+      "name": "028_participant_status_admin",
+      "record_hash": "3acdeba2a541a83421bd4d7c52c94695",
+      "version": "20260923220301"
+    },
+    {
+      "name": "029_season_finalization_archive_hall",
+      "record_hash": "2348e8793b79ee71fbb0b8cfacb7f7f3",
+      "version": "20260923232516"
+    },
+    {
+      "name": "030_trials_sanctions_api",
+      "record_hash": "337435eb946360eeeee2222de644d6a2",
+      "version": "20260924102756"
+    },
+    {
+      "name": "030_trials_sanctions_acl_completion",
+      "record_hash": "69095ad4071d5460744883f39f5168d2",
+      "version": "20260924103256"
+    },
+    {
+      "name": "031_cup_engine_certification",
+      "record_hash": "bed0f8e542976aeaf277b61771d1038f",
+      "version": "20260928110301"
+    },
+    {
+      "name": "032_cup_player_identity_index",
+      "record_hash": "38afc3fd0c4ad981eac8f92f13ae9f20",
+      "version": "20260928111840"
+    },
+    {
+      "name": "033_league_general_read",
+      "record_hash": "f0a77c2aa988787991827e988030a0c7",
+      "version": "20260930113319"
+    },
+    {
+      "name": "034_participant_matchday_results",
+      "record_hash": "f3c985ee8eafa7fc8515b1c6453c2829",
+      "version": "20260930113328"
+    },
+    {
+      "name": "035_daily_sporting_ranking",
+      "record_hash": "482b18eddf33ca8d71cc5468afdb96c9",
+      "version": "20261001111600"
+    },
+    {
+      "name": "036_observed_initial_divisions",
+      "record_hash": "c932ad6c8c1a516d697f34c8af1e7f5b",
+      "version": "20261001165951"
+    }
+  ],
+  "table_baseline": [
+    {
+      "name": "auth.identities",
+      "rows": 0,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "name": "auth.refresh_tokens",
+      "rows": 0,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "name": "auth.sessions",
+      "rows": 0,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "name": "auth.users",
+      "rows": 0,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "name": "public.activity_events",
+      "rows": 42,
+      "sha256": "51809e3c29c6e59a2b4667590693ab7d3f031070367e4342aeaabbd594527f85"
+    },
+    {
+      "name": "public.admin_operation_receipts",
+      "rows": 42,
+      "sha256": "555b1595a3344a1c33282dc0228a42c31f33e88ec2bc4618caebbf21e2df7034"
+    },
+    {
+      "name": "public.app_settings",
+      "rows": 2,
+      "sha256": "db6be94ca71c61c3eccaf4065fc4d8366ecdb94ba748a77574229ce57350ecf7"
+    },
+    {
+      "name": "public.coin_transactions",
+      "rows": 8,
+      "sha256": "9aebab7147e993554984ca726ebc0833980714fe22a63fe8b8560b59a2dfccdc"
+    },
+    {
+      "name": "public.cup_certificates",
+      "rows": 0,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "name": "public.cup_history",
+      "rows": 2,
+      "sha256": "e7b83a22f58ccb1c8c2fddda346cbb19dc9a236681eb89917ef9d25d666e3364"
+    },
+    {
+      "name": "public.cup_matches",
+      "rows": 0,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "name": "public.cup_participants",
+      "rows": 4,
+      "sha256": "a7f335fe4c3f4d5375e08753a99d35e3f6097738d8786a12186ecac01b8fd2bf"
+    },
+    {
+      "name": "public.cup_rounds",
+      "rows": 0,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "name": "public.cup_side_members",
+      "rows": 4,
+      "sha256": "6ac399bf234f7b67038896a5c74e9b24d389b9b755b1ea01b5c2cd93bf97e748"
+    },
+    {
+      "name": "public.cup_standings",
+      "rows": 4,
+      "sha256": "1c98e1ca23163db69dadec3a33014b471de6f19d93225569633164cc98866c29"
+    },
+    {
+      "name": "public.cups",
+      "rows": 1,
+      "sha256": "10a6c0d0a6261eaa0e82954e2a30c469d599923833b9ec5b34e2d4cb59dc8b41"
+    },
+    {
+      "name": "public.division_memberships",
+      "rows": 16,
+      "sha256": "34c644c53c4b244a112fb7deee4d9f7f76aed109b51ad0df3e3aa542f40c1f05"
+    },
+    {
+      "name": "public.divisions",
+      "rows": 2,
+      "sha256": "d08d36bc9489848216e3d1e67d11812430885dc4c092ce0cf442190bd7eadad0"
+    },
+    {
+      "name": "public.hall_of_fame_entries",
+      "rows": 0,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "name": "public.initial_division_snapshots",
+      "rows": 0,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "name": "public.matchday_movements",
+      "rows": 8,
+      "sha256": "3ed603171f7a9d05ec526e9b336d71b1fadba51ea4d006a71836611b2f20a82e"
+    },
+    {
+      "name": "public.matchday_snapshot_revisions",
+      "rows": 1,
+      "sha256": "7c4b5d14f79362ba48a1183729142caf4db8393c9d8102a4e850a1a51968896b"
+    },
+    {
+      "name": "public.matchday_snapshots",
+      "rows": 1,
+      "sha256": "76713a33f22000cd04aebba85b64bc10253d93ae614b116cdc2f2a89e1ecb3de"
+    },
+    {
+      "name": "public.matchdays",
+      "rows": 2,
+      "sha256": "7d00b993dbffa51ee516d40bd6ae6a33d4cec42484d6880af9a7874482629970"
+    },
+    {
+      "name": "public.matches",
+      "rows": 24,
+      "sha256": "c51be625817d26fe8223dafdb99a9e9f0a9865f76846904fa7fcb252814fdf1c"
+    },
+    {
+      "name": "public.parsed_saves",
+      "rows": 0,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "name": "public.penalties",
+      "rows": 0,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "name": "public.pokemon_entities",
+      "rows": 0,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "name": "public.pokemon_entity_flags",
+      "rows": 0,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "name": "public.pokemon_flags",
+      "rows": 0,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "name": "public.pokemon_identity_revisions",
+      "rows": 0,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "name": "public.pokemon_observations",
+      "rows": 0,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "name": "public.purchases",
+      "rows": 1,
+      "sha256": "ea12cf66d1f2e4db607db4036daa9004f8e09b77a29813145fc87ab615720e0b"
+    },
+    {
+      "name": "public.redemptions",
+      "rows": 0,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "name": "public.robbery_cycles",
+      "rows": 0,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "name": "public.save_files",
+      "rows": 0,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "name": "public.season_admin_state",
+      "rows": 3,
+      "sha256": "5998b96b7f189959ec10f6f17f5b341d086d8a8528b7d6dd5987b959a8243e66"
+    },
+    {
+      "name": "public.season_archive_snapshots",
+      "rows": 0,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "name": "public.season_config_versions",
+      "rows": 2,
+      "sha256": "284b2e87e46a1d7d07481eee73a635f578e13d69a4fe5cd41f6bbd608903d2b1"
+    },
+    {
+      "name": "public.season_player_stats",
+      "rows": 24,
+      "sha256": "ccd348375dbbb8fdb23f84034e19ea392cb900ad212124253c137a183cf824dc"
+    },
+    {
+      "name": "public.season_players",
+      "rows": 24,
+      "sha256": "8cbb37a7f8282f07b40b89e84e384a5df813627bd3a8fdbb599a966f1ac8304a"
+    },
+    {
+      "name": "public.seasons",
+      "rows": 3,
+      "sha256": "4e08c1928a33da394e34f99a83d54350506c3db8743c042089d06ef29e565857"
+    },
+    {
+      "name": "public.shop_items",
+      "rows": 62,
+      "sha256": "bb16ddeab4618cd83ed9b0367621c01082fd77d51d60e4a8806e620942e54d24"
+    },
+    {
+      "name": "public.shop_promotions",
+      "rows": 6,
+      "sha256": "136c3569c6b551fe01fc20c1e0f3fc7ea23b6115dc47b8d97602c227cd7d4b7c"
+    },
+    {
+      "name": "public.team_locks",
+      "rows": 0,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "name": "public.trainer_flags",
+      "rows": 0,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "name": "public.trainers",
+      "rows": 10,
+      "sha256": "ee56b522883b1964e26f290f54c474c798cd1fc0eeb6fd3086cca5efc0ecce5b"
+    },
+    {
+      "name": "public.trial_case_counters",
+      "rows": 1,
+      "sha256": "478a9b01515e079a40de5c0ae54c2a0b632dd1e3840c90927b61237ab48543b6"
+    },
+    {
+      "name": "public.trial_case_revisions",
+      "rows": 2,
+      "sha256": "9261e7d1afafa74cfac5e311683248cd081feb13fd64849c93b627fc94390caf"
+    },
+    {
+      "name": "public.trial_cases",
+      "rows": 1,
+      "sha256": "c9dbc5b7a16c22c1a2222d5c9639034bfbb49fd24b6bb55ba08e1f31c1e737b9"
+    },
+    {
+      "name": "public.trial_votes",
+      "rows": 0,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "name": "storage.buckets",
+      "rows": 1,
+      "sha256": "050480b87c212eb0f3345beda3672a96db452ac869df8a17fef17c7161c1af6c"
+    },
+    {
+      "name": "storage.objects",
+      "rows": 3,
+      "sha256": "059b2a8b39bfe0eba8b15a18d8fe7ef37c130b1808fcf16adf04753466570c35"
+    }
+  ],
+  "railway": {
+    "deployment": "6aa70f72-f0cb-41a1-86d6-7b4227803392",
+    "status": "SUCCESS",
+    "source_commit": "90a31fc3b4220cefbe7c160902158084aea2569e",
+    "image_digest": "sha256:f7a8efe77db345305ddda1c6cd398f06cd58d48779edade104b750d05404ee7d",
+    "committed_bundle_files": 229,
+    "service_manifest_unchanged": true
+  },
+  "cloudflare": {
+    "deployment": "3d829325-66fc-4da4-88f4-b7bd4967f8d7",
+    "versions": [
+      {
+        "version_id": "0224318e-38d6-4178-ae3a-646384328eb8",
+        "percentage": 100
+      }
+    ],
+    "source_commit": "0215f73457b7c3245b29af41e0200fd590f2db59"
+  },
+  "hosting": {
+    "time": "2026-10-03T11:19:31.229787+00:00",
+    "source_commit": "90a31fc3b4220cefbe7c160902158084aea2569e",
+    "api": "https://pokeapp-api-production.up.railway.app",
+    "web": "https://pokeapp-web.pokeapp-v2.workers.dev",
+    "assets": [
+      {
+        "path": "/assets/index-R-3zB0JZ.js",
+        "sha256": "9669b304d30a12433d2a01651fe0fef96c0d9c5b02e4828e1e16c6c48b56830c",
+        "content_type": "text/javascript"
+      },
+      {
+        "path": "/assets/index-Ce8Qi1M_.css",
+        "sha256": "fdd473f168f290c4c5a4f05543bb4987fb8eaaa43cc59b3763737e8aa3964ef4",
+        "content_type": "text/css"
+      }
+    ],
+    "web_headers": {
+      "content-type": "text/html",
+      "content-security-policy": "default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'self' https://pokeapp-api-production.up.railway.app; object-src 'none'; base-uri 'none'; frame-ancestors 'none'; form-action 'self'",
+      "x-content-type-options": "nosniff",
+      "referrer-policy": "no-referrer"
+    },
+    "status": "PASS"
+  },
+  "function_catalog": [
+    {
+      "anon": false,
+      "authenticated": false,
+      "proconfig": [
+        "search_path=pg_catalog, public"
+      ],
+      "proname": "admin_setup_config_used",
+      "prosecdef": false,
+      "public_execute": false,
+      "service": true
+    },
+    {
+      "anon": false,
+      "authenticated": false,
+      "proconfig": [
+        "search_path=pg_catalog, public"
+      ],
+      "proname": "admin_setup_readiness",
+      "prosecdef": false,
+      "public_execute": false,
+      "service": true
+    },
+    {
+      "anon": false,
+      "authenticated": false,
+      "proconfig": [
+        "search_path=pg_catalog, public"
+      ],
+      "proname": "admin_setup_readiness_v035",
+      "prosecdef": false,
+      "public_execute": false,
+      "service": true
+    },
+    {
+      "anon": false,
+      "authenticated": false,
+      "proconfig": [
+        "search_path=pg_catalog, public"
+      ],
+      "proname": "api_admin_create_season",
+      "prosecdef": false,
+      "public_execute": false,
+      "service": true
+    },
+    {
+      "anon": false,
+      "authenticated": false,
+      "proconfig": [
+        "search_path=pg_catalog, public"
+      ],
+      "proname": "api_admin_create_season_v035",
+      "prosecdef": false,
+      "public_execute": false,
+      "service": true
+    },
+    {
+      "anon": false,
+      "authenticated": false,
+      "proconfig": [
+        "search_path=pg_catalog, public"
+      ],
+      "proname": "api_admin_finalize_initial_assignment",
+      "prosecdef": false,
+      "public_execute": false,
+      "service": true
+    },
+    {
+      "anon": false,
+      "authenticated": false,
+      "proconfig": [
+        "search_path=pg_catalog, public"
+      ],
+      "proname": "api_admin_get_setup",
+      "prosecdef": false,
+      "public_execute": false,
+      "service": true
+    },
+    {
+      "anon": false,
+      "authenticated": false,
+      "proconfig": [
+        "search_path=pg_catalog, public"
+      ],
+      "proname": "api_admin_get_setup_v035",
+      "prosecdef": false,
+      "public_execute": false,
+      "service": true
+    },
+    {
+      "anon": false,
+      "authenticated": false,
+      "proconfig": [
+        "search_path=pg_catalog, public"
+      ],
+      "proname": "api_admin_initial_divisions",
+      "prosecdef": false,
+      "public_execute": false,
+      "service": true
+    },
+    {
+      "anon": false,
+      "authenticated": false,
+      "proconfig": [
+        "search_path=pg_catalog, public"
+      ],
+      "proname": "api_admin_initial_divisions_v035",
+      "prosecdef": false,
+      "public_execute": false,
+      "service": true
+    },
+    {
+      "anon": false,
+      "authenticated": false,
+      "proconfig": [
+        "search_path=pg_catalog, public"
+      ],
+      "proname": "api_admin_prepare_first_matchday",
+      "prosecdef": false,
+      "public_execute": false,
+      "service": true
+    },
+    {
+      "anon": false,
+      "authenticated": false,
+      "proconfig": [
+        "search_path=pg_catalog, public"
+      ],
+      "proname": "api_admin_prepare_first_matchday_v035",
+      "prosecdef": false,
+      "public_execute": false,
+      "service": true
+    },
+    {
+      "anon": false,
+      "authenticated": false,
+      "proconfig": [
+        "search_path=pg_catalog, public"
+      ],
+      "proname": "initial_assignment_context",
+      "prosecdef": false,
+      "public_execute": false,
+      "service": true
+    },
+    {
+      "anon": false,
+      "authenticated": false,
+      "proconfig": [
+        "search_path=pg_catalog, public"
+      ],
+      "proname": "initial_assignment_inputs",
+      "prosecdef": false,
+      "public_execute": false,
+      "service": true
+    },
+    {
+      "anon": false,
+      "authenticated": false,
+      "proconfig": [
+        "search_path=pg_catalog, public"
+      ],
+      "proname": "initial_assignment_modern",
+      "prosecdef": false,
+      "public_execute": false,
+      "service": true
+    },
+    {
+      "anon": false,
+      "authenticated": false,
+      "proconfig": [
+        "search_path=pg_catalog, public"
+      ],
+      "proname": "initial_assignment_observations",
+      "prosecdef": false,
+      "public_execute": false,
+      "service": true
+    },
+    {
+      "anon": false,
+      "authenticated": false,
+      "proconfig": [
+        "search_path=pg_catalog, public"
+      ],
+      "proname": "league_general_read",
+      "prosecdef": false,
+      "public_execute": false,
+      "service": true
+    },
+    {
+      "anon": false,
+      "authenticated": false,
+      "proconfig": [
+        "search_path=pg_catalog, public"
+      ],
+      "proname": "league_general_read_v035",
+      "prosecdef": false,
+      "public_execute": false,
+      "service": true
+    },
+    {
+      "anon": false,
+      "authenticated": false,
+      "proconfig": [
+        "search_path=pg_catalog, public"
+      ],
+      "proname": "matchday_validate",
+      "prosecdef": false,
+      "public_execute": false,
+      "service": true
+    },
+    {
+      "anon": false,
+      "authenticated": false,
+      "proconfig": [
+        "search_path=pg_catalog, public"
+      ],
+      "proname": "matchday_validate_v035",
+      "prosecdef": false,
+      "public_execute": false,
+      "service": true
+    }
+  ],
+  "snapshot_acl": [
+    {
+      "anon": false,
+      "anon_columns": false,
+      "authenticated": false,
+      "authenticated_columns": false,
+      "rls": true,
+      "service_mutable": false
+    }
+  ],
+  "recovery": {
+    "before": {
+      "time": "2026-10-03T11:06:25.631308+00:00",
+      "results": [
+        {
+          "path": "overview",
+          "status": 200,
+          "seconds": 5.326,
+          "code": null
+        },
+        {
+          "path": "pc",
+          "status": 200,
+          "seconds": 2.183,
+          "code": null
+        },
+        {
+          "path": "shop",
+          "status": 200,
+          "seconds": 3.32,
+          "code": null
+        },
+        {
+          "path": "inventory",
+          "status": 200,
+          "seconds": 3.098,
+          "code": null
+        },
+        {
+          "path": "overview",
+          "status": 503,
+          "seconds": 3.742,
+          "code": "UNKNOWN"
+        },
+        {
+          "path": "pc",
+          "status": 200,
+          "seconds": 1.553,
+          "code": null
+        },
+        {
+          "path": "shop",
+          "status": 200,
+          "seconds": 2.605,
+          "code": null
+        },
+        {
+          "path": "inventory",
+          "status": 503,
+          "seconds": 1.272,
+          "code": "UNKNOWN"
+        },
+        {
+          "path": "overview",
+          "status": 503,
+          "seconds": 0.599,
+          "code": "UNKNOWN"
+        },
+        {
+          "path": "pc",
+          "status": 200,
+          "seconds": 1.685,
+          "code": null
+        },
+        {
+          "path": "shop",
+          "status": 200,
+          "seconds": 3.307,
+          "code": null
+        },
+        {
+          "path": "inventory",
+          "status": 200,
+          "seconds": 3.159,
+          "code": null
+        }
+      ],
+      "failures": 3
+    },
+    "before_logs": [
+      {
+        "time": "2026-10-03T11:06:22.473735673Z",
+        "message": "frontend_read_failed operation=rows cause=ReadError"
+      },
+      {
+        "time": "2026-10-03T11:06:22.473831102Z",
+        "message": "frontend_read_failed operation=rows cause=ReadError"
+      },
+      {
+        "time": "2026-10-03T11:06:22.473847062Z",
+        "message": "frontend_read_failed operation=rows cause=ReadError"
+      }
+    ],
+    "after_logs": [],
+    "observed_failure": "httpx.ReadError receiving upstream response",
+    "underlying_network_cause": "UNKNOWN",
+    "fix": "One retry only for ReadError in read-only frontend repository",
+    "automatic_mutation_retries": 0,
+    "persistent_failure": "Sanitized 503 after second failure"
+  },
+  "actions": {
+    "new_migrations": 0,
+    "new_backend_deployments": 1,
+    "new_frontend_deployments": 0,
+    "business_writes": 0,
+    "fixtures_created": 0
+  },
+  "limitations": [
+    "Only existing owner Auth activity is excluded from table equality; all public rows and Storage metadata are included.",
+    "No Storage bytes touched; metadata equality does not claim byte hashing.",
+    "Positive modern split, non-admin sporting mutations, concurrency and rollback are local evidence; public owner season remains legacy.",
+    "No cloud ingestion or physical save writes; missing observations remain pending.",
+    "Historical intermittent 503 cause remains unknown; fresh passing observations are not a permanent reliability guarantee."
+  ],
+  "previous_checkpoint": {
+    "date": "2026-10-02 Europe/Madrid",
+    "status": "FRESH_PASS",
+    "evaluated_source": "d24b55152d7d8a29c3632a4f4feec710fb331040",
+    "public_run": {
+      "run_id": "phase10_5_public_reads_11efa6eac0154745badf74fb3ee02abf",
+      "started_at": "2026-10-01T22:29:31.477705+00:00",
+      "status": "PASS",
+      "source_commit": "d24b55152d7d8a29c3632a4f4feec710fb331040",
+      "project_ref": "uwleqeuzsveqlugugzba",
+      "api": "https://pokeapp-api-production.up.railway.app",
+      "web": "https://pokeapp-web.pokeapp-v2.workers.dev",
+      "owner_trainer": "507d9c56-04d8-4801-a9da-f1e53674efb5",
+      "owner_auth_user": "ac98932c-f713-43d1-8b20-600f0be3dadc",
+      "owner_season": "c6bcac5b-0b89-403f-8242-41ac58286ade",
+      "owner_auth_exception": "Only this owner's Auth activity; every public row compared",
+      "business_writes": 0,
+      "fixtures_created": 0,
+      "checks": [
+        "Pinned project, applied 033-036, fresh 53-table baseline and owner identity",
+        "Existing PIN login, real JWT refresh and same enabled admin principal",
+        "E real typed initial-assignment read preserves owner legacy initialization",
+        "Real GENERAL/overview: exact strings, current roster, reached days and explicit unknown counts",
+        "Real eligible participant GET and existing matches without mutation",
+        "E typed finalize denies verified absent season and caller-supplied progress without writes",
+        "Deployed D accepts typed tie decision, denies absent resource and injected plan without writes",
+        "Anonymous/invalid JWT 401, extra actor 422 and absent-season RPC 404; no valid business write",
+        "Public React: GENERAL/current day, eleven screens desktop/mobile, admin and logout"
+      ],
+      "requests": [
+        {
+          "method": "POST",
+          "path": "/v1/auth/pin-login",
+          "status": 200,
+          "elapsed_ms": 1139.75
+        },
+        {
+          "method": "POST",
+          "path": "/v1/auth/refresh",
+          "status": 200,
+          "elapsed_ms": 400.03
+        },
+        {
+          "method": "GET",
+          "path": "/v1/me",
+          "status": 200,
+          "elapsed_ms": 594.38
+        },
+        {
+          "method": "GET",
+          "path": "/v1/read/seasons/c6bcac5b-0b89-403f-8242-41ac58286ade/league",
+          "status": 200,
+          "elapsed_ms": 811.67
+        },
+        {
+          "method": "GET",
+          "path": "/v1/read/seasons/c6bcac5b-0b89-403f-8242-41ac58286ade/overview",
+          "status": 200,
+          "elapsed_ms": 4222.88
+        },
+        {
+          "method": "GET",
+          "path": "/v1/seasons/c6bcac5b-0b89-403f-8242-41ac58286ade/initial-assignment",
+          "status": 200,
+          "elapsed_ms": 858.44
+        },
+        {
+          "method": "GET",
+          "path": "/v1/seasons/c6bcac5b-0b89-403f-8242-41ac58286ade/matchdays/3eb1cbd3-9a3b-4b1d-a2b5-d31a4c16ff08",
+          "status": 200,
+          "elapsed_ms": 1613.01
+        },
+        {
+          "method": "GET",
+          "path": "/v1/read/seasons/c6bcac5b-0b89-403f-8242-41ac58286ade/league",
+          "status": 401,
+          "elapsed_ms": 175.35
+        },
+        {
+          "method": "GET",
+          "path": "/v1/read/seasons/c6bcac5b-0b89-403f-8242-41ac58286ade/league",
+          "status": 401,
+          "elapsed_ms": 693.51
+        },
+        {
+          "method": "GET",
+          "path": "/v1/seasons/c6bcac5b-0b89-403f-8242-41ac58286ade/matchdays/3eb1cbd3-9a3b-4b1d-a2b5-d31a4c16ff08",
+          "status": 401,
+          "elapsed_ms": 173.06
+        },
+        {
+          "method": "GET",
+          "path": "/v1/seasons/c6bcac5b-0b89-403f-8242-41ac58286ade/matchdays/3eb1cbd3-9a3b-4b1d-a2b5-d31a4c16ff08",
+          "status": 401,
+          "elapsed_ms": 682.98
+        },
+        {
+          "method": "PUT",
+          "path": "/v1/seasons/c6bcac5b-0b89-403f-8242-41ac58286ade/matchdays/3eb1cbd3-9a3b-4b1d-a2b5-d31a4c16ff08/results",
+          "status": 401,
+          "elapsed_ms": 176.11
+        },
+        {
+          "method": "PUT",
+          "path": "/v1/seasons/c6bcac5b-0b89-403f-8242-41ac58286ade/matchdays/3eb1cbd3-9a3b-4b1d-a2b5-d31a4c16ff08/results",
+          "status": 401,
+          "elapsed_ms": 699.86
+        },
+        {
+          "method": "PUT",
+          "path": "/v1/seasons/c6bcac5b-0b89-403f-8242-41ac58286ade/matchdays/3eb1cbd3-9a3b-4b1d-a2b5-d31a4c16ff08/results",
+          "status": 422,
+          "elapsed_ms": 583.4
+        },
+        {
+          "method": "GET",
+          "path": "/v1/seasons/dde541a7-f8aa-42ff-9e2d-f6627b2f448c/initial-assignment",
+          "status": 401,
+          "elapsed_ms": 321.43
+        },
+        {
+          "method": "GET",
+          "path": "/v1/seasons/dde541a7-f8aa-42ff-9e2d-f6627b2f448c/initial-assignment",
+          "status": 401,
+          "elapsed_ms": 727.59
+        },
+        {
+          "method": "POST",
+          "path": "/v1/admin/seasons/dde541a7-f8aa-42ff-9e2d-f6627b2f448c/initial-assignment/finalize",
+          "status": 404,
+          "elapsed_ms": 1339.57
+        },
+        {
+          "method": "POST",
+          "path": "/v1/admin/seasons/dde541a7-f8aa-42ff-9e2d-f6627b2f448c/initial-assignment/finalize",
+          "status": 422,
+          "elapsed_ms": 866.49
+        },
+        {
+          "method": "PUT",
+          "path": "/v1/seasons/dde541a7-f8aa-42ff-9e2d-f6627b2f448c/matchdays/46797182-8b1a-4c47-8f2e-a0105d546d8a/results",
+          "status": 404,
+          "elapsed_ms": 1103.97
+        },
+        {
+          "method": "POST",
+          "path": "/v1/admin/seasons/dde541a7-f8aa-42ff-9e2d-f6627b2f448c/matchdays/9dd0519d-4cdd-49fb-8577-d4fa4c702091/close",
+          "status": 404,
+          "elapsed_ms": 1110.84
+        },
+        {
+          "method": "POST",
+          "path": "/v1/admin/seasons/dde541a7-f8aa-42ff-9e2d-f6627b2f448c/matchdays/9dd0519d-4cdd-49fb-8577-d4fa4c702091/close",
+          "status": 422,
+          "elapsed_ms": 880.97
+        }
+      ],
+      "failures": [],
+      "limitations": [
+        "Owner is admin: no public positive non-admin result mutation is claimed.",
+        "No manual result changed; successful result/tie/initial assignment mutations, CAS and races use local C/D/E gates.",
+        "No observed save is uploaded or invented; existing owner season remains legacy initialization."
+      ],
+      "migrations": [
+        {
+          "name": "033_league_general_read",
+          "record_hash": "f0a77c2aa988787991827e988030a0c7",
+          "version": "20260930113319"
+        },
+        {
+          "name": "034_participant_matchday_results",
+          "record_hash": "f3c985ee8eafa7fc8515b1c6453c2829",
+          "version": "20260930113328"
+        },
+        {
+          "name": "035_daily_sporting_ranking",
+          "record_hash": "482b18eddf33ca8d71cc5468afdb96c9",
+          "version": "20261001111600"
+        },
+        {
+          "name": "036_observed_initial_divisions",
+          "record_hash": "c932ad6c8c1a516d697f34c8af1e7f5b",
+          "version": "20261001165951"
+        }
+      ],
+      "general": {
+        "rows": 8,
+        "days": 2,
+        "unknown_dead_counts": 8,
+        "exact_string_amounts": true,
+        "private_fields_absent": true
+      },
+      "browser_exit_code": 0,
+      "browser": {
+        "status": "PASS",
+        "screen_visits": 22,
+        "business_writes": 0,
+        "api_interception": false
+      },
+      "baseline_comparison": true,
+      "migration_history_comparison": true,
+      "advisor_comparison": [],
+      "finished_at": "2026-10-01T22:32:11.315400+00:00"
+    },
+    "browser": {
+      "status": "PASS",
+      "api_interception": false,
+      "business_writes": 0,
+      "screens": [
+        "Inicio 1440",
+        "Liga 1440",
+        "Battle 1440",
+        "Entrenadores 1440",
+        "Mi PC 1440",
+        "Tienda 1440",
+        "Copa 1440",
+        "Hall de la Fama 1440",
+        "Juicios 1440",
+        "Administración 1440",
+        "Saves y Launcher 1440",
+        "Inicio 390",
+        "Liga 390",
+        "Battle 390",
+        "Entrenadores 390",
+        "Mi PC 390",
+        "Tienda 390",
+        "Copa 390",
+        "Hall de la Fama 390",
+        "Juicios 390",
+        "Administración 390",
+        "Saves y Launcher 390"
+      ],
+      "reads": [
+        {
+          "method": "POST",
+          "path": "/v1/auth/pin-login",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/v1/me",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/v1/read/seasons",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/v1/read/seasons/c6bcac5b-0b89-403f-8242-41ac58286ade/pc",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/v1/read/seasons/c6bcac5b-0b89-403f-8242-41ac58286ade/overview",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/v1/read/seasons/c6bcac5b-0b89-403f-8242-41ac58286ade/league",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/v1/read/seasons/c6bcac5b-0b89-403f-8242-41ac58286ade/inventory",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/v1/read/seasons/c6bcac5b-0b89-403f-8242-41ac58286ade/shop",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/v1/seasons/c6bcac5b-0b89-403f-8242-41ac58286ade/cups",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/v1/read/trainers",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/v1/read/hall",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/v1/seasons/c6bcac5b-0b89-403f-8242-41ac58286ade/trials",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/v1/admin/seasons/c6bcac5b-0b89-403f-8242-41ac58286ade/setup",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/v1/read/seasons/c6bcac5b-0b89-403f-8242-41ac58286ade/pc",
+          "status": 200
+        }
+      ],
+      "errors": [],
+      "unexpected": [],
+      "environmentOrigins": {
+        "https://me.kis.v2.scr.kaspersky-labs.com": 25
+      }
+    },
+    "concurrent_batches": [
+      {
+        "time": "2026-10-01T22:26:50.440339+00:00",
+        "results": [
+          {
+            "path": "overview",
+            "status": 200,
+            "seconds": 7.103,
+            "code": null
+          },
+          {
+            "path": "pc",
+            "status": 200,
+            "seconds": 2.662,
+            "code": null
+          },
+          {
+            "path": "shop",
+            "status": 200,
+            "seconds": 3.548,
+            "code": null
+          },
+          {
+            "path": "inventory",
+            "status": 200,
+            "seconds": 3.458,
+            "code": null
+          },
+          {
+            "path": "overview",
+            "status": 200,
+            "seconds": 5.126,
+            "code": null
+          },
+          {
+            "path": "pc",
+            "status": 200,
+            "seconds": 1.518,
+            "code": null
+          },
+          {
+            "path": "shop",
+            "status": 200,
+            "seconds": 2.337,
+            "code": null
+          },
+          {
+            "path": "inventory",
+            "status": 200,
+            "seconds": 2.395,
+            "code": null
+          },
+          {
+            "path": "overview",
+            "status": 200,
+            "seconds": 4.719,
+            "code": null
+          },
+          {
+            "path": "pc",
+            "status": 200,
+            "seconds": 1.621,
+            "code": null
+          },
+          {
+            "path": "shop",
+            "status": 200,
+            "seconds": 2.196,
+            "code": null
+          },
+          {
+            "path": "inventory",
+            "status": 200,
+            "seconds": 2.196,
+            "code": null
+          }
+        ],
+        "failures": 0
+      },
+      {
+        "time": "2026-10-01T22:33:02.147941+00:00",
+        "results": [
+          {
+            "path": "overview",
+            "status": 200,
+            "seconds": 5.521,
+            "code": null
+          },
+          {
+            "path": "pc",
+            "status": 200,
+            "seconds": 1.628,
+            "code": null
+          },
+          {
+            "path": "shop",
+            "status": 200,
+            "seconds": 3.246,
+            "code": null
+          },
+          {
+            "path": "inventory",
+            "status": 200,
+            "seconds": 3.521,
+            "code": null
+          },
+          {
+            "path": "overview",
+            "status": 200,
+            "seconds": 5.894,
+            "code": null
+          },
+          {
+            "path": "pc",
+            "status": 200,
+            "seconds": 1.29,
+            "code": null
+          },
+          {
+            "path": "shop",
+            "status": 200,
+            "seconds": 2.2,
+            "code": null
+          },
+          {
+            "path": "inventory",
+            "status": 200,
+            "seconds": 1.795,
+            "code": null
+          },
+          {
+            "path": "overview",
+            "status": 200,
+            "seconds": 4.184,
+            "code": null
+          },
+          {
+            "path": "pc",
+            "status": 200,
+            "seconds": 1.074,
+            "code": null
+          },
+          {
+            "path": "shop",
+            "status": 200,
+            "seconds": 2.363,
+            "code": null
+          },
+          {
+            "path": "inventory",
+            "status": 200,
+            "seconds": 2.1,
+            "code": null
+          }
+        ],
+        "failures": 0
+      }
+    ],
+    "independent_final": {
+      "time": "2026-10-01T22:34:24.791834+00:00",
+      "tables_equal": 53,
+      "migrations_equal": 28,
+      "owner_mapping_admin": true,
+      "advisor": {
+        "INFO": 125,
+        "ERROR": 24,
+        "WARN": 5
+      },
+      "new_error_warn": 0,
+      "removed_error_warn": 0,
+      "helpers": 20,
+      "private_snapshot_acl": "PASS",
+      "fixture_prefix_residue": 0,
+      "business_writes": 0,
+      "migration_writes": 0
+    },
+    "history": [
+      {
+        "name": "010_security_helpers",
+        "record_hash": "cdf4f6b8c1a530e590b36f7948f40d4d",
+        "version": "20260816211949"
+      },
+      {
+        "name": "011_rls_policies",
+        "record_hash": "26e26d199777c265f0f90b15b887af63",
+        "version": "20260816212058"
+      },
+      {
+        "name": "012_security_views",
+        "record_hash": "9a8d77f5f9dd9df58ef3d52485495441",
+        "version": "20260816212336"
+      },
+      {
+        "name": "014_security_invoker_hardening",
+        "record_hash": "deab86b86f5f5bac5aa1ea550b09273e",
+        "version": "20260816213020"
+      },
+      {
+        "name": "013_storage_policies",
+        "record_hash": "2e22d0bc0682d569eefcda63e9758cca",
+        "version": "20260901190001"
+      },
+      {
+        "name": "015_public_trainers_visibility",
+        "record_hash": "aeec8bcc1215a8c62b8e43eb522b0c33",
+        "version": "20260901234808"
+      },
+      {
+        "name": "016_public_team_locks_visibility",
+        "record_hash": "d5751c21233bb2a2ce9994d5881171af",
+        "version": "20260901235030"
+      },
+      {
+        "name": "017_public_coin_balances_visibility",
+        "record_hash": "1d7d90e47aa02b5c243aea751dfadc81",
+        "version": "20260901235223"
+      },
+      {
+        "name": "018_public_views_visibility",
+        "record_hash": "16abbb89c61dabb5d372df6cf800f734",
+        "version": "20260901235520"
+      },
+      {
+        "name": "019_team_lock_api",
+        "record_hash": "b0b92e3f027cc444f5114b235a08efe5",
+        "version": "20260922162954"
+      },
+      {
+        "name": "020_current_matchday_store_ban_contract",
+        "record_hash": "de5439c08eb04ceffff425676d4605e8",
+        "version": "20260922165901"
+      },
+      {
+        "name": "021_normal_purchase_api",
+        "record_hash": "ce6134eca3eb185c7d7b5c56c3499da4",
+        "version": "20260922171752"
+      },
+      {
+        "name": "022_promotional_purchase_api",
+        "record_hash": "0f48392efd1550d8e1f4744c27351bcb",
+        "version": "20260922174842"
+      },
+      {
+        "name": "023_pokemon_identity",
+        "record_hash": "23603bc5d4a89bd740c71cc66d607f78",
+        "version": "20260923165532"
+      },
+      {
+        "name": "024_redemption_effect_boundary",
+        "record_hash": "3d99140a02af7caebc0c4b79feb50d46",
+        "version": "20260923172957"
+      },
+      {
+        "name": "025_robbery_voucher_and_redemption",
+        "record_hash": "8fad71ef19c1bf53a45c290e46376caf",
+        "version": "20260923180416"
+      },
+      {
+        "name": "026_season_admin_setup_api",
+        "record_hash": "ba025575e26ad8407e9bd4be2aaad57b",
+        "version": "20260923192300"
+      },
+      {
+        "name": "027_competitive_matchdays",
+        "record_hash": "8c640ce27d5b7e2f26c1a891954e6774",
+        "version": "20260923210625"
+      },
+      {
+        "name": "028_participant_status_admin",
+        "record_hash": "3acdeba2a541a83421bd4d7c52c94695",
+        "version": "20260923220301"
+      },
+      {
+        "name": "029_season_finalization_archive_hall",
+        "record_hash": "2348e8793b79ee71fbb0b8cfacb7f7f3",
+        "version": "20260923232516"
+      },
+      {
+        "name": "030_trials_sanctions_api",
+        "record_hash": "337435eb946360eeeee2222de644d6a2",
+        "version": "20260924102756"
+      },
+      {
+        "name": "030_trials_sanctions_acl_completion",
+        "record_hash": "69095ad4071d5460744883f39f5168d2",
+        "version": "20260924103256"
+      },
+      {
+        "name": "031_cup_engine_certification",
+        "record_hash": "bed0f8e542976aeaf277b61771d1038f",
+        "version": "20260928110301"
+      },
+      {
+        "name": "032_cup_player_identity_index",
+        "record_hash": "38afc3fd0c4ad981eac8f92f13ae9f20",
+        "version": "20260928111840"
+      },
+      {
+        "name": "033_league_general_read",
+        "record_hash": "f0a77c2aa988787991827e988030a0c7",
+        "version": "20260930113319"
+      },
+      {
+        "name": "034_participant_matchday_results",
+        "record_hash": "f3c985ee8eafa7fc8515b1c6453c2829",
+        "version": "20260930113328"
+      },
+      {
+        "name": "035_daily_sporting_ranking",
+        "record_hash": "482b18eddf33ca8d71cc5468afdb96c9",
+        "version": "20261001111600"
+      },
+      {
+        "name": "036_observed_initial_divisions",
+        "record_hash": "c932ad6c8c1a516d697f34c8af1e7f5b",
+        "version": "20261001165951"
+      }
+    ],
+    "table_baseline": [
+      {
+        "name": "auth.identities",
+        "rows": 0,
+        "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      {
+        "name": "auth.refresh_tokens",
+        "rows": 0,
+        "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      {
+        "name": "auth.sessions",
+        "rows": 0,
+        "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      {
+        "name": "auth.users",
+        "rows": 0,
+        "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      {
+        "name": "public.activity_events",
+        "rows": 42,
+        "sha256": "51809e3c29c6e59a2b4667590693ab7d3f031070367e4342aeaabbd594527f85"
+      },
+      {
+        "name": "public.admin_operation_receipts",
+        "rows": 42,
+        "sha256": "555b1595a3344a1c33282dc0228a42c31f33e88ec2bc4618caebbf21e2df7034"
+      },
+      {
+        "name": "public.app_settings",
+        "rows": 2,
+        "sha256": "db6be94ca71c61c3eccaf4065fc4d8366ecdb94ba748a77574229ce57350ecf7"
+      },
+      {
+        "name": "public.coin_transactions",
+        "rows": 8,
+        "sha256": "9aebab7147e993554984ca726ebc0833980714fe22a63fe8b8560b59a2dfccdc"
+      },
+      {
+        "name": "public.cup_certificates",
+        "rows": 0,
+        "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      {
+        "name": "public.cup_history",
+        "rows": 2,
+        "sha256": "e7b83a22f58ccb1c8c2fddda346cbb19dc9a236681eb89917ef9d25d666e3364"
+      },
+      {
+        "name": "public.cup_matches",
+        "rows": 0,
+        "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      {
+        "name": "public.cup_participants",
+        "rows": 4,
+        "sha256": "a7f335fe4c3f4d5375e08753a99d35e3f6097738d8786a12186ecac01b8fd2bf"
+      },
+      {
+        "name": "public.cup_rounds",
+        "rows": 0,
+        "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      {
+        "name": "public.cup_side_members",
+        "rows": 4,
+        "sha256": "6ac399bf234f7b67038896a5c74e9b24d389b9b755b1ea01b5c2cd93bf97e748"
+      },
+      {
+        "name": "public.cup_standings",
+        "rows": 4,
+        "sha256": "1c98e1ca23163db69dadec3a33014b471de6f19d93225569633164cc98866c29"
+      },
+      {
+        "name": "public.cups",
+        "rows": 1,
+        "sha256": "10a6c0d0a6261eaa0e82954e2a30c469d599923833b9ec5b34e2d4cb59dc8b41"
+      },
+      {
+        "name": "public.division_memberships",
+        "rows": 16,
+        "sha256": "34c644c53c4b244a112fb7deee4d9f7f76aed109b51ad0df3e3aa542f40c1f05"
+      },
+      {
+        "name": "public.divisions",
+        "rows": 2,
+        "sha256": "d08d36bc9489848216e3d1e67d11812430885dc4c092ce0cf442190bd7eadad0"
+      },
+      {
+        "name": "public.hall_of_fame_entries",
+        "rows": 0,
+        "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      {
+        "name": "public.initial_division_snapshots",
+        "rows": 0,
+        "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      {
+        "name": "public.matchday_movements",
+        "rows": 8,
+        "sha256": "3ed603171f7a9d05ec526e9b336d71b1fadba51ea4d006a71836611b2f20a82e"
+      },
+      {
+        "name": "public.matchday_snapshot_revisions",
+        "rows": 1,
+        "sha256": "7c4b5d14f79362ba48a1183729142caf4db8393c9d8102a4e850a1a51968896b"
+      },
+      {
+        "name": "public.matchday_snapshots",
+        "rows": 1,
+        "sha256": "76713a33f22000cd04aebba85b64bc10253d93ae614b116cdc2f2a89e1ecb3de"
+      },
+      {
+        "name": "public.matchdays",
+        "rows": 2,
+        "sha256": "7d00b993dbffa51ee516d40bd6ae6a33d4cec42484d6880af9a7874482629970"
+      },
+      {
+        "name": "public.matches",
+        "rows": 24,
+        "sha256": "c51be625817d26fe8223dafdb99a9e9f0a9865f76846904fa7fcb252814fdf1c"
+      },
+      {
+        "name": "public.parsed_saves",
+        "rows": 0,
+        "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      {
+        "name": "public.penalties",
+        "rows": 0,
+        "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      {
+        "name": "public.pokemon_entities",
+        "rows": 0,
+        "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      {
+        "name": "public.pokemon_entity_flags",
+        "rows": 0,
+        "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      {
+        "name": "public.pokemon_flags",
+        "rows": 0,
+        "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      {
+        "name": "public.pokemon_identity_revisions",
+        "rows": 0,
+        "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      {
+        "name": "public.pokemon_observations",
+        "rows": 0,
+        "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      {
+        "name": "public.purchases",
+        "rows": 1,
+        "sha256": "ea12cf66d1f2e4db607db4036daa9004f8e09b77a29813145fc87ab615720e0b"
+      },
+      {
+        "name": "public.redemptions",
+        "rows": 0,
+        "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      {
+        "name": "public.robbery_cycles",
+        "rows": 0,
+        "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      {
+        "name": "public.save_files",
+        "rows": 0,
+        "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      {
+        "name": "public.season_admin_state",
+        "rows": 3,
+        "sha256": "5998b96b7f189959ec10f6f17f5b341d086d8a8528b7d6dd5987b959a8243e66"
+      },
+      {
+        "name": "public.season_archive_snapshots",
+        "rows": 0,
+        "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      {
+        "name": "public.season_config_versions",
+        "rows": 2,
+        "sha256": "284b2e87e46a1d7d07481eee73a635f578e13d69a4fe5cd41f6bbd608903d2b1"
+      },
+      {
+        "name": "public.season_player_stats",
+        "rows": 24,
+        "sha256": "ccd348375dbbb8fdb23f84034e19ea392cb900ad212124253c137a183cf824dc"
+      },
+      {
+        "name": "public.season_players",
+        "rows": 24,
+        "sha256": "8cbb37a7f8282f07b40b89e84e384a5df813627bd3a8fdbb599a966f1ac8304a"
+      },
+      {
+        "name": "public.seasons",
+        "rows": 3,
+        "sha256": "4e08c1928a33da394e34f99a83d54350506c3db8743c042089d06ef29e565857"
+      },
+      {
+        "name": "public.shop_items",
+        "rows": 62,
+        "sha256": "bb16ddeab4618cd83ed9b0367621c01082fd77d51d60e4a8806e620942e54d24"
+      },
+      {
+        "name": "public.shop_promotions",
+        "rows": 6,
+        "sha256": "136c3569c6b551fe01fc20c1e0f3fc7ea23b6115dc47b8d97602c227cd7d4b7c"
+      },
+      {
+        "name": "public.team_locks",
+        "rows": 0,
+        "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      {
+        "name": "public.trainer_flags",
+        "rows": 0,
+        "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      {
+        "name": "public.trainers",
+        "rows": 10,
+        "sha256": "ee56b522883b1964e26f290f54c474c798cd1fc0eeb6fd3086cca5efc0ecce5b"
+      },
+      {
+        "name": "public.trial_case_counters",
+        "rows": 1,
+        "sha256": "478a9b01515e079a40de5c0ae54c2a0b632dd1e3840c90927b61237ab48543b6"
+      },
+      {
+        "name": "public.trial_case_revisions",
+        "rows": 2,
+        "sha256": "9261e7d1afafa74cfac5e311683248cd081feb13fd64849c93b627fc94390caf"
+      },
+      {
+        "name": "public.trial_cases",
+        "rows": 1,
+        "sha256": "c9dbc5b7a16c22c1a2222d5c9639034bfbb49fd24b6bb55ba08e1f31c1e737b9"
+      },
+      {
+        "name": "public.trial_votes",
+        "rows": 0,
+        "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      {
+        "name": "storage.buckets",
+        "rows": 1,
+        "sha256": "050480b87c212eb0f3345beda3672a96db452ac869df8a17fef17c7161c1af6c"
+      },
+      {
+        "name": "storage.objects",
+        "rows": 3,
+        "sha256": "059b2a8b39bfe0eba8b15a18d8fe7ef37c130b1808fcf16adf04753466570c35"
+      }
+    ],
+    "railway": {
+      "deployment": "1ef649e7-1489-4f97-a4fa-ef08839f5021",
+      "source_commit": "d24b55152d7d8a29c3632a4f4feec710fb331040",
+      "status": "SUCCESS",
+      "image_digest": "sha256:544a744caa62cf8b2101de5678d6e2e7f93e835b7680d50a2fa05ac7282f32cc",
+      "committed_bundle_files": 229
+    },
+    "cloudflare": {
+      "deployment": "3d829325-66fc-4da4-88f4-b7bd4967f8d7",
+      "versions": [
+        {
+          "version_id": "0224318e-38d6-4178-ae3a-646384328eb8",
+          "percentage": 100
+        }
+      ],
+      "source_commit": "0215f73457b7c3245b29af41e0200fd590f2db59"
+    },
+    "hosting": {
+      "time": "2026-10-01T22:31:06.176763+00:00",
+      "source_commit": "d24b55152d7d8a29c3632a4f4feec710fb331040",
+      "api": "https://pokeapp-api-production.up.railway.app",
+      "web": "https://pokeapp-web.pokeapp-v2.workers.dev",
+      "assets": [
+        {
+          "path": "/assets/index-R-3zB0JZ.js",
+          "sha256": "9669b304d30a12433d2a01651fe0fef96c0d9c5b02e4828e1e16c6c48b56830c",
+          "content_type": "text/javascript"
+        },
+        {
+          "path": "/assets/index-Ce8Qi1M_.css",
+          "sha256": "fdd473f168f290c4c5a4f05543bb4987fb8eaaa43cc59b3763737e8aa3964ef4",
+          "content_type": "text/css"
+        }
+      ],
+      "web_headers": {
+        "content-type": "text/html",
+        "content-security-policy": "default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'self' https://pokeapp-api-production.up.railway.app; object-src 'none'; base-uri 'none'; frame-ancestors 'none'; form-action 'self'",
+        "x-content-type-options": "nosniff",
+        "referrer-policy": "no-referrer"
+      },
+      "status": "PASS"
+    },
+    "function_catalog": [
+      {
+        "anon": false,
+        "authenticated": false,
+        "proconfig": [
+          "search_path=pg_catalog, public"
+        ],
+        "proname": "admin_setup_config_used",
+        "prosecdef": false,
+        "public_execute": false,
+        "service": true
+      },
+      {
+        "anon": false,
+        "authenticated": false,
+        "proconfig": [
+          "search_path=pg_catalog, public"
+        ],
+        "proname": "admin_setup_readiness",
+        "prosecdef": false,
+        "public_execute": false,
+        "service": true
+      },
+      {
+        "anon": false,
+        "authenticated": false,
+        "proconfig": [
+          "search_path=pg_catalog, public"
+        ],
+        "proname": "admin_setup_readiness_v035",
+        "prosecdef": false,
+        "public_execute": false,
+        "service": true
+      },
+      {
+        "anon": false,
+        "authenticated": false,
+        "proconfig": [
+          "search_path=pg_catalog, public"
+        ],
+        "proname": "api_admin_create_season",
+        "prosecdef": false,
+        "public_execute": false,
+        "service": true
+      },
+      {
+        "anon": false,
+        "authenticated": false,
+        "proconfig": [
+          "search_path=pg_catalog, public"
+        ],
+        "proname": "api_admin_create_season_v035",
+        "prosecdef": false,
+        "public_execute": false,
+        "service": true
+      },
+      {
+        "anon": false,
+        "authenticated": false,
+        "proconfig": [
+          "search_path=pg_catalog, public"
+        ],
+        "proname": "api_admin_finalize_initial_assignment",
+        "prosecdef": false,
+        "public_execute": false,
+        "service": true
+      },
+      {
+        "anon": false,
+        "authenticated": false,
+        "proconfig": [
+          "search_path=pg_catalog, public"
+        ],
+        "proname": "api_admin_get_setup",
+        "prosecdef": false,
+        "public_execute": false,
+        "service": true
+      },
+      {
+        "anon": false,
+        "authenticated": false,
+        "proconfig": [
+          "search_path=pg_catalog, public"
+        ],
+        "proname": "api_admin_get_setup_v035",
+        "prosecdef": false,
+        "public_execute": false,
+        "service": true
+      },
+      {
+        "anon": false,
+        "authenticated": false,
+        "proconfig": [
+          "search_path=pg_catalog, public"
+        ],
+        "proname": "api_admin_initial_divisions",
+        "prosecdef": false,
+        "public_execute": false,
+        "service": true
+      },
+      {
+        "anon": false,
+        "authenticated": false,
+        "proconfig": [
+          "search_path=pg_catalog, public"
+        ],
+        "proname": "api_admin_initial_divisions_v035",
+        "prosecdef": false,
+        "public_execute": false,
+        "service": true
+      },
+      {
+        "anon": false,
+        "authenticated": false,
+        "proconfig": [
+          "search_path=pg_catalog, public"
+        ],
+        "proname": "api_admin_prepare_first_matchday",
+        "prosecdef": false,
+        "public_execute": false,
+        "service": true
+      },
+      {
+        "anon": false,
+        "authenticated": false,
+        "proconfig": [
+          "search_path=pg_catalog, public"
+        ],
+        "proname": "api_admin_prepare_first_matchday_v035",
+        "prosecdef": false,
+        "public_execute": false,
+        "service": true
+      },
+      {
+        "anon": false,
+        "authenticated": false,
+        "proconfig": [
+          "search_path=pg_catalog, public"
+        ],
+        "proname": "initial_assignment_context",
+        "prosecdef": false,
+        "public_execute": false,
+        "service": true
+      },
+      {
+        "anon": false,
+        "authenticated": false,
+        "proconfig": [
+          "search_path=pg_catalog, public"
+        ],
+        "proname": "initial_assignment_inputs",
+        "prosecdef": false,
+        "public_execute": false,
+        "service": true
+      },
+      {
+        "anon": false,
+        "authenticated": false,
+        "proconfig": [
+          "search_path=pg_catalog, public"
+        ],
+        "proname": "initial_assignment_modern",
+        "prosecdef": false,
+        "public_execute": false,
+        "service": true
+      },
+      {
+        "anon": false,
+        "authenticated": false,
+        "proconfig": [
+          "search_path=pg_catalog, public"
+        ],
+        "proname": "initial_assignment_observations",
+        "prosecdef": false,
+        "public_execute": false,
+        "service": true
+      },
+      {
+        "anon": false,
+        "authenticated": false,
+        "proconfig": [
+          "search_path=pg_catalog, public"
+        ],
+        "proname": "league_general_read",
+        "prosecdef": false,
+        "public_execute": false,
+        "service": true
+      },
+      {
+        "anon": false,
+        "authenticated": false,
+        "proconfig": [
+          "search_path=pg_catalog, public"
+        ],
+        "proname": "league_general_read_v035",
+        "prosecdef": false,
+        "public_execute": false,
+        "service": true
+      },
+      {
+        "anon": false,
+        "authenticated": false,
+        "proconfig": [
+          "search_path=pg_catalog, public"
+        ],
+        "proname": "matchday_validate",
+        "prosecdef": false,
+        "public_execute": false,
+        "service": true
+      },
+      {
+        "anon": false,
+        "authenticated": false,
+        "proconfig": [
+          "search_path=pg_catalog, public"
+        ],
+        "proname": "matchday_validate_v035",
+        "prosecdef": false,
+        "public_execute": false,
+        "service": true
+      }
+    ],
+    "snapshot_acl": [
+      {
+        "anon": false,
+        "anon_columns": false,
+        "authenticated": false,
+        "authenticated_columns": false,
+        "rls": true,
+        "service_mutable": false
+      }
+    ],
+    "historical_delivery": {
+      "migration_036": "20261001165951",
+      "source": "0215f73457b7c3245b29af41e0200fd590f2db59",
+      "applied_once": true,
+      "prior_tables_preserved": 52,
+      "new_snapshot_empty": true
+    },
+    "historical_503": {
+      "status": "NOT_REPRODUCED_CAUSE_UNKNOWN",
+      "first_browser_503s": 4,
+      "prior_concurrent_failures": 6,
+      "prior_concurrent_total": 12,
+      "transport_fix_applied": false,
+      "diagnostic_does_not_prove_causality": true,
+      "failure_evidence": "%TEMP%/phase10-5e-public-readonly and phase10-5e-concurrent-read-check.json"
+    },
+    "continuation_actions": {
+      "new_deployments": 0,
+      "new_migrations": 0,
+      "business_writes": 0,
+      "fixtures_created": 0
+    },
+    "limitations": [
+      "Only existing owner Auth activity is excluded from table equality; all public rows and Storage metadata are included.",
+      "No Storage bytes touched; metadata equality does not claim byte hashing.",
+      "Positive modern split, non-admin sporting mutations, concurrency and rollback are local evidence; public owner season remains legacy.",
+      "No cloud ingestion or physical save writes; missing observations remain pending.",
+      "Historical intermittent 503 cause remains unknown; fresh passing observations are not a permanent reliability guarantee."
+    ]
+  }
+}

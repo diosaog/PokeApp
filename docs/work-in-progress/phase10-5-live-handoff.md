@@ -1,6 +1,6 @@
 # Phase 10.5 — live execution record
 
-Observation: 2026-10-01 Europe/Madrid. **IN PROGRESS; Phase 11 NOT STARTED.**
+Observation: 2026-10-03 Europe/Madrid. **E DONE; Phase 10.5 IN PROGRESS; Phase 11 NOT STARTED.**
 [Contract](../phase10-5-functional-alignment.md),
 [continuity](../AI/PokeApp_Multi_AI_Continuity_Protocol.md),
 [checkpoint](../project-checkpoint.md),
@@ -38,8 +38,8 @@ Unrelated processes/remote operations not inspected: UNKNOWN.
 | B: League lacked primary GENERAL; existing 030 points view is authoritative | FIX NOW | DONE, source `d4ee903`, publicly delivered with C. |
 | C: participant result entry with separate closed-day correction | FIX NOW | DONE, source `9be3d70`, local gates and safe public checks PASS. |
 | D: daily wins/deaths and relevant unresolved ties | FIX NOW | DONE, source `2c8ad42`, 035 + public delivery verified below. |
-| E: 026 requires initial manual A/B before activation | FIX NOW | IN PROGRESS; owner requires observed save progress only. Implementation and local gates PASS; public delivery pending. |
-| F: 029 lifecycle reads final daily snapshot positions for title | FIX NOW | Pending E; structural Phase 11 blocker. |
+| E: 026 requires initial manual A/B before activation | FIX NOW | DONE; observed progress/deaths, boundary-only ties, local/public gates and deployment verified. Closure below. |
+| F: 029 lifecycle reads final daily snapshot positions for title | FIX NOW | Next authorized atomic package, NOT STARTED; structural Phase 11 blocker. |
 | G: wipe counter exists in stats but lacks owned command/UI | FIX NOW | Pending F. |
 | H: Preview only selects scheduled match; missing-lock presentation insufficient | FIX NOW | Pending G. |
 | I: pending promotions hidden by public view; voucher canje absent in React; purchases require active season | FIX NOW | Pending H. |
@@ -476,31 +476,205 @@ admin manual medal attestation. Normal progress is reliable save/parser evidence
 missing observations stay unknown and block initial assignment. The neutral parser
 may be extended now, without cloud ingestion or a final Launcher.
 
-Implementation in progress: optional versioned primary-region badge evidence,
-service-only observed-readiness/initial-split transition, boundary-only audited
-decisions, minimal React presentation. Existing seasons retain their recorded
-initialization; modern new seasons can begin gameplay before A/B exists. No new
-Team Lock prerequisite, manual progress button, F implementation or Phase 11.
-Only minimal E progress foundation overlaps the later L contract; no L completion
-is claimed. Source edits remain local/uncommitted until checks pass.
+Implementation `0215f73457b7c3245b29af41e0200fd590f2db59` is committed and pushed.
+Optional versioned primary-region badge evidence, service-only observed-readiness/
+initial-split transition, boundary-only audited decisions and minimal React are
+implemented. New seasons start gameplay before A/B; existing seasons preserve
+legacy initialization. No manual progress command, Team Lock prerequisite, cloud
+ingestion, final Launcher, F implementation or Phase 11. E supplies the minimal
+badge foundation; later L remains subject to its remaining scope review.
 
-Remote state is the read-only 11:39 UTC entry observation above, not a deployment
-of E. No E migration/deployment or fixture write has occurred. All previous SQL is
-immutable. Fresh pinned history/baselines and committed source are required before
-any eventual 036 write. Local gates PASS: 663 Python, 11 React, 24 Edge, parser 54 assertions/six integration groups, eight E SQL groups/twelve exact rollbacks, inherited 026-030/B/C/D and four-build parity (11,462 lines). See [E report](../phase10-5e-completion-report.md) and [evidence](../phase10-5e-validation-evidence.json). Local PG remains running; all completed fixture runners restored their baselines. Final deployment preflight is running; no migration attempt yet.
+Local gates PASS: 663 Python, 11 React, 24 Edge, parser 54 assertions/six integration
+groups, eight E SQL groups/twelve exact rollbacks, inherited 026-030/B/C/D and four
+fresh build parity (11,462 lines). See [E report](../phase10-5e-completion-report.md)
+and [evidence](../phase10-5e-validation-evidence.json). The final E flow also proves
+initialization through participant results and D close without changing frozen
+initial evidence. Local runners finished with exact cleanup; local PG is stopped.
 
-The owner approved final title policy for future F: final accumulated points, external audited Bo3 for exactly two tied at the top; fewer authoritative adjusted deaths for exactly three, otherwise explicit owner exception if unresolved. See the contract. This is documentation only; F is not started.
+Fresh pinned preflight captured 52 full/scoped public/Auth/Storage tables and
+27 migration records. Migration **036=`20261001165951`** applied once from that
+published source; 52 original tables unchanged and new snapshot table empty.
+**Do not replay 031-036.** Twenty helper catalog checks and private table ACL PASS.
+Advisor 24 ERROR / 5 WARN / 125 INFO; zero new ERROR/WARN. Three new INFO concern
+the backend-only snapshot table (no RLS policy and two unindexed foreign keys).
+
+Railway deployment `f6ae9135-6425-4fa0-b76d-a26002a9993a` is SUCCESS; existing
+one-replica service configuration unchanged. Cloudflare version
+`0224318e-38d6-4178-ae3a-646384328eb8`, deployment
+`3d829325-66fc-4da4-88f4-b7bd4967f8d7`, 100%, source `0215f73` for both.
+Existing URLs remain unchanged. Served assets, deep SPA/security headers/CORS PASS.
+The first public read runner finished FAIL at browser validation: 22 visits but four transient 503 reads; API gates and 53-table/history/Advisor comparisons PASS. A targeted twelve-read concurrent check reproduced six 503s. Local direct V2 reads passed in both default and HTTP/1 modes, so no root cause is inferred yet. Sanitized diagnostic follow-up `d24b551` is committed/pushed, with 19 focused API/adapter tests and 22 reads/CORS tests PASS; backend deployment pending. Raw evidence: `%TEMP%/phase10-5e-public-readonly` and `phase10-5e-concurrent-read-check.json`. Full E closure remains pending investigation and a clean public run. No fixtures,
+positive owner sporting mutation, identity/PIN/admin change or Storage-byte write.
+Remote deployment evidence: `%TEMP%/phase10-5e-deployment-20261001`.
+
+The owner approved final title policy for future F: final accumulated points,
+external audited Bo3 for exactly two tied at the top; fewer authoritative adjusted
+deaths for exactly three, otherwise explicit owner exception if unresolved. See
+the contract. This is documentation only; F is not started.
+
+## E resumed closure - 2026-10-02 Europe/Madrid
+
+Owner authorized completing E with a fresh complete closure gate. Entry
+`d24b55152d7d8a29c3632a4f4feec710fb331040`, main/origin 0/0 after fresh fetch.
+The preceding E delivery/503 notes were already local uncommitted changes in this
+handoff and are preserved. Protected guide remains excluded and unread. No other
+tracked changes at entry. No F or Phase 11 work.
+
+Fresh read-only preflight verifies V2 `uwleqeuzsveqlugugzba`, **28 history rows,
+036 applied exactly once as `20261001165951`**, 53 full/scoped table baselines,
+same owner identity/enabled/admin, Advisor **24 ERROR / 5 WARN / 125 INFO**.
+Source and raw evidence: `%TEMP%/phase10-5e-resume-20261002.py` and
+`%TEMP%/phase10-5e-resume-20261002/`. No migration or business write performed.
+
+The interrupted diagnostic deployment actually completed: Railway
+`1ef649e7-1489-4f97-a4fa-ef08839f5021` SUCCESS, source `d24b551`, image
+`sha256:544a744caa62cf8b2101de5678d6e2e7f93e835b7680d50a2fa05ac7282f32cc`.
+Cloudflare still serves E version `0224318e-38d6-4178-ae3a-646384328eb8`,
+deployment `3d829325-66fc-4da4-88f4-b7bd4967f8d7`, 100%, source `0215f73`.
+Do not repeat the completed diagnostic deployment merely because the previous
+handoff reported it pending. Fresh concurrent read reproduction is running;
+cause remains unproven until the sanitized diagnostic is observed.
+
+Local PG was stopped at entry. Starting the existing disposable directory without
+an explicit port used 5432, so the first rebuild could not connect to 55439 and
+made no database changes. That server was stopped cleanly and restarted explicitly
+on loopback 55439. Fresh independent databases `pokeapp_v2_validation_phase10_5e_resume`
+and `pokeapp_v2_validation_phase10_5e_resume_bootstrap` are now being built.
+Fresh closure results are pending; previous E PASS remains historical evidence.
+
+Fresh source `d24b551` closure progress: **664 Python (0 failures/0 skips), 11 React,
+24 Edge, 54 parser assertions/six binary integration groups PASS**; compile,
+TypeScript/Vite, format and Workers dry run PASS. Migration/bootstrap four-build
+parity **11,462 lines**, regenerated bootstrap unchanged, 001-036 immutable.
+Broad Ruff comparison over app/tools/tests: 1,010 inherited findings in both entry-E
+and final source, **zero new**; this broader scope differs from the historical
+86-finding subset and is not a claim of globally clean lint. E SQL eight groups,
+twelve rollbacks and exact 47-table cleanup PASS. Remaining inherited SQL families
+are still running in the disposable resume database; PG must be stopped afterward.
+
+Public run `phase10_5_public_reads_11efa6eac0154745badf74fb3ee02abf` **PASS**:
+21 API checks and 22 browser screen/viewport visits, no API interception or business
+writes. Runner comparisons: all 53 scoped tables, 28 history rows and Advisor
+unchanged. Two separate concurrent batches before/after browser: **24/24 HTTP 200**.
+The earlier 503 incident was **not reproduced in this window; cause UNKNOWN**.
+No transport fix was made and recovery is not attributed to diagnostic logging.
+The compatible backend is already deployed; its 229-file committed bundle matches
+Git. Existing frontend served assets match the fresh build; headers/CORS PASS.
+Independent final remote data/catalog/Advisor comparison is running. Evidence:
+`%TEMP%/phase10-5e-resume-public` and `%TEMP%/phase10-5e-resume-20261002`.
+
+## E closure verification - 2026-10-03 Europe/Madrid
+
+Entry `d24b55152d7d8a29c3632a4f4feec710fb331040`; fresh fetch confirms
+main/origin 0/0. The two modified E documents and four untracked E evidence/image
+files already existed at entry and are preserved. The protected guide is excluded
+from all reads and writes. No application change or new migration is required by
+the evidence inspected so far.
+
+The previously pending SQL process actually finished successfully on 2026-10-02:
+`sql-gates.json` records exit 0 for E and all inherited 026-030/B/C/D regressions;
+the final log confirms every family completed. `local-cleanup.json` plus both
+full-content baselines prove all 47 public tables restored and zero fixture residue.
+Current `pg_ctl status` reports no server running; no PostgreSQL process or listener
+on 55439 exists. A historical graceful shutdown is not inferred from that check.
+
+Fresh remote read-only preflight is running under
+`%TEMP%/phase10-5e-close-20261003.py`, with a new evidence directory. No remote
+migration, deployment, fixture or business write is planned. Local gate evidence
+will be tied to unchanged source before publishing closure. Current owner instruction
+allows F only after E is fully closed and only with capacity for another complete
+atomic package; it supersedes the earlier E-only stop wording. Phase 11 remains
+prohibited.
+
+Fresh concurrent public reproduction at 2026-10-03 11:06 UTC returned **3/12 HTTP
+503**, so the historical clean window does not close this incident. Railway's
+sanitized diagnostic records three simultaneous `frontend_read_failed
+operation=rows cause=ReadError` entries. This establishes response transport loss;
+the underlying network cause remains UNKNOWN. Existing deployment/source/history
+and Advisor are confirmed unchanged. Do not claim public closure yet.
+
+The narrow follow-up adds one retry only for `httpx.ReadError` in the frontend
+SELECT/read-only-RPC repository. Status errors, malformed data, timeouts and other
+failures retain their existing failure behavior; mutation repositories receive no
+retry. Six focused real-PostgREST/MockTransport tests PASS, including persistent
+failure, identical request scope, concurrent retry budgets and no mutation retry.
+Full Python closure **670 PASS**, exit 0; compile and touched-file Ruff/format PASS.
+Implementation **90a31fc3b4220cefbe7c160902158084aea2569e** committed and pushed,
+main/origin 0/0, before upload. A new 229-file committed-only bundle was submitted
+to the existing Railway service as deployment
+`6aa70f72-f0cb-41a1-86d6-7b4227803392`; last inspected status DEPLOYING.
+No SQL/frontend/dependency change. At that observation, remote public validation
+remained pending; the completed result follows and supersedes those pending notes.
+
+### E complete checkpoint - 2026-10-03, 13:18:42 Europe/Madrid
+
+**E DONE / STAGING_DONE_ZERO_RESIDUE.** [Final report](../phase10-5e-completion-report.md),
+[closure evidence](../phase10-5e-closure-evidence.json),
+[public evidence](../phase10-5e-public-evidence.json),
+[Advisor](../phase10-5e-security-advisor.json). All earlier incomplete E notes are
+dated history and are superseded by this checkpoint; earlier failed runs are retained.
+
+Entry HEAD **d24b55152d7d8a29c3632a4f4feec710fb331040**. Final application HEAD
+**90a31fc3b4220cefbe7c160902158084aea2569e**, pushed before the follow-up deployment.
+Documentation/evidence closure is its own subsequent commit; obtain that exact HEAD
+from Git (the commit carrying this section), rather than a self-referential hash.
+Explicit staging only; no protected-guide access, credential staging or history rewrite.
+
+- **670 Python PASS**, including six new bounded-recovery transport tests; compile,
+  touched-file Ruff/format/diff PASS. No mutation retries were introduced.
+- Unchanged-source 2026-10-02 gates independently verified: 11 React, 24 Edge,
+  parser 54 assertions/six binary groups, eight E SQL groups/twelve exact rollbacks,
+  026-030/B/C/D SQL, exact 47-table restoration, four-build 11,462-line schema/grant/
+  ownership parity. These are retained dated runs, not reruns for the read fix.
+- Remote **28 migration records**, **036=20261001165951 exactly once**. No new SQL;
+  **001-036 remain immutable; do not replay 031-036**.
+- Railway **6aa70f72-f0cb-41a1-86d6-7b4227803392 SUCCESS**, source `90a31fc`, image
+  `sha256:f7a8efe77db345305ddda1c6cd398f06cd58d48779edade104b750d05404ee7d`.
+  Committed-only 229-file bundle; service manifest and one replica unchanged.
+- Cloudflare **3d829325-66fc-4da4-88f4-b7bd4967f8d7**, version
+  **0224318e-38d6-4178-ae3a-646384328eb8**, 100%, compatible source `0215f73`.
+  Live asset equality, SPA/MIME/CSP/nosniff/CORS PASS; no frontend redeployment.
+- Public **phase10_5_public_reads_d5d933292db242288543d89f52fb847a PASS**, exit 0:
+  21 API checks, 22 real browser visits, two post-deploy concurrent batches **24/24
+  HTTP 200**. Existing owner login/refresh and typed denials only; no business writes.
+- Independent **53/53 scoped full-table contents identical**, 28/28 migration
+  records unchanged, same owner identity/enabled/admin; 20 helper and snapshot ACL
+  checks PASS; zero fixture residue. Only existing owner Auth activity is excluded;
+  all public/manual data and Storage metadata are included. No Storage bytes touched.
+- Advisor **24 ERROR / 5 WARN / 125 INFO**, zero added/removed ERROR/WARN.
+- Historical 503 trigger is still unknown at the network level. The fresh pre-fix
+  3/12 failure is linked to `ReadError`; the code now recovers one such response
+  loss. Post-fix hosted samples had no errors or retry log entries, so actual retry
+  execution is proven locally, not claimed from the hosted window.
+
+Raw evidence: `%TEMP%/phase10-5e-close-20261003`, `phase10-5e-close-public`,
+`phase10-5e-close-hosting-final.json`; retained complete local gates in
+`phase10-5e-resume-20261002`. All task test/public/deployment runners completed.
+Local PostgreSQL is stopped (`pg_ctl` exit 3); no local fixtures remain. No new
+remote fixtures were created. Unrelated processes remain UNKNOWN.
+
+Progress authority, J1 Medal 2, unknown != zero and immutable initial history are
+delivered. Full Launcher/cloud ingestion remains future work; absent observations
+correctly block new-season readiness. No manual progress writer was added.
+Positive modern splits and races are local evidence; the owner legacy season and
+all memberships/results/Team Locks remain intact. GENERAL ~0.85 s, overview ~3.36 s,
+initial review ~0.91 s in one final sample; inherited overview latency stays in
+Phase 14, without a broad performance refactor.
 
 ## Exact next step
 
-Publish validated E source and deploy 036/API/React with fresh complete baselines, then safe public gates and independent comparison. Use observed save evidence only; the authority decision
-is resolved and must not be asked again. Preserve C participant results, D daily consequences and all existing
-manual seasons; do not reopen A-D, implement F, or start Phase 11.
+Begin the separately atomic, already authorized **Package F** from fresh Git/remote
+verification and a focused review of 029/030/035 finish/archive/Hall and accumulated
+points contracts. Correct the champion source to final accumulated exact points;
+two tied leaders require audited external BO3, three use authoritative adjusted
+deaths. Preserve frozen Team Lock history and separate Cup Hall. Do not invent
+residual tie/finalist policy. F has not been started in this E delivery.
 
-Before any necessary SQL, recheck actual history; **001-035 are immutable, next
-expected 036**. Local gates, committed/pushed source and fresh complete remote
-baseline must precede any migration/deployment. Never replay 031-035 or use owner
-data for destructive validation.
+Before any necessary F SQL, recheck actual history; **001-036 are immutable; 036 is
+already applied**. Local gates, committed/pushed source and fresh complete remote
+baseline must precede any migration/deployment. Never replay 031-036 or use owner
+data for destructive validation. Preserve C/D/E; no broad audit or infrastructure
+recreation. Do not start G automatically and **do not start Phase 11**.
 
-Phase 10.5 retains independent E-L work and pending owner decisions. Whole-project
+Phase 10.5 retains independent F-M work and pending owner decisions. Whole-project
 estimate remains **~80%**. Phase 11 **NOT READY / NOT STARTED**; no migration/cutover.

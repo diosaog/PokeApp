@@ -1,0 +1,333 @@
+{
+  "date": "2026-10-03 Europe/Madrid",
+  "status": "PASS",
+  "entry_commit": "d24b55152d7d8a29c3632a4f4feec710fb331040",
+  "final_implementation_commit": "90a31fc3b4220cefbe7c160902158084aea2569e",
+  "source_hashes_lf_normalized": {
+    "app/api/initial_assignment_models.py": "24d43ccaf0587d0ce05f5041841c9e4a21278daa1c753e6b3b02e717aa1d8054",
+    "app/api/main.py": "59521c27f9454a97fddf10b77a52ff25396747e6c751cdacab2d27a8be6b05e5",
+    "app/api/read_models.py": "3d5ecbeca37962398bb3f86a72281cf80b746acdd38d33f4461291ae9ae5fc2c",
+    "app/api/routes/initial_assignment.py": "2911d864d2eea0617f152eeae97c048774875d0fbb9af781349e872924217814",
+    "app/api/season_admin_models.py": "9638f9ccbda9302495852562c2e67b6cab7138e6fe7a751a55a93dda63149904",
+    "app/application/frontend_reads.py": "5ca655b8a9399b1bafe0156be43839e706c021f403e7fd930fb4d128d7de5640",
+    "app/application/initial_assignment.py": "3b7b2da6f4b6282727aa78c6d80b565702e9c50248e7e32c3f7169c2ba18bfc0",
+    "app/repositories/supabase/frontend_reads.py": "fa24d99e07603cc23966d33bf696f3f5fe0e776336133d7ba0c6ece2e41c3ac9",
+    "app/repositories/supabase/season_admin.py": "33a2273dc14a222db478cf8809923b181580392fb888083219c29677879d15cd",
+    "app/save_parser/adapter.py": "e9b3b40ca4230e6db00085225cf1f637d09da51600b9284c300024d9d5c543c3",
+    "app/save_parser/models.py": "48a16e295b3f7162e564eeda6133e5ee150cb4f19f30db9f77e0ffaf62b5659d",
+    "companion/parser/PokeApp.Parser.Checks/Program.cs": "9efd9d9ba11e2d5b4d0f079aa7873d5be54efa5812e467b403dcd0835ac0c894",
+    "companion/parser/PokeApp.Parser/Inspection.cs": "a15c5a005a660bb6cfe10d87366216245f170e46a12a83e0d7cc1561756417b4",
+    "supabase/v2/bootstrap.sql": "71b37384151fc995e4075e1231a108b10c2aba79f25285743eeac5743d26ca40",
+    "supabase/v2/migrations/036_observed_initial_divisions.sql": "e2ef27a4c669a4f118cbe14d09174a600dddd8e10d44ebf610297ede8363bbd1",
+    "supabase/v2/reset_dev.sql": "725a7d0f6bd3bf851d1d1e5f6ba0491d9ec83bfd82273b68545fc712bce69de4",
+    "tests/test_api_initial_assignment.py": "8e65be35681ec9b7f7f45f312ed40816227fb2d234534a37641cd350358f8d04",
+    "tests/test_api_season_admin.py": "02e763bbbbd97097e30a73131c5c98ede7a71982c96313f328ca5a771fb2e759",
+    "tests/test_initial_assignment.py": "d676d3c4c956524e93e48a2bf48170da3099fd982d490dd559d5bab3c53a28f6",
+    "tests/test_phase10_5e_parser_progress.py": "ae16aa3b418fa787c71dfcacc51525005570491b322398e06b88581d200227f0",
+    "tests/test_supabase_v2_schema.py": "5012deb2e7b1983e4de64e54e03af6d32a092776d39df35e45715df7fd3346b6",
+    "tools/generate_supabase_v2_bootstrap.py": "f6ff8f26825365443e2402ebf7bd526eb341340a54187ad44021386c3f41d95d",
+    "tools/validate_phase10_5_initial_sql.py": "08568ebd32207db1696622bab581cd3bd4eb111797a2dc61cb628c39cd1ba2db",
+    "tools/validate_phase10_5_public_reads.py": "dff9143ca4942632d4aa8f984f903acc35c1c80713a77689612a08581e47ce75",
+    "tools/validate_phase9_launcher.py": "bde88cf70046ddc7d398fb56c1d6efcbb44cdb76e9cb34d962ac820dae626fa5",
+    "tools/validate_season_admin_fixtures.py": "217f0e617e2e5b4ea5317bba6a87059bb580a8eacd84cd2606e124b5b4e32e88",
+    "tools/validate_supabase_v2_identity_sql.py": "40831e11188223d8104d4f24608a0496580647b3835ea3218011fa25deb716e0",
+    "tools/validate_supabase_v2_schema.py": "f8b1ae6ce452daeaa251fdd5acf5fe3cb8e90e0201dc8576a852b437d224fc87",
+    "tools/validate_supabase_v2_season_admin_sql.py": "b326994615905adf92e41e6ab5ca05761fa896206ef3d13266f8385b8d3c845a",
+    "web/e2e/initial-assignment.spec.ts": "f05828e2e3a7b748c5eb44b1c1e141ab05b22b1c230f3099463304105fe4e90b",
+    "web/src/api/client.ts": "bba6b8d679ba1d68f5c29b80118c87cc8cfb34c5c35f0fc10f4798838493fc94",
+    "web/src/api/schema.d.ts": "d90123b370850bc9f8096e5c77d54028c1190a3193a506ac52bf9dd66532e262",
+    "web/src/features/admin.tsx": "ec4fdc7a3a9116186695a8fb594ffee280ead9b599603260022f18d53d58955e",
+    "web/src/features/core.tsx": "0c512c9298315e2445a50a5dfd4c501dbddeb2dba466b334cedf0a309ec0820b",
+    "web/src/features/initial-assignment.tsx": "47b0da52c211bb3aedf0c2f0b9c3c78395fa9de55ea9a9440bbd24e79e19b6c6",
+    "app/api/routes/reads.py": "d45e51e25bf70d5919e6074c83f1322f3966ae71f8251d7ed720c0274bf1919b",
+    "tests/test_frontend_read_recovery.py": "7642ac4eca7eab78f45f9f7ac03e43b70bf3a77b0f72982ffb82a7af45233905"
+  },
+  "new_python_gate": {
+    "time": "2026-10-03T11:10:50.294967+00:00",
+    "entry_source": "d24b55152d7d8a29c3632a4f4feec710fb331040",
+    "source_sha256": {
+      "app/repositories/supabase/frontend_reads.py": "fa24d99e07603cc23966d33bf696f3f5fe0e776336133d7ba0c6ece2e41c3ac9",
+      "tests/test_frontend_read_recovery.py": "7642ac4eca7eab78f45f9f7ac03e43b70bf3a77b0f72982ffb82a7af45233905"
+    },
+    "exit_code": 0,
+    "seconds": 39.344
+  },
+  "python": {
+    "pass_count": 670,
+    "fail_count": 0,
+    "skip_count": 0,
+    "exit_code": 0
+  },
+  "focused_transport": {
+    "pass_count": 6,
+    "exit_code": 0
+  },
+  "retained_gates_2026_10_02": {
+    "python": {
+      "time": "2026-10-01T22:29:25.847676+00:00",
+      "source": "d24b55152d7d8a29c3632a4f4feec710fb331040",
+      "commands": [
+        {
+          "label": "python-full",
+          "command": [
+            "C:\\Users\\Antonio\\Desktop\\AntoPKMN\\PokeApp\\.venv-api\\Scripts\\python.exe",
+            "tools/run_unit_tests.py"
+          ],
+          "exit_code": 0,
+          "seconds": 56.186,
+          "log": "C:\\Users\\Antonio\\AppData\\Local\\Temp\\phase10-5e-resume-20261002\\python-full.log"
+        }
+      ]
+    },
+    "frontend": {
+      "time": "2026-10-01T22:30:02.337029+00:00",
+      "source": "d24b55152d7d8a29c3632a4f4feec710fb331040",
+      "commands": [
+        {
+          "label": "react",
+          "command": [
+            "npm.cmd",
+            "test"
+          ],
+          "exit_code": 0,
+          "seconds": 3.218,
+          "log": "C:\\Users\\Antonio\\AppData\\Local\\Temp\\phase10-5e-resume-20261002\\react.log"
+        },
+        {
+          "label": "browser",
+          "command": [
+            "npm.cmd",
+            "run",
+            "test:e2e"
+          ],
+          "exit_code": 0,
+          "seconds": 81.367,
+          "log": "C:\\Users\\Antonio\\AppData\\Local\\Temp\\phase10-5e-resume-20261002\\browser.log"
+        },
+        {
+          "label": "build",
+          "command": [
+            "npm.cmd",
+            "run",
+            "build"
+          ],
+          "exit_code": 0,
+          "seconds": 4.786,
+          "log": "C:\\Users\\Antonio\\AppData\\Local\\Temp\\phase10-5e-resume-20261002\\build.log"
+        },
+        {
+          "label": "format",
+          "command": [
+            "npm.cmd",
+            "run",
+            "format:check"
+          ],
+          "exit_code": 0,
+          "seconds": 1.578,
+          "log": "C:\\Users\\Antonio\\AppData\\Local\\Temp\\phase10-5e-resume-20261002\\format.log"
+        },
+        {
+          "label": "worker-dryrun",
+          "command": [
+            "npm.cmd",
+            "run",
+            "deploy:check"
+          ],
+          "exit_code": 0,
+          "seconds": 1.729,
+          "log": "C:\\Users\\Antonio\\AppData\\Local\\Temp\\phase10-5e-resume-20261002\\worker-dryrun.log"
+        }
+      ]
+    },
+    "parser": {
+      "time": "2026-10-01T22:28:40.873364+00:00",
+      "source": "d24b55152d7d8a29c3632a4f4feec710fb331040",
+      "commands": [
+        {
+          "label": "parser-binary",
+          "command": [
+            "C:\\Users\\Antonio\\Desktop\\AntoPKMN\\PokeApp\\.venv-api\\Scripts\\python.exe",
+            "tools/validate_phase9_launcher.py",
+            "--dotnet",
+            "C:\\Users\\Antonio\\AppData\\Local\\Temp\\pokeapp-phase9-tools\\dotnet\\dotnet.exe"
+          ],
+          "exit_code": 0,
+          "seconds": 11.201,
+          "log": "C:\\Users\\Antonio\\AppData\\Local\\Temp\\phase10-5e-resume-20261002\\parser-binary.log"
+        }
+      ]
+    },
+    "sql": {
+      "time": "2026-10-01T22:46:46.795216+00:00",
+      "source": "d24b55152d7d8a29c3632a4f4feec710fb331040",
+      "commands": [
+        {
+          "label": "sql-e",
+          "command": [
+            "C:\\Users\\Antonio\\Desktop\\AntoPKMN\\PokeApp\\.venv-api\\Scripts\\python.exe",
+            "-m",
+            "tools.validate_phase10_5_initial_sql",
+            "--psql",
+            "C:\\Users\\Antonio\\AppData\\Local\\Temp\\pokeapp_pg17_phase8c_20260922\\portable\\pgsql\\bin\\psql.exe",
+            "--database",
+            "pokeapp_v2_validation_phase10_5e_resume"
+          ],
+          "exit_code": 0,
+          "seconds": 99.524,
+          "log": "C:\\Users\\Antonio\\AppData\\Local\\Temp\\phase10-5e-resume-20261002\\sql-e.log"
+        },
+        {
+          "label": "sql-regressions",
+          "command": [
+            "C:\\Users\\Antonio\\Desktop\\AntoPKMN\\PokeApp\\.venv-api\\Scripts\\python.exe",
+            "C:\\Users\\Antonio\\AppData\\Local\\Temp\\phase10-5e-resume-20261002\\regressions.py"
+          ],
+          "exit_code": 0,
+          "seconds": 997.135,
+          "log": "C:\\Users\\Antonio\\AppData\\Local\\Temp\\phase10-5e-resume-20261002\\sql-regressions.log"
+        }
+      ]
+    }
+  },
+  "retained_source": "d24b55152d7d8a29c3632a4f4feec710fb331040",
+  "retained_sources_unchanged": [
+    "web",
+    "companion",
+    "supabase",
+    "app/application",
+    "app/save_parser"
+  ],
+  "react": {
+    "pass_count": 11,
+    "exit_code": 0
+  },
+  "browser": {
+    "pass_count": 24,
+    "exit_code": 0,
+    "synthetic_api": true
+  },
+  "parser": {
+    "dotnet_assertions": 54,
+    "integration_groups": 6,
+    "exit_code": 0
+  },
+  "postgres_e": {
+    "groups": 8,
+    "rollback_boundaries": 12,
+    "public_tables_restored": 47,
+    "exit_code": 0
+  },
+  "sql_regressions": {
+    "families": [
+      "026 setup",
+      "027 matchdays",
+      "028 participants",
+      "029 lifecycle",
+      "030 trials",
+      "B",
+      "C",
+      "D"
+    ],
+    "exit_code": 0
+  },
+  "rebuild": {
+    "parity": {
+      "status": "PASS",
+      "identical_builds": 4,
+      "identical_lines": 11462
+    },
+    "builds": [
+      {
+        "source": "migrations",
+        "iteration": 1,
+        "database": "pokeapp_v2_validation_phase10_5e_resume",
+        "schema_catalog_rls": "PASS",
+        "normalized_dump": "C:\\Users\\Antonio\\AppData\\Local\\Temp\\phase10-5e-resume-migrations-1-schema.sql",
+        "lines": 11462,
+        "sha256": "f13a6143eba5bf93c4fcd2e5913229d03e1be734d8fdf100ca3b056c137621a9"
+      },
+      {
+        "source": "migrations",
+        "iteration": 2,
+        "database": "pokeapp_v2_validation_phase10_5e_resume",
+        "schema_catalog_rls": "PASS",
+        "normalized_dump": "C:\\Users\\Antonio\\AppData\\Local\\Temp\\phase10-5e-resume-migrations-2-schema.sql",
+        "lines": 11462,
+        "sha256": "f13a6143eba5bf93c4fcd2e5913229d03e1be734d8fdf100ca3b056c137621a9"
+      },
+      {
+        "source": "bootstrap",
+        "iteration": 1,
+        "database": "pokeapp_v2_validation_phase10_5e_resume_bootstrap",
+        "schema_catalog_rls": "PASS",
+        "normalized_dump": "C:\\Users\\Antonio\\AppData\\Local\\Temp\\phase10-5e-resume-bootstrap-1-schema.sql",
+        "lines": 11462,
+        "sha256": "f13a6143eba5bf93c4fcd2e5913229d03e1be734d8fdf100ca3b056c137621a9"
+      },
+      {
+        "source": "bootstrap",
+        "iteration": 2,
+        "database": "pokeapp_v2_validation_phase10_5e_resume_bootstrap",
+        "schema_catalog_rls": "PASS",
+        "normalized_dump": "C:\\Users\\Antonio\\AppData\\Local\\Temp\\phase10-5e-resume-bootstrap-2-schema.sql",
+        "lines": 11462,
+        "sha256": "f13a6143eba5bf93c4fcd2e5913229d03e1be734d8fdf100ca3b056c137621a9"
+      }
+    ],
+    "normalization": "Remove only random pg_dump restrict/unrestrict keys; no schema, grant or ownership normalization.",
+    "exit_code": 0
+  },
+  "retained_static": {
+    "compile_exit": 0,
+    "bootstrap_unchanged": true,
+    "diff_check_exit": 0,
+    "migrations_001_036_immutable": true,
+    "lint": {
+      "inherited": 1010,
+      "current": 1010,
+      "new": 0
+    },
+    "versions": {
+      "python": "3.14.3 (tags/v3.14.3:323c59a, Feb  3 2026, 16:04:56) [MSC v.1944 64 bit (AMD64)]",
+      "supabase": "2.27.2",
+      "postgrest": "2.27.2",
+      "fastapi": "0.141.1",
+      "starlette": "1.6.0",
+      "httpx": "0.28.1",
+      "uvicorn": "0.53.0"
+    }
+  },
+  "new_static": {
+    "compile_exit": 0,
+    "ruff_check_exit": 0,
+    "ruff_format_exit": 0,
+    "diff_check_exit": 0
+  },
+  "cleanup": {
+    "tables_equal": 47,
+    "residue": {
+      "seasons": 0,
+      "trainers": 0
+    }
+  },
+  "postgres": {
+    "stopped": true,
+    "status_exit": 3,
+    "observed_at": "2026-10-03T11:19:33.879006+00:00",
+    "historical_graceful_shutdown": "UNKNOWN"
+  },
+  "versions": {
+    "git": "2.56.0.windows.1",
+    "node": "24.14.0",
+    "postgresql": "17.11",
+    "supabase_cli": "2.118.0",
+    "railway_cli": "5.63.0",
+    "wrangler": "4.142.0"
+  },
+  "remote_evidence": "phase10-5e-public-evidence.json",
+  "limitations": [
+    "SQL/parser/frontend gates ran on 2026-10-02 and were verified against unchanged inputs on 2026-10-03; not rerun for the isolated Python read-recovery change.",
+    "ReadError is observed; the underlying network trigger remains unknown. No permanent network-reliability guarantee.",
+    "Full Launcher cloud ingestion is outside E; missing save observations block readiness."
+  ]
+}

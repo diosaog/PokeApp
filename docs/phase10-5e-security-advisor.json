@@ -1,0 +1,3301 @@
+[
+  {
+    "name": "rls_enabled_no_policy",
+    "title": "RLS Enabled No Policy",
+    "level": "INFO",
+    "facing": "EXTERNAL",
+    "categories": [
+      "SECURITY"
+    ],
+    "description": "Detects cases where row level security (RLS) has been enabled on a table but no RLS policies have been created.",
+    "detail": "Table \\`public.admin_operation_receipts\\` has RLS enabled, but no policies exist",
+    "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0008_rls_enabled_no_policy",
+    "metadata": {
+      "name": "admin_operation_receipts",
+      "schema": "public",
+      "type": "table"
+    },
+    "cache_key": "rls_enabled_no_policy_public_admin_operation_receipts"
+  },
+  {
+    "name": "rls_enabled_no_policy",
+    "title": "RLS Enabled No Policy",
+    "level": "INFO",
+    "facing": "EXTERNAL",
+    "categories": [
+      "SECURITY"
+    ],
+    "description": "Detects cases where row level security (RLS) has been enabled on a table but no RLS policies have been created.",
+    "detail": "Table \\`public.cup_certificates\\` has RLS enabled, but no policies exist",
+    "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0008_rls_enabled_no_policy",
+    "metadata": {
+      "name": "cup_certificates",
+      "schema": "public",
+      "type": "table"
+    },
+    "cache_key": "rls_enabled_no_policy_public_cup_certificates"
+  },
+  {
+    "name": "rls_enabled_no_policy",
+    "title": "RLS Enabled No Policy",
+    "level": "INFO",
+    "facing": "EXTERNAL",
+    "categories": [
+      "SECURITY"
+    ],
+    "description": "Detects cases where row level security (RLS) has been enabled on a table but no RLS policies have been created.",
+    "detail": "Table \\`public.cup_history\\` has RLS enabled, but no policies exist",
+    "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0008_rls_enabled_no_policy",
+    "metadata": {
+      "name": "cup_history",
+      "schema": "public",
+      "type": "table"
+    },
+    "cache_key": "rls_enabled_no_policy_public_cup_history"
+  },
+  {
+    "name": "rls_enabled_no_policy",
+    "title": "RLS Enabled No Policy",
+    "level": "INFO",
+    "facing": "EXTERNAL",
+    "categories": [
+      "SECURITY"
+    ],
+    "description": "Detects cases where row level security (RLS) has been enabled on a table but no RLS policies have been created.",
+    "detail": "Table \\`public.cup_rounds\\` has RLS enabled, but no policies exist",
+    "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0008_rls_enabled_no_policy",
+    "metadata": {
+      "name": "cup_rounds",
+      "schema": "public",
+      "type": "table"
+    },
+    "cache_key": "rls_enabled_no_policy_public_cup_rounds"
+  },
+  {
+    "name": "rls_enabled_no_policy",
+    "title": "RLS Enabled No Policy",
+    "level": "INFO",
+    "facing": "EXTERNAL",
+    "categories": [
+      "SECURITY"
+    ],
+    "description": "Detects cases where row level security (RLS) has been enabled on a table but no RLS policies have been created.",
+    "detail": "Table \\`public.cup_side_members\\` has RLS enabled, but no policies exist",
+    "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0008_rls_enabled_no_policy",
+    "metadata": {
+      "name": "cup_side_members",
+      "schema": "public",
+      "type": "table"
+    },
+    "cache_key": "rls_enabled_no_policy_public_cup_side_members"
+  },
+  {
+    "name": "rls_enabled_no_policy",
+    "title": "RLS Enabled No Policy",
+    "level": "INFO",
+    "facing": "EXTERNAL",
+    "categories": [
+      "SECURITY"
+    ],
+    "description": "Detects cases where row level security (RLS) has been enabled on a table but no RLS policies have been created.",
+    "detail": "Table \\`public.initial_division_snapshots\\` has RLS enabled, but no policies exist",
+    "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0008_rls_enabled_no_policy",
+    "metadata": {
+      "name": "initial_division_snapshots",
+      "schema": "public",
+      "type": "table"
+    },
+    "cache_key": "rls_enabled_no_policy_public_initial_division_snapshots"
+  },
+  {
+    "name": "rls_enabled_no_policy",
+    "title": "RLS Enabled No Policy",
+    "level": "INFO",
+    "facing": "EXTERNAL",
+    "categories": [
+      "SECURITY"
+    ],
+    "description": "Detects cases where row level security (RLS) has been enabled on a table but no RLS policies have been created.",
+    "detail": "Table \\`public.matchday_snapshot_revisions\\` has RLS enabled, but no policies exist",
+    "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0008_rls_enabled_no_policy",
+    "metadata": {
+      "name": "matchday_snapshot_revisions",
+      "schema": "public",
+      "type": "table"
+    },
+    "cache_key": "rls_enabled_no_policy_public_matchday_snapshot_revisions"
+  },
+  {
+    "name": "rls_enabled_no_policy",
+    "title": "RLS Enabled No Policy",
+    "level": "INFO",
+    "facing": "EXTERNAL",
+    "categories": [
+      "SECURITY"
+    ],
+    "description": "Detects cases where row level security (RLS) has been enabled on a table but no RLS policies have been created.",
+    "detail": "Table \\`public.robbery_cycles\\` has RLS enabled, but no policies exist",
+    "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0008_rls_enabled_no_policy",
+    "metadata": {
+      "name": "robbery_cycles",
+      "schema": "public",
+      "type": "table"
+    },
+    "cache_key": "rls_enabled_no_policy_public_robbery_cycles"
+  },
+  {
+    "name": "rls_enabled_no_policy",
+    "title": "RLS Enabled No Policy",
+    "level": "INFO",
+    "facing": "EXTERNAL",
+    "categories": [
+      "SECURITY"
+    ],
+    "description": "Detects cases where row level security (RLS) has been enabled on a table but no RLS policies have been created.",
+    "detail": "Table \\`public.season_admin_state\\` has RLS enabled, but no policies exist",
+    "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0008_rls_enabled_no_policy",
+    "metadata": {
+      "name": "season_admin_state",
+      "schema": "public",
+      "type": "table"
+    },
+    "cache_key": "rls_enabled_no_policy_public_season_admin_state"
+  },
+  {
+    "name": "rls_enabled_no_policy",
+    "title": "RLS Enabled No Policy",
+    "level": "INFO",
+    "facing": "EXTERNAL",
+    "categories": [
+      "SECURITY"
+    ],
+    "description": "Detects cases where row level security (RLS) has been enabled on a table but no RLS policies have been created.",
+    "detail": "Table \\`public.trial_case_counters\\` has RLS enabled, but no policies exist",
+    "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0008_rls_enabled_no_policy",
+    "metadata": {
+      "name": "trial_case_counters",
+      "schema": "public",
+      "type": "table"
+    },
+    "cache_key": "rls_enabled_no_policy_public_trial_case_counters"
+  },
+  {
+    "name": "security_definer_view",
+    "title": "Security Definer View",
+    "level": "ERROR",
+    "facing": "EXTERNAL",
+    "categories": [
+      "SECURITY"
+    ],
+    "description": "Detects views defined with the SECURITY DEFINER property. These views enforce Postgres permissions and row level security policies (RLS) of the view creator, rather than that of the querying user",
+    "detail": "View \\`public.public_activity_events\\` is defined with the SECURITY DEFINER property",
+    "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0010_security_definer_view",
+    "metadata": {
+      "name": "public_activity_events",
+      "schema": "public",
+      "type": "view"
+    },
+    "cache_key": "security_definer_view_public_public_activity_events"
+  },
+  {
+    "name": "security_definer_view",
+    "title": "Security Definer View",
+    "level": "ERROR",
+    "facing": "EXTERNAL",
+    "categories": [
+      "SECURITY"
+    ],
+    "description": "Detects views defined with the SECURITY DEFINER property. These views enforce Postgres permissions and row level security policies (RLS) of the view creator, rather than that of the querying user",
+    "detail": "View \\`public.public_coin_balances\\` is defined with the SECURITY DEFINER property",
+    "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0010_security_definer_view",
+    "metadata": {
+      "name": "public_coin_balances",
+      "schema": "public",
+      "type": "view"
+    },
+    "cache_key": "security_definer_view_public_public_coin_balances"
+  },
+  {
+    "name": "security_definer_view",
+    "title": "Security Definer View",
+    "level": "ERROR",
+    "facing": "EXTERNAL",
+    "categories": [
+      "SECURITY"
+    ],
+    "description": "Detects views defined with the SECURITY DEFINER property. These views enforce Postgres permissions and row level security policies (RLS) of the view creator, rather than that of the querying user",
+    "detail": "View \\`public.public_cup_matches\\` is defined with the SECURITY DEFINER property",
+    "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0010_security_definer_view",
+    "metadata": {
+      "name": "public_cup_matches",
+      "schema": "public",
+      "type": "view"
+    },
+    "cache_key": "security_definer_view_public_public_cup_matches"
+  },
+  {
+    "name": "security_definer_view",
+    "title": "Security Definer View",
+    "level": "ERROR",
+    "facing": "EXTERNAL",
+    "categories": [
+      "SECURITY"
+    ],
+    "description": "Detects views defined with the SECURITY DEFINER property. These views enforce Postgres permissions and row level security policies (RLS) of the view creator, rather than that of the querying user",
+    "detail": "View \\`public.public_cup_participants\\` is defined with the SECURITY DEFINER property",
+    "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0010_security_definer_view",
+    "metadata": {
+      "name": "public_cup_participants",
+      "schema": "public",
+      "type": "view"
+    },
+    "cache_key": "security_definer_view_public_public_cup_participants"
+  },
+  {
+    "name": "security_definer_view",
+    "title": "Security Definer View",
+    "level": "ERROR",
+    "facing": "EXTERNAL",
+    "categories": [
+      "SECURITY"
+    ],
+    "description": "Detects views defined with the SECURITY DEFINER property. These views enforce Postgres permissions and row level security policies (RLS) of the view creator, rather than that of the querying user",
+    "detail": "View \\`public.public_cup_standings\\` is defined with the SECURITY DEFINER property",
+    "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0010_security_definer_view",
+    "metadata": {
+      "name": "public_cup_standings",
+      "schema": "public",
+      "type": "view"
+    },
+    "cache_key": "security_definer_view_public_public_cup_standings"
+  },
+  {
+    "name": "security_definer_view",
+    "title": "Security Definer View",
+    "level": "ERROR",
+    "facing": "EXTERNAL",
+    "categories": [
+      "SECURITY"
+    ],
+    "description": "Detects views defined with the SECURITY DEFINER property. These views enforce Postgres permissions and row level security policies (RLS) of the view creator, rather than that of the querying user",
+    "detail": "View \\`public.public_cups\\` is defined with the SECURITY DEFINER property",
+    "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0010_security_definer_view",
+    "metadata": {
+      "name": "public_cups",
+      "schema": "public",
+      "type": "view"
+    },
+    "cache_key": "security_definer_view_public_public_cups"
+  },
+  {
+    "name": "security_definer_view",
+    "title": "Security Definer View",
+    "level": "ERROR",
+    "facing": "EXTERNAL",
+    "categories": [
+      "SECURITY"
+    ],
+    "description": "Detects views defined with the SECURITY DEFINER property. These views enforce Postgres permissions and row level security policies (RLS) of the view creator, rather than that of the querying user",
+    "detail": "View \\`public.public_division_memberships\\` is defined with the SECURITY DEFINER property",
+    "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0010_security_definer_view",
+    "metadata": {
+      "name": "public_division_memberships",
+      "schema": "public",
+      "type": "view"
+    },
+    "cache_key": "security_definer_view_public_public_division_memberships"
+  },
+  {
+    "name": "security_definer_view",
+    "title": "Security Definer View",
+    "level": "ERROR",
+    "facing": "EXTERNAL",
+    "categories": [
+      "SECURITY"
+    ],
+    "description": "Detects views defined with the SECURITY DEFINER property. These views enforce Postgres permissions and row level security policies (RLS) of the view creator, rather than that of the querying user",
+    "detail": "View \\`public.public_divisions\\` is defined with the SECURITY DEFINER property",
+    "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0010_security_definer_view",
+    "metadata": {
+      "name": "public_divisions",
+      "schema": "public",
+      "type": "view"
+    },
+    "cache_key": "security_definer_view_public_public_divisions"
+  },
+  {
+    "name": "security_definer_view",
+    "title": "Security Definer View",
+    "level": "ERROR",
+    "facing": "EXTERNAL",
+    "categories": [
+      "SECURITY"
+    ],
+    "description": "Detects views defined with the SECURITY DEFINER property. These views enforce Postgres permissions and row level security policies (RLS) of the view creator, rather than that of the querying user",
+    "detail": "View \\`public.public_hall_of_fame\\` is defined with the SECURITY DEFINER property",
+    "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0010_security_definer_view",
+    "metadata": {
+      "name": "public_hall_of_fame",
+      "schema": "public",
+      "type": "view"
+    },
+    "cache_key": "security_definer_view_public_public_hall_of_fame"
+  },
+  {
+    "name": "security_definer_view",
+    "title": "Security Definer View",
+    "level": "ERROR",
+    "facing": "EXTERNAL",
+    "categories": [
+      "SECURITY"
+    ],
+    "description": "Detects views defined with the SECURITY DEFINER property. These views enforce Postgres permissions and row level security policies (RLS) of the view creator, rather than that of the querying user",
+    "detail": "View \\`public.public_matchday_movements\\` is defined with the SECURITY DEFINER property",
+    "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0010_security_definer_view",
+    "metadata": {
+      "name": "public_matchday_movements",
+      "schema": "public",
+      "type": "view"
+    },
+    "cache_key": "security_definer_view_public_public_matchday_movements"
+  },
+  {
+    "name": "security_definer_view",
+    "title": "Security Definer View",
+    "level": "ERROR",
+    "facing": "EXTERNAL",
+    "categories": [
+      "SECURITY"
+    ],
+    "description": "Detects views defined with the SECURITY DEFINER property. These views enforce Postgres permissions and row level security policies (RLS) of the view creator, rather than that of the querying user",
+    "detail": "View \\`public.public_matchday_snapshots\\` is defined with the SECURITY DEFINER property",
+    "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0010_security_definer_view",
+    "metadata": {
+      "name": "public_matchday_snapshots",
+      "schema": "public",
+      "type": "view"
+    },
+    "cache_key": "security_definer_view_public_public_matchday_snapshots"
+  },
+  {
+    "name": "security_definer_view",
+    "title": "Security Definer View",
+    "level": "ERROR",
+    "facing": "EXTERNAL",
+    "categories": [
+      "SECURITY"
+    ],
+    "description": "Detects views defined with the SECURITY DEFINER property. These views enforce Postgres permissions and row level security policies (RLS) of the view creator, rather than that of the querying user",
+    "detail": "View \\`public.public_matchdays\\` is defined with the SECURITY DEFINER property",
+    "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0010_security_definer_view",
+    "metadata": {
+      "name": "public_matchdays",
+      "schema": "public",
+      "type": "view"
+    },
+    "cache_key": "security_definer_view_public_public_matchdays"
+  },
+  {
+    "name": "security_definer_view",
+    "title": "Security Definer View",
+    "level": "ERROR",
+    "facing": "EXTERNAL",
+    "categories": [
+      "SECURITY"
+    ],
+    "description": "Detects views defined with the SECURITY DEFINER property. These views enforce Postgres permissions and row level security policies (RLS) of the view creator, rather than that of the querying user",
+    "detail": "View \\`public.public_matches\\` is defined with the SECURITY DEFINER property",
+    "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0010_security_definer_view",
+    "metadata": {
+      "name": "public_matches",
+      "schema": "public",
+      "type": "view"
+    },
+    "cache_key": "security_definer_view_public_public_matches"
+  },
+  {
+    "name": "security_definer_view",
+    "title": "Security Definer View",
+    "level": "ERROR",
+    "facing": "EXTERNAL",
+    "categories": [
+      "SECURITY"
+    ],
+    "description": "Detects views defined with the SECURITY DEFINER property. These views enforce Postgres permissions and row level security policies (RLS) of the view creator, rather than that of the querying user",
+    "detail": "View \\`public.public_penalties\\` is defined with the SECURITY DEFINER property",
+    "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0010_security_definer_view",
+    "metadata": {
+      "name": "public_penalties",
+      "schema": "public",
+      "type": "view"
+    },
+    "cache_key": "security_definer_view_public_public_penalties"
+  },
+  {
+    "name": "security_definer_view",
+    "title": "Security Definer View",
+    "level": "ERROR",
+    "facing": "EXTERNAL",
+    "categories": [
+      "SECURITY"
+    ],
+    "description": "Detects views defined with the SECURITY DEFINER property. These views enforce Postgres permissions and row level security policies (RLS) of the view creator, rather than that of the querying user",
+    "detail": "View \\`public.public_season_config_versions\\` is defined with the SECURITY DEFINER property",
+    "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0010_security_definer_view",
+    "metadata": {
+      "name": "public_season_config_versions",
+      "schema": "public",
+      "type": "view"
+    },
+    "cache_key": "security_definer_view_public_public_season_config_versions"
+  },
+  {
+    "name": "security_definer_view",
+    "title": "Security Definer View",
+    "level": "ERROR",
+    "facing": "EXTERNAL",
+    "categories": [
+      "SECURITY"
+    ],
+    "description": "Detects views defined with the SECURITY DEFINER property. These views enforce Postgres permissions and row level security policies (RLS) of the view creator, rather than that of the querying user",
+    "detail": "View \\`public.public_season_player_stats\\` is defined with the SECURITY DEFINER property",
+    "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0010_security_definer_view",
+    "metadata": {
+      "name": "public_season_player_stats",
+      "schema": "public",
+      "type": "view"
+    },
+    "cache_key": "security_definer_view_public_public_season_player_stats"
+  },
+  {
+    "name": "security_definer_view",
+    "title": "Security Definer View",
+    "level": "ERROR",
+    "facing": "EXTERNAL",
+    "categories": [
+      "SECURITY"
+    ],
+    "description": "Detects views defined with the SECURITY DEFINER property. These views enforce Postgres permissions and row level security policies (RLS) of the view creator, rather than that of the querying user",
+    "detail": "View \\`public.public_season_players\\` is defined with the SECURITY DEFINER property",
+    "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0010_security_definer_view",
+    "metadata": {
+      "name": "public_season_players",
+      "schema": "public",
+      "type": "view"
+    },
+    "cache_key": "security_definer_view_public_public_season_players"
+  },
+  {
+    "name": "security_definer_view",
+    "title": "Security Definer View",
+    "level": "ERROR",
+    "facing": "EXTERNAL",
+    "categories": [
+      "SECURITY"
+    ],
+    "description": "Detects views defined with the SECURITY DEFINER property. These views enforce Postgres permissions and row level security policies (RLS) of the view creator, rather than that of the querying user",
+    "detail": "View \\`public.public_seasons\\` is defined with the SECURITY DEFINER property",
+    "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0010_security_definer_view",
+    "metadata": {
+      "name": "public_seasons",
+      "schema": "public",
+      "type": "view"
+    },
+    "cache_key": "security_definer_view_public_public_seasons"
+  },
+  {
+    "name": "security_definer_view",
+    "title": "Security Definer View",
+    "level": "ERROR",
+    "facing": "EXTERNAL",
+    "categories": [
+      "SECURITY"
+    ],
+    "description": "Detects views defined with the SECURITY DEFINER property. These views enforce Postgres permissions and row level security policies (RLS) of the view creator, rather than that of the querying user",
+    "detail": "View \\`public.public_shop_items\\` is defined with the SECURITY DEFINER property",
+    "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0010_security_definer_view",
+    "metadata": {
+      "name": "public_shop_items",
+      "schema": "public",
+      "type": "view"
+    },
+    "cache_key": "security_definer_view_public_public_shop_items"
+  },
+  {
+    "name": "security_definer_view",
+    "title": "Security Definer View",
+    "level": "ERROR",
+    "facing": "EXTERNAL",
+    "categories": [
+      "SECURITY"
+    ],
+    "description": "Detects views defined with the SECURITY DEFINER property. These views enforce Postgres permissions and row level security policies (RLS) of the view creator, rather than that of the querying user",
+    "detail": "View \\`public.public_shop_promotions\\` is defined with the SECURITY DEFINER property",
+    "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0010_security_definer_view",
+    "metadata": {
+      "name": "public_shop_promotions",
+      "schema": "public",
+      "type": "view"
+    },
+    "cache_key": "security_definer_view_public_public_shop_promotions"
+  },
+  {
+    "name": "security_definer_view",
+    "title": "Security Definer View",
+    "level": "ERROR",
+    "facing": "EXTERNAL",
+    "categories": [
+      "SECURITY"
+    ],
+    "description": "Detects views defined with the SECURITY DEFINER property. These views enforce Postgres permissions and row level security policies (RLS) of the view creator, rather than that of the querying user",
+    "detail": "View \\`public.public_team_locks\\` is defined with the SECURITY DEFINER property",
+    "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0010_security_definer_view",
+    "metadata": {
+      "name": "public_team_locks",
+      "schema": "public",
+      "type": "view"
+    },
+    "cache_key": "security_definer_view_public_public_team_locks"
+  },
+  {
+    "name": "security_definer_view",
+    "title": "Security Definer View",
+    "level": "ERROR",
+    "facing": "EXTERNAL",
+    "categories": [
+      "SECURITY"
+    ],
+    "description": "Detects views defined with the SECURITY DEFINER property. These views enforce Postgres permissions and row level security policies (RLS) of the view creator, rather than that of the querying user",
+    "detail": "View \\`public.public_trainer_flags\\` is defined with the SECURITY DEFINER property",
+    "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0010_security_definer_view",
+    "metadata": {
+      "name": "public_trainer_flags",
+      "schema": "public",
+      "type": "view"
+    },
+    "cache_key": "security_definer_view_public_public_trainer_flags"
+  },
+  {
+    "name": "security_definer_view",
+    "title": "Security Definer View",
+    "level": "ERROR",
+    "facing": "EXTERNAL",
+    "categories": [
+      "SECURITY"
+    ],
+    "description": "Detects views defined with the SECURITY DEFINER property. These views enforce Postgres permissions and row level security policies (RLS) of the view creator, rather than that of the querying user",
+    "detail": "View \\`public.public_trainers\\` is defined with the SECURITY DEFINER property",
+    "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0010_security_definer_view",
+    "metadata": {
+      "name": "public_trainers",
+      "schema": "public",
+      "type": "view"
+    },
+    "cache_key": "security_definer_view_public_public_trainers"
+  },
+  {
+    "name": "security_definer_view",
+    "title": "Security Definer View",
+    "level": "ERROR",
+    "facing": "EXTERNAL",
+    "categories": [
+      "SECURITY"
+    ],
+    "description": "Detects views defined with the SECURITY DEFINER property. These views enforce Postgres permissions and row level security policies (RLS) of the view creator, rather than that of the querying user",
+    "detail": "View \\`public.public_trial_cases\\` is defined with the SECURITY DEFINER property",
+    "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0010_security_definer_view",
+    "metadata": {
+      "name": "public_trial_cases",
+      "schema": "public",
+      "type": "view"
+    },
+    "cache_key": "security_definer_view_public_public_trial_cases"
+  },
+  {
+    "name": "function_search_path_mutable",
+    "title": "Function Search Path Mutable",
+    "level": "WARN",
+    "facing": "EXTERNAL",
+    "categories": [
+      "SECURITY"
+    ],
+    "description": "Detects functions where the search_path parameter is not set.",
+    "detail": "Function \\`public.set_updated_at\\` has a role mutable search_path",
+    "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0011_function_search_path_mutable",
+    "metadata": {
+      "name": "set_updated_at",
+      "schema": "public",
+      "type": "function"
+    },
+    "cache_key": "function_search_path_mutable_public_set_updated_at_204b9b9355e61b7541bc0633bbc9294c"
+  },
+  {
+    "name": "authenticated_security_definer_function_executable",
+    "title": "Signed-In Users Can Execute SECURITY DEFINER Function",
+    "level": "WARN",
+    "facing": "EXTERNAL",
+    "categories": [
+      "SECURITY"
+    ],
+    "description": "Detects `SECURITY DEFINER` functions that are callable by signed-in users. Revoke `EXECUTE`, switch the function to `SECURITY INVOKER`, or move it out of your exposed API schema if signed-in users should not call it.",
+    "detail": "Function `public.current_trainer_id()` can be executed by the `authenticated` role as a `SECURITY DEFINER` function via `/rest/v1/rpc/current_trainer_id`. Revoke `EXECUTE` or switch it to `SECURITY INVOKER` if that is not intentional.",
+    "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0029_authenticated_security_definer_function_executable",
+    "metadata": {
+      "name": "current_trainer_id",
+      "schema": "public"
+    },
+    "cache_key": "authenticated_security_definer_function_executable_public_current_trainer_id_"
+  },
+  {
+    "name": "authenticated_security_definer_function_executable",
+    "title": "Signed-In Users Can Execute SECURITY DEFINER Function",
+    "level": "WARN",
+    "facing": "EXTERNAL",
+    "categories": [
+      "SECURITY"
+    ],
+    "description": "Detects `SECURITY DEFINER` functions that are callable by signed-in users. Revoke `EXECUTE`, switch the function to `SECURITY INVOKER`, or move it out of your exposed API schema if signed-in users should not call it.",
+    "detail": "Function `public.current_user_owns_trainer(p_trainer_id uuid)` can be executed by the `authenticated` role as a `SECURITY DEFINER` function via `/rest/v1/rpc/current_user_owns_trainer`. Revoke `EXECUTE` or switch it to `SECURITY INVOKER` if that is not intentional.",
+    "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0029_authenticated_security_definer_function_executable",
+    "metadata": {
+      "name": "current_user_owns_trainer",
+      "schema": "public"
+    },
+    "cache_key": "authenticated_security_definer_function_executable_public_current_user_owns_trainer_p_trainer_id uuid"
+  },
+  {
+    "name": "authenticated_security_definer_function_executable",
+    "title": "Signed-In Users Can Execute SECURITY DEFINER Function",
+    "level": "WARN",
+    "facing": "EXTERNAL",
+    "categories": [
+      "SECURITY"
+    ],
+    "description": "Detects `SECURITY DEFINER` functions that are callable by signed-in users. Revoke `EXECUTE`, switch the function to `SECURITY INVOKER`, or move it out of your exposed API schema if signed-in users should not call it.",
+    "detail": "Function `public.is_current_user_admin()` can be executed by the `authenticated` role as a `SECURITY DEFINER` function via `/rest/v1/rpc/is_current_user_admin`. Revoke `EXECUTE` or switch it to `SECURITY INVOKER` if that is not intentional.",
+    "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0029_authenticated_security_definer_function_executable",
+    "metadata": {
+      "name": "is_current_user_admin",
+      "schema": "public"
+    },
+    "cache_key": "authenticated_security_definer_function_executable_public_is_current_user_admin_"
+  },
+  {
+    "name": "auth_leaked_password_protection",
+    "title": "Leaked Password Protection Disabled",
+    "level": "WARN",
+    "facing": "EXTERNAL",
+    "categories": [
+      "SECURITY"
+    ],
+    "description": "Leaked password protection is currently disabled.",
+    "detail": "Supabase Auth prevents the use of compromised passwords by checking against HaveIBeenPwned.org. Enable this feature to enhance security.",
+    "remediation": "https://supabase.com/docs/guides/auth/password-security#password-strength-and-leaked-password-protection",
+    "metadata": {
+      "entity": "Auth",
+      "type": "auth"
+    },
+    "cache_key": "auth_leaked_password_protection"
+  },
+  {
+    "name": "unindexed_foreign_keys",
+    "title": "Unindexed foreign keys",
+    "level": "INFO",
+    "facing": "EXTERNAL",
+    "categories": [
+      "PERFORMANCE"
+    ],
+    "description": "Identifies foreign key constraints without a covering index, which can impact database performance.",
+    "detail": "Table \\`public.activity_events\\` has a foreign key \\`activity_events_actor_trainer_id_fkey\\` without a covering index. This can lead to suboptimal query performance.",
+    "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0001_unindexed_foreign_keys",
+    "metadata": {
+      "fkey_columns": [
+        4
+      ],
+      "fkey_name": "activity_events_actor_trainer_id_fkey",
+      "name": "activity_events",
+      "schema": "public",
+      "type": "table"
+    },
+    "cache_key": "unindexed_foreign_keys_public_activity_events_activity_events_actor_trainer_id_fkey"
+  },
+  {
+    "name": "unindexed_foreign_keys",
+    "title": "Unindexed foreign keys",
+    "level": "INFO",
+    "facing": "EXTERNAL",
+    "categories": [
+      "PERFORMANCE"
+    ],
+    "description": "Identifies foreign key constraints without a covering index, which can impact database performance.",
+    "detail": "Table \\`public.activity_events\\` has a foreign key \\`activity_events_trainer_id_fkey\\` without a covering index. This can lead to suboptimal query performance.",
+    "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0001_unindexed_foreign_keys",
+    "metadata": {
+      "fkey_columns": [
+        5
+      ],
+      "fkey_name": "activity_events_trainer_id_fkey",
+      "name": "activity_events",
+      "schema": "public",
+      "type": "table"
+    },
+    "cache_key": "unindexed_foreign_keys_public_activity_events_activity_events_trainer_id_fkey"
+  },
+  {
+    "name": "unindexed_foreign_keys",
+    "title": "Unindexed foreign keys",
+    "level": "INFO",
+    "facing": "EXTERNAL",
+    "categories": [
+      "PERFORMANCE"
+    ],
+    "description": "Identifies foreign key constraints without a covering index, which can impact database performance.",
+    "detail": "Table \\`public.admin_operation_receipts\\` has a foreign key \\`admin_operation_receipts_season_id_fkey\\` without a covering index. This can lead to suboptimal query performance.",
+    "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0001_unindexed_foreign_keys",
+    "metadata": {
+      "fkey_columns": [
+        3
+      ],
+      "fkey_name": "admin_operation_receipts_season_id_fkey",
+      "name": "admin_operation_receipts",
+      "schema": "public",
+      "type": "table"
+    },
+    "cache_key": "unindexed_foreign_keys_public_admin_operation_receipts_admin_operation_receipts_season_id_fkey"
+  },
+  {
+    "name": "unindexed_foreign_keys",
+    "title": "Unindexed foreign keys",
+    "level": "INFO",
+    "facing": "EXTERNAL",
+    "categories": [
+      "PERFORMANCE"
+    ],
+    "description": "Identifies foreign key constraints without a covering index, which can impact database performance.",
+    "detail": "Table \\`public.coin_transactions\\` has a foreign key \\`coin_transactions_created_by_trainer_id_fkey\\` without a covering index. This can lead to suboptimal query performance.",
+    "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0001_unindexed_foreign_keys",
+    "metadata": {
+      "fkey_columns": [
+        10
+      ],
+      "fkey_name": "coin_transactions_created_by_trainer_id_fkey",
+      "name": "coin_transactions",
+      "schema": "public",
+      "type": "table"
+    },
+    "cache_key": "unindexed_foreign_keys_public_coin_transactions_coin_transactions_created_by_trainer_id_fkey"
+  },
+  {
+    "name": "unindexed_foreign_keys",
+    "title": "Unindexed foreign keys",
+    "level": "INFO",
+    "facing": "EXTERNAL",
+    "categories": [
+      "PERFORMANCE"
+    ],
+    "description": "Identifies foreign key constraints without a covering index, which can impact database performance.",
+    "detail": "Table \\`public.coin_transactions\\` has a foreign key \\`coin_transactions_reward_matchday_id_reward_revision_fkey\\` without a covering index. This can lead to suboptimal query performance.",
+    "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0001_unindexed_foreign_keys",
+    "metadata": {
+      "fkey_columns": [
+        12,
+        13
+      ],
+      "fkey_name": "coin_transactions_reward_matchday_id_reward_revision_fkey",
+      "name": "coin_transactions",
+      "schema": "public",
+      "type": "table"
+    },
+    "cache_key": "unindexed_foreign_keys_public_coin_transactions_coin_transactions_reward_matchday_id_reward_revision_fkey"
+  },
+  {
+    "name": "unindexed_foreign_keys",
+    "title": "Unindexed foreign keys",
+    "level": "INFO",
+    "facing": "EXTERNAL",
+    "categories": [
+      "PERFORMANCE"
+    ],
+    "description": "Identifies foreign key constraints without a covering index, which can impact database performance.",
+    "detail": "Table \\`public.coin_transactions\\` has a foreign key \\`coin_transactions_reward_matchday_id_season_id_fkey\\` without a covering index. This can lead to suboptimal query performance.",
+    "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0001_unindexed_foreign_keys",
+    "metadata": {
+      "fkey_columns": [
+        12,
+        2
+      ],
+      "fkey_name": "coin_transactions_reward_matchday_id_season_id_fkey",
+      "name": "coin_transactions",
+      "schema": "public",
+      "type": "table"
+    },
+    "cache_key": "unindexed_foreign_keys_public_coin_transactions_coin_transactions_reward_matchday_id_season_id_fkey"
+  },
+  {
+    "name": "unindexed_foreign_keys",
+    "title": "Unindexed foreign keys",
+    "level": "INFO",
+    "facing": "EXTERNAL",
+    "categories": [
+      "PERFORMANCE"
+    ],
+    "description": "Identifies foreign key constraints without a covering index, which can impact database performance.",
+    "detail": "Table \\`public.coin_transactions\\` has a foreign key \\`fk_coin_transactions_player_same_owner\\` without a covering index. This can lead to suboptimal query performance.",
+    "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0001_unindexed_foreign_keys",
+    "metadata": {
+      "fkey_columns": [
+        4,
+        2,
+        3
+      ],
+      "fkey_name": "fk_coin_transactions_player_same_owner",
+      "name": "coin_transactions",
+      "schema": "public",
+      "type": "table"
+    },
+    "cache_key": "unindexed_foreign_keys_public_coin_transactions_fk_coin_transactions_player_same_owner"
+  },
+  {
+    "name": "unindexed_foreign_keys",
+    "title": "Unindexed foreign keys",
+    "level": "INFO",
+    "facing": "EXTERNAL",
+    "categories": [
+      "PERFORMANCE"
+    ],
+    "description": "Identifies foreign key constraints without a covering index, which can impact database performance.",
+    "detail": "Table \\`public.coin_transactions\\` has a foreign key \\`trial_ledger_penalty\\` without a covering index. This can lead to suboptimal query performance.",
+    "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0001_unindexed_foreign_keys",
+    "metadata": {
+      "fkey_columns": [
+        16,
+        2,
+        3
+      ],
+      "fkey_name": "trial_ledger_penalty",
+      "name": "coin_transactions",
+      "schema": "public",
+      "type": "table"
+    },
+    "cache_key": "unindexed_foreign_keys_public_coin_transactions_trial_ledger_penalty"
+  },
+  {
+    "name": "unindexed_foreign_keys",
+    "title": "Unindexed foreign keys",
+    "level": "INFO",
+    "facing": "EXTERNAL",
+    "categories": [
+      "PERFORMANCE"
+    ],
+    "description": "Identifies foreign key constraints without a covering index, which can impact database performance.",
+    "detail": "Table \\`public.coin_transactions\\` has a foreign key \\`trial_ledger_previous_penalty\\` without a covering index. This can lead to suboptimal query performance.",
+    "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0001_unindexed_foreign_keys",
+    "metadata": {
+      "fkey_columns": [
+        17,
+        2,
+        3
+      ],
+      "fkey_name": "trial_ledger_previous_penalty",
+      "name": "coin_transactions",
+      "schema": "public",
+      "type": "table"
+    },
+    "cache_key": "unindexed_foreign_keys_public_coin_transactions_trial_ledger_previous_penalty"
+  },
+  {
+    "name": "unindexed_foreign_keys",
+    "title": "Unindexed foreign keys",
+    "level": "INFO",
+    "facing": "EXTERNAL",
+    "categories": [
+      "PERFORMANCE"
+    ],
+    "description": "Identifies foreign key constraints without a covering index, which can impact database performance.",
+    "detail": "Table \\`public.coin_transactions\\` has a foreign key \\`trial_ledger_source\\` without a covering index. This can lead to suboptimal query performance.",
+    "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0001_unindexed_foreign_keys",
+    "metadata": {
+      "fkey_columns": [
+        15,
+        14,
+        2
+      ],
+      "fkey_name": "trial_ledger_source",
+      "name": "coin_transactions",
+      "schema": "public",
+      "type": "table"
+    },
+    "cache_key": "unindexed_foreign_keys_public_coin_transactions_trial_ledger_source"
+  },
+  {
+    "name": "unindexed_foreign_keys",
+    "title": "Unindexed foreign keys",
+    "level": "INFO",
+    "facing": "EXTERNAL",
+    "categories": [
+      "PERFORMANCE"
+    ],
+    "description": "Identifies foreign key constraints without a covering index, which can impact database performance.",
+    "detail": "Table \\`public.cup_certificates\\` has a foreign key \\`cup_certificates_actor_trainer_id_fkey\\` without a covering index. This can lead to suboptimal query performance.",
+    "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0001_unindexed_foreign_keys",
+    "metadata": {
+      "fkey_columns": [
+        10
+      ],
+      "fkey_name": "cup_certificates_actor_trainer_id_fkey",
+      "name": "cup_certificates",
+      "schema": "public",
+      "type": "table"
+    },
+    "cache_key": "unindexed_foreign_keys_public_cup_certificates_cup_certificates_actor_trainer_id_fkey"
+  },
+  {
+    "name": "unindexed_foreign_keys",
+    "title": "Unindexed foreign keys",
+    "level": "INFO",
+    "facing": "EXTERNAL",
+    "categories": [
+      "PERFORMANCE"
+    ],
+    "description": "Identifies foreign key constraints without a covering index, which can impact database performance.",
+    "detail": "Table \\`public.cup_certificates\\` has a foreign key \\`cup_certificates_champion_side_id_cup_id_fkey\\` without a covering index. This can lead to suboptimal query performance.",
+    "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0001_unindexed_foreign_keys",
+    "metadata": {
+      "fkey_columns": [
+        6,
+        2
+      ],
+      "fkey_name": "cup_certificates_champion_side_id_cup_id_fkey",
+      "name": "cup_certificates",
+      "schema": "public",
+      "type": "table"
+    },
+    "cache_key": "unindexed_foreign_keys_public_cup_certificates_cup_certificates_champion_side_id_cup_id_fkey"
+  },
+  {
+    "name": "unindexed_foreign_keys",
+    "title": "Unindexed foreign keys",
+    "level": "INFO",
+    "facing": "EXTERNAL",
+    "categories": [
+      "PERFORMANCE"
+    ],
+    "description": "Identifies foreign key constraints without a covering index, which can impact database performance.",
+    "detail": "Table \\`public.cup_certificates\\` has a foreign key \\`cup_certificates_cup_id_season_id_fkey\\` without a covering index. This can lead to suboptimal query performance.",
+    "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0001_unindexed_foreign_keys",
+    "metadata": {
+      "fkey_columns": [
+        2,
+        3
+      ],
+      "fkey_name": "cup_certificates_cup_id_season_id_fkey",
+      "name": "cup_certificates",
+      "schema": "public",
+      "type": "table"
+    },
+    "cache_key": "unindexed_foreign_keys_public_cup_certificates_cup_certificates_cup_id_season_id_fkey"
+  },
+  {
+    "name": "unindexed_foreign_keys",
+    "title": "Unindexed foreign keys",
+    "level": "INFO",
+    "facing": "EXTERNAL",
+    "categories": [
+      "PERFORMANCE"
+    ],
+    "description": "Identifies foreign key constraints without a covering index, which can impact database performance.",
+    "detail": "Table \\`public.cup_certificates\\` has a foreign key \\`cup_certificates_finalist_side_id_cup_id_fkey\\` without a covering index. This can lead to suboptimal query performance.",
+    "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0001_unindexed_foreign_keys",
+    "metadata": {
+      "fkey_columns": [
+        7,
+        2
+      ],
+      "fkey_name": "cup_certificates_finalist_side_id_cup_id_fkey",
+      "name": "cup_certificates",
+      "schema": "public",
+      "type": "table"
+    },
+    "cache_key": "unindexed_foreign_keys_public_cup_certificates_cup_certificates_finalist_side_id_cup_id_fkey"
+  },
+  {
+    "name": "unindexed_foreign_keys",
+    "title": "Unindexed foreign keys",
+    "level": "INFO",
+    "facing": "EXTERNAL",
+    "categories": [
+      "PERFORMANCE"
+    ],
+    "description": "Identifies foreign key constraints without a covering index, which can impact database performance.",
+    "detail": "Table \\`public.cup_certificates\\` has a foreign key \\`cup_certificates_season_id_fkey\\` without a covering index. This can lead to suboptimal query performance.",
+    "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0001_unindexed_foreign_keys",
+    "metadata": {
+      "fkey_columns": [
+        3
+      ],
+      "fkey_name": "cup_certificates_season_id_fkey",
+      "name": "cup_certificates",
+      "schema": "public",
+      "type": "table"
+    },
+    "cache_key": "unindexed_foreign_keys_public_cup_certificates_cup_certificates_season_id_fkey"
+  },
+  {
+    "name": "unindexed_foreign_keys",
+    "title": "Unindexed foreign keys",
+    "level": "INFO",
+    "facing": "EXTERNAL",
+    "categories": [
+      "PERFORMANCE"
+    ],
+    "description": "Identifies foreign key constraints without a covering index, which can impact database performance.",
+    "detail": "Table \\`public.cup_history\\` has a foreign key \\`cup_history_actor_trainer_id_fkey\\` without a covering index. This can lead to suboptimal query performance.",
+    "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0001_unindexed_foreign_keys",
+    "metadata": {
+      "fkey_columns": [
+        4
+      ],
+      "fkey_name": "cup_history_actor_trainer_id_fkey",
+      "name": "cup_history",
+      "schema": "public",
+      "type": "table"
+    },
+    "cache_key": "unindexed_foreign_keys_public_cup_history_cup_history_actor_trainer_id_fkey"
+  },
+  {
+    "name": "unindexed_foreign_keys",
+    "title": "Unindexed foreign keys",
+    "level": "INFO",
+    "facing": "EXTERNAL",
+    "categories": [
+      "PERFORMANCE"
+    ],
+    "description": "Identifies foreign key constraints without a covering index, which can impact database performance.",
+    "detail": "Table \\`public.cup_matches\\` has a foreign key \\`cup_match_a_scope\\` without a covering index. This can lead to suboptimal query performance.",
+    "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0001_unindexed_foreign_keys",
+    "metadata": {
+      "fkey_columns": [
+        5,
+        2
+      ],
+      "fkey_name": "cup_match_a_scope",
+      "name": "cup_matches",
+      "schema": "public",
+      "type": "table"
+    },
+    "cache_key": "unindexed_foreign_keys_public_cup_matches_cup_match_a_scope"
+  },
+  {
+    "name": "unindexed_foreign_keys",
+    "title": "Unindexed foreign keys",
+    "level": "INFO",
+    "facing": "EXTERNAL",
+    "categories": [
+      "PERFORMANCE"
+    ],
+    "description": "Identifies foreign key constraints without a covering index, which can impact database performance.",
+    "detail": "Table \\`public.cup_matches\\` has a foreign key \\`cup_match_b_scope\\` without a covering index. This can lead to suboptimal query performance.",
+    "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0001_unindexed_foreign_keys",
+    "metadata": {
+      "fkey_columns": [
+        6,
+        2
+      ],
+      "fkey_name": "cup_match_b_scope",
+      "name": "cup_matches",
+      "schema": "public",
+      "type": "table"
+    },
+    "cache_key": "unindexed_foreign_keys_public_cup_matches_cup_match_b_scope"
+  },
+  {
+    "name": "unindexed_foreign_keys",
+    "title": "Unindexed foreign keys",
+    "level": "INFO",
+    "facing": "EXTERNAL",
+    "categories": [
+      "PERFORMANCE"
+    ],
+    "description": "Identifies foreign key constraints without a covering index, which can impact database performance.",
+    "detail": "Table \\`public.cup_matches\\` has a foreign key \\`cup_match_winner_scope\\` without a covering index. This can lead to suboptimal query performance.",
+    "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0001_unindexed_foreign_keys",
+    "metadata": {
+      "fkey_columns": [
+        7,
+        2
+      ],
+      "fkey_name": "cup_match_winner_scope",
+      "name": "cup_matches",
+      "schema": "public",
+      "type": "table"
+    },
+    "cache_key": "unindexed_foreign_keys_public_cup_matches_cup_match_winner_scope"
+  },
+  {
+    "name": "unindexed_foreign_keys",
+    "title": "Unindexed foreign keys",
+    "level": "INFO",
+    "facing": "EXTERNAL",
+    "categories": [
+      "PERFORMANCE"
+    ],
+    "description": "Identifies foreign key constraints without a covering index, which can impact database performance.",
+    "detail": "Table \\`public.cup_matches\\` has a foreign key \\`cup_matches_participant_a_id_fkey\\` without a covering index. This can lead to suboptimal query performance.",
+    "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0001_unindexed_foreign_keys",
+    "metadata": {
+      "fkey_columns": [
+        5
+      ],
+      "fkey_name": "cup_matches_participant_a_id_fkey",
+      "name": "cup_matches",
+      "schema": "public",
+      "type": "table"
+    },
+    "cache_key": "unindexed_foreign_keys_public_cup_matches_cup_matches_participant_a_id_fkey"
+  },
+  {
+    "name": "unindexed_foreign_keys",
+    "title": "Unindexed foreign keys",
+    "level": "INFO",
+    "facing": "EXTERNAL",
+    "categories": [
+      "PERFORMANCE"
+    ],
+    "description": "Identifies foreign key constraints without a covering index, which can impact database performance.",
+    "detail": "Table \\`public.cup_matches\\` has a foreign key \\`cup_matches_participant_b_id_fkey\\` without a covering index. This can lead to suboptimal query performance.",
+    "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0001_unindexed_foreign_keys",
+    "metadata": {
+      "fkey_columns": [
+        6
+      ],
+      "fkey_name": "cup_matches_participant_b_id_fkey",
+      "name": "cup_matches",
+      "schema": "public",
+      "type": "table"
+    },
+    "cache_key": "unindexed_foreign_keys_public_cup_matches_cup_matches_participant_b_id_fkey"
+  },
+  {
+    "name": "unindexed_foreign_keys",
+    "title": "Unindexed foreign keys",
+    "level": "INFO",
+    "facing": "EXTERNAL",
+    "categories": [
+      "PERFORMANCE"
+    ],
+    "description": "Identifies foreign key constraints without a covering index, which can impact database performance.",
+    "detail": "Table \\`public.cup_matches\\` has a foreign key \\`cup_matches_winner_participant_id_fkey\\` without a covering index. This can lead to suboptimal query performance.",
+    "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0001_unindexed_foreign_keys",
+    "metadata": {
+      "fkey_columns": [
+        7
+      ],
+      "fkey_name": "cup_matches_winner_participant_id_fkey",
+      "name": "cup_matches",
+      "schema": "public",
+      "type": "table"
+    },
+    "cache_key": "unindexed_foreign_keys_public_cup_matches_cup_matches_winner_participant_id_fkey"
+  },
+  {
+    "name": "unindexed_foreign_keys",
+    "title": "Unindexed foreign keys",
+    "level": "INFO",
+    "facing": "EXTERNAL",
+    "categories": [
+      "PERFORMANCE"
+    ],
+    "description": "Identifies foreign key constraints without a covering index, which can impact database performance.",
+    "detail": "Table \\`public.cup_participants\\` has a foreign key \\`cup_participants_cup_id_fkey\\` without a covering index. This can lead to suboptimal query performance.",
+    "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0001_unindexed_foreign_keys",
+    "metadata": {
+      "fkey_columns": [
+        2
+      ],
+      "fkey_name": "cup_participants_cup_id_fkey",
+      "name": "cup_participants",
+      "schema": "public",
+      "type": "table"
+    },
+    "cache_key": "unindexed_foreign_keys_public_cup_participants_cup_participants_cup_id_fkey"
+  },
+  {
+    "name": "unindexed_foreign_keys",
+    "title": "Unindexed foreign keys",
+    "level": "INFO",
+    "facing": "EXTERNAL",
+    "categories": [
+      "PERFORMANCE"
+    ],
+    "description": "Identifies foreign key constraints without a covering index, which can impact database performance.",
+    "detail": "Table \\`public.cup_participants\\` has a foreign key \\`cup_participants_trainer_id_fkey\\` without a covering index. This can lead to suboptimal query performance.",
+    "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0001_unindexed_foreign_keys",
+    "metadata": {
+      "fkey_columns": [
+        3
+      ],
+      "fkey_name": "cup_participants_trainer_id_fkey",
+      "name": "cup_participants",
+      "schema": "public",
+      "type": "table"
+    },
+    "cache_key": "unindexed_foreign_keys_public_cup_participants_cup_participants_trainer_id_fkey"
+  },
+  {
+    "name": "unindexed_foreign_keys",
+    "title": "Unindexed foreign keys",
+    "level": "INFO",
+    "facing": "EXTERNAL",
+    "categories": [
+      "PERFORMANCE"
+    ],
+    "description": "Identifies foreign key constraints without a covering index, which can impact database performance.",
+    "detail": "Table \\`public.cup_side_members\\` has a foreign key \\`cup_side_members_cup_id_season_id_fkey\\` without a covering index. This can lead to suboptimal query performance.",
+    "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0001_unindexed_foreign_keys",
+    "metadata": {
+      "fkey_columns": [
+        1,
+        3
+      ],
+      "fkey_name": "cup_side_members_cup_id_season_id_fkey",
+      "name": "cup_side_members",
+      "schema": "public",
+      "type": "table"
+    },
+    "cache_key": "unindexed_foreign_keys_public_cup_side_members_cup_side_members_cup_id_season_id_fkey"
+  },
+  {
+    "name": "unindexed_foreign_keys",
+    "title": "Unindexed foreign keys",
+    "level": "INFO",
+    "facing": "EXTERNAL",
+    "categories": [
+      "PERFORMANCE"
+    ],
+    "description": "Identifies foreign key constraints without a covering index, which can impact database performance.",
+    "detail": "Table \\`public.cup_side_members\\` has a foreign key \\`cup_side_members_season_id_fkey\\` without a covering index. This can lead to suboptimal query performance.",
+    "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0001_unindexed_foreign_keys",
+    "metadata": {
+      "fkey_columns": [
+        3
+      ],
+      "fkey_name": "cup_side_members_season_id_fkey",
+      "name": "cup_side_members",
+      "schema": "public",
+      "type": "table"
+    },
+    "cache_key": "unindexed_foreign_keys_public_cup_side_members_cup_side_members_season_id_fkey"
+  },
+  {
+    "name": "unindexed_foreign_keys",
+    "title": "Unindexed foreign keys",
+    "level": "INFO",
+    "facing": "EXTERNAL",
+    "categories": [
+      "PERFORMANCE"
+    ],
+    "description": "Identifies foreign key constraints without a covering index, which can impact database performance.",
+    "detail": "Table \\`public.cup_side_members\\` has a foreign key \\`cup_side_members_season_player_id_season_id_trainer_id_fkey\\` without a covering index. This can lead to suboptimal query performance.",
+    "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0001_unindexed_foreign_keys",
+    "metadata": {
+      "fkey_columns": [
+        4,
+        3,
+        5
+      ],
+      "fkey_name": "cup_side_members_season_player_id_season_id_trainer_id_fkey",
+      "name": "cup_side_members",
+      "schema": "public",
+      "type": "table"
+    },
+    "cache_key": "unindexed_foreign_keys_public_cup_side_members_cup_side_members_season_player_id_season_id_trainer_id_fkey"
+  },
+  {
+    "name": "unindexed_foreign_keys",
+    "title": "Unindexed foreign keys",
+    "level": "INFO",
+    "facing": "EXTERNAL",
+    "categories": [
+      "PERFORMANCE"
+    ],
+    "description": "Identifies foreign key constraints without a covering index, which can impact database performance.",
+    "detail": "Table \\`public.cup_side_members\\` has a foreign key \\`cup_side_members_side_id_cup_id_fkey\\` without a covering index. This can lead to suboptimal query performance.",
+    "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0001_unindexed_foreign_keys",
+    "metadata": {
+      "fkey_columns": [
+        2,
+        1
+      ],
+      "fkey_name": "cup_side_members_side_id_cup_id_fkey",
+      "name": "cup_side_members",
+      "schema": "public",
+      "type": "table"
+    },
+    "cache_key": "unindexed_foreign_keys_public_cup_side_members_cup_side_members_side_id_cup_id_fkey"
+  },
+  {
+    "name": "unindexed_foreign_keys",
+    "title": "Unindexed foreign keys",
+    "level": "INFO",
+    "facing": "EXTERNAL",
+    "categories": [
+      "PERFORMANCE"
+    ],
+    "description": "Identifies foreign key constraints without a covering index, which can impact database performance.",
+    "detail": "Table \\`public.cup_side_members\\` has a foreign key \\`cup_side_members_trainer_id_fkey\\` without a covering index. This can lead to suboptimal query performance.",
+    "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0001_unindexed_foreign_keys",
+    "metadata": {
+      "fkey_columns": [
+        5
+      ],
+      "fkey_name": "cup_side_members_trainer_id_fkey",
+      "name": "cup_side_members",
+      "schema": "public",
+      "type": "table"
+    },
+    "cache_key": "unindexed_foreign_keys_public_cup_side_members_cup_side_members_trainer_id_fkey"
+  },
+  {
+    "name": "unindexed_foreign_keys",
+    "title": "Unindexed foreign keys",
+    "level": "INFO",
+    "facing": "EXTERNAL",
+    "categories": [
+      "PERFORMANCE"
+    ],
+    "description": "Identifies foreign key constraints without a covering index, which can impact database performance.",
+    "detail": "Table \\`public.cup_standings\\` has a foreign key \\`cup_standing_scope\\` without a covering index. This can lead to suboptimal query performance.",
+    "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0001_unindexed_foreign_keys",
+    "metadata": {
+      "fkey_columns": [
+        3,
+        2
+      ],
+      "fkey_name": "cup_standing_scope",
+      "name": "cup_standings",
+      "schema": "public",
+      "type": "table"
+    },
+    "cache_key": "unindexed_foreign_keys_public_cup_standings_cup_standing_scope"
+  },
+  {
+    "name": "unindexed_foreign_keys",
+    "title": "Unindexed foreign keys",
+    "level": "INFO",
+    "facing": "EXTERNAL",
+    "categories": [
+      "PERFORMANCE"
+    ],
+    "description": "Identifies foreign key constraints without a covering index, which can impact database performance.",
+    "detail": "Table \\`public.cup_standings\\` has a foreign key \\`cup_standings_participant_id_fkey\\` without a covering index. This can lead to suboptimal query performance.",
+    "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0001_unindexed_foreign_keys",
+    "metadata": {
+      "fkey_columns": [
+        3
+      ],
+      "fkey_name": "cup_standings_participant_id_fkey",
+      "name": "cup_standings",
+      "schema": "public",
+      "type": "table"
+    },
+    "cache_key": "unindexed_foreign_keys_public_cup_standings_cup_standings_participant_id_fkey"
+  },
+  {
+    "name": "unindexed_foreign_keys",
+    "title": "Unindexed foreign keys",
+    "level": "INFO",
+    "facing": "EXTERNAL",
+    "categories": [
+      "PERFORMANCE"
+    ],
+    "description": "Identifies foreign key constraints without a covering index, which can impact database performance.",
+    "detail": "Table \\`public.division_memberships\\` has a foreign key \\`division_memberships_season_id_fkey\\` without a covering index. This can lead to suboptimal query performance.",
+    "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0001_unindexed_foreign_keys",
+    "metadata": {
+      "fkey_columns": [
+        2
+      ],
+      "fkey_name": "division_memberships_season_id_fkey",
+      "name": "division_memberships",
+      "schema": "public",
+      "type": "table"
+    },
+    "cache_key": "unindexed_foreign_keys_public_division_memberships_division_memberships_season_id_fkey"
+  },
+  {
+    "name": "unindexed_foreign_keys",
+    "title": "Unindexed foreign keys",
+    "level": "INFO",
+    "facing": "EXTERNAL",
+    "categories": [
+      "PERFORMANCE"
+    ],
+    "description": "Identifies foreign key constraints without a covering index, which can impact database performance.",
+    "detail": "Table \\`public.division_memberships\\` has a foreign key \\`fk_division_memberships_division_same_season\\` without a covering index. This can lead to suboptimal query performance.",
+    "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0001_unindexed_foreign_keys",
+    "metadata": {
+      "fkey_columns": [
+        4,
+        2
+      ],
+      "fkey_name": "fk_division_memberships_division_same_season",
+      "name": "division_memberships",
+      "schema": "public",
+      "type": "table"
+    },
+    "cache_key": "unindexed_foreign_keys_public_division_memberships_fk_division_memberships_division_same_season"
+  },
+  {
+    "name": "unindexed_foreign_keys",
+    "title": "Unindexed foreign keys",
+    "level": "INFO",
+    "facing": "EXTERNAL",
+    "categories": [
+      "PERFORMANCE"
+    ],
+    "description": "Identifies foreign key constraints without a covering index, which can impact database performance.",
+    "detail": "Table \\`public.division_memberships\\` has a foreign key \\`fk_division_memberships_player_same_season\\` without a covering index. This can lead to suboptimal query performance.",
+    "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0001_unindexed_foreign_keys",
+    "metadata": {
+      "fkey_columns": [
+        3,
+        2
+      ],
+      "fkey_name": "fk_division_memberships_player_same_season",
+      "name": "division_memberships",
+      "schema": "public",
+      "type": "table"
+    },
+    "cache_key": "unindexed_foreign_keys_public_division_memberships_fk_division_memberships_player_same_season"
+  },
+  {
+    "name": "unindexed_foreign_keys",
+    "title": "Unindexed foreign keys",
+    "level": "INFO",
+    "facing": "EXTERNAL",
+    "categories": [
+      "PERFORMANCE"
+    ],
+    "description": "Identifies foreign key constraints without a covering index, which can impact database performance.",
+    "detail": "Table \\`public.division_memberships\\` has a foreign key \\`fk_division_memberships_source_matchday_same_season\\` without a covering index. This can lead to suboptimal query performance.",
+    "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0001_unindexed_foreign_keys",
+    "metadata": {
+      "fkey_columns": [
+        7,
+        2
+      ],
+      "fkey_name": "fk_division_memberships_source_matchday_same_season",
+      "name": "division_memberships",
+      "schema": "public",
+      "type": "table"
+    },
+    "cache_key": "unindexed_foreign_keys_public_division_memberships_fk_division_memberships_source_matchday_same_season"
+  },
+  {
+    "name": "unindexed_foreign_keys",
+    "title": "Unindexed foreign keys",
+    "level": "INFO",
+    "facing": "EXTERNAL",
+    "categories": [
+      "PERFORMANCE"
+    ],
+    "description": "Identifies foreign key constraints without a covering index, which can impact database performance.",
+    "detail": "Table \\`public.hall_of_fame_entries\\` has a foreign key \\`hall_cup_certificate\\` without a covering index. This can lead to suboptimal query performance.",
+    "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0001_unindexed_foreign_keys",
+    "metadata": {
+      "fkey_columns": [
+        14,
+        13
+      ],
+      "fkey_name": "hall_cup_certificate",
+      "name": "hall_of_fame_entries",
+      "schema": "public",
+      "type": "table"
+    },
+    "cache_key": "unindexed_foreign_keys_public_hall_of_fame_entries_hall_cup_certificate"
+  },
+  {
+    "name": "unindexed_foreign_keys",
+    "title": "Unindexed foreign keys",
+    "level": "INFO",
+    "facing": "EXTERNAL",
+    "categories": [
+      "PERFORMANCE"
+    ],
+    "description": "Identifies foreign key constraints without a covering index, which can impact database performance.",
+    "detail": "Table \\`public.hall_of_fame_entries\\` has a foreign key \\`hall_cup_champion\\` without a covering index. This can lead to suboptimal query performance.",
+    "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0001_unindexed_foreign_keys",
+    "metadata": {
+      "fkey_columns": [
+        15,
+        13
+      ],
+      "fkey_name": "hall_cup_champion",
+      "name": "hall_of_fame_entries",
+      "schema": "public",
+      "type": "table"
+    },
+    "cache_key": "unindexed_foreign_keys_public_hall_of_fame_entries_hall_cup_champion"
+  },
+  {
+    "name": "unindexed_foreign_keys",
+    "title": "Unindexed foreign keys",
+    "level": "INFO",
+    "facing": "EXTERNAL",
+    "categories": [
+      "PERFORMANCE"
+    ],
+    "description": "Identifies foreign key constraints without a covering index, which can impact database performance.",
+    "detail": "Table \\`public.hall_of_fame_entries\\` has a foreign key \\`hall_cup_finalist\\` without a covering index. This can lead to suboptimal query performance.",
+    "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0001_unindexed_foreign_keys",
+    "metadata": {
+      "fkey_columns": [
+        16,
+        13
+      ],
+      "fkey_name": "hall_cup_finalist",
+      "name": "hall_of_fame_entries",
+      "schema": "public",
+      "type": "table"
+    },
+    "cache_key": "unindexed_foreign_keys_public_hall_of_fame_entries_hall_cup_finalist"
+  },
+  {
+    "name": "unindexed_foreign_keys",
+    "title": "Unindexed foreign keys",
+    "level": "INFO",
+    "facing": "EXTERNAL",
+    "categories": [
+      "PERFORMANCE"
+    ],
+    "description": "Identifies foreign key constraints without a covering index, which can impact database performance.",
+    "detail": "Table \\`public.hall_of_fame_entries\\` has a foreign key \\`hall_cup_season\\` without a covering index. This can lead to suboptimal query performance.",
+    "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0001_unindexed_foreign_keys",
+    "metadata": {
+      "fkey_columns": [
+        13,
+        2
+      ],
+      "fkey_name": "hall_cup_season",
+      "name": "hall_of_fame_entries",
+      "schema": "public",
+      "type": "table"
+    },
+    "cache_key": "unindexed_foreign_keys_public_hall_of_fame_entries_hall_cup_season"
+  },
+  {
+    "name": "unindexed_foreign_keys",
+    "title": "Unindexed foreign keys",
+    "level": "INFO",
+    "facing": "EXTERNAL",
+    "categories": [
+      "PERFORMANCE"
+    ],
+    "description": "Identifies foreign key constraints without a covering index, which can impact database performance.",
+    "detail": "Table \\`public.hall_of_fame_entries\\` has a foreign key \\`hall_of_fame_entries_archive_snapshot_id_fkey\\` without a covering index. This can lead to suboptimal query performance.",
+    "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0001_unindexed_foreign_keys",
+    "metadata": {
+      "fkey_columns": [
+        10
+      ],
+      "fkey_name": "hall_of_fame_entries_archive_snapshot_id_fkey",
+      "name": "hall_of_fame_entries",
+      "schema": "public",
+      "type": "table"
+    },
+    "cache_key": "unindexed_foreign_keys_public_hall_of_fame_entries_hall_of_fame_entries_archive_snapshot_id_fkey"
+  },
+  {
+    "name": "unindexed_foreign_keys",
+    "title": "Unindexed foreign keys",
+    "level": "INFO",
+    "facing": "EXTERNAL",
+    "categories": [
+      "PERFORMANCE"
+    ],
+    "description": "Identifies foreign key constraints without a covering index, which can impact database performance.",
+    "detail": "Table \\`public.hall_of_fame_entries\\` has a foreign key \\`hall_of_fame_entries_finalist_trainer_id_fkey\\` without a covering index. This can lead to suboptimal query performance.",
+    "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0001_unindexed_foreign_keys",
+    "metadata": {
+      "fkey_columns": [
+        5
+      ],
+      "fkey_name": "hall_of_fame_entries_finalist_trainer_id_fkey",
+      "name": "hall_of_fame_entries",
+      "schema": "public",
+      "type": "table"
+    },
+    "cache_key": "unindexed_foreign_keys_public_hall_of_fame_entries_hall_of_fame_entries_finalist_trainer_id_fkey"
+  },
+  {
+    "name": "unindexed_foreign_keys",
+    "title": "Unindexed foreign keys",
+    "level": "INFO",
+    "facing": "EXTERNAL",
+    "categories": [
+      "PERFORMANCE"
+    ],
+    "description": "Identifies foreign key constraints without a covering index, which can impact database performance.",
+    "detail": "Table \\`public.hall_of_fame_entries\\` has a foreign key \\`hall_of_fame_entries_source_snapshot_revision_id_fkey\\` without a covering index. This can lead to suboptimal query performance.",
+    "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0001_unindexed_foreign_keys",
+    "metadata": {
+      "fkey_columns": [
+        11
+      ],
+      "fkey_name": "hall_of_fame_entries_source_snapshot_revision_id_fkey",
+      "name": "hall_of_fame_entries",
+      "schema": "public",
+      "type": "table"
+    },
+    "cache_key": "unindexed_foreign_keys_public_hall_of_fame_entries_hall_of_fame_entries_source_snapshot_revision_id_fkey"
+  },
+  {
+    "name": "unindexed_foreign_keys",
+    "title": "Unindexed foreign keys",
+    "level": "INFO",
+    "facing": "EXTERNAL",
+    "categories": [
+      "PERFORMANCE"
+    ],
+    "description": "Identifies foreign key constraints without a covering index, which can impact database performance.",
+    "detail": "Table \\`public.hall_of_fame_entries\\` has a foreign key \\`hall_of_fame_entries_source_team_lock_id_fkey\\` without a covering index. This can lead to suboptimal query performance.",
+    "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0001_unindexed_foreign_keys",
+    "metadata": {
+      "fkey_columns": [
+        12
+      ],
+      "fkey_name": "hall_of_fame_entries_source_team_lock_id_fkey",
+      "name": "hall_of_fame_entries",
+      "schema": "public",
+      "type": "table"
+    },
+    "cache_key": "unindexed_foreign_keys_public_hall_of_fame_entries_hall_of_fame_entries_source_team_lock_id_fkey"
+  },
+  {
+    "name": "unindexed_foreign_keys",
+    "title": "Unindexed foreign keys",
+    "level": "INFO",
+    "facing": "EXTERNAL",
+    "categories": [
+      "PERFORMANCE"
+    ],
+    "description": "Identifies foreign key constraints without a covering index, which can impact database performance.",
+    "detail": "Table \\`public.initial_division_snapshots\\` has a foreign key \\`initial_division_snapshots_actor_trainer_id_fkey\\` without a covering index. This can lead to suboptimal query performance.",
+    "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0001_unindexed_foreign_keys",
+    "metadata": {
+      "fkey_columns": [
+        8
+      ],
+      "fkey_name": "initial_division_snapshots_actor_trainer_id_fkey",
+      "name": "initial_division_snapshots",
+      "schema": "public",
+      "type": "table"
+    },
+    "cache_key": "unindexed_foreign_keys_public_initial_division_snapshots_initial_division_snapshots_actor_trainer_id_fkey"
+  },
+  {
+    "name": "unindexed_foreign_keys",
+    "title": "Unindexed foreign keys",
+    "level": "INFO",
+    "facing": "EXTERNAL",
+    "categories": [
+      "PERFORMANCE"
+    ],
+    "description": "Identifies foreign key constraints without a covering index, which can impact database performance.",
+    "detail": "Table \\`public.initial_division_snapshots\\` has a foreign key \\`initial_division_snapshots_config_version_id_fkey\\` without a covering index. This can lead to suboptimal query performance.",
+    "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0001_unindexed_foreign_keys",
+    "metadata": {
+      "fkey_columns": [
+        2
+      ],
+      "fkey_name": "initial_division_snapshots_config_version_id_fkey",
+      "name": "initial_division_snapshots",
+      "schema": "public",
+      "type": "table"
+    },
+    "cache_key": "unindexed_foreign_keys_public_initial_division_snapshots_initial_division_snapshots_config_version_id_fkey"
+  },
+  {
+    "name": "unindexed_foreign_keys",
+    "title": "Unindexed foreign keys",
+    "level": "INFO",
+    "facing": "EXTERNAL",
+    "categories": [
+      "PERFORMANCE"
+    ],
+    "description": "Identifies foreign key constraints without a covering index, which can impact database performance.",
+    "detail": "Table \\`public.matchday_movements\\` has a foreign key \\`fk_matchday_movements_from_division_same_season\\` without a covering index. This can lead to suboptimal query performance.",
+    "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0001_unindexed_foreign_keys",
+    "metadata": {
+      "fkey_columns": [
+        5,
+        2
+      ],
+      "fkey_name": "fk_matchday_movements_from_division_same_season",
+      "name": "matchday_movements",
+      "schema": "public",
+      "type": "table"
+    },
+    "cache_key": "unindexed_foreign_keys_public_matchday_movements_fk_matchday_movements_from_division_same_season"
+  },
+  {
+    "name": "unindexed_foreign_keys",
+    "title": "Unindexed foreign keys",
+    "level": "INFO",
+    "facing": "EXTERNAL",
+    "categories": [
+      "PERFORMANCE"
+    ],
+    "description": "Identifies foreign key constraints without a covering index, which can impact database performance.",
+    "detail": "Table \\`public.matchday_movements\\` has a foreign key \\`fk_matchday_movements_matchday_same_season\\` without a covering index. This can lead to suboptimal query performance.",
+    "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0001_unindexed_foreign_keys",
+    "metadata": {
+      "fkey_columns": [
+        3,
+        2
+      ],
+      "fkey_name": "fk_matchday_movements_matchday_same_season",
+      "name": "matchday_movements",
+      "schema": "public",
+      "type": "table"
+    },
+    "cache_key": "unindexed_foreign_keys_public_matchday_movements_fk_matchday_movements_matchday_same_season"
+  },
+  {
+    "name": "unindexed_foreign_keys",
+    "title": "Unindexed foreign keys",
+    "level": "INFO",
+    "facing": "EXTERNAL",
+    "categories": [
+      "PERFORMANCE"
+    ],
+    "description": "Identifies foreign key constraints without a covering index, which can impact database performance.",
+    "detail": "Table \\`public.matchday_movements\\` has a foreign key \\`fk_matchday_movements_player_same_season\\` without a covering index. This can lead to suboptimal query performance.",
+    "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0001_unindexed_foreign_keys",
+    "metadata": {
+      "fkey_columns": [
+        4,
+        2
+      ],
+      "fkey_name": "fk_matchday_movements_player_same_season",
+      "name": "matchday_movements",
+      "schema": "public",
+      "type": "table"
+    },
+    "cache_key": "unindexed_foreign_keys_public_matchday_movements_fk_matchday_movements_player_same_season"
+  },
+  {
+    "name": "unindexed_foreign_keys",
+    "title": "Unindexed foreign keys",
+    "level": "INFO",
+    "facing": "EXTERNAL",
+    "categories": [
+      "PERFORMANCE"
+    ],
+    "description": "Identifies foreign key constraints without a covering index, which can impact database performance.",
+    "detail": "Table \\`public.matchday_movements\\` has a foreign key \\`fk_matchday_movements_to_division_same_season\\` without a covering index. This can lead to suboptimal query performance.",
+    "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0001_unindexed_foreign_keys",
+    "metadata": {
+      "fkey_columns": [
+        6,
+        2
+      ],
+      "fkey_name": "fk_matchday_movements_to_division_same_season",
+      "name": "matchday_movements",
+      "schema": "public",
+      "type": "table"
+    },
+    "cache_key": "unindexed_foreign_keys_public_matchday_movements_fk_matchday_movements_to_division_same_season"
+  },
+  {
+    "name": "unindexed_foreign_keys",
+    "title": "Unindexed foreign keys",
+    "level": "INFO",
+    "facing": "EXTERNAL",
+    "categories": [
+      "PERFORMANCE"
+    ],
+    "description": "Identifies foreign key constraints without a covering index, which can impact database performance.",
+    "detail": "Table \\`public.matchday_snapshot_revisions\\` has a foreign key \\`matchday_snapshot_revisions_created_by_trainer_id_fkey\\` without a covering index. This can lead to suboptimal query performance.",
+    "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0001_unindexed_foreign_keys",
+    "metadata": {
+      "fkey_columns": [
+        7
+      ],
+      "fkey_name": "matchday_snapshot_revisions_created_by_trainer_id_fkey",
+      "name": "matchday_snapshot_revisions",
+      "schema": "public",
+      "type": "table"
+    },
+    "cache_key": "unindexed_foreign_keys_public_matchday_snapshot_revisions_matchday_snapshot_revisions_created_by_trainer_id_fkey"
+  },
+  {
+    "name": "unindexed_foreign_keys",
+    "title": "Unindexed foreign keys",
+    "level": "INFO",
+    "facing": "EXTERNAL",
+    "categories": [
+      "PERFORMANCE"
+    ],
+    "description": "Identifies foreign key constraints without a covering index, which can impact database performance.",
+    "detail": "Table \\`public.matchday_snapshot_revisions\\` has a foreign key \\`matchday_snapshot_revisions_matchday_id_season_id_fkey\\` without a covering index. This can lead to suboptimal query performance.",
+    "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0001_unindexed_foreign_keys",
+    "metadata": {
+      "fkey_columns": [
+        3,
+        2
+      ],
+      "fkey_name": "matchday_snapshot_revisions_matchday_id_season_id_fkey",
+      "name": "matchday_snapshot_revisions",
+      "schema": "public",
+      "type": "table"
+    },
+    "cache_key": "unindexed_foreign_keys_public_matchday_snapshot_revisions_matchday_snapshot_revisions_matchday_id_season_id_fkey"
+  },
+  {
+    "name": "unindexed_foreign_keys",
+    "title": "Unindexed foreign keys",
+    "level": "INFO",
+    "facing": "EXTERNAL",
+    "categories": [
+      "PERFORMANCE"
+    ],
+    "description": "Identifies foreign key constraints without a covering index, which can impact database performance.",
+    "detail": "Table \\`public.matchday_snapshots\\` has a foreign key \\`fk_matchday_snapshots_config_same_season\\` without a covering index. This can lead to suboptimal query performance.",
+    "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0001_unindexed_foreign_keys",
+    "metadata": {
+      "fkey_columns": [
+        4,
+        2
+      ],
+      "fkey_name": "fk_matchday_snapshots_config_same_season",
+      "name": "matchday_snapshots",
+      "schema": "public",
+      "type": "table"
+    },
+    "cache_key": "unindexed_foreign_keys_public_matchday_snapshots_fk_matchday_snapshots_config_same_season"
+  },
+  {
+    "name": "unindexed_foreign_keys",
+    "title": "Unindexed foreign keys",
+    "level": "INFO",
+    "facing": "EXTERNAL",
+    "categories": [
+      "PERFORMANCE"
+    ],
+    "description": "Identifies foreign key constraints without a covering index, which can impact database performance.",
+    "detail": "Table \\`public.matchday_snapshots\\` has a foreign key \\`fk_matchday_snapshots_matchday_same_season\\` without a covering index. This can lead to suboptimal query performance.",
+    "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0001_unindexed_foreign_keys",
+    "metadata": {
+      "fkey_columns": [
+        3,
+        2
+      ],
+      "fkey_name": "fk_matchday_snapshots_matchday_same_season",
+      "name": "matchday_snapshots",
+      "schema": "public",
+      "type": "table"
+    },
+    "cache_key": "unindexed_foreign_keys_public_matchday_snapshots_fk_matchday_snapshots_matchday_same_season"
+  },
+  {
+    "name": "unindexed_foreign_keys",
+    "title": "Unindexed foreign keys",
+    "level": "INFO",
+    "facing": "EXTERNAL",
+    "categories": [
+      "PERFORMANCE"
+    ],
+    "description": "Identifies foreign key constraints without a covering index, which can impact database performance.",
+    "detail": "Table \\`public.matchday_snapshots\\` has a foreign key \\`matchday_snapshots_created_by_trainer_id_fkey\\` without a covering index. This can lead to suboptimal query performance.",
+    "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0001_unindexed_foreign_keys",
+    "metadata": {
+      "fkey_columns": [
+        9
+      ],
+      "fkey_name": "matchday_snapshots_created_by_trainer_id_fkey",
+      "name": "matchday_snapshots",
+      "schema": "public",
+      "type": "table"
+    },
+    "cache_key": "unindexed_foreign_keys_public_matchday_snapshots_matchday_snapshots_created_by_trainer_id_fkey"
+  },
+  {
+    "name": "unindexed_foreign_keys",
+    "title": "Unindexed foreign keys",
+    "level": "INFO",
+    "facing": "EXTERNAL",
+    "categories": [
+      "PERFORMANCE"
+    ],
+    "description": "Identifies foreign key constraints without a covering index, which can impact database performance.",
+    "detail": "Table \\`public.matchdays\\` has a foreign key \\`fk_matchdays_config_same_season\\` without a covering index. This can lead to suboptimal query performance.",
+    "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0001_unindexed_foreign_keys",
+    "metadata": {
+      "fkey_columns": [
+        5,
+        2
+      ],
+      "fkey_name": "fk_matchdays_config_same_season",
+      "name": "matchdays",
+      "schema": "public",
+      "type": "table"
+    },
+    "cache_key": "unindexed_foreign_keys_public_matchdays_fk_matchdays_config_same_season"
+  },
+  {
+    "name": "unindexed_foreign_keys",
+    "title": "Unindexed foreign keys",
+    "level": "INFO",
+    "facing": "EXTERNAL",
+    "categories": [
+      "PERFORMANCE"
+    ],
+    "description": "Identifies foreign key constraints without a covering index, which can impact database performance.",
+    "detail": "Table \\`public.matches\\` has a foreign key \\`fk_matches_division_same_season\\` without a covering index. This can lead to suboptimal query performance.",
+    "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0001_unindexed_foreign_keys",
+    "metadata": {
+      "fkey_columns": [
+        4,
+        2
+      ],
+      "fkey_name": "fk_matches_division_same_season",
+      "name": "matches",
+      "schema": "public",
+      "type": "table"
+    },
+    "cache_key": "unindexed_foreign_keys_public_matches_fk_matches_division_same_season"
+  },
+  {
+    "name": "unindexed_foreign_keys",
+    "title": "Unindexed foreign keys",
+    "level": "INFO",
+    "facing": "EXTERNAL",
+    "categories": [
+      "PERFORMANCE"
+    ],
+    "description": "Identifies foreign key constraints without a covering index, which can impact database performance.",
+    "detail": "Table \\`public.matches\\` has a foreign key \\`fk_matches_matchday_same_season\\` without a covering index. This can lead to suboptimal query performance.",
+    "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0001_unindexed_foreign_keys",
+    "metadata": {
+      "fkey_columns": [
+        3,
+        2
+      ],
+      "fkey_name": "fk_matches_matchday_same_season",
+      "name": "matches",
+      "schema": "public",
+      "type": "table"
+    },
+    "cache_key": "unindexed_foreign_keys_public_matches_fk_matches_matchday_same_season"
+  },
+  {
+    "name": "unindexed_foreign_keys",
+    "title": "Unindexed foreign keys",
+    "level": "INFO",
+    "facing": "EXTERNAL",
+    "categories": [
+      "PERFORMANCE"
+    ],
+    "description": "Identifies foreign key constraints without a covering index, which can impact database performance.",
+    "detail": "Table \\`public.matches\\` has a foreign key \\`fk_matches_player_a_same_season\\` without a covering index. This can lead to suboptimal query performance.",
+    "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0001_unindexed_foreign_keys",
+    "metadata": {
+      "fkey_columns": [
+        5,
+        2
+      ],
+      "fkey_name": "fk_matches_player_a_same_season",
+      "name": "matches",
+      "schema": "public",
+      "type": "table"
+    },
+    "cache_key": "unindexed_foreign_keys_public_matches_fk_matches_player_a_same_season"
+  },
+  {
+    "name": "unindexed_foreign_keys",
+    "title": "Unindexed foreign keys",
+    "level": "INFO",
+    "facing": "EXTERNAL",
+    "categories": [
+      "PERFORMANCE"
+    ],
+    "description": "Identifies foreign key constraints without a covering index, which can impact database performance.",
+    "detail": "Table \\`public.matches\\` has a foreign key \\`fk_matches_player_b_same_season\\` without a covering index. This can lead to suboptimal query performance.",
+    "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0001_unindexed_foreign_keys",
+    "metadata": {
+      "fkey_columns": [
+        6,
+        2
+      ],
+      "fkey_name": "fk_matches_player_b_same_season",
+      "name": "matches",
+      "schema": "public",
+      "type": "table"
+    },
+    "cache_key": "unindexed_foreign_keys_public_matches_fk_matches_player_b_same_season"
+  },
+  {
+    "name": "unindexed_foreign_keys",
+    "title": "Unindexed foreign keys",
+    "level": "INFO",
+    "facing": "EXTERNAL",
+    "categories": [
+      "PERFORMANCE"
+    ],
+    "description": "Identifies foreign key constraints without a covering index, which can impact database performance.",
+    "detail": "Table \\`public.matches\\` has a foreign key \\`fk_matches_winner_same_season\\` without a covering index. This can lead to suboptimal query performance.",
+    "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0001_unindexed_foreign_keys",
+    "metadata": {
+      "fkey_columns": [
+        7,
+        2
+      ],
+      "fkey_name": "fk_matches_winner_same_season",
+      "name": "matches",
+      "schema": "public",
+      "type": "table"
+    },
+    "cache_key": "unindexed_foreign_keys_public_matches_fk_matches_winner_same_season"
+  },
+  {
+    "name": "unindexed_foreign_keys",
+    "title": "Unindexed foreign keys",
+    "level": "INFO",
+    "facing": "EXTERNAL",
+    "categories": [
+      "PERFORMANCE"
+    ],
+    "description": "Identifies foreign key constraints without a covering index, which can impact database performance.",
+    "detail": "Table \\`public.penalties\\` has a foreign key \\`fk_penalties_matchday_same_season\\` without a covering index. This can lead to suboptimal query performance.",
+    "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0001_unindexed_foreign_keys",
+    "metadata": {
+      "fkey_columns": [
+        4,
+        2
+      ],
+      "fkey_name": "fk_penalties_matchday_same_season",
+      "name": "penalties",
+      "schema": "public",
+      "type": "table"
+    },
+    "cache_key": "unindexed_foreign_keys_public_penalties_fk_penalties_matchday_same_season"
+  },
+  {
+    "name": "unindexed_foreign_keys",
+    "title": "Unindexed foreign keys",
+    "level": "INFO",
+    "facing": "EXTERNAL",
+    "categories": [
+      "PERFORMANCE"
+    ],
+    "description": "Identifies foreign key constraints without a covering index, which can impact database performance.",
+    "detail": "Table \\`public.penalties\\` has a foreign key \\`penalties_created_by_trainer_id_fkey\\` without a covering index. This can lead to suboptimal query performance.",
+    "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0001_unindexed_foreign_keys",
+    "metadata": {
+      "fkey_columns": [
+        9
+      ],
+      "fkey_name": "penalties_created_by_trainer_id_fkey",
+      "name": "penalties",
+      "schema": "public",
+      "type": "table"
+    },
+    "cache_key": "unindexed_foreign_keys_public_penalties_penalties_created_by_trainer_id_fkey"
+  },
+  {
+    "name": "unindexed_foreign_keys",
+    "title": "Unindexed foreign keys",
+    "level": "INFO",
+    "facing": "EXTERNAL",
+    "categories": [
+      "PERFORMANCE"
+    ],
+    "description": "Identifies foreign key constraints without a covering index, which can impact database performance.",
+    "detail": "Table \\`public.penalties\\` has a foreign key \\`penalties_trainer_id_fkey\\` without a covering index. This can lead to suboptimal query performance.",
+    "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0001_unindexed_foreign_keys",
+    "metadata": {
+      "fkey_columns": [
+        3
+      ],
+      "fkey_name": "penalties_trainer_id_fkey",
+      "name": "penalties",
+      "schema": "public",
+      "type": "table"
+    },
+    "cache_key": "unindexed_foreign_keys_public_penalties_penalties_trainer_id_fkey"
+  },
+  {
+    "name": "unindexed_foreign_keys",
+    "title": "Unindexed foreign keys",
+    "level": "INFO",
+    "facing": "EXTERNAL",
+    "categories": [
+      "PERFORMANCE"
+    ],
+    "description": "Identifies foreign key constraints without a covering index, which can impact database performance.",
+    "detail": "Table \\`public.penalties\\` has a foreign key \\`penalties_trial_case_id_fkey\\` without a covering index. This can lead to suboptimal query performance.",
+    "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0001_unindexed_foreign_keys",
+    "metadata": {
+      "fkey_columns": [
+        5
+      ],
+      "fkey_name": "penalties_trial_case_id_fkey",
+      "name": "penalties",
+      "schema": "public",
+      "type": "table"
+    },
+    "cache_key": "unindexed_foreign_keys_public_penalties_penalties_trial_case_id_fkey"
+  },
+  {
+    "name": "unindexed_foreign_keys",
+    "title": "Unindexed foreign keys",
+    "level": "INFO",
+    "facing": "EXTERNAL",
+    "categories": [
+      "PERFORMANCE"
+    ],
+    "description": "Identifies foreign key constraints without a covering index, which can impact database performance.",
+    "detail": "Table \\`public.penalties\\` has a foreign key \\`trial_penalty_source\\` without a covering index. This can lead to suboptimal query performance.",
+    "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0001_unindexed_foreign_keys",
+    "metadata": {
+      "fkey_columns": [
+        14,
+        5,
+        2
+      ],
+      "fkey_name": "trial_penalty_source",
+      "name": "penalties",
+      "schema": "public",
+      "type": "table"
+    },
+    "cache_key": "unindexed_foreign_keys_public_penalties_trial_penalty_source"
+  },
+  {
+    "name": "unindexed_foreign_keys",
+    "title": "Unindexed foreign keys",
+    "level": "INFO",
+    "facing": "EXTERNAL",
+    "categories": [
+      "PERFORMANCE"
+    ],
+    "description": "Identifies foreign key constraints without a covering index, which can impact database performance.",
+    "detail": "Table \\`public.pokemon_entities\\` has a foreign key \\`pokemon_entities_owner_trainer_id_fkey\\` without a covering index. This can lead to suboptimal query performance.",
+    "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0001_unindexed_foreign_keys",
+    "metadata": {
+      "fkey_columns": [
+        3
+      ],
+      "fkey_name": "pokemon_entities_owner_trainer_id_fkey",
+      "name": "pokemon_entities",
+      "schema": "public",
+      "type": "table"
+    },
+    "cache_key": "unindexed_foreign_keys_public_pokemon_entities_pokemon_entities_owner_trainer_id_fkey"
+  },
+  {
+    "name": "unindexed_foreign_keys",
+    "title": "Unindexed foreign keys",
+    "level": "INFO",
+    "facing": "EXTERNAL",
+    "categories": [
+      "PERFORMANCE"
+    ],
+    "description": "Identifies foreign key constraints without a covering index, which can impact database performance.",
+    "detail": "Table \\`public.pokemon_entity_flags\\` has a foreign key \\`pokemon_entity_flags_flag_trainer_id_fkey\\` without a covering index. This can lead to suboptimal query performance.",
+    "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0001_unindexed_foreign_keys",
+    "metadata": {
+      "fkey_columns": [
+        10
+      ],
+      "fkey_name": "pokemon_entity_flags_flag_trainer_id_fkey",
+      "name": "pokemon_entity_flags",
+      "schema": "public",
+      "type": "table"
+    },
+    "cache_key": "unindexed_foreign_keys_public_pokemon_entity_flags_pokemon_entity_flags_flag_trainer_id_fkey"
+  },
+  {
+    "name": "unindexed_foreign_keys",
+    "title": "Unindexed foreign keys",
+    "level": "INFO",
+    "facing": "EXTERNAL",
+    "categories": [
+      "PERFORMANCE"
+    ],
+    "description": "Identifies foreign key constraints without a covering index, which can impact database performance.",
+    "detail": "Table \\`public.pokemon_entity_flags\\` has a foreign key \\`pokemon_entity_flags_pokemon_entity_id_season_id_fkey\\` without a covering index. This can lead to suboptimal query performance.",
+    "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0001_unindexed_foreign_keys",
+    "metadata": {
+      "fkey_columns": [
+        4,
+        2
+      ],
+      "fkey_name": "pokemon_entity_flags_pokemon_entity_id_season_id_fkey",
+      "name": "pokemon_entity_flags",
+      "schema": "public",
+      "type": "table"
+    },
+    "cache_key": "unindexed_foreign_keys_public_pokemon_entity_flags_pokemon_entity_flags_pokemon_entity_id_season_id_fkey"
+  },
+  {
+    "name": "unindexed_foreign_keys",
+    "title": "Unindexed foreign keys",
+    "level": "INFO",
+    "facing": "EXTERNAL",
+    "categories": [
+      "PERFORMANCE"
+    ],
+    "description": "Identifies foreign key constraints without a covering index, which can impact database performance.",
+    "detail": "Table \\`public.pokemon_entity_flags\\` has a foreign key \\`pokemon_entity_flags_season_id_trainer_id_fkey\\` without a covering index. This can lead to suboptimal query performance.",
+    "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0001_unindexed_foreign_keys",
+    "metadata": {
+      "fkey_columns": [
+        2,
+        3
+      ],
+      "fkey_name": "pokemon_entity_flags_season_id_trainer_id_fkey",
+      "name": "pokemon_entity_flags",
+      "schema": "public",
+      "type": "table"
+    },
+    "cache_key": "unindexed_foreign_keys_public_pokemon_entity_flags_pokemon_entity_flags_season_id_trainer_id_fkey"
+  },
+  {
+    "name": "unindexed_foreign_keys",
+    "title": "Unindexed foreign keys",
+    "level": "INFO",
+    "facing": "EXTERNAL",
+    "categories": [
+      "PERFORMANCE"
+    ],
+    "description": "Identifies foreign key constraints without a covering index, which can impact database performance.",
+    "detail": "Table \\`public.pokemon_flags\\` has a foreign key \\`fk_pokemon_flags_player_same_owner\\` without a covering index. This can lead to suboptimal query performance.",
+    "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0001_unindexed_foreign_keys",
+    "metadata": {
+      "fkey_columns": [
+        4,
+        2,
+        3
+      ],
+      "fkey_name": "fk_pokemon_flags_player_same_owner",
+      "name": "pokemon_flags",
+      "schema": "public",
+      "type": "table"
+    },
+    "cache_key": "unindexed_foreign_keys_public_pokemon_flags_fk_pokemon_flags_player_same_owner"
+  },
+  {
+    "name": "unindexed_foreign_keys",
+    "title": "Unindexed foreign keys",
+    "level": "INFO",
+    "facing": "EXTERNAL",
+    "categories": [
+      "PERFORMANCE"
+    ],
+    "description": "Identifies foreign key constraints without a covering index, which can impact database performance.",
+    "detail": "Table \\`public.pokemon_identity_revisions\\` has a foreign key \\`pokemon_identity_revisions_parsed_save_id_save_file_id_fkey\\` without a covering index. This can lead to suboptimal query performance.",
+    "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0001_unindexed_foreign_keys",
+    "metadata": {
+      "fkey_columns": [
+        5,
+        4
+      ],
+      "fkey_name": "pokemon_identity_revisions_parsed_save_id_save_file_id_fkey",
+      "name": "pokemon_identity_revisions",
+      "schema": "public",
+      "type": "table"
+    },
+    "cache_key": "unindexed_foreign_keys_public_pokemon_identity_revisions_pokemon_identity_revisions_parsed_save_id_save_file_id_fkey"
+  },
+  {
+    "name": "unindexed_foreign_keys",
+    "title": "Unindexed foreign keys",
+    "level": "INFO",
+    "facing": "EXTERNAL",
+    "categories": [
+      "PERFORMANCE"
+    ],
+    "description": "Identifies foreign key constraints without a covering index, which can impact database performance.",
+    "detail": "Table \\`public.pokemon_identity_revisions\\` has a foreign key \\`pokemon_identity_revisions_predecessor_id_season_id_traine_fkey\\` without a covering index. This can lead to suboptimal query performance.",
+    "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0001_unindexed_foreign_keys",
+    "metadata": {
+      "fkey_columns": [
+        6,
+        2,
+        3
+      ],
+      "fkey_name": "pokemon_identity_revisions_predecessor_id_season_id_traine_fkey",
+      "name": "pokemon_identity_revisions",
+      "schema": "public",
+      "type": "table"
+    },
+    "cache_key": "unindexed_foreign_keys_public_pokemon_identity_revisions_pokemon_identity_revisions_predecessor_id_season_id_traine_fkey"
+  },
+  {
+    "name": "unindexed_foreign_keys",
+    "title": "Unindexed foreign keys",
+    "level": "INFO",
+    "facing": "EXTERNAL",
+    "categories": [
+      "PERFORMANCE"
+    ],
+    "description": "Identifies foreign key constraints without a covering index, which can impact database performance.",
+    "detail": "Table \\`public.pokemon_identity_revisions\\` has a foreign key \\`pokemon_identity_revisions_save_file_id_season_id_trainer__fkey\\` without a covering index. This can lead to suboptimal query performance.",
+    "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0001_unindexed_foreign_keys",
+    "metadata": {
+      "fkey_columns": [
+        4,
+        2,
+        3
+      ],
+      "fkey_name": "pokemon_identity_revisions_save_file_id_season_id_trainer__fkey",
+      "name": "pokemon_identity_revisions",
+      "schema": "public",
+      "type": "table"
+    },
+    "cache_key": "unindexed_foreign_keys_public_pokemon_identity_revisions_pokemon_identity_revisions_save_file_id_season_id_trainer__fkey"
+  },
+  {
+    "name": "unindexed_foreign_keys",
+    "title": "Unindexed foreign keys",
+    "level": "INFO",
+    "facing": "EXTERNAL",
+    "categories": [
+      "PERFORMANCE"
+    ],
+    "description": "Identifies foreign key constraints without a covering index, which can impact database performance.",
+    "detail": "Table \\`public.pokemon_observations\\` has a foreign key \\`pokemon_observations_pokemon_entity_id_season_id_fkey\\` without a covering index. This can lead to suboptimal query performance.",
+    "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0001_unindexed_foreign_keys",
+    "metadata": {
+      "fkey_columns": [
+        6,
+        3
+      ],
+      "fkey_name": "pokemon_observations_pokemon_entity_id_season_id_fkey",
+      "name": "pokemon_observations",
+      "schema": "public",
+      "type": "table"
+    },
+    "cache_key": "unindexed_foreign_keys_public_pokemon_observations_pokemon_observations_pokemon_entity_id_season_id_fkey"
+  },
+  {
+    "name": "unindexed_foreign_keys",
+    "title": "Unindexed foreign keys",
+    "level": "INFO",
+    "facing": "EXTERNAL",
+    "categories": [
+      "PERFORMANCE"
+    ],
+    "description": "Identifies foreign key constraints without a covering index, which can impact database performance.",
+    "detail": "Table \\`public.pokemon_observations\\` has a foreign key \\`pokemon_observations_revision_id_save_file_id_season_id_tr_fkey\\` without a covering index. This can lead to suboptimal query performance.",
+    "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0001_unindexed_foreign_keys",
+    "metadata": {
+      "fkey_columns": [
+        2,
+        5,
+        3,
+        4
+      ],
+      "fkey_name": "pokemon_observations_revision_id_save_file_id_season_id_tr_fkey",
+      "name": "pokemon_observations",
+      "schema": "public",
+      "type": "table"
+    },
+    "cache_key": "unindexed_foreign_keys_public_pokemon_observations_pokemon_observations_revision_id_save_file_id_season_id_tr_fkey"
+  },
+  {
+    "name": "unindexed_foreign_keys",
+    "title": "Unindexed foreign keys",
+    "level": "INFO",
+    "facing": "EXTERNAL",
+    "categories": [
+      "PERFORMANCE"
+    ],
+    "description": "Identifies foreign key constraints without a covering index, which can impact database performance.",
+    "detail": "Table \\`public.purchases\\` has a foreign key \\`fk_purchases_player_same_owner\\` without a covering index. This can lead to suboptimal query performance.",
+    "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0001_unindexed_foreign_keys",
+    "metadata": {
+      "fkey_columns": [
+        4,
+        2,
+        3
+      ],
+      "fkey_name": "fk_purchases_player_same_owner",
+      "name": "purchases",
+      "schema": "public",
+      "type": "table"
+    },
+    "cache_key": "unindexed_foreign_keys_public_purchases_fk_purchases_player_same_owner"
+  },
+  {
+    "name": "unindexed_foreign_keys",
+    "title": "Unindexed foreign keys",
+    "level": "INFO",
+    "facing": "EXTERNAL",
+    "categories": [
+      "PERFORMANCE"
+    ],
+    "description": "Identifies foreign key constraints without a covering index, which can impact database performance.",
+    "detail": "Table \\`public.purchases\\` has a foreign key \\`fk_purchases_promotion_same_season\\` without a covering index. This can lead to suboptimal query performance.",
+    "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0001_unindexed_foreign_keys",
+    "metadata": {
+      "fkey_columns": [
+        6,
+        2
+      ],
+      "fkey_name": "fk_purchases_promotion_same_season",
+      "name": "purchases",
+      "schema": "public",
+      "type": "table"
+    },
+    "cache_key": "unindexed_foreign_keys_public_purchases_fk_purchases_promotion_same_season"
+  },
+  {
+    "name": "unindexed_foreign_keys",
+    "title": "Unindexed foreign keys",
+    "level": "INFO",
+    "facing": "EXTERNAL",
+    "categories": [
+      "PERFORMANCE"
+    ],
+    "description": "Identifies foreign key constraints without a covering index, which can impact database performance.",
+    "detail": "Table \\`public.purchases\\` has a foreign key \\`purchases_origin_matchday_id_season_id_fkey\\` without a covering index. This can lead to suboptimal query performance.",
+    "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0001_unindexed_foreign_keys",
+    "metadata": {
+      "fkey_columns": [
+        18,
+        2
+      ],
+      "fkey_name": "purchases_origin_matchday_id_season_id_fkey",
+      "name": "purchases",
+      "schema": "public",
+      "type": "table"
+    },
+    "cache_key": "unindexed_foreign_keys_public_purchases_purchases_origin_matchday_id_season_id_fkey"
+  },
+  {
+    "name": "unindexed_foreign_keys",
+    "title": "Unindexed foreign keys",
+    "level": "INFO",
+    "facing": "EXTERNAL",
+    "categories": [
+      "PERFORMANCE"
+    ],
+    "description": "Identifies foreign key constraints without a covering index, which can impact database performance.",
+    "detail": "Table \\`public.purchases\\` has a foreign key \\`purchases_shop_item_id_fkey\\` without a covering index. This can lead to suboptimal query performance.",
+    "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0001_unindexed_foreign_keys",
+    "metadata": {
+      "fkey_columns": [
+        5
+      ],
+      "fkey_name": "purchases_shop_item_id_fkey",
+      "name": "purchases",
+      "schema": "public",
+      "type": "table"
+    },
+    "cache_key": "unindexed_foreign_keys_public_purchases_purchases_shop_item_id_fkey"
+  },
+  {
+    "name": "unindexed_foreign_keys",
+    "title": "Unindexed foreign keys",
+    "level": "INFO",
+    "facing": "EXTERNAL",
+    "categories": [
+      "PERFORMANCE"
+    ],
+    "description": "Identifies foreign key constraints without a covering index, which can impact database performance.",
+    "detail": "Table \\`public.redemptions\\` has a foreign key \\`fk_redemptions_player_same_owner\\` without a covering index. This can lead to suboptimal query performance.",
+    "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0001_unindexed_foreign_keys",
+    "metadata": {
+      "fkey_columns": [
+        5,
+        3,
+        4
+      ],
+      "fkey_name": "fk_redemptions_player_same_owner",
+      "name": "redemptions",
+      "schema": "public",
+      "type": "table"
+    },
+    "cache_key": "unindexed_foreign_keys_public_redemptions_fk_redemptions_player_same_owner"
+  },
+  {
+    "name": "unindexed_foreign_keys",
+    "title": "Unindexed foreign keys",
+    "level": "INFO",
+    "facing": "EXTERNAL",
+    "categories": [
+      "PERFORMANCE"
+    ],
+    "description": "Identifies foreign key constraints without a covering index, which can impact database performance.",
+    "detail": "Table \\`public.redemptions\\` has a foreign key \\`fk_redemptions_purchase_same_owner_item\\` without a covering index. This can lead to suboptimal query performance.",
+    "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0001_unindexed_foreign_keys",
+    "metadata": {
+      "fkey_columns": [
+        2,
+        3,
+        4,
+        6
+      ],
+      "fkey_name": "fk_redemptions_purchase_same_owner_item",
+      "name": "redemptions",
+      "schema": "public",
+      "type": "table"
+    },
+    "cache_key": "unindexed_foreign_keys_public_redemptions_fk_redemptions_purchase_same_owner_item"
+  },
+  {
+    "name": "unindexed_foreign_keys",
+    "title": "Unindexed foreign keys",
+    "level": "INFO",
+    "facing": "EXTERNAL",
+    "categories": [
+      "PERFORMANCE"
+    ],
+    "description": "Identifies foreign key constraints without a covering index, which can impact database performance.",
+    "detail": "Table \\`public.redemptions\\` has a foreign key \\`redemption_entity_season_fk\\` without a covering index. This can lead to suboptimal query performance.",
+    "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0001_unindexed_foreign_keys",
+    "metadata": {
+      "fkey_columns": [
+        13,
+        3
+      ],
+      "fkey_name": "redemption_entity_season_fk",
+      "name": "redemptions",
+      "schema": "public",
+      "type": "table"
+    },
+    "cache_key": "unindexed_foreign_keys_public_redemptions_redemption_entity_season_fk"
+  },
+  {
+    "name": "unindexed_foreign_keys",
+    "title": "Unindexed foreign keys",
+    "level": "INFO",
+    "facing": "EXTERNAL",
+    "categories": [
+      "PERFORMANCE"
+    ],
+    "description": "Identifies foreign key constraints without a covering index, which can impact database performance.",
+    "detail": "Table \\`public.redemptions\\` has a foreign key \\`redemptions_activity_event_id_fkey\\` without a covering index. This can lead to suboptimal query performance.",
+    "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0001_unindexed_foreign_keys",
+    "metadata": {
+      "fkey_columns": [
+        19
+      ],
+      "fkey_name": "redemptions_activity_event_id_fkey",
+      "name": "redemptions",
+      "schema": "public",
+      "type": "table"
+    },
+    "cache_key": "unindexed_foreign_keys_public_redemptions_redemptions_activity_event_id_fkey"
+  },
+  {
+    "name": "unindexed_foreign_keys",
+    "title": "Unindexed foreign keys",
+    "level": "INFO",
+    "facing": "EXTERNAL",
+    "categories": [
+      "PERFORMANCE"
+    ],
+    "description": "Identifies foreign key constraints without a covering index, which can impact database performance.",
+    "detail": "Table \\`public.redemptions\\` has a foreign key \\`redemptions_gift_purchase_id_fkey\\` without a covering index. This can lead to suboptimal query performance.",
+    "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0001_unindexed_foreign_keys",
+    "metadata": {
+      "fkey_columns": [
+        21
+      ],
+      "fkey_name": "redemptions_gift_purchase_id_fkey",
+      "name": "redemptions",
+      "schema": "public",
+      "type": "table"
+    },
+    "cache_key": "unindexed_foreign_keys_public_redemptions_redemptions_gift_purchase_id_fkey"
+  },
+  {
+    "name": "unindexed_foreign_keys",
+    "title": "Unindexed foreign keys",
+    "level": "INFO",
+    "facing": "EXTERNAL",
+    "categories": [
+      "PERFORMANCE"
+    ],
+    "description": "Identifies foreign key constraints without a covering index, which can impact database performance.",
+    "detail": "Table \\`public.redemptions\\` has a foreign key \\`redemptions_identity_revision_id_fkey\\` without a covering index. This can lead to suboptimal query performance.",
+    "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0001_unindexed_foreign_keys",
+    "metadata": {
+      "fkey_columns": [
+        15
+      ],
+      "fkey_name": "redemptions_identity_revision_id_fkey",
+      "name": "redemptions",
+      "schema": "public",
+      "type": "table"
+    },
+    "cache_key": "unindexed_foreign_keys_public_redemptions_redemptions_identity_revision_id_fkey"
+  },
+  {
+    "name": "unindexed_foreign_keys",
+    "title": "Unindexed foreign keys",
+    "level": "INFO",
+    "facing": "EXTERNAL",
+    "categories": [
+      "PERFORMANCE"
+    ],
+    "description": "Identifies foreign key constraints without a covering index, which can impact database performance.",
+    "detail": "Table \\`public.redemptions\\` has a foreign key \\`redemptions_shop_item_id_fkey\\` without a covering index. This can lead to suboptimal query performance.",
+    "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0001_unindexed_foreign_keys",
+    "metadata": {
+      "fkey_columns": [
+        6
+      ],
+      "fkey_name": "redemptions_shop_item_id_fkey",
+      "name": "redemptions",
+      "schema": "public",
+      "type": "table"
+    },
+    "cache_key": "unindexed_foreign_keys_public_redemptions_redemptions_shop_item_id_fkey"
+  },
+  {
+    "name": "unindexed_foreign_keys",
+    "title": "Unindexed foreign keys",
+    "level": "INFO",
+    "facing": "EXTERNAL",
+    "categories": [
+      "PERFORMANCE"
+    ],
+    "description": "Identifies foreign key constraints without a covering index, which can impact database performance.",
+    "detail": "Table \\`public.redemptions\\` has a foreign key \\`redemptions_target_owner_trainer_id_fkey\\` without a covering index. This can lead to suboptimal query performance.",
+    "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0001_unindexed_foreign_keys",
+    "metadata": {
+      "fkey_columns": [
+        14
+      ],
+      "fkey_name": "redemptions_target_owner_trainer_id_fkey",
+      "name": "redemptions",
+      "schema": "public",
+      "type": "table"
+    },
+    "cache_key": "unindexed_foreign_keys_public_redemptions_redemptions_target_owner_trainer_id_fkey"
+  },
+  {
+    "name": "unindexed_foreign_keys",
+    "title": "Unindexed foreign keys",
+    "level": "INFO",
+    "facing": "EXTERNAL",
+    "categories": [
+      "PERFORMANCE"
+    ],
+    "description": "Identifies foreign key constraints without a covering index, which can impact database performance.",
+    "detail": "Table \\`public.robbery_cycles\\` has a foreign key \\`robbery_cycles_history_watermark_id_fkey\\` without a covering index. This can lead to suboptimal query performance.",
+    "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0001_unindexed_foreign_keys",
+    "metadata": {
+      "fkey_columns": [
+        4
+      ],
+      "fkey_name": "robbery_cycles_history_watermark_id_fkey",
+      "name": "robbery_cycles",
+      "schema": "public",
+      "type": "table"
+    },
+    "cache_key": "unindexed_foreign_keys_public_robbery_cycles_robbery_cycles_history_watermark_id_fkey"
+  },
+  {
+    "name": "unindexed_foreign_keys",
+    "title": "Unindexed foreign keys",
+    "level": "INFO",
+    "facing": "EXTERNAL",
+    "categories": [
+      "PERFORMANCE"
+    ],
+    "description": "Identifies foreign key constraints without a covering index, which can impact database performance.",
+    "detail": "Table \\`public.robbery_cycles\\` has a foreign key \\`robbery_cycles_last_redemption_id_fkey\\` without a covering index. This can lead to suboptimal query performance.",
+    "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0001_unindexed_foreign_keys",
+    "metadata": {
+      "fkey_columns": [
+        3
+      ],
+      "fkey_name": "robbery_cycles_last_redemption_id_fkey",
+      "name": "robbery_cycles",
+      "schema": "public",
+      "type": "table"
+    },
+    "cache_key": "unindexed_foreign_keys_public_robbery_cycles_robbery_cycles_last_redemption_id_fkey"
+  },
+  {
+    "name": "unindexed_foreign_keys",
+    "title": "Unindexed foreign keys",
+    "level": "INFO",
+    "facing": "EXTERNAL",
+    "categories": [
+      "PERFORMANCE"
+    ],
+    "description": "Identifies foreign key constraints without a covering index, which can impact database performance.",
+    "detail": "Table \\`public.season_archive_snapshots\\` has a foreign key \\`season_archive_snapshots_created_by_trainer_id_fkey\\` without a covering index. This can lead to suboptimal query performance.",
+    "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0001_unindexed_foreign_keys",
+    "metadata": {
+      "fkey_columns": [
+        5
+      ],
+      "fkey_name": "season_archive_snapshots_created_by_trainer_id_fkey",
+      "name": "season_archive_snapshots",
+      "schema": "public",
+      "type": "table"
+    },
+    "cache_key": "unindexed_foreign_keys_public_season_archive_snapshots_season_archive_snapshots_created_by_trainer_id_fkey"
+  },
+  {
+    "name": "unindexed_foreign_keys",
+    "title": "Unindexed foreign keys",
+    "level": "INFO",
+    "facing": "EXTERNAL",
+    "categories": [
+      "PERFORMANCE"
+    ],
+    "description": "Identifies foreign key constraints without a covering index, which can impact database performance.",
+    "detail": "Table \\`public.season_archive_snapshots\\` has a foreign key \\`season_archive_snapshots_source_snapshot_revision_id_fkey\\` without a covering index. This can lead to suboptimal query performance.",
+    "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0001_unindexed_foreign_keys",
+    "metadata": {
+      "fkey_columns": [
+        7
+      ],
+      "fkey_name": "season_archive_snapshots_source_snapshot_revision_id_fkey",
+      "name": "season_archive_snapshots",
+      "schema": "public",
+      "type": "table"
+    },
+    "cache_key": "unindexed_foreign_keys_public_season_archive_snapshots_season_archive_snapshots_source_snapshot_revision_id_fkey"
+  },
+  {
+    "name": "unindexed_foreign_keys",
+    "title": "Unindexed foreign keys",
+    "level": "INFO",
+    "facing": "EXTERNAL",
+    "categories": [
+      "PERFORMANCE"
+    ],
+    "description": "Identifies foreign key constraints without a covering index, which can impact database performance.",
+    "detail": "Table \\`public.season_config_versions\\` has a foreign key \\`season_config_versions_created_by_trainer_id_fkey\\` without a covering index. This can lead to suboptimal query performance.",
+    "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0001_unindexed_foreign_keys",
+    "metadata": {
+      "fkey_columns": [
+        14
+      ],
+      "fkey_name": "season_config_versions_created_by_trainer_id_fkey",
+      "name": "season_config_versions",
+      "schema": "public",
+      "type": "table"
+    },
+    "cache_key": "unindexed_foreign_keys_public_season_config_versions_season_config_versions_created_by_trainer_id_fkey"
+  },
+  {
+    "name": "unindexed_foreign_keys",
+    "title": "Unindexed foreign keys",
+    "level": "INFO",
+    "facing": "EXTERNAL",
+    "categories": [
+      "PERFORMANCE"
+    ],
+    "description": "Identifies foreign key constraints without a covering index, which can impact database performance.",
+    "detail": "Table \\`public.season_player_stats\\` has a foreign key \\`fk_season_player_stats_player\\` without a covering index. This can lead to suboptimal query performance.",
+    "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0001_unindexed_foreign_keys",
+    "metadata": {
+      "fkey_columns": [
+        1,
+        2,
+        3
+      ],
+      "fkey_name": "fk_season_player_stats_player",
+      "name": "season_player_stats",
+      "schema": "public",
+      "type": "table"
+    },
+    "cache_key": "unindexed_foreign_keys_public_season_player_stats_fk_season_player_stats_player"
+  },
+  {
+    "name": "unindexed_foreign_keys",
+    "title": "Unindexed foreign keys",
+    "level": "INFO",
+    "facing": "EXTERNAL",
+    "categories": [
+      "PERFORMANCE"
+    ],
+    "description": "Identifies foreign key constraints without a covering index, which can impact database performance.",
+    "detail": "Table \\`public.season_players\\` has a foreign key \\`fk_season_players_current_save_same_owner\\` without a covering index. This can lead to suboptimal query performance.",
+    "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0001_unindexed_foreign_keys",
+    "metadata": {
+      "fkey_columns": [
+        8,
+        2,
+        3
+      ],
+      "fkey_name": "fk_season_players_current_save_same_owner",
+      "name": "season_players",
+      "schema": "public",
+      "type": "table"
+    },
+    "cache_key": "unindexed_foreign_keys_public_season_players_fk_season_players_current_save_same_owner"
+  },
+  {
+    "name": "unindexed_foreign_keys",
+    "title": "Unindexed foreign keys",
+    "level": "INFO",
+    "facing": "EXTERNAL",
+    "categories": [
+      "PERFORMANCE"
+    ],
+    "description": "Identifies foreign key constraints without a covering index, which can impact database performance.",
+    "detail": "Table \\`public.season_players\\` has a foreign key \\`season_players_status_changed_by_trainer_id_fkey\\` without a covering index. This can lead to suboptimal query performance.",
+    "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0001_unindexed_foreign_keys",
+    "metadata": {
+      "fkey_columns": [
+        14
+      ],
+      "fkey_name": "season_players_status_changed_by_trainer_id_fkey",
+      "name": "season_players",
+      "schema": "public",
+      "type": "table"
+    },
+    "cache_key": "unindexed_foreign_keys_public_season_players_season_players_status_changed_by_trainer_id_fkey"
+  },
+  {
+    "name": "unindexed_foreign_keys",
+    "title": "Unindexed foreign keys",
+    "level": "INFO",
+    "facing": "EXTERNAL",
+    "categories": [
+      "PERFORMANCE"
+    ],
+    "description": "Identifies foreign key constraints without a covering index, which can impact database performance.",
+    "detail": "Table \\`public.season_players\\` has a foreign key \\`season_players_trainer_id_fkey\\` without a covering index. This can lead to suboptimal query performance.",
+    "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0001_unindexed_foreign_keys",
+    "metadata": {
+      "fkey_columns": [
+        3
+      ],
+      "fkey_name": "season_players_trainer_id_fkey",
+      "name": "season_players",
+      "schema": "public",
+      "type": "table"
+    },
+    "cache_key": "unindexed_foreign_keys_public_season_players_season_players_trainer_id_fkey"
+  },
+  {
+    "name": "unindexed_foreign_keys",
+    "title": "Unindexed foreign keys",
+    "level": "INFO",
+    "facing": "EXTERNAL",
+    "categories": [
+      "PERFORMANCE"
+    ],
+    "description": "Identifies foreign key constraints without a covering index, which can impact database performance.",
+    "detail": "Table \\`public.seasons\\` has a foreign key \\`fk_seasons_current_matchday_same_season\\` without a covering index. This can lead to suboptimal query performance.",
+    "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0001_unindexed_foreign_keys",
+    "metadata": {
+      "fkey_columns": [
+        12,
+        1
+      ],
+      "fkey_name": "fk_seasons_current_matchday_same_season",
+      "name": "seasons",
+      "schema": "public",
+      "type": "table"
+    },
+    "cache_key": "unindexed_foreign_keys_public_seasons_fk_seasons_current_matchday_same_season"
+  },
+  {
+    "name": "unindexed_foreign_keys",
+    "title": "Unindexed foreign keys",
+    "level": "INFO",
+    "facing": "EXTERNAL",
+    "categories": [
+      "PERFORMANCE"
+    ],
+    "description": "Identifies foreign key constraints without a covering index, which can impact database performance.",
+    "detail": "Table \\`public.seasons\\` has a foreign key \\`seasons_created_by_trainer_id_fkey\\` without a covering index. This can lead to suboptimal query performance.",
+    "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0001_unindexed_foreign_keys",
+    "metadata": {
+      "fkey_columns": [
+        4
+      ],
+      "fkey_name": "seasons_created_by_trainer_id_fkey",
+      "name": "seasons",
+      "schema": "public",
+      "type": "table"
+    },
+    "cache_key": "unindexed_foreign_keys_public_seasons_seasons_created_by_trainer_id_fkey"
+  },
+  {
+    "name": "unindexed_foreign_keys",
+    "title": "Unindexed foreign keys",
+    "level": "INFO",
+    "facing": "EXTERNAL",
+    "categories": [
+      "PERFORMANCE"
+    ],
+    "description": "Identifies foreign key constraints without a covering index, which can impact database performance.",
+    "detail": "Table \\`public.shop_promotions\\` has a foreign key \\`fk_shop_promotions_matchday_same_season\\` without a covering index. This can lead to suboptimal query performance.",
+    "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0001_unindexed_foreign_keys",
+    "metadata": {
+      "fkey_columns": [
+        3,
+        2
+      ],
+      "fkey_name": "fk_shop_promotions_matchday_same_season",
+      "name": "shop_promotions",
+      "schema": "public",
+      "type": "table"
+    },
+    "cache_key": "unindexed_foreign_keys_public_shop_promotions_fk_shop_promotions_matchday_same_season"
+  },
+  {
+    "name": "unindexed_foreign_keys",
+    "title": "Unindexed foreign keys",
+    "level": "INFO",
+    "facing": "EXTERNAL",
+    "categories": [
+      "PERFORMANCE"
+    ],
+    "description": "Identifies foreign key constraints without a covering index, which can impact database performance.",
+    "detail": "Table \\`public.shop_promotions\\` has a foreign key \\`shop_promotions_matchday_id_fkey\\` without a covering index. This can lead to suboptimal query performance.",
+    "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0001_unindexed_foreign_keys",
+    "metadata": {
+      "fkey_columns": [
+        3
+      ],
+      "fkey_name": "shop_promotions_matchday_id_fkey",
+      "name": "shop_promotions",
+      "schema": "public",
+      "type": "table"
+    },
+    "cache_key": "unindexed_foreign_keys_public_shop_promotions_shop_promotions_matchday_id_fkey"
+  },
+  {
+    "name": "unindexed_foreign_keys",
+    "title": "Unindexed foreign keys",
+    "level": "INFO",
+    "facing": "EXTERNAL",
+    "categories": [
+      "PERFORMANCE"
+    ],
+    "description": "Identifies foreign key constraints without a covering index, which can impact database performance.",
+    "detail": "Table \\`public.shop_promotions\\` has a foreign key \\`shop_promotions_shop_item_id_fkey\\` without a covering index. This can lead to suboptimal query performance.",
+    "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0001_unindexed_foreign_keys",
+    "metadata": {
+      "fkey_columns": [
+        4
+      ],
+      "fkey_name": "shop_promotions_shop_item_id_fkey",
+      "name": "shop_promotions",
+      "schema": "public",
+      "type": "table"
+    },
+    "cache_key": "unindexed_foreign_keys_public_shop_promotions_shop_promotions_shop_item_id_fkey"
+  },
+  {
+    "name": "unindexed_foreign_keys",
+    "title": "Unindexed foreign keys",
+    "level": "INFO",
+    "facing": "EXTERNAL",
+    "categories": [
+      "PERFORMANCE"
+    ],
+    "description": "Identifies foreign key constraints without a covering index, which can impact database performance.",
+    "detail": "Table \\`public.team_locks\\` has a foreign key \\`fk_team_locks_matchday_same_season\\` without a covering index. This can lead to suboptimal query performance.",
+    "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0001_unindexed_foreign_keys",
+    "metadata": {
+      "fkey_columns": [
+        3,
+        2
+      ],
+      "fkey_name": "fk_team_locks_matchday_same_season",
+      "name": "team_locks",
+      "schema": "public",
+      "type": "table"
+    },
+    "cache_key": "unindexed_foreign_keys_public_team_locks_fk_team_locks_matchday_same_season"
+  },
+  {
+    "name": "unindexed_foreign_keys",
+    "title": "Unindexed foreign keys",
+    "level": "INFO",
+    "facing": "EXTERNAL",
+    "categories": [
+      "PERFORMANCE"
+    ],
+    "description": "Identifies foreign key constraints without a covering index, which can impact database performance.",
+    "detail": "Table \\`public.team_locks\\` has a foreign key \\`fk_team_locks_player_same_owner\\` without a covering index. This can lead to suboptimal query performance.",
+    "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0001_unindexed_foreign_keys",
+    "metadata": {
+      "fkey_columns": [
+        5,
+        2,
+        4
+      ],
+      "fkey_name": "fk_team_locks_player_same_owner",
+      "name": "team_locks",
+      "schema": "public",
+      "type": "table"
+    },
+    "cache_key": "unindexed_foreign_keys_public_team_locks_fk_team_locks_player_same_owner"
+  },
+  {
+    "name": "unindexed_foreign_keys",
+    "title": "Unindexed foreign keys",
+    "level": "INFO",
+    "facing": "EXTERNAL",
+    "categories": [
+      "PERFORMANCE"
+    ],
+    "description": "Identifies foreign key constraints without a covering index, which can impact database performance.",
+    "detail": "Table \\`public.team_locks\\` has a foreign key \\`fk_team_locks_save_same_owner\\` without a covering index. This can lead to suboptimal query performance.",
+    "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0001_unindexed_foreign_keys",
+    "metadata": {
+      "fkey_columns": [
+        6,
+        2,
+        4
+      ],
+      "fkey_name": "fk_team_locks_save_same_owner",
+      "name": "team_locks",
+      "schema": "public",
+      "type": "table"
+    },
+    "cache_key": "unindexed_foreign_keys_public_team_locks_fk_team_locks_save_same_owner"
+  },
+  {
+    "name": "unindexed_foreign_keys",
+    "title": "Unindexed foreign keys",
+    "level": "INFO",
+    "facing": "EXTERNAL",
+    "categories": [
+      "PERFORMANCE"
+    ],
+    "description": "Identifies foreign key constraints without a covering index, which can impact database performance.",
+    "detail": "Table \\`public.trainer_flags\\` has a foreign key \\`fk_trainer_flags_player_same_owner\\` without a covering index. This can lead to suboptimal query performance.",
+    "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0001_unindexed_foreign_keys",
+    "metadata": {
+      "fkey_columns": [
+        4,
+        2,
+        3
+      ],
+      "fkey_name": "fk_trainer_flags_player_same_owner",
+      "name": "trainer_flags",
+      "schema": "public",
+      "type": "table"
+    },
+    "cache_key": "unindexed_foreign_keys_public_trainer_flags_fk_trainer_flags_player_same_owner"
+  },
+  {
+    "name": "unindexed_foreign_keys",
+    "title": "Unindexed foreign keys",
+    "level": "INFO",
+    "facing": "EXTERNAL",
+    "categories": [
+      "PERFORMANCE"
+    ],
+    "description": "Identifies foreign key constraints without a covering index, which can impact database performance.",
+    "detail": "Table \\`public.trial_case_revisions\\` has a foreign key \\`trial_case_revisions_actor_trainer_id_fkey\\` without a covering index. This can lead to suboptimal query performance.",
+    "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0001_unindexed_foreign_keys",
+    "metadata": {
+      "fkey_columns": [
+        6
+      ],
+      "fkey_name": "trial_case_revisions_actor_trainer_id_fkey",
+      "name": "trial_case_revisions",
+      "schema": "public",
+      "type": "table"
+    },
+    "cache_key": "unindexed_foreign_keys_public_trial_case_revisions_trial_case_revisions_actor_trainer_id_fkey"
+  },
+  {
+    "name": "unindexed_foreign_keys",
+    "title": "Unindexed foreign keys",
+    "level": "INFO",
+    "facing": "EXTERNAL",
+    "categories": [
+      "PERFORMANCE"
+    ],
+    "description": "Identifies foreign key constraints without a covering index, which can impact database performance.",
+    "detail": "Table \\`public.trial_case_revisions\\` has a foreign key \\`trial_case_revisions_previous_decision_id_case_id_season_i_fkey\\` without a covering index. This can lead to suboptimal query performance.",
+    "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0001_unindexed_foreign_keys",
+    "metadata": {
+      "fkey_columns": [
+        7,
+        2,
+        3
+      ],
+      "fkey_name": "trial_case_revisions_previous_decision_id_case_id_season_i_fkey",
+      "name": "trial_case_revisions",
+      "schema": "public",
+      "type": "table"
+    },
+    "cache_key": "unindexed_foreign_keys_public_trial_case_revisions_trial_case_revisions_previous_decision_id_case_id_season_i_fkey"
+  },
+  {
+    "name": "unindexed_foreign_keys",
+    "title": "Unindexed foreign keys",
+    "level": "INFO",
+    "facing": "EXTERNAL",
+    "categories": [
+      "PERFORMANCE"
+    ],
+    "description": "Identifies foreign key constraints without a covering index, which can impact database performance.",
+    "detail": "Table \\`public.trial_case_revisions\\` has a foreign key \\`trial_case_revisions_season_id_fkey\\` without a covering index. This can lead to suboptimal query performance.",
+    "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0001_unindexed_foreign_keys",
+    "metadata": {
+      "fkey_columns": [
+        3
+      ],
+      "fkey_name": "trial_case_revisions_season_id_fkey",
+      "name": "trial_case_revisions",
+      "schema": "public",
+      "type": "table"
+    },
+    "cache_key": "unindexed_foreign_keys_public_trial_case_revisions_trial_case_revisions_season_id_fkey"
+  },
+  {
+    "name": "unindexed_foreign_keys",
+    "title": "Unindexed foreign keys",
+    "level": "INFO",
+    "facing": "EXTERNAL",
+    "categories": [
+      "PERFORMANCE"
+    ],
+    "description": "Identifies foreign key constraints without a covering index, which can impact database performance.",
+    "detail": "Table \\`public.trial_cases\\` has a foreign key \\`fk_trial_cases_matchday_same_season\\` without a covering index. This can lead to suboptimal query performance.",
+    "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0001_unindexed_foreign_keys",
+    "metadata": {
+      "fkey_columns": [
+        3,
+        2
+      ],
+      "fkey_name": "fk_trial_cases_matchday_same_season",
+      "name": "trial_cases",
+      "schema": "public",
+      "type": "table"
+    },
+    "cache_key": "unindexed_foreign_keys_public_trial_cases_fk_trial_cases_matchday_same_season"
+  },
+  {
+    "name": "unindexed_foreign_keys",
+    "title": "Unindexed foreign keys",
+    "level": "INFO",
+    "facing": "EXTERNAL",
+    "categories": [
+      "PERFORMANCE"
+    ],
+    "description": "Identifies foreign key constraints without a covering index, which can impact database performance.",
+    "detail": "Table \\`public.trial_cases\\` has a foreign key \\`trial_cases_accused_trainer_id_fkey\\` without a covering index. This can lead to suboptimal query performance.",
+    "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0001_unindexed_foreign_keys",
+    "metadata": {
+      "fkey_columns": [
+        4
+      ],
+      "fkey_name": "trial_cases_accused_trainer_id_fkey",
+      "name": "trial_cases",
+      "schema": "public",
+      "type": "table"
+    },
+    "cache_key": "unindexed_foreign_keys_public_trial_cases_trial_cases_accused_trainer_id_fkey"
+  },
+  {
+    "name": "unindexed_foreign_keys",
+    "title": "Unindexed foreign keys",
+    "level": "INFO",
+    "facing": "EXTERNAL",
+    "categories": [
+      "PERFORMANCE"
+    ],
+    "description": "Identifies foreign key constraints without a covering index, which can impact database performance.",
+    "detail": "Table \\`public.trial_cases\\` has a foreign key \\`trial_cases_created_by_trainer_id_fkey\\` without a covering index. This can lead to suboptimal query performance.",
+    "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0001_unindexed_foreign_keys",
+    "metadata": {
+      "fkey_columns": [
+        5
+      ],
+      "fkey_name": "trial_cases_created_by_trainer_id_fkey",
+      "name": "trial_cases",
+      "schema": "public",
+      "type": "table"
+    },
+    "cache_key": "unindexed_foreign_keys_public_trial_cases_trial_cases_created_by_trainer_id_fkey"
+  },
+  {
+    "name": "unindexed_foreign_keys",
+    "title": "Unindexed foreign keys",
+    "level": "INFO",
+    "facing": "EXTERNAL",
+    "categories": [
+      "PERFORMANCE"
+    ],
+    "description": "Identifies foreign key constraints without a covering index, which can impact database performance.",
+    "detail": "Table \\`public.trial_votes\\` has a foreign key \\`trial_votes_voter_trainer_id_fkey\\` without a covering index. This can lead to suboptimal query performance.",
+    "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0001_unindexed_foreign_keys",
+    "metadata": {
+      "fkey_columns": [
+        3
+      ],
+      "fkey_name": "trial_votes_voter_trainer_id_fkey",
+      "name": "trial_votes",
+      "schema": "public",
+      "type": "table"
+    },
+    "cache_key": "unindexed_foreign_keys_public_trial_votes_trial_votes_voter_trainer_id_fkey"
+  },
+  {
+    "name": "unused_index",
+    "title": "Unused Index",
+    "level": "INFO",
+    "facing": "EXTERNAL",
+    "categories": [
+      "PERFORMANCE"
+    ],
+    "description": "Detects if an index has never been used and may be a candidate for removal.",
+    "detail": "Index \\`idx_trainers_slug_enabled\\` on table \\`public.trainers\\` has not been used",
+    "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0005_unused_index",
+    "metadata": {
+      "name": "trainers",
+      "schema": "public",
+      "type": "table"
+    },
+    "cache_key": "unused_index_public_trainers_idx_trainers_slug_enabled"
+  },
+  {
+    "name": "unused_index",
+    "title": "Unused Index",
+    "level": "INFO",
+    "facing": "EXTERNAL",
+    "categories": [
+      "PERFORMANCE"
+    ],
+    "description": "Detects if an index has never been used and may be a candidate for removal.",
+    "detail": "Index \\`idx_shop_items_category_enabled\\` on table \\`public.shop_items\\` has not been used",
+    "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0005_unused_index",
+    "metadata": {
+      "name": "shop_items",
+      "schema": "public",
+      "type": "table"
+    },
+    "cache_key": "unused_index_public_shop_items_idx_shop_items_category_enabled"
+  },
+  {
+    "name": "unused_index",
+    "title": "Unused Index",
+    "level": "INFO",
+    "facing": "EXTERNAL",
+    "categories": [
+      "PERFORMANCE"
+    ],
+    "description": "Detects if an index has never been used and may be a candidate for removal.",
+    "detail": "Index \\`idx_save_files_sha256\\` on table \\`public.save_files\\` has not been used",
+    "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0005_unused_index",
+    "metadata": {
+      "name": "save_files",
+      "schema": "public",
+      "type": "table"
+    },
+    "cache_key": "unused_index_public_save_files_idx_save_files_sha256"
+  }
+]

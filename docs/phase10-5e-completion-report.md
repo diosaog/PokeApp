@@ -1,10 +1,17 @@
 # Phase 10.5E - Observed progress and initial A/B
 
-Observation: 2026-10-01 Europe/Madrid. **Local gates PASS; public delivery pending.**
+Observation: 2026-10-03 Europe/Madrid. **E DONE; STAGING_DONE_ZERO_RESIDUE.**
+Final implementation `90a31fc3b4220cefbe7c160902158084aea2569e` is pushed and deployed.
+This report's documentation closure is a separate commit identifiable in Git.
 Entry `8e3d598205613d950e3c4851bd07fb0ffe15ba53`, main/origin 0/0, tracked clean.
+Implementation `0215f73457b7c3245b29af41e0200fd590f2db59`; final diagnostic source and
+resumed entry `d24b55152d7d8a29c3632a4f4feec710fb331040`. Fresh fetch at resumption:
+main/origin 0/0, existing uncommitted E delivery notes in the live handoff preserved.
 [Contract](phase10-5-functional-alignment.md),
 [operational record](work-in-progress/phase10-5-live-handoff.md),
-[local evidence](phase10-5e-validation-evidence.json).
+[historical local evidence](phase10-5e-validation-evidence.json),
+[public evidence, including preserved earlier runs](phase10-5e-public-evidence.json),
+[final closure evidence](phase10-5e-closure-evidence.json).
 
 ## Delivered behavior and boundaries
 
@@ -73,7 +80,7 @@ Lock remains informational. Existing seasons, snapshots, Hall and archive are no
 reinterpreted. F championship rules are documented only; F and Phase 11 have not
 started.
 
-## Local validation
+## Historical implementation validation - 2026-10-01, source 0215f73
 
 | Gate | Result |
 |---|---|
@@ -110,14 +117,158 @@ Raw evidence is under `%TEMP%/phase10-5e-*`, including `python-release.log`,
 `sql-release.log`, `regressions.log`, `rebuild-release.log`, parser results, browser
 and build logs. Durable evidence retains summaries, commands and source hashes.
 
-## Public delivery and publication
+## Fresh final-source closure - 2026-10-02, source d24b551
 
-Pending: commit/push, fresh pinned preflight, additive 036 once, existing Railway
-and Cloudflare deployment, safe public authenticated/browser reads and independent
-full-state/Advisor verification. No positive sporting mutation is permitted against
-owner manual data. Existing Anto identity, PIN/admin and seasons must remain intact.
-No remote E mutation or deployment is claimed by this local report.
+These are new runs on the final published application source, not the historical
+counts above. This continuation has required no application-code change.
 
-Migrations 001-035 remain unchanged. The protected guide is unread/untouched and
-excluded from Git. E remains in progress until public gates and documentation
-closure pass. Whole-project estimate remains approximately 80%; stop after E.
+| Gate | Fresh result |
+|---|---|
+| Full Python | **664 PASS, 0 FAIL, 0 SKIP**, exit 0; includes diagnostic sanitization test |
+| React | **11 PASS**, exit 0 |
+| Complete Edge regression | **24 PASS**, exit 0, existing flows plus E; synthetic API, responsive coverage |
+| Real parser/Launcher | **54 .NET assertions / six binary integration groups PASS**, exit 0; parser Python cases also in full suite |
+| E PostgreSQL | **Eight groups / twelve exact rollback boundaries / 47-table cleanup PASS**, exit 0 |
+| Inherited PostgreSQL | **026-030/B/C/D PASS**, parent exit 0; final logs and 47-table cleanup independently recovered and verified on 2026-10-03 |
+| Independent migrations and bootstrap | Four builds in two fresh disposable databases, schema/RLS/catalog PASS; **11,462 identical normalized lines** |
+| Build/static | Compile, TypeScript/Vite, Prettier, Workers dry run and diff check PASS; generated bootstrap unchanged |
+| Ruff comparison | app/tools/tests: **1,010 inherited findings, zero new** versus 8e3d598; broader scope than the historical 86-finding subset |
+| SQL immutability | 001-035 unchanged by E; all 001-036 unchanged since 0215f73; no new migration |
+
+The first resumed PostgreSQL start omitted the port and listened on 5432. The
+validator on 55439 could not connect and made no database changes. The owned
+disposable server was stopped and restarted explicitly on loopback 55439; the
+complete rebuild then passed. No product constraint or assertion was weakened.
+Raw evidence: `%TEMP%/phase10-5e-resume-20261002`,
+`phase10-5e-resume-rebuild-evidence.json` and `phase10-5e-resume-rebuild-second.log`.
+
+## Public delivery, owner safety and security - 2026-10-02 checkpoint
+
+Published source `0215f73` preceded migration **036=`20261001165951`** and the
+original E deployments. That application preserved all 52 pre-existing tables;
+the new private initial-snapshot table was empty. Fresh inspection now verifies
+**28 migration records unchanged since that deployment**. **Do not reapply 031-036.**
+
+The interrupted diagnostic deployment had actually completed before this session:
+Railway **1ef649e7-1489-4f97-a4fa-ef08839f5021**, SUCCESS, source `d24b551`, image
+`sha256:544a744caa62cf8b2101de5678d6e2e7f93e835b7680d50a2fa05ac7282f32cc`.
+All **229 committed bundle files** match Git and the retained upload bundle.
+One replica and existing service settings are preserved. Cloudflare retains the
+compatible E source `0215f73`, version **0224318e-38d6-4178-ae3a-646384328eb8**,
+deployment **3d829325-66fc-4da4-88f4-b7bd4967f8d7**, 100%.
+No new migration or deployment was needed in this continuation.
+
+Existing URLs: https://pokeapp-api-production.up.railway.app and
+https://pokeapp-web.pokeapp-v2.workers.dev. Served JS/CSS match the fresh final build;
+deep SPA, MIME, CSP, nosniff and allowed/rejected CORS PASS. Backend diagnostic
+changes have not altered the frontend source or its compatible contract.
+
+Public run **phase10_5_public_reads_11efa6eac0154745badf74fb3ee02abf**, exit 0,
+**PASS**: existing owner PIN login/JWT refresh, identity/admin, 21 API requests with
+expected successes/denials, real GENERAL/overview and typed E legacy review.
+Valid-shaped mutations against freshly verified absent resources prove deployed
+RPC paths without changing owner results. Injected progress/actor/plan fields are
+rejected. **22 real browser visits**, eleven screens at 1440 and 390, admin reads
+and logout; no interception, business write, page/API error or unexpected app
+origin. Installed Kaspersky injection remains separately identified.
+Inspected [GENERAL desktop](evidence/phase10-5/e-public-general-desktop.png) and
+[current day mobile](evidence/phase10-5/e-public-current-day-mobile.png).
+
+Runner and independent final comparison at **2026-10-02 00:34:24 Europe/Madrid**:
+**53/53 complete scoped table contents identical**, all **28 migration records
+unchanged**, same owner mapping/enabled/admin, zero fixture-prefix residue. The
+existing owner's rows in the four compared Auth tables are excluded from equality;
+identity/PIN continuity is verified by real login and mapping/admin by a separate
+query. Every public/manual row and Storage metadata row is included. No Storage
+bytes were read or written.
+Twenty helper privilege/fixed-search-path/invoker checks and the private snapshot
+table/column ACL checks PASS. Advisor **24 ERROR / 5 WARN / 125 INFO**, no added or
+removed ERROR/WARN by finding/object identity. Existing findings remain recorded
+in the [Advisor inventory](phase10-5e-security-advisor.json); no global-clean claim.
+
+The first historical public browser run failed with four 503 reads; a subsequent
+historical concurrent run failed six of twelve. These failures remain evidence.
+The fresh public run passed separately. The two concurrent batches returned **24/24
+HTTP 200** reads without 503; diagnostic failure logs are empty in the inspected
+deployment log sample. **Historical cause UNKNOWN; incident not reproduced in this
+window.** No transport fix was made, and passing runs do not establish that logging
+fixed the cause or guarantee permanent absence of intermittent failures.
+
+## Final closure and response-recovery fix - 2026-10-03
+
+Entry `d24b55152d7d8a29c3632a4f4feec710fb331040`, fresh fetch main/origin 0/0.
+Pre-existing local E report/handoff/evidence changes were preserved. The supposedly
+running SQL regressions had finished with exit 0: all eight inherited families,
+E's eight groups/twelve rollback boundaries and exact 47-table cleanup are verified.
+Four retained normalized schema dumps match their original hashes and contain
+11,462 identical lines. SQL, parser, domain and frontend inputs remain unchanged;
+their 2026-10-02 gates are retained evidence, not represented as new runs today.
+`pg_ctl status` now confirms the disposable server is stopped. Its historical
+shutdown mechanism is UNKNOWN; no claim of a verified graceful shutdown is made.
+
+Fresh public reads reproduced **3/12 HTTP 503** at 11:06 UTC. Deployed sanitized
+logs identify three simultaneous **ReadError** failures in the upstream read
+transport. The prior clean window did not prove resolution. HTTPX classifies this
+as failure receiving network data; its built-in connection retry does not cover
+read errors ([exceptions](https://www.python-httpx.org/exceptions/),
+[transport retry scope](https://www.python-httpx.org/advanced/transports/)).
+The underlying network trigger remains UNKNOWN; no HTTP/2 root-cause claim is made.
+
+Follow-up **90a31fc** adds one retry only for that error in the dedicated frontend
+SELECT/read-only-RPC repository. It preserves query scope/body and lets a second
+failure return the existing sanitized 503. HTTP denials, other status errors,
+malformed data and other transport errors are not retried. Mutation repositories
+and unknown-outcome command behavior are unchanged. No dependency, schema or UI
+change was needed. Six real-PostgREST/MockTransport tests prove recovery, identical
+scope, bounded persistent failure, non-retryable errors, concurrent independent
+budgets and no automatic initial-finalization retry. Full Python **670 PASS,
+0 failures/0 skips**, compile and touched-file Ruff/format/diff PASS.
+
+Source was committed/pushed before deployment. Existing Railway deployment
+**6aa70f72-f0cb-41a1-86d6-7b4227803392** is SUCCESS, source `90a31fc`, image
+`sha256:f7a8efe77db345305ddda1c6cd398f06cd58d48779edade104b750d05404ee7d`.
+The committed-only bundle contains 229 files; the service manifest, single replica,
+healthcheck, origins and secrets were not changed. Cloudflare retains the compatible
+`0215f73` version/deployment above; live assets and security headers match. No new
+migration or frontend deployment; **036 remains applied once as 20261001165951**.
+
+Final public run **phase10_5_public_reads_d5d933292db242288543d89f52fb847a**, exit 0:
+**21 API checks, 22 real browser visits PASS**, no interception or business write.
+Two post-deploy concurrent batches returned **24/24 HTTP 200**. The inspected new
+deployment diagnostic sample contains no read failure or retry entries: recovery
+is proven by injected local transport failures; it was not observed firing during
+this hosted window. Passing samples do not guarantee permanent network reliability.
+
+Independent comparison at **2026-10-03 13:18:42 Europe/Madrid** confirms **53/53
+scoped complete table contents identical**, all **28 migration records unchanged**,
+same owner identity/enabled/admin, zero fixtures, 20 helper checks and private
+snapshot ACL PASS. Owner Auth activity is the sole equality exception described
+above; all public/manual data and Storage metadata are compared. No Storage-byte
+access. Advisor remains **24 ERROR / 5 WARN / 125 INFO**, zero added or removed
+ERROR/WARN. Existing PIN continuity is verified by real login, without resetting it.
+
+## Limits, remaining decisions and next package
+
+Positive modern initial assignment, non-admin sporting success, concurrency and
+rollback are proven locally. The public owner season remains legacy initialization;
+no division/result/history was changed to demonstrate a positive modern mutation.
+Full Launcher-to-cloud ingestion remains future work; ordinary missing observations
+correctly remain pending. No physical save write, installer/updater or F code.
+
+A final HTTPS sample measured GENERAL ~0.85 s, overview ~3.36 s and initial
+review ~0.91 s. Earlier concurrent overview samples reached ~7.1 s; these are observations,
+not a benchmark/SLA. Aggregate E readiness introduces no per-player HTTP loop.
+The inherited overview query chain and broader invalidation remain Phase 14 work.
+
+No unresolved owner decision blocks E. Reward policy, later milestones, lifecycle
+triggers, revive semantics, Team Lock cutoff, scouting and Cup eligibility remain
+in the approved contract. Future F uses final accumulated points, external Bo3 for
+two tied leaders, adjusted deaths for three; unresolved exceptions/finalist rules
+must not be invented. Phase 10.5 remains IN PROGRESS and Phase 11 NOT READY/NOT STARTED.
+Whole-project estimate remains approximately 80%; this atomic delivery closes E.
+F is authorized next, but remains unstarted. Begin with authoritative accumulated
+points and existing finish/archive/Hall contracts; then implement the approved
+two-player BO3 and three-player adjusted-deaths rules without inventing finalist
+or residual tie policy. Phase 11 remains prohibited.
+Documentation closure has its own Git commit; obtain its exact hash from Git rather
+than embedding a self-referential hash here. Protected guide remains unread/untouched.

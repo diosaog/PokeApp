@@ -21,7 +21,7 @@ commit before the next starts. Deploy at stable checkpoints, not every commit.
 | C | Any enabled, active, eligible season participant records/edits any editable current match, including matches between other participants. Verified JWT identity, season scope, CAS and stable idempotency; closed-day admin correction stays separate. Ordinary entry belongs in League/Battles. |
 | D | Daily wins descending then fewer adjusted deaths. No H2H-first two-way rule; no alphabetical sporting resolution. Auditable exceptional resolution where unresolved ties affect rewards/movement/cuts. |
 | E | First game segment before initial A/B. Observed save progress/death readiness, suggested split by fewer deaths, external resolution only for a relevant cut tie. Exact capacities and immutable recorded assignment; missing observations block readiness. No manual medal attestation. |
-| F | Finish/Hall uses final accumulated official points, not final day's position. Unique champion/finalist supported; tied first or second blocks certification until an approved resolution exists. Existing frozen history never silently rewritten. |
+| F | Finish/Hall uses final accumulated official points, not final day's position. Exactly two tied leaders require audited external BO3; exactly three use fewer authoritative adjusted deaths. Residual triple ties, 4+ ties and undefined finalist rules require an explicit owner decision. Existing frozen history never silently rewritten. |
 | G | Participant-owned nonnegative audited/idempotent wipe counter, current applicability only. Box 8 (legacy index 7) deaths cost 0.2 each without a cap; each wipe revival costs 0.4. Five visible dead plus one wipe revival costs 1.4. |
 | H | Strong missing-Team-Lock warning with ability to continue. Batallas / Team Preview: two distinct independent public selectors in Espectador; one selector including self in Batalla, own private detail permitted, rivals public only. |
 | I | Reconcile pending promotion visibility/time boundaries; expose existing robbery-shield voucher redemption without selling reward-only items; allow spending existing coins after League without generating new League rewards; preserve Store Ban. |
@@ -101,7 +101,10 @@ counter or reinterpretation of existing seasons is authorized.
 After implementation, complete the full relevant local matrix and any necessary
 new migration/bootstrap parity before committing/pushing and public deployment.
 Public verification uses safe reads and absent-resource checks, preserving all
-manual owner data. Stop after E delivery; do not start F or Phase 11.
+manual owner data. The 2026-10-03 owner continuation authorizes F only after E is
+fully green, committed, pushed, documented and coherently deployed, and only with
+capacity to finish another atomic package. Otherwise stop at E's complete checkpoint.
+Do not start G automatically or begin Phase 11.
 
 ## Approved championship decision for future Package F (2026-10-01)
 
