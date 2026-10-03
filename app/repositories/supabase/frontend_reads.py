@@ -3,6 +3,7 @@
 from typing import Any, Protocol
 import logging
 import re
+from httpx import ReadError
 from app.repositories.errors import PersistenceError
 
 logger = logging.getLogger(__name__)
@@ -15,6 +16,17 @@ def _report_failure(operation: str, error: Exception) -> None:
     if re.fullmatch(r"[A-Za-z][A-Za-z0-9_]{0,79}", category) is None:
         category = "UnknownError"
     logger.warning("frontend_read_failed operation=%s cause=%s", operation, category)
+
+
+def _execute_read(query, operation: str):
+    # These SELECTs and the two explicitly read-only RPCs have no durable effects.
+    # A dropped response can be retried once; mutation repositories must not use
+    # this helper. Do not retry status errors, malformed data or arbitrary failures.
+    try:
+        return query.execute().data
+    except ReadError:
+        logger.warning("frontend_read_retry operation=%s cause=ReadError", operation)
+        return query.execute().data
 
 
 class FrontendReadRepository(Protocol):
@@ -50,12 +62,10 @@ class SupabaseFrontendReadRepository:
                 query = (
                     query.is_(key, "null") if value is None else query.eq(key, value)
                 )
-            rows = (
-                query.order(order or columns.split(",")[0])
-                .range(offset, offset + limit - 1)
-                .execute()
-                .data
+            query = query.order(order or columns.split(",")[0]).range(
+                offset, offset + limit - 1
             )
+            rows = _execute_read(query, "rows")
             if not isinstance(rows, list):
                 raise ValueError("Invalid read")
             return rows
@@ -65,9 +75,10 @@ class SupabaseFrontendReadRepository:
 
     def league_general(self, season_id):
         try:
-            data = self._client.rpc(
-                "league_general_read", {"p_season_id": season_id}
-            ).execute().data
+            data = _execute_read(
+                self._client.rpc("league_general_read", {"p_season_id": season_id}),
+                "league_general",
+            )
             if data is not None and not isinstance(data, dict):
                 raise ValueError("Invalid league read")
             return data
@@ -77,7 +88,10 @@ class SupabaseFrontendReadRepository:
 
     def initial_observations(self, season_id):
         try:
-            data = self._client.rpc("initial_assignment_observations", {"sid": season_id}).execute().data
+            data = _execute_read(
+                self._client.rpc("initial_assignment_observations", {"sid": season_id}),
+                "initial_observations",
+            )
             if not isinstance(data, list):
                 raise ValueError("Invalid observed progress")
             return data
