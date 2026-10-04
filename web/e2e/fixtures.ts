@@ -230,6 +230,15 @@ export async function fixture(page: Page, longNames = false) {
         display_name: p.display_name,
       }));
     else if (path.endsWith("/overview")) result = overview;
+    else if (path.endsWith("/wipe-revivals"))
+      result = {
+        season_id: sid,
+        revived_after_wipe: 0,
+        revision: 0,
+        editable: true,
+        blocking_reason: null,
+        replayed: false,
+      };
     else if (path.endsWith("/league"))
       result = {
         season: overview.season,

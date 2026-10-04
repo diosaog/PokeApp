@@ -1,4 +1,4 @@
-"""Real B/C/D/E/F public reads and guaranteed denials, preserving manual staging data.
+"""Real B/C/D/E/F/G reads and guaranteed denials, preserving manual staging data.
 
 Run as a module with --output <fresh directory outside the repository>. Supply
 {"pin": "..."} through private stdin, never a command argument. No fixture, valid
@@ -24,6 +24,7 @@ from app.api.matchday_models import DayState
 from app.api.initial_assignment_models import InitialAssignmentRead
 from app.api.read_models import LeagueGeneralRead, LeagueStandingRead, OverviewRead
 from app.api.season_lifecycle_models import ChampionshipRead
+from app.api.wipe_revival_models import WipeRevivalsRead
 from tools.validate_phase10_hosted import (
     API,
     HISTORY,
@@ -48,6 +49,7 @@ MIGRATIONS = (
     "035_daily_sporting_ranking",
     "036_observed_initial_divisions",
     "037_league_championship",
+    "038_participant_wipe_revivals",
 )
 
 
@@ -145,6 +147,7 @@ def main():
             "No manual result changed; successful result/tie/initial assignment mutations, CAS and races use local C/D/E gates.",
             "No observed save is uploaded or invented; existing owner season remains legacy initialization.",
             "Positive championship, BO3, finish, archive, Hall, rollback and concurrency proof is local PostgreSQL only; the owner season is never finalized for validation.",
+            "Positive owned wipe updates, races and rollback are proven locally only; the owner's wipe counter is never changed for public validation.",
         ],
     }
     before = history = advisor_before = None
@@ -169,6 +172,7 @@ def main():
             "Pinned project not linked",
         )
         history = query(out, "history-before", HISTORY)
+        require(len(history) == 30, "Unexpected migration record count")
         for name in MIGRATIONS:
             rows = [row for row in history if row["name"] == name]
             require(len(rows) == 1, "Required migration absent or duplicated")
@@ -209,7 +213,7 @@ def main():
             "Expected manual active season unavailable",
         )
         passed(
-            "Pinned project, applied 033-037, fresh 55-table baseline and owner identity"
+            "Pinned project, applied 033-038, fresh 55-table baseline and owner identity"
         )
         stage = "public API"
         with httpx.Client(
@@ -232,6 +236,7 @@ def main():
                     "CORS origin mismatch",
                 )
             token = None
+            verified_absent_wipe_path = None
 
             def request(
                 method,
@@ -243,6 +248,11 @@ def main():
                 invalid=False,
                 key=None,
             ):
+                if method == "PUT" and path.endswith("/wipe-revivals"):
+                    require(
+                        path == verified_absent_wipe_path,
+                        "Public wipe writes require an independently verified absent season",
+                    )
                 headers = {}
                 if invalid:
                     headers["Authorization"] = "Bearer invalid.phase10_5.token"
@@ -329,6 +339,35 @@ def main():
             )
             passed(
                 "F real typed championship read preserves incomplete owner season without a champion"
+            )
+            wipe_path = f"/v1/seasons/{OWNER_SEASON}/wipe-revivals"
+            wipe_raw = request("GET", wipe_path)
+            wipe = WipeRevivalsRead.model_validate(wipe_raw)
+            require(
+                set(wipe_raw) == set(WipeRevivalsRead.model_fields)
+                and str(wipe.season_id) == OWNER_SEASON
+                and not wipe.replayed,
+                "G own counter response scope or public allowlist mismatch",
+            )
+            wipe_stored = query(
+                out,
+                "owner-wipe-counter",
+                "select revived_after_wipe,coalesce((metadata->>'wipe_revision')::bigint,0) as revision "
+                "from public.season_player_stats "
+                f"where season_id='{OWNER_SEASON}'::uuid and trainer_id='{OWNER}'::uuid",
+            )
+            require(
+                wipe_stored
+                == [
+                    dict(
+                        revived_after_wipe=wipe.revived_after_wipe,
+                        revision=wipe.revision,
+                    )
+                ],
+                "G own read differs from existing owner state",
+            )
+            passed(
+                "G real typed own wipe read matches existing counter/revision without save or foreign participant fields"
             )
             require(
                 str(general.season.id) == OWNER_SEASON
@@ -424,7 +463,7 @@ def main():
                     }
                 ],
             }
-            for path in (base + "/league", participant, championship_path):
+            for path in (base + "/league", participant, championship_path, wipe_path):
                 request("GET", path, auth=False, status=401)
                 request("GET", path, invalid=True, status=401)
             request(
@@ -457,6 +496,53 @@ def main():
                 f"select not exists(select 1 from public.seasons where id='{absent}'::uuid) as absent",
             )
             require(absence == [{"absent": True}], "Absent-resource guard failed")
+            wipe_absent = f"/v1/seasons/{absent}/wipe-revivals"
+            verified_absent_wipe_path = wipe_absent
+            wipe_denial = request("GET", wipe_absent, status=404)
+            require(
+                wipe_denial.get("detail", {}).get("code") == "SEASON_NOT_FOUND",
+                "G own read absent-season denial",
+            )
+            wipe_body = dict(revived_after_wipe=0, expected_revision=0)
+            wipe_denial = request(
+                "PUT",
+                wipe_absent,
+                body=wipe_body,
+                status=404,
+                key="phase10-5g-absent-" + uuid4().hex,
+            )
+            require(
+                wipe_denial.get("detail", {}).get("code") == "SEASON_NOT_FOUND",
+                "G own update absent-season denial",
+            )
+            request(
+                "PUT",
+                wipe_absent,
+                body=wipe_body,
+                auth=False,
+                status=401,
+                key="phase10-5g-anon-" + uuid4().hex,
+            )
+            request(
+                "PUT",
+                wipe_absent,
+                body=wipe_body,
+                invalid=True,
+                status=401,
+                key="phase10-5g-invalid-" + uuid4().hex,
+            )
+            request(
+                "PUT",
+                wipe_absent,
+                body=dict(
+                    wipe_body, actor_trainer_id=OWNER, season_player_id=str(uuid4())
+                ),
+                status=422,
+                key="phase10-5g-forged-" + uuid4().hex,
+            )
+            passed(
+                "G GET/PUT deny verified absent season, anonymous/invalid JWT and spoofed owner fields; owner counter untouched"
+            )
             # Every well-formed F command targets this independently verified
             # absent season. Never finish or resolve the owner's real season.
             championship_absent = f"/v1/admin/seasons/{absent}/championship"
@@ -604,6 +690,16 @@ def main():
                 "season_id": OWNER_SEASON,
                 "state": championship.state,
             },
+            "wipe_checks": {
+                "season_id": OWNER_SEASON,
+                "revived_after_wipe": wipe.revived_after_wipe,
+                "editable": wipe.editable,
+                "visible_deaths_unknown": next(
+                    row.dead_count is None
+                    for row in general.rows
+                    if str(row.trainer_id) == OWNER
+                ),
+            },
         }
         browser = subprocess.run(
             ["node", "scripts/validate-public-readonly.mjs"],
@@ -635,7 +731,7 @@ def main():
             "api_interception": False,
         }
         passed(
-            "Public React: GENERAL/current day, eleven screens desktop/mobile, read-only championship review and logout"
+            "Public React: GENERAL/current day, owned wipe counter, eleven screens desktop/mobile, read-only championship review and logout"
         )
     except BaseException as exc:
         # Exception text may contain tokens, request bodies or transport details.
@@ -653,7 +749,7 @@ def main():
                 "advisor",
                 lambda: sorted(
                     significant(advisors(out, "advisors-after"))
-                    - significant(advisor_before)
+                    ^ significant(advisor_before)
                 ),
             ),
         ):

@@ -98,6 +98,12 @@ export function errorText(error: unknown) {
     return "Los datos del campeonato han cambiado. Revisa los puntos y el desempate antes de continuar.";
   if (error.code === "STALE_REVISION")
     return "La temporada ha cambiado. Actualiza los datos y revisa la operación antes de continuar.";
+  if (error.code === "WIPE_REVISION_CONFLICT")
+    return "El recuento de revividos ha cambiado. Revisa la cantidad actual antes de volver a guardar.";
+  if (error.code === "WIPE_REVIVALS_NOT_EDITABLE")
+    return "El recuento ya no puede cambiar en el estado actual de la Liga. Actualiza para consultar sus datos.";
+  if (error.code === "WIPE_STATE_UNAVAILABLE")
+    return "No se pudo consultar o confirmar el recuento de revividos. Inténtalo de nuevo cuando el servicio esté disponible.";
   if (error.code === "CHAMPIONSHIP_BO3_REQUIRED")
     return "Los dos líderes deben jugar un Mejor de 3. Registra su ganador antes de finalizar.";
   if (error.code === "CHAMPIONSHIP_UNRESOLVED")

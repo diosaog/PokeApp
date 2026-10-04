@@ -1,6 +1,6 @@
 # Phase 10.5 — live execution record
 
-Observation: 2026-10-03 Europe/Madrid. **E/F DONE; Phase 10.5 IN PROGRESS; Phase 11 NOT READY / NOT STARTED.**
+Observation: 2026-10-04 Europe/Madrid. **E/F DONE; G IN PROGRESS; Phase 10.5 IN PROGRESS; Phase 11 NOT READY / NOT STARTED.**
 [Contract](../phase10-5-functional-alignment.md),
 [continuity](../AI/PokeApp_Multi_AI_Continuity_Protocol.md),
 [checkpoint](../project-checkpoint.md),
@@ -811,3 +811,68 @@ League DQ/Cup eligibility. No unrelated package was started to resolve them.
 G is the next remaining package; do not begin it automatically. Phase 10.5 remains
 IN PROGRESS; **PHASE 11 READINESS: NOT READY / NOT STARTED**. No V1 migration,
 shadow mode or cutover work is authorized by this completed F continuation.
+
+## G authorized continuation — entry 2026-10-03, resumed 2026-10-04
+
+The owner's subsequent Package G instruction supersedes the stop-after-F instruction
+only for G. Finish G completely, then STOP; H and Phase 11 remain unauthorized.
+Entry `b92b3dd26e182a288a4614e4bef61dade9fb8d43`, main/origin identical after fetch,
+0/0 divergence, clean tracked tree. F's source and delivery remain unchanged.
+
+Fresh read-only entry evidence: Supabase V2 `uwleqeuzsveqlugugzba`, 29 migration
+records through 037=`20261003121543` once, 55 full/scoped tables, owner mapping and
+enabled/admin identity intact. Advisor 24 ERROR / 5 WARN / 131 INFO. Railway
+`99af4814-dcfd-4a95-9c95-10984cc2b2de` SUCCESS and Cloudflare deployment
+`fba10b9a-60a9-4336-b1c2-17030d23b48a`, version
+`cf4e1f2d-141b-44f0-ba67-40f17dae840b`, 100%, both source `6b466663`.
+All 24 existing stats rows lack the new reserved metadata revision key.
+Raw entry evidence: `%TEMP%/phase10-5g-entry-20261003`. Remote writes: zero.
+
+Candidate 038 adds the owned absolute wipe counter command, using the existing
+`revived_after_wipe` field and `metadata.wipe_revision` (absent means zero).
+No new table/column or existing-row rewrite: historical source fingerprints are
+preserved at migration. Real changes atomically increment revision, audit and
+store an idempotency receipt; unchanged values preserve stats/fingerprint and only
+store a receipt. The existing death arithmetic is promoted to bigint to cover the
+full stored integer range. No purchased-revive rule or frozen snapshot changes.
+
+API/UI and focused G tests are in progress. Four candidate migration/bootstrap
+builds passed with 12,175 identical schema/grant/ownership lines and catalog/RLS
+checks. This is candidate evidence, not G closure. Local PostgreSQL is running on
+loopback port 55439; all fixtures are disposable local data. No G source commit,
+remote migration or deployment has occurred. Exact next action: finish focused G
+verification, full applicable final-source closure, commit/push, safe delivery and
+final handoff. Do not claim G DONE before those gates.
+
+### G local closure — 2026-10-04; delivery still pending
+
+Implementation and complete applicable local gates are green. Own GET/PUT
+`/v1/seasons/{season_id}/wipe-revivals` derives the participant from verified enabled
+JWT identity. Strict absolute count, CAS, stable replay, audited real changes and
+no automatic mutation retry. GENERAL contains the personal control, -0.4-point
+explanation and pending-save notice. No Admin override, physical write, purchased
+revive change, fabricated zero or historical recalculation.
+
+[Closure evidence](../phase10-5g-closure-evidence.json): **694 Python PASS, 0 FAIL,
+0 SKIP, exit 0; 22 React PASS; 34 Edge PASS including six G scenarios**. Edge is
+retained unchanged-source evidence, verified against the saved full report and
+current hashes; mobile screenshot reviewed. Compile, touched Ruff, TypeScript,
+Vite production build, Prettier, Workers dry-run and diff check PASS.
+
+Real PostgreSQL G: **nine groups, nine concurrent scenarios, three rollback
+boundaries**; exact 49-public-table restoration. Full 026–030 and B/C/D/E/F
+regressions PASS with exact per-family restoration. Four migration/bootstrap
+builds retain identical **12,175** schema/grant/ownership lines and safe catalogs;
+all SQL hashes still match. All 37 prior migrations are unchanged. No dedicated
+Cup/shop rerun was needed: their implementation and purchased-revive semantics
+are untouched; existing 029 compatibility cases passed.
+
+Two unfinished G fixture issues were corrected (snapshot cleanup dependency and
+missing required lifecycle timestamps). No product SQL was weakened. A resumed
+attempt found PostgreSQL stopped before DB access; final whole G run is green.
+Evidence distinguishes those attempts from the final gates. Local PostgreSQL was
+stopped successfully after zero remaining client sessions.
+
+Next action: commit/push this validated source, fresh remote baseline and Advisor,
+apply only 038 once, then Railway and Cloudflare, safe authenticated reads and
+exact data/security comparison. G is not DONE until delivery and final handoff.

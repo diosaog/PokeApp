@@ -1042,6 +1042,24 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/v1/seasons/{season_id}/wipe-revivals": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** State */
+    get: operations["state_v1_seasons__season_id__wipe_revivals_get"];
+    /** Set Count */
+    put: operations["set_count_v1_seasons__season_id__wipe_revivals_put"];
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -3095,6 +3113,13 @@ export interface components {
       /** Expires In */
       expires_in?: number | null;
     };
+    /** SetWipeRevivalsBody */
+    SetWipeRevivalsBody: {
+      /** Revived After Wipe */
+      revived_after_wipe: number;
+      /** Expected Revision */
+      expected_revision: number;
+    };
     /** SetupRevisionBody */
     SetupRevisionBody: {
       /** Expected Setup Revision */
@@ -3500,6 +3525,31 @@ export interface components {
       input?: unknown;
       /** Context */
       ctx?: Record<string, never>;
+    };
+    /** WipeRevivalsRead */
+    WipeRevivalsRead: {
+      /**
+       * Season Id
+       * Format: uuid
+       */
+      season_id: string;
+      /** Revived After Wipe */
+      revived_after_wipe: number;
+      /** Revision */
+      revision: number;
+      /** Editable */
+      editable: boolean;
+      /** Blocking Reason */
+      blocking_reason:
+        | (
+            | "participant_inactive"
+            | "season_inactive"
+            | "league_closed"
+            | "membership_ineligible"
+          )
+        | null;
+      /** Replayed */
+      replayed: boolean;
     };
   };
   responses: never;
@@ -5682,6 +5732,74 @@ export interface operations {
         };
         content: {
           "application/json": components["schemas"]["AdminReceipt"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  state_v1_seasons__season_id__wipe_revivals_get: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        season_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["WipeRevivalsRead"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  set_count_v1_seasons__season_id__wipe_revivals_put: {
+    parameters: {
+      query?: never;
+      header: {
+        "idempotency-key": string;
+      };
+      path: {
+        season_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["SetWipeRevivalsBody"];
+      };
+    };
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["WipeRevivalsRead"];
         };
       };
       /** @description Validation Error */

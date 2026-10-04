@@ -17,6 +17,7 @@ import { useApp, useRead, useOverview, usePC } from "../state";
 import { Inventory } from "./inventory";
 import { ParticipantResults } from "./league-results";
 import { InitialAssignment } from "./initial-assignment";
+import { WipeRevivals } from "./wipe-revivals";
 import {
   Card,
   CommandState,
@@ -512,7 +513,10 @@ export function LeaguePage() {
                 ))}
               </nav>
               {!day ? (
-                <LeagueGeneral data={data} />
+                <>
+                  <LeagueGeneral data={data} />
+                  <WipeRevivals data={data} />
+                </>
               ) : (
                 <>
                   <LeagueDay dayId={day.id} />

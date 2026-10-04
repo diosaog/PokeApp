@@ -62,6 +62,19 @@ try {
           await expect(page.getByRole('columnheader', { name: title, exact: true })).toBeVisible();
         await expect(page.locator('.league-standings tbody tr')).toHaveCount(checks.rows);
         await expect(tabs.getByRole('button')).toHaveCount(checks.days.length + 1);
+        if (input.wipe_checks) {
+          // Inspect the participant-owned value without filling or submitting it.
+          const wipe = input.wipe_checks;
+          await expect(page.getByRole('heading', { name: 'Revividos tras wipe', exact: true })).toBeVisible();
+          await expect(page.getByText(`Cantidad registrada: ${wipe.revived_after_wipe}`, { exact: true })).toBeVisible();
+          if (wipe.editable) {
+            await expect(page.getByLabel('Cantidad de revividos tras wipe', { exact: true })).toHaveValue(String(wipe.revived_after_wipe));
+            await expect(page.getByRole('button', { name: 'Actualizar revividos', exact: true })).toBeVisible();
+          }
+          if (wipe.visible_deaths_unknown)
+            await expect(page.getByText(/^Pendiente de observar las muertes del save\./)).toBeVisible();
+          await page.screenshot({ path: join(input.output, 'public-wipe-revivals-'+viewport.width+'.png'), fullPage: true });
+        }
         await page.screenshot({ path: join(input.output, 'public-general-'+viewport.width+'.png'), fullPage: true });
         if (checks.current_day_number != null) {
           await tabs.getByRole('button', { name: `J${checks.current_day_number}`, exact: true }).click();
@@ -97,6 +110,8 @@ try {
   expect(reads.some(r => r.path.startsWith('/v1/admin/') && r.status === 200)).toBe(true);
   if (input.championship_checks)
     expect(reads.some(r => r.path === `/v1/admin/seasons/${input.championship_checks.season_id}/championship` && r.method === 'GET' && r.status === 200)).toBe(true);
+  if (input.wipe_checks)
+    expect(reads.some(r => r.path === `/v1/seasons/${input.wipe_checks.season_id}/wipe-revivals` && r.method === 'GET' && r.status === 200)).toBe(true);
   const menu = page.getByRole('button', { name: 'Abrir navegación' });
   if (await menu.isVisible()) await menu.click();
   await page.getByRole('button', { name: 'Cerrar sesión' }).click();
