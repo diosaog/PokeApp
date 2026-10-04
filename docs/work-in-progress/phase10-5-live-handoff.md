@@ -1,6 +1,6 @@
 # Phase 10.5 — live execution record
 
-Observation: 2026-10-05 Europe/Madrid. **E/F DONE; G IN PROGRESS; Phase 10.5 IN PROGRESS; Phase 11 NOT READY / NOT STARTED.**
+Observation: 2026-10-05 Europe/Madrid. **E/F/G DONE; Phase 10.5 IN PROGRESS; Phase 11 NOT READY / NOT STARTED.**
 [Contract](../phase10-5-functional-alignment.md),
 [continuity](../AI/PokeApp_Multi_AI_Continuity_Protocol.md),
 [checkpoint](../project-checkpoint.md),
@@ -40,8 +40,8 @@ Unrelated processes/remote operations not inspected: UNKNOWN.
 | D: daily wins/deaths and relevant unresolved ties | FIX NOW | DONE, source `2c8ad42`, 035 + public delivery verified below. |
 | E: 026 requires initial manual A/B before activation | FIX NOW | DONE; observed progress/deaths, boundary-only ties, local/public gates and deployment verified. Closure below. |
 | F: 029 lifecycle reads final daily snapshot positions for title | FIX NOW | DONE; accumulated championship, finish certificate and frozen Hall delivered. Closure below. |
-| G: wipe counter exists in stats but lacks owned command/UI | FIX NOW | Authorized after F; implementation complete, final local hardening gate and public delivery in progress below. |
-| H: Preview only selects scheduled match; missing-lock presentation insufficient | FIX NOW | Pending G. |
+| G: wipe counter exists in stats but lacks owned command/UI | FIX NOW | DONE; participant-owned counter, full closure and safe public delivery verified below. |
+| H: Preview only selects scheduled match; missing-lock presentation insufficient | FIX NOW | Next remaining package; await explicit owner continuation. |
 | I: pending promotions hidden by public view; voucher canje absent in React; purchases require active season | FIX NOW | Pending H. |
 | J: Admin displays technical readiness keys | FIX NOW | Ordinary result UI moved in C; remaining wording pending I. |
 | K: minimal public projection from permitted published facts | FIX NOW | Pending J; wider scope blocked below. |
@@ -929,3 +929,81 @@ Railway and Cloudflare still serve F, as freshly observed. No G migration POST o
 deployment has occurred at this checkpoint. Next: commit/push the validated
 hardening, single 038 apply, Railway, Cloudflare, safe public read-only closure,
 final report/handoff, then STOP before H/Phase 11.
+
+### G remote apply checkpoint - 2026-10-05
+
+Final hardening source `848e7b0177d26230315424d7edef9a6a3ca466af` is pushed.
+**038 is now applied exactly once as `20261004222029`** (UTC migration version;
+delivery date 2026-10-05 Europe/Madrid). All prior 29 records unchanged; 30 total.
+Post-apply comparison: 55/55 scoped tables identical, zero wipe revision metadata
+rows, two safe service-only helpers, stats RLS/read/service/owner preserved,
+browser surplus capabilities revoked, zero added/removed Advisor ERROR/WARN.
+Do not replay 038. Evidence: `%TEMP%/phase10-5g-deployment-20261005-final2/postapply.json`.
+Railway G deployment `f21954a8-7624-4aaf-ad76-890469355878` was submitted from the
+232-file committed API bundle. Backend completion, Cloudflare and public closure
+are pending at this intermediate checkpoint; the final delivery section will
+supersede it.
+
+Railway subsequently reached SUCCESS with image
+`sha256:b28ea95501afbe722845c996b3a325667fa570813ce97fbb1d3e992be20e1e20`;
+health 200 and unauthenticated G route 401 verified before frontend deployment.
+Cloudflare G deployment `7a7bdf65-0b40-4707-a199-2df331aff3e5`, version
+`f356e801-af3e-452d-884b-0b133778c0dc`, 100%, now serves the same source.
+Live build assets, HTTPS/deep SPA/MIME/CSP/nosniff/exact CORS PASS. The single
+authenticated public read-only run and final preservation comparison remain in
+progress; no further local test reruns are required.
+
+## G delivered - 2026-10-05; STOP after G
+
+This supersedes the pending-delivery notes above. **G DONE / STAGING_DONE_ZERO_RESIDUE.**
+[Report](../phase10-5g-completion-report.md), [local closure](../phase10-5g-closure-evidence.json),
+[public evidence](../phase10-5g-public-evidence.json), [security](../phase10-5g-security-advisor.json).
+F remains DONE. Entry `b92b3dd26e182a288a4614e4bef61dade9fb8d43`; initial source
+`a53a9421f53c029e510d5b0996aacd14eb5796a7`; final application source `848e7b0177d26230315424d7edef9a6a3ca466af`,
+committed/pushed before any remote write. Documentation closure is a subsequent
+commit: read exact final HEAD from Git, not a self-referential hash in this file.
+
+- Own absolute counter GET/PUT uses enabled JWT ownership, strict integer/CAS,
+  stable key/body replay and transactional audit/receipt. Existing adjusted-death
+  formula (+2, -0.4 points each), no-op fingerprint and future freeze are preserved.
+  Unknown save deaths stay unknown. No purchased-revive, physical-save, Admin
+  editor or frozen E/day/F/Hall rewrite. Human personal control is in GENERAL.
+- Full applicable final-source closure: **694 Python / 22 React / 34 Edge PASS**,
+  zero Python fail/errors/skips, exit 0. Browser is retained unchanged-source PASS.
+  Nine G groups / nine concurrent scenarios / three rollback boundaries, 026-030
+  and B/C/D/E/F PASS, exact 49-table restoration. Four builds: **12,175 identical
+  schema/grant/ownership lines**, safe catalogs/RLS, 37 prior migrations unchanged.
+  Local PG stopped. Interrupted harness/native runs and local OpenSSL mitigation
+  remain explicitly recorded; none is counted as successful evidence.
+- **038=20261004222029 once; 30 remote migration records**, all prior 29 unchanged.
+  No new table/column/default/backfill. Stats browser capabilities hardened; RLS
+  reads/service rights/ownership preserved. Both touched helpers are service-only
+  INVOKER with fixed search_path. Supabase preceded Railway, then Cloudflare.
+- Railway **f21954a8-7624-4aaf-ad76-890469355878 SUCCESS**, source above, only 232 committed API inputs.
+  Cloudflare **7a7bdf65-0b40-4707-a199-2df331aff3e5**, version **f356e801-af3e-452d-884b-0b133778c0dc**, 100%, same source.
+  Backend health/new route auth, exact live build assets, SPA/HTTPS/MIME/CSP/
+  nosniff/CORS verified.
+- Public **phase10_5_public_reads_9a1a6007939d401299998b951ba432bb PASS**, exit 0: **37 API requests / 22 browser
+  visits**, no interception/errors/business writes/fixtures. Owner PIN/JWT and
+  own counter read pass. G write denials target a verified absent season only.
+  Public mobile card reviewed. Positive wipe updates/concurrency/rollback remain
+  LOCAL ONLY; owner counter was never changed to prove them publicly.
+- Independent final **55/55 scoped tables identical**, **30/30 migration records
+  unchanged** after apply, zero new tables and zero wipe revision metadata rows.
+  Owner identity/PIN/admin, seasons/results/divisions/Team Locks/save facts/economy/
+  Hall preserved. Full Auth captures plus stable owner credential/identity hashes;
+  only owner login/session activity excluded from scoped equality. Storage
+  metadata fully included; no Storage bytes touched.
+- Advisor **24 ERROR / 5 WARN / 131 INFO**, zero new or removed ERROR/WARN.
+  Exact raw delivery evidence: `%TEMP%/phase10-5g-deployment-20261005-final2` and
+  `%TEMP%/phase10-5g-public`; no remote cleanup or pending operation remains.
+
+One hosted sample measured own-counter read **0.78 s**, GENERAL **1.48 s** and overview **4.80 s**. Single staging observations only; Phase 14 retains overview
+latency. No per-player HTTP loop or broad unrelated invalidation was introduced.
+Existing owner decisions remain unchanged (economy/completion, lifecycle operator,
+residual/4+ championship ties/finalist, purchased revive, Team Lock cutoff, scouting,
+DQ/Cup and future milestones). None blocks G.
+
+**EXACT NEXT STEP: STOP.** H (Team Lock warning + Team Preview/Battle parity) is the
+next remaining package, requiring the next explicit owner continuation. No H work
+has begun. Phase 10.5 IN PROGRESS; **PHASE 11 READINESS: NOT READY / NOT STARTED**.

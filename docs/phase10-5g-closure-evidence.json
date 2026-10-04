@@ -1,7 +1,7 @@
 {
   "recorded_at": "2026-10-04T22:17:53.138558+00:00",
   "entry_head": "b92b3dd26e182a288a4614e4bef61dade9fb8d43",
-  "status": "LOCAL_GREEN_DELIVERY_PENDING",
+  "status": "DONE_STAGING_DONE_ZERO_RESIDUE",
   "python": {
     "classification": "FRESH_PASS",
     "passed": 694,
@@ -596,5 +596,12 @@
     "A resumed run encountered stopped local PostgreSQL before DB interaction. Cluster restarted; full final G gate passed with exact cleanup."
   ],
   "local_environment_reference": "https://docs.openssl.org/3.5/man3/OPENSSL_ia32cap/",
-  "remote": "NOT_YET_DELIVERED: no remote write performed at this local checkpoint."
+  "remote": {
+    "status": "PASS",
+    "public_evidence": "phase10-5g-public-evidence.json",
+    "security_evidence": "phase10-5g-security-advisor.json",
+    "migration_version": "20261004222029",
+    "source_commit": "848e7b0177d26230315424d7edef9a6a3ca466af"
+  },
+  "application_source_commit": "848e7b0177d26230315424d7edef9a6a3ca466af"
 }

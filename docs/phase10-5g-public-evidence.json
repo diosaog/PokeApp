@@ -1,0 +1,401 @@
+{
+  "run_id": "phase10_5_public_reads_9a1a6007939d401299998b951ba432bb",
+  "started_at": "2026-10-04T22:23:50.848280+00:00",
+  "status": "PASS",
+  "source_commit": "848e7b0177d26230315424d7edef9a6a3ca466af",
+  "project_ref": "uwleqeuzsveqlugugzba",
+  "api": "https://pokeapp-api-production.up.railway.app",
+  "web": "https://pokeapp-web.pokeapp-v2.workers.dev",
+  "owner_trainer": "507d9c56-04d8-4801-a9da-f1e53674efb5",
+  "owner_auth_user": "ac98932c-f713-43d1-8b20-600f0be3dadc",
+  "owner_season": "c6bcac5b-0b89-403f-8242-41ac58286ade",
+  "owner_auth_exception": "Only this owner's Auth activity; every public row compared",
+  "business_writes": 0,
+  "fixtures_created": 0,
+  "checks": [
+    "Pinned project, applied 033-038, fresh 55-table baseline and owner identity",
+    "Existing PIN login, real JWT refresh and same enabled admin principal",
+    "E real typed initial-assignment read preserves owner legacy initialization",
+    "F real typed championship read preserves incomplete owner season without a champion",
+    "G real typed own wipe read matches existing counter/revision without save or foreign participant fields",
+    "Real GENERAL/overview: exact strings, current roster, reached days and explicit unknown counts",
+    "Real eligible participant GET and existing matches without mutation",
+    "G GET/PUT deny verified absent season, anonymous/invalid JWT and spoofed owner fields; owner counter untouched",
+    "F championship GET/finish/BO3 deny verified absent season; caller-supplied title/points rejected without writes",
+    "E typed finalize denies verified absent season and caller-supplied progress without writes",
+    "Deployed D accepts typed tie decision, denies absent resource and injected plan without writes",
+    "Anonymous/invalid JWT 401, extra actor 422 and absent-season RPC 404; no valid business write",
+    "Public React: GENERAL/current day, owned wipe counter, eleven screens desktop/mobile, read-only championship review and logout"
+  ],
+  "requests": [
+    {
+      "method": "POST",
+      "path": "/v1/auth/pin-login",
+      "status": 200,
+      "elapsed_ms": 2203.19
+    },
+    {
+      "method": "POST",
+      "path": "/v1/auth/refresh",
+      "status": 200,
+      "elapsed_ms": 689.76
+    },
+    {
+      "method": "GET",
+      "path": "/v1/me",
+      "status": 200,
+      "elapsed_ms": 896.39
+    },
+    {
+      "method": "GET",
+      "path": "/v1/read/seasons/c6bcac5b-0b89-403f-8242-41ac58286ade/league",
+      "status": 200,
+      "elapsed_ms": 1478.0
+    },
+    {
+      "method": "GET",
+      "path": "/v1/read/seasons/c6bcac5b-0b89-403f-8242-41ac58286ade/overview",
+      "status": 200,
+      "elapsed_ms": 4803.33
+    },
+    {
+      "method": "GET",
+      "path": "/v1/seasons/c6bcac5b-0b89-403f-8242-41ac58286ade/initial-assignment",
+      "status": 200,
+      "elapsed_ms": 1149.32
+    },
+    {
+      "method": "GET",
+      "path": "/v1/admin/seasons/c6bcac5b-0b89-403f-8242-41ac58286ade/championship",
+      "status": 200,
+      "elapsed_ms": 1092.11
+    },
+    {
+      "method": "GET",
+      "path": "/v1/seasons/c6bcac5b-0b89-403f-8242-41ac58286ade/wipe-revivals",
+      "status": 200,
+      "elapsed_ms": 782.0
+    },
+    {
+      "method": "GET",
+      "path": "/v1/seasons/c6bcac5b-0b89-403f-8242-41ac58286ade/matchdays/3eb1cbd3-9a3b-4b1d-a2b5-d31a4c16ff08",
+      "status": 200,
+      "elapsed_ms": 1611.6
+    },
+    {
+      "method": "GET",
+      "path": "/v1/read/seasons/c6bcac5b-0b89-403f-8242-41ac58286ade/league",
+      "status": 401,
+      "elapsed_ms": 199.58
+    },
+    {
+      "method": "GET",
+      "path": "/v1/read/seasons/c6bcac5b-0b89-403f-8242-41ac58286ade/league",
+      "status": 401,
+      "elapsed_ms": 724.39
+    },
+    {
+      "method": "GET",
+      "path": "/v1/seasons/c6bcac5b-0b89-403f-8242-41ac58286ade/matchdays/3eb1cbd3-9a3b-4b1d-a2b5-d31a4c16ff08",
+      "status": 401,
+      "elapsed_ms": 211.5
+    },
+    {
+      "method": "GET",
+      "path": "/v1/seasons/c6bcac5b-0b89-403f-8242-41ac58286ade/matchdays/3eb1cbd3-9a3b-4b1d-a2b5-d31a4c16ff08",
+      "status": 401,
+      "elapsed_ms": 369.69
+    },
+    {
+      "method": "GET",
+      "path": "/v1/admin/seasons/c6bcac5b-0b89-403f-8242-41ac58286ade/championship",
+      "status": 401,
+      "elapsed_ms": 186.44
+    },
+    {
+      "method": "GET",
+      "path": "/v1/admin/seasons/c6bcac5b-0b89-403f-8242-41ac58286ade/championship",
+      "status": 401,
+      "elapsed_ms": 642.61
+    },
+    {
+      "method": "GET",
+      "path": "/v1/seasons/c6bcac5b-0b89-403f-8242-41ac58286ade/wipe-revivals",
+      "status": 401,
+      "elapsed_ms": 198.56
+    },
+    {
+      "method": "GET",
+      "path": "/v1/seasons/c6bcac5b-0b89-403f-8242-41ac58286ade/wipe-revivals",
+      "status": 401,
+      "elapsed_ms": 349.07
+    },
+    {
+      "method": "PUT",
+      "path": "/v1/seasons/c6bcac5b-0b89-403f-8242-41ac58286ade/matchdays/3eb1cbd3-9a3b-4b1d-a2b5-d31a4c16ff08/results",
+      "status": 401,
+      "elapsed_ms": 183.78
+    },
+    {
+      "method": "PUT",
+      "path": "/v1/seasons/c6bcac5b-0b89-403f-8242-41ac58286ade/matchdays/3eb1cbd3-9a3b-4b1d-a2b5-d31a4c16ff08/results",
+      "status": 401,
+      "elapsed_ms": 358.37
+    },
+    {
+      "method": "PUT",
+      "path": "/v1/seasons/c6bcac5b-0b89-403f-8242-41ac58286ade/matchdays/3eb1cbd3-9a3b-4b1d-a2b5-d31a4c16ff08/results",
+      "status": 422,
+      "elapsed_ms": 894.8
+    },
+    {
+      "method": "GET",
+      "path": "/v1/seasons/788f52b1-0833-49bf-8fd1-7d69c0eee251/wipe-revivals",
+      "status": 404,
+      "elapsed_ms": 2018.86
+    },
+    {
+      "method": "PUT",
+      "path": "/v1/seasons/788f52b1-0833-49bf-8fd1-7d69c0eee251/wipe-revivals",
+      "status": 404,
+      "elapsed_ms": 1700.87
+    },
+    {
+      "method": "PUT",
+      "path": "/v1/seasons/788f52b1-0833-49bf-8fd1-7d69c0eee251/wipe-revivals",
+      "status": 401,
+      "elapsed_ms": 175.7
+    },
+    {
+      "method": "PUT",
+      "path": "/v1/seasons/788f52b1-0833-49bf-8fd1-7d69c0eee251/wipe-revivals",
+      "status": 401,
+      "elapsed_ms": 378.64
+    },
+    {
+      "method": "PUT",
+      "path": "/v1/seasons/788f52b1-0833-49bf-8fd1-7d69c0eee251/wipe-revivals",
+      "status": 422,
+      "elapsed_ms": 844.61
+    },
+    {
+      "method": "GET",
+      "path": "/v1/admin/seasons/788f52b1-0833-49bf-8fd1-7d69c0eee251/championship",
+      "status": 404,
+      "elapsed_ms": 1695.91
+    },
+    {
+      "method": "POST",
+      "path": "/v1/admin/seasons/788f52b1-0833-49bf-8fd1-7d69c0eee251/finish",
+      "status": 404,
+      "elapsed_ms": 1387.7
+    },
+    {
+      "method": "POST",
+      "path": "/v1/admin/seasons/788f52b1-0833-49bf-8fd1-7d69c0eee251/finish",
+      "status": 422,
+      "elapsed_ms": 1167.12
+    },
+    {
+      "method": "POST",
+      "path": "/v1/admin/seasons/788f52b1-0833-49bf-8fd1-7d69c0eee251/championship/bo3",
+      "status": 404,
+      "elapsed_ms": 1042.87
+    },
+    {
+      "method": "POST",
+      "path": "/v1/admin/seasons/788f52b1-0833-49bf-8fd1-7d69c0eee251/championship/bo3",
+      "status": 422,
+      "elapsed_ms": 1185.78
+    },
+    {
+      "method": "GET",
+      "path": "/v1/seasons/788f52b1-0833-49bf-8fd1-7d69c0eee251/initial-assignment",
+      "status": 401,
+      "elapsed_ms": 174.58
+    },
+    {
+      "method": "GET",
+      "path": "/v1/seasons/788f52b1-0833-49bf-8fd1-7d69c0eee251/initial-assignment",
+      "status": 401,
+      "elapsed_ms": 348.92
+    },
+    {
+      "method": "POST",
+      "path": "/v1/admin/seasons/788f52b1-0833-49bf-8fd1-7d69c0eee251/initial-assignment/finalize",
+      "status": 404,
+      "elapsed_ms": 1049.6
+    },
+    {
+      "method": "POST",
+      "path": "/v1/admin/seasons/788f52b1-0833-49bf-8fd1-7d69c0eee251/initial-assignment/finalize",
+      "status": 422,
+      "elapsed_ms": 562.54
+    },
+    {
+      "method": "PUT",
+      "path": "/v1/seasons/788f52b1-0833-49bf-8fd1-7d69c0eee251/matchdays/de5a4409-3558-4c4e-8b11-aefdd166986b/results",
+      "status": 404,
+      "elapsed_ms": 1402.06
+    },
+    {
+      "method": "POST",
+      "path": "/v1/admin/seasons/788f52b1-0833-49bf-8fd1-7d69c0eee251/matchdays/cc594c5c-7bcf-4d49-8990-bd001f4ecaed/close",
+      "status": 404,
+      "elapsed_ms": 779.37
+    },
+    {
+      "method": "POST",
+      "path": "/v1/admin/seasons/788f52b1-0833-49bf-8fd1-7d69c0eee251/matchdays/cc594c5c-7bcf-4d49-8990-bd001f4ecaed/close",
+      "status": 422,
+      "elapsed_ms": 846.34
+    }
+  ],
+  "failures": [],
+  "limitations": [
+    "Owner is admin: no public positive non-admin result mutation is claimed.",
+    "No manual result changed; successful result/tie/initial assignment mutations, CAS and races use local C/D/E gates.",
+    "No observed save is uploaded or invented; existing owner season remains legacy initialization.",
+    "Positive championship, BO3, finish, archive, Hall, rollback and concurrency proof is local PostgreSQL only; the owner season is never finalized for validation.",
+    "Positive owned wipe updates, races and rollback are proven locally only; the owner's wipe counter is never changed for public validation."
+  ],
+  "migrations": [
+    {
+      "name": "033_league_general_read",
+      "record_hash": "f0a77c2aa988787991827e988030a0c7",
+      "version": "20260930113319"
+    },
+    {
+      "name": "034_participant_matchday_results",
+      "record_hash": "f3c985ee8eafa7fc8515b1c6453c2829",
+      "version": "20260930113328"
+    },
+    {
+      "name": "035_daily_sporting_ranking",
+      "record_hash": "482b18eddf33ca8d71cc5468afdb96c9",
+      "version": "20261001111600"
+    },
+    {
+      "name": "036_observed_initial_divisions",
+      "record_hash": "c932ad6c8c1a516d697f34c8af1e7f5b",
+      "version": "20261001165951"
+    },
+    {
+      "name": "037_league_championship",
+      "record_hash": "0a394fd0d67f579e14764beb8fa772aa",
+      "version": "20261003121543"
+    },
+    {
+      "name": "038_participant_wipe_revivals",
+      "record_hash": "179ac40388e66fb53c086f86cb4cb24b",
+      "version": "20261004222029"
+    }
+  ],
+  "general": {
+    "rows": 8,
+    "days": 2,
+    "unknown_dead_counts": 8,
+    "exact_string_amounts": true,
+    "private_fields_absent": true
+  },
+  "browser_exit_code": 0,
+  "browser": {
+    "status": "PASS",
+    "screen_visits": 22,
+    "business_writes": 0,
+    "api_interception": false
+  },
+  "baseline_comparison": true,
+  "migration_history_comparison": true,
+  "advisor_comparison": [],
+  "finished_at": "2026-10-04T22:26:50.609530+00:00",
+  "deployments": {
+    "time": "2026-10-04T22:23:47.452728+00:00",
+    "source_commit": "848e7b0177d26230315424d7edef9a6a3ca466af",
+    "railway": {
+      "id": "f21954a8-7624-4aaf-ad76-890469355878",
+      "status": "SUCCESS",
+      "image": "sha256:b28ea95501afbe722845c996b3a325667fa570813ce97fbb1d3e992be20e1e20",
+      "source": "Phase 10.5G source 848e7b0177d26230315424d7edef9a6a3ca466af"
+    },
+    "cloudflare": {
+      "id": "7a7bdf65-0b40-4707-a199-2df331aff3e5",
+      "version": "f356e801-af3e-452d-884b-0b133778c0dc",
+      "percentage": 100,
+      "source": "Phase 10.5G source 848e7b0177d26230315424d7edef9a6a3ca466af"
+    }
+  },
+  "independent_final": {
+    "time": "2026-10-04T22:28:13.419758+00:00",
+    "tables_equal": 55,
+    "original_tables_equal": 55,
+    "migrations_equal": 30,
+    "owner_mapping_admin": true,
+    "owner_stable_auth_credential": true,
+    "new_tables": 0,
+    "helpers_verified": 2,
+    "stats_rls_owner_reads_preserved": true,
+    "browser_write_schema_capabilities_removed": true,
+    "wipe_revision_rows": 0,
+    "owner_business_writes": 0,
+    "new_error_warn": 0,
+    "removed_error_warn": 0,
+    "advisor": {
+      "INFO": 131,
+      "ERROR": 24,
+      "WARN": 5
+    },
+    "scope": "All 55 scoped tables including every public/manual row and Storage metadata; only explicit owner Auth activity excluded, separately full-captured and stable-credential-checked. No Storage bytes written."
+  },
+  "hosting": {
+    "time": "2026-10-04T22:23:47.704623+00:00",
+    "source_commit": "848e7b0177d26230315424d7edef9a6a3ca466af",
+    "api": "https://pokeapp-api-production.up.railway.app",
+    "web": "https://pokeapp-web.pokeapp-v2.workers.dev",
+    "assets": [
+      {
+        "path": "/assets/index-D6XIxZUk.js",
+        "sha256": "52cc03ae656304d1679c23de8f2d1ede0af6147c65347f63db6bfea335d9941e",
+        "content_type": "text/javascript"
+      },
+      {
+        "path": "/assets/index-Ce8Qi1M_.css",
+        "sha256": "fdd473f168f290c4c5a4f05543bb4987fb8eaaa43cc59b3763737e8aa3964ef4",
+        "content_type": "text/css"
+      }
+    ],
+    "web_headers": {
+      "content-type": "text/html",
+      "content-security-policy": "default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'self' https://pokeapp-api-production.up.railway.app; object-src 'none'; base-uri 'none'; frame-ancestors 'none'; form-action 'self'",
+      "x-content-type-options": "nosniff",
+      "referrer-policy": "no-referrer"
+    },
+    "status": "PASS"
+  },
+  "api_requests_checked": 37,
+  "local_positive_mutation_only": true,
+  "visual_review": {
+    "mobile": "PASS: owned wipe card, pending save notice and human controls legible; card fits viewport",
+    "desktop_browser": "PASS"
+  },
+  "migration_apply": {
+    "time": "2026-10-04T22:21:43.028820+00:00",
+    "source_commit": "848e7b0177d26230315424d7edef9a6a3ca466af",
+    "version": "20261004222029",
+    "migrations": 30,
+    "original_tables_equal": 55,
+    "new_tables": 0,
+    "helpers_verified": 2,
+    "stats_rls_owner_reads_preserved": true,
+    "browser_write_schema_capabilities_removed": true,
+    "wipe_revision_rows": 0,
+    "owner_business_writes": 0,
+    "new_error_warn": 0,
+    "removed_error_warn": 0,
+    "advisor": {
+      "INFO": 131,
+      "ERROR": 24,
+      "WARN": 5
+    }
+  }
+}

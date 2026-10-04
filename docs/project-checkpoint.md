@@ -1,6 +1,6 @@
 # PokeApp 2.0 Project Checkpoint
 
-Checkpoint reconciled: 2026-10-03. This file is the project index and historical
+Checkpoint reconciled: 2026-10-05. This file is the project index and historical
 milestone record; it does not maintain a second live phase-status ledger.
 
 ## Current project position
@@ -9,7 +9,8 @@ milestone record; it does not maintain a second live phase-status ledger.
   [Approved contract](phase10-5-functional-alignment.md),
   [single live record](work-in-progress/phase10-5-live-handoff.md).
   Owner authorized implementation on 2026-09-29 after the functional knowledge export.
-  Latest closed package: [F final championship and frozen Hall](phase10-5f-completion-report.md).
+  Latest closed package: [G participant-owned wipe revivals](phase10-5g-completion-report.md).
+  [F final championship and frozen Hall](phase10-5f-completion-report.md) remains delivered.
   [E observed progress and initial divisions](phase10-5e-completion-report.md) remains delivered.
   [D daily sporting ranking](phase10-5d-completion-report.md) remains delivered.
   Consult the live record for deployment and the active package.
@@ -40,6 +41,21 @@ season guard and resumption checks. Do not recreate infrastructure or reapply SQ
 The following counts, PASS results, next-step notes and remote versions belong to
 their named milestones. They are retained as evidence, not fresh verification of
 the current repository or remote database. Current project position is indexed above.
+
+### 2026-10-05 - Phase 10.5G CLOSED
+
+Participants manage their own live revived-after-wipe count with JWT ownership,
+CAS, idempotency and atomic audit. Existing +2 adjusted deaths / -0.4 points each,
+unknown save evidence and frozen E/day/F/Hall remain safe. No physical or purchased
+revive change. GENERAL has the human personal control. Source `848e7b0`,
+038=`20261004222029` once, Railway then Cloudflare. Full 694 Python, 22 React, 34 Edge,
+nine-group real-PG G and inherited 026-030/B-F closure PASS; exact 49-table restore,
+12,175-line four-build parity. Local environment interruptions and final successful
+reruns are recorded separately. Public 37 API requests/22 browser visits PASS;
+55 scoped tables preserved, zero business writes and zero added/removed Advisor
+ERROR/WARN. [G report](phase10-5g-completion-report.md) has exact sources, delivery,
+security and limitations. STOP after G; H requires explicit continuation. Phase 11
+NOT READY / NOT STARTED.
 
 ### 2026-10-03 - Phase 10.5F CLOSED
 

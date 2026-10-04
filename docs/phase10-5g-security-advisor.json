@@ -1,0 +1,125 @@
+{
+  "time": "2026-10-04T22:28:13.419758+00:00",
+  "before": {
+    "INFO": 131,
+    "ERROR": 24,
+    "WARN": 5
+  },
+  "after": {
+    "INFO": 131,
+    "ERROR": 24,
+    "WARN": 5
+  },
+  "new_error_warn": 0,
+  "removed_error_warn": 0,
+  "functions": [
+    {
+      "anon": false,
+      "authenticated": false,
+      "owner": "postgres",
+      "proconfig": [
+        "search_path=pg_catalog, public"
+      ],
+      "proname": "api_participant_wipe_revivals",
+      "prosecdef": false,
+      "public_execute": false,
+      "service": true,
+      "signature": "api_participant_wipe_revivals(jsonb)"
+    },
+    {
+      "anon": false,
+      "authenticated": false,
+      "owner": "postgres",
+      "proconfig": [
+        "search_path=pg_catalog, public"
+      ],
+      "proname": "matchday_context_v034",
+      "prosecdef": false,
+      "public_execute": false,
+      "service": true,
+      "signature": "matchday_context_v034(text,jsonb)"
+    }
+  ],
+  "stats_before": [
+    {
+      "anon_column_write": false,
+      "anon_dml": false,
+      "anon_read": false,
+      "anon_write": false,
+      "authenticated_column_write": true,
+      "authenticated_dml": false,
+      "authenticated_read": true,
+      "authenticated_write": true,
+      "owner": "postgres",
+      "policies": 4,
+      "public_column_write": false,
+      "public_write": false,
+      "relname": "season_player_stats",
+      "rls": true,
+      "service_select": true,
+      "service_update": true
+    }
+  ],
+  "stats_after": [
+    {
+      "anon_column_write": false,
+      "anon_dml": false,
+      "anon_read": false,
+      "anon_write": false,
+      "authenticated_column_write": false,
+      "authenticated_dml": false,
+      "authenticated_read": true,
+      "authenticated_write": false,
+      "owner": "postgres",
+      "policies": 4,
+      "public_column_write": false,
+      "public_write": false,
+      "relname": "season_player_stats",
+      "rls": true,
+      "service_select": true,
+      "service_update": true
+    }
+  ],
+  "stats_hardening": {
+    "removed_capabilities": [
+      "authenticated_column_write",
+      "authenticated_write"
+    ],
+    "existing_dml_denial_preserved": true,
+    "rls_owner_reads_service_preserved": true
+  },
+  "independent_final": {
+    "time": "2026-10-04T22:28:13.419758+00:00",
+    "tables_equal": 55,
+    "original_tables_equal": 55,
+    "migrations_equal": 30,
+    "owner_mapping_admin": true,
+    "owner_stable_auth_credential": true,
+    "new_tables": 0,
+    "helpers_verified": 2,
+    "stats_rls_owner_reads_preserved": true,
+    "browser_write_schema_capabilities_removed": true,
+    "wipe_revision_rows": 0,
+    "owner_business_writes": 0,
+    "new_error_warn": 0,
+    "removed_error_warn": 0,
+    "advisor": {
+      "INFO": 131,
+      "ERROR": 24,
+      "WARN": 5
+    },
+    "scope": "All 55 scoped tables including every public/manual row and Storage metadata; only explicit owner Auth activity excluded, separately full-captured and stable-credential-checked. No Storage bytes written."
+  },
+  "auth_activity_delta": {
+    "time": "2026-10-04T22:27:26.360831+00:00",
+    "full_table_differences": [
+      "auth.refresh_tokens",
+      "auth.sessions",
+      "auth.users"
+    ],
+    "scope": "Only this owner's Auth row/identity/session/refresh activity is excluded from scoped equality. Stable owner Auth/credential hashes are compared separately. All public rows and Storage metadata are fully included. No Storage bytes written.",
+    "causation": "Not inferred; owner may be logging in while validation runs."
+  },
+  "raw_evidence": "%TEMP%/phase10-5g-deployment-20261005-final2",
+  "note": "Existing ERROR/WARN are unchanged by identity; no new table/column/backfill. Browser inherited TRUNCATE/REFERENCES/TRIGGER and column write/reference capabilities explicitly removed. RLS/read/service/owner facts preserved."
+}

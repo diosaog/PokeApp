@@ -133,6 +133,23 @@ F is delivered as of 2026-10-03: source `6b46666`, migration
 037=`20261003121543`, verified Railway/Cloudflare and preserved owner data. The
 current instruction ends here; do not begin G automatically or start Phase 11.
 
+## Authorized Package G continuation and closure (2026-10-05)
+
+The subsequent explicit G instruction supersedes the historical stop-after-F note
+for G only. G is now delivered: participants set their own live revived-after-wipe
+counter through verified JWT ownership, strict nonnegative integers, CAS, stable
+replay and transactional audit. The approved +2 adjusted deaths / -0.4 points per
+Pokemon is unchanged, separately from purchased revives. Unknown observations and
+frozen initial A/B, days, championship and Hall remain safe. GENERAL contains the
+personal control; no Admin override or physical save write was added.
+
+Final source `848e7b0`, forward 038=`20261004222029`, complete local closure,
+Railway/Cloudflare and safe public read-only preservation are verified in the
+[G report](phase10-5g-completion-report.md). Initial inherited browser stats schema
+privileges were removed before delivery without changing RLS reads or owner data.
+**STOP after G.** H requires the next explicit owner continuation; Phase 11 remains
+NOT READY / NOT STARTED. Existing unresolved decisions below keep their scope.
+
 ## Owner decisions still required
 
 Implement independent branches; never infer answers to these questions:
@@ -156,7 +173,7 @@ Use disposable local PostgreSQL for active/destructive flows; safe isolated
 staging fixtures or read-only public checks where required. Never read, inspect,
 hash, stage or touch the protected guide named in the master protocol.
 
-Existing migrations 001–032 are immutable. Before new remote SQL verify the pinned
+Existing migrations 001–038 are immutable. Before new remote SQL verify the pinned
 V2 project, actual migration history, committed source, fresh complete baseline
 and Advisor inventory. Never replay 031/032, reset staging or change V1.
 Reuse existing Railway and Cloudflare resources. Push source before deployment.
