@@ -1,6 +1,6 @@
 # Phase 10.5 — live execution record
 
-Observation: 2026-10-04 Europe/Madrid. **E/F DONE; G IN PROGRESS; Phase 10.5 IN PROGRESS; Phase 11 NOT READY / NOT STARTED.**
+Observation: 2026-10-05 Europe/Madrid. **E/F DONE; G IN PROGRESS; Phase 10.5 IN PROGRESS; Phase 11 NOT READY / NOT STARTED.**
 [Contract](../phase10-5-functional-alignment.md),
 [continuity](../AI/PokeApp_Multi_AI_Continuity_Protocol.md),
 [checkpoint](../project-checkpoint.md),
@@ -39,8 +39,8 @@ Unrelated processes/remote operations not inspected: UNKNOWN.
 | C: participant result entry with separate closed-day correction | FIX NOW | DONE, source `9be3d70`, local gates and safe public checks PASS. |
 | D: daily wins/deaths and relevant unresolved ties | FIX NOW | DONE, source `2c8ad42`, 035 + public delivery verified below. |
 | E: 026 requires initial manual A/B before activation | FIX NOW | DONE; observed progress/deaths, boundary-only ties, local/public gates and deployment verified. Closure below. |
-| F: 029 lifecycle reads final daily snapshot positions for title | FIX NOW | Next authorized atomic package, NOT STARTED; structural Phase 11 blocker. |
-| G: wipe counter exists in stats but lacks owned command/UI | FIX NOW | Pending F. |
+| F: 029 lifecycle reads final daily snapshot positions for title | FIX NOW | DONE; accumulated championship, finish certificate and frozen Hall delivered. Closure below. |
+| G: wipe counter exists in stats but lacks owned command/UI | FIX NOW | Authorized after F; implementation complete, final local hardening gate and public delivery in progress below. |
 | H: Preview only selects scheduled match; missing-lock presentation insufficient | FIX NOW | Pending G. |
 | I: pending promotions hidden by public view; voucher canje absent in React; purchases require active season | FIX NOW | Pending H. |
 | J: Admin displays technical readiness keys | FIX NOW | Ordinary result UI moved in C; remaining wording pending I. |
@@ -876,3 +876,56 @@ stopped successfully after zero remaining client sessions.
 Next action: commit/push this validated source, fresh remote baseline and Advisor,
 apply only 038 once, then Railway and Cloudflare, safe authenticated reads and
 exact data/security comparison. G is not DONE until delivery and final handoff.
+
+### G preflight hardening and resumed local gate — 2026-10-04
+
+Initial source checkpoint `a53a9421f53c029e510d5b0996aacd14eb5796a7` was pushed.
+The fresh remote preflight stopped **before any migration POST**: hosted defaults
+still granted authenticated TRUNCATE/REFERENCES/TRIGGER on `season_player_stats`,
+although INSERT/UPDATE/DELETE were already denied. Unapplied 038 now explicitly
+revokes those surplus capabilities and column write/reference privileges while
+preserving existing RLS reads and backend service permissions. No remote data or
+deployment changed. `%TEMP%/phase10-5g-deployment-20261004` retains the failed
+read-only preflight. The next fresh delivery directory ends in `-final`.
+
+All affected local gates are being repeated against this final hardening. Four
+fresh builds again match; G reproduces hosted default grants before revocation.
+A parallel rerun suffered native PostgreSQL exception `0xC0000005` and recovery;
+Python separately printed 694 OK then exited `3221225477`. Neither is PASS.
+Cause is UNKNOWN. Interrupted inherited databases were restored exactly across
+all 49 tables from saved baselines; the focused fixture scope was cleaned without
+touching seed rows. Recovery evidence: `%TEMP%/phase10-5g-crash-recovery.json`.
+
+The subsequent isolated full code gate `phase10-5g-code-closure3` is PASS with exit
+0, including all 694 Python tests. Sequential PostgreSQL families are running via
+`%TEMP%/phase10-5g-sequential-pg.py`, evidence `*-closure3` and focused hardening
+evidence. PostgreSQL remains running for these gates. Do not deploy or mark G DONE
+until the sequential gates, second source commit/push and safe public closure pass.
+
+### G final local hardening closure - 2026-10-05
+
+All final-source local gates are now PASS. Full code closure3: 694 Python, zero
+fail/errors/skips, exit 0; 22 React and 34 unchanged-source Edge PASS. Sequential
+026-030 and B/C/D/E/F each restore all 49 public tables exactly. Four rebuilds
+retain 12,175 identical schema/grant/ownership lines. All prior 37 migrations
+remain unchanged. The final G run passes nine groups, nine concurrency scenarios,
+three rollback boundaries and exact 49-table cleanup, exit 0.
+
+An intervening G run had logged G01-G09 but lacked final cleanup/exit evidence;
+it is not counted as PASS. Its known local fixture scope was removed. A later
+native PG crash interrupted another run; Windows Event 1000 identifies local
+libcrypto-3-x64.dll 3.5.7.0, exception 0xc0000005. The final unchanged-source G run
+uses process-scoped OPENSSL_ia32cap=:0, a documented OpenSSL compatibility override.
+This is a local environment mitigation, not a proven root cause or production
+configuration change. Final evidence is `%TEMP%/phase10-5g-focused-portable-evidence.json`.
+PostgreSQL was stopped after zero remaining clients. The closure evidence records
+all interrupted attempts separately. No further local regression rerun is needed.
+
+Fresh public preflight now passes: 29 migration records, 55 full/scoped tables,
+owner identity/admin preserved, Advisor 24 ERROR / 5 WARN / 131 INFO. A transient
+CLI read failed before any write; an independent identical read succeeded and
+the complete baseline was recaptured in `%TEMP%/phase10-5g-deployment-20261005-final2`.
+Railway and Cloudflare still serve F, as freshly observed. No G migration POST or
+deployment has occurred at this checkpoint. Next: commit/push the validated
+hardening, single 038 apply, Railway, Cloudflare, safe public read-only closure,
+final report/handoff, then STOP before H/Phase 11.

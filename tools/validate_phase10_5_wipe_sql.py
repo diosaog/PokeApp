@@ -894,8 +894,42 @@ def validate(args, sql):
             ).data,
             "Stats RLS disabled",
         )
+        require(
+            client.execute(
+                "select jsonb_agg(jsonb_build_object('role',role,'table_write',"
+                "has_table_privilege(role,'public.season_player_stats','INSERT,UPDATE,DELETE,TRUNCATE,REFERENCES,TRIGGER'),"
+                "'column_write',has_any_column_privilege(role,'public.season_player_stats','INSERT,UPDATE,REFERENCES'))) "
+                "from unnest(array['anon','authenticated']) role"
+            ).data
+            == [
+                dict(role=role, table_write=False, column_write=False)
+                for role in ("anon", "authenticated")
+            ],
+            "Browser retained a stats table/column capability beyond ordinary DML",
+        )
+        # Reproduce hosted Supabase's default privileges on the real local table.
+        # Roll back the entire grant experiment; no fixture or existing row changes.
+        migration = (
+            Path(__file__).resolve().parents[1]
+            / "supabase/v2/migrations/038_participant_wipe_revivals.sql"
+        ).read_text(encoding="utf-8")
+        hardening = migration.split("begin;", 1)[1].split(
+            "create function public.api_participant_wipe_revivals", 1
+        )[0]
+        before = snapshot()
+        sql(
+            args,
+            "begin; grant all on public.season_player_stats to anon,authenticated; "
+            "grant update(metadata),references(metadata) on public.season_player_stats to authenticated; "
+            + hardening
+            + " do $$ begin if exists(select 1 from unnest(array['anon','authenticated']) role "
+            "where has_table_privilege(role,'public.season_player_stats','INSERT,UPDATE,DELETE,TRUNCATE,REFERENCES,TRIGGER') "
+            "or has_any_column_privilege(role,'public.season_player_stats','INSERT,UPDATE,REFERENCES')) then "
+            "raise exception 'Hosted default grants survived G hardening'; end if; end $$; rollback;",
+        )
+        require(snapshot() == before, "Hosted-default privilege experiment changed rows")
         f.passed(
-            "G07 browser table/column/RPC denial, private response whitelist, fixed invoker helpers and existing RLS"
+            "G07 browser table/column/RPC denial including hosted default privileges, private response whitelist, fixed invoker helpers and RLS"
         )
 
         sid, players = modern((0, 1, 4, 5, 6, 7))

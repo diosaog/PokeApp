@@ -1,5 +1,5 @@
 {
-  "recorded_at": "2026-10-04T10:43:23.698728+00:00",
+  "recorded_at": "2026-10-04T22:17:53.138558+00:00",
   "entry_head": "b92b3dd26e182a288a4614e4bef61dade9fb8d43",
   "status": "LOCAL_GREEN_DELIVERY_PENDING",
   "python": {
@@ -38,7 +38,7 @@
       "failed": 0,
       "errors": 0,
       "skipped": 0,
-      "count_basis": "unittest final summary: Ran 694 tests; OK without failures/errors/skips. Interleaved logger output splits some per-test ok lines."
+      "count_basis": "Final unittest summary; interleaved logger lines do not change the 694 total."
     },
     {
       "name": "compile",
@@ -88,7 +88,7 @@
     "tests\\test_api_wipe_revivals.py": "a72bcde9ccb0d281dee2edc4be320c4d87e6a65e60aae3a91b9b373ce6a1a041",
     "tests\\test_supabase_v2_schema.py": "c03137268a01836936beb2d886cc1611933d759aed9210ae40d111bf5096e9ce",
     "tools\\generate_supabase_v2_bootstrap.py": "60aa5346a45cdcc43727ca44cda30c8377d77ed20cf4c9d2d141f9753a445424",
-    "tools\\validate_phase10_5_wipe_sql.py": "ef3a6ec012cbba95605da228e154dd25efe5c820cf6644cab0b6adcc46e08121",
+    "tools\\validate_phase10_5_wipe_sql.py": "33b70078cc302bc4b859329e1d2155d1f82294773dfd47e6464937c48c95fb1c",
     "tools\\validate_phase10_5_public_reads.py": "3b63b5e5038d8379a37f5a6bcbe29068b4b0958dd2a19bb066ba44f16fe78eaa",
     "web\\e2e\\championship.spec.ts": "0977e7eaa51bf10d9134f472ed315ab5aba9ae07dc80934ad1b71f3119bb32de",
     "web\\e2e\\daily-ranking.spec.ts": "7890152b8813ba4f1f093817ffd97e88c39d4de60d922860c09165d91913c22b",
@@ -130,11 +130,14 @@
     "version": "17.11",
     "focused": {
       "source_sha256": {
-        "tools/validate_phase10_5_wipe_sql.py": "ef3a6ec012cbba95605da228e154dd25efe5c820cf6644cab0b6adcc46e08121",
-        "supabase/v2/migrations/038_participant_wipe_revivals.sql": "852801c37706947db647aacfd6d235af1c10bef521013b109f19377b5e10132d"
+        "tools/validate_phase10_5_wipe_sql.py": "33b70078cc302bc4b859329e1d2155d1f82294773dfd47e6464937c48c95fb1c",
+        "supabase/v2/migrations/038_participant_wipe_revivals.sql": "1c8c63b3c44fce9651eaa43795e2774d348291edf1611d40650f7194ee3b472f"
       },
       "database": "pokeapp_v2_validation_phase10_5g_focused",
       "status": "PASS",
+      "local_crypto_environment": {
+        "OPENSSL_ia32cap": ":0"
+      },
       "result": {
         "public_tables": 49,
         "groups": [
@@ -144,7 +147,7 @@
           "G04 identical/conflicting concurrent values and keys have one revision and audit effect",
           "G05 update versus close, initial split, final finish and participant exit serialize sporting authority",
           "G06 three exact all-public rollback boundaries and stable old receipt after day close",
-          "G07 browser table/column/RPC denial, private response whitelist, fixed invoker helpers and existing RLS",
+          "G07 browser table/column/RPC denial including hosted default privileges, private response whitelist, fixed invoker helpers and RLS",
           "G08 equal-win daily ranking consumes live wipe deaths before close and preserves frozen order after decrease",
           "G09 missing stats fail closed; draft/finished/archived/discarded, absent day and ineligible membership cannot mutate"
         ],
@@ -153,46 +156,13 @@
         "cleanup": "PASS"
       },
       "exit_code": 0,
-      "elapsed_seconds": 91.213,
-      "post_run_source_hashes_unchanged": true,
-      "freshness": "FRESH_FINAL_SOURCE",
-      "prior_attempts": [
-        {
-          "status": "FAIL",
-          "source_validator_sha256": "5a5c8621297454e0d6013ba826c8680d652e578f147c83731d949cf8522c7576",
-          "source_migration_sha256": "852801c37706947db647aacfd6d235af1c10bef521013b109f19377b5e10132d",
-          "elapsed_seconds": 119.616,
-          "exit_code": 1,
-          "passed_groups": [
-            "G01",
-            "G02",
-            "G03",
-            "G04",
-            "G05",
-            "G06",
-            "G07",
-            "G08"
-          ],
-          "failure": "G09 synthetic finished status omitted mandatory finished_at; SQLSTATE 23514.",
-          "cleanup": "PASS: fixture cleanup returned and exact all-public baseline assertion passed before the original fixture failure propagated.",
-          "fix": "Fixture supplies required lifecycle timestamps; no product SQL change.",
-          "evidence_limit": "Observed directly from pre-resume final evidence/log; original fixed-name raw files were overwritten by the existing wrapper on retry."
-        },
-        {
-          "status": "FAIL",
-          "exit_code": 1,
-          "elapsed_seconds": 2.062,
-          "failure": "Loopback PostgreSQL was stopped on resume. Connection refused before initial inventory/snapshot.",
-          "database_writes": 0,
-          "fix": "Started the existing isolated loopback PostgreSQL cluster and reran the complete focused gate."
-        }
-      ]
+      "elapsed_seconds": 107.849
     },
     "inherited": [
       {
         "family": "026",
         "exit_code": 0,
-        "seconds": 129.67,
+        "seconds": 128.81,
         "exact_public_restoration": true,
         "classification": "FRESH_PASS",
         "public_tables_restored": 49,
@@ -229,7 +199,7 @@
       {
         "family": "027",
         "exit_code": 0,
-        "seconds": 284.08,
+        "seconds": 246.58,
         "exact_public_restoration": true,
         "classification": "FRESH_PASS",
         "public_tables_restored": 49,
@@ -277,7 +247,7 @@
       {
         "family": "028",
         "exit_code": 0,
-        "seconds": 228.04,
+        "seconds": 236.75,
         "exact_public_restoration": true,
         "classification": "FRESH_PASS",
         "public_tables_restored": 49,
@@ -320,7 +290,7 @@
       {
         "family": "029",
         "exit_code": 0,
-        "seconds": 270.58,
+        "seconds": 230.24,
         "exact_public_restoration": true,
         "classification": "FRESH_PASS",
         "public_tables_restored": 49,
@@ -360,7 +330,7 @@
       {
         "family": "030",
         "exit_code": 0,
-        "seconds": 122.17,
+        "seconds": 120.82,
         "exact_public_restoration": true,
         "classification": "FRESH_PASS",
         "public_tables_restored": 49,
@@ -395,7 +365,7 @@
       {
         "family": "F",
         "exit_code": 0,
-        "seconds": 151.91,
+        "seconds": 155.45,
         "exact_public_restoration": true,
         "classification": "FRESH_PASS",
         "public_tables_restored": 49,
@@ -430,7 +400,7 @@
       {
         "family": "B",
         "exit_code": 0,
-        "seconds": 7.6,
+        "seconds": 7.25,
         "exact_public_restoration": true,
         "classification": "FRESH_PASS",
         "public_tables_restored": 49,
@@ -442,7 +412,7 @@
       {
         "family": "C",
         "exit_code": 0,
-        "seconds": 73.62,
+        "seconds": 69.88,
         "exact_public_restoration": true,
         "classification": "FRESH_PASS",
         "public_tables_restored": 49,
@@ -460,7 +430,7 @@
       {
         "family": "D",
         "exit_code": 0,
-        "seconds": 50.86,
+        "seconds": 46.45,
         "exact_public_restoration": true,
         "classification": "FRESH_PASS",
         "public_tables_restored": 49,
@@ -479,7 +449,7 @@
       {
         "family": "E",
         "exit_code": 0,
-        "seconds": 113.97,
+        "seconds": 89.75,
         "exact_public_restoration": true,
         "classification": "FRESH_PASS",
         "public_tables_restored": 49,
@@ -596,8 +566,8 @@
       "supabase/v2/migrations/035_daily_sporting_ranking.sql": "b8ee7b8715c826a5cb43652e7621a12f41dc73e256ae02ea69a06e885f38cc53",
       "supabase/v2/migrations/036_observed_initial_divisions.sql": "e2ef27a4c669a4f118cbe14d09174a600dddd8e10d44ebf610297ede8363bbd1",
       "supabase/v2/migrations/037_league_championship.sql": "bce209cf49a53643f03aa1a48067bd2d6d61a45847993b7c1e21ff10b69388f4",
-      "supabase/v2/migrations/038_participant_wipe_revivals.sql": "852801c37706947db647aacfd6d235af1c10bef521013b109f19377b5e10132d",
-      "supabase/v2/bootstrap.sql": "91d0b8365f2475c57d82a68a5be1f037906305b6b4c21c131cad327972b77656",
+      "supabase/v2/migrations/038_participant_wipe_revivals.sql": "1c8c63b3c44fce9651eaa43795e2774d348291edf1611d40650f7194ee3b472f",
+      "supabase/v2/bootstrap.sql": "cb91924e74601c7891f362399613a86c18b88504fb74f7755686be92501e4ee3",
       "supabase/v2/reset_dev.sql": "94e037257e1a5254980250a504c494f9eb10c7fc20da133b1ef0a27228822386",
       "tools/validate_supabase_v2_schema.py": "57157ff63972a88c486ff5d99b22d52374d1898cc9e45646b56c6967f33de85d"
     },
@@ -610,14 +580,21 @@
   },
   "scope": {
     "cup_shop": "NOT_APPLICABLE for dedicated rerun: no Cup/shop implementation or purchased-revive semantics changed; existing 029 compatibility scenarios passed.",
-    "security": "Owned enabled JWT, strict integers, browser RPC/table/column denials, service-only invoker helper with fixed search_path; no extra table/column/default/backfill.",
+    "security": "Owned enabled JWT, strict integers, browser RPC/table/column denials, service-only invoker helper with fixed search_path; explicitly strips inherited TRUNCATE/REFERENCES/TRIGGER as well as table/column DML; no extra table/column/default/backfill.",
     "unknown": "B observed dead count remains null and E remains unready without complete evidence. G never computes a replacement total or changes historical legacy calculation contracts.",
     "performance": "One own-counter RPC plus existing aggregate GENERAL. No per-player requests or broad overview/PC/shop/Cup invalidation."
   },
   "harness_history": [
+    "A subsequent focused run reached G01-G09 but ended before its final cleanup/exit evidence; it is not PASS. Only its known local fixture prefix was cleaned. The next run failed when PostgreSQL entered recovery: Windows Event 1000 points to libcrypto-3-x64.dll 3.5.7.0, exception 0xc0000005. No product assertion was weakened. Local PostgreSQL was restarted with process-scoped OPENSSL_ia32cap=:0 (documented OpenSSL compatibility override); final G ran unchanged. This is an environment mitigation, not a proven root-cause diagnosis or production configuration change.",
+    "On 2026-10-05 a fresh remote preflight read failed in Supabase CLI before a complete baseline or any write. The identical read succeeded independently; a new full preflight was taken. Earlier evidence remains separate.",
+    "During parallel hardening reruns, local PostgreSQL logged native exception 0xC0000005 and restarted. Python separately printed 694 OK but exited 3221225477; neither interrupted run is counted as PASS. Root restored all 49 tables exactly in each inherited database from saved baselines and removed only the focused fixture scope. Final gates rerun sequentially; cause remains unknown.",
+    "Fresh remote preflight stopped before any write when inherited authenticated TRUNCATE/REFERENCES/TRIGGER were observed on stats. Forward 038 was hardened before apply, with a local hosted-default privilege simulation and all affected SQL families rerun.",
+    "One parallel closure2 preparation hit a shared ALTER ROLE catalog conflict before fixtures. That family preparation was rerun sequentially as closure2r. No product mutation failure.",
+    "Four-build hardening runner recorded exit_code=0 for every subprocess and final PASS; PowerShell redirection surfaced PostgreSQL notices as outer status 1. Internal structured completion and dumps are authoritative.",
     "Initial unfinished G harness missed initial_division_snapshots cleanup dependency. Targeted local fixture cleanup corrected it; prefix absence checked. Initial all-table restoration was not independently retained.",
     "Later G09 synthetic finished/archived fixture omitted required timestamp and failed 23514 after G01-G08; finally exact 49-table comparison passed. Fixture timestamps corrected; product SQL unchanged.",
     "A resumed run encountered stopped local PostgreSQL before DB interaction. Cluster restarted; full final G gate passed with exact cleanup."
   ],
+  "local_environment_reference": "https://docs.openssl.org/3.5/man3/OPENSSL_ia32cap/",
   "remote": "NOT_YET_DELIVERED: no remote write performed at this local checkpoint."
 }

@@ -1,6 +1,17 @@
 -- Phase 10.5G. Owned live wipe-revival counter; no historical recomputation.
 begin;
 
+-- Supabase may retain default table privileges beyond the old DML revocations.
+-- Preserve existing RLS-governed reads, but no browser role can change or truncate
+-- the protected counter table, install triggers, or acquire column write rights.
+revoke insert,update,delete,truncate,references,trigger on public.season_player_stats
+  from public,anon,authenticated;
+do $$ declare cols text; begin
+  select string_agg(quote_ident(attname),',') into cols from pg_attribute
+    where attrelid='public.season_player_stats'::regclass and attnum>0 and not attisdropped;
+  execute format('revoke insert (%s),update (%s),references (%s) on public.season_player_stats from public,anon,authenticated',cols,cols,cols);
+end $$;
+
 create function public.api_participant_wipe_revivals(p_request jsonb) returns jsonb
 language plpgsql security invoker set search_path=pg_catalog,public as $$
 declare op text=p_request->>'operation'; r jsonb=p_request->'request'; b jsonb=r->'body';
