@@ -1,0 +1,169 @@
+{
+  "package": "10.5H",
+  "status": "PASS",
+  "date": "2026-10-07",
+  "source_commit": "9ecf83d76bc570e88b494b548a3757f252220692",
+  "deployments": {
+    "railway": {
+      "id": "7886ed9c-eb63-4f97-8450-f8d129fa18d8",
+      "status": "SUCCESS",
+      "image": "sha256:d0fa12815f07689b040ab16f9d2fb69b5f7866847f547eebb9f6709a41478b64",
+      "source": "Phase 10.5H source 9ecf83d76bc570e88b494b548a3757f252220692"
+    },
+    "cloudflare": {
+      "id": "7545db42-055b-44fd-97ef-a069c8e77c4b",
+      "version": "51669d19-b5c6-49c0-b1b0-96a4fcbc01b3",
+      "percentage": 100,
+      "source": "Phase 10.5H source 9ecf83d76bc570e88b494b548a3757f252220692"
+    }
+  },
+  "api_bundle_committed_inputs": 234,
+  "database": {
+    "target": "uwleqeuzsveqlugugzba",
+    "action": "after",
+    "tables": 55,
+    "migrations": 30,
+    "advisor": {
+      "INFO": 131,
+      "ERROR": 24,
+      "WARN": 5
+    },
+    "status": "PASS",
+    "scoped_equal": 55,
+    "new_or_removed_error_warn": 0,
+    "owner_credentials_unchanged": true,
+    "remote_business_writes": 0
+  },
+  "api": {
+    "classification": "FRESH PASS",
+    "requests": 11,
+    "records": [
+      {
+        "method": "GET",
+        "path": "/v1/read/seasons/c6bcac5b-0b89-403f-8242-41ac58286ade/team-preview",
+        "status": 401,
+        "seconds": 0.281
+      },
+      {
+        "method": "POST",
+        "path": "/v1/auth/pin-login",
+        "status": 200,
+        "seconds": 1.882
+      },
+      {
+        "method": "GET",
+        "path": "/v1/me",
+        "status": 200,
+        "seconds": 0.888
+      },
+      {
+        "method": "GET",
+        "path": "/v1/read/seasons/c6bcac5b-0b89-403f-8242-41ac58286ade/team-preview?mode=spectator&trainer_id=507d9c56-04d8-4801-a9da-f1e53674efb5",
+        "status": 200,
+        "seconds": 3.232
+      },
+      {
+        "method": "GET",
+        "path": "/v1/read/seasons/c6bcac5b-0b89-403f-8242-41ac58286ade/team-preview?mode=battle&trainer_id=507d9c56-04d8-4801-a9da-f1e53674efb5",
+        "status": 200,
+        "seconds": 2.714
+      },
+      {
+        "method": "GET",
+        "path": "/v1/read/seasons/c6bcac5b-0b89-403f-8242-41ac58286ade/team-preview?mode=battle&trainer_id=03957e59-bdfd-4c68-95e5-22fcc924c0e6",
+        "status": 200,
+        "seconds": 1.939
+      },
+      {
+        "method": "GET",
+        "path": "/v1/read/seasons/c6bcac5b-0b89-403f-8242-41ac58286ade/team-preview?mode=spectator&trainer_id=03957e59-bdfd-4c68-95e5-22fcc924c0e6&second_trainer_id=507d9c56-04d8-4801-a9da-f1e53674efb5",
+        "status": 200,
+        "seconds": 2.212
+      },
+      {
+        "method": "GET",
+        "path": "/v1/read/seasons/c6bcac5b-0b89-403f-8242-41ac58286ade/team-preview?mode=battle&viewer_id=507d9c56-04d8-4801-a9da-f1e53674efb5",
+        "status": 422,
+        "seconds": 0.556
+      },
+      {
+        "method": "GET",
+        "path": "/v1/read/seasons/c6bcac5b-0b89-403f-8242-41ac58286ade/team-preview?mode=battle&private=true",
+        "status": 422,
+        "seconds": 0.551
+      },
+      {
+        "method": "GET",
+        "path": "/v1/read/seasons/c6bcac5b-0b89-403f-8242-41ac58286ade/team-preview?mode=battle&self=true",
+        "status": 422,
+        "seconds": 0.907
+      },
+      {
+        "method": "GET",
+        "path": "/v1/read/seasons/c6bcac5b-0b89-403f-8242-41ac58286ade/team-preview?mode=battle&participant_id=507d9c56-04d8-4801-a9da-f1e53674efb5",
+        "status": 422,
+        "seconds": 0.574
+      }
+    ],
+    "private_lock_present": false,
+    "roster_size": 8
+  },
+  "browser": {
+    "classification": "FRESH PASS",
+    "states": [
+      "spectator 1440",
+      "battle self 1440",
+      "battle rival 1440",
+      "spectator 390",
+      "battle self 390",
+      "battle rival 390"
+    ],
+    "api_responses": 9,
+    "errors": [],
+    "unexpected": [],
+    "api_interception": false,
+    "business_writes": 0,
+    "mobile_screenshot_reviewed": true
+  },
+  "hosting": {
+    "time": "2026-10-07T09:55:41.515994+00:00",
+    "source_commit": "9ecf83d76bc570e88b494b548a3757f252220692",
+    "api": "https://pokeapp-api-production.up.railway.app",
+    "web": "https://pokeapp-web.pokeapp-v2.workers.dev",
+    "assets": [
+      {
+        "path": "/assets/index-BNGo-JkH.js",
+        "sha256": "a4f6feb7a3205b11bc7dd9f67c239f3d7bbf41cc82d9360073555a10d60083fc",
+        "content_type": "text/javascript"
+      },
+      {
+        "path": "/assets/index-Ce8Qi1M_.css",
+        "sha256": "fdd473f168f290c4c5a4f05543bb4987fb8eaaa43cc59b3763737e8aa3964ef4",
+        "content_type": "text/css"
+      }
+    ],
+    "web_headers": {
+      "content-type": "text/html",
+      "content-security-policy": "default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'self' https://pokeapp-api-production.up.railway.app; object-src 'none'; base-uri 'none'; frame-ancestors 'none'; form-action 'self'",
+      "x-content-type-options": "nosniff",
+      "referrer-policy": "no-referrer"
+    },
+    "status": "PASS"
+  },
+  "owner_data": {
+    "scoped_tables_equal": 55,
+    "migration_records_equal": 30,
+    "stable_identity_credentials_equal": true,
+    "auth_activity_exception": "Only owner Auth login/session activity; complete snapshots retained separately",
+    "storage_metadata_included": true,
+    "storage_bytes_touched": false,
+    "business_writes": 0,
+    "fixtures": 0
+  },
+  "limitations": [
+    "Positive own-private Team Lock and lock mutation/retry proof LOCAL ONLY: current owner J2 lock is absent.",
+    "No broad manual product exploration or unrelated migration/concurrency matrices."
+  ],
+  "harness_note": "Initial public browser selector used the wrong exact accessible label; corrected to existing season-picker select, rerun passed with no product changes. Initial failure retained in raw evidence.",
+  "raw_evidence": "%TEMP%/phase10-5h-public"
+}

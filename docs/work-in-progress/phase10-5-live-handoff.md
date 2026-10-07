@@ -1,6 +1,6 @@
 # Phase 10.5 — live execution record
 
-Observation: 2026-10-05 Europe/Madrid. **E/F/G DONE; Phase 10.5 IN PROGRESS; Phase 11 NOT READY / NOT STARTED.**
+Observation: 2026-10-07 Europe/Madrid. **E/F/G/H DONE; Phase 10.5 IN PROGRESS; Phase 11 NOT READY / NOT STARTED.**
 [Contract](../phase10-5-functional-alignment.md),
 [continuity](../AI/PokeApp_Multi_AI_Continuity_Protocol.md),
 [checkpoint](../project-checkpoint.md),
@@ -41,8 +41,8 @@ Unrelated processes/remote operations not inspected: UNKNOWN.
 | E: 026 requires initial manual A/B before activation | FIX NOW | DONE; observed progress/deaths, boundary-only ties, local/public gates and deployment verified. Closure below. |
 | F: 029 lifecycle reads final daily snapshot positions for title | FIX NOW | DONE; accumulated championship, finish certificate and frozen Hall delivered. Closure below. |
 | G: wipe counter exists in stats but lacks owned command/UI | FIX NOW | DONE; participant-owned counter, full closure and safe public delivery verified below. |
-| H: Preview only selects scheduled match; missing-lock presentation insufficient | FIX NOW | Next remaining package; await explicit owner continuation. |
-| I: pending promotions hidden by public view; voucher canje absent in React; purchases require active season | FIX NOW | Pending H. |
+| H: Preview only selects scheduled match; missing-lock presentation insufficient | FIX NOW | DONE; independent public spectator/self-only private battle, nonblocking warnings and verified public delivery below. |
+| I: pending promotions hidden by public view; voucher canje absent in React; purchases require active season | FIX NOW | Next remaining package; await explicit owner continuation. |
 | J: Admin displays technical readiness keys | FIX NOW | Ordinary result UI moved in C; remaining wording pending I. |
 | K: minimal public projection from permitted published facts | FIX NOW | Pending J; wider scope blocked below. |
 | L: legacy exports badges; neutral Phase 9 parser lacks observed progress | FIX NOW | E provides the observed badge foundation; remaining L review pending K. |
@@ -1007,3 +1007,39 @@ DQ/Cup and future milestones). None blocks G.
 **EXACT NEXT STEP: STOP.** H (Team Lock warning + Team Preview/Battle parity) is the
 next remaining package, requiring the next explicit owner continuation. No H work
 has begun. Phase 10.5 IN PROGRESS; **PHASE 11 READINESS: NOT READY / NOT STARTED**.
+
+## H delivered — 2026-10-07; STOP after H
+
+This supersedes G's next-step note. **H DONE / STAGING_DONE_ZERO_RESIDUE.**
+[Report](../phase10-5h-completion-report.md), [local evidence](../phase10-5h-closure-evidence.json),
+[public evidence](../phase10-5h-public-evidence.json).
+Entry `9b7a8dce5953c852b104dc086c69ab689705ffe4`; final application source
+`9ecf83d76bc570e88b494b548a3757f252220692`, committed/pushed before deployment.
+The subsequent documentation closure HEAD is available from Git.
+
+- Batallas/Team Preview: independent public spectator selectors, one battle
+  selector with private details only for JWT self. Strict query/DTO boundaries,
+  explicit missing-lock warnings, no live-save fallback or global League block.
+  Existing Team Lock command/history, F Hall, Cup and G remain unchanged.
+- Fresh **79 focused / 725 full Python, 29 React, 19 Edge PASS**, compile/lint/
+  format/build/dry-run PASS. Full workspace includes 19 pre-existing untracked map
+  tests, left unstaged. Local PG17.11: four security/projection groups, exact
+  49-table restoration, stopped. Rebuild/parity and mutation matrices **NOT RERUN**:
+  source/contracts unchanged; prior G evidence **HISTORICAL**.
+- **No H migration. 30 remote records through 038 unchanged.** Railway
+  `7886ed9c-eb63-4f97-8450-f8d129fa18d8` SUCCESS (234 committed API inputs), followed by
+  Cloudflare `7545db42-055b-44fd-97ef-a069c8e77c4b`, version
+  `51669d19-b5c6-49c0-b1b0-96a4fcbc01b3`, 100%; both use the application source above.
+- Narrow public smoke: 11 API requests, six desktop/mobile browser states, no
+  interception/errors/business writes. Missing own J2 lock verified publicly;
+  positive private-lock/mutation proof LOCAL ONLY. Live assets/headers/CORS pass.
+  **55/55 scoped tables and 30/30 migration records identical**, owner identity/
+  credentials/admin preserved. Only own Auth session activity excluded from row
+  equality; stable identity/credential hashes checked separately. Advisor unchanged
+  24 ERROR / 5 WARN / 131 INFO, zero new/removed ERROR/WARN. No pending cleanup.
+- Bounded preview sample 1.94–3.23 s; M/Phase 14 latency candidate. Team Lock cutoff
+  and broader scouting remain undecided; no new rule. Protected/unrelated untracked
+  files untouched. Raw evidence: `%TEMP%/phase10-5h-public` and `phase10-5h-*` logs.
+
+**EXACT NEXT STEP: STOP. I is next, awaiting owner instruction.**
+Phase 10.5 IN PROGRESS; **PHASE 11 READINESS: NOT READY / NOT STARTED**.
