@@ -76,6 +76,7 @@ class NormalPurchaseTests(unittest.TestCase):
         self.assertEqual(response.status_code, 200, response.text)
         expected = asdict(self.receipt)
         expected["purchased_at"] = "2026-09-22T12:00:00Z"
+        expected["balance_after"] = str(self.receipt.balance_after)
         self.assertEqual(response.json(), expected)
         self.assertEqual(len(self.requests), 1)
         request = self.requests[0]

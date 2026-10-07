@@ -131,7 +131,7 @@ def main() -> int:
         assert regional.observation.progress.primary_region == "johto"
         assert regional.observation.progress.regions[0].badge_flags == (False,) * 8
         assert regional.observation.progress.regions[1].badge_flags == (True,) * 8
-        assert regional.parser_version == "pokeapp-reader/2;pkhex/24.11.11"
+        assert regional.parser_version == PkhexProcessParser.version
         print(
             "PASS regional observed progress across real HGSS byte IPC; unknown never inferred"
         )

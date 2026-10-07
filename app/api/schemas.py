@@ -4,7 +4,7 @@ from datetime import datetime
 from typing import Any, Literal
 from uuid import UUID
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, field_serializer
 
 
 class HealthResponse(BaseModel):
@@ -81,8 +81,12 @@ class NormalPurchaseResponse(BaseModel):
     balance_after: int = Field(ge=0)
     ledger_id: UUID
     event_id: UUID
-    matchday_id: UUID
-    matchday_number: int = Field(gt=0)
+    matchday_id: UUID | None
+    matchday_number: int | None = Field(gt=0)
+
+    @field_serializer("balance_after")
+    def exact_balance(self, value: int) -> str:
+        return str(value)
 
 
 class PromotionalPurchaseResponse(NormalPurchaseResponse):

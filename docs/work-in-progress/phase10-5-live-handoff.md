@@ -1043,3 +1043,45 @@ The subsequent documentation closure HEAD is available from Git.
 
 **EXACT NEXT STEP: STOP. I is next, awaiting owner instruction.**
 Phase 10.5 IN PROGRESS; **PHASE 11 READINESS: NOT READY / NOT STARTED**.
+
+## I entry — 2026-10-07; IMPLEMENTING
+
+Owner explicitly authorized I (shop/economy) after H. Entry main/origin
+`e3d4003337e4410dae46ebaa1de632696b1d80a9`, 0/0, clean tracked tree. Fresh remote
+observation confirms H deployments above and 30 migrations through
+038=`20261004222029`; evidence `%TEMP%/phase10-5i-entry`. No I remote writes.
+
+New decisions: configurable defaults +4 per reliably observed badge, +12 once per
+season/challenge for save-proven in-game Champion completion (not eight badges or
+PokeApp finish). A purchased revive preserves one historical adjusted death and
+must not duplicate that same still-visible death; G wipe semantics stay +2.
+
+Directed implementation underway: exact wallet strings, pending/active promotions,
+owned reward-voucher canje, completed-League spending with nullable matchday, reward
+configuration/proof/deduplication and live purchased-revive overlap. Forward 039
+is implemented but unapplied/uncommitted. Reader/3 emits native Champion proof;
+automatic private rewards share the wallet lock and preserve unknown evidence.
+Initial I PostgreSQL groups, 732 Python, 33 React and parser integration passed.
+Final validation is still in progress: a Box-9 revive observation edge and
+unlinked legacy revive UNKNOWN handling were added after those initial checks.
+Required remaining: final SQL/rebuild parity, affected regressions, browser/static
+gates, commit/push, safe remote DB/API/web delivery and closure. No cloud ingestion, physical writes,
+frozen history rewrite, J or Phase 11. Protected/unrelated untracked files untouched.
+
+### I local closure ? 2026-10-07; delivery pending
+
+Supersedes the in-progress validation note above. Application implementation is
+complete and locally green: 732 Python (713 committed-scope plus 19 pre-existing
+untracked map tests), 33 React, 12 affected Edge; real parser/IPC/Launcher,
+compile/lint/format/build/dry-run PASS. PostgreSQL I 10 groups / five rollback
+boundaries; affected 022/024/025/026/E/G regressions PASS with exact 50-table
+restoration. Four migration/bootstrap builds: 12,590 identical schema/grant/owner
+lines. Sixteen invoker helpers, fixed search paths, private proof RLS/table/column
+permissions checked. [Evidence](../phase10-5i-closure-evidence.json).
+
+Fresh remote preflight: 30 records through 038; 55 scoped tables; owner credentials
+and admin intact; Advisor 24 ERROR / 5 WARN / 131 INFO. Raw baseline in
+`%TEMP%/phase10-5i-public`. No I remote writes yet. Next: commit/push this exact
+source, apply only committed 039 once, compatible Railway then Cloudflare,
+read-only owner smoke and independent final data/security comparison. I remains
+IN PROGRESS until that delivery and documentation closure complete. STOP after I.

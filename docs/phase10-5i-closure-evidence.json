@@ -1,0 +1,191 @@
+{
+  "package": "10.5I",
+  "date": "2026-10-07",
+  "entry_head": "e3d4003337e4410dae46ebaa1de632696b1d80a9",
+  "status": "LOCAL_VALIDATION_PASS",
+  "python": {
+    "exit_code": 0,
+    "total": 732,
+    "passed": 732,
+    "failed": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "react": {
+    "tests": 33,
+    "files": 6,
+    "status": "PASS"
+  },
+  "browser": {
+    "status": "PASS",
+    "engine": "Edge",
+    "tests": 12,
+    "economy_tests": 3,
+    "existing_flows": 9,
+    "failures": 0,
+    "flaky": 0,
+    "api_fixtures": true
+  },
+  "parser": {
+    "status": "PASS",
+    "reader": "pokeapp-reader/3;pkhex/24.11.11",
+    "scope": "Real native Gen3/4/5 binary serialize/reparse, Champion evidence per supported family, IPC and local Launcher; no cloud sync or physical writes"
+  },
+  "postgres": {
+    "version": "17.11",
+    "families": [
+      {
+        "name": "I",
+        "status": "FRESH PASS",
+        "seconds": 37.74,
+        "result": {
+          "groups": 10,
+          "checks": [
+            "exact >int32/negative wallet; same/conflicting key and concurrent double-spend/replay",
+            "pending/publication privacy, activation, promotional price and one-stock concurrency",
+            "finished/archived normal and season-wide promotional spending without fake matchdays",
+            "unknown/zero, trusted hooks, badge deltas, regression/stale proof, eight badges, reader version and completion once",
+            "malformed/hash/game/bool and cross-trainer progress cannot mint coins",
+            "persistent configured 4/12 defaults and 7/20 amounts with actual-window selection",
+            "revive before/while pending/after save movement/re-death, duplicate denial, wipe and live daily parity",
+            "legitimate robbery voucher origin, hidden catalog, eligible owner targets and one-time concurrent redemption",
+            "wallet/purchase/activity and pointer/reward-ledger/claim transactional rollback",
+            "anon/participant/browser-admin service RPC and private proof access denied; immutable claims"
+          ],
+          "rollback_boundaries": [
+            "purchases:insert",
+            "coin_transactions:insert",
+            "activity_events:insert",
+            "coin_transactions:insert",
+            "progress_reward_claims:insert"
+          ],
+          "restored_tables": 50
+        },
+        "restored_tables": 50
+      },
+      {
+        "name": "024",
+        "status": "FRESH PASS",
+        "seconds": 30.88,
+        "result": null,
+        "restored_tables": 50
+      },
+      {
+        "name": "025",
+        "status": "FRESH PASS",
+        "seconds": 38.81,
+        "result": null,
+        "restored_tables": 50
+      },
+      {
+        "name": "026",
+        "status": "FRESH PASS",
+        "seconds": 114.47,
+        "result": null,
+        "restored_tables": 50
+      },
+      {
+        "name": "E",
+        "status": "FRESH PASS",
+        "seconds": 89.27,
+        "result": null,
+        "restored_tables": 50
+      },
+      {
+        "name": "G",
+        "status": "FRESH PASS",
+        "seconds": 100.19,
+        "result": {
+          "public_tables": 50,
+          "groups": [
+            "G01 own strict absolute counter, exact replay/conflict/CAS, no-op fingerprint, audit, metadata and identity isolation",
+            "G02 malformed stored revision fails closed; full int32 count closes with exact official points without clamping",
+            "G03 unknown stays unknown; five-plus-one exact formula; future freeze only, points once, closed E/day/F/Hall preserved",
+            "G04 identical/conflicting concurrent values and keys have one revision and audit effect",
+            "G05 update versus close, initial split, final finish and participant exit serialize sporting authority",
+            "G06 three exact all-public rollback boundaries and stable old receipt after day close",
+            "G07 browser table/column/RPC denial including hosted default privileges, private response whitelist, fixed invoker helpers and RLS",
+            "G08 equal-win daily ranking consumes live wipe deaths before close and preserves frozen order after decrease",
+            "G09 missing stats fail closed; draft/finished/archived/discarded, absent day and ineligible membership cannot mutate"
+          ],
+          "rollback_boundaries": 3,
+          "concurrent_scenarios": 9,
+          "cleanup": "PASS"
+        },
+        "restored_tables": 50
+      }
+    ],
+    "promotional_022": {
+      "status": "PASS",
+      "concurrent_families": 7,
+      "restored_tables": 50,
+      "isolated_empty_database": true
+    },
+    "parity": {
+      "status": "PASS",
+      "identical_builds": 4,
+      "identical_lines": 12590
+    },
+    "security": {
+      "status": "PASS",
+      "helpers": [
+        "admin_setup_config_used",
+        "admin_setup_validate_config",
+        "api_create_normal_purchase_8d",
+        "api_create_promotional_purchase",
+        "api_redeem_purchase",
+        "commit_pokemon_identity",
+        "commit_pokemon_identity_v038",
+        "initial_assignment_observations",
+        "inventory_shield_targets",
+        "matchday_context_v034",
+        "observed_save_progress",
+        "observed_save_source_valid",
+        "progress_reward_immutable",
+        "purchased_revive_overlap",
+        "reward_current_save_observation",
+        "settle_observed_progress_rewards"
+      ],
+      "private_table": "progress_reward_claims",
+      "rls": true,
+      "browser_denied": true,
+      "service_only": true
+    }
+  },
+  "static": {
+    "status": "PASS",
+    "checks": [
+      "Python compileall",
+      "targeted Ruff",
+      "full web Prettier",
+      "TypeScript and production Vite build",
+      "Wrangler dry-run",
+      "hosted browser node syntax",
+      "git diff --check"
+    ]
+  },
+  "scope": {
+    "positive_business_mutations": "DISPOSABLE LOCAL POSTGRESQL ONLY",
+    "historical_frozen_sources_preserved": true,
+    "untracked_map_tests": 19,
+    "committed_python_tests": 713,
+    "unrelated_files_not_staged": true
+  },
+  "failed_attempts": "Initial 022 fixture used unscoped fixture cleanup against an existing local fixture FK; rerun in empty disposable DB passed. Old 024 fixture reused a still-dead revived target; uses distinct observed deaths now. Old E fixture assumed no coins existed before A/B; now compares prior rewards unchanged. All failed attempts restored all 50 public tables exactly. Earlier parity newline mismatch repaired before four successful final builds.",
+  "raw_evidence": [
+    "%TEMP%/phase10-5i-python-final.log",
+    "%TEMP%/phase10-5i-parser-final.log",
+    "%TEMP%/phase10-5i-pg-final.log",
+    "%TEMP%/phase10-5i-pg-resume.log",
+    "%TEMP%/phase10-5i-pg-eg.log",
+    "%TEMP%/phase10-5i-022.log",
+    "%TEMP%/phase10-5i-closure-rebuild-evidence.json",
+    "%TEMP%/phase10-5i-edge-flows.json"
+  ],
+  "validated_source_sha256": {
+    "supabase/v2/migrations/039_shop_economy_alignment.sql": "6370effeb805b1776d06c5842b26f87621a4473e5d1c2da5bf29410680399649",
+    "supabase/v2/bootstrap.sql": "66ab6b876b64e3bb1a2a758a8a5c97ce33de2e749cc0216d26f86b0a1f6440be",
+    "tools/validate_phase10_5_economy_sql.py": "d9e09556208bd0e427e0dc19b67acdf6b99ef91ddc1a90c5c9e75174e4b39bce",
+    "companion/parser/PokeApp.Parser/Inspection.cs": "637e5d7a7ce82307c3bbe7efba6d02463166a56270c0efea9f97729a7b6859a0"
+  }
+}

@@ -142,7 +142,7 @@ class OverviewRead(BaseModel):
     snapshots: list[SnapshotRead]
     points: list[PointsRead]
     locks: list[LockRead]
-    balance: int | None
+    balance: str | None = Field(pattern=r"^-?(0|[1-9][0-9]*)$")
 
 
 class LeagueStandingRead(BaseModel):
@@ -200,12 +200,15 @@ class PromotionRead(BaseModel):
     effective_price: int
     stock_total: int | None
     stock_used: int
+    activates_at: datetime | None = None
+    ends_at: datetime | None = None
 
 
 class ShopRead(BaseModel):
     items: list[ItemRead]
     promotions: list[PromotionRead]
-    balance: int | None
+    balance: str | None = Field(pattern=r"^-?(0|[1-9][0-9]*)$")
+    season_status: str
 
 
 class PurchaseRead(BaseModel):
@@ -216,6 +219,7 @@ class PurchaseRead(BaseModel):
     purchased_at: datetime
     item_name: str
     item_code: str
+    acquisition_type: Literal["paid", "reward"] = "paid"
 
 
 class TargetRead(BaseModel):
@@ -223,6 +227,7 @@ class TargetRead(BaseModel):
     trainer_id: UUID
     location: str
     visibility: Literal["own", "public_team_lock"]
+    can_shield: bool = False
     pokemon: PokemonRead
 
 

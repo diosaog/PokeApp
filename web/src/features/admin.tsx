@@ -97,6 +97,11 @@ function Configuration({ setup }: { setup: Setup }) {
               rules: {
                 team_lock_required: data.has("lock"),
                 last_b_gets_steal: data.has("steal"),
+                badge_reward_coins: number(data, "badge_reward_coins"),
+                game_completion_reward_coins: number(
+                  data,
+                  "game_completion_reward_coins",
+                ),
               },
               expected_config_revision: setup.config_revision,
               expected_roster_revision: setup.roster_revision,
@@ -179,11 +184,45 @@ function Configuration({ setup }: { setup: Setup }) {
               />
             </Field>
           </div>
+          <div className="form-grid">
+            {(
+              [
+                ["badge_reward_coins", "Monedas por medalla observada", 4],
+                [
+                  "game_completion_reward_coins",
+                  "Monedas por vencer al Campeón del juego",
+                  12,
+                ],
+              ] as const
+            ).map(([name, label, fallback]) => (
+              <Field key={name} label={label}>
+                <input
+                  name={name}
+                  type="number"
+                  min={0}
+                  max={2147483647}
+                  step={1}
+                  required
+                  defaultValue={
+                    typeof current?.rules[name] === "number"
+                      ? Number(current.rules[name])
+                      : fallback
+                  }
+                />
+              </Field>
+            ))}
+          </div>
+          <p>
+            Las recompensas requieren pruebas del save. La victoria sobre el
+            Campeón se premia una vez por temporada; ocho medallas no bastan.
+          </p>
           <label className="check">
             <input
               type="checkbox"
               name="lock"
-              defaultChecked={current?.rules.team_lock_required ?? true}
+              defaultChecked={
+                current ? current.rules.team_lock_required === true : true
+              }
             />
             Team Lock obligatorio
           </label>
@@ -191,7 +230,7 @@ function Configuration({ setup }: { setup: Setup }) {
             <input
               type="checkbox"
               name="steal"
-              defaultChecked={current?.rules.last_b_gets_steal ?? false}
+              defaultChecked={current?.rules.last_b_gets_steal === true}
             />
             Último de B recibe robo
           </label>

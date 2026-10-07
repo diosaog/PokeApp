@@ -26,6 +26,11 @@ def _execute(op, principal, container, payload=None, season_id=None, resource_id
     request = {"actor_trainer_id": principal.trainer_id}
     if payload is not None:
         request["body"] = payload.model_dump(mode="json")
+        if op in ("create_config", "replace_config"):
+            # Preserve exact pre-I request hashes on old-client receipt replay.
+            for field in ("badge_reward_coins", "game_completion_reward_coins"):
+                if field not in payload.rules.model_fields_set:
+                    request["body"]["rules"].pop(field)
     for name, value in (("season_id", season_id), ("resource_id", resource_id), ("idempotency_key", key)):
         if value is not None:
             request[name] = str(value)

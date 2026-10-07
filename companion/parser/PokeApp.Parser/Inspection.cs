@@ -7,7 +7,7 @@ namespace PokeApp.Parser;
 public static class Inspection
 {
     public const int MaxBytes = 8 * 1024 * 1024;
-    public const string ParserVersion = "pokeapp-reader/2;pkhex/24.11.11";
+    public const string ParserVersion = "pokeapp-reader/3;pkhex/24.11.11";
     public static readonly JsonSerializerOptions Json = new()
     {
         PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower,
@@ -79,7 +79,21 @@ public static class Inspection
             SAV5 s => ("unova", new[] { BadgeRegion("unova", s.Misc.Badges) }),
             _ => throw new InvalidOperationException(),
         };
-        return new { SchemaVersion = 1, PrimaryRegion = primary, Regions = regions };
+        // Native event flags documented by this pinned PKHeX release. BW's
+        // game-clear flag means Ghetsis, NOT Alder: require its Hall-of-Fame
+        // registration instead. Main-block checksums were validated above.
+        bool? champion = save switch
+        {
+            SAV3RS s => s.GetEventFlag(0x804),
+            SAV3E s => s.GetEventFlag(2148),
+            SAV3FRLG s => s.GetEventFlag(2092),
+            SAV4 s => s.GetEventFlag(2404),
+            SAV5B2W2 s => s.EventWork.GetEventFlag(2400),
+            SAV5BW s => s.PlayerData.IsMagicHallOfFame && s.PlayerData.CountHallOfFame is > 0 and < uint.MaxValue
+                ? true : !s.PlayerData.IsMagicHallOfFame && s.PlayerData.CountHallOfFame == 0 ? false : null,
+            _ => null,
+        };
+        return new { SchemaVersion = 1, PrimaryRegion = primary, Regions = regions, ChampionDefeated = champion };
     }
 
     private static object? Pokemon(PKM p)

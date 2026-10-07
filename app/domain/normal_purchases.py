@@ -41,19 +41,25 @@ class NormalPurchaseReceipt:
     balance_after: int
     ledger_id: str
     event_id: str
-    matchday_id: str
-    matchday_number: int
+    matchday_id: str | None
+    matchday_number: int | None
 
     def __post_init__(self):
         for value in (self.id, self.season_id, self.trainer_id, self.season_player_id,
-                      self.item_id, self.ledger_id, self.event_id, self.matchday_id):
+                      self.item_id, self.ledger_id, self.event_id):
             UUID(value)
+        if (self.matchday_id is None) != (self.matchday_number is None):
+            raise ValueError("invalid_receipt_matchday")
+        if self.matchday_id is not None:
+            UUID(self.matchday_id)
+            if type(self.matchday_number) is not int or self.matchday_number <= 0:
+                raise ValueError("invalid_receipt_matchday")
         date = datetime.fromisoformat(self.purchased_at)
         if date.tzinfo is None:
             raise ValueError("invalid_receipt_date")
-        for value in (self.quantity, self.unit_price, self.total_price, self.balance_after, self.matchday_number):
+        for value in (self.quantity, self.unit_price, self.total_price, self.balance_after):
             if type(value) is not int:
                 raise ValueError("invalid_receipt_number")
         if (self.quantity != 1 or self.unit_price <= 0 or self.unit_price != self.total_price
-                or self.balance_after < 0 or self.matchday_number <= 0 or self.status != "pending"):
+                or self.balance_after < 0 or self.status != "pending"):
             raise ValueError("invalid_purchase_receipt")

@@ -732,7 +732,12 @@ export function ShopPage() {
       `/v1/read/seasons/${season}/shop`,
       !!season,
     ),
-    cmd = useCommand(),
+    cmd = useCommand([
+      `/v1/read/seasons/${season}/shop`,
+      `/v1/read/seasons/${season}/inventory`,
+      `/v1/read/seasons/${season}/overview`,
+      `/v1/read/seasons/${season}/league`,
+    ]),
     [item, setItem] = useState<Model<"ItemRead"> | null>(null),
     [base, setBase] = useState(false);
   const promo = query.data?.promotions.find(
@@ -756,10 +761,20 @@ export function ShopPage() {
                 <span>Saldo disponible</span>
               </div>
               <CommandState command={cmd} />
+              {["finished", "archived"].includes(query.data.season_status) && (
+                <p>
+                  La Liga ha terminado. Puedes seguir gastando tus monedas en
+                  artículos disponibles.
+                </p>
+              )}
               <div className="shop-grid">
                 {query.data.items.map((i) => {
                   const p = query.data!.promotions.find(
                     (p) => p.shop_item_id === i.id && p.status === "active",
+                  );
+                  const upcoming = query.data!.promotions.filter(
+                    (offer) =>
+                      offer.shop_item_id === i.id && offer.status === "pending",
                   );
                   return (
                     <Card key={i.id} className="shop-card">
@@ -771,13 +786,21 @@ export function ShopPage() {
                       <p>{i.description}</p>
                       {p && (
                         <Tag>
-                          Promoción ·{" "}
+                          Promoción activa ·{" "}
                           {p.stock_total == null
                             ? "Sin límite"
                             : Math.max(0, p.stock_total - p.stock_used)}{" "}
                           disponibles
                         </Tag>
                       )}
+                      {upcoming.map((offer) => (
+                        <p key={offer.id}>
+                          <Tag>Próxima promoción</Tag> {offer.effective_price}{" "}
+                          PK₽ · Aún no disponible
+                          {offer.activates_at &&
+                            ` · Desde ${date(offer.activates_at)}`}
+                        </p>
+                      ))}
                       <div className="shop-bottom">
                         <strong>
                           {p?.effective_price ?? i.base_price}{" "}
@@ -785,6 +808,13 @@ export function ShopPage() {
                         </strong>
                         <button
                           className="button"
+                          disabled={
+                            cmd.pending ||
+                            cmd.uncertain ||
+                            (!p &&
+                              upcoming.length > 0 &&
+                              i.category !== "comodines")
+                          }
                           onClick={() => {
                             setItem(i);
                             setBase(false);

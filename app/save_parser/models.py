@@ -112,6 +112,9 @@ class ObservedProgress(WireModel):
     schema_version: Literal[1]
     primary_region: ProgressRegion
     regions: tuple[ObservedBadgeRegion, ...] = Field(min_length=1, max_length=2)
+    # Native Champion/Hall-of-Fame evidence, never inferred from eight badges.
+    # Absent in reader/2 observations and unsupported layouts: unknown, not false.
+    champion_defeated: bool | None = None
 
     @field_validator("schema_version", mode="before")
     @classmethod

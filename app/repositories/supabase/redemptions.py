@@ -12,6 +12,7 @@ REJECTIONS = {
     'redemption_not_supported':409, 'pokemon_not_owned':409,
     'pokemon_identity_ambiguous':409, 'pokemon_target_stale':409,
     'pokemon_not_revivable':409, 'pokemon_already_shielded':409,
+    'pokemon_revive_pending':409,
     'invalid_pokemon_target':409,
     'steal_self_target':409, 'steal_target_shielded':409,
     'steal_target_ineligible':409, 'steal_victim_ineligible':409,

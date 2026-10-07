@@ -13,7 +13,7 @@ def validate_season_admin(args, sql):
     client=LocalClient(args)
     refs=client.execute("select jsonb_agg(distinct conrelid::regclass::text) from pg_constraint "
         "where contype='f' and confrelid='public.season_config_versions'::regclass").data
-    require(set(refs)=={'matchdays','matchday_snapshots','initial_division_snapshots'},'Config used predicate must cover every actual FK')
+    require(set(refs)=={'matchdays','matchday_snapshots','initial_division_snapshots','progress_reward_claims'},'Config used predicate must cover every actual FK')
     fixtures=SeasonAdminFixtures(client,readers,ids)
     try: fixtures.run()
     finally: fixtures.cleanup()

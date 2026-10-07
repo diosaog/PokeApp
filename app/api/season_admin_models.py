@@ -41,6 +41,8 @@ class DivisionSizes(StrictBody):
 class FunctionalRules(StrictBody):
     team_lock_required: Annotated[bool, Field(strict=True)]
     last_b_gets_steal: Annotated[bool, Field(strict=True)]
+    badge_reward_coins: Annotated[int, Field(strict=True, ge=0, le=2147483647)] = 4
+    game_completion_reward_coins: Annotated[int, Field(strict=True, ge=0, le=2147483647)] = 12
 
 
 class ConfigVersionBody(StrictBody):
@@ -120,7 +122,7 @@ class ConfigSummary(StrictBody):
     movement_count: int
     scoring: dict[str, int]
     coin_rewards: dict[str, int]
-    rules: dict[str, bool]
+    rules: dict[str, bool | int]
     roster_revision: int | None
     used: bool
     is_current: bool

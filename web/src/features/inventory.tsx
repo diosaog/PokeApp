@@ -24,13 +24,22 @@ export function Inventory() {
       !!season,
     ),
     overview = useOverview(),
-    cmd = useCommand(),
+    cmd = useCommand([
+      `/v1/read/seasons/${season}/inventory`,
+      `/v1/read/seasons/${season}/overview`,
+      `/v1/read/seasons/${season}/league`,
+      `/v1/seasons/${season}/initial-assignment`,
+    ]),
     [purchase, setPurchase] = useState<Model<"PurchaseRead"> | null>(null);
   const targets =
     q.data?.targets.filter((t) =>
       purchase?.item_code === "robar_pokemon"
         ? t.visibility === "public_team_lock"
-        : t.visibility === "own",
+        : t.visibility === "own" &&
+          (!["blindar_pokemon", "robbery_shield_voucher"].includes(
+            purchase?.item_code || "",
+          ) ||
+            t.can_shield),
     ) || [];
   return (
     <>
@@ -43,6 +52,7 @@ export function Inventory() {
           {q.data.purchases.map((p) => (
             <Card key={p.id}>
               <Tag>{p.status}</Tag>
+              {p.acquisition_type === "reward" && <Tag>Vale de recompensa</Tag>}
               <h3>{p.item_name}</h3>
               <p>
                 {date(p.purchased_at)} · {p.total_price} PK₽
@@ -52,6 +62,7 @@ export function Inventory() {
                   "blindar_pokemon",
                   "revivir_pokemon",
                   "robar_pokemon",
+                  "robbery_shield_voucher",
                 ].includes(p.item_code) ? (
                   <button onClick={() => setPurchase(p)}>Canjear</button>
                 ) : (
@@ -82,7 +93,9 @@ export function Inventory() {
               privadas no se publican aquí.
             </p>
           )}
-          {purchase.item_code !== "blindar_pokemon" && (
+          {["revivir_pokemon", "robar_pokemon"].includes(
+            purchase.item_code,
+          ) && (
             <p>
               El canje se registra en PokeApp. El cambio físico en la partida
               queda pendiente; el Launcher actual todavía no lo ejecuta.

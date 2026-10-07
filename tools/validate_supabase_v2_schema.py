@@ -39,6 +39,7 @@ $$;
 
 
 EXPECTED_TABLES = [
+    "progress_reward_claims",
     "league_championship_resolutions",
     "league_finalizations",
     "initial_division_snapshots",

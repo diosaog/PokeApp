@@ -116,7 +116,7 @@ export const overview = {
       public_team_snapshot: Array.from({ length: 6 }, () => pokemon),
     },
   ],
-  balance: 128,
+  balance: "128",
 };
 export const cup = {
   id: cid,
@@ -311,6 +311,7 @@ export async function fixture(page: Page, longNames = false) {
             shop_item_id: "item",
             item_name: "Escudo Pokémon",
             item_code: "blindar_pokemon",
+            acquisition_type: "paid",
             status: "pending",
             total_price: 30,
             purchased_at: "2026-09-28T12:00:00Z",
@@ -322,6 +323,7 @@ export async function fixture(page: Page, longNames = false) {
             trainer_id: tid,
             location: "Equipo · 1",
             visibility: "own",
+            can_shield: true,
             pokemon,
           },
         ],
@@ -367,7 +369,8 @@ export async function fixture(page: Page, longNames = false) {
       };
     else if (path.endsWith("/shop"))
       result = {
-        balance: 128,
+        balance: "128",
+        season_status: "active",
         items: [
           {
             id: "item",

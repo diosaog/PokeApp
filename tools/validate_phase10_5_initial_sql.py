@@ -423,6 +423,15 @@ def validate(args, sql):
                 )
         f.passed("E03 twelve durable write boundaries restore all public rows exactly")
 
+        consequence_tables = (
+            "coin_transactions", "matchday_movements", "purchases",
+            "shop_promotions", "matchday_snapshots",
+        )
+        # I may already have rewarded trustworthy observations. Initial A/B
+        # must preserve those rows without generating daily consequences.
+        prior_consequences = {
+            table: f.rows(table, season_id=sid) for table in consequence_tables
+        }
         result = race(lambda: commit(envelope), lambda: commit(envelope))
         require(
             all(isinstance(r, dict) for r in result)
@@ -434,15 +443,9 @@ def validate(args, sql):
             == result[0]["operation_id"],
             "Unknown-outcome replay replanned assigned state",
         )
-        for table in (
-            "coin_transactions",
-            "matchday_movements",
-            "purchases",
-            "shop_promotions",
-            "matchday_snapshots",
-        ):
+        for table in consequence_tables:
             require(
-                not f.rows(table, season_id=sid),
+                f.rows(table, season_id=sid) == prior_consequences[table],
                 "Initial split accidentally applied daily consequences " + table,
             )
         frozen = deepcopy(f.rows("initial_division_snapshots", season_id=sid))
@@ -544,8 +547,8 @@ def validate(args, sql):
             and f.rows("initial_division_snapshots", season_id=sid) == frozen,
             "Participant results versus unknown-outcome initialization replay changed initial truth",
         )
-        # Same actual redemption is present in both imported-used and applied
-        # records: max() avoids counting it twice, exactly as 030/D do.
+        # I preserves the historical revive once and removes its overlap with
+        # the same still-visible death; the separate wipe factor remains two.
         p = players[1]
         entitlement = f.entitlement(sid, p, "revivir_pokemon")
         entity = f.rows("pokemon_observations", save_file_id=sources[p["id"]][0]["id"])[
@@ -573,7 +576,7 @@ def validate(args, sql):
         )
         require(
             next(x["adjusted_deaths"] for x in observed_players if x["id"] == p["id"])
-            == 6,
+            == 5,
             "Revive counted twice or wipes unadjusted",
         )
         f.results(sid, did)

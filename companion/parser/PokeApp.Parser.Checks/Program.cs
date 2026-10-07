@@ -131,6 +131,32 @@ foreach (var save in new SaveFile[] {
         }
     }
     else Check(regions.GetArrayLength() == 1, $"{save.GetType().Name} no invented second region");
+    switch (save)
+    {
+        case SAV3 s: s.Badges = 255; break;
+        case SAV4 s: s.Badges = 255; break;
+        case SAV5 s: s.Misc.Badges = 255; break;
+    }
+    if (save is SAV5BW bw) bw.EventWork.SetEventFlag(2400, true); // Ghetsis is not Alder.
+    Check(!Read(Fixture(save)).GetProperty("observation").GetProperty("progress")
+        .GetProperty("champion_defeated").GetBoolean(), $"{save.GetType().Name} eight badges/game clear alone do not prove Champion");
+    switch (save)
+    {
+        case SAV3RS s: s.SetEventFlag(0x804, true); break;
+        case SAV3E s: s.SetEventFlag(2148, true); break;
+        case SAV3FRLG s: s.SetEventFlag(2092, true); break;
+        case SAV4 s: s.SetEventFlag(2404, true); break;
+        case SAV5B2W2 s: s.EventWork.SetEventFlag(2400, true); break;
+        case SAV5BW s: s.PlayerData.IsMagicHallOfFame = true; s.PlayerData.CountHallOfFame = 1; break;
+    }
+    Check(Read(Fixture(save)).GetProperty("observation").GetProperty("progress")
+        .GetProperty("champion_defeated").GetBoolean(), $"{save.GetType().Name} native Champion proof survives binary roundtrip");
+    if (save is SAV5BW inconsistent)
+    {
+        inconsistent.PlayerData.CountHallOfFame = 0;
+        Check(Read(Fixture(save)).GetProperty("observation").GetProperty("progress")
+            .GetProperty("champion_defeated").ValueKind == JsonValueKind.Null, "inconsistent BW Hall evidence is unknown");
+    }
 }
 Check(Read(new byte[20]).GetProperty("error").GetString() == "TRUNCATED_SAVE", "truncation explicit");
 var invalidVersion = new SAV5BW();

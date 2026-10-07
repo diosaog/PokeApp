@@ -311,6 +311,7 @@ class ParticipantStatusFixtures(MatchdayFixtures):
 
     def cleanup(self):
         for sid in self.seasons:
+            self.client.table('progress_reward_claims').delete().eq('season_id',sid).execute()
             self.client.table('season_players').update({'current_save_file_id':None}).eq('season_id',sid).execute()
             for cup in self.rows('cups',season_id=sid):
                 for table in ('cup_matches','cup_standings','cup_participants'):

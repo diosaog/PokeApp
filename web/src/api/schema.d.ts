@@ -1282,7 +1282,7 @@ export interface components {
       };
       /** Rules */
       rules: {
-        [key: string]: boolean;
+        [key: string]: boolean | number;
       };
       /** Roster Revision */
       roster_revision: number | null;
@@ -1927,6 +1927,16 @@ export interface components {
       team_lock_required: boolean;
       /** Last B Gets Steal */
       last_b_gets_steal: boolean;
+      /**
+       * Badge Reward Coins
+       * @default 4
+       */
+      badge_reward_coins: number;
+      /**
+       * Game Completion Reward Coins
+       * @default 12
+       */
+      game_completion_reward_coins: number;
     };
     /** HTTPValidationError */
     HTTPValidationError: {
@@ -2320,7 +2330,7 @@ export interface components {
        */
       purchased_at: string;
       /** Balance After */
-      balance_after: number;
+      balance_after: string;
       /**
        * Ledger Id
        * Format: uuid
@@ -2331,13 +2341,10 @@ export interface components {
        * Format: uuid
        */
       event_id: string;
-      /**
-       * Matchday Id
-       * Format: uuid
-       */
-      matchday_id: string;
+      /** Matchday Id */
+      matchday_id: string | null;
       /** Matchday Number */
-      matchday_number: number;
+      matchday_number: number | null;
     };
     /** OpenDayBody */
     OpenDayBody: {
@@ -2364,7 +2371,7 @@ export interface components {
       /** Locks */
       locks: components["schemas"]["LockRead"][];
       /** Balance */
-      balance: number | null;
+      balance: string | null;
     };
     /** PCRead */
     PCRead: {
@@ -2631,6 +2638,10 @@ export interface components {
       stock_total: number | null;
       /** Stock Used */
       stock_used: number;
+      /** Activates At */
+      activates_at?: string | null;
+      /** Ends At */
+      ends_at?: string | null;
     };
     /** PromotionalPurchaseBody */
     PromotionalPurchaseBody: Record<string, never>;
@@ -2681,7 +2692,7 @@ export interface components {
        */
       purchased_at: string;
       /** Balance After */
-      balance_after: number;
+      balance_after: string;
       /**
        * Ledger Id
        * Format: uuid
@@ -2692,13 +2703,10 @@ export interface components {
        * Format: uuid
        */
       event_id: string;
-      /**
-       * Matchday Id
-       * Format: uuid
-       */
-      matchday_id: string;
+      /** Matchday Id */
+      matchday_id: string | null;
       /** Matchday Number */
-      matchday_number: number;
+      matchday_number: number | null;
       /**
        * Promotion Id
        * Format: uuid
@@ -2782,6 +2790,12 @@ export interface components {
       item_name: string;
       /** Item Code */
       item_code: string;
+      /**
+       * Acquisition Type
+       * @default paid
+       * @enum {string}
+       */
+      acquisition_type: "paid" | "reward";
     };
     /** RankingErrorDetail */
     RankingErrorDetail: {
@@ -3213,7 +3227,9 @@ export interface components {
       /** Promotions */
       promotions: components["schemas"]["PromotionRead"][];
       /** Balance */
-      balance: number | null;
+      balance: string | null;
+      /** Season Status */
+      season_status: string;
     };
     /** SlotRead */
     SlotRead: {
@@ -3307,6 +3323,11 @@ export interface components {
        * @enum {string}
        */
       visibility: "own" | "public_team_lock";
+      /**
+       * Can Shield
+       * @default false
+       */
+      can_shield: boolean;
       pokemon: components["schemas"]["PokemonRead"];
     };
     /** TeamLockRequest */

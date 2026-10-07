@@ -30,6 +30,7 @@ def _execute_read(query, operation: str):
 
 
 class FrontendReadRepository(Protocol):
+    def shield_targets(self, season_id: str, trainer_id: str) -> list[str]: ...
     def league_general(self, season_id: str) -> dict | None: ...
     def initial_observations(self, season_id: str) -> list[dict]: ...
 
@@ -98,3 +99,16 @@ class SupabaseFrontendReadRepository:
         except Exception as exc:
             _report_failure("initial_observations", exc)
             raise PersistenceError("Observed progress unavailable") from exc
+
+    def shield_targets(self, season_id, trainer_id):
+        try:
+            data = _execute_read(
+                self._client.rpc("inventory_shield_targets", {"sid": season_id, "tid": trainer_id}),
+                "shield_targets",
+            )
+            if not isinstance(data, list) or any(not isinstance(v, str) for v in data):
+                raise ValueError("Invalid target eligibility")
+            return data
+        except Exception as exc:
+            _report_failure("shield_targets", exc)
+            raise PersistenceError("Target eligibility unavailable") from exc

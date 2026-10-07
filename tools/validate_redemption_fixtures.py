@@ -202,9 +202,11 @@ class RedemptionFixtures(IdentityFixtures):
         require(receipt2.target_pokemon_entity_id==self.party[5],'movement/evolution identity changed')
         require(self.redeem(first,self.party[0])==receipt,'historical retry after new head changed')
         self.passed('RF10/F30/F33/F34 stale head rejected; moved/evolved Entity revived by CURRENT location')
-        for state,column in (('finished','finished_at'),('archived','archived_at'),('discarded','discarded_at')):
+        for target_index,(state,column) in enumerate((('finished','finished_at'),('archived','archived_at'),('discarded','discarded_at')),start=1):
             self.client.table('seasons').update({'status':state,column:'2026-09-23T12:00:00Z'}).eq('id',self.season['id']).execute()
-            self.redeem(self.purchase('revivir_pokemon'),self.dead[1])
+            # Each fresh entitlement needs a distinct observed death; I rejects
+            # another revive while the same death still awaits physical repair.
+            self.redeem(self.purchase('revivir_pokemon'),self.dead[target_index])
         self.passed('F05 fresh redemption allowed in finished/archived/discarded seasons with active participant')
 
         events=self.select('activity_events',season_id=self.season['id'])

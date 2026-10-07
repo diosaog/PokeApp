@@ -24,7 +24,7 @@ commit before the next starts. Deploy at stable checkpoints, not every commit.
 | F | Finish/Hall uses final accumulated official points, not final day's position. Exactly two tied leaders require audited external BO3; exactly three use fewer authoritative adjusted deaths. Residual triple ties, 4+ ties and undefined finalist rules require an explicit owner decision. Existing frozen history never silently rewritten. |
 | G | Participant-owned nonnegative audited/idempotent wipe counter, current applicability only. Box 8 (legacy index 7) deaths cost 0.2 each without a cap; each wipe revival costs 0.4. Five visible dead plus one wipe revival costs 1.4. |
 | H | Strong missing-Team-Lock warning with ability to continue. Batallas / Team Preview: two distinct independent public selectors in Espectador; one selector including self in Batalla, own private detail permitted, rivals public only. |
-| I | Reconcile pending promotion visibility/time boundaries; expose existing robbery-shield voucher redemption without selling reward-only items; allow spending existing coins after League without generating new League rewards; preserve Store Ban. |
+| I | Exact wallet strings; public pending/active promotions; owned robbery-shield voucher redemption; post-League spending; configurable observed-save badge/Champion rewards; purchased-revive death overlap. |
 | J | Human Spanish readiness/error wording in Admin; setup, supervision, exceptions, history and risk actions. Preserve server revisions/CAS. |
 | K | Safe explicit public scouting projection foundation, no private rival PC access. Do not assume live/box/dead-box publication. |
 | L | Minimal backward-compatible observed progress contract with game/version/provenance; observed zero and unknown distinct. E includes the required badge foundation. No routine manual progress authority, invented League-completed flag or full cloud ingestion. |
@@ -154,12 +154,12 @@ NOT READY / NOT STARTED. Existing unresolved decisions below keep their scope.
 
 Implement independent branches; never infer answers to these questions:
 
-1. Whether the legacy four coins per badge remains approved.
-2. Scope of the twelve-coin League-completion claim: season/reto, persistent save/game, or other.
+1. RESOLVED in I: default four coins per reliably observed badge, persistently configurable.
+2. RESOLVED in I: default twelve coins once per season/challenge, persistently configurable.
 3. Whether eight badges suffice for that claim or actual Pokémon League completion is required.
 4. Normal OPEN/CLOSE/FINISH trigger and authority: automatic, participant, supervised, or combination.
 5. Residual championship exceptions outside the approved two/three-player rule above, including unresolved finalist placement where applicable.
-6. Additional purchased-revive penalty while physical application remains pending.
+6. RESOLVED in I: purchased revive preserves one historical death (-0.2), without stacking it on the same still-visible death. G wipe revival remains two deaths (-0.4).
 7. Team Lock replacement cutoff after combat starts.
 8. Public scouting publication scope: live/snapshot, party, boxes and dead box.
 9. Whether League DQ excludes later Cup entry.

@@ -5,6 +5,15 @@
 
 begin;
 
+drop table if exists public.progress_reward_claims cascade;
+drop function if exists public.progress_reward_immutable() cascade;
+drop function if exists public.reward_current_save_observation() cascade;
+drop function if exists public.settle_observed_progress_rewards(uuid,uuid);
+drop function if exists public.purchased_revive_overlap(uuid,uuid,uuid);
+drop function if exists public.inventory_shield_targets(uuid,uuid);
+drop function if exists public.commit_pokemon_identity_v038(jsonb);
+-- Source-validation helpers depend on the row types dropped below (CASCADE).
+
 -- Local validation only: remove the additive administration helpers and state.
 do $$ declare f regprocedure; begin
   for f in select p.oid::regprocedure from pg_proc p join pg_namespace n on n.oid=p.pronamespace

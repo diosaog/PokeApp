@@ -111,7 +111,12 @@ class FrontendReads:
         rows = self.rows(
             "public_coin_balances", "trainer_id,balance", season_id=sid, trainer_id=tid
         )
-        return rows[0]["balance"] if rows else 0
+        value = rows[0]["balance"] if rows else "0"
+        # The SQL aggregate is an exact integer string, never a browser Number.
+        # Keep compatibility with the old numeric projection during rollout.
+        if isinstance(value, bool) or not isinstance(value, (int, str)):
+            raise PersistenceError("Invalid wallet balance")
+        return str(value)
 
     def overview(self, sid, tid):
         season = self.season(sid)
@@ -267,11 +272,11 @@ class FrontendReads:
         promotions = (
             self.rows(
                 "public_shop_promotions",
-                "id,shop_item_id,status,effective_price,stock_total,stock_used",
+                "id,shop_item_id,status,effective_price,stock_total,stock_used,activates_at,ends_at",
                 season_id=sid,
-                matchday_id=season["current_matchday_id"],
+                matchday_id=season["current_matchday_id"] if season["status"] == "active" else None,
             )
-            if season["current_matchday_id"]
+            if season["status"] in ("active", "finished", "archived")
             else []
         )
         return ShopRead(
@@ -280,6 +285,7 @@ class FrontendReads:
             ),
             promotions=promotions,
             balance=self.balance(sid, tid),
+            season_status=season["status"],
         )
 
     def observed_entities(self, sid, tid, save):
@@ -312,12 +318,14 @@ class FrontendReads:
     def inventory(self, sid, tid):
         season = self.season(sid)
         pc = self.pc(sid, tid)
+        shield_targets = set(self.repo.shield_targets(sid, tid))
         targets = [
             dict(
                 pokemon_entity_id=s.pokemon_entity_id,
                 trainer_id=tid,
                 location=s.location,
                 visibility="own",
+                can_shield=str(s.pokemon_entity_id) in shield_targets,
                 pokemon=s.pokemon.model_dump(),
             )
             for s in pc.pokemon
@@ -352,7 +360,7 @@ class FrontendReads:
                         )
         purchases = self.rows(
             "purchases",
-            "id,shop_item_id,status,total_price,purchased_at",
+            "id,shop_item_id,status,total_price,purchased_at,acquisition_type",
             season_id=sid,
             trainer_id=tid,
         )

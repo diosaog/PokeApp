@@ -78,6 +78,8 @@ export class ApiError extends Error {
 export function errorText(error: unknown) {
   if (!(error instanceof ApiError))
     return "No se pudo conectar. Comprueba la conexión y vuelve a intentarlo.";
+  if (error.code === "POKEMON_REVIVE_PENDING")
+    return "Ya has usado un revivir para esta muerte. El save todavía no muestra a este Pokémon vivo.";
   if (error.code === "RANKING_TIE_UNRESOLVED")
     return "Hay un empate que afecta al reparto de posiciones o recompensas. Registra la decisión externa antes de continuar.";
   if (error.code === "RANKING_REVIEW_STALE")

@@ -50,7 +50,7 @@ class ObservedProgressTests(unittest.TestCase):
                 "game": "B2W2",
                 "generation": 5,
                 "source_hash": source_hash,
-                "progress": progress(),
+                "progress": progress() | {"champion_defeated": None},
             },
         )
         self.assertIsNone(progress_evidence(observed(), source_hash)["progress"])

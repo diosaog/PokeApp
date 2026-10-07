@@ -24,7 +24,7 @@ from app.save_parser.models import (
 
 
 class PkhexProcessParser:
-    version = "pokeapp-reader/2;pkhex/24.11.11"
+    version = "pokeapp-reader/3;pkhex/24.11.11"
 
     def __init__(self, executable: Path, *, timeout: float = 20):
         self.executable = executable.resolve(strict=True)

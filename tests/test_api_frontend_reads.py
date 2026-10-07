@@ -80,6 +80,9 @@ class ReadStore:
             ],
         }
 
+    def shield_targets(self, season_id, trainer_id):
+        return []
+
     def rows(self, table, columns, *, filters=None, offset=0, limit=500, **kwargs):
         self.calls.append((table, columns, filters, offset, limit))
         return deepcopy(
