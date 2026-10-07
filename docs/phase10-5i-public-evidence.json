@@ -1,0 +1,502 @@
+{
+  "package": "10.5I",
+  "date": "2026-10-07",
+  "status": "STAGING_DONE_ZERO_RESIDUE",
+  "entry_head": "e3d4003337e4410dae46ebaa1de632696b1d80a9",
+  "application_source": "a5d1b627928d2e3fe05c90bcdb51851409e5687d",
+  "project_ref": "uwleqeuzsveqlugugzba",
+  "migration": {
+    "name": "039_shop_economy_alignment",
+    "version": "20261007121317",
+    "applied_once": true,
+    "previous_30_records_unchanged": true,
+    "total_records": 31,
+    "after_apply_equals_independent_final": true
+  },
+  "deployments": {
+    "time": "2026-10-07T12:16:59.971537+00:00",
+    "source_commit": "a5d1b627928d2e3fe05c90bcdb51851409e5687d",
+    "railway": {
+      "id": "2402be29-d1ec-4e20-b4c4-3f218ee45893",
+      "status": "SUCCESS",
+      "image": "sha256:f2d9a3d7c7d8cbf47edf56b99e3bb51413e8347765fc43eb7f182b0704591472",
+      "source": "Phase 10.5I source a5d1b627928d2e3fe05c90bcdb51851409e5687d"
+    },
+    "cloudflare": {
+      "id": "75e91cf3-123f-4fda-a836-a61e87c9b09f",
+      "version": "8f9deb86-8ebb-4b55-be52-4790ba8decf5",
+      "percentage": 100,
+      "source": "Phase 10.5I source a5d1b627928d2e3fe05c90bcdb51851409e5687d"
+    }
+  },
+  "api_before_web": {
+    "status": "PASS",
+    "time": "2026-10-07T12:15:54.726424+00:00",
+    "requests": [
+      {
+        "method": "GET",
+        "path": "/v1/read/seasons/c6bcac5b-0b89-403f-8242-41ac58286ade/shop",
+        "status": 401,
+        "seconds": 0.493
+      },
+      {
+        "method": "GET",
+        "path": "/v1/read/seasons/c6bcac5b-0b89-403f-8242-41ac58286ade/inventory",
+        "status": 401,
+        "seconds": 0.195
+      },
+      {
+        "method": "POST",
+        "path": "/v1/auth/pin-login",
+        "status": 200,
+        "seconds": 2.003
+      },
+      {
+        "method": "GET",
+        "path": "/v1/me",
+        "status": 200,
+        "seconds": 0.928
+      },
+      {
+        "method": "GET",
+        "path": "/v1/read/seasons/c6bcac5b-0b89-403f-8242-41ac58286ade/shop",
+        "status": 200,
+        "seconds": 3.305
+      },
+      {
+        "method": "GET",
+        "path": "/v1/read/seasons/c6bcac5b-0b89-403f-8242-41ac58286ade/inventory",
+        "status": 200,
+        "seconds": 2.594
+      },
+      {
+        "method": "GET",
+        "path": "/v1/read/seasons/c6bcac5b-0b89-403f-8242-41ac58286ade/overview",
+        "status": 200,
+        "seconds": 4.817
+      },
+      {
+        "method": "GET",
+        "path": "/v1/read/seasons/c6bcac5b-0b89-403f-8242-41ac58286ade/league",
+        "status": 200,
+        "seconds": 0.837
+      },
+      {
+        "method": "GET",
+        "path": "/v1/admin/seasons/c6bcac5b-0b89-403f-8242-41ac58286ade/setup",
+        "status": 200,
+        "seconds": 1.135
+      }
+    ],
+    "balance": "8",
+    "season_status": "active",
+    "promotions": 6,
+    "reward_vouchers": 0,
+    "eligible_shield_targets": 0,
+    "business_writes": 0,
+    "fixtures": 0,
+    "positive_mutation_validation": "LOCAL ONLY"
+  },
+  "api": {
+    "status": "PASS",
+    "time": "2026-10-07T12:17:11.217173+00:00",
+    "requests": [
+      {
+        "method": "GET",
+        "path": "/v1/read/seasons/c6bcac5b-0b89-403f-8242-41ac58286ade/shop",
+        "status": 401,
+        "seconds": 0.295
+      },
+      {
+        "method": "GET",
+        "path": "/v1/read/seasons/c6bcac5b-0b89-403f-8242-41ac58286ade/inventory",
+        "status": 401,
+        "seconds": 0.196
+      },
+      {
+        "method": "POST",
+        "path": "/v1/auth/pin-login",
+        "status": 200,
+        "seconds": 1.095
+      },
+      {
+        "method": "GET",
+        "path": "/v1/me",
+        "status": 200,
+        "seconds": 0.922
+      },
+      {
+        "method": "GET",
+        "path": "/v1/read/seasons/c6bcac5b-0b89-403f-8242-41ac58286ade/shop",
+        "status": 200,
+        "seconds": 2.211
+      },
+      {
+        "method": "GET",
+        "path": "/v1/read/seasons/c6bcac5b-0b89-403f-8242-41ac58286ade/inventory",
+        "status": 200,
+        "seconds": 2.29
+      },
+      {
+        "method": "GET",
+        "path": "/v1/read/seasons/c6bcac5b-0b89-403f-8242-41ac58286ade/overview",
+        "status": 200,
+        "seconds": 3.827
+      },
+      {
+        "method": "GET",
+        "path": "/v1/read/seasons/c6bcac5b-0b89-403f-8242-41ac58286ade/league",
+        "status": 200,
+        "seconds": 1.15
+      },
+      {
+        "method": "GET",
+        "path": "/v1/admin/seasons/c6bcac5b-0b89-403f-8242-41ac58286ade/setup",
+        "status": 200,
+        "seconds": 1.107
+      }
+    ],
+    "balance": "8",
+    "season_status": "active",
+    "promotions": 6,
+    "reward_vouchers": 0,
+    "eligible_shield_targets": 0,
+    "business_writes": 0,
+    "fixtures": 0,
+    "positive_mutation_validation": "LOCAL ONLY"
+  },
+  "browser": {
+    "status": "PASS",
+    "states": [
+      "shop 1440",
+      "configuration 1440",
+      "shop 390",
+      "configuration 390"
+    ],
+    "reads": [
+      {
+        "method": "POST",
+        "path": "/v1/auth/pin-login",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "path": "/v1/me",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "path": "/v1/read/seasons",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "path": "/v1/read/seasons/c6bcac5b-0b89-403f-8242-41ac58286ade/shop",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "path": "/v1/admin/seasons/c6bcac5b-0b89-403f-8242-41ac58286ade/setup",
+        "status": 200
+      }
+    ],
+    "errors": [],
+    "unexpected": [],
+    "environmentOrigins": {
+      "https://me.kis.v2.scr.kaspersky-labs.com": 9
+    },
+    "api_interception": false,
+    "business_writes": 0
+  },
+  "hosting": {
+    "time": "2026-10-07T12:17:00.189804+00:00",
+    "source_commit": "a5d1b627928d2e3fe05c90bcdb51851409e5687d",
+    "api": "https://pokeapp-api-production.up.railway.app",
+    "web": "https://pokeapp-web.pokeapp-v2.workers.dev",
+    "assets": [
+      {
+        "path": "/assets/index-x9vcmX5V.js",
+        "sha256": "7fe8f0d455efd7b725eab26bdf03cb62dac0fcad7e1c6f66677483176fea1633",
+        "content_type": "text/javascript"
+      },
+      {
+        "path": "/assets/index-Ce8Qi1M_.css",
+        "sha256": "fdd473f168f290c4c5a4f05543bb4987fb8eaaa43cc59b3763737e8aa3964ef4",
+        "content_type": "text/css"
+      }
+    ],
+    "web_headers": {
+      "content-type": "text/html",
+      "content-security-policy": "default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'self' https://pokeapp-api-production.up.railway.app; object-src 'none'; base-uri 'none'; frame-ancestors 'none'; form-action 'self'",
+      "x-content-type-options": "nosniff",
+      "referrer-policy": "no-referrer"
+    },
+    "status": "PASS"
+  },
+  "final_comparison": {
+    "status": "PASS",
+    "time": "2026-10-07T12:21:11.447331+00:00",
+    "version": "20261007121317",
+    "migrations": 31,
+    "original_tables_equal": 55,
+    "scoped_tables": 56,
+    "new_claim_rows": 0,
+    "helpers": 16,
+    "owner_credentials_unchanged": true,
+    "business_writes": 0,
+    "new_or_removed_error_warn": 0,
+    "advisor": {
+      "INFO": 138,
+      "ERROR": 24,
+      "WARN": 5
+    }
+  },
+  "comparison_scope": "All 56 scoped public/Auth/Storage metadata tables compared after apply; all 55 original tables identical to preapply and progress_reward_claims empty. Only owner Auth login/session/refresh activity is excluded from scoped equality; full baselines retained, owner stable credential/identity hashes compared separately. No Storage bytes changed.",
+  "security": {
+    "helpers": [
+      {
+        "anon": false,
+        "authenticated": false,
+        "owner": "postgres",
+        "proconfig": [
+          "search_path=pg_catalog, public"
+        ],
+        "proname": "admin_setup_config_used",
+        "prosecdef": false,
+        "public_execute": false,
+        "service": true,
+        "signature": "admin_setup_config_used(uuid)"
+      },
+      {
+        "anon": false,
+        "authenticated": false,
+        "owner": "postgres",
+        "proconfig": [
+          "search_path=pg_catalog, public"
+        ],
+        "proname": "admin_setup_validate_config",
+        "prosecdef": false,
+        "public_execute": false,
+        "service": true,
+        "signature": "admin_setup_validate_config(uuid,jsonb)"
+      },
+      {
+        "anon": false,
+        "authenticated": false,
+        "owner": "postgres",
+        "proconfig": [
+          "search_path=\"\""
+        ],
+        "proname": "api_create_normal_purchase_8d",
+        "prosecdef": false,
+        "public_execute": false,
+        "service": true,
+        "signature": "api_create_normal_purchase_8d(uuid,uuid,uuid,text,boolean)"
+      },
+      {
+        "anon": false,
+        "authenticated": false,
+        "owner": "postgres",
+        "proconfig": [
+          "search_path=\"\""
+        ],
+        "proname": "api_create_promotional_purchase",
+        "prosecdef": false,
+        "public_execute": false,
+        "service": true,
+        "signature": "api_create_promotional_purchase(uuid,uuid,uuid,text)"
+      },
+      {
+        "anon": false,
+        "authenticated": false,
+        "owner": "postgres",
+        "proconfig": [
+          "search_path=\"\""
+        ],
+        "proname": "api_redeem_purchase",
+        "prosecdef": false,
+        "public_execute": false,
+        "service": true,
+        "signature": "api_redeem_purchase(uuid,uuid,uuid,uuid,text,uuid)"
+      },
+      {
+        "anon": false,
+        "authenticated": false,
+        "owner": "postgres",
+        "proconfig": [
+          "search_path=pg_catalog, public"
+        ],
+        "proname": "commit_pokemon_identity",
+        "prosecdef": false,
+        "public_execute": false,
+        "service": true,
+        "signature": "commit_pokemon_identity(jsonb)"
+      },
+      {
+        "anon": false,
+        "authenticated": false,
+        "owner": "postgres",
+        "proconfig": [
+          "search_path=\"\""
+        ],
+        "proname": "commit_pokemon_identity_v038",
+        "prosecdef": false,
+        "public_execute": false,
+        "service": true,
+        "signature": "commit_pokemon_identity_v038(jsonb)"
+      },
+      {
+        "anon": false,
+        "authenticated": false,
+        "owner": "postgres",
+        "proconfig": [
+          "search_path=pg_catalog, public"
+        ],
+        "proname": "initial_assignment_observations",
+        "prosecdef": false,
+        "public_execute": false,
+        "service": true,
+        "signature": "initial_assignment_observations(uuid)"
+      },
+      {
+        "anon": false,
+        "authenticated": false,
+        "owner": "postgres",
+        "proconfig": [
+          "search_path=pg_catalog, public"
+        ],
+        "proname": "inventory_shield_targets",
+        "prosecdef": false,
+        "public_execute": false,
+        "service": true,
+        "signature": "inventory_shield_targets(uuid,uuid)"
+      },
+      {
+        "anon": false,
+        "authenticated": false,
+        "owner": "postgres",
+        "proconfig": [
+          "search_path=pg_catalog, public"
+        ],
+        "proname": "matchday_context_v034",
+        "prosecdef": false,
+        "public_execute": false,
+        "service": true,
+        "signature": "matchday_context_v034(text,jsonb)"
+      },
+      {
+        "anon": false,
+        "authenticated": false,
+        "owner": "postgres",
+        "proconfig": [
+          "search_path=pg_catalog, public"
+        ],
+        "proname": "observed_save_progress",
+        "prosecdef": false,
+        "public_execute": false,
+        "service": true,
+        "signature": "observed_save_progress(save_files,parsed_saves,uuid)"
+      },
+      {
+        "anon": false,
+        "authenticated": false,
+        "owner": "postgres",
+        "proconfig": [
+          "search_path=pg_catalog, public"
+        ],
+        "proname": "observed_save_source_valid",
+        "prosecdef": false,
+        "public_execute": false,
+        "service": true,
+        "signature": "observed_save_source_valid(save_files,parsed_saves,uuid)"
+      },
+      {
+        "anon": false,
+        "authenticated": false,
+        "owner": "postgres",
+        "proconfig": [
+          "search_path=pg_catalog, public"
+        ],
+        "proname": "progress_reward_immutable",
+        "prosecdef": false,
+        "public_execute": false,
+        "service": true,
+        "signature": "progress_reward_immutable()"
+      },
+      {
+        "anon": false,
+        "authenticated": false,
+        "owner": "postgres",
+        "proconfig": [
+          "search_path=pg_catalog, public"
+        ],
+        "proname": "purchased_revive_overlap",
+        "prosecdef": false,
+        "public_execute": false,
+        "service": true,
+        "signature": "purchased_revive_overlap(uuid,uuid,uuid)"
+      },
+      {
+        "anon": false,
+        "authenticated": false,
+        "owner": "postgres",
+        "proconfig": [
+          "search_path=pg_catalog, public"
+        ],
+        "proname": "reward_current_save_observation",
+        "prosecdef": false,
+        "public_execute": false,
+        "service": true,
+        "signature": "reward_current_save_observation()"
+      },
+      {
+        "anon": false,
+        "authenticated": false,
+        "owner": "postgres",
+        "proconfig": [
+          "search_path=pg_catalog, public"
+        ],
+        "proname": "settle_observed_progress_rewards",
+        "prosecdef": false,
+        "public_execute": false,
+        "service": true,
+        "signature": "settle_observed_progress_rewards(uuid,uuid)"
+      }
+    ],
+    "table_acl": [
+      {
+        "anon_column_write": false,
+        "anon_dml": false,
+        "anon_read": false,
+        "anon_write": false,
+        "authenticated_column_write": false,
+        "authenticated_dml": false,
+        "authenticated_read": false,
+        "authenticated_write": false,
+        "owner": "postgres",
+        "policies": 0,
+        "public_column_write": false,
+        "public_write": false,
+        "relname": "progress_reward_claims",
+        "rls": true,
+        "service_select": true,
+        "service_update": false
+      }
+    ],
+    "column_acl": [
+      {
+        "anon": false,
+        "authenticated": false
+      }
+    ]
+  },
+  "public_limitations": "No owner purchase, promotion activation, redemption, game reward proof submission, season finish/archive or fixture. Positive mutations are proven locally. Existing owner has no reward voucher or eligible shield target; no voucher was fabricated.",
+  "manual_visual_review": {
+    "status": "PASS",
+    "shop_mobile": "shop-390.png",
+    "configuration_mobile": "configuration-390.png",
+    "scope": "390px mobile screenshots reviewed; four real browser desktop/mobile states, no horizontal Shop overflow, private screenshots in raw evidence only."
+  },
+  "harness_note": "Two read-only browser attempts failed on a wallet selector also matching item prices. The corrected .wallet selector passed; no application or network errors/business writes occurred.",
+  "raw_evidence": "%TEMP%/phase10-5i-public and phase10-5i-* logs"
+}

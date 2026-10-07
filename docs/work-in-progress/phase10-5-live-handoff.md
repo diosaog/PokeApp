@@ -1085,3 +1085,49 @@ and admin intact; Advisor 24 ERROR / 5 WARN / 131 INFO. Raw baseline in
 source, apply only committed 039 once, compatible Railway then Cloudflare,
 read-only owner smoke and independent final data/security comparison. I remains
 IN PROGRESS until that delivery and documentation closure complete. STOP after I.
+
+## I delivered - 2026-10-07; STOP after I
+
+Supersedes I's pending-delivery notes. **I DONE / STAGING_DONE_ZERO_RESIDUE.**
+[Report](../phase10-5i-completion-report.md),
+[local evidence](../phase10-5i-closure-evidence.json),
+[public evidence](../phase10-5i-public-evidence.json).
+Entry `e3d4003337e4410dae46ebaa1de632696b1d80a9`; final application HEAD
+`a5d1b627928d2e3fe05c90bcdb51851409e5687d`, committed/pushed before remote writes.
+Documentation closure is the subsequent commit containing this entry; exact HEAD
+is available from Git (no self-referential hash).
+
+- Exact wallet strings, public pending/active promotions, owned reward-only voucher
+  canje, eligible finished/archived spending without fictitious matchdays.
+- Configurable defaults 4/badge and 12/season for observed in-game Champion proof;
+  basic Admin controls delivered. Unknown is not zero; eight badges/PokeApp title
+  cannot claim completion. Private audited claims, atomic delta/replay protection,
+  current owned proof only, no manual attestation or automatic historical backfill.
+  Reader/3 neutral Champion evidence; BW Hall-of-Fame proof rather than Ghetsis.
+  Full Launcher/cloud ingestion remains unfinished; local sync is still local.
+- Purchased revive keeps one historical death without stacking the same visible
+  death. New death requires intervening observed alive state; ambiguous legacy
+  overlap remains UNKNOWN. G factor two and frozen official history preserved.
+- FRESH PASS: 732 Python, 33 React, 12 affected Edge, real parser integration,
+  static/build/dry-run. PostgreSQL I ten groups / five rollback boundaries;
+  022/024/025/026/E/G pass with exact 50-table cleanup. Four clean builds: 12,590
+  identical schema/grant/owner lines. Full unrelated H/F/Cup matrices NOT RERUN.
+  PostgreSQL stopped; no pending fixture cleanup.
+- 039 applied ONCE as `20261007121317`; 31 total records, prior 30 identical.
+  Railway `2402be29-d1ec-4e20-b4c4-3f218ee45893` SUCCESS, then Cloudflare
+  `75e91cf3-123f-4fda-a836-a61e87c9b09f`, version
+  `8f9deb86-8ebb-4b55-be52-4790ba8decf5`, 100%, same application source.
+- Public: 18 successful API requests across pre/post-web checks, four final real
+  browser states, mobile screenshots reviewed, no interception/business writes.
+  Positive mutations LOCAL ONLY. All original 55 scoped tables unchanged, new
+  proof table empty; final 56/56 tables and 31/31 migration records equal postapply.
+  Owner credentials/PIN/admin/manual data preserved; only own Auth session activity
+  excluded, full baselines and stable-credential hashes retained. Storage untouched.
+  Sixteen helpers/private-table ACL verified. Advisor 24 ERROR / 5 WARN / 138 INFO;
+  zero new/removed ERROR/WARN. Raw evidence `%TEMP%/phase10-5i-public` and I logs.
+- Reward scope and purchased-revive decisions are resolved. Other decisions retain
+  existing scope. Shop/inventory/overview latency remains M/Phase 14 work.
+  Protected guide and unrelated untracked files remain untouched and unstaged.
+
+**EXACT NEXT STEP: STOP. J is next, awaiting explicit owner instruction.**
+Phase 10.5 IN PROGRESS; **PHASE 11 READINESS: NOT READY / NOT STARTED**.

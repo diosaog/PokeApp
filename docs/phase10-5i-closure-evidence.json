@@ -9,12 +9,14 @@
     "passed": 732,
     "failed": 0,
     "errors": 0,
-    "skipped": 0
+    "skipped": 0,
+    "classification": "FRESH PASS"
   },
   "react": {
     "tests": 33,
     "files": 6,
-    "status": "PASS"
+    "status": "PASS",
+    "classification": "FRESH PASS"
   },
   "browser": {
     "status": "PASS",
@@ -24,12 +26,15 @@
     "existing_flows": 9,
     "failures": 0,
     "flaky": 0,
-    "api_fixtures": true
+    "api_fixtures": true,
+    "classification": "FRESH PASS",
+    "harness_note": "The existing-flow PowerShell wrapper reported exit 1 from a native NO_COLOR stderr warning; the Playwright process report and log show all nine passed, no global errors, failed, skipped or flaky tests."
   },
   "parser": {
     "status": "PASS",
     "reader": "pokeapp-reader/3;pkhex/24.11.11",
-    "scope": "Real native Gen3/4/5 binary serialize/reparse, Champion evidence per supported family, IPC and local Launcher; no cloud sync or physical writes"
+    "scope": "Real native Gen3/4/5 binary serialize/reparse, Champion evidence per supported family, IPC and local Launcher; no cloud sync or physical writes",
+    "classification": "FRESH PASS"
   },
   "postgres": {
     "version": "17.11",
@@ -150,7 +155,9 @@
       "rls": true,
       "browser_denied": true,
       "service_only": true
-    }
+    },
+    "server_stopped_after_validators_finished": true,
+    "classification": "FRESH PASS"
   },
   "static": {
     "status": "PASS",
@@ -162,7 +169,8 @@
       "Wrangler dry-run",
       "hosted browser node syntax",
       "git diff --check"
-    ]
+    ],
+    "classification": "FRESH PASS"
   },
   "scope": {
     "positive_business_mutations": "DISPOSABLE LOCAL POSTGRESQL ONLY",
@@ -187,5 +195,9 @@
     "supabase/v2/bootstrap.sql": "66ab6b876b64e3bb1a2a758a8a5c97ce33de2e749cc0216d26f86b0a1f6440be",
     "tools/validate_phase10_5_economy_sql.py": "d9e09556208bd0e427e0dc19b67acdf6b99ef91ddc1a90c5c9e75174e4b39bce",
     "companion/parser/PokeApp.Parser/Inspection.cs": "637e5d7a7ce82307c3bbe7efba6d02463166a56270c0efea9f97729a7b6859a0"
+  },
+  "application_source": "a5d1b627928d2e3fe05c90bcdb51851409e5687d",
+  "unchanged_matrices": {
+    "full_H_F_Cup": "NOT RERUN; no sporting/title/preview rule changes. Relevant frozen history and finish concurrency exercised by the fresh G regression."
   }
 }

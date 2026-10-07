@@ -9,7 +9,8 @@ milestone record; it does not maintain a second live phase-status ledger.
   [Approved contract](phase10-5-functional-alignment.md),
   [single live record](work-in-progress/phase10-5-live-handoff.md).
   Owner authorized implementation on 2026-09-29 after the functional knowledge export.
-  Latest closed package: [H Team Lock warnings and Team Preview](phase10-5h-completion-report.md).
+  Latest closed package: [I Shop and economy alignment](phase10-5i-completion-report.md).
+  [H Team Lock warnings and Team Preview](phase10-5h-completion-report.md) remains delivered.
   [G participant-owned wipe revivals](phase10-5g-completion-report.md) remains delivered.
   [F final championship and frozen Hall](phase10-5f-completion-report.md) remains delivered.
   [E observed progress and initial divisions](phase10-5e-completion-report.md) remains delivered.

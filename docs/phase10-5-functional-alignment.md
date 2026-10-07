@@ -38,9 +38,12 @@ Discord verdicts and modern 8L Cup rules are intentional V2 improvements.
 ## Package D contract detail (approved continuation, 2026-10-01)
 
 The same wins/adjusted-deaths rule applies to every group size. Adjusted deaths
-remain the existing 030 integer fact: Box 8 observations plus the greater of
+reuse the existing 030 integer sources: Box 8 observations plus the greater of
 applied revivals and used revive purchases, plus twice the wipe-revival counter.
-The visible Box 8 count delivered by B is a separate fact.
+I subtracts proven overlap with a purchased revive still visible in Box 8, so the
+same death counts once. An intervening alive observation proves a later death is
+new; ambiguous/unlinked legacy overlap remains UNKNOWN. Frozen correction inputs
+are preserved. The visible Box 8 count delivered by B is a separate fact.
 
 A residual daily tie requires external resolution only when group members would
 receive different position points, position coins, unique Top 3 places, movement
@@ -156,7 +159,7 @@ Implement independent branches; never infer answers to these questions:
 
 1. RESOLVED in I: default four coins per reliably observed badge, persistently configurable.
 2. RESOLVED in I: default twelve coins once per season/challenge, persistently configurable.
-3. Whether eight badges suffice for that claim or actual Pokémon League completion is required.
+3. RESOLVED in I: save proof of defeating the in-game Champion is required; eight badges and PokeApp finish/title are insufficient.
 4. Normal OPEN/CLOSE/FINISH trigger and authority: automatic, participant, supervised, or combination.
 5. Residual championship exceptions outside the approved two/three-player rule above, including unresolved finalist placement where applicable.
 6. RESOLVED in I: purchased revive preserves one historical death (-0.2), without stacking it on the same still-visible death. G wipe revival remains two deaths (-0.4).
@@ -189,3 +192,12 @@ No progress credit for a contract alone. Full DONE needs all relevant FIX NOW
 repairs, tests, coherent public delivery and clean/pushed Git. Use
 `PHASE 10.5 PARTIAL — BLOCKED ONLY ON OWNER DECISIONS` only when no independent
 implementation remains. Champion/Hall repair is a structural Phase 11 blocker.
+
+## I delivery - 2026-10-07
+
+I is DONE: exact economy balances, pending/active offers, owned reward vouchers,
+post-League spending, configurable save-proven badge/Champion rewards and purchased
+revive overlap. Basic reward controls are present; general Admin humanization stays
+J. [Report and preserved-owner evidence](phase10-5i-completion-report.md).
+No cloud ingestion or physical writes. STOP after I; J requires the next owner
+instruction. Phase 10.5 remains IN PROGRESS; Phase 11 NOT READY / NOT STARTED.
