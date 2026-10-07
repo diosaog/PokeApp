@@ -229,7 +229,40 @@ export async function fixture(page: Page, longNames = false) {
         id: p.trainer_id,
         display_name: p.display_name,
       }));
-    else if (path.endsWith("/overview")) result = overview;
+    else if (path.endsWith("/team-preview")) {
+      const params = new URL(request.url()).searchParams;
+      const mode = params.get("mode") || "spectator";
+      const first = params.get("trainer_id") || tid;
+      const second =
+        params.get("second_trainer_id") ||
+        players.find((p) => p.trainer_id !== first)!.trainer_id;
+      const { ability, nature, ivs, evs, ...publicPokemon } = pokemon;
+      const roster = players.map((p) => ({
+        trainer_id: p.trainer_id,
+        display_name: p.display_name,
+        status: p.status,
+      }));
+      result = {
+        season: overview.season,
+        day: overview.days[0],
+        mode,
+        trainers: roster,
+        teams: (mode === "spectator" ? [first, second] : [first]).map((id) => ({
+          trainer_id: id,
+          visibility: mode === "battle" && id === tid ? "self" : "public",
+          lock:
+            id === "t4"
+              ? null
+              : {
+                  locked_at: "2026-10-07T10:00:00Z",
+                  is_late: false,
+                  team: Array.from({ length: 6 }, () =>
+                    mode === "battle" && id === tid ? pokemon : publicPokemon,
+                  ),
+                },
+        })),
+      };
+    } else if (path.endsWith("/overview")) result = overview;
     else if (path.endsWith("/wipe-revivals"))
       result = {
         season_id: sid,

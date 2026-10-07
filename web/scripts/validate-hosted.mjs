@@ -48,7 +48,7 @@ try {
   await page.getByRole('button', { name: /Synthetic 0/ }).first().click();
   await page.getByRole('dialog').getByText('Escama Especial', { exact: true }).waitFor();
   await page.keyboard.press('Escape');
-  await nav('Battle');
+  await nav('Batallas');
   await page.getByRole('button', { name: 'Fijar mi equipo' }).click();
   await doneDialog(() => page.getByRole('button', { name: 'Confirmar mi equipo' }).click());
   await nav('Tienda');

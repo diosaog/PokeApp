@@ -30,7 +30,6 @@ import { Field, Notice, Submit, form, text } from "./ui";
 import {
   HomePage,
   LeaguePage,
-  BattlePage,
   TrainersPage,
   PCPage,
   SavesPage,
@@ -40,11 +39,12 @@ import {
 import { CupsPage } from "./features/cups";
 import { TrialsPage } from "./features/trials";
 import { AdminPage } from "./features/admin";
+import { BattlePage } from "./features/team-preview";
 
 const links = [
   ["/", "Inicio", Home],
   ["/liga", "Liga", Trophy],
-  ["/battle", "Battle", Swords],
+  ["/battle", "Batallas", Swords],
   ["/entrenadores", "Entrenadores", Users],
   ["/pc", "Mi PC", Box],
   ["/tienda", "Tienda", ShoppingBag],

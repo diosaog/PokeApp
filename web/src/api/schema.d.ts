@@ -923,6 +923,23 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/v1/read/seasons/{season_id}/team-preview": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Preview */
+    get: operations["preview_v1_read_seasons__season_id__team_preview_get"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/v1/read/seasons/{season_id}/pc": {
     parameters: {
       query?: never;
@@ -2544,6 +2561,18 @@ export interface components {
        */
       is_shiny: boolean;
     };
+    /** PreviewTrainer */
+    PreviewTrainer: {
+      /**
+       * Trainer Id
+       * Format: uuid
+       */
+      trainer_id: string;
+      /** Display Name */
+      display_name: string;
+      /** Status */
+      status: string;
+    };
     /** PrivatePokemonRead */
     PrivatePokemonRead: {
       /** Species */
@@ -2701,6 +2730,32 @@ export interface components {
        * @default
        */
       evidence: string;
+    };
+    /** PublicPreviewLock */
+    PublicPreviewLock: {
+      /**
+       * Locked At
+       * Format: date-time
+       */
+      locked_at: string;
+      /** Is Late */
+      is_late: boolean;
+      /** Team */
+      team: components["schemas"]["PokemonRead"][];
+    };
+    /** PublicPreviewTeam */
+    PublicPreviewTeam: {
+      /**
+       * Trainer Id
+       * Format: uuid
+       */
+      trainer_id: string;
+      /**
+       * @description discriminator enum property added by openapi-typescript
+       * @enum {string}
+       */
+      visibility: "public";
+      lock: components["schemas"]["PublicPreviewLock"] | null;
     };
     /** PurchaseRead */
     PurchaseRead: {
@@ -3097,6 +3152,32 @@ export interface components {
       /** Started At */
       started_at: string | null;
     };
+    /** SelfPreviewLock */
+    SelfPreviewLock: {
+      /**
+       * Locked At
+       * Format: date-time
+       */
+      locked_at: string;
+      /** Is Late */
+      is_late: boolean;
+      /** Team */
+      team: components["schemas"]["PrivatePokemonRead"][];
+    };
+    /** SelfPreviewTeam */
+    SelfPreviewTeam: {
+      /**
+       * Trainer Id
+       * Format: uuid
+       */
+      trainer_id: string;
+      /**
+       * @description discriminator enum property added by openapi-typescript
+       * @enum {string}
+       */
+      visibility: "self";
+      lock: components["schemas"]["SelfPreviewLock"] | null;
+    };
     /** SessionResponse */
     SessionResponse: {
       /** User Id */
@@ -3297,6 +3378,23 @@ export interface components {
        * Format: date-time
        */
       updated_at: string;
+    };
+    /** TeamPreviewRead */
+    TeamPreviewRead: {
+      season: components["schemas"]["SeasonRead"];
+      day: components["schemas"]["DayRead"] | null;
+      /** Trainers */
+      trainers: components["schemas"]["PreviewTrainer"][];
+      /**
+       * Mode
+       * @enum {string}
+       */
+      mode: "spectator" | "battle";
+      /** Teams */
+      teams: (
+        | components["schemas"]["PublicPreviewTeam"]
+        | components["schemas"]["SelfPreviewTeam"]
+      )[];
     };
     /** TieGroup */
     TieGroup: {
@@ -5509,6 +5607,41 @@ export interface operations {
         };
         content: {
           "application/json": components["schemas"]["OverviewRead"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  preview_v1_read_seasons__season_id__team_preview_get: {
+    parameters: {
+      query?: {
+        mode?: "spectator" | "battle";
+        trainer_id?: string | null;
+        second_trainer_id?: string | null;
+      };
+      header?: never;
+      path: {
+        season_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["TeamPreviewRead"];
         };
       };
       /** @description Validation Error */

@@ -1,0 +1,55 @@
+{
+  "package": "10.5H",
+  "date": "2026-10-07",
+  "entry_head": "9b7a8dce5953c852b104dc086c69ab689705ffe4",
+  "status": "LOCAL_VALIDATION_PASS",
+  "python": {
+    "classification": "FRESH PASS",
+    "focused": 79,
+    "full": 725,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "exit_code": 0,
+    "note": "Full workspace discovery includes 19 pre-existing untracked repository-map tests; those files are outside H and are not staged. 706 tests belong to committed H source.",
+    "command": ".venv-api/Scripts/python.exe -X faulthandler tools/run_unit_tests.py",
+    "raw_log": "%TEMP%/phase10-5h-python-final.log"
+  },
+  "react": { "classification": "FRESH PASS", "tests": 29, "files": 5 },
+  "browser": {
+    "classification": "FRESH PASS",
+    "engine": "Edge",
+    "tests": 19,
+    "failed": 0,
+    "skipped": 0,
+    "flaky": 0,
+    "files": ["team-preview.spec.ts", "flows.spec.ts", "participant-results.spec.ts"],
+    "raw_report": "%TEMP%/phase10-5h-edge.json",
+    "coverage": "Unscheduled selectors, public self in spectator, private JWT self in battle, rival isolation, no live-save fallback, nonblocking League warning, explicit lock retry preserving body/key and refreshing preview, mobile/desktop layouts and existing affected navigation."
+  },
+  "postgres": {
+    "classification": "FRESH PASS",
+    "version": "17.11",
+    "validator": "tools/validate_phase10_5_preview_sql.py",
+    "groups": 4,
+    "public_tables_restored_exactly": 49,
+    "coverage": "Production read composition and repository with exact SQL columns, existing role/RLS/view/RPC privileges, self/rival/spectator projection, missing lock, closed snapshot independence, zero read writes and fixture cleanup.",
+    "raw_report": "%TEMP%/phase10-5h-pg.json",
+    "server_stopped_after_clients_finished": true
+  },
+  "static": {
+    "classification": "FRESH PASS",
+    "checks": ["compileall app tools tests", "targeted Ruff", "full web Prettier", "TypeScript and production Vite build", "Wrangler deploy dry-run", "affected hosted-script node syntax", "git diff --check"]
+  },
+  "unchanged_contracts": {
+    "migration_inventory": "Unchanged through 038; no H migration or bootstrap change",
+    "migration_rebuild_bootstrap_parity": "NOT RERUN: schema/migration source unchanged; G evidence HISTORICAL",
+    "mutation_concurrency_rollback": "NOT RERUN: backend/SQL mutation contracts unchanged",
+    "hall_cup": "Dedicated SQL matrices NOT RERUN: source unchanged; full Python and existing affected browser flow freshly pass"
+  },
+  "harness_corrections": [
+    "Browser no-fallback assertion initially included pending Home reads; it now awaits those known responses before measuring preview requests.",
+    "Local PG harness now scopes counts to its fixture season, serializes the privilege boolean as JSON, and clears its season pointer before cleanup. One initial cleanup failed on that FK; the exact fixture was then cleaned, and the final validator passed full 49-table restoration.",
+    "PowerShell redirection reported failure despite a completed OK Python run; a direct subprocess capture independently confirmed final-source 725 tests and process exit 0. Failed/interrupted attempts are not counted as PASS."
+  ]
+}

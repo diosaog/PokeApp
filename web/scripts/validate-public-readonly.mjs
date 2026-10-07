@@ -45,14 +45,18 @@ try {
   expect(identity.is_admin).toBe(true);
   for (const viewport of [{ width: 1440, height: 1000 }, { width: 390, height: 844 }]) {
     await page.setViewportSize(viewport);
-    for (const name of ['Inicio', 'Liga', 'Battle', 'Entrenadores', 'Mi PC', 'Tienda', 'Copa', 'Hall de la Fama', 'Juicios', 'Administración', 'Saves y Launcher']) {
+    for (const name of ['Inicio', 'Liga', 'Batallas', 'Entrenadores', 'Mi PC', 'Tienda', 'Copa', 'Hall de la Fama', 'Juicios', 'Administración', 'Saves y Launcher']) {
       step = name+' '+viewport.width;
       const menu = page.getByRole('button', { name: 'Abrir navegación' });
       if (await menu.isVisible()) await menu.click();
       await page.getByRole('navigation').getByRole('link', { name, exact: true }).click();
       await expect(page.locator('main .loading')).toHaveCount(0, { timeout: 60000 });
       await expect.poll(() => pending.size, { timeout: 60000 }).toBe(0);
-      await expect(page.getByRole('alert')).toHaveCount(0);
+      const alerts = page.getByRole('alert');
+      if (name === 'Batallas') {
+        // H deliberately surfaces missing competitive locks as warnings.
+        await expect(alerts.filter({ hasNot: page.locator('strong', { hasText: /^Falta el Team Lock de este entrenador\.$/ }) })).toHaveCount(0);
+      } else await expect(alerts).toHaveCount(0);
       if (name === 'Liga' && input.league_checks) {
         const checks = input.league_checks;
         const tabs = page.getByRole('navigation', { name: 'Vistas de Liga' });
@@ -80,7 +84,7 @@ try {
           await tabs.getByRole('button', { name: `J${checks.current_day_number}`, exact: true }).click();
           await expect(page.locator('main .loading')).toHaveCount(0);
           await expect.poll(() => pending.size).toBe(0);
-          await expect(page.getByRole('alert')).toHaveCount(0);
+          await expect(page.getByRole('alert').filter({ hasNot: page.locator('strong', { hasText: /^Tu Team Lock está pendiente\.$/ }) })).toHaveCount(0);
           await expect(page.getByRole('heading', { name: 'Registrar resultados', exact: true })).toHaveCount(checks.can_record ? 1 : 0);
           expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth+1)).toBe(true);
           await page.screenshot({ path: join(input.output, 'public-current-day-'+viewport.width+'.png'), fullPage: true });

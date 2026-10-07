@@ -18,6 +18,7 @@ import { Inventory } from "./inventory";
 import { ParticipantResults } from "./league-results";
 import { InitialAssignment } from "./initial-assignment";
 import { WipeRevivals } from "./wipe-revivals";
+import { TeamLockWarning } from "./team-lock-warning";
 import {
   Card,
   CommandState,
@@ -27,7 +28,6 @@ import {
   Loading,
   Modal,
   Notice,
-  Submit,
   Tag,
   date,
   useCommand,
@@ -355,6 +355,12 @@ function LeagueDay({ dayId }: { dayId: string }) {
                 La clasificación aparecerá cuando se cierre esta jornada.
               </Empty>
             )}
+            {canRecord &&
+              !data.locks.some(
+                (lock) =>
+                  lock.trainer_id === me?.trainer_id &&
+                  lock.matchday_id === dayId,
+              ) && <TeamLockWarning own />}
             <h2>Enfrentamientos</h2>
             {canRecord ? (
               <ParticipantResults
@@ -526,143 +532,6 @@ export function LeaguePage() {
           );
         }}
       </LeagueState>
-    </>
-  );
-}
-export function BattlePage() {
-  const { me, season } = useApp(),
-    pc = usePC(),
-    cmd = useCommand(),
-    [confirm, setConfirm] = useState(false),
-    [selected, setSelected] = useState("");
-  return (
-    <>
-      <Heading eyebrow="BATTLE · TEAM PREVIEW" title="Conoce el campo.">
-        El equipo público es el fijado para esta jornada.
-      </Heading>
-      <OverviewState>
-        {(data) => {
-          const day = currentDay(data),
-            matches = data.matches.filter((m) => m.matchday_id === day?.id),
-            own = data.players.find((p) => p.trainer_id === me?.trainer_id),
-            match =
-              matches.find((m) => m.id === selected) ||
-              matches.find(
-                (m) => m.player_a_id === own?.id || m.player_b_id === own?.id,
-              ) ||
-              matches[0];
-          return (
-            <>
-              <div className="toolbar">
-                <Field label="Enfrentamiento">
-                  <select
-                    value={match?.id || ""}
-                    onChange={(e) => setSelected(e.target.value)}
-                  >
-                    {matches.map((m) => (
-                      <option key={m.id} value={m.id}>
-                        {playerName(data, m.player_a_id)} vs{" "}
-                        {playerName(data, m.player_b_id)}
-                      </option>
-                    ))}
-                  </select>
-                </Field>
-                <button
-                  className="button primary"
-                  disabled={
-                    !pc.data?.save ||
-                    pc.data.status !== "ready" ||
-                    !day ||
-                    data.season.status !== "active"
-                  }
-                  onClick={() => setConfirm(true)}
-                >
-                  <ShieldCheck size={18} />
-                  Fijar mi equipo
-                </button>
-              </div>
-              <CommandState command={cmd} />
-              <Notice error={pc.error} />
-              {match ? (
-                <div className="battle-grid">
-                  {[match.player_a_id, match.player_b_id].map((id, index) => {
-                    const player = data.players.find((p) => p.id === id),
-                      lock = data.locks.find(
-                        (l) =>
-                          l.trainer_id === player?.trainer_id &&
-                          l.matchday_id === day?.id,
-                      );
-                    return (
-                      <Card key={id} className={`battle-side side-${index}`}>
-                        <span className="eyebrow">
-                          {index ? "RIVAL" : "CAMPO A"}
-                        </span>
-                        <h2>{playerName(data, id)}</h2>
-                        {lock ? (
-                          <>
-                            <Tag>
-                              {lock.is_late
-                                ? "Team Lock tardío"
-                                : "Team Lock confirmado"}
-                            </Tag>
-                            {lock.public_team_snapshot.map((p, i) => (
-                              <div key={i}>
-                                <Pokemon pokemon={p} />
-                                <div className="moves">
-                                  {p.moves?.map((m) => (
-                                    <span key={m.name}>{m.name}</span>
-                                  ))}
-                                </div>
-                              </div>
-                            ))}
-                          </>
-                        ) : (
-                          <Empty>
-                            Este entrenador todavía no tiene un Team Lock
-                            público.
-                          </Empty>
-                        )}
-                      </Card>
-                    );
-                  })}
-                </div>
-              ) : (
-                <Empty>No hay enfrentamientos en la jornada actual.</Empty>
-              )}
-              {confirm && day && pc.data?.save && (
-                <Modal
-                  title="Confirmar Team Lock"
-                  onClose={() => {
-                    if (!cmd.pending && !cmd.uncertain) setConfirm(false);
-                  }}
-                >
-                  <p>
-                    Se fijará el equipo del save actual. El servidor comprobará
-                    la jornada, los seis Pokémon y tu elegibilidad.
-                  </p>
-                  <button
-                    className="button primary"
-                    disabled={cmd.pending || cmd.uncertain}
-                    onClick={async () => {
-                      if (
-                        await cmd.execute(
-                          `/v1/seasons/${season}/matchdays/${day.id}/team-lock`,
-                          { save_file_id: pc.data!.save!.id },
-                          "PUT",
-                        )
-                      )
-                        setConfirm(false);
-                    }}
-                  >
-                    Confirmar mi equipo
-                  </button>
-                  <CommandState command={cmd} />
-                </Modal>
-              )}
-            </>
-          );
-        }}
-      </OverviewState>
     </>
   );
 }

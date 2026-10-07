@@ -18,7 +18,7 @@ test("long unbroken names fit desktop and mobile screens", async ({ page }) => {
     for (const name of [
       "Inicio",
       "Liga",
-      "Battle",
+      "Batallas",
       "Entrenadores",
       "Mi PC",
       "Tienda",
@@ -49,7 +49,7 @@ test("login, official league, Team Lock, PC dialog, purchase, admin CAS, Cup Bo3
   await navigate(page, "Liga");
   await page.getByRole("button", { name: "J3", exact: true }).click();
   await expect(page.getByText("Oficial · revisión 1")).toBeVisible();
-  await navigate(page, "Battle");
+  await navigate(page, "Batallas");
   await page.getByRole("button", { name: "Fijar mi equipo" }).click();
   await page.getByRole("button", { name: "Confirmar mi equipo" }).click();
   await expect(page.getByRole("dialog")).toHaveCount(0);
@@ -242,7 +242,7 @@ for (const [label, width, height] of [
     for (const [name, file] of [
       ["Inicio", "home"],
       ["Liga", "league"],
-      ["Battle", "battle"],
+      ["Batallas", "battle"],
       ["Entrenadores", "trainers"],
       ["Mi PC", "pc"],
       ["Tienda", "shop"],
