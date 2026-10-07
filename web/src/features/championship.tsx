@@ -26,9 +26,18 @@ const labels: Record<Championship["state"], string> = {
   legacy: "Historia de una temporada anterior",
 };
 
+const unresolvedReasons: Record<string, string> = {
+  championship_deaths_unavailable:
+    "Faltan muertes oficiales fiables para comparar a los líderes empatados. No se puede asignar un campeón con datos desconocidos.",
+  championship_triple_unresolved:
+    "El empate continúa después de comparar las muertes oficiales. Hace falta un desempate externo excepcional; PokeApp todavía no permite registrar esta resolución.",
+  championship_many_tied:
+    "Hay cuatro o más líderes empatados. La regla aprobada usa menos muertes oficiales, pero PokeApp todavía no aplica esa regla a este caso. El título seguirá pendiente hasta completar ese soporte.",
+};
+
 /** The server decides the title from exact frozen facts. This view never ranks. */
 export function ChampionshipReview({ seasonName }: { seasonName: string }) {
-  const { season } = useApp(),
+  const { season, holdAdminNavigation } = useApp(),
     path = `/v1/admin/seasons/${season}/championship`,
     query = useRead<Championship>(path, !!season),
     command = useCommand([
@@ -46,12 +55,22 @@ export function ChampionshipReview({ seasonName }: { seasonName: string }) {
       : null;
   const refetch = query.refetch;
   useEffect(() => {
+    if ((command.pending || command.uncertain) && holdAdminNavigation)
+      return holdAdminNavigation();
+  }, [command.pending, command.uncertain, holdAdminNavigation]);
+  useEffect(() => {
     if (!conflict) return;
     setReset((value) => value + 1);
     void refetch();
   }, [conflict, refetch]);
   if (query.isPending) return <Loading />;
-  if (query.error) return <Notice error={query.error} />;
+  if (query.error)
+    return (
+      <>
+        <Notice error={query.error} />
+        <CommandState command={command} />
+      </>
+    );
   const data = query.data;
   if (!data) return null;
   const disabled = command.pending || command.uncertain || query.isFetching,
@@ -88,8 +107,8 @@ export function ChampionshipReview({ seasonName }: { seasonName: string }) {
       )}
       {data.state === "owner_decision_required" && (
         <p>
-          No se puede finalizar todavía: el campeonato sigue sin resolverse con
-          las reglas aprobadas. Se necesita una decisión del propietario.
+          {unresolvedReasons[data.blocking_reason ?? ""] ??
+            "El campeonato sigue pendiente de una revisión excepcional. No se puede finalizar ni asignar un campeón hasta que el servidor confirme la resolución."}
         </p>
       )}
       {data.players.length > 0 && (

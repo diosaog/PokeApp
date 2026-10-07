@@ -167,6 +167,11 @@ test("closed-day correction carries the chosen results, reason and bound externa
   await page
     .getByLabel("Motivo de corrección", { exact: true })
     .fill("Ganador transcrito incorrectamente");
+  await page
+    .getByLabel(
+      "He revisado los ganadores y confirmo esta corrección excepcional.",
+    )
+    .check();
   await page.getByRole("button", { name: "Corregir jornada" }).click();
   await expect(
     page.getByLabel("Posición 1 · división A", { exact: true }),
@@ -181,7 +186,9 @@ test("closed-day correction carries the chosen results, reason and bound externa
     .getByLabel(/Motivo del desempate/)
     .fill("Resultado externo acordado");
   await page.getByRole("button", { name: "Corregir jornada" }).click();
-  await expect(page.getByRole("status")).toContainText("Cambio confirmado");
+  await expect(
+    page.getByRole("status").filter({ hasText: "Cambio confirmado" }),
+  ).toBeVisible();
   expect(sent).toHaveLength(2);
   expect(sent[1]).toMatchObject({
     expected_snapshot_revision: 1,

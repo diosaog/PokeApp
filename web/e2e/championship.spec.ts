@@ -146,7 +146,7 @@ test("BO3 starts unselected and a stale decision refreshes and clears its form",
     reason: "Decisión revisada, Mejor de 3 externo 2-1.",
   });
 });
-test("unapproved title ties stay unresolved without a title mutation", async ({
+test("unresolved title stays pending without an unsupported title mutation", async ({
   page,
 }) => {
   const current = championship();
@@ -158,7 +158,7 @@ test("unapproved title ties stay unresolved without a title mutation", async ({
   });
   const { commands } = await openReview(page, current);
   await expect(
-    page.getByText(/el campeonato sigue sin resolverse/),
+    page.getByText(/El campeonato sigue pendiente de una revisión excepcional/),
   ).toBeVisible();
   await expect(
     page.getByRole("button", { name: "Finalizar Liga", exact: true }),

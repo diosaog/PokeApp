@@ -40,7 +40,7 @@ test("long unbroken names fit desktop and mobile screens", async ({ page }) => {
   }
 });
 
-test("login, official league, Team Lock, PC dialog, purchase, admin CAS, Cup Bo3, Hall and logout", async ({
+test("login, official league, Team Lock, PC dialog, purchase, admin controls, Cup Bo3, Hall and logout", async ({
   page,
 }) => {
   const commands = await fixture(page);
@@ -76,13 +76,18 @@ test("login, official league, Team Lock, PC dialog, purchase, admin CAS, Cup Bo3
   });
   await navigate(page, "Administración");
   await page.getByRole("tab", { name: "Configuración", exact: true }).click();
-  await page.getByLabel("Nombre", { exact: true }).fill("Liga revisada");
-  await page.getByRole("button", { name: "Guardar nombre" }).click();
-  await expect(page.getByText("Cambio confirmado.")).toBeVisible();
-  expect(commands.at(-1)?.body).toEqual({
-    name: "Liga revisada",
-    expected_revision: 7,
-  });
+  await expect(page.getByLabel("Nombre", { exact: true })).toBeDisabled();
+  await expect(
+    page.getByRole("button", { name: "Guardar nombre" }),
+  ).toBeDisabled();
+  await expect(
+    page.getByText(
+      "El nombre solo puede cambiar durante la preparación de la temporada.",
+    ),
+  ).toBeVisible();
+  expect(commands.some((command) => command.path.endsWith("/name"))).toBe(
+    false,
+  );
   await navigate(page, "Copa");
   await page.getByRole("link", { name: /Copa Equinoccio/ }).click();
   await page
@@ -133,7 +138,7 @@ test("conflicts stay visible without silent CAS retry", async ({ page }) => {
   await page.getByRole("checkbox").check();
   await page.getByRole("button", { name: "Confirmar compra" }).click();
   await expect(page.getByRole("dialog").getByRole("alert")).toContainText(
-    "INSUFFICIENT_FUNDS",
+    "No tienes suficientes monedas para esta compra. Revisa tu saldo.",
   );
   await expect(page.getByRole("dialog")).toBeVisible();
 });

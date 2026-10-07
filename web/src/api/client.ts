@@ -78,6 +78,78 @@ export class ApiError extends Error {
 export function errorText(error: unknown) {
   if (!(error instanceof ApiError))
     return "No se pudo conectar. Comprueba la conexión y vuelve a intentarlo.";
+  const adminErrors: Record<string, string> = {
+    INSUFFICIENT_FUNDS:
+      "No tienes suficientes monedas para esta compra. Revisa tu saldo.",
+    ADMIN_REQUIRED: "Esta acción está disponible solo para administradores.",
+    SEASON_NOT_DRAFT:
+      "Esta acción solo está disponible mientras la temporada es un borrador.",
+    SEASON_NOT_ACTIVE: "La Liga debe estar en curso para realizar esta acción.",
+    SEASON_NOT_FINISHED:
+      "Primero confirma el campeón y finaliza la Liga antes de archivarla.",
+    ACTIVE_SEASON_EXISTS:
+      "Ya hay una Liga en curso. Termínala antes de activar otra temporada.",
+    SETUP_INCOMPLETE:
+      "Completa los pasos pendientes de preparación antes de activar la Liga.",
+    TRAINER_UNAVAILABLE:
+      "Ese entrenador ya no está disponible. Actualiza la lista antes de añadirlo.",
+    PARTICIPANT_EXISTS: "Ese entrenador ya forma parte de esta temporada.",
+    PARTICIPANT_REFERENCED:
+      "Este entrenador ya tiene actividad vinculada y no se puede quitar del borrador.",
+    PARTICIPANT_ALREADY_INACTIVE:
+      "Ese entrenador ya dejó de participar en la Liga. Actualiza su estado.",
+    INVALID_ROSTER:
+      "Revisa la plantilla: la configuración necesita participantes activos y sus estadísticas disponibles.",
+    INVALID_CONFIG:
+      "Revisa las jornadas, las divisiones y los ascensos de la configuración.",
+    INVALID_REWARDS:
+      "Revisa los puntos y las monedas: usa cantidades enteras no negativas y cubre todas las posiciones.",
+    EFFECTIVE_ROUND_EXISTS:
+      "Ya existe una configuración que empieza en esa jornada. Elige otra jornada o modifica la versión sin usar.",
+    CONFIG_WINDOW_CLOSED:
+      "Esa configuración ya no puede cambiarse en este momento. Elige una jornada futura disponible.",
+    CONFIG_ALREADY_USED:
+      "Esa configuración ya se ha utilizado. Conservamos el historial; crea una versión para jornadas futuras.",
+    CONFIG_NOT_EFFECTIVE:
+      "La configuración elegida todavía no corresponde a esta jornada.",
+    INITIAL_SETUP_LOCKED:
+      "La preparación inicial ya está fijada y no permite cambiar la plantilla o sus divisiones.",
+    DIVISION_CAPACITY_MISMATCH:
+      "El reparto no coincide con las plazas configuradas de las divisiones A y B.",
+    MATCHDAY_ALREADY_PREPARED:
+      "La primera jornada ya está preparada. Selecciónala para continuar.",
+    MATCHDAY_NOT_SCHEDULED:
+      "Esta acción requiere una jornada preparada que aún no esté abierta.",
+    MATCHDAY_NOT_OPEN:
+      "Abre la jornada antes de registrar o cerrar sus resultados.",
+    CORRECTION_WINDOW_CLOSED:
+      "La jornada ya tiene consecuencias posteriores que impiden esta corrección. Su historial se conserva.",
+    ONGOING_COMPETITION_DEPENDENCY:
+      "Hay una Copa en curso o en preparación vinculada a este entrenador. Resuelve esa participación antes de cambiar su estado en Liga.",
+    DISCARD_NOT_ALLOWED:
+      "Esta temporada no puede descartarse. Solo se permite un borrador sin actividad que necesite conservarse.",
+    PARTICIPANT_HAS_CURRENT_TEAM_LOCK:
+      "Este entrenador ya fijó su equipo para la jornada. Su participación no puede cambiarse ahora.",
+    ROUND_OPEN:
+      "La jornada ya está abierta. No se puede cambiar ahora la participación de sus entrenadores.",
+    DEPENDENT_DATA_EXISTS:
+      "Hay actividad posterior vinculada que impide este cambio. El historial se conserva.",
+    RESULTS_INCOMPLETE:
+      "Faltan resultados de la jornada. Revisa los combates pendientes antes de cerrarla.",
+    INVALID_RESULTS:
+      "Revisa los ganadores: cada resultado debe corresponder a uno de los entrenadores del combate.",
+    HISTORICAL_SOURCE_INVALID:
+      "La información oficial del historial no permite confirmar esta operación. Se necesita revisar su origen sin sobrescribirla.",
+    HISTORICAL_ARTIFACT_IMMUTABLE:
+      "Este registro histórico ya está congelado y no puede modificarse.",
+    CONFIG_MISMATCH:
+      "La jornada y la configuración consultadas ya no coinciden. Actualiza antes de continuar.",
+    IDEMPOTENCY_CONFLICT:
+      "Esta solicitud ya se registró con otros datos. Actualiza y revisa el resultado antes de realizar otra acción.",
+    PENDING_RETRY_REQUIRED:
+      "Primero confirma el resultado de la solicitud pendiente con «Reintentar la misma solicitud».",
+  };
+  if (adminErrors[error.code]) return adminErrors[error.code];
   if (error.code === "POKEMON_REVIVE_PENDING")
     return "Ya has usado un revivir para esta muerte. El save todavía no muestra a este Pokémon vivo.";
   if (error.code === "RANKING_TIE_UNRESOLVED")
@@ -109,7 +181,7 @@ export function errorText(error: unknown) {
   if (error.code === "CHAMPIONSHIP_BO3_REQUIRED")
     return "Los dos líderes deben jugar un Mejor de 3. Registra su ganador antes de finalizar.";
   if (error.code === "CHAMPIONSHIP_UNRESOLVED")
-    return "El campeonato sigue sin resolverse con las reglas aprobadas. Se necesita una decisión del propietario.";
+    return "El campeonato sigue pendiente. Consulta el motivo en la revisión del título antes de finalizar la Liga.";
   if (error.code === "CHAMPIONSHIP_BO3_NOT_REQUIRED")
     return "El estado actual del campeonato no permite registrar este desempate. Revisa los datos actualizados.";
   if (error.code === "INVALID_CHAMPIONSHIP_WINNER")
@@ -124,7 +196,7 @@ export function errorText(error: unknown) {
     422: "Revisa los datos del formulario.",
     429: "Demasiados intentos. Espera antes de volver a entrar.",
   };
-  return `${labels[error.status] ?? "Servicio temporalmente no disponible."} (${error.code})`;
+  return labels[error.status] ?? "Servicio temporalmente no disponible.";
 }
 
 export class ApiClient {

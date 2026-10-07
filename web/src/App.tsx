@@ -39,6 +39,7 @@ import {
 import { CupsPage } from "./features/cups";
 import { TrialsPage } from "./features/trials";
 import { AdminPage } from "./features/admin";
+import { seasonLabel } from "./features/admin-labels";
 import { BattlePage } from "./features/team-preview";
 
 const links = [
@@ -130,7 +131,7 @@ function Login() {
   );
 }
 function SeasonPicker() {
-  const { season, setSeason } = useApp(),
+  const { season, setSeason, adminOperationPending } = useApp(),
     [offset, setOffset] = useState(0);
   const result = useRead<Model<"SeasonPage">>(
     `/v1/read/seasons?offset=${offset}`,
@@ -149,6 +150,7 @@ function SeasonPicker() {
       <label>
         <span className="sr-only">Temporada</span>
         <select
+          disabled={adminOperationPending}
           value={result.data?.items.some((s) => s.id === season) ? season : ""}
           onChange={(e) => setSeason(e.target.value)}
         >
@@ -157,13 +159,14 @@ function SeasonPicker() {
           </option>
           {result.data?.items.map((s) => (
             <option key={s.id} value={s.id}>
-              {s.name} · {s.status}
+              {s.name} · {seasonLabel(s.status)}
             </option>
           ))}
         </select>
       </label>
       {offset > 0 && (
         <button
+          disabled={adminOperationPending}
           onClick={() => setOffset(Math.max(0, offset - 50))}
           aria-label="Temporadas anteriores"
         >
@@ -172,6 +175,7 @@ function SeasonPicker() {
       )}
       {result.data?.next_offset != null && (
         <button
+          disabled={adminOperationPending}
           onClick={() => setOffset(result.data!.next_offset!)}
           aria-label="Más temporadas"
         >
@@ -183,7 +187,7 @@ function SeasonPicker() {
   );
 }
 export default function App() {
-  const { me, logout } = useApp(),
+  const { me, logout, adminOperationPending } = useApp(),
     [menu, setMenu] = useState(false),
     location = useLocation();
   useEffect(() => {
@@ -198,6 +202,15 @@ export default function App() {
     window.addEventListener("keydown", close);
     return () => window.removeEventListener("keydown", close);
   }, []);
+  useEffect(() => {
+    if (!adminOperationPending) return;
+    const warn = (event: BeforeUnloadEvent) => {
+      event.preventDefault();
+      event.returnValue = "";
+    };
+    window.addEventListener("beforeunload", warn);
+    return () => window.removeEventListener("beforeunload", warn);
+  }, [adminOperationPending]);
   if (!me) return <Login />;
   return (
     <div
@@ -207,21 +220,42 @@ export default function App() {
         Saltar al contenido
       </a>
       <aside className={menu ? "sidebar expanded" : "sidebar"}>
-        <Link to="/" className="brand">
+        <Link
+          to="/"
+          className="brand"
+          aria-disabled={adminOperationPending || undefined}
+          onClick={(event) => {
+            if (adminOperationPending) event.preventDefault();
+          }}
+        >
           <i className="pokeball" />
           POKE<span>APP</span>
         </Link>
         <p className="nav-label">CENTRO DE COMPETICIÓN</p>
         <nav aria-label="Principal">
           {links.map(([to, label, Icon]) => (
-            <NavLink key={to} to={to} end={to === "/"}>
+            <NavLink
+              key={to}
+              to={to}
+              end={to === "/"}
+              aria-disabled={adminOperationPending || undefined}
+              onClick={(event) => {
+                if (adminOperationPending) event.preventDefault();
+              }}
+            >
               <Icon size={19} />
               {label}
               <ArrowUpRight className="nav-arrow" size={14} />
             </NavLink>
           ))}
           {me.is_admin && (
-            <NavLink to="/admin">
+            <NavLink
+              to="/admin"
+              aria-disabled={adminOperationPending || undefined}
+              onClick={(event) => {
+                if (adminOperationPending) event.preventDefault();
+              }}
+            >
               <Settings2 size={19} />
               Administración
             </NavLink>
@@ -238,6 +272,7 @@ export default function App() {
           <button
             aria-label="Cerrar sesión"
             className="icon-button"
+            disabled={adminOperationPending}
             onClick={logout}
           >
             <LogOut size={18} />
@@ -262,6 +297,12 @@ export default function App() {
           </span>
         </header>
         <main id="main" tabIndex={-1}>
+          {adminOperationPending && (
+            <p role="status" className="notice">
+              Confirma el resultado de la operación pendiente antes de cambiar
+              de pantalla, temporada o cerrar sesión.
+            </p>
+          )}
           {!me.globally_enabled ? (
             <section className="empty">
               Tu entrenador está deshabilitado. Contacta con la administración.

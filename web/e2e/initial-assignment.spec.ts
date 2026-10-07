@@ -181,7 +181,9 @@ test("neutral ties inside divisions require no ordering and submit only the obse
   ).toContainText("Propuesta: B");
   await expect(page.getByLabel(/Orden del empate/)).toHaveCount(0);
   await page.getByRole("button", { name: "Confirmar reparto inicial" }).click();
-  await expect(page.getByRole("status")).toContainText("Cambio confirmado");
+  await expect(
+    page.getByRole("status").filter({ hasText: "Cambio confirmado" }),
+  ).toBeVisible();
   expect(commands).toHaveLength(1);
   expect(commands[0].path).toBe(
     `/v1/admin/seasons/${sid}/initial-assignment/finalize`,

@@ -77,7 +77,9 @@ it("offers no fabricated champion or finalization for unresolved title", () => {
   });
   render(<ChampionshipReview seasonName="Liga" />);
   expect(
-    screen.getByText(/Se necesita una decisión del propietario/),
+    screen.getByText(
+      /El campeonato sigue pendiente de una revisión excepcional/,
+    ),
   ).toBeInTheDocument();
   expect(
     screen.queryByRole("button", { name: "Finalizar Liga" }),
@@ -87,6 +89,34 @@ it("offers no fabricated champion or finalization for unresolved title", () => {
   ).not.toBeInTheDocument();
   expect(mocks.execute).not.toHaveBeenCalled();
 });
+it.each([
+  ["championship_deaths_unavailable", /Faltan muertes oficiales fiables/],
+  [
+    "championship_triple_unresolved",
+    /todavía no permite registrar esta resolución/,
+  ],
+  ["championship_many_tied", /todavía no aplica esa regla a este caso/],
+])(
+  "explains %s without inventing an Admin resolution or ranking",
+  (reason, message) => {
+    Object.assign(mocks.data!, {
+      state: "owner_decision_required",
+      champion_trainer_id: null,
+      resolution_type: null,
+      blocking_reason: reason,
+    });
+    render(<ChampionshipReview seasonName="Liga" />);
+    expect(screen.getByText(message)).toBeInTheDocument();
+    expect(screen.queryByText(reason)).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: "Finalizar Liga" }),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("combobox", { name: "Ganador del Mejor de 3" }),
+    ).not.toBeInTheDocument();
+    expect(mocks.execute).not.toHaveBeenCalled();
+  },
+);
 it("requires an explicit BO3 winner and reason; never preselects technical order", () => {
   Object.assign(mocks.data!, {
     state: "bo3_required",

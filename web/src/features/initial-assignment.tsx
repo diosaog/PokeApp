@@ -88,7 +88,7 @@ export function InitialAssignment({
 }: {
   administrative?: boolean;
 }) {
-  const { season, me } = useApp(),
+  const { season, me, holdAdminNavigation } = useApp(),
     path = `/v1/seasons/${season}/initial-assignment`,
     query = useRead<Assignment>(path, !!season),
     command = useCommand(),
@@ -99,14 +99,29 @@ export function InitialAssignment({
       : null;
   const refetch = query.refetch;
   useEffect(() => {
+    if (
+      administrative &&
+      (command.pending || command.uncertain) &&
+      holdAdminNavigation
+    )
+      return holdAdminNavigation();
+  }, [administrative, command.pending, command.uncertain, holdAdminNavigation]);
+  useEffect(() => {
     if (!conflict) return;
     setReset((value) => value + 1);
     void refetch();
   }, [conflict, refetch]);
   if (query.isPending) return <Loading />;
-  if (query.error) return <Notice error={query.error} />;
+  if (query.error)
+    return (
+      <>
+        <Notice error={query.error} />
+        <CommandState command={command} />
+      </>
+    );
   const data = query.data;
-  if (!data || data.state === "legacy") return null;
+  if (!data || data.state === "legacy")
+    return <CommandState command={command} />;
   const admin = administrative && me?.is_admin;
   const disabled = command.pending || command.uncertain || query.isFetching;
   return (
@@ -227,9 +242,9 @@ export function InitialAssignment({
               </Submit>
             </fieldset>
           </form>
-          <CommandState command={command} />
         </>
       )}
+      <CommandState command={command} />
     </Card>
   );
 }

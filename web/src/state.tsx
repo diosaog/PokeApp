@@ -1,4 +1,10 @@
-import { createContext, useContext, useState, type ReactNode } from "react";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useState,
+  type ReactNode,
+} from "react";
 import {
   QueryClient,
   QueryClientProvider,
@@ -24,21 +30,37 @@ type State = {
   season: string;
   setSeason: (id: string) => void;
   logout: () => void;
+  adminOperationPending: boolean;
+  holdAdminNavigation: () => () => void;
 };
 const Context = createContext<State | null>(null);
 export function AppState({ children }: { children: ReactNode }) {
   const [me, setMe] = useState<Me | null>(null);
   const [season, setSeason] = useState("");
+  const [adminHolds, setAdminHolds] = useState(0);
+  const holdAdminNavigation = useCallback(() => {
+    setAdminHolds((count) => count + 1);
+    return () => setAdminHolds((count) => Math.max(0, count - 1));
+  }, []);
   api.onExpired = () => {
     void queries.cancelQueries();
     queries.clear();
     setMe(null);
     setSeason("");
+    setAdminHolds(0);
   };
   return (
     <QueryClientProvider client={queries}>
       <Context
-        value={{ me, setMe, season, setSeason, logout: () => api.logout() }}
+        value={{
+          me,
+          setMe,
+          season,
+          setSeason,
+          logout: () => api.logout(),
+          adminOperationPending: adminHolds > 0,
+          holdAdminNavigation,
+        }}
       >
         {children}
       </Context>

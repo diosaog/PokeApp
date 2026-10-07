@@ -21,7 +21,7 @@ commit before the next starts. Deploy at stable checkpoints, not every commit.
 | C | Any enabled, active, eligible season participant records/edits any editable current match, including matches between other participants. Verified JWT identity, season scope, CAS and stable idempotency; closed-day admin correction stays separate. Ordinary entry belongs in League/Battles. |
 | D | Daily wins descending then fewer adjusted deaths. No H2H-first two-way rule; no alphabetical sporting resolution. Auditable exceptional resolution where unresolved ties affect rewards/movement/cuts. |
 | E | First game segment before initial A/B. Observed save progress/death readiness, suggested split by fewer deaths, external resolution only for a relevant cut tie. Exact capacities and immutable recorded assignment; missing observations block readiness. No manual medal attestation. |
-| F | Finish/Hall uses final accumulated official points, not final day's position. Exactly two tied leaders require audited external BO3; exactly three use fewer authoritative adjusted deaths. Residual triple ties, 4+ ties and undefined finalist rules require an explicit owner decision. Existing frozen history never silently rewritten. |
+| F | Finish/Hall uses final accumulated official points, not final day's position. Delivered F: two tied leaders require audited external BO3; exactly three use fewer authoritative adjusted deaths. J's subsequent approved rule extends deaths to 3+ leaders and residual external resolution; see the implementation gaps below. Finalist remains undefined. Existing frozen history never silently rewritten. |
 | G | Participant-owned nonnegative audited/idempotent wipe counter, current applicability only. Box 8 (legacy index 7) deaths cost 0.2 each without a cap; each wipe revival costs 0.4. Five visible dead plus one wipe revival costs 1.4. |
 | H | Strong missing-Team-Lock warning with ability to continue. Batallas / Team Preview: two distinct independent public selectors in Espectador; one selector including self in Batalla, own private detail permitted, rivals public only. |
 | I | Exact wallet strings; public pending/active promotions; owned robbery-shield voucher redemption; post-League spending; configurable observed-save badge/Champion rewards; purchased-revive death overlap. |
@@ -160,12 +160,12 @@ Implement independent branches; never infer answers to these questions:
 1. RESOLVED in I: default four coins per reliably observed badge, persistently configurable.
 2. RESOLVED in I: default twelve coins once per season/challenge, persistently configurable.
 3. RESOLVED in I: save proof of defeating the in-game Champion is required; eight badges and PokeApp finish/title are insufficient.
-4. Normal OPEN/CLOSE/FINISH trigger and authority: automatic, participant, supervised, or combination.
-5. Residual championship exceptions outside the approved two/three-player rule above, including unresolved finalist placement where applicable.
+4. RESOLVED in J instruction: normal OPEN/CLOSE/FINISH belongs to all eligible participants, preserving lifecycle, CAS and frozen history. Backend extension remains pending below.
+5. RESOLVED in J instruction: exactly two leaders use external deciding battle; 3+ use fewer authoritative adjusted deaths, then exceptional external owner/admin resolution if still tied. Finalist placement alone remains OWNER_DECISION_REQUIRED.
 6. RESOLVED in I: purchased revive preserves one historical death (-0.2), without stacking it on the same still-visible death. G wipe revival remains two deaths (-0.4).
-7. Team Lock replacement cutoff after combat starts.
+7. RESOLVED in J instruction: no replacement cutoff; lateness does not block a lock. Frozen historical locks remain immutable.
 8. Public scouting publication scope: live/snapshot, party, boxes and dead box.
-9. Whether League DQ excludes later Cup entry.
+9. RESOLVED in J instruction: League DQ does not automatically exclude Cup.
 10. Exact milestones by game, round counts other than four/five, League and postgame.
 
 ## Safety, evidence and completion
@@ -176,7 +176,7 @@ Use disposable local PostgreSQL for active/destructive flows; safe isolated
 staging fixtures or read-only public checks where required. Never read, inspect,
 hash, stage or touch the protected guide named in the master protocol.
 
-Existing migrations 001–038 are immutable. Before new remote SQL verify the pinned
+Existing migrations 001–039 are immutable. Before new remote SQL verify the pinned
 V2 project, actual migration history, committed source, fresh complete baseline
 and Advisor inventory. Never replay 031/032, reset staging or change V1.
 Reuse existing Railway and Cloudflare resources. Push source before deployment.
@@ -201,3 +201,32 @@ revive overlap. Basic reward controls are present; general Admin humanization st
 J. [Report and preserved-owner evidence](phase10-5i-completion-report.md).
 No cloud ingestion or physical writes. STOP after I; J requires the next owner
 instruction. Phase 10.5 remains IN PROGRESS; Phase 11 NOT READY / NOT STARTED.
+
+## J authorized scope and resolved decisions - 2026-10-08
+
+The explicit J instruction supersedes the historical stop-after-I note for J only.
+J humanizes existing Admin controls, configuration and exceptional workflows;
+it does not authorize a broad lifecycle/security or championship rewrite.
+The resolved decisions above supersede older owner-decision entries; remaining
+implementation gaps are not requests to decide those rules again:
+
+- Normal OPEN/CLOSE/FINISH still requires admin in the API and shared SQL principal
+  guards. Participant access needs a scoped authorization/API/SQL extension with
+  eligibility, current-state, CAS, replay and concurrency coverage. Corrections and
+  exceptional decisions retain separate admin authority.
+- F's existing championship contract supports a two-player BO3 and exactly-three
+  death comparison. Four-or-more leaders and residual death ties fail closed.
+  Approved 3+ comparison and audited residual external resolution require a backend
+  extension; J explains the gap and never decides the champion in React.
+- Team Lock supports replacement during scheduled/open days and protects closed
+  history. The current projection has overwritten `locked_at`, uninformative
+  `is_late` and no usable deadline; it cannot prove first submission timing across
+  cancellation/reopening. J displays Fijado/Pendiente only. Reliable timing needs
+  first-submission/opening evidence, without introducing a replacement cutoff.
+- League DQ has no automatic Cup DQ cascade. Existing lifecycle guards additionally
+  block League exits while a linked Cup is draft/active; J explains that dependency.
+  Later Cup admission does not filter League DQ. Cup logic is unchanged.
+
+No migration or backend change is required by this scoped UI package. Delivery and
+closure evidence belong in the live handoff. NEXT is K only after J closes and a
+new owner instruction; Phase 11 remains NOT READY / NOT STARTED.

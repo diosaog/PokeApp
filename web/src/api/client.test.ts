@@ -146,7 +146,28 @@ describe("API transport", () => {
     await expect(client.request("/x")).rejects.toMatchObject({
       code: "HTTP_500",
     });
-    for (const status of [401, 403, 409, 422, 503])
-      expect(errorText(new ApiError(status, "CODE"))).toContain("(CODE)");
+    for (const status of [401, 403, 409, 422, 503]) {
+      const error = new ApiError(status, "INTERNAL_RPC_CODE");
+      expect(errorText(error)).not.toContain("INTERNAL_RPC_CODE");
+      expect(errorText(error).length).toBeGreaterThan(15);
+      expect(error.code).toBe("INTERNAL_RPC_CODE");
+    }
+  });
+  it("explains Admin configuration, lifecycle and dependency failures without technical codes", () => {
+    for (const [code, detail] of [
+      ["CONFIG_ALREADY_USED", "jornadas futuras"],
+      ["CONFIG_WINDOW_CLOSED", "jornada futura"],
+      ["INVALID_REWARDS", "enteras no negativas"],
+      ["SEASON_NOT_DRAFT", "borrador"],
+      ["SEASON_NOT_FINISHED", "campeón"],
+      ["ONGOING_COMPETITION_DEPENDENCY", "Copa"],
+      ["PARTICIPANT_HAS_CURRENT_TEAM_LOCK", "fijó su equipo"],
+      ["RESULTS_INCOMPLETE", "combates pendientes"],
+      ["STALE_REVISION", "Actualiza"],
+      ["PENDING_RETRY_REQUIRED", "misma solicitud"],
+    ]) {
+      expect(errorText(new ApiError(409, code))).toContain(detail);
+      expect(errorText(new ApiError(409, code))).not.toContain(code);
+    }
   });
 });

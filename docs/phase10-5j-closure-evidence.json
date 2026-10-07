@@ -1,0 +1,101 @@
+{
+  "package": "10.5J",
+  "entry_head": "a973c914abd6ce7beb7eaf6dc303ccd4277481c6",
+  "scope": "Frontend Admin presentation, confirmations and existing-command recovery; no API/SQL mutations changed",
+  "classification": "FRESH PASS",
+  "python": {
+    "exit_code": 0,
+    "total": 732,
+    "passed": 732,
+    "failed": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "python_scope_note": "732 includes 19 existing unrelated untracked repository-map tests; 713 in committed scope. Those files remain unstaged. Focused test_api_season_admin.py: 25 PASS.",
+  "react": {
+    "passed": 53,
+    "files": 8,
+    "classification": "FRESH PASS on final meaningful source"
+  },
+  "edge": {
+    "unique_passed": 33,
+    "skipped": 0,
+    "flaky": 0,
+    "initial_run": {
+      "startTime": "2026-10-07T13:36:56.451Z",
+      "duration": 90051.853,
+      "expected": 31,
+      "skipped": 0,
+      "unexpected": 2,
+      "flaky": 0
+    },
+    "corrected_expectations_run": {
+      "startTime": "2026-10-07T22:23:00.730Z",
+      "duration": 13220.224,
+      "expected": 7,
+      "skipped": 0,
+      "unexpected": 0,
+      "flaky": 0
+    },
+    "note": "Initial 31/33: stale test expectation omitted the new correction checkbox; generic success status locator matched the navigation notice. Test expectations corrected; all seven cases in both affected files pass. Application source unchanged between runs.",
+    "cases": {
+      "admin.spec.ts::new configuration preserves current zero rewards and sends exact revisions and settings": "expected",
+      "admin.spec.ts::invalid reward integers never submit a configuration": "expected",
+      "admin.spec.ts::a stale configuration requires refresh and deliberate review before a new command": "expected",
+      "admin.spec.ts::discard requires the season name and reason; invalid lifecycle actions stay disabled": "expected",
+      "admin.spec.ts::League disqualification uses a named trainer, requires a reason, and does not imply Cup exclusion": "expected",
+      "admin.spec.ts::archived Admin history cannot submit setup, participant or lifecycle changes": "expected",
+      "admin.spec.ts::participant sessions cannot open Admin or issue Admin reads through navigation": "expected",
+      "admin.spec.ts::an uncertain configuration locks the editor and replays exactly the same request": "expected",
+      "admin.spec.ts::readiness uses human explanations and cannot activate an unready season": "expected",
+      "admin.spec.ts::Admin names, Team Lock presence and configuration remain readable on desktop and mobile": "expected",
+      "championship.spec.ts::review preserves exact points and requires its current title evidence to finish": "expected",
+      "championship.spec.ts::BO3 starts unselected and a stale decision refreshes and clears its form": "expected",
+      "championship.spec.ts::unresolved title stays pending without an unsupported title mutation": "expected",
+      "championship.spec.ts::unknown BO3 outcome is retried only explicitly with the original body and key": "expected",
+      "daily-ranking.spec.ts::close requires an explicit external order; stale review resets choices and unknown retry preserves body/key": "expected",
+      "daily-ranking.spec.ts::closed-day correction carries the chosen results, reason and bound external decision": "expected",
+      "daily-ranking.spec.ts::daily neutral ties display a shared place while recorded legacy podium stays intact": "expected",
+      "economy.spec.ts::archived wallet stays exact; pending offers wait for server activation": "expected",
+      "economy.spec.ts::reward voucher filters targets and retries an uncertain redemption with the original key/body": "expected",
+      "economy.spec.ts::admin persists configurable observed-save rewards with the season configuration": "expected",
+      "flows.spec.ts::long unbroken names fit desktop and mobile screens": "expected",
+      "flows.spec.ts::login, official league, Team Lock, PC dialog, purchase, admin controls, Cup Bo3, Hall and logout": "expected",
+      "flows.spec.ts::conflicts stay visible without silent CAS retry": "expected",
+      "flows.spec.ts::admin can repair unused configuration and cancel provisional editing with CAS": "expected",
+      "flows.spec.ts::inventory redemption and manual Discord verdict preserve IDs, revision and decimal points": "expected",
+      "flows.spec.ts::responsive desktop: all feature layouts and screenshots": "expected",
+      "flows.spec.ts::responsive laptop: all feature layouts and screenshots": "expected",
+      "flows.spec.ts::responsive tablet: all feature layouts and screenshots": "expected",
+      "flows.spec.ts::responsive mobile: all feature layouts and screenshots": "expected",
+      "initial-assignment.spec.ts::unobserved progress differs from observed zero; no manual accreditation or premature split": "expected",
+      "initial-assignment.spec.ts::neutral ties inside divisions require no ordering and submit only the observed revision": "expected",
+      "initial-assignment.spec.ts::boundary decision starts empty, resets stale evidence and preserves the exact unknown-outcome retry": "expected",
+      "initial-assignment.spec.ts::recorded modern assignment is read-only; legacy retains its established manual setup": "expected"
+    }
+  },
+  "static": {
+    "typescript_vite_public_build": "PASS",
+    "prettier": "PASS",
+    "wrangler_dry_run": "PASS",
+    "git_diff_check": "PASS"
+  },
+  "database": {
+    "schema_changes": false,
+    "migrations": false,
+    "real_pg": "N/A: database contracts unchanged",
+    "rebuild_bootstrap": "NOT RERUN: no invalidating source changes",
+    "historical_backend_db_delivery": "RETAINED UNCHANGED-SOURCE from I; no fresh PG claim"
+  },
+  "unrelated_matrices": "NOT RERUN: full Cup/Hall/Team Preview/parser matrices; affected UI regressions only",
+  "source_sha256": {
+    "web/src/App.tsx": "efd732350ff0e7a3885508d1230939c36cd7c6b3cb58ce099bb5a96cad06c35b",
+    "web/src/state.tsx": "816d726f298c708610c9fa8161bb12331efb21f7e7cd3b1abecfd2b577c874eb",
+    "web/src/api/client.ts": "4310f7ae783de9fe393e336021bd0971c4c6b4701bd4fdba83cf18aa3da1b1b7",
+    "web/src/features/admin.tsx": "dfdacaea9c70fc241f0dcc242b7c4fc19d252419850f1069415d5c3569120df0",
+    "web/src/features/admin-labels.ts": "5218a37d220b8dc138058f8d526ba8b69480414b6310428840543c16d73e5e22",
+    "web/src/features/championship.tsx": "418ada0030d9ef00143aff7b0efeec14a98caca80a4388c6ebb44ade6f17c240",
+    "web/src/features/initial-assignment.tsx": "a6b2ce459bc78349ee4a518ec7e42729853cebeaaa1169ac78d7221dccda5162"
+  },
+  "raw_evidence": "%TEMP%/phase10-5j-*"
+}

@@ -1131,3 +1131,57 @@ is available from Git (no self-referential hash).
 
 **EXACT NEXT STEP: STOP. J is next, awaiting explicit owner instruction.**
 Phase 10.5 IN PROGRESS; **PHASE 11 READINESS: NOT READY / NOT STARTED**.
+
+## J entry - 2026-10-07; IMPLEMENTING
+
+Owner explicitly authorized J after I. Entry main/origin
+`a973c914abd6ce7beb7eaf6dc303ccd4277481c6`, fetched 0/0, clean tracked tree.
+I DONE VERIFIED from Git and latest handoff. Fresh pinned remote observation:
+31 migrations through 039=`20261007121317`; Railway I deployment
+`2402be29-d1ec-4e20-b4c4-3f218ee45893` SUCCESS, Cloudflare
+`75e91cf3-123f-4fda-a836-a61e87c9b09f`, version
+`8f9deb86-8ebb-4b55-be52-4790ba8decf5`, 100%, both I application source.
+Raw entry evidence `%TEMP%/phase10-5j-entry`.
+
+Directed impact map: READ Admin UI/API/models plus immediate setup, matchday,
+lifecycle and Team Lock guards; WRITE Admin presentation/forms, readable status/
+error/exception copy, affected client tests and documentation. No backend authority
+or schema change is planned; no migration/rebuild is justified by the UI change.
+Affected tests: configuration/current values/CAS/replay, eligibility-disabled
+controls, explicit confirmations, human names/readiness, mobile and exceptions.
+Unrelated Shop/Hall/Cup/Team Preview sporting matrices remain outside J.
+
+New owner decisions are resolved: all eligible participants should operate normal
+League lifecycle; 3+ title leaders use deaths then exceptional external resolution;
+no Team Lock replacement cutoff; League DQ does not automatically disqualify Cup.
+Current backend gaps are implementation gaps, NOT renewed owner-decision requests:
+F only handles exactly-three death tie / two-player BO3, OPEN/CLOSE/FINISH are still
+admin-only, and Team Lock overview cannot prove first-submission timing.
+J will describe these accurately, preserve existing authorities and frozen history,
+and document the scoped follow-up rather than add a broad authorization/title
+migration. Safe existing Team Lock display is Fijado/Pendiente only.
+No K or Phase 11. Owner/manual data and protected/unrelated files untouched.
+
+
+## J local green - 2026-10-08; DEPLOY pending
+
+Supersedes the implementing state above. Human Admin labels, actual current reward
+values (including zero), integer validation, explicit version save, stale-source
+review, lifecycle-disabled actions and named/reasoned confirmations are complete.
+Pending/unknown commands retain the original body/key and a visible retry even
+when a refreshed state has advanced or its read fails. App navigation controls are
+held while unresolved; this is in-memory recovery, not durable cross-reload storage.
+Browser history navigation is not a router-level blocker. No new server authority,
+API, SQL, business mutation or frozen-history contract.
+
+FRESH PASS: 732 Python (713 committed-scope plus 19 pre-existing untracked map tests),
+25 focused Admin Python, 53 React, 33 unique affected Edge tests; TypeScript/public
+build, formatting, deployment dry-run and diff checks pass. The initial Edge run
+had two outdated test expectations; both affected files pass after checkbox/status
+locator corrections (seven tests). No application change followed those gates.
+[Local evidence](../phase10-5j-closure-evidence.json). Database rebuild/local PG and
+unrelated full sporting matrices NOT RERUN because their contracts are unchanged.
+
+Next: commit/push application and current contract, deploy only Cloudflare, run
+narrow authenticated read-only Admin smoke, compare fresh owner/data/security
+baselines, then write final report/handoff and push documentation closure. No K.
