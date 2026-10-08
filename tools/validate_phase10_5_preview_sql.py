@@ -7,6 +7,8 @@ from pathlib import Path
 import subprocess
 
 from app.api.team_preview_models import TeamPreviewQuery
+from app.api.scouting_models import ScoutingQuery
+from app.application.scouting import scouting
 from app.application.team_preview import team_preview
 from app.repositories.supabase.frontend_reads import SupabaseFrontendReadRepository
 from tools.validate_supabase_v2_identity_sql import (
@@ -54,7 +56,7 @@ class ReadClient(LocalClient):
         return ReadQuery(self, table)
 
 
-def validate(args):
+def validate(args, *, check_scouting=False):
     client = ReadClient(args)  # Enforces loopback and disposable database name.
     tables = client.execute(
         "select jsonb_agg(tablename order by tablename) from pg_tables where schemaname='public'"
@@ -155,6 +157,32 @@ select id from pokeapp_team_lock_test.run();
         assert snapshot() == frozen, "Reads changed database rows"
         groups.append("JWT-selected self whitelist, rival public, zero read writes")
 
+        if check_scouting:
+
+            def scout(viewer, trainer):
+                return scouting(
+                    repo, SID, viewer, ScoutingQuery(trainer_id=trainer)
+                ).model_dump(mode="json")
+
+            scout_frozen = scout(RIVAL, OWNER)
+            assert len(scout_frozen["team"]) == 6
+            assert scout(OWNER, OWNER) == scout_frozen
+            assert scout(OWNER, RIVAL)["team"] is None
+            for mon in scout_frozen["team"]:
+                assert set(mon) == {
+                    "species",
+                    "nickname",
+                    "level",
+                    "types",
+                    "item",
+                    "moves",
+                }
+                assert all(set(move) == {"name"} for move in mon["moves"])
+            assert snapshot() == frozen, "Scouting changed database rows"
+            groups.append(
+                "K single public allowlist; self/rival identical; missing lock null; zero writes"
+            )
+
         for role, uid, private_count in (
             ("authenticated", "00000000-0000-4000-8000-000000008ca1", 1),
             ("authenticated", "00000000-0000-4000-8000-000000008ca2", 0),
@@ -203,6 +231,21 @@ select id from pokeapp_team_lock_test.run();
             == public["teams"]
         )
         groups.append("closed frozen lock independent of later save state")
+        if check_scouting:
+            assert scout(RIVAL, OWNER)["team"] == scout_frozen["team"]
+            sql(
+                f"update public.team_locks set public_team_snapshot='[]' where season_id='{SID}';"
+            )
+            from pydantic import ValidationError
+
+            try:
+                scout(RIVAL, OWNER)
+                raise AssertionError("Malformed public snapshot accepted")
+            except ValidationError:
+                pass
+            groups.append(
+                "K frozen team independent of current save; malformed snapshot fails closed"
+            )
     finally:
         if created:
             sql(cleanup)

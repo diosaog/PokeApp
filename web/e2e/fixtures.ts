@@ -229,7 +229,32 @@ export async function fixture(page: Page, longNames = false) {
         id: p.trainer_id,
         display_name: p.display_name,
       }));
-    else if (path.endsWith("/team-preview")) {
+    else if (path.endsWith("/scouting")) {
+      const selected =
+        new URL(request.url()).searchParams.get("trainer_id") || tid;
+      const { species, nickname, level, types, item, moves } = pokemon;
+      result = {
+        season: overview.season,
+        day: overview.days[0],
+        trainers: players.map(({ trainer_id, display_name, status }) => ({
+          trainer_id,
+          display_name,
+          status,
+        })),
+        trainer_id: selected,
+        team:
+          selected === "t4"
+            ? null
+            : Array.from({ length: 6 }, () => ({
+                species,
+                nickname,
+                level,
+                types,
+                item,
+                moves: moves.map(({ name }) => ({ name })),
+              })),
+      };
+    } else if (path.endsWith("/team-preview")) {
       const params = new URL(request.url()).searchParams;
       const mode = params.get("mode") || "spectator";
       const first = params.get("trainer_id") || tid;

@@ -1,0 +1,73 @@
+{
+  "package": "10.5K",
+  "entry_head": "37ac03294df8bac095e335abfe66098dcaa97b03",
+  "classification": "FRESH PASS",
+  "python": {
+    "exit_code": 0,
+    "total": 745,
+    "passed": 745,
+    "failed": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "python_scope": "745 includes 19 pre-existing unrelated untracked repository-map tests; 726 committed-scope. Files remain unstaged.",
+  "focused_python": {
+    "K": 13,
+    "H": "included in full final suite"
+  },
+  "react": {
+    "passed": 57,
+    "files": 9
+  },
+  "edge": {
+    "startTime": "2026-10-08T08:51:57.806Z",
+    "duration": 45799.641,
+    "expected": 21,
+    "skipped": 0,
+    "unexpected": 0,
+    "flaky": 0
+  },
+  "postgres": {
+    "status": "PASS",
+    "version": "PostgreSQL 17.11",
+    "database": "pokeapp_v2_validation_phase10_5i_closure",
+    "host": "127.0.0.1",
+    "port": 55439,
+    "groups": [
+      "H unscheduled spectator/self public/missing rival",
+      "H JWT-selected self whitelist/rival public/zero read writes",
+      "K single public allowlist/self-rival equality/missing null",
+      "Existing RLS/public-view columns/service-only mutation privileges",
+      "H frozen closed lock independent of later save",
+      "K frozen team/malformed snapshot fail closed"
+    ],
+    "public_tables_restored": 50,
+    "remote_writes": 0,
+    "stopped": true
+  },
+  "static": {
+    "compile": "PASS",
+    "targeted_ruff": "PASS",
+    "typescript_public_build": "PASS",
+    "prettier": "PASS",
+    "wrangler_dry_run": "PASS",
+    "diff_check": "PASS"
+  },
+  "schema": {
+    "migrations": false,
+    "rebuild_bootstrap": "N/A; NOT RERUN: schema unchanged; current local 039 presence verified"
+  },
+  "unrelated_matrices": "Full economy/championship/Cup SQL matrices NOT RERUN; no affected contracts",
+  "source_sha256": {
+    "app/api/scouting_models.py": "a8ffdd7993229c668198ae570c4f41e82fae27ac31f215387f9f4e0877d43056",
+    "app/application/scouting.py": "9098a2ee69d6925426647cbb58d42b4e6f5aed2c87479a2d1ad717f9cea27d75",
+    "app/application/team_preview.py": "ce2dd55fa22086e28e3bab0e28bce106ffe1f3479ee0e1676cb572000a3b4076",
+    "app/api/routes/reads.py": "1b2445aeb5c4fb33832295ce0e635cb7c3d85c209619539771fc5265eea909ba",
+    "web/src/features/scouting.tsx": "dde4d3b11b93d79b09909788983d611d8b39347172f8400a8d99b0fbc14cdc00",
+    "web/src/features/core.tsx": "202e7bef9d9bb618b517b8faebb7478782d61f7f65a99bcc5d4d405c88b07292",
+    "web/src/features/team-preview.tsx": "0a141d24ea15c6abd6facf701c00e209142e0eb633ec1bbce6570dbd4cc5a8fc",
+    "web/src/App.tsx": "43abfba91367c2cc6f407e3ae5a8392818361e570a3985dcab74c72558f95c1a",
+    "web/src/api/schema.d.ts": "d91ad83a5d945c7e355d590d194fec5fdb8bebda943b8ff343dc0972f230e70a"
+  },
+  "raw_evidence": "%TEMP%/phase10-5k-*; local PG output recorded in tool transcript and phase10-5k-pg-result.json"
+}

@@ -26,7 +26,7 @@ commit before the next starts. Deploy at stable checkpoints, not every commit.
 | H | Strong missing-Team-Lock warning with ability to continue. Batallas / Team Preview: two distinct independent public selectors in Espectador; one selector including self in Batalla, own private detail permitted, rivals public only. |
 | I | Exact wallet strings; public pending/active promotions; owned robbery-shield voucher redemption; post-League spending; configurable observed-save badge/Champion rewards; purchased-revive death overlap. |
 | J | Human Spanish readiness/error wording in Admin; setup, supervision, exceptions, history and risk actions. Preserve server revisions/CAS. |
-| K | Safe explicit public scouting projection foundation, no private rival PC access. Do not assume live/box/dead-box publication. |
+| K | Explicit public competitive Team Lock scouting: species, nickname, level, types, item and moves only. Reuse H; self/admin remain public here. No save/PC/box/identity fallback. |
 | L | Minimal backward-compatible observed progress contract with game/version/provenance; observed zero and unknown distinct. E includes the required badge foundation. No routine manual progress authority, invented League-completed flag or full cloud ingestion. |
 | M | Avoid new sequential N+1 reads; measure touched flows where useful and record Phase 14 candidates. No broad performance refactor. |
 
@@ -164,7 +164,7 @@ Implement independent branches; never infer answers to these questions:
 5. RESOLVED in J instruction: exactly two leaders use external deciding battle; 3+ use fewer authoritative adjusted deaths, then exceptional external owner/admin resolution if still tied. Finalist placement alone remains OWNER_DECISION_REQUIRED.
 6. RESOLVED in I: purchased revive preserves one historical death (-0.2), without stacking it on the same still-visible death. G wipe revival remains two deaths (-0.4).
 7. RESOLVED in J instruction: no replacement cutoff; lateness does not block a lock. Frozen historical locks remain immutable.
-8. Public scouting publication scope: live/snapshot, party, boxes and dead box.
+8. RESOLVED in K instruction: current permitted competitive Team Lock only, species/nickname/level/types/item/moves; no live save, party/boxes/dead-box/private identity fallback.
 9. RESOLVED in J instruction: League DQ does not automatically exclude Cup.
 10. Exact milestones by game, round counts other than four/five, League and postgame.
 
@@ -237,3 +237,26 @@ current reward values, explicit confirmations and pending-command recovery are
 verified; the scoped backend gaps above remain explicit. [J report](phase10-5j-completion-report.md).
 **J scope ends here.** A separate owner instruction queues K after committed/pushed
 J closure and entry verification. Phase 11 NOT READY.
+
+
+## K contract - approved and implementing 2026-10-08
+
+The queued K instruction is authorized only after J DONE verification; entry passed
+at `37ac032`. Public scouting reuses H's season roster and current matchday pointer,
+independently of scheduled matches. The server returns one selected public Team Lock
+with an explicit six-field Pokemon allowlist and move names only. It omits PP/shiny
+and timing fields rather than broadening the owner's list. Self/admin receive the
+same public contract. Names/season/day/selection form the necessary navigation
+context; no Pokemon identity/provenance data is returned.
+
+No lock is null, never a fabricated empty team. No current day/roster is explicit;
+no earlier-lock, save, PC or dead-box fallback. Existing frozen current-day locks
+remain history. No eligibility/timing/sporting/Cup rule changes. The authenticated
+read route rejects viewer/private/self/admin overrides. The React surface is reached
+from Entrenadores and reads one aggregate endpoint per selection. Reuse H's query
+bounds; cap overflow and malformed sources fail closed. Real local PG verifies
+existing projection/RLS/grants and historical independence; no migration/rebuild.
+
+K's public scouting scope supersedes stale unresolved-scope wording in dated reports.
+No broader publication beyond this competitive snapshot is inferred. Stop after K;
+L and Phase 11 require separate authorization.

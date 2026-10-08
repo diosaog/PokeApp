@@ -73,7 +73,10 @@ export function Pokemon({
   pokemon,
   onClick,
 }: {
-  pokemon: Model<"PokemonRead">;
+  pokemon: Pick<
+    Model<"PokemonRead">,
+    "species" | "nickname" | "level" | "types"
+  > & { is_shiny?: boolean };
   onClick?: () => void;
 }) {
   const body = (
@@ -541,6 +544,9 @@ export function TrainersPage() {
       <Heading eyebrow="LOS PROTAGONISTAS" title="Entrenadores.">
         Una liga. Muchas formas de llegar a lo más alto.
       </Heading>
+      <Link className="button" to="/entrenadores/scouting">
+        Explorar equipos públicos
+      </Link>
       <OverviewState>
         {(data) => (
           <div className="trainer-grid">
@@ -553,6 +559,12 @@ export function TrainersPage() {
                   <Tag>{p.status}</Tag>
                 </div>
                 <h2>{p.display_name}</h2>
+                <Link
+                  to="/entrenadores/scouting"
+                  state={{ season: data.season.id, trainer: p.trainer_id }}
+                >
+                  Ver equipo público de {p.display_name}
+                </Link>
                 <p>
                   {p.badges_count == null
                     ? "Progreso no observado / pendiente de sincronizar save"

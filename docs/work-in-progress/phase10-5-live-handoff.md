@@ -1236,3 +1236,50 @@ the subsequent commit carrying this entry; obtain its exact final HEAD from Git.
 The owner has queued K with autonomous end-to-end authorization once that gate
 passes. Read its separate instruction only after closing J; no K work is included here.
 Phase 10.5 IN PROGRESS; **PHASE 11 READINESS: NOT READY / NOT STARTED**.
+
+
+## K entry - 2026-10-08; IMPLEMENTING
+
+J DONE VERIFIED at committed/pushed `37ac03294df8bac095e335abfe66098dcaa97b03`,
+main/origin 0/0 and clean tracked tree. J's final remote observation immediately
+precedes K: 56 preserved scoped tables, 31 migrations through 039, Advisor 24/5/138,
+Railway retained I source and Cloudflare J source `49d4790`. This explicit queued
+owner instruction supersedes the historical stop-after-J note for K only.
+
+Directed impact: reuse H's current-day Team Lock reader with a single public
+selection, add a narrower explicit scouting response and a read-only trainer surface.
+READ H projections/DTO/API, shared read repository and direct SQL security fixtures;
+WRITE scouting DTO/service/route, minimal H reuse, React trainer entry/screen/types,
+focused privacy/browser/PG proofs and documentation. No SQL/migration expected.
+Affected gates: public/private allowlists, spoofing, malformed snapshots, scope,
+missing data, cache separation, H compatibility, real PG projection/RLS/grants.
+Out of scope: parser/ingestion, sporting/lifecycle/Admin/Cup and timing redesign.
+
+Public scouting scope is now RESOLVED: only competitive Team Lock species, nickname,
+level, types, held item and moves. No live party/PC/dead-box/save/identity fallback;
+self/admin remain public in this surface. Missing lock stays unknown, not six empty
+Pokemon. Reuse existing roster/current-day semantics including frozen current locks;
+no new eligibility/cutoff rule. No L or Phase 11.
+
+
+## K local green - 2026-10-08; DEPLOY pending
+
+GET `/v1/read/seasons/{season_id}/scouting` is a narrower adapter over H's reader,
+with an internal single-public selection; no separate private projection or save
+read. Explicit Pokemon allowlist: species/nickname/level/types/item/move names.
+Only server JWT identity selects the viewer; all privacy override parameters are
+forbidden. Null lock, absent day/roster and malformed input remain explicit/fail closed.
+Entrenadores links to a named single-selector public surface; all selection caches
+are separate from private battle/PC. Confirmed Team Lock changes invalidate only
+this season's preview/scouting queries. Manual read refresh is available.
+
+FRESH PASS: K 13 focused Python, full Python 745 (726 committed-scope plus 19 existing
+untracked map tests), React 57, affected Edge 21, TypeScript/public build, compile,
+Ruff, Prettier, Wrangler dry-run and diff checks. Real PostgreSQL 17.11: six H/K
+projection/security groups, exact 50-table restoration, current 039 confirmed,
+server stopped. No migration/bootstrap rebuild or unrelated full SQL matrices.
+[Local evidence](../phase10-5k-closure-evidence.json). Fresh public baseline:
+56 scoped tables, 31 migrations, Advisor 24 ERROR / 5 WARN / 138 INFO.
+Next: commit/push, deploy only committed API bundle to Railway, verify compatible
+read/auth, deploy Cloudflare, narrow read-only public scouting checks, final data/
+Advisor comparison, then report/handoff closure commit/push. No L or Phase 11.

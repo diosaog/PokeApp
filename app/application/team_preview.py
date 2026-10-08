@@ -5,7 +5,12 @@ from app.application.frontend_reads import FrontendReads
 from app.repositories.errors import NotFoundError, PersistenceError
 
 
-def team_preview(repository, season_id, viewer_trainer_id, selection):
+def team_preview(
+    repository, season_id, viewer_trainer_id, selection, *, single_public=False
+):
+    # Internal public-only reuse for scouting, never a client authority flag.
+    if single_public and (selection.mode != "spectator" or selection.second_trainer_id):
+        raise ValueError("Single public projection requires spectator selection")
     reads = FrontendReads(repository)
     season = reads.season(season_id)
     names = {str(t.id): t.display_name for t in reads.trainers()}
@@ -33,7 +38,7 @@ def team_preview(repository, season_id, viewer_trainer_id, selection):
         )
     )
     second = str(selection.second_trainer_id) if selection.second_trainer_id else None
-    if selection.mode == "spectator" and second is None:
+    if not single_public and selection.mode == "spectator" and second is None:
         second = next((tid for tid in by_trainer if tid != first), None)
     selected = [tid for tid in (first, second) if tid is not None]
     if any(tid not in by_trainer for tid in selected):

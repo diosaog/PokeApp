@@ -41,6 +41,7 @@ import { TrialsPage } from "./features/trials";
 import { AdminPage } from "./features/admin";
 import { seasonLabel } from "./features/admin-labels";
 import { BattlePage } from "./features/team-preview";
+import { ScoutingPage } from "./features/scouting";
 
 const links = [
   ["/", "Inicio", Home],
@@ -313,6 +314,7 @@ export default function App() {
               <Route path="/liga" element={<LeaguePage />} />
               <Route path="/battle" element={<BattlePage />} />
               <Route path="/entrenadores" element={<TrainersPage />} />
+              <Route path="/entrenadores/scouting" element={<ScoutingPage />} />
               <Route path="/pc" element={<PCPage />} />
               <Route path="/tienda" element={<ShopPage />} />
               <Route path="/copa/*" element={<CupsPage />} />

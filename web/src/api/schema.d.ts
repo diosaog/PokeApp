@@ -957,6 +957,23 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/v1/read/seasons/{season_id}/scouting": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Public Scouting */
+    get: operations["public_scouting_v1_read_seasons__season_id__scouting_get"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/v1/read/seasons/{season_id}/league": {
     parameters: {
       query?: never;
@@ -3053,6 +3070,43 @@ export interface components {
        * Format: date-time
        */
       uploaded_at: string;
+    };
+    /** ScoutingMove */
+    ScoutingMove: {
+      /** Name */
+      name: string;
+    };
+    /** ScoutingPokemon */
+    ScoutingPokemon: {
+      /** Species */
+      species: string;
+      /**
+       * Nickname
+       * @default
+       */
+      nickname: string;
+      /** Level */
+      level?: number | null;
+      /** Types */
+      types?: string[];
+      /**
+       * Item
+       * @default
+       */
+      item: string;
+      /** Moves */
+      moves?: components["schemas"]["ScoutingMove"][];
+    };
+    /** ScoutingRead */
+    ScoutingRead: {
+      season: components["schemas"]["SeasonRead"];
+      day: components["schemas"]["DayRead"] | null;
+      /** Trainers */
+      trainers: components["schemas"]["PreviewTrainer"][];
+      /** Trainer Id */
+      trainer_id: string | null;
+      /** Team */
+      team: components["schemas"]["ScoutingPokemon"][] | null;
     };
     /** SeasonLifecycleReceipt */
     SeasonLifecycleReceipt: {
@@ -5694,6 +5748,39 @@ export interface operations {
         };
         content: {
           "application/json": components["schemas"]["PCRead"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  public_scouting_v1_read_seasons__season_id__scouting_get: {
+    parameters: {
+      query?: {
+        trainer_id?: string | null;
+      };
+      header?: never;
+      path: {
+        season_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ScoutingRead"];
         };
       };
       /** @description Validation Error */

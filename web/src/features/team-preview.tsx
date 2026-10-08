@@ -277,8 +277,10 @@ function LockConfirmation({
     void queries
       .invalidateQueries({
         predicate: (q) =>
-          String(q.queryKey[1]).startsWith(
-            `/v1/read/seasons/${season}/team-preview?`,
+          ["team-preview", "scouting"].some((view) =>
+            String(q.queryKey[1]).startsWith(
+              `/v1/read/seasons/${season}/${view}?`,
+            ),
           ),
       })
       .then(onClose);

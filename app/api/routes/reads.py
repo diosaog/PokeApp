@@ -17,6 +17,8 @@ from app.api.read_models import (
 from app.application.frontend_reads import FrontendReads
 from app.application.team_preview import team_preview
 from app.api.team_preview_models import TeamPreviewQuery, TeamPreviewRead
+from app.api.scouting_models import ScoutingQuery, ScoutingRead
+from app.application.scouting import scouting
 from app.repositories.errors import NotFoundError, PersistenceError
 from app.repositories.supabase.frontend_reads import _report_failure
 
@@ -30,6 +32,8 @@ def read(container, operation, *args):
             raise PersistenceError("Missing backend")
         if operation == "team_preview":
             return team_preview(container.frontend_read_repository, *args)
+        if operation == "scouting":
+            return scouting(container.frontend_read_repository, *args)
         return getattr(FrontendReads(container.frontend_read_repository), operation)(
             *args
         )
@@ -65,12 +69,26 @@ def preview(
     container: Container,
     selection: Annotated[TeamPreviewQuery, Query()],
 ):
-    return read(container, "team_preview", str(season_id), str(principal.trainer_id), selection)
+    return read(
+        container, "team_preview", str(season_id), str(principal.trainer_id), selection
+    )
 
 
 @router.get("/seasons/{season_id}/pc", response_model=PCRead)
 def pc(season_id: UUID, principal: Reader, container: Container):
     return read(container, "pc", str(season_id), str(principal.trainer_id))
+
+
+@router.get("/seasons/{season_id}/scouting", response_model=ScoutingRead)
+def public_scouting(
+    season_id: UUID,
+    principal: Reader,
+    container: Container,
+    selection: Annotated[ScoutingQuery, Query()],
+):
+    return read(
+        container, "scouting", str(season_id), str(principal.trainer_id), selection
+    )
 
 
 @router.get("/seasons/{season_id}/league", response_model=LeagueGeneralRead)
