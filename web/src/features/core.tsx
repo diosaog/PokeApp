@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import type { Model, Overview } from "../api/types";
 import { useApp, useRead, useOverview, usePC } from "../state";
+import { GameProgress, MyProgress } from "./progress";
 import { Inventory } from "./inventory";
 import { ParticipantResults } from "./league-results";
 import { InitialAssignment } from "./initial-assignment";
@@ -565,24 +566,7 @@ export function TrainersPage() {
                 >
                   Ver equipo público de {p.display_name}
                 </Link>
-                <p>
-                  {p.badges_count == null
-                    ? "Progreso no observado / pendiente de sincronizar save"
-                    : `${p.badges_count} medallas registradas`}
-                </p>
-                {p.badges_count != null && (
-                  <div
-                    className="badge-strip"
-                    aria-label={`${p.badges_count} medallas`}
-                  >
-                    {Array.from(
-                      { length: Math.min(p.badges_count, 16) },
-                      (_, i) => (
-                        <span key={i}>◆</span>
-                      ),
-                    )}
-                  </div>
-                )}
+                <GameProgress progress={p.progress} />
               </Card>
             ))}
           </div>
@@ -699,6 +683,9 @@ export function SavesPage() {
       <Heading eyebrow="TU PARTIDA, BAJO CONTROL" title="Saves y Launcher.">
         El estado del save en PokeApp y el Launcher local son independientes.
       </Heading>
+      <WithSeason>
+        <MyProgress />
+      </WithSeason>
       <div className="quick-grid">
         <Card>
           <HardDrive />

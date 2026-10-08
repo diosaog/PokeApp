@@ -18,6 +18,7 @@ from app.application.frontend_reads import FrontendReads
 from app.application.team_preview import team_preview
 from app.api.team_preview_models import TeamPreviewQuery, TeamPreviewRead
 from app.api.scouting_models import ScoutingQuery, ScoutingRead
+from app.api.progress_models import ProgressQuery, ProgressRead
 from app.application.scouting import scouting
 from app.repositories.errors import NotFoundError, PersistenceError
 from app.repositories.supabase.frontend_reads import _report_failure
@@ -77,6 +78,16 @@ def preview(
 @router.get("/seasons/{season_id}/pc", response_model=PCRead)
 def pc(season_id: UUID, principal: Reader, container: Container):
     return read(container, "pc", str(season_id), str(principal.trainer_id))
+
+
+@router.get("/seasons/{season_id}/progress", response_model=ProgressRead)
+def progress(
+    season_id: UUID,
+    principal: Reader,
+    container: Container,
+    selection: Annotated[ProgressQuery, Query()],
+):
+    return read(container, "progress", str(season_id), str(principal.trainer_id))
 
 
 @router.get("/seasons/{season_id}/scouting", response_model=ScoutingRead)

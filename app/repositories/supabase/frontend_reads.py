@@ -19,7 +19,7 @@ def _report_failure(operation: str, error: Exception) -> None:
 
 
 def _execute_read(query, operation: str):
-    # These SELECTs and the two explicitly read-only RPCs have no durable effects.
+    # These SELECTs and explicitly read-only RPCs have no durable effects.
     # A dropped response can be retried once; mutation repositories must not use
     # this helper. Do not retry status errors, malformed data or arbitrary failures.
     try:
@@ -33,6 +33,7 @@ class FrontendReadRepository(Protocol):
     def shield_targets(self, season_id: str, trainer_id: str) -> list[str]: ...
     def league_general(self, season_id: str) -> dict | None: ...
     def initial_observations(self, season_id: str) -> list[dict]: ...
+    def observed_progress(self, season_id: str, trainer_id: str | None = None) -> list[dict] | None: ...
 
     def rows(
         self,
@@ -112,3 +113,17 @@ class SupabaseFrontendReadRepository:
         except Exception as exc:
             _report_failure("shield_targets", exc)
             raise PersistenceError("Target eligibility unavailable") from exc
+
+    def observed_progress(self, season_id, trainer_id=None):
+        try:
+            data = _execute_read(
+                self._client.rpc("observed_progress_read", {
+                    "p_season_id": season_id, "p_trainer_id": trainer_id,
+                }), "observed_progress",
+            )
+            if data is not None and (not isinstance(data, list) or len(data) > 500):
+                raise ValueError("Invalid progress read")
+            return data
+        except Exception as exc:
+            _report_failure("observed_progress", exc)
+            raise PersistenceError("Observed progress unavailable") from exc

@@ -27,7 +27,7 @@ commit before the next starts. Deploy at stable checkpoints, not every commit.
 | I | Exact wallet strings; public pending/active promotions; owned robbery-shield voucher redemption; post-League spending; configurable observed-save badge/Champion rewards; purchased-revive death overlap. |
 | J | Human Spanish readiness/error wording in Admin; setup, supervision, exceptions, history and risk actions. Preserve server revisions/CAS. |
 | K | Explicit public competitive Team Lock scouting: species, nickname, level, types, item and moves only. Reuse H; self/admin remain public here. No save/PC/box/identity fallback. |
-| L | Minimal backward-compatible observed progress contract with game/version/provenance; observed zero and unknown distinct. E includes the required badge foundation. No routine manual progress authority, invented League-completed flag or full cloud ingestion. |
+| L | Reuse E regional badge evidence and I reader/3 nullable Champion proof. Current owned/latest accepted save observations distinguish unknown, observed zero and Champion true/false/unknown. Eight badges are not game completion. Participant presentation preserves regional badge identity; no manual attestation, duplicate reward engine or full cloud ingestion. |
 | M | Avoid new sequential N+1 reads; measure touched flows where useful and record Phase 14 candidates. No broad performance refactor. |
 
 Three distinct truths remain: real save state, competitive state and frozen

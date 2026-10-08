@@ -7,6 +7,7 @@ from uuid import UUID
 
 from pydantic import BaseModel, Field
 from app.api.cup_models import CupSide
+from app.api.progress_models import ProgressRead
 
 
 class SeasonRead(BaseModel):
@@ -33,6 +34,7 @@ class PlayerRead(BaseModel):
     status: str
     display_name: str
     badges_count: int | None = None
+    progress: ProgressRead = Field(default_factory=ProgressRead)
 
 
 class DayRead(BaseModel):

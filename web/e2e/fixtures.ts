@@ -288,6 +288,7 @@ export async function fixture(page: Page, longNames = false) {
         })),
       };
     } else if (path.endsWith("/overview")) result = overview;
+    else if (path.endsWith("/progress")) result = { state: "unknown" };
     else if (path.endsWith("/wipe-revivals"))
       result = {
         season_id: sid,

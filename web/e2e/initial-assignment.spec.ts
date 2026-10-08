@@ -70,6 +70,30 @@ async function modernFixture(
           badges_count:
             current().players.find((p) => p.id === player.id)
               ?.observed_badges ?? null,
+          progress:
+            current().players.find((p) => p.id === player.id)
+              ?.progress_state === "observed"
+              ? {
+                  state: "observed",
+                  badges_count: current().players.find(
+                    (p) => p.id === player.id,
+                  )?.observed_badges,
+                  regions: [
+                    {
+                      region: "unova",
+                      earned_badges: Array.from(
+                        {
+                          length:
+                            current().players.find((p) => p.id === player.id)
+                              ?.observed_badges ?? 0,
+                        },
+                        (_, i) => i + 1,
+                      ),
+                    },
+                  ],
+                  champion_defeated: null,
+                }
+              : { state: "unknown" },
         })),
         season,
         days: [],
@@ -126,12 +150,12 @@ test("unobserved progress differs from observed zero; no manual accreditation or
   ).toHaveCount(0);
   await navigate(page, "Entrenadores");
   await expect(
-    page.getByText("Progreso no observado / pendiente de sincronizar save", {
+    page.getByText("Progreso no observado · Pendiente de sincronizar save.", {
       exact: true,
     }),
   ).toBeVisible();
   await expect(
-    page.getByText("0 medallas registradas", { exact: true }),
+    page.getByText("0 medallas observadas", { exact: true }),
   ).toBeVisible();
   await navigate(page, "Administración");
   await page.getByRole("tab", { name: "Competición", exact: true }).click();
@@ -182,7 +206,10 @@ test("neutral ties inside divisions require no ordering and submit only the obse
   await expect(page.getByLabel(/Orden del empate/)).toHaveCount(0);
   await page.getByRole("button", { name: "Confirmar reparto inicial" }).click();
   await expect(
-    page.getByRole("status").filter({ hasText: "Cambio confirmado" }),
+    page
+      .getByRole("status")
+      .filter({ hasText: "Cambio confirmado" })
+      .filter({ hasText: "Cambio confirmado" }),
   ).toBeVisible();
   expect(commands).toHaveLength(1);
   expect(commands[0].path).toBe(
@@ -288,7 +315,9 @@ test("boundary decision starts empty, resets stale evidence and preserves the ex
   await expect(choices[0]).toBeDisabled();
   expect(sent).toHaveLength(2);
   await retry.click();
-  await expect(page.getByRole("status")).toContainText("Cambio confirmado");
+  await expect(
+    page.getByRole("status").filter({ hasText: "Cambio confirmado" }),
+  ).toContainText("Cambio confirmado");
   expect(sent).toHaveLength(3);
   expect(sent[1]).toEqual(sent[2]);
   expect(sent[1].body).toEqual({

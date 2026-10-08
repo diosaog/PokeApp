@@ -1328,3 +1328,61 @@ subsequent commit carrying this entry; obtain its exact HEAD from Git.
 
 **EXACT NEXT STEP: STOP. L is next, awaiting explicit owner instruction.**
 Phase 10.5 IN PROGRESS; **PHASE 11 READINESS: NOT READY / NOT STARTED**.
+
+
+## L entry / implementation - 2026-10-08
+
+Owner queued L after K; entry verified main/origin
+`5f40737a02d209b6158b31f4598cf8b79c42080d`, 0/0, clean tracked tree.
+K DONE VERIFIED. Fresh pinned remote inventory: 31 records through
+039=`20261007121317`, so next forward migration is 040.
+
+Small impact map: READ E/I parser/neutral progress, validation/reward helpers,
+current frontend projections and their direct tests. EXPECTED WRITE current-game
+read projection/API, Trainers/Saves progress presentation and focused evidence.
+DB: one additive service-only read RPC reusing I source validation; no tables or
+mutation contract changes. TESTS INVALIDATED: current progress projection/overview,
+API scope, browser presentation, migration/bootstrap/security parity. OUT OF SCOPE:
+new parser coverage, reward engine, cloud upload, physical writes, sporting history,
+J's lifecycle/championship/first-lock timing implementation debts, M and Phase 11.
+
+ALREADY SATISFIED BY CURRENT SOURCE: reader/3 neutral regional flags and nullable
+Champion, BW Hall-of-Fame exception, E first-two-primary readiness, I configurable
+idempotent badge/Champion rewards. L preserves all of them. Actual gap: public
+progress cards used counts only (legacy defaults could masquerade as observations),
+and no participant view exposed validated Champion completion. New read uses owned
+current save plus latest identity revision in a single statement snapshot. Unknown
+is explicit; regressions describe current save only, never rewrite rewards/history.
+Full Launcher/cloud ingestion remains NOT CONFIGURED.
+
+## L local green - 2026-10-08; deployment pending
+
+040 adds only `observed_progress_read`, a bounded STABLE service-only SECURITY
+INVOKER function with fixed search_path. It reuses `observed_save_progress` from I;
+no applied migration changed. Current pointer, latest identity revision and owned
+parsed save are joined in one statement snapshot. No row locks or reward settlement.
+The overview uses this aggregate for every season instead of legacy default counts;
+GET `/v1/read/seasons/{season_id}/progress` selects self from verified JWT and rejects
+override/attestation parameters. Strict neutral validation plus public allowlists
+exclude raw flags, hashes, identity and parser data. Badges in compatibility overview
+counts remain primary-region; the new progress total includes both HGSS regions.
+Trainers and Saves show regional earned/missing medals and nullable in-game Champion,
+with observed-in-PokeApp timestamp; frozen competitive history is not recalculated.
+
+FRESH PASS: L 11 focused Python; full 756 (737 committed-scope + 19 untouched
+untracked map tests); React 63; affected Edge six, zero skipped/flaky. Native worker
+and Launcher generated-fixture run: 77 PASS checks including BW Hall evidence.
+PG 17.11 seven L groups, concurrent read replay, exact 50-table restoration; four
+fresh migration/bootstrap builds yield 12,639 identical schema/grant/ownership lines.
+Compile, targeted Ruff, TypeScript/public build, Prettier, Wrangler dry-run and diff
+checks pass. [Local evidence](../phase10-5l-closure-evidence.json).
+Native/parser/economy mutation contracts are unchanged. I's full reward race matrix
+is RETAINED UNCHANGED-SOURCE; unrelated purchase/Cup/championship matrices NOT RERUN.
+The previous temporary PG installation was incomplete; a new official EDB 17.11
+portable install/new disposable cluster was used and is now stopped.
+
+Fresh public baseline: pinned V2, 56 scoped tables, 31 migrations through 039,
+stable owner credentials/admin; Advisor captured before any remote write.
+Next: commit/push, apply only 040, verify history/data/security, deploy compatible
+Railway then Cloudflare, safe authenticated progress reads and final comparison,
+documentation closure commit/push. No owner progress/reward fixtures; no M/Phase 11.

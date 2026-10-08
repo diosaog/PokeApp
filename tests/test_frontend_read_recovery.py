@@ -38,10 +38,11 @@ class FrontendReadRecoveryTests(unittest.TestCase):
             ),
             (lambda: repo.league_general("season"), {"rows": []}),
             (lambda: repo.initial_observations("season"), []),
+            (lambda: repo.observed_progress("season", "owner"), []),
         )
 
     def test_lost_response_retries_same_scoped_read_once(self):
-        for index in range(3):
+        for index in range(4):
             requests = []
 
             def respond(request):
@@ -70,7 +71,7 @@ class FrontendReadRecoveryTests(unittest.TestCase):
             self.assertNotIn("SECRET", str(logs.output))
 
     def test_persistent_read_error_is_bounded_and_sanitized(self):
-        for index in range(3):
+        for index in range(4):
             requests = []
 
             def respond(request):
@@ -90,7 +91,7 @@ class FrontendReadRecoveryTests(unittest.TestCase):
 
     def test_http_denials_and_backend_status_failures_are_not_retried(self):
         for status in (401, 403, 409, 500, 503):
-            for index in range(3):
+            for index in range(4):
                 requests = []
 
                 def respond(request):

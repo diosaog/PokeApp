@@ -5,6 +5,7 @@
 
 begin;
 
+drop function if exists public.observed_progress_read(uuid,uuid);
 drop table if exists public.progress_reward_claims cascade;
 drop function if exists public.progress_reward_immutable() cascade;
 drop function if exists public.reward_current_save_observation() cascade;

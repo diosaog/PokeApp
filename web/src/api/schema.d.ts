@@ -957,6 +957,23 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/v1/read/seasons/{season_id}/progress": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Progress */
+    get: operations["progress_v1_read_seasons__season_id__progress_get"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/v1/read/seasons/{season_id}/scouting": {
     parameters: {
       query?: never;
@@ -1167,6 +1184,16 @@ export interface components {
       /** Auth User Id */
       auth_user_id: string;
       session: components["schemas"]["SessionResponse"];
+    };
+    /** BadgeRegionRead */
+    BadgeRegionRead: {
+      /**
+       * Region
+       * @enum {string}
+       */
+      region: "hoenn" | "kanto" | "sinnoh" | "johto" | "unova";
+      /** Earned Badges */
+      earned_badges: number[];
     };
     /** CancelDayBody */
     CancelDayBody: {
@@ -2517,6 +2544,7 @@ export interface components {
       display_name: string;
       /** Badges Count */
       badges_count?: number | null;
+      progress?: components["schemas"]["ProgressRead"];
     };
     /** PointsRead */
     PointsRead: {
@@ -2634,6 +2662,28 @@ export interface components {
       nature: string;
       ivs?: components["schemas"]["StatsRead"] | null;
       evs?: components["schemas"]["StatsRead"] | null;
+    };
+    /** ProgressRead */
+    ProgressRead: {
+      /**
+       * State
+       * @default unknown
+       * @enum {string}
+       */
+      state: "unknown" | "observed";
+      /** Game */
+      game?: string | null;
+      /** Observed At */
+      observed_at?: string | null;
+      /** Badges Count */
+      badges_count?: number | null;
+      /** Primary Region */
+      primary_region?:
+        ("hoenn" | "kanto" | "sinnoh" | "johto" | "unova") | null;
+      /** Regions */
+      regions?: components["schemas"]["BadgeRegionRead"][] | null;
+      /** Champion Defeated */
+      champion_defeated?: boolean | null;
     };
     /** PromotionRead */
     PromotionRead: {
@@ -5748,6 +5798,37 @@ export interface operations {
         };
         content: {
           "application/json": components["schemas"]["PCRead"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  progress_v1_read_seasons__season_id__progress_get: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        season_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ProgressRead"];
         };
       };
       /** @description Validation Error */

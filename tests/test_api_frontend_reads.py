@@ -80,6 +80,13 @@ class ReadStore:
             ],
         }
 
+    def observed_progress(self, season_id, trainer_id=None):
+        return [dict(id=p["id"], trainer_id=p["trainer_id"], game=None,
+                     observed_at=None, progress=None)
+                for p in self.data.get("public_season_players", [])
+                if p.get("season_id") == season_id
+                and (trainer_id is None or p["trainer_id"] == trainer_id)]
+
     def shield_targets(self, season_id, trainer_id):
         return []
 

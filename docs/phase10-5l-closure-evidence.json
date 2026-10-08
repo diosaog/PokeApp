@@ -1,0 +1,79 @@
+{
+  "package": "10.5L",
+  "entry_head": "5f40737a02d209b6158b31f4598cf8b79c42080d",
+  "classification": "FRESH PASS",
+  "python": {
+    "exit_code": 0,
+    "total": 756,
+    "passed": 756,
+    "failed": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "python_scope": "756 includes 19 pre-existing unrelated untracked map tests; 737 committed-scope. Files untouched and unstaged.",
+  "focused_python": 11,
+  "react": {
+    "tests": 63,
+    "files": 10
+  },
+  "edge": {
+    "startTime": "2026-10-08T18:50:55.420Z",
+    "duration": 15432.006000000001,
+    "expected": 6,
+    "skipped": 0,
+    "unexpected": 0,
+    "flaky": 0
+  },
+  "postgres": {
+    "groups": 7,
+    "checks": [
+      "unknown, observed zero, missing source and season scope",
+      "Champion true/false/unknown, eight badges insufficient and reader compatibility",
+      "sparse badge identity, HGSS second region and E first-two compatibility",
+      "stale pointer rejected and later regressed observation remains current",
+      "malformed/deleted/unowned/hash-mismatched observation rejection",
+      "concurrent replay is read-only: rewards, history and all tables unchanged",
+      "service-only invoker, fixed search_path, stable snapshot and browser denials"
+    ],
+    "restored_tables": 50
+  },
+  "rebuild": {
+    "status": "PASS",
+    "identical_builds": 4,
+    "identical_lines": 12639
+  },
+  "native": {
+    "status": "FRESH PASS",
+    "pass_lines": 77,
+    "scope": "Native Gen3/4/5 binary, regional flags, Champion/BW Hall, IPC and local journal; generated fixtures only"
+  },
+  "static": {
+    "compile": "PASS",
+    "ruff": "PASS",
+    "typescript_public_build": "PASS",
+    "prettier": "PASS",
+    "wrangler_dry_run": "PASS",
+    "diff": "PASS"
+  },
+  "economy": "I reward semantics RETAINED UNCHANGED-SOURCE; L PG freshly proves reads leave claims, ledger and all tables unchanged. No mutation contract invalidated; unrelated Shop purchase races NOT RERUN.",
+  "source_sha256": {
+    "app/api/progress_models.py": "b215c3179f1c5360d8dd3d031da6f29e124ce7b18e11f161a0274ff2a3239bed",
+    "app/application/progress.py": "929420b2f9834131811c26a87259e5184c6aa381d76e5fd0f07c9a297a064188",
+    "app/api/read_models.py": "be7ac75a519299390e17e33c16581371752612d62e0d99fd30e710e98ff37be8",
+    "app/api/routes/reads.py": "fa927eaf56ed1d444968522b8d89caad2b915c5e0974294602eb17af57f4a1a6",
+    "app/application/frontend_reads.py": "be9f595cb06f694dd362db389c419798ac5519bb0ad40fcdb4638d7cdef88563",
+    "app/repositories/supabase/frontend_reads.py": "9a2165ea887fd48c788b937d6c972d1724de6ef69934a5cb4ed5a2c1fff5b3ea",
+    "supabase/v2/migrations/040_observed_progress_read.sql": "80d7632bde915c60f00f35eddbbfd5c8a3c42807d4d1edaa593d3cf93d87efda",
+    "supabase/v2/bootstrap.sql": "c27d60eb14a2093453b9b0fe79dc08d00d907a0c0ae4a8113f92adfb567ec08e",
+    "supabase/v2/reset_dev.sql": "e905d41aed150465c135bc9afec6364eddaf1f55507065045599012f496367f7",
+    "web/src/features/progress.tsx": "bb8b4aa83d531a03a55a78e4fe6866f9fa3e03e25c87b6e43829139ef747fbe4",
+    "web/src/features/core.tsx": "723101356be4999452fdfa70ced55959496dca6191373513c14d744e0eb73eee",
+    "web/src/api/schema.d.ts": "38be09f71219c07de5f82758955b1178d63492c7b0671853d17c4e9f6606fe35",
+    "app/save_parser/models.py": "1cfc54b8a0bdf7bfd771a86d007cc5c959243b9ef2d6a4c80fdae03d6dcfcc65",
+    "app/save_parser/adapter.py": "b19e09a261e12d58c769770042c4d7d5503bd20852795dadc90547b5799023a0",
+    "companion/parser/PokeApp.Parser/Inspection.cs": "637e5d7a7ce82307c3bbe7efba6d02463166a56270c0efea9f97729a7b6859a0"
+  },
+  "raw_evidence": "%TEMP%/phase10-5l-*",
+  "environment": "Old disposable PG installation had missing files; fresh official EDB 17.11 portable install and new local cluster. Initial rebuild caught missing reset helper; fixed, four fresh builds PASS.",
+  "database_status": "Stopped after runners end"
+}

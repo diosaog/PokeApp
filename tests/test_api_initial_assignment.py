@@ -321,8 +321,7 @@ class ObservedOverviewTests(unittest.TestCase):
         store.observations = [
             dict(
                 id=PID,
-                progress_state="unknown",
-                observed_badges=None,
+                trainer_id=TRAINER_ID, game=None, observed_at=None, progress=None,
                 private_source="SECRET",
             )
         ]
@@ -333,7 +332,7 @@ class ObservedOverviewTests(unittest.TestCase):
             store.observation_calls += 1
             return deepcopy(store.observations)
 
-        store.initial_observations = observed
+        store.observed_progress = observed
         return store, SEASON
 
     def test_modern_unknown_ignores_registered_counter_and_hides_metadata(self):
@@ -346,7 +345,9 @@ class ObservedOverviewTests(unittest.TestCase):
 
     def test_observed_zero_stays_zero(self):
         store, sid = self.store()
-        store.observations[0].update(progress_state="observed", observed_badges=0)
+        store.observations[0].update(game="B2", observed_at="2026-10-08T12:00:00Z",
+            progress=dict(schema_version=1, primary_region="unova",
+                regions=[dict(region="unova", badge_flags=[False]*8)]))
         self.assertEqual(
             FrontendReads(store).overview(sid, TRAINER_ID).players[0].badges_count, 0
         )
@@ -359,12 +360,12 @@ class ObservedOverviewTests(unittest.TestCase):
             elif invalid == "foreign":
                 store.observations[0]["id"] = str(uuid4())
             elif invalid == "state":
-                store.observations[0].update(progress_state="manual", observed_badges=2)
+                store.observations[0]["game"] = "B2"
             else:
                 store.observations[0].update(
-                    progress_state="observed", observed_badges=True
+                    progress=True
                 )
-            with self.subTest(invalid=invalid), self.assertRaises(PersistenceError):
+            with self.subTest(invalid=invalid), self.assertRaises((PersistenceError, ValueError)):
                 FrontendReads(store).overview(sid, TRAINER_ID)
 
 

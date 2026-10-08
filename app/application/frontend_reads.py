@@ -10,6 +10,8 @@ from app.api.read_models import (
     InventoryRead,
     LeagueGeneralRead,
 )
+from app.application.progress import progress_read
+from app.api.progress_models import ProgressRead
 from app.repositories.errors import NotFoundError, PersistenceError
 from app.repositories.supabase.frontend_reads import FrontendReadRepository
 
@@ -124,35 +126,22 @@ class FrontendReads:
         players = self.rows(
             "public_season_players", "id,trainer_id,status", season_id=sid
         )
-        if season["initial_assignment_rule"] == "observed_deaths_v1":
-            observed = self.repo.initial_observations(sid)
-            if (len(observed) > 500 or len(observed) != len(players)
-                or len({r["id"] for r in observed}) != len(observed)
-                or {r["id"] for r in observed} != {p["id"] for p in players}):
-                raise PersistenceError("Invalid observed roster")
-            stats = {}
-            for row in observed:
-                value = row["observed_badges"]
-                if row["progress_state"] not in ("observed", "unknown") or (
-                    value is not None and (type(value) is not int or not 0 <= value <= 8)
-                ) or (
-                    (row["progress_state"] == "unknown") != (value is None)
-                ):
-                    raise PersistenceError("Invalid observed progress")
-                stats[row["id"]] = value
-        else:
-            stats = {
-                r["season_player_id"]: r["badges_count"]
-                for r in self.rows(
-                    "public_season_player_stats",
-                    "season_player_id,badges_count",
-                    season_id=sid,
-                )
-            }
+        observed = self.repo.observed_progress(sid)
+        if (not isinstance(observed, list) or len(observed) > 500
+            or len(observed) != len(players)
+            or len({r["id"] for r in observed}) != len(observed)
+            or {(r["id"], r["trainer_id"]) for r in observed}
+                != {(p["id"], p["trainer_id"]) for p in players}):
+            raise PersistenceError("Invalid observed roster")
+        progress = {r["id"]: progress_read(r) for r in observed}
         for p in players:
+            fact = progress[p["id"]]
             p.update(
                 display_name=trainers.get(p["trainer_id"], "Entrenador no disponible"),
-                badges_count=stats.get(p["id"]),
+                # Compatibility field keeps its primary-region meaning. Never use
+                # a legacy default counter as proof of an observed zero.
+                badges_count=len(fact.regions[0].earned_badges) if fact.regions else None,
+                progress=fact,
             )
         snapshots = []
         for r in self.rows(
@@ -195,6 +184,16 @@ class FrontendReads:
             ),
             balance=self.balance(sid, tid),
         )
+
+    def progress(self, sid, tid):
+        rows = self.repo.observed_progress(sid, tid)
+        if rows is None:
+            raise NotFoundError("Season not found")
+        if not rows:
+            return ProgressRead()
+        if len(rows) != 1 or rows[0]["trainer_id"] != tid:
+            raise PersistenceError("Invalid progress owner")
+        return progress_read(rows[0])
 
     def pc(self, sid, tid):
         self.season(sid)
