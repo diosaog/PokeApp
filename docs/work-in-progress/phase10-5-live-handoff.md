@@ -1,5 +1,9 @@
 # Phase 10.5 — live execution record
 
+Closed historical record. The subsequent owner instruction authorized Phase 11;
+the [Phase 11 live handoff](phase11-live-handoff.md) now owns current execution
+state. The dated closure and evidence below are retained unchanged.
+
 Observation: 2026-10-08 Europe/Madrid. **A–M + FINAL ALIGNMENT DONE; PHASE 10.5 DONE;
 PHASE 11 READY FOR REVIEW / NOT STARTED.** [Final report](../phase10-5-completion-report.md).
 The final closure at the end supersedes older dated package states below.

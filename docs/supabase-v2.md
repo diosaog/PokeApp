@@ -501,9 +501,13 @@ como dev/test explicito o eliminarlo cuando la nueva API este estable.
 
 ## Legacy Export
 
-No hay migracion general V1 -> V2 porque la decision de producto es borrar V1 tras
-validar una base limpia/staging. Si antes del borrado se quiere conservar algo,
-habria que exportar explicitamente:
+La decision historica de Fase 6 era validar una base limpia y decidir por separado
+que exportar antes de retirar V1. **La instruccion posterior del propietario para
+Fase 11 la sustituye:** se autoriza migracion real V1 -> V2, preservando V1 y todos
+los datos manuales V2, sin cutover ni borrado. Estado y requisitos de reanudacion:
+[handoff de Fase 11](work-in-progress/phase11-live-handoff.md).
+
+El inventario de exportacion historico incluia:
 
 - saves raw + metadata;
 - Hall entries;
@@ -513,7 +517,9 @@ habria que exportar explicitamente:
 - team locks;
 - league snapshots.
 
-Eso debe decidirlo el usuario antes del cutover, no esta asumido por Fase 6.
+La Fase 11 debe verificar las fuentes reales y reconciliar estos dominios y el
+resto del estado competitivo autorizado. No se debe interpretar esta lista
+historica como permiso para descartar dominios, resetear V2 o eliminar V1.
 
 ## Validation
 

@@ -5,14 +5,19 @@ milestone record; it does not maintain a second live phase-status ledger.
 
 ## Current project position
 
+- Active phase: **11 — real V1 → V2 data migration**, authorized after final 10.5.
+  [Single live record](work-in-progress/phase11-live-handoff.md),
+  [readiness checkpoint](phase11-readiness-report.md). Current execution state and
+  exact resume step are maintained there. No cutover or Phase 12 is included.
 - Latest completed phase: **10.5 — Functional product alignment and repair, DONE**.
   [Approved contract](phase10-5-functional-alignment.md),
-  [single live record](work-in-progress/phase10-5-live-handoff.md).
+  [closed execution record](work-in-progress/phase10-5-live-handoff.md).
   Owner authorized implementation on 2026-09-29 after the functional knowledge export.
   [Final alignment/closure report](phase10-5-completion-report.md): A–M and all
   seven final areas delivered, source `eb4e402`, forward 041, verified local/public
-  evidence and zero owner business-data residue. Phase 11 **READY FOR REVIEW /
-  NOT STARTED**, pending explicit owner authorization. M's intermittent hosted 503
+  evidence and zero owner business-data residue. At that closure Phase 11 was
+  **READY FOR REVIEW**; the subsequent owner instruction authorizes its execution.
+  M's intermittent hosted 503
   availability candidate remains documented; no root-cause fix is claimed.
   [M performance guard](phase10-5m-completion-report.md) remains delivered.
   [L observed badges and in-game Champion progress](phase10-5l-completion-report.md) remains delivered.
@@ -36,8 +41,8 @@ milestone record; it does not maintain a second live phase-status ledger.
 - V1/Streamlit remains legacy/fallback. V2 public staging is available for inspection.
   Cloud save ingestion/current-state promotion, physical save operations, final
   Launcher distribution, onboarding/roles and release polish remain later work.
-- **Phase 11 NOT STARTED; gated by Phase 10.5 and subsequent owner + ChatGPT review.**
-  Do not start V1 migration or cutover during alignment.
+- Phase 11 entry passed after owner authorization; its live record controls
+  readiness, migration progress and blockers. Phase 12 and cutover are not started.
 - Preserve **OWNER_TEMP_STAGING_AUTH / OWNER_TEMP_STAGING_ADMIN** for current review.
   **TEMP_STAGING_AUTH_MUST_BE_REMOVED_OR_RESET_BEFORE_RELEASE** includes role review
   and definitive secure onboarding. Do not copy a temporary staging policy to production.

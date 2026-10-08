@@ -1,0 +1,156 @@
+{
+  "recorded_at": "2026-10-08T21:03:29.996635+00:00",
+  "phase": "11",
+  "execution_state": "READINESS",
+  "status": "BLOCKED",
+  "entry_check": "PHASE_10_5_DONE_VERIFIED",
+  "entry_head": "e256d5b28f751beb7c3851e58b1eb7c9c81ed8fb",
+  "entry_git": {
+    "branch": "main",
+    "origin_main": "e256d5b28f751beb7c3851e58b1eb7c9c81ed8fb",
+    "divergence": [0, 0],
+    "tracked_clean": true
+  },
+  "v2": {
+    "project_ref": "uwleqeuzsveqlugugzba",
+    "status": "ACTIVE_HEALTHY",
+    "history_count": 33,
+    "latest": {
+      "name": "041_final_product_alignment",
+      "record_hash": "8f0f6f824b1a342d49b88a23c1b258d8",
+      "version": "20261008204133"
+    },
+    "full_baseline_tables": 59,
+    "comparison_to_final_10_5": {
+      "observed_at": "2026-10-08T21:01:02.030784+00:00",
+      "comparison": "Phase 10.5 independent closure -> Phase 11 entry",
+      "table_count": 59,
+      "changed_tables": [],
+      "migration_history_identical": true,
+      "owner_stable_identity_credentials_identical": true
+    },
+    "advisor_counts": {
+      "INFO": 143,
+      "ERROR": 24,
+      "WARN": 5
+    },
+    "new_error_warn": 0,
+    "removed_error_warn": 0,
+    "import_journal_found": false
+  },
+  "deployments": {
+    "observed_at": "2026-10-08T20:59:03.843914+00:00",
+    "git_head": "e256d5b28f751beb7c3851e58b1eb7c9c81ed8fb",
+    "railway_target": {
+      "id": "f5c4666a-508f-4e5a-8aae-a54581814f29",
+      "name": "PokeApp V2",
+      "environments": [
+        {
+          "id": "d05ccec3-7a85-4eeb-9b01-c0f8d2111896",
+          "name": "production"
+        }
+      ],
+      "services": [
+        {
+          "id": "9a78e086-c927-471f-8bb9-befe62c77de7",
+          "name": "pokeapp-api"
+        }
+      ]
+    },
+    "railway_deployments": [
+      {
+        "id": "2d71ec3b-095d-49a7-aa15-31749fe67b52",
+        "status": "SUCCESS",
+        "created_at": "2026-10-08T20:43:15.410Z",
+        "image_digest": "sha256:fc59ebcab95dfab6cf4eee72a962dc22f06744a0c6beafb8ebbe984fd2f461e3",
+        "source_message": "Phase 10.5 final source eb4e402891cbaa02e0999229874ac3003e016ae0"
+      }
+    ],
+    "cloudflare_worker": "pokeapp-web",
+    "cloudflare_deployments": [
+      {
+        "id": "ea9c837d-86f0-4b0a-826d-a4774371b56e",
+        "created_at": "2026-10-08T20:45:34.721313Z",
+        "source": "wrangler",
+        "strategy": "percentage",
+        "source_message": "Phase 10.5 final source eb4e402891cbaa02e0999229874ac3003e016ae0",
+        "versions": [
+          {
+            "version_id": "77eea9f6-0c90-45a2-b93a-3bf9cdf5fc11",
+            "percentage": 100
+          }
+        ]
+      }
+    ],
+    "commands_read_only": true
+  },
+  "v1_source": {
+    "authoritative_source": "UNVERIFIED",
+    "configured_connection_found": false,
+    "locations_checked": [
+      "repository Streamlit secrets",
+      "global Streamlit secrets",
+      "process environment",
+      "User environment",
+      "Machine environment"
+    ],
+    "inactive_candidate": {
+      "id": "fdtytpeyfzyssfrsulxd",
+      "name": "diosaog's Project",
+      "region": "eu-north-1",
+      "status": "INACTIVE",
+      "created_at": "2025-12-09T15:04:20.560342Z"
+    },
+    "candidate_is_v1": "UNPROVEN",
+    "catalog_query": {
+      "read_only": true,
+      "http_status": 544,
+      "error": "Failed to run sql query: Connection terminated due to connection timeout"
+    },
+    "historical_streamlit_http": 303,
+    "historical_streamlit_redirect": "https://share.streamlit.io/-/auth/app?redirect_uri=https%3A%2F%2Fpokeapp.streamlit.app%2F",
+    "local_fallback": {
+      "authority": "UNVERIFIED",
+      "tables": {
+        "settings": 12,
+        "saves": 21,
+        "purchases": 0,
+        "redemptions": 10,
+        "shop_discounts": 0,
+        "pokemon_flags": 0,
+        "team_locks": 0
+      },
+      "save_file_count": 21,
+      "redemptions_without_local_purchase": 10,
+      "last_save_created_at_utc": "2025-12-09T13:35:51+00:00"
+    }
+  },
+  "blocker": "Identify an authoritative accessible V1 project or export before source mapping and imports.",
+  "remote_actions": {
+    "business_writes": 0,
+    "schema_writes": 0,
+    "storage_writes": 0,
+    "import_batches_attempted": 0,
+    "deployments": 0,
+    "restore_or_restart": 0,
+    "unknown_import_outcomes": 0
+  },
+  "implementation": {
+    "new_migrations": [],
+    "identity_map": "NOT_CREATED",
+    "journal": "NOT_IMPLEMENTED",
+    "migrated_entities": 0,
+    "quarantined_entities": "NOT_ASSESSED_SOURCE_UNAVAILABLE",
+    "restart_rollback_proof": "NOT_EXECUTED",
+    "economic_and_historical_reconciliation": "NOT_EXECUTED"
+  },
+  "tests": {
+    "application": "NOT_RERUN_DOCUMENTATION_ONLY",
+    "local_postgresql": "NOT_STARTED",
+    "phase_10_5_evidence": "RETAINED_HISTORICAL_ONLY",
+    "readiness": "OBSERVED_READ_ONLY"
+  },
+  "private_evidence_directory": "%TEMP%/phase11-entry-20261008",
+  "phase_12_readiness": "NOT_READY",
+  "cutover": false
+}
