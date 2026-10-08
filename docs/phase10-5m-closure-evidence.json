@@ -1,0 +1,48 @@
+{
+  "status": "FRESH PASS",
+  "entry": "4a7537438ad19cdd6152d339b07caad4bd94de93",
+  "python": {
+    "exit_code": 0,
+    "total": 757,
+    "passed": 757,
+    "failed": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "python_scope": "738 committed-scope plus 19 pre-existing unrelated untracked tests; unrelated files untouched",
+  "focused_python": 23,
+  "react": {
+    "files": 10,
+    "tests": 63,
+    "passed": 63
+  },
+  "edge": {
+    "unique_tests": 5,
+    "passed": 5,
+    "files": [
+      "e2e/economy.spec.ts",
+      "e2e/performance.spec.ts"
+    ],
+    "note": "3 existing economy cases pass; 2 new guards pass after counting completed responses instead of StrictMode-cancelled dev requests; no product edits after initial run"
+  },
+  "checks": [
+    "TypeScript",
+    "public Vite build",
+    "full Prettier",
+    "Wrangler dry-run",
+    "targeted Ruff",
+    "Python compile",
+    "git diff --check"
+  ],
+  "backend_source": "RETAINED UNCHANGED-SOURCE",
+  "postgresql": "NOT RERUN / N/A: no repository/query/SQL changes",
+  "migration_rebuild": "NOT RERUN / N/A: no schema changes",
+  "mutation_and_native_matrices": "NOT RERUN: unchanged source; full Python gate still covers its ordinary unit tests",
+  "fingerprints": {
+    "web/src/features/inventory.tsx": "9b7eed8f031c0aa84dafe886f334cbc1f7b699d4fc5997d2bff0006dd2cd9e79",
+    "web/src/features/economy.test.tsx": "e517fe1ad809291694360d62b56ef722a227830531dbda3f0626f2a531eb3fb2",
+    "web/e2e/performance.spec.ts": "06ef0a3093c882cf0352d029840424119aed728e4e81f87aab2963a8bbe70e16",
+    "tests/test_api_frontend_reads.py": "c63d225a671a7f5db8dd7296db791a5c0fc874ec068a9a0ff87c35b2ff6e8c8f"
+  },
+  "raw_logs": "C:\\Users\\Antonio\\AppData\\Local\\Temp\\phase10-5m-*"
+}

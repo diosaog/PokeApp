@@ -135,6 +135,34 @@ class FrontendReadTests(unittest.TestCase):
             self.assertEqual(result.status_code, 200)
             self.assertNotIn("SECRET", result.text)
 
+    def test_names_and_overview_have_bounded_repository_round_trips(self):
+        # Count business repository calls, not statements executed inside an RPC.
+        # The modal names read must not grow per player or load competition data.
+        self.store.observed_progress = Mock(wraps=self.store.observed_progress)
+        for size in (1, 100):
+            with self.subTest(players=size):
+                self.store.data["public_trainers"] = [
+                    dict(id=str(uuid4()), display_name=f"Trainer {i}")
+                    for i in range(size)
+                ]
+                self.store.data["public_season_players"] = [
+                    dict(id=str(uuid4()), trainer_id=t["id"], season_id=SID,
+                         status="active")
+                    for t in self.store.data["public_trainers"]
+                ]
+                self.store.calls.clear()
+                self.assertEqual(self.get("trainers").status_code, 200)
+                self.assertEqual(self.store.calls, [
+                    ("public_trainers", "id,display_name", {}, 0, 501)
+                ])
+                self.store.calls.clear()
+                self.store.observed_progress.reset_mock()
+                response = self.get(f"seasons/{SID}/overview")
+                self.assertEqual(response.status_code, 200, response.text)
+                self.assertEqual(len(response.json()["players"]), size)
+                self.assertEqual(len(self.store.calls), 12)
+                self.store.observed_progress.assert_called_once_with(SID)
+
     def test_pc_owner_from_verified_jwt_not_query(self):
         response = self.get(f"seasons/{SID}/pc?trainer_id={uuid4()}")
         self.assertEqual(response.status_code, 200)

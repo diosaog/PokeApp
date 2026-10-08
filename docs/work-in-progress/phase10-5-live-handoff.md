@@ -1438,3 +1438,30 @@ carrying this entry; obtain its exact HEAD from Git.
 
 **EXACT NEXT STEP: STOP. NEXT M requires its own instruction.**
 Phase 10.5 IN PROGRESS. **PHASE 11 READINESS: NOT READY / NOT STARTED**.
+
+## M local validation - 2026-10-08; delivery pending
+
+Owner's queued M instruction admitted after L DONE verification. Entry main/origin
+`4a7537438ad19cdd6152d339b07caad4bd94de93`, fetched 0/0, clean tracked tree.
+Directed read review only; [impact map and candidates](../phase10-5m-performance-candidates.md).
+Inventory no longer loads overview for redemption names; the existing public names
+list is enabled only while a redemption is open. Server target identity/eligibility,
+exact economy, session isolation and mutation/invalidation behavior are unchanged.
+
+FRESH PASS: 757 full Python (738 committed-scope plus 19 untouched untracked),
+23 focused read tests, 63 React, five affected Edge cases, TypeScript/public build,
+Prettier, targeted Ruff/compile, deploy dry-run and diff checks.
+[Local evidence](../phase10-5m-closure-evidence.json). No backend/repository/schema
+change; PostgreSQL/rebuild/native/unrelated mutation matrices NOT RERUN.
+
+Fresh pinned Supabase baseline: 56 scoped tables, 32 migration records through
+040=`20261008185548`; Advisor 24 ERROR / 5 WARN / 138 INFO. Railway remains L
+`3a3ebb14-ba87-43e0-839a-639920d5f6bf`, Cloudflare still L before this delivery.
+Three sequential samples of nine API reads and fresh desktop/mobile cold Shop
+measurements captured. Cold Shop has three business reads / 30,060 decoded bytes;
+the unnecessary overview is 17,525 bytes and 13 business repository calls.
+Hosted response durations remain samples, not a benchmark. No owner fixtures.
+
+Next: commit/push source, deploy Cloudflare only, repeat the same read measurements,
+compare owner data/Advisor/history, close documentation and STOP. Final 10.5 product
+alignment is next only after M; it and Phase 11 have not started.

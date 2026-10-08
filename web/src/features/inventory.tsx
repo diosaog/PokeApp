@@ -1,6 +1,6 @@
 import { useState } from "react";
 import type { Model } from "../api/types";
-import { useApp, useOverview, useRead } from "../state";
+import { useApp, useRead } from "../state";
 import {
   Card,
   CommandState,
@@ -23,14 +23,17 @@ export function Inventory() {
       `/v1/read/seasons/${season}/inventory`,
       !!season,
     ),
-    overview = useOverview(),
     cmd = useCommand([
       `/v1/read/seasons/${season}/inventory`,
       `/v1/read/seasons/${season}/overview`,
       `/v1/read/seasons/${season}/league`,
       `/v1/seasons/${season}/initial-assignment`,
     ]),
-    [purchase, setPurchase] = useState<Model<"PurchaseRead"> | null>(null);
+    [purchase, setPurchase] = useState<Model<"PurchaseRead"> | null>(null),
+    trainers = useRead<Model<"TrainerRead">[]>(
+      "/v1/read/trainers",
+      !!season && !!purchase,
+    );
   const targets =
     q.data?.targets.filter((t) =>
       purchase?.item_code === "robar_pokemon"
@@ -121,9 +124,8 @@ export function Inventory() {
                 {targets.map((t) => (
                   <option key={t.pokemon_entity_id} value={t.pokemon_entity_id}>
                     {t.pokemon.nickname || t.pokemon.species} ·{" "}
-                    {overview.data?.players.find(
-                      (p) => p.trainer_id === t.trainer_id,
-                    )?.display_name || "Entrenador"}{" "}
+                    {trainers.data?.find((p) => p.id === t.trainer_id)
+                      ?.display_name || "Entrenador"}{" "}
                     · {t.location}
                   </option>
                 ))}

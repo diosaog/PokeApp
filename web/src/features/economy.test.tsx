@@ -17,11 +17,18 @@ const mocks = vi.hoisted(() => ({
   execute: vi.fn(),
   paths: vi.fn(),
   uncertain: false,
+  trainers: [{ id: "owner", display_name: "Antonio" }] as
+    Model<"TrainerRead">[] | undefined,
 }));
 vi.mock("../state", () => ({
   useApp: () => ({ season: "season", me: { trainer_id: "owner" } }),
   useRead: (path: string) => ({
-    data: path.endsWith("/shop") ? mocks.shop : mocks.inventory,
+    data:
+      path === "/v1/read/trainers"
+        ? mocks.trainers
+        : path.endsWith("/shop")
+          ? mocks.shop
+          : mocks.inventory,
     isPending: false,
     error: null,
   }),
@@ -58,6 +65,7 @@ afterEach(cleanup);
 beforeEach(() => {
   vi.clearAllMocks();
   mocks.uncertain = false;
+  mocks.trainers = [{ id: "owner", display_name: "Antonio" }];
   mocks.execute.mockResolvedValue(true);
   mocks.shop = {
     balance: "9007199254740993",
@@ -210,7 +218,9 @@ it("redeems a reward voucher only against a server-approved owned target without
   render(<Inventory />);
   expect(screen.getByText("Vale de recompensa")).toBeInTheDocument();
   fireEvent.click(screen.getByRole("button", { name: "Canjear" }));
-  expect(screen.getByRole("option", { name: /Pikachu/ })).toBeInTheDocument();
+  expect(
+    screen.getByRole("option", { name: /Pikachu · Antonio/ }),
+  ).toBeInTheDocument();
   expect(
     screen.queryByRole("option", { name: /Gastly|Eevee/ }),
   ).not.toBeInTheDocument();
