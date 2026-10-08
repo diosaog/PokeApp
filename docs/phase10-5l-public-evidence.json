@@ -1,0 +1,263 @@
+{
+  "package": "10.5L",
+  "status": "STAGING_DONE_ZERO_RESIDUE",
+  "application_source": "94386d6c2fdceb5ac8625dbcc83648f469e027fa",
+  "project": "uwleqeuzsveqlugugzba",
+  "entry_deployments": {
+    "railway": {
+      "id": "f11b0a8d-878e-49d6-923b-9df35dff8aef",
+      "status": "SUCCESS",
+      "source": "Phase 10.5K source 23081e146a8c00a57142242369161bc2b7e0f2c8"
+    },
+    "cloudflare": {
+      "id": "7173a0cf-c746-46a8-b5ff-0a56e95cdc8b",
+      "versions": [
+        {
+          "version_id": "8cbde4f2-e51f-4c87-8056-61009d003538",
+          "percentage": 100
+        }
+      ],
+      "source": "Phase 10.5K source 23081e146a8c00a57142242369161bc2b7e0f2c8"
+    }
+  },
+  "deployments": {
+    "time": "2026-10-08T19:01:17.082329+00:00",
+    "source_commit": "94386d6c2fdceb5ac8625dbcc83648f469e027fa",
+    "railway": {
+      "id": "3a3ebb14-ba87-43e0-839a-639920d5f6bf",
+      "status": "SUCCESS",
+      "image": "sha256:51726e531ade52deb7f42da196bb30fdd136cb33fa785cbf556c2015374dd6b0",
+      "source": "Phase 10.5L source 94386d6c2fdceb5ac8625dbcc83648f469e027fa"
+    },
+    "cloudflare": {
+      "id": "54102a24-2e0e-4fac-9519-3bf380888c88",
+      "version": "03e6250b-ee79-42bc-9aeb-e17363cf86d6",
+      "percentage": 100,
+      "source": "Phase 10.5L source 94386d6c2fdceb5ac8625dbcc83648f469e027fa"
+    }
+  },
+  "migration": {
+    "name": "040_observed_progress_read",
+    "version": "20261008185548",
+    "applied_once": true,
+    "previous_31_records_identical": true,
+    "total_records": 32
+  },
+  "hosting": {
+    "time": "2026-10-08T19:01:12.395151+00:00",
+    "source_commit": "94386d6c2fdceb5ac8625dbcc83648f469e027fa",
+    "api": "https://pokeapp-api-production.up.railway.app",
+    "web": "https://pokeapp-web.pokeapp-v2.workers.dev",
+    "assets": [
+      {
+        "path": "/assets/index-cc8VsmXv.js",
+        "sha256": "eaab1557a7135b5305c21ca2caee4796bd6c08a18a103468921161dae10ad7cb",
+        "content_type": "text/javascript"
+      },
+      {
+        "path": "/assets/index-Ce8Qi1M_.css",
+        "sha256": "fdd473f168f290c4c5a4f05543bb4987fb8eaaa43cc59b3763737e8aa3964ef4",
+        "content_type": "text/css"
+      }
+    ],
+    "web_headers": {
+      "content-type": "text/html",
+      "content-security-policy": "default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'self' https://pokeapp-api-production.up.railway.app; object-src 'none'; base-uri 'none'; frame-ancestors 'none'; form-action 'self'",
+      "x-content-type-options": "nosniff",
+      "referrer-policy": "no-referrer"
+    },
+    "status": "PASS"
+  },
+  "api": {
+    "status": "PASS",
+    "requests": [
+      {
+        "method": "GET",
+        "path": "/v1/read/seasons/c6bcac5b-0b89-403f-8242-41ac58286ade/progress",
+        "status": 401,
+        "seconds": 0.397
+      },
+      {
+        "method": "POST",
+        "path": "/v1/auth/pin-login",
+        "status": 200,
+        "seconds": 1.883
+      },
+      {
+        "method": "GET",
+        "path": "/v1/me",
+        "status": 200,
+        "seconds": 0.918
+      },
+      {
+        "method": "GET",
+        "path": "/v1/read/seasons/c6bcac5b-0b89-403f-8242-41ac58286ade/progress",
+        "status": 200,
+        "seconds": 1.424
+      },
+      {
+        "method": "GET",
+        "path": "/v1/read/seasons/c6bcac5b-0b89-403f-8242-41ac58286ade/overview",
+        "status": 200,
+        "seconds": 4.195
+      },
+      {
+        "method": "GET",
+        "path": "/v1/read/seasons/c6bcac5b-0b89-403f-8242-41ac58286ade/progress?trainer_id=aeb067d6-3a0f-4f8f-8f33-160a780fac6a",
+        "status": 422,
+        "seconds": 0.593
+      },
+      {
+        "method": "GET",
+        "path": "/v1/read/seasons/c6bcac5b-0b89-403f-8242-41ac58286ade/progress?badges_count=8",
+        "status": 422,
+        "seconds": 0.586
+      },
+      {
+        "method": "GET",
+        "path": "/v1/read/seasons/c6bcac5b-0b89-403f-8242-41ac58286ade/progress?champion_defeated=true",
+        "status": 422,
+        "seconds": 0.58
+      },
+      {
+        "method": "POST",
+        "path": "/v1/read/seasons/c6bcac5b-0b89-403f-8242-41ac58286ade/progress",
+        "status": 405,
+        "seconds": 0.204
+      },
+      {
+        "method": "GET",
+        "path": "/v1/read/seasons/54beb9b7-e8c1-4ea2-8aa2-f164c69007aa/progress",
+        "status": 404,
+        "seconds": 1.365
+      }
+    ],
+    "owner_progress": "unknown",
+    "roster_size": 8,
+    "all_progress_unknown": true,
+    "positive_evidence": "LOCAL ONLY; no owner fixtures"
+  },
+  "browser": {
+    "status": "PASS",
+    "states": [
+      {
+        "view": "saves",
+        "width": 1440,
+        "state": "unknown"
+      },
+      {
+        "view": "trainers",
+        "width": 1440,
+        "players": 8
+      },
+      {
+        "view": "saves",
+        "width": 390,
+        "state": "unknown"
+      },
+      {
+        "view": "trainers",
+        "width": 390,
+        "players": 8
+      }
+    ],
+    "reads": [
+      {
+        "method": "POST",
+        "path": "/v1/auth/pin-login",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "path": "/v1/me",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "path": "/v1/read/seasons",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "path": "/v1/read/seasons/c6bcac5b-0b89-403f-8242-41ac58286ade/pc",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "path": "/v1/read/seasons/c6bcac5b-0b89-403f-8242-41ac58286ade/progress",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "path": "/v1/read/seasons/c6bcac5b-0b89-403f-8242-41ac58286ade/progress",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "path": "/v1/read/seasons/c6bcac5b-0b89-403f-8242-41ac58286ade/overview",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "path": "/v1/read/seasons/c6bcac5b-0b89-403f-8242-41ac58286ade/progress",
+        "status": 200
+      }
+    ],
+    "errors": [],
+    "unexpected": [],
+    "environmentOrigins": {
+      "https://me.kis.v2.scr.kaspersky-labs.com": 9
+    },
+    "api_interception": false,
+    "business_writes": 0
+  },
+  "security": {
+    "before": {
+      "INFO": 138,
+      "ERROR": 24,
+      "WARN": 5
+    },
+    "after": {
+      "INFO": 138,
+      "ERROR": 24,
+      "WARN": 5
+    },
+    "new_or_removed_error_warn": 0,
+    "function_catalog": [
+      {
+        "anon": false,
+        "authenticated": false,
+        "owner": "postgres",
+        "proconfig": [
+          "search_path=pg_catalog, public"
+        ],
+        "proname": "observed_progress_read",
+        "prosecdef": false,
+        "public_execute": false,
+        "service": true,
+        "signature": "observed_progress_read(uuid,uuid)"
+      }
+    ]
+  },
+  "preservation": {
+    "status": "PASS",
+    "time": "2026-10-08T19:03:05.314161+00:00",
+    "version": "20261008185548",
+    "migrations": 32,
+    "original_tables_equal": 56,
+    "scoped_tables": 56,
+    "helpers": 1,
+    "owner_credentials_unchanged": true,
+    "business_writes": 0,
+    "new_or_removed_error_warn": 0,
+    "advisor": {
+      "INFO": 138,
+      "ERROR": 24,
+      "WARN": 5
+    }
+  },
+  "auth_scope": "Full baselines captured. Scoped equality excludes only owner login/refresh/session activity; stable identity/credential hashes compared separately. All business rows and Storage metadata included; no Storage bytes touched.",
+  "mobile_screenshots_reviewed": true,
+  "public_business_writes": 0,
+  "raw_evidence": "%TEMP%/phase10-5l-public; no secrets copied into repository"
+}

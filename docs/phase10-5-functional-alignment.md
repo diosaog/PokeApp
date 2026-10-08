@@ -176,7 +176,7 @@ Use disposable local PostgreSQL for active/destructive flows; safe isolated
 staging fixtures or read-only public checks where required. Never read, inspect,
 hash, stage or touch the protected guide named in the master protocol.
 
-Existing migrations 001–039 are immutable. Before new remote SQL verify the pinned
+Existing migrations 001–040 are immutable. Before new remote SQL verify the pinned
 V2 project, actual migration history, committed source, fresh complete baseline
 and Advisor inventory. Never replay 031/032, reset staging or change V1.
 Reuse existing Railway and Cloudflare resources. Push source before deployment.
@@ -267,3 +267,14 @@ K delivered 2026-10-08, source `23081e1`, Railway then Cloudflare. No migration;
 privacy/auth checks pass; positive six-Pokemon proof is local only because sampled
 hosted locks are absent. [K report](phase10-5k-completion-report.md).
 **STOP after K. NEXT L requires a new owner instruction.** Phase 11 NOT READY.
+
+## Package L delivered (2026-10-08)
+
+L is DONE after verified K entry and explicit owner authorization. E/I progress,
+completion detection and rewards were already satisfied and remain unchanged.
+040 adds a private current-observation read; API/React now expose regional medals
+and in-game Champion true/false/unknown without default-counter inference or manual
+attestation. [Report and evidence](phase10-5l-completion-report.md).
+Full cloud ingestion remains unfinished; current save observations cannot rewrite
+competitive history. The three J implementation gaps retain their existing scope.
+**STOP after L. NEXT M requires its own instruction.** Phase 11 NOT READY.

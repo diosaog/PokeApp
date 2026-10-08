@@ -1386,3 +1386,55 @@ stable owner credentials/admin; Advisor captured before any remote write.
 Next: commit/push, apply only 040, verify history/data/security, deploy compatible
 Railway then Cloudflare, safe authenticated progress reads and final comparison,
 documentation closure commit/push. No owner progress/reward fixtures; no M/Phase 11.
+
+## L delivered - 2026-10-08; STOP after L
+
+Supersedes the pending-delivery note. **L DONE / STAGING_DONE_ZERO_RESIDUE.**
+[Report](../phase10-5l-completion-report.md), [local](../phase10-5l-closure-evidence.json),
+[public/security](../phase10-5l-public-evidence.json).
+Entry K closure `5f40737a02d209b6158b31f4598cf8b79c42080d`;
+application HEAD `94386d6c2fdceb5ac8625dbcc83648f469e027fa`, committed/pushed
+before migration/deployment. Documentation closure is the subsequent commit
+carrying this entry; obtain its exact HEAD from Git.
+
+- E/I already provide the strict neutral regional badge and nullable Champion
+  authority. Preserved reader/3 native Gen3/4/5 and BW Hall-of-Fame exception,
+  first-two-primary E readiness and I idempotent configurable 4/12 reward semantics.
+- L closes current participant display/reading: Trainers and Saves expose observed
+  regional badges and in-game Champion true/false/unknown. Legacy default counters
+  never prove zero. One bounded aggregate SQL read binds latest identity revision
+  and current owned save; JWT self endpoint rejects overrides/attestation. No raw
+  flags, hashes, private identity or parser details reach the progress UI. Unknown
+  regional sets are null, observed zero is explicit, sparse badge identities persist.
+  No new mutation engine, sporting decision, reward effect or historical rewrite.
+- FRESH PASS: 756 Python (737 committed-scope plus 19 untouched untracked tests),
+  11 focused L, 63 React, six affected Edge tests, 77 native/IPC/Launcher checks.
+  PostgreSQL 17.11 seven groups, concurrent read replay and exact 50-table cleanup;
+  four rebuild/bootstrap runs with 12,639 identical schema/grant/ownership lines.
+  Static/public build/dry-run pass. New local cluster stopped. I mutation/race proof
+  RETAINED UNCHANGED-SOURCE; unrelated sporting/shop purchase matrices NOT RERUN.
+- 040 applied once as `20261008185548`; original 31 migration records unchanged.
+  Railway `3a3ebb14-ba87-43e0-839a-639920d5f6bf` SUCCESS, 238 committed API inputs,
+  source above; image `sha256:51726e531ade52deb7f42da196bb30fdd136cb33fa785cbf556c2015374dd6b0`.
+  New authenticated read passed before Cloudflare `54102a24-2e0e-4fac-9519-3bf380888c88`,
+  version `03e6250b-ee79-42bc-9aeb-e17363cf86d6`, 100%, same application source.
+  Live assets, HTTPS/deep SPA/MIME/CSP/nosniff/CORS/auth PASS.
+- Public: 10 API checks, four real Edge desktop/mobile states, eight successful
+  browser responses, no interception/page errors; owner login/logout and mobile
+  screenshots reviewed. All eight current participants are unknown; positive
+  badge/Champion proof is LOCAL/NATIVE ONLY, without owner save/reward fixtures.
+- Final 56/56 scoped tables identical and 32/32 post-apply history identical.
+  Identity/PIN/admin/manual seasons/results/memberships/Team Locks/economy preserved.
+  Full Auth baselines retained; only own session activity excluded, stable credentials
+  compared separately. Storage metadata included, bytes untouched. Zero business
+  writes/fixtures. Advisor 24 ERROR / 5 WARN / 138 INFO unchanged, zero new/removed
+  ERROR/WARN. New function service-only grants/invoker/fixed search_path verified.
+- Samples: self progress 1.424 s; overview 4.195 s, not a load benchmark. Existing
+  overview round trips remain an M/Phase 14 candidate. No per-player HTTP loop or
+  wider invalidation. Full cloud upload/installer and physical writes remain later.
+- J's participant lifecycle, 4+/residual championship and first-lock timing debts
+  remain IMPLEMENTATION GAPS, not missing owner decisions. Protected guide and
+  unrelated ZIP/AI-map/validator files remain untouched and unstaged.
+
+**EXACT NEXT STEP: STOP. NEXT M requires its own instruction.**
+Phase 10.5 IN PROGRESS. **PHASE 11 READINESS: NOT READY / NOT STARTED**.
