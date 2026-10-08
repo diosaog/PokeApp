@@ -1465,3 +1465,55 @@ Hosted response durations remain samples, not a benchmark. No owner fixtures.
 Next: commit/push source, deploy Cloudflare only, repeat the same read measurements,
 compare owner data/Advisor/history, close documentation and STOP. Final 10.5 product
 alignment is next only after M; it and Phase 11 have not started.
+
+## M delivered - 2026-10-08; STOP after M
+
+Supersedes pending delivery above. **STATUS: M DONE / STAGING_DONE_ZERO_RESIDUE.**
+**ENTRY CHECK: L DONE VERIFIED.** [Report](../phase10-5m-completion-report.md),
+[local evidence](../phase10-5m-closure-evidence.json),
+[public evidence](../phase10-5m-public-evidence.json),
+[ranked candidates](../phase10-5m-performance-candidates.md).
+Entry `4a7537438ad19cdd6152d339b07caad4bd94de93`; application source
+`60367135c514ad0b8423c3051981137e2db420bf`, committed/pushed before deployment.
+Documentation closure is the subsequent commit carrying this entry; read Git for
+its exact HEAD rather than embedding a self-referential hash.
+
+- Cold Shop now makes two business API reads instead of three; 30,060 → 12,535
+  decoded response bytes. Removes 13 overview business repository calls. Names are
+  one bounded public read on redemption intent. No client authority, per-target
+  HTTP loop, mutation/invalidation change, new cache or private-data projection.
+- Same method: three rounds of nine safe API reads before/after, all 54 return 200.
+  Final browser desktop/mobile cold contexts: 3 → 2 business requests each, exact
+  payload reduction; login-to-settled-API samples 11.202 → 6.713 s / 10.307 → 6.943 s.
+  These include auth and harness wait, not render benchmarks. API unchanged.
+- FRESH PASS: 757 Python / 23 focused reads / 63 React / five affected Edge;
+  TypeScript/public build/Prettier/targeted Ruff/compile/dry-run/diff pass. Backend,
+  repository, SQL and parser RETAINED UNCHANGED-SOURCE. PostgreSQL/rebuild/native/
+  unrelated mutation matrices NOT RERUN / N/A, since their contracts did not change.
+- Cloudflare `d9751374-7b4d-4468-aaf6-aaa7bdc50f04`, version
+  `7e501a60-7fac-4fb0-a1f0-4a5181496a7f`, 100%, application source above.
+  Live assets equal local build; HTTPS/deep SPA/MIME/CSP/nosniff/CORS/auth pass.
+  Railway retained L `3a3ebb14-ba87-43e0-839a-639920d5f6bf SUCCESS`, source
+  `94386d6c2fdceb5ac8625dbcc83648f469e027fa`. No API/DB deploy or migration replay.
+- Independent final comparison: 56/56 scoped tables and 32/32 history records
+  identical; 040=`20261008185548` once. Owner identity/PIN/admin/manual data and
+  Storage metadata preserved; no Storage byte operations or remote business writes.
+  Full Auth baselines retained, only expected own login/session activity excluded
+  with credentials separately checked. Advisor unchanged 24 ERROR / 5 WARN / 138 INFO.
+- Final real Edge smoke passed desktop/mobile with no page/API errors or mocking.
+  Empty owner inventory means positive canje/name/retry proof is local only.
+  Earlier harness timeouts and transient 503s remain recorded. First post-deploy
+  mobile attempt had two 503s; unchanged-API recent logs also contain overview
+  failures. Root cause UNKNOWN, not claimed fixed; availability is a Phase 14
+  candidate. No product change was made to hide those failures.
+- HIGH candidates: overview/Trainers breadth and inventory rival identity N+1.
+  MEDIUM: Shop/scouting aggregation, Admin invalidation breadth, hosted 503
+  observability. Exact refresh dependency locations and risks are documented.
+- Final alignment still needs prospective simple Admin rules, cross-view visible
+  freshness, visual trainer profiles, four Shop categories and concise UX. J's
+  participant lifecycle, 4+/residual championship and first-lock timing remain
+  implementation gaps, not missing owner decisions. Protected/unrelated files untouched.
+
+**EXACT NEXT STEP: STOP. NEXT: FINAL 10.5 PRODUCT ALIGNMENT.**
+Final alignment NOT STARTED. Phase 10.5 IN PROGRESS.
+**PHASE 11 READINESS: NOT READY / NOT STARTED.**

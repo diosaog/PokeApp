@@ -1,0 +1,617 @@
+{
+  "status": "PASS",
+  "closed_at": "2026-10-08T19:41:26.872049+00:00",
+  "source_commit": "60367135c514ad0b8423c3051981137e2db420bf",
+  "entry": "4a7537438ad19cdd6152d339b07caad4bd94de93",
+  "before": {
+    "target": "uwleqeuzsveqlugugzba",
+    "action": "before",
+    "time": "2026-10-08T19:27:33.997020+00:00",
+    "tables": 56,
+    "migrations": 32,
+    "advisor": {
+      "INFO": 138,
+      "ERROR": 24,
+      "WARN": 5
+    }
+  },
+  "after": {
+    "target": "uwleqeuzsveqlugugzba",
+    "action": "after",
+    "time": "2026-10-08T19:39:00.411645+00:00",
+    "tables": 56,
+    "migrations": 32,
+    "advisor": {
+      "INFO": 138,
+      "ERROR": 24,
+      "WARN": 5
+    },
+    "status": "PASS",
+    "scoped_equal": 56,
+    "new_or_removed_error_warn": 0,
+    "owner_credentials_unchanged": true,
+    "remote_business_writes": 0,
+    "schema_migrations_changed": false
+  },
+  "deployments": {
+    "time": "2026-10-08T19:35:25.708662+00:00",
+    "source_commit": "60367135c514ad0b8423c3051981137e2db420bf",
+    "railway": {
+      "id": "3a3ebb14-ba87-43e0-839a-639920d5f6bf",
+      "status": "SUCCESS",
+      "image": "sha256:51726e531ade52deb7f42da196bb30fdd136cb33fa785cbf556c2015374dd6b0",
+      "source": "Phase 10.5L source 94386d6c2fdceb5ac8625dbcc83648f469e027fa"
+    },
+    "cloudflare": {
+      "id": "d9751374-7b4d-4468-aaf6-aaa7bdc50f04",
+      "version": "7e501a60-7fac-4fb0-a1f0-4a5181496a7f",
+      "percentage": 100,
+      "source": "Phase 10.5M source 60367135c514ad0b8423c3051981137e2db420bf"
+    }
+  },
+  "hosting": {
+    "time": "2026-10-08T19:35:20.735694+00:00",
+    "source_commit": "60367135c514ad0b8423c3051981137e2db420bf",
+    "api": "https://pokeapp-api-production.up.railway.app",
+    "web": "https://pokeapp-web.pokeapp-v2.workers.dev",
+    "assets": [
+      {
+        "path": "/assets/index-CjwnaCFG.js",
+        "sha256": "3623c3c2ad5eb6abddf84a611fb27e6e7dc6961e387f3569a8075c715cb31660",
+        "content_type": "text/javascript"
+      },
+      {
+        "path": "/assets/index-Ce8Qi1M_.css",
+        "sha256": "fdd473f168f290c4c5a4f05543bb4987fb8eaaa43cc59b3763737e8aa3964ef4",
+        "content_type": "text/css"
+      }
+    ],
+    "web_headers": {
+      "content-type": "text/html",
+      "content-security-policy": "default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'self' https://pokeapp-api-production.up.railway.app; object-src 'none'; base-uri 'none'; frame-ancestors 'none'; form-action 'self'",
+      "x-content-type-options": "nosniff",
+      "referrer-policy": "no-referrer"
+    },
+    "status": "PASS"
+  },
+  "api_measurement": {
+    "method": "3 sequential rounds, same order, one fresh authenticated httpx client; body bytes decoded, excludes auth",
+    "reads_per_phase": 27,
+    "flows": [
+      {
+        "flow": "league",
+        "before": {
+          "samples_seconds": [
+            1.558,
+            0.78,
+            0.786
+          ],
+          "median_seconds": 0.786,
+          "decoded_bytes": [
+            3062,
+            3062,
+            3062
+          ]
+        },
+        "after": {
+          "samples_seconds": [
+            0.838,
+            1.068,
+            0.788
+          ],
+          "median_seconds": 0.838,
+          "decoded_bytes": [
+            3062,
+            3062,
+            3062
+          ]
+        }
+      },
+      {
+        "flow": "overview",
+        "before": {
+          "samples_seconds": [
+            5.654,
+            3.459,
+            3.529
+          ],
+          "median_seconds": 3.529,
+          "decoded_bytes": [
+            17525,
+            17525,
+            17525
+          ]
+        },
+        "after": {
+          "samples_seconds": [
+            3.571,
+            3.79,
+            3.616
+          ],
+          "median_seconds": 3.616,
+          "decoded_bytes": [
+            17525,
+            17525,
+            17525
+          ]
+        }
+      },
+      {
+        "flow": "scouting",
+        "before": {
+          "samples_seconds": [
+            2.398,
+            1.749,
+            2.081
+          ],
+          "median_seconds": 2.081,
+          "decoded_bytes": [
+            1107,
+            1107,
+            1107
+          ]
+        },
+        "after": {
+          "samples_seconds": [
+            2.21,
+            1.861,
+            1.587
+          ],
+          "median_seconds": 1.861,
+          "decoded_bytes": [
+            1107,
+            1107,
+            1107
+          ]
+        }
+      },
+      {
+        "flow": "shop",
+        "before": {
+          "samples_seconds": [
+            2.034,
+            1.72,
+            1.734
+          ],
+          "median_seconds": 1.734,
+          "decoded_bytes": [
+            12506,
+            12506,
+            12506
+          ]
+        },
+        "after": {
+          "samples_seconds": [
+            1.939,
+            1.589,
+            1.601
+          ],
+          "median_seconds": 1.601,
+          "decoded_bytes": [
+            12506,
+            12506,
+            12506
+          ]
+        }
+      },
+      {
+        "flow": "inventory",
+        "before": {
+          "samples_seconds": [
+            2.19,
+            2.123,
+            1.858
+          ],
+          "median_seconds": 2.123,
+          "decoded_bytes": [
+            29,
+            29,
+            29
+          ]
+        },
+        "after": {
+          "samples_seconds": [
+            1.803,
+            2.11,
+            1.826
+          ],
+          "median_seconds": 1.826,
+          "decoded_bytes": [
+            29,
+            29,
+            29
+          ]
+        }
+      },
+      {
+        "flow": "progress",
+        "before": {
+          "samples_seconds": [
+            0.786,
+            0.792,
+            0.784
+          ],
+          "median_seconds": 0.786,
+          "decoded_bytes": [
+            132,
+            132,
+            132
+          ]
+        },
+        "after": {
+          "samples_seconds": [
+            1.079,
+            0.774,
+            0.801
+          ],
+          "median_seconds": 0.801,
+          "decoded_bytes": [
+            132,
+            132,
+            132
+          ]
+        }
+      },
+      {
+        "flow": "admin_setup",
+        "before": {
+          "samples_seconds": [
+            0.872,
+            0.827,
+            0.79
+          ],
+          "median_seconds": 0.827,
+          "decoded_bytes": [
+            6980,
+            6980,
+            6980
+          ]
+        },
+        "after": {
+          "samples_seconds": [
+            1.49,
+            1.158,
+            0.81
+          ],
+          "median_seconds": 1.158,
+          "decoded_bytes": [
+            6980,
+            6980,
+            6980
+          ]
+        }
+      },
+      {
+        "flow": "championship",
+        "before": {
+          "samples_seconds": [
+            1.109,
+            1.094,
+            0.8
+          ],
+          "median_seconds": 1.094,
+          "decoded_bytes": [
+            282,
+            282,
+            282
+          ]
+        },
+        "after": {
+          "samples_seconds": [
+            1.155,
+            0.809,
+            1.184
+          ],
+          "median_seconds": 1.155,
+          "decoded_bytes": [
+            282,
+            282,
+            282
+          ]
+        }
+      },
+      {
+        "flow": "names",
+        "before": {
+          "samples_seconds": [
+            0.781,
+            0.909,
+            1.101
+          ],
+          "median_seconds": 0.909,
+          "decoded_bytes": [
+            692,
+            692,
+            692
+          ]
+        },
+        "after": {
+          "samples_seconds": [
+            0.773,
+            0.792,
+            0.768
+          ],
+          "median_seconds": 0.773,
+          "decoded_bytes": [
+            692,
+            692,
+            692
+          ]
+        }
+      }
+    ],
+    "note": "Unchanged API; three samples per flow are not a load benchmark. Payload sizes are decoded response bytes."
+  },
+  "browser": {
+    "before": {
+      "status": "PASS",
+      "method": "fresh Edge context at /tienda per viewport; login to expected completed domain reads; no prior navigation; API GET bodies decoded; environmental Kaspersky traffic excluded",
+      "states": [
+        {
+          "width": 1440,
+          "route": "/tienda",
+          "domain_reads": 3,
+          "domain_decoded_bytes": 30060,
+          "login_to_domain_reads_seconds": 11.202,
+          "reads": [
+            {
+              "path": "/v1/me",
+              "status": 200,
+              "decoded_bytes": 115,
+              "seconds": 1.173
+            },
+            {
+              "path": "/v1/read/seasons",
+              "status": 200,
+              "decoded_bytes": 172,
+              "seconds": 1.325
+            },
+            {
+              "path": "/v1/read/seasons/c6bcac5b-0b89-403f-8242-41ac58286ade/shop",
+              "status": 200,
+              "decoded_bytes": 12506,
+              "seconds": 3.967
+            },
+            {
+              "path": "/v1/read/seasons/c6bcac5b-0b89-403f-8242-41ac58286ade/inventory",
+              "status": 200,
+              "decoded_bytes": 29,
+              "seconds": 4.606
+            },
+            {
+              "path": "/v1/read/seasons/c6bcac5b-0b89-403f-8242-41ac58286ade/overview",
+              "status": 200,
+              "decoded_bytes": 17525,
+              "seconds": 6.064
+            }
+          ]
+        },
+        {
+          "width": 390,
+          "route": "/tienda",
+          "domain_reads": 3,
+          "domain_decoded_bytes": 30060,
+          "login_to_domain_reads_seconds": 10.307,
+          "reads": [
+            {
+              "path": "/v1/me",
+              "status": 200,
+              "decoded_bytes": 115,
+              "seconds": 1.071
+            },
+            {
+              "path": "/v1/read/seasons",
+              "status": 200,
+              "decoded_bytes": 172,
+              "seconds": 1.292
+            },
+            {
+              "path": "/v1/read/seasons/c6bcac5b-0b89-403f-8242-41ac58286ade/shop",
+              "status": 200,
+              "decoded_bytes": 12506,
+              "seconds": 2.424
+            },
+            {
+              "path": "/v1/read/seasons/c6bcac5b-0b89-403f-8242-41ac58286ade/inventory",
+              "status": 200,
+              "decoded_bytes": 29,
+              "seconds": 4.433
+            },
+            {
+              "path": "/v1/read/seasons/c6bcac5b-0b89-403f-8242-41ac58286ade/overview",
+              "status": 200,
+              "decoded_bytes": 17525,
+              "seconds": 4.838
+            }
+          ]
+        }
+      ],
+      "errors": [],
+      "unexpected": [],
+      "environmentOrigins": {
+        "https://me.kis.v2.scr.kaspersky-labs.com": 12
+      },
+      "api_interception": false,
+      "business_writes": 0
+    },
+    "after": {
+      "status": "PASS",
+      "method": "fresh Edge context at /tienda per viewport; login to expected completed domain reads; no prior navigation; API GET bodies decoded; environmental Kaspersky traffic excluded",
+      "states": [
+        {
+          "width": 1440,
+          "route": "/tienda",
+          "domain_reads": 2,
+          "domain_decoded_bytes": 12535,
+          "login_to_domain_reads_seconds": 6.713,
+          "reads": [
+            {
+              "path": "/v1/me",
+              "status": 200,
+              "decoded_bytes": 115,
+              "seconds": 0.804
+            },
+            {
+              "path": "/v1/read/seasons",
+              "status": 200,
+              "decoded_bytes": 172,
+              "seconds": 0.98
+            },
+            {
+              "path": "/v1/read/seasons/c6bcac5b-0b89-403f-8242-41ac58286ade/shop",
+              "status": 200,
+              "decoded_bytes": 12506,
+              "seconds": 2.555
+            },
+            {
+              "path": "/v1/read/seasons/c6bcac5b-0b89-403f-8242-41ac58286ade/inventory",
+              "status": 200,
+              "decoded_bytes": 29,
+              "seconds": 2.742
+            }
+          ]
+        },
+        {
+          "width": 390,
+          "route": "/tienda",
+          "domain_reads": 2,
+          "domain_decoded_bytes": 12535,
+          "login_to_domain_reads_seconds": 6.943,
+          "reads": [
+            {
+              "path": "/v1/me",
+              "status": 200,
+              "decoded_bytes": 115,
+              "seconds": 0.774
+            },
+            {
+              "path": "/v1/read/seasons",
+              "status": 200,
+              "decoded_bytes": 172,
+              "seconds": 0.969
+            },
+            {
+              "path": "/v1/read/seasons/c6bcac5b-0b89-403f-8242-41ac58286ade/shop",
+              "status": 200,
+              "decoded_bytes": 12506,
+              "seconds": 2.796
+            },
+            {
+              "path": "/v1/read/seasons/c6bcac5b-0b89-403f-8242-41ac58286ade/inventory",
+              "status": 200,
+              "decoded_bytes": 29,
+              "seconds": 3.184
+            }
+          ]
+        }
+      ],
+      "errors": [],
+      "unexpected": [],
+      "environmentOrigins": {
+        "https://me.kis.v2.scr.kaspersky-labs.com": 12
+      },
+      "api_interception": false,
+      "business_writes": 0
+    }
+  },
+  "structural": {
+    "cold_shop_domain_requests_before": 3,
+    "cold_shop_domain_requests_after": 2,
+    "cold_shop_decoded_bytes_before": 30060,
+    "cold_shop_decoded_bytes_after": 12535,
+    "removed_overview_repository_round_trips": 13,
+    "on_demand_names_repository_round_trips": 1,
+    "counts_exclude": "JWT/principal resolution, retries and SQL statements within RPCs"
+  },
+  "incidents": [
+    {
+      "scope": "public harness before measurement",
+      "status": "RETAINED",
+      "detail": "Initial whole-page networkidle timeout with environmental Kaspersky traffic; next exact intermediate-count expectation saw 6 responses and timed out. Final method waits only for application API completion/quiet period and records all responses."
+    },
+    {
+      "scope": "first post-deploy mobile run",
+      "status": "RETAINED NOT FIXED",
+      "detail": "Two 503 responses from unchanged API on shop/inventory. Recent Railway log captured five 503s including overview during measurement window; cause UNKNOWN. Repeat desktop/mobile passed without API/page errors.",
+      "initial_evidence": {
+        "status": "FAIL",
+        "message": "expect(received).toEqual(expected) // deep equality\n\n- Expected  -  1\n+ Received  + 14\n\n- Array []\n+ Array [\n+   Object {\n+     \"decoded_bytes\": 81,\n+     \"path\": \"/v1/read/seasons/c6bcac5b-0b89-403f-8242-41ac58286ade/shop\",\n+     \"seconds\": 0.358,\n+     \"status\": 503,\n+   },\n+   Object {\n+     \"decoded_bytes\": 81,\n+     \"path\": \"/v1/read/seasons/c6bcac5b-0b89-403f-8242-41ac58286ade/inventory\",\n+     \"seconds\": 0.363,\n+     \"status\": 503,\n+   },\n+ ]",
+        "states": [
+          {
+            "width": 1440,
+            "route": "/tienda",
+            "domain_reads": 2,
+            "domain_decoded_bytes": 12535,
+            "login_to_domain_reads_seconds": 6.974,
+            "reads": [
+              {
+                "path": "/v1/me",
+                "status": 200,
+                "decoded_bytes": 115,
+                "seconds": 0.768
+              },
+              {
+                "path": "/v1/read/seasons",
+                "status": 200,
+                "decoded_bytes": 172,
+                "seconds": 0.99
+              },
+              {
+                "path": "/v1/read/seasons/c6bcac5b-0b89-403f-8242-41ac58286ade/shop",
+                "status": 200,
+                "decoded_bytes": 12506,
+                "seconds": 2.704
+              },
+              {
+                "path": "/v1/read/seasons/c6bcac5b-0b89-403f-8242-41ac58286ade/inventory",
+                "status": 200,
+                "decoded_bytes": 29,
+                "seconds": 2.889
+              }
+            ]
+          }
+        ],
+        "errors": [],
+        "unexpected": []
+      }
+    },
+    {
+      "scope": "local new Edge guards",
+      "status": "CORRECTED HARNESS",
+      "detail": "Initial request-event count included cancelled development StrictMode mount. Completed-response guards pass; independent production browser proves actual cold reads."
+    }
+  ],
+  "security": {
+    "advisor_before": {
+      "INFO": 138,
+      "ERROR": 24,
+      "WARN": 5
+    },
+    "advisor_after": {
+      "INFO": 138,
+      "ERROR": 24,
+      "WARN": 5
+    },
+    "new_or_removed_error_warn": 0,
+    "scoped_tables_equal": 56,
+    "migration_records_equal": 32,
+    "owner_identity_credentials_pin_admin_unchanged": true,
+    "owner_competitive_data_unchanged": true,
+    "auth_session_exception": "Only expected owner login/session/refresh rows excluded from scoped equality; stable identity/credential facts compared independently. Full Auth baselines retained privately.",
+    "storage": "Metadata included; no bytes touched",
+    "remote_business_writes": 0,
+    "fixtures": 0
+  },
+  "limitations": [
+    "Owner inventory empty: positive target/name/redemption interaction proved locally only; no owner purchases or business mutations.",
+    "Full populated-season/PC/target load is not represented by this hosted sample.",
+    "Intermittent hosted 503 root cause UNKNOWN; final green sample does not erase failures.",
+    "Only viewport top mobile screenshot and full desktop layout reviewed; no visual redesign."
+  ],
+  "raw_evidence": "C:\\Users\\Antonio\\AppData\\Local\\Temp\\phase10-5m-public",
+  "measurement_harness_sha256": {
+    "phase10-5m-measure.py": "b6beb3d85a9c6911d56f42f4afbad5e2a3da088ecda5a2531b9548747416dc68",
+    "phase10-5m-browser.mjs": "559112bd3242221544a9dd06d545b4aebece96c427bafbb72fa364b6c8a1b7ca",
+    "phase10-5m-remote.py": "b430879de69b56075c4cad0e3868547efe809747d6bf0e44a31085791b409bde"
+  }
+}

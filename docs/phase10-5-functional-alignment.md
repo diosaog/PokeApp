@@ -28,7 +28,7 @@ commit before the next starts. Deploy at stable checkpoints, not every commit.
 | J | Human Spanish readiness/error wording in Admin; setup, supervision, exceptions, history and risk actions. Preserve server revisions/CAS. |
 | K | Explicit public competitive Team Lock scouting: species, nickname, level, types, item and moves only. Reuse H; self/admin remain public here. No save/PC/box/identity fallback. |
 | L | Reuse E regional badge evidence and I reader/3 nullable Champion proof. Current owned/latest accepted save observations distinguish unknown, observed zero and Champion true/false/unknown. Eight badges are not game completion. Participant presentation preserves regional badge identity; no manual attestation, duplicate reward engine or full cloud ingestion. |
-| M | Avoid new sequential N+1 reads; measure touched flows where useful and record Phase 14 candidates. No broad performance refactor. |
+| M | DONE: measured current read flows; cold Shop no longer fetches overview for redemption names. Public names load on demand. [Report](phase10-5m-completion-report.md), [ranked Phase 14 / final alignment candidates](phase10-5m-performance-candidates.md). No broad performance refactor. |
 
 Three distinct truths remain: real save state, competitive state and frozen
 official history. A new save cannot rewrite closed results. A registered virtual
