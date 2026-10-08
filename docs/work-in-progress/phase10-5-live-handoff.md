@@ -1185,3 +1185,54 @@ unrelated full sporting matrices NOT RERUN because their contracts are unchanged
 Next: commit/push application and current contract, deploy only Cloudflare, run
 narrow authenticated read-only Admin smoke, compare fresh owner/data/security
 baselines, then write final report/handoff and push documentation closure. No K.
+
+
+## J delivered - 2026-10-08; STOP after J
+
+Supersedes J's pending-delivery notes. **J DONE / STAGING_DONE_ZERO_RESIDUE** for
+its approved Admin UI scope. [Report](../phase10-5j-completion-report.md),
+[local evidence](../phase10-5j-closure-evidence.json),
+[public evidence](../phase10-5j-public-evidence.json).
+Entry `a973c914abd6ce7beb7eaf6dc303ccd4277481c6`; application HEAD
+`49d47906c3ca64880873bc15a093a8ece1e417a5`, committed/pushed before Cloudflare writes. Documentation closure is
+the subsequent commit carrying this entry; obtain its exact final HEAD from Git.
+
+- Human names/status/readiness/errors; actual current rewards including zero,
+  strict integer validation, deliberate config save and stale-source review.
+  Lifecycle guards and captured confirmations for consequential/exceptional actions.
+  Unknown-outcome recovery retains body/key even after an advanced or failed read;
+  navigation controls held while unresolved. Recovery is in-memory, not durable
+  across accepted reload or browser history navigation.
+- FRESH PASS: 732 Python (713 committed-scope + 19 pre-existing untracked map tests),
+  focused Admin 25, React 53, 33 unique affected Edge, TypeScript/public build,
+  formatting, dry-run and diff checks. Initial browser expectations corrected in
+  tests only; seven affected cases pass. No repeated unrelated sporting matrices.
+- No API/backend/SQL change, migration, replay, local PG or bootstrap rebuild.
+  I's backend/DB contracts retain their prior evidence, not a new PG claim.
+- Cloudflare `9fb756e2-aa1d-41bc-b406-292985ec0b7d`, version `2af2daab-5118-413b-abe4-f8f5985867ba`,
+  100%, same application source. Railway `2402be29-d1ec-4e20-b4c4-3f218ee45893` remains SUCCESS
+  at I source `a5d1b627928d2e3fe05c90bcdb51851409e5687d`. Live assets, HTTPS/deep SPA,
+  MIME/CSP/nosniff, exact CORS and 401 boundaries pass.
+- Final public smoke: six API checks and seven real Admin desktop/mobile states,
+  no interception/page errors, no business writes/fixtures, reviewed screenshots.
+  Initial private harness expected a disabled activation button where active seasons
+  correctly hide it; corrected harness passes, application unchanged.
+- Fresh 56/56 scoped tables and 31/31 migration records identical. Owner identity,
+  PIN/credentials/admin, manual seasons/results/Team Locks/economy preserved.
+  Full Auth baselines plus separately stable credential checks; only own login/session
+  activity excluded. Storage untouched. Advisor 24 ERROR / 5 WARN / 138 INFO;
+  zero new or removed ERROR/WARN. Raw evidence `%TEMP%/phase10-5j-public-final`.
+- New owner rules are resolved. Implementation gaps: participant OPEN/CLOSE/FINISH
+  authority; 3+ championship comparison and residual external decision beyond F's
+  existing contract; reliable first-Team-Lock timing projection. League DQ does not
+  cascade to Cup; linked draft/active Cup still blocks League exit. Do not reopen
+  those product decisions. Undefined finalist/scouting/future milestones remain
+  separately unresolved. See the alignment contract for the exact boundaries.
+- No new N+1/per-player loop or wider invalidation. Final hosted setup 0.94 s,
+  championship 1.47 s, overview 3.63 s; single samples, M/Phase 14 candidates.
+  Protected guide and all unrelated pre-existing untracked files untouched/unstaged.
+
+**EXACT NEXT STEP: commit/push this documentation closure and verify J DONE.**
+The owner has queued K with autonomous end-to-end authorization once that gate
+passes. Read its separate instruction only after closing J; no K work is included here.
+Phase 10.5 IN PROGRESS; **PHASE 11 READINESS: NOT READY / NOT STARTED**.

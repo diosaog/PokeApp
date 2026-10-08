@@ -1,6 +1,6 @@
 # PokeApp 2.0 Project Checkpoint
 
-Checkpoint reconciled: 2026-10-07. This file is the project index and historical
+Checkpoint reconciled: 2026-10-08. This file is the project index and historical
 milestone record; it does not maintain a second live phase-status ledger.
 
 ## Current project position
@@ -9,7 +9,8 @@ milestone record; it does not maintain a second live phase-status ledger.
   [Approved contract](phase10-5-functional-alignment.md),
   [single live record](work-in-progress/phase10-5-live-handoff.md).
   Owner authorized implementation on 2026-09-29 after the functional knowledge export.
-  Latest closed package: [I Shop and economy alignment](phase10-5i-completion-report.md).
+  Latest closed package: [J Admin humanization](phase10-5j-completion-report.md).
+  [I Shop and economy alignment](phase10-5i-completion-report.md) remains delivered.
   [H Team Lock warnings and Team Preview](phase10-5h-completion-report.md) remains delivered.
   [G participant-owned wipe revivals](phase10-5g-completion-report.md) remains delivered.
   [F final championship and frozen Hall](phase10-5f-completion-report.md) remains delivered.

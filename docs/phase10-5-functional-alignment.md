@@ -230,3 +230,10 @@ implementation gaps are not requests to decide those rules again:
 No migration or backend change is required by this scoped UI package. Delivery and
 closure evidence belong in the live handoff. NEXT is K only after J closes and a
 new owner instruction; Phase 11 remains NOT READY / NOT STARTED.
+
+
+J is delivered as of 2026-10-08, source `49d4790`, Cloudflare only. Human controls,
+current reward values, explicit confirmations and pending-command recovery are
+verified; the scoped backend gaps above remain explicit. [J report](phase10-5j-completion-report.md).
+**J scope ends here.** A separate owner instruction queues K after committed/pushed
+J closure and entry verification. Phase 11 NOT READY.

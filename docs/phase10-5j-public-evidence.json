@@ -1,0 +1,207 @@
+{
+  "package": "10.5J",
+  "status": "DONE / STAGING_DONE_ZERO_RESIDUE",
+  "closed_local_date": "2026-10-08",
+  "application_source": "49d47906c3ca64880873bc15a093a8ece1e417a5",
+  "entry_head": "a973c914abd6ce7beb7eaf6dc303ccd4277481c6",
+  "deployments": {
+    "time": "2026-10-07T22:29:33.104840+00:00",
+    "source_commit": "49d47906c3ca64880873bc15a093a8ece1e417a5",
+    "railway": {
+      "id": "2402be29-d1ec-4e20-b4c4-3f218ee45893",
+      "status": "SUCCESS",
+      "image": "sha256:f2d9a3d7c7d8cbf47edf56b99e3bb51413e8347765fc43eb7f182b0704591472",
+      "source": "Phase 10.5I source a5d1b627928d2e3fe05c90bcdb51851409e5687d"
+    },
+    "cloudflare": {
+      "id": "9fb756e2-aa1d-41bc-b406-292985ec0b7d",
+      "version": "2af2daab-5118-413b-abe4-f8f5985867ba",
+      "percentage": 100,
+      "source": "Phase 10.5J source 49d47906c3ca64880873bc15a093a8ece1e417a5"
+    }
+  },
+  "hosting": {
+    "time": "2026-10-07T22:29:28.105334+00:00",
+    "source_commit": "49d47906c3ca64880873bc15a093a8ece1e417a5",
+    "api": "https://pokeapp-api-production.up.railway.app",
+    "web": "https://pokeapp-web.pokeapp-v2.workers.dev",
+    "assets": [
+      {
+        "path": "/assets/index-BkeKsznE.js",
+        "sha256": "95c58578028356be1fa569dc5b69431f32dbff89ce2a6a81fef84126f9569468",
+        "content_type": "text/javascript"
+      },
+      {
+        "path": "/assets/index-Ce8Qi1M_.css",
+        "sha256": "fdd473f168f290c4c5a4f05543bb4987fb8eaaa43cc59b3763737e8aa3964ef4",
+        "content_type": "text/css"
+      }
+    ],
+    "web_headers": {
+      "content-type": "text/html",
+      "content-security-policy": "default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'self' https://pokeapp-api-production.up.railway.app; object-src 'none'; base-uri 'none'; frame-ancestors 'none'; form-action 'self'",
+      "x-content-type-options": "nosniff",
+      "referrer-policy": "no-referrer"
+    },
+    "status": "PASS"
+  },
+  "baseline": {
+    "target": "uwleqeuzsveqlugugzba",
+    "action": "before",
+    "time": "2026-10-07T22:27:37.526027+00:00",
+    "tables": 56,
+    "migrations": 31,
+    "advisor": {
+      "INFO": 138,
+      "ERROR": 24,
+      "WARN": 5
+    }
+  },
+  "preservation": {
+    "target": "uwleqeuzsveqlugugzba",
+    "action": "after",
+    "time": "2026-10-07T22:32:45.168576+00:00",
+    "tables": 56,
+    "migrations": 31,
+    "advisor": {
+      "INFO": 138,
+      "ERROR": 24,
+      "WARN": 5
+    },
+    "status": "PASS",
+    "scoped_equal": 56,
+    "new_or_removed_error_warn": 0,
+    "owner_credentials_unchanged": true,
+    "remote_business_writes": 0,
+    "schema_migrations_changed": false
+  },
+  "api": {
+    "status": "PASS",
+    "time": "2026-10-07T22:31:17.930861+00:00",
+    "requests": [
+      {
+        "method": "GET",
+        "path": "/v1/admin/seasons/c6bcac5b-0b89-403f-8242-41ac58286ade/setup",
+        "status": 401,
+        "seconds": 0.313
+      },
+      {
+        "method": "POST",
+        "path": "/v1/auth/pin-login",
+        "status": 200,
+        "seconds": 1.153
+      },
+      {
+        "method": "GET",
+        "path": "/v1/me",
+        "status": 200,
+        "seconds": 0.947
+      },
+      {
+        "method": "GET",
+        "path": "/v1/admin/seasons/c6bcac5b-0b89-403f-8242-41ac58286ade/setup",
+        "status": 200,
+        "seconds": 0.941
+      },
+      {
+        "method": "GET",
+        "path": "/v1/admin/seasons/c6bcac5b-0b89-403f-8242-41ac58286ade/championship",
+        "status": 200,
+        "seconds": 1.474
+      },
+      {
+        "method": "GET",
+        "path": "/v1/read/seasons/c6bcac5b-0b89-403f-8242-41ac58286ade/overview",
+        "status": 200,
+        "seconds": 3.633
+      }
+    ],
+    "season_status": "active",
+    "championship": "incomplete",
+    "badge_reward_coins": 4,
+    "game_completion_reward_coins": 12,
+    "business_writes": 0,
+    "fixtures": 0,
+    "positive_mutation_validation": "LOCAL ONLY"
+  },
+  "browser": {
+    "status": "PASS",
+    "states": [
+      "desktop summary",
+      "desktop configuration",
+      "desktop trainers",
+      "desktop competition",
+      "desktop risk/championship",
+      "mobile risk/championship",
+      "mobile configuration"
+    ],
+    "reads": [
+      {
+        "method": "POST",
+        "path": "/v1/auth/pin-login",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "path": "/v1/me",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "path": "/v1/read/seasons",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "path": "/v1/admin/seasons/c6bcac5b-0b89-403f-8242-41ac58286ade/setup",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "path": "/v1/admin/seasons/c6bcac5b-0b89-403f-8242-41ac58286ade/matchdays/3eb1cbd3-9a3b-4b1d-a2b5-d31a4c16ff08",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "path": "/v1/read/seasons/c6bcac5b-0b89-403f-8242-41ac58286ade/overview",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "path": "/v1/admin/seasons/c6bcac5b-0b89-403f-8242-41ac58286ade/championship",
+        "status": 200
+      }
+    ],
+    "errors": [],
+    "unexpected": [],
+    "environmentOrigins": {
+      "https://me.kis.v2.scr.kaspersky-labs.com": 6
+    },
+    "api_interception": false,
+    "business_writes": 0
+  },
+  "public_attempts": {
+    "first_api": "PASS (6 requests)",
+    "first_browser": "Harness assertion failed: expected disabled activation button on an already-active season; actual control is intentionally absent. No app change. Six browser API responses were successful, no page errors or business writes. Raw first attempt retained.",
+    "final_api": "PASS (6 requests)",
+    "final_browser": "PASS (7 states, 7 successful API responses)",
+    "positive_business_mutations": "LOCAL ONLY; zero public business writes or fixtures"
+  },
+  "mobile_visual_review": "PASS: rewards form and risk/championship, 390px, readable without horizontal overflow",
+  "data_scope": "Full snapshots plus 56 scoped public/Auth/Storage tables; only owner login/session/refresh activity excluded from scoped equality; stable identity/credentials and admin role checked independently. No Storage bytes touched.",
+  "raw_evidence": "%TEMP%/phase10-5j-public-final, phase10-5j-entry and phase10-5j-* logs",
+  "preservation_digests": {
+    "scoped": {
+      "before": "aceec28570e536114e17acaf613934098240784577b9746387a1f64d288ce56d",
+      "after": "aceec28570e536114e17acaf613934098240784577b9746387a1f64d288ce56d"
+    },
+    "owner-stable": {
+      "before": "9cdd36483562985be32da56bf3ff68b52fc0f3349a146badb3cacf1fe6119069",
+      "after": "9cdd36483562985be32da56bf3ff68b52fc0f3349a146badb3cacf1fe6119069"
+    },
+    "history": {
+      "before": "58f6e3dcba17031494e4d71588726cbde159a352291c7b76ac313c0b0c0b00b4",
+      "after": "58f6e3dcba17031494e4d71588726cbde159a352291c7b76ac313c0b0c0b00b4"
+    }
+  }
+}
