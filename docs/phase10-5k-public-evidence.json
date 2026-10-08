@@ -1,0 +1,291 @@
+{
+  "package": "10.5K",
+  "status": "DONE / STAGING_DONE_ZERO_RESIDUE",
+  "closed_local_date": "2026-10-08",
+  "application_source": "23081e146a8c00a57142242369161bc2b7e0f2c8",
+  "entry_head": "37ac03294df8bac095e335abfe66098dcaa97b03",
+  "entry_deployments": {
+    "railway_id": "2402be29-d1ec-4e20-b4c4-3f218ee45893",
+    "railway_source": "Phase 10.5I source a5d1b627928d2e3fe05c90bcdb51851409e5687d",
+    "cloudflare_id": "9fb756e2-aa1d-41bc-b406-292985ec0b7d",
+    "cloudflare_source": "Phase 10.5J source 49d47906c3ca64880873bc15a093a8ece1e417a5"
+  },
+  "deployments": {
+    "time": "2026-10-08T09:01:37.391028+00:00",
+    "source_commit": "23081e146a8c00a57142242369161bc2b7e0f2c8",
+    "railway": {
+      "id": "f11b0a8d-878e-49d6-923b-9df35dff8aef",
+      "status": "SUCCESS",
+      "image": "sha256:fde4379004be1620cd3603832717779ecda5ece7d7b6c4d9c24bd66844ccfa1d",
+      "source": "Phase 10.5K source 23081e146a8c00a57142242369161bc2b7e0f2c8"
+    },
+    "cloudflare": {
+      "id": "7173a0cf-c746-46a8-b5ff-0a56e95cdc8b",
+      "version": "8cbde4f2-e51f-4c87-8056-61009d003538",
+      "percentage": 100,
+      "source": "Phase 10.5K source 23081e146a8c00a57142242369161bc2b7e0f2c8"
+    }
+  },
+  "api_bundle_committed_inputs": 236,
+  "hosting": {
+    "time": "2026-10-08T09:01:32.663882+00:00",
+    "source_commit": "23081e146a8c00a57142242369161bc2b7e0f2c8",
+    "api": "https://pokeapp-api-production.up.railway.app",
+    "web": "https://pokeapp-web.pokeapp-v2.workers.dev",
+    "assets": [
+      {
+        "path": "/assets/index-D_LfXNKc.js",
+        "sha256": "55b2541b44b3deedaa7bbd9055ad4d8323e48410bac356107ad85e1bb8e36c1a",
+        "content_type": "text/javascript"
+      },
+      {
+        "path": "/assets/index-Ce8Qi1M_.css",
+        "sha256": "fdd473f168f290c4c5a4f05543bb4987fb8eaaa43cc59b3763737e8aa3964ef4",
+        "content_type": "text/css"
+      }
+    ],
+    "web_headers": {
+      "content-type": "text/html",
+      "content-security-policy": "default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'self' https://pokeapp-api-production.up.railway.app; object-src 'none'; base-uri 'none'; frame-ancestors 'none'; form-action 'self'",
+      "x-content-type-options": "nosniff",
+      "referrer-policy": "no-referrer"
+    },
+    "status": "PASS"
+  },
+  "baseline": {
+    "target": "uwleqeuzsveqlugugzba",
+    "action": "before",
+    "time": "2026-10-08T08:54:13.683872+00:00",
+    "tables": 56,
+    "migrations": 31,
+    "advisor": {
+      "INFO": 138,
+      "ERROR": 24,
+      "WARN": 5
+    }
+  },
+  "preservation": {
+    "target": "uwleqeuzsveqlugugzba",
+    "action": "after",
+    "time": "2026-10-08T09:03:23.037251+00:00",
+    "tables": 56,
+    "migrations": 31,
+    "advisor": {
+      "INFO": 138,
+      "ERROR": 24,
+      "WARN": 5
+    },
+    "status": "PASS",
+    "scoped_equal": 56,
+    "new_or_removed_error_warn": 0,
+    "owner_credentials_unchanged": true,
+    "remote_business_writes": 0,
+    "schema_migrations_changed": false
+  },
+  "api": {
+    "status": "PASS",
+    "time": "2026-10-08T09:00:01.800023+00:00",
+    "requests": [
+      {
+        "method": "GET",
+        "path": "/v1/read/seasons/c6bcac5b-0b89-403f-8242-41ac58286ade/scouting",
+        "status": 401,
+        "seconds": 0.49
+      },
+      {
+        "method": "POST",
+        "path": "/v1/auth/pin-login",
+        "status": 200,
+        "seconds": 2.064
+      },
+      {
+        "method": "GET",
+        "path": "/v1/me",
+        "status": 200,
+        "seconds": 0.959
+      },
+      {
+        "method": "GET",
+        "path": "/v1/read/seasons/c6bcac5b-0b89-403f-8242-41ac58286ade/scouting",
+        "status": 200,
+        "seconds": 3.511
+      },
+      {
+        "method": "GET",
+        "path": "/v1/read/seasons/c6bcac5b-0b89-403f-8242-41ac58286ade/scouting?trainer_id=03957e59-bdfd-4c68-95e5-22fcc924c0e6",
+        "status": 200,
+        "seconds": 2.268
+      },
+      {
+        "method": "GET",
+        "path": "/v1/read/seasons/c6bcac5b-0b89-403f-8242-41ac58286ade/scouting?trainer_id=0e0e8838-fc77-4b7a-b9d6-ec0474eaa9dd",
+        "status": 200,
+        "seconds": 2.233
+      },
+      {
+        "method": "GET",
+        "path": "/v1/read/seasons/c6bcac5b-0b89-403f-8242-41ac58286ade/scouting?private=true",
+        "status": 422,
+        "seconds": 0.589
+      },
+      {
+        "method": "GET",
+        "path": "/v1/read/seasons/c6bcac5b-0b89-403f-8242-41ac58286ade/scouting?viewer_id=507d9c56-04d8-4801-a9da-f1e53674efb5&self=true",
+        "status": 422,
+        "seconds": 0.626
+      },
+      {
+        "method": "GET",
+        "path": "/v1/read/seasons/c6bcac5b-0b89-403f-8242-41ac58286ade/scouting?admin=true&mode=battle",
+        "status": 422,
+        "seconds": 0.602
+      },
+      {
+        "method": "GET",
+        "path": "/v1/read/seasons/c6bcac5b-0b89-403f-8242-41ac58286ade/scouting?trainer_id=7e5fb601-5ce1-400f-bdf9-19b229e0b269",
+        "status": 404,
+        "seconds": 1.484
+      },
+      {
+        "method": "GET",
+        "path": "/v1/read/seasons/1b3df58d-f677-46c4-9014-5982ee5e9c0a/scouting",
+        "status": 404,
+        "seconds": 0.774
+      },
+      {
+        "method": "GET",
+        "path": "/v1/read/seasons/c6bcac5b-0b89-403f-8242-41ac58286ade/team-preview?mode=spectator&trainer_id=507d9c56-04d8-4801-a9da-f1e53674efb5",
+        "status": 200,
+        "seconds": 1.732
+      }
+    ],
+    "choices": [
+      "507d9c56-04d8-4801-a9da-f1e53674efb5",
+      "03957e59-bdfd-4c68-95e5-22fcc924c0e6",
+      "0e0e8838-fc77-4b7a-b9d6-ec0474eaa9dd"
+    ],
+    "teams": [
+      {
+        "trainer_id": "507d9c56-04d8-4801-a9da-f1e53674efb5",
+        "count": null
+      },
+      {
+        "trainer_id": "03957e59-bdfd-4c68-95e5-22fcc924c0e6",
+        "count": null
+      },
+      {
+        "trainer_id": "0e0e8838-fc77-4b7a-b9d6-ec0474eaa9dd",
+        "count": null
+      }
+    ],
+    "existing_public_teams": 0,
+    "missing_public_teams": 3,
+    "allowlist": "Exact six Pokemon fields; nested moves name only; no private/raw keys",
+    "h_public_compatibility": true,
+    "business_writes": 0,
+    "fixtures": 0
+  },
+  "browser": {
+    "status": "PASS",
+    "states": [
+      {
+        "width": 1440,
+        "trainer_id": "507d9c56-04d8-4801-a9da-f1e53674efb5",
+        "pokemon": 0
+      },
+      {
+        "width": 1440,
+        "trainer_id": "03957e59-bdfd-4c68-95e5-22fcc924c0e6",
+        "pokemon": 0
+      },
+      {
+        "width": 1440,
+        "trainer_id": "0e0e8838-fc77-4b7a-b9d6-ec0474eaa9dd",
+        "pokemon": 0
+      },
+      {
+        "width": 390,
+        "trainer_id": "507d9c56-04d8-4801-a9da-f1e53674efb5",
+        "pokemon": 0
+      },
+      {
+        "width": 390,
+        "trainer_id": "03957e59-bdfd-4c68-95e5-22fcc924c0e6",
+        "pokemon": 0
+      },
+      {
+        "width": 390,
+        "trainer_id": "0e0e8838-fc77-4b7a-b9d6-ec0474eaa9dd",
+        "pokemon": 0
+      }
+    ],
+    "reads": [
+      {
+        "method": "POST",
+        "path": "/v1/auth/pin-login",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "path": "/v1/me",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "path": "/v1/read/seasons",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "path": "/v1/read/seasons/c6bcac5b-0b89-403f-8242-41ac58286ade/scouting",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "path": "/v1/read/seasons/c6bcac5b-0b89-403f-8242-41ac58286ade/scouting",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "path": "/v1/read/seasons/c6bcac5b-0b89-403f-8242-41ac58286ade/scouting",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "path": "/v1/read/seasons/c6bcac5b-0b89-403f-8242-41ac58286ade/scouting",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "path": "/v1/read/seasons/c6bcac5b-0b89-403f-8242-41ac58286ade/scouting",
+        "status": 200
+      }
+    ],
+    "errors": [],
+    "unexpected": [],
+    "environmentOrigins": {
+      "https://me.kis.v2.scr.kaspersky-labs.com": 6
+    },
+    "api_interception": false,
+    "business_writes": 0,
+    "private_fallback_reads": 0
+  },
+  "positive_public_lock_proof": "NOT AVAILABLE: three selected existing current-day locks absent. Positive six-Pokemon proof is local API/real PG/browser only. No public fixtures created.",
+  "mobile_visual_review": "PASS: local six-Pokemon layout and public missing-lock layout at 390px; no horizontal overflow",
+  "data_scope": "Full public/Auth/Storage snapshots; 56 scoped tables exclude only owner login/session/refresh activity. Stable owner identity/credentials/admin checked independently. Storage bytes untouched.",
+  "raw_evidence": "%TEMP%/phase10-5k-public and phase10-5k-*; local Edge screenshots web/test-results",
+  "preservation_digests": {
+    "scoped": {
+      "before": "aceec28570e536114e17acaf613934098240784577b9746387a1f64d288ce56d",
+      "after": "aceec28570e536114e17acaf613934098240784577b9746387a1f64d288ce56d"
+    },
+    "owner-stable": {
+      "before": "9cdd36483562985be32da56bf3ff68b52fc0f3349a146badb3cacf1fe6119069",
+      "after": "9cdd36483562985be32da56bf3ff68b52fc0f3349a146badb3cacf1fe6119069"
+    },
+    "history": {
+      "before": "58f6e3dcba17031494e4d71588726cbde159a352291c7b76ac313c0b0c0b00b4",
+      "after": "58f6e3dcba17031494e4d71588726cbde159a352291c7b76ac313c0b0c0b00b4"
+    }
+  }
+}

@@ -1283,3 +1283,48 @@ server stopped. No migration/bootstrap rebuild or unrelated full SQL matrices.
 Next: commit/push, deploy only committed API bundle to Railway, verify compatible
 read/auth, deploy Cloudflare, narrow read-only public scouting checks, final data/
 Advisor comparison, then report/handoff closure commit/push. No L or Phase 11.
+
+
+## K delivered - 2026-10-08; STOP after K
+
+Supersedes K's pending-delivery notes. **K DONE / STAGING_DONE_ZERO_RESIDUE.**
+[Report](../phase10-5k-completion-report.md), [local](../phase10-5k-closure-evidence.json),
+[public](../phase10-5k-public-evidence.json). Entry J closure
+`37ac03294df8bac095e335abfe66098dcaa97b03`; application HEAD `23081e146a8c00a57142242369161bc2b7e0f2c8`.
+Committed/pushed before all remote deployment writes. Documentation closure is the
+subsequent commit carrying this entry; obtain its exact HEAD from Git.
+
+- Entrenadores named links/public selector, no scheduled-match dependency.
+  GET scouting reuses H's current-day Team Lock reader with single-public selection.
+  Exact Pokemon fields: species, nickname, level, types, item and move names.
+  Self/admin stay public; no IV/EV/nature/ability/raw/identity/provenance/save/PC.
+  Null lock/absent day/roster explicit; malformed sources fail closed. No old/live
+  fallback, fabricated team, timing calculation or frozen-history rewrite.
+- Query keys isolate sessions/seasons/selections from private Battle/PC caches;
+  confirmed Team Lock updates refresh only this season's preview/scouting caches.
+- FRESH PASS: K Python 13, full Python 745 (726 committed-scope + 19 untouched
+  pre-existing untracked map tests), React 57, Edge 21; compile/Ruff/Prettier/public
+  TypeScript/Vite build/dry-run/diff checks. PostgreSQL 17.11 six H/K privacy/security
+  groups, exact 50-table restoration, current 039 verified, server stopped.
+  No SQL/schema change; rebuild/bootstrap and unrelated full SQL matrices NOT RERUN.
+- Railway `f11b0a8d-878e-49d6-923b-9df35dff8aef` SUCCESS, 236 committed API inputs only;
+  verified new authenticated read before Cloudflare `7173a0cf-c746-46a8-b5ff-0a56e95cdc8b`,
+  version `8cbde4f2-e51f-4c87-8056-61009d003538`, 100%, same application source.
+  Live assets match; HTTPS/deep SPA/MIME/CSP/nosniff/CORS/auth PASS.
+- Public: 12 API checks incl. authority-override/cross-scope denials; six real Edge
+  desktop/mobile states, eight successful browser responses, no interception/page
+  errors/business writes/private fallback, screenshots reviewed. Three sampled
+  current locks absent; positive six-Pokemon proof LOCAL ONLY, no owner fixtures.
+- Final 56/56 scoped tables and 31/31 migrations identical. Owner identity/PIN/admin,
+  manual seasons/results/locks/economy preserved. Full Auth/Storage metadata included;
+  only own session activity excluded and stable credential hashes checked. Storage
+  bytes untouched. Advisor 24 ERROR / 5 WARN / 138 INFO, zero new/removed ERROR/WARN.
+- Five bounded repository reads per current-day selection, no per-trainer loop or
+  overview expansion. Hosted samples 3.51 s / 2.27 s / 2.23 s: M/Phase 14 round-trip
+  aggregation candidate, not a load benchmark. Scouting scope now RESOLVED; J's
+  lifecycle/championship/timing implementation gaps remain separate. Finalist and
+  future game milestones retain their separate unresolved scope.
+- Protected guide and unrelated ZIP/AI-map/validator files untouched and unstaged.
+
+**EXACT NEXT STEP: STOP. L is next, awaiting explicit owner instruction.**
+Phase 10.5 IN PROGRESS; **PHASE 11 READINESS: NOT READY / NOT STARTED**.

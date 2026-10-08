@@ -260,3 +260,10 @@ existing projection/RLS/grants and historical independence; no migration/rebuild
 K's public scouting scope supersedes stale unresolved-scope wording in dated reports.
 No broader publication beyond this competitive snapshot is inferred. Stop after K;
 L and Phase 11 require separate authorization.
+
+
+K delivered 2026-10-08, source `23081e1`, Railway then Cloudflare. No migration;
+56 scoped tables and all 31 migration records preserved. Public missing-state and
+privacy/auth checks pass; positive six-Pokemon proof is local only because sampled
+hosted locks are absent. [K report](phase10-5k-completion-report.md).
+**STOP after K. NEXT L requires a new owner instruction.** Phase 11 NOT READY.
