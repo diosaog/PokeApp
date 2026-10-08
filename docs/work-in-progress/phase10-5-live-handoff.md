@@ -1,6 +1,8 @@
 # Phase 10.5 — live execution record
 
-Observation: 2026-10-07 Europe/Madrid. **E/F/G/H DONE; Phase 10.5 IN PROGRESS; Phase 11 NOT READY / NOT STARTED.**
+Observation: 2026-10-08 Europe/Madrid. **A–M + FINAL ALIGNMENT DONE; PHASE 10.5 DONE;
+PHASE 11 READY FOR REVIEW / NOT STARTED.** [Final report](../phase10-5-completion-report.md).
+The final closure at the end supersedes older dated package states below.
 [Contract](../phase10-5-functional-alignment.md),
 [continuity](../AI/PokeApp_Multi_AI_Continuity_Protocol.md),
 [checkpoint](../project-checkpoint.md),
@@ -42,12 +44,13 @@ Unrelated processes/remote operations not inspected: UNKNOWN.
 | F: 029 lifecycle reads final daily snapshot positions for title | FIX NOW | DONE; accumulated championship, finish certificate and frozen Hall delivered. Closure below. |
 | G: wipe counter exists in stats but lacks owned command/UI | FIX NOW | DONE; participant-owned counter, full closure and safe public delivery verified below. |
 | H: Preview only selects scheduled match; missing-lock presentation insufficient | FIX NOW | DONE; independent public spectator/self-only private battle, nonblocking warnings and verified public delivery below. |
-| I: pending promotions hidden by public view; voucher canje absent in React; purchases require active season | FIX NOW | Next remaining package; await explicit owner continuation. |
-| J: Admin displays technical readiness keys | FIX NOW | Ordinary result UI moved in C; remaining wording pending I. |
-| K: minimal public projection from permitted published facts | FIX NOW | Pending J; wider scope blocked below. |
-| L: legacy exports badges; neutral Phase 9 parser lacks observed progress | FIX NOW | E provides the observed badge foundation; remaining L review pending K. |
-| M: overview has about 13 sequential reads; command invalidation is broad | FIX NOW | Guard every touched package; record Phase 14 work. |
-| Ten unresolved rules listed in contract | OWNER_DECISION_REQUIRED | No answers inferred; defer dependent branches only. |
+| I: pending promotions, vouchers, post-League spending and observed-save rewards | FIX NOW | DONE; economic authority preserved in final alignment. |
+| J: Admin humanization | FIX NOW | DONE; final alignment closes prospective rules and the three backend gaps. |
+| K: public competitive Team Lock projection | FIX NOW | DONE; strict public allowlist, reused by rival profiles. |
+| L: reliable badges / in-game Champion evidence | FIX NOW | DONE; unknown remains distinct from observed zero. |
+| M: directed performance guard | FIX NOW | DONE; lazy name reads retained, broader candidates deferred. |
+| Final alignment: rules, freshness, profiles, categories, participant authority, 3+ title ties, first-lock timing | FIX NOW | DONE, source eb4e402, 041 and both deployments verified. |
+| Later owner decisions | OWNER_DECISION_REQUIRED | Finalist separately undefined; future per-round/postgame caps deferred. All approved 10.5 rules are implemented; no new decision request. |
 | Physical effects, cloud save ingestion, installer/updater | FUTURE LAUNCHER/CLOUD | Out of scope. |
 | Final sprites, item art, audio and broad UI redesign | POLISH | Deferred. |
 | Manual Discord judicial verdicts and modern Cup formats | INTENTIONAL V2 DIFFERENCE | Preserve; no legacy jury/Swiss restoration. |
@@ -1546,3 +1549,62 @@ reobserved unchanged. No remote business writes. Next: commit/push this source,
 apply 041 once after fresh immediate comparison, deploy API then web, safe public
 reads/screens and independent preservation/Advisor comparison, final closure commit.
 Phase 10.5 not DONE yet; Phase 11 NOT STARTED.
+
+## Final verified closure - 2026-10-08; PHASE 10.5 DONE
+
+This entry supersedes the preceding intermediate state. **ENTRY CHECK: M DONE
+VERIFIED. A–M + final product alignment DONE / STAGING_DONE_ZERO_RESIDUE.**
+Entry HEAD `dd9b7b9bcf38491962ace956fd90e53fbfdd0670`; implementation/migration
+source `25c59e42ba7b2ec1ecafdcd34f45b13f4afe3098`; final application/deployed source
+**`eb4e402891cbaa02e0999229874ac3003e016ae0`**. The final source adds only the
+reviewed division-label correction over the validated implementation. All sources
+were pushed before their remote writes. Documentation closure is the subsequent
+commit containing this entry; read Git HEAD for its exact hash.
+
+[Report](../phase10-5-completion-report.md), [local evidence](../phase10-5-closure-evidence.json),
+[public evidence](../phase10-5-public-evidence.json),
+[Phase 14 follow-up](../phase10-5m-performance-candidates.md).
+
+- Direct prospective reward editing with immutable server cutover; centralized
+  viewer/season refresh and safe uncertain retries; visual public/self profiles;
+  four Shop categories; eligible normal participant open/close/finish; 3+ championship
+  deaths/residual audited decisions; immutable first-lock timing/no cutoff.
+  Config/exceptions/archive remain admin. Cup and frozen historical truth retained.
+- **041 applied once = `20261008204133`**, pinned V2 `uwleqeuzsveqlugugzba`;
+  **33 migration records**, prior 32 unchanged. Three new private tables; no backfill.
+  Do not replay 041 or any earlier migration. Final source migration is identical
+  to the committed SQL applied from `25c59e4`.
+- **763 Python / 74 React / 68 unique Edge PASS**; 16 real PG families restore
+  all 53 public tables. New flow 12 rollback boundaries and extended F 23; four
+  fresh migration/bootstrap builds match 13,161 lines. Fifteen helper / three private
+  table catalogs pass locally/remotely. Relevant copy/profile reruns and production
+  build pass. Native parser I/L evidence retained unchanged; no redundant native run.
+- Railway **`2d71ec3b-095d-49a7-aa15-31749fe67b52` SUCCESS**, final source above,
+  238 committed API inputs; image
+  `sha256:fc59ebcab95dfab6cf4eee72a962dc22f06744a0c6beafb8ebbe984fd2f461e3`.
+  Verified API before Cloudflare **`ea9c837d-86f0-4b0a-826d-a4774371b56e`**,
+  version **`77eea9f6-0c90-45a2-b93a-3bf9cdf5fc11`**, 100%, same final source.
+  Live assets match build; HTTPS/deep SPA/MIME/CSP/nosniff/CORS/auth PASS.
+- Public 24 API checks and final 14 real Edge desktop/mobile states / 26 successful
+  GETs PASS; no mocking/page errors/business mutations. Current rules 4/12; owner
+  championship incomplete, team/progress unavailable rather than fabricated.
+  Positive business mutations/populated Pokémon proof remain local only.
+- First browser attempt completed all 14 states but had four recovered 503 reads;
+  strict HTTP assertion failed. Preserved separately. One unchanged-source
+  confirmation passed. Existing M availability candidate remains **ROOT CAUSE
+  UNKNOWN / NOT FIXED**; no retries expanded and no failure hidden.
+- Independent final **56/56 original raw table hashes identical**, three new empty
+  tables, **59/59 post-apply scoped tables** and **33/33 history records** unchanged.
+  Owner credentials/PIN/admin, manual seasons, memberships/results/locks and Storage
+  metadata preserved. Full Auth snapshots retained privately; only expected owner
+  login/session activity excluded, stable credentials compared separately.
+  No Storage bytes or public fixtures; zero owner business writes. Advisor
+  **24 ERROR / 5 WARN / 143 INFO**, zero added/removed ERROR/WARN.
+- Local PostgreSQL stopped after all runners completed. No migration/deployment
+  pending. Protected guide and unrelated untracked artifacts untouched; explicit
+  staging only. Full cloud ingestion, physical writes, distribution and Phase 14
+  remain later roadmap work. Finalist is still separately undefined.
+
+**PHASE 11 READINESS: READY FOR REVIEW. PHASE 11 NOT STARTED.**
+**EXACT NEXT STEP: STOP. NEXT: PHASE 11 READINESS REVIEW.** Await explicit owner
+authorization before any V1→V2 migration, Shadow Mode or later phase.

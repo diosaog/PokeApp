@@ -26,9 +26,13 @@ Out of scope: Phase 11, broad Phase 14 refactoring, full cloud ingestion, physic
 save writes, finalist redesign and Cup changes. Protected guide/unrelated untracked
 files untouched. Local PostgreSQL only for positive destructive fixtures.
 
-State: VALIDATED, ready for committed-source delivery. Final local gates pass:
+State: DONE, delivered and verified. Final local gates pass:
 763 Python, 74 React, 68 unique browser cases, 16 real PostgreSQL families with
 53-table restoration, four fresh identical builds (13,161 schema lines), 15-helper/
 three-table security catalog, TypeScript/build/format/compile/Ruff/dry-run/diff.
-See [local evidence](../phase10-5-closure-evidence.json). Public final delivery and
-preservation comparison remain pending; this is not a DONE claim.
+See [local evidence](../phase10-5-closure-evidence.json) and
+[public evidence](../phase10-5-public-evidence.json). 041=`20261008204133`, final
+application source `eb4e402`, Railway then Cloudflare verified, 56 original tables
+unchanged and three new tables empty. Final public 24 API checks / 14 browser states
+pass; initial recovered 503 responses remain explicitly recorded as an existing
+Phase 14 availability candidate. Phase 11 READY FOR REVIEW / NOT STARTED. STOP.

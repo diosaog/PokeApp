@@ -1,0 +1,748 @@
+{
+  "status": "PASS_WITH_RECORDED_PRIOR_TRANSIENTS",
+  "closed_utc": "2026-10-08T20:51:15.737010+00:00",
+  "entry_head": "dd9b7b9bcf38491962ace956fd90e53fbfdd0670",
+  "application_source": "eb4e402891cbaa02e0999229874ac3003e016ae0",
+  "migration_source": {
+    "time": "2026-10-08T20:41:31.451075+00:00",
+    "source_commit": "25c59e42ba7b2ec1ecafdcd34f45b13f4afe3098",
+    "source": "supabase/v2/migrations/041_final_product_alignment.sql",
+    "sha256": "5ef4462a472b3466c0af6be28fe1d621db9ecb55514fa119836668cde704b3cb",
+    "project_ref": "uwleqeuzsveqlugugzba"
+  },
+  "migration_response": {
+    "status": 200,
+    "time": "2026-10-08T20:41:32.991750+00:00"
+  },
+  "migration_history": [
+    {
+      "name": "010_security_helpers",
+      "record_hash": "cdf4f6b8c1a530e590b36f7948f40d4d",
+      "version": "20260816211949"
+    },
+    {
+      "name": "011_rls_policies",
+      "record_hash": "26e26d199777c265f0f90b15b887af63",
+      "version": "20260816212058"
+    },
+    {
+      "name": "012_security_views",
+      "record_hash": "9a8d77f5f9dd9df58ef3d52485495441",
+      "version": "20260816212336"
+    },
+    {
+      "name": "014_security_invoker_hardening",
+      "record_hash": "deab86b86f5f5bac5aa1ea550b09273e",
+      "version": "20260816213020"
+    },
+    {
+      "name": "013_storage_policies",
+      "record_hash": "2e22d0bc0682d569eefcda63e9758cca",
+      "version": "20260901190001"
+    },
+    {
+      "name": "015_public_trainers_visibility",
+      "record_hash": "aeec8bcc1215a8c62b8e43eb522b0c33",
+      "version": "20260901234808"
+    },
+    {
+      "name": "016_public_team_locks_visibility",
+      "record_hash": "d5751c21233bb2a2ce9994d5881171af",
+      "version": "20260901235030"
+    },
+    {
+      "name": "017_public_coin_balances_visibility",
+      "record_hash": "1d7d90e47aa02b5c243aea751dfadc81",
+      "version": "20260901235223"
+    },
+    {
+      "name": "018_public_views_visibility",
+      "record_hash": "16abbb89c61dabb5d372df6cf800f734",
+      "version": "20260901235520"
+    },
+    {
+      "name": "019_team_lock_api",
+      "record_hash": "b0b92e3f027cc444f5114b235a08efe5",
+      "version": "20260922162954"
+    },
+    {
+      "name": "020_current_matchday_store_ban_contract",
+      "record_hash": "de5439c08eb04ceffff425676d4605e8",
+      "version": "20260922165901"
+    },
+    {
+      "name": "021_normal_purchase_api",
+      "record_hash": "ce6134eca3eb185c7d7b5c56c3499da4",
+      "version": "20260922171752"
+    },
+    {
+      "name": "022_promotional_purchase_api",
+      "record_hash": "0f48392efd1550d8e1f4744c27351bcb",
+      "version": "20260922174842"
+    },
+    {
+      "name": "023_pokemon_identity",
+      "record_hash": "23603bc5d4a89bd740c71cc66d607f78",
+      "version": "20260923165532"
+    },
+    {
+      "name": "024_redemption_effect_boundary",
+      "record_hash": "3d99140a02af7caebc0c4b79feb50d46",
+      "version": "20260923172957"
+    },
+    {
+      "name": "025_robbery_voucher_and_redemption",
+      "record_hash": "8fad71ef19c1bf53a45c290e46376caf",
+      "version": "20260923180416"
+    },
+    {
+      "name": "026_season_admin_setup_api",
+      "record_hash": "ba025575e26ad8407e9bd4be2aaad57b",
+      "version": "20260923192300"
+    },
+    {
+      "name": "027_competitive_matchdays",
+      "record_hash": "8c640ce27d5b7e2f26c1a891954e6774",
+      "version": "20260923210625"
+    },
+    {
+      "name": "028_participant_status_admin",
+      "record_hash": "3acdeba2a541a83421bd4d7c52c94695",
+      "version": "20260923220301"
+    },
+    {
+      "name": "029_season_finalization_archive_hall",
+      "record_hash": "2348e8793b79ee71fbb0b8cfacb7f7f3",
+      "version": "20260923232516"
+    },
+    {
+      "name": "030_trials_sanctions_api",
+      "record_hash": "337435eb946360eeeee2222de644d6a2",
+      "version": "20260924102756"
+    },
+    {
+      "name": "030_trials_sanctions_acl_completion",
+      "record_hash": "69095ad4071d5460744883f39f5168d2",
+      "version": "20260924103256"
+    },
+    {
+      "name": "031_cup_engine_certification",
+      "record_hash": "bed0f8e542976aeaf277b61771d1038f",
+      "version": "20260928110301"
+    },
+    {
+      "name": "032_cup_player_identity_index",
+      "record_hash": "38afc3fd0c4ad981eac8f92f13ae9f20",
+      "version": "20260928111840"
+    },
+    {
+      "name": "033_league_general_read",
+      "record_hash": "f0a77c2aa988787991827e988030a0c7",
+      "version": "20260930113319"
+    },
+    {
+      "name": "034_participant_matchday_results",
+      "record_hash": "f3c985ee8eafa7fc8515b1c6453c2829",
+      "version": "20260930113328"
+    },
+    {
+      "name": "035_daily_sporting_ranking",
+      "record_hash": "482b18eddf33ca8d71cc5468afdb96c9",
+      "version": "20261001111600"
+    },
+    {
+      "name": "036_observed_initial_divisions",
+      "record_hash": "c932ad6c8c1a516d697f34c8af1e7f5b",
+      "version": "20261001165951"
+    },
+    {
+      "name": "037_league_championship",
+      "record_hash": "0a394fd0d67f579e14764beb8fa772aa",
+      "version": "20261003121543"
+    },
+    {
+      "name": "038_participant_wipe_revivals",
+      "record_hash": "179ac40388e66fb53c086f86cb4cb24b",
+      "version": "20261004222029"
+    },
+    {
+      "name": "039_shop_economy_alignment",
+      "record_hash": "9d85dc3095021ff9dd2f118cd130f0b3",
+      "version": "20261007121317"
+    },
+    {
+      "name": "040_observed_progress_read",
+      "record_hash": "89f62a45856b67c0e7913323e5c55a36",
+      "version": "20261008185548"
+    },
+    {
+      "name": "041_final_product_alignment",
+      "record_hash": "8f0f6f824b1a342d49b88a23c1b258d8",
+      "version": "20261008204133"
+    }
+  ],
+  "deployments": {
+    "time": "2026-10-08T20:45:59.850278+00:00",
+    "source_commit": "eb4e402891cbaa02e0999229874ac3003e016ae0",
+    "railway": {
+      "id": "2d71ec3b-095d-49a7-aa15-31749fe67b52",
+      "status": "SUCCESS",
+      "image": "sha256:fc59ebcab95dfab6cf4eee72a962dc22f06744a0c6beafb8ebbe984fd2f461e3",
+      "source": "Phase 10.5 final source eb4e402891cbaa02e0999229874ac3003e016ae0"
+    },
+    "cloudflare": {
+      "id": "ea9c837d-86f0-4b0a-826d-a4774371b56e",
+      "version": "77eea9f6-0c90-45a2-b93a-3bf9cdf5fc11",
+      "percentage": 100,
+      "source": "Phase 10.5 final source eb4e402891cbaa02e0999229874ac3003e016ae0"
+    }
+  },
+  "hosting": {
+    "time": "2026-10-08T20:45:55.201703+00:00",
+    "source_commit": "eb4e402891cbaa02e0999229874ac3003e016ae0",
+    "api": "https://pokeapp-api-production.up.railway.app",
+    "web": "https://pokeapp-web.pokeapp-v2.workers.dev",
+    "assets": [
+      {
+        "path": "/assets/index-gVcLe5bg.js",
+        "sha256": "6cdb5126e43f2cb5857532467c7e580e033d469138c9cdfb6daefcd82d3f4bcb",
+        "content_type": "text/javascript"
+      },
+      {
+        "path": "/assets/index-CiTDJ1XT.css",
+        "sha256": "5370fb9f6d246fa286bcc59846cc918c02e5f373e8d028730592b0bcfcbb83f9",
+        "content_type": "text/css"
+      }
+    ],
+    "web_headers": {
+      "content-type": "text/html",
+      "content-security-policy": "default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'self' https://pokeapp-api-production.up.railway.app; object-src 'none'; base-uri 'none'; frame-ancestors 'none'; form-action 'self'",
+      "x-content-type-options": "nosniff",
+      "referrer-policy": "no-referrer"
+    },
+    "status": "PASS"
+  },
+  "api": {
+    "status": "PASS",
+    "time": "2026-10-08T20:45:20.286309+00:00",
+    "requests": [
+      {
+        "method": "GET",
+        "path": "/v1/admin/seasons/8a84fd33-1296-4f63-9aa4-e84092a58af3/rules",
+        "status": 401,
+        "seconds": 0.328
+      },
+      {
+        "method": "GET",
+        "path": "/v1/seasons/8a84fd33-1296-4f63-9aa4-e84092a58af3/championship",
+        "status": 401,
+        "seconds": 0.218
+      },
+      {
+        "method": "POST",
+        "path": "/v1/seasons/8a84fd33-1296-4f63-9aa4-e84092a58af3/matchdays/34968270-4c3d-4258-bbd6-46e43893d770/open",
+        "status": 401,
+        "seconds": 0.196
+      },
+      {
+        "method": "POST",
+        "path": "/v1/seasons/8a84fd33-1296-4f63-9aa4-e84092a58af3/matchdays/34968270-4c3d-4258-bbd6-46e43893d770/close",
+        "status": 401,
+        "seconds": 0.173
+      },
+      {
+        "method": "POST",
+        "path": "/v1/seasons/8a84fd33-1296-4f63-9aa4-e84092a58af3/finish",
+        "status": 401,
+        "seconds": 0.173
+      },
+      {
+        "method": "POST",
+        "path": "/v1/admin/seasons/8a84fd33-1296-4f63-9aa4-e84092a58af3/championship/residual",
+        "status": 401,
+        "seconds": 0.198
+      },
+      {
+        "method": "POST",
+        "path": "/v1/auth/pin-login",
+        "status": 200,
+        "seconds": 1.802
+      },
+      {
+        "method": "GET",
+        "path": "/v1/me",
+        "status": 200,
+        "seconds": 0.91
+      },
+      {
+        "method": "GET",
+        "path": "/v1/admin/seasons/c6bcac5b-0b89-403f-8242-41ac58286ade/rules",
+        "status": 200,
+        "seconds": 1.661
+      },
+      {
+        "method": "GET",
+        "path": "/v1/admin/seasons/c6bcac5b-0b89-403f-8242-41ac58286ade/setup",
+        "status": 200,
+        "seconds": 1.247
+      },
+      {
+        "method": "GET",
+        "path": "/v1/seasons/c6bcac5b-0b89-403f-8242-41ac58286ade/championship",
+        "status": 200,
+        "seconds": 1.453
+      },
+      {
+        "method": "GET",
+        "path": "/v1/admin/seasons/c6bcac5b-0b89-403f-8242-41ac58286ade/championship",
+        "status": 200,
+        "seconds": 1.125
+      },
+      {
+        "method": "GET",
+        "path": "/v1/read/seasons/c6bcac5b-0b89-403f-8242-41ac58286ade/overview",
+        "status": 200,
+        "seconds": 5.05
+      },
+      {
+        "method": "GET",
+        "path": "/v1/read/seasons/c6bcac5b-0b89-403f-8242-41ac58286ade/league",
+        "status": 200,
+        "seconds": 0.898
+      },
+      {
+        "method": "GET",
+        "path": "/v1/read/seasons/c6bcac5b-0b89-403f-8242-41ac58286ade/shop",
+        "status": 200,
+        "seconds": 1.955
+      },
+      {
+        "method": "GET",
+        "path": "/v1/read/seasons/c6bcac5b-0b89-403f-8242-41ac58286ade/inventory",
+        "status": 200,
+        "seconds": 2.507
+      },
+      {
+        "method": "GET",
+        "path": "/v1/read/seasons/c6bcac5b-0b89-403f-8242-41ac58286ade/scouting?trainer_id=351b6bc1-7ae6-4c1d-8f2b-aeda43ada26b",
+        "status": 200,
+        "seconds": 1.68
+      },
+      {
+        "method": "GET",
+        "path": "/v1/read/seasons/c6bcac5b-0b89-403f-8242-41ac58286ade/team-preview?mode=battle&trainer_id=507d9c56-04d8-4801-a9da-f1e53674efb5",
+        "status": 200,
+        "seconds": 1.889
+      },
+      {
+        "method": "GET",
+        "path": "/v1/admin/seasons/8a84fd33-1296-4f63-9aa4-e84092a58af3/rules",
+        "status": 404,
+        "seconds": 1.123
+      },
+      {
+        "method": "GET",
+        "path": "/v1/seasons/8a84fd33-1296-4f63-9aa4-e84092a58af3/championship",
+        "status": 404,
+        "seconds": 1.442
+      },
+      {
+        "method": "POST",
+        "path": "/v1/seasons/8a84fd33-1296-4f63-9aa4-e84092a58af3/matchdays/34968270-4c3d-4258-bbd6-46e43893d770/open",
+        "status": 404,
+        "seconds": 1.159
+      },
+      {
+        "method": "POST",
+        "path": "/v1/seasons/8a84fd33-1296-4f63-9aa4-e84092a58af3/matchdays/34968270-4c3d-4258-bbd6-46e43893d770/close",
+        "status": 404,
+        "seconds": 1.451
+      },
+      {
+        "method": "POST",
+        "path": "/v1/seasons/8a84fd33-1296-4f63-9aa4-e84092a58af3/finish",
+        "status": 404,
+        "seconds": 1.087
+      },
+      {
+        "method": "POST",
+        "path": "/v1/admin/seasons/8a84fd33-1296-4f63-9aa4-e84092a58af3/championship/residual",
+        "status": 404,
+        "seconds": 0.805
+      }
+    ],
+    "rules": {
+      "season_id": "c6bcac5b-0b89-403f-8242-41ac58286ade",
+      "revision": 0,
+      "config_revision": 1,
+      "badge_reward_coins": 4,
+      "game_completion_reward_coins": 12,
+      "effective_at": null,
+      "editable": true
+    },
+    "review_state": "incomplete",
+    "shop_categories": [
+      "bayas",
+      "comodines",
+      "competitivos",
+      "crianza"
+    ],
+    "lock_count": 0,
+    "business_writes": 0,
+    "fixtures": 0,
+    "positive_business_proof": "LOCAL ONLY"
+  },
+  "browser": {
+    "status": "PASS",
+    "states": [
+      {
+        "width": 1440,
+        "name": "shop",
+        "url": "/tienda"
+      },
+      {
+        "width": 1440,
+        "name": "rules",
+        "url": "/admin"
+      },
+      {
+        "width": 1440,
+        "name": "trainers",
+        "url": "/entrenadores"
+      },
+      {
+        "width": 1440,
+        "name": "own-profile",
+        "url": "/entrenadores/507d9c56-04d8-4801-a9da-f1e53674efb5"
+      },
+      {
+        "width": 1440,
+        "name": "rival-profile",
+        "url": "/entrenadores/351b6bc1-7ae6-4c1d-8f2b-aeda43ada26b"
+      },
+      {
+        "width": 1440,
+        "name": "league",
+        "url": "/liga"
+      },
+      {
+        "width": 1440,
+        "name": "battle",
+        "url": "/battle"
+      },
+      {
+        "width": 390,
+        "name": "shop",
+        "url": "/tienda"
+      },
+      {
+        "width": 390,
+        "name": "rules",
+        "url": "/admin"
+      },
+      {
+        "width": 390,
+        "name": "trainers",
+        "url": "/entrenadores"
+      },
+      {
+        "width": 390,
+        "name": "own-profile",
+        "url": "/entrenadores/507d9c56-04d8-4801-a9da-f1e53674efb5"
+      },
+      {
+        "width": 390,
+        "name": "rival-profile",
+        "url": "/entrenadores/351b6bc1-7ae6-4c1d-8f2b-aeda43ada26b"
+      },
+      {
+        "width": 390,
+        "name": "league",
+        "url": "/liga"
+      },
+      {
+        "width": 390,
+        "name": "battle",
+        "url": "/battle"
+      }
+    ],
+    "reads": [
+      {
+        "width": 1440,
+        "path": "/v1/me",
+        "status": 200,
+        "decoded_bytes": 115,
+        "seconds": 0.802
+      },
+      {
+        "width": 1440,
+        "path": "/v1/read/seasons",
+        "status": 200,
+        "decoded_bytes": 172,
+        "seconds": 1.19
+      },
+      {
+        "width": 1440,
+        "path": "/v1/read/seasons/c6bcac5b-0b89-403f-8242-41ac58286ade/shop",
+        "status": 200,
+        "decoded_bytes": 12506,
+        "seconds": 2.766
+      },
+      {
+        "width": 1440,
+        "path": "/v1/read/seasons/c6bcac5b-0b89-403f-8242-41ac58286ade/inventory",
+        "status": 200,
+        "decoded_bytes": 29,
+        "seconds": 3.195
+      },
+      {
+        "width": 1440,
+        "path": "/v1/admin/seasons/c6bcac5b-0b89-403f-8242-41ac58286ade/setup",
+        "status": 200,
+        "decoded_bytes": 6980,
+        "seconds": 0.999
+      },
+      {
+        "width": 1440,
+        "path": "/v1/admin/seasons/c6bcac5b-0b89-403f-8242-41ac58286ade/rules",
+        "status": 200,
+        "decoded_bytes": 178,
+        "seconds": 0.948
+      },
+      {
+        "width": 1440,
+        "path": "/v1/read/seasons/c6bcac5b-0b89-403f-8242-41ac58286ade/overview",
+        "status": 200,
+        "decoded_bytes": 17525,
+        "seconds": 3.449
+      },
+      {
+        "width": 1440,
+        "path": "/v1/read/seasons/c6bcac5b-0b89-403f-8242-41ac58286ade/league",
+        "status": 200,
+        "decoded_bytes": 3062,
+        "seconds": 1.6
+      },
+      {
+        "width": 1440,
+        "path": "/v1/read/seasons/c6bcac5b-0b89-403f-8242-41ac58286ade/team-preview",
+        "status": 200,
+        "decoded_bytes": 1155,
+        "seconds": 2.626
+      },
+      {
+        "width": 1440,
+        "path": "/v1/read/seasons/c6bcac5b-0b89-403f-8242-41ac58286ade/scouting",
+        "status": 200,
+        "decoded_bytes": 1136,
+        "seconds": 2.057
+      },
+      {
+        "width": 1440,
+        "path": "/v1/seasons/c6bcac5b-0b89-403f-8242-41ac58286ade/wipe-revivals",
+        "status": 200,
+        "decoded_bytes": 145,
+        "seconds": 1.01
+      },
+      {
+        "width": 1440,
+        "path": "/v1/seasons/c6bcac5b-0b89-403f-8242-41ac58286ade/matchdays/3eb1cbd3-9a3b-4b1d-a2b5-d31a4c16ff08",
+        "status": 200,
+        "decoded_bytes": 2282,
+        "seconds": 1.377
+      },
+      {
+        "width": 1440,
+        "path": "/v1/read/seasons/c6bcac5b-0b89-403f-8242-41ac58286ade/team-preview",
+        "status": 200,
+        "decoded_bytes": 1248,
+        "seconds": 1.787
+      },
+      {
+        "width": 390,
+        "path": "/v1/me",
+        "status": 200,
+        "decoded_bytes": 115,
+        "seconds": 0.732
+      },
+      {
+        "width": 390,
+        "path": "/v1/read/seasons",
+        "status": 200,
+        "decoded_bytes": 172,
+        "seconds": 0.942
+      },
+      {
+        "width": 390,
+        "path": "/v1/read/seasons/c6bcac5b-0b89-403f-8242-41ac58286ade/shop",
+        "status": 200,
+        "decoded_bytes": 12506,
+        "seconds": 1.866
+      },
+      {
+        "width": 390,
+        "path": "/v1/read/seasons/c6bcac5b-0b89-403f-8242-41ac58286ade/inventory",
+        "status": 200,
+        "decoded_bytes": 29,
+        "seconds": 2.053
+      },
+      {
+        "width": 390,
+        "path": "/v1/admin/seasons/c6bcac5b-0b89-403f-8242-41ac58286ade/setup",
+        "status": 200,
+        "decoded_bytes": 6980,
+        "seconds": 1.02
+      },
+      {
+        "width": 390,
+        "path": "/v1/admin/seasons/c6bcac5b-0b89-403f-8242-41ac58286ade/rules",
+        "status": 200,
+        "decoded_bytes": 178,
+        "seconds": 0.981
+      },
+      {
+        "width": 390,
+        "path": "/v1/read/seasons/c6bcac5b-0b89-403f-8242-41ac58286ade/overview",
+        "status": 200,
+        "decoded_bytes": 17525,
+        "seconds": 3.91
+      },
+      {
+        "width": 390,
+        "path": "/v1/read/seasons/c6bcac5b-0b89-403f-8242-41ac58286ade/league",
+        "status": 200,
+        "decoded_bytes": 3062,
+        "seconds": 1.58
+      },
+      {
+        "width": 390,
+        "path": "/v1/read/seasons/c6bcac5b-0b89-403f-8242-41ac58286ade/team-preview",
+        "status": 200,
+        "decoded_bytes": 1155,
+        "seconds": 2.581
+      },
+      {
+        "width": 390,
+        "path": "/v1/read/seasons/c6bcac5b-0b89-403f-8242-41ac58286ade/scouting",
+        "status": 200,
+        "decoded_bytes": 1136,
+        "seconds": 1.792
+      },
+      {
+        "width": 390,
+        "path": "/v1/seasons/c6bcac5b-0b89-403f-8242-41ac58286ade/matchdays/3eb1cbd3-9a3b-4b1d-a2b5-d31a4c16ff08",
+        "status": 200,
+        "decoded_bytes": 2282,
+        "seconds": 1.051
+      },
+      {
+        "width": 390,
+        "path": "/v1/seasons/c6bcac5b-0b89-403f-8242-41ac58286ade/wipe-revivals",
+        "status": 200,
+        "decoded_bytes": 145,
+        "seconds": 1.126
+      },
+      {
+        "width": 390,
+        "path": "/v1/read/seasons/c6bcac5b-0b89-403f-8242-41ac58286ade/team-preview",
+        "status": 200,
+        "decoded_bytes": 1248,
+        "seconds": 1.814
+      }
+    ],
+    "errors": [],
+    "unexpected": [],
+    "environmentOrigins": {
+      "https://me.kis.v2.scr.kaspersky-labs.com": 25
+    },
+    "api_interception": false,
+    "business_writes": 0
+  },
+  "first_browser_attempt": {
+    "status": "FAIL_TRANSIENT_API_RESPONSES",
+    "completed_states": 14,
+    "recovered_503": [
+      {
+        "width": 1440,
+        "path": "/v1/read/seasons/c6bcac5b-0b89-403f-8242-41ac58286ade/shop",
+        "status": 503,
+        "decoded_bytes": 81,
+        "seconds": 0.58
+      },
+      {
+        "width": 1440,
+        "path": "/v1/read/seasons/c6bcac5b-0b89-403f-8242-41ac58286ade/inventory",
+        "status": 503,
+        "decoded_bytes": 81,
+        "seconds": 0.586
+      },
+      {
+        "width": 390,
+        "path": "/v1/read/seasons/c6bcac5b-0b89-403f-8242-41ac58286ade/league",
+        "status": 503,
+        "decoded_bytes": 81,
+        "seconds": 0.36
+      },
+      {
+        "width": 390,
+        "path": "/v1/read/seasons/c6bcac5b-0b89-403f-8242-41ac58286ade/team-preview",
+        "status": 503,
+        "decoded_bytes": 81,
+        "seconds": 0.363
+      }
+    ],
+    "page_errors": [],
+    "interpretation": "All 14 read-only UI states and logout completed; four 503 responses recovered through existing bounded GET retry. Initial all-HTTP-success assertion failed. No application error or business mutation; prior M availability candidate remains open."
+  },
+  "preservation": {
+    "status": "PASS",
+    "time": "2026-10-08T20:49:33.670257+00:00",
+    "version": "20261008204133",
+    "migrations": 33,
+    "original_tables_equal": 56,
+    "scoped_tables": 59,
+    "helpers": 15,
+    "owner_credentials_unchanged": true,
+    "business_writes": 0,
+    "new_or_removed_error_warn": 0,
+    "advisor": {
+      "INFO": 143,
+      "ERROR": 24,
+      "WARN": 5
+    },
+    "original_raw_hashes_equal": 56,
+    "new_empty_tables": 3,
+    "all_post_apply_scoped_tables_equal": true,
+    "history_equal_after_apply": true,
+    "auth_scope": "Full Auth snapshots retained privately; only expected owner login/session/refresh activity excluded from scoped equality. Stable identity/PIN/credential hashes compared separately.",
+    "storage": "Metadata included; no Storage byte operations",
+    "owner_business_mutations": 0,
+    "public_fixtures": 0
+  },
+  "security": {
+    "before": {
+      "INFO": 138,
+      "ERROR": 24,
+      "WARN": 5
+    },
+    "after": {
+      "INFO": 143,
+      "ERROR": 24,
+      "WARN": 5
+    },
+    "new_error_warn": 0,
+    "removed_error_warn": 0,
+    "helpers": 15,
+    "private_tables": 3
+  },
+  "visual_review": [
+    "local positive self/rival desktop/mobile Pokemon detail",
+    "public rules desktop/mobile",
+    "public own/rival profiles desktop/mobile",
+    "Shop categories and trainer cards"
+  ],
+  "performance": "Single API samples only; overview 5.050s. Prior M intermittent 503 remains root-cause UNKNOWN / NOT FIXED; no retry expansion.",
+  "positive_business_evidence": "LOCAL ONLY; public owner lock/progress/team remains absent/unknown",
+  "local_postgresql": "Stopped after all runners completed",
+  "phase11": "READY FOR REVIEW; NOT STARTED"
+}

@@ -5,13 +5,16 @@ milestone record; it does not maintain a second live phase-status ledger.
 
 ## Current project position
 
-- Active phase: **10.5 — Functional product alignment and repair, IN PROGRESS**.
+- Latest completed phase: **10.5 — Functional product alignment and repair, DONE**.
   [Approved contract](phase10-5-functional-alignment.md),
   [single live record](work-in-progress/phase10-5-live-handoff.md).
   Owner authorized implementation on 2026-09-29 after the functional knowledge export.
-  Latest closed package: [M performance guard](phase10-5m-completion-report.md).
-  Current: FINAL 10.5 PRODUCT ALIGNMENT implemented, final validation/delivery in progress.
-  Phase 11 remains stopped pending verified closure and owner review.
+  [Final alignment/closure report](phase10-5-completion-report.md): A–M and all
+  seven final areas delivered, source `eb4e402`, forward 041, verified local/public
+  evidence and zero owner business-data residue. Phase 11 **READY FOR REVIEW /
+  NOT STARTED**, pending explicit owner authorization. M's intermittent hosted 503
+  availability candidate remains documented; no root-cause fix is claimed.
+  [M performance guard](phase10-5m-completion-report.md) remains delivered.
   [L observed badges and in-game Champion progress](phase10-5l-completion-report.md) remains delivered.
   [K public competitive scouting](phase10-5k-completion-report.md) remains delivered.
   [J Admin humanization](phase10-5j-completion-report.md) remains delivered.
@@ -23,7 +26,7 @@ milestone record; it does not maintain a second live phase-status ledger.
   [D daily sporting ranking](phase10-5d-completion-report.md) remains delivered.
   Consult the live record for deployment and the active package.
 
-- Last closed phase: **10 - React / public Cloudflare + Railway, DONE**.
+- Previous closed phase: **10 - React / public Cloudflare + Railway, DONE**.
   [Contract](phase10-react-cloudflare.md), [delivery report](phase10-completion-report.md),
   [public evidence](phase10-public-evidence.json),
   [closed handoff](work-in-progress/phase10-live-handoff.md).

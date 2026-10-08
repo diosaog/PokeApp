@@ -9,6 +9,10 @@ Phase 10 remains DONE for its delivered scope. Phase 10.5 corrects product
 semantics established by the subsequent functional review. Phase 11 is NOT STARTED
 and requires owner + ChatGPT review after this phase. This is not a rewrite.
 
+Current 2026-10-08: **PHASE 10.5 DONE; A–M + final alignment delivered**.
+[Final report](phase10-5-completion-report.md). **Phase 11 READY FOR REVIEW /
+NOT STARTED**. Older dated stopping points and gap statements below are historical.
+
 ## Approved behavior and order of execution
 
 Each package ends with focused green checks, documentation and a pushed coherent
@@ -282,11 +286,11 @@ Full cloud ingestion remains unfinished; current save observations cannot rewrit
 competitive history. The three J implementation gaps retain their existing scope.
 **STOP after L. NEXT M requires its own instruction.** Phase 11 NOT READY.
 
-## Final product alignment - implemented, delivery pending (2026-10-08)
+## Final product alignment - delivered (2026-10-08)
 
 The explicit final instruction supersedes previous package stopping points for
-this closure only. A–M remain delivered; the seven final areas now have code and
-local validation. Remote completion is recorded separately in the live handoff.
+this closure only. A–M and the seven final areas are verified locally and deployed.
+Remote completion and owner preservation are recorded in the final report/handoff.
 
 - Admin edits current badge/Champion reward amounts directly. A server-side
   immutable revision takes effect for subsequently accepted eligible observation
@@ -321,4 +325,6 @@ badge/Champion economics, public scouting, League-only DQ, participant authority
 championship residual policy and no Team Lock cutoff are resolved decisions.
 Finalist policy remains separately undefined and does not prevent a proven title.
 Full cloud ingestion, physical save writes and broader Phase 14 work remain deferred.
-Phase 11 must wait for explicit review/authorization after verified final delivery.
+041=`20261008204133`, final application source `eb4e402`, compatible Railway and
+Cloudflare delivery verified. Phase 11 is READY FOR REVIEW, NOT STARTED, and must
+wait for explicit review/authorization. Known M availability work remains deferred.

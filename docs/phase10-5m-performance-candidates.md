@@ -1,5 +1,8 @@
 # Phase 10.5M - Directed read guard and deferred candidates
 
+Historical M baseline below; the final-alignment follow-up at the end supersedes
+its implementation-gap status. Timing samples remain observations, not promises.
+
 Entry: `4a7537438ad19cdd6152d339b07caad4bd94de93` (L DONE verified).
 Scope is the current General/overview, Trainers/scouting, Shop/inventory, Admin
 and L progress read paths. This is not a Phase 14 load benchmark or broad audit.
@@ -98,3 +101,30 @@ Keep J's participant normal lifecycle authorization, championship 4+ / residual
 tie support and reliable first-Team-Lock timing as **implementation gaps**, not
 new requests for owner decisions. FINAL 10.5 PRODUCT ALIGNMENT is next after M;
 it is not started by this package. Phase 11 remains NOT READY / NOT STARTED.
+
+## Final alignment follow-up (2026-10-08)
+
+Source `eb4e402891cbaa02e0999229874ac3003e016ae0` implements all five product
+findings above and the three J backend gaps. The Admin invalidation candidate is
+partially addressed: `read-invalidation.ts` now maps accepted commands/conflicts
+to affected viewer/season reads, without global invalidation. Overview composition
+and the inventory rival-identity loop remain deferred, including their privacy and
+historical-source requirements. Visual profiles reuse overview/General plus a
+selected safe team query; profile aggregation is an additional Phase 14 measurement
+target. Shop still loads only Shop/inventory initially; four category switches add
+no reads. Native source and cloud ingestion remain unchanged.
+
+One hosted API sample after final deployment: rules **1.661 s**, incomplete
+championship **1.453 s**, General **0.898 s**, overview **5.050 s**, Shop **1.955 s**,
+empty inventory **2.507 s**, rival scouting **1.680 s**, own preview **1.889 s**.
+These are single authenticated samples on the manual season, not representative
+populated/full-season performance claims.
+
+The first public browser run reached all 14 desktop/mobile states and logged out,
+but four GETs returned 503 before the existing bounded retry recovered: Shop,
+inventory, General and preview. Its strict all-responses-success assertion failed;
+the evidence is retained independently. Railway logs confirm the four statuses
+without a dependency-stage exception explaining the cause. This reproduces the
+existing M availability candidate; **root cause UNKNOWN / NOT FIXED**. No new retry
+policy, cache workaround or suppressed error was introduced to make closure pass.
+Final public confirmation results are recorded in the final completion report.
