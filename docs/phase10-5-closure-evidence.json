@@ -25,8 +25,10 @@
     "logs": [
       "%TEMP%/phase10-5-final-e2e.log",
       "%TEMP%/phase10-5-final-e2e-affected.log",
-      "%TEMP%/phase10-5-final-e2e-flows-final.log"
-    ]
+      "%TEMP%/phase10-5-final-e2e-flows-final.log",
+      "%TEMP%/phase10-5-final-profile-visual-copy.log"
+    ],
+    "visual_review": "Shop/Trainers and self/rival profiles reviewed desktop/mobile; duplicated division prefix removed using authoritative code; affected two profile cases PASS after copy change"
   },
   "postgresql": {
     "version": "17.11",
@@ -670,7 +672,7 @@
     "web/src/features/rules.tsx": "234b73add170098a4cc1b07fba89920217ea70db6bdb16066b8765fc28d2dbc7",
     "web/src/features/scouting.tsx": "1a925b01984145789fc3cb30cda1b2803e81f5cc90dc78e65b5b2baae744f9ef",
     "web/src/features/team-preview.tsx": "01052607e5eada3f7d89a6334ba972c50353a5a8b93212c27175818329706b22",
-    "web/src/features/trainer-profile.tsx": "ecc9da6708bb56ebb98033de540275b12645b0279cc6278cdb5205ae0b949536",
+    "web/src/features/trainer-profile.tsx": "1143c08197eda3ba061a003fe9b6153ef266dc333c88f250db4f146cdab6603e",
     "web/src/features/wipe-revivals.test.tsx": "34482f680ed44d8edf3f124be309c8401d1779bf9662cf4cae9e3102ae588d40",
     "web/src/features/wipe-revivals.tsx": "de1afe834554c6b9b62d19987df8d4055a431234055d0e244d7b651647e1d306",
     "web/src/read-invalidation.test.ts": "1c4303448eb119a9e9facbc807b910eb39579519c69774cb0ff162ea2b144673",

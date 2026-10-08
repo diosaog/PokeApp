@@ -86,7 +86,7 @@ function Profile({ trainer }: { trainer: string }) {
       />
       <div className="trainer-top">
         <Tag>{participantLabel(player.status)}</Tag>
-        {division && <Tag>División {division.name}</Tag>}
+        {division && <Tag>División {division.code}</Tag>}
         {own && (
           <Link className="button" to="/pc">
             Abrir mi PC
