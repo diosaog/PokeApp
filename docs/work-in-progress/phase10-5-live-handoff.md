@@ -1517,3 +1517,32 @@ its exact HEAD rather than embedding a self-referential hash.
 **EXACT NEXT STEP: STOP. NEXT: FINAL 10.5 PRODUCT ALIGNMENT.**
 Final alignment NOT STARTED. Phase 10.5 IN PROGRESS.
 **PHASE 11 READINESS: NOT READY / NOT STARTED.**
+
+## Final alignment admitted - 2026-10-08; IMPLEMENTING
+
+Owner's explicit final-alignment instruction supersedes the stop-after-M note.
+Entry `dd9b7b9bcf38491962ace956fd90e53fbfdd0670`, main/origin fetched 0/0,
+clean tracked tree, M DONE VERIFIED. Fresh pinned V2 history: 32 rows through
+040=`20261008185548`; next local forward migration is 041. No remote writes.
+[Directed change map](phase10-5-final-change-map.md) records the seven authorized
+areas and affected gates. Implement all, then one applicable final closure gate,
+commit/push, migration/backend/frontend delivery, preservation evidence and report.
+No final-alignment DONE or Phase 11 readiness claim yet. Phase 11 remains stopped.
+
+## Final alignment local gate - 2026-10-08; VALIDATED / DELIVERY NEXT
+
+All seven areas are implemented; [report](../phase10-5-completion-report.md) and
+[local evidence](../phase10-5-closure-evidence.json) record the final contract.
+763 Python, 74 React, 68 unique Edge cases; 16 PostgreSQL families each restore
+53 public tables. Four fresh builds match (13,161 lines); 15 helper / three table
+catalogs pass. New final flows have 12 rollback boundaries, extended F has 23.
+All relevant static/build checks pass. Old test assumptions were corrected and
+only affected browser files rerun. Native parser source/evidence retained unchanged.
+
+041 is local only at this checkpoint. Remote preflight freshly pins V2, 32 records
+through 040, 56 complete/scoped tables, intact owner credentials and Advisor
+24 ERROR / 5 WARN / 138 INFO. Existing API L deployment and web M deployment were
+reobserved unchanged. No remote business writes. Next: commit/push this source,
+apply 041 once after fresh immediate comparison, deploy API then web, safe public
+reads/screens and independent preservation/Advisor comparison, final closure commit.
+Phase 10.5 not DONE yet; Phase 11 NOT STARTED.

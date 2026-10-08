@@ -62,6 +62,7 @@ test("login, official league, Team Lock, PC dialog, purchase, admin controls, Cu
   await page.keyboard.press("Escape");
   await expect(page.getByRole("dialog")).toHaveCount(0);
   await navigate(page, "Tienda");
+  await page.getByRole("button", { name: "Comodines", exact: true }).click();
   await page
     .getByRole("button", { name: "Comprar", exact: true })
     .first()
@@ -81,9 +82,7 @@ test("login, official league, Team Lock, PC dialog, purchase, admin controls, Cu
     page.getByRole("button", { name: "Guardar nombre" }),
   ).toBeDisabled();
   await expect(
-    page.getByText(
-      "El nombre solo puede cambiar durante la preparación de la temporada.",
-    ),
+    page.getByText("El nombre se conserva desde el inicio de la Liga."),
   ).toBeVisible();
   expect(commands.some((command) => command.path.endsWith("/name"))).toBe(
     false,
@@ -131,6 +130,7 @@ test("conflicts stay visible without silent CAS retry", async ({ page }) => {
   );
   await login(page);
   await navigate(page, "Tienda");
+  await page.getByRole("button", { name: "Comodines", exact: true }).click();
   await page
     .getByRole("button", { name: "Comprar", exact: true })
     .first()
@@ -142,31 +142,11 @@ test("conflicts stay visible without silent CAS retry", async ({ page }) => {
   );
   await expect(page.getByRole("dialog")).toBeVisible();
 });
-test("admin can repair unused configuration and cancel provisional editing with CAS", async ({
-  page,
-}) => {
+test("admin can cancel provisional editing with CAS", async ({ page }) => {
   const commands = await fixture(page);
   await login(page);
   await navigate(page, "Administración");
   await page.getByRole("tab", { name: "Configuración", exact: true }).click();
-  await page.getByLabel("Versión a configurar").selectOption("config");
-  await page
-    .getByLabel("Nombre de versión", { exact: true })
-    .fill("Base corregida");
-  await page
-    .getByLabel("Motivo de reemplazo")
-    .fill("Ajustar el borrador antes de usarlo");
-  await page
-    .getByRole("button", { name: "Reemplazar versión sin usar" })
-    .click();
-  await expect(page.getByText("Cambio confirmado.")).toBeVisible();
-  expect(commands.at(-1)?.path).toContain("/config/replace-unused");
-  expect(commands.at(-1)?.body).toMatchObject({
-    expected_config_revision: 2,
-    expected_roster_revision: 3,
-    division_sizes: { A: 2, B: 2 },
-    reason: "Ajustar el borrador antes de usarlo",
-  });
   await page.getByRole("tab", { name: "Competición", exact: true }).click();
   await page
     .getByRole("button", { name: "Cancelar edición", exact: true })

@@ -1,6 +1,6 @@
 import { expect, test, type Page } from "@playwright/test";
 import type { Model } from "../src/api/types";
-import { fixture, login, navigate, sid, tid } from "./fixtures";
+import { fixture, login, navigate, sid, tid, day } from "./fixtures";
 
 async function ownCounter(
   page: Page,
@@ -106,6 +106,7 @@ test("ordinary participant updates and corrects their own absolute count with na
         [
           `/v1/seasons/${sid}/wipe-revivals`,
           `/v1/read/seasons/${sid}/league`,
+          `/v1/seasons/${sid}/matchdays/${day}`,
         ].includes(path),
       ),
   ).toBe(true);

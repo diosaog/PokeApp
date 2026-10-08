@@ -61,12 +61,10 @@ function OwnedWipeRevivals({
     command.error instanceof ApiError && command.error.status === 409
       ? command.error
       : null;
-  const refetch = query.refetch;
   useEffect(() => {
     if (!conflict) return;
     setReset((value) => value + 1);
-    void refetch();
-  }, [conflict, refetch]);
+  }, [conflict]);
   if (query.isPending) return <Loading />;
   if (query.error) return <Notice error={query.error} />;
   const current = query.data;

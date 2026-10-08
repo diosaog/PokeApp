@@ -1,4 +1,4 @@
-import { cleanup, render, screen } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, beforeEach, expect, it, vi } from "vitest";
 import type { Model } from "../api/types";
 import { ChampionshipReview } from "./championship";
@@ -91,11 +91,6 @@ it("offers no fabricated champion or finalization for unresolved title", () => {
 });
 it.each([
   ["championship_deaths_unavailable", /Faltan muertes oficiales fiables/],
-  [
-    "championship_triple_unresolved",
-    /todavía no permite registrar esta resolución/,
-  ],
-  ["championship_many_tied", /todavía no aplica esa regla a este caso/],
 ])(
   "explains %s without inventing an Admin resolution or ranking",
   (reason, message) => {
@@ -134,4 +129,41 @@ it("requires an explicit BO3 winner and reason; never preselects technical order
   expect(
     screen.queryByRole("button", { name: "Finalizar Liga" }),
   ).not.toBeInTheDocument();
+});
+
+it("records a residual decision only from the server candidate list and explicit reason", () => {
+  Object.assign(mocks.data!, {
+    state: "residual_required",
+    champion_trainer_id: null,
+    resolution_type: null,
+    tied_player_ids: ["p1", "p2"],
+  });
+  render(<ChampionshipReview seasonName="Liga" />);
+  const select = screen.getByLabelText("Ganador del desempate externo");
+  expect(select).toHaveValue("");
+  fireEvent.change(select, { target: { value: "p2" } });
+  fireEvent.change(screen.getByLabelText("Resultado y motivo del desempate"), {
+    target: { value: "Decisión externa acordada" },
+  });
+  fireEvent.submit(select.closest("form")!);
+  expect(mocks.execute).toHaveBeenCalledWith(
+    "/v1/admin/seasons/season/championship/residual",
+    {
+      expected_revision: 7,
+      input_hash: "a".repeat(64),
+      winner_season_player_id: "p2",
+      reason: "Decisión externa acordada",
+    },
+  );
+});
+it("participants can review a residual tie but cannot record the exception", () => {
+  Object.assign(mocks.data!, {
+    state: "residual_required",
+    champion_trainer_id: null,
+    resolution_type: null,
+    tied_player_ids: ["p1", "p2"],
+  });
+  render(<ChampionshipReview participant seasonName="Liga" />);
+  expect(screen.queryByRole("combobox")).not.toBeInTheDocument();
+  expect(screen.getByText(/Administración debe registrar/)).toBeVisible();
 });

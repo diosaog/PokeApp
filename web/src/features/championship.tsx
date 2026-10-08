@@ -21,6 +21,7 @@ const labels: Record<Championship["state"], string> = {
   incomplete: "Liga pendiente de completar",
   ready: "Campeonato resuelto",
   bo3_required: "Empate por el campeonato",
+  residual_required: "Desempate externo pendiente",
   owner_decision_required: "Campeonato pendiente de decisión",
   frozen: "Campeón de Liga confirmado",
   legacy: "Historia de una temporada anterior",
@@ -29,16 +30,19 @@ const labels: Record<Championship["state"], string> = {
 const unresolvedReasons: Record<string, string> = {
   championship_deaths_unavailable:
     "Faltan muertes oficiales fiables para comparar a los líderes empatados. No se puede asignar un campeón con datos desconocidos.",
-  championship_triple_unresolved:
-    "El empate continúa después de comparar las muertes oficiales. Hace falta un desempate externo excepcional; PokeApp todavía no permite registrar esta resolución.",
-  championship_many_tied:
-    "Hay cuatro o más líderes empatados. La regla aprobada usa menos muertes oficiales, pero PokeApp todavía no aplica esa regla a este caso. El título seguirá pendiente hasta completar ese soporte.",
 };
 
 /** The server decides the title from exact frozen facts. This view never ranks. */
-export function ChampionshipReview({ seasonName }: { seasonName: string }) {
+export function ChampionshipReview({
+  seasonName,
+  participant = false,
+}: {
+  seasonName: string;
+  participant?: boolean;
+}) {
   const { season, holdAdminNavigation } = useApp(),
-    path = `/v1/admin/seasons/${season}/championship`,
+    base = `/v1/${participant ? "" : "admin/"}seasons/${season}`,
+    path = `${base}/championship`,
     query = useRead<Championship>(path, !!season),
     command = useCommand([
       path,
@@ -53,7 +57,6 @@ export function ChampionshipReview({ seasonName }: { seasonName: string }) {
     command.error instanceof ApiError && command.error.status === 409
       ? command.error
       : null;
-  const refetch = query.refetch;
   useEffect(() => {
     if ((command.pending || command.uncertain) && holdAdminNavigation)
       return holdAdminNavigation();
@@ -61,8 +64,7 @@ export function ChampionshipReview({ seasonName }: { seasonName: string }) {
   useEffect(() => {
     if (!conflict) return;
     setReset((value) => value + 1);
-    void refetch();
-  }, [conflict, refetch]);
+  }, [conflict]);
   if (query.isPending) return <Loading />;
   if (query.error)
     return (
@@ -87,12 +89,9 @@ export function ChampionshipReview({ seasonName }: { seasonName: string }) {
       {data.resolution_type === "championship_bo3" && (
         <p>Desempate resuelto mediante un Mejor de 3 externo registrado.</p>
       )}
-      {data.resolution_type === "triple_adjusted_deaths" && (
-        <p>
-          Empate triple: resuelto por las menores muertes competitivas
-          ajustadas.
-        </p>
-      )}
+      {["triple_adjusted_deaths", "multiple_adjusted_deaths"].includes(
+        data.resolution_type ?? "",
+      ) && <p>Desempate resuelto por menos muertes ajustadas oficiales.</p>}
       {data.state === "incomplete" && (
         <p>
           Completa y cierra todas las jornadas de Liga antes de revisar el
@@ -134,45 +133,68 @@ export function ChampionshipReview({ seasonName }: { seasonName: string }) {
           </table>
         </div>
       )}
-      {data.state === "bo3_required" && (
-        <form
-          key={`${data.input_hash}:${reset}`}
-          onSubmit={(event) => {
-            const values = form(event);
-            if (disabled || !data.input_hash) return;
-            void command.execute(`${path}/bo3`, {
-              expected_revision: data.setup_revision,
-              input_hash: data.input_hash,
-              winner_season_player_id: text(values, "winner"),
-              reason: text(values, "reason").trim(),
-            } satisfies Model<"ChampionshipBo3Body">);
-          }}
-        >
-          <p>
-            Los dos líderes jugarán un Mejor de 3 externo para decidir el
-            campeón. Registra su ganador cuando haya terminado.
-          </p>
-          <fieldset disabled={disabled}>
-            <Field label="Ganador del Mejor de 3">
-              <select name="winner" required defaultValue="">
-                <option value="">Seleccionar el ganador del desempate</option>
-                {data.tied_player_ids.map((id) => (
-                  <option key={id} value={id}>
-                    {
-                      data.players.find((p) => p.season_player_id === id)
-                        ?.display_name
-                    }
-                  </option>
-                ))}
-              </select>
-            </Field>
-            <Field label="Resultado y motivo del desempate">
-              <textarea name="reason" required maxLength={500} />
-            </Field>
-            <Submit pending={disabled}>Registrar ganador del desempate</Submit>
-          </fieldset>
-        </form>
+      {data.resolution_type === "championship_residual" && (
+        <p>Desempate externo registrado.</p>
       )}
+      {participant &&
+        ["bo3_required", "residual_required"].includes(data.state) && (
+          <p>
+            Administración debe registrar el resultado del desempate externo.
+          </p>
+        )}
+      {!participant &&
+        (data.state === "bo3_required" ||
+          data.state === "residual_required") && (
+          <form
+            key={`${data.input_hash}:${reset}`}
+            onSubmit={(event) => {
+              const values = form(event);
+              if (disabled || !data.input_hash) return;
+              void command.execute(
+                `${path}/${data.state === "bo3_required" ? "bo3" : "residual"}`,
+                {
+                  expected_revision: data.setup_revision,
+                  input_hash: data.input_hash,
+                  winner_season_player_id: text(values, "winner"),
+                  reason: text(values, "reason").trim(),
+                } satisfies Model<"ChampionshipBo3Body">,
+              );
+            }}
+          >
+            <p>
+              {data.state === "bo3_required"
+                ? "Los dos líderes jugarán un Mejor de 3 externo. Registra su ganador."
+                : "Persiste el empate tras comparar muertes. Registra la resolución externa entre los candidatos indicados."}
+            </p>
+            <fieldset disabled={disabled}>
+              <Field
+                label={
+                  data.state === "bo3_required"
+                    ? "Ganador del Mejor de 3"
+                    : "Ganador del desempate externo"
+                }
+              >
+                <select name="winner" required defaultValue="">
+                  <option value="">Seleccionar el ganador del desempate</option>
+                  {data.tied_player_ids.map((id) => (
+                    <option key={id} value={id}>
+                      {
+                        data.players.find((p) => p.season_player_id === id)
+                          ?.display_name
+                      }
+                    </option>
+                  ))}
+                </select>
+              </Field>
+              <Field label="Resultado y motivo del desempate">
+                <textarea name="reason" required maxLength={500} />
+              </Field>
+              <Submit pending={disabled}>
+                Registrar ganador del desempate
+              </Submit>
+            </fieldset>
+          </form>
+        )}
       {data.state !== "legacy" && data.state !== "incomplete" && (
         <p>
           La regla de finalista está pendiente de una decisión del propietario;
@@ -218,7 +240,7 @@ export function ChampionshipReview({ seasonName }: { seasonName: string }) {
               )
                 return;
               if (
-                await command.execute(`/v1/admin/seasons/${season}/finish`, {
+                await command.execute(`${base}/finish`, {
                   expected_revision: data.setup_revision,
                   input_hash: data.input_hash,
                 } satisfies Model<"FinishSeasonBody">)

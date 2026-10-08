@@ -28,4 +28,5 @@ def scouting(repository, season_id, viewer_trainer_id, selection):
         trainers=preview.trainers,
         trainer_id=selected,
         team=[p.model_dump() for p in lock.team] if lock is not None else None,
+        team_lock_status=lock.timing_status if lock is not None else "pending",
     )

@@ -19,6 +19,10 @@ import { Inventory } from "./inventory";
 import { ParticipantResults } from "./league-results";
 import { InitialAssignment } from "./initial-assignment";
 import { WipeRevivals } from "./wipe-revivals";
+import { PokemonDetails } from "./pokemon-details";
+import { participantLabel } from "./admin-labels";
+import { LeagueOperations } from "./league-operations";
+import { LockStatus } from "./lock-status";
 import { TeamLockWarning } from "./team-lock-warning";
 import {
   Card,
@@ -181,6 +185,11 @@ export function HomePage() {
                   <ShieldCheck size={27} />
                   <span className="eyebrow">TU EQUIPO</span>
                   <h2>{lock ? "Equipo fijado." : "¿Listo para combatir?"}</h2>
+                  <LockStatus
+                    status={
+                      lock ? (lock.timing_status ?? "unknown") : "pending"
+                    }
+                  />
                   <p>
                     {lock
                       ? "El Team Lock de esta jornada está registrado."
@@ -525,6 +534,7 @@ export function LeaguePage() {
               {!day ? (
                 <>
                   <LeagueGeneral data={data} />
+                  <LeagueOperations key={data.season.id} data={data} />
                   <WipeRevivals data={data} />
                 </>
               ) : (
@@ -552,22 +562,20 @@ export function TrainersPage() {
         {(data) => (
           <div className="trainer-grid">
             {data.players.map((p) => (
-              <Card key={p.id}>
+              <Link
+                className="card trainer-profile-link"
+                key={p.id}
+                to={`/entrenadores/${p.trainer_id}`}
+              >
                 <div className="trainer-top">
                   <div className="avatar large">
                     {p.display_name.slice(0, 2).toUpperCase()}
                   </div>
-                  <Tag>{p.status}</Tag>
+                  <Tag>{participantLabel(p.status)}</Tag>
                 </div>
                 <h2>{p.display_name}</h2>
-                <Link
-                  to="/entrenadores/scouting"
-                  state={{ season: data.season.id, trainer: p.trainer_id }}
-                >
-                  Ver equipo público de {p.display_name}
-                </Link>
                 <GameProgress progress={p.progress} />
-              </Card>
+              </Link>
             ))}
           </div>
         )}
@@ -638,39 +646,7 @@ export function PCPage() {
         >
           <Tag>{selected.location}</Tag>
           <Pokemon pokemon={selected.pokemon} />
-          <dl className="details">
-            <dt>Habilidad</dt>
-            <dd>{selected.pokemon.ability || "—"}</dd>
-            <dt>Naturaleza</dt>
-            <dd>{selected.pokemon.nature || "—"}</dd>
-            <dt>Objeto</dt>
-            <dd>{selected.pokemon.item || "—"}</dd>
-          </dl>
-          <h3>Movimientos</h3>
-          <div className="moves">
-            {selected.pokemon.moves?.map((m) => (
-              <span key={m.name}>
-                {m.name} {m.pp != null && `· ${m.pp} PP`}
-              </span>
-            ))}
-          </div>
-          {(["ivs", "evs"] as const).map((k) => (
-            <div key={k}>
-              <h3>{k.toUpperCase()}</h3>
-              {selected.pokemon[k] ? (
-                <dl className="stats-list">
-                  {Object.entries(selected.pokemon[k]!).map(([stat, value]) => (
-                    <div key={stat}>
-                      <dt>{stat}</dt>
-                      <dd>{value}</dd>
-                    </div>
-                  ))}
-                </dl>
-              ) : (
-                <p>No disponibles.</p>
-              )}
-            </div>
-          ))}
+          <PokemonDetails visibility="self" pokemon={selected.pokemon} />
         </Modal>
       )}
     </>
@@ -738,7 +714,8 @@ export function ShopPage() {
       `/v1/read/seasons/${season}/league`,
     ]),
     [item, setItem] = useState<Model<"ItemRead"> | null>(null),
-    [base, setBase] = useState(false);
+    [base, setBase] = useState(false),
+    [category, setCategory] = useState("comodines");
   const promo = query.data?.promotions.find(
     (p) => p.shop_item_id === item?.id && p.status === "active",
   );
@@ -766,67 +743,89 @@ export function ShopPage() {
                   artículos disponibles.
                 </p>
               )}
+              <nav className="tabs" aria-label="Categorías de tienda">
+                {(
+                  [
+                    ["comodines", "Comodines"],
+                    ["bayas", "Bayas"],
+                    ["competitivos", "Competitivos"],
+                    ["crianza", "Crianza"],
+                  ] as const
+                ).map(([id, label]) => (
+                  <button
+                    key={id}
+                    className={category === id ? "active" : ""}
+                    aria-pressed={category === id}
+                    onClick={() => setCategory(id)}
+                  >
+                    {label}
+                  </button>
+                ))}
+              </nav>
               <div className="shop-grid">
-                {query.data.items.map((i) => {
-                  const p = query.data!.promotions.find(
-                    (p) => p.shop_item_id === i.id && p.status === "active",
-                  );
-                  const upcoming = query.data!.promotions.filter(
-                    (offer) =>
-                      offer.shop_item_id === i.id && offer.status === "pending",
-                  );
-                  return (
-                    <Card key={i.id} className="shop-card">
-                      <div className="shop-icon">
-                        <ShoppingBag />
-                      </div>
-                      <span className="eyebrow">{i.category}</span>
-                      <h2>{i.name}</h2>
-                      <p>{i.description}</p>
-                      {p && (
-                        <Tag>
-                          Promoción activa ·{" "}
-                          {p.stock_total == null
-                            ? "Sin límite"
-                            : Math.max(0, p.stock_total - p.stock_used)}{" "}
-                          disponibles
-                        </Tag>
-                      )}
-                      {upcoming.map((offer) => (
-                        <p key={offer.id}>
-                          <Tag>Próxima promoción</Tag> {offer.effective_price}{" "}
-                          PK₽ · Aún no disponible
-                          {offer.activates_at &&
-                            ` · Desde ${date(offer.activates_at)}`}
-                        </p>
-                      ))}
-                      <div className="shop-bottom">
-                        <strong>
-                          {p?.effective_price ?? i.base_price}{" "}
-                          <small>PK₽</small>
-                        </strong>
-                        <button
-                          className="button"
-                          disabled={
-                            cmd.pending ||
-                            cmd.uncertain ||
-                            (!p &&
-                              upcoming.length > 0 &&
-                              i.category !== "comodines")
-                          }
-                          onClick={() => {
-                            setItem(i);
-                            setBase(false);
-                          }}
-                        >
-                          Comprar
-                        </button>
-                      </div>
-                    </Card>
-                  );
-                })}
+                {query.data.items
+                  .filter((i) => i.category === category)
+                  .map((i) => {
+                    const p = query.data!.promotions.find(
+                      (p) => p.shop_item_id === i.id && p.status === "active",
+                    );
+                    const upcoming = query.data!.promotions.filter(
+                      (offer) =>
+                        offer.shop_item_id === i.id &&
+                        offer.status === "pending",
+                    );
+                    return (
+                      <Card key={i.id} className="shop-card">
+                        <div className="shop-icon">
+                          <ShoppingBag />
+                        </div>
+                        <span className="eyebrow">{i.category}</span>
+                        <h2>{i.name}</h2>
+                        <p>{i.description}</p>
+                        {p && (
+                          <Tag>
+                            Promoción activa ·{" "}
+                            {p.stock_total == null
+                              ? "Sin límite"
+                              : Math.max(0, p.stock_total - p.stock_used)}{" "}
+                            disponibles
+                          </Tag>
+                        )}
+                        {upcoming.map((offer) => (
+                          <p key={offer.id}>
+                            <Tag>Próxima promoción</Tag> {offer.effective_price}{" "}
+                            PK₽ · Aún no disponible
+                            {offer.activates_at &&
+                              ` · Desde ${date(offer.activates_at)}`}
+                          </p>
+                        ))}
+                        <div className="shop-bottom">
+                          <strong>
+                            {p?.effective_price ?? i.base_price}{" "}
+                            <small>PK₽</small>
+                          </strong>
+                          <button
+                            className="button"
+                            disabled={
+                              cmd.pending ||
+                              cmd.uncertain ||
+                              (!p &&
+                                upcoming.length > 0 &&
+                                i.category !== "comodines")
+                            }
+                            onClick={() => {
+                              setItem(i);
+                              setBase(false);
+                            }}
+                          >
+                            Comprar
+                          </button>
+                        </div>
+                      </Card>
+                    );
+                  })}
               </div>
-              {!query.data.items.length && (
+              {!query.data.items.some((i) => i.category === category) && (
                 <Empty>No hay artículos disponibles.</Empty>
               )}
             </>

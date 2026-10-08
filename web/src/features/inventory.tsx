@@ -54,7 +54,16 @@ export function Inventory() {
         <div className="trainer-grid">
           {q.data.purchases.map((p) => (
             <Card key={p.id}>
-              <Tag>{p.status}</Tag>
+              <Tag>
+                {(
+                  {
+                    pending: "Pendiente de canjear",
+                    used: "Canjeado",
+                    cancelled: "Cancelado",
+                    refunded: "Reembolsado",
+                  } as Record<string, string>
+                )[p.status] ?? "Estado no disponible"}
+              </Tag>
               {p.acquisition_type === "reward" && <Tag>Vale de recompensa</Tag>}
               <h3>{p.item_name}</h3>
               <p>

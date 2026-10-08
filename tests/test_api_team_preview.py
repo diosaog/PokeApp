@@ -112,6 +112,14 @@ class TeamPreviewTests(unittest.TestCase):
         self.assertEqual(self.store.data, self.before)
         self.assertNotIn("public_matches", [c[0] for c in self.store.calls])
 
+    def test_first_fixation_status_survives_private_projection_and_legacy_flags(self):
+        for status in ('on_time', 'late', 'unknown'):
+            self.store.data['public_team_locks'][0]['timing_status'] = status
+            self.store.data['team_locks'][0]['is_late'] = status != 'late'
+            response = self.get(mode='battle', trainer_id=TRAINER_ID)
+            self.assertEqual(response.status_code, 200)
+            self.assertEqual(response.json()['teams'][0]['lock']['timing_status'], status)
+
     def test_spectator_self_stays_public_without_private_query(self):
         self.assert_public(self.get(trainer_id=TRAINER_ID, second_trainer_id=RIVAL))
         self.assertNotIn("team_locks", [c[0] for c in self.store.calls])

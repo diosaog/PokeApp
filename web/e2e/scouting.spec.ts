@@ -41,8 +41,9 @@ test("trainer entry chooses a public team without a scheduled battle or private 
     if (r.method() === "GET") reads.push(new URL(r.url()).pathname);
   });
   await page
-    .getByRole("link", { name: "Ver equipo público de Marcos", exact: true })
+    .getByRole("link", { name: "Explorar equipos públicos", exact: true })
     .click();
+  await page.getByLabel("Entrenador a consultar").selectOption("t3");
   await expect(
     page.getByRole("heading", { name: "Equipos públicos", exact: true }),
   ).toBeVisible();
@@ -74,7 +75,7 @@ test("cached private battle details never appear in self scouting and selectors 
   await expect(page.getByText("Foco interno", { exact: true })).toHaveCount(6);
   await navigate(page, "Entrenadores");
   await page
-    .getByRole("link", { name: "Ver equipo público de Antonio", exact: true })
+    .getByRole("link", { name: "Explorar equipos públicos", exact: true })
     .click();
   await expect(page.getByLabel("Entrenador a consultar")).toHaveValue(tid);
   await expect(page.getByText("Foco interno", { exact: true })).toHaveCount(0);

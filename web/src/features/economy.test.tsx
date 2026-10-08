@@ -90,6 +90,7 @@ it("renders exact large and negative wallets and allows explicit post-League pur
       <ShopPage />
     </MemoryRouter>,
   );
+  fireEvent.click(screen.getByRole("button", { name: "Competitivos" }));
   expect(screen.getByText("9007199254740993 PK₽")).toBeInTheDocument();
   expect(screen.getByText(/La Liga ha terminado/)).toBeInTheDocument();
   fireEvent.click(screen.getByRole("button", { name: "Comprar" }));
@@ -107,6 +108,7 @@ it("renders exact large and negative wallets and allows explicit post-League pur
       <ShopPage />
     </MemoryRouter>,
   );
+  fireEvent.click(screen.getByRole("button", { name: "Competitivos" }));
   expect(screen.getByText("-9007199254740993 PK₽")).toBeInTheDocument();
   expect(mocks.paths).toHaveBeenCalledWith(
     expect.arrayContaining([
@@ -133,6 +135,7 @@ it("shows pending promotions without inventing activation dates or enabling thei
       <ShopPage />
     </MemoryRouter>,
   );
+  fireEvent.click(screen.getByRole("button", { name: "Competitivos" }));
   expect(screen.getByText("Próxima promoción")).toBeInTheDocument();
   expect(screen.getByText(/3 PK₽ · Aún no disponible/)).toBeInTheDocument();
   expect(screen.queryByText(/Desde/)).not.toBeInTheDocument();
@@ -156,6 +159,8 @@ it("uses only the authoritative active offer ID for its promotional price", asyn
       <ShopPage />
     </MemoryRouter>,
   );
+  expect(screen.getByRole("button", { name: "Competitivos" })).toBeEnabled();
+  fireEvent.click(screen.getByRole("button", { name: "Competitivos" }));
   expect(
     screen.getByText(/Promoción activa · 1 disponibles/),
   ).toBeInTheDocument();

@@ -6,6 +6,7 @@ from app.application.initial_assignment import initial_assignment_review, plan_i
 
 
 RPCS = {
+    "live_rules_read": "api_admin_live_rules_read", "live_rules_update": "api_admin_live_rules_update",
     "setup": "api_admin_get_setup", "create": "api_admin_create_season",
     "rename": "api_admin_rename_season", "add_participant": "api_admin_add_participant",
     "remove_participant": "api_admin_remove_participant", "create_config": "api_admin_create_config",

@@ -1,4 +1,5 @@
 """Strict public contract for initial season administration, not generic CRUD."""
+from datetime import datetime
 from typing import Annotated, Literal
 from uuid import UUID
 
@@ -43,6 +44,23 @@ class FunctionalRules(StrictBody):
     last_b_gets_steal: Annotated[bool, Field(strict=True)]
     badge_reward_coins: Annotated[int, Field(strict=True, ge=0, le=2147483647)] = 4
     game_completion_reward_coins: Annotated[int, Field(strict=True, ge=0, le=2147483647)] = 12
+
+
+class LiveRulesBody(StrictBody):
+    expected_revision: Revision
+    expected_config_revision: Revision
+    badge_reward_coins: Annotated[int, Field(strict=True, ge=0, le=2147483647)]
+    game_completion_reward_coins: Annotated[int, Field(strict=True, ge=0, le=2147483647)]
+
+
+class LiveRulesRead(StrictBody):
+    season_id: UUID
+    revision: Revision
+    config_revision: Revision
+    badge_reward_coins: Annotated[int, Field(strict=True, ge=0, le=2147483647)]
+    game_completion_reward_coins: Annotated[int, Field(strict=True, ge=0, le=2147483647)]
+    effective_at: datetime | None
+    editable: bool
 
 
 class ConfigVersionBody(StrictBody):

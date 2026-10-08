@@ -157,6 +157,24 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/v1/admin/seasons/{season_id}/rules": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Get Rules */
+    get: operations["get_rules_v1_admin_seasons__season_id__rules_get"];
+    /** Update Rules */
+    put: operations["update_rules_v1_admin_seasons__season_id__rules_put"];
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/v1/admin/seasons": {
     parameters: {
       query?: never;
@@ -446,6 +464,40 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/v1/seasons/{season_id}/matchdays/{day_id}/open": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** Participant Open */
+    post: operations["participant_open_v1_seasons__season_id__matchdays__day_id__open_post"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/seasons/{season_id}/matchdays/{day_id}/close": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** Participant Close */
+    post: operations["participant_close_v1_seasons__season_id__matchdays__day_id__close_post"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/v1/admin/seasons/{season_id}/participants/{participant_id}/retire": {
     parameters: {
       query?: never;
@@ -548,6 +600,23 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/v1/admin/seasons/{season_id}/championship/residual": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** Championship Residual */
+    post: operations["championship_residual_v1_admin_seasons__season_id__championship_residual_post"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/v1/admin/seasons/{season_id}/archive": {
     parameters: {
       query?: never;
@@ -576,6 +645,40 @@ export interface paths {
     put?: never;
     /** Discard */
     post: operations["discard_v1_admin_seasons__season_id__discard_post"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/seasons/{season_id}/championship": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Participant Championship */
+    get: operations["participant_championship_v1_seasons__season_id__championship_get"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/seasons/{season_id}/finish": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** Participant Finish */
+    post: operations["participant_finish_v1_seasons__season_id__finish_post"];
     delete?: never;
     options?: never;
     head?: never;
@@ -1257,6 +1360,7 @@ export interface components {
         | "incomplete"
         | "ready"
         | "bo3_required"
+        | "residual_required"
         | "owner_decision_required"
         | "frozen"
         | "legacy";
@@ -1272,7 +1376,13 @@ export interface components {
       champion_trainer_id: string | null;
       /** Resolution Type */
       resolution_type:
-        | ("unique_points" | "championship_bo3" | "triple_adjusted_deaths")
+        | (
+            | "unique_points"
+            | "championship_bo3"
+            | "triple_adjusted_deaths"
+            | "multiple_adjusted_deaths"
+            | "championship_residual"
+          )
         | null;
       /**
        * Finalist Status
@@ -2192,6 +2302,37 @@ export interface components {
       /** Dead Count Observed At */
       dead_count_observed_at: string | null;
     };
+    /** LiveRulesBody */
+    LiveRulesBody: {
+      /** Expected Revision */
+      expected_revision: number;
+      /** Expected Config Revision */
+      expected_config_revision: number;
+      /** Badge Reward Coins */
+      badge_reward_coins: number;
+      /** Game Completion Reward Coins */
+      game_completion_reward_coins: number;
+    };
+    /** LiveRulesRead */
+    LiveRulesRead: {
+      /**
+       * Season Id
+       * Format: uuid
+       */
+      season_id: string;
+      /** Revision */
+      revision: number;
+      /** Config Revision */
+      config_revision: number;
+      /** Badge Reward Coins */
+      badge_reward_coins: number;
+      /** Game Completion Reward Coins */
+      game_completion_reward_coins: number;
+      /** Effective At */
+      effective_at: string | null;
+      /** Editable */
+      editable: boolean;
+    };
     /** LockRead */
     LockRead: {
       /**
@@ -2211,6 +2352,12 @@ export interface components {
       locked_at: string;
       /** Is Late */
       is_late: boolean;
+      /**
+       * Timing Status
+       * @default unknown
+       * @enum {string}
+       */
+      timing_status: "on_time" | "late" | "unknown";
       /** Public Team Snapshot */
       public_team_snapshot: components["schemas"]["PokemonRead"][];
     };
@@ -2427,6 +2574,11 @@ export interface components {
       status: "no_current_save" | "not_ready" | "ready" | "unsupported_payload";
       /** Pokemon */
       pokemon: components["schemas"]["SlotRead"][];
+    };
+    /** ParticipantCloseDayBody */
+    ParticipantCloseDayBody: {
+      /** Expected Results Revision */
+      expected_results_revision: number;
     };
     /** ParticipantStatusBody */
     ParticipantStatusBody: {
@@ -2815,6 +2967,12 @@ export interface components {
       locked_at: string;
       /** Is Late */
       is_late: boolean;
+      /**
+       * Timing Status
+       * @default unknown
+       * @enum {string}
+       */
+      timing_status: "on_time" | "late" | "unknown";
       /** Team */
       team: components["schemas"]["PokemonRead"][];
     };
@@ -3157,6 +3315,12 @@ export interface components {
       trainer_id: string | null;
       /** Team */
       team: components["schemas"]["ScoutingPokemon"][] | null;
+      /**
+       * Team Lock Status
+       * @default pending
+       * @enum {string}
+       */
+      team_lock_status: "pending" | "on_time" | "late" | "unknown";
     };
     /** SeasonLifecycleReceipt */
     SeasonLifecycleReceipt: {
@@ -3179,7 +3343,12 @@ export interface components {
        * Operation
        * @enum {string}
        */
-      operation: "finish" | "archive" | "discard" | "championship_bo3";
+      operation:
+        | "finish"
+        | "archive"
+        | "discard"
+        | "championship_bo3"
+        | "championship_residual";
       /**
        * State
        * @enum {string}
@@ -3279,6 +3448,12 @@ export interface components {
       locked_at: string;
       /** Is Late */
       is_late: boolean;
+      /**
+       * Timing Status
+       * @default unknown
+       * @enum {string}
+       */
+      timing_status: "on_time" | "late" | "unknown";
       /** Team */
       team: components["schemas"]["PrivatePokemonRead"][];
     };
@@ -4069,6 +4244,74 @@ export interface operations {
       };
     };
   };
+  get_rules_v1_admin_seasons__season_id__rules_get: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        season_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["LiveRulesRead"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  update_rules_v1_admin_seasons__season_id__rules_put: {
+    parameters: {
+      query?: never;
+      header: {
+        "idempotency-key": string;
+      };
+      path: {
+        season_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["LiveRulesBody"];
+      };
+    };
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["AdminReceipt"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
   create_season_v1_admin_seasons_post: {
     parameters: {
       query?: never;
@@ -4710,6 +4953,91 @@ export interface operations {
       };
     };
   };
+  participant_open_v1_seasons__season_id__matchdays__day_id__open_post: {
+    parameters: {
+      query?: never;
+      header: {
+        "idempotency-key": string;
+      };
+      path: {
+        season_id: string;
+        day_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["OpenDayBody"];
+      };
+    };
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["DayReceipt"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  participant_close_v1_seasons__season_id__matchdays__day_id__close_post: {
+    parameters: {
+      query?: never;
+      header: {
+        "idempotency-key": string;
+      };
+      path: {
+        season_id: string;
+        day_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["ParticipantCloseDayBody"];
+      };
+    };
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["DayReceipt"];
+        };
+      };
+      /** @description Conflict */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["RankingErrorResponse"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
   retire_v1_admin_seasons__season_id__participants__participant_id__retire_post: {
     parameters: {
       query?: never;
@@ -4929,6 +5257,43 @@ export interface operations {
       };
     };
   };
+  championship_residual_v1_admin_seasons__season_id__championship_residual_post: {
+    parameters: {
+      query?: never;
+      header: {
+        "idempotency-key": string;
+      };
+      path: {
+        season_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["ChampionshipBo3Body"];
+      };
+    };
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["SeasonLifecycleReceipt"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
   archive_v1_admin_seasons__season_id__archive_post: {
     parameters: {
       query?: never;
@@ -4980,6 +5345,74 @@ export interface operations {
     requestBody: {
       content: {
         "application/json": components["schemas"]["DiscardSeasonBody"];
+      };
+    };
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["SeasonLifecycleReceipt"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  participant_championship_v1_seasons__season_id__championship_get: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        season_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ChampionshipRead"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  participant_finish_v1_seasons__season_id__finish_post: {
+    parameters: {
+      query?: never;
+      header: {
+        "idempotency-key": string;
+      };
+      path: {
+        season_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["FinishSeasonBody"];
       };
     };
     responses: {

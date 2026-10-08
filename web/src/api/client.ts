@@ -185,7 +185,9 @@ export function errorText(error: unknown) {
   if (error.code === "CHAMPIONSHIP_BO3_NOT_REQUIRED")
     return "El estado actual del campeonato no permite registrar este desempate. Revisa los datos actualizados.";
   if (error.code === "INVALID_CHAMPIONSHIP_WINNER")
-    return "El ganador debe ser uno de los dos participantes empatados por el campeonato.";
+    return "El ganador debe ser uno de los candidatos indicados para el desempate.";
+  if (error.code === "CHAMPIONSHIP_RESOLUTION_NOT_REQUIRED")
+    return "El campeonato cambió. Revisa el desempate actual antes de registrar una decisión.";
   if (error.code === "LEGACY_TITLE_UNCERTIFIED")
     return "Esta temporada anterior no tiene una certificación de título compatible. Su historia se conserva y requiere revisión.";
   const labels: Record<number, string> = {

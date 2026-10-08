@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import { ShieldCheck } from "lucide-react";
 import type { Model } from "../api/types";
-import { queries, useApp, useRead, usePC } from "../state";
+import { useApp, useRead, usePC } from "../state";
+import { LockStatus } from "./lock-status";
 import {
   Card,
   CommandState,
@@ -182,9 +183,9 @@ function Preview({ season }: { season: string }) {
                             : "Equipo público"}
                         </Tag>
                         <p>
-                          {entry.lock.is_late
-                            ? "Team Lock tardío"
-                            : "Team Lock confirmado"}{" "}
+                          <LockStatus
+                            status={entry.lock.timing_status ?? "unknown"}
+                          />{" "}
                           · {date(entry.lock.locked_at)}
                         </p>
                         {entry.lock.team.map((pokemon, index) => (
@@ -273,17 +274,7 @@ function LockConfirmation({
   useEffect(() => {
     if (!cmd.success || cmd.pending || refreshed.current) return;
     refreshed.current = true;
-    // This also runs after an explicit retry with an initially unknown outcome.
-    void queries
-      .invalidateQueries({
-        predicate: (q) =>
-          ["team-preview", "scouting"].some((view) =>
-            String(q.queryKey[1]).startsWith(
-              `/v1/read/seasons/${season}/${view}?`,
-            ),
-          ),
-      })
-      .then(onClose);
+    onClose();
   }, [cmd.success, cmd.pending, season, onClose]);
   return (
     <Modal

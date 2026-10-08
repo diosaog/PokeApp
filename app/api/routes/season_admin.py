@@ -14,6 +14,7 @@ from app.api.season_admin_models import (
 )
 from app.repositories.errors import PersistenceError
 from app.repositories.supabase.season_admin import SeasonAdminRejected
+from app.api.season_admin_models import LiveRulesBody, LiveRulesRead
 
 router = APIRouter(prefix="/v1/admin", tags=["season administration"])
 Admin = Annotated[AuthenticatedPrincipal, Depends(require_admin_principal)]
@@ -38,7 +39,7 @@ def _execute(op, principal, container, payload=None, season_id=None, resource_id
         if repo is None:
             raise PersistenceError("Missing backend")
         raw = repo.execute(op, request)
-        model = SeasonSetup if op == "setup" else AdminReceipt
+        model = SeasonSetup if op == "setup" else LiveRulesRead if op == "live_rules_read" else AdminReceipt
         result = model.model_validate(raw)
         actual_season = result.season.id if op == "setup" else result.season_id
         if season_id is not None and str(actual_season) != str(season_id):
@@ -55,6 +56,16 @@ def _execute(op, principal, container, payload=None, season_id=None, resource_id
 @router.get("/seasons/{season_id}/setup", response_model=SeasonSetup)
 def get_setup(season_id: UUID, principal: Admin, container: Container):
     return _execute("setup", principal, container, season_id=season_id)
+
+
+@router.get("/seasons/{season_id}/rules", response_model=LiveRulesRead)
+def get_rules(season_id: UUID, principal: Admin, container: Container):
+    return _execute("live_rules_read", principal, container, season_id=season_id)
+
+
+@router.put("/seasons/{season_id}/rules", response_model=AdminReceipt)
+def update_rules(season_id: UUID, payload: LiveRulesBody, idempotency_key: Key, principal: Admin, container: Container):
+    return _execute("live_rules_update", principal, container, payload, season_id, key=idempotency_key)
 
 
 @router.post("/seasons", response_model=AdminReceipt)

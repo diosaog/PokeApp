@@ -402,7 +402,7 @@ export async function fixture(page: Page, longNames = false) {
             id: "item",
             code: "blindar_pokemon",
             name: "Escudo Pokémon",
-            category: "Protección",
+            category: "comodines",
             description: "Protege a un miembro de tu equipo.",
             base_price: 30,
           },
@@ -410,7 +410,7 @@ export async function fixture(page: Page, longNames = false) {
             id: "item2",
             code: "revivir_pokemon",
             name: "Revivir",
-            category: "Recuperación",
+            category: "comodines",
             description: "Una nueva oportunidad para seguir luchando.",
             base_price: 45,
           },
@@ -418,7 +418,7 @@ export async function fixture(page: Page, longNames = false) {
             id: "item3",
             code: "robar_pokemon",
             name: "Robo Pokémon",
-            category: "Estrategia",
+            category: "comodines",
             description: "Un movimiento inesperado puede cambiar la partida.",
             base_price: 60,
           },
@@ -469,6 +469,16 @@ export async function fixture(page: Page, longNames = false) {
             detail: null,
           },
         ],
+      };
+    else if (path.endsWith("/rules"))
+      result = {
+        season_id: sid,
+        revision: 0,
+        config_revision: 2,
+        badge_reward_coins: 4,
+        game_completion_reward_coins: 12,
+        effective_at: null,
+        editable: true,
       };
     else if (path.endsWith("/setup"))
       result = {

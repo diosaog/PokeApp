@@ -35,12 +35,14 @@ class PreviewTrainer(BaseModel):
 class PublicPreviewLock(BaseModel):
     locked_at: datetime
     is_late: bool
+    timing_status: Literal["on_time", "late", "unknown"] = "unknown"
     team: list[PokemonRead] = Field(min_length=6, max_length=6)
 
 
 class SelfPreviewLock(BaseModel):
     locked_at: datetime
     is_late: bool
+    timing_status: Literal["on_time", "late", "unknown"] = "unknown"
     team: list[PrivatePokemonRead] = Field(min_length=6, max_length=6)
 
 

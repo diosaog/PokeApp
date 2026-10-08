@@ -1,5 +1,6 @@
 import type { Model } from "../api/types";
-import { useApp, useRead } from "../state";
+import { queries, useApp, useRead } from "../state";
+import { invalidationFor } from "../read-invalidation";
 import { Card, Loading, Notice, Tag, date } from "../ui";
 
 const regions = {
@@ -58,7 +59,7 @@ export function GameProgress({
 }
 
 export function MyProgress() {
-  const { season } = useApp();
+  const { season, me } = useApp();
   const query = useRead<Model<"ProgressRead">>(
     `/v1/read/seasons/${season}/progress`,
     !!season,
@@ -80,7 +81,14 @@ export function MyProgress() {
       <button
         className="button secondary"
         disabled={query.isFetching}
-        onClick={() => void query.refetch()}
+        onClick={() =>
+          void queries.invalidateQueries({
+            predicate: invalidationFor(
+              me?.trainer_id,
+              `/v1/seasons/${season}/progress`,
+            ),
+          })
+        }
       >
         Actualizar progreso
       </button>

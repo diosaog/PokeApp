@@ -5,6 +5,15 @@
 
 begin;
 
+drop table if exists public.team_lock_first_fixations cascade;
+drop table if exists public.matchday_start_evidence cascade;
+drop table if exists public.season_reward_rule_revisions cascade;
+drop function if exists public.live_reward_rules(uuid);
+drop function if exists public.first_start_immutable() cascade;
+drop function if exists public.record_first_matchday_start() cascade;
+drop function if exists public.lock_timing_at(uuid,timestamptz);
+drop function if exists public.record_first_team_fixation() cascade;
+
 drop function if exists public.observed_progress_read(uuid,uuid);
 drop table if exists public.progress_reward_claims cascade;
 drop function if exists public.progress_reward_immutable() cascade;

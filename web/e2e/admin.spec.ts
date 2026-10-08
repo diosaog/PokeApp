@@ -13,7 +13,7 @@ import {
 } from "./fixtures";
 
 type Setup = Model<"SeasonSetup">;
-const configPath = `/v1/admin/seasons/${sid}/config-versions`;
+const configPath = `/v1/admin/seasons/${sid}/rules`;
 const headers = {
   "Access-Control-Allow-Origin": "http://127.0.0.1:5173",
   "Access-Control-Allow-Headers": "authorization,content-type,idempotency-key",
@@ -96,6 +96,21 @@ async function adminFixture(
   await page.route(`**/v1/admin/seasons/${sid}/setup`, (route) =>
     reply(route, read()),
   );
+  await page.route(`**${configPath}`, (route) =>
+    route.request().method() === "GET"
+      ? reply(route, {
+          season_id: sid,
+          revision: read().config_revision - 2,
+          config_revision: read().config_revision,
+          badge_reward_coins:
+            read().config_versions[0]?.rules.badge_reward_coins ?? 4,
+          game_completion_reward_coins:
+            read().config_versions[0]?.rules.game_completion_reward_coins ?? 12,
+          effective_at: null,
+          editable: ["draft", "active"].includes(read().season.status),
+        })
+      : route.fallback(),
+  );
   await page.route(`**/v1/admin/seasons/${sid}/championship`, (route) =>
     reply(route, {
       season_id: sid,
@@ -119,90 +134,61 @@ async function adminFixture(
 async function configuration(page: Page) {
   await page.getByRole("tab", { name: "Configuración", exact: true }).click();
   await expect(
-    page.getByLabel("Nombre de versión", { exact: true }),
+    page.getByLabel("Monedas por medalla", { exact: true }),
   ).toBeVisible();
 }
 
-test("new configuration preserves current zero rewards and sends exact revisions and settings", async ({
+test("current zero rewards use simple prospective rules without version metadata", async ({
   page,
 }) => {
   const commands = await adminFixture(page);
   await configuration(page);
-  await expect(page.getByLabel("Monedas por medalla observada")).toHaveValue(
-    "0",
+  await expect(page.getByLabel("Monedas por medalla")).toHaveValue("0");
+  await expect(page.getByLabel("Monedas por vencer al Campeón")).toHaveValue(
+    "37",
   );
-  await expect(
-    page.getByLabel("Monedas por vencer al Campeón del juego"),
-  ).toHaveValue("37");
-  await expect(
-    page.getByText(/Ocho medallas o finalizar esta Liga de PokeApp no bastan/),
-  ).toBeVisible();
+  await expect(page.getByLabel("Nombre de versión")).toHaveCount(0);
+  await expect(page.getByLabel("Primera jornada")).toHaveCount(0);
   await page
-    .getByLabel("Nombre de versión", { exact: true })
-    .fill("Siguiente tramo");
-  await page.getByLabel("Primera jornada", { exact: true }).fill("5");
-  await page
-    .getByRole("button", { name: "Crear versión", exact: true })
+    .getByRole("button", { name: "Guardar cambios", exact: true })
     .click();
   await expect(page.getByText("Cambio confirmado.")).toBeVisible();
   expect(commands).toHaveLength(1);
   expect(commands[0].path).toBe(configPath);
-  expect(commands[0].key).toBeTruthy();
   expect(commands[0].body).toEqual({
-    name: "Siguiente tramo",
-    effective_from_matchday: 5,
-    total_matchdays: 8,
-    division_sizes: { A: 2, B: 2 },
-    movement_count: 1,
-    scoring: { "1": 10, "2": 8, "3": 6, "4": 4 },
-    coin_rewards: { "1": 8, "2": 6, "3": 4, "4": 2 },
-    rules: {
-      team_lock_required: true,
-      last_b_gets_steal: false,
-      badge_reward_coins: 0,
-      game_completion_reward_coins: 37,
-    },
+    expected_revision: 0,
     expected_config_revision: 2,
-    expected_roster_revision: 3,
+    badge_reward_coins: 0,
+    game_completion_reward_coins: 37,
   });
+  expect(commands[0].key).toBeTruthy();
 });
-
-test("invalid reward integers never submit a configuration", async ({
-  page,
-}) => {
+test("invalid reward integers never submit", async ({ page }) => {
   const commands = await adminFixture(page);
   await configuration(page);
-  await page
-    .getByLabel("Nombre de versión", { exact: true })
-    .fill("Revisión económica");
-  await page.getByLabel("Primera jornada", { exact: true }).fill("5");
   for (const label of [
-    "Monedas por medalla observada",
-    "Monedas por vencer al Campeón del juego",
+    "Monedas por medalla",
+    "Monedas por vencer al Campeón",
   ]) {
-    const input = page.getByLabel(label);
     for (const value of ["-1", "0.5", "2147483648", ""]) {
-      await input.fill(value);
+      await page.getByLabel(label).fill(value);
       await page
-        .getByRole("button", { name: "Crear versión", exact: true })
+        .getByRole("button", { name: "Guardar cambios", exact: true })
         .click();
-      expect(
-        await input.evaluate((node: HTMLInputElement) => node.validity.valid),
-      ).toBe(false);
       expect(commands).toHaveLength(0);
     }
-    await input.fill("0");
+    await page.getByLabel(label).fill("0");
   }
 });
-
-test("a stale configuration requires refresh and deliberate review before a new command", async ({
+test("stale rules refresh automatically, preserve input and require deliberate review", async ({
   page,
 }) => {
   let latest = setup();
   const attempts: { key?: string; body: Record<string, unknown> }[] = [];
   await adminFixture(page, () => latest);
-  await page.route(`**${configPath}`, async (route) => {
-    if (route.request().method() === "OPTIONS") return reply(route, null);
+  await page.route(`**${configPath}`, (route) => {
+    if (["GET", "OPTIONS"].includes(route.request().method()))
+      return route.fallback();
     attempts.push({
       key: route.request().headers()["idempotency-key"],
       body: route.request().postDataJSON(),
@@ -210,60 +196,33 @@ test("a stale configuration requires refresh and deliberate review before a new 
     if (attempts.length === 1) {
       latest = structuredClone(latest);
       latest.config_revision = 3;
-      latest.roster_revision = 4;
       latest.config_versions[0].rules.badge_reward_coins = 21;
-      latest.config_versions[0].rules.game_completion_reward_coins = 0;
       return reply(route, { detail: { code: "STALE_REVISION" } }, 409);
     }
-    return reply(route, { operation_id: "new-config", replayed: false });
+    return reply(route, { operation_id: "changed", replayed: false });
   });
   await configuration(page);
+  await page.getByLabel("Monedas por medalla").fill("9");
   await page
-    .getByLabel("Nombre de versión", { exact: true })
-    .fill("Mi propuesta antigua");
-  await page.getByLabel("Primera jornada", { exact: true }).fill("5");
-  await page.getByLabel("Monedas por medalla observada").fill("9");
-  await page
-    .getByRole("button", { name: "Crear versión", exact: true })
-    .click();
-  await expect(page.getByRole("alert")).toContainText(
-    "La temporada ha cambiado",
-  );
-  expect(attempts).toHaveLength(1);
-  await page
-    .getByRole("button", { name: "Actualizar datos antes de continuar" })
+    .getByRole("button", { name: "Guardar cambios", exact: true })
     .click();
   await expect(
-    page.getByRole("button", { name: "Crear versión", exact: true }),
+    page.getByRole("button", { name: "He revisado los cambios" }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("button", { name: "Guardar cambios", exact: true }),
   ).toBeDisabled();
-  await page
-    .getByRole("button", { name: "Revisar configuración actualizada" })
-    .click();
-  await expect(page.getByLabel("Monedas por medalla observada")).toHaveValue(
-    "21",
-  );
-  await expect(
-    page.getByLabel("Monedas por vencer al Campeón del juego"),
-  ).toHaveValue("0");
+  await expect(page.getByLabel("Monedas por medalla")).toHaveValue("9");
   expect(attempts).toHaveLength(1);
+  await page.getByRole("button", { name: "He revisado los cambios" }).click();
   await page
-    .getByLabel("Nombre de versión", { exact: true })
-    .fill("Propuesta revisada");
-  await page.getByLabel("Primera jornada", { exact: true }).fill("5");
-  await page
-    .getByRole("button", { name: "Crear versión", exact: true })
+    .getByRole("button", { name: "Guardar cambios", exact: true })
     .click();
   await expect(page.getByText("Cambio confirmado.")).toBeVisible();
-  expect(attempts).toHaveLength(2);
-  expect(attempts[0].body).toMatchObject({
-    expected_config_revision: 2,
-    expected_roster_revision: 3,
-  });
   expect(attempts[1].body).toMatchObject({
-    name: "Propuesta revisada",
+    expected_revision: 1,
     expected_config_revision: 3,
-    expected_roster_revision: 4,
-    rules: { badge_reward_coins: 21, game_completion_reward_coins: 0 },
+    badge_reward_coins: 9,
   });
   expect(attempts[1].key).not.toBe(attempts[0].key);
 });
@@ -386,9 +345,7 @@ test("archived Admin history cannot submit setup, participant or lifecycle chang
   await expect(
     page.getByRole("button", { name: "Guardar nombre", exact: true }),
   ).toBeDisabled();
-  await expect(
-    page.getByRole("button", { name: "Crear versión", exact: true }),
-  ).toBeDisabled();
+  await expect(page.getByLabel("Monedas por medalla")).toBeDisabled();
   await page.getByRole("tab", { name: "Entrenadores", exact: true }).click();
   await expect(
     page.getByRole("button", { name: "Añadir a la temporada", exact: true }),
@@ -441,81 +398,53 @@ test("participant sessions cannot open Admin or issue Admin reads through naviga
   expect(adminRequests).toEqual([]);
 });
 
-test("an uncertain configuration locks the editor and replays exactly the same request", async ({
+test("uncertain rules hold navigation and replay the exact original request", async ({
   page,
 }) => {
   const attempts: { key?: string; body: Record<string, unknown> }[] = [];
   await adminFixture(page);
-  await page.route(`**${configPath}`, async (route) => {
-    if (route.request().method() === "OPTIONS") return reply(route, null);
+  await page.route(`**${configPath}`, (route) => {
+    if (["GET", "OPTIONS"].includes(route.request().method()))
+      return route.fallback();
     attempts.push({
       key: route.request().headers()["idempotency-key"],
       body: route.request().postDataJSON(),
     });
     return attempts.length === 1
       ? reply(route, { detail: { code: "TEMPORARILY_UNAVAILABLE" } }, 503)
-      : reply(route, { operation_id: "replayed-config", replayed: true });
+      : reply(route, { operation_id: "same", replayed: true });
   });
   await configuration(page);
+  await page.getByLabel("Monedas por medalla").fill("7");
   await page
-    .getByLabel("Nombre de versión", { exact: true })
-    .fill("Reglas futuras");
-  await page.getByLabel("Primera jornada", { exact: true }).fill("5");
-  await page.getByLabel("Monedas por medalla observada").fill("7");
-  await page
-    .getByRole("button", { name: "Crear versión", exact: true })
+    .getByRole("button", { name: "Guardar cambios", exact: true })
     .click();
-  const retry = page.getByRole("button", {
-    name: "Reintentar la misma solicitud",
-  });
-  await expect(retry).toBeVisible();
   await expect(
-    page.getByRole("button", { name: "Crear versión", exact: true }),
+    page.getByRole("button", { name: "Reintentar la misma solicitud" }),
+  ).toBeVisible();
+  await expect(page.getByLabel("Monedas por medalla")).toBeDisabled();
+  await expect(
+    page.getByRole("tab", { name: "Entrenadores", exact: true }),
   ).toBeDisabled();
   await expect(
-    page.getByLabel("Nombre de versión", { exact: true }),
+    page.getByRole("combobox", { name: "Temporada", exact: true }),
   ).toBeDisabled();
-  await expect(page.getByLabel("Monedas por medalla observada")).toBeDisabled();
-  await expect(page.getByLabel("Versión a configurar")).toBeDisabled();
-  const trainersTab = page.getByRole("tab", {
-    name: "Entrenadores",
-    exact: true,
-  });
-  const seasonPicker = page.getByRole("combobox", {
-    name: "Temporada",
-    exact: true,
-  });
-  const shopLink = page
+  await expect(
+    page.getByRole("button", { name: "Cerrar sesión", exact: true }),
+  ).toBeDisabled();
+  const shop = page
     .getByRole("navigation", { name: "Principal" })
     .getByRole("link", { name: "Tienda", exact: true });
-  const logout = page.getByRole("button", {
-    name: "Cerrar sesión",
-    exact: true,
-  });
-  await expect(trainersTab).toBeDisabled();
-  await expect(seasonPicker).toBeDisabled();
-  await expect(shopLink).toBeDisabled();
-  await expect(logout).toBeDisabled();
-  await shopLink.click({ force: true });
+  await expect(shop).toBeDisabled();
+  await shop.click({ force: true });
   await expect(page).toHaveURL(/\/admin$/);
-  await expect(page.getByLabel("Monedas por medalla observada")).toHaveValue(
-    "7",
-  );
   expect(attempts).toHaveLength(1);
-  await retry.click();
+  await page
+    .getByRole("button", { name: "Reintentar la misma solicitud" })
+    .click();
   await expect(page.getByText("Cambio confirmado.")).toBeVisible();
-  await expect(trainersTab).toBeEnabled();
-  await expect(seasonPicker).toBeEnabled();
-  await expect(shopLink).toBeEnabled();
-  await expect(logout).toBeEnabled();
   expect(attempts).toHaveLength(2);
   expect(attempts[1]).toEqual(attempts[0]);
-  expect(attempts[0].key).toBeTruthy();
-  expect(attempts[0].body).toMatchObject({
-    expected_config_revision: 2,
-    expected_roster_revision: 3,
-    rules: { badge_reward_coins: 7, game_completion_reward_coins: 37 },
-  });
 });
 
 test("readiness uses human explanations and cannot activate an unready season", async ({
@@ -595,11 +524,9 @@ test("Admin names, Team Lock presence and configuration remain readable on deskt
         const pending = locks.locator(".trainer-grid > div").filter({
           has: page.getByRole("heading", { name: "Antonio", exact: true }),
         });
-        await expect(fixed).toContainText("Fijado");
-        await expect(pending).toContainText("Pendiente");
-        await expect(locks).toContainText(
-          "no determina si llegó a tiempo o tarde",
-        );
+        await expect(fixed).toContainText("horario sin evidencia");
+        await expect(pending).toContainText("pendiente");
+        await expect(locks).toContainText("El primer equipo fijado");
         await expect(locks).not.toContainText(tid);
         await expect(
           page.getByRole("combobox", {

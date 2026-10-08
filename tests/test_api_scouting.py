@@ -20,10 +20,19 @@ class ScoutingTests(unittest.TestCase):
     def get(self, /, **query):
         return self.client.get(self.path, params=query, headers=self.headers)
 
+    def test_first_fixation_status_is_public_without_private_evidence(self):
+        for state in ('on_time', 'late', 'unknown'):
+            self.store.data['public_team_locks'][1]['timing_status'] = state
+            response = self.get(trainer_id=RIVAL)
+            self.assert_public(response)
+            self.assertEqual(response.json()['team_lock_status'], state)
+        self.store.data['public_team_locks'] = []
+        self.assertEqual(self.get(trainer_id=RIVAL).json()['team_lock_status'], 'pending')
+
     def assert_public(self, response):
         self.assertEqual(response.status_code, 200, response.text)
         data = response.json()
-        self.assertEqual(set(data), {"season", "day", "trainers", "trainer_id", "team"})
+        self.assertEqual(set(data), {"season", "day", "trainers", "trainer_id", "team", "team_lock_status"})
         for mon in data["team"] or []:
             self.assertEqual(
                 set(mon), {"species", "nickname", "level", "types", "item", "moves"}

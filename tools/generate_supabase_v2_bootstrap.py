@@ -49,6 +49,7 @@ EXPECTED_MIGRATIONS = [
     "038_participant_wipe_revivals.sql",
     "039_shop_economy_alignment.sql",
     "040_observed_progress_read.sql",
+    "041_final_product_alignment.sql",
 ]
 
 FORBIDDEN_TOKENS = [

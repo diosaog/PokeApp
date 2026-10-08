@@ -63,19 +63,20 @@ class MatchdayFixtures(SeasonAdminFixtures):
     def run(self):
         self.setup()
         sid,did=self.season()
-        self.reject(lambda:self.open(sid,did,actor=self.owner['id']),'ADMIN_REQUIRED')
+        self.reject(lambda:self.open(sid,did,actor=self.trainers[-1]['id']),'PARTICIPANT_REQUIRED')
         state=self.ds(sid,did); body={'expected_revision':state['revision']}
         race=self.race(lambda:self.md('open',sid,did,body),lambda:self.md('open',sid,did,body,actor=self.admin2['id']))
         self.one_winner(race,'MATCHDAY_NOT_SCHEDULED','STALE_REVISION')
         require(not self.rows('coin_transactions',season_id=sid),'Open awarded coins')
-        self.passed('H01 admin not participant; non-admin denied; concurrent open single transition')
+        self.passed('H01 admin supervision; non-member denied; concurrent open single transition')
         state=self.ds(sid,did)
         self.md('cancel',sid,did,{'expected_revision':state['revision'],'reason':'No results'})
         require(self.ds(sid,did)['state']=='scheduled' and len(self.ds(sid,did)['matches'])==2,'Cancel destroyed canonical pairs')
         self.open(sid,did)
         self.passed('H02 cancel same day scheduled, pointer/pairs retained; reopen revision advances')
         self.reject(lambda:self.close(sid,did),'RESULTS_INCOMPLETE')
-        state=self.ds(sid,did); match=state['matches'][0]
+        state=self.ds(sid,did)
+        match=state['matches'][0]
         invalid={'expected_results_revision':state['results_revision'],'results':[dict(match_id=match['id'],winner_season_player_id=str(uuid4()))]}
         self.reject(lambda:self.md('results',sid,did,invalid),'INVALID_RESULTS')
         self.results(sid,did)

@@ -117,12 +117,13 @@ test("normal non-admin participant records, edits and clears another pair; narro
         [
           `/v1/seasons/${sid}/matchdays/${day}`,
           `/v1/read/seasons/${sid}/overview`,
+          `/v1/read/seasons/${sid}/league`,
         ].includes(path),
       ),
   ).toBe(true);
 });
 
-test("409 stays visible with no automatic mutation retry; explicit refresh obtains new revision", async ({
+test("409 stays visible with no automatic mutation retry; automatic read obtains new revision", async ({
   page,
 }) => {
   const { requests } = await participant(page, "conflict");
@@ -130,11 +131,13 @@ test("409 stays visible with no automatic mutation retry; explicit refresh obtai
   await page
     .getByRole("button", { name: "Guardar resultados", exact: true })
     .click();
-  await expect(page.getByRole("alert")).toBeVisible();
+  await expect(
+    page.getByRole("alert").filter({ hasText: "La temporada ha cambiado" }),
+  ).toBeVisible();
   expect(requests).toHaveLength(1);
-  await page
-    .getByRole("button", { name: "Actualizar datos antes de continuar" })
-    .click();
+  await expect(
+    page.getByText(/Los datos cambiaron mientras editabas/),
+  ).toBeVisible();
   await expect(page.getByLabel("Ganador: Marcos / Elena")).toHaveValue("");
   await page.getByLabel("Ganador: Marcos / Elena").selectOption("p4");
   await page

@@ -1,0 +1,687 @@
+{
+  "status": "PASS",
+  "time": "2026-10-08T20:39:26.270929+00:00",
+  "entry_head": "dd9b7b9bcf38491962ace956fd90e53fbfdd0670",
+  "python": {
+    "exit_code": 0,
+    "total": 763,
+    "passed": 763,
+    "failed": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "python_scope": "744 committed-scope plus 19 pre-existing unrelated untracked map tests",
+  "react": {
+    "tests": 74,
+    "files": 12,
+    "log": "%TEMP%/phase10-5-final-react-final.log",
+    "after_copy_adjustments": "16 affected tests PASS; two Spanish label-only changes"
+  },
+  "browser": {
+    "unique_tests": 68,
+    "status": "PASS",
+    "initial": "62/68; six old expectations",
+    "affected": "30/32 then flows 9/9 after authoritative category fixture correction",
+    "logs": [
+      "%TEMP%/phase10-5-final-e2e.log",
+      "%TEMP%/phase10-5-final-e2e-affected.log",
+      "%TEMP%/phase10-5-final-e2e-flows-final.log"
+    ]
+  },
+  "postgresql": {
+    "version": "17.11",
+    "families": [
+      {
+        "module": "supabase_v2_season_admin",
+        "status": "PASS",
+        "seconds": 111.33,
+        "result": null,
+        "restored_tables": 53
+      },
+      {
+        "module": "supabase_v2_matchdays",
+        "status": "PASS",
+        "seconds": 220.21,
+        "result": null,
+        "restored_tables": 53
+      },
+      {
+        "module": "supabase_v2_participant_status",
+        "status": "PASS",
+        "seconds": 219.42,
+        "result": null,
+        "restored_tables": 53
+      },
+      {
+        "module": "supabase_v2_season_lifecycle",
+        "status": "PASS",
+        "seconds": 192.86,
+        "result": null,
+        "restored_tables": 53
+      },
+      {
+        "module": "supabase_v2_trials",
+        "status": "PASS",
+        "seconds": 98.34,
+        "result": null,
+        "restored_tables": 53
+      },
+      {
+        "module": "phase10_5_final",
+        "status": "PASS",
+        "seconds": 46.57,
+        "result": {
+          "groups": 4,
+          "checks": [
+            "prospective rewards, zero, immutable old claims, CAS/replay/race and four rollback boundaries",
+            "eligible non-admin open/close/finish, denial, replay, races and six rollback boundaries",
+            "first on-time/late, no combat cutoff, replacements/cancellation/reopen, closed history and legacy unknown",
+            "browser table/helper denial including admin JWT; private RLS"
+          ],
+          "rollback_boundaries": [
+            "season_reward_rule_revisions",
+            "season_admin_state",
+            "activity_events",
+            "admin_operation_receipts",
+            "matchday_snapshots",
+            "coin_transactions",
+            "admin_operation_receipts",
+            "league_finalizations",
+            "seasons",
+            "admin_operation_receipts",
+            "team_lock_first_fixations",
+            "matchday_start_evidence"
+          ],
+          "restored_tables": 53
+        },
+        "restored_tables": 53
+      },
+      {
+        "module": "phase10_5_championship",
+        "status": "PASS",
+        "seconds": 154.14,
+        "result": null,
+        "restored_tables": 53
+      },
+      {
+        "module": "phase10_5_preview",
+        "status": "PASS",
+        "seconds": 4.99,
+        "result": {
+          "status": "PASS",
+          "groups": [
+            "unscheduled spectator, self public, missing rival null",
+            "JWT-selected self whitelist, rival public, zero read writes",
+            "K single public allowlist; self/rival identical; missing lock null; zero writes",
+            "existing RLS, public view columns and service-only mutation privileges",
+            "closed frozen lock independent of later save state",
+            "K frozen team independent of current save; malformed snapshot fails closed"
+          ],
+          "public_tables_restored": 53,
+          "remote_writes": 0
+        },
+        "restored_tables": 53
+      },
+      {
+        "module": "phase10_5_progress",
+        "status": "PASS",
+        "seconds": 14.71,
+        "result": {
+          "groups": 7,
+          "checks": [
+            "unknown, observed zero, missing source and season scope",
+            "Champion true/false/unknown, eight badges insufficient and reader compatibility",
+            "sparse badge identity, HGSS second region and E first-two compatibility",
+            "stale pointer rejected and later regressed observation remains current",
+            "malformed/deleted/unowned/hash-mismatched observation rejection",
+            "concurrent replay is read-only: rewards, history and all tables unchanged",
+            "service-only invoker, fixed search_path, stable snapshot and browser denials"
+          ],
+          "restored_tables": 53
+        },
+        "restored_tables": 53
+      },
+      {
+        "module": "phase10_5_results",
+        "status": "PASS",
+        "seconds": 66.59,
+        "result": null,
+        "restored_tables": 53
+      },
+      {
+        "module": "phase10_5_ranking",
+        "status": "PASS",
+        "seconds": 39.93,
+        "result": null,
+        "restored_tables": 53
+      },
+      {
+        "module": "phase10_5_initial",
+        "status": "PASS",
+        "seconds": 80.05,
+        "result": null,
+        "restored_tables": 53
+      },
+      {
+        "module": "phase10_5_economy",
+        "status": "PASS",
+        "seconds": 34.96,
+        "result": {
+          "groups": 10,
+          "checks": [
+            "exact >int32/negative wallet; same/conflicting key and concurrent double-spend/replay",
+            "pending/publication privacy, activation, promotional price and one-stock concurrency",
+            "finished/archived normal and season-wide promotional spending without fake matchdays",
+            "unknown/zero, trusted hooks, badge deltas, regression/stale proof, eight badges, reader version and completion once",
+            "malformed/hash/game/bool and cross-trainer progress cannot mint coins",
+            "persistent configured 4/12 defaults and 7/20 amounts with actual-window selection",
+            "revive before/while pending/after save movement/re-death, duplicate denial, wipe and live daily parity",
+            "legitimate robbery voucher origin, hidden catalog, eligible owner targets and one-time concurrent redemption",
+            "wallet/purchase/activity and pointer/reward-ledger/claim transactional rollback",
+            "anon/participant/browser-admin service RPC and private proof access denied; immutable claims"
+          ],
+          "rollback_boundaries": [
+            "purchases:insert",
+            "coin_transactions:insert",
+            "activity_events:insert",
+            "coin_transactions:insert",
+            "progress_reward_claims:insert"
+          ],
+          "restored_tables": 53
+        },
+        "restored_tables": 53
+      },
+      {
+        "module": "phase10_5_league",
+        "status": "PASS",
+        "seconds": 6.0,
+        "result": null,
+        "restored_tables": 53
+      },
+      {
+        "module": "phase10_5_wipe",
+        "status": "PASS",
+        "seconds": 89.07,
+        "result": {
+          "public_tables": 53,
+          "groups": [
+            "G01 own strict absolute counter, exact replay/conflict/CAS, no-op fingerprint, audit, metadata and identity isolation",
+            "G02 malformed stored revision fails closed; full int32 count closes with exact official points without clamping",
+            "G03 unknown stays unknown; five-plus-one exact formula; future freeze only, points once, closed E/day/F/Hall preserved",
+            "G04 identical/conflicting concurrent values and keys have one revision and audit effect",
+            "G05 update versus close, initial split, final finish and participant exit serialize sporting authority",
+            "G06 three exact all-public rollback boundaries and stable old receipt after day close",
+            "G07 browser table/column/RPC denial including hosted default privileges, private response whitelist, fixed invoker helpers and RLS",
+            "G08 equal-win daily ranking consumes live wipe deaths before close and preserves frozen order after decrease",
+            "G09 missing stats fail closed; draft/finished/archived/discarded, absent day and ineligible membership cannot mutate"
+          ],
+          "rollback_boundaries": 3,
+          "concurrent_scenarios": 9,
+          "cleanup": "PASS"
+        },
+        "restored_tables": 53
+      },
+      {
+        "module": "supabase_v2_cups",
+        "status": "PASS",
+        "seconds": 94.08,
+        "result": null,
+        "restored_tables": 53
+      }
+    ],
+    "rebuild": {
+      "started_utc": "2026-10-08T20:21:33.577733+00:00",
+      "source_head": "dd9b7b9bcf38491962ace956fd90e53fbfdd0670",
+      "source_status": "Final candidate SQL; exact source hashes retained",
+      "builds": [
+        {
+          "source": "migrations",
+          "iteration": 1,
+          "database": "pokeapp_v2_validation_phase10_5_final_closure",
+          "schema_catalog_rls": "PASS",
+          "normalized_dump": "C:\\Users\\Antonio\\AppData\\Local\\Temp\\phase10-5-final-closure-migrations-1-schema.sql",
+          "lines": 13161,
+          "sha256": "69d6d11e4cba8cc0b6d38338000f88f19863862874080c6aca38826aa582330c"
+        },
+        {
+          "source": "migrations",
+          "iteration": 2,
+          "database": "pokeapp_v2_validation_phase10_5_final_closure",
+          "schema_catalog_rls": "PASS",
+          "normalized_dump": "C:\\Users\\Antonio\\AppData\\Local\\Temp\\phase10-5-final-closure-migrations-2-schema.sql",
+          "lines": 13161,
+          "sha256": "69d6d11e4cba8cc0b6d38338000f88f19863862874080c6aca38826aa582330c"
+        },
+        {
+          "source": "bootstrap",
+          "iteration": 1,
+          "database": "pokeapp_v2_validation_phase10_5_final_closure_bootstrap",
+          "schema_catalog_rls": "PASS",
+          "normalized_dump": "C:\\Users\\Antonio\\AppData\\Local\\Temp\\phase10-5-final-closure-bootstrap-1-schema.sql",
+          "lines": 13161,
+          "sha256": "69d6d11e4cba8cc0b6d38338000f88f19863862874080c6aca38826aa582330c"
+        },
+        {
+          "source": "bootstrap",
+          "iteration": 2,
+          "database": "pokeapp_v2_validation_phase10_5_final_closure_bootstrap",
+          "schema_catalog_rls": "PASS",
+          "normalized_dump": "C:\\Users\\Antonio\\AppData\\Local\\Temp\\phase10-5-final-closure-bootstrap-2-schema.sql",
+          "lines": 13161,
+          "sha256": "69d6d11e4cba8cc0b6d38338000f88f19863862874080c6aca38826aa582330c"
+        }
+      ],
+      "normalization": "Remove only random pg_dump restrict/unrestrict keys; no schema, grant or ownership normalization.",
+      "source_sha256": {
+        "supabase/v2/migrations/001_core.sql": "3e6083203fe43e51937751557ab7514de67c2cfae29f110e33ff1ffa9a69a862",
+        "supabase/v2/migrations/002_seasons.sql": "3b713a89c0af1b224556a803276f6cdd0682d712f4ef980cbf89bd7ce92110cc",
+        "supabase/v2/migrations/003_league.sql": "76ed470e8d345557e8e5965cf5f2d7aeede7aed265d9ae53fc7f2487730fc4dc",
+        "supabase/v2/migrations/004_shop.sql": "41f2dcce5a4b81f1ff4b710c36b2662af19a2ab8e7384f6fb8e5c74e9be946ab",
+        "supabase/v2/migrations/005_saves.sql": "10d97db7b3378ce92f6fdaac2120f03822560a36f40066ca3586e9d25efc3072",
+        "supabase/v2/migrations/006_activity_hall.sql": "ccf2c967fca741577bfea3cbe8c6567a857f9df59a1be4f41a8986f626955fde",
+        "supabase/v2/migrations/007_competitions.sql": "b6c9f32eaa1fe33709c452638272e93d9ef702019d901caec90f5479d1ff9f82",
+        "supabase/v2/migrations/008_indexes.sql": "fd4351693640a060ad44cddb43e3690f932d367c9cca73ab910243107eca6ed8",
+        "supabase/v2/migrations/009_seed.sql": "d2bf83cac17fc86d4c3d9f7dbc02a11a80068fa3c1decb9aa4ee624c2486a279",
+        "supabase/v2/migrations/010_security_helpers.sql": "2e6279ceb0cbc92c8822eefa5304614b84bfab484b9e7ecd32e3d32d30db60fb",
+        "supabase/v2/migrations/011_rls_policies.sql": "9e5fc9a5e83f5109d13618263cf57b0d04780c782d8b2ba9825a85bfc6ada919",
+        "supabase/v2/migrations/012_security_views.sql": "3f8cc2cdd4686b777bdf491de5d64e523b7f279f23999f68ea312e6460bd044d",
+        "supabase/v2/migrations/013_storage_policies.sql": "838b13d36f3a1c2d7ca017b9de4772f167a1ece3777f2a5c888e700adf74a9d6",
+        "supabase/v2/migrations/014_security_invoker_hardening.sql": "7dc5f74179f7dd00748ff46926aa8af1fbb7a1b44bf92f4fa7e207e06ac8a2a1",
+        "supabase/v2/migrations/015_public_trainers_visibility.sql": "ca230c7b51552235541ffdc0819c91a123f5c0bdc937020bf055acb71c958f30",
+        "supabase/v2/migrations/016_public_team_locks_visibility.sql": "2dd25e5a9d8ba4e304c1e726515b23c05b743815773d0eac2f156e53fe5a8401",
+        "supabase/v2/migrations/017_public_coin_balances_visibility.sql": "59ed1842a14ee02fd499d9585f91983ab1dfb48a3a6ddf3fb73e191236cac140",
+        "supabase/v2/migrations/018_public_views_visibility.sql": "84746e55fe615dbf6533f91e4692aae3203293e604084ec7107f392f699b010c",
+        "supabase/v2/migrations/019_team_lock_api.sql": "e020ab7af784a17e8deab1b99297087b6dfbe485fd2d04cbd40267c730a9b584",
+        "supabase/v2/migrations/020_current_matchday_store_ban_contract.sql": "af936162a304d271d3c169794c7701bd84e9f21f86ec140562df09e44ec8a700",
+        "supabase/v2/migrations/021_normal_purchase_api.sql": "fe6fa8619f993732129847832aa3f49a44dfa5fef96fbb5479a102ebb32fdf38",
+        "supabase/v2/migrations/022_promotional_purchase_api.sql": "9303cf5a2d60ed7ddef12ab4704afa9580fc39e8034fe529a7b7f916fc30ec07",
+        "supabase/v2/migrations/023_pokemon_identity.sql": "f3a4af2b2f2ad16895bb9abee87182a443df1bdc615d7f458543a21e506bc70f",
+        "supabase/v2/migrations/024_redemption_effect_boundary.sql": "9d12264d0038cea0953da23e50622708acb5d3e45d0658dc508ab1ed12c4cfff",
+        "supabase/v2/migrations/025_robbery_voucher_and_redemption.sql": "baf3679b200ac90030cb83ac9967ccff7d5e2c711c30f23bf615feae23f02b39",
+        "supabase/v2/migrations/026_season_admin_setup_api.sql": "ee9e1f597b1d8efcc5586f9b84068e8f16140f29659a50031c0052aa41549682",
+        "supabase/v2/migrations/027_competitive_matchdays.sql": "08b233bee9fe58311f68e92a6677d3eb0eed9093a5346402dc06f86cf8055565",
+        "supabase/v2/migrations/028_participant_status_admin.sql": "90b7c6781872b8f5111b7a6e1a8f8518f084fdc2fd4faa13b4e0eb4664a386d4",
+        "supabase/v2/migrations/029_season_finalization_archive_hall.sql": "c18e0c3a35007f42003842df82349bbbbb715f52f565f53287d360076c0ddc03",
+        "supabase/v2/migrations/030_trials_sanctions_api.sql": "642940a5951a02d09485b1ccec0c4f265f5e656f80077393d6b53956ae6fc0fc",
+        "supabase/v2/migrations/031_cup_engine_certification.sql": "868efbca7a2ecb76138a2e12b37cd35b08cad7a849effa4fdf1dae7cfdcde362",
+        "supabase/v2/migrations/032_cup_player_identity_index.sql": "9a0e14b45451ba929f72420959939cad6d78fed8c25bcb6bb8b5ed3f5fde18e4",
+        "supabase/v2/migrations/033_league_general_read.sql": "58705e8d08c639534b338f3d9766e4947b3c052828c51653f7dd887b4f41961a",
+        "supabase/v2/migrations/034_participant_matchday_results.sql": "805daa915e93513f3cd36a6b66a6e3681f53e1a029d8311653a239d8bb0326b5",
+        "supabase/v2/migrations/035_daily_sporting_ranking.sql": "b8ee7b8715c826a5cb43652e7621a12f41dc73e256ae02ea69a06e885f38cc53",
+        "supabase/v2/migrations/036_observed_initial_divisions.sql": "e2ef27a4c669a4f118cbe14d09174a600dddd8e10d44ebf610297ede8363bbd1",
+        "supabase/v2/migrations/037_league_championship.sql": "bce209cf49a53643f03aa1a48067bd2d6d61a45847993b7c1e21ff10b69388f4",
+        "supabase/v2/migrations/038_participant_wipe_revivals.sql": "1c8c63b3c44fce9651eaa43795e2774d348291edf1611d40650f7194ee3b472f",
+        "supabase/v2/migrations/039_shop_economy_alignment.sql": "6370effeb805b1776d06c5842b26f87621a4473e5d1c2da5bf29410680399649",
+        "supabase/v2/migrations/040_observed_progress_read.sql": "80d7632bde915c60f00f35eddbbfd5c8a3c42807d4d1edaa593d3cf93d87efda",
+        "supabase/v2/migrations/041_final_product_alignment.sql": "5ef4462a472b3466c0af6be28fe1d621db9ecb55514fa119836668cde704b3cb",
+        "supabase/v2/bootstrap.sql": "c21cb0fc115d393a60c0b44c2ad88081ca9b4d04412f4d080f310974bc5c9fdf",
+        "supabase/v2/reset_dev.sql": "6256a80eff5672a41fca5db25287e52f2a0d1d36fb1fd84d3e403422081dc42d",
+        "tools/validate_supabase_v2_schema.py": "abcd710c7d36dc0cdb8528c7436477de3b19d7696940dc644b703b39ed27dfd0"
+      },
+      "migrations_catalog": {
+        "rls": true,
+        "service_updates": false,
+        "unsafe_functions": 0,
+        "browser_table_or_column_grants": 0
+      },
+      "bootstrap_catalog": {
+        "rls": true,
+        "service_updates": false,
+        "unsafe_functions": 0,
+        "browser_table_or_column_grants": 0
+      },
+      "parity": {
+        "status": "PASS",
+        "identical_builds": 4,
+        "identical_lines": 13161
+      },
+      "exit_code": 0,
+      "finished_utc": "2026-10-08T20:21:45.337839+00:00",
+      "commands_recorded": 106,
+      "raw_evidence": "%TEMP%/phase10-5-final-closure-rebuild-evidence.json"
+    },
+    "catalog": {
+      "status": "PASS",
+      "functions": [
+        {
+          "anon": false,
+          "owner": "postgres",
+          "proname": "admin_setup_begin",
+          "service": true,
+          "proconfig": [
+            "search_path=pg_catalog, public"
+          ],
+          "prosecdef": false,
+          "signature": "admin_setup_begin(text,jsonb)",
+          "authenticated": false,
+          "public_execute": false
+        },
+        {
+          "anon": false,
+          "owner": "postgres",
+          "proname": "admin_setup_begin_v040",
+          "service": true,
+          "proconfig": [
+            "search_path=pg_catalog, public"
+          ],
+          "prosecdef": false,
+          "signature": "admin_setup_begin_v040(text,jsonb)",
+          "authenticated": false,
+          "public_execute": false
+        },
+        {
+          "anon": false,
+          "owner": "postgres",
+          "proname": "api_admin_championship_read",
+          "service": true,
+          "proconfig": [
+            "search_path=pg_catalog, public"
+          ],
+          "prosecdef": false,
+          "signature": "api_admin_championship_read(jsonb)",
+          "authenticated": false,
+          "public_execute": false
+        },
+        {
+          "anon": false,
+          "owner": "postgres",
+          "proname": "api_admin_live_rules_read",
+          "service": true,
+          "proconfig": [
+            "search_path=pg_catalog, public"
+          ],
+          "prosecdef": false,
+          "signature": "api_admin_live_rules_read(jsonb)",
+          "authenticated": false,
+          "public_execute": false
+        },
+        {
+          "anon": false,
+          "owner": "postgres",
+          "proname": "api_admin_live_rules_update",
+          "service": true,
+          "proconfig": [
+            "search_path=pg_catalog, public"
+          ],
+          "prosecdef": false,
+          "signature": "api_admin_live_rules_update(jsonb)",
+          "authenticated": false,
+          "public_execute": false
+        },
+        {
+          "anon": false,
+          "owner": "postgres",
+          "proname": "api_admin_season_lifecycle",
+          "service": true,
+          "proconfig": [
+            "search_path=pg_catalog, public"
+          ],
+          "prosecdef": false,
+          "signature": "api_admin_season_lifecycle(jsonb)",
+          "authenticated": false,
+          "public_execute": false
+        },
+        {
+          "anon": false,
+          "owner": "postgres",
+          "proname": "api_upsert_team_lock",
+          "service": true,
+          "proconfig": [
+            "search_path=pg_catalog, public"
+          ],
+          "prosecdef": false,
+          "signature": "api_upsert_team_lock(uuid,uuid,uuid,uuid,uuid,text,uuid,jsonb,jsonb,jsonb)",
+          "authenticated": false,
+          "public_execute": false
+        },
+        {
+          "anon": false,
+          "owner": "postgres",
+          "proname": "championship_context",
+          "service": true,
+          "proconfig": [
+            "search_path=pg_catalog, public"
+          ],
+          "prosecdef": false,
+          "signature": "championship_context(uuid)",
+          "authenticated": false,
+          "public_execute": false
+        },
+        {
+          "anon": false,
+          "owner": "postgres",
+          "proname": "first_start_immutable",
+          "service": true,
+          "proconfig": [
+            "search_path=pg_catalog, public"
+          ],
+          "prosecdef": false,
+          "signature": "first_start_immutable()",
+          "authenticated": false,
+          "public_execute": false
+        },
+        {
+          "anon": false,
+          "owner": "postgres",
+          "proname": "league_operation_principal",
+          "service": true,
+          "proconfig": [
+            "search_path=pg_catalog, public"
+          ],
+          "prosecdef": false,
+          "signature": "league_operation_principal(uuid,uuid,uuid)",
+          "authenticated": false,
+          "public_execute": false
+        },
+        {
+          "anon": false,
+          "owner": "postgres",
+          "proname": "live_reward_rules",
+          "service": true,
+          "proconfig": [
+            "search_path=pg_catalog, public"
+          ],
+          "prosecdef": false,
+          "signature": "live_reward_rules(uuid)",
+          "authenticated": false,
+          "public_execute": false
+        },
+        {
+          "anon": false,
+          "owner": "postgres",
+          "proname": "lock_timing_at",
+          "service": true,
+          "proconfig": [
+            "search_path=pg_catalog, public"
+          ],
+          "prosecdef": false,
+          "signature": "lock_timing_at(uuid,timestamp with time zone)",
+          "authenticated": false,
+          "public_execute": false
+        },
+        {
+          "anon": false,
+          "owner": "postgres",
+          "proname": "record_first_matchday_start",
+          "service": true,
+          "proconfig": [
+            "search_path=pg_catalog, public"
+          ],
+          "prosecdef": false,
+          "signature": "record_first_matchday_start()",
+          "authenticated": false,
+          "public_execute": false
+        },
+        {
+          "anon": false,
+          "owner": "postgres",
+          "proname": "record_first_team_fixation",
+          "service": true,
+          "proconfig": [
+            "search_path=pg_catalog, public"
+          ],
+          "prosecdef": false,
+          "signature": "record_first_team_fixation()",
+          "authenticated": false,
+          "public_execute": false
+        },
+        {
+          "anon": false,
+          "owner": "postgres",
+          "proname": "settle_observed_progress_rewards",
+          "service": true,
+          "proconfig": [
+            "search_path=pg_catalog, public"
+          ],
+          "prosecdef": false,
+          "signature": "settle_observed_progress_rewards(uuid,uuid)",
+          "authenticated": false,
+          "public_execute": false
+        }
+      ],
+      "tables": [
+        {
+          "rls": true,
+          "owner": "postgres",
+          "relname": "matchday_start_evidence",
+          "anon_dml": false,
+          "policies": 0,
+          "anon_read": false,
+          "anon_write": false,
+          "public_write": false,
+          "service_select": true,
+          "service_update": true,
+          "anon_column_write": false,
+          "authenticated_dml": false,
+          "authenticated_read": false,
+          "authenticated_write": false,
+          "public_column_write": false,
+          "authenticated_column_write": false
+        },
+        {
+          "rls": true,
+          "owner": "postgres",
+          "relname": "season_reward_rule_revisions",
+          "anon_dml": false,
+          "policies": 0,
+          "anon_read": false,
+          "anon_write": false,
+          "public_write": false,
+          "service_select": true,
+          "service_update": false,
+          "anon_column_write": false,
+          "authenticated_dml": false,
+          "authenticated_read": false,
+          "authenticated_write": false,
+          "public_column_write": false,
+          "authenticated_column_write": false
+        },
+        {
+          "rls": true,
+          "owner": "postgres",
+          "relname": "team_lock_first_fixations",
+          "anon_dml": false,
+          "policies": 0,
+          "anon_read": false,
+          "anon_write": false,
+          "public_write": false,
+          "service_select": true,
+          "service_update": false,
+          "anon_column_write": false,
+          "authenticated_dml": false,
+          "authenticated_read": false,
+          "authenticated_write": false,
+          "public_column_write": false,
+          "authenticated_column_write": false
+        }
+      ]
+    },
+    "public_tables_restored": 53
+  },
+  "static": {
+    "compile": "PASS",
+    "ruff": "PASS E9,F63,F7,F82 affected Python",
+    "format": "PASS",
+    "typescript": "PASS",
+    "production_build": "PASS",
+    "wrangler_dryrun": "PASS",
+    "diff": "PASS"
+  },
+  "retained": {
+    "native_parser": "I/L native unchanged-source evidence; not rerun",
+    "migration_001_040": "UNCHANGED",
+    "no_broad_performance_suite": true
+  },
+  "final_file_sha256": {
+    "app/api/main.py": "c72f5d923b13a1fb86d888b5f847902553fbb84c30df9bbe186096266b37fe0a",
+    "app/api/matchday_models.py": "2f2fb67418e1ab1a90e348e424e2f9551ab042e71b33a895a6ff0f7d1937b2c5",
+    "app/api/read_models.py": "f643ec5d8717351b4266803a6c2f0d021e288311f53379cff922f962c66bf50c",
+    "app/api/routes/matchdays.py": "4667149b984bd8ac2cf77f3c8949e1412c69ed48e586f53df63126e9b91a93ad",
+    "app/api/routes/season_admin.py": "2e910eef4a8131429688ebf7fb989111b1a9dd96b12d2e57594908bbb01d0ddd",
+    "app/api/routes/season_lifecycle.py": "ea6680dfdf8367372ee90d8f2e1d9a6f9d109734b0905d565a88d49a77b78825",
+    "app/api/scouting_models.py": "de7051226637403dc222d40d2a0613035768bd54a04a335348d43499caff22fa",
+    "app/api/season_admin_models.py": "a0c7c9879bafeed3034a06b5224cdd814b2c577a5f0ea15eaab924f0c6f42b7a",
+    "app/api/season_lifecycle_models.py": "a90f6f26c5e36e5dcfcd8b6b8ad65c70c21f9c4a0c2b74d9ce78af0613660852",
+    "app/api/team_preview_models.py": "92f99ca5f866b64156a168ddc7acda2b86a160c72f8e5323b61138194dc7854a",
+    "app/application/frontend_reads.py": "39784d6f5ca7903114486706b82ee29483f6604228baf7c78cd25cec079f7661",
+    "app/application/scouting.py": "02300ea860ba52549353bdb4b38f6cafd55cebeaefca4e14de9a1601c6196577",
+    "app/application/team_preview.py": "094290071472110fb546365022c43641624aba0d082a0c09545a2ec8c9878f85",
+    "app/repositories/supabase/season_admin.py": "986c233b6ef1e09acbcb8a4cd3e3b196803485d1addcbd4414c28630e598ae5e",
+    "app/repositories/supabase/season_lifecycle.py": "1f136ec4d89b138729a4dfa7d26acd13915f20bcc8e879a5575a17340a4ce688",
+    "supabase/v2/bootstrap.sql": "c21cb0fc115d393a60c0b44c2ad88081ca9b4d04412f4d080f310974bc5c9fdf",
+    "supabase/v2/migrations/041_final_product_alignment.sql": "5ef4462a472b3466c0af6be28fe1d621db9ecb55514fa119836668cde704b3cb",
+    "supabase/v2/reset_dev.sql": "6256a80eff5672a41fca5db25287e52f2a0d1d36fb1fd84d3e403422081dc42d",
+    "tests/test_api_final_alignment.py": "1c41153f9192fe8b2da5d08d0742124cb7d52a320b353a79f92cf7f7f88d4ba8",
+    "tests/test_api_participant_results.py": "c9f7e3fbb4132812446d219ae343bf351a055dd722fc6c1b4cafd955613eda32",
+    "tests/test_api_scouting.py": "4b02985828c72b505954b43bce816ff899184b851c44241b394f7347e76c911c",
+    "tests/test_api_season_admin.py": "fb058f97d924645ba1eb2f8e61214654882ec6d85e94e3015e1d1f9be67b5e84",
+    "tests/test_api_team_preview.py": "cf65b6fbda756639fb14bc8f359b190e24f072c6a58fd8ca3e8976b5bd1131b4",
+    "tests/test_supabase_v2_schema.py": "f7afe606a10b26479750bc192a5881c61ebb92d59b637e2b7069c77640224e04",
+    "tools/generate_supabase_v2_bootstrap.py": "78371e5a670f08e9ff252cce5bb74ea8a987288d32a1746a475c6397893ebdf3",
+    "tools/validate_matchday_fixtures.py": "99225fde05f20583849f25be73ed649153fcb5dc059eeb8882a76c4b0d99c653",
+    "tools/validate_phase10_5_championship_sql.py": "5101f58a7659c3f0f8f80cf7eb5a5eb6481444d2c1f365c6cf1545d72e769ae0",
+    "tools/validate_phase10_5_final_sql.py": "89dd1f3507b38d21cbcfde6fad6953579f062ad88dc70f4b39ae9fe455dae79c",
+    "tools/validate_season_lifecycle_fixtures.py": "2f7f1e199c939f288db7960e6cf821148d29a3873a28eddc82e20ba6a87ed389",
+    "tools/validate_supabase_v2_schema.py": "1c6bcb8511c0899049f4ffd42ffe0c6c2fe0e5deba06146a2be8e9f3551c9f80",
+    "web/e2e/admin.spec.ts": "bbfc6a4ead7aa1b43d0fa20205a22bdfdc80ee6cd9c560294747037864cd8e75",
+    "web/e2e/economy.spec.ts": "e700fd2b3bb83a19e518fdc9cd9e0a62246df4311737e42a18937199ceeec1be",
+    "web/e2e/final-alignment.spec.ts": "c1dfb2514c16b71979c33d4649ab2994fcf76e13eabdc05c37e2217d920f7be8",
+    "web/e2e/fixtures.ts": "a2cc0604a25a7844f073b31c57ed08565a703bec9cdfa1edfce9ac1cfd7d0ebf",
+    "web/e2e/flows.spec.ts": "a78afae036b72d5825a6576082ac8ca850f520921ef9c45d3215f5e6866d8cec",
+    "web/e2e/participant-results.spec.ts": "320319c82e1d59182e45ad77e69a189902ea431f360bf5262300cc1c46fdcaeb",
+    "web/e2e/scouting.spec.ts": "f703a2695bc663af71ab3d3e1f46dda4bcd0289f261c16e297df37906968cf93",
+    "web/e2e/wipe-revivals.spec.ts": "1a1123040c51901265c7826ef0486fd29f83ecc2d8a435daad00769614cbdac8",
+    "web/src/App.tsx": "4127eb3a16cddd8a1dff30bf0ac092ab69fb776370a3f04a1f06f897cd2a08d5",
+    "web/src/api/client.ts": "cd3f370894eeed754ec222a5d54db05f5bfd174626dca6ad107ae2f0f4c2d779",
+    "web/src/api/schema.d.ts": "8bfc7dd3a6a1af3ad141beaa4c83a5363c61d7a1009664a67cb26453a57d68f2",
+    "web/src/command-refresh.test.tsx": "a3a9e6383d6680aeb0cd74641a8e73200310ed96972c765639e7b13dee646aeb",
+    "web/src/features/admin.test.tsx": "45431ec4ceb2c0cb8f3d8f748c8ae2be1cc6ddf4ae23dc52f8da67b174fba597",
+    "web/src/features/admin.tsx": "e08623418f2b592d401657459cc4aa342cee602d002db807dfe7dedb23e7179f",
+    "web/src/features/championship.test.tsx": "97a4449c86f1c6e75d4c3aae67b81b0eaa813cabdd3f0498b0901f5103171617",
+    "web/src/features/championship.tsx": "0d7c1c1ace09a603be12e14c77284ac709896214e732079091b8b5253cddcecb",
+    "web/src/features/core.tsx": "fe2b6e6ddd1564073138b7e7cfca631746b6ffeb817a42556f6ca54955610434",
+    "web/src/features/economy.test.tsx": "ef3552f6c075250fc6fc303a36b5092b8d1ba8cdb0936ad321d50c6e920a1c24",
+    "web/src/features/initial-assignment.tsx": "6918e4085c17f7b3193166cd2a6d7769e0f91c659de4564d29858748d616fa2d",
+    "web/src/features/inventory.tsx": "cc51c939df2bec98667441dc9bdb02b0efcfe11389709fc0c27810192333ee4a",
+    "web/src/features/league-operations.tsx": "bee55d248a3137192bde422b19f50a22cf06f9a5f54382c44fca49d24cec8fac",
+    "web/src/features/lock-status.tsx": "e5975aff93ab585a85fcad5311ebf2e01c508f30102a7775310da9bc676ab874",
+    "web/src/features/pokemon-details.tsx": "f34ba4e586320f56e83cff5cd78c4657dbe9a9fb00a79049158a4de6ec3ba66a",
+    "web/src/features/progress.tsx": "987267ebdc87e1eb0486be1a36a7e5004e793965f1f8799939226ee578271e77",
+    "web/src/features/rules.tsx": "234b73add170098a4cc1b07fba89920217ea70db6bdb16066b8765fc28d2dbc7",
+    "web/src/features/scouting.tsx": "1a925b01984145789fc3cb30cda1b2803e81f5cc90dc78e65b5b2baae744f9ef",
+    "web/src/features/team-preview.tsx": "01052607e5eada3f7d89a6334ba972c50353a5a8b93212c27175818329706b22",
+    "web/src/features/trainer-profile.tsx": "ecc9da6708bb56ebb98033de540275b12645b0279cc6278cdb5205ae0b949536",
+    "web/src/features/wipe-revivals.test.tsx": "34482f680ed44d8edf3f124be309c8401d1779bf9662cf4cae9e3102ae588d40",
+    "web/src/features/wipe-revivals.tsx": "de1afe834554c6b9b62d19987df8d4055a431234055d0e244d7b651647e1d306",
+    "web/src/read-invalidation.test.ts": "1c4303448eb119a9e9facbc807b910eb39579519c69774cb0ff162ea2b144673",
+    "web/src/read-invalidation.ts": "508eb1df9edbe8b2f400c3a864ff3b6c02b4fd5be37742fa759d8b7f8bb17132",
+    "web/src/state.tsx": "1ad225ffae3370cba7d0d4d60d0b1e86ae20e26c6be485add5fde223f0a237a8",
+    "web/src/styles.css": "83a41b41fd560557445b6c38912822de56d0bdca8f55cac7d9c85c0b70d07e6d",
+    "web/src/ui.tsx": "8c573a4beb67626ec70e3a747362da4bb3d3e34898dfba04aae423073a1a00a6"
+  },
+  "remote_business_writes": 0,
+  "limitations": [
+    "Positive mutations local only",
+    "Full cloud ingestion and physical writes remain deferred"
+  ]
+}

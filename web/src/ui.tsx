@@ -16,7 +16,8 @@ import {
   X,
 } from "lucide-react";
 import { api, ApiError, errorText } from "./api/client";
-import { queries } from "./state";
+import { queries, useViewer } from "./state";
+import { invalidationFor } from "./read-invalidation";
 
 export function Empty({ children }: { children: ReactNode }) {
   return <div className="empty">{children}</div>;
@@ -127,10 +128,17 @@ export function Modal({
 
 /** A retry with an unknown outcome reuses the exact request body and key. */
 export function useCommand(invalidatePaths?: readonly string[]) {
+  const viewer = useViewer();
+  const last = useRef<{ path: string; viewer: string | undefined } | null>(
+    null,
+  );
   const refresh = () =>
     queries.invalidateQueries({
-      predicate: (query) =>
-        !invalidatePaths || invalidatePaths.includes(String(query.queryKey[1])),
+      predicate: invalidationFor(
+        last.current?.viewer ?? viewer,
+        last.current?.path ?? "",
+        invalidatePaths,
+      ),
     });
   const [pending, setPending] = useState(false),
     [error, setError] = useState<unknown>(null),
@@ -172,6 +180,7 @@ export function useCommand(invalidatePaths?: readonly string[]) {
             method,
           };
     const command = request.current;
+    last.current = { path: command.path, viewer };
     try {
       await api.command(
         command.path,
@@ -190,6 +199,8 @@ export function useCommand(invalidatePaths?: readonly string[]) {
         !(err instanceof ApiError) || err.status === 0 || err.status >= 500;
       setUncertain(unknown);
       if (!unknown) request.current = null;
+      if (err instanceof ApiError && err.status === 409 && !unknown)
+        await refresh();
       return false;
     } finally {
       busy.current = false;
@@ -223,9 +234,9 @@ export function CommandState({
       {command.error instanceof ApiError &&
         command.error.status === 409 &&
         !command.uncertain && (
-          <button onClick={() => void command.refresh()}>
-            Actualizar datos antes de continuar
-          </button>
+          <p role="status">
+            Los datos cambiaron mientras editabas. Revísalos y vuelve a guardar.
+          </p>
         )}
       {command.uncertain && (
         <div className="notice">

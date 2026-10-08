@@ -39,6 +39,9 @@ $$;
 
 
 EXPECTED_TABLES = [
+    "season_reward_rule_revisions",
+    "team_lock_first_fixations",
+    "matchday_start_evidence",
     "progress_reward_claims",
     "league_championship_resolutions",
     "league_finalizations",

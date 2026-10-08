@@ -15,6 +15,7 @@ from app.api.matchday_models import (
     CorrectDayBody,
     DayReceipt,
     DayState,
+    ParticipantCloseDayBody,
 )
 from app.repositories.errors import PersistenceError
 from app.repositories.supabase.season_admin import SeasonAdminRejected
@@ -185,3 +186,16 @@ def participant_results(
         payload,
         idempotency_key,
     )
+
+
+@participant_router.post("/{day_id}/open", response_model=DayReceipt)
+def participant_open(season_id: UUID, day_id: UUID, payload: OpenDayBody,
+                     idempotency_key: Key, principal: Reader, container: Container):
+    return execute("open", season_id, day_id, principal, container, payload, idempotency_key)
+
+
+@participant_router.post("/{day_id}/close", response_model=DayReceipt,
+                         responses={409: {"model": RankingErrorResponse}})
+def participant_close(season_id: UUID, day_id: UUID, payload: ParticipantCloseDayBody,
+                      idempotency_key: Key, principal: Reader, container: Container):
+    return execute("close", season_id, day_id, principal, container, payload, idempotency_key)

@@ -4,6 +4,7 @@ import type { Model } from "../api/types";
 import { useApp, useRead } from "../state";
 import { Card, Empty, Field, Heading, Loading, Notice, Tag } from "../ui";
 import { Pokemon, WithSeason } from "./core";
+import { LockStatus } from "./lock-status";
 
 export function ScoutingPage() {
   const { season } = useApp();
@@ -75,6 +76,9 @@ function Scouting({ season, initial }: { season: string; initial: string }) {
       {data.day && <Tag>Jornada {data.day.number}</Tag>}
       <Card>
         <h2>{trainer?.display_name ?? "Entrenador no disponible"}</h2>
+        <LockStatus
+          status={data.team_lock_status ?? (data.team ? "unknown" : "pending")}
+        />
         {!data.day ? (
           <Empty>
             No hay una jornada de referencia para consultar equipos públicos.

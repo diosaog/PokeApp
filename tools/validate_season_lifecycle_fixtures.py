@@ -61,7 +61,7 @@ class SeasonLifecycleFixtures(ParticipantStatusFixtures):
         did=self.state(sid)['current_matchday_id']; self.open(sid,did); self.results(sid,did); self.close(sid,did)
         require(self.rows('seasons',id=sid)[0]['status']=='active','Auto finish at final close')
         self.md('correct',sid,did,self.correction(sid,did))
-        self.reject(lambda:self.life('finish',sid,actor=self.owner['id']),'ADMIN_REQUIRED')
+        self.reject(lambda:self.life('finish',sid,actor=self.trainers[-1]['id']),'PARTICIPANT_REQUIRED')
         self.reject(lambda:self.life('finish',sid,{'expected_revision':0}),'STALE_REVISION')
         before=self.preserved(sid); body={'expected_revision':self.state(sid)['setup_revision']}; key=uuid4().hex
         race=self.race(lambda:self.life('finish',sid,body,key),lambda:self.life('finish',sid,body,key))

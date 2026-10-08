@@ -58,7 +58,7 @@ def team_preview(
         # columns are never selected here, including when the viewer is selected.
         public = reads.rows(
             "public_team_locks",
-            "trainer_id,matchday_id,locked_at,is_late,public_team_snapshot",
+            "trainer_id,matchday_id,locked_at,is_late,timing_status,public_team_snapshot",
             season_id=season_id,
             matchday_id=day_id,
         )
@@ -68,6 +68,7 @@ def team_preview(
         for tid in selected:
             own = selection.mode == "battle" and tid == viewer_trainer_id
             source = locks.get(tid)
+            timing = source.get("timing_status", "unknown") if source else "unknown"
             key = "public_team_snapshot"
             if own:
                 # Only the server-authenticated owner can reach this SELECT.
@@ -95,7 +96,8 @@ def team_preview(
                 ):
                     raise PersistenceError("Invalid preview snapshot")
                 lock = dict(
-                    locked_at=source["locked_at"], is_late=source["is_late"], team=team
+                    locked_at=source["locked_at"], is_late=source["is_late"], team=team,
+                    timing_status=timing,
                 )
             teams.append(
                 dict(trainer_id=tid, visibility="self" if own else "public", lock=lock)

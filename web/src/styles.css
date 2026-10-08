@@ -1797,3 +1797,14 @@ footer span {
     transform: none;
   }
 }
+
+.trainer-profile-link {
+  display: block;
+  color: inherit;
+  text-decoration: none;
+}
+.trainer-profile-link:hover,
+.trainer-profile-link:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 3px;
+}

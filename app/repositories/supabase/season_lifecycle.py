@@ -5,6 +5,7 @@ from app.repositories.supabase.season_admin import REJECTIONS, SeasonAdminReject
 
 ERRORS = {
     **REJECTIONS,
+    **dict.fromkeys(("participant_required", "participant_inactive", "participant_ineligible"), 403),
     **dict.fromkeys(
         (
             "season_not_active",
@@ -22,6 +23,7 @@ ERRORS = {
             "championship_unresolved",
             "championship_bo3_required",
             "championship_bo3_not_required",
+            "championship_resolution_not_required",
             "invalid_championship_winner",
             "legacy_title_uncertified",
         ),

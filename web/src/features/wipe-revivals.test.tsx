@@ -170,6 +170,7 @@ it("a stale write refreshes the owned state and asks for review without retrying
   expect(screen.getByRole("alert")).toHaveTextContent(
     "Revisa la cantidad actual",
   );
-  expect(mocks.refetch).toHaveBeenCalledTimes(1);
+  // useCommand owns the single refresh; this form must not duplicate it.
+  expect(mocks.refetch).not.toHaveBeenCalled();
   expect(mocks.execute).not.toHaveBeenCalled();
 });

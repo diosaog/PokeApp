@@ -179,7 +179,7 @@ class FrontendReads:
             ),
             locks=self.rows(
                 "public_team_locks",
-                "trainer_id,matchday_id,locked_at,is_late,public_team_snapshot",
+                "trainer_id,matchday_id,locked_at,is_late,timing_status,public_team_snapshot",
                 season_id=sid,
             ),
             balance=self.balance(sid, tid),

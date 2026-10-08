@@ -20,6 +20,8 @@ import {
 } from "../ui";
 import { DailyTieFields, readTieResolution, tieReview } from "./daily-ties";
 import { InitialAssignment } from "./initial-assignment";
+import { Rules } from "./rules";
+import { LockStatus } from "./lock-status";
 import { ChampionshipReview } from "./championship";
 import {
   dayLabel,
@@ -50,373 +52,6 @@ function useAdminCommand() {
       return holdAdminNavigation();
   }, [command.pending, command.uncertain, holdAdminNavigation]);
   return command;
-}
-function Configuration({ setup }: { setup: Setup }) {
-  const { season } = useApp(),
-    cmd = useAdminCommand(),
-    [replacement, setReplacement] = useState(""),
-    [source, setSource] = useState(setup),
-    [editor, setEditor] = useState(0),
-    [validation, setValidation] = useState("");
-  const configured = setup.config_versions.find((c) => c.is_current),
-    inherited = source.config_versions.find((c) => c.is_current),
-    current = replacement
-      ? source.config_versions.find((c) => c.id === replacement)
-      : inherited,
-    editable = ["draft", "active"].includes(setup.season.status),
-    stale =
-      source.config_revision !== setup.config_revision ||
-      source.roster_revision !== setup.roster_revision,
-    busy = cmd.pending || cmd.uncertain,
-    disabled = busy || stale || !editable,
-    defaultsUsed =
-      !current ||
-      typeof current.rules.badge_reward_coins !== "number" ||
-      typeof current.rules.game_completion_reward_coins !== "number";
-  const rewardValue = (
-    config: Setup["config_versions"][number] | undefined,
-    key: "badge_reward_coins" | "game_completion_reward_coins",
-  ) =>
-    typeof config?.rules[key] === "number"
-      ? Number(config.rules[key])
-      : key === "badge_reward_coins"
-        ? 4
-        : 12;
-  return (
-    <>
-      <Card>
-        <h2>Nombre de temporada</h2>
-        <form
-          onSubmit={(event) => {
-            const data = form(event);
-            if (busy || setup.season.status !== "draft") return;
-            void cmd.execute(
-              `/v1/admin/seasons/${season}/name`,
-              {
-                name: text(data, "name"),
-                expected_revision: setup.setup_revision,
-              } satisfies Model<"RenameSeasonBody">,
-              "PUT",
-            );
-          }}
-        >
-          <Field label="Nombre">
-            <input
-              key={setup.setup_revision}
-              name="name"
-              disabled={busy || setup.season.status !== "draft"}
-              required
-              maxLength={120}
-              defaultValue={setup.season.name}
-            />
-          </Field>
-          <Submit pending={busy || setup.season.status !== "draft"}>
-            Guardar nombre
-          </Submit>
-        </form>
-        {setup.season.status !== "draft" && (
-          <p>
-            El nombre solo puede cambiar durante la preparación de la temporada.
-          </p>
-        )}
-      </Card>
-      <Card>
-        <h2>Configuración de competición</h2>
-        <p>
-          Los valores se validan frente a la plantilla actual. No se cambian
-          resultados históricos.
-        </p>
-        <h3>Configuración vigente</h3>
-        {configured ? (
-          <p>
-            {configured.name} · desde jornada{" "}
-            {configured.effective_from_matchday}. Monedas por medalla:{" "}
-            {rewardValue(configured, "badge_reward_coins")}. Monedas por
-            completar la Liga Pokémon:{" "}
-            {rewardValue(configured, "game_completion_reward_coins")}.
-          </p>
-        ) : (
-          <p>No hay una configuración vigente.</p>
-        )}
-        {!editable && (
-          <p>
-            Esta temporada conserva su configuración histórica y ya no admite
-            cambios.
-          </p>
-        )}
-        {stale && (
-          <div role="alert" className="notice">
-            La configuración o la plantilla han cambiado. Revisa los valores
-            actuales antes de guardar. Se sustituirá el formulario por los datos
-            del servidor.
-            <button
-              disabled={busy}
-              onClick={() => {
-                setSource(setup);
-                setReplacement("");
-                setEditor((value) => value + 1);
-                setValidation("");
-              }}
-            >
-              Revisar configuración actualizada
-            </button>
-          </div>
-        )}
-        <Field label="Versión a configurar">
-          <select
-            value={replacement}
-            disabled={disabled}
-            onChange={(event) => {
-              setReplacement(event.target.value);
-              setValidation("");
-            }}
-          >
-            <option value="">Crear nueva versión</option>
-            {source.config_versions
-              .filter((c) => !c.used)
-              .map((c) => (
-                <option key={c.id} value={c.id}>
-                  Reemplazar {c.name} (sin usar)
-                </option>
-              ))}
-          </select>
-        </Field>
-        <p>
-          {replacement
-            ? `Editas ${current?.name ?? "la configuración seleccionada"}, que aún no se ha utilizado.`
-            : current
-              ? `La nueva versión parte de ${current.name}; sus valores se conservan hasta que los cambies y guardes.`
-              : "La primera configuración usa los valores iniciales de 4 monedas por medalla y 12 por completar la Liga Pokémon."}
-        </p>
-        {defaultsUsed && current && (
-          <p>
-            Esta configuración anterior usa los valores iniciales de 4 monedas
-            por medalla y 12 por completar la Liga Pokémon cuando no tiene un
-            valor guardado.
-          </p>
-        )}
-        <form
-          key={`${replacement}:${editor}`}
-          onSubmit={(event) => {
-            const data = form(event),
-              scores = text(data, "points").split(",").map(Number),
-              coins = text(data, "coins").split(",").map(Number),
-              positions = (values: number[]) =>
-                Object.fromEntries(values.map((v, i) => [String(i + 1), v]));
-            if (disabled) return;
-            const integers = [
-                "from",
-                "total",
-                "a",
-                "b",
-                "movement",
-                "badge_reward_coins",
-                "game_completion_reward_coins",
-              ],
-              valid =
-                integers.every(
-                  (key) =>
-                    /^\d+$/.test(text(data, key)) &&
-                    Number.isSafeInteger(number(data, key)) &&
-                    number(data, key) <= 2147483647,
-                ) &&
-                ["from", "total", "a", "b"].every(
-                  (key) => number(data, key) > 0,
-                ) &&
-                [...scores, ...coins].every(
-                  (value) =>
-                    Number.isSafeInteger(value) &&
-                    value >= 0 &&
-                    value <= 2147483647,
-                );
-            if (!valid) {
-              setValidation(
-                "Introduce cantidades enteras válidas. Las monedas deben estar entre 0 y 2147483647.",
-              );
-              return;
-            }
-            setValidation("");
-            const body: Model<"ConfigVersionBody"> = {
-              name: text(data, "name"),
-              effective_from_matchday: number(data, "from"),
-              total_matchdays: number(data, "total"),
-              division_sizes: { A: number(data, "a"), B: number(data, "b") },
-              movement_count: number(data, "movement"),
-              scoring: positions(scores),
-              coin_rewards: positions(coins),
-              rules: {
-                team_lock_required: data.has("lock"),
-                last_b_gets_steal: data.has("steal"),
-                badge_reward_coins: number(data, "badge_reward_coins"),
-                game_completion_reward_coins: number(
-                  data,
-                  "game_completion_reward_coins",
-                ),
-              },
-              expected_config_revision: source.config_revision,
-              expected_roster_revision: source.roster_revision,
-            };
-            void cmd.execute(
-              `/v1/admin/seasons/${season}/config-versions${replacement ? `/${replacement}/replace-unused` : ""}`,
-              replacement
-                ? ({
-                    ...body,
-                    reason: text(data, "reason"),
-                  } satisfies Model<"ReplaceConfigBody">)
-                : body,
-            );
-          }}
-        >
-          <fieldset disabled={disabled}>
-            <div className="form-grid">
-              <Field label="Nombre de versión">
-                <input
-                  name="name"
-                  required
-                  maxLength={120}
-                  defaultValue={replacement ? current?.name : undefined}
-                />
-              </Field>
-              {[
-                ["from", "Primera jornada", 1],
-                ["total", "Total de jornadas", 1],
-                ["a", "Participantes en A", 1],
-                ["b", "Participantes en B", 1],
-                ["movement", "Ascensos / descensos", 0],
-              ].map(([name, label, min]) => (
-                <Field key={name} label={String(label)}>
-                  <input
-                    name={String(name)}
-                    type="number"
-                    min={Number(min)}
-                    step={1}
-                    max={2147483647}
-                    defaultValue={
-                      (
-                        {
-                          from: current?.effective_from_matchday,
-                          total: current?.total_matchdays,
-                          a: current?.division_sizes?.A,
-                          b: current?.division_sizes?.B,
-                          movement: current?.movement_count,
-                        } as Record<string, number | undefined>
-                      )[String(name)]
-                    }
-                    required
-                  />
-                </Field>
-              ))}
-              <Field label="Puntos por posición, separados por comas">
-                <input
-                  name="points"
-                  placeholder="10,8,6,4"
-                  defaultValue={
-                    current &&
-                    Object.entries(current.scoring)
-                      .sort((a, b) => Number(a[0]) - Number(b[0]))
-                      .map(([, v]) => v)
-                      .join(",")
-                  }
-                  pattern="[0-9]+(,[0-9]+)*"
-                  required
-                />
-              </Field>
-              <Field label="Monedas por posición, separadas por comas">
-                <input
-                  name="coins"
-                  placeholder="8,6,4,2"
-                  defaultValue={
-                    current &&
-                    Object.entries(current.coin_rewards)
-                      .sort((a, b) => Number(a[0]) - Number(b[0]))
-                      .map(([, v]) => v)
-                      .join(",")
-                  }
-                  pattern="[0-9]+(,[0-9]+)*"
-                  required
-                />
-              </Field>
-            </div>
-            <div className="form-grid">
-              {(
-                [
-                  ["badge_reward_coins", "Monedas por medalla observada", 4],
-                  [
-                    "game_completion_reward_coins",
-                    "Monedas por vencer al Campeón del juego",
-                    12,
-                  ],
-                ] as const
-              ).map(([name, label, fallback]) => (
-                <Field key={name} label={label}>
-                  <input
-                    name={name}
-                    type="number"
-                    min={0}
-                    max={2147483647}
-                    step={1}
-                    required
-                    defaultValue={
-                      typeof current?.rules[name] === "number"
-                        ? Number(current.rules[name])
-                        : fallback
-                    }
-                  />
-                </Field>
-              ))}
-            </div>
-            <p>
-              Completar la Liga Pokémon significa vencer al Campeón dentro del
-              juego con pruebas del save, una vez por temporada. Ocho medallas o
-              finalizar esta Liga de PokeApp no bastan.
-            </p>
-            <label className="check">
-              <input
-                type="checkbox"
-                name="lock"
-                defaultChecked={
-                  current ? current.rules.team_lock_required === true : true
-                }
-              />
-              Mostrar aviso de Team Lock pendiente
-            </label>
-            <p>
-              El aviso no impide jugar. El participante puede fijar o cambiar su
-              equipo mientras la jornada siga editable; la historia cerrada se
-              conserva.
-            </p>
-            <label className="check">
-              <input
-                type="checkbox"
-                name="steal"
-                defaultChecked={current?.rules.last_b_gets_steal === true}
-              />
-              Último de B recibe robo
-            </label>
-            {replacement && (
-              <Field label="Motivo de reemplazo">
-                <textarea name="reason" maxLength={500} required />
-              </Field>
-            )}
-            {validation && <p role="alert">{validation}</p>}
-            <Submit pending={disabled}>
-              {replacement ? "Reemplazar versión sin usar" : "Crear versión"}
-            </Submit>
-          </fieldset>
-        </form>
-      </Card>
-      <CommandState command={cmd} />
-      <Card>
-        <h2>Versiones registradas</h2>
-        {setup.config_versions.map((c) => (
-          <p key={c.id}>
-            {c.name} · desde jornada {c.effective_from_matchday} ·{" "}
-            {c.used ? "En uso / histórica" : "Sin usar"}
-          </p>
-        ))}
-      </Card>
-    </>
-  );
 }
 function Participants({ setup }: { setup: Setup }) {
   const { season } = useApp(),
@@ -1010,9 +645,8 @@ function Competition({ setup }: { setup: Setup }) {
         <Card>
           <h2>Equipos fijados para la jornada</h2>
           <p>
-            El Team Lock es un aviso importante, no un requisito para jugar.
-            Este resumen muestra si hay un equipo registrado; no determina si
-            llegó a tiempo o tarde.
+            El primer equipo fijado determina si llegó a tiempo. Puedes
+            reemplazarlo mientras la jornada esté abierta.
           </p>
           <div className="trainer-grid">
             {setup.participants.map((p) => {
@@ -1023,7 +657,11 @@ function Competition({ setup }: { setup: Setup }) {
               return (
                 <div key={p.id}>
                   <h3>{p.display_name}</h3>
-                  <Tag>{lock ? "Fijado" : "Pendiente"}</Tag>
+                  <LockStatus
+                    status={
+                      lock ? (lock.timing_status ?? "unknown") : "pending"
+                    }
+                  />
                 </div>
               );
             })}
@@ -1189,10 +827,7 @@ export function AdminPage() {
               <Card>
                 <h2>{q.data.season.name}</h2>
                 <Tag>{seasonLabel(q.data.season.status)}</Tag>
-                <p>
-                  {q.data.participants.length} participantes ·{" "}
-                  {q.data.config_versions.length} versiones de configuración
-                </p>
+                <p>{q.data.participants.length} participantes</p>
                 <h3>Preparación</h3>
                 {q.data.readiness.blocking_reasons.length ? (
                   q.data.readiness.blocking_reasons.map((reason) => (
@@ -1203,7 +838,7 @@ export function AdminPage() {
                 )}
               </Card>
             ) : tab === "Configuración" ? (
-              <Configuration setup={q.data} />
+              <Rules setup={q.data} />
             ) : tab === "Entrenadores" ? (
               <Participants setup={q.data} />
             ) : tab === "Competición" ? (

@@ -35,6 +35,10 @@ class CloseDayBody(StrictBody):
     tie_resolution: "TieResolution | None" = None
 
 
+class ParticipantCloseDayBody(StrictBody):
+    expected_results_revision: Revision
+
+
 class CorrectDayBody(StrictBody):
     expected_snapshot_revision: Annotated[int, Field(strict=True, gt=0)]
     reason: Reason

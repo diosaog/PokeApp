@@ -72,6 +72,9 @@ export function useApp() {
   if (!value) throw new Error("Missing app context");
   return value;
 }
+export function useViewer() {
+  return useContext(Context)?.me?.trainer_id;
+}
 export function useRead<T>(path: string, enabled = true) {
   const { me } = useApp();
   return useQuery({

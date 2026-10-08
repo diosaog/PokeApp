@@ -154,7 +154,7 @@ class SeasonAdminApiTests(unittest.TestCase):
         schema = self.client.get("/openapi.json").json()
         routes = [(path, method) for path, ops in schema["paths"].items() if path.startswith("/v1/admin") for method in ops]
         # F adds the authenticated championship review and exceptional BO3 command.
-        self.assertEqual(len(routes), 34)
+        self.assertEqual(len(routes), 37)
         for path, method in routes:
             self.assertIn("security", schema["paths"][path][method])
 
@@ -177,7 +177,7 @@ class SeasonAdminAdapterTests(unittest.TestCase):
         self.assertEqual((exc.exception.code,exc.exception.status),('INVALID_REQUEST',422))
 
     def test_each_operation_has_separate_rpc(self):
-        self.assertEqual(len(set(RPCS.values())), 10)
+        self.assertEqual(len(set(RPCS.values())), 12)
         calls = []
         client = SimpleNamespace(rpc=lambda name, args: (calls.append((name, args)) or SimpleNamespace(execute=lambda: SimpleNamespace(data={}))))
         repo = SupabaseSeasonAdminRepository(client)

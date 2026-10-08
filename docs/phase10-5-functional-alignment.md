@@ -21,7 +21,7 @@ commit before the next starts. Deploy at stable checkpoints, not every commit.
 | C | Any enabled, active, eligible season participant records/edits any editable current match, including matches between other participants. Verified JWT identity, season scope, CAS and stable idempotency; closed-day admin correction stays separate. Ordinary entry belongs in League/Battles. |
 | D | Daily wins descending then fewer adjusted deaths. No H2H-first two-way rule; no alphabetical sporting resolution. Auditable exceptional resolution where unresolved ties affect rewards/movement/cuts. |
 | E | First game segment before initial A/B. Observed save progress/death readiness, suggested split by fewer deaths, external resolution only for a relevant cut tie. Exact capacities and immutable recorded assignment; missing observations block readiness. No manual medal attestation. |
-| F | Finish/Hall uses final accumulated official points, not final day's position. Delivered F: two tied leaders require audited external BO3; exactly three use fewer authoritative adjusted deaths. J's subsequent approved rule extends deaths to 3+ leaders and residual external resolution; see the implementation gaps below. Finalist remains undefined. Existing frozen history never silently rewritten. |
+| F | Finish/Hall uses final accumulated official points, not final day's position. Exactly two tied leaders require audited external BO3; 3+ use fewer frozen authoritative adjusted deaths, then audited external resolution restricted to the remaining minimum-death candidates. Final alignment implements this extension. Finalist remains undefined. Existing frozen history never silently rewritten. |
 | G | Participant-owned nonnegative audited/idempotent wipe counter, current applicability only. Box 8 (legacy index 7) deaths cost 0.2 each without a cap; each wipe revival costs 0.4. Five visible dead plus one wipe revival costs 1.4. |
 | H | Strong missing-Team-Lock warning with ability to continue. Batallas / Team Preview: two distinct independent public selectors in Espectador; one selector including self in Batalla, own private detail permitted, rivals public only. |
 | I | Exact wallet strings; public pending/active promotions; owned robbery-shield voucher redemption; post-League spending; configurable observed-save badge/Champion rewards; purchased-revive death overlap. |
@@ -160,13 +160,13 @@ Implement independent branches; never infer answers to these questions:
 1. RESOLVED in I: default four coins per reliably observed badge, persistently configurable.
 2. RESOLVED in I: default twelve coins once per season/challenge, persistently configurable.
 3. RESOLVED in I: save proof of defeating the in-game Champion is required; eight badges and PokeApp finish/title are insufficient.
-4. RESOLVED in J instruction: normal OPEN/CLOSE/FINISH belongs to all eligible participants, preserving lifecycle, CAS and frozen history. Backend extension remains pending below.
+4. RESOLVED in J instruction and implemented in final alignment: normal OPEN/CLOSE/FINISH belongs to all eligible participants, preserving lifecycle, CAS and frozen history.
 5. RESOLVED in J instruction: exactly two leaders use external deciding battle; 3+ use fewer authoritative adjusted deaths, then exceptional external owner/admin resolution if still tied. Finalist placement alone remains OWNER_DECISION_REQUIRED.
 6. RESOLVED in I: purchased revive preserves one historical death (-0.2), without stacking it on the same still-visible death. G wipe revival remains two deaths (-0.4).
 7. RESOLVED in J instruction: no replacement cutoff; lateness does not block a lock. Frozen historical locks remain immutable.
 8. RESOLVED in K instruction: current permitted competitive Team Lock only, species/nickname/level/types/item/moves; no live save, party/boxes/dead-box/private identity fallback.
 9. RESOLVED in J instruction: League DQ does not automatically exclude Cup.
-10. Exact milestones by game, round counts other than four/five, League and postgame.
+10. RESOLVED general progression in L: badges → in-game Pokémon League → defeat Champion → game completed. Reliable save proof is required; eight badges alone and PokeApp competitive results are insufficient. Technical detection differs by format. Future per-round/postgame caps beyond the implemented J1 first-two-primary-badge rule are separate deferred roadmap configuration, not an unresolved general progression rule.
 
 ## Safety, evidence and completion
 
@@ -176,7 +176,7 @@ Use disposable local PostgreSQL for active/destructive flows; safe isolated
 staging fixtures or read-only public checks where required. Never read, inspect,
 hash, stage or touch the protected guide named in the master protocol.
 
-Existing migrations 001–040 are immutable. Before new remote SQL verify the pinned
+Existing applied migrations are immutable. Before new remote SQL verify the pinned
 V2 project, actual migration history, committed source, fresh complete baseline
 and Advisor inventory. Never replay 031/032, reset staging or change V1.
 Reuse existing Railway and Cloudflare resources. Push source before deployment.
@@ -203,6 +203,9 @@ No cloud ingestion or physical writes. STOP after I; J requires the next owner
 instruction. Phase 10.5 remains IN PROGRESS; Phase 11 NOT READY / NOT STARTED.
 
 ## J authorized scope and resolved decisions - 2026-10-08
+
+Historical J-scope record below. Its three backend gaps are superseded by the
+final alignment implementation at the end of this document.
 
 The explicit J instruction supersedes the historical stop-after-I note for J only.
 J humanizes existing Admin controls, configuration and exceptional workflows;
@@ -278,3 +281,44 @@ attestation. [Report and evidence](phase10-5l-completion-report.md).
 Full cloud ingestion remains unfinished; current save observations cannot rewrite
 competitive history. The three J implementation gaps retain their existing scope.
 **STOP after L. NEXT M requires its own instruction.** Phase 11 NOT READY.
+
+## Final product alignment - implemented, delivery pending (2026-10-08)
+
+The explicit final instruction supersedes previous package stopping points for
+this closure only. A–M remain delivered; the seven final areas now have code and
+local validation. Remote completion is recorded separately in the live handoff.
+
+- Admin edits current badge/Champion reward amounts directly. A server-side
+  immutable revision takes effect for subsequently accepted eligible observation
+  events; old claims, ledger entries and frozen history never change. Client save
+  timestamps cannot backdate the cutover. Zero remains valid. Structural format
+  changes stay restricted to unused draft configuration, without future-version UI.
+- Commands invalidate affected reads for their viewer and season. Active affected
+  screens refresh immediately; inactive reads are stale for the next visit. CAS
+  conflict refresh is automatic, while a new intent still requires user review.
+  Unknown outcomes retain exact original bodies/keys, including after failed reads.
+- Trainer cards open visual profiles. Rival teams use K's public six-field
+  projection only; self details reuse H and own Mi PC. No cloud save means no
+  invented team, PC, medal or death observation. Shop uses the four authoritative
+  item categories; M's lazy trainer-name lookup and I's economic rules remain.
+- Enabled active eligible participants may open/close the current League day and
+  finish a proven completed season through verified API/SQL authority. Daily tie
+  decisions, corrections, championship exceptions, archive and configuration stay
+  admin-only. Normal close cannot submit a tie override. League DQ does not cascade
+  to Cup; existing linked-Cup exit protection remains unchanged.
+- Championship supports 3+ tied leaders, including 4+, by minimum frozen adjusted
+  deaths. Remaining tied candidates require an explicit audited admin external
+  decision with reason and current source fingerprint. Two-player BO3 is retained.
+  Missing death evidence stays unresolved. React never chooses sporting winners.
+- New first-fixation and first-start evidence proves Team Lock on-time/late status.
+  Replacement, cancellation and reopening preserve those first events. No cutoff
+  is introduced during editable days. Old locks without proof show unknown timing;
+  no historical timing is fabricated. Public status reveals no private Pokémon data.
+
+Forward 041 implements the minimal persistent evidence and guards; earlier SQL,
+certified seasons, snapshots, Hall and Cup remain unchanged. General progression,
+badge/Champion economics, public scouting, League-only DQ, participant authority,
+championship residual policy and no Team Lock cutoff are resolved decisions.
+Finalist policy remains separately undefined and does not prevent a proven title.
+Full cloud ingestion, physical save writes and broader Phase 14 work remain deferred.
+Phase 11 must wait for explicit review/authorization after verified final delivery.

@@ -95,7 +95,9 @@ class ParticipantResultApiTests(unittest.TestCase):
             )
         self.body["results"][0]["winner_season_player_id"] = None
         self.assertEqual(self.put().status_code, 200)
-        for op in ("open", "close", "correct", "cancel-editing"):
+        for op in ("open", "close"):
+            self.assertEqual(self.client.post(self.base + "/" + op, json=self.body, headers=self.headers).status_code, 422)
+        for op in ("correct", "cancel-editing"):
             self.assertEqual(
                 self.client.post(
                     self.base + "/" + op, json=self.body, headers=self.headers

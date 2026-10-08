@@ -1,6 +1,7 @@
 """Explicit competitive scouting allowlist; no private/save or timing evidence."""
 
 from uuid import UUID
+from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -32,3 +33,4 @@ class ScoutingRead(BaseModel):
     trainers: list[PreviewTrainer] = Field(max_length=500)
     trainer_id: UUID | None
     team: list[ScoutingPokemon] | None = Field(min_length=6, max_length=6)
+    team_lock_status: Literal["pending", "on_time", "late", "unknown"] = "pending"

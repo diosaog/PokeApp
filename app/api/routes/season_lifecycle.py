@@ -4,6 +4,7 @@ from pydantic import ValidationError
 
 from app.api.errors import api_error
 from app.api.routes.season_admin import Admin, Container, Key
+from app.api.routes.cups import Reader
 from app.api.season_lifecycle_models import (
     FinishSeasonBody,
     ArchiveSeasonBody,
@@ -16,11 +17,13 @@ from app.repositories.errors import PersistenceError
 from app.repositories.supabase.season_admin import SeasonAdminRejected
 
 router = APIRouter(prefix="/v1/admin/seasons", tags=["season lifecycle"])
+participant_router = APIRouter(prefix="/v1/seasons", tags=["participant lifecycle"])
 STATES = {
     "finish": "finished",
     "archive": "archived",
     "discard": "discarded",
     "championship_bo3": "active",
+    "championship_residual": "active",
 }
 
 
@@ -112,6 +115,23 @@ def championship_bo3(
     return execute(
         "championship_bo3", season_id, principal, container, payload, idempotency_key
     )
+
+
+@router.post("/{season_id}/championship/residual", response_model=SeasonLifecycleReceipt)
+def championship_residual(season_id: UUID, payload: ChampionshipBo3Body,
+                          idempotency_key: Key, principal: Admin, container: Container):
+    return execute("championship_residual", season_id, principal, container, payload, idempotency_key)
+
+
+@participant_router.get("/{season_id}/championship", response_model=ChampionshipRead)
+def participant_championship(season_id: UUID, principal: Reader, container: Container):
+    return championship(season_id, principal, container)
+
+
+@participant_router.post("/{season_id}/finish", response_model=SeasonLifecycleReceipt)
+def participant_finish(season_id: UUID, payload: FinishSeasonBody,
+                       idempotency_key: Key, principal: Reader, container: Container):
+    return execute("finish", season_id, principal, container, payload, idempotency_key)
 
 
 @router.post("/{season_id}/archive", response_model=SeasonLifecycleReceipt)

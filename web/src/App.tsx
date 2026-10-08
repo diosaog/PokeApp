@@ -42,6 +42,7 @@ import { AdminPage } from "./features/admin";
 import { seasonLabel } from "./features/admin-labels";
 import { BattlePage } from "./features/team-preview";
 import { ScoutingPage } from "./features/scouting";
+import { TrainerProfilePage } from "./features/trainer-profile";
 
 const links = [
   ["/", "Inicio", Home],
@@ -315,6 +316,10 @@ export default function App() {
               <Route path="/battle" element={<BattlePage />} />
               <Route path="/entrenadores" element={<TrainersPage />} />
               <Route path="/entrenadores/scouting" element={<ScoutingPage />} />
+              <Route
+                path="/entrenadores/:trainerId"
+                element={<TrainerProfilePage />}
+              />
               <Route path="/pc" element={<PCPage />} />
               <Route path="/tienda" element={<ShopPage />} />
               <Route path="/copa/*" element={<CupsPage />} />

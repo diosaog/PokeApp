@@ -89,6 +89,7 @@ class LockRead(BaseModel):
     matchday_id: UUID
     locked_at: datetime
     is_late: bool
+    timing_status: Literal["on_time", "late", "unknown"] = "unknown"
     public_team_snapshot: list[PokemonRead]
 
 

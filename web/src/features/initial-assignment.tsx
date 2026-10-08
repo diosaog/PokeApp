@@ -97,7 +97,6 @@ export function InitialAssignment({
     command.error instanceof ApiError && command.error.status === 409
       ? command.error
       : null;
-  const refetch = query.refetch;
   useEffect(() => {
     if (
       administrative &&
@@ -109,8 +108,7 @@ export function InitialAssignment({
   useEffect(() => {
     if (!conflict) return;
     setReset((value) => value + 1);
-    void refetch();
-  }, [conflict, refetch]);
+  }, [conflict]);
   if (query.isPending) return <Loading />;
   if (query.error)
     return (

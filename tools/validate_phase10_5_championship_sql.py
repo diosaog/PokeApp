@@ -456,7 +456,7 @@ def validate(args, sql):
             sid, did, players = completed(targets=targets, wipes=wipes)
             value = review(sid)
             require(
-                value["state"] == "owner_decision_required"
+                value["state"] == "residual_required"
                 and value["champion_trainer_id"] is None,
                 "Undefined title tie silently resolved",
             )
@@ -468,8 +468,34 @@ def validate(args, sql):
                 lambda: f.life("championship_bo3", sid, bo3_body(sid)),
                 "CHAMPIONSHIP_BO3_NOT_REQUIRED",
             )
+            decision = bo3_body(sid)
+            reject_unchanged(lambda: f.life('championship_residual', sid, dict(decision, reason=' ')), 'INVALID_REQUEST')
+            outsider = next((p['id'] for p in players if p['id'] not in value['tied_player_ids']), None)
+            if outsider:
+                reject_unchanged(lambda: f.life('championship_residual', sid, dict(decision, winner_season_player_id=outsider)), 'INVALID_CHAMPIONSHIP_WINNER')
+            reject_unchanged(lambda: f.life('championship_residual', sid, decision, actor=players[0]['trainer_id']), 'ADMIN_REQUIRED')
+            for table in ('league_championship_resolutions', 'season_admin_state', 'activity_events', 'admin_operation_receipts'):
+                inject('championship_residual', sid, decision, table)
+            key = uuid4().hex
+            race = f.race(lambda: f.life('championship_residual', sid, decision, key), lambda: f.life('championship_residual', sid, decision, key))
+            require(race[0]['operation_id'] == race[1]['operation_id'], 'Residual resolution replay duplicated')
+            resolved = review(sid)
+            require(resolved['state'] == 'ready' and resolved['resolution_type'] == 'championship_residual', 'Residual not explicitly certified')
+            archive(sid)
+        sid, did, players = completed(targets=(0, 0, 0, 0), wipes=(2, 1, 0, 1))
+        value = review(sid)
+        require(value['state'] == 'ready' and value['resolution_type'] == 'multiple_adjusted_deaths'
+                and value['champion_trainer_id'] == players[2]['trainer_id'], 'Four-plus leaders did not use fewer frozen deaths')
+        archive(sid)
+        sid, did, players = completed(targets=(0, 0, 0, 0), wipes=(1, 0, 0, 1))
+        decision = bo3_body(sid)
+        correction = f.correction(sid, did)
+        race = f.race(lambda: f.life('championship_residual', sid, decision), lambda: f.md('correct', sid, did, correction))
+        require(isinstance(race[1], dict) and (isinstance(race[0], dict) or race[0] == 'CHAMPIONSHIP_REVIEW_STALE'), 'Residual/correction race')
+        reject_unchanged(lambda: f.life('finish', sid, dict(expected_revision=f.state(sid)['setup_revision'], input_hash=decision['input_hash'])), 'CHAMPIONSHIP_REVIEW_STALE')
+        require(review(sid)['input_hash'] != decision['input_hash'], 'Residual correction did not stale evidence')
         f.passed(
-            "F04 triple tie minimum frozen deaths; residual triple and four-way fail closed without technical fallback"
+            "F04 three-plus minimum frozen deaths; four-way automatic winner, audited residual subset/replay/rollback/correction race without technical fallback"
         )
 
         sid, did, players = completed(targets=(5, 5, 3, 0))

@@ -41,7 +41,7 @@ class SeasonLifecycleReceipt(BaseModel):
     operation_id: UUID
     event_id: UUID
     season_id: UUID
-    operation: Literal["finish", "archive", "discard", "championship_bo3"]
+    operation: Literal["finish", "archive", "discard", "championship_bo3", "championship_residual"]
     state: Literal["finished", "archived", "discarded", "active"]
     actor_trainer_id: UUID
     changed_at: datetime
@@ -66,6 +66,7 @@ class ChampionshipRead(StrictBody):
         "incomplete",
         "ready",
         "bo3_required",
+        "residual_required",
         "owner_decision_required",
         "frozen",
         "legacy",
@@ -76,7 +77,7 @@ class ChampionshipRead(StrictBody):
     tied_player_ids: Annotated[list[UUID], Field(max_length=500)]
     champion_trainer_id: UUID | None
     resolution_type: (
-        Literal["unique_points", "championship_bo3", "triple_adjusted_deaths"] | None
+        Literal["unique_points", "championship_bo3", "triple_adjusted_deaths", "multiple_adjusted_deaths", "championship_residual"] | None
     )
     finalist_status: Literal["OWNER_DECISION_REQUIRED"]
     blocking_reason: Annotated[str, Field(strict=True, max_length=200)] | None
@@ -110,4 +111,8 @@ class ChampionshipRead(StrictBody):
             len(self.tied_player_ids) != 2 or self.input_hash is None
         ):
             raise ValueError("Invalid championship BO3 state")
+        if self.state == "residual_required" and (
+            len(self.tied_player_ids) < 2 or self.input_hash is None
+        ):
+            raise ValueError("Invalid residual championship state")
         return self

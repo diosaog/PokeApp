@@ -45,6 +45,7 @@ test("archived wallet stays exact; pending offers wait for server activation", a
   );
   await login(page);
   await navigate(page, "Tienda");
+  await page.getByRole("button", { name: "Competitivos", exact: true }).click();
   await expect(page.getByText("9007199254740993 PK₽")).toBeVisible();
   await expect(page.getByText(/La Liga ha terminado/)).toBeVisible();
   await expect(page.getByText("Próxima promoción")).toBeVisible();
@@ -55,6 +56,7 @@ test("archived wallet stays exact; pending offers wait for server activation", a
   await page.reload();
   await login(page);
   await navigate(page, "Tienda");
+  await page.getByRole("button", { name: "Competitivos", exact: true }).click();
   await expect(page.getByText(/Promoción activa/)).toBeVisible();
   await page.getByRole("button", { name: "Comprar", exact: true }).click();
   await page.getByRole("button", { name: "Confirmar compra" }).click();
@@ -164,41 +166,31 @@ test("reward voucher filters targets and retries an uncertain redemption with th
   expect(attempts[0].key).toBeTruthy();
 });
 
-test("admin persists configurable observed-save rewards with the season configuration", async ({
+test("admin persists prospective observed-save rewards with current rule revisions", async ({
   page,
 }) => {
   const commands = await fixture(page);
   await login(page);
   await navigate(page, "Administración");
   await page.getByRole("tab", { name: "Configuración", exact: true }).click();
-  await expect(page.getByLabel("Monedas por medalla observada")).toHaveValue(
-    "4",
+  await expect(page.getByLabel("Monedas por medalla")).toHaveValue("4");
+  await expect(page.getByLabel("Monedas por vencer al Campeón")).toHaveValue(
+    "12",
   );
-  await expect(
-    page.getByLabel("Monedas por vencer al Campeón del juego"),
-  ).toHaveValue("12");
-  await page.getByLabel("Nombre de versión").fill("Recompensas");
   for (const [label, value] of [
-    ["Primera jornada", "4"],
-    ["Total de jornadas", "4"],
-    ["Participantes en A", "2"],
-    ["Participantes en B", "2"],
-    ["Ascensos / descensos", "1"],
-    ["Puntos por posición, separados por comas", "4,3,2,1"],
-    ["Monedas por posición, separadas por comas", "4,3,2,1"],
-    ["Monedas por medalla observada", "7"],
-    ["Monedas por vencer al Campeón del juego", "20"],
+    ["Monedas por medalla", "7"],
+    ["Monedas por vencer al Campeón", "20"],
   ])
     await page.getByLabel(label, { exact: true }).fill(value);
   await page
-    .getByRole("button", { name: "Crear versión", exact: true })
+    .getByRole("button", { name: "Guardar cambios", exact: true })
     .click();
   await expect
     .poll(() => commands.at(-1)?.path)
-    .toBe(`/v1/admin/seasons/${sid}/config-versions`);
-  expect(commands.at(-1)?.body.rules).toEqual({
-    team_lock_required: true,
-    last_b_gets_steal: false,
+    .toBe(`/v1/admin/seasons/${sid}/rules`);
+  expect(commands.at(-1)?.body).toEqual({
+    expected_revision: 0,
+    expected_config_revision: 2,
     badge_reward_coins: 7,
     game_completion_reward_coins: 20,
   });
