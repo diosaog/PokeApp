@@ -1,0 +1,249 @@
+{
+  "recorded_at": "2026-10-08T23:34:26.395177+00:00",
+  "client_date": "2026-10-09",
+  "timezone": "Europe/Madrid",
+  "phase": "11",
+  "status": "BLOCKED",
+  "execution_state": "MAPPING",
+  "resume_head": "dc1b1462c53ed77ddc3af9bac0aa0d9b3de74eb5",
+  "entry_check": "PHASE_10_5_DONE_VERIFIED",
+  "previous_source_access_blocker": "RESOLVED_OWNER_CONFIRMED_AND_RAW_CAPTURE_SUCCEEDED",
+  "latest_reconciliation": {
+    "observed_at": "2026-10-09T00:00:00Z",
+    "v1_tables": 13,
+    "v1_capture_unchanged": true,
+    "v2_history_records": 33,
+    "v2_history_unchanged": true,
+    "v2_catalog_objects": 267,
+    "v2_catalog_unchanged": true,
+    "v2_owner_excluded_tables": 59,
+    "v2_owner_excluded_baseline_unchanged": true,
+    "owner_stable_identity_credentials_unchanged": true,
+    "migration_effects": "NONE_OBSERVED",
+    "remote_writes": 0
+  },
+  "source": {
+    "project": {
+      "id": "fdtytpeyfzyssfrsulxd",
+      "name": "diosaog's Project",
+      "region": "eu-north-1",
+      "status": "ACTIVE_HEALTHY",
+      "created_at": "2025-12-09T15:04:20.560342Z"
+    },
+    "owner_confirmed_identity": true,
+    "expected_legacy_shape_verified": true,
+    "capture_at_utc": "2026-10-08 23:23:37.507176+00",
+    "capture_scope": "one_read_only_statement_snapshot",
+    "tables": [
+      {
+        "name": "auth.identities",
+        "count": 0
+      },
+      {
+        "name": "auth.refresh_tokens",
+        "count": 0
+      },
+      {
+        "name": "auth.sessions",
+        "count": 0
+      },
+      {
+        "name": "auth.users",
+        "count": 0
+      },
+      {
+        "name": "public.pokemon_flags",
+        "count": 0
+      },
+      {
+        "name": "public.purchases",
+        "count": 2
+      },
+      {
+        "name": "public.redemptions",
+        "count": 0
+      },
+      {
+        "name": "public.saves",
+        "count": 1
+      },
+      {
+        "name": "public.settings",
+        "count": 9
+      },
+      {
+        "name": "public.shop_discounts",
+        "count": 0
+      },
+      {
+        "name": "public.team_locks",
+        "count": 0
+      },
+      {
+        "name": "storage.buckets",
+        "count": 1
+      },
+      {
+        "name": "storage.objects",
+        "count": 1
+      }
+    ],
+    "preservation": {
+      "observed_at": "2026-10-08T23:31:18.522915+00:00",
+      "tables": 13,
+      "changed_tables": [],
+      "source_discovery_and_download_only": true
+    },
+    "save_copy": {
+      "source_ref": "fdtytpeyfzyssfrsulxd",
+      "save_id": 434,
+      "object_id": "25709deb-e77f-45fb-8558-3647f1c192a7",
+      "bucket": "saves",
+      "object": "1784672432_36e674b1.sav",
+      "size": 524410,
+      "sha256": "36e674b13377b4ea49b238d32b2357c0e3096bab0436ce54ed2beb7fac723173",
+      "sha256_matches_save_metadata": true,
+      "size_matches_storage_metadata": true,
+      "http": 200,
+      "write_scope": "LOCAL_PRIVATE_COPY_ONLY"
+    },
+    "observed_save_summary": {
+      "observed_at": "2026-10-08T23:30:41.522646+00:00",
+      "parser_version": "pokeapp-reader/3;pkhex/24.11.11",
+      "game": "W2",
+      "generation": 5,
+      "progress": {
+        "schema_version": 1,
+        "primary_region": "unova",
+        "regions": [
+          {
+            "region": "unova",
+            "badge_flags": [true, true, true, true, true, true, true, true]
+          }
+        ],
+        "champion_defeated": false
+      },
+      "visible_dead_box_number": 8,
+      "visible_dead_count": 5,
+      "legacy_snapshot_dead_count": 5,
+      "party_nonempty": 6,
+      "physical_save_write": false,
+      "cloud_observation_acceptance": false,
+      "rewards_created": 0,
+      "source_copy_hash": "36e674b13377b4ea49b238d32b2357c0e3096bab0436ce54ed2beb7fac723173"
+    },
+    "advisor_counts": {
+      "INFO": 19,
+      "WARN": 11,
+      "ERROR": 5
+    },
+    "credentials_and_credential_bearing_hashes": "PRIVATE_NOT_PUBLISHED",
+    "local_sqlite_used": false
+  },
+  "v2_reconciliation": {
+    "observed_at": "2026-10-08T23:26:44.519084+00:00",
+    "project_ref": "uwleqeuzsveqlugugzba",
+    "history_records": 33,
+    "history_unchanged": true,
+    "last_migration": {
+      "version": "20261008204133",
+      "name": "041_final_product_alignment",
+      "record_hash": "8f0f6f824b1a342d49b88a23c1b258d8"
+    },
+    "full_tables": 59,
+    "changed_tables": ["auth.refresh_tokens", "auth.sessions", "auth.users"],
+    "owner_identity_unchanged": true,
+    "owner_stable_credentials_unchanged": true,
+    "catalog_unchanged": true,
+    "advisor_counts": {
+      "INFO": 143,
+      "ERROR": 24,
+      "WARN": 5
+    },
+    "advisor_error_warn_unchanged": true,
+    "remote_writes": 0,
+    "cli_initial_safe_read_failures": [
+      "history",
+      "full-baseline-tables",
+      "owner-stable"
+    ],
+    "safe_fallback": "Management read_only queries after initial calls finished",
+    "owner_excluded_comparison_to_verified_10_5_closure": true,
+    "owner_excluded_tables": 59,
+    "non_owner_auth_rows": {
+      "auth.identities": 0,
+      "auth.refresh_tokens": 0,
+      "auth.sessions": 0,
+      "auth.users": 0
+    },
+    "auth_activity_delta": {
+      "auth.refresh_tokens": [472, 476],
+      "auth.sessions": [72, 72],
+      "auth.users": [1, 1],
+      "stable_owner_credentials_equal": true
+    }
+  },
+  "mapping": {
+    "league_roster": 10,
+    "division_capacities": {
+      "A": 5,
+      "B": 5
+    },
+    "matchday": 1,
+    "league_results": 0,
+    "official_snapshots": 0,
+    "explicit_season_lifecycle": "ABSENT",
+    "effective_tracked_legacy_lifecycle": "ACTIVE_RUNTIME_DEFAULT",
+    "source_started_at": "UNKNOWN",
+    "swiss_cup_participants": 8,
+    "swiss_pending_round1_pairs": 4,
+    "legacy_cup_rules_version": null,
+    "source_auth_users": 0,
+    "target_identity_map": "NOT_COMMITTED",
+    "anto_wallet": {
+      "badge_earnings": 32,
+      "purchase_spend": 24,
+      "available": 8,
+      "currency": "coins",
+      "formula": "legacy_runtime_and_inspected_live_rpc_total_spent",
+      "historical_reward_ledger": "ABSENT"
+    },
+    "purchase_status": "two_pending_no_applied_effect",
+    "physical_save_writes": 0
+  },
+  "blocker": {
+    "kind": "DESTINATION_LIFECYCLE_PLACEMENT",
+    "v2_one_active_season_index_observed": true,
+    "protected_manual_season_active": true,
+    "active_target_requires_started_at": true,
+    "source_started_at_evidence": false,
+    "proposed_resolution": "isolated_relational_import_destination_for_shadow",
+    "owner_decision": "PENDING_NOT_APPROVED"
+  },
+  "migration": {
+    "new_sql": [],
+    "journal_rows": 0,
+    "imported_entities": 0,
+    "remote_business_writes": 0,
+    "remote_schema_writes": 0,
+    "deployments": 0,
+    "unknown_import_outcomes": 0,
+    "private_raw_capture_is_not_completed_migration": true
+  },
+  "proof": {
+    "native_parser_source_read": "PASS_NO_SOURCE_WRITE",
+    "source_table_preservation": "13_OF_13_IDENTICAL",
+    "v2_business_and_storage_preservation": "UNCHANGED",
+    "owner_credentials": "UNCHANGED",
+    "migration_restart_rollback": "NOT_IMPLEMENTED_NOT_EXECUTED",
+    "local_postgresql": "NOT_STARTED",
+    "full_application_suites": "NOT_RERUN_DOCUMENTATION_ONLY"
+  },
+  "private_evidence_directories": [
+    "%TEMP%/phase11-resume-20261009/v1",
+    "%TEMP%/phase11-resume-20261009/v2",
+    "%LOCALAPPDATA%/PokeApp-migration-evidence/phase11/20261009"
+  ],
+  "phase_12_readiness": "NOT_READY",
+  "cutover": false
+}

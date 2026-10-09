@@ -1,14 +1,96 @@
 # Phase 11 — live execution record
 
-Observation: 2026-10-08 Europe/Madrid. **STATUS: PHASE 11 BLOCKED at READINESS.**
-The owner authorized real V1 → V2 migration after final 10.5. Entry passed;
-the authoritative V1 source is not yet identified and readable. This is the
-single current operational record. [Readiness report](../phase11-readiness-report.md),
-[sanitized evidence](../phase11-readiness-evidence.json),
+Observation: 2026-10-09 Europe/Madrid. **STATUS: PHASE 11 BLOCKED at MAPPING.**
+The original source-access blocker is resolved: the owner confirmed V1 and
+reactivated it; raw remote capture and content verification succeeded. The current
+blocker is placement of the legacy competition alongside the protected active V2
+manual season. This is the single current operational record.
+[Source inventory and mapping checkpoint](../phase11-source-inventory.md),
+[current sanitized evidence](../phase11-source-evidence.json),
+[historical readiness report](../phase11-readiness-report.md),
+[historical evidence](../phase11-readiness-evidence.json),
 [checkpoint](../project-checkpoint.md),
 [closed 10.5 handoff](phase10-5-live-handoff.md).
 
-## Verified entry and actual effects
+## Latest reconciliation — 2026-10-09
+
+The resume procedure was rerun against the live projects. V1 remains
+`ACTIVE_HEALTHY`; its 13 captured table count/hash records are unchanged. V2
+remains at 33 migrations through 041, with the same 267-object catalog and 59
+owner-excluded table hashes as the 10.5 closure. The stable owner identity and
+credentials are unchanged. No journal, batch, entity map or import effect exists;
+remote writes remain zero. The detailed read-only reconciliation is in the
+private evidence directory `%TEMP%/phase11-reconcile-20261009-2/`. Its verified
+source/V2 capture copy is under
+`%LOCALAPPDATA%/PokeApp-migration-evidence/phase11/20261009/`.
+
+## Current resume checkpoint — 2026-10-09
+
+- Resume HEAD/origin `dc1b1462c53ed77ddc3af9bac0aa0d9b3de74eb5`, fetched 0/0,
+  tracked tree clean before this documentation update. No import/schema writes
+  existed at entry. Fresh V2 history remains 33 records through 041; catalog
+  267 objects identical, no import journal/effects. All 59 owner-excluded table
+  hashes equal the verified 10.5 closure. Full Auth differences are confined to
+  owner activity; stable credentials/identity and all public/Storage rows match.
+- V1 `fdtytpeyfzyssfrsulxd`, `diosaog's Project`, eu-north-1, ACTIVE_HEALTHY.
+  Owner identity confirmation is authoritative. Real catalog matches all seven
+  legacy tables. One read-only statement captured all seven public tables, four
+  Auth tables and Storage buckets/objects. All 13 hashes remain identical after
+  discovery, metadata reads and save download. Local SQLite was not used.
+- Source: ten League trainers, A/B 5/5, J1 with no results/snapshots; eight-player
+  legacy Swiss Cup with four pending pairs; two pending Anto purchases; one save;
+  no locks, redemptions, Pokémon flags, promotions, archived/Hall records or Auth
+  users. Exact counts, semantics and absence limits are in the source inventory.
+- The save's 524,410 bytes match its stored SHA-256. Local read-only parser version
+  `pokeapp-reader/3;pkhex/24.11.11` observes W2, eight Unova badges, Champion false,
+  five Pokémon in Box 8; source bytes unchanged. No cloud observation/reward was
+  created. V1 wallet formula and live `rpc_total_spent` definition support
+  32 badge earnings - 24 pending-purchase spend = 8 for Anto.
+- No new migrations, helpers, journal rows, target identities, import batches or
+  remote business writes. No deployment or PostgreSQL runner. Existing Railway
+  and Cloudflare remain at `eb4e402`; V2 Advisor remains 24 ERROR / 5 WARN / 143 INFO.
+  V1 Advisor baseline is 5 ERROR / 11 WARN / 19 INFO; V1 was not changed to fix it.
+
+## Current material mapping blocker
+
+`league_state.active=false` closes matchday editing, not the season. Missing
+`season_lifecycle_v1` means effective ACTIVE under the tracked legacy runtime,
+with no evidenced `started_at`. Do not claim the stored JSON explicitly declares
+an active season or that the exact deployed legacy revision has been verified.
+
+The current V2 catalog confirms `uq_seasons_one_active`; the owner's manual
+season occupies that slot. V2 also requires an active season's start timestamp.
+Relabeling V1 draft/archived, inventing its start date, merging it into the manual
+season, retiring that season or changing normal lifecycle invariants is not an
+approved migration mapping. Capturing raw data alone is not a completed import.
+
+The owner was asked whether to authorize an **isolated relational import target
+for Shadow**, outside V2's current competitive lifecycle, preserving both source
+and manual season truth. No isolated target/schema policy has yet been approved
+or implemented. Do not treat silence as approval. This is a destination scope
+decision, not a naming or file-placement preference.
+
+## Exact next action
+
+1. Resolve the pending destination-placement decision. Source identity/access no
+   longer needs reconfirmation. Reconcile Git, remote history, source capture and
+   V2 baseline/journal state before resuming any write.
+2. Finalize mappings against the approved destination, preserving unknown legacy
+   timing and current owner identities. Economic opening-snapshot/high-water
+   design is a documented candidate, not implemented historical reward replay.
+3. Implement journaled deterministic imports; prove restart, rollback and exact
+   state on disposable PostgreSQL before committed/pushed remote migration.
+4. Fresh source/destination baselines, verified atomic imports, reconciliation,
+   security checks and genuine Phase 11 closure. **Phase 12 remains NOT READY /
+   NOT STARTED.** No cutover.
+
+Private capture/evidence: `%TEMP%/phase11-resume-20261009/v1/` and `v2/`.
+Verified private copy and manifest also live at
+`%LOCALAPPDATA%/PokeApp-migration-evidence/phase11/20261009/`.
+Raw settings contain credentials and remain private. The native parse is source
+evidence, not a full parser regression suite or cloud ingestion claim.
+
+## Historical initial entry and effects — 2026-10-08
 
 - Entry main/origin: `e256d5b28f751beb7c3851e58b1eb7c9c81ed8fb`, fetched 0/0,
   clean tracked tree. Final 10.5 DONE / Phase 11 READY FOR REVIEW verified from
@@ -28,7 +110,7 @@ single current operational record. [Readiness report](../phase11-readiness-repor
   Exact deployment identifiers are in the report/evidence. No deployment needed
   or performed for this documentation-only readiness checkpoint.
 
-## Actual blocker
+## Historical source-access blocker — resolved on 2026-10-09
 
 V1 connection configuration is absent from repository/global Streamlit secrets
 and process/User/Machine environment. The accessible Supabase account lists V2
@@ -44,11 +126,11 @@ local purchase. Latest save metadata is 2025-12-09. These observations do not pr
 remote data is corrupt or absent; they prove this local copy cannot silently be
 selected as the authoritative complete source.
 
-Owner question is pending: identify the real V1 project and restore read access,
-or identify an authoritative accessible export. Do not request secrets in chat.
-Do not treat elapsed time or the inactive candidate's name as confirmation.
+At this historical checkpoint the owner question was pending: identify V1 and
+restore read access, or identify an authoritative export. The subsequent owner
+confirmation and successful capture above supersede this access blocker.
 
-## Exact resume point
+## Historical resume point — superseded above
 
 1. Reconcile Git, this handoff, real migration history, V1/V2 state and any
    journal/remote effects again. This checkpoint performed only remote reads.

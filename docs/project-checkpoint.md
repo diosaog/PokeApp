@@ -1,13 +1,14 @@
 # PokeApp 2.0 Project Checkpoint
 
-Checkpoint reconciled: 2026-10-08. This file is the project index and historical
+Checkpoint reconciled: 2026-10-09. This file is the project index and historical
 milestone record; it does not maintain a second live phase-status ledger.
 
 ## Current project position
 
 - Active phase: **11 — real V1 → V2 data migration**, authorized after final 10.5.
   [Single live record](work-in-progress/phase11-live-handoff.md),
-  [readiness checkpoint](phase11-readiness-report.md). Current execution state and
+  [source inventory](phase11-source-inventory.md),
+  [historical readiness checkpoint](phase11-readiness-report.md). Current execution state and
   exact resume step are maintained there. No cutover or Phase 12 is included.
 - Latest completed phase: **10.5 — Functional product alignment and repair, DONE**.
   [Approved contract](phase10-5-functional-alignment.md),

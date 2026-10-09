@@ -1,5 +1,10 @@
 # Phase 11 — migration readiness checkpoint
 
+Historical checkpoint. On 2026-10-09 the owner confirmed/reactivated V1 and raw
+remote capture succeeded. The [source inventory](phase11-source-inventory.md)
+and [live handoff](work-in-progress/phase11-live-handoff.md) supersede the access
+blocker below; this dated evidence is retained unchanged.
+
 2026-10-08. **STATUS: PHASE 11 BLOCKED — READINESS.**
 **ENTRY CHECK: PHASE 10.5 DONE VERIFIED.** This records discovery, not a completed
 data migration. [Live handoff](work-in-progress/phase11-live-handoff.md),
