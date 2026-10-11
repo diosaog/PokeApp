@@ -81,6 +81,8 @@ Temporary working logs remain under `%TEMP%/phase13-staging-20261011/`.
 
 Phase 13 is closed. Do not resume its mutating fixture modes. Next phase is 14
 performance, awaiting execution instruction; no Phase 14 work or cutover started.
+The [Phase 14 readiness map](../phase14-performance-readiness.md) is prepared;
+implementation and benchmarks remain NOT STARTED.
 Launcher/cloud and physical-save gaps remain separate. Local transport timings
 are not hosted benchmarks. See the report's six short read-only owner checks.
 

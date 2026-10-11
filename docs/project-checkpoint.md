@@ -15,6 +15,8 @@ milestone record; it does not maintain a second live phase-status ledger.
   [structured evidence](phase13-staging-evidence.json),
   [single live record](work-in-progress/phase13-live-handoff.md).
   **Phase 14 READY FOR PERFORMANCE / NOT STARTED**, awaiting its instruction.
+  [Phase 14 preparation map](phase14-performance-readiness.md) is complete;
+  preparation did not start implementation or benchmarks.
 - Previous completed phase: **12 — private Shadow comparison, DONE**.
   All seven surviving domains classified: 92 MATCH, 6 EXPECTED_DIFFERENCE,
   22 UNKNOWN, 8 NOT_APPLICABLE and zero BLOCKER. Three deterministic executions;
