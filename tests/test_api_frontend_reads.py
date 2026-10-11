@@ -90,6 +90,27 @@ class ReadStore:
     def shield_targets(self, season_id, trainer_id):
         return []
 
+    def observed_entities_for_locks(self, season_id, locks):
+        pairs = {(lock["trainer_id"], lock["save_file_id"]) for lock in locks}
+        observations = [
+            row for row in self.data.get("pokemon_observations", [])
+            if row.get("season_id") == season_id
+            and (row.get("trainer_id"), row.get("save_file_id")) in pairs
+            and row.get("outcome") in ("NEW", "MATCHED")
+        ]
+        entities = {
+            row["id"]: row
+            for row in self.data.get("pokemon_entities", [])
+            if row.get("season_id") == season_id
+            and row.get("identity_status") == "unambiguous"
+        }
+        return {
+            (row["trainer_id"], row["source"], row["box_number"], row["slot_number"]): row["pokemon_entity_id"]
+            for row in observations
+            if row.get("pokemon_entity_id") in entities
+            and entities[row["pokemon_entity_id"]].get("owner_trainer_id") == row["trainer_id"]
+        }
+
     def rows(self, table, columns, *, filters=None, offset=0, limit=500, **kwargs):
         self.calls.append((table, columns, filters, offset, limit))
         return deepcopy(
@@ -443,8 +464,12 @@ class FrontendReadTests(unittest.TestCase):
                 identity_status="unambiguous",
             )
         ]
+        self.store.observed_entities_for_locks = Mock(
+            wraps=self.store.observed_entities_for_locks
+        )
         result = self.get(f"seasons/{SID}/inventory")
         self.assertEqual(result.status_code, 200)
+        self.store.observed_entities_for_locks.assert_called_once()
         target = result.json()["targets"][0]
         self.assertEqual(target["pokemon_entity_id"], entity)
         self.assertEqual(target["visibility"], "public_team_lock")
@@ -454,6 +479,38 @@ class FrontendReadTests(unittest.TestCase):
                 self.assertEqual(filters["save_file_id"], SAVE)
             self.assertNotIn("evidence", columns)
             self.assertNotIn("private_team_snapshot", columns)
+
+    def test_inventory_batches_public_identity_for_all_rivals(self):
+        locks, observations, entities = [], [], []
+        for index in range(6):
+            rival, rival_save, entity = [str(uuid4()) for _ in range(3)]
+            locks.append(dict(
+                season_id=SID, matchday_id=DAY, trainer_id=rival,
+                save_file_id=rival_save,
+                public_team_snapshot=[dict(species="Eevee")],
+            ))
+            observations.append(dict(
+                season_id=SID, trainer_id=rival, save_file_id=rival_save,
+                pokemon_entity_id=entity, source="party", box_number=0,
+                slot_number=1, outcome="MATCHED",
+            ))
+            entities.append(dict(
+                id=entity, season_id=SID, owner_trainer_id=rival,
+                identity_status="unambiguous",
+            ))
+        self.store.data["team_locks"] = locks
+        self.store.data["pokemon_observations"] = observations
+        self.store.data["pokemon_entities"] = entities
+        self.store.observed_entities_for_locks = Mock(
+            wraps=self.store.observed_entities_for_locks
+        )
+        result = self.get(f"seasons/{SID}/inventory")
+        self.assertEqual(result.status_code, 200)
+        self.assertEqual(
+            len([target for target in result.json()["targets"] if target["visibility"] == "public_team_lock"]),
+            6,
+        )
+        self.store.observed_entities_for_locks.assert_called_once()
 
     def test_inventory_own_gift_visible_without_enabling_catalog_offer(self):
         item, owned, foreign = [str(uuid4()) for _ in range(3)]

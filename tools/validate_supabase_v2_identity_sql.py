@@ -70,6 +70,13 @@ class Query:
     def select(self, _columns): return self
     def eq(self, key, value):
         self.filters.append(identifier(key)+'='+literal(value)); return self
+    def in_(self, key, values):
+        values = list(values)
+        if not values:
+            self.filters.append('false')
+        else:
+            self.filters.append(identifier(key)+' in ('+','.join(literal(value) for value in values)+')')
+        return self
     def order(self, key, desc=False):
         self.sort=' order by '+identifier(key)+(' desc' if desc else ''); return self
     def limit(self, limit): self.lim=' limit '+str(int(limit)); return self

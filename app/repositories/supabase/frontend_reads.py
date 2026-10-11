@@ -34,6 +34,9 @@ class FrontendReadRepository(Protocol):
     def league_general(self, season_id: str) -> dict | None: ...
     def initial_observations(self, season_id: str) -> list[dict]: ...
     def observed_progress(self, season_id: str, trainer_id: str | None = None) -> list[dict] | None: ...
+    def observed_entities_for_locks(
+        self, season_id: str, locks: list[dict]
+    ) -> dict[tuple[str, str, int, int], str]: ...
 
     def rows(
         self,
@@ -127,3 +130,103 @@ class SupabaseFrontendReadRepository:
         except Exception as exc:
             _report_failure("observed_progress", exc)
             raise PersistenceError("Observed progress unavailable") from exc
+
+    def observed_entities_for_locks(self, season_id, locks):
+        """Resolve only public lock slots through one bounded batch read pair.
+
+        The inventory projection needs entity IDs to attach public team-lock
+        Pokémon to existing competitive records.  It must never inspect a rival
+        parsed save.  The lock-provided trainer/save pairs therefore scope both
+        reads, and malformed or ambiguous rows fail closed.
+        """
+        try:
+            pairs = set()
+            for lock in locks:
+                trainer_id, save_file_id = lock.get("trainer_id"), lock.get("save_file_id")
+                if not isinstance(trainer_id, str) or not isinstance(save_file_id, str):
+                    raise ValueError("Invalid lock identity")
+                pairs.add((trainer_id, save_file_id))
+            if len({trainer for trainer, _ in pairs}) != len(pairs):
+                raise ValueError("Conflicting lock saves")
+            if not pairs:
+                return {}
+            if len(pairs) > 500:
+                raise ValueError("Too many locks")
+            trainer_ids = sorted({trainer_id for trainer_id, _ in pairs})
+            save_ids = sorted({save_file_id for _, save_file_id in pairs})
+            observations = _execute_read(
+                self._client.table("pokemon_observations")
+                .select(
+                    "trainer_id,save_file_id,pokemon_entity_id,source,box_number,slot_number,outcome"
+                )
+                .eq("season_id", season_id)
+                .eq("source", "party")
+                .eq("box_number", 0)
+                .in_("slot_number", [1, 2, 3, 4, 5, 6])
+                .in_("trainer_id", trainer_ids)
+                .in_("save_file_id", save_ids)
+                .range(0, 500),
+                "observed_entities_for_locks_observations",
+            )
+            if not isinstance(observations, list) or len(observations) > 500:
+                raise ValueError("Invalid observation collection")
+            candidates = {}
+            entity_ids = set()
+            for observation in observations:
+                if not isinstance(observation, dict):
+                    raise ValueError("Invalid observation")
+                pair = (observation.get("trainer_id"), observation.get("save_file_id"))
+                if pair not in pairs or observation.get("outcome") not in ("NEW", "MATCHED"):
+                    continue
+                entity_id = observation.get("pokemon_entity_id")
+                key = (
+                    observation.get("trainer_id"),
+                    observation.get("source"),
+                    observation.get("box_number"),
+                    observation.get("slot_number"),
+                )
+                if (not isinstance(entity_id, str)
+                    or key[1] != "party" or type(key[2]) is not int or key[2] != 0
+                    or type(key[3]) is not int or not 1 <= key[3] <= 6):
+                    raise ValueError("Invalid observation identity")
+                previous = candidates.get(key)
+                if previous is not None:
+                    raise ValueError("Ambiguous observation identity")
+                candidates[key] = entity_id
+                entity_ids.add(entity_id)
+            if not entity_ids:
+                return {}
+            if len(entity_ids) > 500:
+                raise ValueError("Too many entities")
+            entities = _execute_read(
+                self._client.table("pokemon_entities")
+                .select("id,owner_trainer_id,identity_status")
+                .eq("season_id", season_id)
+                .eq("identity_status", "unambiguous")
+                .in_("id", sorted(entity_ids))
+                .range(0, 500),
+                "observed_entities_for_locks_entities",
+            )
+            if not isinstance(entities, list) or len(entities) > 500:
+                raise ValueError("Invalid entity collection")
+            owners = {}
+            for row in entities:
+                if not isinstance(row, dict):
+                    raise ValueError("Invalid entity")
+                if row.get("identity_status") != "unambiguous":
+                    continue
+                entity_id, owner = row.get("id"), row.get("owner_trainer_id")
+                if not isinstance(entity_id, str) or owner not in trainer_ids:
+                    continue
+                previous = owners.get(entity_id)
+                if previous is not None:
+                    raise ValueError("Ambiguous entity owner")
+                owners[entity_id] = owner
+            return {
+                key: entity_id
+                for key, entity_id in candidates.items()
+                if owners.get(entity_id) == key[0]
+            }
+        except Exception as exc:
+            _report_failure("observed_entities_for_locks", exc)
+            raise PersistenceError("Public team identity unavailable") from exc

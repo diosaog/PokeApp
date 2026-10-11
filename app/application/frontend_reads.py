@@ -197,6 +197,10 @@ class FrontendReads:
 
     def pc(self, sid, tid):
         self.season(sid)
+        return self._pc(sid, tid)
+
+    def _pc(self, sid, tid):
+        # Caller has already validated the season in this request.
         players = self.rows(
             "season_players", "current_save_file_id", season_id=sid, trainer_id=tid
         )
@@ -316,7 +320,7 @@ class FrontendReads:
 
     def inventory(self, sid, tid):
         season = self.season(sid)
-        pc = self.pc(sid, tid)
+        pc = self._pc(sid, tid)
         shield_targets = set(self.repo.shield_targets(sid, tid))
         targets = [
             dict(
@@ -339,14 +343,13 @@ class FrontendReads:
                 season_id=sid,
                 matchday_id=season["current_matchday_id"],
             )
+            rival_locks = [lock for lock in locks if lock["trainer_id"] != tid]
+            entities = self.repo.observed_entities_for_locks(sid, rival_locks)
             for lock in locks:
                 if lock["trainer_id"] == tid:
                     continue
-                entities = self.observed_entities(
-                    sid, lock["trainer_id"], lock["save_file_id"]
-                )
                 for index, pokemon in enumerate(lock["public_team_snapshot"], 1):
-                    entity = entities.get(("party", 0, index))
+                    entity = entities.get((lock["trainer_id"], "party", 0, index))
                     if entity:
                         targets.append(
                             dict(
