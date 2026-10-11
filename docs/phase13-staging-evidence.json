@@ -1,6 +1,6 @@
 {
   "phase": 13,
-  "status": "LOCAL_GREEN_DELIVERY_PENDING",
+  "status": "PHASE 13 DONE",
   "entry_head": "fec337cb4f04aa3c15d36582d1b536fbaa4a4ae1",
   "staging": {
     "isolation": "dedicated loopback PostgreSQL 17.11",
@@ -79,7 +79,16 @@
         "browser-close-fixed.log: fixed close",
         "browser-history-fixed.log: desktop/mobile archive and Hall"
       ],
-      "visual_review": "legible, no horizontal overflow"
+      "visual_review": "legible, no horizontal overflow",
+      "case_names": [
+        "Admin prospective rules and public rival projection",
+        "Participant open/results/on-time replacement",
+        "Purchase/revive/wipe freshness",
+        "Mobile pending/late/replacement",
+        "Participant J1 close/General/profile/J2",
+        "Archived League/Hall desktop",
+        "Archived League/Hall mobile"
+      ]
     },
     "typescript_build": "FRESH PASS",
     "compile": "FRESH PASS",
@@ -154,12 +163,67 @@
     }
   },
   "delivery": {
-    "required": "Railway backend only; pending",
-    "cloudflare": "unchanged",
-    "migration": "none"
+    "classification": "FRESH PASS",
+    "railway": {
+      "id": "3845ce2d-6488-43ef-893a-1459c2aed0bb",
+      "status": "SUCCESS",
+      "source": "cea57ca5d6e25c7b073aa2dd8857152730f1a157",
+      "image": "sha256:3feba3d294bdc5448160e770a42e7203860129c2670677a34e67bbda2314e160",
+      "committed_api_inputs": 238
+    },
+    "cloudflare": {
+      "deployment": "ea9c837d-86f0-4b0a-826d-a4774371b56e",
+      "version": "77eea9f6-0c90-45a2-b93a-3bf9cdf5fc11",
+      "source": "eb4e402891cbaa02e0999229874ac3003e016ae0",
+      "percent": 100,
+      "unchanged": true
+    },
+    "migration": "none",
+    "hosted_probes": {
+      "status": "PASS",
+      "observed_at": "2026-10-11T17:21:24.801204+00:00",
+      "checks": [
+        {
+          "check": "API liveness",
+          "status": 200
+        },
+        {
+          "check": "read requires authentication",
+          "status": 401
+        },
+        {
+          "check": "close denies missing authentication before business mutation",
+          "status": 401
+        },
+        {
+          "check": "exact frontend CORS",
+          "status": 200
+        },
+        {
+          "check": "untrusted origin rejected",
+          "status": 400
+        },
+        {
+          "check": "unchanged frontend HTTPS deep SPA/CSP/nosniff",
+          "status": 200
+        }
+      ],
+      "requests": 6,
+      "positive_business_mutations": "local only",
+      "real_auth_logins": 0,
+      "remote_business_writes": 0
+    }
   },
   "cleanup": {
-    "status": "pending"
+    "status": "PASS",
+    "dedicated_database": "pokeapp_v2_validation_phase13_20261011",
+    "database_absent": true,
+    "other_database_inventory_unchanged": true,
+    "api_stopped": true,
+    "vite_stopped": true,
+    "postgresql_stopped": true,
+    "remote_fixtures": 0,
+    "cleanup_scope": "only dedicated Phase13 local database; private evidence retained"
   },
   "intentional_gaps": [
     "full Launcher/cloud ingestion",
@@ -168,7 +232,7 @@
     "positive business mutations local only",
     "visual polish and representative load measurement later"
   ],
-  "private_evidence": "%TEMP%/phase13-staging-20261011/",
+  "private_evidence": "%LOCALAPPDATA%/PokeApp-migration-evidence/phase13/20261011/",
   "phase14": "NOT STARTED",
   "cutover": false,
   "source_sha256": {
@@ -177,5 +241,68 @@
     "tests/test_phase13_staging.py": "29d8fd9932aa37cc221b64fea14b1048f94b1bd93657731f202008770d4ea10a",
     "tools/phase13_staging.py": "0ca560465cde4a64bc5c22009affd4e9cabc13fae806f40c3d4fe8014fdeb582",
     "web/e2e/phase13-staging.spec.ts": "97a5484fa10535746036241a471171c69979d808ffa81ca77c0b800d14ea3673"
-  }
+  },
+  "application_head": "cea57ca5d6e25c7b073aa2dd8857152730f1a157",
+  "final_head": "documentation closure commit carrying this file; resolve with Git",
+  "final_remote": {
+    "batches": 6,
+    "full_baseline_equals_phase11": false,
+    "full_tables": 59,
+    "history_count": 34,
+    "history_unchanged": true,
+    "identities": 57,
+    "observed_at": "2026-10-11T17:21:25.731506+00:00",
+    "owner_stable_unchanged": true,
+    "phase13_all_five_captures_equal": {
+      "full": false,
+      "history": true,
+      "owner-stable": true,
+      "security": true,
+      "shadow": true
+    },
+    "private_rows": 135,
+    "project": "uwleqeuzsveqlugugzba",
+    "remote_writes": 0,
+    "run_id": "61e5eb57-34f5-57f9-9252-4ea8be8d8b66",
+    "run_status": "reconciled",
+    "runs": 1,
+    "security_unchanged": true
+  },
+  "preservation": {
+    "status": "PASS",
+    "entry_to_final_exact_full_table_records": 56,
+    "full_table_records": 59,
+    "auth_activity_differences": [
+      {
+        "table": "auth.refresh_tokens",
+        "entry_rows": 608,
+        "final_rows": 609
+      },
+      {
+        "table": "auth.sessions",
+        "entry_rows": 72,
+        "final_rows": 73
+      },
+      {
+        "table": "auth.users",
+        "entry_rows": 1,
+        "final_rows": 1
+      }
+    ],
+    "all_other_table_records_identical": true,
+    "predeploy_to_final_all_five_captures_identical": true,
+    "owner_stable_credentials_identical": true,
+    "private_reference_export_identical": true,
+    "security_catalog_identical": true,
+    "migration_history_identical": true,
+    "remote_business_writes": 0,
+    "schema_writes": 0,
+    "auth_operations": 0,
+    "storage_byte_operations": 0,
+    "v1_calls": 0,
+    "read_only_management_queries": 16
+  },
+  "private_evidence_files_verified": 101,
+  "phase14_readiness": "READY FOR PERFORMANCE",
+  "private_manifest_sha256": "c6fcbab31595ca3b94048fc68048059184820654ed0c68d1bf8b55e633d92cc4"
 }

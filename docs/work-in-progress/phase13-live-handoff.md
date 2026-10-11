@@ -1,8 +1,10 @@
 # Phase 13 - representative staging live record
 
-2026-10-11 Europe/Madrid. **STATUS: LOCAL GREEN / DELIVERY PENDING.**
+2026-10-11 Europe/Madrid. **STATUS: PHASE 13 DONE.**
+**PHASE 14 READINESS: READY FOR PERFORMANCE.** Phase 14 NOT STARTED. STOP.
 Phase 11/12 remain closed. Owner authorized Phase 13, then STOP before Phase 14.
-No cutover. [Local evidence](../phase13-staging-evidence.json).
+No cutover. [Report](../phase13-staging-report.md),
+[structured evidence](../phase13-staging-evidence.json).
 
 ## Entry and isolation
 
@@ -50,19 +52,38 @@ were repeated. Desktop/390px screenshots reviewed; no overflow, interception
 or F5. Parser, Phase 11/12 and unrelated browser suites not rerun. SQL/auth
 security contracts unchanged; authority/privacy denials exercised freshly.
 
-## Exact next work
+## Verified delivery and preservation
 
-Commit/push this checkpoint before deployment. Export committed API inputs and
-deploy Railway only. Verify hosted liveness/denials/CORS safely and final hosted
-preservation. Stop owned local servers, drop only the named disposable database,
-verify absence and stop PostgreSQL. Finish report/evidence/checkpoint and push
-closure. Do not mark DONE before delivery, cleanup and comparison are verified.
+Application commit/push `cea57ca5d6e25c7b073aa2dd8857152730f1a157` preceded the
+238-input API-only upload. Railway `3845ce2d-6488-43ef-893a-1459c2aed0bb`
+SUCCESS, same source, image
+`sha256:3feba3d294bdc5448160e770a42e7203860129c2670677a34e67bbda2314e160`.
+Six safe hosted probes pass. Positive mutations remain local only.
+Cloudflare unchanged: `ea9c837d-86f0-4b0a-826d-a4774371b56e`, version
+`77eea9f6-0c90-45a2-b93a-3bf9cdf5fc11`, 100%, source `eb4e402`.
 
-Private logs: `%TEMP%/phase13-staging-20261011/`; fixture/checkpoints in `local/`.
-Read-only observer `%TEMP%/phase13-observe.py`: entry and predeploy captured.
-Never rerun mutating scenario modes blindly. API stop sentinel: `local/stop-api`.
-PG binaries `%TEMP%/phase10-5l-pg17/pgsql/bin/`; cluster
-`%TEMP%/pokeapp_phase10_5l_pg`. Deployment IDs are in structured evidence.
+Entry to final: 56/59 full table records exact; only owner Auth activity changed
+before deployment (608?609 refresh tokens, 72?73 sessions, one user). Stable
+credentials/identity unchanged; zero non-owner users/sessions/tokens. Fresh
+predeploy and final captures are identical across all five categories: all 59
+full table records, 34 migration records, stable credentials, private security
+and all 135 reference rows. Owner seasons/results/economy/locks/Storage preserved.
+No V1 call, migration, hosted Auth operation, business write or Storage-byte
+operation. Sixteen Management API queries explicitly read-only.
 
-Protected guide/unrelated untracked files untouched. Explicit staging only.
-Phase 14 NOT STARTED. No cutover.
+Local API/Vite stopped; dedicated database dropped and absence verified; other
+database inventory unchanged. PostgreSQL stopped with no other client sessions.
+Remote fixtures/residue zero. Verified 101-file private evidence and manifest:
+`%LOCALAPPDATA%/PokeApp-migration-evidence/phase13/20261011/`.
+Temporary working logs remain under `%TEMP%/phase13-staging-20261011/`.
+
+## Exact next action
+
+Phase 13 is closed. Do not resume its mutating fixture modes. Next phase is 14
+performance, awaiting execution instruction; no Phase 14 work or cutover started.
+Launcher/cloud and physical-save gaps remain separate. Local transport timings
+are not hosted benchmarks. See the report's six short read-only owner checks.
+
+Documentation closure is a subsequent commit carrying this record; obtain the
+exact final HEAD from Git. Protected guide/unrelated untracked files untouched.
+Explicit staging only. STOP.
