@@ -1,11 +1,18 @@
 # Phase 11 — authoritative source capture and mapping checkpoint
 
-2026-10-09 Europe/Madrid. **Source identity/access verified; migration not done.**
+2026-10-11 Europe/Madrid. **IMPLEMENTING: approved isolated mapping implemented;
+remote import and final certification remain pending.**
+The owner approved an isolated relational destination outside V2's competitive
+lifecycle. The destination conflict recorded below is resolved by that decision.
+The [current mapping contract](#approved-isolated-mapping--2026-10-11) supersedes
+the historical pending-placement language; the original source evidence remains.
+
+Historical source-capture entry, 2026-10-09:
 Resume `dc1b1462c53ed77ddc3af9bac0aa0d9b3de74eb5`, main/origin 0/0, clean tracked
 tree. [Current operational record](work-in-progress/phase11-live-handoff.md),
-[sanitized evidence](phase11-source-evidence.json). The original HTTP 544 source
-blocker is resolved. This checkpoint is blocked on destination placement, not on
-whether the project is PokeApp.
+[sanitized historical evidence](phase11-source-evidence.json). The original HTTP
+544 source blocker was resolved. At that checkpoint destination placement was
+pending; it no longer requires an owner decision.
 
 ## Actual source and preservation
 
@@ -62,7 +69,7 @@ harness assumption, not an unavailable/corrupt source or a mutation attempt.
 | Cup                   | Configured legacy Swiss Cup: eight named participants, round 1 of maximum 7, four explicit pairs, no winners/history/results, explicit zero wins/losses/byes. V2's legacy branch uses `rules_version=NULL`; do not regenerate pairings or certify as modern Cup. League DQ/Cup state remain separate.                                                                                                                         |
 | Non-business settings | Discord notification hash caches are operational suppression/cache state, not competitive data or credentials. Exclude from normal domain migration while retaining private source evidence. Never resend notifications during import.                                                                                                                                                                                        |
 
-## Concrete destination conflict
+## Historical destination conflict — resolved by owner authorization
 
 V2 still has the protected manual active season
 `c6bcac5b-0b89-403f-8242-41ac58286ade`. Fresh catalog confirms
@@ -75,12 +82,11 @@ season as draft/archived. Nor may the import merge its ten-player roster and
 economy into the owner's separate manual season. Normalizing either season to
 make the constraint pass would violate preservation.
 
-The concrete proposed resolution is an **isolated relational import destination
-for Shadow**, outside the current competitive lifecycle. Its scope is awaiting
-owner approval; no schema, operational lifecycle exception or substitute target
-has been created. A private raw capture by itself is not the requested completed
-domain migration. After placement is approved, start-time UNKNOWN still needs
-explicit truthful representation rather than an invented date.
+The resolution is an **isolated relational import destination for Shadow**,
+outside the current competitive lifecycle. The owner subsequently approved that
+scope. The implementation below preserves start-time UNKNOWN and does not alter
+the normal lifecycle invariants. A private raw capture alone was not a completed
+domain migration.
 
 Code references: [legacy lifecycle default](../app/season/archive.py),
 [V2 lifecycle timestamp constraint](../supabase/v2/migrations/001_core.sql),
@@ -91,10 +97,11 @@ For economy, a migration-time opening snapshot of 8 with source provenance,
 pre-opening inventory costs already included, and a private eight-badge economic
 high-water mark is a viable design candidate. It would avoid fabricated historical
 award timestamps, a second 24 debit, duplicate badge payouts, and a false completion
-claim. It is **not implemented**; ordinary progress settlement must not run during
-import. Final mapping depends on the selected destination contract.
+claim. At the original checkpoint this was **not implemented**. The approved
+mapping below now implements private economic evidence without ordinary progress
+settlement or historical reward replay.
 
-## V2 reconciliation, effects and resumption
+## Historical V2 reconciliation before implementation
 
 V2 is ACTIVE_HEALTHY; **33/33** migration records remain identical, latest
 041=`20261008204133`; **267/267** catalog objects unchanged. All public/Storage rows
@@ -122,6 +129,101 @@ Raw rows, PIN and credential-bearing hashes stay private. No protected guide or
 unrelated untracked file was accessed. Only documentation is committed; read Git
 for the checkpoint commit, distinct from application/deployed source.
 
-Resume with the destination decision, recheck source/destination state, then
-implement and locally prove the approved deterministic migration before remote
-writes. **PHASE 11 NOT DONE; PHASE 12 NOT READY / NOT STARTED.** No cutover.
+At this historical checkpoint the next step was destination approval and local
+proof. Subsequent authorization and implementation are recorded below. This
+inventory does not certify remote import completion; use the live handoff and
+final completion evidence for execution state. No cutover.
+
+## Approved isolated mapping — 2026-10-11
+
+The owner explicitly authorized an isolated relational target for surviving V1
+facts, with the current manual V2 season fully preserved. The owner also confirmed
+that V1 was intentionally cleaned during its old operation. Sparse surviving data
+is valid; deleted results, locks, history and rewards are not reconstructed from
+SQLite, V2 or the surviving save.
+
+[042](../supabase/v2/migrations/042_v1_shadow_relational_destination.sql) defines
+15 private tables in `v1_shadow`. No public season, Auth identity, credential,
+competitive observation, purchase effect, reward ledger, Hall or Storage object
+is created by this isolated import. The manual active season remains independent.
+The schema has no exposed API/RPC or browser policy. Every table has forced RLS;
+`PUBLIC`, `anon`, `authenticated` and `service_role` have neither schema access
+nor table privileges. The migration executes through the database authority;
+later Shadow consumers need a separately authorized private read path.
+
+The implementation is [phase11_import.py](../tools/phase11_import.py), mapping
+version `phase11-surviving-v1/1`, and
+[phase11_sql.py](../tools/phase11_sql.py). Its bounded contract is the actual
+surviving source profile. Unexpected nonempty domains, unknown settings, ambiguous
+trainer names, unsupported purchase semantics or changed source relationships
+fail closed. There is no generic machinery for the empty historical domains.
+
+| Private destination | Mapping and truth boundary                                                                                                                                                                                                             |
+| ------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `runs`              | One capture identity, source ref, mapping version, capture/plan hashes, source capture time and manifest. `prepared`/`reconciled` describe the import, not a season lifecycle.                                                         |
+| `batches`           | Six ordered atomic receipts; counts and content hashes bind each committed unit to its plan. Completion time is an import timestamp, never a fabricated game timestamp.                                                                |
+| `records`           | Preserved source records for traceability, excluding PIN and Discord cache settings. Credentials remain only in the original private capture.                                                                                          |
+| `identities`        | Explicit deterministic source-to-private-entity map. UUIDv5 uses fixed namespace `ad7da12c-0f68-57bc-bc41-4c675d2664f9`, source project, entity kind and exact source key.                                                             |
+| `trainers`          | Ten source trainer names. An exact-name V2 UUID may appear only as `v2_candidate_id`; it does not prove account ownership, merge identities or grant authority.                                                                        |
+| `seasons`           | One legacy League context. Effective `active` carries explicit tracked-runtime-default provenance, not a claimed stored/deployed historical fact. `started_at` is null. Current J1 and closed editing Boolean are retained separately. |
+| `participants`      | Ten members, original A/B 5/5 and source order, with captured trainer flags. Aaron's robbed flag is evidence of that legacy flag, not a modern robbery receipt.                                                                        |
+| `saves`             | One exact save 434, source owner and metadata, verified SHA-256, 524,410 original bytes stored privately as `bytea`, and neutral parser output. No physical save change or V2 cloud acceptance.                                        |
+| `progress`          | Ten rows. Anto's owned save evidences eight badges, Champion false and five Box-8 occupants. Nine players have null counts, null Champion and null save: UNKNOWN.                                                                      |
+| `wallets`           | Ten private current-state evidence rows. Anto has badge earnings 32, spend 24 and balance 8, with badge high-water 8. Nine balances and badge earnings remain null/unknown.                                                            |
+| `purchases`         | Source IDs 206/207, actual exact numeric prices 12 each, pending status, J1 and original timestamp text. Pending purchases already contribute to the private wallet's spend; they are not debited again.                               |
+| `cups`              | One legacy Swiss context linked only to the private League context, round 1/max 7, `rules_version=null` and captured state. No modern certification.                                                                                   |
+| `cup_participants`  | Eight source members with explicitly recorded zero wins/losses/byes and original order. Cup participation is not inferred from League sanctions.                                                                                       |
+| `cup_matches`       | Four original pending pairs and null winners. No regeneration, inferred winner, history or champion.                                                                                                                                   |
+| `exclusions`        | Explicit credential/cache exclusion reasons with empty payloads. No excluded PIN value or credential-bearing individual hash is copied into the target.                                                                                |
+
+Economic components use exact decimals. Zero League/completion earnings and
+sanctions represent the captured surviving legacy calculation under its recorded
+basis; they are not synthetic dated award events or claims about deleted history.
+The known balance follows legacy `max(0, earnings - spend - sanctions)`. No modern
+badge settlement, completion grant, purchased-revive effect or wipe event runs.
+The private high-water value is an interpretation aid, not permission for future
+competitive payouts. Physical/save truth, legacy economic evidence and modern
+competitive truth remain separate.
+
+The mapping binds parsed progress to the hash-verified source save, captured
+current-save pointer and legacy badge count. The SQL destination enforces save
+ownership for known progress. Nine missing observations stay null, never zero.
+No current party becomes Team Lock history. Absent official snapshots, locks,
+archives, Hall, sanctions, redemptions or Auth accounts remain absent. Purchase
+timestamps are preserved as source text; no timezone or missing lifecycle date is
+invented. Stored configuration absence remains explicit; only observed division
+sizes are represented as such, without inventing a dated configuration version.
+
+## Determinism, resumption and the Phase 12 boundary
+
+The plan's capture identity includes the full private source facts and mapping
+version. Entity IDs are stable across exact reruns, while run and content hashes
+bind the specific capture. Private plans also bind the parser evidence, save
+bytes and candidate annotations. Do not publish raw plans or credential-bearing
+source hashes. Fresh remote source hashes must still match the authorized capture
+before importing its plan.
+
+The six units are: source records/exclusions/trainers/season; participants;
+save/progress; wallet/purchases; Cup/members/pairs; identity map. Each transaction
+holds the shared import advisory lock, compares all actual private rows with the
+exact receipted plan prefix, inserts one batch and its receipt atomically, and
+rechecks the resulting state. Replay accepts only exact existing contents.
+Unexpected rows, changed plans, missing predecessors and journal/data disagreement
+fail closed. Finalization requires all six batches and exact complete contents.
+After an unknown outcome, reconcile the journal and actual rows before retry.
+These are implementation contracts; executed validation and remote outcomes
+belong in the closure evidence.
+
+Phase 12 can consume the relational facts and their source records using the run,
+identity map, receipts, manifest and exclusions. It must first require a genuinely
+reconciled import and use the existing source baseline as reference. It must not
+join a candidate trainer UUID into modern ownership automatically, promote the
+private save/progress/wallet to public competitive authority, replay old purchase
+spend or fabricate absent history. Any future V1 changes require an explicit
+comparison to this fixed capture; this Phase 11 runner does not implement live
+synchronization or an automatic second capture overwrite.
+
+Phase 12 execution remains outside this task. No cutover, live synchronization,
+Auth migration or application deployment is implied by creating the isolated
+destination. The live handoff and final evidence determine readiness; this mapping
+document alone does not declare Phase 11 DONE or start Shadow execution.

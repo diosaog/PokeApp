@@ -22,6 +22,20 @@ def _all_sql() -> str:
 
 
 class SupabaseV2SchemaTests(unittest.TestCase):
+    def test_shadow_destination_is_isolated_and_does_not_expose_credentials(self) -> None:
+        sql = (MIGRATIONS_DIR / "042_v1_shadow_relational_destination.sql").read_text(encoding="utf-8").lower()
+        tables = re.findall(r"create table v1_shadow\.([a-z_]+)", sql)
+        protected = re.search(r"foreach t in array array\[([^]]+)\]", sql)
+        self.assertIsNotNone(protected)
+        self.assertEqual(set(tables), set(re.findall(r"'([a-z_]+)'", protected.group(1))))
+        self.assertEqual(len(tables), 15)
+        self.assertIn("revoke all on schema v1_shadow from public, anon, authenticated, service_role", sql)
+        self.assertIn("enable row level security", sql)
+        self.assertIn("force row level security", sql)
+        self.assertIn("revoke all on v1_shadow.%i from public, anon, authenticated, service_role", sql)
+        for forbidden in ("public.", "auth.", "create policy", "create function", "create trigger", "grant "):
+            self.assertNotIn(forbidden, sql)
+
     def test_team_lock_rpc_contract_is_backend_only_and_atomic(self) -> None:
         sql = (MIGRATIONS_DIR / "019_team_lock_api.sql").read_text(encoding="utf-8").lower()
         signature = "public.api_upsert_team_lock(uuid, uuid, uuid, uuid, uuid, text, uuid, jsonb, jsonb, jsonb)"
@@ -104,10 +118,12 @@ class SupabaseV2SchemaTests(unittest.TestCase):
                 "039_shop_economy_alignment.sql",
                 "040_observed_progress_read.sql",
                 "041_final_product_alignment.sql",
+                "042_v1_shadow_relational_destination.sql",
             ],
         )
         for path in _migration_files():
             source = path.read_text(encoding="utf-8").strip().lower()
+            self.assertNotIn("\ufeff", source, path)
             self.assertIn("begin;", source, path)
             self.assertTrue(source.endswith("commit;"), path)
 
@@ -312,7 +328,7 @@ class SupabaseV2SchemaTests(unittest.TestCase):
         self.assertTrue(bootstrap.startswith("-- ONLY FOR EMPTY POKEAPP V2 DATABASE."))
         self.assertEqual(bootstrap, render_bootstrap())
         self.assertIn(
-        "Source of truth: supabase/v2/migrations/001_core.sql through 041_final_product_alignment.sql",
+        "Source of truth: supabase/v2/migrations/001_core.sql through 042_v1_shadow_relational_destination.sql",
             bootstrap,
         )
         self.assertNotIn("drop table", lowered)
@@ -360,7 +376,7 @@ class SupabaseV2SchemaTests(unittest.TestCase):
             else:
                 self.assertIn(f"'{table}'", security_sql, table)
 
-        self.assertEqual(security_sql.count("enable row level security"), 19)
+        self.assertEqual(security_sql.count("enable row level security"), 20)
         self.assertIn("alter table public.%i enable row level security", security_sql)
 
 

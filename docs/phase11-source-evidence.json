@@ -9,7 +9,7 @@
   "entry_check": "PHASE_10_5_DONE_VERIFIED",
   "previous_source_access_blocker": "RESOLVED_OWNER_CONFIRMED_AND_RAW_CAPTURE_SUCCEEDED",
   "latest_reconciliation": {
-    "observed_at": "2026-10-09T00:00:00Z",
+    "observed_at": "2026-10-09T08:29:17.853277+00:00",
     "v1_tables": 13,
     "v1_capture_unchanged": true,
     "v2_history_records": 33,

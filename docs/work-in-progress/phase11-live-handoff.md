@@ -1,16 +1,41 @@
-# Phase 11 — live execution record
+# Phase 11 ? live execution record
 
-Observation: 2026-10-09 Europe/Madrid. **STATUS: PHASE 11 BLOCKED at MAPPING.**
-The original source-access blocker is resolved: the owner confirmed V1 and
-reactivated it; raw remote capture and content verification succeeded. The current
-blocker is placement of the legacy competition alongside the protected active V2
-manual season. This is the single current operational record.
-[Source inventory and mapping checkpoint](../phase11-source-inventory.md),
-[current sanitized evidence](../phase11-source-evidence.json),
-[historical readiness report](../phase11-readiness-report.md),
-[historical evidence](../phase11-readiness-evidence.json),
-[checkpoint](../project-checkpoint.md),
-[closed 10.5 handoff](phase10-5-live-handoff.md).
+Observation: 2026-10-11 Europe/Madrid. **STATUS: PHASE 11 REMOTE BASELINE.**
+Entry HEAD/origin `82d2dd841c10d2864b4c9638dad7acab49840df1`, fetched 0/0.
+The owner explicitly approved an isolated relational Shadow/V1 destination outside
+V2 competitive lifecycle. Placement is resolved; historical blockers below are
+superseded. The active manual V2 season must remain entirely unchanged.
+
+Fresh read-only reconciliation at 2026-10-11 15:59:38 UTC confirms both projects
+ACTIVE_HEALTHY, V1 13/13 captured table hashes unchanged, V2 33 migrations through
+041 and 59/59 owner-excluded table hashes unchanged. Stable owner identity and
+credentials match. `v1_shadow` is absent: no 042, import, journal or remote effects.
+V2 Advisor remains 24 ERROR / 5 WARN / 143 INFO. Three existing warnings have
+additional API metadata, but no finding identity or severity changed.
+
+042 now defines 15 private relational tables with forced RLS and no browser or
+service_role access. The deterministic mapper and atomic SQL renderer produce six
+journaled batches from surviving facts. Credentials and notification caches are
+excluded. Local rehearsal passes: 10 groups, 13 rollback boundaries, 11 relational denials,
+48 role denials, exact 53-public-table preservation/restoration; two clean schema
+paths give 14,026 identical schema/grant/ownership lines. Full Python 784 PASS;
+compile, Ruff and diff checks pass. No remote schema/data write is authorized by a
+passing claim alone: finish these gates and commit/push source first.
+
+Private current evidence: `%TEMP%/phase11-closure-20261011/`.
+Source evidence remains in the verified durable 20261009 private capture.
+[Source inventory](../phase11-source-inventory.md),
+[source evidence](../phase11-source-evidence.json),
+[project checkpoint](../project-checkpoint.md).
+
+## Next atomic step
+
+Commit/push the green implementation, refresh remote baselines, apply only 042
+once, and import/reconcile the six private batches. Local validation is complete.
+On every resume inspect real history and `v1_shadow.runs/batches` before any write.
+No cutover. Phase 12 NOT STARTED; readiness is not yet claimed.
+
+## Historical checkpoints ? superseded operational state
 
 ## Latest reconciliation — 2026-10-09
 
