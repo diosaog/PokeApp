@@ -211,6 +211,34 @@ def domain_context():
 
 
 class MatchdayPlannerTests(unittest.TestCase):
+    def test_progress_reward_configuration_does_not_break_or_reprice_close(self):
+        original = domain_context()
+        expected = plan_close(original)
+        for badge, champion in ((0, 0), (4, 12), (7, 15)):
+            with self.subTest(badge=badge, champion=champion):
+                current = deepcopy(original)
+                current['inputs']['config']['rules_json'].update(
+                    badge_reward_coins=badge, game_completion_reward_coins=champion)
+                before = deepcopy(current)
+                actual = plan_close(current)
+                # The review binds the complete configuration, even fields
+                # which cannot change sporting rewards or order.
+                self.assertNotEqual(actual['ranking']['input_hash'], expected['ranking']['input_hash'])
+                actual['ranking']['input_hash'] = expected['ranking']['input_hash']
+                self.assertEqual(actual, expected)
+                self.assertEqual(current, before)
+
+    def test_frozen_correction_accepts_persisted_progress_reward_fields(self):
+        original = domain_context()
+        changes = [dict(match_id='b', winner_season_player_id='p4')]
+        expected = plan_close(original, changes)
+        original['inputs']['config']['rules_json'].update(
+            badge_reward_coins=7, game_completion_reward_coins=15)
+        actual = plan_close(original, changes)
+        self.assertNotEqual(actual['ranking']['input_hash'], expected['ranking']['input_hash'])
+        actual['ranking']['input_hash'] = expected['ranking']['input_hash']
+        self.assertEqual(actual, expected)
+
     def test_domain_winners_rewards_and_movements(self):
         plan=plan_close(domain_context())
         self.assertEqual([s['trainer_id'] for s in plan['standings']],['p2','p1','p3','p4'])

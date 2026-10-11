@@ -44,7 +44,13 @@ def plan_close(
         promotion_relegation_count=cfg["promotion_relegation_count"],
         points_by_position={int(k): v for k, v in cfg["scoring_json"].items()},
         coins_by_position={int(k): v for k, v in cfg["coin_rewards_json"].items()},
-        rules=SeasonRules(**cfg["rules_json"]),
+        # Persisted configuration also carries prospective progress rewards.
+        # The sporting planner consumes only its two League rules; progress
+        # settlement remains owned by the observed-save reward service.
+        rules=SeasonRules(
+            team_lock_required=cfg["rules_json"]["team_lock_required"],
+            last_b_gets_steal=cfg["rules_json"]["last_b_gets_steal"],
+        ),
     )
     penalties = {
         p["id"]: PenaltySummary(

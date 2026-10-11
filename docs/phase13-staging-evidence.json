@@ -1,0 +1,181 @@
+{
+  "phase": 13,
+  "status": "LOCAL_GREEN_DELIVERY_PENDING",
+  "entry_head": "fec337cb4f04aa3c15d36582d1b536fbaa4a4ae1",
+  "staging": {
+    "isolation": "dedicated loopback PostgreSQL 17.11",
+    "database": "pokeapp_v2_validation_phase13_20261011",
+    "schema": "current 001-042 bootstrap",
+    "participants": 6,
+    "additional_identities": [
+      "synthetic Admin",
+      "synthetic outsider"
+    ],
+    "transport": "real HTTP + real PostgreSQL repositories/RPCs",
+    "auth": "synthetic signed local JWT provider behind real PIN bridge",
+    "observation_boundary": "synthetic neutral parsed DTO + current identity service, not Launcher/cloud proof"
+  },
+  "local_proof": {
+    "status": "PASS",
+    "postgresql": "17.11",
+    "database": "pokeapp_v2_validation_phase13_20261011",
+    "frozen_sources_unchanged_after_later_scenarios": true,
+    "normal_death_penalty": "0.2",
+    "purchased_revive_plus_wipe_penalty": "0.6",
+    "two_day_alia_total": "6.4",
+    "league_certificates": 5,
+    "cup_certificates": 1,
+    "hall_entries": 6,
+    "http_requests": 248,
+    "scenario_checks": [
+      "modern six-player creation, unknown progress, Medal2 split, prospective 4/5 rewards, synthetic PIN/JWT",
+      "8 badges distinct from Champion, one completion reward, observation replay without new claims",
+      "nonmember lifecycle/Admin-only denials and on-time first lock through HTTP",
+      "first-lock timing preserved, Admin/rival private-data denial and owned PC scope",
+      "UI rule cutover pays next event only; purchase replay/no overdraft; revive 1 plus wipe 2 without double count",
+      "all J1 results complete through participant HTTP, ready for browser close",
+      "closed result/correction/TeamLock denials and immutable J1 source",
+      "two-day League, exact-once close/rewards/participant finish, normal champion and frozen archive/Hall",
+      "championship bo3",
+      "championship three",
+      "championship four",
+      "championship residual",
+      "modern Cup rounds/final/certificate/Hall replay; League-only DQ and linked-Cup guards; League history unchanged"
+    ]
+  },
+  "defect": {
+    "trigger": "close a day whose persisted rules include progress reward fields",
+    "observed": "503; TypeError constructing sporting SeasonRules; no close effect",
+    "fix": "explicit sporting-field projection; complete configuration retained in review fingerprint",
+    "schema_change": false,
+    "ui_change": false
+  },
+  "tests": {
+    "python": {
+      "classification": "FRESH PASS",
+      "count": 802,
+      "unrelated_preexisting_untracked_map_tests_included": 19,
+      "full_runs_on_final_product_source": 1
+    },
+    "focused_matchdays": {
+      "classification": "FRESH PASS",
+      "count": 35
+    },
+    "react": {
+      "classification": "FRESH PASS",
+      "count": 74,
+      "files": 12
+    },
+    "browser": {
+      "classification": "FRESH PASS",
+      "unique_cases": 7,
+      "desktop_width": 1440,
+      "mobile_width": 390,
+      "api_interception": false,
+      "reload_for_freshness": false,
+      "runs": [
+        "browser.log: Admin case",
+        "browser-resume.log: three remaining journeys",
+        "browser-close-fixed.log: fixed close",
+        "browser-history-fixed.log: desktop/mobile archive and Hall"
+      ],
+      "visual_review": "legible, no horizontal overflow"
+    },
+    "typescript_build": "FRESH PASS",
+    "compile": "FRESH PASS",
+    "web_format": "FRESH PASS",
+    "ruff": {
+      "changed_test_file_preexisting_lint_findings": 23,
+      "new_findings": 0,
+      "app_and_new_files": "PASS",
+      "compile": "PASS",
+      "web_format": "PASS"
+    },
+    "new_readonly_verifier": "FRESH PASS after full gate; 2 transport-safety tests rerun",
+    "migration_chain_parity": "N/A: schema unchanged; current bootstrap provisioned successfully",
+    "parser": "NOT RERUN: unchanged",
+    "phase11_phase12": "NOT RERUN: unchanged",
+    "db_auth_contract_security": "RETAINED UNCHANGED-SOURCE; negative authority/privacy HTTP checks FRESH PASS"
+  },
+  "harness_only_corrections": [
+    "synthetic stat DTO fields",
+    "season selector accessible-role locator",
+    "final verifier certificate table name"
+  ],
+  "entry_remote": {
+    "batches": 6,
+    "full_baseline_equals_phase11": false,
+    "full_tables": 59,
+    "history_count": 34,
+    "history_unchanged": true,
+    "identities": 57,
+    "observed_at": "2026-10-11T16:45:39.498221+00:00",
+    "owner_stable_unchanged": true,
+    "private_rows": 135,
+    "project": "uwleqeuzsveqlugugzba",
+    "remote_writes": 0,
+    "run_id": "61e5eb57-34f5-57f9-9252-4ea8be8d8b66",
+    "run_status": "reconciled",
+    "runs": 1,
+    "security_unchanged": true
+  },
+  "predeploy_remote": {
+    "batches": 6,
+    "full_baseline_equals_phase11": false,
+    "full_tables": 59,
+    "history_count": 34,
+    "history_unchanged": true,
+    "identities": 57,
+    "observed_at": "2026-10-11T17:17:12.165659+00:00",
+    "owner_stable_unchanged": true,
+    "private_rows": 135,
+    "project": "uwleqeuzsveqlugugzba",
+    "remote_writes": 0,
+    "run_id": "61e5eb57-34f5-57f9-9252-4ea8be8d8b66",
+    "run_status": "reconciled",
+    "runs": 1,
+    "security_unchanged": true
+  },
+  "entry_deployments": {
+    "railway": {
+      "id": "2d71ec3b-095d-49a7-aa15-31749fe67b52",
+      "status": "SUCCESS",
+      "source": "Phase 10.5 final source eb4e402891cbaa02e0999229874ac3003e016ae0"
+    },
+    "cloudflare": {
+      "id": "ea9c837d-86f0-4b0a-826d-a4774371b56e",
+      "versions": [
+        {
+          "version_id": "77eea9f6-0c90-45a2-b93a-3bf9cdf5fc11",
+          "percentage": 100
+        }
+      ],
+      "source": "Phase 10.5 final source eb4e402891cbaa02e0999229874ac3003e016ae0"
+    }
+  },
+  "delivery": {
+    "required": "Railway backend only; pending",
+    "cloudflare": "unchanged",
+    "migration": "none"
+  },
+  "cleanup": {
+    "status": "pending"
+  },
+  "intentional_gaps": [
+    "full Launcher/cloud ingestion",
+    "physical save writes",
+    "real hosted Auth mutation validation not repeated",
+    "positive business mutations local only",
+    "visual polish and representative load measurement later"
+  ],
+  "private_evidence": "%TEMP%/phase13-staging-20261011/",
+  "phase14": "NOT STARTED",
+  "cutover": false,
+  "source_sha256": {
+    "app/application/matchdays.py": "3381562952bac5fb42f6a1a22a15fce8caab7b4e7d088e72aa5abb35ab7460c1",
+    "tests/test_api_matchdays.py": "e54bfca2bf4878f31e524b6843128f9b786c1c6a345be39f00de2759a4f7bf31",
+    "tests/test_phase13_staging.py": "29d8fd9932aa37cc221b64fea14b1048f94b1bd93657731f202008770d4ea10a",
+    "tools/phase13_staging.py": "0ca560465cde4a64bc5c22009affd4e9cabc13fae806f40c3d4fe8014fdeb582",
+    "web/e2e/phase13-staging.spec.ts": "97a5484fa10535746036241a471171c69979d808ffa81ca77c0b800d14ea3673"
+  }
+}
