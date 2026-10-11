@@ -1,53 +1,99 @@
-# Phase 11 — live execution record
+# Phase 11 - live execution record
 
-Observation: 2026-10-11 Europe/Madrid. **STATUS: PHASE 11 REMOTE MIGRATION.**
-Entry HEAD/origin `82d2dd841c10d2864b4c9638dad7acab49840df1`, fetched 0/0.
-The owner explicitly approved an isolated relational Shadow/V1 destination outside
-V2 competitive lifecycle. Placement is resolved; historical blockers below are
-superseded. The active manual V2 season must remain entirely unchanged.
-
-Fresh read-only reconciliation at 2026-10-11 15:59:38 UTC confirms both projects
-ACTIVE_HEALTHY, V1 13/13 captured table hashes unchanged, V2 33 migrations through
-041 and 59/59 owner-excluded table hashes unchanged. Stable owner identity and
-credentials match. At that entry observation `v1_shadow` was absent; subsequent remote effects are
-recorded below.
-V2 Advisor remains 24 ERROR / 5 WARN / 143 INFO. Three existing warnings have
-additional API metadata, but no finding identity or severity changed.
-
-042 now defines 15 private relational tables with forced RLS and no browser or
-service_role access. The deterministic mapper and atomic SQL renderer produce six
-journaled batches from surviving facts. Credentials and notification caches are
-excluded. Local rehearsal passes: 10 groups, 13 rollback boundaries, 11 relational denials,
-48 role denials, exact 53-public-table preservation/restoration; two clean schema
-paths give 14,026 identical schema/grant/ownership lines. Full Python 784 PASS;
-compile, Ruff and diff checks pass. No remote schema/data write is authorized by a
-passing claim alone: finish these gates and commit/push source first.
-
-Private current evidence: `%TEMP%/phase11-closure-20261011/`.
-Source evidence remains in the verified durable 20261009 private capture.
-[Source inventory](../phase11-source-inventory.md),
-[source evidence](../phase11-source-evidence.json),
+Closed 2026-10-11 Europe/Madrid. **STATUS: PHASE 11 DONE.**
+**PHASE 12 READINESS: READY FOR SHADOW. PHASE 12 NOT STARTED. No cutover.**
+[Completion report](../phase11-completion-report.md),
+[closure evidence](../phase11-closure-evidence.json),
+[approved mapping](../phase11-source-inventory.md),
 [project checkpoint](../project-checkpoint.md).
 
-## Current remote checkpoint — 2026-10-11
+## Verified final state
 
-Implementation `a20deb91f86b35e7a0d861a812e0c2ca8f67ab73` was committed and pushed.
-Fresh prewrite baseline at 16:06:11 UTC preserved V1 13/13 and V2 59/59 tables.
-042 applied once as **20261011160629**; all prior 33 migration records unchanged.
-Run `61e5eb57-34f5-57f9-9252-4ea8be8d8b66` exists, with batches **1 and 2 complete**.
-Batch 3 received HTTP 413 (`request entity too large`); its oversized repeated
-save payload did not reach a completed import. A separate read-only exact-prefix
-verification and journal read succeeded afterward. No blind retry was issued.
+Entry main/origin `82d2dd841c10d2864b4c9638dad7acab49840df1`, fetched 0/0.
+The owner's approved isolated destination is implemented as **v1_shadow** in V2
+`uwleqeuzsveqlugugzba`. V1 `fdtytpeyfzyssfrsulxd` remains source/reference.
+Both projects remain ACTIVE_HEALTHY. No source facts were inferred from SQLite.
 
-## Next atomic step
+Implementation `a20deb91f86b35e7a0d861a812e0c2ca8f67ab73` was pushed before 042,
+applied once as **20261011160629**. All previous 33 migration records remain exact.
+Final transport/import source **8c593514c47120baabad7bc9cf7f22a07cf3e334** was pushed
+before resuming imports. Documentation closure is a subsequent commit; Git is the
+authority for that exact final HEAD.
 
-Compact transport fix passes 21 focused tests and the affected full local import
-proof: 11 groups, 13 table rollback boundaries, same-session temporary-payload
-cleanup, 48 role denials and exact 53-table preservation/restoration. Schema builds
-remain valid and were not repeated. Commit/push this fix, reconcile the actual
-remote prefix, then resume batch 3. Do not replay 042 or batches 1/2. Final
-independent preservation/security comparison and closure remain pending.
-No cutover or Phase 12.
+Run **61e5eb57-34f5-57f9-9252-4ea8be8d8b66** is **reconciled**, with six completed
+batches and 135 rows across fifteen private tables. Import finished at
+2026-10-11 16:13:19 UTC. Independent read-only comparison passes all mapped facts:
+fourteen exact table hashes plus complete run-row equality after precise UTC
+normalization of captured_at. Only batch receipt clocks differ between executions.
+
+V1 **13/13** source tables and V2 **59/59** original public/Auth/Storage tables
+remain exact, including full Auth baseline and stable owner identity/credentials.
+The active manual season, memberships, results, economy and Team Locks are intact.
+No public business writes, Auth changes, Storage-byte writes or cutover occurred.
+
+## Imported facts and boundaries
+
+Ten trainers, one private League context, A/B 5/5 memberships, one exact save,
+ten progress rows, ten private wallet rows, two pending purchases, one legacy
+Swiss Cup, eight Cup members and four pending pairs. Fifty-seven identity mappings,
+eleven raw noncredential source records and three explicit PIN/cache exclusions
+make the mapping auditable. No account merge or credential copy occurred.
+
+Anto's private source evidence is eight badges, Champion false, five Box-8
+occupants and derived legacy balance 32 - 24 = 8. Nine missing progress/balance
+observations remain unknown. These are private migration facts, not modern
+competitive observations or permission to issue rewards. Pending purchases are
+not charged again. Missing start dates, rules timing, Team Locks, deleted history,
+championship and Hall remain absent/unknown. No physical-save mutation occurred.
+
+## Validation, recovery and security
+
+Full Python 784 PASS on initial meaningful source, including nineteen pre-existing
+untracked map tests. After the transport-only correction, the 21 affected mapper/
+renderer tests and full affected PostgreSQL proof pass again. Unaffected suites
+are retained, not relabeled as newly rerun. Schema tests15, compile, Ruff and diff
+checks pass; unchanged UI/parser suites were not rerun.
+
+Real PostgreSQL: eleven final groups, thirteen table rollback boundaries plus
+same-session temporary-payload cleanup, eleven relational denials, forty-eight
+actual role denials, exact 53-public-table preservation/restoration, and clean
+private fixture cleanup. Two full-chain/bootstrap builds have 14,026 identical
+schema/grant/ownership lines. Their valid evidence was retained after transport
+changes. Local PostgreSQL is stopped after confirming no active test sessions.
+
+A real HTTP413 interrupted batch3 because its original SQL repeated the save.
+Read-only reconciliation proved only batches1/2 had committed. Compact SQL reuses
+one transaction-local payload without weakening checks. After commit/push and
+local proof, resumption skipped batches1/2 and completed3-6. No blind replay, 042
+reapplication or duplicate effects. The separate initial run-hash mismatch was
+strictly explained by timezone rendering, with the same full timestamp instant;
+original failure evidence is retained. Neither required changing source facts.
+
+All fifteen remote tables have forced RLS, postgres ownership and no browser or
+service_role schema/table/column privileges. No policy, function, user trigger or
+external FK exposes the import. Advisor **24 ERROR / 5 WARN / 170 INFO**, with
+zero added/removed ERROR/WARN; 27 added INFO describe private no-policy RLS tables
+and unindexed FKs. No privileges were loosened.
+
+Railway `2d71ec3b-095d-49a7-aa15-31749fe67b52` SUCCESS and Cloudflare
+`ea9c837d-86f0-4b0a-826d-a4774371b56e` / version
+`77eea9f6-0c90-45a2-b93a-3bf9cdf5fc11` at100% remain on application source
+`eb4e402891cbaa02e0999229874ac3003e016ae0`. No deployment was needed or performed.
+
+## Durable recovery reference and exact next step
+
+Verified private closure evidence (2,694 files) is under
+`%LOCALAPPDATA%/PokeApp-migration-evidence/phase11/20261011/closure-a20deb9-8c59351/`.
+Original source capture is under the adjacent `20261009/` directory. Temporary
+working evidence remains `%TEMP%/phase11-closure-20261011/` and the two local-proof
+folders. Credentials, raw saves and credential-bearing hashes are private.
+
+**STOP. Await the Phase 12 Shadow execution instruction.** Its first action must
+reconcile Git, actual source, migration history and this completed private run.
+Do not restart Phase 11, replay 042, replace this capture automatically, merge
+candidate IDs, promote private progress/economy or reconstruct absent history.
+The migration-owner read path remains private; no browser API is implied.
+Phase 12 is ready for Shadow but has not begun. No cutover is authorized here.
 
 ## Historical checkpoints — superseded operational state
 

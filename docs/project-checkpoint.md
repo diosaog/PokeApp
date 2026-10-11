@@ -1,16 +1,22 @@
 # PokeApp 2.0 Project Checkpoint
 
-Checkpoint reconciled: 2026-10-09. This file is the project index and historical
+Checkpoint reconciled: 2026-10-11. This file is the project index and historical
 milestone record; it does not maintain a second live phase-status ledger.
 
 ## Current project position
 
-- Active phase: **11 — real V1 → V2 data migration**, authorized after final 10.5.
+- Latest completed phase: **11 — real V1 → V2 data migration, DONE**.
+  Surviving V1 facts are imported into the approved private relational destination,
+  outside the current competitive lifecycle. All owner/manual V2 data and V1 source
+  remain intact. Six batches are reconciled; 042 is applied once. No cutover.
+  [Completion report](phase11-completion-report.md),
+  [closure evidence](phase11-closure-evidence.json).
+  **Phase 12 READY FOR SHADOW / NOT STARTED**, awaiting its execution instruction.
   [Single live record](work-in-progress/phase11-live-handoff.md),
   [source inventory](phase11-source-inventory.md),
   [historical readiness checkpoint](phase11-readiness-report.md). Current execution state and
   exact resume step are maintained there. No cutover or Phase 12 is included.
-- Latest completed phase: **10.5 — Functional product alignment and repair, DONE**.
+- Previous completed phase: **10.5 — Functional product alignment and repair, DONE**.
   [Approved contract](phase10-5-functional-alignment.md),
   [closed execution record](work-in-progress/phase10-5-live-handoff.md).
   Owner authorized implementation on 2026-09-29 after the functional knowledge export.
@@ -42,8 +48,8 @@ milestone record; it does not maintain a second live phase-status ledger.
 - V1/Streamlit remains legacy/fallback. V2 public staging is available for inspection.
   Cloud save ingestion/current-state promotion, physical save operations, final
   Launcher distribution, onboarding/roles and release polish remain later work.
-- Phase 11 entry passed after owner authorization; its live record controls
-  readiness, migration progress and blockers. Phase 12 and cutover are not started.
+- Phase 11 closed after owner-authorized isolated import; its live record controls
+  the Phase 12 entry reference. Phase 12 and cutover are not started.
 - Preserve **OWNER_TEMP_STAGING_AUTH / OWNER_TEMP_STAGING_ADMIN** for current review.
   **TEMP_STAGING_AUTH_MUST_BE_REMOVED_OR_RESET_BEFORE_RELEASE** includes role review
   and definitive secure onboarding. Do not copy a temporary staging policy to production.

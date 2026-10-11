@@ -1,5 +1,5 @@
 {
-  "status": "REMOTE_MIGRATION_READY_TO_RESUME_BATCH3",
+  "status": "PHASE_11_DONE",
   "entry_head": "82d2dd841c10d2864b4c9638dad7acab49840df1",
   "date": "2026-10-11",
   "source_ref": "fdtytpeyfzyssfrsulxd",
@@ -144,13 +144,121 @@
   "react_browser": "NOT_RERUN_UNCHANGED",
   "parser_regression": "NOT_RERUN_UNCHANGED; previously hash-bound source parse retained",
   "remote": {
-    "source_commit": "a20deb91f86b35e7a0d861a812e0c2ca8f67ab73",
-    "migration": "20261011160629",
+    "migration_source": "a20deb91f86b35e7a0d861a812e0c2ca8f67ab73",
+    "final_import_source": "8c593514c47120baabad7bc9cf7f22a07cf3e334",
+    "migration_version": "20261011160629",
     "history_count": 34,
-    "prior_history_unchanged": true,
-    "completed_batches": [1, 2],
-    "batch_3_attempt": "HTTP413 payload too large; exact-prefix reconciliation PASS, no batch3 effects",
-    "next": "Validate compact atomic SQL, commit/push, reconcile and resume batch3"
+    "run_id": "61e5eb57-34f5-57f9-9252-4ea8be8d8b66",
+    "run_status": "reconciled",
+    "batches": 6,
+    "total_private_rows": 135,
+    "counts": {
+      "batches": 6,
+      "cup_matches": 4,
+      "cup_participants": 8,
+      "cups": 1,
+      "exclusions": 3,
+      "identities": 57,
+      "participants": 10,
+      "progress": 10,
+      "purchases": 2,
+      "records": 11,
+      "runs": 1,
+      "saves": 1,
+      "seasons": 1,
+      "trainers": 10,
+      "wallets": 10
+    },
+    "finished_at": "2026-10-11T16:13:19.679879+00:00",
+    "independent_verification": {
+      "observed_at": "2026-10-11T16:13:48.125184+00:00",
+      "projects": [
+        {
+          "id": "fdtytpeyfzyssfrsulxd",
+          "name": "diosaog's Project",
+          "region": "eu-north-1",
+          "status": "ACTIVE_HEALTHY"
+        },
+        {
+          "id": "uwleqeuzsveqlugugzba",
+          "name": "Pokeapp 2.0",
+          "region": "eu-central-1",
+          "status": "ACTIVE_HEALTHY"
+        }
+      ],
+      "projects_active": true,
+      "v1_tables": 13,
+      "v1_source_preserved": true,
+      "v1_catalog_preserved": true,
+      "v2_prior_history_preserved": true,
+      "v2_new_042_once": true,
+      "v2_latest_migration": {
+        "version": "20261011160629",
+        "name": "042_v1_shadow_relational_destination",
+        "record_hash": "d5ee4ea586dadd3a8aeff48c88b477ec"
+      },
+      "v2_original_public_auth_storage_inventory_preserved": true,
+      "v2_full_baseline_preserved": true,
+      "v2_owner_excluded_baseline_preserved": true,
+      "v2_preserved_scoped_tables": 59,
+      "owner_stable_identity_credentials_preserved": true,
+      "security_catalog": {
+        "tables": 15,
+        "policies": 0,
+        "functions": 0,
+        "missing_rls": 0,
+        "external_fks": 0,
+        "schema_owner": "postgres",
+        "user_triggers": 0,
+        "role_schema_access": 0,
+        "public_table_grants": 0,
+        "public_column_grants": 0,
+        "public_schema_grants": 0,
+        "non_postgres_table_owner": 0,
+        "role_table_column_access": 0
+      },
+      "security_pass": true,
+      "private_tables_match_local_rehearsal": false,
+      "private_tables_compared": 15,
+      "comparison_exclusion": "batches.completed_at only; runs.captured_at compared as exact UTC instant",
+      "one_reconciled_run": true,
+      "six_batches": true,
+      "private_row_counts": {
+        "batches": 6,
+        "cup_matches": 4,
+        "cup_participants": 8,
+        "cups": 1,
+        "exclusions": 3,
+        "identities": 57,
+        "participants": 10,
+        "progress": 10,
+        "purchases": 2,
+        "records": 11,
+        "runs": 1,
+        "saves": 1,
+        "seasons": 1,
+        "trainers": 10,
+        "wallets": 10
+      },
+      "advisor_counts": {
+        "INFO": 170,
+        "ERROR": 24,
+        "WARN": 5
+      },
+      "advisor_error_warn_preserved": true,
+      "verification_remote_writes": 0,
+      "status": "PASS",
+      "failed_gates": [],
+      "private_tables_match_rehearsed_plan_after_timestamp_normalization": true,
+      "private_raw_hashes_matching": 14,
+      "run_typed_comparison": {
+        "status": "PASS",
+        "normalization": "captured_at UTC instant including microseconds, not excluded",
+        "all_other_fields_equal": true,
+        "rehearsed_plan_hash_matches": true
+      },
+      "initial_raw_hash_only_result": "runs differed in raw serialization; retained in initial-summary.json and private-table-hashes.json"
+    }
   },
   "raw_evidence": [
     "%TEMP%/phase11-closure-20261011/",
@@ -220,5 +328,47 @@
     },
     "rebuild": "RETAINED_UNCHANGED_SCHEMA",
     "private_evidence": "%TEMP%/phase11-local-proof-20261011-compact/"
+  },
+  "implementation_head": "8c593514c47120baabad7bc9cf7f22a07cf3e334",
+  "deployments": {
+    "observed_at": "2026-10-11T16:14:06.098450+00:00",
+    "mode": "final read-only metadata after source push; no deployment or login",
+    "railway": {
+      "id": "2d71ec3b-095d-49a7-aa15-31749fe67b52",
+      "status": "SUCCESS",
+      "source": "Phase 10.5 final source eb4e402891cbaa02e0999229874ac3003e016ae0",
+      "image": "sha256:fc59ebcab95dfab6cf4eee72a962dc22f06744a0c6beafb8ebbe984fd2f461e3"
+    },
+    "cloudflare": {
+      "id": "ea9c837d-86f0-4b0a-826d-a4774371b56e",
+      "version": "77eea9f6-0c90-45a2-b93a-3bf9cdf5fc11",
+      "percentage": 100,
+      "source": "Phase 10.5 final source eb4e402891cbaa02e0999229874ac3003e016ae0"
+    },
+    "unchanged_since_phase11_entry": true,
+    "status": "PASS"
+  },
+  "local_postgres_stop": {
+    "observed_at": "2026-10-11T16:13:49.089982+00:00",
+    "cluster": "C:\\Users\\Antonio\\AppData\\Local\\Temp\\pokeapp_phase10_5l_pg",
+    "target_verified_from_running_server": true,
+    "remaining_client_sessions": 0,
+    "test_runner_processes_observed": 0,
+    "stop_mode": "fast",
+    "stop_exit_code": 0,
+    "post_stop_status_exit_code": 3,
+    "directories_or_databases_deleted": false,
+    "status": "STOPPED"
+  },
+  "durable_evidence": {
+    "path": "%LOCALAPPDATA%/PokeApp-migration-evidence/phase11/20261011/closure-a20deb9-8c59351/",
+    "hash_verified_files": 2694,
+    "bytes": 42881233,
+    "source_capture": "%LOCALAPPDATA%/PokeApp-migration-evidence/phase11/20261009/"
+  },
+  "phase12": {
+    "readiness": "READY_FOR_SHADOW",
+    "execution": "NOT_STARTED",
+    "cutover": false
   }
 }

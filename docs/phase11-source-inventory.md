@@ -1,7 +1,8 @@
 # Phase 11 — authoritative source capture and mapping checkpoint
 
-2026-10-11 Europe/Madrid. **IMPLEMENTING: approved isolated mapping implemented;
-remote import and final certification remain pending.**
+2026-10-11 Europe/Madrid. **PHASE 11 DONE: approved isolated mapping imported and
+independently reconciled.** See the [completion report](phase11-completion-report.md)
+and [closure evidence](phase11-closure-evidence.json) for current remote outcomes.
 The owner approved an isolated relational destination outside V2's competitive
 lifecycle. The destination conflict recorded below is resolved by that decision.
 The [current mapping contract](#approved-isolated-mapping--2026-10-11) supersedes
