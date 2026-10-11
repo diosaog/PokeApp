@@ -293,7 +293,10 @@ def proof(pg: LocalPostgres, built: dict[str, Any]) -> dict[str, Any]:
         a, b = databases
         pg.sql(a, render_prepare(plan))
         for batch in plan["batches"]:
-            pg.sql(a, render_batch(plan, batch["ordinal"]))
+            pg.sql(a, render_batch(plan, batch["ordinal"]) + """
+select 1 / case when to_regclass('pg_temp.phase11_expected_plan') is null
+then 1 else 0 end as temporary_payload_removed_after_commit;
+""")
         pg.sql(a, render_verify(plan, finalize=True))
         reference = pg.snapshot(a, "v1_shadow", receipt_clocks=False)
         exact_reference = pg.snapshot(a, "v1_shadow")
@@ -310,6 +313,16 @@ def proof(pg: LocalPostgres, built: dict[str, Any]) -> dict[str, Any]:
         for batch in plan["batches"]:
             ordinal = batch["ordinal"]
             before = pg.snapshot(b, "v1_shadow")
+            if ordinal == 3:
+                table = next(table for table, rows in batch["tables"].items() if rows)
+                # Keep this same connection alive after the deliberate error;
+                # COMMIT of the aborted transaction performs a full rollback.
+                pg.sql(b, "\\set ON_ERROR_STOP off\n"
+                       + render_batch(plan, ordinal, fail_after_table=table)
+                       + "\\set ON_ERROR_STOP on\n"
+                       + "select 1 / case when to_regclass('pg_temp.phase11_expected_plan') is null "
+                         "then 1 else 0 end as temporary_payload_removed_after_rollback;")
+                assert before == pg.snapshot(b, "v1_shadow"), "Same-session failure left residue"
             for table, rows in batch["tables"].items():
                 if rows:
                     pg.sql(b, render_batch(plan, ordinal, fail_after_table=table), failure=True)
@@ -336,6 +349,7 @@ def proof(pg: LocalPostgres, built: dict[str, Any]) -> dict[str, Any]:
         evidence["groups"].append("interruption after batch 2, prefix replay, restart equals clean run")
         evidence["groups"].append("concurrent final-batch replay produces one effect")
         evidence["groups"].append("injected failure after each nonempty batch table rolls back exactly")
+        evidence["groups"].append("transaction-local payload removed after commit and same-session rollback")
 
         stale = deepcopy(plan)
         stale["run"]["plan_hash"] = "0" * 64

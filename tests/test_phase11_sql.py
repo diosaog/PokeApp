@@ -113,6 +113,20 @@ class Phase11SqlTests(unittest.TestCase):
         self.assertEqual(render_batch(plan, 1), render_batch(deepcopy(plan), 1))
         self.assertEqual(render_prepare(plan), render_prepare(deepcopy(plan)))
 
+    def test_large_evidence_is_transmitted_once_with_transaction_local_reuse(self):
+        plan = sample_plan()
+        evidence = "ab12cd" * 180_000
+        plan["batches"][0]["tables"]["records"][0]["payload"]["large_evidence"] = evidence
+        sql = render_batch(plan, 1)
+        self.assertEqual(sql.count(evidence), 1)
+        self.assertLess(len(sql.encode("utf-8")), 1_200_000)
+        self.assertIn("CREATE TEMP TABLE phase11_expected_plan", sql)
+        self.assertIn("ON COMMIT DROP", sql)
+        self.assertEqual(sql.count("AS phase11_state_matches;"), 2)
+        self.assertIn("payload -> 'batches' -> 0 -> 'tables' -> 'records'", sql)
+        self.assertNotIn("CREATE TABLE", sql)
+        self.assertNotIn("CREATE FUNCTION", sql)
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -161,7 +161,9 @@ def _expected_batches(plan: Mapping[str, Any]) -> list[dict[str, Any]]:
     ]
 
 
-def _assert_state(plan: Mapping[str, Any], *, complete: bool = False) -> str:
+def _assert_state(
+    plan: Mapping[str, Any], *, complete: bool = False, staged: bool = False
+) -> str:
     """Compare all durable rows against exactly the receipted plan prefix."""
     run_id = _literal(plan["run"]["id"]) + "::uuid"
     ctes = [
@@ -189,19 +191,32 @@ def _assert_state(plan: Mapping[str, Any], *, complete: bool = False) -> str:
     if complete:
         conditions.append(f"(SELECT count(*) FROM v1_shadow.batches) = {len(plan['batches'])}")
     for table in TABLE_ORDER:
-        payload = [
-            {"ordinal": batch["ordinal"], "rows": batch["tables"][table]}
-            for batch in plan["batches"]
-            if batch["tables"].get(table)
-        ]
-        ctes.append(
-            f"expected_{table} AS (SELECT pg_catalog.to_jsonb(e) AS row_value "
-            "FROM pg_catalog.jsonb_to_recordset("
-            + _json_literal(payload)
-            + ") AS b(ordinal integer, rows jsonb) "
-            f"CROSS JOIN LATERAL pg_catalog.jsonb_populate_recordset(NULL::v1_shadow.{table}, b.rows) e "
-            "WHERE EXISTS (SELECT 1 FROM v1_shadow.batches receipt WHERE receipt.ordinal = b.ordinal))"
-        )
+        if staged:
+            # Reuse the transaction-local plan. The save's bytea JSON can exceed
+            # a megabyte; repeating it in precheck/insert/postcheck exceeds the
+            # management transport limit without adding any verification value.
+            source = (
+                "FROM pg_temp.phase11_expected_plan p "
+                "CROSS JOIN LATERAL pg_catalog.jsonb_array_elements(p.payload -> 'batches') b(value) "
+                f"CROSS JOIN LATERAL pg_catalog.jsonb_populate_recordset(NULL::v1_shadow.{table}, "
+                f"coalesce(b.value -> 'tables' -> '{table}', '[]'::jsonb)) e "
+                "WHERE EXISTS (SELECT 1 FROM v1_shadow.batches receipt "
+                "WHERE receipt.ordinal = (b.value ->> 'ordinal')::integer))"
+            )
+        else:
+            payload = [
+                {"ordinal": batch["ordinal"], "rows": batch["tables"][table]}
+                for batch in plan["batches"]
+                if batch["tables"].get(table)
+            ]
+            source = (
+                "FROM pg_catalog.jsonb_to_recordset("
+                + _json_literal(payload)
+                + ") AS b(ordinal integer, rows jsonb) "
+                f"CROSS JOIN LATERAL pg_catalog.jsonb_populate_recordset(NULL::v1_shadow.{table}, b.rows) e "
+                "WHERE EXISTS (SELECT 1 FROM v1_shadow.batches receipt WHERE receipt.ordinal = b.ordinal))"
+            )
+        ctes.append(f"expected_{table} AS (SELECT pg_catalog.to_jsonb(e) AS row_value " + source)
         # No other run, orphan row, omitted table, duplicate, or unexpected column
         # is ignored. JSON conversion normalizes numeric and timestamp input forms.
         conditions.append(
@@ -243,7 +258,14 @@ def render_batch(
     batch = plan["batches"][ordinal - 1]
     if fail_after_table is not None and fail_after_table not in batch["tables"]:
         raise ValueError("Failure injection must name a table in this batch")
-    sql = _begin() + _assert_state(plan)
+    sql = _begin()
+    sql += (
+        "CREATE TEMP TABLE phase11_expected_plan (payload jsonb NOT NULL) ON COMMIT DROP;\n"
+        "INSERT INTO pg_temp.phase11_expected_plan (payload) VALUES ("
+        + _json_literal(plan)
+        + ");\n"
+    )
+    sql += _assert_state(plan, staged=True)
     sql += _assert(
         f"(SELECT count(*) FROM v1_shadow.batches WHERE ordinal < {ordinal}) = {ordinal - 1}",
         "batch_predecessors",
@@ -253,9 +275,9 @@ def render_batch(
             continue
         sql += (
             f"INSERT INTO v1_shadow.{table} SELECT * FROM pg_catalog.jsonb_populate_recordset("
-            f"NULL::v1_shadow.{table}, "
-            + _json_literal(batch["tables"][table])
-            + ") ON CONFLICT (run_id, id) DO NOTHING;\n"
+            f"NULL::v1_shadow.{table}, (SELECT payload -> 'batches' -> {ordinal - 1} "
+            f"-> 'tables' -> '{table}' FROM pg_temp.phase11_expected_plan)) "
+            "ON CONFLICT (run_id, id) DO NOTHING;\n"
         )
         if table == fail_after_table:
             sql += "SELECT 1 / 0 AS phase11_forced_failure;\n"
@@ -268,7 +290,7 @@ def render_batch(
         + _json_literal({table: len(rows) for table, rows in batch["tables"].items()})
         + ") ON CONFLICT (run_id, ordinal) DO NOTHING;\n"
     )
-    sql += _assert_state(plan)
+    sql += _assert_state(plan, staged=True)
     return sql + "COMMIT;\n"
 
 

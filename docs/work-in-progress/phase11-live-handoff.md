@@ -1,6 +1,6 @@
-# Phase 11 ? live execution record
+# Phase 11 — live execution record
 
-Observation: 2026-10-11 Europe/Madrid. **STATUS: PHASE 11 REMOTE BASELINE.**
+Observation: 2026-10-11 Europe/Madrid. **STATUS: PHASE 11 REMOTE MIGRATION.**
 Entry HEAD/origin `82d2dd841c10d2864b4c9638dad7acab49840df1`, fetched 0/0.
 The owner explicitly approved an isolated relational Shadow/V1 destination outside
 V2 competitive lifecycle. Placement is resolved; historical blockers below are
@@ -9,7 +9,8 @@ superseded. The active manual V2 season must remain entirely unchanged.
 Fresh read-only reconciliation at 2026-10-11 15:59:38 UTC confirms both projects
 ACTIVE_HEALTHY, V1 13/13 captured table hashes unchanged, V2 33 migrations through
 041 and 59/59 owner-excluded table hashes unchanged. Stable owner identity and
-credentials match. `v1_shadow` is absent: no 042, import, journal or remote effects.
+credentials match. At that entry observation `v1_shadow` was absent; subsequent remote effects are
+recorded below.
 V2 Advisor remains 24 ERROR / 5 WARN / 143 INFO. Three existing warnings have
 additional API metadata, but no finding identity or severity changed.
 
@@ -28,14 +29,27 @@ Source evidence remains in the verified durable 20261009 private capture.
 [source evidence](../phase11-source-evidence.json),
 [project checkpoint](../project-checkpoint.md).
 
+## Current remote checkpoint — 2026-10-11
+
+Implementation `a20deb91f86b35e7a0d861a812e0c2ca8f67ab73` was committed and pushed.
+Fresh prewrite baseline at 16:06:11 UTC preserved V1 13/13 and V2 59/59 tables.
+042 applied once as **20261011160629**; all prior 33 migration records unchanged.
+Run `61e5eb57-34f5-57f9-9252-4ea8be8d8b66` exists, with batches **1 and 2 complete**.
+Batch 3 received HTTP 413 (`request entity too large`); its oversized repeated
+save payload did not reach a completed import. A separate read-only exact-prefix
+verification and journal read succeeded afterward. No blind retry was issued.
+
 ## Next atomic step
 
-Commit/push the green implementation, refresh remote baselines, apply only 042
-once, and import/reconcile the six private batches. Local validation is complete.
-On every resume inspect real history and `v1_shadow.runs/batches` before any write.
-No cutover. Phase 12 NOT STARTED; readiness is not yet claimed.
+Compact transport fix passes 21 focused tests and the affected full local import
+proof: 11 groups, 13 table rollback boundaries, same-session temporary-payload
+cleanup, 48 role denials and exact 53-table preservation/restoration. Schema builds
+remain valid and were not repeated. Commit/push this fix, reconcile the actual
+remote prefix, then resume batch 3. Do not replay 042 or batches 1/2. Final
+independent preservation/security comparison and closure remain pending.
+No cutover or Phase 12.
 
-## Historical checkpoints ? superseded operational state
+## Historical checkpoints — superseded operational state
 
 ## Latest reconciliation — 2026-10-09
 

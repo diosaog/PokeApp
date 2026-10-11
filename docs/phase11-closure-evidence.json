@@ -1,5 +1,5 @@
 {
-  "status": "LOCAL_VALIDATION_PASS_REMOTE_PENDING",
+  "status": "REMOTE_MIGRATION_READY_TO_RESUME_BATCH3",
   "entry_head": "82d2dd841c10d2864b4c9638dad7acab49840df1",
   "date": "2026-10-11",
   "source_ref": "fdtytpeyfzyssfrsulxd",
@@ -12,7 +12,8 @@
     "mapper": 12,
     "sql_renderer": 8,
     "schema": 15,
-    "log": "%TEMP%/phase11-closure-20261011/full-python.log"
+    "log": "%TEMP%/phase11-closure-20261011/full-python.log",
+    "full_source": "a20deb91f86b35e7a0d861a812e0c2ca8f67ab73; unaffected application tests retained after transport-only correction"
   },
   "postgres": {
     "batch_count": 6,
@@ -142,9 +143,82 @@
   "compile_ruff_diff": "PASS",
   "react_browser": "NOT_RERUN_UNCHANGED",
   "parser_regression": "NOT_RERUN_UNCHANGED; previously hash-bound source parse retained",
-  "remote": "PENDING",
+  "remote": {
+    "source_commit": "a20deb91f86b35e7a0d861a812e0c2ca8f67ab73",
+    "migration": "20261011160629",
+    "history_count": 34,
+    "prior_history_unchanged": true,
+    "completed_batches": [1, 2],
+    "batch_3_attempt": "HTTP413 payload too large; exact-prefix reconciliation PASS, no batch3 effects",
+    "next": "Validate compact atomic SQL, commit/push, reconcile and resume batch3"
+  },
   "raw_evidence": [
     "%TEMP%/phase11-closure-20261011/",
     "%TEMP%/phase11-local-proof-20261011/"
-  ]
+  ],
+  "transport_fix": {
+    "reason": "HTTP413 oversized request; confirmed only batches1/2 after separate exact-prefix reconciliation",
+    "approach": "Transaction-local temporary JSON plan reused by both exact checks and inserts; ON COMMIT DROP",
+    "focused_python_pass": 21,
+    "renderer_pass": 9,
+    "mapper_pass": 12,
+    "compile_ruff": "PASS",
+    "batch3_http_payload_bytes": 1161479,
+    "postgres": {
+      "batch_count": 6,
+      "cleanup": {
+        "pokeapp_v2_validation_phase11_oct11_a": {
+          "private_fixture_rows": 0,
+          "public_tables_restored": 53
+        },
+        "pokeapp_v2_validation_phase11_oct11_b_de7532": {
+          "private_fixture_rows": 0,
+          "public_tables_restored": 53
+        }
+      },
+      "constraint_denials": [
+        "duplicate season participant",
+        "progress from another owner's save",
+        "unknown wallet with fabricated balance",
+        "known wallet missing a component",
+        "nonfinite wallet component",
+        "infinite wallet component",
+        "wallet balance does not reconcile",
+        "nonfinite purchase price",
+        "Cup match contains nonmember",
+        "Cup winner outside pairing",
+        "Cup self match"
+      ],
+      "finished_utc": "2026-10-11T16:11:54.439293+00:00",
+      "groups": [
+        "clean deterministic import and complete row reconciliation",
+        "complete replay preserves all rows and receipt timestamps",
+        "interruption after batch 2, prefix replay, restart equals clean run",
+        "concurrent final-batch replay produces one effect",
+        "injected failure after each nonempty batch table rolls back exactly",
+        "transaction-local payload removed after commit and same-session rollback",
+        "stale plan rejected without mutation",
+        "changed imported fact blocks verify and replay",
+        "relational source ownership, wallet precision and Cup constraints",
+        "RLS, forced RLS, grants, columns and actual three-role denials",
+        "all public tables and active manual season remain exact"
+      ],
+      "private_tables_reconciled": 15,
+      "public_tables_preserved": 53,
+      "rollback_boundaries": 13,
+      "security": {
+        "actual_role_denials": 48,
+        "foreign_public_fks": 0,
+        "functions": 0,
+        "missing_rls": 0,
+        "public_grants": 0,
+        "role_schema_access": 0,
+        "role_table_access": 0,
+        "tables": 15
+      },
+      "status": "PASS"
+    },
+    "rebuild": "RETAINED_UNCHANGED_SCHEMA",
+    "private_evidence": "%TEMP%/phase11-local-proof-20261011-compact/"
+  }
 }
