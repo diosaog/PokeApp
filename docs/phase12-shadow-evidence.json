@@ -1,0 +1,1003 @@
+{
+  "status": "PHASE_12_DONE",
+  "entry_head": "abc57754f12a60be4dbd0c921636eb1a50a7c06a",
+  "comparison": {
+    "comparator_version": "phase12-fixed-shadow/1",
+    "comparison_scope": "Fixed private legacy facts; no competitive promotion or relational mutation",
+    "counts": {
+      "BLOCKER": 0,
+      "EXPECTED_DIFFERENCE": 6,
+      "MATCH": 92,
+      "NOT_APPLICABLE": 8,
+      "UNKNOWN": 22
+    },
+    "domains_compared": [
+      "cup",
+      "economy",
+      "identities",
+      "league",
+      "progress",
+      "purchases",
+      "save"
+    ],
+    "findings": [
+      {
+        "classification": "NOT_APPLICABLE",
+        "domain": "championship",
+        "id": "championship/absent",
+        "origin": null,
+        "reason": "No surviving authoritative facts; no reconstruction or fabricated comparison"
+      },
+      {
+        "classification": "EXPECTED_DIFFERENCE",
+        "domain": "cup",
+        "id": "cup/certification_boundary",
+        "origin": null,
+        "reason": "Modern V2 certification rejects legacy null rules rather than inventing a champion"
+      },
+      {
+        "classification": "MATCH",
+        "domain": "cup",
+        "id": "cup/context",
+        "origin": null,
+        "reason": "Original legacy Cup state retained without a modern certificate"
+      },
+      {
+        "classification": "MATCH",
+        "domain": "cup",
+        "id": "cup/members",
+        "origin": null,
+        "reason": "Cup membership/order and explicit zero standings are separate from missing League results"
+      },
+      {
+        "classification": "MATCH",
+        "domain": "cup",
+        "id": "cup/pairs",
+        "origin": null,
+        "reason": "Pending pairings remain in their original order with no inferred winner"
+      },
+      {
+        "classification": "MATCH",
+        "domain": "cup",
+        "id": "cup/v2_representation",
+        "origin": null,
+        "reason": "Existing V2 legacy Cup value objects retain participants, pairs and absent winners"
+      },
+      {
+        "classification": "UNKNOWN",
+        "domain": "economy",
+        "id": "economy/Aaron",
+        "origin": null,
+        "reason": "V2 wallet read DTO preserves the known integer string or unknown null; no ledger synthesized"
+      },
+      {
+        "classification": "MATCH",
+        "domain": "economy",
+        "id": "economy/Aaron-source",
+        "origin": null,
+        "reason": "Exact surviving legacy formula, including pending spend; unknown balance is never zero"
+      },
+      {
+        "classification": "MATCH",
+        "domain": "economy",
+        "id": "economy/Anto",
+        "origin": null,
+        "reason": "V2 wallet read DTO preserves the known integer string or unknown null; no ledger synthesized"
+      },
+      {
+        "classification": "MATCH",
+        "domain": "economy",
+        "id": "economy/Anto-source",
+        "origin": null,
+        "reason": "Exact surviving legacy formula, including pending spend; unknown balance is never zero"
+      },
+      {
+        "classification": "UNKNOWN",
+        "domain": "economy",
+        "id": "economy/Barto",
+        "origin": null,
+        "reason": "V2 wallet read DTO preserves the known integer string or unknown null; no ledger synthesized"
+      },
+      {
+        "classification": "MATCH",
+        "domain": "economy",
+        "id": "economy/Barto-source",
+        "origin": null,
+        "reason": "Exact surviving legacy formula, including pending spend; unknown balance is never zero"
+      },
+      {
+        "classification": "UNKNOWN",
+        "domain": "economy",
+        "id": "economy/Daviry",
+        "origin": null,
+        "reason": "V2 wallet read DTO preserves the known integer string or unknown null; no ledger synthesized"
+      },
+      {
+        "classification": "MATCH",
+        "domain": "economy",
+        "id": "economy/Daviry-source",
+        "origin": null,
+        "reason": "Exact surviving legacy formula, including pending spend; unknown balance is never zero"
+      },
+      {
+        "classification": "UNKNOWN",
+        "domain": "economy",
+        "id": "economy/Iker",
+        "origin": null,
+        "reason": "V2 wallet read DTO preserves the known integer string or unknown null; no ledger synthesized"
+      },
+      {
+        "classification": "MATCH",
+        "domain": "economy",
+        "id": "economy/Iker-source",
+        "origin": null,
+        "reason": "Exact surviving legacy formula, including pending spend; unknown balance is never zero"
+      },
+      {
+        "classification": "UNKNOWN",
+        "domain": "economy",
+        "id": "economy/Miguel",
+        "origin": null,
+        "reason": "V2 wallet read DTO preserves the known integer string or unknown null; no ledger synthesized"
+      },
+      {
+        "classification": "MATCH",
+        "domain": "economy",
+        "id": "economy/Miguel-source",
+        "origin": null,
+        "reason": "Exact surviving legacy formula, including pending spend; unknown balance is never zero"
+      },
+      {
+        "classification": "UNKNOWN",
+        "domain": "economy",
+        "id": "economy/Rober",
+        "origin": null,
+        "reason": "V2 wallet read DTO preserves the known integer string or unknown null; no ledger synthesized"
+      },
+      {
+        "classification": "MATCH",
+        "domain": "economy",
+        "id": "economy/Rober-source",
+        "origin": null,
+        "reason": "Exact surviving legacy formula, including pending spend; unknown balance is never zero"
+      },
+      {
+        "classification": "UNKNOWN",
+        "domain": "economy",
+        "id": "economy/Samu",
+        "origin": null,
+        "reason": "V2 wallet read DTO preserves the known integer string or unknown null; no ledger synthesized"
+      },
+      {
+        "classification": "MATCH",
+        "domain": "economy",
+        "id": "economy/Samu-source",
+        "origin": null,
+        "reason": "Exact surviving legacy formula, including pending spend; unknown balance is never zero"
+      },
+      {
+        "classification": "UNKNOWN",
+        "domain": "economy",
+        "id": "economy/Sergio",
+        "origin": null,
+        "reason": "V2 wallet read DTO preserves the known integer string or unknown null; no ledger synthesized"
+      },
+      {
+        "classification": "MATCH",
+        "domain": "economy",
+        "id": "economy/Sergio-source",
+        "origin": null,
+        "reason": "Exact surviving legacy formula, including pending spend; unknown balance is never zero"
+      },
+      {
+        "classification": "UNKNOWN",
+        "domain": "economy",
+        "id": "economy/Victor",
+        "origin": null,
+        "reason": "V2 wallet read DTO preserves the known integer string or unknown null; no ledger synthesized"
+      },
+      {
+        "classification": "MATCH",
+        "domain": "economy",
+        "id": "economy/Victor-source",
+        "origin": null,
+        "reason": "Exact surviving legacy formula, including pending spend; unknown balance is never zero"
+      },
+      {
+        "classification": "MATCH",
+        "domain": "economy",
+        "id": "economy/coverage",
+        "origin": null,
+        "reason": "One explicit private wallet state per trainer"
+      },
+      {
+        "classification": "EXPECTED_DIFFERENCE",
+        "domain": "economy",
+        "id": "economy/ledger",
+        "origin": null,
+        "reason": "Legacy derived opening snapshot is not modern ledger history or authority for badge/completion settlement"
+      },
+      {
+        "classification": "NOT_APPLICABLE",
+        "domain": "hall_archive",
+        "id": "hall_archive/absent",
+        "origin": null,
+        "reason": "No surviving authoritative facts; no reconstruction or fabricated comparison"
+      },
+      {
+        "classification": "MATCH",
+        "domain": "identities",
+        "id": "identities/Aaron",
+        "origin": null,
+        "reason": "Deterministic private trainer and annotation-only candidate"
+      },
+      {
+        "classification": "MATCH",
+        "domain": "identities",
+        "id": "identities/Aaron-v2",
+        "origin": null,
+        "reason": "Current V2 trainer projection accepts the isolated identity and name"
+      },
+      {
+        "classification": "MATCH",
+        "domain": "identities",
+        "id": "identities/Anto",
+        "origin": null,
+        "reason": "Deterministic private trainer and annotation-only candidate"
+      },
+      {
+        "classification": "MATCH",
+        "domain": "identities",
+        "id": "identities/Anto-v2",
+        "origin": null,
+        "reason": "Current V2 trainer projection accepts the isolated identity and name"
+      },
+      {
+        "classification": "MATCH",
+        "domain": "identities",
+        "id": "identities/Barto",
+        "origin": null,
+        "reason": "Deterministic private trainer and annotation-only candidate"
+      },
+      {
+        "classification": "MATCH",
+        "domain": "identities",
+        "id": "identities/Barto-v2",
+        "origin": null,
+        "reason": "Current V2 trainer projection accepts the isolated identity and name"
+      },
+      {
+        "classification": "MATCH",
+        "domain": "identities",
+        "id": "identities/Daviry",
+        "origin": null,
+        "reason": "Deterministic private trainer and annotation-only candidate"
+      },
+      {
+        "classification": "MATCH",
+        "domain": "identities",
+        "id": "identities/Daviry-v2",
+        "origin": null,
+        "reason": "Current V2 trainer projection accepts the isolated identity and name"
+      },
+      {
+        "classification": "MATCH",
+        "domain": "identities",
+        "id": "identities/Iker",
+        "origin": null,
+        "reason": "Deterministic private trainer and annotation-only candidate"
+      },
+      {
+        "classification": "MATCH",
+        "domain": "identities",
+        "id": "identities/Iker-v2",
+        "origin": null,
+        "reason": "Current V2 trainer projection accepts the isolated identity and name"
+      },
+      {
+        "classification": "MATCH",
+        "domain": "identities",
+        "id": "identities/Miguel",
+        "origin": null,
+        "reason": "Deterministic private trainer and annotation-only candidate"
+      },
+      {
+        "classification": "MATCH",
+        "domain": "identities",
+        "id": "identities/Miguel-v2",
+        "origin": null,
+        "reason": "Current V2 trainer projection accepts the isolated identity and name"
+      },
+      {
+        "classification": "MATCH",
+        "domain": "identities",
+        "id": "identities/Rober",
+        "origin": null,
+        "reason": "Deterministic private trainer and annotation-only candidate"
+      },
+      {
+        "classification": "MATCH",
+        "domain": "identities",
+        "id": "identities/Rober-v2",
+        "origin": null,
+        "reason": "Current V2 trainer projection accepts the isolated identity and name"
+      },
+      {
+        "classification": "MATCH",
+        "domain": "identities",
+        "id": "identities/Samu",
+        "origin": null,
+        "reason": "Deterministic private trainer and annotation-only candidate"
+      },
+      {
+        "classification": "MATCH",
+        "domain": "identities",
+        "id": "identities/Samu-v2",
+        "origin": null,
+        "reason": "Current V2 trainer projection accepts the isolated identity and name"
+      },
+      {
+        "classification": "MATCH",
+        "domain": "identities",
+        "id": "identities/Sergio",
+        "origin": null,
+        "reason": "Deterministic private trainer and annotation-only candidate"
+      },
+      {
+        "classification": "MATCH",
+        "domain": "identities",
+        "id": "identities/Sergio-v2",
+        "origin": null,
+        "reason": "Current V2 trainer projection accepts the isolated identity and name"
+      },
+      {
+        "classification": "MATCH",
+        "domain": "identities",
+        "id": "identities/Victor",
+        "origin": null,
+        "reason": "Deterministic private trainer and annotation-only candidate"
+      },
+      {
+        "classification": "MATCH",
+        "domain": "identities",
+        "id": "identities/Victor-v2",
+        "origin": null,
+        "reason": "Current V2 trainer projection accepts the isolated identity and name"
+      },
+      {
+        "classification": "MATCH",
+        "domain": "identities",
+        "id": "identities/complete_map",
+        "origin": null,
+        "reason": "Each surviving typed entity has one deterministic, auditable mapping"
+      },
+      {
+        "classification": "EXPECTED_DIFFERENCE",
+        "domain": "identities",
+        "id": "identities/no_auth_merge",
+        "origin": null,
+        "reason": "Legacy names map to isolated UUIDs; candidate V2 IDs neither establish ownership nor copy credentials"
+      },
+      {
+        "classification": "MATCH",
+        "domain": "identities",
+        "id": "identities/roster",
+        "origin": null,
+        "reason": "Exact surviving trainer roster"
+      },
+      {
+        "classification": "MATCH",
+        "domain": "league",
+        "id": "league/capacities",
+        "origin": null,
+        "reason": "Observed A/B capacities are retained, never recomputed from current progress"
+      },
+      {
+        "classification": "MATCH",
+        "domain": "league",
+        "id": "league/context",
+        "origin": null,
+        "reason": "J1 and its editing state remain distinct from inferred legacy lifecycle"
+      },
+      {
+        "classification": "UNKNOWN",
+        "domain": "league",
+        "id": "league/historical_timing",
+        "origin": null,
+        "reason": "Season start and effective historical rule timing were not recorded"
+      },
+      {
+        "classification": "EXPECTED_DIFFERENCE",
+        "domain": "league",
+        "id": "league/lifecycle",
+        "origin": null,
+        "reason": "Legacy active=false governs day editing; missing lifecycle uses documented runtime fallback outside public active-season constraints"
+      },
+      {
+        "classification": "MATCH",
+        "domain": "league",
+        "id": "league/member-Aaron",
+        "origin": null,
+        "reason": "Division, relative order and legacy flags match; no modern robbery effect implied"
+      },
+      {
+        "classification": "MATCH",
+        "domain": "league",
+        "id": "league/member-Anto",
+        "origin": null,
+        "reason": "Division, relative order and legacy flags match; no modern robbery effect implied"
+      },
+      {
+        "classification": "MATCH",
+        "domain": "league",
+        "id": "league/member-Barto",
+        "origin": null,
+        "reason": "Division, relative order and legacy flags match; no modern robbery effect implied"
+      },
+      {
+        "classification": "MATCH",
+        "domain": "league",
+        "id": "league/member-Daviry",
+        "origin": null,
+        "reason": "Division, relative order and legacy flags match; no modern robbery effect implied"
+      },
+      {
+        "classification": "MATCH",
+        "domain": "league",
+        "id": "league/member-Iker",
+        "origin": null,
+        "reason": "Division, relative order and legacy flags match; no modern robbery effect implied"
+      },
+      {
+        "classification": "MATCH",
+        "domain": "league",
+        "id": "league/member-Miguel",
+        "origin": null,
+        "reason": "Division, relative order and legacy flags match; no modern robbery effect implied"
+      },
+      {
+        "classification": "MATCH",
+        "domain": "league",
+        "id": "league/member-Rober",
+        "origin": null,
+        "reason": "Division, relative order and legacy flags match; no modern robbery effect implied"
+      },
+      {
+        "classification": "MATCH",
+        "domain": "league",
+        "id": "league/member-Samu",
+        "origin": null,
+        "reason": "Division, relative order and legacy flags match; no modern robbery effect implied"
+      },
+      {
+        "classification": "MATCH",
+        "domain": "league",
+        "id": "league/member-Sergio",
+        "origin": null,
+        "reason": "Division, relative order and legacy flags match; no modern robbery effect implied"
+      },
+      {
+        "classification": "MATCH",
+        "domain": "league",
+        "id": "league/member-Victor",
+        "origin": null,
+        "reason": "Division, relative order and legacy flags match; no modern robbery effect implied"
+      },
+      {
+        "classification": "MATCH",
+        "domain": "league",
+        "id": "league/membership_count",
+        "origin": null,
+        "reason": "One membership per surviving trainer"
+      },
+      {
+        "classification": "MATCH",
+        "domain": "league",
+        "id": "league/unknown_timing_retained",
+        "origin": null,
+        "reason": "No historical date/configuration version invented"
+      },
+      {
+        "classification": "MATCH",
+        "domain": "league",
+        "id": "league/v2_context",
+        "origin": null,
+        "reason": "V2 recognizes the lifecycle value; missing dates prevent any claim of public activation"
+      },
+      {
+        "classification": "NOT_APPLICABLE",
+        "domain": "official_rankings",
+        "id": "official_rankings/absent",
+        "origin": null,
+        "reason": "No surviving authoritative facts; no reconstruction or fabricated comparison"
+      },
+      {
+        "classification": "UNKNOWN",
+        "domain": "progress",
+        "id": "progress/Aaron",
+        "origin": null,
+        "reason": "Current V2 progress reader preserves count and independent Champion state"
+      },
+      {
+        "classification": "MATCH",
+        "domain": "progress",
+        "id": "progress/Aaron-source",
+        "origin": null,
+        "reason": "Progress and deaths retain their observed/unknown provenance"
+      },
+      {
+        "classification": "MATCH",
+        "domain": "progress",
+        "id": "progress/Anto",
+        "origin": null,
+        "reason": "Current V2 progress reader preserves count and independent Champion state"
+      },
+      {
+        "classification": "MATCH",
+        "domain": "progress",
+        "id": "progress/Anto-source",
+        "origin": null,
+        "reason": "Progress and deaths retain their observed/unknown provenance"
+      },
+      {
+        "classification": "UNKNOWN",
+        "domain": "progress",
+        "id": "progress/Barto",
+        "origin": null,
+        "reason": "Current V2 progress reader preserves count and independent Champion state"
+      },
+      {
+        "classification": "MATCH",
+        "domain": "progress",
+        "id": "progress/Barto-source",
+        "origin": null,
+        "reason": "Progress and deaths retain their observed/unknown provenance"
+      },
+      {
+        "classification": "UNKNOWN",
+        "domain": "progress",
+        "id": "progress/Daviry",
+        "origin": null,
+        "reason": "Current V2 progress reader preserves count and independent Champion state"
+      },
+      {
+        "classification": "MATCH",
+        "domain": "progress",
+        "id": "progress/Daviry-source",
+        "origin": null,
+        "reason": "Progress and deaths retain their observed/unknown provenance"
+      },
+      {
+        "classification": "UNKNOWN",
+        "domain": "progress",
+        "id": "progress/Iker",
+        "origin": null,
+        "reason": "Current V2 progress reader preserves count and independent Champion state"
+      },
+      {
+        "classification": "MATCH",
+        "domain": "progress",
+        "id": "progress/Iker-source",
+        "origin": null,
+        "reason": "Progress and deaths retain their observed/unknown provenance"
+      },
+      {
+        "classification": "UNKNOWN",
+        "domain": "progress",
+        "id": "progress/Miguel",
+        "origin": null,
+        "reason": "Current V2 progress reader preserves count and independent Champion state"
+      },
+      {
+        "classification": "MATCH",
+        "domain": "progress",
+        "id": "progress/Miguel-source",
+        "origin": null,
+        "reason": "Progress and deaths retain their observed/unknown provenance"
+      },
+      {
+        "classification": "UNKNOWN",
+        "domain": "progress",
+        "id": "progress/Rober",
+        "origin": null,
+        "reason": "Current V2 progress reader preserves count and independent Champion state"
+      },
+      {
+        "classification": "MATCH",
+        "domain": "progress",
+        "id": "progress/Rober-source",
+        "origin": null,
+        "reason": "Progress and deaths retain their observed/unknown provenance"
+      },
+      {
+        "classification": "UNKNOWN",
+        "domain": "progress",
+        "id": "progress/Samu",
+        "origin": null,
+        "reason": "Current V2 progress reader preserves count and independent Champion state"
+      },
+      {
+        "classification": "MATCH",
+        "domain": "progress",
+        "id": "progress/Samu-source",
+        "origin": null,
+        "reason": "Progress and deaths retain their observed/unknown provenance"
+      },
+      {
+        "classification": "UNKNOWN",
+        "domain": "progress",
+        "id": "progress/Sergio",
+        "origin": null,
+        "reason": "Current V2 progress reader preserves count and independent Champion state"
+      },
+      {
+        "classification": "MATCH",
+        "domain": "progress",
+        "id": "progress/Sergio-source",
+        "origin": null,
+        "reason": "Progress and deaths retain their observed/unknown provenance"
+      },
+      {
+        "classification": "UNKNOWN",
+        "domain": "progress",
+        "id": "progress/Victor",
+        "origin": null,
+        "reason": "Current V2 progress reader preserves count and independent Champion state"
+      },
+      {
+        "classification": "MATCH",
+        "domain": "progress",
+        "id": "progress/Victor-source",
+        "origin": null,
+        "reason": "Progress and deaths retain their observed/unknown provenance"
+      },
+      {
+        "classification": "UNKNOWN",
+        "domain": "progress",
+        "id": "progress/adjusted_deaths",
+        "origin": null,
+        "reason": "Visible Box-8 facts do not prove missing historical wipe/revive contributions or frozen penalties"
+      },
+      {
+        "classification": "MATCH",
+        "domain": "progress",
+        "id": "progress/coverage",
+        "origin": null,
+        "reason": "Every participant has explicit observed or unknown progress"
+      },
+      {
+        "classification": "NOT_APPLICABLE",
+        "domain": "promotions",
+        "id": "promotions/absent",
+        "origin": null,
+        "reason": "No surviving authoritative facts; no reconstruction or fabricated comparison"
+      },
+      {
+        "classification": "MATCH",
+        "domain": "purchases",
+        "id": "purchases/206",
+        "origin": null,
+        "reason": "Original ownership, exact price, pending state, day and timestamp text retained"
+      },
+      {
+        "classification": "MATCH",
+        "domain": "purchases",
+        "id": "purchases/206-pending",
+        "origin": null,
+        "reason": "Current purchase status distinguishes a pending purchase from a redeemed effect"
+      },
+      {
+        "classification": "MATCH",
+        "domain": "purchases",
+        "id": "purchases/207",
+        "origin": null,
+        "reason": "Original ownership, exact price, pending state, day and timestamp text retained"
+      },
+      {
+        "classification": "MATCH",
+        "domain": "purchases",
+        "id": "purchases/207-pending",
+        "origin": null,
+        "reason": "Current purchase status distinguishes a pending purchase from a redeemed effect"
+      },
+      {
+        "classification": "EXPECTED_DIFFERENCE",
+        "domain": "purchases",
+        "id": "purchases/already_spent",
+        "origin": null,
+        "reason": "Legacy pending purchases already reduce the snapshot; no modern purchase command or second debit executes"
+      },
+      {
+        "classification": "MATCH",
+        "domain": "purchases",
+        "id": "purchases/coverage",
+        "origin": null,
+        "reason": "All surviving purchases accounted for once"
+      },
+      {
+        "classification": "UNKNOWN",
+        "domain": "purchases",
+        "id": "purchases/timestamps",
+        "origin": null,
+        "reason": "Purchase timestamp timezones and unrecorded SKU/timing history remain unproven"
+      },
+      {
+        "classification": "NOT_APPLICABLE",
+        "domain": "redemptions",
+        "id": "redemptions/absent",
+        "origin": null,
+        "reason": "No surviving authoritative facts; no reconstruction or fabricated comparison"
+      },
+      {
+        "classification": "MATCH",
+        "domain": "reference",
+        "id": "reference/capture_time",
+        "origin": null,
+        "reason": "Capture timestamps compare as precise instants, not timezone display strings"
+      },
+      {
+        "classification": "MATCH",
+        "domain": "reference",
+        "id": "reference/certified",
+        "origin": null,
+        "reason": "Only the reconciled, approved source mapping can be compared"
+      },
+      {
+        "classification": "MATCH",
+        "domain": "reference",
+        "id": "reference/exclusions",
+        "origin": null,
+        "reason": "Credential/cache exclusions contain no copied values"
+      },
+      {
+        "classification": "MATCH",
+        "domain": "reference",
+        "id": "reference/receipts",
+        "origin": null,
+        "reason": "Six completed atomic units, without replay"
+      },
+      {
+        "classification": "MATCH",
+        "domain": "reference",
+        "id": "reference/retained_records",
+        "origin": null,
+        "reason": "Retained noncredential source records match the fixed capture"
+      },
+      {
+        "classification": "MATCH",
+        "domain": "reference",
+        "id": "reference/run",
+        "origin": null,
+        "reason": "Exactly one captured migration reference"
+      },
+      {
+        "classification": "MATCH",
+        "domain": "reference",
+        "id": "reference/scope-cup_matches",
+        "origin": null,
+        "reason": "Private rows have unique IDs and belong to this run"
+      },
+      {
+        "classification": "MATCH",
+        "domain": "reference",
+        "id": "reference/scope-cup_participants",
+        "origin": null,
+        "reason": "Private rows have unique IDs and belong to this run"
+      },
+      {
+        "classification": "MATCH",
+        "domain": "reference",
+        "id": "reference/scope-cups",
+        "origin": null,
+        "reason": "Private rows have unique IDs and belong to this run"
+      },
+      {
+        "classification": "MATCH",
+        "domain": "reference",
+        "id": "reference/scope-exclusions",
+        "origin": null,
+        "reason": "Private rows have unique IDs and belong to this run"
+      },
+      {
+        "classification": "MATCH",
+        "domain": "reference",
+        "id": "reference/scope-identities",
+        "origin": null,
+        "reason": "Private rows have unique IDs and belong to this run"
+      },
+      {
+        "classification": "MATCH",
+        "domain": "reference",
+        "id": "reference/scope-participants",
+        "origin": null,
+        "reason": "Private rows have unique IDs and belong to this run"
+      },
+      {
+        "classification": "MATCH",
+        "domain": "reference",
+        "id": "reference/scope-progress",
+        "origin": null,
+        "reason": "Private rows have unique IDs and belong to this run"
+      },
+      {
+        "classification": "MATCH",
+        "domain": "reference",
+        "id": "reference/scope-purchases",
+        "origin": null,
+        "reason": "Private rows have unique IDs and belong to this run"
+      },
+      {
+        "classification": "MATCH",
+        "domain": "reference",
+        "id": "reference/scope-records",
+        "origin": null,
+        "reason": "Private rows have unique IDs and belong to this run"
+      },
+      {
+        "classification": "MATCH",
+        "domain": "reference",
+        "id": "reference/scope-saves",
+        "origin": null,
+        "reason": "Private rows have unique IDs and belong to this run"
+      },
+      {
+        "classification": "MATCH",
+        "domain": "reference",
+        "id": "reference/scope-seasons",
+        "origin": null,
+        "reason": "Private rows have unique IDs and belong to this run"
+      },
+      {
+        "classification": "MATCH",
+        "domain": "reference",
+        "id": "reference/scope-trainers",
+        "origin": null,
+        "reason": "Private rows have unique IDs and belong to this run"
+      },
+      {
+        "classification": "MATCH",
+        "domain": "reference",
+        "id": "reference/scope-wallets",
+        "origin": null,
+        "reason": "Private rows have unique IDs and belong to this run"
+      },
+      {
+        "classification": "MATCH",
+        "domain": "reference",
+        "id": "reference/tables",
+        "origin": null,
+        "reason": "Only the fifteen approved private tables are accepted"
+      },
+      {
+        "classification": "NOT_APPLICABLE",
+        "domain": "results",
+        "id": "results/absent",
+        "origin": null,
+        "reason": "No surviving authoritative facts; no reconstruction or fabricated comparison"
+      },
+      {
+        "classification": "NOT_APPLICABLE",
+        "domain": "sanctions",
+        "id": "sanctions/absent",
+        "origin": null,
+        "reason": "No surviving authoritative facts; no reconstruction or fabricated comparison"
+      },
+      {
+        "classification": "EXPECTED_DIFFERENCE",
+        "domain": "save",
+        "id": "save/authority",
+        "origin": null,
+        "reason": "Private original bytes and neutral DTO are not modern current-save acceptance, identity allocation or Team Lock"
+      },
+      {
+        "classification": "MATCH",
+        "domain": "save",
+        "id": "save/continuity",
+        "origin": null,
+        "reason": "Source bytes, hash, owner, pointer, timestamp text and neutral parse all match"
+      },
+      {
+        "classification": "MATCH",
+        "domain": "save",
+        "id": "save/parser_binding",
+        "origin": null,
+        "reason": "Retained parser evidence is bound to the same immutable source bytes"
+      },
+      {
+        "classification": "UNKNOWN",
+        "domain": "save",
+        "id": "save/upload_timezone",
+        "origin": null,
+        "reason": "Legacy timestamp text has no proven timezone; no modern upload time is invented"
+      },
+      {
+        "classification": "NOT_APPLICABLE",
+        "domain": "team_locks",
+        "id": "team_locks/absent",
+        "origin": null,
+        "reason": "No surviving authoritative facts; no reconstruction or fabricated comparison"
+      }
+    ],
+    "run_id": "61e5eb57-34f5-57f9-9252-4ea8be8d8b66",
+    "schema_version": 1,
+    "status": "PASS"
+  },
+  "entry_reconciliation": {
+    "batches": 6,
+    "full_baseline_equals_phase11": true,
+    "full_tables": 59,
+    "history_count": 34,
+    "history_unchanged": true,
+    "identities": 57,
+    "observed_at": "2026-10-11T16:24:47.548861+00:00",
+    "owner_stable_unchanged": true,
+    "private_rows": 135,
+    "project": "uwleqeuzsveqlugugzba",
+    "remote_writes": 0,
+    "run_id": "61e5eb57-34f5-57f9-9252-4ea8be8d8b66",
+    "run_status": "reconciled",
+    "runs": 1,
+    "security_unchanged": true
+  },
+  "final_preservation": {
+    "batches": 6,
+    "full_baseline_equals_phase11": true,
+    "full_tables": 59,
+    "history_count": 34,
+    "history_unchanged": true,
+    "identities": 57,
+    "observed_at": "2026-10-11T16:32:21.096619+00:00",
+    "owner_stable_unchanged": true,
+    "phase12_all_five_captures_equal": {
+      "full": true,
+      "history": true,
+      "owner-stable": true,
+      "security": true,
+      "shadow": true
+    },
+    "private_rows": 135,
+    "project": "uwleqeuzsveqlugugzba",
+    "remote_writes": 0,
+    "run_id": "61e5eb57-34f5-57f9-9252-4ea8be8d8b66",
+    "run_status": "reconciled",
+    "runs": 1,
+    "security_unchanged": true
+  },
+  "determinism": {
+    "fixed_phase11_inputs_verified": 5,
+    "all_input_files_equal_original_manifest": true,
+    "comparison_outputs_byte_identical": 3,
+    "comparison_sha256": "5afd8a487471e323235e4a0d7f1241dd9d7646e7c9643894e35e20ebaef6b804"
+  },
+  "validation": {
+    "python_full": 798,
+    "includes_existing_untracked_map_tests": 19,
+    "focused_shadow_tests": 13,
+    "ruff_compile_diff": "PASS",
+    "react_browser_native_parser": "NOT_RUN_UNCHANGED",
+    "postgres_rebuild_rollback": "NOT_RERUN_PHASE11_RETAINED",
+    "relational_fixture_requirement": "N/A: existing pure readers, DTOs, lifecycle enum and Cup certification guard suffice for surviving facts"
+  },
+  "source_sha256": {
+    "tools/phase12_shadow.py": "417ca9a625aa73598042d2d8f772b1d6d8912f3d67293821f1b03c393e3457dc",
+    "tests/test_phase12_shadow.py": "b40caea740e58f367443025d74065f7e12787403341547a09ea4ee6aff4596f6"
+  },
+  "production_access": {
+    "management_queries": 10,
+    "all_database_read_only": true,
+    "business_writes": 0,
+    "schema_writes": 0,
+    "auth_calls": 0,
+    "storage_byte_operations": 0,
+    "v1_remote_calls": 0,
+    "migration_replays": 0,
+    "deployments": 0
+  },
+  "durable_evidence": {
+    "path": "%LOCALAPPDATA%/PokeApp-migration-evidence/phase12/20261011/",
+    "files_verified": 29
+  },
+  "phase13_readiness": "READY_FOR_REPRESENTATIVE_STAGING",
+  "phase13_started": false,
+  "cutover": false
+}
