@@ -5,17 +5,27 @@ milestone record; it does not maintain a second live phase-status ledger.
 
 ## Current project position
 
-- Latest completed phase: **11 — real V1 → V2 data migration, DONE**.
+- Latest completed phase: **12 — private Shadow comparison, DONE**.
+  All seven surviving domains classified: 92 MATCH, 6 EXPECTED_DIFFERENCE,
+  22 UNKNOWN, 8 NOT_APPLICABLE and zero BLOCKER. Three deterministic executions;
+  13 focused and 798 full Python tests pass. The 59 original V2 tables and all
+  135 private reference rows remain unchanged. No migration replay or cutover.
+  [Shadow report](phase12-shadow-report.md),
+  [structured evidence](phase12-shadow-evidence.json),
+  [single live record](work-in-progress/phase12-live-handoff.md).
+  **Phase 13 READY FOR REPRESENTATIVE STAGING / NOT STARTED**, awaiting its
+  execution instruction.
+- Previous completed phase: **11 — real V1 → V2 data migration, DONE**.
   Surviving V1 facts are imported into the approved private relational destination,
   outside the current competitive lifecycle. All owner/manual V2 data and V1 source
   remain intact. Six batches are reconciled; 042 is applied once. No cutover.
   [Completion report](phase11-completion-report.md),
   [closure evidence](phase11-closure-evidence.json).
-  **Phase 12 READY FOR SHADOW / NOT STARTED**, awaiting its execution instruction.
-  [Single live record](work-in-progress/phase11-live-handoff.md),
+  At that closure Phase 12 was READY FOR SHADOW; it is now closed above.
+  [Closed execution record](work-in-progress/phase11-live-handoff.md),
   [source inventory](phase11-source-inventory.md),
-  [historical readiness checkpoint](phase11-readiness-report.md). Current execution state and
-  exact resume step are maintained there. No cutover or Phase 12 is included.
+  [historical readiness checkpoint](phase11-readiness-report.md). These retain
+  the fixed migration reference; current execution state is in the Phase 12 record.
 - Previous completed phase: **10.5 — Functional product alignment and repair, DONE**.
   [Approved contract](phase10-5-functional-alignment.md),
   [closed execution record](work-in-progress/phase10-5-live-handoff.md).
@@ -48,8 +58,8 @@ milestone record; it does not maintain a second live phase-status ledger.
 - V1/Streamlit remains legacy/fallback. V2 public staging is available for inspection.
   Cloud save ingestion/current-state promotion, physical save operations, final
   Launcher distribution, onboarding/roles and release polish remain later work.
-- Phase 11 closed after owner-authorized isolated import; its live record controls
-  the Phase 12 entry reference. Phase 12 and cutover are not started.
+- Phase 11 closed after owner-authorized isolated import; its record remains the
+  fixed Phase 12 reference. Phase 12 is closed; Phase 13 and cutover are not started.
 - Preserve **OWNER_TEMP_STAGING_AUTH / OWNER_TEMP_STAGING_ADMIN** for current review.
   **TEMP_STAGING_AUTH_MUST_BE_REMOVED_OR_RESET_BEFORE_RELEASE** includes role review
   and definitive secure onboarding. Do not copy a temporary staging policy to production.

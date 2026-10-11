@@ -1,7 +1,10 @@
 # Phase 11 - live execution record
 
 Closed 2026-10-11 Europe/Madrid. **STATUS: PHASE 11 DONE.**
-**PHASE 12 READINESS: READY FOR SHADOW. PHASE 12 NOT STARTED. No cutover.**
+At this closure: **PHASE 12 READINESS: READY FOR SHADOW. No cutover.**
+Subsequent Phase 12 execution is now closed; see the
+[current Phase 12 record](phase12-live-handoff.md). The Phase 11 facts below remain
+the unchanged migration reference.
 [Completion report](../phase11-completion-report.md),
 [closure evidence](../phase11-closure-evidence.json),
 [approved mapping](../phase11-source-inventory.md),
