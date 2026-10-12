@@ -620,3 +620,21 @@ of mutable live saves.
 The current weakest technical point is the broad use of `settings` JSON. That is
 acceptable for Streamlit 2.0, but it must become explicit contracts, repositories
 and Supabase V2 tables before React/Cloudflare becomes the main app.
+
+## Phase 14 performance closure (2026-10-12)
+
+Phase 14 is DONE. Entry `eab706e22bf08004d85b5d9e3253e344659f3c04`; final
+implementation `d05e28e01639d146976300dbcd7bb16baa92c9d1`, pushed to `main`.
+Inventory rival Team Lock identity reads are now bounded and independent of rival
+count, with exact ownership/save/identity/ambiguity/privacy checks preserved.
+Local populated six-player measurement improved 1.1566 s -> 0.8973 s with
+identical responses; hosted owner read improved 1.8671 s -> 1.6028 s in five
+read-only samples per side. Full Python closure: 809 PASS. Railway API deployment
+`9b75a24f-ca5e-474b-9c3c-555625cceb14` is SUCCESS; Cloudflare unchanged. Final
+remote read-only comparison preserves migrations, owner-stable data, security,
+Shadow and Storage; business writes are zero. The historical READ 503 remains
+UNKNOWN / NOT REPRODUCED. Exact local resources were cleaned up. See
+[Phase 14 report](phase14-performance-report.md), [evidence](phase14-performance-evidence.json)
+and [live handoff](work-in-progress/phase14-live-handoff.md).
+
+**PHASE 15 READINESS: READY FOR CUTOVER. Do not start Phase 15 automatically.**

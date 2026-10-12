@@ -1,0 +1,93 @@
+﻿{
+  "phase": "14",
+  "status": "DONE",
+  "entry_head": "eab706e22bf08004d85b5d9e3253e344659f3c04",
+  "implementation_head": "d05e28e01639d146976300dbcd7bb16baa92c9d1",
+  "entry_origin_divergence": "0/0",
+  "optimization": {
+    "surface": "inventory rival Team Lock public identities",
+    "change": "bounded batch identity resolution plus removal of duplicate season read",
+    "source": "app/application/frontend_reads.py; app/repositories/supabase/frontend_reads.py",
+    "queries": "constant two identity reads for populated rival locks, independent of rival count",
+    "privacy": "trainer/save pair, party slot, unambiguous owner and ambiguity checks preserved",
+    "schema_or_migration": false
+  },
+  "local_measurement": {
+    "fixture": "six synthetic participants, six current Team Locks, real PostgreSQL 17.11 and FastAPI",
+    "method": "five sequential authenticated GET rounds, reused client, no retries",
+    "inventory_before_median_s": 1.1566,
+    "inventory_after_median_s": 0.8973,
+    "inventory_improvement_percent": 22.4,
+    "inventory_before_range_s": [1.1386, 1.3322],
+    "inventory_after_range_s": [0.8757, 1.1805],
+    "inventory_statuses_before_after": [200, 200, 200, 200, 200],
+    "inventory_response_bytes_before_after": 12850,
+    "inventory_response_hash_equal": true,
+    "all_measured_flow_hashes_equal": true,
+    "rival_call_slope": {"one_rival_transport_reads": 2, "six_rivals_transport_reads": 2},
+    "local_db_equivalence": "PASS; exact disposable Phase14 database dropped after evidence"
+  },
+  "hosted_measurement": {
+    "api": "https://pokeapp-api-production.up.railway.app",
+    "actor": "owner read-only sparse season",
+    "method": "same five-round sequential GET measurement; no retries; no business writes",
+    "inventory_before_median_s": 1.8671,
+    "inventory_after_median_s": 1.6028,
+    "inventory_before_range_s": [1.7814, 2.3392],
+    "inventory_after_range_s": [1.5770, 1.9864],
+    "inventory_before_after_statuses": [200, 200, 200, 200, 200],
+    "inventory_response_bytes_before_after": 29,
+    "inventory_response_hash_equal": true,
+    "hosted_fixture_limit": "owner season is sparse and has no populated rival-lock workload; populated-path proof is local only",
+    "read_503": "UNKNOWN / NOT REPRODUCED; zero 5xx and zero retries in retained before/after samples"
+  },
+  "tests": {
+    "full_python": "809 PASS",
+    "focused_inventory_and_read": "36 PASS",
+    "extended_related_python": "73 PASS",
+    "compile": "PASS",
+    "git_diff_check": "PASS",
+    "ruff": "not installed in environment; not installed for closure",
+    "react_browser": "not rerun; frontend source unchanged and Phase13 final evidence retained",
+    "typescript_build": "not rerun; frontend source unchanged and retained Phase14 entry build passed"
+  },
+  "deployment": {
+    "component": "Railway API only",
+    "project": "PokeApp V2",
+    "service": "pokeapp-api",
+    "environment": "production",
+    "deployment_id": "9b75a24f-ca5e-474b-9c3c-555625cceb14",
+    "status": "SUCCESS",
+    "source": "d05e28e01639d146976300dbcd7bb16baa92c9d1",
+    "image": "sha256:cdc7a9bcc7edd5fc2c5cf9b76fbe86b3be58b204303f5c029bd62a09246e1120",
+    "previous_compatible_deployment": "3845ce2d-6488-43ef-893a-1459c2aed0bb",
+    "cloudflare": "unchanged; no frontend deployment"
+  },
+  "remote_preservation": {
+    "history_records": 34,
+    "scoped_tables": 59,
+    "history_equal": true,
+    "owner_stable_equal": true,
+    "security_equal": true,
+    "shadow_rows": 135,
+    "shadow_run_status": "reconciled",
+    "shadow_equal": true,
+    "storage_bytes_touched": 0,
+    "business_writes": 0,
+    "auth_activity": "owner login/session/refresh activity excluded from stable business equality"
+  },
+  "cleanup": {
+    "api_local": "stopped",
+    "frontend_local": "not started",
+    "postgres": "stopped",
+    "database": "pokeapp_v2_validation_phase13_phase14_perf dropped and absence verified",
+    "auxiliary_railway_project": "deleted; Railway account list contains only PokeApp V2"
+  },
+  "remaining_limits": [
+    "overview hosted latency remains a Phase14/15 candidate; no safe evidence-led change was justified",
+    "scouting/preview/Admin are measured controls, not optimized in this bounded package",
+    "hosted populated rival-count latency remains unmeasured because owner data was not mutated",
+    "intermittent historical read 503 cause remains unproven"
+  ],
+  "phase15_readiness": "READY FOR CUTOVER"
+}
