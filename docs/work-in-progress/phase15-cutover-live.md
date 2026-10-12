@@ -164,3 +164,118 @@ Stop after this preflight. A separately authorized Phase 15B execution may begin
 by rerunning step 1, confirming the legacy ingress gate, and then following the
 numbered checklist in order. Phase 15C starts only after 15B traffic and rollback
 evidence is complete.
+
+---
+
+# Phase 15B — production cutover execution attempt
+
+Observation: 2026-10-12 Europe/Madrid. **STATUS: PHASE 15B BLOCKED.**
+**CUTOVER: NOT EXECUTED.** The block was reached before any traffic, deployment,
+database or business-data change.
+
+## Fresh entry reconciliation
+
+- Entry HEAD remained `c6bf6bef8655bc40c7657ae486c5b8bd13b3c903`, with
+  `main`/`origin/main` at 0/0 and only the pre-existing unrelated untracked
+  files plus the protected guide listed by Git.
+- Railway remained Online at deployment
+  `9b75a24f-ca5e-474b-9c3c-555625cceb14`; `GET /health` returned 200.
+- Cloudflare remained at version
+  `77eea9f6-0c90-45a2-b93a-3bf9cdf5fc11`; `GET /build-config.json` returned 200
+  with the Railway API origin.
+- Read-only V1/V2 project checks returned `ACTIVE_HEALTHY`. V1 still has the
+  sparse seven-table inventory (settings 9, saves 1, purchases 2, all other
+  public legacy tables empty, one bucket and one object). V2 still has 34
+  migration records through 042 once.
+- The fresh V2 observation at `2026-10-12T16:11:40Z` confirmed the reconciled
+  Phase 11 run `61e5eb57-34f5-57f9-9252-4ea8be8d8b66`, six batches, 57 maps,
+  135 private Shadow rows, unchanged owner-stable data and security catalogs,
+  and zero remote writes. The full baseline difference remains only expected
+  owner Auth/session activity.
+
+## CUTOVER BRANCH: C
+
+`https://pokeapp.streamlit.app/` is an actually reachable Streamlit ingress:
+the root returned the Streamlit Cloud shell with HTTP 200, and `/healthz`
+returned `{"status":"ok"}`. Repository evidence (`main.py`, `desktop/main.js`)
+confirms the URL is the legacy entry, but does not provide hosting ownership or
+a safe traffic/write gate. Current Railway/Cloudflare inventory contains no
+Streamlit deployment or DNS control, and no Streamlit operator credentials are
+available in the execution environment. The `.streamlit` directory is local
+runtime configuration, not proof of hosted control.
+
+Because an active legacy ingress exists while its write gate and routing control
+cannot be positively identified, Phase 15B stops under the required Branch C
+rule. No maintenance mode, DNS change, deployment, migration, V1/V2 write,
+Shadow write or owner-data mutation was attempted.
+
+## PUBLIC ENTRY BEFORE / AFTER
+
+- **Before:** legacy `https://pokeapp.streamlit.app/` remains reachable; the
+  already published V2 surface is
+  `https://pokeapp-web.pokeapp-v2.workers.dev/` → Railway → V2.
+- **After:** unchanged. No traffic switch was performed.
+
+## CHANGES ACTUALLY MADE
+
+Only this documentation update. No application, SQL, environment, hosting,
+Cloudflare, Railway, Supabase, V1 or Storage change.
+
+## AUTHORITY PROOF
+
+The verified V2 path is Cloudflare React → Railway FastAPI → Supabase V2. V1 and
+`v1_shadow` remain preserved reference data. Because the legacy Streamlit host is
+still publicly reachable, exclusive production authority cannot be declared
+until its operator can place it read-only and control the public entry.
+
+## IMMEDIATE PROOF RESULTS
+
+The safe pre-cutover probes passed: V2 API health, Cloudflare reachability and
+API-origin configuration, V1/V2 health, migration head, Shadow reconciliation,
+owner-stable preservation and security comparison. The authenticated 15C-style
+read matrix was not started because Branch C requires stopping before traffic
+changes and before treating the public authority as cut over.
+
+## PRESERVATION RESULTS
+
+V1 source, V2 owner-stable business data, results, economy, Team Locks, Storage,
+34 migration records, Shadow run/batches/maps/rows and security catalogs remain
+unchanged. Remote business writes and fixtures: zero.
+
+## ROLLBACK STATE
+
+No rollback was needed because no change occurred. Existing rollback artifacts
+remain available: Cloudflare version `77eea9f6-0c90-45a2-b93a-3bf9cdf5fc11` and
+Railway deployment `3845ce2d-6488-43ef-893a-1459c2aed0bb` as the prior compatible
+checkpoint. V1 and `v1_shadow` were not altered.
+
+## OBSERVATION RESULT
+
+The bounded read-only observation was clean: API/web health stayed 200, no
+unexpected 5xx or write was observed, and the intermittent historical READ 503
+did not reproduce. This does not override the unresolved legacy ingress control.
+
+## BLOCKERS
+
+Single concrete blocker: provide verified operator/hosting or DNS control for
+`https://pokeapp.streamlit.app/` sufficient to gate legacy writes and switch the
+declared public entry safely. Do not infer this control from `main.py`, the
+Electron launcher or local `.streamlit` files.
+
+## 15C READINESS
+
+**NOT READY.** Do not start Phase 15C until the legacy ingress is controlled,
+placed read-only and the public entry switch is executed and recorded.
+
+## DO NOT REPEAT
+
+Do not rerun Phases 11–14, replay migration 042, rebuild Shadow, mutate the
+owner season, create fixtures, delete V1/`v1_shadow`, deploy uncommitted source,
+or read/touch/stage the protected guide. Do not retry traffic changes without
+the missing legacy control.
+
+## NEXT EXACT ACTION
+
+Obtain and verify the Streamlit hosting/DNS operator control and the safe legacy
+write gate. Then resume Phase 15B from the fresh baseline; if that control cannot
+be obtained, keep production authority unchanged and do not start Phase 15C.
