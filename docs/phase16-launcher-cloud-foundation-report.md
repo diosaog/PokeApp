@@ -1,10 +1,12 @@
 # Phase 16A - Launcher / V2 cloud foundation
 
-2026-10-13. **STATUS: PHASE 16A BLOCKED - local cleanup only.**
-Implementation, local validation and production delivery are complete. The final
-cleanup gate is not complete: automatic execution review rejected deletion of
-16A-owned temporary directories (`blocked by policy`), including an attempt with
-explicit verified paths. No further package has started.
+2026-10-13. **STATUS: PHASE 16A DONE.**
+**LAUNCHER CLOUD FOUNDATION: COMPLETE. LOCAL-FIRST: PROVEN.
+PHYSICAL SAVE WRITES: NOT STARTED.**
+Implementation, local validation, production delivery and cleanup are complete.
+The owner manually resolved the previous cleanup-policy blocker; fresh read-only
+verification confirms all eight temporary paths are absent. No further package
+has started.
 [Evidence](phase16-launcher-cloud-foundation-evidence.json),
 [exact continuation](work-in-progress/phase16-launcher-live.md).
 
@@ -133,14 +135,22 @@ and two added INFO findings. Remote business writes/fixtures and Storage writes:
 No temporary test processes remain; PostgreSQL is stopped and both disposable
 databases are absent. Private captures/logs and useful proof are retained under
 `%LOCALAPPDATA%/PokeApp-migration-evidence/phase16/20261013/closure-f87a986/`.
-Production validation tokens were cleared. The remaining directories are listed
-exactly in the live handoff: synthetic save fixtures, stopped disposable cluster
-files, the exported deployment bundle and temporary client profiles. Their deletion
-was rejected by execution policy, so **the cleanup gate remains BLOCKED**.
+Production validation tokens were cleared. Automatic execution review previously
+rejected temporary directory deletion (`blocked by policy`); the owner subsequently
+completed it manually. At **2026-10-13T11:42:57.3053102Z**, read-only checks confirm
+all eight exact paths listed in the live handoff are absent, with no matching
+Phase16 processes and no listener on validation port 55446. The retained successful
+database DROP proof and fresh absence of the cluster/processes/listener establish
+cleanup without restarting PostgreSQL. **The cleanup gate is PASS.**
+
+Cleanup resume entry was `d16186c27b43faed6cc8f93e0374f4a18b771b0d`, main/origin
+0/0, clean tracked tree. This closure changes documentation only; tests, PostgreSQL,
+migration 043 and deployments were not rerun. Earlier validation and remote results
+remain retained evidence. Obtain the final documentation commit from Git rather
+than a self-referential hash.
 
 This is a Windows development shell, not a bundled installer/updater. Gen6/7,
 trusted competitive observation promotion, public PC expansion and physical writes
-remain outside this delivered foundation. No new package is started. After cleanup
-is actually verified, finish the documentation-only closure without rerunning green
-tests, reapplying 043 or redeploying. Exactly one recommended next packet:
-**GEN6/7 READ SUPPORT**, beginning with X/Y; do not start it automatically.
+remain outside this delivered foundation. No new package is started. Exactly one
+recommended next packet: **GEN6/7 READ SUPPORT**, beginning with X/Y. Stop here;
+do not start it automatically.

@@ -5,10 +5,12 @@ milestone record; it does not maintain a second live phase-status ledger.
 
 ## Current project position
 
-- Current packet: **16A - Launcher/cloud foundation, BLOCKED at local cleanup**.
+- Latest completed packet: **16A - Launcher/cloud foundation, DONE**.
   Application source `f87a986` is validated, pushed and deployed; migration043
-  applied once. Owner data preserved. Only policy-rejected temporary directory
-  deletion remains. [Report](phase16-launcher-cloud-foundation-report.md),
+  applied once. Owner data preserved. Owner cleanup verified: eight temporary
+  paths absent, no temporary processes/listener; local-first proven, physical
+  writes not started. Next recommended packet: Gen6/7 read support (X/Y first),
+  not started. [Report](phase16-launcher-cloud-foundation-report.md),
   [single live record](work-in-progress/phase16-launcher-live.md).
 - Latest completed phase: **15 - cutover, DONE**. V2 is production authority;
   V1/Shadow remain private references. [Cutover report](phase15-cutover-report.md).
