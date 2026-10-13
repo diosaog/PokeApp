@@ -1,3 +1,14 @@
+# Current checkpoint — Phase 15 closed
+
+2026-10-13: **PHASE 15 DONE / CUTOVER COMPLETE / PRODUCTION AUTHORITY V2.**
+15C headless production proof, security, preservation and bounded observation
+are complete. [Final report](../phase15-cutover-report.md),
+[sanitized evidence](../phase15-cutover-evidence.json).
+The latest execution record is appended below; earlier blockers/next actions
+are historical and superseded. A brief read-503 incident reproduced and remains
+documented with unknown cause; it is not claimed fixed. **STOP. NEXT ROADMAP:
+LAUNCHER / CLOUD / SAVE COMPLETION — NOT STARTED.**
+
 # Phase 15A — cutover preflight
 
 Observation: 2026-10-12 Europe/Madrid. **PHASE 15A DONE.**
@@ -377,3 +388,115 @@ already-correct artifacts, or read/touch/stage the protected guide.
 
 Stop after Phase 15B. Await explicit Phase 15C QA/cutover-proof authorization;
 do not begin Phase 16 or any Launcher/save work.
+
+---
+
+# Phase 15C — post-cutover proof and final closure
+
+Observation: 2026-10-13 Europe/Madrid. **PHASE: 15C. STATUS: DONE.**
+**PHASE 15 DONE. CUTOVER BRANCH B / COMPLETE. PRODUCTION AUTHORITY: V2.**
+[Final report](../phase15-cutover-report.md),
+[evidence](../phase15-cutover-evidence.json).
+
+## Entry and execution boundary
+
+Entry main/origin `ef044175ecc1043877f709be7cc4101acbc3cd4b`, 0/0,
+clean tracked tree. 15A and 15B were already closed. The owner explicitly replaced
+the blocked desktop-browser method with CLI/headless validation. This execution
+used isolated headless Edge and read-only HTTP/SQL; no physical desktop control.
+No product/config source, deployment, migration, business mutation or fixture.
+Phases 11–14 and unrelated test/build/parser/PG suites were not repeated.
+
+## Public authority and artifacts
+
+Cloudflare React `https://pokeapp-web.pokeapp-v2.workers.dev` → Railway FastAPI
+`https://pokeapp-api-production.up.railway.app` → Supabase V2
+`uwleqeuzsveqlugugzba`. Cloudflare config and the verified owner JWT issuer match
+that chain. No browser V1/Streamlit authority or direct Supabase business writes.
+**PUBLIC DUAL AUTHORITY: NONE.**
+
+Cloudflare remains version `77eea9f6-0c90-45a2-b93a-3bf9cdf5fc11`, 100%, source
+`eb4e402891cbaa02e0999229874ac3003e016ae0`. Railway remains
+`9b75a24f-ca5e-474b-9c3c-555625cceb14`, SUCCESS/RUNNING, source
+`d05e28e01639d146976300dbcd7bb16baa92c9d1`; no redeployment. V2 remains
+34 migration records through 042 (`20261011160629`, once).
+
+**LEGACY STREAMLIT: PRIVATE / NON-PUBLIC / NON-AUTHORITATIVE.** Anonymous root
+and `/_stcore/stream` returned 303 to hosting authentication in each observation
+cycle. The app is retained, not deleted. The hosting gate is not a claim that
+allowlisted private legacy sessions are database-read-only. V1 is preserved
+reference only; `v1_shadow` is private preserved reference only.
+
+## Browser, security and evidence limits
+
+PASS: **35 complete rendered states, 20 desktop (1440 px) + 15 mobile (390 px)**,
+44 API responses, all 200, zero API interception/mocks, page/console errors or
+failed requests in the final complete run. Login/current identity and season,
+GENERAL/J1/J2, own/rival profile, truthful no-save PC, Team Preview self/rival/
+spectator modes, scouting, four Shop categories, inventory, Admin and Hall/Cup
+reads passed. Admin rewards match current server values **5/12**; no saving.
+Logout cleared browser local/session storage. Browser contexts were closed.
+
+Focused mobile follow-up: six API responses, all 200; all eight J1 frozen rows
+match revision 1. The GENERAL table scrolls within its own container to reveal
+the deaths column. Complete screens have useful content and no document-wide
+overflow; screenshots were reviewed as files. This was not pixel-perfect polish.
+
+Twelve HTTP security checks and a logout denial passed: anonymous/invalid Admin
+and identity requests 401, private scouting/preview escalation 422, exact CORS
+and foreign-origin rejection, no-store, CSP/MIME/nosniff and deep SPA. No existing
+separate non-admin session was available, and none was fabricated. Empty current
+locks, save, purchases/targets and Hall remain explicit: this production proof
+does not pretend to exercise populated private teams, redemptions or champions.
+
+## Preservation
+
+Final capture **2026-10-13 10:36:55 UTC**: all **55 non-Auth tables among 59
+scoped V2 tables** equal retained 15B hashes. Owner/manual season, memberships,
+results, economy, Team Locks, history, rewards and Storage metadata are unchanged.
+Only owner login/session/refresh activity changed Auth rows; non-owner Auth
+hashes match the retained baseline and owner identity/credential hashes are
+stable. History/owner-stable/Shadow/security expectations match both 15B and
+15C entry captures.
+
+V1's **13 hashes unchanged**. Shadow remains **reconciled / 6 batches / 57
+mappings / 135 rows**, 15 private tables with forced RLS/postgres ownership,
+no public/anon/authenticated/service-role table/schema/column access and zero
+external FKs. Retained security expectations unchanged; no broad new audit.
+Business writes, fixtures and Storage bytes written: **zero**.
+
+## Observation and reproduced read-503
+
+**REPRODUCED, CAUSE UNKNOWN, NOT FIXED.** The first attempt received two 503s on
+overview/PC at 10:29:37 UTC. Railway logs confirm application responses without
+proxy errors/restart. The existing retry recovered PC. A five-second harness
+assertion aborted before overview recovery completed; its cancellation produced
+a 499. Original evidence is retained. Only harness timing/season-label selection
+was corrected; application retries/timeouts were unchanged.
+
+The final complete proof and mobile follow-up had no 5xx. A bounded window
+**10:34:34–10:35:19 UTC**, 24 requests/three cycles including authenticated
+League/inventory/Hall, web/config/health and Streamlit gates, also passed without
+5xx. Assessment: brief observed availability incident, not sustained; no authority,
+privacy or data drift. It remains a reliability follow-up, not a claimed fix or
+an unresolved cutover blocker. The evidence distinguishes initial failure from
+the clean final observation; do not summarize the entire phase as “no 503”.
+
+## Rollback, Git and next exact action
+
+**ROLLBACK SAFETY: PRESERVED.** No rollback executed or resource deleted. Retain
+private Streamlit, V1, Shadow, current Cloudflare/Railway and prior compatible
+Railway `3845ce2d-6488-43ef-893a-1459c2aed0bb`. Future rollback controls traffic
+and application artifacts; it must not rewind data/history/migrations or expose
+concurrent public legacy writes.
+
+Durable private captures/logs/screenshots/harnesses and checksum manifest:
+`%LOCALAPPDATA%/PokeApp-migration-evidence/phase15/20261013/phase15c-closure/`.
+Only report/evidence/this handoff are in the documentation closure commit; obtain
+its exact HEAD from Git. Explicit staging only. Protected guide and unrelated
+untracked ZIP/map/test/validator files remain untouched.
+
+**BLOCKERS: NONE FOR CUTOVER CLOSURE. PHASE 15 FINAL VERDICT: DONE.**
+**NEXT ROADMAP: LAUNCHER / CLOUD / SAVE COMPLETION. STATUS: NOT STARTED.**
+Stop after committing/pushing and verifying main/origin 0/0 and clean tracked
+tree. Do not start next-roadmap work or delete rollback resources.

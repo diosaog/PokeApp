@@ -1,0 +1,1230 @@
+{
+  "phase": "15",
+  "packet": "15C",
+  "status": "DONE",
+  "cutover": "COMPLETE",
+  "production_authority": "V2",
+  "public_dual_authority": "NONE",
+  "observed_on": "2026-10-13 Europe/Madrid",
+  "entry": {
+    "head": "ef044175ecc1043877f709be7cc4101acbc3cd4b",
+    "branch": "main",
+    "divergence": [
+      0,
+      0
+    ],
+    "tracked_clean": true,
+    "phase15a": "DONE",
+    "phase15b": "DONE",
+    "method_override": "Explicit owner instruction: CLI/headless only; no Computer Use"
+  },
+  "changes": {
+    "product_files": 0,
+    "deployments": 0,
+    "migrations": 0,
+    "remote_business_writes": 0,
+    "fixtures": 0,
+    "storage_bytes_written": 0,
+    "local_test_harness_only": true
+  },
+  "authority": {
+    "web": "https://pokeapp-web.pokeapp-v2.workers.dev",
+    "api": "https://pokeapp-api-production.up.railway.app",
+    "database": "uwleqeuzsveqlugugzba",
+    "jwt_issuer": "https://uwleqeuzsveqlugugzba.supabase.co/auth/v1",
+    "build_config": {
+      "api_base_url": "https://pokeapp-api-production.up.railway.app",
+      "mode": "production"
+    },
+    "legacy_streamlit": {
+      "url": "https://pokeapp.streamlit.app/",
+      "status": "PRIVATE / NON-PUBLIC / NON-AUTHORITATIVE",
+      "root_and_stream_gate": 303,
+      "gate_target": "https://share.streamlit.io/-/auth/app",
+      "deleted": false,
+      "limit": "Hosting gate blocks anonymous use; allowlisted private legacy use is not certified database-read-only"
+    },
+    "v1": {
+      "ref": "fdtytpeyfzyssfrsulxd",
+      "status": "ACTIVE_HEALTHY / PRESERVED REFERENCE ONLY"
+    },
+    "v1_shadow": "PRIVATE PRESERVED REFERENCE ONLY"
+  },
+  "artifacts": {
+    "railway": {
+      "project": "PokeApp V2",
+      "service": "pokeapp-api",
+      "deployment": "9b75a24f-ca5e-474b-9c3c-555625cceb14",
+      "status": "SUCCESS / RUNNING",
+      "application_source": "d05e28e01639d146976300dbcd7bb16baa92c9d1",
+      "image": "sha256:cdc7a9bcc7edd5fc2c5cf9b76fbe86b3be58b204303f5c029bd62a09246e1120",
+      "previous_compatible": "3845ce2d-6488-43ef-893a-1459c2aed0bb"
+    },
+    "cloudflare": {
+      "worker": "pokeapp-web",
+      "version": "77eea9f6-0c90-45a2-b93a-3bf9cdf5fc11",
+      "traffic_percent": 100,
+      "application_source": "eb4e402891cbaa02e0999229874ac3003e016ae0"
+    },
+    "supabase_v2": {
+      "status": "ACTIVE_HEALTHY",
+      "migration_count": 34,
+      "head": "042_v1_shadow_relational_destination",
+      "head_version": "20261011160629"
+    }
+  },
+  "browser": {
+    "status": "PASS",
+    "engine": "Edge 155.0.4283.45",
+    "headless": true,
+    "interception": false,
+    "viewports": [
+      {
+        "width": 1440,
+        "height": 1000
+      },
+      {
+        "width": 390,
+        "height": 844
+      }
+    ],
+    "desktop_states": 20,
+    "mobile_states": 15,
+    "api_responses": 44,
+    "api_statuses": [
+      200
+    ],
+    "page_errors": [],
+    "console_errors": [],
+    "failed_requests": [],
+    "unexpected_origins_or_methods": [],
+    "environment_origins": {
+      "https://me.kis.v2.scr.kaspersky-labs.com": 25
+    },
+    "environment_note": "Installed Kaspersky origin recorded separately; protection unchanged; not an application authority.",
+    "journeys": [
+      {
+        "name": "login-current-season",
+        "width": 1440,
+        "at": "2026-10-13T10:33:10.940Z"
+      },
+      {
+        "name": "general",
+        "width": 1440,
+        "at": "2026-10-13T10:33:14.066Z"
+      },
+      {
+        "name": "league-J1",
+        "width": 1440,
+        "at": "2026-10-13T10:33:14.242Z"
+      },
+      {
+        "name": "league-J2",
+        "width": 1440,
+        "at": "2026-10-13T10:33:14.449Z"
+      },
+      {
+        "name": "own-profile",
+        "width": 1440,
+        "at": "2026-10-13T10:33:17.540Z"
+      },
+      {
+        "name": "own-pc",
+        "width": 1440,
+        "at": "2026-10-13T10:33:17.696Z"
+      },
+      {
+        "name": "rival-profile",
+        "width": 1440,
+        "at": "2026-10-13T10:33:19.684Z"
+      },
+      {
+        "name": "preview-self",
+        "width": 1440,
+        "at": "2026-10-13T10:33:21.669Z"
+      },
+      {
+        "name": "preview-rival",
+        "width": 1440,
+        "at": "2026-10-13T10:33:23.549Z"
+      },
+      {
+        "name": "preview-spectator",
+        "width": 1440,
+        "at": "2026-10-13T10:33:30.674Z"
+      },
+      {
+        "name": "scouting",
+        "width": 1440,
+        "at": "2026-10-13T10:33:40.419Z"
+      },
+      {
+        "name": "shop-comodines",
+        "width": 1440,
+        "at": "2026-10-13T10:33:43.421Z"
+      },
+      {
+        "name": "shop-bayas",
+        "width": 1440,
+        "at": "2026-10-13T10:33:43.676Z"
+      },
+      {
+        "name": "shop-competitivos",
+        "width": 1440,
+        "at": "2026-10-13T10:33:43.758Z"
+      },
+      {
+        "name": "shop-crianza",
+        "width": 1440,
+        "at": "2026-10-13T10:33:43.797Z"
+      },
+      {
+        "name": "inventory",
+        "width": 1440,
+        "at": "2026-10-13T10:33:43.910Z"
+      },
+      {
+        "name": "hall",
+        "width": 1440,
+        "at": "2026-10-13T10:33:45.406Z"
+      },
+      {
+        "name": "cup-history",
+        "width": 1440,
+        "at": "2026-10-13T10:33:46.821Z"
+      },
+      {
+        "name": "admin-configuration",
+        "width": 1440,
+        "at": "2026-10-13T10:33:49.587Z"
+      },
+      {
+        "name": "admin-risk",
+        "width": 1440,
+        "at": "2026-10-13T10:33:51.037Z"
+      },
+      {
+        "name": "general",
+        "width": 390,
+        "at": "2026-10-13T10:33:53.436Z"
+      },
+      {
+        "name": "league-J1",
+        "width": 390,
+        "at": "2026-10-13T10:33:57.451Z"
+      },
+      {
+        "name": "league-J2",
+        "width": 390,
+        "at": "2026-10-13T10:33:57.484Z"
+      },
+      {
+        "name": "own-profile",
+        "width": 390,
+        "at": "2026-10-13T10:34:00.769Z"
+      },
+      {
+        "name": "rival-profile",
+        "width": 390,
+        "at": "2026-10-13T10:34:04.127Z"
+      },
+      {
+        "name": "preview-self",
+        "width": 390,
+        "at": "2026-10-13T10:34:07.445Z"
+      },
+      {
+        "name": "preview-rival",
+        "width": 390,
+        "at": "2026-10-13T10:34:09.353Z"
+      },
+      {
+        "name": "preview-spectator",
+        "width": 390,
+        "at": "2026-10-13T10:34:16.012Z"
+      },
+      {
+        "name": "scouting",
+        "width": 390,
+        "at": "2026-10-13T10:34:24.080Z"
+      },
+      {
+        "name": "shop-comodines",
+        "width": 390,
+        "at": "2026-10-13T10:34:27.397Z"
+      },
+      {
+        "name": "shop-bayas",
+        "width": 390,
+        "at": "2026-10-13T10:34:27.596Z"
+      },
+      {
+        "name": "shop-competitivos",
+        "width": 390,
+        "at": "2026-10-13T10:34:27.667Z"
+      },
+      {
+        "name": "shop-crianza",
+        "width": 390,
+        "at": "2026-10-13T10:34:27.711Z"
+      },
+      {
+        "name": "inventory",
+        "width": 390,
+        "at": "2026-10-13T10:34:27.808Z"
+      },
+      {
+        "name": "hall",
+        "width": 390,
+        "at": "2026-10-13T10:34:30.109Z"
+      }
+    ],
+    "network": [
+      {
+        "step": "login",
+        "method": "POST",
+        "path": "/v1/auth/pin-login",
+        "status": 200,
+        "at": "2026-10-13T10:33:01.680Z"
+      },
+      {
+        "step": "login",
+        "method": "GET",
+        "path": "/v1/me",
+        "status": 200,
+        "at": "2026-10-13T10:33:02.780Z"
+      },
+      {
+        "step": "login",
+        "method": "GET",
+        "path": "/v1/read/seasons?offset=0",
+        "status": 200,
+        "at": "2026-10-13T10:33:04.504Z"
+      },
+      {
+        "step": "login",
+        "method": "GET",
+        "path": "/v1/read/seasons/c6bcac5b-0b89-403f-8242-41ac58286ade/pc",
+        "status": 200,
+        "at": "2026-10-13T10:33:06.656Z"
+      },
+      {
+        "step": "login",
+        "method": "GET",
+        "path": "/v1/read/seasons/c6bcac5b-0b89-403f-8242-41ac58286ade/overview",
+        "status": 200,
+        "at": "2026-10-13T10:33:10.451Z"
+      },
+      {
+        "step": "Liga 1440",
+        "method": "GET",
+        "path": "/v1/read/seasons/c6bcac5b-0b89-403f-8242-41ac58286ade/league",
+        "status": 200,
+        "at": "2026-10-13T10:33:12.246Z"
+      },
+      {
+        "step": "Liga 1440",
+        "method": "GET",
+        "path": "/v1/seasons/c6bcac5b-0b89-403f-8242-41ac58286ade/matchdays/3eb1cbd3-9a3b-4b1d-a2b5-d31a4c16ff08",
+        "status": 200,
+        "at": "2026-10-13T10:33:13.665Z"
+      },
+      {
+        "step": "Liga 1440",
+        "method": "GET",
+        "path": "/v1/seasons/c6bcac5b-0b89-403f-8242-41ac58286ade/wipe-revivals",
+        "status": 200,
+        "at": "2026-10-13T10:33:13.720Z"
+      },
+      {
+        "step": "Entrenadores 1440",
+        "method": "GET",
+        "path": "/v1/read/seasons/c6bcac5b-0b89-403f-8242-41ac58286ade/team-preview?mode=battle&trainer_id=507d9c56-04d8-4801-a9da-f1e53674efb5",
+        "status": 200,
+        "at": "2026-10-13T10:33:17.272Z"
+      },
+      {
+        "step": "Entrenadores 1440",
+        "method": "GET",
+        "path": "/v1/read/seasons/c6bcac5b-0b89-403f-8242-41ac58286ade/scouting?trainer_id=351b6bc1-7ae6-4c1d-8f2b-aeda43ada26b",
+        "status": 200,
+        "at": "2026-10-13T10:33:19.587Z"
+      },
+      {
+        "step": "Batallas 1440",
+        "method": "GET",
+        "path": "/v1/read/seasons/c6bcac5b-0b89-403f-8242-41ac58286ade/team-preview?mode=spectator",
+        "status": 200,
+        "at": "2026-10-13T10:33:21.558Z"
+      },
+      {
+        "step": "Batallas 1440",
+        "method": "GET",
+        "path": "/v1/read/seasons/c6bcac5b-0b89-403f-8242-41ac58286ade/team-preview?mode=battle&trainer_id=351b6bc1-7ae6-4c1d-8f2b-aeda43ada26b",
+        "status": 200,
+        "at": "2026-10-13T10:33:23.443Z"
+      },
+      {
+        "step": "Batallas 1440",
+        "method": "GET",
+        "path": "/v1/read/seasons/c6bcac5b-0b89-403f-8242-41ac58286ade/team-preview?mode=spectator&trainer_id=351b6bc1-7ae6-4c1d-8f2b-aeda43ada26b",
+        "status": 200,
+        "at": "2026-10-13T10:33:26.124Z"
+      },
+      {
+        "step": "Batallas 1440",
+        "method": "GET",
+        "path": "/v1/read/seasons/c6bcac5b-0b89-403f-8242-41ac58286ade/team-preview?mode=spectator&trainer_id=507d9c56-04d8-4801-a9da-f1e53674efb5&second_trainer_id=03957e59-bdfd-4c68-95e5-22fcc924c0e6",
+        "status": 200,
+        "at": "2026-10-13T10:33:28.231Z"
+      },
+      {
+        "step": "Batallas 1440",
+        "method": "GET",
+        "path": "/v1/read/seasons/c6bcac5b-0b89-403f-8242-41ac58286ade/team-preview?mode=spectator&trainer_id=507d9c56-04d8-4801-a9da-f1e53674efb5&second_trainer_id=351b6bc1-7ae6-4c1d-8f2b-aeda43ada26b",
+        "status": 200,
+        "at": "2026-10-13T10:33:30.337Z"
+      },
+      {
+        "step": "Entrenadores 1440",
+        "method": "GET",
+        "path": "/v1/read/seasons/c6bcac5b-0b89-403f-8242-41ac58286ade/overview",
+        "status": 200,
+        "at": "2026-10-13T10:33:35.097Z"
+      },
+      {
+        "step": "Entrenadores 1440",
+        "method": "GET",
+        "path": "/v1/read/seasons/c6bcac5b-0b89-403f-8242-41ac58286ade/scouting",
+        "status": 200,
+        "at": "2026-10-13T10:33:37.445Z"
+      },
+      {
+        "step": "Entrenadores 1440",
+        "method": "GET",
+        "path": "/v1/read/seasons/c6bcac5b-0b89-403f-8242-41ac58286ade/scouting?trainer_id=351b6bc1-7ae6-4c1d-8f2b-aeda43ada26b",
+        "status": 200,
+        "at": "2026-10-13T10:33:39.613Z"
+      },
+      {
+        "step": "Tienda 1440",
+        "method": "GET",
+        "path": "/v1/read/seasons/c6bcac5b-0b89-403f-8242-41ac58286ade/shop",
+        "status": 200,
+        "at": "2026-10-13T10:33:42.624Z"
+      },
+      {
+        "step": "Tienda 1440",
+        "method": "GET",
+        "path": "/v1/read/seasons/c6bcac5b-0b89-403f-8242-41ac58286ade/inventory",
+        "status": 200,
+        "at": "2026-10-13T10:33:43.038Z"
+      },
+      {
+        "step": "Hall de la Fama 1440",
+        "method": "GET",
+        "path": "/v1/read/hall?offset=0",
+        "status": 200,
+        "at": "2026-10-13T10:33:45.042Z"
+      },
+      {
+        "step": "Hall de la Fama 1440",
+        "method": "GET",
+        "path": "/v1/read/trainers",
+        "status": 200,
+        "at": "2026-10-13T10:33:45.043Z"
+      },
+      {
+        "step": "Copa 1440",
+        "method": "GET",
+        "path": "/v1/seasons/c6bcac5b-0b89-403f-8242-41ac58286ade/cups",
+        "status": 200,
+        "at": "2026-10-13T10:33:46.797Z"
+      },
+      {
+        "step": "AdministraciÃ³n 1440",
+        "method": "GET",
+        "path": "/v1/admin/seasons/c6bcac5b-0b89-403f-8242-41ac58286ade/setup",
+        "status": 200,
+        "at": "2026-10-13T10:33:47.882Z"
+      },
+      {
+        "step": "AdministraciÃ³n 1440",
+        "method": "GET",
+        "path": "/v1/admin/seasons/c6bcac5b-0b89-403f-8242-41ac58286ade/rules",
+        "status": 200,
+        "at": "2026-10-13T10:33:49.199Z"
+      },
+      {
+        "step": "AdministraciÃ³n 1440",
+        "method": "GET",
+        "path": "/v1/admin/seasons/c6bcac5b-0b89-403f-8242-41ac58286ade/championship",
+        "status": 200,
+        "at": "2026-10-13T10:33:50.705Z"
+      },
+      {
+        "step": "Liga 390",
+        "method": "GET",
+        "path": "/v1/seasons/c6bcac5b-0b89-403f-8242-41ac58286ade/wipe-revivals",
+        "status": 200,
+        "at": "2026-10-13T10:33:52.514Z"
+      },
+      {
+        "step": "Liga 390",
+        "method": "GET",
+        "path": "/v1/read/seasons/c6bcac5b-0b89-403f-8242-41ac58286ade/league",
+        "status": 200,
+        "at": "2026-10-13T10:33:52.539Z"
+      },
+      {
+        "step": "Liga 390",
+        "method": "GET",
+        "path": "/v1/seasons/c6bcac5b-0b89-403f-8242-41ac58286ade/matchdays/3eb1cbd3-9a3b-4b1d-a2b5-d31a4c16ff08",
+        "status": 200,
+        "at": "2026-10-13T10:33:52.551Z"
+      },
+      {
+        "step": "Liga 390",
+        "method": "GET",
+        "path": "/v1/read/seasons/c6bcac5b-0b89-403f-8242-41ac58286ade/overview",
+        "status": 200,
+        "at": "2026-10-13T10:33:57.242Z"
+      },
+      {
+        "step": "Entrenadores 390",
+        "method": "GET",
+        "path": "/v1/read/seasons/c6bcac5b-0b89-403f-8242-41ac58286ade/team-preview?mode=battle&trainer_id=507d9c56-04d8-4801-a9da-f1e53674efb5",
+        "status": 200,
+        "at": "2026-10-13T10:34:00.159Z"
+      },
+      {
+        "step": "Entrenadores 390",
+        "method": "GET",
+        "path": "/v1/read/seasons/c6bcac5b-0b89-403f-8242-41ac58286ade/scouting?trainer_id=351b6bc1-7ae6-4c1d-8f2b-aeda43ada26b",
+        "status": 200,
+        "at": "2026-10-13T10:34:03.124Z"
+      },
+      {
+        "step": "Batallas 390",
+        "method": "GET",
+        "path": "/v1/read/seasons/c6bcac5b-0b89-403f-8242-41ac58286ade/team-preview?mode=spectator",
+        "status": 200,
+        "at": "2026-10-13T10:34:06.630Z"
+      },
+      {
+        "step": "Batallas 390",
+        "method": "GET",
+        "path": "/v1/read/seasons/c6bcac5b-0b89-403f-8242-41ac58286ade/team-preview?mode=battle&trainer_id=351b6bc1-7ae6-4c1d-8f2b-aeda43ada26b",
+        "status": 200,
+        "at": "2026-10-13T10:34:09.255Z"
+      },
+      {
+        "step": "Batallas 390",
+        "method": "GET",
+        "path": "/v1/read/seasons/c6bcac5b-0b89-403f-8242-41ac58286ade/team-preview?mode=spectator&trainer_id=351b6bc1-7ae6-4c1d-8f2b-aeda43ada26b",
+        "status": 200,
+        "at": "2026-10-13T10:34:11.522Z"
+      },
+      {
+        "step": "Batallas 390",
+        "method": "GET",
+        "path": "/v1/read/seasons/c6bcac5b-0b89-403f-8242-41ac58286ade/team-preview?mode=spectator&trainer_id=507d9c56-04d8-4801-a9da-f1e53674efb5&second_trainer_id=03957e59-bdfd-4c68-95e5-22fcc924c0e6",
+        "status": 200,
+        "at": "2026-10-13T10:34:14.021Z"
+      },
+      {
+        "step": "Batallas 390",
+        "method": "GET",
+        "path": "/v1/read/seasons/c6bcac5b-0b89-403f-8242-41ac58286ade/team-preview?mode=spectator&trainer_id=507d9c56-04d8-4801-a9da-f1e53674efb5&second_trainer_id=351b6bc1-7ae6-4c1d-8f2b-aeda43ada26b",
+        "status": 200,
+        "at": "2026-10-13T10:34:15.927Z"
+      },
+      {
+        "step": "Entrenadores 390",
+        "method": "GET",
+        "path": "/v1/read/seasons/c6bcac5b-0b89-403f-8242-41ac58286ade/overview",
+        "status": 200,
+        "at": "2026-10-13T10:34:19.837Z"
+      },
+      {
+        "step": "Entrenadores 390",
+        "method": "GET",
+        "path": "/v1/read/seasons/c6bcac5b-0b89-403f-8242-41ac58286ade/scouting",
+        "status": 200,
+        "at": "2026-10-13T10:34:22.129Z"
+      },
+      {
+        "step": "Entrenadores 390",
+        "method": "GET",
+        "path": "/v1/read/seasons/c6bcac5b-0b89-403f-8242-41ac58286ade/scouting?trainer_id=351b6bc1-7ae6-4c1d-8f2b-aeda43ada26b",
+        "status": 200,
+        "at": "2026-10-13T10:34:23.989Z"
+      },
+      {
+        "step": "Tienda 390",
+        "method": "GET",
+        "path": "/v1/read/seasons/c6bcac5b-0b89-403f-8242-41ac58286ade/inventory",
+        "status": 200,
+        "at": "2026-10-13T10:34:26.582Z"
+      },
+      {
+        "step": "Tienda 390",
+        "method": "GET",
+        "path": "/v1/read/seasons/c6bcac5b-0b89-403f-8242-41ac58286ade/shop",
+        "status": 200,
+        "at": "2026-10-13T10:34:26.792Z"
+      },
+      {
+        "step": "Hall de la Fama 390",
+        "method": "GET",
+        "path": "/v1/read/hall?offset=0",
+        "status": 200,
+        "at": "2026-10-13T10:34:29.197Z"
+      },
+      {
+        "step": "Hall de la Fama 390",
+        "method": "GET",
+        "path": "/v1/read/trainers",
+        "status": 200,
+        "at": "2026-10-13T10:34:29.532Z"
+      }
+    ],
+    "facts": {
+      "jwt_issuer": "https://uwleqeuzsveqlugugzba.supabase.co/auth/v1",
+      "current_season": "c6bcac5b-0b89-403f-8242-41ac58286ade",
+      "rival_id": "351b6bc1-7ae6-4c1d-8f2b-aeda43ada26b",
+      "general_rows": 8,
+      "visible_days": [
+        {
+          "number": 1,
+          "status": "closed"
+        },
+        {
+          "number": 2,
+          "status": "scheduled"
+        }
+      ],
+      "pc_status": "no_current_save",
+      "preview_locks_present": 0,
+      "rival_team_present": false,
+      "shop_categories": {
+        "comodines": 5,
+        "bayas": 32,
+        "competitivos": 19,
+        "crianza": 5
+      },
+      "inventory": {
+        "purchases": 0,
+        "targets": 0
+      },
+      "hall_rows": 0,
+      "cup_read_paths": [
+        "/v1/seasons/c6bcac5b-0b89-403f-8242-41ac58286ade/cups"
+      ],
+      "rewards": {
+        "badges": 5,
+        "champion": 12
+      },
+      "csp": "default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'self' https://pokeapp-api-production.up.railway.app; object-src 'none'; base-uri 'none'; frame-ancestors 'none'; form-action 'self'",
+      "nonadmin_authenticated_test": "NOT EXERCISED: no separate existing non-admin session; anonymous/invalid admin denials verified without creating users",
+      "logout_storage_cleared": true
+    },
+    "screenshots": [
+      "login-current-season-1440.png",
+      "general-1440.png",
+      "league-J1-1440.png",
+      "league-J2-1440.png",
+      "own-profile-1440.png",
+      "own-pc-1440.png",
+      "rival-profile-1440.png",
+      "preview-spectator-1440.png",
+      "scouting-1440.png",
+      "shop-comodines-1440.png",
+      "shop-crianza-1440.png",
+      "inventory-1440.png",
+      "hall-1440.png",
+      "cup-history-1440.png",
+      "admin-configuration-1440.png",
+      "admin-risk-1440.png",
+      "general-390.png",
+      "own-profile-390.png",
+      "rival-profile-390.png",
+      "preview-spectator-390.png",
+      "scouting-390.png",
+      "shop-comodines-390.png",
+      "shop-crianza-390.png",
+      "inventory-390.png",
+      "hall-390.png"
+    ],
+    "visual_review": [
+      "general-1440.png",
+      "own-profile-1440.png",
+      "general-390.png",
+      "league-J1-1440.png",
+      "preview-spectator-390.png",
+      "scouting-390.png",
+      "own-profile-390.png",
+      "shop-crianza-390.png",
+      "hall-390.png",
+      "admin-configuration-1440.png"
+    ],
+    "layout": "Every complete state has useful content and no document horizontal overflow; mobile table uses its own scroll container.",
+    "limits": [
+      "Current self/rival Team Locks absent: no fresh positive populated private-team proof.",
+      "PC has no current save; no fabricated observed progress.",
+      "Inventory has zero purchases and targets; no fresh positive redemption/ownership example.",
+      "Hall is empty; no fabricated League/Cup champion. Existing J1 frozen standings were checked separately.",
+      "No existing separate non-admin authenticated session used; no users or claims forged."
+    ]
+  },
+  "mobile_frozen_detail": {
+    "status": "PASS",
+    "started_at": "2026-10-13T10:36:06.448Z",
+    "headless": true,
+    "api_interception": false,
+    "business_writes": 0,
+    "reads": [
+      {
+        "path": "/v1/auth/pin-login",
+        "status": 200
+      },
+      {
+        "path": "/v1/me",
+        "status": 200
+      },
+      {
+        "path": "/v1/read/seasons",
+        "status": 200
+      },
+      {
+        "path": "/v1/read/seasons/c6bcac5b-0b89-403f-8242-41ac58286ade/pc",
+        "status": 200
+      },
+      {
+        "path": "/v1/read/seasons/c6bcac5b-0b89-403f-8242-41ac58286ade/overview",
+        "status": 200
+      },
+      {
+        "path": "/v1/read/seasons/c6bcac5b-0b89-403f-8242-41ac58286ade/league",
+        "status": 200
+      }
+    ],
+    "errors": [],
+    "scroll": {
+      "clientWidth": 314,
+      "scrollWidth": 540,
+      "scrollLeft": 226,
+      "overflowX": "auto"
+    },
+    "frozen_rows_compared": 8,
+    "revision": 1,
+    "finished_at": "2026-10-13T10:36:18.062Z"
+  },
+  "security": {
+    "status": "PASS within stated scope",
+    "checks": [
+      "Enabled owner admin login and V2 JWT issuer",
+      "Anonymous and invalid JWT denied on /me and admin setup (401)",
+      "Public scouting allowlist; self/rival battle and spectator projections stay scoped",
+      "include_private on scouting and Team Preview rejected (422)",
+      "Allowed CORS preflight exact production origin (200); foreign origin rejected (400), no ACAO",
+      "Authenticated public read no-store",
+      "Cloudflare HTTPS/deep SPA, JS/CSS MIME, CSP and nosniff",
+      "Browser requests use Railway, not V1/Streamlit or direct Supabase business writes",
+      "Logout empties local/session storage; subsequent anonymous /me denied",
+      "Shadow security expectations and owner stable credentials unchanged"
+    ],
+    "direct_http_requests": [
+      {
+        "stage": "security",
+        "method": "GET",
+        "url": "https://pokeapp-api-production.up.railway.app/v1/me",
+        "status": 401,
+        "seconds": 0.334,
+        "at": "2026-10-13T10:34:30.477Z"
+      },
+      {
+        "stage": "security",
+        "method": "GET",
+        "url": "https://pokeapp-api-production.up.railway.app/v1/me",
+        "status": 401,
+        "seconds": 0.375,
+        "at": "2026-10-13T10:34:30.853Z"
+      },
+      {
+        "stage": "security",
+        "method": "GET",
+        "url": "https://pokeapp-api-production.up.railway.app/v1/admin/seasons/c6bcac5b-0b89-403f-8242-41ac58286ade/setup",
+        "status": 401,
+        "seconds": 0.285,
+        "at": "2026-10-13T10:34:31.139Z"
+      },
+      {
+        "stage": "security",
+        "method": "GET",
+        "url": "https://pokeapp-api-production.up.railway.app/v1/admin/seasons/c6bcac5b-0b89-403f-8242-41ac58286ade/setup",
+        "status": 401,
+        "seconds": 0.355,
+        "at": "2026-10-13T10:34:31.495Z"
+      },
+      {
+        "stage": "security",
+        "method": "GET",
+        "url": "https://pokeapp-api-production.up.railway.app/v1/read/seasons/c6bcac5b-0b89-403f-8242-41ac58286ade/scouting?trainer_id=351b6bc1-7ae6-4c1d-8f2b-aeda43ada26b",
+        "status": 200,
+        "seconds": 1.595,
+        "at": "2026-10-13T10:34:33.091Z"
+      },
+      {
+        "stage": "security",
+        "method": "GET",
+        "url": "https://pokeapp-api-production.up.railway.app/v1/read/seasons/c6bcac5b-0b89-403f-8242-41ac58286ade/scouting?trainer_id=351b6bc1-7ae6-4c1d-8f2b-aeda43ada26b&include_private=true",
+        "status": 422,
+        "seconds": 0.552,
+        "at": "2026-10-13T10:34:33.648Z"
+      },
+      {
+        "stage": "security",
+        "method": "GET",
+        "url": "https://pokeapp-api-production.up.railway.app/v1/read/seasons/c6bcac5b-0b89-403f-8242-41ac58286ade/team-preview?mode=battle&trainer_id=351b6bc1-7ae6-4c1d-8f2b-aeda43ada26b&include_private=true",
+        "status": 422,
+        "seconds": 0.66,
+        "at": "2026-10-13T10:34:34.310Z"
+      },
+      {
+        "stage": "security",
+        "method": "OPTIONS",
+        "url": "https://pokeapp-api-production.up.railway.app/v1/me",
+        "status": 400,
+        "seconds": 0.171,
+        "at": "2026-10-13T10:34:34.483Z"
+      },
+      {
+        "stage": "security",
+        "method": "OPTIONS",
+        "url": "https://pokeapp-api-production.up.railway.app/v1/me",
+        "status": 200,
+        "seconds": 0.173,
+        "at": "2026-10-13T10:34:34.657Z"
+      },
+      {
+        "stage": "security",
+        "method": "GET",
+        "url": "https://pokeapp-web.pokeapp-v2.workers.dev/entrenadores/507d9c56-04d8-4801-a9da-f1e53674efb5",
+        "status": 200,
+        "seconds": 0.067,
+        "at": "2026-10-13T10:34:34.726Z"
+      },
+      {
+        "stage": "security",
+        "method": "GET",
+        "url": "https://pokeapp-web.pokeapp-v2.workers.dev/assets/index-gVcLe5bg.js",
+        "status": 200,
+        "seconds": 0.029,
+        "at": "2026-10-13T10:34:34.759Z"
+      },
+      {
+        "stage": "security",
+        "method": "GET",
+        "url": "https://pokeapp-web.pokeapp-v2.workers.dev/assets/index-CiTDJ1XT.css",
+        "status": 200,
+        "seconds": 0.128,
+        "at": "2026-10-13T10:34:34.889Z"
+      },
+      {
+        "stage": "observation",
+        "method": "GET",
+        "url": "https://pokeapp-web.pokeapp-v2.workers.dev/",
+        "status": 200,
+        "seconds": 0.038,
+        "at": "2026-10-13T10:34:34.928Z"
+      },
+      {
+        "stage": "observation",
+        "method": "GET",
+        "url": "https://pokeapp-web.pokeapp-v2.workers.dev/build-config.json",
+        "status": 200,
+        "seconds": 0.037,
+        "at": "2026-10-13T10:34:34.967Z"
+      },
+      {
+        "stage": "observation",
+        "method": "GET",
+        "url": "https://pokeapp-api-production.up.railway.app/health",
+        "status": 200,
+        "seconds": 0.172,
+        "at": "2026-10-13T10:34:35.144Z"
+      },
+      {
+        "stage": "observation",
+        "method": "GET",
+        "url": "https://pokeapp-api-production.up.railway.app/v1/read/seasons/c6bcac5b-0b89-403f-8242-41ac58286ade/league",
+        "status": 200,
+        "seconds": 0.78,
+        "at": "2026-10-13T10:34:35.925Z"
+      },
+      {
+        "stage": "observation",
+        "method": "GET",
+        "url": "https://pokeapp-api-production.up.railway.app/v1/read/seasons/c6bcac5b-0b89-403f-8242-41ac58286ade/inventory",
+        "status": 200,
+        "seconds": 1.73,
+        "at": "2026-10-13T10:34:37.656Z"
+      },
+      {
+        "stage": "observation",
+        "method": "GET",
+        "url": "https://pokeapp-api-production.up.railway.app/v1/read/hall",
+        "status": 200,
+        "seconds": 0.788,
+        "at": "2026-10-13T10:34:38.446Z"
+      },
+      {
+        "stage": "observation",
+        "method": "GET",
+        "url": "https://pokeapp.streamlit.app/",
+        "status": 303,
+        "seconds": 0.399,
+        "at": "2026-10-13T10:34:38.846Z"
+      },
+      {
+        "stage": "observation",
+        "method": "GET",
+        "url": "https://pokeapp.streamlit.app/_stcore/stream",
+        "status": 303,
+        "seconds": 0.354,
+        "at": "2026-10-13T10:34:39.201Z"
+      },
+      {
+        "stage": "observation",
+        "method": "GET",
+        "url": "https://pokeapp-web.pokeapp-v2.workers.dev/",
+        "status": 200,
+        "seconds": 0.069,
+        "at": "2026-10-13T10:34:54.274Z"
+      },
+      {
+        "stage": "observation",
+        "method": "GET",
+        "url": "https://pokeapp-web.pokeapp-v2.workers.dev/build-config.json",
+        "status": 200,
+        "seconds": 0.013,
+        "at": "2026-10-13T10:34:54.288Z"
+      },
+      {
+        "stage": "observation",
+        "method": "GET",
+        "url": "https://pokeapp-api-production.up.railway.app/health",
+        "status": 200,
+        "seconds": 0.273,
+        "at": "2026-10-13T10:34:54.564Z"
+      },
+      {
+        "stage": "observation",
+        "method": "GET",
+        "url": "https://pokeapp-api-production.up.railway.app/v1/read/seasons/c6bcac5b-0b89-403f-8242-41ac58286ade/league",
+        "status": 200,
+        "seconds": 1.166,
+        "at": "2026-10-13T10:34:55.731Z"
+      },
+      {
+        "stage": "observation",
+        "method": "GET",
+        "url": "https://pokeapp-api-production.up.railway.app/v1/read/seasons/c6bcac5b-0b89-403f-8242-41ac58286ade/inventory",
+        "status": 200,
+        "seconds": 2.003,
+        "at": "2026-10-13T10:34:57.735Z"
+      },
+      {
+        "stage": "observation",
+        "method": "GET",
+        "url": "https://pokeapp-api-production.up.railway.app/v1/read/hall",
+        "status": 200,
+        "seconds": 0.829,
+        "at": "2026-10-13T10:34:58.565Z"
+      },
+      {
+        "stage": "observation",
+        "method": "GET",
+        "url": "https://pokeapp.streamlit.app/",
+        "status": 303,
+        "seconds": 0.426,
+        "at": "2026-10-13T10:34:58.992Z"
+      },
+      {
+        "stage": "observation",
+        "method": "GET",
+        "url": "https://pokeapp.streamlit.app/_stcore/stream",
+        "status": 303,
+        "seconds": 0.352,
+        "at": "2026-10-13T10:34:59.346Z"
+      },
+      {
+        "stage": "observation",
+        "method": "GET",
+        "url": "https://pokeapp-web.pokeapp-v2.workers.dev/",
+        "status": 200,
+        "seconds": 0.069,
+        "at": "2026-10-13T10:35:14.431Z"
+      },
+      {
+        "stage": "observation",
+        "method": "GET",
+        "url": "https://pokeapp-web.pokeapp-v2.workers.dev/build-config.json",
+        "status": 200,
+        "seconds": 0.024,
+        "at": "2026-10-13T10:35:14.456Z"
+      },
+      {
+        "stage": "observation",
+        "method": "GET",
+        "url": "https://pokeapp-api-production.up.railway.app/health",
+        "status": 200,
+        "seconds": 0.275,
+        "at": "2026-10-13T10:35:14.733Z"
+      },
+      {
+        "stage": "observation",
+        "method": "GET",
+        "url": "https://pokeapp-api-production.up.railway.app/v1/read/seasons/c6bcac5b-0b89-403f-8242-41ac58286ade/league",
+        "status": 200,
+        "seconds": 0.858,
+        "at": "2026-10-13T10:35:15.592Z"
+      },
+      {
+        "stage": "observation",
+        "method": "GET",
+        "url": "https://pokeapp-api-production.up.railway.app/v1/read/seasons/c6bcac5b-0b89-403f-8242-41ac58286ade/inventory",
+        "status": 200,
+        "seconds": 1.644,
+        "at": "2026-10-13T10:35:17.237Z"
+      },
+      {
+        "stage": "observation",
+        "method": "GET",
+        "url": "https://pokeapp-api-production.up.railway.app/v1/read/hall",
+        "status": 200,
+        "seconds": 1.096,
+        "at": "2026-10-13T10:35:18.335Z"
+      },
+      {
+        "stage": "observation",
+        "method": "GET",
+        "url": "https://pokeapp.streamlit.app/",
+        "status": 303,
+        "seconds": 0.393,
+        "at": "2026-10-13T10:35:18.729Z"
+      },
+      {
+        "stage": "observation",
+        "method": "GET",
+        "url": "https://pokeapp.streamlit.app/_stcore/stream",
+        "status": 303,
+        "seconds": 0.353,
+        "at": "2026-10-13T10:35:19.083Z"
+      },
+      {
+        "stage": "logout",
+        "method": "GET",
+        "url": "https://pokeapp-api-production.up.railway.app/v1/me",
+        "status": 401,
+        "seconds": 0.174,
+        "at": "2026-10-13T10:35:19.597Z"
+      }
+    ],
+    "nonadmin_limitation": "NOT EXERCISED: no separate existing non-admin session; anonymous/invalid admin denials verified without creating users",
+    "catalog_scope": "Retained 15B Shadow RLS/ownership/grant/function/trigger/FK expectations; no new broad security audit."
+  },
+  "preservation": {
+    "observed_at": "2026-10-13T10:36:55.467012+00:00",
+    "entry_comparisons": {
+      "history": true,
+      "owner-stable": true,
+      "security": true,
+      "shadow": true
+    },
+    "full_tables": 59,
+    "changed_full_tables": [
+      "auth.refresh_tokens",
+      "auth.sessions",
+      "auth.users"
+    ],
+    "non_auth_tables_equal": true,
+    "non_owner_auth_equal_retained_baseline": true,
+    "non_auth_tables": 55,
+    "storage_tables_equal": true,
+    "entry15c_comparisons": {
+      "history": true,
+      "owner-stable": true,
+      "security": true,
+      "shadow": true
+    },
+    "v1_tables": 13,
+    "v1_all_hashes_unchanged": true,
+    "migrations": 34,
+    "head": "042_v1_shadow_relational_destination",
+    "business_writes": 0,
+    "storage_bytes_written": 0,
+    "shadow": {
+      "status": "reconciled",
+      "batches": 6,
+      "maps": 57,
+      "rows": 135
+    },
+    "shadow_security": {
+      "tables": 15,
+      "policies": 0,
+      "functions": 0,
+      "missing_rls": 0,
+      "external_fks": 0,
+      "schema_owner": "postgres",
+      "user_triggers": 0,
+      "role_schema_access": 0,
+      "public_table_grants": 0,
+      "public_column_grants": 0,
+      "public_schema_grants": 0,
+      "non_postgres_table_owner": 0,
+      "role_table_column_access": 0
+    },
+    "status": "PASS"
+  },
+  "observation": {
+    "started_at": "2026-10-13T10:34:34.890Z",
+    "cycles": 3,
+    "finished_at": "2026-10-13T10:35:19.085Z",
+    "historical_read_503": "REPRODUCED earlier during initial attempt; NOT REPRODUCED in the final bounded observation; cause UNKNOWN / NOT FIXED",
+    "requests": 24,
+    "unexpected_5xx": 0,
+    "retries_added": false
+  },
+  "incidents": [
+    {
+      "kind": "READ_503",
+      "status": "REPRODUCED / CAUSE UNKNOWN / NOT FIXED",
+      "attempt": "attempt-a",
+      "errors": [
+        {
+          "timestamp": "2026-10-13T10:29:37.751037161Z",
+          "requestId": "TCObB3ROQ-CVdu-NljLL4A",
+          "path": "/v1/read/seasons/c6bcac5b-0b89-403f-8242-41ac58286ade/pc",
+          "httpStatus": 503,
+          "totalDuration": 27,
+          "upstreamRqDuration": 5,
+          "responseDetails": "",
+          "upstreamErrors": ""
+        },
+        {
+          "timestamp": "2026-10-13T10:29:37.756296798Z",
+          "requestId": "hshmQ01WSM6sNm8SYqVb7A",
+          "path": "/v1/read/seasons/c6bcac5b-0b89-403f-8242-41ac58286ade/overview",
+          "httpStatus": 503,
+          "totalDuration": 27,
+          "upstreamRqDuration": 6,
+          "responseDetails": "",
+          "upstreamErrors": ""
+        }
+      ],
+      "scope": "Two concurrent read requests during initial home load; login/session succeeded. Existing client retry recovered PC to 200; first harness terminated before overview retry finished. Railway records that cancelled request as 499, attributable to test termination.",
+      "assessment": "One brief observed burst, not sustained: subsequent complete production proof, focused mobile check and bounded authenticated observation succeeded without 5xx. No authority, privacy or data drift. Recorded reliability follow-up; not treated as a cutover blocker or as fixed.",
+      "application_retry_or_timeout_changed": false
+    },
+    {
+      "kind": "HARNESS",
+      "attempt": "attempt-a",
+      "detail": "Default expect timeout was 5 seconds despite page timeout. Only harness assertion deadline changed to 60 seconds; original failure retained."
+    },
+    {
+      "kind": "HARNESS",
+      "attempt": "attempt-b",
+      "detail": "Exact accessible label did not resolve nested season select. Scoped .season-picker select assertion used with same expected season. All five API responses in this attempt were 200."
+    },
+    {
+      "kind": "LOCAL_LAUNCHER",
+      "detail": "Default python alias and old .venv target unavailable; used existing .venv-api Python 3.14.3 and installed Playwright/Edge. No broad tooling installed."
+    }
+  ],
+  "rollback": {
+    "status": "PRESERVED",
+    "executed": false,
+    "deleted_resources": 0,
+    "retain": [
+      "private Streamlit",
+      "V1",
+      "v1_shadow",
+      "current Cloudflare version",
+      "current Railway deployment",
+      "previous compatible Railway checkpoint"
+    ],
+    "boundary": "Any rollback needs separately controlled traffic/application action; never rewind V2 data/history/migrations or reopen concurrent public legacy writes."
+  },
+  "not_rerun": [
+    "809 Python suite",
+    "React/TypeScript/build suites",
+    "Phase11/12/13/14",
+    "parser",
+    "synthetic PostgreSQL"
+  ],
+  "reason": "No product or schema source change; fresh hosted QA only.",
+  "private_evidence": {
+    "directory": "%LOCALAPPDATA%/PokeApp-migration-evidence/phase15/20261013/phase15c-closure",
+    "artifacts": {
+      "attempt-a/result.json": {
+        "bytes": 2067,
+        "sha256": "6ca9a88364564d743403fcc465812581b2148f669f507d1b981aefdc1a7ab42e"
+      },
+      "attempt-b/result.json": {
+        "bytes": 1831,
+        "sha256": "2767cc45f89a724c1cdb2f2bdcbecba8d3868db6268a284bc68b8e6587ccbb9b"
+      },
+      "entry/preservation.json": {
+        "bytes": 700,
+        "sha256": "4135b378eeba211e626a178979e5cae9fd7f73ddf5a9ec07391e9667ec42355c"
+      },
+      "mobile-detail/result.json": {
+        "bytes": 901,
+        "sha256": "db622171466f789bb68fcd41a0fc53fb90a5f03496068f2fdbb04df08517b2ed"
+      },
+      "phase15c-headless.mjs": {
+        "bytes": 18666,
+        "sha256": "c83d5092848f44a809eb59f521abc174a01977e0f08bd465dbf0346d69d59750"
+      },
+      "phase15c-mobile-detail.mjs": {
+        "bytes": 4250,
+        "sha256": "82d8beebf96045a6b372a2a3362b97d600c354abb76885d25b031b73b73d3609"
+      },
+      "phase15c-read503-deploy.jsonl": {
+        "bytes": 2260,
+        "sha256": "968fad2d3aad9a1a7550095ccc13fc431cda3a6fa4ddc8495ad1213f90956e51"
+      },
+      "phase15c-read503-http.jsonl": {
+        "bytes": 10911,
+        "sha256": "39240eabafa9a4ecfebdce09eb83a6510e72ab4b90e09c55c4c9953ac7ee475a"
+      },
+      "preservation/preservation.json": {
+        "bytes": 1275,
+        "sha256": "72be2c3108fec36a521a1b494ff3b1415f9fb8f4668d307ebfa3ef4a4a0d8c76"
+      },
+      "production-proof/result.json": {
+        "bytes": 24996,
+        "sha256": "47031988268ab0167549619cae64df96bd3d74eae1717198af1a19613887e6ba"
+      }
+    },
+    "manifest": "manifest.json",
+    "raw_credentials_committed": false
+  },
+  "git_closure": {
+    "files": [
+      "docs/phase15-cutover-report.md",
+      "docs/phase15-cutover-evidence.json",
+      "docs/work-in-progress/phase15-cutover-live.md"
+    ],
+    "source_changes": false,
+    "final_commit": "Resolve the documentation commit carrying this artifact from Git; avoid a self-referential hash.",
+    "explicit_staging_only": true
+  },
+  "blockers": [],
+  "next_roadmap": {
+    "name": "LAUNCHER / CLOUD / SAVE COMPLETION",
+    "status": "NOT STARTED"
+  }
+}
