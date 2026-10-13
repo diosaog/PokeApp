@@ -5,12 +5,20 @@ milestone record; it does not maintain a second live phase-status ledger.
 
 ## Current project position
 
-- Latest completed packet: **16A - Launcher/cloud foundation, DONE**.
+- Latest completed packet: **16B - Pokemon X/Y read support, DONE**.
+  Application `86b8668` pushed; compatible API deployed, no migration/Cloudflare.
+  101 affected Python tests, 111 native checks and headless X local-first proof pass.
+  X/Y private unverified observations; no competitive or physical writes. One
+  policy-blocked temporary directory remains for the owner, permitted by packet.
+  [Report](phase16b-xy-read-support-report.md),
+  [single live record](work-in-progress/phase16b-xy-read-live.md).
+  Next: Launcher packaging / Windows installer / web download, NOT STARTED.
+- Previous packet: **16A - Launcher/cloud foundation, DONE**.
   Application source `f87a986` is validated, pushed and deployed; migration043
   applied once. Owner data preserved. Owner cleanup verified: eight temporary
   paths absent, no temporary processes/listener; local-first proven, physical
-  writes not started. Next recommended packet: Gen6/7 read support (X/Y first),
-  not started. [Report](phase16-launcher-cloud-foundation-report.md),
+  writes not started. Its next X/Y packet is now closed above.
+  [Report](phase16-launcher-cloud-foundation-report.md),
   [single live record](work-in-progress/phase16-launcher-live.md).
 - Latest completed phase: **15 - cutover, DONE**. V2 is production authority;
   V1/Shadow remain private references. [Cutover report](phase15-cutover-report.md).

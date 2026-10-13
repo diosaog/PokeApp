@@ -1,0 +1,214 @@
+{
+  "status": "PHASE_16B_DONE",
+  "entry_head": "e78d0a8fca48c585e712ed981c8dad9372779f65",
+  "application_head": "86b866847e0c3444f1a526295d3cfa3733024635",
+  "python": {
+    "affected_pass": 101,
+    "unrelated_suites_rerun": false
+  },
+  "native": {
+    "assertions_pass": 111,
+    "build_warnings": 0,
+    "pinned_pkhex": "24.11.11",
+    "integration": {
+      "status": "PASS",
+      "games": {
+        "X": {
+          "parse_ms": [
+            168.15560002578422,
+            174.49479998322204,
+            154.50119995512068,
+            153.61600002506748,
+            152.26060000713915
+          ],
+          "median_parse_ms": 154.50119995512068,
+          "source_sha256": "676674a4a2ae9bfbafdfc1276f3a1952b75db1f3dc58ee9b75d91a7ccb3347ff",
+          "source_unchanged": true,
+          "party_slots": 6,
+          "box_count": 31,
+          "cloud_bytes": 10190,
+          "cache_restart": true,
+          "lost_reply_calls": [
+            "GET",
+            "PUT",
+            "GET"
+          ],
+          "corrupt_not_queued": true,
+          "physical_write_denied": true,
+          "stable_read_guard": true
+        },
+        "Y": {
+          "parse_ms": [
+            150.89019999140874,
+            152.68539998214692,
+            154.7124999924563,
+            153.62820000154898,
+            152.08259999053553
+          ],
+          "median_parse_ms": 152.68539998214692,
+          "source_sha256": "c5b1fdfef70f188b3cb582e32fcf14bebf3de655c6084b049f1f8c689bf0184d",
+          "source_unchanged": true,
+          "party_slots": 6,
+          "box_count": 31,
+          "cloud_bytes": 10190,
+          "cache_restart": true,
+          "lost_reply_calls": [
+            "GET",
+            "PUT",
+            "GET"
+          ],
+          "corrupt_not_queued": true,
+          "physical_write_denied": true,
+          "stable_read_guard": true
+        }
+      },
+      "old_generations": [
+        3,
+        4,
+        5
+      ],
+      "remote_writes": 0
+    }
+  },
+  "headless_ui": {
+    "status": "PASS",
+    "game": "X",
+    "generation": 6,
+    "startup_useful_ui_ms": 2507.0241,
+    "cached_restart_state_ms": 667.4936000000007,
+    "offline_box_navigation_ms": [
+      2.899999976158142,
+      6.200000047683716,
+      6.199999988079071,
+      6,
+      6,
+      6.200000047683716,
+      5.799999952316284,
+      6.100000023841858,
+      6.399999976158142,
+      5.800000011920929,
+      6,
+      6,
+      6.100000023841858,
+      6.100000023841858,
+      6,
+      6,
+      6.100000023841858,
+      6.399999976158142,
+      5.699999988079071,
+      6
+    ],
+    "three_second_network_box_navigation_ms": [
+      1,
+      4.399999976158142,
+      6.100000023841858,
+      6.100000023841858,
+      6,
+      6.199999988079071,
+      6,
+      6,
+      6.099999964237213,
+      6.200000047683716,
+      6,
+      6,
+      6,
+      6.199999988079071,
+      6.099999964237213,
+      6.600000023841858,
+      5.399999976158142,
+      6.200000047683716,
+      5.899999976158142,
+      6.199999988079071
+    ],
+    "background_sync_with_lost_response_ms": 434.4360999999999,
+    "receipt_gets": 2,
+    "put_count": 1,
+    "local_party_slots": 6,
+    "visible_box_slots": 30,
+    "source_unchanged": true,
+    "renderer_network_requests": 0,
+    "page_errors": 0,
+    "boundary": "Headless Edge renders real local UI with actual Python stdio/native parser; shell IPC/native file dialog statically checked, not visibly launched."
+  },
+  "checks": {
+    "compile": true,
+    "targeted_ruff": true,
+    "format": true,
+    "js_syntax": true,
+    "diff": true
+  },
+  "boundaries": {
+    "progress": "UNKNOWN",
+    "cloud": "PRIVATE_UNVERIFIED_NON_COMPETITIVE",
+    "competitive_xy_identity": "REJECTED",
+    "physical_writes": "NOT_STARTED",
+    "migrations_changed": false,
+    "postgres_run": false,
+    "cloudflare_deployed": false
+  },
+  "deployment": {
+    "id": "b917132f-5624-40c4-afbc-bc043b007828",
+    "status": "SUCCESS",
+    "image": "sha256:80e776a42f8a4712894c9a320852291f786ca43fbf5756480b87b97eb6de10e8",
+    "project": "f5c4666a-508f-4e5a-8aae-a54581814f29",
+    "service": "9a78e086-c927-471f-8bb9-befe62c77de7",
+    "api_inputs": 246
+  },
+  "production": {
+    "status": "PASS",
+    "checks": [
+      "existing owner login/me",
+      "health 200",
+      "X valid native private DTO passes shape validation; absent scope denied 403",
+      "X anonymous denied 401",
+      "Y valid native private DTO passes shape validation; absent scope denied 403",
+      "Y anonymous denied 401",
+      "current owner seasons read"
+    ],
+    "unexpected_5xx": 0,
+    "positive_remote_mutations": 0,
+    "synthetic_payload_scope": "independently_verified_absent_season",
+    "owner_saves_read": 0
+  },
+  "preservation": {
+    "time": "2026-10-13T12:08:31.455974+00:00",
+    "migration_records": 35,
+    "migration_head": {
+      "version": "20261013112907",
+      "name": "043_launcher_private_observations",
+      "record_hash": "3e834807be0fee608de50584f08db448"
+    },
+    "scoped_tables": 60,
+    "launcher_inbox": [
+      {
+        "n": 0,
+        "hash": "d751713988987e9331980363e24189ce"
+      }
+    ],
+    "business_unchanged": true,
+    "shadow_unchanged": true,
+    "owner_credentials_unchanged": true,
+    "security_catalog_unchanged": true,
+    "migrations_unchanged": true,
+    "changed_auth_tables": [
+      "auth.refresh_tokens",
+      "auth.sessions",
+      "auth.users"
+    ]
+  },
+  "private_evidence": "C:\\Users\\Antonio\\AppData\\Local\\PokeApp-migration-evidence\\phase16b\\20261013\\closure-86b8668",
+  "cleanup": {
+    "status": "OPERATOR_ACTION_ALLOWED_BY_PACKET",
+    "temporary_root": "C:\\Users\\Antonio\\AppData\\Local\\Temp\\pokeapp-phase16b-20261013",
+    "reason": "Automatic execution review rejected deletion: blocked by policy",
+    "observed_at": "2026-10-13T12:10:53.6247711Z",
+    "exists": true,
+    "root_linked": false,
+    "linked_children": 0,
+    "packet_processes": 0,
+    "postgres_created": false,
+    "policy_bypass_attempted": false,
+    "archived_files": 23
+  },
+  "next_packet": "LAUNCHER PACKAGING / WINDOWS INSTALLER / WEB DOWNLOAD; NOT STARTED"
+}
