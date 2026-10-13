@@ -279,3 +279,101 @@ the missing legacy control.
 Obtain and verify the Streamlit hosting/DNS operator control and the safe legacy
 write gate. Then resume Phase 15B from the fresh baseline; if that control cannot
 be obtained, keep production authority unchanged and do not start Phase 15C.
+
+---
+
+# Phase 15B — resumed after legacy ingress control
+
+Observation: 2026-10-13 Europe/Madrid. **STATUS: PHASE 15B DONE.**
+**PRODUCTION AUTHORITY: V2.** **PHASE 15C READINESS: READY.**
+
+## LEGACY STREAMLIT STATUS
+
+The owner changed Streamlit Sharing for `pokeapp / main / main.py` from public
+and searchable to **only specific people can view this app**. Read-only probes
+confirm the app still exists (`https://pokeapp.streamlit.app/` responds and
+`/healthz` is healthy), while the anonymous application session is gated:
+`/_stcore/stream` returns HTTP 303 to the Streamlit authentication endpoint.
+The app and V1 were not deleted. No anonymous legacy write path remains.
+
+This is **CUTOVER BRANCH B**. The owner supplied the required ingress control;
+the already-tested Cloudflare→Railway→V2 path needed no DNS, code or deployment
+change. Streamlit is retained as a private legacy/reference surface.
+
+## PUBLIC AUTHORITY
+
+The public authority is now unambiguous: Cloudflare React
+`https://pokeapp-web.pokeapp-v2.workers.dev` → Railway FastAPI
+`https://pokeapp-api-production.up.railway.app` → Supabase V2
+`uwleqeuzsveqlugugzba`. Cloudflare build configuration returned the exact
+Railway origin and production mode; Railway remained Online at deployment
+`9b75a24f-ca5e-474b-9c3c-555625cceb14`. There is no public dual-authority path.
+
+## IMMEDIATE PROOF
+
+The bounded read-only proof passed with 0 business writes and no fixtures:
+
+- Cloudflare page/config and Railway health returned 200.
+- Anonymous and invalid JWT reads returned 401.
+- Existing owner PIN login returned 200 and mapped to the enabled admin trainer;
+  `/v1/me` confirmed the same identity.
+- Current active manual season resolved; GENERAL, overview, self profile/PC,
+  Shop, inventory, Hall/history and authorized Admin reads returned 200.
+- One rival public scouting projection returned 200; private-field escalation
+  was rejected with 422 and no private fields were exposed.
+- No request in the proof returned an unexpected 5xx. The owner season was
+  never mutated. The proof was API/read based; the complete browser matrix
+  remains Phase 15C.
+
+## PRESERVATION
+
+The fresh preservation capture compared against the retained 15B baseline:
+
+- all 59 scoped V2 tables were checked; every non-Auth table is byte/hash equal;
+- only `auth.users`, `auth.sessions` and `auth.refresh_tokens` differ, due to
+  the expected validation login/session activity;
+- owner-stable business data, results, economy, Team Locks, migration history,
+  security catalogs and Storage are unchanged;
+- V1's 13 table/count/hash records are unchanged;
+- `v1_shadow` remains `reconciled` with 6 batches, 57 mappings and 135 rows;
+- remote business writes, fixtures and Storage bytes written remain zero.
+
+The prior Phase 11 owner-excluded comparison is retained as historical context;
+four old receipt/state rows differ from that older checkpoint, but none changed
+between the retained 15B baseline and this closure.
+
+## ROLLBACK STATE
+
+No application, routing, deployment or database rollback was needed. The current
+Cloudflare version `77eea9f6-0c90-45a2-b93a-3bf9cdf5fc11` and Railway deployment
+`9b75a24f-ca5e-474b-9c3c-555625cceb14` remain the verified artifacts. The prior
+Railway checkpoint `3845ce2d-6488-43ef-893a-1459c2aed0bb` remains available.
+V1 and `v1_shadow` remain intact and are not rollback targets.
+
+## OBSERVATION RESULT
+
+A short bounded window made 18 read-only requests across three cycles to the
+Cloudflare page/config, Railway health, anonymous API denial and private
+Streamlit gate. All cycles were healthy, with no unexpected 5xx, no repeated
+READ 503 and no business write.
+
+## BLOCKERS
+
+None for Phase 15B. The owner-controlled Streamlit privacy gate resolved the
+only previous blocker. No product or deployment source changed.
+
+## 15C READINESS
+
+**READY.** Phase 15C may execute its full proof matrix under a separately
+authorized instruction. It was not started here.
+
+## DO NOT REPEAT
+
+Do not rerun Phases 11–14, replay migration 042, rebuild Shadow, mutate the
+owner season, create fixtures, delete Streamlit/V1/`v1_shadow`, redeploy the
+already-correct artifacts, or read/touch/stage the protected guide.
+
+## NEXT EXACT ACTION
+
+Stop after Phase 15B. Await explicit Phase 15C QA/cutover-proof authorization;
+do not begin Phase 16 or any Launcher/save work.
