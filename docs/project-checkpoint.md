@@ -5,14 +5,23 @@ milestone record; it does not maintain a second live phase-status ledger.
 
 ## Current project position
 
-- Latest completed packet: **16B - Pokemon X/Y read support, DONE**.
+- Latest completed packet: **16C - Windows Launcher distribution, DONE**.
+  Application `46cf271` pushed; per-user Windows 10/11 x64 preview 0.16.1 passes
+  hidden install/restart/reinstall/uninstall, bundled parser and data preservation.
+  Direct Save download live on existing Cloudflare via one private R2 bucket;
+  hosted SHA-256 matches. Railway/DB unchanged; physical writes NOT STARTED.
+  Unsigned/no-clean-VM limits; policy-blocked build directory needs owner cleanup.
+  [Report](phase16c-launcher-distribution-report.md),
+  [single live record](work-in-progress/phase16c-launcher-distribution-live.md).
+  Next recommended: clean-Windows acceptance/distribution hardening, NOT STARTED.
+- Previous packet: **16B - Pokemon X/Y read support, DONE**.
   Application `86b8668` pushed; compatible API deployed, no migration/Cloudflare.
   101 affected Python tests, 111 native checks and headless X local-first proof pass.
   X/Y private unverified observations; no competitive or physical writes. One
   policy-blocked temporary directory remains for the owner, permitted by packet.
   [Report](phase16b-xy-read-support-report.md),
   [single live record](work-in-progress/phase16b-xy-read-live.md).
-  Next: Launcher packaging / Windows installer / web download, NOT STARTED.
+  Its next packaging / Windows installer / web download packet is closed above.
 - Previous packet: **16A - Launcher/cloud foundation, DONE**.
   Application source `f87a986` is validated, pushed and deployed; migration043
   applied once. Owner data preserved. Owner cleanup verified: eight temporary

@@ -1,7 +1,8 @@
 {
-  "status": "LOCAL_VALIDATED_PUBLICATION_PENDING",
+  "status": "PHASE_16C_DONE",
   "entry_head": "5e796f68f5bdfeb03109e5c900333ff1e3cf9c6a",
   "version": "0.16.1",
+  "application_head": "46cf271b0900d12b2b8fddf6d4e992b0a32597a5",
   "installer": {
     "filename": "PokeApp-Launcher-Setup.exe",
     "sha256": "21f1e6d467ee8be4a924b9e9e6eee48d6933e5e3164bde242cf8a84c5de4d298",
@@ -50,5 +51,37 @@
     "No auto-updater; no physical save writes.",
     "Eight moderate npm advisories in the electron-builder dev-only chain (sprintf-js precision DoS); none of those modules is bundled."
   ],
-  "public": null
+  "public": {
+    "url": "https://pokeapp-web.pokeapp-v2.workers.dev/launcher/download",
+    "bucket": "pokeapp-launcher-releases",
+    "object": "windows/0.16.1/PokeApp-Launcher-Setup.exe",
+    "r2_dev_public": false,
+    "r2_custom_domains": 0,
+    "cloudflare_deployment": "cfeba61c-40d6-42a4-96e8-4b66dd333653",
+    "cloudflare_version": "88b39acc-8850-4e9e-ab1b-c6ce1cb98398",
+    "percentage": 100,
+    "rollback_version": "77eea9f6-0c90-45a2-b93a-3bf9cdf5fc11",
+    "html_js_css_match_build": true,
+    "web_saves_build_config_download_head": [200, 200, 200, 200],
+    "api_health": 200,
+    "real_button_download_sha256_match": true,
+    "hosted_browser_pass": 1,
+    "hosted_account_api": "SIMULATED; live HTML/JS/CSS/download; not an authenticated owner proof",
+    "initial_harness_errors": [
+      "Default urllib request returned 403; httpx and Edge public checks passed.",
+      "First hosted fixture intercepted only localhost, causing one rejected synthetic PIN request; fixture origin parameter corrected. No successful owner authentication or business mutation."
+    ],
+    "railway_redeploy": false,
+    "database_migrations_or_writes": 0,
+    "owner_save_or_competitive_mutations": 0
+  },
+  "cleanup": {
+    "application_uninstalled": true,
+    "temporary_executable_processes": 0,
+    "temporary_root": "%TEMP%/pokeapp-phase16c-20261013",
+    "status": "POLICY_BLOCKED_MANUAL_CLEANUP_PENDING",
+    "reason": "Automatic approval review rejected recursive cleanup: blocked by policy",
+    "archive": "%LOCALAPPDATA%/PokeApp-migration-evidence/phase16c/20261013/release-46cf271",
+    "artifact_archive_sha256_verified": true
+  }
 }

@@ -179,13 +179,17 @@ export const cup = {
   finalist_side_id: null,
   checksum: null,
 };
-export async function fixture(page: Page, longNames = false) {
+export async function fixture(
+  page: Page,
+  longNames = false,
+  apiOrigin = "http://127.0.0.1:8000",
+) {
   const commands: {
     path: string;
     body: Record<string, unknown>;
     key: string | undefined;
   }[] = [];
-  await page.route("http://127.0.0.1:8000/**", async (route) => {
+  await page.route(`${apiOrigin}/**`, async (route) => {
     const request = route.request(),
       path = new URL(request.url()).pathname;
     const headers = {
