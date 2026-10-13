@@ -5,6 +5,9 @@
 
 begin;
 
+drop function if exists public.api_launcher_observation(jsonb);
+drop table if exists public.launcher_observations;
+
 drop table if exists public.team_lock_first_fixations cascade;
 drop table if exists public.matchday_start_evidence cascade;
 drop table if exists public.season_reward_rule_revisions cascade;

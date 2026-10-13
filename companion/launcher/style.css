@@ -1,0 +1,171 @@
+:root {
+  color-scheme: dark;
+  font-family: system-ui, sans-serif;
+  background: #101916;
+  color: #eef5ee;
+}
+* {
+  box-sizing: border-box;
+}
+body {
+  margin: 0;
+}
+header {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1.25rem 2rem;
+  border-bottom: 1px solid #344338;
+}
+main {
+  max-width: 1120px;
+  padding: 1.5rem 2rem;
+  margin: auto;
+}
+nav,
+.toolbar,
+.box-nav {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+nav {
+  margin-bottom: 1rem;
+}
+h1 {
+  font-size: 1.7rem;
+}
+h2 {
+  font-size: 1.1rem;
+}
+button,
+input {
+  font: inherit;
+  border: 1px solid #617161;
+  border-radius: 8px;
+  padding: 0.6rem 0.9rem;
+}
+button {
+  background: #25342b;
+  color: #f0f6ef;
+  cursor: pointer;
+}
+button:hover,
+button[aria-pressed="true"] {
+  border-color: #b5ef72;
+}
+button:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+button:focus-visible,
+input:focus-visible {
+  outline: 3px solid #b5ef72;
+  outline-offset: 2px;
+}
+.toolbar h1 {
+  margin-right: auto;
+}
+.slots {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 0.6rem;
+}
+.slot {
+  min-height: 82px;
+  min-width: 0;
+  padding: 0.5rem;
+  font-size: 0.8rem;
+  overflow-wrap: anywhere;
+  text-align: left;
+}
+.slot strong,
+.slot span {
+  display: block;
+}
+.empty {
+  border: 1px dashed #38493b;
+  color: #99aa9b;
+  background: #142019;
+  border-radius: 8px;
+  display: grid;
+  place-items: center;
+}
+.party {
+  margin-bottom: 1rem;
+}
+.box-nav {
+  justify-content: center;
+  margin: 1rem;
+}
+.muted,
+#cloud-age,
+#save-state {
+  color: #a5b7a7;
+  font-size: 0.9rem;
+}
+#message {
+  color: #f2c798;
+  min-height: 1.3em;
+}
+form {
+  display: flex;
+  gap: 1rem;
+  align-items: end;
+  flex-wrap: wrap;
+}
+label {
+  display: grid;
+  gap: 0.5rem;
+}
+input {
+  background: #18241e;
+  color: #fff;
+}
+article {
+  margin-top: 1.5rem;
+  padding: 1.2rem;
+  border: 1px solid #344338;
+  border-radius: 10px;
+}
+dialog {
+  background: #18241e;
+  color: #eef5ee;
+  border: 1px solid #789279;
+  border-radius: 12px;
+  width: min(500px, 90vw);
+}
+dialog::backdrop {
+  background: #0009;
+}
+dl {
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+  gap: 0.6rem;
+}
+dt {
+  color: #b5c4b5;
+}
+dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+[hidden] {
+  display: none !important;
+}
+@media (max-width: 760px) {
+  main {
+    padding: 1rem;
+  }
+  .slots {
+    gap: 0.3rem;
+  }
+  .slot {
+    font-size: 0.7rem;
+    padding: 0.3rem;
+  }
+  header {
+    padding: 1rem;
+  }
+}

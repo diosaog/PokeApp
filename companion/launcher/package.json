@@ -1,0 +1,13 @@
+{
+  "name": "pokeapp-launcher-local",
+  "version": "0.16.0",
+  "private": true,
+  "main": "main.cjs",
+  "description": "Local-first PokeApp Launcher development shell",
+  "scripts": {
+    "start": "electron ."
+  },
+  "devDependencies": {
+    "electron": "44.7.0"
+  }
+}

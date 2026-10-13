@@ -93,6 +93,28 @@ class BackendClient:
     def me(self, access_token: str) -> BackendPrincipal:
         return self._request("GET", "/v1/me", BackendPrincipal, token=access_token)
 
+    def json(self, method, path, *, body=None, token=None, missing=False):
+        """Bounded Launcher transport. A lost PUT response is never replayed here."""
+        if method not in ("GET", "PUT") or not path.startswith(("/v1/", "/health")):
+            raise ValueError("invalid_launcher_request")
+        try:
+            response = self._http.request(method, path, json=body,
+                headers={"Authorization": "Bearer " + token} if token else {})
+            if response.status_code in (401, 403):
+                raise BackendError("SESSION_REJECTED")
+            if response.status_code == 404 and missing:
+                return None
+            if response.status_code in (409, 413, 422):
+                raise BackendError("OBSERVATION_REJECTED")
+            if response.status_code != 200 or len(response.content) > 2 * 1024 * 1024:
+                raise BackendError("BACKEND_UNAVAILABLE")
+            data = response.json()
+            if not isinstance(data, dict):
+                raise ValueError("invalid_response")
+            return data
+        except (httpx.HTTPError, ValueError):
+            raise BackendError("BACKEND_UNAVAILABLE") from None
+
 
 @dataclass
 class LauncherSession:
@@ -138,6 +160,14 @@ class LauncherSession:
                 raise BackendError("SESSION_REJECTED")
             self._principal = principal
             return principal
-        except BackendError:
-            self.logout()
+        except BackendError as exc:
+            # A network failure does not revoke the identity or erase offline recovery.
+            if str(exc) in ("SESSION_REJECTED", "LOGIN_REQUIRED"):
+                self.logout()
             raise
+
+    def request(self, method, path, *, body=None, missing=False):
+        if not self._tokens or not self._principal:
+            raise BackendError("LOGIN_REQUIRED")
+        return self.client.json(method, path, body=body,
+                                token=self._tokens.access_token, missing=missing)

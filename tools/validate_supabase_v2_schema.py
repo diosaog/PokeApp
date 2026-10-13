@@ -39,6 +39,7 @@ $$;
 
 
 EXPECTED_TABLES = [
+    "launcher_observations",
     "season_reward_rule_revisions",
     "team_lock_first_fixations",
     "matchday_start_evidence",

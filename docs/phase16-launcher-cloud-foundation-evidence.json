@@ -1,0 +1,158 @@
+{
+  "status": "LOCAL_PASS_DELIVERY_PENDING",
+  "entry_head": "ce4ef255424a5a0c99954974cd22ed95349c4ea4",
+  "python": {
+    "full_executed": 821,
+    "initial_pass": 818,
+    "initial_schema_inventory_failures": 3,
+    "schema_file_after_correction_pass": 15,
+    "final_runtime_focused_pass": 13,
+    "unrelated_untracked_tests_in_full": 19,
+    "full_not_repeated": true
+  },
+  "postgres": {
+    "status": "PASS",
+    "schema_sha256": "8cf5fa136392f5ddb99b775d6e78eec9d5df07f19cb3c4824fbd371e0682f333",
+    "schema_lines": 14163,
+    "rebuilt_migrations": 43,
+    "exact_public_table_restoration": 54,
+    "checks": [
+      "private intake",
+      "no competitive effects",
+      "receipt replay",
+      "concurrent receive",
+      "rollback after insertion",
+      "closed-scope replay",
+      "disabled denial",
+      "cross-owner denial",
+      "malformed denial",
+      "RLS/browser grants",
+      "immutable service privileges"
+    ],
+    "security": {
+      "rls": true,
+      "invoker": true,
+      "force_rls": true,
+      "search_path": [
+        "search_path=\"\""
+      ]
+    }
+  },
+  "renderer": {
+    "status": "PASS",
+    "startup_useful_ui_ms": 2380.3794,
+    "cached_restart_state_ms": 624.3834999999999,
+    "offline_box_navigation_ms": [
+      0.3999999761581421,
+      1.399999976158142,
+      6.200000047683716,
+      6,
+      6.099999964237213,
+      6,
+      6,
+      6.100000023841858,
+      6.099999964237213,
+      6.100000023841858,
+      6,
+      6.100000023841858,
+      6,
+      6.099999964237213,
+      6.100000023841858,
+      6.099999964237213,
+      6,
+      6.100000023841858,
+      6,
+      6.100000023841858
+    ],
+    "three_second_network_box_navigation_ms": [
+      1,
+      7.199999988079071,
+      4.699999988079071,
+      6.100000023841858,
+      6,
+      6.199999988079071,
+      6.100000023841858,
+      5.899999976158142,
+      6.100000023841858,
+      6.099999964237213,
+      6.100000023841858,
+      6,
+      6.199999988079071,
+      6,
+      6.100000023841858,
+      6,
+      6.099999964237213,
+      6.100000023841858,
+      6,
+      6
+    ],
+    "background_sync_with_lost_response_ms": 534.1120999999994,
+    "receipt_gets": 2,
+    "put_count": 1,
+    "local_party_slots": 6,
+    "visible_box_slots": 30,
+    "source_unchanged": true,
+    "renderer_network_requests": 0,
+    "page_errors": 0,
+    "boundary": "Headless Edge renders real local UI with actual Python stdio/native parser; shell IPC/native file dialog statically checked, not visibly launched."
+  },
+  "shell": {
+    "status": "PASS",
+    "electron": "44.7.0",
+    "visible": false,
+    "sandbox": true,
+    "node": false,
+    "isolation": true,
+    "exposed": {
+      "actions": [
+        "chooseSave",
+        "login",
+        "logout",
+        "retry",
+        "state",
+        "sync"
+      ],
+      "node": "undefined",
+      "process": "undefined"
+    },
+    "errors": []
+  },
+  "parse": {
+    "native_parse_ms": 195.2393000246957,
+    "party_slots": 6,
+    "boxes": 24,
+    "generation": 5
+  },
+  "remote_baseline": {
+    "time": "2026-10-13T11:21:38.208856+00:00",
+    "projects": [
+      {
+        "id": "fdtytpeyfzyssfrsulxd",
+        "name": "diosaog's Project",
+        "region": "eu-north-1",
+        "status": "ACTIVE_HEALTHY"
+      },
+      {
+        "id": "uwleqeuzsveqlugugzba",
+        "name": "Pokeapp 2.0",
+        "region": "eu-central-1",
+        "status": "ACTIVE_HEALTHY"
+      }
+    ],
+    "migration_count": 34,
+    "head": {
+      "version": "20261011160629",
+      "name": "042_v1_shadow_relational_destination",
+      "record_hash": "d5ee4ea586dadd3a8aeff48c88b477ec"
+    },
+    "scoped_tables": 59,
+    "v1_unchanged": true,
+    "advisors": {
+      "INFO": 170,
+      "ERROR": 24,
+      "WARN": 5
+    }
+  },
+  "private_evidence": "C:\\Users\\Antonio\\AppData\\Local\\Temp\\phase16-evidence",
+  "public_positive_mutations": 0
+}

@@ -40,6 +40,7 @@ class ApiContainer:
     cup_repository: CupRepository | None = None
     frontend_read_repository: FrontendReadRepository | None = None
     wipe_revivals_repository: WipeRevivalsRepository | None = None
+    launcher_repository: object | None = None
 
 
 def get_api_container(request: Request) -> ApiContainer:
@@ -65,6 +66,7 @@ def create_default_container(config: APIConfig | None = None) -> ApiContainer:
     cup_repo = None
     read_repo = None
     wipe_repo = None
+    launcher_repo = None
 
     if config.supabase_url and config.supabase_anon_key:
         from app.auth.supabase_adapter import SupabaseAuthClient
@@ -113,6 +115,8 @@ def create_default_container(config: APIConfig | None = None) -> ApiContainer:
         read_repo = SupabaseFrontendReadRepository.from_url_key(config.supabase_url, config.supabase_service_role_key)
         from app.repositories.supabase.wipe_revivals import SupabaseWipeRevivalsRepository
         wipe_repo = SupabaseWipeRevivalsRepository.from_url_key(config.supabase_url, config.supabase_service_role_key)
+        from app.repositories.supabase.launcher import SupabaseLauncherRepository
+        launcher_repo = SupabaseLauncherRepository.from_url_key(config.supabase_url, config.supabase_service_role_key)
 
     auth_bridge = None
     if auth_client is not None and trainer_repo is not None and config.auth_pin_pepper:
@@ -137,4 +141,5 @@ def create_default_container(config: APIConfig | None = None) -> ApiContainer:
         cup_repository=cup_repo,
         frontend_read_repository=read_repo,
         wipe_revivals_repository=wipe_repo,
+        launcher_repository=launcher_repo,
     )

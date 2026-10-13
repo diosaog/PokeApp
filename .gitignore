@@ -37,6 +37,7 @@ desktop/
 # Isolated Companion builds and user state
 companion/**/bin/
 companion/**/obj/
+companion/launcher/node_modules/
 .pokeapp-launcher/
 
 # React build/development artifacts

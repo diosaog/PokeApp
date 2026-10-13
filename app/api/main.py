@@ -12,6 +12,7 @@ from app.api.routes import cups
 from app.api.routes import reads
 from app.api.routes import initial_assignment
 from app.api.routes import wipe_revivals
+from app.api.routes import launcher
 
 
 def create_app(
@@ -55,6 +56,7 @@ def create_app(
     api.include_router(reads.router)
     api.include_router(initial_assignment.router)
     api.include_router(wipe_revivals.router)
+    api.include_router(launcher.router)
     return api
 
 

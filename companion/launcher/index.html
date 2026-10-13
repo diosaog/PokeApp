@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'none'; base-uri 'none'; form-action 'none'"
+    />
+    <title>PokeApp Launcher</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <header>
+      <strong>POKEAPP · Launcher</strong
+      ><span id="connection" role="status">● Sin conexión</span>
+    </header>
+    <main>
+      <nav aria-label="Secciones">
+        <button id="save-tab" aria-pressed="true">Mi save</button
+        ><button id="cloud-tab" aria-pressed="false">PokeApp V2</button>
+      </nav>
+      <p id="message" role="status"></p>
+      <section id="save-view">
+        <div class="toolbar">
+          <h1>Tu partida, aquí.</h1>
+          <button id="select-save">Seleccionar save</button>
+        </div>
+        <p id="save-state">
+          Selecciona tu archivo para empezar. Puedes explorar sin conexión.
+        </p>
+        <p id="save-identity"></p>
+        <h2>Equipo</h2>
+        <div id="party" class="slots party" aria-label="Equipo"></div>
+        <div class="box-nav">
+          <button id="previous-box" aria-label="Caja anterior">‹</button>
+          <h2 id="box-name">Caja —</h2>
+          <button id="next-box" aria-label="Caja siguiente">›</button>
+        </div>
+        <div id="box" class="slots" aria-label="Caja actual"></div>
+        <p class="muted">
+          Lectura local. No se modifica el archivo ni se consumen artículos.
+        </p>
+      </section>
+      <section id="cloud-view" hidden>
+        <h1>PokeApp V2</h1>
+        <p id="identity">Inicia sesión para conectar tu Launcher.</p>
+        <form id="login">
+          <label
+            >Entrenador<input
+              name="trainer"
+              autocomplete="username"
+              required
+              maxlength="128" /></label
+          ><label
+            >PIN<input
+              name="pin"
+              type="password"
+              autocomplete="current-password"
+              required
+              maxlength="32"
+              minlength="4" /></label
+          ><button>Conectar</button>
+        </form>
+        <div class="toolbar">
+          <button id="logout">Cerrar sesión</button
+          ><button id="retry">Reintentar conexión</button>
+        </div>
+        <article>
+          <h2>Último estado de la nube</h2>
+          <p id="cloud-state">Todavía no hay datos guardados.</p>
+          <p id="cloud-age"></p>
+        </article>
+        <article>
+          <h2>Observaciones privadas</h2>
+          <p>
+            Envía la lectura de este save a tu cuenta. Se guarda como
+            observación del Launcher; no confirma progreso competitivo, no fija
+            equipos ni concede recompensas.
+          </p>
+          <button id="enable-sync">Sincronizar este save</button>
+          <p id="receipt">Todavía no hay un recibo de la nube.</p>
+        </article>
+      </section>
+      <dialog id="details">
+        <h2 id="pokemon-title"></h2>
+        <dl id="pokemon-details"></dl>
+        <button id="close-details">Cerrar</button>
+      </dialog>
+    </main>
+    <script src="renderer.js"></script>
+  </body>
+</html>

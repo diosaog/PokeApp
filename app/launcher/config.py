@@ -65,6 +65,7 @@ class LauncherConfig(WireModel):
     folders: tuple[str, ...] = Field(default=(), max_length=20)
     backend_url: str | None = None
     auto_sync: bool = False
+    cloud_sync: bool = False
     poll_seconds: float = Field(default=5.0, ge=1, le=3600)
     debounce_seconds: float = Field(default=1.0, ge=0.25, le=60)
 

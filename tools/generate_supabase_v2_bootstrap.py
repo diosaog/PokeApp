@@ -51,6 +51,7 @@ EXPECTED_MIGRATIONS = [
     "040_observed_progress_read.sql",
     "041_final_product_alignment.sql",
     "042_v1_shadow_relational_destination.sql",
+    "043_launcher_private_observations.sql",
 ]
 
 FORBIDDEN_TOKENS = [
