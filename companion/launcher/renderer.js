@@ -75,16 +75,23 @@ function render(state) {
     slots("party", observation?.party || Array(6).fill(null), "Equipo");
     renderBox();
   }
-  const local =
-    state.local_status === "READY"
-      ? "Save leído localmente."
-      : state.local_status === "CACHED"
-        ? "Última lectura guardada; comprobando el archivo…"
-        : observation
-          ? "No se ha podido actualizar el save. Mostrando la última lectura local."
-          : state.selected_save
-            ? "Esperando una lectura estable del save seleccionado."
-            : "Selecciona tu archivo para empezar. Puedes explorar sin conexión.";
+  const local = ["UNSUPPORTED_GAME", "UNSUPPORTED_VERSION"].includes(
+    state.local_status,
+  )
+    ? "Save no compatible. Juegos admitidos: Gen3, Gen4, Gen5 y Pokémon X/Y (save descifrado)."
+    : ["CORRUPT_SAVE", "TRUNCATED_SAVE", "AMBIGUOUS_IDENTITY"].includes(
+          state.local_status,
+        )
+      ? "Save incompleto o no válido. No se enviará a la nube; se conserva la última lectura local si existe."
+      : state.local_status === "READY"
+        ? "Save leído localmente."
+        : state.local_status === "CACHED"
+          ? "Última lectura guardada; comprobando el archivo…"
+          : observation
+            ? "No se ha podido actualizar el save. Mostrando la última lectura local."
+            : state.selected_save
+              ? "Esperando una lectura estable del save seleccionado."
+              : "Selecciona tu archivo para empezar. Puedes explorar sin conexión.";
   text("save-state", local);
   text(
     "connection",

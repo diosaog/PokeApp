@@ -84,7 +84,10 @@ app.whenReady().then(() => {
     authorize(event);
     const result = await dialog.showOpenDialog(win, {
       properties: ["openFile"],
-      filters: [{ name: "Save Pokémon", extensions: ["sav", "dsv", "srm"] }],
+      filters: [
+        { name: "Save Pokémon (incluye main de X/Y)", extensions: ["*"] },
+        { name: "Save con extensión", extensions: ["sav", "dsv", "srm"] },
+      ],
     });
     return result.canceled
       ? { status: "CANCELLED" }

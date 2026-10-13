@@ -15,6 +15,7 @@ from app.domain.pokemon_identity import (
     PokemonLocation,
     ParsedPokemonObservation,
 )
+from app.save_parser.xy_identity import ObservedXYIdentity
 
 
 class ErrorCode(StrEnum):
@@ -55,12 +56,12 @@ class ParsedTrainer(WireModel):
 
 
 class ParsedMove(WireModel):
-    id: int = Field(ge=0, le=559)
+    id: int = Field(ge=0, le=617)
     pp: int = Field(ge=0, le=255)
 
 
 class ParsedPokemon(WireModel):
-    species_id: int = Field(ge=1, le=649)
+    species_id: int = Field(ge=1, le=721)
     nickname: str = Field(max_length=64)
     level: int = Field(ge=1, le=100)
     form: int = Field(ge=0, le=255)
@@ -73,12 +74,22 @@ class ParsedPokemon(WireModel):
     moves: tuple[ParsedMove, ...] = Field(min_length=4, max_length=4)
     ivs: tuple[int, ...] = Field(min_length=6, max_length=6)
     evs: tuple[int, ...] = Field(min_length=6, max_length=6)
-    identity: PokemonIdentityEvidence
+    identity: PokemonIdentityEvidence | ObservedXYIdentity
 
     @field_validator("identity", mode="before")
     @classmethod
     def identity_inputs(cls, value):
-        return PokemonIdentityEvidence(**value) if isinstance(value, dict) else value
+        if isinstance(value, dict):
+            identity_type = (
+                ObservedXYIdentity
+                if value.get("format") == 6
+                else PokemonIdentityEvidence
+            )
+            try:
+                return identity_type(**value)
+            except TypeError:
+                raise ValueError("invalid_identity_shape") from None
+        return value
 
     @model_validator(mode="after")
     def validate_stats(self):
@@ -88,11 +99,15 @@ class ParsedPokemon(WireModel):
             raise ValueError("invalid_stats")
         if self.ivs != self.identity.ivs:
             raise ValueError("inconsistent_identity_ivs")
+        if self.identity.format <= 5 and (
+            self.species_id > 649 or any(move.id > 559 for move in self.moves)
+        ):
+            raise ValueError("invalid_native_species_or_move")
         return self
 
 
 class ParsedBox(WireModel):
-    number: int = Field(ge=1, le=24)
+    number: int = Field(ge=1, le=31)
     slots: tuple[ParsedPokemon | None, ...] = Field(min_length=30, max_length=30)
 
 
@@ -148,15 +163,22 @@ def progress_layout(game: str) -> tuple[int, tuple[str, ...]] | None:
 
 class ObservedSave(WireModel):
     game: str = Field(min_length=1, max_length=24)
-    generation: Literal[3, 4, 5]
+    generation: Literal[3, 4, 5, 6]
     trainer: ParsedTrainer
     party: tuple[ParsedPokemon | None, ...] = Field(min_length=6, max_length=6)
-    boxes: tuple[ParsedBox, ...] = Field(min_length=1, max_length=24)
+    boxes: tuple[ParsedBox, ...] = Field(min_length=1, max_length=31)
     # Old neutral observations remain readable, without turning unknown into zero.
     progress: ObservedProgress | None = None
 
     @model_validator(mode="after")
     def validate_layout(self):
+        if self.generation == 6:
+            if self.game not in {"X", "Y"} or len(self.boxes) != 31:
+                raise ValueError("invalid_xy_layout")
+            if self.progress is not None:
+                raise ValueError("xy_progress_not_supported")
+        elif self.game in {"X", "Y"} or len(self.boxes) > 24:
+            raise ValueError("invalid_native_layout")
         if [b.number for b in self.boxes] != list(range(1, len(self.boxes) + 1)):
             raise ValueError("invalid_box_layout")
         if any(p.identity.format != self.generation for _, p in self.occupied()):
@@ -181,6 +203,8 @@ class ObservedSave(WireModel):
 
     def identity_observations(self) -> tuple[ParsedPokemonObservation, ...]:
         """Inputs compatible with 023, WITHOUT allocating or binding authoritative IDs."""
+        if self.generation == 6:
+            raise ValueError("xy_competitive_identity_not_supported")
         return tuple(
             ParsedPokemonObservation(location, p.identity)
             for location, p in self.occupied()

@@ -85,8 +85,15 @@ The shell grants the renderer only six IPC actions and blocks renderer network,
 new windows, navigation and Node integration. No TCP service is exposed locally.
 `POKEAPP_LAUNCHER_HEADLESS_TEST=1` creates a hidden shell for CLI validation only.
 
-Supported initial family: native main-series Gen3/4/5 auto-recognized by pinned
-PKHeX; ambiguous/unsupported/corrupt input fails explicitly. Gen3 game/language
+Supported family: native main-series Gen3/4/5 plus decrypted Pokemon X/Y saves,
+auto-recognized by pinned PKHeX 24.11.11. X/Y accepts the extensionless `main`
+export as well as the usual save extensions; filename alone never identifies the
+game. All 31 X/Y boxes are available locally, one box at a time. X/Y progress stays
+unknown; its real PK6 encryption constant is private observation evidence, not a
+competitive identity binding. The existing reader/3 wire envelope is extended
+additively; old Gen3/4/5 observations/receipts remain valid. ORAS/Gen7, encrypted
+cartridge containers and physical writes are unsupported.
+Ambiguous/unsupported/corrupt input fails explicitly. Gen3 game/language
 recognition and combined game-family labels follow source evidence, not guesses.
 No legality claim or exhaustive ROM-hack/emulator support. Discovery scans only
 selected folders (flat, bounded) and returns candidates; selection stays explicit.

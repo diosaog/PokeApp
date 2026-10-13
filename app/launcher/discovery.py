@@ -6,7 +6,7 @@ from pathlib import Path
 from typing import Protocol
 
 from app.launcher.config import local_directory
-from app.save_parser.files import EXTENSIONS, MAX_SAVE_BYTES, SaveSource
+from app.save_parser.files import MAX_SAVE_BYTES, SaveSource, is_save_candidate
 from app.save_parser.models import SaveError
 
 
@@ -35,7 +35,7 @@ class FolderProvider:
                 if index >= 10000:
                     raise ValueError("discovery_folder_too_large")
                 path = Path(entry.path)
-                if path.suffix.lower() not in EXTENSIONS or not entry.is_file(
+                if not is_save_candidate(path) or not entry.is_file(
                     follow_symlinks=False
                 ):
                     continue

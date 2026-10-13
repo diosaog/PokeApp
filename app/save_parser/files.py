@@ -14,6 +14,12 @@ MAX_SAVE_BYTES = 8 * 1024 * 1024
 EXTENSIONS = {".sav", ".dsv", ".srm"}
 
 
+def is_save_candidate(path: Path) -> bool:
+    # X/Y commonly exports a decrypted, extensionless "main". This only permits
+    # selection/discovery; the native content validator still decides the game.
+    return path.suffix.lower() in EXTENSIONS or path.name.casefold() == "main"
+
+
 def _open_read(path: Path):
     if os.name != "nt":
         return path.open("rb")
@@ -68,7 +74,7 @@ def canonical_path(value: str | Path) -> Path:
     if (
         str(path).startswith(("\\\\", "//"))
         or not path.is_file()
-        or path.suffix.lower() not in EXTENSIONS
+        or not is_save_candidate(path)
     ):
         raise SaveError(ErrorCode.INVALID_PATH)
     return path

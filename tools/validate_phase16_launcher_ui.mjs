@@ -11,7 +11,10 @@ import assert from "node:assert/strict";
 
 const root = process.cwd(),
   evidence = process.argv[2],
-  fixture = process.argv[3];
+  fixture = process.argv[3],
+  game = process.argv[4] || "B2",
+  xy = ["X", "Y"].includes(game),
+  generation = xy ? 6 : 5;
 if (!evidence || !fixture)
   throw new Error("Provide private evidence directory and synthetic save");
 await mkdir(evidence, { recursive: true });
@@ -83,7 +86,14 @@ const server = createServer(async (req, res) => {
         trainer_id: trainer,
         season_id: season,
         payload_digest: createHash("sha256")
-          .update(JSON.stringify(sort(lastBody)))
+          // Match Python's ensure_ascii canonical envelope, including nicknames.
+          .update(
+            JSON.stringify(sort(lastBody)).replace(
+              /[\u007f-\uffff]/g,
+              (char) =>
+                "\\u" + char.charCodeAt(0).toString(16).padStart(4, "0"),
+            ),
+          )
           .digest("hex"),
         received_at: new Date().toISOString(),
         trust: "client_observed",
@@ -211,10 +221,27 @@ try {
   await page.goto(
     pathToFileURL(path.join(root, "companion/launcher/index.html")).href,
   );
-  await page.locator("#party button").waitFor();
+  await page.locator("#party button").first().waitFor();
   const startup = performance.now() - started;
   assert.equal(await page.locator("#party .slot").count(), 6);
   assert.equal(await page.locator("#box .slot").count(), 30);
+  if (xy) {
+    assert.match(
+      await page.locator("#save-identity").innerText(),
+      new RegExp(`${game} · Gen 6`),
+    );
+    await page.evaluate(() => {
+      for (let i = 0; i < 30; i++) document.getElementById("next-box").click();
+    });
+    assert.equal(await page.locator("#box-name").innerText(), "Caja 31 / 31");
+    assert.equal(await page.locator("#box .slot").count(), 30);
+    assert.equal(await page.locator("#next-box").isDisabled(), true);
+    assert.match(await page.locator("#box .slot").nth(29).innerText(), /#657/);
+    await page.evaluate(() => {
+      for (let i = 0; i < 30; i++)
+        document.getElementById("previous-box").click();
+    });
+  }
   async function navigation() {
     return await page.evaluate(async () => {
       const samples = [];
@@ -228,7 +255,7 @@ try {
     });
   }
   const offline = await navigation();
-  await page.locator("#party button").click();
+  await page.locator("#party button").first().click();
   await page.locator("#details[open]").waitFor();
   assert.match(await page.locator("#pokemon-details").innerText(), /IV/);
   await page.locator("#close-details").click();
@@ -251,18 +278,23 @@ try {
   const syncMs = performance.now() - syncStart;
   assert.equal(putCount, 1);
   assert.ok(getCount >= 2);
-  assert.equal(lastBody.observation.generation, 5);
-  assert.equal(
-    lastBody.observation.progress.regions[0].badge_flags.filter(Boolean).length,
-    0,
-  );
+  assert.equal(lastBody.observation.generation, generation);
+  assert.equal(lastBody.observation.game, game);
+  if (xy) assert.equal(lastBody.observation.progress, null);
+  else
+    assert.equal(
+      lastBody.observation.progress.regions[0].badge_flags.filter(Boolean)
+        .length,
+      0,
+    );
   mode = "offline";
   await stop();
   const restarted = performance.now();
   start();
   const cached = await request("state");
   const cachedMs = performance.now() - restarted;
-  assert.equal(cached.observation.generation, 5);
+  assert.equal(cached.observation.generation, generation);
+  assert.equal(cached.observation.game, game);
   assert.equal(cached.cloud.data.wallet, "8.4");
   assert.equal(cached.cloud_stale, true);
   assert.equal(cached.auth_status, "STALE");
@@ -278,8 +310,27 @@ try {
     Math.max(...offline, ...slow) < 200,
     "Local navigation unexpectedly blocked",
   );
+  if (xy) {
+    const unsupported = Buffer.alloc(0x76000);
+    unsupported.writeUInt32LE(0x42454546, unsupported.length - 0x1f0);
+    const invalidPath = path.join(evidence, "unsupported.sav");
+    await writeFile(invalidPath, unsupported);
+    await request("select", { path: invalidPath });
+    await until(
+      async () => (await request("state")).local_status === "UNSUPPORTED_GAME",
+    );
+    await until(async () =>
+      (await page.locator("#save-state").innerText()).includes(
+        "Juegos admitidos",
+      ),
+    );
+    assert.equal(putCount, 1, "Unsupported input cannot become an upload");
+    assert.equal((await request("state")).observation, null);
+  }
   const result = {
     status: "PASS",
+    game,
+    generation,
     startup_useful_ui_ms: startup,
     cached_restart_state_ms: cachedMs,
     offline_box_navigation_ms: offline,

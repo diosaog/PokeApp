@@ -166,7 +166,8 @@ Check(Read(invalidVersion.Write()).GetProperty("error").GetString() == "UNSUPPOR
 invalidVersion.Version = GameVersion.B2;
 Check(Read(invalidVersion.Write()).GetProperty("error").GetString() == "UNSUPPORTED_VERSION", "mismatched Gen5 family fails closed");
 Check(Read(new byte[0x80000]).GetProperty("error").GetString() == "CORRUPT_SAVE", "unknown binary rejected");
-var unsupported = new byte[SaveUtil.SIZE_G6XY];
+var unsupported = new byte[SaveUtil.SIZE_G6ORAS];
 WriteUInt32LittleEndian(unsupported.AsSpan(unsupported.Length - 0x1F0), SaveUtil.BEEF);
 Check(Read(unsupported).GetProperty("error").GetString() == "UNSUPPORTED_GAME", "unsupported recognized game");
+XYChecks.Run(output);
 Console.WriteLine("RESULT OK; generated Gen3/4/5 parser checks");
