@@ -1,0 +1,54 @@
+{
+  "status": "LOCAL_VALIDATED_PUBLICATION_PENDING",
+  "entry_head": "5e796f68f5bdfeb03109e5c900333ff1e3cf9c6a",
+  "version": "0.16.1",
+  "installer": {
+    "filename": "PokeApp-Launcher-Setup.exe",
+    "sha256": "21f1e6d467ee8be4a924b9e9e6eee48d6933e5e3164bde242cf8a84c5de4d298",
+    "bytes": 159076230,
+    "signature": "NotSigned",
+    "content_audit": "PASS",
+    "electron": "44.7.0",
+    "electron_builder": "26.15.3",
+    "python": "3.14.3",
+    "pyinstaller": "6.22.3",
+    "dotnet_runtime": "8.0.29",
+    "pkhex": "24.11.11"
+  },
+  "local_proof": {
+    "documented_build_command": "PASS",
+    "install_exit": 0,
+    "reinstall_exit": 0,
+    "uninstall_exit": 0,
+    "current_user_registry": true,
+    "start_menu_created_removed": true,
+    "local_data_retained": true,
+    "hidden_installed_runs": ["READY", "CACHED"],
+    "bundled_parser": "X / generation 6 / 31 boxes / progress unknown",
+    "synthetic_save_unchanged": true,
+    "developer_runtime_path_removed": true,
+    "development_executable_overrides_ignored": true,
+    "sandbox": true,
+    "context_isolation": true,
+    "node_in_renderer": false,
+    "clean_vm": false,
+    "physical_desktop_control": false
+  },
+  "focused_tests": {
+    "worker": 2,
+    "react": 1,
+    "browser_desktop_mobile": 2,
+    "typescript_build": "PASS",
+    "wrangler_dry_run": "PASS",
+    "ruff_compile": "PASS",
+    "backend_tests": "NOT RERUN / unchanged",
+    "historical_suites": "NOT RERUN"
+  },
+  "limits": [
+    "Unsigned preview; SmartScreen may warn.",
+    "Isolated Windows host proof, not a clean VM or independent Windows 10 test.",
+    "No auto-updater; no physical save writes.",
+    "Eight moderate npm advisories in the electron-builder dev-only chain (sprintf-js precision DoS); none of those modules is bundled."
+  ],
+  "public": null
+}

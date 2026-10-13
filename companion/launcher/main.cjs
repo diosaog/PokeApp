@@ -6,6 +6,16 @@ const { createInterface } = require("node:readline");
 
 const root = path.resolve(__dirname, "../..");
 const entry = pathToFileURL(path.join(__dirname, "index.html")).href;
+// User data survives per-user installation upgrades and uninstallation.
+const profile =
+  process.env.POKEAPP_LAUNCHER_PROFILE ||
+  path.join(
+    process.env.LOCALAPPDATA || app.getPath("appData"),
+    "PokeApp",
+    "Launcher",
+  );
+app.setPath("userData", path.join(profile, "shell"));
+app.setAppUserModelId("app.pokeapp.launcher");
 let worker,
   win,
   sequence = 0;
@@ -33,20 +43,21 @@ function authorize(event) {
     throw new Error("Solicitud no permitida");
 }
 app.whenReady().then(() => {
-  const python =
-    process.env.POKEAPP_LAUNCHER_PYTHON ||
-    path.join(root, ".venv-api/Scripts/python.exe");
-  const parser =
-    process.env.POKEAPP_LAUNCHER_PARSER ||
-    path.join(
-      root,
-      "companion/parser/PokeApp.Parser/bin/Release/net8.0/PokeApp.Parser.exe",
-    );
-  const args = ["-m", "app.launcher.stdio", "--parser", parser];
-  if (process.env.POKEAPP_LAUNCHER_PROFILE)
-    args.push("--profile", process.env.POKEAPP_LAUNCHER_PROFILE);
+  const python = app.isPackaged
+    ? path.join(process.resourcesPath, "runtime/core/PokeApp.Core.exe")
+    : process.env.POKEAPP_LAUNCHER_PYTHON ||
+      path.join(root, ".venv-api/Scripts/python.exe");
+  const parser = app.isPackaged
+    ? path.join(process.resourcesPath, "runtime/parser/PokeApp.Parser.exe")
+    : process.env.POKEAPP_LAUNCHER_PARSER ||
+      path.join(
+        root,
+        "companion/parser/PokeApp.Parser/bin/Release/net8.0/PokeApp.Parser.exe",
+      );
+  const args = app.isPackaged ? [] : ["-m", "app.launcher.stdio"];
+  args.push("--parser", parser, "--profile", profile);
   worker = spawn(python, args, {
-    cwd: root,
+    cwd: app.isPackaged ? process.resourcesPath : root,
     windowsHide: true,
     stdio: ["pipe", "pipe", "ignore"],
   });
@@ -116,6 +127,7 @@ app.whenReady().then(() => {
     minWidth: 720,
     minHeight: 600,
     backgroundColor: "#101916",
+    icon: path.join(__dirname, "assets/icon.ico"),
     webPreferences: {
       preload: path.join(__dirname, "preload.cjs"),
       contextIsolation: true,

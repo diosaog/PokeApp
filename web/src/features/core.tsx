@@ -24,6 +24,7 @@ import { participantLabel } from "./admin-labels";
 import { LeagueOperations } from "./league-operations";
 import { LockStatus } from "./lock-status";
 import { TeamLockWarning } from "./team-lock-warning";
+import { LauncherDownload } from "./launcher-download";
 import {
   Card,
   CommandState,
@@ -686,16 +687,7 @@ export function SavesPage() {
         <Card>
           <Box />
           <h2>Launcher local</h2>
-          <Tag>Base funcional · distribución pendiente</Tag>
-          <p>
-            La lectura y sincronización local están implementadas. La conexión
-            de subida a PokeApp y un instalador público todavía no están
-            disponibles.
-          </p>
-          <p className="muted">
-            Esta página no puede detectar si el Launcher está abierto. El diario
-            local no actualiza automáticamente este PC ni tu Team Lock.
-          </p>
+          <LauncherDownload />
         </Card>
       </div>
     </>

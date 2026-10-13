@@ -3,9 +3,18 @@
   "name": "pokeapp-web",
   "account_id": "a8e089ff4da821ed3dbd24701437514c",
   "compatibility_date": "2026-09-28",
+  "main": "worker/launcher.mjs",
   "assets": {
     "directory": "./dist",
     "not_found_handling": "single-page-application",
+    "binding": "ASSETS",
+    "run_worker_first": ["/launcher/download"],
   },
   "workers_dev": true,
+  "r2_buckets": [
+    {
+      "binding": "LAUNCHER_RELEASES",
+      "bucket_name": "pokeapp-launcher-releases",
+    },
+  ],
 }
