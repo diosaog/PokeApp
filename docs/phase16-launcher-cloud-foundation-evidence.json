@@ -1,5 +1,5 @@
 {
-  "status": "LOCAL_PASS_DELIVERY_PENDING",
+  "status": "BLOCKED_LOCAL_CLEANUP_ONLY",
   "entry_head": "ce4ef255424a5a0c99954974cd22ed95349c4ea4",
   "python": {
     "full_executed": 821,
@@ -153,6 +153,111 @@
       "WARN": 5
     }
   },
-  "private_evidence": "C:\\Users\\Antonio\\AppData\\Local\\Temp\\phase16-evidence",
-  "public_positive_mutations": 0
+  "private_evidence": "C:\\Users\\Antonio\\AppData\\Local\\PokeApp-migration-evidence\\phase16\\20261013\\closure-f87a986",
+  "public_positive_mutations": 0,
+  "application_head": "f87a986812e85d2d60d9888dacfaa5c2c0e8b9f5",
+  "remote_after": {
+    "time": "2026-10-13T11:31:58.188902+00:00",
+    "projects": [
+      {
+        "id": "fdtytpeyfzyssfrsulxd",
+        "name": "diosaog's Project",
+        "region": "eu-north-1",
+        "status": "ACTIVE_HEALTHY"
+      },
+      {
+        "id": "uwleqeuzsveqlugugzba",
+        "name": "Pokeapp 2.0",
+        "region": "eu-central-1",
+        "status": "ACTIVE_HEALTHY"
+      }
+    ],
+    "migration_count": 35,
+    "head": {
+      "version": "20261013112907",
+      "name": "043_launcher_private_observations",
+      "record_hash": "3e834807be0fee608de50584f08db448"
+    },
+    "scoped_tables": 59,
+    "v1_unchanged": true,
+    "advisors": {
+      "INFO": 172,
+      "ERROR": 24,
+      "WARN": 5
+    },
+    "changed_auth_only": [
+      "auth.refresh_tokens",
+      "auth.sessions",
+      "auth.users"
+    ],
+    "business_unchanged": true,
+    "shadow_unchanged": true,
+    "new_inbox_rows": 0,
+    "advisor_error_warn_unchanged": true
+  },
+  "deployment": {
+    "project": "f5c4666a-508f-4e5a-8aae-a54581814f29",
+    "service": "9a78e086-c927-471f-8bb9-befe62c77de7",
+    "deployment": "0930ba0d-695f-47dc-89fa-0060d8498add",
+    "status": "SUCCESS",
+    "image": "sha256:7a872b7f9f51dfe938525053e5e5f11e32c44e853243e0e69b7ee1fbcdb30b75",
+    "source": "f87a986812e85d2d60d9888dacfaa5c2c0e8b9f5",
+    "uploaded_inputs": 245
+  },
+  "production_proof": {
+    "status": "PASS",
+    "checks": [
+      "existing PIN + immutable identity + enabled principal",
+      "health + current season + own wallet cached, no save selected/no uploads",
+      "refresh + me",
+      "own absent receipt 404",
+      "wrong/absent season denied 403",
+      "anonymous GET denied 401",
+      "anonymous PUT denied 401",
+      "unchanged production web reachable",
+      "DPAPI restart with safe stale cache, no network during restoration"
+    ],
+    "seconds": 13.175081800029147,
+    "remote_business_writes": 0,
+    "observation_uploads": 0,
+    "selected_owner_saves": 0,
+    "unexpected_5xx": 0
+  },
+  "new_security": {
+    "rls": true,
+    "force_rls": true,
+    "owner": "postgres",
+    "invoker": true,
+    "proconfig": [
+      "search_path=\"\""
+    ],
+    "anon_denied": true,
+    "browser_columns_denied": true,
+    "browser_rpc_denied": true,
+    "service_intake": true,
+    "service_immutable": true
+  },
+  "nonowner_auth": {
+    "status": "PASS",
+    "retained_phase15_nonowner_auth_equal": true,
+    "tables": 4
+  },
+  "cleanup": {
+    "status": "BLOCKED",
+    "temporary_databases": 0,
+    "postgres_stopped": true,
+    "task_processes_remaining": 0,
+    "remaining": [
+      "phase16-fixtures",
+      "phase16-pg-20261013",
+      "phase16-api-f87a986",
+      "phase16-evidence/production-profile",
+      "phase16-evidence/shell-profile",
+      "phase16-evidence/ui-profile",
+      "phase16-evidence/ui-profile-afu0tI",
+      "phase16-evidence/ui-profile-fuf03j"
+    ],
+    "reason": "Automatic execution review rejected deletion, including explicit verified paths: blocked by policy",
+    "production_tokens_cleared": true
+  }
 }

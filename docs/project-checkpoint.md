@@ -1,11 +1,19 @@
 # PokeApp 2.0 Project Checkpoint
 
-Checkpoint reconciled: 2026-10-11. This file is the project index and historical
+Checkpoint reconciled: 2026-10-13. This file is the project index and historical
 milestone record; it does not maintain a second live phase-status ledger.
 
 ## Current project position
 
-- Latest completed phase: **13 - representative staging, DONE**.
+- Current packet: **16A - Launcher/cloud foundation, BLOCKED at local cleanup**.
+  Application source `f87a986` is validated, pushed and deployed; migration043
+  applied once. Owner data preserved. Only policy-rejected temporary directory
+  deletion remains. [Report](phase16-launcher-cloud-foundation-report.md),
+  [single live record](work-in-progress/phase16-launcher-live.md).
+- Latest completed phase: **15 - cutover, DONE**. V2 is production authority;
+  V1/Shadow remain private references. [Cutover report](phase15-cutover-report.md).
+  Phase14 also closed before cutover: [performance report](phase14-performance-report.md).
+- Historical milestone: **13 - representative staging, DONE**.
   Six synthetic participants, real HTTP/PostgreSQL and seven desktop/mobile
   browser journeys prove League, Team Lock, economy/revive, title and modern Cup.
   One modern-config close defect fixed and deployed to Railway from `cea57ca`.
@@ -14,7 +22,7 @@ milestone record; it does not maintain a second live phase-status ledger.
   [Staging report](phase13-staging-report.md),
   [structured evidence](phase13-staging-evidence.json),
   [single live record](work-in-progress/phase13-live-handoff.md).
-  **Phase 14 READY FOR PERFORMANCE / NOT STARTED**, awaiting its instruction.
+  At that historical closure: **Phase 14 READY FOR PERFORMANCE / NOT STARTED**.
   [Phase 14 preparation map](phase14-performance-readiness.md) is complete;
   preparation did not start implementation or benchmarks.
 - Previous completed phase: **12 — private Shadow comparison, DONE**.
