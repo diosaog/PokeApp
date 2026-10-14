@@ -98,7 +98,14 @@ foreach (var save in new SaveFile[] {
         case SAV4 s: s.Badges = flags; break;
         case SAV5 s: s.Misc.Badges = flags; break;
     }
-    var result = Read(Fixture(save));
+    var progressBytes = Fixture(save);
+    var result = Read(progressBytes);
+    if (output is not null && save is SAV5B2W2)
+    {
+        File.WriteAllBytes(Path.Combine(output, "gen5-progress.sav"), progressBytes);
+        save.Money = 1234; // A later original file with unchanged competitive facts.
+        File.WriteAllBytes(Path.Combine(output, "gen5-later.sav"), save.Write());
+    }
     Check(result.GetProperty("error").ValueKind == JsonValueKind.Null, $"{save.GetType().Name} progress binary accepted");
     var progress = result.GetProperty("observation").GetProperty("progress");
     var expectedRegion = save switch {

@@ -2,8 +2,8 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
 import time
+from dataclasses import dataclass, field
 
 import httpx
 from pydantic import Field, ValidationError
@@ -55,6 +55,29 @@ class BackendClient:
     def close(self):
         self._http.close()
 
+    def upload(self, path, data, token):
+        if not path.startswith("/v1/seasons/") or not isinstance(data, bytes):
+            raise ValueError("invalid_save_upload")
+        try:
+            response = self._http.put(
+                path,
+                content=data,
+                timeout=60,
+                headers={
+                    "Authorization": "Bearer " + token,
+                    "Content-Type": "application/octet-stream",
+                },
+            )
+            if response.status_code in (401, 403):
+                raise BackendError("SESSION_REJECTED")
+            if response.status_code in (409, 413, 415, 422):
+                raise BackendError("SAVE_REJECTED")
+            if response.status_code != 200 or len(response.content) > 65536:
+                raise BackendError("BACKEND_UNAVAILABLE")
+            return response.json()
+        except (httpx.HTTPError, ValueError):
+            raise BackendError("BACKEND_UNAVAILABLE") from None
+
     def _request(self, method, path, model, *, body=None, token=None):
         try:
             response = self._http.request(
@@ -98,8 +121,12 @@ class BackendClient:
         if method not in ("GET", "PUT") or not path.startswith(("/v1/", "/health")):
             raise ValueError("invalid_launcher_request")
         try:
-            response = self._http.request(method, path, json=body,
-                headers={"Authorization": "Bearer " + token} if token else {})
+            response = self._http.request(
+                method,
+                path,
+                json=body,
+                headers={"Authorization": "Bearer " + token} if token else {},
+            )
             if response.status_code in (401, 403):
                 raise BackendError("SESSION_REJECTED")
             if response.status_code == 404 and missing:
@@ -110,9 +137,9 @@ class BackendClient:
                 raise BackendError("BACKEND_UNAVAILABLE")
             data = response.json()
             if not isinstance(data, dict):
-                raise ValueError("invalid_response")
+                raise TypeError("invalid_response")
             return data
-        except (httpx.HTTPError, ValueError):
+        except (httpx.HTTPError, ValueError, TypeError):
             raise BackendError("BACKEND_UNAVAILABLE") from None
 
 
@@ -169,5 +196,11 @@ class LauncherSession:
     def request(self, method, path, *, body=None, missing=False):
         if not self._tokens or not self._principal:
             raise BackendError("LOGIN_REQUIRED")
-        return self.client.json(method, path, body=body,
-                                token=self._tokens.access_token, missing=missing)
+        return self.client.json(
+            method, path, body=body, token=self._tokens.access_token, missing=missing
+        )
+
+    def upload(self, path, data):
+        if not self._tokens or not self._principal:
+            raise BackendError("LOGIN_REQUIRED")
+        return self.client.upload(path, data, self._tokens.access_token)

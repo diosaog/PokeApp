@@ -41,6 +41,7 @@ class ApiContainer:
     frontend_read_repository: FrontendReadRepository | None = None
     wipe_revivals_repository: WipeRevivalsRepository | None = None
     launcher_repository: object | None = None
+    save_ingestion: object | None = None
 
 
 def get_api_container(request: Request) -> ApiContainer:
@@ -67,6 +68,7 @@ def create_default_container(config: APIConfig | None = None) -> ApiContainer:
     read_repo = None
     wipe_repo = None
     launcher_repo = None
+    save_ingestion = None
 
     if config.supabase_url and config.supabase_anon_key:
         from app.auth.supabase_adapter import SupabaseAuthClient
@@ -117,6 +119,17 @@ def create_default_container(config: APIConfig | None = None) -> ApiContainer:
         wipe_repo = SupabaseWipeRevivalsRepository.from_url_key(config.supabase_url, config.supabase_service_role_key)
         from app.repositories.supabase.launcher import SupabaseLauncherRepository
         launcher_repo = SupabaseLauncherRepository.from_url_key(config.supabase_url, config.supabase_service_role_key)
+        import os
+        from pathlib import Path
+        from app.application.save_ingestion import TrustedSaveIngestion
+        from app.repositories.supabase.save_ingestion import SupabaseSaveIngestionRepository
+        from app.save_parser.adapter import PkhexProcessParser
+        parser_path = os.environ.get("POKEAPP_SERVER_PARSER")
+        if parser_path:
+            save_ingestion = TrustedSaveIngestion(
+                SupabaseSaveIngestionRepository.from_url_key(config.supabase_url, config.supabase_service_role_key),
+                PkhexProcessParser(Path(parser_path)),
+            )
 
     auth_bridge = None
     if auth_client is not None and trainer_repo is not None and config.auth_pin_pepper:
@@ -142,4 +155,5 @@ def create_default_container(config: APIConfig | None = None) -> ApiContainer:
         frontend_read_repository=read_repo,
         wipe_revivals_repository=wipe_repo,
         launcher_repository=launcher_repo,
+        save_ingestion=save_ingestion,
     )

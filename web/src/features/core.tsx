@@ -658,7 +658,8 @@ export function SavesPage() {
   return (
     <>
       <Heading eyebrow="TU PARTIDA, BAJO CONTROL" title="Saves y Launcher.">
-        El estado del save en PokeApp y el Launcher local son independientes.
+        Sincroniza tu save desde el Launcher para consultar aquí tu partida y tu
+        PC.
       </Heading>
       <WithSeason>
         <MyProgress />

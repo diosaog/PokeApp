@@ -1,9 +1,9 @@
 {
   "name": "pokeapp-launcher-local",
-  "version": "0.16.1",
+  "version": "0.16.2",
   "private": true,
   "main": "main.cjs",
-  "description": "PokeApp Launcher — lectura local y sincronización privada",
+  "description": "PokeApp Launcher ? lectura local y sincronizaci?n con PokeApp",
   "scripts": {
     "start": "electron ."
   },

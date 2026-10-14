@@ -1214,6 +1214,75 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/v1/launcher/seasons/{season_id}/observations/{observation_id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Receipt */
+    get: operations["receipt_v1_launcher_seasons__season_id__observations__observation_id__get"];
+    /** Receive */
+    put: operations["receive_v1_launcher_seasons__season_id__observations__observation_id__put"];
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/seasons/{season_id}/saves/context": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Context */
+    get: operations["context_v1_seasons__season_id__saves_context_get"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/seasons/{season_id}/saves/receipt": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Receipt */
+    get: operations["receipt_v1_seasons__season_id__saves_receipt_get"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/seasons/{season_id}/saves/raw": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    /** Receive */
+    put: operations["receive_v1_seasons__season_id__saves_raw_put"];
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -2537,6 +2606,29 @@ export interface components {
       /** Matchday Number */
       matchday_number: number | null;
     };
+    /** ObservationReceipt */
+    ObservationReceipt: {
+      /** Id */
+      id: string;
+      /** Trainer Id */
+      trainer_id: string;
+      /** Season Id */
+      season_id: string;
+      /** Payload Digest */
+      payload_digest: string;
+      /** Received At */
+      received_at: string;
+      /**
+       * Trust
+       * @constant
+       */
+      trust: "client_observed";
+      /**
+       * Competitive Authority
+       * @constant
+       */
+      competitive_authority: false;
+    };
     /** OpenDayBody */
     OpenDayBody: {
       /** Expected Revision */
@@ -3278,6 +3370,28 @@ export interface components {
        * Format: date-time
        */
       uploaded_at: string;
+    };
+    /** SaveRegistration */
+    SaveRegistration: {
+      /**
+       * Status
+       * @constant
+       */
+      status: "registered";
+      /** Save Id */
+      save_id: string;
+      /** Trainer Id */
+      trainer_id: string;
+      /** Season Id */
+      season_id: string;
+      /** Sha256 */
+      sha256: string;
+      /** Observation Digest */
+      observation_digest: string;
+      /** Parser Version */
+      parser_version: string;
+      /** Is Current */
+      is_current: boolean;
     };
     /** ScoutingMove */
     ScoutingMove: {
@@ -6555,6 +6669,169 @@ export interface operations {
         };
         content: {
           "application/json": components["schemas"]["WipeRevivalsRead"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  receipt_v1_launcher_seasons__season_id__observations__observation_id__get: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        season_id: string;
+        observation_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ObservationReceipt"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  receive_v1_launcher_seasons__season_id__observations__observation_id__put: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        season_id: string;
+        observation_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ObservationReceipt"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  context_v1_seasons__season_id__saves_context_get: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        season_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": unknown;
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  receipt_v1_seasons__season_id__saves_receipt_get: {
+    parameters: {
+      query: {
+        sha256: string;
+      };
+      header?: never;
+      path: {
+        season_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["SaveRegistration"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  receive_v1_seasons__season_id__saves_raw_put: {
+    parameters: {
+      query: {
+        sha256: string;
+        observation_digest: string;
+        expected_save_id: string;
+      };
+      header?: never;
+      path: {
+        season_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["SaveRegistration"];
         };
       };
       /** @description Validation Error */

@@ -37,6 +37,10 @@ function Profile({ trainer }: { trainer: string }) {
     `/v1/read/seasons/${season}/team-preview?mode=battle&trainer_id=${encodeURIComponent(trainer)}`,
     !!season && own,
   );
+  const ownSave = useRead<Model<"PCRead">>(
+    `/v1/read/seasons/${season}/pc`,
+    !!season && own,
+  );
   const [selected, setSelected] = useState<DetailPokemon | null>(null);
   const player = overview.data?.players.find((p) => p.trainer_id === trainer),
     row = league.data?.rows.find((p) => p.trainer_id === trainer);
@@ -117,6 +121,25 @@ function Profile({ trainer }: { trainer: string }) {
         <h2>Progreso</h2>
         <GameProgress progress={player.progress} />
       </Card>
+      {own && (
+        <Card>
+          <h2>Mi save actual</h2>
+          {ownSave.error ? (
+            <Notice error={ownSave.error} />
+          ) : ownSave.isPending ? (
+            <Loading />
+          ) : (
+            <>
+              <p>
+                {ownSave.data?.status === "ready"
+                  ? "Save registrado y disponible en Mi PC."
+                  : "Sin save actual disponible. Sincroniza tu partida desde el Launcher."}
+              </p>
+              <Link to="/pc">Ver mi equipo y mis cajas →</Link>
+            </>
+          )}
+        </Card>
+      )}
       <Card>
         <h2>Equipo de la jornada</h2>
         {teamQuery.error ? (

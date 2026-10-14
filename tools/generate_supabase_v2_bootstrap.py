@@ -52,6 +52,7 @@ EXPECTED_MIGRATIONS = [
     "041_final_product_alignment.sql",
     "042_v1_shadow_relational_destination.sql",
     "043_launcher_private_observations.sql",
+    "044_trusted_save_registration.sql",
 ]
 
 FORBIDDEN_TOKENS = [

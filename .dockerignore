@@ -4,5 +4,12 @@
 !deploy/
 !Dockerfile
 !deploy/requirements-api.txt
+!deploy/parser-linux-x64.lock.json
+!companion/
+!companion/parser/
+!companion/parser/PokeApp.Parser/
+!companion/parser/PokeApp.Parser/*.cs
+!companion/parser/PokeApp.Parser/*.csproj
+!companion/parser/PokeApp.Parser/packages.lock.json
 app/**/__pycache__/
 app/**/*.pyc

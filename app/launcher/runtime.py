@@ -7,14 +7,13 @@ from pathlib import Path
 from queue import Empty, Full, Queue
 
 from app.launcher.backend import BackendClient, BackendError, LauncherSession
-from app.launcher.cloud_store import CloudStore, deliver
-from app.launcher.config import LauncherConfig
 from app.launcher.core import LauncherCore
 from app.launcher.journal import LocalConflict
 from app.launcher.secrets import TokenStore
 from app.launcher.sync import SaveWatchService
-from app.save_parser.cloud import CloudObservation
-from app.save_parser.files import SaveSource
+from app.launcher.trusted_sync import TrustedStore, deliver_trusted
+from app.save_parser.files import SaveSource, SnapshotReader
+from app.save_parser.models import SaveError
 
 PRODUCTION_API = "https://pokeapp-api-production.up.railway.app"
 
@@ -27,7 +26,7 @@ class LauncherRuntime:
         self.client = client or BackendClient(PRODUCTION_API)
         self.session = LauncherSession(self.client)
         self.tokens = token_store or TokenStore(self.core.profile)
-        self.store = CloudStore(self.core.journal)
+        self.store = TrustedStore(self.core.journal)
         self.lock = threading.Lock()
         self.stop = threading.Event()
         self.next_cloud_refresh = 0.0
@@ -42,7 +41,7 @@ class LauncherRuntime:
             "cloud_status": "OFFLINE",
             "last_online": 0,
             "auth_status": "LOGIN_REQUIRED",
-            "cloud_sync": self.core.config.cloud_sync,
+            "cloud_sync": False,
             "cloud_receipt": None,
             "outbox": {"pending": 0, "paused": 0},
             "error": None,
@@ -58,6 +57,7 @@ class LauncherRuntime:
                     principal=self.session._principal.model_dump(),
                     cloud=self.store.cache(self.client.origin, tid),
                     auth_status="STALE",
+                    cloud_sync=self.store.enabled(self.client.origin, tid),
                 )
         except (OSError, ValueError, KeyError):
             self.session.logout()
@@ -157,12 +157,15 @@ class LauncherRuntime:
                         )
                         self._load_local()
                     elif name == "sync":
-                        self.core.config = LauncherConfig.model_validate(
-                            self.core.config.model_dump() | {"cloud_sync": True}
-                        )
-                        self.core.config.save(self.core.config_path)
-                        self._patch(cloud_sync=True, error=None)
-                        self._enqueue_local()
+                        principal = self.state()["principal"]
+                        if principal:
+                            # Upgrading an old private-inbox opt-in must not silently
+                            # authorize the new registration/economy effects.
+                            self.store.enable(
+                                self.client.origin, principal["trainer_id"]
+                            )
+                            self._patch(cloud_sync=True, error=None)
+                            self._enqueue_local()
                     self.local_commands.task_done()
                 except Empty:
                     pass
@@ -171,6 +174,8 @@ class LauncherRuntime:
                     if result:
                         if result.status in ("SYNCED", "NO_CHANGE"):
                             receipt = self.core.journal.head(self.watch.source)
+                            if self.receipt is None or self.receipt.id != receipt.id:
+                                self._patch(cloud_receipt=None)
                             self.receipt = receipt
                             self._patch(
                                 local_status="READY",
@@ -199,13 +204,13 @@ class LauncherRuntime:
         ):
             return
         try:
-            body = CloudObservation(
-                fingerprint=receipt.fingerprint,
-                parser_version=receipt.parser_version,
-                observation=receipt.observation,
-            )
-            oid = self.store.enqueue(
-                self.client.origin, principal["trainer_id"], season["id"], body
+            snapshot = SnapshotReader().read(SaveSource.enroll(state["selected_save"]))
+            oid = self.store.enqueue_raw(
+                self.client.origin,
+                principal["trainer_id"],
+                season["id"],
+                receipt,
+                snapshot.data,
             )
             accepted = self.store.receipt(
                 self.client.origin, principal["trainer_id"], season["id"], oid
@@ -214,8 +219,8 @@ class LauncherRuntime:
                 cloud_receipt=accepted.model_dump() if accepted else None,
                 outbox=self.store.summary(self.client.origin, principal["trainer_id"]),
             )
-        except LocalConflict:
-            self._patch(error="OUTBOX_FULL")
+        except (LocalConflict, SaveError) as error:
+            self._patch(cloud_receipt=None, error=str(error))
 
     def _cloud_step(self):
         health = self.client.json("GET", "/health")
@@ -265,12 +270,45 @@ class LauncherRuntime:
         row = self.store.pending(self.client.origin, principal.trainer_id)
         if row:
             try:
-                deliver(self.session, self.store, row)
+                current = self.receipt
+                state = self.state()
+                delivered = deliver_trusted(
+                    self.session,
+                    self.store,
+                    row,
+                    selected_hash=current.fingerprint.sha256
+                    if current
+                    and state["local_status"] == "READY"
+                    and state["cloud_sync"]
+                    and season
+                    and row["season"] == season["id"]
+                    else None,
+                )
+                if delivered is not None:
+                    self._patch(cloud_receipt=delivered.model_dump())
                 self._enqueue_local()
             except BackendError as exc:
-                if str(exc) == "OBSERVATION_REJECTED":
+                if str(exc) in (
+                    "OBSERVATION_REJECTED",
+                    "SAVE_REJECTED",
+                    "SAVE_RECEIPT_MISMATCH",
+                ):
                     self.store.block(row)
                 raise
+        accepted = self.state()["cloud_receipt"]
+        if accepted:
+            # A different device may have registered a newer file since our last
+            # success. Cached success must not claim that an old save is current.
+            latest = self.session.request(
+                "GET",
+                f"/v1/seasons/{accepted['season_id']}/saves/receipt?sha256={accepted['sha256']}",
+            )
+            if (
+                not latest.get("is_current")
+                or latest.get("save_id") != accepted["save_id"]
+            ):
+                self._patch(cloud_receipt=None)
+                raise BackendError("SAVE_SUPERSEDED")
         self._patch(
             outbox=self.store.summary(self.client.origin, principal.trainer_id),
             cloud_status="ONLINE",
@@ -292,6 +330,7 @@ class LauncherRuntime:
                             cloud=None,
                             cloud_receipt=None,
                             auth_status="LOGIN_REQUIRED",
+                            cloud_sync=False,
                             error=None,
                         )
                     elif name == "login":
@@ -309,7 +348,11 @@ class LauncherRuntime:
                             args.clear()
                         self.tokens.save(self.client.origin, self.session)
                         self._patch(
-                            principal=principal.model_dump(), auth_status="VERIFIED"
+                            principal=principal.model_dump(),
+                            auth_status="VERIFIED",
+                            cloud_sync=self.store.enabled(
+                                self.client.origin, principal.trainer_id
+                            ),
                         )
                     elif name == "retry" and self.session._principal:
                         self.store.retry(
@@ -339,7 +382,15 @@ class LauncherRuntime:
                 )
                 if not self.session._principal:
                     self._patch(auth_status="LOGIN_REQUIRED")
-                self._patch(cloud_status="OFFLINE", error=code)
+                rejected = code in (
+                    "SAVE_REJECTED",
+                    "OBSERVATION_REJECTED",
+                    "SAVE_SUPERSEDED",
+                    "SAVE_RECEIPT_MISMATCH",
+                )
+                self._patch(
+                    cloud_status="ONLINE" if rejected else "OFFLINE", error=code
+                )
             except Exception:  # noqa: BLE001 - isolate cloud/storage failures from local browsing
                 failures += 1
                 next_attempt = time.monotonic() + (60 if failures < 5 else float("inf"))

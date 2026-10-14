@@ -122,11 +122,16 @@ function render(state) {
   );
   text(
     "receipt",
-    state.cloud_receipt
-      ? `Recibida el ${new Date(state.cloud_receipt.received_at).toLocaleString()} · Privada, sin autoridad competitiva`
-      : state.cloud_sync
-        ? "Sincronización activada. Pendiente de recibo de la nube."
-        : "Todavía no hay un recibo de la nube.",
+    state.cloud_status === "OFFLINE"
+      ? "Sin conexión"
+      : state.error || state.outbox?.paused
+        ? "No se pudo sincronizar"
+        : state.cloud_receipt?.status === "registered" &&
+            state.cloud_receipt.is_current
+          ? "Sincronizado"
+          : state.cloud_sync && state.outbox?.pending
+            ? "Sincronizando…"
+            : "Sin sincronizar",
   );
   $("enable-sync").disabled = !observation || !state.principal;
   if (state.outbox?.pending)
@@ -138,7 +143,17 @@ function render(state) {
     LOGIN_REQUIRED: "Vuelve a iniciar sesión para sincronizar.",
     SESSION_REJECTED: "Sesión no válida. Vuelve a conectar.",
     OBSERVATION_REJECTED:
-      "La nube no ha aceptado esta observación. Tu save local sigue disponible.",
+      "PokeApp no ha aceptado este save. Tu lectura local sigue disponible.",
+    SAVE_REJECTED:
+      "No se pudo registrar el save. Revisa el archivo, la cuenta y la Liga.",
+    SAVE_SUPERSEDED:
+      "La web tiene otro save actual. Selecciona tu archivo actualizado antes de sincronizar.",
+    SAVE_READBACK_PENDING:
+      "Falta comprobar el save en la web. Pulsa Reintentar; no se duplicará la subida.",
+    SAVE_PARSE_MISMATCH:
+      "La lectura local no coincide. Vuelve a abrir el save con el Launcher actualizado.",
+    SAVE_CHANGED_DURING_READ:
+      "El archivo ha cambiado. Esperando una lectura estable.",
     BACKEND_UNAVAILABLE:
       "Sin conexión con PokeApp. Puedes seguir explorando tu save.",
     SYNC_UNAVAILABLE:

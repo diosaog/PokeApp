@@ -17,7 +17,9 @@ def main():
     commit = subprocess.check_output(['git', 'rev-parse', 'HEAD'], cwd=root, text=True).strip()
     names = subprocess.check_output(['git', 'ls-tree', '-r', '--name-only', commit], cwd=root, text=True).splitlines()
     allowed = [n for n in names if n.startswith('app/') and n.endswith('.py')]
-    allowed += ['Dockerfile', '.dockerignore', 'deploy/requirements-api.txt']
+    allowed += [n for n in names if n.startswith('companion/parser/PokeApp.Parser/')
+                and (n.endswith(('.cs', '.csproj')) or n.endswith('/packages.lock.json'))]
+    allowed += ['Dockerfile', '.dockerignore', 'deploy/requirements-api.txt', 'deploy/parser-linux-x64.lock.json']
     for name in allowed:
         if name not in names:
             raise SystemExit('Missing committed deployment input: '+name)
