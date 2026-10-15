@@ -467,6 +467,103 @@ dialog::backdrop {
   }
 }
 /* 17B: trainer identity and bounded PC */
+.shop-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 18px;
+}
+.shop-card {
+  display: flex;
+  flex-direction: column;
+  padding: 22px;
+}
+.shop-card .shop-icon {
+  width: 72px;
+  height: 72px;
+  border-radius: 16px;
+  background: #223b2a;
+}
+.shop-card .shop-icon .item-icon {
+  width: 54px;
+  height: 54px;
+}
+.shop-card h2 {
+  margin: 16px 0 8px;
+  font-size: 1.15rem;
+}
+.shop-card > p {
+  font-size: 0.8rem;
+  line-height: 1.55;
+  margin-bottom: 18px;
+}
+.shop-bottom {
+  margin-top: auto;
+  padding-top: 16px;
+  border-top: 1px solid #2b4332;
+}
+.coin-price {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #f1ce7a;
+}
+.coin-price small {
+  font-size: 0.6rem;
+}
+.inventory-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+}
+.inventory-card {
+  padding: 18px;
+}
+.inventory-item {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 12px;
+}
+.inventory-item h3 {
+  margin: 0;
+  font-size: 1rem;
+}
+.inventory-card .tag {
+  margin: 0 4px 4px 0;
+}
+.inventory-card p {
+  font-size: 0.75rem;
+  color: var(--muted);
+}
+.purchase-summary {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  padding: 20px;
+  border-radius: 12px;
+  background: #213b2a;
+  margin: 16px 0;
+}
+.purchase-summary .item-icon {
+  width: 56px;
+  height: 56px;
+}
+@media (max-width: 1100px) {
+  .shop-grid,
+  .inventory-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (max-width: 640px) {
+  .shop-grid,
+  .inventory-grid {
+    grid-template-columns: 1fr;
+  }
+  .section-tienda .tabs {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+  }
+}
 .trainers-roster {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));

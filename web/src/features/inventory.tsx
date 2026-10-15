@@ -1,6 +1,7 @@
 import { useState } from "react";
 import type { Model } from "../api/types";
 import { pokemonName, pokemonTitle } from "../pokemon/localization";
+import { ItemIcon } from "../pokemon/presentation";
 import { useApp, useRead } from "../state";
 import {
   Card,
@@ -52,9 +53,13 @@ export function Inventory() {
       {q.isPending ? (
         <Loading />
       ) : q.data?.purchases.length ? (
-        <div className="trainer-grid">
+        <div className="inventory-grid">
           {q.data.purchases.map((p) => (
-            <Card key={p.id}>
+            <Card key={p.id} className="inventory-card">
+              <div className="inventory-item">
+                <ItemIcon name={p.item_name} code={p.item_code} />
+                <h3>{pokemonName("item", p.item_name)}</h3>
+              </div>
               <Tag>
                 {(
                   {
@@ -66,7 +71,6 @@ export function Inventory() {
                 )[p.status] ?? "Estado no disponible"}
               </Tag>
               {p.acquisition_type === "reward" && <Tag>Vale de recompensa</Tag>}
-              <h3>{pokemonName("item", p.item_name)}</h3>
               <p>
                 {date(p.purchased_at)} · {p.total_price} PK₽
               </p>
@@ -96,10 +100,7 @@ export function Inventory() {
             if (!cmd.pending && !cmd.uncertain) setPurchase(null);
           }}
         >
-          <p>
-            El servidor comprobará la identidad, propiedad y elegibilidad del
-            objetivo antes de consumir el vale.
-          </p>
+          <p>Elige el Pokémon que recibirá este canje.</p>
           {purchase.item_code === "robar_pokemon" && (
             <p>
               Se muestran los equipos públicos fijados de tus rivales. Sus cajas
@@ -143,8 +144,8 @@ export function Inventory() {
             </Field>
             {!targets.length && (
               <Empty>
-                No hay objetivos con identidad confirmada disponibles. No se
-                crean identidades a partir del apodo o la posición.
+                No hay Pokémon disponibles para este canje. Sincroniza tu
+                partida y vuelve a consultar.
               </Empty>
             )}
             <CommandState command={cmd} />

@@ -14,7 +14,13 @@ import {
 } from "lucide-react";
 import type { Model, Overview } from "../api/types";
 import { pokemonName, pokemonTitle } from "../pokemon/localization";
-import { PokemonSprite, TypeBadge } from "../pokemon/presentation";
+import {
+  PokemonSprite,
+  TypeBadge,
+  ItemIcon,
+  TrainerPhoto,
+  StatPill,
+} from "../pokemon/presentation";
 import { useApp, useRead, useOverview, usePC } from "../state";
 import { GameProgress, MyProgress } from "./progress";
 import { Inventory } from "./inventory";
@@ -569,7 +575,7 @@ export function PCPage() {
         ) : (
           <Empty>
             No hay una partida disponible.{" "}
-            <Link to="/saves">Sincronizar con el Launcher ?</Link>
+            <Link to="/saves">Sincronizar con el Launcher →</Link>
           </Empty>
         )}
       </WithSeason>
@@ -637,7 +643,7 @@ export function ShopPage() {
   );
   return (
     <>
-      <Heading eyebrow="PREPARA TU PRÓXIMA JUGADA" title="Un pequeño impulso.">
+      <Heading eyebrow="PREPARA TU PRÓXIMA JUGADA" title="Tienda">
         La tienda de tu temporada. Cada compra cuenta.
       </Heading>
       <WithSeason>
@@ -693,9 +699,8 @@ export function ShopPage() {
                     return (
                       <Card key={i.id} className="shop-card">
                         <div className="shop-icon">
-                          <ShoppingBag />
+                          <ItemIcon name={i.name} code={i.code} />
                         </div>
-                        <span className="eyebrow">{i.category}</span>
                         <h2>{pokemonName("item", i.name)}</h2>
                         <p>{i.description}</p>
                         {p && (
@@ -716,12 +721,13 @@ export function ShopPage() {
                           </p>
                         ))}
                         <div className="shop-bottom">
-                          <strong>
+                          <strong className="coin-price">
+                            <Coins size={18} aria-hidden="true" />
                             {p?.effective_price ?? i.base_price}{" "}
                             <small>PK₽</small>
                           </strong>
                           <button
-                            className="button"
+                            className="button primary"
                             disabled={
                               cmd.pending ||
                               cmd.uncertain ||
@@ -758,10 +764,13 @@ export function ShopPage() {
             if (!cmd.pending && !cmd.uncertain) setItem(null);
           }}
         >
-          <p>
-            {promo ? promo.effective_price : item.base_price} PK₽ · El saldo,
-            los bloqueos y el stock se verifican al confirmar.
-          </p>
+          <div className="purchase-summary">
+            <ItemIcon name={item.name} code={item.code} />
+            <strong>
+              {promo ? promo.effective_price : item.base_price} PK₽
+            </strong>
+          </div>
+          <p>Revisa el precio antes de confirmar tu compra.</p>
           {!promo && (
             <label className="check">
               <input

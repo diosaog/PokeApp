@@ -3,10 +3,10 @@
 - PHASE: 17
 - STATUS: IMPLEMENTING
 - HEAD: entry `9efd5b324ac48dc86a54f0a9bbde519d7e5a3917`, fetched main/origin 0/0.
-- CURRENT CHECKPOINT: 17D shop/inventory
-- CHECKPOINTS DONE: 17A foundation/assets; 17B trainers/profile/PC; 17C battles. Deployment held for final.
-- CURRENT SCREEN: visual shop and inventory cards
-- NEXT SCREEN: 17E remaining pages, then F QA
+- CURRENT CHECKPOINT: 17E remaining pages
+- CHECKPOINTS DONE: 17A foundation/assets; 17B trainers/profile/PC; 17C battles; 17D shop/inventory. Deployment held for final.
+- CURRENT SCREEN: Home, League, Cup, Hall, Saves, Trials/Admin presentation
+- NEXT SCREEN: 17F responsive/QA
 - TESTS STILL VALID: foundation 25 focused React/catalog PASS; TS/Vite PASS;
   1,363 available asset hashes verified. 102 missing item images are explicit
   fallbacks. 617 exact X/Y Spanish move descriptions. No runtime external assets.
@@ -14,6 +14,7 @@
   Reviewed screenshots; corrected inherited accent and profile text encoding.
   17C six browser cases PASS (four privacy/lock flows + two responsive move popovers),
   TS/build PASS. Self private fields remain behind the discriminated projection.
+  17D economy 4 React + 3 browser tests PASS; purchase/redemption guards unchanged.
 - VISUAL DECISIONS: dark green/coral, existing sidebar, local versioned sprites;
   reuse profile photos and badge/shop art already in the project. Prefer canonical
   game assets over Showdown community sprites requiring additional permission.
