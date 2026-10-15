@@ -1,0 +1,198 @@
+{
+  "status": "PHASE 16E DONE",
+  "entry_head": "793a82f49228ae075c5724ad55616330e273989c",
+  "application_head": "29aecbcfe11f92b076224a9e6684e8194001d905",
+  "source": "PKHeX.Core 24.11.11 embedded English/Spanish name resources",
+  "maximum_ids": {
+    "ability": 188,
+    "item": 717,
+    "item3": 376,
+    "move": 617,
+    "nature": 24,
+    "species": 721,
+    "type": 17
+  },
+  "catalog_sha256": "ed60ed38d59930dc25eefe0cd4d7c3dec743bd589481eb2813d8f6921d87b54d",
+  "reproduction": "PASS byte-exact; locked NuGet restore; embedded resource BOM decoding",
+  "tests": {
+    "react_catalog_unique": 40,
+    "react_evidence": "39 focused PASS; final additional catalog case and all 22 prior catalog cases PASS",
+    "python_scouting": 14,
+    "edge_unique": 16,
+    "edge_evidence": "12 initial PASS + 4 corrected fixture text expectations PASS; application unchanged. Initial 3 new cases also PASS.",
+    "typescript_vite": "PASS",
+    "prettier": "PASS",
+    "wrangler_dry_run": "PASS",
+    "diff": "PASS",
+    "mobile_screenshot": "REVIEWED",
+    "not_rerun": [
+      "full Python",
+      "unrelated React/browser",
+      "Phase13 real PostgreSQL",
+      "16D PG/E2E",
+      "native parser matrices",
+      "Launcher packaging"
+    ]
+  },
+  "deployment_before": {
+    "id": "9468c50c-7a69-45dc-bda4-fe5d4d45cd04",
+    "created_on": "2026-10-15T10:28:10.111434Z",
+    "annotations": {
+      "workers/message": "Phase16D source 2959287b769c9b89897450551d78f55a15b51d18; Launcher 0.16.2",
+      "workers/triggered_by": "deployment"
+    },
+    "versions": [
+      {
+        "version_id": "34cb5721-c205-4ea3-9bd0-d97ffc400127",
+        "percentage": 100
+      }
+    ]
+  },
+  "deployment_after": {
+    "id": "be29d897-ac38-403a-8b78-8fa2acdc8c8c",
+    "created_on": "2026-10-15T10:56:32.773772Z",
+    "annotations": {
+      "workers/message": "Phase16E Spanish names source 29aecbcfe11f92b076224a9e6684e8194001d905",
+      "workers/triggered_by": "deployment"
+    },
+    "versions": [
+      {
+        "version_id": "0d9eeea0-0081-448f-b330-701678e5ee94",
+        "percentage": 100
+      }
+    ]
+  },
+  "public_before": {
+    "observed_at": "2026-10-15T10:55:20.428980+00:00",
+    "mode": "before",
+    "checks": [
+      {
+        "path": "/",
+        "status": 200,
+        "security_headers": "PASS"
+      },
+      {
+        "path": "/pc",
+        "status": 200,
+        "security_headers": "PASS"
+      },
+      {
+        "path": "/entrenadores/scouting",
+        "status": 200,
+        "security_headers": "PASS"
+      },
+      {
+        "path": "/battle",
+        "status": 200,
+        "security_headers": "PASS"
+      },
+      {
+        "path": "/build-config.json",
+        "status": 200,
+        "api": "https://pokeapp-api-production.up.railway.app"
+      },
+      {
+        "path": "/assets/index-CiTDJ1XT.css",
+        "status": 200,
+        "bytes": 23482,
+        "sha256": "5370fb9f6d246fa286bcc59846cc918c02e5f373e8d028730592b0bcfcbb83f9",
+        "matches_build": false
+      },
+      {
+        "path": "/assets/index-DnafSRW1.js",
+        "status": 200,
+        "bytes": 424203,
+        "sha256": "2f002fc8e206910e4705a9a3928c8ee5c7dcd1453b218455c7cc6774893b7639",
+        "matches_build": false
+      },
+      {
+        "path": "API /health",
+        "status": 200
+      },
+      {
+        "path": "API /v1/read/trainers",
+        "status": 401,
+        "unauthenticated_denial": "PASS",
+        "cors": "exact web origin"
+      }
+    ],
+    "unexpected_5xx": 0,
+    "business_mutations": 0
+  },
+  "public_after": {
+    "observed_at": "2026-10-15T10:57:02.763577+00:00",
+    "mode": "after",
+    "checks": [
+      {
+        "path": "/",
+        "status": 200,
+        "security_headers": "PASS"
+      },
+      {
+        "path": "/pc",
+        "status": 200,
+        "security_headers": "PASS"
+      },
+      {
+        "path": "/entrenadores/scouting",
+        "status": 200,
+        "security_headers": "PASS"
+      },
+      {
+        "path": "/battle",
+        "status": 200,
+        "security_headers": "PASS"
+      },
+      {
+        "path": "/build-config.json",
+        "status": 200,
+        "api": "https://pokeapp-api-production.up.railway.app"
+      },
+      {
+        "path": "/assets/index-CiTDJ1XT.css",
+        "status": 200,
+        "bytes": 23482,
+        "sha256": "5370fb9f6d246fa286bcc59846cc918c02e5f373e8d028730592b0bcfcbb83f9",
+        "matches_build": true
+      },
+      {
+        "path": "/assets/index-DA8i6I4v.js",
+        "status": 200,
+        "bytes": 492329,
+        "sha256": "637eaab3b838ef8c8c6a4021130f2662b00dc4379419d27177e3f4e26eb4671f",
+        "matches_build": true
+      },
+      {
+        "path": "API /health",
+        "status": 200
+      },
+      {
+        "path": "API /v1/read/trainers",
+        "status": 401,
+        "unauthenticated_denial": "PASS",
+        "cors": "exact web origin"
+      }
+    ],
+    "unexpected_5xx": 0,
+    "business_mutations": 0
+  },
+  "preservation": {
+    "api_sql_domain_parser_auth_projections": "UNCHANGED SOURCE",
+    "railway_supabase_v1_shadow_streamlit_r2_installer": "NO WRITES/REDEPLOYS",
+    "owner_season_save_economy_team_locks": "NO BUSINESS REQUESTS/MUTATIONS",
+    "database_row_comparison": "NOT RERUN: presentation-only deployment, no database operations",
+    "public_private_fields": "UNCHANGED; private field suppression and no rival PC request tested",
+    "launcher": "0.16.2 unchanged; final desktop parity deferred",
+    "physical_save_writes": "NOT STARTED"
+  },
+  "limits": [
+    "Ambiguous Gen3/Gen4+ numeric item IDs without game context remain unavailable; no generation inferred.",
+    "Current Pokemon web fields have no descriptions; pinned resource contains names only. Sparse legacy cross-version fallback caches not promoted; existing Spanish Shop product descriptions retained.",
+    "No types/forms/abilities inferred from species; missing source fields stay missing.",
+    "Hosted checks are unauthenticated read-only and asset equivalence; authenticated UX proof uses synthetic local browser fixtures.",
+    "Phase13 browser expectation translated to Rayo; historical database matrix intentionally not rerun."
+  ],
+  "cleanup": "Headless runners ended; no listener on 5173. No local database created. Prior operator-owned 16D residue untouched.",
+  "private_evidence": "%LOCALAPPDATA%/PokeApp-migration-evidence/phase16e/20261015",
+  "next": "OWNER PRODUCT REVIEW / EXTRA REQUESTS; STOP"
+}

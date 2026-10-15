@@ -5,7 +5,17 @@ milestone record; it does not maintain a second live phase-status ledger.
 
 ## Current project position
 
-- Latest completed packet: **16D - Launcher to web trusted save sync, DONE**.
+- Latest completed packet: **16E - Spanish Pokémon web presentation, DONE**.
+  Reproducible PKHeX.Core 24.11.11 names catalog; one shared resolver across current
+  PC/profiles/scouting/Team Preview/Shop/inventory surfaces. Privacy/domain unchanged;
+  no guessed descriptions or ambiguous item namespace. Source `29aecbc` pushed and
+  deployed to Cloudflare only. 40 focused React/catalog, 14 Python privacy and 16
+  affected Edge tests pass; hosted assets/health/security pass. Launcher 0.16.2
+  unchanged, final desktop parity deferred; physical writes NOT STARTED.
+  [Evidence](phase16e-spanish-localization-evidence.json),
+  [single live record](work-in-progress/phase16e-spanish-localization-live.md).
+  Next: **OWNER PRODUCT REVIEW / EXTRA REQUESTS. STOP**.
+- Previous packet: **16D - Launcher to web trusted save sync, DONE**.
   Original bytes are parsed by the server, registered atomically in the existing
   V2 current-save model and verified by Launcher PC readback. Local-first/privacy
   preserved; migration 044 once, compatible API/web and Launcher 0.16.2 delivered.
@@ -14,7 +24,7 @@ milestone record; it does not maintain a second live phase-status ledger.
   deletion was policy-blocked, with evidence retained and no process running.
   [Report](phase16d-launcher-web-sync-report.md),
   [single live record](work-in-progress/phase16d-launcher-web-sync-live.md).
-  Next: Spanish localization / user-visible Pokemon data, **NOT STARTED**.
+  Its Spanish localization successor is closed above.
 - Previous packet: **16C - Windows Launcher distribution, DONE**.
   Application `46cf271` pushed; per-user Windows 10/11 x64 preview 0.16.1 passes
   hidden install/restart/reinstall/uninstall, bundled parser and data preservation.
