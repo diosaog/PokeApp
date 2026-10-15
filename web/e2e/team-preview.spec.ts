@@ -14,7 +14,9 @@ test("spectator chooses unscheduled Lucía and Marcos with public fields only", 
     2,
   );
   await expect(page.getByText("Foco interno", { exact: true })).toHaveCount(0);
-  await expect(page.getByText("Objeto: Vidasfera")).toHaveCount(12);
+  await expect(page.locator(".battle-identity .held-item")).toHaveText(
+    Array(12).fill("Vidasfera"),
+  );
 });
 
 test("battle self has private lock details; rival and spectator never retain them", async ({
@@ -27,9 +29,11 @@ test("battle self has private lock details; rival and spectator never retain the
   await page.getByRole("tab", { name: "Batalla", exact: true }).click();
   await expect(page.locator("main select")).toHaveCount(1);
   await expect(page.getByText("Foco interno", { exact: true })).toHaveCount(6);
+  await expect(page.locator(".battle-values")).toHaveCount(6);
+  await page.getByText("Ver IVs y EVs", { exact: true }).first().click();
   await expect(
     page.getByRole("heading", { name: "IVS", exact: true }),
-  ).toHaveCount(6);
+  ).toBeVisible();
   await page
     .getByLabel("Entrenador", { exact: true })
     .selectOption("rival-trainer");
@@ -126,6 +130,25 @@ for (const width of [1440, 390]) {
     await fixture(page);
     await login(page);
     await navigate(page, "Batallas");
+    await expect(page.locator(".battle-roster")).toHaveCount(2);
+    await expect(page.locator(".battle-pokemon")).toHaveCount(12);
+    const move = page.getByRole("button", { name: "Ver Esfera Aural" }).first();
+    await move.focus();
+    await page.keyboard.press("Enter");
+    const popover = page.locator(".move-popover:popover-open");
+    await expect(popover).toContainText("Especial");
+    await expect(popover).toContainText("Referencia Pokémon X/Y");
+    await expect(popover).toContainText("Potencia");
+    await expect
+      .poll(() =>
+        popover
+          .locator(".move-category img")
+          .evaluate((img: HTMLImageElement) => img.naturalWidth),
+      )
+      .toBeGreaterThan(0);
+    await page.screenshot({ path: info.outputPath(`move-${width}.png`) });
+    await page.keyboard.press("Escape");
+    await expect(popover).toHaveCount(0);
     await page.getByLabel("Segundo entrenador").selectOption("t4");
     await expect(page.getByRole("alert")).toBeVisible();
     expect(

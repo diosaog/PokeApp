@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { ShieldCheck } from "lucide-react";
 import type { Model } from "../api/types";
 import { pokemonName, statName } from "../pokemon/localization";
+import { ItemIcon, MovePopover } from "../pokemon/presentation";
 import { useApp, useRead, usePC } from "../state";
 import { LockStatus } from "./lock-status";
 import {
@@ -28,8 +29,7 @@ export function BattlePage() {
   return (
     <>
       <Heading eyebrow="BATALLAS" title="Team Preview">
-        Consulta los equipos fijados para la jornada, aunque no tengan un
-        enfrentamiento programado.
+        Equipos de la jornada. Todo lo que necesitas antes de combatir.
       </Heading>
       <WithSeason>
         <Preview key={season} season={season} />
@@ -75,8 +75,8 @@ function Preview({ season }: { season: string }) {
       </div>
       <p>
         {selection.mode === "spectator"
-          ? "Dos entrenadores, solo información pública, también al seleccionar tu propio equipo."
-          : "Selecciona un entrenador. Solo tu propio Team Lock muestra sus detalles privados."}
+          ? "Compara dos equipos públicos."
+          : "Consulta un equipo. Tus detalles privados solo aparecen al elegirte a ti."}
       </p>
       {query.isPending ? (
         <Loading />
@@ -189,30 +189,71 @@ function Preview({ season }: { season: string }) {
                           />{" "}
                           · {date(entry.lock.locked_at)}
                         </p>
-                        {entry.lock.team.map((pokemon, index) => (
-                          <div key={index}>
-                            <Pokemon pokemon={pokemon} />
-                            <p>
-                              Objeto:{" "}
-                              {pokemon.item
-                                ? pokemonName("item", pokemon.item)
-                                : "Sin objeto"}
-                            </p>
-                            <div className="moves">
-                              {pokemon.moves?.map((m, i) => (
-                                <span key={i}>
-                                  {pokemonName("move", m.name)}
-                                  {m.pp != null && ` · ${m.pp} PP`}
+                        <div className="battle-roster">
+                          {entry.lock.team.map((pokemon, index) => (
+                            <article className="battle-pokemon" key={index}>
+                              <div className="battle-identity">
+                                <Pokemon pokemon={pokemon} />
+                                <span className="held-item">
+                                  {pokemon.item && (
+                                    <ItemIcon name={pokemon.item} />
+                                  )}
+                                  {pokemon.item
+                                    ? pokemonName("item", pokemon.item)
+                                    : "Sin objeto"}
                                 </span>
-                              ))}
-                            </div>
-                            {entry.visibility === "self" && (
-                              <PrivateDetails
-                                pokemon={entry.lock!.team[index]}
-                              />
-                            )}
-                          </div>
-                        ))}
+                                {entry.visibility === "self" && (
+                                  <dl className="battle-private">
+                                    <dt>Habilidad</dt>
+                                    <dd>
+                                      {entry.lock!.team[index].ability
+                                        ? pokemonName(
+                                            "ability",
+                                            entry.lock!.team[index].ability,
+                                          )
+                                        : "—"}
+                                    </dd>
+                                    <dt>Naturaleza</dt>
+                                    <dd>
+                                      {entry.lock!.team[index].nature
+                                        ? pokemonName(
+                                            "nature",
+                                            entry.lock!.team[index].nature,
+                                          )
+                                        : "—"}
+                                    </dd>
+                                  </dl>
+                                )}
+                              </div>
+                              <div
+                                className="battle-moves"
+                                aria-label="Movimientos"
+                              >
+                                {Array.from({ length: 4 }, (_, i) =>
+                                  pokemon.moves?.[i] ? (
+                                    <MovePopover
+                                      key={i}
+                                      name={pokemon.moves[i].name}
+                                      pp={pokemon.moves[i].pp}
+                                    />
+                                  ) : (
+                                    <span className="move-vacant" key={i}>
+                                      No disponible
+                                    </span>
+                                  ),
+                                )}
+                              </div>
+                              {entry.visibility === "self" && (
+                                <details className="battle-values">
+                                  <summary>Ver IVs y EVs</summary>
+                                  <PrivateDetails
+                                    pokemon={entry.lock!.team[index]}
+                                  />
+                                </details>
+                              )}
+                            </article>
+                          ))}
+                        </div>
                       </>
                     )}
                   </Card>
@@ -236,14 +277,6 @@ function Preview({ season }: { season: string }) {
 function PrivateDetails({ pokemon }: { pokemon: Model<"PrivatePokemonRead"> }) {
   return (
     <>
-      <dl className="details">
-        <dt>Habilidad</dt>
-        <dd>
-          {pokemon.ability ? pokemonName("ability", pokemon.ability) : "—"}
-        </dd>
-        <dt>Naturaleza</dt>
-        <dd>{pokemon.nature ? pokemonName("nature", pokemon.nature) : "—"}</dd>
-      </dl>
       {(["ivs", "evs"] as const).map((key) => (
         <div key={key}>
           <h3>{key.toUpperCase()}</h3>

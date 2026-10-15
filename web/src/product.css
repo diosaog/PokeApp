@@ -472,6 +472,138 @@ dialog::backdrop {
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 18px;
 }
+/* Competitive previews keep all four moves visible. */
+.battle-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 24px;
+}
+.battle-side {
+  margin-bottom: 22px;
+}
+.battle-side > h2 {
+  margin-top: 0;
+}
+.battle-side > p {
+  font-size: 0.75rem;
+  color: var(--muted);
+}
+.battle-roster {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 20px;
+}
+.battle-pokemon {
+  display: grid;
+  grid-template-columns: 1.1fr 1fr;
+  gap: 12px;
+  padding: 16px;
+  border: 1px solid #304c39;
+  border-radius: 13px;
+  background: #102118;
+  min-width: 0;
+}
+.battle-identity {
+  min-width: 0;
+}
+.battle-identity .pokemon {
+  padding: 0;
+  background: none;
+  border: 0;
+  gap: 5px;
+}
+.battle-identity .pokemon-sprite {
+  width: 64px;
+  height: 70px;
+}
+.battle-identity .pokemon strong {
+  font-size: 0.86rem;
+  overflow-wrap: anywhere;
+}
+.battle-identity .held-item {
+  font-size: 0.72rem;
+  gap: 4px;
+  margin-top: 8px;
+}
+.battle-identity .item-icon {
+  width: 28px;
+  height: 28px;
+}
+.battle-private {
+  font-size: 0.68rem;
+  margin: 10px 0 0;
+}
+.battle-private dt {
+  color: var(--muted);
+  display: inline;
+}
+.battle-private dd {
+  margin: 2px 0 6px;
+}
+.battle-moves {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.battle-moves .move-button {
+  min-height: 38px;
+  font-size: 0.69rem;
+}
+.move-vacant {
+  padding: 11px 8px;
+  border: 1px dashed #2b4132;
+  color: #7e9987;
+  border-radius: 8px;
+  font-size: 0.65rem;
+}
+.battle-values {
+  grid-column: 1 / -1;
+  border-top: 1px solid #293f30;
+  padding-top: 10px;
+}
+.battle-values summary {
+  font-size: 0.7rem;
+  color: var(--muted);
+  cursor: pointer;
+}
+.battle-values .stats-list {
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+}
+.battle-values h3 {
+  font-size: 0.7rem;
+}
+@media (max-width: 1100px) {
+  .battle-roster {
+    grid-template-columns: 1fr;
+  }
+}
+@media (max-width: 640px) {
+  .battle-side {
+    padding: 14px;
+  }
+  .battle-pokemon {
+    padding: 12px;
+    gap: 8px;
+    grid-template-columns: 1fr 1fr;
+  }
+  .battle-identity .pokemon {
+    display: block;
+  }
+  .battle-identity .pokemon-sprite {
+    width: 62px;
+    height: 62px;
+  }
+  .battle-moves .move-button {
+    min-height: 42px;
+  }
+  .battle-moves .move-button small {
+    display: none;
+  }
+  .battle-values .stats-list {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
 .trainer-card {
   display: flex;
   flex-direction: column;
