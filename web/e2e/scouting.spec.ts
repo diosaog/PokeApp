@@ -12,7 +12,7 @@ test("a confirmed Team Lock invalidates only this season's public scouting cache
     history.pushState({}, "", "/entrenadores/scouting");
     dispatchEvent(new PopStateEvent("popstate"));
   });
-  await expect(page.locator(".pokemon")).toHaveCount(6);
+  await expect(page.locator(".party-slots .pokemon")).toHaveCount(6);
   await navigate(page, "Batallas");
   await page
     .getByRole("button", { name: "Fijar mi equipo", exact: true })
@@ -30,7 +30,7 @@ test("a confirmed Team Lock invalidates only this season's public scouting cache
     dispatchEvent(new PopStateEvent("popstate"));
   });
   await fresh;
-  await expect(page.locator(".pokemon")).toHaveCount(6);
+  await expect(page.locator(".party-slots .pokemon")).toHaveCount(6);
 });
 
 test("trainer entry chooses a public team without a scheduled battle or private fallback", async ({
@@ -49,23 +49,16 @@ test("trainer entry chooses a public team without a scheduled battle or private 
   });
   await page.getByLabel("Entrenador a consultar").selectOption("t3");
   await expect(
-    page.getByRole("heading", { name: "Equipos públicos", exact: true }),
+    page.getByRole("heading", { name: "Scouting", exact: true }),
   ).toBeVisible();
   await expect(page.getByLabel("Entrenador a consultar")).toHaveValue("t3");
-  await expect(page.getByText("Objeto: Vidasfera")).toHaveCount(6);
-  await expect(page.getByText("Esfera Aural", { exact: true })).toHaveCount(6);
+  await expect(page.locator(".public-party .pokemon")).toHaveCount(6);
+  await expect(page.locator(".box-slots .pokemon")).toHaveCount(1);
   await expect(page.getByText("Foco interno", { exact: true })).toHaveCount(0);
-  expect(
-    reads.some(
-      (p) =>
-        p.endsWith("/pc") ||
-        p.endsWith("/overview") ||
-        p.endsWith("/team-preview"),
-    ),
-  ).toBe(false);
+  expect(reads.some((p) => p.endsWith("/team-preview"))).toBe(false);
   await page.getByLabel("Entrenador a consultar").selectOption("t4");
-  await expect(page.getByText(/No hay un Team Lock público/)).toBeVisible();
-  await expect(page.locator(".pokemon")).toHaveCount(0);
+  await expect(page.getByText(/Aún no hay Team Lock/)).toBeVisible();
+  await expect(page.locator(".party-slots .pokemon")).toHaveCount(6);
   expect(commands).toHaveLength(0);
 });
 
@@ -114,7 +107,7 @@ for (const width of [1440, 390])
       fullPage: true,
     });
     await page.getByLabel("Entrenador a consultar").selectOption("t4");
-    await expect(page.locator(".pokemon")).toHaveCount(0);
+    await expect(page.locator(".party-slots .pokemon")).toHaveCount(6);
     expect(
       await page.evaluate(
         () => document.documentElement.scrollWidth <= innerWidth + 1,
@@ -132,7 +125,7 @@ test("a failed selected read does not retain old team; selection can recover", a
     history.pushState({}, "", "/entrenadores/scouting");
     dispatchEvent(new PopStateEvent("popstate"));
   });
-  await expect(page.locator(".pokemon")).toHaveCount(6);
+  await expect(page.locator(".party-slots .pokemon")).toHaveCount(6);
   await page.route(
     `**/seasons/${sid}/scouting?trainer_id=rival-trainer`,
     async (route) =>

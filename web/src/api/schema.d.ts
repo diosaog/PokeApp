@@ -1077,6 +1077,23 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/v1/read/seasons/{season_id}/trainers/{trainer_id}/collection": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Trainer Collection */
+    get: operations["trainer_collection_v1_read_seasons__season_id__trainers__trainer_id__collection_get"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/v1/read/seasons/{season_id}/scouting": {
     parameters: {
       query?: never;
@@ -3082,6 +3099,12 @@ export interface components {
       visibility: "public";
       lock: components["schemas"]["PublicPreviewLock"] | null;
     };
+    /** PublicSlotRead */
+    PublicSlotRead: {
+      /** Location */
+      location: string;
+      pokemon: components["schemas"]["PokemonRead"];
+    };
     /** PurchaseRead */
     PurchaseRead: {
       /**
@@ -3845,6 +3868,21 @@ export interface components {
       input_hash: string;
       /** Orders */
       orders: components["schemas"]["TieOrder"][];
+    };
+    /**
+     * TrainerCollectionRead
+     * @description Live save facts, separate from official Team Locks; no identities or raw data.
+     */
+    TrainerCollectionRead: {
+      /**
+       * Status
+       * @enum {string}
+       */
+      status: "no_current_save" | "not_ready" | "ready" | "unsupported_payload";
+      /** Pokemon */
+      pokemon: components["schemas"]["PublicSlotRead"][];
+      /** Revived After Wipe */
+      revived_after_wipe?: number | null;
     };
     /** TrainerRead */
     TrainerRead: {
@@ -6376,6 +6414,38 @@ export interface operations {
         };
         content: {
           "application/json": components["schemas"]["ProgressRead"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  trainer_collection_v1_read_seasons__season_id__trainers__trainer_id__collection_get: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        season_id: string;
+        trainer_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["TrainerCollectionRead"];
         };
       };
       /** @description Validation Error */

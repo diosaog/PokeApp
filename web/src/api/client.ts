@@ -76,6 +76,8 @@ export class ApiError extends Error {
   }
 }
 export function errorText(error: unknown) {
+  if (error instanceof ApiError && error.code === "READ_TIMEOUT")
+    return "La consulta ha tardado demasiado. Puedes volver a consultar los datos.";
   if (!(error instanceof ApiError))
     return "No se pudo conectar. Comprueba la conexión y vuelve a intentarlo.";
   const adminErrors: Record<string, string> = {
@@ -230,9 +232,20 @@ export class ApiClient {
   ): Promise<T> {
     if (!this.base) throw new ApiError(503, "API_NOT_CONFIGURED");
     let response: Response;
+    // Bound stalled reads without changing command retries or outcome handling.
+    const readDeadline =
+      !init.method || init.method === "GET"
+        ? AbortSignal.timeout(20000)
+        : undefined;
+    const signal = readDeadline
+      ? init.signal
+        ? AbortSignal.any([init.signal, readDeadline])
+        : readDeadline
+      : init.signal;
     try {
       response = await fetch(this.base.replace(/\/$/, "") + path, {
         ...init,
+        signal,
         credentials: "omit",
         cache: "no-store",
         headers: {
@@ -241,9 +254,13 @@ export class ApiClient {
         },
       });
     } catch {
+      if (readDeadline?.aborted) throw new ApiError(0, "READ_TIMEOUT");
       throw new ApiError(0, "NETWORK_ERROR");
     }
-    const data = await response.json().catch(() => null);
+    const data = await response.json().catch(() => {
+      if (readDeadline?.aborted) throw new ApiError(0, "READ_TIMEOUT");
+      return null;
+    });
     if (!response.ok) {
       const code =
         typeof data?.detail?.code === "string"

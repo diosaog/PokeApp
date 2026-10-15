@@ -189,7 +189,7 @@ export function ChampionshipReview({
               <Field label="Resultado y motivo del desempate">
                 <textarea name="reason" required maxLength={500} />
               </Field>
-              <Submit pending={disabled}>
+              <Submit pending={command.pending} disabled={disabled}>
                 Registrar ganador del desempate
               </Submit>
             </fieldset>
@@ -252,7 +252,7 @@ export function ChampionshipReview({
               <input name="confirmation" required disabled={disabled} />
             </Field>
             <CommandState command={command} />
-            <Submit pending={disabled || !canFinish}>
+            <Submit pending={command.pending} disabled={disabled || !canFinish}>
               Confirmar finalización
             </Submit>
           </form>

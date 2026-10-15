@@ -13,6 +13,7 @@ from app.api.read_models import (
     TrainerRead,
     InventoryRead,
     LeagueGeneralRead,
+    TrainerCollectionRead,
 )
 from app.application.frontend_reads import FrontendReads
 from app.application.team_preview import team_preview
@@ -88,6 +89,13 @@ def progress(
     selection: Annotated[ProgressQuery, Query()],
 ):
     return read(container, "progress", str(season_id), str(principal.trainer_id))
+
+
+@router.get("/seasons/{season_id}/trainers/{trainer_id}/collection",
+            response_model=TrainerCollectionRead)
+def trainer_collection(season_id: UUID, trainer_id: UUID,
+                       principal: Reader, container: Container):
+    return read(container, "trainer_collection", str(season_id), str(trainer_id))
 
 
 @router.get("/seasons/{season_id}/scouting", response_model=ScoutingRead)

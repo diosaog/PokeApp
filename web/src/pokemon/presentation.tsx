@@ -10,6 +10,8 @@ import {
 import { catalogId, pokemonName, statName } from "./localization";
 import itemIds from "./visual-items.json";
 import moveTypes from "./move-types.json";
+import catalogShopArt from "./shop-art.json";
+import animatedIds from "./animated-sprites.json";
 import { badgeAsset } from "./badges";
 
 const base = "/visuals/v1";
@@ -45,22 +47,60 @@ export function TrainerPhoto({ name }: { name: string }) {
 export function PokemonSprite({
   species,
   large = false,
+  animated = false,
 }: {
   species: string;
   large?: boolean;
+  animated?: boolean;
 }) {
   const id = catalogId("species", species);
+  const ref = useRef<HTMLImageElement>(null);
+  const [moving, setMoving] = useState(false);
   const [failed, setFailed] = useState<string | null>(null);
+  const [failedAnimation, setFailedAnimation] = useState<number | null>(null);
+  useEffect(() => {
+    setMoving(false);
+    if (
+      !animated ||
+      !id ||
+      !animatedIds.includes(id) ||
+      !ref.current ||
+      typeof IntersectionObserver === "undefined" ||
+      typeof window.matchMedia !== "function"
+    )
+      return;
+    const motion = window.matchMedia("(prefers-reduced-motion: reduce)");
+    let visible = false;
+    const update = () =>
+      setMoving(visible && !motion.matches && !document.hidden);
+    const observer = new IntersectionObserver(([entry]) => {
+      visible = entry.isIntersecting;
+      update();
+    });
+    observer.observe(ref.current);
+    motion.addEventListener("change", update);
+    document.addEventListener("visibilitychange", update);
+    return () => {
+      observer.disconnect();
+      motion.removeEventListener("change", update);
+      document.removeEventListener("visibilitychange", update);
+    };
+  }, [animated, id]);
+  const animate = moving && failedAnimation !== id;
   return id && failed !== species ? (
     <img
+      ref={ref}
+      key={species}
       className={`pokemon-sprite ${large ? "large" : ""}`}
-      src={`${base}/pokemon/${id}.png`}
+      src={
+        animate ? `/visuals/animated/v1/${id}.gif` : `${base}/pokemon/${id}.png`
+      }
       width={96}
       height={96}
       alt={pokemonName("species", species)}
       loading="lazy"
       decoding="async"
-      onError={() => setFailed(species)}
+      onError={() => (animate ? setFailedAnimation(id) : setFailed(species))}
     />
   ) : (
     <CircleHelp
@@ -75,6 +115,9 @@ const shopArt: Record<string, string> = {
   revivir_pokemon: "Revivir.png",
   robar_pokemon: "robar.png",
   recaptura: "recaptura.png",
+  captura_extra: "captura-extra.png",
+  fosil: "fosil.png",
+  menta_naturaleza: "menta.svg",
 };
 export function ItemIcon({ name, code }: { name: string; code?: string }) {
   const id = catalogId("item", name),
@@ -84,7 +127,9 @@ export function ItemIcon({ name, code }: { name: string; code?: string }) {
       ? `${base}/shop/${shopArt[code]}`
       : id && items.has(id)
         ? `${base}/items/${id}.png`
-        : null;
+        : code && code in catalogShopArt
+          ? `${base}/${catalogShopArt[code as keyof typeof catalogShopArt]}`
+          : null;
   return path && failed !== path ? (
     <img
       className="item-icon"

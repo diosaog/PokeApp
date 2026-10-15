@@ -235,7 +235,10 @@ export function InitialAssignment({
               {data.ready && data.boundary_tie && (
                 <BoundaryFields data={data} />
               )}
-              <Submit pending={disabled || !data.ready}>
+              <Submit
+                pending={command.pending}
+                disabled={disabled || !data.ready}
+              >
                 Confirmar reparto inicial
               </Submit>
             </fieldset>

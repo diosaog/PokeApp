@@ -31,9 +31,9 @@ export function PokemonDetails(props: DetailPokemon) {
     <div className={`pokemon-detail-layout ${typeClass(p.types?.[0])}`}>
       <section className="detail-identity">
         <span className="eyebrow">
-          {props.visibility === "self" ? "TU POKÉMON" : "EQUIPO PÚBLICO"}
+          {props.visibility === "self" ? "TU POKÉMON" : "POKÉMON PÚBLICO"}
         </span>
-        <PokemonSprite species={p.species} large />
+        <PokemonSprite species={p.species} large animated />
         <h3>{pokemonName("species", p.species)}</h3>
         <p>Nivel {p.level ?? "—"}</p>
         <div className="tags">

@@ -71,7 +71,10 @@ function SeasonName({ setup }: { setup: Setup }) {
             disabled={!editable || cmd.pending || cmd.uncertain}
           />
         </Field>
-        <Submit pending={!editable || cmd.pending || cmd.uncertain}>
+        <Submit
+          pending={cmd.pending}
+          disabled={!editable || cmd.pending || cmd.uncertain}
+        >
           Guardar nombre
         </Submit>
         {!editable && <p>El nombre se conserva desde el inicio de la Liga.</p>}
@@ -189,7 +192,9 @@ function RewardForm({
         )}
         {error && <p role="alert">{error}</p>}
         {rules.editable ? (
-          <Submit pending={busy || changed}>Guardar cambios</Submit>
+          <Submit pending={cmd.pending} disabled={busy || changed}>
+            Guardar cambios
+          </Submit>
         ) : (
           <p>Esta Liga conserva sus reglas históricas.</p>
         )}
@@ -356,7 +361,9 @@ function Structure({ setup }: { setup: Setup }) {
               Último de B recibe robo
             </label>
             {error && <p role="alert">{error}</p>}
-            <Submit pending={busy || stale}>Guardar formato</Submit>
+            <Submit pending={cmd.pending} disabled={busy || stale}>
+              Guardar formato
+            </Submit>
           </fieldset>
           {stale && (
             <p role="alert">

@@ -48,7 +48,8 @@ export function Inventory() {
     ) || [];
   return (
     <>
-      <h2>Tus compras y vales</h2>
+      <h2>Inventario</h2>
+      <p className="muted">Tus compras y vales · disponibles para canjear</p>
       <Notice error={q.error} />
       {q.isPending ? (
         <Loading />
@@ -103,8 +104,9 @@ export function Inventory() {
           <p>Elige el Pokémon que recibirá este canje.</p>
           {purchase.item_code === "robar_pokemon" && (
             <p>
-              Se muestran los equipos públicos fijados de tus rivales. Sus cajas
-              privadas no se publican aquí.
+              Los objetivos de este canje son los equipos oficiales fijados de
+              tus rivales. Consultar sus cajas no amplía los objetivos
+              permitidos.
             </p>
           )}
           {["revivir_pokemon", "robar_pokemon"].includes(
@@ -149,7 +151,10 @@ export function Inventory() {
               </Empty>
             )}
             <CommandState command={cmd} />
-            <Submit pending={cmd.pending || cmd.uncertain || !targets.length}>
+            <Submit
+              pending={cmd.pending}
+              disabled={cmd.pending || cmd.uncertain || !targets.length}
+            >
               Confirmar canje
             </Submit>
           </form>

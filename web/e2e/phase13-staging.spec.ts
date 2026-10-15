@@ -316,6 +316,7 @@ test("Purchase and revive redemption refresh wallet, inventory and wipe state", 
   await expect(
     page.getByText("Pendiente de canjear", { exact: true }),
   ).toBeVisible();
+  await page.getByRole("link", { name: "Abrir mi inventario →" }).click();
   await page.getByRole("button", { name: "Canjear", exact: true }).click();
   const target = page.getByLabel("Pokémon objetivo", { exact: true });
   const dead = await target

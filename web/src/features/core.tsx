@@ -18,7 +18,6 @@ import {
 } from "../pokemon/presentation";
 import { useApp, useRead, useOverview, usePC } from "../state";
 import { MyProgress } from "./progress";
-import { Inventory } from "./inventory";
 import { ParticipantResults } from "./league-results";
 import { InitialAssignment } from "./initial-assignment";
 import { WipeRevivals } from "./wipe-revivals";
@@ -77,16 +76,18 @@ export function playerName(data: Overview, id: string | null) {
 export function Pokemon({
   pokemon,
   onClick,
+  animated = false,
 }: {
   pokemon: Pick<
     Model<"PokemonRead">,
     "species" | "nickname" | "level" | "types"
   > & { is_shiny?: boolean };
   onClick?: () => void;
+  animated?: boolean;
 }) {
   const body = (
     <>
-      <PokemonSprite species={pokemon.species} />
+      <PokemonSprite species={pokemon.species} animated={animated} />
       <div>
         <strong>{pokemonTitle(pokemon)}</strong>
         <span className="muted">
@@ -476,7 +477,7 @@ export function SavesPage() {
   );
 }
 export function ShopPage() {
-  const { season } = useApp(),
+  const { season, me } = useApp(),
     query = useRead<Model<"ShopRead">>(
       `/v1/read/seasons/${season}/shop`,
       !!season,
@@ -606,9 +607,13 @@ export function ShopPage() {
           )
         )}
       </WithSeason>
-      <WithSeason>
-        <Inventory />
-      </WithSeason>
+      <Card className="shop-inventory-link">
+        <h2>Tu mochila te acompaña</h2>
+        <p>Consulta tus compras, vales y canjes desde tu perfil.</p>
+        <Link className="button" to={`/entrenadores/${me?.trainer_id}`}>
+          Abrir mi inventario →
+        </Link>
+      </Card>
       {item && (
         <Modal
           title={`Comprar ${pokemonName("item", item.name)}`}

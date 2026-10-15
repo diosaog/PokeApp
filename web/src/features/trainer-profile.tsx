@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { Link, useParams } from "react-router-dom";
-import { LockKeyhole } from "lucide-react";
 import type { Model } from "../api/types";
 import { useApp, useOverview, useRead } from "../state";
 import { Card, Empty, Heading, Loading, Notice, Tag } from "../ui";
@@ -8,6 +7,8 @@ import { Pokemon, WithSeason } from "./core";
 import { TrainerPhoto, StatPill } from "../pokemon/presentation";
 import { GameProgress } from "./progress";
 import { Collection } from "./collection";
+import { Inventory } from "./inventory";
+import { WipeRevivals } from "./wipe-revivals";
 import { PokemonDetailModal } from "./pokemon-details";
 import { participantLabel } from "./admin-labels";
 
@@ -25,7 +26,7 @@ export function TrainerProfilePage() {
     </>
   );
 }
-function Profile({ trainer }: { trainer: string }) {
+export function Profile({ trainer }: { trainer: string }) {
   const { season, me } = useApp(),
     own = trainer === me?.trainer_id,
     overview = useOverview();
@@ -40,6 +41,10 @@ function Profile({ trainer }: { trainer: string }) {
   const pc = useRead<Model<"PCRead">>(
     `/v1/read/seasons/${season}/pc`,
     !!season && own,
+  );
+  const collection = useRead<Model<"TrainerCollectionRead">>(
+    `/v1/read/seasons/${season}/trainers/${trainer}/collection`,
+    !!season && !own,
   );
   const [selected, setSelected] = useState<
     NonNullable<Model<"ScoutingRead">["team"]>[number] | null
@@ -56,31 +61,39 @@ function Profile({ trainer }: { trainer: string }) {
         eyebrow={own ? "TU PERFIL" : "ENTRENADOR"}
         title={player.display_name}
       />
-      <Card
-        className={`profile-identity ${player.status !== "active" ? "inactive-trainer" : ""}`}
-      >
-        <TrainerPhoto name={player.display_name} />
-        <div>
-          <div className="tags">
-            {own && <Tag>TÚ</Tag>}
-            {player.status !== "active" && (
-              <Tag>{participantLabel(player.status)}</Tag>
-            )}
+      <div className="profile-command-center">
+        <Card
+          className={`profile-identity ${player.status !== "active" ? "inactive-trainer" : ""}`}
+        >
+          <TrainerPhoto name={player.display_name} />
+          <div>
+            <div className="tags">
+              {own && <Tag>TÚ</Tag>}
+              {player.status !== "active" && (
+                <Tag>{participantLabel(player.status)}</Tag>
+              )}
+            </div>
+            <div className="mini-stats">
+              <StatPill label="Puntos" value={row?.total_points} />
+              <StatPill label="Monedas" value={row?.coin_balance} />
+              <StatPill label="Muertos" value={row?.dead_count ?? "—"} />
+            </div>
+            <GameProgress progress={player.progress} compact />
           </div>
-          <div className="mini-stats">
-            <StatPill label="Puntos" value={row?.total_points} />
-            <StatPill label="Monedas" value={row?.coin_balance} />
-            <StatPill label="Muertos" value={row?.dead_count ?? "—"} />
-          </div>
-          <GameProgress progress={player.progress} compact />
-          {own && (
-            <Link className="text-link" to="/tienda">
-              Ver mi inventario →
-            </Link>
-          )}
-        </div>
-      </Card>
+        </Card>
+        {own && (
+          <aside className="profile-inventory">
+            <Inventory />
+          </aside>
+        )}
+      </div>
       <Notice error={league.error} />
+      {own && league.data && (
+        <details className="profile-wipe">
+          <summary>Revividos tras wipe · consultar o actualizar</summary>
+          <WipeRevivals data={league.data} />
+        </details>
+      )}
       {own ? (
         <>
           <Notice error={pc.error} />
@@ -103,7 +116,7 @@ function Profile({ trainer }: { trainer: string }) {
         <>
           <Card>
             <div className="section-row">
-              <h2>Equipo</h2>
+              <h2>Equipo oficial</h2>
               <Tag>Equipo de la jornada</Tag>
             </div>
             {rival.isPending ? (
@@ -121,26 +134,43 @@ function Profile({ trainer }: { trainer: string }) {
                 ))}
               </div>
             ) : (
-              <Empty>Este entrenador aún no ha fijado su equipo.</Empty>
+              <Empty>
+                Aún no hay Team Lock. Puedes consultar su partida sincronizada
+                más abajo.
+              </Empty>
             )}
           </Card>
-          <div className="private-sections">
-            <Card>
-              <LockKeyhole size={20} />
-              <h2>Cajas</h2>
-              <p>Las cajas de este entrenador son privadas.</p>
-            </Card>
-            <Card>
-              <LockKeyhole size={20} />
-              <h2>Muertos</h2>
-              <p>
-                {row?.dead_count == null
-                  ? "Sin observar"
-                  : `${row.dead_count} Pokémon muertos`}
-                . El detalle de la caja es privado.
-              </p>
-            </Card>
-          </div>
+          <Card className="live-collection-heading">
+            <span className="eyebrow">PARTIDA ACTUAL</span>
+            <h2>Equipo, cajas y muertos</h2>
+            <p>
+              Última partida sincronizada. El equipo oficial de la jornada se
+              conserva por separado.
+            </p>
+            <p>
+              Revividos tras wipe:{" "}
+              <strong>
+                {collection.data?.revived_after_wipe ?? "Sin observar"}
+              </strong>
+            </p>
+          </Card>
+          <Notice error={collection.error} />
+          {collection.isPending ? (
+            <Loading />
+          ) : collection.data?.status === "ready" ? (
+            <Collection
+              slots={collection.data.pokemon}
+              visibility="public"
+              showDead
+            />
+          ) : (
+            !collection.error && (
+              <Empty>
+                Este entrenador todavía no tiene una partida disponible para
+                consulta.
+              </Empty>
+            )
+          )}
         </>
       )}
       {selected && (

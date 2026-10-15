@@ -201,7 +201,7 @@ function Preview({ season }: { season: string }) {
                               key={index}
                             >
                               <div className="battle-identity">
-                                <Pokemon pokemon={pokemon} />
+                                <Pokemon animated pokemon={pokemon} />
                                 <span className="held-item">
                                   {pokemon.item && (
                                     <ItemIcon name={pokemon.item} />

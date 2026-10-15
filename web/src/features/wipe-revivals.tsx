@@ -131,7 +131,9 @@ function OwnedWipeRevivals({
                 defaultValue={current.revived_after_wipe}
               />
             </Field>
-            <Submit pending={disabled}>Actualizar revividos</Submit>
+            <Submit pending={command.pending} disabled={disabled}>
+              Actualizar revividos
+            </Submit>
           </fieldset>
         </form>
       )}

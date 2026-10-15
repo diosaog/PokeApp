@@ -123,7 +123,7 @@ for (const width of [1440, 390]) {
     page.on("request", (r) => reads.push(new URL(r.url()).pathname));
     await page.locator("a[href='/entrenadores/rival-trainer']").click();
     await expect(
-      page.getByText("Las cajas de este entrenador son privadas."),
+      page.getByRole("heading", { name: "Equipo, cajas y muertos" }),
     ).toBeVisible();
     await page.locator(".public-party button").first().click();
     await expect(page.getByRole("dialog")).not.toContainText(

@@ -88,6 +88,10 @@ function Participants({ setup }: { setup: Setup }) {
     <>
       <Card>
         <h2>Añadir entrenador</h2>
+        <p>
+          Incorpora un perfil existente a esta Liga. La creación de cuentas y su
+          acceso se gestionan por separado.
+        </p>
         <form
           onSubmit={(event) => {
             const data = form(event);
@@ -112,7 +116,9 @@ function Participants({ setup }: { setup: Setup }) {
                 ))}
             </select>
           </Field>
-          <Submit pending={busy || !canAdd}>Añadir a la temporada</Submit>
+          <Submit pending={cmd.pending} disabled={busy || !canAdd}>
+            Añadir a la temporada
+          </Submit>
         </form>
         {!canAdd && (
           <p>
@@ -217,7 +223,7 @@ function Participants({ setup }: { setup: Setup }) {
                 implica una descalificación automática de la Copa. Esta decisión
                 no puede deshacerse desde esta pantalla.
               </p>
-              <Submit pending={busy || !allowed}>
+              <Submit pending={cmd.pending} disabled={busy || !allowed}>
                 Confirmar cambio de estado
               </Submit>
             </fieldset>
@@ -342,7 +348,9 @@ function DayAdmin({ dayId, setup }: { dayId: string; setup: Setup }) {
               He revisado los ganadores y confirmo esta corrección excepcional.
             </label>
             {day.matches.length > 0 && (
-              <Submit pending={busy || !canCorrect}>Corregir jornada</Submit>
+              <Submit pending={cmd.pending} disabled={busy || !canCorrect}>
+                Corregir jornada
+              </Submit>
             )}
           </fieldset>
           {!canCorrect && (
@@ -416,7 +424,7 @@ function DayAdmin({ dayId, setup }: { dayId: string; setup: Setup }) {
               <textarea name="reason" required maxLength={500} />
             </Field>
             <CommandState command={cmd} />
-            <Submit pending={busy || !canCancel}>
+            <Submit pending={cmd.pending} disabled={busy || !canCancel}>
               Confirmar cancelación de edición
             </Submit>
           </form>
@@ -455,7 +463,9 @@ function DayAdmin({ dayId, setup }: { dayId: string; setup: Setup }) {
             )}
             <fieldset disabled={busy || !canClose}>
               <DailyTieFields review={review} name={name} />
-              <Submit pending={busy || !canClose}>Confirmar cierre</Submit>
+              <Submit pending={cmd.pending} disabled={busy || !canClose}>
+                Confirmar cierre
+              </Submit>
             </fieldset>
           </form>
           <CommandState command={cmd} />
@@ -538,7 +548,7 @@ function Competition({ setup }: { setup: Setup }) {
                   </Field>
                 ))}
               </div>
-              <Submit pending={busy || !canAssign}>
+              <Submit pending={cmd.pending} disabled={busy || !canAssign}>
                 Guardar divisiones iniciales
               </Submit>
             </fieldset>
@@ -762,7 +772,8 @@ function Risk({ setup }: { setup: Setup }) {
             </Field>
             <CommandState command={cmd} />
             <Submit
-              pending={
+              pending={cmd.pending}
+              disabled={
                 busy ||
                 !allowed[action] ||
                 actionRevision !== setup.setup_revision
@@ -816,6 +827,14 @@ export function AdminPage() {
         ))}
       </div>
       <Notice error={q.error} />
+      {q.error && (
+        <button
+          disabled={q.isFetching || adminOperationPending}
+          onClick={() => void q.refetch()}
+        >
+          Volver a consultar Administración
+        </button>
+      )}
       {!season ? (
         <Empty>Crea o selecciona una temporada.</Empty>
       ) : q.isPending ? (
@@ -893,7 +912,10 @@ export function AdminPage() {
               <input name="name" required maxLength={120} />
             </Field>
             <CommandState command={cmd} />
-            <Submit pending={cmd.pending || cmd.uncertain}>
+            <Submit
+              pending={cmd.pending}
+              disabled={cmd.pending || cmd.uncertain}
+            >
               Crear borrador
             </Submit>
           </form>

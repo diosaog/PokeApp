@@ -321,7 +321,27 @@ export async function fixture(
           dead_count_observed_at: null,
         })),
       };
-    else if (path.endsWith("/pc"))
+    else if (path.endsWith("/collection")) {
+      const { ability, nature, ivs, evs, ...publicPokemon } = pokemon;
+      result = {
+        status: "ready",
+        revived_after_wipe: 2,
+        pokemon: [
+          ...Array.from({ length: 6 }, (_, i) => ({
+            location: `Equipo · ${i + 1}`,
+            pokemon: publicPokemon,
+          })),
+          {
+            location: "Caja 1 · 1",
+            pokemon: { ...publicPokemon, nickname: "Reserva" },
+          },
+          {
+            location: "Caja 8 · 1",
+            pokemon: { ...publicPokemon, nickname: "Recuerdo" },
+          },
+        ],
+      };
+    } else if (path.endsWith("/pc"))
       result = {
         save: {
           id: "save",

@@ -1,0 +1,25 @@
+{
+  "captura-extra.png": {
+    "source": "assets\\shop\\captura-extra.png",
+    "sha256": "816af8f11d67f58e558ec8833ef457e0f6870f7f8739a2176f5f485cf9400c30",
+    "note": "Reuse existing optimized Phase17 asset"
+  },
+  "fosil.png": {
+    "source": "assets\\shop\\fosil.png",
+    "sha256": "c0b5afbf413f314ddb96e8ff7e69f78e26257a4fd20f174cb0e328cc60f952a3",
+    "note": "Reuse existing optimized Phase17 asset"
+  },
+  "menta.svg": {
+    "source": "assets\\shop\\menta.svg",
+    "sha256": "30da9c06c871bec0cb83ddc8016229a938a09b456ee010f2c03c4be20fef9bec",
+    "note": "Reuse existing optimized Phase17 asset"
+  },
+  "gold-bottle-cap.png": {
+    "source": "https://raw.githubusercontent.com/PokeAPI/sprites/ba403973fdf9d0ac59175813861e6a1f8ed5020c/sprites/items/gold-bottle-cap.png",
+    "sha256": "94bc3590fda621033ab9f8464f5716993b084614b19f524c2d7b040334878dbc"
+  },
+  "bottle-cap.png": {
+    "source": "https://raw.githubusercontent.com/PokeAPI/sprites/ba403973fdf9d0ac59175813861e6a1f8ed5020c/sprites/items/bottle-cap.png",
+    "sha256": "6d6397de77a7da4a7a1560726d38b642d33958a63e9f94632850866fe30ee597"
+  }
+}

@@ -139,6 +139,7 @@ test("reward voucher filters targets and retries an uncertain redemption with th
   );
   await login(page);
   await navigate(page, "Tienda");
+  await page.getByRole("link", { name: "Abrir mi inventario →" }).click();
   await expect(page.getByText("Vale de recompensa")).toBeVisible();
   await page.getByRole("button", { name: "Canjear", exact: true }).click();
   await expect(

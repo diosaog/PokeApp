@@ -1,11 +1,10 @@
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import type { Model } from "../api/types";
-import { pokemonName, pokemonTitle } from "../pokemon/localization";
 import { useApp, useRead } from "../state";
-import { Card, Empty, Field, Heading, Loading, Notice, Tag } from "../ui";
-import { Pokemon, WithSeason } from "./core";
-import { LockStatus } from "./lock-status";
+import { Empty, Field, Heading, Loading, Notice } from "../ui";
+import { WithSeason } from "./core";
+import { Profile } from "./trainer-profile";
 
 export function ScoutingPage() {
   const { season } = useApp();
@@ -16,9 +15,8 @@ export function ScoutingPage() {
       : "";
   return (
     <>
-      <Heading eyebrow="ENTRENADORES" title="Equipos públicos">
-        Explora el equipo fijado para la jornada. No hace falta tener un combate
-        programado.
+      <Heading eyebrow="ENTRENADORES" title="Scouting">
+        Explora equipos, cajas, medallas y el recorrido de cada entrenador.
       </Heading>
       <Link to="/entrenadores">Volver a entrenadores</Link>
       <WithSeason>
@@ -52,15 +50,11 @@ function Scouting({ season, initial }: { season: string; initial: string }) {
   if (!data) return null;
   if (!data.trainers.length)
     return <Empty>No hay entrenadores publicados en esta temporada.</Empty>;
-  const trainer = data.trainers.find((t) => t.trainer_id === data.trainer_id);
   return (
     <>
-      <p>
-        Solo información competitiva pública, también al consultar tu propio
-        equipo.
-      </p>
+      <p>La partida actual y el equipo oficial tienen su propio espacio.</p>
       <button disabled={query.isFetching} onClick={() => void query.refetch()}>
-        Actualizar equipo público
+        Actualizar scouting
       </button>
       <Field label="Entrenador a consultar">
         <select
@@ -74,53 +68,9 @@ function Scouting({ season, initial }: { season: string; initial: string }) {
           ))}
         </select>
       </Field>
-      {data.day && <Tag>Jornada {data.day.number}</Tag>}
-      <Card>
-        <h2>{trainer?.display_name ?? "Entrenador no disponible"}</h2>
-        <LockStatus
-          status={data.team_lock_status ?? (data.team ? "unknown" : "pending")}
-        />
-        {!data.day ? (
-          <Empty>
-            No hay una jornada de referencia para consultar equipos públicos.
-          </Empty>
-        ) : data.team === null ? (
-          <Empty>
-            No hay un Team Lock público de este entrenador para esta jornada. Su
-            equipo aún no está disponible.
-          </Empty>
-        ) : (
-          <>
-            <p>
-              Equipo público fijado para esta jornada. No representa el estado
-              actual de su save.
-            </p>
-            <div className="trainer-grid">
-              {data.team.map((pokemon, index) => (
-                <div key={index}>
-                  <Pokemon pokemon={pokemon} />
-                  {!pokemon.types?.length && <p>Tipos no publicados.</p>}
-                  <p>
-                    Objeto:{" "}
-                    {pokemon.item
-                      ? pokemonName("item", pokemon.item)
-                      : "No publicado"}
-                  </p>
-                  {pokemon.moves?.length ? (
-                    <ul aria-label={`Movimientos de ${pokemonTitle(pokemon)}`}>
-                      {pokemon.moves.map((move, i) => (
-                        <li key={i}>{pokemonName("move", move.name)}</li>
-                      ))}
-                    </ul>
-                  ) : (
-                    <p>Movimientos no publicados.</p>
-                  )}
-                </div>
-              ))}
-            </div>
-          </>
-        )}
-      </Card>
+      {data.trainer_id && (
+        <Profile key={data.trainer_id} trainer={data.trainer_id} />
+      )}
     </>
   );
 }

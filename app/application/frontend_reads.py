@@ -9,6 +9,7 @@ from app.api.read_models import (
     TrainerRead,
     InventoryRead,
     LeagueGeneralRead,
+    TrainerCollectionRead,
 )
 from app.application.progress import progress_read
 from app.api.progress_models import ProgressRead
@@ -199,11 +200,35 @@ class FrontendReads:
         self.season(sid)
         return self._pc(sid, tid)
 
-    def _pc(self, sid, tid):
+    def trainer_collection(self, sid, tid):
+        self.season(sid)
+        players = self.rows("season_players", "id", season_id=sid, trainer_id=tid)
+        if not players:
+            raise NotFoundError("Participant not found")
+        if len(players) != 1:
+            raise PersistenceError("Ambiguous participant")
+        stats = self.rows("season_player_stats", "revived_after_wipe",
+                          season_player_id=players[0]["id"])
+        if len(stats) > 1:
+            raise PersistenceError("Ambiguous counter")
+        collection = self._pc(sid, tid, public=True)
+        return TrainerCollectionRead.model_validate({
+            **collection.model_dump(),
+            "revived_after_wipe": stats[0].get("revived_after_wipe") if stats else None,
+        })
+
+    def _pc(self, sid, tid, *, public=False):
         # Caller has already validated the season in this request.
+        def result(save, status, pokemon):
+            if public:
+                return TrainerCollectionRead(status=status, pokemon=pokemon)
+            return PCRead(save=save, status=status, pokemon=pokemon)
+
         players = self.rows(
             "season_players", "current_save_file_id", season_id=sid, trainer_id=tid
         )
+        if len(players) > 1:
+            raise PersistenceError("Ambiguous participant")
         current = players[0]["current_save_file_id"] if players else None
         saves = (
             self.rows(
@@ -218,7 +243,7 @@ class FrontendReads:
             else []
         )
         if not saves:
-            return PCRead(save=None, status="no_current_save", pokemon=[])
+            return result(save=None, status="no_current_save", pokemon=[])
         save = saves[0]
         parsed = (
             self.rows(
@@ -231,10 +256,10 @@ class FrontendReads:
             else []
         )
         if not parsed or parsed[0]["status"] != "parsed":
-            return PCRead(save=save, status="not_ready", pokemon=[])
+            return result(save=save, status="not_ready", pokemon=[])
         payload = parsed[0]["payload"]
         if parsed[0]["schema_version"] != 1 or not isinstance(payload, dict):
-            return PCRead(save=save, status="unsupported_payload", pokemon=[])
+            return result(save=save, status="unsupported_payload", pokemon=[])
         for key, expected in (
             ("save_record_id", current),
             ("trainer_id", tid),
@@ -245,8 +270,8 @@ class FrontendReads:
         # Accept the neutral slotted DTO only; never infer IDs from species/slots.
         party, boxes = payload.get("party", []), payload.get("boxes", [])
         if any("slot_number" not in s or "pokemon" not in s for s in party):
-            return PCRead(save=save, status="unsupported_payload", pokemon=[])
-        entities = self.observed_entities(sid, tid, current)
+            return result(save=save, status="unsupported_payload", pokemon=[])
+        entities = {} if public else self.observed_entities(sid, tid, current)
         pokemon = [
             dict(
                 location=f"Equipo · {s['slot_number']}",
@@ -268,7 +293,7 @@ class FrontendReads:
                             ),
                         )
                     )
-        return PCRead(save=save, status="ready", pokemon=pokemon)
+        return result(save=save, status="ready", pokemon=pokemon)
 
     def shop(self, sid, tid):
         season = self.season(sid)

@@ -260,13 +260,20 @@ export function CommandState({
 }
 export function Submit({
   pending,
+  disabled = false,
   children,
 }: {
   pending: boolean;
+  disabled?: boolean;
   children: ReactNode;
 }) {
   return (
-    <button className="button primary" type="submit" disabled={pending}>
+    <button
+      className="button primary"
+      type="submit"
+      disabled={pending || disabled}
+      aria-busy={pending || undefined}
+    >
       {pending ? (
         <LoaderCircle className="spin" size={18} />
       ) : (

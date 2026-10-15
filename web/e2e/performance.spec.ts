@@ -71,18 +71,21 @@ for (const namesAvailable of [true, false]) {
     await page.getByLabel("PIN", { exact: true }).fill("1234");
     await page.getByRole("button", { name: "Entrar a PokeApp" }).click();
     await expect(
-      page.getByRole("button", { name: "Canjear", exact: true }),
+      page.getByRole("link", { name: "Abrir mi inventario →" }),
     ).toBeVisible();
     await page.waitForLoadState("networkidle");
     expect(
       reads
         .filter((path) => path.startsWith(`/v1/read/seasons/${sid}/`))
         .sort(),
-    ).toEqual([
-      `/v1/read/seasons/${sid}/inventory`,
-      `/v1/read/seasons/${sid}/shop`,
-    ]);
+    ).toEqual([`/v1/read/seasons/${sid}/shop`]);
     expect(reads).not.toContain("/v1/read/trainers");
+    await page.getByRole("link", { name: "Abrir mi inventario →" }).click();
+    await expect(
+      page.getByRole("button", { name: "Canjear", exact: true }),
+    ).toBeVisible();
+    await page.waitForLoadState("networkidle");
+    reads.length = 0;
     await page.getByRole("button", { name: "Canjear", exact: true }).click();
     const targets = page.getByRole("combobox", { name: "Pokémon objetivo" });
     await expect(targets.locator("option")).toHaveCount(7);

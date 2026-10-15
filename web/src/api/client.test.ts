@@ -13,6 +13,30 @@ const response = (data: unknown, status = 200) =>
   });
 afterEach(() => vi.unstubAllGlobals());
 describe("API transport", () => {
+  it("ends a stalled read with a visible timeout and does not repeat it", async () => {
+    const controller = new AbortController();
+    vi.spyOn(AbortSignal, "timeout").mockReturnValue(controller.signal);
+    const fetcher = vi.fn(
+      (_url, init: RequestInit) =>
+        new Promise((_resolve, reject) => {
+          init.signal!.addEventListener("abort", () =>
+            reject(new Error("aborted")),
+          );
+        }),
+    );
+    vi.stubGlobal("fetch", fetcher);
+    const client = new ApiClient("https://api.example");
+    const pending = client.request("/v1/read/trainers");
+    controller.abort();
+    await expect(pending).rejects.toMatchObject({
+      code: "READ_TIMEOUT",
+      status: 0,
+    });
+    expect(fetcher).toHaveBeenCalledTimes(1);
+    expect(errorText(new ApiError(0, "READ_TIMEOUT"))).toContain(
+      "tardado demasiado",
+    );
+  });
   it("keeps tokens in Authorization and never sends browser cookies", async () => {
     const fetcher = vi.fn().mockResolvedValue(response({ ok: true }));
     vi.stubGlobal("fetch", fetcher);

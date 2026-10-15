@@ -6,6 +6,7 @@ import App from "./App";
 import "./styles.css";
 import "./product.css";
 import "./art-direction.css";
+import "./product-polish.css";
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
     <BrowserRouter>

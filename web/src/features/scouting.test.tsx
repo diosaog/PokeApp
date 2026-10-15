@@ -46,6 +46,9 @@ vi.mock("../state", () => ({
     };
   },
 }));
+vi.mock("./trainer-profile", () => ({
+  Profile: ({ trainer }: { trainer: string }) => <div>Ficha: {trainer}</div>,
+}));
 vi.mock("./core", () => ({
   WithSeason: ({ children }: { children: React.ReactNode }) => <>{children}</>,
   Pokemon: ({ pokemon }: { pokemon: { nickname: string } }) => (
@@ -70,33 +73,20 @@ beforeEach(() => {
   mocks.error = null;
 });
 
-it("has one public selector, no private mode or save read, and displays only competitive facts", () => {
+it("selects the full trainer profile without a private-mode switch", () => {
   show();
   expect(screen.getAllByRole("combobox")).toHaveLength(1);
   fireEvent.change(screen.getByLabelText("Entrenador a consultar"), {
     target: { value: "rival" },
   });
-  expect(mocks.reads).toHaveBeenLastCalledWith(
-    "/v1/read/seasons/season/scouting?trainer_id=rival",
-  );
-  expect(screen.getAllByText("Objeto: Baya")).toHaveLength(6);
-  expect(screen.getAllByText("Impactrueno")).toHaveLength(6);
-  expect(screen.queryByText("PRIVATE_SECRET")).not.toBeInTheDocument();
+  expect(screen.getByText("Ficha: rival")).toBeVisible();
   expect(mocks.pc).not.toHaveBeenCalled();
 });
-it("keeps absent lock and absent day distinct without making a six-slot team", () => {
+it("shows the profile even without a lock or current matchday", () => {
   mocks.missing = true;
-  const view = show();
-  expect(screen.getByText(/No hay un Team Lock público/)).toBeVisible();
-  expect(screen.queryByText("Fijado")).not.toBeInTheDocument();
   mocks.day = false;
-  view.rerender(
-    <MemoryRouter>
-      <ScoutingPage />
-    </MemoryRouter>,
-  );
-  expect(screen.getByText(/No hay una jornada de referencia/)).toBeVisible();
-  expect(mocks.pc).not.toHaveBeenCalled();
+  show();
+  expect(screen.getByText("Ficha: owner")).toBeVisible();
 });
 it("initial trainer links are scoped to their season and selection resets on season change", () => {
   const view = show({ season: "season", trainer: "rival" });

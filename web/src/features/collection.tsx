@@ -4,7 +4,7 @@ import type { Model } from "../api/types";
 import { Card, Empty } from "../ui";
 import { PokemonSprite } from "../pokemon/presentation";
 import { pokemonTitle, pokemonName } from "../pokemon/localization";
-import { PokemonDetailModal } from "./pokemon-details";
+import { PokemonDetailModal, type DetailPokemon } from "./pokemon-details";
 
 export function collectionLocation(value: string) {
   const team = /^Equipo · (\d+)$/.exec(value);
@@ -18,15 +18,15 @@ export function collectionLocation(value: string) {
 export function Collection({
   slots,
   showDead = false,
+  visibility = "self",
 }: {
-  slots: Model<"SlotRead">[];
+  slots: (Model<"SlotRead"> | Model<"PublicSlotRead">)[];
+  visibility?: "self" | "public";
   showDead?: boolean;
 }) {
   const [index, setIndex] = useState(0),
     [search, setSearch] = useState("");
-  const [selected, setSelected] = useState<Model<"PrivatePokemonRead"> | null>(
-    null,
-  );
+  const [selected, setSelected] = useState<DetailPokemon | null>(null);
   const located = slots.map((s) => ({
     ...s,
     position: collectionLocation(s.location),
@@ -43,18 +43,25 @@ export function Collection({
   const team = located.filter((s) => s.position?.box === 0);
   const inBox = located.filter((s) => s.position?.box === box);
   function slot(
-    p: Model<"PrivatePokemonRead"> | undefined,
+    p: Model<"PrivatePokemonRead"> | Model<"PokemonRead"> | undefined,
     key: number,
     label: string,
+    animated = false,
   ) {
     return p ? (
       <button
         className="pc-slot pokemon"
         key={key}
-        onClick={() => setSelected(p)}
+        onClick={() =>
+          setSelected(
+            visibility === "self" && "ability" in p && "nature" in p
+              ? { visibility: "self", pokemon: p }
+              : { visibility: "public", pokemon: p },
+          )
+        }
         aria-label={`${pokemonTitle(p)} · ${label}`}
       >
-        <PokemonSprite species={p.species} />
+        <PokemonSprite species={p.species} animated={animated} />
         <span>{pokemonTitle(p)}</span>
         <small>Nv. {p.level ?? "—"}</small>
       </button>
@@ -86,6 +93,7 @@ export function Collection({
               team.find((s) => s.position?.slot === i + 1)?.pokemon,
               i,
               `Equipo ${i + 1}`,
+              true,
             ),
           )}
         </div>
@@ -174,11 +182,7 @@ export function Collection({
         </Card>
       )}
       {selected && (
-        <PokemonDetailModal
-          visibility="self"
-          pokemon={selected}
-          onClose={() => setSelected(null)}
-        />
+        <PokemonDetailModal {...selected} onClose={() => setSelected(null)} />
       )}
     </div>
   );

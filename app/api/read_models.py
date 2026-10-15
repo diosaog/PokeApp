@@ -187,6 +187,19 @@ class PCRead(BaseModel):
     pokemon: list[SlotRead]
 
 
+class PublicSlotRead(BaseModel):
+    location: str
+    pokemon: PokemonRead
+
+
+class TrainerCollectionRead(BaseModel):
+    """Live save facts, separate from official Team Locks; no identities or raw data."""
+
+    status: Literal["no_current_save", "not_ready", "ready", "unsupported_payload"]
+    pokemon: list[PublicSlotRead]
+    revived_after_wipe: int | None = Field(default=None, ge=0, strict=True)
+
+
 class ItemRead(BaseModel):
     id: UUID
     code: str
