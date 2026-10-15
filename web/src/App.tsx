@@ -73,10 +73,8 @@ function Login() {
         <div>
           <p className="eyebrow">TU EQUIPO. TU LIGA. TU HISTORIA.</p>
           <h1>
-            La próxima
-            <br />
-            victoria
-            <br />
+            La próxima <br />
+            victoria <br />
             <em>empieza aquí.</em>
           </h1>
           <p>
