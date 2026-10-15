@@ -5,7 +5,18 @@ milestone record; it does not maintain a second live phase-status ledger.
 
 ## Current project position
 
-- Latest completed phase: **17 - Full product/UI rework, DONE**.
+- Latest completed phase: **17.1 - Art direction / visual polish, DONE**.
+  Eleven section accents, subtle motifs, type-colored inline move details,
+  horizontal Pokemon detail with IV bars/no normal EVs, 50 game badge assets,
+  centered PC frame and coherent micro-polish. Privacy/business rules unchanged.
+  Source `9207bef` pushed; Cloudflare version `681265e6-c1b0-4a37-8357-6a539f01adc1`
+  serves 100%. 24 focused React / 22 unique affected Edge cases pass; desktop/mobile
+  screenshots reviewed; hosted 67 HTTP checks and 10 unauthenticated browser visits
+  pass. No backend/DB/Launcher/R2 object writes. Autonomous art choices recorded.
+  [Report](phase17-1-art-direction-report.md), [evidence](phase17-1-art-direction-evidence.json),
+  [single live record](work-in-progress/phase17-1-art-direction-live.md).
+  Next: **ANTONIO VISUAL REVIEW. STOP.** No next packet started.
+- Previous phase: **17 - Full product/UI rework, DONE**.
   Checkpoints 17A–17F complete. Shared green/coral visual system and local assets;
   trainer profiles, bounded PC/modal, compact Team Preview/move popovers, visual
   store and coherent remaining surfaces. Privacy/domain unchanged. Final source

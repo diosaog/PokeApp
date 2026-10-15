@@ -1,11 +1,15 @@
 # Phase 17.1 - art direction
 
-- STATUS: VALIDATED / PUBLICATION PENDING
-- HEAD: entry `53e72d3c5d881e1294d4ccff9788700c87493739`, fetched main/origin 0/0.
+- STATUS: PHASE 17.1 DONE / ART DIRECTION COMPLETE / PRIVACY PRESERVED
+- HEAD: entry `53e72d3c5d881e1294d4ccff9788700c87493739`, fetched main/origin 0/0;
+  application `9207bef39ff577d9c194db72c7219c47a0a8e179`. Documentation closure follows.
 - DONE: all requested screens; 11 section accents/motifs, inline type moves,
   horizontal Pokemon detail, IV bars, 50 game badge assets and centered PC frame.
-- CURRENT SCREEN: final visual review complete; prepare committed web delivery.
-- NEXT SCREEN: production read-only smoke, exact assets and documentation closure.
+  Cloudflare deployment `9fab9bdd-d4b8-473e-b901-8458ad45a9d6`, version
+  `681265e6-c1b0-4a37-8357-6a539f01adc1`, 100%, same pushed application source.
+  [Report](../phase17-1-art-direction-report.md) / [evidence](../phase17-1-art-direction-evidence.json).
+- CURRENT SCREEN: closed; production verification and documentation complete.
+- NEXT SCREEN: none. Antonio visual review. STOP.
 - EXPLICIT OWNER CHANGES: per-tab accents/motifs; readable type moves with inline
   expansion; no scene/banner; horizontal detail; IV bars; no normal EV display;
   correct game badges; centered PC navigation and terminal frame.
@@ -30,8 +34,13 @@
   final CSS correction. TS/public build, format, dry-run, asset parity, compile,
   targeted Ruff and diff pass. Desktop 1440, intermediate 900 and mobile 390
   reviewed. Move names/PP pass 4.5:1 for all 18 types plus unknown.
+  Public 67 HTTP checks + 10 real headless unauthenticated visits PASS; exact
+  built assets served, no unexpected 5xx. No owner PIN or business mutation.
 - VISUAL ISSUES REMAINING: none blocking; Antonio retains final aesthetic review.
   Missing game context cannot choose Unova variant or fabricate badge evidence;
   X/Y artwork is prepared but competitive progress remains unsupported/unknown.
 - DO NOT REPEAT: backend/PG/parser/Launcher or historical phases. No business,
   database, Storage or installer changes. Protected guide and unrelated files untouched.
+  No local listener/test runner remains. Evidence retained privately under
+  `%LOCALAPPDATA%/PokeApp-migration-evidence/phase17-1/20261015`.
+  No next packet, ORAS/Gen7, physical writes, Launcher parity, signing or updater.

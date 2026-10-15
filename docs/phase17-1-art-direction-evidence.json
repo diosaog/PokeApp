@@ -1,0 +1,946 @@
+{
+  "phase": "17.1",
+  "status": "DONE",
+  "observed_at": "2026-10-15T15:47:52.153456+00:00",
+  "entry_head": "53e72d3c5d881e1294d4ccff9788700c87493739",
+  "application_head": "9207bef39ff577d9c194db72c7219c47a0a8e179",
+  "scope": "frontend art/presentation only; existing competitive logic and privacy projections unchanged",
+  "source_hashes": {
+    "tools/build_badge_assets.py": "e7bf364d866eab87d89ace6aec71971e98d74be9d4a52076fd7f892a9c06b2b8",
+    "web/e2e/art-direction.spec.ts": "c6b191336971910594d94de17b2775f028201d8276efff3381a584da1d390d2b",
+    "web/e2e/final-alignment.spec.ts": "b27e377d8ca1d5e36c1e7c671efe65741bab761c8cefac7195e3dcbc69321e94",
+    "web/e2e/localization.spec.ts": "de230653b425f9bcb9f97a3d0a745540fb3192ccac8f35a645d016fd14e2b5b3",
+    "web/e2e/product-ui.spec.ts": "01dc5139246904d13362f8a453cff880c15c468b0b2511c63e8548a66de464dd",
+    "web/e2e/team-preview.spec.ts": "4564a6426d5ad40439df1444ab214b9f87f7f8cd25ebaae0b1c93f4cbca9f07f",
+    "web/public/visuals/badges/v1/1.png": "20bb0970731b0dcf6ae42115b5d16de26802700dde5fc63e500c748465a29355",
+    "web/public/visuals/badges/v1/10.png": "ab38a4f5845375195b00ca78f3b8fed48cceaf64c3babca191e197962b4683e8",
+    "web/public/visuals/badges/v1/11.png": "c8b04c5f7b5264538f8cf4786662402167351a7b1e2e5767dca2d52e0dc08346",
+    "web/public/visuals/badges/v1/12.png": "9c96456a69d6b2ed58fab2c863b5d5e5db821b0e3261ca72198a7e06bf45b0c9",
+    "web/public/visuals/badges/v1/13.png": "ab0235971c526f525084117157d2d1109ad4308a9fa0591053544d93785a4caf",
+    "web/public/visuals/badges/v1/14.png": "8a60bc2eb5a68b630806341df5a10dc760bc2deb72bf5eeac64c4404e6fca1c2",
+    "web/public/visuals/badges/v1/15.png": "498df8114dbc6d995438d87d0232053aa6e613c2767c3b4bcefc5de2566c0dd4",
+    "web/public/visuals/badges/v1/16.png": "00ed9f3ac8bcb252434c81d0b67613ab51457d067da93e22fb5373b187354696",
+    "web/public/visuals/badges/v1/17.png": "d171026353ac682e8ffe7115f275a86fef5582f714b86e5df96a73abfe94eb94",
+    "web/public/visuals/badges/v1/18.png": "1cd616afff6c9254ed50038dbea9a047ec2819c32ba25c77c00b70a04210a7f7",
+    "web/public/visuals/badges/v1/19.png": "3519ca0c91c7fea2a47f025f4d6aa470bbf5cdc8f6bf8ebb6e0b4a7d4ab266ba",
+    "web/public/visuals/badges/v1/2.png": "6bc6124205fe07ef26fb5864ad136b6b6ab1e874120ed009e16ee39f88d77017",
+    "web/public/visuals/badges/v1/20.png": "c4e86ebc6c22023025fdb50a0e7bbf0ce208d81e45168e17e5c1adb58b68df18",
+    "web/public/visuals/badges/v1/21.png": "fdc8c85542d1208a056d12f2ec5763cf64b73711dec2ed1cf2165dcb5ebe4f58",
+    "web/public/visuals/badges/v1/22.png": "6081c06a99a88636f2462223b5e896fe70c800ad56020439d46f39a484314269",
+    "web/public/visuals/badges/v1/23.png": "30c67e7a0bb4785ae9a820100da62a135749eeadda187da10e03a12e39426885",
+    "web/public/visuals/badges/v1/24.png": "56c8b90aaebdd7eb883f9f01d8b2d9c9d5fbc8f67bb4cbcd98603cd04fc6e267",
+    "web/public/visuals/badges/v1/25.png": "0ce641201e364361bf925216285612e8fde6b8f992214b82ac15ecece94baee6",
+    "web/public/visuals/badges/v1/26.png": "d02c8bc555b0d30183042ad383e6b34bc719549ae0bb0702995f0c4f222c608c",
+    "web/public/visuals/badges/v1/27.png": "663f7e45ab5918c69a50a7d96c68ae98c1d3492298de4e243cbe8ec21159ff25",
+    "web/public/visuals/badges/v1/28.png": "fb6a223a8c1f04fd55c55ce06762bf59dc462229f5283a3041f1aeb245f7b411",
+    "web/public/visuals/badges/v1/29.png": "f6c78498e24a7efaea1e4f8c5c7b133a24961ca71b0fdbc55b8d0afd72e155cf",
+    "web/public/visuals/badges/v1/3.png": "da9d86ba9d67d836bba0974464030dcdc8ca53db17f5d55b69fb4253ac003427",
+    "web/public/visuals/badges/v1/30.png": "1144477356fea4fbddc8e799f636dc5431e0d111fb9c108969381f5dbaef63e2",
+    "web/public/visuals/badges/v1/31.png": "9c6fb59e1f8b5d4ce5aaa543db305e3707c721c1854abce217b7f62b6d34bb9d",
+    "web/public/visuals/badges/v1/32.png": "ecf70701f3feca51f8d930b864869bd3bc72a5ba6a3ce6afb83db4db62e11430",
+    "web/public/visuals/badges/v1/33.png": "123adcd9bebdc92ede8b74da259d49a3cc0fdc2baf9497c87c2523204fbfcf87",
+    "web/public/visuals/badges/v1/34.png": "15931159713e05660091a0e174148a001501718d0b2fa6a74cd8f91c44d59f1c",
+    "web/public/visuals/badges/v1/35.png": "91f3f7cdf88ca34979e871d1bec23e65f2373bedabb16c328040bb0d461de737",
+    "web/public/visuals/badges/v1/36.png": "a9df9e33ab8930518b1fbd0d64a831087137883d415f1b698ed2c6edd069c597",
+    "web/public/visuals/badges/v1/37.png": "fda92e73e18cef81b605fe31c9f90ecc55bbfd314b85e57632ebaaecbc1f3a84",
+    "web/public/visuals/badges/v1/38.png": "5f3774ae64da2467cd9dc51d84ac07af095ae2944c9328ff25571039994a0bce",
+    "web/public/visuals/badges/v1/39.png": "c1ae3c646d42d5fb69430c8278bec1074e9f92165f8f394985c3fee01a4e9e8c",
+    "web/public/visuals/badges/v1/4.png": "c0841f531c1907e72d4b2024f4eeee9c967610c90b2aff6f31eeac45bc82c367",
+    "web/public/visuals/badges/v1/40.png": "5801e0b232d2304427f7f5f678074738f9fae5496f8b8713fdf3c56981bf46e0",
+    "web/public/visuals/badges/v1/41.png": "24c01729f85c6ec63d94be663643b3c1e5a5ff8d0b41e99c6e3c60f4b98427c5",
+    "web/public/visuals/badges/v1/42.png": "2e872f6dd6dd1bc07400a201bf3cbc7a4e3dfeea8e494f2cb51503be5afb956c",
+    "web/public/visuals/badges/v1/43.png": "911bdf677528be29258ba9fc7e499b6f0d40cac48628df83b220318990a5974c",
+    "web/public/visuals/badges/v1/44.png": "40be5e616e21325b04daad1aa3c3d20bfff84cff0e486b262bdae22724803eaf",
+    "web/public/visuals/badges/v1/45.png": "0c7a17024e33e5f6bb19946de3edaca7df627ba8d288953b6ee6df619c047b7a",
+    "web/public/visuals/badges/v1/46.png": "c6f1632aaa76b2a06d3b7ceac4eb40cb105a996bdad90cb85567be5a9fe94e93",
+    "web/public/visuals/badges/v1/47.png": "f54d1ae2c236434e35d0dd162bb559320c4e77891704235185a6581dcd7eff8f",
+    "web/public/visuals/badges/v1/48.png": "7f6c9b7e19981222864c518b4ae9b3389e1bc86a5c6687ae3240a3b10d82f76d",
+    "web/public/visuals/badges/v1/49.png": "eec9f447a78ebe1ec076a3838fcf12411aa096242620ffb5bfdde7b4efa3dd84",
+    "web/public/visuals/badges/v1/5.png": "10c7722973b359363cb32f7b66704fe6dcd951cf9babacb5e64c2dde4e6dfd13",
+    "web/public/visuals/badges/v1/50.png": "6981c8ab940798bb046d7319bd3d7043fbd45d382d87de908476ea2d3ab60da1",
+    "web/public/visuals/badges/v1/6.png": "888cda46d6ea588ef903e0714386973c7a4dca29b307845598a7e867c29bed03",
+    "web/public/visuals/badges/v1/7.png": "b180df51b78bd9cd996a4f49a831537cb97c8005c20b9179d879e0b10511840d",
+    "web/public/visuals/badges/v1/8.png": "4a1770a685892e31135969bd3fbd36f345ad70aa79c2b058b65e7b37e4334f38",
+    "web/public/visuals/badges/v1/9.png": "b9a5065aeff3ae1a21b546e24e0b490a19632a4e310d30c9fbe95fa3c9d4ed92",
+    "web/public/visuals/badges/v1/ATTRIBUTION.md": "e296c5eaabcf21413d16efd4d1582e6170d04f3d2d3706ac490f9a9b88b18387",
+    "web/public/visuals/badges/v1/manifest.json": "74ef69e4e2679b3bce7bd668bcafdadbf5ce24cbdd65ca4076a9cfc20c28c6b3",
+    "web/src/art-direction.css": "eed880a0933cbe58d2ee2f09697b438b524b1873bd143a93536cda396bc74cd5",
+    "web/src/features/pokemon-details.test.tsx": "06b96eae5de26e7773300794ec7ed9370ad603d96d400fc4f02e60935359a650",
+    "web/src/features/pokemon-details.tsx": "9a0ea8fe7a9bb4a293a2e7174cdd8f155a9de3b3c90a2da342438a065119b7ed",
+    "web/src/features/progress.test.tsx": "406c8fd0e76e12201d5b7694040a04e9f251d9832b2ae91b2f34aa34234ed012",
+    "web/src/features/progress.tsx": "4a7622cf4067c547947c453e2c40831067fcbfbc44f2fc48e595f1d64141b9e7",
+    "web/src/features/team-preview.tsx": "dc84a00ceec521c2611de27d145ed93b4de75072a29742abc632783c4e08d104",
+    "web/src/main.tsx": "94c9a0537766cad734032a9cf528978a827b7c10371e1ead64fb38803d98c432",
+    "web/src/pokemon/badges.test.ts": "9425c990cdde3552ea951f2848b8856ebf810b2b3ccd8856aa49aeaff11b9285",
+    "web/src/pokemon/badges.ts": "439203f7df48fef02968c56eb8ede1bf8be9cb6d203f5d6960a1317b1ecfd364",
+    "web/src/pokemon/move-types.json": "e39389128b12349bc715c9eb48107b991cf644e155ca452d0d06a04200474c0f",
+    "web/src/pokemon/presentation.test.tsx": "09781c9775a95160435db4265438829d0b50b8a522dd061463d959cef1227e0b",
+    "web/src/pokemon/presentation.tsx": "47fa70d8c3246e94895de6afa19564251c88f9df69b062082cdad92bdd6c8b70"
+  },
+  "react": {
+    "passed": 24,
+    "files": 6,
+    "log": "react-final.log"
+  },
+  "browser": {
+    "unique_passed": 22,
+    "runs": {
+      "browser-first.json": {
+        "startTime": "2026-10-15T15:34:27.028Z",
+        "duration": 75584.613,
+        "expected": 19,
+        "skipped": 0,
+        "unexpected": 0,
+        "flaky": 0
+      },
+      "browser-art.json": {
+        "startTime": "2026-10-15T15:36:52.527Z",
+        "duration": 13137.388,
+        "expected": 3,
+        "skipped": 0,
+        "unexpected": 0,
+        "flaky": 0
+      },
+      "browser-visual-final.json": {
+        "startTime": "2026-10-15T15:38:53.198Z",
+        "duration": 53621.450000000004,
+        "expected": 5,
+        "skipped": 0,
+        "unexpected": 0,
+        "flaky": 0
+      }
+    },
+    "test_fixtures": "synthetic local API interception only",
+    "public_visits": "real, no interception"
+  },
+  "visual_review": {
+    "widths": [
+      1440,
+      900,
+      390
+    ],
+    "actually_reviewed": true,
+    "screens": [
+      "Home",
+      "Team Preview",
+      "Trainers",
+      "Trainer profile",
+      "PC",
+      "Pokemon detail",
+      "Shop/inventory",
+      "Hall",
+      "Save",
+      "Liga",
+      "Cup",
+      "Juicios",
+      "Admin"
+    ],
+    "corrections": [
+      "Removed inherited type fill from the whole detail layout",
+      "Aligned remaining secondary buttons/tabs/topbar with neutral surfaces"
+    ],
+    "contrast": "all 18 move types plus unknown, name and PP >= 4.5:1",
+    "screenshots": {
+      "badge-inventory.png": "caa8e954b202d00bc12469cfb36b33928ec3640fd139bbb64d52ff889b61361c",
+      "public-login-1440.png": "42406b608d1458aba93562804526dcbb2aba14d335efb24a35863b569dd2796e",
+      "public-login-390.png": "57478c9577e410d8eaf5a4d03c1b0c68dca4fffd8a83aa94f0c61a0354545502",
+      "browser-visual-final-artifacts/product-qa-product-surface-0143f-safe-empty-states-at-1440px/admin-1440.png": "0d03ebf89685f02355744a04d28f6b03dadee35cd2072c8f7bef6cc06b9c1aaf",
+      "browser-visual-final-artifacts/product-qa-product-surface-0143f-safe-empty-states-at-1440px/battle-1440.png": "ca45eb94cdcfd9fbe8d7d3e7a0a43ec45663c1b37b8f91ee4d3257c9e1e61f00",
+      "browser-visual-final-artifacts/product-qa-product-surface-0143f-safe-empty-states-at-1440px/cup-1440.png": "82840a630c08e4b96aa3c62f8874e7653b8a1d508e3c0812b40e4829a4c7b654",
+      "browser-visual-final-artifacts/product-qa-product-surface-0143f-safe-empty-states-at-1440px/hall-1440.png": "6368ccf15fce9ba443d3cac77b1ae698c27bdb4f76286148ec72c01b3614ecad",
+      "browser-visual-final-artifacts/product-qa-product-surface-0143f-safe-empty-states-at-1440px/home-1440.png": "aefbdd9d57ea889fcd783dd8db9e880acca678f08622b04c6ce1e755105ebde9",
+      "browser-visual-final-artifacts/product-qa-product-surface-0143f-safe-empty-states-at-1440px/league-1440.png": "f4c55c4c7efd11b0d170b45c79bf137dd95afaa7da5d34f5f88bdf0319c67d50",
+      "browser-visual-final-artifacts/product-qa-product-surface-0143f-safe-empty-states-at-1440px/saves-1440.png": "e6f0b090cb1419704a70a0661447f3b87b2ebcce9cf685377d7d06d47dc951ca",
+      "browser-visual-final-artifacts/product-qa-product-surface-0143f-safe-empty-states-at-1440px/shop-1440.png": "f7896c417698779c0ce333c2ff9cfec11ee9a95b15e0d8209dcfa659e3ef6176",
+      "browser-visual-final-artifacts/product-qa-product-surface-0143f-safe-empty-states-at-1440px/trainers-1440.png": "7603a751dadd1c103b48f2571b8235513ef422cfe8f0bf7f204bf5a94224286e",
+      "browser-visual-final-artifacts/product-qa-product-surface-0143f-safe-empty-states-at-1440px/trials-1440.png": "34a15e8731ac1b6424b74e03ff34138807e364bf731209d2a02f51d234e7037c",
+      "browser-visual-final-artifacts/product-qa-product-surface-09b96--safe-empty-states-at-900px/admin-900.png": "6e030598e576aec3e9e7223c62c24f55e141f66108113c1e13008362a9efe5d2",
+      "browser-visual-final-artifacts/product-qa-product-surface-09b96--safe-empty-states-at-900px/battle-900.png": "82e011953742a447213e949a27797b6d65db7214728372a9ba0304ec88a70add",
+      "browser-visual-final-artifacts/product-qa-product-surface-09b96--safe-empty-states-at-900px/cup-900.png": "dd01b79fbd2ae2e6e1ff03ea5df494efbdd5da92317f846f7f421b0de80a3dbd",
+      "browser-visual-final-artifacts/product-qa-product-surface-09b96--safe-empty-states-at-900px/hall-900.png": "73d7e5b7254b2b6e2e5864afed85c0470d88029a5ab7ec8ead5a19cf61772411",
+      "browser-visual-final-artifacts/product-qa-product-surface-09b96--safe-empty-states-at-900px/home-900.png": "af51f247e1dd40de0583c68f59dd054ca4c9a043a0f6f497ee515c2c180421aa",
+      "browser-visual-final-artifacts/product-qa-product-surface-09b96--safe-empty-states-at-900px/league-900.png": "e67dabca26633a42f30b7d4a54c65911c9fe9efa8ab31e967ba326a1260c5d3b",
+      "browser-visual-final-artifacts/product-qa-product-surface-09b96--safe-empty-states-at-900px/saves-900.png": "fcc397166d027b93fb8ef1b91cbc3ff0505e278ba48eb537380435ec78219611",
+      "browser-visual-final-artifacts/product-qa-product-surface-09b96--safe-empty-states-at-900px/shop-900.png": "d4942bacb5cfee830e8bffad2bd7ff0cf153b8890f6f7a7db4e942de9094b166",
+      "browser-visual-final-artifacts/product-qa-product-surface-09b96--safe-empty-states-at-900px/trainers-900.png": "1d750c05f50e1fe7d447b7cf84126f9f564f696e7f69688629ed9d06da678f87",
+      "browser-visual-final-artifacts/product-qa-product-surface-09b96--safe-empty-states-at-900px/trials-900.png": "1b778e962a3fca4d32a1a88a22b3a15267a4fb3508d49bdf1634f540ce5227d4",
+      "browser-visual-final-artifacts/product-qa-product-surface-941ed--safe-empty-states-at-390px/admin-390.png": "fd69f6226ca6dd3ee997565078a7440f6e0670581e69776ac0ebf732ccb1cdc8",
+      "browser-visual-final-artifacts/product-qa-product-surface-941ed--safe-empty-states-at-390px/battle-390.png": "4ba07df6fa9c337276e5ed4ba8e2bc929e280cfbc297844220b58b44489ef354",
+      "browser-visual-final-artifacts/product-qa-product-surface-941ed--safe-empty-states-at-390px/cup-390.png": "9b12087c61469d3b5c7fb6fb82c376601c763bc551c01c1197c03bfe0580e405",
+      "browser-visual-final-artifacts/product-qa-product-surface-941ed--safe-empty-states-at-390px/hall-390.png": "807a75e158c2a36984cfab4610f3c61cd1ae886de03f4c2038a8bcb70f469f7f",
+      "browser-visual-final-artifacts/product-qa-product-surface-941ed--safe-empty-states-at-390px/home-390.png": "03604cc38adce892c26588ac60e00a2b87bd93d61c5970bbcaf398dd181f0c8a",
+      "browser-visual-final-artifacts/product-qa-product-surface-941ed--safe-empty-states-at-390px/league-390.png": "6c71cabc1b144feb54f132a6f9c92a9ca662192c8ce1b96094081da6b5be51a6",
+      "browser-visual-final-artifacts/product-qa-product-surface-941ed--safe-empty-states-at-390px/saves-390.png": "8d63eb757ff6319734b4854bed50f758b98bf27842dd3b845ce84ec3ff7e7f7b",
+      "browser-visual-final-artifacts/product-qa-product-surface-941ed--safe-empty-states-at-390px/shop-390.png": "a894849d8c8542b1eec0c9054c67d8e4cb51be1a33c61a86b85232a21ccc3e14",
+      "browser-visual-final-artifacts/product-qa-product-surface-941ed--safe-empty-states-at-390px/trainers-390.png": "168bad40e21f6044e29d1740c7d481e6d437a13f0a65206221e5ceb3e904f272",
+      "browser-visual-final-artifacts/product-qa-product-surface-941ed--safe-empty-states-at-390px/trials-390.png": "780189ebdbbdae32ff4c5eba9feafd70cd41e54b9626210c2a0d551944a7f620",
+      "browser-visual-final-artifacts/product-ui-product-collection-and-public-privacy-at-1440px/pc-1440.png": "973a50d4061b7f807782c928defa6b4134537292bea66e050ea2f4cf6808d1e0",
+      "browser-visual-final-artifacts/product-ui-product-collection-and-public-privacy-at-1440px/popup-1440.png": "b1651d022ecb9c17a452a0fbad324e6adf073c048811af7ac0c076dd88f86220",
+      "browser-visual-final-artifacts/product-ui-product-collection-and-public-privacy-at-1440px/trainers-1440.png": "3ef3bd01d15aa1cb639edc7fa41f0bedf088d037bc983ecf9bd735ed02b82f4e",
+      "browser-visual-final-artifacts/product-ui-product-collection-and-public-privacy-at-390px/pc-390.png": "3d121b4d04d5d06d1a35e2630ed6f2e35bb9d0ff83d637d94a5a3168e99ab56b",
+      "browser-visual-final-artifacts/product-ui-product-collection-and-public-privacy-at-390px/popup-390.png": "b37c3c8f5d45a595427be32fe152f39f30405f68958c3acfafa881bbe8816ad1",
+      "browser-visual-final-artifacts/product-ui-product-collection-and-public-privacy-at-390px/trainers-390.png": "a6719b102b4b312322fd0d93ee882baf0e8daf821bc147f84c861edf01881e17",
+      "browser-first-artifacts/final-alignment-trainer-ca-b0c07-s-and-reuse-own-PC-at-390px/rival-detail-390.png": "cae015bc46824211bb4b91d60f2b82d0d21e8cc548a239b1cf946c96ba10046f",
+      "browser-first-artifacts/final-alignment-trainer-ca-b0c07-s-and-reuse-own-PC-at-390px/self-profile-390.png": "46f6fda91ec52fddf6ad16ff1c6d7c56f2818e040fa2454db96fc250914e3880",
+      "browser-first-artifacts/final-alignment-trainer-ca-bc19b--and-reuse-own-PC-at-1440px/rival-detail-1440.png": "9c8e98fd293f272439ff5f1d275e60f296ed6f9aef52c723449ff878489e419e",
+      "browser-first-artifacts/final-alignment-trainer-ca-bc19b--and-reuse-own-PC-at-1440px/self-profile-1440.png": "f94055639ffb5e8aab3ebe80ece963ac8083e5a6cbf573dafec4353b7af24778",
+      "browser-first-artifacts/localization-Spanish-PC-se-00dc0-rofile-and-preview-at-390px/spanish-pc-390.png": "2d720b036f795458b8361d03f813e8922c0a8cd0156131986c8e2d396fca27fc",
+      "browser-first-artifacts/localization-Spanish-PC-se-4f68e-ofile-and-preview-at-1440px/spanish-pc-1440.png": "7d1f26d74b213d893951a65c7363ce4c7eb3bc84dfced7db1dce3b6d9be3887d",
+      "browser-first-artifacts/product-qa-product-surface-0143f-safe-empty-states-at-1440px/admin-1440.png": "96c5822d3f2edb817b3ef318021ca83ff2656f3e4899cc8c1c12eee4297c5cbf",
+      "browser-first-artifacts/product-qa-product-surface-0143f-safe-empty-states-at-1440px/battle-1440.png": "bd7a3055878767a30ff6265d6d610d33c917e18ac27549faf6cd1743335370a6",
+      "browser-first-artifacts/product-qa-product-surface-0143f-safe-empty-states-at-1440px/cup-1440.png": "4cc4e5d2d6a51f71576cad28201252ea2f9b4324f59316b97986e38c693a2f5f",
+      "browser-first-artifacts/product-qa-product-surface-0143f-safe-empty-states-at-1440px/hall-1440.png": "81a3605afa1971befe68c18b651a2918336fcff46b0716224da233f698c740f6",
+      "browser-first-artifacts/product-qa-product-surface-0143f-safe-empty-states-at-1440px/home-1440.png": "6e71fd9d9ef647ad35e7a7717c89f84debf2882ac85b4c679eb7249cb589534f",
+      "browser-first-artifacts/product-qa-product-surface-0143f-safe-empty-states-at-1440px/league-1440.png": "1e8ae78be081b2ff7d10ac84254f37ad8755a96dd3e2bbe27dea21d82f24d69f",
+      "browser-first-artifacts/product-qa-product-surface-0143f-safe-empty-states-at-1440px/saves-1440.png": "724ee87fde0ca8fa4e76e7752b8941ecf7b6ebdbfb99c82433d6652d4fff6c8d",
+      "browser-first-artifacts/product-qa-product-surface-0143f-safe-empty-states-at-1440px/shop-1440.png": "51f7dcb8b0f5c813e59bf50b4a2f35cabbd9e204bef98d91a195740c722e6442",
+      "browser-first-artifacts/product-qa-product-surface-0143f-safe-empty-states-at-1440px/trainers-1440.png": "6a0fa8a8f1c449838426cd9e3675c66225a8a5601af4b53915dbf04b685d3f3a",
+      "browser-first-artifacts/product-qa-product-surface-0143f-safe-empty-states-at-1440px/trials-1440.png": "d157cc1643d66fbf8874cd03072e806d6080ac8e460a642382d2ef6469b94ea0",
+      "browser-first-artifacts/product-qa-product-surface-09b96--safe-empty-states-at-900px/admin-900.png": "7876b57f2bf0b78aa7ce6cc7171dbef106fd254d519f99fa2beef149c19edf5a",
+      "browser-first-artifacts/product-qa-product-surface-09b96--safe-empty-states-at-900px/battle-900.png": "6181311bce97c865bbe4c7f6207c7c40421c948f3020520b9a469cf0e1202435",
+      "browser-first-artifacts/product-qa-product-surface-09b96--safe-empty-states-at-900px/cup-900.png": "ea9568b3d8915b0310e6bf85eb04287d3ffa7dbdd3c4540082d909f18af13c05",
+      "browser-first-artifacts/product-qa-product-surface-09b96--safe-empty-states-at-900px/hall-900.png": "31eaf3f99725eb5cc43b2c86f6f001aa5fbcf42ec60f3ac135dc32ca4f054f51",
+      "browser-first-artifacts/product-qa-product-surface-09b96--safe-empty-states-at-900px/home-900.png": "623c97029aa5c32959b2d2dba0e3d0db3941f0dbb9dfc407b9facaec3b8b3864",
+      "browser-first-artifacts/product-qa-product-surface-09b96--safe-empty-states-at-900px/league-900.png": "57c0fcdf70bb6d681918a6303048a81d98681d2b33d8f025aca4ffd32f1cbe6f",
+      "browser-first-artifacts/product-qa-product-surface-09b96--safe-empty-states-at-900px/saves-900.png": "53c82371e378758391259bd625d455360e77cdd074e584b1d17700fabc361c4c",
+      "browser-first-artifacts/product-qa-product-surface-09b96--safe-empty-states-at-900px/shop-900.png": "be2932d3b3e1748a11badaa73622871847cc61b3a7edfc9cf29762e13fa2b127",
+      "browser-first-artifacts/product-qa-product-surface-09b96--safe-empty-states-at-900px/trainers-900.png": "e0720783c8f8ac576ad29155c5ec7e123cb900914aacb0ce2cebcacf5ba445f6",
+      "browser-first-artifacts/product-qa-product-surface-09b96--safe-empty-states-at-900px/trials-900.png": "212e25f12ddee9dc394d2fd030c6c67963184bc0adf4b5896c9445305871b35a",
+      "browser-first-artifacts/product-qa-product-surface-941ed--safe-empty-states-at-390px/admin-390.png": "ba7451c9944d03d7f66af753920a84ef988af29a9de85c6bfd684b0e3cf673e7",
+      "browser-first-artifacts/product-qa-product-surface-941ed--safe-empty-states-at-390px/battle-390.png": "49e1d464831df8732b567b67f1d2491df09e60206b60a57e8a693e39e152ca0f",
+      "browser-first-artifacts/product-qa-product-surface-941ed--safe-empty-states-at-390px/cup-390.png": "a0656eecb686243909c83b363837152f1837abb8ec9a392b271827b9e11d5f0b",
+      "browser-first-artifacts/product-qa-product-surface-941ed--safe-empty-states-at-390px/hall-390.png": "8231977dde9dcbe9d99e5ed263c03d3aefe6855b01b36b53d5f4c2849d28afba",
+      "browser-first-artifacts/product-qa-product-surface-941ed--safe-empty-states-at-390px/home-390.png": "482986e520ecfe13e63cabfdc7f7acc583172bc331456172371ace1fc3815c23",
+      "browser-first-artifacts/product-qa-product-surface-941ed--safe-empty-states-at-390px/league-390.png": "7cfd0be3f0ce2862123763c94ceeadfc28c739fee44f994d84767ecdc183d28f",
+      "browser-first-artifacts/product-qa-product-surface-941ed--safe-empty-states-at-390px/saves-390.png": "6c4c5e31f0d4d700986ea645eaff3cd463e93db72893b63aa51998225fe95927",
+      "browser-first-artifacts/product-qa-product-surface-941ed--safe-empty-states-at-390px/shop-390.png": "2b26ceed29f620984c7f724e954366716af1a0f14df7030636adb825f79fbb88",
+      "browser-first-artifacts/product-qa-product-surface-941ed--safe-empty-states-at-390px/trainers-390.png": "b6178cf188fbfc929d268696fc137b5a3acaebc15ae77a8308d8f00b5449faa8",
+      "browser-first-artifacts/product-qa-product-surface-941ed--safe-empty-states-at-390px/trials-390.png": "cc11377b9c2d64dc9d15a695cdc2dc333c428529479932d16b71203b39399353",
+      "browser-first-artifacts/product-ui-product-collection-and-public-privacy-at-1440px/pc-1440.png": "6b7fa055f4f2e5a435007cc37902cee452eb0f5f3e6705555326d34b25309494",
+      "browser-first-artifacts/product-ui-product-collection-and-public-privacy-at-1440px/popup-1440.png": "452b773f72c21796b5b9dc875f2b240b8ea874ed22aa28f028b48674ea98f0b2",
+      "browser-first-artifacts/product-ui-product-collection-and-public-privacy-at-1440px/trainers-1440.png": "a1792082f6e85f57591abd8a4211b6bc87c58496fa1c695769370bfedf2f80fe",
+      "browser-first-artifacts/product-ui-product-collection-and-public-privacy-at-390px/pc-390.png": "24ada2a9c8dbccd32b27fb38dd5d5ed06c859132fe9f841cf5f8f05dd2fc5d94",
+      "browser-first-artifacts/product-ui-product-collection-and-public-privacy-at-390px/popup-390.png": "40353f524719d322331700ed93558f0e4baa9199ffe9efd781b2f413be6bfc1d",
+      "browser-first-artifacts/product-ui-product-collection-and-public-privacy-at-390px/trainers-390.png": "a66144af5e9c2aee9e26c315077ab40c97f0529457e13e7aa7ff7bb08475a373",
+      "browser-first-artifacts/team-preview-Team-Preview--9d32b-s-and-warning-fit-at-1440px/move-1440.png": "0806ac690d0de216f760d5139a1739e44cee1e3af1ebeacb1fe359f3a6b6dae9",
+      "browser-first-artifacts/team-preview-Team-Preview--9d32b-s-and-warning-fit-at-1440px/team-preview-1440.png": "a46a5b6e5516ac215aa867e3178698fbe9a3db3e6e8093013b2b19e24da9b861",
+      "browser-first-artifacts/team-preview-Team-Preview-selectors-and-warning-fit-at-390px/move-390.png": "e6b9ef17af087dd17f216af4ae74df982b66f0e74758b6def7792792524e5a0b",
+      "browser-first-artifacts/team-preview-Team-Preview-selectors-and-warning-fit-at-390px/team-preview-390.png": "f6b1e175f63c9c151919422d4e95997842bd7344f3fa77e66a4652e54c5e7366",
+      "browser-art-artifacts/art-direction-inline-move--3836c-ail-IVs-and-focus-at-1440px/inline-1440.png": "1bc814f3a47717ba151971c99c514a7840d6245624b86167a4e4813a36bf9f00",
+      "browser-art-artifacts/art-direction-inline-move--3836c-ail-IVs-and-focus-at-1440px/iv-detail-1440.png": "e083414de535a6adf9338f9f56e72dd75a260cac0e90fda8019e11f3a8de194b",
+      "browser-art-artifacts/art-direction-inline-move--3836c-ail-IVs-and-focus-at-1440px/profile-1440.png": "21c53bd2193586d486ef933c91a2d4d32ae2f4b8b88ed14c2e6aaf270465b332",
+      "browser-art-artifacts/art-direction-inline-move--579cc-tail-IVs-and-focus-at-390px/inline-390.png": "d3f734171550b0e71e04c2af126640360228e3dd67ad21b355117b84bc068334",
+      "browser-art-artifacts/art-direction-inline-move--579cc-tail-IVs-and-focus-at-390px/iv-detail-390.png": "22e8cc1183c5a7aa2109e489ee6ee2d46454b7a7d9d443f359b79ee602880274",
+      "browser-art-artifacts/art-direction-inline-move--579cc-tail-IVs-and-focus-at-390px/profile-390.png": "58389202e55797c3ea1174d91a0520e87c8b03c0ef63daa6fe6be4dbd8b03894"
+    }
+  },
+  "assets": {
+    "badge_hashes": 50,
+    "badge_bytes": 583457,
+    "move_types_parity": 617,
+    "upstream_revision": "ba403973fdf9d0ac59175813861e6a1f8ed5020c",
+    "status": "PASS"
+  },
+  "gates": {
+    "typescript_build": "PASS",
+    "prettier": "PASS",
+    "asset_builder_compile_ruff": "PASS",
+    "diff": "PASS",
+    "worker_dry_run": "PASS",
+    "backend_pg_parser_launcher": "NOT RERUN; unchanged/not invalidated"
+  },
+  "deployment": {
+    "id": "9fab9bdd-d4b8-473e-b901-8458ad45a9d6",
+    "created_on": "2026-10-15T15:43:52.958454Z",
+    "versions": [
+      {
+        "version_id": "681265e6-c1b0-4a37-8357-6a539f01adc1",
+        "percentage": 100
+      }
+    ],
+    "annotations": {
+      "workers/message": "Phase17.1 art direction source 9207bef39ff577d9c194db72c7219c47a0a8e179",
+      "workers/triggered_by": "deployment"
+    }
+  },
+  "public_before": {
+    "observed_at": "2026-10-15T15:40:03.993721+00:00",
+    "mode": "before",
+    "checks": [
+      {
+        "path": "/",
+        "status": 200,
+        "security_headers": "PASS"
+      },
+      {
+        "path": "/pc",
+        "status": 200,
+        "security_headers": "PASS"
+      },
+      {
+        "path": "/entrenadores/scouting",
+        "status": 200,
+        "security_headers": "PASS"
+      },
+      {
+        "path": "/battle",
+        "status": 200,
+        "security_headers": "PASS"
+      },
+      {
+        "path": "/build-config.json",
+        "status": 200,
+        "api": "https://pokeapp-api-production.up.railway.app"
+      },
+      {
+        "path": "/assets/index-BsYnagxu.css",
+        "status": 200,
+        "bytes": 40438,
+        "sha256": "b19c8c732678d3b6c8a05d73e283251b896def3d9704e0bb4395654af2769676",
+        "matches_build": false
+      },
+      {
+        "path": "/assets/index-D9hbT4Ey.js",
+        "status": 200,
+        "bytes": 480513,
+        "sha256": "4120e58dd68216e0d366852f35786804f0df40b6303306c8a63720227c99bc41",
+        "matches_build": false
+      },
+      {
+        "path": "API /health",
+        "status": 200
+      },
+      {
+        "path": "API /v1/read/trainers",
+        "status": 401,
+        "unauthenticated_denial": "PASS",
+        "cors": "exact web origin"
+      }
+    ],
+    "unexpected_5xx": 0,
+    "business_mutations": 0
+  },
+  "public_after": {
+    "observed_at": "2026-10-15T15:44:44.025025+00:00",
+    "mode": "after",
+    "checks": [
+      {
+        "path": "/",
+        "status": 200,
+        "security_headers": "PASS"
+      },
+      {
+        "path": "/pc",
+        "status": 200,
+        "security_headers": "PASS"
+      },
+      {
+        "path": "/entrenadores/scouting",
+        "status": 200,
+        "security_headers": "PASS"
+      },
+      {
+        "path": "/battle",
+        "status": 200,
+        "security_headers": "PASS"
+      },
+      {
+        "path": "/build-config.json",
+        "status": 200,
+        "api": "https://pokeapp-api-production.up.railway.app"
+      },
+      {
+        "path": "/assets/index-B8153HJM.js",
+        "status": 200,
+        "bytes": 490597,
+        "sha256": "bebc3b040b58b79cce7b21a19530a7b921c223f0a802ccddb068c54e4a7fd451",
+        "matches_build": true
+      },
+      {
+        "path": "/assets/index-DUqzRPZ0.css",
+        "status": 200,
+        "bytes": 55942,
+        "sha256": "be4edc70af4484f0f980b35a8b2573820902e947cf0a0f772950992920c42fcf",
+        "matches_build": true
+      },
+      {
+        "path": "API /health",
+        "status": 200
+      },
+      {
+        "path": "API /v1/read/trainers",
+        "status": 401,
+        "unauthenticated_denial": "PASS",
+        "cors": "exact web origin"
+      }
+    ],
+    "unexpected_5xx": 0,
+    "business_mutations": 0
+  },
+  "public_assets": {
+    "observed_at": "2026-10-15T15:44:47.776322+00:00",
+    "checks": [
+      {
+        "path": "/assets/admin-BU3mHQCw.js",
+        "status": 200,
+        "bytes": 26002,
+        "sha256": "d977270b7aa2fde0350453726140d845ed6458f446a9e87434fbc98b44a3658a",
+        "content_type": "text/javascript",
+        "matches_build": true
+      },
+      {
+        "path": "/assets/index-B8153HJM.js",
+        "status": 200,
+        "bytes": 490597,
+        "sha256": "bebc3b040b58b79cce7b21a19530a7b921c223f0a802ccddb068c54e4a7fd451",
+        "content_type": "text/javascript",
+        "matches_build": true
+      },
+      {
+        "path": "/assets/index-DUqzRPZ0.css",
+        "status": 200,
+        "bytes": 55942,
+        "sha256": "be4edc70af4484f0f980b35a8b2573820902e947cf0a0f772950992920c42fcf",
+        "content_type": "text/css",
+        "matches_build": true
+      },
+      {
+        "path": "/visuals/badges/v1/1.png",
+        "status": 200,
+        "bytes": 3445,
+        "sha256": "20bb0970731b0dcf6ae42115b5d16de26802700dde5fc63e500c748465a29355",
+        "content_type": "image/png",
+        "matches_build": true
+      },
+      {
+        "path": "/visuals/badges/v1/2.png",
+        "status": 200,
+        "bytes": 4682,
+        "sha256": "6bc6124205fe07ef26fb5864ad136b6b6ab1e874120ed009e16ee39f88d77017",
+        "content_type": "image/png",
+        "matches_build": true
+      },
+      {
+        "path": "/visuals/badges/v1/3.png",
+        "status": 200,
+        "bytes": 6630,
+        "sha256": "da9d86ba9d67d836bba0974464030dcdc8ca53db17f5d55b69fb4253ac003427",
+        "content_type": "image/png",
+        "matches_build": true
+      },
+      {
+        "path": "/visuals/badges/v1/4.png",
+        "status": 200,
+        "bytes": 6748,
+        "sha256": "c0841f531c1907e72d4b2024f4eeee9c967610c90b2aff6f31eeac45bc82c367",
+        "content_type": "image/png",
+        "matches_build": true
+      },
+      {
+        "path": "/visuals/badges/v1/5.png",
+        "status": 200,
+        "bytes": 2023,
+        "sha256": "10c7722973b359363cb32f7b66704fe6dcd951cf9babacb5e64c2dde4e6dfd13",
+        "content_type": "image/png",
+        "matches_build": true
+      },
+      {
+        "path": "/visuals/badges/v1/6.png",
+        "status": 200,
+        "bytes": 2818,
+        "sha256": "888cda46d6ea588ef903e0714386973c7a4dca29b307845598a7e867c29bed03",
+        "content_type": "image/png",
+        "matches_build": true
+      },
+      {
+        "path": "/visuals/badges/v1/7.png",
+        "status": 200,
+        "bytes": 3070,
+        "sha256": "b180df51b78bd9cd996a4f49a831537cb97c8005c20b9179d879e0b10511840d",
+        "content_type": "image/png",
+        "matches_build": true
+      },
+      {
+        "path": "/visuals/badges/v1/8.png",
+        "status": 200,
+        "bytes": 3335,
+        "sha256": "4a1770a685892e31135969bd3fbd36f345ad70aa79c2b058b65e7b37e4334f38",
+        "content_type": "image/png",
+        "matches_build": true
+      },
+      {
+        "path": "/visuals/badges/v1/9.png",
+        "status": 200,
+        "bytes": 6360,
+        "sha256": "b9a5065aeff3ae1a21b546e24e0b490a19632a4e310d30c9fbe95fa3c9d4ed92",
+        "content_type": "image/png",
+        "matches_build": true
+      },
+      {
+        "path": "/visuals/badges/v1/10.png",
+        "status": 200,
+        "bytes": 5564,
+        "sha256": "ab38a4f5845375195b00ca78f3b8fed48cceaf64c3babca191e197962b4683e8",
+        "content_type": "image/png",
+        "matches_build": true
+      },
+      {
+        "path": "/visuals/badges/v1/11.png",
+        "status": 200,
+        "bytes": 5317,
+        "sha256": "c8b04c5f7b5264538f8cf4786662402167351a7b1e2e5767dca2d52e0dc08346",
+        "content_type": "image/png",
+        "matches_build": true
+      },
+      {
+        "path": "/visuals/badges/v1/12.png",
+        "status": 200,
+        "bytes": 5974,
+        "sha256": "9c96456a69d6b2ed58fab2c863b5d5e5db821b0e3261ca72198a7e06bf45b0c9",
+        "content_type": "image/png",
+        "matches_build": true
+      },
+      {
+        "path": "/visuals/badges/v1/13.png",
+        "status": 200,
+        "bytes": 5483,
+        "sha256": "ab0235971c526f525084117157d2d1109ad4308a9fa0591053544d93785a4caf",
+        "content_type": "image/png",
+        "matches_build": true
+      },
+      {
+        "path": "/visuals/badges/v1/14.png",
+        "status": 200,
+        "bytes": 1535,
+        "sha256": "8a60bc2eb5a68b630806341df5a10dc760bc2deb72bf5eeac64c4404e6fca1c2",
+        "content_type": "image/png",
+        "matches_build": true
+      },
+      {
+        "path": "/visuals/badges/v1/15.png",
+        "status": 200,
+        "bytes": 2477,
+        "sha256": "498df8114dbc6d995438d87d0232053aa6e613c2767c3b4bcefc5de2566c0dd4",
+        "content_type": "image/png",
+        "matches_build": true
+      },
+      {
+        "path": "/visuals/badges/v1/16.png",
+        "status": 200,
+        "bytes": 5748,
+        "sha256": "00ed9f3ac8bcb252434c81d0b67613ab51457d067da93e22fb5373b187354696",
+        "content_type": "image/png",
+        "matches_build": true
+      },
+      {
+        "path": "/visuals/badges/v1/17.png",
+        "status": 200,
+        "bytes": 18416,
+        "sha256": "d171026353ac682e8ffe7115f275a86fef5582f714b86e5df96a73abfe94eb94",
+        "content_type": "image/png",
+        "matches_build": true
+      },
+      {
+        "path": "/visuals/badges/v1/18.png",
+        "status": 200,
+        "bytes": 16924,
+        "sha256": "1cd616afff6c9254ed50038dbea9a047ec2819c32ba25c77c00b70a04210a7f7",
+        "content_type": "image/png",
+        "matches_build": true
+      },
+      {
+        "path": "/visuals/badges/v1/19.png",
+        "status": 200,
+        "bytes": 20319,
+        "sha256": "3519ca0c91c7fea2a47f025f4d6aa470bbf5cdc8f6bf8ebb6e0b4a7d4ab266ba",
+        "content_type": "image/png",
+        "matches_build": true
+      },
+      {
+        "path": "/visuals/badges/v1/20.png",
+        "status": 200,
+        "bytes": 20262,
+        "sha256": "c4e86ebc6c22023025fdb50a0e7bbf0ce208d81e45168e17e5c1adb58b68df18",
+        "content_type": "image/png",
+        "matches_build": true
+      },
+      {
+        "path": "/visuals/badges/v1/21.png",
+        "status": 200,
+        "bytes": 19274,
+        "sha256": "fdc8c85542d1208a056d12f2ec5763cf64b73711dec2ed1cf2165dcb5ebe4f58",
+        "content_type": "image/png",
+        "matches_build": true
+      },
+      {
+        "path": "/visuals/badges/v1/22.png",
+        "status": 200,
+        "bytes": 19542,
+        "sha256": "6081c06a99a88636f2462223b5e896fe70c800ad56020439d46f39a484314269",
+        "content_type": "image/png",
+        "matches_build": true
+      },
+      {
+        "path": "/visuals/badges/v1/23.png",
+        "status": 200,
+        "bytes": 21554,
+        "sha256": "30c67e7a0bb4785ae9a820100da62a135749eeadda187da10e03a12e39426885",
+        "content_type": "image/png",
+        "matches_build": true
+      },
+      {
+        "path": "/visuals/badges/v1/24.png",
+        "status": 200,
+        "bytes": 21176,
+        "sha256": "56c8b90aaebdd7eb883f9f01d8b2d9c9d5fbc8f67bb4cbcd98603cd04fc6e267",
+        "content_type": "image/png",
+        "matches_build": true
+      },
+      {
+        "path": "/visuals/badges/v1/25.png",
+        "status": 200,
+        "bytes": 22388,
+        "sha256": "0ce641201e364361bf925216285612e8fde6b8f992214b82ac15ecece94baee6",
+        "content_type": "image/png",
+        "matches_build": true
+      },
+      {
+        "path": "/visuals/badges/v1/26.png",
+        "status": 200,
+        "bytes": 19708,
+        "sha256": "d02c8bc555b0d30183042ad383e6b34bc719549ae0bb0702995f0c4f222c608c",
+        "content_type": "image/png",
+        "matches_build": true
+      },
+      {
+        "path": "/visuals/badges/v1/27.png",
+        "status": 200,
+        "bytes": 17568,
+        "sha256": "663f7e45ab5918c69a50a7d96c68ae98c1d3492298de4e243cbe8ec21159ff25",
+        "content_type": "image/png",
+        "matches_build": true
+      },
+      {
+        "path": "/visuals/badges/v1/28.png",
+        "status": 200,
+        "bytes": 19785,
+        "sha256": "fb6a223a8c1f04fd55c55ce06762bf59dc462229f5283a3041f1aeb245f7b411",
+        "content_type": "image/png",
+        "matches_build": true
+      },
+      {
+        "path": "/visuals/badges/v1/29.png",
+        "status": 200,
+        "bytes": 20073,
+        "sha256": "f6c78498e24a7efaea1e4f8c5c7b133a24961ca71b0fdbc55b8d0afd72e155cf",
+        "content_type": "image/png",
+        "matches_build": true
+      },
+      {
+        "path": "/visuals/badges/v1/30.png",
+        "status": 200,
+        "bytes": 22513,
+        "sha256": "1144477356fea4fbddc8e799f636dc5431e0d111fb9c108969381f5dbaef63e2",
+        "content_type": "image/png",
+        "matches_build": true
+      },
+      {
+        "path": "/visuals/badges/v1/31.png",
+        "status": 200,
+        "bytes": 19950,
+        "sha256": "9c6fb59e1f8b5d4ce5aaa543db305e3707c721c1854abce217b7f62b6d34bb9d",
+        "content_type": "image/png",
+        "matches_build": true
+      },
+      {
+        "path": "/visuals/badges/v1/32.png",
+        "status": 200,
+        "bytes": 21615,
+        "sha256": "ecf70701f3feca51f8d930b864869bd3bc72a5ba6a3ce6afb83db4db62e11430",
+        "content_type": "image/png",
+        "matches_build": true
+      },
+      {
+        "path": "/visuals/badges/v1/33.png",
+        "status": 200,
+        "bytes": 6736,
+        "sha256": "123adcd9bebdc92ede8b74da259d49a3cc0fdc2baf9497c87c2523204fbfcf87",
+        "content_type": "image/png",
+        "matches_build": true
+      },
+      {
+        "path": "/visuals/badges/v1/34.png",
+        "status": 200,
+        "bytes": 5369,
+        "sha256": "15931159713e05660091a0e174148a001501718d0b2fa6a74cd8f91c44d59f1c",
+        "content_type": "image/png",
+        "matches_build": true
+      },
+      {
+        "path": "/visuals/badges/v1/35.png",
+        "status": 200,
+        "bytes": 9656,
+        "sha256": "91f3f7cdf88ca34979e871d1bec23e65f2373bedabb16c328040bb0d461de737",
+        "content_type": "image/png",
+        "matches_build": true
+      },
+      {
+        "path": "/visuals/badges/v1/36.png",
+        "status": 200,
+        "bytes": 8731,
+        "sha256": "a9df9e33ab8930518b1fbd0d64a831087137883d415f1b698ed2c6edd069c597",
+        "content_type": "image/png",
+        "matches_build": true
+      },
+      {
+        "path": "/visuals/badges/v1/37.png",
+        "status": 200,
+        "bytes": 7136,
+        "sha256": "fda92e73e18cef81b605fe31c9f90ecc55bbfd314b85e57632ebaaecbc1f3a84",
+        "content_type": "image/png",
+        "matches_build": true
+      },
+      {
+        "path": "/visuals/badges/v1/38.png",
+        "status": 200,
+        "bytes": 6837,
+        "sha256": "5f3774ae64da2467cd9dc51d84ac07af095ae2944c9328ff25571039994a0bce",
+        "content_type": "image/png",
+        "matches_build": true
+      },
+      {
+        "path": "/visuals/badges/v1/39.png",
+        "status": 200,
+        "bytes": 7022,
+        "sha256": "c1ae3c646d42d5fb69430c8278bec1074e9f92165f8f394985c3fee01a4e9e8c",
+        "content_type": "image/png",
+        "matches_build": true
+      },
+      {
+        "path": "/visuals/badges/v1/40.png",
+        "status": 200,
+        "bytes": 10370,
+        "sha256": "5801e0b232d2304427f7f5f678074738f9fae5496f8b8713fdf3c56981bf46e0",
+        "content_type": "image/png",
+        "matches_build": true
+      },
+      {
+        "path": "/visuals/badges/v1/41.png",
+        "status": 200,
+        "bytes": 8992,
+        "sha256": "24c01729f85c6ec63d94be663643b3c1e5a5ff8d0b41e99c6e3c60f4b98427c5",
+        "content_type": "image/png",
+        "matches_build": true
+      },
+      {
+        "path": "/visuals/badges/v1/42.png",
+        "status": 200,
+        "bytes": 8710,
+        "sha256": "2e872f6dd6dd1bc07400a201bf3cbc7a4e3dfeea8e494f2cb51503be5afb956c",
+        "content_type": "image/png",
+        "matches_build": true
+      },
+      {
+        "path": "/visuals/badges/v1/43.png",
+        "status": 200,
+        "bytes": 17507,
+        "sha256": "911bdf677528be29258ba9fc7e499b6f0d40cac48628df83b220318990a5974c",
+        "content_type": "image/png",
+        "matches_build": true
+      },
+      {
+        "path": "/visuals/badges/v1/44.png",
+        "status": 200,
+        "bytes": 6252,
+        "sha256": "40be5e616e21325b04daad1aa3c3d20bfff84cff0e486b262bdae22724803eaf",
+        "content_type": "image/png",
+        "matches_build": true
+      },
+      {
+        "path": "/visuals/badges/v1/45.png",
+        "status": 200,
+        "bytes": 5127,
+        "sha256": "0c7a17024e33e5f6bb19946de3edaca7df627ba8d288953b6ee6df619c047b7a",
+        "content_type": "image/png",
+        "matches_build": true
+      },
+      {
+        "path": "/visuals/badges/v1/46.png",
+        "status": 200,
+        "bytes": 19732,
+        "sha256": "c6f1632aaa76b2a06d3b7ceac4eb40cb105a996bdad90cb85567be5a9fe94e93",
+        "content_type": "image/png",
+        "matches_build": true
+      },
+      {
+        "path": "/visuals/badges/v1/47.png",
+        "status": 200,
+        "bytes": 19910,
+        "sha256": "f54d1ae2c236434e35d0dd162bb559320c4e77891704235185a6581dcd7eff8f",
+        "content_type": "image/png",
+        "matches_build": true
+      },
+      {
+        "path": "/visuals/badges/v1/48.png",
+        "status": 200,
+        "bytes": 8545,
+        "sha256": "7f6c9b7e19981222864c518b4ae9b3389e1bc86a5c6687ae3240a3b10d82f76d",
+        "content_type": "image/png",
+        "matches_build": true
+      },
+      {
+        "path": "/visuals/badges/v1/49.png",
+        "status": 200,
+        "bytes": 16239,
+        "sha256": "eec9f447a78ebe1ec076a3838fcf12411aa096242620ffb5bfdde7b4efa3dd84",
+        "content_type": "image/png",
+        "matches_build": true
+      },
+      {
+        "path": "/visuals/badges/v1/50.png",
+        "status": 200,
+        "bytes": 18310,
+        "sha256": "6981c8ab940798bb046d7319bd3d7043fbd45d382d87de908476ea2d3ab60da1",
+        "content_type": "image/png",
+        "matches_build": true
+      },
+      {
+        "path": "/visuals/badges/v1/manifest.json",
+        "status": 200,
+        "bytes": 13087,
+        "sha256": "74ef69e4e2679b3bce7bd668bcafdadbf5ce24cbdd65ca4076a9cfc20c28c6b3",
+        "content_type": "application/json",
+        "matches_build": true
+      },
+      {
+        "path": "/visuals/badges/v1/ATTRIBUTION.md",
+        "status": 200,
+        "bytes": 1400,
+        "sha256": "e296c5eaabcf21413d16efd4d1582e6170d04f3d2d3706ac490f9a9b88b18387",
+        "content_type": "text/markdown",
+        "matches_build": true
+      },
+      {
+        "path": "/visuals/v1/categories/Special.png",
+        "status": 200,
+        "bytes": 547,
+        "sha256": "2732d95c527d392b26a7bc822b53c184938bb6fc8b6278eb050a88d18c9d8ee4",
+        "content_type": "image/png",
+        "matches_build": true
+      },
+      {
+        "path": "/visuals/v1/types/electric-icon.svg",
+        "status": 200,
+        "bytes": 547,
+        "sha256": "b0d465cdcef505f85fce25923cea47ca395a4a05f3928fd8a738cc8d661bb818",
+        "content_type": "image/svg+xml",
+        "matches_build": true
+      },
+      {
+        "path": "/visuals/v1/moves-xy.json",
+        "status": 200,
+        "bytes": 103069,
+        "sha256": "ff3a0bc0a3844223d6674c30c0f634884703f3aae7de4c2feb7a16590fc5833d",
+        "content_type": "application/json",
+        "matches_build": true
+      }
+    ],
+    "unexpected_5xx": 0,
+    "business_writes": 0
+  },
+  "public_browser": {
+    "visits": [
+      {
+        "width": 1440,
+        "route": "/",
+        "status": 200,
+        "login_gate": true
+      },
+      {
+        "width": 1440,
+        "route": "/pc",
+        "status": 200,
+        "login_gate": true
+      },
+      {
+        "width": 1440,
+        "route": "/battle",
+        "status": 200,
+        "login_gate": true
+      },
+      {
+        "width": 1440,
+        "route": "/tienda",
+        "status": 200,
+        "login_gate": true
+      },
+      {
+        "width": 1440,
+        "route": "/admin",
+        "status": 200,
+        "login_gate": true
+      },
+      {
+        "width": 390,
+        "route": "/",
+        "status": 200,
+        "login_gate": true
+      },
+      {
+        "width": 390,
+        "route": "/pc",
+        "status": 200,
+        "login_gate": true
+      },
+      {
+        "width": 390,
+        "route": "/battle",
+        "status": 200,
+        "login_gate": true
+      },
+      {
+        "width": 390,
+        "route": "/tienda",
+        "status": 200,
+        "login_gate": true
+      },
+      {
+        "width": 390,
+        "route": "/admin",
+        "status": 200,
+        "login_gate": true
+      }
+    ],
+    "interception": false,
+    "credentials_submitted": false,
+    "business_mutations": 0,
+    "page_errors": 0,
+    "unexpected_5xx": 0
+  },
+  "http_checks_after": 67,
+  "preservation": {
+    "business_mutations": 0,
+    "credentials_submitted": false,
+    "backend_api_contracts": "unchanged source",
+    "db_baseline": "not performed; no database operations",
+    "R2_objects": "no reads/writes in this phase",
+    "launcher": "unchanged",
+    "V1_Shadow_Streamlit": "not operated on",
+    "protected_guide": "not read or modified"
+  },
+  "limitations": [
+    "Authenticated hosted owner journey not repeated; no PIN supplied/required for this visual-only delivery",
+    "X/Y progress remains UNKNOWN; badge art does not implement parser support",
+    "Unknown game/context cannot select ambiguous Unova badge variants",
+    "Move reference remains explicitly X/Y",
+    "No new ORAS/Gen7, physical save writes, Launcher parity, signing/updater"
+  ],
+  "cleanup": {
+    "test_web_listener_5173": "absent",
+    "headless_runners": "exited",
+    "postgres": "not started",
+    "screenshots_logs": "retained private; task artifacts moved out of workspace"
+  },
+  "private_evidence": "%LOCALAPPDATA%/PokeApp-migration-evidence/phase17-1/20261015",
+  "next_action": "Antonio visual review; STOP"
+}
