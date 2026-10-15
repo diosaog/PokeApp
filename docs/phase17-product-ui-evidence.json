@@ -1,7 +1,7 @@
 {
   "phase": "17",
   "entry_head": "9efd5b324ac48dc86a54f0a9bbde519d7e5a3917",
-  "status": "LOCAL_VALIDATED_DEPLOY_PENDING",
+  "status": "PHASE 17 DONE",
   "react": {
     "total": 104,
     "passed_initial": 103,
@@ -40,9 +40,10 @@
     "backend_pg_installer": "NOT RERUN / UNCHANGED"
   },
   "build": {
-    "entry_js_bytes": 480510,
-    "entry_gzip_approx_bytes": 152440,
-    "admin_lazy_chunk_approx_bytes": 26000
+    "entry_js_bytes": 480513,
+    "entry_gzip_bytes": 150581,
+    "admin_lazy_chunk_bytes": 26002,
+    "admin_gzip_bytes": 7589
   },
   "preservation": {
     "backend_source_changed": false,
@@ -108,5 +109,276 @@
     "unexpected_5xx": 0,
     "business_mutations": 0
   },
-  "private_evidence": "%LOCALAPPDATA%/PokeApp-migration-evidence/phase17/20261015"
+  "private_evidence": "%LOCALAPPDATA%/PokeApp-migration-evidence/phase17/20261015",
+  "application_source": "20334d1a5fed571c38097c593c9335a1dfd48780",
+  "deployment": {
+    "id": "fd5cb5e3-c582-4923-b39c-1ca5b6a27175",
+    "version": "49eb0430-3443-4555-b60b-53cae0a4538e",
+    "percentage": 100,
+    "first_deployment": "7db70c94-bc94-4ba7-81c6-4a2a2f92e7d8",
+    "second_reason": "Public mobile login review found missing whitespace across hidden line break; literal spacing-only correction."
+  },
+  "public_after": {
+    "observed_at": "2026-10-15T11:51:02.333039+00:00",
+    "mode": "after",
+    "checks": [
+      {
+        "path": "/",
+        "status": 200,
+        "security_headers": "PASS"
+      },
+      {
+        "path": "/pc",
+        "status": 200,
+        "security_headers": "PASS"
+      },
+      {
+        "path": "/entrenadores/scouting",
+        "status": 200,
+        "security_headers": "PASS"
+      },
+      {
+        "path": "/battle",
+        "status": 200,
+        "security_headers": "PASS"
+      },
+      {
+        "path": "/build-config.json",
+        "status": 200,
+        "api": "https://pokeapp-api-production.up.railway.app"
+      },
+      {
+        "path": "/assets/index-BsYnagxu.css",
+        "status": 200,
+        "bytes": 40438,
+        "sha256": "b19c8c732678d3b6c8a05d73e283251b896def3d9704e0bb4395654af2769676",
+        "matches_build": true
+      },
+      {
+        "path": "/assets/index-D9hbT4Ey.js",
+        "status": 200,
+        "bytes": 480513,
+        "sha256": "4120e58dd68216e0d366852f35786804f0df40b6303306c8a63720227c99bc41",
+        "matches_build": true
+      },
+      {
+        "path": "API /health",
+        "status": 200
+      },
+      {
+        "path": "API /v1/read/trainers",
+        "status": 401,
+        "unauthenticated_denial": "PASS",
+        "cors": "exact web origin"
+      }
+    ],
+    "unexpected_5xx": 0,
+    "business_mutations": 0
+  },
+  "public_assets": {
+    "observed_at": "2026-10-15T11:51:03.793718+00:00",
+    "asset_checks": [
+      {
+        "path": "/assets/admin-xc7zB6Va.js",
+        "status": 200,
+        "bytes": 26002,
+        "sha256": "305594419b48bb8a8097cf3bbf6d268333d4d8f9244948574637c9351afe8563",
+        "content_type": "text/javascript",
+        "cache_control": "public, max-age=0, must-revalidate",
+        "matches_build": true
+      },
+      {
+        "path": "/assets/index-BsYnagxu.css",
+        "status": 200,
+        "bytes": 40438,
+        "sha256": "b19c8c732678d3b6c8a05d73e283251b896def3d9704e0bb4395654af2769676",
+        "content_type": "text/css",
+        "cache_control": "public, max-age=0, must-revalidate",
+        "matches_build": true
+      },
+      {
+        "path": "/assets/index-D9hbT4Ey.js",
+        "status": 200,
+        "bytes": 480513,
+        "sha256": "4120e58dd68216e0d366852f35786804f0df40b6303306c8a63720227c99bc41",
+        "content_type": "text/javascript",
+        "cache_control": "public, max-age=0, must-revalidate",
+        "matches_build": true
+      },
+      {
+        "path": "/visuals/v1/pokemon/635.png",
+        "status": 200,
+        "bytes": 1354,
+        "sha256": "2307eb6cfa64b5bc591719fb95e56fa5f0718c8868369c954894a2f1785d8fb5",
+        "content_type": "image/png",
+        "cache_control": "public, max-age=0, must-revalidate",
+        "matches_build": true
+      },
+      {
+        "path": "/visuals/v1/pokemon/700.png",
+        "status": 200,
+        "bytes": 2667,
+        "sha256": "307692ec2380e8ed187767e41db5c8fad77323d2748d2159247e946a61e151cc",
+        "content_type": "image/png",
+        "cache_control": "public, max-age=0, must-revalidate",
+        "matches_build": true
+      },
+      {
+        "path": "/visuals/v1/items/234.png",
+        "status": 200,
+        "bytes": 264,
+        "sha256": "3ea874aaa17bbcb682131876763ca2f9a896644f7a2b5d9c51ea234f7aace558",
+        "content_type": "image/png",
+        "cache_control": "public, max-age=0, must-revalidate",
+        "matches_build": true
+      },
+      {
+        "path": "/visuals/v1/trainers/ANTO.png",
+        "status": 200,
+        "bytes": 93170,
+        "sha256": "ba3a9287ffbcdc2f6507423f7a310512d82ef9ad0182604adeeb6c8dd20d157c",
+        "content_type": "image/png",
+        "cache_control": "public, max-age=0, must-revalidate",
+        "matches_build": true
+      },
+      {
+        "path": "/visuals/v1/medallas/Medalla_Lignito.png",
+        "status": 200,
+        "bytes": 13700,
+        "sha256": "0f501565ca1e0c57875f634ce4058579e30cc1b2a4524a2059473b32e12cfc62",
+        "content_type": "image/png",
+        "cache_control": "public, max-age=0, must-revalidate",
+        "matches_build": true
+      },
+      {
+        "path": "/visuals/v1/types/electric-icon.svg",
+        "status": 200,
+        "bytes": 547,
+        "sha256": "b0d465cdcef505f85fce25923cea47ca395a4a05f3928fd8a738cc8d661bb818",
+        "content_type": "image/svg+xml",
+        "cache_control": "public, max-age=0, must-revalidate",
+        "matches_build": true
+      },
+      {
+        "path": "/visuals/v1/categories/Special.png",
+        "status": 200,
+        "bytes": 547,
+        "sha256": "2732d95c527d392b26a7bc822b53c184938bb6fc8b6278eb050a88d18c9d8ee4",
+        "content_type": "image/png",
+        "cache_control": "public, max-age=0, must-revalidate",
+        "matches_build": true
+      },
+      {
+        "path": "/visuals/v1/moves-xy.json",
+        "status": 200,
+        "bytes": 103069,
+        "sha256": "ff3a0bc0a3844223d6674c30c0f634884703f3aae7de4c2feb7a16590fc5833d",
+        "content_type": "application/json",
+        "cache_control": "public, max-age=0, must-revalidate",
+        "matches_build": true
+      },
+      {
+        "path": "/visuals/v1/ATTRIBUTION.md",
+        "status": 200,
+        "bytes": 1755,
+        "sha256": "7cc193b06eeb6947a3ae09613c3bdec6fb0b321b25c6f6b054e51742ef8e1e1a",
+        "content_type": "text/markdown",
+        "cache_control": "public, max-age=0, must-revalidate",
+        "matches_build": true
+      },
+      {
+        "path": "/visuals/v1/manifest.json",
+        "status": 200,
+        "bytes": 418116,
+        "sha256": "d0f8fc355befd5b8b61545bebcea2055c80a821a94110a4db37dfe4c51f4e288",
+        "content_type": "application/json",
+        "cache_control": "public, max-age=0, must-revalidate",
+        "matches_build": true
+      }
+    ],
+    "launcher_head": {
+      "status": 200,
+      "size": 159086018,
+      "etag": "\"a66602675bf44a1301c6d72aa250e3d6\"",
+      "unchanged_worker_source": true,
+      "object_written": false
+    },
+    "unexpected_5xx": 0
+  },
+  "public_browser": {
+    "visits": [
+      {
+        "width": 1440,
+        "route": "/",
+        "status": 200,
+        "login_gate": true
+      },
+      {
+        "width": 1440,
+        "route": "/pc",
+        "status": 200,
+        "login_gate": true
+      },
+      {
+        "width": 1440,
+        "route": "/battle",
+        "status": 200,
+        "login_gate": true
+      },
+      {
+        "width": 1440,
+        "route": "/tienda",
+        "status": 200,
+        "login_gate": true
+      },
+      {
+        "width": 1440,
+        "route": "/admin",
+        "status": 200,
+        "login_gate": true
+      },
+      {
+        "width": 390,
+        "route": "/",
+        "status": 200,
+        "login_gate": true
+      },
+      {
+        "width": 390,
+        "route": "/pc",
+        "status": 200,
+        "login_gate": true
+      },
+      {
+        "width": 390,
+        "route": "/battle",
+        "status": 200,
+        "login_gate": true
+      },
+      {
+        "width": 390,
+        "route": "/tienda",
+        "status": 200,
+        "login_gate": true
+      },
+      {
+        "width": 390,
+        "route": "/admin",
+        "status": 200,
+        "login_gate": true
+      }
+    ],
+    "interception": false,
+    "credentials_submitted": false,
+    "business_mutations": 0,
+    "page_errors": 0,
+    "unexpected_5xx": 0
+  },
+  "public_authenticated_owner": "NOT REPEATED; no owner PIN submitted; authenticated product proof uses local synthetic fixtures.",
+  "cleanup": {
+    "local_web_port_5173": "no listener",
+    "headless_probes": "exited; browser closed in finally",
+    "postgres": "not started",
+    "evidence": "retained private"
+  }
 }

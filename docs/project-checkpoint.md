@@ -5,7 +5,18 @@ milestone record; it does not maintain a second live phase-status ledger.
 
 ## Current project position
 
-- Latest completed packet: **16E - Spanish Pokémon web presentation, DONE**.
+- Latest completed phase: **17 - Full product/UI rework, DONE**.
+  Checkpoints 17A–17F complete. Shared green/coral visual system and local assets;
+  trainer profiles, bounded PC/modal, compact Team Preview/move popovers, visual
+  store and coherent remaining surfaces. Privacy/domain unchanged. Final source
+  `20334d1` pushed; Cloudflare version `49eb0430-3443-4555-b60b-53cae0a4538e`
+  serves 100%. 104 React / 76 unique Edge cases pass; hosted 23 HTTP checks and
+  10 unauthenticated real browser visits pass. No backend/DB/Launcher writes.
+  [Report](phase17-product-ui-report.md), [evidence](phase17-product-ui-evidence.json),
+  [single live record](work-in-progress/phase17-product-ui-live.md).
+  Next: **ANTONIO PRODUCT REVIEW. STOP.** Final Launcher React parity, ORAS/Gen7
+  and physical save writes remain deferred/not started.
+- Previous packet: **16E - Spanish Pokémon web presentation, DONE**.
   Reproducible PKHeX.Core 24.11.11 names catalog; one shared resolver across current
   PC/profiles/scouting/Team Preview/Shop/inventory surfaces. Privacy/domain unchanged;
   no guessed descriptions or ambiguous item namespace. Source `29aecbc` pushed and
@@ -14,7 +25,6 @@ milestone record; it does not maintain a second live phase-status ledger.
   unchanged, final desktop parity deferred; physical writes NOT STARTED.
   [Evidence](phase16e-spanish-localization-evidence.json),
   [single live record](work-in-progress/phase16e-spanish-localization-live.md).
-  Next: **OWNER PRODUCT REVIEW / EXTRA REQUESTS. STOP**.
 - Previous packet: **16D - Launcher to web trusted save sync, DONE**.
   Original bytes are parsed by the server, registered atomically in the existing
   V2 current-save model and verified by Launcher PC readback. Local-first/privacy
