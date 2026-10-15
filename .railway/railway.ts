@@ -2,6 +2,7 @@ import { defineRailway, project, service, preserve } from "railway/iac";
 
 export default defineRailway(() => project("PokeApp V2", {
   resources: [service("pokeapp-api", {
+    build: { builder: "DOCKERFILE", dockerfilePath: "Dockerfile", buildEnvironment: "V3" },
     healthcheck: "/health",
     healthcheckTimeout: 120,
     replicas: 1,
