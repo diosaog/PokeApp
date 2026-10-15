@@ -1,11 +1,21 @@
 # PokeApp 2.0 Project Checkpoint
 
-Checkpoint reconciled: 2026-10-13. This file is the project index and historical
+Checkpoint reconciled: 2026-10-15. This file is the project index and historical
 milestone record; it does not maintain a second live phase-status ledger.
 
 ## Current project position
 
-- Latest completed packet: **16C - Windows Launcher distribution, DONE**.
+- Latest completed packet: **16D - Launcher to web trusted save sync, DONE**.
+  Original bytes are parsed by the server, registered atomically in the existing
+  V2 current-save model and verified by Launcher PC readback. Local-first/privacy
+  preserved; migration 044 once, compatible API/web and Launcher 0.16.2 delivered.
+  Final source `2959287`; hosted checksum and owner-data preservation pass.
+  Positive real-save hosted acceptance remains owner-only; temporary 16D directory
+  deletion was policy-blocked, with evidence retained and no process running.
+  [Report](phase16d-launcher-web-sync-report.md),
+  [single live record](work-in-progress/phase16d-launcher-web-sync-live.md).
+  Next: Spanish localization / user-visible Pokemon data, **NOT STARTED**.
+- Previous packet: **16C - Windows Launcher distribution, DONE**.
   Application `46cf271` pushed; per-user Windows 10/11 x64 preview 0.16.1 passes
   hidden install/restart/reinstall/uninstall, bundled parser and data preservation.
   Direct Save download live on existing Cloudflare via one private R2 bucket;

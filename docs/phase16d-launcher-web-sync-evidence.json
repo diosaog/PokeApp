@@ -1,0 +1,299 @@
+{
+  "phase": "16D",
+  "status": "DONE",
+  "closed": "2026-10-15 Europe/Madrid",
+  "entry_head": "18e05366cf7234bb09a748eb2da9e0bac1e512bf",
+  "implementation_head": "0a2732547dbcdc3edaa33a872a518956591825d9",
+  "deployment_source": "2959287b769c9b89897450551d78f55a15b51d18",
+  "tests": {
+    "python_full": {
+      "passed": 844,
+      "preexisting_untracked_map_tests": 19,
+      "log": "full-python-final2.log"
+    },
+    "api_launcher_focused": 26,
+    "schema_focused": 15,
+    "react_affected": 12,
+    "worker": 2,
+    "browser_affected": 14,
+    "postgres": {
+      "status": "PASS",
+      "public_tables_restored": 54,
+      "migrations": 44,
+      "bootstrap_parity": true,
+      "native_gen5_xy": true,
+      "real_http_pin_jwt": true,
+      "private_inbox_no_effects": true,
+      "raw_registered_pc_readback": true,
+      "same_hash_replay_concurrency": true,
+      "cross_owner_denied": true,
+      "xy_identity_progress_unknown": true,
+      "transaction_rollback": true,
+      "browser_writes_denied": true,
+      "source_bytes_unchanged": true,
+      "browser": true,
+      "concurrent_new_save_rewards_once": true,
+      "stale_cas_denied": true,
+      "old_replay_no_rewind": true
+    },
+    "real_browser": {
+      "status": "PASS",
+      "real_api_responses": 23,
+      "no_api_interception": true,
+      "reload_save_pc_own_trainer": true,
+      "rival_private_pc_not_requested": true,
+      "launcher_raw_receipt_pc_readback": true,
+      "page_errors": []
+    },
+    "packaged_core": {
+      "status": "PASS",
+      "packaged_core_stdio": true,
+      "new_outbox_imports": true,
+      "no_owner_profile": true
+    },
+    "typescript_build": true,
+    "ruff_targeted": true,
+    "format_diff": true
+  },
+  "deployment": {
+    "railway": {
+      "id": "c3e33fd1-a355-4edc-a663-3947288e247d",
+      "status": "SUCCESS",
+      "image": "sha256:d93f6415a8d050dc24ec67370e382709ce44f36ed5c292c7cae7a48a8746f70a",
+      "source": "Phase16D committed API bundle 2959287b769c9b89897450551d78f55a15b51d18",
+      "committed_inputs": 256
+    },
+    "cloudflare": {
+      "id": "9468c50c-7a69-45dc-bda4-fe5d4d45cd04",
+      "versions": [
+        {
+          "version_id": "34cb5721-c205-4ea3-9bd0-d97ffc400127",
+          "percentage": 100
+        }
+      ],
+      "source": "Phase16D source 2959287b769c9b89897450551d78f55a15b51d18; Launcher 0.16.2"
+    },
+    "r2_key": "windows/0.16.2/PokeApp-Launcher-Setup.exe"
+  },
+  "installer": {
+    "status": "PASS",
+    "version": "0.16.2",
+    "sha256": "4c4ddf69ac13a5566a58cffe04401fb7cc3a1c1d7efefe97c0d91561336f9523",
+    "bytes": 159086018,
+    "asar_files": [
+      "assets",
+      "assets/icon.ico",
+      "index.html",
+      "main.cjs",
+      "package.json",
+      "preload.cjs",
+      "renderer.js",
+      "style.css"
+    ],
+    "application_modules": [
+      "app.domain",
+      "app.domain.pokemon_identity",
+      "app.launcher",
+      "app.launcher.backend",
+      "app.launcher.backup",
+      "app.launcher.cloud_store",
+      "app.launcher.config",
+      "app.launcher.core",
+      "app.launcher.journal",
+      "app.launcher.runtime",
+      "app.launcher.secrets",
+      "app.launcher.stdio",
+      "app.launcher.sync",
+      "app.launcher.trusted_sync",
+      "app.save_parser",
+      "app.save_parser.adapter",
+      "app.save_parser.cloud",
+      "app.save_parser.files",
+      "app.save_parser.models",
+      "app.save_parser.registration",
+      "app.save_parser.xy_identity"
+    ],
+    "runtime_file_count": 334,
+    "unsigned": true
+  },
+  "public_proof": {
+    "status": "PASS",
+    "checks": [
+      {
+        "method": "GET",
+        "path": "api/health",
+        "status": 200,
+        "seconds": 0.281
+      },
+      {
+        "method": "GET",
+        "path": "api/openapi.json",
+        "status": 200,
+        "seconds": 0.235
+      },
+      {
+        "method": "GET",
+        "path": "api/v1/seasons/00000000-0000-4000-8000-000000000016/saves/context",
+        "status": 401,
+        "seconds": 0.195
+      },
+      {
+        "method": "GET",
+        "path": "api/v1/seasons/00000000-0000-4000-8000-000000000016/saves/receipt?sha256=0000000000000000000000000000000000000000000000000000000000000000",
+        "status": 401,
+        "seconds": 0.174
+      },
+      {
+        "method": "PUT",
+        "path": "api/v1/seasons/00000000-0000-4000-8000-000000000016/saves/raw?sha256=0000000000000000000000000000000000000000000000000000000000000000&observation_digest=0000000000000000000000000000000000000000000000000000000000000000&expected_save_id=none",
+        "status": 401,
+        "seconds": 0.177
+      },
+      {
+        "method": "GET",
+        "path": "api/v1/seasons/00000000-0000-4000-8000-000000000016/saves/context",
+        "status": 401,
+        "seconds": 0.694
+      },
+      {
+        "method": "OPTIONS",
+        "path": "api/v1/seasons/00000000-0000-4000-8000-000000000016/saves/raw",
+        "status": 200,
+        "seconds": 0.193
+      },
+      {
+        "method": "GET",
+        "path": "web/saves",
+        "status": 200,
+        "seconds": 0.228
+      },
+      {
+        "method": "GET",
+        "path": "web/build-config.json",
+        "status": 200,
+        "seconds": 0.015
+      },
+      {
+        "method": "GET",
+        "path": "web/assets/index-DnafSRW1.js",
+        "status": 200,
+        "seconds": 0.328
+      },
+      {
+        "method": "GET",
+        "path": "web/assets/index-CiTDJ1XT.css",
+        "status": 200,
+        "seconds": 0.014
+      },
+      {
+        "method": "HEAD",
+        "path": "web/launcher/download",
+        "status": 200,
+        "seconds": 0.312
+      },
+      {
+        "method": "GET",
+        "path": "web/launcher/download",
+        "status": 200,
+        "seconds": 3.078
+      }
+    ],
+    "assets_match_build": [
+      "/assets/index-DnafSRW1.js",
+      "/assets/index-CiTDJ1XT.css"
+    ],
+    "launcher_version": "0.16.2",
+    "download_sha256": "4c4ddf69ac13a5566a58cffe04401fb7cc3a1c1d7efefe97c0d91561336f9523",
+    "download_bytes": 159086018,
+    "no_positive_owner_mutations": true,
+    "production_login_test": "NOT_RUN_OWNER_PIN_UNAVAILABLE"
+  },
+  "preservation": {
+    "status": "PASS",
+    "owner_unchanged": true,
+    "inbox_unchanged": true,
+    "prior_migrations_unchanged": 35,
+    "new_migration_once": {
+      "version": "20261014164204",
+      "name": "044_trusted_save_registration",
+      "record_hash": "42f4f342e7f04e9f8c55f6d691621887"
+    },
+    "advisor_error_warn_unchanged": true,
+    "security": [
+      {
+        "invoker": true,
+        "proconfig": [
+          "search_path=pg_catalog, public"
+        ],
+        "browser_denied": true,
+        "service_execute": true
+      }
+    ],
+    "storage_policies": [
+      {
+        "policyname": "trusted_raw_no_browser_delete",
+        "permissive": "RESTRICTIVE",
+        "roles": "{authenticated}",
+        "cmd": "DELETE"
+      },
+      {
+        "policyname": "trusted_raw_no_browser_insert",
+        "permissive": "RESTRICTIVE",
+        "roles": "{authenticated}",
+        "cmd": "INSERT"
+      },
+      {
+        "policyname": "trusted_raw_no_browser_update",
+        "permissive": "RESTRICTIVE",
+        "roles": "{authenticated}",
+        "cmd": "UPDATE"
+      }
+    ],
+    "after_deploy": true,
+    "tables_compared": 59,
+    "tables_identical": 56,
+    "auth_activity_tables_changed": [
+      "auth.refresh_tokens",
+      "auth.sessions",
+      "auth.users"
+    ],
+    "auth_activity_scope": [
+      {
+        "one_user": true,
+        "one_identity": true,
+        "sessions_known_owner": true,
+        "tokens_known_owner": true
+      }
+    ],
+    "all_business_storage_identity_rows_unchanged": true,
+    "stable_owner_credentials_unchanged": true,
+    "all_36_migration_records_unchanged_after_apply": true,
+    "security_unchanged_after_apply": true,
+    "advisor_counts": {
+      "ERROR": 24,
+      "WARN": 5,
+      "INFO": 171
+    }
+  },
+  "cleanup": {
+    "processes_and_listeners_remaining": false,
+    "pg_fixture_databases_dropped_by_runner": true,
+    "temporary_directory_removed": false,
+    "remaining_path": "%TEMP%/pokeapp-phase16d-20261014",
+    "removal_rejected": "Automatic approval review: blocked by policy",
+    "operator_cleanup_required": true,
+    "old_16c_residue": "untouched"
+  },
+  "private_evidence": "%LOCALAPPDATA%/PokeApp-migration-evidence/phase16d/20261015",
+  "release_copy": "%LOCALAPPDATA%/PokeApp-releases/0.16.2/PokeApp-Launcher-Setup.exe",
+  "limits": [
+    "Hosted positive save registration is reserved for the owner; no production fixture or owner-season mutation.",
+    "Local E2E substitutes external Auth/object transport, using real API, PIN/JWT bridge, native parsing and PostgreSQL.",
+    "Server Linux image passed parser smoke at build; optional synthetic live-parser SSH diagnostic did not run because no SSH keys were available.",
+    "Installer remains unsigned; no clean-Windows VM or fresh installation matrix repeated.",
+    "An immutable raw object can remain if its subsequent DB transaction fails; it has no current-save or competitive authority.",
+    "X/Y competitive progress and identity stay unknown; user-visible numeric labels remain until localization."
+  ],
+  "next": "Spanish localization / user-visible Pokemon data - NOT STARTED",
+  "physical_save_writes": "NOT STARTED"
+}
