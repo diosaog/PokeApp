@@ -1,13 +1,14 @@
 import { useState } from "react";
 import { Link, useParams } from "react-router-dom";
+import { LockKeyhole } from "lucide-react";
 import type { Model } from "../api/types";
-import { pokemonTitle } from "../pokemon/localization";
 import { useApp, useOverview, useRead } from "../state";
-import { Card, Empty, Heading, Loading, Modal, Notice, Tag } from "../ui";
+import { Card, Empty, Heading, Loading, Notice, Tag } from "../ui";
 import { Pokemon, WithSeason } from "./core";
+import { TrainerPhoto, StatPill } from "../pokemon/presentation";
 import { GameProgress } from "./progress";
-import { LockStatus } from "./lock-status";
-import { PokemonDetails, type DetailPokemon } from "./pokemon-details";
+import { Collection } from "./collection";
+import { PokemonDetailModal } from "./pokemon-details";
 import { participantLabel } from "./admin-labels";
 
 export function TrainerProfilePage() {
@@ -15,7 +16,9 @@ export function TrainerProfilePage() {
     { trainerId = "" } = useParams();
   return (
     <>
-      <Link to="/entrenadores">← Entrenadores</Link>
+      <Link className="text-link" to="/entrenadores">
+        ← Entrenadores
+      </Link>
       <WithSeason>
         <Profile key={`${season}:${trainerId}`} trainer={trainerId} />
       </WithSeason>
@@ -24,61 +27,25 @@ export function TrainerProfilePage() {
 }
 function Profile({ trainer }: { trainer: string }) {
   const { season, me } = useApp(),
-    own = trainer === me?.trainer_id;
-  const overview = useOverview(),
-    league = useRead<Model<"LeagueGeneralRead">>(
-      `/v1/read/seasons/${season}/league`,
-      !!season,
-    );
-  const publicTeam = useRead<Model<"ScoutingRead">>(
+    own = trainer === me?.trainer_id,
+    overview = useOverview();
+  const league = useRead<Model<"LeagueGeneralRead">>(
+    `/v1/read/seasons/${season}/league`,
+    !!season,
+  );
+  const rival = useRead<Model<"ScoutingRead">>(
     `/v1/read/seasons/${season}/scouting?trainer_id=${encodeURIComponent(trainer)}`,
     !!season && !own,
   );
-  const selfTeam = useRead<Model<"TeamPreviewRead">>(
-    `/v1/read/seasons/${season}/team-preview?mode=battle&trainer_id=${encodeURIComponent(trainer)}`,
-    !!season && own,
-  );
-  const ownSave = useRead<Model<"PCRead">>(
+  const pc = useRead<Model<"PCRead">>(
     `/v1/read/seasons/${season}/pc`,
     !!season && own,
   );
-  const [selected, setSelected] = useState<DetailPokemon | null>(null);
+  const [selected, setSelected] = useState<
+    NonNullable<Model<"ScoutingRead">["team"]>[number] | null
+  >(null);
   const player = overview.data?.players.find((p) => p.trainer_id === trainer),
-    row = league.data?.rows.find((p) => p.trainer_id === trainer);
-  const dayNumber = overview.data?.days.find(
-    (d) => d.id === overview.data?.season.current_matchday_id,
-  )?.number;
-  const membership = overview.data?.memberships.find(
-    (m) =>
-      m.season_player_id === player?.id &&
-      dayNumber != null &&
-      m.effective_from_matchday_number <= dayNumber &&
-      (m.effective_to_matchday_number == null ||
-        m.effective_to_matchday_number >= dayNumber) &&
-      (m.eligibility_ends_before_matchday_number == null ||
-        dayNumber < m.eligibility_ends_before_matchday_number),
-  );
-  const division = overview.data?.divisions.find(
-    (d) => d.id === membership?.division_id,
-  );
-  const entry = selfTeam.data?.teams.find(
-    (t) => t.trainer_id === trainer && t.visibility === "self",
-  );
-  const mons: DetailPokemon[] = own
-    ? entry?.visibility === "self"
-      ? (entry.lock?.team.map((pokemon) => ({
-          visibility: "self" as const,
-          pokemon,
-        })) ?? [])
-      : []
-    : (publicTeam.data?.team?.map((pokemon) => ({
-        visibility: "public" as const,
-        pokemon,
-      })) ?? []);
-  const teamQuery = own ? selfTeam : publicTeam;
-  const status = own
-    ? (entry?.lock?.timing_status ?? (entry?.lock ? "unknown" : "pending"))
-    : (publicTeam.data?.team_lock_status ?? "pending");
+    row = league.data?.rows.find((r) => r.trainer_id === trainer);
   if (overview.isPending) return <Loading />;
   if (overview.error) return <Notice error={overview.error} />;
   if (!player)
@@ -89,106 +56,99 @@ function Profile({ trainer }: { trainer: string }) {
         eyebrow={own ? "TU PERFIL" : "ENTRENADOR"}
         title={player.display_name}
       />
-      <div className="trainer-top">
-        <Tag>{participantLabel(player.status)}</Tag>
-        {division && <Tag>División {division.code}</Tag>}
-        {own && (
-          <Link className="button" to="/pc">
-            Abrir mi PC
-          </Link>
-        )}
-      </div>
-      <Notice error={league.error} />
-      {row && (
-        <div className="quick-grid">
-          <Card>
-            <span>Puntos totales</span>
-            <h2>{row.total_points}</h2>
-          </Card>
-          <Card>
-            <span>Pokémon muertos</span>
-            <h2>{row.dead_count ?? "Sin observar"}</h2>
-          </Card>
+      <Card
+        className={`profile-identity ${player.status !== "active" ? "inactive-trainer" : ""}`}
+      >
+        <TrainerPhoto name={player.display_name} />
+        <div>
+          <div className="tags">
+            {own && <Tag>TÚ</Tag>}
+            {player.status !== "active" && (
+              <Tag>{participantLabel(player.status)}</Tag>
+            )}
+          </div>
+          <div className="mini-stats">
+            <StatPill label="Puntos" value={row?.total_points} />
+            <StatPill label="Monedas" value={row?.coin_balance} />
+            <StatPill label="Muertos" value={row?.dead_count ?? "—"} />
+          </div>
+          <GameProgress progress={player.progress} compact />
           {own && (
-            <Card>
-              <span>Monedas</span>
-              <h2>{row.coin_balance} PK₽</h2>
-              <Link to="/tienda">Mi inventario →</Link>
-            </Card>
+            <Link className="text-link" to="/tienda">
+              Ver mi inventario →
+            </Link>
           )}
         </div>
-      )}
-      <Card>
-        <h2>Progreso</h2>
-        <GameProgress progress={player.progress} />
       </Card>
-      {own && (
-        <Card>
-          <h2>Mi save actual</h2>
-          {ownSave.error ? (
-            <Notice error={ownSave.error} />
-          ) : ownSave.isPending ? (
+      <Notice error={league.error} />
+      {own ? (
+        <>
+          <Notice error={pc.error} />
+          {pc.isPending ? (
             <Loading />
+          ) : pc.data?.status === "ready" ? (
+            <Collection
+              key={pc.data.save?.id}
+              slots={pc.data.pokemon}
+              showDead
+            />
           ) : (
-            <>
-              <p>
-                {ownSave.data?.status === "ready"
-                  ? "Save registrado y disponible en Mi PC."
-                  : "Sin save actual disponible. Sincroniza tu partida desde el Launcher."}
-              </p>
-              <Link to="/pc">Ver mi equipo y mis cajas →</Link>
-            </>
+            <Empty>
+              Tu equipo y tus cajas aparecerán al sincronizar tu partida.{" "}
+              <Link to="/saves">Abrir Saves y Launcher →</Link>
+            </Empty>
           )}
-        </Card>
-      )}
-      <Card>
-        <h2>Equipo de la jornada</h2>
-        {teamQuery.error ? (
-          <Notice error={teamQuery.error} />
-        ) : teamQuery.isPending ? (
-          <Loading />
-        ) : (
-          <>
-            <LockStatus status={status} />
-            <p>Team Lock competitivo de la jornada.</p>
-            {mons.length ? (
-              <div className="pokemon-grid">
-                {mons.map((detail, i) => (
-                  <div key={i}>
-                    <Pokemon
-                      pokemon={detail.pokemon}
-                      onClick={() => setSelected(detail)}
-                    />
-                    <button
-                      className="button secondary"
-                      onClick={() => setSelected(detail)}
-                    >
-                      Ver detalles
-                    </button>
-                  </div>
+        </>
+      ) : (
+        <>
+          <Card>
+            <div className="section-row">
+              <h2>Equipo</h2>
+              <Tag>Equipo de la jornada</Tag>
+            </div>
+            {rival.isPending ? (
+              <Loading />
+            ) : rival.error ? (
+              <Notice error={rival.error} />
+            ) : rival.data?.team?.length ? (
+              <div className="public-party">
+                {rival.data.team.map((pokemon, i) => (
+                  <Pokemon
+                    key={i}
+                    pokemon={pokemon}
+                    onClick={() => setSelected(pokemon)}
+                  />
                 ))}
               </div>
             ) : (
-              <Empty>
-                No hay un equipo fijado disponible.
-                {own && (
-                  <>
-                    {" "}
-                    <Link to="/battle">Fijar mi equipo →</Link>
-                  </>
-                )}
-              </Empty>
+              <Empty>Este entrenador aún no ha fijado su equipo.</Empty>
             )}
-          </>
-        )}
-      </Card>
+          </Card>
+          <div className="private-sections">
+            <Card>
+              <LockKeyhole size={20} />
+              <h2>Cajas</h2>
+              <p>Las cajas de este entrenador son privadas.</p>
+            </Card>
+            <Card>
+              <LockKeyhole size={20} />
+              <h2>Muertos</h2>
+              <p>
+                {row?.dead_count == null
+                  ? "Sin observar"
+                  : `${row.dead_count} Pokémon muertos`}
+                . El detalle de la caja es privado.
+              </p>
+            </Card>
+          </div>
+        </>
+      )}
       {selected && (
-        <Modal
-          title={pokemonTitle(selected.pokemon)}
+        <PokemonDetailModal
+          visibility="public"
+          pokemon={selected}
           onClose={() => setSelected(null)}
-        >
-          <PokemonDetails {...selected} />
-        </Modal>
+        />
       )}
     </>
   );

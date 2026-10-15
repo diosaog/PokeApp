@@ -8,6 +8,15 @@
   background: #091410;
   color: #edf4ef;
 }
+.app-shell {
+  --accent: #ff8c6d;
+}
+.skip:not(:focus) {
+  clip-path: inset(50%);
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
 h1 {
   font-size: clamp(1.8rem, 2.5vw, 2.65rem);
   font-weight: 750;
@@ -455,5 +464,324 @@ dialog::backdrop {
   .pokemon-sprite.large {
     width: 110px;
     height: 110px;
+  }
+}
+/* 17B: trainer identity and bounded PC */
+.trainers-roster {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 18px;
+}
+.trainer-card {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  padding: 18px;
+}
+.trainer-card-top {
+  display: flex;
+  gap: 15px;
+  min-width: 0;
+}
+.trainer-summary {
+  min-width: 0;
+  flex: 1;
+}
+.trainer-card h2 {
+  font-size: 1.05rem;
+  margin: 4px 0 0;
+}
+.trainer-card .mini-stats {
+  gap: 12px;
+  margin: 17px 0 0;
+}
+.trainer-card .stat-pill strong {
+  font-size: 1.05rem;
+}
+.trainer-card .stat-pill span {
+  font-size: 0.57rem;
+}
+.trainer-card .trainer-photo {
+  width: 86px;
+  min-width: 86px;
+  height: 114px;
+}
+.trainer-card > .button {
+  justify-content: center;
+  margin-top: auto;
+  display: flex;
+  gap: 12px;
+}
+.trainer-badges {
+  font-size: 0.7rem;
+  min-height: 45px;
+}
+.trainer-badges p {
+  margin: 5px 0;
+}
+.trainer-badges .game-badge {
+  width: 25px;
+}
+.trainer-badges strong {
+  font-size: 0.7rem;
+}
+.inactive-trainer {
+  filter: grayscale(0.8);
+  opacity: 0.7;
+}
+.profile-identity {
+  display: flex;
+  gap: 28px;
+  align-items: center;
+  margin-bottom: 24px;
+}
+.profile-identity .trainer-photo {
+  width: 135px;
+  height: 170px;
+}
+.profile-identity .mini-stats {
+  gap: 35px;
+}
+.profile-identity .text-link {
+  display: inline-block;
+  margin-top: 15px;
+}
+.collection {
+  display: grid;
+  gap: 22px;
+}
+.collection h2 {
+  margin: 0;
+}
+.party-slots {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 16px;
+}
+.pc-slot.pokemon {
+  flex-direction: column;
+  gap: 0;
+  padding: 8px 4px;
+  min-width: 0;
+  min-height: 120px;
+  border: 1px solid #304c39;
+  background: #183123;
+}
+.pc-slot .pokemon-sprite {
+  width: 72px;
+  height: 72px;
+}
+.pc-slot > span {
+  font-size: 0.7rem;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  max-width: 100%;
+  overflow: hidden;
+}
+.pc-slot > small {
+  font-size: 0.6rem;
+  color: var(--muted);
+  margin-top: 4px;
+}
+.pc-slot.vacant {
+  border: 1px solid #274032;
+  background: #11251a;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  color: #3c5e46;
+  min-height: 90px;
+}
+.pc-slot.vacant > span {
+  font-size: 2rem;
+}
+.box-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  margin-bottom: 22px;
+}
+.box-controls {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  text-align: center;
+}
+.box-controls h2 {
+  font-size: 1.2rem;
+}
+.box-controls .caption {
+  font-size: 0.6rem;
+  color: var(--muted);
+}
+.box-slots {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 8px;
+  background: #0e2017;
+  border-radius: 12px;
+  padding: 10px;
+}
+.box-slots .pc-slot.pokemon {
+  min-height: 100px;
+}
+.box-slots .pokemon-sprite {
+  width: 64px;
+  height: 64px;
+}
+.pc-search {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: #102319;
+  padding: 0 10px;
+  border: 1px solid #2d4935;
+  border-radius: 9px;
+  max-width: 280px;
+}
+.pc-search input {
+  border: 0;
+  background: none;
+  padding: 10px 0;
+  min-width: 0;
+  width: 100%;
+  font-size: 0.75rem;
+}
+.dead-slots {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 10px;
+}
+.public-party {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+.private-sections {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px;
+  margin-top: 20px;
+}
+.private-sections .card {
+  color: var(--muted);
+}
+.private-sections h2 {
+  margin: 12px 0 8px;
+}
+.private-sections p {
+  font-size: 0.8rem;
+  margin: 0;
+}
+.detail-identity {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  padding-bottom: 15px;
+}
+.detail-identity h3 {
+  font-size: 1.5rem;
+  margin: 8px 0;
+}
+.detail-identity p {
+  color: var(--muted);
+  font-size: 0.8rem;
+}
+.held-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+@media (max-width: 1200px) {
+  .trainers-roster {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .public-party {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .box-toolbar {
+    flex-wrap: wrap;
+  }
+}
+@media (max-width: 640px) {
+  .trainers-roster {
+    grid-template-columns: 1fr;
+  }
+  .trainer-card .trainer-photo {
+    width: 92px;
+    height: 115px;
+  }
+  .trainer-card h2 {
+    font-size: 1.15rem;
+  }
+  .trainer-card .mini-stats {
+    gap: 22px;
+  }
+  .party-slots {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 7px;
+  }
+  .pc-slot.pokemon {
+    min-height: 100px;
+  }
+  .box-slots {
+    gap: 4px;
+    padding: 5px;
+  }
+  .box-slots .pc-slot.pokemon {
+    padding: 3px 1px;
+    min-height: 66px;
+  }
+  .box-slots .pc-slot.vacant {
+    min-height: 58px;
+  }
+  .box-slots .pokemon-sprite {
+    width: 42px;
+    height: 42px;
+  }
+  .box-slots .pc-slot > span {
+    font-size: 0.48rem;
+  }
+  .box-slots .pc-slot > small {
+    display: none;
+  }
+  .box-toolbar {
+    justify-content: center;
+    gap: 13px;
+  }
+  .pc-search {
+    max-width: 100%;
+    width: 100%;
+  }
+  .box-controls {
+    width: 100%;
+    justify-content: space-between;
+  }
+  .profile-identity {
+    gap: 18px;
+    align-items: flex-start;
+  }
+  .profile-identity .trainer-photo {
+    width: 85px;
+    height: 118px;
+  }
+  .profile-identity .mini-stats {
+    gap: 17px;
+    margin: 10px 0;
+  }
+  .profile-identity .stat-pill strong {
+    font-size: 1.1rem;
+  }
+  .private-sections {
+    grid-template-columns: 1fr;
+  }
+  .public-party {
+    grid-template-columns: 1fr;
+  }
+  .dead-slots {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }

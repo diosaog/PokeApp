@@ -1,5 +1,12 @@
 import type { Model } from "../api/types";
-import { pokemonName, statName } from "../pokemon/localization";
+import { pokemonName, pokemonTitle, statName } from "../pokemon/localization";
+import {
+  ItemIcon,
+  MovePopover,
+  PokemonSprite,
+  TypeBadge,
+} from "../pokemon/presentation";
+import { Modal } from "../ui";
 type Public = Pick<
   Model<"PokemonRead">,
   "species" | "nickname" | "level" | "types" | "item"
@@ -7,6 +14,25 @@ type Public = Pick<
 export type DetailPokemon =
   | { visibility: "public"; pokemon: Public }
   | { visibility: "self"; pokemon: Model<"PrivatePokemonRead"> };
+export function PokemonDetailModal(
+  props: DetailPokemon & { onClose: () => void },
+) {
+  return (
+    <Modal title={pokemonTitle(props.pokemon)} onClose={props.onClose}>
+      <div className="detail-identity">
+        <PokemonSprite species={props.pokemon.species} large />
+        <div>
+          <span className="eyebrow">
+            {props.visibility === "self" ? "TU POKÉMON" : "EQUIPO PÚBLICO"}
+          </span>
+          <h3>{pokemonName("species", props.pokemon.species)}</h3>
+          <p>Nivel {props.pokemon.level ?? "—"}</p>
+        </div>
+      </div>
+      <PokemonDetails {...props} />
+    </Modal>
+  );
+}
 export function PokemonDetails(props: DetailPokemon) {
   const p = props.pokemon;
   return (
@@ -18,17 +44,32 @@ export function PokemonDetails(props: DetailPokemon) {
         <dd>{p.level ?? "—"}</dd>
         <dt>Tipos</dt>
         <dd>
-          {p.types?.map((t) => pokemonName("type", t)).join(" / ") || "—"}
+          {p.types?.length ? (
+            <div className="tags">
+              {p.types.map((t) => (
+                <TypeBadge key={t} type={t} />
+              ))}
+            </div>
+          ) : (
+            "—"
+          )}
         </dd>
         <dt>Objeto</dt>
-        <dd>{p.item ? pokemonName("item", p.item) : "—"}</dd>
+        <dd>
+          {p.item ? (
+            <span className="held-item">
+              <ItemIcon name={p.item} />
+              {pokemonName("item", p.item)}
+            </span>
+          ) : (
+            "Sin objeto"
+          )}
+        </dd>
       </dl>
       <h3>Movimientos</h3>
       <div className="moves">
         {p.moves?.length
-          ? p.moves.map((m, i) => (
-              <span key={i}>{pokemonName("move", m.name)}</span>
-            ))
+          ? p.moves.map((m, i) => <MovePopover key={i} name={m.name} />)
           : "No disponibles."}
       </div>
       {props.visibility === "self" && (

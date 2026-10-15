@@ -3,13 +3,15 @@
 - PHASE: 17
 - STATUS: IMPLEMENTING
 - HEAD: entry `9efd5b324ac48dc86a54f0a9bbde519d7e5a3917`, fetched main/origin 0/0.
-- CURRENT CHECKPOINT: 17B trainers/profile/PC
-- CHECKPOINTS DONE: 17A foundation/assets, validated locally; deployment held for final.
-- CURRENT SCREEN: trainers and bounded PC composition
-- NEXT SCREEN: 17C battles, then D/E/F sequentially
+- CURRENT CHECKPOINT: 17C battles/team preview
+- CHECKPOINTS DONE: 17A foundation/assets; 17B trainers/profile/PC. Deployment held for final.
+- CURRENT SCREEN: compact competitive team cards
+- NEXT SCREEN: 17D shop/inventory, then E/F sequentially
 - TESTS STILL VALID: foundation 25 focused React/catalog PASS; TS/Vite PASS;
   1,363 available asset hashes verified. 102 missing item images are explicit
   fallbacks. 617 exact X/Y Spanish move descriptions. No runtime external assets.
+  17B collection/progress 8 React PASS; TS/build PASS; desktop/mobile 2 journeys PASS.
+  Reviewed screenshots; corrected inherited accent and profile text encoding.
 - VISUAL DECISIONS: dark green/coral, existing sidebar, local versioned sprites;
   reuse profile photos and badge/shop art already in the project. Prefer canonical
   game assets over Showdown community sprites requiring additional permission.

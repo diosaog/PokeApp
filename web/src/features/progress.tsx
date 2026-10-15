@@ -14,16 +14,28 @@ const regions = {
 
 export function GameProgress({
   progress,
+  compact = false,
 }: {
   progress?: Model<"ProgressRead">;
+  compact?: boolean;
 }) {
   if (!progress || progress.state !== "observed") {
-    return <p>Progreso no observado · Pendiente de sincronizar save.</p>;
+    return (
+      <p className="muted">
+        {compact
+          ? "Progreso no observado"
+          : "Progreso no observado · Pendiente de sincronizar save."}
+      </p>
+    );
   }
   return (
     <div>
-      <Tag>Progreso observado</Tag>
-      <p>{progress.badges_count} medallas observadas</p>
+      {!compact && (
+        <>
+          <Tag>Progreso observado</Tag>
+          <p>{progress.badges_count} medallas observadas</p>
+        </>
+      )}
       {progress.regions?.map((region) => (
         <div key={region.region}>
           <strong>{regions[region.region]}</strong>
@@ -47,14 +59,16 @@ export function GameProgress({
           </div>
         </div>
       ))}
-      <p>
-        {progress.champion_defeated === true
-          ? "Campeón del juego derrotado · Juego completado."
-          : progress.champion_defeated === false
-            ? "Campeón del juego aún no derrotado."
-            : "Victoria ante el Campeón del juego: sin observar."}
-      </p>
-      {progress.observed_at && (
+      {!compact && (
+        <p>
+          {progress.champion_defeated === true
+            ? "Campeón del juego derrotado · Juego completado."
+            : progress.champion_defeated === false
+              ? "Campeón del juego aún no derrotado."
+              : "Victoria ante el Campeón del juego: sin observar."}
+        </p>
+      )}
+      {!compact && progress.observed_at && (
         <p className="muted">
           Observado en PokeApp el {date(progress.observed_at)}
         </p>

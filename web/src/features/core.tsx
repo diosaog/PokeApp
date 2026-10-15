@@ -21,7 +21,7 @@ import { Inventory } from "./inventory";
 import { ParticipantResults } from "./league-results";
 import { InitialAssignment } from "./initial-assignment";
 import { WipeRevivals } from "./wipe-revivals";
-import { PokemonDetails } from "./pokemon-details";
+import { Collection } from "./collection";
 import { participantLabel } from "./admin-labels";
 import { LeagueOperations } from "./league-operations";
 import { LockStatus } from "./lock-status";
@@ -552,106 +552,27 @@ export function LeaguePage() {
     </>
   );
 }
-export function TrainersPage() {
-  return (
-    <>
-      <Heading eyebrow="LOS PROTAGONISTAS" title="Entrenadores.">
-        Una liga. Muchas formas de llegar a lo más alto.
-      </Heading>
-      <Link className="button" to="/entrenadores/scouting">
-        Explorar equipos públicos
-      </Link>
-      <OverviewState>
-        {(data) => (
-          <div className="trainer-grid">
-            {data.players.map((p) => (
-              <Link
-                className="card trainer-profile-link"
-                key={p.id}
-                to={`/entrenadores/${p.trainer_id}`}
-              >
-                <div className="trainer-top">
-                  <div className="avatar large">
-                    {p.display_name.slice(0, 2).toUpperCase()}
-                  </div>
-                  <Tag>{participantLabel(p.status)}</Tag>
-                </div>
-                <h2>{p.display_name}</h2>
-                <GameProgress progress={p.progress} />
-              </Link>
-            ))}
-          </div>
-        )}
-      </OverviewState>
-    </>
-  );
-}
+export { TrainersPage } from "./trainers";
 export function PCPage() {
-  const pc = usePC(),
-    [selected, setSelected] = useState<Model<"SlotRead"> | null>(null),
-    [search, setSearch] = useState("");
+  const pc = usePC();
   return (
     <>
-      <Heading
-        eyebrow="TU COLECCIÓN PRIVADA"
-        title="Siempre hay un próximo equipo."
-      >
-        Explora los Pokémon de tu save actual en PokeApp.
+      <Heading eyebrow="TU PARTIDA" title="Mi PC">
+        Tu equipo y tus cajas, a un movimiento de distancia.
       </Heading>
       <WithSeason>
         <Notice error={pc.error} />
         {pc.isPending ? (
           <Loading />
         ) : pc.data?.status === "ready" ? (
-          <>
-            <Field label="Buscar Pokémon">
-              <input
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                placeholder="Especie o apodo"
-                type="search"
-              />
-            </Field>
-            <div className="pokemon-grid">
-              {pc.data.pokemon
-                .filter((s) =>
-                  `${pokemonName("species", s.pokemon.species)} ${s.pokemon.nickname}`
-                    .toLowerCase()
-                    .includes(search.toLowerCase()),
-                )
-                .map((s, i) => (
-                  <Card key={i}>
-                    <span className="eyebrow">{s.location}</span>
-                    <Pokemon
-                      pokemon={s.pokemon}
-                      onClick={() => setSelected(s)}
-                    />
-                  </Card>
-                ))}
-            </div>
-            {pc.data.pokemon.length === 0 && (
-              <Empty>Este save no contiene Pokémon disponibles.</Empty>
-            )}
-          </>
+          <Collection key={pc.data.save?.id} slots={pc.data.pokemon} />
         ) : (
           <Empty>
-            {pc.data?.status === "unsupported_payload"
-              ? "Este save usa un formato que todavía no puede mostrarse."
-              : "No hay un save actual analizado disponible."}{" "}
-            <Link to="/saves">Ver Saves y Launcher →</Link>
+            No hay una partida disponible.{" "}
+            <Link to="/saves">Sincronizar con el Launcher ?</Link>
           </Empty>
         )}
       </WithSeason>
-      {selected && (
-        <Modal
-          title={pokemonTitle(selected.pokemon)}
-          onClose={() => setSelected(null)}
-        >
-          <Tag>{selected.location}</Tag>
-          <Pokemon pokemon={selected.pokemon} />
-          <PokemonDetails visibility="self" pokemon={selected.pokemon} />
-        </Modal>
-      )}
     </>
   );
 }
