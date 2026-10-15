@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import type { Model } from "../api/types";
+import { pokemonName, pokemonTitle } from "../pokemon/localization";
 import { useApp, useRead } from "../state";
 import { Card, Empty, Field, Heading, Loading, Notice, Tag } from "../ui";
 import { Pokemon, WithSeason } from "./core";
@@ -99,13 +100,16 @@ function Scouting({ season, initial }: { season: string; initial: string }) {
                 <div key={index}>
                   <Pokemon pokemon={pokemon} />
                   {!pokemon.types?.length && <p>Tipos no publicados.</p>}
-                  <p>Objeto: {pokemon.item || "No publicado"}</p>
+                  <p>
+                    Objeto:{" "}
+                    {pokemon.item
+                      ? pokemonName("item", pokemon.item)
+                      : "No publicado"}
+                  </p>
                   {pokemon.moves?.length ? (
-                    <ul
-                      aria-label={`Movimientos de ${pokemon.nickname || pokemon.species}`}
-                    >
+                    <ul aria-label={`Movimientos de ${pokemonTitle(pokemon)}`}>
                       {pokemon.moves.map((move, i) => (
-                        <li key={i}>{move.name}</li>
+                        <li key={i}>{pokemonName("move", move.name)}</li>
                       ))}
                     </ul>
                   ) : (

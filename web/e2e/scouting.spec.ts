@@ -49,7 +49,7 @@ test("trainer entry chooses a public team without a scheduled battle or private 
   ).toBeVisible();
   await expect(page.getByLabel("Entrenador a consultar")).toHaveValue("t3");
   await expect(page.getByText("Objeto: Vidasfera")).toHaveCount(6);
-  await expect(page.getByText("Esfera aural", { exact: true })).toHaveCount(6);
+  await expect(page.getByText("Esfera Aural", { exact: true })).toHaveCount(6);
   await expect(page.getByText("Foco interno", { exact: true })).toHaveCount(0);
   expect(
     reads.some(

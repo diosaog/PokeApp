@@ -183,7 +183,9 @@ export async function fixture(
   page: Page,
   longNames = false,
   apiOrigin = "http://127.0.0.1:8000",
+  displayPokemon = pokemon,
 ) {
+  const pokemon = displayPokemon;
   const commands: {
     path: string;
     body: Record<string, unknown>;

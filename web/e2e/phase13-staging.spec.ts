@@ -110,7 +110,7 @@ test("Admin saves prospective reward rules and keeps rival projections public", 
     .getByRole("button", { name: "Ver detalles", exact: true })
     .first()
     .click();
-  await expect(page.getByRole("dialog")).toContainText("Thunderbolt");
+  await expect(page.getByRole("dialog")).toContainText("Rayo");
   await expect(page.getByRole("dialog")).not.toContainText("Static");
   await expect(page.getByRole("dialog")).not.toContainText("IVS");
   await page

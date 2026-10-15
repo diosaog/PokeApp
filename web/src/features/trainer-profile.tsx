@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import type { Model } from "../api/types";
+import { pokemonTitle } from "../pokemon/localization";
 import { useApp, useOverview, useRead } from "../state";
 import { Card, Empty, Heading, Loading, Modal, Notice, Tag } from "../ui";
 import { Pokemon, WithSeason } from "./core";
@@ -183,7 +184,7 @@ function Profile({ trainer }: { trainer: string }) {
       </Card>
       {selected && (
         <Modal
-          title={selected.pokemon.nickname || selected.pokemon.species}
+          title={pokemonTitle(selected.pokemon)}
           onClose={() => setSelected(null)}
         >
           <PokemonDetails {...selected} />

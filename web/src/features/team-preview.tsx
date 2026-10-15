@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { ShieldCheck } from "lucide-react";
 import type { Model } from "../api/types";
+import { pokemonName, statName } from "../pokemon/localization";
 import { useApp, useRead, usePC } from "../state";
 import { LockStatus } from "./lock-status";
 import {
@@ -191,11 +192,16 @@ function Preview({ season }: { season: string }) {
                         {entry.lock.team.map((pokemon, index) => (
                           <div key={index}>
                             <Pokemon pokemon={pokemon} />
-                            <p>Objeto: {pokemon.item || "Sin objeto"}</p>
+                            <p>
+                              Objeto:{" "}
+                              {pokemon.item
+                                ? pokemonName("item", pokemon.item)
+                                : "Sin objeto"}
+                            </p>
                             <div className="moves">
                               {pokemon.moves?.map((m, i) => (
                                 <span key={i}>
-                                  {m.name}
+                                  {pokemonName("move", m.name)}
                                   {m.pp != null && ` · ${m.pp} PP`}
                                 </span>
                               ))}
@@ -232,9 +238,11 @@ function PrivateDetails({ pokemon }: { pokemon: Model<"PrivatePokemonRead"> }) {
     <>
       <dl className="details">
         <dt>Habilidad</dt>
-        <dd>{pokemon.ability || "—"}</dd>
+        <dd>
+          {pokemon.ability ? pokemonName("ability", pokemon.ability) : "—"}
+        </dd>
         <dt>Naturaleza</dt>
-        <dd>{pokemon.nature || "—"}</dd>
+        <dd>{pokemon.nature ? pokemonName("nature", pokemon.nature) : "—"}</dd>
       </dl>
       {(["ivs", "evs"] as const).map((key) => (
         <div key={key}>
@@ -243,7 +251,7 @@ function PrivateDetails({ pokemon }: { pokemon: Model<"PrivatePokemonRead"> }) {
             <dl className="stats-list">
               {Object.entries(pokemon[key]!).map(([stat, value]) => (
                 <div key={stat}>
-                  <dt>{stat}</dt>
+                  <dt>{statName(stat)}</dt>
                   <dd>{value}</dd>
                 </div>
               ))}

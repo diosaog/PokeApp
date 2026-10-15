@@ -1,4 +1,5 @@
 import type { Model } from "../api/types";
+import { pokemonName, statName } from "../pokemon/localization";
 type Public = Pick<
   Model<"PokemonRead">,
   "species" | "nickname" | "level" | "types" | "item"
@@ -12,27 +13,39 @@ export function PokemonDetails(props: DetailPokemon) {
     <>
       <dl className="details">
         <dt>Especie</dt>
-        <dd>{p.species}</dd>
+        <dd>{pokemonName("species", p.species)}</dd>
         <dt>Nivel</dt>
         <dd>{p.level ?? "—"}</dd>
         <dt>Tipos</dt>
-        <dd>{p.types?.join(" / ") || "—"}</dd>
+        <dd>
+          {p.types?.map((t) => pokemonName("type", t)).join(" / ") || "—"}
+        </dd>
         <dt>Objeto</dt>
-        <dd>{p.item || "—"}</dd>
+        <dd>{p.item ? pokemonName("item", p.item) : "—"}</dd>
       </dl>
       <h3>Movimientos</h3>
       <div className="moves">
         {p.moves?.length
-          ? p.moves.map((m, i) => <span key={i}>{m.name}</span>)
+          ? p.moves.map((m, i) => (
+              <span key={i}>{pokemonName("move", m.name)}</span>
+            ))
           : "No disponibles."}
       </div>
       {props.visibility === "self" && (
         <>
           <dl className="details">
             <dt>Habilidad</dt>
-            <dd>{props.pokemon.ability || "—"}</dd>
+            <dd>
+              {props.pokemon.ability
+                ? pokemonName("ability", props.pokemon.ability)
+                : "—"}
+            </dd>
             <dt>Naturaleza</dt>
-            <dd>{props.pokemon.nature || "—"}</dd>
+            <dd>
+              {props.pokemon.nature
+                ? pokemonName("nature", props.pokemon.nature)
+                : "—"}
+            </dd>
           </dl>
           {(["ivs", "evs"] as const).map((k) => (
             <div key={k}>
@@ -41,7 +54,7 @@ export function PokemonDetails(props: DetailPokemon) {
                 <dl className="stats-list">
                   {Object.entries(props.pokemon[k]!).map(([stat, v]) => (
                     <div key={stat}>
-                      <dt>{stat}</dt>
+                      <dt>{statName(stat)}</dt>
                       <dd>{v}</dd>
                     </div>
                   ))}

@@ -1,5 +1,6 @@
 import { useState } from "react";
 import type { Model } from "../api/types";
+import { pokemonName, pokemonTitle } from "../pokemon/localization";
 import { useApp, useRead } from "../state";
 import {
   Card,
@@ -65,7 +66,7 @@ export function Inventory() {
                 )[p.status] ?? "Estado no disponible"}
               </Tag>
               {p.acquisition_type === "reward" && <Tag>Vale de recompensa</Tag>}
-              <h3>{p.item_name}</h3>
+              <h3>{pokemonName("item", p.item_name)}</h3>
               <p>
                 {date(p.purchased_at)} · {p.total_price} PK₽
               </p>
@@ -90,7 +91,7 @@ export function Inventory() {
       )}
       {purchase && (
         <Modal
-          title={`Canjear ${purchase.item_name}`}
+          title={`Canjear ${pokemonName("item", purchase.item_name)}`}
           onClose={() => {
             if (!cmd.pending && !cmd.uncertain) setPurchase(null);
           }}
@@ -132,7 +133,7 @@ export function Inventory() {
                 <option value="">Seleccionar Pokémon</option>
                 {targets.map((t) => (
                   <option key={t.pokemon_entity_id} value={t.pokemon_entity_id}>
-                    {t.pokemon.nickname || t.pokemon.species} ·{" "}
+                    {pokemonTitle(t.pokemon)} ·{" "}
                     {trainers.data?.find((p) => p.id === t.trainer_id)
                       ?.display_name || "Entrenador"}{" "}
                     · {t.location}

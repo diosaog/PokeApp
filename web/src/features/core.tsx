@@ -13,6 +13,7 @@ import {
   ShoppingBag,
 } from "lucide-react";
 import type { Model, Overview } from "../api/types";
+import { pokemonName, pokemonTitle } from "../pokemon/localization";
 import { useApp, useRead, useOverview, usePC } from "../state";
 import { GameProgress, MyProgress } from "./progress";
 import { Inventory } from "./inventory";
@@ -88,17 +89,19 @@ export function Pokemon({
   const body = (
     <>
       <div className="mon-emblem" aria-hidden="true">
-        {pokemon.species.slice(0, 2).toUpperCase()}
+        {pokemonName("species", pokemon.species).slice(0, 2).toUpperCase()}
       </div>
       <div>
-        <strong>{pokemon.nickname || pokemon.species}</strong>
+        <strong>{pokemonTitle(pokemon)}</strong>
         <span className="muted">
-          {pokemon.nickname ? pokemon.species : "Pokémon"} · Nv.{" "}
-          {pokemon.level ?? "—"}
+          {pokemon.nickname
+            ? pokemonName("species", pokemon.species)
+            : "Pokémon"}{" "}
+          · Nv. {pokemon.level ?? "—"}
         </span>
         <div className="tags">
           {pokemon.types?.map((t) => (
-            <Tag key={t}>{t}</Tag>
+            <Tag key={t}>{pokemonName("type", t)}</Tag>
           ))}
           {pokemon.is_shiny && <Sparkles size={15} />}
         </div>
@@ -613,7 +616,7 @@ export function PCPage() {
             <div className="pokemon-grid">
               {pc.data.pokemon
                 .filter((s) =>
-                  `${s.pokemon.species} ${s.pokemon.nickname}`
+                  `${pokemonName("species", s.pokemon.species)} ${s.pokemon.nickname}`
                     .toLowerCase()
                     .includes(search.toLowerCase()),
                 )
@@ -642,7 +645,7 @@ export function PCPage() {
       </WithSeason>
       {selected && (
         <Modal
-          title={selected.pokemon.nickname || selected.pokemon.species}
+          title={pokemonTitle(selected.pokemon)}
           onClose={() => setSelected(null)}
         >
           <Tag>{selected.location}</Tag>
@@ -773,7 +776,7 @@ export function ShopPage() {
                           <ShoppingBag />
                         </div>
                         <span className="eyebrow">{i.category}</span>
-                        <h2>{i.name}</h2>
+                        <h2>{pokemonName("item", i.name)}</h2>
                         <p>{i.description}</p>
                         {p && (
                           <Tag>
@@ -830,7 +833,7 @@ export function ShopPage() {
       </WithSeason>
       {item && (
         <Modal
-          title={`Comprar ${item.name}`}
+          title={`Comprar ${pokemonName("item", item.name)}`}
           onClose={() => {
             if (!cmd.pending && !cmd.uncertain) setItem(null);
           }}

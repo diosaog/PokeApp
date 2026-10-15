@@ -35,7 +35,7 @@ for (const width of [1440, 390])
       .first()
       .click();
     const modal = page.getByRole("dialog");
-    await expect(modal).toContainText("Esfera aural");
+    await expect(modal).toContainText("Esfera Aural");
     await expect(modal).not.toContainText("Foco interno");
     await expect(modal).not.toContainText("IVS");
     expect(
