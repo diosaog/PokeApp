@@ -11,6 +11,17 @@
 .app-shell {
   --accent: #ff8c6d;
 }
+.mobile-close {
+  display: none;
+}
+@media (max-width: 650px) {
+  .sidebar.expanded .mobile-close {
+    display: flex;
+    position: absolute;
+    right: 14px;
+    top: 22px;
+  }
+}
 .skip:not(:focus) {
   clip-path: inset(50%);
   width: 1px;

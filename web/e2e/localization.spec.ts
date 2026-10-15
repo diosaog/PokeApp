@@ -28,20 +28,20 @@ for (const width of [1440, 390]) {
     await login(page);
     await navigate(page, "Mi PC");
     await page.getByLabel("Buscar Pokémon").fill("Hydreigon");
-    await expect(page.locator(".pokemon")).toHaveCount(12);
+    await expect(page.locator(".box-slots .pokemon")).toHaveCount(12);
     await page
       .getByRole("button", { name: /Hydreigon/ })
       .first()
       .click();
     const dialog = page.getByRole("dialog");
-    for (const name of [
-      "Restos",
-      "Rayo",
-      "Pulso Umbrío",
-      "Levitación",
-      "Miedosa",
-    ])
+    for (const name of ["Restos", "Levitación", "Miedosa"])
       await expect(dialog.getByText(name, { exact: true })).toBeVisible();
+    await expect(
+      dialog.getByRole("button", { name: "Ver Rayo" }),
+    ).toBeVisible();
+    await expect(
+      dialog.getByRole("button", { name: "Ver Pulso Umbrío" }),
+    ).toBeVisible();
     await expect(dialog).not.toContainText(
       /#635|#234|#85|#26|#10|Thunderbolt|\bspa\b/,
     );
@@ -52,13 +52,13 @@ for (const width of [1440, 390]) {
     await page.keyboard.press("Escape");
     await navigate(page, "Entrenadores");
     await page.locator(`a[href='/entrenadores/${tid}']`).click();
-    await page.getByRole("button", { name: "Ver detalles" }).first().click();
+    await page.locator(".party-slots button").first().click();
     await expect(dialog.getByText("Levitación", { exact: true })).toBeVisible();
     await page.keyboard.press("Escape");
     await navigate(page, "Entrenadores");
     paths.length = 0;
     await page.locator("a[href='/entrenadores/rival-trainer']").click();
-    await page.getByRole("button", { name: "Ver detalles" }).first().click();
+    await page.locator(".public-party button").first().click();
     await expect(dialog.getByText("Restos", { exact: true })).toBeVisible();
     await expect(dialog).not.toContainText(
       /Levitación|Miedosa|Habilidad|Naturaleza|IVS|EVS/,
@@ -66,7 +66,9 @@ for (const width of [1440, 390]) {
     expect(paths.some((p) => p.endsWith("/pc"))).toBe(false);
     await page.keyboard.press("Escape");
     await navigate(page, "Batallas");
-    await expect(page.getByText("Objeto: Restos")).toHaveCount(12);
+    await expect(page.locator(".battle-identity .held-item")).toHaveText(
+      Array(12).fill("Restos"),
+    );
     await expect(page.locator("main")).not.toContainText(
       /Ability|Nature|Levitación|Miedosa/,
     );
@@ -90,15 +92,14 @@ test("X/Y species and names survive public scouting and inventory selection", as
   });
   await login(page);
   await navigate(page, "Entrenadores");
-  await page
-    .getByRole("link", { name: "Explorar equipos públicos", exact: true })
-    .click();
-  await page.getByLabel("Entrenador a consultar").selectOption("rival-trainer");
+  await page.locator("a[href='/entrenadores/rival-trainer']").click();
   await expect(page.locator(".pokemon").first()).toContainText("Greninja");
-  await expect(page.getByText("Rayo", { exact: true })).toHaveCount(6);
+  await page.locator(".public-party button").first().click();
+  await expect(page.getByRole("button", { name: "Ver Rayo" })).toBeVisible();
   await expect(page.locator("main")).not.toContainText(
     /Levitación|Miedosa|#658|Move #/,
   );
+  await page.keyboard.press("Escape");
   await navigate(page, "Tienda");
   await page.getByRole("button", { name: "Canjear", exact: true }).click();
   await expect(page.getByLabel("Pokémon objetivo")).toContainText("Greninja");

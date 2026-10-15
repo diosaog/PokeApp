@@ -35,23 +35,28 @@ vi.mock("../state", () => ({
                   id: "winner",
                   name: "Dúo Aurora",
                   members: [
-                    { display_name: "Antonio" },
-                    { display_name: "Lucía" },
+                    { trainer_id: "t1", display_name: "Antonio" },
+                    { trainer_id: "t2", display_name: "Lucía" },
                   ],
                 },
                 {
                   id: "runner",
                   name: "Dúo rival",
                   members: [
-                    { display_name: "Marta" },
-                    { display_name: "Iván" },
+                    { trainer_id: "t3", display_name: "Marta" },
+                    { trainer_id: "t4", display_name: "Iván" },
                   ],
                 },
               ],
             },
           ],
         }
-      : [{ id: "league-winner", display_name: "Campeona de Liga" }],
+      : path.startsWith("/v1/read/seasons")
+        ? {
+            items: [{ id: "season", name: "Copa histórica" }],
+            next_offset: null,
+          }
+        : [{ id: "league-winner", display_name: "Campeona de Liga" }],
   }),
   useApp: () => ({}),
   useOverview: () => ({}),
@@ -66,6 +71,7 @@ it("renders both certified doubles members and links the exact Cup and season", 
   expect(screen.getByText("Antonio & Lucía")).toBeInTheDocument();
   expect(screen.getByText("Finalista: Marta & Iván")).toBeInTheDocument();
   expect(screen.getByText("Campeona de Liga")).toBeInTheDocument();
+  expect(screen.getByText("Copa histórica")).toBeInTheDocument();
   expect(
     screen.queryByText("Finalista: Entrenador histórico"),
   ).not.toBeInTheDocument();

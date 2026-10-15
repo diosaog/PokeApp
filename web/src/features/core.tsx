@@ -3,14 +3,10 @@ import { Link } from "react-router-dom";
 import {
   ArrowUpRight,
   Coins,
-  ShieldCheck,
-  Swords,
   Trophy,
   Box,
   HardDrive,
   Sparkles,
-  Crown,
-  ShoppingBag,
 } from "lucide-react";
 import type { Model, Overview } from "../api/types";
 import { pokemonName, pokemonTitle } from "../pokemon/localization";
@@ -19,25 +15,22 @@ import {
   TypeBadge,
   ItemIcon,
   TrainerPhoto,
-  StatPill,
 } from "../pokemon/presentation";
 import { useApp, useRead, useOverview, usePC } from "../state";
-import { GameProgress, MyProgress } from "./progress";
+import { MyProgress } from "./progress";
 import { Inventory } from "./inventory";
 import { ParticipantResults } from "./league-results";
 import { InitialAssignment } from "./initial-assignment";
 import { WipeRevivals } from "./wipe-revivals";
 import { Collection } from "./collection";
-import { participantLabel, matchLabel } from "./admin-labels";
+import { matchLabel } from "./admin-labels";
 import { LeagueOperations } from "./league-operations";
-import { LockStatus } from "./lock-status";
 import { TeamLockWarning } from "./team-lock-warning";
 import { LauncherDownload } from "./launcher-download";
 import {
   Card,
   CommandState,
   Empty,
-  Field,
   Heading,
   Loading,
   Modal,
@@ -81,8 +74,6 @@ export function playerName(data: Overview, id: string | null) {
     data.players.find((p) => p.id === id)?.display_name || "Por determinar"
   );
 }
-const currentDay = (data: Overview) =>
-  data.days.find((d) => d.id === data.season.current_matchday_id);
 export function Pokemon({
   pokemon,
   onClick,

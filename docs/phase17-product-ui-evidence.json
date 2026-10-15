@@ -1,0 +1,112 @@
+{
+  "phase": "17",
+  "entry_head": "9efd5b324ac48dc86a54f0a9bbde519d7e5a3917",
+  "status": "LOCAL_VALIDATED_DEPLOY_PENDING",
+  "react": {
+    "total": 104,
+    "passed_initial": 103,
+    "hall_mock_fixed_and_focused_pass": 1
+  },
+  "browser": {
+    "unique": 76,
+    "passed": 76,
+    "initial_pass": 67,
+    "focused_fixes": 9,
+    "guard_rechecked": 1,
+    "viewports": [
+      1440,
+      900,
+      390
+    ],
+    "errors_in_final_runs": 0,
+    "mocked_business_mutations": "only in existing local command tests",
+    "real_business_mutations": 0,
+    "antivirus_note": "Observed me.kis.v2.scr.kaspersky-labs.com instrumentation excluded from app resource-host checks; no security software configuration changed."
+  },
+  "assets": {
+    "available_hashes_pass": 1363,
+    "unavailable_item_fallbacks": 102,
+    "static_bytes": 2207611,
+    "spanish_xy_move_references": 617,
+    "runtime_external_assets": false
+  },
+  "gates": {
+    "typescript_build": "PASS",
+    "prettier": "PASS",
+    "ruff_asset_builder": "PASS",
+    "compile_asset_builder": "PASS",
+    "worker_dry_run": "PASS",
+    "diff": "PASS",
+    "backend_pg_installer": "NOT RERUN / UNCHANGED"
+  },
+  "build": {
+    "entry_js_bytes": 480510,
+    "entry_gzip_approx_bytes": 152440,
+    "admin_lazy_chunk_approx_bytes": 26000
+  },
+  "preservation": {
+    "backend_source_changed": false,
+    "db_or_storage_operations": 0,
+    "launcher_artifact_writes": 0,
+    "owner_fixture_writes": 0,
+    "new_table_equality_baseline": "NOT RUN: frontend-only, no business operations"
+  },
+  "public_before": {
+    "observed_at": "2026-10-15T11:42:05.142619+00:00",
+    "mode": "before",
+    "checks": [
+      {
+        "path": "/",
+        "status": 200,
+        "security_headers": "PASS"
+      },
+      {
+        "path": "/pc",
+        "status": 200,
+        "security_headers": "PASS"
+      },
+      {
+        "path": "/entrenadores/scouting",
+        "status": 200,
+        "security_headers": "PASS"
+      },
+      {
+        "path": "/battle",
+        "status": 200,
+        "security_headers": "PASS"
+      },
+      {
+        "path": "/build-config.json",
+        "status": 200,
+        "api": "https://pokeapp-api-production.up.railway.app"
+      },
+      {
+        "path": "/assets/index-CiTDJ1XT.css",
+        "status": 200,
+        "bytes": 23482,
+        "sha256": "5370fb9f6d246fa286bcc59846cc918c02e5f373e8d028730592b0bcfcbb83f9",
+        "matches_build": false
+      },
+      {
+        "path": "/assets/index-DA8i6I4v.js",
+        "status": 200,
+        "bytes": 492329,
+        "sha256": "637eaab3b838ef8c8c6a4021130f2662b00dc4379419d27177e3f4e26eb4671f",
+        "matches_build": false
+      },
+      {
+        "path": "API /health",
+        "status": 200
+      },
+      {
+        "path": "API /v1/read/trainers",
+        "status": 401,
+        "unauthenticated_denial": "PASS",
+        "cors": "exact web origin"
+      }
+    ],
+    "unexpected_5xx": 0,
+    "business_mutations": 0
+  },
+  "private_evidence": "%LOCALAPPDATA%/PokeApp-migration-evidence/phase17/20261015"
+}

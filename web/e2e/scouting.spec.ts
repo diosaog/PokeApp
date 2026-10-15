@@ -1,3 +1,4 @@
+// Retained public deep link compatibility; the roster now opens internal profiles.
 import { test, expect } from "@playwright/test";
 import { fixture, login, navigate, tid, sid } from "./fixtures";
 
@@ -7,9 +8,10 @@ test("a confirmed Team Lock invalidates only this season's public scouting cache
   await fixture(page);
   await login(page);
   await navigate(page, "Entrenadores");
-  await page
-    .getByRole("link", { name: "Explorar equipos públicos", exact: true })
-    .click();
+  await page.evaluate(() => {
+    history.pushState({}, "", "/entrenadores/scouting");
+    dispatchEvent(new PopStateEvent("popstate"));
+  });
   await expect(page.locator(".pokemon")).toHaveCount(6);
   await navigate(page, "Batallas");
   await page
@@ -23,9 +25,10 @@ test("a confirmed Team Lock invalidates only this season's public scouting cache
   const fresh = page.waitForResponse((r) =>
     new URL(r.url()).pathname.endsWith("/scouting"),
   );
-  await page
-    .getByRole("link", { name: "Explorar equipos públicos", exact: true })
-    .click();
+  await page.evaluate(() => {
+    history.pushState({}, "", "/entrenadores/scouting");
+    dispatchEvent(new PopStateEvent("popstate"));
+  });
   await fresh;
   await expect(page.locator(".pokemon")).toHaveCount(6);
 });
@@ -40,9 +43,10 @@ test("trainer entry chooses a public team without a scheduled battle or private 
   page.on("request", (r) => {
     if (r.method() === "GET") reads.push(new URL(r.url()).pathname);
   });
-  await page
-    .getByRole("link", { name: "Explorar equipos públicos", exact: true })
-    .click();
+  await page.evaluate(() => {
+    history.pushState({}, "", "/entrenadores/scouting");
+    dispatchEvent(new PopStateEvent("popstate"));
+  });
   await page.getByLabel("Entrenador a consultar").selectOption("t3");
   await expect(
     page.getByRole("heading", { name: "Equipos públicos", exact: true }),
@@ -74,9 +78,10 @@ test("cached private battle details never appear in self scouting and selectors 
   await page.getByRole("tab", { name: "Batalla", exact: true }).click();
   await expect(page.getByText("Foco interno", { exact: true })).toHaveCount(6);
   await navigate(page, "Entrenadores");
-  await page
-    .getByRole("link", { name: "Explorar equipos públicos", exact: true })
-    .click();
+  await page.evaluate(() => {
+    history.pushState({}, "", "/entrenadores/scouting");
+    dispatchEvent(new PopStateEvent("popstate"));
+  });
   await expect(page.getByLabel("Entrenador a consultar")).toHaveValue(tid);
   await expect(page.getByText("Foco interno", { exact: true })).toHaveCount(0);
   for (const id of ["rival-trainer", tid, "t4"]) {
@@ -94,9 +99,10 @@ for (const width of [1440, 390])
     await fixture(page);
     await login(page);
     await navigate(page, "Entrenadores");
-    await page
-      .getByRole("link", { name: "Explorar equipos públicos", exact: true })
-      .click();
+    await page.evaluate(() => {
+      history.pushState({}, "", "/entrenadores/scouting");
+      dispatchEvent(new PopStateEvent("popstate"));
+    });
     await expect(page.getByLabel("Entrenador a consultar")).toHaveValue(tid);
     expect(
       await page.evaluate(
@@ -122,9 +128,10 @@ test("a failed selected read does not retain old team; selection can recover", a
   await fixture(page);
   await login(page);
   await navigate(page, "Entrenadores");
-  await page
-    .getByRole("link", { name: "Explorar equipos públicos", exact: true })
-    .click();
+  await page.evaluate(() => {
+    history.pushState({}, "", "/entrenadores/scouting");
+    dispatchEvent(new PopStateEvent("popstate"));
+  });
   await expect(page.locator(".pokemon")).toHaveCount(6);
   await page.route(
     `**/seasons/${sid}/scouting?trainer_id=rival-trainer`,

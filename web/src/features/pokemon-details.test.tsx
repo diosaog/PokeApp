@@ -22,14 +22,15 @@ it("localizes existing private details without altering the source object", () =
   render(<PokemonDetails visibility="self" pokemon={pokemon} />);
   for (const text of [
     "Greninja",
-    "Agua / Siniestro",
+    "Agua",
+    "Siniestro",
     "Restos",
-    "Rayo",
     "Levitación",
     "Miedosa",
     "At. Esp.",
   ])
     expect(screen.getByText(text)).toBeVisible();
+  expect(screen.getByRole("button", { name: "Ver Rayo" })).toBeVisible();
   expect(document.body.textContent).not.toMatch(
     /#658|#234|#85|#26|#10|\bspa\b|\bdefense\b/,
   );
@@ -37,7 +38,7 @@ it("localizes existing private details without altering the source object", () =
 });
 it("public rendering never discovers private fields even on an overfull object", () => {
   render(<PokemonDetails visibility="public" pokemon={pokemon} />);
-  expect(screen.getByText("Rayo")).toBeVisible();
+  expect(screen.getByRole("button", { name: "Ver Rayo" })).toBeVisible();
   for (const text of [
     "Habilidad",
     "Levitación",

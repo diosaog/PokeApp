@@ -80,7 +80,10 @@ test("current save progress distinguishes unknown, zero, sparse regions and Cham
   await page.reload();
   await login(page);
   await navigate(page, "Entrenadores");
-  await expect(page.getByText("0 medallas observadas")).toHaveCount(4);
+  await expect(page.locator(".trainer-card .game-badge.earned")).toHaveCount(0);
+  await expect(page.locator(".trainer-card .game-badge.unearned")).toHaveCount(
+    64,
+  );
   expect(commands).toHaveLength(0);
 });
 

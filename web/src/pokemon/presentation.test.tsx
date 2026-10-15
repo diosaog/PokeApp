@@ -34,22 +34,20 @@ it("uses local sprites, canonical categories and honest unresolved fallbacks", (
   expect(catalogId("item", "Item #200")).toBeNull();
 });
 it("loads the explicitly versioned local reference only on move interaction", async () => {
-  const fetcher = vi
-    .spyOn(globalThis, "fetch")
-    .mockResolvedValue(
-      new Response(
-        JSON.stringify({
-          85: {
-            type: "Electric",
-            category: "Special",
-            power: 90,
-            accuracy: 100,
-            description:
-              "Potente ataque eléctrico que puede paralizar al objetivo.",
-          },
-        }),
-      ),
-    );
+  const fetcher = vi.spyOn(globalThis, "fetch").mockResolvedValue(
+    new Response(
+      JSON.stringify({
+        85: {
+          type: "Electric",
+          category: "Special",
+          power: 90,
+          accuracy: 100,
+          description:
+            "Potente ataque eléctrico que puede paralizar al objetivo.",
+        },
+      }),
+    ),
+  );
   render(<MovePopover name="Move #85" />);
   expect(fetcher).not.toHaveBeenCalled();
   fireEvent.click(screen.getByRole("button", { name: "Ver Rayo" }));

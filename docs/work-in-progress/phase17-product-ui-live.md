@@ -1,11 +1,11 @@
 # Phase 17 — product/UI rework
 
 - PHASE: 17
-- STATUS: IMPLEMENTING
+- STATUS: VALIDATED / DEPLOYMENT PENDING
 - HEAD: entry `9efd5b324ac48dc86a54f0a9bbde519d7e5a3917`, fetched main/origin 0/0.
-- CURRENT CHECKPOINT: 17F responsive/QA
+- CURRENT CHECKPOINT: 17F final delivery
 - CHECKPOINTS DONE: 17A foundation/assets; 17B trainers/profile/PC; 17C battles; 17D shop/inventory; 17E remaining pages. Deployment held for final.
-- CURRENT SCREEN: final desktop/mobile/intermediate journeys and meaningful regression closure
+- CURRENT SCREEN: all required product surfaces locally validated
 - NEXT SCREEN: final committed-source Cloudflare deployment, public reads and report
 - TESTS STILL VALID: foundation 25 focused React/catalog PASS; TS/Vite PASS;
   1,363 available asset hashes verified. 102 missing item images are explicit
@@ -17,6 +17,12 @@
   17D economy 4 React + 3 browser tests PASS; purchase/redemption guards unchanged.
   17E TS/build + 2 multi-screen browser journeys PASS (long names, official results,
   lock, purchase, Admin guards, Cup BO3, Hall/logout). No backend/DB changes.
+  Final applicable closure: 104 React PASS (103 initial + corrected Hall mock),
+  76 unique Edge cases PASS (67 initial + 9 focused fixes; navigation guard also
+  rechecked). Mobile same-page navigation now closes the drawer. TS/build,
+  formatting, asset hashes, Python asset-builder compile/Ruff and Worker dry-run PASS.
+  Screenshot review at 1440/900/390; local antivirus-injected traffic is excluded
+  from application asset provenance checks. Public pre-deploy 9 HTTP checks PASS.
 - VISUAL DECISIONS: dark green/coral, existing sidebar, local versioned sprites;
   reuse profile photos and badge/shop art already in the project. Prefer canonical
   game assets over Showdown community sprites requiring additional permission.

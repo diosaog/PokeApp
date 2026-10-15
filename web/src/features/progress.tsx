@@ -11,6 +11,24 @@ const regions = {
   johto: "Johto",
   unova: "Teselia",
 };
+const games: Record<string, string> = {
+  R: "Rubí",
+  S: "Zafiro",
+  E: "Esmeralda",
+  FR: "Rojo Fuego",
+  LG: "Verde Hoja",
+  D: "Diamante",
+  P: "Perla",
+  Pt: "Platino",
+  HG: "HeartGold",
+  SS: "SoulSilver",
+  B: "Negro",
+  W: "Blanco",
+  B2: "Negro 2",
+  W2: "Blanco 2",
+  X: "X",
+  Y: "Y",
+};
 
 export function GameProgress({
   progress,
@@ -30,8 +48,18 @@ export function GameProgress({
   }
   return (
     <div>
+      {compact && !progress.regions?.length && (
+        <p>
+          {progress.badges_count == null
+            ? "Medallas no disponibles"
+            : `${progress.badges_count} medallas observadas`}
+        </p>
+      )}
       {!compact && (
         <>
+          {progress.game && games[progress.game] && (
+            <p className="game-context">Pokémon {games[progress.game]}</p>
+          )}
           <Tag>Progreso observado</Tag>
           <p>{progress.badges_count} medallas observadas</p>
         </>

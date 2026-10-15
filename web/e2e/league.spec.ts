@@ -56,7 +56,9 @@ for (const state of [
       route.fulfill({ json: general }),
     );
     await login(page);
-    await expect(page.getByText("128", { exact: false }).first()).toBeVisible();
+    await expect(
+      page.locator(".home-stats").getByText("-4294967294", { exact: true }),
+    ).toBeVisible();
     const before = dailyReads;
     await navigate(page, "Liga");
     await expect(

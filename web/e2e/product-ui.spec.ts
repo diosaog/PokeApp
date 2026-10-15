@@ -58,6 +58,25 @@ for (const width of [1440, 390]) {
     await expect(
       page.locator(".trainer-card").first().locator(".stat-pill span"),
     ).toHaveText(["Puntos", "Monedas", "Muertos"]);
+    await expect
+      .poll(() =>
+        page
+          .locator(".trainer-card")
+          .first()
+          .locator(".game-badge img")
+          .evaluateAll((images) =>
+            images.every(
+              (img) =>
+                (img as HTMLImageElement).complete &&
+                (img as HTMLImageElement).naturalWidth > 0,
+            ),
+          ),
+      )
+      .toBe(true);
+    await expect(page.locator(".trainer-card > .button").first()).toHaveCSS(
+      "background-color",
+      "rgb(255, 140, 109)",
+    );
     await page.screenshot({
       path: info.outputPath(`trainers-${width}.png`),
       fullPage: true,
@@ -82,8 +101,22 @@ for (const width of [1440, 390]) {
       .toBeGreaterThan(0);
     await page.screenshot({
       path: info.outputPath(`popup-${width}.png`),
-      fullPage: true,
+      fullPage: false,
     });
+    expect(
+      await page.getByRole("dialog").evaluate((el) => {
+        const r = el.getBoundingClientRect();
+        return (
+          r.top >= 0 &&
+          r.bottom <= innerHeight &&
+          r.left >= 0 &&
+          r.right <= innerWidth
+        );
+      }),
+    ).toBe(true);
+    await expect(
+      page.getByRole("button", { name: "Cerrar", exact: true }),
+    ).toBeFocused();
     await page.keyboard.press("Escape");
     await navigate(page, "Entrenadores");
     const reads: string[] = [];

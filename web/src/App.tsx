@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, lazy, Suspense } from "react";
 import {
   Link,
   NavLink,
@@ -22,11 +22,12 @@ import {
   Menu,
   ArrowUpRight,
   ShieldCheck,
+  X,
 } from "lucide-react";
 import { api } from "./api/client";
 import type { Model } from "./api/types";
 import { useApp, useRead } from "./state";
-import { Field, Notice, Submit, form, text } from "./ui";
+import { Field, Notice, Submit, Loading, form, text } from "./ui";
 import {
   HomePage,
   LeaguePage,
@@ -38,7 +39,9 @@ import {
 } from "./features/core";
 import { CupsPage } from "./features/cups";
 import { TrialsPage } from "./features/trials";
-import { AdminPage } from "./features/admin";
+const AdminPage = lazy(() =>
+  import("./features/admin").then((m) => ({ default: m.AdminPage })),
+);
 import { seasonLabel } from "./features/admin-labels";
 import { BattlePage } from "./features/team-preview";
 import { ScoutingPage } from "./features/scouting";
@@ -228,11 +231,19 @@ export default function App() {
           aria-disabled={adminOperationPending || undefined}
           onClick={(event) => {
             if (adminOperationPending) event.preventDefault();
+            else setMenu(false);
           }}
         >
           <i className="pokeball" />
           POKE<span>APP</span>
         </Link>
+        <button
+          className="mobile-close icon-button"
+          aria-label="Cerrar navegación"
+          onClick={() => setMenu(false)}
+        >
+          <X />
+        </button>
         <p className="nav-label">CENTRO DE COMPETICIÓN</p>
         <nav aria-label="Principal">
           {links.map(([to, label, Icon]) => (
@@ -243,6 +254,7 @@ export default function App() {
               aria-disabled={adminOperationPending || undefined}
               onClick={(event) => {
                 if (adminOperationPending) event.preventDefault();
+                else setMenu(false);
               }}
             >
               <Icon size={19} />
@@ -256,6 +268,7 @@ export default function App() {
               aria-disabled={adminOperationPending || undefined}
               onClick={(event) => {
                 if (adminOperationPending) event.preventDefault();
+                else setMenu(false);
               }}
             >
               <Settings2 size={19} />
@@ -328,7 +341,13 @@ export default function App() {
               <Route
                 path="/admin"
                 element={
-                  me.is_admin ? <AdminPage /> : <Navigate to="/" replace />
+                  me.is_admin ? (
+                    <Suspense fallback={<Loading />}>
+                      <AdminPage />
+                    </Suspense>
+                  ) : (
+                    <Navigate to="/" replace />
+                  )
                 }
               />
               <Route path="/saves" element={<SavesPage />} />

@@ -30,10 +30,7 @@ for (const width of [1440, 390])
     await expect(page.getByRole("link", { name: "Abrir mi PC" })).toHaveCount(
       0,
     );
-    await page
-      .getByRole("button", { name: "Ver detalles", exact: true })
-      .first()
-      .click();
+    await page.locator(".public-party button").first().click();
     const modal = page.getByRole("dialog");
     await expect(modal).toContainText("Esfera Aural");
     await expect(modal).not.toContainText("Foco interno");
@@ -49,7 +46,9 @@ for (const width of [1440, 390])
     await navigate(page, "Entrenadores");
     await page.locator('a[href="/entrenadores/t4"]').click();
     await expect(
-      page.getByText("Team Lock pendiente", { exact: true }),
+      page.getByText("Este entrenador aún no ha fijado su equipo.", {
+        exact: true,
+      }),
     ).toBeVisible();
     await expect(page.locator(".pokemon")).toHaveCount(0);
     await navigate(page, "Entrenadores");
@@ -57,10 +56,7 @@ for (const width of [1440, 390])
     await expect(
       page.getByRole("heading", { name: "Antonio", exact: true }),
     ).toBeVisible();
-    await page
-      .getByRole("button", { name: "Ver detalles", exact: true })
-      .first()
-      .click();
+    await page.locator(".party-slots button").first().click();
     await expect(modal).toContainText("Foco interno");
     await expect(modal).toContainText("IVS");
     await modal.getByRole("button", { name: "Cerrar", exact: true }).click();
@@ -73,7 +69,7 @@ for (const width of [1440, 390])
       path: info.outputPath(`self-profile-${width}.png`),
       fullPage: true,
     });
-    await page.getByRole("link", { name: "Abrir mi PC" }).click();
+    await navigate(page, "Mi PC");
     await expect(page).toHaveURL(/\/pc$/);
     await expect(page.locator(".pokemon")).toHaveCount(12);
     expect(commands).toHaveLength(0);
@@ -96,7 +92,7 @@ test("four Shop categories use metadata, without new HTTP reads or name matching
           (category, i) => ({
             id: `item-${i}`,
             code: `item-${i}`,
-            name: `Objeto ${i}`,
+            name: `Vale especial ${String.fromCharCode(65 + i)}`,
             description: "Nombre sin categoría",
             category,
             base_price: 5,
@@ -107,7 +103,9 @@ test("four Shop categories use metadata, without new HTTP reads or name matching
   });
   await login(page);
   await navigate(page, "Tienda");
-  await expect(page.getByRole("heading", { name: "Objeto 0" })).toBeVisible();
+  await expect(
+    page.getByRole("heading", { name: "Vale especial A" }),
+  ).toBeVisible();
   const initial = reads;
   for (const [i, name] of [
     "Comodines",
@@ -117,7 +115,10 @@ test("four Shop categories use metadata, without new HTTP reads or name matching
   ].entries()) {
     await page.getByRole("button", { name, exact: true }).click();
     await expect(
-      page.getByRole("heading", { name: `Objeto ${i}`, exact: true }),
+      page.getByRole("heading", {
+        name: `Vale especial ${String.fromCharCode(65 + i)}`,
+        exact: true,
+      }),
     ).toBeVisible();
     await expect(page.locator(".shop-card")).toHaveCount(1);
   }

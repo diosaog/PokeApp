@@ -150,13 +150,15 @@ test("unobserved progress differs from observed zero; no manual accreditation or
   ).toHaveCount(0);
   await navigate(page, "Entrenadores");
   await expect(
-    page.getByText("Progreso no observado · Pendiente de sincronizar save.", {
+    page.getByText("Progreso no observado", {
       exact: true,
     }),
   ).toBeVisible();
-  await expect(
-    page.getByText("0 medallas observadas", { exact: true }),
-  ).toBeVisible();
+  const zeroCard = page
+    .locator(".trainer-card")
+    .filter({ has: page.getByRole("heading", { name: "Lucía", exact: true }) });
+  await expect(zeroCard.locator(".game-badge.earned")).toHaveCount(0);
+  await expect(zeroCard.locator(".game-badge.unearned")).toHaveCount(8);
   await navigate(page, "Administración");
   await page.getByRole("tab", { name: "Competición", exact: true }).click();
   await expect(
