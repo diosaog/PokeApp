@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import type { Model, Overview } from "../api/types";
 import { pokemonName, pokemonTitle } from "../pokemon/localization";
+import { PokemonSprite, TypeBadge } from "../pokemon/presentation";
 import { useApp, useRead, useOverview, usePC } from "../state";
 import { GameProgress, MyProgress } from "./progress";
 import { Inventory } from "./inventory";
@@ -88,9 +89,7 @@ export function Pokemon({
 }) {
   const body = (
     <>
-      <div className="mon-emblem" aria-hidden="true">
-        {pokemonName("species", pokemon.species).slice(0, 2).toUpperCase()}
-      </div>
+      <PokemonSprite species={pokemon.species} />
       <div>
         <strong>{pokemonTitle(pokemon)}</strong>
         <span className="muted">
@@ -101,7 +100,7 @@ export function Pokemon({
         </span>
         <div className="tags">
           {pokemon.types?.map((t) => (
-            <Tag key={t}>{pokemonName("type", t)}</Tag>
+            <TypeBadge key={t} type={t} />
           ))}
           {pokemon.is_shiny && <Sparkles size={15} />}
         </div>

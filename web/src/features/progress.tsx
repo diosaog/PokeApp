@@ -2,6 +2,7 @@ import type { Model } from "../api/types";
 import { queries, useApp, useRead } from "../state";
 import { invalidationFor } from "../read-invalidation";
 import { Card, Loading, Notice, Tag, date } from "../ui";
+import { BadgeIcon } from "../pokemon/presentation";
 
 const regions = {
   hoenn: "Hoenn",
@@ -34,9 +35,13 @@ export function GameProgress({
               const earned = region.earned_badges.includes(i + 1);
               const label = `Medalla ${i + 1} de ${regions[region.region]}: ${earned ? "conseguida" : "no conseguida"}`;
               return (
-                <span key={i} role="img" aria-label={label} title={label}>
-                  {earned ? "◆" : "◇"}
-                </span>
+                <BadgeIcon
+                  key={i}
+                  region={region.region}
+                  number={i + 1}
+                  earned={earned}
+                  label={label}
+                />
               );
             })}
           </div>

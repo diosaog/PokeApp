@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-label="Menta Pokemon">
+  <defs>
+    <linearGradient id="leafFill" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#b9ff9e"/>
+      <stop offset="48%" stop-color="#67dc65"/>
+      <stop offset="100%" stop-color="#2ea250"/>
+    </linearGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="4" stdDeviation="3" flood-color="#12301a" flood-opacity="0.28"/>
+    </filter>
+  </defs>
+  <g filter="url(#shadow)">
+    <path d="M34 100c17-6 28-20 34-39-20 5-34 17-41 35-2 5 3 7 7 4z" fill="#2f9f4c" stroke="#214b2e" stroke-width="4.4" stroke-linejoin="round"/>
+    <path d="M67 80c-18-13-28-31-30-56 24 4 43 18 53 40 3 7-6 12-12 8z" fill="url(#leafFill)" stroke="#214b2e" stroke-width="4.4" stroke-linejoin="round"/>
+    <path d="M72 78c0-24 11-45 30-58 7 25 1 48-16 66-5 5-14 0-14-8z" fill="url(#leafFill)" stroke="#214b2e" stroke-width="4.4" stroke-linejoin="round"/>
+    <path d="M67 85c-13-6-22-18-23-34 15 2 28 10 36 23 4 6-5 13-13 11z" fill="url(#leafFill)" stroke="#214b2e" stroke-width="4.4" stroke-linejoin="round"/>
+    <path d="M44 31c14 8 24 20 29 35" fill="none" stroke="#defff0" stroke-width="3.2" stroke-linecap="round"/>
+    <path d="M82 24c-9 12-14 27-14 43" fill="none" stroke="#defff0" stroke-width="3.2" stroke-linecap="round"/>
+    <path d="M53 55c10 6 18 14 22 23" fill="none" stroke="#defff0" stroke-width="3.2" stroke-linecap="round"/>
+  </g>
+</svg>

@@ -128,3 +128,26 @@ const stats: Record<string, string> = {
   spe: "Velocidad",
 };
 export const statName = (stat: string) => stats[stat] ?? "Característica";
+
+const ids = Object.fromEntries(
+  (Object.keys(names) as (Category | "item3")[]).map((category) => {
+    const map = new Map<string, number | null>();
+    const table = names[category];
+    table.es.forEach((name, id) => {
+      if (id < firstId(category === "item3" ? "item" : category)) return;
+      for (const alias of [name, table.en[id]]) {
+        if (!valid(alias)) continue;
+        const k = key(alias),
+          previous = map.get(k);
+        map.set(k, previous === undefined || previous === id ? id : null);
+      }
+    });
+    return [category, map];
+  }),
+) as Record<Category | "item3", Map<string, number | null>>;
+
+/** Presentation asset key only. Never an entity identity or a command target. */
+export function catalogId(category: Category, value: string): number | null {
+  const label = pokemonName(category, value);
+  return ids[category].get(key(label)) ?? null;
+}
