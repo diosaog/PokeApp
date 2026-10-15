@@ -268,6 +268,9 @@ class FrontendReads:
             if key in payload and payload[key] != expected:
                 raise PersistenceError("Parsed identity mismatch")
         # Accept the neutral slotted DTO only; never infer IDs from species/slots.
+        if public and not all(isinstance(payload.get(key), list) for key in ("party", "boxes")):
+            # A partial legacy payload is not evidence of empty boxes/dead Box 8.
+            return result(save=save, status="unsupported_payload", pokemon=[])
         party, boxes = payload.get("party", []), payload.get("boxes", [])
         if any("slot_number" not in s or "pokemon" not in s for s in party):
             return result(save=save, status="unsupported_payload", pokemon=[])

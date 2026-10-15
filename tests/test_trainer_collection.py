@@ -102,6 +102,14 @@ class PublicCollectionTests(unittest.TestCase):
         self.store.data["parsed_saves"][0]["schema_version"] = 999
         self.assertEqual(self.get().json()["status"], "unsupported_payload")
 
+    def test_partial_legacy_payload_does_not_claim_empty_boxes(self):
+        for field in ("party", "boxes"):
+            self.store.data = deepcopy(self.before)
+            del self.store.data["parsed_saves"][0]["payload"][field]
+            data = self.get().json()
+            self.assertEqual(data["status"], "unsupported_payload")
+            self.assertEqual(data["pokemon"], [])
+
 
 if __name__ == "__main__":
     unittest.main()
