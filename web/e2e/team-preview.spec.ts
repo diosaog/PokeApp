@@ -30,9 +30,9 @@ test("battle self has private lock details; rival and spectator never retain the
   await expect(page.locator("main select")).toHaveCount(1);
   await expect(page.getByText("Foco interno", { exact: true })).toHaveCount(6);
   await expect(page.locator(".battle-values")).toHaveCount(6);
-  await page.getByText("Ver IVs y EVs", { exact: true }).first().click();
+  await page.getByText("Ver IVs", { exact: true }).first().click();
   await expect(
-    page.getByRole("heading", { name: "IVS", exact: true }),
+    page.getByRole("heading", { name: "IVs", exact: true }),
   ).toBeVisible();
   await page
     .getByLabel("Entrenador", { exact: true })
@@ -135,7 +135,7 @@ for (const width of [1440, 390]) {
     const move = page.getByRole("button", { name: "Ver Esfera Aural" }).first();
     await move.focus();
     await page.keyboard.press("Enter");
-    const popover = page.locator(".move-popover:popover-open");
+    const popover = page.locator(".move-expansion");
     await expect(popover).toContainText("Especial");
     await expect(popover).toContainText("Referencia Pokémon X/Y");
     await expect(popover).toContainText("Potencia");

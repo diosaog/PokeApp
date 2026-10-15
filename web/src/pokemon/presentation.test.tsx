@@ -60,3 +60,22 @@ it("loads the explicitly versioned local reference only on move interaction", as
   expect(fetcher).toHaveBeenCalledWith("/visuals/v1/moves-xy.json");
   fetcher.mockRestore();
 });
+
+it("opening a second move dismisses the first; Escape returns focus", () => {
+  render(
+    <>
+      <MovePopover name="Rayo" />
+      <MovePopover name="Placaje" />
+    </>,
+  );
+  const first = screen.getByRole("button", { name: "Ver Rayo" });
+  const second = screen.getByRole("button", { name: "Ver Placaje" });
+  fireEvent.click(first);
+  expect(first).toHaveAttribute("aria-expanded", "true");
+  fireEvent.click(second);
+  expect(first).toHaveAttribute("aria-expanded", "false");
+  expect(second).toHaveAttribute("aria-expanded", "true");
+  fireEvent.keyDown(window, { key: "Escape" });
+  expect(second).toHaveAttribute("aria-expanded", "false");
+  expect(second).toHaveFocus();
+});

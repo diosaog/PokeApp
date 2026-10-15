@@ -36,12 +36,8 @@ for (const width of [1440, 390]) {
     const dialog = page.getByRole("dialog");
     for (const name of ["Restos", "Levitación", "Miedosa"])
       await expect(dialog.getByText(name, { exact: true })).toBeVisible();
-    await expect(
-      dialog.getByRole("button", { name: "Ver Rayo" }),
-    ).toBeVisible();
-    await expect(
-      dialog.getByRole("button", { name: "Ver Pulso Umbrío" }),
-    ).toBeVisible();
+    await expect(dialog.getByText("Rayo")).toBeVisible();
+    await expect(dialog.getByText("Pulso Umbrío")).toBeVisible();
     await expect(dialog).not.toContainText(
       /#635|#234|#85|#26|#10|Thunderbolt|\bspa\b/,
     );
@@ -61,7 +57,7 @@ for (const width of [1440, 390]) {
     await page.locator(".public-party button").first().click();
     await expect(dialog.getByText("Restos", { exact: true })).toBeVisible();
     await expect(dialog).not.toContainText(
-      /Levitación|Miedosa|Habilidad|Naturaleza|IVS|EVS/,
+      /Levitación|Miedosa|Habilidad|Naturaleza|IVs|EVs/,
     );
     expect(paths.some((p) => p.endsWith("/pc"))).toBe(false);
     await page.keyboard.press("Escape");
@@ -95,7 +91,7 @@ test("X/Y species and names survive public scouting and inventory selection", as
   await page.locator("a[href='/entrenadores/rival-trainer']").click();
   await expect(page.locator(".pokemon").first()).toContainText("Greninja");
   await page.locator(".public-party button").first().click();
-  await expect(page.getByRole("button", { name: "Ver Rayo" })).toBeVisible();
+  await expect(page.getByRole("dialog").getByText("Rayo")).toBeVisible();
   await expect(page.locator("main")).not.toContainText(
     /Levitación|Miedosa|#658|Move #/,
   );

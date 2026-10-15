@@ -30,7 +30,7 @@ it("localizes existing private details without altering the source object", () =
     "At. Esp.",
   ])
     expect(screen.getByText(text)).toBeVisible();
-  expect(screen.getByRole("button", { name: "Ver Rayo" })).toBeVisible();
+  expect(screen.getByText("Rayo")).toBeVisible();
   expect(document.body.textContent).not.toMatch(
     /#658|#234|#85|#26|#10|\bspa\b|\bdefense\b/,
   );
@@ -38,15 +38,44 @@ it("localizes existing private details without altering the source object", () =
 });
 it("public rendering never discovers private fields even on an overfull object", () => {
   render(<PokemonDetails visibility="public" pokemon={pokemon} />);
-  expect(screen.getByRole("button", { name: "Ver Rayo" })).toBeVisible();
+  expect(screen.getByText("Rayo")).toBeVisible();
   for (const text of [
     "Habilidad",
     "Levitación",
     "Naturaleza",
     "Miedosa",
-    "IVS",
-    "EVS",
+    "IVs",
+    "EVs",
     "At. Esp.",
   ])
     expect(screen.queryByText(text)).not.toBeInTheDocument();
+});
+
+it("IV bars preserve exact zero/max and omit EVs, invalid or missing IV is not zero", () => {
+  render(
+    <PokemonDetails
+      visibility="self"
+      pokemon={{
+        ...pokemon,
+        ivs: { hp: 0, atk: 31, defense: -1, spa: 32, spd: 17, spe: 24 },
+        evs: { hp: 252, atk: 0, defense: 0, spa: 0, spd: 0, spe: 0 },
+      }}
+    />,
+  );
+  expect(screen.getByRole("meter", { name: "PS" })).toHaveAttribute(
+    "aria-valuenow",
+    "0",
+  );
+  expect(screen.getByRole("meter", { name: "Ataque" })).toHaveAttribute(
+    "aria-valuenow",
+    "31",
+  );
+  expect(
+    screen.queryByRole("meter", { name: "Defensa" }),
+  ).not.toBeInTheDocument();
+  expect(screen.queryByText("252")).not.toBeInTheDocument();
+  expect(screen.queryByText(/EVs/)).not.toBeInTheDocument();
+  expect(
+    screen.queryByRole("button", { name: /Ver Rayo/ }),
+  ).not.toBeInTheDocument();
 });

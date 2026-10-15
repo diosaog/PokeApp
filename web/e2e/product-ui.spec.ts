@@ -75,7 +75,7 @@ for (const width of [1440, 390]) {
       .toBe(true);
     await expect(page.locator(".trainer-card > .button").first()).toHaveCSS(
       "background-color",
-      "rgb(255, 140, 109)",
+      "rgb(127, 216, 203)",
     );
     await page.screenshot({
       path: info.outputPath(`trainers-${width}.png`),
@@ -127,7 +127,7 @@ for (const width of [1440, 390]) {
     ).toBeVisible();
     await page.locator(".public-party button").first().click();
     await expect(page.getByRole("dialog")).not.toContainText(
-      /Modesta|Foco interno|IVS|EVS/,
+      /Modesta|Foco interno|IVs|EVs/,
     );
     expect(
       reads.some((p) => p.endsWith("/pc") || p.endsWith("/inventory")),

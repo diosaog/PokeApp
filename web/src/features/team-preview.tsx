@@ -1,8 +1,13 @@
 import { useEffect, useRef, useState } from "react";
 import { ShieldCheck } from "lucide-react";
 import type { Model } from "../api/types";
-import { pokemonName, statName } from "../pokemon/localization";
-import { ItemIcon, MovePopover } from "../pokemon/presentation";
+import { pokemonName } from "../pokemon/localization";
+import {
+  ItemIcon,
+  MovePopover,
+  IVBars,
+  typeClass,
+} from "../pokemon/presentation";
 import { useApp, useRead, usePC } from "../state";
 import { LockStatus } from "./lock-status";
 import {
@@ -191,7 +196,10 @@ function Preview({ season }: { season: string }) {
                         </p>
                         <div className="battle-roster">
                           {entry.lock.team.map((pokemon, index) => (
-                            <article className="battle-pokemon" key={index}>
+                            <article
+                              className={`battle-pokemon ${typeClass(pokemon.types?.[0])}`}
+                              key={index}
+                            >
                               <div className="battle-identity">
                                 <Pokemon pokemon={pokemon} />
                                 <span className="held-item">
@@ -245,7 +253,7 @@ function Preview({ season }: { season: string }) {
                               </div>
                               {entry.visibility === "self" && (
                                 <details className="battle-values">
-                                  <summary>Ver IVs y EVs</summary>
+                                  <summary>Ver IVs</summary>
                                   <PrivateDetails
                                     pokemon={entry.lock!.team[index]}
                                   />
@@ -276,25 +284,10 @@ function Preview({ season }: { season: string }) {
 
 function PrivateDetails({ pokemon }: { pokemon: Model<"PrivatePokemonRead"> }) {
   return (
-    <>
-      {(["ivs", "evs"] as const).map((key) => (
-        <div key={key}>
-          <h3>{key.toUpperCase()}</h3>
-          {pokemon[key] ? (
-            <dl className="stats-list">
-              {Object.entries(pokemon[key]!).map(([stat, value]) => (
-                <div key={stat}>
-                  <dt>{statName(stat)}</dt>
-                  <dd>{value}</dd>
-                </div>
-              ))}
-            </dl>
-          ) : (
-            <p>No disponible en este Team Lock.</p>
-          )}
-        </div>
-      ))}
-    </>
+    <div>
+      <h3>IVs</h3>
+      <IVBars values={pokemon.ivs} />
+    </div>
   );
 }
 

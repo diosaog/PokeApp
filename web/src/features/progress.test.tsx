@@ -73,3 +73,14 @@ it("a count without regional evidence does not invent individual badges", () => 
   expect(screen.getByText("8 medallas observadas")).toBeVisible();
   expect(screen.queryByRole("img")).not.toBeInTheDocument();
 });
+
+it("known Kalos artwork with UNKNOWN evidence never implies unearned zero", () => {
+  render(<GameProgress progress={{ state: "unknown", game: "X" }} />);
+  expect(screen.getAllByRole("img", { name: /sin observar/ })).toHaveLength(8);
+  expect(document.querySelectorAll(".game-badge.unearned")).toHaveLength(0);
+  expect(document.querySelector(".game-badge img")).toHaveAttribute(
+    "src",
+    "/visuals/badges/v1/43.png",
+  );
+  expect(screen.queryByText(/0 medallas/)).not.toBeInTheDocument();
+});

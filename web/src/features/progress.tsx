@@ -2,9 +2,11 @@ import type { Model } from "../api/types";
 import { queries, useApp, useRead } from "../state";
 import { invalidationFor } from "../read-invalidation";
 import { Card, Loading, Notice, Tag, date } from "../ui";
+import { gameRegion } from "../pokemon/badges";
 import { BadgeIcon } from "../pokemon/presentation";
 
-const regions = {
+const regions: Record<string, string> = {
+  kalos: "Kalos",
   hoenn: "Hoenn",
   kanto: "Kanto",
   sinnoh: "Sinnoh",
@@ -28,6 +30,8 @@ const games: Record<string, string> = {
   W2: "Blanco 2",
   X: "X",
   Y: "Y",
+  OR: "Rubí Omega",
+  AS: "Zafiro Alfa",
 };
 
 export function GameProgress({
@@ -39,11 +43,27 @@ export function GameProgress({
 }) {
   if (!progress || progress.state !== "observed") {
     return (
-      <p className="muted">
-        {compact
-          ? "Progreso no observado"
-          : "Progreso no observado · Pendiente de sincronizar save."}
-      </p>
+      <div className="progress-unknown">
+        <p className="muted">
+          {compact
+            ? "Progreso no observado"
+            : "Progreso no observado · Pendiente de sincronizar save."}
+        </p>
+        {progress?.game && gameRegion[progress.game] && (
+          <div className="badge-strip" aria-label="Medallas sin observar">
+            {Array.from({ length: 8 }, (_, i) => (
+              <BadgeIcon
+                key={i}
+                region={gameRegion[progress.game!]}
+                game={progress.game}
+                number={i + 1}
+                earned={null}
+                label={`Medalla ${i + 1}: sin observar`}
+              />
+            ))}
+          </div>
+        )}
+      </div>
     );
   }
   return (
@@ -77,6 +97,7 @@ export function GameProgress({
               return (
                 <BadgeIcon
                   key={i}
+                  game={progress.game}
                   region={region.region}
                   number={i + 1}
                   earned={earned}

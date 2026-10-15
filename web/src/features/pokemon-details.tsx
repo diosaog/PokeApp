@@ -1,10 +1,12 @@
 import type { Model } from "../api/types";
-import { pokemonName, pokemonTitle, statName } from "../pokemon/localization";
+import { pokemonName, pokemonTitle } from "../pokemon/localization";
 import {
   ItemIcon,
-  MovePopover,
+  MoveLabel,
   PokemonSprite,
   TypeBadge,
+  IVBars,
+  typeClass,
 } from "../pokemon/presentation";
 import { Modal } from "../ui";
 type Public = Pick<
@@ -19,16 +21,6 @@ export function PokemonDetailModal(
 ) {
   return (
     <Modal title={pokemonTitle(props.pokemon)} onClose={props.onClose}>
-      <div className="detail-identity">
-        <PokemonSprite species={props.pokemon.species} large />
-        <div>
-          <span className="eyebrow">
-            {props.visibility === "self" ? "TU POKÉMON" : "EQUIPO PÚBLICO"}
-          </span>
-          <h3>{pokemonName("species", props.pokemon.species)}</h3>
-          <p>Nivel {props.pokemon.level ?? "—"}</p>
-        </div>
-      </div>
       <PokemonDetails {...props} />
     </Modal>
   );
@@ -36,77 +28,75 @@ export function PokemonDetailModal(
 export function PokemonDetails(props: DetailPokemon) {
   const p = props.pokemon;
   return (
-    <>
-      <dl className="details">
-        <dt>Especie</dt>
-        <dd>{pokemonName("species", p.species)}</dd>
-        <dt>Nivel</dt>
-        <dd>{p.level ?? "—"}</dd>
-        <dt>Tipos</dt>
-        <dd>
-          {p.types?.length ? (
-            <div className="tags">
-              {p.types.map((t) => (
-                <TypeBadge key={t} type={t} />
-              ))}
-            </div>
-          ) : (
-            "—"
-          )}
-        </dd>
-        <dt>Objeto</dt>
-        <dd>
-          {p.item ? (
-            <span className="held-item">
-              <ItemIcon name={p.item} />
-              {pokemonName("item", p.item)}
-            </span>
-          ) : (
-            "Sin objeto"
-          )}
-        </dd>
-      </dl>
-      <h3>Movimientos</h3>
-      <div className="moves">
-        {p.moves?.length
-          ? p.moves.map((m, i) => <MovePopover key={i} name={m.name} />)
-          : "No disponibles."}
-      </div>
-      {props.visibility === "self" && (
-        <>
-          <dl className="details">
-            <dt>Habilidad</dt>
-            <dd>
-              {props.pokemon.ability
-                ? pokemonName("ability", props.pokemon.ability)
-                : "—"}
-            </dd>
-            <dt>Naturaleza</dt>
-            <dd>
-              {props.pokemon.nature
-                ? pokemonName("nature", props.pokemon.nature)
-                : "—"}
-            </dd>
-          </dl>
-          {(["ivs", "evs"] as const).map((k) => (
-            <div key={k}>
-              <h3>{k.toUpperCase()}</h3>
-              {props.pokemon[k] ? (
-                <dl className="stats-list">
-                  {Object.entries(props.pokemon[k]!).map(([stat, v]) => (
-                    <div key={stat}>
-                      <dt>{statName(stat)}</dt>
-                      <dd>{v}</dd>
-                    </div>
-                  ))}
-                </dl>
-              ) : (
-                <p>No disponibles.</p>
-              )}
-            </div>
+    <div className={`pokemon-detail-layout ${typeClass(p.types?.[0])}`}>
+      <section className="detail-identity">
+        <span className="eyebrow">
+          {props.visibility === "self" ? "TU POKÉMON" : "EQUIPO PÚBLICO"}
+        </span>
+        <PokemonSprite species={p.species} large />
+        <h3>{pokemonName("species", p.species)}</h3>
+        <p>Nivel {p.level ?? "—"}</p>
+        <div className="tags">
+          {p.types?.map((t) => (
+            <TypeBadge key={t} type={t} />
           ))}
-        </>
-      )}
-    </>
+        </div>
+      </section>
+      <section className="detail-data" aria-label="Características">
+        {props.visibility === "self" && (
+          <>
+            <h3>IVs</h3>
+            <IVBars values={props.pokemon.ivs} />
+          </>
+        )}
+        <dl className="detail-traits">
+          {props.visibility === "self" && (
+            <>
+              <div>
+                <dt>Habilidad</dt>
+                <dd>
+                  {props.pokemon.ability
+                    ? pokemonName("ability", props.pokemon.ability)
+                    : "—"}
+                </dd>
+              </div>
+              <div>
+                <dt>Naturaleza</dt>
+                <dd>
+                  {props.pokemon.nature
+                    ? pokemonName("nature", props.pokemon.nature)
+                    : "—"}
+                </dd>
+              </div>
+            </>
+          )}
+          <div>
+            <dt>Objeto equipado</dt>
+            <dd>
+              {p.item ? (
+                <span className="held-item">
+                  <ItemIcon name={p.item} />
+                  {pokemonName("item", p.item)}
+                </span>
+              ) : (
+                "Sin objeto"
+              )}
+            </dd>
+          </div>
+        </dl>
+      </section>
+      <section className="detail-moves" aria-label="Movimientos">
+        <h3>Movimientos</h3>
+        {Array.from({ length: 4 }, (_, i) =>
+          p.moves?.[i] ? (
+            <MoveLabel key={i} name={p.moves[i].name} />
+          ) : (
+            <div className="move-vacant" key={i}>
+              No disponible
+            </div>
+          ),
+        )}
+      </section>
+    </div>
   );
 }

@@ -34,7 +34,7 @@ for (const width of [1440, 390])
     const modal = page.getByRole("dialog");
     await expect(modal).toContainText("Esfera Aural");
     await expect(modal).not.toContainText("Foco interno");
-    await expect(modal).not.toContainText("IVS");
+    await expect(modal).not.toContainText("IVs");
     expect(
       reads.some((p) => p.endsWith("/pc") || p.endsWith("/team-preview")),
     ).toBe(false);
@@ -58,7 +58,7 @@ for (const width of [1440, 390])
     ).toBeVisible();
     await page.locator(".party-slots button").first().click();
     await expect(modal).toContainText("Foco interno");
-    await expect(modal).toContainText("IVS");
+    await expect(modal).toContainText("IVs");
     await modal.getByRole("button", { name: "Cerrar", exact: true }).click();
     expect(
       await page.evaluate(

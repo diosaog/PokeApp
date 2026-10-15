@@ -1,7 +1,16 @@
-import { useId, useState } from "react";
-import { Award, CircleHelp, Package, UserRound } from "lucide-react";
-import { catalogId, pokemonName } from "./localization";
+import { useEffect, useId, useRef, useState } from "react";
+import {
+  Award,
+  ChevronDown,
+  CircleHelp,
+  Package,
+  UserRound,
+  X,
+} from "lucide-react";
+import { catalogId, pokemonName, statName } from "./localization";
 import itemIds from "./visual-items.json";
+import moveTypes from "./move-types.json";
+import { badgeAsset } from "./badges";
 
 const base = "/visuals/v1";
 const items = new Set(itemIds);
@@ -110,12 +119,15 @@ const typeSlugs = [
   "dark",
   "fairy",
 ];
+export function typeClass(type?: string) {
+  const id = type ? catalogId("type", type) : null;
+  return `type-${id == null ? "unknown" : typeSlugs[id] || "unknown"}`;
+}
 export function TypeBadge({ type }: { type: string }) {
-  const id = catalogId("type", type),
-    slug = id == null ? null : typeSlugs[id];
+  const slug = typeClass(type).slice(5);
   return (
-    <span className={`type-badge type-${slug || "unknown"}`}>
-      {slug && (
+    <span className={`type-badge ${typeClass(type)}`}>
+      {slug !== "unknown" && (
         <img
           src={`${base}/types/${slug}-icon.svg`}
           alt=""
@@ -127,38 +139,31 @@ export function TypeBadge({ type }: { type: string }) {
     </span>
   );
 }
-const sinnoh = [
-  "Lignito",
-  "Bosque",
-  "Adoquin",
-  "Cienaga",
-  "Reliquia",
-  "Mina",
-  "Carambano",
-  "Faro",
-];
 export function BadgeIcon({
   region,
   number,
   earned,
   label,
+  game,
 }: {
+  game?: string | null;
   region: string;
   number: number;
-  earned: boolean;
+  earned: boolean | null;
   label: string;
 }) {
+  const asset = badgeAsset(region, number, game);
   return (
     <span
-      className={`game-badge ${earned ? "earned" : "unearned"}`}
+      className={`game-badge ${earned === null ? "unknown" : earned ? "earned" : "unearned"}`}
       role="img"
       aria-label={label}
       title={label}
     >
-      {region === "sinnoh" ? (
+      {asset ? (
         <img
           alt=""
-          src={`${base}/medallas/Medalla_${sinnoh[number - 1]}.png`}
+          src={`/visuals/badges/v1/${asset}.png`}
           width={30}
           height={30}
           loading="lazy"
@@ -190,7 +195,50 @@ export type MoveReference = {
   accuracy: number | null;
   description: string | null;
 };
+const moveType = (name: string) => {
+  const id = catalogId("move", name);
+  return id == null ? undefined : (moveTypes as Record<string, string>)[id];
+};
+/** Compact static move label: Pokemon detail never opens descriptions. */
+export function MoveLabel({ name }: { name: string }) {
+  return (
+    <div className={`move-label ${typeClass(moveType(name))}`}>
+      <span className="type-dot" aria-hidden="true" />
+      {pokemonName("move", name)}
+    </div>
+  );
+}
+export function IVBars({ values }: { values?: Record<string, number> | null }) {
+  if (!values) return <p className="muted">IVs no disponibles.</p>;
+  return (
+    <div className="iv-bars" aria-label="Valores individuales">
+      {["hp", "atk", "defense", "spa", "spd", "spe"].map((stat) => {
+        const value = values[stat];
+        const known = Number.isInteger(value) && value >= 0 && value <= 31;
+        return (
+          <div className={`iv-row iv-${stat}`} key={stat}>
+            <span>{statName(stat)}</span>
+            <span
+              className="iv-track"
+              role={known ? "meter" : undefined}
+              aria-label={statName(stat)}
+              aria-valuemin={known ? 0 : undefined}
+              aria-valuemax={known ? 31 : undefined}
+              aria-valuenow={known ? value : undefined}
+            >
+              <span
+                style={{ width: known ? `${(value / 31) * 100}%` : "0%" }}
+              />
+            </span>
+            <strong>{known ? value : "—"}</strong>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
 let reference: Promise<Record<string, MoveReference>> | undefined;
+/** Local reference data only; one compact disclosure across the visible team. */
 export function MovePopover({
   name,
   pp,
@@ -200,10 +248,39 @@ export function MovePopover({
 }) {
   const id = useId(),
     move = catalogId("move", name);
-  const [info, setInfo] = useState<MoveReference | null>(null);
-  const [loaded, setLoaded] = useState(false);
+  const trigger = useRef<HTMLButtonElement>(null);
+  const [open, setOpen] = useState(false);
+  const [result, setResult] = useState<{
+    move: number | null;
+    info: MoveReference | null;
+  } | null>(null);
+  const [failed, setFailed] = useState(false);
+  const info = result?.move === move ? result.info : null;
+  useEffect(() => {
+    setOpen(false);
+    setResult(null);
+    setFailed(false);
+  }, [name]);
+  useEffect(() => {
+    if (!open) return;
+    const dismiss = () => setOpen(false);
+    const escape = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        e.stopPropagation();
+        setOpen(false);
+        trigger.current?.focus();
+      }
+    };
+    window.addEventListener("pokeapp:move-open", dismiss);
+    window.addEventListener("keydown", escape, true);
+    return () => {
+      window.removeEventListener("pokeapp:move-open", dismiss);
+      window.removeEventListener("keydown", escape, true);
+    };
+  }, [open]);
   async function load() {
-    if (loaded) return;
+    if (result?.move === move) return;
+    setFailed(false);
     try {
       reference ??= fetch(`${base}/moves-xy.json`)
         .then((r) => {
@@ -215,69 +292,95 @@ export function MovePopover({
           throw e;
         });
       const values = await reference;
-      setInfo(move == null ? null : (values[move] ?? null));
-      setLoaded(true);
+      setResult({ move, info: move == null ? null : (values[move] ?? null) });
     } catch {
-      setInfo(null);
+      setFailed(true);
     }
   }
   return (
-    <>
+    <div className={`move-disclosure ${typeClass(moveType(name))}`}>
       <button
+        ref={trigger}
         type="button"
         className="move-button"
-        popoverTarget={id}
-        onClick={() => void load()}
+        aria-expanded={open}
+        aria-controls={id}
         aria-label={`Ver ${pokemonName("move", name)}`}
+        onClick={() => {
+          if (!open) {
+            window.dispatchEvent(new Event("pokeapp:move-open"));
+            void load();
+          }
+          setOpen(!open);
+        }}
       >
-        <span>{pokemonName("move", name)}</span>
+        <span className="type-dot" aria-hidden="true" />
+        <span className="move-name">{pokemonName("move", name)}</span>
         {pp != null && <small>{pp} PP</small>}
-        <CircleHelp size={13} />
+        <ChevronDown size={13} aria-hidden="true" />
       </button>
-      <div id={id} popover="auto" className="move-popover">
-        <div className="section-row">
-          <h3>{pokemonName("move", name)}</h3>
-          <button
-            className="icon-button"
-            popoverTarget={id}
-            popoverTargetAction="hide"
-            aria-label="Cerrar movimiento"
-          >
-            ×
-          </button>
+      {open && (
+        <div
+          id={id}
+          className="move-expansion"
+          role="region"
+          aria-label={`Detalles de ${pokemonName("move", name)}`}
+        >
+          <div className="move-expansion-heading">
+            <span>Referencia Pokémon X/Y</span>
+            <button
+              className="icon-button"
+              aria-label="Cerrar movimiento"
+              onClick={() => {
+                setOpen(false);
+                trigger.current?.focus();
+              }}
+            >
+              <X size={14} />
+            </button>
+          </div>
+          {info ? (
+            <>
+              <div className="move-facts">
+                <TypeBadge type={info.type} />
+                <span className="move-category">
+                  <img
+                    src={`${base}/categories/${info.category}.png`}
+                    width={32}
+                    height={14}
+                    alt=""
+                  />
+                  {
+                    {
+                      Physical: "Físico",
+                      Special: "Especial",
+                      Status: "Estado",
+                    }[info.category]
+                  }
+                </span>
+              </div>
+              <div className="move-numbers">
+                <span>
+                  Potencia <strong>{info.power || "—"}</strong>
+                </span>
+                <span>
+                  Precisión{" "}
+                  <strong>
+                    {info.accuracy == null ? "—" : `${info.accuracy}%`}
+                  </strong>
+                </span>
+              </div>
+              <p>{info.description || "Descripción no disponible para X/Y."}</p>
+            </>
+          ) : (
+            <p role="status">
+              {failed || result?.move === move
+                ? "Información no disponible."
+                : "Cargando movimiento…"}
+            </p>
+          )}
         </div>
-        <p className="caption">Referencia Pokémon X/Y</p>
-        {info ? (
-          <>
-            <div className="tags">
-              <TypeBadge type={info.type} />
-              <span className="move-category">
-                <img
-                  src={`${base}/categories/${info.category}.png`}
-                  width={32}
-                  height={14}
-                  alt=""
-                />
-                {
-                  { Physical: "Físico", Special: "Especial", Status: "Estado" }[
-                    info.category
-                  ]
-                }
-              </span>
-            </div>
-            <div className="mini-stats">
-              <StatPill label="Potencia" value={info.power || "—"} />
-              <StatPill
-                label="Precisión"
-                value={info.accuracy == null ? "—" : `${info.accuracy}%`}
-              />
-            </div>
-            <p>{info.description || "Descripción no disponible para X/Y."}</p>
-          </>
-        ) : (
-          <p>Información no disponible.</p>
-        )}
-      </div>
-    </>
+      )}
+    </div>
   );
 }
