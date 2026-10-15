@@ -1,54 +1,46 @@
-# Phase 17.2 — product polish live record
+# Phase 17.2 ? live execution record
 
-Observation 2026-10-15. **VALIDATED / DEPLOYMENT PENDING.**
-Entry main/origin `f692ced8e63446c5943f7e467a8af4af474ecd73`, fetched 0/0,
-clean tracked tree. Previous 17.1 closure retained. No 17.2 deployment yet.
+Observation 2026-10-15. **STATUS: PHASE 17.2 DONE.**
 
-## Implemented locally
+## Entry and implementation
 
-- Owner-approved visibility correction: a JWT-protected, read-only trainer
-  collection projection exposes current party/boxes/dead Box 8 and the recorded
-  revived-after-wipe counter. No IV/EV/ability/nature, entity identity, raw evidence,
-  save identifiers or Storage access. Existing private PC and official Team Lock
-  readers remain separate. Six bounded repository reads, no schema/migration.
-- Profile/scouting retain useful live data without a lock. Own inventory/canjes
-  move from Shop into the identity area; own wipe editor is retained in profile.
-  Rival purchase inventory is not exposed; robbery eligibility remains unchanged.
-- Disabled actions no longer pretend to be in progress. Admin, rules, championship,
-  initial assignment, inventory and wipe controls separate spinner from disabling.
-  Stalled GET reads have an explicit 20-second error; command replay semantics unchanged.
-  Existing trainer addition selects an existing account; no account-creation API exists.
-- 721 pinned real animated sprites (33,930,353 bytes, lazy visible team/detail only;
-  static boxes, reduced-motion and hidden-tab/offscreen static fallback).
-  Existing local wildcard art mapped correctly; all 61 seeded catalog codes have
-  art, including two new bottle-cap icons. No Launcher or save write changes.
-- Original geometric section backdrops, gentle reduced-motion-aware glow, larger
-  party/badges, profile inventory layout, stronger PC and battle framing.
+Entry was `f692ced8e63446c5943f7e467a8af4af474ecd73`, with main/origin aligned.
+The final application source is `d7eb78b66861a4bddd1d79ec3eebc93c7429d1a1`,
+pushed before deployment. The packet adds the approved public current-save
+collection (party, boxes and dead Box 8) with a strict privacy allowlist, moves
+own inventory to the trainer profile, separates disabled from pending controls,
+and applies bounded visual/art polish. Team Lock remains the official historical
+team; no competitive, parser, reward, migration or physical-save semantics were
+changed.
 
-## Validation and remote entry
+## Validation and delivery
 
-Final focused Python/API/privacy **52 PASS**, affected React **68 PASS**,
-**51 unique affected browser tests PASS** across retained successful runs and
-focused reruns. TypeScript/public build, formatting, targeted Ruff/compile,
-Wrangler dry-run and diff checks pass. Desktop/tablet/mobile screenshots reviewed.
-Harness fixes: full navigation discarded the in-memory session; a Shop expectation
-preceded navigation to the new inventory location; late Home requests polluted the
-rival-only request window. Formatting during one run reloaded Vite, so the invalidated
-900px case was repeated on stable source and passed. No product mutation for tests.
+Existing final validation is retained: **53 focused Python**, **68 affected React**
+and **51 unique affected browser cases**, with build, formatting, Ruff, compile,
+Wrangler dry-run and animation hashes passing. No PostgreSQL run was needed because
+SQL, schema, grants and migrations were unchanged.
 
-Fresh read-only remote baseline retained privately at
-`%LOCALAPPDATA%/PokeApp-migration-evidence/phase17-2/20261015/before`:
-59 table hashes, stable owner credentials, security, Advisors, private inbox,
-36 migrations through 044=`20261014164204` once. Railway remains healthy at
-`c3e33fd1-a355-4edc-a663-3947288e247d` / source `2959287`.
-No remote writes, fixtures or deployments in 17.2 at this checkpoint.
+Railway deployment `c4ed81bf-da7f-4ea5-9b20-5a8bb4344f36` is SUCCESS with image
+`sha256:ac40a3ca47df3b1198f6841c411b0e8a11b1b12018152b402940d1c2ba250ff4`.
+Cloudflare deployment `a132a525-70a0-4727-b4f4-85f837379cc3`, version
+`33849862-0eef-40e6-b5a7-54228e8684e2`, serves 100% with the same source. The
+read-only public probe passed 31 checks and the unauthenticated browser smoke
+passed 10 visits at desktop/mobile widths, with no unexpected 5xx or mutation.
 
-## Exact next steps
+The private before/after capture has 59 scoped tables and 36 migrations through
+044. All public/business tables, owner-stable identity/credentials, security,
+private inbox and Advisor ERROR/WARN findings are unchanged. Differences are
+limited to expected Auth session/refresh activity in `auth.users`,
+`auth.sessions` and `auth.refresh_tokens`. No V1, Shadow, R2, Launcher or
+physical-save write occurred.
 
-Finish affected browser/visual checks, final focused Python and build/lint gates;
-commit/push application; deploy committed API bundle first and Cloudflare second;
-read-only hosted checks and exact before/after preservation; report/evidence,
-checkpoint and documentation closure. Do not start another packet.
+## Evidence boundaries and next state
 
-Use explicit staging. Protected guide and unrelated untracked files must not be
-staged or modified. Existing owner data and all frozen history remain intact.
+The hosted authenticated PIN journey and positive owner-season mutation were not
+run because no PIN was available; local authenticated tests and public denial
+checks passed. V1 and Shadow were not accessed. Evidence is in
+[phase17-2-product-polish-evidence.json](../phase17-2-product-polish-evidence.json)
+and the private directory `%LOCALAPPDATA%/PokeApp-migration-evidence/phase17-2/20261015`.
+
+**NEXT: Antonio visual acceptance.** No next packet, Gen6/7 support or physical
+save writes starts from this closure.

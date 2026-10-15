@@ -5,6 +5,22 @@ milestone record; it does not maintain a second live phase-status ledger.
 
 ## Current project position
 
+- Latest completed packet: **17.2 - public trainer collections and final product
+  polish, DONE**. Public current-save party/boxes/dead Box 8 projection uses a
+  strict privacy allowlist; own inventory is on the profile; Admin pending and
+  disabled states are separated; section art, lazy animations and shop assets
+  are delivered. Final source `d7eb78b` pushed. Railway deployment
+  `c4ed81bf-da7f-4ea5-9b20-5a8bb4344f36` and Cloudflare deployment
+  `a132a525-70a0-4727-b4f4-85f837379cc3` serve 100%. 53 focused Python, 68
+  affected React and 51 affected browser cases pass; public read-only proof is
+  green. Before/after preservation leaves all public/business tables unchanged;
+  only expected owner Auth session activity differs. No migration, V1/Shadow,
+  R2, Launcher or physical save write occurred.
+  [Report](phase17-2-product-polish-report.md),
+  [evidence](phase17-2-product-polish-evidence.json),
+  [live record](work-in-progress/phase17-2-product-polish-live.md).
+  **Next: ANTONIO VISUAL ACCEPTANCE. STOP.**
+
 - Latest completed phase: **17.1 - Art direction / visual polish, DONE**.
   Eleven section accents, subtle motifs, type-colored inline move details,
   horizontal Pokemon detail with IV bars/no normal EVs, 50 game badge assets,

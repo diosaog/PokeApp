@@ -1,0 +1,65 @@
+{
+  "phase": "17.2",
+  "status": "DONE",
+  "observed_at": "2026-10-15",
+  "entry_head": "f692ced8e63446c5943f7e467a8af4af474ecd73",
+  "final_application_head": "d7eb78b66861a4bddd1d79ec3eebc93c7429d1a1",
+  "local_validation": {
+    "python_focused": 53,
+    "react_affected": 68,
+    "browser_unique_affected": 51,
+    "result": "PASS",
+    "pg_or_migration": "NOT_APPLICABLE"
+  },
+  "railway": {
+    "deployment": "c4ed81bf-da7f-4ea5-9b20-5a8bb4344f36",
+    "status": "SUCCESS",
+    "image": "sha256:ac40a3ca47df3b1198f6841c411b0e8a11b1b12018152b402940d1c2ba250ff4",
+    "source": "d7eb78b66861a4bddd1d79ec3eebc93c7429d1a1"
+  },
+  "cloudflare": {
+    "deployment": "a132a525-70a0-4727-b4f4-85f837379cc3",
+    "version": "33849862-0eef-40e6-b5a7-54228e8684e2",
+    "percentage": 100,
+    "source": "d7eb78b66861a4bddd1d79ec3eebc93c7429d1a1"
+  },
+  "public_proof": {
+    "http_checks": 31,
+    "browser_visits": 10,
+    "unexpected_5xx": 0,
+    "business_mutations": 0,
+    "result": "PASS"
+  },
+  "preservation": {
+    "scoped_tables_before": 59,
+    "scoped_tables_after": 59,
+    "non_auth_table_differences": [],
+    "auth_activity_differences": [
+      "auth.users",
+      "auth.sessions",
+      "auth.refresh_tokens"
+    ],
+    "migrations_before": 36,
+    "migrations_after": 36,
+    "migration_head": "044_trusted_save_registration",
+    "history_unchanged": true,
+    "owner_stable_unchanged": true,
+    "security_unchanged": true,
+    "private_inbox_unchanged": true,
+    "advisor_error_warn_unchanged": true,
+    "v1_shadow_touched": false,
+    "r2_touched": false,
+    "physical_save_writes": false
+  },
+  "boundaries": {
+    "hosted_authenticated_pin_flow": "NOT_RUN_PIN_UNAVAILABLE",
+    "hosted_positive_owner_mutation": "NOT_RUN",
+    "v1_and_shadow": "NOT_ACCESSED",
+    "launcher_changes": "NONE"
+  },
+  "evidence_paths": {
+    "private_root": "%LOCALAPPDATA%/PokeApp-migration-evidence/phase17-2/20261015",
+    "public_after": "public-after.json",
+    "browser_after": "public-browser.json"
+  }
+}
