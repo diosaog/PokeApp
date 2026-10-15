@@ -20,11 +20,27 @@ import {
   useCommand,
 } from "../ui";
 import { WithSeason } from "./core";
+import { participantLabel, matchLabel } from "./admin-labels";
 
 const formats = {
   swiss: "Suiza + Top Cut",
   elimination: "Eliminatoria",
   doubles: "Dobles",
+};
+const cupStatus = (value: string) =>
+  ({
+    draft: "Preparación",
+    active: "En juego",
+    finished: "Finalizada",
+    certified: "Certificada",
+    discarded: "Cancelada",
+  })[value] ?? "Estado pendiente";
+const phaseLabel = {
+  swiss: "Suiza",
+  elimination: "Eliminatoria",
+  semifinal: "Semifinal",
+  round_robin: "Todos contra todos",
+  final: "Final",
 };
 function CupForm({ cup, onClose }: { cup?: Cup; onClose: () => void }) {
   const { season } = useApp(),
@@ -138,7 +154,7 @@ function CupForm({ cup, onClose }: { cup?: Cup; onClose: () => void }) {
                   <option value="">Seleccionar</option>
                   {overview.data?.players.map((p) => (
                     <option key={p.id} value={p.trainer_id}>
-                      {p.display_name} · {p.status}
+                      {p.display_name} · {participantLabel(p.status)}
                     </option>
                   ))}
                 </select>
@@ -165,14 +181,15 @@ function CupDetail({ id }: { id: string }) {
   if (query.error) return <Notice error={query.error} />;
   const cup = query.data!,
     name = (id: string | null) =>
-      cup.sides.find((s) => s.id === id)?.name || "Bye",
+      cup.sides.find((s) => s.id === id)?.name ||
+      (id ? "Participante no disponible" : "Pase libre"),
     active = cup.status === "active";
   return (
     <>
       <div className="toolbar">
         <Link to="/copa">← Todas las Copas</Link>
         <Tag>
-          {formats[cup.format]} · {cup.status}
+          {formats[cup.format]} · {cupStatus(cup.status)}
         </Tag>
       </div>
       <h2>{cup.name}</h2>
@@ -221,14 +238,14 @@ function CupDetail({ id }: { id: string }) {
           <Link to="/hall">Ver Hall de la Fama →</Link>
         </Card>
       )}
-      <div className="cup-rounds">
+      <div className="cup-rounds" aria-label="Rondas de la Copa" tabIndex={0}>
         {cup.rounds.map((round) => (
-          <Card key={round.number}>
+          <Card key={round.number} className="cup-round">
             <div className="section-row">
               <h3>
-                Ronda {round.number} · {round.phase}
+                Ronda {round.number} · {phaseLabel[round.phase]}
               </h3>
-              <Tag>{round.status}</Tag>
+              <Tag>{round.status === "open" ? "En juego" : "Cerrada"}</Tag>
             </div>
             <form
               onSubmit={async (event) => {
@@ -270,7 +287,7 @@ function CupDetail({ id }: { id: string }) {
                       {name(m.b)}
                     </span>
                   </div>
-                  <Tag>{m.status}</Tag>
+                  <Tag>{matchLabel(m.status)}</Tag>
                   {me?.is_admin &&
                     active &&
                     m.a &&
@@ -380,7 +397,12 @@ function CupDetail({ id }: { id: string }) {
         {cup.sides.map((s) => (
           <Card key={s.id}>
             <Tag>
-              Seed {s.seed} · {s.status}
+              Posición inicial {s.seed} ·{" "}
+              {s.status === "active"
+                ? "En juego"
+                : s.status === "disqualified"
+                  ? "Descalificado de la Copa"
+                  : "Fuera de competición"}
             </Tag>
             <h3>{s.name}</h3>
             <p>{s.members.map((m) => m.display_name).join(" & ")}</p>
@@ -419,7 +441,7 @@ function CupDetail({ id }: { id: string }) {
               ? "La Copa quedará cancelada y conservará su historial."
               : action.op === "finalize"
                 ? "Se certificarán el campeón y el finalista y se registrará el resultado en el Hall."
-                : "Se aplicará el cambio a la revisión actual de la Copa."}
+                : "Confirma el cambio para continuar con esta Copa."}
           </p>
           <form
             onSubmit={async (event) => {
@@ -497,7 +519,7 @@ export function CupsPage() {
                     <Crown />
                     <div>
                       <Tag>
-                        {formats[c.format]} · {c.status}
+                        {formats[c.format]} · {cupStatus(c.status)}
                       </Tag>
                       <h2>{c.name}</h2>
                     </div>

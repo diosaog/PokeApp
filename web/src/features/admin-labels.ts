@@ -24,6 +24,14 @@ export const participantLabel = (value: string) =>
   participantLabels[value] ?? "Estado pendiente de consultar";
 export const dayLabel = (value: string) =>
   dayLabels[value] ?? "Estado pendiente de consultar";
+export const matchLabel = (value: string) =>
+  ({
+    scheduled: "Pendiente",
+    completed: "Finalizado",
+    cancelled: "Cancelado",
+    bye: "Pase libre",
+    forfeit: "Victoria por retirada",
+  })[value] ?? "Estado pendiente";
 
 const readinessLabels: Record<string, string> = {
   has_roster: "Añade participantes a la Liga.",

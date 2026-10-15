@@ -5,7 +5,7 @@ export function LauncherDownload() {
   return (
     <>
       <a
-        className="button"
+        className="button primary"
         href="/launcher/download"
         download="PokeApp-Launcher-Setup.exe"
       >

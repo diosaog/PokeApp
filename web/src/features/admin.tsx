@@ -853,7 +853,7 @@ export function AdminPage() {
                 <h2>Historia oficial</h2>
                 <p>
                   Consulta las jornadas congeladas y los campeones certificados.
-                  Las correcciones conservan su trazabilidad en el servidor.
+                  Cada corrección conserva el registro de lo que cambió.
                 </p>
                 <div className="toolbar">
                   <AdminLink className="button" to="/liga">

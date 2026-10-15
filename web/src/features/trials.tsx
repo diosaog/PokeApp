@@ -20,6 +20,28 @@ import {
   useCommand,
 } from "../ui";
 import { WithSeason } from "./core";
+const trialStatus = (value: string) =>
+  ({
+    open: "Abierto",
+    resolved: "Resuelto",
+    dismissed: "Desestimado",
+    cancelled: "Cancelado",
+  })[value] ?? "Pendiente";
+const trialOperation: Record<string, string> = {
+  create: "Propuesta",
+  proposal: "Propuesta actualizada",
+  resolve: "Decisión registrada",
+  correct: "Decisión corregida",
+  cancel: "Propuesta cancelada",
+};
+const sanctionLabel = (value: string) =>
+  ({
+    store_ban: "Bloqueo de tienda",
+    coins_reduction: "Reducción de monedas",
+    points_reduction: "Reducción de puntos",
+    pokemon_release: "Liberación de Pokémon",
+    other: "Otra medida",
+  })[value] ?? "Medida registrada";
 
 function TrialForm({
   trial,
@@ -186,10 +208,10 @@ function TrialForm({
               <textarea name="summary" required maxLength={2000} />
             </Field>
             <fieldset disabled={verdict === "not_guilty"}>
-              <legend>Sanciones mecánicas</legend>
+              <legend>Sanciones en la Liga</legend>
               <label className="check">
                 <input type="checkbox" name="store_ban" />
-                Store Ban
+                Bloqueo de tienda
               </label>
               <Field label="Duración (jornadas)">
                 <input
@@ -277,7 +299,10 @@ function TrialDetail({ id, onClose }: { id: string; onClose: () => void }) {
           trial && (
             <>
               <Tag>
-                #{trial.case_number ?? "Legacy"} · {trial.status}
+                {trial.case_number == null
+                  ? "Caso anterior"
+                  : `Caso ${trial.case_number}`}{" "}
+                · {trialStatus(trial.status)}
               </Tag>
               <p>{trial.description}</p>
               <p>
@@ -325,14 +350,14 @@ function TrialDetail({ id, onClose }: { id: string; onClose: () => void }) {
                   {trial.detail.history.map((h) => (
                     <article key={h.id} className="history-item">
                       <span className="eyebrow">
-                        {date(h.created_at)} · {h.operation} · revisión{" "}
-                        {h.revision}
+                        {date(h.created_at)} ·{" "}
+                        {trialOperation[h.operation] ?? "Actualización"}
                       </span>
                       <p>{h.decision_summary || h.details.description}</p>
                       {h.reason && <p>Motivo: {h.reason}</p>}
                       {h.sanctions.map((s) => (
                         <p key={s.type}>
-                          {s.type}:{" "}
+                          {sanctionLabel(s.type)}:{" "}
                           {"amount" in s
                             ? s.amount
                             : "duration_matchdays" in s
@@ -384,7 +409,10 @@ export function TrialsPage() {
               >
                 <Scale />
                 <Tag>
-                  #{t.case_number ?? "Legacy"} · {t.status}
+                  {t.case_number == null
+                    ? "Caso anterior"
+                    : `Caso ${t.case_number}`}{" "}
+                  · {trialStatus(t.status)}
                 </Tag>
                 <h2>{t.title}</h2>
                 <p>{t.description}</p>

@@ -86,10 +86,6 @@ export function MyProgress() {
   return (
     <Card>
       <h2>Progreso en tu juego</h2>
-      <p>
-        Medallas → Liga Pokémon → derrotar al Campeón. Ocho medallas no bastan
-        para completar el juego.
-      </p>
       {query.error ? (
         <Notice error={query.error} />
       ) : query.isPending ? (
@@ -111,10 +107,6 @@ export function MyProgress() {
       >
         Actualizar progreso
       </button>
-      <p className="muted">
-        Estas son observaciones del save registrado en PokeApp. No determinan el
-        título de tu Liga competitiva.
-      </p>
     </Card>
   );
 }

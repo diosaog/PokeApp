@@ -28,7 +28,7 @@ import { ParticipantResults } from "./league-results";
 import { InitialAssignment } from "./initial-assignment";
 import { WipeRevivals } from "./wipe-revivals";
 import { Collection } from "./collection";
-import { participantLabel } from "./admin-labels";
+import { participantLabel, matchLabel } from "./admin-labels";
 import { LeagueOperations } from "./league-operations";
 import { LockStatus } from "./lock-status";
 import { TeamLockWarning } from "./team-lock-warning";
@@ -122,155 +122,7 @@ export function Pokemon({
     <div className="pokemon">{body}</div>
   );
 }
-export function HomePage() {
-  const { me } = useApp();
-  const pc = usePC();
-  return (
-    <>
-      <Heading
-        eyebrow="TU CENTRO DE COMPETICIÓN"
-        title={`A por la siguiente, ${me?.display_name}.`}
-      >
-        Todo listo para tu próxima jornada.
-      </Heading>
-      <OverviewState>
-        {(data) => {
-          const day = currentDay(data),
-            player = data.players.find((p) => p.trainer_id === me?.trainer_id),
-            match = data.matches.find(
-              (m) =>
-                m.matchday_id === day?.id &&
-                !m.winner_id &&
-                (m.player_a_id === player?.id || m.player_b_id === player?.id),
-            ),
-            lock = data.locks.find(
-              (l) =>
-                l.trainer_id === me?.trainer_id && l.matchday_id === day?.id,
-            );
-          const membership = data.memberships.find(
-            (m) =>
-              m.season_player_id === player?.id &&
-              day &&
-              m.effective_from_matchday_number <= day.number &&
-              (m.effective_to_matchday_number == null ||
-                m.effective_to_matchday_number >= day.number) &&
-              (m.eligibility_ends_before_matchday_number == null ||
-                day.number < m.eligibility_ends_before_matchday_number),
-          );
-          return (
-            <>
-              <div className="home-grid">
-                <section className="hero card">
-                  <span className="eyebrow">
-                    <i className="live-dot" />{" "}
-                    {day ? `JORNADA ${day.number}` : "TEMPORADA"} ·{" "}
-                    {data.season.name}
-                  </span>
-                  <div className="hero-content">
-                    <Tag>PRÓXIMA BATALLA</Tag>
-                    <h2>
-                      {match
-                        ? playerName(
-                            data,
-                            match.player_a_id === player?.id
-                              ? match.player_b_id
-                              : match.player_a_id,
-                          )
-                        : "Tu próximo desafío te espera."}
-                    </h2>
-                    <p>
-                      {match
-                        ? "Un rival. Una oportunidad de subir. Prepara tu equipo y entra en la jornada."
-                        : "No tienes un enfrentamiento pendiente en la jornada actual."}
-                    </p>
-                    <Link className="button primary" to="/battle">
-                      {match ? "Preparar batalla" : "Ver la jornada"}
-                      <ArrowUpRight size={18} />
-                    </Link>
-                  </div>
-                  <Swords className="hero-art" aria-hidden="true" />
-                </section>
-                <Card className="readiness">
-                  <ShieldCheck size={27} />
-                  <span className="eyebrow">TU EQUIPO</span>
-                  <h2>{lock ? "Equipo fijado." : "¿Listo para combatir?"}</h2>
-                  <LockStatus
-                    status={
-                      lock ? (lock.timing_status ?? "unknown") : "pending"
-                    }
-                  />
-                  <p>
-                    {lock
-                      ? "El Team Lock de esta jornada está registrado."
-                      : "Revisa tu save disponible y confirma el Team Lock antes de jugar."}
-                  </p>
-                  <Link className="text-link" to="/battle">
-                    Revisar Team Preview <ArrowUpRight size={16} />
-                  </Link>
-                </Card>
-              </div>
-              <div className="stat-grid">
-                <Card>
-                  <Coins />
-                  <span className="eyebrow">MONEDAS</span>
-                  <strong className="stat-number">
-                    {data.balance ?? "—"} <small>PK₽</small>
-                  </strong>
-                  <Link to="/tienda">Visitar la tienda →</Link>
-                </Card>
-                <Card>
-                  <Trophy />
-                  <span className="eyebrow">DIVISIÓN</span>
-                  <strong className="stat-number">
-                    {data.divisions.find(
-                      (d) => d.id === membership?.division_id,
-                    )?.code ?? "—"}
-                  </strong>
-                  <Link to="/liga">Ver clasificación →</Link>
-                </Card>
-                <Card>
-                  <HardDrive />
-                  <span className="eyebrow">SAVE EN POKEAPP</span>
-                  <strong className="stat-word">
-                    {pc.data?.save
-                      ? "Disponible"
-                      : pc.isPending
-                        ? "Consultando…"
-                        : "Sin save actual"}
-                  </strong>
-                  <Link to="/saves">Ver estado →</Link>
-                </Card>
-              </div>
-              <div className="section-row">
-                <h2>Tu siguiente movimiento</h2>
-                <span className="caption">FUERA DEL CAMPO</span>
-              </div>
-              <div className="quick-grid">
-                <Link className="card action-card" to="/pc">
-                  <Box />
-                  <div>
-                    <h3>Tu PC, a mano</h3>
-                    <p>Consulta tu equipo y tus cajas.</p>
-                  </div>
-                  <ArrowUpRight />
-                </Link>
-                <Link className="card action-card" to="/copa">
-                  <Crown />
-                  <div>
-                    <h3>Una Copa. Otra historia.</h3>
-                    <p>Rondas, clasificación y Top Cut.</p>
-                  </div>
-                  <ArrowUpRight />
-                </Link>
-              </div>
-              <Notice error={pc.error} />
-            </>
-          );
-        }}
-      </OverviewState>
-    </>
-  );
-}
+export { HomePage } from "./home";
 function LeagueState({
   children,
 }: {
@@ -317,9 +169,7 @@ function LeagueDay({ dayId }: { dayId: string }) {
         return (
           <>
             <Tag>
-              {snapshot
-                ? `Oficial · revisión ${snapshot.revision}`
-                : "Aún sin clasificación oficial"}
+              {snapshot ? "Resultado oficial" : "Aún sin clasificación oficial"}
             </Tag>
             {snapshot ? (
               <>
@@ -397,7 +247,7 @@ function LeagueDay({ dayId }: { dayId: string }) {
                     .filter((m) => m.matchday_id === dayId)
                     .map((m) => (
                       <Card key={m.id}>
-                        <Tag>{m.status}</Tag>
+                        <Tag>{matchLabel(m.status)}</Tag>
                         <h3>
                           {playerName(data, m.player_a_id)}{" "}
                           <span className="muted">vs</span>{" "}
@@ -427,12 +277,11 @@ function LeagueGeneral({ data }: { data: Model<"LeagueGeneralRead"> }) {
     disqualified: "Descalificado",
   };
   return (
-    <Card>
+    <Card className="league-table-card">
       <h2>Clasificación general</h2>
       <p>
-        Puntos acumulados de las jornadas oficiales, con sus penalizaciones. Las
-        monedas son el saldo actual. El orden entre puntos iguales no resuelve
-        un desempate.
+        Puntos oficiales acumulados y saldo actual. A igualdad de puntos, el
+        orden mostrado no decide el desempate.
       </p>
       <div
         className="table-scroll"
@@ -456,7 +305,13 @@ function LeagueGeneral({ data }: { data: Model<"LeagueGeneralRead"> }) {
               return (
                 <tr key={row.season_player_id}>
                   <td>
-                    {row.display_name}
+                    <Link
+                      className="standing-trainer"
+                      to={`/entrenadores/${row.trainer_id}`}
+                    >
+                      <TrainerPhoto name={row.display_name} />
+                      <span>{row.display_name}</span>
+                    </Link>
                     {states[row.status] && (
                       <span className="muted"> · {states[row.status]}</span>
                     )}
@@ -586,13 +441,9 @@ export function SavesPage() {
   const pc = usePC();
   return (
     <>
-      <Heading eyebrow="TU PARTIDA, BAJO CONTROL" title="Saves y Launcher.">
-        Sincroniza tu save desde el Launcher para consultar aquí tu partida y tu
-        PC.
+      <Heading eyebrow="TU PARTIDA, BAJO CONTROL" title="Saves y Launcher">
+        Tu partida del juego, disponible en PokeApp.
       </Heading>
-      <WithSeason>
-        <MyProgress />
-      </WithSeason>
       <div className="quick-grid">
         <Card>
           <HardDrive />
@@ -600,8 +451,12 @@ export function SavesPage() {
           <Notice error={pc.error} />
           {pc.data?.save ? (
             <>
-              <Tag>{pc.data.save.parser_status}</Tag>
-              <p>Registrado el {date(pc.data.save.uploaded_at)}</p>
+              <Tag>
+                {pc.data.status === "ready"
+                  ? "Partida disponible"
+                  : "Partida pendiente de preparar"}
+              </Tag>
+              <p>Última sincronización · {date(pc.data.save.uploaded_at)}</p>
               <Link className="button" to="/pc">
                 Abrir mi PC
               </Link>
@@ -616,10 +471,16 @@ export function SavesPage() {
         </Card>
         <Card>
           <Box />
-          <h2>Launcher local</h2>
+          <h2>Continúa tu aventura</h2>
+          <p>
+            Abre tu partida en el Launcher y elige «Sincronizar con PokeApp».
+          </p>
           <LauncherDownload />
         </Card>
       </div>
+      <WithSeason>
+        <MyProgress />
+      </WithSeason>
     </>
   );
 }
@@ -807,7 +668,8 @@ export function ShopPage() {
 export function HallPage() {
   const [offset, setOffset] = useState(0),
     query = useRead<Model<"HallPage">>(`/v1/read/hall?offset=${offset}`),
-    trainers = useRead<Model<"TrainerRead">[]>("/v1/read/trainers");
+    trainers = useRead<Model<"TrainerRead">[]>("/v1/read/trainers"),
+    seasons = useRead<Model<"SeasonPage">>("/v1/read/seasons?offset=0");
   const name = (id: string | null) =>
     trainers.data?.find((t) => t.id === id)?.display_name ||
     "Entrenador histórico";
@@ -830,6 +692,15 @@ export function HallPage() {
             return (
               <Card key={h.id} className="hall-card">
                 <Trophy className="hall-trophy" />
+                <div className="hall-portraits">
+                  {champion ? (
+                    champion.members.map((m) => (
+                      <TrainerPhoto key={m.trainer_id} name={m.display_name} />
+                    ))
+                  ) : (
+                    <TrainerPhoto name={name(h.champion_trainer_id)} />
+                  )}
+                </div>
                 <span className="eyebrow">
                   {h.competition_type === "league"
                     ? "CAMPEÓN DE LIGA"
@@ -838,6 +709,12 @@ export function HallPage() {
                       : "CAMPEÓN DE COPA"}
                 </span>
                 <h2>{champion?.name || name(h.champion_trainer_id)}</h2>
+                {seasons.data?.items.find((s) => s.id === h.season_id)
+                  ?.name && (
+                  <p className="hall-season">
+                    {seasons.data.items.find((s) => s.id === h.season_id)!.name}
+                  </p>
+                )}
                 {champion && (
                   <p className="champion-members">
                     {champion.members.map((m) => m.display_name).join(" & ")}
@@ -866,10 +743,14 @@ export function HallPage() {
           })}
         </div>
       ) : (
-        <Empty>
-          El Hall espera su próxima historia. Los títulos aparecerán tras su
-          certificación oficial.
-        </Empty>
+        <div className="hall-empty">
+          <Trophy size={60} />
+          <h2>Tu próxima historia empieza aquí.</h2>
+          <p>Los campeones aparecerán cuando su título sea oficial.</p>
+          <Link to="/liga" className="button">
+            Volver a la Liga
+          </Link>
+        </div>
       )}
       <div className="toolbar">
         {offset > 0 && (

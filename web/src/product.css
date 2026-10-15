@@ -467,6 +467,265 @@ dialog::backdrop {
   }
 }
 /* 17B: trainer identity and bounded PC */
+/* Main product surfaces share the same calm hierarchy. */
+.home-product {
+  display: grid;
+  grid-template-columns: 1.3fr 1fr;
+  gap: 20px;
+}
+.home-product .card {
+  margin: 0;
+}
+.home-product .hero {
+  min-height: 300px;
+}
+.home-product .hero-content {
+  margin-top: 24px;
+}
+.home-product .hero h2 {
+  font-size: clamp(1.6rem, 2.2vw, 2.2rem);
+}
+.home-product .hero p {
+  max-width: 360px;
+}
+.home-stats .section-row {
+  justify-content: flex-start;
+  gap: 20px;
+}
+.home-stats .trainer-photo {
+  width: 80px;
+  min-width: 80px;
+  height: 100px;
+}
+.home-stats .mini-stats {
+  justify-content: space-between;
+  margin: 24px 0;
+}
+.home-party h2,
+.home-progress h2 {
+  margin-top: 0;
+}
+.home-party p,
+.home-progress p {
+  font-size: 0.8rem;
+}
+.home-sprites {
+  display: flex;
+  justify-content: space-between;
+  margin: 14px 0;
+}
+.home-sprites .pokemon-sprite {
+  width: 15%;
+  height: 64px;
+  min-width: 0;
+}
+.home-progress .game-badge {
+  width: 34px;
+}
+.league-table-card {
+  padding: 24px;
+}
+.league-table-card > p {
+  font-size: 0.78rem;
+  max-width: 700px;
+  color: var(--muted);
+}
+.league-standings td {
+  padding: 16px 10px;
+  font-size: 0.95rem;
+}
+.league-standings td:nth-child(2) {
+  font-size: 1.25rem;
+  font-weight: 750;
+  color: #e2f4de;
+}
+.standing-trainer {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  color: inherit;
+  font-weight: 600;
+}
+.standing-trainer .trainer-photo {
+  width: 38px;
+  min-width: 38px;
+  height: 46px;
+  border-radius: 7px;
+}
+.standing-trainer .trainer-photo > svg {
+  width: 24px;
+  height: 24px;
+}
+.cup-rounds {
+  display: flex;
+  align-items: flex-start;
+  overflow: auto;
+  gap: 20px;
+  padding: 6px 2px 16px;
+  margin: 16px 0;
+}
+.cup-round {
+  width: 360px;
+  min-width: 320px;
+  flex: 0 0 360px;
+  position: relative;
+  margin: 0;
+}
+.cup-round:not(:last-child)::after {
+  content: "→";
+  position: absolute;
+  right: -18px;
+  top: 45px;
+  color: #86ad8f;
+}
+.cup-round h3 {
+  font-size: 0.9rem;
+}
+.cup-match {
+  padding: 14px;
+  margin: 14px 0;
+  border: 1px solid #36523f;
+  border-radius: 10px;
+  background: #11251a;
+}
+.cup-match > div:first-child {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  gap: 8px;
+  font-size: 0.78rem;
+  align-items: center;
+}
+.cup-match .winner {
+  color: #cee5a0;
+  font-weight: 750;
+}
+.cup-match .tag {
+  margin-top: 10px;
+}
+.hall-card {
+  text-align: center;
+  position: relative;
+  border-color: #5a5032;
+  background: radial-gradient(ellipse at top, #303624, #14231b 70%);
+}
+.hall-card h2 {
+  font-size: 1.7rem;
+}
+.hall-portraits {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin: 20px 0;
+}
+.hall-portraits .trainer-photo {
+  border: 1px solid #8f8050;
+  width: 100px;
+  height: 125px;
+}
+.hall-season {
+  color: #d9c58e;
+}
+.hall-empty {
+  text-align: center;
+  padding: 65px 22px;
+  border: 1px solid #655b3c;
+  border-radius: 18px;
+  background: radial-gradient(ellipse at top, #353823, #11231a 65%);
+}
+.hall-empty > svg {
+  color: #c9ad64;
+}
+.hall-empty h2 {
+  font-size: 1.8rem;
+  margin-top: 30px;
+}
+.hall-empty p {
+  color: var(--muted);
+}
+.trial-card {
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.trial-card h2,
+.trial-card p {
+  margin: 0;
+}
+.trial-card p {
+  color: var(--muted);
+  font-size: 0.82rem;
+}
+.section-admin [role="tabpanel"] > .card {
+  margin: 20px 0;
+}
+.section-admin fieldset {
+  border: 1px solid #334d3b;
+  background: #102219;
+  border-radius: 12px;
+  padding: 20px;
+  margin: 20px 0;
+}
+.section-admin legend {
+  padding: 0 8px;
+  font-weight: 650;
+}
+.section-admin .field label {
+  font-size: 0.78rem;
+}
+.section-admin .check {
+  padding: 12px;
+  background: #203326;
+  border-radius: 9px;
+  line-height: 1.5;
+}
+.section-admin .danger-zone {
+  border-color: #975f46;
+}
+@media (max-width: 1100px) {
+  .home-product {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+@media (max-width: 760px) {
+  .home-product {
+    grid-template-columns: 1fr;
+  }
+  .home-product .hero {
+    min-height: 275px;
+  }
+  .cup-rounds {
+    flex-direction: column;
+    overflow: visible;
+  }
+  .cup-round {
+    width: 100%;
+    min-width: 0;
+    flex: 0 1 auto;
+  }
+  .cup-round:not(:last-child)::after {
+    content: "↓";
+    right: 50%;
+    top: auto;
+    bottom: -21px;
+  }
+  .league-table-card {
+    padding: 14px;
+  }
+  .standing-trainer .trainer-photo {
+    display: none;
+  }
+  .league-standings td {
+    padding: 12px 8px;
+    font-size: 0.8rem;
+  }
+  .league-standings td:nth-child(2) {
+    font-size: 1.1rem;
+  }
+  .section-admin .tabs {
+    flex-wrap: wrap;
+  }
+}
 .shop-grid {
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 18px;

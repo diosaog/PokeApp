@@ -48,7 +48,7 @@ test("login, official league, Team Lock, PC dialog, purchase, admin controls, Cu
   await expect(page.getByText("128", { exact: false }).first()).toBeVisible();
   await navigate(page, "Liga");
   await page.getByRole("button", { name: "J3", exact: true }).click();
-  await expect(page.getByText("Oficial · revisión 1")).toBeVisible();
+  await expect(page.getByText("Resultado oficial")).toBeVisible();
   await navigate(page, "Batallas");
   await page.getByRole("button", { name: "Fijar mi equipo" }).click();
   await page.getByRole("button", { name: "Confirmar mi equipo" }).click();
