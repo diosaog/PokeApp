@@ -44,3 +44,32 @@ and the private directory `%LOCALAPPDATA%/PokeApp-migration-evidence/phase17-2/2
 
 **NEXT: Antonio visual acceptance.** No next packet, Gen6/7 support or physical
 save writes starts from this closure.
+
+## Post-17.2 final visual delta — 2026-10-16
+
+**STATUS: DONE.** The public read projection now exposes only the persisted
+`ROBADO`, `BLINDADO` and `REVIVIDO` states. Compact coloured labels render on
+team, box, dead and scouting/profile cards, including compatible combinations;
+private IVs, ability, nature and identity metadata remain excluded. Box
+navigation wraps from the first box to the last and back, with one-box controls
+remaining inactive. Home animates only the visible six team slots and keeps the
+static/reduced-motion fallback; box grids are not animated.
+
+Source commit `a97e8de0a000d68e9b9db2da5ac8e2f8d355e40d` is pushed. Focused checks
+actually run for this delta: trainer collection **10 PASS**, Vitest collection /
+presentation / Team Preview **14 PASS**, affected browser **5 PASS** (including
+flags, wrap and Home/reduced-motion), targeted Ruff, Prettier, compile and public
+build. The existing frontend-read API **24 PASS** and Team Preview API **13 PASS**
+were retained and not repeated; no unrelated matrix was rerun.
+
+Railway deployment `927587fd-037e-44ad-b95f-7480d67be333` is SUCCESS with image
+`sha256:85832f7aca8d7877ec62fd03814a0e47d9397d868dcef3a1141238f0508f97c2`.
+Cloudflare deployment `0c00e78f-843c-4a24-9823-a59f81f14654`, version
+`57aeb7d6-1850-4f0f-a635-f2610262a405`, serves 100%. The read-only smoke passed
+**31 HTTP checks** and **10 desktop/mobile browser visits** after deployment;
+API health returned 200 and no unexpected 5xx or owner mutation occurred.
+
+No migration, PostgreSQL run, V1/Shadow/R2/Launcher operation or physical save
+write was performed. The final documentation commit records this delta; the
+protected guide and unrelated untracked files remain untouched. **NEXT: Antonio
+visual acceptance. STOP.**
