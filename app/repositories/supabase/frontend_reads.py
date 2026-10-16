@@ -37,6 +37,9 @@ class FrontendReadRepository(Protocol):
     def observed_entities_for_locks(
         self, season_id: str, locks: list[dict]
     ) -> dict[tuple[str, str, int, int], str]: ...
+    def public_pokemon_flags(
+        self, season_id: str, pokemon_entity_ids: list[str]
+    ) -> dict[str, list[str]]: ...
 
     def rows(
         self,
@@ -130,6 +133,47 @@ class SupabaseFrontendReadRepository:
         except Exception as exc:
             _report_failure("observed_progress", exc)
             raise PersistenceError("Observed progress unavailable") from exc
+
+    def public_pokemon_flags(self, season_id, pokemon_entity_ids):
+        """Read only the three already-public state labels for known entities."""
+        try:
+            ids = sorted({value for value in pokemon_entity_ids if isinstance(value, str)})
+            if len(ids) > 500:
+                raise ValueError("Too many Pokemon entities")
+            if not ids:
+                return {}
+            rows = _execute_read(
+                self._client.table("pokemon_entity_flags")
+                .select("pokemon_entity_id,flag_type,flag_value,flag_timestamp")
+                .eq("season_id", season_id)
+                .in_("pokemon_entity_id", ids)
+                .in_("flag_type", ["robbed", "robado_at", "blindado", "revivido_at"])
+                .range(0, 1999),
+                "public_pokemon_flags",
+            )
+            if not isinstance(rows, list) or len(rows) > 2000:
+                raise ValueError("Invalid Pokemon flags")
+            result = {entity_id: [] for entity_id in ids}
+            labels = {"robbed": "robado", "robado_at": "robado",
+                      "blindado": "blindado", "revivido_at": "revivido"}
+            for row in rows:
+                entity_id, kind = row.get("pokemon_entity_id"), row.get("flag_type")
+                if entity_id not in result or kind not in labels:
+                    continue
+                active = (
+                    kind == "blindado" and row.get("flag_value") is True
+                ) or (
+                    kind == "robbed" and row.get("flag_value") is True
+                ) or (
+                    kind in ("robado_at", "revivido_at")
+                    and row.get("flag_timestamp") is not None
+                )
+                if active and labels[kind] not in result[entity_id]:
+                    result[entity_id].append(labels[kind])
+            return result
+        except Exception as exc:
+            _report_failure("public_pokemon_flags", exc)
+            raise PersistenceError("Pokemon flags unavailable") from exc
 
     def observed_entities_for_locks(self, season_id, locks):
         """Resolve only public lock slots through one bounded batch read pair.

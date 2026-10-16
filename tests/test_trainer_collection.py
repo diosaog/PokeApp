@@ -5,7 +5,7 @@ from dataclasses import replace
 from uuid import uuid4
 
 import test_api_frontend_reads as frontend_tests
-from test_api_frontend_reads import PID, SID
+from test_api_frontend_reads import PID, SAVE, SID
 from test_api_phase8b import TRAINER_ID
 
 
@@ -39,6 +39,33 @@ class PublicCollectionTests(unittest.TestCase):
         self.assertFalse({"team_locks", "pokemon_entities", "pokemon_observations"}
                          .intersection(c[0] for c in self.store.calls))
         self.assertEqual(len(self.store.calls), 6)
+
+    def test_public_state_flags_are_combined_without_private_identity(self):
+        entity_ids = [str(uuid4()), str(uuid4()), str(uuid4())]
+        self.store.data["pokemon_observations"] = [
+            dict(season_id=SID, trainer_id=TRAINER_ID, save_file_id=SAVE,
+                 pokemon_entity_id=entity_ids[i], source="party" if i == 0 else "box",
+                 box_number=0 if i == 0 else (1 if i == 1 else 8),
+                 slot_number=1, outcome="MATCHED")
+            for i in range(3)
+        ]
+        self.store.data["pokemon_entities"] = [
+            dict(id=entity_id, season_id=SID, owner_trainer_id=TRAINER_ID,
+                 identity_status="unambiguous")
+            for entity_id in entity_ids
+        ]
+        self.store.public_pokemon_flags = lambda _sid, _ids: {
+            entity_ids[0]: ["blindado", "revivido", "blindado"],
+            entity_ids[1]: ["robado"],
+            entity_ids[2]: [],
+        }
+        data = self.get().json()
+        self.assertEqual(data["pokemon"][0]["pokemon"]["status_flags"],
+                         ["blindado", "revivido"])
+        self.assertEqual(data["pokemon"][1]["pokemon"]["status_flags"], ["robado"])
+        self.assertEqual(data["pokemon"][2]["pokemon"]["status_flags"], [])
+        for forbidden in ("pokemon_entity_id", "identity_status", "trainer_id"):
+            self.assertNotIn(forbidden, self.get().text)
 
     def test_same_public_fields_for_self_admin_and_rival(self):
         expected = self.get().json()

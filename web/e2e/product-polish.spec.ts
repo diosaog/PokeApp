@@ -22,6 +22,9 @@ for (const width of [1440, 900, 390]) {
     await expect(
       page.getByRole("heading", { name: "Equipo, cajas y muertos" }),
     ).toBeVisible();
+    await expect(page.getByText("BLINDADO").first()).toBeVisible();
+    await expect(page.getByText("REVIVIDO").first()).toBeVisible();
+    await expect(page.getByText("ROBADO").first()).toBeVisible();
     await expect(page.locator(".live-collection-heading")).toContainText(
       "Revividos tras wipe: 2",
     );
@@ -146,4 +149,22 @@ test("reduced motion stays static, and public unknown/error never invents boxes"
   await page.locator("a[href='/entrenadores/t4']").click();
   await expect(page.getByRole("alert")).toBeVisible();
   await expect(page.locator(".collection")).toHaveCount(0);
+});
+
+test("Home team animates only the visible party and respects reduced motion", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 1440, height: 1000 });
+  await fixture(page);
+  await login(page);
+  await page.locator(".home-party").scrollIntoViewIfNeeded();
+  await expect(
+    page.locator(".home-sprites .pokemon-sprite").first(),
+  ).toHaveAttribute("src", /animated.*gif/);
+  expect(await page.locator(".home-sprites .pokemon-sprite").count()).toBe(6);
+  expect(await page.locator(".box-slots").count()).toBe(0);
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await expect(
+    page.locator(".home-sprites .pokemon-sprite").first(),
+  ).toHaveAttribute("src", /pokemon.*png/);
 });

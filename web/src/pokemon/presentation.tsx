@@ -28,6 +28,31 @@ const portraits: Record<string, string> = {
 };
 const normalize = (s: string) =>
   s.normalize("NFD").replace(/\p{M}/gu, "").toLowerCase();
+export type PokemonStatusFlag = "robado" | "blindado" | "revivido";
+const statusFlagLabels: Record<PokemonStatusFlag, string> = {
+  robado: "ROBADO",
+  blindado: "BLINDADO",
+  revivido: "REVIVIDO",
+};
+export function PokemonStatusFlags({
+  flags,
+}: {
+  flags?: readonly PokemonStatusFlag[];
+}) {
+  const visible = (flags || []).filter(
+    (flag, index, values) =>
+      flag in statusFlagLabels && values.indexOf(flag) === index,
+  );
+  return visible.length ? (
+    <span className="pokemon-status-flags" aria-label="Estados del Pokémon">
+      {visible.map((flag) => (
+        <span key={flag} className={`pokemon-status-flag ${flag}`}>
+          {statusFlagLabels[flag]}
+        </span>
+      ))}
+    </span>
+  ) : null;
+}
 export function TrainerPhoto({ name }: { name: string }) {
   const portrait = portraits[normalize(name)];
   return (

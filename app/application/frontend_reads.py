@@ -217,6 +217,25 @@ class FrontendReads:
             "revived_after_wipe": stats[0].get("revived_after_wipe") if stats else None,
         })
 
+    def _public_flags(self, sid, entity_ids):
+        reader = getattr(self.repo, "public_pokemon_flags", None)
+        if not callable(reader):
+            return {}
+        flags = reader(sid, sorted({str(value) for value in entity_ids if value}))
+        if not isinstance(flags, dict):
+            raise PersistenceError("Invalid Pokemon flags")
+        allowed = {"robado", "blindado", "revivido"}
+        result = {}
+        for entity_id, values in flags.items():
+            if not isinstance(entity_id, str) or not isinstance(values, list):
+                raise PersistenceError("Invalid Pokemon flags")
+            clean = []
+            for value in values:
+                if value in allowed and value not in clean:
+                    clean.append(value)
+            result[entity_id] = clean
+        return result
+
     def _pc(self, sid, tid, *, public=False):
         # Caller has already validated the season in this request.
         def result(save, status, pokemon):
@@ -274,12 +293,26 @@ class FrontendReads:
         party, boxes = payload.get("party", []), payload.get("boxes", [])
         if any("slot_number" not in s or "pokemon" not in s for s in party):
             return result(save=save, status="unsupported_payload", pokemon=[])
-        entities = {} if public else self.observed_entities(sid, tid, current)
+        # Public labels are allowed only after the existing unambiguous identity
+        # reconciliation.  A repository without this optional projection keeps
+        # the historical read shape for compatibility with old adapters/tests.
+        can_read_flags = callable(getattr(self.repo, "public_pokemon_flags", None))
+        entities = (
+            self.observed_entities(sid, tid, current)
+            if not public or can_read_flags
+            else {}
+        )
+        flags = self._public_flags(sid, entities.values())
         pokemon = [
             dict(
                 location=f"Equipo · {s['slot_number']}",
-                pokemon=s["pokemon"],
-                pokemon_entity_id=entities.get(("party", 0, s["slot_number"])),
+                pokemon={
+                    **s["pokemon"],
+                    "status_flags": flags.get(
+                        entities.get(("party", 0, s["slot_number"])), []
+                    ),
+                },
+                **({} if public else {"pokemon_entity_id": entities.get(("party", 0, s["slot_number"]))}),
             )
             for s in party
             if s.get("pokemon")
@@ -290,10 +323,13 @@ class FrontendReads:
                     pokemon.append(
                         dict(
                             location=f"Caja {box['box_number']} · {slot['slot_number']}",
-                            pokemon=slot["pokemon"],
-                            pokemon_entity_id=entities.get(
-                                ("box", box["box_number"], slot["slot_number"])
-                            ),
+                            pokemon={
+                                **slot["pokemon"],
+                                "status_flags": flags.get(
+                                    entities.get(("box", box["box_number"], slot["slot_number"])), []
+                                ),
+                            },
+                            **({} if public else {"pokemon_entity_id": entities.get(("box", box["box_number"], slot["slot_number"]))}),
                         )
                     )
         return result(save=save, status="ready", pokemon=pokemon)

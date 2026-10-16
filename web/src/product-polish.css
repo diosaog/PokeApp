@@ -212,6 +212,65 @@
   font-size: 0.95rem;
   font-weight: 700;
 }
+.pokemon-status-flags {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  max-width: 100%;
+}
+.pokemon-status-flag {
+  display: inline-flex;
+  align-items: center;
+  min-height: 18px;
+  padding: 2px 6px;
+  border: 1px solid currentColor;
+  border-radius: 4px;
+  font-size: 0.56rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  line-height: 1;
+  white-space: nowrap;
+}
+.pokemon-status-flag.robado {
+  color: #ffd5d1;
+  background: #a63d4b;
+}
+.pokemon-status-flag.blindado {
+  color: #d5f3ff;
+  background: #246b8d;
+}
+.pokemon-status-flag.revivido {
+  color: #fff2ba;
+  background: #6f7430;
+}
+.pc-slot .pokemon-status-flags {
+  width: 100%;
+  min-height: 0;
+}
+.pc-slot .pokemon-status-flag {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: 0.48rem;
+  padding: 2px 4px;
+}
+.home-sprite-slot {
+  display: flex;
+  flex: 0 1 15%;
+  min-width: 0;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+}
+.home-sprite-slot .pokemon-sprite {
+  width: 100%;
+}
+.home-sprite-slot .pokemon-status-flag {
+  font-size: 0.46rem;
+  padding: 2px 3px;
+}
 .box-panel {
   border: 1px solid #455875;
   box-shadow:

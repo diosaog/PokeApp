@@ -2873,6 +2873,8 @@ export interface components {
        * @default false
        */
       is_shiny: boolean;
+      /** Status Flags */
+      status_flags?: ("robado" | "blindado" | "revivido")[];
     };
     /** PreviewTrainer */
     PreviewTrainer: {
@@ -2911,6 +2913,8 @@ export interface components {
        * @default false
        */
       is_shiny: boolean;
+      /** Status Flags */
+      status_flags?: ("robado" | "blindado" | "revivido")[];
       /**
        * Ability
        * @default

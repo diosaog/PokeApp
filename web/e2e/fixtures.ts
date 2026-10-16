@@ -323,21 +323,26 @@ export async function fixture(
       };
     else if (path.endsWith("/collection")) {
       const { ability, nature, ivs, evs, ...publicPokemon } = pokemon;
+      const shieldedRevived = {
+          ...publicPokemon,
+          status_flags: ["blindado", "revivido"],
+        },
+        robbed = { ...publicPokemon, status_flags: ["robado"] };
       result = {
         status: "ready",
         revived_after_wipe: 2,
         pokemon: [
           ...Array.from({ length: 6 }, (_, i) => ({
             location: `Equipo · ${i + 1}`,
-            pokemon: publicPokemon,
+            pokemon: i === 0 ? shieldedRevived : publicPokemon,
           })),
           {
             location: "Caja 1 · 1",
-            pokemon: { ...publicPokemon, nickname: "Reserva" },
+            pokemon: { ...robbed, nickname: "Reserva" },
           },
           {
             location: "Caja 8 · 1",
-            pokemon: { ...publicPokemon, nickname: "Recuerdo" },
+            pokemon: { ...shieldedRevived, nickname: "Recuerdo" },
           },
         ],
       };

@@ -3,7 +3,12 @@ import { ArrowUpRight, ShieldCheck, Swords } from "lucide-react";
 import type { Model } from "../api/types";
 import { useApp, useOverview, usePC, useRead } from "../state";
 import { Card, Heading, Loading, Notice, Tag } from "../ui";
-import { PokemonSprite, StatPill, TrainerPhoto } from "../pokemon/presentation";
+import {
+  PokemonSprite,
+  PokemonStatusFlags,
+  StatPill,
+  TrainerPhoto,
+} from "../pokemon/presentation";
 import { WithSeason, playerName } from "./core";
 import { GameProgress } from "./progress";
 import { LockStatus } from "./lock-status";
@@ -109,7 +114,10 @@ export function HomePage() {
                 <p className="caption">Equipo actual del juego</p>
                 <div className="home-sprites" aria-label="Equipo de tu partida">
                   {party.map((p, i) => (
-                    <PokemonSprite key={i} species={p.pokemon.species} />
+                    <span className="home-sprite-slot" key={i}>
+                      <PokemonSprite species={p.pokemon.species} animated />
+                      <PokemonStatusFlags flags={p.pokemon.status_flags} />
+                    </span>
                   ))}
                 </div>
                 <Notice error={pc.error} />

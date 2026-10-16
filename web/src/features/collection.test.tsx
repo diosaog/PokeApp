@@ -32,8 +32,34 @@ it("renders six team slots and only one observed box without inventing empty cap
   expect(
     screen.queryByRole("button", { name: /Primero/ }),
   ).not.toBeInTheDocument();
-  expect(screen.getByRole("button", { name: "Caja siguiente" })).toBeDisabled();
+  expect(screen.getByRole("button", { name: "Caja siguiente" })).toBeEnabled();
+  fireEvent.click(screen.getByRole("button", { name: "Caja siguiente" }));
+  expect(screen.getByRole("heading", { name: "Caja 1" })).toBeVisible();
+  fireEvent.click(screen.getByRole("button", { name: "Caja anterior" }));
+  expect(screen.getByRole("heading", { name: "Caja 12" })).toBeVisible();
   expect(JSON.stringify(slots)).toBe(original);
+});
+it("wraps left from the first box and disables cycling for one box", () => {
+  const slots: Model<"SlotRead">[] = [
+    { location: "Caja 1 · 1", pokemon: mon },
+    {
+      location: "Caja 4 · 1",
+      pokemon: {
+        ...mon,
+        nickname: "Cuatro",
+        status_flags: ["blindado", "revivido"],
+      },
+    },
+  ];
+  const view = render(<Collection slots={slots} />);
+  fireEvent.click(screen.getByRole("button", { name: "Caja anterior" }));
+  expect(screen.getByRole("heading", { name: "Caja 4" })).toBeVisible();
+  expect(screen.getByText("BLINDADO")).toBeVisible();
+  expect(screen.getByText("REVIVIDO")).toBeVisible();
+  view.unmount();
+  render(<Collection slots={[slots[0]]} />);
+  expect(screen.getByRole("button", { name: "Caja anterior" })).toBeDisabled();
+  expect(screen.getByRole("button", { name: "Caja siguiente" })).toBeDisabled();
 });
 it("does not infer a box from malformed location or turn unknown source into a dead Pokémon", () => {
   expect(collectionLocation("missing")).toBeNull();

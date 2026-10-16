@@ -65,6 +65,35 @@ def team_preview(
         locks = {r["trainer_id"]: r for r in public}
         if len(locks) != len(public):
             raise PersistenceError("Ambiguous preview locks")
+        # Resolve only the already-public team slots to persisted entity flags.
+        # The snapshot itself remains the source for public display; entity IDs
+        # never cross this read boundary.
+        entity_by_slot = {}
+        public_flags = {}
+        if callable(getattr(repository, "public_pokemon_flags", None)):
+            flag_sources = reads.rows(
+                "team_locks",
+                "trainer_id,matchday_id,save_file_id,public_team_snapshot",
+                season_id=season_id,
+                matchday_id=day_id,
+            )
+            flag_sources = [
+                row for row in flag_sources
+                if isinstance(row.get("save_file_id"), str)
+            ]
+            if len({r.get("trainer_id") for r in flag_sources}) != len(flag_sources):
+                raise PersistenceError("Ambiguous preview flag sources")
+            entity_by_slot = (
+                repository.observed_entities_for_locks(season_id, flag_sources)
+                if flag_sources
+                else {}
+            )
+            flag_entity_ids = [
+                entity_id
+                for (trainer_id, source, box, slot), entity_id in entity_by_slot.items()
+                if trainer_id in selected and source == "party" and box == 0 and 1 <= slot <= 6
+            ]
+            public_flags = reads._public_flags(season_id, flag_entity_ids)
         for tid in selected:
             own = selection.mode == "battle" and tid == viewer_trainer_id
             source = locks.get(tid)
@@ -95,6 +124,15 @@ def team_preview(
                     for p in team
                 ):
                     raise PersistenceError("Invalid preview snapshot")
+                team = [
+                    {
+                        **pokemon,
+                        "status_flags": public_flags.get(
+                            entity_by_slot.get((tid, "party", 0, index)), []
+                        ),
+                    }
+                    for index, pokemon in enumerate(team, 1)
+                ]
                 lock = dict(
                     locked_at=source["locked_at"], is_late=source["is_late"], team=team,
                     timing_status=timing,

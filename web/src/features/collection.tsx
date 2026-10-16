@@ -2,7 +2,7 @@ import { useState } from "react";
 import { ChevronLeft, ChevronRight, Search } from "lucide-react";
 import type { Model } from "../api/types";
 import { Card, Empty } from "../ui";
-import { PokemonSprite } from "../pokemon/presentation";
+import { PokemonSprite, PokemonStatusFlags } from "../pokemon/presentation";
 import { pokemonTitle, pokemonName } from "../pokemon/localization";
 import { PokemonDetailModal, type DetailPokemon } from "./pokemon-details";
 
@@ -40,6 +40,10 @@ export function Collection({
   ].sort((a, b) => a - b);
   const current = Math.min(index, Math.max(0, boxes.length - 1)),
     box = boxes[current];
+  const moveBox = (delta: number) => {
+    if (boxes.length <= 1) return;
+    setIndex((current + delta + boxes.length) % boxes.length);
+  };
   const team = located.filter((s) => s.position?.box === 0);
   const inBox = located.filter((s) => s.position?.box === box);
   function slot(
@@ -62,6 +66,7 @@ export function Collection({
         aria-label={`${pokemonTitle(p)} · ${label}`}
       >
         <PokemonSprite species={p.species} animated={animated} />
+        <PokemonStatusFlags flags={p.status_flags} />
         <span>{pokemonTitle(p)}</span>
         <small>Nv. {p.level ?? "—"}</small>
       </button>
@@ -104,8 +109,8 @@ export function Collection({
             <button
               className="icon-button"
               aria-label="Caja anterior"
-              disabled={current === 0}
-              onClick={() => setIndex(current - 1)}
+              disabled={boxes.length <= 1}
+              onClick={() => moveBox(-1)}
             >
               <ChevronLeft />
             </button>
@@ -123,8 +128,8 @@ export function Collection({
             <button
               className="icon-button"
               aria-label="Caja siguiente"
-              disabled={current >= boxes.length - 1}
-              onClick={() => setIndex(current + 1)}
+              disabled={boxes.length <= 1}
+              onClick={() => moveBox(1)}
             >
               <ChevronRight />
             </button>

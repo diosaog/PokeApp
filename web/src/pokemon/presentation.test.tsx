@@ -6,9 +6,16 @@ import {
   TypeBadge,
   ItemIcon,
   MovePopover,
+  PokemonStatusFlags,
 } from "./presentation";
 import { catalogId } from "./localization";
 afterEach(cleanup);
+it("renders compatible public state flags as compact labels", () => {
+  render(<PokemonStatusFlags flags={["blindado", "revivido", "blindado"]} />);
+  expect(screen.getByText("BLINDADO")).toHaveClass("blindado");
+  expect(screen.getByText("REVIVIDO")).toHaveClass("revivido");
+  expect(screen.queryAllByText("BLINDADO")).toHaveLength(1);
+});
 it("uses local sprites, canonical categories and honest unresolved fallbacks", () => {
   render(
     <>

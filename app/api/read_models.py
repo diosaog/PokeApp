@@ -66,6 +66,11 @@ class PokemonRead(BaseModel):
     item: str = ""
     moves: list[MoveRead] = Field(default_factory=list)
     is_shiny: bool = False
+    # Public competitive state.  These are labels only; mutation rules remain
+    # server-side and private save metadata is never exposed.
+    status_flags: list[Literal["robado", "blindado", "revivido"]] = Field(
+        default_factory=list, max_length=3
+    )
 
 
 class StatsRead(BaseModel):

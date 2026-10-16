@@ -12,6 +12,7 @@ import type { Model, Overview } from "../api/types";
 import { pokemonName, pokemonTitle } from "../pokemon/localization";
 import {
   PokemonSprite,
+  PokemonStatusFlags,
   TypeBadge,
   ItemIcon,
   TrainerPhoto,
@@ -80,7 +81,7 @@ export function Pokemon({
 }: {
   pokemon: Pick<
     Model<"PokemonRead">,
-    "species" | "nickname" | "level" | "types"
+    "species" | "nickname" | "level" | "types" | "status_flags"
   > & { is_shiny?: boolean };
   onClick?: () => void;
   animated?: boolean;
@@ -102,6 +103,7 @@ export function Pokemon({
           ))}
           {pokemon.is_shiny && <Sparkles size={15} />}
         </div>
+        <PokemonStatusFlags flags={pokemon.status_flags} />
       </div>
       {onClick && <ArrowUpRight size={18} />}
     </>
