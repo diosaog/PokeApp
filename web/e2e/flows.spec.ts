@@ -179,8 +179,12 @@ test("inventory redemption and manual Discord verdict preserve IDs, revision and
   await navigate(page, "Tienda");
   await page.getByRole("link", { name: "Abrir mi inventario →" }).click();
   await page.getByRole("button", { name: "Canjear", exact: true }).click();
-  await page.getByLabel("Pokémon objetivo").selectOption("confirmed-entity");
-  await page.getByRole("button", { name: "Confirmar canje" }).click();
+  await page
+    .getByRole("dialog")
+    .getByRole("button", { name: /Equipo/ })
+    .first()
+    .click();
+  await page.getByRole("button", { name: "Sí, blindar" }).click();
   await expect(page.getByRole("dialog")).toHaveCount(0);
   expect(commands.at(-1)?.body).toEqual({
     pokemon_entity_id: "confirmed-entity",

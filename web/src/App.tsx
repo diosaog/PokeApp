@@ -47,17 +47,32 @@ import { BattlePage } from "./features/team-preview";
 import { ScoutingPage } from "./features/scouting";
 import { TrainerProfilePage } from "./features/trainer-profile";
 
-const links = [
-  ["/", "Inicio", Home],
-  ["/liga", "Liga", Trophy],
-  ["/battle", "Batallas", Swords],
-  ["/entrenadores", "Entrenadores", Users],
-  ["/pc", "Mi PC", Box],
-  ["/tienda", "Tienda", ShoppingBag],
-  ["/copa", "Copa", Crown],
-  ["/hall", "Hall de la Fama", Trophy],
-  ["/juicios", "Juicios", Scale],
-  ["/saves", "Saves y Launcher", HardDrive],
+const linkGroups = [
+  { label: "GENERAL", links: [["/", "Inicio", Home]] },
+  {
+    label: "COMPETICIÓN",
+    links: [
+      ["/liga", "Liga", Trophy],
+      ["/battle", "Batallas", Swords],
+      ["/copa", "Copa", Crown],
+    ],
+  },
+  {
+    label: "COLECCIÓN",
+    links: [
+      ["/entrenadores", "Entrenadores", Users],
+      ["/pc", "Mi PC", Box],
+    ],
+  },
+  { label: "ECONOMÍA", links: [["/tienda", "Tienda", ShoppingBag]] },
+  {
+    label: "HISTORIAL",
+    links: [
+      ["/hall", "Hall de la Fama", Trophy],
+      ["/juicios", "Juicios", Scale],
+      ["/saves", "Saves y Launcher", HardDrive],
+    ],
+  },
 ] as const;
 function Login() {
   const { setMe } = useApp(),
@@ -244,34 +259,42 @@ export default function App() {
         </button>
         <p className="nav-label">CENTRO DE COMPETICIÓN</p>
         <nav aria-label="Principal">
-          {links.map(([to, label, Icon]) => (
-            <NavLink
-              key={to}
-              to={to}
-              end={to === "/"}
-              aria-disabled={adminOperationPending || undefined}
-              onClick={(event) => {
-                if (adminOperationPending) event.preventDefault();
-                else setMenu(false);
-              }}
-            >
-              <Icon size={19} />
-              {label}
-              <ArrowUpRight className="nav-arrow" size={14} />
-            </NavLink>
+          {linkGroups.map((group) => (
+            <div className="nav-group" key={group.label}>
+              <span className="nav-group-label">{group.label}</span>
+              {group.links.map(([to, label, Icon]) => (
+                <NavLink
+                  key={to}
+                  to={to}
+                  end={to === "/"}
+                  aria-disabled={adminOperationPending || undefined}
+                  onClick={(event) => {
+                    if (adminOperationPending) event.preventDefault();
+                    else setMenu(false);
+                  }}
+                >
+                  <Icon size={19} />
+                  {label}
+                  <ArrowUpRight className="nav-arrow" size={14} />
+                </NavLink>
+              ))}
+            </div>
           ))}
           {me.is_admin && (
-            <NavLink
-              to="/admin"
-              aria-disabled={adminOperationPending || undefined}
-              onClick={(event) => {
-                if (adminOperationPending) event.preventDefault();
-                else setMenu(false);
-              }}
-            >
-              <Settings2 size={19} />
-              Administración
-            </NavLink>
+            <div className="nav-group">
+              <span className="nav-group-label">ADMIN</span>
+              <NavLink
+                to="/admin"
+                aria-disabled={adminOperationPending || undefined}
+                onClick={(event) => {
+                  if (adminOperationPending) event.preventDefault();
+                  else setMenu(false);
+                }}
+              >
+                <Settings2 size={19} />
+                Administración
+              </NavLink>
+            </div>
           )}
         </nav>
         <div className="profile">

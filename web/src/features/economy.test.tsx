@@ -224,16 +224,14 @@ it("redeems a reward voucher only against a server-approved owned target without
   expect(screen.getByText("Vale de recompensa")).toBeInTheDocument();
   fireEvent.click(screen.getByRole("button", { name: "Canjear" }));
   expect(
-    screen.getByRole("option", { name: /Pikachu · Antonio/ }),
+    screen.getByRole("button", { name: /Pikachu.*Equipo 1/ }),
   ).toBeInTheDocument();
   expect(
-    screen.queryByRole("option", { name: /Gastly|Eevee/ }),
+    screen.queryByRole("button", { name: /Gastly|Eevee/ }),
   ).not.toBeInTheDocument();
-  expect(screen.queryByText(/cambio físico/)).not.toBeInTheDocument();
-  fireEvent.change(screen.getByRole("combobox"), {
-    target: { value: "eligible" },
-  });
-  fireEvent.click(screen.getByRole("button", { name: "Confirmar canje" }));
+  expect(screen.queryByText(/cambio fÃ­sico/)).not.toBeInTheDocument();
+  fireEvent.click(screen.getByRole("button", { name: /Pikachu.*Equipo 1/ }));
+  fireEvent.click(screen.getByRole("button", { name: "Sí, blindar" }));
   await waitFor(() =>
     expect(mocks.execute).toHaveBeenCalledWith(
       "/v1/seasons/season/shop/purchases/gift/redemptions",

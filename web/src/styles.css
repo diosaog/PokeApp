@@ -440,6 +440,19 @@ legend {
   gap: 4px;
   overflow-y: auto;
 }
+.nav-group {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin: 8px 0;
+}
+.nav-group-label {
+  padding: 0 14px 5px;
+  color: #7f9688;
+  font-size: 0.58rem;
+  font-weight: 750;
+  letter-spacing: 0.14em;
+}
 .sidebar nav a {
   display: flex;
   align-items: center;

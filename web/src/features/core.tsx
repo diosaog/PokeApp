@@ -233,6 +233,7 @@ function LeagueDay({ dayId }: { dayId: string }) {
                 key={`${data.season.id}:${dayId}`}
                 data={data}
                 dayId={dayId}
+                dayNumber={data.days.find((day) => day.id === dayId)?.number}
               />
             ) : (
               <>

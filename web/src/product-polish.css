@@ -256,6 +256,285 @@
   font-size: 0.48rem;
   padding: 2px 4px;
 }
+.pokemon-selector {
+  min-width: min(720px, 82vw);
+}
+.pokemon-selector section + section {
+  margin-top: 22px;
+}
+.selector-section-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+.selector-section-heading h3 {
+  margin: 0;
+}
+.selector-box-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.selector-box-controls button {
+  min-height: 34px;
+  padding: 4px 10px;
+}
+.pokemon-selector-grid {
+  display: grid;
+  gap: 9px;
+}
+.party-selector-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+.box-selector-grid {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  max-height: 340px;
+  overflow: auto;
+  padding: 5px;
+}
+.pokemon-selector-card {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  min-width: 0;
+  min-height: 82px;
+  padding: 8px;
+  text-align: left;
+  background: #12221f;
+  border-color: #36544a;
+}
+.pokemon-selector-card:hover:not(:disabled),
+.pokemon-selector-card.is-selected {
+  border-color: var(--accent);
+  background: #233d32;
+  box-shadow: 0 0 0 2px #c3f77826;
+}
+.pokemon-selector-card .pokemon-sprite {
+  width: 58px;
+  height: 58px;
+  flex: 0 0 58px;
+  object-fit: contain;
+}
+.pokemon-selector-copy {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.pokemon-selector-copy strong,
+.pokemon-selector-copy small,
+.pokemon-selector-copy .muted {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.pokemon-selector-copy small,
+.pokemon-selector-copy .muted {
+  font-size: 0.66rem;
+}
+.pokemon-selector-copy .pokemon-status-flags {
+  justify-content: flex-start;
+}
+.pokemon-selector-confirm {
+  max-width: 520px;
+}
+.selector-confirmation {
+  color: #f1f7e7;
+  font-size: 1rem;
+  margin: 18px 0;
+}
+.selector-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 16px;
+}
+.trainer-picker-layer {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  display: grid;
+  place-items: center;
+  padding: 18px;
+  background: #06100dcc;
+}
+.trainer-picker-panel {
+  width: min(620px, 100%);
+  max-height: min(720px, 90vh);
+  overflow: auto;
+  padding: 24px;
+  border: 1px solid #3c5a4e;
+  border-radius: 16px;
+  background: #12221f;
+  box-shadow: 0 24px 80px #0008;
+}
+.trainer-selector-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 10px;
+}
+.trainer-selector-card {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-align: left;
+}
+.trainer-selector-card .trainer-photo {
+  width: 46px;
+  height: 52px;
+  flex: 0 0 46px;
+}
+.league-match-heading {
+  align-items: flex-start;
+  margin-bottom: 8px;
+}
+.league-match-heading h2,
+.league-match-heading p {
+  margin: 0;
+}
+.matchday-state {
+  color: var(--muted);
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+.matchday-state.is-open {
+  color: var(--accent);
+}
+.league-match-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 18px;
+}
+.league-match-card {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 13px;
+  border: 1px solid #345144;
+  border-radius: 12px;
+  background: #12231f;
+  text-align: center;
+}
+button.league-match-card:hover:not(:disabled) {
+  border-color: var(--accent);
+  background: #1b352b;
+}
+.match-trainer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  min-width: 0;
+  color: var(--muted);
+}
+.match-trainer strong {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.match-trainer.is-winner {
+  color: #e6f7c8;
+}
+.match-trainer .trainer-photo {
+  width: 34px;
+  height: 40px;
+  flex: 0 0 34px;
+}
+.match-vs {
+  color: #d8bd7a;
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+}
+.match-result {
+  grid-column: 1 / -1;
+  padding-top: 7px;
+  border-top: 1px solid #2a4237;
+  color: #c4d8c8;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+}
+.winner-picker {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin: 18px 0;
+}
+.winner-picker button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+.winner-picker button:last-child {
+  grid-column: 1 / -1;
+}
+.winner-picker button.is-selected {
+  border-color: var(--accent);
+  background: #294432;
+}
+.winner-picker .trainer-photo {
+  width: 36px;
+  height: 42px;
+}
+.spectator-matchup {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: start;
+  gap: 14px;
+}
+.spectator-matchup .battle-side {
+  margin: 0;
+}
+.spectator-vs {
+  position: sticky;
+  top: 18px;
+  align-self: start;
+  padding: 12px 8px;
+  border: 1px solid #8d7544;
+  border-radius: 999px;
+  color: #f2d48d;
+  background: #32291a;
+  font-size: 0.7rem;
+  font-weight: 850;
+  letter-spacing: 0.12em;
+}
+@media (max-width: 900px) {
+  .spectator-matchup {
+    grid-template-columns: 1fr;
+  }
+  .spectator-vs {
+    position: static;
+    justify-self: center;
+    padding: 7px 14px;
+  }
+}
+@media (max-width: 600px) {
+  .league-match-grid {
+    grid-template-columns: 1fr;
+  }
+  .league-match-card {
+    padding: 10px;
+  }
+  .match-trainer .trainer-photo {
+    width: 28px;
+    height: 34px;
+    flex-basis: 28px;
+  }
+  .winner-picker {
+    grid-template-columns: 1fr;
+  }
+  .winner-picker button:last-child {
+    grid-column: auto;
+  }
+}
 .home-sprite-slot {
   display: flex;
   flex: 0 1 15%;
@@ -383,6 +662,34 @@ button[aria-busy="true"] {
   .box-slots .pokemon-sprite {
     width: 50px;
     height: 50px;
+  }
+  .pokemon-selector {
+    min-width: 0;
+  }
+  .party-selector-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .box-selector-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    max-height: 300px;
+  }
+  .pokemon-selector-card {
+    min-height: 72px;
+    padding: 6px;
+  }
+  .pokemon-selector-card .pokemon-sprite {
+    width: 44px;
+    height: 44px;
+    flex-basis: 44px;
+  }
+  .selector-actions {
+    flex-direction: column-reverse;
+  }
+  .selector-actions button {
+    width: 100%;
+  }
+  .trainer-picker-panel {
+    padding: 18px;
   }
 }
 @media (prefers-reduced-motion: reduce) {

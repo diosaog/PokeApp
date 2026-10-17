@@ -1,21 +1,17 @@
+import { useState } from "react";
 import type { Model, Overview } from "../api/types";
+import { TrainerPhoto } from "../pokemon/presentation";
 import { useRead } from "../state";
-import {
-  Card,
-  CommandState,
-  Field,
-  Loading,
-  Notice,
-  Submit,
-  useCommand,
-} from "../ui";
+import { Card, CommandState, Loading, Modal, Notice, useCommand } from "../ui";
 
 export function ParticipantResults({
   data,
   dayId,
+  dayNumber,
 }: {
   data: Overview;
   dayId: string;
+  dayNumber?: number;
 }) {
   const sid = data.season.id;
   const base = `/v1/seasons/${sid}/matchdays/${dayId}`;
@@ -25,70 +21,145 @@ export function ParticipantResults({
     `/v1/read/seasons/${sid}/overview`,
     `/v1/admin/seasons/${sid}/matchdays/${dayId}`,
   ]);
+  const [selected, setSelected] = useState<
+    Model<"DayState">["matches"][number] | null
+  >(null);
+  const [winner, setWinner] = useState<string | null>(null);
   const name = (id: string) =>
-    data.players.find((p) => p.id === id)?.display_name || "Entrenador";
+    data.players.find((player) => player.id === id)?.display_name ||
+    "Entrenador";
   if (q.isPending) return <Loading />;
   if (q.error) return <Notice error={q.error} />;
   const day = q.data!;
+  const recorded = day.matches.filter((match) => match.winner_id).length;
+  const editable = day.state === "open" && day.current_matchday_id === dayId;
+  const openMatch = (match: Model<"DayState">["matches"][number]) => {
+    if (!editable || cmd.pending || cmd.uncertain) return;
+    setSelected(match);
+    setWinner(match.winner_id);
+  };
+  const save = async () => {
+    if (!selected || winner === selected.winner_id) return;
+    if (
+      await cmd.execute(
+        `${base}/results`,
+        {
+          expected_results_revision: day.results_revision,
+          results: [
+            {
+              match_id: selected.id,
+              winner_season_player_id: winner,
+            },
+          ],
+        } satisfies Model<"ResultsBody">,
+        "PUT",
+      )
+    ) {
+      setSelected(null);
+    }
+  };
   return (
     <Card>
-      <h2>Registrar resultados</h2>
+      <div className="section-row league-match-heading">
+        <div>
+          <h2>Jornada {dayNumber ?? ""}</h2>
+          <p className="muted">
+            {recorded}/{day.matches.length} resultados registrados
+          </p>
+        </div>
+        <span className={`matchday-state ${editable ? "is-open" : ""}`}>
+          {editable ? "Jornada abierta" : "Resultado oficial"}
+        </span>
+      </div>
       <p>
-        Cualquier participante activo puede registrar o cambiar el ganador de
-        estos combates mientras la jornada siga abierta.
+        {editable
+          ? "Toca un combate para elegir el ganador. Puedes revisar cualquier resultado antes de cerrar la jornada."
+          : "Esta jornada ya no admite cambios ordinarios. Las correcciones oficiales se realizan desde Administración."}
       </p>
       <CommandState command={cmd} />
-      {day.state === "open" && day.current_matchday_id === dayId ? (
-        <form
-          key={`${sid}:${dayId}:${day.results_revision}`}
-          onSubmit={(event) => {
-            event.preventDefault();
-            const values = new FormData(event.currentTarget);
-            const results = day.matches
-              .map((m) => ({
-                match_id: m.id,
-                winner_season_player_id: String(values.get(m.id) || "") || null,
-              }))
-              .filter(
-                (r, i) =>
-                  r.winner_season_player_id !== day.matches[i].winner_id,
-              );
-            if (!results.length) return;
-            void cmd.execute(
-              `${base}/results`,
-              {
-                expected_results_revision: day.results_revision,
-                results,
-              } satisfies Model<"ResultsBody">,
-              "PUT",
-            );
+      <div className="league-match-grid">
+        {day.matches.map((match) => {
+          const winnerName = match.winner_id ? name(match.winner_id) : null;
+          const content = (
+            <>
+              <div
+                className={`match-trainer ${match.winner_id === match.player_a_id ? "is-winner" : ""}`}
+              >
+                <TrainerPhoto name={name(match.player_a_id)} />
+                <strong>{name(match.player_a_id)}</strong>
+              </div>
+              <span className="match-vs">VS</span>
+              <div
+                className={`match-trainer ${match.winner_id === match.player_b_id ? "is-winner" : ""}`}
+              >
+                <strong>{name(match.player_b_id)}</strong>
+                <TrainerPhoto name={name(match.player_b_id)} />
+              </div>
+              <div className="match-result">
+                {winnerName ? `GANADOR: ${winnerName}` : "PENDIENTE"}
+              </div>
+            </>
+          );
+          return editable ? (
+            <button
+              type="button"
+              className="league-match-card"
+              key={match.id}
+              onClick={() => openMatch(match)}
+            >
+              {content}
+            </button>
+          ) : (
+            <article className="league-match-card" key={match.id}>
+              {content}
+            </article>
+          );
+        })}
+      </div>
+      {selected && (
+        <Modal
+          title="¿Quién ganó?"
+          onClose={() => {
+            if (!cmd.pending && !cmd.uncertain) setSelected(null);
           }}
         >
-          <fieldset disabled={cmd.pending || cmd.uncertain}>
-            {day.matches.map((m) => (
-              <Field
-                key={m.id}
-                label={`Ganador: ${name(m.player_a_id)} / ${name(m.player_b_id)}`}
+          <p>
+            {name(selected.player_a_id)} contra {name(selected.player_b_id)}
+          </p>
+          <div className="winner-picker">
+            {[selected.player_a_id, selected.player_b_id].map((id) => (
+              <button
+                type="button"
+                key={id}
+                className={winner === id ? "is-selected" : ""}
+                aria-pressed={winner === id}
+                onClick={() => setWinner(id)}
               >
-                <select name={m.id} defaultValue={m.winner_id || ""}>
-                  <option value="">Sin resultado</option>
-                  <option value={m.player_a_id}>{name(m.player_a_id)}</option>
-                  <option value={m.player_b_id}>{name(m.player_b_id)}</option>
-                </select>
-              </Field>
+                <TrainerPhoto name={name(id)} />
+                <span>{name(id)}</span>
+              </button>
             ))}
-            {day.matches.length > 0 && (
-              <Submit pending={cmd.pending || cmd.uncertain}>
-                Guardar resultados
-              </Submit>
-            )}
-          </fieldset>
-        </form>
-      ) : (
-        <p>
-          Esta jornada ya no admite cambios ordinarios. Las correcciones
-          oficiales se realizan desde Administración.
-        </p>
+            <button
+              type="button"
+              className={winner === null ? "is-selected" : ""}
+              aria-pressed={winner === null}
+              onClick={() => setWinner(null)}
+            >
+              Sin resultado
+            </button>
+          </div>
+          <button
+            type="button"
+            className="button primary"
+            disabled={
+              cmd.pending || cmd.uncertain || winner === selected.winner_id
+            }
+            aria-busy={cmd.pending || undefined}
+            onClick={() => void save()}
+          >
+            {cmd.pending ? "Guardando…" : "Guardar resultado"}
+          </button>
+        </Modal>
       )}
     </Card>
   );
