@@ -1,0 +1,43 @@
+{
+  "purpose": "Local read/import testing of publicly contributed gameplay saves; no ROMs, production imports or binary redistribution.",
+  "provenance_limit": "Contributors describe these as their gameplay saves. Hardware origin, absence of edits and Pokemon legality are not independently attested.",
+  "retrieved": "2026-10-18",
+  "fixtures": [
+    {
+      "file": "OR/main",
+      "game": "OR",
+      "contributor": "Minay",
+      "source": "https://projectpokemon.org/home/forums/topic/58103-sharing-pokemon-omega-ruby-save-completed/",
+      "attachment_id": 46752,
+      "bytes": 483328,
+      "sha256": "09d3c3a8b58bef7fd7529d2300767def2df259ce550e91b4d7019831ab18eebd",
+      "party_slots": 2,
+      "occupied_slots_including_party": 415,
+      "boxes": 31
+    },
+    {
+      "file": "AS-start/main",
+      "game": "AS",
+      "contributor": "Melampus",
+      "source": "https://projectpokemon.org/home/files/file/5447-alpha-sapphire-sectionslegendary-save-files/",
+      "attachment_id": 58738,
+      "bytes": 483328,
+      "sha256": "41e0056122627c2e84cf2ff01649aba9da0f7185ebf5bc684632b31ec90edf24",
+      "party_slots": 0,
+      "occupied_slots_including_party": 0,
+      "boxes": 31
+    },
+    {
+      "file": "AS-current/main",
+      "game": "AS",
+      "contributor": "Melampus",
+      "source": "https://projectpokemon.org/home/files/file/5447-alpha-sapphire-sectionslegendary-save-files/",
+      "attachment_id": 58788,
+      "bytes": 483328,
+      "sha256": "1edab357827dc6dab18d776133996e054f778d06c80a3d15d9e4c731da6f3e73",
+      "party_slots": 6,
+      "occupied_slots_including_party": 30,
+      "boxes": 31
+    }
+  ]
+}

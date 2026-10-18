@@ -1,9 +1,11 @@
 # Phase 18 — Omega Ruby / Alpha Sapphire read and import
 
-2026-10-18. **STATUS: PARTIAL. Implementation and deployment complete; authentic
-ORAS acceptance unverified.** The owner confirmed there are no authentic ORAS
-fixtures and authorized proceeding without their tests. A Black/White save is not
-ORAS evidence. Nothing synthetic is represented as a real gameplay save.
+2026-10-18. **STATUS: DONE for ORAS read/import, including the public gameplay
+fixture follow-up below.** At the initial delivery, only synthetic evidence was
+available and the status was PARTIAL. The owner subsequently required a search of
+legitimate public fixtures and blocked future unverified ingestion deployments.
+That search found contributor gameplay saves for both OR and AS. A Black/White
+save is not Gen6/7 evidence; nothing synthetic is represented as gameplay proof.
 [Evidence](phase18-oras-read-evidence.json),
 [live checkpoint](work-in-progress/phase18-oras-live.md).
 
@@ -59,8 +61,68 @@ import the save's bag inventory. Full desktop Spanish labels are still deferred.
 The first synthetic native run found byte-array types serializing as base64;
 native integer arrays fixed it before the final green checks. A local harness
 import-order issue was corrected before PostgreSQL execution. These are recorded
-as development failures, not hidden passes. No authentic OR/AS files, fresh clean
-Windows install or hosted positive save registration were tested.
+as development failures, not hidden passes. At that initial checkpoint no authentic
+OR/AS files, fresh clean Windows install or hosted positive save registration were
+tested. The follow-up below supersedes only the missing ORAS fixture evidence.
+
+## Public fixture follow-up — 2026-10-18
+
+Entry `6a219a4176048102588aae25172c71fdcd98bffc`, tracked tree clean and main/origin
+0/0 after fetch. The product source remains `e783344`; no application, migration,
+installer, Railway or Cloudflare change was needed or published in this follow-up.
+The earlier deployment predates this follow-up and had synthetic evidence only;
+the new tests do not retroactively change that delivery sequence.
+
+No tracked ORAS/Sun/Moon binary existed in the repository's authorized test/parser
+scope. The pinned PKHeX tree was searched too. Public files were then downloaded
+directly from their contributor pages, without an account or access bypass:
+
+- [Minay's Omega Ruby gameplay save](https://projectpokemon.org/home/forums/topic/58103-sharing-pokemon-omega-ruby-save-completed/):
+  two party slots, 415 occupied party/box slots, 31 boxes, forms 0 and 3.
+- [Melampus's Alpha Sapphire gameplay saves](https://projectpokemon.org/home/files/file/5447-alpha-sapphire-sectionslegendary-save-files/):
+  starting point with no Pokemon, and current save with six party slots and 30
+  occupied slots. Their trainer identity is consistent across both captures.
+
+All three are 483328-byte native ORAS saves. Exact SHA-256, contributor, page and
+attachment IDs are pinned in
+[fixture manifest](../tests/fixtures/phase18-public-saves.json). They are shared as
+gameplay saves by their authors, not fixtures constructed by PokeApp. Hardware
+origin, absence of external edits and individual Pokemon legality are not
+independently attested. This is read/import compatibility evidence, not a legality
+certification. Binary files and full observations stay outside Git; no ROMs or
+owner saves were accessed or downloaded.
+
+**PASS:** packaged native parser and packaged core offline reads for all three;
+real local PostgreSQL registration/replay/concurrency, complete 415-slot public
+projection, privacy, wrong-owner/game denial, rollback and no competitive effects.
+AS start -> current preserves the authoritative pointer; replaying the older file
+does not rewind it. All source hashes remain unchanged. All 54 public test tables
+were restored, disposable DBs dropped and local PG stopped. Prior chain/bootstrap,
+React/browser and other regression evidence was retained without rerunning it.
+External Auth and Storage remain local substitutes; no positive hosted import.
+
+Only the fixture runner changed: `--public-fixtures` verifies the pinned hashes
+and uses one fresh bootstrap DB. Its local object substitute now serializes file
+publication, matching atomic object visibility while DB calls remain concurrent.
+Initial follow-up attempts exposed a wrong local port, a partial local-file race,
+an unsupported fixture filename suffix and a test-source encoding error. Those
+harness/setup issues were fixed without relaxing product validation. The final
+public-fixture gate passed; compile, critical Ruff and diff checks pass.
+
+Sun/Moon: pinned upstream includes
+[SM Project 802.main](https://github.com/kwsch/PKHeX/blob/b60c6e5f1427263260061d3f8c5540b924063572/Tests/PKHeX.Core.Tests/TestData/SM%20Project%20802.main),
+a useful test resource, **not independently established gameplay provenance for
+both Sun and Moon**. The Project Pokemon base-save download list contains Ultra
+Moon, which is not interchangeable with Sun/Moon. Real Sun and real Moon gameplay
+validation and dependent ingestion deployment gates remain **BLOCKED** until
+appropriate evidence and implementation are available. Ordinary development is
+not blocked by fixture absence. Gen7 implementation has not started.
+
+The latest rule is durable: search authorized local fixtures and legitimate public
+resources first; continue safe development and automated testing when real saves
+are missing; block only their validation/dependent release gates. Never substitute
+Gen5 or synthetic files for Gen6/7 gameplay proof, or deploy unverified ingestion.
+No new deployment or remote write occurred in this follow-up.
 
 ## Delivery and preservation
 
@@ -104,6 +166,6 @@ private evidence and release paths are in the handoff.
 
 Documentation closure is a later commit carrying these documents; exact final
 HEAD comes from Git. Explicit staging only; protected/unrelated files untouched.
-**Next dependency:** lawful authentic decrypted OR and AS saves for acceptance.
-The owner waived waiting for them, not the distinction between tested and unknown.
-Stop here; no Phase 19.
+**Next:** owner acceptance of the published ORAS feature when personal saves are
+available. Public-fixture read/import acceptance is complete; owner-hosted use is
+not claimed. No Phase 19 or Sun/Moon implementation started.

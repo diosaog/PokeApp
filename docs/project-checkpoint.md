@@ -5,15 +5,18 @@ milestone record; it does not maintain a second live phase-status ledger.
 
 ## Current project position
 
-- Current packet: **18 - ORAS read/import, PARTIAL: implementation deployed,
-  authentic-save acceptance pending**. Owner authorized continuing without real
-  ORAS fixtures. Source `e783344` provides native OR/AS read support, existing
+- Current packet: **18 - ORAS read/import, DONE with public gameplay fixtures**.
+  Initial synthetic-only delivery was PARTIAL; the subsequent legitimate public
+  fixture search and local acceptance supersede that evidence gap. Source
+  `e783344` provides native OR/AS read support, existing
   trusted raw ingestion and form/type/game web presentation. Forward 045 applied
   once; Railway/Cloudflare and Launcher 0.18.0 verified. Synthetic focused gates
-  pass; no authentic ORAS or positive hosted import is claimed. Data preserved.
+  pass; public OR and AS import/offline/privacy checks now pass too. No positive
+  hosted import is claimed. No follow-up deployment or product change. Data preserved.
   [Report](phase18-oras-read-report.md), [evidence](phase18-oras-read-evidence.json),
   [current live record](work-in-progress/phase18-oras-live.md).
-  **Next: owner OR/AS acceptance when authentic saves exist. No Phase 19.**
+  **Next: owner OR/AS acceptance. No Phase 19.** Missing Sun/Moon gameplay
+  evidence blocks only its real-save/dependent deployment gates, not development.
 
 - Historical packet: **17.2 - public trainer collections and final product
   polish, DONE**. Public current-save party/boxes/dead Box 8 projection uses a

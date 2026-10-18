@@ -1,7 +1,8 @@
-"""Focused ORAS synthetic integration on disposable LOCAL PostgreSQL only.
+"""Focused ORAS integration on disposable LOCAL PostgreSQL only.
 
-No authentic gameplay fixture is claimed. Reuses production parser, registration,
-read projections and Launcher journal; external Auth/Storage are local substitutes.
+Default fixtures are synthetic. --public-fixtures uses the pinned contributor
+saves described in tests/fixtures/phase18-public-saves.json. External Auth/Storage
+remain local substitutes; neither mode writes to hosted services.
 """
 # ruff: noqa: E402
 import argparse
@@ -13,6 +14,7 @@ from pathlib import Path
 import subprocess
 import sys
 from types import SimpleNamespace
+from threading import Lock
 from uuid import uuid4
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -31,15 +33,34 @@ from tools.validate_supabase_v2_identity_sql import SqlError, literal
 from tools.validate_supabase_v2_schema import MIGRATIONS, BOOTSTRAP_SQL, SUPABASE_ROLE_MOCK_SQL
 
 
+class FixtureRawRepository(RawRepository):
+    """Model atomic object visibility without serializing database commands."""
+
+    def __init__(self, client, folder):
+        super().__init__(client, folder)
+        self.object_lock = Lock()
+
+    def store_raw(self, key, data, raw_hash):
+        # Plain local files become visible before their writer finishes. Hosted
+        # object PUT does not; don't mistake that fixture-only race for replay.
+        with self.object_lock:
+            super().store_raw(key, data, raw_hash)
+
+
 def main():
     cli = argparse.ArgumentParser(description=__doc__)
     cli.add_argument('--pg-bin', type=Path, required=True)
     cli.add_argument('--port', type=int, required=True)
     cli.add_argument('--parser', type=Path, required=True)
     cli.add_argument('--fixtures', type=Path, required=True)
+    cli.add_argument('--public-fixtures', action='store_true')
     cli.add_argument('--output', type=Path, required=True)
     args = cli.parse_args()
     args.output.mkdir(parents=True, exist_ok=False)
+    if args.public_fixtures:
+        manifest = json.loads((ROOT / 'tests/fixtures/phase18-public-saves.json').read_text(encoding='utf-8'))
+        for fixture in manifest['fixtures']:
+            assert sha256((args.fixtures / fixture['file']).read_bytes()).hexdigest() == fixture['sha256'], fixture['file']
     db = 'pokeapp_v2_validation_phase18_' + uuid4().hex[:12]
     created = []
 
@@ -65,33 +86,40 @@ def main():
         return scalar('select jsonb_object_agg(name,hash) from (' + ' union all '.join(parts) + ') q')
 
     try:
-        for name, sources in ((db, MIGRATIONS), (db + '_bootstrap', [BOOTSTRAP_SQL])):
+        # Full chain parity was already proved on the same application source.
+        # Public-fixture follow-up only needs one fresh disposable schema.
+        builds = ((db, [BOOTSTRAP_SQL]),) if args.public_fixtures else ((db, MIGRATIONS), (db + '_bootstrap', [BOOTSTRAP_SQL]))
+        for name, sources in builds:
             run('createdb', 'postgres', [name])
             created.append(name)
             sql(SUPABASE_ROLE_MOCK_SQL, name)
             for source in sources:
                 sql(source.read_text(encoding='utf-8'), name)
-        dumps = ['\n'.join(line for line in run('pg_dump', name, ['--schema-only', '--schema=public', '--schema=v1_shadow']).splitlines()
-                           if not line.startswith(('\\restrict ', '\\unrestrict '))) for name in created]
-        assert dumps[0] == dumps[1], 'bootstrap parity'
+        if not args.public_fixtures:
+            dumps = ['\n'.join(line for line in run('pg_dump', name, ['--schema-only', '--schema=public', '--schema=v1_shadow']).splitlines()
+                               if not line.startswith(('\\restrict ', '\\unrestrict '))) for name in created]
+            assert dumps[0] == dumps[1], 'bootstrap parity'
         before = snapshot()
         sid = str(uuid4())
         sql(f"insert into public.seasons(id,name,status,started_at) values('{sid}','Phase18 disposable','active',now())")
         local = SimpleNamespace(psql=str(args.pg_bin / 'psql.exe'), host='127.0.0.1', port=args.port,
                                 user='postgres', password='', database=db)
         client = Client(local)
-        repo = RawRepository(client, args.output / 'storage')
+        repo = FixtureRawRepository(client, args.output / 'storage')
         parser = PkhexProcessParser(args.parser)
         service = TrustedSaveIngestion(repo, parser)
         reads = FrontendReads(SupabaseFrontendReadRepository(client))
         tids = []
         evidence = {}
-        for game, folder in (('OR', 'oras'), ('AS', 'oras'), ('X', 'xy'), ('Y', 'xy')):
+        cases = (('OR', 'OR/main', None), ('AS', 'AS-start/main', 'AS-current/main')) if args.public_fixtures else (
+            ('OR', 'oras/OR/main', 'oras/OR/later'), ('AS', 'oras/AS/main', 'oras/AS/later'),
+            ('X', 'xy/X/main', None), ('Y', 'xy/Y/main', None))
+        for game, relative, later_relative in cases:
             tid, rival = str(uuid4()), str(uuid4())
             tids += [tid, rival]
             sql(f"insert into public.trainers(id,display_name,slug) values('{tid}','Fixture {game}','{tid}'),('{rival}','Other {game}','{rival}'); "
                 f"insert into public.season_players(season_id,trainer_id) values('{sid}','{tid}'),('{sid}','{rival}')")
-            source = args.fixtures / folder / game / 'main'
+            source = args.fixtures / relative
             raw = source.read_bytes()
             original_hash = sha256(raw).hexdigest()
             obs = parser.parse(raw)
@@ -111,19 +139,38 @@ def main():
             forbidden = {'ivs', 'evs', 'ability', 'nature', 'identity_evidence', 'pokemon_entity_id', 'trainer'}
             assert all(not forbidden.intersection(p.pokemon.model_dump()) for p in public.pokemon)
             assert all(p.pokemon.ivs is not None for p in pc.pokemon)
-            if game in ('OR', 'AS'):
+            if args.public_fixtures:
+                expected_count = 415 if game == 'OR' else 0
+                assert len(pc.pokemon) == expected_count
+                for slot, (_, native) in zip(public.pokemon, obs.occupied(), strict=True):
+                    assert slot.pokemon.form == native.form
+                    assert slot.pokemon.species == f'Pokémon #{native.species_id}'
+                    assert slot.pokemon.level == native.level
+                    assert slot.pokemon.types == list(dict.fromkeys(f'Type #{t}' for t in native.type_ids))
+                    assert [m.name for m in slot.pokemon.moves] == [f'Move #{m.id}' for m in native.moves if m.id]
+            elif game in ('OR', 'AS'):
                 assert public.pokemon[0].pokemon.form == 1
                 assert public.pokemon[0].pokemon.types == ['Type #12', 'Type #9']
                 assert public.pokemon[0].pokemon.moves[0].name == 'Move #621'
                 assert any(p.location == 'Caja 8 · 1' for p in public.pokemon)
-                later = (source.parent / 'later').read_bytes()
+            if later_relative:
+                later = (args.fixtures / later_relative).read_bytes()
                 latest = service.receive(sid, tid, sha256(later).hexdigest(), receipts[0].save_id,
                                          observation_digest(parser.parse(later), parser.version), later)
                 assert latest.is_current and not send().is_current
                 assert str(reads.pc(sid, tid).save.id) == latest.save_id
+                if args.public_fixtures:
+                    latest_pc = reads.pc(sid, tid)
+                    latest_public = reads.trainer_collection(sid, tid)
+                    assert len(latest_pc.pokemon) == len(latest_public.pokemon) == 30
+                    assert all(not forbidden.intersection(p.pokemon.model_dump()) for p in latest_public.pokemon)
             accepted = snapshot()
+            if args.public_fixtures:
+                other_source = args.fixtures / (cases[1][1] if game == 'OR' else cases[0][1])
+            else:
+                other_source = args.fixtures / ('xy/X/main' if game in ('OR', 'AS') else 'oras/OR/main')
             for target, expected, candidate in ((rival, None, raw),
-                (tid, str(reads.pc(sid, tid).save.id), (args.fixtures / ('xy' if folder == 'oras' else 'oras') / ('X' if folder == 'oras' else 'OR') / 'main').read_bytes())):
+                (tid, str(reads.pc(sid, tid).save.id), other_source.read_bytes())):
                 try:
                     service.receive(sid, target, sha256(candidate).hexdigest(), expected,
                                     observation_digest(parser.parse(candidate), parser.version), candidate)
@@ -159,8 +206,9 @@ def main():
             finally:
                 runtime.close()
             assert sha256(source.read_bytes()).hexdigest() == original_hash
-            evidence[game] = {'synthetic':True, 'import':True, 'replay_concurrency':True, 'privacy':True,
-                              'offline_cache':True, 'source_unchanged':True, 'slots':len(pc.pokemon)}
+            evidence[game] = {'synthetic':not args.public_fixtures, 'import':True, 'replay_concurrency':True, 'privacy':True,
+                              'offline_cache':True, 'source_unchanged':True, 'slots':len(pc.pokemon),
+                              'final_slots':len(reads.pc(sid, tid).pokemon), 'later_receipt_no_rewind':bool(later_relative)}
         for role in ('anon', 'authenticated'):
             try:
                 Client(local, role).execute("select public.api_register_save('{}')")
@@ -175,8 +223,14 @@ def main():
             f"delete from public.save_files where season_id='{sid}'; delete from public.season_players where season_id='{sid}'; "
             f"delete from public.seasons where id='{sid}'; delete from public.trainers where id in ({','.join(literal(t) for t in tids)})")
         assert snapshot() == before
-        report = {'status':'PASS_SYNTHETIC_ONLY','authentic_oras':'NOT_RUN_OWNER_WAIVER',
-                  'games':evidence,'tables_restored':len(before),'bootstrap_parity':True,'migration':45,'remote_writes':0}
+        if args.public_fixtures:
+            for fixture in manifest['fixtures']:
+                assert sha256((args.fixtures / fixture['file']).read_bytes()).hexdigest() == fixture['sha256']
+        report = {'status':'PASS_PUBLIC_CONTRIBUTOR_SAVES' if args.public_fixtures else 'PASS_SYNTHETIC_ONLY',
+                  'authentic_oras':'PUBLIC_CONTRIBUTOR_GAMEPLAY_PROVENANCE' if args.public_fixtures else 'NOT_RUN_OWNER_WAIVER',
+                  'games':evidence,'tables_restored':len(before),
+                  'bootstrap_parity':'RETAINED_UNCHANGED_SOURCE' if args.public_fixtures else True,
+                  'migration':45,'remote_writes':0}
         (args.output / 'result.json').write_text(json.dumps(report, indent=2), encoding='utf-8')
         print(json.dumps(report))
     finally:

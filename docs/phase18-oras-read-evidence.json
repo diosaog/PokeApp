@@ -1,11 +1,12 @@
 {
   "phase": "18",
   "observed": "2026-10-18",
-  "status": "PARTIAL",
+  "status": "DONE",
   "implementation": "DEPLOYED",
   "authentic_oras": {
-    "status": "NOT_RUN",
-    "reason": "No authentic OR/AS saves available; owner explicitly authorized continuing without them. Black/White is not ORAS evidence."
+    "status": "PASS_PUBLIC_CONTRIBUTOR_GAMEPLAY",
+    "manifest": "tests/fixtures/phase18-public-saves.json",
+    "provenance_limit": "Author-described gameplay saves; hardware origin, absence of edits and Pokemon legality not independently attested. Not PokeApp-generated fixtures."
   },
   "entry_head": "08f00acd3a06a579e899c3e19454ea5be896c222",
   "application_head": "e7833440f0c77579a82a9f00a030ab6cdd27619c",
@@ -99,7 +100,122 @@
     "build_format_compile_targeted_critical_ruff_diff": "PASS",
     "wrangler_dry_run": "PASS",
     "full_historical_suites": "NOT_RERUN",
-    "fresh_clean_windows_install": "NOT_RUN"
+    "fresh_clean_windows_install": "NOT_RUN",
+    "public_fixture_followup": {
+      "entry_head": "6a219a4176048102588aae25172c71fdcd98bffc",
+      "postgres": {
+        "status": "PASS_PUBLIC_CONTRIBUTOR_SAVES",
+        "authentic_oras": "PUBLIC_CONTRIBUTOR_GAMEPLAY_PROVENANCE",
+        "games": {
+          "OR": {
+            "synthetic": false,
+            "import": true,
+            "replay_concurrency": true,
+            "privacy": true,
+            "offline_cache": true,
+            "source_unchanged": true,
+            "slots": 415,
+            "final_slots": 415,
+            "later_receipt_no_rewind": false
+          },
+          "AS": {
+            "synthetic": false,
+            "import": true,
+            "replay_concurrency": true,
+            "privacy": true,
+            "offline_cache": true,
+            "source_unchanged": true,
+            "slots": 0,
+            "final_slots": 30,
+            "later_receipt_no_rewind": true
+          }
+        },
+        "tables_restored": 54,
+        "bootstrap_parity": "RETAINED_UNCHANGED_SOURCE",
+        "migration": 45,
+        "remote_writes": 0
+      },
+      "packaged": [
+        {
+          "fixture": "OR",
+          "game": "OR",
+          "slots": 415,
+          "packaged_local_ready": true,
+          "offline": true,
+          "source_unchanged": true
+        },
+        {
+          "fixture": "AS-start",
+          "game": "AS",
+          "slots": 0,
+          "packaged_local_ready": true,
+          "offline": true,
+          "source_unchanged": true
+        },
+        {
+          "fixture": "AS-current",
+          "game": "AS",
+          "slots": 30,
+          "packaged_local_ready": true,
+          "offline": true,
+          "source_unchanged": true
+        }
+      ],
+      "source_manifest": {
+        "purpose": "Local read/import testing of publicly contributed gameplay saves; no ROMs, production imports or binary redistribution.",
+        "provenance_limit": "Contributors describe these as their gameplay saves. Hardware origin, absence of edits and Pokemon legality are not independently attested.",
+        "retrieved": "2026-10-18",
+        "fixtures": [
+          {
+            "file": "OR/main",
+            "game": "OR",
+            "contributor": "Minay",
+            "source": "https://projectpokemon.org/home/forums/topic/58103-sharing-pokemon-omega-ruby-save-completed/",
+            "attachment_id": 46752,
+            "bytes": 483328,
+            "sha256": "09d3c3a8b58bef7fd7529d2300767def2df259ce550e91b4d7019831ab18eebd",
+            "party_slots": 2,
+            "occupied_slots_including_party": 415,
+            "boxes": 31
+          },
+          {
+            "file": "AS-start/main",
+            "game": "AS",
+            "contributor": "Melampus",
+            "source": "https://projectpokemon.org/home/files/file/5447-alpha-sapphire-sectionslegendary-save-files/",
+            "attachment_id": 58738,
+            "bytes": 483328,
+            "sha256": "41e0056122627c2e84cf2ff01649aba9da0f7185ebf5bc684632b31ec90edf24",
+            "party_slots": 0,
+            "occupied_slots_including_party": 0,
+            "boxes": 31
+          },
+          {
+            "file": "AS-current/main",
+            "game": "AS",
+            "contributor": "Melampus",
+            "source": "https://projectpokemon.org/home/files/file/5447-alpha-sapphire-sectionslegendary-save-files/",
+            "attachment_id": 58788,
+            "bytes": 483328,
+            "sha256": "1edab357827dc6dab18d776133996e054f778d06c80a3d15d9e4c731da6f3e73",
+            "party_slots": 6,
+            "occupied_slots_including_party": 30,
+            "boxes": 31
+          }
+        ]
+      },
+      "setup_harness_issues": [
+        "local server initially started on default port",
+        "local file substitute exposed partial write during concurrency",
+        "fixture .main suffix not an accepted Launcher filename",
+        "test-source encoding corrected"
+      ],
+      "product_changes": 0,
+      "remote_writes": 0,
+      "deployments": 0,
+      "bootstrap_parity_and_ui_regressions": "RETAINED_UNCHANGED_PRODUCT_SOURCE",
+      "full_historical_suites": "NOT_RERUN"
+    }
   },
   "migration": {
     "version": "20261018105158",
@@ -269,5 +385,37 @@
     "stopped_synthetic_cluster_retained": "%TEMP%/pokeapp-phase18-pg"
   },
   "evidence_root": "%LOCALAPPDATA%/PokeApp-migration-evidence/phase18/20261018",
-  "next": "Owner acceptance with lawful authentic decrypted OR and AS saves when available."
+  "next": "Owner acceptance of the published ORAS feature; no Phase 19 started.",
+  "initial_status": "PARTIAL",
+  "initial_authentic_oras": {
+    "status": "NOT_RUN",
+    "reason": "No authentic OR/AS saves available; owner explicitly authorized continuing without them. Black/White is not ORAS evidence."
+  },
+  "fixture_policy": {
+    "search_order": [
+      "authorized repository fixtures",
+      "legitimate public testing resources"
+    ],
+    "missing_real_fixtures_block": "only corresponding real-save validation and dependent deployments",
+    "ordinary_development": "CONTINUES",
+    "gen5_is_gen6_gen7_evidence": false,
+    "synthetic_is_gameplay_evidence": false,
+    "unverified_ingestion_deployment": "PROHIBITED",
+    "previous_oras_delivery": "Occurred before follow-up public fixture verification; no retroactive pre-deployment PASS claim."
+  },
+  "sun_moon": {
+    "implementation": "NOT_STARTED",
+    "real_gameplay_validation": "BLOCKED",
+    "dependent_ingestion_deployment": "BLOCKED",
+    "missing": "Suitable proven gameplay fixtures for both Sun and Moon plus game-specific implementation/validation.",
+    "upstream_test_resource": {
+      "source": "https://raw.githubusercontent.com/kwsch/PKHeX/b60c6e5f1427263260061d3f8c5540b924063572/Tests/PKHeX.Core.Tests/TestData/SM Project 802.main",
+      "revision": "b60c6e5f1427263260061d3f8c5540b924063572",
+      "bytes": 441856,
+      "sha256": "e02bb1aa23c851ef48a3548be26f658e648b3168a4ca4fefa53a1d79dd68b3e1",
+      "classification": "UPSTREAM_TEST_FIXTURE_NOT_ATTESTED_GAMEPLAY",
+      "gen7_product_validation": "NOT_RUN"
+    },
+    "ultra_moon_substitution": false
+  }
 }

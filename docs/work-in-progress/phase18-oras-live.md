@@ -1,15 +1,15 @@
 # Phase 18 — ORAS read/import
 
-2026-10-18. **STATUS: PARTIAL — IMPLEMENTED AND DEPLOYED; AUTHENTIC SAVE ACCEPTANCE PENDING.**
+2026-10-18. **STATUS: PHASE 18 DONE — ORAS PUBLIC GAMEPLAY FIXTURE FOLLOW-UP PASS.**
 Application source `e7833440f0c77579a82a9f00a030ab6cdd27619c` committed/pushed
 before all remote writes. [Report](../phase18-oras-read-report.md),
 [sanitized evidence](../phase18-oras-read-evidence.json).
 Entry main/origin `08f00acd3a06a579e899c3e19454ea5be896c222`, clean tracked tree.
 
-The owner confirms no authentic ORAS saves are available and explicitly authorizes
-continuing without their tests. A Black/White save cannot validate ORAS. Authentic
-Omega Ruby/Alpha Sapphire acceptance is **NOT RUN / evidence unavailable**, never
-PASS. No existing owner save has been used or changed.
+At initial delivery the owner had no authentic ORAS files and authorized continuing
+without their tests: real-save acceptance was NOT RUN and phase status PARTIAL.
+The subsequent public-fixture search and local proof below supersede that evidence
+gap. A Black/White save cannot validate ORAS. No owner save was used or changed.
 
 Native PKHeX 24.11.11 now accepts decrypted OR/AS saves, validates checksums/game/
 form, emits neutral form-specific types, and preserves existing X/Y wire digests.
@@ -68,7 +68,37 @@ No V1, Shadow business data or physical save writes. Protected/unrelated files
 remain untouched. Documentation closure is the subsequent commit: obtain exact
 final HEAD from Git, avoiding a self-referential hash.
 
-**NEXT: owner acceptance with lawful authentic OR and AS decrypted saves when
-available.** Synthetic checks do not close that gate. Gen6 competitive identity,
+## Follow-up: fixture availability and release gate
+
+Resume entry `6a219a4176048102588aae25172c71fdcd98bffc`, fetched 0/0, clean tracked.
+Owner's latest instruction requires legitimate fixture discovery and blocks
+unverified save-ingestion deployment; missing real saves must not block ordinary
+development. This rule supersedes the initial waiver for future releases. The
+earlier ORAS deployment is retained as historical fact, not relabeled as having
+had real-save proof before publication. **No new remote write/deployment here.**
+
+Three public contributor gameplay saves found: Minay's OR, Melampus's AS start
+and AS current. Provenance/links/hashes in
+[manifest](../../tests/fixtures/phase18-public-saves.json) and the report. These
+are not PokeApp-generated saves; author-described gameplay provenance does not
+attest hardware origin, lack of edits or Pokemon legality. Packaged parser/core
+offline reads PASS. Final real local PG gate PASS: OR 415 occupied slots, AS
+0 -> 30, replay/concurrency/rollback/ownership/privacy, no stale rewind, source
+bytes unchanged, no fabricated identity/reward/locks. 54-table restoration; all
+disposable DBs dropped and PG stopped. Only runner/manifest/docs changed.
+Prior synthetic/parity/UI evidence remains retained, not rerun.
+
+Private evidence: existing phase18 directory plus `fixture-review/`:
+`download-results.json`, `packaged-public.json`, `pg-public-final/result.json`.
+Raw files/observations stay private and outside Git. Setup/harness-only failures
+and final results are documented in the report. No production fixture import.
+
+Upstream pinned `SM Project 802.main` is available as a test resource. It is not
+proof of authentic gameplay for both Sun and Moon; Ultra Moon is not a substitute.
+**Sun/Moon real-save validation and dependent deployment: BLOCKED** pending
+appropriate evidence/implementation. Ordinary implementation remains unblocked;
+Gen7 is NOT STARTED and this follow-up does not authorize the next phase.
+
+**NEXT: owner acceptance of the published ORAS feature.** Gen6 competitive identity,
 progress mapping, bag inventory, alternate form art and full Launcher Spanish
 presentation remain outside this read/import increment. No Phase 19 started.
