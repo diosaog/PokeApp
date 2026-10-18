@@ -5,7 +5,18 @@ milestone record; it does not maintain a second live phase-status ledger.
 
 ## Current project position
 
-- Current packet: **18 - ORAS read/import, DONE with public gameplay fixtures**.
+- Current packet: **19 - Sun/Moon read/import, DONE**. Native SN/MN only,32 boxes,
+  signature/checksum integrity, form/types and Spanish data; trusted current-save
+  authority and privacy preserved. Real public contributor Sun/Moon fixtures,
+  local PostgreSQL replay/concurrency/rollback and packaged offline checks PASS.
+  Application `e29cb05`;046 applied once; Railway/Cloudflare and Launcher0.19.0
+  verified. All59 scoped tables unchanged; no hosted positive import. No USUM or
+  physical writes. [Report](phase19-sun-moon-report.md),
+  [evidence](phase19-sun-moon-evidence.json),
+  [live record](work-in-progress/phase19-sun-moon-live.md).
+  **Next: Antonio acceptance. Do not start Phase20 automatically.**
+
+- Historical packet: **18 - ORAS read/import, DONE with public gameplay fixtures**.
   Initial synthetic-only delivery was PARTIAL; the subsequent legitimate public
   fixture search and local acceptance supersede that evidence gap. Source
   `e783344` provides native OR/AS read support, existing
@@ -15,8 +26,8 @@ milestone record; it does not maintain a second live phase-status ledger.
   hosted import is claimed. No follow-up deployment or product change. Data preserved.
   [Report](phase18-oras-read-report.md), [evidence](phase18-oras-read-evidence.json),
   [current live record](work-in-progress/phase18-oras-live.md).
-  **Next: owner OR/AS acceptance. No Phase 19.** Missing Sun/Moon gameplay
-  evidence blocks only its real-save/dependent deployment gates, not development.
+  The former Sun/Moon evidence gap and wait for Phase19 authorization are
+  superseded by the explicit Phase19 instruction and verified closure above.
 
 - Historical packet: **17.2 - public trainer collections and final product
   polish, DONE**. Public current-save party/boxes/dead Box 8 projection uses a

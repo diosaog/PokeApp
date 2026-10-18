@@ -6,7 +6,8 @@ tracked tree clean. Phase18 DONE. Remote entry remains migration045
 SUCCESS and Cloudflare `411aeb3d-a68a-4d8c-8327-22430a97ba95`, both app source
 `e7833440f0c77579a82a9f00a030ab6cdd27619c`.
 
-**STATUS: IMPLEMENTING / LOCAL VALIDATION. No Phase19 remote writes.**
+**STATUS: PHASE19 DONE.** The implementation checkpoint below is historical;
+final delivery supersedes its pending steps.
 
 Implemented locally: explicit SAV7SM/SN/MN only; 32 boxes; independent EC;
 Alolan/native form types; bounded SM species/moves/items/abilities; original-byte
@@ -59,3 +60,28 @@ issues. No product test failure was hidden.
 Fresh pre-write baseline:59 tables,37 migrations, unchanged private inbox.
 Next: commit/push source,046 exactly once, backend with Linux native SM smoke,
 installer0.19.0 hosting, web, public checks, preservation and cleanup.
+
+## Final delivery — 2026-10-18
+
+Application HEAD `e29cb05c6a0c1965a7253c7b4169d84edbfa5f3d`, pushed before all
+remote writes.046 applied once as `20261018112548`;38 migration records, prior37
+identical. Railway `fa6ef08e-cabf-485f-ba17-936aa5802bab` SUCCESS with this source
+and262 committed inputs. Linux native checks and final production-runtime SM
+smoke pass. Cloudflare `c46c2f7b-1621-4102-9b88-aa74ae1ef77c`, version
+`5547e5e6-2fec-454b-b580-5d8fe66f1046`,100%, same source.
+
+Launcher0.19.0 new R2 key only; package and public GET SHA-256
+`5b3c783a138b53a9f2b0fe172ce5a8b8ab4df8b954db5f58dc4c6a102fb1460e`,159086505 bytes.
+12 public checks PASS;2 Worker tests PASS. Hosted positive import NOT RUN,
+owner data preserved. All59 scoped tables including Auth/Storage identical;
+stable owner/inbox/security identical. Advisor24 ERROR/5 WARN/171 INFO unchanged.
+No V1/Shadow/Streamlit mutation, no physical writes.
+
+Disposable Phase19 databases absent; cluster stopped; no5173/55468 listener.
+Private evidence and audited installer retained. No destructive cleanup required.
+Final Git is the documentation closure commit carrying this record; obtain its
+exact hash from Git rather than a self-referential hash. Explicit staging only,
+protected and unrelated files untouched.
+
+[Report](../phase19-sun-moon-report.md), [evidence](../phase19-sun-moon-evidence.json).
+**Remaining blockers: none. NEXT: Antonio acceptance. STOP before Phase20.**

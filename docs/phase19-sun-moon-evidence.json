@@ -1,6 +1,6 @@
 {
   "phase": "19",
-  "status": "LOCAL_GATES_PASS_DELIVERY_PENDING",
+  "status": "DONE",
   "entry": "7617315640936b6efa7abaf6d5397bf04a5e23f4",
   "fixture_manifest": "tests/fixtures/phase19-public-saves.json",
   "native_checks": 102,
@@ -186,6 +186,121 @@
     "Installer unsigned; clean-Windows install not rerun",
     "No physical writes"
   ],
-  "public_delivery": null,
-  "private_evidence": "%LOCALAPPDATA%/PokeApp-migration-evidence/phase19/20261018"
+  "public_delivery": {
+    "migration": {
+      "version": "20261018112548",
+      "name": "046_sun_moon_save_registration",
+      "record_hash": "7162f44a563f48512283e0888e7d4426"
+    },
+    "railway": {
+      "id": "fa6ef08e-cabf-485f-ba17-936aa5802bab",
+      "status": "SUCCESS",
+      "image": "sha256:69751c82672c3b9eb7a250791c7e1914af297b6cc939d999eca607a02df59b90",
+      "committed_inputs": 262,
+      "linux_final_runtime_smoke": true
+    },
+    "cloudflare": {
+      "deployment": "c46c2f7b-1621-4102-9b88-aa74ae1ef77c",
+      "version": "5547e5e6-2fec-454b-b580-5d8fe66f1046",
+      "percentage": 100
+    },
+    "r2_new_key": "windows/0.19.0/PokeApp-Launcher-Setup.exe",
+    "smoke": {
+      "status": "PASS",
+      "checks": [
+        {
+          "path": "/health",
+          "status": 200
+        },
+        {
+          "path": "/v1/seasons/00000000-0000-0000-0000-000000000000/saves/receipt?sha256=0000000000000000000000000000000000000000000000000000000000000000",
+          "status": 401
+        },
+        {
+          "path": "/v1/read/seasons/00000000-0000-0000-0000-000000000000/pc",
+          "status": 401
+        },
+        {
+          "path": "/",
+          "status": 200
+        },
+        {
+          "path": "/pc",
+          "status": 200
+        },
+        {
+          "path": "/entrenadores",
+          "status": 200
+        },
+        {
+          "path": "build-config",
+          "status": 200
+        },
+        {
+          "path": "/assets/index-BuYMVUFu.css",
+          "status": 200,
+          "matches_build": true
+        },
+        {
+          "path": "/assets/index-csxIEVRg.js",
+          "status": 200,
+          "matches_build": true
+        },
+        {
+          "path": "exact_cors",
+          "status": 200
+        },
+        {
+          "path": "download_HEAD",
+          "status": 200
+        },
+        {
+          "path": "download_GET",
+          "status": 200,
+          "bytes": 159086505,
+          "sha256": "5b3c783a138b53a9f2b0fe172ce5a8b8ab4df8b954db5f58dc4c6a102fb1460e"
+        }
+      ],
+      "no_unexpected_5xx": true,
+      "business_writes": 0,
+      "hosted_positive_import": "NOT_RUN_OWNER_DATA_PRESERVED"
+    },
+    "preservation": {
+      "status": "PASS",
+      "tables_identical": 59,
+      "owner_stable_identical": true,
+      "inbox_identical": true,
+      "security_catalog_identical": true,
+      "storage_metadata_identical": true,
+      "prior_migrations_identical": 37,
+      "migrations_after": 38,
+      "advisor_before_after": {
+        "ERROR": 24,
+        "WARN": 5,
+        "INFO": 171
+      },
+      "business_writes": 0
+    },
+    "rpc_security": [
+      {
+        "invoker": true,
+        "proconfig": [
+          "search_path=pg_catalog, public"
+        ],
+        "anon_denied": true,
+        "browser_denied": true,
+        "service_execute": true,
+        "sm_guard": true
+      }
+    ]
+  },
+  "private_evidence": "%LOCALAPPDATA%/PokeApp-migration-evidence/phase19/20261018",
+  "application_source": "e29cb05c6a0c1965a7253c7b4169d84edbfa5f3d",
+  "worker_tests": 2,
+  "cleanup": {
+    "validation_databases_remaining": 0,
+    "local_pg_stopped": true,
+    "test_listeners_remaining": 0,
+    "private_evidence_and_release_retained": true
+  }
 }
