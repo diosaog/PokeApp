@@ -72,11 +72,5 @@ internal static class SMChecks
         }
         var sm = new SAV7SM();
         Check(sm.MaxSpeciesID == 802 && sm.MaxMoveID == 719 && sm.MaxItemID == 920 && sm.MaxAbilityID == 232, "pinned SM ceilings");
-        foreach (var game in new[] { GameVersion.US, GameVersion.UM })
-        {
-            var usum = new SAV7USUM { Version = game };
-            WriteUInt32LittleEndian(usum.Data.AsSpan(usum.Data.Length - 0x1F0), SaveUtil.BEEF);
-            Check(Error(usum.Write()) == "UNSUPPORTED_GAME", "USUM rejected " + game);
-        }
     }
 }

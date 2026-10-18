@@ -56,12 +56,12 @@ class ParsedTrainer(WireModel):
 
 
 class ParsedMove(WireModel):
-    id: int = Field(ge=0, le=719)
+    id: int = Field(ge=0, le=728)
     pp: int = Field(ge=0, le=255)
 
 
 class ParsedPokemon(WireModel):
-    species_id: int = Field(ge=1, le=802)
+    species_id: int = Field(ge=1, le=807)
     nickname: str = Field(max_length=64)
     level: int = Field(ge=1, le=100)
     form: int = Field(ge=0, le=255)
@@ -76,7 +76,9 @@ class ParsedPokemon(WireModel):
     evs: tuple[int, ...] = Field(min_length=6, max_length=6)
     # Native ORAS/SM personal table; absent in old observations and excluded from
     # their serialization so existing Launcher registration digests remain valid.
-    type_ids: tuple[int, int] | None = Field(default=None, exclude_if=lambda v: v is None)
+    type_ids: tuple[int, int] | None = Field(
+        default=None, exclude_if=lambda v: v is None
+    )
     identity: PokemonIdentityEvidence | ObservedXYIdentity
 
     @field_validator("identity", mode="before")
@@ -112,8 +114,8 @@ class ParsedPokemon(WireModel):
             self.species_id > 721 or any(move.id > 621 for move in self.moves)
         ):
             raise ValueError("invalid_native_species_or_move")
-        if self.identity.format == 7 and (self.ability_id > 232 or self.item_id > 920):
-            raise ValueError("invalid_sm_attribute")
+        if self.identity.format == 7 and (self.ability_id > 233 or self.item_id > 959):
+            raise ValueError("invalid_gen7_attribute")
         return self
 
 
@@ -184,25 +186,37 @@ class ObservedSave(WireModel):
     @model_validator(mode="after")
     def validate_layout(self):
         if self.generation == 7:
-            if self.game not in {"SN", "MN"} or len(self.boxes) != 32:
-                raise ValueError("invalid_sm_layout")
+            if self.game not in {"SN", "MN", "US", "UM"} or len(self.boxes) != 32:
+                raise ValueError("invalid_gen7_layout")
             if self.progress is not None:
-                raise ValueError("sm_progress_not_supported")
+                raise ValueError("gen7_progress_not_supported")
         elif self.generation == 6:
             if self.game not in {"X", "Y", "OR", "AS"} or len(self.boxes) != 31:
                 raise ValueError("invalid_xy_layout")
             if self.progress is not None:
                 raise ValueError("xy_progress_not_supported")
-        elif self.game in {"X", "Y", "OR", "AS", "SN", "MN"} or len(self.boxes) > 24:
+        elif (
+            self.game in {"X", "Y", "OR", "AS", "SN", "MN", "US", "UM"}
+            or len(self.boxes) > 24
+        ):
             raise ValueError("invalid_native_layout")
         if [b.number for b in self.boxes] != list(range(1, len(self.boxes) + 1)):
             raise ValueError("invalid_box_layout")
         if any(p.identity.format != self.generation for _, p in self.occupied()):
             raise ValueError("invalid_native_format")
         for _, pokemon in self.occupied():
+            # PK7 origin may differ from the current save after a transfer.
+            # Bounds follow the current native game, never origin_version.
+            if self.game in {"SN", "MN"} and (
+                pokemon.species_id > 802
+                or pokemon.item_id > 920
+                or pokemon.ability_id > 232
+                or any(m.id > 719 for m in pokemon.moves)
+            ):
+                raise ValueError("invalid_sm_attribute")
             if self.game in {"X", "Y"} and any(m.id > 617 for m in pokemon.moves):
                 raise ValueError("invalid_xy_move")
-            if self.game in {"OR", "AS", "SN", "MN"}:
+            if self.game in {"OR", "AS", "SN", "MN", "US", "UM"}:
                 if pokemon.type_ids is None:
                     raise ValueError("missing_oras_types")
             elif pokemon.type_ids is not None:

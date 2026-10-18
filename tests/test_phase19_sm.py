@@ -71,10 +71,10 @@ class SMContractTests(unittest.TestCase):
             self.assertEqual(payload["party"][0]["pokemon"]["item_generation"], 7)
             self.assertEqual(payload["party"][0]["pokemon"]["form"], 1)
 
-    def test_rejects_usum_and_wrong_generation_count_progress(self):
+    def test_rejects_wrong_game_generation_count_progress(self):
         for change in (
-            {"game": "US"},
-            {"game": "UM"},
+            {"game": "SW"},
+            {"game": "SH"},
             {"game": "X"},
             {"generation": 6},
             {"boxes": sm_payload()["boxes"][:-1]},

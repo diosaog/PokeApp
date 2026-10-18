@@ -96,7 +96,7 @@ app.whenReady().then(() => {
     const result = await dialog.showOpenDialog(win, {
       properties: ["openFile"],
       filters: [
-        { name: "Save Pokémon (incluye main de X/Y, ORAS y Sol/Luna)", extensions: ["*"] },
+        { name: "Save Pokémon (incluye main de X/Y, ORAS y Sol/Luna/Ultrasol/Ultraluna)", extensions: ["*"] },
         { name: "Save con extensión", extensions: ["sav", "dsv", "srm"] },
       ],
     });

@@ -9,7 +9,7 @@ if (args.Length == 2 && args[0] is "--gen6" or "--gen7")
     Directory.CreateDirectory(args[1]);
     XYChecks.Run(args[1]);
     ORASChecks.Run(args[1]);
-    if (args[0] == "--gen7") SMChecks.Run(args[1]);
+    if (args[0] == "--gen7") { SMChecks.Run(args[1]); USUMChecks.Run(args[1]); }
     return;
 }
 

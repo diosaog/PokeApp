@@ -1,0 +1,27 @@
+{
+  "kind": "Public contributor gameplay provenance, with disclosed edits; no independent hardware or legality attestation",
+  "fixtures": [
+    {
+      "game": "US",
+      "file": "US/main",
+      "source": "https://projectpokemon.org/home/files/file/5724-ultra-sun-all-legendary-ultra-beast-shiny-wormhole-pok%C3%A9mon/",
+      "provenance": "Totter gameplay Checkpoint backup at Blacephalon encounter, reportedly tested on digital Ultra Sun/New 3DS XL. Contributor edited Pokedex/shiny charm, Smeargle nature and item quantities and removed other party/PC Pokemon. Selected Non-Wormhole/Blacephalon/main from nested US - Non-Wormhole UB & Legendary.zip. No independent hardware or legality verification.",
+      "sha256": "3c1a3b507d3ef7d5d5937867ebd8f2f91a6044b1b5a4df5d9c6975abd4a3d884",
+      "bytes": 445440,
+      "archive_sha256": "dca05b39338a1727e98956441c2358738dcd19fbc7138e9801fa02795ad78f61",
+      "retrieved": "2026-10-18",
+      "occupied_slots": 1
+    },
+    {
+      "game": "UM",
+      "file": "UM/main",
+      "source": "https://projectpokemon.org/home/files/file/5342-my-old-saves-for-alpha-sapphire-moon-and-ultra-moon/",
+      "provenance": "TheWhiteDevil27 personal 2015-2019 gameplay backup via Checkpoint. Contributor reports removal of illegal Pokemon and box sorting; not asserted unmodified. Selected 0x01B51 Pokémon Ultra Moon/oldUMsave/main. No independent hardware or legality verification.",
+      "sha256": "2a46508170124fc69417f68dfe8916d5a6a51cf96f7707c3d796ae1695422331",
+      "bytes": 445440,
+      "archive_sha256": "dcca03f19037b132bb492d007fd3edce0ad8722c99c60369ee5de3630071df16",
+      "retrieved": "2026-10-18",
+      "occupied_slots": 595
+    }
+  ]
+}

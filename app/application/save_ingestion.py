@@ -45,7 +45,7 @@ def parsed_payload(observation, save_id, trainer_id, raw_hash):
             "identity_evidence": asdict(p.identity),
             "legacy_fingerprints": [],
         }
-        if observation.game in {"OR", "AS", "SN", "MN"}:
+        if observation.game in {"OR", "AS", "SN", "MN", "US", "UM"}:
             # Public form/type facts from the same trusted parser, never inferred
             # from nickname or from another game's species table.
             value.update(form=p.form, item_generation=observation.generation)

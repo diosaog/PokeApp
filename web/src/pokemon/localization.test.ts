@@ -27,12 +27,16 @@ describe("pinned Spanish presentation catalog", () => {
   ] as const)("resolves %s / %s", (category, input, output) => {
     expect(pokemonName(category, input)).toBe(output);
   });
-  it("localizes Sun/Moon data without extending to USUM", () => {
+  it("localizes SM and USUM without extending beyond generation 7", () => {
     expect(pokemonName("species", 802)).toBe("Marshadow");
-    expect(pokemonName("species", 803)).toBe("Especie no disponible");
+    expect(pokemonName("species", 808)).toBe("Especie no disponible");
     expect(pokemonName("move", 719)).toBe("Gigarrayo Fulminante");
     expect(pokemonName("item", 776, 7)).toBe("Normastal Z");
     expect(pokemonName("ability", 207)).toBe("Cola Surf");
+    expect(pokemonName("species", 807)).toBe("Zeraora");
+    expect(pokemonName("move", 728)).toBe("Estruendo Implacable");
+    expect(pokemonName("ability", 233)).toBe("Fuerza Cerebral");
+    expect(pokemonName("item", 923, 7)).toBe("Ultranecrostal Z");
   });
   it("fails closed on ambiguous item IDs instead of guessing Gen3 vs Gen4+", () => {
     expect(pokemonName("item", "Item #200")).toBe(

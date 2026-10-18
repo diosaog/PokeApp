@@ -22,7 +22,7 @@ public static class Inspection
         {
             var save = SaveUtil.GetVariantSAV((byte[])bytes.Clone());
             if (save is null) return Failure("CORRUPT_SAVE");
-            if (save is not (SAV3RS or SAV3E or SAV3FRLG or SAV4DP or SAV4Pt or SAV4HGSS or SAV5BW or SAV5B2W2 or SAV6XY or SAV6AO or SAV7SM))
+            if (save is not (SAV3RS or SAV3E or SAV3FRLG or SAV4DP or SAV4Pt or SAV4HGSS or SAV5BW or SAV5B2W2 or SAV6XY or SAV6AO or SAV7SM or SAV7USUM))
                 return Failure("UNSUPPORTED_GAME");
             if (!save.IsVersionValid()) return Failure("UNSUPPORTED_VERSION");
             if (save is SAV6XY && bytes.Length != SaveUtil.SIZE_G6XY)
@@ -31,13 +31,16 @@ public static class Inspection
                 return Failure("UNSUPPORTED_VERSION"); // Decrypted native ORAS, not demo/container.
             // SAV7 clears its signature buffer during construction. Validate the
             // original signature and checksum-table binding, without touching input.
-            if (save is SAV7SM)
+            if (save is SAV7)
             {
-                if (bytes.Length != SaveUtil.SIZE_G7SM || save.Version is not (GameVersion.SN or GameVersion.MN))
+                bool ultra = save is SAV7USUM;
+                if (bytes.Length != (ultra ? SaveUtil.SIZE_G7USUM : SaveUtil.SIZE_G7SM)
+                    || (ultra ? save.Version is not (GameVersion.US or GameVersion.UM)
+                              : save.Version is not (GameVersion.SN or GameVersion.MN)))
                     return Failure("UNSUPPORTED_VERSION");
-                var signature = bytes.AsSpan(0x6BA00 + MemeCrypto.SaveFileSignatureOffset, MemeCrypto.SaveFileSignatureLength);
+                var signature = bytes.AsSpan((ultra ? 0x6C000 : 0x6BA00) + MemeCrypto.SaveFileSignatureOffset, MemeCrypto.SaveFileSignatureLength);
                 if (!MemeCrypto.VerifyMemeData(signature, out var verified, MemeKeyIndex.PokedexAndSaveFile)
-                    || !SHA256.HashData(bytes.AsSpan(bytes.Length - 0x200, 0x140)).AsSpan().SequenceEqual(verified.AsSpan(0, 32)))
+                    || !SHA256.HashData(bytes.AsSpan(bytes.Length - 0x200, ultra ? 0x150 : 0x140)).AsSpan().SequenceEqual(verified.AsSpan(0, 32)))
                     return Failure("CORRUPT_SAVE");
             }
             // This pinned library's Gen5 IsVersionValid inherits an unconditional
@@ -47,7 +50,7 @@ public static class Inspection
                 return Failure("UNSUPPORTED_VERSION");
             if (!save.ChecksumsValid || save.PartyCount is < 0 or > 6)
                 return Failure("CORRUPT_SAVE");
-            if (save.BoxSlotCount != 30 || save.BoxCount < 1 || save.BoxCount > (save is SAV7SM ? 32 : save is SAV6 ? 31 : 24))
+            if (save.BoxSlotCount != 30 || save.BoxCount < 1 || save.BoxCount > (save is SAV7 ? 32 : save is SAV6 ? 31 : 24))
                 return Failure("UNSUPPORTED_VERSION");
             var party = save.PartyData;
             var boxes = save.BoxData;
@@ -121,6 +124,8 @@ public static class Inspection
         if (p.Format != save.Generation || (save.Generation >= 6 &&
             new[] { p.Move1, p.Move2, p.Move3, p.Move4 }.Any(move => move > save.MaxMoveID)))
             throw new InvalidPokemonException();
+        if (save is SAV7 && (p.Species > save.MaxSpeciesID || p.HeldItem > save.MaxItemID || p.Ability > save.MaxAbilityID))
+            throw new InvalidPokemonException();
         if (string.IsNullOrWhiteSpace(p.OriginalTrainerName) || (int)p.Version == 0 || p.Language == 0)
             throw new IncompleteIdentityException();
         var value = new
@@ -143,7 +148,7 @@ public static class Inspection
                 Ivs = new[] { p.IV_HP, p.IV_ATK, p.IV_DEF, p.IV_SPA, p.IV_SPD, p.IV_SPE },
             },
         };
-        if (save is SAV6AO or SAV7SM)
+        if (save is SAV6AO or SAV7)
         {
             if (!save.Personal.IsPresentInGame(p.Species, p.Form))
                 throw new InvalidPokemonException();

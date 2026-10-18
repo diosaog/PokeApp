@@ -20,19 +20,21 @@ RUN pip install --disable-pip-version-check -r requirements-api.txt \
     && useradd --uid 10001 --create-home pokeapp
 COPY --from=parser /parser /opt/pokeapp-parser
 COPY --from=parser --chown=10001:10001 /fixtures/sm /tmp/parser-sm-fixtures
+COPY --from=parser --chown=10001:10001 /fixtures/usum /tmp/parser-usum-fixtures
 COPY app ./app
 USER 10001
 RUN python -c "import json,subprocess; r=subprocess.run(['/opt/pokeapp-parser/PokeApp.Parser'],input=b'',capture_output=True,check=True); assert json.loads(r.stdout)['error']=='TRUNCATED_SAVE'"
 RUN python - <<'PY'
 import json, pathlib, shutil, subprocess
-root = pathlib.Path('/tmp/parser-sm-fixtures')
-for game in ('SN', 'MN'):
+for game in ('SN', 'MN', 'US', 'UM'):
+    root = pathlib.Path('/tmp/parser-sm-fixtures' if game in ('SN', 'MN') else '/tmp/parser-usum-fixtures')
     result = subprocess.run(['/opt/pokeapp-parser/PokeApp.Parser'],
                             input=(root/game/'main').read_bytes(), capture_output=True, check=True)
     parsed = json.loads(result.stdout)
     assert parsed['error'] is None and parsed['observation']['game'] == game
     assert len(parsed['observation']['boxes']) == 32
-shutil.rmtree(root)
-print('PASS Linux production-runtime Sun/Moon parser smoke')
+shutil.rmtree('/tmp/parser-sm-fixtures')
+shutil.rmtree('/tmp/parser-usum-fixtures')
+print('PASS Linux production-runtime Sun/Moon and Ultra Sun/Ultra Moon parser smoke')
 PY
 CMD ["python", "-m", "app.api.serve"]

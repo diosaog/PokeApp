@@ -24,7 +24,7 @@ string[] Read(string name, string language)
     return lines.ToArray();
 }
 var categories = new SortedDictionary<string, object>(StringComparer.Ordinal);
-var xy = new SAV7SM();
+var xy = new SAV7USUM();
 var maximumIds = new SortedDictionary<string, int>(StringComparer.Ordinal) {
     ["species"] = xy.MaxSpeciesID, ["move"] = xy.MaxMoveID,
     ["ability"] = xy.MaxAbilityID, ["item"] = xy.MaxItemID,
@@ -38,7 +38,7 @@ foreach (var (key, resource) in new[] {
     var en = Read(resource, "en");
     var es = Read(resource, "es");
     if (en.Length != es.Length) throw new InvalidDataException($"Mismatched {key} resources");
-    // Ship Gen3-7 through Sun/Moon, not later-game catalogs.
+    // Ship Gen3-7 through Ultra Sun/Ultra Moon, not later-game catalogs.
     var count = maximumIds[key] + 1;
     categories[key] = new { en = en.Take(count).ToArray(), es = es.Take(count).ToArray() };
 }

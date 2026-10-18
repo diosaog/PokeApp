@@ -3,12 +3,12 @@
   "source": "PKHeX.Core 24.11.11 embedded English/Spanish name resources",
   "descriptions": "unavailable",
   "maximumIds": {
-    "ability": 232,
-    "item": 920,
+    "ability": 233,
+    "item": 959,
     "item3": 376,
-    "move": 719,
+    "move": 728,
     "nature": 24,
-    "species": 802,
+    "species": 807,
     "type": 17
   },
   "resources": {
@@ -262,7 +262,8 @@
         "Grassy Surge",
         "Full Metal Body",
         "Shadow Shield",
-        "Prism Armor"
+        "Prism Armor",
+        "Neuroforce"
       ],
       "es": [
         "—",
@@ -497,7 +498,8 @@
         "Herbogénesis",
         "Guardia Metálica",
         "Guardia Espectro",
-        "Armadura Prisma"
+        "Armadura Prisma",
+        "Fuerza Cerebral"
       ]
     },
     "item": {
@@ -1422,7 +1424,46 @@
         "Ice Memory",
         "Dragon Memory",
         "Dark Memory",
-        "Fairy Memory"
+        "Fairy Memory",
+        "Solganium Z",
+        "Lunalium Z",
+        "Ultranecrozium Z",
+        "Mimikium Z",
+        "Lycanium Z",
+        "Kommonium Z",
+        "Solganium Z",
+        "Lunalium Z",
+        "Ultranecrozium Z",
+        "Mimikium Z",
+        "Lycanium Z",
+        "Kommonium Z",
+        "Z-Power Ring",
+        "Pink Petal",
+        "Orange Petal",
+        "Blue Petal",
+        "Red Petal",
+        "Green Petal",
+        "Yellow Petal",
+        "Purple Petal",
+        "Rainbow Flower",
+        "Surge Badge",
+        "N-Solarizer",
+        "N-Lunarizer",
+        "N-Solarizer",
+        "N-Lunarizer",
+        "Ilima’s Normalium Z",
+        "Left Poké Ball",
+        "Roto Hatch",
+        "Roto Bargain",
+        "Roto Prize Money",
+        "Roto Exp. Points",
+        "Roto Friendship",
+        "Roto Encounter",
+        "Roto Stealth",
+        "Roto HP Restore",
+        "Roto PP Restore",
+        "Roto Boost",
+        "Roto Catch"
       ],
       "es": [
         "Ningún objeto",
@@ -2345,7 +2386,46 @@
         "Disco Hielo",
         "Disco Dragón",
         "Disco Siniestro",
-        "Disco Hada"
+        "Disco Hada",
+        "Solgaleostal Z",
+        "Lunalastal Z",
+        "Ultranecrostal Z",
+        "Mimikyustal Z",
+        "Lycanrostal Z",
+        "Kommostal Z",
+        "Solgaleostal Z",
+        "Lunalastal Z",
+        "Ultranecrostal Z",
+        "Mimikyustal Z",
+        "Lycanrostal Z",
+        "Kommostal Z",
+        "Superpulsera Z",
+        "Pétalo Rosa",
+        "Pétalo Naranja",
+        "Pétalo Azul",
+        "Pétalo Rojo",
+        "Pétalo Verde",
+        "Pétalo Amarillo",
+        "Pétalo Violeta",
+        "Flor Irisada",
+        "Medalla Fulgor",
+        "Necrosol",
+        "Necroluna",
+        "Necrosol",
+        "Necroluna",
+        "Cristal Z (Liam)",
+        "Poké Ball Ajena",
+        "Cupón Eclosión",
+        "Cupón Rebaja",
+        "Cupón Botín",
+        "Cupón Exp",
+        "Cupón Amistad",
+        "Cupón Reclamo",
+        "Cupón Sigilo",
+        "Cupón PS",
+        "Cupón PP",
+        "Cupón Refuerzo",
+        "Cupón Captura"
       ]
     },
     "item3": {
@@ -3829,7 +3909,16 @@
         "Zing Zap",
         "Nature’s Madness",
         "Multi-Attack",
-        "10,000,000 Volt Thunderbolt"
+        "10,000,000 Volt Thunderbolt",
+        "Mind Blown",
+        "Plasma Fists",
+        "Photon Geyser",
+        "Light That Burns the Sky",
+        "Searing Sunraze Smash",
+        "Menacing Moonraze Maelstrom",
+        "Let’s Snuggle Forever",
+        "Splintered Stormshards",
+        "Clangorous Soulblaze"
       ],
       "es": [
         "—",
@@ -4551,7 +4640,16 @@
         "Electropunzada",
         "Furia Natural",
         "Multiataque",
-        "Gigarrayo Fulminante"
+        "Gigarrayo Fulminante",
+        "Cabeza Sorpresa",
+        "Puños Plasma",
+        "Géiser Fotónico",
+        "Fotodestrucción Apocalíptica",
+        "Embestida Solar",
+        "Deflagración Lunar",
+        "Somanta Amistosa",
+        "Tempestad Rocosa",
+        "Estruendo Implacable"
       ]
     },
     "nature": {
@@ -5414,7 +5512,12 @@
         "Guzzlord",
         "Necrozma",
         "Magearna",
-        "Marshadow"
+        "Marshadow",
+        "Poipole",
+        "Naganadel",
+        "Stakataka",
+        "Blacephalon",
+        "Zeraora"
       ],
       "es": [
         "Huevo",
@@ -6219,7 +6322,12 @@
         "Guzzlord",
         "Necrozma",
         "Magearna",
-        "Marshadow"
+        "Marshadow",
+        "Poipole",
+        "Naganadel",
+        "Stakataka",
+        "Blacephalon",
+        "Zeraora"
       ]
     },
     "type": {

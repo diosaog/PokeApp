@@ -91,7 +91,7 @@ internal static class XYChecks
         {
             var bytes = new byte[size];
             WriteUInt32LittleEndian(bytes.AsSpan(size - 0x1F0), SaveUtil.BEEF);
-            Check(Error(bytes) == "UNSUPPORTED_GAME", "USUM stays unsupported " + size);
+            Check(Error(bytes) == "UNSUPPORTED_VERSION", "absent USUM game ID rejected " + size);
         }
         Check(new SAV6XY().MaxMoveID == 617, "XY move ceiling confirmed from pinned library");
     }
