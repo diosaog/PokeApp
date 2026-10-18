@@ -1,0 +1,495 @@
+{
+  "status": "PHASE20_DONE",
+  "date": "2026-10-18",
+  "entry": "d58222401f76e603e1ab3764c9846acd0728898d",
+  "application_source": "99b302e9823ad8ef123fdc37d0b524fefc9ebf07",
+  "fixtures": {
+    "kind": "Public contributor gameplay provenance, with disclosed edits; no independent hardware or legality attestation",
+    "fixtures": [
+      {
+        "game": "US",
+        "file": "US/main",
+        "source": "https://projectpokemon.org/home/files/file/5724-ultra-sun-all-legendary-ultra-beast-shiny-wormhole-pok%C3%A9mon/",
+        "provenance": "Totter gameplay Checkpoint backup at Blacephalon encounter, reportedly tested on digital Ultra Sun/New 3DS XL. Contributor edited Pokedex/shiny charm, Smeargle nature and item quantities and removed other party/PC Pokemon. Selected Non-Wormhole/Blacephalon/main from nested US - Non-Wormhole UB & Legendary.zip. No independent hardware or legality verification.",
+        "sha256": "3c1a3b507d3ef7d5d5937867ebd8f2f91a6044b1b5a4df5d9c6975abd4a3d884",
+        "bytes": 445440,
+        "archive_sha256": "dca05b39338a1727e98956441c2358738dcd19fbc7138e9801fa02795ad78f61",
+        "retrieved": "2026-10-18",
+        "occupied_slots": 1
+      },
+      {
+        "game": "UM",
+        "file": "UM/main",
+        "source": "https://projectpokemon.org/home/files/file/5342-my-old-saves-for-alpha-sapphire-moon-and-ultra-moon/",
+        "provenance": "TheWhiteDevil27 personal 2015-2019 gameplay backup via Checkpoint. Contributor reports removal of illegal Pokemon and box sorting; not asserted unmodified. Selected 0x01B51 Pokémon Ultra Moon/oldUMsave/main. No independent hardware or legality verification.",
+        "sha256": "2a46508170124fc69417f68dfe8916d5a6a51cf96f7707c3d796ae1695422331",
+        "bytes": 445440,
+        "archive_sha256": "dcca03f19037b132bb492d007fd3edce0ad8722c99c60369ee5de3630071df16",
+        "retrieved": "2026-10-18",
+        "occupied_slots": 595
+      }
+    ]
+  },
+  "native": {
+    "assertions_pass": 145,
+    "games": [
+      "X",
+      "Y",
+      "OR",
+      "AS",
+      "SN",
+      "MN",
+      "US",
+      "UM"
+    ],
+    "pin": "PKHeX.Core24.11.11",
+    "usum_bytes": 445440,
+    "sm_bytes": 441856,
+    "usum_signature_offset": "0x6C100",
+    "usum_checksum_table_length": "0x150",
+    "checksums_original_signature_forms_and_limits": true,
+    "original_bytes_unchanged": true
+  },
+  "focused_python": {
+    "USUM": 3,
+    "SM": 8,
+    "ORAS": 5,
+    "XY": 9,
+    "schema": 15,
+    "total": 40
+  },
+  "frontend": {
+    "react_pass": 42,
+    "worker_pass": 2,
+    "edge_pass": 4,
+    "edge_games": [
+      "SN",
+      "MN",
+      "US",
+      "UM"
+    ],
+    "mock_api": true,
+    "desktop_mobile_visual_review": true,
+    "form_art_explicit_fallback": true
+  },
+  "quality": {
+    "typescript_vite_build": "PASS",
+    "api_schema": "REGENERATED_NO_DIFF",
+    "compile": "PASS",
+    "ruff": "PASS_NEW_FILES_AND_TARGETED_RUNTIME",
+    "format": "PASS_AFFECTED",
+    "diff": "PASS",
+    "wrangler_dry_run": "PASS",
+    "prior_catalog_prefixes": "UNCHANGED",
+    "prior_real_sm": {
+      "SN": {
+        "observation_unchanged": true,
+        "digest": "e39be106467c73558392cf01bdac3a88778c00170523de18254dc88950752218"
+      },
+      "MN": {
+        "observation_unchanged": true,
+        "digest": "1e1b080e9ac872140c7a305482b989fc3789b0dfefdf0e697b4862a0317bd8e5"
+      }
+    }
+  },
+  "postgres": {
+    "synthetic": {
+      "status": "PASS_SYNTHETIC_ONLY",
+      "authentic_usum": "SEPARATE_PUBLIC_FIXTURE_GATE",
+      "games": {
+        "US": {
+          "synthetic": true,
+          "import": true,
+          "replay_concurrency": true,
+          "privacy": true,
+          "stale_cas": true,
+          "offline_cache": true,
+          "source_unchanged": true,
+          "slots": 5,
+          "final_slots": 5,
+          "later_receipt_no_rewind": true
+        },
+        "UM": {
+          "synthetic": true,
+          "import": true,
+          "replay_concurrency": true,
+          "privacy": true,
+          "stale_cas": true,
+          "offline_cache": true,
+          "source_unchanged": true,
+          "slots": 5,
+          "final_slots": 5,
+          "later_receipt_no_rewind": true
+        },
+        "SN": {
+          "synthetic": true,
+          "import": true,
+          "replay_concurrency": true,
+          "privacy": true,
+          "stale_cas": true,
+          "offline_cache": true,
+          "source_unchanged": true,
+          "slots": 4,
+          "final_slots": 4,
+          "later_receipt_no_rewind": true
+        },
+        "MN": {
+          "synthetic": true,
+          "import": true,
+          "replay_concurrency": true,
+          "privacy": true,
+          "stale_cas": true,
+          "offline_cache": true,
+          "source_unchanged": true,
+          "slots": 4,
+          "final_slots": 4,
+          "later_receipt_no_rewind": true
+        },
+        "OR": {
+          "synthetic": true,
+          "import": true,
+          "replay_concurrency": true,
+          "privacy": true,
+          "stale_cas": true,
+          "offline_cache": true,
+          "source_unchanged": true,
+          "slots": 4,
+          "final_slots": 4,
+          "later_receipt_no_rewind": true
+        },
+        "AS": {
+          "synthetic": true,
+          "import": true,
+          "replay_concurrency": true,
+          "privacy": true,
+          "stale_cas": true,
+          "offline_cache": true,
+          "source_unchanged": true,
+          "slots": 4,
+          "final_slots": 4,
+          "later_receipt_no_rewind": true
+        },
+        "X": {
+          "synthetic": true,
+          "import": true,
+          "replay_concurrency": true,
+          "privacy": true,
+          "stale_cas": true,
+          "offline_cache": true,
+          "source_unchanged": true,
+          "slots": 8,
+          "final_slots": 8,
+          "later_receipt_no_rewind": false
+        },
+        "Y": {
+          "synthetic": true,
+          "import": true,
+          "replay_concurrency": true,
+          "privacy": true,
+          "stale_cas": true,
+          "offline_cache": true,
+          "source_unchanged": true,
+          "slots": 8,
+          "final_slots": 8,
+          "later_receipt_no_rewind": false
+        }
+      },
+      "tables_restored": 54,
+      "bootstrap_parity": true,
+      "migration": 47,
+      "remote_writes": 0
+    },
+    "public": {
+      "status": "PASS_PUBLIC_CONTRIBUTOR_SAVES",
+      "authentic_usum": "PUBLIC_CONTRIBUTOR_GAMEPLAY_PROVENANCE",
+      "games": {
+        "US": {
+          "synthetic": false,
+          "import": true,
+          "replay_concurrency": true,
+          "privacy": true,
+          "stale_cas": true,
+          "offline_cache": true,
+          "source_unchanged": true,
+          "slots": 1,
+          "final_slots": 1,
+          "later_receipt_no_rewind": false
+        },
+        "UM": {
+          "synthetic": false,
+          "import": true,
+          "replay_concurrency": true,
+          "privacy": true,
+          "stale_cas": true,
+          "offline_cache": true,
+          "source_unchanged": true,
+          "slots": 595,
+          "final_slots": 595,
+          "later_receipt_no_rewind": false
+        }
+      },
+      "tables_restored": 54,
+      "bootstrap_parity": "RETAINED_UNCHANGED_SOURCE",
+      "migration": 47,
+      "remote_writes": 0
+    },
+    "substitutes": [
+      "external Auth",
+      "object transport"
+    ],
+    "dbs_dropped": true,
+    "cluster_stopped": true
+  },
+  "launcher": {
+    "version": "0.20.0",
+    "bytes": 159087398,
+    "sha256": "1f581c2dcf479a1676ed3ccb65420007b8b12000be7d32b0235282e3095200e0",
+    "package_audit": "PASS",
+    "packaged_games": {
+      "X": {
+        "status": "PASS",
+        "local": "READY",
+        "cloud": "OFFLINE",
+        "source_unchanged": true,
+        "sha256": "676674a4a2ae9bfbafdfc1276f3a1952b75db1f3dc58ee9b75d91a7ccb3347ff",
+        "synthetic": true
+      },
+      "Y": {
+        "status": "PASS",
+        "local": "READY",
+        "cloud": "OFFLINE",
+        "source_unchanged": true,
+        "sha256": "c5b1fdfef70f188b3cb582e32fcf14bebf3de655c6084b049f1f8c689bf0184d",
+        "synthetic": true
+      },
+      "OR": {
+        "status": "PASS",
+        "local": "READY",
+        "cloud": "OFFLINE",
+        "source_unchanged": true,
+        "sha256": "5988d1aec79f9aac271dc654fb0bca3edc307085ade8d35a0d0efa215f83f314",
+        "synthetic": true
+      },
+      "AS": {
+        "status": "PASS",
+        "local": "READY",
+        "cloud": "OFFLINE",
+        "source_unchanged": true,
+        "sha256": "b28fd7090997db294024dc14559b0f262649431b49c6716c091fcdceeb2f31bd",
+        "synthetic": true
+      },
+      "SN": {
+        "status": "PASS",
+        "local": "READY",
+        "cloud": "OFFLINE",
+        "source_unchanged": true,
+        "sha256": "c8435253b7a6ebaed7cd9695d736828dbe5079911875d27a4945ef5f6e218a85",
+        "synthetic": true
+      },
+      "MN": {
+        "status": "PASS",
+        "local": "READY",
+        "cloud": "OFFLINE",
+        "source_unchanged": true,
+        "sha256": "390a8d8603e3e78508b6bf0e4b17110c06e7b6b97f3e67cadbe9d45b9983422e",
+        "synthetic": true
+      },
+      "US": {
+        "status": "PASS",
+        "local": "READY",
+        "cloud": "OFFLINE",
+        "source_unchanged": true,
+        "sha256": "3c1a3b507d3ef7d5d5937867ebd8f2f91a6044b1b5a4df5d9c6975abd4a3d884",
+        "synthetic": false
+      },
+      "UM": {
+        "status": "PASS",
+        "local": "READY",
+        "cloud": "OFFLINE",
+        "source_unchanged": true,
+        "sha256": "2a46508170124fc69417f68dfe8916d5a6a51cf96f7707c3d796ae1695422331",
+        "synthetic": false
+      }
+    },
+    "unsigned": true,
+    "clean_windows_install": "NOT_RUN_NO_DISPOSABLE_CLEAN_WINDOWS_ENVIRONMENT",
+    "prior_installer": {
+      "previous_version": "0.19.0",
+      "sha256": "5b3c783a138b53a9f2b0fe172ce5a8b8ab4df8b954db5f58dc4c6a102fb1460e",
+      "bytes": 159086505,
+      "new_key_absent": true
+    }
+  },
+  "migration": {
+    "version": "20261018163946",
+    "name": "047_ultra_sun_moon_save_registration",
+    "record_hash": "e98fc55a68a84a75b08ba192055be2af"
+  },
+  "railway": {
+    "id": "d869e493-1792-4bfe-a0fc-cc372ef6abf2",
+    "status": "SUCCESS",
+    "source": "Phase20 USUM 99b302e9823ad8ef123fdc37d0b524fefc9ebf07",
+    "image": "sha256:8ded66f5dfd775a0c0f6b3c02c3f6fd42a587c20ff3bb5e5ef96346d1ea6a32b",
+    "committed_inputs": 263,
+    "linux_production_sm_usum_smoke": "PASS"
+  },
+  "cloudflare": {
+    "id": "f83b8161-0bb4-4d09-8111-6b1185990182",
+    "versions": [
+      {
+        "version_id": "bfedf17f-df71-4d4e-9d42-bb7b85903ac1",
+        "percentage": 100
+      }
+    ],
+    "source": "Phase20 USUM 99b302e9823ad8ef123fdc37d0b524fefc9ebf07"
+  },
+  "public": {
+    "status": "PASS",
+    "checks": [
+      {
+        "path": "/health",
+        "status": 200,
+        "method": "GET"
+      },
+      {
+        "path": "/",
+        "status": 200,
+        "method": "GET"
+      },
+      {
+        "path": "/pc",
+        "status": 200,
+        "method": "GET"
+      },
+      {
+        "path": "/entrenadores",
+        "status": 200,
+        "method": "GET"
+      },
+      {
+        "path": "/build-config.json",
+        "status": 200,
+        "method": "GET"
+      },
+      {
+        "path": "/assets/index-B0bpEONM.js",
+        "status": 200,
+        "method": "GET"
+      },
+      {
+        "path": "/assets/index-BuYMVUFu.css",
+        "status": 200,
+        "method": "GET"
+      },
+      {
+        "path": "/v1/seasons/00000000-0000-4000-8000-000000000000/saves/context",
+        "status": 401,
+        "method": "GET"
+      },
+      {
+        "path": "/v1/seasons/00000000-0000-4000-8000-000000000000/saves/receipt?sha256=0000000000000000000000000000000000000000000000000000000000000000",
+        "status": 401,
+        "method": "GET"
+      },
+      {
+        "path": "/v1/read/seasons/00000000-0000-4000-8000-000000000000/pc",
+        "status": 401,
+        "method": "GET"
+      },
+      {
+        "path": "/v1/seasons/00000000-0000-4000-8000-000000000000/saves/raw",
+        "status": 200,
+        "method": "OPTIONS"
+      },
+      {
+        "path": "/launcher/download",
+        "status": 200,
+        "method": "HEAD"
+      },
+      {
+        "path": "/launcher/download",
+        "status": 200,
+        "method": "GET"
+      }
+    ],
+    "count": 13,
+    "installer_sha256": "1f581c2dcf479a1676ed3ccb65420007b8b12000be7d32b0235282e3095200e0",
+    "installer_bytes": 159087398,
+    "unexpected_5xx": 0,
+    "positive_import": false,
+    "authenticated_owner_journey": false,
+    "network_boundary": {
+      "default_dns": [
+        "188.114.96.5",
+        "188.114.97.5"
+      ],
+      "default_path": "TCP connect timeout before HTTP",
+      "google_dns_A": [
+        "188.114.96.1",
+        "188.114.97.1"
+      ],
+      "probe_edge": "188.114.96.1",
+      "tls_hostname_verified": true,
+      "system_dns_or_app_changes": false
+    }
+  },
+  "preservation": {
+    "full": {
+      "identical": true,
+      "records": 59
+    },
+    "owner-stable": {
+      "identical": true,
+      "records": 2
+    },
+    "security": {
+      "identical": true,
+      "records": 1
+    },
+    "inbox": {
+      "identical": true,
+      "records": 1
+    },
+    "history": {
+      "prior_records_unchanged": 38,
+      "current_records": 39,
+      "head": {
+        "version": "20261018163946",
+        "name": "047_ultra_sun_moon_save_registration",
+        "record_hash": "e98fc55a68a84a75b08ba192055be2af"
+      }
+    },
+    "advisors": {
+      "before": {
+        "INFO": 171,
+        "ERROR": 24,
+        "WARN": 5
+      },
+      "after": {
+        "INFO": 171,
+        "ERROR": 24,
+        "WARN": 5
+      },
+      "new_or_removed_error_warn": 0,
+      "excluded_fields": [
+        "observed_at"
+      ]
+    }
+  },
+  "scope": {
+    "competitive_identity": "UNKNOWN",
+    "progress_champion_badges": "UNKNOWN",
+    "physical_writes": "NOT_STARTED",
+    "hosted_business_writes": 0,
+    "v1_shadow_streamlit_changes": false,
+    "r2_write": "windows/0.20.0/PokeApp-Launcher-Setup.exe only"
+  },
+  "harness_corrections": [
+    "PG stale CAS error expected stale but actual authoritative save_current_changed; failed transaction cleanup completed; corrected final harness passes.",
+    "Browser expected species on nickname card, then used an incorrect box accessible name; corrected final two USUM tests pass without product changes.",
+    "Initial public probe timed out before HTTP on locally resolved Cloudflare edge; successful probe uses an independently DNS-resolved public edge with original hostname and verified TLS; no system DNS/app changes."
+  ],
+  "git": "Application committed/pushed before all remote writes; final documentation commit follows. Protected/unrelated files untouched.",
+  "remaining": "Unsigned installer; clean Windows install not exercised; default local Cloudflare route timeout documented. No remaining implementation/release evidence blocker.",
+  "next": "STOP. Antonio acceptance; Phase21 not started."
+}

@@ -5,7 +5,19 @@ milestone record; it does not maintain a second live phase-status ledger.
 
 ## Current project position
 
-- Current packet: **19 - Sun/Moon read/import, DONE**. Native SN/MN only,32 boxes,
+- Current packet: **20 - Ultra Sun/Ultra Moon read/import, DONE**. Native US/UM
+  integrity,32 boxes, forms/types and Spanish data; trusted import and privacy.
+  Real public gameplay fixtures for both games and eight-game local/packaged
+  regressions pass. Source `99b302e`;047 applied once; Railway/Cloudflare and
+  Launcher0.20.0 verified. All59 scoped tables unchanged; no hosted positive import.
+  Competitive identity/progress remain UNKNOWN; no physical writes.
+  Public proof used a reachable DNS-confirmed Cloudflare edge because this machine's
+  default edge timed out; original hostname/TLS verified, no DNS/app change.
+  [Report](phase20-usum-report.md), [evidence](phase20-usum-evidence.json),
+  [live record](work-in-progress/phase20-usum-live.md).
+  **Next: Antonio acceptance. STOP before Phase21.**
+
+- Historical packet: **19 - Sun/Moon read/import, DONE**. Native SN/MN only,32 boxes,
   signature/checksum integrity, form/types and Spanish data; trusted current-save
   authority and privacy preserved. Real public contributor Sun/Moon fixtures,
   local PostgreSQL replay/concurrency/rollback and packaged offline checks PASS.
@@ -14,7 +26,7 @@ milestone record; it does not maintain a second live phase-status ledger.
   physical writes. [Report](phase19-sun-moon-report.md),
   [evidence](phase19-sun-moon-evidence.json),
   [live record](work-in-progress/phase19-sun-moon-live.md).
-  **Next: Antonio acceptance. Do not start Phase20 automatically.**
+  Phase20 was subsequently explicitly authorized and is closed above.
 
 - Historical packet: **18 - ORAS read/import, DONE with public gameplay fixtures**.
   Initial synthetic-only delivery was PARTIAL; the subsequent legitimate public
