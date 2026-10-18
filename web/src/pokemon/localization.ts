@@ -74,7 +74,7 @@ export function pokemonName(
   value: string | number | null | undefined,
   // Reserved for a future projection with explicit source context. Current web
   // callers MUST NOT infer generation from species, progress or the viewer's save.
-  itemGeneration?: 3 | 4 | 5 | 6,
+  itemGeneration?: 3 | 4 | 5 | 6 | 7,
 ): string {
   const text = String(value ?? "").trim();
   if (!text || text === "—" || text === "-") return unavailable[category];

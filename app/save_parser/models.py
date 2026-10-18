@@ -56,12 +56,12 @@ class ParsedTrainer(WireModel):
 
 
 class ParsedMove(WireModel):
-    id: int = Field(ge=0, le=621)
+    id: int = Field(ge=0, le=719)
     pp: int = Field(ge=0, le=255)
 
 
 class ParsedPokemon(WireModel):
-    species_id: int = Field(ge=1, le=721)
+    species_id: int = Field(ge=1, le=802)
     nickname: str = Field(max_length=64)
     level: int = Field(ge=1, le=100)
     form: int = Field(ge=0, le=255)
@@ -74,7 +74,7 @@ class ParsedPokemon(WireModel):
     moves: tuple[ParsedMove, ...] = Field(min_length=4, max_length=4)
     ivs: tuple[int, ...] = Field(min_length=6, max_length=6)
     evs: tuple[int, ...] = Field(min_length=6, max_length=6)
-    # Native ORAS personal table; absent in old observations and excluded from
+    # Native ORAS/SM personal table; absent in old observations and excluded from
     # their serialization so existing Launcher registration digests remain valid.
     type_ids: tuple[int, int] | None = Field(default=None, exclude_if=lambda v: v is None)
     identity: PokemonIdentityEvidence | ObservedXYIdentity
@@ -85,7 +85,7 @@ class ParsedPokemon(WireModel):
         if isinstance(value, dict):
             identity_type = (
                 ObservedXYIdentity
-                if value.get("format") == 6
+                if value.get("format") in (6, 7)
                 else PokemonIdentityEvidence
             )
             try:
@@ -108,11 +108,17 @@ class ParsedPokemon(WireModel):
             self.species_id > 649 or any(move.id > 559 for move in self.moves)
         ):
             raise ValueError("invalid_native_species_or_move")
+        if self.identity.format == 6 and (
+            self.species_id > 721 or any(move.id > 621 for move in self.moves)
+        ):
+            raise ValueError("invalid_native_species_or_move")
+        if self.identity.format == 7 and (self.ability_id > 232 or self.item_id > 920):
+            raise ValueError("invalid_sm_attribute")
         return self
 
 
 class ParsedBox(WireModel):
-    number: int = Field(ge=1, le=31)
+    number: int = Field(ge=1, le=32)
     slots: tuple[ParsedPokemon | None, ...] = Field(min_length=30, max_length=30)
 
 
@@ -168,21 +174,26 @@ def progress_layout(game: str) -> tuple[int, tuple[str, ...]] | None:
 
 class ObservedSave(WireModel):
     game: str = Field(min_length=1, max_length=24)
-    generation: Literal[3, 4, 5, 6]
+    generation: Literal[3, 4, 5, 6, 7]
     trainer: ParsedTrainer
     party: tuple[ParsedPokemon | None, ...] = Field(min_length=6, max_length=6)
-    boxes: tuple[ParsedBox, ...] = Field(min_length=1, max_length=31)
+    boxes: tuple[ParsedBox, ...] = Field(min_length=1, max_length=32)
     # Old neutral observations remain readable, without turning unknown into zero.
     progress: ObservedProgress | None = None
 
     @model_validator(mode="after")
     def validate_layout(self):
-        if self.generation == 6:
+        if self.generation == 7:
+            if self.game not in {"SN", "MN"} or len(self.boxes) != 32:
+                raise ValueError("invalid_sm_layout")
+            if self.progress is not None:
+                raise ValueError("sm_progress_not_supported")
+        elif self.generation == 6:
             if self.game not in {"X", "Y", "OR", "AS"} or len(self.boxes) != 31:
                 raise ValueError("invalid_xy_layout")
             if self.progress is not None:
                 raise ValueError("xy_progress_not_supported")
-        elif self.game in {"X", "Y", "OR", "AS"} or len(self.boxes) > 24:
+        elif self.game in {"X", "Y", "OR", "AS", "SN", "MN"} or len(self.boxes) > 24:
             raise ValueError("invalid_native_layout")
         if [b.number for b in self.boxes] != list(range(1, len(self.boxes) + 1)):
             raise ValueError("invalid_box_layout")
@@ -191,7 +202,7 @@ class ObservedSave(WireModel):
         for _, pokemon in self.occupied():
             if self.game in {"X", "Y"} and any(m.id > 617 for m in pokemon.moves):
                 raise ValueError("invalid_xy_move")
-            if self.game in {"OR", "AS"}:
+            if self.game in {"OR", "AS", "SN", "MN"}:
                 if pokemon.type_ids is None:
                     raise ValueError("missing_oras_types")
             elif pokemon.type_ids is not None:
@@ -216,7 +227,7 @@ class ObservedSave(WireModel):
 
     def identity_observations(self) -> tuple[ParsedPokemonObservation, ...]:
         """Inputs compatible with 023, WITHOUT allocating or binding authoritative IDs."""
-        if self.generation == 6:
+        if self.generation >= 6:
             raise ValueError("xy_competitive_identity_not_supported")
         return tuple(
             ParsedPokemonObservation(location, p.identity)

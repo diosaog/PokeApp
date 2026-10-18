@@ -333,7 +333,7 @@ class FrontendReads:
                         )
                     )
         game = payload.get("game")
-        if game not in {"X", "Y", "OR", "AS"}:
+        if game not in {"X", "Y", "OR", "AS", "SN", "MN"}:
             game = None
         ready = result(save={**save, "game": game}, status="ready", pokemon=pokemon)
         if public:

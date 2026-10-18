@@ -1,0 +1,191 @@
+{
+  "phase": "19",
+  "status": "LOCAL_GATES_PASS_DELIVERY_PENDING",
+  "entry": "7617315640936b6efa7abaf6d5397bf04a5e23f4",
+  "fixture_manifest": "tests/fixtures/phase19-public-saves.json",
+  "native_checks": 102,
+  "python": {
+    "sm": 8,
+    "oras": 5,
+    "xy": 9,
+    "schema": 15
+  },
+  "react": 41,
+  "browser": 4,
+  "synthetic_pg": {
+    "status": "PASS_SYNTHETIC_ONLY",
+    "authentic_sm": "SEPARATE_PUBLIC_FIXTURE_GATE",
+    "games": {
+      "SN": {
+        "synthetic": true,
+        "import": true,
+        "replay_concurrency": true,
+        "privacy": true,
+        "offline_cache": true,
+        "source_unchanged": true,
+        "slots": 4,
+        "final_slots": 4,
+        "later_receipt_no_rewind": true
+      },
+      "MN": {
+        "synthetic": true,
+        "import": true,
+        "replay_concurrency": true,
+        "privacy": true,
+        "offline_cache": true,
+        "source_unchanged": true,
+        "slots": 4,
+        "final_slots": 4,
+        "later_receipt_no_rewind": true
+      },
+      "OR": {
+        "synthetic": true,
+        "import": true,
+        "replay_concurrency": true,
+        "privacy": true,
+        "offline_cache": true,
+        "source_unchanged": true,
+        "slots": 4,
+        "final_slots": 4,
+        "later_receipt_no_rewind": true
+      },
+      "AS": {
+        "synthetic": true,
+        "import": true,
+        "replay_concurrency": true,
+        "privacy": true,
+        "offline_cache": true,
+        "source_unchanged": true,
+        "slots": 4,
+        "final_slots": 4,
+        "later_receipt_no_rewind": true
+      },
+      "X": {
+        "synthetic": true,
+        "import": true,
+        "replay_concurrency": true,
+        "privacy": true,
+        "offline_cache": true,
+        "source_unchanged": true,
+        "slots": 8,
+        "final_slots": 8,
+        "later_receipt_no_rewind": false
+      },
+      "Y": {
+        "synthetic": true,
+        "import": true,
+        "replay_concurrency": true,
+        "privacy": true,
+        "offline_cache": true,
+        "source_unchanged": true,
+        "slots": 8,
+        "final_slots": 8,
+        "later_receipt_no_rewind": false
+      }
+    },
+    "tables_restored": 54,
+    "bootstrap_parity": true,
+    "migration": 46,
+    "remote_writes": 0
+  },
+  "public_pg": {
+    "status": "PASS_PUBLIC_CONTRIBUTOR_SAVES",
+    "authentic_sm": "PUBLIC_CONTRIBUTOR_GAMEPLAY_PROVENANCE",
+    "games": {
+      "SN": {
+        "synthetic": false,
+        "import": true,
+        "replay_concurrency": true,
+        "privacy": true,
+        "offline_cache": true,
+        "source_unchanged": true,
+        "slots": 331,
+        "final_slots": 331,
+        "later_receipt_no_rewind": false
+      },
+      "MN": {
+        "synthetic": false,
+        "import": true,
+        "replay_concurrency": true,
+        "privacy": true,
+        "offline_cache": true,
+        "source_unchanged": true,
+        "slots": 68,
+        "final_slots": 68,
+        "later_receipt_no_rewind": false
+      }
+    },
+    "tables_restored": 54,
+    "bootstrap_parity": "RETAINED_UNCHANGED_SOURCE",
+    "migration": 46,
+    "remote_writes": 0
+  },
+  "packaged_public": [
+    {
+      "game": "SN",
+      "slots": 331,
+      "packaged_ready": true,
+      "offline": true,
+      "source_unchanged": true
+    },
+    {
+      "game": "MN",
+      "slots": 68,
+      "packaged_ready": true,
+      "offline": true,
+      "source_unchanged": true
+    }
+  ],
+  "package": {
+    "status": "PASS",
+    "version": "0.19.0",
+    "sha256": "5b3c783a138b53a9f2b0fe172ce5a8b8ab4df8b954db5f58dc4c6a102fb1460e",
+    "bytes": 159086505,
+    "asar_files": [
+      "assets",
+      "assets/icon.ico",
+      "index.html",
+      "main.cjs",
+      "package.json",
+      "preload.cjs",
+      "renderer.js",
+      "style.css"
+    ],
+    "application_modules": [
+      "app.domain",
+      "app.domain.pokemon_identity",
+      "app.launcher",
+      "app.launcher.backend",
+      "app.launcher.backup",
+      "app.launcher.cloud_store",
+      "app.launcher.config",
+      "app.launcher.core",
+      "app.launcher.journal",
+      "app.launcher.runtime",
+      "app.launcher.secrets",
+      "app.launcher.stdio",
+      "app.launcher.sync",
+      "app.launcher.trusted_sync",
+      "app.save_parser",
+      "app.save_parser.adapter",
+      "app.save_parser.cloud",
+      "app.save_parser.files",
+      "app.save_parser.models",
+      "app.save_parser.registration",
+      "app.save_parser.xy_identity"
+    ],
+    "runtime_file_count": 334,
+    "unsigned": true
+  },
+  "boundaries": [
+    "No production fixture import",
+    "Auth/Storage transport replaced locally; real PostgreSQL/native bytes/application reads",
+    "Browser scenarios use API mocks; screenshots reviewed",
+    "Gen7 competitive identity/progress unsupported, no new rules",
+    "Alternate form art uses explicit fallback",
+    "Installer unsigned; clean-Windows install not rerun",
+    "No physical writes"
+  ],
+  "public_delivery": null,
+  "private_evidence": "%LOCALAPPDATA%/PokeApp-migration-evidence/phase19/20261018"
+}

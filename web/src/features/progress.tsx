@@ -32,6 +32,8 @@ const games: Record<string, string> = {
   Y: "Y",
   OR: "Rubí Omega",
   AS: "Zafiro Alfa",
+  SN: "Sol",
+  MN: "Luna",
 };
 
 export function SaveGame({ game }: { game?: string | null }) {

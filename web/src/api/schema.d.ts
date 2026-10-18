@@ -2855,7 +2855,7 @@ export interface components {
       /** Form */
       form?: number | null;
       /** Item Generation */
-      item_generation?: (3 | 4 | 5 | 6) | null;
+      item_generation?: (3 | 4 | 5 | 6 | 7) | null;
       /**
        * Nickname
        * @default
@@ -2899,7 +2899,7 @@ export interface components {
       /** Form */
       form?: number | null;
       /** Item Generation */
-      item_generation?: (3 | 4 | 5 | 6) | null;
+      item_generation?: (3 | 4 | 5 | 6 | 7) | null;
       /**
        * Nickname
        * @default

@@ -87,11 +87,11 @@ internal static class XYChecks
             save.Version = GameVersion.Any;
             Check(Error(save.Write()) == "UNSUPPORTED_VERSION", "missing trainer game rejected");
         }
-        foreach (var size in new[] { SaveUtil.SIZE_G7SM, SaveUtil.SIZE_G7USUM })
+        foreach (var size in new[] { SaveUtil.SIZE_G7USUM })
         {
             var bytes = new byte[size];
             WriteUInt32LittleEndian(bytes.AsSpan(size - 0x1F0), SaveUtil.BEEF);
-            Check(Error(bytes) == "UNSUPPORTED_GAME", "SM/USUM stays unsupported " + size);
+            Check(Error(bytes) == "UNSUPPORTED_GAME", "USUM stays unsupported " + size);
         }
         Check(new SAV6XY().MaxMoveID == 617, "XY move ceiling confirmed from pinned library");
     }

@@ -69,7 +69,7 @@ function render(state) {
     text(
       "save-identity",
       observation
-        ? `${observation.trainer.name} · ${observation.game} · Gen ${observation.generation} · TID ${observation.trainer.tid}`
+        ? `${observation.trainer.name} · ${({ SN: "Sol", MN: "Luna", OR: "Rubí Omega", AS: "Zafiro Alfa" })[observation.game] || observation.game} · Gen ${observation.generation} · TID ${observation.trainer.tid}`
         : "",
     );
     slots("party", observation?.party || Array(6).fill(null), "Equipo");
@@ -78,7 +78,7 @@ function render(state) {
   const local = ["UNSUPPORTED_GAME", "UNSUPPORTED_VERSION"].includes(
     state.local_status,
   )
-    ? "Save no compatible. Juegos admitidos: Gen3, Gen4, Gen5 y Pokémon X/Y (save descifrado)."
+    ? "Save no compatible. Juegos admitidos: Gen3, Gen4, Gen5, Pokémon X/Y, Rubí Omega/Zafiro Alfa y Sol/Luna (save descifrado)."
     : ["CORRUPT_SAVE", "TRUNCATED_SAVE", "AMBIGUOUS_IDENTITY"].includes(
           state.local_status,
         )

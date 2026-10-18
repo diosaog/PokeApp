@@ -1,4 +1,4 @@
-"""Private PK6 evidence (X/Y/ORAS), separate from competitive 023 identity.
+"""Private PK6/PK7 evidence (X/Y/ORAS/SM), separate from competitive 023 identity.
 
 The historical class name is kept for local journal/import compatibility.
 """
@@ -31,7 +31,7 @@ class ObservedXYIdentity:
     def __post_init__(self):
         if type(self.schema_version) is not int or self.schema_version != 1:
             raise ValueError("unsupported_identity_evidence")
-        if type(self.format) is not int or self.format != 6:
+        if type(self.format) is not int or self.format not in (6, 7):
             raise ValueError("unsupported_identity_format")
         for name, upper in (
             ("pid", 2**32 - 1),
@@ -68,7 +68,7 @@ class ObservedXYIdentity:
     @property
     def candidate_key(self) -> str:
         # Local hints only. Same-PID duplicates still remain ambiguous. Unlike
-        # PK3/4/5, PK6 has an independent EC; a changed EC cannot silently match.
+        # PK3/4/5, PK6/PK7 has an independent EC; a changed EC cannot silently match.
         return digest(
             [
                 self.schema_version,

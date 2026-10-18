@@ -61,7 +61,7 @@ class MoveRead(BaseModel):
 class PokemonRead(BaseModel):
     species: str
     form: int | None = Field(default=None, ge=0, le=255)
-    item_generation: Literal[3, 4, 5, 6] | None = None
+    item_generation: Literal[3, 4, 5, 6, 7] | None = None
     nickname: str = ""
     level: int | None = None
     types: list[str] = Field(default_factory=list)

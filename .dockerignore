@@ -11,5 +11,9 @@
 !companion/parser/PokeApp.Parser/*.cs
 !companion/parser/PokeApp.Parser/*.csproj
 !companion/parser/PokeApp.Parser/packages.lock.json
+!companion/parser/PokeApp.Parser.Checks/
+!companion/parser/PokeApp.Parser.Checks/*.cs
+!companion/parser/PokeApp.Parser.Checks/*.csproj
+!companion/parser/PokeApp.Parser.Checks/packages.lock.json
 app/**/__pycache__/
 app/**/*.pyc

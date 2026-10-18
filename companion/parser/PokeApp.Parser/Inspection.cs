@@ -1,5 +1,6 @@
 using PKHeX.Core;
 using System.Text.Json;
+using System.Security.Cryptography;
 
 namespace PokeApp.Parser;
 
@@ -19,15 +20,26 @@ public static class Inspection
         if (bytes.Length > MaxBytes) return Failure("UNSUPPORTED_VERSION");
         try
         {
-            var save = SaveUtil.GetVariantSAV(bytes);
+            var save = SaveUtil.GetVariantSAV((byte[])bytes.Clone());
             if (save is null) return Failure("CORRUPT_SAVE");
-            if (save is not (SAV3RS or SAV3E or SAV3FRLG or SAV4DP or SAV4Pt or SAV4HGSS or SAV5BW or SAV5B2W2 or SAV6XY or SAV6AO))
+            if (save is not (SAV3RS or SAV3E or SAV3FRLG or SAV4DP or SAV4Pt or SAV4HGSS or SAV5BW or SAV5B2W2 or SAV6XY or SAV6AO or SAV7SM))
                 return Failure("UNSUPPORTED_GAME");
             if (!save.IsVersionValid()) return Failure("UNSUPPORTED_VERSION");
             if (save is SAV6XY && bytes.Length != SaveUtil.SIZE_G6XY)
                 return Failure("UNSUPPORTED_VERSION"); // Decrypted native X/Y only.
             if (save is SAV6AO && bytes.Length != SaveUtil.SIZE_G6ORAS)
                 return Failure("UNSUPPORTED_VERSION"); // Decrypted native ORAS, not demo/container.
+            // SAV7 clears its signature buffer during construction. Validate the
+            // original signature and checksum-table binding, without touching input.
+            if (save is SAV7SM)
+            {
+                if (bytes.Length != SaveUtil.SIZE_G7SM || save.Version is not (GameVersion.SN or GameVersion.MN))
+                    return Failure("UNSUPPORTED_VERSION");
+                var signature = bytes.AsSpan(0x6BA00 + MemeCrypto.SaveFileSignatureOffset, MemeCrypto.SaveFileSignatureLength);
+                if (!MemeCrypto.VerifyMemeData(signature, out var verified, MemeKeyIndex.PokedexAndSaveFile)
+                    || !SHA256.HashData(bytes.AsSpan(bytes.Length - 0x200, 0x140)).AsSpan().SequenceEqual(verified.AsSpan(0, 32)))
+                    return Failure("CORRUPT_SAVE");
+            }
             // This pinned library's Gen5 IsVersionValid inherits an unconditional
             // true. Reject absent or mismatched trainer game IDs explicitly.
             if (save is SAV5BW && save.Version is not (GameVersion.B or GameVersion.W)
@@ -35,7 +47,7 @@ public static class Inspection
                 return Failure("UNSUPPORTED_VERSION");
             if (!save.ChecksumsValid || save.PartyCount is < 0 or > 6)
                 return Failure("CORRUPT_SAVE");
-            if (save.BoxSlotCount != 30 || save.BoxCount < 1 || save.BoxCount > (save is SAV6 ? 31 : 24))
+            if (save.BoxSlotCount != 30 || save.BoxCount < 1 || save.BoxCount > (save is SAV7SM ? 32 : save is SAV6 ? 31 : 24))
                 return Failure("UNSUPPORTED_VERSION");
             var party = save.PartyData;
             var boxes = save.BoxData;
@@ -45,8 +57,8 @@ public static class Inspection
                 Generation = save.Generation,
                 Trainer = new { Name = save.OT, Tid = save.TID16, Sid = save.SID16,
                     Gender = save.Gender, Language = save.Language < 0 ? (int?)null : save.Language },
-                // Gen6 read support does not claim an approved progress mapping.
-                Progress = save is SAV6 ? null : Progress(save),
+                // Gen6/7 read support does not claim an approved progress mapping.
+                Progress = save.Generation >= 6 ? null : Progress(save),
                 Party = Enumerable.Range(0, 6).Select(i => i < party.Count ? Pokemon(party[i], save) : null).ToArray(),
                 Boxes = Enumerable.Range(0, save.BoxCount).Select(b => new
                 {
@@ -104,9 +116,9 @@ public static class Inspection
     private static object? Pokemon(PKM p, SaveFile save)
     {
         if (p.Species == 0) return null;
-        if (!p.ChecksumValid || p.Species > p.MaxSpeciesID || p.Format is < 3 or > 6)
+        if (!p.ChecksumValid || p.Species > p.MaxSpeciesID || p.Format is < 3 or > 7)
             throw new InvalidPokemonException();
-        if (p.Format != save.Generation || (save is SAV6 &&
+        if (p.Format != save.Generation || (save.Generation >= 6 &&
             new[] { p.Move1, p.Move2, p.Move3, p.Move4 }.Any(move => move > save.MaxMoveID)))
             throw new InvalidPokemonException();
         if (string.IsNullOrWhiteSpace(p.OriginalTrainerName) || (int)p.Version == 0 || p.Language == 0)
@@ -127,16 +139,16 @@ public static class Inspection
                 OtGender = p.OriginalTrainerGender, p.MetLocation, p.MetLevel,
                 EggLocation = p.Format == 3 ? (int?)null : p.EggLocation,
                 MetDate = p.MetDate?.ToString("yyyy-MM-dd"), EggDate = p.EggMetDate?.ToString("yyyy-MM-dd"),
-                EncryptionConstant = p.Format == 6 ? p.EncryptionConstant : (uint?)null,
+                EncryptionConstant = p.Format >= 6 ? p.EncryptionConstant : (uint?)null,
                 Ivs = new[] { p.IV_HP, p.IV_ATK, p.IV_DEF, p.IV_SPA, p.IV_SPD, p.IV_SPE },
             },
         };
-        if (save is SAV6AO oras)
+        if (save is SAV6AO or SAV7SM)
         {
-            if (!oras.Personal.IsPresentInGame(p.Species, p.Form))
+            if (!save.Personal.IsPresentInGame(p.Species, p.Form))
                 throw new InvalidPokemonException();
-            var personal = oras.Personal.GetFormEntry(p.Species, p.Form);
-            // Additive ORAS-only evidence keeps the existing X/Y/Gen3-5 wire
+            var personal = save.Personal.GetFormEntry(p.Species, p.Form);
+            // Additive ORAS/SM evidence keeps the existing X/Y/Gen3-5 wire
             // representation and replay digests byte-for-byte compatible.
             var node = JsonSerializer.SerializeToNode(value, Json)!;
             node["type_ids"] = JsonSerializer.SerializeToNode(new[] { (int)personal.Type1, (int)personal.Type2 });

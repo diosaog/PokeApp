@@ -4,11 +4,12 @@ using System.Text.Json;
 using static System.Buffers.Binary.BinaryPrimitives;
 
 // Bounded Phase18 gate: existing X/Y regression plus ORAS, no historical matrix.
-if (args.Length == 2 && args[0] == "--gen6")
+if (args.Length == 2 && args[0] is "--gen6" or "--gen7")
 {
     Directory.CreateDirectory(args[1]);
     XYChecks.Run(args[1]);
     ORASChecks.Run(args[1]);
+    if (args[0] == "--gen7") SMChecks.Run(args[1]);
     return;
 }
 

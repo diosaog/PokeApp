@@ -45,10 +45,10 @@ def parsed_payload(observation, save_id, trainer_id, raw_hash):
             "identity_evidence": asdict(p.identity),
             "legacy_fingerprints": [],
         }
-        if observation.game in {"OR", "AS"}:
+        if observation.game in {"OR", "AS", "SN", "MN"}:
             # Public form/type facts from the same trusted parser, never inferred
             # from nickname or from another game's species table.
-            value.update(form=p.form, item_generation=6)
+            value.update(form=p.form, item_generation=observation.generation)
             value["types"] = list(dict.fromkeys(f"Type #{t}" for t in p.type_ids))
         return value
 
@@ -151,7 +151,7 @@ class TrustedSaveIngestion:
         )
         payload = parsed_payload(observed, save_id, tid, raw_hash)
         plan = None
-        if observed.generation != 6:
+        if observed.generation < 6:
             incoming = observed.identity_observations()
             previous = tuple(
                 PokemonEntity(
