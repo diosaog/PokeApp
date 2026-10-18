@@ -5,7 +5,7 @@ import { useApp, useOverview, useRead } from "../state";
 import { Card, Empty, Heading, Loading, Notice, Tag } from "../ui";
 import { Pokemon, WithSeason } from "./core";
 import { TrainerPhoto, StatPill } from "../pokemon/presentation";
-import { GameProgress } from "./progress";
+import { GameProgress, SaveGame } from "./progress";
 import { Collection } from "./collection";
 import { Inventory } from "./inventory";
 import { WipeRevivals } from "./wipe-revivals";
@@ -96,6 +96,7 @@ export function Profile({ trainer }: { trainer: string }) {
       )}
       {own ? (
         <>
+          <SaveGame game={pc.data?.save?.game} />
           <Notice error={pc.error} />
           {pc.isPending ? (
             <Loading />
@@ -143,6 +144,7 @@ export function Profile({ trainer }: { trainer: string }) {
           <Card className="live-collection-heading">
             <span className="eyebrow">PARTIDA ACTUAL</span>
             <h2>Equipo, cajas y muertos</h2>
+            <SaveGame game={collection.data?.game} />
             <p>
               Última partida sincronizada. El equipo oficial de la jornada se
               conserva por separado.

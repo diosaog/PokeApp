@@ -59,8 +59,7 @@ class XYContractTests(unittest.TestCase):
 
     def test_unsupported_games_mismatched_generations_layouts_and_progress(self):
         for change in (
-            {"game": "OR"},
-            {"game": "AS"},
+            {"game": "ORAS"},
             {"game": "SN"},
             {"game": "XY"},
             {"generation": 7},
@@ -190,7 +189,7 @@ class XYApiTests(unittest.TestCase):
             value | {"trainer_id": str(uuid4())},
             value | {"competitive_authority": True},
             value | {"parser_version": "unknown"},
-            value | {"observation": xy_payload("OR")},
+            value | {"observation": xy_payload("ORAS")},
         ):
             result = f.client.put(f.path, headers=f.headers, json=invalid)
             self.assertEqual(result.status_code, 422, result.text)

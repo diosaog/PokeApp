@@ -56,7 +56,7 @@ class ParsedTrainer(WireModel):
 
 
 class ParsedMove(WireModel):
-    id: int = Field(ge=0, le=617)
+    id: int = Field(ge=0, le=621)
     pp: int = Field(ge=0, le=255)
 
 
@@ -74,6 +74,9 @@ class ParsedPokemon(WireModel):
     moves: tuple[ParsedMove, ...] = Field(min_length=4, max_length=4)
     ivs: tuple[int, ...] = Field(min_length=6, max_length=6)
     evs: tuple[int, ...] = Field(min_length=6, max_length=6)
+    # Native ORAS personal table; absent in old observations and excluded from
+    # their serialization so existing Launcher registration digests remain valid.
+    type_ids: tuple[int, int] | None = Field(default=None, exclude_if=lambda v: v is None)
     identity: PokemonIdentityEvidence | ObservedXYIdentity
 
     @field_validator("identity", mode="before")
@@ -93,6 +96,8 @@ class ParsedPokemon(WireModel):
 
     @model_validator(mode="after")
     def validate_stats(self):
+        if self.type_ids is not None and any(not 0 <= v <= 17 for v in self.type_ids):
+            raise ValueError("invalid_pokemon_types")
         if any(not 0 <= v <= 31 for v in self.ivs) or any(
             not 0 <= v <= 255 for v in self.evs
         ):
@@ -173,16 +178,24 @@ class ObservedSave(WireModel):
     @model_validator(mode="after")
     def validate_layout(self):
         if self.generation == 6:
-            if self.game not in {"X", "Y"} or len(self.boxes) != 31:
+            if self.game not in {"X", "Y", "OR", "AS"} or len(self.boxes) != 31:
                 raise ValueError("invalid_xy_layout")
             if self.progress is not None:
                 raise ValueError("xy_progress_not_supported")
-        elif self.game in {"X", "Y"} or len(self.boxes) > 24:
+        elif self.game in {"X", "Y", "OR", "AS"} or len(self.boxes) > 24:
             raise ValueError("invalid_native_layout")
         if [b.number for b in self.boxes] != list(range(1, len(self.boxes) + 1)):
             raise ValueError("invalid_box_layout")
         if any(p.identity.format != self.generation for _, p in self.occupied()):
             raise ValueError("invalid_native_format")
+        for _, pokemon in self.occupied():
+            if self.game in {"X", "Y"} and any(m.id > 617 for m in pokemon.moves):
+                raise ValueError("invalid_xy_move")
+            if self.game in {"OR", "AS"}:
+                if pokemon.type_ids is None:
+                    raise ValueError("missing_oras_types")
+            elif pokemon.type_ids is not None:
+                raise ValueError("unexpected_pokemon_types")
         if self.progress is not None:
             observed_layout = (
                 self.generation,

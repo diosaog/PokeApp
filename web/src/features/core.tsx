@@ -23,6 +23,7 @@ import { ParticipantResults } from "./league-results";
 import { InitialAssignment } from "./initial-assignment";
 import { WipeRevivals } from "./wipe-revivals";
 import { Collection } from "./collection";
+import { SaveGame } from "./progress";
 import { matchLabel } from "./admin-labels";
 import { LeagueOperations } from "./league-operations";
 import { TeamLockWarning } from "./team-lock-warning";
@@ -81,16 +82,21 @@ export function Pokemon({
 }: {
   pokemon: Pick<
     Model<"PokemonRead">,
-    "species" | "nickname" | "level" | "types" | "status_flags"
+    "species" | "nickname" | "level" | "types" | "status_flags" | "form"
   > & { is_shiny?: boolean };
   onClick?: () => void;
   animated?: boolean;
 }) {
   const body = (
     <>
-      <PokemonSprite species={pokemon.species} animated={animated} />
+      <PokemonSprite
+        species={pokemon.species}
+        form={pokemon.form}
+        animated={animated}
+      />
       <div>
         <strong>{pokemonTitle(pokemon)}</strong>
+        {!!pokemon.form && <small>Forma {pokemon.form}</small>}
         <span className="muted">
           {pokemon.nickname
             ? pokemonName("species", pokemon.species)
@@ -421,7 +427,10 @@ export function PCPage() {
         {pc.isPending ? (
           <Loading />
         ) : pc.data?.status === "ready" ? (
-          <Collection key={pc.data.save?.id} slots={pc.data.pokemon} />
+          <>
+            <SaveGame game={pc.data.save?.game} />
+            <Collection key={pc.data.save?.id} slots={pc.data.pokemon} />
+          </>
         ) : (
           <Empty>
             No hay una partida disponible.{" "}
@@ -452,6 +461,7 @@ export function SavesPage() {
                   : "Partida pendiente de preparar"}
               </Tag>
               <p>Última sincronización · {date(pc.data.save.uploaded_at)}</p>
+              <SaveGame game={pc.data.save.game} />
               <Link className="button" to="/pc">
                 Abrir mi PC
               </Link>

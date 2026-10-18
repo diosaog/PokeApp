@@ -10,7 +10,7 @@ import {
   TrainerPhoto,
 } from "../pokemon/presentation";
 import { WithSeason, playerName } from "./core";
-import { GameProgress } from "./progress";
+import { GameProgress, SaveGame } from "./progress";
 import { LockStatus } from "./lock-status";
 
 export function HomePage() {
@@ -112,10 +112,18 @@ export function HomePage() {
                   status={lock ? (lock.timing_status ?? "unknown") : "pending"}
                 />
                 <p className="caption">Equipo actual del juego</p>
+                <SaveGame game={pc.data?.save?.game} />
                 <div className="home-sprites" aria-label="Equipo de tu partida">
                   {party.map((p, i) => (
                     <span className="home-sprite-slot" key={i}>
-                      <PokemonSprite species={p.pokemon.species} animated />
+                      <PokemonSprite
+                        species={p.pokemon.species}
+                        form={p.pokemon.form}
+                        animated
+                      />
+                      {!!p.pokemon.form && (
+                        <small>Forma {p.pokemon.form}</small>
+                      )}
                       <PokemonStatusFlags flags={p.pokemon.status_flags} />
                     </span>
                   ))}

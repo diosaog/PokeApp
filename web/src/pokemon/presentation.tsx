@@ -71,14 +71,18 @@ export function TrainerPhoto({ name }: { name: string }) {
 }
 export function PokemonSprite({
   species,
+  form,
   large = false,
   animated = false,
 }: {
   species: string;
+  form?: number | null;
   large?: boolean;
   animated?: boolean;
 }) {
-  const id = catalogId("species", species);
+  // Existing assets cover base forms only. Never depict an unverified alternate
+  // form as its base form; keep the textual observed form beside the fallback.
+  const id = form ? null : catalogId("species", species);
   const ref = useRef<HTMLImageElement>(null);
   const [moving, setMoving] = useState(false);
   const [failed, setFailed] = useState<string | null>(null);

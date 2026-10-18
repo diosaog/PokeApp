@@ -6,7 +6,7 @@ Upstream: https://github.com/kwsch/PKHeX; NuGet package license expression:
 `GPL-3.0-or-later`. The lockfile pins the package content hash; the JSON records
 SHA-256 for each original resource, preserving its array offsets/IDs. Resource
 text remains unmodified. This module does not import PKHeX types into the web.
-Only the currently supported Gen3–5/X/Y ranges are shipped; limits come from
+Only the currently supported Gen3–6 (X/Y and ORAS) ranges are shipped; limits come from
 the pinned save classes (plus 25 natures and types through Fairy), keeping later
 game catalogs out of the initial web bundle.
 
@@ -29,7 +29,10 @@ commands, rewards, history, or public/private field selection. Current views
 still choose their original fields. No missing types, forms or abilities are
 inferred from species, and private PC reads are not added to rival views.
 
-Current API strings omit game context. Gen3 item IDs have a different namespace
+Older API strings omit game context. ORAS projections provide generation 6
+explicitly; form/type facts come from its pinned native personal table. Unsupported
+form sprites use the unavailable-image treatment, never a guessed base form.
+Gen3 item IDs have a different namespace
 from Gen4+ IDs: contradictory numeric mappings show **Objeto sin identificar
 (falta el juego)**. Names such as `Leftovers` and unambiguous `Item #234` resolve
 to **Restos**. The optional resolver context supports later explicit generation
@@ -46,5 +49,5 @@ Ignored legacy flavor caches are sparse and permit cross-version fallback; their
 `xy:` labels do not prove X/Y wording. They are deliberately not imported, and
 no modern description is asserted for X/Y or Gen5.
 
-The asset can later be consumed by desktop presentation, but Launcher 0.16.2,
-its installer, and final desktop parity are unchanged/deferred.
+The asset can later be consumed by desktop presentation; full desktop name
+localization remains deferred. Launcher 0.18.0 packages ORAS parser support.

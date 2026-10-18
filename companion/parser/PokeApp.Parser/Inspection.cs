@@ -21,11 +21,13 @@ public static class Inspection
         {
             var save = SaveUtil.GetVariantSAV(bytes);
             if (save is null) return Failure("CORRUPT_SAVE");
-            if (save is not (SAV3RS or SAV3E or SAV3FRLG or SAV4DP or SAV4Pt or SAV4HGSS or SAV5BW or SAV5B2W2 or SAV6XY))
+            if (save is not (SAV3RS or SAV3E or SAV3FRLG or SAV4DP or SAV4Pt or SAV4HGSS or SAV5BW or SAV5B2W2 or SAV6XY or SAV6AO))
                 return Failure("UNSUPPORTED_GAME");
             if (!save.IsVersionValid()) return Failure("UNSUPPORTED_VERSION");
             if (save is SAV6XY && bytes.Length != SaveUtil.SIZE_G6XY)
                 return Failure("UNSUPPORTED_VERSION"); // Decrypted native X/Y only.
+            if (save is SAV6AO && bytes.Length != SaveUtil.SIZE_G6ORAS)
+                return Failure("UNSUPPORTED_VERSION"); // Decrypted native ORAS, not demo/container.
             // This pinned library's Gen5 IsVersionValid inherits an unconditional
             // true. Reject absent or mismatched trainer game IDs explicitly.
             if (save is SAV5BW && save.Version is not (GameVersion.B or GameVersion.W)
@@ -33,7 +35,7 @@ public static class Inspection
                 return Failure("UNSUPPORTED_VERSION");
             if (!save.ChecksumsValid || save.PartyCount is < 0 or > 6)
                 return Failure("CORRUPT_SAVE");
-            if (save.BoxSlotCount != 30 || save.BoxCount < 1 || save.BoxCount > (save is SAV6XY ? 31 : 24))
+            if (save.BoxSlotCount != 30 || save.BoxCount < 1 || save.BoxCount > (save is SAV6 ? 31 : 24))
                 return Failure("UNSUPPORTED_VERSION");
             var party = save.PartyData;
             var boxes = save.BoxData;
@@ -43,8 +45,8 @@ public static class Inspection
                 Generation = save.Generation,
                 Trainer = new { Name = save.OT, Tid = save.TID16, Sid = save.SID16,
                     Gender = save.Gender, Language = save.Language < 0 ? (int?)null : save.Language },
-                // X/Y read support does not claim an approved progress mapping.
-                Progress = save is SAV6XY ? null : Progress(save),
+                // Gen6 read support does not claim an approved progress mapping.
+                Progress = save is SAV6 ? null : Progress(save),
                 Party = Enumerable.Range(0, 6).Select(i => i < party.Count ? Pokemon(party[i], save) : null).ToArray(),
                 Boxes = Enumerable.Range(0, save.BoxCount).Select(b => new
                 {
@@ -104,12 +106,12 @@ public static class Inspection
         if (p.Species == 0) return null;
         if (!p.ChecksumValid || p.Species > p.MaxSpeciesID || p.Format is < 3 or > 6)
             throw new InvalidPokemonException();
-        if (p.Format != save.Generation || (save is SAV6XY &&
+        if (p.Format != save.Generation || (save is SAV6 &&
             new[] { p.Move1, p.Move2, p.Move3, p.Move4 }.Any(move => move > save.MaxMoveID)))
             throw new InvalidPokemonException();
         if (string.IsNullOrWhiteSpace(p.OriginalTrainerName) || (int)p.Version == 0 || p.Language == 0)
             throw new IncompleteIdentityException();
-        return new
+        var value = new
         {
             SpeciesId = p.Species, p.Nickname, Level = p.CurrentLevel, p.Form, p.Gender,
             Shiny = p.IsShiny, p.IsEgg, AbilityId = p.Ability, NatureId = (int)p.Nature,
@@ -129,6 +131,18 @@ public static class Inspection
                 Ivs = new[] { p.IV_HP, p.IV_ATK, p.IV_DEF, p.IV_SPA, p.IV_SPD, p.IV_SPE },
             },
         };
+        if (save is SAV6AO oras)
+        {
+            if (!oras.Personal.IsPresentInGame(p.Species, p.Form))
+                throw new InvalidPokemonException();
+            var personal = oras.Personal.GetFormEntry(p.Species, p.Form);
+            // Additive ORAS-only evidence keeps the existing X/Y/Gen3-5 wire
+            // representation and replay digests byte-for-byte compatible.
+            var node = JsonSerializer.SerializeToNode(value, Json)!;
+            node["type_ids"] = JsonSerializer.SerializeToNode(new[] { (int)personal.Type1, (int)personal.Type2 });
+            return node;
+        }
+        return value;
     }
 
     private sealed class InvalidPokemonException : Exception;

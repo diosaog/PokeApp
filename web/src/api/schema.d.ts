@@ -2852,6 +2852,10 @@ export interface components {
     PokemonRead: {
       /** Species */
       species: string;
+      /** Form */
+      form?: number | null;
+      /** Item Generation */
+      item_generation?: (3 | 4 | 5 | 6) | null;
       /**
        * Nickname
        * @default
@@ -2892,6 +2896,10 @@ export interface components {
     PrivatePokemonRead: {
       /** Species */
       species: string;
+      /** Form */
+      form?: number | null;
+      /** Item Generation */
+      item_generation?: (3 | 4 | 5 | 6) | null;
       /**
        * Nickname
        * @default
@@ -3397,6 +3405,8 @@ export interface components {
        * Format: date-time
        */
       uploaded_at: string;
+      /** Game */
+      game?: string | null;
     };
     /** SaveRegistration */
     SaveRegistration: {
@@ -3885,6 +3895,8 @@ export interface components {
       status: "no_current_save" | "not_ready" | "ready" | "unsupported_payload";
       /** Pokemon */
       pokemon: components["schemas"]["PublicSlotRead"][];
+      /** Game */
+      game?: string | null;
       /** Revived After Wipe */
       revived_after_wipe?: number | null;
     };

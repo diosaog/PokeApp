@@ -3,6 +3,15 @@ using PokeApp.Parser;
 using System.Text.Json;
 using static System.Buffers.Binary.BinaryPrimitives;
 
+// Bounded Phase18 gate: existing X/Y regression plus ORAS, no historical matrix.
+if (args.Length == 2 && args[0] == "--gen6")
+{
+    Directory.CreateDirectory(args[1]);
+    XYChecks.Run(args[1]);
+    ORASChecks.Run(args[1]);
+    return;
+}
+
 // Fixtures are generated here from blank save/PKM objects. No personal/third-party saves.
 static void Check(bool condition, string name)
 {
@@ -173,7 +182,7 @@ Check(Read(invalidVersion.Write()).GetProperty("error").GetString() == "UNSUPPOR
 invalidVersion.Version = GameVersion.B2;
 Check(Read(invalidVersion.Write()).GetProperty("error").GetString() == "UNSUPPORTED_VERSION", "mismatched Gen5 family fails closed");
 Check(Read(new byte[0x80000]).GetProperty("error").GetString() == "CORRUPT_SAVE", "unknown binary rejected");
-var unsupported = new byte[SaveUtil.SIZE_G6ORAS];
+var unsupported = new byte[SaveUtil.SIZE_G7SM];
 WriteUInt32LittleEndian(unsupported.AsSpan(unsupported.Length - 0x1F0), SaveUtil.BEEF);
 Check(Read(unsupported).GetProperty("error").GetString() == "UNSUPPORTED_GAME", "unsupported recognized game");
 XYChecks.Run(output);

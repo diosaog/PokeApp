@@ -60,6 +60,8 @@ class MoveRead(BaseModel):
 
 class PokemonRead(BaseModel):
     species: str
+    form: int | None = Field(default=None, ge=0, le=255)
+    item_generation: Literal[3, 4, 5, 6] | None = None
     nickname: str = ""
     level: int | None = None
     types: list[str] = Field(default_factory=list)
@@ -178,6 +180,7 @@ class SaveRead(BaseModel):
     parser_status: str
     parser_version: str
     uploaded_at: datetime
+    game: str | None = None
 
 
 class SlotRead(BaseModel):
@@ -202,6 +205,7 @@ class TrainerCollectionRead(BaseModel):
 
     status: Literal["no_current_save", "not_ready", "ready", "unsupported_payload"]
     pokemon: list[PublicSlotRead]
+    game: str | None = None
     revived_after_wipe: int | None = Field(default=None, ge=0, strict=True)
 
 

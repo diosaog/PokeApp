@@ -1,4 +1,7 @@
-"""Private PK6 evidence; deliberately separate from competitive 023 identity."""
+"""Private PK6 evidence (X/Y/ORAS), separate from competitive 023 identity.
+
+The historical class name is kept for local journal/import compatibility.
+"""
 
 from dataclasses import dataclass
 from datetime import date

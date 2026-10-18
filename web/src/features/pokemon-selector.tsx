@@ -43,6 +43,7 @@ function TargetCard({
     >
       <PokemonSprite
         species={target.pokemon.species}
+        form={target.pokemon.form}
         animated={isParty(target.location)}
       />
       <span className="pokemon-selector-copy">

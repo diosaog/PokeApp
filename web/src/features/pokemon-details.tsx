@@ -11,7 +11,13 @@ import {
 import { Modal } from "../ui";
 type Public = Pick<
   Model<"PokemonRead">,
-  "species" | "nickname" | "level" | "types" | "item"
+  | "species"
+  | "nickname"
+  | "level"
+  | "types"
+  | "item"
+  | "form"
+  | "item_generation"
 > & { moves?: { name: string }[] | null };
 export type DetailPokemon =
   | { visibility: "public"; pokemon: Public }
@@ -33,8 +39,9 @@ export function PokemonDetails(props: DetailPokemon) {
         <span className="eyebrow">
           {props.visibility === "self" ? "TU POKÉMON" : "POKÉMON PÚBLICO"}
         </span>
-        <PokemonSprite species={p.species} large animated />
+        <PokemonSprite species={p.species} form={p.form} large animated />
         <h3>{pokemonName("species", p.species)}</h3>
+        {!!p.form && <p>Forma {p.form}</p>}
         <p>Nivel {p.level ?? "—"}</p>
         <div className="tags">
           {p.types?.map((t) => (
@@ -75,8 +82,14 @@ export function PokemonDetails(props: DetailPokemon) {
             <dd>
               {p.item ? (
                 <span className="held-item">
-                  <ItemIcon name={p.item} />
-                  {pokemonName("item", p.item)}
+                  <ItemIcon
+                    name={pokemonName(
+                      "item",
+                      p.item,
+                      p.item_generation ?? undefined,
+                    )}
+                  />
+                  {pokemonName("item", p.item, p.item_generation ?? undefined)}
                 </span>
               ) : (
                 "Sin objeto"

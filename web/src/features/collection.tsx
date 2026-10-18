@@ -65,10 +65,11 @@ export function Collection({
         }
         aria-label={`${pokemonTitle(p)} · ${label}`}
       >
-        <PokemonSprite species={p.species} animated={animated} />
+        <PokemonSprite species={p.species} form={p.form} animated={animated} />
         <PokemonStatusFlags flags={p.status_flags} />
         <span>{pokemonTitle(p)}</span>
         <small>Nv. {p.level ?? "—"}</small>
+        {!!p.form && <small>Forma {p.form}</small>}
       </button>
     ) : (
       <div

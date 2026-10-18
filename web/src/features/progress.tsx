@@ -34,6 +34,12 @@ const games: Record<string, string> = {
   AS: "Zafiro Alfa",
 };
 
+export function SaveGame({ game }: { game?: string | null }) {
+  return game && games[game] ? (
+    <p className="caption">Pokémon {games[game]}</p>
+  ) : null;
+}
+
 export function GameProgress({
   progress,
   compact = false,

@@ -332,7 +332,13 @@ class FrontendReads:
                             **({} if public else {"pokemon_entity_id": entities.get(("box", box["box_number"], slot["slot_number"]))}),
                         )
                     )
-        return result(save=save, status="ready", pokemon=pokemon)
+        game = payload.get("game")
+        if game not in {"X", "Y", "OR", "AS"}:
+            game = None
+        ready = result(save={**save, "game": game}, status="ready", pokemon=pokemon)
+        if public:
+            ready.game = game
+        return ready
 
     def shop(self, sid, tid):
         season = self.season(sid)

@@ -24,7 +24,7 @@ string[] Read(string name, string language)
     return lines.ToArray();
 }
 var categories = new SortedDictionary<string, object>(StringComparer.Ordinal);
-var xy = new SAV6XY();
+var xy = new SAV6AO();
 var maximumIds = new SortedDictionary<string, int>(StringComparer.Ordinal) {
     ["species"] = xy.MaxSpeciesID, ["move"] = xy.MaxMoveID,
     ["ability"] = xy.MaxAbilityID, ["item"] = xy.MaxItemID,
@@ -38,7 +38,7 @@ foreach (var (key, resource) in new[] {
     var en = Read(resource, "en");
     var es = Read(resource, "es");
     if (en.Length != es.Length) throw new InvalidDataException($"Mismatched {key} resources");
-    // Ship only currently supported Gen3-5/X/Y data, not later-game catalogs.
+    // Ship Gen3-6 including ORAS, not later-game catalogs.
     var count = maximumIds[key] + 1;
     categories[key] = new { en = en.Take(count).ToArray(), es = es.Take(count).ToArray() };
 }
