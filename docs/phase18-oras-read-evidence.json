@@ -1,0 +1,273 @@
+{
+  "phase": "18",
+  "observed": "2026-10-18",
+  "status": "PARTIAL",
+  "implementation": "DEPLOYED",
+  "authentic_oras": {
+    "status": "NOT_RUN",
+    "reason": "No authentic OR/AS saves available; owner explicitly authorized continuing without them. Black/White is not ORAS evidence."
+  },
+  "entry_head": "08f00acd3a06a579e899c3e19454ea5be896c222",
+  "application_head": "e7833440f0c77579a82a9f00a030ab6cdd27619c",
+  "parser": "pokeapp-reader/3;pkhex/24.11.11",
+  "validation": {
+    "native_synthetic_assertions": 68,
+    "python": {
+      "oras": 5,
+      "xy": 9,
+      "ingestion": 13,
+      "frontend_reads": 24
+    },
+    "react": 33,
+    "browser": {
+      "tests": 2,
+      "api_fixture_interception": true,
+      "desktop_mobile_visual_review": true
+    },
+    "postgres": {
+      "status": "PASS_SYNTHETIC_ONLY",
+      "authentic_oras": "NOT_RUN_OWNER_WAIVER",
+      "games": {
+        "OR": {
+          "synthetic": true,
+          "import": true,
+          "replay_concurrency": true,
+          "privacy": true,
+          "offline_cache": true,
+          "source_unchanged": true,
+          "slots": 4
+        },
+        "AS": {
+          "synthetic": true,
+          "import": true,
+          "replay_concurrency": true,
+          "privacy": true,
+          "offline_cache": true,
+          "source_unchanged": true,
+          "slots": 4
+        },
+        "X": {
+          "synthetic": true,
+          "import": true,
+          "replay_concurrency": true,
+          "privacy": true,
+          "offline_cache": true,
+          "source_unchanged": true,
+          "slots": 8
+        },
+        "Y": {
+          "synthetic": true,
+          "import": true,
+          "replay_concurrency": true,
+          "privacy": true,
+          "offline_cache": true,
+          "source_unchanged": true,
+          "slots": 8
+        }
+      },
+      "tables_restored": 54,
+      "bootstrap_parity": true,
+      "migration": 45,
+      "remote_writes": 0
+    },
+    "packaged_smoke": {
+      "OR": {
+        "native_parse": true,
+        "packaged_local_read": true,
+        "offline": true,
+        "source_unchanged": true
+      },
+      "AS": {
+        "native_parse": true,
+        "packaged_local_read": true,
+        "offline": true,
+        "source_unchanged": true
+      },
+      "X": {
+        "native_parse": true,
+        "packaged_local_read": true,
+        "offline": true,
+        "source_unchanged": true
+      },
+      "Y": {
+        "native_parse": true,
+        "packaged_local_read": true,
+        "offline": true,
+        "source_unchanged": true
+      }
+    },
+    "build_format_compile_targeted_critical_ruff_diff": "PASS",
+    "wrangler_dry_run": "PASS",
+    "full_historical_suites": "NOT_RERUN",
+    "fresh_clean_windows_install": "NOT_RUN"
+  },
+  "migration": {
+    "version": "20261018105158",
+    "name": "045_oras_save_registration",
+    "record_hash": "b9e3a97af0d45bef80053c8b0e7d10e6"
+  },
+  "railway": {
+    "project": "PokeApp V2",
+    "service": "pokeapp-api",
+    "id": "2253b885-dc35-43b4-8b93-773fd628656f",
+    "status": "SUCCESS",
+    "image": "sha256:73681da8e8128d35fb5c05fed85585cbb38f682d61c84fee5dc4bb52749fac98",
+    "source_message": "Phase18 ORAS e7833440f0c77579a82a9f00a030ab6cdd27619c",
+    "committed_input_count": 256
+  },
+  "cloudflare": {
+    "worker": "pokeapp-web",
+    "deployment": "411aeb3d-a68a-4d8c-8327-22430a97ba95",
+    "version": "e48fd707-900b-4597-a181-ca3eca114caa",
+    "traffic_percent": 100
+  },
+  "public": {
+    "status": "PASS",
+    "checks": [
+      {
+        "method": "GET",
+        "path": "/health",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "path": "/v1/seasons/00000000-0000-0000-0000-000000000000/saves/context",
+        "status": 401
+      },
+      {
+        "method": "GET",
+        "path": "/build-config.json",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "path": "/",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "path": "/pc",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "path": "/trainers",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "path": "/assets/admin-B5vJCePe.js",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "path": "/assets/index-BuYMVUFu.css",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "path": "/assets/index-qO-UNyQV.js",
+        "status": 200
+      },
+      {
+        "method": "OPTIONS",
+        "path": "/saves/context",
+        "status": 200
+      },
+      {
+        "method": "HEAD",
+        "path": "/launcher/download",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "path": "/launcher/download",
+        "status": 200
+      }
+    ],
+    "count": 12,
+    "assets": [
+      {
+        "name": "admin-B5vJCePe.js",
+        "sha256": "ae83e6fa75bc1d6612c0122afb2861195681e670ac7ef61cc777efe80682b949"
+      },
+      {
+        "name": "index-BuYMVUFu.css",
+        "sha256": "329ebf053ddd34e695211eb05fad45b29e34d75a505c6f02e67644589c98f75f"
+      },
+      {
+        "name": "index-qO-UNyQV.js",
+        "sha256": "ceee6b8a27cccec2e542efe918dd3c86fa4b16ed4352816ab707b361519b7bcd"
+      }
+    ],
+    "installer": {
+      "version": "0.18.0",
+      "bytes": 159086220,
+      "sha256": "63c3c1373f6cdb32871f8101350d88e9b89da190cf774a7407960f40c0819fbb"
+    },
+    "unexpected_5xx": 0,
+    "positive_hosted_import": "NOT_RUN",
+    "authentic_oras": "NOT_RUN_OWNER_WAIVER"
+  },
+  "preservation": {
+    "status": "PASS",
+    "tables_unchanged": 59,
+    "entry_tables_unchanged": 56,
+    "entry_auth_changes_before_remote_writes": [
+      "auth.refresh_tokens",
+      "auth.sessions",
+      "auth.users"
+    ],
+    "owner_stable": true,
+    "inbox_unchanged": true,
+    "security_catalog_unchanged": true,
+    "prior_migrations_unchanged": 36,
+    "current_migrations": 37,
+    "new_migration": {
+      "version": "20261018105158",
+      "name": "045_oras_save_registration",
+      "record_hash": "b9e3a97af0d45bef80053c8b0e7d10e6"
+    },
+    "advisors": {
+      "INFO": 171,
+      "ERROR": 24,
+      "WARN": 5
+    },
+    "advisor_error_warn_unchanged": true,
+    "remote_business_writes": 0,
+    "source_save_writes": 0
+  },
+  "rpc_security": [
+    {
+      "invoker": true,
+      "proconfig": [
+        "search_path=pg_catalog, public"
+      ],
+      "anon_denied": true,
+      "browser_denied": true,
+      "service_execute": true,
+      "body_hash": "4977008500ad557a14700138adbfedb2"
+    }
+  ],
+  "r2": {
+    "bucket": "pokeapp-launcher-releases",
+    "only_written_key": "windows/0.18.0/PokeApp-Launcher-Setup.exe",
+    "prior_keys_deleted_or_replaced": false
+  },
+  "boundaries": {
+    "gen6_progress": "UNKNOWN",
+    "gen6_competitive_identity": "UNSUPPORTED",
+    "bag_inventory": "NOT_IN_EXISTING_CONTRACT",
+    "alternate_form_art": "UNAVAILABLE_PLACEHOLDER",
+    "physical_save_writes": "NOT_STARTED",
+    "phase19": "NOT_STARTED"
+  },
+  "cleanup": {
+    "disposable_databases_dropped": true,
+    "pg_55468_stopped": true,
+    "packaged_processes_remaining": false,
+    "stopped_synthetic_cluster_retained": "%TEMP%/pokeapp-phase18-pg"
+  },
+  "evidence_root": "%LOCALAPPDATA%/PokeApp-migration-evidence/phase18/20261018",
+  "next": "Owner acceptance with lawful authentic decrypted OR and AS saves when available."
+}

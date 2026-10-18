@@ -1,11 +1,21 @@
 # PokeApp 2.0 Project Checkpoint
 
-Checkpoint reconciled: 2026-10-15. This file is the project index and historical
+Checkpoint reconciled: 2026-10-18. This file is the project index and historical
 milestone record; it does not maintain a second live phase-status ledger.
 
 ## Current project position
 
-- Latest completed packet: **17.2 - public trainer collections and final product
+- Current packet: **18 - ORAS read/import, PARTIAL: implementation deployed,
+  authentic-save acceptance pending**. Owner authorized continuing without real
+  ORAS fixtures. Source `e783344` provides native OR/AS read support, existing
+  trusted raw ingestion and form/type/game web presentation. Forward 045 applied
+  once; Railway/Cloudflare and Launcher 0.18.0 verified. Synthetic focused gates
+  pass; no authentic ORAS or positive hosted import is claimed. Data preserved.
+  [Report](phase18-oras-read-report.md), [evidence](phase18-oras-read-evidence.json),
+  [current live record](work-in-progress/phase18-oras-live.md).
+  **Next: owner OR/AS acceptance when authentic saves exist. No Phase 19.**
+
+- Historical packet: **17.2 - public trainer collections and final product
   polish, DONE**. Public current-save party/boxes/dead Box 8 projection uses a
   strict privacy allowlist; own inventory is on the profile; Admin pending and
   disabled states are separated; section art, lazy animations and shop assets
