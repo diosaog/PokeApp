@@ -1380,7 +1380,7 @@ export interface components {
        * Region
        * @enum {string}
        */
-      region: "hoenn" | "kanto" | "sinnoh" | "johto" | "unova";
+      region: "hoenn" | "kanto" | "sinnoh" | "johto" | "unova" | "kalos";
       /** Earned Badges */
       earned_badges: number[];
     };
@@ -2952,11 +2952,27 @@ export interface components {
       badges_count?: number | null;
       /** Primary Region */
       primary_region?:
-        ("hoenn" | "kanto" | "sinnoh" | "johto" | "unova") | null;
+        ("hoenn" | "kanto" | "sinnoh" | "johto" | "unova" | "kalos") | null;
       /** Regions */
       regions?: components["schemas"]["BadgeRegionRead"][] | null;
       /** Champion Defeated */
       champion_defeated?: boolean | null;
+      /** Native Model */
+      native_model?: ("gym_badges" | "island_challenge") | null;
+      /** League Access */
+      league_access?: boolean | null;
+      /** League Visited */
+      league_visited?: boolean | null;
+      /** League Fly Unlocked */
+      league_fly_unlocked?: boolean | null;
+      /** Hall Of Fame Entered */
+      hall_of_fame_entered?: boolean | null;
+      /** Completed Islands */
+      completed_islands?: ("melemele" | "akala" | "ulaula" | "poni")[] | null;
+      /** Island Challenge Completed */
+      island_challenge_completed?: boolean | null;
+      /** Reward State */
+      reward_state?: ("pending_validation" | "pending_policy") | null;
     };
     /** PromotionRead */
     PromotionRead: {

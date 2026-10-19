@@ -60,7 +60,7 @@ public static class Inspection
                 Generation = save.Generation,
                 Trainer = new { Name = save.OT, Tid = save.TID16, Sid = save.SID16,
                     Gender = save.Gender, Language = save.Language < 0 ? (int?)null : save.Language },
-                // Gen6/7 read support does not claim an approved progress mapping.
+                // Gen6/7 native facts are separate from approved reward policy.
                 Progress = save.Generation >= 6 ? null : Progress(save),
                 Party = Enumerable.Range(0, 6).Select(i => i < party.Count ? Pokemon(party[i], save) : null).ToArray(),
                 Boxes = Enumerable.Range(0, save.BoxCount).Select(b => new
@@ -69,7 +69,16 @@ public static class Inspection
                     Slots = Enumerable.Range(0, 30).Select(s => Pokemon(boxes[b * 30 + s], save)).ToArray(),
                 }).ToArray(),
             };
-            return new { SchemaVersion = 1, ParserVersion, Observation = observation, Error = (string?)null };
+            object exported = observation;
+            if (save.Generation >= 6)
+            {
+                // Additive only: older generations retain their original wire
+                // representation. This projection does not authorize awards.
+                var node = JsonSerializer.SerializeToNode(observation, Json)!;
+                node["native_progress"] = JsonSerializer.SerializeToNode(NativeProgress(save), Json);
+                exported = node;
+            }
+            return new { SchemaVersion = 1, ParserVersion, Observation = exported, Error = (string?)null };
         }
         catch (InvalidPokemonException) { return Failure("CORRUPT_SAVE"); }
         catch (IncompleteIdentityException) { return Failure("AMBIGUOUS_IDENTITY"); }
@@ -114,6 +123,78 @@ public static class Inspection
             _ => null,
         };
         return new { SchemaVersion = 1, PrimaryRegion = primary, Regions = regions, ChampionDefeated = champion };
+    }
+
+    private static object NativeProgress(SaveFile save)
+    {
+        // PKHeX 24.11.11: Misc6XY/Misc6AO.Badges and the game-specific
+        // Resources/text/script flag labels. A League fly destination is not
+        // proof of eligibility, and eight badges do not establish Champion.
+        var gen6 = save as SAV6;
+        var gen7 = save as SAV7;
+        bool? hallEntered = save switch
+        {
+            SAV6XY s => s.EventWork.GetEventFlag(2640),
+            SAV6AO s => s.EventWork.GetEventFlag(2720),
+            _ => null,
+        };
+        return new
+        {
+            SchemaVersion = 1,
+            Model = gen6 is not null ? "gym_badges" : "island_challenge",
+            BadgeFlags = gen6 is null ? null : Enumerable.Range(0, 8).Select(bit => (gen6.Badges & (1 << bit)) != 0).ToArray(),
+            LeagueAccess = (bool?)null,
+            LeagueVisited = save is SAV6AO ao ? ao.EventWork.GetEventFlag(2897) : (bool?)null,
+            LeagueFlyUnlocked = save switch
+            {
+                SAV6XY s => s.EventWork.GetEventFlag(2735),
+                SAV6AO s => s.EventWork.GetEventFlag(2901),
+                _ => (bool?)null,
+            },
+            HallOfFameEntered = hallEntered,
+            ChampionDefeated = save switch
+            {
+                SAV6XY s => Gen6Champion(s, s.HallOfFame, hallEntered!.Value),
+                SAV6AO s => Gen6Champion(s, s.HallOfFame, hallEntered!.Value),
+                // Explicit title-specific "Is Alolan Champion" labels. These
+                // flags also activate Magearna; native bits do not prove that
+                // gameplay was legitimate or authorize competitive effects.
+                SAV7SM s => s.EventWork.GetEventFlag(3100),
+                SAV7USUM s => s.EventWork.GetEventFlag(4060),
+                _ => (bool?)null,
+            },
+            // Misc7.Stamps and Stamp7 define these four island completion
+            // stamps and the separate island-challenge stamp. They do not
+            // identify each individual trial or create traditional badges.
+            IslandStampFlags = gen7 is null ? null : Enumerable.Range(1, 4).Select(bit => (gen7.Misc.Stamps & (1u << bit)) != 0).ToArray(),
+            IslandChallengeCompleted = gen7 is null ? (bool?)null : (gen7.Misc.Stamps & (1u << 5)) != 0,
+        };
+    }
+
+    private static bool? Gen6Champion(SAV6 save, HallOfFame6 hall, bool entered)
+    {
+        // Pinned HallOfFame6 preserves the first clear in entry 0; its
+        // HallFame6Index is zero-based. The separately named entered-HoF flag
+        // must agree with that concrete first-clear record. This observes a
+        // recorded completion, not legitimate play or an economic entitlement.
+        if (!entered)
+        {
+            for (int i = 0; i < HallOfFame6.Entries; i++)
+                if (hall.GetEntry(i).ContainsAnyExcept<byte>(0)) return null;
+            return false;
+        }
+        var first = new HallFame6Index(hall.GetEntry(0)[^HallFame6Index.SIZE..]);
+        if (!first.HasData || first.ClearIndex != 0 || first.Month is < 1 or > 12
+            || first.Day < 1 || first.Day > DateTime.DaysInMonth(2000 + (int)first.Year, (int)first.Month))
+            return null;
+        bool any = false;
+        for (int i = 0; i < HallOfFame6.PokeCount; i++)
+        {
+            var member = new HallFame6Entity(hall.GetEntity(0, i), save.Language);
+            if (member.Species > save.MaxSpeciesID) return null;
+            any |= member.Species != 0;
+        }
+        return any ? true : null;
     }
 
     private static object? Pokemon(PKM p, SaveFile save)

@@ -78,20 +78,24 @@ export function GameProgress({
   }
   return (
     <div>
-      {compact && !progress.regions?.length && (
-        <p>
-          {progress.badges_count == null
-            ? "Medallas no disponibles"
-            : `${progress.badges_count} medallas observadas`}
-        </p>
-      )}
+      {compact &&
+        !progress.regions?.length &&
+        progress.native_model !== "island_challenge" && (
+          <p>
+            {progress.badges_count == null
+              ? "Medallas no disponibles"
+              : `${progress.badges_count} medallas observadas`}
+          </p>
+        )}
       {!compact && (
         <>
           {progress.game && games[progress.game] && (
             <p className="game-context">Pokémon {games[progress.game]}</p>
           )}
           <Tag>Progreso observado</Tag>
-          <p>{progress.badges_count} medallas observadas</p>
+          {progress.native_model !== "island_challenge" && (
+            <p>{progress.badges_count} medallas observadas</p>
+          )}
         </>
       )}
       {progress.regions?.map((region) => (
@@ -118,13 +122,78 @@ export function GameProgress({
           </div>
         </div>
       ))}
+      {progress.native_model === "island_challenge" && (
+        <div>
+          <strong>Recorrido insular</strong>
+          <p className="muted">Sellos de las islas observados en tu partida.</p>
+          <div className="badge-strip" aria-label="Sellos de las islas">
+            {(
+              [
+                ["melemele", "Melemele"],
+                ["akala", "Akala"],
+                ["ulaula", "Ula-Ula"],
+                ["poni", "Poni"],
+              ] as const
+            ).map(([id, name]) => (
+              <Tag key={id}>
+                {name}:{" "}
+                {progress.completed_islands?.includes(id)
+                  ? "conseguido"
+                  : "no conseguido"}
+              </Tag>
+            ))}
+          </div>
+          {!compact && (
+            <p>
+              {progress.island_challenge_completed === true
+                ? "Recorrido insular completado."
+                : progress.island_challenge_completed === false
+                  ? "Recorrido insular aún no completado."
+                  : "Final del recorrido insular: sin observar."}
+            </p>
+          )}
+        </div>
+      )}
       {!compact && (
         <p>
           {progress.champion_defeated === true
-            ? "Campeón del juego derrotado · Juego completado."
+            ? progress.native_model === "island_challenge"
+              ? "Título de Campeón de Alola registrado."
+              : "Campeón del juego derrotado · Juego completado."
             : progress.champion_defeated === false
               ? "Campeón del juego aún no derrotado."
               : "Victoria ante el Campeón del juego: sin observar."}
+        </p>
+      )}
+      {!compact && progress.native_model === "gym_badges" && (
+        <>
+          <p>
+            {progress.hall_of_fame_entered === true
+              ? "Entrada en el Salón de la Fama registrada."
+              : progress.hall_of_fame_entered === false
+                ? "Sin entrada en el Salón de la Fama."
+                : "Salón de la Fama: sin observar."}
+          </p>
+          {(progress.league_visited === true ||
+            progress.league_fly_unlocked === true) && (
+            <p>
+              Liga Pokémon:{" "}
+              {progress.league_visited === true
+                ? "lugar visitado"
+                : "destino de Vuelo desbloqueado"}
+              .
+            </p>
+          )}
+          <p className="muted">
+            El acceso a los combates de la Liga no está verificado.
+          </p>
+        </>
+      )}
+      {!compact && progress.reward_state && (
+        <p className="muted">
+          {progress.reward_state === "pending_validation"
+            ? "Las recompensas de progreso de este juego están pendientes de validación."
+            : "El recorrido insular no concede recompensas de medallas. Su política competitiva está pendiente."}
         </p>
       )}
       {!compact && progress.observed_at && (

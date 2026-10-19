@@ -12,7 +12,13 @@ def observation_digest(observation: ObservedSave, parser_version: str) -> str:
     return digest(
         {
             "parser_version": parser_version,
-            "observation": observation.model_dump(mode="json"),
+            # Phase21's additive native facts are independently reparsed from the
+            # SHA256-bound raw bytes by the server. Keep the established digest
+            # projection so old receipts/outbox intents remain immutable and do
+            # not backfill progress or identities on same-file replay.
+            "observation": observation.model_dump(
+                mode="json", exclude={"native_progress"}
+            ),
         }
     )
 

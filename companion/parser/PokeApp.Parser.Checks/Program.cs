@@ -3,6 +3,20 @@ using PokeApp.Parser;
 using System.Text.Json;
 using static System.Buffers.Binary.BinaryPrimitives;
 
+if (args.Length == 2 && args[0] == "--progression")
+{
+    Directory.CreateDirectory(args[1]);
+    ProgressionChecks.Run(args[1]);
+    return;
+}
+
+if (args.Length == 2 && args[0] == "--identity-fixtures")
+{
+    Directory.CreateDirectory(args[1]);
+    IdentityFixtures.Run(args[1]);
+    return;
+}
+
 // Bounded Phase18 gate: existing X/Y regression plus ORAS, no historical matrix.
 if (args.Length == 2 && args[0] is "--gen6" or "--gen7")
 {

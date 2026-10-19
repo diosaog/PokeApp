@@ -56,6 +56,8 @@ EXPECTED_MIGRATIONS = [
     "045_oras_save_registration.sql",
     "046_sun_moon_save_registration.sql",
     "047_ultra_sun_moon_save_registration.sql",
+    "048_trusted_gen67_identity.sql",
+    "049_native_progress_read.sql",
 ]
 
 FORBIDDEN_TOKENS = [

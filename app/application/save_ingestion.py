@@ -6,10 +6,12 @@ from threading import BoundedSemaphore
 from uuid import NAMESPACE_URL, uuid5
 
 from app.domain.pokemon_identity import (
+    ParsedPokemonObservation,
     PokemonEntity,
-    PokemonIdentityEvidence,
     digest,
+    identity_evidence_from_dict,
     reconcile_pokemon,
+    trusted_native_identity,
 )
 from app.repositories.supabase.season_admin import SeasonAdminRejected
 from app.save_parser.files import MAX_SAVE_BYTES
@@ -45,6 +47,13 @@ def parsed_payload(observation, save_id, trainer_id, raw_hash):
             "identity_evidence": asdict(p.identity),
             "legacy_fingerprints": [],
         }
+        if observation.native_progress is not None:
+            value["identity_evidence"] = asdict(
+                trusted_native_identity(
+                    p.identity, trainer=observation.trainer, is_egg=p.is_egg
+                )
+            )
+            value["is_egg"] = p.is_egg
         if observation.game in {"OR", "AS", "SN", "MN", "US", "UM"}:
             # Public form/type facts from the same trusted parser, never inferred
             # from nickname or from another game's species table.
@@ -52,7 +61,7 @@ def parsed_payload(observation, save_id, trainer_id, raw_hash):
             value["types"] = list(dict.fromkeys(f"Type #{t}" for t in p.type_ids))
         return value
 
-    return {
+    result = {
         "save_record_id": save_id,
         "trainer_id": trainer_id,
         "source_hash": raw_hash,
@@ -75,6 +84,10 @@ def parsed_payload(observation, save_id, trainer_id, raw_hash):
             for b in observation.boxes
         ],
     }
+    if observation.native_progress is not None:
+        result["native_progress"] = observation.native_progress.model_dump(mode="json")
+        result["identity_policy_version"] = 2
+    return result
 
 
 class TrustedSaveIngestion:
@@ -151,17 +164,40 @@ class TrustedSaveIngestion:
         )
         payload = parsed_payload(observed, save_id, tid, raw_hash)
         plan = None
-        if observed.generation < 6:
-            incoming = observed.identity_observations()
+        if observed.generation < 6 or observed.native_progress is not None:
+            native = observed.generation >= 6
+            incoming = (
+                tuple(
+                    ParsedPokemonObservation(
+                        location,
+                        trusted_native_identity(
+                            p.identity, trainer=observed.trainer, is_egg=p.is_egg
+                        ),
+                    )
+                    for location, p in observed.occupied()
+                )
+                if native
+                else observed.identity_observations()
+            )
             previous = tuple(
                 PokemonEntity(
                     r["id"],
-                    PokemonIdentityEvidence(**r["initial_evidence"]),
+                    identity_evidence_from_dict(r["initial_evidence"]),
                     r["identity_status"],
                 )
                 for r in context["entities"]
             )
-            reconciliation = reconcile_pokemon(previous, incoming, save_file_id=save_id)
+            reconciliation = reconcile_pokemon(
+                previous,
+                incoming,
+                save_file_id=save_id,
+                unresolved_evidence=tuple(
+                    identity_evidence_from_dict(e)
+                    for e in context.get("unresolved_evidence", [])
+                )
+                if native
+                else (),
+            )
             head = context["head"]
             plan = dict(
                 **scope,
@@ -173,8 +209,8 @@ class TrustedSaveIngestion:
                 if head
                 else str(uuid5(NAMESPACE_URL, f"pokeapp:accept:{sid}:{tid}")),
                 capture_sequence=head["capture_sequence"] + 1 if head else 1,
-                identity_schema_version=1,
-                reconciliation_version=1,
+                identity_schema_version=2 if native else 1,
+                reconciliation_version=2 if native else 1,
                 input_signature=digest([asdict(o) for o in incoming]),
                 bindings=[],
             )

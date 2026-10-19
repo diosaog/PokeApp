@@ -1,15 +1,17 @@
 """Versioned, private read-only evidence and conservative individual reconciliation."""
 from __future__ import annotations
 
+import json
 from collections import Counter, defaultdict
 from dataclasses import asdict, dataclass, replace
 from hashlib import sha256
-import json
 from typing import Literal
 from uuid import UUID, uuid5
 
 IDENTITY_SCHEMA_VERSION = 1
 RECONCILIATION_VERSION = 1
+NATIVE_IDENTITY_SCHEMA_VERSION = 2
+NATIVE_RECONCILIATION_VERSION = 2
 
 
 @dataclass(frozen=True)
@@ -63,6 +65,92 @@ class PokemonIdentityEvidence:
         # Deliberately broad: same PID collisions remain ambiguous, not falsely new.
         return digest([self.schema_version, self.format, self.pid, self.ot_tid,
                        self.ot_sid, self.origin_version, self.language, self.ot_name, self.ot_gender])
+
+
+@dataclass(frozen=True)
+class TrustedNativeIdentityEvidence(PokemonIdentityEvidence):
+    """Private Gen6/7 reconciliation input, derived only by trusted ingestion.
+
+    This is intentionally separate from the unchanged neutral reader wire shape.
+    The evidence supports a scoped association; it is not a globally unique ID
+    or proof that the source was never edited, cloned or traded.
+    """
+
+    is_egg: bool = False
+    source_trainer_match: bool = False
+
+    def __post_init__(self):
+        if (type(self.schema_version) is not int or self.schema_version != 2
+                or type(self.format) is not int or self.format not in (6, 7)):
+            raise ValueError("unsupported_native_identity_evidence")
+        for name, upper in (("pid", 2**32 - 1), ("encryption_constant", 2**32 - 1),
+                            ("ot_tid", 65535), ("ot_sid", 65535), ("origin_version", 255),
+                            ("language", 255), ("ot_gender", 1)):
+            value = getattr(self, name)
+            if type(value) is not int or not 0 <= value <= upper:
+                raise ValueError("invalid_identity_" + name)
+        if (not isinstance(self.ot_name, str) or not self.ot_name.strip()
+                or self.origin_version == 0 or self.language == 0):
+            raise ValueError("incomplete_identity_evidence")
+        if type(self.is_egg) is not bool or type(self.source_trainer_match) is not bool:
+            raise ValueError("invalid_native_identity_context")
+        object.__setattr__(self, "ivs", tuple(self.ivs))
+        if len(self.ivs) != 6 or any(type(v) is not int or not 0 <= v <= 31 for v in self.ivs):
+            raise ValueError("invalid_identity_ivs")
+        for name, upper in (("met_location", 65535), ("met_level", 100), ("egg_location", 65535)):
+            value = getattr(self, name)
+            if value is not None and (type(value) is not int or not 0 <= value <= upper):
+                raise ValueError("invalid_identity_" + name)
+        for name in ("met_date", "egg_date"):
+            value = getattr(self, name)
+            if value is not None:
+                from datetime import date
+                if not isinstance(value, str):
+                    raise ValueError("invalid_identity_" + name)
+                date.fromisoformat(value)
+
+    @property
+    def candidate_key(self) -> str:
+        # Native IVs, met and egg facts are guards, not tie-breakers for clones.
+        # Visible species/form/name/stats/moves/location never enter this key.
+        return digest(asdict(self))
+
+    @property
+    def unresolved_reason(self) -> str | None:
+        if not self.source_trainer_match:
+            return "original_trainer_unproven"
+        if self.is_egg or self.egg_location not in (None, 0) or self.egg_date is not None:
+            return "egg_or_hatch_unproven"
+        if (self.met_location in (None, 0) or self.met_level in (None, 0)
+                or self.met_date is None or self.egg_location is None):
+            return "incomplete_native_identity"
+        return None
+
+
+def identity_evidence_from_dict(value: dict) -> PokemonIdentityEvidence:
+    """Reconstruct persisted evidence without changing any schema-1 digest."""
+    identity_type = TrustedNativeIdentityEvidence if value.get("schema_version") == 2 else PokemonIdentityEvidence
+    return identity_type(**value)
+
+
+def trusted_native_identity(evidence, *, trainer, is_egg: bool) -> TrustedNativeIdentityEvidence:
+    """Promote neutral evidence after server parsing, never from a browser claim.
+
+    The caller must already have established save ownership and native integrity.
+    Exact OT/name/language comparison deliberately leaves uncertain trades unknown.
+    """
+    raw = asdict(evidence)
+    if raw.get("schema_version") != 1 or raw.get("format") not in (6, 7):
+        raise ValueError("unsupported_native_identity_evidence")
+    def trainer_value(name):
+        return trainer.get(name) if isinstance(trainer, dict) else getattr(trainer, name, None)
+    matches = all(raw[key] == trainer_value(name) for key, name in (
+        ("ot_name", "name"), ("ot_tid", "tid"), ("ot_sid", "sid"),
+        ("ot_gender", "gender"), ("language", "language"),
+    ))
+    return TrustedNativeIdentityEvidence(**(raw | {
+        "schema_version": 2, "is_egg": is_egg, "source_trainer_match": matches,
+    }))
 
 
 def digest(value) -> str:
@@ -131,11 +219,14 @@ class Reconciliation:
 
 
 def reconcile_pokemon(previous: tuple[PokemonEntity, ...], incoming: tuple[ParsedPokemonObservation, ...],
-                      *, save_file_id: str) -> Reconciliation:
+                      *, save_file_id: str,
+                      unresolved_evidence: tuple[PokemonIdentityEvidence, ...] = ()) -> Reconciliation:
     """Previous is the scoped head state, including retained missing entities."""
     namespace = UUID(save_file_id)
     if len({p.id for p in previous}) != len(previous) or len({p.location for p in incoming}) != len(incoming):
         raise ValueError("duplicate_identity_input")
+    if any(isinstance(p.evidence, TrustedNativeIdentityEvidence) for p in (*previous, *incoming)) or unresolved_evidence:
+        return _reconcile_native(previous, incoming, namespace, unresolved_evidence)
     groups = defaultdict(list)
     for entity in previous:
         groups[entity.evidence.pid].append(entity)
@@ -158,6 +249,57 @@ def reconcile_pokemon(previous: tuple[PokemonEntity, ...], incoming: tuple[Parse
             seen.update(ids)
         bindings.append(binding)
     return Reconciliation(tuple(bindings), tuple(sorted(p.id for p in previous if p.id not in seen)))
+
+
+def native_identity_collision(a: PokemonIdentityEvidence, b: PokemonIdentityEvidence) -> bool:
+    """Either identifier colliding is enough to forbid automatic allocation."""
+    return a.pid == b.pid or (a.encryption_constant is not None
+                             and a.encryption_constant == b.encryption_constant)
+
+
+def _reconcile_native(previous, incoming, namespace, unresolved_evidence):
+    if any(not isinstance(obs.evidence, TrustedNativeIdentityEvidence) for obs in incoming):
+        raise ValueError("mixed_identity_schema")
+    by_pid, by_ec = defaultdict(list), defaultdict(list)
+    for entity in previous:
+        by_pid[entity.evidence.pid].append(entity)
+        if entity.evidence.encryption_constant is not None:
+            by_ec[entity.evidence.encryption_constant].append(entity)
+    pid_counts = Counter(obs.evidence.pid for obs in incoming)
+    ec_counts = Counter(obs.evidence.encryption_constant for obs in incoming)
+    unresolved_pids = {old.pid for old in unresolved_evidence}
+    unresolved_ecs = {old.encryption_constant for old in unresolved_evidence
+                      if old.encryption_constant is not None}
+    bindings, seen = [], set()
+    for obs in sorted(incoming, key=lambda value: value.location):
+        evidence = obs.evidence
+        candidates = list({entity.id: entity for entity in (
+            *by_pid[evidence.pid], *by_ec[evidence.encryption_constant],
+        )}.values())
+        unique = pid_counts[evidence.pid] == 1 and ec_counts[evidence.encryption_constant] == 1
+        poisoned = evidence.pid in unresolved_pids or evidence.encryption_constant in unresolved_ecs
+        if evidence.unresolved_reason is not None or not unique or poisoned:
+            outcome = "AMBIGUOUS"
+        elif not candidates:
+            outcome = "NEW"
+        elif (len(candidates) == 1 and candidates[0].identity_status == "unambiguous"
+              and candidates[0].evidence.candidate_key == evidence.candidate_key):
+            outcome = "MATCHED"
+        else:
+            outcome = "AMBIGUOUS"
+        if outcome == "NEW":
+            # Allocation is stable on retries of this accepted save. The UUID is
+            # an application ID, not a claim that the native evidence is global.
+            binding = PokemonBinding(obs, outcome, str(uuid5(namespace, "pokeapp-identity-v2:" + evidence.candidate_key)))
+        elif outcome == "MATCHED":
+            binding = PokemonBinding(obs, outcome, candidates[0].id)
+            seen.add(candidates[0].id)
+        else:
+            ids = tuple(sorted(entity.id for entity in candidates))
+            binding = PokemonBinding(obs, outcome, None, ids)
+            seen.update(ids)
+        bindings.append(binding)
+    return Reconciliation(tuple(bindings), tuple(sorted(entity.id for entity in previous if entity.id not in seen)))
 
 
 def unique_legacy_flag_targets(bindings: tuple[PokemonBinding, ...]) -> dict[str, str | None]:

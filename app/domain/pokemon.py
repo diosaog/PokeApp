@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from app.domain.pokemon_identity import PokemonIdentityEvidence
 
 from app.domain.common import (
     JsonObject,
@@ -9,6 +8,10 @@ from app.domain.common import (
     clean_text,
     optional_id,
     require_non_negative_int,
+)
+from app.domain.pokemon_identity import (
+    PokemonIdentityEvidence,
+    identity_evidence_from_dict,
 )
 
 
@@ -112,7 +115,7 @@ class PrivatePokemon(PublicPokemon):
         object.__setattr__(self, "nature", clean_text(self.nature))
         object.__setattr__(self, "original_trainer", clean_text(self.original_trainer))
         if isinstance(self.identity_evidence, dict):
-            object.__setattr__(self, "identity_evidence", PokemonIdentityEvidence(**self.identity_evidence))
+            object.__setattr__(self, "identity_evidence", identity_evidence_from_dict(self.identity_evidence))
         elif self.identity_evidence is not None and not isinstance(self.identity_evidence, PokemonIdentityEvidence):
             raise ValueError("invalid_identity_evidence")
 

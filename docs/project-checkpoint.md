@@ -758,3 +758,7 @@ UNKNOWN / NOT REPRODUCED. Exact local resources were cleaned up. See
 and [live handoff](work-in-progress/phase14-live-handoff.md).
 
 **PHASE 15 READINESS: READY FOR CUTOVER. Do not start Phase 15 automatically.**
+
+## Phase 21 source validation checkpoint (2026-10-20)
+
+Phase 21 trusted Gen6/7 identity and native progression is locally validated: full Python 916 PASS, focused identity/progress/API and compatibility gates PASS, 360 native assertions PASS, native PostgreSQL projection PASS, fresh migration and bootstrap builds identical at 54 public / 15 private tables, and disposable PostgreSQL cleanup complete. Migrations 048/049 are new and remain unapplied to production at this checkpoint. Gen6/7 rewards stay gated pending transition and policy evidence; no owner data, history, saves or physical bytes changed. See [Phase 21 report](phase21-identity-progress-report.md) and [live handoff](work-in-progress/phase21-identity-progress-live.md).

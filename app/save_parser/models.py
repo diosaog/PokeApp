@@ -2,18 +2,18 @@
 
 from __future__ import annotations
 
+import re
 from collections import defaultdict
 from dataclasses import dataclass
 from enum import StrEnum
-import re
 from typing import Literal, Protocol
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
 from app.domain.pokemon_identity import (
+    ParsedPokemonObservation,
     PokemonIdentityEvidence,
     PokemonLocation,
-    ParsedPokemonObservation,
 )
 from app.save_parser.xy_identity import ObservedXYIdentity
 
@@ -159,6 +159,59 @@ class ObservedProgress(WireModel):
         return self
 
 
+class NativeGameProgress(WireModel):
+    """Additive Gen6/7 facts, deliberately outside certified reward evidence."""
+
+    schema_version: Literal[1]
+    model: Literal["gym_badges", "island_challenge"]
+    badge_flags: tuple[bool, ...] | None = Field(
+        default=None, min_length=8, max_length=8
+    )
+    league_access: bool | None = None
+    league_visited: bool | None = None
+    league_fly_unlocked: bool | None = None
+    hall_of_fame_entered: bool | None = None
+    champion_defeated: bool | None = None
+    island_stamp_flags: tuple[bool, ...] | None = Field(
+        default=None, min_length=4, max_length=4
+    )
+    island_challenge_completed: bool | None = None
+
+    @field_validator("schema_version", mode="before")
+    @classmethod
+    def version_is_integer(cls, value):
+        if type(value) is not int:
+            raise ValueError("invalid_native_progress_version")
+        return value
+
+    @model_validator(mode="after")
+    def validate_facts(self):
+        # No supported native field proves unrestricted League entry entitlement.
+        if self.league_access is not None:
+            raise ValueError("unproven_league_access")
+        if self.model == "gym_badges":
+            if (
+                self.badge_flags is None
+                or self.island_stamp_flags is not None
+                or self.island_challenge_completed is not None
+            ):
+                raise ValueError("invalid_gym_progress")
+        elif (
+            self.island_stamp_flags is None
+            or self.badge_flags is not None
+            or any(
+                value is not None
+                for value in (
+                    self.league_visited,
+                    self.league_fly_unlocked,
+                    self.hall_of_fame_entered,
+                )
+            )
+        ):
+            raise ValueError("invalid_island_progress")
+        return self
+
+
 def progress_layout(game: str) -> tuple[int, tuple[str, ...]] | None:
     """Native games supported by the worker, including PKHeX family labels."""
     if game in {"R", "S", "RS", "E"}:
@@ -182,9 +235,16 @@ class ObservedSave(WireModel):
     boxes: tuple[ParsedBox, ...] = Field(min_length=1, max_length=32)
     # Old neutral observations remain readable, without turning unknown into zero.
     progress: ObservedProgress | None = None
+    native_progress: NativeGameProgress | None = Field(
+        default=None, exclude_if=lambda v: v is None
+    )
 
     @model_validator(mode="after")
     def validate_layout(self):
+        if self.native_progress is not None:
+            expected = "gym_badges" if self.generation == 6 else "island_challenge"
+            if self.generation < 6 or self.native_progress.model != expected:
+                raise ValueError("invalid_native_progress_game")
         if self.generation == 7:
             if self.game not in {"SN", "MN", "US", "UM"} or len(self.boxes) != 32:
                 raise ValueError("invalid_gen7_layout")

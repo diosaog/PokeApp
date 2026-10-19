@@ -5,7 +5,7 @@ from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field
 
-Region = Literal["hoenn", "kanto", "sinnoh", "johto", "unova"]
+Region = Literal["hoenn", "kanto", "sinnoh", "johto", "unova", "kalos"]
 
 
 class ProgressQuery(BaseModel):
@@ -28,3 +28,13 @@ class ProgressRead(BaseModel):
     primary_region: Region | None = None
     regions: list[BadgeRegionRead] | None = None
     champion_defeated: bool | None = None
+    native_model: Literal["gym_badges", "island_challenge"] | None = None
+    league_access: bool | None = None
+    league_visited: bool | None = None
+    league_fly_unlocked: bool | None = None
+    hall_of_fame_entered: bool | None = None
+    completed_islands: list[Literal["melemele", "akala", "ulaula", "poni"]] | None = (
+        None
+    )
+    island_challenge_completed: bool | None = None
+    reward_state: Literal["pending_validation", "pending_policy"] | None = None
