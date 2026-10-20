@@ -6,4 +6,7 @@ contextBridge.exposeInMainWorld("launcher", {
   logout: () => ipcRenderer.invoke("launcher:logout"),
   retry: () => ipcRenderer.invoke("launcher:retry"),
   sync: () => ipcRenderer.invoke("launcher:sync"),
+  confirmWrite: (operationId, emulatorClosed) =>
+    ipcRenderer.invoke("launcher:write-confirm", operationId, emulatorClosed),
+  reconcileWrite: () => ipcRenderer.invoke("launcher:write-reconcile"),
 });

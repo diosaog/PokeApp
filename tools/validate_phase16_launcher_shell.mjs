@@ -50,8 +50,10 @@ try {
   }));
   assert.deepEqual(exposed.actions, [
     "chooseSave",
+    "confirmWrite",
     "login",
     "logout",
+    "reconcileWrite",
     "retry",
     "state",
     "sync",

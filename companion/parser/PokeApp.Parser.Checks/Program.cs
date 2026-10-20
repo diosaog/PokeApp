@@ -3,6 +3,12 @@ using PokeApp.Parser;
 using System.Text.Json;
 using static System.Buffers.Binary.BinaryPrimitives;
 
+if (args.Length == 3 && args[0] == "--write-checks")
+{
+    WriteChecks.Run(args[1], args[2]);
+    return;
+}
+
 if (args.Length == 2 && args[0] == "--progression")
 {
     Directory.CreateDirectory(args[1]);

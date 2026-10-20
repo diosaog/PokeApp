@@ -1,7 +1,28 @@
 using System.Text.Json;
 using PokeApp.Parser;
 
-// Bytes only. No caller path, flags selecting writes, UI or network access.
+// Zero args preserves the existing read-only byte protocol exactly. Explicit
+// write preparation/verification accepts bytes/intent only: never a path, file
+// write, network request or implicit permission to replace a local save.
+if (args.Length == 1 && args[0] is "--prepare-write" or "--verify-write")
+{
+    using var writeInput = Console.OpenStandardInput();
+    using var writeSnapshot = new MemoryStream();
+    var writeBuffer = new byte[81920];
+    while (true)
+    {
+        int count = writeInput.Read(writeBuffer);
+        if (count == 0) break;
+        if (writeSnapshot.Length + count > NativeWrite.MaxRequestBytes)
+        {
+            Console.WriteLine(JsonSerializer.Serialize(NativeWrite.Failure("INVALID_REQUEST"), Inspection.Json));
+            return 2;
+        }
+        writeSnapshot.Write(writeBuffer, 0, count);
+    }
+    Console.WriteLine(JsonSerializer.Serialize(NativeWrite.Execute(writeSnapshot.ToArray(), args[0] == "--verify-write"), Inspection.Json));
+    return 0;
+}
 if (args.Length != 0)
 {
     Console.WriteLine(JsonSerializer.Serialize(Inspection.Failure("UNSUPPORTED_VERSION"), Inspection.Json));

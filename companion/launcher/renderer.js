@@ -3,7 +3,8 @@ const $ = (id) => document.getElementById(id);
 let observation = null,
   revision = null,
   boxIndex = 0,
-  polling = false;
+  polling = false,
+  pendingWrite = null;
 const text = (id, value) => {
   $(id).textContent = value;
 };
@@ -63,13 +64,29 @@ function renderBox() {
   $("next-box").disabled = boxIndex >= boxes.length - 1;
 }
 function render(state) {
+  const write = state.write;
+  if (pendingWrite !== write?.operation_id)
+    $("emulator-closed").checked = false;
+  pendingWrite = write?.operation_id || null;
+  text(
+    "write-state",
+    write?.message || "No hay cambios autorizados pendientes.",
+  );
+  text("write-description", write?.description || "");
+  text("write-error", state.write_error || "");
+  $("write-confirmation").hidden = !write?.can_confirm;
+  $("confirm-write").disabled =
+    !write?.can_confirm || !$("emulator-closed").checked;
+  $("reconcile-write").hidden = !write?.can_reconcile;
+  const recovery = write?.status === "RECOVERY_REQUIRED";
+  $("select-save").disabled = recovery;
   if ("observation" in state) {
     observation = state.observation;
     revision = state.receipt_id;
     text(
       "save-identity",
       observation
-        ? `${observation.trainer.name} · ${({ SN: "Sol", MN: "Luna", US: "Ultrasol", UM: "Ultraluna", OR: "Rubí Omega", AS: "Zafiro Alfa" })[observation.game] || observation.game} · Gen ${observation.generation} · TID ${observation.trainer.tid}`
+        ? `${observation.trainer.name} · ${{ SN: "Sol", MN: "Luna", US: "Ultrasol", UM: "Ultraluna", OR: "Rubí Omega", AS: "Zafiro Alfa" }[observation.game] || observation.game} · Gen ${observation.generation} · TID ${observation.trainer.tid}`
         : "",
     );
     slots("party", observation?.party || Array(6).fill(null), "Equipo");
@@ -133,7 +150,7 @@ function render(state) {
             ? "Sincronizando…"
             : "Sin sincronizar",
   );
-  $("enable-sync").disabled = !observation || !state.principal;
+  $("enable-sync").disabled = recovery || !observation || !state.principal;
   if (state.outbox?.pending)
     $("receipt").textContent +=
       ` · ${state.outbox.pending} pendiente(s)${state.outbox.paused ? " · Revisa la conexión y pulsa Reintentar" : ""}`;
@@ -191,6 +208,15 @@ $("select-save").onclick = () => action(() => window.launcher.chooseSave());
 $("retry").onclick = () => action(() => window.launcher.retry());
 $("logout").onclick = () => action(() => window.launcher.logout());
 $("enable-sync").onclick = () => action(() => window.launcher.sync());
+$("emulator-closed").onchange = () => {
+  $("confirm-write").disabled = !pendingWrite || !$("emulator-closed").checked;
+};
+$("confirm-write").onclick = () =>
+  action(() =>
+    window.launcher.confirmWrite(pendingWrite, $("emulator-closed").checked),
+  );
+$("reconcile-write").onclick = () =>
+  action(() => window.launcher.reconcileWrite());
 $("login").onsubmit = (event) => {
   event.preventDefault();
   const form = new FormData(event.currentTarget),

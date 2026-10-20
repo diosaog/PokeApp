@@ -30,6 +30,26 @@
           Selecciona tu archivo para empezar. Puedes explorar sin conexión.
         </p>
         <p id="save-identity"></p>
+        <article aria-labelledby="write-title">
+          <h2 id="write-title">Cambios en tu partida</h2>
+          <p id="write-state" role="status">
+            No hay cambios autorizados pendientes.
+          </p>
+          <p id="write-description"></p>
+          <div id="write-confirmation" hidden>
+            <label
+              ><input id="emulator-closed" type="checkbox" /> He cerrado el
+              juego y el emulador.</label
+            >
+            <button id="confirm-write" disabled>
+              Revisar y confirmar cambio
+            </button>
+          </div>
+          <button id="reconcile-write" hidden>
+            Volver a comprobar la operación
+          </button>
+          <p id="write-error" role="status"></p>
+        </article>
         <h2>Equipo</h2>
         <div id="party" class="slots party" aria-label="Equipo"></div>
         <div class="box-nav">
@@ -39,7 +59,7 @@
         </div>
         <div id="box" class="slots" aria-label="Caja actual"></div>
         <p class="muted">
-          Lectura local. No se modifica el archivo ni se consumen artículos.
+          Explorar tu partida no modifica el archivo ni consume artículos.
         </p>
       </section>
       <section id="cloud-view" hidden>

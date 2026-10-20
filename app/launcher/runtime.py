@@ -8,6 +8,11 @@ from queue import Empty, Full, Queue
 
 from app.launcher.backend import BackendClient, BackendError, LauncherSession
 from app.launcher.core import LauncherCore
+from app.launcher.save_activity import SaveActivityGate, SaveBusy, save_read
+from app.launcher.write_control import LocalWriteController
+from app.launcher.write_engine import LocalWriteEngine
+from app.launcher.write_files import WriteSafetyError
+from app.save_parser.writer import PkhexProcessWriter
 from app.launcher.journal import LocalConflict
 from app.launcher.secrets import TokenStore
 from app.launcher.sync import SaveWatchService
@@ -16,6 +21,28 @@ from app.save_parser.files import SaveSource, SnapshotReader
 from app.save_parser.models import SaveError
 
 PRODUCTION_API = "https://pokeapp-api-production.up.railway.app"
+
+
+def _write_recovery_exists(directory):
+    """Absent/empty infrastructure is not an uncertain physical operation."""
+    try:
+        if directory.is_symlink() or directory.is_junction():
+            return True
+        if not directory.exists():
+            return False
+        for child in directory.iterdir():
+            if (
+                child.name == "write-backups"
+                and not child.is_symlink()
+                and not child.is_junction()
+                and child.is_dir()
+                and not any(child.iterdir())
+            ):
+                continue
+            return True
+        return False
+    except OSError:
+        return True
 
 
 class LauncherRuntime:
@@ -28,9 +55,30 @@ class LauncherRuntime:
         self.tokens = token_store or TokenStore(self.core.profile)
         self.store = TrustedStore(self.core.journal)
         self.lock = threading.Lock()
+        self.save_activity = SaveActivityGate()
+        writer = None
+        write_directory = self.core.profile / "writes"
+        had_recovery_material = _write_recovery_exists(write_directory)
+        executable = getattr(inspector.parser, "executable", None)
+        if executable is not None:
+            try:
+                writer = LocalWriteEngine(
+                    write_directory, PkhexProcessWriter(executable)
+                )
+            except Exception:  # fail closed on unreadable local recovery state
+                pass
+        self.writes = LocalWriteController(
+            self.save_activity,
+            lambda: self.core.config.selected_save,
+            writer,
+            on_verified=self._invalidate_written_save,
+        )
+        if writer is None and had_recovery_material:
+            self.save_activity.recovery_required = True
         self.stop = threading.Event()
         self.next_cloud_refresh = 0.0
         self.local_commands, self.cloud_commands = Queue(maxsize=1), Queue(maxsize=1)
+        self.write_commands = Queue(maxsize=1)
         self.value = {
             "local_status": "NO_SAVE",
             "receipt_id": None,
@@ -45,6 +93,7 @@ class LauncherRuntime:
             "cloud_receipt": None,
             "outbox": {"pending": 0, "paused": 0},
             "error": None,
+            "write_error": None,
         }
         self.receipt = None
         self.watch = None
@@ -89,12 +138,32 @@ class LauncherRuntime:
             and result["cloud_status"] != "SYNCING"
         ):
             result["cloud_status"] = "OFFLINE"
+        result["write"] = self.writes.state()
         return result
 
     def command(self, name, args=None):
         args = args or {}
+        if not isinstance(args, dict):
+            raise ValueError("invalid_command_arguments")
         if name == "state":
             return self.state(args.get("known_receipt"))
+        if name in ("write_confirm", "write_reconcile"):
+            if name == "write_confirm":
+                state = self.writes.state()
+                if (
+                    set(args) != {"operation_id", "closed_emulator_confirmed"}
+                    or args["closed_emulator_confirmed"] is not True
+                    or not state["can_confirm"]
+                    or args["operation_id"] != state["operation_id"]
+                ):
+                    raise ValueError("write_confirmation_required")
+            elif args:
+                raise ValueError("unexpected_recovery_arguments")
+            try:
+                self.write_commands.put_nowait((name, dict(args)))
+            except Full:
+                return {"status": "BUSY"}
+            return {"status": "QUEUED"}
         if name not in ("select", "login", "logout", "retry", "sync"):
             raise ValueError("command_not_supported")
         if name == "select" and (
@@ -144,52 +213,97 @@ class LauncherRuntime:
     def _local_loop(self):
         while not self.stop.wait(0.1):
             try:
-                try:
-                    name, args = self.local_commands.get_nowait()
-                    if name == "select":
-                        self.core.select(Path(args["path"]))
-                        self._patch(
-                            selected_save=self.core.config.selected_save,
-                            observation=None,
-                            receipt_id=None,
-                            cloud_receipt=None,
-                            local_status="READING",
-                        )
-                        self._load_local()
-                    elif name == "sync":
-                        principal = self.state()["principal"]
-                        if principal:
-                            # Upgrading an old private-inbox opt-in must not silently
-                            # authorize the new registration/economy effects.
-                            self.store.enable(
-                                self.client.origin, principal["trainer_id"]
-                            )
-                            self._patch(cloud_sync=True, error=None)
-                            self._enqueue_local()
-                    self.local_commands.task_done()
-                except Empty:
-                    pass
-                if self.watch:
-                    result = self.watch.tick(time.monotonic())
-                    if result:
-                        if result.status in ("SYNCED", "NO_CHANGE"):
-                            receipt = self.core.journal.head(self.watch.source)
-                            if self.receipt is None or self.receipt.id != receipt.id:
-                                self._patch(cloud_receipt=None)
-                            self.receipt = receipt
-                            self._patch(
-                                local_status="READY",
-                                receipt_id=receipt.id,
-                                observation=receipt.observation.model_dump(mode="json"),
-                            )
-                            self._enqueue_local()
-                        else:
-                            self._patch(
-                                local_status=result.error or "LOCAL_UNAVAILABLE"
-                            )
-            except Exception:  # noqa: BLE001 - worker boundary, private parser errors never reach UI
+                self._write_step()
+                self._local_step()
+            except SaveBusy:
+                continue  # a local physical write/recovery exclusively owns the save
+            except Exception:  # noqa: BLE001 - sanitized local boundary
                 self._patch(local_status="LOCAL_UNAVAILABLE")
 
+    def _write_step(self):
+        try:
+            name, args = self.write_commands.get_nowait()
+        except Empty:
+            return
+        try:
+            if name == "write_confirm":
+                result = self.writes.confirm(**args)
+            else:
+                result = self.writes.reconcile()
+            self._patch(write_error=None)
+            if result["status"] in ("APPLIED_VERIFIED", "RESTORED_VERIFIED"):
+                self._load_local()
+        except SaveBusy:
+            self._patch(
+                write_error="Hay una lectura o sincronización en curso. Espera y vuelve a confirmar."
+            )
+        except WriteSafetyError:
+            self._patch(
+                write_error="No se pudo confirmar el cambio. Revisa la partida seleccionada y conserva las copias."
+            )
+        except Exception:  # no native output, private path or journal data to UI
+            self.save_activity.recovery_required = True
+            self._patch(
+                write_error="No se pudo verificar la operación. La sincronización queda pausada."
+            )
+        finally:
+            self.write_commands.task_done()
+
+    def _invalidate_written_save(self):
+        # Called while the controller still holds the exclusive write lease.
+        # A cloud worker can resume only after stale upload eligibility is gone.
+        self.receipt = None
+        self.watch = None
+        self._patch(
+            local_status="READING",
+            receipt_id=None,
+            observation=None,
+            cloud_receipt=None,
+        )
+
+    @save_read
+    def _local_step(self):
+        try:
+            name, args = self.local_commands.get_nowait()
+            if name == "select":
+                self.core.select(Path(args["path"]))
+                self._patch(
+                    selected_save=self.core.config.selected_save,
+                    observation=None,
+                    receipt_id=None,
+                    cloud_receipt=None,
+                    local_status="READING",
+                )
+                self._load_local()
+            elif name == "sync":
+                principal = self.state()["principal"]
+                if principal:
+                    # Upgrading an old private-inbox opt-in must not silently
+                    # authorize the new registration/economy effects.
+                    self.store.enable(self.client.origin, principal["trainer_id"])
+                    self._patch(cloud_sync=True, error=None)
+                    self._enqueue_local()
+            self.local_commands.task_done()
+        except Empty:
+            pass
+        if self.watch:
+            result = self.watch.tick(time.monotonic())
+            if result:
+                if result.status in ("SYNCED", "NO_CHANGE"):
+                    receipt = self.core.journal.head(self.watch.source)
+                    if self.receipt is None or self.receipt.id != receipt.id:
+                        self._patch(cloud_receipt=None)
+                    self.receipt = receipt
+                    self._patch(
+                        local_status="READY",
+                        receipt_id=receipt.id,
+                        observation=receipt.observation.model_dump(mode="json"),
+                    )
+                    self._enqueue_local()
+                else:
+                    self._patch(local_status=result.error or "LOCAL_UNAVAILABLE")
+
+    @save_read
     def _enqueue_local(self):
         state = self.state()
         principal = state["principal"]
@@ -220,8 +334,9 @@ class LauncherRuntime:
                 outbox=self.store.summary(self.client.origin, principal["trainer_id"]),
             )
         except (LocalConflict, SaveError) as error:
-            self._patch(cloud_receipt=None, error=str(error))
+            self._patch(cloud_receipt=None, local_status="READING", error=str(error))
 
+    @save_read
     def _cloud_step(self):
         health = self.client.json("GET", "/health")
         if health.get("status") != "ok" or health.get("service") != "pokeapp-api":
@@ -369,6 +484,8 @@ class LauncherRuntime:
                 self._patch(cloud_status="SYNCING")
                 self._cloud_step()
                 failures, next_attempt = 0, time.monotonic() + 30
+            except SaveBusy:
+                continue  # no upload/reimport overlaps a physical write/recovery
             except BackendError as exc:
                 code = str(exc)
                 if code in ("LOGIN_REQUIRED", "SESSION_REJECTED"):

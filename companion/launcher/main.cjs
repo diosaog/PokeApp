@@ -96,7 +96,10 @@ app.whenReady().then(() => {
     const result = await dialog.showOpenDialog(win, {
       properties: ["openFile"],
       filters: [
-        { name: "Save Pokémon (incluye main de X/Y, ORAS y Sol/Luna/Ultrasol/Ultraluna)", extensions: ["*"] },
+        {
+          name: "Save Pokémon (incluye main de X/Y, ORAS y Sol/Luna/Ultrasol/Ultraluna)",
+          extensions: ["*"],
+        },
         { name: "Save con extensión", extensions: ["sav", "dsv", "srm"] },
       ],
     });
@@ -120,6 +123,44 @@ app.whenReady().then(() => {
       authorize(event);
       return request(name);
     });
+  ipcMain.handle(
+    "launcher:write-confirm",
+    async (event, operationId, emulatorClosed) => {
+      authorize(event);
+      if (
+        typeof operationId !== "string" ||
+        operationId.length > 128 ||
+        emulatorClosed !== true
+      )
+        throw new Error("Confirma que el juego y el emulador están cerrados.");
+      const state = await request("state");
+      if (
+        !state.write?.can_confirm ||
+        state.write.operation_id !== operationId ||
+        !state.write.description
+      )
+        throw new Error("La acción ya no está pendiente de confirmación.");
+      const confirmation = await dialog.showMessageBox(win, {
+        type: "warning",
+        title: "Confirmar cambio local",
+        message: `${state.write.game} · ${state.write.description}`,
+        detail: `${state.selected_save}\n\nEl juego y el emulador deben permanecer cerrados. Se conservará una copia del archivo original. No se consume ningún artículo.`,
+        buttons: ["Cancelar", "Confirmar cambio"],
+        defaultId: 0,
+        cancelId: 0,
+        noLink: true,
+      });
+      if (confirmation.response !== 1) return { status: "CANCELLED" };
+      return request("write_confirm", {
+        operation_id: operationId,
+        closed_emulator_confirmed: true,
+      });
+    },
+  );
+  ipcMain.handle("launcher:write-reconcile", (event) => {
+    authorize(event);
+    return request("write_reconcile");
+  });
   win = new BrowserWindow({
     show: process.env.POKEAPP_LAUNCHER_HEADLESS_TEST !== "1",
     width: 1120,
