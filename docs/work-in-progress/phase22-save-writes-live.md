@@ -4,6 +4,43 @@ Entry 2026-10-20 Europe/Madrid: `77c2f18f9e07db19c5c6e58446fbcfd830228977`,
 main/origin 0/0, clean tracked tree. **STATUS: PARTIAL / PUBLIC RELEASE BLOCKED.**
 Phase 21 accepted; identity/progress rewards remain gated.
 
+## Safety resolution follow-up — 2026-10-20
+
+Entry `e5cb0821b96d0f7945e2e5ff4f19a32873fe20b1`, fetched main/origin 0/0,
+tracked tree clean. **Phase22 remains PARTIAL; public writes disabled.**
+[Safety recommendation](../phase22-safety-resolution.md),
+[new evidence](../phase22-safety-resolution-evidence.json).
+
+The existing ReplaceFileW race is reproduced with independent processes.
+Strict no-delete sharing blocks our own replacement; permitting it or releasing
+the handle admits an external replacement. This does not prove Windows-wide
+impossibility: TxF commit/rollback/process-termination isolation passed on this
+Windows/NTFS host. Microsoft discourages new TxF dependencies; no release or
+multi-platform qualification is claimed.
+
+Recommended alternative: verified export to a new file, never replacement of
+the selected source. An isolated tools-only prototype holds source/stage handles,
+publishes through a directory-relative native rename with replacement forbidden,
+and reports EXPORTED_VERIFIED / applied_to_source=false. It preserves originals,
+refuses collisions and treats partial/uncertain files as read-only recovery
+material. It does not grant entitlement, sync or automatic-application authority.
+
+New PASS: sharing/rename **7 scenarios**, TxF **3 scenarios**, export **9 unique
+tests**, native real-X fixture-copy integration **1**. Only affected recovery
+tests were repeated; final Ruff/format/compile pass. Prior native225/Python69,
+eight-game and package gates below remain retained, not rerun. Public0.20.0,
+candidate0.22.0-rc.1, product code and owner data are untouched; no production
+access or deployment. No new helpers remain. Private evidence:
+`%LOCALAPPDATA%/PokeApp-migration-evidence/phase22-safety-resolution`.
+
+**Next recommended implementation:** integrate export intent/publication/recovery
+into the existing durable journal and UI, with a distinct exported status and no
+automatic replacement or economic consumption. Manual substitution is a separate
+step, not certified by export. Close handles does not prevent later external edits;
+power-loss and hostile metadata/kernel behavior remain outside this proof.
+This follow-up supersedes the generic next action at the end of the historical
+checkpoint below. Exact final commit is obtained from Git. **STOP; no Phase23.**
+
 ## Scope and current work
 
 Implemented a byte-only native preparation/verification mode in the existing

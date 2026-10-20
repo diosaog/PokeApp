@@ -5,6 +5,11 @@ physical-write activation/release BLOCKED.** No Phase 23.
 [Evidence](phase22-save-writes-evidence.json),
 [live handoff](work-in-progress/phase22-save-writes-live.md).
 
+Follow-up: [Windows safety resolution](phase22-safety-resolution.md) recommends
+new-file export and records independent-process proofs, including a feasible
+but unqualified TxF alternative. Phase22 remains PARTIAL; the original product
+implementation and all valid gates below are retained.
+
 Entry `77c2f18f9e07db19c5c6e58446fbcfd830228977`, main/origin aligned, clean
 tracked tree. Application commit `62822a69370e7ee34d028c607a0d2c9d2644ddb3`.
 Documentation closure follows separately; obtain its exact HEAD from Git.

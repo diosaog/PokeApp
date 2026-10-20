@@ -15,7 +15,11 @@ milestone record; it does not maintain a second live phase-status ledger.
   [Report](phase22-save-writes-report.md), [evidence](phase22-save-writes-evidence.json),
   [live handoff](work-in-progress/phase22-save-writes-live.md).
   Exact package build temporary remains after policy-rejected cleanup; see handoff.
-  **Next: Antonio acceptance / resolve Phase22 release blockers. No Phase23.**
+  [Safety follow-up](phase22-safety-resolution.md): isolated new-file export
+  recommended; 7 sharing + 3 TxF scenarios, 9 export tests and one native X
+  integration PASS. TxF works on this host but is not product-qualified.
+  Existing application/candidate/public release unchanged.
+  **Next: integrate explicit export journal/UI within Phase22. No Phase23.**
 
 - Previous packet: **21 - Trusted Gen6/7 identity and native progression, DONE**.
   Application `5260eac`, 048/049 applied once; 41 migration records.

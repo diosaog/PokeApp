@@ -1,0 +1,346 @@
+{
+  "observation_date": "2026-10-20",
+  "phase_status": "PARTIAL",
+  "entry_head": "e5cb0821b96d0f7945e2e5ff4f19a32873fe20b1",
+  "application_source_retained": "62822a69370e7ee34d028c607a0d2c9d2644ddb3",
+  "recommendation": "Integrate verified new-file export; keep automatic original replacement disabled.",
+  "scope": "Isolated local tools/tests/docs only; no product or release integration.",
+  "environment": {
+    "windows": "Windows-11-10.0.26300-SP0",
+    "python": "3.14.3",
+    "filesystem": "local NTFS"
+  },
+  "sharing": {
+    "status": "PASS",
+    "scenario_count": 7,
+    "cases": [
+      {
+        "case": "deny_write_delete_blocks_normal_apis_and_own_replace",
+        "results": {
+          "child_write": {
+            "success": false,
+            "winerror": 32,
+            "pid": 25028
+          },
+          "child_move": {
+            "success": false,
+            "winerror": 32,
+            "pid": 31064
+          },
+          "child_replace": {
+            "success": false,
+            "winerror": 32,
+            "pid": 19700
+          },
+          "own_replace": {
+            "success": false,
+            "winerror": 32
+          },
+          "child_handle_rename": {
+            "success": false,
+            "winerror": 5,
+            "pid": 40576
+          }
+        }
+      },
+      {
+        "case": "delete_sharing_allows_external_replace_then_our_overwrite",
+        "external": {
+          "success": true,
+          "winerror": 0,
+          "pid": 23744
+        },
+        "own": {
+          "success": true,
+          "winerror": 0
+        },
+        "old_handle_kept_original": true,
+        "external_bytes_only_in_witness": true
+      },
+      {
+        "case": "strict_handle_release_reopens_gap",
+        "external": {
+          "success": true,
+          "winerror": 0,
+          "pid": 23508
+        },
+        "own": {
+          "success": true,
+          "winerror": 0
+        }
+      },
+      {
+        "case": "handle_source_rename_target_still_named_not_cas",
+        "blocked": {
+          "success": false,
+          "winerror": 5
+        },
+        "external": {
+          "success": true,
+          "winerror": 0,
+          "pid": 2844
+        },
+        "own": {
+          "success": true,
+          "winerror": 0
+        }
+      },
+      {
+        "case": "posix_handle_rename_against_no_delete_sharing",
+        "result": {
+          "success": false,
+          "winerror": 32,
+          "pid": 41652
+        },
+        "original_at_path": true
+      },
+      {
+        "case": "preexisting_writable_mapping_with_file_handles_closed",
+        "read_handle_open_success": false,
+        "read_handle_open_error": 32,
+        "child_mutation": {
+          "success": true,
+          "winerror": 0,
+          "pid": 31968
+        },
+        "path_changed_externally": true
+      },
+      {
+        "case": "no_replace_rename_preserves_existing_destination",
+        "external": {
+          "success": true,
+          "winerror": 0,
+          "pid": 31972
+        },
+        "refused": {
+          "success": false,
+          "winerror": 183
+        }
+      }
+    ]
+  },
+  "txf": {
+    "status": "PASS",
+    "scenario_count": 3,
+    "cases": [
+      {
+        "mode": "commit",
+        "status": "PASS",
+        "outside_read_before_commit": {
+          "success": true,
+          "winerror": 0,
+          "old_bytes_if_readable": true
+        },
+        "child_writer": {
+          "success": false,
+          "winerror": 6800,
+          "pid": 20864
+        },
+        "child_replacer": {
+          "success": false,
+          "winerror": 6800,
+          "pid": 40292
+        },
+        "end": {
+          "success": true,
+          "winerror": 0,
+          "operation": "commit",
+          "pid": 17700
+        },
+        "expected_final_content": "candidate",
+        "ordinary_writer_after_end": {
+          "success": true,
+          "winerror": 0,
+          "pid": 24804
+        }
+      },
+      {
+        "mode": "rollback",
+        "status": "PASS",
+        "outside_read_before_commit": {
+          "success": true,
+          "winerror": 0,
+          "old_bytes_if_readable": true
+        },
+        "child_writer": {
+          "success": false,
+          "winerror": 6800,
+          "pid": 38956
+        },
+        "child_replacer": {
+          "success": false,
+          "winerror": 6800,
+          "pid": 44600
+        },
+        "end": {
+          "success": true,
+          "winerror": 0,
+          "operation": "rollback",
+          "pid": 12712
+        },
+        "expected_final_content": "original",
+        "ordinary_writer_after_end": {
+          "success": true,
+          "winerror": 0,
+          "pid": 23256
+        }
+      },
+      {
+        "mode": "process-termination",
+        "status": "PASS",
+        "outside_read_before_commit": {
+          "success": true,
+          "winerror": 0,
+          "old_bytes_if_readable": true
+        },
+        "child_writer": {
+          "success": false,
+          "winerror": 6800,
+          "pid": 2464
+        },
+        "child_replacer": {
+          "success": false,
+          "winerror": 6800,
+          "pid": 22852
+        },
+        "end": {
+          "operation": "forced_process_termination",
+          "exit_code": 1
+        },
+        "expected_final_content": "original",
+        "ordinary_writer_after_end": {
+          "success": true,
+          "winerror": 0,
+          "pid": 24420
+        }
+      }
+    ],
+    "qualification": "Feasible on this host, not product-certified; Microsoft discourages new dependencies."
+  },
+  "export": {
+    "status": "PASS_COMBINED_FOCUSED_EVIDENCE",
+    "unique_tests": 9,
+    "cases": [
+      "test_valid_partial_is_not_a_published_export",
+      "test_new_export_original_unchanged_and_replay_cannot_replace",
+      "test_child_cannot_write_rename_or_replace_locked_source_and_stage",
+      "test_child_claims_final_name_no_overwrite_occurs",
+      "test_existing_writer_and_writable_mapping_fail_closed",
+      "test_two_prepared_processes_same_name_only_one_can_publish",
+      "test_process_death_partial_is_rejected_final_can_be_inspected_read_only",
+      "test_later_export_edit_is_not_an_accepted_receipt",
+      "test_later_source_edit_stays_intact_recovery_is_historical_only"
+    ],
+    "initial_eight": {
+      "status": "PASS",
+      "evidence_kind": "retained tool output, no private logfile",
+      "tool_chunk": "78a8c5",
+      "duration_seconds": 2.05,
+      "exit_code": 0
+    },
+    "inspect_guard_followup": {
+      "evidence": "export-final-focused.log",
+      "tests_run": 4,
+      "passed": 3,
+      "harness_expectation_failures": 1,
+      "reason": "New published-name guard rejects partials earlier; expected code updated."
+    },
+    "affected_crash_rerun": {
+      "evidence": "export-crash-final.log",
+      "tests_run": 1,
+      "passed": 1,
+      "exit_code": 0
+    },
+    "receipt_state": "EXPORTED_VERIFIED",
+    "applied_to_source": false,
+    "source_writes": 0,
+    "existing_destination_overwrites": 0
+  },
+  "native_x_connection": {
+    "operation_id": "218bf7ab-6a7c-50d8-ae5f-50dc3ff44411",
+    "source_sha256": "fe7cd382448ce308b3ecfb1c32c908ad7cc6b763f1e73ff8b7f38e616d7e95f8",
+    "output_sha256": "3cc5145bc51f732be45d1b837f2b3bbd7c041f3afb43e9a5f4621f1ac4138842",
+    "output_path": "disposable-copy/exports/export-<operation-id>.save",
+    "state": "EXPORTED_VERIFIED",
+    "applied_to_source": false,
+    "status": "PASS",
+    "game": "X",
+    "original_fixture_unchanged": true,
+    "selected_copy_unchanged": true,
+    "same_reader_and_digest": true,
+    "native_prepare_verify": true,
+    "local_only": true,
+    "temporary_directory_removed": true
+  },
+  "static_checks": {
+    "ruff_check": "PASS",
+    "ruff_format": "PASS",
+    "py_compile": "PASS",
+    "scope": [
+      "tools/phase22_safe_export.py",
+      "tools/phase22_windows_sharing_probe.py",
+      "tools/phase22_windows_txf_probe.py",
+      "tools/validate_phase22_export_native.py",
+      "tests/test_phase22_safe_export.py"
+    ],
+    "last_changes": "Import order, equivalent removeprefix formatting and explicit default check=False; no functional change after final focused tests."
+  },
+  "retained_not_rerun": {
+    "native_checks": 225,
+    "focused_python_tests": 69,
+    "eight_game_real_native_windows_packaged": "PASS_RETAINED",
+    "packaged_electron_runs": 2
+  },
+  "preservation": {
+    "owner_saves": "NOT_ACCESSED",
+    "original_public_X_fixture": "HASH_UNCHANGED",
+    "production_access": false,
+    "deployments": false,
+    "product_source_changes": false,
+    "public_launcher": "0.20.0 unchanged",
+    "candidate": "0.22.0-rc.1 not rebuilt",
+    "rewards": "unchanged",
+    "protected_guide": "NOT_ACCESSED",
+    "phase23": "NOT_STARTED"
+  },
+  "limits": [
+    "No automatic replacement guarantee in current product.",
+    "No public write operation enabled.",
+    "Export receipt does not certify manual application, entitlement consumption or cloud acceptance.",
+    "Later edits after handle release remain possible.",
+    "No new durable export journal or UI.",
+    "No universal hostile attribute/reparse/admin/kernel defense.",
+    "No power-loss/hardware durability or Windows version matrix certification.",
+    "New export integration tested with one real X copy, not a repeated eight-game matrix."
+  ],
+  "cleanup": {
+    "export_test_trees": "removed by TemporaryDirectory",
+    "native_X_test_tree_removed": true,
+    "research_helpers_remaining": 0,
+    "dummy_research_files": "retained as private evidence",
+    "historical_policy_blocked_build_directory": "untouched; no new deletion attempted"
+  },
+  "private_evidence_root": "%LOCALAPPDATA%/PokeApp-migration-evidence/phase22-safety-resolution",
+  "private_json_evidence": {
+    "sharing": {
+      "path": "sharing-47c4159a32e44ae8ab7e412aec3e7100/sharing-evidence.json",
+      "sha256": "bae24391b719bc46661ecd931d30471830d3ea0b05880d35476568121d3cf8e1"
+    },
+    "txf": {
+      "path": "txf-875031eff21f47baa6e93e4cd84b3ce0/txf-evidence.json",
+      "sha256": "289a7a73b1d1a1e13570ca8b93f12a57b6a2af46224fc9da19187855f3711ecd"
+    },
+    "native_x": {
+      "path": "native-x-export-final/native-export-evidence.json",
+      "sha256": "716b8020daf7d69559895c645750abef7d42e395e30a08bb368afb08668e9077"
+    }
+  },
+  "source_sha256_utf8_lf": {
+    "tools/phase22_safe_export.py": "07404569f60de1ca12939a7bf203439edbb940cf565d115e8e1132a86cfc1c3d",
+    "tools/phase22_windows_sharing_probe.py": "baa285d0e3e341f7f4b0cc37252fd303492bf583ffbfaebc9fd317e46bcaa1cd",
+    "tools/phase22_windows_txf_probe.py": "6fdcee0ee2c76bf81345981edfae3ef1000bec7ada11101caf5a68e53e7d9f08",
+    "tools/validate_phase22_export_native.py": "1cab20c7993b6aef51c7fbdec3bf5a6d8767c6d9ed34fa4b2c527e57e8275388",
+    "tests/test_phase22_safe_export.py": "c96a305835f73664c4958c2f06928eb68b24fc2a849b9c2e9865331f1f1b1e47"
+  },
+  "final_head": "Obtain from the commit carrying this evidence; no self-referential hash."
+}
