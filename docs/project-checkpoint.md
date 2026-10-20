@@ -1,11 +1,24 @@
 # PokeApp 2.0 Project Checkpoint
 
-Checkpoint reconciled: 2026-10-18. This file is the project index and historical
+Checkpoint reconciled: 2026-10-20. This file is the project index and historical
 milestone record; it does not maintain a second live phase-status ledger.
 
 ## Current project position
 
-- Current packet: **20 - Ultra Sun/Ultra Moon read/import, DONE**. Native US/UM
+- Current packet: **21 - Trusted Gen6/7 identity and native progression, DONE**.
+  Application `5260eac`, 048/049 applied once; 41 migration records.
+  Railway `319be126-91fd-43d7-98c3-dd8556941757` SUCCESS; Cloudflare version
+  `5d6ceff7-03f2-4c4d-ac43-c1a63c137007` serves 100%.
+  Existing 916 Python / 360 native and focused gates retained. Final 26 public
+  checks PASS, 59/59 scoped baseline tables identical, Advisor ERROR/WARN unchanged.
+  Gen6/7 rewards remain pending_validation/pending_policy; no owner mutation,
+  backfill, new Launcher package or physical save write.
+  [Report](phase21-identity-progress-report.md),
+  [evidence](phase21-identity-progress-evidence.json),
+  [live handoff](work-in-progress/phase21-identity-progress-live.md).
+  **Next: Antonio acceptance. STOP before Phase 22.**
+
+- Historical packet: **20 - Ultra Sun/Ultra Moon read/import, DONE**. Native US/UM
   integrity,32 boxes, forms/types and Spanish data; trusted import and privacy.
   Real public gameplay fixtures for both games and eight-game local/packaged
   regressions pass. Source `99b302e`;047 applied once; Railway/Cloudflare and
@@ -15,7 +28,7 @@ milestone record; it does not maintain a second live phase-status ledger.
   default edge timed out; original hostname/TLS verified, no DNS/app change.
   [Report](phase20-usum-report.md), [evidence](phase20-usum-evidence.json),
   [live record](work-in-progress/phase20-usum-live.md).
-  **Next: Antonio acceptance. STOP before Phase21.**
+  Phase21 was subsequently authorized and is closed above.
 
 - Historical packet: **19 - Sun/Moon read/import, DONE**. Native SN/MN only,32 boxes,
   signature/checksum integrity, form/types and Spanish data; trusted current-save
@@ -759,6 +772,11 @@ and [live handoff](work-in-progress/phase14-live-handoff.md).
 
 **PHASE 15 READINESS: READY FOR CUTOVER. Do not start Phase 15 automatically.**
 
-## Phase 21 source validation checkpoint (2026-10-20)
+## Phase 21 closure (2026-10-20)
 
-Phase 21 trusted Gen6/7 identity and native progression is locally validated: full Python 916 PASS, focused identity/progress/API and compatibility gates PASS, 360 native assertions PASS, native PostgreSQL projection PASS, fresh migration and bootstrap builds identical at 54 public / 15 private tables, and disposable PostgreSQL cleanup complete. Migrations 048/049 are new and remain unapplied to production at this checkpoint. Gen6/7 rewards stay gated pending transition and policy evidence; no owner data, history, saves or physical bytes changed. See [Phase 21 report](phase21-identity-progress-report.md) and [live handoff](work-in-progress/phase21-identity-progress-live.md).
+Phase 21's source-validation checkpoint is superseded by the verified closure
+above: 048/049 are applied once and compatible API/web deployments are live.
+Gen6/7 rewards stay gated pending transition and policy evidence. No business
+table change, owner mutation, backfill or physical save write occurred.
+See [Phase 21 report](phase21-identity-progress-report.md) and
+[live handoff](work-in-progress/phase21-identity-progress-live.md).

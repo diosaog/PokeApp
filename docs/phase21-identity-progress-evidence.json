@@ -1,0 +1,230 @@
+{
+  "status": "PHASE 21 DONE",
+  "date": "2026-10-20 Europe/Madrid",
+  "scope": "Trusted scoped Gen6/7 identity and native progress reads; Gen6/7 rewards remain gated",
+  "entry_head": "1c5e1a0e46af18c02e6739c9670efa12ef5b5ff7",
+  "application_head": "5260eac53b555840df5dc11fc40b8e1078328782",
+  "retained_validation": {
+    "python": 916,
+    "python_includes_unrelated_untracked_map_tests": 19,
+    "native_assertions": 360,
+    "phase21_identity": 16,
+    "phase21_progress_api": 30,
+    "schema": 15,
+    "react": 7,
+    "browser": 2,
+    "native_pg_projection_checks": 2,
+    "legacy_identity_sql_checks": 19,
+    "fresh_migration_bootstrap_public_tables": 54,
+    "fresh_migration_bootstrap_private_tables": 15,
+    "local_pg_cleanup": "disposable databases dropped; cluster stopped; no postgres process on final resume",
+    "note": "Previous valid gates retained; no matrix rerun on final resume"
+  },
+  "build_validation": {
+    "production_ts_vite": "PASS",
+    "wrangler_dry_run": "PASS",
+    "railway_linux_eight_game_native_smoke": "PASS in retained successful image build log"
+  },
+  "railway": {
+    "deployment": "319be126-91fd-43d7-98c3-dd8556941757",
+    "status": "SUCCESS",
+    "image_digest": "sha256:b36235100b16e070a879602fa111616b92da0317eb106ea7d8b1c3acc3de45b0",
+    "committed_bundle_files": 265,
+    "source": "5260eac53b555840df5dc11fc40b8e1078328782"
+  },
+  "cloudflare": {
+    "deployment": "bc36d34b-42b1-490b-91fb-bb1817af5e6d",
+    "version": "5d6ceff7-03f2-4c4d-ac43-c1a63c137007",
+    "traffic_percent": 100,
+    "source_verified_by_local_build_asset_bytes": "5260eac53b555840df5dc11fc40b8e1078328782"
+  },
+  "preservation": {
+    "status": "PASS",
+    "at": "2026-10-20T11:46:12.778634+00:00",
+    "ref": "uwleqeuzsveqlugugzba",
+    "scoped_tables": 59,
+    "exactly_equal_tables": 59,
+    "changed_tables": [],
+    "business_tables_unchanged": true,
+    "owner_stable_unchanged": true,
+    "retained_private_schema_security_unchanged": true,
+    "native_service_functions_verified": 6,
+    "history_count": 41,
+    "prior_migration_records_unchanged": 39,
+    "phase21_migrations": [
+      {
+        "version": "20261019231747",
+        "name": "048_trusted_gen67_identity",
+        "record_hash": "34c506315dc3fe772d6242f1c8db71bb"
+      },
+      {
+        "version": "20261019231750",
+        "name": "049_native_progress_read",
+        "record_hash": "17cf570f4ca6ca03ee3e926b2b6ebfec"
+      }
+    ],
+    "advisors_before": {
+      "INFO": 171,
+      "ERROR": 24,
+      "WARN": 5
+    },
+    "advisors_after": {
+      "INFO": 171,
+      "ERROR": 24,
+      "WARN": 5
+    },
+    "new_or_removed_error_warn": 0,
+    "business_write_fixtures": 0
+  },
+  "public_smoke": {
+    "status": "PASS",
+    "at": "2026-10-20T11:46:45.057460+00:00",
+    "checks": [
+      {
+        "name": "API health",
+        "pass": true,
+        "status": 200
+      },
+      {
+        "name": "Unauthenticated denial /v1/me",
+        "pass": true,
+        "status": 401
+      },
+      {
+        "name": "Unauthenticated denial /v1/read/seasons",
+        "pass": true,
+        "status": 401
+      },
+      {
+        "name": "Unauthenticated denial /v1/read/seasons/00000000-0000-0000-0000-000000000001/progress",
+        "pass": true,
+        "status": 401
+      },
+      {
+        "name": "Unauthenticated denial /v1/read/seasons/00000000-0000-0000-0000-000000000001/pc",
+        "pass": true,
+        "status": 401
+      },
+      {
+        "name": "Unauthenticated denial /v1/read/seasons/00000000-0000-0000-0000-000000000001/overview",
+        "pass": true,
+        "status": 401
+      },
+      {
+        "name": "Unauthenticated denial /v1/read/seasons/00000000-0000-0000-0000-000000000001/trainers/00000000-0000-0000-0000-000000000001/collection",
+        "pass": true,
+        "status": 401
+      },
+      {
+        "name": "Unauthenticated denial /v1/seasons/00000000-0000-0000-0000-000000000001/saves/context",
+        "pass": true,
+        "status": 401
+      },
+      {
+        "name": "Invalid bearer denial",
+        "pass": true,
+        "status": 401
+      },
+      {
+        "name": "Exact web CORS",
+        "pass": true,
+        "status": 200
+      },
+      {
+        "name": "Foreign origin denied",
+        "pass": true,
+        "status": 400
+      },
+      {
+        "name": "Web exact content /",
+        "pass": true,
+        "status": 200,
+        "sha256": "56e07ca693254e732845a0233f0968e97b583b6726e56798e51bad1094795c43"
+      },
+      {
+        "name": "Web security headers /",
+        "pass": true
+      },
+      {
+        "name": "Web exact content /pc",
+        "pass": true,
+        "status": 200,
+        "sha256": "56e07ca693254e732845a0233f0968e97b583b6726e56798e51bad1094795c43"
+      },
+      {
+        "name": "Web security headers /pc",
+        "pass": true
+      },
+      {
+        "name": "Web exact content /save",
+        "pass": true,
+        "status": 200,
+        "sha256": "56e07ca693254e732845a0233f0968e97b583b6726e56798e51bad1094795c43"
+      },
+      {
+        "name": "Web security headers /save",
+        "pass": true
+      },
+      {
+        "name": "Web exact content /build-config.json",
+        "pass": true,
+        "status": 200,
+        "sha256": "86ff53f944bfc3e0f3154707b6241f54bf6e08733a40dcae898cb90e171a4f20"
+      },
+      {
+        "name": "Web security headers /build-config.json",
+        "pass": true
+      },
+      {
+        "name": "Production API build config",
+        "pass": true
+      },
+      {
+        "name": "Asset bytes admin-CKpjZGmS.js",
+        "pass": true,
+        "status": 200,
+        "sha256": "ca00225aa7d31e3511baa737eac0990eab96d34d5b55e83c8d009d1969b535e7"
+      },
+      {
+        "name": "Asset MIME admin-CKpjZGmS.js",
+        "pass": true
+      },
+      {
+        "name": "Asset bytes index-BuYMVUFu.css",
+        "pass": true,
+        "status": 200,
+        "sha256": "329ebf053ddd34e695211eb05fad45b29e34d75a505c6f02e67644589c98f75f"
+      },
+      {
+        "name": "Asset MIME index-BuYMVUFu.css",
+        "pass": true
+      },
+      {
+        "name": "Asset bytes index-DAQ2pLun.js",
+        "pass": true,
+        "status": 200,
+        "sha256": "04d345b689ebb2e66a56506deb6e855786c3fd28097d8ec791b461a332ca6647"
+      },
+      {
+        "name": "Asset MIME index-DAQ2pLun.js",
+        "pass": true
+      }
+    ],
+    "checks_count": 26,
+    "unexpected_5xx": 0,
+    "positive_authentication": "NOT RUN: no PIN; missing/invalid JWT denial checked",
+    "rival_private_projection": "retained focused API/browser tests, no positive authenticated hosted rival session",
+    "business_writes": 0,
+    "application_source": "5260eac53b555840df5dc11fc40b8e1078328782"
+  },
+  "limitations": [
+    "No fresh positive hosted PIN login or owner save import; local authenticated/ingestion proof retained.",
+    "Gen6 rewards pending_validation; Gen7 pending_policy. No reward activation or backfill.",
+    "Native save observations cannot cryptographically prove legitimate gameplay or distinguish every undetectable edit/clone.",
+    "No Launcher release; 0.20.0 retained. No physical save write or Phase22.",
+    "Preservation equality covers the retained 59-table baseline; this is not a new full database audit."
+  ],
+  "blockers_for_current_safe_scope": [],
+  "private_evidence": "%LOCALAPPDATA%/PokeApp-migration-evidence/phase21/20261020",
+  "final_documentation_head": "subsequent commit containing this evidence; obtain from Git"
+}
