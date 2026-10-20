@@ -1,0 +1,142 @@
+{
+  "status": "PHASE 22 PARTIAL - validated engineering foundation; public release BLOCKED",
+  "date": "2026-10-20 Europe/Madrid",
+  "entry_head": "77c2f18f9e07db19c5c6e58446fbcfd830228977",
+  "application_head": "62822a69370e7ee34d028c607a0d2c9d2644ddb3",
+  "production_mutations_enabled": false,
+  "validation": {
+    "native_checks": 225,
+    "native_writer": "pokeapp-writer/1;pkhex/24.11.11",
+    "windows_tests": 29,
+    "actual_crash_subprocesses": 6,
+    "crash_boundaries": [
+      "prepared",
+      "backup_verified",
+      "stage_verified",
+      "before_replace",
+      "after_replace",
+      "after_verify"
+    ],
+    "native_bridge_tests": 10,
+    "launcher_integration_tests": 16,
+    "affected_sync_regressions": 14,
+    "python_focused_total": 69,
+    "packaged_electron_runs": 2,
+    "native_packaged_eight_games": "PASS; exact reader observation/digest unchanged",
+    "games": [
+      {
+        "game": "X",
+        "fixture_copy_native_transaction": "PASS",
+        "exact_restore": true,
+        "original_unchanged": true
+      },
+      {
+        "game": "Y",
+        "fixture_copy_native_transaction": "PASS",
+        "exact_restore": true,
+        "original_unchanged": true
+      },
+      {
+        "game": "OR",
+        "fixture_copy_native_transaction": "PASS",
+        "exact_restore": true,
+        "original_unchanged": true
+      },
+      {
+        "game": "AS",
+        "fixture_copy_native_transaction": "PASS",
+        "exact_restore": true,
+        "original_unchanged": true
+      },
+      {
+        "game": "SN",
+        "fixture_copy_native_transaction": "PASS",
+        "exact_restore": true,
+        "original_unchanged": true
+      },
+      {
+        "game": "MN",
+        "fixture_copy_native_transaction": "PASS",
+        "exact_restore": true,
+        "original_unchanged": true
+      },
+      {
+        "game": "US",
+        "fixture_copy_native_transaction": "PASS",
+        "exact_restore": true,
+        "original_unchanged": true
+      },
+      {
+        "game": "UM",
+        "fixture_copy_native_transaction": "PASS",
+        "exact_restore": true,
+        "original_unchanged": true
+      }
+    ],
+    "build": "PyInstaller + selfcontained pinned .NET8.0.29 + Electron NSIS PASS",
+    "checks": "targeted Ruff, Python compile, JS syntax, Prettier, diff PASS",
+    "not_rerun": [
+      "full Python",
+      "historical native matrices",
+      "React/web",
+      "PostgreSQL",
+      "migrations"
+    ],
+    "boundaries": "Filesystem unit fixtures are explicitly synthetic; all8 native integration uses manifest-bound real contributor snapshots. Renderer result-state injection is visual-only; forged packaged IPC is genuinely denied."
+  },
+  "candidate": {
+    "version": "0.22.0-rc.1",
+    "sha256": "cb234fc8936c7ab4cff3c7d5af92f81e5a7e3991e382985ca76c2dac295bd48d",
+    "bytes": 159147043,
+    "unsigned": true
+  },
+  "delivery": {
+    "public_launcher": "0.20.0 retained",
+    "owner_installed_launcher": "0.16.2 untouched",
+    "public_candidate_upload": false,
+    "railway_deployed": false,
+    "cloudflare_deployed": false,
+    "r2_writes": 0,
+    "database_writes": 0,
+    "migrations_added": 0,
+    "migration_history": "41 through049 retained from verified entry; no replay",
+    "gen67_rewards": "pending_validation / pending_policy unchanged"
+  },
+  "production_preservation": {
+    "owner_save_writes": 0,
+    "competitive_writes": 0,
+    "v1_shadow_writes": 0,
+    "fresh_table_hash_comparison": "NOT RERUN; no Phase22 remote writes",
+    "remote_evidence": "Phase21 entry/deployment baseline retained; not relabeled as a new database comparison"
+  },
+  "blockers": [
+    "ReplaceFileW cannot atomically compare pathname/hash; adversarial external replacement detected after replacement and both versions retained, not certified as no overwrite.",
+    "Known-emulator process checks cannot certify arbitrary renamed/custom emulator shutdown.",
+    "Clean-machine install/upgrade acceptance unavailable without replacing owner installation; only unpacked isolated candidate certified."
+  ],
+  "limits": [
+    "Sudden power-loss/storage-hardware durability not certified by process crash tests.",
+    "Readonly/exclusive backups provide application immutability, not protection from malicious same-user ACL edits.",
+    "Contributor fixture snapshots do not certify gameplay legitimacy or all possible save variants."
+  ],
+  "cleanup": {
+    "test_owned_windows_directories": "removed by runners",
+    "candidate_processes": 0,
+    "temporary_build": "TEMP/pokeapp-phase22-package-20261020 retained; automatic approval review rejected deletion: blocked by policy",
+    "private_candidate": "LOCALAPPDATA/PokeApp-releases/0.22.0-rc.1",
+    "evidence": "LOCALAPPDATA/PokeApp-migration-evidence/phase22/20261020"
+  },
+  "source_sha256": {
+    "app/launcher/runtime.py": "c82371f0477010ce809a5c3394ce45b9c5a4c3a4faced4dddfbdc298e5cf5852",
+    "app/launcher/save_activity.py": "0c85a88d24085ada39e730faa011cad1243134db34ef8902b2aa520b0fdf35f1",
+    "app/launcher/write_control.py": "89b819690e511d68d30249f01c2bc582bdb38a11e4d767ededfd05735d2fbeee",
+    "app/launcher/write_engine.py": "8616afb0380412614cda06403ccaf075a4da113c114e05e37fe0e2b3af1c92d0",
+    "app/launcher/write_files.py": "92701384054346794a374dbed14f7a57464f6e96e783cb0460b21f7c1f48d177",
+    "app/save_parser/writer.py": "977d056793c79c1c17facd9154b708eb913d967e6758ae0a62bc0749c50b7fcf",
+    "companion/parser/PokeApp.Parser/NativeWrite.cs": "ec9a7167b3ef0cc184073eab083b6ff4ba43c109c3a709a005d3ff06d0156bd1",
+    "companion/parser/PokeApp.Parser/Program.cs": "9c3e514839f60d8292ed9c6b3dbd704a7ea0d802ede1a7fa44da4e883062a073",
+    "companion/launcher/main.cjs": "6309a2fbbb1c61b48de93c8c25b468d86766abe7b996a06d4fe5caf3aaf0f471",
+    "companion/launcher/renderer.js": "abbe3346ca3ad94366e268042213a1759f427931c718caa0527540f1428363cd"
+  },
+  "next": "Resolve blocked physical-write/release guarantees within Phase22; no Phase23."
+}

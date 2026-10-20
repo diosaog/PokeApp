@@ -5,7 +5,19 @@ milestone record; it does not maintain a second live phase-status ledger.
 
 ## Current project position
 
-- Current packet: **21 - Trusted Gen6/7 identity and native progression, DONE**.
+- Current packet: **22 - Native save-write foundation, PARTIAL / release BLOCKED**.
+  Application `62822a6`; native225, focusedPython69, all-eight real fixture-copy
+  write/verify/replay/restore and packaged-native gates PASS. Candidate0.22.0-rc.1
+  built privately; two isolated packaged Launcher runs PASS, unsigned/unpublished.
+  Production registry empty: external Windows pathname replacement lacks atomic
+  CAS; arbitrary emulator shutdown and clean-machine install remain uncertified.
+  No remote deploy/schema/business/owner-save change; public Launcher0.20.0 retained.
+  [Report](phase22-save-writes-report.md), [evidence](phase22-save-writes-evidence.json),
+  [live handoff](work-in-progress/phase22-save-writes-live.md).
+  Exact package build temporary remains after policy-rejected cleanup; see handoff.
+  **Next: Antonio acceptance / resolve Phase22 release blockers. No Phase23.**
+
+- Previous packet: **21 - Trusted Gen6/7 identity and native progression, DONE**.
   Application `5260eac`, 048/049 applied once; 41 migration records.
   Railway `319be126-91fd-43d7-98c3-dd8556941757` SUCCESS; Cloudflare version
   `5d6ceff7-03f2-4c4d-ac43-c1a63c137007` serves 100%.
@@ -16,7 +28,7 @@ milestone record; it does not maintain a second live phase-status ledger.
   [Report](phase21-identity-progress-report.md),
   [evidence](phase21-identity-progress-evidence.json),
   [live handoff](work-in-progress/phase21-identity-progress-live.md).
-  **Next: Antonio acceptance. STOP before Phase 22.**
+  Phase22 was subsequently explicitly authorized; its current state is above.
 
 - Historical packet: **20 - Ultra Sun/Ultra Moon read/import, DONE**. Native US/UM
   integrity,32 boxes, forms/types and Spanish data; trusted import and privacy.
