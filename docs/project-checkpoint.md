@@ -796,3 +796,18 @@ Gen6/7 rewards stay gated pending transition and policy evidence. No business
 table change, owner mutation, backfill or physical save write occurred.
 See [Phase 21 report](phase21-identity-progress-report.md) and
 [live handoff](work-in-progress/phase21-identity-progress-live.md).
+
+## Phase 22 export integration (2026-10-21)
+
+The native write foundation now has a verified, capability-gated new-file export
+path. **Phase 22 remains PARTIAL / public physical writes blocked.** 58 affected
+Python tests, eight disposable real-game journaled exports and two isolated
+packaged Launcher runs pass. Candidate `0.22.0-rc.2` is unsigned and
+unpublished; source SHA-256
+`95b447f7fb787a2c5bb54a3b6110d6c0adbeb15c736b3a6a4f8e7cd41e18969e`,
+159253386 bytes. Originals, owner data, economy and production remain unchanged.
+Export is `EXPORTED_VERIFIED` with `applied_to_source=false`; no purchase or
+competitive entitlement is consumed. Automatic replacement is still blocked by
+external-writer/power-loss/clean-machine certification gaps. No Phase 23.
+See [export report](phase22-export-integration-report.md) and
+[evidence](phase22-export-integration-evidence.json).

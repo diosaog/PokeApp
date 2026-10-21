@@ -77,6 +77,7 @@ function render(state) {
   $("write-confirmation").hidden = !write?.can_confirm;
   $("confirm-write").disabled =
     !write?.can_confirm || !$("emulator-closed").checked;
+  $("export-save").disabled = !write?.can_export;
   $("reconcile-write").hidden = !write?.can_reconcile;
   const recovery = write?.status === "RECOVERY_REQUIRED";
   $("select-save").disabled = recovery;
@@ -205,6 +206,7 @@ $("next-box").onclick = () => {
 };
 $("close-details").onclick = () => $("details").close();
 $("select-save").onclick = () => action(() => window.launcher.chooseSave());
+$("export-save").onclick = () => action(() => window.launcher.exportSave());
 $("retry").onclick = () => action(() => window.launcher.retry());
 $("logout").onclick = () => action(() => window.launcher.logout());
 $("enable-sync").onclick = () => action(() => window.launcher.sync());

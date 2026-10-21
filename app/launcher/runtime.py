@@ -8,17 +8,17 @@ from queue import Empty, Full, Queue
 
 from app.launcher.backend import BackendClient, BackendError, LauncherSession
 from app.launcher.core import LauncherCore
-from app.launcher.save_activity import SaveActivityGate, SaveBusy, save_read
-from app.launcher.write_control import LocalWriteController
-from app.launcher.write_engine import LocalWriteEngine
-from app.launcher.write_files import WriteSafetyError
-from app.save_parser.writer import PkhexProcessWriter
 from app.launcher.journal import LocalConflict
+from app.launcher.save_activity import SaveActivityGate, SaveBusy, save_read
 from app.launcher.secrets import TokenStore
 from app.launcher.sync import SaveWatchService
 from app.launcher.trusted_sync import TrustedStore, deliver_trusted
+from app.launcher.write_control import LocalWriteController
+from app.launcher.write_engine import LocalWriteEngine
+from app.launcher.write_files import WriteSafetyError
 from app.save_parser.files import SaveSource, SnapshotReader
 from app.save_parser.models import SaveError
+from app.save_parser.writer import PkhexProcessWriter
 
 PRODUCTION_API = "https://pokeapp-api-production.up.railway.app"
 
@@ -147,7 +147,13 @@ class LauncherRuntime:
             raise ValueError("invalid_command_arguments")
         if name == "state":
             return self.state(args.get("known_receipt"))
-        if name in ("write_confirm", "write_reconcile"):
+        if name in (
+            "write_confirm",
+            "write_reconcile",
+            "export_prepare",
+            "export_confirm",
+            "export_reconcile",
+        ):
             if name == "write_confirm":
                 state = self.writes.state()
                 if (
@@ -157,6 +163,23 @@ class LauncherRuntime:
                     or args["operation_id"] != state["operation_id"]
                 ):
                     raise ValueError("write_confirmation_required")
+            elif name == "export_prepare":
+                if (
+                    set(args) - {"destination", "intent", "closed_emulator_confirmed"}
+                    or not isinstance(args.get("destination"), str)
+                    or not args["destination"]
+                    or len(args["destination"]) > 4096
+                    or not isinstance(args.get("intent"), dict)
+                    or args.get("closed_emulator_confirmed") is not True
+                ):
+                    raise ValueError("invalid_export_destination")
+            elif name == "export_confirm":
+                if (
+                    set(args) != {"operation_id", "closed_emulator_confirmed"}
+                    or not isinstance(args["operation_id"], str)
+                    or args["closed_emulator_confirmed"] is not True
+                ):
+                    raise ValueError("invalid_export_operation")
             elif args:
                 raise ValueError("unexpected_recovery_arguments")
             try:
@@ -228,6 +251,12 @@ class LauncherRuntime:
         try:
             if name == "write_confirm":
                 result = self.writes.confirm(**args)
+            elif name == "export_prepare":
+                result = self.writes.prepare_export(**args)
+            elif name == "export_confirm":
+                result = self.writes.confirm_export(**args)
+            elif name == "export_reconcile":
+                result = self.writes.reconcile()
             else:
                 result = self.writes.reconcile()
             self._patch(write_error=None)

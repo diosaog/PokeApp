@@ -97,6 +97,7 @@ for (let run = 0; run < 2; run++) {
     assert.deepEqual(exposed, [
       "chooseSave",
       "confirmWrite",
+      "exportSave",
       "login",
       "logout",
       "reconcileWrite",

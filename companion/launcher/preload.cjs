@@ -9,4 +9,6 @@ contextBridge.exposeInMainWorld("launcher", {
   confirmWrite: (operationId, emulatorClosed) =>
     ipcRenderer.invoke("launcher:write-confirm", operationId, emulatorClosed),
   reconcileWrite: () => ipcRenderer.invoke("launcher:write-reconcile"),
+  exportSave: (destination) =>
+    ipcRenderer.invoke("launcher:export", destination),
 });

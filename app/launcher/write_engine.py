@@ -8,21 +8,22 @@ discovery. The NTFS pathname replacement limitation is in write_files.py.
 
 from __future__ import annotations
 
+import json
+import os
+import re
+import sqlite3
+from collections.abc import Callable
 from contextlib import contextmanager
 from dataclasses import dataclass
 from functools import wraps
 from hashlib import sha256
-import json
-import os
 from pathlib import Path
-import re
-import sqlite3
 from threading import RLock
-from typing import Callable, Protocol
+from typing import Protocol
 from uuid import NAMESPACE_URL, UUID, uuid5
 
+from app.launcher.export_files import WindowsExportFiles
 from app.launcher.write_files import EnrolledTarget, WindowsWriteFiles, WriteSafetyError
-
 
 GAMES = frozenset(("X", "Y", "OR", "AS", "SN", "MN", "US", "UM"))
 PRODUCTION_MUTATIONS: frozenset[str] = frozenset()
@@ -35,7 +36,7 @@ def _serialized(method):
         with self._mutex:
             if self._operation_depth:
                 return method(self, *args, **kwargs)
-            if method.__name__ == "prepare":
+            if method.__name__ in ("prepare", "prepare_export"):
                 target = args[0] if args else kwargs["target"]
                 intent = args[1] if len(args) > 1 else kwargs["intent"]
                 self._authorize(target, intent)
@@ -146,15 +147,25 @@ class WriteReceipt:
     game: str
     error: str | None = None
     current_matches_receipt: bool | None = None
+    mode: str = "apply"
+    export_path: str | None = None
+    applied_to_source: bool = False
 
     def public_status(self) -> dict:
-        return {
+        result = {
             "operation_id": self.operation_id,
             "status": self.status,
             "game": self.game,
             "error": self.error,
             "current_matches_receipt": self.current_matches_receipt,
         }
+        if self.mode == "export" or self.status == "EXPORTED_VERIFIED":
+            result.update(
+                mode=self.mode,
+                export_path=self.export_path,
+                applied_to_source=self.applied_to_source,
+            )
+        return result
 
 
 class LocalWriteEngine:
@@ -174,6 +185,7 @@ class LocalWriteEngine:
         )
         self.database = self.profile / "physical-writes.sqlite3"
         self.native, self.capability = native, engineering_capability
+        self.export_files = WindowsExportFiles()
         self.fault_hook = fault_hook or (lambda _stage: None)
         self._mutex, self._operation_depth = RLock(), 0
         self._db_check()
@@ -238,6 +250,9 @@ class LocalWriteEngine:
             record["intent"]["game"],
             record.get("error"),
             current_matches,
+            record.get("mode", record.get("phase", "apply")),
+            record.get("final_path"),
+            record.get("status") == "APPLIED_VERIFIED",
         )
 
     def status(self, operation_id: str) -> WriteReceipt:
@@ -420,6 +435,85 @@ class LocalWriteEngine:
                 raise WriteSafetyError(record["error"]) from None
         return self._receipt(record)
 
+    @_serialized
+    def prepare_export(
+        self,
+        target: EnrolledTarget,
+        intent: WriteIntent,
+        *,
+        destination_directory: Path,
+        closed_emulator_confirmed: bool,
+    ) -> WriteReceipt:
+        """Prepare a verified new-file export; the selected source is never written."""
+        self._authorize(target, intent)
+        self.files.assert_closed(closed_emulator_confirmed)
+        destination = self.export_files.directory(Path(destination_directory))
+        if destination == target.path.parent:
+            raise WriteSafetyError("EXPORT_DESTINATION_MUST_BE_SEPARATE")
+        operation_id = intent.operation_id
+        try:
+            existing = self._load(operation_id)
+        except WriteSafetyError as error:
+            if error.code != "WRITE_OPERATION_NOT_FOUND":
+                raise
+        else:
+            if (
+                existing.get("mode") != "export"
+                or existing["intent"] != intent.to_payload()
+                or existing["target"] != str(target.path)
+                or existing["destination"] != str(destination)
+            ):
+                raise WriteSafetyError("OPERATION_ID_REUSED")
+            return self.reconcile(operation_id)
+        with self.export_files.strict_source(target.path) as stream:
+            original = self.files.read(stream)
+            if _hash(original) != intent.expected_sha256:
+                raise WriteSafetyError("SOURCE_HASH_CHANGED")
+            prepared = self._native_prepare(original, intent)
+            final = destination / f"export-{operation_id}.save"
+            if final.exists():
+                raise WriteSafetyError("EXPORT_DESTINATION_OCCUPIED")
+            record = {
+                "operation_id": operation_id,
+                "intent": intent.to_payload(),
+                "target": str(target.path),
+                "device": target.device,
+                "inode": target.inode,
+                "size": len(original),
+                "output_hash": prepared.output_hash,
+                "semantic_diff": prepared.semantic_diff,
+                "contract": prepared.contract,
+                "status": "AWAITING_CONFIRMATION",
+                "error": None,
+                "commit_started": False,
+                "phase": "export",
+                "mode": "export",
+                "destination": str(destination),
+                "final_path": str(final),
+                "stage_path": None,
+                "stage_identity": None,
+            }
+            self._save(record, insert=True)
+            try:
+                self.files.create_verified(
+                    self.artifacts / (operation_id + ".original"),
+                    original,
+                    immutable=True,
+                )
+                self.files.create_verified(
+                    self.artifacts / (operation_id + ".export"),
+                    prepared.output,
+                )
+                self.fault_hook("export_prepared")
+            except Exception as error:
+                record.update(
+                    status="REJECTED",
+                    error=self._error(error, "EXPORT_PREPARATION_FAILED"),
+                )
+                self._save(record)
+                raise WriteSafetyError(record["error"]) from None
+        return self._receipt(record)
+
     @staticmethod
     def _error(error: Exception, fallback: str) -> str:
         return error.code if isinstance(error, WriteSafetyError) else fallback
@@ -429,6 +523,10 @@ class LocalWriteEngine:
         self, operation_id: str, *, closed_emulator_confirmed: bool
     ) -> WriteReceipt:
         record = self._load(operation_id)
+        if record.get("mode") == "export":
+            return self._confirm_export(
+                record, closed_emulator_confirmed=closed_emulator_confirmed
+            )
         if record["status"] != "AWAITING_CONFIRMATION":
             return self.reconcile(operation_id)
         intent, original, prepared = self._materials(record)
@@ -481,10 +579,74 @@ class LocalWriteEngine:
             self._save(record)
             return self._receipt(record)
 
+    def _confirm_export(self, record, *, closed_emulator_confirmed: bool):
+        intent, original, prepared = self._materials(record)
+        target = self._target(record)
+        self._authorize(target, intent)
+        self.files.assert_closed(closed_emulator_confirmed)
+        final = Path(record["final_path"])
+        stage = Path(
+            record["stage_path"]
+            or (
+                Path(record["destination"])
+                / f".export-{record['operation_id']}.partial"
+            )
+        )
+        record["stage_path"] = str(stage)
+        try:
+            with self.export_files.strict_source(target.path) as source:
+                if self.files.read(source) != original:
+                    raise WriteSafetyError("SOURCE_HASH_CHANGED")
+                if final.exists():
+                    raise WriteSafetyError("EXPORT_DESTINATION_OCCUPIED")
+                record.update(
+                    status="RECOVERY_REQUIRED",
+                    commit_started=True,
+                    error="EXPORT_COMMIT_INTERRUPTED",
+                )
+                self._save(record)
+                with self.export_files.new_stage(stage) as output:
+                    data = self.files.read_path(
+                        self.artifacts / (record["operation_id"] + ".export")
+                    )
+                    self._verify(original, data, intent, prepared)
+                    if output.write(data) != len(data):
+                        raise WriteSafetyError("SHORT_WRITE")
+                    output.flush()
+                    os.fsync(output.fileno())
+                    if self.files.read(output) != data:
+                        raise WriteSafetyError("EXPORT_CHANGED_DURING_WRITE")
+                    self._verify(original, self.files.read(output), intent, prepared)
+                    identity = os.fstat(output.fileno())
+                    record["stage_identity"] = [identity.st_dev, identity.st_ino]
+                    self._save(record)
+                    self.fault_hook("export_stage_created")
+                    self.export_files.publish_new(output, final)
+                    self.fault_hook("export_after_publish")
+                with self.export_files.strict_source(final) as published:
+                    persisted = self.files.read(published)
+                    self._verify(original, persisted, intent, prepared)
+                record.update(
+                    status="EXPORTED_VERIFIED", error=None, commit_started=False
+                )
+                self._save(record)
+                return self._receipt(record, False)
+        except Exception as error:
+            record.update(
+                status="RECOVERY_REQUIRED"
+                if record.get("commit_started")
+                else "REJECTED",
+                error=self._error(error, "EXPORT_FAILED"),
+            )
+            self._save(record)
+            return self._receipt(record, False)
+
     @_serialized
     def reconcile(self, operation_id: str) -> WriteReceipt:
         """Observe before retry; this method NEVER replaces a save."""
         record = self._load(operation_id)
+        if record.get("mode") == "export":
+            return self._reconcile_export(record)
         if record["status"] == "REJECTED":
             return self._receipt(record)
         try:
@@ -539,6 +701,40 @@ class LocalWriteEngine:
             )
         self._save(record)
         return self._receipt(record)
+
+    def _reconcile_export(self, record):
+        """Read-only export recovery; never retries publication or touches source."""
+        if record["status"] == "REJECTED":
+            return self._receipt(record)
+        try:
+            intent, original, prepared = self._materials(record)
+            final = Path(record["final_path"])
+            if final.name != f"export-{record['operation_id']}.save":
+                raise WriteSafetyError("INVALID_EXPORT_DESTINATION")
+            if final.exists():
+                with self.export_files.strict_source(final) as stream:
+                    persisted = self.files.read(stream)
+                self._verify(original, persisted, intent, prepared)
+                record.update(
+                    status="EXPORTED_VERIFIED", error=None, commit_started=False
+                )
+                self._save(record)
+                return self._receipt(record, False)
+            stage = Path(record["stage_path"]) if record.get("stage_path") else None
+            if stage is not None and stage.exists():
+                # A partial is never treated as a completed export.
+                record.update(
+                    status="RECOVERY_REQUIRED", error="EXPORT_PARTIAL_UNPUBLISHED"
+                )
+            else:
+                record.update(status="RECOVERY_REQUIRED", error="EXPORT_NOT_PUBLISHED")
+        except Exception as error:
+            record.update(
+                status="RECOVERY_REQUIRED",
+                error=self._error(error, "EXPORT_RECOVERY_REQUIRED"),
+            )
+        self._save(record)
+        return self._receipt(record, False)
 
     @_serialized
     def restore(

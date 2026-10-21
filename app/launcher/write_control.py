@@ -1,11 +1,11 @@
 """Local confirmation/controller seam. No remote intent or entitlement intake."""
 
+import threading
 from contextlib import contextmanager
 from pathlib import Path
-import threading
 
-from app.launcher.write_files import WriteSafetyError
 from app.launcher.save_activity import SaveBusy
+from app.launcher.write_files import WriteSafetyError
 
 
 class LocalWriteController:
@@ -20,6 +20,7 @@ class LocalWriteController:
         self._selection = None
         self._error = None
         self._description = None
+        self._export_intent = None
         if engine is not None:
             try:
                 self._pending = engine.pending()
@@ -43,10 +44,17 @@ class LocalWriteController:
                 "operation_id": receipt.operation_id if receipt else None,
                 "game": receipt.game if receipt else None,
                 "can_confirm": not self._busy and state == "AWAITING_CONFIRMATION",
+                "can_export": not self._busy and self._export_intent is not None,
+                "export_intent": self._export_intent.to_payload()
+                if self._export_intent is not None
+                else None,
                 "can_reconcile": not self._busy and bool(self._pending or receipt),
                 "busy": self._busy,
                 "production_operations_enabled": False,
                 "description": self._description,
+                "mode": receipt.mode if receipt else None,
+                "export_path": receipt.export_path if receipt else None,
+                "applied_to_source": receipt.applied_to_source if receipt else False,
                 # Exact private errors, fingerprints, paths and parameters stay local.
                 "message": "Comprobando la operación local. Mantén el juego cerrado."
                 if self._busy
@@ -60,6 +68,7 @@ class LocalWriteController:
             "PREPARED": "Cambio preparado. Falta comprobarlo antes de pedir confirmación.",
             "AWAITING_CONFIRMATION": "Hay un cambio local preparado. Cierra el juego y el emulador antes de confirmarlo.",
             "APPLIED_VERIFIED": "Cambio guardado y comprobado. La copia original se conserva.",
+            "EXPORTED_VERIFIED": "Copia exportada y comprobada. La partida original no se ha modificado.",
             "RESTORED_VERIFIED": "Se ha recuperado y comprobado la copia original.",
             "REJECTED": "El cambio no se ha aplicado. Revisa el archivo y vuelve a preparar la acción.",
             "RECOVERY_REQUIRED": "Hay una operación pendiente de comprobar. Se ha pausado la sincronización. Conserva las copias de recuperación.",
@@ -108,7 +117,10 @@ class LocalWriteController:
             except Exception:
                 self.gate.recovery_required = True
                 raise
-        description = self._describe(self.engine.intent_for(receipt.operation_id))
+        try:
+            description = self._describe(self.engine.intent_for(receipt.operation_id))
+        except (AttributeError, WriteSafetyError):
+            description = "Exportación preparada. Se creará un archivo nuevo y se conservará el save original."
         with self._lock:
             self._receipt = receipt
             self._pending = pending
@@ -175,7 +187,10 @@ class LocalWriteController:
             if not self.selected():
                 raise WriteSafetyError("NO_SELECTED_WRITE_TARGET")
             current = self.engine.enroll(Path(self.selected()))
-            if current.path != self.engine.target_path(operation_id):
+            receipt_info = self.engine.status(operation_id)
+            if receipt_info.mode == "apply" and current.path != self.engine.target_path(
+                operation_id
+            ):
                 raise WriteSafetyError("WRITE_TARGET_CHANGED")
             receipt = self.engine.confirm(
                 operation_id,
@@ -198,4 +213,54 @@ class LocalWriteController:
                 self._record(self.engine.reconcile(receipt.operation_id))
             if not pending:
                 self.gate.recovery_required = False
+        return self.state()
+
+    # Export is deliberately kept on the same serialized controller seam as
+    # physical writes.  The export engine is supplied by the runtime when it
+    # becomes available; this small adapter also keeps older engines read-only.
+    def prepare_export(self, destination, *, intent, closed_emulator_confirmed=True):
+        if self.engine is None or not self.selected():
+            raise WriteSafetyError("NO_SELECTED_WRITE_TARGET")
+        method = getattr(self.engine, "prepare_export", None)
+        if method is None:
+            raise WriteSafetyError("LOCAL_EXPORT_UNAVAILABLE")
+        with self._operation():
+            source = Path(self.selected())
+            target = self.engine.enroll(source)
+            receipt = method(
+                target,
+                intent,
+                destination_directory=Path(destination),
+                closed_emulator_confirmed=closed_emulator_confirmed,
+            )
+            self._record(receipt)
+        return self.state()
+
+    def register_export(self, intent):
+        """Install a local, capability-backed export offer.
+
+        This is intentionally an in-process seam. Renderer supplied mutation
+        plans never become offers; production currently registers none.
+        """
+        self._describe(intent)
+        with self._lock:
+            self._export_intent = intent
+            self._description = (
+                "Exportar una copia validada; la partida original no se modifica."
+            )
+        return self.state()
+
+    def confirm_export(self, operation_id, *, closed_emulator_confirmed=True):
+        if self.engine is None:
+            raise WriteSafetyError("LOCAL_EXPORT_UNAVAILABLE")
+        method = getattr(self.engine, "confirm_export", None) or getattr(
+            self.engine, "confirm", None
+        )
+        if method is None:
+            raise WriteSafetyError("LOCAL_EXPORT_UNAVAILABLE")
+        with self._operation():
+            receipt = method(
+                operation_id, closed_emulator_confirmed=closed_emulator_confirmed
+            )
+            self._record(receipt)
         return self.state()

@@ -108,3 +108,35 @@ and evidence are safely retained; no bypass was attempted.
 **NEXT:** resolve the external path-replacement/concurrent-program safety and
 clean-machine release gates within Phase22. Reuse the finished implementation
 and valid gates. Production operation registry stays empty. **STOP: no Phase23.**
+
+## Export integration continuation - 2026-10-21
+
+**STATUS: PHASE 22 PARTIAL / EXPORT INTEGRATION VERIFIED / PUBLIC PHYSICAL WRITES BLOCKED.**
+The existing native engine, SQLite journal, IPC and Launcher now include a
+capability-gated new-file export path. It records intent, source/output hashes,
+backup, destination and recovery state; it never replaces the selected source.
+`EXPORTED_VERIFIED` is distinct from `APPLIED_VERIFIED`, and export carries
+`applied_to_source=false`. Partial or uncertain files remain
+`RECOVERY_REQUIRED` and reconciliation is read-only. No business mutation,
+reward, coin, purchase, robbery or competitive state is reachable from export.
+
+Focused affected validation retained **58 Python PASS**. The journaled
+validator passed on disposable authentic copies of **X, Y, OR, AS, SN, MN, US and
+UM**: all eight `EXPORTED_VERIFIED`, originals unchanged, zero source applies.
+The private unsigned candidate **0.22.0-rc.2** passed package audit and two
+isolated Electron runs with packaged read `READY`, no login, forged-write
+rejection, sandbox/context isolation and no owner file access. Correct installer
+SHA-256 is `95b447f7fb787a2c5bb54a3b6110d6c0adbeb15c736b3a6a4f8e7cd41e18969e`
+(159253386 bytes); it is retained under `%LOCALAPPDATA%/PokeApp-releases/0.22.0-rc.2`
+with `NOT-PUBLISHED.txt`.
+
+No Railway/Cloudflare/Supabase deployment or migration occurred. Public
+Launcher 0.20.0, owner installation, saves, competitive history, economy and
+rewards are unchanged. Automatic source replacement remains blocked because
+Windows pathname replacement has no required external-writer CAS guarantee;
+clean-machine installation and power-loss/arbitrary emulator certification also
+remain open. A future purchase needs explicit user substitution, post-apply
+parse/reverification and a separate committed applied receipt before consuming
+any entitlement. Export alone never consumes.
+
+[Export report](../phase22-export-integration-report.md) · [Evidence](../phase22-export-integration-evidence.json)

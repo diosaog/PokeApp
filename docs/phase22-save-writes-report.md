@@ -139,3 +139,29 @@ attempted. The protected guide and unrelated files were untouched.
 **Next:** resolve the physical-write exclusion and release-certification blockers
 within Phase22, preserving these passed gates. Return to Antonio for acceptance.
 Do not enable production mutations or start Phase23.
+
+## Export integration closure - 2026-10-21
+
+The export alternative is now integrated into the existing journaled write
+engine and private Launcher candidate. The source save is never replaced:
+intent, hashes, immutable backup, destination, stage and recovery state are
+durable; `EXPORTED_VERIFIED` is separate from `APPLIED_VERIFIED`, with
+`applied_to_source=false`. Partial files remain `RECOVERY_REQUIRED` and replay
+is idempotent. The UI path is Spanish and capability-gated; production exposes
+no export mutation capability.
+
+Affected validation retained **58 Python PASS**. Disposable copies of all eight
+real formats (X, Y, OR, AS, SN, MN, US, UM) passed journaled export verification,
+with unchanged originals and no economic or competitive effect. Private
+candidate `0.22.0-rc.2` is unsigned/unpublished, package-audited and passed two
+isolated Electron runs. Installer SHA-256:
+`95b447f7fb787a2c5bb54a3b6110d6c0adbeb15c736b3a6a4f8e7cd41e18969e`,
+159253386 bytes. No remote deployment, migration, owner write or public
+Launcher replacement occurred.
+
+Automatic replacement and public physical writes remain blocked by the
+previously documented external-writer/power-loss/clean-machine guarantees.
+Export does not apply a purchase. A future entitlement requires explicit user
+substitution followed by parse/reverification and a separate applied receipt.
+See [export integration report](phase22-export-integration-report.md) and
+[evidence](phase22-export-integration-evidence.json).

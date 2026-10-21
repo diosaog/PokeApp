@@ -161,6 +161,37 @@ app.whenReady().then(() => {
     authorize(event);
     return request("write_reconcile");
   });
+  ipcMain.handle("launcher:export", async (event) => {
+    authorize(event);
+    const state = await request("state");
+    if (!state.write?.can_export || !state.write?.export_intent) {
+      throw new Error("No hay una operación de exportación autorizada.");
+    }
+    const result = await dialog.showOpenDialog(win, {
+      title: "Elegir carpeta para la copia del save",
+      properties: ["openDirectory", "createDirectory"],
+      buttonLabel: "Elegir carpeta",
+    });
+    if (result.canceled || !result.filePaths[0]) return { status: "CANCELLED" };
+    const confirmation = await dialog.showMessageBox(win, {
+      type: "warning",
+      title: "Exportar copia validada",
+      message:
+        "Se creará un archivo nuevo y se conservará la partida original.",
+      detail: `${state.selected_save}\n\nLa exportación no aplica cambios al archivo original ni consume recursos de Liga.`,
+      buttons: ["Cancelar", "Exportar copia"],
+      defaultId: 0,
+      cancelId: 0,
+      noLink: true,
+    });
+    return confirmation.response !== 1
+      ? { status: "CANCELLED" }
+      : request("export_prepare", {
+          destination: result.filePaths[0],
+          intent: state.write.export_intent,
+          closed_emulator_confirmed: true,
+        });
+  });
   win = new BrowserWindow({
     show: process.env.POKEAPP_LAUNCHER_HEADLESS_TEST !== "1",
     width: 1120,

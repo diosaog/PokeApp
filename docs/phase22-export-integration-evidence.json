@@ -1,0 +1,64 @@
+﻿{
+  "phase": "22-export-integration",
+  "status": "PARTIAL",
+  "entry_head": "013ff75882e4f09352a66ecc0bd8df4176165224",
+  "scope": "Verified new-file export integrated into the existing native write engine, SQLite journal, recovery and private Launcher candidate. Automatic replacement of the selected source remains disabled.",
+  "focused_validation": {
+    "python_export_and_affected_launcher": "58 PASS retained",
+    "eight_game_journaled_export": "PASS",
+    "packaged_electron_smoke": "PASS, 2 isolated runs",
+    "package_audit": "PASS",
+    "node_syntax": "PASS",
+    "python_compile": "PASS",
+    "ruff_format": "PASS",
+    "diff_check": "PASS"
+  },
+  "games": ["X", "Y", "OR", "AS", "SN", "MN", "US", "UM"],
+  "game_result": {
+    "status": "EXPORTED_VERIFIED",
+    "source_unchanged": true,
+    "applied_to_source": false,
+    "output_verified": true,
+    "temporary_copies": true,
+    "economic_effect": false
+  },
+  "journal": {
+    "durable_intent": true,
+    "original_backup": true,
+    "recovery_status": "RECOVERY_REQUIRED",
+    "partial_files_never_promoted": true,
+    "replay_idempotent": true,
+    "export_never_means_applied": true
+  },
+  "candidate": {
+    "version": "0.22.0-rc.2",
+    "status": "PRIVATE_UNSIGNED_UNPUBLISHED",
+    "bytes": 159253386,
+    "sha256": "95b447f7fb787a2c5bb54a3b6110d6c0adbeb15c736b3a6a4f8e7cd41e18969e",
+    "path": "%LOCALAPPDATA%/PokeApp-releases/0.22.0-rc.2/PokeApp-Launcher-Setup.exe",
+    "package_smoke": "PASS",
+    "owner_installation_touched": false
+  },
+  "deployment": {
+    "railway": "UNCHANGED",
+    "cloudflare": "UNCHANGED",
+    "supabase": "UNCHANGED",
+    "public_launcher": "0.20.0"
+  },
+  "preservation": {
+    "owner_saves": "unchanged",
+    "competitive_state": "unchanged",
+    "rewards_or_currency": "none consumed",
+    "physical_application": "not performed"
+  },
+  "remaining_blockers": [
+    "Automatic source replacement is not certified against non-cooperative external writers or power loss and remains disabled.",
+    "A future purchase still needs a separate authorized applied-and-reparsed acceptance before any entitlement can be consumed.",
+    "Clean-machine installer acceptance and code signing remain outside this private candidate gate."
+  ],
+  "private_evidence": [
+    "%LOCALAPPDATA%/PokeApp-migration-evidence/phase22-safety-resolution/journaled-export-eight-final-20261021c/journaled-export-eight-evidence.json",
+    "%TEMP%/pokeapp-phase22-package-smoke-20261021c/evidence2/package-smoke.json"
+  ],
+  "next": "Owner may review the private candidate and exported-copy workflow. Keep automatic replacement and public physical writes disabled; do not start Phase 23."
+}
