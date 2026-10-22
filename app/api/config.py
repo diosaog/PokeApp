@@ -17,6 +17,7 @@ class APIConfig:
     pin_login_limit: int = 8
     pin_login_window_seconds: int = 300
     cors_origins: tuple[str, ...] = ()
+    account_management_enabled: bool = False
 
     def __post_init__(self):
         for origin in self.cors_origins:
@@ -40,6 +41,7 @@ class APIConfig:
                 "SUPABASE_SERVICE_ROLE_KEY",
             ),
             auth_pin_pepper=_first(source, AUTH_PIN_PEPPER_ENV),
+            account_management_enabled=source.get("POKEAPP_ACCOUNT_MANAGEMENT_ENABLED") == "true",
             pin_login_limit=_int_value(source, "POKEAPP_API_PIN_LOGIN_LIMIT", 8),
             pin_login_window_seconds=_int_value(source, "POKEAPP_API_PIN_LOGIN_WINDOW_SECONDS", 300),
             cors_origins=tuple(x.strip() for x in source.get('POKEAPP_API_CORS_ORIGINS', '').split(',') if x.strip()),

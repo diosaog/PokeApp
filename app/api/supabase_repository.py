@@ -33,7 +33,12 @@ class SupabaseTrainerAuthRepository:
         try:
             trainer_id = str(UUID(clean))
         except ValueError:
-            row = self._find_one("slug", clean.lower())
+            from app.auth.accounts import account_name, AccountError
+            try:
+                _, slug = account_name(clean)
+            except AccountError:
+                return None
+            row = self._find_one("slug", slug)
         else:
             row = self._find_one("id", trainer_id)
         return _trainer_from_row(row) if row else None

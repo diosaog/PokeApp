@@ -73,6 +73,18 @@ def me(principal=Depends(require_principal)) -> MeResponse:
 
 
 def _check_pin_login_rate_limit(container: ApiContainer, request: Request, trainer_identifier: str) -> None:
+    if container.account_service is not None and container.account_service.enabled:
+        from app.api.routes.accounts import invoke
+        def check():
+            service = container.account_service
+            host = request.client.host if request.client else "unknown"
+            service.throttle("login-ip",host,30,900)
+            trainer = container.trainer_repository.find_for_login(trainer_identifier)
+            identity = trainer.id if trainer else trainer_identifier.strip().lower()
+            service.throttle("login-account",identity,8,900)
+            service.throttle("login-account-day",identity,30,86400)
+        invoke(check)
+        return
     if container.rate_limiter is None:
         return
     client_host = request.client.host if request.client else "unknown"

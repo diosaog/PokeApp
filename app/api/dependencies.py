@@ -42,6 +42,7 @@ class ApiContainer:
     wipe_revivals_repository: WipeRevivalsRepository | None = None
     launcher_repository: object | None = None
     save_ingestion: object | None = None
+    account_service: object | None = None
 
 
 def get_api_container(request: Request) -> ApiContainer:
@@ -69,6 +70,7 @@ def create_default_container(config: APIConfig | None = None) -> ApiContainer:
     wipe_repo = None
     launcher_repo = None
     save_ingestion = None
+    accounts = None
 
     if config.supabase_url and config.supabase_anon_key:
         from app.auth.supabase_adapter import SupabaseAuthClient
@@ -82,6 +84,14 @@ def create_default_container(config: APIConfig | None = None) -> ApiContainer:
             config.supabase_url,
             config.supabase_service_role_key,
         )
+        if config.auth_pin_pepper:
+            from supabase import create_client
+            from app.auth.accounts import AccountService
+            from app.repositories.supabase.accounts import SupabaseAccountRepository, SupabaseAccountAuth
+            account_client = create_client(config.supabase_url, config.supabase_service_role_key)
+            accounts = AccountService(SupabaseAccountRepository(account_client),
+                SupabaseAccountAuth(account_client.auth.admin), pepper=config.auth_pin_pepper,
+                enabled=config.account_management_enabled)
         from app.repositories.supabase.team_locks import SupabaseTeamLockRepository
 
         team_lock_repo = SupabaseTeamLockRepository.from_url_key(
@@ -156,4 +166,5 @@ def create_default_container(config: APIConfig | None = None) -> ApiContainer:
         wipe_revivals_repository=wipe_repo,
         launcher_repository=launcher_repo,
         save_ingestion=save_ingestion,
+        account_service=accounts,
     )

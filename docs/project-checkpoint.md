@@ -5,7 +5,14 @@ milestone record; it does not maintain a second live phase-status ledger.
 
 ## Current project position
 
-- Current packet: **22E private candidate VALIDATED; Phase22 PARTIAL**.
+- Current packet: **Accounts/profile P1 LOCAL PASS; P2–P4 in progress**.
+  New owner instruction authorizes independent accounts work after the safe22E
+  closure. Registration reuses trainer UUIDs and the PIN/Auth bridge; service-only
+  provisioning and distributed throttle pass focused tests and disposable PG.
+  No remote account/schema/storage change or deployment authorized.
+  [Account/profile live handoff](work-in-progress/accounts-profile-live.md).
+
+- Previous packet: **22E private candidate VALIDATED; Phase22 PARTIAL**.
   Owner authorized independent packaging despite the absent3DS title. New private
   rc.3 includes22C, separate installation/profile identity and unchanged production
   write denial. Six focused Python, three installed journeys and isolated

@@ -14,6 +14,9 @@ from app.api.routes import initial_assignment
 from app.api.routes import wipe_revivals
 from app.api.routes import launcher
 from app.api.routes import saves
+from app.api.routes import accounts
+from fastapi.exceptions import RequestValidationError
+from fastapi.responses import JSONResponse
 
 
 def create_app(
@@ -29,6 +32,14 @@ def create_app(
         openapi_url="/openapi.json",
     )
     api.state.api_container = container or create_default_container(config)
+
+    @api.exception_handler(RequestValidationError)
+    async def validation_error(request, exc):
+        # Never echo malformed credential bodies (including unexpected fields).
+        return JSONResponse(status_code=422, content={"detail": [
+            {"loc": e["loc"], "type": e["type"], "msg": "Invalid input."}
+            for e in exc.errors()
+        ]})
 
     @api.middleware('http')
     async def private_responses(request, call_next):
@@ -59,6 +70,7 @@ def create_app(
     api.include_router(wipe_revivals.router)
     api.include_router(launcher.router)
     api.include_router(saves.router)
+    api.include_router(accounts.router)
     return api
 
 
