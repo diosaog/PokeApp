@@ -1,5 +1,56 @@
 # Phase 22 - safe native save writes
 
+## Current checkpoint - 22C + targeted 22D, 2026-10-23
+
+**DONE LOCAL ENGINEERING / CONDITIONAL RELEASE. Phase22 PARTIAL; production OFF.**
+Entry `457bc30e15468648cb5e195b06dd1cf00f3be93a`, fetched main/origin 0/0.
+Owner instruction `5f966a98-e706-4d36-93d5-cd358cfd4c6e` authorizes the absent-path
+handoff for integration/tests only. This supersedes 22B's approval stop below;
+it does not approve public release, real-save writes or an unqualified emulator.
+
+Existing engine/SQLite journal now durably records exact independent backup,
+verification, source/candidate identities and no-replace parking/publication
+intent. Backup precedes native mutation preparation. Application and explicit
+restore validate the final pathname natively; restore also preserves the current
+candidate independently. Interrupted operations reconcile hashes AND identities;
+external collisions are preserved, never replaced. Legacy replacement is disabled.
+Spanish backup history shows game/date/validity and recovery state. Native-dialog
+**Guardar copia** works without native parser or cloud credentials. Copy does not
+apply anything to the game. Restore requires explicit closure/confirmation and
+engineering capability; production runtime has none. No real restart inhibition
+is claimed merely from UI flags. Save/sync leases remain shared.
+
+Fresh combined evidence: **74 unique affected Python tests** (59 existing affected,
+13 new boundaries, 2 targeted runtime regressions); **8 authentic fixture-copy
+games** pass backup/apply/replay/copy/restore/native validation. **Two isolated dev
+Electron launches**, with/without native parser, pass exact copying, corrupt-backup
+UI and ten IPC denials. Final UI delta verified separately. Compile, targeted
+Ruff, Python/JS/HTML/CSS formatting, node syntax and diff pass. No historic/full
+matrix, PG, package build or remote gate repeated. Test-only fault-hook/import/
+stdin harness corrections are detailed in evidence; they are not hidden PASS.
+
+[22C report](../phase22c-backup-application-report.md) and
+[structured evidence](../phase22c-backup-application-evidence.json).
+Private evidence: `%LOCALAPPDATA%/PokeApp-migration-evidence/phase22c/20261023/`.
+Eight-game/test temporary trees removed; dev Electron/core processes ended.
+The deliberately corrupt disposable UI backup/profile is retained as negative
+private evidence, with its untouched source copy. Earlier cleanup residue untouched.
+Five unrelated untracked files preserved. Public Launcher0.20.0/private rc.2
+retained, no new package; no owner save, production, database or economy writes.
+
+**Remaining release gates:** pinned real emulator graceful close/save flush/exit
+and restart exclusion (none qualified); absent-path/recovery product acceptance;
+power-loss durability policy/evidence; supported Windows/filesystem/mapped-I/O
+qualification; integrated packaged/clean-machine/signing acceptance; business
+item-use authorization and verified application receipt before entitlement use.
+Purchases debit at purchase time; this work neither reverses nor consumes them.
+
+**Exact next packet:** qualify one pinned real emulator adapter with a legal
+owned test title/save in an isolated environment, prove restart denial during
+gap/recovery and unsupported-state refusal. Do not enable production meanwhile.
+No Phase23 or profiles. The focused closure commit carries this record and report;
+obtain its exact HEAD from Git rather than a self-referential hash.
+
 ## Current checkpoint — 22B publication proof, 2026-10-22
 
 **CONDITIONAL — OWNER DECISION REQUIRED. Phase 22 PARTIAL; production writes OFF.**

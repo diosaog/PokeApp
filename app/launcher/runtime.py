@@ -60,13 +60,14 @@ class LauncherRuntime:
         write_directory = self.core.profile / "writes"
         had_recovery_material = _write_recovery_exists(write_directory)
         executable = getattr(inspector.parser, "executable", None)
-        if executable is not None:
-            try:
-                writer = LocalWriteEngine(
-                    write_directory, PkhexProcessWriter(executable)
-                )
-            except Exception:  # fail closed on unreadable local recovery state
-                pass
+        try:
+            # Listing/exporting verified backups never requires a native parser.
+            writer = LocalWriteEngine(
+                write_directory,
+                PkhexProcessWriter(executable) if executable is not None else None,
+            )
+        except Exception:  # fail closed on unreadable local recovery state
+            pass
         self.writes = LocalWriteController(
             self.save_activity,
             lambda: self.core.config.selected_save,
@@ -153,8 +154,38 @@ class LauncherRuntime:
             "export_prepare",
             "export_confirm",
             "export_reconcile",
+            "backup_list",
+            "backup_export",
+            "backup_restore",
         ):
-            if name == "write_confirm":
+            if name in ("backup_export", "backup_restore"):
+                expected = (
+                    {"operation_id", "destination", "role"}
+                    if name == "backup_export"
+                    else {
+                        "operation_id",
+                        "closed_emulator_confirmed",
+                        "restore_confirmed",
+                    }
+                )
+                if (
+                    set(args) != expected
+                    or not isinstance(args.get("operation_id"), str)
+                    or len(args["operation_id"]) != 36
+                ):
+                    raise ValueError("invalid_backup_arguments")
+                if name == "backup_export" and (
+                    args["role"] not in ("original", "before_restore")
+                    or not isinstance(args["destination"], str)
+                    or not 1 <= len(args["destination"]) <= 4096
+                ):
+                    raise ValueError("invalid_backup_destination")
+                if name == "backup_restore" and (
+                    args["closed_emulator_confirmed"] is not True
+                    or args["restore_confirmed"] is not True
+                ):
+                    raise ValueError("restore_confirmation_required")
+            elif name == "write_confirm":
                 state = self.writes.state()
                 if (
                     set(args) != {"operation_id", "closed_emulator_confirmed"}
@@ -251,6 +282,12 @@ class LauncherRuntime:
         try:
             if name == "write_confirm":
                 result = self.writes.confirm(**args)
+            elif name == "backup_list":
+                result = self.writes.refresh_backups()
+            elif name == "backup_export":
+                result = self.writes.export_backup(**args)
+            elif name == "backup_restore":
+                result = self.writes.restore_backup(**args)
             elif name == "export_prepare":
                 result = self.writes.prepare_export(**args)
             elif name == "export_confirm":

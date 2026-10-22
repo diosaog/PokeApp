@@ -4,11 +4,11 @@ from __future__ import annotations
 
 import base64
 import binascii
-from hashlib import sha256
 import json
-from pathlib import Path
 import subprocess
 import threading
+from hashlib import sha256
+from pathlib import Path
 
 from app.launcher.write_engine import PreparedNative, WriteIntent
 
@@ -82,6 +82,31 @@ class PkhexProcessWriter:
     """Local fixed executable, no shell, bounded pipes and hard child timeout."""
 
     version = WRITER_VERSION
+
+    def validate_original(self, source: bytes, intent: WriteIntent) -> None:
+        # Reuse the native read boundary; restore never runs a new mutation.
+        from app.save_parser.adapter import PkhexProcessParser
+
+        observed = PkhexProcessParser(self.executable).parse(source)
+        trainer = observed.trainer
+        key = _digest(
+            "\0".join(
+                (
+                    observed.game,
+                    trainer.name,
+                    str(trainer.tid),
+                    str(trainer.sid),
+                    str(trainer.gender),
+                    str(trainer.language),
+                )
+            ).encode()
+        )
+        if (
+            _digest(source) != intent.expected_sha256
+            or observed.game != intent.game
+            or key != intent.trainer_key
+        ):
+            raise NativeWriteError("WRONG_TRAINER")
 
     def __init__(self, executable: Path, *, timeout: float = 30):
         self.executable = executable.resolve(strict=True)

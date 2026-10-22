@@ -161,8 +161,70 @@ app.whenReady().then(() => {
     authorize(event);
     return request("write_reconcile");
   });
-  ipcMain.handle("launcher:export", async (event) => {
+  ipcMain.handle("launcher:backups", (event) => {
     authorize(event);
+    return request("backup_list");
+  });
+  ipcMain.handle("launcher:backup-copy", async (event, operationId, role) => {
+    authorize(event);
+    const state = await request("state");
+    const backup = state.write?.backups?.find(
+      (b) => b.operation_id === operationId && b.role === role && b.verified,
+    );
+    if (!backup || state.write.busy)
+      throw new Error("La copia no está verificada. Actualiza el historial.");
+    const chosen = await dialog.showSaveDialog(win, {
+      title: "Guardar copia original",
+      buttonLabel: "Guardar copia",
+      defaultPath: `PokeApp-${backup.game}-${operationId.slice(0, 8)}-${role}.sav`,
+      filters: [{ name: "Copia de partida", extensions: ["sav"] }],
+    });
+    if (chosen.canceled || !chosen.filePath) return { status: "CANCELLED" };
+    return request("backup_export", {
+      operation_id: operationId,
+      role,
+      destination: chosen.filePath,
+    });
+  });
+  ipcMain.handle(
+    "launcher:backup-restore",
+    async (event, operationId, emulatorClosed) => {
+      authorize(event);
+      if (emulatorClosed !== true)
+        throw new Error("Confirma que el juego y el emulador están cerrados.");
+      const state = await request("state");
+      const backup = state.write?.backups?.find(
+        (b) =>
+          b.operation_id === operationId &&
+          b.role === "original" &&
+          b.can_restore &&
+          b.verified,
+      );
+      if (!backup || state.write.busy)
+        throw new Error("Restauración no disponible.");
+      const confirmation = await dialog.showMessageBox(win, {
+        type: "warning",
+        title: "Restaurar copia original",
+        message: `${backup.game} · Recuperar los bytes originales`,
+        detail:
+          "Mantén el juego y el emulador cerrados hasta terminar. Un archivo externo distinto se conservará y bloqueará la restauración. Recuperar bytes no revierte compras ni recompensas.",
+        buttons: ["Cancelar", "Restaurar copia"],
+        defaultId: 0,
+        cancelId: 0,
+        noLink: true,
+      });
+      if (confirmation.response !== 1) return { status: "CANCELLED" };
+      return request("backup_restore", {
+        operation_id: operationId,
+        closed_emulator_confirmed: true,
+        restore_confirmed: true,
+      });
+    },
+  );
+  ipcMain.handle("launcher:export", async (event, emulatorClosed) => {
+    authorize(event);
+    if (emulatorClosed !== true)
+      throw new Error("Confirma que el juego y el emulador están cerrados.");
     const state = await request("state");
     if (!state.write?.can_export || !state.write?.export_intent) {
       throw new Error("No hay una operación de exportación autorizada.");

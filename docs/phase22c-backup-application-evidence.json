@@ -1,0 +1,224 @@
+{
+  "observed": "2026-10-23 Europe/Madrid",
+  "status": "DONE_LOCAL_ENGINEERING / CONDITIONAL_RELEASE",
+  "phase22": "PARTIAL",
+  "entry_head": "457bc30e15468648cb5e195b06dd1cf00f3be93a",
+  "authority": "owner attachment 5f966a98-e706-4d36-93d5-cd358cfd4c6e; temporary absent pathname authorized for engineering only",
+  "host": "Windows 11 build 26300 / local NTFS / Python 3.14.3",
+  "gates": {
+    "affected_python": {
+      "status": "PASS",
+      "unique_tests": 74,
+      "families": {
+        "engine": 29,
+        "export": 4,
+        "launcher_controller_runtime": 16,
+        "native_bridge": 10,
+        "new_22c": 13,
+        "targeted_cloud_runtime": 2
+      },
+      "runs": [
+        "59 affected tests, 10.229 seconds",
+        "12 new tests, 3.391 seconds",
+        "1 additional independent-process test + 2 runtime regressions, 2.284 seconds",
+        "16 launcher tests passed after capability guard; runner also named two nonexistent modules (selection error, not product failure)"
+      ],
+      "boundary": "Combined final evidence, not one fresh 74-test invocation. Only invalidated tests rerun; formatting-only edits retain behavior evidence."
+    },
+    "eight_games": {
+      "status": "PASS",
+      "games": [
+        {
+          "game": "X",
+          "status": "PASS",
+          "source_sha256": "fe7cd382448ce308b3ecfb1c32c908ad7cc6b763f1e73ff8b7f38e616d7e95f8",
+          "candidate_sha256": "3cc5145bc51f732be45d1b837f2b3bbd7c041f3afb43e9a5f4621f1ac4138842",
+          "backup_before_mutation": true,
+          "apply_native_verified": true,
+          "apply_replay": true,
+          "native_free_backup_export": true,
+          "restore_native_verified": true,
+          "restore_replay": true,
+          "both_backups_retained": true
+        },
+        {
+          "game": "Y",
+          "status": "PASS",
+          "source_sha256": "d67f2772eda54de759cfa928a2f11d9697182545bd832ed29e8017e74381336c",
+          "candidate_sha256": "a7314cf6d86a4e5b4e490fcc2acf5b856824a6dd28d7b430b473e24189ed7601",
+          "backup_before_mutation": true,
+          "apply_native_verified": true,
+          "apply_replay": true,
+          "native_free_backup_export": true,
+          "restore_native_verified": true,
+          "restore_replay": true,
+          "both_backups_retained": true
+        },
+        {
+          "game": "OR",
+          "status": "PASS",
+          "source_sha256": "09d3c3a8b58bef7fd7529d2300767def2df259ce550e91b4d7019831ab18eebd",
+          "candidate_sha256": "6902bf4a0d40663663f68d38917ff0610ae7684d35d202764cd8a2761b7cea6e",
+          "backup_before_mutation": true,
+          "apply_native_verified": true,
+          "apply_replay": true,
+          "native_free_backup_export": true,
+          "restore_native_verified": true,
+          "restore_replay": true,
+          "both_backups_retained": true
+        },
+        {
+          "game": "AS",
+          "status": "PASS",
+          "source_sha256": "1edab357827dc6dab18d776133996e054f778d06c80a3d15d9e4c731da6f3e73",
+          "candidate_sha256": "2d219e261ac9a13cd888f78f78a22dd476c7ad5b39927747b16da3fc77341be5",
+          "backup_before_mutation": true,
+          "apply_native_verified": true,
+          "apply_replay": true,
+          "native_free_backup_export": true,
+          "restore_native_verified": true,
+          "restore_replay": true,
+          "both_backups_retained": true
+        },
+        {
+          "game": "SN",
+          "status": "PASS",
+          "source_sha256": "83fe616bd2d04e4d7f51705f37721189f920717296224c9d42bbd238df7a3345",
+          "candidate_sha256": "26609b195532619f3b9c46e4bc1aa93dd4296099cc177df411b246d5cf1655d2",
+          "backup_before_mutation": true,
+          "apply_native_verified": true,
+          "apply_replay": true,
+          "native_free_backup_export": true,
+          "restore_native_verified": true,
+          "restore_replay": true,
+          "both_backups_retained": true
+        },
+        {
+          "game": "MN",
+          "status": "PASS",
+          "source_sha256": "20ea7b125d7d1b878eb6b11b0516dd9c960b761d5c2e11d1c2d4a33c1947675c",
+          "candidate_sha256": "274d68b82bf082b00c73200b62644bdd8fd717e3d2cb320811fdce13998db367",
+          "backup_before_mutation": true,
+          "apply_native_verified": true,
+          "apply_replay": true,
+          "native_free_backup_export": true,
+          "restore_native_verified": true,
+          "restore_replay": true,
+          "both_backups_retained": true
+        },
+        {
+          "game": "US",
+          "status": "PASS",
+          "source_sha256": "3c1a3b507d3ef7d5d5937867ebd8f2f91a6044b1b5a4df5d9c6975abd4a3d884",
+          "candidate_sha256": "fd25d26ebae3467e924ce9b9ac5e7a99e581dfc039d939685dae63d83cd21d7b",
+          "backup_before_mutation": true,
+          "apply_native_verified": true,
+          "apply_replay": true,
+          "native_free_backup_export": true,
+          "restore_native_verified": true,
+          "restore_replay": true,
+          "both_backups_retained": true
+        },
+        {
+          "game": "UM",
+          "status": "PASS",
+          "source_sha256": "2a46508170124fc69417f68dfe8916d5a6a51cf96f7707c3d796ae1695422331",
+          "candidate_sha256": "539df552638978379ba2b3b484da65b079504022cf6c7388b2e41a10a3aa5f62",
+          "backup_before_mutation": true,
+          "apply_native_verified": true,
+          "apply_replay": true,
+          "native_free_backup_export": true,
+          "restore_native_verified": true,
+          "restore_replay": true,
+          "both_backups_retained": true
+        }
+      ],
+      "count": 8,
+      "originals_unchanged": true,
+      "temporary_root_removed": true,
+      "real_emulator_qualified": false,
+      "power_loss_certified": false,
+      "production_capability": false
+    },
+    "dev_electron": {
+      "status": "PASS",
+      "scope": "dev Electron, isolated profile; not packaged or real emulator",
+      "results": [
+        {
+          "native_available": true,
+          "exact_backup_copy": true,
+          "source_unchanged": true,
+          "ipc_denials": 5,
+          "production_writes": false,
+          "browser_errors": []
+        },
+        {
+          "native_available": false,
+          "exact_backup_copy": true,
+          "source_unchanged": true,
+          "ipc_denials": 5,
+          "production_writes": false,
+          "browser_errors": []
+        }
+      ]
+    },
+    "final_ui_delta": {
+      "status": "PASS",
+      "scope": "only pending-sync label and checkbox layout; prior UI flows retained",
+      "corrupt_backup_copy_disabled": true
+    },
+    "static": {
+      "compile": "PASS",
+      "ruff_E4_E7_E9_F_I": "PASS",
+      "ruff_format": "PASS",
+      "prettier": "PASS",
+      "node_syntax": "PASS",
+      "diff": "PASS"
+    },
+    "prior_native_export_package": "RETAINED_UNCHANGED_NATIVE_SOURCE; no new packaged release claim",
+    "test_corrections": [
+      "Old ReplaceFileW mocks/fault points updated to no-replace boundaries; assertions retained.",
+      "New test-module class import initially caused duplicate legacy execution; corrected to module alias.",
+      "Ad hoc UI delta command needed ASCII predicate through PowerShell stdin; file-based UI harness had already passed."
+    ]
+  },
+  "preservation": {
+    "authentic_fixture_hashes": "unchanged",
+    "owner_saves_touched": false,
+    "production_writes": false,
+    "backend_or_database_changed": false,
+    "public_launcher_changed": false,
+    "economic_effects": false,
+    "temporary_eight_game_tree_removed": true,
+    "dev_electron_processes_remaining": false,
+    "private_ui_fixture_evidence_retained": true
+  },
+  "limits": [
+    "No real emulator qualified or externally enforced restart exclusion.",
+    "No continuous atomic pathname availability.",
+    "Process-crash recovery is not power-loss/namespace durability certification.",
+    "Windows 10, other builds/filesystems, mapped-write and hostile/privileged actors not certified.",
+    "No new installer, signing, clean-machine or packaged integration proof.",
+    "No real item-use authorization/physical-consumption acknowledgement implemented."
+  ],
+  "private_evidence": "%LOCALAPPDATA%/PokeApp-migration-evidence/phase22c/20261023/",
+  "source_sha256": {
+    "app/launcher/handoff_files.py": "79a7f71ecc03d1005196811ed0393ea38a10fb70e2b307534269436155c29dbb",
+    "app/launcher/write_engine.py": "372896af9264612e5c47681a0ef1db3eb61b1f503baa0fcd2edafac5184ad981",
+    "app/launcher/write_control.py": "12c8c0b74584615aec653119504942d8fa9f33d8914805381e84968bd07f51e4",
+    "app/launcher/runtime.py": "651cab3e90f86fcbd8230f8c1e6fd74c81e0f6e92684a8031efea845ed23722a",
+    "app/launcher/stdio.py": "003c72020decd1d11083ec2add9b41c7e864c8b35ba96d6d271988a0bd20c977",
+    "app/save_parser/writer.py": "eaca2f7748cf7d6f441ee30cd0e21f324e0fbac43ed4bf535a9d9682136e8fcb",
+    "companion/launcher/main.cjs": "77b22c6eda0343e19a06a5a70f24f33a195c47859b546b39df84775630b0bec7",
+    "companion/launcher/preload.cjs": "3a34f63b64fad6bc2d7d866d0a6ac5942a9953ff1efb8ce4b9f066a133f74116",
+    "companion/launcher/renderer.js": "b57ba970245a2b4c424b8975a498e5dab6f1b72ed9926cb31ec99db9beb54bb4",
+    "companion/launcher/index.html": "3477ce9fbf894d23f8a016e04adce8e06fb1cae983122635b10a621ca5f0088e",
+    "companion/launcher/style.css": "0bb8fa7cb2bfcee29de9e348b1af8eb8a41ce81bd578cab591c36aebb40e9ccd",
+    "tests/test_phase22_write_engine.py": "1c66f7e7b59212ba2bc86c3e9781be3405a92018fa21fd8e0fd540bd2a77b87c",
+    "tests/test_phase22c_handoff.py": "206a30f0c530e971993cdc2b21ff1c7f31d77b31a7addf82b5aed6fc74b0b318",
+    "tools/validate_phase22c_handoff.py": "0a691d2d26355a14d907e18a9acb0beb9983ccc9057b11f83efb1beb4c9ef3f7",
+    "tools/validate_phase22c_launcher.mjs": "8e4f7a0637f0762f0c4a642d1a2cc712aec1d4e7ed3cc129f9514ad64543603f",
+    "tools/validate_phase22_launcher_package.mjs": "fe6ae37d954e5b620e59c9c0392a9279b1eb58d155a0145f17f7597921e25bfa"
+  },
+  "next": "Qualify a pinned real emulator adapter on owned test environment; keep capability closed until lifecycle/restart exclusion, recovery and platform release gates are proven."
+}

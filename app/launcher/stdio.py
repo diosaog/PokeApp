@@ -10,6 +10,16 @@ from app.launcher.config import state_directory
 from app.launcher.core import LauncherLease
 from app.launcher.runtime import PRODUCTION_API, LauncherRuntime
 from app.save_parser.adapter import PkhexProcessParser, SaveInspector
+from app.save_parser.models import ErrorCode, SaveError
+
+
+class UnavailableParser:
+    """Backup history/copy remains local even if the optional worker is missing."""
+
+    version = "unavailable"
+
+    def parse(self, data):
+        raise SaveError(ErrorCode.PARSER_FAILURE)
 
 
 def main():
@@ -19,10 +29,14 @@ def main():
     cli.add_argument("--backend", default=PRODUCTION_API)
     args = cli.parse_args()
     profile = args.profile or state_directory()
+    try:
+        parser = PkhexProcessParser(args.parser)
+    except (OSError, ValueError):
+        parser = UnavailableParser()
     with LauncherLease(profile):
         runtime = LauncherRuntime(
             profile,
-            SaveInspector(PkhexProcessParser(args.parser)),
+            SaveInspector(parser),
             client=BackendClient(args.backend),
         )
         try:

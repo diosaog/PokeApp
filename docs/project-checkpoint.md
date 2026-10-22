@@ -1,21 +1,20 @@
 # PokeApp 2.0 Project Checkpoint
 
-Checkpoint reconciled: 2026-10-22. This file is the project index and historical
+Checkpoint reconciled: 2026-10-23. This file is the project index and historical
 milestone record; it does not maintain a second live phase-status ledger.
 
 ## Current project position
 
-- Current packet: **22B - CONDITIONAL / owner decision required; Phase22 PARTIAL**.
-  New original-path handoff proof: eight authentic fixture-copy games, 27 safety
-  scenarios, four tool-control tests and corrected cooperative model PASS.
-  No-replace renames preserve an external file that wins the publication gap;
-  the pair is **not atomic**, and interruption can leave the pathname absent
-  until recovery. Owner acceptance of this availability change precedes existing
-  journal integration and real-emulator qualification. No product/remote change
-  or new package. Public0.20.0 and private0.22.0-rc.2 remain unchanged. See
-  [current live handoff](work-in-progress/phase22-save-writes-live.md),
-  [22B report](phase22b-architecture-feasibility-report.md) and
-  [evidence](phase22b-architecture-feasibility-evidence.json). No Phase23.
+- Current packet: **22C + targeted22D - DONE LOCAL ENGINEERING / CONDITIONAL
+  RELEASE; Phase22 PARTIAL**. Existing journal integrates independent verified
+  backups, no-replace automatic application and safe explicit restore. Spanish
+  local backup history and native-dialog Save Copy work without PKHeX/cloud.
+  Combined focused74 Python, eight real fixture-copy games and two dev Electron
+  journeys pass. Real emulator/restart exclusion, power-loss and release/platform
+  gates remain open. No production writes, package/deploy or business effects.
+  [Live handoff](work-in-progress/phase22-save-writes-live.md),
+  [22C report](phase22c-backup-application-report.md),
+  [evidence](phase22c-backup-application-evidence.json). No Phase23/profiles.
 
 - Historical Phase22 foundation entry (2026-10-20):
   Application `62822a6`; native225, focusedPython69, all-eight real fixture-copy

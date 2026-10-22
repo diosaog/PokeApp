@@ -9,6 +9,11 @@ contextBridge.exposeInMainWorld("launcher", {
   confirmWrite: (operationId, emulatorClosed) =>
     ipcRenderer.invoke("launcher:write-confirm", operationId, emulatorClosed),
   reconcileWrite: () => ipcRenderer.invoke("launcher:write-reconcile"),
-  exportSave: (destination) =>
-    ipcRenderer.invoke("launcher:export", destination),
+  exportSave: (emulatorClosed) =>
+    ipcRenderer.invoke("launcher:export", emulatorClosed),
+  backups: () => ipcRenderer.invoke("launcher:backups"),
+  saveBackup: (operationId, role) =>
+    ipcRenderer.invoke("launcher:backup-copy", operationId, role),
+  restoreBackup: (operationId, emulatorClosed) =>
+    ipcRenderer.invoke("launcher:backup-restore", operationId, emulatorClosed),
 });

@@ -2,8 +2,8 @@
 
 Only an explicit in-process engineering capability admits the isolated fixture
 mutation. Neither an API/renderer JSON object nor a database right grants it.
-This does not certify a hostile same-user filesystem or arbitrary emulator
-discovery. The NTFS pathname replacement limitation is in write_files.py.
+This does not certify a hostile same-user filesystem or arbitrary emulator.
+The no-replace handoff has a temporary missing pathname and remains fixture-only.
 """
 
 from __future__ import annotations
@@ -13,16 +13,18 @@ import os
 import re
 import sqlite3
 from collections.abc import Callable
-from contextlib import contextmanager
+from contextlib import ExitStack, contextmanager, nullcontext
 from dataclasses import dataclass
+from datetime import UTC, datetime
 from functools import wraps
 from hashlib import sha256
 from pathlib import Path
 from threading import RLock
 from typing import Protocol
-from uuid import NAMESPACE_URL, UUID, uuid5
+from uuid import NAMESPACE_URL, UUID, uuid4, uuid5
 
 from app.launcher.export_files import WindowsExportFiles
+from app.launcher.handoff_files import WindowsHandoffFiles
 from app.launcher.write_files import EnrolledTarget, WindowsWriteFiles, WriteSafetyError
 
 GAMES = frozenset(("X", "Y", "OR", "AS", "SN", "MN", "US", "UM"))
@@ -50,7 +52,11 @@ def _serialized(method):
             with self.files.operation_lock(self.profile / "physical-write.lock"):
                 # The path-derived lease also excludes other PokeApp profiles.
                 # It does not claim to control external programs ignoring it.
-                with self.files.operation_lock(target_lock):
+                with (
+                    nullcontext()
+                    if method.__name__ == "export_backup"
+                    else self.files.operation_lock(target_lock)
+                ):
                     self._operation_depth += 1
                     try:
                         return method(self, *args, **kwargs)
@@ -119,6 +125,7 @@ class PreparedNative:
 
 
 class NativeWriter(Protocol):
+    def validate_original(self, source: bytes, intent: WriteIntent) -> None: ...
     def prepare(self, source: bytes, intent: WriteIntent) -> PreparedNative: ...
     def verify(
         self,
@@ -172,7 +179,7 @@ class LocalWriteEngine:
     def __init__(
         self,
         profile: Path,
-        native: NativeWriter,
+        native: NativeWriter | None,
         *,
         files: WindowsWriteFiles | None = None,
         engineering_capability: EngineeringCapability | None = None,
@@ -186,6 +193,7 @@ class LocalWriteEngine:
         self.database = self.profile / "physical-writes.sqlite3"
         self.native, self.capability = native, engineering_capability
         self.export_files = WindowsExportFiles()
+        self.handoff = WindowsHandoffFiles()
         self.fault_hook = fault_hook or (lambda _stage: None)
         self._mutex, self._operation_depth = RLock(), 0
         self._db_check()
@@ -342,10 +350,7 @@ class LocalWriteEngine:
 
     def _materials(self, record: dict) -> tuple[WriteIntent, bytes, PreparedNative]:
         intent = WriteIntent.create(**record["intent"])
-        backup_path = self.artifacts / (record["operation_id"] + ".original")
-        original = self.files.read_path(backup_path)
-        if _hash(original) != intent.expected_sha256 or len(original) != record["size"]:
-            raise WriteSafetyError("BACKUP_INVALID")
+        original = self._backup_bytes(record)
         prepared = PreparedNative(
             b"",
             intent.game,
@@ -356,6 +361,115 @@ class LocalWriteEngine:
             record["contract"],
         )
         return intent, original, prepared
+
+    def _backup_path(self, record, role="original"):
+        identifier = (
+            record["operation_id"]
+            if role == "original"
+            else str(uuid5(NAMESPACE_URL, record["operation_id"] + ":before_restore"))
+        )
+        return self.artifacts / (identifier + ".original")
+
+    def _backup_bytes(self, record, role="original"):
+        expected = (
+            record["intent"]["expected_sha256"]
+            if role == "original"
+            else record["output_hash"]
+        )
+        try:
+            data = self.files.read_path(self._backup_path(record, role))
+            if len(data) != record["size"] or _hash(data) != expected:
+                raise WriteSafetyError("BACKUP_INVALID")
+            return data
+        except (OSError, WriteSafetyError):
+            raise WriteSafetyError("BACKUP_INVALID") from None
+
+    def _validate_original(self, data, intent):
+        try:
+            self.native.validate_original(data, intent)
+        except Exception:
+            raise WriteSafetyError("NATIVE_VERIFICATION_FAILED") from None
+
+    def backups_for(self, selected):
+        """Local profile-only view. No cloud account, native process or file bytes."""
+        if not selected:
+            return []
+        with self._db() as connection:
+            records = [
+                json.loads(row[0])
+                for row in connection.execute(
+                    "SELECT record FROM physical_writes ORDER BY id"
+                )
+            ]
+        result = []
+        for record in records:
+            if os.path.normcase(record["target"]) != os.path.normcase(
+                str(Path(selected).absolute())
+            ):
+                continue
+            for role in ("original", "before_restore"):
+                if role == "before_restore" and not record.get(
+                    "restore_backup_created_at"
+                ):
+                    continue
+                try:
+                    self._backup_bytes(record, role)
+                    verified = True
+                except WriteSafetyError:
+                    verified = False
+                result.append(
+                    {
+                        "operation_id": record["operation_id"],
+                        "role": role,
+                        "game": record["intent"]["game"],
+                        "created_at": record.get(
+                            "created_at"
+                            if role == "original"
+                            else "restore_backup_created_at"
+                        ),
+                        "verified": verified,
+                        "status": record["status"],
+                        "can_restore": verified
+                        and role == "original"
+                        and record.get("protocol") == "no_replace_v1"
+                        and record.get("commit_started", False)
+                        and type(self.capability) is EngineeringCapability,
+                    }
+                )
+        return result
+
+    @_serialized
+    def export_backup(self, operation_id, *, destination: Path, role="original"):
+        if role not in ("original", "before_restore"):
+            raise WriteSafetyError("INVALID_BACKUP_ROLE")
+        record = self._load(operation_id)
+        final = Path(destination).absolute()
+        self.files.path(final.parent, directory=True)
+        if (
+            final == self._target(record).path
+            or final.is_relative_to(self.profile)
+            or final.name.startswith(".pokeapp-")
+        ):
+            raise WriteSafetyError("UNSAFE_BACKUP_DESTINATION")
+        data = self._backup_bytes(record, role)
+        stage = final.parent / (".pokeapp-copy-" + str(uuid4()) + ".partial")
+        with (
+            self.handoff.pin(final),
+            self.export_files.strict_source(self._backup_path(record, role)) as backup,
+        ):
+            if self.files.read(backup) != data:
+                raise WriteSafetyError("BACKUP_INVALID")
+            with self.export_files.new_stage(stage) as output:
+                if output.write(data) != len(data):
+                    raise WriteSafetyError("SHORT_WRITE")
+                output.flush()
+                os.fsync(output.fileno())
+                if self.files.read(output) != data:
+                    raise WriteSafetyError("BACKUP_COPY_INVALID")
+                self.handoff.rename_new(output, final)
+                if self.files.read(output) != data:
+                    raise WriteSafetyError("BACKUP_COPY_INVALID")
+        return {"status": "BACKUP_EXPORTED_VERIFIED", "operation_id": operation_id}
 
     def _verify_displaced_original(self, record: dict, original: bytes):
         if not record["commit_started"]:
@@ -388,11 +502,18 @@ class LocalWriteEngine:
             ):
                 raise WriteSafetyError("OPERATION_ID_REUSED")
             return self.reconcile(operation_id)
-        with self.files.locked(target) as stream:
+        if self.artifacts == target.path.parent or target.path.is_relative_to(
+            self.profile
+        ):
+            raise WriteSafetyError("BACKUP_LOCATION_NOT_SEPARATE")
+        with (
+            self.handoff.pin(target.path),
+            self.handoff.held(target.path, [target.device, target.inode]) as stream,
+        ):
             original = self.files.read(stream)
             if _hash(original) != intent.expected_sha256:
                 raise WriteSafetyError("SOURCE_HASH_CHANGED")
-            prepared = self._native_prepare(original, intent)
+            self._validate_original(original, intent)
             record = {
                 "operation_id": operation_id,
                 "intent": intent.to_payload(),
@@ -400,13 +521,20 @@ class LocalWriteEngine:
                 "device": target.device,
                 "inode": target.inode,
                 "size": len(original),
-                "output_hash": prepared.output_hash,
-                "semantic_diff": prepared.semantic_diff,
-                "contract": prepared.contract,
+                "output_hash": None,
+                "semantic_diff": None,
+                "contract": None,
                 "status": "PREPARED",
                 "error": None,
                 "commit_started": False,
                 "phase": "apply",
+                "mode": "apply",
+                "protocol": "no_replace_v1",
+                "created_at": datetime.now(UTC).isoformat(),
+                "backup_verified": False,
+                "handoff_phase": "BACKUP_INTENT",
+                "stage_identity": None,
+                "park_identity": [target.device, target.inode],
             }
             self._save(record, insert=True)
             try:
@@ -416,7 +544,18 @@ class LocalWriteEngine:
                     original,
                     immutable=True,
                 )
+                if self._backup_bytes(record) != original:
+                    raise WriteSafetyError("BACKUP_INVALID")
+                record.update(backup_verified=True, handoff_phase="BACKUP_VERIFIED")
+                self._save(record)
                 self.fault_hook("backup_verified")
+                prepared = self._native_prepare(original, intent)
+                record.update(
+                    output_hash=prepared.output_hash,
+                    semantic_diff=prepared.semantic_diff,
+                    contract=prepared.contract,
+                )
+                self._save(record)
                 self.files.create_verified(
                     target.path.parent / (".pokeapp-" + operation_id + ".stage"),
                     prepared.output,
@@ -426,6 +565,10 @@ class LocalWriteEngine:
                     raise WriteSafetyError("SOURCE_HASH_CHANGED")
                 self.files.assert_same_path(target.path, target.device, target.inode)
                 record["status"] = "AWAITING_CONFIRMATION"
+                stage = target.path.parent / (".pokeapp-" + operation_id + ".stage")
+                enrolled_stage = self.files.enroll(stage)
+                record["stage_identity"] = [enrolled_stage.device, enrolled_stage.inode]
+                record["handoff_phase"] = "PREPARED"
                 self._save(record)
             except Exception as error:
                 record.update(
@@ -527,54 +670,273 @@ class LocalWriteEngine:
             return self._confirm_export(
                 record, closed_emulator_confirmed=closed_emulator_confirmed
             )
+        if record.get("protocol") != "no_replace_v1":
+            raise WriteSafetyError("LEGACY_WRITE_PROTOCOL_DISABLED")
+        return self._confirm_handoff(
+            record, closed_emulator_confirmed=closed_emulator_confirmed
+        )
+
+    def _handoff_path(self, record, suffix):
+        return self._target(record).path.parent / (
+            ".pokeapp-" + record["operation_id"] + suffix
+        )
+
+    def _confirm_handoff(self, record, *, closed_emulator_confirmed):
+        self.files.assert_closed(closed_emulator_confirmed)
         if record["status"] != "AWAITING_CONFIRMATION":
-            return self.reconcile(operation_id)
+            return self._reconcile_handoff(record)
         intent, original, prepared = self._materials(record)
         target = self._target(record)
         self._authorize(target, intent)
-        self.files.assert_closed(closed_emulator_confirmed)
         try:
-            with self.files.locked(target) as stream:
-                if self.files.read(stream) != original:
+            with ExitStack() as stack:
+                stack.enter_context(self.handoff.pin(target.path))
+                stack.enter_context(self.handoff.pin(self._backup_path(record)))
+                backup = stack.enter_context(
+                    self.export_files.strict_source(self._backup_path(record))
+                )
+                if self.files.read(backup) != original or not record.get(
+                    "backup_verified"
+                ):
+                    raise WriteSafetyError("BACKUP_INVALID")
+                source = stack.enter_context(
+                    self.handoff.held(target.path, [target.device, target.inode])
+                )
+                if self.files.read(source) != original:
                     raise WriteSafetyError("SOURCE_HASH_CHANGED")
-                stage = target.path.parent / (".pokeapp-" + operation_id + ".stage")
-                output = self.files.read_path(stage)
-                self._verify(original, output, intent, prepared)
-                # Durably record uncertainty BEFORE the only replacement call.
+                candidate = stack.enter_context(
+                    self.handoff.held(
+                        self._handoff_path(record, ".stage"), record["stage_identity"]
+                    )
+                )
+                self._verify(original, self.files.read(candidate), intent, prepared)
                 record.update(
                     status="RECOVERY_REQUIRED",
                     commit_started=True,
-                    error="COMMIT_INTERRUPTED",
+                    handoff_phase="PARK_INTENT",
+                    error="HANDOFF_INTERRUPTED",
                 )
                 self._save(record)
-                self.fault_hook("before_replace")
+                self.fault_hook("before_park")
                 self.files.assert_closed(closed_emulator_confirmed)
-                self.files.assert_same_path(target.path, target.device, target.inode)
-                if self.files.read(stream) != original:
-                    raise WriteSafetyError("SOURCE_HASH_CHANGED")
-                witness = target.path.parent / (
-                    ".pokeapp-" + operation_id + ".displaced"
+                self.handoff.rename_new(
+                    source, self._handoff_path(record, ".displaced")
                 )
-                self.files.replace(target.path, stage, witness)
-                self.fault_hook("after_replace")
-                if self.files.read_path(witness) != original:
-                    raise WriteSafetyError("DISPLACED_SOURCE_CHANGED")
-                self.files.flush(target.path)
-                current = self.files.enroll(target.path)
-                with self.files.locked(current) as final_stream:
-                    persisted = self.files.read(final_stream)
-                    self._verify(original, persisted, intent, prepared)
-                    self.fault_hook("after_verify")
-                    self.files.assert_same_path(
-                        current.path, current.device, current.inode
-                    )
-                    record.update(status="APPLIED_VERIFIED", error=None)
-                    self._save(record)
-                return self._receipt(record, True)
+                self.fault_hook("after_park")
+                record["handoff_phase"] = "PUBLISH_INTENT"
+                self._save(record)
+                self.handoff.rename_new(candidate, target.path)
+                self.fault_hook("after_publish")
+                self._verify(original, self.files.read(candidate), intent, prepared)
+                if (
+                    self.files.read(backup) != original
+                    or self.files.read(source) != original
+                ):
+                    raise WriteSafetyError("BACKUP_INVALID")
+                self.handoff.verify_name(candidate, target.path)
+                self.fault_hook("after_verify")
+                record.update(
+                    status="APPLIED_VERIFIED", error=None, handoff_phase="VERIFIED"
+                )
+                self._save(record)
+            return self._receipt(record, True)
         except Exception as error:
             record.update(
                 status="RECOVERY_REQUIRED" if record["commit_started"] else "REJECTED",
-                error=self._error(error, "WRITE_FAILED"),
+                error=self._error(error, "HANDOFF_FAILED"),
+            )
+            self._save(record)
+            return self._receipt(record)
+
+    def _reconcile_handoff(self, record):
+        """No namespace writes. Actual file identity AND native bytes decide."""
+        if record["status"] == "REJECTED":
+            return self._receipt(record)
+        target = self._target(record)
+        try:
+            original = self._backup_bytes(record)
+            intent = WriteIntent.create(**record["intent"])
+            self._validate_original(original, intent)
+            with (
+                self.handoff.pin(target.path),
+                self.handoff.held(target.path) as current,
+            ):
+                data, identity = (
+                    self.files.read(current),
+                    self.handoff.identity(current),
+                )
+                if record["status"] in ("APPLIED_VERIFIED", "RESTORED_VERIFIED"):
+                    expected_hash = (
+                        record["output_hash"]
+                        if record["status"] == "APPLIED_VERIFIED"
+                        else intent.expected_sha256
+                    )
+                    expected_id = (
+                        record.get("restore_identity")
+                        if record["status"] == "RESTORED_VERIFIED"
+                        else record["stage_identity"]
+                    )
+                    return self._receipt(
+                        record, _hash(data) == expected_hash and identity == expected_id
+                    )
+                if record["phase"] == "restore":
+                    if identity == record.get("restore_identity") and data == original:
+                        self._validate_original(data, intent)
+                        record.update(
+                            status="RESTORED_VERIFIED",
+                            error=None,
+                            handoff_phase="RESTORED",
+                        )
+                    else:
+                        raise WriteSafetyError("RESTORE_NOT_APPLIED")
+                elif data == original and identity == [target.device, target.inode]:
+                    if (
+                        record["status"] == "AWAITING_CONFIRMATION"
+                        and not record["commit_started"]
+                    ):
+                        _, _, prepared = self._materials(record)
+                        with self.handoff.held(
+                            self._handoff_path(record, ".stage"),
+                            record["stage_identity"],
+                        ) as stage:
+                            self._verify(
+                                original, self.files.read(stage), intent, prepared
+                            )
+                        return self._receipt(record, True)
+                    record.update(
+                        status="REJECTED", error="INTERRUPTED_WITH_ORIGINAL_PRESERVED"
+                    )
+                elif record["commit_started"] and identity == record["stage_identity"]:
+                    _, _, prepared = self._materials(record)
+                    self._verify(original, data, intent, prepared)
+                    with self.handoff.held(
+                        self._handoff_path(record, ".displaced"),
+                        record["park_identity"],
+                    ) as parked:
+                        if self.files.read(parked) != original:
+                            raise WriteSafetyError("DISPLACED_SOURCE_CHANGED")
+                    record.update(
+                        status="APPLIED_VERIFIED", error=None, handoff_phase="VERIFIED"
+                    )
+                else:
+                    raise WriteSafetyError("EXTERNAL_CHANGE_PRESERVED")
+                self._save(record)
+                return self._receipt(record, True)
+        except Exception as error:
+            # An established receipt is history; loss of current file never replays it.
+            if record["status"] in ("APPLIED_VERIFIED", "RESTORED_VERIFIED"):
+                return self._receipt(record, False)
+            record.update(
+                status="RECOVERY_REQUIRED",
+                error=self._error(error, "SAVE_PATH_UNAVAILABLE"),
+            )
+            self._save(record)
+            return self._receipt(record)
+
+    def _restore_handoff(self, record, *, closed_emulator_confirmed):
+        self.files.assert_closed(closed_emulator_confirmed)
+        self._authorize(self._target(record), WriteIntent.create(**record["intent"]))
+        reconciled = self._reconcile_handoff(record)
+        if reconciled.status == "RESTORED_VERIFIED":
+            return reconciled
+        record = self._load(record["operation_id"])
+        try:
+            intent, original, prepared = self._materials(record)
+            self._validate_original(original, intent)
+            target = self._target(record)
+            with ExitStack() as stack:
+                stack.enter_context(self.handoff.pin(target.path))
+                stack.enter_context(self.handoff.pin(self._backup_path(record)))
+                backup = stack.enter_context(
+                    self.export_files.strict_source(self._backup_path(record))
+                )
+                if self.files.read(backup) != original:
+                    raise WriteSafetyError("BACKUP_INVALID")
+                current = None
+                if target.path.exists():
+                    current = stack.enter_context(
+                        self.handoff.held(target.path, record["stage_identity"])
+                    )
+                    output = self.files.read(current)
+                    self._verify(original, output, intent, prepared)
+                    # Every restore also preserves the current, validated candidate.
+                    if not record.get("restore_backup_created_at"):
+                        self.files.create_verified(
+                            self._backup_path(record, "before_restore"),
+                            output,
+                            immutable=True,
+                        )
+                        record["restore_backup_created_at"] = datetime.now(
+                            UTC
+                        ).isoformat()
+                        self._save(record)
+                    if self._backup_bytes(record, "before_restore") != output:
+                        raise WriteSafetyError("BACKUP_INVALID")
+                    before_restore = stack.enter_context(
+                        self.export_files.strict_source(
+                            self._backup_path(record, "before_restore")
+                        )
+                    )
+                    if self.files.read(before_restore) != output:
+                        raise WriteSafetyError("BACKUP_INVALID")
+                elif not record["commit_started"]:
+                    raise WriteSafetyError("UNEXPECTED_MISSING_SOURCE")
+                else:
+                    # Prove which original was parked; an absent name alone is insufficient.
+                    parked = stack.enter_context(
+                        self.handoff.held(
+                            self._handoff_path(record, ".displaced"),
+                            record["park_identity"],
+                        )
+                    )
+                    if self.files.read(parked) != original:
+                        raise WriteSafetyError("DISPLACED_SOURCE_CHANGED")
+                stage_path = self._handoff_path(record, ".restore")
+                if not record.get("restore_identity"):
+                    record.update(
+                        phase="restore",
+                        status="RECOVERY_REQUIRED",
+                        error="RESTORE_INTERRUPTED",
+                        handoff_phase="RESTORE_STAGE_INTENT",
+                    )
+                    self._save(record)
+                    self.files.create_verified(stage_path, original)
+                    created = self.files.enroll(stage_path)
+                    record["restore_identity"] = [created.device, created.inode]
+                    self._save(record)
+                stage = stack.enter_context(
+                    self.handoff.held(stage_path, record["restore_identity"])
+                )
+                if self.files.read(stage) != original:
+                    raise WriteSafetyError("BACKUP_INVALID")
+                self._validate_original(self.files.read(stage), intent)
+                record.update(
+                    phase="restore",
+                    status="RECOVERY_REQUIRED",
+                    error="RESTORE_INTERRUPTED",
+                    handoff_phase="RESTORE_PARK_INTENT",
+                )
+                self._save(record)
+                self.fault_hook("before_restore")
+                if current is not None:
+                    self.handoff.rename_new(
+                        current, self._handoff_path(record, ".restored-output")
+                    )
+                self.fault_hook("restore_after_park")
+                record["handoff_phase"] = "RESTORE_PUBLISH_INTENT"
+                self._save(record)
+                self.handoff.rename_new(stage, target.path)
+                self.fault_hook("after_restore")
+                self._validate_original(self.files.read(stage), intent)
+                self.handoff.verify_name(stage, target.path)
+                record.update(
+                    status="RESTORED_VERIFIED", error=None, handoff_phase="RESTORED"
+                )
+                self._save(record)
+            return self._receipt(record, True)
+        except Exception as error:
+            record.update(
+                status="RECOVERY_REQUIRED", error=self._error(error, "RESTORE_FAILED")
             )
             self._save(record)
             return self._receipt(record)
@@ -647,6 +1009,8 @@ class LocalWriteEngine:
         record = self._load(operation_id)
         if record.get("mode") == "export":
             return self._reconcile_export(record)
+        if record.get("protocol") == "no_replace_v1":
+            return self._reconcile_handoff(record)
         if record["status"] == "REJECTED":
             return self._receipt(record)
         try:
@@ -741,57 +1105,11 @@ class LocalWriteEngine:
         self, operation_id: str, *, closed_emulator_confirmed: bool
     ) -> WriteReceipt:
         record = self._load(operation_id)
-        if record["status"] == "RESTORED_VERIFIED":
-            return self.reconcile(operation_id)
-        intent, original, prepared = self._materials(record)
-        target = self.files.enroll(Path(record["target"]))
-        self._authorize(target, intent)
-        self.files.assert_closed(closed_emulator_confirmed)
-        try:
-            self._verify_displaced_original(record, original)
-            with self.files.locked(target) as stream:
-                output = self.files.read(stream)
-                self._verify(original, output, intent, prepared)
-                restore_stage = target.path.parent / (
-                    ".pokeapp-" + operation_id + ".restore"
-                )
-                self.files.create_verified(restore_stage, original)
-                record.update(
-                    phase="restore",
-                    status="RECOVERY_REQUIRED",
-                    error="RESTORE_INTERRUPTED",
-                    commit_started=True,
-                )
-                self._save(record)
-                self.fault_hook("before_restore")
-                self.files.assert_closed(closed_emulator_confirmed)
-                self.files.assert_same_path(target.path, target.device, target.inode)
-                if self.files.read(stream) != output:
-                    raise WriteSafetyError("EXTERNAL_CHANGE_PRESERVED")
-                witness = target.path.parent / (
-                    ".pokeapp-" + operation_id + ".restored-output"
-                )
-                self.files.replace(target.path, restore_stage, witness)
-                self.fault_hook("after_restore")
-                if self.files.read_path(witness) != output:
-                    raise WriteSafetyError("DISPLACED_SOURCE_CHANGED")
-                self.files.flush(target.path)
-                current = self.files.enroll(target.path)
-                with self.files.locked(current) as final_stream:
-                    if self.files.read(final_stream) != original:
-                        raise WriteSafetyError("RESTORE_VERIFICATION_FAILED")
-                    self.files.assert_same_path(
-                        current.path, current.device, current.inode
-                    )
-                    record.update(status="RESTORED_VERIFIED", error=None)
-                    self._save(record)
-                return self._receipt(record, True)
-        except Exception as error:
-            record.update(
-                status="RECOVERY_REQUIRED", error=self._error(error, "RESTORE_FAILED")
-            )
-            self._save(record)
-            return self._receipt(record)
+        if record.get("protocol") != "no_replace_v1":
+            raise WriteSafetyError("LEGACY_WRITE_PROTOCOL_DISABLED")
+        return self._restore_handoff(
+            record, closed_emulator_confirmed=closed_emulator_confirmed
+        )
 
 
 WriteEngine = LocalWriteEngine

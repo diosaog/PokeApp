@@ -119,6 +119,14 @@ label {
   display: grid;
   gap: 0.5rem;
 }
+label:has(input[type="checkbox"]) {
+  display: flex;
+  align-items: center;
+  margin-top: 0.75rem;
+}
+input[type="checkbox"] {
+  flex: 0 0 auto;
+}
 input {
   background: #18241e;
   color: #fff;

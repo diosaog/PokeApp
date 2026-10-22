@@ -4,16 +4,16 @@ The native writer fixture gate separately proves game formats. These tests never
 claim their small byte fixture is a Pokémon save or real native-format evidence.
 """
 
-from dataclasses import replace
-from hashlib import sha256
 import json
 import os
-from pathlib import Path
 import stat
 import subprocess
 import sys
 import tempfile
 import unittest
+from dataclasses import replace
+from hashlib import sha256
+from pathlib import Path
 from unittest.mock import patch
 
 from app.launcher.write_engine import (
@@ -28,7 +28,6 @@ from app.launcher.write_files import (
     windows_process_names,
 )
 
-
 SOURCE = b"ENGINEERING FILESYSTEM TEST ONLY:" + bytes(range(256))
 TRAINER = sha256(b"fixture trainer").hexdigest()
 MUTATION = {
@@ -42,6 +41,10 @@ MUTATION = {
 
 
 class TestNative:
+    def validate_original(self, source, intent):
+        if source != SOURCE or intent.game != "X" or intent.trainer_key != TRAINER:
+            raise ValueError("invalid isolated source")
+
     def prepare(self, source, intent):
         if source != SOURCE or intent.game != "X" or intent.trainer_key != TRAINER:
             raise ValueError("invalid isolated source")
@@ -75,7 +78,7 @@ def engine_at(root, *, files=None, fault_hook=None, native=None, enabled=True):
     return LocalWriteEngine(
         root / "profile",
         native or TestNative(),
-        files=files or WindowsWriteFiles(process_names=lambda: []),
+        files=files or WindowsWriteFiles(process_names=list),
         engineering_capability=EngineeringCapability.for_fixture_root(root)
         if enabled
         else None,
@@ -261,7 +264,7 @@ class TransactionTests(unittest.TestCase):
         other = LocalWriteEngine(
             other_profile,
             TestNative(),
-            files=WindowsWriteFiles(process_names=lambda: []),
+            files=WindowsWriteFiles(process_names=list),
             engineering_capability=EngineeringCapability.for_fixture_root(self.root),
         )
         with self.engine.files.operation_lock(target_lock):
@@ -339,7 +342,7 @@ class TransactionTests(unittest.TestCase):
                     raise OSError("disk full")
                 return super().create_verified(path, data, immutable=immutable)
 
-        engine = engine_at(self.root, files=Failure(process_names=lambda: []))
+        engine = engine_at(self.root, files=Failure(process_names=list))
         self.assert_error(
             "PREPARATION_FAILED",
             lambda: engine.prepare(
@@ -360,7 +363,7 @@ class TransactionTests(unittest.TestCase):
                     raise WriteSafetyError("SHORT_WRITE")
                 return super().create_verified(path, data, immutable=immutable)
 
-        engine = engine_at(self.root, files=Failure(process_names=lambda: []))
+        engine = engine_at(self.root, files=Failure(process_names=list))
         self.assert_error(
             "SHORT_WRITE",
             lambda: engine.prepare(
@@ -424,7 +427,7 @@ class TransactionTests(unittest.TestCase):
     def test_replace_failure_is_reconciled_not_retried(self):
         self.prepared()
         with patch.object(
-            self.engine.files, "replace", side_effect=OSError("replace failed")
+            self.engine.handoff, "rename_new", side_effect=OSError("rename failed")
         ) as mocked:
             result = self.engine.confirm(
                 self.intent.operation_id, closed_emulator_confirmed=True
@@ -439,12 +442,15 @@ class TransactionTests(unittest.TestCase):
 
     def test_postwrite_failure_retains_backup_and_reconciles(self):
         self.prepared()
-        with patch.object(
-            self.engine.files, "flush", side_effect=OSError("flush failed")
-        ):
-            result = self.engine.confirm(
-                self.intent.operation_id, closed_emulator_confirmed=True
-            )
+
+        def interrupted(at):
+            if at == "after_publish":
+                raise OSError("journal receipt interrupted")
+
+        self.engine.fault_hook = interrupted
+        result = self.engine.confirm(
+            self.intent.operation_id, closed_emulator_confirmed=True
+        )
         self.assertEqual("RECOVERY_REQUIRED", result.status)
         self.assertNotEqual(SOURCE, self.target.read_bytes())
         fresh = engine_at(self.root)
@@ -452,28 +458,35 @@ class TransactionTests(unittest.TestCase):
             "APPLIED_VERIFIED", fresh.reconcile(self.intent.operation_id).status
         )
 
-    def test_external_delete_sharing_race_is_not_silently_certified_or_restored(self):
+    def test_external_gap_creator_is_preserved_and_restore_rejected(self):
         later = SOURCE[:-1] + b"Q"
 
-        class Adversarial(WindowsWriteFiles):
-            def replace(inner, target, stage, witness):
-                impostor = target.parent / "external-change"
-                impostor.write_bytes(later)
-                # Another same-user actor can use the same delete-sharing
-                # ReplaceFileW primitive; plain CRT rename is stricter here.
-                super().replace(target, impostor, target.parent / "external-original")
-                super().replace(target, stage, witness)
+        def external(at):
+            if at == "after_park":
+                result = subprocess.run(
+                    [
+                        sys.executable,
+                        "-c",
+                        "from pathlib import Path; import sys; Path(sys.argv[1]).write_bytes(bytes.fromhex(sys.argv[2]))",
+                        str(self.target),
+                        later.hex(),
+                    ],
+                    capture_output=True,
+                    check=True,
+                    timeout=10,
+                )
+                self.assertEqual(0, result.returncode)
 
-        engine = engine_at(self.root, files=Adversarial(process_names=lambda: []))
-        engine.prepare(self.enrolled, self.intent, closed_emulator_confirmed=True)
-        result = engine.confirm(
+        self.engine.fault_hook = external
+        self.prepared()
+        result = self.engine.confirm(
             self.intent.operation_id, closed_emulator_confirmed=True
         )
         self.assertEqual("RECOVERY_REQUIRED", result.status)
-        self.assertEqual("DISPLACED_SOURCE_CHANGED", result.error)
+        self.assertEqual("DESTINATION_OCCUPIED", result.error)
+        self.assertEqual(later, self.target.read_bytes())
         witness = self.root / (".pokeapp-" + self.intent.operation_id + ".displaced")
-        self.assertEqual(later, witness.read_bytes())
-        before_recovery = self.target.read_bytes()
+        self.assertEqual(SOURCE, witness.read_bytes())
         fresh = engine_at(self.root)
         self.assertEqual(
             "RECOVERY_REQUIRED", fresh.reconcile(self.intent.operation_id).status
@@ -484,8 +497,12 @@ class TransactionTests(unittest.TestCase):
                 self.intent.operation_id, closed_emulator_confirmed=True
             ).status,
         )
-        self.assertEqual(before_recovery, self.target.read_bytes())
-        self.assertEqual(later, witness.read_bytes())
+        self.assertEqual(later, self.target.read_bytes())
+        self.assertEqual(SOURCE, witness.read_bytes())
+        self.assertEqual(
+            SOURCE,
+            fresh._backup_path(fresh._load(self.intent.operation_id)).read_bytes(),
+        )
 
     def test_public_receipt_omits_paths_hashes_native_and_private_trainer(self):
         receipt = self.prepared().public_status()
@@ -511,8 +528,9 @@ class TransactionTests(unittest.TestCase):
             ("prepared", "RECOVERY_REQUIRED"),
             ("backup_verified", "REJECTED"),
             ("stage_verified", "REJECTED"),
-            ("before_replace", "REJECTED"),
-            ("after_replace", "APPLIED_VERIFIED"),
+            ("before_park", "REJECTED"),
+            ("after_park", "RECOVERY_REQUIRED"),
+            ("after_publish", "APPLIED_VERIFIED"),
             ("after_verify", "APPLIED_VERIFIED"),
         ):
             with self.subTest(checkpoint=checkpoint):
@@ -534,7 +552,17 @@ class TransactionTests(unittest.TestCase):
                     if expected == "APPLIED_VERIFIED"
                     else SOURCE
                 )
-                self.assertEqual(expected_data, (isolated / "main").read_bytes())
+                if checkpoint == "after_park":
+                    self.assertFalse((isolated / "main").exists())
+                    self.assertEqual(
+                        "RESTORED_VERIFIED",
+                        fresh.restore(
+                            self.intent.operation_id, closed_emulator_confirmed=True
+                        ).status,
+                    )
+                    self.assertEqual(SOURCE, (isolated / "main").read_bytes())
+                else:
+                    self.assertEqual(expected_data, (isolated / "main").read_bytes())
 
 
 if __name__ == "__main__":

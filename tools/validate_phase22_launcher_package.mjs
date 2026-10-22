@@ -95,13 +95,16 @@ for (let run = 0; run < 2; run++) {
       Object.keys(window.launcher).sort(),
     );
     assert.deepEqual(exposed, [
+      "backups",
       "chooseSave",
       "confirmWrite",
       "exportSave",
       "login",
       "logout",
       "reconcileWrite",
+      "restoreBackup",
       "retry",
+      "saveBackup",
       "state",
       "sync",
     ]);

@@ -4,7 +4,12 @@ let observation = null,
   revision = null,
   boxIndex = 0,
   polling = false,
-  pendingWrite = null;
+  pendingWrite = null,
+  backupRows = [],
+  backupKey = "",
+  selectedSave = null,
+  exportAvailable = false,
+  backupBusy = false;
 const text = (id, value) => {
   $(id).textContent = value;
 };
@@ -77,7 +82,25 @@ function render(state) {
   $("write-confirmation").hidden = !write?.can_confirm;
   $("confirm-write").disabled =
     !write?.can_confirm || !$("emulator-closed").checked;
-  $("export-save").disabled = !write?.can_export;
+  if (selectedSave !== state.selected_save) {
+    selectedSave = state.selected_save;
+    $("backup-emulator-closed").checked = false;
+  }
+  exportAvailable = Boolean(write?.can_export);
+  backupBusy = Boolean(write?.busy);
+  $("export-save").disabled =
+    !exportAvailable || !$("backup-emulator-closed").checked;
+  text("backup-notice", write?.backup_message || "");
+  const key = JSON.stringify([
+    write?.backups || [],
+    write?.busy,
+    $("backup-emulator-closed").checked,
+  ]);
+  if (key !== backupKey) {
+    backupKey = key;
+    backupRows = write?.backups || [];
+    renderBackups(Boolean(write?.busy));
+  }
   $("reconcile-write").hidden = !write?.can_reconcile;
   const recovery = write?.status === "RECOVERY_REQUIRED";
   $("select-save").disabled = recovery;
@@ -113,11 +136,13 @@ function render(state) {
   text("save-state", local);
   text(
     "connection",
-    state.cloud_status === "ONLINE"
-      ? "● Online"
-      : state.cloud_status === "SYNCING"
-        ? "● Sincronizando"
-        : "● Sin conexión",
+    recovery
+      ? "● Sincronización pausada"
+      : state.cloud_status === "ONLINE"
+        ? "● Online"
+        : state.cloud_status === "SYNCING"
+          ? "● Sincronizando"
+          : "● Sin conexión",
   );
   text(
     "identity",
@@ -179,6 +204,43 @@ function render(state) {
   };
   text("message", errors[state.error] || "");
 }
+
+function renderBackups(busy) {
+  const list = $("backup-list");
+  list.replaceChildren();
+  if (!backupRows.length) {
+    list.textContent =
+      "No hay copias cargadas para esta partida. Pulsa Ver / actualizar copias.";
+    return;
+  }
+  for (const backup of backupRows) {
+    const row = document.createElement("p"),
+      label = document.createElement("span"),
+      copy = document.createElement("button");
+    label.textContent = `${backup.game} · ${backup.created_at ? new Date(backup.created_at).toLocaleString("es-ES") : "Fecha no disponible"} · ${backup.role === "before_restore" ? "Antes de restaurar" : "Original"} · ${backup.verified ? "Verificada" : "Inválida o ilegible"} · ${["RECOVERY_REQUIRED", "PREPARED"].includes(backup.status) ? "Recuperación pendiente" : "Conservada"} `;
+    copy.textContent = "Guardar copia…";
+    copy.disabled = !backup.verified || busy;
+    copy.onclick = () =>
+      action(() =>
+        window.launcher.saveBackup(backup.operation_id, backup.role),
+      );
+    row.append(label, copy);
+    if (backup.can_restore) {
+      const restore = document.createElement("button");
+      restore.textContent = "Restaurar copia…";
+      restore.disabled = busy || !$("backup-emulator-closed").checked;
+      restore.onclick = () =>
+        action(() =>
+          window.launcher.restoreBackup(
+            backup.operation_id,
+            $("backup-emulator-closed").checked,
+          ),
+        );
+      row.append(restore);
+    }
+    list.append(row);
+  }
+}
 async function action(fn) {
   try {
     const result = await fn();
@@ -206,7 +268,15 @@ $("next-box").onclick = () => {
 };
 $("close-details").onclick = () => $("details").close();
 $("select-save").onclick = () => action(() => window.launcher.chooseSave());
-$("export-save").onclick = () => action(() => window.launcher.exportSave());
+$("export-save").onclick = () =>
+  action(() => window.launcher.exportSave($("backup-emulator-closed").checked));
+$("refresh-backups").onclick = () => action(() => window.launcher.backups());
+$("backup-emulator-closed").onchange = () => {
+  backupKey = "";
+  $("export-save").disabled =
+    !exportAvailable || !$("backup-emulator-closed").checked;
+  renderBackups(backupBusy);
+};
 $("retry").onclick = () => action(() => window.launcher.retry());
 $("logout").onclick = () => action(() => window.launcher.logout());
 $("enable-sync").onclick = () => action(() => window.launcher.sync());

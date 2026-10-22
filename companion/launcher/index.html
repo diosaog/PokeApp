@@ -51,6 +51,26 @@
           </button>
           <p id="write-error" role="status"></p>
         </article>
+        <article aria-labelledby="backups-title">
+          <h2 id="backups-title">Copias de seguridad</h2>
+          <p>
+            Copias completas de esta partida, guardadas en este equipo. Guardar
+            una copia no modifica el save activo ni necesita conexión.
+          </p>
+          <button id="refresh-backups">Ver / actualizar copias</button>
+          <label
+            ><input id="backup-emulator-closed" type="checkbox" /> He cerrado el
+            juego y el emulador. Los mantendré cerrados durante la
+            operación.</label
+          >
+          <p id="backup-notice" role="status"></p>
+          <div id="backup-list"></div>
+          <p class="muted">
+            Si hay una recuperación pendiente, no abras el emulador. La
+            restauración automática sigue limitada a pruebas de ingeniería;
+            siempre puedes guardar una copia verificada.
+          </p>
+        </article>
         <h2>Equipo</h2>
         <div id="party" class="slots party" aria-label="Equipo"></div>
         <div class="box-nav">

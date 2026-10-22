@@ -5,6 +5,7 @@ from contextlib import contextmanager
 from pathlib import Path
 
 from app.launcher.save_activity import SaveBusy
+from app.launcher.write_engine import EngineeringCapability
 from app.launcher.write_files import WriteSafetyError
 
 
@@ -21,6 +22,9 @@ class LocalWriteController:
         self._error = None
         self._description = None
         self._export_intent = None
+        self._backups = []
+        self._backup_selection = None
+        self._backup_message = None
         if engine is not None:
             try:
                 self._pending = engine.pending()
@@ -43,8 +47,14 @@ class LocalWriteController:
                 "status": state,
                 "operation_id": receipt.operation_id if receipt else None,
                 "game": receipt.game if receipt else None,
-                "can_confirm": not self._busy and state == "AWAITING_CONFIRMATION",
-                "can_export": not self._busy and self._export_intent is not None,
+                "can_confirm": not self._busy
+                and state == "AWAITING_CONFIRMATION"
+                and type(getattr(self.engine, "capability", None))
+                is EngineeringCapability,
+                "can_export": not self._busy
+                and self._export_intent is not None
+                and type(getattr(self.engine, "capability", None))
+                is EngineeringCapability,
                 "export_intent": self._export_intent.to_payload()
                 if self._export_intent is not None
                 else None,
@@ -55,6 +65,14 @@ class LocalWriteController:
                 "mode": receipt.mode if receipt else None,
                 "export_path": receipt.export_path if receipt else None,
                 "applied_to_source": receipt.applied_to_source if receipt else False,
+                "backups": self._backups
+                if self._backup_selection == self.selected()
+                else [],
+                "backup_message": self._backup_message,
+                "restart_blocked_by_recovery": self._busy
+                or self.gate.recovery_required,
+                "emulator_restart_allowed": False,  # no real lifecycle adapter qualified
+                "emulator_qualified": False,
                 # Exact private errors, fingerprints, paths and parameters stay local.
                 "message": "Comprobando la operación local. Mantén el juego cerrado."
                 if self._busy
@@ -128,6 +146,48 @@ class LocalWriteController:
         self.gate.recovery_required = any(
             r.status in ("RECOVERY_REQUIRED", "PREPARED") for r in pending
         )
+        if self.engine is not None and hasattr(self.engine, "backups_for"):
+            self._backups = self.engine.backups_for(self.selected())
+            self._backup_selection = self.selected()
+
+    def _selected_backup(self, operation_id):
+        if (
+            self.engine is None
+            or not self.selected()
+            or self.engine.target_path(operation_id) != Path(self.selected()).absolute()
+        ):
+            raise WriteSafetyError("BACKUP_SELECTION_CHANGED")
+
+    def refresh_backups(self):
+        with self._operation(recovery=True):
+            if self.engine is None:
+                raise WriteSafetyError("LOCAL_BACKUPS_UNAVAILABLE")
+            with self._lock:
+                self._backups = self.engine.backups_for(self.selected())
+                self._backup_selection = self.selected()
+                self._backup_message = None
+        return self.state()
+
+    def export_backup(self, operation_id, destination, role="original"):
+        with self._operation(recovery=True):
+            self._selected_backup(operation_id)
+            self.engine.export_backup(
+                operation_id, destination=Path(destination), role=role
+            )
+            with self._lock:
+                self._backup_message = "Copia original guardada y verificada. La partida activa no se ha modificado."
+        return self.state()
+
+    def restore_backup(
+        self, operation_id, *, closed_emulator_confirmed, restore_confirmed
+    ):
+        if closed_emulator_confirmed is not True or restore_confirmed is not True:
+            raise WriteSafetyError("RESTORE_CONFIRMATION_REQUIRED")
+        with self._operation(recovery=True):
+            self._selected_backup(operation_id)
+            receipt = self.engine.restore(operation_id, closed_emulator_confirmed=True)
+            self._record(receipt)
+        return self.state()
 
     @staticmethod
     def _describe(intent):
@@ -218,12 +278,19 @@ class LocalWriteController:
     # Export is deliberately kept on the same serialized controller seam as
     # physical writes.  The export engine is supplied by the runtime when it
     # becomes available; this small adapter also keeps older engines read-only.
-    def prepare_export(self, destination, *, intent, closed_emulator_confirmed=True):
+    def prepare_export(self, destination, *, intent, closed_emulator_confirmed):
         if self.engine is None or not self.selected():
             raise WriteSafetyError("NO_SELECTED_WRITE_TARGET")
         method = getattr(self.engine, "prepare_export", None)
         if method is None:
             raise WriteSafetyError("LOCAL_EXPORT_UNAVAILABLE")
+        if isinstance(intent, dict):
+            if (
+                self._export_intent is None
+                or intent != self._export_intent.to_payload()
+            ):
+                raise WriteSafetyError("EXPORT_INTENT_NOT_AUTHORIZED")
+            intent = self._export_intent
         with self._operation():
             source = Path(self.selected())
             target = self.engine.enroll(source)
@@ -250,7 +317,7 @@ class LocalWriteController:
             )
         return self.state()
 
-    def confirm_export(self, operation_id, *, closed_emulator_confirmed=True):
+    def confirm_export(self, operation_id, *, closed_emulator_confirmed):
         if self.engine is None:
             raise WriteSafetyError("LOCAL_EXPORT_UNAVAILABLE")
         method = getattr(self.engine, "confirm_export", None) or getattr(
