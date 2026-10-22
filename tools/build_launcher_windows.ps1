@@ -1,7 +1,8 @@
 param(
     [Parameter(Mandatory=$true)][string]$BuildRoot,
     [Parameter(Mandatory=$true)][string]$Python,
-    [Parameter(Mandatory=$true)][string]$Dotnet
+    [Parameter(Mandatory=$true)][string]$Dotnet,
+    [switch]$PrivateCandidate
 )
 $ErrorActionPreference = 'Stop'
 $repo = Split-Path -Parent $PSScriptRoot
@@ -43,6 +44,7 @@ try {
     Checked $buildPython @('tools/prepare_launcher_notices.py','--stage',$stage,'--build',$build)
     $env:POKEAPP_PACKAGE_STAGE = $stage
     $env:POKEAPP_PACKAGE_OUTPUT = Join-Path $build 'release'
+    $env:POKEAPP_PRIVATE_CANDIDATE = if ($PrivateCandidate) { '1' } else { '0' }
     $env:CSC_IDENTITY_AUTO_DISCOVERY = 'false'
     Checked 'companion/launcher/node_modules/.bin/electron-builder.cmd' @(
         '--projectDir','companion/launcher','--config','electron-builder.cjs','--win','nsis','--x64','--publish','never')

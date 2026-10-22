@@ -1,0 +1,266 @@
+{
+  "date": "2026-10-23 Europe/Madrid",
+  "status": "PRIVATE_CANDIDATE_VALIDATED / PHASE22_PARTIAL / PUBLIC_WRITES_DISABLED",
+  "entry_head": "5156d64213f21a00fdf2c75f0a73c08dc01237db",
+  "entry_git": "main/origin 0/0; clean tracked tree; five unrelated untracked files",
+  "authority": "Owner explicitly separates private packaging/isolated installation from real 3DS qualification gate; no game available; no DS scope expansion",
+  "implementation": [
+    "Private build flag: separate appId/executable/shortcut/registration/default profile",
+    "rc.3 includes current 22C engine/history/copy/recovery",
+    "Pinned Azahar read-only candidate/qualification seam and isolated portable preparation, no launch authority",
+    "Corresponding native source archive now includes NativeWrite.cs and exact source verification"
+  ],
+  "tests": {
+    "focused": "6 PASS in 0.103s: 3 new qualification/preparation tests + 3 affected runtime fallback regressions",
+    "package_audit": {
+      "status": "PASS",
+      "version": "0.22.0-rc.3",
+      "private_candidate": true,
+      "installer": "PokeApp-Launcher-Private-Setup.exe",
+      "sha256": "567993ad1e83b82eb5c8c9051f2f9075d12d2ef5db4c97f8a53fae6d0c14e3d3",
+      "bytes": 159181644,
+      "asar_files": [
+        "assets",
+        "assets/icon.ico",
+        "index.html",
+        "main.cjs",
+        "package.json",
+        "preload.cjs",
+        "renderer.js",
+        "style.css"
+      ],
+      "application_modules": [
+        "app.domain",
+        "app.domain.pokemon_identity",
+        "app.launcher",
+        "app.launcher.backend",
+        "app.launcher.backup",
+        "app.launcher.cloud_store",
+        "app.launcher.config",
+        "app.launcher.core",
+        "app.launcher.emulator_qualification",
+        "app.launcher.export_files",
+        "app.launcher.handoff_files",
+        "app.launcher.journal",
+        "app.launcher.runtime",
+        "app.launcher.save_activity",
+        "app.launcher.secrets",
+        "app.launcher.stdio",
+        "app.launcher.sync",
+        "app.launcher.trusted_sync",
+        "app.launcher.write_control",
+        "app.launcher.write_engine",
+        "app.launcher.write_files",
+        "app.save_parser",
+        "app.save_parser.adapter",
+        "app.save_parser.cloud",
+        "app.save_parser.files",
+        "app.save_parser.models",
+        "app.save_parser.registration",
+        "app.save_parser.writer",
+        "app.save_parser.xy_identity"
+      ],
+      "runtime_file_count": 334,
+      "unsigned": true
+    },
+    "installed_journeys": [
+      {
+        "status": "PASS",
+        "mode": "read",
+        "native_read": true,
+        "original_sha256": "fe7cd382448ce308b3ecfb1c32c908ad7cc6b763f1e73ff8b7f38e616d7e95f8",
+        "packaged": true,
+        "version": "0.22.0-rc.3",
+        "userData": "isolated LOCALAPPDATA/PokeApp/Launcher-Private/shell",
+        "visible": false,
+        "sandbox": true,
+        "isolation": true,
+        "node": false,
+        "errors": [],
+        "production_writes": false,
+        "emulator_certified": false,
+        "developer_runtimes_removed": true
+      },
+      {
+        "status": "PASS",
+        "mode": "recovery",
+        "exact_backup_copy": true,
+        "restore_and_write_denials": 4,
+        "recovery_preserved": true,
+        "dialog_response_controlled": true,
+        "packaged": true,
+        "version": "0.22.0-rc.3",
+        "userData": "isolated LOCALAPPDATA/PokeApp/Launcher-Private/shell",
+        "visible": false,
+        "sandbox": true,
+        "isolation": true,
+        "node": false,
+        "errors": [],
+        "production_writes": false,
+        "emulator_certified": false,
+        "developer_runtimes_removed": true
+      },
+      {
+        "status": "PASS",
+        "mode": "restart",
+        "exact_backup_copy": true,
+        "restore_and_write_denials": 4,
+        "recovery_preserved": true,
+        "dialog_response_controlled": true,
+        "packaged": true,
+        "version": "0.22.0-rc.3",
+        "userData": "isolated LOCALAPPDATA/PokeApp/Launcher-Private/shell",
+        "visible": false,
+        "sandbox": true,
+        "isolation": true,
+        "node": false,
+        "errors": [],
+        "production_writes": false,
+        "emulator_certified": false,
+        "developer_runtimes_removed": true
+      }
+    ],
+    "installation": [
+      {
+        "exit_code": 0,
+        "owner_registry_identical": true,
+        "step": "Install",
+        "install": "private BuildRoot/isolated-installed",
+        "status": "PASS",
+        "clean_vm": false,
+        "isolated_app_identity": true,
+        "owner_files_identical": 440
+      },
+      {
+        "exit_code": 0,
+        "owner_registry_identical": true,
+        "step": "Reinstall",
+        "install": "private BuildRoot/isolated-installed",
+        "status": "PASS",
+        "clean_vm": false,
+        "isolated_app_identity": true,
+        "owner_files_identical": 440
+      },
+      {
+        "exit_code": 0,
+        "owner_registry_identical": true,
+        "step": "Uninstall",
+        "install": "private BuildRoot/isolated-installed",
+        "status": "PASS",
+        "clean_vm": false,
+        "isolated_app_identity": true,
+        "owner_files_identical": 440
+      }
+    ],
+    "reinstall_preservation": {
+      "status": "PASS",
+      "identical_profile_files": 65,
+      "actual_private_default_sentinel_preserved": true
+    },
+    "uninstall_preservation": {
+      "status": "PASS",
+      "identical_profile_files": 65,
+      "actual_private_default_sentinel_preserved": true
+    },
+    "retained": "74 prior focused engine/Launcher cases, eight native authentic-copy games, 22D three recovery tests retained; only three runtime fallback cases rerun because runtime added qualification status",
+    "unchanged_source_checks": {
+      "app/launcher/write_engine.py": true,
+      "app/launcher/write_control.py": true,
+      "app/launcher/handoff_files.py": true
+    },
+    "format_compile_ruff_node_diff": "PASS"
+  },
+  "azahar": {
+    "preparation": "PASS: pinned 2126.2 executable and runtime, isolated empty user directory, no owner data/game copied",
+    "startup": {
+      "status": "PASS_STARTUP_ONLY",
+      "command": "no arguments / no game",
+      "version": "2126.2",
+      "exit_code": 0,
+      "portable_files": [
+        "user\\config\\qt-config.ini",
+        "user\\log\\azahar_log.old.txt",
+        "user\\log\\azahar_log.txt",
+        "user\\nand\\data\\00000000000000000000000000000000\\sysdata\\00010017\\00000000\\config"
+      ],
+      "game_loaded": false,
+      "emulator_qualified": false,
+      "forced_kill": false
+    },
+    "early_attempt": "--version rejected by installed meta frontend; subsequent first-window close left idle process alive. That owned no-game diagnostic was terminated for cleanup only and not counted as graceful exit. Final probe waits for ready main window; normal exit 0.",
+    "qualification": false,
+    "launch_or_write_authority_added": false,
+    "actual_game_flush_application_relaunch_exclusion": "PENDING_LEGAL_3DS_TITLE"
+  },
+  "candidate": {
+    "version": "0.22.0-rc.3",
+    "private": true,
+    "signed": false,
+    "published": false,
+    "installer": "PokeApp-Launcher-Private-Setup.exe",
+    "bytes": 159181644,
+    "sha256": "567993ad1e83b82eb5c8c9051f2f9075d12d2ef5db4c97f8a53fae6d0c14e3d3",
+    "path": "%LOCALAPPDATA%/PokeApp-releases/0.22.0-rc.3-private",
+    "production_mutations_enabled": false,
+    "old_public": "0.20.0 unchanged",
+    "old_private": "0.22.0-rc.2 unchanged"
+  },
+  "evidence_limits": [
+    "Fresh separate app identity/profile on existing Windows11 build26300/NTFS, not fresh OS/VM",
+    "Same-version reinstall, not cross-version production upgrade",
+    "Save Copy native-dialog response controlled by harness; no interactive native-picker acceptance claim",
+    "Recovery fixture seeded through existing engineering capability with real native X bytes and after_park fault; packaged renderer never receives write authority",
+    "No 3DS title loaded, no DS writes added",
+    "No OS crash/power-loss/Windows10/new-filesystem certification",
+    "No cloud login/sync mutation or economy effect"
+  ],
+  "build_note": "Initial system dotnet had no SDK. Resumed native stage with private official SDK9.0.318 ZIP verified SHA512; Python build not repeated. Final source whitespace-only formatting after build has AST equivalence evidence.",
+  "format_equivalence": {
+    "formatting_only_after_build": "app\\launcher\\emulator_qualification.py",
+    "ast_identical": true,
+    "built_source_sha256": "76de1b1c7d098096279b049b8c88111b169da708060989c17881c75ad7589bc5",
+    "final_source_sha256": "4426cab84a65e3d62185c266853cb303a31cae12a401e0e75a4c6212faf57db8"
+  },
+  "preservation": {
+    "owner_install_profile_files_identical": 440,
+    "owner_registry_shortcut_unchanged": true,
+    "isolated_profile_files_identical_across_reinstall_uninstall": 65,
+    "owner_save_written": false,
+    "production_contacted": false,
+    "original_fixture_unchanged": true,
+    "unrelated_untracked_preserved": 5
+  },
+  "cleanup": {
+    "private_installer_uninstalled": true,
+    "private_registry_shortcut_removed": true,
+    "test_processes_ended": true,
+    "build_and_evidence_retained_intentionally": true,
+    "previous_residue_untouched": true,
+    "new_sentinel_cleanup": "AUTOMATIC_APPROVAL_REVIEW_REJECTED: blocked by policy; no retry",
+    "sentinel": "%LOCALAPPDATA%/PokeApp/Launcher-Private/installation-sentinel.txt"
+  },
+  "remaining": [
+    "Real Azahar gameplay/save flush/resource/restart exclusion/application/readback",
+    "Additional platform and crash/power-loss qualification/policy",
+    "Clean-OS and genuine cross-version upgrade acceptance",
+    "Signing and private owner acceptance before future release",
+    "Business item-use authorization and idempotent physical application acknowledgement"
+  ],
+  "next": "Use legal supported 3DS title when available to qualify pinned adapter. Existing private candidate can be reviewed independently. No production writes/Phase23/profiles.",
+  "progress_estimate": "about 90%, qualitative, not a measured completion percentage",
+  "private_evidence": "%LOCALAPPDATA%/PokeApp-migration-evidence/phase22e/20261023",
+  "source_sha256": {
+    "app/launcher/runtime.py": "8d5c75bd069a5de92dd8f2ceae6b62939f26709da2554c3029336925fce9649d",
+    "app/launcher/emulator_qualification.py": "4426cab84a65e3d62185c266853cb303a31cae12a401e0e75a4c6212faf57db8",
+    "companion/launcher/main.cjs": "3409da89225f2328bb8fe542d7f04395f1b00a229eba83440e3f5dc3f06e8592",
+    "companion/launcher/electron-builder.cjs": "fa7d3f86ebbf7191bfa02fcb2caf56c33cd653f724c6f0af81ec51df885097b7",
+    "companion/launcher/package.json": "9e751ee0d13c2dece265f5d7a7fdda01b8e19fde96d4e6e3f623793ced194a08",
+    "tools/audit_launcher_package.py": "bed0d60222876198f3dec9bc64005a56df88c837d6777ee5d64a109bb0548691",
+    "tools/prepare_launcher_notices.py": "5c7daf0a43a97ed006c3a908ac363695a8ec7e26d1ad8ff2a67527eaff3562db",
+    "tools/prepare_azahar_qualification.py": "8b2eeb31e21344e6ad4176246584fd63f187cdbe28c6c8f49277bd950e1dc987",
+    "tools/seed_phase22e_package.py": "f132c02724b9197b574e301eb85ee406d0ef7e75cd23aed3e5bc1391f55f4ae7",
+    "tools/validate_phase22e_install.ps1": "1eabd42326d426213dc19b9e707c4cc2498ed89d70b9a21bac509e5c349876e3",
+    "tools/validate_phase22e_private_package.mjs": "b9e13dc41f3d37c872428f96672dfc2279aabb7eb36605c0c9dfaa6af61bb678",
+    "tests/test_phase22e_qualification.py": "ab204c5050a51d1a332ed070b649de83e6cc41065f9a3d3838c20e8d3bf8c096"
+  }
+}

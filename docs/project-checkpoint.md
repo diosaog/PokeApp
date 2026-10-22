@@ -5,7 +5,18 @@ milestone record; it does not maintain a second live phase-status ledger.
 
 ## Current project position
 
-- Current packet: **22D/22E - PARTIAL / real3DS qualification and private release
+- Current packet: **22E private candidate VALIDATED; Phase22 PARTIAL**.
+  Owner authorized independent packaging despite the absent3DS title. New private
+  rc.3 includes22C, separate installation/profile identity and unchanged production
+  write denial. Six focused Python, three installed journeys and isolated
+  install/reinstall/uninstall pass;440 owner files/registry preserved. Azahar2126.2
+  portable idle startup/close passes; actual gameplay/flush/restart exclusion remain
+  uncertified. No clean-OS/power-loss claim, public release or production effects.
+  [Live handoff](work-in-progress/phase22-save-writes-live.md),
+  [22E report](phase22e-private-candidate-report.md),
+  [evidence](phase22e-private-candidate-evidence.json). No Phase23/profiles.
+
+- Historical packet: **22D/22E - PARTIAL / real3DS qualification and private release
   BLOCKED**. Azahar2126.2 located; no executable3DS title available. Owner-approved
   DS-copy checks pass real DeSmuME0.9.13/Blanca2 ROM load/close, Launcher read/backup
   and reopen; these do not certify save flush, 3DS or DS physical writes. Three new

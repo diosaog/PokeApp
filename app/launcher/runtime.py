@@ -8,6 +8,7 @@ from queue import Empty, Full, Queue
 
 from app.launcher.backend import BackendClient, BackendError, LauncherSession
 from app.launcher.core import LauncherCore
+from app.launcher.emulator_qualification import qualification_status
 from app.launcher.journal import LocalConflict
 from app.launcher.save_activity import SaveActivityGate, SaveBusy, save_read
 from app.launcher.secrets import TokenStore
@@ -140,6 +141,7 @@ class LauncherRuntime:
         ):
             result["cloud_status"] = "OFFLINE"
         result["write"] = self.writes.state()
+        result["emulator"] = qualification_status()
         return result
 
     def command(self, name, args=None):

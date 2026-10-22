@@ -3,6 +3,8 @@ const { spawn } = require("node:child_process");
 const path = require("node:path");
 const { pathToFileURL } = require("node:url");
 const { createInterface } = require("node:readline");
+const privateCandidate =
+  require("./package.json").pokeappPrivateCandidate === true;
 
 const root = path.resolve(__dirname, "../..");
 const entry = pathToFileURL(path.join(__dirname, "index.html")).href;
@@ -12,10 +14,12 @@ const profile =
   path.join(
     process.env.LOCALAPPDATA || app.getPath("appData"),
     "PokeApp",
-    "Launcher",
+    privateCandidate ? "Launcher-Private" : "Launcher",
   );
 app.setPath("userData", path.join(profile, "shell"));
-app.setAppUserModelId("app.pokeapp.launcher");
+app.setAppUserModelId(
+  privateCandidate ? "app.pokeapp.launcher.private" : "app.pokeapp.launcher",
+);
 let worker,
   win,
   sequence = 0;

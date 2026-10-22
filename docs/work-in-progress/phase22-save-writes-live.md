@@ -1,6 +1,54 @@
 # Phase 22 - safe native save writes
 
-## Current checkpoint - 22D/22E, 2026-10-23
+## Current checkpoint - independent 22E private candidate, 2026-10-23
+
+**PRIVATE CANDIDATE VALIDATED. Phase22 PARTIAL; production physical writes OFF.**
+Entry main/origin `5156d64213f21a00fdf2c75f0a73c08dc01237db`, fetched0/0.
+Owner explicitly authorizes private packaging and isolated installation separately
+from real3DS qualification. This supersedes the previous all-packaging gate below.
+This commit carries implementation/evidence/docs; obtain exact final HEAD from Git.
+
+**0.22.0-rc.3 private** contains 22C, with separate appId/executable/shortcut/
+registration/default profile. Packaged read, backup history, Save Copy and restart
+recovery pass; production registry remains empty, restore/application denied.
+Package source archive now includes NativeWrite.cs with exact-source audit.
+New Azahar2126.2 inspection/portable preparation and runtime status are unqualified
+by construction; no automatic lifecycle authority or DS write support added.
+
+New gates: **6 Python**, **3 installed Electron journeys**, package audit,
+**install/reinstall/uninstall**, Ruff/format/compile/node/diff PASS. Owner's **440
+installation/profile files and registry unchanged**; **65 isolated profile files**
+preserved across reinstall/uninstall. Same-version reinstall on existing Windows11
+NTFS, not clean OS or cross-version production upgrade. Existing motor/eight-game/
+22D evidence retained; no full matrix. Final module formatting has recorded AST
+equivalence to packaged input, no behavioral edit or repeated build.
+
+Actual portable Azahar main window idle startup/close exits0; no game loaded.
+An early-close diagnostic hung and required cleanup termination of that owned
+no-game process; it is not graceful-exit evidence. Final probe waits for startup.
+Game flush, gameplay resource release, restart exclusion and in-game application
+remain **NOT CERTIFIED**. No executable3DS title is available.
+
+Installer **159181644 bytes**, SHA256
+`567993ad1e83b82eb5c8c9051f2f9075d12d2ef5db4c97f8a53fae6d0c14e3d3`,
+unsigned/unpublished, at `%LOCALAPPDATA%/PokeApp-releases/0.22.0-rc.3-private/`.
+Public0.20.0, private rc.2, owner-installed0.16.2, saves/economy/backend unchanged.
+Private test installation uninstalled; no test process remains. Build/evidence/
+portable environment retained deliberately. Cleanup of the one private default
+profile sentinel was rejected by automatic approval review (**blocked by policy**),
+no bypass; exact path in [22E report](../phase22e-private-candidate-report.md).
+
+[22E evidence](../phase22e-private-candidate-evidence.json); private evidence
+`%LOCALAPPDATA%/PokeApp-migration-evidence/phase22e/20261023/`.
+**Next:** private owner review can proceed independently. When a legal supported
+3DS title is available, qualify pinned Azahar lifecycle/application/recovery,
+including startup interruption. Remaining release gates: platform/durability,
+clean-OS/cross-version upgrade, signing/acceptance, item-use authorization and
+verified physical acknowledgement. Approved absent-path contract stays approved.
+Do not repeat completed engine tests. No production writes/Phase23/profiles.
+Five unrelated untracked files preserved. Global estimate about90%, qualitative.
+
+## Historical checkpoint - 22D/22E, 2026-10-23
 
 **PARTIAL. Real 3DS qualification / private release BLOCKED; production OFF.**
 Entry main/origin `4614cd3b7fe53bdc48df5f3f39117a0356d72fca`, fetched 0/0.

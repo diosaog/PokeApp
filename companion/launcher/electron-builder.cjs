@@ -1,11 +1,20 @@
 const path = require("node:path");
 if (!process.env.POKEAPP_PACKAGE_STAGE || !process.env.POKEAPP_PACKAGE_OUTPUT)
   throw new Error("Use tools/build_launcher_windows.ps1");
+const privateCandidate = process.env.POKEAPP_PRIVATE_CANDIDATE === "1";
+const productName = privateCandidate
+  ? "PokeApp Launcher Private"
+  : "PokeApp Launcher";
 
 module.exports = {
-  appId: "app.pokeapp.launcher",
-  productName: "PokeApp Launcher",
-  artifactName: "PokeApp-Launcher-Setup.exe",
+  appId: privateCandidate
+    ? "app.pokeapp.launcher.private"
+    : "app.pokeapp.launcher",
+  productName,
+  artifactName: privateCandidate
+    ? "PokeApp-Launcher-Private-Setup.exe"
+    : "PokeApp-Launcher-Setup.exe",
+  extraMetadata: { pokeappPrivateCandidate: privateCandidate },
   asar: true,
   npmRebuild: false,
   directories: { output: process.env.POKEAPP_PACKAGE_OUTPUT },
@@ -28,7 +37,7 @@ module.exports = {
   win: {
     target: [{ target: "nsis", arch: ["x64"] }],
     icon: path.join(__dirname, "assets/icon.ico"),
-    executableName: "PokeApp Launcher",
+    executableName: productName,
     requestedExecutionLevel: "asInvoker",
     signAndEditExecutable: true,
   },
@@ -39,7 +48,7 @@ module.exports = {
     allowToChangeInstallationDirectory: true,
     createDesktopShortcut: false,
     createStartMenuShortcut: true,
-    shortcutName: "PokeApp Launcher",
+    shortcutName: productName,
     deleteAppDataOnUninstall: false,
     runAfterFinish: false,
   },
