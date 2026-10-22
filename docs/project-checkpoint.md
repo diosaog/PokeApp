@@ -5,7 +5,19 @@ milestone record; it does not maintain a second live phase-status ledger.
 
 ## Current project position
 
-- Current packet: **22C + targeted22D - DONE LOCAL ENGINEERING / CONDITIONAL
+- Current packet: **22D/22E - PARTIAL / real3DS qualification and private release
+  BLOCKED**. Azahar2126.2 located; no executable3DS title available. Owner-approved
+  DS-copy checks pass real DeSmuME0.9.13/Blanca2 ROM load/close, Launcher read/backup
+  and reopen; these do not certify save flush, 3DS or DS physical writes. Three new
+  mapped-view/restore-conflict/identity tests pass; existing74/eight-game evidence
+  retained with16 unchanged source hashes. No new package or production effects.
+  [Live handoff](work-in-progress/phase22-save-writes-live.md),
+  [22D/E report](phase22de-emulator-release-report.md),
+  [evidence](phase22de-emulator-release-evidence.json). Cleanup paths retained after
+  automatic approval review denial. Next: legal3DS title and real pinned adapter
+  qualification, then platform/durability/private release gates. No Phase23.
+
+- Historical packet: **22C + targeted22D - DONE LOCAL ENGINEERING / CONDITIONAL
   RELEASE; Phase22 PARTIAL**. Existing journal integrates independent verified
   backups, no-replace automatic application and safe explicit restore. Spanish
   local backup history and native-dialog Save Copy work without PKHeX/cloud.

@@ -1,0 +1,126 @@
+{
+  "observed": "2026-10-23 Europe/Madrid",
+  "status": "PARTIAL / REAL_3DS_QUALIFICATION_BLOCKED / PRIVATE_RELEASE_BLOCKED",
+  "entry_head": "4614cd3b7fe53bdc48df5f3f39117a0356d72fca",
+  "entry_git": "main/origin 0/0; clean tracked tree; five unrelated untracked files preserved",
+  "production_mutations_enabled": false,
+  "application_changed": false,
+  "production_accessed": false,
+  "owner_direction": "Temporary absent-path contract accepted. No 3DS game available. DS copies authorized for compatible checks only; no DS write-support expansion.",
+  "azahar": {
+    "version": "2126.2",
+    "version_source": "installed registry and binary string",
+    "executable": "C:/Program Files/Azahar/azahar.exe",
+    "sha256": "c248414eb5328cb8bb720775ace6959898e2f50a0a10221c3a1e7a14190183eb",
+    "launched": false,
+    "qualification": "BLOCKED: legal executable supported 3DS title unavailable; no real adapter qualified"
+  },
+  "real_ds_probe": {
+    "emulator": "DeSmuME 0.9.13 x64 SSE2",
+    "executable_sha256": "1ca4e771b92f38a1cef4fc2a61f7d729a638f94d0e56f7948eeeb472000cf32c",
+    "game": "Pokemon White 2 / Blanca 2",
+    "native_game": "W2",
+    "rom_internal_name": "POKEMON W2",
+    "rom_serial": "TWL-IRDS-ESP",
+    "status": "PASS_LIMITED_DS_LIFECYCLE_READ_BACKUP_ONLY",
+    "runs": [
+      {
+        "label": "paused-load",
+        "exit_code": 0,
+        "rom_load_log": true,
+        "post_exit_guard": "PASS"
+      },
+      {
+        "label": "running-reopen",
+        "exit_code": 0,
+        "rom_load_log": true,
+        "post_exit_guard": "PASS"
+      }
+    ],
+    "graceful_shutdown": "WM_CLOSE to owned main window; normal process exit 0 twice; never killed",
+    "launcher_native_read_backup": "PASS, existing LauncherCore + PKHeX; exact backup hash/native reparse; local SQLite journal only",
+    "ds_write_refusal": "PASS",
+    "legacy_apply_refusal": "PASS",
+    "originals_preserved": {
+      "count": 5,
+      "hash_size_mtime_equal": true
+    },
+    "save_copy_and_backup_unchanged_after_reopen": true,
+    "not_proven": [
+      "in-game save action/flush",
+      "game-observed modification",
+      "actual external relaunch exclusion",
+      "automatic applied/recovery reopen integration",
+      "3DS compatibility"
+    ],
+    "harness_correction": "First launch from TEMP redirected DeSmuME profile to LOCALAPPDATA/DeSmuME. Invalidated run retained separately; final execution outside TEMP used explicit isolated paths, observed 4 Mbit backup load, no missing-save log. No owner installation/save changed."
+  },
+  "new_tests": {
+    "file": "tests/test_phase22d_recovery.py",
+    "unique_pass": 3,
+    "initial_run_seconds": 0.85,
+    "final_mapped_view_seconds": 0.322,
+    "final_mapped_view_exit_code": 0,
+    "cases": [
+      "Independent writable mapped views survive file/mapping handle closure; source and candidate guards deny admission, admit after UnmapViewOfFile",
+      "External creator in restore gap preserved across restart; both exact backups remain exportable; recovery flags fail closed",
+      "Identical external bytes with different file identity invalidate current application receipt and block restore"
+    ],
+    "boundary": "Fake native fixture only for recovery-unit cases; real Windows handles/processes. Actual native W2 reader/backup exercised separately. No new eight-game writer matrix.",
+    "runner_note": "Initial three tests passed before formatting. Only mapped-view test rerun after positive control added. PowerShell stderr/Tee wrapper reported exit 1 despite unittest OK; final capture uses subprocess and records exit 0."
+  },
+  "retained": {
+    "affected_python": 74,
+    "authentic_3ds_fixture_games": 8,
+    "dev_electron_journeys": 2,
+    "source_hashes_unchanged": 16,
+    "evidence": "docs/phase22c-backup-application-evidence.json",
+    "rerun": false
+  },
+  "platform": {
+    "tested": "Windows 11 Pro 10.0.26300 / local NTFS / Python 3.14.3",
+    "windows10": "NOT_TESTED: no disposable environment identified",
+    "other_windows11": "NOT_TESTED",
+    "non_ntfs": "NOT_TESTED: no disposable volume identified",
+    "os_crash": "NOT_TESTED",
+    "power_loss": "NOT_TESTED",
+    "hostile_privileged": "NOT_CERTIFIED"
+  },
+  "checks": {
+    "ruff": "PASS",
+    "format": "PASS",
+    "compile": "PASS",
+    "diff": "PASS"
+  },
+  "packaging": {
+    "new_build": false,
+    "reason": "Real 3DS adapter/safety qualification unmet; no emulator-enabled package can be certified",
+    "public": "0.20.0 unchanged",
+    "private": "0.22.0-rc.2 retained, unsigned, unpublished; does not include 22C",
+    "clean_install_upgrade": "NOT_TESTED; owner installation untouched"
+  },
+  "cleanup": {
+    "cleanup_status": "BLOCKED_BY_AUTOMATIC_APPROVAL_REVIEW",
+    "deletion_executed": false,
+    "reason": "blocked by policy",
+    "retained_paths": [
+      "C:\\Users\\Antonio\\AppData\\Local\\Temp\\pokeapp-phase22d-ds-iej_rerq",
+      "C:\\Users\\Antonio\\AppData\\Local\\PokeApp-migration-evidence\\phase22de\\20261023\\disposable-ds-g3e6ndq0",
+      "C:\\Users\\Antonio\\AppData\\Local\\DeSmuME"
+    ],
+    "redirected_ini_references_disposable_root": true,
+    "originals_unchanged": true
+  },
+  "remaining_gates": [
+    "Legal supported 3DS title + disposable save setup",
+    "Pinned Azahar graceful save/exit/handle and restart exclusion adapter",
+    "Actual in-game applied/recovery round trip",
+    "Windows/storage qualification and crash/power-loss policy/evidence",
+    "New private packaged integration, clean install/upgrade and signing/release acceptance"
+  ],
+  "next": "Use a legal supported 3DS title when available; qualify pinned Azahar adapter before packaging. No Phase23, profiles, production or economy writes.",
+  "private_evidence": "%LOCALAPPDATA%/PokeApp-migration-evidence/phase22de/20261023",
+  "source_sha256": {
+    "tests/test_phase22d_recovery.py": "55475d1cebbb45ed576ffbf516e259d68c766bdd1e2baad6f2e9d473a65a1961"
+  }
+}

@@ -1,6 +1,48 @@
 # Phase 22 - safe native save writes
 
-## Current checkpoint - 22C + targeted 22D, 2026-10-23
+## Current checkpoint - 22D/22E, 2026-10-23
+
+**PARTIAL. Real 3DS qualification / private release BLOCKED; production OFF.**
+Entry main/origin `4614cd3b7fe53bdc48df5f3f39117a0356d72fca`, fetched 0/0.
+This focused tests/docs commit carries the checkpoint; obtain final HEAD from Git.
+Application code is unchanged. Owner accepts the temporary absent-path contract;
+that decision is resolved, not a pending repeat approval.
+
+Azahar **2126.2** located at `C:\Program Files\Azahar\azahar.exe`, pinned in
+[22D/E evidence](../phase22de-emulator-release-evidence.json). Owner confirms no
+executable 3DS game is available; no real Azahar adapter/gameplay is qualified.
+Owner permits DS copies for compatible tests only, without DS write expansion.
+Real **DeSmuME0.9.13 + Blanca2/W2** (actual ROM/parser identity, not filename)
+passes two isolated ROM/save loads, graceful close/exit0, post-exit handle access,
+offline Launcher native read/exact backup/reparse and reopen. DS writes are denied.
+All five original source hashes/sizes/mtimes unchanged. In-game save/flush,
+modified-game observation and external restart exclusion are **NOT PROVEN**.
+The initial TEMP-based run redirected its profile; invalidated evidence retained,
+corrected isolated run passes. No DS or 3DS support was added.
+
+**3 new recovery tests PASS:** closed-handle writable views deny source/candidate
+admission (positive unmap controls pass), independent restore-gap collision survives
+restart with both backups, identical external bytes/different file identity refuse
+restore. Existing74 tests/eight authentic3DS fixture-copy workflows/two dev Electron
+runs retained, not rerun; all16 recorded source hashes match. Ruff/format/compile/
+diff pass. Only Windows11 build26300/local NTFS tested. No Windows10, other build,
+OS-crash, hardware-power-loss or hostile-process certification.
+
+**22E gated: no new package.** Public0.20.0/private0.22.0-rc.2 unchanged; no owner
+install, production/backend/economy/entitlement change. No test process remains.
+Automatic approval review rejected disposable cleanup with **blocked by policy**;
+no retry/bypass. Exact retained paths and first-run redirected profile artifacts
+are listed in the [22D/E report](../phase22de-emulator-release-report.md).
+Private evidence: `%LOCALAPPDATA%/PokeApp-migration-evidence/phase22de/20261023/`.
+
+**Next exact prerequisite:** legal executable supported3DS title, then qualify
+pinned Azahar save/flush/graceful exit, restart exclusion throughout journaled
+application/recovery, and actual in-game readback. Continue platform/durability
+qualification before private packaged/clean-install/upgrade/signing acceptance.
+Do not repeat completed engine matrices or expand to DS writes. Phase22 remains
+PARTIAL; no Phase23/profiles. Five unrelated untracked files preserved.
+
+## Historical checkpoint - 22C + targeted 22D, 2026-10-23
 
 **DONE LOCAL ENGINEERING / CONDITIONAL RELEASE. Phase22 PARTIAL; production OFF.**
 Entry `457bc30e15468648cb5e195b06dd1cf00f3be93a`, fetched main/origin 0/0.
