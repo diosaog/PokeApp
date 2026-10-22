@@ -109,6 +109,14 @@ class LocalPG:
         self.sql(
             "create role anon nologin; create role authenticated nologin; create role service_role nologin bypassrls;"
         )
+        self.sql("""create schema storage;
+        create table storage.buckets(id text primary key,name text,public boolean,file_size_limit bigint,allowed_mime_types text[]);
+        create table storage.objects(id uuid primary key default gen_random_uuid(),bucket_id text,name text,owner uuid);
+        alter table storage.objects enable row level security;
+        grant usage on schema storage to authenticated,service_role;
+        grant all on storage.objects,storage.buckets to service_role;
+        grant select,insert,update,delete on storage.objects to authenticated;
+        """)
         self.sql((ROOT / "supabase/v2/bootstrap.sql").read_text(encoding="utf-8"))
 
     def stop(self):
@@ -200,18 +208,136 @@ def p1(pg):
     }
 
 
+def p2(pg):
+    tid = str(uuid4())
+    rival = str(uuid4())
+    auth = str(uuid4())
+    season = str(uuid4())
+    pg.sql(f"""insert into trainers(id,display_name,slug,auth_user_id,is_admin) values
+    ('{tid}','Profile Owner','profile-owner','{auth}',true),('{rival}','Rival','rival',gen_random_uuid(),false);
+    insert into seasons(id,name,created_by_trainer_id) values('{season}','Preserved','{tid}');
+    insert into season_players(season_id,trainer_id) values('{season}','{tid}');""")
+    baseline = pg.sql(
+        "select md5(string_agg(row_to_json(t)::text,'' order by id)) from season_players t;"
+    ).stdout
+    op = str(uuid4())
+    digest = "b" * 64
+    rename = f"select account_profile_update('{tid}','{op}','{digest}',0,'New Name','new-name',null);"
+    with ThreadPoolExecutor(4) as pool:
+        rows = list(pool.map(lambda _: pg.sql(rename).stdout, range(4)))
+    assert all(r == rows[0] for r in rows)
+    assert (
+        pg.sql(
+            f"select profile_revision from trainers where id='{tid}';"
+        ).stdout.strip()
+        == "1"
+    )
+    assert pg.sql(
+        f"select account_profile_update('{tid}','{uuid4()}','{digest}',0,'Stale','stale',null);",
+        ok=False,
+    ).returncode
+    assert pg.sql(
+        f"select account_profile_update('{tid}','{uuid4()}','{digest}',1,'Rival','rival',null);",
+        ok=False,
+    ).returncode
+    assert pg.sql(
+        f"select account_profile_update('{tid}','{uuid4()}','{digest}',1,null,null,'portraits/{rival}/{'c' * 64}.jpg');",
+        ok=False,
+    ).returncode
+    assert (
+        pg.sql(
+            "select md5(string_agg(row_to_json(t)::text,'' order by id)) from season_players t;"
+        ).stdout
+        == baseline
+    )
+    pg.sql(f"update trainers set display_name='Alias Display' where id='{rival}';")
+    collision = pg.sql(
+        f"select account_registration_reserve('{uuid4()}','{digest}','Alias Display','alias-display');",
+        ok=False,
+    )
+    assert collision.returncode and "account_conflict" in collision.stderr
+    pinop = str(uuid4())
+    pg.sql(f"select account_pin_begin('{tid}','{tid}','{pinop}','{digest}');")
+    assert (
+        pg.sql(f"select account_session_allowed('{auth}',9999999999);").stdout.strip()
+        == "f"
+    )
+    with ThreadPoolExecutor(4) as pool:
+        claims = list(
+            pool.map(
+                lambda _: pg.sql(
+                    f"select account_pin_claim('{pinop}','{digest}');"
+                ).stdout.strip(),
+                range(4),
+            )
+        )
+    assert claims.count("t") == 1 and claims.count("f") == 3
+    assert pg.sql(
+        f"select account_pin_begin('{tid}','{tid}','{uuid4()}','{digest}');", ok=False
+    ).returncode
+    pg.sql(f"select account_pin_finish('{pinop}','{digest}');")
+    assert (
+        pg.sql(
+            f"select account_session_allowed('{auth}',1),account_session_allowed('{auth}',9999999999);"
+        ).stdout.strip()
+        == "f|t"
+    )
+    for iat, expected in ((1, ""), (9999999999, tid)):
+        value = pg.sql(
+            f"set role authenticated; set request.jwt.claim.sub='{auth}'; set request.jwt.claims='{{\"iat\":{iat}}}'; select current_trainer_id();"
+        ).stdout.strip()
+        assert value == expected, (value, expected)
+    assert pg.sql(
+        f"select account_pin_begin('{rival}','{tid}','{uuid4()}','{digest}');", ok=False
+    ).returncode
+    for role in ("anon", "authenticated"):
+        assert pg.sql(f"set role {role};" + rename, ok=False).returncode
+        assert pg.sql(
+            f"set role {role}; select * from account_pin_changes;", ok=False
+        ).returncode
+    # Prove restrictive photo policies defeat even an accidental broad policy.
+    pg.sql(
+        "create policy broad_test on storage.objects for all to authenticated using(true) with check(true);"
+    )
+    assert pg.sql(
+        "set role authenticated; insert into storage.objects(bucket_id,name) values('trainer-photos','attack.jpg');",
+        ok=False,
+    ).returncode
+    pg.sql(
+        "insert into storage.objects(bucket_id,name) values('trainer-photos','retained.jpg');"
+    )
+    pg.sql(
+        "set role authenticated; update storage.objects set name='attack.jpg'; delete from storage.objects;"
+    )
+    assert pg.sql("select name from storage.objects;").stdout.strip() == "retained.jpg"
+    return {
+        "concurrent_profile": 4,
+        "pin_claims": 4,
+        "single_update_authority": True,
+        "identity_history_preserved": True,
+        "stale_duplicate_foreign_photo_denied": True,
+        "old_session_api_rls_denied": True,
+        "storage_write_denial": True,
+    }
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--bin", type=Path, required=True)
     parser.add_argument("--port", type=int, default=55479)
     parser.add_argument("--evidence", type=Path, required=True)
+    parser.add_argument("--packet", choices=["p1", "p2"], default="p1")
     args = parser.parse_args()
     pg = LocalPG(args.bin, args.port)
     started = False
     try:
         pg.start()
         started = True
-        result = {"status": "PASS", "p1": p1(pg), "cluster": str(pg.root)}
+        result = {
+            "status": "PASS",
+            args.packet: (p1 if args.packet == "p1" else p2)(pg),
+            "cluster": str(pg.root),
+        }
     finally:
         if started:
             pg.stop()

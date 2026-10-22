@@ -37,6 +37,12 @@ def require_principal(
         raise unavailable_error() from exc
     if trainer is None:
         raise invalid_session_error()
+    if container.account_service is not None and container.account_service.enabled:
+        try:
+            if not container.account_service.valid_session(user.user_id,token):
+                raise invalid_session_error()
+        except AuthError:
+            raise unavailable_error() from None
     return AuthenticatedPrincipal.from_trainer(trainer)
 
 

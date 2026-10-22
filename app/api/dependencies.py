@@ -90,7 +90,8 @@ def create_default_container(config: APIConfig | None = None) -> ApiContainer:
             from app.repositories.supabase.accounts import SupabaseAccountRepository, SupabaseAccountAuth
             account_client = create_client(config.supabase_url, config.supabase_service_role_key)
             accounts = AccountService(SupabaseAccountRepository(account_client),
-                SupabaseAccountAuth(account_client.auth.admin), pepper=config.auth_pin_pepper,
+                SupabaseAccountAuth(account_client.auth.admin,
+                    lambda: SupabaseAuthClient.from_url_key(config.supabase_url,config.supabase_anon_key)), pepper=config.auth_pin_pepper,
                 enabled=config.account_management_enabled)
         from app.repositories.supabase.team_locks import SupabaseTeamLockRepository
 

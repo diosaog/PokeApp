@@ -59,6 +59,7 @@ EXPECTED_MIGRATIONS = [
     "048_trusted_gen67_identity.sql",
     "049_native_progress_read.sql",
     "050_account_registration.sql",
+    "051_account_profiles.sql",
 ]
 
 FORBIDDEN_TOKENS = [

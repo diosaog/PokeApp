@@ -1,6 +1,6 @@
 # Accounts and profiles — live handoff
 
-2026-10-23. **P1 IMPLEMENTED / LOCAL PASS; P2–P4 NEXT. LOCAL ONLY.**
+2026-10-23. **P1/P2 IMPLEMENTED / LOCAL PASS; P3/P4 NEXT. LOCAL ONLY.**
 Entry main/origin `2b77b62d2a7fd8d0f1b6e01f4ac2d0c8e51b4b82`, fetched 0/0,
 clean tracked tree, five unrelated untracked files preserved. Previous Phase22E
 work is committed/pushed and finished; no active child agent or Git lock. Phase22
@@ -37,5 +37,25 @@ corrected file-backed logging, stopped owned cluster, final run PASS. No product
 failure. Supabase Auth uses local doubles; hosted signup-disabled configuration
 and real Auth transport remain explicit release checks, never a claimed remote PASS.
 
-Next: P2 personal profile/photo/PIN on stable trainer identity. No Phase22/23 or
-Launcher work in this packet. No production effects.
+P1 commit `ee9d425` is pushed. P2 adds migration051: profile revision/CAS and
+receipts, normalized display-name uniqueness (including legacy names different
+from their slugs), private portrait bucket with restrictive browser write denial,
+PIN intents and immediate API/RLS session guards. Images decode/re-encode to
+bounded JPEG without metadata. Rename/photo never change trainer/Auth IDs.
+PIN changes authenticate current credentials, permit only ONE outbound password
+update attempt, reconcile new credentials, revoke Auth sessions and raise the JWT
+issuance floor. Exact interrupted-intent recovery cannot originate a new change.
+If interruption precedes the Auth write and no new credential can be proved,
+the account stays blocked for operator reconciliation; no stale password replay.
+The UI retains only the opaque operation key across reload, never PINs.
+
+P2 tests:10 Python service/API,5 React editor and real PostgreSQL profile/PIN/
+Storage/RLS gates PASS, including four concurrent claims (one winner), concurrent
+profile replay, stale/duplicate/foreign portrait rejection and preserved membership.
+Display-name/legacy-slug collision regression PASS. Fake Auth/object transport
+remain explicitly local doubles; real Auth/global signout is a remote release gate.
+Migration/bootstrap051 local only. DB dropped/cluster stopped; `p2-pg.json` next to
+P1 evidence. Editor is ready; P4 wires navigation and account-only profiles.
+
+Next: P3 admin account management; then P4 integration. No Phase22/23 or Launcher
+work in this packet. No production effects.

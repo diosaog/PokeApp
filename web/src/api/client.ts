@@ -81,6 +81,27 @@ export function errorText(error: unknown) {
   if (!(error instanceof ApiError))
     return "No se pudo conectar. Comprueba la conexión y vuelve a intentarlo.";
   const adminErrors: Record<string, string> = {
+    ACCOUNTS_UNAVAILABLE:
+      "La gestión de cuentas no está disponible en este momento.",
+    ACCOUNT_CONFLICT:
+      "Ese nombre o solicitud no está disponible. Revisa los datos.",
+    ACCOUNT_STALE:
+      "El perfil cambió. Revisa los valores actuales antes de guardar.",
+    INVALID_ACCOUNT_NAME:
+      "Usa hasta 48 letras, números, espacios, guiones o guiones bajos.",
+    INVALID_PIN_CONFIRMATION:
+      "Introduce y repite un PIN nuevo de cuatro cifras.",
+    INVALID_CURRENT_PIN: "El PIN actual no es correcto.",
+    INVALID_PHOTO: "Usa una imagen JPEG, PNG o WebP válida de hasta 5 MB.",
+    REGISTRATION_REJECTED:
+      "No se pudo validar el acceso. Revisa los datos de registro.",
+    ACCOUNT_RETRY_REQUIRED:
+      "El registro no está confirmado. Reintenta la misma solicitud.",
+    ACCOUNT_RECONCILIATION_REQUIRED:
+      "La cuenta necesita una comprobación antes de continuar. Contacta con el administrador.",
+    PIN_RECONCILIATION_REQUIRED:
+      "El cambio de PIN sigue pendiente de comprobación. No inicies otro cambio.",
+    ACCOUNT_FORBIDDEN: "Esta cuenta no permite la operación solicitada.",
     INSUFFICIENT_FUNDS:
       "No tienes suficientes monedas para esta compra. Revisa tu saldo.",
     ADMIN_REQUIRED: "Esta acción está disponible solo para administradores.",
