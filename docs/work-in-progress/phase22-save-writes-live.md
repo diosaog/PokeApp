@@ -140,3 +140,38 @@ parse/reverification and a separate committed applied receipt before consuming
 any entitlement. Export alone never consumes.
 
 [Export report](../phase22-export-integration-report.md) · [Evidence](../phase22-export-integration-evidence.json)
+
+## Phase 22A resume - 2026-10-22
+
+**STATUS: BLOCKED at safe automatic replacement; PHASE 22 remains PARTIAL.**
+Current HEAD `58cbe8261da0e9537f2d69e29b71c8a2e488d0be`, origin aligned. The
+interrupted session left no tracked code changes to recover. Existing native
+write, journal, recovery and verified export implementation is preserved.
+
+The current focused matrix was run once on this HEAD:
+`test_phase22_safe_export test_phase22_write_engine test_phase22_native_bridge
+test_phase22_launcher test_phase22_export_engine` -> **68 PASS, 13.165 s**.
+No broader suites, database, deployment or owner data access were needed.
+
+The blocker is unchanged and now explicitly closed for this packet: Windows
+sharing handles protect the opened object, but `ReplaceFileW` has no expected
+identity/hash CAS for the target pathname. Strict no-delete sharing prevents our
+own replacement; releasing it or permitting delete sharing permits an external
+replacement after validation. In-place writes, oplocks, process-name checks and
+user confirmation do not provide the required universal guarantee. TxF passed a
+limited dummy-file experiment on this host but is not product-qualified and is
+not adopted as a dependency.
+
+No defensible automatic replacement method is therefore proven under the
+non-cooperative external-writer threat model. Production mutation registry,
+`APPLIED_VERIFIED` for ordinary users, Railway/Cloudflare/Supabase, public
+Launcher 0.20.0 and owner saves remain unchanged. `EXPORTED_VERIFIED` remains
+safe within its tested scope, never modifies the selected source, and never
+consumes a purchase/reward/coin or competitive effect.
+
+First incomplete step: qualify a supported transactional/driver-level Windows
+publication mechanism across target configurations, with adversarial writer,
+interruption and restart proof. If none is supportable, obtain an explicit
+product decision about export-only semantics; do not weaken the current gate.
+
+[22A report](../phase22a-write-safety-report.md) · [22A evidence](../phase22a-write-safety-evidence.json)

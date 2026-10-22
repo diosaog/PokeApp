@@ -1,0 +1,55 @@
+﻿{
+  "phase": "22A-safe-automatic-save-replacement",
+  "status": "BLOCKED",
+  "phase22_overall": "PARTIAL",
+  "observed_at": "2026-10-22 Europe/Madrid",
+  "entry_head": "58cbe8261da0e9537f2d69e29b71c8a2e488d0be",
+  "final_head_before_documentation": "58cbe8261da0e9537f2d69e29b71c8a2e488d0be",
+  "git": {
+    "origin_divergence": "0/0",
+    "tracked_changes_before_documentation": false,
+    "unrelated_untracked_preserved": true,
+    "protected_file_touched": false
+  },
+  "reused_work": [
+    "pinned PKHeX native preparation and verification for eight games",
+    "durable SQLite journal, immutable backups and recovery states",
+    "verified new-file export with EXPORTED_VERIFIED distinct from APPLIED_VERIFIED",
+    "Launcher sync/write exclusion and production mutation registry disabled"
+  ],
+  "current_validation": {
+    "command": "PYTHONPATH=repo;tests .venv-api/Scripts/python.exe -m unittest test_phase22_safe_export test_phase22_write_engine test_phase22_native_bridge test_phase22_launcher test_phase22_export_engine",
+    "result": "PASS",
+    "tests": 68,
+    "seconds": 13.165
+  },
+  "technical_finding": {
+    "replacefilew_expected_hash_cas": false,
+    "strict_no_delete_sharing": "blocks our own pathname replacement but does not reserve future pathname ownership",
+    "released_or_delete_shared_handle": "permits an independent replacement between final validation and publication",
+    "in_place_write": "not crash-atomic and can expose partial bytes",
+    "oplocks": "coordination/cache mechanism, not a universal write exclusion barrier",
+    "process_name_or_user_confirmation": "cannot certify arbitrary renamed/custom emulators",
+    "txf": "limited commit/rollback/process-death proof on one Windows NTFS host; not product-qualified and not adopted"
+  },
+  "decision": "No defensible software-only automatic replacement method is proven under the required non-cooperative external-writer threat model. Do not enable APPLIED_VERIFIED for ordinary users.",
+  "preserved_guarantees": [
+    "EXPORTED_VERIFIED never modifies the selected source",
+    "partial/uncertain export remains RECOVERY_REQUIRED",
+    "reconciliation is read-only",
+    "replay/idempotency and native verification remain enforced",
+    "no purchase, reward, coin, inventory or competitive state is consumed"
+  ],
+  "production": {
+    "writes_enabled": false,
+    "public_launcher": "0.20.0 unchanged",
+    "railway_cloudflare_supabase": "unchanged",
+    "owner_saves": "unchanged"
+  },
+  "remaining_gates": [
+    "supported OS/filesystem-level transactional mechanism with cross-version qualification, or an explicitly accepted product threat model",
+    "clean-machine installer/signing validation after the automatic-write design is resolved",
+    "separate post-apply parse/reverification and applied receipt before any future entitlement consumption"
+  ],
+  "next_concrete_experiment": "Qualify a supported transactional/driver-level publication mechanism on every target Windows/NTFS configuration, with independent-writer, interruption and restart tests. If no supported mechanism is available, obtain explicit product approval for export-only application semantics; do not weaken the current safety gate."
+}

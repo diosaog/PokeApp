@@ -811,3 +811,17 @@ competitive entitlement is consumed. Automatic replacement is still blocked by
 external-writer/power-loss/clean-machine certification gaps. No Phase 23.
 See [export report](phase22-export-integration-report.md) and
 [evidence](phase22-export-integration-evidence.json).
+
+## Phase 22A safety result (2026-10-22)
+
+The current HEAD is `58cbe8261da0e9537f2d69e29b71c8a2e488d0be`, origin aligned.
+The automatic original-save replacement gate is **BLOCKED**: current Windows
+sharing/`ReplaceFileW` semantics do not provide external-writer hash CAS, and
+TxF is not a product-qualified dependency. The verified new-file exporter,
+backups, journal and recovery remain valid. The focused current-HEAD matrix is
+68 PASS in 13.165 seconds. Production writes remain disabled; owner saves,
+public Launcher 0.20.0 and remote services are unchanged. Next action is to
+qualify a supported OS/filesystem transactional mechanism across target
+configurations or obtain an explicit export-only product decision. No Phase 23.
+See [Phase 22A report](phase22a-write-safety-report.md) and
+[evidence](phase22a-write-safety-evidence.json).
