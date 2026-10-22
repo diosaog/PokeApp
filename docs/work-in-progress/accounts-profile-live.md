@@ -1,6 +1,6 @@
 # Accounts and profiles — live handoff
 
-2026-10-23. **P1/P2 IMPLEMENTED / LOCAL PASS; P3/P4 NEXT. LOCAL ONLY.**
+2026-10-23. **P1–P3 IMPLEMENTED / LOCAL PASS; P4 INTEGRATION NEXT. LOCAL ONLY.**
 Entry main/origin `2b77b62d2a7fd8d0f1b6e01f4ac2d0c8e51b4b82`, fetched 0/0,
 clean tracked tree, five unrelated untracked files preserved. Previous Phase22E
 work is committed/pushed and finished; no active child agent or Git lock. Phase22
@@ -57,5 +57,18 @@ remain explicitly local doubles; real Auth/global signout is a remote release ga
 Migration/bootstrap051 local only. DB dropped/cluster stopped; `p2-pg.json` next to
 P1 evidence. Editor is ready; P4 wires navigation and account-only profiles.
 
-Next: P3 admin account management; then P4 integration. No Phase22/23 or Launcher
-work in this packet. No production effects.
+P2 commit `6e66c63` is pushed. P3 adds migration052 and admin API/UI: paginated
+accounts, CAS/idempotent disable/re-enable with session guards, explicit target
+PIN reset through the same durable intent, no role editor/delete/name linking.
+Self-disable/reset bypass is denied. Existing draft-only season enrollment remains
+authoritative; late enrollment is denied rather than inventing division/history.
+Five new Admin API tests, three Admin React tests plus five invalidated PIN-form
+regressions PASS. Real PG: four status retries, preserved identity/membership,
+stale/nonadmin/self/late-enrollment denials, pending PIN cannot be bypassed PASS.
+The first harness expected only two rows despite baseline seed trainers; corrected
+to check exact fixture inclusion and private-field omission. Product unchanged.
+Local052 database dropped/cluster stopped; `p3-pg.json` retained.
+
+Next: P4 register/login/navigation, public account profiles without membership,
+portrait integration, affected browser tests and final local build/parity. No
+Phase22/23 or Launcher work. No production effects.

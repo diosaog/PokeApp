@@ -321,12 +321,102 @@ def p2(pg):
     }
 
 
+def p3(pg):
+    actor, target, season = (str(uuid4()) for _ in range(3))
+    op = str(uuid4())
+    digest = "d" * 64
+    pg.sql(f"""insert into trainers(id,display_name,slug,auth_user_id,is_admin) values
+    ('{actor}','Admin','admin',gen_random_uuid(),true),('{target}','Player','player',gen_random_uuid(),false);
+    insert into seasons(id,name,created_by_trainer_id) values('{season}','Draft','{actor}');
+    insert into season_admin_state(season_id) values('{season}');""")
+    add = json.dumps(
+        dict(
+            actor_trainer_id=actor,
+            season_id=season,
+            idempotency_key=str(uuid4()),
+            body=dict(trainer_id=target, expected_roster_revision=0),
+        )
+    )
+    pg.sql(f"select api_admin_add_participant('{add}'::jsonb);")
+    baseline = pg.sql(
+        "select md5(string_agg(row_to_json(t)::text,'' order by id)) from season_players t;"
+    ).stdout
+    request = (
+        f"select account_admin_status('{actor}','{target}','{op}','{digest}',0,false);"
+    )
+    with ThreadPoolExecutor(4) as pool:
+        receipts = list(pool.map(lambda _: pg.sql(request).stdout, range(4)))
+    assert all(r == receipts[0] for r in receipts)
+    assert (
+        pg.sql(
+            f"select globally_enabled,is_admin,profile_revision from trainers where id='{target}';"
+        ).stdout.strip()
+        == "f|f|1"
+    )
+    assert (
+        pg.sql(
+            "select md5(string_agg(row_to_json(t)::text,'' order by id)) from season_players t;"
+        ).stdout
+        == baseline
+    )
+    assert pg.sql(
+        f"select account_admin_status('{actor}','{actor}','{uuid4()}','{digest}',0,false);",
+        ok=False,
+    ).returncode
+    assert pg.sql(
+        f"select account_admin_status('{actor}','{target}','{uuid4()}','{digest}',0,true);",
+        ok=False,
+    ).returncode
+    pg.sql(
+        f"select account_admin_status('{actor}','{target}','{uuid4()}','{digest}',1,true);"
+    )
+    assert pg.sql(f"select account_admin_list('{target}',0);", ok=False).returncode
+    assert pg.sql(
+        f"select account_admin_status('{target}','{actor}','{uuid4()}','{digest}',0,false);",
+        ok=False,
+    ).returncode
+    data = json.loads(pg.sql(f"select account_admin_list('{actor}',0);").stdout)
+    assert {actor, target} <= {t["trainer_id"] for t in data["items"]} and all(
+        "auth_user_id" not in t for t in data["items"]
+    )
+    pg.sql(f"update seasons set status='active',started_at=now() where id='{season}';")
+    add = json.dumps(
+        dict(
+            actor_trainer_id=actor,
+            season_id=season,
+            idempotency_key=str(uuid4()),
+            body=dict(trainer_id=actor, expected_roster_revision=1),
+        )
+    )
+    denied = pg.sql(f"select api_admin_add_participant('{add}'::jsonb);", ok=False)
+    assert denied.returncode and "season_not_draft" in denied.stderr
+    assert pg.sql("select count(*) from coin_transactions;").stdout.strip() == "0"
+    pin = str(uuid4())
+    pg.sql(f"select account_pin_begin('{actor}','{target}','{pin}','{digest}');")
+    assert pg.sql(
+        f"select account_admin_status('{actor}','{target}','{uuid4()}','{digest}',2,true);",
+        ok=False,
+    ).returncode
+    for role in ("anon", "authenticated"):
+        assert pg.sql(f"set role {role};" + request, ok=False).returncode
+    return dict(
+        concurrent_status=4,
+        stable_identity_membership=True,
+        self_disable_denied=True,
+        nonadmin_denied=True,
+        stale_denied=True,
+        late_enrollment_denied=True,
+        no_rewards=True,
+        pending_pin_no_bypass=True,
+    )
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--bin", type=Path, required=True)
     parser.add_argument("--port", type=int, default=55479)
     parser.add_argument("--evidence", type=Path, required=True)
-    parser.add_argument("--packet", choices=["p1", "p2"], default="p1")
+    parser.add_argument("--packet", choices=["p1", "p2", "p3"], default="p1")
     args = parser.parse_args()
     pg = LocalPG(args.bin, args.port)
     started = False
@@ -335,7 +425,7 @@ def main():
         started = True
         result = {
             "status": "PASS",
-            args.packet: (p1 if args.packet == "p1" else p2)(pg),
+            args.packet: {"p1": p1, "p2": p2, "p3": p3}[args.packet](pg),
             "cluster": str(pg.root),
         }
     finally:

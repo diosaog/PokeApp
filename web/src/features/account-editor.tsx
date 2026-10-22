@@ -11,7 +11,13 @@ export type AccountProfile = {
 };
 export const pinRecoveryKey = "pokeapp-pin-change-operation";
 
-export function PinForm({ recovery = false }: { recovery?: boolean }) {
+export function PinForm({
+  recovery = false,
+  adminTarget,
+}: {
+  recovery?: boolean;
+  adminTarget?: string;
+}) {
   const { logout, holdAdminNavigation } = useApp();
   const [pending, setPending] = useState(false),
     [error, setError] = useState<unknown>(null);
@@ -19,8 +25,11 @@ export function PinForm({ recovery = false }: { recovery?: boolean }) {
     [done, setDone] = useState(false);
   const intent = useRef<{
     key: string;
-    body: { current_pin: string; new_pin: string; confirmation: string };
+    body: { current_pin?: string; new_pin: string; confirmation: string };
   } | null>(null);
+  const storageKey = adminTarget
+    ? `${pinRecoveryKey}:${adminTarget}`
+    : pinRecoveryKey;
   useEffect(
     () => (pending || uncertain ? holdAdminNavigation() : undefined),
     [pending, uncertain, holdAdminNavigation],
@@ -32,7 +41,11 @@ export function PinForm({ recovery = false }: { recovery?: boolean }) {
     setError(null);
     try {
       await api.request(
-        resume ? "/v1/auth/pin-change/resume" : "/v1/account/pin",
+        adminTarget
+          ? `/v1/admin/accounts/${adminTarget}/reset-pin`
+          : resume
+            ? "/v1/auth/pin-change/resume"
+            : "/v1/account/pin",
         {
           method: "POST",
           headers: {
@@ -41,13 +54,13 @@ export function PinForm({ recovery = false }: { recovery?: boolean }) {
           },
           body: JSON.stringify(saved.body),
         },
-        !resume,
+        !!adminTarget || !resume,
       );
-      sessionStorage.removeItem(pinRecoveryKey);
+      sessionStorage.removeItem(storageKey);
       intent.current = null;
       setUncertain(false);
       setDone(true);
-      logout();
+      if (!adminTarget) logout();
     } catch (err) {
       setError(err);
       const unknown =
@@ -58,7 +71,7 @@ export function PinForm({ recovery = false }: { recovery?: boolean }) {
       setUncertain(unknown);
       if (!unknown) {
         intent.current = null;
-        sessionStorage.removeItem(pinRecoveryKey);
+        sessionStorage.removeItem(storageKey);
       }
     } finally {
       setPending(false);
@@ -67,12 +80,20 @@ export function PinForm({ recovery = false }: { recovery?: boolean }) {
   if (done)
     return (
       <p role="status">
-        PIN cambiado. Espera un instante y vuelve a entrar con el nuevo PIN.
+        {adminTarget
+          ? "PIN restablecido. El entrenador debe entrar con el nuevo PIN."
+          : "PIN cambiado. Espera un instante y vuelve a entrar con el nuevo PIN."}
       </p>
     );
   return (
     <Card>
-      <h2>{recovery ? "Recuperar cambio de PIN" : "Cambiar PIN"}</h2>
+      <h2>
+        {adminTarget
+          ? "Restablecer PIN"
+          : recovery
+            ? "Recuperar cambio de PIN"
+            : "Cambiar PIN"}
+      </h2>
       <p>
         Se cerrarán las sesiones anteriores.{" "}
         {recovery && "Introduce los mismos PIN de la solicitud interrumpida."}
@@ -82,7 +103,7 @@ export function PinForm({ recovery = false }: { recovery?: boolean }) {
           const data = form(event);
           if (pending || uncertain) return;
           const body = {
-            current_pin: text(data, "current"),
+            ...(!adminTarget ? { current_pin: text(data, "current") } : {}),
             new_pin: text(data, "new"),
             confirmation: text(data, "repeat"),
           };
@@ -91,14 +112,15 @@ export function PinForm({ recovery = false }: { recovery?: boolean }) {
             return;
           }
           const key = recovery
-            ? sessionStorage.getItem(pinRecoveryKey)
-            : crypto.randomUUID();
+            ? sessionStorage.getItem(storageKey)
+            : (adminTarget ? sessionStorage.getItem(storageKey) : null) ||
+              crypto.randomUUID();
           if (!key) {
             setError(new ApiError(409, "ACCOUNT_RECONCILIATION_REQUIRED"));
             return;
           }
           intent.current = { key, body };
-          sessionStorage.setItem(pinRecoveryKey, key); // No PIN or credential is persisted.
+          sessionStorage.setItem(storageKey, key); // No PIN or credential is persisted.
           void send(recovery);
         }}
       >
@@ -107,21 +129,25 @@ export function PinForm({ recovery = false }: { recovery?: boolean }) {
             ["current", "PIN actual", "current-password"],
             ["new", "Nuevo PIN", "new-password"],
             ["repeat", "Repetir nuevo PIN", "new-password"],
-          ].map(([name, label, autocomplete]) => (
-            <Field key={name} label={label}>
-              <input
-                name={name}
-                type="password"
-                inputMode="numeric"
-                pattern="[0-9]{4}"
-                minLength={4}
-                maxLength={4}
-                autoComplete={autocomplete}
-                required
-              />
-            </Field>
-          ))}
-          <Submit pending={pending}>Cambiar PIN</Submit>
+          ]
+            .filter(([name]) => !adminTarget || name !== "current")
+            .map(([name, label, autocomplete]) => (
+              <Field key={name} label={label}>
+                <input
+                  name={name}
+                  type="password"
+                  inputMode="numeric"
+                  pattern="[0-9]{4}"
+                  minLength={4}
+                  maxLength={4}
+                  autoComplete={autocomplete}
+                  required
+                />
+              </Field>
+            ))}
+          <Submit pending={pending}>
+            {adminTarget ? "Restablecer PIN" : "Cambiar PIN"}
+          </Submit>
         </fieldset>
       </form>
       <Notice error={error} />

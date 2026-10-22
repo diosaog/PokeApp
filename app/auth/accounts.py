@@ -265,3 +265,24 @@ class AccountService:
         return self.repository.rpc(
             "account_pin_finish", dict(p_operation=str(operation), p_hash=digest)
         )
+
+    def admin_accounts(self, actor, offset):
+        return self.repository.rpc(
+            "account_admin_list", dict(p_actor=actor, p_offset=offset)
+        )
+
+    def admin_status(self, actor, target, operation, revision, enabled):
+        digest = self.fingerprint(
+            ["account_status", actor, target, str(operation), revision, enabled]
+        )
+        return self.repository.rpc(
+            "account_admin_status",
+            dict(
+                p_actor=actor,
+                p_target=target,
+                p_operation=str(operation),
+                p_hash=digest,
+                p_revision=revision,
+                p_enabled=enabled,
+            ),
+        )

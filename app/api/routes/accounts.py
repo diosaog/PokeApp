@@ -8,7 +8,7 @@ from app.api.errors import api_error
 from app.auth.accounts import AccountError
 from app.auth.errors import AuthError
 from app.auth.errors import InvalidCredentialsError
-from app.api.security import require_enabled_principal
+from app.api.security import require_enabled_principal, require_admin_principal
 
 router = APIRouter(prefix="/v1", tags=["accounts"])
 
@@ -210,6 +210,90 @@ def resume_pin(
             payload.new_pin,
             payload.confirmation,
             resume=True,
+        )
+
+    return invoke(action)
+
+
+class AdminAccount(BaseModel):
+    trainer_id: UUID
+    display_name: str
+    globally_enabled: bool
+    is_admin: bool
+    revision: int
+    provisioned: bool
+
+
+class AdminAccountPage(BaseModel):
+    items: list[AdminAccount]
+    offset: int
+    has_more: bool
+
+
+class AccountStatusRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    expected_revision: int = Field(ge=0, strict=True)
+    enabled: bool = Field(strict=True)
+
+
+class AccountStatusReceipt(ProfileReceipt):
+    globally_enabled: bool
+
+
+class ResetPinRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid", hide_input_in_errors=True)
+    new_pin: str = Field(pattern=r"^[0-9]{4}$", repr=False)
+    confirmation: str = Field(pattern=r"^[0-9]{4}$", repr=False)
+
+
+@router.get("/admin/accounts", response_model=AdminAccountPage)
+def admin_accounts(
+    offset: int = Query(0, ge=0, le=100000),
+    principal=Depends(require_admin_principal),
+    service=Depends(account_service),
+):
+    return invoke(lambda: service.admin_accounts(principal.trainer_id, offset))
+
+
+@router.put("/admin/accounts/{trainer_id}/status", response_model=AccountStatusReceipt)
+def admin_status(
+    trainer_id: UUID,
+    payload: AccountStatusRequest,
+    key: UUID = Header(alias="Idempotency-Key"),
+    principal=Depends(require_admin_principal),
+    service=Depends(account_service),
+):
+    return invoke(
+        lambda: service.admin_status(
+            principal.trainer_id,
+            str(trainer_id),
+            key,
+            payload.expected_revision,
+            payload.enabled,
+        )
+    )
+
+
+@router.post("/admin/accounts/{trainer_id}/reset-pin", response_model=PinChangeResponse)
+def reset_pin(
+    trainer_id: UUID,
+    payload: ResetPinRequest,
+    key: UUID = Header(alias="Idempotency-Key"),
+    principal=Depends(require_admin_principal),
+    service=Depends(account_service),
+):
+    if str(trainer_id) == principal.trainer_id:
+        raise api_error(403, "ACCOUNT_FORBIDDEN", "Use your personal PIN change.")
+
+    def action():
+        service.throttle("admin-reset", principal.trainer_id, 10, 3600)
+        return service.change_pin(
+            principal.trainer_id,
+            key,
+            "",
+            payload.new_pin,
+            payload.confirmation,
+            target=str(trainer_id),
         )
 
     return invoke(action)
