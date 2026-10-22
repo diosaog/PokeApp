@@ -1,11 +1,23 @@
 # PokeApp 2.0 Project Checkpoint
 
-Checkpoint reconciled: 2026-10-20. This file is the project index and historical
+Checkpoint reconciled: 2026-10-22. This file is the project index and historical
 milestone record; it does not maintain a second live phase-status ledger.
 
 ## Current project position
 
-- Current packet: **22 - Native save-write foundation, PARTIAL / release BLOCKED**.
+- Current packet: **22B - CONDITIONAL / owner decision required; Phase22 PARTIAL**.
+  New original-path handoff proof: eight authentic fixture-copy games, 27 safety
+  scenarios, four tool-control tests and corrected cooperative model PASS.
+  No-replace renames preserve an external file that wins the publication gap;
+  the pair is **not atomic**, and interruption can leave the pathname absent
+  until recovery. Owner acceptance of this availability change precedes existing
+  journal integration and real-emulator qualification. No product/remote change
+  or new package. Public0.20.0 and private0.22.0-rc.2 remain unchanged. See
+  [current live handoff](work-in-progress/phase22-save-writes-live.md),
+  [22B report](phase22b-architecture-feasibility-report.md) and
+  [evidence](phase22b-architecture-feasibility-evidence.json). No Phase23.
+
+- Historical Phase22 foundation entry (2026-10-20):
   Application `62822a6`; native225, focusedPython69, all-eight real fixture-copy
   write/verify/replay/restore and packaged-native gates PASS. Candidate0.22.0-rc.1
   built privately; two isolated packaged Launcher runs PASS, unsigned/unpublished.
@@ -825,3 +837,15 @@ qualify a supported OS/filesystem transactional mechanism across target
 configurations or obtain an explicit export-only product decision. No Phase 23.
 See [Phase 22A report](phase22a-write-safety-report.md) and
 [evidence](phase22a-write-safety-evidence.json).
+
+## Interrupted Phase 22B assessment (superseded, 2026-10-22)
+
+Automatic original-save application is **CONDITIONAL**, not generally viable in
+Windows user mode. A tools-only cooperative-emulator lifecycle proof passed on a
+disposable real X copy: exclusive emulator handle, close handshake, Launcher lock,
+rename blocking and independent-writer blocking all behaved as expected. This
+covers only supported cooperative emulators; independent replacement, power loss
+and privileged actors remain outside the guarantee. No production writes or
+Launcher release changed. Product Owner approval is required before defining a
+per-emulator adapter packet. See [Phase 22B report](phase22b-architecture-feasibility-report.md)
+and [evidence](phase22b-architecture-feasibility-evidence.json).

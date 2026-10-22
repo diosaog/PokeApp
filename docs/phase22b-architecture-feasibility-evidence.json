@@ -1,0 +1,295 @@
+{
+  "phase": "22B",
+  "observed_at": "2026-10-22 Europe/Madrid",
+  "status": "CONDITIONAL_OWNER_DECISION_REQUIRED",
+  "phase22": "PARTIAL",
+  "entry_head": "58cf806c273fd0e551e10ae6422b2fff187fbc41",
+  "entry_origin_divergence": "0/0",
+  "interrupted_work_preserved": true,
+  "unrelated_untracked_preserved": 5,
+  "inherited_assessment_superseded": "%LOCALAPPDATA%/PokeApp-migration-evidence/phase22b/20261022/interrupted-assessment.json",
+  "new_hypothesis": "READ+DELETE handles, READ sharing only; park original then publish candidate by handle, both WITHOUT REPLACE. A competing gap creator is preserved. The two renames are NOT atomic.",
+  "api": "SetFileInformationByHandle/FileRenameInfo; absolute name; RootDirectory=NULL; ReplaceIfExists=FALSE; no fallback, TxF or new native dependency",
+  "new_probe": {
+    "status": "PASS",
+    "decision": "CONDITIONAL_NOT_ATOMIC",
+    "platform": "Windows-11-10.0.26300-SP0",
+    "python": "3.14.3",
+    "filesystem": "local NTFS",
+    "games": [
+      {
+        "game": "X",
+        "native_verified_at_original_path": true,
+        "original_preserved": true,
+        "source_sha256": "fe7cd382448ce308b3ecfb1c32c908ad7cc6b763f1e73ff8b7f38e616d7e95f8",
+        "candidate_sha256": "3cc5145bc51f732be45d1b837f2b3bbd7c041f3afb43e9a5f4621f1ac4138842"
+      },
+      {
+        "game": "Y",
+        "native_verified_at_original_path": true,
+        "original_preserved": true,
+        "source_sha256": "d67f2772eda54de759cfa928a2f11d9697182545bd832ed29e8017e74381336c",
+        "candidate_sha256": "a7314cf6d86a4e5b4e490fcc2acf5b856824a6dd28d7b430b473e24189ed7601"
+      },
+      {
+        "game": "OR",
+        "native_verified_at_original_path": true,
+        "original_preserved": true,
+        "source_sha256": "09d3c3a8b58bef7fd7529d2300767def2df259ce550e91b4d7019831ab18eebd",
+        "candidate_sha256": "6902bf4a0d40663663f68d38917ff0610ae7684d35d202764cd8a2761b7cea6e"
+      },
+      {
+        "game": "AS",
+        "native_verified_at_original_path": true,
+        "original_preserved": true,
+        "source_sha256": "1edab357827dc6dab18d776133996e054f778d06c80a3d15d9e4c731da6f3e73",
+        "candidate_sha256": "2d219e261ac9a13cd888f78f78a22dd476c7ad5b39927747b16da3fc77341be5"
+      },
+      {
+        "game": "SN",
+        "native_verified_at_original_path": true,
+        "original_preserved": true,
+        "source_sha256": "83fe616bd2d04e4d7f51705f37721189f920717296224c9d42bbd238df7a3345",
+        "candidate_sha256": "26609b195532619f3b9c46e4bc1aa93dd4296099cc177df411b246d5cf1655d2"
+      },
+      {
+        "game": "MN",
+        "native_verified_at_original_path": true,
+        "original_preserved": true,
+        "source_sha256": "20ea7b125d7d1b878eb6b11b0516dd9c960b761d5c2e11d1c2d4a33c1947675c",
+        "candidate_sha256": "274d68b82bf082b00c73200b62644bdd8fd717e3d2cb320811fdce13998db367"
+      },
+      {
+        "game": "US",
+        "native_verified_at_original_path": true,
+        "original_preserved": true,
+        "source_sha256": "3c1a3b507d3ef7d5d5937867ebd8f2f91a6044b1b5a4df5d9c6975abd4a3d884",
+        "candidate_sha256": "fd25d26ebae3467e924ce9b9ac5e7a99e581dfc039d939685dae63d83cd21d7b"
+      },
+      {
+        "game": "UM",
+        "native_verified_at_original_path": true,
+        "original_preserved": true,
+        "source_sha256": "2a46508170124fc69417f68dfe8916d5a6a51cf96f7707c3d796ae1695422331",
+        "candidate_sha256": "539df552638978379ba2b3b484da65b079504022cf6c7388b2e41a10a3aa5f62"
+      }
+    ],
+    "scenarios": [
+      {
+        "name": "LOCKED-write",
+        "succeeded": false,
+        "winerror": 32,
+        "original_preserved": true
+      },
+      {
+        "name": "LOCKED-replace",
+        "succeeded": false,
+        "winerror": 5,
+        "original_preserved": true
+      },
+      {
+        "name": "LOCKED-rename_out",
+        "succeeded": false,
+        "winerror": 32,
+        "original_preserved": true
+      },
+      {
+        "name": "LOCKED-delete",
+        "succeeded": false,
+        "winerror": 32,
+        "original_preserved": true
+      },
+      {
+        "name": "PARKED-write",
+        "succeeded": true,
+        "original_preserved": true
+      },
+      {
+        "name": "PARKED-replace",
+        "succeeded": true,
+        "original_preserved": true
+      },
+      {
+        "name": "PARKED-rename_in",
+        "succeeded": true,
+        "original_preserved": true
+      },
+      {
+        "name": "PUBLISHED-write",
+        "succeeded": false,
+        "winerror": 32,
+        "original_preserved": true
+      },
+      {
+        "name": "PUBLISHED-replace",
+        "succeeded": false,
+        "winerror": 5,
+        "original_preserved": true
+      },
+      {
+        "name": "PUBLISHED-rename_out",
+        "succeeded": false,
+        "winerror": 32,
+        "original_preserved": true
+      },
+      {
+        "name": "PUBLISHED-delete",
+        "succeeded": false,
+        "winerror": 32,
+        "original_preserved": true
+      },
+      {
+        "name": "kill-LOCKED",
+        "classification": "ORIGINAL_PRESENT",
+        "original_preserved": true
+      },
+      {
+        "name": "kill-PARKED",
+        "classification": "RECOVERY_REQUIRED_PATH_ABSENT",
+        "original_preserved": true
+      },
+      {
+        "name": "kill-PUBLISHED",
+        "classification": "CANDIDATE_PRESENT",
+        "original_preserved": true
+      },
+      {
+        "name": "kill-VERIFIED",
+        "classification": "CANDIDATE_PRESENT",
+        "original_preserved": true
+      },
+      {
+        "name": "recovery-conflict",
+        "external_preserved": true
+      },
+      {
+        "name": "existing_writer",
+        "denied": true
+      },
+      {
+        "name": "competing_process",
+        "denied": true
+      },
+      {
+        "name": "replay",
+        "denied": true
+      },
+      {
+        "name": "unguarded-write",
+        "succeeded": true
+      },
+      {
+        "name": "unguarded-replace",
+        "succeeded": true
+      },
+      {
+        "name": "unguarded-rename_out",
+        "succeeded": true
+      },
+      {
+        "name": "unguarded-delete",
+        "succeeded": true
+      },
+      {
+        "name": "stale_source",
+        "denied_preserved": true
+      },
+      {
+        "name": "stale_candidate",
+        "denied_preserved": true
+      },
+      {
+        "name": "occupied_park",
+        "denied_preserved": true
+      },
+      {
+        "name": "corrupt-recovery",
+        "denied": true
+      }
+    ],
+    "scenario_count": 27,
+    "fixture_hashes_unchanged": true,
+    "temporary_root_removed": true,
+    "production_integration": false,
+    "power_loss_tested": false,
+    "real_emulator_tested": false,
+    "journal_integration": false
+  },
+  "cooperative_model_corrected": {
+    "status": "PASS",
+    "architecture": "COOPERATIVE_EMULATOR_LIFECYCLE",
+    "disposable_copy": true,
+    "emulator_opened_exclusively": true,
+    "launcher_lock_before_close": "FILE_LOCKED_OR_ACCESS_DENIED",
+    "rename_while_emulator_open": {
+      "blocked": true,
+      "winerror": 32
+    },
+    "cooperative_close_acknowledged": true,
+    "launcher_lock_after_close": true,
+    "writer_blocked_during_launcher_lock": {
+      "blocked": true,
+      "errno": 32
+    },
+    "bytes_preserved": true,
+    "automatic_publication": false,
+    "owner_or_production_data": false,
+    "scope": "supported cooperative emulator only; no hostile actor claim"
+  },
+  "control_tests": {
+    "count": 4,
+    "result": "PASS",
+    "seconds": 0.202,
+    "module": "test_phase22b_probe_controls"
+  },
+  "harness_failures_corrected": [
+    "Python open omitted winerror; independent writer now uses CreateFileW.",
+    "Protected MoveFileEx target returned 5, not 32; test now records both denial forms and includes successful unguarded attack controls."
+  ],
+  "retained_not_rerun": [
+    "68 focused Phase22 tests, unchanged product source",
+    "native225 and prior eight-game writer/export matrices",
+    "private rc.2 packaged proof"
+  ],
+  "guarantees": {
+    "A_atomic_old_to_new_path": false,
+    "B_ordinary_writers": "Denied while strict handles live; existing writer denies entry.",
+    "C_rename_replace": "Tested normal APIs denied while guarded; gap creator preserved and publication fails with183.",
+    "D_process_interruption": "Four TerminateProcess boundaries; read-only oracle, exclusive restore, conflict/corruption rejection. Product SQLite integration pending.",
+    "E_power_loss": "NOT_TESTED_NOT_CERTIFIED",
+    "F_hostile_privileged": "NOT_GUARANTEED"
+  },
+  "not_certified": [
+    "Windows10/other Windows builds",
+    "real emulator adapter/close/flush/restart and savestates",
+    "new-method memory mappings/additional APIs",
+    "cloud-sync/network/reparse/non-NTFS paths",
+    "power-loss/hardware durability",
+    "journaled handoff/exact receipt replay",
+    "package/signing/clean installation"
+  ],
+  "owner_decision": "Accept or reject temporary absence of the save pathname, including after a Launcher crash until recovery, with supported emulator restart blocked pending reconciliation. If continuous atomic availability is mandatory this design is insufficient.",
+  "next_if_approved": "22C existing journal/native verifier/backups/sync exclusion integration; persist original/candidate identity/hash and parking/publication intent, reconcile before retry, preserve conflicts; qualify pinned real emulator/Windows; then22D/22E.",
+  "production_code_changed": false,
+  "production_writes_enabled": false,
+  "remote_operations": 0,
+  "public_launcher": "0.20.0 unchanged",
+  "private_candidate": "0.22.0-rc.2 retained; no new build",
+  "owner_saves_touched": false,
+  "business_effects": false,
+  "economy": "Coins debited at purchase. Item use/application confirmation separate. Export consumes nothing.",
+  "compile_ruff_format_diff": "PASS",
+  "probe_processes_remaining": 0,
+  "source_hashes": {
+    "tools/phase22b_handoff_probe.py": "1e905b1c2813bd4c005e5e304e7dc252bd57f5d4e5b2a8d1d55ae142bb1341ac",
+    "tools/phase22b_cooperative_lifecycle_probe.py": "df9238a3661dcf8ec2f73fe556d318e636d68a217b94a1da9df21d5547bbd3dd",
+    "tests/test_phase22b_probe_controls.py": "b237163e3042ce4bd3fff8d830fce880bbde1611df73a81d3c1f040a26039d2e"
+  },
+  "sources": [
+    "https://learn.microsoft.com/en-us/windows/win32/api/fileapi/nf-fileapi-createfilew",
+    "https://learn.microsoft.com/en-us/windows/win32/api/fileapi/nf-fileapi-setfileinformationbyhandle",
+    "https://learn.microsoft.com/en-us/windows/win32/api/winbase/ns-winbase-file_rename_info",
+    "https://learn.microsoft.com/en-us/windows/win32/fileio/file-buffering",
+    "https://citra.azahar-emu.org/wiki/user-directory/"
+  ]
+}

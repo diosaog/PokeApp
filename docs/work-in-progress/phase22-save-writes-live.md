@@ -1,5 +1,48 @@
 # Phase 22 - safe native save writes
 
+## Current checkpoint — 22B publication proof, 2026-10-22
+
+**CONDITIONAL — OWNER DECISION REQUIRED. Phase 22 PARTIAL; production writes OFF.**
+This supersedes the historical next actions below, including manual export as
+the proposed final UX. Entry HEAD `58cf806c273fd0e551e10ae6422b2fff187fbc41`,
+fetched main/origin 0/0. The interrupted 22B tool, report/evidence and two document
+changes were preserved and completed; five unrelated untracked files untouched.
+
+New tools-only proof publishes a validated candidate at the selected **disposable
+original pathname**, retaining the source under a recovery name. Supported Win32
+handle-based renames use no replacement; both files deny other write/delete
+opens until verification. Independent writes/replacements are denied while
+guarded; if an external creator wins the gap, our publication fails and preserves
+its bytes. **The pair of renames is NOT atomic: the original pathname is absent
+between steps and can remain absent after process death.** No weaker contract
+was approved and no product writer/IPC/registry/journal was changed.
+
+Fresh PASS: **8 native game publications** (X/Y/OR/AS/SN/MN/US/UM), **27 scenarios**
+(guards, gap conflicts, four process deaths, recovery/corruption, stale intent,
+competing process, replay and positive attack controls), **4 probe-control tests**,
+and corrected inherited cooperative lifecycle proof. Real fixture hashes stayed
+unchanged; temporary probe trees removed. Ruff/format/compile/diff pass.
+Inherited **68 tests**, prior native/export/packaged matrices retained; not rerun.
+The new recovery oracle is a tools experiment, not integrated SQLite recovery.
+Only Windows 11 build26300/local NTFS tested; no real emulator, Windows10,
+power-loss, new-method mapping, signing or clean-install certification.
+
+Evidence: [22B report](../phase22b-architecture-feasibility-report.md),
+[22B JSON](../phase22b-architecture-feasibility-evidence.json), private
+`%LOCALAPPDATA%/PokeApp-migration-evidence/phase22b/20261022/`.
+No production access/deployment, owner save or economy change. Public Launcher
+**0.20.0 unchanged**, private **0.22.0-rc.2 retained**; no new candidate.
+
+**Exact next action:** owner accepts or rejects the temporary missing-path /
+recovery-before-emulator-restart contract. If accepted, integrate this mechanism
+into the existing journal/backups/sync exclusion and qualify a pinned emulator
+adapter, crash/replay/IPC and Windows configurations before private packaging.
+If continuous atomic pathname availability is required, automatic application
+remains blocked. Export remains available engineering evidence, not the final
+automatic product. Purchases debit at purchase; item application is separate.
+Documentation/probe closure commit carries this checkpoint; obtain its full HEAD
+from Git. **STOP before 22C integration pending that decision; no Phase23.**
+
 Entry 2026-10-20 Europe/Madrid: `77c2f18f9e07db19c5c6e58446fbcfd830228977`,
 main/origin 0/0, clean tracked tree. **STATUS: PARTIAL / PUBLIC RELEASE BLOCKED.**
 Phase 21 accepted; identity/progress rewards remain gated.
@@ -175,3 +218,33 @@ interruption and restart proof. If none is supportable, obtain an explicit
 product decision about export-only semantics; do not weaken the current gate.
 
 [22A report](../phase22a-write-safety-report.md) · [22A evidence](../phase22a-write-safety-evidence.json)
+
+## Historical interrupted Phase 22B assessment - superseded above
+
+**DECISION: CONDITIONAL. PHASE 22 remains PARTIAL; production writes DISABLED.**
+A generic Windows user-mode automatic replacement is still not defensible under
+non-cooperative external writers. A narrower architecture is plausible for
+explicitly supported emulators whose lifecycle the Launcher controls.
+
+Guarantees are now separated: `ReplaceFileW` supplies atomic publication only on
+a quiescent local NTFS path; a strict Launcher handle blocks ordinary cooperative
+writers; independent rename/replacement is not protected; journal/backup gates
+cover process interruption; power-loss durability and privileged actors remain
+unproven/out of scope.
+
+The tools-only PoC `tools/phase22b_cooperative_lifecycle_probe.py` passed on one
+disposable real X save copy. The cooperative emulator opened exclusively, the
+Launcher lock and rename were blocked while it was open, the close handshake
+released the file, and an independent writer was blocked during the Launcher
+lock. Bytes remained intact. Evidence:
+`%LOCALAPPDATA%/PokeApp-migration-evidence/phase22b/20261022/cooperative-lifecycle-evidence.json`.
+No automatic publication or production capability was enabled.
+
+**First incomplete step:** obtain Product Owner approval for a per-emulator
+cooperative support boundary, then qualify the first adapter with process
+ownership, close handshake, save-path ownership, journaled apply, post-apply
+parse/reverification and adversarial interruption tests. Unknown/uncontrolled
+emulators remain export-only. If the boundary is not accepted, automatic
+application is NOT VIABLE under the universal contract.
+
+[22B report](../phase22b-architecture-feasibility-report.md) · [22B evidence](../phase22b-architecture-feasibility-evidence.json)
