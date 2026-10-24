@@ -1,55 +1,103 @@
 # Accounts and profiles - live handoff
 
-## Authorized clean production release — 2026-10-24
+2026-10-24. **PRODUCTION DEPLOYED — WAITING OWNER REGISTRATION. NOT DONE GLOBAL.**
+Application source `912908179c310630c0d10145969e1013b5dcbad6` pushed before deployment.
+Release entry `d5e83993846d3ce3f08c3a429171c1e5a0f786e1`; preparation `cbe8acf`.
+[Release report](../accounts-profile-report.md), [evidence](../accounts-release-evidence.json).
 
-**IN PROGRESS. Entry d5e83993846d3ce3f08c3a429171c1e5a0f786e1.** Owner now
-authorizes deleting all V2 test accounts/seasons/business data, including old
-Anto, after verified backup. This supersedes preservation/deployment restrictions
-in the historical local closure below. No account names confer privileges.
+## Completed remote units — DO NOT REPEAT
 
-Pinned targets verified: Supabase `uwleqeuzsveqlugugzba` / Pokeapp 2.0;
-Railway project `f5c4666a-508f-4e5a-8aae-a54581814f29`, production,
-service `9a78e086-c927-471f-8bb9-befe62c77de7`; existing Cloudflare account/Worker.
-Remote migration head049,41 records;050–053 still unapplied at this checkpoint.
+Owner explicitly authorized removing all V2 test accounts/business data, including
+old Anto. Backup BEFORE reset:105 PostgreSQL/Auth/Storage/Shadow tables restored
+with exact hashes;4 actual Storage objects (524732 bytes) privately captured and
+round-trip restored under disposable keys with exact cleanup. PostgreSQL archive
+SHA256 `2459888ab860f61079e2365f79803a81c2e99311d2fdef3054496fb53180b624`.
+Private evidence/root: `%LOCALAPPDATA%/PokeApp-migration-evidence/accounts-release/20261024/`.
+Folder access restricted to owner/SYSTEM; new key material is DPAPI-protected.
+`pre-reset-v2-postgres.dump`, Storage manifest/bytes and restore scripts retained.
 
-Private backup in `%LOCALAPPDATA%/PokeApp-migration-evidence/accounts-release/20261024/`:
-`pre-reset-v2-postgres.dump`, SHA256
-`2459888ab860f61079e2365f79803a81c2e99311d2fdef3054496fb53180b624`.
-All105 tables restore exactly on disposable PostgreSQL, including Auth/Shadow.
-Four Storage objects,524732 bytes, backed up and restored to unique disposable
-keys, downloaded/hash-verified and removed; original Storage metadata unchanged.
-No source reset yet. No Shadow Storage dependency found.
+Old Railway deployment c90bccc2-553e-42e5-95c8-86eedf63d045 removed before reset.
+CLI down rejected the sleeping deployment; live health/state were reconciled,
+then explicit ID removal succeeded. Old API did not operate after053.
+One atomic explicit52-table DELETE, with exact baseline preconditions, removed
+competitive test state. No TRUNCATE, trigger/FK bypass or schema/grant reset.
+Old Auth identity and4 backed-up Storage objects deleted through Admin/Storage.
+Divisions/configuration versions/promotions were season-scoped test data; global
+settings2 and shop catalog62 remain. Shadow15 tables/135 rows remain identical.
+V1/local original saves/Launcher installs untouched.
 
-Private `reviewed-reset-public.sql` uses one explicit52-table DELETE statement,
-exact baseline preconditions and a transaction; no TRUNCATE, disabled triggers,
-schema/permission changes or foreign-key bypass. Rehearsal empties test data and
-preserves all53 other tables. `app_settings` and62 `shop_items` retained;
-divisions/config versions/promotions are season-scoped test rows, not global
-reference catalogs. Their original values remain in the verified backup.
-Actual49 backup upgrades through053 successfully after rehearsal cleanup.
+050=20261024120248;051=20261024120251;052=20261024120253;
+053=20261024120256. Each applied once;45 records,41 prior records identical.
+Private v2/intent/throttle keys + invitation configured; v1 pepper REMOVED.
+Legacy cutoff `2026-10-24T00:00:00Z`; no v1 account/session/intent remains.
+Supabase direct signup OFF; Admin provisioning proved. Existing modern Supabase
+keys unchanged. All8 new private account tables enforce RLS/browser denial.
+Advisor24ERROR/5WARN/40INFO: one additional WARN is authenticated execution of
+read-only SECURITY DEFINER `account_session_allowed`, required by session RLS;
+it returns eligibility only, does not elevate or modify accounts. No new ERROR.
+Only3 old relation grants changed, as050 deliberately revokes trainer/view writes.
 
-Private bootstrap tool `tools/account_admin_bootstrap.py` renders SQL only;
-postgres operator, independently verified exact new trainer/Auth IDs, complete
-v2 registration, zero prior admins, one auditable receipt. Four concurrent exact
-replays produce one promotion; wrong Auth/disabled/second operation and browser/
-service-role execution denied. `tools/validate_account_release.py` reproduces
-the isolated backup/reset/bootstrap proof without remote access.
+Railway `3d03e4eb-62a1-414b-9cb4-e1f4af7d6f39` SUCCESS; /health200;
+image `sha256:565c8affc85931ac8a6fb58f1a95a17e2bafdfe5bba90d463f9cb41b6c9ac5b7`.
+280 committed inputs. Earlier8b8f36ee image built but startup demanded old pepper;
+9129081 fixes the entry-point guard to require complete v2 configuration. Four
+new startup tests pass; no retired secret restored. Final Linux parser smoke PASS.
+Cloudflare deployment `4ad95457-bc53-4e0d-8830-9482ce3795a6`, version
+`8330afcf-e94c-4135-858d-5ae60cff1704`,100%, correct API and byte-identical assets.
+Public Launcher pinned independently to0.20.0, unchanged bytes/ETag; no R2 writes.
+Production physical writes remain disabled; no Phase22/23 work.
 
-New optional `POKEAPP_REGISTRATION_BOOTSTRAP_HASH` adds a private initial-registration
-token in addition to the ordinary invitation. It never grants admin; raw token/PIN
-remain in memory in the UI. Keep this gate until owner-created Anto is independently
-verified and promoted. Public Launcher download pinned separately to0.20.0 so
-deploying the web cannot accidentally publish the private0.22.0-rc.3 candidate.
-Fresh focused20 Python,5 React,2 Worker,2 Edge desktop/mobile checks PASS;
-OpenAPI/build/dry-run, targeted Ruff, formatting/syntax/diff PASS. Prior suites
-retained. PostgreSQL rehearsal clusters stopped; no owner files touched.
+## Acceptance and exact final state
 
-Next: push validated source; quiesce old API; fresh baseline check; execute exact
-reset and scoped Storage/Auth deletion; apply missing050–053 once; configure v2
-only policy/keys and disable direct Auth signup; deploy API/web and real disposable
-acceptance. Stop at owner manual registration, never create their PIN/account.
-Reconcile unknown remote outcomes before retry. Do not open general registration
-or claim global completion before owner Admin acceptance.
+24 focused Python,5 React,2 Worker and2 local Edge cases PASS. Real services:
+26 FastAPI HTTP checks plus direct-signup and5 private REST/elevation denials;
+actual provisioning/login/refresh/PIN/global revoke/disabled guards, rename,
+portrait upload/read, stable identity and zero membership/economy PASS.
+Real Edge desktop1440/mobile390 registers from login, logs in, opens/edits the
+no-season profile and logs out;11 API responses, no interception/page errors/5xx.
+Registration/profile captures reviewed.8 public infrastructure checks PASS.
+OpenAPI/build/dry-run, targeted lint/format/syntax/diff pass. Prior full suites
+retained. Disposable PostgreSQL clusters stopped, browser process ended.
+
+Harness-only corrections: Supabase uses numeric `code` plus `error_code`; use
+`signup_disabled` from the latter. Browser waits for DOM/product controls, not
+network idle; corrected a private-script encoding error in Spanish selectors.
+No repeated registration after an unknown outcome: initial browser failures
+preceded registration and were reconciled before retry.
+
+Both acceptance accounts/Auth identities and their one photo removed by exact
+UUID/key. Final trainers/Auth users/sessions/refresh/Storage objects all0;
+credentials/registrations/PIN intents/commands/grants/session guards all0.
+Opaque v2 security rate counters and the credential policy remain intentionally.
+All52 old public test tables empty; catalog/settings/Shadow preserved. Migrations
+remain45; no admin promotion has run remotely. No owner account/PIN invented.
+
+## NEXT EXACT ACTION — OWNER MANUAL REGISTRATION
+
+Registration remains controlled by a private initial token in addition to the
+normal invitation. `POKEAPP_REGISTRATION_BOOTSTRAP_HASH` stores only its hash.
+The field is **Autorización de alta inicial**; the token grants registration only,
+never Admin. Owner instructions/token are in the private `Anto-alta-inicial.txt`
+inside the evidence folder. Never print it, the invitation or any PIN in logs/Git.
+
+1. Owner opens production web, chooses Crear cuenta, name Anto, their own new PIN,
+   known invitation, and the private initial authorization. No personal email.
+2. STOP here until owner confirms creation through the existing owner channel.
+   Do not repeat reset/deployment. Reconcile exact new trainer/Auth IDs, complete
+   v2 registration, creation time and controlled enrollment with that independent
+   owner confirmation/local-token delivery. Name/PIN/session alone are insufficient.
+3. Render/review `tools/account_admin_bootstrap.py` for only those exact UUIDs,
+   fresh operation UUID, independent verification reference and release-time lower
+   bound. Execute privately as postgres once; verify journal receipt and Admin role.
+   Tool has no HTTP route, requires zero existing admins and complete v2 binding;
+   exact concurrent replay is idempotent. Local backup rehearsal proved denials.
+4. Owner accepts Admin panel/trainer management. Verify other accounts remain
+   ordinary. Then remove the initial-registration hash in a controlled configuration
+   rollout (retain invitation), verify normal invitation-only registration, and
+   archive/restrict temporary authorization. No automatic first-user/name privilege.
+5. Only then close GLOBAL. No admin/enrollment acceptance is claimed before owner.
+
+Historical authorization/readiness statements below are superseded by this release.
 
 ## Historical local closure (superseded operational authorization)
 

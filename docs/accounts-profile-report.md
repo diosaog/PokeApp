@@ -1,6 +1,67 @@
-# Accounts and profiles — final local acceptance
+# Accounts and profiles — controlled production activation
 
-2026-10-24. **P1 / P2 / P3 / P4 / SEC-PIN-01 DONE LOCAL. NOT DEPLOYED.**
+2026-10-24. **DEPLOYED / WAITING OWNER REGISTRATION. NOT DONE GLOBAL.**
+Application `912908179c310630c0d10145969e1013b5dcbad6`; documentation HEAD is the
+subsequent Git commit. [Live continuation](work-in-progress/accounts-profile-live.md),
+[release evidence](accounts-release-evidence.json).
+
+The owner authorized a clean start. Verified private backups restore all105
+PostgreSQL/Auth/Storage/Shadow tables exactly and all4 Storage objects (524732
+bytes). The active V2 test trainers, seasons, results, economy, saves, snapshots
+and old Anto/Auth were then removed. Cleanup used52 explicit DELETE targets and
+exact preconditions; no schema/grant/trigger reset or TRUNCATE. Global settings2,
+shop catalog62 and Shadow15 tables/135 rows preserved. V1, original local saves
+and Launcher installations were untouched. Backups remain private and recoverable.
+
+050–053 applied once:20261024120248/251/253/256 respectively. History now45 records;
+all41 previous records unchanged. Direct Supabase signup is disabled. New private
+v2 password/intent/throttle keys are active; old PIN pepper removed from Railway.
+There are no surviving v1 credentials, old sessions or old credential operations.
+No Supabase API/signing keys were rotated. Eight account tables deny browser access.
+Advisor has24ERROR/5WARN/40INFO; added WARN concerns the intentional read-only
+SECURITY DEFINER session predicate used by RLS, not a mutation/elevation capability.
+
+Railway **3d03e4eb-62a1-414b-9cb4-e1f4af7d6f39 SUCCESS**, health200.
+Cloudflare deployment **4ad95457-bc53-4e0d-8830-9482ce3795a6**, version
+**8330afcf-e94c-4135-858d-5ae60cff1704**,100%, correct API and matching build bytes.
+The first image compiled but an old startup guard required the retired v1 pepper;
+corrected and tested in9129081. No credential downgrade was used. Public Launcher
+stays0.20.0 with identical download bytes; physical writes remain disabled.
+
+Fresh affected validation:24 Python,5 React,2 Worker,2 local browser cases;
+real backup/reset/bootstrap PostgreSQL proof;26 real API checks, direct-signup
+and5 RLS/private/elevation denials; real desktop/mobile browser registration,
+login/no-season profile/logout with11 API responses and no interception/errors.
+Auth provisioning, refresh, PIN change/global revocation, disabled sessions and
+portrait Storage are real hosted proofs.8 public infrastructure checks pass.
+Build/OpenAPI/targeted lint/format/syntax/diff pass. Previous unaffected suites
+were retained. Private harness error-field, encoding and navigation waits were
+corrected; no corresponding product defect or false PASS was hidden.
+
+Two disposable acceptance accounts and their portrait were removed by exact IDs.
+Final trainers/Auth users/sessions/refresh/Storage objects are all0. Credential,
+registration, PIN, command and grant journals contain no test identities.
+V2 rate-limit security counters and the rollout policy remain intentionally.
+
+**Next is the owner's manual creation of Anto.** Login exposes Crear cuenta;
+registration requires both the ordinary invitation and a private initial token.
+The token is in `Anto-alta-inicial.txt` under the private evidence directory; its
+hash is the only server configuration value. Registration never grants Admin.
+The owner chooses their own PIN. After independent owner confirmation, the
+operator will verify exact trainer/Auth UUIDs and run one audited private
+`tools/account_admin_bootstrap.py` transaction. No HTTP elevation endpoint exists.
+The zero-admin, concurrency, identity-conflict and replay behavior passed locally.
+
+New Anto/Admin status: **WAITING OWNER**. No real admin promotion, owner Admin-panel
+acceptance or general invitation registration activation is claimed yet. Keep the
+initial-registration gate until those checks finish. No other phase starts.
+Private evidence: `%LOCALAPPDATA%/PokeApp-migration-evidence/accounts-release/20261024/`.
+
+---
+
+# Historical local acceptance before the production release
+
+2026-10-24. **Historical local checkpoint at d5e8399; superseded by the release above.**
 Real-user renewal and production pepper retirement: **NOT EXECUTED**.
 Entry `0908a33be1ed1baa1df8e5443a1cd87290f79e4f`, main/origin aligned.
 Previous P4 `24a87e45aac6372b2f39f05ae942f8d728872c79` retained.

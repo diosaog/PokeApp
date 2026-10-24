@@ -1,0 +1,138 @@
+{
+  "status": "WAITING_OWNER_REGISTRATION",
+  "application_source": "912908179c310630c0d10145969e1013b5dcbad6",
+  "backup": {
+    "bytes": 1223902,
+    "sha256": "2459888ab860f61079e2365f79803a81c2e99311d2fdef3054496fb53180b624",
+    "table_data_entries": 105,
+    "readable": true,
+    "restore_exit": 0,
+    "error_classes": [],
+    "tables_restored": 105,
+    "different_tables": []
+  },
+  "storage_backup": {
+    "status": "PASS",
+    "objects_restored_to_unique_disposable_keys": 4,
+    "bytes": 524732,
+    "all_hashes_equal": true,
+    "exact_object_cleanup": true,
+    "shadow_object_dependencies": false
+  },
+  "reset": {
+    "public_test_tables_empty": 52,
+    "trainers": 0,
+    "seasons": 0,
+    "auth_users": 0,
+    "auth_sessions": 0,
+    "storage_objects": 0,
+    "catalog_items": 62,
+    "global_settings": 2,
+    "v1_shadow_tables_identical": 15,
+    "v1_shadow_rows": 135
+  },
+  "migrations": {
+    "records": 45,
+    "prior41_unchanged": true,
+    "applied": [
+      {
+        "version": "20261024120248",
+        "name": "050_account_registration"
+      },
+      {
+        "version": "20261024120251",
+        "name": "051_account_profiles"
+      },
+      {
+        "version": "20261024120253",
+        "name": "052_account_administration"
+      },
+      {
+        "version": "20261024120256",
+        "name": "053_versioned_account_credentials"
+      }
+    ]
+  },
+  "private_configuration": {
+    "direct_signup_disabled": true,
+    "v1_pepper_removed": true,
+    "versioned_keys_verified": true,
+    "initial_registration_controlled": true,
+    "no_secrets_in_bundle": true
+  },
+  "railway": {
+    "id": "3d03e4eb-62a1-414b-9cb4-e1f4af7d6f39",
+    "status": "SUCCESS",
+    "image": "sha256:565c8affc85931ac8a6fb58f1a95a17e2bafdfe5bba90d463f9cb41b6c9ac5b7",
+    "health": 200
+  },
+  "cloudflare": {
+    "deployment_id": "4ad95457-bc53-4e0d-8830-9482ce3795a6",
+    "version": "8330afcf-e94c-4135-858d-5ae60cff1704",
+    "percentage": 100
+  },
+  "tests": {
+    "python": 24,
+    "react": 5,
+    "worker": 2,
+    "local_edge": 2,
+    "real_http": {
+      "status": "PASS",
+      "api_requests": 26,
+      "real_auth_provision_login_refresh_pin_revoke": true,
+      "real_storage_portrait": true,
+      "disabled_denial": true,
+      "direct_signup_denied": true,
+      "rls_private_and_elevation_denied": true,
+      "no_membership_economy": [
+        {
+          "memberships": 0,
+          "economy": 0
+        }
+      ],
+      "harness_adjustment": "Supabase error_code is signup_disabled; code is numeric422"
+    },
+    "real_browser": {
+      "status": "PASS",
+      "widths": [
+        1440,
+        390
+      ],
+      "api_responses": 11,
+      "intercepted": false,
+      "page_errors": 0
+    },
+    "public_smoke": 8,
+    "auth_private_rest_denials": 5,
+    "source_restoration_and_bootstrap": "PASS"
+  },
+  "advisor": {
+    "shadow_rows": 135,
+    "catalog_items": 62,
+    "private_tables_secured": 8,
+    "advisor_before": {
+      "ERROR": 24,
+      "WARN": 4,
+      "INFO": 32
+    },
+    "advisor_after": {
+      "ERROR": 24,
+      "WARN": 5,
+      "INFO": 40
+    }
+  },
+  "bootstrap": {
+    "local_proof": "PASS",
+    "production_promotions": 0,
+    "owner_account": "WAITING_OWNER",
+    "general_registration": "BLOCKED_BY_PRIVATE_INITIAL_TOKEN"
+  },
+  "public_launcher": "0.20.0 unchanged",
+  "physical_writes": "DISABLED",
+  "pending": [
+    "owner manually registers Anto",
+    "independent exact UUID/Auth binding verification",
+    "one private admin promotion and owner panel acceptance",
+    "remove initial-registration gate; enable invitation-only registration"
+  ]
+}

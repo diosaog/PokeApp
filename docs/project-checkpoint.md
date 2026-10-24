@@ -5,18 +5,18 @@ milestone record; it does not maintain a second live phase-status ledger.
 
 ## Current project position
 
-- Current packet: **Accounts/profile P1-P4 and SEC-PIN-01 DONE LOCAL**.
-  Registration visible when privately configured/enabled; independent profile and
-  Admin controls preserved. Runtime versioned credentials/renewal and additive053
-  tested with real local PostgreSQL and synthetic Auth. Cutoff in API/RLS even
-  profiles OFF, stable counters, atomic bound intent/recovery and one-use operator
-  grants.50 focused Python/static,12 React,4 Edge journeys PASS;053 parity15858
-  lines,54 prior public tables preserved; disposable DBs removed/clusters stopped.
-  **NOT DEPLOYED; real-user renewal/old-pepper retirement NOT EXECUTED.** Next is
-  authorized coordinated account/security acceptance and rollout, not another
-  phase. Production, existing users and security keys unchanged.
-  [Local closure and deployment gates](accounts-profile-report.md).
-  [Account/profile live handoff](work-in-progress/accounts-profile-live.md).
+- Current packet: **Accounts/profile production DEPLOYED — WAITING OWNER**.
+  Authorized clean V2 reset completed after exact105-table/4-object restore proof.
+  050–053 applied once;45 records. V2-only credentials active, old pepper removed,
+  direct signup OFF. Railway9129081 healthy; Cloudflare matching release deployed.
+  Real Auth/Storage/API and desktop/mobile registration/profile proofs PASS;
+  disposable acceptance fixtures removed. Catalog/settings/Shadow retained.
+  Registration remains controlled; owner must manually create NEW Anto before
+  exact-UUID private Admin bootstrap and owner panel acceptance. No name/first-user
+  elevation; no owner PIN invented. **NOT DONE GLOBAL. Do not repeat reset.**
+  [Production report](accounts-profile-report.md),
+  [live next action](work-in-progress/accounts-profile-live.md),
+  [release evidence](accounts-release-evidence.json).
 
 - Previous packet: **22E private candidate VALIDATED; Phase22 PARTIAL**.
   Owner authorized independent packaging despite the absent3DS title. New private
