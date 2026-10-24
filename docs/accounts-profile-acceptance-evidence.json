@@ -1,0 +1,106 @@
+{
+  "observed": "2026-10-24",
+  "status": "P1-P4 / SEC-PIN-01 DONE LOCAL / NOT DEPLOYED",
+  "entry": "0908a33be1ed1baa1df8e5443a1cd87290f79e4f",
+  "fresh_tests": {
+    "python_static": {
+      "registration": 13,
+      "session_guards": 8,
+      "schema": 15,
+      "runtime_configuration": 3,
+      "admin_api": 5,
+      "auth_bridge": 6,
+      "total": 50
+    },
+    "react": 12,
+    "edge": 4,
+    "viewports": [
+      1440,
+      390
+    ],
+    "typescript_vite": "PASS",
+    "openapi": "PASS",
+    "focused_ruff_format_syntax_diff": "PASS"
+  },
+  "postgresql": {
+    "status": "PASS",
+    "gates": {
+      "concurrent_registration": 4,
+      "creation_effects": 1,
+      "interruption_groups": 5,
+      "concurrent_pin_claims": 4,
+      "one_claim_winner": true,
+      "atomic_bound_intent_recovery": true,
+      "expired_intent_denied": true,
+      "sql_rollback": true,
+      "verified_renewal": true,
+      "legacy_retirement_api_rls": true,
+      "old_pin_alone_denied": true,
+      "stable_identity_roles_history": true,
+      "private_permissions": true,
+      "rate_transition": true,
+      "api_refresh_flag_on_off": true,
+      "real_http_profile_admin_journey": true
+    },
+    "parity": {
+      "prior_tables_preserved": 54,
+      "schema_grants_ownership_identical": true,
+      "schema_lines": 15858,
+      "mutation_privileges_and_rls": true,
+      "ordered_upgrade_and_bootstrap": true
+    },
+    "reset": {
+      "disposable_reset": true,
+      "account_objects_removed": true,
+      "shadow_preserved": true
+    },
+    "cleanup": "owned database dropped; cluster stopped"
+  },
+  "retained": {
+    "keyring_tests": 18,
+    "unaffected_P1_P4_and_season_enrollment": "RETAINED NOT RERUN"
+  },
+  "evidence_boundary": {
+    "browser": "intercepted API fixtures",
+    "http": "actual FastAPI and PostgreSQL, synthetic Auth and photo object transport",
+    "hosted_integration": "NOT RUN",
+    "production_writes": 0,
+    "deployments": 0,
+    "migrations": "053 local only; no applied historical migration edited",
+    "real_user_renewal": "NOT EXECUTED",
+    "old_production_pepper_retirement": "NOT EXECUTED"
+  },
+  "screenshots_reviewed": [
+    "login-1440.png",
+    "login-390.png",
+    "profile-390.png"
+  ],
+  "release_gates": [
+    "independent identity verification and secure operator-grant delivery",
+    "approved UTC cutoff and coordinated SQL/config/API rollout",
+    "pending intent reconciliation",
+    "direct Auth signup disabled before registration activation",
+    "real Auth/global signout/Storage/owner acceptance",
+    "bounded legacy counter/session retirement"
+  ],
+  "private_evidence": "%LOCALAPPDATA%/PokeApp-migration-evidence/accounts/20261024/",
+  "source_sha256": {
+    "app/auth/versioned_accounts.py": "a0f77d7cea21774f3ad458b1da1fd1a527414b44a7995d759302949ccd829046",
+    "app/auth/accounts.py": "f82444e16c5cb210ac705b53ab20bf4a04d2185f47cc7444bbf464f0e51edf58",
+    "app/auth/config.py": "51d19ddffe1d5566b4ed264bbfe1e376368523ae417956afefbd789abd8ff556",
+    "app/auth/keyring.py": "a6c4c982f7408b2ff32d19886517cbb2642529fb7db34653db11ffed86fbbd8b",
+    "app/auth/service.py": "d4643f73f27066bf4ee50e7872c823a28aa1fd9436add83350bd607bb76c91bb",
+    "app/api/config.py": "f7452872baad40557e4acf3638c5e1b6112b4f9561b3e0e673866274721680c4",
+    "app/api/dependencies.py": "a96506e5fc1e82b213ac711ec18246706932918629576c9741a3e9bdf484de29",
+    "app/api/routes/accounts.py": "7391775d20b721042f7f76e3949c48f0fb45255f476c8777d6c8bf6bd42d69f9",
+    "app/repositories/supabase/accounts.py": "51c0f2b6e3d4f2b5384a77eb55a1a305e38306960aef1c41c818caa400df95b1",
+    "supabase/v2/migrations/053_versioned_account_credentials.sql": "7c799a422ad29bdf73166600959c1ca88ff7cb774a5f49b873f1da1ef242dee1",
+    "supabase/v2/bootstrap.sql": "29698f04891cc6c6f9268e07b706c322a0d7b824a2acda0e19241244fe68c7e7",
+    "tools/validate_sec_pin_local.py": "a4f22fff0ae89365066bdd07bc6c3d6f7b90ec7610a481e9067b32172ddb0680",
+    "web/src/App.tsx": "2bb97ea3180c18ea533b5747b5eb60e51f4d21c4ba6521bcc97937697a79d3af",
+    "web/src/state.tsx": "16a153fb30c8b6c6e7e5965775ec5238ca0aff516615f71342e8b3f7c5cf97e7",
+    "web/src/features/account-editor.tsx": "bdd2ffee2dc90113602e7ee4fd0f38a4fda88277fea0c04d9f7a742b905e8379",
+    "web/e2e/accounts.spec.ts": "fbe0b957a40d477b9b96cce18d5ccd4d53753d6875583055c2e0f6dac75558f9"
+  },
+  "application_source": "1b8db579822ea3470568bc0bd3f6f007c1d83722"
+}

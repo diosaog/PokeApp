@@ -5,16 +5,17 @@ milestone record; it does not maintain a second live phase-status ledger.
 
 ## Current project position
 
-- Current packet: **Accounts/profile P1–P4 DONE LOCAL; SEC-PIN-01 PARTIAL**.
-  Registration, independent profiles, name/photo/PIN and Admin controls integrated;
-  session guards cover login/refresh and remain active with UI disabled. Focused
-  API/React/browser/build checks pass; real050–052 PG parity/reset evidence retained.
-  No remote account/schema/storage change or deployment performed/authorized.
-  P4 pushed as `24a87e4`. Subsequent credential-policy foundation has18 new tests;
-  missing-pepper session-guard retention has a focused ON/OFF test. Versioned
-  Auth/SQL migration, verified renewal and counter transition are still pending;
-  the current login still uses the old pepper. No retirement claim or new SQL.
-  [Local closure and next gates](accounts-profile-report.md).
+- Current packet: **Accounts/profile P1-P4 and SEC-PIN-01 DONE LOCAL**.
+  Registration visible when privately configured/enabled; independent profile and
+  Admin controls preserved. Runtime versioned credentials/renewal and additive053
+  tested with real local PostgreSQL and synthetic Auth. Cutoff in API/RLS even
+  profiles OFF, stable counters, atomic bound intent/recovery and one-use operator
+  grants.50 focused Python/static,12 React,4 Edge journeys PASS;053 parity15858
+  lines,54 prior public tables preserved; disposable DBs removed/clusters stopped.
+  **NOT DEPLOYED; real-user renewal/old-pepper retirement NOT EXECUTED.** Next is
+  authorized coordinated account/security acceptance and rollout, not another
+  phase. Production, existing users and security keys unchanged.
+  [Local closure and deployment gates](accounts-profile-report.md).
   [Account/profile live handoff](work-in-progress/accounts-profile-live.md).
 
 - Previous packet: **22E private candidate VALIDATED; Phase22 PARTIAL**.

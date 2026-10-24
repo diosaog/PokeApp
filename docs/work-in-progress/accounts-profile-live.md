@@ -1,46 +1,56 @@
-# Accounts and profiles — live handoff
+# Accounts and profiles - live handoff
 
-2026-10-24. **P1–P4 DONE LOCAL; SEC-PIN-01 PARTIAL. NOT DEPLOYED.**
-Resume entry `1313820d247b82a07e470d1591972aef79744367`, main/origin aligned,
-no other active agent. Recovered all23 modified P4 paths and its new registration,
-browser and transport tests. [Local report](../accounts-profile-report.md).
+2026-10-24. **P1-P4 and SEC-PIN-01 DONE LOCAL. NOT DEPLOYED.**
+Real-user renewal/production old-pepper retirement: **NOT EXECUTED**.
+Entry `0908a33be1ed1baa1df8e5443a1cd87290f79e4f`, fetched main/origin0/0,
+no other active agent. Application `1b8db579822ea3470568bc0bd3f6f007c1d83722` pushed.
+Prior P4/foundation retained; no restart or remote audit.
+[Report](../accounts-profile-report.md), [evidence](../accounts-profile-acceptance-evidence.json).
 
-Final new gates:8 session tests,10 Auth API,15 schema/static,8 React,3 browser
-journeys PASS; desktop/mobile screenshots reviewed. OpenAPI, TypeScript/Vite,
-Ruff/format and backend syntax/import PASS. Login/refresh now apply guards even
-when account UI OFF, bind verified Auth identity, reject disabled/revoked sessions.
-Browser mobile login-navigation race fixed only in harness; no full matrices.
+## Implemented and validated
 
-Recovered prior p4-pg.json: PASS,54 tables preserved,15385 identical schema/grant/
-ownership lines,050–052 upgrade/bootstrap parity. reset-pg.json PASS preserves
-Shadow deliberately. Both under private accounts/20261023 evidence. These were
-already complete; retained unchanged SQL, not rerun. No PG process started here.
-Historical P1–P3 and security21 tests retained, not counted as fresh runs.
+Existing login now exposes registration only when privately configured/enabled.
+The invitation moved from a source constant to private server configuration;
+no real invitation in current source/browser/evidence. Earlier Git history remains.
+Existing form/profile/Admin flows reused; no automatic season/economy/role grant.
+Operator-authorized renewal is available even with profiles OFF. No HTTP grant
+issuance, no reset based solely on a potentially compromised old PIN/session.
 
-Production unchanged. Release still needs explicit authorization for050–052,
-fresh remote baselines/name collisions, signup disabled, real Auth/signout/Storage
-proof and user acceptance. Direct Auth signup alone cannot link a trainer; live
-disable_signup=false remains a separate configuration gate, not silently fixed.
+New053 extends existing PIN/registration journals with versions, expiry and bound
+Auth identity; three private RLS tables hold policy/versions/hashed renewal grants.
+Default runtime selects VersionedAccountService; no legacy fallback without full
+new config. PIN intent HMAC + session block are atomic before Auth. Single claim,
+verify/revoke/finish recovery; unknown outcomes never blindly repeat writes.
+SQL/API cutoff and monotonic credentials, unchanged UUID/history, stable throttle
+key plus active old counters. Old unversioned credential RPCs fail closed.
 
-P4 committed/pushed as `24a87e45aac6372b2f39f05ae942f8d728872c79`.
-Subsequent SEC-PIN-01 foundation: `app/auth/keyring.py`, explicit config loader,
-18 synthetic tests PASS; exact v1 compatibility/cutoff, v2-only selection,
-independent intent/throttle keys and expiring version-bound request hashes.
-Not wired into runtime credential selection. Current Auth still uses old pepper.
-One runtime fix keeps account/session guards constructed when that pepper is
-missing, with credential-dependent features disabled. One new configuration
-test (UI ON/OFF) and one legacy config regression PASS; Ruff/format/syntax PASS.
-No new SQL or SEC migration PG proof. Security21 suite not repeated.
+Fresh PASS:50 focused Python/static checks,12 React,4 Edge desktop/mobile journeys,
+real FastAPI/PG with synthetic Auth/object transport. Final PG runner evidence
+sec-pin-http-final.json: interruption/replay/concurrency/renewal/cutoff/RLS/rates;
+053 ordered/bootstrap parity15858 identical lines,54 prior public tables preserved;
+reset preserves Shadow. Test databases dropped, owned clusters stopped.
+Build/OpenAPI/Ruff/format/syntax/diff PASS. Existing bundle-size warning nonfatal.
+Browser APIs are fixtures; HTTP/PG is separate real application/SQL proof.
+18 previous keyring tests and unaffected P1-P4/enrollment retained, not rerun.
+Private evidence: %LOCALAPPDATA%/PokeApp-migration-evidence/accounts/20261024/.
 
-Next exact packet: additive credential/intent version persistence after052,
-API/RLS cutoff enforcement, verified-identity renewal/first-admin bootstrap and
-integration with existing claim/revoke/finish recovery. Preserve old rate counters
-on transition; prove failures/concurrency/replay/revoke/refresh in disposable PG
-with synthetic Auth. See the scoped checklist in the local report. Do not use
-P4 PG evidence to claim this migration is tested or the old pepper retired.
-Operational verification/cutoff and remote rollout remain separately authorized
-steps. No production pepper, keys, sessions or features changed. Security
-documentation remains separate and untouched. No other phase starts.
+## Next exact action - controlled acceptance, not automatic deployment
+
+See the report's ordered rollout procedure. Requires owner authorization:
+independent identity-verification/token-delivery policy and UTC cutoff/window;
+fresh real bindings/pending-intent/baseline checks; drain old credential writes;
+coordinated050-053, policy row and complete private keyring (feature OFF initially).
+Set Supabase direct signup OFF before PokeApp registration; prove hosted Admin
+provisioning, global signout, Storage and acceptance. Do not change providers/keys
+blindly. Renew existing identities through operator grants; reconcile all pending
+operations and sessions before old-secret removal. Keep throttle key, wait bounded
+48h old-counter window. Unknown Auth outcomes stay blocked for operator resolution.
+
+Production and real users, saves, economy, history, V1/Shadow, public Launcher and
+security keys untouched. Real-user migration remains pending; no claim that the
+old pepper was retired. No other phase starts. Unrelated untracked files/security
+documents and protected guide excluded. Final docs commit carries this handoff;
+obtain exact HEAD from Git, not a self-referential document hash.
 
 ## Retained P1–P3 execution record
 
