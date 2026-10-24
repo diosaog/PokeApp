@@ -99,7 +99,8 @@ def create_default_container(config: APIConfig | None = None) -> ApiContainer:
             from app.auth.versioned_accounts import VersionedAccountService
             accounts = VersionedAccountService(accounts.repository, accounts.auth,
                 keyring=config.credential_keyring, enabled=config.account_management_enabled,
-                access_code=config.registration_access_code)
+                access_code=config.registration_access_code,
+                bootstrap_hash=config.registration_bootstrap_hash)
         from app.repositories.supabase.team_locks import SupabaseTeamLockRepository
 
         team_lock_repo = SupabaseTeamLockRepository.from_url_key(

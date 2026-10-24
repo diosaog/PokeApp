@@ -19,6 +19,7 @@ class APIConfig:
     cors_origins: tuple[str, ...] = ()
     account_management_enabled: bool = False
     registration_access_code: str = field(default="", repr=False)
+    registration_bootstrap_hash: str = field(default="", repr=False)
     credential_keyring: object | None = field(default=None, repr=False)
 
     def __post_init__(self):
@@ -59,6 +60,9 @@ class APIConfig:
             if versioned
             else None,
             registration_access_code=source.get("POKEAPP_REGISTRATION_ACCESS_CODE", ""),
+            registration_bootstrap_hash=source.get(
+                "POKEAPP_REGISTRATION_BOOTSTRAP_HASH", ""
+            ),
             supabase_url=_first(source, "POKEAPP_V2_SUPABASE_URL", "SUPABASE_URL"),
             supabase_anon_key=_first(
                 source, "POKEAPP_V2_SUPABASE_ANON_KEY", "SUPABASE_ANON_KEY"

@@ -1516,6 +1516,8 @@ export interface components {
       registration_enabled: boolean;
       /** Renewal Enabled */
       renewal_enabled: boolean;
+      /** Bootstrap Required */
+      bootstrap_required: boolean;
     };
     /** AccountStatusReceipt */
     AccountStatusReceipt: {
@@ -3628,6 +3630,11 @@ export interface components {
       confirmation: string;
       /** Access Code */
       access_code: string;
+      /**
+       * Bootstrap Token
+       * @default
+       */
+      bootstrap_token: string;
     };
     /** RegistrationResponse */
     RegistrationResponse: {

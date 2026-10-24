@@ -27,10 +27,16 @@ class VersionedAccountService(AccountService):
         keyring: CredentialKeyring,
         enabled=False,
         access_code="",
+        bootstrap_hash="",
         clock=None,
     ):
         super().__init__(
-            repository, auth, pepper="", enabled=enabled, access_code=access_code
+            repository,
+            auth,
+            pepper="",
+            enabled=enabled,
+            access_code=access_code,
+            bootstrap_hash=bootstrap_hash,
         )
         self.keyring = keyring
         self.clock = clock or (lambda: datetime.now(timezone.utc))
@@ -107,11 +113,12 @@ class VersionedAccountService(AccountService):
         )
         return dict(p_hash=self._digest(row, body), p_expires=row["expires_at"])
 
-    def register(self, operation, name, pin, confirmation, access_code):
+    def register(
+        self, operation, name, pin, confirmation, access_code, bootstrap_token=""
+    ):
         if not self.registration_enabled:
             raise AccountError("ACCOUNTS_UNAVAILABLE", 503)
-        if not hmac.compare_digest(access_code.encode(), self.access_code.encode()):
-            raise AccountError("REGISTRATION_REJECTED", 400)
+        self.check_registration_access(access_code, bootstrap_token)
         if not re.fullmatch(r"[0-9]{4}", pin) or pin != confirmation:
             raise AccountError("INVALID_PIN_CONFIRMATION", 422)
         display, slug = account_name(name)

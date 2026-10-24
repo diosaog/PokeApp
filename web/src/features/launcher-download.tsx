@@ -1,5 +1,5 @@
 import { Download } from "lucide-react";
-import launcher from "../../../companion/launcher/package.json";
+import launcher from "../../launcher-release.json";
 
 export function LauncherDownload() {
   return (

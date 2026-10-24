@@ -6,9 +6,11 @@ export const registrationRecoveryKey = "pokeapp-registration-operation";
 export function RegistrationForm({
   onRegistered,
   onCancel,
+  bootstrapRequired = false,
 }: {
   onRegistered: (name: string) => void;
   onCancel: () => void;
+  bootstrapRequired?: boolean;
 }) {
   const [pending, setPending] = useState(false),
     [uncertain, setUncertain] = useState(false),
@@ -20,6 +22,7 @@ export function RegistrationForm({
       pin: string;
       confirmation: string;
       access_code: string;
+      bootstrap_token?: string;
     };
   } | null>(null);
   async function send() {
@@ -79,6 +82,9 @@ export function RegistrationForm({
             pin: text(data, "pin"),
             confirmation: text(data, "repeat"),
             access_code: text(data, "access"),
+            ...(bootstrapRequired
+              ? { bootstrap_token: text(data, "bootstrap") }
+              : {}),
           };
           if (body.pin !== body.confirmation) {
             setError(new ApiError(422, "INVALID_PIN_CONFIRMATION"));
@@ -134,6 +140,17 @@ export function RegistrationForm({
               autoComplete="off"
             />
           </Field>
+          {bootstrapRequired && (
+            <Field label="Autorización de alta inicial">
+              <input
+                name="bootstrap"
+                type="password"
+                required
+                maxLength={256}
+                autoComplete="off"
+              />
+            </Field>
+          )}
           <Submit pending={pending}>Crear cuenta</Submit>
         </fieldset>
       </form>

@@ -82,8 +82,13 @@ const linkGroups = [
   },
 ] as const;
 function Login() {
-  const { setMe, accountsEnabled, registrationEnabled, renewalEnabled } =
-      useApp(),
+  const {
+      setMe,
+      accountsEnabled,
+      registrationEnabled,
+      renewalEnabled,
+      bootstrapRequired,
+    } = useApp(),
     [pending, setPending] = useState(false),
     [error, setError] = useState<unknown>(null),
     [register, setRegister] = useState(false),
@@ -115,6 +120,7 @@ function Login() {
       <section className="login-form">
         {register && registrationEnabled ? (
           <RegistrationForm
+            bootstrapRequired={bootstrapRequired}
             onCancel={() => setRegister(false)}
             onRegistered={(name) => {
               setCreated(name);

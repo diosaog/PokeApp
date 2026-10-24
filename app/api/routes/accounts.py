@@ -17,6 +17,7 @@ class AccountCapabilities(BaseModel):
     enabled: bool
     registration_enabled: bool
     renewal_enabled: bool
+    bootstrap_required: bool
 
 
 @router.get("/auth/account-capabilities", response_model=AccountCapabilities)
@@ -31,6 +32,9 @@ def account_capabilities(container: ApiContainer = Depends(get_api_container)):
         "renewal_enabled": bool(
             container.account_service and hasattr(container.account_service, "keyring")
         ),
+        "bootstrap_required": bool(
+            container.account_service and container.account_service.bootstrap_hash
+        ),
     }
 
 
@@ -40,6 +44,7 @@ class RegistrationRequest(BaseModel):
     pin: str = Field(min_length=1, max_length=32, repr=False)
     confirmation: str = Field(min_length=1, max_length=32, repr=False)
     access_code: str = Field(min_length=1, max_length=128, repr=False)
+    bootstrap_token: str = Field(default="", max_length=256, repr=False)
 
 
 class RegistrationResponse(BaseModel):
@@ -88,6 +93,7 @@ def register(
             payload.pin,
             payload.confirmation,
             payload.access_code,
+            payload.bootstrap_token,
         )
 
     return invoke(action)

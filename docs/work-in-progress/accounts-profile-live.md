@@ -1,5 +1,58 @@
 # Accounts and profiles - live handoff
 
+## Authorized clean production release — 2026-10-24
+
+**IN PROGRESS. Entry d5e83993846d3ce3f08c3a429171c1e5a0f786e1.** Owner now
+authorizes deleting all V2 test accounts/seasons/business data, including old
+Anto, after verified backup. This supersedes preservation/deployment restrictions
+in the historical local closure below. No account names confer privileges.
+
+Pinned targets verified: Supabase `uwleqeuzsveqlugugzba` / Pokeapp 2.0;
+Railway project `f5c4666a-508f-4e5a-8aae-a54581814f29`, production,
+service `9a78e086-c927-471f-8bb9-befe62c77de7`; existing Cloudflare account/Worker.
+Remote migration head049,41 records;050–053 still unapplied at this checkpoint.
+
+Private backup in `%LOCALAPPDATA%/PokeApp-migration-evidence/accounts-release/20261024/`:
+`pre-reset-v2-postgres.dump`, SHA256
+`2459888ab860f61079e2365f79803a81c2e99311d2fdef3054496fb53180b624`.
+All105 tables restore exactly on disposable PostgreSQL, including Auth/Shadow.
+Four Storage objects,524732 bytes, backed up and restored to unique disposable
+keys, downloaded/hash-verified and removed; original Storage metadata unchanged.
+No source reset yet. No Shadow Storage dependency found.
+
+Private `reviewed-reset-public.sql` uses one explicit52-table DELETE statement,
+exact baseline preconditions and a transaction; no TRUNCATE, disabled triggers,
+schema/permission changes or foreign-key bypass. Rehearsal empties test data and
+preserves all53 other tables. `app_settings` and62 `shop_items` retained;
+divisions/config versions/promotions are season-scoped test rows, not global
+reference catalogs. Their original values remain in the verified backup.
+Actual49 backup upgrades through053 successfully after rehearsal cleanup.
+
+Private bootstrap tool `tools/account_admin_bootstrap.py` renders SQL only;
+postgres operator, independently verified exact new trainer/Auth IDs, complete
+v2 registration, zero prior admins, one auditable receipt. Four concurrent exact
+replays produce one promotion; wrong Auth/disabled/second operation and browser/
+service-role execution denied. `tools/validate_account_release.py` reproduces
+the isolated backup/reset/bootstrap proof without remote access.
+
+New optional `POKEAPP_REGISTRATION_BOOTSTRAP_HASH` adds a private initial-registration
+token in addition to the ordinary invitation. It never grants admin; raw token/PIN
+remain in memory in the UI. Keep this gate until owner-created Anto is independently
+verified and promoted. Public Launcher download pinned separately to0.20.0 so
+deploying the web cannot accidentally publish the private0.22.0-rc.3 candidate.
+Fresh focused20 Python,5 React,2 Worker,2 Edge desktop/mobile checks PASS;
+OpenAPI/build/dry-run, targeted Ruff, formatting/syntax/diff PASS. Prior suites
+retained. PostgreSQL rehearsal clusters stopped; no owner files touched.
+
+Next: push validated source; quiesce old API; fresh baseline check; execute exact
+reset and scoped Storage/Auth deletion; apply missing050–053 once; configure v2
+only policy/keys and disable direct Auth signup; deploy API/web and real disposable
+acceptance. Stop at owner manual registration, never create their PIN/account.
+Reconcile unknown remote outcomes before retry. Do not open general registration
+or claim global completion before owner Admin acceptance.
+
+## Historical local closure (superseded operational authorization)
+
 2026-10-24. **P1-P4 and SEC-PIN-01 DONE LOCAL. NOT DEPLOYED.**
 Real-user renewal/production old-pepper retirement: **NOT EXECUTED**.
 Entry `0908a33be1ed1baa1df8e5443a1cd87290f79e4f`, fetched main/origin0/0,

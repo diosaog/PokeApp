@@ -50,10 +50,22 @@ class AccountService:
         pepper: str,
         enabled: bool = False,
         access_code: str = "",
+        bootstrap_hash: str = "",
     ):
         self.repository, self.auth = repository, auth
         self.pepper, self.enabled = pepper, enabled
         self.access_code = access_code
+        if bootstrap_hash and not re.fullmatch(r"[a-f0-9]{64}", bootstrap_hash):
+            raise ValueError("Invalid controlled registration configuration")
+        self.bootstrap_hash = bootstrap_hash
+
+    def check_registration_access(self, access_code: str, bootstrap_token: str = ""):
+        if not hmac.compare_digest(access_code.encode(), self.access_code.encode()):
+            raise AccountError("REGISTRATION_REJECTED", 400)
+        if self.bootstrap_hash and not hmac.compare_digest(
+            hashlib.sha256(bootstrap_token.encode()).hexdigest(), self.bootstrap_hash
+        ):
+            raise AccountError("REGISTRATION_REJECTED", 400)
 
     @property
     def registration_enabled(self):
@@ -73,13 +85,18 @@ class AccountService:
             raise AccountError("RATE_LIMITED", 429)
 
     def register(
-        self, operation: UUID, name: str, pin: str, confirmation: str, access_code: str
+        self,
+        operation: UUID,
+        name: str,
+        pin: str,
+        confirmation: str,
+        access_code: str,
+        bootstrap_token: str = "",
     ):
         if not self.registration_enabled or not self.pepper:
             raise AccountError("ACCOUNTS_UNAVAILABLE", 503)
         # Private deployment configuration, never a client constant.
-        if not hmac.compare_digest(access_code.encode(), self.access_code.encode()):
-            raise AccountError("REGISTRATION_REJECTED", 400)
+        self.check_registration_access(access_code, bootstrap_token)
         if not re.fullmatch(r"[0-9]{4}", pin) or pin != confirmation:
             raise AccountError("INVALID_PIN_CONFIRMATION", 422)
         display, slug = account_name(name)

@@ -1,4 +1,4 @@
-import launcher from "../../companion/launcher/package.json" with { type: "json" };
+import launcher from "../launcher-release.json" with { type: "json" };
 
 const filename = "PokeApp-Launcher-Setup.exe";
 export const artifactKey = `windows/${launcher.version}/${filename}`;

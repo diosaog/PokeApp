@@ -35,6 +35,7 @@ type State = {
   holdAdminNavigation: () => () => void;
   accountsEnabled: boolean;
   registrationEnabled: boolean;
+  bootstrapRequired: boolean;
   renewalEnabled: boolean;
 };
 const Context = createContext<State | null>(null);
@@ -43,6 +44,7 @@ export function AppState({ children }: { children: ReactNode }) {
   const [season, setSeason] = useState("");
   const [accountsEnabled, setAccountsEnabled] = useState(false);
   const [registrationEnabled, setRegistrationEnabled] = useState(false);
+  const [bootstrapRequired, setBootstrapRequired] = useState(false);
   const [renewalEnabled, setRenewalEnabled] = useState(false);
   useEffect(() => {
     const controller = new AbortController();
@@ -50,11 +52,13 @@ export function AppState({ children }: { children: ReactNode }) {
       .request<{
         enabled: boolean;
         registration_enabled: boolean;
+        bootstrap_required: boolean;
         renewal_enabled: boolean;
       }>("/v1/auth/account-capabilities", { signal: controller.signal }, false)
       .then((value) => {
         setAccountsEnabled(value.enabled === true);
         setRegistrationEnabled(value.registration_enabled === true);
+        setBootstrapRequired(value.bootstrap_required === true);
         setRenewalEnabled(value.renewal_enabled === true);
       })
       .catch(() => {});
@@ -85,6 +89,7 @@ export function AppState({ children }: { children: ReactNode }) {
           holdAdminNavigation,
           accountsEnabled,
           registrationEnabled,
+          bootstrapRequired,
           renewalEnabled,
         }}
       >

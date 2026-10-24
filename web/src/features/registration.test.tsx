@@ -73,3 +73,28 @@ it("does not submit mismatched PINs", () => {
   fireEvent.click(screen.getByRole("button", { name: "Crear cuenta" }));
   expect(mocks.request).not.toHaveBeenCalled();
 });
+it("keeps the initial authorization in memory only and sends it with the invitation", async () => {
+  mocks.request.mockRejectedValueOnce(
+    new ApiError(503, "ACCOUNT_RETRY_REQUIRED"),
+  );
+  render(
+    <RegistrationForm
+      bootstrapRequired
+      onRegistered={vi.fn()}
+      onCancel={vi.fn()}
+    />,
+  );
+  fill();
+  fireEvent.change(screen.getByLabelText("Autorización de alta inicial"), {
+    target: { value: "fictional-bootstrap" },
+  });
+  fireEvent.click(screen.getByRole("button", { name: "Crear cuenta" }));
+  await screen.findByRole("button", { name: "Reintentar el mismo registro" });
+  expect(JSON.parse(mocks.request.mock.calls[0][1].body).bootstrap_token).toBe(
+    "fictional-bootstrap",
+  );
+  expect(sessionStorage.length).toBe(1);
+  expect(sessionStorage.getItem(registrationRecoveryKey)).not.toContain(
+    "fictional-bootstrap",
+  );
+});

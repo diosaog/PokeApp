@@ -130,6 +130,7 @@ class GuardConfigurationTests(unittest.TestCase):
                         "enabled": False,
                         "registration_enabled": False,
                         "renewal_enabled": False,
+                        "bootstrap_required": False,
                     },
                 )
 

@@ -1,7 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import { expect, test } from "vitest";
 import { LauncherDownload } from "./launcher-download";
-import launcher from "../../../companion/launcher/package.json";
+import launcher from "../../launcher-release.json";
 
 test("Save downloads the current version directly, without an intermediate route", () => {
   render(<LauncherDownload />);
