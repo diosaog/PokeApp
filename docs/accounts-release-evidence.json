@@ -1,5 +1,5 @@
 {
-  "status": "ADMIN_PROMOTED_WAITING_OWNER_PANEL",
+  "status": "DONE_GLOBAL_REGISTRATION_ACTIVE",
   "application_source": "912908179c310630c0d10145969e1013b5dcbad6",
   "backup": {
     "bytes": 1223902,
@@ -61,16 +61,19 @@
     "initial_registration_controlled": false,
     "no_secrets_in_bundle": true,
     "initial_authorization_retired": true,
-    "registration_enabled": false,
-    "account_management_enabled": true
+    "registration_enabled": true,
+    "account_management_enabled": true,
+    "bootstrap_hash_empty": true,
+    "ordinary_invitation_required": true
   },
   "railway": {
-    "id": "372df3ed-1d48-4ec4-98c9-0a5a9604c6ed",
+    "id": "b91ecd9f-c341-467e-860d-df417d59b01a",
     "status": "SUCCESS",
     "image": "sha256:565c8affc85931ac8a6fb58f1a95a17e2bafdfe5bba90d463f9cb41b6c9ac5b7",
     "health": 200,
     "initial_release_id": "3d03e4eb-62a1-414b-9cb4-e1f4af7d6f39",
-    "configuration_only_rollout": true
+    "configuration_only_rollout": true,
+    "application_source": "912908179c310630c0d10145969e1013b5dcbad6"
   },
   "cloudflare": {
     "deployment_id": "4ad95457-bc53-4e0d-8830-9482ce3795a6",
@@ -131,7 +134,7 @@
     "local_proof": "PASS, retained",
     "production_promotions": 1,
     "owner_account": "ANTO_ADMIN_VERIFIED",
-    "general_registration": "CLOSED_UNTIL_OWNER_PANEL_ACCEPTANCE",
+    "general_registration": "ACTIVE_INVITATION_ONLY",
     "binding_proof": [
       "independent owner confirmation",
       "private initial authorization",
@@ -178,8 +181,31 @@
   },
   "public_launcher": "0.20.0 unchanged",
   "physical_writes": "DISABLED",
-  "pending": [
-    "owner confirms Admin panel works",
-    "only after owner confirmation, controlled reopening of invitation-only registration; initial token remains retired"
-  ]
+  "pending": [],
+  "registration_activation": {
+    "status": "PASS",
+    "deployment_id": "b91ecd9f-c341-467e-860d-df417d59b01a",
+    "health": 200,
+    "registration_enabled": true,
+    "bootstrap_required": false,
+    "registration_status": 200,
+    "login_status": 200,
+    "me_status": 200,
+    "profile_status": 200,
+    "new_trainer_is_admin": false,
+    "new_trainer_memberships": 0,
+    "direct_signup_remains_disabled": true,
+    "exact_cleanup": true,
+    "admin_preserved": true,
+    "counts_restored": true
+  },
+  "final": {
+    "status": "ACCOUNTS_PROFILES_DONE_GLOBAL",
+    "anto_admin": true,
+    "registration": "ACTIVE_INVITATION_ONLY",
+    "initial_authorization": "DISABLED",
+    "new_trainers": "NORMAL_NO_SEASON_NO_ADMIN",
+    "cloudflare": "UNCHANGED_HEALTHY",
+    "production_writes": "DISABLED"
+  }
 }

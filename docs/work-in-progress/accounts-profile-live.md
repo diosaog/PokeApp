@@ -1,19 +1,18 @@
 # Accounts and profiles - live handoff
 
-2026-10-24. **INITIAL ANTO ADMIN ACTIVATION COMPLETE — WAITING OWNER PANEL ACCEPTANCE.**
+2026-10-24. **ACCOUNTS & PROFILES DONE GLOBAL. REGISTRATION ACTIVE.**
 Application source `912908179c310630c0d10145969e1013b5dcbad6` pushed before deployment.
 Release entry `d5e83993846d3ce3f08c3a429171c1e5a0f786e1`; preparation `cbe8acf`.
 [Release report](../accounts-profile-report.md), [evidence](../accounts-release-evidence.json).
 
-## Current state — initial administrator verified
+## Current state — initial administrator and general registration verified
 
-Resume HEAD `e4241f1a8d898088be91ce9ceeb3d6b6c3212ddd`, main/origin aligned.
-The owner confirmed successful manual registration and explicitly authorized only
-the private initial promotion. Exact trainer `32ec4e97-bf04-4a28-a68d-88c2194f4b65`
-and Auth user `3246e081-5fa4-4edd-bf15-233746a43edf` match the completed v2
-registration created at `2026-10-24T12:35:55.945499Z`, the server provisioning
-HMAC and private initial authorization. Name alone was not used as authority.
-There is one trainer, one Auth user, one completed registration and no ambiguity.
+Entry HEAD `91639eda01bd55677fa3ca05a9b683c7c8e16d23`, main/origin aligned before
+this documentation closure. The owner confirmed that Anto signs in and sees
+Administración. Exact trainer `32ec4e97-bf04-4a28-a68d-88c2194f4b65` and Auth
+user `3246e081-5fa4-4edd-bf15-233746a43edf` match the completed v2 registration,
+server provisioning HMAC and private authorization. Name alone was not used.
+There is one Anto trainer/Auth identity and one administrator; no ambiguity.
 
 `tools/account_admin_bootstrap.py` executed once for those exact identities with
 the independent owner-verification reference. One private bootstrap receipt and
@@ -23,14 +22,13 @@ returns200 with that one Anto account. A private Admin-generated verification
 session was used without requesting/changing the PIN or sending email; only that
 temporary session was revoked afterwards. No replacement account was created.
 
-The initial authorization is consumed/invalidated. Both registration configuration
-values (ordinary access code and initial-token hash) are empty in Railway; account
-management remains ON. Configuration-only deployment
-`372df3ed-1d48-4ec4-98c9-0a5a9604c6ed` is SUCCESS, unchanged application source,
-health200. Capabilities report registration OFF, renewal ON, bootstrap not required.
-The old initial token is denied with503/ACCOUNTS_UNAVAILABLE and no account/journal
-creation. A private harness initially looked for `error` instead of FastAPI's
-`detail`; correcting only that assertion proved the denial. No product change.
+The initial authorization is consumed/invalidated and remains absent. The ordinary
+invitation is configured again in Railway; its value is never logged or documented.
+The bootstrap hash remains empty. Configuration deployment
+`b91ecd9f-c341-467e-860d-df417d59b01a` is SUCCESS, same application source,
+health200. Capabilities report registration ON, renewal ON, bootstrap not required.
+The initial-token route is therefore unavailable and cannot be reused. Direct
+Supabase signup remains OFF.
 Temporary token/hash material was removed from the private DPAPI bundle and
 `Anto-alta-inicial.txt` now contains only a consumed notice. The ordinary invitation
 is retained privately for a later authorized opening. The one-use SQL receipt
@@ -44,11 +42,19 @@ Private evidence: `anto-admin-final.json`, `anto-admin-bootstrap-result.json`,
 `anto-authority-probe-result.json` and `anto-registration-close-result.json` in
 the release evidence directory below.
 
-**NEXT EXACT ACTION:** owner refreshes/re-enters the web and opens Administración.
-Keep general registration CLOSED until the owner confirms their panel works.
-Only after that confirmation may the ordinary invitation be restored in a
-controlled configuration rollout; the initial-token hash stays absent. Do not
-repeat promotion or cleanup. Global owner acceptance is still pending. STOP.
+The owner-approved disposable registration proof used Auth and the backend with
+the private invitation: registration, PIN login, `/v1/me`, self profile and
+no-season membership all passed. The new trainer was not Admin. Its exact trainer,
+Auth, credential, registration and session data were removed afterwards; counts
+returned to the pre-test state and Anto remained the only admin. No economy,
+season, Storage, V1, Shadow, Launcher or save data was touched.
+
+**FINAL STATE:** registration is ACTIVE for normal trainers; the invitation is
+mandatory; the initial authorization is disabled; Anto is a functional Admin;
+new accounts have no season membership or Admin role. Account management, PIN,
+session, RLS and rate-limit controls remain active. The web, Railway and Cloudflare
+are healthy. Accounts & Profiles is **DONE GLOBAL**. Stop here; do not start another
+package.
 
 ## Completed remote units — DO NOT REPEAT
 

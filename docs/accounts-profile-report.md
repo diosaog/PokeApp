@@ -1,6 +1,6 @@
 # Accounts and profiles — controlled production activation
 
-2026-10-24. **DEPLOYED / ANTO ADMIN VERIFIED / WAITING OWNER PANEL ACCEPTANCE.**
+2026-10-24. **ACCOUNTS & PROFILES DONE GLOBAL. REGISTRATION ACTIVE.**
 Application `912908179c310630c0d10145969e1013b5dcbad6`; documentation HEAD is the
 subsequent Git commit. [Live continuation](work-in-progress/accounts-profile-live.md),
 [release evidence](accounts-release-evidence.json).
@@ -43,7 +43,7 @@ After that cleanup, trainers/Auth users/sessions/refresh/Storage objects were al
 registration, PIN, command and grant journals contain no test identities.
 V2 rate-limit security counters and the rollout policy remain intentionally.
 
-**Initial Anto activation is now complete.** The owner manually registered and
+**Initial Anto activation is complete.** The owner manually registered and
 explicitly authorized promotion. Exact trainer `32ec4e97-bf04-4a28-a68d-88c2194f4b65`
 and Auth `3246e081-5fa4-4edd-bf15-233746a43edf` were verified against the completed
 v2 registration, creation time, provisioning HMAC and private authorization;
@@ -55,17 +55,24 @@ Real `/v1/me` returns200/is_admin=true and `/v1/admin/accounts` returns200 for A
 A temporary private verification session was revoked locally after the proof;
 no owner PIN was requested or changed. Health200. The initial token is invalidated,
 its private handoff replaced by a consumed notice and its DPAPI material removed.
-Both registration configuration values are blank, leaving general registration
-closed while account management stays enabled. Configuration-only Railway
-deployment **372df3ed-1d48-4ec4-98c9-0a5a9604c6ed SUCCESS** uses unchanged source.
-The old authorization is rejected with503/ACCOUNTS_UNAVAILABLE and no new account.
-Direct Supabase signup remains disabled; v2 keys and45 migration records unchanged.
-No migration/reset, Cloudflare deployment or historical suite was repeated.
+The ordinary invitation is configured in Railway and remains mandatory; its value
+is never logged or documented. The initial-token hash is empty and the temporary
+authorization is retired. Configuration-only Railway deployment
+**b91ecd9f-c341-467e-860d-df417d59b01a SUCCESS** uses unchanged source and health200.
+Capabilities report registration ON, renewal ON and bootstrap not required. Direct
+Supabase signup remains disabled; v2 keys and45 migration records are unchanged.
 
-**WAITING OWNER PANEL ACCEPTANCE:** refresh/re-enter the web and open Administración.
-General registration stays CLOSED until the owner confirms the panel works.
-No further promotion is needed; the private receipt prevents bootstrap reuse.
-No other phase starts. Global owner acceptance is not claimed.
+The owner-approved disposable real registration then passed: new account creation,
+PIN login, `/v1/me`, self profile and no-season membership. The account was not
+Admin and its exact Auth/trainer/credential/registration/session data was deleted
+afterward. Counts returned to the pre-test state; Anto remained the sole admin.
+Cloudflare stayed on the existing healthy release. No migration/reset, V1, Shadow,
+Launcher, save, economy or historical matrix was touched.
+
+**FINAL:** registration is ACTIVE for normal trainers; invitation required;
+initial authorization disabled; Anto ADMIN FUNCTIONAL; new trainers NORMAL with
+no season membership. Auth, Storage, PIN, sessions, RLS and rate limits remain
+protected. Accounts & Profiles: **DONE GLOBAL**. Stop; do not start another packet.
 Private evidence: `%LOCALAPPDATA%/PokeApp-migration-evidence/accounts-release/20261024/`.
 
 ---

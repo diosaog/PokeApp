@@ -5,7 +5,7 @@ milestone record; it does not maintain a second live phase-status ledger.
 
 ## Current project position
 
-- Current packet: **Accounts/profile DEPLOYED — ANTO ADMIN VERIFIED, WAITING OWNER PANEL**.
+- Current packet: **Accounts/profile DONE GLOBAL — REGISTRATION ACTIVE**.
   Authorized clean V2 reset completed after exact105-table/4-object restore proof.
   050–053 applied once;45 records. V2-only credentials active, old pepper removed,
   direct signup OFF. Railway9129081 healthy; Cloudflare matching release deployed.
@@ -13,9 +13,10 @@ milestone record; it does not maintain a second live phase-status ledger.
   disposable acceptance fixtures removed. Catalog/settings/Shadow retained.
   Owner created NEW Anto; exact trainer/Auth binding verified and private bootstrap
   executed once. Real /v1/me and Admin API PASS; one account/admin, PIN unchanged.
-  Initial token retired; general registration CLOSED until owner panel acceptance.
-  Railway configuration rollout372df3ed SUCCESS, same application; direct signup OFF.
-  **NOT DONE GLOBAL. Do not repeat reset or promotion.**
+  Initial token retired; ordinary invitation restored and general registration
+  verified with a disposable Auth account, then cleaned by exact UUID. Railway
+  configuration rollout b91ecd9f SUCCESS, same application; direct signup OFF.
+  New account had no Admin role or season membership. **DONE GLOBAL.**
   [Production report](accounts-profile-report.md),
   [live next action](work-in-progress/accounts-profile-live.md),
   [release evidence](accounts-release-evidence.json).
