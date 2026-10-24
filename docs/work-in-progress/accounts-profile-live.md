@@ -1,6 +1,6 @@
 # Accounts and profiles — live handoff
 
-2026-10-24. **P1–P4 DONE LOCAL; SEC-PIN-01 NEXT. NOT DEPLOYED.**
+2026-10-24. **P1–P4 DONE LOCAL; SEC-PIN-01 PARTIAL. NOT DEPLOYED.**
 Resume entry `1313820d247b82a07e470d1591972aef79744367`, main/origin aligned,
 no other active agent. Recovered all23 modified P4 paths and its new registration,
 browser and transport tests. [Local report](../accounts-profile-report.md).
@@ -22,9 +22,25 @@ fresh remote baselines/name collisions, signup disabled, real Auth/signout/Stora
 proof and user acceptance. Direct Auth signup alone cannot link a trainer; live
 disable_signup=false remains a separate configuration gate, not silently fixed.
 
-Next: commit/push this completed P4; then evaluate/implement SEC-PIN-01 separately
-on the stable base. Do not change production pepper, keys, sessions or features.
-Security documentation remains separate and untouched. No other phase starts.
+P4 committed/pushed as `24a87e45aac6372b2f39f05ae942f8d728872c79`.
+Subsequent SEC-PIN-01 foundation: `app/auth/keyring.py`, explicit config loader,
+18 synthetic tests PASS; exact v1 compatibility/cutoff, v2-only selection,
+independent intent/throttle keys and expiring version-bound request hashes.
+Not wired into runtime credential selection. Current Auth still uses old pepper.
+One runtime fix keeps account/session guards constructed when that pepper is
+missing, with credential-dependent features disabled. One new configuration
+test (UI ON/OFF) and one legacy config regression PASS; Ruff/format/syntax PASS.
+No new SQL or SEC migration PG proof. Security21 suite not repeated.
+
+Next exact packet: additive credential/intent version persistence after052,
+API/RLS cutoff enforcement, verified-identity renewal/first-admin bootstrap and
+integration with existing claim/revoke/finish recovery. Preserve old rate counters
+on transition; prove failures/concurrency/replay/revoke/refresh in disposable PG
+with synthetic Auth. See the scoped checklist in the local report. Do not use
+P4 PG evidence to claim this migration is tested or the old pepper retired.
+Operational verification/cutoff and remote rollout remain separately authorized
+steps. No production pepper, keys, sessions or features changed. Security
+documentation remains separate and untouched. No other phase starts.
 
 ## Retained P1–P3 execution record
 

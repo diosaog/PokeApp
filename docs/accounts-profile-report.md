@@ -53,10 +53,60 @@ Auth provisioning/global signout, Storage and owner acceptance in an approved
 environment. An unmapped Auth identity is denied, but that is not a substitute
 for disabling direct signup. No live settings were inspected or changed here.
 
-SEC-PIN-01 is separate and must follow this closure. P4 still uses the existing
-pepper; it does not claim that secret has been retired. Keep the existing security
-documentation intact. No legacy-key/signing-key operations, real users, saves,
-economy, V1/Shadow, Railway, Cloudflare or production schema were changed.
+P4 was committed/pushed separately as
+`24a87e45aac6372b2f39f05ae942f8d728872c79` before SEC-PIN-01 work. P4 still uses
+the existing pepper; it does not claim that secret has been retired. Existing
+security documentation remains untouched. No legacy-key/signing-key operations,
+real users, saves, economy, V1/Shadow, Railway, Cloudflare or production schema
+were changed.
+
+## SEC-PIN-01 — PARTIAL, credential policy foundation only
+
+The subsequent isolated foundation adds typed credential/intent versions, exact
+legacy derivation before an explicit UTC cutoff, v2 domain-separated passwords,
+separate intent/throttle keys, expiring intent HMACs and secret-redacted errors.
+V2 intent hashes bind credential version and expiry. No key trial/fallback occurs;
+missing metadata, reset-required state and expired legacy material fail closed.
+Changing the password key does not change the new counter identity. This does
+**not** migrate P4's existing counter hashes or retire any live credential.
+
+One runtime prerequisite was fixed: default container construction formerly
+omitted the account/session guard service entirely when the pepper was absent.
+It now retains persisted session checks while disabling PIN-dependent account
+mutations. Removing a derivation key cannot itself erase revocation enforcement.
+The API does **not** load the new keyring or select versioned credentials yet.
+Its explicit configuration loader requires a supplied mapping and cannot change
+live configuration merely by importing the module.
+
+**18 new synthetic keyring tests**, **1 configuration/guard test with UI ON/OFF**
+and **1 affected legacy missing-pepper configuration regression** PASS. Focused
+Ruff, formatting and syntax checks pass. No security21 matrix was repeated, no
+SEC SQL was added, and no SEC PostgreSQL/Auth migration proof is claimed. The P4
+PG proof above remains valid and cannot be used to certify pepper migration.
+
+Remaining work is a coordinated Auth/SQL migration, substantially larger than a
+P4 configuration change. Exact next units, keeping the existing journal:
+
+1. Add a forward migration after052: trusted per-trainer credential version,
+   reset-required state, bounded legacy policy and per-registration/PIN-intent
+   password/HMAC versions and expiry. Enforce monotonic migration and cutoff in
+   API **and RLS**, even with profiles OFF. Do not infer unknown credentials or
+   silently re-sign old requests with a new key.
+2. Wire version selection into login, registration, change/reset/resume and the
+   existing claim/revoke/finish saga. Establish independent verified-identity
+   renewal and first-admin bootstrap; possession of a potentially compromised
+   PIN/session alone is not sufficient proof. Persist authorization, never PINs.
+   Keep UUID/Auth ID/roles and do not create a replacement account.
+3. Preserve existing rate counters during the first key transition; test real
+   disposable PG plus fake Auth interruption before/after update, failed global
+   revoke, concurrent claims, replay after cutoff, disabled users and refresh.
+   Retire v1 only after pending intents and sessions are reconciled. An unknown
+   Auth update must never cause a blind second password write.
+
+No rollout date or identity-verification process has been chosen on behalf of the
+owner. Those operational steps and deployment authorization remain future gates.
+**SEC-PIN-01 is not resolved: its versioned policy is not integrated into live
+authentication, and the current application still depends on the old pepper.**
 
 Focused commit carries this report and source; derive its exact HEAD from Git.
 Unrelated security documents, repository-map files, ZIP and protected guide stay

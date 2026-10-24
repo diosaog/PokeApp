@@ -84,15 +84,17 @@ def create_default_container(config: APIConfig | None = None) -> ApiContainer:
             config.supabase_url,
             config.supabase_service_role_key,
         )
-        if config.auth_pin_pepper:
-            from supabase import create_client
-            from app.auth.accounts import AccountService
-            from app.repositories.supabase.accounts import SupabaseAccountRepository, SupabaseAccountAuth
-            account_client = create_client(config.supabase_url, config.supabase_service_role_key)
-            accounts = AccountService(SupabaseAccountRepository(account_client),
-                SupabaseAccountAuth(account_client.auth.admin,
-                    lambda: SupabaseAuthClient.from_url_key(config.supabase_url,config.supabase_anon_key)), pepper=config.auth_pin_pepper,
-                enabled=config.account_management_enabled)
+        from supabase import create_client
+        from app.auth.accounts import AccountService
+        from app.auth.supabase_adapter import SupabaseAuthClient
+        from app.repositories.supabase.accounts import SupabaseAccountRepository, SupabaseAccountAuth
+        # Session guards depend on persisted account state, not on the presence
+        # of a PIN derivation key. A missing/retired pepper must never remove them.
+        account_client = create_client(config.supabase_url, config.supabase_service_role_key)
+        accounts = AccountService(SupabaseAccountRepository(account_client),
+            SupabaseAccountAuth(account_client.auth.admin,
+                lambda: SupabaseAuthClient.from_url_key(config.supabase_url,config.supabase_anon_key)), pepper=config.auth_pin_pepper,
+            enabled=bool(config.account_management_enabled and config.auth_pin_pepper))
         from app.repositories.supabase.team_locks import SupabaseTeamLockRepository
 
         team_lock_repo = SupabaseTeamLockRepository.from_url_key(

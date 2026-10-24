@@ -5,13 +5,16 @@ milestone record; it does not maintain a second live phase-status ledger.
 
 ## Current project position
 
-- Current packet: **Accounts/profile P1–P4 DONE LOCAL; SEC-PIN-01 next**.
+- Current packet: **Accounts/profile P1–P4 DONE LOCAL; SEC-PIN-01 PARTIAL**.
   Registration, independent profiles, name/photo/PIN and Admin controls integrated;
   session guards cover login/refresh and remain active with UI disabled. Focused
   API/React/browser/build checks pass; real050–052 PG parity/reset evidence retained.
   No remote account/schema/storage change or deployment performed/authorized.
-  Pepper migration remains a distinct subsequent change; security retirement is
-  outside this packet. [Local closure](accounts-profile-report.md).
+  P4 pushed as `24a87e4`. Subsequent credential-policy foundation has18 new tests;
+  missing-pepper session-guard retention has a focused ON/OFF test. Versioned
+  Auth/SQL migration, verified renewal and counter transition are still pending;
+  the current login still uses the old pepper. No retirement claim or new SQL.
+  [Local closure and next gates](accounts-profile-report.md).
   [Account/profile live handoff](work-in-progress/accounts-profile-live.md).
 
 - Previous packet: **22E private candidate VALIDATED; Phase22 PARTIAL**.
