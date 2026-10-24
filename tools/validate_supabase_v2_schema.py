@@ -39,6 +39,11 @@ $$;
 
 
 EXPECTED_TABLES = [
+    "account_registrations",
+    "account_rate_windows",
+    "account_commands",
+    "account_pin_changes",
+    "account_session_guards",
     "launcher_observations",
     "season_reward_rule_revisions",
     "team_lock_first_fixations",

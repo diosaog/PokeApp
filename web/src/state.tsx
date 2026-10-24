@@ -1,6 +1,7 @@
 import {
   createContext,
   useCallback,
+  useEffect,
   useContext,
   useState,
   type ReactNode,
@@ -32,11 +33,25 @@ type State = {
   logout: () => void;
   adminOperationPending: boolean;
   holdAdminNavigation: () => () => void;
+  accountsEnabled: boolean;
 };
 const Context = createContext<State | null>(null);
 export function AppState({ children }: { children: ReactNode }) {
   const [me, setMe] = useState<Me | null>(null);
   const [season, setSeason] = useState("");
+  const [accountsEnabled, setAccountsEnabled] = useState(false);
+  useEffect(() => {
+    const controller = new AbortController();
+    void api
+      .request<{ enabled: boolean }>(
+        "/v1/auth/account-capabilities",
+        { signal: controller.signal },
+        false,
+      )
+      .then((value) => setAccountsEnabled(value.enabled === true))
+      .catch(() => {});
+    return () => controller.abort();
+  }, []);
   const [adminHolds, setAdminHolds] = useState(0);
   const holdAdminNavigation = useCallback(() => {
     setAdminHolds((count) => count + 1);
@@ -60,6 +75,7 @@ export function AppState({ children }: { children: ReactNode }) {
           logout: () => api.logout(),
           adminOperationPending: adminHolds > 0,
           holdAdminNavigation,
+          accountsEnabled,
         }}
       >
         {children}

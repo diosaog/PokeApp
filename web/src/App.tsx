@@ -46,6 +46,13 @@ import { seasonLabel } from "./features/admin-labels";
 import { BattlePage } from "./features/team-preview";
 import { ScoutingPage } from "./features/scouting";
 import { TrainerProfilePage } from "./features/trainer-profile";
+import { RegistrationForm } from "./features/registration";
+import { PinForm, pinRecoveryKey } from "./features/account-editor";
+const AdminAccountsPage = lazy(() =>
+  import("./features/admin-accounts").then((m) => ({
+    default: m.AdminAccountsPage,
+  })),
+);
 
 const linkGroups = [
   { label: "GENERAL", links: [["/", "Inicio", Home]] },
@@ -75,9 +82,11 @@ const linkGroups = [
   },
 ] as const;
 function Login() {
-  const { setMe } = useApp(),
+  const { setMe, accountsEnabled } = useApp(),
     [pending, setPending] = useState(false),
-    [error, setError] = useState<unknown>(null);
+    [error, setError] = useState<unknown>(null),
+    [register, setRegister] = useState(false),
+    [created, setCreated] = useState("");
   return (
     <main className="login">
       <section className="login-story">
@@ -102,48 +111,84 @@ function Login() {
         <div className="orbit" aria-hidden="true" />
       </section>
       <section className="login-form">
-        <ShieldCheck size={32} />
-        <h2>Bienvenido, entrenador.</h2>
-        <p>Entra con tu identidad y PIN de PokeApp.</p>
-        <form
-          onSubmit={async (event) => {
-            const data = form(event);
-            if (pending) return;
-            setPending(true);
-            setError(null);
-            try {
-              setMe(await api.login(text(data, "trainer"), text(data, "pin")));
-            } catch (err) {
-              setError(err);
-            } finally {
-              setPending(false);
-            }
-          }}
-        >
-          <Field label="Entrenador">
-            <input name="trainer" autoComplete="username" required autoFocus />
-          </Field>
-          <Field label="PIN">
-            <input
-              name="pin"
-              type="password"
-              inputMode="numeric"
-              autoComplete="current-password"
-              required
-              maxLength={128}
-            />
-          </Field>
-          <Notice error={error} />
-          {!api.configured && (
-            <p role="alert">
-              El servidor todavía no está configurado para este despliegue.
+        {register && accountsEnabled ? (
+          <RegistrationForm
+            onCancel={() => setRegister(false)}
+            onRegistered={(name) => {
+              setCreated(name);
+              setRegister(false);
+            }}
+          />
+        ) : (
+          <>
+            <ShieldCheck size={32} />
+            <h2>Bienvenido, entrenador.</h2>
+            <p>Entra con tu identidad y PIN de PokeApp.</p>
+            {created && (
+              <p role="status">
+                Cuenta creada. Ya puedes entrar con tu nombre y PIN.
+              </p>
+            )}
+            <form
+              onSubmit={async (event) => {
+                const data = form(event);
+                if (pending) return;
+                setPending(true);
+                setError(null);
+                try {
+                  setMe(
+                    await api.login(text(data, "trainer"), text(data, "pin")),
+                  );
+                } catch (err) {
+                  setError(err);
+                } finally {
+                  setPending(false);
+                }
+              }}
+            >
+              <Field label="Entrenador">
+                <input
+                  key={created}
+                  defaultValue={created}
+                  name="trainer"
+                  autoComplete="username"
+                  required
+                  autoFocus
+                />
+              </Field>
+              <Field label="PIN">
+                <input
+                  name="pin"
+                  type="password"
+                  inputMode="numeric"
+                  autoComplete="current-password"
+                  required
+                  maxLength={128}
+                />
+              </Field>
+              <Notice error={error} />
+              {!api.configured && (
+                <p role="alert">
+                  El servidor todavía no está configurado para este despliegue.
+                </p>
+              )}
+              <Submit pending={pending || !api.configured}>
+                Entrar a PokeApp
+              </Submit>
+            </form>
+            <p className="caption">
+              Tu PIN y tu sesión no se guardan en este navegador.
             </p>
-          )}
-          <Submit pending={pending || !api.configured}>Entrar a PokeApp</Submit>
-        </form>
-        <p className="caption">
-          Tu PIN y tu sesión no se guardan en este navegador.
-        </p>
+            {accountsEnabled && (
+              <button disabled={pending} onClick={() => setRegister(true)}>
+                Crear cuenta
+              </button>
+            )}
+            {accountsEnabled && sessionStorage.getItem(pinRecoveryKey) && (
+              <PinForm recovery />
+            )}
+          </>
+        )}
       </section>
     </main>
   );
@@ -205,7 +250,7 @@ function SeasonPicker() {
   );
 }
 export default function App() {
-  const { me, logout, adminOperationPending } = useApp(),
+  const { me, logout, adminOperationPending, accountsEnabled } = useApp(),
     [menu, setMenu] = useState(false),
     location = useLocation();
   useEffect(() => {
@@ -294,6 +339,19 @@ export default function App() {
                 <Settings2 size={19} />
                 Administración
               </NavLink>
+              {accountsEnabled && (
+                <NavLink
+                  to="/admin/cuentas"
+                  aria-disabled={adminOperationPending}
+                  onClick={(e) => {
+                    if (adminOperationPending) e.preventDefault();
+                    else setMenu(false);
+                  }}
+                >
+                  <Users size={19} />
+                  Cuentas
+                </NavLink>
+              )}
             </div>
           )}
         </nav>
@@ -304,6 +362,17 @@ export default function App() {
           <div>
             <strong>{me.display_name}</strong>
             <span>{me.is_admin ? "Administrador" : "Entrenador"}</span>
+            {accountsEnabled && (
+              <Link
+                to={`/entrenadores/${me.trainer_id}`}
+                onClick={(e) => {
+                  if (adminOperationPending) e.preventDefault();
+                  else setMenu(false);
+                }}
+              >
+                Mi perfil
+              </Link>
+            )}
           </div>
           <button
             aria-label="Cerrar sesión"
@@ -372,6 +441,18 @@ export default function App() {
                 }
               />
               <Route path="/saves" element={<SavesPage />} />
+              <Route
+                path="/admin/cuentas"
+                element={
+                  me.is_admin && accountsEnabled ? (
+                    <Suspense fallback={<Loading />}>
+                      <AdminAccountsPage />
+                    </Suspense>
+                  ) : (
+                    <Navigate to="/" replace />
+                  )
+                }
+              />
               <Route
                 path="*"
                 element={

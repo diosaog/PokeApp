@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import type { Model } from "../api/types";
-import { useApp, useOverview, useRead } from "../state";
+import { queries, useApp, useOverview, useRead } from "../state";
 import { Card, Empty, Heading, Loading, Notice, Tag } from "../ui";
 import { Pokemon, WithSeason } from "./core";
 import { TrainerPhoto, StatPill } from "../pokemon/presentation";
@@ -11,10 +11,13 @@ import { Inventory } from "./inventory";
 import { WipeRevivals } from "./wipe-revivals";
 import { PokemonDetailModal } from "./pokemon-details";
 import { participantLabel } from "./admin-labels";
+import { AccountEditor, type AccountProfile } from "./account-editor";
 
 export function TrainerProfilePage() {
-  const { season } = useApp(),
+  const { season, accountsEnabled } = useApp(),
     { trainerId = "" } = useParams();
+  if (accountsEnabled)
+    return <AccountProfileView key={trainerId} trainer={trainerId} />;
   return (
     <>
       <Link className="text-link" to="/entrenadores">
@@ -26,7 +29,82 @@ export function TrainerProfilePage() {
     </>
   );
 }
-export function Profile({ trainer }: { trainer: string }) {
+function AccountProfileView({ trainer }: { trainer: string }) {
+  const { me, season, adminOperationPending } = useApp(),
+    profile = useRead<AccountProfile>(`/v1/accounts/${trainer}`),
+    overview = useOverview();
+  const [editing, setEditing] = useState(false);
+  if (profile.isPending) return <Loading />;
+  if (!profile.data) return <Notice error={profile.error} />;
+  const own = trainer === me?.trainer_id,
+    member = overview.data?.players.some((p) => p.trainer_id === trainer);
+  async function refresh() {
+    await queries.invalidateQueries({
+      predicate: (q) =>
+        q.queryKey[0] === me?.trainer_id &&
+        (String(q.queryKey[1]).startsWith("/v1/accounts") ||
+          String(q.queryKey[1]) === "/v1/read/trainers" ||
+          new RegExp(
+            `/seasons/${season}/(overview|league|team-preview|scouting|setup)`,
+          ).test(String(q.queryKey[1]))),
+    });
+  }
+  return (
+    <>
+      <Link className="text-link" to="/entrenadores">
+        ← Entrenadores
+      </Link>
+      {season && overview.isPending ? (
+        <Loading />
+      ) : member ? (
+        <Profile trainer={trainer} account={profile.data} />
+      ) : (
+        <>
+          <Heading
+            eyebrow={own ? "TU PERFIL" : "ENTRENADOR"}
+            title={profile.data.display_name}
+          />
+          <Card className="profile-identity">
+            <TrainerPhoto
+              name={profile.data.display_name}
+              url={profile.data.photo_url}
+            />
+            {overview.error ? (
+              <Notice error={overview.error} />
+            ) : (
+              <p>
+                Cuenta de entrenador. Sin participación en la temporada
+                seleccionada.
+              </p>
+            )}
+          </Card>
+        </>
+      )}
+      {own && (
+        <>
+          <button
+            className="button primary"
+            disabled={adminOperationPending}
+            onClick={() => setEditing(!editing)}
+          >
+            Editar mi perfil
+          </button>
+          {editing && (
+            <AccountEditor profile={profile.data} refresh={refresh} />
+          )}
+        </>
+      )}
+    </>
+  );
+}
+
+export function Profile({
+  trainer,
+  account,
+}: {
+  trainer: string;
+  account?: AccountProfile;
+}) {
   const { season, me } = useApp(),
     own = trainer === me?.trainer_id,
     overview = useOverview();
@@ -59,13 +137,16 @@ export function Profile({ trainer }: { trainer: string }) {
     <>
       <Heading
         eyebrow={own ? "TU PERFIL" : "ENTRENADOR"}
-        title={player.display_name}
+        title={account?.display_name || player.display_name}
       />
       <div className="profile-command-center">
         <Card
           className={`profile-identity ${player.status !== "active" ? "inactive-trainer" : ""}`}
         >
-          <TrainerPhoto name={player.display_name} />
+          <TrainerPhoto
+            name={account?.display_name || player.display_name}
+            url={account?.photo_url}
+          />
           <div>
             <div className="tags">
               {own && <Tag>TÚ</Tag>}

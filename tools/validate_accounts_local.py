@@ -109,15 +109,21 @@ class LocalPG:
         self.sql(
             "create role anon nologin; create role authenticated nologin; create role service_role nologin bypassrls;"
         )
-        self.sql("""create schema storage;
+        self.storage()
+        self.sql((ROOT / "supabase/v2/bootstrap.sql").read_text(encoding="utf-8"))
+
+    def storage(self, database="pokeapp_v2_validation_accounts"):
+        self.sql(
+            """create schema storage;
         create table storage.buckets(id text primary key,name text,public boolean,file_size_limit bigint,allowed_mime_types text[]);
         create table storage.objects(id uuid primary key default gen_random_uuid(),bucket_id text,name text,owner uuid);
         alter table storage.objects enable row level security;
         grant usage on schema storage to authenticated,service_role;
         grant all on storage.objects,storage.buckets to service_role;
         grant select,insert,update,delete on storage.objects to authenticated;
-        """)
-        self.sql((ROOT / "supabase/v2/bootstrap.sql").read_text(encoding="utf-8"))
+        """,
+            database,
+        )
 
     def stop(self):
         self.sql("drop database if exists pokeapp_v2_validation_accounts;", "postgres")
@@ -411,12 +417,125 @@ def p3(pg):
     )
 
 
+def p4(pg):
+    chain = "pokeapp_v2_validation_accounts_chain"
+    pg.sql(f"create database {chain};", "postgres")
+    try:
+        pg.storage(chain)
+        paths = sorted((ROOT / "supabase/v2/migrations").glob("*.sql"))
+        for path in paths:
+            if int(path.name[:3]) < 50:
+                pg.sql(path.read_text(encoding="utf-8"), chain)
+        tables = pg.sql(
+            "select tablename from pg_tables where schemaname='public' order by tablename;",
+            chain,
+        ).stdout.splitlines()
+        statement = (
+            "select jsonb_object_agg(name,value) from ("
+            + " union all ".join(
+                f"select '{name}' name,md5(coalesce(string_agg((to_jsonb(t)-'profile_revision'-'photo_key')::text,'' order by (to_jsonb(t)-'profile_revision'-'photo_key')::text),'')) value from public.{name} t"
+                for name in tables
+            )
+            + ") q;"
+        )
+        baseline = pg.sql(statement, chain).stdout
+        for path in paths:
+            if int(path.name[:3]) >= 50:
+                pg.sql(path.read_text(encoding="utf-8"), chain)
+        assert pg.sql(statement, chain).stdout == baseline
+
+        def dump(db):
+            data = pg.command(
+                "pg_dump",
+                [
+                    "-h",
+                    "127.0.0.1",
+                    "-p",
+                    str(pg.port),
+                    "-U",
+                    "postgres",
+                    "-d",
+                    db,
+                    "--schema-only",
+                ],
+            ).stdout
+            return "\n".join(
+                line
+                for line in data.splitlines()
+                if not line.startswith(("\\restrict", "\\unrestrict"))
+            )
+
+        a, b = dump("pokeapp_v2_validation_accounts"), dump(chain)
+        assert a == b, "migration/bootstrap schema, ownership or grant mismatch"
+        catalog = """select count(*) from pg_proc p join pg_namespace n on n.oid=p.pronamespace
+        where n.nspname='public' and p.proname like 'account_%' and
+        (has_function_privilege('anon',p.oid,'execute') or
+         (p.proname not in ('account_session_allowed','account_name_key') and has_function_privilege('authenticated',p.oid,'execute'))
+         or not has_function_privilege('service_role',p.oid,'execute') or p.proconfig is null);"""
+        assert pg.sql(catalog).stdout.strip() == "0"
+        assert (
+            pg.sql(
+                "select count(*) from information_schema.column_privileges where grantee='authenticated' and table_schema='public' and table_name='trainers' and privilege_type in ('INSERT','UPDATE');"
+            ).stdout.strip()
+            == "0"
+        )
+        assert (
+            pg.sql(
+                "select count(*) from pg_tables where schemaname='public' and tablename like 'account_%' and not rowsecurity;"
+            ).stdout.strip()
+            == "0"
+        )
+        return dict(
+            prior_tables_preserved=len(tables),
+            schema_grants_ownership_identical=True,
+            schema_lines=len(a.splitlines()),
+            mutation_privileges_and_rls=True,
+            ordered_upgrade_and_bootstrap=True,
+        )
+    finally:
+        pg.sql(f"drop database {chain};", "postgres")
+
+
+def reset_gate(pg):
+    shadow = pg.sql("select count(*) from v1_shadow.runs;").stdout
+    pg.sql((ROOT / "supabase/v2/reset_dev.sql").read_text(encoding="utf-8"))
+    assert (
+        pg.sql(
+            "select count(*) from pg_tables where schemaname='public' and tablename like 'account_%';"
+        ).stdout.strip()
+        == "0"
+    )
+    assert (
+        pg.sql(
+            "select count(*) from pg_proc p join pg_namespace n on n.oid=p.pronamespace where n.nspname='public' and p.proname like 'account_%';"
+        ).stdout.strip()
+        == "0"
+    )
+    assert (
+        pg.sql(
+            "select count(*) from pg_policies where schemaname='storage' and policyname like 'trainer_photos_%';"
+        ).stdout.strip()
+        == "0"
+    )
+    # This reset intentionally preserves Shadow and unrelated Storage policies.
+    # A full fresh bootstrap is independently covered by p4, not by this reset.
+    assert pg.sql("select count(*) from v1_shadow.runs;").stdout == shadow
+    assert (
+        pg.sql("select to_regclass('public.trainers') is null;").stdout.strip() == "t"
+    )
+    return dict(
+        disposable_reset=True, account_objects_removed=True, shadow_preserved=True
+    )
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--bin", type=Path, required=True)
     parser.add_argument("--port", type=int, default=55479)
     parser.add_argument("--evidence", type=Path, required=True)
-    parser.add_argument("--packet", choices=["p1", "p2", "p3"], default="p1")
+    parser.add_argument(
+        "--packet", choices=["p1", "p2", "p3", "p4", "reset"], default="p1"
+    )
     args = parser.parse_args()
     pg = LocalPG(args.bin, args.port)
     started = False
@@ -425,7 +544,9 @@ def main():
         started = True
         result = {
             "status": "PASS",
-            args.packet: {"p1": p1, "p2": p2, "p3": p3}[args.packet](pg),
+            args.packet: {"p1": p1, "p2": p2, "p3": p3, "p4": p4, "reset": reset_gate}[
+                args.packet
+            ](pg),
             "cluster": str(pg.root),
         }
     finally:

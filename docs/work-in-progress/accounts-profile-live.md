@@ -1,6 +1,33 @@
 # Accounts and profiles — live handoff
 
-2026-10-23. **P1–P3 IMPLEMENTED / LOCAL PASS; P4 INTEGRATION NEXT. LOCAL ONLY.**
+2026-10-24. **P1–P4 DONE LOCAL; SEC-PIN-01 NEXT. NOT DEPLOYED.**
+Resume entry `1313820d247b82a07e470d1591972aef79744367`, main/origin aligned,
+no other active agent. Recovered all23 modified P4 paths and its new registration,
+browser and transport tests. [Local report](../accounts-profile-report.md).
+
+Final new gates:8 session tests,10 Auth API,15 schema/static,8 React,3 browser
+journeys PASS; desktop/mobile screenshots reviewed. OpenAPI, TypeScript/Vite,
+Ruff/format and backend syntax/import PASS. Login/refresh now apply guards even
+when account UI OFF, bind verified Auth identity, reject disabled/revoked sessions.
+Browser mobile login-navigation race fixed only in harness; no full matrices.
+
+Recovered prior p4-pg.json: PASS,54 tables preserved,15385 identical schema/grant/
+ownership lines,050–052 upgrade/bootstrap parity. reset-pg.json PASS preserves
+Shadow deliberately. Both under private accounts/20261023 evidence. These were
+already complete; retained unchanged SQL, not rerun. No PG process started here.
+Historical P1–P3 and security21 tests retained, not counted as fresh runs.
+
+Production unchanged. Release still needs explicit authorization for050–052,
+fresh remote baselines/name collisions, signup disabled, real Auth/signout/Storage
+proof and user acceptance. Direct Auth signup alone cannot link a trainer; live
+disable_signup=false remains a separate configuration gate, not silently fixed.
+
+Next: commit/push this completed P4; then evaluate/implement SEC-PIN-01 separately
+on the stable base. Do not change production pepper, keys, sessions or features.
+Security documentation remains separate and untouched. No other phase starts.
+
+## Retained P1–P3 execution record
+
 Entry main/origin `2b77b62d2a7fd8d0f1b6e01f4ac2d0c8e51b4b82`, fetched 0/0,
 clean tracked tree, five unrelated untracked files preserved. Previous Phase22E
 work is committed/pushed and finished; no active child agent or Git lock. Phase22

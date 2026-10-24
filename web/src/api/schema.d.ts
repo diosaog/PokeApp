@@ -1300,10 +1300,221 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/v1/auth/account-capabilities": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Account Capabilities */
+    get: operations["account_capabilities_v1_auth_account_capabilities_get"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/auth/register": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** Register */
+    post: operations["register_v1_auth_register_post"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/accounts": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Profiles */
+    get: operations["profiles_v1_accounts_get"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/accounts/{trainer_id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Profile */
+    get: operations["profile_v1_accounts__trainer_id__get"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/account/name": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    /** Rename */
+    put: operations["rename_v1_account_name_put"];
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/account/photo": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    /** Photo */
+    put: operations["photo_v1_account_photo_put"];
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/account/pin": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** Change Pin */
+    post: operations["change_pin_v1_account_pin_post"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/auth/pin-change/resume": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** Resume Pin */
+    post: operations["resume_pin_v1_auth_pin_change_resume_post"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/admin/accounts": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Admin Accounts */
+    get: operations["admin_accounts_v1_admin_accounts_get"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/admin/accounts/{trainer_id}/status": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    /** Admin Status */
+    put: operations["admin_status_v1_admin_accounts__trainer_id__status_put"];
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/admin/accounts/{trainer_id}/reset-pin": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** Reset Pin */
+    post: operations["reset_pin_v1_admin_accounts__trainer_id__reset_pin_post"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
 }
 export type webhooks = Record<string, never>;
 export interface components {
   schemas: {
+    /** AccountCapabilities */
+    AccountCapabilities: {
+      /** Enabled */
+      enabled: boolean;
+    };
+    /** AccountStatusReceipt */
+    AccountStatusReceipt: {
+      /**
+       * Trainer Id
+       * Format: uuid
+       */
+      trainer_id: string;
+      /** Revision */
+      revision: number;
+      /** Globally Enabled */
+      globally_enabled: boolean;
+    };
+    /** AccountStatusRequest */
+    AccountStatusRequest: {
+      /** Expected Revision */
+      expected_revision: number;
+      /** Enabled */
+      enabled: boolean;
+    };
     /** AddParticipantBody */
     AddParticipantBody: {
       /**
@@ -1315,6 +1526,33 @@ export interface components {
       seed_order?: number | null;
       /** Expected Roster Revision */
       expected_roster_revision: number;
+    };
+    /** AdminAccount */
+    AdminAccount: {
+      /**
+       * Trainer Id
+       * Format: uuid
+       */
+      trainer_id: string;
+      /** Display Name */
+      display_name: string;
+      /** Globally Enabled */
+      globally_enabled: boolean;
+      /** Is Admin */
+      is_admin: boolean;
+      /** Revision */
+      revision: number;
+      /** Provisioned */
+      provisioned: boolean;
+    };
+    /** AdminAccountPage */
+    AdminAccountPage: {
+      /** Items */
+      items: components["schemas"]["AdminAccount"][];
+      /** Offset */
+      offset: number;
+      /** Has More */
+      has_more: boolean;
     };
     /** AdminReceipt */
     AdminReceipt: {
@@ -2780,6 +3018,22 @@ export interface components {
       /** Status Effective Matchday Number */
       status_effective_matchday_number?: number | null;
     };
+    /** PinChangeRequest */
+    PinChangeRequest: {
+      /** Current Pin */
+      current_pin: string;
+      /** New Pin */
+      new_pin: string;
+      /** Confirmation */
+      confirmation: string;
+    };
+    /** PinChangeResponse */
+    PinChangeResponse: {
+      /** Status */
+      status: string;
+      /** Sign In Required */
+      sign_in_required: boolean;
+    };
     /** PinLoginRequest */
     PinLoginRequest: {
       /** Trainer Identifier */
@@ -2935,6 +3189,39 @@ export interface components {
       nature: string;
       ivs?: components["schemas"]["StatsRead"] | null;
       evs?: components["schemas"]["StatsRead"] | null;
+    };
+    /** ProfilePage */
+    ProfilePage: {
+      /** Items */
+      items: components["schemas"]["ProfileResponse"][];
+      /** Offset */
+      offset: number;
+      /** Has More */
+      has_more: boolean;
+    };
+    /** ProfileReceipt */
+    ProfileReceipt: {
+      /**
+       * Trainer Id
+       * Format: uuid
+       */
+      trainer_id: string;
+      /** Revision */
+      revision: number;
+    };
+    /** ProfileResponse */
+    ProfileResponse: {
+      /**
+       * Trainer Id
+       * Format: uuid
+       */
+      trainer_id: string;
+      /** Display Name */
+      display_name: string;
+      /** Photo Url */
+      photo_url?: string | null;
+      /** Revision */
+      revision?: number | null;
     };
     /** ProgressRead */
     ProgressRead: {
@@ -3310,12 +3597,40 @@ export interface components {
     RefreshResponse: {
       session: components["schemas"]["SessionResponse"];
     };
+    /** RegistrationRequest */
+    RegistrationRequest: {
+      /** Trainer Name */
+      trainer_name: string;
+      /** Pin */
+      pin: string;
+      /** Confirmation */
+      confirmation: string;
+      /** Access Code */
+      access_code: string;
+    };
+    /** RegistrationResponse */
+    RegistrationResponse: {
+      /**
+       * Trainer Id
+       * Format: uuid
+       */
+      trainer_id: string;
+      /** Status */
+      status: string;
+    };
     /** RemoveParticipantBody */
     RemoveParticipantBody: {
       /** Reason */
       reason: string;
       /** Expected Roster Revision */
       expected_roster_revision: number;
+    };
+    /** RenameRequest */
+    RenameRequest: {
+      /** Display Name */
+      display_name: string;
+      /** Expected Revision */
+      expected_revision: number;
     };
     /** RenameSeasonBody */
     RenameSeasonBody: {
@@ -3350,6 +3665,13 @@ export interface components {
       expected_roster_revision: number;
       /** Reason */
       reason: string;
+    };
+    /** ResetPinRequest */
+    ResetPinRequest: {
+      /** New Pin */
+      new_pin: string;
+      /** Confirmation */
+      confirmation: string;
     };
     /** ResolveTrialBody */
     ResolveTrialBody: {
@@ -6934,6 +7256,366 @@ export interface operations {
         };
         content: {
           "application/json": components["schemas"]["SaveRegistration"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  account_capabilities_v1_auth_account_capabilities_get: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["AccountCapabilities"];
+        };
+      };
+    };
+  };
+  register_v1_auth_register_post: {
+    parameters: {
+      query?: never;
+      header: {
+        "Idempotency-Key": string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["RegistrationRequest"];
+      };
+    };
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["RegistrationResponse"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  profiles_v1_accounts_get: {
+    parameters: {
+      query?: {
+        offset?: number;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ProfilePage"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  profile_v1_accounts__trainer_id__get: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        trainer_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ProfileResponse"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  rename_v1_account_name_put: {
+    parameters: {
+      query?: never;
+      header: {
+        "Idempotency-Key": string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["RenameRequest"];
+      };
+    };
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ProfileReceipt"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  photo_v1_account_photo_put: {
+    parameters: {
+      query: {
+        expected_revision: number;
+      };
+      header: {
+        "Idempotency-Key": string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ProfileReceipt"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  change_pin_v1_account_pin_post: {
+    parameters: {
+      query?: never;
+      header: {
+        "Idempotency-Key": string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["PinChangeRequest"];
+      };
+    };
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PinChangeResponse"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  resume_pin_v1_auth_pin_change_resume_post: {
+    parameters: {
+      query?: never;
+      header: {
+        "Idempotency-Key": string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["PinChangeRequest"];
+      };
+    };
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PinChangeResponse"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  admin_accounts_v1_admin_accounts_get: {
+    parameters: {
+      query?: {
+        offset?: number;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["AdminAccountPage"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  admin_status_v1_admin_accounts__trainer_id__status_put: {
+    parameters: {
+      query?: never;
+      header: {
+        "Idempotency-Key": string;
+      };
+      path: {
+        trainer_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["AccountStatusRequest"];
+      };
+    };
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["AccountStatusReceipt"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  reset_pin_v1_admin_accounts__trainer_id__reset_pin_post: {
+    parameters: {
+      query?: never;
+      header: {
+        "Idempotency-Key": string;
+      };
+      path: {
+        trainer_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["ResetPinRequest"];
+      };
+    };
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PinChangeResponse"];
         };
       };
       /** @description Validation Error */

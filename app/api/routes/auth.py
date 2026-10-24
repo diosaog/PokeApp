@@ -19,7 +19,11 @@ from app.api.schemas import (
     RefreshResponse,
     SessionResponse,
 )
-from app.api.security import require_principal
+from app.api.security import (
+    require_enabled_principal,
+    require_principal,
+    resolve_principal,
+)
 from app.auth.errors import AuthError
 from app.auth.models import PinAuthResult, SupabaseAuthSession
 
@@ -43,6 +47,7 @@ def pin_login(
         )
     except AuthError as exc:
         raise map_pin_login_error(exc) from exc
+    _guard_issued_session(container, result.session, result.trainer_id)
     return _auth_response(result)
 
 
@@ -54,12 +59,26 @@ def refresh_session(
     if container.session_refresher is None:
         raise unavailable_error()
     try:
-        session = container.session_refresher.refresh_session(refresh_token=payload.refresh_token)
+        session = container.session_refresher.refresh_session(
+            refresh_token=payload.refresh_token
+        )
     except AuthError as exc:
         raise map_session_error(exc) from exc
     if not session.access_token:
         raise invalid_session_error()
+    _guard_issued_session(container, session)
     return RefreshResponse(session=_session_response(session))
+
+
+def _guard_issued_session(container, session, trainer_id=None):
+    if container.account_service is None:
+        return  # Existing bridge-only containers have no account journal.
+    principal = resolve_principal(
+        session.access_token, container, expected_auth_user_id=session.user_id
+    )
+    require_enabled_principal(principal)
+    if trainer_id is not None and principal.trainer_id != trainer_id:
+        raise invalid_session_error()
 
 
 @me_router.get("/me", response_model=MeResponse)
@@ -72,17 +91,21 @@ def me(principal=Depends(require_principal)) -> MeResponse:
     )
 
 
-def _check_pin_login_rate_limit(container: ApiContainer, request: Request, trainer_identifier: str) -> None:
-    if container.account_service is not None and container.account_service.enabled:
+def _check_pin_login_rate_limit(
+    container: ApiContainer, request: Request, trainer_identifier: str
+) -> None:
+    if container.account_service is not None:
         from app.api.routes.accounts import invoke
+
         def check():
             service = container.account_service
             host = request.client.host if request.client else "unknown"
-            service.throttle("login-ip",host,30,900)
+            service.throttle("login-ip", host, 30, 900)
             trainer = container.trainer_repository.find_for_login(trainer_identifier)
             identity = trainer.id if trainer else trainer_identifier.strip().lower()
-            service.throttle("login-account",identity,8,900)
-            service.throttle("login-account-day",identity,30,86400)
+            service.throttle("login-account", identity, 8, 900)
+            service.throttle("login-account-day", identity, 30, 86400)
+
         invoke(check)
         return
     if container.rate_limiter is None:

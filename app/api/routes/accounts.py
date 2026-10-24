@@ -13,6 +13,17 @@ from app.api.security import require_enabled_principal, require_admin_principal
 router = APIRouter(prefix="/v1", tags=["accounts"])
 
 
+class AccountCapabilities(BaseModel):
+    enabled: bool
+
+
+@router.get("/auth/account-capabilities", response_model=AccountCapabilities)
+def account_capabilities(container: ApiContainer = Depends(get_api_container)):
+    return {
+        "enabled": bool(container.account_service and container.account_service.enabled)
+    }
+
+
 class RegistrationRequest(BaseModel):
     model_config = ConfigDict(extra="forbid", hide_input_in_errors=True)
     trainer_name: str = Field(min_length=1, max_length=64)
@@ -88,7 +99,7 @@ class ProfilePage(BaseModel):
 class RenameRequest(BaseModel):
     model_config = ConfigDict(extra="forbid", hide_input_in_errors=True)
     display_name: str = Field(min_length=1, max_length=64)
-    expected_revision: int = Field(ge=0)
+    expected_revision: int = Field(ge=0, strict=True)
 
 
 class ProfileReceipt(BaseModel):

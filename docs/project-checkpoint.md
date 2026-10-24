@@ -1,15 +1,17 @@
 # PokeApp 2.0 Project Checkpoint
 
-Checkpoint reconciled: 2026-10-23. This file is the project index and historical
+Checkpoint reconciled: 2026-10-24. This file is the project index and historical
 milestone record; it does not maintain a second live phase-status ledger.
 
 ## Current project position
 
-- Current packet: **Accounts/profile P1 LOCAL PASS; P2–P4 in progress**.
-  New owner instruction authorizes independent accounts work after the safe22E
-  closure. Registration reuses trainer UUIDs and the PIN/Auth bridge; service-only
-  provisioning and distributed throttle pass focused tests and disposable PG.
-  No remote account/schema/storage change or deployment authorized.
+- Current packet: **Accounts/profile P1–P4 DONE LOCAL; SEC-PIN-01 next**.
+  Registration, independent profiles, name/photo/PIN and Admin controls integrated;
+  session guards cover login/refresh and remain active with UI disabled. Focused
+  API/React/browser/build checks pass; real050–052 PG parity/reset evidence retained.
+  No remote account/schema/storage change or deployment performed/authorized.
+  Pepper migration remains a distinct subsequent change; security retirement is
+  outside this packet. [Local closure](accounts-profile-report.md).
   [Account/profile live handoff](work-in-progress/accounts-profile-live.md).
 
 - Previous packet: **22E private candidate VALIDATED; Phase22 PARTIAL**.

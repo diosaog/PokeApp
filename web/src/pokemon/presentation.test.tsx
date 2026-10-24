@@ -10,6 +10,13 @@ import {
 } from "./presentation";
 import { catalogId } from "./localization";
 afterEach(cleanup);
+it("shows an uploaded portrait and safely falls back when its signed URL expires", () => {
+  render(<TrainerPhoto name="Nuevo" url="https://example.invalid/portrait" />);
+  const image = screen.getByAltText("Retrato de Nuevo");
+  expect(image).toHaveAttribute("src", "https://example.invalid/portrait");
+  fireEvent.error(image);
+  expect(screen.getByLabelText("Sin foto")).toBeVisible();
+});
 it("renders compatible public state flags as compact labels", () => {
   render(<PokemonStatusFlags flags={["blindado", "revivido", "blindado"]} />);
   expect(screen.getByText("BLINDADO")).toHaveClass("blindado");

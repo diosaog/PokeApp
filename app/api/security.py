@@ -14,7 +14,11 @@ bearer_scheme = HTTPBearer(auto_error=False)
 def require_bearer_token(
     credentials: HTTPAuthorizationCredentials | None = Depends(bearer_scheme),
 ) -> str:
-    if credentials is None or credentials.scheme.lower() != "bearer" or not credentials.credentials:
+    if (
+        credentials is None
+        or credentials.scheme.lower() != "bearer"
+        or not credentials.credentials
+    ):
         raise invalid_session_error()
     return credentials.credentials
 
@@ -23,6 +27,10 @@ def require_principal(
     token: str = Depends(require_bearer_token),
     container: ApiContainer = Depends(get_api_container),
 ) -> AuthenticatedPrincipal:
+    return resolve_principal(token, container)
+
+
+def resolve_principal(token, container, *, expected_auth_user_id=None):
     if container.token_verifier is None or container.principal_repository is None:
         raise unavailable_error()
     try:
@@ -31,15 +39,18 @@ def require_principal(
         from app.api.errors import map_session_error
 
         raise map_session_error(exc) from exc
+    if expected_auth_user_id is not None and user.user_id != expected_auth_user_id:
+        raise invalid_session_error()
     try:
         trainer = container.principal_repository.find_by_auth_user_id(user.user_id)
     except AuthError as exc:
         raise unavailable_error() from exc
     if trainer is None:
         raise invalid_session_error()
-    if container.account_service is not None and container.account_service.enabled:
+    # Session revocation cannot be bypassed by switching registration/profile UI off.
+    if container.account_service is not None:
         try:
-            if not container.account_service.valid_session(user.user_id,token):
+            if not container.account_service.valid_session(user.user_id, token):
                 raise invalid_session_error()
         except AuthError:
             raise unavailable_error() from None

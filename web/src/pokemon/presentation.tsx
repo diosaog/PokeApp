@@ -53,15 +53,26 @@ export function PokemonStatusFlags({
     </span>
   ) : null;
 }
-export function TrainerPhoto({ name }: { name: string }) {
+export function TrainerPhoto({
+  name,
+  url,
+}: {
+  name: string;
+  url?: string | null;
+}) {
   const portrait = portraits[normalize(name)];
+  const [failed, setFailed] = useState<string | null>(null);
+  const uploaded = url && failed !== url ? url : null;
   return (
     <div className="trainer-photo">
-      {portrait ? (
+      {uploaded || portrait ? (
         <img
-          src={`${base}/trainers/${portrait}.png`}
+          src={uploaded || `${base}/trainers/${portrait}.png`}
           alt={`Retrato de ${name}`}
           loading="lazy"
+          onError={() => {
+            if (url) setFailed(url);
+          }}
         />
       ) : (
         <UserRound aria-label="Sin foto" />

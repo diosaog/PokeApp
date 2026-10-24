@@ -138,6 +138,11 @@ do $$ begin
    insert into storage.buckets(id,name,public,file_size_limit,allowed_mime_types)
    values('trainer-photos','trainer-photos',false,5242880,array['image/jpeg'])
    on conflict(id) do nothing;
+   if exists(select 1 from storage.buckets where id='trainer-photos' and
+     (public is distinct from false or file_size_limit is distinct from 5242880
+      or allowed_mime_types is distinct from array['image/jpeg'])) then
+     raise exception 'trainer_photo_bucket_configuration_conflict';
+   end if;
  end if;
  if to_regclass('storage.objects') is not null then
    -- RESTRICTIVE denies also defeat a future broad permissive browser policy.

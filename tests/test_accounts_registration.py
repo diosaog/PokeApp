@@ -175,7 +175,7 @@ class RegistrationTests(unittest.TestCase):
         self.register()
         with self.assertRaises(AccountError):
             self.register(operation=uuid4(), name=" NEW TRAINER ")
-        for name in ("<script>", "../admin", "", "a" * 49):
+        for name in ("<script>", "../admin", "", "a" * 49, str(uuid4())):
             with self.assertRaises(AccountError):
                 account_name(name)
 

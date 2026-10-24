@@ -5,6 +5,23 @@
 
 begin;
 
+-- Account packet cleanup, only for the disposable development reset above.
+do $$ declare f regprocedure; begin
+  for f in select p.oid::regprocedure from pg_proc p join pg_namespace n on n.oid=p.pronamespace
+    where n.nspname='public' and p.proname like 'account_%'
+  loop execute format('drop function if exists %s cascade',f); end loop;
+  if to_regclass('storage.objects') is not null then
+    execute 'drop policy if exists trainer_photos_no_browser_insert on storage.objects';
+    execute 'drop policy if exists trainer_photos_no_browser_update on storage.objects';
+    execute 'drop policy if exists trainer_photos_no_browser_delete on storage.objects';
+  end if;
+end $$;
+drop table if exists public.account_commands;
+drop table if exists public.account_pin_changes;
+drop table if exists public.account_session_guards;
+drop table if exists public.account_registrations;
+drop table if exists public.account_rate_windows;
+
 drop function if exists public.api_launcher_observation(jsonb);
 drop table if exists public.launcher_observations;
 

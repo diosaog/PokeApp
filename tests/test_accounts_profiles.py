@@ -273,3 +273,5 @@ class ProfileTests(unittest.TestCase):
         self.assertNotIn("is_admin", profile)
         self.repo.guards[TRAINER_ID] = True
         self.assertEqual(client.get("/v1/me", headers=headers).status_code, 401)
+        self.service.enabled = False
+        self.assertEqual(client.get("/v1/me", headers=headers).status_code, 401)

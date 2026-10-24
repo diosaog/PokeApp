@@ -30,6 +30,14 @@ def account_name(value: str) -> tuple[str, str]:
     slug = plain.lower().replace(" ", "-")
     if not 1 <= len(name) <= 48 or not re.fullmatch(r"[a-z0-9][a-z0-9_-]{0,47}", slug):
         raise AccountError("INVALID_ACCOUNT_NAME", 422)
+    try:
+        UUID(slug)
+    except ValueError:
+        pass
+    else:
+        raise AccountError(
+            "INVALID_ACCOUNT_NAME", 422
+        )  # UUID login is reserved for stable identity.
     return name, slug
 
 

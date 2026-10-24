@@ -204,7 +204,8 @@ export async function fixture(
     if (request.method() === "OPTIONS")
       return route.fulfill({ status: 204, headers });
     let result: unknown;
-    if (path.endsWith("/pin-login"))
+    if (path === "/v1/auth/account-capabilities") result = { enabled: false };
+    else if (path.endsWith("/pin-login"))
       result = {
         trainer_id: tid,
         auth_user_id: "user",
