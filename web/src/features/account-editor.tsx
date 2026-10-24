@@ -14,9 +14,11 @@ export const pinRecoveryKey = "pokeapp-pin-change-operation";
 export function PinForm({
   recovery = false,
   adminTarget,
+  renewal = false,
 }: {
   recovery?: boolean;
   adminTarget?: string;
+  renewal?: boolean;
 }) {
   const { logout, holdAdminNavigation } = useApp();
   const [pending, setPending] = useState(false),
@@ -25,11 +27,18 @@ export function PinForm({
     [done, setDone] = useState(false);
   const intent = useRef<{
     key: string;
-    body: { current_pin?: string; new_pin: string; confirmation: string };
+    body: {
+      current_pin?: string;
+      new_pin: string;
+      confirmation: string;
+      renewal_token?: string;
+    };
   } | null>(null);
   const storageKey = adminTarget
     ? `${pinRecoveryKey}:${adminTarget}`
-    : pinRecoveryKey;
+    : renewal
+      ? `${pinRecoveryKey}:renewal`
+      : pinRecoveryKey;
   useEffect(
     () => (pending || uncertain ? holdAdminNavigation() : undefined),
     [pending, uncertain, holdAdminNavigation],
@@ -43,9 +52,11 @@ export function PinForm({
       await api.request(
         adminTarget
           ? `/v1/admin/accounts/${adminTarget}/reset-pin`
-          : resume
-            ? "/v1/auth/pin-change/resume"
-            : "/v1/account/pin",
+          : renewal
+            ? "/v1/auth/pin-renewal"
+            : resume
+              ? "/v1/auth/pin-change/resume"
+              : "/v1/account/pin",
         {
           method: "POST",
           headers: {
@@ -54,7 +65,7 @@ export function PinForm({
           },
           body: JSON.stringify(saved.body),
         },
-        !!adminTarget || !resume,
+        !!adminTarget || (!resume && !renewal),
       );
       sessionStorage.removeItem(storageKey);
       intent.current = null;
@@ -103,7 +114,9 @@ export function PinForm({
           const data = form(event);
           if (pending || uncertain) return;
           const body = {
-            ...(!adminTarget ? { current_pin: text(data, "current") } : {}),
+            ...(!adminTarget && !renewal
+              ? { current_pin: text(data, "current") }
+              : { renewal_token: text(data, "renewal") }),
             new_pin: text(data, "new"),
             confirmation: text(data, "repeat"),
           };
@@ -113,8 +126,9 @@ export function PinForm({
           }
           const key = recovery
             ? sessionStorage.getItem(storageKey)
-            : (adminTarget ? sessionStorage.getItem(storageKey) : null) ||
-              crypto.randomUUID();
+            : (adminTarget || renewal
+                ? sessionStorage.getItem(storageKey)
+                : null) || crypto.randomUUID();
           if (!key) {
             setError(new ApiError(409, "ACCOUNT_RECONCILIATION_REQUIRED"));
             return;
@@ -125,12 +139,32 @@ export function PinForm({
         }}
       >
         <fieldset disabled={pending || uncertain}>
+          {(adminTarget || renewal) && (
+            <>
+              <p>
+                Introduce la autorización de un solo uso entregada después de
+                verificar la identidad. No es el código de registro.
+              </p>
+              <Field label="Código de renovación">
+                <input
+                  name="renewal"
+                  type="password"
+                  autoComplete="off"
+                  minLength={43}
+                  maxLength={128}
+                  required
+                />
+              </Field>
+            </>
+          )}
           {[
             ["current", "PIN actual", "current-password"],
             ["new", "Nuevo PIN", "new-password"],
             ["repeat", "Repetir nuevo PIN", "new-password"],
           ]
-            .filter(([name]) => !adminTarget || name !== "current")
+            .filter(
+              ([name]) => (!adminTarget && !renewal) || name !== "current",
+            )
             .map(([name, label, autocomplete]) => (
               <Field key={name} label={label}>
                 <input

@@ -94,7 +94,12 @@ def create_default_container(config: APIConfig | None = None) -> ApiContainer:
         accounts = AccountService(SupabaseAccountRepository(account_client),
             SupabaseAccountAuth(account_client.auth.admin,
                 lambda: SupabaseAuthClient.from_url_key(config.supabase_url,config.supabase_anon_key)), pepper=config.auth_pin_pepper,
-            enabled=bool(config.account_management_enabled and config.auth_pin_pepper))
+            enabled=False)
+        if config.credential_keyring is not None:
+            from app.auth.versioned_accounts import VersionedAccountService
+            accounts = VersionedAccountService(accounts.repository, accounts.auth,
+                keyring=config.credential_keyring, enabled=config.account_management_enabled,
+                access_code=config.registration_access_code)
         from app.repositories.supabase.team_locks import SupabaseTeamLockRepository
 
         team_lock_repo = SupabaseTeamLockRepository.from_url_key(
@@ -145,8 +150,9 @@ def create_default_container(config: APIConfig | None = None) -> ApiContainer:
             )
 
     auth_bridge = None
-    if auth_client is not None and trainer_repo is not None and config.auth_pin_pepper:
-        auth_bridge = PinAuthBridge(trainers=trainer_repo, auth=auth_client, pepper=config.auth_pin_pepper)
+    if auth_client is not None and trainer_repo is not None and config.credential_keyring is not None:
+        auth_bridge = PinAuthBridge(trainers=trainer_repo, auth=auth_client, pepper="",
+            credential_provider=accounts.credential)
 
     return ApiContainer(
         auth_bridge=auth_bridge,

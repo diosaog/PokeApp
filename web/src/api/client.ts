@@ -92,6 +92,8 @@ export function errorText(error: unknown) {
     INVALID_PIN_CONFIRMATION:
       "Introduce y repite un PIN nuevo de cuatro cifras.",
     INVALID_CURRENT_PIN: "El PIN actual no es correcto.",
+    ACCOUNT_RENEWAL_REQUIRED:
+      "Necesitas una autorización de renovación tras verificar tu identidad. Solicítala al responsable de PokeApp.",
     INVALID_PHOTO: "Usa una imagen JPEG, PNG o WebP válida de hasta 5 MB.",
     REGISTRATION_REJECTED:
       "No se pudo validar el acceso. Revisa los datos de registro.",

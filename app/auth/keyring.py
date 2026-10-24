@@ -1,9 +1,9 @@
-"""SEC-PIN-01 credential policy foundation, not enabled by the API container.
+"""SEC-PIN-01 credential policy used by the versioned account service.
 
 Versions must come from trusted, persisted account/intent metadata, never a
 request's choice. This module neither updates Auth nor certifies a migration.
-The SQL saga, independent identity verification and session cutover are still
-required before wiring it into login, registration or PIN recovery.
+The SQL saga supplies versions and expiry; independent identity verification
+and an explicitly authorized operational cutover remain deployment requirements.
 """
 
 from __future__ import annotations

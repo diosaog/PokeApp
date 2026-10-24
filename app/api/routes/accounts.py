@@ -15,12 +15,22 @@ router = APIRouter(prefix="/v1", tags=["accounts"])
 
 class AccountCapabilities(BaseModel):
     enabled: bool
+    registration_enabled: bool
+    renewal_enabled: bool
 
 
 @router.get("/auth/account-capabilities", response_model=AccountCapabilities)
 def account_capabilities(container: ApiContainer = Depends(get_api_container)):
     return {
-        "enabled": bool(container.account_service and container.account_service.enabled)
+        "enabled": bool(
+            container.account_service and container.account_service.enabled
+        ),
+        "registration_enabled": bool(
+            container.account_service and container.account_service.registration_enabled
+        ),
+        "renewal_enabled": bool(
+            container.account_service and hasattr(container.account_service, "keyring")
+        ),
     }
 
 
@@ -255,6 +265,7 @@ class ResetPinRequest(BaseModel):
     model_config = ConfigDict(extra="forbid", hide_input_in_errors=True)
     new_pin: str = Field(pattern=r"^[0-9]{4}$", repr=False)
     confirmation: str = Field(pattern=r"^[0-9]{4}$", repr=False)
+    renewal_token: str = Field(default="", max_length=128, repr=False)
 
 
 @router.get("/admin/accounts", response_model=AdminAccountPage)
@@ -305,6 +316,36 @@ def reset_pin(
             payload.new_pin,
             payload.confirmation,
             target=str(trainer_id),
+            renewal_token=payload.renewal_token,
+        )
+
+    return invoke(action)
+
+
+class RenewalRequest(ResetPinRequest):
+    renewal_token: str = Field(min_length=43, max_length=128, repr=False)
+
+
+@router.post("/auth/pin-renewal", response_model=PinChangeResponse)
+def renew_pin(
+    payload: RenewalRequest,
+    request: Request,
+    key: UUID = Header(alias="Idempotency-Key"),
+    container: ApiContainer = Depends(get_api_container),
+):
+    service = container.account_service
+    if service is None or not hasattr(service, "keyring"):
+        raise api_error(
+            503, "ACCOUNTS_UNAVAILABLE", "Credential renewal is unavailable."
+        )
+
+    def action():
+        service.throttle(
+            "renewal-ip", request.client.host if request.client else "unknown", 8, 3600
+        )
+        service.throttle("renewal-op", str(key), 8, 3600)
+        return service.renew_pin(
+            key, payload.renewal_token, payload.new_pin, payload.confirmation
         )
 
     return invoke(action)

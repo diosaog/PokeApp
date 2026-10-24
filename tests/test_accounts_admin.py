@@ -122,7 +122,11 @@ class AdminAccountsTests(unittest.TestCase):
     def test_admin_reset_is_targeted_and_self_requires_current_pin(self):
         client = self.client()
         headers = {"Authorization": "Bearer dummy", "Idempotency-Key": str(uuid4())}
-        body = {"new_pin": "0071", "confirmation": "0071"}
+        body = {
+            "new_pin": "0071",
+            "confirmation": "0071",
+            "renewal_token": "synthetic-renewal-" + "x" * 48,
+        }
         self.assertEqual(
             client.post(
                 f"/v1/admin/accounts/{TRAINER_ID}/reset-pin", headers=headers, json=body
@@ -135,4 +139,7 @@ class AdminAccountsTests(unittest.TestCase):
         )
         self.assertEqual(r.status_code, 200)
         self.assertNotIn("0071", r.text)
-        self.assertEqual(self.service.calls[-1][1], {"target": target})
+        self.assertEqual(
+            self.service.calls[-1][1],
+            {"target": target, "renewal_token": body["renewal_token"]},
+        )

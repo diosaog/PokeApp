@@ -16,6 +16,8 @@ class SupabaseAccountRepository:
                 ("account_conflict", 409),
                 ("account_stale", 409),
                 ("account_forbidden", 403),
+                ("account_renewal_required", 403),
+                ("account_reconciliation_required", 409),
             ):
                 if code in str(exc):
                     raise AccountError(code.upper(), status) from None
@@ -26,6 +28,19 @@ class SupabaseAccountRepository:
             "account_registration_reserve",
             dict(p_operation=operation, p_hash=digest, p_name=name, p_slug=slug),
         )
+
+    def credential_intent(self, kind, key):
+        table, column = {
+            "pin": ("account_pin_changes", "operation_id"),
+            "grant": ("account_renewal_grants", "token_hash"),
+        }[kind]
+        try:
+            rows = self.client.table(table).select("*").eq(column, key).execute().data
+            if len(rows) > 1:
+                raise ValueError("ambiguous intent")
+            return rows[0] if rows else None
+        except Exception:
+            raise AuthBackendError("Credential reconciliation unavailable.") from None
 
     def complete(self, operation, digest, auth_id):
         return self.rpc(

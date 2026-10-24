@@ -1487,6 +1487,23 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/v1/auth/pin-renewal": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** Renew Pin */
+    post: operations["renew_pin_v1_auth_pin_renewal_post"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -1495,6 +1512,10 @@ export interface components {
     AccountCapabilities: {
       /** Enabled */
       enabled: boolean;
+      /** Registration Enabled */
+      registration_enabled: boolean;
+      /** Renewal Enabled */
+      renewal_enabled: boolean;
     };
     /** AccountStatusReceipt */
     AccountStatusReceipt: {
@@ -3639,6 +3660,15 @@ export interface components {
       /** Expected Revision */
       expected_revision: number;
     };
+    /** RenewalRequest */
+    RenewalRequest: {
+      /** New Pin */
+      new_pin: string;
+      /** Confirmation */
+      confirmation: string;
+      /** Renewal Token */
+      renewal_token: string;
+    };
     /** ReplaceConfigBody */
     ReplaceConfigBody: {
       /** Name */
@@ -3672,6 +3702,11 @@ export interface components {
       new_pin: string;
       /** Confirmation */
       confirmation: string;
+      /**
+       * Renewal Token
+       * @default
+       */
+      renewal_token: string;
     };
     /** ResolveTrialBody */
     ResolveTrialBody: {
@@ -7606,6 +7641,41 @@ export interface operations {
     requestBody: {
       content: {
         "application/json": components["schemas"]["ResetPinRequest"];
+      };
+    };
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PinChangeResponse"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  renew_pin_v1_auth_pin_renewal_post: {
+    parameters: {
+      query?: never;
+      header: {
+        "Idempotency-Key": string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["RenewalRequest"];
       };
     };
     responses: {

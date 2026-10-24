@@ -129,6 +129,7 @@ class SupabaseV2SchemaTests(unittest.TestCase):
                 "050_account_registration.sql",
                 "051_account_profiles.sql",
                 "052_account_administration.sql",
+                "053_versioned_account_credentials.sql",
             ],
         )
         for path in _migration_files():
@@ -259,9 +260,10 @@ class SupabaseV2SchemaTests(unittest.TestCase):
         ]:
             self.assertIn(token, sql)
 
-        self.assertNotRegex(sql, r"\bpin\b")
-        self.assertNotRegex(sql, r"\bpins\b")
-        self.assertNotRegex(sql, r"\bpassword\b")
+        # An intent-kind literal named 'pin' is not a stored credential. Inspect
+        # column declarations instead of rejecting comments or operation names.
+        self.assertNotRegex(sql, r"(?m)^\s*(?:pin|pins|password|pepper|secret)\s+(?:text|varchar|char|jsonb|bytea|integer)\b")
+        self.assertNotRegex(sql, r"add column\s+(?:pin|pins|password|pepper|secret)\b")
         self.assertIn("'chapa_dorada'", sql)
         self.assertIn('"promotion_blocked": true', sql)
 
@@ -338,7 +340,7 @@ class SupabaseV2SchemaTests(unittest.TestCase):
         self.assertTrue(bootstrap.startswith("-- ONLY FOR EMPTY POKEAPP V2 DATABASE."))
         self.assertEqual(bootstrap, render_bootstrap())
         self.assertIn(
-        "Source of truth: supabase/v2/migrations/001_core.sql through 052_account_administration.sql",
+        "Source of truth: supabase/v2/migrations/001_core.sql through 053_versioned_account_credentials.sql",
             bootstrap,
         )
         self.assertNotIn("drop table", lowered)
@@ -396,7 +398,7 @@ class SupabaseV2SchemaTests(unittest.TestCase):
             else:
                 self.assertIn(f"'{table}'", security_sql, table)
 
-        self.assertEqual(security_sql.count("enable row level security"), 26)
+        self.assertEqual(security_sql.count("enable row level security"), 29)
         self.assertIn("alter table public.%i enable row level security", security_sql)
 
 

@@ -15,7 +15,11 @@ from app.auth.models import (
     TrainerAuthIdentity,
 )
 from app.auth.identifiers import canonical_trainer_uuid
-from app.auth.ports import SupabaseAdminAuthPort, SupabaseAuthPort, TrainerAuthRepository
+from app.auth.ports import (
+    SupabaseAdminAuthPort,
+    SupabaseAuthPort,
+    TrainerAuthRepository,
+)
 
 
 def _clean_pin_for_current_semantics(pin: str) -> str:
@@ -38,10 +42,12 @@ class PinAuthBridge:
         trainers: TrainerAuthRepository,
         auth: SupabaseAuthPort,
         pepper: str,
+        credential_provider=None,
     ) -> None:
         self._trainers = trainers
         self._auth = auth
         self._pepper = pepper
+        self._credential_provider = credential_provider
 
     def authenticate(self, *, trainer_identifier: str, pin: str) -> PinAuthResult:
         cleaned_pin = _clean_pin_for_current_semantics(pin)
@@ -51,8 +57,14 @@ class PinAuthBridge:
         if not trainer.auth_user_id:
             raise AuthNotProvisionedError(trainer.id)
 
-        credential = build_internal_auth_credential(trainer.id, cleaned_pin, self._pepper)
-        session = self._auth.sign_in_with_password(email=credential.email, password=credential.password)
+        credential = (
+            self._credential_provider(trainer.id, cleaned_pin)
+            if self._credential_provider
+            else build_internal_auth_credential(trainer.id, cleaned_pin, self._pepper)
+        )
+        session = self._auth.sign_in_with_password(
+            email=credential.email, password=credential.password
+        )
 
         if not _same_uuid(session.user_id, trainer.auth_user_id):
             raise AuthIdentityMismatchError(trainer.id)
@@ -94,15 +106,27 @@ class TrainerAuthProvisioner:
                 auth_user_id=trainer.auth_user_id,
             )
 
-        credential = build_internal_auth_credential(trainer.id, cleaned_pin, self._pepper)
-        created_user = self._admin_auth.create_user(email=credential.email, password=credential.password)
+        credential = build_internal_auth_credential(
+            trainer.id, cleaned_pin, self._pepper
+        )
+        created_user = self._admin_auth.create_user(
+            email=credential.email, password=credential.password
+        )
         try:
-            updated_trainer = self._trainers.set_auth_user_id(trainer.id, created_user.user_id)
+            updated_trainer = self._trainers.set_auth_user_id(
+                trainer.id, created_user.user_id
+            )
         except Exception as exc:
-            raise PartialProvisioningError(trainer_id=trainer.id, auth_user_id=created_user.user_id) from exc
+            raise PartialProvisioningError(
+                trainer_id=trainer.id, auth_user_id=created_user.user_id
+            ) from exc
 
-        if not updated_trainer.auth_user_id or not _same_uuid(updated_trainer.auth_user_id, created_user.user_id):
-            raise PartialProvisioningError(trainer_id=trainer.id, auth_user_id=created_user.user_id)
+        if not updated_trainer.auth_user_id or not _same_uuid(
+            updated_trainer.auth_user_id, created_user.user_id
+        ):
+            raise PartialProvisioningError(
+                trainer_id=trainer.id, auth_user_id=created_user.user_id
+            )
 
         return AuthProvisioningResult(
             status=AuthProvisioningStatus.PROVISIONED,

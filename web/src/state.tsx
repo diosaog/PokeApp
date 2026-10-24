@@ -34,21 +34,29 @@ type State = {
   adminOperationPending: boolean;
   holdAdminNavigation: () => () => void;
   accountsEnabled: boolean;
+  registrationEnabled: boolean;
+  renewalEnabled: boolean;
 };
 const Context = createContext<State | null>(null);
 export function AppState({ children }: { children: ReactNode }) {
   const [me, setMe] = useState<Me | null>(null);
   const [season, setSeason] = useState("");
   const [accountsEnabled, setAccountsEnabled] = useState(false);
+  const [registrationEnabled, setRegistrationEnabled] = useState(false);
+  const [renewalEnabled, setRenewalEnabled] = useState(false);
   useEffect(() => {
     const controller = new AbortController();
     void api
-      .request<{ enabled: boolean }>(
-        "/v1/auth/account-capabilities",
-        { signal: controller.signal },
-        false,
-      )
-      .then((value) => setAccountsEnabled(value.enabled === true))
+      .request<{
+        enabled: boolean;
+        registration_enabled: boolean;
+        renewal_enabled: boolean;
+      }>("/v1/auth/account-capabilities", { signal: controller.signal }, false)
+      .then((value) => {
+        setAccountsEnabled(value.enabled === true);
+        setRegistrationEnabled(value.registration_enabled === true);
+        setRenewalEnabled(value.renewal_enabled === true);
+      })
       .catch(() => {});
     return () => controller.abort();
   }, []);
@@ -76,6 +84,8 @@ export function AppState({ children }: { children: ReactNode }) {
           adminOperationPending: adminHolds > 0,
           holdAdminNavigation,
           accountsEnabled,
+          registrationEnabled,
+          renewalEnabled,
         }}
       >
         {children}

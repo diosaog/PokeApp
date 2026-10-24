@@ -82,10 +82,12 @@ const linkGroups = [
   },
 ] as const;
 function Login() {
-  const { setMe, accountsEnabled } = useApp(),
+  const { setMe, accountsEnabled, registrationEnabled, renewalEnabled } =
+      useApp(),
     [pending, setPending] = useState(false),
     [error, setError] = useState<unknown>(null),
     [register, setRegister] = useState(false),
+    [renew, setRenew] = useState(false),
     [created, setCreated] = useState("");
   return (
     <main className="login">
@@ -111,7 +113,7 @@ function Login() {
         <div className="orbit" aria-hidden="true" />
       </section>
       <section className="login-form">
-        {register && accountsEnabled ? (
+        {register && registrationEnabled ? (
           <RegistrationForm
             onCancel={() => setRegister(false)}
             onRegistered={(name) => {
@@ -179,10 +181,21 @@ function Login() {
             <p className="caption">
               Tu PIN y tu sesión no se guardan en este navegador.
             </p>
-            {accountsEnabled && (
-              <button disabled={pending} onClick={() => setRegister(true)}>
-                Crear cuenta
-              </button>
+            {registrationEnabled && (
+              <>
+                <p>¿Todavía no tienes cuenta?</p>
+                <button disabled={pending} onClick={() => setRegister(true)}>
+                  Crear cuenta
+                </button>
+              </>
+            )}
+            {renewalEnabled && (
+              <>
+                <button disabled={pending} onClick={() => setRenew(!renew)}>
+                  Renovar PIN con autorización
+                </button>
+                {renew && <PinForm renewal />}
+              </>
             )}
             {accountsEnabled && sessionStorage.getItem(pinRecoveryKey) && (
               <PinForm recovery />

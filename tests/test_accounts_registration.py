@@ -88,7 +88,7 @@ class RegistrationTests(unittest.TestCase):
     def setUp(self):
         self.repo, self.auth = Repository(), Auth()
         self.service = AccountService(
-            self.repo, self.auth, pepper="test-only-pepper", enabled=True
+            self.repo, self.auth, pepper="test-only-pepper", enabled=True, access_code="synthetic-invitation"
         )
         self.key = uuid4()
 
@@ -98,7 +98,7 @@ class RegistrationTests(unittest.TestCase):
             name="New Trainer",
             pin="0061",
             confirmation="0061",
-            access_code="PokeApp679",
+            access_code="synthetic-invitation",
         )
         data.update(kw)
         return self.service.register(**data)
@@ -239,7 +239,7 @@ class RegistrationTests(unittest.TestCase):
             trainer_name="New Trainer",
             pin="0061",
             confirmation="0061",
-            access_code="PokeApp679",
+            access_code="synthetic-invitation",
         )
         headers = {"Idempotency-Key": str(self.key)}
         response = client.post("/v1/auth/register", json=body, headers=headers)

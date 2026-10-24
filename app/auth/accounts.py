@@ -42,9 +42,22 @@ def account_name(value: str) -> tuple[str, str]:
 
 
 class AccountService:
-    def __init__(self, repository, auth, *, pepper: str, enabled: bool = False):
+    def __init__(
+        self,
+        repository,
+        auth,
+        *,
+        pepper: str,
+        enabled: bool = False,
+        access_code: str = "",
+    ):
         self.repository, self.auth = repository, auth
         self.pepper, self.enabled = pepper, enabled
+        self.access_code = access_code
+
+    @property
+    def registration_enabled(self):
+        return bool(self.enabled and self.access_code)
 
     def fingerprint(self, value) -> str:
         return hmac.new(
@@ -62,10 +75,10 @@ class AccountService:
     def register(
         self, operation: UUID, name: str, pin: str, confirmation: str, access_code: str
     ):
-        if not self.enabled or not self.pepper:
+        if not self.registration_enabled or not self.pepper:
             raise AccountError("ACCOUNTS_UNAVAILABLE", 503)
-        # Fixed approved invitation, server only. It grants no existing-account access.
-        if not hmac.compare_digest(access_code.encode(), b"PokeApp679"):
+        # Private deployment configuration, never a client constant.
+        if not hmac.compare_digest(access_code.encode(), self.access_code.encode()):
             raise AccountError("REGISTRATION_REJECTED", 400)
         if not re.fullmatch(r"[0-9]{4}", pin) or pin != confirmation:
             raise AccountError("INVALID_PIN_CONFIRMATION", 422)

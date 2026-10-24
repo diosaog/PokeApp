@@ -17,11 +17,10 @@ def auth_pin_pepper_from_env(environ: Mapping[str, str] | None = None) -> str:
 
 
 def credential_keyring_from_env(environ: Mapping[str, str]):
-    """Explicit SEC-PIN-01 preparation only; no implicit live-env loading.
+    """Load SEC-PIN-01 configuration only from the explicitly supplied mapping.
 
-    The API container does not call this until the versioned SQL/Auth migration
-    is integrated. Missing/invalid configuration fails, rather than reverting to
-    the existing unversioned credential path.
+    APIConfig invokes this when versioned settings are present. Partial/invalid
+    configuration fails rather than reverting to an unversioned credential path.
     """
     from datetime import datetime
 

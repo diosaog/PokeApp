@@ -1,7 +1,10 @@
 import { test, expect, type Page } from "@playwright/test";
 import { fixture, login, navigate, tid } from "./fixtures";
 
-async function accountRoutes(page: Page, { empty = false, admin = true } = {}) {
+async function accountRoutes(
+  page: Page,
+  { empty = false, admin = true, accounts = true } = {},
+) {
   await fixture(page);
   const calls: { path: string; body: unknown; key: string | undefined }[] = [];
   let name = "Antonio",
@@ -31,7 +34,11 @@ async function accountRoutes(page: Page, { empty = false, admin = true } = {}) {
         },
       });
     if (path === "/v1/auth/account-capabilities")
-      return json({ enabled: true });
+      return json({
+        enabled: accounts,
+        registration_enabled: accounts,
+        renewal_enabled: true,
+      });
     if (path === "/v1/me")
       return json({
         trainer_id: tid,
@@ -42,6 +49,14 @@ async function accountRoutes(page: Page, { empty = false, admin = true } = {}) {
     if (empty && path === "/v1/read/seasons")
       return json({ items: [], offset: 0, has_more: false });
     if (path === "/v1/auth/register") {
+      if (req.postDataJSON().access_code !== "fixture-invitation")
+        return route.fulfill({
+          status: 400,
+          json: {
+            error: { code: "REGISTRATION_REJECTED", message: "Rejected" },
+          },
+          headers: { "Access-Control-Allow-Origin": "*" },
+        });
       calls.push({
         path,
         body: req.postDataJSON(),
@@ -87,7 +102,7 @@ async function accountRoutes(page: Page, { empty = false, admin = true } = {}) {
       revision++;
       return json({ trainer_id: tid, revision });
     }
-    if (path === "/v1/account/pin") {
+    if (path === "/v1/account/pin" || path === "/v1/auth/pin-renewal") {
       calls.push({
         path,
         body: "redacted",
@@ -138,12 +153,29 @@ for (const width of [1440, 390])
     const errors: string[] = [];
     page.on("pageerror", (e) => errors.push(e.message));
     await page.goto("/");
+    await expect(
+      page.getByText("¿Todavía no tienes cuenta?", { exact: true }),
+    ).toBeVisible();
+    await page.screenshot({
+      path: info.outputPath(`login-${width}.png`),
+      fullPage: true,
+    });
+    await page
+      .getByRole("button", { name: "Crear cuenta", exact: true })
+      .click();
+    await page.getByRole("button", { name: "Volver a entrar" }).click();
     await page
       .getByRole("button", { name: "Crear cuenta", exact: true })
       .click();
     await page.getByLabel("Nombre de entrenador").fill("Antonio");
     await page.getByLabel("PIN de cuatro cifras").fill("0017");
     await page.getByLabel("Repetir PIN", { exact: true }).fill("0017");
+    await page.getByLabel("Código de acceso a la App").fill("wrong-invitation");
+    await page
+      .getByRole("button", { name: "Crear cuenta", exact: true })
+      .click();
+    await expect(page.getByRole("alert")).toBeVisible();
+    expect(calls).toHaveLength(0);
     await page
       .getByLabel("Código de acceso a la App")
       .fill("fixture-invitation");
@@ -203,6 +235,10 @@ for (const width of [1440, 390])
     await expect(
       page.getByRole("button", { name: "Entrar a PokeApp" }),
     ).toBeVisible();
+    await page.getByLabel("Entrenador", { exact: true }).fill("antonio-nuevo");
+    await page.getByLabel("PIN", { exact: true }).fill("0028");
+    await page.getByRole("button", { name: "Entrar a PokeApp" }).click();
+    await expect(page.getByRole("banner")).toBeVisible();
     expect(calls.map((c) => c.path)).toEqual([
       "/v1/auth/register",
       "/v1/account/name",
@@ -211,6 +247,31 @@ for (const width of [1440, 390])
     ]);
     expect(errors).toEqual([]);
   });
+
+test("accounts OFF hides registration while verified renewal remains available", async ({
+  page,
+}) => {
+  const calls = await accountRoutes(page, { accounts: false });
+  await page.goto("/");
+  await expect(
+    page.getByRole("button", { name: "Entrar a PokeApp" }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("button", { name: "Crear cuenta", exact: true }),
+  ).toHaveCount(0);
+  await page
+    .getByRole("button", { name: "Renovar PIN con autorización" })
+    .click();
+  await expect(page.getByLabel("PIN actual")).toHaveCount(0);
+  await page
+    .getByLabel("Código de renovación")
+    .fill("synthetic-renewal-authorization-token-000000000000");
+  await page.getByLabel("Nuevo PIN", { exact: true }).fill("0028");
+  await page.getByLabel("Repetir nuevo PIN").fill("0028");
+  await page.getByRole("button", { name: "Cambiar PIN", exact: true }).click();
+  await expect(page.getByText("PIN cambiado.", { exact: false })).toBeVisible();
+  expect(calls.map((c) => c.path)).toEqual(["/v1/auth/pin-renewal"]);
+});
 
 test("existing season collection and Admin account confirmation remain separate", async ({
   page,
