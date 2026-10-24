@@ -1,6 +1,6 @@
 # Accounts and profiles — controlled production activation
 
-2026-10-24. **DEPLOYED / WAITING OWNER REGISTRATION. NOT DONE GLOBAL.**
+2026-10-24. **DEPLOYED / ANTO ADMIN VERIFIED / WAITING OWNER PANEL ACCEPTANCE.**
 Application `912908179c310630c0d10145969e1013b5dcbad6`; documentation HEAD is the
 subsequent Git commit. [Live continuation](work-in-progress/accounts-profile-live.md),
 [release evidence](accounts-release-evidence.json).
@@ -21,7 +21,7 @@ No Supabase API/signing keys were rotated. Eight account tables deny browser acc
 Advisor has24ERROR/5WARN/40INFO; added WARN concerns the intentional read-only
 SECURITY DEFINER session predicate used by RLS, not a mutation/elevation capability.
 
-Railway **3d03e4eb-62a1-414b-9cb4-e1f4af7d6f39 SUCCESS**, health200.
+Initial Railway release **3d03e4eb-62a1-414b-9cb4-e1f4af7d6f39 SUCCESS**, health200.
 Cloudflare deployment **4ad95457-bc53-4e0d-8830-9482ce3795a6**, version
 **8330afcf-e94c-4135-858d-5ae60cff1704**,100%, correct API and matching build bytes.
 The first image compiled but an old startup guard required the retired v1 pepper;
@@ -39,22 +39,33 @@ were retained. Private harness error-field, encoding and navigation waits were
 corrected; no corresponding product defect or false PASS was hidden.
 
 Two disposable acceptance accounts and their portrait were removed by exact IDs.
-Final trainers/Auth users/sessions/refresh/Storage objects are all0. Credential,
+After that cleanup, trainers/Auth users/sessions/refresh/Storage objects were all0. Credential,
 registration, PIN, command and grant journals contain no test identities.
 V2 rate-limit security counters and the rollout policy remain intentionally.
 
-**Next is the owner's manual creation of Anto.** Login exposes Crear cuenta;
-registration requires both the ordinary invitation and a private initial token.
-The token is in `Anto-alta-inicial.txt` under the private evidence directory; its
-hash is the only server configuration value. Registration never grants Admin.
-The owner chooses their own PIN. After independent owner confirmation, the
-operator will verify exact trainer/Auth UUIDs and run one audited private
-`tools/account_admin_bootstrap.py` transaction. No HTTP elevation endpoint exists.
-The zero-admin, concurrency, identity-conflict and replay behavior passed locally.
+**Initial Anto activation is now complete.** The owner manually registered and
+explicitly authorized promotion. Exact trainer `32ec4e97-bf04-4a28-a68d-88c2194f4b65`
+and Auth `3246e081-5fa4-4edd-bf15-233746a43edf` were verified against the completed
+v2 registration, creation time, provisioning HMAC and private authorization;
+the name was not sufficient. `tools/account_admin_bootstrap.py` produced one
+audited private receipt. There is one trainer, one Auth user and one admin.
+PIN/password and owner sessions are unchanged; no duplicate identity was created.
 
-New Anto/Admin status: **WAITING OWNER**. No real admin promotion, owner Admin-panel
-acceptance or general invitation registration activation is claimed yet. Keep the
-initial-registration gate until those checks finish. No other phase starts.
+Real `/v1/me` returns200/is_admin=true and `/v1/admin/accounts` returns200 for Anto.
+A temporary private verification session was revoked locally after the proof;
+no owner PIN was requested or changed. Health200. The initial token is invalidated,
+its private handoff replaced by a consumed notice and its DPAPI material removed.
+Both registration configuration values are blank, leaving general registration
+closed while account management stays enabled. Configuration-only Railway
+deployment **372df3ed-1d48-4ec4-98c9-0a5a9604c6ed SUCCESS** uses unchanged source.
+The old authorization is rejected with503/ACCOUNTS_UNAVAILABLE and no new account.
+Direct Supabase signup remains disabled; v2 keys and45 migration records unchanged.
+No migration/reset, Cloudflare deployment or historical suite was repeated.
+
+**WAITING OWNER PANEL ACCEPTANCE:** refresh/re-enter the web and open Administración.
+General registration stays CLOSED until the owner confirms the panel works.
+No further promotion is needed; the private receipt prevents bootstrap reuse.
+No other phase starts. Global owner acceptance is not claimed.
 Private evidence: `%LOCALAPPDATA%/PokeApp-migration-evidence/accounts-release/20261024/`.
 
 ---

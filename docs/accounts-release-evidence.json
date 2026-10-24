@@ -1,5 +1,5 @@
 {
-  "status": "WAITING_OWNER_REGISTRATION",
+  "status": "ADMIN_PROMOTED_WAITING_OWNER_PANEL",
   "application_source": "912908179c310630c0d10145969e1013b5dcbad6",
   "backup": {
     "bytes": 1223902,
@@ -29,7 +29,8 @@
     "catalog_items": 62,
     "global_settings": 2,
     "v1_shadow_tables_identical": 15,
-    "v1_shadow_rows": 135
+    "v1_shadow_rows": 135,
+    "observation": "Historical post-reset/pre-owner-registration baseline, not current account counts"
   },
   "migrations": {
     "records": 45,
@@ -57,14 +58,19 @@
     "direct_signup_disabled": true,
     "v1_pepper_removed": true,
     "versioned_keys_verified": true,
-    "initial_registration_controlled": true,
-    "no_secrets_in_bundle": true
+    "initial_registration_controlled": false,
+    "no_secrets_in_bundle": true,
+    "initial_authorization_retired": true,
+    "registration_enabled": false,
+    "account_management_enabled": true
   },
   "railway": {
-    "id": "3d03e4eb-62a1-414b-9cb4-e1f4af7d6f39",
+    "id": "372df3ed-1d48-4ec4-98c9-0a5a9604c6ed",
     "status": "SUCCESS",
     "image": "sha256:565c8affc85931ac8a6fb58f1a95a17e2bafdfe5bba90d463f9cb41b6c9ac5b7",
-    "health": 200
+    "health": 200,
+    "initial_release_id": "3d03e4eb-62a1-414b-9cb4-e1f4af7d6f39",
+    "configuration_only_rollout": true
   },
   "cloudflare": {
     "deployment_id": "4ad95457-bc53-4e0d-8830-9482ce3795a6",
@@ -122,17 +128,58 @@
     }
   },
   "bootstrap": {
-    "local_proof": "PASS",
-    "production_promotions": 0,
-    "owner_account": "WAITING_OWNER",
-    "general_registration": "BLOCKED_BY_PRIVATE_INITIAL_TOKEN"
+    "local_proof": "PASS, retained",
+    "production_promotions": 1,
+    "owner_account": "ANTO_ADMIN_VERIFIED",
+    "general_registration": "CLOSED_UNTIL_OWNER_PANEL_ACCEPTANCE",
+    "binding_proof": [
+      "independent owner confirmation",
+      "private initial authorization",
+      "completed v2 registration and exact trainer/Auth IDs",
+      "creation timestamp",
+      "server provisioning HMAC"
+    ],
+    "procedure": "tools/account_admin_bootstrap.py",
+    "current_proof": {
+      "status": "ADMIN_PROMOTED_WAITING_OWNER_PANEL",
+      "trainer_id": "32ec4e97-bf04-4a28-a68d-88c2194f4b65",
+      "auth_user_id": "3246e081-5fa4-4edd-bf15-233746a43edf",
+      "trainers": 1,
+      "auth_users": 1,
+      "admins": 1,
+      "bootstrap_receipts": 1,
+      "pin_unchanged": true,
+      "owner_sessions_preserved": true,
+      "me_is_admin": true,
+      "admin_api_status": 200,
+      "health": 200,
+      "registration_enabled": false,
+      "initial_authorization_invalidated": true,
+      "old_token_request_denied": true,
+      "direct_supabase_signup_disabled": true,
+      "v1_pepper_absent": true,
+      "migration_records_unchanged": 45,
+      "railway_configuration_deployment": "372df3ed-1d48-4ec4-98c9-0a5a9604c6ed",
+      "application_source": "912908179c310630c0d10145969e1013b5dcbad6",
+      "cloudflare_unchanged": true,
+      "owner_panel_acceptance": "PENDING"
+    },
+    "hosted_auth_probe": "Temporary Admin-generated link session; no email/PIN change; probe session revoked, owner sessions preserved",
+    "retired_material": [
+      "initial token/hash removed from DPAPI bundle",
+      "initial plaintext handoff replaced by consumed notice"
+    ],
+    "negative_proof": {
+      "status": 503,
+      "code": "ACCOUNTS_UNAVAILABLE",
+      "no_account_or_registration_or_bootstrap_journal_created": true
+    },
+    "harness_adjustment": "Private denial assertion corrected from error to FastAPI detail; no product change"
   },
   "public_launcher": "0.20.0 unchanged",
   "physical_writes": "DISABLED",
   "pending": [
-    "owner manually registers Anto",
-    "independent exact UUID/Auth binding verification",
-    "one private admin promotion and owner panel acceptance",
-    "remove initial-registration gate; enable invitation-only registration"
+    "owner confirms Admin panel works",
+    "only after owner confirmation, controlled reopening of invitation-only registration; initial token remains retired"
   ]
 }

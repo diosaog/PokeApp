@@ -1,9 +1,54 @@
 # Accounts and profiles - live handoff
 
-2026-10-24. **PRODUCTION DEPLOYED — WAITING OWNER REGISTRATION. NOT DONE GLOBAL.**
+2026-10-24. **INITIAL ANTO ADMIN ACTIVATION COMPLETE — WAITING OWNER PANEL ACCEPTANCE.**
 Application source `912908179c310630c0d10145969e1013b5dcbad6` pushed before deployment.
 Release entry `d5e83993846d3ce3f08c3a429171c1e5a0f786e1`; preparation `cbe8acf`.
 [Release report](../accounts-profile-report.md), [evidence](../accounts-release-evidence.json).
+
+## Current state — initial administrator verified
+
+Resume HEAD `e4241f1a8d898088be91ce9ceeb3d6b6c3212ddd`, main/origin aligned.
+The owner confirmed successful manual registration and explicitly authorized only
+the private initial promotion. Exact trainer `32ec4e97-bf04-4a28-a68d-88c2194f4b65`
+and Auth user `3246e081-5fa4-4edd-bf15-233746a43edf` match the completed v2
+registration created at `2026-10-24T12:35:55.945499Z`, the server provisioning
+HMAC and private initial authorization. Name alone was not used as authority.
+There is one trainer, one Auth user, one completed registration and no ambiguity.
+
+`tools/account_admin_bootstrap.py` executed once for those exact identities with
+the independent owner-verification reference. One private bootstrap receipt and
+one administrator exist. PIN/password, UUIDs and owner sessions are preserved.
+Real production `/v1/me` returns200 with `is_admin=true`; `/v1/admin/accounts`
+returns200 with that one Anto account. A private Admin-generated verification
+session was used without requesting/changing the PIN or sending email; only that
+temporary session was revoked afterwards. No replacement account was created.
+
+The initial authorization is consumed/invalidated. Both registration configuration
+values (ordinary access code and initial-token hash) are empty in Railway; account
+management remains ON. Configuration-only deployment
+`372df3ed-1d48-4ec4-98c9-0a5a9604c6ed` is SUCCESS, unchanged application source,
+health200. Capabilities report registration OFF, renewal ON, bootstrap not required.
+The old initial token is denied with503/ACCOUNTS_UNAVAILABLE and no account/journal
+creation. A private harness initially looked for `error` instead of FastAPI's
+`detail`; correcting only that assertion proved the denial. No product change.
+Temporary token/hash material was removed from the private DPAPI bundle and
+`Anto-alta-inicial.txt` now contains only a consumed notice. The ordinary invitation
+is retained privately for a later authorized opening. The one-use SQL receipt
+prevents another initial promotion; no public promotion route or temporary SQL
+function exists.
+
+Direct Supabase signup remains OFF, v2 credential controls remain active, old
+pepper absent and migration count45 unchanged. No reset, migration, broad test
+matrix, Cloudflare/V1/Shadow/Launcher or competitive-data operation was repeated.
+Private evidence: `anto-admin-final.json`, `anto-admin-bootstrap-result.json`,
+`anto-authority-probe-result.json` and `anto-registration-close-result.json` in
+the release evidence directory below.
+
+**NEXT EXACT ACTION:** owner refreshes/re-enters the web and opens Administración.
+Keep general registration CLOSED until the owner confirms their panel works.
+Only after that confirmation may the ordinary invitation be restored in a
+controlled configuration rollout; the initial-token hash stays absent. Do not
+repeat promotion or cleanup. Global owner acceptance is still pending. STOP.
 
 ## Completed remote units — DO NOT REPEAT
 
@@ -47,7 +92,7 @@ Cloudflare deployment `4ad95457-bc53-4e0d-8830-9482ce3795a6`, version
 Public Launcher pinned independently to0.20.0, unchanged bytes/ETag; no R2 writes.
 Production physical writes remain disabled; no Phase22/23 work.
 
-## Acceptance and exact final state
+## Historical release acceptance — before owner registration
 
 24 focused Python,5 React,2 Worker and2 local Edge cases PASS. Real services:
 26 FastAPI HTTP checks plus direct-signup and5 private REST/elevation denials;
@@ -66,13 +111,13 @@ No repeated registration after an unknown outcome: initial browser failures
 preceded registration and were reconciled before retry.
 
 Both acceptance accounts/Auth identities and their one photo removed by exact
-UUID/key. Final trainers/Auth users/sessions/refresh/Storage objects all0;
+UUID/key. At that cleanup, trainers/Auth users/sessions/refresh/Storage objects all0;
 credentials/registrations/PIN intents/commands/grants/session guards all0.
 Opaque v2 security rate counters and the credential policy remain intentionally.
 All52 old public test tables empty; catalog/settings/Shadow preserved. Migrations
-remain45; no admin promotion has run remotely. No owner account/PIN invented.
+remained45; no admin promotion had run remotely. No owner account/PIN invented.
 
-## NEXT EXACT ACTION — OWNER MANUAL REGISTRATION
+## Historical owner-registration instructions — completed and superseded above
 
 Registration remains controlled by a private initial token in addition to the
 normal invitation. `POKEAPP_REGISTRATION_BOOTSTRAP_HASH` stores only its hash.
