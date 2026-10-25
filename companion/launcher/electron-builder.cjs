@@ -1,7 +1,24 @@
+const fs = require("node:fs");
 const path = require("node:path");
 if (!process.env.POKEAPP_PACKAGE_STAGE || !process.env.POKEAPP_PACKAGE_OUTPUT)
   throw new Error("Use tools/build_launcher_windows.ps1");
 const privateCandidate = process.env.POKEAPP_PRIVATE_CANDIDATE === "1";
+// Updates: only the PUBLIC key and an HTTPS feed are baked in, together or not
+// at all. Without both, the shipped updater stays disabled.
+const updateKeyFile = process.env.POKEAPP_UPDATE_PUBLIC_KEY_FILE || "";
+const updateFeed = process.env.POKEAPP_UPDATE_FEED || "";
+if (!!updateKeyFile !== !!updateFeed)
+  throw new Error("Update public key and feed must be configured together");
+if (updateFeed && !updateFeed.startsWith("https://"))
+  throw new Error("Update feed must use HTTPS");
+const updateKey = updateKeyFile ? fs.readFileSync(updateKeyFile, "utf8") : null;
+if (updateKey && /PRIVATE KEY/.test(updateKey))
+  throw new Error("Refusing to embed a private key");
+// Disposable version numbers are for private candidates only.
+const buildVersion = process.env.POKEAPP_BUILD_VERSION || "";
+if (buildVersion && !privateCandidate)
+  throw new Error("Version override is limited to private candidates");
+const channel = privateCandidate ? "private" : "stable";
 const productName = privateCandidate
   ? "PokeApp Launcher Private"
   : "PokeApp Launcher";
@@ -14,7 +31,18 @@ module.exports = {
   artifactName: privateCandidate
     ? "PokeApp-Launcher-Private-Setup.exe"
     : "PokeApp-Launcher-Setup.exe",
-  extraMetadata: { pokeappPrivateCandidate: privateCandidate },
+  extraMetadata: {
+    pokeappPrivateCandidate: privateCandidate,
+    ...(buildVersion ? { version: buildVersion } : {}),
+    ...(updateKey
+      ? {
+          pokeappUpdate: {
+            publicKey: updateKey,
+            feed: { stable: null, private: null, [channel]: updateFeed },
+          },
+        }
+      : {}),
+  },
   asar: true,
   npmRebuild: false,
   directories: { output: process.env.POKEAPP_PACKAGE_OUTPUT },

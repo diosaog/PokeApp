@@ -2,7 +2,16 @@ param(
     [Parameter(Mandatory=$true)][string]$BuildRoot,
     [Parameter(Mandatory=$true)][string]$Python,
     [Parameter(Mandatory=$true)][string]$Dotnet,
-    [switch]$PrivateCandidate
+    [switch]$PrivateCandidate,
+    # Optional signed updates. The signing key must live outside the repository
+    # and the build root; only the public key is embedded in the package.
+    [string]$UpdatePublicKeyFile = '',
+    [string]$UpdateFeed = '',
+    [string]$UpdateSigningKeyFile = '',
+    [string]$UpdateDownloadUrl = '',
+    [string]$UpdateMinimumVersion = '',
+    [string]$UpdateNotes = '',
+    [string]$BuildVersion = ''
 )
 $ErrorActionPreference = 'Stop'
 $repo = Split-Path -Parent $PSScriptRoot
@@ -46,7 +55,24 @@ try {
     $env:POKEAPP_PACKAGE_OUTPUT = Join-Path $build 'release'
     $env:POKEAPP_PRIVATE_CANDIDATE = if ($PrivateCandidate) { '1' } else { '0' }
     $env:CSC_IDENTITY_AUTO_DISCOVERY = 'false'
+    $env:POKEAPP_UPDATE_PUBLIC_KEY_FILE = $UpdatePublicKeyFile
+    $env:POKEAPP_UPDATE_FEED = $UpdateFeed
+    $env:POKEAPP_BUILD_VERSION = $BuildVersion
     Checked 'companion/launcher/node_modules/.bin/electron-builder.cmd' @(
         '--projectDir','companion/launcher','--config','electron-builder.cjs','--win','nsis','--x64','--publish','never')
     Checked $buildPython @('tools/audit_launcher_package.py','--build',$build)
+    if ($UpdateSigningKeyFile) {
+        $key = [IO.Path]::GetFullPath($UpdateSigningKeyFile)
+        if ($key.StartsWith($repo, [StringComparison]::OrdinalIgnoreCase) -or $key.StartsWith($build, [StringComparison]::OrdinalIgnoreCase)) {
+            throw 'Update signing key must be outside the repository and the build root'
+        }
+        $installer = Get-ChildItem -LiteralPath (Join-Path $build 'release') -Filter '*.exe' | Select-Object -First 1
+        $channel = if ($PrivateCandidate) { 'private' } else { 'stable' }
+        $authenticode = (Get-AuthenticodeSignature -LiteralPath $installer.FullName).Status.ToString()
+        $version = if ($BuildVersion) { $BuildVersion } else { (Get-Content companion/launcher/package.json -Raw | ConvertFrom-Json).version }
+        Checked 'node' @('tools/sign_launcher_update.cjs','--installer',$installer.FullName,'--version',$version,
+            '--channel',$channel,'--minimum',$UpdateMinimumVersion,'--notes',$UpdateNotes,'--url',$UpdateDownloadUrl,
+            '--key-file',$key,'--authenticode',$authenticode,'--build-root',$build,
+            '--out',(Join-Path $build ('release/' + $channel + '.json')))
+    }
 } finally { Pop-Location }
