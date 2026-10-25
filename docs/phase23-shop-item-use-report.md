@@ -1,5 +1,8 @@
 # PokeApp - Phase 23B integration report
 
+Historical23B closure. Current native-revive progress and limits are in the
+[23C report](phase23c-native-revive-report.md) and the shared live handoff.
+
 2026-10-25. **PHASE 23 PARTIAL / NOT DEPLOYED.** Entry main/origin
 `0c074a84a33a63588e0ff0a432dcac421ec8c451`,0/0,clean tracked tree.
 The closure commit carries source and documentation; obtain exact HEAD from Git.

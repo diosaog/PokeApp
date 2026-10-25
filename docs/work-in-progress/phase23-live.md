@@ -1,44 +1,62 @@
 # Phase 23 - live handoff
 
-Observed2026-10-25. **PHASE23 PARTIAL / 23B LOCAL VALIDATION COMPLETE / NOT DEPLOYED.**
-Entry main/origin `0c074a84a33a63588e0ff0a432dcac421ec8c451`,clean tracked,0/0.
-Source and docs are in this closure commit; derive final HEAD from Git.
-[Report](../phase23-shop-item-use-report.md) / [Evidence](../phase23b-local-evidence.json).
+Observed2026-10-25. **23C DONE LOCAL ENGINEERING / Phase23 PARTIAL / NOT DEPLOYED.**
+Entry main/origin `e741822e4af5e2d06dac4338d0f27567e1754c6c`, fetched0/0,
+clean tracked. Implementation committed/pushed `6469f75d6d2825b3c770d858b1ab621ecab6a1e4`.
+Closure commit carries this record; obtain exact final HEAD from Git.
+[23C report](../phase23c-native-revive-report.md) /
+[evidence](../phase23c-local-evidence.json). Historical23B evidence retained.
 
-## Completed - do not repeat
+## Completed; do not repeat
 
-- Retained PostgreSQL17.11 and .venv-api work; no installation required.
-- Unapplied054 hardened: private proof, distinct source/result hashes, expiry,
-  claimant/target reservation, old-redemption bypass denial. API service_role
-  can read proof, never create it. No production proof issuer exists.
-- Real PG10 groups PASS: concurrency, two Launchers, false proof, expiry/scope,
-  lost response, rollback and exactly-once purchase debit/verified consumption.
-- Upgrade/bootstrap054:16,376 identical schema lines;62 initialized pre054 table
-  hashes preserved. Owned databases dropped, loopback cluster stopped.
-- Existing-engine journal bridge proves local apply/recovery/lost acknowledgement
-  with SYNTHETIC test_marking. Explicit capability only; no runtime/IPC activation.
-- Python75 unique focused tests,React10,Edge2 desktop/mobile,build/schema,
-  syntax/targeted lint/format/diff PASS. No unrelated full matrix.
-- Inventory/Launcher states visible without enabling physical actions. Internal
-  shields retained; direct physical revive/steal can no longer consume prematurely.
+- Exact existing revive: Caja8 -> first free slot in Cajas1-7, preserving all PKM
+  bytes/attributes. No healing, party insertion, new scoring or reward semantics.
+- Native effect:192 checks PASS across X,Y,OR,AS,SN,MN,US,UM. Authentic public
+  format fixtures with explicitly synthetic dead-target setup; originals unchanged.
+- Independent server service derives plan from trusted source/entity/revision;
+  checks actual result bytes and parser read, never client claims or embedded keys.
+- Real localPG/native/Windows journeys:all8 PASS; exactly one consumption after
+  proof, replay/lost acknowledgement/restart, flags retained, no extra coin debit.
+  Six injected interruption gates and extra concurrency/CAS/permission/stale-source
+  gates PASS. Final X rerun covers strengthened effect/revision and sync bindings.
+- Python57 unique focused PASS (15 new verifier/binding,26 bridge/Launcher,
+  15 schema,1 production-denial). Native build/compile, focused lint/format/diff PASS.
+  No full historical/React/browser matrices rerun. Existing web states reused.
+- Real native ingestion discovered048 SQLSTATE42702. Forward055 only renames its
+  local evidence variable; applied048 remains untouched. Through055 upgrade/
+  bootstrap16,376 identical schema lines and64 pre055 table hashes preserved.
+  054 untouched; prior23B full SQL gates retained. 054/055 NOT applied remotely.
+- Existing backup/no-replace journal, explicit closed-emulator confirmation and
+  sync exclusion reused. New Spanish confirmation states exact move/server check.
 
-## Remaining gates
+## Trust/release limits
 
-**Authorizations DONE LOCAL; real PG PASS; Launcher PARTIAL; certified physical
-application NO; Phase23 GLOBAL PARTIAL.**
+Production mutation registry is EMPTY. No runtime/IPC activation or public verifier
+endpoint. The tested private evidence recorder is LOOPBACK TEST infrastructure,
+using retained server source and locked context CAS; never an API service_role
+proof-write bypass. Deployable restricted verifier identity/transport and durable
+remote artifact retention still need provisioning and acceptance.
 
-Production effect registry is empty. Native eight-game proof covers marking only.
-No native revive mapper or two-save steal protocol exists. Local harness reads its
-own files independently and inserts proof as local postgres; this is NOT a deployed
-anti-forgery verifier. No client APPLIED string/embedded signing secret suffices.
-Legacy redemption receipts preserve their internal snapshot; reconcile physical
-status reads before future activation. Expired/uncertain claims stay blocked.
+Proof validates the received artifact, not continuous use on an untrusted user's
+machine. Local physical application used disposable copies; no actual game or
+Azahar was certified. Existing Phase22 emulator/platform/durability/package gates
+remain. Historical redemption receipt physical-pending snapshots require read
+projection reconciliation before activation. Two-save theft is not implemented.
 
-Next: native revive/identity contract plus trusted production verification design,
-then authentic-copy qualification and outstanding real Azahar gates. Do not deploy
-054 or enable physical writes based only on this engineering bridge. No Phase24.
+## Exact next action / safety
 
-Private evidence: `%LOCALAPPDATA%/PokeApp-migration-evidence/phase23b/20261025/`.
-Final PG file:pg-final.json. Early harness failure is not a PASS. No owner account,
-economy, save, remote service, V1 or Shadow was accessed/changed. Explicit staging;
-protected guide and eight unrelated untracked files remain outside closure.
+Prepare the scoped private verifier transport/provisioning and physical-status read
+integration; finish real Azahar/runtime qualification when the executable test game
+is available. Before any separately authorized rollout, fresh remote baseline,
+privilege/retention review, hosted acceptance, committed migration source and
+package gates are required. Do not deploy054/055 or infer capability from these
+local PASS results. No Phase24 or other functionality starts from this closure.
+
+Production actions:this session ZERO. Remote state STAGING_UNVERIFIED (not queried).
+No owner save, randomised Y, real account/economy, remote service, V1/Shadow or public
+Launcher access. Eight unrelated untracked files/protected guide untouched.
+Owned PG databases dropped and clusters stopped; no active run. Private evidence
+`%LOCALAPPDATA%/PokeApp-migration-evidence/phase23c/20261025/` contains
+native/native-revive.json,pg.json,security-parity.json,final-binding.json.
+Stopped local test trees are retained at the exact paths those files record.
+No unknown remote outcome. Explicit staging only. STOP after local23C closure.

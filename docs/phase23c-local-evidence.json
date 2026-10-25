@@ -1,0 +1,237 @@
+{
+  "date": "2026-10-25",
+  "entry": "e741822e4af5e2d06dac4338d0f27567e1754c6c",
+  "status": "23C_DONE_LOCAL_ENGINEERING_PHASE23_PARTIAL_NOT_DEPLOYED",
+  "production_actions": 0,
+  "remote_state": "STAGING_UNVERIFIED_NOT_QUERIED",
+  "host": "Windows-11-10.0.26300-SP0",
+  "python": "3.14.3",
+  "native": {
+    "status": "PASS",
+    "checks": 192,
+    "games": [
+      {
+        "game": "X",
+        "original_sha256": "fe7cd382448ce308b3ecfb1c32c908ad7cc6b763f1e73ff8b7f38e616d7e95f8",
+        "source_sha256": "9bdc0ce32e7ef75ba1082685e1248444b19b4bfe2a5f70b8da6a9a59415df59f",
+        "result_sha256": "ba0a9a3eddb2d38ef374cc6233b1e654d0f8d8c0ada5125185845f30087b9926",
+        "status": "PASS",
+        "fixture": "authentic format fixture with synthetic own dead target; NOT gameplay certification"
+      },
+      {
+        "game": "Y",
+        "original_sha256": "d67f2772eda54de759cfa928a2f11d9697182545bd832ed29e8017e74381336c",
+        "source_sha256": "f06d142c70abc5adc8e580209362507be335dffb7c28dc12167774e32fe9237f",
+        "result_sha256": "bbd1b3f9a7b419847b730d038385e31ade2d3135a8b4af5dfda0711210bd0bb5",
+        "status": "PASS",
+        "fixture": "authentic format fixture with synthetic own dead target; NOT gameplay certification"
+      },
+      {
+        "game": "OR",
+        "original_sha256": "09d3c3a8b58bef7fd7529d2300767def2df259ce550e91b4d7019831ab18eebd",
+        "source_sha256": "551a6e1c849702c51e77fb6315fe2999993de969635c3a83f2c0b07584f33973",
+        "result_sha256": "0935af2109986f8681c347164c661ef418d746f3e8614bda597958cb78890142",
+        "status": "PASS",
+        "fixture": "authentic format fixture with synthetic own dead target; NOT gameplay certification"
+      },
+      {
+        "game": "AS",
+        "original_sha256": "1edab357827dc6dab18d776133996e054f778d06c80a3d15d9e4c731da6f3e73",
+        "source_sha256": "2af2a0828ded2f5b36a2422b3384340763c85a523d4b289a7f619319ed96a8f5",
+        "result_sha256": "1745b51602811e72a6e977c8bd015f62f3d1bcebe6d153d3fa01ec1bfa5fbb3d",
+        "status": "PASS",
+        "fixture": "authentic format fixture with synthetic own dead target; NOT gameplay certification"
+      },
+      {
+        "game": "SN",
+        "original_sha256": "83fe616bd2d04e4d7f51705f37721189f920717296224c9d42bbd238df7a3345",
+        "source_sha256": "5fe8931b1a9a4f8a9e2ffac23f3d9dc53d1e59132f2269796d369be048a1786a",
+        "result_sha256": "25cedd022a7a3c9c5c8b098449a50459602dbf716e63c4337399fe79048e1320",
+        "status": "PASS",
+        "fixture": "authentic format fixture with synthetic own dead target; NOT gameplay certification"
+      },
+      {
+        "game": "MN",
+        "original_sha256": "20ea7b125d7d1b878eb6b11b0516dd9c960b761d5c2e11d1c2d4a33c1947675c",
+        "source_sha256": "a7902de0a6a5650bc047324dbed1ebcbb25c4708f305522dff13130cea715833",
+        "result_sha256": "6da69245198e3f8c2b4c1ea84a265b9a2a3c28594ba5c51777b9a418adde5f98",
+        "status": "PASS",
+        "fixture": "authentic format fixture with synthetic own dead target; NOT gameplay certification"
+      },
+      {
+        "game": "US",
+        "original_sha256": "3c1a3b507d3ef7d5d5937867ebd8f2f91a6044b1b5a4df5d9c6975abd4a3d884",
+        "source_sha256": "d58cb90241a7256fd8153ddf4c19f1c681c3a229460a66a8d05a469da0296984",
+        "result_sha256": "74abe64549470c6ca9febdb62fcf914428ee22e36678ff3cc93b88855811d5c8",
+        "status": "PASS",
+        "fixture": "authentic format fixture with synthetic own dead target; NOT gameplay certification"
+      },
+      {
+        "game": "UM",
+        "original_sha256": "2a46508170124fc69417f68dfe8916d5a6a51cf96f7707c3d796ae1695422331",
+        "source_sha256": "1a0e16e928c72364ce839d17e211ec37bdc9d6f6743f690a47969c897c8bc076",
+        "result_sha256": "8d27b49737623fe3c2a63244149743793f33cdf24a60b87443e611bd467d363b",
+        "status": "PASS",
+        "fixture": "authentic format fixture with synthetic own dead target; NOT gameplay certification"
+      }
+    ]
+  },
+  "pg_eight_games_and_recovery": {
+    "status": "PASS",
+    "games": [
+      {
+        "game": "X",
+        "status": "PASS",
+        "source_sha256": "9bdc0ce32e7ef75ba1082685e1248444b19b4bfe2a5f70b8da6a9a59415df59f",
+        "result_sha256": "ba0a9a3eddb2d38ef374cc6233b1e654d0f8d8c0ada5125185845f30087b9926",
+        "single_consumption": true,
+        "boundary": "derived native-valid dead-target fixture; isolated local PG and filesystem; no emulator"
+      },
+      {
+        "game": "Y",
+        "status": "PASS",
+        "source_sha256": "f06d142c70abc5adc8e580209362507be335dffb7c28dc12167774e32fe9237f",
+        "result_sha256": "bbd1b3f9a7b419847b730d038385e31ade2d3135a8b4af5dfda0711210bd0bb5",
+        "single_consumption": true,
+        "boundary": "derived native-valid dead-target fixture; isolated local PG and filesystem; no emulator"
+      },
+      {
+        "game": "OR",
+        "status": "PASS",
+        "source_sha256": "551a6e1c849702c51e77fb6315fe2999993de969635c3a83f2c0b07584f33973",
+        "result_sha256": "0935af2109986f8681c347164c661ef418d746f3e8614bda597958cb78890142",
+        "single_consumption": true,
+        "boundary": "derived native-valid dead-target fixture; isolated local PG and filesystem; no emulator"
+      },
+      {
+        "game": "AS",
+        "status": "PASS",
+        "source_sha256": "2af2a0828ded2f5b36a2422b3384340763c85a523d4b289a7f619319ed96a8f5",
+        "result_sha256": "1745b51602811e72a6e977c8bd015f62f3d1bcebe6d153d3fa01ec1bfa5fbb3d",
+        "single_consumption": true,
+        "boundary": "derived native-valid dead-target fixture; isolated local PG and filesystem; no emulator"
+      },
+      {
+        "game": "SN",
+        "status": "PASS",
+        "source_sha256": "5fe8931b1a9a4f8a9e2ffac23f3d9dc53d1e59132f2269796d369be048a1786a",
+        "result_sha256": "25cedd022a7a3c9c5c8b098449a50459602dbf716e63c4337399fe79048e1320",
+        "single_consumption": true,
+        "boundary": "derived native-valid dead-target fixture; isolated local PG and filesystem; no emulator"
+      },
+      {
+        "game": "MN",
+        "status": "PASS",
+        "source_sha256": "a7902de0a6a5650bc047324dbed1ebcbb25c4708f305522dff13130cea715833",
+        "result_sha256": "6da69245198e3f8c2b4c1ea84a265b9a2a3c28594ba5c51777b9a418adde5f98",
+        "single_consumption": true,
+        "boundary": "derived native-valid dead-target fixture; isolated local PG and filesystem; no emulator"
+      },
+      {
+        "game": "US",
+        "status": "PASS",
+        "source_sha256": "d58cb90241a7256fd8153ddf4c19f1c681c3a229460a66a8d05a469da0296984",
+        "result_sha256": "74abe64549470c6ca9febdb62fcf914428ee22e36678ff3cc93b88855811d5c8",
+        "single_consumption": true,
+        "boundary": "derived native-valid dead-target fixture; isolated local PG and filesystem; no emulator"
+      },
+      {
+        "game": "UM",
+        "status": "PASS",
+        "source_sha256": "1a0e16e928c72364ce839d17e211ec37bdc9d6f6743f690a47969c897c8bc076",
+        "result_sha256": "8d27b49737623fe3c2a63244149743793f33cdf24a60b87443e611bd467d363b",
+        "single_consumption": true,
+        "boundary": "derived native-valid dead-target fixture; isolated local PG and filesystem; no emulator"
+      }
+    ],
+    "checks": [
+      "native interruption prepared: no unknown consumption; intact source/candidate; restart guarded",
+      "native interruption backup_verified: no unknown consumption; intact source/candidate; restart guarded",
+      "native interruption stage_verified: no unknown consumption; intact source/candidate; restart guarded",
+      "native interruption after_park: no unknown consumption; intact source/candidate; restart guarded",
+      "native interruption after_publish: no unknown consumption; intact source/candidate; restart guarded",
+      "native interruption after_verify: no unknown consumption; intact source/candidate; restart guarded"
+    ],
+    "cluster": "%TEMP%/pokeapp-accounts-pg-nn95fte6",
+    "database_dropped_cluster_stopped": true
+  },
+  "security_and_055_parity": {
+    "status": "PASS",
+    "games": [],
+    "checks": [
+      "two Launcher profiles, sync exclusion, incompatible proof, issuer grants, CAS and restored-source rejection",
+      "stale selected file rejected and preserved; entitlement pending"
+    ],
+    "cluster": "%TEMP%/pokeapp-accounts-pg-m0jkoh6g",
+    "parity": {
+      "schema_lines": 16376,
+      "preserved_tables": 64
+    },
+    "database_dropped_cluster_stopped": true
+  },
+  "final_bridge_binding": {
+    "status": "PASS",
+    "games": [
+      {
+        "game": "X",
+        "status": "PASS",
+        "source_sha256": "9bdc0ce32e7ef75ba1082685e1248444b19b4bfe2a5f70b8da6a9a59415df59f",
+        "result_sha256": "ba0a9a3eddb2d38ef374cc6233b1e654d0f8d8c0ada5125185845f30087b9926",
+        "single_consumption": true,
+        "boundary": "derived native-valid dead-target fixture; isolated local PG and filesystem; no emulator"
+      }
+    ],
+    "checks": [],
+    "cluster": "%TEMP%/pokeapp-accounts-pg-5ohacqng",
+    "database_dropped_cluster_stopped": true
+  },
+  "python_tests": {
+    "unique_pass": 57,
+    "new_verifier_binding": 15,
+    "native_bridge_launcher_regressions": 26,
+    "schema": 15,
+    "production_capability": 1,
+    "stale_schema_expectations_corrected": 2,
+    "failed_schema_cases_rerun_pass": true,
+    "raw_log": "console execution only; no retained full raw Python log"
+  },
+  "build": "dotnet build PokeApp.Parser.Checks -c Release --no-restore: exit0,0warnings,0errors",
+  "format": "6 affected Python files PASS; legacy generator/schema-test formatting retained; dotnet-format cache absent NOT CLAIMED",
+  "lint": "new files full Ruff PASS; existing files targeted E9,F63,F7,F82 PASS",
+  "retained_not_rerun": [
+    "23B unaffected full SQL concurrency/rollback matrix",
+    "React10 Edge2 web build",
+    "Phase22 native marking/export/physical process-kill and platform evidence"
+  ],
+  "migrations": {
+    "054": "unchanged local NOT applied remotely",
+    "055": "new local forward variable disambiguation ONLY; NOT applied remotely",
+    "048": "unchanged"
+  },
+  "boundaries": [
+    "Native-valid derived fixtures from authenticated public-file manifest; synthetic own dead target, not gameplay/encounter proof",
+    "Server service and native verifier real; artifact transport in-memory; privileged recorder only loopback test infrastructure",
+    "No live Auth/Storage/HTTP/end-user emulator proof",
+    "No claim of continuous local save use or power-loss durability",
+    "Public mutation registry empty; no production proof endpoint or deployment",
+    "Existing internal redemption physical-pending snapshots require future read reconciliation"
+  ],
+  "fingerprints": {
+    "app/application/item_use_verification.py": "201231d41544bd0a02c0a232bf55c2834c254ba74eb031ce69a6d72fec5b43fa",
+    "app/launcher/item_use.py": "72d415439740e7357a066957bf4365a5b776031bc8f5763c7a05a9e219ecb18a",
+    "app/launcher/write_engine.py": "38d7b5af23afd227be9776bcf4aa080fbc201e8956ab642440d1a9fb4fbe7094",
+    "app/launcher/write_control.py": "0ccf6d0721e86ca84391bed4e5ffebae124d6741ce1e77012ef2da65a29b2ac4",
+    "companion/parser/PokeApp.Parser/NativeWrite.cs": "1ba238d7cc2e29d6d4386559d5e23c786809a4151765128b5df3d95b121a07df",
+    "companion/parser/PokeApp.Parser/NativeRevive.cs": "3392cec8388e65cbb56371cfa757768bd3f4bf68646346eecb8568c299c2c46e",
+    "companion/parser/PokeApp.Parser.Checks/Program.cs": "e39e7e90ce692b5dbcb1f96a496456d175befe6a27e29e0fd344712e5d60d3a9",
+    "companion/parser/PokeApp.Parser.Checks/ReviveChecks.cs": "dd9276a95619a01efde5c2c8c9904172720e2094c5a2166cc2f2052eb979dca1",
+    "supabase/v2/migrations/055_native_identity_evidence_scope.sql": "e874687f65479ccf35b73ca3915f960ad09f94d535d896d6ed94ed8acc15affb",
+    "supabase/v2/bootstrap.sql": "c823731f8b2e7632500e2e8fad8d79d502e4cf0cbf090b5e7988cafc3af37e6a",
+    "tools/generate_supabase_v2_bootstrap.py": "a6a34b6aaed0100d99545932f7b3da1bc831d45e41e5a0d90945d3237ca42ab1",
+    "tools/validate_phase23c_local.py": "104d43047ea03bad335ae1d3f9bc21fde3f42c7155ef69734e4f4d86e8c96645",
+    "tests/test_item_use_verification.py": "45460b6b3945c2d7db710dc3ea1d6bc56c9f6fcb6d2d55e76704ac0ef3ce7513",
+    "tests/test_supabase_v2_schema.py": "c24d450a1a4dfe75f94e1af565a4a2da73792ee07309468ff94402faa53758f9"
+  },
+  "application_commit": "6469f75d6d2825b3c770d858b1ab621ecab6a1e4",
+  "fingerprint_format": "SHA256 of UTF8 source normalized LF; native original/result hashes remain byte hashes"
+}
