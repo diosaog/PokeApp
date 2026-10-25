@@ -34,6 +34,7 @@ class ApiContainer:
     redemption_repository: RedemptionMutationRepository | None = None
     item_use_repository: object | None = None
     item_use_transport: object | None = None
+    transfer_integration: object | None = None
     season_admin_repository: SeasonAdminRepository | None = None
     matchday_repository: MatchdayRepository | None = None
     participant_status_repository: ParticipantStatusRepository | None = None
@@ -64,6 +65,7 @@ def create_default_container(config: APIConfig | None = None) -> ApiContainer:
     redemption_repo = None
     item_use_repo = None
     item_use_transport = None
+    transfer_integration = None
     season_admin_repo = None
     matchday_repo = None
     participant_status_repo = None
@@ -165,6 +167,19 @@ def create_default_container(config: APIConfig | None = None) -> ApiContainer:
         client = create_client(config.supabase_url, config.supabase_service_role_key)
         item_use_transport = ItemUseTransport(SupabaseItemUseTransport(client), PrivateItemUseBlobs(client), allowed_trainers=config.item_verification_trainers)
 
+    if config.transfer_engineering_enabled and config.supabase_url and config.supabase_service_role_key:
+        # Engineering cohort only; physical application still needs a Launcher
+        # engineering capability that no production build constructs.
+        from app.application.transfer_integration import TransferIntegration
+        from app.application.transfer_transport import TransferTransport
+        from app.repositories.supabase.item_use_transport import PrivateItemUseBlobs
+        from app.repositories.supabase.transfer import TransferRepository
+        from supabase import create_client
+        client = create_client(config.supabase_url, config.supabase_service_role_key)
+        repository = TransferRepository(client)
+        transfer_integration = TransferIntegration(repository, TransferTransport(repository, PrivateItemUseBlobs(client)),
+            allowed_trainers=config.transfer_engineering_trainers)
+
     auth_bridge = None
     if auth_client is not None and trainer_repo is not None and config.credential_keyring is not None:
         auth_bridge = PinAuthBridge(trainers=trainer_repo, auth=auth_client, pepper="",
@@ -183,6 +198,7 @@ def create_default_container(config: APIConfig | None = None) -> ApiContainer:
         redemption_repository=redemption_repo,
         item_use_repository=item_use_repo,
         item_use_transport=item_use_transport,
+        transfer_integration=transfer_integration,
         season_admin_repository=season_admin_repo,
         matchday_repository=matchday_repo,
         participant_status_repository=participant_status_repo,

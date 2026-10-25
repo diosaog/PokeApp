@@ -41,13 +41,36 @@ export const itemUseLabels: Record<string, string> = {
 const physicalItem = (code: string) =>
   ["revivir_pokemon", "robar_pokemon"].includes(code);
 
+// Only COMMITTED means the server confirmed ownership, both saves and use.
+export const transferLabels: Record<string, string> = {
+  PREPARING: "Robo pendiente · preparando guardados",
+  WAITING_OTHER: "Esperando al otro entrenador",
+  PENDING_SOURCE: "Guardados preparados · pendiente de la primera parte",
+  VERIFYING_SOURCE: "Primera parte aplicada · verificación en curso",
+  PENDING_DESTINATION: "Primera parte verificada · esperando la segunda parte",
+  VERIFYING_BOTH: "Segunda parte aplicada · verificación en curso",
+  BOTH_VERIFIED_PENDING_IDENTITY: "Verificación en curso",
+  COMMITTED: "Robo completado",
+  CANCELLED: "Robo cancelado · el objeto no se ha consumido",
+  BLOCKED_UNCERTAIN: "Operación bloqueada",
+};
+const withdrawable = ["PREPARING", "WAITING_OTHER", "PENDING_SOURCE"];
+
 export function Inventory() {
   const { season } = useApp();
   const q = useRead<Model<"InventoryRead">>(
     `/v1/read/seasons/${season}/inventory`,
     !!season,
   );
+  const transfers = useRead<Model<"TransferListResponse">>(
+    `/v1/seasons/${season}/transfers`,
+    !!season,
+  );
+  const robberyEnabled = transfers.data?.transfer_enabled === true;
+  const transferFor = (purchaseId: string) =>
+    transfers.data?.items.find((t) => t.purchase_id === purchaseId);
   const cmd = useCommand([
+    `/v1/seasons/${season}/transfers`,
     `/v1/read/seasons/${season}/inventory`,
     `/v1/read/seasons/${season}/overview`,
     `/v1/read/seasons/${season}/league`,
@@ -96,13 +119,17 @@ export function Inventory() {
   );
 
   async function redeem(target: PokemonTarget) {
-    if (!purchase || physicalItem(purchase.item_code)) return;
+    if (!purchase) return;
+    const robbery = purchase.item_code === "robar_pokemon" && robberyEnabled;
+    if (physicalItem(purchase.item_code) && !robbery) return;
     if (
       await cmd.execute(
-        `/v1/seasons/${season}/shop/purchases/${purchase.id}/redemptions`,
+        robbery
+          ? `/v1/seasons/${season}/shop/purchases/${purchase.id}/transfer`
+          : `/v1/seasons/${season}/shop/purchases/${purchase.id}/redemptions`,
         {
           pokemon_entity_id: target.pokemon_entity_id,
-        } satisfies Model<"RedemptionBody">,
+        } satisfies Model<"RedemptionBody"> & Model<"TransferRequestBody">,
       )
     ) {
       setPurchase(null);
@@ -121,6 +148,9 @@ export function Inventory() {
       ) : q.data?.purchases.length ? (
         <div className="inventory-grid">
           {q.data.purchases.map((item) => {
+            const transfer = transferFor(item.id);
+            const robbery =
+              item.item_code === "robar_pokemon" && robberyEnabled && !transfer;
             return (
               <Card key={item.id} className="inventory-card">
                 <div className="inventory-item">
@@ -128,17 +158,20 @@ export function Inventory() {
                   <h3>{pokemonName("item", item.item_name)}</h3>
                 </div>
                 <Tag>
-                  {physicalItem(item.item_code)
-                    ? (itemUseLabels[item.physical_state ?? "UNKNOWN"] ??
-                      "Estado físico no disponible")
-                    : ((
-                        {
-                          pending: "Objeto disponible",
-                          used: "Canjeado",
-                          cancelled: "Cancelado",
-                          refunded: "Reembolsado",
-                        } as Record<string, string>
-                      )[item.status] ?? "Estado no disponible")}
+                  {transfer
+                    ? (transferLabels[transfer.status] ??
+                      "Estado del robo no disponible")
+                    : physicalItem(item.item_code)
+                      ? (itemUseLabels[item.physical_state ?? "UNKNOWN"] ??
+                        "Estado físico no disponible")
+                      : ((
+                          {
+                            pending: "Objeto disponible",
+                            used: "Canjeado",
+                            cancelled: "Cancelado",
+                            refunded: "Reembolsado",
+                          } as Record<string, string>
+                        )[item.status] ?? "Estado no disponible")}
                 </Tag>
                 {item.acquisition_type === "reward" && (
                   <Tag>Vale de recompensa</Tag>
@@ -147,7 +180,12 @@ export function Inventory() {
                   {date(item.purchased_at)} · {item.total_price} PK₽
                 </p>
                 {item.status === "pending" &&
-                  (physicalItem(item.item_code) ? (
+                  (transfer ? (
+                    <p>
+                      El robo solo se confirma cuando PokeApp verifica los dos
+                      guardados. Mantén el Launcher abierto y sigue sus pasos.
+                    </p>
+                  ) : physicalItem(item.item_code) && !robbery ? (
                     <p>
                       La aplicación física mediante Launcher aún no está
                       habilitada. El objeto se conserva sin consumir.
@@ -174,6 +212,40 @@ export function Inventory() {
         </div>
       ) : (
         <Empty>Aún no hay compras ni vales registrados.</Empty>
+      )}
+
+      {!!transfers.data?.items.length && (
+        <section aria-labelledby="transfers-title">
+          <h3 id="transfers-title">Robos entre guardados</h3>
+          {transfers.data.items.map((transfer) => (
+            <Card key={transfer.authorization_id} className="inventory-card">
+              <p>
+                {transfer.side === "destination"
+                  ? "Has solicitado este robo."
+                  : "Otro entrenador va a robarte un Pokémon. Abre tu Launcher para completar tu parte."}
+              </p>
+              <Tag>
+                {transferLabels[transfer.status] ??
+                  "Estado del robo no disponible"}
+              </Tag>
+              {transfer.side === "destination" &&
+                withdrawable.includes(transfer.status) && (
+                  <button
+                    type="button"
+                    disabled={cmd.pending}
+                    onClick={() =>
+                      cmd.execute(
+                        `/v1/seasons/${season}/transfers/${transfer.authorization_id}/cancel`,
+                        {},
+                      )
+                    }
+                  >
+                    Cancelar robo
+                  </button>
+                )}
+            </Card>
+          ))}
+        </section>
       )}
 
       {purchase?.item_code === "robar_pokemon" && !robberyTrainer && (

@@ -9,10 +9,37 @@ import json
 from datetime import UTC, datetime
 from hashlib import sha256
 from pathlib import Path
+from typing import Literal
 from uuid import UUID, uuid4
+
+from pydantic import BaseModel, ConfigDict, Field
 
 from app.launcher.write_engine import EngineeringCapability
 from app.launcher.write_files import WriteSafetyError
+
+_UUID = r"^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+
+
+class ItemUseStatusWire(BaseModel):
+    """Launcher-local status subset of the API receipt; no app.api import."""
+
+    model_config = ConfigDict(extra="ignore", frozen=True)
+    trainer_id: str = Field(pattern=_UUID)
+    season_id: str = Field(pattern=_UUID)
+    status: Literal[
+        "PREPARED",
+        "PENDING_APPLICATION",
+        "APPLIED_VERIFIED",
+        "FAILED_RECOVERABLE",
+        "RECOVERY_REQUIRED",
+        "BLOCKED_UNCERTAIN",
+    ]
+
+
+class ItemUseListWire(BaseModel):
+    model_config = ConfigDict(extra="ignore", frozen=True)
+    items: list[ItemUseStatusWire]
+    physical_application_enabled: Literal[False] = False
 
 
 class AuthenticatedItemResultTransport:

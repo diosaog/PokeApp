@@ -167,6 +167,34 @@ function render(state) {
           .join(" · ")
       : "Aplicación de objetos deshabilitada. No se consume ningún objeto desde este Launcher.",
   );
+  // A local application is never the robbery: only COMMITTED is server-confirmed.
+  const transferLabels = {
+    PREPARING: "Robo pendiente · preparando guardados",
+    WAITING_OTHER: "Esperando al otro entrenador",
+    PENDING_SOURCE: "Pendiente de la primera parte",
+    VERIFYING_SOURCE: "Primera parte aplicada · verificando",
+    PENDING_DESTINATION: "Esperando la segunda parte",
+    VERIFYING_BOTH: "Segunda parte aplicada · verificando",
+    BOTH_VERIFIED_PENDING_IDENTITY: "Verificación en curso",
+    COMMITTED: "Robo completado",
+    CANCELLED: "Robo cancelado",
+    BLOCKED_UNCERTAIN: "Operación bloqueada",
+  };
+  const transfers = cached?.transfers || [];
+  text(
+    "transfer-state",
+    transfers.length
+      ? transfers
+          .map(
+            (t) =>
+              `${t.side === "source" ? "Te roban" : "Robas"}: ${transferLabels[t.status] || "Estado no disponible"}`,
+          )
+          .join(" · ") +
+          (state.write?.transfer_application_enabled
+            ? ""
+            : " · Este Launcher no aplica robos todavía.")
+      : "No hay robos en curso.",
+  );
 
   text(
     "cloud-state",

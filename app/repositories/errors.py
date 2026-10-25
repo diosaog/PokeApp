@@ -44,3 +44,11 @@ class ItemUseRejectedError(RepositoryError):
     def __init__(self, code: str, status: int):
         super().__init__(code)
         self.code, self.status = code, status
+
+
+class TransferRejectedError(PersistenceError):
+    """Whitelisted paired-transfer rejection; still a persistence failure to callers."""
+
+    def __init__(self, code: str, status: int):
+        super().__init__(code)
+        self.code, self.status = code, status

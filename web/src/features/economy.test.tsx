@@ -9,7 +9,7 @@ import {
 import { MemoryRouter } from "react-router-dom";
 import type { Model } from "../api/types";
 import { ShopPage } from "./core";
-import { Inventory, itemUseLabels } from "./inventory";
+import { Inventory, itemUseLabels, transferLabels } from "./inventory";
 
 const mocks = vi.hoisted(() => ({
   shop: {} as Model<"ShopRead">,
@@ -18,6 +18,10 @@ const mocks = vi.hoisted(() => ({
     items: [],
     physical_application_enabled: false,
   } as Model<"ItemUseListResponse">,
+  transfers: {
+    items: [],
+    transfer_enabled: false,
+  } as Model<"TransferListResponse">,
   execute: vi.fn(),
   paths: vi.fn(),
   uncertain: false,
@@ -34,7 +38,9 @@ vi.mock("../state", () => ({
           ? mocks.shop
           : path.endsWith("/item-uses")
             ? mocks.itemUses
-            : mocks.inventory,
+            : path.endsWith("/transfers")
+              ? mocks.transfers
+              : mocks.inventory,
     isPending: false,
     error: null,
   }),
@@ -72,6 +78,7 @@ beforeEach(() => {
   vi.clearAllMocks();
   mocks.uncertain = false;
   mocks.itemUses = { items: [], physical_application_enabled: false };
+  mocks.transfers = { items: [], transfer_enabled: false };
   mocks.trainers = [{ id: "owner", display_name: "Antonio" }];
   mocks.execute.mockResolvedValue(true);
   mocks.shop = {
@@ -271,6 +278,124 @@ it("redeems a reward voucher only against a server-approved owned target without
     expect(mocks.execute).toHaveBeenCalledWith(
       "/v1/seasons/season/shop/purchases/gift/redemptions",
       { pokemon_entity_id: "eligible" },
+    ),
+  );
+});
+
+const robbery = {
+  id: "steal",
+  shop_item_id: "robar",
+  item_name: "Robar Pokémon",
+  item_code: "robar_pokemon",
+  acquisition_type: "paid",
+  status: "pending",
+  physical_state: "AVAILABLE",
+  total_price: 40,
+  purchased_at: "2026-10-25T10:00:00Z",
+} as Model<"PurchaseRead">;
+const leg = (
+  status: Model<"TransferSummary">["status"],
+  side: "source" | "destination" = "destination",
+) =>
+  ({
+    authorization_id: "aid",
+    side,
+    status,
+    purchase_id: side === "destination" ? "steal" : null,
+    pokemon_entity_id: "rival",
+    claimed: false,
+    apply_started: false,
+    verified: false,
+    accepted_save_id: null,
+    expires_at: "2026-10-25T11:00:00Z",
+    created_at: "2026-10-25T10:00:00Z",
+  }) as Model<"TransferSummary">;
+
+it("keeps robbery unavailable unless the backend enables this account", () => {
+  mocks.inventory = { purchases: [robbery], targets: [] };
+  render(<Inventory />);
+  expect(screen.getByText(/aún no está\s+habilitada/)).toBeInTheDocument();
+  expect(
+    screen.queryByRole("button", { name: "Canjear" }),
+  ).not.toBeInTheDocument();
+});
+
+it("requests an enabled robbery through the paired transfer route only", async () => {
+  mocks.transfers = { items: [], transfer_enabled: true };
+  mocks.trainers = [
+    { id: "rival", display_name: "Rival" },
+  ] as Model<"TrainerRead">[];
+  mocks.inventory = {
+    purchases: [robbery],
+    targets: [
+      {
+        pokemon_entity_id: "rival",
+        trainer_id: "rival",
+        visibility: "public_team_lock",
+        can_shield: false,
+        location: "Equipo rival",
+        pokemon: { species: "Eevee", nickname: "", item: "", is_shiny: false },
+      },
+    ],
+  };
+  render(<Inventory />);
+  fireEvent.click(screen.getByRole("button", { name: "Canjear" }));
+  fireEvent.click(screen.getByRole("button", { name: /Rival/ }));
+  fireEvent.click(screen.getByRole("button", { name: /Eevee/ }));
+  fireEvent.click(screen.getByRole("button", { name: "Sí, robar" }));
+  await waitFor(() =>
+    expect(mocks.execute).toHaveBeenCalledWith(
+      "/v1/seasons/season/shop/purchases/steal/transfer",
+      { pokemon_entity_id: "rival" },
+    ),
+  );
+  expect(mocks.paths).toHaveBeenCalledWith(
+    expect.arrayContaining(["/v1/seasons/season/transfers"]),
+  );
+});
+
+it.each(Object.entries(transferLabels))(
+  "shows transfer %s without claiming an unconfirmed robbery",
+  (status, label) => {
+    mocks.transfers = {
+      items: [leg(status as Model<"TransferSummary">["status"])],
+      transfer_enabled: true,
+    };
+    mocks.inventory = { purchases: [robbery], targets: [] };
+    render(<Inventory />);
+    expect(screen.getAllByText(label).length).toBeGreaterThan(0);
+    expect(screen.queryAllByText("Robo completado").length > 0).toBe(
+      status === "COMMITTED",
+    );
+    expect(
+      screen.queryByRole("button", { name: "Canjear" }),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: "Cancelar robo" }) !== null,
+    ).toBe(["PREPARING", "WAITING_OTHER", "PENDING_SOURCE"].includes(status));
+  },
+);
+
+it("tells the victim to use the Launcher and offers no web cancellation", () => {
+  mocks.transfers = {
+    items: [leg("WAITING_OTHER", "source")],
+    transfer_enabled: true,
+  };
+  render(<Inventory />);
+  expect(screen.getByText(/Otro entrenador va a robarte/)).toBeInTheDocument();
+  expect(
+    screen.queryByRole("button", { name: "Cancelar robo" }),
+  ).not.toBeInTheDocument();
+});
+
+it("withdraws a requested robbery before any application", async () => {
+  mocks.transfers = { items: [leg("PENDING_SOURCE")], transfer_enabled: true };
+  render(<Inventory />);
+  fireEvent.click(screen.getByRole("button", { name: "Cancelar robo" }));
+  await waitFor(() =>
+    expect(mocks.execute).toHaveBeenCalledWith(
+      "/v1/seasons/season/transfers/aid/cancel",
+      {},
     ),
   );
 });

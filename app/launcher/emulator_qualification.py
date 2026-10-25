@@ -15,6 +15,10 @@ AZAHAR_SHA256 = "c248414eb5328cb8bb720775ace6959898e2f50a0a10221c3a1e7a14190183e
 
 def qualification_status():
     return {
+        # Owner's primary emulator. No build is pinned or certified yet; running
+        # lime3ds/azahar/citra processes already block every physical write.
+        "primary_candidate": "Lime3DS",
+        "primary_status": "PENDING_PINNED_BUILD_AND_REAL_GAME_QUALIFICATION",
         "candidate": "Azahar",
         "candidate_version": AZAHAR_VERSION,
         "status": "PENDING_REAL_GAME_QUALIFICATION",

@@ -44,6 +44,9 @@ class ItemStatusRuntimeTests(unittest.TestCase):
             if path.endswith("/item-uses"):
                 self.assertTrue(kwargs["missing"])
                 return payload
+            if path.endswith("/transfers"):
+                self.assertTrue(kwargs["missing"])
+                return None
             self.fail("unexpected request")
 
         runtime.session.request.side_effect = get

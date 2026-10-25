@@ -7,6 +7,8 @@ begin;
 
 drop function if exists public.transfer_identity_proven(uuid,uuid,jsonb);
 drop function if exists public.transfer_foreign_collision(uuid,uuid,jsonb);
+drop function if exists public.api_transfer_list(jsonb);
+drop function if exists public.transfer_verifier_v058(jsonb);
 drop function if exists public.transfer_verifier_v057(jsonb);
 drop function if exists public.transfer_leg_v057(jsonb);
 drop table if exists public.transfer_commit_permits;

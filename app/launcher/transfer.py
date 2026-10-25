@@ -2,13 +2,16 @@
 
 Both original backups are prepared before donor removal. Remote authority only
 admits insertion after independent donor proof. Neither local receipt closes a
-transfer; sync/reopening stay blocked pending competitive identity reconciliation.
+transfer; sync/reopening stay blocked until the server reports COMMITTED.
 """
 
 import json
 from hashlib import sha256
 from pathlib import Path
-from uuid import uuid4
+from typing import Literal
+from uuid import UUID, uuid4
+
+from pydantic import BaseModel, ConfigDict, Field, ValidationError
 
 from app.launcher.write_engine import (
     EngineeringCapability,
@@ -16,6 +19,50 @@ from app.launcher.write_engine import (
     WriteIntent,
 )
 from app.launcher.write_files import WriteSafetyError
+
+UUID_TEXT = r"^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+HASH_TEXT = r"^[0-9a-f]{64}$"
+TransferState = Literal[
+    "PREPARING",
+    "WAITING_OTHER",
+    "PENDING_SOURCE",
+    "VERIFYING_SOURCE",
+    "PENDING_DESTINATION",
+    "VERIFYING_BOTH",
+    "BOTH_VERIFIED_PENDING_IDENTITY",
+    "COMMITTED",
+    "CANCELLED",
+    "BLOCKED_UNCERTAIN",
+]
+
+
+class _Wire(BaseModel):
+    # Launcher-local wire contract: no app.api import. Newer server fields ignored.
+    model_config = ConfigDict(extra="ignore", frozen=True)
+
+
+class TransferLegWire(_Wire):
+    authorization_id: str = Field(pattern=UUID_TEXT)
+    side: Literal["source", "destination"]
+    status: TransferState
+    source_sha256: str = Field(pattern=HASH_TEXT)
+    apply_started: bool
+    result_sha256: str | None = Field(default=None, pattern=HASH_TEXT)
+    verified: bool
+    accepted_save_id: str | None = Field(default=None, pattern=UUID_TEXT)
+
+
+class TransferAssignmentWire(_Wire):
+    authorization_id: str = Field(pattern=UUID_TEXT)
+    side: Literal["source", "destination"]
+    status: TransferState
+    intent: dict | None = None
+
+
+class TransferAssignmentsWire(_Wire):
+    items: list[TransferAssignmentWire] = Field(max_length=20)
+    transfer_enabled: bool = False
+
 
 TRANSFER_MESSAGES = {
     "REQUESTED": "Robo solicitado. Pendiente de preparar ambos guardados.",
@@ -25,7 +72,8 @@ TRANSFER_MESSAGES = {
     "VERIFYING_SOURCE": "Verificando el guardado de origen. El robo aún no está completado.",
     "PENDING_DESTINATION": "Origen verificado. Pendiente de aplicar en destino.",
     "VERIFYING_BOTH": "Verificando los dos guardados. El robo aún no está completado.",
-    "BOTH_VERIFIED_PENDING_IDENTITY": "Los dos archivos están verificados; falta reconciliar la identidad. Robo sin confirmar.",
+    "BOTH_VERIFIED_PENDING_IDENTITY": "Los dos guardados están verificados; PokeApp está registrando la propiedad. Robo aún sin confirmar.",
+    "BLOCKED_UNCERTAIN": "Operación bloqueada. Conserva ambos backups y mantén los emuladores cerrados hasta la recuperación asistida.",
     "RECOVERY_REQUIRED": "Recuperación necesaria. Conserva ambos backups y mantén los emuladores cerrados.",
     "COMMITTED": "Robo confirmado: ambos guardados y la propiedad competitiva están verificados.",
     "CANCELLED": "Operación cancelada antes de aplicar. El objeto no se ha consumido y las copias se conservan.",
@@ -264,3 +312,139 @@ class EngineeringTransfer:
             self._state(record, "RECOVERY_REQUIRED")
             self._remote("cancel", record)
         return self.state(aid)
+
+
+class AuthenticatedTransferRemote:
+    """User-JWT transport with the same leg/submit seam; never grants capability.
+
+    The server derives trainer scope from the session. Results are revalidated
+    here so a malformed or foreign receipt never reaches the local journal.
+    """
+
+    def __init__(self, session, season_id, trainer_id):
+        self.session = session
+        self.sid, self.tid = str(UUID(season_id)), str(UUID(trainer_id))
+
+    def _path(self, aid):
+        return f"/v1/launcher/seasons/{self.sid}/transfers/{UUID(aid)}"
+
+    def _scope(self, sid, tid):
+        if sid != self.sid or tid != self.tid:
+            raise WriteSafetyError("TRANSFER_BINDING_MISMATCH")
+
+    @staticmethod
+    def _leg(data, aid):
+        try:
+            leg = TransferLegWire.model_validate(data).model_dump()
+        except (ValidationError, TypeError, ValueError):
+            raise WriteSafetyError("TRANSFER_RECEIPT_MISMATCH") from None
+        if leg["authorization_id"] != aid:
+            raise WriteSafetyError("TRANSFER_RECEIPT_MISMATCH")
+        return leg
+
+    def leg(self, request):
+        self._scope(request.get("season_id"), request.get("trainer_id"))
+        aid, op = str(UUID(request["authorization_id"])), request["operation"]
+        if op == "get":
+            return self._leg(self.session.request("GET", self._path(aid)), aid)
+        if op not in ("ready", "begin", "cancel"):
+            raise WriteSafetyError("TRANSFER_OPERATION_DENIED")
+        body = {"operation": op}
+        if op != "cancel":
+            body["claim_id"] = str(UUID(request["claim_id"]))
+        if op == "ready":
+            body["backup_sha256"] = request["backup_sha256"]
+        return self._leg(self.session.request("PUT", self._path(aid), body=body), aid)
+
+    def submit(self, aid, sid, tid, claim, data):
+        self._scope(sid, tid)
+        aid = str(UUID(aid))
+        path = f"{self._path(aid)}/result?claim_id={UUID(claim)}"
+        return self._leg(self.session.upload(path, data), aid)
+
+    def assignments(self):
+        raw = self.session.request(
+            "GET", f"/v1/launcher/seasons/{self.sid}/transfers", missing=True
+        )
+        if raw is None:
+            return None
+        try:
+            return TransferAssignmentsWire.model_validate(raw).model_dump()
+        except (ValidationError, TypeError, ValueError):
+            raise WriteSafetyError("TRANSFER_RECEIPT_MISMATCH") from None
+
+
+class LauncherTransfers:
+    """Runtime seam over EngineeringTransfer and the existing physical journal.
+
+    Only this trainer's own server-planned leg is bound; the native engine still
+    revalidates game, trainer, exact source bytes and target before any change.
+    Construction fails closed without an in-process EngineeringCapability.
+    """
+
+    def __init__(self, controller, remote):
+        self.controller, self.remote = controller, remote
+
+    def _bridge(self):
+        return EngineeringTransfer(
+            self.controller,
+            self.remote,
+            season_id=self.remote.sid,
+            trainer_id=self.remote.tid,
+        )
+
+    @staticmethod
+    def _bound(bridge, aid):
+        try:
+            bridge._load(aid)
+        except WriteSafetyError as error:
+            if str(error) == "TRANSFER_BINDING_NOT_FOUND":
+                return False
+            raise
+        return True
+
+    def prepare(self, aid, *, closed_emulator_confirmed):
+        if closed_emulator_confirmed is not True:
+            raise WriteSafetyError("WRITE_CONFIRMATION_REQUIRED")
+        bridge = self._bridge()
+        if not self._bound(bridge, aid):
+            listing = self.remote.assignments() or {"items": []}
+            item = next(
+                (i for i in listing["items"] if i["authorization_id"] == aid), None
+            )
+            if item is None or item["intent"] is None:
+                raise WriteSafetyError("TRANSFER_NOT_PLANNED")
+            bridge.bind(aid, item["side"], WriteIntent.create(**item["intent"]))
+        return bridge.prepare(aid, closed_emulator_confirmed=True)
+
+    def apply(self, aid, *, closed_emulator_confirmed):
+        bridge = self._bridge()
+        result = bridge.apply(aid, closed_emulator_confirmed=closed_emulator_confirmed)
+        if result["status"] == "RECOVERY_REQUIRED":
+            return result
+        # Local application is NOT the robbery: upload for independent proof.
+        return bridge.submit(aid, self.remote)
+
+    def refresh(self, aid):
+        return self._bridge().state(aid)
+
+    def cancel(self, aid):
+        bridge = self._bridge()
+        if self._bound(bridge, aid):
+            return bridge.cancel(aid)
+        # Nothing was prepared locally, so there is nothing physical to release.
+        leg = self.remote.leg(
+            {
+                "operation": "cancel",
+                "authorization_id": aid,
+                "season_id": self.remote.sid,
+                "trainer_id": self.remote.tid,
+            }
+        )
+        return {
+            "status": leg["status"],
+            "message": TRANSFER_MESSAGES.get(
+                leg["status"], TRANSFER_MESSAGES["RECOVERY_REQUIRED"]
+            ),
+            "completed": False,
+        }

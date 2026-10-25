@@ -15,13 +15,19 @@ from app.launcher.secrets import TokenStore
 from app.launcher.sync import SaveWatchService
 from app.launcher.trusted_sync import TrustedStore, deliver_trusted
 from app.launcher.write_control import LocalWriteController
-from app.launcher.write_engine import LocalWriteEngine
+from app.launcher.write_engine import EngineeringCapability, LocalWriteEngine
 from app.launcher.write_files import WriteSafetyError
 from app.save_parser.files import SaveSource, SnapshotReader
 from app.save_parser.models import SaveError
 from app.save_parser.writer import PkhexProcessWriter
 
 PRODUCTION_API = "https://pokeapp-api-production.up.railway.app"
+TRANSFER_COMMANDS = (
+    "transfer_prepare",
+    "transfer_apply",
+    "transfer_cancel",
+    "transfer_refresh",
+)
 
 
 def _write_recovery_exists(directory):
@@ -96,6 +102,7 @@ class LauncherRuntime:
             "outbox": {"pending": 0, "paused": 0},
             "error": None,
             "write_error": None,
+            "transfer_result": None,
         }
         self.receipt = None
         self.watch = None
@@ -141,6 +148,11 @@ class LauncherRuntime:
         ):
             result["cloud_status"] = "OFFLINE"
         result["write"] = self.writes.state()
+        # Never true in a production build: no code path constructs the capability.
+        result["write"]["transfer_application_enabled"] = (
+            type(getattr(self.writes.engine, "capability", None))
+            is EngineeringCapability
+        )
         result["emulator"] = qualification_status()
         return result
 
@@ -220,6 +232,24 @@ class LauncherRuntime:
             except Full:
                 return {"status": "BUSY"}
             return {"status": "QUEUED"}
+        if name in TRANSFER_COMMANDS:
+            expected = (
+                {"authorization_id", "closed_emulator_confirmed"}
+                if name in ("transfer_prepare", "transfer_apply")
+                else {"authorization_id"}
+            )
+            if (
+                set(args) != expected
+                or not isinstance(args["authorization_id"], str)
+                or len(args["authorization_id"]) != 36
+                or args.get("closed_emulator_confirmed", True) is not True
+            ):
+                raise ValueError("invalid_transfer_arguments")
+            try:
+                self.write_commands.put_nowait((name, dict(args)))
+            except Full:
+                return {"status": "BUSY"}
+            return {"status": "QUEUED"}
         if name not in ("select", "login", "logout", "retry", "sync"):
             raise ValueError("command_not_supported")
         if name == "select" and (
@@ -276,10 +306,65 @@ class LauncherRuntime:
             except Exception:  # noqa: BLE001 - sanitized local boundary
                 self._patch(local_status="LOCAL_UNAVAILABLE")
 
+    def _transfer_step(self, name, args):
+        from app.launcher.transfer import AuthenticatedTransferRemote, LauncherTransfers
+
+        try:
+            principal = self.session._principal
+            with self.lock:
+                cloud = deepcopy(self.value.get("cloud")) or {}
+            season = (cloud.get("data") or {}).get("season")
+            if principal is None or not season:
+                raise WriteSafetyError("TRANSFER_CONTEXT_UNAVAILABLE")
+            transfers = LauncherTransfers(
+                self.writes,
+                AuthenticatedTransferRemote(
+                    self.session, season["id"], principal.trainer_id
+                ),
+            )
+            aid = args["authorization_id"]
+            if name == "transfer_prepare":
+                result = transfers.prepare(aid, closed_emulator_confirmed=True)
+            elif name == "transfer_apply":
+                result = transfers.apply(aid, closed_emulator_confirmed=True)
+            elif name == "transfer_cancel":
+                result = transfers.cancel(aid)
+            else:
+                result = transfers.refresh(aid)
+            self._patch(write_error=None, transfer_result=result)
+            if result["status"] == "COMMITTED":
+                self.next_cloud_refresh = 0
+                self._load_local()  # re-read the save the server now accepts
+        except SaveBusy:
+            self._patch(
+                write_error="Hay una lectura o sincronización en curso. Espera y vuelve a intentarlo."
+            )
+        except BackendError:
+            self._patch(
+                write_error="PokeApp todavía no permite este paso: esperando al otro entrenador o a la verificación. Nada se ha confirmado."
+            )
+        except WriteSafetyError as error:
+            self._patch(
+                write_error="La aplicación física de robos no está habilitada en este Launcher."
+                if str(error) == "TRANSFER_APPLICATION_DISABLED"
+                else "No se pudo continuar el robo. Mantén el emulador cerrado y conserva las copias."
+            )
+        except Exception:  # noqa: BLE001 - no native output, private path or journal data to UI
+            self.save_activity.recovery_required = True
+            self._patch(
+                write_error="No se pudo verificar la operación. La sincronización queda pausada."
+            )
+
     def _write_step(self):
         try:
             name, args = self.write_commands.get_nowait()
         except Empty:
+            return
+        if name in TRANSFER_COMMANDS:
+            try:
+                self._transfer_step(name, args)
+            finally:
+                self.write_commands.task_done()
             return
         try:
             if name == "write_confirm":
@@ -436,6 +521,7 @@ class LauncherRuntime:
         season = active[0] if active else None
         wallet = None
         item_uses = None
+        transfers = None
         if season:
             from uuid import UUID
 
@@ -448,10 +534,10 @@ class LauncherRuntime:
             if raw_uses is not None:
                 from pydantic import ValidationError
 
-                from app.api.schemas import ItemUseListResponse
+                from app.launcher.item_use import ItemUseListWire
 
                 try:
-                    validated = ItemUseListResponse.model_validate(raw_uses)
+                    validated = ItemUseListWire.model_validate(raw_uses)
                     if any(
                         str(a.trainer_id) != principal.trainer_id
                         or str(a.season_id) != sid
@@ -461,11 +547,34 @@ class LauncherRuntime:
                     item_uses = [{"status": a.status} for a in validated.items]
                 except (ValidationError, ValueError):
                     raise BackendError("BACKEND_UNAVAILABLE") from None
+            raw_transfers = self.session.request(
+                "GET", f"/v1/launcher/seasons/{sid}/transfers", missing=True
+            )
+            if raw_transfers is not None:
+                from pydantic import ValidationError
+
+                from app.launcher.transfer import TransferAssignmentsWire
+
+                try:
+                    listed = TransferAssignmentsWire.model_validate(raw_transfers)
+                except ValidationError:
+                    raise BackendError("BACKEND_UNAVAILABLE") from None
+                # Status only: plans are fetched fresh at preparation, never cached.
+                transfers = [
+                    {
+                        "authorization_id": t.authorization_id,
+                        "side": t.side,
+                        "status": t.status,
+                        "planned": t.intent is not None,
+                    }
+                    for t in listed.items
+                ]
         data = {
             "principal": principal.model_dump(),
             "season": season,
             "wallet": wallet,
             "item_uses": item_uses,
+            "transfers": transfers,
         }
         self.store.save_cache(self.client.origin, principal.trainer_id, data)
         self._patch(

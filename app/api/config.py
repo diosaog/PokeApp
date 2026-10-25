@@ -20,6 +20,8 @@ class APIConfig:
     account_management_enabled: bool = False
     item_verification_transport_enabled: bool = False
     item_verification_trainers: tuple[str, ...] = ()
+    transfer_engineering_enabled: bool = False
+    transfer_engineering_trainers: tuple[str, ...] = ()
     registration_access_code: str = field(default="", repr=False)
     registration_bootstrap_hash: str = field(default="", repr=False)
     credential_keyring: object | None = field(default=None, repr=False)
@@ -29,6 +31,10 @@ class APIConfig:
             from uuid import UUID
             if not self.item_verification_trainers or any(str(UUID(t)) != t for t in self.item_verification_trainers):
                 raise ValueError("Restricted verifier acceptance needs exact trainer UUIDs")
+        if self.transfer_engineering_enabled:
+            from uuid import UUID
+            if not self.transfer_engineering_trainers or any(str(UUID(t)) != t for t in self.transfer_engineering_trainers):
+                raise ValueError("Engineering transfers need an exact trainer UUID cohort")
         for origin in self.cors_origins:
             parsed = urlsplit(origin)
             local = parsed.hostname in ("localhost", "127.0.0.1", "::1")
@@ -64,6 +70,8 @@ class APIConfig:
         return cls(
             item_verification_transport_enabled=source.get("POKEAPP_ITEM_VERIFICATION_TRANSPORT_ENABLED") == "true",
             item_verification_trainers=tuple(t.strip() for t in source.get("POKEAPP_ITEM_VERIFICATION_TRAINERS", "").split(",") if t.strip()),
+            transfer_engineering_enabled=source.get("POKEAPP_TRANSFER_ENGINEERING_ENABLED") == "true",
+            transfer_engineering_trainers=tuple(t.strip() for t in source.get("POKEAPP_TRANSFER_ENGINEERING_TRAINERS", "").split(",") if t.strip()),
             credential_keyring=credential_keyring_from_env(source)
             if versioned
             else None,

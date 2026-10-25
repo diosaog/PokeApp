@@ -1590,6 +1590,109 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/v1/seasons/{season_id}/shop/purchases/{purchase_id}/transfer": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** Request Transfer */
+    post: operations["request_transfer_v1_seasons__season_id__shop_purchases__purchase_id__transfer_post"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/seasons/{season_id}/transfers": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** List Transfers */
+    get: operations["list_transfers_v1_seasons__season_id__transfers_get"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/seasons/{season_id}/transfers/{authorization_id}/cancel": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** Withdraw Transfer */
+    post: operations["withdraw_transfer_v1_seasons__season_id__transfers__authorization_id__cancel_post"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/launcher/seasons/{season_id}/transfers": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Launcher Transfers */
+    get: operations["launcher_transfers_v1_launcher_seasons__season_id__transfers_get"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/launcher/seasons/{season_id}/transfers/{authorization_id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Transfer Leg */
+    get: operations["transfer_leg_v1_launcher_seasons__season_id__transfers__authorization_id__get"];
+    /** Update Leg */
+    put: operations["update_leg_v1_launcher_seasons__season_id__transfers__authorization_id__put"];
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/launcher/seasons/{season_id}/transfers/{authorization_id}/result": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    /** Submit Result */
+    put: operations["submit_result_v1_launcher_seasons__season_id__transfers__authorization_id__result_put"];
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -4543,6 +4646,221 @@ export interface components {
       id: string;
       /** Display Name */
       display_name: string;
+    };
+    /** TransferLauncherItem */
+    TransferLauncherItem: {
+      /**
+       * Authorization Id
+       * Format: uuid
+       */
+      authorization_id: string;
+      /**
+       * Side
+       * @enum {string}
+       */
+      side: "source" | "destination";
+      /**
+       * Status
+       * @enum {string}
+       */
+      status:
+        | "PREPARING"
+        | "WAITING_OTHER"
+        | "PENDING_SOURCE"
+        | "VERIFYING_SOURCE"
+        | "PENDING_DESTINATION"
+        | "VERIFYING_BOTH"
+        | "BOTH_VERIFIED_PENDING_IDENTITY"
+        | "COMMITTED"
+        | "CANCELLED"
+        | "BLOCKED_UNCERTAIN";
+      /** Purchase Id */
+      purchase_id?: string | null;
+      /**
+       * Pokemon Entity Id
+       * Format: uuid
+       */
+      pokemon_entity_id: string;
+      /** Claimed */
+      claimed: boolean;
+      /** Apply Started */
+      apply_started: boolean;
+      /** Verified */
+      verified: boolean;
+      /** Accepted Save Id */
+      accepted_save_id?: string | null;
+      /**
+       * Expires At
+       * Format: date-time
+       */
+      expires_at: string;
+      /**
+       * Created At
+       * Format: date-time
+       */
+      created_at: string;
+      /** Source Sha256 */
+      source_sha256: string;
+      /** Result Sha256 */
+      result_sha256?: string | null;
+      /** Intent */
+      intent?: {
+        [key: string]: unknown;
+      } | null;
+    };
+    /** TransferLauncherListResponse */
+    TransferLauncherListResponse: {
+      /** Items */
+      items: components["schemas"]["TransferLauncherItem"][];
+      /**
+       * Transfer Enabled
+       * @default false
+       */
+      transfer_enabled: boolean;
+    };
+    /** TransferLegBody */
+    TransferLegBody: {
+      /**
+       * Operation
+       * @enum {string}
+       */
+      operation: "ready" | "begin" | "cancel";
+      /** Claim Id */
+      claim_id?: string | null;
+      /** Backup Sha256 */
+      backup_sha256?: string | null;
+    };
+    /** TransferLegResponse */
+    TransferLegResponse: {
+      /**
+       * Authorization Id
+       * Format: uuid
+       */
+      authorization_id: string;
+      /**
+       * Side
+       * @enum {string}
+       */
+      side: "source" | "destination";
+      /**
+       * Status
+       * @enum {string}
+       */
+      status:
+        | "PREPARING"
+        | "WAITING_OTHER"
+        | "PENDING_SOURCE"
+        | "VERIFYING_SOURCE"
+        | "PENDING_DESTINATION"
+        | "VERIFYING_BOTH"
+        | "BOTH_VERIFIED_PENDING_IDENTITY"
+        | "COMMITTED"
+        | "CANCELLED"
+        | "BLOCKED_UNCERTAIN";
+      /** Source Sha256 */
+      source_sha256: string;
+      /** Apply Started */
+      apply_started: boolean;
+      /** Result Sha256 */
+      result_sha256?: string | null;
+      /** Verified */
+      verified: boolean;
+      /** Accepted Save Id */
+      accepted_save_id?: string | null;
+    };
+    /** TransferListResponse */
+    TransferListResponse: {
+      /** Items */
+      items: components["schemas"]["TransferSummary"][];
+      /**
+       * Transfer Enabled
+       * @default false
+       */
+      transfer_enabled: boolean;
+    };
+    /** TransferRequestBody */
+    TransferRequestBody: {
+      /**
+       * Pokemon Entity Id
+       * Format: uuid
+       */
+      pokemon_entity_id: string;
+    };
+    /** TransferRequestResponse */
+    TransferRequestResponse: {
+      /**
+       * Authorization Id
+       * Format: uuid
+       */
+      authorization_id: string;
+      /**
+       * Status
+       * @enum {string}
+       */
+      status:
+        | "PREPARING"
+        | "WAITING_OTHER"
+        | "PENDING_SOURCE"
+        | "VERIFYING_SOURCE"
+        | "PENDING_DESTINATION"
+        | "VERIFYING_BOTH"
+        | "BOTH_VERIFIED_PENDING_IDENTITY"
+        | "COMMITTED"
+        | "CANCELLED"
+        | "BLOCKED_UNCERTAIN";
+    };
+    /** TransferSummary */
+    TransferSummary: {
+      /**
+       * Authorization Id
+       * Format: uuid
+       */
+      authorization_id: string;
+      /**
+       * Side
+       * @enum {string}
+       */
+      side: "source" | "destination";
+      /**
+       * Status
+       * @enum {string}
+       */
+      status:
+        | "PREPARING"
+        | "WAITING_OTHER"
+        | "PENDING_SOURCE"
+        | "VERIFYING_SOURCE"
+        | "PENDING_DESTINATION"
+        | "VERIFYING_BOTH"
+        | "BOTH_VERIFIED_PENDING_IDENTITY"
+        | "COMMITTED"
+        | "CANCELLED"
+        | "BLOCKED_UNCERTAIN";
+      /** Purchase Id */
+      purchase_id?: string | null;
+      /**
+       * Pokemon Entity Id
+       * Format: uuid
+       */
+      pokemon_entity_id: string;
+      /** Claimed */
+      claimed: boolean;
+      /** Apply Started */
+      apply_started: boolean;
+      /** Verified */
+      verified: boolean;
+      /** Accepted Save Id */
+      accepted_save_id?: string | null;
+      /**
+       * Expires At
+       * Format: date-time
+       */
+      expires_at: string;
+      /**
+       * Created At
+       * Format: date-time
+       */
+      created_at: string;
     };
     /** TrialDetail */
     TrialDetail: {
@@ -8156,6 +8474,240 @@ export interface operations {
         };
         content: {
           "application/json": components["schemas"]["ItemArtifactResponse"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  request_transfer_v1_seasons__season_id__shop_purchases__purchase_id__transfer_post: {
+    parameters: {
+      query?: never;
+      header: {
+        "idempotency-key": string;
+      };
+      path: {
+        season_id: string;
+        purchase_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["TransferRequestBody"];
+      };
+    };
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["TransferRequestResponse"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  list_transfers_v1_seasons__season_id__transfers_get: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        season_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["TransferListResponse"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  withdraw_transfer_v1_seasons__season_id__transfers__authorization_id__cancel_post: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        season_id: string;
+        authorization_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["TransferLegResponse"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  launcher_transfers_v1_launcher_seasons__season_id__transfers_get: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        season_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["TransferLauncherListResponse"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  transfer_leg_v1_launcher_seasons__season_id__transfers__authorization_id__get: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        season_id: string;
+        authorization_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["TransferLegResponse"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  update_leg_v1_launcher_seasons__season_id__transfers__authorization_id__put: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        season_id: string;
+        authorization_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["TransferLegBody"];
+      };
+    };
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["TransferLegResponse"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  submit_result_v1_launcher_seasons__season_id__transfers__authorization_id__result_put: {
+    parameters: {
+      query: {
+        claim_id: string;
+      };
+      header?: never;
+      path: {
+        season_id: string;
+        authorization_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["TransferLegResponse"];
         };
       };
       /** @description Validation Error */

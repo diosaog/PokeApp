@@ -185,6 +185,81 @@ class ItemUseListResponse(BaseModel):
     physical_application_enabled: Literal[False] = False
 
 
+TransferStatus = Literal[
+    "PREPARING",
+    "WAITING_OTHER",
+    "PENDING_SOURCE",
+    "VERIFYING_SOURCE",
+    "PENDING_DESTINATION",
+    "VERIFYING_BOTH",
+    "BOTH_VERIFIED_PENDING_IDENTITY",
+    "COMMITTED",
+    "CANCELLED",
+    "BLOCKED_UNCERTAIN",
+]
+
+
+class TransferRequestBody(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    pokemon_entity_id: UUID
+
+
+class TransferRequestResponse(BaseModel):
+    authorization_id: UUID
+    status: TransferStatus
+
+
+class TransferSummary(BaseModel):
+    authorization_id: UUID
+    side: Literal["source", "destination"]
+    status: TransferStatus
+    purchase_id: UUID | None = None
+    pokemon_entity_id: UUID
+    claimed: bool
+    apply_started: bool
+    verified: bool
+    accepted_save_id: UUID | None = None
+    expires_at: datetime
+    created_at: datetime
+
+
+class TransferListResponse(BaseModel):
+    items: list[TransferSummary]
+    transfer_enabled: bool = False
+
+
+class TransferLauncherItem(TransferSummary):
+    source_sha256: str = Field(pattern=r"^[a-f0-9]{64}$")
+    result_sha256: str | None = Field(default=None, pattern=r"^[a-f0-9]{64}$")
+    # Own side only; the Launcher's native engine revalidates it before any use.
+    intent: dict[str, Any] | None = None
+
+
+class TransferLauncherListResponse(BaseModel):
+    items: list[TransferLauncherItem]
+    transfer_enabled: bool = False
+
+
+class TransferLegBody(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    operation: Literal["ready", "begin", "cancel"]
+    claim_id: UUID | None = None
+    backup_sha256: str | None = Field(default=None, pattern=r"^[a-f0-9]{64}$")
+
+
+class TransferLegResponse(BaseModel):
+    authorization_id: UUID
+    side: Literal["source", "destination"]
+    status: TransferStatus
+    source_sha256: str = Field(pattern=r"^[a-f0-9]{64}$")
+    apply_started: bool
+    result_sha256: str | None = Field(default=None, pattern=r"^[a-f0-9]{64}$")
+    verified: bool
+    accepted_save_id: UUID | None = None
+
+
 class ItemArtifactResponse(BaseModel):
     authorization_id: UUID
     status: Literal[

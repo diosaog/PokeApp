@@ -294,20 +294,23 @@ class TrustedOutboxTests(unittest.TestCase):
         runtime._enqueue_local = Mock()
         seasons = {"items": [{"id": SID, "status": "active"}]}
         self.session.request.side_effect = [
-            seasons, {"balance": "0"}, self.registration, {"status": "not_ready"},
+            # Old backend: item-use and transfer endpoints absent (missing=True).
+            seasons, {"balance": "0"}, None, None, self.registration, {"status": "not_ready"},
         ]
         with self.assertRaisesRegex(BackendError, "SAVE_READBACK_PENDING"):
             runtime._cloud_step()
         self.assertIsNone(runtime.state()["cloud_receipt"])
         self.session.request.side_effect = [
-            seasons, {"balance": "0"}, self.registration,
+            # Old backend: item-use and transfer endpoints absent (missing=True).
+            seasons, {"balance": "0"}, None, None, self.registration,
             {"status": "ready", "save": {"id": SID}}, self.registration,
         ]
         runtime._cloud_step()
         self.assertEqual(runtime.state()["cloud_receipt"]["save_id"], SID)
         runtime.next_cloud_refresh = 0
         self.session.request.side_effect = [
-            seasons, {"balance": "0"}, self.registration | {"is_current": False},
+            # Old backend: item-use and transfer endpoints absent (missing=True).
+            seasons, {"balance": "0"}, None, None, self.registration | {"is_current": False},
         ]
         with self.assertRaisesRegex(BackendError, "SAVE_SUPERSEDED"):
             runtime._cloud_step()
