@@ -5,7 +5,14 @@ milestone record; it does not maintain a second live phase-status ledger.
 
 ## Current project position
 
-- Current packet: **Phase24 DONE LOCAL (24A + 24B) — robbery connected locally
+- Current packet: **Phase25A PARTIAL (updater activation only) — local Launcher
+  integration, Rare Candy/Heart Scale quick items behind the engineering
+  capability, signed-manifest updater disabled pending release key/feed/
+  Authenticode; no release published; production writes disabled**.
+  [Live handoff](work-in-progress/phase25-live.md), [report](phase25a-launcher-report.md),
+  [evidence](phase25a-launcher-evidence.json). Lime3DS certification PENDING.
+
+- Previous packet: **Phase24 DONE LOCAL (24A + 24B) — robbery connected locally
   through API, worker, two Launchers and web; nothing deployed; physical writes
   disabled in production**. 24A: native transfer for eight same-title boxed
   pairs, 057/058, atomic owner/two-save/025 finalization exactly once, paired
@@ -14,12 +21,12 @@ milestone record; it does not maintain a second live phase-status ledger.
   without an engineering capability, web inventory states. Party/cross-title,
   Electron action UI, hosted verifier and deployment remain pending. Lime3DS is
   the primary future certification emulator; personal randomized Y untouched.
-  [Current live handoff](work-in-progress/phase24-live.md),
+  [Phase24 live handoff](work-in-progress/phase24-live.md),
   [24A report](phase24a-two-save-report.md), [24B report](phase24b-integration-report.md),
   [24B evidence](phase24b-integration-evidence.json).
   Entry23D gate PASS at published `3f5d1ea`; [23D](phase23d-verifier-transport-report.md)
   remains DONE LOCAL. Phase23 and22 remain PARTIAL/undeployed or uncertified as
-  recorded. No phase beyond the requested Phase24 packets started.
+  recorded. No phase beyond the requested packets started.
 
 - Previous packet: **Accounts/profile DONE GLOBAL — REGISTRATION ACTIVE**.
   Authorized clean V2 reset completed after exact105-table/4-object restore proof.

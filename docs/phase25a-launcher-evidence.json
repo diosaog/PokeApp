@@ -1,0 +1,193 @@
+{
+  "date": "2026-10-25",
+  "entry": "92d20d2a8daee83116e67ee3e7e9433e7c52ca7d",
+  "status": "PHASE25A_PARTIAL_UPDATER_ACTIVATION_ONLY",
+  "phase24b_gate": "PASS",
+  "classification": {
+    "launcher_integration": "DONE_LOCAL",
+    "auto_updater": "PARTIAL_ACTIVATION_BLOCKED_EXTERNAL",
+    "update_signature_integrity": "PASS_LOCAL_ED25519_SHA512_AUTHENTICODE_PENDING",
+    "rare_candy": "DONE_LOCAL_ENGINEERING_CAPABILITY",
+    "heart_scale": "DONE_LOCAL_ENGINEERING_CAPABILITY",
+    "editable_quantity_input": "PASS",
+    "backup_recovery": "PASS",
+    "lime3ds_integration": "DONE_LOCAL",
+    "lime3ds_real_certification": "PENDING",
+    "physical_writes_production": "DISABLED"
+  },
+  "remote_actions": 0,
+  "release_published": false,
+  "secrets_in_launcher": false,
+  "native": {
+    "quick_item": {
+      "status": "PASS",
+      "checks": 281,
+      "gen7_resign_rejections_fail_closed": 1,
+      "games": [
+        {
+          "game": "X",
+          "rare_candy": 5,
+          "heart_scale": 3,
+          "full_pouch": "INVENTORY_FULL"
+        },
+        {
+          "game": "Y",
+          "rare_candy": 6,
+          "heart_scale": 3,
+          "full_pouch": "INVENTORY_FULL"
+        },
+        {
+          "game": "OR",
+          "rare_candy": 0,
+          "heart_scale": 213,
+          "full_pouch": "INVENTORY_FULL"
+        },
+        {
+          "game": "AS",
+          "rare_candy": 0,
+          "heart_scale": 0,
+          "full_pouch": "INVENTORY_FULL"
+        },
+        {
+          "game": "SN",
+          "rare_candy": 0,
+          "heart_scale": 9,
+          "full_pouch": "INVENTORY_FULL"
+        },
+        {
+          "game": "MN",
+          "rare_candy": 0,
+          "heart_scale": 7,
+          "full_pouch": "INVENTORY_FULL"
+        },
+        {
+          "game": "US",
+          "rare_candy": 995,
+          "heart_scale": 995,
+          "full_pouch": "INVENTORY_FULL"
+        },
+        {
+          "game": "UM",
+          "rare_candy": 0,
+          "heart_scale": 9,
+          "full_pouch": "INVENTORY_FULL"
+        }
+      ]
+    },
+    "regression": {
+      "write": 225,
+      "revive": 192,
+      "transfer": 168,
+      "cross_title_rejections": 8
+    },
+    "build": "0 warnings / 0 errors, local SDK 9.0.318",
+    "csharp_format": "NOT RUN: dotnet-format unavailable"
+  },
+  "quick_items_local": {
+    "status": "PASS",
+    "checks": [
+      "8 titles: prepare with verified backup, explicit confirm, native readback, lost reply/re-offer/restart without duplication",
+      "open Lime3DS process blocks before any change; incompatible save and invalid quantities refused",
+      "runtime commands: production build reads only; engineering build prepares, waits for explicit confirm, applies once and re-reads"
+    ],
+    "games": [
+      {
+        "game": "X",
+        "item": "rare_candy",
+        "before": 5,
+        "added": 3,
+        "status": "APPLIED_VERIFIED"
+      },
+      {
+        "game": "Y",
+        "item": "rare_candy",
+        "before": 6,
+        "added": 3,
+        "status": "APPLIED_VERIFIED"
+      },
+      {
+        "game": "OR",
+        "item": "rare_candy",
+        "before": 0,
+        "added": 3,
+        "status": "APPLIED_VERIFIED"
+      },
+      {
+        "game": "AS",
+        "item": "rare_candy",
+        "before": 0,
+        "added": 3,
+        "status": "APPLIED_VERIFIED"
+      },
+      {
+        "game": "SN",
+        "item": "rare_candy",
+        "before": 0,
+        "added": 3,
+        "status": "APPLIED_VERIFIED"
+      },
+      {
+        "game": "MN",
+        "item": "rare_candy",
+        "before": 0,
+        "added": 3,
+        "status": "APPLIED_VERIFIED"
+      },
+      {
+        "game": "US",
+        "item": "rare_candy",
+        "before": 995,
+        "added": 3,
+        "status": "APPLIED_VERIFIED"
+      },
+      {
+        "game": "UM",
+        "item": "rare_candy",
+        "before": 0,
+        "added": 3,
+        "status": "APPLIED_VERIFIED"
+      }
+    ],
+    "cleanup": "disposable copies removed"
+  },
+  "javascript": {
+    "updater_tests": 7,
+    "quantity_tests": 3,
+    "electron_ui_smoke": "14/14 PASS (Electron 44.7.0 headless, real index.html, test preload)"
+  },
+  "python": {
+    "focused_tests": 336,
+    "failures": 0,
+    "ruff": "no new findings versus 92d20d2",
+    "compile": "PASS",
+    "diff": "PASS"
+  },
+  "limitations": [
+    "updater activation needs release key custody, signing step, HTTPS feed, Authenticode and a real two-installer upgrade on Win10/11",
+    "no approved League policy for granting quick items: adding disabled in production",
+    "Gen7 PKHeX re-sign is content-dependent; unverifiable outputs fail closed (1 of 20 Moon quantities)",
+    "no in-game readback; Lime3DS not certified",
+    "robbery Electron action dialogs still deferred"
+  ],
+  "private_evidence": "C:\\Users\\Antonio\\AppData\\Local\\PokeApp-migration-evidence\\phase25a\\20261025",
+  "source_fingerprints": {
+    "companion/parser/PokeApp.Parser/NativeItems.cs": "4c17b39b34281d158f240c9cc293f36bd5cd3d2932ded3e1d2ba88d3e5dfb2cf",
+    "companion/parser/PokeApp.Parser/NativeWrite.cs": "1b16af27770935fc49c50adff4fbdcf05d85967ac9ecd78aff7bbeb01aa036c1",
+    "companion/parser/PokeApp.Parser/Program.cs": "a7f38821f5cde2ca0a14ecd25805e9cf1ed88ad118573d7bb1b4c21d88d23ffe",
+    "companion/parser/PokeApp.Parser.Checks/QuickItemChecks.cs": "9b4152a21be3cb62c661fe8e87b0494a85b121c5eafb178a1c714b73eb24c337",
+    "app/save_parser/writer.py": "1aba268d7884fdaa9eff3730a2a1fd84004165121e893c0d8e1a2fc9a53e2456",
+    "app/launcher/quick_items.py": "42bc68d45a1194c38e2a5dc9b852121a4f4448738e123d91632872f2b32599ad",
+    "app/launcher/runtime.py": "919742409171b814764249a2a3e76bd70840234ced069f7063ecd5fa89382899",
+    "app/launcher/write_engine.py": "b85fb1c148feb79653e96a210362958be372b5d01dab9c66962ad1c65a7d78fc",
+    "app/launcher/write_control.py": "323e4d493b10156e5f908a194bb59e464735436c01ba05db6de9fc27f6ea7ed3",
+    "app/launcher/discovery.py": "05179565a4deb2c707c443eed529eadeaea22ae963d5aa0fc7c5a42c73401c75",
+    "companion/launcher/updater.cjs": "b019414fa7917546f81edbb87a5f5aa93e300be38b738c66602e1326baa81b22",
+    "companion/launcher/quantity.js": "702a316b37fb4b92adbadbf2c03e99c98a944dd162d69f8aa7ebed3280426c77",
+    "companion/launcher/main.cjs": "78487bae6d152b5aa0321bb8837002419a13c0bd3e8e21682feeef323d205e5d",
+    "companion/launcher/renderer.js": "2fbc01207a94a6fbe5a474842bb06b01b87a374761ac2e82a58b362e92d9e87e",
+    "companion/launcher/index.html": "ddb77d23bc681d6ddc7f6f0f5729336f51fa891f7d57fffd6bb32c7032c48545",
+    "companion/launcher/package.json": "ad2e0b36d65c32da328efb9317b358d972a0189752ecabc432d08668b324e454",
+    "companion/launcher/assets/items/50.png": "e68ad7f41cbd5e0e1ce20fb5be5068e2d976b1370f06b2cef1c5c614a19e79ab",
+    "companion/launcher/assets/items/93.png": "a99328173bb80722f913772e1775b2b7f9c8f7d15a4000636b89d33d8da2765d"
+  }
+}
