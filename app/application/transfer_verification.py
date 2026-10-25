@@ -4,17 +4,87 @@ The result is two verified artifacts, NOT proof of continued local possession,
 competitive completion or permission to consume an entitlement.
 """
 
+from copy import deepcopy
 from dataclasses import asdict
 from hashlib import sha256
 
 from app.application.item_use_verification import require
+from app.application.save_ingestion import registration_request
 from app.domain.pokemon_identity import digest, trusted_native_identity
 
 
 class TransferVerification:
-    def __init__(self, rpc, read_source, reader, parser, native):
+    def __init__(self, rpc, read_source, reader, parser, native, *, store_raw=None):
         self.rpc, self.read_source, self.reader = rpc, read_source, reader
         self.parser, self.native = parser, native
+        self.store_raw = store_raw
+
+    def finalization_request(self, aid):
+        """Private server-side parse/store boundary, never a Launcher payload.
+
+        Storage is immutable and precedes the atomic SQL operation. Failed SQL may
+        leave unreferenced private bytes, never a partial competitive transfer.
+        """
+        require(self.store_raw is not None, "TRANSFER_ACCEPTANCE_STORAGE_REQUIRED")
+        c, originals, plans, prepared = self.derive(aid)
+        registration = self.rpc(
+            {"operation": "registration_context", "authorization_id": aid}
+        )
+        require(registration["context"] == c, "TRANSFER_CONTEXT_CHANGED")
+        requests = {}
+        entity = c["entity"]
+        for side in ("source", "destination"):
+            job = self.rpc(
+                {"operation": "artifact", "authorization_id": aid, "side": side}
+            )
+            require(job["proof"] is not None, "TRANSFER_BOTH_PROOFS_REQUIRED")
+            result = self.reader.read(
+                job["result_url"],
+                job["result_key"],
+                job["result_sha256"],
+                job["byte_size"],
+            )
+            self.native.verify(originals[side], result, plans[side], prepared[side])
+            observed = self.parser.parse(result)
+            context = deepcopy(registration["registration"][side])
+            if side == "source":
+                context["entities"] = [
+                    e for e in context["entities"] if e["id"] != entity["id"]
+                ]
+                context["foreign_transfer_evidence"].append(entity["initial_evidence"])
+            else:
+                context["entities"].append(entity)
+                context["proven_entity_ids"].append(entity["id"])
+            leg = c["legs"][side]
+            request = registration_request(
+                c["authorization"]["season_id"],
+                leg["trainer_id"],
+                job["result_sha256"],
+                leg["save"]["id"],
+                observed,
+                self.parser.version,
+                context,
+            )
+            self.store_raw(request["storage_key"], result, job["result_sha256"])
+            requests[side] = request
+        return {
+            "operation": "finalize",
+            "authorization_id": aid,
+            "context": c,
+            "requests": requests,
+        }
+
+    def finalize(self, aid):
+        # An unknown commit outcome is reconciled BEFORE derive/read/store; after
+        # success the old ownership context is intentionally no longer valid.
+        state = self.rpc({"operation": "status", "authorization_id": aid})
+        if state["status"] == "COMMITTED":
+            return state
+        require(
+            state["status"] == "BOTH_VERIFIED_PENDING_IDENTITY",
+            "TRANSFER_BOTH_PROOFS_REQUIRED",
+        )
+        return self.rpc(self.finalization_request(aid))
 
     def derive(self, aid):
         c = self.rpc({"operation": "context", "authorization_id": aid})

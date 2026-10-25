@@ -5,6 +5,12 @@
 
 begin;
 
+drop function if exists public.transfer_identity_proven(uuid,uuid,jsonb);
+drop function if exists public.transfer_foreign_collision(uuid,uuid,jsonb);
+drop function if exists public.transfer_verifier_v057(jsonb);
+drop function if exists public.transfer_leg_v057(jsonb);
+drop table if exists public.transfer_commit_permits;
+drop table if exists public.transfer_provenance;
 -- Local paired transfer adjunct; no remote cleanup.
 drop trigger if exists transfer_no_save_advance on public.season_players;
 drop trigger if exists transfer_no_identity_advance on public.pokemon_identity_revisions;

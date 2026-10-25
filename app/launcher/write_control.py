@@ -52,7 +52,13 @@ class LocalWriteController:
                     "SELECT 1 FROM sqlite_master WHERE type='table' AND name='transfer_bindings'"
                 ).fetchone():
                     return None
-                rows = db.execute("SELECT record FROM transfer_bindings").fetchall()
+                rows = [
+                    row
+                    for row in db.execute(
+                        "SELECT record FROM transfer_bindings"
+                    ).fetchall()
+                    if json.loads(row[0]).get("state") not in ("COMMITTED", "CANCELLED")
+                ]
             for row in rows:
                 record = json.loads(row[0])
                 if record["binding"]["path"] == str(Path(self.selected()).absolute()):

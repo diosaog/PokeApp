@@ -220,13 +220,14 @@ class Reconciliation:
 
 def reconcile_pokemon(previous: tuple[PokemonEntity, ...], incoming: tuple[ParsedPokemonObservation, ...],
                       *, save_file_id: str,
-                      unresolved_evidence: tuple[PokemonIdentityEvidence, ...] = ()) -> Reconciliation:
+                      unresolved_evidence: tuple[PokemonIdentityEvidence, ...] = (),
+                      proven_entity_ids: frozenset[str] = frozenset()) -> Reconciliation:
     """Previous is the scoped head state, including retained missing entities."""
     namespace = UUID(save_file_id)
     if len({p.id for p in previous}) != len(previous) or len({p.location for p in incoming}) != len(incoming):
         raise ValueError("duplicate_identity_input")
     if any(isinstance(p.evidence, TrustedNativeIdentityEvidence) for p in (*previous, *incoming)) or unresolved_evidence:
-        return _reconcile_native(previous, incoming, namespace, unresolved_evidence)
+        return _reconcile_native(previous, incoming, namespace, unresolved_evidence, proven_entity_ids)
     groups = defaultdict(list)
     for entity in previous:
         groups[entity.evidence.pid].append(entity)
@@ -257,7 +258,7 @@ def native_identity_collision(a: PokemonIdentityEvidence, b: PokemonIdentityEvid
                              and a.encryption_constant == b.encryption_constant)
 
 
-def _reconcile_native(previous, incoming, namespace, unresolved_evidence):
+def _reconcile_native(previous, incoming, namespace, unresolved_evidence, proven_entity_ids):
     if any(not isinstance(obs.evidence, TrustedNativeIdentityEvidence) for obs in incoming):
         raise ValueError("mixed_identity_schema")
     by_pid, by_ec = defaultdict(list), defaultdict(list)
@@ -278,12 +279,20 @@ def _reconcile_native(previous, incoming, namespace, unresolved_evidence):
         )}.values())
         unique = pid_counts[evidence.pid] == 1 and ec_counts[evidence.encryption_constant] == 1
         poisoned = evidence.pid in unresolved_pids or evidence.encryption_constant in unresolved_ecs
-        if evidence.unresolved_reason is not None or not unique or poisoned:
+        # A proof-bound competitive transfer changes ownership, never OT evidence.
+        # Only the exact previously proven entity may match a foreign OT; NEW
+        # allocation, clones, eggs and altered immutable evidence stay forbidden.
+        proven = (len(candidates) == 1 and candidates[0].id in proven_entity_ids
+                  and isinstance(candidates[0].evidence, TrustedNativeIdentityEvidence)
+                  and candidates[0].evidence.unresolved_reason is None
+                  and {k: v for k, v in asdict(candidates[0].evidence).items() if k != "source_trainer_match"}
+                      == {k: v for k, v in asdict(evidence).items() if k != "source_trainer_match"})
+        if (evidence.unresolved_reason is not None and not proven) or not unique or poisoned:
             outcome = "AMBIGUOUS"
         elif not candidates:
             outcome = "NEW"
         elif (len(candidates) == 1 and candidates[0].identity_status == "unambiguous"
-              and candidates[0].evidence.candidate_key == evidence.candidate_key):
+              and (candidates[0].evidence.candidate_key == evidence.candidate_key or proven)):
             outcome = "MATCHED"
         else:
             outcome = "AMBIGUOUS"

@@ -27,6 +27,8 @@ TRANSFER_MESSAGES = {
     "VERIFYING_BOTH": "Verificando los dos guardados. El robo aún no está completado.",
     "BOTH_VERIFIED_PENDING_IDENTITY": "Los dos archivos están verificados; falta reconciliar la identidad. Robo sin confirmar.",
     "RECOVERY_REQUIRED": "Recuperación necesaria. Conserva ambos backups y mantén los emuladores cerrados.",
+    "COMMITTED": "Robo confirmado: ambos guardados y la propiedad competitiva están verificados.",
+    "CANCELLED": "Operación cancelada antes de aplicar. El objeto no se ha consumido y las copias se conservan.",
 }
 
 
@@ -141,13 +143,16 @@ class EngineeringTransfer:
                 "UPDATE transfer_bindings SET record=? WHERE id=?",
                 (json.dumps(record), record["binding"]["authorization_id"]),
             )
-        self.controller.gate.recovery_required = True  # BOTH_VERIFIED is not final
+        self.controller.gate.recovery_required = (
+            self.controller._transfer_notice() is not None
+            or bool(self.engine.pending())
+        )
         return {
             "status": state,
             "message": TRANSFER_MESSAGES.get(
                 state, TRANSFER_MESSAGES["RECOVERY_REQUIRED"]
             ),
-            "completed": False,
+            "completed": state == "COMMITTED",
         }
 
     def prepare(self, aid, *, closed_emulator_confirmed):
@@ -217,5 +222,45 @@ class EngineeringTransfer:
             return self._state(record, self._remote("get", record)["status"])
 
     def state(self, aid):
-        record, _ = self._load(aid)
-        return self._state(record, self._remote("get", record)["status"])
+        with self.controller._operation(recovery=True):
+            record, intent = self._load(aid)
+            self._state(record, "RECOVERY_REQUIRED")
+            remote = self._remote("get", record)
+            if remote["status"] == "COMMITTED":
+                receipt = self.engine.reconcile(intent.operation_id)
+                local = self.engine._load(intent.operation_id)
+                if (
+                    receipt.status != "APPLIED_VERIFIED"
+                    or receipt.current_matches_receipt is not True
+                    or remote.get("result_sha256") != local["output_hash"]
+                    or not remote.get("accepted_save_id")
+                ):
+                    return self._state(record, "RECOVERY_REQUIRED")
+            elif remote["status"] == "CANCELLED":
+                try:
+                    self.engine.cancel_paired_prepared(
+                        intent.operation_id,
+                        paired_permit=PairedApplyPermit(intent.operation_id),
+                    )
+                except WriteSafetyError as error:
+                    if str(error) != "WRITE_OPERATION_NOT_FOUND":
+                        raise
+                    # Unprepared side: no local apply ever existed. Verify bytes
+                    # before releasing its journal gate, still never restore.
+                    if (
+                        sha256(
+                            self.engine.files.read_path(Path(record["binding"]["path"]))
+                        ).hexdigest()
+                        != intent.expected_sha256
+                    ):
+                        return self._state(record, "RECOVERY_REQUIRED")
+            return self._state(record, remote["status"])
+
+    def cancel(self, aid):
+        # Remote compare/cancel is serialized against BOTH begin calls. A lost
+        # reply is reconciled with get/state; it never causes physical rollback.
+        with self.controller._operation(recovery=True):
+            record, _ = self._load(aid)
+            self._state(record, "RECOVERY_REQUIRED")
+            self._remote("cancel", record)
+        return self.state(aid)

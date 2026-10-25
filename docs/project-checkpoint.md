@@ -5,11 +5,12 @@ milestone record; it does not maintain a second live phase-status ledger.
 
 ## Current project position
 
-- Current packet: **Phase24A PARTIAL ? local two-save engineering unit verified;
-  no production activation**. Paired native transformations, reservations,
-  independent artifact proofs and restart/backup safety implemented. Competitive
-  ownership/accepted-save finalization and coordinated rollback remain unfinished;
-  two proofs must not be presented as a confirmed robbery. Lime3DS is the primary
+- Current packet: **Phase24A DONE LOCAL — paired two-save transfer finalized
+  locally; no production activation; 24B gate PASS**. Native transfer for eight
+  same-title boxed pairs, 057 reservations, local058 foreign-OT provenance,
+  atomic owner/two-save/025 finalization exactly once, pre-apply paired
+  cancellation and forward-only recovery verified on disposable PostgreSQL.
+  Party/cross-title and public wiring remain unqualified. Lime3DS is the primary
   future certification emulator; personal randomized Y untouched.
   [Current live handoff](work-in-progress/phase24-live.md),
   [report](phase24a-two-save-report.md), [evidence](phase24a-two-save-evidence.json).

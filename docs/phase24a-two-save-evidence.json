@@ -2,12 +2,14 @@
   "date": "2026-10-25",
   "entry": "3f5d1ea92af37457baa4dced819a3c86c42a11cc",
   "phase23d_gate": "PASS_AT_ENTRY",
-  "status": "PHASE24_PARTIAL",
+  "status": "PHASE24A_DONE_LOCAL",
   "classification": {
-    "two_save_protocol": "PARTIAL",
-    "native_transfer": "PARTIAL: eight same-title boxed workflows passed",
-    "server_verification": "PARTIAL: both artifacts independently verified, no competitive identity promotion",
-    "recovery": "PARTIAL: restart/replay/backup/conflict handling passed; coordinated rollback not implemented",
+    "foreign_ot_provenance": "PASS",
+    "competitive_ownership": "PASS",
+    "atomic_finalization": "PASS",
+    "coordinated_recovery": "PASS: paired pre-apply cancellation; forward-only reconciliation/finalization after apply; unilateral restore denied",
+    "exactly_once_consumption": "PASS",
+    "native_transfer": "PASS: eight same-title boxed workflows",
     "lime3ds_certification": "PENDING"
   },
   "remote_actions": 0,
@@ -75,7 +77,66 @@
     "skipped": 0,
     "final_combined_subsets": true
   },
-  "pg_eight_games": {
+  "evidence_boundaries": [
+    "Derived copies of retained public Gen6/7 fixtures; no owner files",
+    "Mock immutable object transport + SignedArtifactReader, no hosted Auth/Storage/HTTP route claim",
+    "Original local journals reused; no production IPC capability",
+    "Artifact proof does not attest ongoing use of selected pathname by player",
+    "Win11/local NTFS inherited host; no real emulator, OS crash, power-loss, Windows10 or new installation certification"
+  ],
+  "checks": {
+    "build": "PASS pinned native Release --no-restore",
+    "python_format": "PASS changed Python product/new test/harness",
+    "ruff": "PASS full new Python; targeted existing changed modules",
+    "compile": "PASS",
+    "diff": "PASS",
+    "csharp_format": "NOT RUN: installed SDK lacks dotnet-format; native build succeeded"
+  },
+  "not_run": [
+    "historic full suites",
+    "web/React/browser unchanged",
+    "Launcher package",
+    "remote migration or deployment",
+    "real emulator/owner randomized Y"
+  ],
+  "limitations": [
+    "party transfer not qualified",
+    "cross-title conversion not qualified",
+    "post-apply external divergence stays blocked for reconciliation; no automatic physical rollback by design",
+    "private engineering seams only, no public command/transport activation",
+    "058 local only; not applied remotely",
+    "Lime3DS lifecycle certification pending"
+  ],
+  "private_evidence": "C:\\Users\\Antonio\\AppData\\Local\\PokeApp-migration-evidence\\phase24a\\20261025",
+  "source_fingerprints": {
+    "app/application/save_ingestion.py": "df5866991fe375e31bb1a9426123c52fe1d7ec74fb7dbb132951d5e07ac87d1c",
+    "app/application/transfer_transport.py": "e21e5abbd3373ba6b78fbd27b93bf81f537e689d6c8089abe1ab8fb6e24a2e9c",
+    "app/application/transfer_verification.py": "05a17a5ba07bb597802bd033ebb5829e9b4ba5438213931ef8420ab44aea040f",
+    "app/domain/pokemon_identity.py": "ed80f97b4244943dc054be2ba1af478a0a1a03d5ce280d86d404866f5e07563c",
+    "app/launcher/transfer.py": "82b4f78e3af2bf07e6e66bfb07f8e57c237a37e5ff3b8d0897b4315370eab1f4",
+    "app/launcher/write_control.py": "e39fb126b173795aa37b708047001e531f52431f0d04e0ab0d8b7e2d72d29b64",
+    "app/launcher/write_engine.py": "2f1199abfcea03d292f329c8a10418e8cbd91f7448969c6da579199b02e40938",
+    "app/repositories/supabase/transfer.py": "dd4f44548f4686030bb6a581aa606d7661ea16a891439e7d4598901f94d30bd2",
+    "app/repositories/transfer_verifier_pg.py": "8ff6314e2f210d36e15182253f8a3d23580c0a1e1e47e61dc5b26cd33daa62c4",
+    "app/save_parser/writer.py": "a4b051bdd3c1b3a91c054ac37e56824d6d418b037769b03be2351e12873ea899",
+    "companion/parser/PokeApp.Parser.Checks/Program.cs": "3b753b2a54f2390b6d35d241e9a79571434ae016cd795dedb4f955a12315b98c",
+    "companion/parser/PokeApp.Parser.Checks/TransferChecks.cs": "e64032887bd9e4d4dce3fa9eccfe7a4b4dd5a8c3f7aefa7b0326df41b05ca0ed",
+    "companion/parser/PokeApp.Parser/NativeTransfer.cs": "1721646f2ca340ac467ede502a8fcf084ac32771db74e06af50759bfe78a93fc",
+    "companion/parser/PokeApp.Parser/NativeWrite.cs": "486315492f337747578ed21b84e1b6f53d8030317f80130d7956741bfb48ac98",
+    "companion/parser/PokeApp.Parser/Program.cs": "b17d34ecd79a9648eb4c87ebe8bcd9ff3ddd935c571724bbb09e4631d7f6d964",
+    "supabase/v2/bootstrap.sql": "8ad340dde1ef890979f851e801399efeeb179d0608ffc81fc2e07a232c61e28b",
+    "supabase/v2/migrations/057_two_save_transfer_reservations.sql": "ae1061aeae62ce8250877d2dd036e21fa22a4fb461d2892379536658eaa92066",
+    "supabase/v2/migrations/058_transfer_provenance_finalization.sql": "82ae34ee566e02d18c4a0d498a6e51a63dae438e48dbd31c834626a90f576037",
+    "supabase/v2/reset_dev.sql": "91e25b8c73b8f0217f72ff463a19a384eef9a6bce9729c3c7783410775a42323",
+    "tests/test_phase24_transfer.py": "ff023a46931fd3801e8747555c6d1a3529347d120de0cb344504920d36ccded0",
+    "tests/test_supabase_v2_schema.py": "d2820b8687013988d8404c1669bb2ccf8f32ae9ffbc805f8b6e25554a6148114",
+    "tools/generate_supabase_v2_bootstrap.py": "db689dcbf77e5666a38f4ed788765040aa9f88cc30c96558fb108c1397bcbee0",
+    "tools/validate_phase24_closure.py": "dae5420d6e497168f1f45bc2997fc4223af1d3c4e2101ea9c4fe504ab3a0f573",
+    "tools/validate_phase24_local.py": "f02aa7dc73aa8656cc056819e7c77d9d4583fe2a1a19669f1f17a0f65d9852e2"
+  },
+  "first_unit_commit": "5652808bd078f9de78ddc21f12f9867b4284ccc2",
+  "phase24b_gate": "PASS",
+  "first_unit_pg_eight_games": {
     "status": "PASS",
     "checks": [
       "wrong owner and persisted shield rejected",
@@ -137,7 +198,7 @@
     "cluster": "C:\\Users\\Antonio\\AppData\\Local\\Temp\\pokeapp-accounts-pg-24mks1cs",
     "cleanup": "owned databases dropped; cluster stopped"
   },
-  "pg_final_targeted": {
+  "first_unit_pg_final_targeted": {
     "status": "PASS",
     "checks": [
       "wrong owner and persisted shield rejected",
@@ -163,62 +224,134 @@
     "cluster": "C:\\Users\\Antonio\\AppData\\Local\\Temp\\pokeapp-accounts-pg-iujjvrkn",
     "cleanup": "owned databases dropped; cluster stopped"
   },
-  "parity": {
+  "first_unit_parity_057": {
     "schema_lines": 17077,
     "preserved_tables": 65
   },
-  "evidence_boundaries": [
-    "Derived copies of retained public Gen6/7 fixtures; no owner files",
-    "Mock immutable object transport + SignedArtifactReader, no hosted Auth/Storage/HTTP route claim",
-    "Original local journals reused; no production IPC capability",
-    "Artifact proof does not attest ongoing use of selected pathname by player",
-    "Both native proof rows do NOT consume, switch owner, register cloud saves or issue APPLIED_VERIFIED",
-    "Win11/local NTFS inherited host; no real emulator, OS crash, power-loss, Windows10 or new installation certification"
-  ],
-  "checks": {
-    "build": "PASS pinned native Release --no-restore",
-    "python_format": "PASS changed Python product/new test/harness",
-    "ruff": "PASS full new Python; targeted existing changed modules",
-    "compile": "PASS",
-    "diff": "PASS",
-    "csharp_format": "NOT RUN: installed SDK lacks dotnet-format; native build succeeded"
+  "closure_pg_x": {
+    "status": "PASS",
+    "checks": [
+      "wrong owner and persisted shield rejected",
+      "injected final SQL failure restores all17 tables; physical receipts/backups retained; unilateral cancellation denied",
+      "concurrent finalizers exactly one effect and identical terminal receipt",
+      "X atomic owner/save/identity/025 effects, immutable provenance, terminal replay and two restarted Launcher gates",
+      "ordinary sync builder preserves foreign-OT UUID; retired donor clone blocked and old receipt cannot rewind",
+      "paired pre-apply cancellation, no physical rollback, originals/unused purchase preserved and both gates released",
+      "1 native/PG/Launcher paired workflows, both backups, no false completion",
+      "restricted issuer and paired-table grants",
+      "foreign OT remains unproven, ownership/consumption deliberately gated",
+      "reserved current-save pointer cannot advance"
+    ],
+    "games": [
+      {
+        "game": "X",
+        "status": "COMMITTED",
+        "originals_preserved": true,
+        "entitlement_consumed": true
+      }
+    ],
+    "cluster": "C:\\Users\\Antonio\\AppData\\Local\\Temp\\pokeapp-accounts-pg-mn4ofjp4",
+    "cleanup": "owned databases dropped; cluster stopped"
   },
-  "not_run": [
+  "closure_pg_eight_games": {
+    "status": "PASS",
+    "checks": [
+      "wrong owner and persisted shield rejected",
+      "injected final SQL failure restores all17 tables; physical receipts/backups retained; unilateral cancellation denied",
+      "concurrent finalizers exactly one effect and identical terminal receipt",
+      "X atomic owner/save/identity/025 effects, immutable provenance, terminal replay and two restarted Launcher gates",
+      "ordinary sync builder preserves foreign-OT UUID; retired donor clone blocked and old receipt cannot rewind",
+      "paired pre-apply cancellation, no physical rollback, originals/unused purchase preserved and both gates released",
+      "Y atomic owner/save/identity/025 effects, immutable provenance, terminal replay and two restarted Launcher gates",
+      "OR atomic owner/save/identity/025 effects, immutable provenance, terminal replay and two restarted Launcher gates",
+      "AS atomic owner/save/identity/025 effects, immutable provenance, terminal replay and two restarted Launcher gates",
+      "SN atomic owner/save/identity/025 effects, immutable provenance, terminal replay and two restarted Launcher gates",
+      "MN atomic owner/save/identity/025 effects, immutable provenance, terminal replay and two restarted Launcher gates",
+      "US atomic owner/save/identity/025 effects, immutable provenance, terminal replay and two restarted Launcher gates",
+      "UM atomic owner/save/identity/025 effects, immutable provenance, terminal replay and two restarted Launcher gates",
+      "8 native/PG/Launcher paired workflows, both backups, no false completion",
+      "restricted issuer and paired-table grants",
+      "foreign OT remains unproven, ownership/consumption deliberately gated",
+      "reserved current-save pointer cannot advance"
+    ],
+    "games": [
+      {
+        "game": "X",
+        "status": "COMMITTED",
+        "originals_preserved": true,
+        "entitlement_consumed": true
+      },
+      {
+        "game": "Y",
+        "status": "COMMITTED",
+        "originals_preserved": true,
+        "entitlement_consumed": true
+      },
+      {
+        "game": "OR",
+        "status": "COMMITTED",
+        "originals_preserved": true,
+        "entitlement_consumed": true
+      },
+      {
+        "game": "AS",
+        "status": "COMMITTED",
+        "originals_preserved": true,
+        "entitlement_consumed": true
+      },
+      {
+        "game": "SN",
+        "status": "COMMITTED",
+        "originals_preserved": true,
+        "entitlement_consumed": true
+      },
+      {
+        "game": "MN",
+        "status": "COMMITTED",
+        "originals_preserved": true,
+        "entitlement_consumed": true
+      },
+      {
+        "game": "US",
+        "status": "COMMITTED",
+        "originals_preserved": true,
+        "entitlement_consumed": true
+      },
+      {
+        "game": "UM",
+        "status": "COMMITTED",
+        "originals_preserved": true,
+        "entitlement_consumed": true
+      }
+    ],
+    "cluster": "C:\\Users\\Antonio\\AppData\\Local\\Temp\\pokeapp-accounts-pg-aq9cafgo",
+    "cleanup": "owned databases dropped; cluster stopped",
+    "note": "Run with --skip-parity; X-only fault injection/concurrency/sync/clone/cancellation checks are title-neutral SQL/journal paths, not repeated per title. Inherited label 'foreign OT remains unproven' refers to the pre-finalization intermediate state."
+  },
+  "closure_parity_058": {
+    "status": "PASS",
+    "cluster": "C:\\Users\\Antonio\\AppData\\Local\\Temp\\pokeapp-accounts-pg-9oryyinm",
+    "parity": {
+      "schema_lines": 17395,
+      "preserved_tables": 67
+    },
+    "cleanup": "owned databases dropped; cluster stopped"
+  },
+  "closure_python": {
+    "affected_tests_run": 268,
+    "pass": 267,
+    "fail_preexisting": [
+      "test_phase16d_save_sync.TrustedOutboxTests.test_runtime_publishes_only_verified_readback_and_clears_superseded (fails identically on clean export of 5652808)"
+    ],
+    "ruff": "no new findings; 17 inherited identical at 5652808",
+    "format": "PASS changed files except inherited unformatted files identical to HEAD; new harness reformatted with identical AST",
+    "compile": "PASS",
+    "diff": "PASS"
+  },
+  "retained_not_rerun": [
+    "176 native checks (native sources and 057 hashes unchanged)",
+    "first-unit tampering/concurrency/privacy/allowlist gates",
     "historic full suites",
-    "web/React/browser unchanged",
-    "Launcher package",
-    "remote migration or deployment",
-    "real emulator/owner randomized Y"
-  ],
-  "limitations": [
-    "party transfer not qualified",
-    "cross-title conversion not qualified",
-    "foreign OT requires proof-bound identity provenance and atomic registration of both current saves",
-    "competitive finalization/exactly-once consumption intentionally unavailable",
-    "coordinated abort/rollback/release of reservations unavailable",
-    "private engineering seams only, no public command/transport activation"
-  ],
-  "private_evidence": "C:\\Users\\Antonio\\AppData\\Local\\PokeApp-migration-evidence\\phase24a\\20261025",
-  "source_fingerprints": {
-    "app/application/transfer_transport.py": "e21e5abbd3373ba6b78fbd27b93bf81f537e689d6c8089abe1ab8fb6e24a2e9c",
-    "app/application/transfer_verification.py": "8e09fb361c8ca80bfb3810035968242cc54f579558a9f1d2dea67d6499ee4554",
-    "app/repositories/supabase/transfer.py": "dd4f44548f4686030bb6a581aa606d7661ea16a891439e7d4598901f94d30bd2",
-    "app/repositories/transfer_verifier_pg.py": "8ff6314e2f210d36e15182253f8a3d23580c0a1e1e47e61dc5b26cd33daa62c4",
-    "app/launcher/transfer.py": "2d929474502993c40f4b851b5195da8b7b77c2b531afa5f8a0cc4dbacb704944",
-    "app/launcher/write_engine.py": "8c58ee40b4d675c84b07e37f83859975c2ca197c9ac5ef3fb1825898d33d84d8",
-    "app/launcher/write_control.py": "c0751da730f095fd13caaade55fb9783076950e84cbfb262e4be72fb819ba50b",
-    "app/save_parser/writer.py": "a4b051bdd3c1b3a91c054ac37e56824d6d418b037769b03be2351e12873ea899",
-    "companion/parser/PokeApp.Parser/NativeTransfer.cs": "1721646f2ca340ac467ede502a8fcf084ac32771db74e06af50759bfe78a93fc",
-    "companion/parser/PokeApp.Parser/NativeWrite.cs": "486315492f337747578ed21b84e1b6f53d8030317f80130d7956741bfb48ac98",
-    "companion/parser/PokeApp.Parser/Program.cs": "b17d34ecd79a9648eb4c87ebe8bcd9ff3ddd935c571724bbb09e4631d7f6d964",
-    "companion/parser/PokeApp.Parser.Checks/TransferChecks.cs": "e64032887bd9e4d4dce3fa9eccfe7a4b4dd5a8c3f7aefa7b0326df41b05ca0ed",
-    "companion/parser/PokeApp.Parser.Checks/Program.cs": "3b753b2a54f2390b6d35d241e9a79571434ae016cd795dedb4f955a12315b98c",
-    "supabase/v2/migrations/057_two_save_transfer_reservations.sql": "ae1061aeae62ce8250877d2dd036e21fa22a4fb461d2892379536658eaa92066",
-    "supabase/v2/bootstrap.sql": "c096e4d0911142616d1219efc8eae069c826f5444d9df3dd2f8c10f98e06efbf",
-    "supabase/v2/reset_dev.sql": "87fde7a897118decb674867ecde15769e7da4c0cc6a4f42315b578442571f88e",
-    "tests/test_phase24_transfer.py": "ff023a46931fd3801e8747555c6d1a3529347d120de0cb344504920d36ccded0",
-    "tests/test_supabase_v2_schema.py": "0c0713c0ee1f135aec2418ad575e3c7ca6295dd14d1a6bbeede4225fbcc68751",
-    "tools/validate_phase24_local.py": "b583faab1669a34471fd132e6a7f63afcdf23510e25f71f93362d35e7c417f09",
-    "tools/generate_supabase_v2_bootstrap.py": "5ebb7fd45ef2825a744b5438c1797b9833245be6138ba9f8edfc399bb77c4d20"
-  }
+    "Phase23B/23C/23D matrices"
+  ]
 }

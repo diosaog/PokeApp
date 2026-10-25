@@ -1,4 +1,4 @@
-"""Original bytes → isolated server parser → existing authoritative V2 save model."""
+"""Original bytes â†’ isolated server parser â†’ existing authoritative V2 save model."""
 
 from dataclasses import asdict
 from hashlib import sha256
@@ -33,7 +33,7 @@ def parsed_payload(observation, save_id, trainer_id, raw_hash):
         if p is None:
             return None
         value = {
-            "species": f"Pokémon #{p.species_id}",
+            "species": f"PokÃ©mon #{p.species_id}",
             "nickname": p.nickname,
             "level": p.level,
             "types": [],
@@ -158,92 +158,114 @@ class TrustedSaveIngestion:
             reject("SAVE_TRAINER_MISMATCH")
         if context["current_save_id"] is not None and context["save_identity"] is None:
             reject("SAVE_IDENTITY_UNPROVEN")
-        save_id = str(uuid5(NAMESPACE_URL, f"pokeapp:save:{sid}:{tid}:{raw_hash}"))
-        parsed_id = str(
-            uuid5(NAMESPACE_URL, f"pokeapp:parsed:{save_id}:{self.parser.version}")
+        request = registration_request(
+            sid, tid, raw_hash, expected, observed, self.parser.version, context
         )
-        payload = parsed_payload(observed, save_id, tid, raw_hash)
-        plan = None
-        if observed.generation < 6 or observed.native_progress is not None:
-            native = observed.generation >= 6
-            incoming = (
-                tuple(
-                    ParsedPokemonObservation(
-                        location,
-                        trusted_native_identity(
-                            p.identity, trainer=observed.trainer, is_egg=p.is_egg
-                        ),
-                    )
-                    for location, p in observed.occupied()
-                )
-                if native
-                else observed.identity_observations()
-            )
-            previous = tuple(
-                PokemonEntity(
-                    r["id"],
-                    identity_evidence_from_dict(r["initial_evidence"]),
-                    r["identity_status"],
-                )
-                for r in context["entities"]
-            )
-            reconciliation = reconcile_pokemon(
-                previous,
-                incoming,
-                save_file_id=save_id,
-                unresolved_evidence=tuple(
-                    identity_evidence_from_dict(e)
-                    for e in context.get("unresolved_evidence", [])
-                )
-                if native
-                else (),
-            )
-            head = context["head"]
-            plan = dict(
-                **scope,
-                save_file_id=save_id,
-                parsed_save_id=parsed_id,
-                parsed_payload=payload,
-                expected_predecessor_id=head["id"] if head else None,
-                capture_stream_id=head["capture_stream_id"]
-                if head
-                else str(uuid5(NAMESPACE_URL, f"pokeapp:accept:{sid}:{tid}")),
-                capture_sequence=head["capture_sequence"] + 1 if head else 1,
-                identity_schema_version=2 if native else 1,
-                reconciliation_version=2 if native else 1,
-                input_signature=digest([asdict(o) for o in incoming]),
-                bindings=[],
-            )
-            for binding in reconciliation.bindings:
-                obs = binding.observation
-                plan["bindings"].append(
-                    {
-                        **asdict(obs.location),
-                        "outcome": binding.outcome,
-                        "pokemon_entity_id": binding.pokemon_entity_id,
-                        "candidate_entity_ids": list(binding.candidate_entity_ids),
-                        "evidence": asdict(obs.evidence),
-                        "candidate_key": obs.evidence.candidate_key,
-                        "observation_signature": obs.signature,
-                        "legacy_fingerprints": [],
-                    }
-                )
-        # 'trusted' prefix is deliberately outside browser-owned Storage path policies.
-        key = f"trusted/{tid}/{sid}/{raw_hash}.sav"
-        request = dict(
-            **scope,
-            sha256=raw_hash,
-            save_id=save_id,
-            parsed_id=parsed_id,
-            expected_save_id=expected,
-            storage_key=key,
-            parser_version=self.parser.version,
-            observation_digest=observed_digest,
-            save_identity=identity,
-            payload=payload,
-            identity_plan=plan,
-        )
+        key = request["storage_key"]
         self.repository.store_raw(key, data, raw_hash)
         return SaveRegistration.model_validate(
             self.repository.execute("register", request)
         )
+
+
+def registration_request(
+    sid, tid, raw_hash, expected, observed, parser_version, context
+):
+    """Build the same native registration plan for ingestion and the private verifier.
+
+    Context/provenance must come from persisted server authority, never client DTOs.
+    """
+    scope = {"season_id": sid, "trainer_id": tid}
+    observed_digest = observation_digest(observed, parser_version)
+    identity = {
+        "game": observed.game,
+        "trainer": observed.trainer.model_dump(mode="json"),
+    }
+    save_id = str(uuid5(NAMESPACE_URL, f"pokeapp:save:{sid}:{tid}:{raw_hash}"))
+    parsed_id = str(uuid5(NAMESPACE_URL, f"pokeapp:parsed:{save_id}:{parser_version}"))
+    payload = parsed_payload(observed, save_id, tid, raw_hash)
+    plan = None
+    if observed.generation < 6 or observed.native_progress is not None:
+        native = observed.generation >= 6
+        incoming = (
+            tuple(
+                ParsedPokemonObservation(
+                    location,
+                    trusted_native_identity(
+                        p.identity, trainer=observed.trainer, is_egg=p.is_egg
+                    ),
+                )
+                for location, p in observed.occupied()
+            )
+            if native
+            else observed.identity_observations()
+        )
+        previous = tuple(
+            PokemonEntity(
+                r["id"],
+                identity_evidence_from_dict(r["initial_evidence"]),
+                r["identity_status"],
+            )
+            for r in context["entities"]
+        )
+        reconciliation = reconcile_pokemon(
+            previous,
+            incoming,
+            save_file_id=save_id,
+            proven_entity_ids=frozenset(context.get("proven_entity_ids", ())),
+            unresolved_evidence=tuple(
+                identity_evidence_from_dict(e)
+                for e in (
+                    *context.get("unresolved_evidence", []),
+                    *context.get("foreign_transfer_evidence", []),
+                )
+            )
+            if native
+            else (),
+        )
+        head = context["head"]
+        plan = dict(
+            **scope,
+            save_file_id=save_id,
+            parsed_save_id=parsed_id,
+            parsed_payload=payload,
+            expected_predecessor_id=head["id"] if head else None,
+            capture_stream_id=head["capture_stream_id"]
+            if head
+            else str(uuid5(NAMESPACE_URL, f"pokeapp:accept:{sid}:{tid}")),
+            capture_sequence=head["capture_sequence"] + 1 if head else 1,
+            identity_schema_version=2 if native else 1,
+            reconciliation_version=2 if native else 1,
+            input_signature=digest([asdict(o) for o in incoming]),
+            bindings=[],
+        )
+        for binding in reconciliation.bindings:
+            obs = binding.observation
+            plan["bindings"].append(
+                {
+                    **asdict(obs.location),
+                    "outcome": binding.outcome,
+                    "pokemon_entity_id": binding.pokemon_entity_id,
+                    "candidate_entity_ids": list(binding.candidate_entity_ids),
+                    "evidence": asdict(obs.evidence),
+                    "candidate_key": obs.evidence.candidate_key,
+                    "observation_signature": obs.signature,
+                    "legacy_fingerprints": [],
+                }
+            )
+    # 'trusted' prefix is deliberately outside browser-owned Storage path policies.
+    key = f"trusted/{tid}/{sid}/{raw_hash}.sav"
+    request = dict(
+        **scope,
+        sha256=raw_hash,
+        save_id=save_id,
+        parsed_id=parsed_id,
+        expected_save_id=expected,
+        storage_key=key,
+        parser_version=parser_version,
+        observation_digest=observed_digest,
+        save_identity=identity,
+        payload=payload,
+        identity_plan=plan,
+    )
+    return request

@@ -1024,6 +1024,36 @@ class LocalWriteEngine:
             return self._receipt(record, False)
 
     @_serialized
+    def cancel_paired_prepared(
+        self, operation_id: str, *, paired_permit
+    ) -> WriteReceipt:
+        """Retain backup/stage; only abandon an unstarted, server-cancelled pair.
+
+        No namespace mutation or compensating restore is performed here.
+        """
+        record = self._load(operation_id)
+        if (
+            type(paired_permit) is not PairedApplyPermit
+            or paired_permit.operation_id != operation_id
+            or record["intent"]["mutation"].get("kind")
+            not in ("transfer_remove", "transfer_insert")
+            or record.get("commit_started")
+            or record.get("phase") == "restore"
+        ):
+            raise WriteSafetyError("TRANSFER_COORDINATED_RECOVERY_REQUIRED")
+        target = self._target(record)
+        with self.handoff.pin(target.path), self.handoff.held(target.path) as current:
+            if (
+                self.handoff.identity(current) != [target.device, target.inode]
+                or _hash(self.files.read(current))
+                != record["intent"]["expected_sha256"]
+            ):
+                raise WriteSafetyError("EXTERNAL_CHANGE_PRESERVED")
+            record.update(status="REJECTED", error="TRANSFER_CANCELLED_BEFORE_APPLY")
+            self._save(record)
+        return self._receipt(record, True)
+
+    @_serialized
     def reconcile(self, operation_id: str) -> WriteReceipt:
         """Observe before retry; this method NEVER replaces a save."""
         record = self._load(operation_id)

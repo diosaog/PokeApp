@@ -1,10 +1,10 @@
 # Phase24A — paired save transfer, local engineering unit
 
-2026-10-25. **PHASE24 PARTIAL. Production UNCHANGED.**
-Entry `3f5d1ea92af37457baa4dced819a3c86c42a11cc`, main/origin0/0, tracked clean,
-no other active agent.23D gate PASS: published report/evidence, PG results and all
-source fingerprints checked at entry. Its matrices were not repeated.
-[Evidence](phase24a-two-save-evidence.json) · [Live handoff](work-in-progress/phase24-live.md).
+2026-10-25. **PHASE24A DONE LOCAL. Production UNCHANGED.**
+Entry `3f5d1ea92af37457baa4dced819a3c86c42a11cc`; first unit published as
+`5652808bd078f9de78ddc21f12f9867b4284ccc2` (PARTIAL), closed by the focused
+finalization commit on top of it. 23D gate PASS at entry; its matrices were not
+repeated. [Evidence](phase24a-two-save-evidence.json) · [Live handoff](work-in-progress/phase24-live.md).
 
 ## Implemented and proven boundary
 
@@ -17,130 +17,108 @@ are independently derived and verified; client plans, local receipts and hashes
 alone cannot issue evidence.
 
 **PASS: X→X, Y→Y, OR→OR, AS→AS, SN→SN, MN→MN, US→US, UM→UM**, on derived copies
-of the retained authentic public-format fixtures. The qualified new subset is
+of the retained authentic public-format fixtures. The qualified subset is
 boxes1–7, same title, non-egg, unique PID/EC and known original trainer. Party
 compaction and cross-title conversions are unsupported and rejected; this is an
 implementation boundary, not a change to the approved robbery rules.
 
-Additive **057_two_save_transfer_reservations**, LOCAL ONLY, extends the existing
-item-use authorization with two private RLS leg records. Reservation binds the
-purchase, entity, both trainers, current saves, hashes and identity heads. It
-reserves both participants, preserves uncertain reservations without timeout
-reuse, and rejects conflicting sync, identity advancement and redemptions. Both
-backups must be prepared locally before donor application. Recipient application
-requires the independently verified donor artifact. A readiness acknowledgement
-is not privileged proof that a remote disk has a backup.
+Additive **057_two_save_transfer_reservations** (unchanged) reserves both
+participants against the existing item-use authorization: purchase, entity,
+trainers, current saves, hashes and identity heads. It blocks conflicting sync,
+identity advancement and redemptions without timeout reuse. The restricted23D
+verifier role issues both artifact proofs; normal API service, browser and
+Launcher cannot. `EngineeringTransfer` reuses LocalWriteController, its sync gate,
+the SQLite physical journal, verified backups and the no-replace handoff.
 
-The restricted23D verifier role gains one paired RPC, with no direct table DML;
-normal API service, browser and Launcher cannot issue proofs. The new seam reuses
-the native bridge, immutable item-use namespace and signed artifact reader.
-It is not wired into public HTTP, the API container or production IPC. There is
-no second generic upload system, verifier secret in the Launcher or deployment.
+## Closure: identity, finalization and recovery (058)
 
-`EngineeringTransfer` reuses LocalWriteController, its sync gate, the SQLite
-physical journal, verified backups and the existing no-replace handoff. Stable
-claims/intents survive response loss and restart. It reconciles before retry and
-never reapplies a verified side. The existing Launcher status area gets Spanish
-paired-state notices; generic confirmation and unilateral restore are denied.
-Save Copy still exports exact verified backup bytes. No separate web screen or
-public initiation flow was added while finalization remains unsafe.
+Additive **058_transfer_provenance_finalization**, LOCAL ONLY, closes the gap
+that kept the first unit PARTIAL. Historical migrations001–057 are unchanged.
 
-## Rules and why this is PARTIAL
+- **Foreign-OT provenance.** Private `transfer_provenance` (forced RLS, all
+  privileges revoked from every API/verifier role, one row per authorization)
+  binds entity, donor, recipient, original evidence/flags, both results and both
+  proofs. Ordinary ingestion consults it through `transfer_identity_proven`:
+  the received Pokémon is `MATCHED` to its **original UUID** while
+  `source_trainer_match` stays literally false. No OT rewrite or forged flag.
+- **Atomic competitive finalization.** One verifier transaction re-checks the
+  proofs, moves `owner_trainer_id`, registers BOTH accepted saves and identity
+  revisions, advances both current-save pointers and applies the existing025
+  effects once: purchase `used`, one redemption, one robber shield voucher,
+  `blindado`/`robado` flags. A transaction-scoped `transfer_commit_permits` row
+  (unforgeable by API/worker roles, empty after commit) is the only way past the
+  057 reservation guards. Terminal state and receipt are stored; replay returns
+  the identical receipt without re-deriving obsolete donor context.
+- **Clone/history safety.** Prior revisions/observations are untouched. The
+  retired donor re-uploading original bytes under another hash gets `AMBIGUOUS`
+  via `transfer_foreign_collision`; an old donor receipt cannot rewind pointers.
+- **Coordinated recovery.** Before any physical effect, a paired cancellation
+  releases both legs (`released`), keeps originals and the unused purchase, and
+  clears both Launcher gates; no physical rollback is attempted. After physical
+  application, recovery is forward-only: reconciliation reports
+  APPLIED_VERIFIED, unilateral cancellation/restore is denied, and finalization
+  is retried idempotently. Uncertain/one-leg states stay blocked.
 
-Canonical8F.1/025 remains authoritative: enabled actor and another active
-same-season participant, own pending robbery purchase, current unambiguous live
-target, no shield/already-stolen state, victim cycle eligibility. No new matchday
-or season-lifecycle rule. Coins are charged at purchase; the approved shield
-voucher belongs to the robber.054's later physical-proof boundary delays use
-consumption. This packet consumes no entitlement and grants no voucher.
+## Fresh closure validation
 
-**The indispensable unresolved integration is foreign-OT identity.** Existing
-schema2 reconciliation deliberately marks the received Pokémon
-`original_trainer_unproven`. Tests reproduce that after exact native insertion.
-Changing the OT, forcing `source_trainer_match=true`, allocating another entity
-or merely changing its owner would violate the trusted identity/current-save
-contract. A proof-bound ownership transition must also register both resulting
-saves and new identity revisions atomically, without changing the stable UUID,
-original provenance or frozen history. That path is not implemented here.
+- **Real disposable PostgreSQL17 + native PKHeX + two Launcher journals, all
+  eight titles: COMMITTED.** Per title: atomic owner/save/identity/025 effects,
+  one immutable provenance row, empty permits, foreign-OT `MATCHED` on the
+  original UUID, recipient-only proven context, lost-final-response replay
+  identical, both restarted Launcher gates complete and released. Wrong proof
+  hash rejected before effects.
+- **X additionally:** injected failure after all effects rolls back all17
+  involved tables exactly, physical receipts/backups retained, unilateral
+  cancellation denied; two concurrent finalizers produce one effect and identical
+  receipts; ordinary later sync keeps the foreign-OT UUID; retired-donor clone
+  blocked; paired pre-apply cancellation releases both sides. These title-neutral
+  SQL/journal paths were not repeated for the other seven titles.
+- **058 upgrade/bootstrap parity:** 001–057 then 058 equals bootstrap,
+  **17,395 schema/grant/ownership lines; 67 prior public table hashes preserved**.
+  Disposable cluster only; not a production data comparison.
+- **268 affected Python tests (schema, identity, ingestion, Launcher/write,
+  transfer, per-title parsers): 267 PASS, 1 FAIL pre-existing** —
+  `test_phase16d_save_sync…test_runtime_publishes_only_verified_readback_and_clears_superseded`
+  fails identically on a clean export of `5652808`; outside 24A, not changed.
+- Ruff on changed Python: no new findings (17 inherited, identical at HEAD);
+  format/compile/diff PASS. The new harness was format-only reformatted after the
+  run with an identical AST hash.
+- **Retained, not rerun:** 176 native checks (native sources and 057 hashes
+  unchanged since the first unit), first-unit tampering/concurrency/privacy gates.
 
-Consequently, two valid proofs end at **BOTH_VERIFIED_PENDING_IDENTITY**, never
-APPLIED_VERIFIED/transfer-confirmed. The purchase remains pending, owner remains
-the donor, cloud current-save pointers remain unchanged, and sync/reopening remain
-blocked. Exactly-once *consumption* is not claimed: consumption is unavailable.
-Historical receipts are untouched. Partial physical application remains pending;
-no independent restore can duplicate a Pokémon already inserted at the peer.
+Development history: the first closure X runs failed in the harness (a test
+flag and an assertion), and 058/the validator were corrected; only the affected
+gate was rerun, then the eight-title run. No failures or skips remain in the
+reported closure evidence.
 
-Coordinated abort/rollback and reservation release are also unfinished. Backups
-are recoverable/exportable and conflicts preserved, but operators must not clear
-reservations or independently restore either side as an improvised repair. This
-engineering-only unit is unsuitable for user activation in its present state.
+Private evidence: `%LOCALAPPDATA%/PokeApp-migration-evidence/phase24a/20261025/`
+(`closure-x-final.json`, `closure-eight-games.json`, `closure-parity-058.json`).
+Owned PG databases dropped and clusters stopped. No real saves, personal
+randomized Y, remote V1/Shadow, accounts, economy, Railway, Cloudflare, Supabase
+or public Launcher were accessed or changed. Physical production mutation
+registry remains empty; 058 is not applied anywhere remote.
 
-## Fresh validation
+## Remaining limits (not 24A blockers)
 
-- **176 native checks PASS:**168 boxed paired checks across eight titles plus8
-  explicit cross-title denials. Wrong target/slot, stale input, clone collision,
-  full destination, dead box, unintended money changes, integrity and exact PKM
-  preservation included. New C# build: no warnings/errors; pinned dependencies.
-- **46 unique Python/static checks PASS:**10 new journal tests,21 affected
-  Launcher/write regressions and15 schema checks, combined final evidence. New
-  coverage includes explicit confirmation, lost ready/begin/upload responses,
-  restart after publication, independent writer and gap creator, corrupt binding,
-  Lime process denial, stale source, generic-IPC/restore denial, exact Save Copy
-  and restart/selection sync exclusion. Native semantics in these10 tests are a
-  synthetic fixture; the separate eight-game journey uses real PKHeX.
-- **Real disposable PostgreSQL + native + two Launcher journals:** all eight
-  same-title workflows reach both-artifacts-verified with both backups intact,
-  unchanged owner, no redemption/consumption, restart and replay. Additional X
-  gate proves concurrent reservation, second robbery rejection, later shield/
-  stolen flags, disabled peer, tampered artifact rejection, private grants,
-  exact two-function worker allowlist and old completion API denial.
-- **057 migration/bootstrap parity:17,077 schema/grant/ownership lines;65 prior
-  public table hashes preserved** across the forward migration. Disposable reset
-  removes the adjunct while preserving the local Shadow schema. This is not a
-  production data comparison.
-- Python formatting, targeted Ruff, syntax and diff PASS. Installed SDK lacks
-  `dotnet-format`; no C# formatter PASS is claimed. No React/browser/build matrix,
-  packaging, hosted Auth/Storage or emulator certification was repeated.
-
-Early development found a trigger referencing a field absent from an identity
-row; product SQL now branches by table. The harness used an obsolete `price`
-field; corrected to `base_price`. A completion-denial assertion initially passed
-with wrong RPC argument order; it was invalidated and replaced by the real
-repository claim/complete call, which returns BLOCKED_UNCERTAIN without consuming.
-The final schema test was adjusted for two new explicit RLS tables. Only affected
-gates were repeated; no failures/skips remain in the reported final evidence.
-
-Private evidence: `%LOCALAPPDATA%/PokeApp-migration-evidence/phase24a/20261025/`.
-Owned PG databases dropped and clusters stopped. Test journals/backups in the
-recorded temporary clusters and derived fixture evidence are retained; no blanket
-cleanup of unrelated paths. No real saves, personal randomized Y, remote V1/Shadow,
-accounts, economy, Railway, Cloudflare, Supabase or public Launcher were accessed
-or changed. Physical production mutation registry remains empty.
-
-## Exact next unit and classification
-
-1. Add proof-bound transferred-identity provenance and accepted-save reconciliation
-   for both parties; prove ordinary subsequent sync preserves the same entity/OT
-   and rejects clones or ambiguous observations.
-2. Atomically register both authoritative results and finalize the existing025
-   competitive effects once; fault-test every step, lost response and replay.
-3. Implement paired abort/rollback authority and reservation release without
-   restoring a donor while recipient state is unknown. Extend party/cross-title
-   qualification separately; unsupported combinations remain unavailable.
-4. Then expose the existing screens/IPC to the approved flow and qualify real
-   lifecycle/application with **Lime3DS**, the owner's primary emulator. Retain
-   Azahar/Citra detection. Owner's randomized Y remains reserved, never tested here.
+1. Party transfer and cross-title conversion remain unqualified and rejected.
+2. No public HTTP route, API container wiring, production IPC or web screen.
+3. A post-apply divergence (peer save changed outside the protocol) stays
+   blocked for reconciliation; there is no automatic physical rollback by design.
+4. Lime3DS real lifecycle certification PENDING; Azahar/Citra detection retained.
+   No OS-crash/power-loss certification. C# formatter unavailable in SDK.
 
 | Gate | Result |
 | --- | --- |
-| PHASE23D GATE | PASS |
-| TWO-SAVE PROTOCOL | PARTIAL — durable coordinated physical unit proven |
-| NATIVE TRANSFER | PARTIAL — eight same-title boxed workflows proven |
-| SERVER VERIFICATION | PARTIAL — both artifact proofs PASS; ownership finalization absent |
-| RECOVERY | PARTIAL — reconciliation/backups/conflicts PASS; paired rollback absent |
+| FOREIGN-OT PROVENANCE | PASS |
+| COMPETITIVE OWNERSHIP | PASS |
+| ATOMIC FINALIZATION | PASS |
+| COORDINATED RECOVERY | PASS (pre-apply cancel; forward-only after apply) |
+| EXACTLY-ONCE CONSUMPTION | PASS |
+| X/Y/OR/AS/SN/MN/US/UM | PASS ×8 |
+| POSTGRESQL + 058 | PASS |
 | LIME3DS CERTIFICATION | PENDING |
-| PHASE24 | PARTIAL; no public activation |
+| PHASE24A | DONE LOCAL; no public activation |
+| PHASE24B GATE | PASS |
 
-The focused closure commit carries implementation and this evidence; derive its
-exact final HEAD from Git. Explicit staging only, eight unrelated untracked files
-preserved. No next phase started.
+Explicit staging only; the eight unrelated untracked files are preserved.
+No next phase started.

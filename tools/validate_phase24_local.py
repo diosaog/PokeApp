@@ -42,8 +42,8 @@ from tools.validate_phase23d_local import Blobs, rejected
 from tools.validate_supabase_v2_identity_sql import LocalClient
 
 
-def run(args):
-    pg = LocalPG(args.pg_bin, 55476)
+def run(args, closure=None):
+    pg = LocalPG(args.pg_bin, 55477 if closure else 55476)
     report = {"status": "RUNNING", "checks": [], "games": [], "cluster": str(pg.root)}
     worker = None
 
@@ -88,7 +88,12 @@ def run(args):
             client=httpx.Client(transport=httpx.MockTransport(blobs.serve)),
         )
         verifier = TransferVerification(
-            rpc, lambda s: sources.blobs[s["storage_key"]], reader, parser, native
+            rpc,
+            lambda s: sources.blobs[s["storage_key"]],
+            reader,
+            parser,
+            native,
+            store_raw=sources.store_raw,
         )
         transport = TransferTransport(repo, blobs)
 
@@ -407,12 +412,16 @@ def run(args):
                     WriteSafetyError,
                 )
             unconsumed(c)
+            if closure:
+                closure(locals())
             report["games"].append(
                 {
                     "game": game,
-                    "status": "BOTH_VERIFIED_PENDING_IDENTITY",
+                    "status": "COMMITTED"
+                    if closure
+                    else "BOTH_VERIFIED_PENDING_IDENTITY",
                     "originals_preserved": True,
-                    "entitlement_consumed": False,
+                    "entitlement_consumed": bool(closure),
                 }
             )
             print(
@@ -447,12 +456,15 @@ def run(args):
         )
         passed("foreign OT remains unproven, ownership/consumption deliberately gated")
         # Reservations block ordinary future accepted-save revisions and pointer advance.
-        assert pg.sql(
-            f"update season_players set current_save_file_id=null where season_id='{c['season_id']}' and trainer_id='{c['source']['tid']}';",
-            ok=False,
-        ).returncode
+        assert (
+            closure
+            or pg.sql(
+                f"update season_players set current_save_file_id=null where season_id='{c['season_id']}' and trainer_id='{c['source']['tid']}';",
+                ok=False,
+            ).returncode
+        )
         passed("reserved current-save pointer cannot advance")
-        if args.additional:
+        if args.additional and not closure:
             a = store.one("item_use_authorizations", id=aid)
             old = SupabaseItemUseRepository(client)
             claim = {"operation_id": a["operation_id"], "claim_id": str(uuid4())}
@@ -471,7 +483,7 @@ def run(args):
             passed("worker exact function allowlist and no one-leg completion")
         if not args.skip_parity:
             report["parity"] = parity(pg)
-            passed("057 upgrade/bootstrap parity and prior table preservation")
+            passed("current upgrade/bootstrap parity and prior table preservation")
         if args.additional:
             shadow = pg.sql(
                 "select count(*) from information_schema.tables where table_schema='v1_shadow';"
