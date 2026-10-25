@@ -26,10 +26,25 @@ function isDead(target: PokemonTarget) {
   return target.location.toLowerCase().startsWith("caja 8");
 }
 
+export const itemUseLabels: Record<string, string> = {
+  PREPARED: "Aplicación pendiente",
+  PENDING_APPLICATION: "Aplicación pendiente",
+  APPLIED_VERIFIED: "Aplicación verificada",
+  FAILED_RECOVERABLE: "Error recuperable",
+  RECOVERY_REQUIRED: "Recuperación necesaria",
+  BLOCKED_UNCERTAIN: "Operación bloqueada",
+};
+const physicalItem = (code: string) =>
+  ["revivir_pokemon", "robar_pokemon"].includes(code);
+
 export function Inventory() {
   const { season } = useApp();
   const q = useRead<Model<"InventoryRead">>(
     `/v1/read/seasons/${season}/inventory`,
+    !!season,
+  );
+  const uses = useRead<Model<"ItemUseListResponse">>(
+    `/v1/launcher/seasons/${season}/item-uses`,
     !!season,
   );
   const cmd = useCommand([
@@ -81,7 +96,7 @@ export function Inventory() {
   );
 
   async function redeem(target: PokemonTarget) {
-    if (!purchase) return;
+    if (!purchase || physicalItem(purchase.item_code)) return;
     if (
       await cmd.execute(
         `/v1/seasons/${season}/shop/purchases/${purchase.id}/redemptions`,
@@ -100,52 +115,65 @@ export function Inventory() {
       <h2>Inventario</h2>
       <p className="muted">Tus compras y vales · disponibles para canjear</p>
       <Notice error={q.error} />
+      <Notice error={uses.error} />
       <CommandState command={cmd} />
       {q.isPending ? (
         <Loading />
       ) : q.data?.purchases.length ? (
         <div className="inventory-grid">
-          {q.data.purchases.map((item) => (
-            <Card key={item.id} className="inventory-card">
-              <div className="inventory-item">
-                <ItemIcon name={item.item_name} code={item.item_code} />
-                <h3>{pokemonName("item", item.item_name)}</h3>
-              </div>
-              <Tag>
-                {(
-                  {
-                    pending: "Pendiente de canjear",
-                    used: "Canjeado",
-                    cancelled: "Cancelado",
-                    refunded: "Reembolsado",
-                  } as Record<string, string>
-                )[item.status] ?? "Estado no disponible"}
-              </Tag>
-              {item.acquisition_type === "reward" && (
-                <Tag>Vale de recompensa</Tag>
-              )}
-              <p>
-                {date(item.purchased_at)} · {item.total_price} PK₽
-              </p>
-              {item.status === "pending" &&
-                (pokemonActions.includes(item.item_code) ? (
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setPurchase(item);
-                      setRobberyTrainer(null);
-                    }}
-                  >
-                    Canjear
-                  </button>
-                ) : (
-                  <p>
-                    Este artículo todavía no tiene un canje disponible en
-                    PokeApp.
-                  </p>
-                ))}
-            </Card>
-          ))}
+          {q.data.purchases.map((item) => {
+            const use = uses.data?.items?.find(
+              (entry) => entry.purchase_id === item.id,
+            );
+            return (
+              <Card key={item.id} className="inventory-card">
+                <div className="inventory-item">
+                  <ItemIcon name={item.item_name} code={item.item_code} />
+                  <h3>{pokemonName("item", item.item_name)}</h3>
+                </div>
+                <Tag>
+                  {use
+                    ? (itemUseLabels[use.status] ?? "Estado no disponible")
+                    : ((
+                        {
+                          pending: "Objeto disponible",
+                          used: "Canjeado",
+                          cancelled: "Cancelado",
+                          refunded: "Reembolsado",
+                        } as Record<string, string>
+                      )[item.status] ?? "Estado no disponible")}
+                </Tag>
+                {item.acquisition_type === "reward" && (
+                  <Tag>Vale de recompensa</Tag>
+                )}
+                <p>
+                  {date(item.purchased_at)} · {item.total_price} PK₽
+                </p>
+                {item.status === "pending" &&
+                  (physicalItem(item.item_code) ? (
+                    <p>
+                      La aplicación física mediante Launcher aún no está
+                      habilitada. El objeto se conserva sin consumir.
+                    </p>
+                  ) : pokemonActions.includes(item.item_code) ? (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setPurchase(item);
+                        setRobberyTrainer(null);
+                      }}
+                    >
+                      Canjear
+                    </button>
+                  ) : (
+                    <p>
+                      Este artículo todavía no tiene un canje disponible en
+                      PokeApp.
+                    </p>
+                  ))}
+              </Card>
+            );
+          })}
         </div>
       ) : (
         <Empty>Aún no hay compras ni vales registrados.</Empty>

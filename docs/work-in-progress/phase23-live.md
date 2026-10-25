@@ -1,33 +1,44 @@
-# Phase 23 — live handoff
+# Phase 23 - live handoff
 
-Observed 2026-10-25. **STATUS: PARTIAL / LOCAL FOUNDATION COMPLETE.**
+Observed2026-10-25. **PHASE23 PARTIAL / 23B LOCAL VALIDATION COMPLETE / NOT DEPLOYED.**
+Entry main/origin `0c074a84a33a63588e0ff0a432dcac421ec8c451`,clean tracked,0/0.
+Source and docs are in this closure commit; derive final HEAD from Git.
+[Report](../phase23-shop-item-use-report.md) / [Evidence](../phase23b-local-evidence.json).
 
-Entry HEAD was `512025ef27e7bc3798701d11d5fd96d3b4ac95ef`; origin was aligned.
-The working change adds migration 054 and the service-only item-use API. It is
-not deployed and has not changed Supabase, Railway, Cloudflare, owner data,
-economy or saves.
+## Completed - do not repeat
 
-## Completed locally
+- Retained PostgreSQL17.11 and .venv-api work; no installation required.
+- Unapplied054 hardened: private proof, distinct source/result hashes, expiry,
+  claimant/target reservation, old-redemption bypass denial. API service_role
+  can read proof, never create it. No production proof issuer exists.
+- Real PG10 groups PASS: concurrency, two Launchers, false proof, expiry/scope,
+  lost response, rollback and exactly-once purchase debit/verified consumption.
+- Upgrade/bootstrap054:16,376 identical schema lines;62 initialized pre054 table
+  hashes preserved. Owned databases dropped, loopback cluster stopped.
+- Existing-engine journal bridge proves local apply/recovery/lost acknowledgement
+  with SYNTHETIC test_marking. Explicit capability only; no runtime/IPC activation.
+- Python75 unique focused tests,React10,Edge2 desktop/mobile,build/schema,
+  syntax/targeted lint/format/diff PASS. No unrelated full matrix.
+- Inventory/Launcher states visible without enabling physical actions. Internal
+  shields retained; direct physical revive/steal can no longer consume prematurely.
 
-- Purchase and inventory behavior from the existing 039/024/025 contracts was
-  retained.
-- 054 journals `PREPARED`, `APPLIED_VERIFIED`, `FAILED_RECOVERABLE`,
-  `RECOVERY_REQUIRED` and `BLOCKED_UNCERTAIN`.
-- Preparation binds the exact principal, purchase, target, current save and
-  identity revision without consuming the purchase.
-- Completion checks scope and hash, and delegates the verified effect to the
-  existing redemption transaction. Browser access is denied by grants/RLS.
-- API/domain/schema tests and generated-bootstrap parity pass.
+## Remaining gates
 
-## Gates still open
+**Authorizations DONE LOCAL; real PG PASS; Launcher PARTIAL; certified physical
+application NO; Phase23 GLOBAL PARTIAL.**
 
-Real PostgreSQL execution, concurrent/restart/recovery proof, integration with
-the capability-gated native write engine and UI status presentation remain
-pending. Phase 22 has no qualified Azahar/3DS physical-write proof; production
-physical writes therefore stay disabled. Existing web redemption UI is not
-silently changed to claim physical application.
+Production effect registry is empty. Native eight-game proof covers marking only.
+No native revive mapper or two-save steal protocol exists. Local harness reads its
+own files independently and inserts proof as local postgres; this is NOT a deployed
+anti-forgery verifier. No client APPLIED string/embedded signing secret suffices.
+Legacy redemption receipts preserve their internal snapshot; reconcile physical
+status reads before future activation. Expired/uncertain claims stay blocked.
 
-No migration or deployment has been attempted. The next step is a disposable
-PostgreSQL gate with synthetic purchases and saves, followed by an isolated
-Launcher integration test. Do not deploy or start another phase from this
-checkpoint.
+Next: native revive/identity contract plus trusted production verification design,
+then authentic-copy qualification and outstanding real Azahar gates. Do not deploy
+054 or enable physical writes based only on this engineering bridge. No Phase24.
+
+Private evidence: `%LOCALAPPDATA%/PokeApp-migration-evidence/phase23b/20261025/`.
+Final PG file:pg-final.json. Early harness failure is not a PASS. No owner account,
+economy, save, remote service, V1 or Shadow was accessed/changed. Explicit staging;
+protected guide and eight unrelated untracked files remain outside closure.

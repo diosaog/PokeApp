@@ -151,6 +151,23 @@ function render(state) {
       : "Inicia sesión para conectar tu Launcher.",
   );
   const cached = state.cloud?.data;
+  const useLabels = {
+    PREPARED: "Aplicación pendiente",
+    PENDING_APPLICATION: "Aplicación pendiente",
+    APPLIED_VERIFIED: "Aplicación verificada",
+    FAILED_RECOVERABLE: "Error recuperable",
+    RECOVERY_REQUIRED: "Recuperación necesaria",
+    BLOCKED_UNCERTAIN: "Operación bloqueada",
+  };
+  text(
+    "item-use-state",
+    cached?.item_uses?.length
+      ? cached.item_uses
+          .map((use) => useLabels[use.status] || "Estado no disponible")
+          .join(" · ")
+      : "Aplicación de objetos deshabilitada. No se consume ningún objeto desde este Launcher.",
+  );
+
   text(
     "cloud-state",
     cached

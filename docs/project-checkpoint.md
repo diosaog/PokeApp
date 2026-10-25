@@ -1,11 +1,21 @@
 # PokeApp 2.0 Project Checkpoint
 
-Checkpoint reconciled: 2026-10-24. This file is the project index and historical
+Checkpoint reconciled: 2026-10-25. This file is the project index and historical
 milestone record; it does not maintain a second live phase-status ledger.
 
 ## Current project position
 
-- Current packet: **Accounts/profile DONE GLOBAL — REGISTRATION ACTIVE**.
+- Current packet: **Phase23B LOCAL VALIDATION COMPLETE; Phase23 PARTIAL / NOT DEPLOYED**.
+  Unapplied054 denies client-only physical confirmation and direct-redemption
+  bypass; durable claims/private proof bind source,result,identity and operation.
+  Real disposable PG17.11:10 groups PASS,16,376-line bootstrap parity,62 pre054
+  table hashes preserved. Python75,React10,Edge2 and build PASS. Launcher bridge
+  remains engineering-only with synthetic marking; native revive/theft and trusted
+  production verification remain unimplemented. No remote writes/deploy or Phase24.
+  [Live handoff](work-in-progress/phase23-live.md),
+  [report](phase23-shop-item-use-report.md),[evidence](phase23b-local-evidence.json).
+
+- Previous packet: **Accounts/profile DONE GLOBAL — REGISTRATION ACTIVE**.
   Authorized clean V2 reset completed after exact105-table/4-object restore proof.
   050–053 applied once;45 records. V2-only credentials active, old pepper removed,
   direct signup OFF. Railway9129081 healthy; Cloudflare matching release deployed.

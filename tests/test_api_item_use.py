@@ -1,19 +1,18 @@
 from __future__ import annotations
 
+import unittest
 from dataclasses import dataclass
 from pathlib import Path
-import unittest
 from uuid import uuid4
 
 from fastapi.testclient import TestClient
+from test_api_phase8b import TRAINER_ID, FakePrincipalRepository, FakeTokenVerifier
 
 from app.api.dependencies import ApiContainer
 from app.api.main import create_app
 from app.auth.errors import InvalidSessionError
 from app.domain.item_use import ItemUsePrepareRequest
 from app.repositories.errors import ItemUseRejectedError
-from test_api_phase8b import FakePrincipalRepository, FakeTokenVerifier, TRAINER_ID
-
 
 SEASON_ID = str(uuid4())
 PURCHASE_ID = str(uuid4())
@@ -39,6 +38,7 @@ def receipt(**changes):
         "error_code": None,
         "receipt": None,
         "created_at": "2026-10-25T10:00:00Z",
+        "expires_at": "2026-10-25T10:15:00Z",
         "updated_at": "2026-10-25T10:00:00Z",
         "applied_at": None,
     }
@@ -52,6 +52,16 @@ class FakeItemUseRepository:
     completed: dict | None = None
     listed: list[dict] | None = None
     error: Exception | None = None
+
+    def claim(self, authorization_id, season_id, trainer_id, request):
+        self.completed = request | {"trainer_id": trainer_id}
+        return receipt(
+            id=authorization_id,
+            season_id=season_id,
+            trainer_id=trainer_id,
+            status="PENDING_APPLICATION",
+            claim_id=request["claim_id"],
+        )
 
     def prepare(self, request):
         if self.error:
@@ -125,6 +135,18 @@ class ItemUseApiTests(unittest.TestCase):
         self.assertEqual(self.repo.prepared.idempotency_key, "prepare-key")
         self.assertEqual(response.json()["status"], "PREPARED")
 
+    def test_claim_uses_authenticated_identity_and_hides_private_claim(self):
+        key = str(uuid4())
+        response = self.client.put(
+            f"/v1/launcher/seasons/{SEASON_ID}/item-uses/{AUTHORIZATION_ID}/claim",
+            headers=self.headers,
+            json={"operation_id": "item-op-1", "claim_id": key},
+        )
+        self.assertEqual(response.status_code, 200, response.text)
+        self.assertEqual(self.repo.completed["trainer_id"], TRAINER_ID)
+        self.assertEqual(self.repo.completed["claim_id"], key)
+        self.assertNotIn("claim_id", response.json())
+
     def test_complete_passes_scope_before_completion(self):
         response = self.client.put(
             f"/v1/launcher/seasons/{SEASON_ID}/item-uses/{AUTHORIZATION_ID}",
@@ -132,7 +154,8 @@ class ItemUseApiTests(unittest.TestCase):
             json={
                 "operation_id": "item-op-1",
                 "status": "APPLIED_VERIFIED",
-                "observed_sha256": SAVE_HASH,
+                "claim_id": str(uuid4()),
+                "observed_sha256": "b" * 64,
             },
         )
         self.assertEqual(response.status_code, 200, response.text)
@@ -168,7 +191,11 @@ class ItemUseApiTests(unittest.TestCase):
         response = self.client.put(
             f"/v1/launcher/seasons/{SEASON_ID}/item-uses/{AUTHORIZATION_ID}",
             headers=self.headers,
-            json={"operation_id": "item-op-1", "status": "RECOVERY_REQUIRED"},
+            json={
+                "operation_id": "item-op-1",
+                "claim_id": str(uuid4()),
+                "status": "RECOVERY_REQUIRED",
+            },
         )
         self.assertEqual(response.status_code, 403)
         self.assertEqual(response.json()["detail"]["code"], "ITEM_USE_FORBIDDEN")
@@ -194,21 +221,29 @@ class ItemUseApiTests(unittest.TestCase):
         self.assertIn("api_redeem_purchase", complete)
         self.assertIn("item_use_forbidden", complete)
         self.assertIn("force row level security", sql.lower())
-        self.assertLess(
-            complete.index("from public.seasons where id=v_auth.season_id"),
-            complete.index(
-                "from public.season_players where season_id=v_auth.season_id"
-            ),
+        self.assertIn("item_use_verifications", complete)
+        self.assertIn("v.result_sha256 is distinct from p_observed_sha256", complete)
+
+    def test_claim_is_required_and_list_does_not_grant_capability(self):
+        response = self.client.put(
+            f"/v1/launcher/seasons/{SEASON_ID}/item-uses/{AUTHORIZATION_ID}",
+            headers=self.headers,
+            json={"operation_id": "item-op-1", "status": "APPLIED_VERIFIED"},
         )
-        self.assertLess(
-            complete.index(
-                "from public.season_players where season_id=v_auth.season_id"
-            ),
-            complete.index(
-                "from public.item_use_authorizations "
-                "where id=p_authorization_id for update"
-            ),
+        self.assertEqual(response.status_code, 422)
+        self.assertIsNone(self.repo.completed)
+        response = self.client.get(
+            f"/v1/launcher/seasons/{SEASON_ID}/item-uses", headers=self.headers
         )
+        self.assertFalse(response.json()["physical_application_enabled"])
+
+    def test_cross_scope_or_malformed_repository_receipt_fails_closed(self):
+        for row in (receipt(trainer_id=str(uuid4())), {"status": "APPLIED_VERIFIED"}):
+            self.repo.listed = [row]
+            response = self.client.get(
+                f"/v1/launcher/seasons/{SEASON_ID}/item-uses", headers=self.headers
+            )
+            self.assertEqual(response.status_code, 503)
 
     def test_domain_rejects_noncanonical_save_hash(self):
         with self.assertRaises(ValueError):

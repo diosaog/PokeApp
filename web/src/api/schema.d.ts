@@ -1504,6 +1504,74 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/v1/seasons/{season_id}/shop/purchases/{purchase_id}/item-use": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** Prepare */
+    post: operations["prepare_v1_seasons__season_id__shop_purchases__purchase_id__item_use_post"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/launcher/seasons/{season_id}/item-uses": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Pending */
+    get: operations["pending_v1_launcher_seasons__season_id__item_uses_get"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/launcher/seasons/{season_id}/item-uses/{authorization_id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    /** Complete */
+    put: operations["complete_v1_launcher_seasons__season_id__item_uses__authorization_id__put"];
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/launcher/seasons/{season_id}/item-uses/{authorization_id}/claim": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    /** Claim */
+    put: operations["claim_v1_launcher_seasons__season_id__item_uses__authorization_id__claim_put"];
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -2608,6 +2676,145 @@ export interface components {
       description: string;
       /** Base Price */
       base_price: number;
+    };
+    /** ItemUseClaimBody */
+    ItemUseClaimBody: {
+      /** Operation Id */
+      operation_id: string;
+      /**
+       * Claim Id
+       * Format: uuid
+       */
+      claim_id: string;
+    };
+    /** ItemUseCompleteBody */
+    ItemUseCompleteBody: {
+      /** Operation Id */
+      operation_id: string;
+      /**
+       * Claim Id
+       * Format: uuid
+       */
+      claim_id: string;
+      /**
+       * Status
+       * @enum {string}
+       */
+      status:
+        | "APPLIED_VERIFIED"
+        | "FAILED_RECOVERABLE"
+        | "RECOVERY_REQUIRED"
+        | "BLOCKED_UNCERTAIN";
+      /** Observed Sha256 */
+      observed_sha256?: string | null;
+      /** Error Code */
+      error_code?: string | null;
+    };
+    /** ItemUseListResponse */
+    ItemUseListResponse: {
+      /** Items */
+      items: components["schemas"]["ItemUseResponse"][];
+      /**
+       * Physical Application Enabled
+       * @default false
+       * @constant
+       */
+      physical_application_enabled: false;
+    };
+    /** ItemUsePrepareBody */
+    ItemUsePrepareBody: {
+      /**
+       * Pokemon Entity Id
+       * Format: uuid
+       */
+      pokemon_entity_id: string;
+      /**
+       * Save File Id
+       * Format: uuid
+       */
+      save_file_id: string;
+      /** Save Sha256 */
+      save_sha256: string;
+      /** Operation Id */
+      operation_id: string;
+    };
+    /** ItemUseResponse */
+    ItemUseResponse: {
+      /**
+       * Id
+       * Format: uuid
+       */
+      id: string;
+      /** Operation Id */
+      operation_id: string;
+      /**
+       * Purchase Id
+       * Format: uuid
+       */
+      purchase_id: string;
+      /**
+       * Season Id
+       * Format: uuid
+       */
+      season_id: string;
+      /**
+       * Trainer Id
+       * Format: uuid
+       */
+      trainer_id: string;
+      /**
+       * Target Pokemon Entity Id
+       * Format: uuid
+       */
+      target_pokemon_entity_id: string;
+      /**
+       * Save File Id
+       * Format: uuid
+       */
+      save_file_id: string;
+      /** Save Sha256 */
+      save_sha256: string;
+      /**
+       * Effect Code
+       * @enum {string}
+       */
+      effect_code: "revive" | "steal";
+      /**
+       * Status
+       * @enum {string}
+       */
+      status:
+        | "PREPARED"
+        | "PENDING_APPLICATION"
+        | "APPLIED_VERIFIED"
+        | "FAILED_RECOVERABLE"
+        | "RECOVERY_REQUIRED"
+        | "BLOCKED_UNCERTAIN";
+      /** Observed Sha256 */
+      observed_sha256?: string | null;
+      /** Error Code */
+      error_code?: string | null;
+      /** Receipt */
+      receipt?: {
+        [key: string]: unknown;
+      } | null;
+      /**
+       * Created At
+       * Format: date-time
+       */
+      created_at: string;
+      /**
+       * Updated At
+       * Format: date-time
+       */
+      updated_at: string;
+      /** Applied At */
+      applied_at?: string | null;
+      /**
+       * Expires At
+       * Format: date-time
+       */
+      expires_at: string;
     };
     /** LeagueGeneralRead */
     LeagueGeneralRead: {
@@ -7693,6 +7900,147 @@ export interface operations {
         };
         content: {
           "application/json": components["schemas"]["PinChangeResponse"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  prepare_v1_seasons__season_id__shop_purchases__purchase_id__item_use_post: {
+    parameters: {
+      query?: never;
+      header: {
+        "idempotency-key": string;
+      };
+      path: {
+        season_id: string;
+        purchase_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["ItemUsePrepareBody"];
+      };
+    };
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ItemUseResponse"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  pending_v1_launcher_seasons__season_id__item_uses_get: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        season_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ItemUseListResponse"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  complete_v1_launcher_seasons__season_id__item_uses__authorization_id__put: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        season_id: string;
+        authorization_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["ItemUseCompleteBody"];
+      };
+    };
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ItemUseResponse"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  claim_v1_launcher_seasons__season_id__item_uses__authorization_id__claim_put: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        season_id: string;
+        authorization_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["ItemUseClaimBody"];
+      };
+    };
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ItemUseResponse"];
         };
       };
       /** @description Validation Error */

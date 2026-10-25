@@ -396,6 +396,9 @@ class SupabaseV2SchemaTests(unittest.TestCase):
             if table == 'robbery_cycles':
                 self.assertIn('alter table public.robbery_cycles enable row level security', security_sql)
                 self.assertIn('revoke all on public.robbery_cycles from public,anon,authenticated', security_sql)
+            elif table == 'item_use_verifications':
+                self.assertIn("alter table public.item_use_verifications force row level security", security_sql)
+                self.assertIn("grant select on public.item_use_verifications to service_role", security_sql)
             elif table == 'item_use_authorizations':
                 self.assertIn('alter table public.item_use_authorizations enable row level security', security_sql)
                 self.assertIn('alter table public.item_use_authorizations force row level security', security_sql)
@@ -404,7 +407,7 @@ class SupabaseV2SchemaTests(unittest.TestCase):
             else:
                 self.assertIn(f"'{table}'", security_sql, table)
 
-        self.assertEqual(security_sql.count("enable row level security"), 30)
+        self.assertEqual(security_sql.count("enable row level security"), 31)
         self.assertIn("alter table public.%i enable row level security", security_sql)
 
 

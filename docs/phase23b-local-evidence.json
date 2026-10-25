@@ -1,0 +1,95 @@
+{
+  "observed": "2026-10-25 Europe/Madrid",
+  "entry_head": "0c074a84a33a63588e0ff0a432dcac421ec8c451",
+  "phase23": "PARTIAL",
+  "deployed": false,
+  "remote_operations": 0,
+  "authorizations": "DONE LOCAL",
+  "launcher": "PARTIAL - engineering bridge; no native revive mapper",
+  "physical_application_certified": false,
+  "postgres": {
+    "status": "PASS",
+    "checks": [
+      "concurrent_prepare_exact_replay_target_reservation_wrong_pokemon_stale_hash",
+      "two_launchers_single_claim_lost_claim_response_replay_private_list",
+      "forged_client_claim_and_legacy_redemption_no_consumption_or_flags",
+      "rollback_after_redemption_preserves_purchase_flags_and_journal",
+      "concurrent_verified_completion_once_distinct_hashes_lost_response_no_economic_effect",
+      "expired_cross_target_cross_claim_and_changed_current_pointer_preserve_entitlements",
+      "real_RLS_RPC_grants_and_API_cannot_issue_verification",
+      "real_purchase_funded_unfunded_concurrent_retry_single_debit",
+      "upgrade_001_054_equals_bootstrap_and_053_rows_preserved",
+      "existing_launcher_journal_apply_independent_local_verify_restart_and_lost_ack"
+    ],
+    "version": "PostgreSQL 17.11 on x86_64-windows, compiled by msvc-19.44.35229, 64-bit",
+    "parity": {
+      "schema_lines": 16376,
+      "preserved_tables": 62
+    },
+    "bridge": {
+      "status": "PASS",
+      "semantics": "synthetic test_marking only; NOT physical revive certification",
+      "original_backup_preserved": true,
+      "independent_local_native_readback": true,
+      "client_claim_denied": true,
+      "restart_lost_ack_single_consume": true
+    },
+    "cleanup": "owned_database_dropped_cluster_stopped"
+  },
+  "tests": {
+    "python_unique_pass": 75,
+    "item_use_api": 11,
+    "launcher_bridge": 8,
+    "status_runtime": 3,
+    "affected_sync_exclusion": 3,
+    "heartbeat": 1,
+    "schema": 15,
+    "purchases_redemptions": 34,
+    "react": 10,
+    "browser": 2
+  },
+  "checks": {
+    "openapi": "PASS",
+    "ts_vite": "PASS - existing bundle warning",
+    "python_syntax_files": 11,
+    "renderer_js_syntax": "PASS",
+    "targeted_ruff": "PASS",
+    "format": "PASS",
+    "diff": "PASS"
+  },
+  "boundaries": [
+    "SQL negative/concurrency proofs use synthetic attestations",
+    "Bridge independently reads synthetic test_marking through existing native interface, not revive",
+    "Public API cannot insert proof; no production proof issuer",
+    "New interruption tests use injected exceptions, not OS/process kills",
+    "Eight-game native and Phase22 filesystem evidence retained, not repeated",
+    "No Azahar gameplay or hardware durability certification",
+    "Legacy redemption snapshot is not a new physical-effect read contract",
+    "No remote owner/auth/economy/save comparison needed: no remote operations"
+  ],
+  "screenshots_reviewed": [
+    "inventory-390.png",
+    "inventory-1440.png"
+  ],
+  "source_sha256": {
+    "app/api/routes/item_use.py": "8c15bf9dfd405adb2f3658c0ba9733cab96d8423e89b620cfa0dab4bc5034f72",
+    "app/api/schemas.py": "8a3d83d3cd62ef628208e2c7c1108c4a686dfd4e8e8e6267236e3e10bcca4445",
+    "app/launcher/item_use.py": "401d1e1a0f0e9ce837cc2826ecbc93b49a315d618ce324995e756aba52d42e3f",
+    "app/launcher/runtime.py": "ade0146b7c2a61834e7258d664106459f9d970663ec77d263bc658be3630a867",
+    "app/repositories/supabase/item_use.py": "3c30fd5a655a4e1cd04a669cf2795e1854be25c144c41ebabac7235743493112",
+    "app/repositories/supabase/redemptions.py": "93543ed334e9d61b967e5423da4beb333fa2185cd472706cdadea56483762fc5",
+    "companion/launcher/index.html": "a7e5ca38de8a0297534bc000350016361184210be62983795d4e2c011773630e",
+    "companion/launcher/renderer.js": "bbdc5f92388e649890fe655f0121ac1efae557f96e4a5fed3636f51886792442",
+    "supabase/v2/migrations/054_item_use_authorizations.sql": "f6e4c775bee8f79f4f8c487b266eef318d611c3f5810eeb7c14249c7aa1f11c9",
+    "supabase/v2/bootstrap.sql": "39b4acfec2ba8d9ee9e27d6d7b3d98015c894bcb0d1f71318aa849ee88cfbc9e",
+    "tests/test_api_item_use.py": "b3887690b9268824cd52fed7e8071503b2e0fc067d6a0826e56d726d02b58d94",
+    "tests/test_phase23_launcher.py": "326db962abc0698b945b3dde0b31bae0656368a05da09d1d02c0385133c9bdda",
+    "tests/test_phase23_runtime.py": "a632c6985e54b4ce12da1e9de1ce42a53e09fd5761b5905b7c3b81ee76e428d9",
+    "tests/test_supabase_v2_schema.py": "94c01519d08ad7f12251a01471b03e6e28d7b0483105f5d5a54ec4b8befa3a22",
+    "tools/validate_phase23_local.py": "831b9a92287c39f00bed2886aa028c7f00a2a1c60ba8a8891529329006084ad8",
+    "web/src/api/schema.d.ts": "9ced2dd866c2d2dc149e7e394597f4d66bff44afbe9ca406d553a312a1520f66",
+    "web/src/features/inventory.tsx": "88030c959f7e841945365b16de3abe133639ee265fe3070936b2a8266ca29155",
+    "web/src/features/economy.test.tsx": "93320f34285556f09bd55a8ef41991f2fc524a92e5768156211a10d5106f1a25",
+    "web/e2e/phase23-item-use.spec.ts": "2fa018686491903e6e78174179141dcab3b702f9fafc60ebec3f6cd35e0216b1"
+  }
+}

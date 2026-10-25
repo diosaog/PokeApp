@@ -5,7 +5,6 @@ from typing import Any
 
 from app.repositories.errors import ItemUseRejectedError, PersistenceError
 
-
 REJECTIONS = {
     "trainer_disabled": 403,
     "item_use_forbidden": 403,
@@ -13,8 +12,10 @@ REJECTIONS = {
     "season_not_found": 404,
     "purchase_not_found": 404,
     "item_use_not_found": 404,
-    "invalid_item_use_request": 409,
-    "invalid_item_use_completion": 409,
+    "invalid_item_use_request": 422,
+    "invalid_item_use_completion": 422,
+    "item_use_expired": 409,
+    "item_use_unavailable": 409,
     "item_use_conflict": 409,
     "purchase_not_redeemable": 409,
     "item_use_not_required": 409,
@@ -44,7 +45,7 @@ class SupabaseItemUseRepository:
         except Exception as exc:
             code = str(getattr(exc, "message", ""))
             status = REJECTIONS.get(code)
-            if status:
+            if status and str(getattr(exc, "code", "")) == f"PT{status}":
                 raise ItemUseRejectedError(code.upper(), status) from exc
             raise PersistenceError("Item-use backend unavailable.") from exc
         if not isinstance(data, dict) and not isinstance(data, list):
@@ -66,8 +67,21 @@ class SupabaseItemUseRepository:
                 "p_trainer_id": trainer_id,
                 "p_operation_id": request["operation_id"],
                 "p_status": request["status"],
+                "p_claim_id": request["claim_id"],
                 "p_observed_sha256": request.get("observed_sha256"),
                 "p_error_code": request.get("error_code"),
+            },
+        )
+
+    def claim(self, authorization_id: str, season_id: str, trainer_id: str, request):
+        return self._rpc(
+            "api_claim_item_use",
+            {
+                "p_authorization_id": authorization_id,
+                "p_season_id": season_id,
+                "p_trainer_id": trainer_id,
+                "p_operation_id": request["operation_id"],
+                "p_claim_id": request["claim_id"],
             },
         )
 

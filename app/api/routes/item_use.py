@@ -1,12 +1,14 @@
 from uuid import UUID
 
 from fastapi import APIRouter, Depends
+from pydantic import ValidationError
 
 from app.api.dependencies import ApiContainer, get_api_container
 from app.api.errors import api_error
 from app.api.models import AuthenticatedPrincipal
 from app.api.routes.purchases import IdempotencyHeader
 from app.api.schemas import (
+    ItemUseClaimBody,
     ItemUseCompleteBody,
     ItemUseListResponse,
     ItemUsePrepareBody,
@@ -15,7 +17,6 @@ from app.api.schemas import (
 from app.api.security import require_enabled_principal
 from app.application.item_use import prepare_item_use
 from app.repositories.errors import ItemUseRejectedError, PersistenceError
-
 
 router = APIRouter(tags=["item-use"])
 Reader = Depends(require_enabled_principal)
@@ -68,7 +69,7 @@ def prepare(
             operation_id=payload.operation_id,
         )
     )
-    return ItemUseResponse.model_validate(result)
+    return _receipt(result, season_id, principal.trainer_id)
 
 
 @router.get(
@@ -82,7 +83,7 @@ def pending(
 ):
     rows = _execute(lambda: _repo(container).list(str(season_id), principal.trainer_id))
     return ItemUseListResponse(
-        items=[ItemUseResponse.model_validate(row) for row in rows]
+        items=[_receipt(row, season_id, principal.trainer_id) for row in rows]
     )
 
 
@@ -102,12 +103,44 @@ def complete(
             str(authorization_id),
             str(season_id),
             principal.trainer_id,
-            payload.model_dump(),
+            payload.model_dump(mode="json"),
         )
     )
-    if (
-        str(result.get("season_id")) != str(season_id)
-        or str(result.get("trainer_id")) != principal.trainer_id
-    ):
-        raise api_error(503, "ITEM_USE_UNAVAILABLE", "La autorización no coincide.")
-    return ItemUseResponse.model_validate(result)
+    return _receipt(result, season_id, principal.trainer_id)
+
+
+def _receipt(result, season_id, trainer_id):
+    try:
+        receipt = ItemUseResponse.model_validate(result)
+        if (
+            str(receipt.season_id) != str(season_id)
+            or str(receipt.trainer_id) != trainer_id
+        ):
+            raise ValueError("scope mismatch")
+        return receipt
+    except (ValidationError, ValueError, TypeError):
+        raise api_error(
+            503, "ITEM_USE_UNAVAILABLE", "La autorización no coincide."
+        ) from None
+
+
+@router.put(
+    "/v1/launcher/seasons/{season_id}/item-uses/{authorization_id}/claim",
+    response_model=ItemUseResponse,
+)
+def claim(
+    season_id: UUID,
+    authorization_id: UUID,
+    payload: ItemUseClaimBody,
+    principal: AuthenticatedPrincipal = Reader,
+    container: ApiContainer = ContainerReader,
+):
+    result = _execute(
+        lambda: _repo(container).claim(
+            str(authorization_id),
+            str(season_id),
+            principal.trainer_id,
+            payload.model_dump(mode="json"),
+        )
+    )
+    return _receipt(result, season_id, principal.trainer_id)

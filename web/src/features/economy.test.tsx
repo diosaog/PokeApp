@@ -9,11 +9,15 @@ import {
 import { MemoryRouter } from "react-router-dom";
 import type { Model } from "../api/types";
 import { ShopPage } from "./core";
-import { Inventory } from "./inventory";
+import { Inventory, itemUseLabels } from "./inventory";
 
 const mocks = vi.hoisted(() => ({
   shop: {} as Model<"ShopRead">,
   inventory: {} as Model<"InventoryRead">,
+  itemUses: {
+    items: [],
+    physical_application_enabled: false,
+  } as Model<"ItemUseListResponse">,
   execute: vi.fn(),
   paths: vi.fn(),
   uncertain: false,
@@ -28,7 +32,9 @@ vi.mock("../state", () => ({
         ? mocks.trainers
         : path.endsWith("/shop")
           ? mocks.shop
-          : mocks.inventory,
+          : path.endsWith("/item-uses")
+            ? mocks.itemUses
+            : mocks.inventory,
     isPending: false,
     error: null,
   }),
@@ -65,6 +71,7 @@ afterEach(cleanup);
 beforeEach(() => {
   vi.clearAllMocks();
   mocks.uncertain = false;
+  mocks.itemUses = { items: [], physical_application_enabled: false };
   mocks.trainers = [{ id: "owner", display_name: "Antonio" }];
   mocks.execute.mockResolvedValue(true);
   mocks.shop = {
@@ -84,6 +91,36 @@ beforeEach(() => {
   };
   mocks.inventory = { purchases: [], targets: [] };
 });
+it.each(Object.entries(itemUseLabels))(
+  "shows %s without consuming a physical entitlement",
+  (status, label) => {
+    mocks.inventory = {
+      targets: [],
+      purchases: [
+        {
+          id: "physical",
+          shop_item_id: "revive",
+          item_name: "Revivir Pokémon",
+          item_code: "revivir_pokemon",
+          acquisition_type: "paid",
+          status: "pending",
+          total_price: 12,
+          purchased_at: "2026-10-25T10:00:00Z",
+        },
+      ],
+    };
+    mocks.itemUses.items = [
+      { purchase_id: "physical", status } as Model<"ItemUseResponse">,
+    ];
+    render(<Inventory />);
+    expect(screen.getByText(label)).toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: "Canjear" }),
+    ).not.toBeInTheDocument();
+    expect(screen.queryByText("Canjeado")).not.toBeInTheDocument();
+    expect(mocks.execute).not.toHaveBeenCalled();
+  },
+);
 it("renders exact large and negative wallets and allows explicit post-League purchases", async () => {
   const view = render(
     <MemoryRouter>

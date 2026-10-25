@@ -435,13 +435,38 @@ class LauncherRuntime:
             raise BackendError("BACKEND_UNAVAILABLE")
         season = active[0] if active else None
         wallet = None
+        item_uses = None
         if season:
             from uuid import UUID
 
             sid = str(UUID(season["id"]))
             shop = self.session.request("GET", f"/v1/read/seasons/{sid}/shop")
             wallet = shop.get("balance")
-        data = {"principal": principal.model_dump(), "season": season, "wallet": wallet}
+            raw_uses = self.session.request(
+                "GET", f"/v1/launcher/seasons/{sid}/item-uses", missing=True
+            )
+            if raw_uses is not None:
+                from pydantic import ValidationError
+
+                from app.api.schemas import ItemUseListResponse
+
+                try:
+                    validated = ItemUseListResponse.model_validate(raw_uses)
+                    if any(
+                        str(a.trainer_id) != principal.trainer_id
+                        or str(a.season_id) != sid
+                        for a in validated.items
+                    ):
+                        raise ValueError("item-use scope")
+                    item_uses = [{"status": a.status} for a in validated.items]
+                except (ValidationError, ValueError):
+                    raise BackendError("BACKEND_UNAVAILABLE") from None
+        data = {
+            "principal": principal.model_dump(),
+            "season": season,
+            "wallet": wallet,
+            "item_uses": item_uses,
+        }
         self.store.save_cache(self.client.origin, principal.trainer_id, data)
         self._patch(
             cloud=self.store.cache(self.client.origin, principal.trainer_id),

@@ -107,12 +107,12 @@ class RedemptionResponse(BaseModel):
     season_id: UUID
     trainer_id: UUID
     shop_item_id: UUID
-    effect_code: Literal['shield', 'revive', 'robbery_shield', 'steal']
+    effect_code: Literal["shield", "revive", "robbery_shield", "steal"]
     target_pokemon_entity_id: UUID
     target_owner_trainer_id: UUID
-    purchase_status: Literal['used']
-    redemption_status: Literal['applied']
-    physical_effect_status: Literal['not_required', 'pending']
+    purchase_status: Literal["used"]
+    redemption_status: Literal["applied"]
+    physical_effect_status: Literal["not_required", "pending"]
     requested_at: datetime
     redeemed_at: datetime
     physical_effect_completed_at: None
@@ -129,7 +129,14 @@ class ItemUsePrepareBody(BaseModel):
     operation_id: str = Field(min_length=1, max_length=128, pattern=r"^[!-~]+$")
 
 
-class ItemUseCompleteBody(BaseModel):
+class ItemUseClaimBody(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    operation_id: str = Field(min_length=1, max_length=128, pattern=r"^[!-~]+$")
+    claim_id: UUID
+
+
+class ItemUseCompleteBody(ItemUseClaimBody):
     model_config = ConfigDict(extra="forbid")
 
     operation_id: str = Field(min_length=1, max_length=128, pattern=r"^[!-~]+$")
@@ -155,6 +162,7 @@ class ItemUseResponse(BaseModel):
     effect_code: Literal["revive", "steal"]
     status: Literal[
         "PREPARED",
+        "PENDING_APPLICATION",
         "APPLIED_VERIFIED",
         "FAILED_RECOVERABLE",
         "RECOVERY_REQUIRED",
@@ -166,10 +174,12 @@ class ItemUseResponse(BaseModel):
     created_at: datetime
     updated_at: datetime
     applied_at: datetime | None = None
+    expires_at: datetime
 
 
 class ItemUseListResponse(BaseModel):
     items: list[ItemUseResponse]
+    physical_application_enabled: Literal[False] = False
 
 
 class TeamLockResponse(BaseModel):
