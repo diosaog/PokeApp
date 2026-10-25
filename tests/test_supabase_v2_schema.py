@@ -131,6 +131,7 @@ class SupabaseV2SchemaTests(unittest.TestCase):
                 "052_account_administration.sql",
                 "053_versioned_account_credentials.sql",
                 "054_item_use_authorizations.sql",
+                "055_native_identity_evidence_scope.sql",
             ],
         )
         for path in _migration_files():
@@ -341,7 +342,7 @@ class SupabaseV2SchemaTests(unittest.TestCase):
         self.assertTrue(bootstrap.startswith("-- ONLY FOR EMPTY POKEAPP V2 DATABASE."))
         self.assertEqual(bootstrap, render_bootstrap())
         self.assertIn(
-            "Source of truth: supabase/v2/migrations/001_core.sql through 054_item_use_authorizations.sql",
+            "Source of truth: supabase/v2/migrations/001_core.sql through 055_native_identity_evidence_scope.sql",
             bootstrap,
         )
         self.assertNotIn("drop table", lowered)

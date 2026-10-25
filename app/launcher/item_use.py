@@ -1,8 +1,8 @@
 """Engineering-only item-use bridge on the existing physical journal/controller.
 
-There is no production effect mapper, IPC command or trusted-proof issuer here.
-The fixture harness explicitly binds a synthetic entitlement to test_marking.
-This never claims that test_marking implements revive or a two-save theft.
+No production IPC command or trusted-proof issuer lives in the Launcher.
+The isolated harness can bind a server-derived revive plan or the older synthetic
+test_marking. Neither a local receipt nor this capability is server evidence.
 """
 
 import json
@@ -31,14 +31,27 @@ class EngineeringItemUse:
             controller.gate.recovery_required = True
 
     def bind_fixture(self, authorization, intent, *, pokemon_entity_id):
-        """Only the local harness supplies this mapping, never a server/IPC plan."""
+        """Retained synthetic fixture seam; it never certifies physical revival."""
+        if intent.mutation.get("kind") != "test_marking":
+            raise WriteSafetyError("ITEM_BINDING_MISMATCH")
+        return self._bind(authorization, intent, pokemon_entity_id=pokemon_entity_id)
+
+    def bind_revive(self, authorization, intent, *, pokemon_entity_id):
+        """Engineering-only intake of the independently derived server plan."""
+        if (
+            authorization.get("effect_code") != "revive"
+            or intent.mutation.get("kind") != "revive"
+        ):
+            raise WriteSafetyError("ITEM_BINDING_MISMATCH")
+        return self._bind(authorization, intent, pokemon_entity_id=pokemon_entity_id)
+
+    def _bind(self, authorization, intent, *, pokemon_entity_id):
         a = authorization
         if (
             a["season_id"] != self.season_id
             or a["trainer_id"] != self.trainer_id
             or a["target_pokemon_entity_id"] != pokemon_entity_id
             or a["save_sha256"] != intent.expected_sha256
-            or intent.mutation.get("kind") != "test_marking"
         ):
             raise WriteSafetyError("ITEM_BINDING_MISMATCH")
         binding = {
@@ -53,6 +66,8 @@ class EngineeringItemUse:
                 "save_file_id",
                 "save_sha256",
                 "expires_at",
+                "identity_revision_id",
+                "effect_code",
             )
         }
         binding["intent"] = intent.to_payload()
@@ -102,7 +117,10 @@ class EngineeringItemUse:
                 "UPDATE item_use_bindings SET record=? WHERE id=?",
                 (json.dumps(record), identifier),
             )
-        self.controller.gate.recovery_required = state != "APPLIED_VERIFIED"
+            remaining = db.execute("SELECT record FROM item_use_bindings").fetchall()
+        self.controller.gate.recovery_required = any(
+            json.loads(row[0])["state"] != "APPLIED_VERIFIED" for row in remaining
+        ) or bool(self.engine.pending())
         return state
 
     def _claim(self, identifier, record):

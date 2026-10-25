@@ -7,7 +7,7 @@ using System.Text.Json;
 namespace PokeApp.Parser;
 
 // Local native byte transformation only. This is not filesystem or competitive
-// authority. The only implemented mutation is an explicit engineering test mark.
+// authority. Native transformations never grant permission to publish a file.
 public static class NativeWrite
 {
     public const string WriterVersion = "pokeapp-writer/1;pkhex/24.11.11";
@@ -18,7 +18,7 @@ public static class NativeWrite
     private sealed record Mutation(string Kind, string Location, int? BoxIndex, int SlotIndex,
         int ExpectedOriginal, int NewValue);
     private sealed record Intent(string Game, string ExpectedSha256, string TrainerKey, Mutation Mutation);
-    private sealed class Rejection(string code) : Exception
+    internal sealed class Rejection(string code) : Exception
     {
         public string Code { get; } = code;
     }
@@ -44,6 +44,8 @@ public static class NativeWrite
             Exact(root, verify ? ["schema_version", "source_base64", "output_base64", "intent"]
                                : ["schema_version", "source_base64", "intent"]);
             if (Integer(root, "schema_version") != 1) throw new Rejection("INVALID_REQUEST");
+            if (Text(root.GetProperty("intent").GetProperty("mutation"), "kind") == "revive")
+                return NativeRevive.Execute(root, verify);
             var intent = ParseIntent(root.GetProperty("intent"));
             var original = Bytes(root, "source_base64");
             var source = Validate(original);
@@ -106,7 +108,7 @@ public static class NativeWrite
         OutputSha256 = (string?)null, OutputBase64 = (string?)null, SemanticDiff = (object?)null,
     };
 
-    private static void Exact(JsonElement element, string[] names)
+    internal static void Exact(JsonElement element, string[] names)
     {
         if (element.ValueKind != JsonValueKind.Object) throw new Rejection("INVALID_REQUEST");
         var seen = new HashSet<string>(StringComparer.Ordinal);
@@ -116,14 +118,14 @@ public static class NativeWrite
         if (seen.Count != names.Length) throw new Rejection("INVALID_REQUEST");
     }
 
-    private static string Text(JsonElement element, string key)
+    internal static string Text(JsonElement element, string key)
     {
         var value = element.GetProperty(key);
         if (value.ValueKind != JsonValueKind.String) throw new Rejection("INVALID_REQUEST");
         return value.GetString()!;
     }
 
-    private static int Integer(JsonElement element, string key)
+    internal static int Integer(JsonElement element, string key)
     {
         var value = element.GetProperty(key);
         if (value.ValueKind != JsonValueKind.Number || !value.TryGetInt32(out var number))
@@ -131,7 +133,7 @@ public static class NativeWrite
         return number;
     }
 
-    private static byte[] Bytes(JsonElement element, string key)
+    internal static byte[] Bytes(JsonElement element, string key)
     {
         var text = Text(element, key);
         if (text.Length > 645000) throw new Rejection("INVALID_REQUEST");
@@ -168,7 +170,7 @@ public static class NativeWrite
                 Integer(m, "expected_original"), Integer(m, "new_value")));
     }
 
-    private static SAV_BEEF Validate(byte[] bytes)
+    internal static SAV_BEEF Validate(byte[] bytes)
     {
         // Inspection checks raw Gen7 signature binding BEFORE PKHeX clears its
         // signature buffer, as well as all occupied Pokemon and native checksums.
