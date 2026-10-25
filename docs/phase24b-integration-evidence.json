@@ -1,0 +1,110 @@
+{
+  "date": "2026-10-25",
+  "entry": "089eb6acb876e346e204d735041d3b2ceb933e46",
+  "status": "PHASE24_DONE_LOCAL",
+  "classification": {
+    "backend": "PASS_LOCAL_DISABLED_BY_DEFAULT",
+    "launcher": "PASS_RUNTIME_STDIO_STATUS_UI_ACTION_UI_DEFERRED",
+    "robbery_ui": "PASS",
+    "post_transfer_sync": "PASS",
+    "two_launchers": "PASS",
+    "security_recovery": "PASS",
+    "lime3ds_certification": "PENDING",
+    "deployment": "NOT_EXECUTED"
+  },
+  "remote_actions": 0,
+  "production_writes_enabled": false,
+  "production_mutations_registry": "EMPTY",
+  "new_migration": "059_transfer_integration_reads.sql (additive, local only)",
+  "pg_integration": {
+    "status": "PASS",
+    "checks": [
+      "wrong owner and persisted shield rejected",
+      "disabled service, outsider-victim reservation refused before any reservation",
+      "authorized idempotent request, conflict, outsider denial and status-only web reads",
+      "private worker plans once; each Launcher receives only its own leg plan",
+      "both Launchers prepare verified backups; early/out-of-order application refused without file change",
+      "first part applied locally is not confirmation; tampered/foreign/wrong-claim uploads and post-apply cancel refused; restart replay idempotent",
+      "worker verifies each side independently, finalizes once; replay returns identical receipt",
+      "both Launchers and web report COMMITTED; gates released and stay released after restart",
+      "owner, both current saves, PC observations, single consumption/voucher; Launcher re-sync of result bytes is deduplicated, no clone",
+      "web withdrawal before application releases the prepared Launcher; original file and purchase untouched",
+      "1 native/PG/Launcher paired workflows, both backups, no false completion",
+      "restricted issuer and paired-table grants",
+      "foreign OT remains unproven, ownership/consumption deliberately gated",
+      "reserved current-save pointer cannot advance",
+      "current upgrade/bootstrap parity and prior table preservation"
+    ],
+    "games": [
+      {
+        "game": "X",
+        "status": "COMMITTED",
+        "originals_preserved": true,
+        "entitlement_consumed": true
+      }
+    ],
+    "cluster": "C:\\Users\\Antonio\\AppData\\Local\\Temp\\pokeapp-accounts-pg-3oxu9tv8",
+    "parity": {
+      "schema_lines": 17473,
+      "preserved_tables": 69
+    },
+    "cleanup": "owned databases dropped; cluster stopped"
+  },
+  "python": {
+    "focused_tests": 329,
+    "failures": 0,
+    "new_tests": 12,
+    "ruff": "no new findings versus 089eb6a",
+    "compile": "PASS",
+    "diff": "PASS"
+  },
+  "web": {
+    "test_files": 22,
+    "tests": 152,
+    "tsc": "PASS",
+    "prettier": "PASS",
+    "schema_types": "regenerated, insertions only"
+  },
+  "renderer": "node --check PASS",
+  "inherited_failures_resolved": [
+    "test_phase16d_save_sync...clears_superseded: stale fixture since 23B item-uses read",
+    "test_phase9_launcher...architecture: app.api import from app/launcher since 23D"
+  ],
+  "development_runs": [
+    "pg-24b-dev1.json: harness read private table as service_role (42501), harness corrected",
+    "pg-24b-dev2.json: PASS before Launcher-local wire models",
+    "pg-24b-final.json: PASS final code"
+  ],
+  "retained_not_rerun": [
+    "eight-title native/PG matrices",
+    "24A closure",
+    "176 native checks"
+  ],
+  "limitations": [
+    "Electron action UI/dialogs and capability decision deferred with Lime3DS certification",
+    "hosted verifier runner not shipped",
+    "054-059 not deployed",
+    "party and cross-title unqualified",
+    "victim non-cooperation policy undefined",
+    "recipient receives target stored bytes before completion"
+  ],
+  "private_evidence": "C:\\Users\\Antonio\\AppData\\Local\\PokeApp-migration-evidence\\phase24b\\20261025",
+  "source_fingerprints": {
+    "supabase/v2/migrations/059_transfer_integration_reads.sql": "7ad33a22672e226ad03436c9c577512d705d472eb82f67e4b75bc09bffdcaa05",
+    "supabase/v2/bootstrap.sql": "c0f56a98109123c894f07afd59f1d08a696d018c7341e01aef4d5ca4b83cbf1a",
+    "supabase/v2/reset_dev.sql": "cb859b261b86bde3a4e11897d85021c19ca4666b417674bcf02c383b6cea226f",
+    "app/api/routes/transfers.py": "3d74da44ac3fdfeb87540c7965261bcbab29f9460c094026ee55dbf2ed5cc42e",
+    "app/application/transfer_integration.py": "87e7fc062736cdc01350c1ae3da6fdf1c6400e58f3cecb37c2a817514592c629",
+    "app/application/transfer_worker.py": "5879e8afa5e05ceb2827a8f6edaeae7c89cc97d889d01f63f3ae71a01ab4b766",
+    "app/repositories/supabase/transfer.py": "a52b0590252e2566b64a492af9be712dbc6c360a2e179d7f545e20fda9813079",
+    "app/launcher/transfer.py": "212f39d2d1500694224347778221ed3e9fb34ffda0468ca45b77d4608b8c1c88",
+    "app/launcher/runtime.py": "b710c8ceb02b56addc36b526f8e44f28fd0ba80b0c2fba25e8e4c8fd244e079e",
+    "app/launcher/item_use.py": "1e2d3d688b940cd799ad4bb0fcf04d2436a7db9ffcc90eaab840c8d8a414f1b9",
+    "web/src/features/inventory.tsx": "94d16a86eb594ad3453c353d66940af820191c34da5f1ff31be8eec69f1b5014",
+    "companion/launcher/renderer.js": "2469f28a8c161c791e3c716e26cfa8a4213073adef0db64e4b0cddb62d1b4a0e",
+    "tools/validate_phase24b_local.py": "6f888cec1fb3624a1bf19cb936d99e1c355ddbcdadb6d690394b2c514146a455",
+    "tests/test_phase24b_integration.py": "f0829d7a1320407133cefef344162399e4e6be6a0c8815eff456be3acff9b15a",
+    "supabase/v2/migrations/057_two_save_transfer_reservations.sql": "ae1061aeae62ce8250877d2dd036e21fa22a4fb461d2892379536658eaa92066",
+    "supabase/v2/migrations/058_transfer_provenance_finalization.sql": "82ae34ee566e02d18c4a0d498a6e51a63dae438e48dbd31c834626a90f576037"
+  }
+}

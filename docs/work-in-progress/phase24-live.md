@@ -1,45 +1,41 @@
-# Phase24A — live execution record
+# Phase24 — live execution record
 
-2026-10-25. **PHASE24A DONE LOCAL. Local engineering only; production unchanged.**
-Entry `3f5d1ea92af37457baa4dced819a3c86c42a11cc`; first unit `5652808` (PARTIAL);
-closed by the focused finalization commit on top of it — use Git for the exact
-final HEAD. 23D gate PASS at entry. No historical full matrix rerun.
-[Report](../phase24a-two-save-report.md) · [Evidence](../phase24a-two-save-evidence.json).
+2026-10-25. **PHASE24 DONE LOCAL (24A + 24B). Production unchanged; nothing deployed.**
+24A closed at `089eb6a`; 24B integration committed on top of it — use Git for the
+exact final HEAD. No historical full matrix rerun.
+[24A report](../phase24a-two-save-report.md) · [24B report](../phase24b-integration-report.md)
+· [24B evidence](../phase24b-integration-evidence.json).
 
 ## Completed
 
-- Paired native plan and exact boxed transfer for X→X, Y→Y, OR→OR, AS→AS, SN→SN,
-  MN→MN, US→US, UM→UM. OT/individual bytes preserved. Other titles/party denied.
-- 057 reservations (unchanged) plus additive local 058: private immutable
-  provenance, foreign-OT `MATCHED` on the original UUID without forging
-  `source_trainer_match`, one atomic finalizer for owner, both accepted saves,
-  identity revisions, pointers and the existing025 effects exactly once.
-- Clone protection for the retired donor, no receipt rewind, ordinary later sync.
-- Paired pre-apply cancellation releases both legs without physical rollback;
-  after application recovery is forward-only and unilateral restore is denied.
-  Restarted Launchers reconcile and replay terminal receipts idempotently.
+- 24A: native paired transfer (eight same-title boxed pairs), 057 reservations,
+  058 foreign-OT provenance and atomic owner/two-save/025 finalization, paired
+  pre-apply cancellation, forward-only recovery.
+- 24B: additive local 059 (own-leg discovery with own plan; verifier queue),
+  FastAPI routes behind an engineering cohort flag (both participants must be in
+  it), private worker step, Launcher HTTP remote + runtime commands over the
+  existing journal (fail closed without an in-process engineering capability),
+  read-only Launcher status, web inventory states and requester withdrawal.
 
 ## Evidence
 
-Real disposable PG17 + native + two journals: eight titles COMMITTED. X also
-covers injected final failure (17 tables restored), concurrent finalizers,
-later sync, clone rejection and cancellation. 058 upgrade/bootstrap parity
-17,395 lines, 67 prior table hashes preserved. 268 affected Python tests: 267
-PASS, 1 pre-existing 16D failure (identical at `5652808`, outside 24A). Ruff no
-new findings; format/compile/diff PASS. 176 native checks retained (sources and
-057 hashes unchanged), not rerun.
+Disposable PG17 + real FastAPI + two LauncherRuntimes + native X: 15/15 PASS,
+including outsider/tampering/claim/ordering denials, restarts, lost replies,
+single consumption, post-sync dedupe and web withdrawal; 059 upgrade/bootstrap
+parity 17,473 lines, 69 prior tables preserved. 329 focused Python tests and 152
+web tests OK. Two inherited test failures (16D fixture, phase9 architecture)
+resolved. Eight-title matrices retained, not rerun.
 
 ## Limits and next action
 
-Party/cross-title unqualified; no public route/IPC/UI; post-apply external
-divergence stays blocked (no automatic physical rollback by design); 058 local
-only. Lime3DS certification PENDING; personal randomized Y never accessed.
+Electron action UI/dialogs and enabling the capability wait for Lime3DS real
+certification; hosted verifier runner not shipped; 054–059 not deployed; party
+and cross-title unqualified; victim non-cooperation policy undefined. Personal
+randomized Y never accessed.
 
-**PHASE24B GATE: PASS.** 24B may start in a new, explicitly requested packet.
-Nothing of 24B or later was started here.
+Next: a new, explicitly requested packet (Phase 25A was queued by the owner and
+is conditional on this closure). Nothing of Phase 25 is part of this record.
 
-Private evidence: `%LOCALAPPDATA%/PokeApp-migration-evidence/phase24a/20261025/`.
-Owned PG databases dropped and clusters stopped. Derived fixtures and temporary
-journals/backups retained; no blanket cleanup. Eight unrelated untracked files
-preserved. No production, owner saves, remote V1/Shadow, accounts, services,
-economy or Launcher release touched. STOP.
+Private evidence: `%LOCALAPPDATA%/PokeApp-migration-evidence/phase24a|phase24b/20261025/`.
+Owned PG databases dropped and clusters stopped; derived fixtures and temporary
+journals retained. Eight unrelated untracked files preserved.
