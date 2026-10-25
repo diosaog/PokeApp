@@ -5,7 +5,14 @@ milestone record; it does not maintain a second live phase-status ledger.
 
 ## Current project position
 
-- Current packet: **Phase25B DONE LOCAL — Launcher robbery action UI, signed
+- Current packet: **Phase26A BLOCKED at owner approval — Lime3DS installation and
+  the Pokémon Y save located (not opened); private pre-release 0.23.0-rc.1 built
+  and audited, not distributed; nothing published; production writes disabled**.
+  [Report](phase26a-lime3ds-acceptance-report.md),
+  [evidence](phase26a-lime3ds-acceptance-evidence.json),
+  [backend procedure](restricted-backend-acceptance-procedure.md).
+
+- Previous packet: **Phase25B DONE LOCAL — Launcher robbery action UI, signed
   update build/signing and real Windows 11 installed update, quick items free and
   unlimited (owner decision) behind a prepared public switch that stays OFF;
   pre-release CONDITIONAL; nothing published; production writes disabled**.

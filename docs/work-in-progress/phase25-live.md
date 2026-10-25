@@ -1,5 +1,13 @@
 # Phase25 — live execution record
 
+2026-10-26. **PHASE26A BLOCKED at the owner gate** (follows 25B). Lime3DS found
+(portable `Desktop\Lime3DS\Lime3DS\lime3ds.exe`, `%APPDATA%\Lime3DS`); one Pokémon Y
+save located by discovery, NOT opened/read/copied. Private pre-release
+`0.23.0-rc.1` built with the official script and audited (unsigned, updates off,
+not distributed). [26A report](../phase26a-lime3ds-acceptance-report.md). Next: the
+owner confirms the save path and scope; then follow
+[the procedure](../lime3ds-certification-procedure.md).
+
 2026-10-26. **PHASE25B DONE LOCAL** on top of 25A. Robbery action UI, signed-update
 build/signing integration, real installed update on Windows 11 (7/7), quick-item
 free/unlimited policy recorded with a prepared public switch that stays OFF, Gen7

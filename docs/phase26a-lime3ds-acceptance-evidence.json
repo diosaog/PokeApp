@@ -1,0 +1,107 @@
+{
+  "date": "2026-10-26",
+  "entry": "1450062",
+  "status": "PHASE26A_BLOCKED_OWNER_GATE",
+  "phase25b_gate": "PASS",
+  "lime3ds": {
+    "executable": "C:\\Users\\Antonio\\Desktop\\Lime3DS\\Lime3DS\\lime3ds.exe",
+    "process_name": "lime3ds.exe",
+    "user_directory": "%APPDATA%\\Lime3DS",
+    "portable_user_directory": false,
+    "azahar_user_directory": true,
+    "citra": false,
+    "running_at_check": false,
+    "discovered_saves": [
+      {
+        "emulator": "Lime3DS",
+        "game": "Y",
+        "path": "C:\\Users\\Antonio\\AppData\\Roaming\\Lime3DS\\sdmc\\Nintendo 3DS\\00000000000000000000000000000000\\00000000000000000000000000000000\\title\\00040000\\00055e00\\data\\00000001\\main"
+      }
+    ],
+    "personal_save_opened_read_hashed_copied_or_modified": false
+  },
+  "private_prerelease": {
+    "audit": {
+      "status": "PASS",
+      "version": "0.23.0-rc.1",
+      "updates_configured": false,
+      "private_candidate": true,
+      "installer": "PokeApp-Launcher-Private-Setup.exe",
+      "sha256": "ddfac30149eb02865d1d4193d1566c2b4ef90159489c7689a58039bc047dacde",
+      "bytes": 159236210,
+      "asar_files": [
+        "assets",
+        "assets/icon.ico",
+        "assets/items",
+        "assets/items/50.png",
+        "assets/items/93.png",
+        "index.html",
+        "main.cjs",
+        "package.json",
+        "preload.cjs",
+        "quantity.js",
+        "renderer.js",
+        "style.css",
+        "updater.cjs"
+      ],
+      "application_modules": [
+        "app.domain",
+        "app.domain.pokemon_identity",
+        "app.launcher",
+        "app.launcher.backend",
+        "app.launcher.backup",
+        "app.launcher.cloud_store",
+        "app.launcher.config",
+        "app.launcher.core",
+        "app.launcher.discovery",
+        "app.launcher.emulator_qualification",
+        "app.launcher.export_files",
+        "app.launcher.handoff_files",
+        "app.launcher.item_use",
+        "app.launcher.journal",
+        "app.launcher.quick_items",
+        "app.launcher.runtime",
+        "app.launcher.save_activity",
+        "app.launcher.secrets",
+        "app.launcher.stdio",
+        "app.launcher.sync",
+        "app.launcher.transfer",
+        "app.launcher.trusted_sync",
+        "app.launcher.write_control",
+        "app.launcher.write_engine",
+        "app.launcher.write_files",
+        "app.save_parser",
+        "app.save_parser.adapter",
+        "app.save_parser.cloud",
+        "app.save_parser.files",
+        "app.save_parser.models",
+        "app.save_parser.registration",
+        "app.save_parser.writer",
+        "app.save_parser.xy_identity"
+      ],
+      "runtime_file_count": 334,
+      "unsigned": true
+    },
+    "installed_smoke": {
+      "install": "PASS",
+      "start_app_and_core": "PASS",
+      "graceful_close": "NOT_VERIFIED_HEADLESS",
+      "uninstall_keeps_profile": "PASS",
+      "real_profiles_untouched": "PASS"
+    },
+    "distributed": false
+  },
+  "pending_owner": [
+    "confirm save path and permission to copy+hash it",
+    "scope on the copy: Rare Candy and Heart Scale only",
+    "perform in-game steps in Lime3DS",
+    "prepared Box 8 copy for revive",
+    "second participant for a real robbery"
+  ],
+  "external": [
+    "Authenticode",
+    "release key and HTTPS feeds",
+    "Windows 10",
+    "054-059 and verifier deployment (separate authorization)"
+  ]
+}
