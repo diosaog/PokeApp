@@ -36,3 +36,11 @@ class RedemptionRejectedError(RepositoryError):
     def __init__(self, code: str, status: int):
         super().__init__(code)
         self.code, self.status = code, status
+
+
+class ItemUseRejectedError(RepositoryError):
+    """Safe business rejection for prepare/complete physical item use."""
+
+    def __init__(self, code: str, status: int):
+        super().__init__(code)
+        self.code, self.status = code, status

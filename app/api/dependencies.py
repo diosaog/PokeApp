@@ -32,6 +32,7 @@ class ApiContainer:
     purchase_repository: NormalPurchaseRepository | None = None
     promotional_purchase_repository: PromotionalPurchaseRepository | None = None
     redemption_repository: RedemptionMutationRepository | None = None
+    item_use_repository: object | None = None
     season_admin_repository: SeasonAdminRepository | None = None
     matchday_repository: MatchdayRepository | None = None
     participant_status_repository: ParticipantStatusRepository | None = None
@@ -60,6 +61,7 @@ def create_default_container(config: APIConfig | None = None) -> ApiContainer:
     team_lock_repo = None
     purchase_repo = None
     redemption_repo = None
+    item_use_repo = None
     season_admin_repo = None
     matchday_repo = None
     participant_status_repo = None
@@ -116,6 +118,10 @@ def create_default_container(config: APIConfig | None = None) -> ApiContainer:
         redemption_repo = SupabaseRedemptionRepository.from_url_key(
             config.supabase_url, config.supabase_service_role_key,
         )
+        from app.repositories.supabase.item_use import SupabaseItemUseRepository
+        item_use_repo = SupabaseItemUseRepository.from_url_key(
+            config.supabase_url, config.supabase_service_role_key,
+        )
         from app.repositories.supabase.season_admin import SupabaseSeasonAdminRepository
 
         season_admin_repo = SupabaseSeasonAdminRepository.from_url_key(
@@ -166,6 +172,7 @@ def create_default_container(config: APIConfig | None = None) -> ApiContainer:
         purchase_repository=purchase_repo,
         promotional_purchase_repository=purchase_repo,
         redemption_repository=redemption_repo,
+        item_use_repository=item_use_repo,
         season_admin_repository=season_admin_repo,
         matchday_repository=matchday_repo,
         participant_status_repository=participant_status_repo,

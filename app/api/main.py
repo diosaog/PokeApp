@@ -14,7 +14,7 @@ from app.api.routes import initial_assignment
 from app.api.routes import wipe_revivals
 from app.api.routes import launcher
 from app.api.routes import saves
-from app.api.routes import accounts
+from app.api.routes import accounts, item_use
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 
@@ -71,6 +71,7 @@ def create_app(
     api.include_router(launcher.router)
     api.include_router(saves.router)
     api.include_router(accounts.router)
+    api.include_router(item_use.router)
     return api
 
 

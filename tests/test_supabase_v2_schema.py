@@ -130,6 +130,7 @@ class SupabaseV2SchemaTests(unittest.TestCase):
                 "051_account_profiles.sql",
                 "052_account_administration.sql",
                 "053_versioned_account_credentials.sql",
+                "054_item_use_authorizations.sql",
             ],
         )
         for path in _migration_files():
@@ -340,7 +341,7 @@ class SupabaseV2SchemaTests(unittest.TestCase):
         self.assertTrue(bootstrap.startswith("-- ONLY FOR EMPTY POKEAPP V2 DATABASE."))
         self.assertEqual(bootstrap, render_bootstrap())
         self.assertIn(
-        "Source of truth: supabase/v2/migrations/001_core.sql through 053_versioned_account_credentials.sql",
+            "Source of truth: supabase/v2/migrations/001_core.sql through 054_item_use_authorizations.sql",
             bootstrap,
         )
         self.assertNotIn("drop table", lowered)
@@ -395,10 +396,15 @@ class SupabaseV2SchemaTests(unittest.TestCase):
             if table == 'robbery_cycles':
                 self.assertIn('alter table public.robbery_cycles enable row level security', security_sql)
                 self.assertIn('revoke all on public.robbery_cycles from public,anon,authenticated', security_sql)
+            elif table == 'item_use_authorizations':
+                self.assertIn('alter table public.item_use_authorizations enable row level security', security_sql)
+                self.assertIn('alter table public.item_use_authorizations force row level security', security_sql)
+                self.assertIn('revoke all on public.item_use_authorizations from public,anon,authenticated,service_role', security_sql)
+                self.assertIn('grant select,insert,update on public.item_use_authorizations to service_role', security_sql)
             else:
                 self.assertIn(f"'{table}'", security_sql, table)
 
-        self.assertEqual(security_sql.count("enable row level security"), 29)
+        self.assertEqual(security_sql.count("enable row level security"), 30)
         self.assertIn("alter table public.%i enable row level security", security_sql)
 
 

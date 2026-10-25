@@ -120,6 +120,58 @@ class RedemptionResponse(BaseModel):
     gift_purchase_id: UUID | None
 
 
+class ItemUsePrepareBody(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    pokemon_entity_id: UUID
+    save_file_id: UUID
+    save_sha256: str = Field(pattern=r"^[a-f0-9]{64}$")
+    operation_id: str = Field(min_length=1, max_length=128, pattern=r"^[!-~]+$")
+
+
+class ItemUseCompleteBody(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    operation_id: str = Field(min_length=1, max_length=128, pattern=r"^[!-~]+$")
+    status: Literal[
+        "APPLIED_VERIFIED",
+        "FAILED_RECOVERABLE",
+        "RECOVERY_REQUIRED",
+        "BLOCKED_UNCERTAIN",
+    ]
+    observed_sha256: str | None = Field(default=None, pattern=r"^[a-f0-9]{64}$")
+    error_code: str | None = Field(default=None, pattern=r"^[A-Z0-9_]{1,64}$")
+
+
+class ItemUseResponse(BaseModel):
+    id: UUID
+    operation_id: str
+    purchase_id: UUID
+    season_id: UUID
+    trainer_id: UUID
+    target_pokemon_entity_id: UUID
+    save_file_id: UUID
+    save_sha256: str = Field(pattern=r"^[a-f0-9]{64}$")
+    effect_code: Literal["revive", "steal"]
+    status: Literal[
+        "PREPARED",
+        "APPLIED_VERIFIED",
+        "FAILED_RECOVERABLE",
+        "RECOVERY_REQUIRED",
+        "BLOCKED_UNCERTAIN",
+    ]
+    observed_sha256: str | None = None
+    error_code: str | None = None
+    receipt: dict | None = None
+    created_at: datetime
+    updated_at: datetime
+    applied_at: datetime | None = None
+
+
+class ItemUseListResponse(BaseModel):
+    items: list[ItemUseResponse]
+
+
 class TeamLockResponse(BaseModel):
     id: UUID
     season_id: UUID

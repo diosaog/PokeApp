@@ -62,6 +62,7 @@ EXPECTED_MIGRATIONS = [
     "051_account_profiles.sql",
     "052_account_administration.sql",
     "053_versioned_account_credentials.sql",
+    "054_item_use_authorizations.sql",
 ]
 
 FORBIDDEN_TOKENS = [

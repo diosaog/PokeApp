@@ -887,3 +887,24 @@ and privileged actors remain outside the guarantee. No production writes or
 Launcher release changed. Product Owner approval is required before defining a
 per-emulator adapter packet. See [Phase 22B report](phase22b-architecture-feasibility-report.md)
 and [evidence](phase22b-architecture-feasibility-evidence.json).
+
+## Phase 23 item-use authorization foundation (2026-10-25)
+
+Phase 23 is **PARTIAL / DONE LOCAL for its authorization foundation**. The
+existing shop purchase and inventory contracts remain unchanged. Forward
+migration `054_item_use_authorizations.sql` adds a private service-only journal
+for `PREPARED`, `APPLIED_VERIFIED`, `FAILED_RECOVERABLE`,
+`RECOVERY_REQUIRED` and `BLOCKED_UNCERTAIN`. Preparation binds the exact
+purchase, trainer, target, current parsed save and identity revision without
+consuming the entitlement; completion consumes it only after the existing
+redemption transaction returns a verified result for the same save hash and
+pointer. Scope, replay, RLS and browser-grant checks are fail closed.
+
+The local API/domain/schema gate is green (8 new API/domain checks, 15
+schema/bootstrap checks and 5 retained RLS checks). No PostgreSQL executable is
+available in this checkout, so real migration/concurrency/restart proof is
+still open. The Launcher write engine, physical save writes and web claim UI
+remain disabled or unchanged until Phase 22 real-emulator qualification. No
+remote migration, deployment, owner mutation, balance change, save change or
+Phase 24 work occurred. See [Phase 23 report](phase23-shop-item-use-report.md)
+and [live handoff](work-in-progress/phase23-live.md).
