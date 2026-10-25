@@ -28,7 +28,12 @@ def audit(build):
     allowed = {
         "assets",
         "assets/icon.ico",
+        "assets/items",
+        "assets/items/50.png",
+        "assets/items/93.png",
         "main.cjs",
+        "quantity.js",
+        "updater.cjs",
         "preload.cjs",
         "renderer.js",
         "index.html",
@@ -119,9 +124,11 @@ def audit(build):
     )
     result = {
         "status": "PASS",
-        "version": json.loads((REPO / "companion/launcher/package.json").read_text())[
-            "version"
-        ],
+        # The packaged metadata is authoritative (private builds may override it).
+        "version": metadata["version"],
+        "updates_configured": bool(
+            (metadata.get("pokeappUpdate") or {}).get("publicKey")
+        ),
         "private_candidate": private,
         "installer": installer.name,
         "sha256": hashlib.sha256(installer.read_bytes()).hexdigest(),
