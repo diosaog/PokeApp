@@ -4,7 +4,7 @@ using PokeApp.Parser;
 // Zero args preserves the existing read-only byte protocol exactly. Explicit
 // write preparation/verification accepts bytes/intent only: never a path, file
 // write, network request or implicit permission to replace a local save.
-if (args.Length == 1 && args[0] is "--prepare-write" or "--verify-write" or "--plan-transfer")
+if (args.Length == 1 && args[0] is "--prepare-write" or "--verify-write" or "--plan-transfer" or "--inventory-items")
 {
     using var writeInput = Console.OpenStandardInput();
     using var writeSnapshot = new MemoryStream();
@@ -20,7 +20,12 @@ if (args.Length == 1 && args[0] is "--prepare-write" or "--verify-write" or "--p
         }
         writeSnapshot.Write(writeBuffer, 0, count);
     }
-    Console.WriteLine(JsonSerializer.Serialize(args[0] == "--plan-transfer" ? NativeTransfer.Plan(writeSnapshot.ToArray()) : NativeWrite.Execute(writeSnapshot.ToArray(), args[0] == "--verify-write"), Inspection.Json));
+    Console.WriteLine(JsonSerializer.Serialize(args[0] switch
+    {
+        "--plan-transfer" => NativeTransfer.Plan(writeSnapshot.ToArray()),
+        "--inventory-items" => NativeItems.Inventory(writeSnapshot.ToArray()),
+        _ => NativeWrite.Execute(writeSnapshot.ToArray(), args[0] == "--verify-write"),
+    }, Inspection.Json));
     return 0;
 }
 if (args.Length != 0)

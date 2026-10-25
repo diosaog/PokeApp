@@ -302,7 +302,13 @@ class LocalWriteEngine:
         if (
             type(capability) is not EngineeringCapability
             or intent.mutation.get("kind")
-            not in ("test_marking", "revive", "transfer_remove", "transfer_insert")
+            not in (
+                "test_marking",
+                "revive",
+                "transfer_remove",
+                "transfer_insert",
+                "add_item",
+            )
             or target.path == capability.fixture_root
             or not target.path.is_relative_to(capability.fixture_root)
         ):

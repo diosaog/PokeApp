@@ -39,8 +39,11 @@ ERRORS = frozenset(
         "UNEXPECTED_DIFF",
         "VERIFICATION_FAILED",
         "WRITE_PREPARATION_FAILED",
+        "INVENTORY_LIMIT",
+        "INVENTORY_FULL",
     }
 )
+QUICK_ITEMS = ("rare_candy", "heart_scale")
 RESPONSE_KEYS = frozenset(
     {
         "schema_version",
@@ -298,6 +301,40 @@ class PkhexProcessWriter:
         ].expected_sha256 != _digest(destination):
             raise NativeWriteError("VERIFICATION_FAILED")
         return plans
+
+    def inventory(self, source: bytes) -> dict:
+        """Read-only quick-item counts and per-title limits for this exact file."""
+        if type(source) is not bytes or len(source) not in NATIVE_SIZES.values():
+            raise NativeWriteError("UNSUPPORTED_FORMAT")
+        response = self._run(
+            "--inventory-items",
+            {
+                "schema_version": 1,
+                "source_base64": base64.b64encode(source).decode("ascii"),
+            },
+        )
+        items = response["semantic_diff"]
+        if (
+            response["status"] != "inspected"
+            or response["source_sha256"] != _digest(source)
+            or response["output_base64"] is not None
+            or not isinstance(items, dict)
+            or set(items) != set(QUICK_ITEMS)
+            or any(
+                set(v) != {"count", "max", "addable"}
+                or any(type(v[k]) is not int or v[k] < 0 for k in v)
+                or v["count"] > v["max"]
+                or v["addable"] > v["max"] - v["count"]
+                for v in items.values()
+            )
+        ):
+            raise NativeWriteError("VERIFICATION_FAILED")
+        return {
+            "game": response["game"],
+            "trainer_key": response["trainer_key"],
+            "source_sha256": response["source_sha256"],
+            "items": items,
+        }
 
     def prepare(self, source: bytes, intent: WriteIntent) -> PreparedNative:
         request = self._input(source, intent)

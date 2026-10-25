@@ -22,6 +22,19 @@ from app.save_parser.models import SaveError
 from app.save_parser.writer import PkhexProcessWriter
 
 PRODUCTION_API = "https://pokeapp-api-production.up.railway.app"
+QUICK_COMMANDS = ("quick_items_refresh", "quick_item_offer")
+QUICK_ERRORS = {
+    "INVENTORY_LIMIT": "Esa cantidad supera el máximo de la bolsa en este juego.",
+    "INVENTORY_FULL": "La bolsa está llena: no cabe un objeto nuevo.",
+    "CORRUPT_SAVE": "No se pudo preparar un archivo verificable con esa cantidad. Prueba con otra; tu partida no se ha modificado.",
+    "STALE_SOURCE": "La partida ha cambiado. Vuelve a leerla e inténtalo de nuevo.",
+    "STALE_MUTATION": "La partida ha cambiado. Vuelve a leerla e inténtalo de nuevo.",
+    "EMULATOR_RUNNING": "Cierra el juego y el emulador antes de añadir objetos.",
+    "QUICK_ITEMS_DISABLED": "Añadir objetos aún no está habilitado: falta una regla aprobada de la Liga. Puedes consultar tus cantidades.",
+    "NATIVE_VERIFICATION_FAILED": "No se pudo preparar un archivo verificable con esa cantidad. Prueba con otra; tu partida no se ha modificado.",
+    "NO_SELECTED_WRITE_TARGET": "Selecciona tu partida primero.",
+    "UNSUPPORTED_FORMAT": "Esta partida no admite objetos rápidos. Juegos admitidos: X/Y, Rubí Omega/Zafiro Alfa y Sol/Luna/Ultrasol/Ultraluna.",
+}
 TRANSFER_COMMANDS = (
     "transfer_prepare",
     "transfer_apply",
@@ -103,6 +116,9 @@ class LauncherRuntime:
             "error": None,
             "write_error": None,
             "transfer_result": None,
+            "quick_items": None,
+            "quick_item_error": None,
+            "emulator_saves": [],
         }
         self.receipt = None
         self.watch = None
@@ -232,6 +248,38 @@ class LauncherRuntime:
             except Full:
                 return {"status": "BUSY"}
             return {"status": "QUEUED"}
+        if name == "discover_saves":
+            from app.launcher.discovery import emulator_saves
+
+            if args:
+                raise ValueError("unexpected_discovery_arguments")
+            found = emulator_saves()
+            self._patch(emulator_saves=found)
+            return {"status": "DONE", "count": len(found)}
+        if name == "select_discovered":
+            with self.lock:
+                known = {s["path"] for s in self.value["emulator_saves"]}
+            if set(args) != {"path"} or args["path"] not in known:
+                raise ValueError("invalid_selection")
+            name = "select"
+        if name in QUICK_COMMANDS:
+            if name == "quick_items_refresh":
+                valid = args == {}
+            else:
+                valid = (
+                    set(args) == {"item", "quantity", "closed_emulator_confirmed"}
+                    and args["item"] in ("rare_candy", "heart_scale")
+                    and type(args["quantity"]) is int
+                    and 1 <= args["quantity"] <= 9999
+                    and args["closed_emulator_confirmed"] is True
+                )
+            if not valid:
+                raise ValueError("invalid_quick_item_arguments")
+            try:
+                self.write_commands.put_nowait((name, dict(args)))
+            except Full:
+                return {"status": "BUSY"}
+            return {"status": "QUEUED"}
         if name in TRANSFER_COMMANDS:
             expected = (
                 {"authorization_id", "closed_emulator_confirmed"}
@@ -355,10 +403,58 @@ class LauncherRuntime:
                 write_error="No se pudo verificar la operación. La sincronización queda pausada."
             )
 
+    def _quick_step(self, name, args):
+        from app.launcher.quick_items import inventory_view, quick_item_intent
+        from app.save_parser.writer import NativeWriteError
+
+        engine = self.writes.engine
+        try:
+            native = getattr(engine, "native", None)
+            if native is None or not self.writes.selected():
+                raise WriteSafetyError("NO_SELECTED_WRITE_TARGET")
+            data = engine.files.read_path(Path(self.writes.selected()))
+            enabled = type(engine.capability) is EngineeringCapability
+            if name == "quick_items_refresh":
+                view = inventory_view(native, data)
+                self._patch(
+                    quick_items=view | {"application_enabled": enabled},
+                    quick_item_error=None,
+                )
+                return
+            if not enabled:
+                raise WriteSafetyError("QUICK_ITEMS_DISABLED")
+            intent = quick_item_intent(native, data, args["item"], args["quantity"])
+            # Existing journal: backup, explicit write_confirm, readback, recovery.
+            self.writes.offer(intent, closed_emulator_confirmed=True)
+            self._patch(quick_item_error=None, write_error=None)
+        except SaveBusy:
+            self._patch(
+                quick_item_error="Hay una lectura o sincronización en curso. Espera y vuelve a intentarlo."
+            )
+        except (NativeWriteError, WriteSafetyError) as error:
+            self._patch(
+                quick_item_error=QUICK_ERRORS.get(
+                    str(error) or getattr(error, "code", ""),
+                    "No se puede preparar el cambio. Revisa la partida seleccionada; no se ha modificado.",
+                )
+            )
+        except Exception:  # noqa: BLE001 - no native output, path or journal data to UI
+            if name == "quick_item_offer":
+                self.save_activity.recovery_required = True
+            self._patch(
+                quick_item_error="No se pudo comprobar la partida. Conserva las copias y vuelve a intentarlo."
+            )
+
     def _write_step(self):
         try:
             name, args = self.write_commands.get_nowait()
         except Empty:
+            return
+        if name in QUICK_COMMANDS:
+            try:
+                self._quick_step(name, args)
+            finally:
+                self.write_commands.task_done()
             return
         if name in TRANSFER_COMMANDS:
             try:
@@ -385,6 +481,7 @@ class LauncherRuntime:
                 result = self.writes.reconcile()
             self._patch(write_error=None)
             if result["status"] in ("APPLIED_VERIFIED", "RESTORED_VERIFIED"):
+                self._patch(quick_items=None)  # counts are re-read, never assumed
                 self._load_local()
         except SaveBusy:
             self._patch(

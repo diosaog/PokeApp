@@ -48,6 +48,8 @@ public static class NativeWrite
                 return NativeRevive.Execute(root, verify);
             if (Text(root.GetProperty("intent").GetProperty("mutation"), "kind") is "transfer_remove" or "transfer_insert")
                 return NativeTransfer.Execute(root, verify);
+            if (Text(root.GetProperty("intent").GetProperty("mutation"), "kind") == "add_item")
+                return NativeItems.Execute(root, verify);
             var intent = ParseIntent(root.GetProperty("intent"));
             var original = Bytes(root, "source_base64");
             var source = Validate(original);

@@ -251,6 +251,10 @@ class LocalWriteController:
                 f"{change['destination_slot_index'] + 1}. Se conservan sus atributos y una copia original. "
                 "El canje requiere además verificación del servidor."
             )
+        if change.get("kind") == "add_item":
+            from app.launcher.quick_items import describe
+
+            return describe(change)
         if change.get("kind") != "test_marking":
             raise WriteSafetyError("PRODUCTION_WRITES_DISABLED")
         if change.get("location") == "party":
