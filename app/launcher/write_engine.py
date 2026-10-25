@@ -29,6 +29,11 @@ from app.launcher.write_files import EnrolledTarget, WindowsWriteFiles, WriteSaf
 
 GAMES = frozenset(("X", "Y", "OR", "AS", "SN", "MN", "US", "UM"))
 PRODUCTION_MUTATIONS: frozenset[str] = frozenset()
+# Owner decision 2026-10-26: Rare Candy and Heart Scale are free and unlimited
+# within each game's technical limits. Public use is enabled ONLY by adding
+# "add_item" to PRODUCTION_MUTATIONS after real Lime3DS certification; no other
+# kind (revive, transfer, test marking) can ever pass through this switch.
+PUBLIC_READY_MUTATIONS: frozenset[str] = frozenset({"add_item"})
 PENDING = ("PREPARED", "AWAITING_CONFIRMATION", "RECOVERY_REQUIRED")
 
 
@@ -299,9 +304,13 @@ class LocalWriteEngine:
         if valid != intent:
             raise WriteSafetyError("INVALID_WRITE_INTENT")
         capability = self.capability
+        kind = intent.mutation.get("kind")
+        if type(capability) is not EngineeringCapability:
+            if kind not in PRODUCTION_MUTATIONS or kind not in PUBLIC_READY_MUTATIONS:
+                raise WriteSafetyError("PRODUCTION_WRITES_DISABLED")
+            return
         if (
-            type(capability) is not EngineeringCapability
-            or intent.mutation.get("kind")
+            kind
             not in (
                 "test_marking",
                 "revive",
@@ -314,6 +323,14 @@ class LocalWriteEngine:
         ):
             raise WriteSafetyError("PRODUCTION_WRITES_DISABLED")
         self.files.path(capability.fixture_root, directory=True)
+
+    def allows(self, kind) -> bool:
+        if type(self.capability) is EngineeringCapability:
+            return True
+        return kind in PRODUCTION_MUTATIONS and kind in PUBLIC_READY_MUTATIONS
+
+    def allows_operation(self, operation_id) -> bool:
+        return self.allows(self._load(operation_id)["intent"]["mutation"]["kind"])
 
     def _native_prepare(self, source: bytes, intent: WriteIntent) -> PreparedNative:
         try:

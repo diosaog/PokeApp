@@ -36,6 +36,7 @@ MAX_BYTES = 8 * 1024 * 1024
 EMULATORS = (
     "citra",
     "lime3ds",
+    "lime-qt",
     "azahar",
     "mandarine",
     "mikage",

@@ -1,9 +1,10 @@
 """Owner-approved quick items (Rare Candy, Heart Scale) over the existing journal.
 
-No League policy grants these items yet, so application exists only behind the
-in-process engineering capability; a production build can read counts but never
-add. Count, hash and limits come from one snapshot, and the native writer
-revalidates all of them before any change.
+Owner decision (2026-10-26): free and unlimited for every trainer, within each
+game's technical limits only; no coins, purchase, admin approval or economy
+record. Public adding stays off until real Lime3DS certification enables the
+prepared "add_item" switch. Count, hash and limits come from one snapshot, and
+the native writer revalidates all of them before any change.
 """
 
 from hashlib import sha256

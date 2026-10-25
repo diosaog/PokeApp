@@ -30,7 +30,7 @@ QUICK_ERRORS = {
     "STALE_SOURCE": "La partida ha cambiado. Vuelve a leerla e inténtalo de nuevo.",
     "STALE_MUTATION": "La partida ha cambiado. Vuelve a leerla e inténtalo de nuevo.",
     "EMULATOR_RUNNING": "Cierra el juego y el emulador antes de añadir objetos.",
-    "QUICK_ITEMS_DISABLED": "Añadir objetos aún no está habilitado: falta una regla aprobada de la Liga. Puedes consultar tus cantidades.",
+    "QUICK_ITEMS_DISABLED": "Añadir objetos se activará cuando termine la certificación real del Launcher con Lime3DS. Ya puedes consultar tus cantidades.",
     "NATIVE_VERIFICATION_FAILED": "No se pudo preparar un archivo verificable con esa cantidad. Prueba con otra; tu partida no se ha modificado.",
     "NO_SELECTED_WRITE_TARGET": "Selecciona tu partida primero.",
     "UNSUPPORTED_FORMAT": "Esta partida no admite objetos rápidos. Juegos admitidos: X/Y, Rubí Omega/Zafiro Alfa y Sol/Luna/Ultrasol/Ultraluna.",
@@ -413,7 +413,7 @@ class LauncherRuntime:
             if native is None or not self.writes.selected():
                 raise WriteSafetyError("NO_SELECTED_WRITE_TARGET")
             data = engine.files.read_path(Path(self.writes.selected()))
-            enabled = type(engine.capability) is EngineeringCapability
+            enabled = engine.allows("add_item")
             if name == "quick_items_refresh":
                 view = inventory_view(native, data)
                 self._patch(
@@ -663,6 +663,10 @@ class LauncherRuntime:
                         "side": t.side,
                         "status": t.status,
                         "planned": t.intent is not None,
+                        "claimed": t.claimed,
+                        "apply_started": t.apply_started,
+                        "verified": t.verified,
+                        "location": t.location(),
                     }
                     for t in listed.items
                 ]

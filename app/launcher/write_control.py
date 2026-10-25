@@ -85,8 +85,7 @@ class LocalWriteController:
                 "can_confirm": not self._busy
                 and transfer_notice is None
                 and state == "AWAITING_CONFIRMATION"
-                and type(getattr(self.engine, "capability", None))
-                is EngineeringCapability,
+                and self._confirmable(receipt),
                 "can_export": not self._busy
                 and self._export_intent is not None
                 and type(getattr(self.engine, "capability", None))
@@ -114,6 +113,12 @@ class LocalWriteController:
                 if self._busy
                 else transfer_notice or self._message(state),
             }
+
+    def _confirmable(self, receipt):
+        try:
+            return bool(receipt) and self.engine.allows_operation(receipt.operation_id)
+        except Exception:  # noqa: BLE001 - unreadable journal never becomes a confirmable write
+            return False
 
     @staticmethod
     def _message(state):
