@@ -288,6 +288,84 @@ app.whenReady().then(() => {
       });
     },
   );
+  // Robbery: only this trainer's listed leg; runtime and server recheck all.
+  // The dialog explains the LOCAL effect; completion is the server's verdict.
+  ipcMain.handle(
+    "launcher:transfer",
+    async (event, kind, authorizationId, emulatorClosed) => {
+      authorize(event);
+      if (
+        !["prepare", "apply", "cancel", "refresh"].includes(kind) ||
+        typeof authorizationId !== "string" ||
+        authorizationId.length !== 36
+      )
+        throw new Error("Operación de robo no válida");
+      const state = await request("state");
+      const transfer = (state.cloud?.data?.transfers || []).find(
+        (t) => t.authorization_id === authorizationId,
+      );
+      if (!transfer) throw new Error("La operación ya no está pendiente.");
+      const args = { authorization_id: authorizationId };
+      if (kind === "refresh") return request("transfer_refresh", args);
+      if (kind === "cancel") {
+        if (transfer.side !== "destination" || transfer.apply_started)
+          throw new Error(
+            "Solo quien solicitó el robo puede cancelarlo, y solo antes de aplicar.",
+          );
+        const answer = await dialog.showMessageBox(win, {
+          type: "question",
+          title: "Cancelar robo",
+          message: "¿Cancelar este robo antes de aplicar ningún cambio?",
+          detail:
+            "No se modifica ninguna partida y el objeto no se consume. Las copias se conservan.",
+          buttons: ["Volver", "Cancelar robo"],
+          defaultId: 0,
+          cancelId: 0,
+          noLink: true,
+        });
+        if (answer.response !== 1) return { status: "NOT_CONFIRMED" };
+        return request("transfer_cancel", args);
+      }
+      if (emulatorClosed !== true)
+        throw new Error("Confirma que el juego y el emulador están cerrados.");
+      const where = transfer.location
+        ? `Caja ${transfer.location.box}, posición ${transfer.location.slot}`
+        : "la posición indicada por PokeApp";
+      const effect =
+        kind === "prepare"
+          ? "Se creará y comprobará una copia completa de tu partida. Todavía no se modifica nada."
+          : transfer.side === "source"
+            ? `Se retirará de tu partida el Pokémon de la ${where}.`
+            : `Se añadirá a tu partida el Pokémon robado en la ${where}.`;
+      const answer = await dialog.showMessageBox(win, {
+        type: "warning",
+        title:
+          kind === "prepare"
+            ? "Preparar copia para el robo"
+            : "Aplicar tu parte",
+        message:
+          kind === "prepare"
+            ? "Preparar copia verificada"
+            : "Aplicar tu parte del robo",
+        detail: `${state.selected_save}\n\n${effect} El robo solo es definitivo cuando PokeApp verifica las dos partidas.\n\nMantén el juego y el emulador cerrados hasta que termine.`,
+        buttons: [
+          "Cancelar",
+          kind === "prepare" ? "Preparar copia" : "Aplicar mi parte",
+        ],
+        defaultId: 0,
+        cancelId: 0,
+        noLink: true,
+      });
+      if (answer.response !== 1) return { status: "NOT_CONFIRMED" };
+      return request(
+        kind === "prepare" ? "transfer_prepare" : "transfer_apply",
+        {
+          ...args,
+          closed_emulator_confirmed: true,
+        },
+      );
+    },
+  );
   ipcMain.handle("launcher:discover", (event) => {
     authorize(event);
     return request("discover_saves");

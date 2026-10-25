@@ -8,7 +8,70 @@ const state = () => ({
   cloud_status: "ONLINE",
   auth_status: "VERIFIED",
   principal: null,
-  cloud: null,
+  receipt_id: "r1",
+  observation: {
+    game: "Y",
+    generation: 6,
+    trainer: { name: "Test", tid: 1 },
+    party: [],
+    boxes: [{ slots: [null, { nickname: "Pikachu", species_id: 25 }] }],
+  },
+  cloud: {
+    data: {
+      transfers: [
+        {
+          authorization_id: "a".repeat(36),
+          side: "destination",
+          status: "PENDING_SOURCE",
+          planned: true,
+          claimed: true,
+          apply_started: false,
+          verified: false,
+          location: { box: 2, slot: 5 },
+        },
+        {
+          authorization_id: "b".repeat(36),
+          side: "source",
+          status: "PENDING_SOURCE",
+          planned: true,
+          claimed: true,
+          apply_started: false,
+          verified: false,
+          location: { box: 1, slot: 2 },
+        },
+        {
+          authorization_id: "c".repeat(36),
+          side: "source",
+          status: "VERIFYING_SOURCE",
+          planned: true,
+          claimed: true,
+          apply_started: true,
+          verified: false,
+          location: { box: 1, slot: 2 },
+        },
+        {
+          authorization_id: "d".repeat(36),
+          side: "destination",
+          status: "BLOCKED_UNCERTAIN",
+          planned: true,
+          claimed: true,
+          apply_started: true,
+          verified: false,
+          location: null,
+        },
+        {
+          authorization_id: "e".repeat(36),
+          side: "destination",
+          status: "COMMITTED",
+          planned: false,
+          claimed: true,
+          apply_started: true,
+          verified: true,
+          location: null,
+        },
+      ],
+    },
+  },
   emulator: { primary_candidate: "Lime3DS" },
   emulator_saves: [{ path: "C:/fixture/main", emulator: "Lime3DS", game: "Y" }],
   quick_items: {
@@ -19,17 +82,40 @@ const state = () => ({
     },
   },
   quick_item_error: null,
-  write: { status: "IDLE", busy: false, backups: [], can_confirm: false, can_reconcile: false },
+  write: {
+    status: "IDLE",
+    busy: false,
+    backups: [],
+    can_confirm: false,
+    can_reconcile: false,
+    transfer_application_enabled: enabled,
+  },
 });
 contextBridge.exposeInMainWorld("launcher", {
   state: async () => state(),
   quickItems: async () => ({ status: "QUEUED" }),
   addQuickItem: async (...args) => (calls.push(args), { status: "QUEUED" }),
+  transfer: async (...args) => (
+    calls.push(["transfer", ...args]),
+    { status: "QUEUED" }
+  ),
   discoverSaves: async () => ({ status: "DONE", count: 1 }),
-  selectDiscovered: async (p) => (calls.push(["select", p]), { status: "QUEUED" }),
-  updateState: async () => ({ status: "AVAILABLE", current: "0.22.0-rc.3", version: "0.23.0", notes: "Prueba", channel: "private" }),
+  selectDiscovered: async (p) => (
+    calls.push(["select", p]),
+    { status: "QUEUED" }
+  ),
+  updateState: async () => ({
+    status: "AVAILABLE",
+    current: "0.22.0-rc.3",
+    version: "0.23.0",
+    notes: "Prueba",
+    channel: "private",
+  }),
   downloadUpdate: async () => ({ status: "DOWNLOADING" }),
-  installUpdate: async () => ({ status: "DOWNLOADED", deferred: "WRITE_IN_PROGRESS" }),
+  installUpdate: async () => ({
+    status: "DOWNLOADED",
+    deferred: "WRITE_IN_PROGRESS",
+  }),
   __calls: () => calls.map((c) => [...c]),
   __disable: () => {
     enabled = false;

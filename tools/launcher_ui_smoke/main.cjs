@@ -28,17 +28,37 @@ const script = `(async () => {
   check(!document.getElementById("update-banner").hidden && !document.getElementById("update-download").hidden, "update offered with download button");
   check(/v0.22.0-rc.3/.test(document.getElementById("launcher-version").textContent), "installed version shown");
   check(/Lime3DS/.test(document.getElementById("emulator-state").textContent) && document.querySelectorAll("#discovered-saves button").length === 1, "Lime3DS state and discovered save");
+  const card = (id) => document.querySelector('.transfer-card[data-id="' + id.repeat(36) + '"]');
+  const kinds = (id) => [...card(id).querySelectorAll("button")].map((b) => b.dataset.kind).join(",");
+  check(kinds("a") === "cancel,refresh" && /Has solicitado/.test(card("a").textContent) && /Caja 2, posición 5/.test(card("a").textContent), "requester waits for source: only cancel/refresh");
+  check(kinds("b") === "apply,refresh" && /Te van a robar/.test(card("b").textContent) && /Pikachu · Caja 1, posición 2/.test(card("b").textContent), "victim sees own role, Pokémon and turn; no cancel");
+  const apply = card("b").querySelector('[data-kind="apply"]');
+  check(apply.disabled, "apply needs emulator-closed confirmation");
+  document.getElementById("transfer-emulator-closed").click(); await sleep(50);
+  const applyNow = card("b").querySelector('[data-kind="apply"]');
+  check(!applyNow.disabled, "confirmation enables own action");
+  applyNow.click(); await sleep(200);
+  check(JSON.stringify(window.launcher.__calls().at(-1)) === JSON.stringify(["transfer", "apply", "b".repeat(36), true]), "exact own-leg action sent");
+  check(/Reanudar mi parte/.test(card("c").textContent) && /NO es definitivo/.test(card("c").textContent), "local application distinguished from final robbery");
+  check(/Necesitas asistencia/.test(card("d").textContent) && kinds("d") === "refresh", "blocked operation asks for assistance, no unsafe action");
+  check(/Robo completado y registrado/.test(card("e").textContent), "completed only on COMMITTED");
   window.launcher.__disable(); await sleep(1300);
+  check(/aún no aplica cambios/.test(document.getElementById("transfer-summary").textContent) && [...document.querySelectorAll("#transfer-list button")].every((b) => b.disabled), "no capability: robbery visible but every action disabled");
   check(add.disabled && /Operación bloqueada/.test(document.getElementById("quick-state").textContent), "disabled capability blocks with explanation");
   return out;
 })()`;
 app.whenReady().then(async () => {
   const win = new BrowserWindow({
     show: false,
-    webPreferences: { preload: path.join(__dirname, "preload.cjs"), contextIsolation: true, sandbox: false },
+    webPreferences: {
+      preload: path.join(__dirname, "preload.cjs"),
+      contextIsolation: true,
+      sandbox: false,
+    },
   });
   await win.loadFile(page);
   const result = await win.webContents.executeJavaScript(script);
-  for (const [ok, label] of result) console.log((ok ? "PASS " : "FAIL ") + label);
+  for (const [ok, label] of result)
+    console.log((ok ? "PASS " : "FAIL ") + label);
   app.exit(result.every(([ok]) => ok) ? 0 : 1);
 });

@@ -342,6 +342,145 @@ $("login").onsubmit = (event) => {
   event.currentTarget.elements.pin.value = "";
   void action(() => window.launcher.login(trainer, pin));
 };
+// Robbery actions: only this trainer's own leg; no peer data, no second logic.
+const transferProgress = {
+  PREPARING: "Ninguna copia preparada todavía.",
+  WAITING_OTHER: "Una copia preparada; falta la del otro entrenador.",
+  PENDING_SOURCE:
+    "Las dos copias están preparadas; falta retirar el Pokémon de la partida de origen.",
+  VERIFYING_SOURCE:
+    "La partida de origen ya está modificada; PokeApp la está verificando.",
+  PENDING_DESTINATION:
+    "Origen verificado; falta añadir el Pokémon en la partida de destino.",
+  VERIFYING_BOTH:
+    "La partida de destino ya está modificada; PokeApp la está verificando.",
+  BOTH_VERIFIED_PENDING_IDENTITY:
+    "Las dos partidas están verificadas; PokeApp está registrando la propiedad.",
+  COMMITTED: "Robo completado y registrado por PokeApp.",
+  CANCELLED: "Robo cancelado antes de aplicar. No se ha consumido el objeto.",
+  BLOCKED_UNCERTAIN: "Operación bloqueada.",
+};
+function transferActions(t) {
+  return {
+    prepare:
+      t.planned &&
+      !t.claimed &&
+      ["PREPARING", "WAITING_OTHER"].includes(t.status),
+    apply:
+      (t.side === "source" &&
+        ["PENDING_SOURCE", "VERIFYING_SOURCE"].includes(t.status)) ||
+      (t.side === "destination" &&
+        ["PENDING_DESTINATION", "VERIFYING_BOTH"].includes(t.status)),
+    cancel:
+      t.side === "destination" &&
+      !t.apply_started &&
+      ["PREPARING", "WAITING_OTHER", "PENDING_SOURCE"].includes(t.status),
+    refresh: true,
+  };
+}
+function renderTransfers(state) {
+  const items = state.cloud?.data?.transfers || [];
+  const write = state.write || {};
+  const enabled = Boolean(write.transfer_application_enabled);
+  const closed = $("transfer-emulator-closed").checked;
+  text(
+    "transfer-summary",
+    !items.length
+      ? "No hay robos en curso."
+      : enabled
+        ? "Sigue los pasos de cada robo. Solo puedes confirmar lo que te corresponde."
+        : "Puedes consultar tus robos, pero este Launcher aún no aplica cambios: falta la certificación con Lime3DS.",
+  );
+  const key = JSON.stringify([
+    items,
+    enabled,
+    write.busy,
+    write.status,
+    closed,
+    state.selected_save,
+    revision,
+  ]);
+  const list = $("transfer-list");
+  if (list.dataset.key === key) return;
+  list.dataset.key = key;
+  list.replaceChildren(
+    ...items.map((t) => {
+      const card = document.createElement("div");
+      card.className = "transfer-card";
+      card.dataset.id = t.authorization_id;
+      const line = (value, cls) => {
+        const p = document.createElement("p");
+        p.textContent = value;
+        if (cls) p.className = cls;
+        card.append(p);
+      };
+      line(
+        t.side === "source"
+          ? "Te van a robar un Pokémon: tu partida es la de origen."
+          : "Has solicitado este robo: tu partida es la de destino.",
+        "transfer-role",
+      );
+      const where = t.location;
+      const pokemon =
+        where && t.side === "source"
+          ? observation?.boxes?.[where.box - 1]?.slots?.[where.slot - 1]
+          : null;
+      if (where)
+        line(
+          t.side === "source"
+            ? `Pokémon: ${pokemon ? pokemon.nickname || `#${pokemon.species_id}` : "el indicado por PokeApp"} · Caja ${where.box}, posición ${where.slot}.`
+            : `Llegará a tu partida en la Caja ${where.box}, posición ${where.slot}.`,
+        );
+      line(`Partida: ${state.selected_save || "sin seleccionar"}`, "muted");
+      line(
+        transferProgress[t.status] || "Estado no disponible.",
+        "transfer-progress",
+      );
+      if (t.apply_started && t.status !== "COMMITTED")
+        line(
+          "Tu parte ya está aplicada en tu partida, pero el robo NO es definitivo hasta que PokeApp verifique las dos partidas.",
+        );
+      if (
+        t.status === "BLOCKED_UNCERTAIN" ||
+        write.status === "RECOVERY_REQUIRED"
+      )
+        line(
+          "Necesitas asistencia: no abras el emulador, conserva las copias y contacta con el administrador. No restaures la partida por tu cuenta.",
+          "transfer-help",
+        );
+      const actions = transferActions(t);
+      if (enabled && (actions.prepare || actions.apply))
+        line(
+          "Cierra el juego y el emulador y marca la casilla antes de continuar.",
+        );
+      const labels = {
+        prepare: "Preparar copia",
+        apply: t.apply_started ? "Reanudar mi parte" : "Aplicar mi parte",
+        cancel: "Cancelar robo",
+        refresh: "Comprobar estado",
+      };
+      for (const kind of ["prepare", "apply", "cancel", "refresh"]) {
+        if (!actions[kind]) continue;
+        const button = document.createElement("button");
+        button.textContent = labels[kind];
+        button.dataset.kind = kind;
+        button.disabled =
+          !enabled ||
+          write.busy ||
+          (["prepare", "apply"].includes(kind) && !closed);
+        button.onclick = () =>
+          action(() =>
+            window.launcher.transfer(kind, t.authorization_id, closed),
+          );
+        card.append(button);
+      }
+      return card;
+    }),
+  );
+}
+$("transfer-emulator-closed").onchange = () =>
+  lastState && renderTransfers(lastState);
+
 // Quick items: ONE text state per item, shared by keyboard, + and −.
 const quantities = { rare_candy: "1", heart_scale: "1" };
 const gameNames = {
@@ -377,7 +516,7 @@ function renderQuick(state) {
                 : !view
                   ? "Pulsa «Leer objetos de la partida» para ver tus cantidades."
                   : !enabled
-                    ? "Operación bloqueada: añadir objetos aún no está habilitado (falta una regla aprobada de la Liga). Puedes consultar tus cantidades."
+                    ? "Operación bloqueada: añadir objetos se activará tras la certificación real con Lime3DS. Puedes consultar tus cantidades."
                     : "Listo para añadir.",
   );
   for (const row of document.querySelectorAll(".quick-item")) {
@@ -503,6 +642,7 @@ async function poll() {
     render(state);
     lastState = state;
     renderQuick(state);
+    renderTransfers(state);
     renderEmulator(state);
     void renderUpdate();
   } catch {

@@ -56,7 +56,18 @@ class TransferAssignmentWire(_Wire):
     authorization_id: str = Field(pattern=UUID_TEXT)
     side: Literal["source", "destination"]
     status: TransferState
+    claimed: bool = False
+    apply_started: bool = False
+    verified: bool = False
     intent: dict | None = None
+
+    def location(self):
+        """Own-side box/slot for display only; never the Pokemon bytes."""
+        mutation = (self.intent or {}).get("mutation") or {}
+        box, slot = mutation.get("box_index"), mutation.get("slot_index")
+        if type(box) is int and type(slot) is int and 0 <= box < 7 and 0 <= slot < 30:
+            return {"box": box + 1, "slot": slot + 1}
+        return None
 
 
 class TransferAssignmentsWire(_Wire):

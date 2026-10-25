@@ -24,6 +24,13 @@ contextBridge.exposeInMainWorld("launcher", {
       quantity,
       emulatorClosed,
     ),
+  transfer: (kind, authorizationId, emulatorClosed) =>
+    ipcRenderer.invoke(
+      "launcher:transfer",
+      kind,
+      authorizationId,
+      emulatorClosed,
+    ),
   discoverSaves: () => ipcRenderer.invoke("launcher:discover"),
   selectDiscovered: (savePath) =>
     ipcRenderer.invoke("launcher:select-discovered", savePath),

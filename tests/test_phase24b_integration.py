@@ -290,6 +290,10 @@ class RuntimeTests(unittest.TestCase):
                     "side": "destination",
                     "status": "PREPARING",
                     "planned": True,
+                    "claimed": False,
+                    "apply_started": False,
+                    "verified": False,
+                    "location": None,
                 }
             ],
         )
