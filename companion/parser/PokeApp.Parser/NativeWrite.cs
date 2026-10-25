@@ -46,6 +46,8 @@ public static class NativeWrite
             if (Integer(root, "schema_version") != 1) throw new Rejection("INVALID_REQUEST");
             if (Text(root.GetProperty("intent").GetProperty("mutation"), "kind") == "revive")
                 return NativeRevive.Execute(root, verify);
+            if (Text(root.GetProperty("intent").GetProperty("mutation"), "kind") is "transfer_remove" or "transfer_insert")
+                return NativeTransfer.Execute(root, verify);
             var intent = ParseIntent(root.GetProperty("intent"));
             var original = Bytes(root, "source_base64");
             var source = Validate(original);

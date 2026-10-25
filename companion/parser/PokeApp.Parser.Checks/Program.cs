@@ -3,6 +3,18 @@ using PokeApp.Parser;
 using System.Text.Json;
 using static System.Buffers.Binary.BinaryPrimitives;
 
+if (args.Length == 2 && args[0] == "--transfer-compatibility")
+{
+    TransferChecks.Compatibility(args[1]);
+    return;
+}
+
+if (args.Length == 3 && args[0] == "--transfer-checks")
+{
+    TransferChecks.Run(args[1], args[2]);
+    return;
+}
+
 if (args.Length == 3 && args[0] == "--transport-forgeries")
 {
     TransportForgeries.Run(args[1], args[2]);

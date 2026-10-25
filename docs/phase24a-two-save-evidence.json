@@ -1,0 +1,224 @@
+{
+  "date": "2026-10-25",
+  "entry": "3f5d1ea92af37457baa4dced819a3c86c42a11cc",
+  "phase23d_gate": "PASS_AT_ENTRY",
+  "status": "PHASE24_PARTIAL",
+  "classification": {
+    "two_save_protocol": "PARTIAL",
+    "native_transfer": "PARTIAL: eight same-title boxed workflows passed",
+    "server_verification": "PARTIAL: both artifacts independently verified, no competitive identity promotion",
+    "recovery": "PARTIAL: restart/replay/backup/conflict handling passed; coordinated rollback not implemented",
+    "lime3ds_certification": "PENDING"
+  },
+  "remote_actions": 0,
+  "production_writes_enabled": false,
+  "native": {
+    "status": "PASS",
+    "checks": 168,
+    "games": [
+      {
+        "game": "X",
+        "source_sha256": "ba0a9a3eddb2d38ef374cc6233b1e654d0f8d8c0ada5125185845f30087b9926",
+        "destination_sha256": "dbb4a3e3c8a4299c129f39be79a9cbb77b6f73ce50a7cce796307da999be3e9c",
+        "status": "PASS"
+      },
+      {
+        "game": "Y",
+        "source_sha256": "bbd1b3f9a7b419847b730d038385e31ade2d3135a8b4af5dfda0711210bd0bb5",
+        "destination_sha256": "7cf6a8e431986f535f407826d698eaa513b061a322b23ae377b084e54fe9735e",
+        "status": "PASS"
+      },
+      {
+        "game": "OR",
+        "source_sha256": "0935af2109986f8681c347164c661ef418d746f3e8614bda597958cb78890142",
+        "destination_sha256": "ec3218e6512ff98e59ba751e56173c39f9e743df24881a6ea42f3a1ccd8eebad",
+        "status": "PASS"
+      },
+      {
+        "game": "AS",
+        "source_sha256": "1745b51602811e72a6e977c8bd015f62f3d1bcebe6d153d3fa01ec1bfa5fbb3d",
+        "destination_sha256": "5fc509c1b3fc89e25bbdcdf04fb13d855269cf6daa5d171f823710e5764d3197",
+        "status": "PASS"
+      },
+      {
+        "game": "SN",
+        "source_sha256": "25cedd022a7a3c9c5c8b098449a50459602dbf716e63c4337399fe79048e1320",
+        "destination_sha256": "98c50e10ae1ebcb719396c81f453566b457be52c45469be0309cb9512442a523",
+        "status": "PASS"
+      },
+      {
+        "game": "MN",
+        "source_sha256": "6da69245198e3f8c2b4c1ea84a265b9a2a3c28594ba5c51777b9a418adde5f98",
+        "destination_sha256": "cc9adfee5ba0fadc34e1f1aa373a88f53b2987680c72c9d68b8b4eb56025acd4",
+        "status": "PASS"
+      },
+      {
+        "game": "US",
+        "source_sha256": "74abe64549470c6ca9febdb62fcf914428ee22e36678ff3cc93b88855811d5c8",
+        "destination_sha256": "9ef002016c7daae5c2ee00e4923f25e7bc7d8c1270258475bac622a6e1c1eb93",
+        "status": "PASS"
+      },
+      {
+        "game": "UM",
+        "source_sha256": "8d27b49737623fe3c2a63244149743793f33cdf24a60b87443e611bd467d363b",
+        "destination_sha256": "c9e93cb04b523d226505c014a5a1937ff67a49fe70590d13a648b7bd1c23777c",
+        "status": "PASS"
+      }
+    ]
+  },
+  "additional_native_cross_title_rejections": 8,
+  "python": {
+    "unique_pass": 46,
+    "journal_and_affected_regressions": 31,
+    "schema": 15,
+    "new_journal_tests": 10,
+    "skipped": 0,
+    "final_combined_subsets": true
+  },
+  "pg_eight_games": {
+    "status": "PASS",
+    "checks": [
+      "wrong owner and persisted shield rejected",
+      "eight native/PG/Launcher paired workflows, both backups, no false completion",
+      "restricted issuer and paired-table grants",
+      "foreign OT remains unproven, ownership/consumption deliberately gated",
+      "reserved current-save pointer cannot advance"
+    ],
+    "games": [
+      {
+        "game": "X",
+        "status": "BOTH_VERIFIED_PENDING_IDENTITY",
+        "originals_preserved": true,
+        "entitlement_consumed": false
+      },
+      {
+        "game": "Y",
+        "status": "BOTH_VERIFIED_PENDING_IDENTITY",
+        "originals_preserved": true,
+        "entitlement_consumed": false
+      },
+      {
+        "game": "OR",
+        "status": "BOTH_VERIFIED_PENDING_IDENTITY",
+        "originals_preserved": true,
+        "entitlement_consumed": false
+      },
+      {
+        "game": "AS",
+        "status": "BOTH_VERIFIED_PENDING_IDENTITY",
+        "originals_preserved": true,
+        "entitlement_consumed": false
+      },
+      {
+        "game": "SN",
+        "status": "BOTH_VERIFIED_PENDING_IDENTITY",
+        "originals_preserved": true,
+        "entitlement_consumed": false
+      },
+      {
+        "game": "MN",
+        "status": "BOTH_VERIFIED_PENDING_IDENTITY",
+        "originals_preserved": true,
+        "entitlement_consumed": false
+      },
+      {
+        "game": "US",
+        "status": "BOTH_VERIFIED_PENDING_IDENTITY",
+        "originals_preserved": true,
+        "entitlement_consumed": false
+      },
+      {
+        "game": "UM",
+        "status": "BOTH_VERIFIED_PENDING_IDENTITY",
+        "originals_preserved": true,
+        "entitlement_consumed": false
+      }
+    ],
+    "cluster": "C:\\Users\\Antonio\\AppData\\Local\\Temp\\pokeapp-accounts-pg-24mks1cs",
+    "cleanup": "owned databases dropped; cluster stopped"
+  },
+  "pg_final_targeted": {
+    "status": "PASS",
+    "checks": [
+      "wrong owner and persisted shield rejected",
+      "concurrent identical reservation one authority",
+      "second theft, foreign participant, later protection rejected",
+      "disabled peer prevents application without changing files",
+      "manipulated artifact cannot issue proof or release recipient",
+      "1 native/PG/Launcher paired workflows, both backups, no false completion",
+      "restricted issuer and paired-table grants",
+      "foreign OT remains unproven, ownership/consumption deliberately gated",
+      "reserved current-save pointer cannot advance",
+      "worker exact function allowlist and no one-leg completion",
+      "disposable reset removes new adjunct and preserves Shadow schema"
+    ],
+    "games": [
+      {
+        "game": "X",
+        "status": "BOTH_VERIFIED_PENDING_IDENTITY",
+        "originals_preserved": true,
+        "entitlement_consumed": false
+      }
+    ],
+    "cluster": "C:\\Users\\Antonio\\AppData\\Local\\Temp\\pokeapp-accounts-pg-iujjvrkn",
+    "cleanup": "owned databases dropped; cluster stopped"
+  },
+  "parity": {
+    "schema_lines": 17077,
+    "preserved_tables": 65
+  },
+  "evidence_boundaries": [
+    "Derived copies of retained public Gen6/7 fixtures; no owner files",
+    "Mock immutable object transport + SignedArtifactReader, no hosted Auth/Storage/HTTP route claim",
+    "Original local journals reused; no production IPC capability",
+    "Artifact proof does not attest ongoing use of selected pathname by player",
+    "Both native proof rows do NOT consume, switch owner, register cloud saves or issue APPLIED_VERIFIED",
+    "Win11/local NTFS inherited host; no real emulator, OS crash, power-loss, Windows10 or new installation certification"
+  ],
+  "checks": {
+    "build": "PASS pinned native Release --no-restore",
+    "python_format": "PASS changed Python product/new test/harness",
+    "ruff": "PASS full new Python; targeted existing changed modules",
+    "compile": "PASS",
+    "diff": "PASS",
+    "csharp_format": "NOT RUN: installed SDK lacks dotnet-format; native build succeeded"
+  },
+  "not_run": [
+    "historic full suites",
+    "web/React/browser unchanged",
+    "Launcher package",
+    "remote migration or deployment",
+    "real emulator/owner randomized Y"
+  ],
+  "limitations": [
+    "party transfer not qualified",
+    "cross-title conversion not qualified",
+    "foreign OT requires proof-bound identity provenance and atomic registration of both current saves",
+    "competitive finalization/exactly-once consumption intentionally unavailable",
+    "coordinated abort/rollback/release of reservations unavailable",
+    "private engineering seams only, no public command/transport activation"
+  ],
+  "private_evidence": "C:\\Users\\Antonio\\AppData\\Local\\PokeApp-migration-evidence\\phase24a\\20261025",
+  "source_fingerprints": {
+    "app/application/transfer_transport.py": "e21e5abbd3373ba6b78fbd27b93bf81f537e689d6c8089abe1ab8fb6e24a2e9c",
+    "app/application/transfer_verification.py": "8e09fb361c8ca80bfb3810035968242cc54f579558a9f1d2dea67d6499ee4554",
+    "app/repositories/supabase/transfer.py": "dd4f44548f4686030bb6a581aa606d7661ea16a891439e7d4598901f94d30bd2",
+    "app/repositories/transfer_verifier_pg.py": "8ff6314e2f210d36e15182253f8a3d23580c0a1e1e47e61dc5b26cd33daa62c4",
+    "app/launcher/transfer.py": "2d929474502993c40f4b851b5195da8b7b77c2b531afa5f8a0cc4dbacb704944",
+    "app/launcher/write_engine.py": "8c58ee40b4d675c84b07e37f83859975c2ca197c9ac5ef3fb1825898d33d84d8",
+    "app/launcher/write_control.py": "c0751da730f095fd13caaade55fb9783076950e84cbfb262e4be72fb819ba50b",
+    "app/save_parser/writer.py": "a4b051bdd3c1b3a91c054ac37e56824d6d418b037769b03be2351e12873ea899",
+    "companion/parser/PokeApp.Parser/NativeTransfer.cs": "1721646f2ca340ac467ede502a8fcf084ac32771db74e06af50759bfe78a93fc",
+    "companion/parser/PokeApp.Parser/NativeWrite.cs": "486315492f337747578ed21b84e1b6f53d8030317f80130d7956741bfb48ac98",
+    "companion/parser/PokeApp.Parser/Program.cs": "b17d34ecd79a9648eb4c87ebe8bcd9ff3ddd935c571724bbb09e4631d7f6d964",
+    "companion/parser/PokeApp.Parser.Checks/TransferChecks.cs": "e64032887bd9e4d4dce3fa9eccfe7a4b4dd5a8c3f7aefa7b0326df41b05ca0ed",
+    "companion/parser/PokeApp.Parser.Checks/Program.cs": "3b753b2a54f2390b6d35d241e9a79571434ae016cd795dedb4f955a12315b98c",
+    "supabase/v2/migrations/057_two_save_transfer_reservations.sql": "ae1061aeae62ce8250877d2dd036e21fa22a4fb461d2892379536658eaa92066",
+    "supabase/v2/bootstrap.sql": "c096e4d0911142616d1219efc8eae069c826f5444d9df3dd2f8c10f98e06efbf",
+    "supabase/v2/reset_dev.sql": "87fde7a897118decb674867ecde15769e7da4c0cc6a4f42315b578442571f88e",
+    "tests/test_phase24_transfer.py": "ff023a46931fd3801e8747555c6d1a3529347d120de0cb344504920d36ccded0",
+    "tests/test_supabase_v2_schema.py": "0c0713c0ee1f135aec2418ad575e3c7ca6295dd14d1a6bbeede4225fbcc68751",
+    "tools/validate_phase24_local.py": "b583faab1669a34471fd132e6a7f63afcdf23510e25f71f93362d35e7c417f09",
+    "tools/generate_supabase_v2_bootstrap.py": "5ebb7fd45ef2825a744b5438c1797b9833245be6138ba9f8edfc399bb77c4d20"
+  }
+}

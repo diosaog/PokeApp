@@ -148,6 +148,13 @@ class EngineeringCapability:
 
 
 @dataclass(frozen=True)
+class PairedApplyPermit:
+    """In-process engineering permit after coordinated server begin; not an IPC DTO."""
+
+    operation_id: str
+
+
+@dataclass(frozen=True)
 class WriteReceipt:
     operation_id: str
     status: str
@@ -294,7 +301,8 @@ class LocalWriteEngine:
         capability = self.capability
         if (
             type(capability) is not EngineeringCapability
-            or intent.mutation.get("kind") not in ("test_marking", "revive")
+            or intent.mutation.get("kind")
+            not in ("test_marking", "revive", "transfer_remove", "transfer_insert")
             or target.path == capability.fixture_root
             or not target.path.is_relative_to(capability.fixture_root)
         ):
@@ -431,6 +439,9 @@ class LocalWriteEngine:
                         "status": record["status"],
                         "can_restore": verified
                         and role == "original"
+                        and not record["intent"]["mutation"]["kind"].startswith(
+                            "transfer_"
+                        )
                         and record.get("protocol") == "no_replace_v1"
                         and record.get("commit_started", False)
                         and type(self.capability) is EngineeringCapability,
@@ -663,9 +674,18 @@ class LocalWriteEngine:
 
     @_serialized
     def confirm(
-        self, operation_id: str, *, closed_emulator_confirmed: bool
+        self,
+        operation_id: str,
+        *,
+        closed_emulator_confirmed: bool,
+        paired_permit: PairedApplyPermit | None = None,
     ) -> WriteReceipt:
         record = self._load(operation_id)
+        if record["intent"]["mutation"]["kind"].startswith("transfer_") and (
+            type(paired_permit) is not PairedApplyPermit
+            or paired_permit.operation_id != operation_id
+        ):
+            raise WriteSafetyError("TRANSFER_COORDINATED_APPLICATION_REQUIRED")
         if record.get("mode") == "export":
             return self._confirm_export(
                 record, closed_emulator_confirmed=closed_emulator_confirmed
@@ -1105,6 +1125,8 @@ class LocalWriteEngine:
         self, operation_id: str, *, closed_emulator_confirmed: bool
     ) -> WriteReceipt:
         record = self._load(operation_id)
+        if record["intent"]["mutation"]["kind"].startswith("transfer_"):
+            raise WriteSafetyError("TRANSFER_COORDINATED_RECOVERY_REQUIRED")
         if record.get("protocol") != "no_replace_v1":
             raise WriteSafetyError("LEGACY_WRITE_PROTOCOL_DISABLED")
         return self._restore_handoff(

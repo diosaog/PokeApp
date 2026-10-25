@@ -5,6 +5,21 @@
 
 begin;
 
+-- Local paired transfer adjunct; no remote cleanup.
+drop trigger if exists transfer_no_save_advance on public.season_players;
+drop trigger if exists transfer_no_identity_advance on public.pokemon_identity_revisions;
+drop trigger if exists transfer_no_redemption on public.redemptions;
+drop trigger if exists transfer_no_other_physical_use on public.item_use_authorizations;
+drop function if exists public.guard_transfer_reservation();
+drop function if exists public.transfer_verifier(jsonb);
+drop function if exists public.api_transfer_leg(jsonb);
+drop function if exists public.api_prepare_transfer(jsonb);
+drop function if exists public.transfer_state(uuid);
+drop function if exists public.transfer_context(uuid);
+drop table if exists public.item_use_transfer_legs;
+drop table if exists public.item_use_transfers;
+
+
 -- Private verifier queue; only this disposable reset, never a production cleanup.
 drop function if exists public.item_verifier_job(jsonb);
 drop function if exists public.item_verifier_context(uuid);

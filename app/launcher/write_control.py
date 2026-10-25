@@ -1,5 +1,7 @@
 """Local confirmation/controller seam. No remote intent or entitlement intake."""
 
+import json
+import sqlite3
 import threading
 from contextlib import contextmanager
 from pathlib import Path
@@ -36,10 +38,37 @@ class LocalWriteController:
             ):  # journal uncertainty blocks sync, never implies no intent
                 self.gate.recovery_required = True
                 self._error = "RECOVERY_REQUIRED"
+            if self._transfer_notice() is not None:
+                self.gate.recovery_required = True
+
+    def _transfer_notice(self):
+        if self.engine is None:
+            return None
+        from app.launcher.transfer import TRANSFER_MESSAGES
+
+        try:
+            with self.engine._db() as db:
+                if not db.execute(
+                    "SELECT 1 FROM sqlite_master WHERE type='table' AND name='transfer_bindings'"
+                ).fetchone():
+                    return None
+                rows = db.execute("SELECT record FROM transfer_bindings").fetchall()
+            for row in rows:
+                record = json.loads(row[0])
+                if record["binding"]["path"] == str(Path(self.selected()).absolute()):
+                    return TRANSFER_MESSAGES.get(
+                        record["state"], TRANSFER_MESSAGES["RECOVERY_REQUIRED"]
+                    )
+            if rows:
+                return TRANSFER_MESSAGES["RECOVERY_REQUIRED"]
+        except (sqlite3.Error, ValueError, TypeError, KeyError, OSError):
+            return TRANSFER_MESSAGES["RECOVERY_REQUIRED"]
+        return None
 
     def state(self):
         with self._lock:
             receipt = self._receipt
+            transfer_notice = self._transfer_notice()
             state = receipt.status if receipt else "IDLE"
             if self.gate.recovery_required:
                 state = "RECOVERY_REQUIRED"
@@ -48,6 +77,7 @@ class LocalWriteController:
                 "operation_id": receipt.operation_id if receipt else None,
                 "game": receipt.game if receipt else None,
                 "can_confirm": not self._busy
+                and transfer_notice is None
                 and state == "AWAITING_CONFIRMATION"
                 and type(getattr(self.engine, "capability", None))
                 is EngineeringCapability,
@@ -76,7 +106,7 @@ class LocalWriteController:
                 # Exact private errors, fingerprints, paths and parameters stay local.
                 "message": "Comprobando la operación local. Mantén el juego cerrado."
                 if self._busy
-                else self._message(state),
+                else transfer_notice or self._message(state),
             }
 
     @staticmethod

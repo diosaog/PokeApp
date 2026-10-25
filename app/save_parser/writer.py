@@ -262,6 +262,43 @@ class PkhexProcessWriter:
         ):
             raise NativeWriteError("VERIFICATION_FAILED")
 
+    def plan_transfer(
+        self,
+        source,
+        destination,
+        *,
+        pair_id,
+        box_index,
+        slot_index,
+        target_pid,
+        target_ec,
+    ):
+        """Private planner seam; never expose peer bytes or this plan as authority."""
+        request = {
+            "schema_version": 1,
+            "source_base64": base64.b64encode(source).decode("ascii"),
+            "destination_base64": base64.b64encode(destination).decode("ascii"),
+            "pair_id": pair_id,
+            "box_index": box_index,
+            "slot_index": slot_index,
+            "target_pid": target_pid,
+            "target_ec": target_ec,
+        }
+        response = self._run("--plan-transfer", request)
+        if response["status"] != "planned" or response["source_sha256"] != _digest(
+            source
+        ):
+            raise NativeWriteError("VERIFICATION_FAILED")
+        plans = {
+            side: WriteIntent.create(**response["semantic_diff"][side])
+            for side in ("source", "destination")
+        }
+        if plans["source"].expected_sha256 != _digest(source) or plans[
+            "destination"
+        ].expected_sha256 != _digest(destination):
+            raise NativeWriteError("VERIFICATION_FAILED")
+        return plans
+
     def prepare(self, source: bytes, intent: WriteIntent) -> PreparedNative:
         request = self._input(source, intent)
         response = self._run("--prepare-write", request)

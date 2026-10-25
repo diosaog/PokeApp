@@ -65,6 +65,7 @@ EXPECTED_MIGRATIONS = [
     "054_item_use_authorizations.sql",
     "055_native_identity_evidence_scope.sql",
     "056_item_use_verifier_transport.sql",
+    "057_two_save_transfer_reservations.sql",
 ]
 
 FORBIDDEN_TOKENS = [

@@ -1,5 +1,10 @@
 # Phase 22 - safe native save writes
 
+Owner steering2026-10-25: **Lime3DS is the primary future real-certification
+emulator**. Existing Azahar inspection/preparation and Citra/Lime detection remain;
+none grants certified lifecycle control. Personal randomized Y is reserved for
+that future gate and was not accessed by [Phase24A](phase24-live.md).
+
 ## Current checkpoint - independent 22E private candidate, 2026-10-23
 
 **PRIVATE CANDIDATE VALIDATED. Phase22 PARTIAL; production physical writes OFF.**
