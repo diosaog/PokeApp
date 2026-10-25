@@ -1,0 +1,148 @@
+{
+  "date": "2026-10-25",
+  "entry": "cb8cbbc773a4f862dc7144714860ea52963b0d11",
+  "status": "23D_DONE_LOCAL_READY_FOR_RESTRICTED_ACCEPTANCE",
+  "phase23": "PARTIAL_NOT_DEPLOYED",
+  "physical_certification": "PENDING_PHASE22",
+  "production_actions": 0,
+  "remote_state": "NOT_QUERIED_UNCHANGED_BY_THIS_TASK",
+  "migration": "056_item_use_verifier_transport LOCAL_ONLY; 054/055 also not deployed",
+  "python": {
+    "unique_pass": 106,
+    "combined_final_subsets": true,
+    "modules": {
+      "test_api_frontend_reads": 25,
+      "test_api_redemptions": 20,
+      "test_api_item_use": 11,
+      "test_supabase_v2_schema": 15,
+      "test_item_use_verification": 15,
+      "test_phase23_launcher": 8,
+      "test_item_use_transport": 12
+    }
+  },
+  "react": {
+    "pass": 14,
+    "file": "web/src/features/economy.test.tsx"
+  },
+  "pg": {
+    "status": "PASS",
+    "checks": [
+      "real_HTTP_PG_worker_native_exactly_once_and_immutable_historical_receipt",
+      "upload_interruptions_and_lost_verification_ack_reconcile_without_consumption",
+      "proof_insert_failure_rolls_back_and_expired_lease_requeues_same_bytes",
+      "tamper_correct_hash_wrong_transform_other_save_and_extra_pkm_denied",
+      "trainer_season_claim_hash_binding_and_expiry_fail_closed",
+      "concurrent_worker_lease_fencing_and_stale_source_denial",
+      "real_private_role_grants_no_browser_API_or_worker_direct_proof_DML",
+      "real_Launcher_restart_lost_upload_no_reapplication_backup_and_one_consumption",
+      "056_upgrade_bootstrap_catalog_parity_previous_rows_preserved"
+    ],
+    "cluster": "%TEMP%\\pokeapp-accounts-pg-2e1txhqq",
+    "parity": {
+      "schema_lines": 16643,
+      "preserved_tables": 64
+    },
+    "cleanup": "owned_database_dropped_cluster_stopped"
+  },
+  "pg_additional": {
+    "status": "PASS",
+    "checks": [
+      "native_valid_extra_money_and_IV_correct_hash_rejected_through_transport",
+      "SQL_finish_CAS_rechecks_authority_after_native_verification",
+      "restrictive_Storage_policy_overrides_other_permissive_browser_read"
+    ],
+    "cluster": "%TEMP%\\pokeapp-accounts-pg-cryei8gh",
+    "cleanup": "owned_database_dropped_cluster_stopped"
+  },
+  "worker_privileges": {
+    "cluster": "%TEMP%\\pokeapp-accounts-pg-6l9smaob",
+    "callable_security_definers": [
+      "item_verifier_job(jsonb)"
+    ],
+    "cleanup": "owned_database_dropped_cluster_stopped"
+  },
+  "retained_23c": {
+    "native_checks": 192,
+    "games": [
+      "X",
+      "Y",
+      "OR",
+      "AS",
+      "SN",
+      "MN",
+      "US",
+      "UM"
+    ],
+    "unchanged_contract_fingerprints": {
+      "app/application/item_use_verification.py": true,
+      "app/launcher/write_engine.py": true,
+      "app/launcher/write_control.py": true,
+      "companion/parser/PokeApp.Parser/NativeWrite.cs": true,
+      "companion/parser/PokeApp.Parser/NativeRevive.cs": true,
+      "companion/parser/PokeApp.Parser.Checks/ReviveChecks.cs": true,
+      "supabase/v2/migrations/055_native_identity_evidence_scope.sql": true
+    }
+  },
+  "build": {
+    "typescript_vite": "PASS",
+    "openapi": "PASS",
+    "locked_native_test_helper": "PASS",
+    "new_python_ruff": "PASS",
+    "changed_python_critical_ruff": "PASS",
+    "syntax_diff": "PASS",
+    "frontend_format": "PASS",
+    "worker_default": "DISABLED",
+    "worker_container": "NOT_BUILT_DOCKER_UNAVAILABLE"
+  },
+  "security": {
+    "API_and_browser_cannot_issue_proof": true,
+    "worker_direct_proof_DML": false,
+    "lease_CAS_retention": "PASS",
+    "historical_receipts_unchanged": "PASS",
+    "production_mutation_registry": "EMPTY"
+  },
+  "limits": [
+    "Synthetic Auth; emulated Storage byte transport; real loopback PostgreSQL and application",
+    "New positive native+Launcher journey X; eight-game native contract retained unchanged",
+    "No hosted/container/Azahar/gameplay/platform/power-loss acceptance",
+    "Proof validates supplied artifact, not continuous player machine use",
+    "Signed URL refresh after expired lease does not reapply physical effect",
+    "Original/results retained; no automatic deletion; privileged operator deletion outside artifact guarantee"
+  ],
+  "fingerprint_format": "SHA256 UTF8 normalized LF",
+  "fingerprints": {
+    "app/api/config.py": "e4f385fa25ae57a7fd92b24e613411367a297b05d35b29c6d202b0f0f16b9478",
+    "app/api/dependencies.py": "bcc5cf19e9659e01688307df8a7b1c51881df572b7481b6bddfaabb8d776d1eb",
+    "app/api/read_models.py": "0ed07868ac76c0a8a18347eaf5a2a90019e3e653cc75ad0371d9e3daf516e027",
+    "app/api/routes/item_use.py": "4a3ea318061c4afc7f98b645bd3516d06a85dbebf221f4eb653c451db969d00a",
+    "app/api/routes/redemptions.py": "36764e0305df414cea8a78839125c136b9ca1c4772c5258ffc2a28e56e449a77",
+    "app/api/schemas.py": "8c61ea78350fbf6f327da3edb4daa38e8308c7a53dbad3599de405fe2920f314",
+    "app/application/frontend_reads.py": "f37045cc4d66d9826571ee25ac3e0bcdc58f30031ac7292a8d6818d190c35080",
+    "app/launcher/backend.py": "7ca481550214c457f03c1b3445f50769a9f303457cf39f05cd3d2192df8ac7fa",
+    "app/launcher/item_use.py": "d09dd385465fd4075cee0774c46061738e52b4a23a9768604c3c045ce6d25bab",
+    "companion/parser/PokeApp.Parser.Checks/Program.cs": "d759e3226cf4b04abc7d680883db1cd763fbccf402986b94f53b9ff82d00fff3",
+    "supabase/v2/bootstrap.sql": "b86f5b85a2cb23e31525d7fbbc67c0abab9af52606cde73b7eac58e50197b09f",
+    "supabase/v2/reset_dev.sql": "7635ebefdaa3e19343e47ac9d1b775cf89c49dc9275584d5e8beb67be8e9cec4",
+    "tests/test_api_frontend_reads.py": "9cf4c397af2bd432911ef27efb142912e57f2f679b3a4584c92845f9691212f1",
+    "tests/test_api_redemptions.py": "2da959372f32c3b141c5a4132742b4f2a655c49118fa79d0af681e260149e9a0",
+    "tests/test_phase23_launcher.py": "dde18989ecfdde134f8bc138aba5cd3e634da3a74614d67c064dae34f754f7e3",
+    "tests/test_supabase_v2_schema.py": "d498b0df4f083b2a1b7799693947ccbd8e52c563971852cc1ec3c64cbdd45096",
+    "tools/generate_supabase_v2_bootstrap.py": "9b52709fb61911dc7474f8220c3306fdcb7c99bb4c93e6d43b868b55597ef631",
+    "web/src/api/schema.d.ts": "cff333bea4e3da4b7bc9fdffd9480850b56fee7a6ceae6fd0472928daeb1b93b",
+    "web/src/features/economy.test.tsx": "bcc66ea1ac59771ccaa11fa03d0d1d0b30cfdffd7f75a5b74f7e18cc092550f5",
+    "web/src/features/inventory.tsx": "cccab5c99a4c1a89b1657af1cd309251d5fc517d872c04d1b10aabb6036dca5d",
+    "app/application/item_use_transport.py": "5c923fa00378f8711ed31e3b8df87ebbcbd41fe262f083be1edb8615abbc233e",
+    "app/application/item_use_worker.py": "20caca6b29561a491085eb54d3908e79fe45f47a17a6de304b75dae2c0e8791e",
+    "app/domain/item_use_status.py": "3fafb5cb1b01cbead58e6dc4a9255f42b1f3044b0f5ed3059211083270bbccee",
+    "app/repositories/item_verifier_pg.py": "3af133f2b9d60de0170a7257fae5bfa8f71b380db31dbb58b14c7bf37c57fdd2",
+    "app/repositories/supabase/item_use_transport.py": "529ea478d8eb05a6a73d903eaf17ba3dd0cff023122edcac08682d4496a231ef",
+    "tests/test_item_use_transport.py": "873b2c9cf24e20b1765d30f064f8f7390d0e9c07da42e9096268f04143fbd8ee",
+    "tools/run_item_use_verifier.py": "616358c2e558dde1c3b6675f7ca56f3b3962928fc4396fcafe2e07abdee0b98d",
+    "tools/validate_phase23d_local.py": "4fdacc882528b63445f96e63543e2b3d1b218dc7824ccee2425d65b1b0b8fbe4",
+    "companion/parser/PokeApp.Parser.Checks/TransportForgeries.cs": "8fee3ac4091dae55a9f2c98514c0302dd541ec1768bdaaf3ea65faad7af0f679",
+    "deploy/Dockerfile.item-verifier": "cfe240527d4af819f02f160d3ac0719cd081b6270b1c3252cd30c3b666395a78",
+    "deploy/requirements-item-verifier.txt": "bb91bf1e40ca41e8e40b413b06053089200024ce8b4f90dbe6410b947a9d1769",
+    "requirements-verifier.txt": "43a6a0f36ccbb8d13709e956e28158c23f2a73dc26f17523c07b9a14a5fc798a",
+    "supabase/v2/migrations/056_item_use_verifier_transport.sql": "7b5d9619562e09828dee3313fe514eb99a8ffb71eab3457a4d4b2514fe965e38"
+  }
+}

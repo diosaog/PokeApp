@@ -1,0 +1,2 @@
+# Private worker only; deliberately absent from public API's environment.
+psycopg[binary]==3.3.6

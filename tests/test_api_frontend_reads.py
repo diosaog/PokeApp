@@ -512,6 +512,22 @@ class FrontendReadTests(unittest.TestCase):
         )
         self.store.observed_entities_for_locks.assert_called_once()
 
+    def test_inventory_current_physical_state_is_scoped_and_separate_from_history(self):
+        item, purchase, foreign = [str(uuid4()) for _ in range(3)]
+        self.store.data['shop_items'] = [dict(id=item, code='revivir_pokemon', name='Revivir')]
+        self.store.data['purchases'] = [dict(id=purchase, shop_item_id=item, season_id=SID,
+            trainer_id=TRAINER_ID, status='used', total_price=12, purchased_at='2026-10-25T10:00:00Z')]
+        self.store.data['item_use_authorizations'] = [
+            dict(purchase_id=purchase, season_id=SID, trainer_id=TRAINER_ID, status='APPLIED_VERIFIED'),
+            dict(purchase_id=foreign, season_id=SID, trainer_id=str(uuid4()), status='RECOVERY_REQUIRED', claim_id='PRIVATE')]
+        result = self.get(f'seasons/{SID}/inventory')
+        self.assertEqual(result.status_code,200,result.text)
+        self.assertEqual(result.json()['purchases'][0]['physical_state'],'APPLIED_VERIFIED')
+        self.assertNotIn('PRIVATE',result.text)
+        self.assertEqual(sum(c[0]=='item_use_authorizations' for c in self.store.calls),1)
+        self.store.data['item_use_authorizations'] = []
+        self.assertEqual(self.get(f'seasons/{SID}/inventory').json()['purchases'][0]['physical_state'],'LEGACY_PENDING')
+
     def test_inventory_own_gift_visible_without_enabling_catalog_offer(self):
         item, owned, foreign = [str(uuid4()) for _ in range(3)]
         base = dict(

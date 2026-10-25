@@ -104,14 +104,12 @@ it.each(Object.entries(itemUseLabels))(
           item_code: "revivir_pokemon",
           acquisition_type: "paid",
           status: "pending",
+          physical_state: status,
           total_price: 12,
           purchased_at: "2026-10-25T10:00:00Z",
         },
       ],
     };
-    mocks.itemUses.items = [
-      { purchase_id: "physical", status } as Model<"ItemUseResponse">,
-    ];
     render(<Inventory />);
     expect(screen.getByText(label)).toBeInTheDocument();
     expect(

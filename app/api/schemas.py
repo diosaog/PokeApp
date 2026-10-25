@@ -102,6 +102,8 @@ class RedemptionBody(BaseModel):
 
 
 class RedemptionResponse(BaseModel):
+    # Additive current projection; physical_effect_status remains the original snapshot.
+    physical_state: str | None = None
     redemption_id: UUID
     purchase_id: UUID
     season_id: UUID
@@ -151,6 +153,7 @@ class ItemUseCompleteBody(ItemUseClaimBody):
 
 
 class ItemUseResponse(BaseModel):
+    physical_state: str | None = None
     id: UUID
     operation_id: str
     purchase_id: UUID
@@ -180,6 +183,14 @@ class ItemUseResponse(BaseModel):
 class ItemUseListResponse(BaseModel):
     items: list[ItemUseResponse]
     physical_application_enabled: Literal[False] = False
+
+
+class ItemArtifactResponse(BaseModel):
+    authorization_id: UUID
+    status: Literal[
+        "NOT_SUBMITTED", "UPLOADING", "QUEUED", "VERIFYING", "VERIFIED", "REJECTED", "EXPIRED", "RETRY_REQUIRED"
+    ]
+    result_sha256: str | None = None
 
 
 class TeamLockResponse(BaseModel):

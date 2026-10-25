@@ -7,11 +7,31 @@ test_marking. Neither a local receipt nor this capability is server evidence.
 
 import json
 from datetime import UTC, datetime
+from hashlib import sha256
 from pathlib import Path
-from uuid import uuid4
+from uuid import UUID, uuid4
 
 from app.launcher.write_engine import EngineeringCapability
 from app.launcher.write_files import WriteSafetyError
+
+
+class AuthenticatedItemResultTransport:
+    """Untrusted byte transport with existing user JWT; never grants capability."""
+
+    def __init__(self, session):
+        self.session = session
+
+    def _path(self, aid, sid, tid, claim):
+        aid, sid, tid, claim = (str(UUID(value)) for value in (aid, sid, tid, claim))
+        if self.session.principal().trainer_id != tid:
+            raise WriteSafetyError("ITEM_BINDING_MISMATCH")
+        return f"/v1/launcher/seasons/{sid}/item-uses/{aid}/result?claim_id={claim}"
+
+    def status(self, aid, sid, tid, claim):
+        return self.session.request("GET", self._path(aid, sid, tid, claim))
+
+    def submit(self, aid, sid, tid, claim, data):
+        return self.session.upload(self._path(aid, sid, tid, claim), data)
 
 
 class EngineeringItemUse:
@@ -183,6 +203,47 @@ class EngineeringItemUse:
                 else "RECOVERY_REQUIRED"
             )
             return self._state(identifier, record, state)
+
+    def submit_verification(self, identifier, transport):
+        """Engineering seam only. Reconcile server intake before any byte resend.
+
+        Transport is scoped/authenticated externally. No verifier credentials or
+        proof endpoint belong here; restart uses the existing durable binding.
+        """
+        with self.controller._operation(recovery=True):
+            native_id, record = self._load(identifier)
+            self._state(identifier, record, "RECOVERY_REQUIRED")
+            receipt = self.engine.reconcile(native_id)
+            if (
+                receipt.status != "APPLIED_VERIFIED"
+                or receipt.current_matches_receipt is not True
+            ):
+                return "RECOVERY_REQUIRED"
+            _, _, prepared = self.engine._materials(self.engine._load(native_id))
+            scope = (identifier, self.season_id, self.trainer_id, record["claim_id"])
+            remote = transport.status(*scope)
+            if remote.get("authorization_id") != identifier or remote.get(
+                "result_sha256"
+            ) not in (None, prepared.output_hash):
+                raise WriteSafetyError("ITEM_RECEIPT_MISMATCH")
+            if remote["status"] in ("NOT_SUBMITTED", "UPLOADING", "RETRY_REQUIRED"):
+                # Read the journal-bound target and match the verified receipt.
+                # External changes cannot turn into a different submitted result.
+                data = self.engine.files.read_path(Path(record["binding"]["path"]))
+                if sha256(data).hexdigest() != prepared.output_hash:
+                    raise WriteSafetyError("ITEM_RECEIPT_MISMATCH")
+                remote = transport.submit(*scope, data)
+            if remote.get("authorization_id") != identifier or remote.get(
+                "result_sha256"
+            ) not in (None, prepared.output_hash):
+                raise WriteSafetyError("ITEM_RECEIPT_MISMATCH")
+            state = (
+                "LOCAL_VERIFIED_AWAITING_CONFIRMATION"
+                if remote["status"] == "VERIFIED"
+                else "RECOVERY_REQUIRED"
+            )
+            self._state(identifier, record, state)
+            return remote["status"]
 
     def complete(self, identifier):
         # No application/reapplication here, including after a lost HTTP response.

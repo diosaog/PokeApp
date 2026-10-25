@@ -1,13 +1,15 @@
 from uuid import UUID
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Request
 from pydantic import ValidationError
+from starlette.concurrency import run_in_threadpool
 
 from app.api.dependencies import ApiContainer, get_api_container
 from app.api.errors import api_error
 from app.api.models import AuthenticatedPrincipal
 from app.api.routes.purchases import IdempotencyHeader
 from app.api.schemas import (
+    ItemArtifactResponse,
     ItemUseClaimBody,
     ItemUseCompleteBody,
     ItemUseListResponse,
@@ -16,7 +18,9 @@ from app.api.schemas import (
 )
 from app.api.security import require_enabled_principal
 from app.application.item_use import prepare_item_use
+from app.domain.item_use_status import physical_state
 from app.repositories.errors import ItemUseRejectedError, PersistenceError
+from app.save_parser.writer import NATIVE_SIZES
 
 router = APIRouter(tags=["item-use"])
 Reader = Depends(require_enabled_principal)
@@ -111,14 +115,16 @@ def complete(
 
 def _receipt(result, season_id, trainer_id):
     try:
-        receipt = ItemUseResponse.model_validate(result)
+        receipt = ItemUseResponse.model_validate(
+            result | {"physical_state": physical_state(result["effect_code"], result)}
+        )
         if (
             str(receipt.season_id) != str(season_id)
             or str(receipt.trainer_id) != trainer_id
         ):
             raise ValueError("scope mismatch")
         return receipt
-    except (ValidationError, ValueError, TypeError):
+    except (ValidationError, ValueError, TypeError, KeyError):
         raise api_error(
             503, "ITEM_USE_UNAVAILABLE", "La autorización no coincide."
         ) from None
@@ -144,3 +150,60 @@ def claim(
         )
     )
     return _receipt(result, season_id, principal.trainer_id)
+
+
+def _transport(container):
+    if container.item_use_transport is None:
+        raise api_error(
+            503, "ITEM_USE_UNAVAILABLE", "La verificación no está habilitada."
+        )
+    return container.item_use_transport
+
+
+@router.put(
+    "/v1/launcher/seasons/{season_id}/item-uses/{authorization_id}/result",
+    response_model=ItemArtifactResponse,
+    response_model_exclude_none=True,
+)
+async def submit_result(
+    season_id: UUID,
+    authorization_id: UUID,
+    claim_id: UUID,
+    request: Request,
+    principal: AuthenticatedPrincipal = Reader,
+    container: ApiContainer = ContainerReader,
+):
+    transport = _transport(container)
+    scope = (str(authorization_id), str(season_id), principal.trainer_id, str(claim_id))
+    _execute(lambda: transport.scope(*scope))
+    if request.headers.get("content-type") != "application/octet-stream":
+        raise api_error(
+            415, "SAVE_BYTES_REQUIRED", "Se necesita el archivo resultante."
+        )
+    data = bytearray()
+    async for chunk in request.stream():
+        data.extend(chunk)
+        if len(data) > max(NATIVE_SIZES.values()):
+            raise api_error(413, "SAVE_TOO_LARGE", "El archivo es demasiado grande.")
+    return await run_in_threadpool(_execute, transport.submit, *scope, bytes(data))
+
+
+@router.get(
+    "/v1/launcher/seasons/{season_id}/item-uses/{authorization_id}/result",
+    response_model=ItemArtifactResponse,
+    response_model_exclude_none=True,
+)
+def result_status(
+    season_id: UUID,
+    authorization_id: UUID,
+    claim_id: UUID,
+    principal: AuthenticatedPrincipal = Reader,
+    container: ApiContainer = ContainerReader,
+):
+    return _execute(
+        _transport(container).status,
+        str(authorization_id),
+        str(season_id),
+        principal.trainer_id,
+        str(claim_id),
+    )

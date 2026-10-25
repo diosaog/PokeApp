@@ -132,6 +132,7 @@ class SupabaseV2SchemaTests(unittest.TestCase):
                 "053_versioned_account_credentials.sql",
                 "054_item_use_authorizations.sql",
                 "055_native_identity_evidence_scope.sql",
+                "056_item_use_verifier_transport.sql",
             ],
         )
         for path in _migration_files():
@@ -342,7 +343,7 @@ class SupabaseV2SchemaTests(unittest.TestCase):
         self.assertTrue(bootstrap.startswith("-- ONLY FOR EMPTY POKEAPP V2 DATABASE."))
         self.assertEqual(bootstrap, render_bootstrap())
         self.assertIn(
-            "Source of truth: supabase/v2/migrations/001_core.sql through 055_native_identity_evidence_scope.sql",
+            "Source of truth: supabase/v2/migrations/001_core.sql through 056_item_use_verifier_transport.sql",
             bootstrap,
         )
         self.assertNotIn("drop table", lowered)
@@ -400,6 +401,9 @@ class SupabaseV2SchemaTests(unittest.TestCase):
             elif table == 'item_use_verifications':
                 self.assertIn("alter table public.item_use_verifications force row level security", security_sql)
                 self.assertIn("grant select on public.item_use_verifications to service_role", security_sql)
+            elif table == 'item_use_artifacts':
+                self.assertIn('alter table public.item_use_artifacts force row level security', security_sql)
+                self.assertIn('revoke all on public.item_use_artifacts from public,anon,authenticated,service_role,pokeapp_item_verifier', security_sql)
             elif table == 'item_use_authorizations':
                 self.assertIn('alter table public.item_use_authorizations enable row level security', security_sql)
                 self.assertIn('alter table public.item_use_authorizations force row level security', security_sql)
@@ -408,7 +412,7 @@ class SupabaseV2SchemaTests(unittest.TestCase):
             else:
                 self.assertIn(f"'{table}'", security_sql, table)
 
-        self.assertEqual(security_sql.count("enable row level security"), 31)
+        self.assertEqual(security_sql.count("enable row level security"), 32)
         self.assertIn("alter table public.%i enable row level security", security_sql)
 
 

@@ -245,6 +245,7 @@ class PurchaseRead(BaseModel):
     item_name: str
     item_code: str
     acquisition_type: Literal["paid", "reward"] = "paid"
+    physical_state: str | None = None
 
 
 class TargetRead(BaseModel):

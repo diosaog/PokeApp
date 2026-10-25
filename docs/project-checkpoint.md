@@ -5,16 +5,18 @@ milestone record; it does not maintain a second live phase-status ledger.
 
 ## Current project position
 
-- Current packet: **Phase23C DONE LOCAL ENGINEERING; Phase23 PARTIAL / NOT DEPLOYED**.
-  Exact native revive and independent server artifact verification pass isolated
-  PG/native/Windows journeys for eight games;192 native checks,57 focused Python,
-  six interruption gates and scoped security gates PASS. Forward055 fixes a proven
-  native identity variable ambiguity without touching048; bootstrap parity and64
-  pre055 table hashes preserved. 054/055 local only. Production writes OFF;
-  real Azahar, deployed verifier transport, physical-status read alignment and
-  two-save theft remain. No remote operations or Phase24.
+- Current packet: **Phase23D DONE LOCAL / READY FOR RESTRICTED ACCEPTANCE;
+  Phase23 PARTIAL / NOT DEPLOYED; PHYSICAL CERTIFICATION PENDING**.
+  Private verifier transport/retention, restricted SQL issuer, restart/reconciliation
+  and additive current physical-state reads implemented.106 focused Python and14
+  React checks,12 local PG/native/transport groups,16643-line bootstrap parity and
+ 64 pre056 table hashes PASS. Prior192 eight-game native checks retained.054–056
+  local only; worker container recipe unbuilt. Production writes OFF. Next requires
+  separately authorized hosted Auth/Storage/SQL acceptance and Phase22 real-emulator
+  qualification. No production operations, owner saves, two-save theft or Phase24.
   [Live handoff](work-in-progress/phase23-live.md),
-  [23C report](phase23c-native-revive-report.md),[evidence](phase23c-local-evidence.json).
+  [23D report](phase23d-verifier-transport-report.md),
+  [evidence](phase23d-verifier-transport-evidence.json).
 
 - Previous packet: **Accounts/profile DONE GLOBAL — REGISTRATION ACTIVE**.
   Authorized clean V2 reset completed after exact105-table/4-object restore proof.

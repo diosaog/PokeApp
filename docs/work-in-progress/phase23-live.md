@@ -1,62 +1,75 @@
-# Phase 23 - live handoff
+# Phase 23 ? live handoff
 
-Observed2026-10-25. **23C DONE LOCAL ENGINEERING / Phase23 PARTIAL / NOT DEPLOYED.**
-Entry main/origin `e741822e4af5e2d06dac4338d0f27567e1754c6c`, fetched0/0,
-clean tracked. Implementation committed/pushed `6469f75d6d2825b3c770d858b1ab621ecab6a1e4`.
-Closure commit carries this record; obtain exact final HEAD from Git.
-[23C report](../phase23c-native-revive-report.md) /
-[evidence](../phase23c-local-evidence.json). Historical23B evidence retained.
+Observed2026-10-25. **23D DONE LOCAL / READY FOR RESTRICTED ACCEPTANCE.**
+**Phase23 PARTIAL / NOT DEPLOYED. PHYSICAL CERTIFICATION PENDING.**
+Entry `cb8cbbc773a4f862dc7144714860ea52963b0d11`, main/origin0/0, clean tracked.
+The focused implementation/closure commit carries this record; obtain final HEAD
+from Git. [23D report](../phase23d-verifier-transport-report.md),
+[evidence](../phase23d-verifier-transport-evidence.json).
 
-## Completed; do not repeat
+## Current implementation
 
-- Exact existing revive: Caja8 -> first free slot in Cajas1-7, preserving all PKM
-  bytes/attributes. No healing, party insertion, new scoring or reward semantics.
-- Native effect:192 checks PASS across X,Y,OR,AS,SN,MN,US,UM. Authentic public
-  format fixtures with explicitly synthetic dead-target setup; originals unchanged.
-- Independent server service derives plan from trusted source/entity/revision;
-  checks actual result bytes and parser read, never client claims or embedded keys.
-- Real localPG/native/Windows journeys:all8 PASS; exactly one consumption after
-  proof, replay/lost acknowledgement/restart, flags retained, no extra coin debit.
-  Six injected interruption gates and extra concurrency/CAS/permission/stale-source
-  gates PASS. Final X rerun covers strengthened effect/revision and sync bindings.
-- Python57 unique focused PASS (15 new verifier/binding,26 bridge/Launcher,
-  15 schema,1 production-denial). Native build/compile, focused lint/format/diff PASS.
-  No full historical/React/browser matrices rerun. Existing web states reused.
-- Real native ingestion discovered048 SQLSTATE42702. Forward055 only renames its
-  local evidence variable; applied048 remains untouched. Through055 upgrade/
-  bootstrap16,376 identical schema lines and64 pre055 table hashes preserved.
-  054 untouched; prior23B full SQL gates retained. 054/055 NOT applied remotely.
-- Existing backup/no-replace journal, explicit closed-emulator confirmation and
-  sync exclusion reused. New Spanish confirmation states exact move/server check.
+- Authenticated result PUT/GET: OFF by default, exact trainer allowlist, bounded
+  bytes and storage concurrency. Client results/receipts never become proof.
+- Additive056: private artifact manifest/lease, restricted NOLOGIN verifier group,
+  separate intake/worker SECURITY DEFINER functions. No public/direct proof DML.
+  Private worker only executes its job function; no API/service-role credential
+  is needed in that process. Uses original server source and existing23C native
+  plan/verifier, context CAS and proof/job commit in one transaction.
+- Existing private raw-saves bucket: immutable item-use result keys; short signed
+  read URLs kept in private jobs only. Pinned HTTPS paths, no redirects, size/hash
+  checks. Durable original/result retention; no automated orphan deletion.
+- Engineering Launcher uses existing JWT/SQLite binding and reconciles intake
+  before resend. No repeated physical apply after lost response/restart. API and
+  worker outages preserve uncertainty. Existing completion consumes once only.
+- Additive current physical_state on scoped reads, inventory and redemption
+  responses; historical receipt remains immutable. No old pending receipt is
+  silently converted into physical success; no retrospective economy effects.
+- Production mutation registry still EMPTY; no runtime/IPC capability activation.
 
-## Trust/release limits
+## Verified; retain rather than repeat
 
-Production mutation registry is EMPTY. No runtime/IPC activation or public verifier
-endpoint. The tested private evidence recorder is LOOPBACK TEST infrastructure,
-using retained server source and locked context CAS; never an API service_role
-proof-write bypass. Deployable restricted verifier identity/transport and durable
-remote artifact retention still need provisioning and acceptance.
+106 unique focused Python checks PASS (combined final subsets),14 React economy
+checks PASS. RealPG17.11/native/HTTP + isolated Storage:9 main groups plus3 additional
+PASS, including native-valid extra money/IV rejection, SQL finish CAS, restricted
+Storage and worker privileges. Upgrade/bootstrap056:16643 identical schema lines;
+64 previous table hashes preserved. CLI OFF, OpenAPI, TS/Vite, focused lint,
+new-file formatting, syntax/diff PASS. Existing bundle-size warning remains.
 
-Proof validates the received artifact, not continuous use on an untrusted user's
-machine. Local physical application used disposable copies; no actual game or
-Azahar was certified. Existing Phase22 emulator/platform/durability/package gates
-remain. Historical redemption receipt physical-pending snapshots require read
-projection reconciliation before activation. Two-save theft is not implemented.
+Native engine/23C verification contract unchanged:192 checks/eight games retained.
+New positive integrated path uses disposable X; public Y only a foreign-save
+negative. A test-only helper creates two native-valid negative X files. No owner
+or randomized Y access. Prior backup/emulator/platform evidence remains in
+[23C](../phase23c-native-revive-report.md) and Phase22, not rerun.
 
-## Exact next action / safety
+New malformed-receipt KeyError fixed to sanitized503. Schema assertion extended
+for056. Eight old bridge fixtures updated with already-required revision/effect
+fields. Initial negative-marking harness corrected; no native contract change.
 
-Prepare the scoped private verifier transport/provisioning and physical-status read
-integration; finish real Azahar/runtime qualification when the executable test game
-is available. Before any separately authorized rollout, fresh remote baseline,
-privilege/retention review, hosted acceptance, committed migration source and
-package gates are required. Do not deploy054/055 or infer capability from these
-local PASS results. No Phase24 or other functionality starts from this closure.
+## Boundaries and exact next action
 
-Production actions:this session ZERO. Remote state STAGING_UNVERIFIED (not queried).
-No owner save, randomised Y, real account/economy, remote service, V1/Shadow or public
-Launcher access. Eight unrelated untracked files/protected guide untouched.
-Owned PG databases dropped and clusters stopped; no active run. Private evidence
-`%LOCALAPPDATA%/PokeApp-migration-evidence/phase23c/20261025/` contains
-native/native-revive.json,pg.json,security-parity.json,final-binding.json.
-Stopped local test trees are retained at the exact paths those files record.
-No unknown remote outcome. Explicit staging only. STOP after local23C closure.
+No production actions or remote queries.054/055/056 NOT applied remotely.
+Auth is synthetic; Storage transport is emulated. Worker role, SQL, native code,
+application and Windows journal/filesystem are real local tests. Separate Docker
+worker recipe prepared, not built: Docker is unavailable here. No deployment,
+private/public Launcher package or fresh hosted evidence is claimed.
+
+With separate owner authorization: build the exact API/parser and private worker
+images; fresh remote baseline/collision/security review; coordinated054?056 and
+restricted role provisioning; run approved disposable real Auth/Storage/PG
+acceptance with intake allowlist and production physical writes OFF. Exact roles,
+configuration, retention and failure procedure are in23D report. Do not provision
+worker credentials in API/Launcher/web, enable body/SQL parameter logging, delete
+unknown artifacts or guess a successful application.
+
+Azahar/gameplay/flush/restart exclusion, platform durability and Phase22 release
+qualification remain separate prerequisites. Artifact validity is not continuous
+local use or gameplay attestation. Two-save theft and other item types remain out
+of scope. STOP; no Phase24, accounts, V1/Shadow or further functional packet.
+
+Private evidence: `%LOCALAPPDATA%/PokeApp-migration-evidence/phase23d/20261025/`:
+`pg-final.json`, `pg-extra.json`, `worker-privileges.json`, negative fixture copies.
+Owned databases dropped and clusters stopped; no55475 listener. Stopped cluster
+artifacts retained at those exact evidence paths. Eight unrelated untracked files
+and protected guide remain untouched. Explicit staging only; unknown remote
+outcomes NONE because no remote operation was attempted.

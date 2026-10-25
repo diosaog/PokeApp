@@ -1,0 +1,3 @@
+# Separate private worker environment; never adds issuer credentials to the API.
+-r requirements-api.txt
+-r deploy/requirements-item-verifier.txt

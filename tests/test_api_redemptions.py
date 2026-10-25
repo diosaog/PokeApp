@@ -49,6 +49,18 @@ class RedemptionTests(unittest.TestCase):
         self.assertEqual(self.post(headers={'Idempotency-Key':'x'}).status_code,401)
         self.assertEqual(self.requests,[])
 
+    def test_current_verification_overlays_but_never_rewrites_receipt(self):
+        from types import SimpleNamespace
+        self.rpc_body = asdict(replace(self.receipt,effect_code='revive',physical_effect_status='pending'))
+        historical = dict(self.rpc_body)
+        current = SimpleNamespace(list=lambda sid,tid:[dict(purchase_id=self.purchase,status='APPLIED_VERIFIED')])
+        self.client.app.state.api_container = replace(self.container,item_use_repository=current)
+        response = self.post()
+        self.assertEqual(response.status_code,200,response.text)
+        self.assertEqual(response.json()['physical_state'],'APPLIED_VERIFIED')
+        self.assertEqual(response.json()['physical_effect_status'],'pending')
+        self.assertEqual(self.rpc_body,historical)
+
     def test_f02_invalid_bearer(self):
         self.verifier.fail = InvalidSessionError()
         self.assertEqual(self.post().status_code,401)

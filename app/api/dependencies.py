@@ -33,6 +33,7 @@ class ApiContainer:
     promotional_purchase_repository: PromotionalPurchaseRepository | None = None
     redemption_repository: RedemptionMutationRepository | None = None
     item_use_repository: object | None = None
+    item_use_transport: object | None = None
     season_admin_repository: SeasonAdminRepository | None = None
     matchday_repository: MatchdayRepository | None = None
     participant_status_repository: ParticipantStatusRepository | None = None
@@ -62,6 +63,7 @@ def create_default_container(config: APIConfig | None = None) -> ApiContainer:
     purchase_repo = None
     redemption_repo = None
     item_use_repo = None
+    item_use_transport = None
     season_admin_repo = None
     matchday_repo = None
     participant_status_repo = None
@@ -156,6 +158,13 @@ def create_default_container(config: APIConfig | None = None) -> ApiContainer:
                 PkhexProcessParser(Path(parser_path)),
             )
 
+    if config.item_verification_transport_enabled and config.supabase_url and config.supabase_service_role_key:
+        from supabase import create_client
+        from app.application.item_use_transport import ItemUseTransport
+        from app.repositories.supabase.item_use_transport import SupabaseItemUseTransport, PrivateItemUseBlobs
+        client = create_client(config.supabase_url, config.supabase_service_role_key)
+        item_use_transport = ItemUseTransport(SupabaseItemUseTransport(client), PrivateItemUseBlobs(client), allowed_trainers=config.item_verification_trainers)
+
     auth_bridge = None
     if auth_client is not None and trainer_repo is not None and config.credential_keyring is not None:
         auth_bridge = PinAuthBridge(trainers=trainer_repo, auth=auth_client, pepper="",
@@ -173,6 +182,7 @@ def create_default_container(config: APIConfig | None = None) -> ApiContainer:
         promotional_purchase_repository=purchase_repo,
         redemption_repository=redemption_repo,
         item_use_repository=item_use_repo,
+        item_use_transport=item_use_transport,
         season_admin_repository=season_admin_repo,
         matchday_repository=matchday_repo,
         participant_status_repository=participant_status_repo,

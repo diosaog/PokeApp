@@ -60,9 +60,11 @@ class ItemBridgeTests(unittest.TestCase):
                 "target_pokemon_entity_id",
                 "save_file_id",
                 "operation_id",
+                "identity_revision_id",
             )
         }
         self.a.update(
+            effect_code="revive",
             save_sha256=intent().expected_sha256,
             status="PREPARED",
             expires_at=(datetime.now(UTC) + timedelta(minutes=15)).isoformat(),

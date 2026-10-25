@@ -5,6 +5,15 @@
 
 begin;
 
+-- Private verifier queue; only this disposable reset, never a production cleanup.
+drop function if exists public.item_verifier_job(jsonb);
+drop function if exists public.item_verifier_context(uuid);
+drop function if exists public.api_item_use_artifact(jsonb);
+drop table if exists public.item_use_artifacts;
+do $$ begin if to_regclass('storage.objects') is not null then
+ execute 'drop policy if exists item_artifacts_no_browser on storage.objects';
+end if; end $$;
+
 -- Account packet cleanup, only for the disposable development reset above.
 do $$ declare f regprocedure; begin
   for f in select p.oid::regprocedure from pg_proc p join pg_namespace n on n.oid=p.pronamespace

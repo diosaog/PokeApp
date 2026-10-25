@@ -27,6 +27,10 @@ function isDead(target: PokemonTarget) {
 }
 
 export const itemUseLabels: Record<string, string> = {
+  AVAILABLE: "Objeto disponible",
+  LEGACY_PENDING: "Canje histórico · archivo pendiente de verificar",
+  EXPIRED: "Autorización caducada · requiere revisión",
+  UNKNOWN: "Estado físico no disponible",
   PREPARED: "Aplicación pendiente",
   PENDING_APPLICATION: "Aplicación pendiente",
   APPLIED_VERIFIED: "Aplicación verificada",
@@ -41,10 +45,6 @@ export function Inventory() {
   const { season } = useApp();
   const q = useRead<Model<"InventoryRead">>(
     `/v1/read/seasons/${season}/inventory`,
-    !!season,
-  );
-  const uses = useRead<Model<"ItemUseListResponse">>(
-    `/v1/launcher/seasons/${season}/item-uses`,
     !!season,
   );
   const cmd = useCommand([
@@ -115,16 +115,12 @@ export function Inventory() {
       <h2>Inventario</h2>
       <p className="muted">Tus compras y vales · disponibles para canjear</p>
       <Notice error={q.error} />
-      <Notice error={uses.error} />
       <CommandState command={cmd} />
       {q.isPending ? (
         <Loading />
       ) : q.data?.purchases.length ? (
         <div className="inventory-grid">
           {q.data.purchases.map((item) => {
-            const use = uses.data?.items?.find(
-              (entry) => entry.purchase_id === item.id,
-            );
             return (
               <Card key={item.id} className="inventory-card">
                 <div className="inventory-item">
@@ -132,8 +128,9 @@ export function Inventory() {
                   <h3>{pokemonName("item", item.item_name)}</h3>
                 </div>
                 <Tag>
-                  {use
-                    ? (itemUseLabels[use.status] ?? "Estado no disponible")
+                  {physicalItem(item.item_code)
+                    ? (itemUseLabels[item.physical_state ?? "UNKNOWN"] ??
+                      "Estado físico no disponible")
                     : ((
                         {
                           pending: "Objeto disponible",

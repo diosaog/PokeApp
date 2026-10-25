@@ -1572,6 +1572,24 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/v1/launcher/seasons/{season_id}/item-uses/{authorization_id}/result": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Result Status */
+    get: operations["result_status_v1_launcher_seasons__season_id__item_uses__authorization_id__result_get"];
+    /** Submit Result */
+    put: operations["submit_result_v1_launcher_seasons__season_id__item_uses__authorization_id__result_put"];
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -2659,6 +2677,29 @@ export interface components {
       /** Targets */
       targets: components["schemas"]["TargetRead"][];
     };
+    /** ItemArtifactResponse */
+    ItemArtifactResponse: {
+      /**
+       * Authorization Id
+       * Format: uuid
+       */
+      authorization_id: string;
+      /**
+       * Status
+       * @enum {string}
+       */
+      status:
+        | "NOT_SUBMITTED"
+        | "UPLOADING"
+        | "QUEUED"
+        | "VERIFYING"
+        | "VERIFIED"
+        | "REJECTED"
+        | "EXPIRED"
+        | "RETRY_REQUIRED";
+      /** Result Sha256 */
+      result_sha256?: string | null;
+    };
     /** ItemRead */
     ItemRead: {
       /**
@@ -2740,6 +2781,8 @@ export interface components {
     };
     /** ItemUseResponse */
     ItemUseResponse: {
+      /** Physical State */
+      physical_state?: string | null;
       /**
        * Id
        * Format: uuid
@@ -3681,6 +3724,8 @@ export interface components {
        * @enum {string}
        */
       acquisition_type: "paid" | "reward";
+      /** Physical State */
+      physical_state?: string | null;
     };
     /** RankingErrorDetail */
     RankingErrorDetail: {
@@ -3743,6 +3788,8 @@ export interface components {
     };
     /** RedemptionResponse */
     RedemptionResponse: {
+      /** Physical State */
+      physical_state?: string | null;
       /**
        * Redemption Id
        * Format: uuid
@@ -8041,6 +8088,74 @@ export interface operations {
         };
         content: {
           "application/json": components["schemas"]["ItemUseResponse"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  result_status_v1_launcher_seasons__season_id__item_uses__authorization_id__result_get: {
+    parameters: {
+      query: {
+        claim_id: string;
+      };
+      header?: never;
+      path: {
+        season_id: string;
+        authorization_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ItemArtifactResponse"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  submit_result_v1_launcher_seasons__season_id__item_uses__authorization_id__result_put: {
+    parameters: {
+      query: {
+        claim_id: string;
+      };
+      header?: never;
+      path: {
+        season_id: string;
+        authorization_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ItemArtifactResponse"];
         };
       };
       /** @description Validation Error */

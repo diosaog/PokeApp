@@ -441,9 +441,22 @@ class FrontendReads:
             if purchases
             else {}
         )
+        from app.domain.item_use_status import physical_state
+
+        uses = {}
+        if any(catalog[p['shop_item_id']]['code'] in ('revivir_pokemon', 'robar_pokemon') for p in purchases):
+            uses = {
+                a['purchase_id']: a for a in self.rows(
+                    'item_use_authorizations', 'purchase_id,status,expires_at',
+                    season_id=sid, trainer_id=tid,
+                )
+            }
         for purchase in purchases:
             item = catalog[purchase["shop_item_id"]]
             purchase.update(item_name=item["name"], item_code=item["code"])
+            purchase['physical_state'] = physical_state(
+                item['code'], uses.get(purchase['id']), used=purchase['status'] == 'used'
+            )
         return InventoryRead(purchases=purchases, targets=targets)
 
     def hall(self, offset=0):
