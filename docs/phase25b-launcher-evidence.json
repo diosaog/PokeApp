@@ -1,0 +1,98 @@
+{
+  "date": "2026-10-26",
+  "entry": "eb71598721b0b5fbc8b0d932cc06e135f2a73e33",
+  "status": "PHASE25B_DONE_LOCAL",
+  "classification": {
+    "launcher_functional_integration": "DONE_LOCAL",
+    "robbery_action_ui": "PASS",
+    "auto_updater": "DONE_LOCAL_ACTIVATION_NEEDS_REAL_KEY_AND_FEED",
+    "signed_update_manifest": "PASS",
+    "authenticode": "PENDING",
+    "real_installed_update_test": "PASS_WINDOWS11_WINDOWS10_PENDING",
+    "quick_items": "DONE_LOCAL_FREE_UNLIMITED_POLICY_RECORDED_PUBLIC_SWITCH_PREPARED_OFF",
+    "gen7_signature": "KNOWN_SAFE_BLOCKER",
+    "lime3ds_ready_for_acceptance": "YES_DISPOSABLE_COPY_OWNER_APPROVAL_REQUIRED",
+    "prerelease_readiness": "CONDITIONAL"
+  },
+  "remote_actions": "none intended; installed test apps likely issued read-only GET /health to the production API",
+  "published": false,
+  "production_mutations": [],
+  "public_ready_mutations": [
+    "add_item"
+  ],
+  "installed_update_win11": {
+    "status": "PASS",
+    "checks": [
+      "installed 0.22.0-rc.90 per-user into a disposable folder",
+      "over real HTTPS: tampered installer, downgrade and foreign-key manifest rejected; nothing installed",
+      "signed 0.22.0-rc.91 downloaded, re-hashed and installed over 0.22.0-rc.90 (same per-user install)",
+      "installed 0.22.0-rc.91 restarted (process running) on the disposable profile and reconciled/removed the pending update",
+      "journal, backups and configuration byte-identical after update and restart",
+      "silent uninstall removed the app and kept profile journal/backups",
+      "owner's real private and public Launcher profiles untouched during this run"
+    ],
+    "oldVersion": "0.22.0-rc.90",
+    "newVersion": "0.22.0-rc.91"
+  },
+  "installer_sha256": [
+    "b35976940b17e156d1863cfcccae23c86ef9bb8afc8e9abc3e2c94850c5437f8 *build-90/PokeApp-Launcher-Private-Setup.exe",
+    "6c5e7f65b0b4e89b37304eedaa63029823a1a325291f65127798c8d65ae51299 *build-91/PokeApp-Launcher-Private-Setup.exe"
+  ],
+  "installer_build_note": "Disposable rc.90/rc.91 built with electron-builder from current shell and the existing 2026-10-23 runtime stage; disposable Ed25519 key and local TLS cert in scratch; not distributed",
+  "public_switch": {
+    "status": "PASS",
+    "checks": [
+      "shipped build: empty registry denies quick items; file untouched",
+      "flipped switch (test process only): production engine adds quick items with real process check, verified backup, confirm, readback and restart; other kinds still denied"
+    ]
+  },
+  "gen7_signature_diagnostic": {
+    "title": "MN",
+    "operation": "new Rare Candy stack",
+    "quantities_tested": 200,
+    "verified": 199,
+    "failed": [
+      5
+    ],
+    "failure": "PKHeX 24.11.11 MemeCrypto.VerifyMemeData rejects its own re-signature; no hash mismatch; fails closed"
+  },
+  "tests": {
+    "electron_ui_smoke": "23/23",
+    "node": "14/14 (signer 4, updater 7, quantity 3)",
+    "python_affected": 254,
+    "ruff": "no new findings",
+    "native_build": "0 warnings / 0 errors"
+  },
+  "incident": {
+    "what": "first installed-update attempt: --force-run relaunch ran rc.91 ~1 min on owner's private-candidate test profile",
+    "impact": "all profile tables empty; new empty write journal (0 operations) and shell cache; no save read/modified; no upload; public Launcher profile unchanged",
+    "action": "files left as-is; harness changed to install silently and start the app on a disposable profile"
+  },
+  "external_requirements": [
+    "Authenticode certificate",
+    "release key ceremony and custody",
+    "HTTPS hosting for private and stable feeds",
+    "Windows 10 installed-update run",
+    "deploy 054-059 and private verifier (separate authorization)",
+    "Lime3DS real certification with owner approval",
+    "owner decisions: party robbery, cross-title robbery, victim non-cooperation"
+  ],
+  "private_evidence": "C:\\Users\\Antonio\\AppData\\Local\\PokeApp-migration-evidence\\phase25b\\20261026",
+  "source_fingerprints": {
+    "companion/launcher/main.cjs": "27bc030a8de47e53f5da47a30eca29277d414d8acbde483474d218d67c7a781e",
+    "companion/launcher/preload.cjs": "c7412d514314e3a6be5bc2eddab113f2f7d5028fceb0c529d9b20f053374e0ee",
+    "companion/launcher/renderer.js": "a81ab8c6915e7b2b8f8313fba2c683eb99cdb69e3a08985ce8f233d503851872",
+    "companion/launcher/index.html": "341b854bc7b7c83590a2e421b11877ae45877d9245cbb9e1e5776f54e908371b",
+    "companion/launcher/electron-builder.cjs": "b59137eeecd0c7806f792c774919ed086636b13c5db23f4c04f6a5cb9953df5b",
+    "companion/launcher/updater.cjs": "b019414fa7917546f81edbb87a5f5aa93e300be38b738c66602e1326baa81b22",
+    "tools/build_launcher_windows.ps1": "d26e7583f67dbb8dde3d7429d9fbcd0dcf1ac87c67d99a3b59621960c381384a",
+    "tools/sign_launcher_update.cjs": "e2691f43ee34e3e9b36a47d62802c346fdbfd6158feade41aee942cd9bc2b365",
+    "tools/validate_launcher_update_install.cjs": "4aa7fa4c3c8e9cef9d8a4d135830709d40f58b18ce80730da3732a966c0e0202",
+    "app/launcher/write_engine.py": "4fa2a3770abe9bb25761932a8e815b78848274d82423d301aac4ad44f6cfa735",
+    "app/launcher/write_control.py": "74cd77afce3882f8f98cc211385a32b8d0e17e0fa39304a89adf49c398631261",
+    "app/launcher/runtime.py": "2278636a728690e46c9dedb1f659a920c5532105447ddd2acf004b86c777cbcc",
+    "app/launcher/transfer.py": "ec1aad7f6ed72141f5fe7f2d2f0738c3a00c272b3f758497b836c7f3874e3b7e",
+    "app/launcher/write_files.py": "5a79a806a843c3098e8906bf25156f5ac2c9267c2923d318b29a18e89f20c243",
+    "app/launcher/quick_items.py": "04f6b4bf266362f1b2bc09b6477c26de9a5ccbfc4f10d6053dc6d629945672d4"
+  }
+}

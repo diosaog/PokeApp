@@ -5,7 +5,14 @@ milestone record; it does not maintain a second live phase-status ledger.
 
 ## Current project position
 
-- Current packet: **Phase25A PARTIAL (updater activation only) — local Launcher
+- Current packet: **Phase25B DONE LOCAL — Launcher robbery action UI, signed
+  update build/signing and real Windows 11 installed update, quick items free and
+  unlimited (owner decision) behind a prepared public switch that stays OFF;
+  pre-release CONDITIONAL; nothing published; production writes disabled**.
+  [Report](phase25b-launcher-report.md), [evidence](phase25b-launcher-evidence.json),
+  [Lime3DS procedure](lime3ds-certification-procedure.md).
+
+- Previous packet: **Phase25A PARTIAL (updater activation only) — local Launcher
   integration, Rare Candy/Heart Scale quick items behind the engineering
   capability, signed-manifest updater disabled pending release key/feed/
   Authenticode; no release published; production writes disabled**.

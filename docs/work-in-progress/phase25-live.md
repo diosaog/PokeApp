@@ -1,5 +1,17 @@
 # Phase25 — live execution record
 
+2026-10-26. **PHASE25B DONE LOCAL** on top of 25A. Robbery action UI, signed-update
+build/signing integration, real installed update on Windows 11 (7/7), quick-item
+free/unlimited policy recorded with a prepared public switch that stays OFF, Gen7
+signature classified as a known safe blocker, Lime3DS acceptance procedure ready.
+[25B report](../phase25b-launcher-report.md) · [25B evidence](../phase25b-launcher-evidence.json).
+Pre-release CONDITIONAL on: Authenticode, release key/feed, Windows 10, 054–059 +
+verifier deployment, Lime3DS certification (owner approval of the copy path) and
+three robbery decisions. Incident during the first update attempt disclosed in the
+report (owner's private test profile touched, no data effect).
+
+## Phase25A record
+
 2026-10-25. **PHASE25A PARTIAL (updater activation only). Local engineering;
 production unchanged; no Launcher release published.** Entry `92d20d2`
 (Phase24 DONE LOCAL, 24B gate PASS). Use Git for the exact final HEAD.
