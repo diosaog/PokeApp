@@ -16,4 +16,18 @@ contextBridge.exposeInMainWorld("launcher", {
     ipcRenderer.invoke("launcher:backup-copy", operationId, role),
   restoreBackup: (operationId, emulatorClosed) =>
     ipcRenderer.invoke("launcher:backup-restore", operationId, emulatorClosed),
+  quickItems: () => ipcRenderer.invoke("launcher:quick-items"),
+  addQuickItem: (item, quantity, emulatorClosed) =>
+    ipcRenderer.invoke(
+      "launcher:quick-item-add",
+      item,
+      quantity,
+      emulatorClosed,
+    ),
+  discoverSaves: () => ipcRenderer.invoke("launcher:discover"),
+  selectDiscovered: (savePath) =>
+    ipcRenderer.invoke("launcher:select-discovered", savePath),
+  updateState: () => ipcRenderer.invoke("launcher:update-state"),
+  downloadUpdate: () => ipcRenderer.invoke("launcher:update-download"),
+  installUpdate: () => ipcRenderer.invoke("launcher:update-install"),
 });

@@ -342,11 +342,169 @@ $("login").onsubmit = (event) => {
   event.currentTarget.elements.pin.value = "";
   void action(() => window.launcher.login(trainer, pin));
 };
+// Quick items: ONE text state per item, shared by keyboard, + and −.
+const quantities = { rare_candy: "1", heart_scale: "1" };
+const gameNames = {
+  X: "X",
+  Y: "Y",
+  OR: "Rubí Omega",
+  AS: "Zafiro Alfa",
+  SN: "Sol",
+  MN: "Luna",
+  US: "Ultrasol",
+  UM: "Ultraluna",
+};
+let lastState = null;
+function renderQuick(state) {
+  const write = state.write || {};
+  const view = state.quick_items;
+  const enabled = Boolean(view?.application_enabled);
+  const adding = (write.description || "").startsWith("Añadir");
+  text(
+    "quick-state",
+    !state.selected_save
+      ? "Selecciona tu partida para ver tus objetos."
+      : write.status === "RECOVERY_REQUIRED"
+        ? "Recuperación necesaria. Conserva las copias y no abras el emulador."
+        : write.busy
+          ? "Preparando copia, aplicando o verificando. Mantén el juego cerrado."
+          : write.status === "AWAITING_CONFIRMATION" && adding
+            ? "Esperando cierre del emulador: marca la casilla y confirma en «Cambios en tu partida»."
+            : write.status === "APPLIED_VERIFIED" && adding
+              ? "Aplicado correctamente: la partida se ha releído y verificado."
+              : state.quick_item_error
+                ? "Error recuperable: " + state.quick_item_error
+                : !view
+                  ? "Pulsa «Leer objetos de la partida» para ver tus cantidades."
+                  : !enabled
+                    ? "Operación bloqueada: añadir objetos aún no está habilitado (falta una regla aprobada de la Liga). Puedes consultar tus cantidades."
+                    : "Listo para añadir.",
+  );
+  for (const row of document.querySelectorAll(".quick-item")) {
+    const item = row.dataset.item;
+    const info = view?.items?.[item];
+    const input = row.querySelector(".quick-input");
+    if (document.activeElement !== input && input.value !== quantities[item])
+      input.value = quantities[item];
+    const parsed = PokeQuantity.parse(quantities[item], info?.addable ?? 0);
+    row.querySelector(".quick-count").textContent = info
+      ? `Tienes ${info.count} · máximo ${info.max}`
+      : "";
+    row.querySelector(".quick-error").textContent =
+      info && parsed.error ? parsed.error : "";
+    const blocked =
+      !enabled ||
+      !info ||
+      write.busy ||
+      ["RECOVERY_REQUIRED", "AWAITING_CONFIRMATION", "PREPARED"].includes(
+        write.status,
+      );
+    for (const name of [".quick-minus", ".quick-plus", ".quick-input"])
+      row.querySelector(name).disabled = blocked;
+    row.querySelector(".quick-add").disabled =
+      blocked || parsed.value === null || !$("quick-emulator-closed").checked;
+  }
+}
+for (const row of document.querySelectorAll(".quick-item")) {
+  const item = row.dataset.item;
+  const input = row.querySelector(".quick-input");
+  const max = () => lastState?.quick_items?.items?.[item]?.addable ?? 0;
+  const update = (value) => {
+    quantities[item] = value;
+    if (input.value !== value) input.value = value;
+    if (lastState) renderQuick(lastState);
+  };
+  input.oninput = () => update(PokeQuantity.clean(input.value));
+  row.querySelector(".quick-minus").onclick = () =>
+    update(PokeQuantity.step(quantities[item], -1, max()));
+  row.querySelector(".quick-plus").onclick = () =>
+    update(PokeQuantity.step(quantities[item], 1, max()));
+  row.querySelector(".quick-add").onclick = () => {
+    const parsed = PokeQuantity.parse(quantities[item], max());
+    if (parsed.value === null) return update(quantities[item]);
+    action(() =>
+      window.launcher.addQuickItem(
+        item,
+        parsed.value,
+        $("quick-emulator-closed").checked,
+      ),
+    );
+  };
+}
+$("quick-emulator-closed").onchange = () => lastState && renderQuick(lastState);
+$("quick-refresh").onclick = () => action(() => window.launcher.quickItems());
+
+function renderEmulator(state) {
+  text(
+    "emulator-state",
+    `Emulador principal: ${state.emulator?.primary_candidate || "Lime3DS"} · compatibilidad pendiente de certificar. Cierra siempre el juego y el emulador antes de un cambio.`,
+  );
+  const list = $("discovered-saves");
+  const found = state.emulator_saves || [];
+  const key = JSON.stringify(found);
+  if (list.dataset.key === key) return;
+  list.dataset.key = key;
+  list.replaceChildren(
+    ...found.map((save) => {
+      const button = document.createElement("button");
+      button.textContent = `Usar Pokémon ${gameNames[save.game] || "partida"} · ${save.emulator}`;
+      button.onclick = () =>
+        action(() => window.launcher.selectDiscovered(save.path));
+      return button;
+    }),
+  );
+}
+$("discover-saves").onclick = () =>
+  action(async () => {
+    const result = await window.launcher.discoverSaves();
+    if (result?.count === 0)
+      text(
+        "message",
+        "No se han encontrado partidas compatibles en Lime3DS, Azahar o Citra.",
+      );
+    return result;
+  });
+
+let deferredReason = null;
+async function renderUpdate() {
+  const u = await window.launcher.updateState().catch(() => null);
+  if (!u) return;
+  text(
+    "launcher-version",
+    `v${u.current}${u.channel === "private" ? " · canal privado" : ""}`,
+  );
+  const messages = {
+    AVAILABLE: `Nueva versión ${u.version} disponible (tienes ${u.current}). ${u.notes || ""}`,
+    DOWNLOADING: `Descargando y verificando la versión ${u.version}…`,
+    DOWNLOADED: deferredReason
+      ? "Actualización verificada. Se podrá instalar cuando termine la operación en curso; no se interrumpe ningún cambio."
+      : `Versión ${u.version || u.recovered?.version} descargada y verificada.`,
+    INSTALLING: "Instalando la actualización…",
+  };
+  $("update-banner").hidden = !messages[u.status];
+  text("update-text", messages[u.status] || "");
+  $("update-download").hidden = u.status !== "AVAILABLE";
+  $("update-install").hidden = u.status !== "DOWNLOADED";
+}
+$("update-download").onclick = () =>
+  action(() => window.launcher.downloadUpdate());
+$("update-install").onclick = () =>
+  action(async () => {
+    const result = await window.launcher.installUpdate();
+    deferredReason = result?.deferred || null;
+    return result;
+  });
+
 async function poll() {
   if (polling) return;
   polling = true;
   try {
-    render(await window.launcher.state(revision));
+    const state = await window.launcher.state(revision);
+    render(state);
+    lastState = state;
+    renderQuick(state);
+    renderEmulator(state);
+    void renderUpdate();
   } catch {
     text(
       "message",

@@ -22,11 +22,15 @@ app.setAppUserModelId(
 );
 let worker,
   win,
-  sequence = 0;
+  sequence = 0,
+  installing = false;
 const pending = new Map();
 function request(command, args = {}) {
   if (!worker || worker.killed || pending.size >= 8)
     return Promise.reject(new Error("Launcher no disponible"));
+  // Once an update install is confirmed, no new local operation may start.
+  if (installing && command !== "state")
+    return Promise.reject(new Error("Actualización en curso"));
   const id = ++sequence;
   return new Promise((resolve, reject) => {
     const timer = setTimeout(() => {
@@ -258,6 +262,149 @@ app.whenReady().then(() => {
           closed_emulator_confirmed: true,
         });
   });
+  ipcMain.handle("launcher:quick-items", (event) => {
+    authorize(event);
+    return request("quick_items_refresh");
+  });
+  ipcMain.handle(
+    "launcher:quick-item-add",
+    (event, item, quantity, emulatorClosed) => {
+      authorize(event);
+      if (
+        !["rare_candy", "heart_scale"].includes(item) ||
+        !Number.isInteger(quantity) ||
+        quantity < 1 ||
+        quantity > 9999 ||
+        emulatorClosed !== true
+      )
+        throw new Error(
+          "Revisa el objeto, la cantidad y el cierre del emulador.",
+        );
+      // Only prepares; the existing write confirmation still applies it.
+      return request("quick_item_offer", {
+        item,
+        quantity,
+        closed_emulator_confirmed: true,
+      });
+    },
+  );
+  ipcMain.handle("launcher:discover", (event) => {
+    authorize(event);
+    return request("discover_saves");
+  });
+  ipcMain.handle("launcher:select-discovered", (event, savePath) => {
+    authorize(event);
+    if (typeof savePath !== "string" || savePath.length > 4096)
+      throw new Error("Partida no válida");
+    return request("select_discovered", { path: savePath });
+  });
+
+  const updates = require("./updater.cjs");
+  const updateConfig = require("./package.json").pokeappUpdate || {};
+  const channel = privateCandidate ? "private" : "stable";
+  const updateDir = path.join(profile, "updates");
+  const feed = updateConfig.feed && updateConfig.feed[channel];
+  let update = {
+    status: "DISABLED",
+    current: app.getVersion(),
+    channel,
+    reason: "UPDATES_NOT_CONFIGURED",
+  };
+  let offered = null;
+  if (
+    updateConfig.publicKey &&
+    typeof feed === "string" &&
+    feed.startsWith("https://")
+  ) {
+    const recovered = updates.reconcileStartup(updateDir, app.getVersion());
+    update = {
+      status:
+        recovered.status === "INSTALL_INCOMPLETE" ? "DOWNLOADED" : "CHECKING",
+      current: app.getVersion(),
+      channel,
+      recovered,
+    };
+    fetch(feed, { redirect: "error" })
+      .then((response) =>
+        response.ok ? response.json() : Promise.reject(new Error("feed")),
+      )
+      .then((envelope) => {
+        offered = updates.verifyManifest(envelope, updateConfig.publicKey, {
+          channel,
+          currentVersion: app.getVersion(),
+        });
+        if (update.status !== "DOWNLOADED")
+          update = offered
+            ? {
+                ...update,
+                status: "AVAILABLE",
+                version: offered.version,
+                notes: offered.notes,
+              }
+            : { ...update, status: "UP_TO_DATE" };
+      })
+      .catch((error) => {
+        update = {
+          ...update,
+          status: "ERROR",
+          reason: error.code || "UPDATE_CHECK_FAILED",
+        };
+      });
+  }
+  ipcMain.handle("launcher:update-state", (event) => {
+    authorize(event);
+    return update;
+  });
+  ipcMain.handle("launcher:update-download", async (event) => {
+    authorize(event);
+    if (!offered || update.status !== "AVAILABLE") return update;
+    update = { ...update, status: "DOWNLOADING" };
+    try {
+      await updates.download(fetch, offered, updateDir);
+      update = { ...update, status: "DOWNLOADED" };
+    } catch (error) {
+      update = {
+        ...update,
+        status: "AVAILABLE",
+        reason: error.code || "DOWNLOAD_FAILED",
+      };
+    }
+    return update;
+  });
+  ipcMain.handle("launcher:update-install", async (event) => {
+    authorize(event);
+    if (update.status !== "DOWNLOADED") return update;
+    const blocker = updates.installBlocker(
+      await request("state").catch(() => null),
+    );
+    if (blocker) return { ...update, deferred: blocker };
+    const installer = updates.verifiedInstaller(updateDir);
+    const confirmation = await dialog.showMessageBox(win, {
+      type: "info",
+      title: "Instalar actualización",
+      message: `PokeApp Launcher ${installer.version}`,
+      detail:
+        "El Launcher se cerrará, se instalará la nueva versión y volverá a abrirse. Tus copias, sesión y operaciones se conservan.",
+      buttons: ["Más tarde", "Instalar y reiniciar"],
+      defaultId: 0,
+      cancelId: 0,
+      noLink: true,
+    });
+    if (confirmation.response !== 1) return update;
+    const last = updates.installBlocker(
+      await request("state").catch(() => null),
+    );
+    if (last) return { ...update, deferred: last };
+    installing = true;
+    spawn(installer.file, ["/S", "--force-run"], {
+      detached: true,
+      stdio: "ignore",
+      windowsHide: true,
+    }).unref();
+    app.quit();
+    return { ...update, status: "INSTALLING" };
+  });
+
   win = new BrowserWindow({
     show: process.env.POKEAPP_LAUNCHER_HEADLESS_TEST !== "1",
     width: 1120,

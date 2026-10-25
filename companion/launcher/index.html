@@ -13,8 +13,14 @@
   <body>
     <header>
       <strong>POKEAPP · Launcher</strong
+      ><span id="launcher-version" class="muted"></span
       ><span id="connection" role="status">● Sin conexión</span>
     </header>
+    <div id="update-banner" role="status" hidden>
+      <span id="update-text"></span>
+      <button id="update-download" hidden>Descargar actualización</button>
+      <button id="update-install" hidden>Instalar y reiniciar</button>
+    </div>
     <main>
       <nav aria-label="Secciones">
         <button id="save-tab" aria-pressed="true">Mi save</button
@@ -31,6 +37,11 @@
           Selecciona tu archivo para empezar. Puedes explorar sin conexión.
         </p>
         <p id="save-identity"></p>
+        <p id="emulator-state" class="muted"></p>
+        <button id="discover-saves">
+          Buscar partidas en Lime3DS, Azahar o Citra
+        </button>
+        <div id="discovered-saves"></div>
         <article aria-labelledby="write-title">
           <h2 id="write-title">Cambios en tu partida</h2>
           <p id="write-state" role="status">
@@ -50,6 +61,69 @@
             Volver a comprobar la operación
           </button>
           <p id="write-error" role="status"></p>
+        </article>
+        <article aria-labelledby="quick-title">
+          <h2 id="quick-title">Objetos rápidos</h2>
+          <p id="quick-state" role="status">
+            Selecciona tu partida para ver tus objetos.
+          </p>
+          <div class="quick-item" data-item="rare_candy">
+            <img src="assets/items/50.png" alt="" width="32" height="32" />
+            <span class="quick-name">Caramelo Raro</span>
+            <span class="quick-count muted"></span>
+            <button class="quick-minus" aria-label="Uno menos de Caramelo Raro">
+              −
+            </button>
+            <input
+              class="quick-input"
+              type="text"
+              inputmode="numeric"
+              autocomplete="off"
+              maxlength="4"
+              value="1"
+              aria-label="Cantidad de Caramelo Raro"
+            />
+            <button class="quick-plus" aria-label="Uno más de Caramelo Raro">
+              +
+            </button>
+            <button class="quick-add">Añadir</button>
+            <span class="quick-error" role="status"></span>
+          </div>
+          <div class="quick-item" data-item="heart_scale">
+            <img src="assets/items/93.png" alt="" width="32" height="32" />
+            <span class="quick-name">Escama Corazón</span>
+            <span class="quick-count muted"></span>
+            <button
+              class="quick-minus"
+              aria-label="Uno menos de Escama Corazón"
+            >
+              −
+            </button>
+            <input
+              class="quick-input"
+              type="text"
+              inputmode="numeric"
+              autocomplete="off"
+              maxlength="4"
+              value="1"
+              aria-label="Cantidad de Escama Corazón"
+            />
+            <button class="quick-plus" aria-label="Uno más de Escama Corazón">
+              +
+            </button>
+            <button class="quick-add">Añadir</button>
+            <span class="quick-error" role="status"></span>
+          </div>
+          <label
+            ><input id="quick-emulator-closed" type="checkbox" /> He cerrado el
+            juego y el emulador.</label
+          >
+          <button id="quick-refresh">Leer objetos de la partida</button>
+          <p class="muted">
+            Primero se prepara una copia verificada; después confirmas el cambio
+            en «Cambios en tu partida». Solo se muestra «aplicado» tras releer
+            la partida.
+          </p>
         </article>
         <article aria-labelledby="backups-title">
           <h2 id="backups-title">Copias de seguridad</h2>
@@ -130,6 +204,7 @@
         <button id="close-details">Cerrar</button>
       </dialog>
     </main>
+    <script src="quantity.js"></script>
     <script src="renderer.js"></script>
   </body>
 </html>

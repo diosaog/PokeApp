@@ -1,0 +1,44 @@
+// Headless check of the real Launcher page with a test preload. Not packaged.
+const { app, BrowserWindow } = require("electron");
+const path = require("node:path");
+const page = path.resolve(__dirname, "../../companion/launcher/index.html");
+const script = `(async () => {
+  const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+  const out = [];
+  const check = (ok, label) => out.push([Boolean(ok), label]);
+  await sleep(1500);
+  const row = document.querySelector('[data-item="rare_candy"]');
+  const input = row.querySelector(".quick-input"), plus = row.querySelector(".quick-plus"),
+    minus = row.querySelector(".quick-minus"), add = row.querySelector(".quick-add");
+  const type = (v) => { input.focus(); input.value = v; input.dispatchEvent(new Event("input")); };
+  check(input.value === "1" && /Tienes 5/.test(row.querySelector(".quick-count").textContent), "initial value and count");
+  plus.click(); plus.click(); minus.click();
+  check(input.value === "2", "plus/minus share one value");
+  type(""); check(add.disabled && /Escribe una cantidad/.test(row.querySelector(".quick-error").textContent), "cleared field cannot confirm");
+  type("250"); plus.click(); check(input.value === "251", "buttons continue from typed value");
+  type("-1.5"); check(input.value === "15", "only digits kept");
+  type("995"); check(add.disabled && /máximo que cabe ahora es 994/.test(row.querySelector(".quick-error").textContent), "above real maximum refused");
+  type("994"); check(add.disabled, "emulator checkbox required");
+  const box = document.getElementById("quick-emulator-closed"); box.click();
+  check(!add.disabled, "valid value and confirmation enable Añadir");
+  add.click(); await sleep(200);
+  check(JSON.stringify(window.launcher.__calls()) === JSON.stringify([["rare_candy", 994, true]]), "exact request sent once");
+  const full = document.querySelector('[data-item="heart_scale"]');
+  check(full.querySelector(".quick-add").disabled && /No cabe/.test(full.querySelector(".quick-error").textContent), "full stack cannot add");
+  check(!document.getElementById("update-banner").hidden && !document.getElementById("update-download").hidden, "update offered with download button");
+  check(/v0.22.0-rc.3/.test(document.getElementById("launcher-version").textContent), "installed version shown");
+  check(/Lime3DS/.test(document.getElementById("emulator-state").textContent) && document.querySelectorAll("#discovered-saves button").length === 1, "Lime3DS state and discovered save");
+  window.launcher.__disable(); await sleep(1300);
+  check(add.disabled && /Operación bloqueada/.test(document.getElementById("quick-state").textContent), "disabled capability blocks with explanation");
+  return out;
+})()`;
+app.whenReady().then(async () => {
+  const win = new BrowserWindow({
+    show: false,
+    webPreferences: { preload: path.join(__dirname, "preload.cjs"), contextIsolation: true, sandbox: false },
+  });
+  await win.loadFile(page);
+  const result = await win.webContents.executeJavaScript(script);
+  for (const [ok, label] of result) console.log((ok ? "PASS " : "FAIL ") + label);
+  app.exit(result.every(([ok]) => ok) ? 0 : 1);
+});

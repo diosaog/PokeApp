@@ -26,6 +26,10 @@ module.exports = {
     "style.css",
     "package.json",
     "assets/icon.ico",
+    "assets/items/50.png",
+    "assets/items/93.png",
+    "quantity.js",
+    "updater.cjs",
   ],
   extraResources: [
     {
