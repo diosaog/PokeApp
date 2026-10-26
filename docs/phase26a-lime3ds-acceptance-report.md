@@ -1,7 +1,43 @@
-# Phase26A — Lime3DS acceptance (stopped at the owner gate)
+# Phase26A — Lime3DS acceptance
 
-2026-10-26. **PHASE26A BLOCKED at the owner-approval gate. No personal save was
-opened, read, hashed, copied or modified. Production UNCHANGED; nothing
+2026-10-26 continuation. **Owner authorized work on COPIES of the Pokémon Y save.
+PARTIAL: everything automatable PASS on isolated copies; the in-game check is
+the owner's manual step.** The original was only read once and hashed; it is
+byte-identical. First stop (before authorization) preserved below.
+
+## Continuation results (isolated copies)
+
+- **Real save read:** Pokémon Y, Gen 6, 415,232 bytes, SHA-256 `c0e666e7…`;
+  party Bagon Lv10, Zygarde Lv5, Keldeo Lv6; nothing boxed; Rare Candy 0, Heart
+  Scale 0 (max 999).
+- **Backup:** independent byte copy (+ `.metadata`) in the private evidence
+  folder, hash-verified, restore verified byte-identical.
+- **Isolated Lime3DS:** portable copy of the owner's Lime3DS binaries (no ROMs
+  copied) with its own `user` folder; the owner's config/keys copied and
+  `nand`/`sdmc` pinned to the isolated folders. Working copy in the isolated sdmc.
+  Starting it left `%APPDATA%\Lime3DS` unchanged (snapshot compared).
+- **Real process:** isolated `lime3ds.exe` running → write refused
+  (`EMULATOR_RUNNING`), file unchanged; closed gracefully.
+- **Quick items on the working copy (runtime commands, real native):** Rare
+  Candy 0→10 and Heart Scale 0→7, verified backup, explicit confirm, native
+  readback; party, boxes and trainer identical.
+- **Idempotency:** re-offer of the original intent and restart → no second add.
+- **Recovery (extra disposable copies):** external change after preparation →
+  `REJECTED`, external bytes kept; interruption at backup → nothing written;
+  interruption after publish → reconciled `APPLIED_VERIFIED`, +4 once; corrupt
+  backup → `RECOVERY_REQUIRED`, file untouched; good backup → `RESTORED_VERIFIED`
+  exact original.
+- **Finding (release blocker for public writes):** the Phase22 no-replace handoff
+  leaves the parked original `.pokeapp-<op>.displaced` (full copy) and a `.lock`
+  beside the save after success, and reusing an operation id with a leftover
+  displaced file correctly blocks with `DESTINATION_OCCUPIED`. The engine itself
+  marks that handoff fixture-only; a retention/cleanup design is required before
+  public enablement. The in-game check runs with those files present.
+- **Robbery rules:** recorded in [robbery-rules.md](robbery-rules.md); the API now
+  refuses victim cancellation (409 `TRANSFER_VICTIM_CANNOT_CANCEL`), proven again
+  on PostgreSQL (24B harness 15/15).
+
+## First stop (before authorization) Production UNCHANGED; nothing
 published; public physical writes OFF.** Entry `1450062` (25B DONE LOCAL, gate
 PASS). [25B report](phase25b-launcher-report.md) ·
 [Lime3DS procedure](lime3ds-certification-procedure.md) ·
@@ -50,17 +86,18 @@ PASS). [25B report](phase25b-launcher-report.md) ·
 | --- | --- |
 | PHASE 25B GATE | PASS |
 | LIME3DS DETECTION | PASS (install, executable/process name, save location) |
-| REAL SAVE READ | PENDING (owner approval) |
-| REAL BACKUP/RESTORE | PENDING (owner approval) |
-| RARE CANDY IN-GAME | PENDING |
-| HEART SCALE IN-GAME | PENDING |
+| REAL SAVE READ | PASS |
+| REAL BACKUP/RESTORE | PASS |
+| RARE CANDY IN-GAME | PENDING owner check (file: 0→10 PASS) |
+| HEART SCALE IN-GAME | PENDING owner check (file: 0→7 PASS) |
 | NATIVE REVIVE IN-GAME | PENDING (fixtures: native/independent PASS since 23C) |
 | TWO-SAVE ROBBERY | PENDING (needs two real participants; fixtures PASS in 24A/24B) |
 | GAME SAVE/REOPEN PERSISTENCE | PENDING |
-| RECOVERY | PARTIAL (fixtures PASS; real Lime3DS pending) |
+| RECOVERY | PASS on real-save copies (in-game recovery not applicable) |
 | GEN7 SIGNATURE | KNOWN BLOCKER (fails closed; Y is Gen6, unaffected) |
 | PRIVATE PRE-RELEASE BUILD | PARTIAL (built + audited; unsigned private channel; graceful close unverified headless) |
 | AUTO-UPDATER | PENDING (real key, feed, Authenticode) |
 | HOSTED VERIFIER | NOT DEPLOYED |
 | PUBLIC PHYSICAL WRITES | DISABLED |
-| PHASE26A | BLOCKED (owner gate) |
+| THREE ORIGINAL POKÉMON | PASS (unchanged on copy; original untouched) |
+| PHASE26A | PARTIAL (owner in-game step) |

@@ -1,5 +1,15 @@
 # Phase25 — live execution record
 
+2026-10-26 (continuation). **PHASE26A PARTIAL — owner in-game step pending.**
+Owner authorized copies of the Pokémon Y save. On isolated copies: real read,
+backup/restore, real lime3ds.exe blocking, Rare Candy 0→10 and Heart Scale 0→7
+with readback, idempotency and recovery all PASS; original unchanged. Waiting for
+the owner to open the isolated copy in Lime3DS, check the bag, save and reopen;
+then re-read the copy to confirm persistence. Robbery rules in
+[robbery-rules.md](../robbery-rules.md): team allowed (pending), cross-title
+prohibited, no victim consent (API veto refused; full contract pending).
+Release blocker: handoff leaves `.displaced`/`.lock` beside the save.
+
 2026-10-26. **PHASE26A BLOCKED at the owner gate** (follows 25B). Lime3DS found
 (portable `Desktop\Lime3DS\Lime3DS\lime3ds.exe`, `%APPDATA%\Lime3DS`); one Pokémon Y
 save located by discovery, NOT opened/read/copied. Private pre-release

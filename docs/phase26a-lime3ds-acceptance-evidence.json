@@ -1,7 +1,7 @@
 {
   "date": "2026-10-26",
   "entry": "1450062",
-  "status": "PHASE26A_BLOCKED_OWNER_GATE",
+  "status": "PHASE26A_PARTIAL_OWNER_IN_GAME_STEP",
   "phase25b_gate": "PASS",
   "lime3ds": {
     "executable": "C:\\Users\\Antonio\\Desktop\\Lime3DS\\Lime3DS\\lime3ds.exe",
@@ -103,5 +103,119 @@
     "release key and HTTPS feeds",
     "Windows 10",
     "054-059 and verifier deployment (separate authorization)"
-  ]
+  ],
+  "owner_authorization": "2026-10-26: copies of the Pokémon Y save authorized; original never a working file",
+  "original_reading": {
+    "original_path": "C:\\Users\\Antonio\\AppData\\Roaming\\Lime3DS\\sdmc\\Nintendo 3DS\\00000000000000000000000000000000\\00000000000000000000000000000000\\title\\00040000\\00055e00\\data\\00000001\\main",
+    "sha256": "c0e666e75047d3571ae656387bd8bfecf9f23c6e613a3ffb10f20964a45fc2de",
+    "metadata_sha256": "24bb7e7f2835b4a0306d8ef31cb0ff1a37776ee7e8a591efe71e1046c78c4499",
+    "size": 415232,
+    "game": "Y",
+    "generation": 6,
+    "party_count": 3,
+    "party": [
+      {
+        "species_id": 371,
+        "nickname": "Bagon",
+        "level": 10
+      },
+      {
+        "species_id": 718,
+        "nickname": "Zygarde",
+        "level": 5
+      },
+      {
+        "species_id": 647,
+        "nickname": "Keldeo",
+        "level": 6
+      }
+    ],
+    "boxed_count": 0,
+    "inventory": {
+      "rare_candy": {
+        "count": 0,
+        "max": 999
+      },
+      "heart_scale": {
+        "count": 0,
+        "max": 999
+      }
+    }
+  },
+  "real_y_acceptance": {
+    "status": "PASS",
+    "checks": [
+      "real lime3ds.exe (isolated portable) detected: write refused while open, graceful close, owner's Lime3DS data untouched",
+      "Rare Candy +10 and Heart Scale +7 applied with verified backup, explicit confirm and native readback; party, boxes and trainer identical",
+      "lost reply / re-offer of the original intent and Launcher restart: no duplicate addition",
+      "file modified externally after preparation: confirmation refused, external bytes kept",
+      "interruption during preparation leaves the file untouched; interruption after writing reconciles without duplication",
+      "corrupt backup refused without touching the file; verified restore returns the exact original bytes",
+      "original save byte-identical (SHA-256 unchanged)"
+    ],
+    "original_sha256": "c0e666e75047d3571ae656387bd8bfecf9f23c6e613a3ffb10f20964a45fc2de",
+    "quick_items": {
+      "rare_candy": {
+        "before": 0,
+        "after": 10,
+        "operation_id": "4d1f54e0-488c-5078-bf05-cd18f08abd76"
+      },
+      "heart_scale": {
+        "before": 0,
+        "after": 7,
+        "operation_id": "1d6e1893-8edf-5251-b72c-ec382aedcedb"
+      }
+    },
+    "work_sha256": "c8744bfa2f3e7cf97f2137bd9919d7e699034b11cd00b4602ca912c8cfd08ab0",
+    "external_modification": "REJECTED",
+    "simulated_crashes": [
+      "WriteSafetyError"
+    ],
+    "interruptions": {
+      "backup_verified": {
+        "receipt": "REJECTED",
+        "heart_scale": 0
+      },
+      "after_publish": {
+        "receipt": "APPLIED_VERIFIED",
+        "heart_scale": 4
+      }
+    },
+    "restore": {
+      "status": "RESTORED_VERIFIED",
+      "corrupt_backup": "RECOVERY_REQUIRED"
+    }
+  },
+  "isolated_lime3ds": {
+    "root": "%LOCALAPPDATA%\\PokeApp-lime3ds-test-20261026",
+    "portable_user_folder": true,
+    "roms_copied": false,
+    "storage_pinned": "use_custom_storage=true, nand/sdmc in isolated user folder",
+    "owner_lime3ds_data_unchanged": true
+  },
+  "findings": [
+    "no-replace handoff leaves .pokeapp-<op>.displaced and .lock beside the save after success (fixture-only protocol); release blocker for public writes"
+  ],
+  "robbery_rules": {
+    "team": "ALLOWED_PENDING_IMPLEMENTATION",
+    "cross_title": "PROHIBITED_DEFINITIVE",
+    "victim_consent": "NOT_REQUIRED_CONTRACT_APPROVED_PARTIAL",
+    "victim_cancel_refused": "409 TRANSFER_VICTIM_CANNOT_CANCEL (web + Launcher leg route)",
+    "pg_regression": [
+      "wrong owner and persisted shield rejected",
+      "disabled service, outsider-victim reservation refused before any reservation",
+      "authorized idempotent request, conflict, outsider denial and status-only web reads",
+      "private worker plans once; each Launcher receives only its own leg plan",
+      "both Launchers prepare verified backups; early/out-of-order application refused without file change",
+      "first part applied locally is not confirmation; tampered/foreign/wrong-claim uploads and post-apply cancel refused; restart replay idempotent",
+      "worker verifies each side independently, finalizes once; replay returns identical receipt",
+      "both Launchers and web report COMMITTED; gates released and stay released after restart",
+      "owner, both current saves, PC observations, single consumption/voucher; Launcher re-sync of result bytes is deduplicated, no clone",
+      "web withdrawal before application releases the prepared Launcher; original file and purchase untouched",
+      "1 native/PG/Launcher paired workflows, both backups, no false completion",
+      "restricted issuer and paired-table grants",
+      "foreign OT remains unproven, ownership/consumption deliberately gated",
+      "reserved current-save pointer cannot advance"
+    ]
+  }
 }

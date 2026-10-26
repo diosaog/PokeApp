@@ -5,7 +5,12 @@ milestone record; it does not maintain a second live phase-status ledger.
 
 ## Current project position
 
-- Current packet: **Phase26A BLOCKED at owner approval — Lime3DS installation and
+- Current packet: **Phase26A PARTIAL — real Pokémon Y copies certified outside the
+  game (read, backup/restore, Lime3DS blocking, Rare Candy/Heart Scale, recovery);
+  owner in-game check pending; robbery rules recorded
+  ([robbery-rules.md](robbery-rules.md)); production unchanged**.
+
+- Earlier in 26A: **Phase26A BLOCKED at owner approval — Lime3DS installation and
   the Pokémon Y save located (not opened); private pre-release 0.23.0-rc.1 built
   and audited, not distributed; nothing published; production writes disabled**.
   [Report](phase26a-lime3ds-acceptance-report.md),
