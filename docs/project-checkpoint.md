@@ -5,7 +5,12 @@ milestone record; it does not maintain a second live phase-status ledger.
 
 ## Current project position
 
-- Current packet: **Phase26D DONE LOCAL — save engine leaves nothing but the save
+- Current packet: **Phase27A DONE LOCAL — server-authoritative robbery without
+  victim cooperation (local 061), mandatory sync in the Launcher, restricted
+  verifier ready; production and public physical writes unchanged**
+  ([27A report](phase27a-report.md)). Next: 27B (hosted acceptance).
+
+- Earlier: **Phase26D DONE LOCAL — save engine leaves nothing but the save
   beside it after verified writes; recovery procedure documented; power-loss and
   Windows 10 PENDING** ([26D report](phase26d-save-engine-report.md)); owner's
   daily backup policy (one point per save and day, 30 days) added. Next: 27A.

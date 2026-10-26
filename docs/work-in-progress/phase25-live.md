@@ -1,5 +1,16 @@
 # Phase25 — live execution record
 
+2026-10-26 (27A). **27A DONE LOCAL**: PokeApp decides a valid robbery from the
+accepted saves without the victim (local 061); each save then has its own
+physical obligation; the victim's removal is a mandatory sync in the Launcher;
+the robber receives the victim's canonical bytes; re-planning on current bytes,
+verified absence, restart and incidents covered. Disposable E2E 16/16 (PG +
+FastAPI + two Launchers + verifier + parity). Not applied to production, worker
+not deployed (image build needs Docker), public writes OFF.
+[27A report](../phase27a-report.md), [backend](../robbery-backend.md).
+**Next: 27B** — owner-approved restricted hosted acceptance (procedure steps
+1–18), real two-player robbery on Lime3DS, worker image, packaged Launcher.
+
 2026-10-26 (daily backups). Owner decision implemented on the 26D engine: one
 ordinary restore point per save and local date (state before the day's first
 write), kept 30 days, listed in the Launcher with date and game and exportable;

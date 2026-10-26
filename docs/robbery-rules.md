@@ -30,47 +30,97 @@ unique identity qualify (clones and foreign OT are refused). Additive local
 `060_transfer_party_origin.sql` widens the reservation scope only.
 
 **B. Cross-title robbery is prohibited — definitive product rule.** Status:
-**enforced** — the native planner refuses different titles (8 cross-title
-rejections proven); no conversion will be built. Next packet adds the early
-same-title check at reservation so such a request is refused immediately.
+**enforced at reservation (27A)** — `api_prepare_transfer` refuses different
+titles (`TRANSFER_CROSS_TITLE_FORBIDDEN`) before any work, adjudication rechecks
+it, and the native planner still refuses it; no conversion will be built.
 
-**C. No victim consent; PokeApp is the authority.** Status: **contract approved,
-implementation pending.** Implemented now: the victim has no accept/refuse/cancel
-control in web or Launcher, and the API refuses a victim cancellation
-(`TRANSFER_VICTIM_CANNOT_CANCEL`, web and Launcher leg route; proven on
-PostgreSQL). Only the requester may withdraw, and only before any application.
+**C. No victim consent; PokeApp is the authority.** Status: **implemented and
+validated locally (Phase27A, migration 061).** The victim has no accept, refuse
+or cancel control anywhere; only the requester may withdraw, and only before the
+decision (`TRANSFER_ADJUDICATED` afterwards, for everybody).
 
-### Contract for C (to implement)
+## Definitive contract (27A)
 
-States, never conflated:
-- **Competitive decision** (server): the authorized robbery is final for
-  ownership, flags, voucher and consumption once the server can derive both
-  plans from the server-held accepted saves.
-- **Physical transfer pending**: each Launcher still has an obligation.
-- **Physical transfer verified**: per side, only with an independently verified
-  artifact — never inferred.
-- **Mandatory sync**: when the victim's Launcher is next online and the emulator
-  is closed, it must apply the removal before any other write or sync.
-- **Reconciliation incident**: the file changed elsewhere, cannot be planned or
-  cannot be verified; blocked, materials kept, admin-assisted.
+Two things are never conflated:
 
-Guarantees: no duplication competitively (the server owns identity; a victim
-upload still containing the Pokémon is not credited and cannot be used in team
-locks); no loss (the robber's insertion uses the server-held bytes and is
-verified); full traceability of both saves. An offline computer cannot be changed
-remotely: until its mandatory sync the victim's file still physically contains
-the Pokémon, and that copy is competitively invalid.
+- **Competitive decision** — taken once by the restricted verifier from the
+  server-held accepted saves of both trainers (no Launcher, no physical proof):
+  purchase consumed, canonical 025 effects (ROBADO/BLINDADO, voucher, robbery
+  cycle), ownership switched to the robber, provenance recorded. Final from then
+  on; the victim's absence or refusal cannot undo it.
+- **Physical obligation per side** — each save is changed only by its own
+  Launcher through the safe engine, and settled only by an independently verified
+  artifact (or, for the victim, a verified absence).
 
-### Exact next technical unit
+### States and transitions
 
-1. SQL: competitive finalization decoupled from the victim's physical proof
-   (server decision + per-side obligations), reservation same-title check,
-   victim-side sync gating limited to the robbed entity.
-2. Ingestion/team locks: robbed entity in the victim's upload → pending-removal,
-   never credited; team lock rejects it.
-3. Launcher: mandatory removal at startup (blocks other writes/sync until done or
-   escalated), robber insertion independent of the victim's proof.
-4. Native: team-source plan (party extraction and compaction, destination first
-   free box slot), qualified on the eight titles.
-5. Tests: offline victim for days, victim edits elsewhere, both online, lost
-   replies, restarts; no duplication or loss in any order.
+Overall (`transfer_state`):
+
+| State | Meaning | Next |
+| --- | --- | --- |
+| `REQUESTED` | reservation created, nothing decided | `ELIGIBILITY_VERIFIED`, `CANCELLED` (requester) |
+| `ELIGIBILITY_VERIFIED` | both plans derived from accepted saves | `COMPETITIVELY_ADJUDICATED`, `CANCELLED` (requester) |
+| `COMPETITIVELY_ADJUDICATED` | decided; physical delivery pending on one or both sides | `RECONCILED`, `BLOCKED_UNCERTAIN` |
+| `RECONCILED` | both sides settled; terminal | — |
+| `BLOCKED_UNCERTAIN` | a side has an incident; decision unchanged | assisted recovery |
+| `CANCELLED` | withdrawn before the decision; nothing consumed | — |
+
+Per side (`transfer_obligation`), after the decision:
+
+| Victim (`DONOR_…`) / robber (`RECIPIENT_…`) | Meaning |
+| --- | --- |
+| `PHYSICAL_PENDING` | waiting for this Launcher (emulator closed) |
+| `RECOVERY_REQUIRED` | the current file could not be planned (e.g. full boxes, unreadable); the Launcher may offer it again |
+| `VERIFIED` | verified artifact registered as this trainer's accepted save; trainer released |
+| `ABSENT_VERIFIED` (victim only) | the victim's current file was proven not to hold the Pokémon and was accepted as is |
+| `BLOCKED_UNCERTAIN` | ambiguous identity or another trainer's save; evidence kept, assisted |
+
+The pre-27A states (`PREPARING` … `BOTH_VERIFIED_PENDING_IDENTITY`, `COMMITTED`)
+remain readable for history only; the two-proof finalization is superseded and
+refused by SQL.
+
+### Mandatory sync (victim)
+
+While the victim's side is pending, the server refuses the victim's ordinary
+sync (`transfer_reconciliation_required`) and any team lock
+(`transfer_removal_pending`); a save that still holds another trainer's Pokémon
+in the party can never be locked (`team_contains_robbed_pokemon`). The Launcher
+shows the obligation first, pauses ordinary sync and offers only «Aplicar
+retirada obligatoria» (emulator closed). Then:
+
+1. File equals the decided plan's source: verified backup, explicit confirm,
+   native removal, upload, independent proof, registration.
+2. File moved on (played, older copy, edited elsewhere, or a rejected attempt):
+   the Launcher uploads its **current** bytes without changing anything; the
+   verifier locates the robbed identity by its immutable evidence and re-plans on
+   those bytes (new plan id), or accepts the file when the Pokémon is no longer
+   there, or blocks (ambiguous/another save).
+3. Restart during the removal: the engine journal decides (applied → upload;
+   rejected with the original intact → fresh plan); never a guess.
+
+An offline computer is never changed remotely: until its sync the victim's file
+still physically holds the Pokémon, and that copy is competitively invalid.
+
+### Delivery to the robber
+
+The robber's insertion always uses the **victim's canonical accepted save** (the
+bytes the decision was taken on): same PID/EC, OT, UUID entity, attributes and
+history. A victim upload is never a source of Pokémon bytes. If the robber's own
+file moved on, it is re-planned on the robber's current bytes with the same
+canonical Pokémon. Until `RECIPIENT_VERIFIED` the Pokémon belongs to the robber
+competitively but is not physically available, and it cannot be fielded (the
+robber's accepted save does not contain it).
+
+### Guarantees
+
+Exactly once: decision, consumption, flags and voucher (idempotent verifier,
+`adjudicated_at` set once, canonical 025 idempotency key); each proof and
+registration once (lost replies are no-ops). No clone: the robbed identity can
+only be bound to the robber; a kept victim copy is AMBIGUOUS and never
+fieldable. No loss: originals are backed up before any change; the robber
+receives verified canonical bytes. Two concurrent robberies on the same trainers
+or Pokémon are refused (`TRANSFER_RESERVED`); a trainer is released as soon as
+their own side is settled.
+
+Foreign-OT origins stay **restricted** (only own-OT, unique identities are
+robbable); a received Pokémon is proven for its new owner through provenance.
