@@ -1676,6 +1676,26 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/v1/launcher/seasons/{season_id}/transfers/{authorization_id}/candidate": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    /**
+     * Submit Candidate
+     * @description Current own save after the decision when it no longer matches the plan.
+     */
+    put: operations["submit_candidate_v1_launcher_seasons__season_id__transfers__authorization_id__candidate_put"];
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/v1/launcher/seasons/{season_id}/transfers/{authorization_id}/result": {
     parameters: {
       query?: never;
@@ -4666,6 +4686,10 @@ export interface components {
        * @enum {string}
        */
       status:
+        | "REQUESTED"
+        | "ELIGIBILITY_VERIFIED"
+        | "COMPETITIVELY_ADJUDICATED"
+        | "RECONCILED"
         | "PREPARING"
         | "WAITING_OTHER"
         | "PENDING_SOURCE"
@@ -4676,6 +4700,20 @@ export interface components {
         | "COMMITTED"
         | "CANCELLED"
         | "BLOCKED_UNCERTAIN";
+      /** Obligation */
+      obligation?:
+        | (
+            | "DONOR_PHYSICAL_PENDING"
+            | "DONOR_RECOVERY_REQUIRED"
+            | "DONOR_VERIFIED"
+            | "DONOR_ABSENT_VERIFIED"
+            | "DONOR_BLOCKED_UNCERTAIN"
+            | "RECIPIENT_PHYSICAL_PENDING"
+            | "RECIPIENT_RECOVERY_REQUIRED"
+            | "RECIPIENT_VERIFIED"
+            | "RECIPIENT_BLOCKED_UNCERTAIN"
+          )
+        | null;
       /** Purchase Id */
       purchase_id?: string | null;
       /**
@@ -4705,6 +4743,8 @@ export interface components {
       source_sha256: string;
       /** Result Sha256 */
       result_sha256?: string | null;
+      /** Pair Id */
+      pair_id?: string | null;
       /** Intent */
       intent?: {
         [key: string]: unknown;
@@ -4749,6 +4789,10 @@ export interface components {
        * @enum {string}
        */
       status:
+        | "REQUESTED"
+        | "ELIGIBILITY_VERIFIED"
+        | "COMPETITIVELY_ADJUDICATED"
+        | "RECONCILED"
         | "PREPARING"
         | "WAITING_OTHER"
         | "PENDING_SOURCE"
@@ -4759,6 +4803,22 @@ export interface components {
         | "COMMITTED"
         | "CANCELLED"
         | "BLOCKED_UNCERTAIN";
+      /** Obligation */
+      obligation?:
+        | (
+            | "DONOR_PHYSICAL_PENDING"
+            | "DONOR_RECOVERY_REQUIRED"
+            | "DONOR_VERIFIED"
+            | "DONOR_ABSENT_VERIFIED"
+            | "DONOR_BLOCKED_UNCERTAIN"
+            | "RECIPIENT_PHYSICAL_PENDING"
+            | "RECIPIENT_RECOVERY_REQUIRED"
+            | "RECIPIENT_VERIFIED"
+            | "RECIPIENT_BLOCKED_UNCERTAIN"
+          )
+        | null;
+      /** Pair Id */
+      pair_id?: string | null;
       /** Source Sha256 */
       source_sha256: string;
       /** Apply Started */
@@ -4800,6 +4860,10 @@ export interface components {
        * @enum {string}
        */
       status:
+        | "REQUESTED"
+        | "ELIGIBILITY_VERIFIED"
+        | "COMPETITIVELY_ADJUDICATED"
+        | "RECONCILED"
         | "PREPARING"
         | "WAITING_OTHER"
         | "PENDING_SOURCE"
@@ -4828,6 +4892,10 @@ export interface components {
        * @enum {string}
        */
       status:
+        | "REQUESTED"
+        | "ELIGIBILITY_VERIFIED"
+        | "COMPETITIVELY_ADJUDICATED"
+        | "RECONCILED"
         | "PREPARING"
         | "WAITING_OTHER"
         | "PENDING_SOURCE"
@@ -4838,6 +4906,20 @@ export interface components {
         | "COMMITTED"
         | "CANCELLED"
         | "BLOCKED_UNCERTAIN";
+      /** Obligation */
+      obligation?:
+        | (
+            | "DONOR_PHYSICAL_PENDING"
+            | "DONOR_RECOVERY_REQUIRED"
+            | "DONOR_VERIFIED"
+            | "DONOR_ABSENT_VERIFIED"
+            | "DONOR_BLOCKED_UNCERTAIN"
+            | "RECIPIENT_PHYSICAL_PENDING"
+            | "RECIPIENT_RECOVERY_REQUIRED"
+            | "RECIPIENT_VERIFIED"
+            | "RECIPIENT_BLOCKED_UNCERTAIN"
+          )
+        | null;
       /** Purchase Id */
       purchase_id?: string | null;
       /**
@@ -8690,6 +8772,38 @@ export interface operations {
         "application/json": components["schemas"]["TransferLegBody"];
       };
     };
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["TransferLegResponse"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  submit_candidate_v1_launcher_seasons__season_id__transfers__authorization_id__candidate_put: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        season_id: string;
+        authorization_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
     responses: {
       /** @description Successful Response */
       200: {

@@ -357,7 +357,7 @@ app.whenReady().then(() => {
     async (event, kind, authorizationId, emulatorClosed) => {
       authorize(event);
       if (
-        !["prepare", "apply", "cancel", "refresh"].includes(kind) ||
+        !["prepare", "apply", "fulfil", "cancel", "refresh"].includes(kind) ||
         typeof authorizationId !== "string" ||
         authorizationId.length !== 36
       )
@@ -390,6 +390,28 @@ app.whenReady().then(() => {
       }
       if (emulatorClosed !== true)
         throw new Error("Confirma que el juego y el emulador están cerrados.");
+      if (kind === "fulfil") {
+        if (!transfer.obligation)
+          throw new Error("PokeApp aún no ha decidido.");
+        const victim = transfer.side === "source";
+        const answer = await dialog.showMessageBox(win, {
+          type: "warning",
+          title: victim ? "Sincronización obligatoria" : "Recibir Pokémon",
+          message: victim
+            ? "Retirar de tu partida el Pokémon robado"
+            : "Añadir a tu partida el Pokémon robado",
+          detail: `${state.selected_save}\n\nEl robo ya está decidido por PokeApp. ${victim ? "Se retirará el Pokémon de tu partida actual" : "Se añadirá el Pokémon a tu partida actual"} con copia verificada, confirmación y verificación independiente. Si tu partida cambió desde la decisión, PokeApp recalculará tu parte sin modificar nada todavía.\n\nMantén el juego y el emulador cerrados hasta que termine.`,
+          buttons: ["Cancelar", victim ? "Retirar ahora" : "Recibir ahora"],
+          defaultId: 0,
+          cancelId: 0,
+          noLink: true,
+        });
+        if (answer.response !== 1) return { status: "NOT_CONFIRMED" };
+        return request("transfer_fulfil", {
+          ...args,
+          closed_emulator_confirmed: true,
+        });
+      }
       const where = transfer.location
         ? `Caja ${transfer.location.box}, posición ${transfer.location.slot}`
         : "la posición indicada por PokeApp";

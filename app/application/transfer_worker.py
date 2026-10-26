@@ -1,8 +1,9 @@
-"""Private paired verifier step. No listener, file publication or account access.
+"""Private robbery verifier step. No listener, file publication or account access.
 
 Every action re-derives its full server context inside TransferVerification;
-the queue is discovery only. Plan, proof and finalization are idempotent, so a
-lost reply is retried by the next scheduled step without duplicating effects.
+the queue is discovery only. Plan, adjudication, re-plan, proof and settlement
+are idempotent, so a lost reply is retried by the next scheduled step without
+duplicating effects.
 """
 
 from app.application.item_use_verification import VerificationRejected
@@ -21,16 +22,20 @@ def run_transfer_step(rpc, verification, *, limit=10):
         try:
             if action == "plan":
                 verification.prepare(aid)
+            elif action == "adjudicate":
+                verification.adjudicate(aid)
+            elif action == "rebase":
+                verification.rebase(aid, job["side"])
             elif action == "verify":
                 verification.verify(aid, job["side"])
-            elif action == "finalize":
-                verification.finalize(aid)
+            elif action == "settle":
+                verification.settle(aid, job["side"])
             else:
                 raise VerificationRejected("TRANSFER_ACTION")
             outcome = "DONE"
         except (VerificationRejected, NativeWriteError, SaveError) as exc:
-            # No proof is issued. The reservation stays visible to both players,
-            # who may cancel before application; nothing is consumed.
+            # A failed step issues no proof or decision: before the decision
+            # nothing is consumed, after it the obligation simply stays pending.
             transient = getattr(exc, "code", None) in (
                 "NATIVE_WRITER_FAILURE",
                 "PARSER_FAILURE",

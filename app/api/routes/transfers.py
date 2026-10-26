@@ -35,7 +35,12 @@ MESSAGES = {
     "TRANSFER_FORBIDDEN": "Los robos entre guardados no están habilitados para tu cuenta.",
     "TRANSFER_PEER_UNAVAILABLE": "Ese entrenador todavía no puede participar en robos entre guardados.",
     "TRANSFER_TARGET_INVALID": "Ese Pokémon no se puede robar.",
-    "TRANSFER_NATIVE_SCOPE_UNQUALIFIED": "Solo se pueden robar Pokémon guardados en las cajas 1–7. Los del equipo todavía no están admitidos.",
+    "TRANSFER_NATIVE_SCOPE_UNQUALIFIED": "Solo se pueden robar Pokémon del equipo o de las cajas 1–7.",
+    "TRANSFER_CROSS_TITLE_FORBIDDEN": "Solo se puede robar a un entrenador que juega el mismo título.",
+    "TRANSFER_NOT_ADJUDICATED": "PokeApp todavía no ha decidido este robo.",
+    "TRANSFER_ADJUDICATED": "El robo ya está decidido: no se puede cancelar ni rechazar.",
+    "TRANSFER_LEG_SETTLED": "Tu parte ya está completada.",
+    "TRANSFER_CANDIDATE_CONFLICT": "Ya se está revisando tu partida actual.",
     "STEAL_TARGET_SHIELDED": "Ese Pokémon está blindado o ya ha sido robado.",
     "STEAL_VICTIM_ALREADY_ROBBED": "Ese entrenador ya ha sido robado en este ciclo.",
     "TRANSFER_RESERVED": "Uno de los entrenadores ya tiene una operación en curso.",
@@ -236,6 +241,44 @@ def update_leg(
     )
 
 
+async def _save_bytes(request: Request):
+    if request.headers.get("content-type") != "application/octet-stream":
+        raise api_error(
+            415, "SAVE_BYTES_REQUIRED", "Se necesita el archivo de partida."
+        )
+    data = bytearray()
+    async for chunk in request.stream():
+        data.extend(chunk)
+        if len(data) > max(NATIVE_SIZES.values()):
+            raise api_error(413, "SAVE_TOO_LARGE", "El archivo es demasiado grande.")
+    return bytes(data)
+
+
+@router.put(
+    "/v1/launcher/seasons/{season_id}/transfers/{authorization_id}/candidate",
+    response_model=TransferLegResponse,
+)
+async def submit_candidate(
+    season_id: UUID,
+    authorization_id: UUID,
+    request: Request,
+    principal: AuthenticatedPrincipal = Reader,
+    container: ApiContainer = ContainerReader,
+):
+    """Current own save after the decision when it no longer matches the plan."""
+    service = _service(container)
+    data = await _save_bytes(request)
+    row = await run_in_threadpool(
+        _execute,
+        service.candidate,
+        str(season_id),
+        principal.trainer_id,
+        str(authorization_id),
+        data,
+    )
+    return _validated(TransferLegResponse, row)
+
+
 @router.put(
     "/v1/launcher/seasons/{season_id}/transfers/{authorization_id}/result",
     response_model=TransferLegResponse,
@@ -249,15 +292,7 @@ async def submit_result(
     container: ApiContainer = ContainerReader,
 ):
     service = _service(container)
-    if request.headers.get("content-type") != "application/octet-stream":
-        raise api_error(
-            415, "SAVE_BYTES_REQUIRED", "Se necesita el archivo resultante."
-        )
-    data = bytearray()
-    async for chunk in request.stream():
-        data.extend(chunk)
-        if len(data) > max(NATIVE_SIZES.values()):
-            raise api_error(413, "SAVE_TOO_LARGE", "El archivo es demasiado grande.")
+    data = await _save_bytes(request)
     row = await run_in_threadpool(
         _execute,
         service.submit,
@@ -265,6 +300,6 @@ async def submit_result(
         principal.trainer_id,
         str(authorization_id),
         str(claim_id),
-        bytes(data),
+        data,
     )
     return _validated(TransferLegResponse, row)

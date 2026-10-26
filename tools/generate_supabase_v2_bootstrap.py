@@ -69,6 +69,7 @@ EXPECTED_MIGRATIONS = [
     "058_transfer_provenance_finalization.sql",
     "059_transfer_integration_reads.sql",
     "060_transfer_party_origin.sql",
+    "061_transfer_authoritative_adjudication.sql",
 ]
 
 FORBIDDEN_TOKENS = [

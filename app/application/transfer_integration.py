@@ -12,6 +12,7 @@ SUMMARY = (
     "authorization_id",
     "side",
     "status",
+    "obligation",
     "purchase_id",
     "pokemon_entity_id",
     "claimed",
@@ -21,11 +22,13 @@ SUMMARY = (
     "expires_at",
     "created_at",
 )
-LAUNCHER = SUMMARY + ("source_sha256", "result_sha256", "intent")
+LAUNCHER = SUMMARY + ("source_sha256", "result_sha256", "pair_id", "intent")
 LEG = (
     "authorization_id",
     "side",
     "status",
+    "obligation",
+    "pair_id",
     "source_sha256",
     "apply_started",
     "result_sha256",
@@ -93,6 +96,12 @@ class TransferIntegration:
     def submit(self, sid, tid, aid, claim_id, data):
         self._require(tid)
         return self._leg(self.transport.submit(aid, sid, tid, claim_id, data), aid)
+
+    def candidate(self, sid, tid, aid, data):
+        """Own CURRENT save when it no longer matches the plan; the verifier
+        re-plans on it. Never a decision, never accepted as a result."""
+        self._require(tid)
+        return self._leg(self.transport.submit_candidate(aid, sid, tid, data), aid)
 
     def withdraw(self, sid, tid, aid):
         """Cancellation is the requester's choice only; the SQL still refuses

@@ -47,3 +47,25 @@ class TransferTransport:
                 result_url=self.blobs.sign(job["result_key"]),
             )
         )
+
+    def submit_candidate(self, aid, sid, tid, data):
+        require(
+            type(data) is bytes and len(data) in NATIVE_SIZES.values(), "TRANSFER_SIZE"
+        )
+        scope = {"authorization_id": aid, "season_id": sid, "trainer_id": tid}
+        job = self.repository.leg(
+            dict(
+                **scope,
+                operation="reserve_candidate",
+                candidate_sha256=sha256(data).hexdigest(),
+                byte_size=len(data),
+            )
+        )
+        self.blobs.put(job["candidate_key"], data, job["candidate_sha256"])
+        return self.repository.leg(
+            dict(
+                **scope,
+                operation="queue_candidate",
+                candidate_url=self.blobs.sign(job["candidate_key"]),
+            )
+        )

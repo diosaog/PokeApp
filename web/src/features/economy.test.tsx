@@ -372,7 +372,11 @@ it.each(Object.entries(transferLabels))(
     ).not.toBeInTheDocument();
     expect(
       screen.queryByRole("button", { name: "Cancelar robo" }) !== null,
-    ).toBe(["PREPARING", "WAITING_OTHER", "PENDING_SOURCE"].includes(status));
+    ).toBe(
+      ["REQUESTED", "PREPARING", "WAITING_OTHER", "PENDING_SOURCE"].includes(
+        status,
+      ),
+    );
   },
 );
 
@@ -382,7 +386,32 @@ it("tells the victim to use the Launcher and offers no web cancellation", () => 
     transfer_enabled: true,
   };
   render(<Inventory />);
-  expect(screen.getByText(/Otro entrenador va a robarte/)).toBeInTheDocument();
+  expect(screen.getByText(/No necesita tu aprobación/)).toBeInTheDocument();
+  expect(
+    screen.queryByRole("button", { name: "Cancelar robo" }),
+  ).not.toBeInTheDocument();
+});
+
+it("separates the decided robbery from each save's pending delivery", () => {
+  mocks.transfers = {
+    items: [
+      {
+        ...leg("COMPETITIVELY_ADJUDICATED", "source"),
+        obligation: "DONOR_PHYSICAL_PENDING",
+      },
+      {
+        ...leg("COMPETITIVELY_ADJUDICATED"),
+        authorization_id: "other",
+        obligation: "RECIPIENT_PHYSICAL_PENDING",
+      },
+    ],
+    transfer_enabled: true,
+  };
+  render(<Inventory />);
+  expect(screen.getAllByText("Robo adjudicado · definitivo")).toHaveLength(2);
+  expect(screen.getByText(/Retirada pendiente/)).toBeInTheDocument();
+  expect(screen.getByText(/Pendiente de recepción/)).toBeInTheDocument();
+  expect(screen.queryAllByText(/Robo completado/)).toHaveLength(0);
   expect(
     screen.queryByRole("button", { name: "Cancelar robo" }),
   ).not.toBeInTheDocument();

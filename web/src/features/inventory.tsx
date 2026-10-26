@@ -41,8 +41,13 @@ export const itemUseLabels: Record<string, string> = {
 const physicalItem = (code: string) =>
   ["revivir_pokemon", "robar_pokemon"].includes(code);
 
-// Only COMMITTED means the server confirmed ownership, both saves and use.
+// The competitive decision (adjudicated) and each save's physical delivery are
+// shown separately; only RECONCILED/COMMITTED means both saves are verified.
 export const transferLabels: Record<string, string> = {
+  REQUESTED: "Robo solicitado · PokeApp comprueba que es válido",
+  ELIGIBILITY_VERIFIED: "Robo válido · PokeApp lo está adjudicando",
+  COMPETITIVELY_ADJUDICATED: "Robo adjudicado · definitivo",
+  RECONCILED: "Robo completado · entregado en las dos partidas",
   PREPARING: "Robo pendiente · preparando guardados",
   WAITING_OTHER: "Esperando al otro entrenador",
   PENDING_SOURCE: "Guardados preparados · pendiente de la primera parte",
@@ -54,7 +59,28 @@ export const transferLabels: Record<string, string> = {
   CANCELLED: "Robo cancelado · el objeto no se ha consumido",
   BLOCKED_UNCERTAIN: "Operación bloqueada",
 };
-const withdrawable = ["PREPARING", "WAITING_OTHER", "PENDING_SOURCE"];
+export const obligationLabels: Record<string, string> = {
+  DONOR_PHYSICAL_PENDING:
+    "Retirada pendiente: abre tu Launcher con el juego cerrado. Tu sincronización normal está en pausa hasta entonces.",
+  DONOR_RECOVERY_REQUIRED:
+    "PokeApp no pudo preparar la retirada en tu partida actual. Abre tu Launcher para reintentarlo.",
+  DONOR_VERIFIED: "Retirada verificada en tu partida.",
+  DONOR_ABSENT_VERIFIED: "Tu partida ya no tenía ese Pokémon: verificado.",
+  DONOR_BLOCKED_UNCERTAIN: "Retirada bloqueada: recuperación asistida.",
+  RECIPIENT_PHYSICAL_PENDING:
+    "Pendiente de recepción: aún no está en tu partida y no puedes usarlo. Abre tu Launcher para recibirlo.",
+  RECIPIENT_RECOVERY_REQUIRED:
+    "PokeApp no pudo preparar la entrega en tu partida actual (¿cajas llenas?). Libera un hueco y abre tu Launcher.",
+  RECIPIENT_VERIFIED: "Pokémon recibido y verificado en tu partida.",
+  RECIPIENT_BLOCKED_UNCERTAIN: "Entrega bloqueada: recuperación asistida.",
+};
+// Only the requester, and only before PokeApp decides; never the victim.
+const withdrawable = [
+  "REQUESTED",
+  "PREPARING",
+  "WAITING_OTHER",
+  "PENDING_SOURCE",
+];
 // Inside PokeApp Launcher this same web adds a marker to its user agent; the
 // Launcher intercepts the plain link below and opens its native quick-item panel.
 const insideLauncher = () =>
@@ -253,12 +279,18 @@ export function Inventory() {
               <p>
                 {transfer.side === "destination"
                   ? "Has solicitado este robo."
-                  : "Otro entrenador va a robarte un Pokémon. Abre tu Launcher para completar tu parte."}
+                  : "PokeApp ha decidido un robo sobre uno de tus Pokémon. No necesita tu aprobación."}
               </p>
               <Tag>
                 {transferLabels[transfer.status] ??
                   "Estado del robo no disponible"}
               </Tag>
+              {transfer.obligation && (
+                <p>
+                  {obligationLabels[transfer.obligation] ??
+                    "Estado de la entrega no disponible"}
+                </p>
+              )}
               {transfer.side === "destination" &&
                 withdrawable.includes(transfer.status) && (
                   <button

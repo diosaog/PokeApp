@@ -137,6 +137,7 @@ class SupabaseV2SchemaTests(unittest.TestCase):
                 "058_transfer_provenance_finalization.sql",
                 "059_transfer_integration_reads.sql",
                 "060_transfer_party_origin.sql",
+                "061_transfer_authoritative_adjudication.sql",
             ],
         )
         for path in _migration_files():
@@ -347,7 +348,7 @@ class SupabaseV2SchemaTests(unittest.TestCase):
         self.assertTrue(bootstrap.startswith("-- ONLY FOR EMPTY POKEAPP V2 DATABASE."))
         self.assertEqual(bootstrap, render_bootstrap())
         self.assertIn(
-            "Source of truth: supabase/v2/migrations/001_core.sql through 060_transfer_party_origin.sql",
+            "Source of truth: supabase/v2/migrations/001_core.sql through 061_transfer_authoritative_adjudication.sql",
             bootstrap,
         )
         self.assertNotIn("drop table", lowered)

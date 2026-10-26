@@ -1,8 +1,9 @@
 """Engineering-only two-save journal bridge. No renderer capability or business use.
 
-Both original backups are prepared before donor removal. Remote authority only
-admits insertion after independent donor proof. Neither local receipt closes a
-transfer; sync/reopening stay blocked until the server reports COMMITTED.
+27A: PokeApp decides the robbery first (COMPETITIVELY_ADJUDICATED); each side then
+fulfils its own physical obligation with the safe engine. The victim's removal is
+a mandatory sync. A local receipt never settles a side: only the server's
+independent verification does.
 """
 
 import json
@@ -14,6 +15,7 @@ from uuid import UUID, uuid4
 from pydantic import BaseModel, ConfigDict, Field, ValidationError
 
 from app.launcher.write_engine import (
+    PENDING,
     EngineeringCapability,
     PairedApplyPermit,
     WriteIntent,
@@ -23,6 +25,10 @@ from app.launcher.write_files import WriteSafetyError
 UUID_TEXT = r"^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
 HASH_TEXT = r"^[0-9a-f]{64}$"
 TransferState = Literal[
+    "REQUESTED",
+    "ELIGIBILITY_VERIFIED",
+    "COMPETITIVELY_ADJUDICATED",
+    "RECONCILED",
     "PREPARING",
     "WAITING_OTHER",
     "PENDING_SOURCE",
@@ -34,6 +40,24 @@ TransferState = Literal[
     "CANCELLED",
     "BLOCKED_UNCERTAIN",
 ]
+TransferObligation = Literal[
+    "DONOR_PHYSICAL_PENDING",
+    "DONOR_RECOVERY_REQUIRED",
+    "DONOR_VERIFIED",
+    "DONOR_ABSENT_VERIFIED",
+    "DONOR_BLOCKED_UNCERTAIN",
+    "RECIPIENT_PHYSICAL_PENDING",
+    "RECIPIENT_RECOVERY_REQUIRED",
+    "RECIPIENT_VERIFIED",
+    "RECIPIENT_BLOCKED_UNCERTAIN",
+]
+SETTLED = ("DONOR_VERIFIED", "DONOR_ABSENT_VERIFIED", "RECIPIENT_VERIFIED")
+OPEN = (
+    "DONOR_PHYSICAL_PENDING",
+    "DONOR_RECOVERY_REQUIRED",
+    "RECIPIENT_PHYSICAL_PENDING",
+    "RECIPIENT_RECOVERY_REQUIRED",
+)
 
 
 class _Wire(BaseModel):
@@ -45,6 +69,8 @@ class TransferLegWire(_Wire):
     authorization_id: str = Field(pattern=UUID_TEXT)
     side: Literal["source", "destination"]
     status: TransferState
+    obligation: TransferObligation | None = None
+    pair_id: str | None = Field(default=None, pattern=UUID_TEXT)
     source_sha256: str = Field(pattern=HASH_TEXT)
     apply_started: bool
     result_sha256: str | None = Field(default=None, pattern=HASH_TEXT)
@@ -56,10 +82,18 @@ class TransferAssignmentWire(_Wire):
     authorization_id: str = Field(pattern=UUID_TEXT)
     side: Literal["source", "destination"]
     status: TransferState
+    obligation: TransferObligation | None = None
+    pair_id: str | None = Field(default=None, pattern=UUID_TEXT)
+    source_sha256: str | None = Field(default=None, pattern=HASH_TEXT)
     claimed: bool = False
     apply_started: bool = False
     verified: bool = False
     intent: dict | None = None
+
+    @property
+    def mandatory(self):
+        """Victim side after the decision: removal before any other sync."""
+        return self.side == "source" and self.obligation in OPEN
 
     def location(self):
         """Own-side box/slot for display only; never the Pokemon bytes."""
@@ -83,7 +117,20 @@ class TransferAssignmentsWire(_Wire):
 
 
 TRANSFER_MESSAGES = {
-    "REQUESTED": "Robo solicitado. Pendiente de preparar ambos guardados.",
+    "REQUESTED": "Robo solicitado. PokeApp está comprobando que es válido.",
+    "ELIGIBILITY_VERIFIED": "Robo válido. PokeApp lo está adjudicando.",
+    "COMPETITIVELY_ADJUDICATED": "Robo adjudicado por PokeApp: es definitivo. Falta la entrega física en las partidas.",
+    "RECONCILED": "Robo completado: decisión y entrega física verificadas en las dos partidas.",
+    "DONOR_PHYSICAL_PENDING": "Sincronización obligatoria: PokeApp debe retirar este Pokémon de tu partida antes de cualquier otra sincronización. Cierra el juego y el emulador.",
+    "DONOR_RECOVERY_REQUIRED": "No se pudo preparar la retirada sobre tu partida actual. Cierra el juego y vuelve a intentarlo.",
+    "DONOR_VERIFIED": "Retirada verificada. Tu partida vuelve a sincronizar con normalidad.",
+    "DONOR_ABSENT_VERIFIED": "Tu partida actual ya no tenía ese Pokémon. Sincronización normal restablecida.",
+    "DONOR_BLOCKED_UNCERTAIN": "Retirada bloqueada. Conserva tus copias: necesitas recuperación asistida.",
+    "RECIPIENT_PHYSICAL_PENDING": "Pokémon adjudicado, pendiente de recepción: aún no está en tu partida y no puedes usarlo.",
+    "RECIPIENT_RECOVERY_REQUIRED": "No se pudo preparar la entrega en tu partida actual (¿cajas llenas?). Libera un hueco y vuelve a intentarlo.",
+    "RECIPIENT_VERIFIED": "Pokémon recibido y verificado en tu partida.",
+    "RECIPIENT_BLOCKED_UNCERTAIN": "Entrega bloqueada. Conserva tus copias: necesitas recuperación asistida.",
+    "REPLANNING": "Tu partida ha cambiado desde la decisión. PokeApp está recalculando tu parte sobre la partida actual; no se ha modificado nada.",
     "PREPARING": "Preparando las copias de seguridad de ambos guardados.",
     "WAITING_OTHER": "Esperando la preparación del otro entrenador.",
     "PENDING_SOURCE": "Ambos guardados preparados. Pendiente de retirar en origen.",
@@ -113,11 +160,8 @@ class EngineeringTransfer:
                 controller.gate.recovery_required = True
 
     def bind(self, aid, side, intent):
-        if (
-            side not in ("source", "destination")
-            or intent.mutation.get("kind")
-            != ("transfer_remove" if side == "source" else "transfer_insert")
-            or intent.mutation.get("pair_id") != aid
+        if side not in ("source", "destination") or intent.mutation.get("kind") != (
+            "transfer_remove" if side == "source" else "transfer_insert"
         ):
             raise WriteSafetyError("TRANSFER_BINDING_MISMATCH")
         remote = self.repo.leg(
@@ -131,6 +175,7 @@ class EngineeringTransfer:
         if (
             remote.get("side") != side
             or remote.get("source_sha256") != intent.expected_sha256
+            or intent.mutation.get("pair_id") != (remote.get("pair_id") or aid)
         ):
             raise WriteSafetyError("TRANSFER_BINDING_MISMATCH")
         binding = {
@@ -146,24 +191,36 @@ class EngineeringTransfer:
             row = db.execute(
                 "SELECT record FROM transfer_bindings WHERE id=?", (aid,)
             ).fetchone()
+            fresh = {"binding": binding, "claim_id": str(uuid4()), "state": "REQUESTED"}
             if row:
-                if json.loads(row[0])["binding"] != binding:
-                    raise WriteSafetyError("TRANSFER_BINDING_MISMATCH")
+                old = json.loads(row[0])
+                if old["binding"] != binding:
+                    # Server re-plan: only an UNAPPLIED local operation is replaced;
+                    # its journal record and backup stay as history.
+                    if not self._unapplied(old):
+                        raise WriteSafetyError("TRANSFER_BINDING_MISMATCH")
+                    fresh["replaced"] = old.get("replaced", []) + [old["binding"]]
+                    db.execute(
+                        "UPDATE transfer_bindings SET record=? WHERE id=?",
+                        (json.dumps(fresh), aid),
+                    )
             else:
                 db.execute(
                     "INSERT INTO transfer_bindings VALUES(?,?)",
-                    (
-                        aid,
-                        json.dumps(
-                            {
-                                "binding": binding,
-                                "claim_id": str(uuid4()),
-                                "state": "REQUESTED",
-                            }
-                        ),
-                    ),
+                    (aid, json.dumps(fresh)),
                 )
         self.controller.gate.recovery_required = True
+
+    def _unapplied(self, record):
+        intent = WriteIntent.create(**record["binding"]["intent"])
+        try:
+            local = self.engine._load(intent.operation_id)
+        except WriteSafetyError as error:
+            if str(error) == "WRITE_OPERATION_NOT_FOUND":
+                return True
+            raise
+        # The engine only rejects with the original proven intact (identity+bytes).
+        return local["status"] == "REJECTED"
 
     def _load(self, aid):
         with self.engine._db() as db:
@@ -218,7 +275,7 @@ class EngineeringTransfer:
             "message": TRANSFER_MESSAGES.get(
                 state, TRANSFER_MESSAGES["RECOVERY_REQUIRED"]
             ),
-            "completed": state == "COMMITTED",
+            "completed": state in ("COMMITTED", "RECONCILED") or state in SETTLED,
         }
 
     def prepare(self, aid, *, closed_emulator_confirmed):
@@ -262,7 +319,7 @@ class EngineeringTransfer:
                 or receipt.current_matches_receipt is not True
             ):
                 return self._state(record, "RECOVERY_REQUIRED")
-            return self._state(record, remote["status"])
+            return self._state(record, remote.get("obligation") or remote["status"])
 
     def submit(self, aid, transport):
         with self.controller._operation(recovery=True):
@@ -285,14 +342,18 @@ class EngineeringTransfer:
                 if sha256(result).hexdigest() != prepared.output_hash:
                     raise WriteSafetyError("TRANSFER_RECEIPT_MISMATCH")
                 transport.submit(aid, self.sid, self.tid, record["claim_id"], result)
-            return self._state(record, self._remote("get", record)["status"])
+            remote = self._remote("get", record)
+            return self._state(record, remote.get("obligation") or remote["status"])
 
     def state(self, aid):
         with self.controller._operation(recovery=True):
             record, intent = self._load(aid)
             self._state(record, "RECOVERY_REQUIRED")
             remote = self._remote("get", record)
-            if remote["status"] == "COMMITTED":
+            if remote["status"] == "COMMITTED" or remote.get("obligation") in (
+                "DONOR_VERIFIED",
+                "RECIPIENT_VERIFIED",
+            ):
                 receipt = self.engine.reconcile(intent.operation_id)
                 local = self.engine._load(intent.operation_id)
                 if (
@@ -320,7 +381,7 @@ class EngineeringTransfer:
                         != intent.expected_sha256
                     ):
                         return self._state(record, "RECOVERY_REQUIRED")
-            return self._state(record, remote["status"])
+            return self._state(record, remote.get("obligation") or remote["status"])
 
     def cancel(self, aid):
         # Remote compare/cancel is serialized against BOTH begin calls. A lost
@@ -379,6 +440,11 @@ class AuthenticatedTransferRemote:
         aid = str(UUID(aid))
         path = f"{self._path(aid)}/result?claim_id={UUID(claim)}"
         return self._leg(self.session.upload(path, data), aid)
+
+    def submit_candidate(self, aid, sid, tid, data):
+        self._scope(sid, tid)
+        aid = str(UUID(aid))
+        return self._leg(self.session.upload(f"{self._path(aid)}/candidate", data), aid)
 
     def assignments(self):
         raw = self.session.request(
@@ -445,6 +511,89 @@ class LauncherTransfers:
 
     def refresh(self, aid):
         return self._bridge().state(aid)
+
+    def obligations(self):
+        """Own open physical obligations after the decision, victim first."""
+        listing = self.remote.assignments() or {"items": []}
+        items = [i for i in listing["items"] if i.get("obligation") in OPEN]
+        return sorted(items, key=lambda i: i["side"] != "source")
+
+    def fulfil(self, aid, *, closed_emulator_confirmed):
+        """Fulfil this trainer's own side of an adjudicated robbery.
+
+        Matching file: bind the server plan, then the usual safe sequence
+        (verified backup, explicit confirm, native verification, upload).
+        Applied but not yet proven: upload the result. Otherwise (the game was
+        played, an older copy, an edit elsewhere, an unapplied retry): upload the
+        CURRENT bytes so the server re-plans; nothing is modified here.
+        """
+        if closed_emulator_confirmed is not True:
+            raise WriteSafetyError("WRITE_CONFIRMATION_REQUIRED")
+        item = next(
+            (i for i in self.obligations() if i["authorization_id"] == aid), None
+        )
+        if item is None:
+            raise WriteSafetyError("TRANSFER_NO_OPEN_OBLIGATION")
+        engine = self.controller.engine
+        engine.files.assert_closed(True)
+        path = Path(self.controller.selected())
+        data = engine.files.read_path(path)
+        current = sha256(data).hexdigest()
+        bridge = self._bridge()
+        local = intent = None
+        if self._bound(bridge, aid):
+            record, intent = bridge._load(aid)
+            try:
+                local = engine._load(intent.operation_id)
+            except WriteSafetyError:
+                local = None
+            if local is not None and local["status"] in PENDING:
+                # Restart during the removal: the journal decides, never a guess.
+                engine.reconcile(intent.operation_id)
+                local = engine._load(intent.operation_id)
+                if local["status"] == "RECOVERY_REQUIRED":
+                    return bridge._state(record, "RECOVERY_REQUIRED")
+            if (
+                local is not None
+                and local["status"] == "APPLIED_VERIFIED"
+                and current == local["output_hash"]
+            ):
+                return bridge.submit(aid, self.remote)
+        # A rejected (unapplied) attempt of the CURRENT server plan needs a fresh
+        # plan; once the server re-planned, the new plan replaces the binding.
+        retry = (
+            local is not None
+            and local["status"] == "REJECTED"
+            and intent.to_payload() == item["intent"]
+        )
+        if (
+            not retry
+            and item["obligation"].endswith("PHYSICAL_PENDING")
+            and item["intent"] is not None
+            and current == item["source_sha256"]
+        ):
+            bridge.bind(aid, item["side"], WriteIntent.create(**item["intent"]))
+            if not self._unapplied_or_pending(bridge, aid):
+                raise WriteSafetyError("TRANSFER_BINDING_MISMATCH")
+            prepared = bridge.prepare(aid, closed_emulator_confirmed=True)
+            if prepared["status"] == "RECOVERY_REQUIRED":
+                return prepared
+            return self.apply(aid, closed_emulator_confirmed=True)
+        self.remote.submit_candidate(aid, self.remote.sid, self.remote.tid, data)
+        return {
+            "status": "REPLANNING",
+            "message": TRANSFER_MESSAGES["REPLANNING"],
+            "completed": False,
+        }
+
+    @staticmethod
+    def _unapplied_or_pending(bridge, aid):
+        _, intent = bridge._load(aid)
+        try:
+            local = bridge.engine._load(intent.operation_id)
+        except WriteSafetyError:
+            return True
+        return local["status"] in ("PREPARED", "AWAITING_CONFIRMATION")
 
     def cancel(self, aid):
         bridge = self._bridge()

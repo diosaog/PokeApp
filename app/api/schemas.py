@@ -186,6 +186,10 @@ class ItemUseListResponse(BaseModel):
 
 
 TransferStatus = Literal[
+    "REQUESTED",
+    "ELIGIBILITY_VERIFIED",
+    "COMPETITIVELY_ADJUDICATED",
+    "RECONCILED",
     "PREPARING",
     "WAITING_OTHER",
     "PENDING_SOURCE",
@@ -196,6 +200,18 @@ TransferStatus = Literal[
     "COMMITTED",
     "CANCELLED",
     "BLOCKED_UNCERTAIN",
+]
+# Physical state of ONE side after the competitive decision (never the decision).
+TransferObligation = Literal[
+    "DONOR_PHYSICAL_PENDING",
+    "DONOR_RECOVERY_REQUIRED",
+    "DONOR_VERIFIED",
+    "DONOR_ABSENT_VERIFIED",
+    "DONOR_BLOCKED_UNCERTAIN",
+    "RECIPIENT_PHYSICAL_PENDING",
+    "RECIPIENT_RECOVERY_REQUIRED",
+    "RECIPIENT_VERIFIED",
+    "RECIPIENT_BLOCKED_UNCERTAIN",
 ]
 
 
@@ -214,6 +230,7 @@ class TransferSummary(BaseModel):
     authorization_id: UUID
     side: Literal["source", "destination"]
     status: TransferStatus
+    obligation: TransferObligation | None = None
     purchase_id: UUID | None = None
     pokemon_entity_id: UUID
     claimed: bool
@@ -232,6 +249,7 @@ class TransferListResponse(BaseModel):
 class TransferLauncherItem(TransferSummary):
     source_sha256: str = Field(pattern=r"^[a-f0-9]{64}$")
     result_sha256: str | None = Field(default=None, pattern=r"^[a-f0-9]{64}$")
+    pair_id: UUID | None = None
     # Own side only; the Launcher's native engine revalidates it before any use.
     intent: dict[str, Any] | None = None
 
@@ -253,6 +271,8 @@ class TransferLegResponse(BaseModel):
     authorization_id: UUID
     side: Literal["source", "destination"]
     status: TransferStatus
+    obligation: TransferObligation | None = None
+    pair_id: UUID | None = None
     source_sha256: str = Field(pattern=r"^[a-f0-9]{64}$")
     apply_started: bool
     result_sha256: str | None = Field(default=None, pattern=r"^[a-f0-9]{64}$")
@@ -263,7 +283,14 @@ class TransferLegResponse(BaseModel):
 class ItemArtifactResponse(BaseModel):
     authorization_id: UUID
     status: Literal[
-        "NOT_SUBMITTED", "UPLOADING", "QUEUED", "VERIFYING", "VERIFIED", "REJECTED", "EXPIRED", "RETRY_REQUIRED"
+        "NOT_SUBMITTED",
+        "UPLOADING",
+        "QUEUED",
+        "VERIFYING",
+        "VERIFIED",
+        "REJECTED",
+        "EXPIRED",
+        "RETRY_REQUIRED",
     ]
     result_sha256: str | None = None
 

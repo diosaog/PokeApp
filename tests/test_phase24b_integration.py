@@ -302,6 +302,8 @@ class RuntimeTests(unittest.TestCase):
                     "authorization_id": AID,
                     "side": "destination",
                     "status": "PREPARING",
+                    "obligation": None,
+                    "mandatory": False,
                     "planned": True,
                     "claimed": False,
                     "apply_started": False,
@@ -318,11 +320,11 @@ class WorkerTests(unittest.TestCase):
         jobs = [
             {"authorization_id": "a", "action": "plan", "side": None},
             {"authorization_id": "b", "action": "verify", "side": "source"},
-            {"authorization_id": "c", "action": "finalize", "side": None},
+            {"authorization_id": "c", "action": "settle", "side": "destination"},
         ]
         verification = Mock()
         verification.verify.side_effect = VerificationRejected("ARTIFACT_HASH_MISMATCH")
-        verification.finalize.side_effect = PersistenceError("lost")
+        verification.settle.side_effect = PersistenceError("lost")
         outcomes = run_transfer_step(lambda request: jobs, verification)
         self.assertEqual(
             [o["outcome"] for o in outcomes], ["DONE", "REJECTED", "RETRY_LATER"]

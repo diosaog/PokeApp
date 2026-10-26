@@ -42,6 +42,8 @@ const script = `(async () => {
   check(/Reanudar mi parte/.test(card("c").textContent) && /NO es definitivo/.test(card("c").textContent), "local application distinguished from final robbery");
   check(/Necesitas asistencia/.test(card("d").textContent) && kinds("d") === "refresh", "blocked operation asks for assistance, no unsafe action");
   check(/Robo completado y registrado/.test(card("e").textContent), "completed only on COMMITTED");
+  check(/Sincronización obligatoria/.test(document.getElementById("transfer-summary").textContent) && kinds("1") === "fulfil,refresh" && /Aplicar retirada obligatoria/.test(card("1").textContent) && /antes de cualquier otra sincronización/.test(card("1").textContent), "27A: decided robbery shows the victim's mandatory removal, no cancel or veto");
+  check(kinds("2") === "fulfil,refresh" && /Pendiente de recepción/.test(card("2").textContent) && /es definitivo/.test(card("2").textContent), "27A: robber sees adjudicated but not yet usable");
   const backupRows = [...document.querySelectorAll("#backup-list p")];
   check(backupRows.length === 2 && /Original/.test(backupRows[0].textContent) && backupRows[0].querySelectorAll("button").length === 2 && /Copia diaria del 25.10.2026/.test(backupRows[1].textContent) && /Se conserva 30 días/.test(backupRows[1].textContent) && backupRows[1].querySelectorAll("button").length === 1, "daily point listed with date and game, copy only (no restore)");
   document.getElementById("web-tab").click(); await sleep(200);

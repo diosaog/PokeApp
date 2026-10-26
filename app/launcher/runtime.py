@@ -38,6 +38,7 @@ QUICK_ERRORS = {
 TRANSFER_COMMANDS = (
     "transfer_prepare",
     "transfer_apply",
+    "transfer_fulfil",
     "transfer_cancel",
     "transfer_refresh",
 )
@@ -283,7 +284,7 @@ class LauncherRuntime:
         if name in TRANSFER_COMMANDS:
             expected = (
                 {"authorization_id", "closed_emulator_confirmed"}
-                if name in ("transfer_prepare", "transfer_apply")
+                if name in ("transfer_prepare", "transfer_apply", "transfer_fulfil")
                 else {"authorization_id"}
             )
             if (
@@ -375,11 +376,15 @@ class LauncherRuntime:
                 result = transfers.prepare(aid, closed_emulator_confirmed=True)
             elif name == "transfer_apply":
                 result = transfers.apply(aid, closed_emulator_confirmed=True)
+            elif name == "transfer_fulfil":
+                result = transfers.fulfil(aid, closed_emulator_confirmed=True)
             elif name == "transfer_cancel":
                 result = transfers.cancel(aid)
             else:
                 result = transfers.refresh(aid)
             self._patch(write_error=None, transfer_result=result)
+            if name == "transfer_fulfil" or result.get("completed"):
+                self.next_cloud_refresh = 0  # the obligation state changes server-side
             if result["status"] == "COMMITTED":
                 self.next_cloud_refresh = 0
                 self._load_local()  # re-read the save the server now accepts
@@ -664,6 +669,8 @@ class LauncherRuntime:
                         "authorization_id": t.authorization_id,
                         "side": t.side,
                         "status": t.status,
+                        "obligation": t.obligation,
+                        "mandatory": t.mandatory,
                         "planned": t.intent is not None,
                         "claimed": t.claimed,
                         "apply_started": t.apply_started,
@@ -678,6 +685,8 @@ class LauncherRuntime:
             "wallet": wallet,
             "item_uses": item_uses,
             "transfers": transfers,
+            # 27A: a decided robbery's removal comes before any ordinary sync.
+            "mandatory_sync": any(t["mandatory"] for t in transfers or []),
         }
         self.store.save_cache(self.client.origin, principal.trainer_id, data)
         self._patch(
@@ -685,6 +694,8 @@ class LauncherRuntime:
             last_online=time.time(),
         )
         self.next_cloud_refresh = time.monotonic() + 120
+        if data["mandatory_sync"]:
+            return  # the server refuses ordinary sync until the removal is verified
         # Only the locally ready selected save is eligible; never upload old/missing cache as new.
         self._enqueue_local()
         row = self.store.pending(self.client.origin, principal.trainer_id)

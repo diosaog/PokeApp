@@ -30,6 +30,11 @@ REJECTIONS = {
     "transfer_assisted_recovery_required": 409,
     "transfer_terminal": 409,
     "transfer_reconciliation_required": 409,
+    "transfer_not_adjudicated": 409,
+    "transfer_adjudicated": 409,
+    "transfer_leg_settled": 409,
+    "transfer_candidate_conflict": 409,
+    "transfer_cross_title_forbidden": 409,
 }
 
 

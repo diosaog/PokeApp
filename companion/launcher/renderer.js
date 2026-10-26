@@ -367,6 +367,12 @@ $("login").onsubmit = (event) => {
 };
 // Robbery actions: only this trainer's own leg; no peer data, no second logic.
 const transferProgress = {
+  REQUESTED: "Robo solicitado. PokeApp está comprobando que es válido.",
+  ELIGIBILITY_VERIFIED: "Robo válido. PokeApp lo está adjudicando.",
+  COMPETITIVELY_ADJUDICATED:
+    "Robo adjudicado por PokeApp: es definitivo. Falta la entrega física en las partidas.",
+  RECONCILED:
+    "Robo completado: decisión y entrega física verificadas en las dos partidas.",
   PREPARING: "Ninguna copia preparada todavía.",
   WAITING_OTHER: "Una copia preparada; falta la del otro entrenador.",
   PENDING_SOURCE:
@@ -383,7 +389,33 @@ const transferProgress = {
   CANCELLED: "Robo cancelado antes de aplicar. No se ha consumido el objeto.",
   BLOCKED_UNCERTAIN: "Operación bloqueada.",
 };
+const obligationText = {
+  DONOR_PHYSICAL_PENDING:
+    "Sincronización obligatoria: PokeApp debe retirar este Pokémon de tu partida antes de cualquier otra sincronización.",
+  DONOR_RECOVERY_REQUIRED:
+    "No se pudo preparar la retirada sobre tu partida actual. Cierra el juego y vuelve a intentarlo.",
+  DONOR_VERIFIED: "Retirada verificada en tu partida.",
+  DONOR_ABSENT_VERIFIED: "Tu partida ya no tenía ese Pokémon: verificado.",
+  DONOR_BLOCKED_UNCERTAIN:
+    "Retirada bloqueada: necesitas recuperación asistida.",
+  RECIPIENT_PHYSICAL_PENDING:
+    "Pendiente de recepción: el Pokémon aún no está en tu partida y no puedes usarlo.",
+  RECIPIENT_RECOVERY_REQUIRED:
+    "No se pudo preparar la entrega en tu partida actual (¿cajas llenas?). Libera un hueco y vuelve a intentarlo.",
+  RECIPIENT_VERIFIED: "Pokémon recibido y verificado en tu partida.",
+  RECIPIENT_BLOCKED_UNCERTAIN:
+    "Entrega bloqueada: necesitas recuperación asistida.",
+};
 function transferActions(t) {
+  const open = [
+    "DONOR_PHYSICAL_PENDING",
+    "DONOR_RECOVERY_REQUIRED",
+    "RECIPIENT_PHYSICAL_PENDING",
+    "RECIPIENT_RECOVERY_REQUIRED",
+  ].includes(t.obligation);
+  if (t.obligation)
+    // Decided robbery: only this side's physical obligation, never a veto.
+    return { fulfil: open, refresh: true };
   return {
     prepare:
       t.planned &&
@@ -410,9 +442,11 @@ function renderTransfers(state) {
     "transfer-summary",
     !items.length
       ? "No hay robos en curso."
-      : enabled
-        ? "Sigue los pasos de cada robo. Solo puedes confirmar lo que te corresponde."
-        : "Puedes consultar tus robos, pero este Launcher aún no aplica cambios: falta la certificación con Lime3DS.",
+      : !enabled
+        ? "Puedes consultar tus robos, pero este Launcher aún no aplica cambios: falta la certificación con Lime3DS."
+        : items.some((t) => t.mandatory)
+          ? "Sincronización obligatoria: PokeApp ya ha decidido un robo sobre tu partida. Tu sincronización normal está en pausa hasta retirar ese Pokémon."
+          : "Sigue los pasos de cada robo. Solo puedes confirmar lo que te corresponde.",
   );
   const key = JSON.stringify([
     items,
@@ -461,7 +495,12 @@ function renderTransfers(state) {
         transferProgress[t.status] || "Estado no disponible.",
         "transfer-progress",
       );
-      if (t.apply_started && t.status !== "COMMITTED")
+      if (t.obligation)
+        line(
+          obligationText[t.obligation] || "Estado no disponible.",
+          t.mandatory ? "transfer-help" : "transfer-progress",
+        );
+      if (t.apply_started && !t.obligation && t.status !== "COMMITTED")
         line(
           "Tu parte ya está aplicada en tu partida, pero el robo NO es definitivo hasta que PokeApp verifique las dos partidas.",
         );
@@ -474,17 +513,21 @@ function renderTransfers(state) {
           "transfer-help",
         );
       const actions = transferActions(t);
-      if (enabled && (actions.prepare || actions.apply))
+      if (enabled && (actions.prepare || actions.apply || actions.fulfil))
         line(
           "Cierra el juego y el emulador y marca la casilla antes de continuar.",
         );
       const labels = {
         prepare: "Preparar copia",
         apply: t.apply_started ? "Reanudar mi parte" : "Aplicar mi parte",
+        fulfil:
+          t.side === "source"
+            ? "Aplicar retirada obligatoria"
+            : "Recibir el Pokémon",
         cancel: "Cancelar robo",
         refresh: "Comprobar estado",
       };
-      for (const kind of ["prepare", "apply", "cancel", "refresh"]) {
+      for (const kind of ["prepare", "apply", "fulfil", "cancel", "refresh"]) {
         if (!actions[kind]) continue;
         const button = document.createElement("button");
         button.textContent = labels[kind];
@@ -492,7 +535,7 @@ function renderTransfers(state) {
         button.disabled =
           !enabled ||
           write.busy ||
-          (["prepare", "apply"].includes(kind) && !closed);
+          (["prepare", "apply", "fulfil"].includes(kind) && !closed);
         button.onclick = () =>
           action(() =>
             window.launcher.transfer(kind, t.authorization_id, closed),
