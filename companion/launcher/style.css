@@ -1,3 +1,11 @@
+/* One family with the web (Artistic Evolution): Rubik, OFL, packaged locally. */
+@font-face {
+  font-family: "Rubik Variable";
+  font-style: normal;
+  font-weight: 300 900;
+  font-display: swap;
+  src: url("assets/fonts/rubik-latin-wght.woff2") format("woff2-variations");
+}
 /* PokeApp Launcher — native screens on the PokeApp Arena design system (27B).
    Palette primitives mirror web/src/design/tokens.css (checked by
    design-sync.test.cjs) so «Mi partida» and the PokeApp tab look like one app. */
@@ -30,7 +38,7 @@
   --radius: 16px;
   --t: 180ms;
   color-scheme: dark;
-  font-family: "Segoe UI Variable Text", "Segoe UI", system-ui, sans-serif;
+  font-family: "Rubik Variable", "Segoe UI", system-ui, sans-serif;
   background: var(--c-bg-0);
   color: var(--c-text);
 }
@@ -73,7 +81,7 @@ header::before {
   background: var(--brand-gradient);
 }
 header strong {
-  font-family: "Segoe UI Variable Display", "Segoe UI", system-ui, sans-serif;
+  font-family: "Rubik Variable", "Segoe UI", system-ui, sans-serif;
   font-weight: 900;
   letter-spacing: 0.06em;
   background: var(--brand-gradient);
@@ -123,7 +131,7 @@ nav button[aria-pressed="true"] {
 }
 h1,
 h2 {
-  font-family: "Segoe UI Variable Display", "Segoe UI", system-ui, sans-serif;
+  font-family: "Rubik Variable", "Segoe UI", system-ui, sans-serif;
   font-weight: 850;
   letter-spacing: -0.01em;
 }
@@ -430,4 +438,52 @@ body[data-mode="strip"] {
   .slot:not(.empty) {
     transition: none;
   }
+}
+
+/* Artistic Evolution: the web panel language — ribbon titles, ball band. */
+#panel-title {
+  padding: 5px 20px 5px 12px;
+  background: var(--c-accent);
+  color: var(--c-ink);
+  -webkit-text-fill-color: var(--c-ink);
+  clip-path: polygon(0 0, 100% 0, calc(100% - 10px) 100%, 0 100%);
+  font-size: 0.8rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+body:not([data-mode]) #panel-title,
+[data-mode="offline"] #panel-title {
+  padding: 0;
+  background: var(--brand-gradient);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  clip-path: none;
+  text-transform: none;
+  letter-spacing: 0.06em;
+}
+.toolbar h1::after {
+  content: "";
+  display: block;
+  width: 72px;
+  height: 5px;
+  margin-top: 8px;
+  border-radius: 999px;
+  background:
+    radial-gradient(
+        circle,
+        var(--c-text) 0 2.5px,
+        var(--c-ink) 2.5px 4px,
+        transparent 4px
+      )
+      center / 10px 10px no-repeat,
+    linear-gradient(
+      90deg,
+      var(--c-accent) 0 44%,
+      transparent 44% 56%,
+      var(--c-accent) 56%
+    );
+}
+.slot img {
+  image-rendering: pixelated;
 }

@@ -61,6 +61,8 @@ module.exports = {
     "assets/icon.ico",
     "assets/items/50.png",
     "assets/items/93.png",
+    "assets/fonts/rubik-latin-wght.woff2",
+    "assets/fonts/OFL.txt",
     "quantity.js",
     "updater.cjs",
     "webview.cjs",

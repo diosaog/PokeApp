@@ -158,7 +158,11 @@ export function Collection({
             {!found.length && <Empty>No hay coincidencias.</Empty>}
           </>
         ) : box ? (
-          <div className="box-slots" aria-label={`Contenido de Caja ${box}`}>
+          <div
+            className="box-slots"
+            aria-label={`Contenido de Caja ${box}`}
+            data-wallpaper={box % 6}
+          >
             {Array.from({ length: 30 }, (_, i) =>
               slot(
                 inBox.find((s) => s.position?.slot === i + 1)?.pokemon,
