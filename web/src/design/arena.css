@@ -1,0 +1,1353 @@
+/* PokeApp Arena — visual layer (Phase27B). Loaded last; tokens only.
+   One React app for browser and Launcher: no page-specific copies. */
+
+/* ---------- Base & backdrop ---------- */
+:root {
+  font-family: var(--font-body);
+  color: var(--text-strong);
+  background: var(--bg);
+}
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(
+      70vw 45vw at 92% -12%,
+      color-mix(in srgb, var(--c-magenta) 17%, transparent),
+      transparent 70%
+    ),
+    radial-gradient(
+      60vw 45vw at -12% 112%,
+      color-mix(in srgb, var(--c-accent) 15%, transparent),
+      transparent 70%
+    ),
+    repeating-linear-gradient(
+      -58deg,
+      color-mix(in srgb, var(--c-line) 20%, transparent) 0 2px,
+      transparent 2px 28px
+    ),
+    var(--bg);
+  background-size:
+    auto,
+    auto,
+    240px 240px,
+    auto;
+  animation: arena-drift 30s linear infinite;
+}
+@keyframes arena-drift {
+  to {
+    background-position:
+      0 0,
+      0 0,
+      240px 0,
+      0 0;
+  }
+}
+h1,
+h2,
+h3,
+.brand {
+  font-family: var(--font-display);
+}
+h1 {
+  font-weight: var(--weight-heavy);
+  letter-spacing: -0.015em;
+}
+h2 {
+  font-weight: 800;
+}
+::selection {
+  background: color-mix(in srgb, var(--c-accent) 40%, transparent);
+}
+:focus-visible {
+  outline: none;
+  box-shadow: var(--glow);
+}
+
+/* ---------- Shell: game-menu navigation ---------- */
+.sidebar {
+  background:
+    linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--c-bg-1) 96%, transparent),
+      color-mix(in srgb, var(--c-bg-0) 98%, transparent)
+    ),
+    var(--bg);
+  border-right: 1px solid var(--border-subtle);
+  box-shadow: 6px 0 30px color-mix(in srgb, var(--c-ink) 55%, transparent);
+}
+.sidebar::after {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto;
+  height: 4px;
+  background: var(--brand-gradient);
+}
+.brand {
+  font-weight: 900;
+  letter-spacing: 0.06em;
+}
+.brand > span {
+  background: var(--brand-gradient);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+.pokeball {
+  filter: drop-shadow(
+    0 0 6px color-mix(in srgb, var(--c-magenta) 45%, transparent)
+  );
+}
+.nav-label {
+  color: var(--text-dim);
+  letter-spacing: 0.18em;
+}
+.nav-group-label {
+  color: var(--competitive);
+  opacity: 0.85;
+}
+.sidebar nav a {
+  position: relative;
+  border-radius: var(--radius-pill);
+  color: var(--text-body);
+  font-size: var(--text-sm);
+  font-weight: 650;
+  transition:
+    background var(--t-base) var(--ease-out),
+    color var(--t-fast),
+    transform var(--t-base) var(--ease-spring),
+    box-shadow var(--t-base);
+}
+.sidebar nav a svg {
+  flex-shrink: 0;
+  padding: 5px;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: var(--surface);
+  border: 1px solid var(--border-subtle);
+  transition: inherit;
+}
+.sidebar nav a:hover {
+  background: var(--surface-hover);
+  color: var(--text-strong);
+  transform: translateX(4px);
+}
+.sidebar nav a.active {
+  background:
+    linear-gradient(
+      100deg,
+      transparent,
+      color-mix(in srgb, var(--c-text) 30%, transparent)
+    ),
+    var(--accent);
+  border-color: transparent;
+  color: var(--on-primary);
+  font-weight: 800;
+  box-shadow:
+    0 6px 18px color-mix(in srgb, var(--accent) 30%, transparent),
+    inset 0 -2px 0 color-mix(in srgb, var(--c-ink) 25%, transparent);
+}
+.sidebar nav a.active svg {
+  background: var(--c-ink);
+  border-color: transparent;
+  color: var(--accent);
+}
+.sidebar nav a.active .nav-arrow {
+  background: none;
+  border: 0;
+  color: var(--on-primary);
+}
+.avatar {
+  background: var(--brand-gradient);
+  color: var(--on-primary);
+  border: 0;
+  font-weight: 900;
+}
+.topbar {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  border-bottom: 1px solid var(--border-subtle);
+  background: color-mix(in srgb, var(--c-bg-0) 78%, transparent);
+  backdrop-filter: blur(14px);
+}
+.topbar-caption {
+  color: var(--competitive);
+  letter-spacing: 0.2em;
+  font-weight: 800;
+}
+.connection i {
+  background: var(--success);
+  box-shadow: 0 0 10px var(--success);
+}
+footer span {
+  color: var(--text-dim);
+}
+
+/* Each area keeps its own signal colour (navigation stays recognisable).
+   Outside the shell (login, registration) the brand teal leads; the legacy
+   :root accent was a coral that the colour migration mapped to "danger". */
+:root,
+.app-shell,
+.section-home {
+  --accent: var(--sec-home);
+}
+.section-liga {
+  --accent: var(--sec-liga);
+}
+.section-battle {
+  --accent: var(--sec-battle);
+}
+.section-copa {
+  --accent: var(--sec-copa);
+}
+.section-entrenadores {
+  --accent: var(--sec-entrenadores);
+}
+.section-pc {
+  --accent: var(--sec-pc);
+}
+.section-tienda {
+  --accent: var(--sec-tienda);
+}
+.section-hall {
+  --accent: var(--sec-hall);
+}
+.section-juicios {
+  --accent: var(--sec-juicios);
+}
+.section-saves {
+  --accent: var(--sec-saves);
+}
+.section-admin {
+  --accent: var(--sec-admin);
+}
+
+/* ---------- Page heading: ribbon title ---------- */
+.page-heading {
+  position: relative;
+  padding-left: var(--space-4);
+  animation: arena-rise var(--t-slow) var(--ease-out) both;
+}
+.page-heading::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 4px;
+  bottom: 4px;
+  width: 5px;
+  border-radius: var(--radius-pill);
+  background: linear-gradient(180deg, var(--accent), var(--c-magenta));
+}
+.page-heading h1 {
+  font-size: var(--text-2xl);
+  margin: 4px 0 8px;
+}
+.eyebrow {
+  color: var(--accent);
+  font-weight: 800;
+  letter-spacing: 0.16em;
+}
+@keyframes arena-rise {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+}
+
+/* ---------- Surfaces ---------- */
+.card {
+  background: linear-gradient(
+    160deg,
+    color-mix(in srgb, var(--c-surface-2) 92%, transparent),
+    color-mix(in srgb, var(--c-surface-1) 96%, transparent)
+  );
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-2);
+  position: relative;
+}
+.card::before {
+  content: "";
+  position: absolute;
+  inset: 0 18% auto;
+  height: 2px;
+  border-radius: var(--radius-pill);
+  background: linear-gradient(
+    90deg,
+    transparent,
+    color-mix(in srgb, var(--accent) 70%, transparent),
+    transparent
+  );
+  pointer-events: none;
+}
+.action-card,
+button.card,
+.shop-card,
+.inventory-card,
+.trainer-card,
+.hall-card {
+  transition:
+    transform var(--t-base) var(--ease-spring),
+    border-color var(--t-base),
+    box-shadow var(--t-base);
+}
+.action-card:hover,
+button.card:hover,
+.shop-card:hover,
+.trainer-card:hover,
+.hall-card:hover {
+  transform: translateY(-4px);
+  border-color: color-mix(in srgb, var(--accent) 60%, var(--c-line));
+  box-shadow:
+    var(--shadow-2),
+    0 14px 34px color-mix(in srgb, var(--accent) 16%, transparent);
+}
+.hero {
+  background:
+    radial-gradient(
+      ellipse at 88% 70%,
+      color-mix(in srgb, var(--accent) 24%, transparent),
+      transparent 70%
+    ),
+    repeating-linear-gradient(
+      -58deg,
+      color-mix(in srgb, var(--c-text) 4%, transparent) 0 2px,
+      transparent 2px 22px
+    ),
+    linear-gradient(125deg, var(--c-surface-3), var(--c-surface-1) 70%);
+}
+.hero-art {
+  color: var(--accent);
+  opacity: 0.22;
+}
+
+/* ---------- Buttons: chunky pills ---------- */
+button,
+.button {
+  border-radius: var(--radius-pill);
+  background: var(--surface-active);
+  border: 1px solid var(--border-strong);
+  color: var(--text-strong);
+  font-weight: 700;
+  box-shadow: var(--shadow-1);
+  transition:
+    transform var(--t-fast) var(--ease-spring),
+    background var(--t-base),
+    border-color var(--t-base),
+    box-shadow var(--t-base);
+}
+button:hover:not(:disabled),
+.button:hover {
+  background: var(--surface-hover);
+  border-color: var(--accent);
+  transform: translateY(-1px);
+}
+button:active:not(:disabled),
+.button:active {
+  transform: translateY(1px) scale(0.98);
+  box-shadow: none;
+}
+/* The fill is the area colour itself; the gradient is a light sheen on top. */
+.button.primary,
+button.primary {
+  background:
+    linear-gradient(
+      100deg,
+      transparent,
+      color-mix(in srgb, var(--c-text) 28%, transparent)
+    ),
+    var(--accent);
+  border-color: transparent;
+  color: var(--on-primary);
+  font-weight: 850;
+  box-shadow:
+    0 8px 20px color-mix(in srgb, var(--accent) 28%, transparent),
+    inset 0 -3px 0 color-mix(in srgb, var(--c-ink) 22%, transparent);
+}
+.button.primary:hover,
+button.primary:hover:not(:disabled) {
+  background:
+    linear-gradient(
+      100deg,
+      color-mix(in srgb, var(--c-text) 18%, transparent),
+      transparent
+    ),
+    var(--accent);
+  color: var(--on-primary);
+}
+.button.danger,
+button.danger {
+  background: var(--c-danger-deep);
+  border-color: var(--error);
+  color: var(--c-danger-soft);
+}
+.icon-button {
+  border-radius: 50%;
+}
+.text-link {
+  color: var(--accent);
+  font-weight: 750;
+}
+.text-link:hover {
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
+/* ---------- Tabs: segmented menu ---------- */
+.tabs {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  padding: 5px;
+  border-radius: var(--radius-pill);
+  background: var(--c-bg-1);
+  border: 1px solid var(--border-subtle);
+}
+.tabs button,
+.tabs a {
+  border-radius: var(--radius-pill);
+  background: transparent;
+  border-color: transparent;
+  box-shadow: none;
+  color: var(--text-body);
+}
+.tabs button.active,
+.tabs button[aria-pressed="true"],
+.tabs button[aria-selected="true"],
+.tabs a.active {
+  background: var(--accent);
+  color: var(--on-primary);
+  font-weight: 850;
+  box-shadow: 0 6px 16px color-mix(in srgb, var(--accent) 30%, transparent);
+}
+
+/* ---------- Tags, badges and Pokémon flags ---------- */
+.tag {
+  border-radius: var(--radius-pill);
+  background: color-mix(in srgb, var(--accent) 16%, transparent);
+  border: 1px solid color-mix(in srgb, var(--accent) 45%, transparent);
+  color: color-mix(in srgb, var(--accent) 55%, var(--c-text));
+  font-weight: 800;
+  letter-spacing: 0.04em;
+}
+.pokemon-status-flag {
+  border-radius: var(--radius-pill);
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  box-shadow: var(--shadow-1);
+}
+.pokemon-status-flag.robado {
+  background: var(--c-magenta);
+  color: var(--c-ink);
+}
+.pokemon-status-flag.blindado {
+  background: var(--c-info);
+  color: var(--c-ink);
+}
+.pokemon-status-flag.revivido {
+  background: var(--c-gold);
+  color: var(--c-ink);
+}
+.stat-pill {
+  border-radius: var(--radius-md);
+  background: var(--c-bg-1);
+  border: 1px solid var(--border-subtle);
+}
+.stat-pill strong {
+  font-family: var(--font-display);
+  font-weight: 900;
+  color: var(--text-strong);
+}
+
+/* ---------- Forms ---------- */
+input,
+select,
+textarea {
+  border-radius: var(--radius-sm);
+  background: var(--c-bg-1);
+  border: 1px solid var(--border-strong);
+  color: var(--text-strong);
+  transition:
+    border-color var(--t-fast),
+    box-shadow var(--t-fast);
+}
+input:focus,
+select:focus,
+textarea:focus {
+  border-color: var(--accent);
+  box-shadow: var(--glow);
+}
+.season-picker select {
+  border-radius: var(--radius-pill);
+  font-weight: 700;
+}
+
+/* ---------- Dialogs ---------- */
+dialog {
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border-strong);
+  background: linear-gradient(170deg, var(--c-surface-2), var(--c-surface-1));
+  box-shadow:
+    0 30px 80px color-mix(in srgb, var(--c-ink) 80%, transparent),
+    inset 0 3px 0 var(--accent);
+  animation: arena-pop var(--t-base) var(--ease-spring);
+}
+dialog::backdrop {
+  background: color-mix(in srgb, var(--c-bg-0) 70%, transparent);
+  backdrop-filter: blur(6px);
+}
+@keyframes arena-pop {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.97);
+  }
+}
+
+/* ---------- Tables: standings feel ---------- */
+.table-scroll,
+.league-table-card {
+  border-radius: var(--radius-md);
+}
+th {
+  color: var(--text-dim);
+  font-size: var(--text-xs);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  background: var(--c-bg-1);
+}
+tbody tr {
+  transition: background var(--t-fast);
+}
+tbody tr:nth-child(even) {
+  background: color-mix(in srgb, var(--c-surface-2) 45%, transparent);
+}
+.league-standings tbody tr:nth-child(-n + 3) td:first-child {
+  font-family: var(--font-display);
+  font-weight: 900;
+}
+.league-standings tbody tr:nth-child(1) td:first-child {
+  color: var(--c-gold);
+}
+.league-standings tbody tr:nth-child(2) td:first-child {
+  color: var(--c-text-soft);
+}
+.league-standings tbody tr:nth-child(3) td:first-child {
+  color: var(--c-warm);
+}
+
+/* ---------- States: notice, empty, loading ---------- */
+.notice {
+  border-radius: var(--radius-md);
+  background: var(--c-danger-deep);
+  border: 1px solid color-mix(in srgb, var(--error) 60%, transparent);
+  color: var(--c-danger-soft);
+}
+p[role="status"].notice,
+.notice[role="status"] {
+  background: var(--c-info-deep);
+  border-color: color-mix(in srgb, var(--information) 60%, transparent);
+  color: var(--c-info-soft);
+}
+.empty {
+  border-radius: var(--radius-lg);
+  border: 2px dashed var(--border-strong);
+  background:
+    radial-gradient(
+      circle at 50% 0,
+      color-mix(in srgb, var(--accent) 10%, transparent),
+      transparent 60%
+    ),
+    var(--surface);
+  color: var(--text-body);
+}
+.loading {
+  border-radius: var(--radius-pill);
+  background: linear-gradient(
+    90deg,
+    var(--surface) 0%,
+    var(--surface-hover) 50%,
+    var(--surface) 100%
+  );
+  background-size: 200% 100%;
+  animation: arena-shimmer 1.4s linear infinite;
+}
+@keyframes arena-shimmer {
+  to {
+    background-position: -200% 0;
+  }
+}
+
+/* ---------- Home: game menu tiles ----------
+   Nine areas, a complete 3 × 3 board: wide menu buttons on desktop, an icon
+   grid on phones. Each tile wears its area's signal colour. */
+.arena-menu {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-3);
+  margin: 0 0 var(--space-6);
+  padding: 0;
+  list-style: none;
+}
+.arena-menu li {
+  display: flex;
+}
+.arena-menu a {
+  --tile: var(--sec-home);
+  position: relative;
+  flex: 1;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  justify-items: start;
+  column-gap: var(--space-4);
+  row-gap: 2px;
+  min-height: 84px;
+  padding: var(--space-3) var(--space-5) var(--space-3) var(--space-3);
+  border-radius: var(--radius-lg);
+  background: linear-gradient(170deg, var(--c-surface-2), var(--c-surface-1));
+  border: 1px solid var(--border-subtle);
+  box-shadow: var(--shadow-2);
+  color: var(--text-strong);
+  font-family: var(--font-display);
+  font-size: var(--text-md);
+  font-weight: 850;
+  text-align: left;
+  overflow: hidden;
+  animation: arena-rise var(--t-slow) var(--ease-out) both;
+  transition:
+    transform var(--t-base) var(--ease-spring),
+    border-color var(--t-base),
+    box-shadow var(--t-base);
+}
+.arena-menu li:nth-child(2) a {
+  animation-delay: 30ms;
+}
+.arena-menu li:nth-child(3) a {
+  animation-delay: 60ms;
+}
+.arena-menu li:nth-child(4) a {
+  animation-delay: 90ms;
+}
+.arena-menu li:nth-child(n + 5) a {
+  animation-delay: 120ms;
+}
+/* Speed stripes in the tile colour, fading in towards the right edge. */
+.arena-menu a::after {
+  content: "";
+  position: absolute;
+  inset: 0 0 0 auto;
+  width: 45%;
+  background: repeating-linear-gradient(
+    -58deg,
+    color-mix(in srgb, var(--tile) 16%, transparent) 0 2px,
+    transparent 2px 10px
+  );
+  mask-image: linear-gradient(to right, transparent, var(--c-ink));
+  opacity: 0.55;
+  pointer-events: none;
+  transition:
+    opacity var(--t-base),
+    background-position var(--t-slow) var(--ease-out);
+}
+/* A selection chevron slides in, like a cursor on a game menu. */
+.arena-menu a::before {
+  content: "";
+  position: absolute;
+  right: var(--space-4);
+  top: 50%;
+  width: 10px;
+  height: 10px;
+  border-top: 3px solid var(--tile);
+  border-right: 3px solid var(--tile);
+  border-radius: 2px;
+  opacity: 0;
+  transform: translate(-8px, -50%) rotate(45deg);
+  transition:
+    opacity var(--t-base),
+    transform var(--t-base) var(--ease-spring);
+}
+.arena-menu a:hover,
+.arena-menu a:focus-visible {
+  transform: translateY(-3px);
+  border-color: var(--tile);
+  box-shadow:
+    var(--shadow-2),
+    0 14px 32px color-mix(in srgb, var(--tile) 22%, transparent),
+    inset 4px 0 0 var(--tile);
+  color: var(--text-strong);
+}
+.arena-menu a:hover::before,
+.arena-menu a:focus-visible::before {
+  opacity: 1;
+  transform: translate(0, -50%) rotate(45deg);
+}
+.arena-menu a:hover::after {
+  opacity: 1;
+  background-position: 24px 0;
+}
+.arena-menu .tile-icon {
+  grid-row: 1 / span 2;
+  display: grid;
+  place-items: center;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  color: var(--c-ink);
+  background: radial-gradient(
+    circle at 35% 30%,
+    color-mix(in srgb, var(--tile) 55%, var(--c-text)),
+    var(--tile) 70%
+  );
+  box-shadow:
+    0 8px 18px color-mix(in srgb, var(--tile) 35%, transparent),
+    inset 0 -4px 0 color-mix(in srgb, var(--c-ink) 25%, transparent);
+  transition: transform var(--t-base) var(--ease-spring);
+}
+.arena-menu a:hover .tile-icon {
+  transform: scale(1.08) rotate(-8deg);
+}
+.arena-menu small {
+  grid-column: 2;
+  color: var(--text-dim);
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: var(--text-xs);
+}
+.arena-menu .tile-liga {
+  --tile: var(--sec-liga);
+}
+.arena-menu .tile-battle {
+  --tile: var(--sec-battle);
+}
+.arena-menu .tile-copa {
+  --tile: var(--sec-copa);
+}
+.arena-menu .tile-pc {
+  --tile: var(--sec-pc);
+}
+.arena-menu .tile-tienda {
+  --tile: var(--sec-tienda);
+}
+.arena-menu .tile-entrenadores {
+  --tile: var(--sec-entrenadores);
+}
+.arena-menu .tile-hall {
+  --tile: var(--sec-hall);
+}
+.arena-menu .tile-juicios {
+  --tile: var(--sec-juicios);
+}
+.arena-menu .tile-saves {
+  --tile: var(--sec-saves);
+}
+
+/* ---------- Shop: an in-game counter ---------- */
+.wallet {
+  border-radius: var(--radius-pill);
+  background:
+    linear-gradient(
+      100deg,
+      color-mix(in srgb, var(--c-gold) 22%, transparent),
+      transparent
+    ),
+    var(--surface);
+  border: 1px solid color-mix(in srgb, var(--c-gold) 55%, transparent);
+  box-shadow: var(--shadow-2);
+}
+.wallet strong {
+  font-family: var(--font-display);
+  font-weight: 900;
+  color: var(--c-gold-soft);
+}
+.wallet svg,
+.coin-price svg {
+  color: var(--c-gold);
+  filter: drop-shadow(
+    0 0 6px color-mix(in srgb, var(--c-gold) 50%, transparent)
+  );
+}
+.shop-card {
+  overflow: hidden;
+}
+/* The item sits on a lit counter disc (the legacy rule is more specific). */
+.shop-card .shop-icon {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 96px;
+  height: 96px;
+  margin: 0 auto var(--space-3);
+  border-radius: 50%;
+  background:
+    radial-gradient(
+      circle at 50% 35%,
+      color-mix(in srgb, var(--c-gold) 30%, transparent),
+      transparent 70%
+    ),
+    var(--c-bg-1);
+  border: 2px solid color-mix(in srgb, var(--c-gold) 40%, var(--c-line));
+  box-shadow:
+    0 10px 24px color-mix(in srgb, var(--c-ink) 60%, transparent),
+    inset 0 -6px 0 color-mix(in srgb, var(--c-ink) 30%, transparent);
+  transition: transform var(--t-base) var(--ease-spring);
+}
+.shop-card .shop-icon .item-icon {
+  width: 60px;
+  height: 60px;
+  border-radius: var(--radius-sm);
+}
+.shop-card:hover .shop-icon {
+  transform: translateY(-4px) scale(1.06) rotate(-3deg);
+}
+/* A light sweep crosses the card on hover: the "shiny" moment. */
+.shop-card::after,
+.hall-card::after {
+  content: "";
+  position: absolute;
+  inset: -20% auto -20% -60%;
+  width: 40%;
+  background: linear-gradient(
+    100deg,
+    transparent,
+    color-mix(in srgb, var(--c-text) 14%, transparent),
+    transparent
+  );
+  transform: skewX(-18deg) translateX(0);
+  pointer-events: none;
+  opacity: 0;
+}
+.shop-card:hover::after {
+  opacity: 1;
+  transform: skewX(-18deg) translateX(520%);
+  transition:
+    transform 900ms var(--ease-out),
+    opacity var(--t-fast);
+}
+.shop-card h2 {
+  text-align: center;
+}
+.shop-bottom {
+  border-top: 1px dashed var(--border-strong);
+  padding-top: var(--space-3);
+}
+.coin-price {
+  font-family: var(--font-display);
+  font-weight: 900;
+  color: var(--c-gold-soft);
+}
+.purchase-summary {
+  border-radius: var(--radius-md);
+  background: linear-gradient(
+    100deg,
+    color-mix(in srgb, var(--c-gold) 16%, var(--c-bg-1)),
+    var(--c-bg-1)
+  );
+  border: 1px solid color-mix(in srgb, var(--c-gold) 45%, transparent);
+}
+.shop-owned {
+  display: inline-flex;
+  margin: 0 auto var(--space-2);
+}
+
+/* ---------- Inventory: infinite items stand out ----------
+   A slow holographic border: the one thing that never runs out. */
+.inventory-card.unlimited {
+  border: 2px solid transparent;
+  background:
+    linear-gradient(160deg, var(--c-surface-2), var(--c-surface-1)) padding-box,
+    linear-gradient(
+        100deg,
+        var(--c-accent),
+        var(--c-info),
+        var(--c-magenta),
+        var(--c-gold),
+        var(--c-accent)
+      )
+      border-box;
+  background-size:
+    100% 100%,
+    300% 100%;
+  animation: arena-holo 9s linear infinite;
+}
+@keyframes arena-holo {
+  to {
+    background-position:
+      0 0,
+      150% 0;
+  }
+}
+.unlimited-badge {
+  margin-left: auto;
+  font-family: var(--font-display);
+  font-size: 2.2rem;
+  font-weight: 900;
+  line-height: 1;
+  background: var(--brand-gradient);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* ---------- Pokémon sprites on a platform ---------- */
+.home-sprite-slot,
+.pc-slot {
+  border-radius: var(--radius-md);
+  background:
+    radial-gradient(
+      ellipse 60% 22% at 50% 82%,
+      color-mix(in srgb, var(--accent) 28%, transparent),
+      transparent 70%
+    ),
+    var(--c-bg-1);
+  border: 1px solid var(--border-subtle);
+  transition:
+    transform var(--t-base) var(--ease-spring),
+    border-color var(--t-base);
+}
+.home-sprite-slot:hover,
+.pc-slot:hover {
+  transform: translateY(-3px);
+  border-color: var(--accent);
+}
+
+/* ---------- Login ---------- */
+.login-story h1 em {
+  background: var(--brand-gradient);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* ---------- Mobile ---------- */
+@media (max-width: 1100px) and (min-width: 761px) {
+  .arena-menu a {
+    min-height: 76px;
+    padding-right: var(--space-4);
+    column-gap: var(--space-3);
+  }
+  .arena-menu .tile-icon {
+    width: 46px;
+    height: 46px;
+  }
+  .arena-menu a::before {
+    display: none;
+  }
+}
+@media (max-width: 760px) {
+  /* Phone: a 3 × 3 icon board; the detail stays in the accessible name. */
+  .arena-menu {
+    gap: var(--space-2);
+  }
+  .arena-menu a {
+    grid-template-columns: minmax(0, 1fr);
+    justify-items: center;
+    align-content: start;
+    min-height: 0;
+    padding: var(--space-4) var(--space-1) var(--space-3);
+    text-align: center;
+    font-size: var(--text-sm);
+    line-height: 1.2;
+  }
+  .arena-menu .tile-icon {
+    grid-row: auto;
+    width: 50px;
+    height: 50px;
+    margin-bottom: var(--space-1);
+  }
+  .arena-menu a::before {
+    display: none;
+  }
+  .arena-menu a:hover,
+  .arena-menu a:focus-visible {
+    box-shadow:
+      var(--shadow-2),
+      0 10px 24px color-mix(in srgb, var(--tile) 22%, transparent),
+      inset 0 -3px 0 var(--tile);
+  }
+  .arena-menu small {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+  .tabs {
+    display: flex;
+    border-radius: var(--radius-md);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  body::before,
+  .loading {
+    animation: none;
+  }
+  .page-heading,
+  .arena-menu a,
+  dialog {
+    animation: none;
+  }
+}
+
+/* ---------- Corrections after visual review (gallery v1) ---------- */
+/* Legacy line-art scenes stay as faint atmosphere, never across headings. */
+.workspace::before {
+  opacity: 0.14;
+}
+/* Menu icons sit in discs; the trailing arrow stays a plain glyph. */
+.sidebar nav a .nav-arrow {
+  padding: 0;
+  width: 14px;
+  height: 14px;
+  border: 0;
+  background: none;
+  opacity: 0;
+}
+.sidebar nav a.active .nav-arrow {
+  opacity: 1;
+}
+.sidebar nav a {
+  gap: 10px;
+  padding: 7px 12px 7px 8px;
+  white-space: nowrap;
+}
+.app-shell .tabs button.active,
+.app-shell .tabs button[aria-pressed="true"],
+.app-shell .tabs button[aria-selected="true"] {
+  background: var(--accent);
+  border-color: transparent;
+  color: var(--on-primary);
+}
+/* Pills size to their label and wrap as a group: a label is never cut or
+   broken inside a word ("MONEDA S", "MONED…"). */
+.mini-stats {
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+.stat-pill,
+.stat-pill + .stat-pill {
+  flex: 1 0 auto;
+  min-width: 84px;
+  max-width: 168px;
+  padding: 10px 14px;
+  border: 1px solid var(--border-subtle);
+}
+.stat-pill span {
+  font-size: var(--text-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-dim);
+  white-space: nowrap;
+}
+/* Trainer cards (and the profile on phones): stats as rows beside the
+   portrait, like a trainer card. */
+.trainer-card .mini-stats {
+  flex-direction: column;
+  gap: 4px;
+  margin: 10px 0 0;
+}
+.trainer-card .stat-pill,
+.trainer-card .stat-pill + .stat-pill {
+  flex: none;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: var(--space-2);
+  max-width: none;
+  padding: 4px 10px;
+  border-radius: var(--radius-sm);
+}
+.trainer-card .stat-pill span {
+  font-size: 0.62rem;
+  letter-spacing: 0.08em;
+}
+/* The profile identity follows its own width (phone, Launcher window, desktop),
+   not the screen's: narrow cards switch to trainer-card rows. */
+.profile-identity {
+  container: identity / inline-size;
+}
+@container identity (max-width: 520px) {
+  .profile-identity .mini-stats {
+    flex-direction: column;
+    flex-wrap: nowrap;
+    gap: 4px;
+  }
+  .profile-identity .stat-pill,
+  .profile-identity .stat-pill + .stat-pill {
+    flex: none;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: var(--space-2);
+    max-width: none;
+    padding: 4px 10px;
+    border-radius: var(--radius-sm);
+  }
+}
+@media (max-width: 640px) {
+  .stat-pill,
+  .stat-pill + .stat-pill {
+    padding: 8px 10px;
+  }
+  .stat-pill span {
+    font-size: 0.62rem;
+    letter-spacing: 0.05em;
+  }
+}
+tbody tr:hover {
+  background: var(--surface-active);
+  box-shadow: inset 4px 0 0 var(--accent);
+}
+
+/* ---------- Sidebar fits a laptop screen ----------
+   Every destination (Cuentas included) fits 1440 × 900. Shorter screens scroll
+   the menu, which fades at its lower edge so the scroll is discoverable. The
+   inner padding keeps the active pill's glow from being clipped into a box. */
+.brand {
+  margin-bottom: 18px;
+}
+.nav-label {
+  margin-bottom: 2px;
+}
+.sidebar nav {
+  gap: 0;
+  margin: 0 -8px;
+  padding: 2px 8px 20px;
+  overflow-x: hidden;
+  scrollbar-width: thin;
+  scrollbar-color: var(--c-line-strong) transparent;
+  mask-image: linear-gradient(
+    to bottom,
+    var(--c-ink) calc(100% - 22px),
+    transparent
+  );
+}
+.nav-group {
+  gap: 2px;
+  margin: 2px 0;
+}
+.nav-group-label {
+  padding: 7px 12px 3px;
+}
+.sidebar nav a {
+  min-height: 36px;
+  padding: 4px 12px 4px 6px;
+}
+.sidebar nav a svg {
+  width: 28px;
+  height: 28px;
+}
+.sidebar nav a:focus-visible {
+  outline: 2px solid var(--c-text);
+  outline-offset: -2px;
+}
+@media (max-height: 820px) {
+  .sidebar {
+    padding-top: 20px;
+  }
+  .brand {
+    margin-bottom: 8px;
+  }
+  .nav-label {
+    display: none;
+  }
+  .sidebar nav a {
+    min-height: 32px;
+  }
+  .sidebar nav a svg {
+    width: 24px;
+    height: 24px;
+    padding: 4px;
+  }
+}
+
+/* ---------- Inventory states ---------- */
+.inventory-item {
+  position: relative;
+}
+.inventory-card.unlimited .button.primary {
+  display: inline-flex;
+  margin-top: var(--space-2);
+}
+.inventory-card.item-pending {
+  box-shadow:
+    var(--shadow-2),
+    inset 4px 0 0 var(--c-accent);
+}
+.inventory-card.item-transfer {
+  box-shadow:
+    var(--shadow-2),
+    inset 4px 0 0 var(--c-magenta);
+}
+.inventory-card.item-used,
+.inventory-card.item-cancelled,
+.inventory-card.item-refunded {
+  opacity: 0.72;
+  filter: saturate(0.6);
+}
+.profile-inventory {
+  max-height: 780px;
+  scrollbar-color: var(--c-line-strong) transparent;
+}
+/* One scroll per screen on phones: the inventory grows with the page. */
+@media (max-width: 760px) {
+  .profile-inventory {
+    max-height: none;
+  }
+}
+section[aria-labelledby="unlimited-title"] {
+  margin-bottom: var(--space-4);
+}
+
+/* ---------- Team Preview: never squeeze a Pokémon card (pre-27B defect) ---------- */
+.battle-roster {
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 430px), 1fr));
+}
+.battle-pokemon {
+  border-radius: var(--radius-md);
+}
+
+/* ---------- Phase27B completion: details after the full-route review ---------- */
+
+/* Hall of Fame: champions wear foil; a sheen crosses the card now and then. */
+.hall-card {
+  overflow: hidden;
+  border-width: 2px;
+  border-color: color-mix(in srgb, var(--c-gold) 70%, transparent);
+  box-shadow:
+    var(--shadow-2),
+    0 0 40px color-mix(in srgb, var(--c-gold) 14%, transparent);
+}
+.hall-card::after {
+  opacity: 1;
+  animation: arena-foil 7s var(--ease-out) infinite;
+}
+@keyframes arena-foil {
+  0%,
+  70% {
+    transform: skewX(-18deg) translateX(0);
+  }
+  100% {
+    transform: skewX(-18deg) translateX(520%);
+  }
+}
+
+/* Login and registration: the brand itself is the call to action. */
+.login-form .button.primary,
+.login-form button.primary {
+  background: var(--brand-gradient);
+  background-size: 160% 100%;
+  color: var(--on-primary);
+  transition:
+    background-position var(--t-slow) var(--ease-out),
+    transform var(--t-fast) var(--ease-spring);
+}
+.login-form .button.primary:hover,
+.login-form button.primary:hover:not(:disabled) {
+  background: var(--brand-gradient);
+  background-size: 160% 100%;
+  background-position: 100% 0;
+}
+
+/* Dialogs: the sticky heading belongs to the dialog, not to a blue slab. */
+.dialog-heading {
+  background: var(--c-surface-2);
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+/* A tag labels its card; it never stretches across it (Juicios, Copa). */
+.card > .tag {
+  align-self: flex-start;
+  justify-self: start;
+}
+
+/* Route change: the new screen fades in (opacity only, no containing block). */
+main#main > * {
+  animation: arena-fade var(--t-base) var(--ease-out) backwards;
+}
+@keyframes arena-fade {
+  from {
+    opacity: 0;
+  }
+}
+
+/* Pokémon hop when you point at them, like a party menu. */
+.pc-slot.pokemon:hover img,
+.home-sprite-slot:hover img,
+.battle-pokemon:hover .pokemon-sprite {
+  animation: arena-hop 520ms var(--ease-out);
+}
+@keyframes arena-hop {
+  30% {
+    transform: translateY(-7px);
+  }
+  55% {
+    transform: translateY(0);
+  }
+  75% {
+    transform: translateY(-2px);
+  }
+}
+
+/* Themed scrollbars and keyboard focus that survives every surface. */
+html {
+  scrollbar-color: var(--c-line-strong) var(--c-bg-0);
+}
+.arena-menu a:focus-visible,
+.card:focus-visible,
+.button:focus-visible {
+  outline: 2px solid var(--c-text);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .inventory-card.unlimited,
+  .hall-card::after,
+  main#main > *,
+  .pc-slot.pokemon:hover img,
+  .home-sprite-slot:hover img,
+  .battle-pokemon:hover .pokemon-sprite {
+    animation: none;
+  }
+  .shop-card::after,
+  .hall-card::after {
+    display: none;
+  }
+}
+
+/* Back links read as navigation, not as body text. */
+.back-link {
+  display: inline-flex;
+  margin: 0 0 var(--space-4);
+}
+.back-link::before {
+  content: "←" / "";
+  margin-right: 6px;
+}
+
+/* Plain links inside a screen look like links, in the area's colour. */
+main#main a:not([class]) {
+  color: var(--accent);
+  font-weight: 700;
+  text-underline-offset: 4px;
+}
+main#main a:not([class]):hover {
+  text-decoration: underline;
+}
+/* Adjacent tags (status + role) keep their own space. */
+.tag + .tag {
+  margin-inline-start: var(--space-1);
+}
+
+/* Inline disclosures (moves) stay put: their detail panel is attached to the
+   trigger, so the trigger neither lifts on hover nor sinks when pressed. */
+.move-disclosure button,
+.move-disclosure button:hover:not(:disabled),
+.move-disclosure button:active:not(:disabled) {
+  transform: none;
+}

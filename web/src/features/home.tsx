@@ -1,5 +1,17 @@
 import { Link } from "react-router-dom";
-import { ArrowUpRight, ShieldCheck, Swords } from "lucide-react";
+import {
+  ArrowUpRight,
+  Box,
+  Crown,
+  HardDrive,
+  Medal,
+  Scale,
+  ShieldCheck,
+  ShoppingBag,
+  Swords,
+  Trophy,
+  Users,
+} from "lucide-react";
 import type { Model } from "../api/types";
 import { useApp, useOverview, usePC, useRead } from "../state";
 import { Card, Heading, Loading, Notice, Tag } from "../ui";
@@ -12,6 +24,39 @@ import {
 import { WithSeason, playerName } from "./core";
 import { GameProgress, SaveGame } from "./progress";
 import { LockStatus } from "./lock-status";
+
+// Game-style main menu: every tile is an existing route, nothing new. Each
+// tile wears its area's signal colour (tile-<area>, see design/tokens.css).
+const tiles = [
+  ["/liga", "Liga", "Clasificación y jornadas", Trophy],
+  ["/battle", "Batallas", "Team Preview y combate", Swords],
+  ["/copa", "Copa", "Eliminatorias", Crown],
+  ["/pc", "Mi PC", "Equipo y cajas", Box],
+  ["/tienda", "Tienda", "Objetos y comodines", ShoppingBag],
+  ["/entrenadores", "Entrenadores", "Rivales y scouting", Users],
+  ["/hall", "Hall de la Fama", "Campeones", Medal],
+  ["/juicios", "Juicios", "Decisiones de la Liga", Scale],
+  ["/saves", "Saves y Launcher", "Tu partida en PokeApp", HardDrive],
+] as const;
+export function ArenaMenu() {
+  return (
+    <nav aria-label="Menú de PokeApp">
+      <ul className="arena-menu">
+        {tiles.map(([to, label, detail, Icon]) => (
+          <li key={to}>
+            <Link to={to} className={`tile-${to.slice(1)}`}>
+              <span className="tile-icon" aria-hidden="true">
+                <Icon size={28} strokeWidth={2.4} />
+              </span>
+              {label}
+              <small>{detail}</small>
+            </Link>
+          </li>
+        ))}
+      </ul>
+    </nav>
+  );
+}
 
 export function HomePage() {
   const { me, season } = useApp(),
@@ -46,6 +91,7 @@ export function HomePage() {
         eyebrow="TU CENTRO DE COMPETICIÓN"
         title={`A por la siguiente, ${me?.display_name}.`}
       />
+      <ArenaMenu />
       <WithSeason>
         <Notice error={overview.error} />
         {overview.isPending ? (

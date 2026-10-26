@@ -7,15 +7,15 @@
     BlinkMacSystemFont,
     "Segoe UI",
     sans-serif;
-  color: #edf3ec;
-  background: #0b1010;
+  color: var(--c-text);
+  background: var(--c-bg-0);
   font-synthesis: none;
   font-weight: 400;
-  --accent: #c3f778;
-  --muted: #98aaa5;
-  --border: #26332e;
-  --panel: #131c19;
-  --danger: #ff9b94;
+  --accent: var(--c-accent);
+  --muted: var(--c-text-muted);
+  --border: var(--c-surface-2);
+  --panel: var(--c-bg-1);
+  --danger: var(--c-danger-soft);
   color-scheme: dark;
 }
 * {
@@ -67,15 +67,15 @@ a:hover {
 }
 button {
   color: inherit;
-  background: #1b2822;
-  border: 1px solid #3b4d42;
+  background: var(--c-surface-1);
+  border: 1px solid var(--c-line);
   border-radius: 9px;
   padding: 11px 16px;
   min-height: 44px;
 }
 button:hover:not(:disabled) {
   border-color: var(--accent);
-  background: #28362d;
+  background: var(--c-surface-2);
 }
 button:active:not(:disabled) {
   transform: translateY(1px);
@@ -129,10 +129,10 @@ textarea {
   width: 100%;
   min-height: 46px;
   padding: 11px 13px;
-  background: #0c1411;
-  border: 1px solid #36493e;
+  background: var(--c-bg-0);
+  border: 1px solid var(--c-surface-3);
   border-radius: 8px;
-  color: #edf3ec;
+  color: var(--c-text);
   max-width: 100%;
 }
 input:focus,
@@ -177,7 +177,7 @@ legend {
   top: -80px;
   left: 20px;
   background: var(--accent);
-  color: #14210e;
+  color: var(--c-bg-1);
   padding: 16px;
 }
 .skip:focus {
@@ -204,10 +204,10 @@ legend {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  border: 1px solid #344838;
+  border: 1px solid var(--c-surface-3);
   padding: 5px 9px;
   border-radius: 5px;
-  color: #c6d6c5;
+  color: var(--c-text);
   font-size: 0.68rem;
   font-weight: 550;
   line-height: 1.4;
@@ -224,23 +224,23 @@ legend {
   justify-content: center;
   gap: 9px;
   padding: 12px 18px;
-  border: 1px solid #3b4d42;
+  border: 1px solid var(--c-line);
   border-radius: 8px;
   font-size: 0.82rem;
   font-weight: 650;
   min-height: 44px;
-  background: #1b2822;
+  background: var(--c-surface-1);
 }
 .primary {
   background: var(--accent);
   border-color: var(--accent);
-  color: #16210c;
+  color: var(--c-bg-1);
 }
 .primary:hover:not(:disabled) {
-  background: #ddf9b7;
-  color: #16210c;
-  border-color: #ddf9b7;
-  box-shadow: 0 3px 22px #b8ff5620;
+  background: var(--c-accent-soft);
+  color: var(--c-bg-1);
+  border-color: var(--c-accent-soft);
+  box-shadow: 0 3px 22px color-mix(in srgb, var(--c-accent) 13%, transparent);
 }
 .icon-button {
   display: flex;
@@ -253,8 +253,8 @@ legend {
 }
 .danger {
   color: var(--danger);
-  border-color: #6d3d39;
-  background: #321b18;
+  border-color: var(--c-danger);
+  background: var(--c-danger-deep);
 }
 .field {
   display: flex;
@@ -262,7 +262,7 @@ legend {
   gap: 9px;
   margin-bottom: 18px;
   font-size: 0.8rem;
-  color: #c3d1c6;
+  color: var(--c-text-soft);
 }
 .field > label {
   font-weight: 550;
@@ -296,10 +296,10 @@ legend {
   align-items: flex-start;
   gap: 10px;
   padding: 16px;
-  border: 1px solid #6a4731;
-  background: #2d241a;
+  border: 1px solid var(--c-warm);
+  background: var(--c-surface-1);
   border-radius: 10px;
-  color: #f1c68b;
+  color: var(--c-warm-soft);
   line-height: 1.6;
   font-size: 0.82rem;
   margin: 16px 0;
@@ -318,7 +318,7 @@ legend {
   padding: 36px 24px;
   text-align: center;
   color: var(--muted);
-  border: 1px dashed #35463d;
+  border: 1px dashed var(--c-surface-3);
   border-radius: 14px;
   line-height: 1.8;
   margin: 24px 0;
@@ -348,40 +348,40 @@ legend {
   overflow-wrap: anywhere;
 }
 .app-shell {
-  --accent: #c3f778;
+  --accent: var(--c-accent);
 }
 .section-liga {
-  --accent: #c3f778;
+  --accent: var(--c-accent);
 }
 .section-battle {
-  --accent: #efa47d;
+  --accent: var(--c-warm);
 }
 .section-pc,
 .section-entrenadores {
-  --accent: #91d2c7;
+  --accent: var(--c-accent);
 }
 .section-tienda {
-  --accent: #e6c579;
+  --accent: var(--c-gold);
 }
 .section-copa {
-  --accent: #c5b1f1;
+  --accent: var(--c-violet-soft);
 }
 .section-hall {
-  --accent: #e9c56f;
+  --accent: var(--c-gold);
 }
 .section-juicios {
-  --accent: #d8b8cf;
+  --accent: var(--c-violet-soft);
 }
 .section-admin {
-  --accent: #f0b7a1;
+  --accent: var(--c-warm-soft);
 }
 .sidebar {
   position: fixed;
   inset: 0 auto 0 0;
   width: 228px;
   padding: 33px 17px 20px;
-  background: #101713;
-  border-right: 1px solid #223027;
+  background: var(--c-bg-0);
+  border-right: 1px solid var(--c-surface-2);
   z-index: 30;
   display: flex;
   flex-direction: column;
@@ -396,13 +396,13 @@ legend {
   margin: 0 16px 45px;
 }
 .brand > span {
-  color: #bdf277;
+  color: var(--c-accent);
   margin-left: -8px;
 }
 .pokeball {
   width: 25px;
   height: 25px;
-  border: 2px solid #c3f778;
+  border: 2px solid var(--c-accent);
   border-radius: 50%;
   display: inline-block;
   position: relative;
@@ -415,7 +415,7 @@ legend {
   width: 100%;
   top: 9px;
   left: 0;
-  border-top: 2px solid #c3f778;
+  border-top: 2px solid var(--c-accent);
 }
 .pokeball:after {
   content: "";
@@ -424,15 +424,15 @@ legend {
   height: 6px;
   top: 6px;
   left: 6px;
-  border: 2px solid #c3f778;
+  border: 2px solid var(--c-accent);
   border-radius: 50%;
-  background: #101713;
+  background: var(--c-bg-0);
 }
 .nav-label {
   font-size: 0.56rem;
   letter-spacing: 0.14em;
   margin: 0 14px 17px;
-  color: #75857b;
+  color: var(--c-text-muted);
 }
 .sidebar nav {
   display: flex;
@@ -448,7 +448,7 @@ legend {
 }
 .nav-group-label {
   padding: 0 14px 5px;
-  color: #7f9688;
+  color: var(--c-text-muted);
   font-size: 0.58rem;
   font-weight: 750;
   letter-spacing: 0.14em;
@@ -461,18 +461,18 @@ legend {
   padding: 10px 14px;
   border: 1px solid transparent;
   border-radius: 8px;
-  color: #acbaae;
+  color: var(--c-text-soft);
   font-size: 0.78rem;
   font-weight: 500;
 }
 .sidebar nav a:hover {
-  background: #1a281d;
-  color: #ddedcf;
+  background: var(--c-surface-1);
+  color: var(--c-accent-soft);
 }
 .sidebar nav a.active {
-  background: #25371e;
-  border-color: #3a4b2d;
-  color: #c3f778;
+  background: var(--c-accent-deep);
+  border-color: var(--c-surface-3);
+  color: var(--c-accent);
 }
 .nav-arrow {
   margin-left: auto;
@@ -512,9 +512,9 @@ legend {
   justify-content: center;
   width: 35px;
   height: 35px;
-  background: #2c4032;
-  color: #c3f778;
-  border: 1px solid #49604a;
+  background: var(--c-surface-3);
+  color: var(--c-accent);
+  border: 1px solid var(--c-line);
   border-radius: 10px;
   font-size: 0.7rem;
   flex-shrink: 0;
@@ -531,7 +531,7 @@ legend {
 }
 .topbar {
   min-height: 83px;
-  border-bottom: 1px solid #243027;
+  border-bottom: 1px solid var(--c-surface-2);
   display: flex;
   align-items: center;
   padding: 12px 44px;
@@ -540,7 +540,7 @@ legend {
 .topbar-caption {
   font-size: 0.6rem;
   letter-spacing: 0.14em;
-  color: #84968b;
+  color: var(--c-text-muted);
   flex: 1;
 }
 .season-picker {
@@ -550,7 +550,7 @@ legend {
 }
 .season-picker select {
   font-size: 0.72rem;
-  background: #141e18;
+  background: var(--c-bg-1);
   min-height: 38px;
   max-width: 260px;
 }
@@ -559,12 +559,12 @@ legend {
   align-items: center;
   gap: 7px;
   font-size: 0.65rem;
-  color: #b8c7b8;
+  color: var(--c-text-soft);
   white-space: nowrap;
 }
 .connection i,
 .live-dot {
-  background: #bcf577;
+  background: var(--c-accent);
   width: 5px;
   height: 5px;
   border-radius: 50%;
@@ -591,13 +591,13 @@ main#main {
   margin: 0;
 }
 .card {
-  background: linear-gradient(145deg, #17221b, #121a16);
-  border: 1px solid #2a382d;
+  background: linear-gradient(145deg, var(--c-surface-1), var(--c-bg-1));
+  border: 1px solid var(--c-surface-3);
   border-radius: 15px;
   padding: 25px;
   min-width: 0;
   margin-bottom: 20px;
-  box-shadow: 0 7px 30px #00000010;
+  box-shadow: 0 7px 30px color-mix(in srgb, var(--c-bg-0) 6%, transparent);
 }
 .card > p:last-child {
   margin-bottom: 0;
@@ -612,8 +612,8 @@ button.card {
 .action-card:hover,
 button.card:hover {
   transform: translateY(-3px);
-  border-color: #728858;
-  box-shadow: 0 12px 30px #9bd6440a;
+  border-color: var(--c-line-strong);
+  box-shadow: 0 12px 30px color-mix(in srgb, var(--c-accent) 4%, transparent);
 }
 .home-grid {
   display: grid;
@@ -625,14 +625,23 @@ button.card:hover {
   overflow: hidden;
   min-height: 332px;
   background:
-    radial-gradient(ellipse at 90% 70%, #416d2830, transparent 75%),
-    linear-gradient(125deg, #203122, #142418 65%, #253824);
+    radial-gradient(
+      ellipse at 90% 70%,
+      color-mix(in srgb, var(--c-accent-deep) 19%, transparent),
+      transparent 75%
+    ),
+    linear-gradient(
+      125deg,
+      var(--c-surface-2),
+      var(--c-bg-1) 65%,
+      var(--c-surface-2)
+    );
 }
 .hero > .eyebrow {
   position: relative;
   z-index: 1;
   font-size: 0.61rem;
-  color: #c8dabe;
+  color: var(--c-text);
   display: flex;
   align-items: center;
   gap: 8px;
@@ -645,9 +654,9 @@ button.card:hover {
 }
 .hero-content .tag {
   font-size: 0.58rem;
-  background: #344d2370;
-  color: #d1edb1;
-  border-color: #516c39;
+  background: color-mix(in srgb, var(--c-accent-deep) 44%, transparent);
+  color: var(--c-accent-soft);
+  border-color: var(--c-accent);
 }
 .hero-content h2 {
   font-size: clamp(1.8rem, 3vw, 2.6rem);
@@ -658,7 +667,7 @@ button.card:hover {
   font-size: 0.75rem;
   max-width: 320px;
   margin-bottom: 22px;
-  color: #b7c7b0;
+  color: var(--c-text-soft);
 }
 .hero-art {
   position: absolute;
@@ -667,15 +676,17 @@ button.card:hover {
   width: 245px;
   height: 245px;
   stroke-width: 0.8;
-  color: #bded7550;
+  color: color-mix(in srgb, var(--c-accent) 31%, transparent);
   transform: rotate(-12deg);
-  filter: drop-shadow(0 0 22px #a7f05b20);
+  filter: drop-shadow(
+    0 0 22px color-mix(in srgb, var(--c-accent) 13%, transparent)
+  );
 }
 .readiness {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  background: linear-gradient(155deg, #1d2a1b, #121b16);
+  background: linear-gradient(155deg, var(--c-surface-1), var(--c-bg-1));
 }
 .readiness > svg {
   color: var(--accent);
@@ -714,12 +725,12 @@ button.card:hover {
   position: absolute;
   right: 22px;
   top: 23px;
-  color: #9eb687;
+  color: var(--c-text-muted);
   width: 19px;
 }
 .stat-grid .eyebrow {
   font-size: 0.55rem;
-  color: #9eafa0;
+  color: var(--c-text-soft);
 }
 .stat-number {
   font-size: 2.15rem;
@@ -733,7 +744,7 @@ button.card:hover {
 }
 .stat-grid a {
   font-size: 0.67rem;
-  color: #afc2a6;
+  color: var(--c-text-soft);
 }
 .section-row {
   display: flex;
@@ -766,7 +777,7 @@ button.card:hover {
   margin-left: auto;
   height: 18px;
   width: 18px;
-  color: #8c9c8b;
+  color: var(--c-text-muted);
 }
 .action-card h3 {
   font-size: 0.88rem;
@@ -802,7 +813,7 @@ button.card:hover {
   display: flex;
   gap: 6px;
   flex-wrap: wrap;
-  color: #dabd7d;
+  color: var(--c-gold);
 }
 .table-scroll {
   overflow: auto;
@@ -815,17 +826,17 @@ table {
 }
 th {
   text-align: left;
-  color: #96a891;
+  color: var(--c-text-muted);
   text-transform: uppercase;
   font-size: 0.59rem;
   letter-spacing: 0.12em;
   font-weight: 550;
   padding: 13px 8px;
-  border-bottom: 1px solid #3b4a36;
+  border-bottom: 1px solid var(--c-line);
 }
 td {
   padding: 18px 8px;
-  border-bottom: 1px solid #27342a;
+  border-bottom: 1px solid var(--c-surface-2);
 }
 tbody tr:last-child td {
   border: 0;
@@ -836,15 +847,15 @@ tbody tr:last-child td {
   gap: 20px;
 }
 .podium svg {
-  color: #ddc27d;
+  color: var(--c-gold);
   margin-bottom: 20px;
 }
 .podium h2 {
   margin: 14px 0;
 }
 .podium .card:first-child {
-  border-color: #766337;
-  background: linear-gradient(145deg, #302d1b, #1a2018);
+  border-color: var(--c-gold);
+  background: linear-gradient(145deg, var(--c-surface-2), var(--c-bg-1));
 }
 .match-grid,
 .battle-grid {
@@ -862,19 +873,19 @@ tbody tr:last-child td {
   margin-bottom: 20px;
 }
 .side-1 {
-  border-color: #584037;
-  background: linear-gradient(145deg, #281f1b, #191a15);
+  border-color: var(--c-line);
+  background: linear-gradient(145deg, var(--c-surface-1), var(--c-bg-1));
 }
 .pokemon {
   display: flex;
   width: 100%;
   align-items: center;
   gap: 15px;
-  border: 1px solid #2d3d30;
+  border: 1px solid var(--c-surface-3);
   border-radius: 10px;
   padding: 15px;
   margin: 12px 0;
-  background: #142019;
+  background: var(--c-bg-1);
   text-align: left;
   min-width: 0;
 }
@@ -903,12 +914,12 @@ tbody tr:last-child td {
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  background: radial-gradient(ellipse, #516542, #263922);
-  border: 1px solid #567346;
+  background: radial-gradient(ellipse, var(--c-line), var(--c-surface-2));
+  border: 1px solid var(--c-line-strong);
   border-radius: 50%;
   font-size: 0.9rem;
   font-weight: 700;
-  color: #c3dca8;
+  color: var(--c-accent-soft);
 }
 .moves {
   display: flex;
@@ -918,9 +929,9 @@ tbody tr:last-child td {
 }
 .moves > span {
   font-size: 0.64rem;
-  border-bottom: 1px solid #4b5946;
+  border-bottom: 1px solid var(--c-line);
   padding: 5px;
-  color: #afc2a7;
+  color: var(--c-text-soft);
 }
 .pokemon-grid > .card {
   padding: 18px;
@@ -969,9 +980,9 @@ tbody tr:last-child td {
   display: flex;
   align-items: center;
   gap: 12px;
-  color: #e9cb86;
-  border: 1px solid #665730;
-  background: #2b2819;
+  color: var(--c-gold);
+  border: 1px solid var(--c-gold-deep);
+  background: var(--c-surface-1);
   padding: 19px 25px;
   border-radius: 12px;
   max-width: 420px;
@@ -979,20 +990,20 @@ tbody tr:last-child td {
 .wallet span {
   margin-left: auto;
   font-size: 0.7rem;
-  color: #bbae8b;
+  color: var(--c-text-muted);
 }
 .shop-card {
   display: flex;
   align-items: flex-start;
   flex-direction: column;
-  background: linear-gradient(155deg, #20281c, #151e17);
+  background: linear-gradient(155deg, var(--c-surface-1), var(--c-bg-1));
 }
 .shop-icon {
   height: 52px;
   width: 52px;
   border-radius: 13px;
-  background: #3a3820;
-  color: #e6c579;
+  background: var(--c-gold-deep);
+  color: var(--c-gold);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1012,13 +1023,13 @@ tbody tr:last-child td {
   gap: 15px;
   align-items: center;
   justify-content: space-between;
-  border-top: 1px solid #3a412c;
+  border-top: 1px solid var(--c-surface-3);
   padding-top: 20px;
   margin-top: 22px;
 }
 .shop-bottom strong {
   font-size: 1.2rem;
-  color: #eacb81;
+  color: var(--c-gold);
 }
 .hall-grid {
   display: grid;
@@ -1028,32 +1039,38 @@ tbody tr:last-child td {
 .hall-card {
   text-align: center;
   padding: 40px 28px;
-  border-color: #635333;
+  border-color: var(--c-gold-deep);
   background:
-    radial-gradient(ellipse at top, #63502740, transparent 70%),
-    linear-gradient(145deg, #251f16, #151a14);
+    radial-gradient(
+      ellipse at top,
+      color-mix(in srgb, var(--c-gold-deep) 25%, transparent),
+      transparent 70%
+    ),
+    linear-gradient(145deg, var(--c-surface-1), var(--c-bg-1));
 }
 .hall-trophy {
-  color: #e9c56f;
+  color: var(--c-gold);
   width: 57px;
   height: 57px;
   stroke-width: 1.25;
   margin: 0 0 25px;
-  filter: drop-shadow(0 0 16px #ddb24320);
+  filter: drop-shadow(
+    0 0 16px color-mix(in srgb, var(--c-gold) 13%, transparent)
+  );
 }
 .hall-card h2 {
   font-size: 2rem;
   margin: 22px 0 12px;
-  color: #f4e0b0;
+  color: var(--c-gold-soft);
 }
 .hall-card p {
   font-size: 0.82rem;
-  color: #b5aa90;
+  color: var(--c-text-muted);
 }
 .hall-line {
   width: 55px;
   height: 1px;
-  background: #9e8650;
+  background: var(--c-gold);
   margin: 25px auto;
 }
 .hall-card .caption {
@@ -1061,14 +1078,14 @@ tbody tr:last-child td {
 }
 .champion-members {
   font-weight: 600;
-  color: #ebd19a !important;
+  color: var(--c-gold-soft) !important;
 }
 .certificate {
-  border-color: #7b6943;
+  border-color: var(--c-gold);
   text-align: center;
 }
 .certificate svg {
-  color: #e9c56f;
+  color: var(--c-gold);
 }
 .cup-rounds {
   display: grid;
@@ -1128,7 +1145,7 @@ tbody tr:last-child td {
   overflow: hidden;
 }
 .history-item {
-  border-left: 1px solid #614d62;
+  border-left: 1px solid var(--c-line-strong);
   margin: 20px 0;
   padding: 0 0 0 18px;
 }
@@ -1151,8 +1168,8 @@ tbody tr:last-child td {
 .tabs button[aria-selected="true"],
 .tabs button[aria-pressed="true"] {
   color: var(--accent);
-  background: #302820;
-  border-color: #634d3d;
+  background: var(--c-surface-2);
+  border-color: var(--c-line);
 }
 
 .standings-source {
@@ -1167,22 +1184,22 @@ tbody tr:last-child td {
   white-space: nowrap;
 }
 .risk {
-  border-color: #6e3f34;
-  background: linear-gradient(145deg, #2b1c17, #1e1b15);
+  border-color: var(--c-danger);
+  background: linear-gradient(145deg, var(--c-warm-deep), var(--c-bg-1));
 }
 dialog {
-  color: #edf3ec;
-  background: #162018;
-  border: 1px solid #50613e;
+  color: var(--c-text);
+  background: var(--c-bg-1);
+  border: 1px solid var(--c-line);
   border-radius: 18px;
   width: min(600px, calc(100vw - 30px));
   max-height: 88dvh;
   padding: 27px;
-  box-shadow: 0 35px 150px #000a;
+  box-shadow: 0 35px 150px color-mix(in srgb, var(--c-bg-0) 67%, transparent);
   overflow-y: auto;
 }
 dialog::backdrop {
-  background: #050906bd;
+  background: color-mix(in srgb, var(--c-bg-0) 74%, transparent);
   backdrop-filter: blur(5px);
 }
 .dialog-heading {
@@ -1204,8 +1221,8 @@ footer {
   gap: 20px;
   justify-content: space-between;
   padding: 25px 44px;
-  border-top: 1px solid #1d2a21;
-  color: #647969;
+  border-top: 1px solid var(--c-surface-1);
+  color: var(--c-line-strong);
   letter-spacing: 0.08em;
   font-size: 0.59rem;
 }
@@ -1220,8 +1237,12 @@ footer span {
 .login-story {
   position: relative;
   background:
-    radial-gradient(ellipse at 100% 65%, #56853455, transparent 65%),
-    linear-gradient(140deg, #18291a, #102014 70%);
+    radial-gradient(
+      ellipse at 100% 65%,
+      color-mix(in srgb, var(--c-accent) 33%, transparent),
+      transparent 65%
+    ),
+    linear-gradient(140deg, var(--c-surface-1), var(--c-bg-1) 70%);
   padding: 50px 9%;
   overflow: hidden;
   display: flex;
@@ -1244,14 +1265,14 @@ footer span {
 }
 .login-story h1 em {
   font-style: normal;
-  color: #bdef7a;
+  color: var(--c-accent);
 }
 .login-story p {
   font-size: 0.85rem;
 }
 .login-story .eyebrow {
   font-size: 0.61rem;
-  color: #bddb99;
+  color: var(--c-accent);
 }
 .login-story .caption {
   font-size: 0.56rem;
@@ -1259,14 +1280,14 @@ footer span {
 .orbit {
   width: 450px;
   height: 450px;
-  border: 1px solid #91b4652b;
+  border: 1px solid color-mix(in srgb, var(--c-accent) 17%, transparent);
   border-radius: 50%;
   position: absolute;
   right: -270px;
   top: 30%;
   box-shadow:
-    0 0 0 80px #8aaa4d05,
-    0 0 0 160px #8aaa4d04;
+    0 0 0 80px color-mix(in srgb, var(--c-accent) 2%, transparent),
+    0 0 0 160px color-mix(in srgb, var(--c-accent) 2%, transparent);
 }
 .login-form {
   width: 100%;
@@ -1275,7 +1296,7 @@ footer span {
   margin: auto;
 }
 .login-form > svg {
-  color: #c3f778;
+  color: var(--c-accent);
   margin-bottom: 26px;
 }
 .login-form h2 {
@@ -1487,7 +1508,7 @@ footer span {
     transform: translateX(-100%);
     width: min(295px, 85vw);
     padding: 26px 18px;
-    box-shadow: 20px 0 100px #0009;
+    box-shadow: 20px 0 100px color-mix(in srgb, var(--c-bg-0) 60%, transparent);
     transition: transform 0.2s;
   }
   .sidebar.expanded {
@@ -1510,7 +1531,7 @@ footer span {
     min-height: 69px;
     position: sticky;
     top: 0;
-    background: #0e1712ed;
+    background: color-mix(in srgb, var(--c-bg-0) 93%, transparent);
     backdrop-filter: blur(10px);
     z-index: 20;
   }

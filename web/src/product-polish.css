@@ -36,7 +36,7 @@
   height: min(950px, 90vh);
   background: var(--scene) right top / max(900px, 100%) auto no-repeat;
   opacity: 0.65;
-  mask-image: linear-gradient(#000 35%, transparent);
+  mask-image: linear-gradient(var(--c-bg-0) 35%, transparent);
 }
 .workspace::after {
   content: "";
@@ -83,23 +83,24 @@
   position: relative;
 }
 .section-battle .battle-pokemon {
-  border-top: 2px solid color-mix(in srgb, var(--type) 70%, #68758b);
+  border-top: 2px solid color-mix(in srgb, var(--type) 70%, var(--c-text-muted));
   box-shadow:
-    0 15px 35px #0004,
-    inset 0 1px #fff1;
+    0 15px 35px color-mix(in srgb, var(--c-bg-0) 27%, transparent),
+    inset 0 1px color-mix(in srgb, var(--c-text) 7%, transparent);
 }
 .section-battle .team-preview-grid {
   gap: 18px;
 }
 .section-hall .card {
-  border-top-color: #dcc28288;
+  border-top-color: color-mix(in srgb, var(--c-gold) 53%, transparent);
   box-shadow:
-    0 12px 40px #0003,
-    inset 0 1px #f8d37718;
+    0 12px 40px color-mix(in srgb, var(--c-bg-0) 20%, transparent),
+    inset 0 1px color-mix(in srgb, var(--c-gold) 9%, transparent);
 }
 .section-tienda .shop-card {
   border-radius: 12px 12px 22px 22px;
-  border-bottom: 3px solid #bea0ee55;
+  border-bottom: 3px solid
+    color-mix(in srgb, var(--c-violet-soft) 33%, transparent);
 }
 .section-admin .card,
 .section-juicios .card {
@@ -120,19 +121,23 @@
   min-height: 290px;
 }
 .profile-identity {
-  background: linear-gradient(125deg, #233d42a8, #131c29 70%);
+  background: linear-gradient(
+    125deg,
+    color-mix(in srgb, var(--c-accent-deep) 66%, transparent),
+    var(--c-surface-1) 70%
+  );
 }
 .profile-identity .trainer-photo {
   width: 115px;
   height: 135px;
   border-radius: 18px;
-  box-shadow: 0 8px 25px #0004;
+  box-shadow: 0 8px 25px color-mix(in srgb, var(--c-bg-0) 27%, transparent);
 }
 .profile-inventory {
   min-width: 0;
-  border: 1px solid #38504d;
+  border: 1px solid var(--c-line);
   border-radius: 16px;
-  background: #132321d9;
+  background: color-mix(in srgb, var(--c-bg-1) 85%, transparent);
   padding: 20px;
   max-height: 530px;
   overflow: auto;
@@ -156,14 +161,14 @@
 }
 .profile-wipe {
   padding: 18px 22px;
-  border: 1px solid #37524c;
+  border: 1px solid var(--c-line);
   border-radius: 12px;
-  background: #10241f;
+  background: var(--c-bg-1);
   margin-bottom: 22px;
 }
 .profile-wipe summary {
   cursor: pointer;
-  color: #badcd2;
+  color: var(--c-accent-soft);
   font-weight: 650;
 }
 .profile-wipe .card {
@@ -188,7 +193,12 @@
   position: relative;
   border-top: 2px solid var(--accent);
   background:
-    radial-gradient(ellipse at 50% 100%, #32456150, transparent 70%), #151f2f;
+    radial-gradient(
+      ellipse at 50% 100%,
+      color-mix(in srgb, var(--c-info-deep) 31%, transparent),
+      transparent 70%
+    ),
+    var(--c-info-deep);
   padding: 24px;
 }
 .party-slots {
@@ -197,8 +207,8 @@
 .party-slots .pc-slot {
   min-height: 172px;
   border-radius: 14px;
-  background: linear-gradient(#233247, #121b29);
-  border-color: #4b607d;
+  background: linear-gradient(var(--c-info-deep), var(--c-surface-1));
+  border-color: var(--c-line-strong);
   padding: 12px 5px;
 }
 .party-slots .pokemon-sprite {
@@ -206,7 +216,9 @@
   height: 112px;
   max-width: 100%;
   object-fit: contain;
-  filter: drop-shadow(0 7px 7px #0006);
+  filter: drop-shadow(
+    0 7px 7px color-mix(in srgb, var(--c-bg-0) 40%, transparent)
+  );
 }
 .party-slots .pc-slot > span {
   font-size: 0.95rem;
@@ -234,16 +246,16 @@
   white-space: nowrap;
 }
 .pokemon-status-flag.robado {
-  color: #ffd5d1;
-  background: #a63d4b;
+  color: var(--c-danger-soft);
+  background: var(--c-danger);
 }
 .pokemon-status-flag.blindado {
-  color: #d5f3ff;
-  background: #246b8d;
+  color: var(--c-accent-soft);
+  background: var(--c-accent);
 }
 .pokemon-status-flag.revivido {
-  color: #fff2ba;
-  background: #6f7430;
+  color: var(--c-gold-soft);
+  background: var(--c-accent);
 }
 .pc-slot .pokemon-status-flags {
   width: 100%;
@@ -302,14 +314,14 @@
   min-height: 82px;
   padding: 8px;
   text-align: left;
-  background: #12221f;
-  border-color: #36544a;
+  background: var(--c-bg-1);
+  border-color: var(--c-line);
 }
 .pokemon-selector-card:hover:not(:disabled),
 .pokemon-selector-card.is-selected {
   border-color: var(--accent);
-  background: #233d32;
-  box-shadow: 0 0 0 2px #c3f77826;
+  background: var(--c-surface-2);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--c-accent) 15%, transparent);
 }
 .pokemon-selector-card .pokemon-sprite {
   width: 58px;
@@ -341,7 +353,7 @@
   max-width: 520px;
 }
 .selector-confirmation {
-  color: #f1f7e7;
+  color: var(--c-text);
   font-size: 1rem;
   margin: 18px 0;
 }
@@ -358,17 +370,17 @@
   display: grid;
   place-items: center;
   padding: 18px;
-  background: #06100dcc;
+  background: color-mix(in srgb, var(--c-bg-0) 80%, transparent);
 }
 .trainer-picker-panel {
   width: min(620px, 100%);
   max-height: min(720px, 90vh);
   overflow: auto;
   padding: 24px;
-  border: 1px solid #3c5a4e;
+  border: 1px solid var(--c-line);
   border-radius: 16px;
-  background: #12221f;
-  box-shadow: 0 24px 80px #0008;
+  background: var(--c-bg-1);
+  box-shadow: 0 24px 80px color-mix(in srgb, var(--c-bg-0) 53%, transparent);
 }
 .trainer-selector-grid {
   display: grid;
@@ -416,14 +428,14 @@
   gap: 8px;
   width: 100%;
   padding: 13px;
-  border: 1px solid #345144;
+  border: 1px solid var(--c-line);
   border-radius: 12px;
-  background: #12231f;
+  background: var(--c-bg-1);
   text-align: center;
 }
 button.league-match-card:hover:not(:disabled) {
   border-color: var(--accent);
-  background: #1b352b;
+  background: var(--c-accent-deep);
 }
 .match-trainer {
   display: flex;
@@ -439,7 +451,7 @@ button.league-match-card:hover:not(:disabled) {
   white-space: nowrap;
 }
 .match-trainer.is-winner {
-  color: #e6f7c8;
+  color: var(--c-accent-soft);
 }
 .match-trainer .trainer-photo {
   width: 34px;
@@ -447,7 +459,7 @@ button.league-match-card:hover:not(:disabled) {
   flex: 0 0 34px;
 }
 .match-vs {
-  color: #d8bd7a;
+  color: var(--c-gold);
   font-size: 0.68rem;
   font-weight: 800;
   letter-spacing: 0.12em;
@@ -455,8 +467,8 @@ button.league-match-card:hover:not(:disabled) {
 .match-result {
   grid-column: 1 / -1;
   padding-top: 7px;
-  border-top: 1px solid #2a4237;
-  color: #c4d8c8;
+  border-top: 1px solid var(--c-surface-3);
+  color: var(--c-text);
   font-size: 0.68rem;
   font-weight: 700;
   letter-spacing: 0.08em;
@@ -478,7 +490,7 @@ button.league-match-card:hover:not(:disabled) {
 }
 .winner-picker button.is-selected {
   border-color: var(--accent);
-  background: #294432;
+  background: var(--c-surface-3);
 }
 .winner-picker .trainer-photo {
   width: 36px;
@@ -498,10 +510,10 @@ button.league-match-card:hover:not(:disabled) {
   top: 18px;
   align-self: start;
   padding: 12px 8px;
-  border: 1px solid #8d7544;
+  border: 1px solid var(--c-gold);
   border-radius: 999px;
-  color: #f2d48d;
-  background: #32291a;
+  color: var(--c-gold-soft);
+  background: var(--c-warm-deep);
   font-size: 0.7rem;
   font-weight: 850;
   letter-spacing: 0.12em;
@@ -551,13 +563,13 @@ button.league-match-card:hover:not(:disabled) {
   padding: 2px 3px;
 }
 .box-panel {
-  border: 1px solid #455875;
+  border: 1px solid var(--c-line-strong);
   box-shadow:
-    inset 0 0 0 5px #121b29,
-    0 12px 35px #0003;
+    inset 0 0 0 5px var(--c-surface-1),
+    0 12px 35px color-mix(in srgb, var(--c-bg-0) 20%, transparent);
 }
 .box-toolbar {
-  border-bottom: 1px solid #334661;
+  border-bottom: 1px solid var(--c-info-deep);
   padding-bottom: 20px;
   margin-bottom: 18px;
 }
@@ -566,8 +578,16 @@ button.league-match-card:hover:not(:disabled) {
 }
 .box-slots {
   background:
-    linear-gradient(#23314444 1px, transparent 1px),
-    linear-gradient(90deg, #23314444 1px, transparent 1px), #0f1825;
+    linear-gradient(
+      color-mix(in srgb, var(--c-info-deep) 27%, transparent) 1px,
+      transparent 1px
+    ),
+    linear-gradient(
+      90deg,
+      color-mix(in srgb, var(--c-info-deep) 27%, transparent) 1px,
+      transparent 1px
+    ),
+    var(--c-bg-1);
   background-size: 28px 28px;
   padding: 12px;
   border-radius: 12px;
@@ -580,17 +600,19 @@ button.league-match-card:hover:not(:disabled) {
 .pokemon-detail-layout .detail-identity {
   background: radial-gradient(
     ellipse at 50% 45%,
-    color-mix(in srgb, var(--type) 20%, #121a28),
-    #121a28 70%
+    color-mix(in srgb, var(--type) 20%, var(--c-surface-1)),
+    var(--c-surface-1) 70%
   );
-  border: 1px solid #38455b;
+  border: 1px solid var(--c-line);
   border-radius: 16px;
 }
 .pokemon-detail-layout .pokemon-sprite.large {
   width: 160px;
   height: 160px;
   object-fit: contain;
-  filter: drop-shadow(0 10px 8px #0006);
+  filter: drop-shadow(
+    0 10px 8px color-mix(in srgb, var(--c-bg-0) 40%, transparent)
+  );
 }
 .detail-moves {
   align-self: start;

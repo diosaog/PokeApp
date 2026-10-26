@@ -1,15 +1,15 @@
 /* Shared product tokens and layout; mutation guards live in their existing components. */
 :root {
-  --accent: #ff8c6d;
-  --green: #a9d7b5;
-  --muted: #a1b4ad;
-  --panel: #111f1b;
-  --border: #293b33;
-  background: #091410;
-  color: #edf4ef;
+  --accent: var(--c-danger);
+  --green: var(--c-accent-soft);
+  --muted: var(--c-text-soft);
+  --panel: var(--c-bg-1);
+  --border: var(--c-surface-3);
+  background: var(--c-bg-0);
+  color: var(--c-text);
 }
 .app-shell {
-  --accent: #ff8c6d;
+  --accent: var(--c-danger);
 }
 .mobile-close {
   display: none;
@@ -58,7 +58,7 @@ h2 {
   line-height: 1.6;
 }
 .sidebar {
-  background: #0c1914;
+  background: var(--c-bg-0);
   border-right: 1px solid var(--border);
 }
 .sidebar nav a {
@@ -67,9 +67,9 @@ h2 {
   min-height: 43px;
 }
 .sidebar nav a.active {
-  background: #20392c;
-  color: #d4f3d9;
-  box-shadow: inset 3px 0 #a9d7b5;
+  background: var(--c-accent-deep);
+  color: var(--c-accent-soft);
+  box-shadow: inset 3px 0 var(--c-accent-soft);
 }
 .nav-arrow {
   opacity: 0.4;
@@ -78,11 +78,11 @@ h2 {
   letter-spacing: -0.06em;
 }
 .topbar {
-  background: #0b1712;
+  background: var(--c-bg-0);
   border-color: var(--border);
 }
 .card {
-  background: linear-gradient(145deg, #14251d, #101d18);
+  background: linear-gradient(145deg, var(--c-surface-1), var(--c-bg-1));
   border: 1px solid var(--border);
   border-radius: 15px;
   padding: 22px;
@@ -92,14 +92,14 @@ h2 {
 button.primary {
   background: var(--accent);
   border-color: var(--accent);
-  color: #20120d;
+  color: var(--c-bg-1);
   font-weight: 750;
 }
 .button.primary:hover,
 button.primary:hover {
-  background: #ffa085;
-  border-color: #ffa085;
-  color: #20120d;
+  background: var(--c-danger-soft);
+  border-color: var(--c-danger-soft);
+  color: var(--c-bg-1);
 }
 .button,
 button {
@@ -107,14 +107,14 @@ button {
   font-size: 0.85rem;
 }
 .tag {
-  color: #c2d9ca;
-  background: #20362a;
-  border: 1px solid #314b3a;
+  color: var(--c-text);
+  background: var(--c-surface-2);
+  border: 1px solid var(--c-surface-3);
   font-size: 0.68rem;
 }
 .empty {
-  border: 1px dashed #36503f;
-  background: #102017;
+  border: 1px dashed var(--c-line);
+  background: var(--c-bg-1);
   border-radius: 16px;
   padding: 38px 22px;
   color: var(--muted);
@@ -123,7 +123,12 @@ button {
 .loading {
   padding: 25px;
   border-radius: 12px;
-  background: linear-gradient(100deg, #14241b, #1e3527, #14241b);
+  background: linear-gradient(
+    100deg,
+    var(--c-bg-1),
+    var(--c-surface-2),
+    var(--c-bg-1)
+  );
   color: var(--muted);
 }
 .notice {
@@ -136,7 +141,7 @@ button {
   align-items: center;
 }
 .trainer-photo {
-  background: #20342a;
+  background: var(--c-surface-2);
   border-radius: 12px;
   overflow: hidden;
   display: flex;
@@ -155,7 +160,7 @@ button {
 .trainer-photo > svg {
   width: 44px;
   height: 44px;
-  color: #85a58f;
+  color: var(--c-text-muted);
 }
 .pokemon-sprite {
   object-fit: contain;
@@ -163,7 +168,9 @@ button {
   image-rendering: auto;
   width: 80px;
   height: 80px;
-  filter: drop-shadow(0 6px 7px #0005);
+  filter: drop-shadow(
+    0 6px 7px color-mix(in srgb, var(--c-bg-0) 33%, transparent)
+  );
 }
 .pokemon-sprite.large {
   width: 140px;
@@ -190,8 +197,8 @@ button {
   gap: 5px;
   border-radius: 5px;
   padding: 4px 7px;
-  background: #314435;
-  color: #fff;
+  background: var(--c-surface-3);
+  color: var(--c-text);
   font-size: 0.62rem;
   font-weight: 650;
   line-height: 1;
@@ -200,55 +207,55 @@ button {
   object-fit: contain;
 }
 .type-fire {
-  background: #773b25;
+  background: var(--c-warm);
 }
 .type-water {
-  background: #285c78;
+  background: var(--c-info);
 }
 .type-grass {
-  background: #32643b;
+  background: var(--c-accent-deep);
 }
 .type-electric {
-  background: #716021;
+  background: var(--c-gold-deep);
 }
 .type-fairy {
-  background: #75465e;
+  background: var(--c-line-strong);
 }
 .type-dragon {
-  background: #514c83;
+  background: var(--c-line-strong);
 }
 .type-dark {
-  background: #494744;
+  background: var(--c-line);
 }
 .type-psychic {
-  background: #7e3e62;
+  background: var(--c-danger);
 }
 .type-ice {
-  background: #386568;
+  background: var(--c-accent);
 }
 .type-poison {
-  background: #654678;
+  background: var(--c-line-strong);
 }
 .type-fighting {
-  background: #784239;
+  background: var(--c-danger);
 }
 .type-steel {
-  background: #496069;
+  background: var(--c-line-strong);
 }
 .type-ground {
-  background: #6e5430;
+  background: var(--c-warm);
 }
 .type-flying {
-  background: #5a617d;
+  background: var(--c-line-strong);
 }
 .type-ghost {
-  background: #4a486c;
+  background: var(--c-line-strong);
 }
 .type-bug {
-  background: #556629;
+  background: var(--c-accent-deep);
 }
 .type-rock {
-  background: #665f3e;
+  background: var(--c-line);
 }
 .tags {
   gap: 5px;
@@ -269,14 +276,16 @@ button {
 }
 .game-badge svg {
   width: 25px;
-  color: #f4cd71;
+  color: var(--c-gold);
 }
 .game-badge.unearned {
   filter: grayscale(1);
   opacity: 0.22;
 }
 .game-badge.earned {
-  filter: drop-shadow(0 0 5px #e5ca5940);
+  filter: drop-shadow(
+    0 0 5px color-mix(in srgb, var(--c-gold) 25%, transparent)
+  );
 }
 .badge-strip {
   gap: 3px;
@@ -307,8 +316,8 @@ button {
   display: flex;
   gap: 12px;
   align-items: center;
-  background: #17291f;
-  border-color: #304536;
+  background: var(--c-accent-deep);
+  border-color: var(--c-surface-3);
   border-radius: 12px;
   min-width: 0;
   padding: 10px;
@@ -330,8 +339,8 @@ button {
   width: 100%;
   min-height: 36px;
   padding: 8px 9px;
-  border: 1px solid #304638;
-  background: #14251c;
+  border: 1px solid var(--c-surface-3);
+  background: var(--c-surface-1);
   font-size: 0.74rem;
   text-align: left;
 }
@@ -347,15 +356,15 @@ button {
 }
 .move-popover {
   color: inherit;
-  background: #14271e;
-  border: 1px solid #4b6a54;
+  background: var(--c-surface-1);
+  border: 1px solid var(--c-line-strong);
   border-radius: 14px;
   padding: 20px;
   max-width: min(390px, calc(100vw - 28px));
-  box-shadow: 0 24px 80px #0009;
+  box-shadow: 0 24px 80px color-mix(in srgb, var(--c-bg-0) 60%, transparent);
 }
 .move-popover::backdrop {
-  background: #0003;
+  background: color-mix(in srgb, var(--c-bg-0) 20%, transparent);
 }
 .move-popover h3 {
   margin: 0;
@@ -382,19 +391,19 @@ dialog {
   width: min(680px, calc(100vw - 24px));
   max-height: calc(100dvh - 32px);
   overflow: auto;
-  background: #112119;
-  border: 1px solid #3c5845;
+  background: var(--c-bg-1);
+  border: 1px solid var(--c-line);
   border-radius: 18px;
   padding: 24px;
 }
 dialog::backdrop {
-  background: #020b08bd;
+  background: color-mix(in srgb, var(--c-bg-0) 74%, transparent);
   backdrop-filter: blur(5px);
 }
 .dialog-heading {
   position: sticky;
   top: -24px;
-  background: #112119;
+  background: var(--c-bg-1);
   z-index: 2;
   padding: 12px 0;
 }
@@ -548,7 +557,7 @@ dialog::backdrop {
 .league-standings td:nth-child(2) {
   font-size: 1.25rem;
   font-weight: 750;
-  color: #e2f4de;
+  color: var(--c-accent-soft);
 }
 .standing-trainer {
   display: flex;
@@ -587,7 +596,7 @@ dialog::backdrop {
   position: absolute;
   right: -18px;
   top: 45px;
-  color: #86ad8f;
+  color: var(--c-text-muted);
 }
 .cup-round h3 {
   font-size: 0.9rem;
@@ -595,9 +604,9 @@ dialog::backdrop {
 .cup-match {
   padding: 14px;
   margin: 14px 0;
-  border: 1px solid #36523f;
+  border: 1px solid var(--c-line);
   border-radius: 10px;
-  background: #11251a;
+  background: var(--c-bg-1);
 }
 .cup-match > div:first-child {
   display: grid;
@@ -607,7 +616,7 @@ dialog::backdrop {
   align-items: center;
 }
 .cup-match .winner {
-  color: #cee5a0;
+  color: var(--c-accent-soft);
   font-weight: 750;
 }
 .cup-match .tag {
@@ -616,8 +625,12 @@ dialog::backdrop {
 .hall-card {
   text-align: center;
   position: relative;
-  border-color: #5a5032;
-  background: radial-gradient(ellipse at top, #303624, #14231b 70%);
+  border-color: var(--c-gold-deep);
+  background: radial-gradient(
+    ellipse at top,
+    var(--c-surface-2),
+    var(--c-bg-1) 70%
+  );
 }
 .hall-card h2 {
   font-size: 1.7rem;
@@ -629,22 +642,26 @@ dialog::backdrop {
   margin: 20px 0;
 }
 .hall-portraits .trainer-photo {
-  border: 1px solid #8f8050;
+  border: 1px solid var(--c-gold);
   width: 100px;
   height: 125px;
 }
 .hall-season {
-  color: #d9c58e;
+  color: var(--c-gold);
 }
 .hall-empty {
   text-align: center;
   padding: 65px 22px;
-  border: 1px solid #655b3c;
+  border: 1px solid var(--c-line);
   border-radius: 18px;
-  background: radial-gradient(ellipse at top, #353823, #11231a 65%);
+  background: radial-gradient(
+    ellipse at top,
+    var(--c-surface-2),
+    var(--c-bg-1) 65%
+  );
 }
 .hall-empty > svg {
-  color: #c9ad64;
+  color: var(--c-gold);
 }
 .hall-empty h2 {
   font-size: 1.8rem;
@@ -671,8 +688,8 @@ dialog::backdrop {
   margin: 20px 0;
 }
 .section-admin fieldset {
-  border: 1px solid #334d3b;
-  background: #102219;
+  border: 1px solid var(--c-line);
+  background: var(--c-bg-1);
   border-radius: 12px;
   padding: 20px;
   margin: 20px 0;
@@ -686,12 +703,12 @@ dialog::backdrop {
 }
 .section-admin .check {
   padding: 12px;
-  background: #203326;
+  background: var(--c-surface-2);
   border-radius: 9px;
   line-height: 1.5;
 }
 .section-admin .danger-zone {
-  border-color: #975f46;
+  border-color: var(--c-warm);
 }
 @media (max-width: 1100px) {
   .home-product {
@@ -750,7 +767,7 @@ dialog::backdrop {
   width: 72px;
   height: 72px;
   border-radius: 16px;
-  background: #223b2a;
+  background: var(--c-surface-2);
 }
 .shop-card .shop-icon .item-icon {
   width: 54px;
@@ -768,13 +785,13 @@ dialog::backdrop {
 .shop-bottom {
   margin-top: auto;
   padding-top: 16px;
-  border-top: 1px solid #2b4332;
+  border-top: 1px solid var(--c-surface-3);
 }
 .coin-price {
   display: flex;
   align-items: center;
   gap: 6px;
-  color: #f1ce7a;
+  color: var(--c-gold);
 }
 .coin-price small {
   font-size: 0.6rem;
@@ -810,7 +827,7 @@ dialog::backdrop {
   gap: 18px;
   padding: 20px;
   border-radius: 12px;
-  background: #213b2a;
+  background: var(--c-accent-deep);
   margin: 16px 0;
 }
 .purchase-summary .item-icon {
@@ -866,9 +883,9 @@ dialog::backdrop {
   grid-template-columns: 1.1fr 1fr;
   gap: 12px;
   padding: 16px;
-  border: 1px solid #304c39;
+  border: 1px solid var(--c-surface-3);
   border-radius: 13px;
-  background: #102118;
+  background: var(--c-bg-1);
   min-width: 0;
 }
 .battle-identity {
@@ -919,14 +936,14 @@ dialog::backdrop {
 }
 .move-vacant {
   padding: 11px 8px;
-  border: 1px dashed #2b4132;
-  color: #7e9987;
+  border: 1px dashed var(--c-surface-3);
+  color: var(--c-text-muted);
   border-radius: 8px;
   font-size: 0.65rem;
 }
 .battle-values {
   grid-column: 1 / -1;
-  border-top: 1px solid #293f30;
+  border-top: 1px solid var(--c-surface-3);
   padding-top: 10px;
 }
 .battle-values summary {
@@ -1064,8 +1081,8 @@ dialog::backdrop {
   padding: 8px 4px;
   min-width: 0;
   min-height: 120px;
-  border: 1px solid #304c39;
-  background: #183123;
+  border: 1px solid var(--c-surface-3);
+  background: var(--c-accent-deep);
 }
 .pc-slot .pokemon-sprite {
   width: 72px;
@@ -1084,13 +1101,13 @@ dialog::backdrop {
   margin-top: 4px;
 }
 .pc-slot.vacant {
-  border: 1px solid #274032;
-  background: #11251a;
+  border: 1px solid var(--c-surface-3);
+  background: var(--c-bg-1);
   display: flex;
   align-items: center;
   justify-content: center;
   border-radius: 10px;
-  color: #3c5e46;
+  color: var(--c-line);
   min-height: 90px;
 }
 .pc-slot.vacant > span {
@@ -1120,7 +1137,7 @@ dialog::backdrop {
   display: grid;
   grid-template-columns: repeat(6, minmax(0, 1fr));
   gap: 8px;
-  background: #0e2017;
+  background: var(--c-bg-1);
   border-radius: 12px;
   padding: 10px;
 }
@@ -1135,9 +1152,9 @@ dialog::backdrop {
   display: flex;
   align-items: center;
   gap: 6px;
-  background: #102319;
+  background: var(--c-bg-1);
   padding: 0 10px;
-  border: 1px solid #2d4935;
+  border: 1px solid var(--c-surface-3);
   border-radius: 9px;
   max-width: 280px;
 }

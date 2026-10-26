@@ -178,15 +178,21 @@ export function Inventory() {
           <h3 id="unlimited-title">Objetos ilimitados</h3>
           <div className="inventory-grid">
             {q.data.unlimited_items.map((item) => (
-              <Card key={item.code} className="inventory-card">
+              <Card key={item.code} className="inventory-card unlimited">
                 <div className="inventory-item">
                   <ItemIcon name={item.name} />
                   <h3>{item.label}</h3>
+                  <span className="unlimited-badge" aria-hidden="true">
+                    ∞
+                  </span>
                 </div>
                 <Tag>∞ · Gratis</Tag>
                 <p>{item.description}</p>
                 {insideLauncher() ? (
-                  <a href={`/__launcher/quick-items/${item.code}`}>
+                  <a
+                    className="button primary"
+                    href={`/__launcher/quick-items/${item.code}`}
+                  >
                     Añadir a mi partida
                   </a>
                 ) : (
@@ -209,7 +215,10 @@ export function Inventory() {
             const robbery =
               item.item_code === "robar_pokemon" && robberyEnabled && !transfer;
             return (
-              <Card key={item.id} className="inventory-card">
+              <Card
+                key={item.id}
+                className={`inventory-card item-${transfer ? "transfer" : item.status}`}
+              >
                 <div className="inventory-item">
                   <ItemIcon name={item.item_name} code={item.item_code} />
                   <h3>{pokemonName("item", item.item_name)}</h3>
@@ -239,8 +248,8 @@ export function Inventory() {
                 {item.status === "pending" &&
                   (transfer ? (
                     <p>
-                      El robo solo se confirma cuando PokeApp verifica los dos
-                      guardados. Mantén el Launcher abierto y sigue sus pasos.
+                      PokeApp decide el robo; la entrega física se completa en
+                      cada partida con el Launcher. Tu estado aparece arriba.
                     </p>
                   ) : physicalItem(item.item_code) && !robbery ? (
                     <p>

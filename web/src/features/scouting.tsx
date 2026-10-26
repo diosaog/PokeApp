@@ -18,7 +18,9 @@ export function ScoutingPage() {
       <Heading eyebrow="ENTRENADORES" title="Scouting">
         Explora equipos, cajas, medallas y el recorrido de cada entrenador.
       </Heading>
-      <Link to="/entrenadores">Volver a entrenadores</Link>
+      <Link className="text-link back-link" to="/entrenadores">
+        Volver a entrenadores
+      </Link>
       <WithSeason>
         <Scouting key={season} season={season} initial={initial} />
       </WithSeason>

@@ -363,6 +363,27 @@ export async function fixture(
       };
     else if (path.endsWith("/inventory"))
       result = {
+        // Same virtual items the API returns for every trainer since 26C.
+        unlimited_items: [
+          {
+            code: "rare_candy",
+            item_id: 50,
+            name: "Rare Candy",
+            label: "Caramelo Raro",
+            description:
+              "Sube un nivel a un Pokémon. Gratis e ilimitado: añádelos a tu partida desde PokeApp Launcher.",
+            availability: "unlimited",
+          },
+          {
+            code: "heart_scale",
+            item_id: 93,
+            name: "Heart Scale",
+            label: "Escama Corazón",
+            description:
+              "Permite recordar movimientos. Gratis e ilimitada: añádelas a tu partida desde PokeApp Launcher.",
+            availability: "unlimited",
+          },
+        ],
         purchases: [
           {
             id: "owned-purchase",

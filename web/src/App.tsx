@@ -349,6 +349,7 @@ export default function App() {
               <span className="nav-group-label">ADMIN</span>
               <NavLink
                 to="/admin"
+                end
                 aria-disabled={adminOperationPending || undefined}
                 onClick={(event) => {
                   if (adminOperationPending) event.preventDefault();

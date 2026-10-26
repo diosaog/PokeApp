@@ -79,6 +79,8 @@ test("all type move treatments retain readable contrast, sections remain distinc
   await fixture(page);
   await login(page);
   await navigate(page, "Batallas");
+  // The team arrives asynchronously; measure only once a move is on screen.
+  await expect(page.locator(".move-disclosure").first()).toBeAttached();
   const ratios = await page.evaluate(() => {
     const canvas = document.createElement("canvas");
     canvas.width = 1;

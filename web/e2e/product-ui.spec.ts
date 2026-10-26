@@ -75,7 +75,7 @@ for (const width of [1440, 390]) {
       .toBe(true);
     await expect(page.locator(".trainer-card > .button").first()).toHaveCSS(
       "background-color",
-      "rgb(127, 216, 203)",
+      "rgb(95, 157, 255)",
     );
     await page.screenshot({
       path: info.outputPath(`trainers-${width}.png`),
