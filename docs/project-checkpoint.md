@@ -5,7 +5,11 @@ milestone record; it does not maintain a second live phase-status ledger.
 
 ## Current project position
 
-- Current packet: **Phase26C PARTIAL (deploy-dependent) — infinite Rare Candy and
+- Current packet: **Phase26D DONE LOCAL — save engine leaves nothing but the save
+  beside it after verified writes; recovery procedure documented; power-loss and
+  Windows 10 PENDING** ([26D report](phase26d-save-engine-report.md)). Next: 27A.
+
+- Earlier: **Phase26C PARTIAL (deploy-dependent) — infinite Rare Candy and
   Heart Scale in every inventory; Launcher hosts the full PokeApp web in an
   isolated view; private 0.23.0-rc.2 audited; nothing deployed or published**
   ([26C report](phase26c-launcher-web-report.md)). Queued: 26D, then 27A.

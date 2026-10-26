@@ -1,5 +1,12 @@
 # Phase25 — live execution record
 
+2026-10-26 (26D). **26D DONE LOCAL**: no `.displaced`/`.lock` left beside saves
+after verified writes; identity-bound, journaled retirement; Windows 11 PASS;
+power-loss and Windows 10 PENDING. [26D report](../phase26d-save-engine-report.md),
+[recovery procedure](../save-engine-recovery-procedure.md).
+**Next: 27A** — server-authoritative robberies without victim cooperation,
+mandatory sync, verifier build, local migrations (054–060 pending production).
+
 2026-10-26 (26C). **26C PARTIAL (deploy-dependent only)** under the owner's 26B
 exception: infinite Rare Candy/Heart Scale in every trainer inventory (virtual, no
 migration), Launcher «PokeApp» tab hosting the real deployed web in an isolated
