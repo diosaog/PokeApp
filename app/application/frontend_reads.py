@@ -457,7 +457,13 @@ class FrontendReads:
             purchase['physical_state'] = physical_state(
                 item['code'], uses.get(purchase['id']), used=purchase['status'] == 'used'
             )
-        return InventoryRead(purchases=purchases, targets=targets)
+        from app.domain.unlimited_items import UNLIMITED_ITEMS
+
+        return InventoryRead(
+            purchases=purchases,
+            targets=targets,
+            unlimited_items=[dict(item) for item in UNLIMITED_ITEMS],
+        )
 
     def hall(self, offset=0):
         columns = "id,season_id,competition_type,champion_trainer_id,finalist_trainer_id,finalized_at,cup_id,cup_certificate_id,champion_side_id,finalist_side_id,cup_sides,cup_checksum"

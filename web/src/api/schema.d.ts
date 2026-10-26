@@ -2779,6 +2779,8 @@ export interface components {
       purchases: components["schemas"]["PurchaseRead"][];
       /** Targets */
       targets: components["schemas"]["TargetRead"][];
+      /** Unlimited Items */
+      unlimited_items?: components["schemas"]["UnlimitedItemRead"][];
     };
     /** ItemArtifactResponse */
     ItemArtifactResponse: {
@@ -5011,6 +5013,28 @@ export interface components {
       /** Sanctions */
       sanctions: components["schemas"]["SafeSanction"][];
       detail: components["schemas"]["TrialDetail"] | null;
+    };
+    /** UnlimitedItemRead */
+    UnlimitedItemRead: {
+      /**
+       * Code
+       * @enum {string}
+       */
+      code: "rare_candy" | "heart_scale";
+      /** Item Id */
+      item_id: number;
+      /** Name */
+      name: string;
+      /** Label */
+      label: string;
+      /** Description */
+      description: string;
+      /**
+       * Availability
+       * @default unlimited
+       * @constant
+       */
+      availability: "unlimited";
     };
     /** UpdateTrialBody */
     UpdateTrialBody: {

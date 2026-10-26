@@ -55,6 +55,11 @@ export const transferLabels: Record<string, string> = {
   BLOCKED_UNCERTAIN: "Operación bloqueada",
 };
 const withdrawable = ["PREPARING", "WAITING_OTHER", "PENDING_SOURCE"];
+// Inside PokeApp Launcher this same web adds a marker to its user agent; the
+// Launcher intercepts the plain link below and opens its native quick-item panel.
+const insideLauncher = () =>
+  typeof navigator !== "undefined" &&
+  navigator.userAgent.includes("PokeAppLauncher/");
 
 export function Inventory() {
   const { season } = useApp();
@@ -142,6 +147,32 @@ export function Inventory() {
       <h2>Inventario</h2>
       <p className="muted">Tus compras y vales · disponibles para canjear</p>
       <Notice error={q.error} />
+      {!!q.data?.unlimited_items?.length && (
+        <section aria-labelledby="unlimited-title">
+          <h3 id="unlimited-title">Objetos ilimitados</h3>
+          <div className="inventory-grid">
+            {q.data.unlimited_items.map((item) => (
+              <Card key={item.code} className="inventory-card">
+                <div className="inventory-item">
+                  <ItemIcon name={item.name} />
+                  <h3>{item.label}</h3>
+                </div>
+                <Tag>∞ · Gratis</Tag>
+                <p>{item.description}</p>
+                {insideLauncher() ? (
+                  <a href={`/__launcher/quick-items/${item.code}`}>
+                    Añadir a mi partida
+                  </a>
+                ) : (
+                  <p className="muted">
+                    Disponible en PokeApp Launcher para añadirlo a tu partida.
+                  </p>
+                )}
+              </Card>
+            ))}
+          </div>
+        </section>
+      )}
       <CommandState command={cmd} />
       {q.isPending ? (
         <Loading />

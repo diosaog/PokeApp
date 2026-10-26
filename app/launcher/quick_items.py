@@ -9,10 +9,11 @@ the native writer revalidates all of them before any change.
 
 from hashlib import sha256
 
+from app.domain.unlimited_items import UNLIMITED_ITEMS
 from app.launcher.write_engine import WriteIntent
 from app.launcher.write_files import WriteSafetyError
 
-QUICK_ITEMS = {"rare_candy": "Caramelo Raro", "heart_scale": "Escama Corazón"}
+QUICK_ITEMS = {item["code"]: item["label"] for item in UNLIMITED_ITEMS}
 
 
 def describe(change):

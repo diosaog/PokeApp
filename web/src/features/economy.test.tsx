@@ -399,3 +399,53 @@ it("withdraws a requested robbery before any application", async () => {
     ),
   );
 });
+
+const unlimited = [
+  {
+    code: "rare_candy",
+    item_id: 50,
+    name: "Rare Candy",
+    label: "Caramelo Raro",
+    description: "Gratis e ilimitado.",
+    availability: "unlimited",
+  },
+  {
+    code: "heart_scale",
+    item_id: 93,
+    name: "Heart Scale",
+    label: "Escama Corazón",
+    description: "Gratis e ilimitada.",
+    availability: "unlimited",
+  },
+] as Model<"InventoryRead">["unlimited_items"];
+
+it("shows Rare Candy and Heart Scale as infinite and free with no purchase action", () => {
+  mocks.inventory = { purchases: [], targets: [], unlimited_items: unlimited };
+  render(<Inventory />);
+  expect(screen.getByText("Caramelo Raro")).toBeInTheDocument();
+  expect(screen.getByText("Escama Corazón")).toBeInTheDocument();
+  expect(screen.getAllByText("∞ · Gratis")).toHaveLength(2);
+  expect(screen.getAllByText(/Disponible en PokeApp Launcher/)).toHaveLength(2);
+  expect(
+    screen.queryByRole("link", { name: "Añadir a mi partida" }),
+  ).not.toBeInTheDocument();
+  expect(
+    screen.queryByRole("button", { name: "Canjear" }),
+  ).not.toBeInTheDocument();
+  expect(mocks.execute).not.toHaveBeenCalled();
+});
+
+it("inside the Launcher links each infinite item to the native quick-item panel", () => {
+  const agent = vi
+    .spyOn(navigator, "userAgent", "get")
+    .mockReturnValue("Mozilla/5.0 PokeAppLauncher/0.23.0");
+  mocks.inventory = { purchases: [], targets: [], unlimited_items: unlimited };
+  render(<Inventory />);
+  const links = screen.getAllByRole("link", { name: "Añadir a mi partida" });
+  expect(links.map((a) => a.getAttribute("href"))).toEqual([
+    "/__launcher/quick-items/rare_candy",
+    "/__launcher/quick-items/heart_scale",
+  ]);
+  expect(mocks.execute).not.toHaveBeenCalled();
+  agent.mockRestore();
+});

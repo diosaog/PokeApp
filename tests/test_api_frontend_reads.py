@@ -551,6 +551,27 @@ class FrontendReadTests(unittest.TestCase):
         self.assertEqual(result.json()["purchases"][0]["item_code"], "robar_pokemon")
         self.assertNotIn("SECRET", result.text)
 
+    def test_inventory_unlimited_items_are_virtual_free_and_never_consumed(self):
+        # Owner decision: Rare Candy and Heart Scale are infinite for everyone.
+        expected = [("rare_candy", 50, "unlimited"), ("heart_scale", 93, "unlimited")]
+        first = self.get(f"seasons/{SID}/inventory").json()
+        self.assertEqual(first["purchases"], [])  # trainer with nothing bought
+        def shape(body):
+            return [(i["code"], i["item_id"], i["availability"]) for i in body["unlimited_items"]]
+
+        self.assertEqual(shape(first), expected)
+        self.assertTrue(all("quantity" not in i and "price" not in i for i in first["unlimited_items"]))
+        item, purchase = str(uuid4()), str(uuid4())
+        self.store.data["shop_items"] = [{"id": item, "code": "blindar_pokemon", "name": "Escudo"}]
+        self.store.data["purchases"] = [{"id": purchase, "shop_item_id": item, "season_id": SID, "trainer_id": TRAINER_ID,
+            "status": "pending", "total_price": 30, "purchased_at": "2026-10-26T10:00:00Z"}]
+        again = self.get(f"seasons/{SID}/inventory").json()
+        self.assertEqual(shape(again), expected)  # not consumed by repeated reads
+        self.assertEqual([p["id"] for p in again["purchases"]], [purchase])  # ordinary inventory intact
+        other_season = self.get(f"seasons/{uuid4()}/inventory")
+        if other_season.status_code == 200:
+            self.assertEqual(shape(other_season.json()), expected)
+
 
 class CorsTests(unittest.TestCase):
     def test_private_success_and_errors_are_not_cacheable(self):
