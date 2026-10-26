@@ -262,7 +262,10 @@ function renderBackups(busy) {
     const row = document.createElement("p"),
       label = document.createElement("span"),
       copy = document.createElement("button");
-    label.textContent = `${backup.game} · ${backup.created_at ? new Date(backup.created_at).toLocaleString("es-ES") : "Fecha no disponible"} · ${backup.role === "before_restore" ? "Antes de restaurar" : "Original"} · ${backup.verified ? "Verificada" : "Inválida o ilegible"} · ${["RECOVERY_REQUIRED", "PREPARED"].includes(backup.status) ? "Recuperación pendiente" : "Conservada"}${backup.beside_save === "REMOVED" ? " · Sin restos junto a la partida" : backup.beside_save === "KEPT_CHANGED" ? " · Copia junto a la partida conservada: cambió fuera de PokeApp" : backup.beside_save?.startsWith("KEPT_") || backup.beside_save === "REMOVAL_INTENT" ? " · Copia junto a la partida conservada por seguridad" : ""} `;
+    label.textContent =
+      backup.role === "daily"
+        ? `${backup.game} · Copia diaria del ${new Date(`${backup.date}T12:00:00`).toLocaleDateString("es-ES")} · Estado antes de la primera modificación del día · Verificada · Se conserva 30 días `
+        : `${backup.game} · ${backup.created_at ? new Date(backup.created_at).toLocaleString("es-ES") : "Fecha no disponible"} · ${backup.role === "before_restore" ? "Antes de restaurar" : "Original"} · ${backup.verified ? "Verificada" : "Inválida o ilegible"} · ${["RECOVERY_REQUIRED", "PREPARED"].includes(backup.status) ? "Recuperación pendiente" : "Conservada"}${backup.beside_save === "REMOVED" ? " · Sin restos junto a la partida" : backup.beside_save === "KEPT_CHANGED" ? " · Copia junto a la partida conservada: cambió fuera de PokeApp" : backup.beside_save?.startsWith("KEPT_") || backup.beside_save === "REMOVAL_INTENT" ? " · Copia junto a la partida conservada por seguridad" : ""} `;
     copy.textContent = "Guardar copia…";
     copy.disabled = !backup.verified || busy;
     copy.onclick = () =>

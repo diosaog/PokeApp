@@ -44,7 +44,7 @@ PARTIAL only for deploy-dependent items (flexible gate: continue).
 | JOURNAL RECOVERY | PASS |
 | INTERRUPTION SAFETY | PASS (process kill; power loss PENDING) |
 | TWO-SAVE SAFETY | PASS (current protocol) |
-| CLEANUP | PASS (beside-save artifacts; profile backups kept: no approved retention policy) |
+| CLEANUP | PASS (beside-save artifacts; profile backups: daily policy, addendum) |
 | WINDOWS 11 | PASS |
 | WINDOWS 10 | PENDING |
 | PHYSICAL POWER-LOSS TEST | PENDING |
@@ -52,5 +52,24 @@ PARTIAL only for deploy-dependent items (flexible gate: continue).
 | PHASE 26D | DONE LOCAL |
 
 Pending, not blocking the queue: Windows 10 run, power-loss test, low-disk and
-antivirus-lock behaviour on real machines, a retention policy for profile
-backups (owner decision). Ready for **27A** (authoritative robberies, verifier).
+antivirus-lock behaviour on real machines. Ready for **27A** (authoritative
+robberies, verifier).
+
+## Addendum — daily backup retention (owner decision 2026-10-26)
+
+One ordinary point per save and local date (state before the day's first write),
+kept 30 days; transactional backups still created and verified before each
+write; older ones retired only when provably redundant. Rules in the
+[recovery procedure](save-engine-recovery-procedure.md#daily-retention-owner-decision-2026-10-26).
+The 26D protocol (park, publish, verify, retire residue) is unchanged.
+
+- New tests 8/8 (`tests/test_phase26d_daily_backups.py`, real NTFS): three
+  writes in a day keep the first state and only the latest transactional backup;
+  date change; 29 days kept, 30 expired, clock moved back keeps the newest;
+  pending, failed/recovery and pre-policy backups untouched; unrecognized,
+  tampered and externally changed files untouched; crash inside retirement
+  completed after restart; crash between point and manifest keeps every backup;
+  restored records keep both backups.
+- Launcher UI smoke 26/26 (daily row with date and game, copy only).
+- Engine/Launcher regression 138 tests OK (one historical assertion now also
+  expects the daily row).

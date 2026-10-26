@@ -205,7 +205,7 @@ class LauncherRuntime:
                 ):
                     raise ValueError("invalid_backup_arguments")
                 if name == "backup_export" and (
-                    args["role"] not in ("original", "before_restore")
+                    args["role"] not in ("original", "before_restore", "daily")
                     or not isinstance(args["destination"], str)
                     or not 1 <= len(args["destination"]) <= 4096
                 ):

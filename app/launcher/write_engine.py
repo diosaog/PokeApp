@@ -15,7 +15,7 @@ import sqlite3
 from collections.abc import Callable
 from contextlib import ExitStack, contextmanager, nullcontext
 from dataclasses import dataclass
-from datetime import UTC, datetime
+from datetime import UTC, date, datetime
 from functools import wraps
 from hashlib import sha256
 from pathlib import Path
@@ -35,6 +35,8 @@ PRODUCTION_MUTATIONS: frozenset[str] = frozenset()
 # kind (revive, transfer, test marking) can ever pass through this switch.
 PUBLIC_READY_MUTATIONS: frozenset[str] = frozenset({"add_item"})
 PENDING = ("PREPARED", "AWAITING_CONFIRMATION", "RECOVERY_REQUIRED")
+# Owner decision 2026-10-26: one ordinary daily restore point per save, kept 30 days.
+DAILY_RETENTION_DAYS = 30
 
 
 def _serialized(method):
@@ -207,6 +209,7 @@ class LocalWriteEngine:
         self.export_files = WindowsExportFiles()
         self.handoff = WindowsHandoffFiles()
         self.fault_hook = fault_hook or (lambda _stage: None)
+        self.today = lambda: datetime.now().astimezone().date()  # local calendar day
         self._mutex, self._operation_depth = RLock(), 0
         self._db_check()
         with self._db() as connection:
@@ -443,6 +446,8 @@ class LocalWriteEngine:
                     "restore_backup_created_at"
                 ):
                     continue
+                if role == "original" and record.get("backup_retired") == "RETIRED":
+                    continue  # superseded: daily point plus a newer verified backup
                 try:
                     self._backup_bytes(record, role)
                     verified = True
@@ -474,11 +479,25 @@ class LocalWriteEngine:
                         and type(self.capability) is EngineeringCapability,
                     }
                 )
+        for day, meta in sorted(self._daily_points(selected).items(), reverse=True):
+            result.append(
+                {
+                    "operation_id": meta["operation_id"],
+                    "role": "daily",
+                    "date": day,
+                    "beside_save": None,
+                    "game": meta["game"],
+                    "created_at": meta["created_at"],
+                    "verified": True,
+                    "status": "DAILY",
+                    "can_restore": False,
+                }
+            )
         return result
 
     @_serialized
     def export_backup(self, operation_id, *, destination: Path, role="original"):
-        if role not in ("original", "before_restore"):
+        if role not in ("original", "before_restore", "daily"):
             raise WriteSafetyError("INVALID_BACKUP_ROLE")
         record = self._load(operation_id)
         final = Path(destination).absolute()
@@ -489,11 +508,15 @@ class LocalWriteEngine:
             or final.name.startswith(".pokeapp-")
         ):
             raise WriteSafetyError("UNSAFE_BACKUP_DESTINATION")
-        data = self._backup_bytes(record, role)
+        if role == "daily":
+            source, data = self._daily_source(record)
+        else:
+            source = self._backup_path(record, role)
+            data = self._backup_bytes(record, role)
         stage = final.parent / (".pokeapp-copy-" + str(uuid4()) + ".partial")
         with (
             self.handoff.pin(final),
-            self.export_files.strict_source(self._backup_path(record, role)) as backup,
+            self.export_files.strict_source(source) as backup,
         ):
             if self.files.read(backup) != data:
                 raise WriteSafetyError("BACKUP_INVALID")
@@ -723,7 +746,148 @@ class LocalWriteEngine:
             record, closed_emulator_confirmed=closed_emulator_confirmed
         )
         self._retire_residue(operation_id)
+        self._apply_retention(operation_id)
         return receipt
+
+    def _daily_folder(self, target):
+        key = _hash(os.path.normcase(str(Path(target).absolute())).encode("utf-8"))
+        return self.profile / "daily-backups" / key[:32]
+
+    def _daily_points(self, target):
+        """Recognized daily points only: manifest, name and bytes all agree."""
+        folder, points = self._daily_folder(target), {}
+        if not folder.is_dir():
+            return points
+        for manifest in sorted(folder.glob("*.json")):
+            try:
+                day = date.fromisoformat(manifest.stem).isoformat()
+                meta = json.loads(self.files.read_path(manifest))
+                data = self.files.read_path(folder / (day + ".sav"))
+                if (
+                    meta["date"] == day == manifest.stem
+                    and os.path.normcase(meta["target"])
+                    == os.path.normcase(str(Path(target).absolute()))
+                    and meta["size"] == len(data)
+                    and meta["sha256"] == _hash(data)
+                ):
+                    points[day] = meta
+            except (OSError, ValueError, KeyError, TypeError, WriteSafetyError):
+                continue  # unrecognized: never listed, never deleted
+        return points
+
+    def _daily_source(self, record):
+        for day, meta in self._daily_points(record["target"]).items():
+            if meta["operation_id"] == record["operation_id"]:
+                path = self._daily_folder(record["target"]) / (day + ".sav")
+                return path, self.files.read_path(path)
+        raise WriteSafetyError("BACKUP_INVALID")
+
+    def _apply_retention(self, operation_id):
+        """Daily restore points (30 days) instead of one permanent copy per write.
+
+        After a verified apply the save's verified pre-modification bytes become
+        the day's point unless one exists (never overwritten). Older transactional
+        backups of the same save are then retired only if their own record is
+        terminal verified under this policy, their bytes still verify and their day
+        has a recognized point, and no operation on the save is pending. Kept:
+        this operation's backup (the latest good copy), pending, failed, uncertain
+        or restored records, robbery legs and every pre-policy backup. Expiry
+        removes recognized points older than 30 days, never the newest. Any doubt
+        keeps everything and records why.
+        """
+        record = self._load(operation_id)
+        if record["status"] != "APPLIED_VERIFIED" or record.get("mode") == "export":
+            return
+        transfer = record["intent"]["mutation"]["kind"].startswith("transfer_")
+        try:
+            original = self._backup_bytes(record)
+            today = self.today()
+            day = today.isoformat()
+            self.files.directory(self.profile / "daily-backups", create=True)
+            folder = self.files.directory(
+                self._daily_folder(record["target"]), create=True
+            )
+            if not (folder / (day + ".sav")).exists():
+                self.files.create_verified(
+                    folder / (day + ".sav"), original, immutable=True
+                )
+                meta = {
+                    "date": day,
+                    "target": record["target"],
+                    "game": record["intent"]["game"],
+                    "trainer_key": record["intent"]["trainer_key"],
+                    "sha256": _hash(original),
+                    "size": len(original),
+                    "operation_id": operation_id,
+                    "created_at": datetime.now(UTC).isoformat(),
+                }
+                self.files.create_verified(
+                    folder / (day + ".json"),
+                    _json(meta).encode("utf-8"),
+                    immutable=True,
+                )
+            points = self._daily_points(record["target"])
+            if day not in points:
+                raise WriteSafetyError("DAILY_POINT_UNVERIFIED")
+            if transfer:
+                return  # robbery legs keep their own backups; coordinated recovery
+            record.update(retention="daily_v1", retention_day=day)
+            self._save(record)
+            with self._db() as connection:
+                same_save = [
+                    row
+                    for row in (
+                        json.loads(item[0])
+                        for item in connection.execute(
+                            "SELECT record FROM physical_writes ORDER BY id"
+                        )
+                    )
+                    if os.path.normcase(row["target"])
+                    == os.path.normcase(record["target"])
+                ]
+            if any(row["status"] in PENDING for row in same_save):
+                return  # recovery may still depend on any of them
+            for other in same_save:
+                if (
+                    other["operation_id"] == operation_id
+                    or other.get("retention") != "daily_v1"
+                    or other.get("retention_day") not in points
+                    or other["status"] != "APPLIED_VERIFIED"
+                    or other.get("residue") != "REMOVED"
+                    or other.get("restore_backup_created_at")
+                    or other.get("backup_retired") == "RETIRED"
+                    or other["intent"]["mutation"]["kind"].startswith("transfer_")
+                    or other.get("created_at", "") >= record.get("created_at", "")
+                ):
+                    continue
+                backup = self._backup_path(other)
+                if other.get("backup_retired") != "INTENT":
+                    try:
+                        self._backup_bytes(other)
+                    except WriteSafetyError:
+                        continue  # changed or unreadable: not proven, never deleted
+                    other["backup_retired"] = "INTENT"
+                    self._save(other)
+                if backup.exists():
+                    backup.chmod(0o600)
+                    backup.unlink()
+                other["backup_retired"] = "RETIRED"
+                self._save(other)
+            newest = max(points)
+            for old in points:
+                if old == newest or (today - date.fromisoformat(old)).days < (
+                    DAILY_RETENTION_DAYS
+                ):
+                    continue
+                for suffix in (".sav", ".json"):
+                    path = folder / (old + suffix)
+                    if path.exists():
+                        path.chmod(0o600)
+                        path.unlink()
+        except (OSError, ValueError, WriteSafetyError) as error:
+            record = self._load(operation_id)
+            record["retention_error"] = self._error(error, "RETENTION_SKIPPED")
+            self._save(record)
 
     def _retire_residue(self, operation_id):
         """Remove the parked copy beside the save once provably redundant.
@@ -1145,6 +1309,13 @@ class LocalWriteEngine:
         record = self._load(operation_id)
         if record.get("mode") == "export":
             return self._reconcile_export(record)
+        if record.get("backup_retired"):
+            # Terminal verified history whose backup the daily policy retired.
+            try:
+                current = _hash(self.files.read_path(self._target(record).path))
+            except (OSError, WriteSafetyError):
+                return self._receipt(record, False)
+            return self._receipt(record, current == record["output_hash"])
         if record.get("protocol") == "no_replace_v1":
             receipt = self._reconcile_handoff(record)
             self._retire_residue(operation_id)  # also clears residue from older runs
@@ -1243,6 +1414,8 @@ class LocalWriteEngine:
         self, operation_id: str, *, closed_emulator_confirmed: bool
     ) -> WriteReceipt:
         record = self._load(operation_id)
+        if record.get("backup_retired"):
+            raise WriteSafetyError("BACKUP_RETIRED_USE_DAILY_POINT")
         if record["intent"]["mutation"]["kind"].startswith("transfer_"):
             raise WriteSafetyError("TRANSFER_COORDINATED_RECOVERY_REQUIRED")
         if record.get("protocol") != "no_replace_v1":

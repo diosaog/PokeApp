@@ -29,7 +29,8 @@ persistent source of physical truth; nothing is decided from file names or ages.
 
 | Artifact | Where | Purpose | Removed when |
 | --- | --- | --- | --- |
-| original / before-restore backup | profile `write-backups/` | permanent recovery | never automatically (no approved policy) |
+| original / before-restore backup | profile `write-backups/` | transactional recovery | original only, by the daily policy below; before-restore never |
+| daily point `<date>.sav` + `.json` | profile `daily-backups/<save key>/` | state before the day's first write | recognized and older than 30 days, never the newest |
 | `.pokeapp-<op>.stage` | beside save | active publication input | consumed by the publish rename |
 | `.pokeapp-<op>.displaced` | beside save | proof of which original was parked during a commit | terminal verified + identity + bytes + backup verified |
 | `.pokeapp-<op>.restored-output` | beside save | parked applied output during restore | same rule against the before-restore backup |
@@ -54,3 +55,35 @@ would break that proof. After verification the profile backup is the recovery.
 | two-save robbery leg | no unilateral restore (`TRANSFER_COORDINATED_RECOVERY_REQUIRED`) |
 
 Power loss is not the same as killing the process (tested); it is PENDING.
+
+## Daily retention (owner decision 2026-10-26)
+
+One ordinary restore point per save and local date, kept 30 days, replaces one
+permanent copy per write. Runs after every verified apply (`_apply_retention`):
+
+1. The transactional backup is still created and verified before every write.
+2. If the save has no point for today, the operation's verified pre-write bytes
+   become `<YYYY-MM-DD>.sav` with a manifest (`date`, `target`, `game`,
+   `trainer_key`, `sha256`, `size`, `operation_id`). Exclusive create, read-only,
+   never overwritten by later writes that day.
+3. Older transactional backups of the same save are retired only when **all**
+   hold: no operation on that save is pending (`PREPARED`, `AWAITING_CONFIRMATION`,
+   `RECOVERY_REQUIRED`); the record is `APPLIED_VERIFIED` under this policy
+   (`retention=daily_v1`), its beside-save copy is `REMOVED`, it was never
+   restored, it is not a robbery leg, its day has a recognized point, and its
+   bytes still verify. Journal `backup_retired=INTENT` first, then `RETIRED`; an
+   interrupted retirement is completed by the next write.
+4. Recognized points 30 or more days old are deleted, never the newest one.
+
+Never touched: the latest write's backup, failed/pending/uncertain/restored
+records, robbery legs, every backup from before the policy (no purge on
+activation), files in `daily-backups/` without a matching manifest and bytes, and
+transactional backups changed outside PokeApp. Any error keeps everything and
+records `retention_error`.
+
+A retired record stays terminal history: `reconcile` only compares the current
+file, and `restore` refuses with `BACKUP_RETIRED_USE_DAILY_POINT` (its state was
+not restorable anyway once a newer write replaced the file). The Launcher lists
+each point as «Copia diaria del <fecha>» with the game and «Guardar copia…»
+(verified export, `role=daily`); the latest write keeps «Restaurar copia…».
+

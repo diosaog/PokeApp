@@ -216,7 +216,11 @@ class LocalWriteController:
                 operation_id, destination=Path(destination), role=role
             )
             with self._lock:
-                self._backup_message = "Copia original guardada y verificada. La partida activa no se ha modificado."
+                self._backup_message = (
+                    "Copia diaria guardada y verificada. La partida activa no se ha modificado."
+                    if role == "daily"
+                    else "Copia original guardada y verificada. La partida activa no se ha modificado."
+                )
         return self.state()
 
     def restore_backup(

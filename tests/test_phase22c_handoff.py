@@ -128,7 +128,10 @@ engine.prepare(engine.enroll(root/'main'),intent(),closed_emulator_confirmed=Tru
             ).status,
         )
         rows = self.engine.backups_for(self.target)
-        self.assertEqual({"original", "before_restore"}, {r["role"] for r in rows})
+        # The day's restore point (daily retention policy) is listed after them.
+        self.assertEqual(
+            {"original", "before_restore", "daily"}, {r["role"] for r in rows}
+        )
         self.assertTrue(all(r["verified"] for r in rows))
         self.engine.export_backup(
             self.intent.operation_id,

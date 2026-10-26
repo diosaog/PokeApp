@@ -190,9 +190,13 @@ app.whenReady().then(() => {
     if (!backup || state.write.busy)
       throw new Error("La copia no está verificada. Actualiza el historial.");
     const chosen = await dialog.showSaveDialog(win, {
-      title: "Guardar copia original",
+      title:
+        role === "daily" ? "Guardar copia diaria" : "Guardar copia original",
       buttonLabel: "Guardar copia",
-      defaultPath: `PokeApp-${backup.game}-${operationId.slice(0, 8)}-${role}.sav`,
+      defaultPath:
+        role === "daily"
+          ? `PokeApp-${backup.game}-diaria-${backup.date}.sav`
+          : `PokeApp-${backup.game}-${operationId.slice(0, 8)}-${role}.sav`,
       filters: [{ name: "Copia de partida", extensions: ["sav"] }],
     });
     if (chosen.canceled || !chosen.filePath) return { status: "CANCELLED" };

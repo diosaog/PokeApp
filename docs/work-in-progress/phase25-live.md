@@ -1,5 +1,13 @@
 # Phase25 — live execution record
 
+2026-10-26 (daily backups). Owner decision implemented on the 26D engine: one
+ordinary restore point per save and local date (state before the day's first
+write), kept 30 days, listed in the Launcher with date and game and exportable;
+transactional backups still made before every write, older ones retired only
+when provably redundant; pending/failed/restored/robbery/pre-policy backups and
+unrecognized files never touched. Tests 8/8, UI smoke 26/26, regression 138 OK.
+[Rules](../save-engine-recovery-procedure.md#daily-retention-owner-decision-2026-10-26).
+
 2026-10-26 (26D). **26D DONE LOCAL**: no `.displaced`/`.lock` left beside saves
 after verified writes; identity-bound, journaled retirement; Windows 11 PASS;
 power-loss and Windows 10 PENDING. [26D report](../phase26d-save-engine-report.md),
