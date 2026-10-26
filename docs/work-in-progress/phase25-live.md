@@ -1,5 +1,24 @@
 # Phase25 — live execution record
 
+2026-10-26 (27B). **27B DONE LOCAL — visual redesign** (owner reassigned the 27B
+slot from hosted acceptance to the redesign). Resumed after the first instance
+hit its quota with everything uncommitted; its work was audited and kept.
+PokeApp Arena tokens + layer over the 15 routes, login and registration; 11
+distinct area signals; 3 × 3 Home menu; trainer-card stats; ∞ holographic items;
+Launcher on the same palette. Private preview `npm run preview:design` (from
+`web/`): 127.0.0.1:4173/4174, synthetic fixture, production CSP, Host/Origin
+guards. Private Launcher `0.24.0-preview.2` built, audited, driven over CDP 11/11
+(not distributed). Gates: tsc, Vitest 159/159, gallery 4/4 (`gallery-v6`),
+Launcher 15/15 + 28/28; inherited E2E failures proven on a clean `7c00486`
+worktree, Kaspersky script interference identified. Nothing deployed.
+[27B report](../phase27b-report.md), [design system](../design-system.md).
+**Next (needs owner authorization)**: deploy the redesigned web; release items
+unchanged (two-player Lime3DS, hosted verifier, Docker worker, Windows 10,
+Authenticode, update channel, physical certification, production 054–061).
+Left running at hand-off: the design preview (`node preview/run.mjs`,
+127.0.0.1:4173/4174, synthetic data) for the owner to browse; stopping it loses
+nothing. Restart any time with `npm run preview:design` from `web/`.
+
 2026-10-26 (27A). **27A DONE LOCAL**: PokeApp decides a valid robbery from the
 accepted saves without the victim (local 061); each save then has its own
 physical obligation; the victim's removal is a mandatory sync in the Launcher;

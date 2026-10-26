@@ -1,14 +1,23 @@
 # PokeApp 2.0 Project Checkpoint
 
-Checkpoint reconciled: 2026-10-25. This file is the project index and historical
+Checkpoint reconciled: 2026-10-26. This file is the project index and historical
 milestone record; it does not maintain a second live phase-status ledger.
 
 ## Current project position
 
-- Current packet: **Phase27A DONE LOCAL — server-authoritative robbery without
+- Current packet: **Phase27B DONE LOCAL — PokeApp Arena visual redesign of the
+  web (15/15 routes + login/registration, desktop and phone) and the Launcher on
+  one design system; private design preview (127.0.0.1, synthetic data,
+  production CSP) and private `0.24.0-preview.2` Launcher candidate audited;
+  nothing deployed or published; production and public physical writes
+  unchanged** ([27B report](phase27b-report.md),
+  [design system](design-system.md)). The owner assigned 27B to the redesign;
+  hosted acceptance and the other release items stay pending. No 27C/28 started.
+
+- Earlier: **Phase27A DONE LOCAL — server-authoritative robbery without
   victim cooperation (local 061), mandatory sync in the Launcher, restricted
   verifier ready; production and public physical writes unchanged**
-  ([27A report](phase27a-report.md)). Next: 27B (hosted acceptance).
+  ([27A report](phase27a-report.md)).
 
 - Earlier: **Phase26D DONE LOCAL — save engine leaves nothing but the save
   beside it after verified writes; recovery procedure documented; power-loss and
