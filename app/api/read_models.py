@@ -256,9 +256,20 @@ class TargetRead(BaseModel):
     pokemon: PokemonRead
 
 
+class UnlimitedItemRead(BaseModel):
+    # Virtual permanent item: availability is unlimited, never a stored quantity.
+    code: Literal["rare_candy", "heart_scale"]
+    item_id: int
+    name: str
+    label: str
+    description: str
+    availability: Literal["unlimited"] = "unlimited"
+
+
 class InventoryRead(BaseModel):
     purchases: list[PurchaseRead]
     targets: list[TargetRead]
+    unlimited_items: list[UnlimitedItemRead] = Field(default_factory=list)
 
 
 class HallRead(BaseModel):
