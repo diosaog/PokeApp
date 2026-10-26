@@ -1,5 +1,13 @@
 # Phase25 — live execution record
 
+2026-10-26 (26C). **26C PARTIAL (deploy-dependent only)** under the owner's 26B
+exception: infinite Rare Candy/Heart Scale in every trainer inventory (virtual, no
+migration), Launcher «PokeApp» tab hosting the real deployed web in an isolated
+view, private 0.23.0-rc.2 built and audited. 26B stays PARTIAL/deferred.
+**Next queued: 26D (save-engine hardening: `.displaced`/`.lock`, recovery,
+cleanup), then 27A (authoritative robberies, verifier).** Not started here.
+[26C report](../phase26c-launcher-web-report.md).
+
 2026-10-26 (26B). **26A CLOSED: Pokémon Y inventory certified in isolated Lime3DS.
 26B PARTIAL:** team robbery done locally (native 500/500, PG E2E 12/12, local 060);
 server-authoritative completion without the victim and mandatory sync NOT done —

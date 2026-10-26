@@ -5,7 +5,12 @@ milestone record; it does not maintain a second live phase-status ledger.
 
 ## Current project position
 
-- Current packet: **Phase26B PARTIAL — team robbery implemented and validated
+- Current packet: **Phase26C PARTIAL (deploy-dependent) — infinite Rare Candy and
+  Heart Scale in every inventory; Launcher hosts the full PokeApp web in an
+  isolated view; private 0.23.0-rc.2 audited; nothing deployed or published**
+  ([26C report](phase26c-launcher-web-report.md)). Queued: 26D, then 27A.
+
+- Earlier: **Phase26B PARTIAL — team robbery implemented and validated
   locally (local 060); server authority without victim cooperation and mandatory
   sync pending; 26A closed with Pokémon Y inventory certified in Lime3DS;
   production unchanged** ([26B report](phase26b-robbery-report.md)).
