@@ -571,15 +571,23 @@ body::after {
   );
 }
 
-/* ---------- Login: the stadium waits behind the welcome ---------- */
+/* ---------- Login: the stadium waits behind the welcome ----------
+   Anchored at the bottom (stands and pitch); its top fades out so the
+   scoreboard never meets the brand or the headline at any window size. */
 .login-story {
   background:
     linear-gradient(
-      90deg,
-      color-mix(in srgb, var(--c-bg-0) 88%, transparent) 0%,
-      color-mix(in srgb, var(--c-bg-0) 55%, transparent) 100%
+      180deg,
+      var(--c-bg-1) 0%,
+      color-mix(in srgb, var(--c-bg-1) 80%, transparent) 30%,
+      transparent 60%
     ),
-    url("./scenes/stadium.svg") 60% 30% / 1500px auto no-repeat,
+    linear-gradient(
+      90deg,
+      color-mix(in srgb, var(--c-bg-0) 85%, transparent) 0%,
+      color-mix(in srgb, var(--c-bg-0) 45%, transparent) 100%
+    ),
+    url("./scenes/stadium.svg") 60% 100% / 1500px auto no-repeat,
     var(--c-bg-1);
 }
 
