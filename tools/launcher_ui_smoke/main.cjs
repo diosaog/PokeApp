@@ -65,6 +65,16 @@ app.whenReady().then(async () => {
     },
   });
   await win.loadFile(page);
+  if (process.env.POKEAPP_LAUNCHER_SHOT) {
+    // Optional design review capture (27B): the native screen before checks.
+    win.setContentSize(1280, 1600);
+    await new Promise((r) => setTimeout(r, 1500));
+    const image = await win.webContents.capturePage();
+    require("node:fs").writeFileSync(
+      process.env.POKEAPP_LAUNCHER_SHOT,
+      image.toPNG(),
+    );
+  }
   const result = await win.webContents.executeJavaScript(script);
   for (const [ok, label] of result)
     console.log((ok ? "PASS " : "FAIL ") + label);
