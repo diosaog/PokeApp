@@ -83,6 +83,25 @@ Folder `%LOCALAPPDATA%\PokeApp-migration-evidence\artpass2\`.
 | Layout shift (CLS) | 0 | **0** |
 | Scene assets | — | 99 KB SVG, per screen |
 
+## Publication (owner-authorised: "publícalo en la web y el Launcher")
+
+Everything since 27C — Liga Nocturna, its fixes and art pass 2 — is live.
+Production API and database unchanged (Railway `501a399`, no migration).
+
+| Item | Result |
+| --- | --- |
+| Web | Cloudflare `pokeapp-web` version **`a7e33476-698c-4f7e-b4cf-60c46032d9f2`** (100 %), built from `3910926` with the Railway API URL; `/`, JS and CSS bytes match the local build; CSP/DENY headers, build-config, API health 200 and exact CORS verified; real Edge at 1440 and 390: design tokens, Rubik, star field and login stadium loaded, no failed request or console error |
+| Earlier web version in this release | `60cb95a3-d043-4ff4-b2c9-550c1bbb48f2` (from `e685fdb`), superseded by the login scene fix |
+| Public Launcher | **0.25.0**, built without `-PrivateCandidate`/`-WebPreview`: production web only, updater off, unsigned (as every public build so far; SmartScreen may warn). Audit PASS. Installer `PokeApp-Launcher-Setup.exe`, 159 293 410 bytes, SHA-256 `f02eccd0dbef2579218b7b1f4a14c6ebfcaa398433b7022827038659e983d3fa` |
+| R2 | New key `windows/0.25.0/PokeApp-Launcher-Setup.exe` (was absent; read back, same hash). `windows/0.20.0/…` kept and re-verified (`1f581c2d…95200e0`) |
+| Public download | `/launcher/download` → 200, `Content-Length 159293410`, body SHA-256 equal to the audited installer; the web card reads «v0.25.0» |
+| Launcher on production | Packaged 0.25.0 on a throw-away profile: 10/10 (official origin only, no Node/bridge, CSP blocks other hosts, desktop routes, Objetos panel, origin pinned), before and after the new web went live; core «Online» against the production API, writes disabled («Los canjes sobre el save siguen desactivados»). Robbery and item-use routes answer 404 on this API and the core treats them as not available; ordinary sync uses only routes the API serves |
+
+**Rollback**: web — `npx wrangler rollback 4a8fffed-a912-47d8-aa7e-dfaea7b7bce3`
+(27C web, which also points the download back to 0.20.0, whose object is kept).
+Launcher users who installed 0.25.0 can reinstall 0.20.0 from that object; user
+data in `%LOCALAPPDATA%\PokeApp\Launcher` is preserved by install/uninstall.
+
 ## Limits
 
 - Scenes are vector illustrations, not painted art; commissioned artwork could

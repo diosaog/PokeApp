@@ -1,5 +1,15 @@
 # Phase25 — live execution record
 
+2026-10-27 (art pass 2 + release). **Published.** Scene backdrops for every
+area (`web/scripts/build-scenes.mjs`, `web/src/design/scenes.css`), reviewed
+in real pages at 1920/1440/1366/1104/390/360; CLS 0; full suite 92/10/11 with
+only inherited failures. Web Cloudflare `a7e33476` (`3910926`); public Launcher
+0.25.0 in R2 `windows/0.25.0/…` (sha256 `f02eccd0…3fa`), 0.20.0 kept. API and
+database unchanged. Rollback: `npx wrangler rollback 4a8fffed-a912-47d8-aa7e-dfaea7b7bce3`.
+[Report](../artpass2-report.md). Release gates still open (unchanged): 054–061,
+hosted verifier, Docker worker, two-player Lime3DS, Windows 10, Authenticode,
+update channel, physical certification.
+
 2026-10-26 (Artistic Evolution). **DONE LOCAL, not deployed.** Entry 2ffdb29.
 "Liga Nocturna" over Arena: stadium Home, rival scouting, Pokédex dialogs,
 themed Shop/League/Hall/PC (box arrows untouched), Rubik everywhere, sounds

@@ -5,7 +5,16 @@ milestone record; it does not maintain a second live phase-status ledger.
 
 ## Current project position
 
-- Current packet: **Artistic Evolution ("Liga Nocturna") DONE LOCAL — not
+- Current packet: **Liga Nocturna + art pass 2 DONE GLOBAL — published on the
+  owner's instruction.** Original scene backdrops for every area (stadium
+  Home, market, scope, championship, licence, handheld PC…), generated and
+  reproducible; web live as Cloudflare `a7e33476` (source `3910926`); public
+  Launcher **0.25.0** (unified shell, unsigned, updater off, writes disabled)
+  served by `/launcher/download`, 0.20.0 kept for rollback. Production API
+  `501a399` and database unchanged; 054–061 still not applied; physical writes
+  OFF ([report](artpass2-report.md)). No Phase28 started.
+
+- Earlier: **Artistic Evolution ("Liga Nocturna") DONE LOCAL — not
   deployed, awaiting the owner's visual review.** Stadium Home, one-click
   rival scouting, Pokédex dialogs, themed Shop/League/Hall/PC, 18 type
   colours, one Rubik family for web and Launcher, interface sounds and
