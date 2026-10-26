@@ -1218,3 +1218,13 @@ dialog {
     width: 100%;
   }
 }
+
+/* ---------- Stability: nothing jumps while the season data arrives ---------- */
+/* The screen always fills the window, so the footer never slides up into view
+   and down again; the season picker keeps its place in the top bar. */
+main#main {
+  min-height: 100dvh;
+}
+.topbar .season-picker {
+  min-width: 190px;
+}
