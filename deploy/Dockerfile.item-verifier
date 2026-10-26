@@ -2,11 +2,16 @@
 # No default mutable image; supply --build-arg API_IMAGE=...@sha256:...
 ARG API_IMAGE
 FROM ${API_IMAGE}
+ARG API_IMAGE
 USER root
+WORKDIR /srv/pokeapp
+# Reject a mutable tag or the minimal public 27C API image (which lacks 061).
+RUN python -c "import os,re; from app.application.transfer_verification import TransferVerification; assert re.fullmatch(r'[^\s@]+@sha256:[0-9a-f]{64}', os.environ['API_IMAGE']); assert all(callable(getattr(TransferVerification, m, None)) for m in ('adjudicate','rebase','settle'))"
 COPY deploy/requirements-item-verifier.txt /tmp/requirements-item-verifier.txt
 RUN pip install --disable-pip-version-check -r /tmp/requirements-item-verifier.txt
 COPY tools/run_item_use_verifier.py /srv/pokeapp/run_item_use_verifier.py
 USER 10001
 ENV POKEAPP_ITEM_VERIFIER_ENABLED=false
 ENV POKEAPP_NATIVE_PARSER_PATH=/opt/pokeapp-parser/PokeApp.Parser
+RUN python -c "import subprocess; p=subprocess.run(['python','run_item_use_verifier.py'],capture_output=True,text=True); assert p.returncode == 0 and p.stdout.strip() == 'DISABLED' and not p.stderr"
 CMD ["python", "run_item_use_verifier.py"]

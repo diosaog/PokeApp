@@ -1,0 +1,8 @@
+# This Dockerfile has a separate, minimal context from the public API build.
+**
+!deploy/
+!deploy/Dockerfile.item-verifier
+!deploy/Dockerfile.item-verifier.dockerignore
+!deploy/requirements-item-verifier.txt
+!tools/
+!tools/run_item_use_verifier.py
