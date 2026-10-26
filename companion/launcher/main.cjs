@@ -328,7 +328,8 @@ app.whenReady().then(() => {
     panel = null,
     panelFromUrl = false,
     left = 0,
-    offline = false;
+    offline = false,
+    turn = 0; // the latest open/close wins; a slower earlier open is dropped
   const layout = () => {
     const [width, height] = win.getContentSize();
     web.setBounds({
@@ -358,14 +359,18 @@ app.whenReady().then(() => {
         () => 0,
       );
   const openPanel = async (target, fromUrl) => {
+    const mine = ++turn;
     panel = target.panel;
     panelFromUrl = fromUrl;
-    left = await sidebarEdge();
+    const edge = await sidebarEdge();
+    if (mine !== turn) return;
+    left = edge;
     layout();
     tools.webContents.focus();
     tools.webContents.send("launcher:navigate", { view: "panel", ...target });
   };
   const closePanel = () => {
+    turn++;
     panel = null;
     layout();
     tools.webContents.send("launcher:navigate", { view: "strip" });
