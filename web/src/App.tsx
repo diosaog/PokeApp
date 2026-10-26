@@ -6,6 +6,7 @@ import {
   Route,
   Routes,
   useLocation,
+  useNavigate,
 } from "react-router-dom";
 import {
   Home,
@@ -23,6 +24,11 @@ import {
   ArrowUpRight,
   ShieldCheck,
   X,
+  Gamepad2,
+  Candy,
+  ArrowLeftRight,
+  ArchiveRestore,
+  Cloud,
 } from "lucide-react";
 import { api } from "./api/client";
 import type { Model } from "./api/types";
@@ -46,6 +52,8 @@ import { seasonLabel } from "./features/admin-labels";
 import { BattlePage } from "./features/team-preview";
 import { ScoutingPage } from "./features/scouting";
 import { TrainerProfilePage } from "./features/trainer-profile";
+import { DesktopPage } from "./features/desktop";
+import { desktopPanels, desktopPath, insideLauncher } from "./launcher";
 import { RegistrationForm } from "./features/registration";
 import { PinForm, pinRecoveryKey } from "./features/account-editor";
 const AdminAccountsPage = lazy(() =>
@@ -81,6 +89,14 @@ const linkGroups = [
     ],
   },
 ] as const;
+// Inside PokeApp Launcher the sidebar also leads to the native desktop tools.
+const desktopIcons = {
+  partida: Gamepad2,
+  objetos: Candy,
+  robos: ArrowLeftRight,
+  copias: ArchiveRestore,
+  nube: Cloud,
+};
 function Login() {
   const {
       setMe,
@@ -93,7 +109,15 @@ function Login() {
     [error, setError] = useState<unknown>(null),
     [register, setRegister] = useState(false),
     [renew, setRenew] = useState(false),
-    [created, setCreated] = useState("");
+    [created, setCreated] = useState(""),
+    location = useLocation(),
+    navigate = useNavigate();
+  // Signed out on a desktop tool: leave its route so PokeApp Launcher closes
+  // the native panel instead of keeping it over the sign-in screen.
+  useEffect(() => {
+    if (insideLauncher() && location.pathname.startsWith("/escritorio/"))
+      navigate("/", { replace: true });
+  }, [location.pathname, navigate]);
   return (
     <main className="login">
       <section className="login-story">
@@ -344,6 +368,29 @@ export default function App() {
               ))}
             </div>
           ))}
+          {insideLauncher() && (
+            <div className="nav-group nav-desktop">
+              <span className="nav-group-label">ESCRITORIO</span>
+              {desktopPanels.map(([panel, label]) => {
+                const Icon = desktopIcons[panel];
+                return (
+                  <NavLink
+                    key={panel}
+                    to={desktopPath(panel)}
+                    aria-disabled={adminOperationPending || undefined}
+                    onClick={(event) => {
+                      if (adminOperationPending) event.preventDefault();
+                      else setMenu(false);
+                    }}
+                  >
+                    <Icon size={19} />
+                    {label}
+                    <ArrowUpRight className="nav-arrow" size={14} />
+                  </NavLink>
+                );
+              })}
+            </div>
+          )}
           {me.is_admin && (
             <div className="nav-group">
               <span className="nav-group-label">ADMIN</span>
@@ -461,6 +508,7 @@ export default function App() {
                 }
               />
               <Route path="/saves" element={<SavesPage />} />
+              <Route path="/escritorio/:panel/*" element={<DesktopPage />} />
               <Route
                 path="/admin/cuentas"
                 element={

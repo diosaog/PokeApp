@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import type { Model } from "../api/types";
 import { pokemonName } from "../pokemon/localization";
 import { ItemIcon, TrainerPhoto } from "../pokemon/presentation";
@@ -14,6 +15,7 @@ import {
   useCommand,
 } from "../ui";
 import { PokemonSelectorModal, type PokemonTarget } from "./pokemon-selector";
+import { desktopPath, insideLauncher } from "../launcher";
 
 const pokemonActions = [
   "blindar_pokemon",
@@ -80,11 +82,6 @@ const withdrawable = [
   "WAITING_OTHER",
   "PENDING_SOURCE",
 ];
-// Inside PokeApp Launcher this same web adds a marker to its user agent; the
-// Launcher intercepts the plain link below and opens its native quick-item panel.
-const insideLauncher = () =>
-  typeof navigator !== "undefined" &&
-  navigator.userAgent.includes("PokeAppLauncher/");
 
 export function Inventory() {
   const { season } = useApp();
@@ -193,12 +190,12 @@ export function Inventory() {
                 <Tag>∞ · Gratis</Tag>
                 <p>{item.description}</p>
                 {insideLauncher() ? (
-                  <a
+                  <Link
                     className="button primary"
-                    href={`/__launcher/quick-items/${item.code}`}
+                    to={desktopPath("objetos", item.code)}
                   >
                     Añadir a mi partida
-                  </a>
+                  </Link>
                 ) : (
                   <p className="muted">
                     Disponible en PokeApp Launcher para añadirlo a tu partida.
@@ -304,6 +301,12 @@ export function Inventory() {
                     "Estado de la entrega no disponible"}
                 </p>
               )}
+              {transfer.obligation?.endsWith("_PENDING") &&
+                insideLauncher() && (
+                  <Link className="text-link" to={desktopPath("robos")}>
+                    Abrir Robos y entregas →
+                  </Link>
+                )}
               {transfer.side === "destination" &&
                 withdrawable.includes(transfer.status) && (
                   <button

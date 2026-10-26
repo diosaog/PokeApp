@@ -481,7 +481,7 @@ it("shows Rare Candy and Heart Scale as infinite and free with no purchase actio
   expect(mocks.execute).not.toHaveBeenCalled();
 });
 
-it("inside the Launcher links each infinite item to the native quick-item panel", () => {
+it("inside the Launcher opens each infinite item in the native Objetos panel", () => {
   const agent = vi
     .spyOn(navigator, "userAgent", "get")
     .mockReturnValue("Mozilla/5.0 PokeAppLauncher/0.23.0");
@@ -491,11 +491,17 @@ it("inside the Launcher links each infinite item to the native quick-item panel"
     unlimited_items: unlimited,
     physical_items: true,
   };
-  render(<Inventory />);
+  // In-app navigation (no reload, the web session stays); the Launcher maps
+  // /escritorio/objetos/<item> to its quick-item panel.
+  render(
+    <MemoryRouter>
+      <Inventory />
+    </MemoryRouter>,
+  );
   const links = screen.getAllByRole("link", { name: "Añadir a mi partida" });
   expect(links.map((a) => a.getAttribute("href"))).toEqual([
-    "/__launcher/quick-items/rare_candy",
-    "/__launcher/quick-items/heart_scale",
+    "/escritorio/objetos/rare_candy",
+    "/escritorio/objetos/heart_scale",
   ]);
   expect(mocks.execute).not.toHaveBeenCalled();
   agent.mockRestore();

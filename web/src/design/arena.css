@@ -1351,3 +1351,21 @@ main#main a:not([class]):hover {
 .move-disclosure button:active:not(:disabled) {
   transform: none;
 }
+
+/* Desktop tools (inside PokeApp Launcher): their own area colour, and the
+   page the native panel covers. */
+.section-escritorio {
+  --accent: var(--c-accent-soft);
+}
+.desktop-host {
+  min-height: 40vh;
+  display: grid;
+  place-items: center;
+  border: 2px dashed var(--border-subtle);
+  border-radius: var(--radius-lg);
+}
+.desktop-download {
+  display: grid;
+  justify-items: start;
+  gap: var(--space-2);
+}
