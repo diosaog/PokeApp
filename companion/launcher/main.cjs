@@ -30,6 +30,7 @@ app.setAppUserModelId(
 );
 let worker,
   win,
+  tools,
   sequence = 0,
   installing = false;
 const pending = new Map();
@@ -49,12 +50,15 @@ function request(command, args = {}) {
     worker.stdin.write(JSON.stringify({ id, command, args }) + "\n");
   });
 }
+// Only the Launcher's own page (the native tools view) may call the core.
 function authorize(event) {
+  const from = event.senderFrame && new URL(event.senderFrame.url);
+  if (from) from.search = "";
   if (
-    !win ||
-    event.sender !== win.webContents ||
-    event.senderFrame !== win.webContents.mainFrame ||
-    event.senderFrame.url !== entry
+    !tools ||
+    event.sender !== tools.webContents ||
+    event.senderFrame !== tools.webContents.mainFrame ||
+    from?.href !== entry
   )
     throw new Error("Solicitud no permitida");
 }
@@ -274,26 +278,158 @@ app.whenReady().then(() => {
           closed_emulator_confirmed: true,
         });
   });
-  // Full PokeApp web: the deployed React app in an isolated view under the
-  // native navigation bar. Only the native UI may show/hide it.
-  let web = null,
-    webTop = 0,
-    webShown = false;
+  // Window: an empty base; the web view and the native tools view stack on it.
+  win = new BrowserWindow({
+    show: process.env.POKEAPP_LAUNCHER_HEADLESS_TEST !== "1",
+    width: 1120,
+    height: 820,
+    minWidth: 720,
+    minHeight: 600,
+    backgroundColor: "#0a0d22",
+    icon: path.join(__dirname, "assets/icon.ico"),
+    webPreferences: {
+      contextIsolation: true,
+      nodeIntegration: false,
+      sandbox: true,
+    },
+  });
+  win.webContents.setWindowOpenHandler(() => ({ action: "deny" }));
+  win.webContents.on("will-navigate", (event) => event.preventDefault());
+  void win.loadURL("about:blank");
+  // Native tools: this Launcher's own page, the only holder of the preload.
+  tools = new WebContentsView({
+    webPreferences: {
+      preload: path.join(__dirname, "preload.cjs"),
+      contextIsolation: true,
+      nodeIntegration: false,
+      sandbox: true,
+    },
+  });
+  tools.webContents.setWindowOpenHandler(() => ({ action: "deny" }));
+  tools.webContents.on("will-navigate", (event) => event.preventDefault());
+  tools.webContents.session.setPermissionRequestHandler(
+    (_webContents, _permission, callback) => callback(false),
+  );
+  // One app (27C): the real PokeApp web fills the window and stays the base of
+  // the experience. The Launcher's own page (tools) opens as a panel over the
+  // web content, beside the web's sidebar, whenever the web navigates to one
+  // of its /escritorio routes; otherwise only a strip of it shows, and only
+  // while an update notice needs it. If the web cannot load, the tools take
+  // the whole window so the local save tools keep working offline.
   const webAt = webview.webOrigin(
     app.isPackaged,
     process.env,
     require("./package.json"),
   );
-  const layoutWeb = () => {
-    if (!web || !webShown) return;
+  const web = new WebContentsView({
+    webPreferences: webview.webPreferences(webAt),
+  });
+  let strip = 0,
+    panel = null,
+    panelFromUrl = false,
+    left = 0,
+    offline = false;
+  const layout = () => {
     const [width, height] = win.getContentSize();
     web.setBounds({
       x: 0,
-      y: webTop,
+      y: strip,
       width,
-      height: Math.max(0, height - webTop),
+      height: Math.max(0, height - strip),
     });
+    const x = offline ? 0 : left;
+    tools.setBounds(
+      offline || panel
+        ? { x, y: 0, width: Math.max(0, width - x), height }
+        : { x: 0, y: 0, width, height: strip },
+    );
+    tools.setVisible(Boolean(offline || panel || strip));
   };
+  // The web's sidebar edge, read in an isolated world as a plain number.
+  const sidebarEdge = () =>
+    web.webContents
+      .executeJavaScriptInIsolatedWorld(999, [
+        {
+          code: `(() => { const s = document.querySelector(".sidebar"); const r = s && s.getBoundingClientRect(); return r && r.left === 0 && r.width > 0 ? Math.round(r.right) : 0; })()`,
+        },
+      ])
+      .then(
+        (value) => webview.panelLeft(value, win.getContentSize()[0]),
+        () => 0,
+      );
+  const openPanel = async (target, fromUrl) => {
+    panel = target.panel;
+    panelFromUrl = fromUrl;
+    left = await sidebarEdge();
+    layout();
+    tools.webContents.focus();
+    tools.webContents.send("launcher:navigate", { view: "panel", ...target });
+  };
+  const closePanel = () => {
+    panel = null;
+    layout();
+    tools.webContents.send("launcher:navigate", { view: "strip" });
+  };
+  const followWeb = (url) => {
+    const target = webview.desktopPanel(url, webAt);
+    if (target) void openPanel(target, true);
+    else if (panel && panelFromUrl) closePanel();
+  };
+  web.webContents.on("did-navigate-in-page", (_event, url, isMainFrame) => {
+    if (isMainFrame) followWeb(url);
+  });
+  web.webContents.on("did-navigate", (_event, url) => {
+    if (offline) {
+      offline = false;
+      layout();
+      tools.webContents.send("launcher:navigate", { view: "strip" });
+    }
+    followWeb(url);
+  });
+  web.webContents.on(
+    "did-fail-load",
+    (_event, code, _description, _url, isMainFrame) => {
+      // -3 is a navigation this Launcher cancelled itself.
+      if (!isMainFrame || code === -3) return;
+      offline = true;
+      layout();
+      tools.webContents.send("launcher:navigate", { view: "offline" });
+    },
+  );
+  win.on("resize", () => {
+    if (!panel) return layout();
+    void sidebarEdge().then((edge) => {
+      left = edge;
+      layout();
+    });
+  });
+  void webview.attach(web, {
+    origin: webAt,
+    version: app.getVersion(),
+    openExternal: (url) => shell.openExternal(url),
+    // Older webs link "Añadir a mi partida" to /__launcher/quick-items/<item>.
+    onQuickItems: (item) => void openPanel({ panel: "objetos", item }, false),
+  });
+  ipcMain.handle("launcher:layout", (event, height) => {
+    authorize(event);
+    if (!Number.isInteger(height) || height < 0 || height > 160)
+      throw new Error("Vista no válida");
+    strip = height;
+    layout();
+  });
+  // "Volver a PokeApp": the web goes back to where it was before the panel.
+  ipcMain.handle("launcher:panel-close", (event) => {
+    authorize(event);
+    if (offline) {
+      web.webContents.reload();
+      return { offline: true };
+    }
+    const history = web.webContents.navigationHistory;
+    if (panelFromUrl && history.canGoBack()) history.goBack();
+    closePanel();
+    return { offline: false };
+  });
+  // Classic tab bar (used when the web is unreachable): "PokeApp" retries it.
   ipcMain.handle("launcher:show-web", (event, show, top) => {
     authorize(event);
     if (
@@ -303,33 +439,13 @@ app.whenReady().then(() => {
       top > 400
     )
       throw new Error("Vista no válida");
-    if (show && !web) {
-      web = new WebContentsView({
-        webPreferences: webview.webPreferences(webAt),
-      });
-      void webview.attach(web, {
-        origin: webAt,
-        version: app.getVersion(),
-        openExternal: (url) => shell.openExternal(url),
-        onQuickItems: (item) => {
-          webShown = false;
-          win.contentView.removeChildView(web);
-          win.webContents.send("launcher:navigate", {
-            view: "quick-items",
-            item,
-          });
-        },
-      });
-      win.on("resize", layoutWeb);
-    }
-    webTop = top;
-    webShown = show;
-    if (show) {
-      win.contentView.addChildView(web);
-      layoutWeb();
-    } else if (web) win.contentView.removeChildView(web);
+    if (show && offline) web.webContents.reload();
+    else if (show) closePanel();
     return { shown: show, origin: webAt };
   });
+  win.contentView.addChildView(web);
+  win.contentView.addChildView(tools);
+  layout();
   ipcMain.handle("launcher:quick-items", (event) => {
     authorize(event);
     return request("quick_items_refresh");
@@ -573,27 +689,9 @@ app.whenReady().then(() => {
     return { ...update, status: "INSTALLING" };
   });
 
-  win = new BrowserWindow({
-    show: process.env.POKEAPP_LAUNCHER_HEADLESS_TEST !== "1",
-    width: 1120,
-    height: 820,
-    minWidth: 720,
-    minHeight: 600,
-    backgroundColor: "#101916",
-    icon: path.join(__dirname, "assets/icon.ico"),
-    webPreferences: {
-      preload: path.join(__dirname, "preload.cjs"),
-      contextIsolation: true,
-      nodeIntegration: false,
-      sandbox: true,
-    },
+  tools.webContents.loadFile(path.join(__dirname, "index.html"), {
+    query: { shell: "unified" },
   });
-  win.webContents.setWindowOpenHandler(() => ({ action: "deny" }));
-  win.webContents.on("will-navigate", (event) => event.preventDefault());
-  win.webContents.session.setPermissionRequestHandler(
-    (_webContents, _permission, callback) => callback(false),
-  );
-  win.loadFile(path.join(__dirname, "index.html"));
 });
 app.on("window-all-closed", () => app.quit());
 app.on("before-quit", () => {

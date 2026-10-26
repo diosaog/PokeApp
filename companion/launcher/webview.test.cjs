@@ -90,3 +90,38 @@ test("the web view has no preload and is sandboxed in its own session", () => {
   );
   assert.equal(p.partition, "persist:pokeapp-web");
 });
+
+test("only the web's own desktop routes open a native panel, from a fixed list", () => {
+  const o = w.PRODUCTION_WEB;
+  assert.deepEqual(w.desktopPanel(o + "/escritorio/partida", o), {
+    panel: "partida",
+  });
+  for (const panel of w.DESKTOP_PANELS)
+    assert.equal(w.desktopPanel(`${o}/escritorio/${panel}/`, o).panel, panel);
+  // URLs are normalised first, exactly as the browser navigates them.
+  assert.deepEqual(w.desktopPanel(o + "/escritorio/partida/../nube", o), {
+    panel: "nube",
+  });
+  assert.deepEqual(w.desktopPanel(o + "/escritorio/objetos/rare_candy", o), {
+    panel: "objetos",
+    item: "rare_candy",
+  });
+  for (const url of [
+    o + "/liga",
+    o + "/escritorio",
+    o + "/escritorio/admin",
+    o + "/escritorio/objetos/master_ball",
+    o + "/escritorio/partida/rare_candy",
+    "https://evil.test/escritorio/partida",
+    "http://pokeapp-web.pokeapp-v2.workers.dev/escritorio/partida",
+    "not a url",
+  ])
+    assert.equal(w.desktopPanel(url, o), null, url);
+});
+
+test("the panel edge accepts only a plausible sidebar width", () => {
+  assert.equal(w.panelLeft(228, 1280), 228);
+  for (const value of [0, -5, 228.5, "228", null, undefined, 900, 700])
+    assert.equal(w.panelLeft(value, 1280), 0, String(value));
+  assert.equal(w.panelLeft(228, 400), 0); // phone width: sidebar is a drawer
+});

@@ -35,14 +35,24 @@ contextBridge.exposeInMainWorld("launcher", {
   selectDiscovered: (savePath) =>
     ipcRenderer.invoke("launcher:select-discovered", savePath),
   showWeb: (show, top) => ipcRenderer.invoke("launcher:show-web", show, top),
+  // Unified shell (27C): the strip height this page needs, and the way back.
+  layout: (height) => ipcRenderer.invoke("launcher:layout", height),
+  closePanel: () => ipcRenderer.invoke("launcher:panel-close"),
   onNavigate: (callback) =>
     ipcRenderer.on("launcher:navigate", (_event, message) => {
-      // Only a known view and item code ever reach the page.
-      if (
-        message?.view === "quick-items" &&
-        ["rare_candy", "heart_scale"].includes(message.item)
-      )
+      // Only a known view, panel and item code ever reach the page.
+      const items = ["rare_candy", "heart_scale"];
+      const panels = ["partida", "objetos", "robos", "copias", "nube"];
+      if (message?.view === "quick-items" && items.includes(message.item))
         callback({ view: "quick-items", item: message.item });
+      else if (message?.view === "panel" && panels.includes(message.panel))
+        callback({
+          view: "panel",
+          panel: message.panel,
+          item: items.includes(message.item) ? message.item : undefined,
+        });
+      else if (message?.view === "strip" || message?.view === "offline")
+        callback({ view: message.view });
     }),
   updateState: () => ipcRenderer.invoke("launcher:update-state"),
   downloadUpdate: () => ipcRenderer.invoke("launcher:update-download"),

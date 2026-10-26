@@ -9,6 +9,39 @@ const PRODUCTION_WEB = "https://pokeapp-web.pokeapp-v2.workers.dev";
 // at run time, never in public builds, and never sharing the real web session.
 const PREVIEW_ORIGIN = "http://127.0.0.1:4173";
 const QUICK_ITEMS = ["rare_candy", "heart_scale"];
+// One app (27C): the web's own desktop routes (/escritorio/<panel>, shown only
+// inside the Launcher) open the matching native panel over the web content,
+// beside the web's sidebar. The web never sends a command: the Launcher only
+// observes its URL and maps it to this fixed list.
+const DESKTOP_PANELS = ["partida", "objetos", "robos", "copias", "nube"];
+
+function desktopPanel(url, origin) {
+  let target;
+  try {
+    target = new URL(url);
+  } catch {
+    return null;
+  }
+  if (target.origin !== origin) return null;
+  const match = /^\/escritorio\/([a-z]+)(?:\/([a-z_]+))?\/?$/.exec(
+    target.pathname,
+  );
+  if (!match || !DESKTOP_PANELS.includes(match[1])) return null;
+  if (!match[2]) return { panel: match[1] };
+  return match[1] === "objetos" && QUICK_ITEMS.includes(match[2])
+    ? { panel: "objetos", item: match[2] }
+    : null;
+}
+
+// The web's sidebar edge, read from the page as a plain number: anything else
+// (or a hidden phone-width sidebar) means the panel covers the whole width.
+function panelLeft(value, width) {
+  return Number.isInteger(value) &&
+    value > 0 &&
+    value <= Math.min(480, width / 2)
+    ? value
+    : 0;
+}
 
 function webOrigin(packaged, env, metadata = {}) {
   if (packaged)
@@ -93,8 +126,11 @@ function attach(view, { origin, version, onQuickItems, openExternal }) {
 module.exports = {
   PRODUCTION_WEB,
   PREVIEW_ORIGIN,
+  DESKTOP_PANELS,
   webOrigin,
   webPreferences,
   decide,
+  desktopPanel,
+  panelLeft,
   attach,
 };

@@ -394,6 +394,37 @@ article > h2:first-child::before {
 .slot:not(.empty):hover {
   transform: translateY(-2px);
 }
+/* Unified shell (27C). Strip: only the update notice above the web. Panel: a
+   native tool beside the web sidebar, which is the navigation. Offline: the
+   classic tabs, with «PokeApp» retrying the web. */
+#panel-back {
+  display: none;
+}
+[data-mode="panel"] #panel-back {
+  display: inline-flex;
+  margin-right: 0.25rem;
+}
+[data-mode="panel"] main > nav,
+[data-mode="strip"] header,
+[data-mode="strip"] main {
+  display: none;
+}
+body[data-mode="strip"] {
+  min-height: 0;
+  background: var(--c-bg-1);
+}
+/* Programmatic focus targets (panel title, section headings) show no ring. */
+[tabindex="-1"]:focus {
+  outline: none;
+}
+#offline-note {
+  margin: 1rem 2rem 0;
+  padding: 0.75rem 1rem;
+  border-radius: var(--radius);
+  border: 1px solid color-mix(in srgb, var(--c-gold) 45%, transparent);
+  background: color-mix(in srgb, var(--c-gold) 12%, var(--c-bg-1));
+  color: var(--c-gold-soft);
+}
 @media (prefers-reduced-motion: reduce) {
   button,
   .slot:not(.empty) {

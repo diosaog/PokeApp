@@ -12,10 +12,16 @@
   </head>
   <body>
     <header>
-      <strong>POKEAPP · Launcher</strong
+      <button id="panel-back" type="button">← Volver a PokeApp</button>
+      <strong id="panel-title" tabindex="-1">POKEAPP · Launcher</strong
       ><span id="launcher-version" class="muted"></span
       ><span id="connection" role="status">● Sin conexión</span>
     </header>
+    <p id="offline-note" role="status" hidden>
+      PokeApp no responde ahora mismo (sin conexión o servidor no disponible).
+      Tu partida, tus copias y los objetos siguen aquí; «PokeApp» lo vuelve a
+      intentar.
+    </p>
     <div id="update-banner" role="status" hidden>
       <span id="update-text"></span>
       <button id="update-download" hidden>Descargar actualización</button>
@@ -64,7 +70,7 @@
           <p id="write-error" role="status"></p>
         </article>
         <article aria-labelledby="transfer-title">
-          <h2 id="transfer-title">Robos entre partidas</h2>
+          <h2 id="transfer-title" tabindex="-1">Robos entre partidas</h2>
           <p id="transfer-summary" role="status">No hay robos en curso.</p>
           <div id="transfer-list"></div>
           <label
@@ -79,7 +85,7 @@
           </p>
         </article>
         <article aria-labelledby="quick-title">
-          <h2 id="quick-title">Objetos rápidos</h2>
+          <h2 id="quick-title" tabindex="-1">Objetos rápidos</h2>
           <p id="quick-state" role="status">
             Selecciona tu partida para ver tus objetos.
           </p>
@@ -142,7 +148,7 @@
           </p>
         </article>
         <article aria-labelledby="backups-title">
-          <h2 id="backups-title">Copias de seguridad</h2>
+          <h2 id="backups-title" tabindex="-1">Copias de seguridad</h2>
           <p>
             Copias completas de esta partida, guardadas en este equipo. Guardar
             una copia no modifica el save activo ni necesita conexión.

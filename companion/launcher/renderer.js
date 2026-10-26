@@ -318,14 +318,63 @@ function tab(name) {
 $("web-tab").onclick = () => tab("web");
 $("save-tab").onclick = () => tab("save");
 $("cloud-tab").onclick = () => tab("cloud");
-// From the web inventory: "Añadir a mi partida" opens the native quick items.
-window.launcher.onNavigate(({ item }) => {
+// Unified shell (27C): loaded as the Launcher's tools view, this page is a
+// panel of the PokeApp web (the web's sidebar stays beside it) or, between
+// panels, just the update strip. Opened on its own it keeps the classic tabs.
+const unified = new URLSearchParams(location.search).get("shell") === "unified";
+const panels = {
+  partida: ["Mi partida", "save", null],
+  objetos: ["Objetos ∞", "save", "quick-title"],
+  robos: ["Robos y entregas", "save", "transfer-title"],
+  copias: ["Copias de seguridad", "save", "backups-title"],
+  nube: ["Conexión y sincronización", "cloud", null],
+};
+function mode(name) {
+  document.body.dataset.mode = name;
+  $("offline-note").hidden = name !== "offline";
+  reportStrip();
+}
+let stripHeight = -1;
+function reportStrip() {
+  if (!unified) return;
+  const banner = $("update-banner");
+  const height = banner.hidden
+    ? 0
+    : Math.ceil(banner.getBoundingClientRect().height);
+  if (height === stripHeight) return;
+  stripHeight = height;
+  void action(() => window.launcher.layout(height));
+}
+function openPanel(name, item) {
+  const [title, view, anchor] = panels[name];
+  mode("panel");
+  text("panel-title", title);
+  $("save-view").hidden = view !== "save";
+  $("cloud-view").hidden = view !== "cloud";
+  if (anchor) $(anchor).scrollIntoView();
+  else window.scrollTo(0, 0);
+  // Keyboard lands in the panel: on the item when it can be edited.
+  const input = item
+    ? document.querySelector(`.quick-item[data-item="${item}"] .quick-input`)
+    : null;
+  (input && !input.disabled ? input : $(anchor || "panel-title"))?.focus();
+}
+$("panel-back").onclick = () => action(() => window.launcher.closePanel());
+window.launcher.onNavigate(({ view, panel, item }) => {
+  if (view === "panel") return openPanel(panel, item);
+  if (view === "strip" || view === "offline") {
+    mode(view);
+    if (view === "offline") tab("save");
+    return;
+  }
+  // Classic tabs: "Añadir a mi partida" opens the native quick items.
   tab("save");
   $("quick-title").scrollIntoView();
   document
     .querySelector(`.quick-item[data-item="${item}"] .quick-input`)
     ?.focus();
 });
+if (unified) mode("strip");
 $("previous-box").onclick = () => {
   boxIndex--;
   renderBox();
@@ -692,6 +741,7 @@ async function renderUpdate() {
   text("update-text", messages[u.status] || "");
   $("update-download").hidden = u.status !== "AVAILABLE";
   $("update-install").hidden = u.status !== "DOWNLOADED";
+  reportStrip();
 }
 $("update-download").onclick = () =>
   action(() => window.launcher.downloadUpdate());
