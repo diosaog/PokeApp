@@ -327,6 +327,14 @@ export default function App() {
   return (
     <div
       className={`app-shell section-${location.pathname.split("/")[1] || "home"}`}
+      // Presentation only: Entrenadores holds three screens with their own scene.
+      data-view={
+        location.pathname.startsWith("/entrenadores/")
+          ? location.pathname === "/entrenadores/scouting"
+            ? "scouting"
+            : "profile"
+          : undefined
+      }
     >
       <a className="skip" href="#main">
         Saltar al contenido
@@ -459,6 +467,13 @@ export default function App() {
         </div>
       </aside>
       <div className="workspace">
+        {/* Decorative light of the current area; a new node per area keeps
+            route changes free of layout shift. */}
+        <div
+          className="scene-fx"
+          key={location.pathname.split("/")[1] || "home"}
+          aria-hidden="true"
+        />
         <header className="topbar">
           <button
             className="mobile-menu icon-button"

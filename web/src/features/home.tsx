@@ -108,6 +108,15 @@ export function HomePage() {
     : null;
   return (
     <>
+      {/* Night-stadium effects behind the whole screen: floodlight beams and
+          camera flashes in the stands. Decorative only. */}
+      <div className="stadium-fx" aria-hidden="true">
+        <span className="beam left" />
+        <span className="beam right" />
+        {Array.from({ length: 9 }, (_, i) => (
+          <i key={i} />
+        ))}
+      </div>
       {/* The stadium: who you are, how your season goes and the team you bring. */}
       <section className="home-stage" aria-labelledby="home-title">
         <div className="stage-copy">
