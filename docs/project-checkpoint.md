@@ -5,7 +5,18 @@ milestone record; it does not maintain a second live phase-status ledger.
 
 ## Current project position
 
-- Current packet: **Phase27C DONE LOCAL — unified private Launcher0.24.0-rc.2
+- Current packet: **Artistic Evolution ("Liga Nocturna") DONE LOCAL — not
+  deployed, awaiting the owner's visual review.** Stadium Home, one-click
+  rival scouting, Pokédex dialogs, themed Shop/League/Hall/PC, 18 type
+  colours, one Rubik family for web and Launcher, interface sounds and
+  audio-visual preferences (on by default, reduced motion respected), CLS
+  0.258 → 0. Mechanics, economy, permissions, PC box navigation and Electron
+  security unchanged; production still serves 27C
+  ([report](artistic-evolution-report.md),
+  [design system](design-system.md#artistic-evolution--liga-nocturna)).
+  No Phase28 started.
+
+- Earlier: **Phase27C DONE LOCAL — unified private Launcher0.24.0-rc.2
   packaged acceptance, migration053→061/bootstrap parity and restricted worker
   startup verified. Already-deployed API501a399 and Cloudflare4a8fffed verified
   without redeploy. Public Launcher0.20.0 preserved; physical writes OFF;

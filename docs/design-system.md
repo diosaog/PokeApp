@@ -5,17 +5,23 @@ bright teal / magenta / gold signals and chunky rounded "game menu" shapes.
 Inspired by the energy of modern Pokémon menus; every screen, shape and asset is
 original (no copied screens or protected artwork).
 
+**Artistic Evolution ("Liga Nocturna")** builds on Arena: Pokémon game feel
+first, then game colour and dynamism, with touches of esports and premium.
+See [Artistic Evolution](#artistic-evolution--liga-nocturna) below.
+
 ## Files
 
 | File | Role |
 | --- | --- |
 | [web/src/design/tokens.css](../web/src/design/tokens.css) | Palette primitives (`--c-*`), semantic aliases, area signals (`--sec-*`), type, space, radii, shadows, motion |
-| [web/src/design/arena.css](../web/src/design/arena.css) | Shared visual layer, loaded last; tokens only, no page-specific copies |
+| [web/src/design/arena.css](../web/src/design/arena.css) | Shared visual layer (27B); tokens only, no page-specific copies |
+| [web/src/design/evolution.css](../web/src/design/evolution.css) | Artistic Evolution layer, loaded last: typography, ribbons, per-area scenes, types, Pokédex, motion switch |
+| [web/src/preferences.ts](../web/src/preferences.ts), [web/src/sound.ts](../web/src/sound.ts) | Audio-visual preferences and the synthesised interface sounds |
 | `web/src/{styles,product,art-direction,product-polish}.css` | Legacy layers; their 451 literal colours were mapped once to tokens by [tokenize-colors.mjs](../web/scripts/tokenize-colors.mjs) (report beside it). Do not run it again |
 | [companion/launcher/style.css](../companion/launcher/style.css) | Native Launcher screens; its primitives must equal the web tokens ([design-sync.test.cjs](../companion/launcher/design-sync.test.cjs)) |
 
-Load order ([main.tsx](../web/src/main.tsx)): `tokens.css` → four legacy layers →
-`arena.css`.
+Load order ([main.tsx](../web/src/main.tsx)): Rubik → `tokens.css` → four legacy
+layers → `arena.css` → `evolution.css`.
 
 ## Rules
 
@@ -62,6 +68,78 @@ Load order ([main.tsx](../web/src/main.tsx)): `tokens.css` → four legacy layer
   holographic border; the logic (free, unlimited, no coins, Launcher-limited by
   the physical bag) is unchanged from 26C.
 - **Hall of Fame**: champion cards in gold foil with an occasional sheen.
+
+## Artistic Evolution — Liga Nocturna
+
+**One family:** Rubik (variable 300–900, rounded and sporty, very legible
+numbers) for every screen of the web and the Launcher, in different weights
+only. Web: `@fontsource-variable/rubik@5.3.0`, bundled and split by script
+(the Latin file, 35 KB, is the only one normally fetched). Launcher: the same
+Latin file packaged in `assets/fonts` with `font-src 'self'`.
+
+**Signature language**
+
+- Galar-style diagonal ribbon for screen eyebrows, in the area colour.
+- The ball band (two bars and a centre button) under every screen title and
+  the Launcher's main title; a wobbling ball for loading states.
+- Pokémon stand on lit platforms; cards and the Pokédex stage take the
+  Pokémon's primary type colour (18 type tokens `--type-*`, original values).
+
+**Intensity by area**
+
+| Level | Areas | What moves |
+| --- | --- | --- |
+| Show | Inicio, Tienda, Liga, Hall, Mi PC | stadium beams, turning ball, VS pulse, awning, gold spotlight and trophy glow, box wallpapers |
+| Balanced | Perfil, Inventario, navigation | licence card, ∞ holographic border, route fade |
+| Competitive | Team Preview, Scouting, Combates | static layouts; hover feedback only; move panels never move |
+| Calm | Administración | flat cards, no lift or glow |
+
+**Screens**
+
+- *Inicio*: a stadium hero (portrait, greeting, scoreboard, the team on lit
+  platforms), the 3 × 3 menu board, a versus card against the next rival.
+- *Scouting*: one-click rival portraits (the labelled select stays for
+  keyboards), licence-card identity, type-tinted team cards.
+- *Pokédex dialog*: national number, type stage, data and moves in the three
+  approved columns; a bottom sheet on phones.
+- *Tienda*: market awning, ₽ purse, gold price chips; descriptions are always
+  visible text (never hover-only).
+- *Mi PC*: framed box system, pill box title, six DS-style wallpapers chosen by
+  box number (`data-wallpaper`, presentation only). The arrow navigation,
+  slot positions and box order are unchanged.
+
+**Sounds** (on by default): original Web Audio synthesis, no files, no game
+music. `nav` on screen change, `open`/`close` for dialogs, `confirm`, `coin`
+after a purchase, `error`/`notice` for refused or uncertain commands, `select`
+for segmented tabs and `data-sfx` buttons. Quiet (master 0.22 × volume),
+slightly detuned so repeats never sound identical, 60 ms debounce, never on
+hover, and only after a user gesture (browser autoplay rules are respected;
+no audio means silence, never an error).
+
+**Preferences** (own profile → *Ajustes de la app*; quick mute in the
+sidebar): Sonidos Activados/Desactivados, Volumen, Animaciones
+Activadas/Reducidas. Stored in `localStorage` (`pokeapp.preferences.v1`),
+presentation only, never sent to the API. `html[data-motion="reduced"]` turns
+every animation and transition off and stops animated sprites; the system's
+`prefers-reduced-motion` always forces it. Inside the Launcher the web keeps
+its own preferences in its own isolated session.
+
+**Stability and performance**: the main area always fills the window, so
+nothing shifts while data arrives (CLS 0.258 → 0 over login and seven
+screens). Animations use transform and opacity, except the existing ∞ border
+and the Hall trophy glow.
+
+### Assets and licences
+
+| Asset | Source | Licence |
+| --- | --- | --- |
+| Rubik variable (web + Launcher) | Rubik Project via `@fontsource-variable/rubik` 5.3.0 | SIL OFL 1.1 ([copy](../companion/launcher/assets/fonts/OFL.txt)) |
+| Interface sounds | Synthesised at run time by `web/src/sound.ts` | Original project code |
+| Ribbons, ball band, stadium beams, wallpapers, awning, VS badge | Pure CSS in `evolution.css` | Original project code |
+| Type colours `--type-*` | Chosen for the night palette | Original values |
+| Pokémon, item and type images | Unchanged; see [ATTRIBUTION.md](../web/public/visuals/v1/ATTRIBUTION.md) | As recorded there |
+
+No new third-party images, no hotlinks and no extracted game audio.
 
 ## Private design preview
 

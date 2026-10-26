@@ -1,5 +1,16 @@
 # Phase25 — live execution record
 
+2026-10-26 (Artistic Evolution). **DONE LOCAL, not deployed.** Entry 2ffdb29.
+"Liga Nocturna" over Arena: stadium Home, rival scouting, Pokédex dialogs,
+themed Shop/League/Hall/PC (box arrows untouched), Rubik everywhere, sounds
+and preferences, CLS fix. [Report](../artistic-evolution-report.md).
+Owner review: `npm run preview:design` in `web/` (http://127.0.0.1:4173, any
+name and PIN, synthetic data) and the before/after gallery
+`%LOCALAPPDATA%\PokeApp-migration-evidence\artistic\index.html`.
+**Next (needs owner approval)**: deploy the web with the 27C procedure
+(build with the Railway API URL, `npm run deploy`, verify bytes); Launcher
+release items unchanged from 27C.
+
 2026-10-26 (27C). **27C DONE LOCAL — resumed validation and closure.**
 Entry c3835b6, main ahead4/behind0; existing edits preserved. Application source
 remains c3835b6; validation/build-preparation commit228569d. The documentation
