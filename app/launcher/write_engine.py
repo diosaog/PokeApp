@@ -60,7 +60,7 @@ def _serialized(method):
                 with (
                     nullcontext()
                     if method.__name__ == "export_backup"
-                    else self.files.operation_lock(target_lock)
+                    else self.files.operation_lock(target_lock, delete_on_close=True)
                 ):
                     self._operation_depth += 1
                     try:
@@ -452,6 +452,10 @@ class LocalWriteEngine:
                     {
                         "operation_id": record["operation_id"],
                         "role": role,
+                        # 26D: state of the copy that was parked beside the save.
+                        "beside_save": record.get(
+                            "residue" if role == "original" else "restore_residue"
+                        ),
                         "game": record["intent"]["game"],
                         "created_at": record.get(
                             "created_at"
@@ -715,9 +719,64 @@ class LocalWriteEngine:
             )
         if record.get("protocol") != "no_replace_v1":
             raise WriteSafetyError("LEGACY_WRITE_PROTOCOL_DISABLED")
-        return self._confirm_handoff(
+        receipt = self._confirm_handoff(
             record, closed_emulator_confirmed=closed_emulator_confirmed
         )
+        self._retire_residue(operation_id)
+        return receipt
+
+    def _retire_residue(self, operation_id):
+        """Remove the parked copy beside the save once provably redundant.
+
+        Terminal verified records only. The file must be the journal's recorded
+        identity, byte-identical to a verified profile backup, and the intent is
+        journaled first, so a crash at any point is completed or kept on the next
+        reconcile. Any doubt keeps the file and records why; never age-based.
+        """
+        record = self._load(operation_id)
+        if record.get("protocol") != "no_replace_v1":
+            return
+        # One journal field per artifact: the parked original and, after a
+        # restore, the parked applied output.
+        if record["status"] == "APPLIED_VERIFIED" and record.get("park_identity"):
+            key, suffix, identity, role = (
+                "residue",
+                ".displaced",
+                record["park_identity"],
+                "original",
+            )
+        elif record["status"] == "RESTORED_VERIFIED" and record.get(
+            "restore_backup_created_at"
+        ):
+            key, suffix, identity, role = (
+                "restore_residue",
+                ".restored-output",
+                record.get("stage_identity"),
+                "before_restore",
+            )
+        else:
+            return
+        if record.get(key) in ("REMOVED", "KEPT_CHANGED"):
+            return
+        path = self._handoff_path(record, suffix)
+        try:
+            expected = self._backup_bytes(record, role)  # verified hash and size
+            if not path.exists():
+                record[key] = "REMOVED"
+                self._save(record)
+                return
+            with self.handoff.held(path, identity) as parked:
+                if self.files.read(parked) != expected:
+                    record[key] = "KEPT_CHANGED"
+                    self._save(record)
+                    return
+                record[key] = "REMOVAL_INTENT"
+                self._save(record)
+                self.handoff.delete_held(parked)
+            record[key] = "REMOVED"
+        except (OSError, WriteSafetyError) as error:
+            record[key] = "KEPT_" + self._error(error, "UNVERIFIED")
+        self._save(record)
 
     def _handoff_path(self, record, suffix):
         return self._target(record).path.parent / (
@@ -924,6 +983,10 @@ class LocalWriteEngine:
                         raise WriteSafetyError("BACKUP_INVALID")
                 elif not record["commit_started"]:
                     raise WriteSafetyError("UNEXPECTED_MISSING_SOURCE")
+                elif record.get("residue") == "REMOVED":
+                    # Parked copy retired after a verified apply: the profile
+                    # backup, verified above, is the original.
+                    pass
                 else:
                     # Prove which original was parked; an absent name alone is insufficient.
                     parked = stack.enter_context(
@@ -1083,7 +1146,9 @@ class LocalWriteEngine:
         if record.get("mode") == "export":
             return self._reconcile_export(record)
         if record.get("protocol") == "no_replace_v1":
-            return self._reconcile_handoff(record)
+            receipt = self._reconcile_handoff(record)
+            self._retire_residue(operation_id)  # also clears residue from older runs
+            return receipt
         if record["status"] == "REJECTED":
             return self._receipt(record)
         try:
@@ -1182,9 +1247,11 @@ class LocalWriteEngine:
             raise WriteSafetyError("TRANSFER_COORDINATED_RECOVERY_REQUIRED")
         if record.get("protocol") != "no_replace_v1":
             raise WriteSafetyError("LEGACY_WRITE_PROTOCOL_DISABLED")
-        return self._restore_handoff(
+        receipt = self._restore_handoff(
             record, closed_emulator_confirmed=closed_emulator_confirmed
         )
+        self._retire_residue(operation_id)
+        return receipt
 
 
 WriteEngine = LocalWriteEngine

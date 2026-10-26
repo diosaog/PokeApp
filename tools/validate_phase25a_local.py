@@ -105,6 +105,10 @@ def main(args):
                 inventory_view(native, target.read_bytes())["items"][item]["count"]
                 == before + quantity
             )
+            # 26D: nothing but the save remains beside it after a verified write.
+            assert sorted(p.name for p in folder.iterdir() if p.name != "profile") == [
+                "main"
+            ], game
             report["games"].append(
                 {
                     "game": game,
@@ -182,7 +186,7 @@ def main(args):
         )
         runtime._write_step()
         assert (
-            "no está habilitado" in runtime.state()["quick_item_error"]
+            "se activará" in runtime.state()["quick_item_error"]
             and target.read_bytes() == data
         )
         assert not runtime.save_activity.recovery_required

@@ -327,14 +327,19 @@ class WindowsWriteFiles:
             return self.read(stream)
 
     @contextmanager
-    def operation_lock(self, path: Path):
+    def operation_lock(self, path: Path, *, delete_on_close: bool = False):
         import ctypes
 
         kernel = _kernel()
         self.path(path.parent, directory=True)
         if path.exists():
             self.path(path)
-        handle = kernel.CreateFileW(str(path), 0xC0000000, 0, None, 4, 0x00200000, None)
+        # Exclusivity is the share-mode-0 handle, never the file's existence, so
+        # a lock beside a save may vanish with its last handle (no residue).
+        access, flags = (
+            (0xC0010000, 0x04200000) if delete_on_close else (0xC0000000, 0x00200000)
+        )
+        handle = kernel.CreateFileW(str(path), access, 0, None, 4, flags, None)
         if handle == ctypes.c_void_p(-1).value:
             raise WriteSafetyError("WRITE_ALREADY_RUNNING")
         try:

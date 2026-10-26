@@ -60,6 +60,22 @@ class WindowsHandoffFiles(WindowsExportFiles):
         if actual != os.path.normcase(str(path)):
             raise WriteSafetyError("OPENED_PATH_CHANGED")
 
+    def delete_held(self, stream):
+        """Delete exactly the held file (by handle, never by name) on close."""
+        kernel = _kernel()
+        kernel.SetFileInformationByHandle.argtypes = (
+            wintypes.HANDLE,
+            ctypes.c_int,
+            wintypes.LPVOID,
+            wintypes.DWORD,
+        )
+        kernel.SetFileInformationByHandle.restype = wintypes.BOOL
+        flag = ctypes.c_ubyte(1)  # FILE_DISPOSITION_INFO.DeleteFile
+        if not kernel.SetFileInformationByHandle(
+            msvcrt.get_osfhandle(stream.fileno()), 4, ctypes.byref(flag), 1
+        ):
+            raise WriteSafetyError("RESIDUE_DELETE_FAILED")
+
     def rename_new(self, stream, destination):
         self.path(destination.parent, directory=True)
 

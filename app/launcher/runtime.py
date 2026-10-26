@@ -487,9 +487,11 @@ class LauncherRuntime:
             self._patch(
                 write_error="Hay una lectura o sincronización en curso. Espera y vuelve a confirmar."
             )
-        except WriteSafetyError:
+        except WriteSafetyError as error:
             self._patch(
-                write_error="No se pudo confirmar el cambio. Revisa la partida seleccionada y conserva las copias."
+                write_error="Otra instancia de PokeApp Launcher está trabajando con esta partida. Ciérrala y vuelve a intentarlo; no se ha modificado nada."
+                if str(error) == "WRITE_ALREADY_RUNNING"
+                else "No se pudo confirmar el cambio. Revisa la partida seleccionada y conserva las copias."
             )
         except Exception:  # no native output, private path or journal data to UI
             self.save_activity.recovery_required = True
