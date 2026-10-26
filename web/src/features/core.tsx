@@ -16,6 +16,7 @@ import {
   TypeBadge,
   ItemIcon,
   TrainerPhoto,
+  typeClass,
 } from "../pokemon/presentation";
 import { useApp, useRead, useOverview, usePC } from "../state";
 import { MyProgress } from "./progress";
@@ -114,12 +115,14 @@ export function Pokemon({
       {onClick && <ArrowUpRight size={18} />}
     </>
   );
+  // The card wears its primary type colour.
+  const tone = `pokemon ${typeClass(pokemon.types?.[0])}`;
   return onClick ? (
-    <button className="pokemon" onClick={onClick}>
+    <button className={tone} onClick={onClick}>
       {body}
     </button>
   ) : (
-    <div className="pokemon">{body}</div>
+    <div className={tone}>{body}</div>
   );
 }
 export { HomePage } from "./home";

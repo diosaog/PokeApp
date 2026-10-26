@@ -18,6 +18,7 @@ import {
 import { api, ApiError, errorText } from "./api/client";
 import { queries, useViewer } from "./state";
 import { invalidationFor } from "./read-invalidation";
+import { play } from "./sound";
 
 export function Empty({ children }: { children: ReactNode }) {
   return <div className="empty">{children}</div>;
@@ -98,8 +99,10 @@ export function Modal({
     const dialog = ref.current!;
     const previous = document.activeElement as HTMLElement | null;
     dialog.showModal();
+    play("open");
     return () => {
       dialog.close();
+      play("close");
       previous?.focus();
     };
   }, []);
@@ -191,6 +194,7 @@ export function useCommand(invalidatePaths?: readonly string[]) {
       request.current = null;
       setUncertain(false);
       setSuccess(true);
+      play(command.path.includes("/purchases") ? "coin" : "confirm");
       await refresh();
       return true;
     } catch (err) {
@@ -198,6 +202,7 @@ export function useCommand(invalidatePaths?: readonly string[]) {
       const unknown =
         !(err instanceof ApiError) || err.status === 0 || err.status >= 500;
       setUncertain(unknown);
+      play(unknown ? "notice" : "error");
       if (!unknown) request.current = null;
       if (err instanceof ApiError && err.status === 409 && !unknown)
         await refresh();

@@ -12,6 +12,7 @@ import { WipeRevivals } from "./wipe-revivals";
 import { PokemonDetailModal } from "./pokemon-details";
 import { participantLabel } from "./admin-labels";
 import { AccountEditor, type AccountProfile } from "./account-editor";
+import { PreferencesCard } from "./preferences";
 
 export function TrainerProfilePage() {
   const { season, accountsEnabled } = useApp(),
@@ -169,6 +170,7 @@ export function Profile({
         )}
       </div>
       <Notice error={league.error} />
+      {own && <PreferencesCard />}
       {own && league.data && (
         <details className="profile-wipe">
           <summary>Revividos tras wipe · consultar o actualizar</summary>

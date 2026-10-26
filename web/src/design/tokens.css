@@ -37,6 +37,26 @@
   --c-magenta: #ff3d8b;
   --c-leaf: #9be15d;
   --c-ink: #06131d;
+  /* Pokémon types (Artistic Evolution): eighteen distinct signals, tuned for
+     the night background; original values, not an official chart. */
+  --type-normal: #b9b49b;
+  --type-fire: #ff8a3d;
+  --type-water: #4f9dff;
+  --type-grass: #5fd068;
+  --type-electric: #ffd43b;
+  --type-ice: #7fe3e8;
+  --type-fighting: #e0485a;
+  --type-poison: #b462d8;
+  --type-ground: #dcae5a;
+  --type-flying: #96aaf7;
+  --type-psychic: #ff5f9e;
+  --type-bug: #a8c62d;
+  --type-rock: #c2a868;
+  --type-ghost: #8170dc;
+  --type-dragon: #6c5cff;
+  --type-dark: #9a8576;
+  --type-steel: #92b6cc;
+  --type-fairy: #f59ae6;
 
   /* Semantic aliases used by components */
   --bg: var(--c-bg-0);

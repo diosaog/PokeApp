@@ -1,0 +1,847 @@
+/* PokeApp Artistic Evolution — "Liga Nocturna". Loaded after arena.css.
+   Evolves Arena towards an unmistakably Pokémon game feel: one rounded sporty
+   family (Rubik), Galar-style diagonal ribbons, the ball band as signature,
+   stadium light where a screen is a show, calm precision where it is a tool.
+   Tokens only; every animation stops with data-motion="reduced". */
+
+/* ---------- One family for the whole app ---------- */
+:root {
+  --font-display:
+    "Rubik Variable", "Segoe UI Variable Display", "Segoe UI", system-ui,
+    sans-serif;
+  --font-body:
+    "Rubik Variable", "Segoe UI Variable Text", "Segoe UI", system-ui,
+    sans-serif;
+  --ribbon-cut: polygon(0 0, 100% 0, calc(100% - 10px) 100%, 0 100%);
+  font-family: var(--font-body);
+  font-feature-settings: "tnum" 0;
+}
+body,
+button,
+input,
+select,
+textarea {
+  font-family: var(--font-body);
+}
+h1,
+h2,
+h3,
+.brand {
+  font-family: var(--font-display);
+  letter-spacing: -0.01em;
+}
+.stat-pill strong,
+.coin-price,
+td,
+.versus-badge {
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---------- Page heading: a Galar ribbon for the eyebrow ---------- */
+.page-heading {
+  padding-left: 0;
+}
+.page-heading::before {
+  display: none;
+}
+.page-heading .eyebrow,
+.home-stage .eyebrow {
+  display: inline-block;
+  padding: 5px 18px 5px 12px;
+  background: var(--accent);
+  color: var(--on-primary);
+  clip-path: var(--ribbon-cut);
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+}
+.page-heading .eyebrow::before {
+  content: "";
+}
+.page-heading h1 {
+  font-weight: 800;
+  margin-top: 10px;
+}
+.page-heading h1::after {
+  /* the ball band under every screen title */
+  content: "";
+  display: block;
+  width: 88px;
+  height: 6px;
+  margin-top: 12px;
+  border-radius: var(--radius-pill);
+  background:
+    radial-gradient(
+        circle at 50% 50%,
+        var(--c-text) 0 3px,
+        var(--c-ink) 3px 5px,
+        transparent 5px
+      )
+      center / 12px 12px no-repeat,
+    linear-gradient(
+      90deg,
+      var(--accent) 0 44%,
+      transparent 44% 56%,
+      var(--accent) 56%
+    );
+}
+
+/* ---------- Loading: a ball that wobbles, as if about to be caught ---------- */
+.loading {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-2) var(--space-4) var(--space-2) var(--space-2);
+  background: var(--surface);
+  animation: none;
+}
+.loading .spin {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  color: transparent;
+  background:
+    radial-gradient(
+      circle,
+      var(--c-text) 0 3px,
+      var(--c-ink) 3px 5px,
+      transparent 5px
+    ),
+    linear-gradient(
+      180deg,
+      var(--c-danger) 0 45%,
+      var(--c-ink) 45% 55%,
+      var(--c-text) 55%
+    );
+  box-shadow: 0 0 0 2px var(--c-ink);
+  animation: ball-wobble 1.1s var(--ease-out) infinite;
+}
+.loading .spin * {
+  display: none;
+}
+@keyframes ball-wobble {
+  0%,
+  60%,
+  100% {
+    transform: rotate(0);
+  }
+  20% {
+    transform: rotate(-22deg);
+  }
+  40% {
+    transform: rotate(18deg);
+  }
+}
+
+/* ---------- Sidebar: the brand wears the ball; a quick sound switch ---------- */
+.sidebar-user,
+.sidebar > div:last-child {
+  gap: 6px;
+}
+.sound-toggle[aria-pressed="false"] {
+  color: var(--text-dim);
+}
+
+/* ---------- INICIO: the stadium ---------- */
+.home-stage {
+  position: relative;
+  isolation: isolate;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-areas:
+    "copy hud"
+    "team team";
+  gap: var(--space-5) var(--space-6);
+  margin: 0 0 var(--space-5);
+  padding: var(--space-6) var(--space-6) var(--space-5);
+  overflow: hidden;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border-subtle);
+  background:
+    radial-gradient(
+      90% 70% at 50% 120%,
+      color-mix(in srgb, var(--accent) 30%, transparent),
+      transparent 65%
+    ),
+    radial-gradient(
+      60% 80% at 100% 0%,
+      color-mix(in srgb, var(--c-magenta) 26%, transparent),
+      transparent 60%
+    ),
+    linear-gradient(160deg, var(--c-surface-3), var(--c-bg-1) 75%);
+  box-shadow: var(--shadow-2);
+}
+/* stadium beams sweeping from the roof */
+.home-stage::before {
+  content: "";
+  position: absolute;
+  inset: -40% -10% auto;
+  height: 160%;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    conic-gradient(
+      from 172deg at 18% 0%,
+      transparent 0deg,
+      color-mix(in srgb, var(--c-text) 9%, transparent) 8deg,
+      transparent 16deg
+    ),
+    conic-gradient(
+      from 176deg at 82% 0%,
+      transparent 0deg,
+      color-mix(in srgb, var(--c-accent) 12%, transparent) 9deg,
+      transparent 18deg
+    );
+  transform-origin: 50% 0;
+  animation: stage-sweep 9s ease-in-out infinite alternate;
+}
+/* the ball, huge and faint, turning slowly behind the trainer */
+.home-stage::after {
+  content: "";
+  position: absolute;
+  right: -110px;
+  top: -130px;
+  width: 460px;
+  height: 460px;
+  z-index: -1;
+  border-radius: 50%;
+  border: 16px solid color-mix(in srgb, var(--c-text) 6%, transparent);
+  background:
+    radial-gradient(
+      circle,
+      transparent 0 52px,
+      color-mix(in srgb, var(--c-text) 6%, transparent) 52px 70px,
+      transparent 70px
+    ),
+    linear-gradient(
+      180deg,
+      transparent calc(50% - 8px),
+      color-mix(in srgb, var(--c-text) 6%, transparent) calc(50% - 8px)
+        calc(50% + 8px),
+      transparent calc(50% + 8px)
+    );
+  animation: ball-turn 80s linear infinite;
+}
+@keyframes stage-sweep {
+  from {
+    transform: rotate(-4deg);
+  }
+  to {
+    transform: rotate(4deg);
+  }
+}
+@keyframes ball-turn {
+  to {
+    transform: rotate(360deg);
+  }
+}
+.stage-copy {
+  grid-area: copy;
+  display: flex;
+  align-items: center;
+  gap: var(--space-5);
+  min-width: 0;
+}
+.stage-copy .trainer-photo {
+  width: 96px;
+  min-width: 96px;
+  height: 120px;
+  border-radius: var(--radius-md);
+  border: 3px solid var(--accent);
+  box-shadow:
+    0 0 0 4px var(--c-ink),
+    0 12px 30px color-mix(in srgb, var(--accent) 30%, transparent);
+  transform: rotate(-3deg);
+}
+.stage-copy h1 {
+  margin: 10px 0 6px;
+  font-size: clamp(2rem, 1.3rem + 2.6vw, 3.4rem);
+  font-weight: 900;
+  line-height: 1.02;
+  letter-spacing: -0.02em;
+  text-shadow: 0 4px 24px color-mix(in srgb, var(--c-ink) 70%, transparent);
+}
+.stage-season {
+  margin: 0;
+  color: var(--text-body);
+  font-weight: 600;
+}
+.stage-hud {
+  grid-area: hud;
+  align-self: center;
+  display: grid;
+  grid-template-columns: repeat(3, auto);
+  gap: var(--space-2);
+  justify-items: stretch;
+}
+.stage-hud .stat-pill,
+.stage-hud .stat-pill + .stat-pill {
+  max-width: none;
+  min-width: 96px;
+  background: color-mix(in srgb, var(--c-ink) 55%, transparent);
+  border: 1px solid color-mix(in srgb, var(--c-text) 14%, transparent);
+  backdrop-filter: blur(6px);
+}
+.stage-hud .stat-pill strong {
+  font-size: 1.6rem;
+}
+.stage-hud .stat-pill:nth-of-type(2) strong {
+  color: var(--c-gold-soft);
+}
+.stage-hud .text-link {
+  grid-column: 1 / -1;
+  justify-self: end;
+}
+.stage-team {
+  grid-area: team;
+  display: grid;
+  gap: var(--space-2);
+}
+.stage-team-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2) var(--space-3);
+}
+.stage-team-head h2 {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0;
+  font-size: var(--text-md);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--text-body);
+}
+.home-stage .home-sprites {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: var(--space-3);
+  margin: var(--space-2) 0 0;
+}
+/* each Pokémon stands on a lit platform */
+.home-stage .home-sprite-slot {
+  position: relative;
+  display: grid;
+  place-items: end center;
+  min-height: 132px;
+  padding: 0 0 18px;
+  border: 0;
+  border-radius: 0;
+  background: radial-gradient(
+    50% 14% at 50% 88%,
+    color-mix(in srgb, var(--accent) 55%, transparent),
+    color-mix(in srgb, var(--accent) 12%, transparent) 60%,
+    transparent 72%
+  );
+  box-shadow: none;
+}
+.home-stage .home-sprite-slot::after {
+  content: "";
+  position: absolute;
+  left: 18%;
+  right: 18%;
+  bottom: 10px;
+  height: 14px;
+  border-radius: 50%;
+  border: 2px solid color-mix(in srgb, var(--accent) 60%, transparent);
+  box-shadow: 0 0 18px color-mix(in srgb, var(--accent) 40%, transparent);
+}
+.home-stage .home-sprite-slot .pokemon-sprite {
+  position: relative;
+  z-index: 1;
+  width: 104px;
+  height: 104px;
+  image-rendering: pixelated;
+  filter: drop-shadow(
+    0 6px 6px color-mix(in srgb, var(--c-ink) 70%, transparent)
+  );
+}
+.home-stage .home-sprite-slot:hover {
+  transform: none;
+}
+.stage-empty,
+.stage-team .caption {
+  margin: 0;
+  color: var(--text-body);
+}
+
+/* Home: the versus card */
+.home-battle .versus {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: var(--space-4);
+  margin: var(--space-4) 0;
+}
+.versus-side {
+  display: grid;
+  justify-items: center;
+  gap: var(--space-2);
+  text-align: center;
+  font-family: var(--font-display);
+  font-size: var(--text-lg);
+  font-weight: 800;
+}
+.versus-side .trainer-photo {
+  width: 78px;
+  min-width: 78px;
+  height: 98px;
+  border-radius: var(--radius-md);
+  border: 3px solid var(--c-accent);
+}
+.versus-side.rival .trainer-photo {
+  border-color: var(--c-magenta);
+}
+.versus-badge {
+  display: grid;
+  place-items: center;
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: var(--brand-gradient);
+  color: var(--c-ink);
+  font-family: var(--font-display);
+  font-size: 1.4rem;
+  font-weight: 900;
+  font-style: italic;
+  box-shadow:
+    0 0 0 4px var(--c-ink),
+    0 0 30px color-mix(in srgb, var(--c-magenta) 45%, transparent);
+  animation: versus-pulse 2.4s ease-in-out infinite;
+}
+@keyframes versus-pulse {
+  50% {
+    transform: scale(1.08);
+  }
+}
+
+@media (max-width: 1100px) {
+  .home-stage {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas: "copy" "hud" "team";
+  }
+  .stage-hud {
+    justify-self: start;
+  }
+}
+@media (max-width: 760px) {
+  .home-stage {
+    padding: var(--space-5) var(--space-4) var(--space-4);
+  }
+  .stage-copy {
+    gap: var(--space-3);
+  }
+  .stage-copy .trainer-photo {
+    width: 64px;
+    min-width: 64px;
+    height: 80px;
+  }
+  .stage-copy h1 {
+    font-size: 1.75rem;
+  }
+  .stage-hud {
+    width: 100%;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+  .stage-hud .stat-pill,
+  .stage-hud .stat-pill + .stat-pill {
+    min-width: 0;
+  }
+  .stage-hud .stat-pill strong {
+    font-size: 1.2rem;
+  }
+  .home-stage .home-sprites {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--space-1);
+  }
+  .home-stage .home-sprite-slot {
+    min-height: 104px;
+  }
+  .home-stage .home-sprite-slot .pokemon-sprite {
+    width: 80px;
+    height: 80px;
+  }
+  .home-stage::after {
+    width: 300px;
+    height: 300px;
+    right: -120px;
+    top: -110px;
+  }
+}
+
+/* ---------- Motion preference: one switch for every decoration ---------- */
+:root[data-motion="reduced"] {
+  --t-fast: 0ms;
+  --t-base: 0ms;
+  --t-slow: 0ms;
+}
+:root[data-motion="reduced"] *,
+:root[data-motion="reduced"] *::before,
+:root[data-motion="reduced"] *::after {
+  animation: none !important;
+  transition-duration: 0s !important;
+  scroll-behavior: auto !important;
+}
+
+/* ---------- Pokémon types: eighteen colours again ---------- */
+.type-normal {
+  --type: var(--type-normal);
+}
+.type-fire {
+  --type: var(--type-fire);
+}
+.type-water {
+  --type: var(--type-water);
+}
+.type-grass {
+  --type: var(--type-grass);
+}
+.type-electric {
+  --type: var(--type-electric);
+}
+.type-ice {
+  --type: var(--type-ice);
+}
+.type-fighting {
+  --type: var(--type-fighting);
+}
+.type-poison {
+  --type: var(--type-poison);
+}
+.type-ground {
+  --type: var(--type-ground);
+}
+.type-flying {
+  --type: var(--type-flying);
+}
+.type-psychic {
+  --type: var(--type-psychic);
+}
+.type-bug {
+  --type: var(--type-bug);
+}
+.type-rock {
+  --type: var(--type-rock);
+}
+.type-ghost {
+  --type: var(--type-ghost);
+}
+.type-dragon {
+  --type: var(--type-dragon);
+}
+.type-dark {
+  --type: var(--type-dark);
+}
+.type-steel {
+  --type: var(--type-steel);
+}
+.type-fairy {
+  --type: var(--type-fairy);
+}
+.type-badge {
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+/* ---------- Pokémon cards: the primary type tints the card ---------- */
+:where(.pokemon, .pokemon-detail-layout) {
+  --type: var(--c-text-muted); /* zero specificity: any .type-* wins */
+}
+.pokemon {
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--radius-md);
+  border: 1px solid color-mix(in srgb, var(--type) 40%, var(--c-line));
+  background:
+    radial-gradient(
+      circle at 14% 50%,
+      color-mix(in srgb, var(--type) 30%, transparent) 0 46px,
+      transparent 47px
+    ),
+    linear-gradient(
+      110deg,
+      color-mix(in srgb, var(--type) 18%, var(--c-surface-2)),
+      var(--c-surface-1) 70%
+    );
+  box-shadow: inset 4px 0 0 var(--type);
+}
+.pokemon .pokemon-sprite {
+  image-rendering: pixelated;
+  filter: drop-shadow(
+    0 4px 4px color-mix(in srgb, var(--c-ink) 60%, transparent)
+  );
+}
+button.pokemon:hover {
+  border-color: var(--type);
+  box-shadow:
+    inset 4px 0 0 var(--type),
+    0 10px 26px color-mix(in srgb, var(--type) 22%, transparent);
+}
+button.pokemon:hover .pokemon-sprite {
+  animation: arena-hop 520ms var(--ease-out);
+}
+
+/* ---------- SCOUTING: pick a rival in one click ---------- */
+.scout-roster {
+  display: flex;
+  gap: var(--space-3);
+  margin: 0 0 var(--space-4);
+  padding: var(--space-1) var(--space-1) var(--space-3);
+  overflow-x: auto;
+  scrollbar-width: thin;
+}
+.scout-chip {
+  flex: none;
+  display: grid;
+  justify-items: center;
+  gap: var(--space-2);
+  width: 104px;
+  padding: var(--space-3) var(--space-2) var(--space-2);
+  border-radius: var(--radius-md);
+  background: linear-gradient(170deg, var(--c-surface-2), var(--c-surface-1));
+  border: 1px solid var(--border-subtle);
+  font-size: var(--text-sm);
+  font-weight: 700;
+}
+.scout-chip .trainer-photo {
+  width: 60px;
+  min-width: 60px;
+  height: 74px;
+  border-radius: var(--radius-sm);
+}
+.scout-chip span {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.scout-chip[aria-pressed="true"] {
+  background: linear-gradient(
+    170deg,
+    color-mix(in srgb, var(--accent) 28%, var(--c-surface-2)),
+    var(--c-surface-1)
+  );
+  border-color: var(--accent);
+  box-shadow:
+    0 0 0 2px var(--accent),
+    0 10px 24px color-mix(in srgb, var(--accent) 28%, transparent);
+}
+.scout-chip[aria-pressed="true"] .trainer-photo {
+  border-color: var(--accent);
+}
+.scout-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2) var(--space-4);
+  margin-bottom: var(--space-2);
+}
+.scout-controls p {
+  margin: 0;
+}
+
+/* Trainer identity: a league licence card */
+.profile-identity {
+  position: relative;
+  overflow: hidden;
+  border: 2px solid color-mix(in srgb, var(--accent) 55%, var(--c-line));
+  background:
+    repeating-linear-gradient(
+      -58deg,
+      color-mix(in srgb, var(--accent) 7%, transparent) 0 2px,
+      transparent 2px 14px
+    ),
+    linear-gradient(150deg, var(--c-surface-3), var(--c-surface-1) 70%);
+}
+.profile-identity::after {
+  content: "LICENCIA DE ENTRENADOR";
+  position: absolute;
+  top: 0;
+  right: 0;
+  padding: 6px 22px 6px 16px;
+  background: var(--accent);
+  color: var(--on-primary);
+  clip-path: polygon(12px 0, 100% 0, 100% 100%, 0 100%);
+  font-size: 0.62rem;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+}
+.profile-identity .trainer-photo {
+  border: 3px solid var(--accent);
+  box-shadow: 0 0 0 4px var(--c-ink);
+  transform: rotate(-2deg);
+}
+.public-party {
+  gap: var(--space-3);
+}
+
+/* ---------- Dialogs: a sheet on phones, a dex card on desktop ---------- */
+dialog {
+  border: 1px solid var(--border-strong);
+  box-shadow:
+    0 30px 80px color-mix(in srgb, var(--c-ink) 80%, transparent),
+    inset 0 4px 0 var(--accent);
+}
+.dialog-heading h2 {
+  font-weight: 800;
+}
+.dialog-heading .icon-button {
+  border-radius: 50%;
+}
+@media (max-width: 640px) {
+  dialog[open] {
+    width: 100%;
+    max-width: 100%;
+    max-height: 92dvh;
+    margin: auto 0 0;
+    border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+    animation: sheet-up var(--t-slow) var(--ease-out);
+  }
+}
+@keyframes sheet-up {
+  from {
+    transform: translateY(40px);
+    opacity: 0;
+  }
+}
+
+/* Pokédex entry */
+.pokemon-detail-layout .detail-identity {
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--radius-md);
+  padding: var(--space-4);
+  text-align: center;
+  background:
+    repeating-linear-gradient(
+      -58deg,
+      color-mix(in srgb, var(--type) 10%, transparent) 0 2px,
+      transparent 2px 12px
+    ),
+    linear-gradient(
+      165deg,
+      color-mix(in srgb, var(--type) 34%, var(--c-surface-2)),
+      var(--c-bg-1) 85%
+    );
+  border: 1px solid color-mix(in srgb, var(--type) 45%, var(--c-line));
+}
+.detail-identity .eyebrow {
+  display: inline-block;
+  padding: 4px 12px;
+  background: var(--type);
+  color: var(--c-ink);
+  clip-path: var(--ribbon-cut);
+  font-size: 0.62rem;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+}
+.dex-stage {
+  display: grid;
+  place-items: center;
+  width: min(200px, 100%);
+  aspect-ratio: 1;
+  margin: var(--space-3) auto var(--space-2);
+  border-radius: 50%;
+  background:
+    radial-gradient(
+      circle,
+      color-mix(in srgb, var(--type) 26%, transparent) 0 55%,
+      transparent 56%
+    ),
+    radial-gradient(
+      circle,
+      transparent 0 63%,
+      color-mix(in srgb, var(--type) 40%, transparent) 63% 65%,
+      transparent 66%
+    );
+}
+.dex-stage .pokemon-sprite.large {
+  width: 150px;
+  height: 150px;
+  image-rendering: pixelated;
+  filter: drop-shadow(
+    0 10px 10px color-mix(in srgb, var(--c-ink) 70%, transparent)
+  );
+}
+.detail-identity h3 {
+  margin: 0;
+  font-size: 1.6rem;
+  font-weight: 900;
+}
+.dex-level {
+  display: inline-block;
+  margin: var(--space-2) 0;
+  padding: 3px 12px;
+  border-radius: var(--radius-pill);
+  background: color-mix(in srgb, var(--c-ink) 55%, transparent);
+  font-weight: 800;
+}
+.detail-identity .tags {
+  justify-content: center;
+}
+.pokemon-detail-layout .detail-data,
+.pokemon-detail-layout .detail-moves {
+  border-radius: var(--radius-md);
+  padding: var(--space-4);
+  background: var(--c-bg-1);
+  border: 1px solid var(--border-subtle);
+}
+.pokemon-detail-layout h3 {
+  font-size: var(--text-sm);
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--text-dim);
+}
+.pokemon-detail-layout .detail-identity h3 {
+  font-size: 1.6rem;
+  text-transform: none;
+  letter-spacing: -0.01em;
+  color: var(--text-strong);
+}
+
+.page-heading {
+  border-left: 0;
+}
+.scout-controls label {
+  margin-left: auto;
+  min-width: min(280px, 100%);
+}
+
+/* Pokédex entry: identity on the left, data and moves stacked on the right */
+.pokemon-detail-layout {
+  grid-template-columns: minmax(230px, 300px) minmax(0, 1fr);
+  grid-template-rows: auto 1fr;
+  gap: var(--space-4);
+}
+.pokemon-detail-layout .detail-identity {
+  grid-row: 1 / span 2;
+  display: grid;
+  justify-items: center;
+  align-content: start;
+}
+.pokemon-detail-layout .detail-data,
+.pokemon-detail-layout .detail-moves {
+  grid-column: 2;
+}
+.dex-number {
+  margin-top: var(--space-1);
+  color: color-mix(in srgb, var(--type) 70%, var(--c-text));
+  font-weight: 800;
+  letter-spacing: 0.08em;
+}
+.dex-level {
+  width: fit-content;
+}
+@media (max-width: 760px) {
+  .pokemon-detail-layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .pokemon-detail-layout .detail-identity {
+    grid-row: auto;
+  }
+  .pokemon-detail-layout .detail-data,
+  .pokemon-detail-layout .detail-moves {
+    grid-column: auto;
+  }
+}

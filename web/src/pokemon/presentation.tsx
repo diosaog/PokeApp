@@ -13,6 +13,7 @@ import moveTypes from "./move-types.json";
 import catalogShopArt from "./shop-art.json";
 import animatedIds from "./animated-sprites.json";
 import { badgeAsset } from "./badges";
+import { useReducedMotion } from "../preferences";
 
 const base = "/visuals/v1";
 const items = new Set(itemIds);
@@ -98,6 +99,7 @@ export function PokemonSprite({
   const [moving, setMoving] = useState(false);
   const [failed, setFailed] = useState<string | null>(null);
   const [failedAnimation, setFailedAnimation] = useState<number | null>(null);
+  const reduced = useReducedMotion();
   useEffect(() => {
     setMoving(false);
     if (
@@ -109,23 +111,19 @@ export function PokemonSprite({
       typeof window.matchMedia !== "function"
     )
       return;
-    const motion = window.matchMedia("(prefers-reduced-motion: reduce)");
     let visible = false;
-    const update = () =>
-      setMoving(visible && !motion.matches && !document.hidden);
+    const update = () => setMoving(visible && !reduced && !document.hidden);
     const observer = new IntersectionObserver(([entry]) => {
       visible = entry.isIntersecting;
       update();
     });
     observer.observe(ref.current);
-    motion.addEventListener("change", update);
     document.addEventListener("visibilitychange", update);
     return () => {
       observer.disconnect();
-      motion.removeEventListener("change", update);
       document.removeEventListener("visibilitychange", update);
     };
-  }, [animated, id]);
+  }, [animated, id, reduced]);
   const animate = moving && failedAnimation !== id;
   return id && failed !== species ? (
     <img

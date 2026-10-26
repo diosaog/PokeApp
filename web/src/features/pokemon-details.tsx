@@ -1,5 +1,5 @@
 import type { Model } from "../api/types";
-import { pokemonName, pokemonTitle } from "../pokemon/localization";
+import { catalogId, pokemonName, pokemonTitle } from "../pokemon/localization";
 import {
   ItemIcon,
   MoveLabel,
@@ -33,16 +33,23 @@ export function PokemonDetailModal(
 }
 export function PokemonDetails(props: DetailPokemon) {
   const p = props.pokemon;
+  const dex = catalogId("species", p.species);
   return (
     <div className={`pokemon-detail-layout ${typeClass(p.types?.[0])}`}>
       <section className="detail-identity">
         <span className="eyebrow">
           {props.visibility === "self" ? "TU POKÉMON" : "POKÉMON PÚBLICO"}
         </span>
-        <PokemonSprite species={p.species} form={p.form} large animated />
+        {/* Pokédex-style stage: the Pokémon on its type colour. */}
+        <div className="dex-stage">
+          <PokemonSprite species={p.species} form={p.form} large animated />
+        </div>
+        {dex && (
+          <span className="dex-number">Nº {String(dex).padStart(3, "0")}</span>
+        )}
         <h3>{pokemonName("species", p.species)}</h3>
         {!!p.form && <p>Forma {p.form}</p>}
-        <p>Nivel {p.level ?? "—"}</p>
+        <p className="dex-level">Nivel {p.level ?? "—"}</p>
         <div className="tags">
           {p.types?.map((t) => (
             <TypeBadge key={t} type={t} />

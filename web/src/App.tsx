@@ -1,4 +1,4 @@
-import { useEffect, useState, lazy, Suspense } from "react";
+import { useEffect, useRef, useState, lazy, Suspense } from "react";
 import {
   Link,
   NavLink,
@@ -56,6 +56,8 @@ import { DesktopPage } from "./features/desktop";
 import { desktopPanels, desktopPath, insideLauncher } from "./launcher";
 import { RegistrationForm } from "./features/registration";
 import { PinForm, pinRecoveryKey } from "./features/account-editor";
+import { play } from "./sound";
+import { SoundToggle } from "./features/preferences";
 const AdminAccountsPage = lazy(() =>
   import("./features/admin-accounts").then((m) => ({
     default: m.AdminAccountsPage,
@@ -295,11 +297,15 @@ function SeasonPicker() {
 export default function App() {
   const { me, logout, adminOperationPending, accountsEnabled } = useApp(),
     [menu, setMenu] = useState(false),
-    location = useLocation();
+    location = useLocation(),
+    visited = useRef(location.pathname);
   useEffect(() => {
     setMenu(false);
     window.scrollTo(0, 0);
     document.getElementById("main")?.focus({ preventScroll: true });
+    // A soft cue when the trainer moves to another screen (not on first load).
+    if (visited.current !== location.pathname) play("nav");
+    visited.current = location.pathname;
   }, [location.pathname]);
   useEffect(() => {
     const close = (event: KeyboardEvent) => {
@@ -441,6 +447,7 @@ export default function App() {
               </Link>
             )}
           </div>
+          <SoundToggle />
           <button
             aria-label="Cerrar sesión"
             className="icon-button"

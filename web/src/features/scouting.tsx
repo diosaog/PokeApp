@@ -5,6 +5,7 @@ import { useApp, useRead } from "../state";
 import { Empty, Field, Heading, Loading, Notice } from "../ui";
 import { WithSeason } from "./core";
 import { Profile } from "./trainer-profile";
+import { TrainerPhoto } from "../pokemon/presentation";
 
 export function ScoutingPage() {
   const { season } = useApp();
@@ -54,22 +55,45 @@ function Scouting({ season, initial }: { season: string; initial: string }) {
     return <Empty>No hay entrenadores publicados en esta temporada.</Empty>;
   return (
     <>
-      <p>La partida actual y el equipo oficial tienen su propio espacio.</p>
-      <button disabled={query.isFetching} onClick={() => void query.refetch()}>
-        Actualizar scouting
-      </button>
-      <Field label="Entrenador a consultar">
-        <select
-          value={data.trainer_id ?? ""}
-          onChange={(e) => setSelected(e.target.value)}
+      {/* One click on a rival portrait; the labelled list stays for keyboards. */}
+      <div className="scout-roster" role="group" aria-label="Rivales">
+        {data.trainers.map((t) => (
+          <button
+            key={t.trainer_id}
+            type="button"
+            className="scout-chip"
+            aria-pressed={t.trainer_id === data.trainer_id}
+            data-sfx="select"
+            onClick={() => setSelected(t.trainer_id)}
+          >
+            <TrainerPhoto name={t.display_name} />
+            <span>{t.display_name}</span>
+          </button>
+        ))}
+      </div>
+      <div className="scout-controls">
+        <button
+          disabled={query.isFetching}
+          onClick={() => void query.refetch()}
         >
-          {data.trainers.map((t) => (
-            <option key={t.trainer_id} value={t.trainer_id}>
-              {t.display_name}
-            </option>
-          ))}
-        </select>
-      </Field>
+          Actualizar scouting
+        </button>
+        <p className="muted">
+          La partida actual y el equipo oficial tienen su propio espacio.
+        </p>
+        <Field label="Entrenador a consultar">
+          <select
+            value={data.trainer_id ?? ""}
+            onChange={(e) => setSelected(e.target.value)}
+          >
+            {data.trainers.map((t) => (
+              <option key={t.trainer_id} value={t.trainer_id}>
+                {t.display_name}
+              </option>
+            ))}
+          </select>
+        </Field>
+      </div>
       {data.trainer_id && (
         <Profile key={data.trainer_id} trainer={data.trainer_id} />
       )}

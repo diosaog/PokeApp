@@ -14,7 +14,7 @@ import {
 } from "lucide-react";
 import type { Model } from "../api/types";
 import { useApp, useOverview, usePC, useRead } from "../state";
-import { Card, Heading, Loading, Notice, Tag } from "../ui";
+import { Card, Loading, Notice } from "../ui";
 import {
   PokemonSprite,
   PokemonStatusFlags,
@@ -98,12 +98,90 @@ export function HomePage() {
           .filter((p) => p.location.startsWith("Equipo · "))
           .slice(0, 6)
       : [];
+  const rival = match
+    ? playerName(
+        data!,
+        match.player_a_id === player?.id
+          ? match.player_b_id
+          : match.player_a_id,
+      )
+    : null;
   return (
     <>
-      <Heading
-        eyebrow="TU CENTRO DE COMPETICIÓN"
-        title={`A por la siguiente, ${me?.display_name}.`}
-      />
+      {/* The stadium: who you are, how your season goes and the team you bring. */}
+      <section className="home-stage" aria-labelledby="home-title">
+        <div className="stage-copy">
+          <TrainerPhoto name={me?.display_name || ""} />
+          <div>
+            <span className="eyebrow">TU CENTRO DE COMPETICIÓN</span>
+            <h1 id="home-title">A por la siguiente, {me?.display_name}.</h1>
+            {data && (
+              <p className="stage-season">
+                {data.season.name}
+                {day && ` · Jornada ${day.number}`}
+              </p>
+            )}
+          </div>
+        </div>
+        {data && (
+          <div className="home-stats stage-hud">
+            <StatPill label="Puntos" value={row?.total_points} />
+            <StatPill label="Monedas" value={row?.coin_balance} />
+            <StatPill label="Muertos" value={row?.dead_count} />
+            <Link className="text-link" to="/liga">
+              Clasificación →
+            </Link>
+          </div>
+        )}
+        <Notice error={league.error} />
+        {data && (
+          <div className="home-party stage-team">
+            <div className="stage-team-head">
+              <h2>
+                <ShieldCheck size={18} aria-hidden="true" /> Tu equipo
+              </h2>
+              <LockStatus
+                status={lock ? (lock.timing_status ?? "unknown") : "pending"}
+              />
+              <SaveGame game={pc.data?.save?.game} />
+            </div>
+            <div className="home-sprites" aria-label="Equipo de tu partida">
+              {party.map((p, i) => (
+                <span className="home-sprite-slot" key={i}>
+                  <PokemonSprite
+                    species={p.pokemon.species}
+                    form={p.pokemon.form}
+                    animated
+                  />
+                  {!!p.pokemon.form && <small>Forma {p.pokemon.form}</small>}
+                  <PokemonStatusFlags flags={p.pokemon.status_flags} />
+                </span>
+              ))}
+            </div>
+            <Notice error={pc.error} />
+            {!party.length && (
+              <p className="stage-empty">
+                {pc.isPending
+                  ? "Consultando tu partida…"
+                  : "Sincroniza tu partida para ver tu equipo."}
+              </p>
+            )}
+            <p className="caption">
+              {lock
+                ? "Tu equipo de batalla está fijado para esta jornada."
+                : "Equipo actual del juego · revisa el Team Lock antes de jugar."}
+            </p>
+            <div className="toolbar">
+              <Link className="text-link" to="/pc">
+                Abrir Mi PC →
+              </Link>
+              <Link className="text-link" to="/battle">
+                Team Preview →
+              </Link>
+            </div>
+          </div>
+        )}
+      </section>
       <ArenaMenu />
       <WithSeason>
         <Notice error={overview.error} />
@@ -114,100 +192,39 @@ export function HomePage() {
             <div className="home-product">
               <Card className="hero home-battle">
                 <span className="eyebrow">
-                  {data.season.name}
+                  {match ? "PRÓXIMA BATALLA" : "TU LIGA"}
                   {day && ` · JORNADA ${day.number}`}
                 </span>
-                <div className="hero-content">
-                  <Tag>{match ? "PRÓXIMA BATALLA" : "TU LIGA"}</Tag>
-                  <h2>
-                    {match
-                      ? playerName(
-                          data,
-                          match.player_a_id === player?.id
-                            ? match.player_b_id
-                            : match.player_a_id,
-                        )
-                      : "Cada jornada cuenta."}
-                  </h2>
-                  <p>
-                    {match
-                      ? "Prepara tu equipo para el próximo enfrentamiento."
-                      : "No tienes un enfrentamiento pendiente en la jornada actual."}
-                  </p>
-                  <Link
-                    className="button primary"
-                    to={match ? "/battle" : "/liga"}
-                  >
-                    {match ? "Preparar batalla" : "Ver la jornada"}
-                    <ArrowUpRight size={18} />
-                  </Link>
-                </div>
-                <Swords className="hero-art" aria-hidden="true" />
-              </Card>
-              <Card className="home-stats">
-                <div className="section-row">
-                  <TrainerPhoto name={me?.display_name || ""} />
-                  <div>
-                    <span className="eyebrow">TU TEMPORADA</span>
-                    <h2>{me?.display_name}</h2>
-                  </div>
-                </div>
-                <Notice error={league.error} />
-                <div className="mini-stats">
-                  <StatPill label="Puntos" value={row?.total_points} />
-                  <StatPill label="Monedas" value={row?.coin_balance} />
-                  <StatPill label="Muertos" value={row?.dead_count} />
-                </div>
-                <Link className="text-link" to="/liga">
-                  Ver clasificación →
-                </Link>
-              </Card>
-              <Card className="home-party">
-                <div className="section-row">
-                  <h2>Tu equipo</h2>
-                  <ShieldCheck size={22} />
-                </div>
-                <LockStatus
-                  status={lock ? (lock.timing_status ?? "unknown") : "pending"}
-                />
-                <p className="caption">Equipo actual del juego</p>
-                <SaveGame game={pc.data?.save?.game} />
-                <div className="home-sprites" aria-label="Equipo de tu partida">
-                  {party.map((p, i) => (
-                    <span className="home-sprite-slot" key={i}>
-                      <PokemonSprite
-                        species={p.pokemon.species}
-                        form={p.pokemon.form}
-                        animated
-                      />
-                      {!!p.pokemon.form && (
-                        <small>Forma {p.pokemon.form}</small>
-                      )}
-                      <PokemonStatusFlags flags={p.pokemon.status_flags} />
+                {rival ? (
+                  <div className="versus" aria-label={`Tú contra ${rival}`}>
+                    <span className="versus-side">
+                      <TrainerPhoto name={me?.display_name || ""} />
+                      <strong>{me?.display_name}</strong>
                     </span>
-                  ))}
-                </div>
-                <Notice error={pc.error} />
-                {!party.length && (
-                  <p>
-                    {pc.isPending
-                      ? "Consultando tu partida…"
-                      : "Sincroniza tu partida para ver tu equipo."}
-                  </p>
+                    <span className="versus-badge" aria-hidden="true">
+                      VS
+                    </span>
+                    <span className="versus-side rival">
+                      <TrainerPhoto name={rival} />
+                      <strong>{rival}</strong>
+                    </span>
+                  </div>
+                ) : (
+                  <h2>Cada jornada cuenta.</h2>
                 )}
-                <p className="muted">
-                  {lock
-                    ? "Tu equipo de batalla está fijado para esta jornada."
-                    : "Revisa el Team Lock antes de jugar."}
+                <p>
+                  {match
+                    ? "Prepara tu equipo para el próximo enfrentamiento."
+                    : "No tienes un enfrentamiento pendiente en la jornada actual."}
                 </p>
-                <div className="toolbar">
-                  <Link className="text-link" to="/pc">
-                    Abrir Mi PC →
-                  </Link>
-                  <Link className="text-link" to="/battle">
-                    Team Preview →
-                  </Link>
-                </div>
+                <Link
+                  className="button primary"
+                  to={match ? "/battle" : "/liga"}
+                >
+                  {match ? "Preparar batalla" : "Ver la jornada"}
+                  <ArrowUpRight size={18} />
+                </Link>
+                <Swords className="hero-art" aria-hidden="true" />
               </Card>
               <Card className="home-progress">
                 <h2>Tu aventura</h2>
