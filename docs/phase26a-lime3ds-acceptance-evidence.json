@@ -217,5 +217,25 @@
       "foreign OT remains unproven, ownership/consumption deliberately gated",
       "reserved current-save pointer cannot advance"
     ]
+  },
+  "in_game_check_1": {
+    "result": "FAILED_WRONG_INSTANCE",
+    "owner_sessions": [
+      "01:08",
+      "01:10"
+    ],
+    "used": "%APPDATA%\\Lime3DS (usual instance, original save 0/0)",
+    "original_sha256_unchanged": true,
+    "isolated_copy": {
+      "sha256_prefix": "c8744bfa",
+      "rare_candy": 10,
+      "heart_scale": 7,
+      "written_by_game": false
+    },
+    "fix": "isolated instance booted with RomAntoPrueba.cxi by the agent: isolated user/sdmc and nand in its log; desktop shortcut created"
+  },
+  "launcher_versions": {
+    "public": "0.20.0 used from public profile at 01:02; installer Downloads/PokeApp-Launcher-Setup (1).exe; no uninstall entry now",
+    "private": "0.23.0-rc.1 built at %LOCALAPPDATA%\\PokeApp-builds\\0.23.0-rc.1-private-20261026\\release; not installed; isolated preview .cmd on desktop"
   }
 }

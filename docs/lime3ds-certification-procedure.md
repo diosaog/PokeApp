@@ -32,6 +32,10 @@ the exact source path and the scope before step 3.
 8. **Recovery.** On another disposable copy: externally modified file before
    confirm (must refuse), interruption before/after write, restart with a
    pending journal, verified restore of the original backup.
-9. **Record** results per step with hashes and screenshots; keep backups. Two-
+9. **Never ask the owner to open a hidden path.** Create one desktop shortcut to
+   the isolated `lime3ds.exe` with the ROM as argument and the isolated folder as
+   working directory, and first boot it yourself to confirm from its log that it
+   uses the isolated `user\sdmc` (the usual Lime3DS log must stay unchanged).
+10. **Record** results per step with hashes and screenshots; keep backups. Two-
    save robbery cannot be certified with one personal save; revive needs a
    prepared Box 8 copy, never one of the three personal Pokémon.

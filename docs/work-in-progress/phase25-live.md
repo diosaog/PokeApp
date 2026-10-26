@@ -1,5 +1,11 @@
 # Phase25 — live execution record
 
+2026-10-26 (correction). **26A in-game check #1 FAILED: the usual Lime3DS opened
+the untouched original.** Isolated instance proven with the game; desktop shortcut
+«PRUEBA PokeApp - Pokemon Y (copia aislada)» created; owner retry pending. Launcher:
+public 0.20.0 in use; private 0.23.0-rc.1 only built (isolated preview .cmd on
+desktop). No product code change.
+
 2026-10-26 (continuation). **PHASE26A PARTIAL — owner in-game step pending.**
 Owner authorized copies of the Pokémon Y save. On isolated copies: real read,
 backup/restore, real lime3ds.exe blocking, Rare Candy 0→10 and Heart Scale 0→7
