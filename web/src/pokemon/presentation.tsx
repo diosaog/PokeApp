@@ -124,7 +124,21 @@ export function PokemonSprite({
       document.removeEventListener("visibilitychange", update);
     };
   }, [animated, id, reduced]);
-  const animate = moving && failedAnimation !== id;
+  // Keep the still image on screen until the animation has downloaded, so a
+  // Pokémon never blinks out while its GIF arrives.
+  const [loadedAnimation, setLoadedAnimation] = useState<number | null>(null);
+  useEffect(() => {
+    if (!moving || !id || failedAnimation === id || loadedAnimation === id)
+      return;
+    const preload = new Image();
+    preload.onload = () => setLoadedAnimation(id);
+    preload.onerror = () => setFailedAnimation(id);
+    preload.src = `/visuals/animated/v1/${id}.gif`;
+    return () => {
+      preload.onload = preload.onerror = null;
+    };
+  }, [moving, id, failedAnimation, loadedAnimation]);
+  const animate = moving && failedAnimation !== id && loadedAnimation === id;
   return id && failed !== species ? (
     <img
       ref={ref}
