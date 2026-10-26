@@ -154,7 +154,11 @@ test("all type move treatments retain readable contrast, sections remain distinc
     "Saves y Launcher",
     "Administración",
   ]) {
+    const shell = page.locator(".app-shell");
+    const before = await shell.getAttribute("class");
     await navigate(page, name);
+    // Router navigations render as transitions: read once the area changed.
+    await expect(shell).not.toHaveAttribute("class", before ?? "");
     accents.add(
       await page
         .locator(".app-shell")

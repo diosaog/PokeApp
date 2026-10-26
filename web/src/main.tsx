@@ -15,12 +15,20 @@ import "./design/arena.css";
 import "./design/evolution.css";
 installPreferences();
 installSound();
-ReactDOM.createRoot(document.getElementById("root")!).render(
-  <React.StrictMode>
-    <BrowserRouter>
-      <AppState>
-        <App />
-      </AppState>
-    </BrowserRouter>
-  </React.StrictMode>,
+// First paint waits (at most 1.2 s) for the Rubik Latin face, so text never
+// re-flows under the trainer once the font swaps in.
+const fontReady = Promise.race([
+  document.fonts?.load('700 1rem "Rubik Variable"') ?? Promise.resolve(),
+  new Promise((resolve) => setTimeout(resolve, 1200)),
+]).catch(() => undefined);
+void fontReady.then(() =>
+  ReactDOM.createRoot(document.getElementById("root")!).render(
+    <React.StrictMode>
+      <BrowserRouter>
+        <AppState>
+          <App />
+        </AppState>
+      </BrowserRouter>
+    </React.StrictMode>,
+  ),
 );
