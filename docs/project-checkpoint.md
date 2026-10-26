@@ -5,7 +5,12 @@ milestone record; it does not maintain a second live phase-status ledger.
 
 ## Current project position
 
-- Current packet: **Phase26A PARTIAL — real Pokémon Y copies certified outside the
+- Current packet: **Phase26B PARTIAL — team robbery implemented and validated
+  locally (local 060); server authority without victim cooperation and mandatory
+  sync pending; 26A closed with Pokémon Y inventory certified in Lime3DS;
+  production unchanged** ([26B report](phase26b-robbery-report.md)).
+
+- Earlier: **Phase26A PARTIAL — real Pokémon Y copies certified outside the
   game (read, backup/restore, Lime3DS blocking, Rare Candy/Heart Scale, recovery);
   owner in-game check pending; robbery rules recorded
   ([robbery-rules.md](robbery-rules.md)); production unchanged**.

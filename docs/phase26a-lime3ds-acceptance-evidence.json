@@ -1,7 +1,7 @@
 {
   "date": "2026-10-26",
   "entry": "1450062",
-  "status": "PHASE26A_PARTIAL_OWNER_IN_GAME_STEP",
+  "status": "PHASE26A_CLOSED_POKEMON_Y_INVENTORY_CERTIFIED",
   "phase25b_gate": "PASS",
   "lime3ds": {
     "executable": "C:\\Users\\Antonio\\Desktop\\Lime3DS\\Lime3DS\\lime3ds.exe",
@@ -237,5 +237,93 @@
   "launcher_versions": {
     "public": "0.20.0 used from public profile at 01:02; installer Downloads/PokeApp-Launcher-Setup (1).exe; no uninstall entry now",
     "private": "0.23.0-rc.1 built at %LOCALAPPDATA%\\PokeApp-builds\\0.23.0-rc.1-private-20261026\\release; not installed; isolated preview .cmd on desktop"
+  },
+  "in_game_check_2": {
+    "work": {
+      "sha256": "e9d13c65c9712f8ef6b30ceb27460dcdfc1bc86b1d70e4be1a78e31ddb830275",
+      "mtime": "10-26 01:23",
+      "rare_candy": 8,
+      "heart_scale": 7,
+      "party": [
+        [
+          "Bagon",
+          371,
+          12
+        ],
+        [
+          "Zygarde",
+          718,
+          5
+        ],
+        [
+          "Keldeo",
+          647,
+          6
+        ]
+      ]
+    },
+    "original": {
+      "sha256": "c0e666e75047d3571ae656387bd8bfecf9f23c6e613a3ffb10f20964a45fc2de",
+      "mtime": "10-25 12:30",
+      "rare_candy": 0,
+      "heart_scale": 0,
+      "party": [
+        [
+          "Bagon",
+          371,
+          10
+        ],
+        [
+          "Zygarde",
+          718,
+          5
+        ],
+        [
+          "Keldeo",
+          647,
+          6
+        ]
+      ]
+    },
+    "backup": {
+      "sha256": "c0e666e75047d3571ae656387bd8bfecf9f23c6e613a3ffb10f20964a45fc2de",
+      "mtime": "10-26 00:50",
+      "rare_candy": 0,
+      "heart_scale": 0,
+      "party": [
+        [
+          "Bagon",
+          371,
+          10
+        ],
+        [
+          "Zygarde",
+          718,
+          5
+        ],
+        [
+          "Keldeo",
+          647,
+          6
+        ]
+      ]
+    },
+    "journal": [
+      {
+        "op": "4d1f54e0",
+        "status": "APPLIED_VERIFIED",
+        "item": "rare_candy",
+        "backup_is_original": true,
+        "current_matches_receipt": false
+      },
+      {
+        "op": "1d6e1893",
+        "status": "APPLIED_VERIFIED",
+        "item": "heart_scale",
+        "backup_is_original": false,
+        "current_matches_receipt": false
+      }
+    ],
+    "interpretation": "owner PASS; file shows Rare Candy 8 and Bagon Lv12 with identical identity: 2 candies used in game"
   }
 }

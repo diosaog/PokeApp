@@ -22,9 +22,12 @@ everything else is an approved contract awaiting its own packet.
 
 ## Owner decisions
 
-**A. Team Pokémon can be stolen.** Status: **PENDING implementation.** Today
-only boxes 1–7 are qualified; a team target is refused with a clear message
-(`TRANSFER_NATIVE_SCOPE_UNQUALIFIED`). Not to be presented as available.
+**A. Team Pokémon can be stolen.** Status: **implemented and validated
+locally (Phase26B).** Origin: party slots 1–6 or boxes 1–7; destination: first
+free box slot. PKHeX compaction (later members move up, count − 1), the last
+team member is never taken (`LAST_PARTY_MEMBER`), and only own-OT origins with a
+unique identity qualify (clones and foreign OT are refused). Additive local
+`060_transfer_party_origin.sql` widens the reservation scope only.
 
 **B. Cross-title robbery is prohibited — definitive product rule.** Status:
 **enforced** — the native planner refuses different titles (8 cross-title

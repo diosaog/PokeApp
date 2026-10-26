@@ -1,5 +1,11 @@
 # Phase25 — live execution record
 
+2026-10-26 (26B). **26A CLOSED: Pokémon Y inventory certified in isolated Lime3DS.
+26B PARTIAL:** team robbery done locally (native 500/500, PG E2E 12/12, local 060);
+server-authoritative completion without the victim and mandatory sync NOT done —
+exact unit in [robbery-rules.md](../robbery-rules.md). 26C not started (gate FAIL).
+[26B report](../phase26b-robbery-report.md).
+
 2026-10-26 (correction). **26A in-game check #1 FAILED: the usual Lime3DS opened
 the untouched original.** Isolated instance proven with the game; desktop shortcut
 «PRUEBA PokeApp - Pokemon Y (copia aislada)» created; owner retry pending. Launcher:
