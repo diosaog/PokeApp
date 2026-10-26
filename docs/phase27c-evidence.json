@@ -1,0 +1,512 @@
+{
+  "observed": "2026-10-26",
+  "status": "PHASE27C DONE LOCAL",
+  "entry": {
+    "head": "c3835b6eaf9f91250be1b7ec003e4a7b51c2081b",
+    "ahead": 4,
+    "behind": 0,
+    "unrelated_untracked": 8,
+    "pending_web_paths": "Three paths had no normalized Git content difference; index explicitly refreshed without content edits"
+  },
+  "validation_commit": "228569d06857c7a999d915b0f7ea225cc49f6efe",
+  "application_source": "c3835b6eaf9f91250be1b7ec003e4a7b51c2081b",
+  "railway": {
+    "source": "501a39944096e858ff2214e3fb778adc79108f21",
+    "deployment": "22d96f80-9d99-498f-b3f6-d90b3ec39da9",
+    "image": "sha256:1ac8a52800959b9ec0faee7d1f02df2737a0cb8e840abcd011883a738aae087c",
+    "status": "initial CLI SLEEPING, instance RUNNING; fresh health200",
+    "redeployed": false
+  },
+  "cloudflare": {
+    "version": "4a8fffed-a912-47d8-aa7e-dfaea7b7bce3",
+    "traffic_percent": 100,
+    "source": "98de687",
+    "redeployed": false
+  },
+  "public_readonly": {
+    "checks": [
+      {
+        "pass": true,
+        "label": "health",
+        "detail": 200
+      },
+      {
+        "pass": true,
+        "label": "OpenAPI unlimited +88",
+        "detail": 88
+      },
+      {
+        "pass": true,
+        "label": "web",
+        "detail": 200
+      },
+      {
+        "pass": true,
+        "label": "asset exact /assets/index-BP67ikuJ.js",
+        "detail": "9874c9f3cfcb03ebeaa56023628e4c6fdb7b2b964ee428bb95a44b9452a1bf75"
+      },
+      {
+        "pass": true,
+        "label": "configured API",
+        "detail": null
+      },
+      {
+        "pass": true,
+        "label": "desktop routes in bundle",
+        "detail": null
+      },
+      {
+        "pass": true,
+        "label": "asset exact /assets/index-DrxUKZTv.css",
+        "detail": "3b6bfc0ae68e6f30eae340e1b01b2e6b9f5ba4545e439569f4fa7ab58bd77780"
+      },
+      {
+        "pass": true,
+        "label": "unauthenticated /v1/me",
+        "detail": 401
+      },
+      {
+        "pass": true,
+        "label": "unauthenticated /v1/read/seasons",
+        "detail": 401
+      },
+      {
+        "pass": true,
+        "label": "CORS https://pokeapp-web.pokeapp-v2.workers.dev",
+        "detail": 200
+      },
+      {
+        "pass": true,
+        "label": "CORS https://foreign.invalid",
+        "detail": 400
+      },
+      {
+        "pass": true,
+        "label": "stable installer HEAD",
+        "detail": {
+          "bytes": "159087398",
+          "disposition": "attachment; filename=\"PokeApp-Launcher-Setup.exe\"",
+          "etag": "\"284a61a5697fff391a3ffe35896465ab\""
+        }
+      }
+    ],
+    "status": "PASS",
+    "harness_correction": "Initial probe used nonexistent /v1/seasons (404); corrected to actual /v1/read/seasons (401). No product change."
+  },
+  "public_authenticated_inventory": "PARTIAL: contract and deployed assets validated; authenticated UI uses synthetic API, no real account exercised",
+  "migrations_disposable": {
+    "deployed": [
+      "001_core.sql",
+      "002_seasons.sql",
+      "003_league.sql",
+      "004_shop.sql",
+      "005_saves.sql",
+      "006_activity_hall.sql",
+      "007_competitions.sql",
+      "008_indexes.sql",
+      "009_seed.sql",
+      "010_security_helpers.sql",
+      "011_rls_policies.sql",
+      "012_security_views.sql",
+      "013_storage_policies.sql",
+      "014_security_invoker_hardening.sql",
+      "015_public_trainers_visibility.sql",
+      "016_public_team_locks_visibility.sql",
+      "017_public_coin_balances_visibility.sql",
+      "018_public_views_visibility.sql",
+      "019_team_lock_api.sql",
+      "020_current_matchday_store_ban_contract.sql",
+      "021_normal_purchase_api.sql",
+      "022_promotional_purchase_api.sql",
+      "023_pokemon_identity.sql",
+      "024_redemption_effect_boundary.sql",
+      "025_robbery_voucher_and_redemption.sql",
+      "026_season_admin_setup_api.sql",
+      "027_competitive_matchdays.sql",
+      "028_participant_status_admin.sql",
+      "029_season_finalization_archive_hall.sql",
+      "030_trials_sanctions_api.sql",
+      "031_cup_engine_certification.sql",
+      "032_cup_player_identity_index.sql",
+      "033_league_general_read.sql",
+      "034_participant_matchday_results.sql",
+      "035_daily_sporting_ranking.sql",
+      "036_observed_initial_divisions.sql",
+      "037_league_championship.sql",
+      "038_participant_wipe_revivals.sql",
+      "039_shop_economy_alignment.sql",
+      "040_observed_progress_read.sql",
+      "041_final_product_alignment.sql",
+      "042_v1_shadow_relational_destination.sql",
+      "043_launcher_private_observations.sql",
+      "044_trusted_save_registration.sql",
+      "045_oras_save_registration.sql",
+      "046_sun_moon_save_registration.sql",
+      "047_ultra_sun_moon_save_registration.sql",
+      "048_trusted_gen67_identity.sql",
+      "049_native_progress_read.sql",
+      "050_account_registration.sql",
+      "051_account_profiles.sql",
+      "052_account_administration.sql",
+      "053_versioned_account_credentials.sql"
+    ],
+    "pending": [
+      "054_item_use_authorizations.sql",
+      "055_native_identity_evidence_scope.sql",
+      "056_item_use_verifier_transport.sql",
+      "057_two_save_transfer_reservations.sql",
+      "058_transfer_provenance_finalization.sql",
+      "059_transfer_integration_reads.sql",
+      "060_transfer_party_origin.sql",
+      "061_transfer_authoritative_adjudication.sql"
+    ],
+    "sha256": {
+      "054_item_use_authorizations.sql": "f6e4c775bee8f79f4f8c487b266eef318d611c3f5810eeb7c14249c7aa1f11c9",
+      "055_native_identity_evidence_scope.sql": "f1fae278caa2832619713d74b6da03055ede5870ca7b902c85d34427b9e3fc83",
+      "056_item_use_verifier_transport.sql": "7b5d9619562e09828dee3313fe514eb99a8ffb71eab3457a4d4b2514fe965e38",
+      "057_two_save_transfer_reservations.sql": "ae1061aeae62ce8250877d2dd036e21fa22a4fb461d2892379536658eaa92066",
+      "058_transfer_provenance_finalization.sql": "82ae34ee566e02d18c4a0d498a6e51a63dae438e48dbd31c834626a90f576037",
+      "059_transfer_integration_reads.sql": "7ad33a22672e226ad03436c9c577512d705d472eb82f67e4b75bc09bffdcaa05",
+      "060_transfer_party_origin.sql": "624a59d67e77720bfb862e8efda19f6cbabc530e2169485268206b06160441c4",
+      "061_transfer_authoritative_adjudication.sql": "332ff8a2e54e102d744405fcf3b76ff2c5097596eb2dd484e4ebd9fe7bef4482"
+    },
+    "checks": [
+      "pending set is exactly 054-061, in order",
+      "production state rebuilt: 53 files up to 053",
+      "representative data: trainers, season, coins and paid purchases",
+      "applied 054_item_use_authorizations.sql",
+      "immediate retry 054_item_use_authorizations.sql: refused_atomically",
+      "applied 055_native_identity_evidence_scope.sql",
+      "immediate retry 055_native_identity_evidence_scope.sql: idempotent_at_own_version",
+      "applied 056_item_use_verifier_transport.sql",
+      "immediate retry 056_item_use_verifier_transport.sql: refused_atomically",
+      "applied 057_two_save_transfer_reservations.sql",
+      "immediate retry 057_two_save_transfer_reservations.sql: refused_atomically",
+      "applied 058_transfer_provenance_finalization.sql",
+      "immediate retry 058_transfer_provenance_finalization.sql: refused_atomically",
+      "applied 059_transfer_integration_reads.sql",
+      "immediate retry 059_transfer_integration_reads.sql: refused_atomically",
+      "applied 060_transfer_party_origin.sql",
+      "immediate retry 060_transfer_party_origin.sql: idempotent_at_own_version",
+      "applied 061_transfer_authoritative_adjudication.sql",
+      "immediate retry 061_transfer_authoritative_adjudication.sql: refused_atomically",
+      "64 existing tables keep byte-identical rows",
+      "no existing column removed or retyped",
+      "no table grant revoked from anon/authenticated/service_role",
+      "all seven new tables force RLS",
+      "7 new tables closed to anon/authenticated",
+      "historical055 changes exactly the058-superseded identity function",
+      "historical replay diagnostic leaves rows intact",
+      "historical replay rollback restores exact latest function definitions",
+      "001-053 + 054-061 schema equals a fresh 61-file bootstrap"
+    ],
+    "immediate_retry": {
+      "054_item_use_authorizations.sql": {
+        "result": "refused_atomically",
+        "no_effect": true
+      },
+      "055_native_identity_evidence_scope.sql": {
+        "result": "idempotent_at_own_version",
+        "no_effect": true
+      },
+      "056_item_use_verifier_transport.sql": {
+        "result": "refused_atomically",
+        "no_effect": true
+      },
+      "057_two_save_transfer_reservations.sql": {
+        "result": "refused_atomically",
+        "no_effect": true
+      },
+      "058_transfer_provenance_finalization.sql": {
+        "result": "refused_atomically",
+        "no_effect": true
+      },
+      "059_transfer_integration_reads.sql": {
+        "result": "refused_atomically",
+        "no_effect": true
+      },
+      "060_transfer_party_origin.sql": {
+        "result": "idempotent_at_own_version",
+        "no_effect": true
+      },
+      "061_transfer_authoritative_adjudication.sql": {
+        "result": "refused_atomically",
+        "no_effect": true
+      }
+    },
+    "functions_replaced_or_retired": [],
+    "execute_revoked": [],
+    "new_tables": [
+      "public.item_use_artifacts",
+      "public.item_use_authorizations",
+      "public.item_use_transfer_legs",
+      "public.item_use_transfers",
+      "public.item_use_verifications",
+      "public.transfer_commit_permits",
+      "public.transfer_provenance"
+    ],
+    "historical_replay_055_after_061": {
+      "classification": "UNSAFE_HISTORICAL_REPLAY_NOT_AN_UPGRADE_DEFECT",
+      "changed_objects": [
+        "commit_pokemon_identity_v038(jsonb)"
+      ],
+      "superseding_migration": "058_transfer_provenance_finalization.sql",
+      "function_diff": {
+        "commit_pokemon_identity_v038(jsonb)": [
+          "--- 061\n",
+          "+++ replayed055\n",
+          "@@ -172,8 +172,7 @@\n",
+          "         where o.season_id=season and o.trainer_id=trainer and o.outcome='AMBIGUOUS'",
+          "           and o.revision_id<>revision.id and (o.evidence->'pid'=v_evidence->'pid'",
+          "             or o.evidence->'encryption_constant'=v_evidence->'encryption_constant')) into poisoned;",
+          "-      poisoned := poisoned or public.transfer_foreign_collision(season,trainer,v_evidence);",
+          "-      eligible := coalesce((trainer_match or (cardinality(candidate_ids)=1 and public.transfer_identity_proven(candidate_ids[1],trainer,v_evidence))) and v_evidence->'is_egg'='false'::jsonb",
+          "+      eligible := coalesce(trainer_match and v_evidence->'is_egg'='false'::jsonb",
+          "         and v_evidence->'egg_location'='0'::jsonb and v_evidence->'egg_date'='null'::jsonb",
+          "         and jsonb_typeof(v_evidence->'met_location')='number'",
+          "         and (v_evidence->>'met_location')::integer between 1 and 65535",
+          "@@ -187,8 +186,7 @@\n",
+          "         elsif cardinality(candidate_ids)=1 then",
+          "           select * into entity from public.pokemon_entities where id=candidate_ids[1] for update;",
+          "           if entity.identity_status='unambiguous' and entity.identity_schema_version=2",
+          "-            and ((entity.initial_evidence=v_evidence and entity.candidate_key=item->>'candidate_key')",
+          "-              or public.transfer_identity_proven(entity.id,trainer,v_evidence)) then",
+          "+            and entity.initial_evidence=v_evidence and entity.candidate_key=item->>'candidate_key' then",
+          "             expected_outcome := 'MATCHED';",
+          "           end if;",
+          "         end if;"
+        ]
+      },
+      "rolled_back": true
+    },
+    "schema_sha256": "6b34e86947dfaa5abbc79f4b008ab739bfd4eb18821daa780fdcdfa00a6fe08f",
+    "status": "PASS",
+    "cleanup": "both owned databases dropped and clusters stopped"
+  },
+  "packaged_acceptance": {
+    "version": "0.24.0-rc.2",
+    "status": "PASS",
+    "checks": [
+      {
+        "pass": true,
+        "label": "packaged app starts with isolated profile"
+      },
+      {
+        "pass": true,
+        "label": "official origin loaded; packaged override ignored"
+      },
+      {
+        "pass": true,
+        "label": "web has no Node/preload/IPC bridge and identifies rc.2"
+      },
+      {
+        "pass": true,
+        "label": "web is initial main surface"
+      },
+      {
+        "pass": true,
+        "label": "signed-out route redirect does not leave stale native panel"
+      },
+      {
+        "pass": true,
+        "label": "deployed React navigation works with synthetic session"
+      },
+      {
+        "pass": true,
+        "label": "Mi partida opens correct native panel"
+      },
+      {
+        "pass": true,
+        "label": "Objetos ∞ opens correct native panel"
+      },
+      {
+        "pass": true,
+        "label": "Robos y entregas opens correct native panel"
+      },
+      {
+        "pass": true,
+        "label": "Copias de seguridad opens correct native panel"
+      },
+      {
+        "pass": true,
+        "label": "Conexión opens correct native panel"
+      },
+      {
+        "pass": true,
+        "label": "web synthetic login does not authenticate native connection or select a save"
+      },
+      {
+        "pass": true,
+        "label": "production physical operations disabled"
+      },
+      {
+        "pass": true,
+        "label": "return to PokeApp closes panel"
+      },
+      {
+        "pass": true,
+        "label": "infinite inventory links select only approved item panels"
+      },
+      {
+        "pass": true,
+        "label": "inventory/session preserved on return"
+      },
+      {
+        "pass": true,
+        "label": "30 rapid transitions: latest close wins"
+      },
+      {
+        "pass": true,
+        "label": "non-allowlisted native route ignored"
+      },
+      {
+        "pass": true,
+        "label": "web logout closes open native panel"
+      },
+      {
+        "pass": true,
+        "label": "foreign navigation blocked"
+      },
+      {
+        "pass": true,
+        "label": "offline load falls back to local tools"
+      },
+      {
+        "pass": true,
+        "label": "packaged core remains available offline"
+      },
+      {
+        "pass": true,
+        "label": "online recovery returns to web without native credentials"
+      },
+      {
+        "pass": true,
+        "label": "no web/tools JavaScript errors"
+      }
+    ],
+    "boundaries": "Packaged real core/UI and official assets; synthetic authenticated browser API, no real accounts."
+  },
+  "packaged_integrity": {
+    "files_match_source": {
+      "main.cjs": "781a2bcb1ab4fb930911d55fa27f99e7f852f90443b5c774f2ddcc457085bb1f",
+      "webview.cjs": "241a7aa2c4031ba13301235d4a19ee3d16b2d64afbe80fec8947491acb2d66d0",
+      "preload.cjs": "7777ae16d6eff405a9f238268ad029c91f095840ed27d1937cef7ae794e82bc5",
+      "renderer.js": "9b1f8656a7dc0bdddb5d3017e09a2ddb7c8fc92f29ab8b50bf4c65751c7a14b0",
+      "updater.cjs": "b019414fa7917546f81edbb87a5f5aa93e300be38b738c66602e1326baa81b22",
+      "index.html": "61a3069e6cecca7aacc6ceafe241b166244f747473756287446ae6f123f2b538",
+      "style.css": "b3fb057c4f098a04b29b1b26bb1e0dd3ea76cd6c30ef065b81140d2730a4dd2a",
+      "quantity.js": "702a316b37fb4b92adbadbf2c03e99c98a944dd162d69f8aa7ebed3280426c77"
+    },
+    "installer": {
+      "sha256": "27760cc8cedb8609c2cd8a482a35dd88d5230cf2ded6ce2aed67856b30891df3",
+      "sha512": "+bPsBDwKGeAkYcLShGbKZh3kcfexaWRCfyA82opomFz29NlB3VUUFbpQbY8z2AAuJnF369HWCIW/s10IE2pDHA==",
+      "size": 159254332
+    },
+    "authenticode": "NotSigned",
+    "updater_configured": false,
+    "private_candidate": true
+  },
+  "worker_startup": {
+    "checks": [
+      "CLI disabled without credentials",
+      "transfer flag alone cannot enable runner",
+      "missing configuration fails closed and redacted",
+      "insecure DSN refused before connection, no secret echo",
+      "real restricted connection: item and transfer runner idle/replay, no artifact access",
+      "restricted security-definer RPC allowlist is exactly two functions",
+      "direct table reads/DML and internal projection denied",
+      "privileged database identity refused by runner adapter"
+    ],
+    "status": "PASS",
+    "cleanup": "Owned database dropped; cluster stopped"
+  },
+  "worker_container": {
+    "status": "PENDING",
+    "reason": "No Docker CLI/engine available",
+    "local_build_guard": "PASS immutable reference and required061 methods; mutable tag refused",
+    "context_fix": "Dockerfile-specific allowlist supplies worker requirements and entry point",
+    "public_501a399_base_compatible": false,
+    "hosted_storage_identity": "PENDING dedicated least-privilege proof; generic service-role key is not storage-only"
+  },
+  "release_preparation": {
+    "status": "PASS",
+    "production_key_created": false,
+    "test_only": true,
+    "checks": [
+      "existing signer/verifier binds exact rc.2 installer size and SHA512",
+      "same version is no-op",
+      "downgrade refused",
+      "private cannot cross to stable",
+      "manifest tampering refused",
+      "unsigned installer cannot produce stable manifest"
+    ],
+    "installer": {
+      "url": "https://updates.invalid/private/PokeApp-Launcher-Private-Setup.exe",
+      "sha512": "+bPsBDwKGeAkYcLShGbKZh3kcfexaWRCfyA82opomFz29NlB3VUUFbpQbY8z2AAuJnF369HWCIW/s10IE2pDHA==",
+      "size": 159254332
+    },
+    "private_test_key_destroyed": true
+  },
+  "retained_not_rerun": {
+    "launcher_node": 17,
+    "classic_electron": 28,
+    "unified_dev": 18,
+    "offline": 2,
+    "vitest": 161,
+    "affected_browser": 33,
+    "phase27a_integration": 16,
+    "phase27a_unit_storage": 8,
+    "installed_updater_win11": "7/7, earlier versions only",
+    "full_python": "Prior1162 run: three inherited failures (account capability default, admin route count, timing0.2s); not claimed PASS"
+  },
+  "fresh_checks": {
+    "migration": 28,
+    "packaged": 24,
+    "public": 12,
+    "worker_startup": 8,
+    "current_installer_manifest": 6
+  },
+  "quality": {
+    "ruff": "PASS targeted",
+    "format": "PASS targeted",
+    "python_compile": "PASS targeted",
+    "javascript_syntax": "PASS",
+    "git_diff_check": "PASS"
+  },
+  "pending": [
+    "Docker image/Linux container",
+    "Hosted verifier and private Storage IAM/TLS",
+    "Windows10",
+    "Authenticode",
+    "Actual trusted release key and HTTPS feeds",
+    "Fresh rc2 installer/upgrade",
+    "Real two-player Lime3DS",
+    "Actual revive certification",
+    "Hardware power loss",
+    "PKHeX Gen7 limitation",
+    "Additional foreign-OT support"
+  ],
+  "safety": {
+    "production054_061": "NOT APPLIED per retained checkpoint; no fresh remote migration query",
+    "production_physical_writes": "DISABLED",
+    "public_launcher": "0.20.0 PRESERVED",
+    "owner_data_saves_economy": "No access/mutation",
+    "V1_Shadow_R2": "No mutation/access",
+    "production_secret_or_config_change": false,
+    "phase28_started": false
+  },
+  "cleanup": {
+    "pg": "Disposable databases dropped; clusters stopped",
+    "listeners": "9337,55491,55492,55493 absent",
+    "test_profile_logs": "Retained privately",
+    "ephemeral_test_signing_private_key": "Destroyed"
+  },
+  "evidence_root": "%LOCALAPPDATA%/PokeApp-migration-evidence/phase27c/",
+  "validation_inputs_sha256": {
+    "tools/validate_migrations_upgrade.py": "f72c74d6d81814a5e4f57bcf6ff36594d182a769b055a74b652ddee82f1c3111",
+    "tools/validate_phase27c_packaged.mjs": "a3f1d0557d8af2afd284e2b89f690a3ab4174f7d65ae508320929eee40e51ebf",
+    "tools/validate_phase27c_worker.py": "bb27549215febea2ca19431749cdbee6b3f2ba239a682243c988cec800770088",
+    "deploy/Dockerfile.item-verifier": "df03f4168838b73bdf00e9d70e464aa57f17ecb279243a42728ff9d9d85049af",
+    "deploy/Dockerfile.item-verifier.dockerignore": "2f8e766c8fee464ce4ee23988d4e5183f976fe02bc7ef5206bf656e828bfdeaf"
+  }
+}

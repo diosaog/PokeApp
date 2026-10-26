@@ -1,5 +1,45 @@
 # Phase25 — live execution record
 
+2026-10-26 (27C). **27C DONE LOCAL — resumed validation and closure.**
+Entry c3835b6, main ahead4/behind0; existing edits preserved. Application source
+remains c3835b6; validation/build-preparation commit228569d. The documentation
+commit carrying this entry supplies final HEAD (read Git). Normal push includes
+the four interrupted commits; eight unrelated untracked files and release
+worktree retained. No Phase28 started.
+
+**Production already updated by prior session, freshly verified without deploy:**
+Railway501a399 / deployment22d96f80-9d99-498f-b3f6-d90b3ec39da9, health200,
+88 routes plus optional unlimited inventory. Cloudflare4a8fffed-a912-47d8-aa7e-dfaea7b7bce3
+at100%, source98de687, assets equal retained build;12 read-only checks PASS.
+Public authenticated inventory acceptance remains PARTIAL (no owner PIN/use).
+Public Launcher0.20.0 preserved. No remote SQL;054–061 NOT APPLIED per retained
+checkpoint, not a fresh remote migration-history assertion.
+
+**Fresh local proof:** SQL28 checks PASS,64 prior tables unchanged,7 private new
+tables, upgrade053→061/bootstrap schema+grants+ownership parity. Historical055
+replay rolls back058's identity function: validator corrected, no migration edited.
+Private rc.2 packaged24 checks PASS incl. all5 panels/race/logout/offline/session
+separation/IPC. Eight packaged files match c3835b6. Worker startup/restricted PG8
+PASS; manifest/integrity6 PASS with destroyed ephemeral test key, no release feed.
+Targeted lint/format/compile/diff PASS. Disposable PG dropped/stopped; new test
+listeners gone. Retain earlier Node17/Electron28/dev18/offline2/React161/browser33
+and27A16+8 evidence, no historical matrices repeated.
+
+**Release boundary:** rc.2 installer159254332 bytes,
+SHA25627760cc8cedb8609c2cd8a482a35dd88d5230cf2ded6ce2aed67856b30891df3,
+unsigned/private/updaterOFF; no install over owner and no rebuild/publication.
+Worker Docker context repaired; digest/capability/default-off guards prepared.
+Docker absent, image PENDING. Public501a399 is not a061-capable worker base.
+Hosted verifier/least-privilege Storage, actual release key/feed, fresh rc.2 install,
+Win10, Authenticode, two-real-player test, revive/power-loss and Gen7/foreign-OT
+gates stay PENDING. Public physical writes DISABLED. No saves/economy/V1/Shadow writes.
+
+**NEXT EXACT ACTION:** return to owner with [27C report](../phase27c-report.md)
+and [evidence](../phase27c-evidence.json); await a specifically authorized next
+packet. Do not auto-deploy migrations/worker or publish stable Launcher.
+Private evidence: `%LOCALAPPDATA%/PokeApp-migration-evidence/phase27c/`.
+The earlier entries below are historical, superseded where27C records a result.
+
 2026-10-26 (27B). **27B DONE LOCAL — visual redesign** (owner reassigned the 27B
 slot from hosted acceptance to the redesign). Resumed after the first instance
 hit its quota with everything uncommitted; its work was audited and kept.

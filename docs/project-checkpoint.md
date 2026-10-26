@@ -5,7 +5,15 @@ milestone record; it does not maintain a second live phase-status ledger.
 
 ## Current project position
 
-- Current packet: **Phase27B DONE LOCAL — PokeApp Arena visual redesign of the
+- Current packet: **Phase27C DONE LOCAL — unified private Launcher0.24.0-rc.2
+  packaged acceptance, migration053→061/bootstrap parity and restricted worker
+  startup verified. Already-deployed API501a399 and Cloudflare4a8fffed verified
+  without redeploy. Public Launcher0.20.0 preserved; physical writes OFF;
+  production054–061, hosted verifier, Docker image and external release gates
+  remain pending** ([27C report](phase27c-report.md),
+  [operational handoff](work-in-progress/phase25-live.md)). No Phase28 started.
+
+- Earlier: **Phase27B DONE LOCAL — PokeApp Arena visual redesign of the
   web (15/15 routes + login/registration, desktop and phone) and the Launcher on
   one design system; private design preview (127.0.0.1, synthetic data,
   production CSP) and private `0.24.0-preview.2` Launcher candidate audited;

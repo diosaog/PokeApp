@@ -47,6 +47,28 @@ image digest** (`--build-arg API_IMAGE=…@sha256:…`); adds only `psycopg` and
 runner. Runner: `tools/run_item_use_verifier.py`, one job per invocation, no
 listener, logs only outcome codes.
 
+27C build preparation: the base must contain the full061-capable main source;
+the current minimal public API release501a399 does **not** contain those modules
+and cannot be used. Build/qualify a separate private API/parser image first,
+record its exact source and registry digest, without deploying that image.
+`deploy/Dockerfile.item-verifier.dockerignore` allows only the worker COPY inputs
+and overrides the public API's root ignore file. Docker itself remains untested
+on the current host (CLI/engine unavailable).
+
+On an authorized Docker-capable host, with a recorded private base digest:
+
+```text
+docker build --file deploy/Dockerfile.item-verifier --build-arg API_IMAGE=<private-base>@sha256:<digest> --tag pokeapp-item-verifier:27c .
+docker run --rm --network none pokeapp-item-verifier:27c
+```
+
+Expect exactly `DISABLED` and exit0, no listener. Build gates reject mutable
+image tags, missing adjudication/rebase/settlement methods and an enabled/broken
+default runner. Record the output image digest before any acceptance. An actual
+Linux build, non-root inspection and verified-TLS hosted startup are still
+required; local Python import and restricted PG proof do not substitute for them.
+No secrets belong in build arguments, image layers or those commands.
+
 | Variable | Purpose |
 | --- | --- |
 | `POKEAPP_ITEM_VERIFIER_ENABLED=true` | master switch (default `false`: prints `DISABLED`) |
@@ -60,6 +82,13 @@ Secrets live only in the worker service's secret store; never in the API
 environment, the repository, a command line or logs. The database role is the
 existing `pokeapp_item_verifier` grant on a login role without table DML (the
 adapter refuses to start otherwise).
+
+The table's storage-only privilege is a **release requirement**, not an already
+provisioned identity. A generic Supabase service-role/secret key bypassing RLS is
+not bucket-scoped. Before hosted approval, demonstrate that the selected dedicated
+identity cannot access other buckets/tables or overwrite existing objects; if
+that cannot be established, keep hosted activation blocked. Local immutable-key
+and lost-response tests establish application behavior, not provider IAM scope.
 
 ## Restricted deployment procedure (future hosted acceptance)
 
