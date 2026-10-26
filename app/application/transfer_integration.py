@@ -72,6 +72,12 @@ class TransferIntegration:
 
     def leg(self, sid, tid, aid, operation, *, claim_id=None, backup_sha256=None):
         self._require(tid)
+        if (
+            operation == "cancel"
+            and self.leg(sid, tid, aid, "get")["side"] != "destination"
+        ):
+            # Owner rule: a valid robbery needs no consent; the victim cannot veto.
+            raise TransferRejectedError("TRANSFER_VICTIM_CANNOT_CANCEL", 409)
         request = {
             "operation": operation,
             "authorization_id": aid,
@@ -89,10 +95,8 @@ class TransferIntegration:
         return self._leg(self.transport.submit(aid, sid, tid, claim_id, data), aid)
 
     def withdraw(self, sid, tid, aid):
-        """Web cancellation is the requester's choice only; the SQL still refuses
+        """Cancellation is the requester's choice only; the SQL still refuses
         once any side started applying."""
-        if self.leg(sid, tid, aid, "get")["side"] != "destination":
-            raise TransferRejectedError("TRANSFER_NOT_OWNED", 403)
         return self.leg(sid, tid, aid, "cancel")
 
     @staticmethod

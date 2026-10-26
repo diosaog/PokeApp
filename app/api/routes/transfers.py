@@ -47,6 +47,7 @@ MESSAGES = {
     "TRANSFER_ASSISTED_RECOVERY_REQUIRED": "Ya se ha aplicado una parte: no se puede cancelar. El Launcher completará o recuperará la operación.",
     "TRANSFER_TERMINAL": "La operación ya ha terminado.",
     "TRANSFER_NOT_OWNED": "Esta operación no te pertenece.",
+    "TRANSFER_VICTIM_CANNOT_CANCEL": "Un robo válido no necesita tu aprobación: no se puede rechazar ni cancelar.",
     "TRANSFER_NOT_FOUND": "No se encuentra la operación.",
 }
 

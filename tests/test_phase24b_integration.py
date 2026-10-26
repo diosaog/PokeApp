@@ -167,7 +167,20 @@ class TransferApiTests(unittest.TestCase):
         self.assertEqual(got.status_code, 404)
         self.repo.leg = lambda request: leg(side="source")
         cancel = self.call("POST", f"/v1/seasons/{SID}/transfers/{AID}/cancel", VICTIM)
-        self.assertEqual(cancel.status_code, 403)
+        self.assertEqual(
+            cancel.json()["detail"]["code"], "TRANSFER_VICTIM_CANNOT_CANCEL"
+        )
+        # Same rule through the Launcher leg route: the victim cannot veto.
+        launcher = self.call(
+            "PUT",
+            f"/v1/launcher/seasons/{SID}/transfers/{AID}",
+            VICTIM,
+            json={"operation": "cancel"},
+        )
+        self.assertEqual(launcher.status_code, 409)
+        self.assertEqual(
+            launcher.json()["detail"]["code"], "TRANSFER_VICTIM_CANNOT_CANCEL"
+        )
 
 
 class LauncherRemoteTests(unittest.TestCase):

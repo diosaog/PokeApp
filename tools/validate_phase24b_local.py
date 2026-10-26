@@ -277,11 +277,19 @@ def integration(env):
             ).status_code
             == 409
         )
+        # Owner rule: a valid robbery needs no consent; the victim cannot veto
+        # through the web or the Launcher leg route.
         assert (
             api.post(
                 f"/v1/seasons/{sid}/transfers/{aid}/cancel", headers=auth(victim)
             ).status_code
-            == 403
+            == 409
+        )
+        assert (
+            api.put(
+                leg_path, json={"operation": "cancel"}, headers=auth(victim)
+            ).status_code
+            == 409
         )
         # Restarted donor Launcher after a lost reply: reconcile, never reapply.
         donor, _ = runtime(victim, "source", restart=True)
