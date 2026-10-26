@@ -65,6 +65,13 @@ class TransferAssignmentWire(_Wire):
         """Own-side box/slot for display only; never the Pokemon bytes."""
         mutation = (self.intent or {}).get("mutation") or {}
         box, slot = mutation.get("box_index"), mutation.get("slot_index")
+        if (
+            mutation.get("location") == "party"
+            and box == -1
+            and type(slot) is int
+            and 0 <= slot < 6
+        ):
+            return {"party": True, "slot": slot + 1}
         if type(box) is int and type(slot) is int and 0 <= box < 7 and 0 <= slot < 30:
             return {"box": box + 1, "slot": slot + 1}
         return None

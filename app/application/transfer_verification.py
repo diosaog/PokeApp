@@ -103,8 +103,12 @@ class TransferVerification:
             and a["trainer_id"] == c["legs"]["destination"]["trainer_id"]
             and e["owner_trainer_id"] != a["trainer_id"]
             and o["revision_id"] == a["identity_revision_id"]
-            and o["source"] == "box"
-            and 1 <= o["box_number"] <= 7
+            and (
+                o["source"] == "box"
+                and 1 <= o["box_number"] <= 7
+                or o["source"] == "party"
+                and 1 <= o["slot_number"] <= 6
+            )
             and o["outcome"] in ("NEW", "MATCHED"),
             "TRANSFER_IDENTITY",
         )
@@ -134,8 +138,11 @@ class TransferVerification:
             )
             originals[side], observations[side] = raw, parsed
         observed = observations["source"]
-        box = next(b for b in observed.boxes if b.number == o["box_number"])
-        target = box.slots[o["slot_number"] - 1]
+        if o["source"] == "party":
+            target = observed.party[o["slot_number"] - 1]
+        else:
+            box = next(b for b in observed.boxes if b.number == o["box_number"])
+            target = box.slots[o["slot_number"] - 1]
         require(target is not None, "TRANSFER_TARGET_MISSING")
         identity = trusted_native_identity(
             target.identity, trainer=observed.trainer, is_egg=target.is_egg
@@ -150,7 +157,8 @@ class TransferVerification:
             originals["source"],
             originals["destination"],
             pair_id=aid,
-            box_index=o["box_number"] - 1,
+            location=o["source"],
+            box_index=o["box_number"] - 1 if o["source"] == "box" else -1,
             slot_index=o["slot_number"] - 1,
             target_pid=identity.pid,
             target_ec=identity.encryption_constant,

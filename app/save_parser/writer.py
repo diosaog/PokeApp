@@ -41,6 +41,7 @@ ERRORS = frozenset(
         "WRITE_PREPARATION_FAILED",
         "INVENTORY_LIMIT",
         "INVENTORY_FULL",
+        "LAST_PARTY_MEMBER",
     }
 )
 QUICK_ITEMS = ("rare_candy", "heart_scale")
@@ -275,6 +276,7 @@ class PkhexProcessWriter:
         slot_index,
         target_pid,
         target_ec,
+        location="box",
     ):
         """Private planner seam; never expose peer bytes or this plan as authority."""
         request = {
@@ -282,6 +284,7 @@ class PkhexProcessWriter:
             "source_base64": base64.b64encode(source).decode("ascii"),
             "destination_base64": base64.b64encode(destination).decode("ascii"),
             "pair_id": pair_id,
+            "location": location,
             "box_index": box_index,
             "slot_index": slot_index,
             "target_pid": target_pid,

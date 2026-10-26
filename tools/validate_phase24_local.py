@@ -142,13 +142,15 @@ def run(args, closure=None):
             head = store.one(
                 "pokemon_identity_revisions", save_file_id=scope["source"]["save"]
             )
-            entity = store.one(
-                "pokemon_observations",
-                revision_id=head["id"],
-                source="box",
-                box_number=1,
-                slot_number=1,
-            )["pokemon_entity_id"]
+            origin = getattr(args, "origin", "box")
+            where = (
+                {"source": "party", "slot_number": int(origin.split(":")[1])}
+                if origin.startswith("party:")
+                else {"source": "box", "box_number": 1, "slot_number": 1}
+            )
+            entity = store.one("pokemon_observations", revision_id=head["id"], **where)[
+                "pokemon_entity_id"
+            ]
             item = store.one("shop_items", code="robar_pokemon")
             purchase = insert(
                 "purchases",

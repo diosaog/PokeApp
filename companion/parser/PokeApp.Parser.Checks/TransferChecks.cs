@@ -13,7 +13,7 @@ internal static class TransferChecks
             var peer=File.ReadAllBytes(Path.Combine(root,game=="X"?"Y":"X","expected"));
             var target=SaveUtil.GetVariantSAV((byte[])source.Clone())!.GetBoxSlotAtIndex(0,0);
             var request=new {SchemaVersion=1,SourceBase64=Convert.ToBase64String(source),DestinationBase64=Convert.ToBase64String(peer),
-                PairId=Guid.NewGuid().ToString(),BoxIndex=0,SlotIndex=0,TargetPid=target.PID,TargetEc=target.EncryptionConstant};
+                PairId=Guid.NewGuid().ToString(),Location="box",BoxIndex=0,SlotIndex=0,TargetPid=target.PID,TargetEc=target.EncryptionConstant};
             var result=JsonSerializer.SerializeToNode(NativeTransfer.Plan(JsonSerializer.SerializeToUtf8Bytes(request,Inspection.Json)),Inspection.Json)!;
             if(result["status"]!.GetValue<string>()!="rejected"||result["error"]!.GetValue<string>()!="WRONG_GAME") throw new Exception("cross-title unexpectedly admitted: "+game);
         }
@@ -38,7 +38,7 @@ internal static class TransferChecks
             receiver.PartyData=[];
             byte[] destination=receiver.Write();
             var request=new JsonObject { ["schema_version"]=1,["source_base64"]=Convert.ToBase64String(source),["destination_base64"]=Convert.ToBase64String(destination),
-                ["pair_id"]=Guid.NewGuid().ToString(),["box_index"]=0,["slot_index"]=0,["target_pid"]=target.PID,["target_ec"]=target.EncryptionConstant };
+                ["pair_id"]=Guid.NewGuid().ToString(),["location"]="box",["box_index"]=0,["slot_index"]=0,["target_pid"]=target.PID,["target_ec"]=target.EncryptionConstant };
             var plan=Plan(request);Check(plan["status"]!.GetValue<string>()=="planned",game+" plan "+plan["error"]);
             var dir=Path.Combine(outputRoot,game);Directory.CreateDirectory(dir);
             File.WriteAllBytes(Path.Combine(dir,"source"),source);File.WriteAllBytes(Path.Combine(dir,"destination"),destination);

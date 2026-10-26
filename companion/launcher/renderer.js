@@ -423,12 +423,14 @@ function renderTransfers(state) {
       const where = t.location;
       const pokemon =
         where && t.side === "source"
-          ? observation?.boxes?.[where.box - 1]?.slots?.[where.slot - 1]
+          ? where.party
+            ? observation?.party?.[where.slot - 1]
+            : observation?.boxes?.[where.box - 1]?.slots?.[where.slot - 1]
           : null;
       if (where)
         line(
           t.side === "source"
-            ? `Pokémon: ${pokemon ? pokemon.nickname || `#${pokemon.species_id}` : "el indicado por PokeApp"} · Caja ${where.box}, posición ${where.slot}.`
+            ? `Pokémon: ${pokemon ? pokemon.nickname || `#${pokemon.species_id}` : "el indicado por PokeApp"} · ${where.party ? "Equipo" : `Caja ${where.box}`}, posición ${where.slot}.`
             : `Llegará a tu partida en la Caja ${where.box}, posición ${where.slot}.`,
         );
       line(`Partida: ${state.selected_save || "sin seleccionar"}`, "muted");

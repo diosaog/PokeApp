@@ -214,7 +214,13 @@ def closure(env):
             env["parser"].version,
             donor_context,
         )
-        assert clone["identity_plan"]["bindings"][0]["outcome"] == "AMBIGUOUS"
+        # The stolen individual (any origin: box or party) must not be re-credited.
+        stolen = store.one("pokemon_entities", id=c["entity"])["candidate_key"]
+        assert [
+            b["outcome"]
+            for b in clone["identity_plan"]["bindings"]
+            if b["candidate_key"] == stolen
+        ] == ["AMBIGUOUS"]
         # Existing identical old-source receipt never rewinds current pointer.
         receipt = env["ingestion"].receipt(
             c["season_id"], c["source"]["tid"], sha256(c["source"]["data"]).hexdigest()
@@ -259,4 +265,5 @@ if __name__ == "__main__":
     )
     p.add_argument("--skip-parity", action="store_true")
     p.add_argument("--additional", action="store_true")
+    p.add_argument("--origin", default="box")  # or party:N (Phase26B)
     run(p.parse_args(), closure)

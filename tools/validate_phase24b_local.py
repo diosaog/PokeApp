@@ -464,4 +464,5 @@ if __name__ == "__main__":
     p.add_argument("--games", nargs="+", default=["X"])
     p.add_argument("--skip-parity", action="store_true")
     p.add_argument("--additional", action="store_true")
+    p.add_argument("--origin", default="box")  # or party:N (Phase26B)
     run(p.parse_args(), integration)
