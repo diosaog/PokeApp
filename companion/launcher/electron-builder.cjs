@@ -3,6 +3,10 @@ const path = require("node:path");
 if (!process.env.POKEAPP_PACKAGE_STAGE || !process.env.POKEAPP_PACKAGE_OUTPUT)
   throw new Error("Use tools/build_launcher_windows.ps1");
 const privateCandidate = process.env.POKEAPP_PRIVATE_CANDIDATE === "1";
+// Owner preview of the undeployed web: private candidates only (see webview.cjs).
+const webPreview = process.env.POKEAPP_WEB_PREVIEW === "1";
+if (webPreview && !privateCandidate)
+  throw new Error("Web preview is limited to private candidates");
 // Updates: only the PUBLIC key and an HTTPS feed are baked in, together or not
 // at all. Without both, the shipped updater stays disabled.
 const updateKeyFile = process.env.POKEAPP_UPDATE_PUBLIC_KEY_FILE || "";
@@ -33,6 +37,7 @@ module.exports = {
     : "PokeApp-Launcher-Setup.exe",
   extraMetadata: {
     pokeappPrivateCandidate: privateCandidate,
+    ...(webPreview ? { pokeappWebPreview: "http://127.0.0.1:4173" } : {}),
     ...(buildVersion ? { version: buildVersion } : {}),
     ...(updateKey
       ? {

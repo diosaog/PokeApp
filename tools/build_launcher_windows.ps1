@@ -3,6 +3,9 @@ param(
     [Parameter(Mandatory=$true)][string]$Python,
     [Parameter(Mandatory=$true)][string]$Dotnet,
     [switch]$PrivateCandidate,
+    # Private owner preview: the PokeApp tab loads http://127.0.0.1:4173 (the
+    # local design preview) instead of the deployed web. Private builds only.
+    [switch]$WebPreview,
     # Optional signed updates. The signing key must live outside the repository
     # and the build root; only the public key is embedded in the package.
     [string]$UpdatePublicKeyFile = '',
@@ -14,6 +17,7 @@ param(
     [string]$BuildVersion = ''
 )
 $ErrorActionPreference = 'Stop'
+if ($WebPreview -and -not $PrivateCandidate) { throw 'WebPreview requires PrivateCandidate' }
 $repo = Split-Path -Parent $PSScriptRoot
 $build = [IO.Path]::GetFullPath($BuildRoot)
 if ($build.StartsWith($repo, [StringComparison]::OrdinalIgnoreCase)) { throw 'BuildRoot must be outside the repository' }
@@ -54,6 +58,7 @@ try {
     $env:POKEAPP_PACKAGE_STAGE = $stage
     $env:POKEAPP_PACKAGE_OUTPUT = Join-Path $build 'release'
     $env:POKEAPP_PRIVATE_CANDIDATE = if ($PrivateCandidate) { '1' } else { '0' }
+    $env:POKEAPP_WEB_PREVIEW = if ($WebPreview) { '1' } else { '0' }
     $env:CSC_IDENTITY_AUTO_DISCOVERY = 'false'
     $env:POKEAPP_UPDATE_PUBLIC_KEY_FILE = $UpdatePublicKeyFile
     $env:POKEAPP_UPDATE_FEED = $UpdateFeed

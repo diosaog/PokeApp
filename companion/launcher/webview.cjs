@@ -4,11 +4,20 @@
 // (/__launcher/quick-items/<item>) that the Launcher intercepts to open its own
 // native panel; it carries an item code, never data or a command.
 const PRODUCTION_WEB = "https://pokeapp-web.pokeapp-v2.workers.dev";
+// Owner preview of an undeployed web (27B): ONE exact loopback origin, honoured
+// only by private-candidate packages built with -WebPreview. Never configurable
+// at run time, never in public builds, and never sharing the real web session.
+const PREVIEW_ORIGIN = "http://127.0.0.1:4173";
 const QUICK_ITEMS = ["rare_candy", "heart_scale"];
 
-function webOrigin(packaged, env) {
+function webOrigin(packaged, env, metadata = {}) {
+  if (packaged)
+    return metadata.pokeappPrivateCandidate === true &&
+      metadata.pokeappWebPreview === PREVIEW_ORIGIN
+      ? PREVIEW_ORIGIN
+      : PRODUCTION_WEB;
   const override = env.POKEAPP_WEB_ORIGIN;
-  if (packaged || !override) return PRODUCTION_WEB;
+  if (!override) return PRODUCTION_WEB;
   const url = new URL(override);
   const local = ["127.0.0.1", "localhost"].includes(url.hostname);
   if (!(url.protocol === "https:" || (url.protocol === "http:" && local)))
@@ -16,7 +25,7 @@ function webOrigin(packaged, env) {
   return url.origin;
 }
 
-function webPreferences() {
+function webPreferences(origin = PRODUCTION_WEB) {
   return {
     sandbox: true,
     contextIsolation: true,
@@ -24,7 +33,10 @@ function webPreferences() {
     nodeIntegrationInSubFrames: false,
     webSecurity: true,
     webviewTag: false,
-    partition: "persist:pokeapp-web",
+    partition:
+      origin === PRODUCTION_WEB
+        ? "persist:pokeapp-web"
+        : "persist:pokeapp-web-preview",
     spellcheck: false,
   };
 }
@@ -78,4 +90,11 @@ function attach(view, { origin, version, onQuickItems, openExternal }) {
   return contents.loadURL(origin + "/");
 }
 
-module.exports = { PRODUCTION_WEB, webOrigin, webPreferences, decide, attach };
+module.exports = {
+  PRODUCTION_WEB,
+  PREVIEW_ORIGIN,
+  webOrigin,
+  webPreferences,
+  decide,
+  attach,
+};

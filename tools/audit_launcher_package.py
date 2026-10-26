@@ -114,6 +114,10 @@ def audit(build):
         )
     )
     private = metadata.get("pokeappPrivateCandidate") is True
+    preview = metadata.get("pokeappWebPreview")
+    # A web preview origin is legal only in a private candidate, and only the one.
+    assert preview in (None, "http://127.0.0.1:4173"), preview
+    assert preview is None or private, "web preview in a public build"
     installer = (
         build
         / "release"
@@ -131,6 +135,7 @@ def audit(build):
             (metadata.get("pokeappUpdate") or {}).get("publicKey")
         ),
         "private_candidate": private,
+        "web_origin": preview or "https://pokeapp-web.pokeapp-v2.workers.dev",
         "installer": installer.name,
         "sha256": hashlib.sha256(installer.read_bytes()).hexdigest(),
         "bytes": installer.stat().st_size,

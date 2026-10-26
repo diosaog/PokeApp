@@ -43,6 +43,7 @@ companion/launcher/node_modules/
 # React build/development artifacts
 web/node_modules/
 web/dist/
+web/dist-preview/
 web/.wrangler/
 /.wrangler/
 web/test-results/

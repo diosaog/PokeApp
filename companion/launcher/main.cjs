@@ -279,7 +279,11 @@ app.whenReady().then(() => {
   let web = null,
     webTop = 0,
     webShown = false;
-  const webAt = webview.webOrigin(app.isPackaged, process.env);
+  const webAt = webview.webOrigin(
+    app.isPackaged,
+    process.env,
+    require("./package.json"),
+  );
   const layoutWeb = () => {
     if (!web || !webShown) return;
     const [width, height] = win.getContentSize();
@@ -300,7 +304,9 @@ app.whenReady().then(() => {
     )
       throw new Error("Vista no válida");
     if (show && !web) {
-      web = new WebContentsView({ webPreferences: webview.webPreferences() });
+      web = new WebContentsView({
+        webPreferences: webview.webPreferences(webAt),
+      });
       void webview.attach(web, {
         origin: webAt,
         version: app.getVersion(),

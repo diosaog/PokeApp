@@ -52,6 +52,35 @@ test("packaged builds always use the production web; dev override only local or 
   );
 });
 
+test("the preview origin exists only in private -WebPreview packages", () => {
+  const preview = {
+    pokeappPrivateCandidate: true,
+    pokeappWebPreview: w.PREVIEW_ORIGIN,
+  };
+  assert.equal(w.webOrigin(true, {}, preview), w.PREVIEW_ORIGIN);
+  for (const metadata of [
+    {},
+    { pokeappWebPreview: w.PREVIEW_ORIGIN },
+    { pokeappPrivateCandidate: false, pokeappWebPreview: w.PREVIEW_ORIGIN },
+    { pokeappPrivateCandidate: true, pokeappWebPreview: "http://127.0.0.1:9" },
+    { pokeappPrivateCandidate: true, pokeappWebPreview: "https://evil.test" },
+  ])
+    assert.equal(w.webOrigin(true, {}, metadata), w.PRODUCTION_WEB);
+  // A run-time variable can never redirect a packaged build.
+  assert.equal(
+    w.webOrigin(true, { POKEAPP_WEB_ORIGIN: w.PREVIEW_ORIGIN }, {}),
+    w.PRODUCTION_WEB,
+  );
+  assert.notEqual(
+    w.webPreferences(w.PREVIEW_ORIGIN).partition,
+    w.webPreferences(w.PRODUCTION_WEB).partition,
+  );
+  assert.equal(
+    w.decide("http://127.0.0.1:4174/x", w.PREVIEW_ORIGIN).action,
+    "block",
+  );
+});
+
 test("the web view has no preload and is sandboxed in its own session", () => {
   const p = w.webPreferences();
   assert.equal(p.preload, undefined);
