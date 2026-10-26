@@ -142,24 +142,21 @@ test("reward voucher filters targets and retries an uncertain redemption with th
   await page.getByRole("link", { name: "Abrir mi inventario →" }).click();
   await expect(page.getByText("Vale de recompensa")).toBeVisible();
   await page.getByRole("button", { name: "Canjear", exact: true }).click();
+  // The visual selector offers only the server-approved own target.
+  const dialog = page.getByRole("dialog");
+  await expect(dialog.getByRole("button", { name: /Equipo 1/ })).toHaveCount(1);
   await expect(
-    page.getByRole("combobox", { name: "Pokémon objetivo" }).locator("option"),
-  ).toHaveCount(2);
+    dialog.getByRole("button", { name: /Ya protegido|Rival/ }),
+  ).toHaveCount(0);
   await expect(page.getByText(/cambio físico/)).toHaveCount(0);
-  await page
-    .getByRole("combobox", { name: "Pokémon objetivo" })
-    .selectOption("eligible");
-  await page.getByRole("button", { name: "Confirmar canje" }).click();
+  await dialog.getByRole("button", { name: /Equipo 1/ }).click();
+  await dialog.getByRole("button", { name: "Sí, blindar" }).click();
   await expect(
-    page.getByRole("button", { name: "Reintentar la misma solicitud" }),
+    page.getByText(/No se ha confirmado el resultado/),
   ).toBeVisible();
-  await expect(
-    page.getByRole("button", { name: "Confirmar canje" }),
-  ).toBeDisabled();
   expect(attempts).toHaveLength(1);
-  await page
-    .getByRole("button", { name: "Reintentar la misma solicitud" })
-    .click();
+  // Confirming again while the outcome is unknown is the same request.
+  await dialog.getByRole("button", { name: "Sí, blindar" }).click();
   await expect(page.getByText("Cambio confirmado.")).toBeVisible();
   expect(attempts).toHaveLength(2);
   expect(attempts[1]).toEqual(attempts[0]);

@@ -271,6 +271,10 @@ class InventoryRead(BaseModel):
     purchases: list[PurchaseRead]
     targets: list[TargetRead]
     unlimited_items: list[UnlimitedItemRead] = Field(default_factory=list)
+    # Revive and robbery are applied to the save through the Launcher (Phase 23
+    # onwards). Older APIs omit the field and the web keeps their direct
+    # redemption, so a web release never removes a flow its API still serves.
+    physical_items: Literal[True] = True
 
 
 class HallRead(BaseModel):

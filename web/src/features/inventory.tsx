@@ -38,8 +38,7 @@ export const itemUseLabels: Record<string, string> = {
   RECOVERY_REQUIRED: "Recuperación necesaria",
   BLOCKED_UNCERTAIN: "Operación bloqueada",
 };
-const physicalItem = (code: string) =>
-  ["revivir_pokemon", "robar_pokemon"].includes(code);
+const physicalCodes = ["revivir_pokemon", "robar_pokemon"];
 
 // The competitive decision (adjudicated) and each save's physical delivery are
 // shown separately; only RECONCILED/COMMITTED means both saves are verified.
@@ -93,9 +92,14 @@ export function Inventory() {
     `/v1/read/seasons/${season}/inventory`,
     !!season,
   );
+  // An API from before the Launcher item flow omits `physical_items`: revive
+  // and robbery then keep that API's direct redemption and no robbery reads.
+  const launcherFlow = q.data?.physical_items === true;
+  const physicalItem = (code: string) =>
+    launcherFlow && physicalCodes.includes(code);
   const transfers = useRead<Model<"TransferListResponse">>(
     `/v1/seasons/${season}/transfers`,
-    !!season,
+    !!season && launcherFlow,
   );
   const robberyEnabled = transfers.data?.transfer_enabled === true;
   const transferFor = (purchaseId: string) =>

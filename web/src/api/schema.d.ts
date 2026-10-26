@@ -2801,6 +2801,12 @@ export interface components {
       targets: components["schemas"]["TargetRead"][];
       /** Unlimited Items */
       unlimited_items?: components["schemas"]["UnlimitedItemRead"][];
+      /**
+       * Physical Items
+       * @default true
+       * @constant
+       */
+      physical_items: true;
     };
     /** ItemArtifactResponse */
     ItemArtifactResponse: {

@@ -20,14 +20,17 @@ for (const width of [1440, 390]) {
     await page.route(`**/v1/read/seasons/${sid}/inventory`, (route) =>
       route.fulfill({
         headers,
+        // The API projects each purchase's physical state into the inventory.
         json: {
-          purchases: statuses.map((_, i) => ({
+          physical_items: true,
+          purchases: statuses.map((status, i) => ({
             id: `item-${i}`,
             shop_item_id: `catalog-${i}`,
             item_name: `Revivir Pokémon ${i + 1}`,
             item_code: "revivir_pokemon",
             acquisition_type: "paid",
             status: i === 1 ? "used" : "pending",
+            physical_state: status,
             total_price: 12,
             purchased_at: "2026-10-25T10:00:00Z",
           })),

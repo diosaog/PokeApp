@@ -24,26 +24,31 @@ const mocks = vi.hoisted(() => ({
   } as Model<"TransferListResponse">,
   execute: vi.fn(),
   paths: vi.fn(),
+  reads: vi.fn(),
   uncertain: false,
   trainers: [{ id: "owner", display_name: "Antonio" }] as
     Model<"TrainerRead">[] | undefined,
 }));
 vi.mock("../state", () => ({
   useApp: () => ({ season: "season", me: { trainer_id: "owner" } }),
-  useRead: (path: string) => ({
-    data:
-      path === "/v1/read/trainers"
-        ? mocks.trainers
-        : path.endsWith("/shop")
-          ? mocks.shop
-          : path.endsWith("/item-uses")
-            ? mocks.itemUses
-            : path.endsWith("/transfers")
-              ? mocks.transfers
-              : mocks.inventory,
-    isPending: false,
-    error: null,
-  }),
+  useRead: (path: string, enabled = true) => {
+    mocks.reads(path, enabled);
+    return {
+      data: !enabled
+        ? undefined
+        : path === "/v1/read/trainers"
+          ? mocks.trainers
+          : path.endsWith("/shop")
+            ? mocks.shop
+            : path.endsWith("/item-uses")
+              ? mocks.itemUses
+              : path.endsWith("/transfers")
+                ? mocks.transfers
+                : mocks.inventory,
+      isPending: false,
+      error: null,
+    };
+  },
   useOverview: () => ({
     data: { players: [{ trainer_id: "owner", display_name: "Antonio" }] },
   }),
@@ -96,12 +101,13 @@ beforeEach(() => {
       },
     ],
   };
-  mocks.inventory = { purchases: [], targets: [] };
+  mocks.inventory = { purchases: [], targets: [], physical_items: true };
 });
 it.each(Object.entries(itemUseLabels))(
   "shows %s without consuming a physical entitlement",
   (status, label) => {
     mocks.inventory = {
+      physical_items: true,
       targets: [],
       purchases: [
         {
@@ -218,6 +224,7 @@ it("uses only the authoritative active offer ID for its promotional price", asyn
 });
 it("redeems a reward voucher only against a server-approved owned target without physical-save copy", async () => {
   mocks.inventory = {
+    physical_items: true,
     purchases: [
       {
         id: "gift",
@@ -312,7 +319,7 @@ const leg = (
   }) as Model<"TransferSummary">;
 
 it("keeps robbery unavailable unless the backend enables this account", () => {
-  mocks.inventory = { purchases: [robbery], targets: [] };
+  mocks.inventory = { purchases: [robbery], targets: [], physical_items: true };
   render(<Inventory />);
   expect(screen.getByText(/aún no está\s+habilitada/)).toBeInTheDocument();
   expect(
@@ -326,6 +333,7 @@ it("requests an enabled robbery through the paired transfer route only", async (
     { id: "rival", display_name: "Rival" },
   ] as Model<"TrainerRead">[];
   mocks.inventory = {
+    physical_items: true,
     purchases: [robbery],
     targets: [
       {
@@ -361,7 +369,11 @@ it.each(Object.entries(transferLabels))(
       items: [leg(status as Model<"TransferSummary">["status"])],
       transfer_enabled: true,
     };
-    mocks.inventory = { purchases: [robbery], targets: [] };
+    mocks.inventory = {
+      purchases: [robbery],
+      targets: [],
+      physical_items: true,
+    };
     render(<Inventory />);
     expect(screen.getAllByText(label).length).toBeGreaterThan(0);
     expect(screen.queryAllByText("Robo completado").length > 0).toBe(
@@ -449,7 +461,12 @@ const unlimited = [
 ] as Model<"InventoryRead">["unlimited_items"];
 
 it("shows Rare Candy and Heart Scale as infinite and free with no purchase action", () => {
-  mocks.inventory = { purchases: [], targets: [], unlimited_items: unlimited };
+  mocks.inventory = {
+    purchases: [],
+    targets: [],
+    unlimited_items: unlimited,
+    physical_items: true,
+  };
   render(<Inventory />);
   expect(screen.getByText("Caramelo Raro")).toBeInTheDocument();
   expect(screen.getByText("Escama Corazón")).toBeInTheDocument();
@@ -468,7 +485,12 @@ it("inside the Launcher links each infinite item to the native quick-item panel"
   const agent = vi
     .spyOn(navigator, "userAgent", "get")
     .mockReturnValue("Mozilla/5.0 PokeAppLauncher/0.23.0");
-  mocks.inventory = { purchases: [], targets: [], unlimited_items: unlimited };
+  mocks.inventory = {
+    purchases: [],
+    targets: [],
+    unlimited_items: unlimited,
+    physical_items: true,
+  };
   render(<Inventory />);
   const links = screen.getAllByRole("link", { name: "Añadir a mi partida" });
   expect(links.map((a) => a.getAttribute("href"))).toEqual([
@@ -477,4 +499,98 @@ it("inside the Launcher links each infinite item to the native quick-item panel"
   ]);
   expect(mocks.execute).not.toHaveBeenCalled();
   agent.mockRestore();
+});
+
+// The production API before the Launcher item flow (no `physical_items`):
+// the redesigned web must keep its direct redemption exactly as before.
+const legacy = (inventory: object) =>
+  inventory as unknown as Model<"InventoryRead">;
+
+it("keeps direct revive redemption with an API that predates the Launcher flow", async () => {
+  mocks.inventory = legacy({
+    purchases: [
+      {
+        id: "revive",
+        shop_item_id: "revivir",
+        item_name: "Revivir Pokémon",
+        item_code: "revivir_pokemon",
+        acquisition_type: "paid",
+        status: "pending",
+        total_price: 12,
+        purchased_at: "2026-10-25T10:00:00Z",
+      },
+    ],
+    targets: [
+      {
+        pokemon_entity_id: "fallen",
+        trainer_id: "owner",
+        visibility: "own",
+        can_shield: false,
+        location: "Caja 8 · 1",
+        pokemon: {
+          species: "Pikachu",
+          nickname: "",
+          item: "",
+          is_shiny: false,
+        },
+      },
+    ],
+  });
+  render(<Inventory />);
+  expect(screen.getByText("Objeto disponible")).toBeInTheDocument();
+  expect(
+    screen.queryByText(/aún no está\s+habilitada/),
+  ).not.toBeInTheDocument();
+  expect(mocks.reads).toHaveBeenCalledWith(
+    "/v1/seasons/season/transfers",
+    false,
+  );
+  expect(mocks.reads).not.toHaveBeenCalledWith(
+    "/v1/seasons/season/transfers",
+    true,
+  );
+  fireEvent.click(screen.getByRole("button", { name: "Canjear" }));
+  fireEvent.click(screen.getByRole("button", { name: /Pikachu/ }));
+  fireEvent.click(screen.getByRole("button", { name: "Sí, revivir" }));
+  await waitFor(() =>
+    expect(mocks.execute).toHaveBeenCalledWith(
+      "/v1/seasons/season/shop/purchases/revive/redemptions",
+      { pokemon_entity_id: "fallen" },
+    ),
+  );
+});
+
+it("keeps direct robbery redemption with an API that predates the Launcher flow", async () => {
+  mocks.trainers = [
+    { id: "rival", display_name: "Rival" },
+  ] as Model<"TrainerRead">[];
+  const { physical_state: _unused, ...plain } = robbery;
+  mocks.inventory = legacy({
+    purchases: [plain],
+    targets: [
+      {
+        pokemon_entity_id: "rival",
+        trainer_id: "rival",
+        visibility: "public_team_lock",
+        can_shield: false,
+        location: "Equipo rival",
+        pokemon: { species: "Eevee", nickname: "", item: "", is_shiny: false },
+      },
+    ],
+  });
+  render(<Inventory />);
+  fireEvent.click(screen.getByRole("button", { name: "Canjear" }));
+  fireEvent.click(screen.getByRole("button", { name: /Rival/ }));
+  fireEvent.click(screen.getByRole("button", { name: /Eevee/ }));
+  fireEvent.click(screen.getByRole("button", { name: "Sí, robar" }));
+  await waitFor(() =>
+    expect(mocks.execute).toHaveBeenCalledWith(
+      "/v1/seasons/season/shop/purchases/steal/redemptions",
+      { pokemon_entity_id: "rival" },
+    ),
+  );
+  expect(mocks.execute).not.toHaveBeenCalledWith(
+    expect.stringContaining("/transfer"),
+    expect.anything(),
+  );
 });

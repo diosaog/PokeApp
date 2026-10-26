@@ -561,6 +561,8 @@ class FrontendReadTests(unittest.TestCase):
 
         self.assertEqual(shape(first), expected)
         self.assertTrue(all("quantity" not in i and "price" not in i for i in first["unlimited_items"]))
+        # This API applies revive/robbery through the Launcher and says so.
+        self.assertIs(first["physical_items"], True)
         item, purchase = str(uuid4()), str(uuid4())
         self.store.data["shop_items"] = [{"id": item, "code": "blindar_pokemon", "name": "Escudo"}]
         self.store.data["purchases"] = [{"id": purchase, "shop_item_id": item, "season_id": SID, "trainer_id": TRAINER_ID,
