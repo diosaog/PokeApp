@@ -42,6 +42,10 @@ const script = `(async () => {
   check(/Reanudar mi parte/.test(card("c").textContent) && /NO es definitivo/.test(card("c").textContent), "local application distinguished from final robbery");
   check(/Necesitas asistencia/.test(card("d").textContent) && kinds("d") === "refresh", "blocked operation asks for assistance, no unsafe action");
   check(/Robo completado y registrado/.test(card("e").textContent), "completed only on COMMITTED");
+  document.getElementById("web-tab").click(); await sleep(200);
+  check(JSON.stringify(window.launcher.__calls().at(-1)) === JSON.stringify(["web", true, true]) && document.getElementById("save-view").hidden, "PokeApp tab shows the full web below the navigation");
+  window.launcher.__navigate("heart_scale"); await sleep(200);
+  check(!document.getElementById("save-view").hidden && document.activeElement === document.querySelector('[data-item="heart_scale"] .quick-input') && JSON.stringify(window.launcher.__calls().at(-1)) === JSON.stringify(["web", false, false]), "web inventory link opens the native Heart Scale input");
   window.launcher.__disable(); await sleep(1300);
   check(/aún no aplica cambios/.test(document.getElementById("transfer-summary").textContent) && [...document.querySelectorAll("#transfer-list button")].every((b) => b.disabled), "no capability: robbery visible but every action disabled");
   check(add.disabled && /Operación bloqueada/.test(document.getElementById("quick-state").textContent), "disabled capability blocks with explanation");

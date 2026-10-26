@@ -295,14 +295,34 @@ async function action(fn) {
     text("message", "No se pudo contactar con el núcleo local del Launcher.");
   }
 }
-function tab(cloud) {
-  $("save-view").hidden = cloud;
-  $("cloud-view").hidden = !cloud;
-  $("save-tab").setAttribute("aria-pressed", String(!cloud));
-  $("cloud-tab").setAttribute("aria-pressed", String(cloud));
+// Three areas: the full PokeApp web (isolated view), the local save tools, and
+// the cached cloud state. The web view sits below the native navigation bar.
+function tab(name) {
+  const web = name === "web";
+  $("save-view").hidden = name !== "save";
+  $("cloud-view").hidden = name !== "cloud";
+  for (const [id, own] of [
+    ["web-tab", "web"],
+    ["save-tab", "save"],
+    ["cloud-tab", "cloud"],
+  ])
+    $(id).setAttribute("aria-pressed", String(name === own));
+  const top = Math.ceil(
+    document.querySelector("nav").getBoundingClientRect().bottom,
+  );
+  void action(() => window.launcher.showWeb(web, web ? top : 0));
 }
-$("save-tab").onclick = () => tab(false);
-$("cloud-tab").onclick = () => tab(true);
+$("web-tab").onclick = () => tab("web");
+$("save-tab").onclick = () => tab("save");
+$("cloud-tab").onclick = () => tab("cloud");
+// From the web inventory: "Añadir a mi partida" opens the native quick items.
+window.launcher.onNavigate(({ item }) => {
+  tab("save");
+  $("quick-title").scrollIntoView();
+  document
+    .querySelector(`.quick-item[data-item="${item}"] .quick-input`)
+    ?.focus();
+});
 $("previous-box").onclick = () => {
   boxIndex--;
   renderBox();

@@ -34,6 +34,7 @@ def audit(build):
         "main.cjs",
         "quantity.js",
         "updater.cjs",
+        "webview.cjs",
         "preload.cjs",
         "renderer.js",
         "index.html",

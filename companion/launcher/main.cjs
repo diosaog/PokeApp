@@ -1,4 +1,12 @@
-const { app, BrowserWindow, ipcMain, dialog } = require("electron");
+const {
+  app,
+  BrowserWindow,
+  WebContentsView,
+  ipcMain,
+  dialog,
+  shell,
+} = require("electron");
+const webview = require("./webview.cjs");
 const { spawn } = require("node:child_process");
 const path = require("node:path");
 const { pathToFileURL } = require("node:url");
@@ -261,6 +269,56 @@ app.whenReady().then(() => {
           intent: state.write.export_intent,
           closed_emulator_confirmed: true,
         });
+  });
+  // Full PokeApp web: the deployed React app in an isolated view under the
+  // native navigation bar. Only the native UI may show/hide it.
+  let web = null,
+    webTop = 0,
+    webShown = false;
+  const webAt = webview.webOrigin(app.isPackaged, process.env);
+  const layoutWeb = () => {
+    if (!web || !webShown) return;
+    const [width, height] = win.getContentSize();
+    web.setBounds({
+      x: 0,
+      y: webTop,
+      width,
+      height: Math.max(0, height - webTop),
+    });
+  };
+  ipcMain.handle("launcher:show-web", (event, show, top) => {
+    authorize(event);
+    if (
+      typeof show !== "boolean" ||
+      !Number.isInteger(top) ||
+      top < 0 ||
+      top > 400
+    )
+      throw new Error("Vista no válida");
+    if (show && !web) {
+      web = new WebContentsView({ webPreferences: webview.webPreferences() });
+      void webview.attach(web, {
+        origin: webAt,
+        version: app.getVersion(),
+        openExternal: (url) => shell.openExternal(url),
+        onQuickItems: (item) => {
+          webShown = false;
+          win.contentView.removeChildView(web);
+          win.webContents.send("launcher:navigate", {
+            view: "quick-items",
+            item,
+          });
+        },
+      });
+      win.on("resize", layoutWeb);
+    }
+    webTop = top;
+    webShown = show;
+    if (show) {
+      win.contentView.addChildView(web);
+      layoutWeb();
+    } else if (web) win.contentView.removeChildView(web);
+    return { shown: show, origin: webAt };
   });
   ipcMain.handle("launcher:quick-items", (event) => {
     authorize(event);

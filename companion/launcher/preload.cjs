@@ -34,6 +34,16 @@ contextBridge.exposeInMainWorld("launcher", {
   discoverSaves: () => ipcRenderer.invoke("launcher:discover"),
   selectDiscovered: (savePath) =>
     ipcRenderer.invoke("launcher:select-discovered", savePath),
+  showWeb: (show, top) => ipcRenderer.invoke("launcher:show-web", show, top),
+  onNavigate: (callback) =>
+    ipcRenderer.on("launcher:navigate", (_event, message) => {
+      // Only a known view and item code ever reach the page.
+      if (
+        message?.view === "quick-items" &&
+        ["rare_candy", "heart_scale"].includes(message.item)
+      )
+        callback({ view: "quick-items", item: message.item });
+    }),
   updateState: () => ipcRenderer.invoke("launcher:update-state"),
   downloadUpdate: () => ipcRenderer.invoke("launcher:update-download"),
   installUpdate: () => ipcRenderer.invoke("launcher:update-install"),

@@ -58,6 +58,7 @@ module.exports = {
     "assets/items/93.png",
     "quantity.js",
     "updater.cjs",
+    "webview.cjs",
   ],
   extraResources: [
     {

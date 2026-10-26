@@ -2,6 +2,7 @@
 const { contextBridge } = require("electron");
 const calls = [];
 let enabled = true;
+let navigate = null;
 const state = () => ({
   local_status: "READY",
   selected_save: "C:/fixture/main",
@@ -104,6 +105,14 @@ contextBridge.exposeInMainWorld("launcher", {
     calls.push(["select", p]),
     { status: "QUEUED" }
   ),
+  showWeb: async (show, top) => (
+    calls.push(["web", show, top > 0]),
+    { shown: show }
+  ),
+  onNavigate: (callback) => {
+    navigate = callback;
+  },
+  __navigate: (item) => navigate && navigate({ view: "quick-items", item }),
   updateState: async () => ({
     status: "AVAILABLE",
     current: "0.22.0-rc.3",
