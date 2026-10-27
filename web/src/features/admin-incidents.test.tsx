@@ -167,3 +167,67 @@ it("coin corrections never leave a wallet below zero", () => {
   expect(submit).toBeEnabled();
   expect(screen.getByRole("status")).toHaveTextContent("20 → 0 PK₽");
 });
+
+const robbery = (over: Partial<Model<"IncidentRobbery">>) =>
+  ({
+    authorization_id: "r1",
+    purchase_id: "p9",
+    requester: "Lucía",
+    donor: "Mario",
+    state: "REQUESTED",
+    source_obligation: null,
+    destination_obligation: null,
+    price: 12,
+    cancellable: true,
+    reconciliation_required: false,
+    cancelled_by_admin: false,
+    created_at: "2026-10-27T10:00:00Z",
+    ...over,
+  }) as Model<"IncidentRobbery">;
+
+it("offers to cancel only a reversible robbery and sends the reason", async () => {
+  mocks.data = {
+    ...overview(),
+    robberies: [
+      robbery({}),
+      robbery({
+        authorization_id: "r2",
+        state: "COMPETITIVELY_ADJUDICATED",
+        cancellable: false,
+        reconciliation_required: true,
+      }),
+      robbery({
+        authorization_id: "r3",
+        state: "CANCELLED",
+        cancellable: false,
+        cancelled_by_admin: true,
+      }),
+    ],
+  };
+  mocks.execute.mockResolvedValue(true);
+  render(<IncidentCenter />);
+  expect(screen.getAllByRole("button", { name: "Anular robo" })).toHaveLength(
+    1,
+  );
+  expect(screen.getByText("Requiere conciliación")).toBeInTheDocument();
+  expect(screen.getByText("Anulado por administración")).toBeInTheDocument();
+  fireEvent.click(screen.getByRole("button", { name: "Anular robo" }));
+  const dialog = screen.getByRole("dialog", { name: "Anular robo" });
+  expect(dialog).toHaveTextContent("12 PK₽");
+  expect(dialog).toHaveTextContent("Mario");
+  fireEvent.change(screen.getByLabelText("Motivo (queda en el historial)"), {
+    target: { value: "Robo atascado" },
+  });
+  fireEvent.click(screen.getByRole("checkbox"));
+  fireEvent.submit(
+    screen
+      .getByRole("button", { name: "Confirmar anulación" })
+      .closest("form")!,
+  );
+  await vi.waitFor(() =>
+    expect(mocks.execute).toHaveBeenCalledWith(
+      "/v1/admin/seasons/s/incidents/robberies/r1/cancel",
+      { reason: "Robo atascado" },
+    ),
+  );
+});

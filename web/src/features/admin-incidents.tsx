@@ -23,6 +23,7 @@ import { transferLabels } from "./inventory";
 type Overview = Model<"IncidentOverview">;
 type Purchase = Overview["purchases"][number];
 type Wallet = Overview["wallets"][number];
+type Robbery = Overview["robberies"][number];
 const statusLabels: Record<string, string> = {
   pending: "Disponible",
   used: "Usada",
@@ -33,6 +34,7 @@ const kindLabels: Record<string, string> = {
   purchase_cancel: "Compra cancelada",
   purchase_refund: "Compra reembolsada",
   coin_adjustment: "Corrección de monedas",
+  robbery_cancel: "Robo anulado",
 };
 // Each save's physical delivery, in short (the full text is in Inventario).
 const deliveryLabels: Record<string, string> = {
@@ -81,6 +83,7 @@ export function IncidentCenter() {
     action: "cancel" | "refund";
   } | null>(null);
   const [wallet, setWallet] = useState<Wallet | null>(null);
+  const [robbery, setRobbery] = useState<Robbery | null>(null);
   const purchases = useMemo(() => {
     const needle = search.trim().toLocaleLowerCase();
     return (q.data?.purchases ?? []).filter(
@@ -143,7 +146,7 @@ export function IncidentCenter() {
           </Card>
         ))}
       </div>
-      <CommandState command={cmd} />
+      {!target && !robbery && !wallet && <CommandState command={cmd} />}
 
       <section aria-labelledby="incident-purchases" className="incident-block">
         <div className="incident-head">
@@ -244,9 +247,10 @@ export function IncidentCenter() {
       <section aria-labelledby="incident-robberies" className="incident-block">
         <h2 id="incident-robberies">Robos</h2>
         <p className="muted">
-          Un robo aplicado en las partidas no se deshace cambiando un estado: se
-          resuelve con su propia reconciliación, que protege las dos partidas.
-          Aquí ves en qué punto está cada uno.
+          Puedes anular un robo mientras no tenga decisión competitiva ni
+          cambios en las partidas. Uno ya decidido o aplicado no se deshace
+          cambiando un estado: requiere su propia conciliación, que protege las
+          dos partidas.
         </p>
         {q.data.robberies.length ? (
           <ul className="incident-list">
@@ -267,6 +271,20 @@ export function IncidentCenter() {
                     .map((o) => deliveryLabels[o] ?? "Estado no disponible")
                     .join(" · ") || "Sin entregas pendientes"}
                 </span>
+                {r.cancellable ? (
+                  <button
+                    type="button"
+                    className="secondary"
+                    disabled={cmd.pending || cmd.uncertain}
+                    onClick={() => setRobbery(r)}
+                  >
+                    Anular robo
+                  </button>
+                ) : r.reconciliation_required ? (
+                  <Tag>Requiere conciliación</Tag>
+                ) : r.cancelled_by_admin ? (
+                  <Tag>Anulado por administración</Tag>
+                ) : null}
               </li>
             ))}
           </ul>
@@ -359,6 +377,65 @@ export function IncidentCenter() {
                 : "Confirmar reembolso"}
             </Submit>
           </form>
+          <CommandState command={cmd} />
+        </Modal>
+      )}
+      {robbery && (
+        <Modal
+          title="Anular robo"
+          onClose={() => {
+            if (!cmd.pending && !cmd.uncertain) setRobbery(null);
+          }}
+        >
+          <dl className="incident-facts">
+            <dt>Quien roba</dt>
+            <dd>{robbery.requester ?? "—"}</dd>
+            <dt>Víctima</dt>
+            <dd>{robbery.donor ?? "—"}</dd>
+            <dt>Estado</dt>
+            <dd>
+              {transferLabels[robbery.state ?? ""] ??
+                robbery.state ??
+                "Sin estado"}
+            </dd>
+            <dt>Se devuelve</dt>
+            <dd>{robbery.price ?? 0} PK₽</dd>
+          </dl>
+          <p>
+            Se libera la reserva de las dos partidas, el objeto de robo queda
+            cancelado y sus monedas vuelven una sola vez a quien robaba. No se
+            ha escrito nada en ninguna partida, así que no hay nada que deshacer
+            en ellas. El historial lo conserva todo.
+          </p>
+          <form
+            onSubmit={async (event) => {
+              const data = form(event);
+              if (
+                await cmd.execute(
+                  `${path}/robberies/${robbery.authorization_id}/cancel`,
+                  {
+                    reason: text(data, "reason"),
+                  } satisfies Model<"RobberyCancelBody">,
+                )
+              )
+                setRobbery(null);
+            }}
+          >
+            <Field label="Motivo (queda en el historial)">
+              <textarea name="reason" required minLength={5} maxLength={500} />
+            </Field>
+            <label className="check-row">
+              <input type="checkbox" required /> He revisado los dos
+              entrenadores y las consecuencias.
+            </label>
+            <Submit
+              pending={cmd.pending}
+              disabled={cmd.pending || cmd.uncertain}
+            >
+              Confirmar anulación
+            </Submit>
+          </form>
+          <CommandState command={cmd} />
         </Modal>
       )}
       {wallet && (
@@ -444,6 +521,7 @@ function CoinCorrection({
           Confirmar corrección
         </Submit>
       </form>
+      <CommandState command={command} />
     </Modal>
   );
 }
