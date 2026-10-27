@@ -76,7 +76,9 @@ export function ParticipantResults({
           ? "Toca un combate para elegir el ganador. Puedes revisar cualquier resultado antes de cerrar la jornada."
           : "Esta jornada ya no admite cambios ordinarios. Las correcciones oficiales se realizan desde Administración."}
       </p>
-      <CommandState command={cmd} />
+      {/* While the dialog is open the page behind it is inert: the dialog
+          shows the outcome, including the retry of an uncertain save. */}
+      {!selected && <CommandState command={cmd} />}
       <div className="league-match-grid">
         {day.matches.map((match) => {
           const winnerName = match.winner_id ? name(match.winner_id) : null;
@@ -159,6 +161,7 @@ export function ParticipantResults({
           >
             {cmd.pending ? "Guardando…" : "Guardar resultado"}
           </button>
+          <CommandState command={cmd} />
         </Modal>
       )}
     </Card>

@@ -120,16 +120,23 @@ export function Inventory() {
     !!season && !!purchase,
   );
 
-  const candidateTrainers =
-    trainers.data?.filter((trainer) =>
-      q.data?.targets.some(
-        (target) =>
-          target.visibility === "public_team_lock" &&
-          target.trainer_id === trainer.id &&
-          !target.pokemon.status_flags?.includes("robado") &&
-          !target.pokemon.status_flags?.includes("blindado"),
-      ),
-    ) || [];
+  // Rivals come from the robbable targets themselves; the names list only
+  // labels them, so a slow or unavailable list never hides a rival.
+  const names = new Map(
+    trainers.data?.map((trainer) => [trainer.id, trainer.display_name]),
+  );
+  const candidateTrainers = [
+    ...new Set(
+      q.data?.targets
+        .filter(
+          (target) =>
+            target.visibility === "public_team_lock" &&
+            !target.pokemon.status_flags?.includes("robado") &&
+            !target.pokemon.status_flags?.includes("blindado"),
+        )
+        .map((target) => target.trainer_id),
+    ),
+  ].map((id) => ({ id, display_name: names.get(id) ?? "Entrenador" }));
   const selectedTrainer = candidateTrainers.find(
     (trainer) => trainer.id === robberyTrainer,
   );
@@ -420,7 +427,7 @@ function TrainerPickerModal({
   onClose,
   onSelect,
 }: {
-  trainers: Model<"TrainerRead">[];
+  trainers: { id: string; display_name: string }[];
   onClose: () => void;
   onSelect: (trainerId: string) => void;
 }) {
