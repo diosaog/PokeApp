@@ -12,6 +12,7 @@
 //
 //   node tools/validate_launcher_update_e2e.mjs --a <build root A> --b <build root B>
 //        --va <version A> --vb <version B> --key <rehearsal private key> --out <dir>
+//        [--vn <next version, offered to B at the end; default: B's last number + 1>]
 import { chromium } from "../web/node_modules/@playwright/test/index.mjs";
 import { spawn, execFileSync } from "node:child_process";
 import { createRequire } from "node:module";
@@ -38,6 +39,8 @@ const args = Object.fromEntries(
 for (const name of ["a", "b", "va", "vb", "key", "out"])
   assert(args[name], "missing --" + name);
 const out = path.resolve(args.out);
+const nextVersion =
+  args.vn || args.vb.replace(/(\d+)$/, (n) => String(Number(n) + 1));
 const product = "PokeApp Launcher UpdateTest";
 const setup = (root) =>
   path.join(root, "release", "PokeApp-Launcher-UpdateTest-Setup.exe");
@@ -152,6 +155,12 @@ const feeds = {
   downgrade: envelopeOf({ ...offerManifest, version: "0.25.0" }),
   incompatible: envelopeOf({ ...offerManifest, minimum_version: args.vb }),
   channel: envelopeOf({ ...offerManifest, channel: "stable" }),
+  // After the update: the next release, so B proves it keeps finding updates.
+  next: envelopeOf({
+    ...offerManifest,
+    version: nextVersion,
+    minimum_version: args.vb,
+  }),
 };
 const scenario = { feed: "same", installer: "ok", served: 0 };
 const server = http.createServer((req, res) => {
@@ -285,7 +294,9 @@ try {
     "00000001",
   );
   fs.mkdirSync(saveDir, { recursive: true });
-  fs.writeFileSync(path.join(saveDir, "main"), Buffer.alloc(4096, 9));
+  const saveFile = path.join(saveDir, "main");
+  fs.writeFileSync(saveFile, Buffer.alloc(4096, 9));
+  const saveHash = sha(saveFile);
   // A protected session bound to another origin: kept, never used or sent.
   execFileSync(path.resolve(".venv-api/Scripts/python.exe"), [
     "-c",
@@ -600,6 +611,19 @@ try {
     (await tools.evaluate(() => localStorage.getItem("rehearsal-marker"))) ===
       "kept-across-update",
     "Launcher app data (Electron profile) kept",
+  );
+  check(
+    sha(saveFile) === saveHash && fs.readdirSync(saveDir).join() === "main",
+    "the game save is byte-identical: no save written across the update",
+  );
+  scenario.feed = "next";
+  const servedBeforeNext = scenario.served;
+  const next = await manualCheck();
+  check(
+    next.status === "AVAILABLE" &&
+      next.version === nextVersion &&
+      scenario.served === servedBeforeNext,
+    `${args.vb} detects the next release ${nextVersion} (nothing downloaded)`,
   );
   await stop();
   report.installed_version = installedVersion();

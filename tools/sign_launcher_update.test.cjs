@@ -6,7 +6,16 @@ const path = require("node:path");
 const { generate, sign } = require("./sign_launcher_update.cjs");
 const updater = require("../companion/launcher/updater.cjs");
 
-const temp = () => fs.mkdtempSync(path.join(os.tmpdir(), "pokeapp-sign-"));
+// Every folder holds a freshly generated private key: none outlives the run.
+const made = [];
+const temp = () => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), "pokeapp-sign-"));
+  made.push(dir);
+  return dir;
+};
+test.after(() => {
+  for (const dir of made) fs.rmSync(dir, { recursive: true, force: true });
+});
 const repo = path.resolve(__dirname, "..");
 const URL = "https://updates.invalid/PokeApp-Launcher-Private-Setup.exe";
 
