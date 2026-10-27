@@ -107,6 +107,12 @@ export function errorText(error: unknown) {
     INSUFFICIENT_FUNDS:
       "No tienes suficientes monedas para esta compra. Revisa tu saldo.",
     ADMIN_REQUIRED: "Esta acción está disponible solo para administradores.",
+    ROBBERY_RECONCILIATION_REQUIRED:
+      "Este robo ya tiene decisión competitiva o cambios en las partidas: no se anula cambiando un estado. Requiere conciliación.",
+    ROBBERY_ALREADY_CANCELLED:
+      "Este robo ya está anulado. Actualiza la lista; sus monedas solo se devuelven una vez.",
+    ROBBERY_NOT_FOUND:
+      "Ese robo ya no existe en esta temporada. Actualiza la lista.",
     SEASON_NOT_DRAFT:
       "Esta acción solo está disponible mientras la temporada es un borrador.",
     SEASON_NOT_ACTIVE: "La Liga debe estar en curso para realizar esta acción.",
@@ -139,6 +145,10 @@ export function errorText(error: unknown) {
       "La configuración elegida todavía no corresponde a esta jornada.",
     INITIAL_SETUP_LOCKED:
       "La preparación inicial ya está fijada y no permite cambiar la plantilla o sus divisiones.",
+    COMPETITION_STRUCTURE_LOCKED:
+      "La estructura de competición ya está fijada porque la temporada ha empezado. Puedes ajustar jornadas, puntos y monedas, pero no pasar de una Liga a Liga A y Liga B ni al revés.",
+    COMPETITION_STRUCTURE_MISMATCH:
+      "Todas las versiones de la configuración de una temporada usan la misma estructura de competición. Cambia primero la configuración inicial.",
     DIVISION_CAPACITY_MISMATCH:
       "El reparto no coincide con las plazas configuradas de las divisiones A y B.",
     MATCHDAY_ALREADY_PREPARED:

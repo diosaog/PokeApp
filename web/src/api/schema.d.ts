@@ -1747,6 +1747,23 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/v1/admin/seasons/{season_id}/incidents/robberies/{authorization_id}/cancel": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** Cancel Robbery */
+    post: operations["cancel_robbery_v1_admin_seasons__season_id__incidents_robberies__authorization_id__cancel_post"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/v1/admin/seasons/{season_id}/incidents/coins": {
     parameters: {
       query?: never;
@@ -2626,7 +2643,7 @@ export interface components {
       /** A */
       A: number;
       /** B */
-      B: number;
+      B?: number | null;
     };
     /** DivisionSummary */
     DivisionSummary: {
@@ -2861,7 +2878,11 @@ export interface components {
        * Kind
        * @enum {string}
        */
-      kind: "purchase_cancel" | "purchase_refund" | "coin_adjustment";
+      kind:
+        | "purchase_cancel"
+        | "purchase_refund"
+        | "coin_adjustment"
+        | "robbery_cancel";
       /**
        * Season Id
        * Format: uuid
@@ -2874,6 +2895,8 @@ export interface components {
       trainer_id: string;
       /** Purchase Id */
       purchase_id?: string | null;
+      /** Authorization Id */
+      authorization_id?: string | null;
       /**
        * Status
        * @enum {string}
@@ -2910,6 +2933,23 @@ export interface components {
       source_obligation?: string | null;
       /** Destination Obligation */
       destination_obligation?: string | null;
+      /** Price */
+      price?: number | null;
+      /**
+       * Cancellable
+       * @default false
+       */
+      cancellable: boolean;
+      /**
+       * Reconciliation Required
+       * @default false
+       */
+      reconciliation_required: boolean;
+      /**
+       * Cancelled By Admin
+       * @default false
+       */
+      cancelled_by_admin: boolean;
       /**
        * Created At
        * Format: date-time
@@ -4362,6 +4402,11 @@ export interface components {
       expected_results_revision: number;
       /** Results */
       results: components["schemas"]["MatchResult"][];
+    };
+    /** RobberyCancelBody */
+    RobberyCancelBody: {
+      /** Reason */
+      reason: string;
     };
     /** SafeSanction */
     SafeSanction: {
@@ -9148,6 +9193,44 @@ export interface operations {
     requestBody: {
       content: {
         "application/json": components["schemas"]["PurchaseResolveBody"];
+      };
+    };
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["IncidentReceipt"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  cancel_robbery_v1_admin_seasons__season_id__incidents_robberies__authorization_id__cancel_post: {
+    parameters: {
+      query?: never;
+      header: {
+        "Idempotency-Key": string;
+      };
+      path: {
+        season_id: string;
+        authorization_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["RobberyCancelBody"];
       };
     };
     responses: {
