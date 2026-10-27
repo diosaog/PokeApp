@@ -19,8 +19,11 @@ const { spawn } = require("node:child_process");
 const path = require("node:path");
 const { pathToFileURL } = require("node:url");
 const { createInterface } = require("node:readline");
-const privateCandidate =
-  require("./package.json").pokeappPrivateCandidate === true;
+const metadata = require("./package.json");
+const privateCandidate = metadata.pokeappPrivateCandidate === true;
+// Update rehearsal builds (private only) keep their own profile and never see
+// the real emulator folders.
+const rehearsal = privateCandidate && metadata.pokeappVariant === "updatetest";
 
 const root = path.resolve(__dirname, "../..");
 const entry = pathToFileURL(path.join(__dirname, "index.html")).href;
@@ -30,7 +33,11 @@ const profile =
   path.join(
     process.env.LOCALAPPDATA || app.getPath("appData"),
     "PokeApp",
-    privateCandidate ? "Launcher-Private" : "Launcher",
+    rehearsal
+      ? "Launcher-UpdateTest"
+      : privateCandidate
+        ? "Launcher-Private"
+        : "Launcher",
   );
 app.setPath("userData", path.join(profile, "shell"));
 app.setAppUserModelId(
@@ -89,6 +96,9 @@ app.whenReady().then(() => {
   args.push("--parser", parser, "--profile", profile);
   worker = spawn(python, args, {
     cwd: app.isPackaged ? process.resourcesPath : root,
+    env: rehearsal
+      ? { ...process.env, APPDATA: path.join(profile, "sandbox-appdata") }
+      : process.env,
     windowsHide: true,
     stdio: ["pipe", "pipe", "ignore"],
   });
@@ -640,32 +650,47 @@ app.whenReady().then(() => {
   const channel = privateCandidate ? "private" : "stable";
   const updateDir = path.join(profile, "updates");
   const feed = updateConfig.feed && updateConfig.feed[channel];
-  let update = {
-    status: "DISABLED",
-    current: app.getVersion(),
-    channel,
-    reason: "UPDATES_NOT_CONFIGURED",
-  };
-  let offered = null;
-  const configured =
+  // Rehearsal feeds on loopback exist only in private candidates.
+  const allowLoopback = privateCandidate;
+  const configured = Boolean(
     updateConfig.publicKey &&
     typeof feed === "string" &&
-    feed.startsWith("https://");
-  let checking = null;
-  const checkFeed = () => {
-    if (!configured) return Promise.resolve();
-    if (["DOWNLOADING", "DOWNLOADED", "INSTALLING"].includes(update.status))
-      return Promise.resolve();
+    updates.secureUrl(feed, allowLoopback),
+  );
+  const current = app.getVersion();
+  const recovered = configured
+    ? updates.reconcileStartup(updateDir, current)
+    : { status: "IDLE" };
+  let update = configured
+    ? {
+        status: recovered.status === "INSTALL_INCOMPLETE" ? "READY" : "IDLE",
+        current,
+        channel,
+        recovered,
+        version:
+          recovered.status === "INSTALL_INCOMPLETE"
+            ? recovered.version
+            : undefined,
+      }
+    : {
+        status: "DISABLED",
+        current,
+        channel,
+        reason: "UPDATES_NOT_CONFIGURED",
+      };
+  let offered = null,
+    checking = null,
+    applying = null;
+  const busy = () =>
+    ["DOWNLOADING", "VERIFYING", "WAITING", "INSTALLING"].includes(
+      update.status,
+    );
+  // `prompt`: the popup opens by itself at most once per version, and never
+  // for a version the trainer postponed (a manual check still shows it).
+  const checkFeed = ({ manual = false } = {}) => {
+    if (!configured || busy()) return Promise.resolve();
     if (checking) return checking;
-    const recovered =
-      update.recovered ?? updates.reconcileStartup(updateDir, app.getVersion());
-    update = {
-      status:
-        recovered.status === "INSTALL_INCOMPLETE" ? "DOWNLOADED" : "CHECKING",
-      current: app.getVersion(),
-      channel,
-      recovered,
-    };
+    update = { ...update, status: "CHECKING", reason: undefined };
     checking = fetch(feed, { redirect: "error" })
       .then((response) =>
         response.ok ? response.json() : Promise.reject(new Error("feed")),
@@ -673,24 +698,37 @@ app.whenReady().then(() => {
       .then((envelope) => {
         offered = updates.verifyManifest(envelope, updateConfig.publicKey, {
           channel,
-          currentVersion: app.getVersion(),
+          currentVersion: current,
+          allowLoopback,
         });
-        if (update.status !== "DOWNLOADED")
-          update = offered
-            ? {
-                ...update,
-                status: "AVAILABLE",
-                version: offered.version,
-                notes: offered.notes,
-                size: offered.installer?.size,
-              }
-            : { ...update, status: "UP_TO_DATE" };
+        update = offered
+          ? {
+              ...update,
+              status: updates.readyInstaller(updateDir, offered)
+                ? "READY"
+                : "AVAILABLE",
+              version: offered.version,
+              notes: offered.notes,
+              size: offered.installer.size,
+              prompt:
+                !manual && updates.postponed(updateDir) !== offered.version,
+            }
+          : {
+              ...update,
+              status: "UP_TO_DATE",
+              version: undefined,
+              prompt: false,
+            };
       })
       .catch((error) => {
+        offered = null;
+        // A verified file left by an unfinished install can still be offered.
+        const left = recovered.status === "INSTALL_INCOMPLETE";
         update = {
           ...update,
-          status: "ERROR",
+          status: left ? "READY" : "ERROR",
           reason: error.code || "UPDATE_CHECK_FAILED",
+          prompt: false,
         };
       })
       .finally(() => {
@@ -699,34 +737,115 @@ app.whenReady().then(() => {
     return checking;
   };
   void checkFeed();
+  const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+  // The core must be gone before the installer replaces its files.
+  const stopCore = () =>
+    new Promise((resolve) => {
+      if (!worker || worker.exitCode !== null) return resolve();
+      const child = worker;
+      child.once("exit", () => resolve());
+      child.stdin.end();
+      setTimeout(() => {
+        if (child.exitCode === null) child.kill();
+      }, 15000).unref();
+    });
+  // Download (once) → verify → wait for critical work → stop the core →
+  // run the verified installer silently → it restarts the Launcher.
+  const applyUpdate = async () => {
+    try {
+      if (offered) {
+        update = {
+          ...update,
+          status: "DOWNLOADING",
+          progress: { received: 0, total: offered.installer.size },
+          reason: undefined,
+          deferred: undefined,
+        };
+        await updates.download(fetch, offered, updateDir, (received, total) => {
+          update = { ...update, progress: { received, total } };
+        });
+      }
+      update = { ...update, status: "VERIFYING" };
+      const installer = updates.verifiedInstaller(updateDir);
+      if (
+        installer.version !== update.version ||
+        updates.compareVersions(installer.version, current) <= 0
+      )
+        throw new updates.UpdateError("DOWNGRADE_REJECTED");
+      // Sync settles by itself: wait for it. Other work defers the install.
+      for (let wait = 0; ; wait++) {
+        const blocker = updates.installBlocker(
+          await request("state").catch(() => null),
+        );
+        if (!blocker) break;
+        if (blocker !== "SYNC_IN_PROGRESS" || wait >= 60) {
+          update = { ...update, status: "READY", deferred: blocker };
+          return;
+        }
+        update = { ...update, status: "WAITING", deferred: blocker };
+        await sleep(1000);
+      }
+      update = { ...update, status: "INSTALLING", deferred: undefined };
+      installing = true;
+      await stopCore();
+      // Re-hash at the last moment: the file run is the file signed.
+      const final = updates.verifiedInstaller(updateDir);
+      spawn(final.file, ["/S", "--updated", "--force-run"], {
+        detached: true,
+        stdio: "ignore",
+        windowsHide: true,
+      }).unref();
+      app.quit();
+    } catch (error) {
+      update = {
+        ...update,
+        status: "ERROR",
+        reason: error.code || "UPDATE_FAILED",
+        progress: undefined,
+      };
+      if (installing) {
+        // The core was stopped for an install that could not start: come
+        // back as before rather than stay without it.
+        app.relaunch();
+        app.exit(0);
+      }
+    } finally {
+      applying = null;
+    }
+  };
   ipcMain.handle("launcher:update-state", (event) => {
     authorize(event);
     return update;
   });
   ipcMain.handle("launcher:update-check", async (event) => {
     authorize(event);
-    if (configured && update.status !== "DOWNLOADED")
-      update = { ...update, status: "CHECKING" };
-    await checkFeed();
+    await checkFeed({ manual: true });
     return update;
   });
-  ipcMain.handle("launcher:update-download", async (event) => {
+  ipcMain.handle("launcher:update-postpone", (event) => {
     authorize(event);
-    if (!offered || update.status !== "AVAILABLE") return update;
-    update = { ...update, status: "DOWNLOADING" };
-    try {
-      await updates.download(fetch, offered, updateDir);
-      update = { ...update, status: "DOWNLOADED" };
-    } catch (error) {
-      update = {
-        ...update,
-        status: "AVAILABLE",
-        reason: error.code || "DOWNLOAD_FAILED",
-      };
-    }
+    if (
+      update.version &&
+      ["AVAILABLE", "READY", "ERROR"].includes(update.status)
+    )
+      updates.postpone(updateDir, update.version);
+    update = { ...update, prompt: false };
     return update;
   });
-  const installVersion = () => update.version || update.recovered?.version;
+  ipcMain.handle("launcher:update-apply", (event, ticket) => {
+    authorize(event);
+    if (
+      !["AVAILABLE", "READY", "ERROR"].includes(update.status) ||
+      !update.version
+    )
+      throw new Error("No hay ninguna actualización verificada.");
+    confirmations.redeem(ticket, "update", update.version, [
+      update.version,
+      offered?.installer.sha512 ?? null,
+    ]);
+    if (!applying) applying = applyUpdate();
+    return { ...update, status: offered ? "DOWNLOADING" : "VERIFYING" };
+  });
   ipcMain.handle("launcher:confirm-begin", async (event, kind, target) => {
     authorize(event);
     if (
@@ -735,18 +854,18 @@ app.whenReady().then(() => {
       target.length > 128
     )
       throw new Error("Confirmación no válida");
-    if (kind === "install") {
-      if (update.status !== "DOWNLOADED" || target !== installVersion())
-        throw new Error(
-          "No hay ninguna actualización verificada para instalar.",
-        );
+    if (kind === "update") {
+      // The popup is the confirmation; the ticket binds it to this signed offer.
+      if (
+        !["AVAILABLE", "READY", "ERROR"].includes(update.status) ||
+        target !== update.version
+      )
+        throw new Error("No hay ninguna actualización verificada.");
       return {
-        ticket: confirmations.issue("install", target, [target]),
-        title: "Instalar actualización",
-        message: `PokeApp Launcher ${target}`,
-        detail:
-          "El Launcher se cerrará, se instalará la nueva versión y volverá a abrirse. Tus copias, sesión y operaciones se conservan.",
-        go: "Instalar y reiniciar",
+        ticket: confirmations.issue("update", target, [
+          target,
+          offered?.installer.sha512 ?? null,
+        ]),
       };
     }
     if (
@@ -771,30 +890,6 @@ app.whenReady().then(() => {
         fingerprint(kind, target, state),
       ),
     };
-  });
-  ipcMain.handle("launcher:update-install", async (event, ticket) => {
-    authorize(event);
-    if (update.status !== "DOWNLOADED") return update;
-    confirmations.redeem(ticket, "install", installVersion(), [
-      installVersion(),
-    ]);
-    const blocker = updates.installBlocker(
-      await request("state").catch(() => null),
-    );
-    if (blocker) return { ...update, deferred: blocker };
-    const installer = updates.verifiedInstaller(updateDir);
-    const last = updates.installBlocker(
-      await request("state").catch(() => null),
-    );
-    if (last) return { ...update, deferred: last };
-    installing = true;
-    spawn(installer.file, ["/S", "--force-run"], {
-      detached: true,
-      stdio: "ignore",
-      windowsHide: true,
-    }).unref();
-    app.quit();
-    return { ...update, status: "INSTALLING" };
   });
 
   tools.webContents.loadFile(path.join(__dirname, "index.html"), {

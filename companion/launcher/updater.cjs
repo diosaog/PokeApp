@@ -2,6 +2,8 @@
 // only authority. A hash served by the same origin is never trusted on its own:
 // the installer's SHA-512 and size are bound by that signature. Disabled until a
 // release key is configured; nothing here publishes, uploads or holds secrets.
+// Private candidates may use a loopback feed (http://127.0.0.1) for rehearsal;
+// public builds accept HTTPS only.
 const crypto = require("node:crypto");
 const fs = require("node:fs");
 const path = require("node:path");
@@ -55,8 +57,29 @@ function compareVersions(a, b) {
   return 0;
 }
 
+// A loopback HTTP URL is accepted only when the build allows rehearsal feeds.
+function secureUrl(value, allowLoopback = false) {
+  let url;
+  try {
+    url = new URL(value);
+  } catch {
+    return false;
+  }
+  if (url.username || url.password) return false;
+  if (url.protocol === "https:") return true;
+  return (
+    allowLoopback &&
+    url.protocol === "http:" &&
+    ["127.0.0.1", "localhost"].includes(url.hostname)
+  );
+}
+
 // envelope = { manifest: base64(JSON bytes), signature: base64(Ed25519 over those bytes) }
-function verifyManifest(envelope, publicKeyPem, { channel, currentVersion }) {
+function verifyManifest(
+  envelope,
+  publicKeyPem,
+  { channel, currentVersion, allowLoopback = false },
+) {
   if (!publicKeyPem) throw new UpdateError("UPDATES_NOT_CONFIGURED");
   if (
     !envelope ||
@@ -104,14 +127,9 @@ function verifyManifest(envelope, publicKeyPem, { channel, currentVersion }) {
     installer.size > 512 * 1024 * 1024
   )
     throw new UpdateError("MANIFEST_INVALID");
-  let url;
-  try {
-    url = new URL(installer.url);
-  } catch {
-    throw new UpdateError("MANIFEST_INVALID");
-  }
-  if (url.protocol !== "https:" || url.username || url.password)
+  if (!secureUrl(installer.url, allowLoopback))
     throw new UpdateError("INSECURE_URL");
+  parseVersion(manifest.minimum_version);
   if (manifest.channel !== channel) throw new UpdateError("CHANNEL_MISMATCH");
   const order = compareVersions(manifest.version, currentVersion);
   if (order < 0) throw new UpdateError("DOWNGRADE_REJECTED");
@@ -138,8 +156,27 @@ function installBlocker(state) {
   return null;
 }
 
-async function download(fetchImpl, manifest, directory) {
+// The verified installer for this exact manifest, if it is already on disk:
+// a repeated «Actualizar» never downloads twice.
+function readyInstaller(directory, manifest) {
+  const pending = readPending(directory);
+  if (
+    !pending ||
+    pending.version !== manifest.version ||
+    pending.sha512 !== manifest.installer.sha512
+  )
+    return null;
+  try {
+    return verifiedInstaller(directory).file;
+  } catch {
+    return null;
+  }
+}
+
+async function download(fetchImpl, manifest, directory, onProgress = () => {}) {
   fs.mkdirSync(directory, { recursive: true });
+  const ready = readyInstaller(directory, manifest);
+  if (ready) return ready;
   const final = path.join(
     directory,
     `PokeApp-Launcher-${manifest.version}.exe`,
@@ -162,6 +199,7 @@ async function download(fetchImpl, manifest, directory) {
           throw new UpdateError("INTEGRITY_FAILED");
         hash.update(chunk);
         fs.writeSync(out, chunk);
+        onProgress(size, manifest.installer.size);
       }
     } finally {
       fs.closeSync(out);
@@ -170,6 +208,11 @@ async function download(fetchImpl, manifest, directory) {
       throw new UpdateError("DOWNLOAD_INTERRUPTED");
     if (hash.digest("base64") !== manifest.installer.sha512)
       throw new UpdateError("INTEGRITY_FAILED");
+    // An older verified installer is superseded by this one.
+    const previous = readPending(directory);
+    if (previous && previous.file !== path.basename(final))
+      fs.rmSync(path.join(directory, previous.file), { force: true });
+    fs.rmSync(final, { force: true });
     fs.renameSync(partial, final);
   } catch (error) {
     fs.rmSync(partial, { force: true });
@@ -231,8 +274,35 @@ function reconcileStartup(directory, currentVersion) {
   return { status: "INSTALL_INCOMPLETE", version: pending.version };
 }
 
+// «Más tarde» is remembered per version: no popup again for that version at
+// start; a manual check still shows it, and a newer version asks again.
+function postpone(directory, version) {
+  parseVersion(version);
+  fs.mkdirSync(directory, { recursive: true });
+  fs.writeFileSync(
+    path.join(directory, "postponed.json"),
+    JSON.stringify({ version }),
+  );
+}
+
+function postponed(directory) {
+  try {
+    const { version } = JSON.parse(
+      fs.readFileSync(path.join(directory, "postponed.json"), "utf8"),
+    );
+    parseVersion(version);
+    return version;
+  } catch {
+    return null;
+  }
+}
+
 module.exports = {
   UpdateError,
+  secureUrl,
+  readyInstaller,
+  postpone,
+  postponed,
   compareVersions,
   verifyManifest,
   installBlocker,

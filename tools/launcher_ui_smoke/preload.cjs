@@ -10,6 +10,7 @@ let updateInfo = {
   version: "0.23.0",
   notes: "Prueba",
   channel: "private",
+  prompt: true,
 };
 const base = () => ({
   local_status: "READY",
@@ -203,11 +204,14 @@ contextBridge.exposeInMainWorld("launcher", {
   present: async (view) => (calls.push(["present", view]), { shown: true }),
   openHub: async (tab) => (calls.push(["openHub", tab]), { shown: true }),
   updateState: async () => updateInfo,
-  downloadUpdate: async () => ({ status: "DOWNLOADING" }),
-  installUpdate: async () => ({
-    status: "DOWNLOADED",
-    deferred: "WRITE_IN_PROGRESS",
-  }),
+  postponeUpdate: async () => (
+    calls.push(["postpone"]),
+    (updateInfo = { ...updateInfo, prompt: false })
+  ),
+  applyUpdate: async (ticket) => (
+    calls.push(["apply", ticket]),
+    { ...updateInfo, status: "DOWNLOADING" }
+  ),
   __calls: () => calls.map((c) => [...c]),
   __disable: () => {
     enabled = false;

@@ -643,7 +643,11 @@ const dialogIds = {
   robos: "sheet-dialog",
 };
 const anyOpen = () => document.querySelector("dialog[open]") !== null;
-function present(view) {
+// The update popup re-checks the feed when the trainer opens it; opened by
+// the updater itself (or from the strip) it shows the offer already verified.
+let updateCheckOnOpen = true;
+function present(view, { check = true } = {}) {
+  if (view === "update") updateCheckOnOpen = check;
   if (unified && document.body.dataset.mode === "strip")
     return void action(() => window.launcher.present(view));
   openDialog(view);
@@ -651,7 +655,11 @@ function present(view) {
 function openDialog(view, item) {
   if (view === "objetos" || view === "robos") fillSheet(view, item);
   if (view === "selector") renderSelector(lastState, true);
-  if (view === "update") void checkForUpdates();
+  if (view === "update") {
+    if (updateCheckOnOpen || !lastUpdate) void checkForUpdates();
+    else fillUpdateDialog(lastUpdate);
+    updateCheckOnOpen = true;
+  }
   const dialog = $(dialogIds[view]);
   if (!dialog.open) dialog.showModal();
   if (view === "objetos") focusItem(item);
@@ -1266,20 +1274,42 @@ function renderEmulator(state) {
 }
 $("discover-saves").onclick = () => action(discover);
 
-// Updates: the signed-manifest updater, on demand from «Buscar actualizaciones».
-let deferredReason = null;
+// Updates. Main checks the signed feed at start and on «Buscar actualizaciones»;
+// a newer version opens this popup by itself once (never again after «Más
+// tarde» for that version). «Actualizar» downloads, verifies, installs and
+// restarts; nothing is forced and nothing is shown done before it is.
 const megabytes = (bytes) =>
   `${(bytes / 1024 / 1024).toLocaleString("es-ES", { maximumFractionDigits: 1 })} MB`;
-function updateMessages(u) {
-  return {
-    AVAILABLE: `Nueva versión ${u.version} disponible (tienes ${u.current}). ${u.notes || ""}`,
-    DOWNLOADING: `Descargando y verificando la versión ${u.version}…`,
-    DOWNLOADED: deferredReason
-      ? "Actualización verificada. Se podrá instalar cuando termine la operación en curso; no se interrumpe ningún cambio."
-      : `Versión ${u.version || u.recovered?.version} descargada y verificada.`,
-    INSTALLING: "Instalando la actualización…",
-  };
-}
+const updateBusy = ["DOWNLOADING", "VERIFYING", "WAITING", "INSTALLING"];
+const blockerText = {
+  WRITE_IN_PROGRESS: "un cambio en tu partida",
+  WRITE_PENDING: "un cambio pendiente de confirmar",
+  RECOVERY_PENDING: "una recuperación pendiente",
+  SYNC_IN_PROGRESS: "la sincronización",
+  TRANSFER_IN_PROGRESS: "una entrega de robo",
+  STATE_UNAVAILABLE: "el núcleo del Launcher",
+};
+const updateErrors = {
+  SIGNATURE_INVALID:
+    "La actualización no supera la verificación de firma. No se instalará.",
+  SIGNATURE_MISSING: "La actualización no viene firmada. No se instalará.",
+  INTEGRITY_FAILED:
+    "El archivo descargado no coincide con el firmado. Se ha descartado.",
+  DOWNLOAD_INTERRUPTED:
+    "Se perdió la conexión durante la descarga. Puedes reintentarlo.",
+  DOWNLOAD_FAILED: "No se pudo descargar ahora mismo. Puedes reintentarlo.",
+  DOWNGRADE_REJECTED: "Se ha ignorado una versión anterior a la tuya.",
+  INCOMPATIBLE_VERSION:
+    "Esta versión no se instala sobre la tuya: descárgala desde la web de PokeApp.",
+  CHANNEL_MISMATCH: "La versión ofrecida es de otro canal. Se ha ignorado.",
+  INSECURE_URL: "La descarga no usa una conexión segura. Se ha ignorado.",
+  MANIFEST_INVALID:
+    "La información de la versión no es válida. Se ha ignorado.",
+  UPDATE_CHECK_FAILED:
+    "No se pudo comprobar ahora mismo. Tu Launcher sigue funcionando.",
+};
+let updateAutoShown = new Set(),
+  updateWatch = null;
 async function renderUpdate() {
   const u = await window.launcher.updateState().catch(() => null);
   if (!u) return;
@@ -1287,26 +1317,97 @@ async function renderUpdate() {
   const version = `v${u.current}${u.channel === "private" ? " · canal privado" : ""}`;
   text("launcher-version", version);
   text("launcher-version-detail", version);
-  const messages = updateMessages(u);
-  $("update-banner").hidden = !messages[u.status];
-  text("update-text", messages[u.status] || "");
-  $("update-download").hidden = u.status !== "AVAILABLE";
-  $("update-install").hidden = u.status !== "DOWNLOADED";
-  if ($("update-dialog").open) fillUpdateDialog(u);
+  const dialogOpen = $("update-dialog").open;
+  // Discreet strip: an offer not postponed, or an update running unseen.
+  const offer = ["AVAILABLE", "READY"].includes(u.status) && u.prompt;
+  const running = updateBusy.includes(u.status);
+  $("update-banner").hidden = dialogOpen || !(offer || running);
+  text(
+    "update-text",
+    running
+      ? `Actualizando PokeApp Launcher ${u.version}…${u.progress ? ` ${percent(u.progress)} %` : ""}`
+      : offer
+        ? `Nueva versión ${u.version} de PokeApp Launcher.`
+        : "",
+  );
+  $("update-open").hidden = $("update-banner").hidden;
+  if (dialogOpen) fillUpdateDialog(u);
+  // Once per version, over the web only: never over another dialog, the hub
+  // in use or the offline tools.
+  if (
+    offer &&
+    !updateAutoShown.has(u.version) &&
+    !anyOpen() &&
+    document.body.dataset.mode === "strip"
+  ) {
+    updateAutoShown.add(u.version);
+    present("update", { check: false });
+  }
   reportStrip();
 }
+const percent = ({ received, total }) =>
+  total ? Math.floor((received / total) * 100) : 0;
 function fillUpdateDialog(u) {
-  const facts = [
-    ["Versión instalada", u.current],
-    ["Canal", u.channel === "private" ? "Privado" : "Estable"],
-  ];
-  if (u.version) facts.push(["Versión nueva", u.version]);
-  if (u.size) facts.push(["Tamaño", megabytes(u.size)]);
-  if (["AVAILABLE", "DOWNLOADING", "DOWNLOADED"].includes(u.status))
+  const busy = updateBusy.includes(u.status);
+  const versions = u.version
+    ? `Versión ${u.version} · tienes ${u.current}`
+    : `PokeApp Launcher ${u.current}`;
+  const message = {
+    CHECKING: "Buscando actualizaciones…",
+    IDLE: "Buscando actualizaciones…",
+    UP_TO_DATE: "Estás utilizando la última versión.",
+    AVAILABLE: "Hay una versión nueva de PokeApp Launcher.",
+    READY: u.deferred
+      ? `Lista para instalar. Esperando a que termine ${blockerText[u.deferred] || "una operación en curso"}.`
+      : "La nueva versión está descargada y verificada.",
+    DOWNLOADING: `Descargando la versión ${u.version}…`,
+    VERIFYING: "Verificando la firma y la integridad…",
+    WAITING: `Esperando a que termine ${blockerText[u.deferred] || "una operación en curso"}…`,
+    INSTALLING:
+      "Instalando. PokeApp Launcher se reiniciará solo; tu sesión, tu partida y tus copias se conservan.",
+    ERROR:
+      updateErrors[u.reason] ||
+      "No se pudo completar la actualización. Tu Launcher sigue funcionando.",
+    DISABLED:
+      "Este Launcher no tiene activado un canal de actualizaciones automáticas. Cuando haya una versión nueva, descárgala desde la web de PokeApp («Descargar Launcher»).",
+  }[u.status];
+  $("update-hero").dataset.tone =
+    u.status === "ERROR"
+      ? "error"
+      : ["AVAILABLE", "READY"].includes(u.status) || busy
+        ? "new"
+        : "idle";
+  text(
+    "update-title",
+    u.version && u.status !== "UP_TO_DATE"
+      ? "Actualización disponible"
+      : "Actualizaciones",
+  );
+  text("update-message", message || "Estado de actualización no disponible.");
+  text("update-versions", versions);
+  // Novedades: one line per change, as signed in the manifest.
+  const notes =
+    ["AVAILABLE", "READY"].includes(u.status) && u.notes
+      ? u.notes.split(/\n+/).filter((line) => line.trim())
+      : [];
+  $("update-notes").replaceChildren(
+    ...notes.map((line) => {
+      const li = document.createElement("li");
+      li.textContent = line.replace(/^[-•]\s*/, "");
+      return li;
+    }),
+  );
+  const facts = [];
+  if (u.size && ["AVAILABLE", "READY", "DOWNLOADING"].includes(u.status))
+    facts.push(["Tamaño", megabytes(u.size)]);
+  if (["AVAILABLE", "READY"].includes(u.status) || busy)
     facts.push([
       "Seguridad",
-      "Manifiesto firmado; el instalador se comprueba (SHA-512 y tamaño) antes de instalar",
+      "Versión firmada; el instalador se comprueba (SHA-512 y tamaño) antes de ejecutarse",
     ]);
+  if (["AVAILABLE", "READY"].includes(u.status))
+    facts.push(["Se conserva", "Sesión, partida elegida, copias y ajustes"]);
+  $("update-facts").hidden = !facts.length;
   $("update-facts").replaceChildren(
     ...facts.flatMap(([label, value]) => {
       const dt = document.createElement("dt"),
@@ -1316,27 +1417,51 @@ function fillUpdateDialog(u) {
       return [dt, dd];
     }),
   );
+  $("update-progress-box").hidden = !busy;
+  const progress = u.progress || { received: 0, total: u.size || 0 };
+  $("update-progress").value =
+    u.status === "DOWNLOADING" ? percent(progress) : busy ? 100 : 0;
   text(
-    "update-message",
-    {
-      CHECKING: "Buscando actualizaciones…",
-      UP_TO_DATE: "Tienes la última versión.",
-      AVAILABLE: `Hay una versión nueva: ${u.version}.`,
-      DOWNLOADING: `Descargando y verificando la versión ${u.version}…`,
-      DOWNLOADED: `La versión ${u.version || u.recovered?.version} está descargada y verificada.`,
-      INSTALLING: "Instalando…",
-      ERROR:
-        "No se pudo comprobar ahora mismo. Tu Launcher sigue funcionando; inténtalo más tarde.",
-      DISABLED:
-        "Este Launcher no tiene activado un canal de actualizaciones automáticas. Cuando haya una versión nueva, descárgala desde la web de PokeApp («Descargar Launcher»).",
-    }[u.status] || "Estado de actualización no disponible.",
+    "update-progress-text",
+    u.status === "DOWNLOADING"
+      ? `${megabytes(progress.received)} de ${megabytes(progress.total)} · ${percent(progress)} %`
+      : u.status === "VERIFYING"
+        ? "Comprobando…"
+        : u.status === "INSTALLING"
+          ? "Reiniciando…"
+          : "",
   );
-  text("update-notes", u.status === "AVAILABLE" ? u.notes || "" : "");
-  $("update-go").hidden = !["AVAILABLE", "DOWNLOADED"].includes(u.status);
+  const canApply =
+    ["AVAILABLE", "READY"].includes(u.status) ||
+    (u.status === "ERROR" && Boolean(u.version));
+  $("update-go").hidden = !(canApply || u.status === "ERROR");
   text(
     "update-go",
-    u.status === "DOWNLOADED" ? "Instalar y reiniciar" : "Descargar e instalar",
+    u.status === "READY"
+      ? "Instalar ahora"
+      : u.status === "ERROR"
+        ? "Reintentar"
+        : "Actualizar",
   );
+  $("update-later").hidden = busy;
+  text(
+    "update-later",
+    ["AVAILABLE", "READY"].includes(u.status) ? "Más tarde" : "Cerrar",
+  );
+}
+// While something runs, follow it closely (progress), then stop.
+function watchUpdate() {
+  if (updateWatch) return;
+  updateWatch = setInterval(async () => {
+    const u = await window.launcher.updateState().catch(() => null);
+    if (!u) return;
+    lastUpdate = u;
+    if ($("update-dialog").open) fillUpdateDialog(u);
+    if (!updateBusy.includes(u.status)) {
+      clearInterval(updateWatch);
+      updateWatch = null;
+    }
+  }, 250);
 }
 async function checkForUpdates() {
   if (lastUpdate) fillUpdateDialog({ ...lastUpdate, status: "CHECKING" });
@@ -1350,21 +1475,30 @@ async function checkForUpdates() {
       "No se pudo comprobar ahora mismo. Inténtalo más tarde.",
     );
 }
-async function install() {
-  const version = lastUpdate?.version || lastUpdate?.recovered?.version;
-  const ticket = await confirmWith("install", String(version || ""));
-  if (!ticket) return;
-  const result = await action(() => window.launcher.installUpdate(ticket));
-  deferredReason = result?.deferred || null;
+async function applyUpdate() {
+  const u = lastUpdate;
+  if (!u) return;
+  if (u.status === "ERROR" && !u.version) return checkForUpdates();
+  // The popup is the confirmation; main binds it to this signed offer.
+  const offer = await action(() =>
+    window.launcher.confirmBegin("update", String(u.version)),
+  );
+  if (!offer?.ticket) return;
+  const started = await action(() => window.launcher.applyUpdate(offer.ticket));
+  if (started) {
+    lastUpdate = { ...u, ...started };
+    fillUpdateDialog(lastUpdate);
+    watchUpdate();
+  }
 }
 $("check-update").onclick = () => present("update");
-$("update-go").onclick = () =>
-  lastUpdate?.status === "DOWNLOADED"
-    ? install()
-    : action(() => window.launcher.downloadUpdate());
-$("update-download").onclick = () =>
-  action(() => window.launcher.downloadUpdate());
-$("update-install").onclick = install;
+$("update-go").onclick = () => void applyUpdate();
+$("update-later").onclick = async () => {
+  if (["AVAILABLE", "READY"].includes(lastUpdate?.status))
+    await action(() => window.launcher.postponeUpdate());
+  shut($("update-dialog"));
+};
+$("update-open").onclick = () => present("update", { check: false });
 
 async function poll() {
   if (polling) return;

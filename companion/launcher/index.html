@@ -24,8 +24,7 @@
     </p>
     <div id="update-banner" role="status" hidden>
       <span id="update-text"></span>
-      <button id="update-download" hidden>Descargar actualización</button>
-      <button id="update-install" hidden>Instalar y reiniciar</button>
+      <button id="update-open" type="button" hidden>Ver actualización</button>
     </div>
     <div id="notices" class="notices" role="status" hidden></div>
     <main>
@@ -372,7 +371,7 @@
     </dialog>
     <dialog
       id="update-dialog"
-      class="game-dialog"
+      class="game-dialog update-dialog"
       aria-labelledby="update-title"
     >
       <header class="dialog-head">
@@ -381,13 +380,23 @@
           ×
         </button>
       </header>
-      <p id="update-message" class="lead" role="status"></p>
+      <div class="update-hero" id="update-hero" data-tone="idle">
+        <span class="update-badge" aria-hidden="true">↑</span>
+        <div>
+          <p id="update-message" class="lead" role="status"></p>
+          <p id="update-versions" class="muted"></p>
+        </div>
+      </div>
+      <ul id="update-notes" class="update-notes"></ul>
       <dl id="update-facts" class="facts"></dl>
-      <p id="update-notes" class="muted"></p>
+      <div id="update-progress-box" class="update-progress" hidden>
+        <progress id="update-progress" max="100" value="0"></progress>
+        <span id="update-progress-text"></span>
+      </div>
       <div class="dialog-actions">
-        <button id="update-later" type="button" data-close>Posponer</button
+        <button id="update-later" type="button">Más tarde</button
         ><button id="update-go" type="button" class="primary" hidden>
-          Descargar e instalar
+          Actualizar
         </button>
       </div>
     </dialog>

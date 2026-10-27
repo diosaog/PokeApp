@@ -80,7 +80,6 @@ contextBridge.exposeInMainWorld("launcher", {
         callback({ view: message.view });
     }),
   updateState: () => ipcRenderer.invoke("launcher:update-state"),
-  downloadUpdate: () => ipcRenderer.invoke("launcher:update-download"),
-  installUpdate: (ticket) =>
-    ipcRenderer.invoke("launcher:update-install", ticket),
+  postponeUpdate: () => ipcRenderer.invoke("launcher:update-postpone"),
+  applyUpdate: (ticket) => ipcRenderer.invoke("launcher:update-apply", ticket),
 });

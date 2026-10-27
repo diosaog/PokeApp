@@ -233,3 +233,99 @@ test("restart reconciliation: incomplete install keeps the verified file, succes
   assert.deepEqual(fs.readdirSync(dir), []);
   assert.deepEqual(u.reconcileStartup(dir, "0.23.0"), { status: "IDLE" });
 });
+
+test("loopback rehearsal feeds only where the build allows them", () => {
+  const local = manifest({
+    installer: {
+      ...manifest().installer,
+      url: "http://127.0.0.1:8766/PokeApp-Launcher-Private-Setup.exe",
+    },
+  });
+  assert.equal(
+    code(() => verify(envelope(local))),
+    "INSECURE_URL",
+  );
+  assert.equal(
+    verify(envelope(local), { allowLoopback: true }).version,
+    "0.23.0",
+  );
+  for (const url of [
+    "http://updates.invalid/x.exe",
+    "http://user:pw@127.0.0.1/x.exe",
+    "ftp://127.0.0.1/x.exe",
+  ])
+    assert.equal(
+      code(() =>
+        verify(
+          envelope(manifest({ installer: { ...manifest().installer, url } })),
+          { allowLoopback: true },
+        ),
+      ),
+      "INSECURE_URL",
+      url,
+    );
+});
+
+test("progress is reported and a verified installer is never downloaded twice", async () => {
+  const dir = temp();
+  const seen = [];
+  let fetches = 0;
+  const fetchOnce = async (...args) => {
+    fetches++;
+    return fetchOf([INSTALLER.subarray(0, 1000), INSTALLER.subarray(1000)])(
+      ...args,
+    );
+  };
+  await u.download(fetchOnce, manifest(), dir, (received, total) =>
+    seen.push([received, total]),
+  );
+  assert.deepEqual(seen, [
+    [1000, INSTALLER.length],
+    [INSTALLER.length, INSTALLER.length],
+  ]);
+  await u.download(fetchOnce, manifest(), dir);
+  assert.equal(fetches, 1);
+  assert.ok(u.readyInstaller(dir, manifest()));
+  // Another signed file for the same version is not "ready": it downloads.
+  assert.equal(
+    u.readyInstaller(
+      dir,
+      manifest({
+        installer: { ...manifest().installer, sha512: "A".repeat(86) + "==" },
+      }),
+    ),
+    null,
+  );
+});
+
+test("a newer download retires the older verified installer", async () => {
+  const dir = temp();
+  await u.download(fetchOf([INSTALLER]), manifest(), dir);
+  const newer = Buffer.concat([INSTALLER, Buffer.from("v2")]);
+  await u.download(
+    fetchOf([newer]),
+    manifest({
+      version: "0.24.0",
+      installer: {
+        ...manifest().installer,
+        sha512: crypto.createHash("sha512").update(newer).digest("base64"),
+        size: newer.length,
+      },
+    }),
+    dir,
+  );
+  assert.deepEqual(fs.readdirSync(dir).sort(), [
+    "PokeApp-Launcher-0.24.0.exe",
+    "pending.json",
+  ]);
+});
+
+test("«Más tarde» is remembered per version and rejects junk", () => {
+  const dir = temp();
+  assert.equal(u.postponed(dir), null);
+  u.postpone(dir, "0.23.0");
+  assert.equal(u.postponed(dir), "0.23.0");
+  assert.throws(() => u.postpone(dir, "../../evil"));
+  fs.writeFileSync(path.join(dir, "postponed.json"), "{oops");
+  assert.equal(u.postponed(dir), null);
+});

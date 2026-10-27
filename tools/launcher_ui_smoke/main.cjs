@@ -25,7 +25,7 @@ const script = `(async () => {
   check(JSON.stringify(window.launcher.__calls()) === JSON.stringify([["rare_candy", 994, true]]), "exact request sent once");
   const full = document.querySelector('[data-item="heart_scale"]');
   check(full.querySelector(".quick-add").disabled && /No cabe/.test(full.querySelector(".quick-error").textContent), "full stack cannot add");
-  check(!document.getElementById("update-banner").hidden && !document.getElementById("update-download").hidden, "update offered with download button");
+  check(!document.getElementById("update-banner").hidden && !document.getElementById("update-open").hidden && /0\.23\.0/.test(document.getElementById("update-text").textContent), "update offered discreetly in the strip");
   check(/v0.22.0-rc.3/.test(document.getElementById("launcher-version").textContent), "installed version shown");
   check(/Lime3DS/.test(document.getElementById("emulator-state").textContent) && document.querySelectorAll("#discovered-saves button").length === 1, "Lime3DS state and discovered save");
   const card = (id) => document.querySelector('.transfer-card[data-id="' + id.repeat(36) + '"]');
@@ -97,6 +97,27 @@ const script = `(async () => {
   check(/Hemos encontrado varias partidas/.test(document.getElementById("notices").textContent), "choice also stays as a notice");
   options[1].click(); await sleep(200);
   check(JSON.stringify(window.launcher.__calls().at(-1)) === JSON.stringify(["select", "C:/fx/Azahar/sdmc/Nintendo 3DS/a/b/title/00040000/00175e00/data/00000001/main"]), "choosing sends exactly that save");
+  // Updates: the popup opens by itself once per version, «Más tarde» is kept,
+  // «Actualizar» goes through a main ticket, progress and errors are shown.
+  const ud = document.getElementById("update-dialog"), uq = (id) => document.getElementById(id);
+  const offer = { status: "AVAILABLE", current: "0.26.0", version: "0.27.0", channel: "private", prompt: true, size: 160 * 1024 * 1024, notes: "- Selector de partidas\\n- Copias de seguridad" };
+  shut(ud); window.launcher.__navigateTo({ view: "strip" });
+  window.launcher.__setUpdate(offer); await sleep(1300);
+  check(ud.open && /Hay una versión nueva/.test(uq("update-message").textContent) && /Versión 0\.27\.0 · tienes 0\.26\.0/.test(uq("update-versions").textContent) && document.querySelectorAll("#update-notes li").length === 2 && !uq("update-go").hidden && uq("update-go").textContent.trim() === "Actualizar" && uq("update-later").textContent.trim() === "Más tarde" && /160 MB/.test(uq("update-facts").textContent), "a newer version opens the popup by itself with version, notes and size");
+  uq("update-later").click(); await sleep(200);
+  check(!ud.open && window.launcher.__calls().some((c) => c[0] === "postpone"), "«Más tarde» postpones that version");
+  await sleep(1300);
+  check(!ud.open && uq("update-banner").hidden, "no repeated popup or banner for a postponed version");
+  window.launcher.__navigateTo({ view: "modal", panel: "update" }); await sleep(300);
+  check(ud.open && uq("update-go").textContent.trim() === "Actualizar", "a manual check still shows the postponed version");
+  uq("update-go").click(); await sleep(300);
+  check(JSON.stringify(window.launcher.__calls().slice(-2)) === JSON.stringify([["begin", "update", "0.27.0"], ["apply", "t:update:0.27.0"]]), "«Actualizar» asks main for a ticket bound to that version");
+  window.launcher.__setUpdate({ ...offer, prompt: false, status: "DOWNLOADING", progress: { received: 80 * 1024 * 1024, total: 160 * 1024 * 1024 } }); await sleep(600);
+  check(!uq("update-progress-box").hidden && /80 MB de 160 MB · 50 %/.test(uq("update-progress-text").textContent) && uq("update-later").hidden, "download progress is shown; no «Más tarde» once accepted");
+  window.launcher.__setUpdate({ ...offer, prompt: false, status: "ERROR", reason: "SIGNATURE_INVALID" }); await sleep(1300);
+  check(/verificación de firma/.test(uq("update-message").textContent) && uq("update-go").textContent.trim() === "Reintentar", "a forged update is refused and explained");
+  window.launcher.__setUpdate({ status: "UP_TO_DATE", current: "0.27.0", channel: "private" }); await sleep(1300);
+  check(/Estás utilizando la última versión/.test(uq("update-message").textContent) && uq("update-go").hidden, "no update: «Estás utilizando la última versión»");
   return out;
 })()`;
 app.whenReady().then(async () => {
