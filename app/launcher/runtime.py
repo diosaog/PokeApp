@@ -142,6 +142,9 @@ class LauncherRuntime:
         # self.value: state() goes to the renderer, this goes to main only.
         self._web_token = None
         self._web_token_wanted = False
+        # Set the moment a logout is requested, before the cloud loop runs it,
+        # so the web can never be handed the session it just signed out of.
+        self._web_signed_out = False
         self.receipt = None
         self.watch = None
         self._load_local()
@@ -275,6 +278,8 @@ class LauncherRuntime:
                 raise ValueError("unexpected_web_session_arguments")
             with self.lock:
                 token = self._web_token
+                if self._web_signed_out:
+                    return {"status": "LOGIN_REQUIRED"}
             if token and token["expires_at"] > time.time() + 300:
                 return {"status": "OK", **token}
             # Ask the cloud loop for a fresh token; main retries shortly.
@@ -356,6 +361,11 @@ class LauncherRuntime:
         queue = (
             self.local_commands if name in ("select", "sync") else self.cloud_commands
         )
+        if name == "logout":
+            with self.lock:
+                self._web_token = None
+                self._web_token_wanted = False
+                self._web_signed_out = True
         try:
             queue.put_nowait((name, args))
         except Full:
@@ -733,13 +743,17 @@ class LauncherRuntime:
         tokens = self.session._tokens
         with self.lock:
             self._web_token = (
-                {
-                    "access_token": tokens.access_token,
-                    "expires_at": int(tokens.expires_at),
-                    "trainer_id": principal.trainer_id,
-                }
-                if tokens and isinstance(tokens.expires_at, (int, float))
-                else None
+                None
+                if self._web_signed_out
+                else (
+                    {
+                        "access_token": tokens.access_token,
+                        "expires_at": int(tokens.expires_at),
+                        "trainer_id": principal.trainer_id,
+                    }
+                    if tokens and isinstance(tokens.expires_at, (int, float))
+                    else None
+                )
             )
         if not self.store.enabled(
             self.client.origin, principal.trainer_id
@@ -916,6 +930,8 @@ class LauncherRuntime:
                         finally:
                             args.clear()
                         self.tokens.save(self.client.origin, self.session)
+                        with self.lock:
+                            self._web_signed_out = False
                         self._patch(
                             principal=principal.model_dump(),
                             auth_status="VERIFIED",

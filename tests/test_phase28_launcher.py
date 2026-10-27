@@ -179,6 +179,21 @@ class WebSessionTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             runtime.command("web_session", {"token": "x"})
 
+    def test_logout_withdraws_the_web_session_at_once(self):
+        runtime = self.runtime()
+        runtime.session._principal = {"trainer_id": "t1"}
+        runtime._web_token = {
+            "access_token": "access-1",
+            "expires_at": int(time.time()) + 900,
+            "trainer_id": "t1",
+        }
+        # Queued for the cloud loop, but the web is refused right now.
+        self.assertEqual(runtime.command("logout", {}), {"status": "QUEUED"})
+        self.assertEqual(
+            runtime.command("web_session", {}), {"status": "LOGIN_REQUIRED"}
+        )
+        self.assertIsNone(runtime._web_token)
+
 
 class AutomaticSyncTests(unittest.TestCase):
     """The selected save reaches the outbox only when stable, once per content,
