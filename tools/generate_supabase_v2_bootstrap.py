@@ -71,6 +71,8 @@ EXPECTED_MIGRATIONS = [
     "060_transfer_party_origin.sql",
     "061_transfer_authoritative_adjudication.sql",
     "062_admin_incident_center.sql",
+    "063_single_league_structure.sql",
+    "064_admin_robbery_cancellation.sql",
 ]
 
 FORBIDDEN_TOKENS = [

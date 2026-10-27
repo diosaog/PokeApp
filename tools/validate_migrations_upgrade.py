@@ -1,12 +1,12 @@
-"""Upgrade proof for the pending production migrations 054-062 (27C, +062 in 28).
+"""Upgrade proof for the pending production migrations 054-064 (27C, +062 in 28, +063-064 in 29).
 
 Disposable PostgreSQL only (never a hosted database). Applies 001-053, the
 state production runs today, loads representative competitive data, then
-applies 054-062 one by one and proves:
+applies 054-064 one by one and proves:
 
 * every table that existed before keeps byte-identical rows;
 * no existing column, function signature or grant is removed or narrowed;
-* the upgraded schema equals a fresh bootstrap of all 62 files;
+* the upgraded schema equals a fresh bootstrap of all 64 files;
 * immediate retries are refused atomically or are exact no-ops;
 * replay of historical055 after058 is diagnosed and rolled back, never required safe;
 * the new transfer and item-use tables stay closed to anon/authenticated.
@@ -25,13 +25,18 @@ from tools.validate_accounts_local import LocalPG
 
 ROOT = Path(__file__).resolve().parents[1]
 MIGRATIONS = sorted((ROOT / "supabase/v2/migrations").glob("*.sql"))
-PENDING = [m for m in MIGRATIONS if 54 <= int(m.name[:3]) <= 62]
+PENDING = [m for m in MIGRATIONS if 54 <= int(m.name[:3]) <= 64]
 DEPLOYED = [m for m in MIGRATIONS if int(m.name[:3]) <= 53]
 FIXTURES = ["shop_context_setup.sql", "purchase_setup.sql"]
 REPRESENTATIVE = """
 select pokeapp_shop_test.buy('upgrade-proof-1', true);
 select pokeapp_shop_test.buy('upgrade-proof-2', true,
   '00000000-0000-4000-8000-000000008d61');
+-- A validated two-league config as production stores it (063 must keep it).
+insert into public.season_config_versions(id,season_id,version_number,name,
+  effective_from_matchday,total_matchdays,division_count,division_sizes)
+values('00000000-0000-4000-8000-000000008d22','00000000-0000-4000-8000-000000008d10',
+  2,'Two leagues',2,5,2,'{"A":2,"B":2}'::jsonb);
 """
 TABLES = """select table_schema||'.'||table_name from information_schema.tables
  where table_schema in ('public','storage') and table_type='BASE TABLE' order by 1;"""
@@ -89,7 +94,7 @@ def schema_dump(pg):
 
 
 def fresh(pg_bin, port):
-    """Second disposable cluster: a fresh bootstrap of 001-062 to compare."""
+    """Second disposable cluster: a fresh bootstrap of 001-064 to compare."""
     pg = LocalPG(pg_bin, port)
     pg.start()  # roles + storage mock + bootstrap.sql
     try:
@@ -128,8 +133,8 @@ def main():
         print("PASS", label, flush=True)
 
     ok(
-        [int(m.name[:3]) for m in PENDING] == list(range(54, 63)),
-        "pending set is exactly 054-062, in order",
+        [int(m.name[:3]) for m in PENDING] == list(range(54, 65)),
+        "pending set is exactly 054-064, in order",
     )
     pg = LocalPG(args.pg_bin, 55491)
     pg.command(
@@ -332,7 +337,7 @@ def main():
     bootstrap = hashlib.sha256(bootstrap_text.encode()).hexdigest()
     ok(
         bootstrap == upgraded,
-        "001-053 + 054-062 schema equals a fresh 62-file bootstrap",
+        "001-053 + 054-064 schema equals a fresh 64-file bootstrap",
         {
             "upgraded": upgraded,
             "bootstrap": bootstrap,
