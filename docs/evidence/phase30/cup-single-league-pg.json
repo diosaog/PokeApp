@@ -1,0 +1,10 @@
+{
+  "postgres": "17.11",
+  "migrations": "001-064 bootstrap",
+  "checks": [
+    "C1 one league x4: Swiss Cup (2 rounds + Top 4) and doubles Cup certified during the league, participation untouched",
+    "C2 league played to archive with Cups: standings, points, coins and champion identical to a Cup-free twin",
+    "C3 Hall: one league champion and two separate Cup entries; archive and history read both",
+    "C4 Cup after archive in a one-league season leaves league history byte-identical"
+  ]
+}
