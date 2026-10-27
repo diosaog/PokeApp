@@ -1377,6 +1377,14 @@ function fillUpdateDialog(u) {
       : ["AVAILABLE", "READY"].includes(u.status) || busy
         ? "new"
         : "idle";
+  $("update-hero").querySelector(".update-badge").textContent =
+    u.status === "ERROR"
+      ? "!"
+      : u.status === "UP_TO_DATE"
+        ? "✓"
+        : ["CHECKING", "IDLE"].includes(u.status)
+          ? "↻"
+          : "↑";
   text(
     "update-title",
     u.version && u.status !== "UP_TO_DATE"
