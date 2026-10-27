@@ -27,6 +27,7 @@ class LocalWriteController:
         self._backups = []
         self._backup_selection = None
         self._backup_message = None
+        self._notice_key = self._notice = None
         if engine is not None:
             try:
                 self._pending = engine.pending()
@@ -44,6 +45,29 @@ class LocalWriteController:
     def _transfer_notice(self):
         if self.engine is None:
             return None
+        # A pure read of the engine database for the selected save. The 1 s
+        # state poll reuses it while neither changes, instead of reopening the
+        # database and re-running its path checks every time; any change to
+        # the file (including a path now resolving to another file) or to the
+        # selection reads it again with every check.
+        try:
+            info = self.engine.database.stat()
+            selected = self.selected()
+            key = (
+                info.st_ino,
+                info.st_mtime_ns,
+                info.st_size,
+                str(Path(selected).absolute()) if selected else None,
+            )
+        except (OSError, TypeError, ValueError):
+            key = None
+        if key is not None and key == self._notice_key:
+            return self._notice
+        notice = self._read_transfer_notice()
+        self._notice_key, self._notice = key, notice
+        return notice
+
+    def _read_transfer_notice(self):
         from app.launcher.transfer import TRANSFER_MESSAGES
 
         try:

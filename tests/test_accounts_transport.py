@@ -73,8 +73,16 @@ class AccountTransportTests(unittest.TestCase):
 
     def test_capability_off_default_and_register_requires_explicit_container(self):
         client = TestClient(create_app(container=ApiContainer()))
+        # The contract grew registration/renewal/bootstrap flags: all stay off
+        # without an explicitly configured account service.
         self.assertEqual(
-            client.get("/v1/auth/account-capabilities").json(), {"enabled": False}
+            client.get("/v1/auth/account-capabilities").json(),
+            {
+                "enabled": False,
+                "registration_enabled": False,
+                "renewal_enabled": False,
+                "bootstrap_required": False,
+            },
         )
         response = client.post(
             "/v1/auth/register",
