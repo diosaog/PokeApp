@@ -60,8 +60,13 @@ function sign({
     throw new Error("KEY_INSIDE_REPOSITORY_OR_BUILD");
   if (channel === "stable" && authenticode !== "Valid")
     throw new Error("STABLE_REQUIRES_VALID_AUTHENTICODE");
-  if (!/^https:\/\//.test(url || ""))
+  // HTTPS only; a loopback rehearsal URL is accepted on the private channel.
+  const loopback = /^http:\/\/127\.0\.0\.1:\d{2,5}\//.test(url || "");
+  if (!/^https:\/\//.test(url || "") && !(loopback && channel === "private"))
     throw new Error("DOWNLOAD_URL_MUST_BE_HTTPS");
+  const semver = /^\d{1,4}\.\d{1,4}\.\d{1,4}(-[0-9A-Za-z.]{1,32})?$/;
+  if (!semver.test(version || "") || !semver.test(minimum || ""))
+    throw new Error("INVALID_VERSION");
   const bytes = fs.readFileSync(installer);
   const manifest = {
     channel,

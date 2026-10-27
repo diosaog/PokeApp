@@ -13,8 +13,12 @@ const updateKeyFile = process.env.POKEAPP_UPDATE_PUBLIC_KEY_FILE || "";
 const updateFeed = process.env.POKEAPP_UPDATE_FEED || "";
 if (!!updateKeyFile !== !!updateFeed)
   throw new Error("Update public key and feed must be configured together");
-if (updateFeed && !updateFeed.startsWith("https://"))
+// HTTPS only; a loopback rehearsal feed is accepted for private candidates.
+const loopbackFeed = /^http:\/\/127\.0\.0\.1:\d{2,5}\//.test(updateFeed);
+if (updateFeed && !updateFeed.startsWith("https://") && !loopbackFeed)
   throw new Error("Update feed must use HTTPS");
+if (loopbackFeed && !privateCandidate)
+  throw new Error("A loopback update feed is limited to private candidates");
 const updateKey = updateKeyFile ? fs.readFileSync(updateKeyFile, "utf8") : null;
 if (updateKey && /PRIVATE KEY/.test(updateKey))
   throw new Error("Refusing to embed a private key");
@@ -23,20 +27,34 @@ const buildVersion = process.env.POKEAPP_BUILD_VERSION || "";
 if (buildVersion && !privateCandidate)
   throw new Error("Version override is limited to private candidates");
 const channel = privateCandidate ? "private" : "stable";
-const productName = privateCandidate
-  ? "PokeApp Launcher Private"
-  : "PokeApp Launcher";
+// Update rehearsal: an installable private build with its own identity, so a
+// real install/update cycle never touches the owner's installed Launcher.
+const rehearsal = process.env.POKEAPP_PACKAGE_VARIANT === "updatetest";
+if (process.env.POKEAPP_PACKAGE_VARIANT && !rehearsal)
+  throw new Error("Unknown package variant");
+if (rehearsal && !privateCandidate)
+  throw new Error("Update rehearsal builds are private candidates only");
+const productName = rehearsal
+  ? "PokeApp Launcher UpdateTest"
+  : privateCandidate
+    ? "PokeApp Launcher Private"
+    : "PokeApp Launcher";
 
 module.exports = {
-  appId: privateCandidate
-    ? "app.pokeapp.launcher.private"
-    : "app.pokeapp.launcher",
+  appId: rehearsal
+    ? "app.pokeapp.launcher.updatetest"
+    : privateCandidate
+      ? "app.pokeapp.launcher.private"
+      : "app.pokeapp.launcher",
   productName,
-  artifactName: privateCandidate
-    ? "PokeApp-Launcher-Private-Setup.exe"
-    : "PokeApp-Launcher-Setup.exe",
+  artifactName: rehearsal
+    ? "PokeApp-Launcher-UpdateTest-Setup.exe"
+    : privateCandidate
+      ? "PokeApp-Launcher-Private-Setup.exe"
+      : "PokeApp-Launcher-Setup.exe",
   extraMetadata: {
     pokeappPrivateCandidate: privateCandidate,
+    ...(rehearsal ? { pokeappVariant: "updatetest" } : {}),
     ...(webPreview ? { pokeappWebPreview: "http://127.0.0.1:4173" } : {}),
     ...(buildVersion ? { version: buildVersion } : {}),
     ...(updateKey

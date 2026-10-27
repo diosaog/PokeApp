@@ -119,6 +119,18 @@ def audit(build):
     )
     private = metadata.get("pokeappPrivateCandidate") is True
     preview = metadata.get("pokeappWebPreview")
+    variant = metadata.get("pokeappVariant")
+    assert variant in (None, "updatetest"), variant
+    assert variant is None or private, "update rehearsal in a public build"
+    update = metadata.get("pokeappUpdate") or {}
+    for channel, feed in (update.get("feed") or {}).items():
+        # Public feeds are HTTPS; loopback rehearsal feeds exist only in private.
+        assert (
+            feed is None
+            or feed.startswith("https://")
+            or (private and feed.startswith("http://127.0.0.1:"))
+        ), (channel, feed)
+    assert "PRIVATE KEY" not in json.dumps(update), "private key embedded"
     # A web preview origin is legal only in a private candidate, and only the one.
     assert preview in (None, "http://127.0.0.1:4173"), preview
     assert preview is None or private, "web preview in a public build"
@@ -126,7 +138,9 @@ def audit(build):
         build
         / "release"
         / (
-            "PokeApp-Launcher-Private-Setup.exe"
+            "PokeApp-Launcher-UpdateTest-Setup.exe"
+            if variant
+            else "PokeApp-Launcher-Private-Setup.exe"
             if private
             else "PokeApp-Launcher-Setup.exe"
         )
@@ -139,6 +153,8 @@ def audit(build):
             (metadata.get("pokeappUpdate") or {}).get("publicKey")
         ),
         "private_candidate": private,
+        "variant": variant,
+        "update_feed": update.get("feed") or {},
         "web_origin": preview or "https://pokeapp-web.pokeapp-v2.workers.dev",
         "installer": installer.name,
         "sha256": hashlib.sha256(installer.read_bytes()).hexdigest(),
