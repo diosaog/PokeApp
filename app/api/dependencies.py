@@ -46,6 +46,7 @@ class ApiContainer:
     launcher_repository: object | None = None
     save_ingestion: object | None = None
     account_service: object | None = None
+    incident_repository: object | None = None
 
 
 def get_api_container(request: Request) -> ApiContainer:
@@ -180,6 +181,11 @@ def create_default_container(config: APIConfig | None = None) -> ApiContainer:
         transfer_integration = TransferIntegration(repository, TransferTransport(repository, PrivateItemUseBlobs(client)),
             allowed_trainers=config.transfer_engineering_trainers)
 
+    incident_repo = None
+    if config.admin_incidents_enabled and config.supabase_url and config.supabase_service_role_key:
+        from app.repositories.supabase.incidents import SupabaseIncidentRepository
+        incident_repo = SupabaseIncidentRepository.from_url_key(config.supabase_url, config.supabase_service_role_key)
+
     auth_bridge = None
     if auth_client is not None and trainer_repo is not None and config.credential_keyring is not None:
         auth_bridge = PinAuthBridge(trainers=trainer_repo, auth=auth_client, pepper="",
@@ -199,6 +205,7 @@ def create_default_container(config: APIConfig | None = None) -> ApiContainer:
         item_use_repository=item_use_repo,
         item_use_transport=item_use_transport,
         transfer_integration=transfer_integration,
+        incident_repository=incident_repo,
         season_admin_repository=season_admin_repo,
         matchday_repository=matchday_repo,
         participant_status_repository=participant_status_repo,

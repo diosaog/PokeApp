@@ -1713,6 +1713,57 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/v1/admin/seasons/{season_id}/incidents": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Overview */
+    get: operations["overview_v1_admin_seasons__season_id__incidents_get"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/admin/seasons/{season_id}/incidents/purchases/{purchase_id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** Resolve Purchase */
+    post: operations["resolve_purchase_v1_admin_seasons__season_id__incidents_purchases__purchase_id__post"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/admin/seasons/{season_id}/incidents/coins": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** Adjust Coins */
+    post: operations["adjust_coins_v1_admin_seasons__season_id__incidents_coins_post"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -1953,6 +2004,18 @@ export interface components {
       /** Expected Results Revision */
       expected_results_revision: number;
       tie_resolution?: components["schemas"]["TieResolution"] | null;
+    };
+    /** CoinAdjustBody */
+    CoinAdjustBody: {
+      /**
+       * Trainer Id
+       * Format: uuid
+       */
+      trainer_id: string;
+      /** Amount */
+      amount: number;
+      /** Reason */
+      reason: string;
     };
     /** CoinsReduction */
     CoinsReduction: {
@@ -2702,6 +2765,170 @@ export interface components {
       service: string;
       /** Status */
       status: string;
+    };
+    /** IncidentHistory */
+    IncidentHistory: {
+      /**
+       * Operation Id
+       * Format: uuid
+       */
+      operation_id: string;
+      /** Kind */
+      kind: string;
+      /** Actor */
+      actor?: string | null;
+      /** Target */
+      target?: string | null;
+      /** Purchase Id */
+      purchase_id?: string | null;
+      /** Amount */
+      amount: number;
+      /** Reason */
+      reason: string;
+      /** Status */
+      status?: string | null;
+      /**
+       * Created At
+       * Format: date-time
+       */
+      created_at: string;
+    };
+    /** IncidentOverview */
+    IncidentOverview: {
+      /**
+       * Season Id
+       * Format: uuid
+       */
+      season_id: string;
+      /** Season Status */
+      season_status: string;
+      /** Wallets */
+      wallets: components["schemas"]["IncidentWallet"][];
+      /** Purchases */
+      purchases: components["schemas"]["IncidentPurchase"][];
+      /** Robberies */
+      robberies: components["schemas"]["IncidentRobbery"][];
+      /** History */
+      history: components["schemas"]["IncidentHistory"][];
+    };
+    /** IncidentPurchase */
+    IncidentPurchase: {
+      /**
+       * Id
+       * Format: uuid
+       */
+      id: string;
+      /**
+       * Trainer Id
+       * Format: uuid
+       */
+      trainer_id: string;
+      /** Display Name */
+      display_name: string;
+      /** Item Name */
+      item_name: string;
+      /** Item Code */
+      item_code?: string | null;
+      /** Total Price */
+      total_price: number;
+      /**
+       * Status
+       * @enum {string}
+       */
+      status: "pending" | "used" | "cancelled" | "refunded";
+      /** Acquisition Type */
+      acquisition_type: string;
+      /**
+       * Purchased At
+       * Format: date-time
+       */
+      purchased_at: string;
+      /** Linked Operation */
+      linked_operation: boolean;
+      /** Cancellable */
+      cancellable: boolean;
+      /** Refundable */
+      refundable: boolean;
+    };
+    /** IncidentReceipt */
+    IncidentReceipt: {
+      /**
+       * Operation Id
+       * Format: uuid
+       */
+      operation_id: string;
+      /**
+       * Kind
+       * @enum {string}
+       */
+      kind: "purchase_cancel" | "purchase_refund" | "coin_adjustment";
+      /**
+       * Season Id
+       * Format: uuid
+       */
+      season_id: string;
+      /**
+       * Trainer Id
+       * Format: uuid
+       */
+      trainer_id: string;
+      /** Purchase Id */
+      purchase_id?: string | null;
+      /**
+       * Status
+       * @enum {string}
+       */
+      status: "cancelled" | "refunded" | "applied";
+      /** Amount */
+      amount: number;
+      /** Ledger Id */
+      ledger_id?: string | null;
+      /** Balance After */
+      balance_after: number;
+      /** Replayed */
+      replayed: boolean;
+    };
+    /** IncidentRobbery */
+    IncidentRobbery: {
+      /**
+       * Authorization Id
+       * Format: uuid
+       */
+      authorization_id: string;
+      /**
+       * Purchase Id
+       * Format: uuid
+       */
+      purchase_id: string;
+      /** Requester */
+      requester?: string | null;
+      /** Donor */
+      donor?: string | null;
+      /** State */
+      state?: string | null;
+      /** Source Obligation */
+      source_obligation?: string | null;
+      /** Destination Obligation */
+      destination_obligation?: string | null;
+      /**
+       * Created At
+       * Format: date-time
+       */
+      created_at: string;
+    };
+    /** IncidentWallet */
+    IncidentWallet: {
+      /**
+       * Trainer Id
+       * Format: uuid
+       */
+      trainer_id: string;
+      /** Display Name */
+      display_name: string;
+      /** Status */
+      status: string;
+      /** Balance */
+      balance: number;
     };
     /** InitialAssignmentPlayer */
     InitialAssignmentPlayer: {
@@ -3857,6 +4084,16 @@ export interface components {
       acquisition_type: "paid" | "reward";
       /** Physical State */
       physical_state?: string | null;
+    };
+    /** PurchaseResolveBody */
+    PurchaseResolveBody: {
+      /**
+       * Action
+       * @enum {string}
+       */
+      action: "cancel" | "refund";
+      /** Reason */
+      reason: string;
     };
     /** RankingErrorDetail */
     RankingErrorDetail: {
@@ -8852,6 +9089,112 @@ export interface operations {
         };
         content: {
           "application/json": components["schemas"]["TransferLegResponse"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  overview_v1_admin_seasons__season_id__incidents_get: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        season_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["IncidentOverview"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  resolve_purchase_v1_admin_seasons__season_id__incidents_purchases__purchase_id__post: {
+    parameters: {
+      query?: never;
+      header: {
+        "Idempotency-Key": string;
+      };
+      path: {
+        season_id: string;
+        purchase_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["PurchaseResolveBody"];
+      };
+    };
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["IncidentReceipt"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  adjust_coins_v1_admin_seasons__season_id__incidents_coins_post: {
+    parameters: {
+      query?: never;
+      header: {
+        "Idempotency-Key": string;
+      };
+      path: {
+        season_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["CoinAdjustBody"];
+      };
+    };
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["IncidentReceipt"];
         };
       };
       /** @description Validation Error */

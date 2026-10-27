@@ -65,3 +65,15 @@ it("rules refresh current rules/setup and close refreshes participant/admin day 
   ])
     expect(affectedRead("/v1/seasons/s/matchdays/d/close", path)).toBe(true);
 });
+it("incident commands refresh wallets, purchases and the incident console", () => {
+  for (const command of [
+    "/v1/admin/seasons/s/incidents/purchases/p",
+    "/v1/admin/seasons/s/incidents/coins",
+  ]) {
+    for (const path of ["shop", "inventory", "league", "overview"])
+      expect(affectedRead(command, read(path))).toBe(true);
+    expect(affectedRead(command, "/v1/admin/seasons/s/incidents")).toBe(true);
+    expect(affectedRead(command, read("pc"))).toBe(false);
+    expect(affectedRead(command, "/v1/read/seasons/other/shop")).toBe(false);
+  }
+});

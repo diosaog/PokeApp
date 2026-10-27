@@ -26,7 +26,12 @@ type AccountsPage = {
   offset: number;
   has_more: boolean;
 };
-export function AdminAccountsPage() {
+// `embedded`: inside Administración › Cuentas y sistema (no page heading).
+export function AdminAccountsPage({
+  embedded = false,
+}: {
+  embedded?: boolean;
+}) {
   const { me, holdAdminNavigation, adminOperationPending } = useApp(),
     [offset, setOffset] = useState(0);
   const path = `/v1/admin/accounts?offset=${offset}`;
@@ -43,18 +48,24 @@ export function AdminAccountsPage() {
     return <Empty>Esta pantalla está reservada a administradores.</Empty>;
   return (
     <>
-      <Heading eyebrow="ADMINISTRACIÓN" title="Cuentas de entrenadores">
-        Crear una cuenta no añade participantes ni genera recompensas.
-      </Heading>
-      <Link
-        to="/admin"
-        aria-disabled={adminOperationPending}
-        onClick={(e) => {
-          if (adminOperationPending) e.preventDefault();
-        }}
-      >
-        Organizar mi Liga · añadir cuentas existentes desde Participantes
-      </Link>
+      {embedded ? (
+        <h2>Cuentas de entrenadores</h2>
+      ) : (
+        <>
+          <Heading eyebrow="ADMINISTRACIÓN" title="Cuentas de entrenadores">
+            Crear una cuenta no añade participantes ni genera recompensas.
+          </Heading>
+          <Link
+            to="/admin"
+            aria-disabled={adminOperationPending}
+            onClick={(e) => {
+              if (adminOperationPending) e.preventDefault();
+            }}
+          >
+            Organizar mi Liga · añadir cuentas existentes desde Participantes
+          </Link>
+        </>
+      )}
       <p>
         La incorporación conserva las reglas actuales: solo en borrador, antes
         de preparar divisiones y jornadas. No se añade historial retroactivo.

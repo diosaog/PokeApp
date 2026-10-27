@@ -1,5 +1,6 @@
 import { useEffect, useState, type ComponentProps } from "react";
 import { Link } from "react-router-dom";
+import { Coins, Trophy, Users } from "lucide-react";
 import type { Model } from "../api/types";
 import { useApp, useOverview, useRead } from "../state";
 import {
@@ -29,6 +30,8 @@ import {
   readinessLabel,
   seasonLabel,
 } from "./admin-labels";
+import { IncidentCenter } from "./admin-incidents";
+import { AdminAccountsPage } from "./admin-accounts";
 
 type Setup = Model<"SeasonSetup">;
 function AdminLink(props: ComponentProps<typeof Link>) {
@@ -787,9 +790,45 @@ function Risk({ setup }: { setup: Setup }) {
     </Card>
   );
 }
+// Three areas, no more: the League itself, its economy and incidents, and
+// accounts with the system. Every existing tool keeps its place inside them.
+const areas = [
+  [
+    "liga",
+    "Liga y competición",
+    Trophy,
+    "Temporada, reglas, jornadas y cierre",
+  ],
+  [
+    "economia",
+    "Economía e incidencias",
+    Coins,
+    "Compras, monedas, robos e intervenciones",
+  ],
+  ["cuentas", "Cuentas y sistema", Users, "Cuentas, accesos y estado"],
+] as const;
+type Area = (typeof areas)[number][0];
+function SystemStatus() {
+  const { accountsEnabled, registrationEnabled, renewalEnabled } = useApp();
+  return (
+    <Card className="admin-system">
+      <h2>Estado del sistema</h2>
+      <dl>
+        <dt>Gestión de cuentas</dt>
+        <dd>{accountsEnabled ? "Activa" : "No disponible"}</dd>
+        <dt>Registro de entrenadores</dt>
+        <dd>{registrationEnabled ? "Abierto" : "Cerrado"}</dd>
+        <dt>Renovación de accesos</dt>
+        <dd>{renewalEnabled ? "Disponible" : "No disponible"}</dd>
+      </dl>
+    </Card>
+  );
+}
 export function AdminPage() {
   const { season, adminOperationPending } = useApp(),
-    q = useRead<Setup>(`/v1/admin/seasons/${season}/setup`, !!season),
+    // Polls while open: a change made by another administrator shows up.
+    q = useRead<Setup>(`/v1/admin/seasons/${season}/setup`, !!season, 20000),
+    [area, setArea] = useState<Area>("liga"),
     [tab, setTab] = useState("Resumen"),
     [create, setCreate] = useState(false),
     cmd = useAdminCommand();
@@ -799,96 +838,128 @@ export function AdminPage() {
         Prepara la temporada, revisa sus reglas y gestiona las decisiones
         excepcionales.
       </Heading>
-      <button
-        className="button"
-        disabled={adminOperationPending}
-        onClick={() => setCreate(true)}
-      >
-        Crear temporada
-      </button>
-      <div className="tabs" role="tablist" aria-label="Administración">
-        {[
-          "Resumen",
-          "Configuración",
-          "Entrenadores",
-          "Competición",
-          "Historial",
-          "Zona de riesgo",
-        ].map((t) => (
+      <nav className="admin-areas" aria-label="Áreas de administración">
+        {areas.map(([id, label, Icon, detail]) => (
           <button
-            key={t}
-            role="tab"
-            aria-selected={tab === t}
+            key={id}
+            type="button"
+            aria-pressed={area === id}
             disabled={adminOperationPending}
-            onClick={() => setTab(t)}
+            onClick={() => setArea(id)}
           >
-            {t}
+            <Icon aria-hidden="true" />
+            <strong>{label}</strong>
+            <small>{detail}</small>
           </button>
         ))}
-      </div>
-      <Notice error={q.error} />
-      {q.error && (
-        <button
-          disabled={q.isFetching || adminOperationPending}
-          onClick={() => void q.refetch()}
-        >
-          Volver a consultar Administración
-        </button>
+      </nav>
+      {area === "economia" &&
+        (season ? (
+          <IncidentCenter />
+        ) : (
+          <Empty>Crea o selecciona una temporada.</Empty>
+        ))}
+      {area === "cuentas" && (
+        <div className="admin-accounts-area">
+          <SystemStatus />
+          <AdminAccountsPage embedded />
+        </div>
       )}
-      {!season ? (
-        <Empty>Crea o selecciona una temporada.</Empty>
-      ) : q.isPending ? (
-        <Loading />
-      ) : (
-        q.data && (
-          <div key={`${season}:${tab}`} role="tabpanel">
-            {tab === "Resumen" ? (
-              <Card>
-                <h2>{q.data.season.name}</h2>
-                <Tag>{seasonLabel(q.data.season.status)}</Tag>
-                <p>{q.data.participants.length} participantes</p>
-                <h3>Preparación</h3>
-                {q.data.readiness.blocking_reasons.length ? (
-                  q.data.readiness.blocking_reasons.map((reason) => (
-                    <p key={reason}>{readinessLabel(reason)}</p>
-                  ))
-                ) : (
-                  <p>Sin bloqueos de preparación.</p>
-                )}
-              </Card>
-            ) : tab === "Configuración" ? (
-              <Rules setup={q.data} />
-            ) : tab === "Entrenadores" ? (
-              <Participants setup={q.data} />
-            ) : tab === "Competición" ? (
-              <Competition setup={q.data} />
-            ) : tab === "Zona de riesgo" ? (
-              <>
-                <ChampionshipReview seasonName={q.data.season.name} />
-                <Risk setup={q.data} />
-              </>
-            ) : (
-              <Card>
-                <h2>Historia oficial</h2>
-                <p>
-                  Consulta las jornadas congeladas y los campeones certificados.
-                  Cada corrección conserva el registro de lo que cambió.
-                </p>
-                <div className="toolbar">
-                  <AdminLink className="button" to="/liga">
-                    Jornadas oficiales
-                  </AdminLink>
-                  <AdminLink className="button" to="/hall">
-                    Hall de la Fama
-                  </AdminLink>
-                  <AdminLink className="button" to="/juicios">
-                    Historial de juicios
-                  </AdminLink>
-                </div>
-              </Card>
-            )}
+      {area === "liga" && (
+        <>
+          <button
+            className="button"
+            disabled={adminOperationPending}
+            onClick={() => setCreate(true)}
+          >
+            Crear temporada
+          </button>
+          <div className="tabs" role="tablist" aria-label="Administración">
+            {[
+              "Resumen",
+              "Configuración",
+              "Entrenadores",
+              "Competición",
+              "Historial",
+              "Zona de riesgo",
+            ].map((t) => (
+              <button
+                key={t}
+                role="tab"
+                aria-selected={tab === t}
+                disabled={adminOperationPending}
+                onClick={() => setTab(t)}
+              >
+                {t}
+              </button>
+            ))}
           </div>
-        )
+          <Notice error={q.error} />
+          {q.error && (
+            <button
+              disabled={q.isFetching || adminOperationPending}
+              onClick={() => void q.refetch()}
+            >
+              Volver a consultar Administración
+            </button>
+          )}
+          {!season ? (
+            <Empty>Crea o selecciona una temporada.</Empty>
+          ) : q.isPending ? (
+            <Loading />
+          ) : (
+            q.data && (
+              <div key={`${season}:${tab}`} role="tabpanel">
+                {tab === "Resumen" ? (
+                  <Card>
+                    <h2>{q.data.season.name}</h2>
+                    <Tag>{seasonLabel(q.data.season.status)}</Tag>
+                    <p>{q.data.participants.length} participantes</p>
+                    <h3>Preparación</h3>
+                    {q.data.readiness.blocking_reasons.length ? (
+                      q.data.readiness.blocking_reasons.map((reason) => (
+                        <p key={reason}>{readinessLabel(reason)}</p>
+                      ))
+                    ) : (
+                      <p>Sin bloqueos de preparación.</p>
+                    )}
+                  </Card>
+                ) : tab === "Configuración" ? (
+                  <Rules setup={q.data} />
+                ) : tab === "Entrenadores" ? (
+                  <Participants setup={q.data} />
+                ) : tab === "Competición" ? (
+                  <Competition setup={q.data} />
+                ) : tab === "Zona de riesgo" ? (
+                  <>
+                    <ChampionshipReview seasonName={q.data.season.name} />
+                    <Risk setup={q.data} />
+                  </>
+                ) : (
+                  <Card>
+                    <h2>Historia oficial</h2>
+                    <p>
+                      Consulta las jornadas congeladas y los campeones
+                      certificados. Cada corrección conserva el registro de lo
+                      que cambió.
+                    </p>
+                    <div className="toolbar">
+                      <AdminLink className="button" to="/liga">
+                        Jornadas oficiales
+                      </AdminLink>
+                      <AdminLink className="button" to="/hall">
+                        Hall de la Fama
+                      </AdminLink>
+                      <AdminLink className="button" to="/juicios">
+                        Historial de juicios
+                      </AdminLink>
+                    </div>
+                  </Card>
+                )}
+              </div>
+            )
+          )}
+        </>
       )}
       {create && (
         <Modal

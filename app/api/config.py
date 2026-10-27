@@ -22,6 +22,8 @@ class APIConfig:
     item_verification_trainers: tuple[str, ...] = ()
     transfer_engineering_enabled: bool = False
     transfer_engineering_trainers: tuple[str, ...] = ()
+    # Phase 28: only after migration 062 is applied to that database.
+    admin_incidents_enabled: bool = False
     registration_access_code: str = field(default="", repr=False)
     registration_bootstrap_hash: str = field(default="", repr=False)
     credential_keyring: object | None = field(default=None, repr=False)
@@ -71,6 +73,7 @@ class APIConfig:
             item_verification_transport_enabled=source.get("POKEAPP_ITEM_VERIFICATION_TRANSPORT_ENABLED") == "true",
             item_verification_trainers=tuple(t.strip() for t in source.get("POKEAPP_ITEM_VERIFICATION_TRAINERS", "").split(",") if t.strip()),
             transfer_engineering_enabled=source.get("POKEAPP_TRANSFER_ENGINEERING_ENABLED") == "true",
+            admin_incidents_enabled=source.get("POKEAPP_ADMIN_INCIDENTS_ENABLED") == "true",
             transfer_engineering_trainers=tuple(t.strip() for t in source.get("POKEAPP_TRANSFER_ENGINEERING_TRAINERS", "").split(",") if t.strip()),
             credential_keyring=credential_keyring_from_env(source)
             if versioned

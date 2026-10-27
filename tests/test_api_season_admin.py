@@ -154,7 +154,9 @@ class SeasonAdminApiTests(unittest.TestCase):
         schema = self.client.get("/openapi.json").json()
         routes = [(path, method) for path, ops in schema["paths"].items() if path.startswith("/v1/admin") for method in ops]
         # F adds the authenticated championship review and exceptional BO3 command.
-        self.assertEqual(len(routes), 37)
+        # The account administration routes made it 40 (count not updated then);
+        # Phase 28 adds the incident center read and its two commands: 43.
+        self.assertEqual(len(routes), 43)
         for path, method in routes:
             self.assertIn("security", schema["paths"][path][method])
 

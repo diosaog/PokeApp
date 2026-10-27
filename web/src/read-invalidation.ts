@@ -44,6 +44,10 @@ export function affectedRead(command: string, read: string): boolean {
       "/wipe-revivals",
     );
   if (action.includes("/championship/")) return is("/championship", "/setup");
+  // Incident center (Phase 28): a cancellation, refund or correction moves
+  // coins and purchase states, so every wallet and inventory read refreshes.
+  if (action.includes("/incidents"))
+    return is("/incidents", "/shop", "/inventory", "/league", "/overview");
   // Economic commands can change deaths/eligibility as well as the wallet.
   if (
     action.includes("/shop") ||

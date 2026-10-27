@@ -1,12 +1,12 @@
-"""Phase27C upgrade proof for the pending production migrations 054-061.
+"""Upgrade proof for the pending production migrations 054-062 (27C, +062 in 28).
 
 Disposable PostgreSQL only (never a hosted database). Applies 001-053, the
 state production runs today, loads representative competitive data, then
-applies 054-061 one by one and proves:
+applies 054-062 one by one and proves:
 
 * every table that existed before keeps byte-identical rows;
 * no existing column, function signature or grant is removed or narrowed;
-* the upgraded schema equals a fresh bootstrap of all 61 files;
+* the upgraded schema equals a fresh bootstrap of all 62 files;
 * immediate retries are refused atomically or are exact no-ops;
 * replay of historical055 after058 is diagnosed and rolled back, never required safe;
 * the new transfer and item-use tables stay closed to anon/authenticated.
@@ -25,7 +25,7 @@ from tools.validate_accounts_local import LocalPG
 
 ROOT = Path(__file__).resolve().parents[1]
 MIGRATIONS = sorted((ROOT / "supabase/v2/migrations").glob("*.sql"))
-PENDING = [m for m in MIGRATIONS if 54 <= int(m.name[:3]) <= 61]
+PENDING = [m for m in MIGRATIONS if 54 <= int(m.name[:3]) <= 62]
 DEPLOYED = [m for m in MIGRATIONS if int(m.name[:3]) <= 53]
 FIXTURES = ["shop_context_setup.sql", "purchase_setup.sql"]
 REPRESENTATIVE = """
@@ -89,7 +89,7 @@ def schema_dump(pg):
 
 
 def fresh(pg_bin, port):
-    """Second disposable cluster: a fresh bootstrap of 001-061 to compare."""
+    """Second disposable cluster: a fresh bootstrap of 001-062 to compare."""
     pg = LocalPG(pg_bin, port)
     pg.start()  # roles + storage mock + bootstrap.sql
     try:
@@ -128,8 +128,8 @@ def main():
         print("PASS", label, flush=True)
 
     ok(
-        [int(m.name[:3]) for m in PENDING] == list(range(54, 62)),
-        "pending set is exactly 054-061, in order",
+        [int(m.name[:3]) for m in PENDING] == list(range(54, 63)),
+        "pending set is exactly 054-062, in order",
     )
     pg = LocalPG(args.pg_bin, 55491)
     pg.command(
@@ -244,7 +244,10 @@ def main():
             pg,
             "select n.nspname||'.'||c.relname from pg_class c join pg_namespace n on n.oid=c.relnamespace where c.relrowsecurity and c.relforcerowsecurity;",
         )
-        ok(set(new_tables) <= set(private_rls), "all seven new tables force RLS")
+        ok(
+            set(new_tables) <= set(private_rls),
+            f"all {len(new_tables)} new tables force RLS",
+        )
         ok(
             not exposed,
             f"{len(new_tables)} new tables closed to anon/authenticated",
@@ -329,7 +332,7 @@ def main():
     bootstrap = hashlib.sha256(bootstrap_text.encode()).hexdigest()
     ok(
         bootstrap == upgraded,
-        "001-053 + 054-061 schema equals a fresh 61-file bootstrap",
+        "001-053 + 054-062 schema equals a fresh 62-file bootstrap",
         {
             "upgraded": upgraded,
             "bootstrap": bootstrap,

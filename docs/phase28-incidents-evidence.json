@@ -1,0 +1,16 @@
+{
+  "postgres": "17.11",
+  "migrations": "001-062 bootstrap",
+  "checks": [
+    "cancel returns the exact price once and keeps the purchase row",
+    "same operation replays; other data conflicts; no double return",
+    "concurrent cancellations: one effect, others refused",
+    "refund only for used purchases, history kept",
+    "robbery/revive purchases are not reversed by a status change",
+    "mid-operation failure rolls back status, coins and audit",
+    "corrections are bounded, admin only, reason required",
+    "incident read: wallets, purchases with allowed actions, history",
+    "archived seasons cannot be corrected",
+    "append-only audit; only the backend role can run the commands"
+  ]
+}
