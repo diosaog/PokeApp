@@ -1,6 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import worker, { artifactKey } from "./launcher.mjs";
+import worker from "./launcher.mjs";
+import { artifactKey } from "./release-keys.mjs";
 import launcher from "../launcher-release.json" with { type: "json" };
 
 test("direct binary GET and HEAD use only the pinned object, with download headers", async () => {
