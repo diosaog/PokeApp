@@ -720,3 +720,60 @@ button[aria-busy="true"] {
     opacity: 0.5;
   }
 }
+
+/* Phase 29: competition structure (one league or Liga A + Liga B). Two
+   option tiles inside the form, not another framed box: the admin fieldset
+   frame is undone here. */
+.structure-choice,
+.section-admin .structure-choice {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0 12px;
+  margin: 0 0 6px;
+  padding: 0;
+  border: 0;
+  background: none;
+}
+.structure-choice legend,
+.section-admin .structure-choice legend {
+  margin-bottom: 4px;
+  padding: 0;
+  font-weight: 550;
+}
+.structure-choice .check {
+  align-items: flex-start;
+  margin: 6px 0;
+  border: 1px solid var(--c-line);
+  cursor: pointer;
+}
+.structure-choice .check input {
+  margin-top: 2px;
+}
+.structure-choice .check:has(input:checked) {
+  border-color: var(--c-accent);
+}
+.structure-choice .check span {
+  display: grid;
+  gap: 2px;
+  font-weight: 550;
+}
+.structure-choice .check small,
+.structure-choice .muted {
+  color: var(--c-text-soft);
+  font-weight: 400;
+}
+.structure-choice .muted {
+  grid-column: 1 / -1;
+  margin: 2px 0 8px;
+  font-size: 0.78rem;
+}
+.structure-roster {
+  grid-column: 1 / -1;
+  margin: 6px 0 12px;
+}
+@media (max-width: 640px) {
+  .structure-choice,
+  .section-admin .structure-choice {
+    grid-template-columns: 1fr;
+  }
+}

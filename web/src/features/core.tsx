@@ -139,6 +139,17 @@ function LeagueState({
     </WithSeason>
   );
 }
+// One league shows a single «Liga»; two leagues keep División A and B. The
+// standings themselves count too, so a league is never hidden.
+function leagueCodes(data: Overview, standings: { division: string }[]) {
+  const codes = [
+    ...new Set([
+      ...data.divisions.map((d) => d.code),
+      ...standings.map((s) => s.division),
+    ]),
+  ].sort();
+  return codes.length ? codes : ["A", "B"];
+}
 function dailyPosition(row: Model<"StandingRead">, division = false) {
   const start = division ? row.division_position : row.position;
   if (row.tie_status === "unresolved_neutral" && row.position_end != null) {
@@ -184,37 +195,43 @@ function LeagueDay({ dayId }: { dayId: string }) {
                       </Card>
                     ))}
                 </div>
-                {["A", "B"].map((division) => (
-                  <Card key={division}>
-                    <h2>División {division}</h2>
-                    <div className="table-scroll">
-                      <table>
-                        <thead>
-                          <tr>
-                            <th>Pos.</th>
-                            <th>Entrenador</th>
-                            <th>Puntos de jornada</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {snapshot.standings
-                            .filter((s) => s.division === division)
-                            .sort(
-                              (a, b) =>
-                                a.division_position - b.division_position,
-                            )
-                            .map((s) => (
-                              <tr key={s.season_player_id}>
-                                <td>{dailyPosition(s, true)}</td>
-                                <td>{playerName(data, s.season_player_id)}</td>
-                                <td>{s.points_awarded}</td>
-                              </tr>
-                            ))}
-                        </tbody>
-                      </table>
-                    </div>
-                  </Card>
-                ))}
+                {leagueCodes(data, snapshot.standings).map(
+                  (division, _, codes) => (
+                    <Card key={division}>
+                      <h2>
+                        {codes.length === 1 ? "Liga" : `División ${division}`}
+                      </h2>
+                      <div className="table-scroll">
+                        <table>
+                          <thead>
+                            <tr>
+                              <th>Pos.</th>
+                              <th>Entrenador</th>
+                              <th>Puntos de jornada</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {snapshot.standings
+                              .filter((s) => s.division === division)
+                              .sort(
+                                (a, b) =>
+                                  a.division_position - b.division_position,
+                              )
+                              .map((s) => (
+                                <tr key={s.season_player_id}>
+                                  <td>{dailyPosition(s, true)}</td>
+                                  <td>
+                                    {playerName(data, s.season_player_id)}
+                                  </td>
+                                  <td>{s.points_awarded}</td>
+                                </tr>
+                              ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    </Card>
+                  ),
+                )}
               </>
             ) : (
               <Empty>

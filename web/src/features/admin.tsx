@@ -345,7 +345,11 @@ function DayAdmin({ dayId, setup }: { dayId: string; setup: Setup }) {
             <Field label="Motivo de corrección">
               <textarea name="reason" required maxLength={500} />
             </Field>
-            <DailyTieFields review={review} name={name} />
+            <DailyTieFields
+              review={review}
+              name={name}
+              single={setup.divisions.length === 1}
+            />
             <label className="check">
               <input name="confirm" type="checkbox" required />
               He revisado los ganadores y confirmo esta corrección excepcional.
@@ -465,7 +469,11 @@ function DayAdmin({ dayId, setup }: { dayId: string; setup: Setup }) {
               </p>
             )}
             <fieldset disabled={busy || !canClose}>
-              <DailyTieFields review={review} name={name} />
+              <DailyTieFields
+                review={review}
+                name={name}
+                single={setup.divisions.length === 1}
+              />
               <Submit pending={cmd.pending} disabled={busy || !canClose}>
                 Confirmar cierre
               </Submit>

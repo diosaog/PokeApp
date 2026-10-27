@@ -121,14 +121,18 @@ export function InitialAssignment({
   if (!data || data.state === "legacy")
     return <CommandState command={command} />;
   const admin = administrative && me?.is_admin;
+  // One league (division_sizes {A}) has no cut: everyone starts in the Liga.
+  const single = !!data.division_sizes && data.division_sizes.B == null;
   const disabled = command.pending || command.uncertain || query.isFetching;
   return (
     <Card>
-      <h2>Reparto inicial A/B</h2>
+      <h2>{single ? "Inicio de la Liga" : "Reparto inicial A/B"}</h2>
       <p>
         El primer tramo termina en la Medalla 2 inclusive. El progreso se
-        obtiene leyendo el save; cuando todos alcancen el objetivo observado,
-        las menores muertes competitivas ajustadas determinan el reparto.
+        obtiene leyendo el save; cuando todos alcancen el objetivo observado,{" "}
+        {single
+          ? "empieza la Liga con todos los participantes."
+          : "las menores muertes competitivas ajustadas determinan el reparto."}
       </p>
       <Tag>
         {data.state === "assigned"
@@ -139,12 +143,18 @@ export function InitialAssignment({
               ? "Pendiente de decisión externa en el corte"
               : "Listo para confirmar el reparto"}
       </Tag>
-      {data.division_sizes && (
-        <p>
-          Capacidad configurada: A · {data.division_sizes.A}; B ·{" "}
-          {data.division_sizes.B}.
-        </p>
-      )}
+      {data.division_sizes &&
+        (single ? (
+          <p>
+            Una Liga: los {data.division_sizes.A} participantes juegan en una
+            sola clasificación.
+          </p>
+        ) : (
+          <p>
+            Capacidad configurada: A · {data.division_sizes.A}; B ·{" "}
+            {data.division_sizes.B}.
+          </p>
+        ))}
       <div className="trainer-grid">
         {data.players.map((player) => (
           <section key={player.id} aria-label={player.display_name}>
@@ -160,11 +170,15 @@ export function InitialAssignment({
               {player.adjusted_deaths ?? "No observadas"}
             </p>
             <p>
-              {player.proposed_division
-                ? `${data.state === "assigned" ? "División" : "Propuesta"}: ${player.proposed_division}`
-                : data.boundary_tie?.player_ids.includes(player.id)
-                  ? "División pendiente de desempate"
-                  : "División pendiente"}
+              {player.proposed_division && single
+                ? data.state === "assigned"
+                  ? "En la Liga"
+                  : "Propuesta: Liga"
+                : player.proposed_division
+                  ? `${data.state === "assigned" ? "División" : "Propuesta"}: ${player.proposed_division}`
+                  : data.boundary_tie?.player_ids.includes(player.id)
+                    ? "División pendiente de desempate"
+                    : "División pendiente"}
             </p>
           </section>
         ))}
@@ -185,12 +199,15 @@ export function InitialAssignment({
           )}
         </>
       )}
-      {data.state === "pending" && data.ready && !data.boundary_tie && (
-        <p>
-          No hay empate que cruce el corte. Los empates dentro de una misma
-          división no requieren ninguna decisión.
-        </p>
-      )}
+      {data.state === "pending" &&
+        data.ready &&
+        !data.boundary_tie &&
+        !single && (
+          <p>
+            No hay empate que cruce el corte. Los empates dentro de una misma
+            división no requieren ninguna decisión.
+          </p>
+        )}
       {data.state === "pending" && data.boundary_tie && !admin && (
         <p>
           Un empate cruza el corte A/B. Un administrador debe registrar la
@@ -239,7 +256,9 @@ export function InitialAssignment({
                 pending={command.pending}
                 disabled={disabled || !data.ready}
               >
-                Confirmar reparto inicial
+                {single
+                  ? "Confirmar inicio de la Liga"
+                  : "Confirmar reparto inicial"}
               </Submit>
             </fieldset>
           </form>

@@ -314,6 +314,52 @@ it("configures draft structure with generated internal metadata and preserves re
   );
 });
 
+it("configures one league without a B division, movement or last-of-B reward", () => {
+  mocks.setup.season.status = "draft";
+  mocks.setup.config_versions[0].used = false;
+  render(page());
+  tab("Configuración");
+  expect(screen.getByLabelText(/Liga A y Liga B/)).toBeChecked();
+  fireEvent.click(screen.getByLabelText(/Una Liga/));
+  expect(screen.queryByLabelText("Participantes en B")).not.toBeInTheDocument();
+  expect(
+    screen.queryByLabelText("Ascensos / descensos"),
+  ).not.toBeInTheDocument();
+  expect(screen.queryByText("Último de B recibe robo")).not.toBeInTheDocument();
+  expect(screen.getByText(/Participantes en la Liga/)).toHaveTextContent("1");
+  fireEvent.submit(screen.getByLabelText("Total de jornadas").closest("form")!);
+  const body = mocks.execute.mock.calls[0][1];
+  expect(body.division_sizes).toEqual({ A: 1 });
+  expect(body.movement_count).toBe(0);
+  expect(body.rules.last_b_gets_steal).toBe(false);
+});
+
+it("an older season without the observed assignment keeps Liga A and Liga B", () => {
+  mocks.setup.season.status = "draft";
+  mocks.setup.config_versions[0].used = false;
+  mocks.setup.initial_assignment_rule = null;
+  render(page());
+  tab("Configuración");
+  expect(screen.queryByLabelText(/Una Liga/)).not.toBeInTheDocument();
+  expect(screen.getByLabelText("Participantes en B")).toBeInTheDocument();
+  fireEvent.submit(screen.getByLabelText("Total de jornadas").closest("form")!);
+  expect(mocks.execute.mock.calls[0][1].division_sizes).toEqual({
+    A: 2,
+    B: 2,
+  });
+});
+
+it("shows the fixed competition structure once the season has started", () => {
+  mocks.setup.config_versions[0].division_sizes = { A: 4 };
+  render(page());
+  tab("Configuración");
+  expect(screen.getByText("Una Liga")).toBeInTheDocument();
+  expect(screen.queryByRole("radio")).not.toBeInTheDocument();
+  expect(
+    screen.getByText(/no pueden cambiarse con la temporada en marcha/),
+  ).toBeInTheDocument();
+});
+
 it("renders human readiness and status names without leaking unknown internal reason codes", () => {
   mocks.setup.readiness.blocking_reasons = [
     "has_valid_config",

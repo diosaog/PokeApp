@@ -18,14 +18,23 @@ const consequenceLabels: Record<
   last_b_reward: "robo del último de B",
 };
 
+// One league has no division letter: its groups are simply «Liga». Inside a
+// sentence the noun is lowercase but the letter stays («división A»).
+const where = (group: Model<"TieGroup">, single: boolean) =>
+  single ? "Liga" : `División ${group.division}`;
+const whereInline = (group: Model<"TieGroup">, single: boolean) =>
+  single ? "liga" : `división ${group.division}`;
+
 function TieOrderFields({
   group,
   index,
   name,
+  single,
 }: {
   group: Model<"TieGroup">;
   index: number;
   name: (id: string) => string;
+  single: boolean;
 }) {
   const [selected, setSelected] = useState<string[]>(
     group.player_ids.map(() => ""),
@@ -33,7 +42,7 @@ function TieOrderFields({
   return (
     <fieldset>
       <legend>
-        División {group.division} · posiciones {group.position}–
+        {where(group, single)} · posiciones {group.position}–
         {group.position_end}
       </legend>
       <p>
@@ -54,7 +63,7 @@ function TieOrderFields({
       {selected.map((value, place) => (
         <Field
           key={place}
-          label={`Posición ${group.position + place} · división ${group.division}`}
+          label={`Posición ${group.position + place} · ${whereInline(group, single)}`}
         >
           <select
             name={`tie-${index}-${place}`}
@@ -84,7 +93,7 @@ function TieOrderFields({
         </Field>
       ))}
       <Field
-        label={`Motivo del desempate · división ${group.division} · posición ${group.position}`}
+        label={`Motivo del desempate · ${whereInline(group, single)} · posición ${group.position}`}
       >
         <textarea name={`tie-${index}-reason`} required maxLength={500} />
       </Field>
@@ -95,9 +104,11 @@ function TieOrderFields({
 export function DailyTieFields({
   review,
   name,
+  single = false,
 }: {
   review?: Model<"RankingReview">;
   name: (id: string) => string;
+  single?: boolean;
 }) {
   if (!review) return null;
   return (
@@ -114,10 +125,11 @@ export function DailyTieFields({
             group={group}
             index={index}
             name={name}
+            single={single}
           />
         ) : (
           <p key={`${review.input_hash}:${index}`}>
-            División {group.division}: {group.player_ids.map(name).join(", ")}{" "}
+            {where(group, single)}: {group.player_ids.map(name).join(", ")}{" "}
             comparten posición {group.position}. Este empate no necesita
             resolución.
           </p>

@@ -144,7 +144,9 @@ textarea {
   min-height: 100px;
   resize: vertical;
 }
-input[type="checkbox"] {
+input[type="checkbox"],
+input[type="radio"] {
+  flex-shrink: 0;
   width: 19px;
   min-height: 19px;
   height: 19px;
@@ -826,6 +828,8 @@ table {
 }
 th {
   text-align: left;
+  /* Short labels wrap between words, never inside one («POS.»). */
+  overflow-wrap: normal;
   color: var(--c-text-muted);
   text-transform: uppercase;
   font-size: 0.59rem;

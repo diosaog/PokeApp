@@ -213,6 +213,16 @@ function Structure({ setup }: { setup: Setup }) {
     source.config_versions.find((c) => c.is_current) ??
     source.config_versions[0];
   const editable = setup.season.status === "draft" && !config?.used;
+  // One league is stored as division_sizes {A}; two leagues as {A, B}.
+  const [shape, setShape] = useState<"single" | "two">(
+    config?.division_sizes && config.division_sizes.B == null
+      ? "single"
+      : "two",
+  );
+  const single = shape === "single";
+  // Only the observed initial assignment can start a single league; an older
+  // season keeps Liga A and Liga B, as the server requires.
+  const choosable = setup.initial_assignment_rule === "observed_deaths_v1";
   const stale =
     source.config_revision !== setup.config_revision ||
     source.roster_revision !== setup.roster_revision;
@@ -221,10 +231,23 @@ function Structure({ setup }: { setup: Setup }) {
     <Card>
       <h2>Formato de la Liga</h2>
       {!editable ? (
-        <p>
-          Las divisiones y jornadas ya preparadas se conservan para proteger la
-          competición.
-        </p>
+        <>
+          {config?.division_sizes && (
+            <p>
+              Estructura de competición:{" "}
+              <strong>
+                {config.division_sizes.B == null
+                  ? "Una Liga"
+                  : "Liga A y Liga B"}
+              </strong>
+            </p>
+          )}
+          <p>
+            La estructura, las divisiones y las jornadas ya preparadas se
+            conservan para proteger la competición: no pueden cambiarse con la
+            temporada en marcha.
+          </p>
+        </>
       ) : (
         <form
           key={`${source.config_revision}:${source.roster_revision}`}
@@ -234,13 +257,13 @@ function Structure({ setup }: { setup: Setup }) {
             const scores = text(data, "points").split(",").map(Number),
               coins = text(data, "coins").split(",").map(Number);
             const values = ["total", "a", "b", "movement"].map((k) =>
-              number(data, k),
+              single && k !== "total" ? 0 : number(data, k),
             );
             if (
               ![...scores, ...coins, ...values].every(
                 (v) => Number.isSafeInteger(v) && v >= 0 && v <= 2147483647,
               ) ||
-              values.slice(0, 3).some((v) => v === 0)
+              values.slice(0, single ? 1 : 3).some((v) => v === 0)
             ) {
               setError("Introduce cantidades enteras válidas.");
               return;
@@ -252,7 +275,9 @@ function Structure({ setup }: { setup: Setup }) {
               name: "Reglas de la Liga",
               effective_from_matchday: 1,
               total_matchdays: values[0],
-              division_sizes: { A: values[1], B: values[2] },
+              division_sizes: single
+                ? { A: setup.participants.length }
+                : { A: values[1], B: values[2] },
               movement_count: values[3],
               scoring: positions(scores),
               coin_rewards: positions(coins),
@@ -261,7 +286,7 @@ function Structure({ setup }: { setup: Setup }) {
                 game_completion_reward_coins: 12,
                 ...config?.rules,
                 team_lock_required: data.has("lock"),
-                last_b_gets_steal: data.has("steal"),
+                last_b_gets_steal: !single && data.has("steal"),
               },
               expected_config_revision: source.config_revision,
               expected_roster_revision: source.roster_revision,
@@ -278,7 +303,49 @@ function Structure({ setup }: { setup: Setup }) {
           }}
         >
           <fieldset disabled={busy || stale}>
+            {choosable && (
+              <fieldset className="structure-choice">
+                <legend>Estructura de competición</legend>
+                {(
+                  [
+                    [
+                      "single",
+                      "Una Liga",
+                      "Todos los participantes en una sola clasificación, sin ascensos ni descensos.",
+                    ],
+                    [
+                      "two",
+                      "Liga A y Liga B",
+                      "Dos divisiones con ascensos y descensos entre ellas.",
+                    ],
+                  ] as const
+                ).map(([value, label, hint]) => (
+                  <label key={value} className="check">
+                    <input
+                      type="radio"
+                      name="structure"
+                      value={value}
+                      checked={shape === value}
+                      onChange={() => setShape(value)}
+                    />
+                    <span>
+                      {label}
+                      <small>{hint}</small>
+                    </span>
+                  </label>
+                ))}
+                <p className="muted">
+                  Se fija al empezar la temporada y no puede cambiarse después.
+                </p>
+              </fieldset>
+            )}
             <div className="form-grid">
+              {single && (
+                <p className="structure-roster">
+                  Participantes en la Liga:{" "}
+                  <strong>{setup.participants.length}</strong>
+                </p>
+              )}
               {(
                 [
                   [
@@ -308,19 +375,21 @@ function Structure({ setup }: { setup: Setup }) {
                     0,
                   ],
                 ] as const
-              ).map(([name, label, value, min]) => (
-                <Field key={name} label={label}>
-                  <input
-                    name={name}
-                    type="number"
-                    min={min}
-                    max={2147483647}
-                    step={1}
-                    required
-                    defaultValue={value}
-                  />
-                </Field>
-              ))}
+              )
+                .filter(([name]) => !single || name === "total")
+                .map(([name, label, value, min]) => (
+                  <Field key={name} label={label}>
+                    <input
+                      name={name}
+                      type="number"
+                      min={min}
+                      max={2147483647}
+                      step={1}
+                      required
+                      defaultValue={value}
+                    />
+                  </Field>
+                ))}
               {(
                 [
                   ["points", "Puntos por posición", config?.scoring],
@@ -352,14 +421,16 @@ function Structure({ setup }: { setup: Setup }) {
               />
               Avisar si falta Team Lock
             </label>
-            <label className="check">
-              <input
-                type="checkbox"
-                name="steal"
-                defaultChecked={config?.rules.last_b_gets_steal === true}
-              />
-              Último de B recibe robo
-            </label>
+            {!single && (
+              <label className="check">
+                <input
+                  type="checkbox"
+                  name="steal"
+                  defaultChecked={config?.rules.last_b_gets_steal === true}
+                />
+                Último de B recibe robo
+              </label>
+            )}
             {error && <p role="alert">{error}</p>}
             <Submit pending={cmd.pending} disabled={busy || stale}>
               Guardar formato
