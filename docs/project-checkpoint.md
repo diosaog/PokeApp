@@ -5,7 +5,19 @@ milestone record; it does not maintain a second live phase-status ledger.
 
 ## Current project position
 
-- Current packet: **Phase 28 — Launcher definitivo y administración avanzada:
+- Current packet: **Launcher automatic updates — DONE LOCAL / PASS PACKAGED,
+  not active publicly.** One-click updater (popup, progress, «Más tarde»,
+  verified install, restart, recovery) certified by a real update between two
+  packaged rehearsal versions (0.26.0-test.1 → test.2, 28/28) with the real
+  NSIS installers, an isolated app id/profile and a temporary key. Channel
+  routes on the Worker implemented, not deployed. Public channel waits for
+  the owner's stable key, an Authenticode certificate and an authorized
+  deploy/upload; players on 0.25.0 install the bridge build once
+  ([report](launcher-updates-report.md), [design](launcher-updates.md)).
+  Production unchanged; the earlier «sube todo público» was superseded before
+  any upload.
+
+- Earlier: **Phase 28 — Launcher definitivo y administración avanzada:
   DONE LOCAL, not deployed.** One navigation for web and Launcher (no
   «Escritorio» group), native «Saves y Launcher» hub, automatic save choice,
   in-app dialogs with main-issued single-use confirmation tickets, restore with

@@ -1,5 +1,17 @@
 # Phase25 — live execution record
 
+2026-10-27 (Launcher updates). **DONE LOCAL / PASS PACKAGED, nothing
+published.** The «sube todo público» order was superseded by the owner before
+any upload: the production web build and a 0.26.0 public build were stopped
+locally (web dist only, R2 untouched). Updater completed and certified by a
+real update between packaged rehearsal versions (28/28; real NSIS install,
+restart, data kept); one start-up defect found and fixed (`1fd8399`).
+Temporary rehearsal key deleted; certification builds kept in
+`%LOCALAPPDATA%Temppk-cert-0.26.0-test.{1,2}`. Rehearsal app uninstalled.
+[Report](../launcher-updates-report.md) · [design](../launcher-updates.md).
+**Next (owner)**: provide a stable key and Authenticode certificate, then
+authorize Worker deploy + bridge upload (procedure in the design doc).
+
 2026-10-27 (Phase 28). **DONE LOCAL, not deployed.** Entry a392042 with the
 interrupted Launcher edits preserved and committed first. Launcher hub,
 selector, restore «Confirmo» with main tickets, sync consent, session bridge;
