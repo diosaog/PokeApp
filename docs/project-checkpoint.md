@@ -5,7 +5,20 @@ milestone record; it does not maintain a second live phase-status ledger.
 
 ## Current project position
 
-- Current packet: **Liga Nocturna + art pass 2 DONE GLOBAL — published on the
+- Current packet: **Phase 28 — Launcher definitivo y administración avanzada:
+  DONE LOCAL, not deployed.** One navigation for web and Launcher (no
+  «Escritorio» group), native «Saves y Launcher» hub, automatic save choice,
+  in-app dialogs with main-issued single-use confirmation tickets, restore with
+  «Confirmo», compact infinite items, one sign-in (access token only to the
+  web), automatic sync with shared-PC consent, admin console in three areas and
+  the incident center (migration 062 + API, local only, flag off). Private
+  Launcher 0.26.0-preview.1 built and accepted packaged (28/28), not published.
+  Production unchanged (web a7e33476, API 501a399, Launcher 0.25.0, 054–062 not
+  applied). Partial: admin cancellation of reversible robberies not built
+  ([report](phase28-report.md), [contracts](phase28-launcher-admin.md)).
+  No Phase29 started.
+
+- Earlier: **Liga Nocturna + art pass 2 DONE GLOBAL — published on the
   owner's instruction.** Original scene backdrops for every area (stadium
   Home, market, scope, championship, licence, handheld PC…), generated and
   reproducible; web live as Cloudflare `a7e33476` (source `3910926`); public

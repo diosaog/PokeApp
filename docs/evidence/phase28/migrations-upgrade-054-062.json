@@ -1,0 +1,198 @@
+{
+  "deployed": [
+    "001_core.sql",
+    "002_seasons.sql",
+    "003_league.sql",
+    "004_shop.sql",
+    "005_saves.sql",
+    "006_activity_hall.sql",
+    "007_competitions.sql",
+    "008_indexes.sql",
+    "009_seed.sql",
+    "010_security_helpers.sql",
+    "011_rls_policies.sql",
+    "012_security_views.sql",
+    "013_storage_policies.sql",
+    "014_security_invoker_hardening.sql",
+    "015_public_trainers_visibility.sql",
+    "016_public_team_locks_visibility.sql",
+    "017_public_coin_balances_visibility.sql",
+    "018_public_views_visibility.sql",
+    "019_team_lock_api.sql",
+    "020_current_matchday_store_ban_contract.sql",
+    "021_normal_purchase_api.sql",
+    "022_promotional_purchase_api.sql",
+    "023_pokemon_identity.sql",
+    "024_redemption_effect_boundary.sql",
+    "025_robbery_voucher_and_redemption.sql",
+    "026_season_admin_setup_api.sql",
+    "027_competitive_matchdays.sql",
+    "028_participant_status_admin.sql",
+    "029_season_finalization_archive_hall.sql",
+    "030_trials_sanctions_api.sql",
+    "031_cup_engine_certification.sql",
+    "032_cup_player_identity_index.sql",
+    "033_league_general_read.sql",
+    "034_participant_matchday_results.sql",
+    "035_daily_sporting_ranking.sql",
+    "036_observed_initial_divisions.sql",
+    "037_league_championship.sql",
+    "038_participant_wipe_revivals.sql",
+    "039_shop_economy_alignment.sql",
+    "040_observed_progress_read.sql",
+    "041_final_product_alignment.sql",
+    "042_v1_shadow_relational_destination.sql",
+    "043_launcher_private_observations.sql",
+    "044_trusted_save_registration.sql",
+    "045_oras_save_registration.sql",
+    "046_sun_moon_save_registration.sql",
+    "047_ultra_sun_moon_save_registration.sql",
+    "048_trusted_gen67_identity.sql",
+    "049_native_progress_read.sql",
+    "050_account_registration.sql",
+    "051_account_profiles.sql",
+    "052_account_administration.sql",
+    "053_versioned_account_credentials.sql"
+  ],
+  "pending": [
+    "054_item_use_authorizations.sql",
+    "055_native_identity_evidence_scope.sql",
+    "056_item_use_verifier_transport.sql",
+    "057_two_save_transfer_reservations.sql",
+    "058_transfer_provenance_finalization.sql",
+    "059_transfer_integration_reads.sql",
+    "060_transfer_party_origin.sql",
+    "061_transfer_authoritative_adjudication.sql",
+    "062_admin_incident_center.sql"
+  ],
+  "sha256": {
+    "054_item_use_authorizations.sql": "f6e4c775bee8f79f4f8c487b266eef318d611c3f5810eeb7c14249c7aa1f11c9",
+    "055_native_identity_evidence_scope.sql": "f1fae278caa2832619713d74b6da03055ede5870ca7b902c85d34427b9e3fc83",
+    "056_item_use_verifier_transport.sql": "7b5d9619562e09828dee3313fe514eb99a8ffb71eab3457a4d4b2514fe965e38",
+    "057_two_save_transfer_reservations.sql": "ae1061aeae62ce8250877d2dd036e21fa22a4fb461d2892379536658eaa92066",
+    "058_transfer_provenance_finalization.sql": "82ae34ee566e02d18c4a0d498a6e51a63dae438e48dbd31c834626a90f576037",
+    "059_transfer_integration_reads.sql": "7ad33a22672e226ad03436c9c577512d705d472eb82f67e4b75bc09bffdcaa05",
+    "060_transfer_party_origin.sql": "624a59d67e77720bfb862e8efda19f6cbabc530e2169485268206b06160441c4",
+    "061_transfer_authoritative_adjudication.sql": "332ff8a2e54e102d744405fcf3b76ff2c5097596eb2dd484e4ebd9fe7bef4482",
+    "062_admin_incident_center.sql": "7abd350f7d99247bc82912fce2c53bc636a1745571265332dbd767fce41497ad"
+  },
+  "checks": [
+    "pending set is exactly 054-062, in order",
+    "production state rebuilt: 53 files up to 053",
+    "representative data: trainers, season, coins and paid purchases",
+    "applied 054_item_use_authorizations.sql",
+    "immediate retry 054_item_use_authorizations.sql: refused_atomically",
+    "applied 055_native_identity_evidence_scope.sql",
+    "immediate retry 055_native_identity_evidence_scope.sql: idempotent_at_own_version",
+    "applied 056_item_use_verifier_transport.sql",
+    "immediate retry 056_item_use_verifier_transport.sql: refused_atomically",
+    "applied 057_two_save_transfer_reservations.sql",
+    "immediate retry 057_two_save_transfer_reservations.sql: refused_atomically",
+    "applied 058_transfer_provenance_finalization.sql",
+    "immediate retry 058_transfer_provenance_finalization.sql: refused_atomically",
+    "applied 059_transfer_integration_reads.sql",
+    "immediate retry 059_transfer_integration_reads.sql: refused_atomically",
+    "applied 060_transfer_party_origin.sql",
+    "immediate retry 060_transfer_party_origin.sql: idempotent_at_own_version",
+    "applied 061_transfer_authoritative_adjudication.sql",
+    "immediate retry 061_transfer_authoritative_adjudication.sql: refused_atomically",
+    "applied 062_admin_incident_center.sql",
+    "immediate retry 062_admin_incident_center.sql: refused_atomically",
+    "64 existing tables keep byte-identical rows",
+    "no existing column removed or retyped",
+    "no table grant revoked from anon/authenticated/service_role",
+    "all seven new tables force RLS",
+    "8 new tables closed to anon/authenticated",
+    "historical055 changes exactly the058-superseded identity function",
+    "historical replay diagnostic leaves rows intact",
+    "historical replay rollback restores exact latest function definitions",
+    "001-053 + 054-062 schema equals a fresh 62-file bootstrap"
+  ],
+  "immediate_retry": {
+    "054_item_use_authorizations.sql": {
+      "result": "refused_atomically",
+      "no_effect": true
+    },
+    "055_native_identity_evidence_scope.sql": {
+      "result": "idempotent_at_own_version",
+      "no_effect": true
+    },
+    "056_item_use_verifier_transport.sql": {
+      "result": "refused_atomically",
+      "no_effect": true
+    },
+    "057_two_save_transfer_reservations.sql": {
+      "result": "refused_atomically",
+      "no_effect": true
+    },
+    "058_transfer_provenance_finalization.sql": {
+      "result": "refused_atomically",
+      "no_effect": true
+    },
+    "059_transfer_integration_reads.sql": {
+      "result": "refused_atomically",
+      "no_effect": true
+    },
+    "060_transfer_party_origin.sql": {
+      "result": "idempotent_at_own_version",
+      "no_effect": true
+    },
+    "061_transfer_authoritative_adjudication.sql": {
+      "result": "refused_atomically",
+      "no_effect": true
+    },
+    "062_admin_incident_center.sql": {
+      "result": "refused_atomically",
+      "no_effect": true
+    }
+  },
+  "functions_replaced_or_retired": [],
+  "execute_revoked": [],
+  "new_tables": [
+    "public.admin_incident_commands",
+    "public.item_use_artifacts",
+    "public.item_use_authorizations",
+    "public.item_use_transfer_legs",
+    "public.item_use_transfers",
+    "public.item_use_verifications",
+    "public.transfer_commit_permits",
+    "public.transfer_provenance"
+  ],
+  "historical_replay_055_after_061": {
+    "classification": "UNSAFE_HISTORICAL_REPLAY_NOT_AN_UPGRADE_DEFECT",
+    "changed_objects": [
+      "commit_pokemon_identity_v038(jsonb)"
+    ],
+    "superseding_migration": "058_transfer_provenance_finalization.sql",
+    "function_diff": {
+      "commit_pokemon_identity_v038(jsonb)": [
+        "--- 061\n",
+        "+++ replayed055\n",
+        "@@ -172,8 +172,7 @@\n",
+        "         where o.season_id=season and o.trainer_id=trainer and o.outcome='AMBIGUOUS'",
+        "           and o.revision_id<>revision.id and (o.evidence->'pid'=v_evidence->'pid'",
+        "             or o.evidence->'encryption_constant'=v_evidence->'encryption_constant')) into poisoned;",
+        "-      poisoned := poisoned or public.transfer_foreign_collision(season,trainer,v_evidence);",
+        "-      eligible := coalesce((trainer_match or (cardinality(candidate_ids)=1 and public.transfer_identity_proven(candidate_ids[1],trainer,v_evidence))) and v_evidence->'is_egg'='false'::jsonb",
+        "+      eligible := coalesce(trainer_match and v_evidence->'is_egg'='false'::jsonb",
+        "         and v_evidence->'egg_location'='0'::jsonb and v_evidence->'egg_date'='null'::jsonb",
+        "         and jsonb_typeof(v_evidence->'met_location')='number'",
+        "         and (v_evidence->>'met_location')::integer between 1 and 65535",
+        "@@ -187,8 +186,7 @@\n",
+        "         elsif cardinality(candidate_ids)=1 then",
+        "           select * into entity from public.pokemon_entities where id=candidate_ids[1] for update;",
+        "           if entity.identity_status='unambiguous' and entity.identity_schema_version=2",
+        "-            and ((entity.initial_evidence=v_evidence and entity.candidate_key=item->>'candidate_key')",
+        "-              or public.transfer_identity_proven(entity.id,trainer,v_evidence)) then",
+        "+            and entity.initial_evidence=v_evidence and entity.candidate_key=item->>'candidate_key' then",
+        "             expected_outcome := 'MATCHED';",
+        "           end if;",
+        "         end if;"
+      ]
+    },
+    "rolled_back": true
+  },
+  "schema_sha256": "188b04c82fc75b77da3dccaadb33223b0721d068234929698d91a79ead99ab1c",
+  "status": "PASS",
+  "cleanup": "both owned databases dropped and clusters stopped"
+}

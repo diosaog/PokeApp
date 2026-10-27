@@ -1,0 +1,119 @@
+{
+  "version": "0.26.0-preview.1",
+  "status": "PASS",
+  "checks": [
+    {
+      "pass": true,
+      "label": "packaged app starts with isolated profile and APPDATA"
+    },
+    {
+      "pass": true,
+      "label": "two candidates: selector opens over the web, nothing selected"
+    },
+    {
+      "pass": true,
+      "label": "no save chosen without the trainer"
+    },
+    {
+      "pass": true,
+      "label": "closing the selector hands the window back to the web"
+    },
+    {
+      "pass": true,
+      "label": "web has no Node, preload or IPC bridge"
+    },
+    {
+      "pass": true,
+      "label": "preview web signs in with its synthetic API"
+    },
+    {
+      "pass": true,
+      "label": "a preview sign-in never reaches the core (different API: no forwarding)"
+    },
+    {
+      "pass": true,
+      "label": "production physical operations disabled"
+    },
+    {
+      "pass": true,
+      "label": "same sidebar as the browser"
+    },
+    {
+      "pass": true,
+      "label": "Saves y Launcher opens the native hub"
+    },
+    {
+      "pass": true,
+      "label": "hub tab backups-tab shows its section"
+    },
+    {
+      "pass": true,
+      "label": "hub tab cloud-tab shows its section"
+    },
+    {
+      "pass": true,
+      "label": "hub tab save-tab shows its section"
+    },
+    {
+      "pass": true,
+      "label": "Buscar actualizaciones is honest: no channel, nothing offered"
+    },
+    {
+      "pass": true,
+      "label": "closing a dialog keeps the hub"
+    },
+    {
+      "pass": true,
+      "label": "Volver a PokeApp closes the hub"
+    },
+    {
+      "pass": true,
+      "label": "inventory doors name only approved items"
+    },
+    {
+      "pass": true,
+      "label": "item popup opens over the web"
+    },
+    {
+      "pass": true,
+      "label": "closing the popup returns to the profile"
+    },
+    {
+      "pass": true,
+      "label": "forged or stale confirmations are refused by main"
+    },
+    {
+      "pass": true,
+      "label": "malformed bridge codes are blocked in place"
+    },
+    {
+      "pass": true,
+      "label": "non-allowlisted route ignored"
+    },
+    {
+      "pass": true,
+      "label": "30 rapid transitions: latest wins"
+    },
+    {
+      "pass": true,
+      "label": "web logout: login shown, core signed out"
+    },
+    {
+      "pass": true,
+      "label": "foreign navigation blocked"
+    },
+    {
+      "pass": true,
+      "label": "offline: local tools with the same tabs"
+    },
+    {
+      "pass": true,
+      "label": "online recovery returns to the web"
+    },
+    {
+      "pass": true,
+      "label": "no web/tools JavaScript errors "
+    }
+  ],
+  "boundaries": "Packaged real core and UI; isolated profile and APPDATA with synthetic files; local preview web with synthetic API; no real accounts or saves."
+}

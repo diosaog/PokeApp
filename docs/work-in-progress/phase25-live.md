@@ -1,5 +1,19 @@
 # Phase25 — live execution record
 
+2026-10-27 (Phase 28). **DONE LOCAL, not deployed.** Entry a392042 with the
+interrupted Launcher edits preserved and committed first. Launcher hub,
+selector, restore «Confirmo» with main tickets, sync consent, session bridge;
+web navigation, hub, compact items; admin three areas + incident center
+(migration 062, API flag POKEAPP_ADMIN_INCIDENTS_ENABLED, both local only).
+Private Launcher 0.26.0-preview.1 (sha256 1e25c65f…94a5ba, unsigned, -WebPreview)
+audited and accepted packaged 28/28 with isolated profile+APPDATA; not installed
+over the owner, not published. Production unchanged. Owner review:
+`npm run preview:design` in `web/`, then the unpacked private exe in
+`%LOCALAPPDATA%Temppk28-b3-0.26.0-preview.1eleasewin-unpacked`.
+[Report](../phase28-report.md) · [contracts](../phase28-launcher-admin.md).
+**Next (owner authorization)**: deploy web; apply 054–061 then 062 and enable
+the incident flag; publish a public Launcher from this HEAD. Gates unchanged.
+
 2026-10-27 (art pass 2 + release). **Published.** Scene backdrops for every
 area (`web/scripts/build-scenes.mjs`, `web/src/design/scenes.css`), reviewed
 in real pages at 1920/1440/1366/1104/390/360; CLS 0; full suite 92/10/11 with
