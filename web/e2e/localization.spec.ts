@@ -99,7 +99,10 @@ test("X/Y species and names survive public scouting and inventory selection", as
   await navigate(page, "Tienda");
   await page.getByRole("link", { name: "Abrir mi inventario →" }).click();
   await page.getByRole("button", { name: "Canjear", exact: true }).click();
-  await expect(page.getByLabel("Pokémon objetivo")).toContainText("Greninja");
+  // The target is chosen on visual cards (Pokémon selector), not a list.
+  await expect(page.locator(".pokemon-selector-card").first()).toContainText(
+    "Greninja",
+  );
   await expect(page.getByRole("dialog")).not.toContainText("#658");
   expect(commands).toHaveLength(0);
 });

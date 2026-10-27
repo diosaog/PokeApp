@@ -26,7 +26,8 @@ for (const width of [1440, 390])
     await expect(
       page.getByRole("heading", { name: "Lucía", exact: true }),
     ).toBeVisible();
-    await expect(page.locator(".pokemon")).toHaveCount(6);
+    // The official (Team Lock) team; the live save collection below is separate.
+    await expect(page.locator(".public-party .pokemon")).toHaveCount(6);
     await expect(page.getByRole("link", { name: "Abrir mi PC" })).toHaveCount(
       0,
     );
@@ -45,12 +46,8 @@ for (const width of [1440, 390])
     await modal.getByRole("button", { name: "Cerrar", exact: true }).click();
     await navigate(page, "Entrenadores");
     await page.locator('a[href="/entrenadores/t4"]').click();
-    await expect(
-      page.getByText("Este entrenador aún no ha fijado su equipo.", {
-        exact: true,
-      }),
-    ).toBeVisible();
-    await expect(page.locator(".pokemon")).toHaveCount(0);
+    await expect(page.getByText(/^Aún no hay Team Lock./)).toBeVisible();
+    await expect(page.locator(".public-party .pokemon")).toHaveCount(0);
     await navigate(page, "Entrenadores");
     await page.locator(`a[href="/entrenadores/${tid}"]`).click();
     await expect(

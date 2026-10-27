@@ -87,24 +87,34 @@ for (const namesAvailable of [true, false]) {
     await page.waitForLoadState("networkidle");
     reads.length = 0;
     await page.getByRole("button", { name: "Canjear", exact: true }).click();
-    const targets = page.getByRole("combobox", { name: "Pokémon objetivo" });
-    await expect(targets.locator("option")).toHaveCount(7);
-    await expect(targets).not.toContainText("Objetivo 0");
-    await expect(targets).toContainText("Objetivo 1 · Entrenador");
-    await targets.selectOption("entity-1");
+    // A robbery first picks the rival, then one of their public Pokémon.
+    // Rivals come from the public targets (never your own), so they show
+    // before the names list arrives and stay when it is unavailable.
+    const rivals = page
+      .getByRole("dialog", { name: "Elige un entrenador" })
+      .locator(".trainer-selector-card");
+    await expect(rivals).toHaveCount(2);
+    await expect(rivals.nth(0)).toContainText("Entrenador");
     const response = page.waitForResponse(
       (r) => new URL(r.url()).pathname === "/v1/read/trainers",
     );
     releaseNames();
     await response;
-    await expect(targets).toContainText(
-      namesAvailable ? "Objetivo 1 · Lucía" : "Objetivo 1 · Entrenador",
+    await expect(rivals.nth(0)).toContainText(
+      namesAvailable ? "Lucía" : "Entrenador",
     );
-    await expect(targets).toContainText("Objetivo 6 · Entrenador");
-    await expect(targets).toHaveValue("entity-1");
-    await expect(
-      page.getByRole("button", { name: "Confirmar canje" }),
-    ).toBeEnabled();
+    await expect(rivals.nth(1)).toContainText("Entrenador");
+    await rivals.nth(0).click();
+    const cards = page.locator(".pokemon-selector-card");
+    await expect(cards).toHaveCount(5);
+    await expect(page.locator(".pokemon-selector")).not.toContainText(
+      "Objetivo 0",
+    );
+    await cards.filter({ hasText: "Objetivo 1" }).click();
+    await expect(page.getByRole("button", { name: "Sí, robar" })).toBeEnabled();
+    await expect(page.locator(".selector-confirmation")).toContainText(
+      namesAvailable ? "de Lucía" : "de Entrenador",
+    );
     expect(reads.filter((path) => path === "/v1/read/trainers")).toHaveLength(
       1,
     );
@@ -112,7 +122,7 @@ for (const namesAvailable of [true, false]) {
     if (namesAvailable) {
       await page.getByRole("button", { name: "Cerrar", exact: true }).click();
       await page.getByRole("button", { name: "Canjear", exact: true }).click();
-      await expect(targets).toContainText("Objetivo 1 · Lucía");
+      await expect(rivals.nth(0)).toContainText("Lucía");
       expect(reads.filter((path) => path === "/v1/read/trainers")).toHaveLength(
         1,
       );

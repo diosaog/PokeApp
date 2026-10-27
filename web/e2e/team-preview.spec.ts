@@ -75,9 +75,8 @@ test("missing lock warns without a save fallback or a League result blocker", as
   await expect(page.getByRole("alert")).toContainText(
     "Tu Team Lock está pendiente",
   );
-  await expect(
-    page.getByRole("button", { name: /Guardar resultados/ }),
-  ).toBeEnabled();
+  // Results stay open to record: each match card is an enabled button.
+  await expect(page.getByRole("button", { name: /VS/ }).first()).toBeEnabled();
 });
 
 test("explicit Team Lock retry preserves its request and refreshes the preview", async ({

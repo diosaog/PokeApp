@@ -78,10 +78,28 @@ async function participant(
   await login(page);
   await navigate(page, "Liga");
   await page.getByRole("button", { name: "J4", exact: true }).click();
-  await expect(
-    page.getByRole("heading", { name: "Registrar resultados" }),
-  ).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Jornada 4" })).toBeVisible();
   return { requests, reads };
+}
+
+// Results are recorded per match: its card opens «¿Quién ganó?», where the
+// winner (or «Sin resultado») is chosen and saved.
+const card = (page: Page) =>
+  page.getByRole("button", { name: /Marcos.*VS.*Elena/ });
+const dialog = (page: Page) =>
+  page.getByRole("dialog", { name: "¿Quién ganó?" });
+async function record(
+  page: Page,
+  winner: "Marcos" | "Elena" | "Sin resultado",
+) {
+  if (!(await dialog(page).isVisible())) await card(page).click();
+  // A trainer button reads «<photo> <name>»; «Sin resultado» is plain.
+  await dialog(page)
+    .getByRole("button", { name: new RegExp(`(^| )${winner}$`) })
+    .click();
+  await dialog(page)
+    .getByRole("button", { name: "Guardar resultado", exact: true })
+    .click();
 }
 
 test("normal non-admin participant records, edits and clears another pair; narrow refetch", async ({
@@ -91,17 +109,18 @@ test("normal non-admin participant records, edits and clears another pair; narro
   await expect(
     page.getByRole("link", { name: "Administración", exact: true }),
   ).toHaveCount(0);
-  const select = page.getByLabel("Ganador: Marcos / Elena", { exact: true });
   const before = reads.length;
-  for (const [i, value] of ["p3", "p4", ""].entries()) {
-    await select.selectOption(value);
-    await page
-      .getByRole("button", { name: "Guardar resultados", exact: true })
-      .click();
+  for (const [i, [value, name]] of (
+    [
+      ["p3", "Marcos"],
+      ["p4", "Elena"],
+      ["", "Sin resultado"],
+    ] as const
+  ).entries()) {
+    await record(page, name);
     await expect(page.getByText("Cambio confirmado.")).toBeVisible();
-    await expect(
-      page.getByRole("button", { name: "Guardar resultados", exact: true }),
-    ).toBeEnabled();
+    await expect(dialog(page)).toHaveCount(0);
+    await expect(card(page)).toBeEnabled();
     expect(requests[i].body).toEqual({
       expected_results_revision: i + 3,
       results: [
@@ -110,39 +129,37 @@ test("normal non-admin participant records, edits and clears another pair; narro
     });
     expect(requests[i].key).toBeTruthy();
   }
+  // Only API reads count: the test browser may add same-origin requests the
+  // app never makes (GUID paths injected by local security software). A
+  // failure names the unexpected read.
   expect(
     reads
       .slice(before)
-      .every((path) =>
-        [
-          `/v1/seasons/${sid}/matchdays/${day}`,
-          `/v1/read/seasons/${sid}/overview`,
-          `/v1/read/seasons/${sid}/league`,
-        ].includes(path),
+      .filter(
+        (path) =>
+          path.startsWith("/v1/") &&
+          ![
+            `/v1/seasons/${sid}/matchdays/${day}`,
+            `/v1/read/seasons/${sid}/overview`,
+            `/v1/read/seasons/${sid}/league`,
+          ].includes(path),
       ),
-  ).toBe(true);
+  ).toEqual([]);
 });
 
 test("409 stays visible with no automatic mutation retry; automatic read obtains new revision", async ({
   page,
 }) => {
   const { requests } = await participant(page, "conflict");
-  await page.getByLabel("Ganador: Marcos / Elena").selectOption("p3");
-  await page
-    .getByRole("button", { name: "Guardar resultados", exact: true })
-    .click();
+  await record(page, "Marcos");
+  // The refusal is shown inside the dialog: the page behind it is inert.
   await expect(
-    page.getByRole("alert").filter({ hasText: "La temporada ha cambiado" }),
+    dialog(page)
+      .getByRole("alert")
+      .filter({ hasText: "La temporada ha cambiado" }),
   ).toBeVisible();
   expect(requests).toHaveLength(1);
-  await expect(
-    page.getByText(/Los datos cambiaron mientras editabas/),
-  ).toBeVisible();
-  await expect(page.getByLabel("Ganador: Marcos / Elena")).toHaveValue("");
-  await page.getByLabel("Ganador: Marcos / Elena").selectOption("p4");
-  await page
-    .getByRole("button", { name: "Guardar resultados", exact: true })
-    .click();
+  await record(page, "Elena");
   await expect(page.getByText("Cambio confirmado.")).toBeVisible();
   expect(requests[1].body.expected_results_revision).toBe(4);
   expect(requests[1].key).not.toBe(requests[0].key);
@@ -152,12 +169,14 @@ test("unknown outcome retry retains original body/key and freezes inputs", async
   page,
 }) => {
   const { requests } = await participant(page, "unknown");
-  await page.getByLabel("Ganador: Marcos / Elena").selectOption("p3");
-  await page
-    .getByRole("button", { name: "Guardar resultados", exact: true })
-    .click();
-  await expect(page.getByLabel("Ganador: Marcos / Elena")).toBeDisabled();
-  await page
+  await record(page, "Marcos");
+  await expect(
+    dialog(page).getByRole("button", { name: "Guardar resultado" }),
+  ).toBeDisabled();
+  // An uncertain save cannot be abandoned or changed, only retried as sent.
+  await page.keyboard.press("Escape");
+  await expect(dialog(page)).toBeVisible();
+  await dialog(page)
     .getByRole("button", { name: "Reintentar la misma solicitud" })
     .click();
   await expect(page.getByText("Cambio confirmado.")).toBeVisible();
@@ -169,9 +188,8 @@ test("concurrently closed day has no ordinary submission; Admin keeps only corre
   page,
 }) => {
   const { requests } = await participant(page, "closed");
-  await expect(
-    page.getByRole("button", { name: "Guardar resultados", exact: true }),
-  ).toHaveCount(0);
+  await expect(card(page)).toHaveCount(0);
+  await expect(page.getByRole("button", { name: /VS/ })).toHaveCount(0);
   await expect(page.getByText(/ya no admite cambios ordinarios/)).toBeVisible();
   expect(requests).toHaveLength(0);
 });

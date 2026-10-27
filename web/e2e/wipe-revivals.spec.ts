@@ -99,17 +99,22 @@ test("ordinary participant updates and corrects their own absolute count with na
     });
   }
   expect(commands[1].key).not.toBe(commands[0].key);
+  // Only API reads count: the test browser may add same-origin requests the
+  // app never makes (GUID paths injected by local security software). A
+  // failure names the unexpected read.
   expect(
     reads
       .slice(before)
-      .every((path) =>
-        [
-          `/v1/seasons/${sid}/wipe-revivals`,
-          `/v1/read/seasons/${sid}/league`,
-          `/v1/seasons/${sid}/matchdays/${day}`,
-        ].includes(path),
+      .filter(
+        (path) =>
+          path.startsWith("/v1/") &&
+          ![
+            `/v1/seasons/${sid}/wipe-revivals`,
+            `/v1/read/seasons/${sid}/league`,
+            `/v1/seasons/${sid}/matchdays/${day}`,
+          ].includes(path),
       ),
-  ).toBe(true);
+  ).toEqual([]);
   await expect(
     page.getByText(/Pendiente de observar las muertes del save/),
   ).toBeVisible();
