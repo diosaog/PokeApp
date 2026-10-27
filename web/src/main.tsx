@@ -14,6 +14,7 @@ import "./product-polish.css";
 import "./design/arena.css";
 import "./design/evolution.css";
 import "./design/scenes.css";
+import "./design/hub.css";
 installPreferences();
 installSound();
 // First paint waits (at most 1.2 s) for the Rubik Latin face, so text never

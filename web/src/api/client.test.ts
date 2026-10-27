@@ -52,6 +52,50 @@ describe("API transport", () => {
       }),
     );
   });
+  it("a Launcher session renews through the Launcher, never /refresh", async () => {
+    const fetcher = vi.fn(async (path: string, init: RequestInit) => {
+      const auth = (init.headers as Record<string, string>).Authorization;
+      return auth === "Bearer fresh"
+        ? response({ ok: true })
+        : response({ detail: { code: "INVALID_SESSION" } }, 401);
+    });
+    vi.stubGlobal("fetch", fetcher);
+    const client = new ApiClient("https://api.example");
+    client.setSession({
+      user_id: "",
+      access_token: "stale",
+      refresh_token: "",
+    });
+    client.renewSession = vi.fn().mockResolvedValue({
+      user_id: "",
+      access_token: "fresh",
+      refresh_token: "",
+    });
+    await expect(client.request("/v1/me")).resolves.toEqual({ ok: true });
+    expect(client.renewSession).toHaveBeenCalledTimes(1);
+    expect(
+      fetcher.mock.calls.some(([path]) => String(path).endsWith("/refresh")),
+    ).toBe(false);
+  });
+  it("without a Launcher answer the Launcher session ends", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue(response({ detail: {} }, 401)),
+    );
+    const client = new ApiClient("https://api.example");
+    const expired = vi.fn();
+    client.onExpired = expired;
+    client.setSession({
+      user_id: "",
+      access_token: "stale",
+      refresh_token: "",
+    });
+    client.renewSession = vi.fn().mockResolvedValue(null);
+    await expect(client.request("/v1/me")).rejects.toMatchObject({
+      status: 401,
+    });
+    expect(expired).toHaveBeenCalled();
+  });
   it("coalesces simultaneous 401 refreshes and retries with the new JWT", async () => {
     let refreshes = 0;
     vi.stubGlobal(

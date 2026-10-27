@@ -1,0 +1,353 @@
+/* Phase 28 — «Saves y Launcher» hub, compact infinite items and the admin
+   console. Liga Nocturna tokens only; wide layouts, no narrow text columns. */
+
+.hub-tabs {
+  margin-bottom: 1.25rem;
+}
+.hub-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+  gap: 1.25rem;
+  align-items: stretch;
+  margin-bottom: 1.5rem;
+}
+.hub-layout.three {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+.hub-layout .wide {
+  grid-column: 1 / -1;
+}
+.hub-save,
+.hub-launcher,
+.hub-feature {
+  display: grid;
+  align-content: start;
+  gap: 0.75rem;
+}
+.hub-save {
+  border: 2px solid transparent;
+  background:
+    radial-gradient(
+        120% 140% at 0% 0%,
+        color-mix(in srgb, var(--c-accent) 14%, transparent),
+        transparent 55%
+      )
+      padding-box,
+    linear-gradient(160deg, var(--c-surface-2), var(--c-surface-1)) padding-box,
+    var(--brand-gradient) border-box;
+}
+.hub-save .eyebrow,
+.hub-launcher .eyebrow {
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  color: var(--c-accent);
+}
+.hub-save-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+}
+.hub-save-when {
+  color: var(--c-text-soft);
+}
+.hub-save .button {
+  justify-self: start;
+}
+.hub-empty {
+  display: grid;
+  justify-items: start;
+  gap: 0.5rem;
+}
+.hub-empty svg,
+.hub-feature > svg,
+.hub-launcher > svg {
+  width: 40px;
+  height: 40px;
+  color: var(--c-accent);
+}
+.hub-empty h2,
+.hub-launcher h2,
+.hub-feature h2 {
+  margin: 0;
+}
+.hub-facts {
+  display: grid;
+  gap: 0.6rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.hub-facts li {
+  display: grid;
+  grid-template-columns: 22px 1fr;
+  gap: 0.6rem;
+  align-items: start;
+  color: var(--c-text-soft);
+}
+.hub-facts svg {
+  width: 20px;
+  height: 20px;
+  color: var(--c-accent);
+}
+.hub-feature p {
+  margin: 0;
+  color: var(--c-text-soft);
+}
+
+/* Infinite items: compact rows, small icons, one action each. */
+.unlimited-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 420px), 1fr));
+  gap: 0.6rem;
+  margin: 0 0 1.25rem;
+  padding: 0;
+  list-style: none;
+}
+.unlimited-row {
+  display: grid;
+  grid-template-columns: 36px minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.55rem 0.75rem;
+  border-radius: var(--radius-md);
+  border: 1.5px solid transparent;
+  background:
+    linear-gradient(var(--c-bg-1), var(--c-bg-1)) padding-box,
+    var(--brand-gradient) border-box;
+}
+.unlimited-row .item-icon {
+  width: 32px;
+  height: 32px;
+  image-rendering: pixelated;
+}
+.unlimited-text {
+  display: grid;
+  min-width: 0;
+}
+.unlimited-text span {
+  color: var(--c-text-muted);
+  font-size: 0.82rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.unlimited-row .button {
+  padding: 0.4rem 0.9rem;
+  font-size: 0.85rem;
+  white-space: nowrap;
+}
+.unlimited-dialog {
+  display: grid;
+  grid-template-columns: 48px 1fr;
+  gap: 1rem;
+  align-items: start;
+}
+.unlimited-dialog .item-icon {
+  width: 48px;
+  height: 48px;
+  image-rendering: pixelated;
+}
+
+@media (max-width: 760px) {
+  .hub-layout,
+  .hub-layout.three {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .unlimited-row {
+    grid-template-columns: 32px minmax(0, 1fr) auto;
+  }
+  .unlimited-row .tag {
+    display: none;
+  }
+}
+
+/* Administración: three large areas, then wide panels. */
+.admin-areas {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.9rem;
+  margin: 1rem 0 1.4rem;
+}
+.admin-areas button {
+  display: grid;
+  grid-template-columns: 34px 1fr;
+  grid-template-rows: auto auto;
+  column-gap: 0.75rem;
+  align-items: center;
+  padding: 0.95rem 1.1rem;
+  border-radius: var(--radius-lg);
+  border: 1.5px solid var(--c-line);
+  background: linear-gradient(160deg, var(--c-surface-2), var(--c-surface-1));
+  color: var(--c-text);
+  text-align: left;
+  cursor: pointer;
+}
+.admin-areas button svg {
+  grid-row: span 2;
+  width: 30px;
+  height: 30px;
+  color: var(--c-accent);
+}
+.admin-areas button small {
+  color: var(--c-text-muted);
+}
+.admin-areas button[aria-pressed="true"] {
+  border-color: transparent;
+  background:
+    linear-gradient(160deg, var(--c-surface-3), var(--c-surface-2)) padding-box,
+    var(--brand-gradient) border-box;
+  box-shadow: 0 10px 30px color-mix(in srgb, var(--c-accent) 18%, transparent);
+}
+.admin-accounts-area {
+  display: grid;
+  gap: 1.25rem;
+}
+.admin-system dl {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 0.6rem 1.25rem;
+  margin: 0;
+}
+.admin-system dt {
+  color: var(--c-text-muted);
+  font-size: 0.82rem;
+}
+.admin-system dd {
+  margin: 0;
+  font-weight: 750;
+}
+
+/* Economía e incidencias. */
+.incident-center {
+  display: grid;
+  gap: 1.5rem;
+}
+.incident-kpis {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.9rem;
+}
+.incident-kpi {
+  display: grid;
+  grid-template-columns: 30px 1fr;
+  align-items: center;
+  column-gap: 0.6rem;
+}
+.incident-kpi svg {
+  grid-row: span 2;
+  color: var(--c-accent);
+}
+.incident-kpi strong {
+  font-size: 1.5rem;
+  line-height: 1;
+}
+.incident-kpi span {
+  color: var(--c-text-muted);
+  font-size: 0.85rem;
+}
+.incident-block h2 {
+  margin: 0 0 0.6rem;
+}
+.incident-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+.incident-head input {
+  min-width: min(100%, 280px);
+}
+.incident-list {
+  display: grid;
+  gap: 0.5rem;
+  margin: 0.6rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+.incident-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: 0.9rem;
+  padding: 0.65rem 0.9rem;
+  border-radius: var(--radius-md);
+  background: var(--c-bg-1);
+  border: 1px solid var(--c-line);
+  box-shadow: inset 4px 0 0 var(--c-accent);
+}
+.incident-row[data-status="cancelled"],
+.incident-row[data-status="refunded"] {
+  box-shadow: inset 4px 0 0 var(--c-line-strong);
+  opacity: 0.85;
+}
+.incident-who {
+  display: grid;
+  min-width: 0;
+}
+.incident-who span,
+.incident-meta {
+  color: var(--c-text-muted);
+  font-size: 0.85rem;
+  overflow-wrap: anywhere;
+}
+.incident-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  justify-content: flex-end;
+}
+.incident-wallets {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 0.75rem;
+}
+.incident-wallet {
+  display: grid;
+  gap: 0.4rem;
+}
+.incident-wallet button {
+  justify-self: start;
+}
+.incident-facts {
+  display: grid;
+  grid-template-columns: minmax(110px, auto) 1fr;
+  gap: 0.35rem 1rem;
+  padding: 0.8rem 1rem;
+  border-radius: var(--radius-md);
+  background: var(--c-bg-1);
+  border: 1px solid var(--c-line);
+}
+.incident-facts dt {
+  color: var(--c-text-muted);
+}
+.incident-facts dd {
+  margin: 0;
+  font-weight: 700;
+}
+.incident-preview {
+  font-weight: 750;
+  color: var(--c-gold-soft);
+}
+.check-row {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  margin: 0.75rem 0;
+}
+
+@media (max-width: 900px) {
+  .admin-areas,
+  .incident-kpis {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .incident-row {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+  .incident-actions {
+    grid-column: 1 / -1;
+    justify-content: flex-start;
+  }
+}

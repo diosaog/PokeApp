@@ -23,7 +23,6 @@ import {
 } from "../pokemon/presentation";
 import { WithSeason, playerName } from "./core";
 import { GameProgress, SaveGame } from "./progress";
-import { desktopPath, insideLauncher } from "../launcher";
 import { LockStatus } from "./lock-status";
 
 // Game-style main menu: every tile is an existing route, nothing new. Each
@@ -40,28 +39,19 @@ const tiles = [
   ["/saves", "Saves y Launcher", "Tu partida en PokeApp", HardDrive],
 ] as const;
 export function ArenaMenu() {
-  // Inside PokeApp Launcher the save tile opens the desktop save tool itself.
-  const desktop = insideLauncher();
+  // Inside PokeApp Launcher /saves itself opens the native «Saves y Launcher».
   return (
     <nav aria-label="Menú de PokeApp">
       <ul className="arena-menu">
         {tiles.map(([to, label, detail, Icon]) => {
-          const [href, name, note] =
-            desktop && to === "/saves"
-              ? [
-                  desktopPath("partida"),
-                  "Mi partida",
-                  "Tu partida en este equipo",
-                ]
-              : [to, label, detail];
           return (
             <li key={to}>
-              <Link to={href} className={`tile-${to.slice(1)}`}>
+              <Link to={to} className={`tile-${to.slice(1)}`}>
                 <span className="tile-icon" aria-hidden="true">
                   <Icon size={28} strokeWidth={2.4} />
                 </span>
-                {name}
-                <small>{note}</small>
+                {label}
+                <small>{detail}</small>
               </Link>
             </li>
           );

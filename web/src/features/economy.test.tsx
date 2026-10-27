@@ -460,7 +460,7 @@ const unlimited = [
   },
 ] as Model<"InventoryRead">["unlimited_items"];
 
-it("shows Rare Candy and Heart Scale as infinite and free with no purchase action", () => {
+it("shows Rare Candy and Heart Scale as compact, infinite and free with no purchase action", () => {
   mocks.inventory = {
     purchases: [],
     targets: [],
@@ -471,9 +471,12 @@ it("shows Rare Candy and Heart Scale as infinite and free with no purchase actio
   expect(screen.getByText("Caramelo Raro")).toBeInTheDocument();
   expect(screen.getByText("Escama Corazón")).toBeInTheDocument();
   expect(screen.getAllByText("∞ · Gratis")).toHaveLength(2);
-  expect(screen.getAllByText(/Disponible en PokeApp Launcher/)).toHaveLength(2);
+  const add = screen.getAllByRole("button", { name: "Añadir a la bolsa" });
+  expect(add).toHaveLength(2);
+  // The description stays available to assistive technology.
+  expect(add[0]).toHaveAccessibleDescription("Gratis e ilimitado.");
   expect(
-    screen.queryByRole("link", { name: "Añadir a mi partida" }),
+    screen.queryByRole("link", { name: "Añadir a la bolsa" }),
   ).not.toBeInTheDocument();
   expect(
     screen.queryByRole("button", { name: "Canjear" }),
@@ -481,7 +484,27 @@ it("shows Rare Candy and Heart Scale as infinite and free with no purchase actio
   expect(mocks.execute).not.toHaveBeenCalled();
 });
 
-it("inside the Launcher opens each infinite item in the native Objetos panel", () => {
+it("in a browser, an infinite item opens a popup that points to the Launcher honestly", () => {
+  mocks.inventory = {
+    purchases: [],
+    targets: [],
+    unlimited_items: unlimited,
+    physical_items: true,
+  };
+  render(<Inventory />);
+  fireEvent.click(
+    screen.getAllByRole("button", { name: "Añadir a la bolsa" })[1],
+  );
+  const dialog = screen.getByRole("dialog", { name: "Escama Corazón" });
+  expect(dialog).toHaveTextContent(/a la bolsa de tu partida, no a un Pokémon/);
+  expect(dialog).toHaveTextContent(/se activa tras la certificación/);
+  expect(
+    screen.getByRole("link", { name: /Descargar Launcher/ }),
+  ).toHaveAttribute("href", "/launcher/download");
+  expect(mocks.execute).not.toHaveBeenCalled();
+});
+
+it("inside the Launcher opens each infinite item in the native popup", () => {
   const agent = vi
     .spyOn(navigator, "userAgent", "get")
     .mockReturnValue("Mozilla/5.0 PokeAppLauncher/0.23.0");
@@ -498,7 +521,7 @@ it("inside the Launcher opens each infinite item in the native Objetos panel", (
       <Inventory />
     </MemoryRouter>,
   );
-  const links = screen.getAllByRole("link", { name: "Añadir a mi partida" });
+  const links = screen.getAllByRole("link", { name: "Añadir a la bolsa" });
   expect(links.map((a) => a.getAttribute("href"))).toEqual([
     "/escritorio/objetos/rare_candy",
     "/escritorio/objetos/heart_scale",

@@ -1,13 +1,6 @@
 import { useState, type ReactNode } from "react";
 import { Link } from "react-router-dom";
-import {
-  ArrowUpRight,
-  Coins,
-  Trophy,
-  Box,
-  HardDrive,
-  Sparkles,
-} from "lucide-react";
+import { ArrowUpRight, Coins, Trophy, Sparkles } from "lucide-react";
 import type { Model, Overview } from "../api/types";
 import { pokemonName, pokemonTitle } from "../pokemon/localization";
 import {
@@ -19,7 +12,6 @@ import {
   typeClass,
 } from "../pokemon/presentation";
 import { useApp, useRead, useOverview, usePC } from "../state";
-import { MyProgress } from "./progress";
 import { ParticipantResults } from "./league-results";
 import { InitialAssignment } from "./initial-assignment";
 import { WipeRevivals } from "./wipe-revivals";
@@ -28,7 +20,6 @@ import { SaveGame } from "./progress";
 import { matchLabel } from "./admin-labels";
 import { LeagueOperations } from "./league-operations";
 import { TeamLockWarning } from "./team-lock-warning";
-import { LauncherDownload } from "./launcher-download";
 import {
   Card,
   CommandState,
@@ -440,54 +431,6 @@ export function PCPage() {
             <Link to="/saves">Sincronizar con el Launcher →</Link>
           </Empty>
         )}
-      </WithSeason>
-    </>
-  );
-}
-export function SavesPage() {
-  const pc = usePC();
-  return (
-    <>
-      <Heading eyebrow="TU PARTIDA, BAJO CONTROL" title="Saves y Launcher">
-        Tu partida del juego, disponible en PokeApp.
-      </Heading>
-      <div className="quick-grid">
-        <Card>
-          <HardDrive />
-          <h2>Save actual en PokeApp</h2>
-          <Notice error={pc.error} />
-          {pc.data?.save ? (
-            <>
-              <Tag>
-                {pc.data.status === "ready"
-                  ? "Partida disponible"
-                  : "Partida pendiente de preparar"}
-              </Tag>
-              <p>Última sincronización · {date(pc.data.save.uploaded_at)}</p>
-              <SaveGame game={pc.data.save.game} />
-              <Link className="button" to="/pc">
-                Abrir mi PC
-              </Link>
-            </>
-          ) : (
-            <p>
-              {pc.isPending
-                ? "Consultando…"
-                : "No hay un save actual disponible para esta temporada."}
-            </p>
-          )}
-        </Card>
-        <Card>
-          <Box />
-          <h2>Continúa tu aventura</h2>
-          <p>
-            Abre tu partida en el Launcher y elige «Sincronizar con PokeApp».
-          </p>
-          <LauncherDownload />
-        </Card>
-      </div>
-      <WithSeason>
-        <MyProgress />
       </WithSeason>
     </>
   );

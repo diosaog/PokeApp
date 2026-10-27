@@ -9,13 +9,15 @@ import {
   CommandState,
   Empty,
   Loading,
+  Modal,
   Notice,
   Tag,
   date,
   useCommand,
 } from "../ui";
 import { PokemonSelectorModal, type PokemonTarget } from "./pokemon-selector";
-import { desktopPath, insideLauncher } from "../launcher";
+import { deliveriesPath, infiniteItemPath, insideLauncher } from "../launcher";
+import { LauncherDownload } from "./launcher-download";
 
 const pokemonActions = [
   "blindar_pokemon",
@@ -110,6 +112,9 @@ export function Inventory() {
   ]);
   const [purchase, setPurchase] = useState<Model<"PurchaseRead"> | null>(null);
   const [robberyTrainer, setRobberyTrainer] = useState<string | null>(null);
+  const [unlimitedInfo, setUnlimitedInfo] = useState<
+    NonNullable<Model<"InventoryRead">["unlimited_items"]>[number] | null
+  >(null);
   const trainers = useRead<Model<"TrainerRead">[]>(
     "/v1/read/trainers",
     !!season && !!purchase,
@@ -175,36 +180,68 @@ export function Inventory() {
       <p className="muted">Tus compras y vales · disponibles para canjear</p>
       <Notice error={q.error} />
       {!!q.data?.unlimited_items?.length && (
-        <section aria-labelledby="unlimited-title">
+        <section
+          aria-labelledby="unlimited-title"
+          className="unlimited-section"
+        >
           <h3 id="unlimited-title">Objetos ilimitados</h3>
-          <div className="inventory-grid">
+          {/* Compact rows: a small icon, the name, ∞ and one action. Inside
+              PokeApp Launcher the action opens its native popup (quantity,
+              bag limit, confirmation); the effect goes to the bag, never to a
+              Pokémon. */}
+          <ul className="unlimited-list">
             {q.data.unlimited_items.map((item) => (
-              <Card key={item.code} className="inventory-card unlimited">
-                <div className="inventory-item">
-                  <ItemIcon name={item.name} />
-                  <h3>{item.label}</h3>
-                  <span className="unlimited-badge" aria-hidden="true">
-                    ∞
-                  </span>
-                </div>
+              <li key={item.code} className="unlimited-row">
+                <ItemIcon name={item.name} />
+                <span className="unlimited-text">
+                  <strong>{item.label}</strong>
+                  <span id={`unlimited-${item.code}`}>{item.description}</span>
+                </span>
                 <Tag>∞ · Gratis</Tag>
-                <p>{item.description}</p>
                 {insideLauncher() ? (
                   <Link
                     className="button primary"
-                    to={desktopPath("objetos", item.code)}
+                    to={infiniteItemPath(item.code)}
+                    aria-describedby={`unlimited-${item.code}`}
                   >
-                    Añadir a mi partida
+                    Añadir a la bolsa
                   </Link>
                 ) : (
-                  <p className="muted">
-                    Disponible en PokeApp Launcher para añadirlo a tu partida.
-                  </p>
+                  <button
+                    type="button"
+                    className="button primary"
+                    aria-describedby={`unlimited-${item.code}`}
+                    onClick={() => setUnlimitedInfo(item)}
+                  >
+                    Añadir a la bolsa
+                  </button>
                 )}
-              </Card>
+              </li>
             ))}
-          </div>
+          </ul>
         </section>
+      )}
+      {unlimitedInfo && (
+        <Modal
+          title={unlimitedInfo.label}
+          onClose={() => setUnlimitedInfo(null)}
+        >
+          <div className="unlimited-dialog">
+            <ItemIcon name={unlimitedInfo.name} />
+            <p>
+              <strong>Gratis e ilimitado.</strong> Se añade a la bolsa de tu
+              partida, no a un Pokémon: eliges la cantidad, PokeApp prepara una
+              copia verificada y confirmas. Nunca supera lo que cabe en la
+              bolsa.
+            </p>
+          </div>
+          <p className="muted">
+            Disponible en PokeApp Launcher, que trabaja con la partida de tu
+            equipo. Añadir objetos a la partida se activa tras la certificación
+            con el emulador; mientras tanto puedes consultar tus cantidades.
+          </p>
+          <LauncherDownload />
+        </Modal>
       )}
       <CommandState command={cmd} />
       {q.isPending ? (
@@ -303,8 +340,8 @@ export function Inventory() {
               )}
               {transfer.obligation?.endsWith("_PENDING") &&
                 insideLauncher() && (
-                  <Link className="text-link" to={desktopPath("robos")}>
-                    Abrir Robos y entregas →
+                  <Link className="text-link" to={deliveriesPath}>
+                    Abrir la entrega en el Launcher →
                   </Link>
                 )}
               {transfer.side === "destination" &&

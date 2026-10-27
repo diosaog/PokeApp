@@ -235,6 +235,9 @@ export class ApiClient {
     { key: string; promise?: Promise<unknown> }
   >();
   onExpired = () => {};
+  // Inside PokeApp Launcher the session belongs to the Launcher: this web holds
+  // an access token only and asks the Launcher for a fresh one instead.
+  renewSession: (() => Promise<Session | null>) | null = null;
   constructor(readonly base = import.meta.env.VITE_API_BASE_URL || "") {}
   setSession(session: Session | null) {
     this.generation++;
@@ -244,6 +247,13 @@ export class ApiClient {
   logout() {
     this.setSession(null);
     this.onExpired();
+  }
+  // The same signed-in trainer, with a newer access token from the Launcher.
+  renewAccess(session: Session) {
+    if (this.session && !this.session.refresh_token) this.session = session;
+  }
+  get signedIn() {
+    return this.session !== null;
   }
   get configured() {
     return Boolean(this.base);
@@ -304,6 +314,15 @@ export class ApiClient {
       const generation = this.generation;
       const token = this.session?.refresh_token;
       this.refreshing = (async () => {
+        if (!token && this.renewSession) {
+          const renewed = await this.renewSession();
+          if (generation !== this.generation)
+            throw new ApiError(401, "SESSION_CHANGED");
+          if (renewed) {
+            this.session = renewed;
+            return;
+          }
+        }
         if (!token) throw new ApiError(401, "INVALID_SESSION");
         const data = await this.send<Model<"RefreshResponse">>(
           "/v1/auth/refresh",

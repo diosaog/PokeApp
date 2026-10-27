@@ -13,6 +13,13 @@ import {
 } from "@tanstack/react-query";
 import { api, ApiError } from "./api/client";
 import type { Me, Model, Overview } from "./api/types";
+import {
+  insideLauncher,
+  listenForLauncherSession,
+  renewFromLauncher,
+  requestLauncherSession,
+  tellLauncherLogout,
+} from "./launcher";
 
 export const queries = new QueryClient({
   defaultOptions: {
@@ -64,6 +71,29 @@ export function AppState({ children }: { children: ReactNode }) {
       .catch(() => {});
     return () => controller.abort();
   }, []);
+  // Inside PokeApp Launcher: one sign-in. The Launcher keeps the session
+  // (encrypted on this PC) and hands this web an access token, kept in memory
+  // only; an explicit sign-out here also signs the Launcher out.
+  useEffect(() => {
+    if (!insideLauncher()) return;
+    api.renewSession = renewFromLauncher;
+    const stop = listenForLauncherSession((session, trainerId) => {
+      if (api.signedIn) return api.renewAccess(session);
+      api.setSession(session);
+      void api
+        .request<Me>("/v1/me")
+        .then((value) => {
+          if (value.trainer_id === trainerId) setMe(value);
+          else api.setSession(null);
+        })
+        .catch(() => api.setSession(null));
+    });
+    requestLauncherSession();
+    return () => {
+      stop();
+      api.renewSession = null;
+    };
+  }, []);
   const [adminHolds, setAdminHolds] = useState(0);
   const holdAdminNavigation = useCallback(() => {
     setAdminHolds((count) => count + 1);
@@ -84,7 +114,10 @@ export function AppState({ children }: { children: ReactNode }) {
           setMe,
           season,
           setSeason,
-          logout: () => api.logout(),
+          logout: () => {
+            tellLauncherLogout();
+            api.logout();
+          },
           adminOperationPending: adminHolds > 0,
           holdAdminNavigation,
           accountsEnabled,
@@ -106,12 +139,15 @@ export function useApp() {
 export function useViewer() {
   return useContext(Context)?.me?.trainer_id;
 }
-export function useRead<T>(path: string, enabled = true) {
+// `live` polls while the screen is open (admin consoles), so a change made
+// elsewhere appears without reloading; commands still invalidate at once.
+export function useRead<T>(path: string, enabled = true, live?: number) {
   const { me } = useApp();
   return useQuery({
     queryKey: [me?.trainer_id, path],
     queryFn: ({ signal }) => api.request<T>(path, { signal }),
     enabled: Boolean(me) && enabled,
+    refetchInterval: live,
   });
 }
 export function useOverview() {

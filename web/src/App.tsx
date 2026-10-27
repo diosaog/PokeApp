@@ -24,11 +24,6 @@ import {
   ArrowUpRight,
   ShieldCheck,
   X,
-  Gamepad2,
-  Candy,
-  ArrowLeftRight,
-  ArchiveRestore,
-  Cloud,
 } from "lucide-react";
 import { api } from "./api/client";
 import type { Model } from "./api/types";
@@ -39,7 +34,6 @@ import {
   LeaguePage,
   TrainersPage,
   PCPage,
-  SavesPage,
   ShopPage,
   HallPage,
 } from "./features/core";
@@ -53,7 +47,8 @@ import { BattlePage } from "./features/team-preview";
 import { ScoutingPage } from "./features/scouting";
 import { TrainerProfilePage } from "./features/trainer-profile";
 import { DesktopPage } from "./features/desktop";
-import { desktopPanels, desktopPath, insideLauncher } from "./launcher";
+import { SavesPage } from "./features/saves";
+import { insideLauncher } from "./launcher";
 import { RegistrationForm } from "./features/registration";
 import { PinForm, pinRecoveryKey } from "./features/account-editor";
 import { play } from "./sound";
@@ -91,14 +86,6 @@ const linkGroups = [
     ],
   },
 ] as const;
-// Inside PokeApp Launcher the sidebar also leads to the native desktop tools.
-const desktopIcons = {
-  partida: Gamepad2,
-  objetos: Candy,
-  robos: ArrowLeftRight,
-  copias: ArchiveRestore,
-  nube: Cloud,
-};
 function Login() {
   const {
       setMe,
@@ -382,29 +369,6 @@ export default function App() {
               ))}
             </div>
           ))}
-          {insideLauncher() && (
-            <div className="nav-group nav-desktop">
-              <span className="nav-group-label">ESCRITORIO</span>
-              {desktopPanels.map(([panel, label]) => {
-                const Icon = desktopIcons[panel];
-                return (
-                  <NavLink
-                    key={panel}
-                    to={desktopPath(panel)}
-                    aria-disabled={adminOperationPending || undefined}
-                    onClick={(event) => {
-                      if (adminOperationPending) event.preventDefault();
-                      else setMenu(false);
-                    }}
-                  >
-                    <Icon size={19} />
-                    {label}
-                    <ArrowUpRight className="nav-arrow" size={14} />
-                  </NavLink>
-                );
-              })}
-            </div>
-          )}
           {me.is_admin && (
             <div className="nav-group">
               <span className="nav-group-label">ADMIN</span>
