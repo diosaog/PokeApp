@@ -229,7 +229,51 @@ export async function fixture(
         key: request.headers()["idempotency-key"],
       });
       result = { operation_id: "receipt", replayed: false };
-    } else if (path === "/v1/read/seasons")
+    } else if (path.endsWith("/incidents"))
+      // Phase 28 incident center (also feeds the local design preview).
+      result = {
+        season_id: sid,
+        season_status: "active",
+        wallets: players.map(({ trainer_id, display_name }, i) => ({
+          trainer_id,
+          display_name,
+          status: "active",
+          balance: 40 - i * 7,
+        })),
+        purchases: [
+          {
+            id: "70000000-0000-4000-8000-000000000001",
+            trainer_id: players[1].trainer_id,
+            display_name: players[1].display_name,
+            item_name: "Escudo Pokémon",
+            item_code: "blindar_pokemon",
+            total_price: 30,
+            status: "pending",
+            acquisition_type: "paid",
+            purchased_at: "2026-10-20T10:00:00Z",
+            linked_operation: false,
+            cancellable: true,
+            refundable: false,
+          },
+          {
+            id: "70000000-0000-4000-8000-000000000002",
+            trainer_id: players[2].trainer_id,
+            display_name: players[2].display_name,
+            item_name: "Baya Zidra",
+            item_code: "baya_zidra",
+            total_price: 4,
+            status: "used",
+            acquisition_type: "paid",
+            purchased_at: "2026-10-18T10:00:00Z",
+            linked_operation: false,
+            cancellable: false,
+            refundable: true,
+          },
+        ],
+        robberies: [],
+        history: [],
+      };
+    else if (path === "/v1/read/seasons")
       result = { items: [overview.season], next_offset: null };
     else if (path === "/v1/read/trainers")
       result = players.map((p) => ({
