@@ -1,0 +1,136 @@
+{
+  "versions": {
+    "a": "0.26.0-test.3",
+    "b": "0.26.0-test.4"
+  },
+  "status": "PASS",
+  "checks": [
+    {
+      "pass": true,
+      "label": "real installer: version 0.26.0-test.3 installed in a disposable folder"
+    },
+    {
+      "pass": true,
+      "label": "start-up check: nothing newer"
+    },
+    {
+      "pass": true,
+      "label": "popup says «Estás utilizando la última versión»"
+    },
+    {
+      "pass": true,
+      "label": "one synthetic save in the sandbox is chosen automatically"
+    },
+    {
+      "pass": true,
+      "label": "forged manifest refused (SIGNATURE_INVALID), nothing downloaded"
+    },
+    {
+      "pass": true,
+      "label": "downgrade manifest refused (DOWNGRADE_REJECTED), nothing downloaded"
+    },
+    {
+      "pass": true,
+      "label": "incompatible manifest refused (INCOMPATIBLE_VERSION), nothing downloaded"
+    },
+    {
+      "pass": true,
+      "label": "channel manifest refused (CHANNEL_MISMATCH), nothing downloaded"
+    },
+    {
+      "pass": true,
+      "label": "valid offer detected"
+    },
+    {
+      "pass": true,
+      "label": "IPC: a forged ticket cannot start an update; the web has no native bridge"
+    },
+    {
+      "pass": true,
+      "label": "corrupted download refused by SHA-512 and removed"
+    },
+    {
+      "pass": true,
+      "label": "dropped connection: partial file removed, «Reintentar» offered"
+    },
+    {
+      "pass": true,
+      "label": "newer version: popup opens by itself with notes"
+    },
+    {
+      "pass": true,
+      "label": "«Más tarde» remembered for that version"
+    },
+    {
+      "pass": true,
+      "label": "no repeated popup at the next start"
+    },
+    {
+      "pass": true,
+      "label": "download shows its progress in the popup"
+    },
+    {
+      "pass": true,
+      "label": "repeated «Actualizar»: one single download"
+    },
+    {
+      "pass": true,
+      "label": "pending recovery: verified installer kept, install deferred, Launcher keeps running"
+    },
+    {
+      "pass": true,
+      "label": "unfinished install recovered at start (offline): «Instalar ahora»"
+    },
+    {
+      "pass": true,
+      "label": "installing: the Launcher closes for the installer"
+    },
+    {
+      "pass": true,
+      "label": "nothing downloaded again for the install"
+    },
+    {
+      "pass": true,
+      "label": "silent install done; 0.26.0-test.4 restarted by itself"
+    },
+    {
+      "pass": true,
+      "label": "the restarted version keeps running and clears the downloaded installer"
+    },
+    {
+      "pass": true,
+      "label": "running 0.26.0-test.4; the same feed is now «última versión»"
+    },
+    {
+      "pass": true,
+      "label": "selected save kept"
+    },
+    {
+      "pass": true,
+      "label": "configuration and known saves kept byte for byte"
+    },
+    {
+      "pass": true,
+      "label": "DPAPI-protected session kept and still decryptable"
+    },
+    {
+      "pass": true,
+      "label": "Launcher app data (Electron profile) kept"
+    },
+    {
+      "pass": true,
+      "label": "the game save is byte-identical: no save written across the update"
+    },
+    {
+      "pass": true,
+      "label": "0.26.0-test.4 detects the next release 0.26.0-test.5 (nothing downloaded)"
+    }
+  ],
+  "boundaries": "Rehearsal app id/profile/install folder, loopback feed, temporary key, synthetic saves; not the owner's Launcher, no account, nothing published.",
+  "installed_version": "0.26.0-test.4",
+  "cleanup": {
+    "uninstall_entry_left": "0",
+    "profile_removed": true,
+    "install_removed": true
+  }
+}

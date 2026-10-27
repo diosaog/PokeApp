@@ -1,0 +1,90 @@
+{
+  "worker": "web/worker/launcher.mjs (wrangler dev --local, disposable R2)",
+  "passed": 19,
+  "total": 19,
+  "checks": [
+    {
+      "pass": true,
+      "label": "wrangler dev serves the committed Worker on loopback"
+    },
+    {
+      "pass": true,
+      "label": "manifest route: exact bytes, JSON, no-store, nosniff"
+    },
+    {
+      "pass": true,
+      "label": "stable feed absent until published: 404, no-store"
+    },
+    {
+      "pass": true,
+      "label": "installer route: exact bytes, octet-stream, immutable, private file name"
+    },
+    {
+      "pass": true,
+      "label": "HEAD gives the size without the body"
+    },
+    {
+      "pass": true,
+      "label": "/launcher/download serves windows/0.25.0/ (the version the card shows)"
+    },
+    {
+      "pass": true,
+      "label": "POST refused (405)"
+    },
+    {
+      "pass": true,
+      "label": "PUT refused (405)"
+    },
+    {
+      "pass": true,
+      "label": "DELETE refused (405)"
+    },
+    {
+      "pass": true,
+      "label": "PATCH refused (405)"
+    },
+    {
+      "pass": true,
+      "label": "no listing or traversal: /launcher/updates/",
+      "observed": 404
+    },
+    {
+      "pass": true,
+      "label": "no listing or traversal: /launcher/updates/beta.json",
+      "observed": 404
+    },
+    {
+      "pass": true,
+      "label": "no listing or traversal: /launcher/updates/private/latest.exe",
+      "observed": 404
+    },
+    {
+      "pass": true,
+      "label": "no listing or traversal: /launcher/updates/private/..%2F..%2Fwindows%2F0.25.0.exe",
+      "observed": 404
+    },
+    {
+      "pass": true,
+      "label": "no listing or traversal: /launcher/updates/stable/9.0.0-channel.1/../../x.exe",
+      "observed": 404
+    },
+    {
+      "pass": true,
+      "label": "no listing or traversal: /launcher/updates/private/9.0.0-channel.1.exe.json",
+      "observed": 404
+    },
+    {
+      "pass": true,
+      "label": "unpublished version: 503, no-store, nothing cached"
+    },
+    {
+      "pass": true,
+      "label": "updater verifies the Worker's manifest (Ed25519) and its download (SHA-512)"
+    },
+    {
+      "pass": true,
+      "label": "a stable Launcher refuses the private feed",
+      "observed": "CHANNEL_MISMATCH"
+    }
+  ]
+}
