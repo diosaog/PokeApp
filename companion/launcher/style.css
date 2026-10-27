@@ -412,8 +412,8 @@ article > h2:first-child::before {
   display: inline-flex;
   margin-right: 0.25rem;
 }
-[data-mode="strip"] header,
-[data-mode="strip"] main {
+[data-mode="strip"] body > header,
+[data-mode="strip"] body > main {
   display: none;
 }
 body[data-mode="strip"] {
@@ -501,8 +501,8 @@ body:not([data-mode]) #panel-title,
   display: none;
 }
 /* Modal: the window is only the dialog, over the web. */
-[data-mode="modal"] header,
-[data-mode="modal"] main,
+[data-mode="modal"] body > header,
+[data-mode="modal"] body > main,
 [data-mode="modal"] #update-banner,
 [data-mode="modal"] #notices,
 [data-mode="modal"] #offline-note {
@@ -924,6 +924,11 @@ html[data-mode="strip"] {
 #sheet-body > article {
   margin-top: 0.5rem;
   box-shadow: none;
+}
+/* The dialog already carries the title (and its accessible name). */
+#sheet-body > #quick-article > h2:first-child,
+#sheet-body > #transfer-article > h2:first-child {
+  display: none;
 }
 
 /* Save selector. */
