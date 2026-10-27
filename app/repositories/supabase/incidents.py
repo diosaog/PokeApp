@@ -1,4 +1,4 @@
-"""Admin incident center: one service-only RPC per command (migration 062).
+"""Admin incident center: one service-only RPC per command (062, robbery 064).
 
 A mutation is never retried here: the caller retries with the same operation
 id, and the database returns the stored receipt instead of a second effect.
@@ -13,6 +13,10 @@ ERRORS = {
     "admin_required": ("ADMIN_REQUIRED", 403),
     "season_not_found": ("SEASON_NOT_FOUND", 404),
     "purchase_not_found": ("PURCHASE_NOT_FOUND", 404),
+    "robbery_not_found": ("ROBBERY_NOT_FOUND", 404),
+    "robbery_already_cancelled": ("ROBBERY_ALREADY_CANCELLED", 409),
+    "admin_incident_robbery_once": ("ROBBERY_ALREADY_CANCELLED", 409),
+    "robbery_reconciliation_required": ("ROBBERY_RECONCILIATION_REQUIRED", 409),
     "participant_not_found": ("PARTICIPANT_NOT_FOUND", 404),
     "idempotency_conflict": ("IDEMPOTENCY_CONFLICT", 409),
     "purchase_not_cancellable": ("PURCHASE_NOT_CANCELLABLE", 409),
@@ -37,6 +41,10 @@ class IncidentRepository(Protocol):
 
     def adjust_coins(
         self, actor, season, trainer, amount, operation, digest, reason
+    ) -> dict: ...
+
+    def cancel_robbery(
+        self, actor, season, authorization, operation, digest, reason
     ) -> dict: ...
 
 
@@ -73,6 +81,19 @@ class SupabaseIncidentRepository:
                 "p_season": season,
                 "p_purchase": purchase,
                 "p_kind": kind,
+                "p_operation": operation,
+                "p_hash": digest,
+                "p_reason": reason,
+            },
+        )
+
+    def cancel_robbery(self, actor, season, authorization, operation, digest, reason):
+        return self._rpc(
+            "admin_robbery_cancel",
+            {
+                "p_actor": actor,
+                "p_season": season,
+                "p_authorization": authorization,
                 "p_operation": operation,
                 "p_hash": digest,
                 "p_reason": reason,

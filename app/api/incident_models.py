@@ -28,6 +28,11 @@ class PurchaseResolveBody(Strict):
     reason: str = Reason
 
 
+class RobberyCancelBody(Strict):
+    # Only a robbery with nothing decided or applied; its item's coins return once.
+    reason: str = Reason
+
+
 class CoinAdjustBody(Strict):
     trainer_id: UUID
     amount: int = Field(ge=-100000, le=100000)
@@ -43,10 +48,11 @@ class CoinAdjustBody(Strict):
 
 class IncidentReceipt(BaseModel):
     operation_id: UUID
-    kind: Literal["purchase_cancel", "purchase_refund", "coin_adjustment"]
+    kind: Literal["purchase_cancel", "purchase_refund", "coin_adjustment", "robbery_cancel"]
     season_id: UUID
     trainer_id: UUID
     purchase_id: UUID | None = None
+    authorization_id: UUID | None = None
     status: Literal["cancelled", "refunded", "applied"]
     amount: int
     ledger_id: UUID | None = None
@@ -84,6 +90,10 @@ class IncidentRobbery(BaseModel):
     state: str | None = None
     source_obligation: str | None = None
     destination_obligation: str | None = None
+    price: int | None = None
+    cancellable: bool = False
+    reconciliation_required: bool = False
+    cancelled_by_admin: bool = False
     created_at: datetime
 
 

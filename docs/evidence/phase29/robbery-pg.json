@@ -1,0 +1,14 @@
+{
+  "postgres": "17.11",
+  "migrations": "001-064 bootstrap",
+  "checks": [
+    "overview tells reversible robberies from those needing reconciliation",
+    "non-admin, missing reason, decided/physical/terminal robberies refused with no change",
+    "requested robbery cancelled: both trainers released, item cancelled, price returned once, audited",
+    "same operation replays; other data conflicts; no second return by either incident path",
+    "four concurrent cancellations of one robbery: exactly one effect",
+    "overview refreshes: cancelled by admin, history keeps both commands",
+    "archived season refused; intervention history append-only",
+    "grants: service role only; helper closed"
+  ]
+}

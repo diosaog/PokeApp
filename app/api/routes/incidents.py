@@ -1,4 +1,5 @@
-"""Admin incident center (Phase 28): cancel or refund purchases, correct coins.
+"""Admin incident center: cancel or refund purchases, correct coins (Phase 28)
+and cancel a still-reversible robbery (Phase 29, migration 064).
 
 Off unless the deployment enables it after applying migration 062. Every
 command needs an administrator, a reason and an Idempotency-Key (UUID); the
@@ -21,6 +22,7 @@ from app.api.incident_models import (
     IncidentOverview,
     IncidentReceipt,
     PurchaseResolveBody,
+    RobberyCancelBody,
 )
 from app.api.models import AuthenticatedPrincipal
 from app.api.security import require_admin_principal
@@ -58,7 +60,9 @@ def _call(container, action):
         ) from exc
 
 
-def _receipt(raw, *, season_id, operation, kind, trainer=None, purchase=None):
+def _receipt(
+    raw, *, season_id, operation, kind, trainer=None, purchase=None, authorization=None
+):
     receipt = IncidentReceipt.model_validate(raw)
     if (
         receipt.season_id != season_id
@@ -66,6 +70,7 @@ def _receipt(raw, *, season_id, operation, kind, trainer=None, purchase=None):
         or receipt.kind != kind
         or (trainer is not None and receipt.trainer_id != trainer)
         or (purchase is not None and receipt.purchase_id != purchase)
+        or (authorization is not None and receipt.authorization_id != authorization)
     ):
         raise ValueError("Incident receipt scope mismatch")
     return receipt
@@ -111,6 +116,35 @@ def resolve_purchase(
             operation=operation,
             kind=kind,
             purchase=purchase_id,
+        ),
+    )
+
+
+@router.post("/robberies/{authorization_id}/cancel", response_model=IncidentReceipt)
+def cancel_robbery(
+    season_id: UUID,
+    authorization_id: UUID,
+    payload: RobberyCancelBody,
+    operation: Operation,
+    principal: Admin,
+    container: Container,
+):
+    body = payload.model_dump(mode="json")
+    return _call(
+        container,
+        lambda repository: _receipt(
+            repository.cancel_robbery(
+                str(principal.trainer_id),
+                str(season_id),
+                str(authorization_id),
+                str(operation),
+                digest("robbery_cancel", season_id, authorization_id, body),
+                payload.reason,
+            ),
+            season_id=season_id,
+            operation=operation,
+            kind="robbery_cancel",
+            authorization=authorization_id,
         ),
     )
 

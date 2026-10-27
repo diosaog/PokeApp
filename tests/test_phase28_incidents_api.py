@@ -262,3 +262,98 @@ class RepositoryErrorTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+ROBBERY = "55555555-5555-4555-8555-555555555555"
+
+
+class RobberyIncidents(FakeIncidents):
+    def cancel_robbery(self, actor, season, authorization, operation, digest, reason):
+        self.calls.append(("robbery", actor, season, authorization, operation, digest, reason))
+        if self.fail:
+            raise self.fail
+        return self.receipts.setdefault(
+            operation,
+            {
+                "operation_id": operation,
+                "kind": "robbery_cancel",
+                "season_id": season,
+                "trainer_id": PLAYER,
+                "purchase_id": PURCHASE,
+                "authorization_id": authorization,
+                "status": "cancelled",
+                "amount": 12,
+                "ledger_id": str(uuid4()),
+                "balance_after": 112,
+                "replayed": operation in self.receipts,
+            },
+        )
+
+
+class RobberyCancelApiTests(unittest.TestCase):
+    path = f"/v1/admin/seasons/{SEASON}/incidents/robberies/{ROBBERY}/cancel"
+
+    def post(self, api, body, key=None, path=None):
+        return api.post(
+            path or self.path,
+            json=body,
+            headers={**AUTH, "Idempotency-Key": key or str(uuid4())},
+        )
+
+    def test_admin_cancel_binds_reason_target_and_key(self):
+        incidents = RobberyIncidents()
+        key = str(uuid4())
+        response = self.post(client(incidents), {"reason": "  Robo atascado  "}, key)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json()["kind"], "robbery_cancel")
+        _, actor, season, authorization, operation, digest_, reason = incidents.calls[0]
+        self.assertEqual((season, authorization, operation, reason), (SEASON, ROBBERY, key, "Robo atascado"))
+        self.assertEqual(digest_, digest("robbery_cancel", SEASON, ROBBERY, {"reason": "Robo atascado"}))
+        again = self.post(client(incidents), {"reason": "Robo atascado"}, key)
+        # Same key, same stored receipt: one ledger credit, never a second one.
+        self.assertEqual(again.json()["ledger_id"], response.json()["ledger_id"])
+
+    def test_only_admins_and_valid_requests_reach_the_database(self):
+        incidents = RobberyIncidents()
+        self.assertEqual(self.post(client(incidents, admin=False), {"reason": "Robo atascado"}).status_code, 403)
+        for body in ({}, {"reason": "  ab  "}, {"reason": "Robo atascado", "refund": False}):
+            self.assertEqual(self.post(client(incidents), body).status_code, 422)
+        self.assertEqual(self.post(client(incidents), {"reason": "Robo atascado"}, key="not-a-uuid").status_code, 422)
+        self.assertEqual(incidents.calls, [])
+
+    def test_refusals_keep_their_meaning_and_wrong_receipts_fail_closed(self):
+        incidents = RobberyIncidents()
+        for code, status in (
+            ("ROBBERY_RECONCILIATION_REQUIRED", 409),
+            ("ROBBERY_ALREADY_CANCELLED", 409),
+            ("ROBBERY_NOT_FOUND", 404),
+            ("HISTORICAL_ARTIFACT_IMMUTABLE", 409),
+        ):
+            incidents.fail = SeasonAdminRejected(code, status)
+            response = self.post(client(incidents), {"reason": "Robo atascado"})
+            self.assertEqual((response.status_code, response.json()["detail"]["code"]), (status, code))
+
+        class Wrong(RobberyIncidents):
+            def cancel_robbery(self, *args):
+                return {**super().cancel_robbery(*args), "authorization_id": str(uuid4())}
+
+        self.assertEqual(self.post(client(Wrong()), {"reason": "Robo atascado"}).status_code, 503)
+
+    def test_repository_maps_robbery_refusals(self):
+        for message, code in (
+            ("robbery_reconciliation_required", "ROBBERY_RECONCILIATION_REQUIRED"),
+            ("duplicate key value violates unique constraint \"admin_incident_robbery_once\"", "ROBBERY_ALREADY_CANCELLED"),
+            ("robbery_already_cancelled", "ROBBERY_ALREADY_CANCELLED"),
+        ):
+            class Boom(Exception):
+                pass
+
+            boom = Boom(message)
+
+            class Client:
+                def rpc(self, *_):
+                    raise boom
+
+            with self.assertRaises(SeasonAdminRejected) as raised:
+                SupabaseIncidentRepository(Client()).cancel_robbery("a", "s", "r", "o", "d", "reason")
+            self.assertEqual(raised.exception.code, code)
