@@ -10,7 +10,7 @@ import {
 } from "lucide-react";
 import { usePC } from "../state";
 import { Card, Heading, Notice, Tag, date } from "../ui";
-import { insideLauncher } from "../launcher";
+import { insideLauncher, launcherWithoutHub } from "../launcher";
 import { MyProgress, SaveGame } from "./progress";
 import { LauncherDownload } from "./launcher-download";
 import { WithSeason } from "./core";
@@ -21,6 +21,21 @@ const tabs = [
   ["launcher", "Launcher"],
 ] as const;
 type Tab = (typeof tabs)[number][0];
+
+// Launcher 0.25.x opens these views as panels from the 27C routes.
+function OlderLauncherPanel({
+  panel,
+  label,
+}: {
+  panel: string;
+  label: string;
+}) {
+  return (
+    <Link className="button primary" to={`/escritorio/${panel}`}>
+      {label}
+    </Link>
+  );
+}
 
 // «Saves y Launcher». Inside PokeApp Launcher this route opens the native hub
 // (the same three tabs, with the save on this PC). In a browser it shows what
@@ -106,7 +121,9 @@ function Saves() {
               el archivo está estable, sin duplicados.
             </li>
           </ul>
-          {insideLauncher() ? (
+          {launcherWithoutHub() ? (
+            <OlderLauncherPanel panel="partida" label="Abrir Mi partida" />
+          ) : insideLauncher() ? (
             <p className="muted">
               Estás en PokeApp Launcher: abre «Saves y Launcher» en la barra
               lateral para ver la partida de este equipo.
@@ -157,7 +174,14 @@ function Backups() {
           Las copias de seguridad se guardan en el ordenador donde juegas, no en
           la nube. Consúltalas, expórtalas o restáuralas desde PokeApp Launcher.
         </p>
-        {!insideLauncher() && <LauncherDownload />}
+        {launcherWithoutHub() ? (
+          <OlderLauncherPanel
+            panel="copias"
+            label="Abrir copias de seguridad"
+          />
+        ) : (
+          !insideLauncher() && <LauncherDownload />
+        )}
       </Card>
     </div>
   );
@@ -169,9 +193,22 @@ function LauncherTab() {
       <Card className="hub-launcher">
         <MonitorDown aria-hidden="true" />
         <h2>
-          {insideLauncher() ? "Buscar actualizaciones" : "Descargar Launcher"}
+          {launcherWithoutHub()
+            ? "Tu Launcher"
+            : insideLauncher()
+              ? "Buscar actualizaciones"
+              : "Descargar Launcher"}
         </h2>
-        {insideLauncher() ? (
+        {launcherWithoutHub() ? (
+          <>
+            <p>
+              Esta versión se actualiza instalando la nueva desde la web de
+              PokeApp cuando se publique. Su conexión y su sincronización están
+              en «Conexión».
+            </p>
+            <OlderLauncherPanel panel="nube" label="Abrir Conexión" />
+          </>
+        ) : insideLauncher() ? (
           <p>
             Abre «Saves y Launcher» › Launcher para buscar actualizaciones. Solo
             se instalan versiones firmadas y verificadas.

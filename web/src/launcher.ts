@@ -13,6 +13,16 @@ export const infiniteItemPath = (item: string) => `/escritorio/objetos/${item}`;
 export const deliveriesPath = "/escritorio/robos";
 // Links from 27C (Mi partida, Copias, Conexión) now live in the hub's tabs.
 export const legacyDesktopPanels = ["partida", "copias", "nube"] as const;
+// Launchers before 0.26.0 have no native hub at /saves: they still open their
+// panels from the 27C routes, so the hub links there for them.
+export function launcherWithoutHub() {
+  const version = /PokeAppLauncher\/(\d+)\.(\d+)\./.exec(
+    typeof navigator === "undefined" ? "" : navigator.userAgent,
+  );
+  return (
+    Boolean(version) && Number(version![1]) === 0 && Number(version![2]) < 26
+  );
+}
 
 // Session bridge. The Launcher keeps the session (encrypted on this PC) and
 // hands this web an access token only — never the refresh token — through

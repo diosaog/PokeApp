@@ -88,3 +88,53 @@ test.describe("inside PokeApp Launcher", () => {
     ).toEqual([]);
   });
 });
+
+// Phase 30: the public Launcher stays 0.25.0 for now. It has no native hub at
+// /saves; its panels still open from the 27C routes, which the hub links to.
+test.describe("inside the public Launcher 0.25.0", () => {
+  test.use({ userAgent: launcherAgent.replace("0.26.0", "0.25.0") });
+  for (const width of [1440, 390]) {
+    test(`the hub opens its native panels through the 27C routes at ${width}px`, async ({
+      page,
+    }) => {
+      await page.setViewportSize({ width, height: 900 });
+      await page.route("**/__launcher/**", (route) =>
+        route.fulfill({ status: 204 }),
+      );
+      const errors: string[] = [];
+      page.on("pageerror", (error) => errors.push(error.message));
+      await fixture(page);
+      await login(page);
+      await page.evaluate(() => {
+        history.pushState({}, "", "/saves");
+        dispatchEvent(new PopStateEvent("popstate"));
+      });
+      const panels: [string, string, string][] = [
+        ["Mis partidas", "Abrir Mi partida", "/escritorio/partida"],
+        [
+          "Copias de seguridad",
+          "Abrir copias de seguridad",
+          "/escritorio/copias",
+        ],
+        ["Launcher", "Abrir Conexión", "/escritorio/nube"],
+      ];
+      for (const [tab, link, href] of panels) {
+        await page.getByRole("button", { name: tab, exact: true }).click();
+        await expect(page.getByRole("link", { name: link })).toHaveAttribute(
+          "href",
+          href,
+        );
+      }
+      await expect(page.getByText("Buscar actualizaciones")).toHaveCount(0);
+      await page.getByRole("link", { name: "Abrir Conexión" }).click();
+      await expect(page).toHaveURL(/\/escritorio\/nube$/);
+      await expect(page.getByText("Abriendo en tu Launcher…")).toBeVisible();
+      expect(
+        await page.evaluate(
+          () => document.documentElement.scrollWidth <= innerWidth,
+        ),
+      ).toBe(true);
+      expect(errors).toEqual([]);
+    });
+  }
+});
