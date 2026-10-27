@@ -97,6 +97,22 @@ it("says honestly when the center is not enabled on this server", () => {
   expect(screen.queryByRole("button", { name: "Cancelar" })).toBeNull();
 });
 
+it("an API from before migration 062 (404) is also shown as not enabled", () => {
+  mocks.data = undefined;
+  mocks.error = new ApiError(404, "HTTP_404");
+  render(<IncidentCenter />);
+  expect(
+    screen.getByRole("heading", {
+      name: "Centro de incidencias pendiente de activar",
+    }),
+  ).toBeInTheDocument();
+  // Polling stops once the center is known to be off.
+  expect(mocks.live).toHaveBeenLastCalledWith(
+    "/v1/admin/seasons/s/incidents",
+    undefined,
+  );
+});
+
 it("polls while open and offers only the actions the server allows", () => {
   mocks.data = overview();
   render(<IncidentCenter />);

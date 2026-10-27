@@ -60,7 +60,14 @@ const filters = [
 export function IncidentCenter() {
   const { season, holdAdminNavigation } = useApp();
   const path = `/v1/admin/seasons/${season}/incidents`;
-  const q = useRead<Overview>(path, !!season, 15000);
+  // An API without the center answers 503 (flag off) or 404 (before 062):
+  // say so and stop polling until the screen is opened again.
+  const [off, setOff] = useState(false);
+  const q = useRead<Overview>(path, !!season, off ? undefined : 15000);
+  const unavailable =
+    q.error instanceof ApiError &&
+    (q.error.code === "INCIDENTS_UNAVAILABLE" || q.error.status === 404);
+  useEffect(() => setOff(unavailable), [unavailable]);
   const cmd = useCommand([path]);
   useEffect(
     () => (cmd.pending || cmd.uncertain ? holdAdminNavigation() : undefined),
@@ -89,7 +96,7 @@ export function IncidentCenter() {
           p.item_name.toLocaleLowerCase().includes(needle)),
     );
   }, [q.data, filter, search]);
-  if (q.error instanceof ApiError && q.error.code === "INCIDENTS_UNAVAILABLE")
+  if (unavailable)
     return (
       <Card className="incident-off">
         <h2>Centro de incidencias pendiente de activar</h2>
