@@ -1,0 +1,196 @@
+{
+  "phase": "30 release readiness",
+  "head_tested": "5cff48e + Phase 30 working tree (see report \u00a710)",
+  "production": {
+    "captured_at": "2026-10-27T23:12:38+00:00",
+    "supabase": {
+      "project": "uwleqeuzsveqlugugzba",
+      "name": "Pokeapp 2.0",
+      "status": "ACTIVE_HEALTHY",
+      "postgres": "17.6.1.155",
+      "backups": {
+        "pitr_enabled": false,
+        "walg_enabled": true,
+        "platform_backups_listed": 0
+      }
+    },
+    "migration_history": {
+      "records": 45,
+      "first": "010_security_helpers",
+      "last": "053_versioned_account_credentials",
+      "records_without_repository_file": [
+        "030_trials_sanctions_acl_completion"
+      ],
+      "pending_recorded": []
+    },
+    "migrations_001_009": "applied before the history table existed; their objects are in the parity catalog",
+    "objects_of_054_064_present": [],
+    "critical_row_counts": {
+      "public.trainers": 1,
+      "public.seasons": 1,
+      "public.season_players": 0,
+      "public.coin_transactions": 0,
+      "public.purchases": 0,
+      "public.redemptions": 0,
+      "public.save_files": 0,
+      "public.parsed_saves": 0,
+      "public.hall_of_fame_entries": 0,
+      "public.season_archive_snapshots": 0,
+      "public.cups": 0,
+      "public.account_credentials": 1,
+      "public.shop_items": 62,
+      "auth.users": 1,
+      "storage.objects": 0
+    },
+    "non_empty_tables": 36,
+    "seasons_by_status": [
+      {
+        "status": "draft",
+        "n": 1,
+        "without_b": 0
+      }
+    ],
+    "railway": {
+      "deployments": [
+        {
+          "id": "22d96f80-9d99-498f-b3f6-d90b3ec39da9",
+          "status": "SLEEPING",
+          "createdAt": "2026-10-26T14:58:59.588Z"
+        },
+        {
+          "id": "b91ecd9f-c341-467e-860d-df417d59b01a",
+          "status": "REMOVED",
+          "createdAt": "2026-10-24T13:25:21.716Z"
+        }
+      ],
+      "feature_flags": {
+        "POKEAPP_ADMIN_INCIDENTS_ENABLED": "<unset>",
+        "POKEAPP_ITEM_VERIFICATION_TRANSPORT_ENABLED": "<unset>",
+        "POKEAPP_TRANSFER_ENGINEERING_ENABLED": "<unset>",
+        "POKEAPP_ACCOUNT_MANAGEMENT_ENABLED": "true"
+      }
+    },
+    "api": {
+      "health": 200,
+      "routes": 88,
+      "division_sizes_required": [
+        "A",
+        "B"
+      ]
+    },
+    "web": {
+      "launcher_download": {
+        "status": 200,
+        "bytes": "159293410",
+        "etag": "\"efd26c656dc1cff351d24c8c999169e7\""
+      },
+      "update_feed_content_type": "text/html"
+    },
+    "security_advisor_baseline": {
+      "levels": {
+        "INFO": 40,
+        "ERROR": 24,
+        "WARN": 6
+      },
+      "by_rule": {
+        "ERROR security_definer_view": 24,
+        "INFO rls_enabled_no_policy": 40,
+        "WARN auth_leaked_password_protection": 1,
+        "WARN authenticated_security_definer_function_executable": 4,
+        "WARN function_search_path_mutable": 1
+      }
+    }
+  },
+  "schema_parity_production_vs_repository_053": {
+    "identical": true,
+    "objects": {
+      "relations": 115,
+      "columns": 1107,
+      "constraints": 586,
+      "indexes": 211,
+      "functions": 137,
+      "views": 38,
+      "triggers": 50,
+      "policies": 107,
+      "types": 0,
+      "schemas": 2
+    },
+    "model": "loopback PostgreSQL 17.11 shaped like Supabase: postgres non-superuser (CREATEROLE, BYPASSRLS), Supabase default privileges, pgcrypto in extensions"
+  },
+  "backup": {
+    "captured_at": "2026-10-27T23:16:27+00:00",
+    "archive": "pre-release-20261027T231606Z.dump",
+    "bytes": 1274391,
+    "sha256": "94ab28edad0f3002ead5c62b32088b0702c1ce5029a479568e446f764fff56db",
+    "schemas": [
+      "public",
+      "auth",
+      "storage",
+      "v1_shadow",
+      "supabase_migrations"
+    ],
+    "excluded_data": [
+      "auth.sessions",
+      "auth.refresh_tokens",
+      "auth.mfa_amr_claims",
+      "auth.mfa_challenges",
+      "auth.one_time_tokens",
+      "auth.flow_state"
+    ],
+    "table_data_entries": 107,
+    "tables_fingerprinted": 107,
+    "location": "%LOCALAPPDATA%/PokeApp-migration-evidence/phase30 (ACL: owner + SYSTEM)",
+    "consistency": "pg_dump on the exported snapshot of the same read-only transaction that fingerprinted every table"
+  },
+  "rehearsal_on_backup": {
+    "result": "PASS",
+    "checks": [
+      "backup restores into an isolated cluster with owners and grants",
+      "restored rows identical to production: 107 tables (count + hash)",
+      "restored catalog identical to production (objects, definitions, owners, ACLs)",
+      "migration history restored: 054-064 not recorded",
+      "42 API reads run on the restored copy (no privilege or missing-object error)",
+      "054_item_use_authorizations.sql applies once as non-superuser postgres",
+      "055_native_identity_evidence_scope.sql applies once as non-superuser postgres",
+      "056_item_use_verifier_transport.sql applies once as non-superuser postgres",
+      "057_two_save_transfer_reservations.sql applies once as non-superuser postgres",
+      "058_transfer_provenance_finalization.sql applies once as non-superuser postgres",
+      "059_transfer_integration_reads.sql applies once as non-superuser postgres",
+      "060_transfer_party_origin.sql applies once as non-superuser postgres",
+      "061_transfer_authoritative_adjudication.sql applies once as non-superuser postgres",
+      "062_admin_incident_center.sql applies once as non-superuser postgres",
+      "063_single_league_structure.sql applies once as non-superuser postgres",
+      "064_admin_robbery_cancellation.sql applies once as non-superuser postgres",
+      "85 existing tables keep byte-identical rows (seasons, economy, saves, history)",
+      "42 API reads return identical results after 054-064",
+      "no browser privilege removed from existing objects",
+      "no new privilege for anon/authenticated (tables, views or functions)",
+      "8 new tables exist and force RLS",
+      "verifier role created without login, superuser or RLS bypass",
+      "existing season configs keep Liga A + Liga B (no backfill to one league)",
+      "upgraded copy equals a fresh 001-064 build (Supabase-shaped)"
+    ],
+    "round_trip_equivalences": [
+      "owner-only ACL: explicit {owner}=<all>/{owner} after revokes equals the NULL default pg_restore leaves",
+      "CHECK text: an IN list is stored as nested ORs; dump text re-parses flat. Compared without parentheses",
+      "USAGE on schema public for PUBLIC is a built-in default pg_dump omits; the restore procedure re-grants it"
+    ],
+    "supautils_emulation": "postgres temporarily member of supabase_storage_admin while 056 runs",
+    "reads_refused_by_rule": [
+      "ERROR psql:<stdin>:1: ERROR:  current_matchday_required"
+    ],
+    "pending_sha256": {
+      "054_item_use_authorizations.sql": "f6e4c775bee8f79f4f8c487b266eef318d611c3f5810eeb7c14249c7aa1f11c9",
+      "055_native_identity_evidence_scope.sql": "f1fae278caa2832619713d74b6da03055ede5870ca7b902c85d34427b9e3fc83",
+      "056_item_use_verifier_transport.sql": "7b5d9619562e09828dee3313fe514eb99a8ffb71eab3457a4d4b2514fe965e38",
+      "057_two_save_transfer_reservations.sql": "ae1061aeae62ce8250877d2dd036e21fa22a4fb461d2892379536658eaa92066",
+      "058_transfer_provenance_finalization.sql": "82ae34ee566e02d18c4a0d498a6e51a63dae438e48dbd31c834626a90f576037",
+      "059_transfer_integration_reads.sql": "7ad33a22672e226ad03436c9c577512d705d472eb82f67e4b75bc09bffdcaa05",
+      "060_transfer_party_origin.sql": "624a59d67e77720bfb862e8efda19f6cbabc530e2169485268206b06160441c4",
+      "061_transfer_authoritative_adjudication.sql": "332ff8a2e54e102d744405fcf3b76ff2c5097596eb2dd484e4ebd9fe7bef4482",
+      "062_admin_incident_center.sql": "7abd350f7d99247bc82912fce2c53bc636a1745571265332dbd767fce41497ad",
+      "063_single_league_structure.sql": "621e43f2c44cc4b232f4a40c787ae84c4a36ad63ab2279778967cffc33576e1c",
+      "064_admin_robbery_cancellation.sql": "80407837fce1d205b90757c19e4148419d3fab52e24de6d47952c43afad21b2e"
+    }
+  }
+}
