@@ -35,8 +35,9 @@ class RemoveParticipantBody(StrictBody):
 
 
 class DivisionSizes(StrictBody):
+    # Without B the season is one league ("Liga"); with B, Liga A and Liga B.
     A: Positive
-    B: Positive
+    B: Positive | None = None
 
 
 class FunctionalRules(StrictBody):

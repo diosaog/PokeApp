@@ -126,12 +126,30 @@ class SeasonAdminApiTests(unittest.TestCase):
         response = self.client.put(f"/v1/admin/seasons/{SID}/name", json={"name": "x", "expected_revision": 0}, headers=self.headers)
         self.assertEqual(response.status_code, 503)
 
-    def test_config_is_explicit_two_divisions(self):
+    def test_config_is_one_league_or_two(self):
         body = config_body()
         ConfigVersionBody.model_validate(body)
-        for sizes in ({"A": 4}, {"A": 2, "B": 2, "C": 1}, {"A": 0, "B": 4}, {"A": True, "B": 3}):
+        ConfigVersionBody.model_validate({**body, "division_sizes": {"A": 4}})
+        for sizes in ({}, {"B": 4}, {"A": 2, "B": 2, "C": 1}, {"A": 0, "B": 4}, {"A": 4, "B": 0},
+                      {"A": True, "B": 3}, {"A": 4, "B": "1"}):
             with self.assertRaises(ValueError):
                 ConfigVersionBody.model_validate({**body, "division_sizes": sizes})
+
+    def test_one_league_body_has_no_b(self):
+        # One league reaches SQL as division_sizes {A}: B absent, never null,
+        # and a two-league body is forwarded exactly as before.
+        for sizes, sent in (({"A": 4}, {"A": 4}), ({"A": 4, "B": None}, {"A": 4}), ({"A": 2, "B": 2}, {"A": 2, "B": 2})):
+            with self.subTest(sizes=sizes):
+                self.repo.calls.clear()
+                response = self.post({**config_body(), "division_sizes": sizes}, path=f"/v1/admin/seasons/{SID}/config-versions")
+                self.assertEqual(response.status_code, 200)
+                self.assertEqual(self.repo.calls[0][1]["body"]["division_sizes"], sent)
+        self.repo.calls.clear()
+        self.repo.response["resource_id"] = SID
+        response = self.post({**config_body(), "division_sizes": {"A": 4}, "reason": "Una Liga"},
+                             path=f"/v1/admin/seasons/{SID}/config-versions/{SID}/replace-unused")
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(self.repo.calls[0][1]["body"]["division_sizes"], {"A": 4})
 
     def test_config_rules_allowlist(self):
         body = config_body()
@@ -156,7 +174,8 @@ class SeasonAdminApiTests(unittest.TestCase):
         # F adds the authenticated championship review and exceptional BO3 command.
         # The account administration routes made it 40 (count not updated then);
         # Phase 28 adds the incident center read and its two commands: 43.
-        self.assertEqual(len(routes), 43)
+        # Phase 29 adds the cancellation of a reversible robbery: 44.
+        self.assertEqual(len(routes), 44)
         for path, method in routes:
             self.assertIn("security", schema["paths"][path][method])
 

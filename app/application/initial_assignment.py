@@ -58,7 +58,7 @@ def initial_assignment_review(context: dict) -> dict:
         if len(assigned) != len(players) or set(assigned) != set(players):
             raise ValueError("Invalid recorded assignments")
         for division in ("A", "B"):
-            if len(assignments[division]) != result["division_sizes"][division]:
+            if len(assignments[division]) != result["division_sizes"].get(division, 0):
                 raise ValueError("Invalid recorded capacity")
             for pid in assignments[division]:
                 players[pid]["proposed_division"] = division

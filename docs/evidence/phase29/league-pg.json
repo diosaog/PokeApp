@@ -1,0 +1,20 @@
+{
+  "postgres": "17.11",
+  "migrations": "001-064 bootstrap",
+  "checks": [
+    "S1 one league: no movement, no last-of-B reward, exact size, modern seasons only, admin only",
+    "S2 structure stored in the config; free while draft, one per season, locked once started",
+    "S3 concurrent initial assignment: one league, one winner, exact replay",
+    "A1 one league x4: calendar, pairings, standings, rewards, no movement, champion unique_points, finish, archive, history",
+    "A2 one league x2 played to archive",
+    "A3 one league x3 played to archive",
+    "A5 one league x5 played to archive",
+    "B1 Liga A + Liga B x6: movement 1 per day, last-of-B rule, champion, archive",
+    "B2 Liga A + Liga B x4 without movement played to archive"
+  ],
+  "inherited": [
+    "validate_phase10_5_ranking_sql",
+    "validate_phase10_5_championship_sql",
+    "validate_phase10_5_final_sql"
+  ]
+}

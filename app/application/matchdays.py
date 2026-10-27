@@ -40,7 +40,10 @@ def plan_close(
         effective_matchday=cfg["effective_from_matchday"],
         max_matchdays=cfg["total_matchdays"],
         participant_ids=tuple(players),
-        division_sizes=tuple(cfg["division_sizes"][d] for d in ("A", "B")),
+        # One league has no B: its config is division_sizes {A}.
+        division_sizes=tuple(
+            cfg["division_sizes"][d] for d in ("A", "B") if d in cfg["division_sizes"]
+        ),
         promotion_relegation_count=cfg["promotion_relegation_count"],
         points_by_position={int(k): v for k, v in cfg["scoring_json"].items()},
         coins_by_position={int(k): v for k, v in cfg["coin_rewards_json"].items()},

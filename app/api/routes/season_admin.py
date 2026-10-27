@@ -32,6 +32,9 @@ def _execute(op, principal, container, payload=None, season_id=None, resource_id
             for field in ("badge_reward_coins", "game_completion_reward_coins"):
                 if field not in payload.rules.model_fields_set:
                     request["body"]["rules"].pop(field)
+            # One league is division_sizes {A}: B is absent, never null.
+            if request["body"]["division_sizes"]["B"] is None:
+                request["body"]["division_sizes"].pop("B")
     for name, value in (("season_id", season_id), ("resource_id", resource_id), ("idempotency_key", key)):
         if value is not None:
             request[name] = str(value)

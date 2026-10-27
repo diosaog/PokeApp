@@ -85,7 +85,7 @@ class InitialAssignmentRead(StrictBody):
             or self.blocking_reasons
             or self.config_version_id is None
             or self.division_sizes is None
-            or self.division_sizes.A + self.division_sizes.B != len(ids)
+            or self.division_sizes.A + (self.division_sizes.B or 0) != len(ids)
             or any(not p.cap_reached or p.adjusted_deaths is None for p in self.players)
         ):
             raise ValueError("Invalid readiness")

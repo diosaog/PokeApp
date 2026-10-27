@@ -20,7 +20,7 @@ REJECTIONS = {
         "idempotency_conflict", "trainer_unavailable", "participant_exists", "participant_referenced",
         "invalid_roster", "invalid_config", "invalid_rewards", "effective_round_exists", "config_window_closed",
         "config_already_used", "initial_setup_locked", "division_capacity_mismatch", "matchday_already_prepared",
-        "config_not_effective"), 409),
+        "config_not_effective", "competition_structure_locked", "competition_structure_mismatch"), 409),
     **dict.fromkeys(("initial_assignment_required", "initial_assignment_not_ready",
         "initial_assignment_locked", "initial_assignment_review_stale", "stale_inputs",
         "initial_boundary_tie_unresolved", "invalid_tie_resolution"), 409),
