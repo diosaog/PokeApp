@@ -514,10 +514,17 @@ try {
     1000,
   );
   check(true, `silent install done; ${args.vb} restarted by itself`);
-  await sleep(12000);
+  // The installer that restarted the Launcher may still hold its own file:
+  // the new version must keep running and clean it up shortly after.
+  await until(
+    async () =>
+      !files().some((f) => f.endsWith(".exe") || f === "pending.json"),
+    100000,
+    1000,
+  );
   check(
-    !files().some((f) => f.endsWith(".exe") || f === "pending.json"),
-    "installed target clears the downloaded installer",
+    running().length > 0,
+    "the restarted version keeps running and clears the downloaded installer",
   );
   for (const pid of running())
     try {

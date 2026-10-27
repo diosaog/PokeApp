@@ -267,9 +267,15 @@ function reconcileStartup(directory, currentVersion) {
   const pending = readPending(directory);
   if (!pending) return { status: "IDLE" };
   if (compareVersions(currentVersion, pending.version) >= 0) {
-    fs.rmSync(path.join(directory, pending.file), { force: true });
-    fs.rmSync(path.join(directory, "pending.json"), { force: true });
-    return { status: "INSTALLED", version: pending.version };
+    // The installer starts the new version itself and may still be running:
+    // a file in use stays, with its record, for the next attempt.
+    try {
+      fs.rmSync(path.join(directory, pending.file), { force: true });
+      fs.rmSync(path.join(directory, "pending.json"), { force: true });
+      return { status: "INSTALLED", version: pending.version };
+    } catch {
+      return { status: "INSTALLED", version: pending.version, leftover: true };
+    }
   }
   return { status: "INSTALL_INCOMPLETE", version: pending.version };
 }

@@ -329,3 +329,33 @@ test("«Más tarde» is remembered per version and rejects junk", () => {
   fs.writeFileSync(path.join(dir, "postponed.json"), "{oops");
   assert.equal(u.postponed(dir), null);
 });
+
+test("after an update, a file still in use never stops the start and is retried", async () => {
+  const dir = temp();
+  await u.download(fetchOf([INSTALLER]), manifest(), dir);
+  const rmSync = fs.rmSync;
+  fs.rmSync = (target, options) => {
+    if (String(target).endsWith(".exe")) {
+      const error = new Error("EBUSY");
+      error.code = "EBUSY";
+      throw error;
+    }
+    return rmSync(target, options);
+  };
+  try {
+    assert.deepEqual(u.reconcileStartup(dir, "0.23.0"), {
+      status: "INSTALLED",
+      version: "0.23.0",
+      leftover: true,
+    });
+    // The record stays so the next attempt finishes the cleanup.
+    assert.ok(fs.existsSync(path.join(dir, "pending.json")));
+  } finally {
+    fs.rmSync = rmSync;
+  }
+  assert.deepEqual(u.reconcileStartup(dir, "0.23.0"), {
+    status: "INSTALLED",
+    version: "0.23.0",
+  });
+  assert.deepEqual(fs.readdirSync(dir), []);
+});

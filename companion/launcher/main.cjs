@@ -658,9 +658,17 @@ app.whenReady().then(() => {
     updates.secureUrl(feed, allowLoopback),
   );
   const current = app.getVersion();
-  const recovered = configured
-    ? updates.reconcileStartup(updateDir, current)
-    : { status: "IDLE" };
+  // Never let the updater's own housekeeping stop the Launcher from starting.
+  const reconcile = () => {
+    try {
+      return updates.reconcileStartup(updateDir, current);
+    } catch {
+      return { status: "IDLE" };
+    }
+  };
+  const recovered = configured ? reconcile() : { status: "IDLE" };
+  // The installer that restarted us may still hold its file: retry shortly.
+  if (recovered.leftover) setTimeout(reconcile, 60000).unref();
   let update = configured
     ? {
         status: recovered.status === "INSTALL_INCOMPLETE" ? "READY" : "IDLE",
