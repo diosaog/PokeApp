@@ -133,11 +133,17 @@ def emulator_saves(appdata=None):
             None,
         )
         title = parts[-4].casefold() if len(parts) >= 4 else ""
+        try:
+            # stat() only: the selector shows when each save last changed.
+            modified = int(source.path.stat().st_mtime)
+        except OSError:
+            modified = None
         items.append(
             {
                 "path": str(source.path),
                 "emulator": emulator,
                 "game": TITLE_GAMES.get(title),
+                "modified": modified,
             }
         )
     return items

@@ -27,50 +27,87 @@
       <button id="update-download" hidden>Descargar actualización</button>
       <button id="update-install" hidden>Instalar y reiniciar</button>
     </div>
+    <div id="notices" class="notices" role="status" hidden></div>
     <main>
-      <nav aria-label="Secciones">
+      <nav id="hub-tabs" aria-label="Saves y Launcher">
         <button id="web-tab" aria-pressed="false">PokeApp</button
-        ><button id="save-tab" aria-pressed="true">Mi partida</button
-        ><button id="cloud-tab" aria-pressed="false">Estado de la nube</button>
+        ><button id="save-tab" aria-pressed="true">Mis partidas</button
+        ><button id="backups-tab" aria-pressed="false">
+          Copias de seguridad</button
+        ><button id="cloud-tab" aria-pressed="false">Launcher</button>
       </nav>
       <p id="message" role="status"></p>
       <section id="save-view">
-        <div class="toolbar">
-          <h1>Tu partida, aquí.</h1>
-          <button id="select-save">Seleccionar save</button>
-          <button id="export-save" disabled>Exportar copia validada</button>
-        </div>
-        <p id="save-state">
-          Selecciona tu archivo para empezar. Puedes explorar sin conexión.
-        </p>
-        <p id="save-identity"></p>
-        <p id="emulator-state" class="muted"></p>
-        <button id="discover-saves">
-          Buscar partidas en Lime3DS, Azahar o Citra
-        </button>
-        <div id="discovered-saves"></div>
-        <article aria-labelledby="write-title">
-          <h2 id="write-title">Cambios en tu partida</h2>
-          <p id="write-state" role="status">
-            No hay cambios autorizados pendientes.
-          </p>
-          <p id="write-description"></p>
-          <div id="write-confirmation" hidden>
-            <label
-              ><input id="emulator-closed" type="checkbox" /> He cerrado el
-              juego y el emulador.</label
-            >
-            <button id="confirm-write" disabled>
-              Revisar y confirmar cambio
-            </button>
+        <article
+          id="save-card"
+          class="save-card"
+          aria-labelledby="save-card-title"
+        >
+          <div class="save-card-art" aria-hidden="true">
+            <span id="save-card-badge">?</span>
           </div>
-          <button id="reconcile-write" hidden>
-            Volver a comprobar la operación
-          </button>
-          <p id="write-error" role="status"></p>
+          <div class="save-card-body">
+            <span class="eyebrow">PARTIDA ACTIVA</span>
+            <h2 id="save-card-title">Aún no hay partida</h2>
+            <p id="save-card-meta" class="muted">
+              Busca tu partida y PokeApp la sincronizará sola.
+            </p>
+            <div class="save-card-status">
+              <span id="sync-chip" class="sync-chip" data-tone="idle"
+                >Sin partida</span
+              ><span id="sync-detail" class="muted"></span>
+            </div>
+            <p id="other-saves" class="other-saves" hidden></p>
+          </div>
+          <div class="save-card-actions">
+            <button id="discover-primary" type="button" class="primary">
+              Buscar partidas en un emulador
+            </button>
+            <button id="choose-save" type="button">Cambiar partida</button>
+          </div>
         </article>
-        <article aria-labelledby="transfer-title">
-          <h2 id="transfer-title" tabindex="-1">Robos entre partidas</h2>
+        <div class="hub-grid">
+          <article id="save-tools" aria-labelledby="save-tools-title">
+            <h2 id="save-tools-title">Partidas en este equipo</h2>
+            <p id="save-state">
+              Selecciona tu archivo para empezar. Puedes explorar sin conexión.
+            </p>
+            <p id="save-identity"></p>
+            <p id="emulator-state" class="muted"></p>
+            <div id="discovered-saves" class="discovered"></div>
+            <div class="toolbar">
+              <button id="discover-saves">Buscar partidas en un emulador</button
+              ><button id="select-save">Elegir archivo…</button>
+            </div>
+            <p class="muted">
+              Buscar solo lee la lista de archivos del emulador: no abre ni
+              modifica tus partidas. Una partida nueva nunca sustituye a la
+              activa sin que tú lo elijas.
+            </p>
+          </article>
+          <article id="write-article" aria-labelledby="write-title">
+            <h2 id="write-title">Cambios en tu partida</h2>
+            <p id="write-state" role="status">
+              No hay cambios autorizados pendientes.
+            </p>
+            <p id="write-description"></p>
+            <div id="write-confirmation" hidden>
+              <label
+                ><input id="emulator-closed" type="checkbox" /> He cerrado el
+                juego y el emulador.</label
+              >
+              <button id="confirm-write" disabled>
+                Revisar y confirmar cambio
+              </button>
+            </div>
+            <button id="reconcile-write" hidden>
+              Volver a comprobar la operación
+            </button>
+            <p id="write-error" role="status"></p>
+          </article>
+        </div>
+        <article id="transfer-article" aria-labelledby="transfer-title">
+          <h2 id="transfer-title" tabindex="-1">Robos y entregas</h2>
           <p id="transfer-summary" role="status">No hay robos en curso.</p>
           <div id="transfer-list"></div>
           <label
@@ -84,8 +121,8 @@
             PokeApp tiene que verificar las dos partidas.
           </p>
         </article>
-        <article aria-labelledby="quick-title">
-          <h2 id="quick-title" tabindex="-1">Objetos rápidos</h2>
+        <article id="quick-article" aria-labelledby="quick-title">
+          <h2 id="quick-title" tabindex="-1">Objetos ∞</h2>
           <p id="quick-state" role="status">
             Selecciona tu partida para ver tus objetos.
           </p>
@@ -108,7 +145,7 @@
             <button class="quick-plus" aria-label="Uno más de Caramelo Raro">
               +
             </button>
-            <button class="quick-add">Añadir</button>
+            <button class="quick-add">Añadir a la bolsa</button>
             <span class="quick-error" role="status"></span>
           </div>
           <div class="quick-item" data-item="heart_scale">
@@ -133,7 +170,7 @@
             <button class="quick-plus" aria-label="Uno más de Escama Corazón">
               +
             </button>
-            <button class="quick-add">Añadir</button>
+            <button class="quick-add">Añadir a la bolsa</button>
             <span class="quick-error" role="status"></span>
           </div>
           <label
@@ -142,96 +179,249 @@
           >
           <button id="quick-refresh">Leer objetos de la partida</button>
           <p class="muted">
-            Primero se prepara una copia verificada; después confirmas el cambio
-            en «Cambios en tu partida». Solo se muestra «aplicado» tras releer
-            la partida.
+            Se añaden a la bolsa de tu partida, no a un Pokémon. Primero se
+            prepara una copia verificada; después confirmas el cambio en
+            «Cambios en tu partida». Solo se muestra «aplicado» tras releer la
+            partida.
           </p>
         </article>
+        <article id="team-article" aria-labelledby="team-title">
+          <h2 id="team-title">Equipo</h2>
+          <div id="party" class="slots party" aria-label="Equipo"></div>
+          <div class="box-nav">
+            <button id="previous-box" aria-label="Caja anterior">‹</button>
+            <h2 id="box-name">Caja —</h2>
+            <button id="next-box" aria-label="Caja siguiente">›</button>
+          </div>
+          <div id="box" class="slots" aria-label="Caja actual"></div>
+          <p class="muted">
+            Explorar tu partida no modifica el archivo ni consume artículos.
+          </p>
+        </article>
+      </section>
+      <section id="backups-view" hidden>
         <article aria-labelledby="backups-title">
           <h2 id="backups-title" tabindex="-1">Copias de seguridad</h2>
           <p>
-            Copias completas de esta partida, guardadas en este equipo. Guardar
-            una copia no modifica el save activo ni necesita conexión.
+            Copias completas de tu partida, guardadas en este equipo y
+            verificadas por su huella. PokeApp conserva la copia original de
+            cada cambio y una copia diaria durante 30 días. Guardar una copia no
+            modifica la partida activa ni necesita conexión.
           </p>
-          <button id="refresh-backups">Ver / actualizar copias</button>
+          <div class="toolbar">
+            <button id="refresh-backups">Actualizar lista</button
+            ><button id="export-save" disabled>
+              Exportar la partida actual…
+            </button>
+          </div>
           <label
             ><input id="backup-emulator-closed" type="checkbox" /> He cerrado el
-            juego y el emulador. Los mantendré cerrados durante la
-            operación.</label
+            juego y el emulador (necesario para exportar la partida
+            actual).</label
           >
           <p id="backup-notice" role="status"></p>
-          <div id="backup-list"></div>
+          <div id="backup-list" class="backup-list"></div>
           <p class="muted">
-            Si hay una recuperación pendiente, no abras el emulador. La
-            restauración automática sigue limitada a pruebas de ingeniería;
-            siempre puedes guardar una copia verificada.
+            Si hay una recuperación pendiente, no abras el emulador. Restaurar
+            solo aparece en las copias que este Launcher puede devolver con
+            seguridad; siempre puedes exportar cualquier copia verificada.
           </p>
         </article>
-        <h2>Equipo</h2>
-        <div id="party" class="slots party" aria-label="Equipo"></div>
-        <div class="box-nav">
-          <button id="previous-box" aria-label="Caja anterior">‹</button>
-          <h2 id="box-name">Caja —</h2>
-          <button id="next-box" aria-label="Caja siguiente">›</button>
-        </div>
-        <div id="box" class="slots" aria-label="Caja actual"></div>
-        <p class="muted">
-          Explorar tu partida no modifica el archivo ni consume artículos.
-        </p>
       </section>
       <section id="cloud-view" hidden>
-        <h1>PokeApp V2</h1>
-        <p id="identity">Inicia sesión para conectar tu Launcher.</p>
-        <p class="muted">
-          Conecta este Launcher una sola vez: la sesión se guarda cifrada en
-          este equipo y sirve para sincronizar tu partida y completar entregas.
-          La web de PokeApp de la izquierda inicia sesión por su cuenta y no
-          comparte credenciales con el Launcher.
-        </p>
-        <form id="login">
-          <label
-            >Entrenador<input
-              name="trainer"
-              autocomplete="username"
-              required
-              maxlength="128" /></label
-          ><label
-            >PIN<input
-              name="pin"
-              type="password"
-              autocomplete="current-password"
-              required
-              maxlength="32"
-              minlength="4" /></label
-          ><button>Conectar</button>
-        </form>
-        <div class="toolbar">
-          <button id="logout">Cerrar sesión</button
-          ><button id="retry">Reintentar conexión</button>
+        <div class="hub-grid">
+          <article class="launcher-card" aria-labelledby="launcher-card-title">
+            <h2 id="launcher-card-title">PokeApp Launcher</h2>
+            <dl class="launcher-facts">
+              <div>
+                <dt>Versión</dt>
+                <dd id="launcher-version-detail">—</dd>
+              </div>
+              <div>
+                <dt>Cuenta</dt>
+                <dd id="launcher-account">Sin vincular</dd>
+              </div>
+              <div>
+                <dt>Sincronización</dt>
+                <dd id="launcher-sync">Se activa al iniciar sesión</dd>
+              </div>
+            </dl>
+            <div class="toolbar">
+              <button id="check-update" type="button" class="primary">
+                Buscar actualizaciones</button
+              ><button id="retry">Reintentar conexión</button
+              ><button id="logout">Cerrar sesión</button>
+            </div>
+          </article>
+          <article aria-labelledby="account-title">
+            <h2 id="account-title">Cuenta de PokeApp</h2>
+            <p id="identity">Inicia sesión para conectar tu Launcher.</p>
+            <p class="muted">
+              Normalmente no hace falta: al iniciar sesión en PokeApp, este
+              Launcher se conecta solo. La sesión se guarda cifrada en este
+              equipo; el PIN nunca se guarda. Cerrar sesión detiene la
+              sincronización.
+            </p>
+            <form id="login">
+              <label
+                >Entrenador<input
+                  name="trainer"
+                  autocomplete="username"
+                  required
+                  maxlength="128" /></label
+              ><label
+                >PIN<input
+                  name="pin"
+                  type="password"
+                  autocomplete="current-password"
+                  required
+                  maxlength="32"
+                  minlength="4" /></label
+              ><button>Conectar</button>
+            </form>
+          </article>
         </div>
-        <article>
-          <h2>Último estado de la nube</h2>
-          <p id="cloud-state">Todavía no hay datos guardados.</p>
-          <p id="cloud-age"></p>
-          <p id="item-use-state">Aplicación de objetos deshabilitada.</p>
-          <p id="transfer-state" role="status">No hay robos en curso.</p>
-        </article>
-        <article>
-          <h2>Sincronizar con PokeApp</h2>
-          <p>
-            Envía el archivo original a tu cuenta para consultar tu save y tu PC
-            en la web. Puedes seguir explorando aquí mientras se sincroniza.
-          </p>
-          <button id="enable-sync">Sincronizar este save</button>
-          <p id="receipt">Sin sincronizar</p>
-        </article>
+        <div class="hub-grid">
+          <article aria-labelledby="cloud-title">
+            <h2 id="cloud-title">Último estado de la nube</h2>
+            <p id="cloud-state">Todavía no hay datos guardados.</p>
+            <p id="cloud-age"></p>
+            <p id="item-use-state">Aplicación de objetos deshabilitada.</p>
+            <p id="transfer-state" role="status">No hay robos en curso.</p>
+          </article>
+          <article aria-labelledby="sync-title">
+            <h2 id="sync-title">Sincronización automática</h2>
+            <p>
+              Cuando tu partida cambia, PokeApp espera a que el archivo esté
+              estable, lo comprueba y lo envía. Si no hay cambios no se envía
+              nada, y sin conexión queda en cola para más tarde.
+            </p>
+            <button id="enable-sync">Sincronizar ahora</button>
+            <p id="receipt">Sin sincronizar</p>
+          </article>
+        </div>
       </section>
-      <dialog id="details">
+      <dialog id="details" class="pokemon-dialog">
         <h2 id="pokemon-title"></h2>
         <dl id="pokemon-details"></dl>
         <button id="close-details">Cerrar</button>
       </dialog>
     </main>
+    <dialog
+      id="selector-dialog"
+      class="game-dialog"
+      aria-labelledby="selector-title"
+    >
+      <header class="dialog-head">
+        <h2 id="selector-title">Elige tu partida</h2>
+        <button type="button" class="icon-close" data-close aria-label="Cerrar">
+          ×
+        </button>
+      </header>
+      <p class="muted">
+        PokeApp sincronizará la partida que elijas y la recordará. Comprobamos
+        el juego y el entrenador al leerla; nunca se modifica para detectarla.
+      </p>
+      <div id="selector-list" class="selector-list"></div>
+      <p id="selector-empty" class="empty-note" hidden>
+        No hemos encontrado partidas compatibles en los emuladores de este
+        equipo. Abre tu juego una vez en el emulador y vuelve a buscar, o elige
+        el archivo a mano.
+      </p>
+      <div class="dialog-actions">
+        <button id="selector-rescan" type="button">Buscar de nuevo</button
+        ><button id="selector-manual" type="button">Elegir archivo…</button>
+      </div>
+    </dialog>
+    <dialog
+      id="restore-dialog"
+      class="game-dialog"
+      aria-labelledby="restore-title"
+    >
+      <header class="dialog-head">
+        <h2 id="restore-title">Restaurar copia</h2>
+        <button type="button" class="icon-close" data-close aria-label="Cerrar">
+          ×
+        </button>
+      </header>
+      <dl id="restore-summary" class="facts"></dl>
+      <ul id="restore-checks" class="checks"></ul>
+      <label class="check-row"
+        ><input id="restore-closed" type="checkbox" /> He cerrado el juego y el
+        emulador y no los abriré hasta terminar.</label
+      >
+      <label class="confirm-row"
+        >Escribe <strong>Confirmo</strong> para restaurar
+        <input
+          id="restore-word"
+          type="text"
+          autocomplete="off"
+          spellcheck="false"
+          maxlength="16"
+      /></label>
+      <p class="muted">
+        Antes de cambiar nada, PokeApp guarda y verifica una copia del estado
+        actual. Restaurar no revierte compras, recompensas ni robos.
+      </p>
+      <div class="dialog-actions">
+        <button type="button" data-close>Cancelar</button
+        ><button id="restore-confirm" type="button" class="danger" disabled>
+          Restaurar
+        </button>
+      </div>
+    </dialog>
+    <dialog
+      id="update-dialog"
+      class="game-dialog"
+      aria-labelledby="update-title"
+    >
+      <header class="dialog-head">
+        <h2 id="update-title">Actualizaciones</h2>
+        <button type="button" class="icon-close" data-close aria-label="Cerrar">
+          ×
+        </button>
+      </header>
+      <p id="update-message" class="lead" role="status"></p>
+      <dl id="update-facts" class="facts"></dl>
+      <p id="update-notes" class="muted"></p>
+      <div class="dialog-actions">
+        <button id="update-later" type="button" data-close>Posponer</button
+        ><button id="update-go" type="button" class="primary" hidden>
+          Descargar e instalar
+        </button>
+      </div>
+    </dialog>
+    <dialog
+      id="confirm-dialog"
+      class="game-dialog"
+      aria-labelledby="confirm-title"
+    >
+      <header class="dialog-head">
+        <h2 id="confirm-title"></h2>
+        <button type="button" class="icon-close" data-close aria-label="Cerrar">
+          ×
+        </button>
+      </header>
+      <p id="confirm-message" class="lead"></p>
+      <p id="confirm-detail" class="muted"></p>
+      <div class="dialog-actions">
+        <button type="button" data-close>Volver</button
+        ><button id="confirm-go" type="button" class="primary"></button>
+      </div>
+    </dialog>
+    <dialog
+      id="sheet-dialog"
+      class="game-dialog wide"
+      aria-labelledby="sheet-title"
+    >
+      <header class="dialog-head">
+        <h2 id="sheet-title"></h2>
+        <button type="button" class="icon-close" data-close aria-label="Cerrar">
+          ×
+        </button>
+      </header>
+      <div id="sheet-body"></div>
+    </dialog>
     <script src="quantity.js"></script>
     <script src="renderer.js"></script>
   </body>

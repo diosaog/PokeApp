@@ -5,8 +5,16 @@ const {
   ipcMain,
   dialog,
   shell,
+  net,
 } = require("electron");
 const webview = require("./webview.cjs");
+const {
+  createConfirmations,
+  describe,
+  fingerprint,
+  restorable,
+  robberyOpen,
+} = require("./confirmations.cjs");
 const { spawn } = require("node:child_process");
 const path = require("node:path");
 const { pathToFileURL } = require("node:url");
@@ -28,6 +36,9 @@ app.setPath("userData", path.join(profile, "shell"));
 app.setAppUserModelId(
   privateCandidate ? "app.pokeapp.launcher.private" : "app.pokeapp.launcher",
 );
+// In-app confirmations: main writes the summary from the core's state and
+// issues a single-use ticket bound to that action, target and state.
+const confirmations = createConfirmations();
 let worker,
   win,
   tools,
@@ -145,7 +156,7 @@ app.whenReady().then(() => {
     });
   ipcMain.handle(
     "launcher:write-confirm",
-    async (event, operationId, emulatorClosed) => {
+    async (event, operationId, emulatorClosed, ticket) => {
       authorize(event);
       if (
         typeof operationId !== "string" ||
@@ -154,23 +165,13 @@ app.whenReady().then(() => {
       )
         throw new Error("Confirma que el juego y el emulador están cerrados.");
       const state = await request("state");
-      if (
-        !state.write?.can_confirm ||
-        state.write.operation_id !== operationId ||
-        !state.write.description
-      )
-        throw new Error("La acción ya no está pendiente de confirmación.");
-      const confirmation = await dialog.showMessageBox(win, {
-        type: "warning",
-        title: "Confirmar cambio local",
-        message: `${state.write.game} · ${state.write.description}`,
-        detail: `${state.selected_save}\n\nEl juego y el emulador deben permanecer cerrados. Se conservará una copia del archivo original. No se consume ningún artículo.`,
-        buttons: ["Cancelar", "Confirmar cambio"],
-        defaultId: 0,
-        cancelId: 0,
-        noLink: true,
-      });
-      if (confirmation.response !== 1) return { status: "CANCELLED" };
+      describe("write", operationId, state);
+      confirmations.redeem(
+        ticket,
+        "write",
+        operationId,
+        fingerprint("write", operationId, state),
+      );
       return request("write_confirm", {
         operation_id: operationId,
         closed_emulator_confirmed: true,
@@ -212,32 +213,33 @@ app.whenReady().then(() => {
   });
   ipcMain.handle(
     "launcher:backup-restore",
-    async (event, operationId, emulatorClosed) => {
+    async (event, operationId, emulatorClosed, typed, ticket) => {
       authorize(event);
+      if (typeof operationId !== "string" || operationId.length > 128)
+        throw new Error("Restauración no disponible.");
       if (emulatorClosed !== true)
         throw new Error("Confirma que el juego y el emulador están cerrados.");
+      if (typed !== "Confirmo")
+        throw new Error("Escribe Confirmo para restaurar.");
       const state = await request("state");
-      const backup = state.write?.backups?.find(
-        (b) =>
-          b.operation_id === operationId &&
-          b.role === "original" &&
-          b.can_restore &&
-          b.verified,
+      // The ticket was issued for this backup of this save, in this state.
+      confirmations.redeem(
+        ticket,
+        "restore",
+        operationId,
+        fingerprint("restore", operationId, state),
       );
-      if (!backup || state.write.busy)
+      if (!restorable(state, operationId) || state.write.busy)
         throw new Error("Restauración no disponible.");
-      const confirmation = await dialog.showMessageBox(win, {
-        type: "warning",
-        title: "Restaurar copia original",
-        message: `${backup.game} · Recuperar los bytes originales`,
-        detail:
-          "Mantén el juego y el emulador cerrados hasta terminar. Un archivo externo distinto se conservará y bloqueará la restauración. Recuperar bytes no revierte compras ni recompensas.",
-        buttons: ["Cancelar", "Restaurar copia"],
-        defaultId: 0,
-        cancelId: 0,
-        noLink: true,
-      });
-      if (confirmation.response !== 1) return { status: "CANCELLED" };
+      // Pending robbery deliveries could duplicate or lose a Pokémon.
+      if (
+        state.cloud?.data?.mandatory_sync ||
+        robberyOpen(state.cloud?.data?.transfers) ||
+        state.write.status === "RECOVERY_REQUIRED"
+      )
+        throw new Error(
+          "Hay operaciones pendientes: resuélvelas antes de restaurar.",
+        );
       return request("backup_restore", {
         operation_id: operationId,
         closed_emulator_confirmed: true,
@@ -245,38 +247,29 @@ app.whenReady().then(() => {
       });
     },
   );
-  ipcMain.handle("launcher:export", async (event, emulatorClosed) => {
+  ipcMain.handle("launcher:export", async (event, emulatorClosed, ticket) => {
     authorize(event);
     if (emulatorClosed !== true)
       throw new Error("Confirma que el juego y el emulador están cerrados.");
     const state = await request("state");
-    if (!state.write?.can_export || !state.write?.export_intent) {
-      throw new Error("No hay una operación de exportación autorizada.");
-    }
+    describe("export", "current", state);
+    confirmations.redeem(
+      ticket,
+      "export",
+      "current",
+      fingerprint("export", "current", state),
+    );
     const result = await dialog.showOpenDialog(win, {
       title: "Elegir carpeta para la copia del save",
       properties: ["openDirectory", "createDirectory"],
       buttonLabel: "Elegir carpeta",
     });
     if (result.canceled || !result.filePaths[0]) return { status: "CANCELLED" };
-    const confirmation = await dialog.showMessageBox(win, {
-      type: "warning",
-      title: "Exportar copia validada",
-      message:
-        "Se creará un archivo nuevo y se conservará la partida original.",
-      detail: `${state.selected_save}\n\nLa exportación no aplica cambios al archivo original ni consume recursos de Liga.`,
-      buttons: ["Cancelar", "Exportar copia"],
-      defaultId: 0,
-      cancelId: 0,
-      noLink: true,
+    return request("export_prepare", {
+      destination: result.filePaths[0],
+      intent: state.write.export_intent,
+      closed_emulator_confirmed: true,
     });
-    return confirmation.response !== 1
-      ? { status: "CANCELLED" }
-      : request("export_prepare", {
-          destination: result.filePaths[0],
-          intent: state.write.export_intent,
-          closed_emulator_confirmed: true,
-        });
   });
   // Window: an empty base; the web view and the native tools view stack on it.
   win = new BrowserWindow({
@@ -305,6 +298,7 @@ app.whenReady().then(() => {
       sandbox: true,
     },
   });
+  tools.setBackgroundColor("#00000000");
   tools.webContents.setWindowOpenHandler(() => ({ action: "deny" }));
   tools.webContents.on("will-navigate", (event) => event.preventDefault());
   tools.webContents.session.setPermissionRequestHandler(
@@ -325,6 +319,7 @@ app.whenReady().then(() => {
     webPreferences: webview.webPreferences(webAt),
   });
   let strip = 0,
+    modal = false,
     panel = null,
     panelFromUrl = false,
     left = 0,
@@ -338,7 +333,8 @@ app.whenReady().then(() => {
       width,
       height: Math.max(0, height - strip),
     });
-    const x = offline ? 0 : left;
+    // Dialogs cover the whole window; the hub sits beside the web's sidebar.
+    const x = offline || modal ? 0 : left;
     tools.setBounds(
       offline || panel
         ? { x, y: 0, width: Math.max(0, width - x), height }
@@ -362,16 +358,23 @@ app.whenReady().then(() => {
     const mine = ++turn;
     panel = target.panel;
     panelFromUrl = fromUrl;
-    const edge = await sidebarEdge();
+    const edge = target.modal ? 0 : await sidebarEdge();
     if (mine !== turn) return;
+    modal = Boolean(target.modal);
     left = edge;
     layout();
     tools.webContents.focus();
-    tools.webContents.send("launcher:navigate", { view: "panel", ...target });
+    tools.webContents.send("launcher:navigate", {
+      view: modal ? "modal" : "panel",
+      panel: target.panel,
+      item: target.item,
+      tab: target.tab,
+    });
   };
   const closePanel = () => {
     turn++;
     panel = null;
+    modal = false;
     layout();
     tools.webContents.send("launcher:navigate", { view: "strip" });
   };
@@ -408,12 +411,110 @@ app.whenReady().then(() => {
       layout();
     });
   });
+  const shareApi = (async () => {
+    try {
+      const config = await (
+        await net.fetch(webAt + "/build-config.json")
+      ).json();
+      const state = await request("state");
+      const api = new URL(config.api_base_url).origin;
+      return api === state.backend_origin ? api : null;
+    } catch {
+      return null;
+    }
+  })();
+  const onWebOrigin = () => {
+    try {
+      return new URL(web.webContents.getURL()).origin === webAt;
+    } catch {
+      return false;
+    }
+  };
+  const pushSession = async () => {
+    if (!(await shareApi)) return;
+    for (let attempt = 0; attempt < 8; attempt++) {
+      if (!onWebOrigin()) return;
+      const reply = await request("web_session").catch(() => null);
+      if (!reply || reply.status === "LOGIN_REQUIRED") return;
+      if (reply.status === "OK") {
+        const session = JSON.stringify({
+          access_token: reply.access_token,
+          expires_at: reply.expires_at,
+          trainer_id: reply.trainer_id,
+        });
+        await web.webContents
+          .executeJavaScript(
+            `window.__pokeappLauncherSession && window.__pokeappLauncherSession(${session})`,
+          )
+          .catch(() => {});
+        return;
+      }
+      await new Promise((resolve) => setTimeout(resolve, 1500));
+    }
+  };
+  // One sign-in: when the web signs in successfully, the core signs in with
+  // the same credentials, which pass through memory only (never stored).
+  void shareApi.then((api) => {
+    if (!api) return;
+    const pending = new Map();
+    const filter = { urls: [api + "/v1/auth/pin-login"] };
+    const webRequest = web.webContents.session.webRequest;
+    webRequest.onBeforeRequest(filter, (details, callback) => {
+      try {
+        if (details.method === "POST" && details.uploadData?.[0]?.bytes) {
+          const body = JSON.parse(details.uploadData[0].bytes.toString("utf8"));
+          if (
+            typeof body.trainer_identifier === "string" &&
+            typeof body.pin === "string"
+          )
+            pending.set(details.id, {
+              trainer: body.trainer_identifier,
+              pin: body.pin,
+            });
+        }
+      } catch {
+        // Not a login body this Launcher understands: nothing to forward.
+      }
+      callback({});
+    });
+    webRequest.onCompleted(filter, async (details) => {
+      const login = pending.get(details.id);
+      pending.delete(details.id);
+      if (!login || details.statusCode !== 200) return;
+      const state = await request("state").catch(() => null);
+      const linked = state?.principal?.display_name;
+      if (
+        !linked ||
+        linked.toLocaleLowerCase() !== login.trainer.toLocaleLowerCase()
+      )
+        await request("login", login).catch(() => {});
+    });
+    webRequest.onErrorOccurred(filter, (details) => pending.delete(details.id));
+  });
+  web.webContents.on("did-finish-load", () => void pushSession());
   void webview.attach(web, {
     origin: webAt,
     version: app.getVersion(),
     openExternal: (url) => shell.openExternal(url),
+    onSession: () => void pushSession(),
+    // Signing out of PokeApp also unlinks this Launcher and stops its sync.
+    onLogout: () => void request("logout").catch(() => {}),
     // Older webs link "Añadir a mi partida" to /__launcher/quick-items/<item>.
     onQuickItems: (item) => void openPanel({ panel: "objetos", item }, false),
+  });
+  ipcMain.handle("launcher:present", (event, view) => {
+    authorize(event);
+    if (!["selector", "update", "robos", "objetos", "restore"].includes(view))
+      throw new Error("Vista no válida");
+    void openPanel({ panel: view, modal: true }, false);
+    return { shown: true };
+  });
+  ipcMain.handle("launcher:open-hub", (event, tab) => {
+    authorize(event);
+    if (!["partidas", "copias", "launcher"].includes(tab))
+      throw new Error("Vista no válida");
+    void openPanel({ panel: "saves", tab }, false);
+    return { shown: true };
   });
   ipcMain.handle("launcher:layout", (event, height) => {
     authorize(event);
@@ -478,10 +579,11 @@ app.whenReady().then(() => {
     },
   );
   // Robbery: only this trainer's listed leg; runtime and server recheck all.
-  // The dialog explains the LOCAL effect; completion is the server's verdict.
+  // The tools page explains the LOCAL effect in its own dialog and passes an
+  // explicit confirmation; completion is the server's verdict.
   ipcMain.handle(
     "launcher:transfer",
-    async (event, kind, authorizationId, emulatorClosed) => {
+    async (event, kind, authorizationId, emulatorClosed, ticket) => {
       authorize(event);
       if (
         !["prepare", "apply", "fulfil", "cancel", "refresh"].includes(kind) ||
@@ -496,78 +598,23 @@ app.whenReady().then(() => {
       if (!transfer) throw new Error("La operación ya no está pendiente.");
       const args = { authorization_id: authorizationId };
       if (kind === "refresh") return request("transfer_refresh", args);
-      if (kind === "cancel") {
-        if (transfer.side !== "destination" || transfer.apply_started)
-          throw new Error(
-            "Solo quien solicitó el robo puede cancelarlo, y solo antes de aplicar.",
-          );
-        const answer = await dialog.showMessageBox(win, {
-          type: "question",
-          title: "Cancelar robo",
-          message: "¿Cancelar este robo antes de aplicar ningún cambio?",
-          detail:
-            "No se modifica ninguna partida y el objeto no se consume. Las copias se conservan.",
-          buttons: ["Volver", "Cancelar robo"],
-          defaultId: 0,
-          cancelId: 0,
-          noLink: true,
-        });
-        if (answer.response !== 1) return { status: "NOT_CONFIRMED" };
-        return request("transfer_cancel", args);
-      }
+      const step = "transfer:" + kind;
+      describe(step, authorizationId, state);
+      confirmations.redeem(
+        ticket,
+        step,
+        authorizationId,
+        fingerprint(step, authorizationId, state),
+      );
+      if (kind === "cancel") return request("transfer_cancel", args);
       if (emulatorClosed !== true)
         throw new Error("Confirma que el juego y el emulador están cerrados.");
       if (kind === "fulfil") {
-        if (!transfer.obligation)
-          throw new Error("PokeApp aún no ha decidido.");
-        const victim = transfer.side === "source";
-        const answer = await dialog.showMessageBox(win, {
-          type: "warning",
-          title: victim ? "Sincronización obligatoria" : "Recibir Pokémon",
-          message: victim
-            ? "Retirar de tu partida el Pokémon robado"
-            : "Añadir a tu partida el Pokémon robado",
-          detail: `${state.selected_save}\n\nEl robo ya está decidido por PokeApp. ${victim ? "Se retirará el Pokémon de tu partida actual" : "Se añadirá el Pokémon a tu partida actual"} con copia verificada, confirmación y verificación independiente. Si tu partida cambió desde la decisión, PokeApp recalculará tu parte sin modificar nada todavía.\n\nMantén el juego y el emulador cerrados hasta que termine.`,
-          buttons: ["Cancelar", victim ? "Retirar ahora" : "Recibir ahora"],
-          defaultId: 0,
-          cancelId: 0,
-          noLink: true,
-        });
-        if (answer.response !== 1) return { status: "NOT_CONFIRMED" };
         return request("transfer_fulfil", {
           ...args,
           closed_emulator_confirmed: true,
         });
       }
-      const where = transfer.location
-        ? `Caja ${transfer.location.box}, posición ${transfer.location.slot}`
-        : "la posición indicada por PokeApp";
-      const effect =
-        kind === "prepare"
-          ? "Se creará y comprobará una copia completa de tu partida. Todavía no se modifica nada."
-          : transfer.side === "source"
-            ? `Se retirará de tu partida el Pokémon de la ${where}.`
-            : `Se añadirá a tu partida el Pokémon robado en la ${where}.`;
-      const answer = await dialog.showMessageBox(win, {
-        type: "warning",
-        title:
-          kind === "prepare"
-            ? "Preparar copia para el robo"
-            : "Aplicar tu parte",
-        message:
-          kind === "prepare"
-            ? "Preparar copia verificada"
-            : "Aplicar tu parte del robo",
-        detail: `${state.selected_save}\n\n${effect} El robo solo es definitivo cuando PokeApp verifica las dos partidas.\n\nMantén el juego y el emulador cerrados hasta que termine.`,
-        buttons: [
-          "Cancelar",
-          kind === "prepare" ? "Preparar copia" : "Aplicar mi parte",
-        ],
-        defaultId: 0,
-        cancelId: 0,
-        noLink: true,
-      });
-      if (answer.response !== 1) return { status: "NOT_CONFIRMED" };
       return request(
         kind === "prepare" ? "transfer_prepare" : "transfer_apply",
         {
@@ -600,12 +647,18 @@ app.whenReady().then(() => {
     reason: "UPDATES_NOT_CONFIGURED",
   };
   let offered = null;
-  if (
+  const configured =
     updateConfig.publicKey &&
     typeof feed === "string" &&
-    feed.startsWith("https://")
-  ) {
-    const recovered = updates.reconcileStartup(updateDir, app.getVersion());
+    feed.startsWith("https://");
+  let checking = null;
+  const checkFeed = () => {
+    if (!configured) return Promise.resolve();
+    if (["DOWNLOADING", "DOWNLOADED", "INSTALLING"].includes(update.status))
+      return Promise.resolve();
+    if (checking) return checking;
+    const recovered =
+      update.recovered ?? updates.reconcileStartup(updateDir, app.getVersion());
     update = {
       status:
         recovered.status === "INSTALL_INCOMPLETE" ? "DOWNLOADED" : "CHECKING",
@@ -613,7 +666,7 @@ app.whenReady().then(() => {
       channel,
       recovered,
     };
-    fetch(feed, { redirect: "error" })
+    checking = fetch(feed, { redirect: "error" })
       .then((response) =>
         response.ok ? response.json() : Promise.reject(new Error("feed")),
       )
@@ -629,6 +682,7 @@ app.whenReady().then(() => {
                 status: "AVAILABLE",
                 version: offered.version,
                 notes: offered.notes,
+                size: offered.installer?.size,
               }
             : { ...update, status: "UP_TO_DATE" };
       })
@@ -638,10 +692,22 @@ app.whenReady().then(() => {
           status: "ERROR",
           reason: error.code || "UPDATE_CHECK_FAILED",
         };
+      })
+      .finally(() => {
+        checking = null;
       });
-  }
+    return checking;
+  };
+  void checkFeed();
   ipcMain.handle("launcher:update-state", (event) => {
     authorize(event);
+    return update;
+  });
+  ipcMain.handle("launcher:update-check", async (event) => {
+    authorize(event);
+    if (configured && update.status !== "DOWNLOADED")
+      update = { ...update, status: "CHECKING" };
+    await checkFeed();
     return update;
   });
   ipcMain.handle("launcher:update-download", async (event) => {
@@ -660,26 +726,63 @@ app.whenReady().then(() => {
     }
     return update;
   });
-  ipcMain.handle("launcher:update-install", async (event) => {
+  const installVersion = () => update.version || update.recovered?.version;
+  ipcMain.handle("launcher:confirm-begin", async (event, kind, target) => {
+    authorize(event);
+    if (
+      typeof kind !== "string" ||
+      typeof target !== "string" ||
+      target.length > 128
+    )
+      throw new Error("Confirmación no válida");
+    if (kind === "install") {
+      if (update.status !== "DOWNLOADED" || target !== installVersion())
+        throw new Error(
+          "No hay ninguna actualización verificada para instalar.",
+        );
+      return {
+        ticket: confirmations.issue("install", target, [target]),
+        title: "Instalar actualización",
+        message: `PokeApp Launcher ${target}`,
+        detail:
+          "El Launcher se cerrará, se instalará la nueva versión y volverá a abrirse. Tus copias, sesión y operaciones se conservan.",
+        go: "Instalar y reiniciar",
+      };
+    }
+    if (
+      ![
+        "write",
+        "export",
+        "restore",
+        "transfer:prepare",
+        "transfer:apply",
+        "transfer:fulfil",
+        "transfer:cancel",
+      ].includes(kind)
+    )
+      throw new Error("Confirmación no válida");
+    const state = await request("state");
+    const offer = describe(kind, target, state);
+    return {
+      ...offer,
+      ticket: confirmations.issue(
+        kind,
+        target,
+        fingerprint(kind, target, state),
+      ),
+    };
+  });
+  ipcMain.handle("launcher:update-install", async (event, ticket) => {
     authorize(event);
     if (update.status !== "DOWNLOADED") return update;
+    confirmations.redeem(ticket, "install", installVersion(), [
+      installVersion(),
+    ]);
     const blocker = updates.installBlocker(
       await request("state").catch(() => null),
     );
     if (blocker) return { ...update, deferred: blocker };
     const installer = updates.verifiedInstaller(updateDir);
-    const confirmation = await dialog.showMessageBox(win, {
-      type: "info",
-      title: "Instalar actualización",
-      message: `PokeApp Launcher ${installer.version}`,
-      detail:
-        "El Launcher se cerrará, se instalará la nueva versión y volverá a abrirse. Tus copias, sesión y operaciones se conservan.",
-      buttons: ["Más tarde", "Instalar y reiniciar"],
-      defaultId: 0,
-      cancelId: 0,
-      noLink: true,
-    });
-    if (confirmation.response !== 1) return update;
     const last = updates.installBlocker(
       await request("state").catch(() => null),
     );

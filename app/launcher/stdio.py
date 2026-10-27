@@ -38,6 +38,7 @@ def main():
             profile,
             SaveInspector(parser),
             client=BackendClient(args.backend),
+            discover=True,
         )
         try:
             for line in sys.stdin:

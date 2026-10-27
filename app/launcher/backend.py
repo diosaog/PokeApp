@@ -165,13 +165,13 @@ class LauncherSession:
         self._tokens, self._principal = result.session, principal
         return principal
 
-    def principal(self) -> BackendPrincipal:
+    def principal(self, min_validity: int = 30) -> BackendPrincipal:
         if not self._tokens or not self._principal:
             raise BackendError("LOGIN_REQUIRED")
         try:
             if (
                 self._tokens.expires_at is None
-                or self._tokens.expires_at <= time.time() + 30
+                or self._tokens.expires_at <= time.time() + min_validity
             ):
                 if not self._tokens.refresh_token:
                     raise BackendError("LOGIN_REQUIRED")

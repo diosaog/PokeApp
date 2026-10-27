@@ -1,5 +1,8 @@
 """Local UI state never waits for cloud. Separate parse and network workers."""
 
+import hashlib
+import json
+import os
 import threading
 import time
 from copy import deepcopy
@@ -68,8 +71,17 @@ def _write_recovery_exists(directory):
 
 class LauncherRuntime:
     def __init__(
-        self, profile, inspector, *, client=None, token_store=None, start=True
+        self,
+        profile,
+        inspector,
+        *,
+        client=None,
+        token_store=None,
+        start=True,
+        discover=False,
     ):
+        # Emulator discovery at start is for the real Launcher only (stdio).
+        self.discover_on_start = discover
         self.core = LauncherCore(profile, inspector)
         self.client = client or BackendClient(PRODUCTION_API)
         self.session = LauncherSession(self.client)
@@ -110,6 +122,8 @@ class LauncherRuntime:
             "cloud": None,
             "cloud_status": "OFFLINE",
             "last_online": 0,
+            # Last time PokeApp confirmed this save is the current one.
+            "last_synced": None,
             "auth_status": "LOGIN_REQUIRED",
             "cloud_sync": False,
             "cloud_receipt": None,
@@ -120,7 +134,14 @@ class LauncherRuntime:
             "quick_items": None,
             "quick_item_error": None,
             "emulator_saves": [],
+            # Automatic save choice: PENDING | NONE | AUTO_SELECTED | CHOOSE | KEPT.
+            "save_choice": {"status": "PENDING", "count": 0},
+            "backend_origin": self.client.origin,
         }
+        # Short-lived access token for the Launcher's own web view. Kept out of
+        # self.value: state() goes to the renderer, this goes to main only.
+        self._web_token = None
+        self._web_token_wanted = False
         self.receipt = None
         self.watch = None
         self._load_local()
@@ -249,14 +270,34 @@ class LauncherRuntime:
             except Full:
                 return {"status": "BUSY"}
             return {"status": "QUEUED"}
+        if name == "web_session":
+            if args:
+                raise ValueError("unexpected_web_session_arguments")
+            with self.lock:
+                token = self._web_token
+            if token and token["expires_at"] > time.time() + 300:
+                return {"status": "OK", **token}
+            # Ask the cloud loop for a fresh token; main retries shortly.
+            self._web_token_wanted = True
+            self.next_cloud_refresh = 0
+            return {
+                "status": "PENDING" if self.session._principal else "LOGIN_REQUIRED"
+            }
         if name == "discover_saves":
             from app.launcher.discovery import emulator_saves
 
             if args:
                 raise ValueError("unexpected_discovery_arguments")
             found = emulator_saves()
-            self._patch(emulator_saves=found)
-            return {"status": "DONE", "count": len(found)}
+            auto = self._choose_save(found)
+            if auto:
+                try:
+                    self.local_commands.put_nowait(
+                        ("select", {"path": found[0]["path"]})
+                    )
+                except Full:
+                    return {"status": "BUSY"}
+            return {"status": "DONE", "count": len(found), "auto_selected": auto}
         if name == "select_discovered":
             with self.lock:
                 known = {s["path"] for s in self.value["emulator_saves"]}
@@ -345,7 +386,84 @@ class LauncherRuntime:
             debounce_seconds=self.core.config.debounce_seconds,
         )
 
+    def _auto_consent(self, trainer_id):
+        """Owner decision (2026-10-27): signing in is the consent to sync the
+        selected save automatically. On a shared PC, where another trainer
+        already synced from this profile, the save could be someone else's:
+        then the trainer confirms once with «Sincronizar ahora»."""
+        origin = self.client.origin
+        if self.store.enabled(origin, trainer_id):
+            return True
+        if self.store.other_consent(origin, trainer_id):
+            return False
+        self.store.enable(origin, trainer_id)
+        return True
+
+    def _new_saves(self, found):
+        """Candidates this Launcher has not listed before (path hashes only).
+
+        The first discovery sets the baseline, so nothing counts as new then."""
+        path = self.core.profile / "known-saves.json"
+        key = lambda f: hashlib.sha256(
+            os.path.normcase(f["path"]).encode("utf-8")
+        ).hexdigest()
+        try:
+            known = set(json.loads(path.read_text(encoding="utf-8"))[:64])
+            baseline = False
+        except (OSError, ValueError, TypeError):
+            known, baseline = set(), True
+        selected = self.core.config.selected_save
+        new = [
+            f
+            for f in found
+            if key(f) not in known and f["path"] != selected and not baseline
+        ]
+        try:
+            path.write_text(
+                json.dumps(sorted(known | {key(f) for f in found})[:64]),
+                encoding="utf-8",
+            )
+        except OSError:
+            pass
+        return new
+
+    def _choose_save(self, found):
+        """Owner rule: one valid candidate is chosen automatically; several ask.
+
+        A remembered save is never replaced: other or new candidates only raise
+        a notice. Discovery lists and stats files; it never opens them."""
+        new = self._new_saves(found)
+        selected = self.core.config.selected_save
+        if selected:
+            others = [f for f in found if f["path"] != selected]
+            choice = {"status": "KEPT", "count": len(others), "new": len(new)}
+        elif len(found) == 1:
+            choice = {"status": "AUTO_SELECTED", "count": 1, "new": 0}
+        else:
+            choice = {
+                "status": "CHOOSE" if found else "NONE",
+                "count": len(found),
+                "new": len(new),
+            }
+        self._patch(emulator_saves=found, save_choice=choice)
+        return choice["status"] == "AUTO_SELECTED"
+
+    def _discover_on_start(self):
+        from app.launcher.discovery import emulator_saves
+
+        try:
+            found = emulator_saves()
+        except OSError:
+            found = []
+        if self._choose_save(found):
+            self.local_commands.put_nowait(("select", {"path": found[0]["path"]}))
+
     def _local_loop(self):
+        if self.discover_on_start:
+            try:
+                self._discover_on_start()
+            except Exception:  # noqa: BLE001 - discovery is a convenience only
+                self._patch(save_choice={"status": "NONE", "count": 0})
         while not self.stop.wait(0.1):
             try:
                 self._write_step()
@@ -609,8 +727,24 @@ class LauncherRuntime:
             is None
         ):
             return  # lightweight /health only between cached cloud refreshes
-        principal = self.session.principal()
+        wanted, self._web_token_wanted = self._web_token_wanted, False
+        principal = self.session.principal(min_validity=600 if wanted else 30)
         self.tokens.save(self.client.origin, self.session)
+        tokens = self.session._tokens
+        with self.lock:
+            self._web_token = (
+                {
+                    "access_token": tokens.access_token,
+                    "expires_at": int(tokens.expires_at),
+                    "trainer_id": principal.trainer_id,
+                }
+                if tokens and isinstance(tokens.expires_at, (int, float))
+                else None
+            )
+        if not self.store.enabled(
+            self.client.origin, principal.trainer_id
+        ) and self._auto_consent(principal.trainer_id):
+            self._patch(cloud_sync=True)
         self._patch(principal=principal.model_dump(), auth_status="VERIFIED")
         seasons = self.session.request("GET", "/v1/read/seasons")
         items = seasons.get("items")
@@ -745,6 +879,7 @@ class LauncherRuntime:
             cloud_status="ONLINE",
             last_online=time.time(),
             error=None,
+            **({"last_synced": time.time()} if accepted else {}),
         )
 
     def _cloud_loop(self):
@@ -756,10 +891,13 @@ class LauncherRuntime:
                     if name == "logout":
                         self.session.logout()
                         self.tokens.clear()
+                        with self.lock:
+                            self._web_token = None
                         self._patch(
                             principal=None,
                             cloud=None,
                             cloud_receipt=None,
+                            last_synced=None,
                             auth_status="LOGIN_REQUIRED",
                             cloud_sync=False,
                             error=None,
@@ -781,9 +919,7 @@ class LauncherRuntime:
                         self._patch(
                             principal=principal.model_dump(),
                             auth_status="VERIFIED",
-                            cloud_sync=self.store.enabled(
-                                self.client.origin, principal.trainer_id
-                            ),
+                            cloud_sync=self._auto_consent(principal.trainer_id),
                         )
                     elif name == "retry" and self.session._principal:
                         self.store.retry(

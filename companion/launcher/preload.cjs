@@ -6,16 +6,29 @@ contextBridge.exposeInMainWorld("launcher", {
   logout: () => ipcRenderer.invoke("launcher:logout"),
   retry: () => ipcRenderer.invoke("launcher:retry"),
   sync: () => ipcRenderer.invoke("launcher:sync"),
-  confirmWrite: (operationId, emulatorClosed) =>
-    ipcRenderer.invoke("launcher:write-confirm", operationId, emulatorClosed),
+  confirmBegin: (kind, target) =>
+    ipcRenderer.invoke("launcher:confirm-begin", kind, target),
+  confirmWrite: (operationId, emulatorClosed, ticket) =>
+    ipcRenderer.invoke(
+      "launcher:write-confirm",
+      operationId,
+      emulatorClosed,
+      ticket,
+    ),
   reconcileWrite: () => ipcRenderer.invoke("launcher:write-reconcile"),
-  exportSave: (emulatorClosed) =>
-    ipcRenderer.invoke("launcher:export", emulatorClosed),
+  exportSave: (emulatorClosed, ticket) =>
+    ipcRenderer.invoke("launcher:export", emulatorClosed, ticket),
   backups: () => ipcRenderer.invoke("launcher:backups"),
   saveBackup: (operationId, role) =>
     ipcRenderer.invoke("launcher:backup-copy", operationId, role),
-  restoreBackup: (operationId, emulatorClosed) =>
-    ipcRenderer.invoke("launcher:backup-restore", operationId, emulatorClosed),
+  restoreBackup: (operationId, emulatorClosed, typed, ticket) =>
+    ipcRenderer.invoke(
+      "launcher:backup-restore",
+      operationId,
+      emulatorClosed,
+      typed,
+      ticket,
+    ),
   quickItems: () => ipcRenderer.invoke("launcher:quick-items"),
   addQuickItem: (item, quantity, emulatorClosed) =>
     ipcRenderer.invoke(
@@ -24,12 +37,13 @@ contextBridge.exposeInMainWorld("launcher", {
       quantity,
       emulatorClosed,
     ),
-  transfer: (kind, authorizationId, emulatorClosed) =>
+  transfer: (kind, authorizationId, emulatorClosed, ticket) =>
     ipcRenderer.invoke(
       "launcher:transfer",
       kind,
       authorizationId,
       emulatorClosed,
+      ticket,
     ),
   discoverSaves: () => ipcRenderer.invoke("launcher:discover"),
   selectDiscovered: (savePath) =>
@@ -38,16 +52,27 @@ contextBridge.exposeInMainWorld("launcher", {
   // Unified shell (27C): the strip height this page needs, and the way back.
   layout: (height) => ipcRenderer.invoke("launcher:layout", height),
   closePanel: () => ipcRenderer.invoke("launcher:panel-close"),
+  present: (view) => ipcRenderer.invoke("launcher:present", view),
+  openHub: (tab) => ipcRenderer.invoke("launcher:open-hub", tab),
+  checkUpdate: () => ipcRenderer.invoke("launcher:update-check"),
   onNavigate: (callback) =>
     ipcRenderer.on("launcher:navigate", (_event, message) => {
       // Only a known view, panel and item code ever reach the page.
       const items = ["rare_candy", "heart_scale"];
-      const panels = ["partida", "objetos", "robos", "copias", "nube"];
+      const panels = ["saves"];
+      const tabs = ["partidas", "copias", "launcher"];
+      const modals = ["objetos", "robos", "selector", "update", "restore"];
       if (message?.view === "quick-items" && items.includes(message.item))
         callback({ view: "quick-items", item: message.item });
       else if (message?.view === "panel" && panels.includes(message.panel))
         callback({
           view: "panel",
+          panel: message.panel,
+          tab: tabs.includes(message.tab) ? message.tab : undefined,
+        });
+      else if (message?.view === "modal" && modals.includes(message.panel))
+        callback({
+          view: "modal",
           panel: message.panel,
           item: items.includes(message.item) ? message.item : undefined,
         });
@@ -56,5 +81,6 @@ contextBridge.exposeInMainWorld("launcher", {
     }),
   updateState: () => ipcRenderer.invoke("launcher:update-state"),
   downloadUpdate: () => ipcRenderer.invoke("launcher:update-download"),
-  installUpdate: () => ipcRenderer.invoke("launcher:update-install"),
+  installUpdate: (ticket) =>
+    ipcRenderer.invoke("launcher:update-install", ticket),
 });

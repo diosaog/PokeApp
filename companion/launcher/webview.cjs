@@ -9,10 +9,16 @@ const PRODUCTION_WEB = "https://pokeapp-web.pokeapp-v2.workers.dev";
 // at run time, never in public builds, and never sharing the real web session.
 const PREVIEW_ORIGIN = "http://127.0.0.1:4173";
 const QUICK_ITEMS = ["rare_candy", "heart_scale"];
-// One app (27C): the web's own desktop routes (/escritorio/<panel>, shown only
-// inside the Launcher) open the matching native panel over the web content,
-// beside the web's sidebar. The web never sends a command: the Launcher only
-// observes its URL and maps it to this fixed list.
+// One app: the web's own routes open native Launcher views. The web never
+// sends a command: the Launcher only observes its URL and maps it to this
+// fixed list.
+// - /saves (Saves y Launcher) is the native hub, beside the web's sidebar.
+// - Infinite items and robbery deliveries open as dialogs over the web.
+// - The 27C /escritorio/<panel> links keep working and land in the same views.
+const HUB_TABS = ["partidas", "copias", "launcher"];
+const MODALS = ["objetos", "robos"];
+const LEGACY = { partida: "partidas", copias: "copias", nube: "launcher" };
+// Kept for older webs and tests that list the 27C panel names.
 const DESKTOP_PANELS = ["partida", "objetos", "robos", "copias", "nube"];
 
 function desktopPanel(url, origin) {
@@ -23,14 +29,18 @@ function desktopPanel(url, origin) {
     return null;
   }
   if (target.origin !== origin) return null;
+  if (/^\/saves\/?$/.test(target.pathname)) return { panel: "saves" };
   const match = /^\/escritorio\/([a-z]+)(?:\/([a-z_]+))?\/?$/.exec(
     target.pathname,
   );
-  if (!match || !DESKTOP_PANELS.includes(match[1])) return null;
-  if (!match[2]) return { panel: match[1] };
-  return match[1] === "objetos" && QUICK_ITEMS.includes(match[2])
-    ? { panel: "objetos", item: match[2] }
-    : null;
+  if (!match) return null;
+  const [, name, item] = match;
+  if (LEGACY[name] && !item) return { panel: "saves", tab: LEGACY[name] };
+  if (name === "robos" && !item) return { panel: "robos", modal: true };
+  if (name === "objetos" && !item) return { panel: "objetos", modal: true };
+  if (name === "objetos" && QUICK_ITEMS.includes(item))
+    return { panel: "objetos", item, modal: true };
+  return null;
 }
 
 // The web's sidebar edge, read from the page as a plain number: anything else
@@ -87,6 +97,12 @@ function decide(url, origin) {
     );
     if (match && QUICK_ITEMS.includes(match[1]))
       return { action: "quick-items", item: match[1] };
+    // Session bridge codes: no data travels; the Launcher acts on its own.
+    const bare = !target.search && !target.hash;
+    if (bare && target.pathname === "/__launcher/session")
+      return { action: "session" };
+    if (bare && target.pathname === "/__launcher/logout")
+      return { action: "logout" };
     if (target.pathname.startsWith("/__launcher/")) return { action: "block" };
     return { action: "allow" };
   }
@@ -95,7 +111,17 @@ function decide(url, origin) {
   return { action: "block" };
 }
 
-function attach(view, { origin, version, onQuickItems, openExternal }) {
+function attach(
+  view,
+  {
+    origin,
+    version,
+    onQuickItems,
+    openExternal,
+    onSession = () => {},
+    onLogout = () => {},
+  },
+) {
   const contents = view.webContents;
   contents.setUserAgent(
     `${contents.getUserAgent()} PokeAppLauncher/${version}`,
@@ -104,6 +130,8 @@ function attach(view, { origin, version, onQuickItems, openExternal }) {
     const decision = decide(url, origin);
     if (decision.action === "quick-items") onQuickItems(decision.item);
     if (decision.action === "external") openExternal(decision.url);
+    if (decision.action === "session") onSession();
+    if (decision.action === "logout") onLogout();
     return decision.action === "allow";
   };
   contents.setWindowOpenHandler(({ url }) => {
@@ -127,6 +155,8 @@ module.exports = {
   PRODUCTION_WEB,
   PREVIEW_ORIGIN,
   DESKTOP_PANELS,
+  HUB_TABS,
+  MODALS,
   webOrigin,
   webPreferences,
   decide,

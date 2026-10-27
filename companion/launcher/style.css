@@ -412,7 +412,6 @@ article > h2:first-child::before {
   display: inline-flex;
   margin-right: 0.25rem;
 }
-[data-mode="panel"] main > nav,
 [data-mode="strip"] header,
 [data-mode="strip"] main {
   display: none;
@@ -486,6 +485,520 @@ body:not([data-mode]) #panel-title,
 }
 .slot img {
   image-rendering: pixelated;
+}
+
+/* Launcher definitivo: «Saves y Launcher» hub, notices and in-app dialogs. */
+[data-mode="panel"] #web-tab {
+  display: none;
+}
+[data-mode="panel"] main {
+  max-width: none;
+  padding: 1.25rem clamp(1rem, 3vw, 2.5rem) 2.5rem;
+}
+/* Robberies and infinite items are contextual: in the hub they open as sheets. */
+[data-mode="panel"] #save-view > #transfer-article,
+[data-mode="panel"] #save-view > #quick-article {
+  display: none;
+}
+/* Modal: the window is only the dialog, over the web. */
+[data-mode="modal"] header,
+[data-mode="modal"] main,
+[data-mode="modal"] #update-banner,
+[data-mode="modal"] #notices,
+[data-mode="modal"] #offline-note {
+  display: none;
+}
+html[data-mode="modal"],
+html[data-mode="modal"] body {
+  background: transparent;
+  min-height: 0;
+}
+html[data-mode="strip"] {
+  background: var(--c-bg-1);
+}
+.primary,
+#discover-primary {
+  background: linear-gradient(100deg, var(--c-accent), var(--c-accent-soft));
+  color: var(--c-ink);
+  font-weight: 850;
+  border-color: transparent;
+}
+.danger {
+  background: linear-gradient(100deg, var(--c-danger), var(--c-magenta));
+  color: var(--c-ink);
+  font-weight: 850;
+  border-color: transparent;
+}
+.danger-soft {
+  border-color: color-mix(in srgb, var(--c-danger) 55%, transparent);
+  color: var(--c-danger-soft);
+}
+#hub-tabs button {
+  white-space: nowrap;
+}
+.hub-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 340px), 1fr));
+  gap: 0 1.25rem;
+  align-items: start;
+}
+
+/* Active save card. */
+.save-card {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: 1.25rem;
+  align-items: center;
+  margin-top: 0.5rem;
+  padding: 1.4rem 1.6rem;
+  border: 2px solid transparent;
+  background:
+    radial-gradient(
+        120% 160% at 0% 0%,
+        color-mix(in srgb, var(--c-accent) 16%, transparent),
+        transparent 55%
+      )
+      padding-box,
+    linear-gradient(160deg, var(--c-surface-2), var(--c-surface-1)) padding-box,
+    var(--brand-gradient) border-box;
+}
+.save-card > h2:first-child::before {
+  display: none;
+}
+.save-card-art {
+  display: grid;
+  place-items: center;
+  width: 84px;
+  height: 84px;
+  border-radius: 22px;
+  background:
+    radial-gradient(
+      circle at 50% 50%,
+      var(--c-text) 0 9px,
+      var(--c-ink) 9px 13px,
+      transparent 13px
+    ),
+    linear-gradient(
+      180deg,
+      var(--c-magenta) 0 46%,
+      var(--c-ink) 46% 54%,
+      var(--c-surface-3) 54%
+    );
+  box-shadow:
+    inset 0 0 0 3px var(--c-ink),
+    0 10px 24px color-mix(in srgb, var(--c-magenta) 30%, transparent);
+}
+.save-card-art span {
+  translate: 0 34px;
+  padding: 1px 8px;
+  border-radius: 999px;
+  background: var(--c-gold);
+  color: var(--c-ink);
+  font-size: 0.75rem;
+  font-weight: 900;
+  letter-spacing: 0.06em;
+}
+.save-card[data-empty="true"] .save-card-art {
+  filter: grayscale(0.85) brightness(0.8);
+}
+.save-card[data-empty="true"] .save-card-art span {
+  display: none;
+}
+.save-card-body {
+  min-width: 0;
+}
+.save-card-body h2 {
+  margin: 0.15rem 0 0.3rem;
+  font-size: 1.45rem;
+  overflow-wrap: anywhere;
+}
+.eyebrow {
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  color: var(--c-accent);
+}
+.save-card-status {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.6rem;
+  margin-top: 0.6rem;
+}
+.save-card-actions {
+  display: grid;
+  gap: 0.6rem;
+  justify-items: stretch;
+}
+.save-card[data-empty="true"] {
+  grid-template-columns: auto minmax(0, 1fr);
+}
+.save-card[data-empty="true"] .save-card-actions {
+  grid-column: 1 / -1;
+  justify-items: start;
+}
+.save-card[data-empty="true"] #discover-primary {
+  padding: 0.85rem 1.6rem;
+  font-size: 1.05rem;
+}
+.other-saves {
+  margin: 0.7rem 0 0;
+  padding: 0.45rem 0.8rem;
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--c-info) 14%, var(--c-bg-1));
+  border: 1px solid color-mix(in srgb, var(--c-info) 40%, transparent);
+  color: var(--c-text-soft);
+  font-size: 0.88rem;
+}
+.sync-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.25rem 0.75rem;
+  border-radius: 999px;
+  font-size: 0.82rem;
+  font-weight: 800;
+  border: 1px solid var(--c-line-strong);
+  background: var(--c-bg-1);
+}
+.sync-chip::before {
+  content: "";
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: currentColor;
+}
+.sync-chip[data-tone="ok"] {
+  color: var(--c-accent);
+  border-color: color-mix(in srgb, var(--c-accent) 50%, transparent);
+}
+.sync-chip[data-tone="busy"] {
+  color: var(--c-info);
+  border-color: color-mix(in srgb, var(--c-info) 50%, transparent);
+}
+.sync-chip[data-tone="busy"]::before {
+  animation: pulse 1.2s ease-in-out infinite;
+}
+.sync-chip[data-tone="pending"] {
+  color: var(--c-gold);
+  border-color: color-mix(in srgb, var(--c-gold) 50%, transparent);
+}
+.sync-chip[data-tone="offline"],
+.sync-chip[data-tone="idle"] {
+  color: var(--c-text-muted);
+}
+.sync-chip[data-tone="error"] {
+  color: var(--c-danger);
+  border-color: color-mix(in srgb, var(--c-danger) 50%, transparent);
+}
+@keyframes pulse {
+  50% {
+    opacity: 0.3;
+  }
+}
+.discovered {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin: 0.5rem 0;
+}
+.discovered button[data-current="true"] {
+  border-color: var(--c-accent);
+  color: var(--c-accent-soft);
+  opacity: 1;
+}
+
+/* Backups. */
+.backup-list {
+  display: grid;
+  gap: 0.6rem;
+  margin: 0.75rem 0;
+}
+.backup-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin: 0;
+  padding: 0.8rem 1rem;
+  border-radius: 14px;
+  background: var(--c-bg-1);
+  border: 1px solid var(--c-line);
+  box-shadow: inset 4px 0 0 var(--c-accent);
+}
+.backup-row[data-verified="false"] {
+  box-shadow: inset 4px 0 0 var(--c-danger);
+}
+.backup-label {
+  min-width: 0;
+  flex: 1 1 340px;
+}
+.backup-label strong {
+  display: block;
+}
+.backup-label span {
+  color: var(--c-text-muted);
+  font-size: 0.86rem;
+}
+.backup-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+/* Launcher tab. */
+.launcher-facts {
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 0.75rem;
+  margin: 0 0 1rem;
+}
+.launcher-facts > div {
+  padding: 0.75rem 0.9rem;
+  border-radius: 12px;
+  background: var(--c-bg-1);
+  border: 1px solid var(--c-line);
+}
+.launcher-facts dd {
+  font-weight: 750;
+  margin-top: 0.2rem;
+}
+
+/* Notices strip (above the web, or above the hub). */
+.notices {
+  display: grid;
+  gap: 6px;
+  padding: 6px 16px;
+  background: var(--c-bg-1);
+  border-bottom: 1px solid var(--c-line);
+}
+.notice {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin: 0;
+  padding: 4px 6px 4px 14px;
+  border-radius: 999px;
+  font-size: 0.9rem;
+  background: color-mix(in srgb, var(--c-info) 14%, var(--c-bg-1));
+  box-shadow: inset 4px 0 0 var(--c-info);
+}
+.notice span {
+  flex: 1;
+  min-width: 0;
+}
+.notice button {
+  padding: 0.3rem 0.85rem;
+  font-size: 0.85rem;
+}
+.notice[data-tone="gold"] {
+  background: color-mix(in srgb, var(--c-gold) 16%, var(--c-bg-1));
+  box-shadow: inset 4px 0 0 var(--c-gold);
+}
+.notice[data-tone="danger"] {
+  background: color-mix(in srgb, var(--c-danger) 16%, var(--c-bg-1));
+  box-shadow: inset 4px 0 0 var(--c-danger);
+}
+.icon-close {
+  display: inline-grid;
+  place-items: center;
+  width: 2rem;
+  height: 2rem;
+  padding: 0;
+  font-size: 1.2rem;
+  line-height: 1;
+  background: transparent;
+  border-color: transparent;
+  box-shadow: none;
+}
+
+/* In-app dialogs: one Liga Nocturna card, centred, with a dim backdrop. */
+.game-dialog {
+  width: min(560px, calc(100vw - 32px));
+  max-height: calc(100vh - 48px);
+  padding: 0 1.4rem 1.3rem;
+  overflow: auto;
+  border: 2px solid transparent;
+  background:
+    radial-gradient(
+        120% 90% at 100% 0%,
+        color-mix(in srgb, var(--c-magenta) 14%, transparent),
+        transparent 60%
+      )
+      padding-box,
+    linear-gradient(170deg, var(--c-surface-2), var(--c-surface-1)) padding-box,
+    var(--brand-gradient) border-box;
+  box-shadow: 0 30px 80px color-mix(in srgb, #000 60%, transparent);
+}
+.game-dialog.wide {
+  width: min(880px, calc(100vw - 32px));
+}
+.game-dialog[open] {
+  animation: rise 220ms cubic-bezier(0.2, 1.2, 0.4, 1);
+}
+.game-dialog::backdrop {
+  background: color-mix(in srgb, #04061a 66%, transparent);
+}
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.98);
+  }
+}
+.dialog-head {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin: 0 -1.4rem 0.75rem;
+  padding: 1rem 1rem 0.6rem 1.4rem;
+  background: color-mix(in srgb, var(--c-surface-2) 94%, transparent);
+  border-bottom: 1px solid var(--c-line);
+}
+.dialog-head h2 {
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.dialog-head h2::before {
+  content: "";
+  width: 5px;
+  height: 1.1em;
+  border-radius: 999px;
+  background: linear-gradient(180deg, var(--c-accent), var(--c-magenta));
+}
+.dialog-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 0.6rem;
+  margin-top: 1rem;
+}
+.lead {
+  font-size: 1.05rem;
+  font-weight: 700;
+}
+#confirm-detail {
+  white-space: pre-line;
+  overflow-wrap: anywhere;
+}
+.facts {
+  grid-template-columns: minmax(120px, auto) 1fr;
+  gap: 0.4rem 1rem;
+  padding: 0.8rem 1rem;
+  border-radius: 12px;
+  background: var(--c-bg-1);
+  border: 1px solid var(--c-line);
+}
+.checks {
+  display: grid;
+  gap: 0.3rem;
+  padding: 0;
+  list-style: none;
+}
+.checks li[data-ok="true"] {
+  color: var(--c-accent-soft);
+}
+.checks li[data-ok="false"] {
+  color: var(--c-danger-soft);
+  font-weight: 700;
+}
+.confirm-row {
+  margin-top: 0.9rem;
+}
+.confirm-row input {
+  max-width: 14rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+}
+.empty-note {
+  padding: 1rem;
+  border-radius: 12px;
+  border: 1px dashed var(--c-line-strong);
+  color: var(--c-text-soft);
+}
+#sheet-body > article {
+  margin-top: 0.5rem;
+  box-shadow: none;
+}
+
+/* Save selector. */
+.selector-list {
+  display: grid;
+  gap: 0.6rem;
+}
+.save-option {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 0.9rem;
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border-radius: 16px;
+  text-align: left;
+  background: var(--c-bg-1);
+  border: 1px solid var(--c-line);
+}
+.save-option[data-current="true"] {
+  border-color: var(--c-accent);
+  box-shadow: inset 4px 0 0 var(--c-accent);
+}
+.save-option-badge {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
+  background: var(--brand-gradient);
+  color: var(--c-ink);
+  font-weight: 900;
+}
+.save-option-body {
+  display: grid;
+  min-width: 0;
+}
+.save-option-body span {
+  color: var(--c-text-muted);
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+.save-option-path {
+  font-family: ui-monospace, "Cascadia Mono", monospace;
+  font-size: 0.75rem !important;
+  overflow-wrap: anywhere;
+}
+.save-option-status {
+  font-size: 0.78rem;
+  color: var(--c-accent-soft);
+  text-align: right;
+}
+
+@media (max-width: 760px) {
+  .save-card,
+  .save-card[data-empty="true"] {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+  .save-card-actions {
+    grid-column: 1 / -1;
+    justify-items: start;
+  }
+  .save-option {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+  .save-option-status {
+    grid-column: 2;
+    text-align: left;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .game-dialog[open],
+  .sync-chip[data-tone="busy"]::before {
+    animation: none;
+  }
 }
 
 /* scenes:start — generated by web/scripts/build-scenes.mjs; do not edit */

@@ -36,6 +36,17 @@ class TrustedStore(CloudStore):
                 is not None
             )
 
+    def other_consent(self, origin, trainer):
+        """Another trainer already synced from this Launcher profile."""
+        with self.journal.connection() as db:
+            return (
+                db.execute(
+                    "SELECT 1 FROM trusted_save_consent WHERE origin=? AND trainer<>?",
+                    (origin, trainer),
+                ).fetchone()
+                is not None
+            )
+
     def enable(self, origin, trainer):
         with self.journal.connection() as db:
             db.execute(

@@ -66,6 +66,7 @@ module.exports = {
     "quantity.js",
     "updater.cjs",
     "webview.cjs",
+    "confirmations.cjs",
   ],
   extraResources: [
     {

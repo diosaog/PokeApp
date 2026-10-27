@@ -9,10 +9,40 @@ let observation = null,
   backupKey = "",
   selectedSave = null,
   exportAvailable = false,
-  backupBusy = false;
+  backupBusy = false,
+  lastState = null,
+  lastUpdate = null;
 const text = (id, value) => {
   $(id).textContent = value;
 };
+const gameNames = {
+  X: "X",
+  Y: "Y",
+  OR: "Rubí Omega",
+  AS: "Zafiro Alfa",
+  SN: "Sol",
+  MN: "Luna",
+  US: "Ultrasol",
+  UM: "Ultraluna",
+};
+// "hace 3 min" for recent moments, a short date otherwise. Seconds since epoch.
+function when(seconds) {
+  const elapsed = Date.now() / 1000 - seconds;
+  if (elapsed < 60) return "hace un momento";
+  if (elapsed < 3600) return `hace ${Math.floor(elapsed / 60)} min`;
+  return new Date(seconds * 1000).toLocaleString("es-ES", {
+    dateStyle: "short",
+    timeStyle: "short",
+  });
+}
+// A robbery whose physical delivery is not verified yet (main checks the same).
+const robberyOpen = (transfers) =>
+  (transfers || []).some(
+    (t) =>
+      t.mandatory ||
+      (t.obligation && !t.obligation.endsWith("_VERIFIED")) ||
+      (t.apply_started && !["COMMITTED", "CANCELLED"].includes(t.status)),
+  );
 function details(p, location) {
   text("pokemon-title", p.nickname || `Pokémon #${p.species_id}`);
   $("pokemon-details").replaceChildren();
@@ -68,6 +98,89 @@ function renderBox() {
   $("previous-box").disabled = boxIndex === 0;
   $("next-box").disabled = boxIndex >= boxes.length - 1;
 }
+const errorText = {
+  LOGIN_REQUIRED: "Vuelve a iniciar sesión para sincronizar.",
+  SESSION_REJECTED: "Sesión no válida. Vuelve a conectar.",
+  OBSERVATION_REJECTED:
+    "PokeApp no ha aceptado este save. Tu lectura local sigue disponible.",
+  SAVE_REJECTED:
+    "No se pudo registrar el save. Revisa el archivo, la cuenta y la Liga.",
+  SAVE_SUPERSEDED:
+    "La web tiene otro save actual. Selecciona tu archivo actualizado antes de sincronizar.",
+  SAVE_READBACK_PENDING:
+    "Falta comprobar el save en la web. Pulsa Reintentar; no se duplicará la subida.",
+  SAVE_PARSE_MISMATCH:
+    "La lectura local no coincide. Vuelve a abrir el save con el Launcher actualizado.",
+  SAVE_CHANGED_DURING_READ:
+    "El archivo ha cambiado. Esperando una lectura estable.",
+  BACKEND_UNAVAILABLE:
+    "Sin conexión con PokeApp. Puedes seguir explorando tu save.",
+  SYNC_UNAVAILABLE:
+    "No se pudo sincronizar. Puedes seguir explorando y reintentar.",
+};
+// The five owner-facing sync states, plus "no save" and "no account".
+function syncStatus(state) {
+  const pending = state.outbox?.pending || 0;
+  if (!state.selected_save)
+    return ["idle", "Sin partida", "Busca tu partida para empezar."];
+  if (state.write?.status === "RECOVERY_REQUIRED")
+    return [
+      "error",
+      "Error",
+      "Sincronización en pausa: hay una recuperación pendiente. No abras el emulador.",
+    ];
+  if (!state.principal)
+    return [
+      "idle",
+      "Sin cuenta",
+      "Inicia sesión en PokeApp y esta partida se sincronizará sola.",
+    ];
+  // Shared PC: another trainer synced from this Launcher before.
+  if (!state.cloud_sync)
+    return [
+      "pending",
+      "Pendiente",
+      "Confirma que esta partida es tuya con «Sincronizar ahora» (pestaña Launcher).",
+    ];
+  if (state.cloud_status === "OFFLINE")
+    return [
+      "offline",
+      "Sin conexión",
+      pending
+        ? `${pending} cambio(s) en cola: se enviarán al volver la conexión.`
+        : "Se sincronizará al volver la conexión.",
+    ];
+  if (
+    state.outbox?.paused ||
+    (state.error && state.error !== "SAVE_CHANGED_DURING_READ")
+  )
+    return [
+      "error",
+      "Error",
+      errorText[state.error] || "No se pudo sincronizar. Lo reintentaremos.",
+    ];
+  if (
+    !pending &&
+    state.cloud_receipt?.status === "registered" &&
+    state.cloud_receipt.is_current
+  )
+    return [
+      "ok",
+      "Sincronizado",
+      state.last_synced
+        ? `Última sincronización: ${when(state.last_synced)}`
+        : "Tu partida está al día en PokeApp.",
+    ];
+  if (pending && state.cloud_status === "SYNCING")
+    return ["busy", "Sincronizando", "Enviando tu partida a PokeApp…"];
+  return [
+    "pending",
+    "Pendiente",
+    state.local_status === "READY"
+      ? "Se enviará en un momento."
+      : "Esperando a que el archivo deje de cambiar.",
+  ];
+}
 function render(state) {
   const write = state.write;
   if (pendingWrite !== write?.operation_id)
@@ -91,11 +204,7 @@ function render(state) {
   $("export-save").disabled =
     !exportAvailable || !$("backup-emulator-closed").checked;
   text("backup-notice", write?.backup_message || "");
-  const key = JSON.stringify([
-    write?.backups || [],
-    write?.busy,
-    $("backup-emulator-closed").checked,
-  ]);
+  const key = JSON.stringify([write?.backups || [], write?.busy]);
   if (key !== backupKey) {
     backupKey = key;
     backupRows = write?.backups || [];
@@ -104,13 +213,14 @@ function render(state) {
   $("reconcile-write").hidden = !write?.can_reconcile;
   const recovery = write?.status === "RECOVERY_REQUIRED";
   $("select-save").disabled = recovery;
+  $("selector-manual").disabled = recovery;
   if ("observation" in state) {
     observation = state.observation;
     revision = state.receipt_id;
     text(
       "save-identity",
       observation
-        ? `${observation.trainer.name} · ${{ SN: "Sol", MN: "Luna", US: "Ultrasol", UM: "Ultraluna", OR: "Rubí Omega", AS: "Zafiro Alfa" }[observation.game] || observation.game} · Gen ${observation.generation} · TID ${observation.trainer.tid}`
+        ? `${observation.trainer.name} · ${gameNames[observation.game] || observation.game} · Gen ${observation.generation} · TID ${observation.trainer.tid}`
         : "",
     );
     slots("party", observation?.party || Array(6).fill(null), "Equipo");
@@ -208,84 +318,222 @@ function render(state) {
       ? `${state.cloud_stale ? "Último estado guardado · Puede estar desactualizado" : "Estado consultado"} · ${new Date(state.cloud.refreshed_at * 1000).toLocaleString()}`
       : "",
   );
-  text(
-    "receipt",
-    state.cloud_status === "OFFLINE"
-      ? "Sin conexión"
-      : state.error || state.outbox?.paused
-        ? "No se pudo sincronizar"
-        : state.cloud_receipt?.status === "registered" &&
-            state.cloud_receipt.is_current
-          ? "Sincronizado"
-          : state.cloud_sync && state.outbox?.pending
-            ? "Sincronizando…"
-            : "Sin sincronizar",
-  );
+  const [tone, label, detail] = syncStatus(state);
+  text("receipt", `${label} · ${detail}`);
   $("enable-sync").disabled = recovery || !observation || !state.principal;
-  if (state.outbox?.pending)
-    $("receipt").textContent +=
-      ` · ${state.outbox.pending} pendiente(s)${state.outbox.paused ? " · Revisa la conexión y pulsa Reintentar" : ""}`;
   $("login").querySelector("button").disabled =
     state.auth_status === "CHECKING";
-  const errors = {
-    LOGIN_REQUIRED: "Vuelve a iniciar sesión para sincronizar.",
-    SESSION_REJECTED: "Sesión no válida. Vuelve a conectar.",
-    OBSERVATION_REJECTED:
-      "PokeApp no ha aceptado este save. Tu lectura local sigue disponible.",
-    SAVE_REJECTED:
-      "No se pudo registrar el save. Revisa el archivo, la cuenta y la Liga.",
-    SAVE_SUPERSEDED:
-      "La web tiene otro save actual. Selecciona tu archivo actualizado antes de sincronizar.",
-    SAVE_READBACK_PENDING:
-      "Falta comprobar el save en la web. Pulsa Reintentar; no se duplicará la subida.",
-    SAVE_PARSE_MISMATCH:
-      "La lectura local no coincide. Vuelve a abrir el save con el Launcher actualizado.",
-    SAVE_CHANGED_DURING_READ:
-      "El archivo ha cambiado. Esperando una lectura estable.",
-    BACKEND_UNAVAILABLE:
-      "Sin conexión con PokeApp. Puedes seguir explorando tu save.",
-    SYNC_UNAVAILABLE:
-      "No se pudo sincronizar. Puedes seguir explorando y reintentar.",
-  };
-  text("message", errors[state.error] || "");
+  text("message", errorText[state.error] || "");
+  renderSaveCard(state, tone, label, detail);
+  renderLauncher(state, label);
+}
+
+// Saves y Launcher · Mis partidas: the active save at a glance.
+function renderSaveCard(state, tone, label, detail) {
+  const saves = state.emulator_saves || [];
+  const current = saves.find((s) => s.path === state.selected_save);
+  const game = observation?.game || current?.game;
+  $("save-card").dataset.empty = String(!state.selected_save);
+  $("save-card").dataset.game = game || "";
+  text("save-card-badge", game || "?");
+  text(
+    "save-card-title",
+    !state.selected_save
+      ? "Aún no hay partida"
+      : observation
+        ? `${observation.trainer.name} · Pokémon ${gameNames[observation.game] || observation.game}`
+        : game
+          ? `Pokémon ${gameNames[game] || game} · leyendo…`
+          : "Leyendo tu partida…",
+  );
+  text(
+    "save-card-meta",
+    !state.selected_save
+      ? "Busca tu partida en el emulador y PokeApp la sincronizará sola, sin modificar el archivo."
+      : [
+          current?.emulator || "Archivo elegido a mano",
+          observation ? `TID ${observation.trainer.tid}` : null,
+          current?.modified ? `Modificada ${when(current.modified)}` : null,
+        ]
+          .filter(Boolean)
+          .join(" · "),
+  );
+  $("sync-chip").dataset.tone = tone;
+  text("sync-chip", label);
+  text("sync-detail", detail);
+  $("choose-save").hidden = !state.selected_save;
+  $("choose-save").disabled = state.write?.status === "RECOVERY_REQUIRED";
+  const choice = state.save_choice || {};
+  const others = state.selected_save
+    ? saves.filter((s) => s.path !== state.selected_save).length
+    : 0;
+  $("other-saves").hidden = !others;
+  text(
+    "other-saves",
+    choice.new
+      ? "Hay una partida nueva en este equipo. Tu partida activa no cambia: pulsa «Cambiar partida» si quieres usar la nueva."
+      : `${others === 1 ? "Hay otra partida" : `Hay ${others} partidas más`} en este equipo. Puedes cambiar cuando quieras.`,
+  );
+}
+
+// Saves y Launcher · Launcher: version, account, automatic sync.
+function renderLauncher(state, label) {
+  text(
+    "launcher-account",
+    state.principal
+      ? `${state.principal.display_name} · ${state.auth_status === "VERIFIED" ? "verificada" : "pendiente de verificar"}`
+      : "Sin vincular: inicia sesión en PokeApp",
+  );
+  text(
+    "launcher-sync",
+    !state.principal
+      ? "Se activa al iniciar sesión"
+      : state.cloud_sync
+        ? `Automática · ${label}`
+        : "En pausa",
+  );
+  $("login").hidden = Boolean(state.principal);
+  $("logout").hidden = !state.principal;
+}
+
+// Contextual notices above the web: choices and incidents, never silent.
+const dismissed = new Set();
+let noticeKey = "";
+function renderNotices(state) {
+  const notices = [];
+  const choice = state.save_choice || {};
+  if (choice.status === "CHOOSE" && !state.selected_save)
+    notices.push([
+      "choose",
+      "info",
+      "Hemos encontrado varias partidas. Elige cuál quieres sincronizar.",
+      "Elegir partida",
+      () => present("selector"),
+    ]);
+  if (choice.new && state.selected_save)
+    notices.push([
+      "new-save",
+      "info",
+      "Hay una partida nueva en este equipo. Tu partida activa no cambia.",
+      "Ver partidas",
+      () => present("selector"),
+    ]);
+  if (robberyOpen(state.cloud?.data?.transfers))
+    notices.push([
+      "robbery",
+      "gold",
+      state.cloud?.data?.mandatory_sync
+        ? "Sincronización obligatoria: PokeApp ha decidido un robo sobre tu partida."
+        : "Tienes una entrega de robo pendiente en tu partida.",
+      "Ver entrega",
+      () => present("robos"),
+    ]);
+  if (state.write?.status === "RECOVERY_REQUIRED")
+    notices.push([
+      "recovery",
+      "danger",
+      "Recuperación pendiente: no abras el emulador hasta resolverla.",
+      "Ver detalles",
+      () => openHub("partidas"),
+    ]);
+  else if (state.principal && state.outbox?.paused)
+    notices.push([
+      "sync-error",
+      "danger",
+      "No se pudo sincronizar tu partida. Lo reintentaremos.",
+      "Ver detalles",
+      () => openHub("partidas"),
+    ]);
+  const shown = notices.filter(([id]) => !dismissed.has(id));
+  const key = JSON.stringify(shown.map(([id, , message]) => [id, message]));
+  if (key === noticeKey) return;
+  noticeKey = key;
+  const box = $("notices");
+  box.hidden = !shown.length;
+  box.replaceChildren(
+    ...shown.map(([id, tone, message, label, go]) => {
+      const row = document.createElement("p"),
+        span = document.createElement("span"),
+        button = document.createElement("button"),
+        close = document.createElement("button");
+      row.className = "notice";
+      row.dataset.tone = tone;
+      row.dataset.id = id;
+      span.textContent = message;
+      button.type = close.type = "button";
+      button.textContent = label;
+      button.onclick = go;
+      close.className = "icon-close";
+      close.textContent = "×";
+      close.setAttribute("aria-label", "Ocultar aviso");
+      close.onclick = () => {
+        dismissed.add(id);
+        renderNotices(lastState || state);
+      };
+      row.append(span, button, close);
+      return row;
+    }),
+  );
+  reportStrip();
+}
+
+// Owner rule: several saves and none chosen → the selector opens by itself, once.
+let autoPresented = false;
+function autoChoose(state) {
+  if (
+    autoPresented ||
+    state.save_choice?.status !== "CHOOSE" ||
+    state.selected_save
+  )
+    return;
+  autoPresented = true;
+  present("selector");
 }
 
 function renderBackups(busy) {
   const list = $("backup-list");
   list.replaceChildren();
   if (!backupRows.length) {
-    list.textContent =
-      "No hay copias cargadas para esta partida. Pulsa Ver / actualizar copias.";
+    list.textContent = lastState?.selected_save
+      ? "Todavía no hay copias de esta partida. PokeApp crea una antes de cada cambio y una diaria."
+      : "Elige tu partida para ver sus copias.";
     return;
   }
   for (const backup of backupRows) {
     const row = document.createElement("p"),
       label = document.createElement("span"),
+      title = document.createElement("strong"),
+      meta = document.createElement("span"),
+      actions = document.createElement("span"),
       copy = document.createElement("button");
-    label.textContent =
-      backup.role === "daily"
-        ? `${backup.game} · Copia diaria del ${new Date(`${backup.date}T12:00:00`).toLocaleDateString("es-ES")} · Estado antes de la primera modificación del día · Verificada · Se conserva 30 días `
-        : `${backup.game} · ${backup.created_at ? new Date(backup.created_at).toLocaleString("es-ES") : "Fecha no disponible"} · ${backup.role === "before_restore" ? "Antes de restaurar" : "Original"} · ${backup.verified ? "Verificada" : "Inválida o ilegible"} · ${["RECOVERY_REQUIRED", "PREPARED"].includes(backup.status) ? "Recuperación pendiente" : "Conservada"}${backup.beside_save === "REMOVED" ? " · Sin restos junto a la partida" : backup.beside_save === "KEPT_CHANGED" ? " · Copia junto a la partida conservada: cambió fuera de PokeApp" : backup.beside_save?.startsWith("KEPT_") || backup.beside_save === "REMOVAL_INTENT" ? " · Copia junto a la partida conservada por seguridad" : ""} `;
-    copy.textContent = "Guardar copia…";
+    row.className = "backup-row";
+    row.dataset.verified = String(Boolean(backup.verified));
+    label.className = "backup-label";
+    actions.className = "backup-actions";
+    const daily = backup.role === "daily";
+    title.textContent = daily
+      ? `${backup.game} · Copia diaria del ${new Date(`${backup.date}T12:00:00`).toLocaleDateString("es-ES")}`
+      : `${backup.game} · ${backup.created_at ? new Date(backup.created_at).toLocaleString("es-ES") : "Fecha no disponible"}`;
+    meta.textContent = daily
+      ? " · Estado antes de la primera modificación del día · Verificada · Se conserva 30 días "
+      : ` · ${backup.role === "before_restore" ? "Antes de restaurar" : "Original"} · ${backup.verified ? "Verificada" : "Inválida o ilegible"} · ${["RECOVERY_REQUIRED", "PREPARED"].includes(backup.status) ? "Recuperación pendiente" : "Conservada"}${backup.beside_save === "REMOVED" ? " · Sin restos junto a la partida" : backup.beside_save === "KEPT_CHANGED" ? " · Copia junto a la partida conservada: cambió fuera de PokeApp" : backup.beside_save?.startsWith("KEPT_") || backup.beside_save === "REMOVAL_INTENT" ? " · Copia junto a la partida conservada por seguridad" : ""} `;
+    label.append(title, meta);
+    copy.textContent = "Exportar copia…";
     copy.disabled = !backup.verified || busy;
     copy.onclick = () =>
       action(() =>
         window.launcher.saveBackup(backup.operation_id, backup.role),
       );
-    row.append(label, copy);
+    actions.append(copy);
     if (backup.can_restore) {
       const restore = document.createElement("button");
-      restore.textContent = "Restaurar copia…";
-      restore.disabled = busy || !$("backup-emulator-closed").checked;
-      restore.onclick = () =>
-        action(() =>
-          window.launcher.restoreBackup(
-            backup.operation_id,
-            $("backup-emulator-closed").checked,
-          ),
-        );
-      row.append(restore);
+      restore.textContent = "Restaurar…";
+      restore.className = "danger-soft";
+      restore.disabled = busy;
+      restore.onclick = () => openRestore(backup);
+      actions.append(restore);
     }
+    row.append(label, actions);
     list.append(row);
   }
 }
@@ -294,85 +542,222 @@ async function action(fn) {
     const result = await fn();
     if (result?.status === "BUSY")
       text("message", "Hay una operación pendiente.");
-  } catch {
-    text("message", "No se pudo contactar con el núcleo local del Launcher.");
+    return result;
+  } catch (error) {
+    // Main's own refusals are sentences meant for the trainer; codes are not.
+    const reason = String(error?.message || "")
+      .split("Error: ")
+      .pop();
+    text(
+      "message",
+      /^[A-ZÁÉÍÓÚ¿¡].* /.test(reason)
+        ? reason
+        : "No se pudo contactar con el núcleo local del Launcher.",
+    );
   }
 }
-// Three areas: the full PokeApp web (isolated view), the local save tools, and
-// the cached cloud state. The web view sits below the native navigation bar.
+
+// Sections: the PokeApp web (classic window only) and the three hub tabs.
+const sections = {
+  partidas: ["save-view", "save-tab"],
+  copias: ["backups-view", "backups-tab"],
+  launcher: ["cloud-view", "cloud-tab"],
+};
+let hubTab = "partidas";
+function showSection(name) {
+  for (const [key, [view, button]] of Object.entries(sections)) {
+    $(view).hidden = key !== name;
+    $(button).setAttribute("aria-pressed", String(key === name));
+  }
+  $("web-tab").setAttribute("aria-pressed", String(name === "web"));
+  if (name in sections) hubTab = name;
+  if (name === "copias" && lastState?.selected_save)
+    void action(() => window.launcher.backups());
+}
 function tab(name) {
+  name = { save: "partidas", cloud: "launcher" }[name] || name;
+  showSection(name);
+  // Unified shell: the web stays beside the hub; it is never toggled here.
+  if (document.body.dataset.mode === "panel") return;
   const web = name === "web";
-  $("save-view").hidden = name !== "save";
-  $("cloud-view").hidden = name !== "cloud";
-  for (const [id, own] of [
-    ["web-tab", "web"],
-    ["save-tab", "save"],
-    ["cloud-tab", "cloud"],
-  ])
-    $(id).setAttribute("aria-pressed", String(name === own));
   const top = Math.ceil(
     document.querySelector("nav").getBoundingClientRect().bottom,
   );
   void action(() => window.launcher.showWeb(web, web ? top : 0));
 }
 $("web-tab").onclick = () => tab("web");
-$("save-tab").onclick = () => tab("save");
-$("cloud-tab").onclick = () => tab("cloud");
-// Unified shell (27C): loaded as the Launcher's tools view, this page is a
-// panel of the PokeApp web (the web's sidebar stays beside it) or, between
-// panels, just the update strip. Opened on its own it keeps the classic tabs.
+$("save-tab").onclick = () => tab("partidas");
+$("backups-tab").onclick = () => tab("copias");
+$("cloud-tab").onclick = () => tab("launcher");
+// Unified shell: loaded as the Launcher's tools view, this page is the
+// «Saves y Launcher» hub beside the web's sidebar, a dialog over the web, or,
+// between those, just the strip of notices. Opened on its own it keeps the
+// classic tabs.
 const unified = new URLSearchParams(location.search).get("shell") === "unified";
-const panels = {
-  partida: ["Mi partida", "save", null],
-  objetos: ["Objetos ∞", "save", "quick-title"],
-  robos: ["Robos y entregas", "save", "transfer-title"],
-  copias: ["Copias de seguridad", "save", "backups-title"],
-  nube: ["Conexión y sincronización", "cloud", null],
-};
 function mode(name) {
   document.body.dataset.mode = name;
+  document.documentElement.dataset.mode = name;
   $("offline-note").hidden = name !== "offline";
   reportStrip();
 }
 let stripHeight = -1;
 function reportStrip() {
-  if (!unified) return;
-  const banner = $("update-banner");
-  const height = banner.hidden
-    ? 0
-    : Math.ceil(banner.getBoundingClientRect().height);
+  if (!unified || document.body.dataset.mode !== "strip") return;
+  const shown = [$("update-banner"), $("notices")].filter((el) => !el.hidden);
+  const height = shown.length
+    ? Math.min(
+        160,
+        Math.ceil(
+          Math.max(...shown.map((el) => el.getBoundingClientRect().bottom)),
+        ),
+      )
+    : 0;
   if (height === stripHeight) return;
   stripHeight = height;
   void action(() => window.launcher.layout(height));
 }
-function openPanel(name, item) {
-  const [title, view, anchor] = panels[name];
+function openHub(name) {
+  const current = document.body.dataset.mode;
+  if (unified && (current === "strip" || current === "modal"))
+    return void action(() => window.launcher.openHub(name || hubTab));
+  if (current === "panel") return showSection(name || hubTab);
+  tab(name || hubTab);
+}
+function enterHub(name) {
+  closeDialogs();
   mode("panel");
-  text("panel-title", title);
-  $("save-view").hidden = view !== "save";
-  $("cloud-view").hidden = view !== "cloud";
-  if (anchor) $(anchor).scrollIntoView();
-  else window.scrollTo(0, 0);
-  // Keyboard lands in the panel: on the item when it can be edited.
+  text("panel-title", "Saves y Launcher");
+  showSection(name || hubTab);
+  window.scrollTo(0, 0);
+  $("panel-title").focus();
+}
+$("panel-back").onclick = () => action(() => window.launcher.closePanel());
+
+// Dialogs. Over the web (modal mode) the window is only the dialog: closing
+// the last one hands the window back to the web.
+const dialogIds = {
+  selector: "selector-dialog",
+  update: "update-dialog",
+  restore: "restore-dialog",
+  objetos: "sheet-dialog",
+  robos: "sheet-dialog",
+};
+const anyOpen = () => document.querySelector("dialog[open]") !== null;
+function present(view) {
+  if (unified && document.body.dataset.mode === "strip")
+    return void action(() => window.launcher.present(view));
+  openDialog(view);
+}
+function openDialog(view, item) {
+  if (view === "objetos" || view === "robos") fillSheet(view, item);
+  if (view === "selector") renderSelector(lastState, true);
+  if (view === "update") void checkForUpdates();
+  const dialog = $(dialogIds[view]);
+  if (!dialog.open) dialog.showModal();
+  if (view === "objetos") focusItem(item);
+}
+// Every close goes through here, synchronously: the dialog "close" event is
+// queued and is not delivered while the window is not painting.
+function shut(dialog, quiet = false) {
+  if (!dialog.open) return;
+  dialog.close();
+  if (dialog.id === "sheet-dialog") returnSheet();
+  dialog.dispatchEvent(new Event("shut"));
+  if (!quiet && document.body.dataset.mode === "modal" && !anyOpen())
+    void action(() => window.launcher.closePanel());
+}
+function closeDialogs() {
+  for (const dialog of document.querySelectorAll("dialog[open]"))
+    shut(dialog, true);
+}
+for (const dialog of document.querySelectorAll("dialog")) {
+  dialog.addEventListener("click", (event) => {
+    if (event.target.closest("[data-close]")) shut(dialog);
+  });
+  // Escape closes like «Cerrar», through the same path.
+  dialog.addEventListener("cancel", (event) => {
+    event.preventDefault();
+    shut(dialog);
+  });
+}
+
+// In-app confirmation (replaces native message boxes). Main writes the text
+// from the core's state and issues a single-use ticket for this action only;
+// the dialog hands that ticket back, or null when the trainer steps back.
+async function confirmWith(kind, target) {
+  const offer = await action(() => window.launcher.confirmBegin(kind, target));
+  if (!offer?.ticket) return null;
+  return (await confirmDialog(offer)) ? offer.ticket : null;
+}
+function confirmDialog({ title, message, detail, go, danger }) {
+  const dialog = $("confirm-dialog");
+  text("confirm-title", title);
+  text("confirm-message", message);
+  text("confirm-detail", detail || "");
+  text("confirm-go", go);
+  $("confirm-go").className = danger ? "danger" : "primary";
+  return new Promise((resolve) => {
+    let ok = false;
+    $("confirm-go").onclick = () => {
+      ok = true;
+      shut(dialog);
+    };
+    dialog.addEventListener("shut", () => resolve(ok), { once: true });
+    dialog.showModal();
+    $("confirm-go").focus();
+  });
+}
+
+// Objetos ∞ and Robos y entregas open as sheets: the same native sections,
+// moved into the dialog and returned when it closes.
+const sheets = {
+  objetos: ["Objetos ∞", ["quick-article", "write-article"]],
+  robos: ["Robos y entregas", ["transfer-article", "write-article"]],
+};
+const homes = new Map();
+function fillSheet(view) {
+  returnSheet();
+  const [title, ids] = sheets[view];
+  text("sheet-title", title);
+  $("sheet-dialog").dataset.sheet = view;
+  for (const id of ids) {
+    const section = $(id),
+      mark = document.createComment(id);
+    section.before(mark);
+    homes.set(section, mark);
+    $("sheet-body").append(section);
+  }
+  if (view === "objetos" && lastState?.selected_save && !lastState.quick_items)
+    void action(() => window.launcher.quickItems());
+}
+function returnSheet() {
+  for (const [section, mark] of homes) mark.replaceWith(section);
+  homes.clear();
+}
+function focusItem(item) {
   const input = item
     ? document.querySelector(`.quick-item[data-item="${item}"] .quick-input`)
     : null;
-  (input && !input.disabled ? input : $(anchor || "panel-title"))?.focus();
+  if (input && !input.disabled) input.focus();
 }
-$("panel-back").onclick = () => action(() => window.launcher.closePanel());
-window.launcher.onNavigate(({ view, panel, item }) => {
-  if (view === "panel") return openPanel(panel, item);
+
+window.launcher.onNavigate(({ view, panel, item, tab: hub }) => {
+  if (view === "panel") return enterHub(hub);
+  if (view === "modal") {
+    closeDialogs();
+    mode("modal");
+    return openDialog(panel, item);
+  }
   if (view === "strip" || view === "offline") {
+    closeDialogs();
     mode(view);
-    if (view === "offline") tab("save");
+    if (view === "offline") tab("partidas");
     return;
   }
   // Classic tabs: "Añadir a mi partida" opens the native quick items.
-  tab("save");
+  tab("partidas");
   $("quick-title").scrollIntoView();
-  document
-    .querySelector(`.quick-item[data-item="${item}"] .quick-input`)
-    ?.focus();
+  focusItem(item);
 });
 if (unified) mode("strip");
 $("previous-box").onclick = () => {
@@ -385,14 +770,23 @@ $("next-box").onclick = () => {
 };
 $("close-details").onclick = () => $("details").close();
 $("select-save").onclick = () => action(() => window.launcher.chooseSave());
-$("export-save").onclick = () =>
-  action(() => window.launcher.exportSave($("backup-emulator-closed").checked));
+$("selector-manual").onclick = () =>
+  action(async () => {
+    const result = await window.launcher.chooseSave();
+    if (result?.status !== "CANCELLED") shut($("selector-dialog"));
+    return result;
+  });
+$("export-save").onclick = async () => {
+  const ticket = await confirmWith("export", "current");
+  if (ticket)
+    void action(() =>
+      window.launcher.exportSave($("backup-emulator-closed").checked, ticket),
+    );
+};
 $("refresh-backups").onclick = () => action(() => window.launcher.backups());
 $("backup-emulator-closed").onchange = () => {
-  backupKey = "";
   $("export-save").disabled =
     !exportAvailable || !$("backup-emulator-closed").checked;
-  renderBackups(backupBusy);
 };
 $("retry").onclick = () => action(() => window.launcher.retry());
 $("logout").onclick = () => action(() => window.launcher.logout());
@@ -400,10 +794,18 @@ $("enable-sync").onclick = () => action(() => window.launcher.sync());
 $("emulator-closed").onchange = () => {
   $("confirm-write").disabled = !pendingWrite || !$("emulator-closed").checked;
 };
-$("confirm-write").onclick = () =>
-  action(() =>
-    window.launcher.confirmWrite(pendingWrite, $("emulator-closed").checked),
-  );
+$("confirm-write").onclick = async () => {
+  const operation = pendingWrite;
+  const ticket = await confirmWith("write", operation);
+  if (ticket)
+    void action(() =>
+      window.launcher.confirmWrite(
+        operation,
+        $("emulator-closed").checked,
+        ticket,
+      ),
+    );
+};
 $("reconcile-write").onclick = () =>
   action(() => window.launcher.reconcileWrite());
 $("login").onsubmit = (event) => {
@@ -414,6 +816,154 @@ $("login").onsubmit = (event) => {
   event.currentTarget.elements.pin.value = "";
   void action(() => window.launcher.login(trainer, pin));
 };
+
+// Save selector: every candidate with what is known before reading it.
+function renderSelector(state, force) {
+  const found = state?.emulator_saves || [];
+  const list = $("selector-list");
+  const key = JSON.stringify([found, state?.selected_save, observation?.game]);
+  if (!force && list.dataset.key === key) return;
+  list.dataset.key = key;
+  $("selector-empty").hidden = found.length > 0;
+  list.replaceChildren(
+    ...found.map((save) => {
+      const current = save.path === state.selected_save;
+      const button = document.createElement("button"),
+        badge = document.createElement("span"),
+        body = document.createElement("span"),
+        title = document.createElement("strong"),
+        meta = document.createElement("span"),
+        where = document.createElement("span"),
+        status = document.createElement("span");
+      button.type = "button";
+      button.className = "save-option";
+      button.dataset.current = String(current);
+      badge.className = "save-option-badge";
+      badge.textContent = save.game || "?";
+      body.className = "save-option-body";
+      title.textContent = `Pokémon ${gameNames[save.game] || "partida"}${current && observation ? ` · ${observation.trainer.name}` : ""}`;
+      meta.textContent = [
+        save.emulator || "Emulador",
+        save.modified
+          ? `modificada ${when(save.modified)}`
+          : "fecha no disponible",
+      ].join(" · ");
+      // Only the tail of the path: enough to tell saves apart, no user name.
+      where.className = "save-option-path";
+      where.textContent = `…/${save.path.split(/[\\/]/).slice(-6, -3).join("/")}`;
+      status.className = "save-option-status";
+      status.textContent = current
+        ? state.local_status === "READY"
+          ? "Elegida · validada"
+          : "Elegida"
+        : save.game
+          ? "Compatible · se valida al elegirla"
+          : "Juego sin identificar · se valida al elegirla";
+      body.append(title, meta, where);
+      button.append(badge, body, status);
+      button.onclick = () =>
+        action(async () => {
+          if (!current) await window.launcher.selectDiscovered(save.path);
+          shut($("selector-dialog"));
+        });
+      return button;
+    }),
+  );
+}
+$("selector-rescan").onclick = () => action(discover);
+$("choose-save").onclick = () => present("selector");
+$("discover-primary").onclick = () => action(discover);
+async function discover() {
+  const result = await window.launcher.discoverSaves();
+  if (result?.count === 0)
+    text(
+      "message",
+      "No se han encontrado partidas compatibles en los emuladores de este equipo.",
+    );
+  else if (result?.count > 1 && !result.auto_selected) {
+    // Wait for the core to publish the list, then let the trainer choose.
+    await poll();
+    present("selector");
+  }
+  return result;
+}
+
+// Restore: a summary, the safety checks, closed emulator and "Confirmo".
+let restoreTarget = null;
+function restoreChecks(state) {
+  const write = state?.write || {};
+  return [
+    [Boolean(restoreTarget?.verified), "Copia verificada por su huella"],
+    [
+      !robberyOpen(state?.cloud?.data?.transfers) &&
+        !state?.cloud?.data?.mandatory_sync,
+      "Sin entregas de robo pendientes",
+    ],
+    [
+      !write.busy && write.status !== "RECOVERY_REQUIRED",
+      "Ninguna otra operación en curso",
+    ],
+  ];
+}
+let restoreTicket = null;
+// Main describes this backup of this save and issues the ticket that the
+// typed "Confirmo" is bound to; a stale or other backup is refused by main.
+async function openRestore(backup) {
+  const offer = await action(() =>
+    window.launcher.confirmBegin("restore", backup.operation_id),
+  );
+  if (!offer?.ticket) return;
+  restoreTarget = backup;
+  restoreTicket = offer.ticket;
+  $("restore-summary").replaceChildren();
+  for (const [label, value] of offer.facts || []) {
+    const dt = document.createElement("dt"),
+      dd = document.createElement("dd");
+    dt.textContent = label;
+    dd.textContent = value;
+    $("restore-summary").append(dt, dd);
+  }
+  $("restore-closed").checked = false;
+  $("restore-word").value = "";
+  updateRestore();
+  present("restore");
+  $("restore-closed").focus();
+}
+function updateRestore() {
+  if (!restoreTarget) return;
+  const checks = restoreChecks(lastState);
+  $("restore-checks").replaceChildren(
+    ...checks.map(([ok, label]) => {
+      const li = document.createElement("li");
+      li.dataset.ok = String(ok);
+      li.textContent = `${ok ? "✓" : "✕"} ${label}`;
+      return li;
+    }),
+  );
+  $("restore-confirm").disabled = !(
+    checks.every(([ok]) => ok) &&
+    $("restore-closed").checked &&
+    $("restore-word").value === "Confirmo"
+  );
+}
+$("restore-closed").onchange = updateRestore;
+$("restore-word").oninput = updateRestore;
+// Enter never confirms: the button is the only way.
+$("restore-word").onkeydown = (event) => {
+  if (event.key === "Enter") event.preventDefault();
+};
+$("restore-confirm").onclick = () => {
+  const operation = restoreTarget?.operation_id,
+    typed = $("restore-word").value,
+    ticket = restoreTicket;
+  if (!operation || !ticket || $("restore-confirm").disabled) return;
+  restoreTicket = null;
+  shut($("restore-dialog"));
+  void action(() =>
+    window.launcher.restoreBackup(operation, true, typed, ticket),
+  );
+};
+
 // Robbery actions: only this trainer's own leg; no peer data, no second logic.
 const transferProgress = {
   REQUESTED: "Robo solicitado. PokeApp está comprobando que es válido.",
@@ -585,10 +1135,22 @@ function renderTransfers(state) {
           !enabled ||
           write.busy ||
           (["prepare", "apply", "fulfil"].includes(kind) && !closed);
-        button.onclick = () =>
-          action(() =>
-            window.launcher.transfer(kind, t.authorization_id, closed),
-          );
+        button.onclick = async () => {
+          // Main says what this step does to the local file before it runs.
+          const ticket =
+            kind === "refresh"
+              ? null
+              : await confirmWith("transfer:" + kind, t.authorization_id);
+          if (kind === "refresh" || ticket)
+            void action(() =>
+              window.launcher.transfer(
+                kind,
+                t.authorization_id,
+                closed,
+                ticket,
+              ),
+            );
+        };
         card.append(button);
       }
       return card;
@@ -600,17 +1162,6 @@ $("transfer-emulator-closed").onchange = () =>
 
 // Quick items: ONE text state per item, shared by keyboard, + and −.
 const quantities = { rare_candy: "1", heart_scale: "1" };
-const gameNames = {
-  X: "X",
-  Y: "Y",
-  OR: "Rubí Omega",
-  AS: "Zafiro Alfa",
-  SN: "Sol",
-  MN: "Luna",
-  US: "Ultrasol",
-  UM: "Ultraluna",
-};
-let lastState = null;
 function renderQuick(state) {
   const write = state.write || {};
   const view = state.quick_items;
@@ -697,39 +1248,30 @@ function renderEmulator(state) {
   );
   const list = $("discovered-saves");
   const found = state.emulator_saves || [];
-  const key = JSON.stringify(found);
+  const key = JSON.stringify([found, state.selected_save]);
   if (list.dataset.key === key) return;
   list.dataset.key = key;
   list.replaceChildren(
     ...found.map((save) => {
       const button = document.createElement("button");
-      button.textContent = `Usar Pokémon ${gameNames[save.game] || "partida"} · ${save.emulator}`;
+      const current = save.path === state.selected_save;
+      button.textContent = `${current ? "Activa · " : "Usar "}Pokémon ${gameNames[save.game] || "partida"} · ${save.emulator}`;
+      button.dataset.current = String(current);
+      button.disabled = current;
       button.onclick = () =>
         action(() => window.launcher.selectDiscovered(save.path));
       return button;
     }),
   );
 }
-$("discover-saves").onclick = () =>
-  action(async () => {
-    const result = await window.launcher.discoverSaves();
-    if (result?.count === 0)
-      text(
-        "message",
-        "No se han encontrado partidas compatibles en Lime3DS, Azahar o Citra.",
-      );
-    return result;
-  });
+$("discover-saves").onclick = () => action(discover);
 
+// Updates: the signed-manifest updater, on demand from «Buscar actualizaciones».
 let deferredReason = null;
-async function renderUpdate() {
-  const u = await window.launcher.updateState().catch(() => null);
-  if (!u) return;
-  text(
-    "launcher-version",
-    `v${u.current}${u.channel === "private" ? " · canal privado" : ""}`,
-  );
-  const messages = {
+const megabytes = (bytes) =>
+  `${(bytes / 1024 / 1024).toLocaleString("es-ES", { maximumFractionDigits: 1 })} MB`;
+function updateMessages(u) {
+  return {
     AVAILABLE: `Nueva versión ${u.version} disponible (tienes ${u.current}). ${u.notes || ""}`,
     DOWNLOADING: `Descargando y verificando la versión ${u.version}…`,
     DOWNLOADED: deferredReason
@@ -737,31 +1279,107 @@ async function renderUpdate() {
       : `Versión ${u.version || u.recovered?.version} descargada y verificada.`,
     INSTALLING: "Instalando la actualización…",
   };
+}
+async function renderUpdate() {
+  const u = await window.launcher.updateState().catch(() => null);
+  if (!u) return;
+  lastUpdate = u;
+  const version = `v${u.current}${u.channel === "private" ? " · canal privado" : ""}`;
+  text("launcher-version", version);
+  text("launcher-version-detail", version);
+  const messages = updateMessages(u);
   $("update-banner").hidden = !messages[u.status];
   text("update-text", messages[u.status] || "");
   $("update-download").hidden = u.status !== "AVAILABLE";
   $("update-install").hidden = u.status !== "DOWNLOADED";
+  if ($("update-dialog").open) fillUpdateDialog(u);
   reportStrip();
 }
+function fillUpdateDialog(u) {
+  const facts = [
+    ["Versión instalada", u.current],
+    ["Canal", u.channel === "private" ? "Privado" : "Estable"],
+  ];
+  if (u.version) facts.push(["Versión nueva", u.version]);
+  if (u.size) facts.push(["Tamaño", megabytes(u.size)]);
+  if (["AVAILABLE", "DOWNLOADING", "DOWNLOADED"].includes(u.status))
+    facts.push([
+      "Seguridad",
+      "Manifiesto firmado; el instalador se comprueba (SHA-512 y tamaño) antes de instalar",
+    ]);
+  $("update-facts").replaceChildren(
+    ...facts.flatMap(([label, value]) => {
+      const dt = document.createElement("dt"),
+        dd = document.createElement("dd");
+      dt.textContent = label;
+      dd.textContent = value;
+      return [dt, dd];
+    }),
+  );
+  text(
+    "update-message",
+    {
+      CHECKING: "Buscando actualizaciones…",
+      UP_TO_DATE: "Tienes la última versión.",
+      AVAILABLE: `Hay una versión nueva: ${u.version}.`,
+      DOWNLOADING: `Descargando y verificando la versión ${u.version}…`,
+      DOWNLOADED: `La versión ${u.version || u.recovered?.version} está descargada y verificada.`,
+      INSTALLING: "Instalando…",
+      ERROR:
+        "No se pudo comprobar ahora mismo. Tu Launcher sigue funcionando; inténtalo más tarde.",
+      DISABLED:
+        "Este Launcher no tiene activado un canal de actualizaciones automáticas. Cuando haya una versión nueva, descárgala desde la web de PokeApp («Descargar Launcher»).",
+    }[u.status] || "Estado de actualización no disponible.",
+  );
+  text("update-notes", u.status === "AVAILABLE" ? u.notes || "" : "");
+  $("update-go").hidden = !["AVAILABLE", "DOWNLOADED"].includes(u.status);
+  text(
+    "update-go",
+    u.status === "DOWNLOADED" ? "Instalar y reiniciar" : "Descargar e instalar",
+  );
+}
+async function checkForUpdates() {
+  if (lastUpdate) fillUpdateDialog({ ...lastUpdate, status: "CHECKING" });
+  const u = await window.launcher.checkUpdate().catch(() => null);
+  if (u) {
+    lastUpdate = u;
+    fillUpdateDialog(u);
+  } else
+    text(
+      "update-message",
+      "No se pudo comprobar ahora mismo. Inténtalo más tarde.",
+    );
+}
+async function install() {
+  const version = lastUpdate?.version || lastUpdate?.recovered?.version;
+  const ticket = await confirmWith("install", String(version || ""));
+  if (!ticket) return;
+  const result = await action(() => window.launcher.installUpdate(ticket));
+  deferredReason = result?.deferred || null;
+}
+$("check-update").onclick = () => present("update");
+$("update-go").onclick = () =>
+  lastUpdate?.status === "DOWNLOADED"
+    ? install()
+    : action(() => window.launcher.downloadUpdate());
 $("update-download").onclick = () =>
   action(() => window.launcher.downloadUpdate());
-$("update-install").onclick = () =>
-  action(async () => {
-    const result = await window.launcher.installUpdate();
-    deferredReason = result?.deferred || null;
-    return result;
-  });
+$("update-install").onclick = install;
 
 async function poll() {
   if (polling) return;
   polling = true;
   try {
     const state = await window.launcher.state(revision);
-    render(state);
     lastState = state;
+    render(state);
     renderQuick(state);
     renderTransfers(state);
     renderEmulator(state);
+    renderNotices(state);
+    if ($("selector-dialog").open) renderSelector(state);
+    if ($("restore-dialog").open) updateRestore();
+    autoChoose(state);
     void renderUpdate();
   } catch {
     text(

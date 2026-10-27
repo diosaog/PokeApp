@@ -3,7 +3,15 @@ const { contextBridge } = require("electron");
 const calls = [];
 let enabled = true;
 let navigate = null;
-const state = () => ({
+let overrides = {};
+let updateInfo = {
+  status: "AVAILABLE",
+  current: "0.22.0-rc.3",
+  version: "0.23.0",
+  notes: "Prueba",
+  channel: "private",
+};
+const base = () => ({
   local_status: "READY",
   selected_save: "C:/fixture/main",
   cloud_status: "ONLINE",
@@ -138,6 +146,7 @@ const state = () => ({
     transfer_application_enabled: enabled,
   },
 });
+const state = () => ({ ...base(), ...overrides });
 contextBridge.exposeInMainWorld("launcher", {
   state: async () => state(),
   quickItems: async () => ({ status: "QUEUED" }),
@@ -159,13 +168,41 @@ contextBridge.exposeInMainWorld("launcher", {
     navigate = callback;
   },
   __navigate: (item) => navigate && navigate({ view: "quick-items", item }),
-  updateState: async () => ({
-    status: "AVAILABLE",
-    current: "0.22.0-rc.3",
-    version: "0.23.0",
-    notes: "Prueba",
-    channel: "private",
-  }),
+  __navigateTo: (message) => navigate && navigate(message),
+  __set: (patch) => {
+    overrides = { ...overrides, ...patch };
+  },
+  restoreBackup: async (...args) => (
+    calls.push(["restore", ...args]),
+    { status: "QUEUED" }
+  ),
+  backups: async () => ({ status: "QUEUED" }),
+  // Main issues one ticket per action; here it simply names what it binds.
+  confirmBegin: async (kind, target) => (
+    calls.push(["begin", kind, target]),
+    {
+      ticket: "t:" + kind + ":" + target,
+      title: "Confirmar",
+      message:
+        kind === "transfer:apply" ? "Aplicar tu parte del robo" : "Confirmar",
+      detail: "",
+      go: "Confirmar",
+      facts: [["Juego", "Y (desde main)"]],
+    }
+  ),
+  checkUpdate: async () => updateInfo,
+  __setUpdate: (info) => {
+    updateInfo = info;
+  },
+  __unset: (keys) => {
+    overrides = Object.fromEntries(
+      Object.entries(overrides).filter(([key]) => !keys.includes(key)),
+    );
+  },
+  closePanel: async () => (calls.push(["closePanel"]), { closed: true }),
+  present: async (view) => (calls.push(["present", view]), { shown: true }),
+  openHub: async (tab) => (calls.push(["openHub", tab]), { shown: true }),
+  updateState: async () => updateInfo,
   downloadUpdate: async () => ({ status: "DOWNLOADING" }),
   installUpdate: async () => ({
     status: "DOWNLOADED",

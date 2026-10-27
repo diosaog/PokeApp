@@ -91,32 +91,69 @@ test("the web view has no preload and is sandboxed in its own session", () => {
   assert.equal(p.partition, "persist:pokeapp-web");
 });
 
-test("only the web's own desktop routes open a native panel, from a fixed list", () => {
+test("only the web's own routes open native views, from a fixed list", () => {
   const o = w.PRODUCTION_WEB;
+  // Saves y Launcher is the native hub; the 27C links land in its tabs.
+  assert.deepEqual(w.desktopPanel(o + "/saves", o), { panel: "saves" });
+  assert.deepEqual(w.desktopPanel(o + "/saves/", o), { panel: "saves" });
   assert.deepEqual(w.desktopPanel(o + "/escritorio/partida", o), {
-    panel: "partida",
+    panel: "saves",
+    tab: "partidas",
   });
-  for (const panel of w.DESKTOP_PANELS)
-    assert.equal(w.desktopPanel(`${o}/escritorio/${panel}/`, o).panel, panel);
+  assert.deepEqual(w.desktopPanel(o + "/escritorio/copias/", o), {
+    panel: "saves",
+    tab: "copias",
+  });
   // URLs are normalised first, exactly as the browser navigates them.
   assert.deepEqual(w.desktopPanel(o + "/escritorio/partida/../nube", o), {
-    panel: "nube",
+    panel: "saves",
+    tab: "launcher",
   });
+  // Infinite items and robbery deliveries open as dialogs over the web.
   assert.deepEqual(w.desktopPanel(o + "/escritorio/objetos/rare_candy", o), {
     panel: "objetos",
     item: "rare_candy",
+    modal: true,
+  });
+  assert.deepEqual(w.desktopPanel(o + "/escritorio/robos", o), {
+    panel: "robos",
+    modal: true,
   });
   for (const url of [
     o + "/liga",
+    o + "/saves/copias",
     o + "/escritorio",
     o + "/escritorio/admin",
     o + "/escritorio/objetos/master_ball",
     o + "/escritorio/partida/rare_candy",
-    "https://evil.test/escritorio/partida",
-    "http://pokeapp-web.pokeapp-v2.workers.dev/escritorio/partida",
+    o + "/escritorio/robos/abc",
+    "https://evil.test/saves",
+    "http://pokeapp-web.pokeapp-v2.workers.dev/saves",
     "not a url",
   ])
     assert.equal(w.desktopPanel(url, o), null, url);
+});
+
+test("session bridge codes carry no data and only exist on the web origin", () => {
+  const o = w.PRODUCTION_WEB;
+  assert.deepEqual(w.decide(o + "/__launcher/session", o), {
+    action: "session",
+  });
+  assert.deepEqual(w.decide(o + "/__launcher/logout", o), {
+    action: "logout",
+  });
+  for (const url of [
+    o + "/__launcher/session/x",
+    o + "/__launcher/session?token=abc",
+    o + "/__launcher/sessions",
+    o + "/__launcher/pin",
+  ])
+    assert.notEqual(w.decide(url, o).action, "session", url);
+  assert.equal(w.decide(o + "/__launcher/pin", o).action, "block");
+  assert.equal(
+    w.decide("https://evil.test/__launcher/session", o).action,
+    "external",
+  );
 });
 
 test("the panel edge accepts only a plausible sidebar width", () => {
