@@ -238,7 +238,7 @@ try {
           "forged",
         ),
       () => window.launcher.confirmWrite("op", true, "forged"),
-      () => window.launcher.installUpdate("forged"),
+      () => window.launcher.applyUpdate("forged"),
     ])
       out.push(
         await call().then(

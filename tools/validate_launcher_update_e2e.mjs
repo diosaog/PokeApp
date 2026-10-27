@@ -241,10 +241,18 @@ const updatesDir = path.join(profile, "updates");
 const files = () =>
   fs.existsSync(updatesDir) ? fs.readdirSync(updatesDir).sort() : [];
 // «Actualizar» exactly as a trainer does it: open the popup and click.
+// The page polls main every second: act on (or capture) what it shows.
+async function synced() {
+  const { status, reason } = await updateState();
+  await until(() =>
+    tools.evaluate(
+      ([s, r]) => lastUpdate?.status === s && lastUpdate?.reason === r,
+      [status, reason],
+    ),
+  );
+}
 async function clickUpdate() {
-  // Click what the trainer sees: wait for the page to show main's state.
-  const status = (await updateState()).status;
-  await until(() => tools.evaluate((s) => lastUpdate?.status === s, status));
+  await synced();
   await tools.evaluate(() => present("update", { check: false }));
   await until(() =>
     tools.evaluate(
@@ -335,6 +343,9 @@ try {
       `${feed} manifest refused (${reason}), nothing downloaded`,
     );
   }
+  scenario.feed = "forged";
+  await manualCheck();
+  await synced();
   await tools.evaluate(() => present("update", { check: false }));
   await sleep(500);
   await shot("popup-forged-refused");
@@ -343,6 +354,28 @@ try {
   // 4. Corrupted bytes and a dropped connection: discarded, retry possible.
   scenario.feed = "offer";
   check((await manualCheck()).status === "AVAILABLE", "valid offer detected");
+  // Only a ticket main issued for this offer starts it; the web has no bridge.
+  const forged = await tools
+    .evaluate(() => window.launcher.applyUpdate("forged-ticket"))
+    .then(
+      () => "accepted",
+      () => "refused",
+    );
+  const web = browser
+    .contexts()
+    .flatMap((c) => c.pages())
+    .find((p) => p.url().startsWith("http://127.0.0.1:4173"));
+  check(
+    forged === "refused" &&
+      scenario.served === 0 &&
+      (!web ||
+        (await web.evaluate(
+          () =>
+            typeof window.launcher === "undefined" &&
+            typeof require === "undefined",
+        ))),
+    "IPC: a forged ticket cannot start an update; the web has no native bridge",
+  );
   scenario.installer = "corrupt";
   await clickUpdate();
   const corrupt = await until(async () => {
