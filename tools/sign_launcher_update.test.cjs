@@ -3,7 +3,13 @@ const assert = require("node:assert/strict");
 const fs = require("node:fs");
 const os = require("node:os");
 const path = require("node:path");
-const { generate, sign } = require("./sign_launcher_update.cjs");
+const {
+  generate,
+  sign,
+  exportKey,
+  importKey,
+  UNSIGNED_POLICY,
+} = require("./sign_launcher_update.cjs");
 const updater = require("../companion/launcher/updater.cjs");
 
 // Every folder holds a freshly generated private key: none outlives the run.
@@ -102,6 +108,90 @@ test("stable requires valid Authenticode; key placement and HTTPS enforced", () 
     /KEY_INSIDE_REPOSITORY_OR_BUILD/,
   );
   assert.throws(() => sign(base(r, { channel: "beta" })), /INVALID_CHANNEL/);
+});
+
+test("private distribution: an unsigned stable installer is accepted only by stated policy and recorded", () => {
+  const r = release();
+  const stable = (extra) =>
+    base(r, {
+      channel: "stable",
+      url: "https://updates.invalid/s.exe",
+      ...extra,
+    });
+  assert.throws(
+    () => sign(stable({ authenticode: "NotSigned" })),
+    /STABLE_REQUIRES_VALID_AUTHENTICODE/,
+  );
+  assert.throws(
+    () => sign(stable({ authenticode: "NotSigned", unsignedPolicy: "yes" })),
+    /STABLE_REQUIRES_VALID_AUTHENTICODE/,
+  );
+  // A broken or untrusted signature is never waved through.
+  for (const authenticode of ["HashMismatch", "NotTrusted", "UnknownError"])
+    assert.throws(
+      () => sign(stable({ authenticode, unsignedPolicy: UNSIGNED_POLICY })),
+      /STABLE_REQUIRES_VALID_AUTHENTICODE/,
+    );
+  const envelope = sign(
+    stable({ authenticode: "NotSigned", unsignedPolicy: UNSIGNED_POLICY }),
+  );
+  const manifest = updater.verifyManifest(
+    envelope,
+    fs.readFileSync(r.keys.publicFile, "utf8"),
+    { channel: "stable", currentVersion: "0.22.0-rc.90" },
+  );
+  assert.equal(manifest.channel, "stable");
+  const record = JSON.parse(
+    fs.readFileSync(path.join(r.dir, "private.release.json"), "utf8"),
+  );
+  assert.equal(record.authenticode, "NotSigned");
+  assert.equal(record.authenticode_policy, UNSIGNED_POLICY);
+});
+
+test("DPAPI key: never plain on disk, signs, survives a new process, backs up and restores", async () => {
+  const dir = temp();
+  const keys = generate(path.join(dir, "stable"), { protect: true });
+  assert.match(keys.privateFile, /\.dpapi$/);
+  const blob = fs.readFileSync(keys.privateFile);
+  assert.ok(!blob.includes("PRIVATE KEY") && !blob.includes("MC4CAQ"));
+  assert.throws(() => generate(path.join(dir, "stable")), /KEY_ALREADY_EXISTS/);
+  const installer = path.join(dir, "setup.exe");
+  fs.writeFileSync(installer, Buffer.alloc(1024, 3));
+  const out = path.join(dir, "stable.json");
+  const args = { installer, version: "1.0.1", channel: "stable", minimum: "1.0.0",
+    notes: "", url: "https://updates.invalid/1.0.1.exe", out,
+    authenticode: "NotSigned", unsignedPolicy: UNSIGNED_POLICY }; // prettier-ignore
+  // A separate process: the key is usable after this one ends.
+  const { execFileSync } = require("node:child_process");
+  execFileSync(process.execPath, [path.join(__dirname, "sign_launcher_update.cjs"),
+    "--installer", installer, "--version", "1.0.1", "--channel", "stable", "--minimum", "1.0.0",
+    "--notes", "x", "--url", args.url, "--key-file", keys.privateFile, "--authenticode", "NotSigned",
+    "--unsigned-policy", UNSIGNED_POLICY, "--out", out], { stdio: "ignore" }); // prettier-ignore
+  const publicKey = fs.readFileSync(keys.publicFile, "utf8");
+  updater.verifyManifest(JSON.parse(fs.readFileSync(out, "utf8")), publicKey, {
+    channel: "stable",
+    currentVersion: "1.0.0",
+  });
+  const backup = path.join(dir, "backup.pem");
+  assert.throws(
+    () => exportKey(keys.privateFile, backup, "short"),
+    /PASSPHRASE_TOO_SHORT/,
+  );
+  exportKey(keys.privateFile, backup, "correct horse battery staple");
+  assert.match(fs.readFileSync(backup, "utf8"), /ENCRYPTED PRIVATE KEY/);
+  const restored = importKey(
+    backup,
+    path.join(dir, "restored"),
+    "correct horse battery staple",
+  );
+  assert.equal(fs.readFileSync(restored.publicFile, "utf8"), publicKey);
+  sign({
+    ...args,
+    keyFile: restored.privateFile,
+    out: path.join(dir, "again.json"),
+  });
+  updater.verifyManifest(JSON.parse(fs.readFileSync(path.join(dir, "again.json"), "utf8")), publicKey,
+    { channel: "stable", currentVersion: "1.0.0" }); // prettier-ignore
 });
 
 function config(env) {

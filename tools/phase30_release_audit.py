@@ -52,7 +52,7 @@ CATALOG = {
         left join pg_attrdef d on d.adrelid=a.attrelid and d.adnum=a.attnum
         where n.nspname in {SCHEMAS} and a.attnum>0 and not a.attisdropped and c.relkind in ('r','p','v','m','f')
         and {NOT_EXTENSION.format(oid="c.oid")}""",
-    "constraints": f"""select 'con '||n.nspname||'.'||c.relname||' '||k.conname||' '||pg_get_constraintdef(k.oid) as x
+    "constraints": f"""select 'con '||n.nspname||'.'||c.relname||' '||k.conname||' '||regexp_replace(pg_get_constraintdef(k.oid), '[[:space:]]+', ' ', 'g') as x
         from pg_constraint k join pg_class c on c.oid=k.conrelid join pg_namespace n on n.oid=c.relnamespace
         where n.nspname in {SCHEMAS}""",
     "indexes": f"select 'idx '||schemaname||'.'||indexname||' '||indexdef as x from pg_indexes where schemaname in {SCHEMAS}",

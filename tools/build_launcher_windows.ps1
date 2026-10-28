@@ -17,6 +17,9 @@ param(
     [string]$UpdateDownloadUrl = '',
     [string]$UpdateMinimumVersion = '',
     [string]$UpdateNotes = '',
+    # 'private-distribution' (owner decision 2026-10-28): sign a stable manifest
+    # for an installer without Authenticode. A broken signature is still refused.
+    [string]$UnsignedPolicy = '',
     [string]$BuildVersion = ''
 )
 $ErrorActionPreference = 'Stop'
@@ -80,9 +83,11 @@ try {
         $channel = if ($PrivateCandidate) { 'private' } else { 'stable' }
         $authenticode = (Get-AuthenticodeSignature -LiteralPath $installer.FullName).Status.ToString()
         $version = if ($BuildVersion) { $BuildVersion } else { (Get-Content companion/launcher/package.json -Raw | ConvertFrom-Json).version }
-        Checked 'node' @('tools/sign_launcher_update.cjs','--installer',$installer.FullName,'--version',$version,
+        $signArgs = @('tools/sign_launcher_update.cjs','--installer',$installer.FullName,'--version',$version,
             '--channel',$channel,'--minimum',$UpdateMinimumVersion,'--notes',$UpdateNotes,'--url',$UpdateDownloadUrl,
             '--key-file',$key,'--authenticode',$authenticode,'--build-root',$build,
             '--out',(Join-Path $build ('release/' + $channel + '.json')))
+        if ($UnsignedPolicy) { $signArgs += @('--unsigned-policy', $UnsignedPolicy) }
+        Checked 'node' $signArgs
     }
 } finally { Pop-Location }

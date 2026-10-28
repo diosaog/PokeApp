@@ -2,7 +2,9 @@
 //
 // Refuses unless every condition holds, so a stable manifest can never go out
 // with an unsigned or mismatched installer:
-//   * the installer's Authenticode status is Valid (Windows' own check);
+//   * the installer's Authenticode status is Valid (Windows' own check), or
+//     NotSigned under the owner's stated private-distribution policy
+//     (--unsigned-policy private-distribution); a broken signature never passes;
 //   * the package audit of that build root passed and is a public, stable
 //     build (no private candidate, HTTPS stable feed);
 //   * the signed manifest verifies with the public key embedded in that very
@@ -14,7 +16,7 @@
 // manifest (the switch players see). The web card is deployed afterwards.
 //
 //   node tools/publish_launcher_release.mjs --build <build root> --manifest <stable.json>
-//        [--apply --owner-authorized]
+//        [--unsigned-policy private-distribution] [--apply --owner-authorized]
 import { execFileSync } from "node:child_process";
 import { createRequire } from "node:module";
 import crypto from "node:crypto";
@@ -23,6 +25,7 @@ import path from "node:path";
 
 const require = createRequire(import.meta.url);
 const updater = require("../companion/launcher/updater.cjs");
+const { UNSIGNED_POLICY } = require("./sign_launcher_update.cjs");
 const asar = require("../companion/launcher/node_modules/@electron/asar");
 const argv = process.argv.slice(2);
 const arg = (name) => {
@@ -46,7 +49,12 @@ const status = fs.existsSync(installer)
       `(Get-AuthenticodeSignature -LiteralPath '${installer.replace(/'/g, "''")}').Status`],
       { encoding: "utf8" }).trim() // prettier-ignore
   : "Missing";
-need(status === "Valid", `installer Authenticode is ${status}, not Valid`);
+const unsignedPolicy = arg("unsigned-policy");
+need(
+  status === "Valid" ||
+    (status === "NotSigned" && unsignedPolicy === UNSIGNED_POLICY),
+  `installer Authenticode is ${status}: only Valid, or NotSigned under --unsigned-policy ${UNSIGNED_POLICY}`,
+);
 const auditFile = path.join(build, "package-audit.json");
 const audit = fs.existsSync(auditFile)
   ? JSON.parse(fs.readFileSync(auditFile, "utf8"))
@@ -101,6 +109,7 @@ const plan = {
     sha256: crypto.createHash("sha256").update(bytes).digest("hex"),
   },
   authenticode: status,
+  authenticode_policy: status === "Valid" ? "signed" : unsignedPolicy || null,
   steps: key ? [`upload ${key}`, "read back through the public route and compare SHA-512",
     "upload updates/stable.json (last)", "deploy the web with web/launcher-release.json = " + manifest.version] : [], // prettier-ignore
   problems,
