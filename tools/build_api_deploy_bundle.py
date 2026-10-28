@@ -53,6 +53,9 @@ def main():
         raw = subprocess.check_output(['git', 'show', commit+':'+name], cwd=root)
         if args.worker and name == 'Dockerfile':
             raw = worker_dockerfile(raw.decode()).encode()
+        if args.worker and name == '.dockerignore':
+            # The worker image also needs its entry point and the Supabase CA.
+            raw += b'\n!tools/\n!tools/run_item_use_verifier.py\n!deploy/certs/\n!deploy/certs/*\n!deploy/requirements-item-verifier.txt\n'
         dest = output/name
         dest.parent.mkdir(parents=True, exist_ok=True)
         dest.write_bytes(raw)
