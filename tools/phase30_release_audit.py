@@ -26,9 +26,10 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 MIGRATIONS = sorted((ROOT / "supabase/v2/migrations").glob("*.sql"))
 # 054-064 went out with the final release, 065 (personal saves, «Mi PC»
-# outside seasons) after it; 066 takes back what 065 meant to withhold.
-DEPLOYED = [m for m in MIGRATIONS if int(m.name[:3]) <= 65]
-PENDING = [m for m in MIGRATIONS if int(m.name[:3]) == 66]
+# outside seasons) and 066 (its least privilege) after it; 067 (Discord
+# announcement outbox) is the window after those.
+DEPLOYED = [m for m in MIGRATIONS if int(m.name[:3]) <= 66]
+PENDING = [m for m in MIGRATIONS if 67 <= int(m.name[:3]) <= 68]
 WINDOW = f"{PENDING[0].name[:3]}-{PENDING[-1].name[:3]}"
 SCHEMAS = "('public','v1_shadow')"
 
@@ -304,7 +305,7 @@ def audit(args) -> dict:
         """select c.relname as name from pg_class c join pg_namespace n on n.oid=c.relnamespace
         where n.nspname='public' and c.relname in ('item_use_authorizations','item_use_verifications',
         'item_use_artifacts','item_use_transfers','item_use_transfer_legs','transfer_provenance',
-        'transfer_commit_permits','admin_incident_commands','trainer_personal_saves')
+        'transfer_commit_permits','admin_incident_commands','trainer_personal_saves','discord_announcements')
         union all select p.proname from pg_proc p join pg_namespace n on n.oid=p.pronamespace
         where n.nspname='public' and p.proname in ('api_prepare_item_use','api_prepare_transfer',
         'admin_incident_overview','config_division_count','admin_robbery_cancel')

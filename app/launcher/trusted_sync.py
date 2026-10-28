@@ -95,7 +95,7 @@ class TrustedStore(CloudStore):
         with self.journal.connection() as db:
             row = db.execute(
                 "SELECT * FROM trusted_save_outbox WHERE origin=? AND trainer=? AND verified=0 "
-                "AND blocked=0 AND attempts<5 ORDER BY rowid LIMIT 1",
+                "AND blocked=0 ORDER BY rowid LIMIT 1",
                 (origin, trainer),
             ).fetchone()
         return dict(row) if row else None
@@ -141,7 +141,7 @@ class TrustedStore(CloudStore):
         with self.journal.connection() as db:
             return dict(
                 db.execute(
-                    "SELECT count(*) pending,coalesce(sum(attempts>=5 OR blocked=1),0) paused "
+                    "SELECT count(*) pending,coalesce(sum(blocked=1),0) paused "
                     "FROM trusted_save_outbox WHERE origin=? AND trainer=? AND verified=0",
                     (origin, trainer),
                 ).fetchone()

@@ -26,6 +26,7 @@ async function reply(route: Route, json: unknown, status = 200) {
 }
 function setup(state: Setup["season"]["status"] = "active"): Setup {
   return {
+    can_discard: state === "draft",
     season: {
       id: sid,
       name: "Liga Horizonte",

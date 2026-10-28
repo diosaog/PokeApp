@@ -135,18 +135,9 @@ test("unobserved progress differs from observed zero; no manual accreditation or
   await navigate(page, "Liga");
   await expect(
     page.getByRole("heading", { name: "Reparto inicial A/B" }),
-  ).toBeVisible();
-  const unknown = page.getByRole("region", { name: "Antonio", exact: true });
-  const zero = page.getByRole("region", { name: "Lucía", exact: true });
-  await expect(unknown).toContainText(
-    "Progreso no observado / pendiente de sincronizar save",
-  );
-  await expect(unknown).not.toContainText("0 medallas");
-  await expect(zero).toContainText(
-    "0 medallas observadas · Medalla 2 pendiente",
-  );
+  ).toHaveCount(0);
   await expect(
-    page.getByRole("button", { name: "Confirmar reparto inicial" }),
+    page.getByRole("heading", { name: "Inicio de la Liga" }),
   ).toHaveCount(0);
   await navigate(page, "Entrenadores");
   await expect(
@@ -161,6 +152,15 @@ test("unobserved progress differs from observed zero; no manual accreditation or
   await expect(zeroCard.locator(".game-badge.unearned")).toHaveCount(8);
   await navigate(page, "Administración");
   await page.getByRole("tab", { name: "Competición", exact: true }).click();
+  const unknown = page.getByRole("region", { name: "Antonio", exact: true });
+  const zero = page.getByRole("region", { name: "Lucía", exact: true });
+  await expect(unknown).toContainText(
+    "Progreso no observado / pendiente de sincronizar save",
+  );
+  await expect(unknown).not.toContainText("0 medallas");
+  await expect(zero).toContainText(
+    "0 medallas observadas · Medalla 2 pendiente",
+  );
   await expect(
     page.getByRole("button", { name: "Confirmar reparto inicial" }),
   ).toBeDisabled();

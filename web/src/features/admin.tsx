@@ -699,11 +699,14 @@ function Risk({ setup }: { setup: Setup }) {
     [actionRevision, setActionRevision] = useState(setup.setup_revision);
   const labels: Record<string, string> = {
       archive: "Archivar temporada",
-      discard: "Descartar temporada",
+      discard:
+        setup.season.status === "active"
+          ? "Cancelar temporada sin competición"
+          : "Descartar temporada",
     },
     allowed: Record<string, boolean> = {
       archive: setup.season.status === "finished",
-      discard: setup.season.status === "draft",
+      discard: setup.can_discard ?? setup.season.status === "draft",
     },
     busy = cmd.pending || cmd.uncertain;
   return (
@@ -715,12 +718,13 @@ function Risk({ setup }: { setup: Setup }) {
       </p>
       <p>
         Archivar está disponible después de finalizar la Liga. Solo se puede
-        descartar un borrador.
+        descartar un borrador o cancelar una temporada activa sin jornadas,
+        resultados ni actividad económica. Se conserva su trazabilidad.
       </p>
       <div className="toolbar">
         {[
           ["archive", "Archivar temporada"],
-          ["discard", "Descartar temporada"],
+          ["discard", labels.discard],
         ].map(([op, label]) => (
           <button
             className="danger"

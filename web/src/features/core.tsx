@@ -13,7 +13,6 @@ import {
 } from "../pokemon/presentation";
 import { useApp, useRead, useOverview, useMyPC } from "../state";
 import { ParticipantResults } from "./league-results";
-import { InitialAssignment } from "./initial-assignment";
 import { WipeRevivals } from "./wipe-revivals";
 import { Collection } from "./collection";
 import { SaveGame } from "./progress";
@@ -384,8 +383,6 @@ export function LeaguePage() {
 
           return (
             <>
-              {data.season.initial_assignment_rule === "observed_deaths_v1" &&
-                !data.days.length && <InitialAssignment />}
               <nav className="tabs" aria-label="Vistas de Liga">
                 <button
                   aria-pressed={!day}

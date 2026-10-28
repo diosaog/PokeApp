@@ -441,11 +441,11 @@ def rehearse(args) -> dict:
             """select c.relname||' rls='||c.relrowsecurity||' force='||c.relforcerowsecurity
             from pg_class c join pg_namespace n on n.oid=c.relnamespace where n.nspname='public' and c.relkind='r'
             and c.relname in ('item_use_authorizations','item_use_verifications','item_use_artifacts','item_use_transfers',
-            'item_use_transfer_legs','transfer_provenance','transfer_commit_permits','admin_incident_commands') order by 1""",
+            'item_use_transfer_legs','transfer_provenance','transfer_commit_permits','admin_incident_commands','discord_announcements') order by 1""",
             "supabase_admin",
         )
-        ok(len(new_tables) == 8 and all(t.endswith("rls=true force=true") for t in new_tables),
-           "8 new tables exist and force RLS", new_tables)  # fmt: skip
+        ok(len(new_tables) == 9 and all(t.endswith("rls=true force=true") for t in new_tables),
+           "9 private operational tables exist and force RLS", new_tables)  # fmt: skip
         verifier = pg.lines(
             "select rolcanlogin::text||rolsuper::text||rolbypassrls::text from pg_roles where rolname='pokeapp_item_verifier'",
             "supabase_admin",
@@ -454,14 +454,9 @@ def rehearse(args) -> dict:
             verifier == ["falsefalsefalse"],
             "verifier role created without login, superuser or RLS bypass",
         )
-        sizes = pg.lines(
-            "select count(*) from public.season_config_versions where not (division_sizes ? 'B')",
-            "supabase_admin",
-        )
-        ok(
-            sizes == ["0"],
-            "existing season configs keep Liga A + Liga B (no backfill to one league)",
-        )
+        from tools.validate_final_corrections_pg import validate
+        report["final_corrections"] = validate(pg)
+        ok(local_fingerprints(pg, public_tables) == rows_after, "focused fixtures rolled back exactly")
         upgraded = catalog_local(pg)
     finally:
         pg.stop(remove=True)

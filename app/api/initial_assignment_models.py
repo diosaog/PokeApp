@@ -11,6 +11,7 @@ from app.api.season_admin_models import DivisionSizes, Revision, StrictBody
 InitialRule = Literal["observed_deaths_v1"]
 Digest = Annotated[str, Field(strict=True, pattern=r"^[0-9a-f]{64}$")]
 BlockReason = Literal[
+    "opponent_missing",
     "season_not_active",
     "invalid_roster",
     "config_not_effective",

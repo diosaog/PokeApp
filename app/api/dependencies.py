@@ -4,12 +4,22 @@ from dataclasses import dataclass
 
 from fastapi import Request
 
+from app.api.announcer import create_announcer
 from app.api.config import APIConfig
-from app.api.ports import AccessTokenVerifierPort, SessionRefreshPort, TrainerPrincipalRepository
+from app.api.ports import (
+    AccessTokenVerifierPort,
+    SessionRefreshPort,
+    TrainerPrincipalRepository,
+)
 from app.api.rate_limit import InMemoryWindowRateLimiter, RateLimiter
 from app.auth.ports import TrainerAuthRepository
 from app.auth.service import PinAuthBridge
-from app.repositories.protocols import NormalPurchaseRepository, PromotionalPurchaseRepository, TeamLockMutationRepository, RedemptionMutationRepository
+from app.repositories.protocols import (
+    NormalPurchaseRepository,
+    PromotionalPurchaseRepository,
+    TeamLockMutationRepository,
+    RedemptionMutationRepository,
+)
 from app.repositories.supabase.season_admin import SeasonAdminRepository
 from app.repositories.supabase.matchdays import MatchdayRepository
 from app.repositories.supabase.participant_status import ParticipantStatusRepository
@@ -48,6 +58,7 @@ class ApiContainer:
     personal_saves: object | None = None
     account_service: object | None = None
     incident_repository: object | None = None
+    announcer: object | None = None
 
 
 def get_api_container(request: Request) -> ApiContainer:
@@ -84,7 +95,9 @@ def create_default_container(config: APIConfig | None = None) -> ApiContainer:
     if config.supabase_url and config.supabase_anon_key:
         from app.auth.supabase_adapter import SupabaseAuthClient
 
-        auth_client = SupabaseAuthClient.from_url_key(config.supabase_url, config.supabase_anon_key)
+        auth_client = SupabaseAuthClient.from_url_key(
+            config.supabase_url, config.supabase_anon_key
+        )
 
     if config.supabase_url and config.supabase_service_role_key:
         from app.api.supabase_repository import SupabaseTrainerAuthRepository
@@ -96,87 +109,170 @@ def create_default_container(config: APIConfig | None = None) -> ApiContainer:
         from supabase import create_client
         from app.auth.accounts import AccountService
         from app.auth.supabase_adapter import SupabaseAuthClient
-        from app.repositories.supabase.accounts import SupabaseAccountRepository, SupabaseAccountAuth
+        from app.repositories.supabase.accounts import (
+            SupabaseAccountRepository,
+            SupabaseAccountAuth,
+        )
+
         # Session guards depend on persisted account state, not on the presence
         # of a PIN derivation key. A missing/retired pepper must never remove them.
-        account_client = create_client(config.supabase_url, config.supabase_service_role_key)
-        accounts = AccountService(SupabaseAccountRepository(account_client),
-            SupabaseAccountAuth(account_client.auth.admin,
-                lambda: SupabaseAuthClient.from_url_key(config.supabase_url,config.supabase_anon_key)), pepper=config.auth_pin_pepper,
-            enabled=False)
+        account_client = create_client(
+            config.supabase_url, config.supabase_service_role_key
+        )
+        accounts = AccountService(
+            SupabaseAccountRepository(account_client),
+            SupabaseAccountAuth(
+                account_client.auth.admin,
+                lambda: SupabaseAuthClient.from_url_key(
+                    config.supabase_url, config.supabase_anon_key
+                ),
+            ),
+            pepper=config.auth_pin_pepper,
+            enabled=False,
+        )
         if config.credential_keyring is not None:
             from app.auth.versioned_accounts import VersionedAccountService
-            accounts = VersionedAccountService(accounts.repository, accounts.auth,
-                keyring=config.credential_keyring, enabled=config.account_management_enabled,
+
+            accounts = VersionedAccountService(
+                accounts.repository,
+                accounts.auth,
+                keyring=config.credential_keyring,
+                enabled=config.account_management_enabled,
                 access_code=config.registration_access_code,
-                bootstrap_hash=config.registration_bootstrap_hash)
+                bootstrap_hash=config.registration_bootstrap_hash,
+            )
         from app.repositories.supabase.team_locks import SupabaseTeamLockRepository
 
         team_lock_repo = SupabaseTeamLockRepository.from_url_key(
-            config.supabase_url, config.supabase_service_role_key,
+            config.supabase_url,
+            config.supabase_service_role_key,
         )
-        from app.repositories.supabase.normal_purchases import SupabaseNormalPurchaseRepository
+        from app.repositories.supabase.normal_purchases import (
+            SupabaseNormalPurchaseRepository,
+        )
 
         purchase_repo = SupabaseNormalPurchaseRepository.from_url_key(
-            config.supabase_url, config.supabase_service_role_key,
+            config.supabase_url,
+            config.supabase_service_role_key,
         )
         from app.repositories.supabase.redemptions import SupabaseRedemptionRepository
 
         redemption_repo = SupabaseRedemptionRepository.from_url_key(
-            config.supabase_url, config.supabase_service_role_key,
+            config.supabase_url,
+            config.supabase_service_role_key,
         )
         from app.repositories.supabase.item_use import SupabaseItemUseRepository
+
         item_use_repo = SupabaseItemUseRepository.from_url_key(
-            config.supabase_url, config.supabase_service_role_key,
+            config.supabase_url,
+            config.supabase_service_role_key,
         )
         from app.repositories.supabase.season_admin import SupabaseSeasonAdminRepository
 
         season_admin_repo = SupabaseSeasonAdminRepository.from_url_key(
-            config.supabase_url, config.supabase_service_role_key,
+            config.supabase_url,
+            config.supabase_service_role_key,
         )
         from app.repositories.supabase.matchdays import SupabaseMatchdayRepository
 
-        matchday_repo = SupabaseMatchdayRepository.from_url_key(config.supabase_url, config.supabase_service_role_key)
-        from app.repositories.supabase.participant_status import SupabaseParticipantStatusRepository
-        participant_status_repo = SupabaseParticipantStatusRepository.from_url_key(config.supabase_url, config.supabase_service_role_key)
-        from app.repositories.supabase.season_lifecycle import SupabaseSeasonLifecycleRepository
-        season_lifecycle_repo = SupabaseSeasonLifecycleRepository.from_url_key(config.supabase_url, config.supabase_service_role_key)
+        matchday_repo = SupabaseMatchdayRepository.from_url_key(
+            config.supabase_url, config.supabase_service_role_key
+        )
+        from app.repositories.supabase.participant_status import (
+            SupabaseParticipantStatusRepository,
+        )
+
+        participant_status_repo = SupabaseParticipantStatusRepository.from_url_key(
+            config.supabase_url, config.supabase_service_role_key
+        )
+        from app.repositories.supabase.season_lifecycle import (
+            SupabaseSeasonLifecycleRepository,
+        )
+
+        season_lifecycle_repo = SupabaseSeasonLifecycleRepository.from_url_key(
+            config.supabase_url, config.supabase_service_role_key
+        )
         from app.repositories.supabase.trials import SupabaseTrialRepository
-        trial_repo = SupabaseTrialRepository.from_url_key(config.supabase_url, config.supabase_service_role_key)
+
+        trial_repo = SupabaseTrialRepository.from_url_key(
+            config.supabase_url, config.supabase_service_role_key
+        )
         from app.repositories.supabase.cups import SupabaseCupRepository
-        cup_repo = SupabaseCupRepository.from_url_key(config.supabase_url, config.supabase_service_role_key)
-        from app.repositories.supabase.frontend_reads import SupabaseFrontendReadRepository
-        read_repo = SupabaseFrontendReadRepository.from_url_key(config.supabase_url, config.supabase_service_role_key)
-        from app.repositories.supabase.wipe_revivals import SupabaseWipeRevivalsRepository
-        wipe_repo = SupabaseWipeRevivalsRepository.from_url_key(config.supabase_url, config.supabase_service_role_key)
+
+        cup_repo = SupabaseCupRepository.from_url_key(
+            config.supabase_url, config.supabase_service_role_key
+        )
+        from app.repositories.supabase.frontend_reads import (
+            SupabaseFrontendReadRepository,
+        )
+
+        read_repo = SupabaseFrontendReadRepository.from_url_key(
+            config.supabase_url, config.supabase_service_role_key
+        )
+        from app.repositories.supabase.wipe_revivals import (
+            SupabaseWipeRevivalsRepository,
+        )
+
+        wipe_repo = SupabaseWipeRevivalsRepository.from_url_key(
+            config.supabase_url, config.supabase_service_role_key
+        )
         from app.repositories.supabase.launcher import SupabaseLauncherRepository
-        launcher_repo = SupabaseLauncherRepository.from_url_key(config.supabase_url, config.supabase_service_role_key)
+
+        launcher_repo = SupabaseLauncherRepository.from_url_key(
+            config.supabase_url, config.supabase_service_role_key
+        )
         import os
         from pathlib import Path
         from app.application.save_ingestion import TrustedSaveIngestion
-        from app.repositories.supabase.save_ingestion import SupabaseSaveIngestionRepository
+        from app.repositories.supabase.save_ingestion import (
+            SupabaseSaveIngestionRepository,
+        )
         from app.save_parser.adapter import PkhexProcessParser
+
         parser_path = os.environ.get("POKEAPP_SERVER_PARSER")
         if parser_path:
             save_ingestion = TrustedSaveIngestion(
-                SupabaseSaveIngestionRepository.from_url_key(config.supabase_url, config.supabase_service_role_key),
+                SupabaseSaveIngestionRepository.from_url_key(
+                    config.supabase_url, config.supabase_service_role_key
+                ),
                 PkhexProcessParser(Path(parser_path)),
             )
             from app.application.personal_saves import PersonalSaves
-            from app.repositories.supabase.personal_saves import SupabasePersonalSaveRepository
+            from app.repositories.supabase.personal_saves import (
+                SupabasePersonalSaveRepository,
+            )
+
             personal_saves = PersonalSaves(
-                SupabasePersonalSaveRepository.from_url_key(config.supabase_url, config.supabase_service_role_key),
+                SupabasePersonalSaveRepository.from_url_key(
+                    config.supabase_url, config.supabase_service_role_key
+                ),
                 save_ingestion.parser,
             )
 
-    if config.item_verification_transport_enabled and config.supabase_url and config.supabase_service_role_key:
+    if (
+        config.item_verification_transport_enabled
+        and config.supabase_url
+        and config.supabase_service_role_key
+    ):
         from supabase import create_client
         from app.application.item_use_transport import ItemUseTransport
-        from app.repositories.supabase.item_use_transport import SupabaseItemUseTransport, PrivateItemUseBlobs
-        client = create_client(config.supabase_url, config.supabase_service_role_key)
-        item_use_transport = ItemUseTransport(SupabaseItemUseTransport(client), PrivateItemUseBlobs(client), allowed_trainers=config.item_verification_trainers)
+        from app.repositories.supabase.item_use_transport import (
+            SupabaseItemUseTransport,
+            PrivateItemUseBlobs,
+        )
 
-    if config.transfer_engineering_enabled and config.supabase_url and config.supabase_service_role_key:
+        client = create_client(config.supabase_url, config.supabase_service_role_key)
+        item_use_transport = ItemUseTransport(
+            SupabaseItemUseTransport(client),
+            PrivateItemUseBlobs(client),
+            allowed_trainers=config.item_verification_trainers,
+        )
+
+    if (
+        config.transfer_engineering_enabled
+        and config.supabase_url
+        and config.supabase_service_role_key
+    ):
         # Engineering cohort only; physical application still needs a Launcher
         # engineering capability that no production build constructs.
         from app.application.transfer_integration import TransferIntegration
@@ -184,20 +280,39 @@ def create_default_container(config: APIConfig | None = None) -> ApiContainer:
         from app.repositories.supabase.item_use_transport import PrivateItemUseBlobs
         from app.repositories.supabase.transfer import TransferRepository
         from supabase import create_client
+
         client = create_client(config.supabase_url, config.supabase_service_role_key)
         repository = TransferRepository(client)
-        transfer_integration = TransferIntegration(repository, TransferTransport(repository, PrivateItemUseBlobs(client)),
-            allowed_trainers=config.transfer_engineering_trainers)
+        transfer_integration = TransferIntegration(
+            repository,
+            TransferTransport(repository, PrivateItemUseBlobs(client)),
+            allowed_trainers=config.transfer_engineering_trainers,
+        )
 
     incident_repo = None
-    if config.admin_incidents_enabled and config.supabase_url and config.supabase_service_role_key:
+    if (
+        config.admin_incidents_enabled
+        and config.supabase_url
+        and config.supabase_service_role_key
+    ):
         from app.repositories.supabase.incidents import SupabaseIncidentRepository
-        incident_repo = SupabaseIncidentRepository.from_url_key(config.supabase_url, config.supabase_service_role_key)
+
+        incident_repo = SupabaseIncidentRepository.from_url_key(
+            config.supabase_url, config.supabase_service_role_key
+        )
 
     auth_bridge = None
-    if auth_client is not None and trainer_repo is not None and config.credential_keyring is not None:
-        auth_bridge = PinAuthBridge(trainers=trainer_repo, auth=auth_client, pepper="",
-            credential_provider=accounts.credential)
+    if (
+        auth_client is not None
+        and trainer_repo is not None
+        and config.credential_keyring is not None
+    ):
+        auth_bridge = PinAuthBridge(
+            trainers=trainer_repo,
+            auth=auth_client,
+            pepper="",
+            credential_provider=accounts.credential,
+        )
 
     return ApiContainer(
         auth_bridge=auth_bridge,
@@ -226,4 +341,5 @@ def create_default_container(config: APIConfig | None = None) -> ApiContainer:
         save_ingestion=save_ingestion,
         personal_saves=personal_saves,
         account_service=accounts,
+        announcer=create_announcer(config),
     )

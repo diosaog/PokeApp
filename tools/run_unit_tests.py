@@ -21,7 +21,7 @@ def main() -> int:
     os.chdir(ROOT)
     sys.path.insert(0, str(ROOT))
     for name in list(os.environ):
-        if name.upper().startswith(("SUPABASE", "POKEAPP_V2_SUPABASE", "POKEAPP_AUTH_PIN", "DISCORD")):
+        if name.upper().startswith(("SUPABASE", "POKEAPP_V2_SUPABASE", "POKEAPP_AUTH_PIN", "DISCORD", "POKEAPP_DISCORD")):
             os.environ.pop(name)
     os.environ["DISCORD_NOTIFICATIONS_ENABLED"] = "false"
     import streamlit

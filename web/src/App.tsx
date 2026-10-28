@@ -160,11 +160,7 @@ function Login() {
         </Link>
         <div>
           <p className="eyebrow">TU EQUIPO. TU LIGA. TU HISTORIA.</p>
-          <h1>
-            La próxima <br />
-            victoria <br />
-            <em>empieza aquí.</em>
-          </h1>
+          <h1>PokeApp</h1>
           <p>
             Prepara tu equipo. Defiende tu división.
             <br />

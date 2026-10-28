@@ -56,7 +56,10 @@ class BackendClient:
         self._http.close()
 
     def upload(self, path, data, token):
-        if not path.startswith(("/v1/seasons/", "/v1/launcher/seasons/")) or not isinstance(data, bytes):
+        if not (
+            path.startswith(("/v1/seasons/", "/v1/launcher/seasons/"))
+            or path.split("?", 1)[0] == "/v1/me/save/raw"
+        ) or not isinstance(data, bytes):
             raise ValueError("invalid_save_upload")
         try:
             response = self._http.put(

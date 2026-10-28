@@ -962,9 +962,10 @@ class LauncherRuntime:
                     self.tokens.clear()
                     self._patch(auth_status="LOGIN_REQUIRED", principal=None)
                 failures += 1
-                # Five automatic attempts, then manual retry. No endless replay loop.
-                next_attempt = time.monotonic() + (
-                    min(300, 5 * 3 ** (failures - 1)) if failures < 5 else float("inf")
+                # Recover unattended after an outage. Each upload still reconciles
+                # its exact receipt/CAS before retry; semantic rejection stays blocked.
+                next_attempt = time.monotonic() + min(
+                    300, 5 * 3 ** min(failures - 1, 4)
                 )
                 if not self.session._principal:
                     self._patch(auth_status="LOGIN_REQUIRED")
@@ -979,7 +980,7 @@ class LauncherRuntime:
                 )
             except Exception:  # noqa: BLE001 - isolate cloud/storage failures from local browsing
                 failures += 1
-                next_attempt = time.monotonic() + (60 if failures < 5 else float("inf"))
+                next_attempt = time.monotonic() + 300
                 self._patch(cloud_status="OFFLINE", error="SYNC_UNAVAILABLE")
 
     def close(self):

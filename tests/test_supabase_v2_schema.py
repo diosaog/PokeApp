@@ -143,6 +143,8 @@ class SupabaseV2SchemaTests(unittest.TestCase):
                 "064_admin_robbery_cancellation.sql",
                 "065_personal_saves.sql",
                 "066_personal_saves_least_privilege.sql",
+                "067_discord_announcements.sql",
+                "068_precompetition_readiness.sql",
             ],
         )
         for path in _migration_files():
@@ -353,7 +355,7 @@ class SupabaseV2SchemaTests(unittest.TestCase):
         self.assertTrue(bootstrap.startswith("-- ONLY FOR EMPTY POKEAPP V2 DATABASE."))
         self.assertEqual(bootstrap, render_bootstrap())
         self.assertIn(
-            "Source of truth: supabase/v2/migrations/001_core.sql through 066_personal_saves_least_privilege.sql",
+            "Source of truth: supabase/v2/migrations/001_core.sql through 068_precompetition_readiness.sql",
             bootstrap,
         )
         self.assertNotIn("drop table", lowered)
@@ -400,6 +402,12 @@ class SupabaseV2SchemaTests(unittest.TestCase):
                 self.assertIn('revoke all on public.trainer_personal_saves from service_role', security_sql)
                 self.assertIn('grant select, insert, update on public.trainer_personal_saves to service_role', security_sql)
                 continue
+            if table == 'discord_announcements':
+                # 067: outbox queued only by triggers; the API reads and closes rows.
+                self.assertIn('alter table public.discord_announcements force row level security', security_sql)
+                self.assertIn('revoke all on public.discord_announcements from public, anon, authenticated, service_role', security_sql)
+                self.assertIn('grant select, update on public.discord_announcements to service_role', security_sql)
+                continue
             if table == 'launcher_observations':
                 self.assertIn('alter table public.launcher_observations enable row level security', security_sql)
                 self.assertIn('alter table public.launcher_observations force row level security', security_sql)
@@ -441,7 +449,7 @@ class SupabaseV2SchemaTests(unittest.TestCase):
             else:
                 self.assertIn(f"'{table}'", security_sql, table)
 
-        self.assertEqual(security_sql.count("enable row level security"), 38)
+        self.assertEqual(security_sql.count("enable row level security"), 39)
         self.assertIn("alter table public.%i enable row level security", security_sql)
 
 

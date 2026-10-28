@@ -92,6 +92,7 @@ beforeEach(() => {
   mocks.execute.mockResolvedValue(true);
   mocks.holdNavigation.mockReturnValue(mocks.releaseNavigation);
   mocks.setup = {
+    can_discard: false,
     initial_assignment_rule: "observed_deaths_v1",
     season: {
       id: "season",
@@ -431,4 +432,20 @@ it("disables invalid historical operations and shows Team Lock presence without 
   expect(
     screen.queryByRole("button", { name: "Preparar primera jornada" }),
   ).not.toBeInTheDocument();
+});
+
+it("allows cancellation of active preparation only when the server confirms it is safe", () => {
+  mocks.setup.can_discard = true;
+  render(page());
+  tab("Zona de riesgo");
+  const cancel = screen.getByRole("button", {
+    name: "Cancelar temporada sin competición",
+  });
+  expect(cancel).toBeEnabled();
+  fireEvent.click(cancel);
+  expect(screen.getByLabelText("Motivo")).toBeRequired();
+  expect(
+    screen.getByLabelText("Escribe Liga Horizonte para confirmar"),
+  ).toBeRequired();
+  expect(mocks.execute).not.toHaveBeenCalled();
 });

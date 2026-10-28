@@ -33,6 +33,8 @@ from tools.phase30_release_audit import DEPLOYED, PENDING
 from tools.production_readonly import SUPABASE_REF, _supabase, query, supabase_get
 
 EXPECTED_SHA256 = {
+    '068_precompetition_readiness.sql': 'e582c4a973581003b194eb157370521b37f6a002189491f564b7710d7afcad69',
+    '067_discord_announcements.sql': '63300555a3b927765a5984ceb7353d2229656b8a529f306e8704ca20a0a462e2',
     "054_item_use_authorizations.sql": "f6e4c775bee8f79f4f8c487b266eef318d611c3f5810eeb7c14249c7aa1f11c9",
     "055_native_identity_evidence_scope.sql": "f1fae278caa2832619713d74b6da03055ede5870ca7b902c85d34427b9e3fc83",
     "056_item_use_verifier_transport.sql": "7b5d9619562e09828dee3313fe514eb99a8ffb71eab3457a4d4b2514fe965e38",

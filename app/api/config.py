@@ -24,6 +24,8 @@ class APIConfig:
     transfer_engineering_trainers: tuple[str, ...] = ()
     # Phase 28: only after migration 062 is applied to that database.
     admin_incidents_enabled: bool = False
+    # «Aaron Avisa!»: the URL carries the webhook token; server secret only.
+    discord_webhook_url: str = field(default="", repr=False)
     registration_access_code: str = field(default="", repr=False)
     registration_bootstrap_hash: str = field(default="", repr=False)
     credential_keyring: object | None = field(default=None, repr=False)
@@ -31,12 +33,22 @@ class APIConfig:
     def __post_init__(self):
         if self.item_verification_transport_enabled:
             from uuid import UUID
-            if not self.item_verification_trainers or any(str(UUID(t)) != t for t in self.item_verification_trainers):
-                raise ValueError("Restricted verifier acceptance needs exact trainer UUIDs")
+
+            if not self.item_verification_trainers or any(
+                str(UUID(t)) != t for t in self.item_verification_trainers
+            ):
+                raise ValueError(
+                    "Restricted verifier acceptance needs exact trainer UUIDs"
+                )
         if self.transfer_engineering_enabled:
             from uuid import UUID
-            if not self.transfer_engineering_trainers or any(str(UUID(t)) != t for t in self.transfer_engineering_trainers):
-                raise ValueError("Engineering transfers need an exact trainer UUID cohort")
+
+            if not self.transfer_engineering_trainers or any(
+                str(UUID(t)) != t for t in self.transfer_engineering_trainers
+            ):
+                raise ValueError(
+                    "Engineering transfers need an exact trainer UUID cohort"
+                )
         for origin in self.cors_origins:
             parsed = urlsplit(origin)
             local = parsed.hostname in ("localhost", "127.0.0.1", "::1")
@@ -70,14 +82,32 @@ class APIConfig:
             )
         )
         return cls(
-            item_verification_transport_enabled=source.get("POKEAPP_ITEM_VERIFICATION_TRANSPORT_ENABLED") == "true",
-            item_verification_trainers=tuple(t.strip() for t in source.get("POKEAPP_ITEM_VERIFICATION_TRAINERS", "").split(",") if t.strip()),
-            transfer_engineering_enabled=source.get("POKEAPP_TRANSFER_ENGINEERING_ENABLED") == "true",
-            admin_incidents_enabled=source.get("POKEAPP_ADMIN_INCIDENTS_ENABLED") == "true",
-            transfer_engineering_trainers=tuple(t.strip() for t in source.get("POKEAPP_TRANSFER_ENGINEERING_TRAINERS", "").split(",") if t.strip()),
+            item_verification_transport_enabled=source.get(
+                "POKEAPP_ITEM_VERIFICATION_TRANSPORT_ENABLED"
+            )
+            == "true",
+            item_verification_trainers=tuple(
+                t.strip()
+                for t in source.get("POKEAPP_ITEM_VERIFICATION_TRAINERS", "").split(",")
+                if t.strip()
+            ),
+            transfer_engineering_enabled=source.get(
+                "POKEAPP_TRANSFER_ENGINEERING_ENABLED"
+            )
+            == "true",
+            admin_incidents_enabled=source.get("POKEAPP_ADMIN_INCIDENTS_ENABLED")
+            == "true",
+            transfer_engineering_trainers=tuple(
+                t.strip()
+                for t in source.get("POKEAPP_TRANSFER_ENGINEERING_TRAINERS", "").split(
+                    ","
+                )
+                if t.strip()
+            ),
             credential_keyring=credential_keyring_from_env(source)
             if versioned
             else None,
+            discord_webhook_url=source.get("POKEAPP_DISCORD_WEBHOOK_URL", "").strip(),
             registration_access_code=source.get("POKEAPP_REGISTRATION_ACCESS_CODE", ""),
             registration_bootstrap_hash=source.get(
                 "POKEAPP_REGISTRATION_BOOTSTRAP_HASH", ""

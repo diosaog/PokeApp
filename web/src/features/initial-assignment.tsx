@@ -17,6 +17,8 @@ import {
 
 type Assignment = Model<"InitialAssignmentRead">;
 const blockingLabels: Record<string, string> = {
+  opponent_missing:
+    "Puedes preparar y sincronizar tu partida a solas. Para comenzar los enfrentamientos deben estar inscritos al menos dos entrenadores; no necesitan estar conectados.",
   season_not_active:
     "La temporada debe estar activa para confirmar el reparto.",
   invalid_roster:
@@ -128,8 +130,8 @@ export function InitialAssignment({
     <Card>
       <h2>{single ? "Inicio de la Liga" : "Reparto inicial A/B"}</h2>
       <p>
-        El primer tramo termina en la Medalla 2 inclusive. El progreso se
-        obtiene leyendo el save; cuando todos alcancen el objetivo observado,{" "}
+        La temporada está abierta para preparar las partidas. Cuando todos
+        alcancen la Medalla 2 observada,{" "}
         {single
           ? "empieza la Liga con todos los participantes."
           : "las menores muertes competitivas ajustadas determinan el reparto."}
@@ -186,10 +188,8 @@ export function InitialAssignment({
       {data.state === "pending" && !data.ready && (
         <>
           <p>
-            Se necesita una observación fiable y suficiente de cada
-            participante, junto con una configuración y una temporada
-            preparadas. La conexión de subida del save todavía está pendiente;
-            no se acredita el progreso manualmente.
+            Falta completar los requisitos indicados. El Launcher actualiza el
+            save automáticamente al guardar en el juego.
           </p>
           {data.blocking_reasons.map(
             (reason) =>

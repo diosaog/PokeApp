@@ -5,6 +5,13 @@ milestone record; it does not maintain a second live phase-status ledger.
 
 ## Current project position
 
+- Current packet (2026-10-28): **Final corrections — validated, publication
+  pending.** Automatic personal-save upload/retry, concise League preparation,
+  safe precompetition cancellation, native Gen6 readiness and Discord delivery.
+  Authoritative continuation: [live record](work-in-progress/final-corrections-live.md).
+  Earlier production references below are historical; the 2026-10-28 entry
+  serves Launcher0.26.3 and database066 (see final release report).
+
 - Current packet: **Launcher automatic updates — DONE LOCAL / PASS PACKAGED,
   not active publicly.** One-click updater (popup, progress, «Más tarde»,
   verified install, restart, recovery) certified by a real update between two
