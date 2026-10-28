@@ -44,7 +44,7 @@ EXPECTED_SHA256 = {
     "062_admin_incident_center.sql": "7abd350f7d99247bc82912fce2c53bc636a1745571265332dbd767fce41497ad",
     "063_single_league_structure.sql": "621e43f2c44cc4b232f4a40c787ae84c4a36ad63ab2279778967cffc33576e1c",
     "064_admin_robbery_cancellation.sql": "80407837fce1d205b90757c19e4148419d3fab52e24de6d47952c43afad21b2e",
-    "065_personal_saves.sql": "7fafaa066b34b6fb1690c30ecb80ff65eb5ec32242310bca599be686f960d0b3",
+    "065_personal_saves.sql": "11b02406d1b8eabd688d51bb8c51886cc462c3c5115cdb9b1e685b7b0e417ec9",
 }
 BACKUP_MAX_AGE = timedelta(hours=2)
 
