@@ -19,7 +19,8 @@ def main():
     allowed = [n for n in names if n.startswith('app/') and n.endswith('.py')]
     allowed += [n for n in names if n.startswith(('companion/parser/PokeApp.Parser/', 'companion/parser/PokeApp.Parser.Checks/'))
                 and (n.endswith(('.cs', '.csproj')) or n.endswith('/packages.lock.json'))]
-    allowed += ['Dockerfile', '.dockerignore', 'deploy/requirements-api.txt', 'deploy/parser-linux-x64.lock.json']
+    # railway.json: the service runs next to Supabase (eu-central-1), not in us-west.
+    allowed += ['Dockerfile', '.dockerignore', 'deploy/requirements-api.txt', 'deploy/parser-linux-x64.lock.json', 'railway.json']
     for name in allowed:
         if name not in names:
             raise SystemExit('Missing committed deployment input: '+name)
