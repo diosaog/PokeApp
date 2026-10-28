@@ -50,13 +50,19 @@ class LocalWriteController:
         # database and re-running its path checks every time; any change to
         # the file (including a path now resolving to another file) or to the
         # selection reads it again with every check.
+        # Two commits inside one timestamp tick can leave mtime and size equal,
+        # so SQLite's own file change counter (header bytes 24-27, bumped on
+        # every commit in rollback-journal mode) is part of the key.
         try:
             info = self.engine.database.stat()
+            with self.engine.database.open("rb") as handle:
+                counter = handle.read(28)[24:28]
             selected = self.selected()
             key = (
                 info.st_ino,
                 info.st_mtime_ns,
                 info.st_size,
+                counter,
                 str(Path(selected).absolute()) if selected else None,
             )
         except (OSError, TypeError, ValueError):
