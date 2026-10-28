@@ -41,14 +41,25 @@ type State = {
   adminOperationPending: boolean;
   holdAdminNavigation: () => () => void;
   accountsEnabled: boolean;
+  // False until the server (or the last visit) has said which options exist.
+  capabilitiesKnown: boolean;
   registrationEnabled: boolean;
   bootstrapRequired: boolean;
   renewalEnabled: boolean;
 };
 const Context = createContext<State | null>(null);
+type Capabilities = {
+  enabled: boolean;
+  registration_enabled: boolean;
+  bootstrap_required: boolean;
+  renewal_enabled: boolean;
+};
 export function AppState({ children }: { children: ReactNode }) {
   const [me, setMe] = useState<Me | null>(null);
   const [season, setSeason] = useState("");
+  // Nothing about the sign-in options is stored in the browser: until the
+  // server answers, the sign-in screen holds their place instead.
+  const [capabilitiesKnown, setCapabilitiesKnown] = useState(false);
   const [accountsEnabled, setAccountsEnabled] = useState(false);
   const [registrationEnabled, setRegistrationEnabled] = useState(false);
   const [bootstrapRequired, setBootstrapRequired] = useState(false);
@@ -56,19 +67,19 @@ export function AppState({ children }: { children: ReactNode }) {
   useEffect(() => {
     const controller = new AbortController();
     void api
-      .request<{
-        enabled: boolean;
-        registration_enabled: boolean;
-        bootstrap_required: boolean;
-        renewal_enabled: boolean;
-      }>("/v1/auth/account-capabilities", { signal: controller.signal }, false)
+      .request<Capabilities>(
+        "/v1/auth/account-capabilities",
+        { signal: controller.signal },
+        false,
+      )
       .then((value) => {
         setAccountsEnabled(value.enabled === true);
         setRegistrationEnabled(value.registration_enabled === true);
         setBootstrapRequired(value.bootstrap_required === true);
         setRenewalEnabled(value.renewal_enabled === true);
+        setCapabilitiesKnown(true);
       })
-      .catch(() => {});
+      .catch(() => setCapabilitiesKnown(true));
     return () => controller.abort();
   }, []);
   // Inside PokeApp Launcher: one sign-in. The Launcher keeps the session
@@ -121,6 +132,7 @@ export function AppState({ children }: { children: ReactNode }) {
           adminOperationPending: adminHolds > 0,
           holdAdminNavigation,
           accountsEnabled,
+          capabilitiesKnown,
           registrationEnabled,
           bootstrapRequired,
           renewalEnabled,

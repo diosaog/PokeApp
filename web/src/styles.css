@@ -1299,6 +1299,11 @@ footer span {
   padding: 80px 50px;
   margin: auto;
 }
+/* Same layout as the registration offer, invisible until capabilities load. */
+.login-reserve {
+  display: contents;
+  visibility: hidden;
+}
 .login-form > svg {
   color: var(--c-accent);
   margin-bottom: 26px;

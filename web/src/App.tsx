@@ -29,25 +29,68 @@ import { api } from "./api/client";
 import type { Model } from "./api/types";
 import { useApp, useRead } from "./state";
 import { Field, Notice, Submit, Loading, form, text } from "./ui";
-import {
-  HomePage,
-  LeaguePage,
-  TrainersPage,
-  PCPage,
-  ShopPage,
-  HallPage,
-} from "./features/core";
-import { CupsPage } from "./features/cups";
-import { TrialsPage } from "./features/trials";
+// Every screen behind the sign-in loads on demand: the sign-in screen ships
+// only the shell. Once signed in, the screens are fetched while the browser is
+// idle (warmScreens), so moving between them stays instant.
+const screens = {
+  core: () => import("./features/core"),
+  cups: () => import("./features/cups"),
+  trials: () => import("./features/trials"),
+  battle: () => import("./features/team-preview"),
+  scouting: () => import("./features/scouting"),
+  profile: () => import("./features/trainer-profile"),
+  desktop: () => import("./features/desktop"),
+  saves: () => import("./features/saves"),
+};
+const HomePage = lazy(() =>
+  screens.core().then((m) => ({ default: m.HomePage })),
+);
+const LeaguePage = lazy(() =>
+  screens.core().then((m) => ({ default: m.LeaguePage })),
+);
+const TrainersPage = lazy(() =>
+  screens.core().then((m) => ({ default: m.TrainersPage })),
+);
+const PCPage = lazy(() => screens.core().then((m) => ({ default: m.PCPage })));
+const ShopPage = lazy(() =>
+  screens.core().then((m) => ({ default: m.ShopPage })),
+);
+const HallPage = lazy(() =>
+  screens.core().then((m) => ({ default: m.HallPage })),
+);
+const CupsPage = lazy(() =>
+  screens.cups().then((m) => ({ default: m.CupsPage })),
+);
+const TrialsPage = lazy(() =>
+  screens.trials().then((m) => ({ default: m.TrialsPage })),
+);
+function warmScreens() {
+  const idle =
+    window.requestIdleCallback ??
+    ((run: () => void) => window.setTimeout(run, 200));
+  idle(() => {
+    for (const load of Object.values(screens)) void load().catch(() => {});
+  });
+}
 const AdminPage = lazy(() =>
   import("./features/admin").then((m) => ({ default: m.AdminPage })),
 );
 import { seasonLabel } from "./features/admin-labels";
-import { BattlePage } from "./features/team-preview";
-import { ScoutingPage } from "./features/scouting";
-import { TrainerProfilePage } from "./features/trainer-profile";
-import { DesktopPage } from "./features/desktop";
-import { SavesPage } from "./features/saves";
+const BattlePage = lazy(() =>
+  screens.battle().then((m) => ({ default: m.BattlePage })),
+);
+const ScoutingPage = lazy(() =>
+  screens.scouting().then((m) => ({ default: m.ScoutingPage })),
+);
+const TrainerProfilePage = lazy(() =>
+  screens.profile().then((m) => ({ default: m.TrainerProfilePage })),
+);
+const DesktopPage = lazy(() =>
+  screens.desktop().then((m) => ({ default: m.DesktopPage })),
+);
+const SavesPage = lazy(() =>
+  screens.saves().then((m) => ({ default: m.SavesPage })),
+);
 import { insideLauncher } from "./launcher";
 import { RegistrationForm } from "./features/registration";
 import { PinForm, pinRecoveryKey } from "./features/account-editor";
@@ -90,6 +133,7 @@ function Login() {
   const {
       setMe,
       accountsEnabled,
+      capabilitiesKnown,
       registrationEnabled,
       renewalEnabled,
       bootstrapRequired,
@@ -200,6 +244,19 @@ function Login() {
             <p className="caption">
               Tu PIN y tu sesión no se guardan en este navegador.
             </p>
+            {!capabilitiesKnown && (
+              // Holds the place of the registration and PIN renewal offers
+              // until the server answers, so the form does not jump.
+              <div className="login-reserve" aria-hidden="true">
+                <p>¿Todavía no tienes cuenta?</p>
+                <button tabIndex={-1} disabled>
+                  Crear cuenta
+                </button>
+                <button tabIndex={-1} disabled>
+                  Renovar PIN con autorización
+                </button>
+              </div>
+            )}
             {registrationEnabled && (
               <>
                 <p>¿Todavía no tienes cuenta?</p>
@@ -286,6 +343,10 @@ export default function App() {
     [menu, setMenu] = useState(false),
     location = useLocation(),
     visited = useRef(location.pathname);
+  const signedIn = Boolean(me);
+  useEffect(() => {
+    if (signedIn) warmScreens();
+  }, [signedIn]);
   useEffect(() => {
     setMenu(false);
     window.scrollTo(0, 0);
@@ -466,57 +527,62 @@ export default function App() {
               Tu entrenador está deshabilitado. Contacta con la administración.
             </section>
           ) : (
-            <Routes>
-              <Route path="/" element={<HomePage />} />
-              <Route path="/liga" element={<LeaguePage />} />
-              <Route path="/battle" element={<BattlePage />} />
-              <Route path="/entrenadores" element={<TrainersPage />} />
-              <Route path="/entrenadores/scouting" element={<ScoutingPage />} />
-              <Route
-                path="/entrenadores/:trainerId"
-                element={<TrainerProfilePage />}
-              />
-              <Route path="/pc" element={<PCPage />} />
-              <Route path="/tienda" element={<ShopPage />} />
-              <Route path="/copa/*" element={<CupsPage />} />
-              <Route path="/hall" element={<HallPage />} />
-              <Route path="/juicios" element={<TrialsPage />} />
-              <Route
-                path="/admin"
-                element={
-                  me.is_admin ? (
-                    <Suspense fallback={<Loading />}>
-                      <AdminPage />
-                    </Suspense>
-                  ) : (
-                    <Navigate to="/" replace />
-                  )
-                }
-              />
-              <Route path="/saves" element={<SavesPage />} />
-              <Route path="/escritorio/:panel/*" element={<DesktopPage />} />
-              <Route
-                path="/admin/cuentas"
-                element={
-                  me.is_admin && accountsEnabled ? (
-                    <Suspense fallback={<Loading />}>
-                      <AdminAccountsPage />
-                    </Suspense>
-                  ) : (
-                    <Navigate to="/" replace />
-                  )
-                }
-              />
-              <Route
-                path="*"
-                element={
-                  <section className="empty">
-                    <h1>Página no encontrada</h1>
-                    <Link to="/">Volver a Inicio</Link>
-                  </section>
-                }
-              />
-            </Routes>
+            <Suspense fallback={<Loading />}>
+              <Routes>
+                <Route path="/" element={<HomePage />} />
+                <Route path="/liga" element={<LeaguePage />} />
+                <Route path="/battle" element={<BattlePage />} />
+                <Route path="/entrenadores" element={<TrainersPage />} />
+                <Route
+                  path="/entrenadores/scouting"
+                  element={<ScoutingPage />}
+                />
+                <Route
+                  path="/entrenadores/:trainerId"
+                  element={<TrainerProfilePage />}
+                />
+                <Route path="/pc" element={<PCPage />} />
+                <Route path="/tienda" element={<ShopPage />} />
+                <Route path="/copa/*" element={<CupsPage />} />
+                <Route path="/hall" element={<HallPage />} />
+                <Route path="/juicios" element={<TrialsPage />} />
+                <Route
+                  path="/admin"
+                  element={
+                    me.is_admin ? (
+                      <Suspense fallback={<Loading />}>
+                        <AdminPage />
+                      </Suspense>
+                    ) : (
+                      <Navigate to="/" replace />
+                    )
+                  }
+                />
+                <Route path="/saves" element={<SavesPage />} />
+                <Route path="/escritorio/:panel/*" element={<DesktopPage />} />
+                <Route
+                  path="/admin/cuentas"
+                  element={
+                    me.is_admin && accountsEnabled ? (
+                      <Suspense fallback={<Loading />}>
+                        <AdminAccountsPage />
+                      </Suspense>
+                    ) : (
+                      <Navigate to="/" replace />
+                    )
+                  }
+                />
+                <Route
+                  path="*"
+                  element={
+                    <section className="empty">
+                      <h1>Página no encontrada</h1>
+                      <Link to="/">Volver a Inicio</Link>
+                    </section>
+                  }
+                />
+              </Routes>
+            </Suspense>
           )}
         </main>
         <footer>
