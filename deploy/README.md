@@ -29,6 +29,13 @@ not trusted, so forwarded IP spoofing cannot change its key; clients behind the
 edge can share a limit per trainer. Shared durable throttling is needed before
 scaling replicas. `/health` is liveness, not a database/auth readiness assertion.
 
+Region: the service runs in **EU West** (one replica), next to Supabase
+(`eu-central-1`); it ran in us-west until 2026-10-28, which put an Atlantic
+round trip on every request and on every database call. Railway keeps the
+region in the service settings (`railway scale eu-west=1 sfo=0 us-west=0`
+from a folder linked to the service), not in the uploaded files. App
+sleeping stays on.
+
 Commit/push before deploying. Export a new temporary directory with:
 
 ```powershell
