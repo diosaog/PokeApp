@@ -13,8 +13,7 @@ from datetime import UTC, datetime
 from hashlib import sha256
 
 from app.domain.pokemon_identity import digest, trusted_native_identity
-from app.launcher.write_engine import WriteIntent
-from app.save_parser.writer import NATIVE_SIZES
+from app.save_parser.native_sizes import NATIVE_SIZES
 
 
 class VerificationRejected(Exception):
@@ -141,6 +140,10 @@ class TrustedItemUseVerification:
                 map(str, (obs.game, t.name, t.tid, t.sid, t.gender, t.language))
             ).encode()
         ).hexdigest()
+        # The writer engine is Windows-only; the API imports this module on Linux
+        # for VerificationRejected and never reaches this verifier step.
+        from app.launcher.write_engine import WriteIntent
+
         intent = WriteIntent.create(
             game=obs.game,
             expected_sha256=saved["sha256"],

@@ -4,7 +4,7 @@ from hashlib import sha256
 from threading import BoundedSemaphore
 
 from app.repositories.errors import ItemUseRejectedError
-from app.save_parser.writer import NATIVE_SIZES
+from app.save_parser.native_sizes import NATIVE_SIZES
 
 
 def public_receipt(row):

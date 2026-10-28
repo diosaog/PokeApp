@@ -11,18 +11,9 @@ from hashlib import sha256
 from pathlib import Path
 
 from app.launcher.write_engine import PreparedNative, WriteIntent
+from app.save_parser.native_sizes import NATIVE_SIZES
 
 WRITER_VERSION = "pokeapp-writer/1;pkhex/24.11.11"
-NATIVE_SIZES = {
-    "X": 415232,
-    "Y": 415232,
-    "OR": 483328,
-    "AS": 483328,
-    "SN": 441856,
-    "MN": 441856,
-    "US": 445440,
-    "UM": 445440,
-}
 MAX_REQUEST = 2 * 1024 * 1024
 MAX_RESPONSE = 1024 * 1024
 MAX_STDERR = 16384

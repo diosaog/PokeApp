@@ -25,7 +25,7 @@ from app.api.schemas import (
 from app.api.security import require_enabled_principal
 from app.application.item_use_verification import VerificationRejected
 from app.repositories.errors import PersistenceError, TransferRejectedError
-from app.save_parser.writer import NATIVE_SIZES
+from app.save_parser.native_sizes import NATIVE_SIZES
 
 router = APIRouter(tags=["transfers"])
 Reader = Depends(require_enabled_principal)

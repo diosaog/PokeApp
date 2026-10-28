@@ -3,7 +3,7 @@
 from hashlib import sha256
 
 from app.application.item_use_verification import require
-from app.save_parser.writer import NATIVE_SIZES
+from app.save_parser.native_sizes import NATIVE_SIZES
 
 
 class TransferTransport:

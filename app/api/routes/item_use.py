@@ -20,7 +20,7 @@ from app.api.security import require_enabled_principal
 from app.application.item_use import prepare_item_use
 from app.domain.item_use_status import physical_state
 from app.repositories.errors import ItemUseRejectedError, PersistenceError
-from app.save_parser.writer import NATIVE_SIZES
+from app.save_parser.native_sizes import NATIVE_SIZES
 
 router = APIRouter(tags=["item-use"])
 Reader = Depends(require_enabled_principal)
