@@ -1,0 +1,11 @@
+{
+  "build": "Launcher 0.26.1 (packaged, win-unpacked, isolated profile, hosted web)",
+  "machine_logical_cpus": 16,
+  "method": "Win32_Process kernel+user time over 30 s, per process, after settling (before: 20 s; after: 65 s, past the 45 s idle threshold)",
+  "percent_of_one_core": {
+    "before": {"main": 0.15, "gpu-process": 12.72, "core": 0.10, "utility": 0.00, "renderer_launcher_ui": 0.00, "renderer_web": 2.81, "renderer_other": 0.20, "total": 15.98},
+    "after_idle_pause": {"main": 0.05, "gpu-process": 0.46, "core": 0.20, "utility": 0.10, "renderer_launcher_ui": 0.00, "renderer_web": 0.26, "renderer_other": 0.05, "total": 1.12}
+  },
+  "cause": "18 infinite decorative CSS animations repainting the visible scene",
+  "change": "web/src/idle-motion.ts: after 45 s without input, animations (except spinners) pause on their current frame"
+}
