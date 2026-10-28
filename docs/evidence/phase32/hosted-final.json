@@ -1,0 +1,117 @@
+{
+  "stage": "final",
+  "captured_at": "2026-10-28T07:00:05+00:00",
+  "installer_sha256": "edf8d6479a7bf8187b76e240457eb0399d8eb36a5ac4c029face22366e18d320",
+  "passed": 20,
+  "total": 20,
+  "checks": [
+    {
+      "check": "web answers",
+      "pass": true,
+      "observed": 200
+    },
+    {
+      "check": "web targets the production API",
+      "pass": true,
+      "observed": "https://pokeapp-api-production.up.railway.app"
+    },
+    {
+      "check": "download card announces 0.26.1, the installer R2 serves",
+      "pass": true,
+      "observed": [
+        "0.26.1",
+        "19.3.0"
+      ]
+    },
+    {
+      "check": "public installer is the 0.26.1 object",
+      "pass": true,
+      "observed": 159312173
+    },
+    {
+      "check": "downloaded installer hash matches the recorded 0.26.1 hash",
+      "pass": true,
+      "observed": "edf8d6479a7bf8187b76e240457eb0399d8eb36a5ac4c029face22366e18d320"
+    },
+    {
+      "check": "update channel state: feed",
+      "pass": true,
+      "observed": [
+        200,
+        "feed"
+      ]
+    },
+    {
+      "check": "stable feed is signed by the stable key (Ed25519)",
+      "pass": true,
+      "observed": null
+    },
+    {
+      "check": "a tampered manifest fails the signature",
+      "pass": true,
+      "observed": null
+    },
+    {
+      "check": "stable feed offers 0.26.1 at its stable route, size bound",
+      "pass": true,
+      "observed": "0.26.1"
+    },
+    {
+      "check": "stable installer route: immutable cache, exact size",
+      "pass": true,
+      "observed": null
+    },
+    {
+      "check": "no traversal or listing through the update routes",
+      "pass": true,
+      "observed": 404
+    },
+    {
+      "check": "API health",
+      "pass": true,
+      "observed": 200
+    },
+    {
+      "check": "API exposes 104 routes",
+      "pass": true,
+      "observed": 104
+    },
+    {
+      "check": "DivisionSizes structure",
+      "pass": true,
+      "observed": [
+        "A"
+      ]
+    },
+    {
+      "check": "robbery cancellation route",
+      "pass": true,
+      "observed": true
+    },
+    {
+      "check": "/v1/me... refuses without a session",
+      "pass": true,
+      "observed": 401
+    },
+    {
+      "check": "/v1/admin/seasons/... refuses without a session",
+      "pass": true,
+      "observed": 401
+    },
+    {
+      "check": "/v1/launcher/seasons/... refuses without a session",
+      "pass": true,
+      "observed": 401
+    },
+    {
+      "check": "CORS admits the public web",
+      "pass": true,
+      "observed": "https://pokeapp-web.pokeapp-v2.workers.dev"
+    },
+    {
+      "check": "CORS refuses another origin",
+      "pass": true,
+      "observed": 400
+    }
+  ]
+}

@@ -1,0 +1,38 @@
+{
+  "phase": "transition",
+  "checks": [
+    {
+      "pass": true,
+      "label": "public 0.25.0 installed in the sandbox"
+    },
+    {
+      "pass": true,
+      "label": "0.25.0 ran on its profile: selected save, encrypted session, backups"
+    },
+    {
+      "pass": true,
+      "label": "the 0.26.0 installer replaced 0.25.0 in the same folder"
+    },
+    {
+      "pass": true,
+      "label": "one installed PokeApp Launcher (no side-by-side copy)"
+    },
+    {
+      "pass": true,
+      "label": "the installer kept the profile byte for byte: configuration, known saves, encrypted session, backups"
+    },
+    {
+      "pass": true,
+      "label": "the game save is untouched by the transition"
+    },
+    {
+      "pass": true,
+      "label": "0.26.0 keeps the save chosen in 0.25.0"
+    },
+    {
+      "pass": true,
+      "label": "0.26.0 reads the hosted stable feed: «Estás utilizando la última versión»"
+    }
+  ],
+  "status": "PASS"
+}

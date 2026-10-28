@@ -1,0 +1,97 @@
+{
+  "stage": "after",
+  "captured_at": "2026-10-28T01:05:00+00:00",
+  "installer_sha256": "f02eccd0dbef2579218b7b1f4a14c6ebfcaa398433b7022827038659e983d3fa",
+  "passed": 16,
+  "total": 16,
+  "checks": [
+    {
+      "check": "web answers",
+      "pass": true,
+      "observed": 200
+    },
+    {
+      "check": "web targets the production API",
+      "pass": true,
+      "observed": "https://pokeapp-api-production.up.railway.app"
+    },
+    {
+      "check": "download card announces 0.25.0, the installer R2 serves",
+      "pass": true,
+      "observed": [
+        "0.25.0",
+        "19.3.0"
+      ]
+    },
+    {
+      "check": "public installer is the 0.25.0 object",
+      "pass": true,
+      "observed": 159293410
+    },
+    {
+      "check": "downloaded installer hash matches the recorded 0.25.0 hash",
+      "pass": true,
+      "observed": "f02eccd0dbef2579218b7b1f4a14c6ebfcaa398433b7022827038659e983d3fa"
+    },
+    {
+      "check": "update channel stays off (absent)",
+      "pass": true,
+      "observed": [
+        404,
+        "absent"
+      ]
+    },
+    {
+      "check": "no traversal or listing through the update routes",
+      "pass": true,
+      "observed": 404
+    },
+    {
+      "check": "API health",
+      "pass": true,
+      "observed": 200
+    },
+    {
+      "check": "API exposes 104 routes",
+      "pass": true,
+      "observed": 104
+    },
+    {
+      "check": "DivisionSizes structure",
+      "pass": true,
+      "observed": [
+        "A"
+      ]
+    },
+    {
+      "check": "robbery cancellation route",
+      "pass": true,
+      "observed": true
+    },
+    {
+      "check": "/v1/me... refuses without a session",
+      "pass": true,
+      "observed": 401
+    },
+    {
+      "check": "/v1/admin/seasons/... refuses without a session",
+      "pass": true,
+      "observed": 401
+    },
+    {
+      "check": "/v1/launcher/seasons/... refuses without a session",
+      "pass": true,
+      "observed": 401
+    },
+    {
+      "check": "CORS admits the public web",
+      "pass": true,
+      "observed": "https://pokeapp-web.pokeapp-v2.workers.dev"
+    },
+    {
+      "check": "CORS refuses another origin",
+      "pass": true,
+      "observed": 400
+    }
+  ]
+}

@@ -1,0 +1,11 @@
+{
+  "channel": "stable",
+  "version": "0.26.0",
+  "minimum_version": "0.26.0",
+  "installer_sha256": "0610caee1356127a4894c294eebec32cc9d42d0e27747027b46088d1755608d3",
+  "installer_bytes": 159311881,
+  "authenticode": "NotSigned",
+  "authenticode_policy": "private-distribution",
+  "public_key_sha256": "639e544049a6a9e0518baba1efc0c5b9def43ded145c3e2ae394861915598ff4",
+  "signed_at": "2026-10-28T00:53:33.637Z"
+}

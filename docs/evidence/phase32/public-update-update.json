@@ -1,0 +1,23 @@
+{
+  "phase": "update",
+  "checks": [
+    {
+      "pass": true,
+      "label": "0.26.0 finds 0.26.1 on the hosted stable feed"
+    },
+    {
+      "pass": true,
+      "label": "download verified (Ed25519 manifest, SHA-512 installer) and installation started: DOWNLOADING → INSTALLING"
+    },
+    {
+      "pass": true,
+      "label": "silent install done; 0.26.1 restarted by itself"
+    }
+  ],
+  "status": "FAIL",
+  "error": "Error: timed out\n    at until (file:///C:/Users/Antonio/Desktop/AntoPKMN/PokeApp/tools/validate_launcher_public_update.mjs:59:33)\n    at async file:///C:/Users/Antonio/Desktop/AntoPKMN/PokeApp/tools/validate_launcher_public_update.mjs:201:5",
+  "cleanup": {
+    "uninstall_entries_left": 0,
+    "sandbox_removed": true
+  }
+}

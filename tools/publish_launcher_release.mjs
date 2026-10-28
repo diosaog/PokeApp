@@ -72,9 +72,37 @@ need(embedded.publicKey && embedded.feed?.stable === `${WEB}/launcher/updates/st
   "the build does not embed the stable key and the stable feed"); // prettier-ignore
 let manifest;
 try {
-  manifest = updater.verifyManifest(JSON.parse(fs.readFileSync(path.resolve(arg("manifest") || ""), "utf8")),
-    embedded.publicKey, { channel: "stable", currentVersion: "0.0.0" }); // prettier-ignore
+  const envelope = JSON.parse(
+    fs.readFileSync(path.resolve(arg("manifest") || ""), "utf8"),
+  );
+  const body = Buffer.from(envelope.manifest, "base64");
+  // The signature, with the key embedded in this very build.
+  if (
+    !crypto.verify(
+      null,
+      body,
+      crypto.createPublicKey(embedded.publicKey),
+      Buffer.from(envelope.signature, "base64"),
+    )
+  )
+    throw Object.assign(new Error("SIGNATURE_INVALID"), {
+      code: "SIGNATURE_INVALID",
+    });
+  manifest = JSON.parse(body.toString("utf8"));
+  need(
+    manifest.channel === "stable",
+    "the manifest is not for the stable channel",
+  );
+  // And the shipped updater, as a client at the minimum version would read it
+  // (a bridge manifest names itself as minimum: nobody installs it, it says
+  // «última versión» to the bridge).
+  if (updater.compareVersions(manifest.minimum_version, manifest.version) < 0)
+    updater.verifyManifest(envelope, embedded.publicKey, {
+      channel: "stable",
+      currentVersion: manifest.minimum_version,
+    });
 } catch (error) {
+  manifest = undefined;
   problems.push(
     `manifest refused by the shipped updater: ${error.code || error.message}`,
   );

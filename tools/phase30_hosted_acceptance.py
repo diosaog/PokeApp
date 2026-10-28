@@ -12,8 +12,10 @@ Run: python -m tools.phase30_hosted_acceptance --stage before|after [--full-down
 from __future__ import annotations
 
 import argparse
+import base64
 import hashlib
 import json
+import os
 import re
 from datetime import UTC, datetime
 from pathlib import Path
@@ -21,10 +23,17 @@ from pathlib import Path
 from tools.production_readonly import WEB, http
 
 API = "https://pokeapp-api-production.up.railway.app"
-INSTALLER_025 = {
-    "bytes": 159293410,
-    "sha256_prefix": "f02eccd0",
-    "sha256_suffix": "83d3fa",
+INSTALLERS = {
+    "0.25.0": {
+        "bytes": 159293410,
+        "sha256_prefix": "f02eccd0",
+        "sha256_suffix": "83d3fa",
+    },
+    "0.26.1": {
+        "bytes": 159312173,
+        "sha256_prefix": "edf8d647",
+        "sha256_suffix": "18d320",
+    },
 }
 EXPECTED = {
     "before": {
@@ -39,8 +48,30 @@ EXPECTED = {
         "incidents": True,
         "feed": "absent",
     },
+    # Phase 32 published: 0.26.1 is the download and the stable feed's offer.
+    "final": {
+        "routes": 104,
+        "division_required": ["A"],
+        "incidents": True,
+        "feed": "feed",
+        "launcher": "0.26.1",
+    },
 }
 ZERO = "00000000-0000-4000-8000-000000000000"
+STABLE_KEY = (
+    Path(os.environ.get("LOCALAPPDATA", ""))
+    / "PokeApp-release-keys/stable/pokeapp-update-public.pem"
+)
+
+
+def signed_by_stable_key(signature: bytes, body: bytes) -> bool:
+    from cryptography.hazmat.primitives.serialization import load_pem_public_key
+
+    try:
+        load_pem_public_key(STABLE_KEY.read_bytes()).verify(signature, body)
+        return True
+    except Exception:  # noqa: BLE001 - any failure is "not signed by it"
+        return False
 
 
 def main():
@@ -50,6 +81,8 @@ def main():
     parser.add_argument("--output", type=Path)
     args = parser.parse_args()
     want = EXPECTED[args.stage]
+    launcher = want.get("launcher", "0.25.0")
+    installer = INSTALLERS[launcher]
     checks = []
 
     def check(label, condition, observed=None):
@@ -77,17 +110,18 @@ def main():
     bundle_path = re.search(r'src="(/assets/index-[^"]+\.js)"', index.text)
     bundle = http("GET", WEB + bundle_path.group(1)).text if bundle_path else ""
     versions = sorted(set(re.findall(r'version:["`](\d+\.\d+\.\d+)["`]', bundle)))
+    launchers = [v for v in versions if v.startswith("0.2")]
     check(
-        "download card announces 0.25.0, the installer R2 serves",
-        "0.25.0" in versions and "0.26.0" not in versions,
+        f"download card announces {launcher}, the installer R2 serves",
+        launchers == [launcher],
         versions,
     )
 
     head = http("HEAD", WEB + "/launcher/download")
     size = int(head.headers.get("content-length", "0"))
     check(
-        "public installer is the 0.25.0 object",
-        head.status_code == 200 and size == INSTALLER_025["bytes"],
+        f"public installer is the {launcher} object",
+        head.status_code == 200 and size == installer["bytes"],
         size,
     )
     digest = None
@@ -99,9 +133,9 @@ def main():
                 sha.update(chunk)
         digest = sha.hexdigest()
         check(
-            "downloaded installer hash matches the recorded 0.25.0 hash",
-            digest.startswith(INSTALLER_025["sha256_prefix"])
-            and digest.endswith(INSTALLER_025["sha256_suffix"]),
+            f"downloaded installer hash matches the recorded {launcher} hash",
+            digest.startswith(installer["sha256_prefix"])
+            and digest.endswith(installer["sha256_suffix"]),
             digest,
         )
     feed = http("GET", WEB + "/launcher/updates/stable.json")
@@ -111,10 +145,41 @@ def main():
         else ("absent" if feed.status_code == 404 else "feed")
     )
     check(
-        f"update channel stays off ({want['feed']})",
+        f"update channel state: {want['feed']}",
         shape == want["feed"],
         [feed.status_code, shape],
     )
+    if shape == "feed":
+        envelope = feed.json()
+        body = base64.b64decode(envelope["manifest"])
+        signature = base64.b64decode(envelope["signature"])
+        manifest = json.loads(body)
+        check(
+            "stable feed is signed by the stable key (Ed25519)",
+            signed_by_stable_key(signature, body),
+        )
+        tampered = bytearray(body)
+        tampered[-2] ^= 1
+        check(
+            "a tampered manifest fails the signature",
+            not signed_by_stable_key(signature, bytes(tampered)),
+        )
+        check(
+            f"stable feed offers {launcher} at its stable route, size bound",
+            manifest["channel"] == "stable"
+            and manifest["version"] == launcher
+            and manifest["installer"]["size"] == installer["bytes"]
+            and manifest["installer"]["url"]
+            == f"{WEB}/launcher/updates/stable/{launcher}.exe",
+            manifest["version"],
+        )
+        route = http("HEAD", f"{WEB}/launcher/updates/stable/{launcher}.exe")
+        check(
+            "stable installer route: immutable cache, exact size",
+            route.status_code == 200
+            and "immutable" in route.headers.get("cache-control", "")
+            and int(route.headers.get("content-length", "0")) == installer["bytes"],
+        )
     upload = http("GET", WEB + "/launcher/updates/stable/..%2f..%2fwindows.exe")
     check(
         "no traversal or listing through the update routes",
