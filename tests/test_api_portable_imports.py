@@ -19,7 +19,7 @@ class ApiPortableImportsTest(unittest.TestCase):
             check=False,
         )
         self.assertEqual(result.returncode, 0, result.stderr[-2000:])
-        self.assertIn("104 routes", result.stdout)
+        self.assertIn("108 routes", result.stdout)
 
 
 if __name__ == "__main__":

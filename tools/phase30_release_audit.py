@@ -25,8 +25,11 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 MIGRATIONS = sorted((ROOT / "supabase/v2/migrations").glob("*.sql"))
-DEPLOYED = [m for m in MIGRATIONS if int(m.name[:3]) <= 53]
-PENDING = [m for m in MIGRATIONS if 54 <= int(m.name[:3]) <= 64]
+# 054-064 went out with the final release; 065 (personal saves, «Mi PC»
+# outside seasons) is the window after it.
+DEPLOYED = [m for m in MIGRATIONS if int(m.name[:3]) <= 64]
+PENDING = [m for m in MIGRATIONS if int(m.name[:3]) == 65]
+WINDOW = f"{PENDING[0].name[:3]}-{PENDING[-1].name[:3]}"
 SCHEMAS = "('public','v1_shadow')"
 
 
@@ -301,7 +304,7 @@ def audit(args) -> dict:
         """select c.relname as name from pg_class c join pg_namespace n on n.oid=c.relnamespace
         where n.nspname='public' and c.relname in ('item_use_authorizations','item_use_verifications',
         'item_use_artifacts','item_use_transfers','item_use_transfer_legs','transfer_provenance',
-        'transfer_commit_permits','admin_incident_commands')
+        'transfer_commit_permits','admin_incident_commands','trainer_personal_saves')
         union all select p.proname from pg_proc p join pg_namespace n on n.oid=p.pronamespace
         where n.nspname='public' and p.proname in ('api_prepare_item_use','api_prepare_transfer',
         'admin_incident_overview','config_division_count','admin_robbery_cancel')
@@ -377,7 +380,7 @@ def audit(args) -> dict:
                 ),
                 "pending_recorded": sorted(m.stem for m in PENDING if m.stem in names),
             },
-            "objects_of_054_064_present": sorted(r["name"] for r in pending_objects),
+            "release_objects_present": sorted(r["name"] for r in pending_objects),
             "row_counts": counts,
             "seasons_by_status": seasons,
             "states_by_table": states,

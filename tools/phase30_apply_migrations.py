@@ -44,6 +44,7 @@ EXPECTED_SHA256 = {
     "062_admin_incident_center.sql": "7abd350f7d99247bc82912fce2c53bc636a1745571265332dbd767fce41497ad",
     "063_single_league_structure.sql": "621e43f2c44cc4b232f4a40c787ae84c4a36ad63ab2279778967cffc33576e1c",
     "064_admin_robbery_cancellation.sql": "80407837fce1d205b90757c19e4148419d3fab52e24de6d47952c43afad21b2e",
+    "065_personal_saves.sql": "7fafaa066b34b6fb1690c30ecb80ff65eb5ec32242310bca599be686f960d0b3",
 }
 BACKUP_MAX_AGE = timedelta(hours=2)
 
@@ -61,7 +62,7 @@ def preflight(args) -> dict:
     """Read-only: what production looks like and whether the window may open."""
     problems = []
     files = {m.name: hashlib.sha256(m.read_bytes()).hexdigest() for m in PENDING}
-    if files != EXPECTED_SHA256:
+    if any(EXPECTED_SHA256.get(name) != digest for name, digest in files.items()):
         problems.append("pending files differ from the rehearsed bytes")
     project = supabase_get("")
     if project["status"] != "ACTIVE_HEALTHY":

@@ -36,6 +36,7 @@ from tools.phase30_release_audit import (
     DEPLOYED,
     MIGRATIONS,
     PENDING,
+    WINDOW,
     SupabaseLikePG,
     catalog_local,
     compare,
@@ -310,6 +311,12 @@ def rehearse(args) -> dict:
     pg = SupabaseLikePG(args.pg_bin, args.port, args.dir)
     try:
         pg.start(storage_mock=False)
+        # Roles are cluster-wide, outside the archive: the ones production's
+        # grants name since 056, created as 056 creates them (no login here).
+        pg.sql(
+            "create role pokeapp_item_verifier nologin nosuperuser nocreatedb nocreaterole noinherit nobypassrls;",
+            "supabase_admin",
+        )
         # The archive recreates public with production's owner, ACL and defaults.
         pg.sql("drop schema public cascade;", "supabase_admin")
         restore = pg.run(
@@ -351,7 +358,7 @@ def rehearse(args) -> dict:
             "supabase_admin",
         )
         ok(history == manifest["migration_history"] and not any(m.stem in history for m in PENDING),
-           "migration history restored: 054-064 not recorded")  # fmt: skip
+           f"migration history restored: {WINDOW} not recorded")  # fmt: skip
 
         reads_before, privileges_before = reads(pg), privileges(pg)
         broken = {
@@ -418,7 +425,7 @@ def rehearse(args) -> dict:
         }
         ok(
             not moved,
-            f"{len(reads_before)} API reads return identical results after 054-064",
+            f"{len(reads_before)} API reads return identical results after {WINDOW}",
             moved,
         )
         privileges_after = privileges(pg)

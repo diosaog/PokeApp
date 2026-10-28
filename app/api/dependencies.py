@@ -45,6 +45,7 @@ class ApiContainer:
     wipe_revivals_repository: WipeRevivalsRepository | None = None
     launcher_repository: object | None = None
     save_ingestion: object | None = None
+    personal_saves: object | None = None
     account_service: object | None = None
     incident_repository: object | None = None
 
@@ -77,6 +78,7 @@ def create_default_container(config: APIConfig | None = None) -> ApiContainer:
     wipe_repo = None
     launcher_repo = None
     save_ingestion = None
+    personal_saves = None
     accounts = None
 
     if config.supabase_url and config.supabase_anon_key:
@@ -160,6 +162,12 @@ def create_default_container(config: APIConfig | None = None) -> ApiContainer:
                 SupabaseSaveIngestionRepository.from_url_key(config.supabase_url, config.supabase_service_role_key),
                 PkhexProcessParser(Path(parser_path)),
             )
+            from app.application.personal_saves import PersonalSaves
+            from app.repositories.supabase.personal_saves import SupabasePersonalSaveRepository
+            personal_saves = PersonalSaves(
+                SupabasePersonalSaveRepository.from_url_key(config.supabase_url, config.supabase_service_role_key),
+                save_ingestion.parser,
+            )
 
     if config.item_verification_transport_enabled and config.supabase_url and config.supabase_service_role_key:
         from supabase import create_client
@@ -216,5 +224,6 @@ def create_default_container(config: APIConfig | None = None) -> ApiContainer:
         wipe_revivals_repository=wipe_repo,
         launcher_repository=launcher_repo,
         save_ingestion=save_ingestion,
+        personal_saves=personal_saves,
         account_service=accounts,
     )
