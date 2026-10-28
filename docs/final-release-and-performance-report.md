@@ -128,6 +128,6 @@ Backups are still made only before PokeApp changes a save (the first of each
 day kept 30 days); syncing never writes to it.
 
 Gates: Python 1208/1208; Vitest 189/189; Playwright Mi PC/saves specs 39 passed,
-4 skipped; Launcher node 31/31; rehearsals on fresh production backups 14/14
+4 skipped; Launcher node 37/37; rehearsals on fresh production backups 14/14
 (065, then 066); hosted acceptance 19/19; unpacked 0.26.3 in a sandboxed
 profile reads the hosted feed as `UP_TO_DATE`.
