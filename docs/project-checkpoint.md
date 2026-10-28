@@ -5,12 +5,18 @@ milestone record; it does not maintain a second live phase-status ledger.
 
 ## Current project position
 
+- Sprite correction (2026-10-28): **PUBLISHED / VERIFIED**, web `cf68afc`,
+  Cloudflare `f12d4c1f-589e-44ae-aa75-2811193c2104`. Shared species/form resolution
+  fixes Keldeo/Zygarde/Bagon; 51 React, 6 local browser, 2 hosted browser cases and
+  existing packaged Launcher 0.26.4 sprite proof PASS. Owner confirms Y sync works;
+  no sync/data/backend/Launcher change. [Current live record](work-in-progress/final-corrections-live.md).
+
 - Current packet (2026-10-28): **Final corrections — PUBLISHED / VERIFIED.**
   Backend c0dd561 deployed successfully on the authorized resume; 067–068 applied
   once after the still-valid backup/rehearsal. Safe preparation cancellation,
   native Gen6 readiness and Discord worker/triggers active. Web and Launcher 0.26.4
   remain published; automatic personal-save transport/retry fixed. No extra Discord
-  test or historical replay; actual owner-Y acceptance awaits normal owner use.
+  test or historical replay; owner-Y sync success confirmed in the sprite packet.
   Authoritative continuation: [live record](work-in-progress/final-corrections-live.md).
   Earlier production references below are historical. Database 068/60 records;
   115 previous tables unchanged, only migration history differs, new outbox empty.

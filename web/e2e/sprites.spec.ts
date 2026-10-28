@@ -4,7 +4,11 @@ import { fixture, login, navigate, pokemon } from "./fixtures";
 // Reproduce the observed legacy prefix and public species/form/level only.
 // Authentication/PC responses are synthetic; sprite requests are real assets.
 async function pcFixture(page: Page) {
-  const commands = await fixture(page);
+  const commands = await fixture(
+    page,
+    false,
+    process.env.POKEAPP_E2E_API_ORIGIN || "http://127.0.0.1:8000",
+  );
   const make = (id: number, form = 0, level = 5) => ({
     ...pokemon,
     species: `Pok\u00c3\u00a9mon #${id}`,

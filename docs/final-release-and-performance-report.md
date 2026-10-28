@@ -1,5 +1,29 @@
 # POKEAPP 2.0 — FINAL RELEASE AND PERFORMANCE REPORT
 
+## Shared Pokémon sprites — 2026-10-28 20:46 Europe/Madrid
+
+**FIXED / PUBLISHED.** Owner confirms Y synchronization works. The remaining
+question marks came from the display resolver rejecting the legacy encoded species
+prefix (`PokÃ©mon #647`, `#718`, `#371`), not missing Keldeo/Zygarde/Bagon images.
+Web source `cf68afcc1c651c359b40937d3c39badc1ee3d967` now resolves those exact
+labels using the existing catalog. Local sprites cover base species 1–807 plus 16
+explicit alternate forms. Unknown forms and image load failures have distinct
+fallbacks; static/reduced-motion behavior and card layout remain intact.
+
+Cloudflare version **f12d4c1f-589e-44ae-aa75-2811193c2104**, 100%. **51 focused
+React tests, 6 local browser cases, 823 sprite hashes, build/format PASS**. Hosted:
+25 exact asset comparisons, health 200/private-PC 401, 2 desktop/mobile journeys and
+visual review PASS. The unchanged packaged Launcher 0.26.4 also shows all three
+sprites using the hosted web, verified visually in an isolated profile. Browser
+Auth/PC responses are synthetic; image downloads and packaged runtime are real.
+No owner credentials or original save used for this acceptance. A private harness
+navigation/capture issue was corrected without product edits.
+
+Only Cloudflare was published. No synchronization, linkage, Pokémon/save data,
+backend, database, Launcher installer, economy or competitive changes. Refresh
+the web or reopen Launcher; no save reselection/resynchronization is necessary.
+[Current handoff and evidence boundaries](work-in-progress/final-corrections-live.md).
+
 ## Final corrections publication — 2026-10-28 20:19 Europe/Madrid
 
 **PUBLISHED / VERIFIED.** The earlier sections below retain their dated release

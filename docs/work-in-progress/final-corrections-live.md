@@ -1,5 +1,52 @@
 # Final corrections — live execution record
 
+## Sprite correction — 2026-10-28 19:46 UTC
+
+**PUBLISHED / VERIFIED.** Entry `384d181bf8e6f20fd9ae0aabf425af7d6750647b`,
+main/origin aligned; final web source `cf68afcc1c651c359b40937d3c39badc1ee3d967`,
+committed/pushed before Cloudflare publication. Owner now confirms automatic Y
+sync works. This supersedes the earlier awaiting-owner observation below.
+
+- Exact read-only species/form/level inspection found legacy `PokÃ©mon #647`,
+  `#718`, `#371` labels, with levels 6/5/10. The original sprite URLs already
+  returned correct PNGs; shared display resolution rejected the encoded prefix.
+  The resolver now accepts that precise numeric prefix without rewriting data,
+  nicknames, ingestion or synchronization. All screens using PokemonSprite benefit.
+- Existing local assets extended to base species 1–807 and 16 explicitly mapped
+  forms (Keldeo, Zygarde, Raichu, Charizard, Deoxys, Rotom). Pinned source/hash
+  manifest retained; 102 new PNGs, 87,428 bytes. Unknown forms remain explicitly
+  unavailable, never silently depicted as another form. Network/image failures
+  have a distinct accessible fallback and bounded diagnostic; failed animations
+  retain the static sprite. No card CSS/layout or shiny-palette change.
+- **51 focused React tests, 6 local Edge cases PASS** (one test-only strengthened
+  GIF-failure assertion rerun separately). Coverage includes the three observed
+  labels, generations, forms, detail, Home animations, reduced motion, static boxes
+  and actual asset failure. All **823 static sprite hashes** verified. TS/Vite,
+  focused formatting/Ruff/compile, diff and Wrangler dry-run PASS. No backend,
+  PostgreSQL, synchronization or historical full suite rerun.
+- Cloudflare version **f12d4c1f-589e-44ae-aa75-2811193c2104**, 100%, published
+  19:40:56 UTC. **25 hosted asset byte comparisons + health 200/private-PC 401 PASS**.
+  Two hosted Edge journeys at 1440/390 and their visual review PASS. Existing
+  packaged **Launcher 0.26.4** also displays all three decoded hosted sprites;
+  isolated profile, real native IPC, no selected save, no business commands or JS
+  errors. Auth/PC browser responses are synthetic; no owner PIN/login used.
+  Packaged harness locator/screenshot auto-waits stalled on Electron's intercepted
+  session navigation; DOM polling and direct CDP capture resolved this test-only
+  issue, with no product change. Failed harness reports retained separately.
+- API/Railway, schema 068, R2 installer/feed and Launcher binary unchanged. No
+  Pokémon, save, owner, economy or competitive write. Production changes are only
+  Cloudflare web assets. No new phase. Refresh the web/reopen Launcher for visual
+  owner acceptance; do not resync or reselect the save to fix an image.
+
+Private evidence: `%LOCALAPPDATA%/PokeApp-migration-evidence/sprites/20261028/`:
+`public-sprites.json`, `launcher-sprites.json`, local/hosted1440/390 and packaged
+screenshots; isolated disposable profile retained with the evidence. Source and
+test fixture updates are explicitly staged; unrelated files remain untouched.
+The final documentation/test-harness commit follows the deployed source; use Git
+for exact final HEAD. No pending publication remains.
+
+## Earlier corrections publication — retained evidence
+
 2026-10-28 19:19 UTC (20:19 Europe/Madrid). **CORRECTIONS PUBLISHED / VERIFIED.**
 This is the current operational handoff. The deployment blocker is resolved for
 this release; no claim that Railway's wider incident is resolved.
