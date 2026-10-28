@@ -148,9 +148,20 @@ class TrustedStore(CloudStore):
             )
 
 
+# Outside an active season the save goes to the trainer's personal record
+# (/v1/me/save, migration 065): same protocol, its own readback (/v1/me/pc).
+PERSONAL = "personal"
+
+
+def save_paths(season):
+    if season == PERSONAL:
+        return "/v1/me/save", "/v1/me/pc"
+    return f"/v1/seasons/{season}/saves", f"/v1/read/seasons/{season}/pc"
+
+
 def deliver_trusted(session, store, row, *, selected_hash):
     """GET receipt first, retain acceptance before readback, never renew a stale CAS."""
-    base = f"/v1/seasons/{row['season']}/saves"
+    base, pc_path = save_paths(row["season"])
     store.update(row, attempts=row["attempts"] + 1)
     raw = session.request(
         "GET", base + "/receipt?" + urlencode({"sha256": row["id"]}), missing=True
@@ -189,7 +200,7 @@ def deliver_trusted(session, store, row, *, selected_hash):
     if not receipt.is_current:
         store.update(row, blocked=1, raw=None)
         raise BackendError("SAVE_SUPERSEDED")
-    pc = session.request("GET", f"/v1/read/seasons/{row['season']}/pc")
+    pc = session.request("GET", pc_path)
     if (
         pc.get("status") != "ready"
         or (pc.get("save") or {}).get("id") != receipt.save_id

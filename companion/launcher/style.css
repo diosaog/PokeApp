@@ -102,8 +102,7 @@ main {
   margin: auto;
 }
 nav,
-.toolbar,
-.box-nav {
+.toolbar {
   display: flex;
   align-items: center;
   gap: 1rem;
@@ -226,10 +225,6 @@ input:focus-visible {
 }
 .party {
   margin-bottom: 1rem;
-}
-.box-nav {
-  justify-content: center;
-  margin: 1rem;
 }
 .muted,
 #cloud-age,

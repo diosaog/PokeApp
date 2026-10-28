@@ -169,6 +169,25 @@ export function useOverview() {
     Boolean(season),
   );
 }
+// «Mi PC»: the season's save when it is ready, otherwise the trainer's own
+// latest synced save (outside any season). Refreshed while on screen, so a
+// save made in game appears after the Launcher syncs it, with no reload.
+export function useMyPC() {
+  const { season } = useApp();
+  const seasonPc = useRead<Model<"PCRead">>(
+    `/v1/read/seasons/${season}/pc`,
+    Boolean(season),
+    15000,
+  );
+  const personal = useRead<Model<"PCRead">>("/v1/me/pc", true, 15000);
+  const inSeason = seasonPc.data?.status === "ready";
+  return {
+    data: inSeason ? seasonPc.data : personal.data,
+    error: inSeason ? null : personal.error,
+    isPending: (Boolean(season) && seasonPc.isPending) || personal.isPending,
+    personal: !inSeason,
+  };
+}
 export function usePC() {
   const { season } = useApp();
   return useRead<Model<"PCRead">>(

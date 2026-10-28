@@ -11,7 +11,7 @@ import {
   TrainerPhoto,
   typeClass,
 } from "../pokemon/presentation";
-import { useApp, useRead, useOverview, usePC } from "../state";
+import { useApp, useRead, useOverview, useMyPC } from "../state";
 import { ParticipantResults } from "./league-results";
 import { InitialAssignment } from "./initial-assignment";
 import { WipeRevivals } from "./wipe-revivals";
@@ -427,28 +427,32 @@ export function LeaguePage() {
 }
 export { TrainersPage } from "./trainers";
 export function PCPage() {
-  const pc = usePC();
+  const pc = useMyPC();
   return (
     <>
       <Heading eyebrow="TU PARTIDA" title="Mi PC">
         Tu equipo y tus cajas, a un movimiento de distancia.
       </Heading>
-      <WithSeason>
-        <Notice error={pc.error} />
-        {pc.isPending ? (
-          <Loading />
-        ) : pc.data?.status === "ready" ? (
-          <>
-            <SaveGame game={pc.data.save?.game} />
-            <Collection key={pc.data.save?.id} slots={pc.data.pokemon} />
-          </>
-        ) : (
-          <Empty>
-            No hay una partida disponible.{" "}
-            <Link to="/saves">Sincronizar con el Launcher →</Link>
-          </Empty>
-        )}
-      </WithSeason>
+      <Notice error={pc.error} />
+      {pc.isPending && !pc.data ? (
+        <Loading />
+      ) : pc.data?.status === "ready" ? (
+        <>
+          <SaveGame game={pc.data.save?.game} />
+          {pc.personal && (
+            <p className="muted">
+              Tu partida personal: no estás jugando una temporada ahora.
+            </p>
+          )}
+          <Collection key={pc.data.save?.id} slots={pc.data.pokemon} />
+        </>
+      ) : (
+        <Empty>
+          Todavía no hay una partida sincronizada. Abre PokeApp Launcher:
+          detecta tu partida y la envía sola.{" "}
+          <Link to="/saves">Saves y Launcher →</Link>
+        </Empty>
+      )}
     </>
   );
 }

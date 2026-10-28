@@ -2,7 +2,6 @@
 const $ = (id) => document.getElementById(id);
 let observation = null,
   revision = null,
-  boxIndex = 0,
   polling = false,
   pendingWrite = null,
   backupRows = [],
@@ -87,17 +86,6 @@ function slots(id, data, prefix) {
     $(id).append(el);
   });
 }
-function renderBox() {
-  const boxes = observation?.boxes || [];
-  boxIndex = Math.max(0, Math.min(boxIndex, boxes.length - 1));
-  text(
-    "box-name",
-    boxes.length ? `Caja ${boxIndex + 1} / ${boxes.length}` : "Caja —",
-  );
-  slots("box", boxes[boxIndex]?.slots || [], `Caja ${boxIndex + 1}`);
-  $("previous-box").disabled = boxIndex === 0;
-  $("next-box").disabled = boxIndex >= boxes.length - 1;
-}
 const errorText = {
   LOGIN_REQUIRED: "Vuelve a iniciar sesión para sincronizar.",
   SESSION_REJECTED: "Sesión no válida. Vuelve a conectar.",
@@ -140,7 +128,7 @@ function syncStatus(state) {
     return [
       "pending",
       "Pendiente",
-      "Confirma que esta partida es tuya con «Sincronizar ahora» (pestaña Launcher).",
+      "Inicia sesión en PokeApp y esta partida se sincronizará sola.",
     ];
   if (state.cloud_status === "OFFLINE")
     return [
@@ -224,7 +212,6 @@ function render(state) {
         : "",
     );
     slots("party", observation?.party || Array(6).fill(null), "Equipo");
-    renderBox();
   }
   const local = ["UNSUPPORTED_GAME", "UNSUPPORTED_VERSION"].includes(
     state.local_status,
@@ -320,7 +307,6 @@ function render(state) {
   );
   const [tone, label, detail] = syncStatus(state);
   text("receipt", `${label} · ${detail}`);
-  $("enable-sync").disabled = recovery || !observation || !state.principal;
   $("login").querySelector("button").disabled =
     state.auth_status === "CHECKING";
   text("message", errorText[state.error] || "");
@@ -495,7 +481,7 @@ function renderBackups(busy) {
   list.replaceChildren();
   if (!backupRows.length) {
     list.textContent = lastState?.selected_save
-      ? "Todavía no hay copias de esta partida. PokeApp crea una antes de cada cambio y una diaria."
+      ? "Todavía no hay copias: PokeApp guarda una completa y verificada justo antes de cada cambio que hace en tu partida (la primera de cada día se conserva 30 días). Sincronizar nunca modifica tu partida."
       : "Elige tu partida para ver sus copias.";
     return;
   }
@@ -768,14 +754,6 @@ window.launcher.onNavigate(({ view, panel, item, tab: hub }) => {
   focusItem(item);
 });
 if (unified) mode("strip");
-$("previous-box").onclick = () => {
-  boxIndex--;
-  renderBox();
-};
-$("next-box").onclick = () => {
-  boxIndex++;
-  renderBox();
-};
 $("close-details").onclick = () => $("details").close();
 $("select-save").onclick = () => action(() => window.launcher.chooseSave());
 $("selector-manual").onclick = () =>
@@ -798,7 +776,6 @@ $("backup-emulator-closed").onchange = () => {
 };
 $("retry").onclick = () => action(() => window.launcher.retry());
 $("logout").onclick = () => action(() => window.launcher.logout());
-$("enable-sync").onclick = () => action(() => window.launcher.sync());
 $("emulator-closed").onchange = () => {
   $("confirm-write").disabled = !pendingWrite || !$("emulator-closed").checked;
 };
@@ -1533,6 +1510,5 @@ async function poll() {
   }
 }
 slots("party", Array(6).fill(null), "Equipo");
-renderBox();
 void poll();
 setInterval(poll, 1000);

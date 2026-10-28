@@ -224,31 +224,24 @@ try {
   await page.locator("#party button").first().waitFor();
   const startup = performance.now() - started;
   assert.equal(await page.locator("#party .slot").count(), 6);
-  assert.equal(await page.locator("#box .slot").count(), 30);
+  // Owner decision 2026-10-28: «Saves y Launcher» shows the team only; the
+  // boxes are read for «Mi PC» and robberies, not browsed here.
+  assert.equal(await page.locator("#box, #box-name, #next-box").count(), 0);
   if (xy) {
     assert.match(
       await page.locator("#save-identity").innerText(),
       new RegExp(`${game} · Gen 6`),
     );
-    await page.evaluate(() => {
-      for (let i = 0; i < 30; i++) document.getElementById("next-box").click();
-    });
-    assert.equal(await page.locator("#box-name").innerText(), "Caja 31 / 31");
-    assert.equal(await page.locator("#box .slot").count(), 30);
-    assert.equal(await page.locator("#next-box").isDisabled(), true);
-    assert.match(await page.locator("#box .slot").nth(29).innerText(), /#657/);
-    await page.evaluate(() => {
-      for (let i = 0; i < 30; i++)
-        document.getElementById("previous-box").click();
-    });
   }
   async function navigation() {
+    // Opening a team member's details is the remaining local navigation.
     return await page.evaluate(async () => {
       const samples = [];
       for (let i = 0; i < 20; i++) {
         const begin = performance.now();
-        document.getElementById(i % 2 ? "previous-box" : "next-box").click();
+        document.querySelectorAll("#party button")[i % 6]?.click();
         await new Promise(requestAnimationFrame);
+        document.getElementById("close-details")?.click();
         samples.push(performance.now() - begin);
       }
       return samples;
@@ -333,8 +326,8 @@ try {
     generation,
     startup_useful_ui_ms: startup,
     cached_restart_state_ms: cachedMs,
-    offline_box_navigation_ms: offline,
-    three_second_network_box_navigation_ms: slow,
+    offline_team_navigation_ms: offline,
+    three_second_network_team_navigation_ms: slow,
     background_sync_with_lost_response_ms: syncMs,
     receipt_gets: getCount,
     put_count: putCount,

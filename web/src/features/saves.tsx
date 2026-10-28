@@ -8,7 +8,7 @@ import {
   Radar,
   ShieldCheck,
 } from "lucide-react";
-import { usePC } from "../state";
+import { useMyPC } from "../state";
 import { Card, Heading, Notice, Tag, date } from "../ui";
 import { insideLauncher, launcherWithoutHub } from "../launcher";
 import { MyProgress, SaveGame } from "./progress";
@@ -68,7 +68,7 @@ export function SavesPage() {
 }
 
 function Saves() {
-  const pc = usePC();
+  const pc = useMyPC();
   const save = pc.data?.save;
   return (
     <>

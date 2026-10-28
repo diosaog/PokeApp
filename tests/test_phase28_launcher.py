@@ -247,6 +247,19 @@ class AutomaticSyncTests(unittest.TestCase):
         self.runtime._enqueue_local()
         self.assertEqual(self.pending(), 1)
 
+    def test_without_an_active_season_the_save_goes_to_the_personal_record(self):
+        # It used to wait forever («Pendiente · Se enviará en un momento»).
+        self.runtime._patch(cloud={"data": {"season": None}})
+        self.runtime._enqueue_local()
+        row = self.runtime.store.pending(self.ORIGIN, self.TRAINER)
+        self.assertEqual((self.pending(), row["season"]), (1, "personal"))
+
+    def test_before_the_first_cloud_answer_nothing_is_queued(self):
+        # Until PokeApp says whether a season is active, the scope is unknown.
+        self.runtime._patch(cloud=None)
+        self.runtime._enqueue_local()
+        self.assertEqual(self.pending(), 0)
+
     def test_same_content_is_queued_once(self):
         for _ in range(3):
             self.runtime._enqueue_local()
@@ -278,13 +291,11 @@ class AutomaticSyncTests(unittest.TestCase):
         self.runtime._enqueue_local()
         self.assertEqual(self.pending(), 0)
 
-    def test_shared_pc_second_trainer_must_confirm_once(self):
-        self.assertFalse(self.runtime._auto_consent(self.OTHER))
-        self.assertFalse(self.runtime.store.enabled(self.ORIGIN, self.OTHER))
-        # «Sincronizar ahora» is the explicit consent for that trainer.
-        self.runtime.store.enable(self.ORIGIN, self.OTHER)
+    def test_signing_in_is_the_consent_also_on_a_shared_pc(self):
+        # Owner decision 2026-10-28: there is no manual sync. The server still
+        # refuses another in-game trainer's save for a season.
         self.assertTrue(self.runtime._auto_consent(self.OTHER))
-        # The first trainer keeps automatic sync.
+        self.assertTrue(self.runtime.store.enabled(self.ORIGIN, self.OTHER))
         self.assertTrue(self.runtime._auto_consent(self.TRAINER))
 
 

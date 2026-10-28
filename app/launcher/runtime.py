@@ -16,7 +16,12 @@ from app.launcher.journal import LocalConflict
 from app.launcher.save_activity import SaveActivityGate, SaveBusy, save_read
 from app.launcher.secrets import TokenStore
 from app.launcher.sync import SaveWatchService
-from app.launcher.trusted_sync import TrustedStore, deliver_trusted
+from app.launcher.trusted_sync import (
+    PERSONAL,
+    TrustedStore,
+    deliver_trusted,
+    save_paths,
+)
 from app.launcher.write_control import LocalWriteController
 from app.launcher.write_engine import EngineeringCapability, LocalWriteEngine
 from app.launcher.write_files import WriteSafetyError
@@ -397,16 +402,11 @@ class LauncherRuntime:
         )
 
     def _auto_consent(self, trainer_id):
-        """Owner decision (2026-10-27): signing in is the consent to sync the
-        selected save automatically. On a shared PC, where another trainer
-        already synced from this profile, the save could be someone else's:
-        then the trainer confirms once with «Sincronizar ahora»."""
-        origin = self.client.origin
-        if self.store.enabled(origin, trainer_id):
-            return True
-        if self.store.other_consent(origin, trainer_id):
-            return False
-        self.store.enable(origin, trainer_id)
+        """Owner decisions (2026-10-27, 2026-10-28): signing in is the consent
+        to sync the selected save automatically — also on a shared PC; there
+        is no manual sync. A save of another in-game trainer is still refused
+        by the server for a season (SAVE_TRAINER_MISMATCH)."""
+        self.store.enable(self.client.origin, trainer_id)
         return True
 
     def _new_saves(self, found):
@@ -694,10 +694,12 @@ class LauncherRuntime:
         principal = state["principal"]
         season = (state["cloud"] or {}).get("data", {}).get("season")
         receipt = self.receipt
+        # Without an active season the save still syncs, to the personal record.
+        scope = season["id"] if season else PERSONAL
         if not (
             state["cloud_sync"]
             and principal
-            and season
+            and state["cloud"]
             and receipt
             and state["local_status"] == "READY"
         ):
@@ -707,12 +709,12 @@ class LauncherRuntime:
             oid = self.store.enqueue_raw(
                 self.client.origin,
                 principal["trainer_id"],
-                season["id"],
+                scope,
                 receipt,
                 snapshot.data,
             )
             accepted = self.store.receipt(
-                self.client.origin, principal["trainer_id"], season["id"], oid
+                self.client.origin, principal["trainer_id"], scope, oid
             )
             self._patch(
                 cloud_receipt=accepted.model_dump() if accepted else None,
@@ -859,8 +861,7 @@ class LauncherRuntime:
                     if current
                     and state["local_status"] == "READY"
                     and state["cloud_sync"]
-                    and season
-                    and row["season"] == season["id"]
+                    and row["season"] == (season["id"] if season else PERSONAL)
                     else None,
                 )
                 if delivered is not None:
@@ -880,7 +881,7 @@ class LauncherRuntime:
             # success. Cached success must not claim that an old save is current.
             latest = self.session.request(
                 "GET",
-                f"/v1/seasons/{accepted['season_id']}/saves/receipt?sha256={accepted['sha256']}",
+                f"{save_paths(accepted['season_id'])[0]}/receipt?sha256={accepted['sha256']}",
             )
             if (
                 not latest.get("is_current")

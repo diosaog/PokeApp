@@ -7,6 +7,12 @@ vi.mock("../state", () => ({
   useApp: () => ({ season: "", me: { trainer_id: "owner" } }),
   useRead: () => ({ data: undefined, isPending: false, error: null }),
   usePC: () => ({ data: undefined, isPending: false, error: null }),
+  useMyPC: () => ({
+    data: undefined,
+    isPending: false,
+    error: null,
+    personal: true,
+  }),
 }));
 
 const agent = (value: string) =>
