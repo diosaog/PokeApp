@@ -244,8 +244,8 @@ export function Inventory() {
           </div>
           <p className="muted">
             Disponible en PokeApp Launcher, que trabaja con la partida de tu
-            equipo. Añadir objetos a la partida se activa tras la certificación
-            con el emulador; mientras tanto puedes consultar tus cantidades.
+            equipo: eliges la cantidad, se guarda una copia de seguridad y
+            confirmas con el emulador cerrado.
           </p>
           <LauncherDownload />
         </Modal>

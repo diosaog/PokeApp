@@ -150,7 +150,14 @@ class EngineeringTransfer:
         self.controller, self.repo = controller, repository
         self.engine = controller.engine
         self.sid, self.tid = season_id, trainer_id
-        if type(getattr(self.engine, "capability", None)) is not EngineeringCapability:
+        if not (
+            type(getattr(self.engine, "capability", None)) is EngineeringCapability
+            or (
+                self.engine is not None
+                and self.engine.allows("transfer_remove")
+                and self.engine.allows("transfer_insert")
+            )
+        ):
             raise WriteSafetyError("TRANSFER_APPLICATION_DISABLED")
         with self.engine._db() as db:
             db.execute(
@@ -463,7 +470,7 @@ class LauncherTransfers:
 
     Only this trainer's own server-planned leg is bound; the native engine still
     revalidates game, trainer, exact source bytes and target before any change.
-    Construction fails closed without an in-process EngineeringCapability.
+    Construction fails closed unless the engine allows both robbery legs.
     """
 
     def __init__(self, controller, remote):

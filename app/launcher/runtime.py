@@ -189,10 +189,10 @@ class LauncherRuntime:
         ):
             result["cloud_status"] = "OFFLINE"
         result["write"] = self.writes.state()
-        # Never true in a production build: no code path constructs the capability.
-        result["write"]["transfer_application_enabled"] = (
-            type(getattr(self.writes.engine, "capability", None))
-            is EngineeringCapability
+        engine = getattr(self.writes, "engine", None)
+        result["write"]["transfer_application_enabled"] = engine is not None and (
+            type(getattr(engine, "capability", None)) is EngineeringCapability
+            or (engine.allows("transfer_remove") and engine.allows("transfer_insert"))
         )
         result["emulator"] = qualification_status()
         return result

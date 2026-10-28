@@ -23,17 +23,22 @@ from threading import RLock
 from typing import Protocol
 from uuid import NAMESPACE_URL, UUID, uuid4, uuid5
 
-from app.launcher.export_files import WindowsExportFiles
-from app.launcher.handoff_files import WindowsHandoffFiles
 from app.launcher.write_files import EnrolledTarget, WindowsWriteFiles, WriteSafetyError
 
 GAMES = frozenset(("X", "Y", "OR", "AS", "SN", "MN", "US", "UM"))
-PRODUCTION_MUTATIONS: frozenset[str] = frozenset()
-# Owner decision 2026-10-26: Rare Candy and Heart Scale are free and unlimited
-# within each game's technical limits. Public use is enabled ONLY by adding
-# "add_item" to PRODUCTION_MUTATIONS after real Lime3DS certification; no other
-# kind (revive, transfer, test marking) can ever pass through this switch.
-PUBLIC_READY_MUTATIONS: frozenset[str] = frozenset({"add_item"})
+# Owner decision 2026-10-28 (real tests between two players): Rare Candy and
+# Heart Scale (add_item) and the two legs of a robbery (transfer_remove /
+# transfer_insert) are enabled. Every one still goes through this engine:
+# verified backup first, emulator closed, exact source bytes, native re-read;
+# a robbery leg also needs the server's paired begin (PairedApplyPermit) and the
+# hosted verifier's proofs. Which trainers may run them is decided server-side.
+# test_marking and revive never pass this switch (revive has no product flow).
+PRODUCTION_MUTATIONS: frozenset[str] = frozenset(
+    {"add_item", "transfer_remove", "transfer_insert"}
+)
+PUBLIC_READY_MUTATIONS: frozenset[str] = frozenset(
+    {"add_item", "transfer_remove", "transfer_insert"}
+)
 PENDING = ("PREPARED", "AWAITING_CONFIRMATION", "RECOVERY_REQUIRED")
 # Owner decision 2026-10-26: one ordinary daily restore point per save, kept 30 days.
 DAILY_RETENTION_DAYS = 30
@@ -206,6 +211,11 @@ class LocalWriteEngine:
         )
         self.database = self.profile / "physical-writes.sqlite3"
         self.native, self.capability = native, engineering_capability
+        # Windows-only file primitives (msvcrt), loaded with a real engine: the
+        # Linux verifier imports this module only for WriteIntent/PreparedNative.
+        from app.launcher.export_files import WindowsExportFiles
+        from app.launcher.handoff_files import WindowsHandoffFiles
+
         self.export_files = WindowsExportFiles()
         self.handoff = WindowsHandoffFiles()
         self.fault_hook = fault_hook or (lambda _stage: None)

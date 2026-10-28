@@ -256,6 +256,14 @@ class RuntimeTests(unittest.TestCase):
                 runtime.command(name, args)
 
     def test_production_build_fails_closed_without_pausing_sync(self):
+        # With the robbery kinds switched off (the shipped policy enables them).
+        from unittest.mock import patch
+
+        import app.launcher.write_engine as write_engine
+
+        switched_off = patch.object(write_engine, "PRODUCTION_MUTATIONS", frozenset({"add_item"}))
+        switched_off.start()
+        self.addCleanup(switched_off.stop)
         runtime = self.runtime()
         self.assertFalse(runtime.state()["write"]["transfer_application_enabled"])
         runtime.command(

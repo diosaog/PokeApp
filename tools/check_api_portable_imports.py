@@ -15,6 +15,7 @@ import importlib
 import importlib.abc
 import os
 import sys
+from pathlib import Path
 
 # Only what application code could import; the stdlib on this host needs
 # _winapi/_overlapped itself.
@@ -61,7 +62,11 @@ def main() -> int:
             os.environ.pop(name)
     from app.api.main import app
 
+    # The hosted verifier worker runs in the same Linux image.
+    sys.path.insert(0, str(Path(__file__).resolve().parent))
+    importlib.import_module("run_item_use_verifier")
     print("API imports without Windows modules:", len(app.openapi()["paths"]), "routes")
+    print("Verifier worker imports without Windows modules")
     return 0
 
 

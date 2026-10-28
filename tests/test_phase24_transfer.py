@@ -254,13 +254,22 @@ class TransferJournalTests(unittest.TestCase):
         finally:
             child.communicate("close\n", timeout=10)
 
-    def test_production_engine_cannot_accept_transfer(self):
+    def test_production_engine_without_robbery_kinds_cannot_accept_transfer(self):
+        # The shipped policy enables both legs (owner, 2026-10-28); with them
+        # switched off the bridge still fails closed.
+        from unittest.mock import patch
+
+        import app.launcher.write_engine as write_engine
+
         controller = LocalWriteController(
             SaveActivityGate(),
             lambda: str(self.target),
             engine_at(self.root, enabled=False),
         )
-        with self.assertRaisesRegex(WriteSafetyError, "TRANSFER_APPLICATION_DISABLED"):
-            EngineeringTransfer(
-                controller, self.repo, season_id=self.sid, trainer_id=self.tid
-            )
+        with patch.object(write_engine, "PRODUCTION_MUTATIONS", frozenset({"add_item"})):
+            with self.assertRaisesRegex(WriteSafetyError, "TRANSFER_APPLICATION_DISABLED"):
+                EngineeringTransfer(
+                    controller, self.repo, season_id=self.sid, trainer_id=self.tid
+                )
+        # Shipped policy: the production engine accepts the bridge.
+        EngineeringTransfer(controller, self.repo, season_id=self.sid, trainer_id=self.tid)
