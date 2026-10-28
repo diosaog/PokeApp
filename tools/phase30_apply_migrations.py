@@ -45,6 +45,7 @@ EXPECTED_SHA256 = {
     "063_single_league_structure.sql": "621e43f2c44cc4b232f4a40c787ae84c4a36ad63ab2279778967cffc33576e1c",
     "064_admin_robbery_cancellation.sql": "80407837fce1d205b90757c19e4148419d3fab52e24de6d47952c43afad21b2e",
     "065_personal_saves.sql": "11b02406d1b8eabd688d51bb8c51886cc462c3c5115cdb9b1e685b7b0e417ec9",
+    "066_personal_saves_least_privilege.sql": "23529af177f86c7541326e76ee2bbd1b48fbcff8f275f504f970a5ff0a0c81d0",
 }
 BACKUP_MAX_AGE = timedelta(hours=2)
 

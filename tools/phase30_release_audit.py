@@ -25,10 +25,10 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 MIGRATIONS = sorted((ROOT / "supabase/v2/migrations").glob("*.sql"))
-# 054-064 went out with the final release; 065 (personal saves, «Mi PC»
-# outside seasons) is the window after it.
-DEPLOYED = [m for m in MIGRATIONS if int(m.name[:3]) <= 64]
-PENDING = [m for m in MIGRATIONS if int(m.name[:3]) == 65]
+# 054-064 went out with the final release, 065 (personal saves, «Mi PC»
+# outside seasons) after it; 066 takes back what 065 meant to withhold.
+DEPLOYED = [m for m in MIGRATIONS if int(m.name[:3]) <= 65]
+PENDING = [m for m in MIGRATIONS if int(m.name[:3]) == 66]
 WINDOW = f"{PENDING[0].name[:3]}-{PENDING[-1].name[:3]}"
 SCHEMAS = "('public','v1_shadow')"
 

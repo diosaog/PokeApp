@@ -74,6 +74,7 @@ EXPECTED_MIGRATIONS = [
     "063_single_league_structure.sql",
     "064_admin_robbery_cancellation.sql",
     "065_personal_saves.sql",
+    "066_personal_saves_least_privilege.sql",
 ]
 
 FORBIDDEN_TOKENS = [
