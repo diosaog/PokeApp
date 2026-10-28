@@ -109,6 +109,9 @@ def main():
     )
     bundle_path = re.search(r'src="(/assets/index-[^"]+\.js)"', index.text)
     bundle = http("GET", WEB + bundle_path.group(1)).text if bundle_path else ""
+    # Screens are lazy chunks: the download card lives in one of them.
+    for chunk in sorted(set(re.findall(r"assets/[\w.-]+\.js", bundle))):
+        bundle += http("GET", f"{WEB}/{chunk}").text
     versions = sorted(set(re.findall(r'version:["`](\d+\.\d+\.\d+)["`]', bundle)))
     launchers = [v for v in versions if v.startswith("0.2")]
     check(

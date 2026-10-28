@@ -340,6 +340,12 @@ legend {
 .spin {
   animation: spin 1s linear infinite;
 }
+/* Idle (see idle-motion.ts): decorative loops hold their frame; spinners keep turning. */
+:root[data-idle] :not(.spin),
+:root[data-idle] :not(.spin)::before,
+:root[data-idle] :not(.spin)::after {
+  animation-play-state: paused !important;
+}
 @keyframes spin {
   to {
     transform: rotate(360deg);

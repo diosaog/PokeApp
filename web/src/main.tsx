@@ -5,6 +5,7 @@ import { AppState } from "./state";
 import App from "./App";
 import { installPreferences } from "./preferences";
 import { installSound } from "./sound";
+import { installIdleMotion } from "./idle-motion";
 import "@fontsource-variable/rubik/wght.css";
 import "./design/tokens.css";
 import "./styles.css";
@@ -17,6 +18,7 @@ import "./design/scenes.css";
 import "./design/hub.css";
 installPreferences();
 installSound();
+installIdleMotion();
 // First paint waits (at most 1.2 s) for the Rubik Latin face, so text never
 // re-flows under the trainer once the font swaps in.
 const fontReady = Promise.race([

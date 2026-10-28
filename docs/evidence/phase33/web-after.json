@@ -1,0 +1,79 @@
+{
+  "url": "https://pokeapp-web.pokeapp-v2.workers.dev/",
+  "runs": 3,
+  "measured_at": "2026-10-28T07:24:51.552Z",
+  "results": {
+    "cold-1440": {
+      "ttfb": 395.6,
+      "dcl": 519.2,
+      "load": 620.5,
+      "lcp": 636,
+      "cls": 0.001,
+      "long": 0,
+      "ready": 654,
+      "requests": 8,
+      "bytes": 198824,
+      "js": 115253
+    },
+    "warm-1440": {
+      "ttfb": 32.2,
+      "dcl": 69.1,
+      "load": 87.9,
+      "lcp": 140,
+      "cls": 0.001,
+      "long": 0,
+      "ready": 142,
+      "requests": 8,
+      "bytes": 2797,
+      "js": 0
+    },
+    "slow-cold-1440": {
+      "ttfb": 373.4,
+      "dcl": 2294.6,
+      "load": 2655.2,
+      "lcp": 2880,
+      "cls": 0.001,
+      "long": 0,
+      "ready": 2705,
+      "requests": 8,
+      "bytes": 198829,
+      "js": 115251
+    },
+    "cold-390": {
+      "ttfb": 377.9,
+      "dcl": 513.2,
+      "load": 572,
+      "lcp": 596,
+      "cls": 0,
+      "long": 0,
+      "ready": 603,
+      "requests": 8,
+      "bytes": 198839,
+      "js": 115253
+    },
+    "warm-390": {
+      "ttfb": 46.1,
+      "dcl": 91.1,
+      "load": 114.3,
+      "lcp": 164,
+      "cls": 0,
+      "long": 0,
+      "ready": 177,
+      "requests": 8,
+      "bytes": 2799,
+      "js": 0
+    },
+    "slow-cold-390": {
+      "ttfb": 380.2,
+      "dcl": 2285.8,
+      "load": 2656.7,
+      "lcp": 2876,
+      "cls": 0,
+      "long": 0,
+      "ready": 2710,
+      "requests": 8,
+      "bytes": 198806,
+      "js": 115249
+    }
+  }
+}

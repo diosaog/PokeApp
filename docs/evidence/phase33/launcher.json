@@ -1,0 +1,34 @@
+{
+  "build": "C:\\Users\\Antonio\\AppData\\Local\\Temp\\claude\\c--Users-Antonio-Desktop-AntoPKMN-PokeApp\\04dbd50a-a38f-4f17-b7bd-00a71da3a67f\\scratchpad\\stable-0.26.1\\release\\win-unpacked",
+  "cpus": 16,
+  "runs": [
+    {
+      "usable_ms": 2764,
+      "processes": 7,
+      "working_set_mb": 625,
+      "private_mb": 322,
+      "idle_cpu_percent_of_machine": 1.77
+    },
+    {
+      "usable_ms": 997,
+      "processes": 7,
+      "working_set_mb": 605,
+      "private_mb": 314,
+      "idle_cpu_percent_of_machine": 1.61
+    },
+    {
+      "usable_ms": 970,
+      "processes": 7,
+      "working_set_mb": 578,
+      "private_mb": 320,
+      "idle_cpu_percent_of_machine": 1.8
+    }
+  ],
+  "median": {
+    "usable_ms": 997,
+    "processes": 7,
+    "working_set_mb": 605,
+    "private_mb": 320,
+    "idle_cpu_percent_of_machine": 1.77
+  }
+}
