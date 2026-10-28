@@ -1,5 +1,51 @@
 # POKEAPP 2.0 — FINAL RELEASE AND PERFORMANCE REPORT
 
+## Final corrections publication — 2026-10-28 20:19 Europe/Madrid
+
+**PUBLISHED / VERIFIED.** The earlier sections below retain their dated release
+and performance evidence; this update supersedes their component versions for
+the corrected surfaces. [Current operational record](work-in-progress/final-corrections-live.md).
+
+- Application source `c0dd5619c1ffef311154a6994624572ec4526d62`, web/release pointer
+  `d2d2832860229854a94779839be42a6764f969a9`, committed/pushed before publication.
+- Railway `893d5345-0bf2-4ab8-9ce1-9da649270eb9 SUCCESS`. One renewed upload was
+  accepted after the earlier platform rejection, despite the open incident page.
+  Exact 321 committed inputs; locked Linux parser build/runtime smoke PASS.
+  New OpenAPI contract and health 200 confirmed before migrating.
+- Supabase 067 `20261028191441` and 068 `20261028191443`, each once; 60 history records.
+  Backup/rehearsal reused at 31 minutes after hash and 116-table equality checks.
+  Final 115 tables unchanged; only migration history changed. Empty private outbox,
+  expected catalog delta only, 108 prior RLS policies unchanged, no expanded browser
+  access. No season, owner, save, economy or certified history was mutated.
+- Cloudflare `305cb813-ed83-4829-ad2d-188a95b733bc` and Launcher 0.26.4 retained,
+  no redundant publication. Live web assets match the build; installer 159313550
+  bytes; live Ed25519 feed verifies with the shipped key. Earlier focused tests,
+  packaged acceptance and desktop/mobile evidence remain valid.
+- Player Liga no longer shows the enormous preparation card. Preparation checks
+  remain in Admin. Hosted read RPCs validated through current API models show the
+  active Prueba can be safely cancelled, championship is incomplete rather than
+  corrupt, and missing observations/another participant are explicit. Cancellation
+  was not invoked. Native Gen6 readiness does not authorize new progression rewards.
+- Launcher fixes the personal-save HTTP allowlist and retries technical failures
+  automatically beyond five attempts with bounded backoff. Existing receipts,
+  identity checks and semantic blocks remain. Actual owner-Y acceptance after
+  updating is not claimed; no new owner PIN/login or save was used for acceptance.
+- Discord worker and triggers are enabled. Configuration and service reads pass;
+  the pre067 startup error stopped after migration, with no further warning through
+  19:19 UTC. One earlier authorized webhook test succeeded; no second message,
+  fabricated competition event or historical replay. A real competitive delivery
+  will be observable on the next genuine event, not invented for this report.
+- This resume ran 11 public/configuration checks, signed-feed verification, scoped
+  real read RPCs, preservation and privilege checks. No historical suites repeated.
+  Privacy denial 401 passes. No unexpected 5xx. The absence of the first RPC's
+  Management read-role permission was expected; the approved service read path
+  succeeded without broadening grants.
+
+No pending deployment/migration remains for this packet. The normal Launcher
+update and owner use provide the remaining personal-save acceptance observation.
+This closure neither recertifies nor changes previously enabled physical operations.
+No new phase. Private evidence and exact resume boundaries are in the live record.
+
 Date: 2026-10-28 (Europe/Madrid). Covers the publication of Phases 30 and 32
 and the Phase 33 work. Facts below were checked on the deployed services.
 

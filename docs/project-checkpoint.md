@@ -5,14 +5,15 @@ milestone record; it does not maintain a second live phase-status ledger.
 
 ## Current project position
 
-- Current packet (2026-10-28): **Final corrections — web and Launcher 0.26.4
-  published; backend release BLOCKED by Railway's deployment incident.**
-  Automatic personal-save upload/retry and concise League UI are published.
-  Safe precompetition cancellation, native Gen6 readiness and automatic Discord
-  await the verified backend plus 067–068. Webhook configured; one test delivered.
+- Current packet (2026-10-28): **Final corrections — PUBLISHED / VERIFIED.**
+  Backend c0dd561 deployed successfully on the authorized resume; 067–068 applied
+  once after the still-valid backup/rehearsal. Safe preparation cancellation,
+  native Gen6 readiness and Discord worker/triggers active. Web and Launcher 0.26.4
+  remain published; automatic personal-save transport/retry fixed. No extra Discord
+  test or historical replay; actual owner-Y acceptance awaits normal owner use.
   Authoritative continuation: [live record](work-in-progress/final-corrections-live.md).
-  Earlier production references below are historical. Production database remains
-  066/58 records; 116 captured tables unchanged. No full completion claim.
+  Earlier production references below are historical. Database 068/60 records;
+  115 previous tables unchanged, only migration history differs, new outbox empty.
 
 - Current packet: **Launcher automatic updates — DONE LOCAL / PASS PACKAGED,
   not active publicly.** One-click updater (popup, progress, «Más tarde»,
