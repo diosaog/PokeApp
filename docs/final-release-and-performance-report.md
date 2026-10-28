@@ -103,3 +103,31 @@ game. They are the only open items.
 
 `HEAD` = `origin/main` (this report's commit, after `2fb379b`). Eight foreign
 untracked files preserved; the protected guide untouched.
+
+## 8. After the release (2026-10-28)
+
+**0.26.2 — physical operations for the real tests.** Rare Candy, Heart Scale
+and both robbery legs are production mutations (backup before every write,
+paired permit for robberies, emulator closed). The hosted verifier runs on
+Linux. Robberies need both players in one active season; revive/item use has
+no production flow and stays off.
+
+**0.26.3 — automatic save sync, also without a season.** The «Pendiente»
+that never cleared came from a trainer with no active season: every save
+endpoint and «Mi PC» were season-scoped, so the Launcher queued nothing.
+
+| Change | Where |
+| --- | --- |
+| `trainer_personal_saves` (065) + least privilege (066): one backend-only row per trainer, forced RLS, service_role select/insert/update | Supabase, history 58 |
+| `/v1/me/save/{context,receipt,raw}` and `/v1/me/pc`: same server-side parse and digest check as season saves; not competitive evidence | API, 108 routes |
+| Signing in is the consent; each stable new save goes to the active season, otherwise to the personal record; «Sincronizada» only after the server readback | Launcher 0.26.3 |
+| «Sincronizar ahora» removed; «Mis partidas» keeps the team of six, no box browser | Launcher 0.26.3 |
+| «Mi PC» shows the season PC when ready, otherwise the personal save (15 s refresh); nobody is enrolled in a league | Web |
+
+Backups are still made only before PokeApp changes a save (the first of each
+day kept 30 days); syncing never writes to it.
+
+Gates: Python 1208/1208; Vitest 189/189; Playwright Mi PC/saves specs 39 passed,
+4 skipped; Launcher node 31/31; rehearsals on fresh production backups 14/14
+(065, then 066); hosted acceptance 19/19; unpacked 0.26.3 in a sandboxed
+profile reads the hosted feed as `UP_TO_DATE`.

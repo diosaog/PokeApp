@@ -34,6 +34,11 @@ INSTALLERS = {
         "sha256_prefix": "edf8d647",
         "sha256_suffix": "18d320",
     },
+    "0.26.3": {
+        "bytes": 159311823,
+        "sha256_prefix": "7b31ad92",
+        "sha256_suffix": "507bef",
+    },
 }
 EXPECTED = {
     "before": {
@@ -48,13 +53,14 @@ EXPECTED = {
         "incidents": True,
         "feed": "absent",
     },
-    # Phase 32 published: 0.26.1 is the download and the stable feed's offer.
+    # After 065/066: personal saves (108 routes); 0.26.3 is the download and
+    # the stable feed's offer.
     "final": {
-        "routes": 104,
+        "routes": 108,
         "division_required": ["A"],
         "incidents": True,
         "feed": "feed",
-        "launcher": "0.26.1",
+        "launcher": "0.26.3",
     },
 }
 ZERO = "00000000-0000-4000-8000-000000000000"
