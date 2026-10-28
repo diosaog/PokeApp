@@ -1,8 +1,29 @@
 import { describe, expect, it } from "vitest";
 import catalog from "./catalog.es.json";
-import { pokemonName, pokemonTitle, statName } from "./localization";
+import { catalogId, pokemonName, pokemonTitle, statName } from "./localization";
 
 describe("pinned Spanish presentation catalog", () => {
+  it.each([
+    [647, "Keldeo"],
+    [718, "Zygarde"],
+    [371, "Bagon"],
+  ] as const)(
+    "resolves the existing encoded server species label %s without changing nicknames",
+    (id, name) => {
+      const species = `Pok\u00c3\u00a9mon #${id}`;
+      expect(pokemonName("species", species)).toBe(name);
+      expect(catalogId("species", species)).toBe(id);
+      expect(pokemonTitle({ species, nickname: species })).toBe(species);
+    },
+  );
+  it("does not extract a species number from arbitrary names or invalid legacy labels", () => {
+    for (const value of [
+      "My Keldeo #647",
+      "Pok\u00c3\u00a9mon #999999",
+      "Pok\u00c3\u00a9mon #647 extra",
+    ])
+      expect(catalogId("species", value)).toBeNull();
+  });
   it.each([
     ["species", "#635", "Hydreigon"],
     ["species", "Pokémon #658", "Greninja"],

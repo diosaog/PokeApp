@@ -9,7 +9,10 @@ import {
   PokemonStatusFlags,
 } from "./presentation";
 import { catalogId } from "./localization";
-afterEach(cleanup);
+afterEach(() => {
+  cleanup();
+  vi.restoreAllMocks();
+});
 it("shows an uploaded portrait and safely falls back when its signed URL expires", () => {
   render(<TrainerPhoto name="Nuevo" url="https://example.invalid/portrait" />);
   const image = screen.getByAltText("Retrato de Nuevo");
@@ -44,8 +47,54 @@ it("uses local sprites, canonical categories and honest unresolved fallbacks", (
     "lazy",
   );
   fireEvent.error(screen.getByAltText("Hydreigon"));
-  expect(screen.getAllByLabelText("Imagen no disponible")).toHaveLength(2);
+  expect(screen.getAllByLabelText("Imagen no disponible")).toHaveLength(1);
+  expect(
+    screen.getByRole("img", {
+      name: "No se pudo cargar la imagen de Hydreigon",
+    }),
+  ).toBeVisible();
   expect(catalogId("item", "Item #200")).toBeNull();
+});
+it.each([
+  ["Pok\u00c3\u00a9mon #647", null, "647", "Keldeo"],
+  ["Pok\u00c3\u00a9mon #718", 0, "718", "Zygarde"],
+  ["Pok\u00c3\u00a9mon #371", null, "371", "Bagon"],
+  ["Pikachu", 0, "25", "Pikachu"],
+  ["#722", 0, "722", "Rowlet"],
+  ["Zeraora", 0, "807", "Zeraora"],
+  ["Keldeo", 1, "647-form-1", "Keldeo"],
+  ["Zygarde", 4, "718-form-4", "Zygarde"],
+  ["Raichu", 1, "26-form-1", "Raichu"],
+  ["Deoxys", 3, "386-form-3", "Deoxys"],
+  ["Charizard", 2, "6-form-2", "Charizard"],
+] as const)("resolves sprite %s form %s", (species, form, file, label) => {
+  render(<PokemonSprite species={species} form={form} animated />);
+  expect(screen.getByAltText(label)).toHaveAttribute(
+    "src",
+    `/visuals/v1/pokemon/${file}.png`,
+  );
+});
+it("never substitutes base art for an unknown form or masks a load failure as unknown data", () => {
+  const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+  const view = render(<PokemonSprite species="Keldeo" form={255} />);
+  expect(
+    screen.getByLabelText("Imagen de esta forma no disponible"),
+  ).toBeVisible();
+  expect(warn).not.toHaveBeenCalled();
+  view.rerender(<PokemonSprite species="Keldeo" form={1} />);
+  fireEvent.error(screen.getByAltText("Keldeo"));
+  expect(
+    screen.getByRole("img", { name: "No se pudo cargar la imagen de Keldeo" }),
+  ).toBeVisible();
+  expect(warn).toHaveBeenCalledWith(
+    "pokemon_sprite_load_failed",
+    "/visuals/v1/pokemon/647-form-1.png",
+  );
+  view.rerender(<PokemonSprite species="Keldeo" form={0} />);
+  expect(screen.getByAltText("Keldeo")).toHaveAttribute(
+    "src",
+    "/visuals/v1/pokemon/647.png",
+  );
 });
 it("loads the explicitly versioned local reference only on move interaction", async () => {
   const fetcher = vi.spyOn(globalThis, "fetch").mockResolvedValue(

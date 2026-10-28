@@ -61,7 +61,9 @@ const unavailable: Record<Category, string> = {
   nature: "Naturaleza no disponible",
 };
 const prefixes: Record<Category, RegExp> = {
-  species: /^(?:pok[eé]mon|species|especie)\s*#?\s*(\d+)$/i,
+  // The trusted legacy projection also emitted UTF-8 decoded as Latin-1.
+  // Accept that exact numeric prefix for display; never reinterpret nicknames.
+  species: /^(?:pok(?:[eé]|\u00c3\u00a9)mon|species|especie)\s*#?\s*(\d+)$/i,
   move: /^(?:move|movimiento)\s*#?\s*(\d+)$/i,
   ability: /^(?:ability|habilidad)\s*#?\s*(\d+)$/i,
   item: /^(?:item|objeto)\s*#?\s*(\d+)$/i,

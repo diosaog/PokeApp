@@ -3,6 +3,7 @@ import {
   Award,
   ChevronDown,
   CircleHelp,
+  ImageOff,
   Package,
   UserRound,
   X,
@@ -12,6 +13,7 @@ import itemIds from "./visual-items.json";
 import moveTypes from "./move-types.json";
 import catalogShopArt from "./shop-art.json";
 import animatedIds from "./animated-sprites.json";
+import formSprites from "./visual-forms.json";
 import { badgeAsset } from "./badges";
 import { useReducedMotion } from "../preferences";
 
@@ -92,9 +94,15 @@ export function PokemonSprite({
   large?: boolean;
   animated?: boolean;
 }) {
-  // Existing assets cover base forms only. Never depict an unverified alternate
-  // form as its base form; keep the textual observed form beside the fallback.
-  const id = form ? null : catalogId("species", species);
+  const id = catalogId("species", species);
+  // Only explicitly mapped forms use alternate art; an unknown form is never
+  // silently shown as the base form. All asset paths are local catalog entries.
+  const variant = form
+    ? (formSprites as Record<string, string>)[`${id}:${form}`]
+    : id;
+  const still = variant ? `${base}/pokemon/${variant}.png` : null;
+  // Existing animations depict base forms only.
+  const animationId = !form && id && animatedIds.includes(id) ? id : null;
   const ref = useRef<HTMLImageElement>(null);
   const [moving, setMoving] = useState(false);
   const [failed, setFailed] = useState<string | null>(null);
@@ -104,8 +112,8 @@ export function PokemonSprite({
     setMoving(false);
     if (
       !animated ||
-      !id ||
-      !animatedIds.includes(id) ||
+      !animationId ||
+      failed === still ||
       !ref.current ||
       typeof IntersectionObserver === "undefined" ||
       typeof window.matchMedia !== "function"
@@ -123,41 +131,64 @@ export function PokemonSprite({
       observer.disconnect();
       document.removeEventListener("visibilitychange", update);
     };
-  }, [animated, id, reduced]);
+  }, [animated, animationId, reduced, still, failed]);
   // Keep the still image on screen until the animation has downloaded, so a
   // Pokémon never blinks out while its GIF arrives.
   const [loadedAnimation, setLoadedAnimation] = useState<number | null>(null);
   useEffect(() => {
-    if (!moving || !id || failedAnimation === id || loadedAnimation === id)
+    if (
+      !moving ||
+      !animationId ||
+      failedAnimation === animationId ||
+      loadedAnimation === animationId
+    )
       return;
     const preload = new Image();
-    preload.onload = () => setLoadedAnimation(id);
-    preload.onerror = () => setFailedAnimation(id);
-    preload.src = `/visuals/animated/v1/${id}.gif`;
+    preload.onload = () => setLoadedAnimation(animationId);
+    preload.onerror = () => setFailedAnimation(animationId);
+    preload.src = `/visuals/animated/v1/${animationId}.gif`;
     return () => {
       preload.onload = preload.onerror = null;
     };
-  }, [moving, id, failedAnimation, loadedAnimation]);
-  const animate = moving && failedAnimation !== id && loadedAnimation === id;
-  return id && failed !== species ? (
+  }, [moving, animationId, failedAnimation, loadedAnimation]);
+  const animate =
+    moving &&
+    !!animationId &&
+    failedAnimation !== animationId &&
+    loadedAnimation === animationId;
+  return still && failed !== still ? (
     <img
       ref={ref}
-      key={species}
+      key={still}
       className={`pokemon-sprite ${large ? "large" : ""}`}
-      src={
-        animate ? `/visuals/animated/v1/${id}.gif` : `${base}/pokemon/${id}.png`
-      }
+      src={animate ? `/visuals/animated/v1/${animationId}.gif` : still}
       width={96}
       height={96}
       alt={pokemonName("species", species)}
       loading="lazy"
       decoding="async"
-      onError={() => (animate ? setFailedAnimation(id) : setFailed(species))}
+      onError={() => {
+        if (animate) setFailedAnimation(animationId);
+        else {
+          console.warn("pokemon_sprite_load_failed", still);
+          setFailed(still);
+        }
+      }}
     />
+  ) : still ? (
+    <ImageOff
+      className="pokemon-sprite unresolved"
+      role="img"
+      aria-label={`No se pudo cargar la imagen de ${pokemonName("species", species)}`}
+    >
+      <title>No se pudo cargar la imagen. Vuelve a cargar la pantalla.</title>
+    </ImageOff>
   ) : (
     <CircleHelp
       className="pokemon-sprite unresolved"
-      aria-label="Imagen no disponible"
+      aria-label={
+        form ? "Imagen de esta forma no disponible" : "Imagen no disponible"
+      }
     />
   );
 }
