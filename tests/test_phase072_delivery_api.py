@@ -3,6 +3,7 @@ purchase guard and the reads. Fakes only (refunds: 062 incident center)."""
 
 import re
 import unittest
+from hashlib import sha256
 from pathlib import Path
 from unittest.mock import Mock
 from uuid import NAMESPACE_URL, uuid4, uuid5
@@ -29,6 +30,11 @@ from app.repositories.supabase.item_delivery import SupabaseItemDeliveryReposito
 
 ROOT = Path(__file__).resolve().parents[1]
 TRAINER = str(uuid4())
+SAVE_TRAINER = {"name": "Samu", "tid": 123, "sid": 456, "gender": 0, "language": 7}
+
+
+def native_key(game="US"):
+    return sha256("\0".join((game, "Samu", "123", "456", "0", "7")).encode()).hexdigest()
 
 
 class ContractTests(unittest.TestCase):
@@ -133,12 +139,18 @@ class Reads:
 
     def __init__(self, game):
         self.game = game
+        self.trainer = dict(SAVE_TRAINER)
+        self.error = None
+        self.filters = []
 
     def rows(self, table, columns, filters=None, limit=None, offset=None, order=None):
+        if self.error:
+            raise self.error
+        self.filters.append((table, filters))
         if table == "season_players":
             return [{"current_save_file_id": "save-1" if self.game else None}]
         if table == "save_files":
-            return [{"metadata": {"save_identity": {"game": self.game}}}]
+            return [{"metadata": {"save_identity": {"game": self.game, "trainer": self.trainer}}}]
         return []
 
 
@@ -173,6 +185,28 @@ class RouteTests(unittest.TestCase):
         name, args = self.repo.calls[-1]
         self.assertEqual("reserve", name)
         self.assertEqual((self.sid, TRAINER, self.pid, self.op, "bottle_cap", 795, "US"), args)
+        self.assertEqual(native_key(), response.json()["authorized_trainer_key"])
+        self.assertIn(("save_files", {"id": "save-1", "season_id": self.sid, "trainer_id": TRAINER}), self.reads.filters)
+
+    def test_reservation_requires_a_complete_server_accepted_save_identity(self):
+        self.reads.game = None
+        response = self.reserve()
+        self.assertEqual((409, "DELIVERY_SAVE_NOT_BOUND"), (response.status_code, response.json()["detail"]["code"]))
+        self.reads.game = "US"
+        self.reads.trainer.pop("tid")
+        response = self.reserve()
+        self.assertEqual((503, "ITEM_DELIVERY_UNAVAILABLE"), (response.status_code, response.json()["detail"]["code"]))
+        self.assertEqual([], self.repo.calls)
+
+    def test_unavailable_save_read_never_skips_purchase_compatibility(self):
+        self.reads.error = PersistenceError("offline")
+        item = str(uuid4())
+        self.repo.codes[item] = "chapa_plateada"
+        response = self.client.post(
+            f"/v1/seasons/{self.sid}/shop/purchases", json={"item_id": item}, headers={"Idempotency-Key": "k"}
+        )
+        self.assertEqual((503, "ITEM_DELIVERY_UNAVAILABLE"), (response.status_code, response.json()["detail"]["code"]))
+        self.purchases.assert_not_called()
 
     def test_reserve_refusals(self):
         cases = (

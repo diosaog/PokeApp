@@ -10,6 +10,7 @@ object: «usar» records its use once.
 """
 
 from datetime import datetime
+from hashlib import sha256
 from typing import Literal
 from uuid import NAMESPACE_URL, UUID, uuid5
 
@@ -61,6 +62,10 @@ class DeliveryReceipt(BaseModel):
     reserved_at: datetime
     finished_at: datetime | None
     purchase_status: str
+    # Only reservation supplies this server-derived native identity. The
+    # Launcher compares it with the bytes it is about to write, not a cached
+    # parse or a client-selected game.
+    authorized_trainer_key: str | None = Field(default=None, pattern=r"^[a-f0-9]{64}$")
 
 
 class PendingDelivery(BaseModel):
@@ -104,13 +109,36 @@ def league_game(container: ApiContainer, season_id: str, trainer_id: str):
     """The game of the save this trainer's season accepted, or None."""
     reads = getattr(container, "frontend_read_repository", None)
     if reads is None:
-        return None
+        raise api_error(503, "ITEM_DELIVERY_UNAVAILABLE", "No se puede comprobar tu partida ahora.")
     from app.application.frontend_reads import FrontendReads
 
     try:
         return FrontendReads(reads).league_game(season_id, trainer_id)
-    except Exception:  # noqa: BLE001 - an unknown game only skips the check
-        return None
+    except (PersistenceError, KeyError, TypeError, ValueError):
+        raise api_error(503, "ITEM_DELIVERY_UNAVAILABLE", "No se puede comprobar tu partida ahora.") from None
+
+
+def _authorized_identity(container, sid, tid):
+    """Use only the identity accepted by the server for this participant."""
+    from app.application.frontend_reads import FrontendReads
+    from app.save_parser.models import ParsedTrainer
+
+    reads = getattr(container, "frontend_read_repository", None)
+    if reads is None:
+        raise api_error(503, "ITEM_DELIVERY_UNAVAILABLE", "No se puede comprobar tu partida ahora.")
+    try:
+        identity = FrontendReads(reads).league_identity(sid, tid)
+        if not identity:
+            raise api_error(409, "DELIVERY_SAVE_NOT_BOUND", "Sincroniza primero tu partida de la Liga.")
+        game = identity["game"]
+        trainer = ParsedTrainer.model_validate(identity["trainer"])
+        if game not in GAMES or trainer.language is None:
+            raise ValueError("incomplete_save_identity")
+        key = sha256("\0".join((game, trainer.name, str(trainer.tid), str(trainer.sid),
+                                str(trainer.gender), str(trainer.language))).encode()).hexdigest()
+        return game, key
+    except (PersistenceError, KeyError, TypeError, ValueError):
+        raise api_error(503, "ITEM_DELIVERY_UNAVAILABLE", "No se puede comprobar tu partida ahora.") from None
 
 
 def _option(code):
@@ -182,13 +210,14 @@ def reserve(
     if payload.game not in item_games(payload.item):
         raise api_error(409, "ITEM_INCOMPATIBLE_WITH_GAME", "Ese objeto no existe en este juego.")
     # The object goes to the save this season competes with, never another one.
-    bound = league_game(container, sid, tid)
-    if bound in GAMES and bound != payload.game:
+    bound, trainer_key = _authorized_identity(container, sid, tid)
+    if bound != payload.game:
         raise api_error(409, "DELIVERY_OTHER_GAME", "La entrega es para tu partida de la Liga.")
-    return _call(
+    receipt = _call(
         repo.reserve, sid, tid, str(purchase_id), str(operation_id),
         payload.item, BAG_ITEMS[payload.item][0], payload.game,
     )  # fmt: skip
+    return receipt.model_copy(update={"authorized_trainer_key": trainer_key})
 
 
 @router.put(

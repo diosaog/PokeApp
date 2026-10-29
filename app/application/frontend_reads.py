@@ -376,19 +376,24 @@ class FrontendReads:
             league_game=game,
         )
 
-    def league_game(self, sid, tid):
-        """The game of the save this trainer's season accepted (its bound
-        identity), or None before one: what the Shop's compatibility uses."""
-        from app.domain.shop_item_uses import GAMES
-
+    def league_identity(self, sid, tid):
+        """Server-accepted identity of this participant's competitive save."""
         players = self.rows(
             "season_players", "current_save_file_id", season_id=sid, trainer_id=tid
         )
         save = players[0]["current_save_file_id"] if players else None
         if not save:
             return None
-        rows = self.rows("save_files", "metadata", id=save)
+        rows = self.rows("save_files", "metadata", id=save, season_id=sid, trainer_id=tid)
         identity = (rows[0].get("metadata") or {}).get("save_identity") if rows else None
+        return identity if isinstance(identity, dict) else None
+
+    def league_game(self, sid, tid):
+        """The game of the save this trainer's season accepted (its bound
+        identity), or None before one: what the Shop's compatibility uses."""
+        from app.domain.shop_item_uses import GAMES
+
+        identity = self.league_identity(sid, tid)
         game = identity.get("game") if isinstance(identity, dict) else None
         return game if game in GAMES else None
 

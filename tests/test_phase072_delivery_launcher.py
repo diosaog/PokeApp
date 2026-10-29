@@ -9,10 +9,12 @@ nothing was written. No real save, account or network is used.
 import os
 import stat
 import tempfile
+import threading
 import unittest
 from hashlib import sha256
 from pathlib import Path
 from uuid import uuid4
+from unittest.mock import Mock
 
 from app.launcher.backend import BackendError
 from app.launcher.item_delivery import DeliveryRefused, LauncherDeliveries, describe
@@ -109,10 +111,12 @@ class Server:
         self.deliveries = {}
         self.calls = []
         self.fail = {}
+        self.authorized_key = TRAINER_KEY
 
     def _receipt(self, op):
         d = self.deliveries[op]
-        return dict(d, operation_id=op, purchase_status=self.purchases[d["purchase_id"]])
+        return dict(d, operation_id=op, purchase_status=self.purchases[d["purchase_id"]],
+                    authorized_trainer_key=self.authorized_key)
 
     def _maybe_fail(self, step):
         error = self.fail.pop(step, None)
@@ -237,6 +241,21 @@ class DeliveryFlowTests(unittest.TestCase):
         self.assertEqual(["RELEASED"], self.states())
         self.assertEqual((), self.engine.pending())
 
+    def test_same_game_other_trainer_or_missing_authorization_never_writes(self):
+        for key in (sha256(b"another trainer in the same Sun game").hexdigest(), None):
+            with self.subTest(key=key):
+                self.server.authorized_key = key
+                with self.assertRaises(WriteSafetyError) as refused:
+                    self.flow.deliver(self.purchase, "sitrus_berry")
+                self.assertEqual("DELIVERY_OTHER_GAME", refused.exception.code)
+                self.assertEqual(save(), self.target.read_bytes())
+                self.assertEqual("pending", self.server.purchases[self.purchase])
+                self.assertEqual((), self.engine.pending())
+                self.assertTrue(all(d["status"] == "RELEASED" for d in self.server.deliveries.values()))
+        self.server.authorized_key = TRAINER_KEY
+        self.assertEqual("DELIVERED", self.flow.deliver(self.purchase, "sitrus_berry")["status"])
+        self.assertEqual(1, self.counts()[0])
+
     def test_open_emulator_releases_the_purchase(self):
         self.processes.append("Lime3DS.exe")
         with self.assertRaises(WriteSafetyError) as caught:
@@ -294,6 +313,35 @@ class DeliveryFlowTests(unittest.TestCase):
         self.assertEqual(["DELIVERED"], self.states())
         self.assertEqual("used", self.server.purchases[self.purchase])
         self.assertEqual(1, self.counts()[0])
+
+    def test_uncertain_write_keeps_reservation_until_native_recovery_decides(self):
+        def fail_after_publish(point):
+            if point == "after_publish":
+                raise OSError("interrupted after the namespace change")
+
+        self.engine.fault_hook = fail_after_publish
+        with self.assertRaises(WriteSafetyError) as caught:
+            self.flow.deliver(self.purchase, "sitrus_berry")
+        self.assertEqual("DELIVERY_RECOVERY_REQUIRED", caught.exception.code)
+        operation = self.flow.pending()[0]["operation_id"]
+        self.assertEqual([operation], self.flow.settle())
+        self.assertEqual("RESERVED", self.server.deliveries[operation]["status"])
+        self.assertEqual("pending", self.server.purchases[self.purchase])
+        self.assertNotIn("release", [c[0] for c in self.server.calls])
+        self.engine.fault_hook = lambda point: None
+        self.assertEqual("APPLIED_VERIFIED", self.engine.reconcile(operation).status)
+        self.assertEqual([], self.flow.settle())
+        self.assertEqual("used", self.server.purchases[self.purchase])
+        self.assertEqual(1, self.counts()[0])
+
+    def test_another_account_does_not_settle_the_original_accounts_delivery(self):
+        record = self._reserved_only()
+        other = LauncherDeliveries(self.controller, self.server, trainer_id=str(uuid4()))
+        calls = list(self.server.calls)
+        self.assertEqual([], other.settle())
+        self.assertEqual(calls, self.server.calls)
+        self.assertEqual("RESERVED", self.server.deliveries[record["operation_id"]]["status"])
+        self.assertEqual([], self.flow.settle())
 
     def test_crash_after_reserve_before_prepare_releases(self):
         self._reserved_only()
@@ -405,6 +453,23 @@ class DeliveryFlowTests(unittest.TestCase):
         self.flow._write(record, insert=True)
         self.server.reserve(intent.operation_id, self.purchase, "sitrus_berry", "SN")
         return record
+
+
+class RuntimeDeliveryBindingTests(unittest.TestCase):
+    def test_unbound_season_never_starts_a_physical_delivery(self):
+        from app.launcher.runtime import DELIVERY_ERRORS, LauncherRuntime
+
+        for status in ("OPEN", "UNKNOWN", "NOT_PARTICIPANT", "CLOSED"):
+            with self.subTest(status=status):
+                runtime = object.__new__(LauncherRuntime)
+                runtime.lock = threading.Lock()
+                runtime.value = {"delivery_seq": 0}
+                flow = Mock()
+                runtime._delivery_context = lambda: (flow, Mock(), {"status": status})
+                runtime._delivery_step("delivery_apply", {"purchase_id": str(uuid4()), "item": "sitrus_berry"})
+                flow.deliver.assert_not_called()
+                self.assertEqual(DELIVERY_ERRORS["DELIVERY_SAVE_NOT_BOUND"], runtime.value["delivery_error"])
+                self.assertEqual(1, runtime.value["delivery_seq"])
 
 
 if __name__ == "__main__":

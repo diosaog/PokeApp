@@ -274,6 +274,11 @@ class LauncherDeliveries:
                 raise  # unknown outcome: settle() releases it later
             self._receipt(reserved, record, "RESERVED")
             self._state(record, "RESERVED")
+            if reserved.get("authorized_trainer_key") != intent.trainer_key:
+                # No preparation or write has happened. This also refuses an
+                # older API that cannot authorize the exact in-game trainer.
+                self._release(record, "DELIVERY_OTHER_GAME")
+                raise WriteSafetyError("DELIVERY_OTHER_GAME")
             try:
                 prepared = self.engine.prepare(
                     self.engine.enroll(path), intent, closed_emulator_confirmed=True

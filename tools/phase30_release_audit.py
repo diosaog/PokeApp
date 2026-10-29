@@ -31,9 +31,9 @@ MIGRATIONS = sorted((ROOT / "supabase/v2/migrations").glob("*.sql"))
 # progress coins, cancellation at any stage, account repair) followed, then
 # 070 (each participant's dead box, one live League total), 071 (the shop is
 # open in the preseason); 072 (in-game Shop objects delivered to the bag once,
-# audited refunds) is this window.
+# audited refunds) and 073 (prospective League scoring) are this window.
 DEPLOYED = [m for m in MIGRATIONS if int(m.name[:3]) <= 71]
-PENDING = [m for m in MIGRATIONS if 72 <= int(m.name[:3]) <= 72]
+PENDING = [m for m in MIGRATIONS if 72 <= int(m.name[:3]) <= 73]
 WINDOW = f"{PENDING[0].name[:3]}-{PENDING[-1].name[:3]}"
 SCHEMAS = "('public','v1_shadow')"
 

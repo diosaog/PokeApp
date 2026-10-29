@@ -1,5 +1,48 @@
 # Final corrections — live execution record
 
+## Shop delivery 072 and League rules — Codex continuation, 2026-10-29
+
+**IN PROGRESS; publication is not claimed.** Entry HEAD `9222cd4`, main two
+commits ahead of the fetched origin `3d59900`; tracked tree initially clean.
+Claude's `74f9536` and `9222cd4` are preserved. All unrelated untracked files,
+including the protected guide, are excluded from this work.
+
+- Public Launcher **0.26.7 VERIFIED**: full installer 159398331 bytes, SHA-256
+  `e884350a3a455efb9954ffa51b8b5282d48471cd859fa971ef9acc4766919e11`;
+  stable feed 0.26.7/minimum 0.26.0, Ed25519 verified against the packaged key.
+  No claim of acceptance on a friend's PC. 0.26.8 is free in remote R2.
+- Recovered Claude results: web 246/246, TypeScript and Prettier PASS,
+  Electron UI 80/80. Native 1776 and quick-item 281 evidence retained; those
+  matrices are not repeated. Focused checks will cover changes and final package.
+- Remote migration history currently ends at 071; 072 is committed locally,
+  not published. API remains deployment `002dd4dd`; final live preflight pending.
+- League changes are still required: confirmed wins in one-day round robin,
+  new death deductions, equal configured coins and existing item rewards.
+  A prospective 073 will preserve closed history and existing discarded configs.
+- Assigned disjoint subtasks: League implementation/tests; delivery safety and
+  integration; Launcher package/update acceptance. Root owns publication,
+  production rehearsal, explicit Git staging and this operational record.
+- Definitive 072/073 rehearsal **15/15 PASS** on backup captured 22:06 UTC
+  (`pre-release-20261029T220554Z.dump`, SHA-256 `1ce033a2…73bc3`): 117 restored
+  table fingerprints and catalog match; 95 business/Storage/Shadow tables and
+  104 reads unchanged, zero new browser grants, fixtures rolled back, upgrade
+  equals fresh 001–073. Both SQL files were frozen throughout. Later harness
+  hardening also checks hashes at start/application/end; SQL bytes unchanged.
+- New delivery identity check and recovery refresh: Python 96 PASS, Electron UI
+  81/81 PASS. New League: Python 85 PASS, React Admin/League 22 PASS, real SQL
+  closing/replay/correction plus positional multi-day regression PASS. Release
+  gates 6 PASS; focused Electron confirmation/supervisor 23 PASS. Groups overlap.
+- Stable 0.26.8 candidate built/signed, not published: package audit PASS;
+  packaged startup/recovery 9/9; packaged Python/native/NTFS delivery 17/17.
+  Installer 159427247 bytes, SHA-256
+  `3c8f54a96938b0a16d4e3b71176c2fc7cc97fbfa64011212d50c18a0c87cb233`.
+  Isolated actual NSIS install/update retention check is running.
+
+Private evidence: `%LOCALAPPDATA%/PokeApp-migration-evidence/shop-delivery-league/20261029/`.
+No production business mutation, refund or real-save write is authorized by this
+record. Only the deployments/migrations requested by the owner will be applied
+after the backup and rehearsal gates pass.
+
 ## Launcher 0.26.7: supervised core («Sin conexión» on a friend's PC) — 2026-10-29 17:40 UTC
 
 **PUBLISHED / VERIFIED here; the friend's PC itself was not accessed.** Commits

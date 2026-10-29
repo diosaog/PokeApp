@@ -1,4 +1,4 @@
-"""Phase 30 release step: apply 054-064 to production, once each, in order.
+"""Apply the pending, rehearsed production migrations once each, in order.
 
 THIS WRITES TO PRODUCTION. Run it only inside the release window the owner has
 authorized explicitly, after a fresh verified backup (tools.phase30_backup_rehearsal
@@ -26,6 +26,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import subprocess
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
 
@@ -33,6 +34,8 @@ from tools.phase30_release_audit import DEPLOYED, PENDING
 from tools.production_readonly import SUPABASE_REF, _supabase, query, supabase_get
 
 EXPECTED_SHA256 = {
+    '073_single_day_league_rules.sql': 'c43b1b91914f5e4dde43a20bf427d185407b7c0b35945df1328b8d04ee798432',
+    '072_shop_item_delivery.sql': '7535336d24f976dd1a71cceaf46ea3dee4d28fd732abafa91dbb592be02613ee',
     '071_preseason_shop.sql': '82dfc27bc6a4dbed245f8e79a4c514eed7457a9cc65d691c771badc7280ad621',
     '070_dead_box_and_live_league.sql': '826ccd09a6828717e4f1a8b99643651e782e1971cd38d66d6a5707b1b7e89d3b',
     '069_real_test_corrections.sql': 'c5ddb335ce4683f35c8b83911a86762520122d46f144c6eafe93315579754803',
@@ -81,16 +84,27 @@ def preflight(args) -> dict:
     applied = sorted(m.stem for m in PENDING if m.stem in names)
     if missing:
         problems.append(f"history lacks {missing}")
-    # Nothing mid-flight: an open matchday or a pending purchase waits for the window.
+    # A pending purchase is owned, unused inventory, not an in-flight payment.
+    # Preserve it (including purchases in discarded seasons); never force a
+    # refund to clear a release gate. Block actual competitive/write operations.
     busy = query(
         """select (select count(*) from public.seasons where status='active') as active_seasons,
         (select count(*) from public.matchdays where status='open') as open_matchdays,
-        (select count(*) from public.purchases where status='pending') as pending_purchases"""
+        (select count(*) from public.purchases where status='pending') as pending_purchases,
+        (select count(*) from public.item_use_authorizations a where a.status<>'APPLIED_VERIFIED'
+          and not exists(select 1 from public.item_use_transfers x where x.authorization_id=a.id
+            and (x.terminal='CANCELLED' or x.adjudicated_at is not null))) as open_physical_authorizations,
+        (select count(*) from public.item_use_transfer_legs where not released) as unsettled_transfer_legs"""
     )[0]
-    if busy["open_matchdays"] or busy["pending_purchases"]:
-        problems.append(
-            "an open matchday or a pending purchase: wait or settle it first"
-        )
+    has_deliveries = query("select to_regclass('public.item_deliveries') is not null as present")[0]["present"]
+    busy["reserved_deliveries"] = (
+        query("select count(*) as n from public.item_deliveries where status='RESERVED'")[0]["n"]
+        if has_deliveries else 0
+    )
+    if busy["open_matchdays"] or busy["reserved_deliveries"]:
+        problems.append("an open matchday or reserved delivery: wait for it to finish")
+    if busy["open_physical_authorizations"] or busy["unsettled_transfer_legs"]:
+        problems.append("an unsettled physical operation: wait for its journal to settle")
     backup = None
     if args.backup:
         manifest = json.loads(Path(args.backup).read_text(encoding="utf-8"))
@@ -108,8 +122,21 @@ def preflight(args) -> dict:
         if (
             rehearsal.get("archive") != manifest["archive"]
             or rehearsal.get("result") != "PASS"
+            or rehearsal.get("archive_sha256") != manifest["sha256"]
         ):
             problems.append("the rehearsal did not pass on this same archive")
+        archive = Path(args.backup).parent / manifest["archive"]
+        if not archive.exists() or hashlib.sha256(archive.read_bytes()).hexdigest() != manifest["sha256"]:
+            problems.append("backup archive is missing or changed")
+        if rehearsal.get("pending_sha256") != files:
+            problems.append("pending migration bytes differ from this rehearsal")
+        for migration in PENDING:
+            committed = subprocess.run(
+                ["git", "show", f"HEAD:supabase/v2/migrations/{migration.name}"],
+                capture_output=True, check=False,
+            )
+            if committed.returncode or committed.stdout != migration.read_bytes():
+                problems.append(f"{migration.name} is not the committed source")
     elif args.apply:
         problems.append("no rehearsed backup manifest given")
     return {

@@ -85,6 +85,7 @@ DELIVERY_ERRORS = {
     "CORRUPT_SAVE": "No se pudo preparar un archivo verificable. Guarda otra vez en el juego y vuelve a intentarlo; tu partida no ha cambiado.",
     "DELIVERY_DISABLED": "Entregar objetos no está disponible en este Launcher.",
     "DELIVERY_CONTEXT_UNAVAILABLE": "Inicia sesión y espera a que se cargue tu temporada.",
+    "DELIVERY_SAVE_NOT_BOUND": "Espera a que tu partida se sincronice con la Liga antes de entregar objetos.",
     "BACKEND_UNAVAILABLE": "No hay conexión con PokeApp: tu compra no se ha gastado. Vuelve a intentarlo.",
 }
 GAME_NAMES = {
@@ -786,10 +787,9 @@ class LauncherRuntime:
             waiting = flow.settle()
             if name == "delivery_apply":
                 # The object goes to the save this season competes with.
-                if (
-                    link.get("status") == "BOUND"
-                    and link.get("identity") != save_identity(self.receipt)
-                ):
+                if link.get("status") != "BOUND":
+                    raise WriteSafetyError("DELIVERY_SAVE_NOT_BOUND")
+                if link.get("identity") != save_identity(self.receipt):
                     raise WriteSafetyError("DELIVERY_OTHER_GAME")
                 result = flow.deliver(args["purchase_id"], args["item"])
                 self._patch(quick_items=None)  # another version of the file now

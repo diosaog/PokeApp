@@ -1,6 +1,7 @@
 """Pure close planning; SQL rechecks the input fingerprint under mutation locks."""
 
 from dataclasses import asdict
+from decimal import Decimal
 import random
 
 from app.application.daily_ranking import RULE, consequence_order
@@ -18,6 +19,14 @@ def plan_close(
 ) -> dict:
     inputs = context["inputs"]
     cfg = inputs["config"]
+    single_round_robin = cfg.get("scoring_mode") == "single_round_robin_v1"
+    death_rate = Decimal(str(cfg.get("death_penalty_per_mon", "0.2")))
+    common_coins = None
+    if single_round_robin:
+        rewards = set(cfg["coin_rewards_json"].values())
+        if cfg["total_matchdays"] != 1 or set(cfg["division_sizes"]) != {"A"} or len(rewards) != 1:
+            raise ValueError("Single-day League requires one common configured coin reward")
+        common_coins = next(iter(rewards))
     players = {p["id"]: p for p in inputs["players"]}
     matches = {m["id"]: dict(m) for m in inputs["matches"]}
     for change in corrections or []:
@@ -58,7 +67,7 @@ def plan_close(
     penalties = {
         p["id"]: PenaltySummary(
             dead_count=p["dead_count"],
-            dead_points_penalty=round(0.2 * p["dead_count"], 1),
+            dead_points_penalty=float(death_rate * p["dead_count"]),
             points_reduction=p["points_reduction"],
             coins_reduction=p["coins_reduction"],
         )
@@ -79,6 +88,11 @@ def plan_close(
     for standing in standings:
         if standing["trainer_id"] in ordering.sporting_rows:
             standing.update(ordering.sporting_rows[standing["trainer_id"]])
+        if single_round_robin:
+            standing["points_awarded"] = 2 * sum(
+                m["winner_id"] == standing["trainer_id"] for m in matches.values()
+            )
+            standing["coins_awarded"] = common_coins
         value = players[standing["trainer_id"]]["points_reduction"]
         if isinstance(value, str):
             standing["penalties"]["points_reduction"] = value
@@ -136,7 +150,7 @@ def plan_close(
                         stock_total=1 if item["discount_kind"] == "mega" else 2,
                     )
                 )
-    return dict(
+    result = dict(
         ranking=ordering.audit,
         standings=standings,
         matches=list(matches.values()),
@@ -144,3 +158,9 @@ def plan_close(
         last_b_player_id=award.trainer_id if award else None,
         promotions=promotions,
     )
+    if single_round_robin:
+        result["single_league_rewards"] = [
+            dict(code="blindar_pokemon", season_player_id=ranks["A"][0]),
+            dict(code="robar_pokemon", season_player_id=ranks["A"][-1]),
+        ]
+    return result

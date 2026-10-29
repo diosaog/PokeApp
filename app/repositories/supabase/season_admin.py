@@ -19,7 +19,7 @@ REJECTIONS = {
     **dict.fromkeys(("season_not_found", "participant_not_found", "config_not_found"), 404),
     **dict.fromkeys(("season_not_draft", "active_season_exists", "setup_incomplete", "stale_revision",
         "idempotency_conflict", "trainer_unavailable", "participant_exists", "participant_referenced",
-        "invalid_roster", "invalid_config", "invalid_rewards", "effective_round_exists", "config_window_closed",
+        "invalid_roster", "invalid_config", "invalid_rewards", "single_league_common_coins_required", "effective_round_exists", "config_window_closed",
         "config_already_used", "initial_setup_locked", "division_capacity_mismatch", "matchday_already_prepared",
         "config_not_effective", "competition_structure_locked", "competition_structure_mismatch",
         "season_not_editable"), 409),

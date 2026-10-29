@@ -3171,6 +3171,8 @@ export interface components {
       finished_at: string | null;
       /** Purchase Status */
       purchase_status: string;
+      /** Authorized Trainer Key */
+      authorized_trainer_key?: string | null;
     };
     /** DeliveryReleaseBody */
     DeliveryReleaseBody: Record<string, never>;

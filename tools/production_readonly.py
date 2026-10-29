@@ -142,11 +142,16 @@ def railway(graphql: str, variables: dict | None = None) -> dict:
 
 def railway_variables() -> dict[str, str]:
     """Service variables, for the caller to reduce to names and flags. Never print it."""
-    return railway(
-        "query($p:String!,$e:String!,$s:String!){variables(projectId:$p,"
-        "environmentId:$e,serviceId:$s,unrendered:true)}",
-        {"p": RAILWAY_PROJECT, "e": RAILWAY_ENVIRONMENT, "s": RAILWAY_SERVICE},
-    )["variables"]
+    # The CLI owns the current GraphQL contract. Its JSON includes secrets, so
+    # capture it in memory and never include stdout/stderr in an exception.
+    result = subprocess.run(
+        [shutil.which("railway"), "variables", "--json", "--project", RAILWAY_PROJECT,
+         "--environment", RAILWAY_ENVIRONMENT, "--service", RAILWAY_SERVICE],
+        capture_output=True, text=True, timeout=120, check=False,
+    )
+    if result.returncode:
+        raise RuntimeError("Railway CLI variables unavailable; no values emitted")
+    return json.loads(result.stdout)
 
 
 def railway_deployments(limit: int = 5) -> list[dict]:

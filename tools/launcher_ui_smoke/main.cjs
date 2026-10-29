@@ -1,6 +1,12 @@
 // Headless check of the real Launcher page with a test preload. Not packaged.
 const { app, BrowserWindow } = require("electron");
 const path = require("node:path");
+app.setPath(
+  "userData",
+  require("node:fs").mkdtempSync(
+    path.join(require("node:os").tmpdir(), "pokeapp-ui-smoke-"),
+  ),
+);
 const page = path.resolve(__dirname, "../../companion/launcher/index.html");
 const script = `(async () => {
   const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
@@ -121,6 +127,10 @@ const script = `(async () => {
   check(JSON.stringify(window.launcher.__calls().at(-1)) === JSON.stringify(["delivery", "c0000000-0000-4000-8000-000000000001", "dusk_stone", "t:delivery:c0000000-0000-4000-8000-000000000001:dusk_stone"]), "exact ticketed delivery sent once");
   window.launcher.__set({ delivery_seq: 1, delivery_result: { purchase_id: "c0000000-0000-4000-8000-000000000001", item: "dusk_stone", name: "Piedra Noche", status: "DELIVERED", game: "Y", count: 2, at: 2 } }); await sleep(1300);
   check(/Piedra Noche añadido a la bolsa y comprobado en tu partida \\(ahora tienes 2\\)/.test(document.getElementById("toasts").textContent) && window.launcher.__calls().filter((c) => c[0] === "webEvent" && c[1] === "items-changed").length >= 2, "a verified delivery is confirmed with the new count and the web refreshes");
+  const itemEvents = () => window.launcher.__calls().filter((c) => c[0] === "webEvent" && c[1] === "items-changed").length;
+  const beforeRecovery = itemEvents();
+  window.launcher.__set({ delivery_seq: 2 }); await sleep(1300);
+  check(itemEvents() === beforeRecovery + 1, "recovered server confirmation refreshes Inventory without a new local write result");
   window.launcher.__unset(["delivery_seq", "delivery_result"]);
   window.launcher.__disable();
   document.querySelector("#sheet-dialog [data-close]").click(); await sleep(50);
@@ -159,7 +169,7 @@ const script = `(async () => {
   check(ud.open && uq("update-go").textContent.trim() === "Actualizar", "a manual check still shows the postponed version");
   uq("update-go").click(); await sleep(300);
   check(JSON.stringify(window.launcher.__calls().slice(-2)) === JSON.stringify([["begin", "update", "0.27.0"], ["apply", "t:update:0.27.0"]]), "«Actualizar» asks main for a ticket bound to that version");
-  window.launcher.__setUpdate({ ...offer, prompt: false, status: "DOWNLOADING", progress: { received: 80 * 1024 * 1024, total: 160 * 1024 * 1024 } }); await sleep(600);
+  window.launcher.__setUpdate({ ...offer, prompt: false, status: "DOWNLOADING", progress: { received: 80 * 1024 * 1024, total: 160 * 1024 * 1024 } }); await sleep(1300);
   check(!uq("update-progress-box").hidden && /80 MB de 160 MB · 50 %/.test(uq("update-progress-text").textContent) && uq("update-later").hidden, "download progress is shown; no «Más tarde» once accepted");
   window.launcher.__setUpdate({ ...offer, prompt: false, status: "ERROR", reason: "SIGNATURE_INVALID" }); await sleep(1300);
   check(/verificación de firma/.test(uq("update-message").textContent) && uq("update-go").textContent.trim() === "Reintentar", "a forged update is refused and explained");

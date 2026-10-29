@@ -30,6 +30,7 @@ def consequence_order(
 ) -> ConsequenceOrder:
     players = {p["id"]: p for p in inputs["players"]}
     cfg = inputs["config"]
+    single_round_robin = cfg.get("scoring_mode") == "single_round_robin_v1"
     final = inputs["number"] == cfg["total_matchdays"]
     sizes = {d: sum(p["division"] == d for p in players.values()) for d in ("A", "B")}
     moving = (
@@ -97,7 +98,7 @@ def consequence_order(
             ids = list(group.display_members)
             positions = list(range(position, position + len(ids)))
             signatures = {
-                "points": [cfg["scoring_json"][str(offset + i)] for i in positions],
+                "points": [2 * group.wins if single_round_robin else cfg["scoring_json"][str(offset + i)] for i in positions],
                 "coins": [cfg["coin_rewards_json"][str(offset + i)] for i in positions],
                 "podium": [offset + i if offset + i <= 3 else None for i in positions],
                 "movement": [
@@ -110,6 +111,11 @@ def consequence_order(
                         and cfg["rules_json"]["last_b_gets_steal"]
                         and i == sizes["B"]
                     )
+                    for i in positions
+                ],
+                "single_league_prize": [
+                    "shield" if single_round_robin and i == 1 else
+                    "steal" if single_round_robin and i == sizes["A"] else None
                     for i in positions
                 ],
             }

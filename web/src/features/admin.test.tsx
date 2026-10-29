@@ -359,6 +359,55 @@ it("an older season without the observed assignment keeps Liga A and Liga B", ()
   });
 });
 
+it("requires explicit common coins for a single-day round robin and shows its win/prize rules", () => {
+  mocks.setup.season.status = "draft";
+  mocks.setup.config_versions[0].used = false;
+  render(page());
+  tab("Configuración");
+  fireEvent.click(screen.getByLabelText(/Una Liga/));
+  fireEvent.change(screen.getByLabelText("Total de jornadas"), {
+    target: { value: "1" },
+  });
+  const common = screen.getByLabelText(
+    "Monedas de jornada para cada participante",
+  );
+  expect(common).toHaveValue(null);
+  expect(
+    screen.queryByLabelText("Puntos por posición"),
+  ).not.toBeInTheDocument();
+  expect(
+    screen.queryByLabelText("Monedas por posición"),
+  ).not.toBeInTheDocument();
+  expect(screen.getByText(/2 puntos por victoria/)).toHaveTextContent(
+    "Primero: Blindar Pokémon extra. Último: Robar Pokémon extra.",
+  );
+  fireEvent.submit(common.closest("form")!);
+  expect(mocks.execute).not.toHaveBeenCalled();
+  fireEvent.change(common, { target: { value: "23" } });
+  fireEvent.submit(common.closest("form")!);
+  expect(mocks.execute.mock.calls[0][1]).toEqual(
+    expect.objectContaining({
+      total_matchdays: 1,
+      division_sizes: { A: 1 },
+      scoring: { "1": 0 },
+      coin_rewards: { "1": 23 },
+    }),
+  );
+});
+
+it("keeps an existing uniform configured coin amount when selecting a single-day league", () => {
+  mocks.setup.season.status = "draft";
+  mocks.setup.config_versions[0].used = false;
+  mocks.setup.config_versions[0].total_matchdays = 1;
+  mocks.setup.config_versions[0].coin_rewards = { "1": 19, "2": 19 };
+  render(page());
+  tab("Configuración");
+  fireEvent.click(screen.getByLabelText(/Una Liga/));
+  expect(
+    screen.getByLabelText("Monedas de jornada para cada participante"),
+  ).toHaveValue(19);
+});
+
 it("shows the fixed competition structure once the season has started", () => {
   mocks.setup.config_versions[0].division_sizes = { A: 4 };
   render(page());

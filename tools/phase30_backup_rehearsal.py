@@ -304,6 +304,7 @@ def rehearse(args) -> dict:
         "archive changed"
     )
     report = {"archive": dump.name, "archive_sha256": manifest["sha256"], "checks": []}
+    pending_hashes = {m.name: hashlib.sha256(m.read_bytes()).hexdigest() for m in PENDING}
 
     def ok(condition, label, detail=None):
         report["checks"].append(
@@ -403,7 +404,10 @@ def rehearse(args) -> dict:
             "postgres temporarily member of supabase_storage_admin while 056 runs"
         )
         for migration in PENDING:
-            text = migration.read_text(encoding="utf-8")
+            migration_bytes = migration.read_bytes()
+            ok(hashlib.sha256(migration_bytes).hexdigest() == pending_hashes[migration.name],
+               f"{migration.name} still matches the bytes frozen at rehearsal start")
+            text = migration_bytes.decode("utf-8")
             emulate = storage_policy in text
             if emulate:
                 pg.sql("grant supabase_storage_admin to postgres;", "supabase_admin")
@@ -422,6 +426,16 @@ def rehearse(args) -> dict:
                 f"values ('{datetime.now(UTC):%Y%m%d%H%M%S}{migration.name[:3]}','{migration.stem}','{{}}');",
                 "supabase_admin",
             )
+            if migration.name.startswith("072_"):
+                from tools.validate_phase070_pg import validate as validate_070
+                from tools.validate_phase072_delivery import validate as validate_072
+
+                report["phase070"] = validate_070(pg)
+                report["phase072"] = validate_072(pg)
+            if migration.name.startswith("073_"):
+                from tools.validate_phase073_league import validate as validate_073
+
+                report["phase073"] = validate_073(pg)
 
         rows_after = local_fingerprints(pg, public_tables)
         # 072 adds the private item_deliveries table, its commands and the
@@ -470,10 +484,6 @@ def rehearse(args) -> dict:
             verifier == ["falsefalsefalse"],
             "verifier role created without login, superuser or RLS bypass",
         )
-        from tools.validate_phase070_pg import validate
-        from tools.validate_phase072_delivery import validate as validate_072
-        report["phase070"] = validate(pg)
-        report["phase072"] = validate_072(pg)
         ok(local_fingerprints(pg, public_tables) == rows_after, "focused fixtures rolled back exactly")
         upgraded = catalog_local(pg)
     finally:
@@ -498,12 +508,12 @@ def rehearse(args) -> dict:
         f"upgraded copy equals a fresh 001-{MIGRATIONS[-1].name[:3]} build (Supabase-shaped)",
         drift,
     )
+    ok(pending_hashes == {m.name: hashlib.sha256(m.read_bytes()).hexdigest() for m in PENDING},
+       "pending migration bytes unchanged throughout the rehearsal")
     report["result"] = "PASS"
     report["deployed_before"] = len(DEPLOYED)
     report["pending"] = [m.name for m in PENDING]
-    report["pending_sha256"] = {
-        m.name: hashlib.sha256(m.read_bytes()).hexdigest() for m in PENDING
-    }
+    report["pending_sha256"] = pending_hashes
     return report
 
 

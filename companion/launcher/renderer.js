@@ -120,7 +120,8 @@ const detailText = {
   SAVE_PARSE_MISMATCH: errorText.SAVE_PARSE_MISMATCH,
   INVALID_SAVE_SIZE: "El archivo no tiene el tamaño de una partida válida.",
   SAVE_HASH_MISMATCH: "El archivo cambió durante el envío. Se reintentará.",
-  CORRUPT_SAVE: "PokeApp no ha podido leer esta partida: parece dañada o incompleta.",
+  CORRUPT_SAVE:
+    "PokeApp no ha podido leer esta partida: parece dañada o incompleta.",
   UNSUPPORTED_GAME: "PokeApp no admite este juego.",
 };
 const gameLabel = (code) => `Pokémon ${gameNames[code] || code || "?"}`;
@@ -193,7 +194,10 @@ function syncStatus(state) {
     ];
   if (state.error === "SAVE_READBACK_PENDING")
     return ["busy", "Comprobando", "PokeApp está comprobando tu partida…"];
-  if (state.error && !["SAVE_CHANGED_DURING_READ", "RATE_LIMITED"].includes(state.error))
+  if (
+    state.error &&
+    !["SAVE_CHANGED_DURING_READ", "RATE_LIMITED"].includes(state.error)
+  )
     return [
       "error",
       "Error",
@@ -238,7 +242,10 @@ function announce(state) {
     receipt: state.receipt_id,
     // Each copy PokeApp accepts (season first, then personal) refreshes the
     // web at once, without waiting for the rest of the sync.
-    accepted: [state.season_receipt?.save_id, state.cloud_receipt?.save_id].join(),
+    accepted: [
+      state.season_receipt?.save_id,
+      state.cloud_receipt?.save_id,
+    ].join(),
   };
   const before = seen;
   seen = now;
@@ -265,8 +272,16 @@ function announce(state) {
     tell("items-changed");
   }
   // 072: a delivery the trainer asked for says how it ended, once.
-  if (now.deliverySeq !== before.deliverySeq && state.delivery_error && shopPending)
+  if (
+    now.deliverySeq !== before.deliverySeq &&
+    state.delivery_error &&
+    shopPending
+  )
     toast(state.delivery_error);
+  // Recovery can confirm an earlier write without producing a new local
+  // result. Its server-side purchase state must refresh the web as well.
+  if (now.deliverySeq !== before.deliverySeq && !state.delivery_error)
+    tell("items-changed");
   if (now.deliveryDone && now.deliveryDone !== before.deliveryDone) {
     const r = state.delivery_result;
     toast(
@@ -275,7 +290,7 @@ function announce(state) {
         : `${r.name} ya está en tu bolsa. Falta avisarlo a PokeApp: se hará solo en cuanto haya conexión.`,
       "ok",
     );
-    tell("items-changed");
+    if (now.deliverySeq === before.deliverySeq) tell("items-changed");
   }
 }
 function render(state) {
@@ -567,7 +582,12 @@ function renderNotices(state) {
   else if (
     state.principal &&
     state.error &&
-    !["SAVE_CHANGED_DURING_READ", "SAVE_READBACK_PENDING", "RATE_LIMITED", "BACKEND_UNAVAILABLE"].includes(state.error)
+    ![
+      "SAVE_CHANGED_DURING_READ",
+      "SAVE_READBACK_PENDING",
+      "RATE_LIMITED",
+      "BACKEND_UNAVAILABLE",
+    ].includes(state.error)
   )
     // The real cause, not a generic "we will retry".
     notices.push([
@@ -1442,7 +1462,13 @@ const quantities = { rare_candy: "1", heart_scale: "1" };
 let quickPending = false;
 // One read at a time. It always ends: with the counts, with the core's reason,
 // or — if the core never answers — with a message and «Volver a leer».
-const quickRead = { pending: false, since: 0, seq: 0, tries: 0, stalled: false };
+const quickRead = {
+  pending: false,
+  since: 0,
+  seq: 0,
+  tries: 0,
+  stalled: false,
+};
 function requestQuick(manual = false) {
   if (quickRead.pending || !lastState?.selected_save) return;
   if (manual) quickRead.tries = 0;

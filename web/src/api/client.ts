@@ -175,6 +175,8 @@ export function errorText(error: unknown) {
       "Revisa las jornadas, las divisiones y los ascensos de la configuración.",
     INVALID_REWARDS:
       "Revisa los puntos y las monedas: usa cantidades enteras no negativas y cubre todas las posiciones.",
+    SINGLE_LEAGUE_COMMON_COINS_REQUIRED:
+      "Una Liga de una sola jornada necesita la misma cantidad de monedas para todos los participantes. Revisa las monedas de jornada en el formato.",
     EFFECTIVE_ROUND_EXISTS:
       "Ya existe una configuración que empieza en esa jornada. Elige otra jornada o modifica la versión sin usar.",
     CONFIG_WINDOW_CLOSED:

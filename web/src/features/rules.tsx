@@ -220,6 +220,16 @@ function Structure({ setup }: { setup: Setup }) {
       : "two",
   );
   const single = shape === "single";
+  const [total, setTotal] = useState(config?.total_matchdays ?? 1);
+  useEffect(() => {
+    setTotal(config?.total_matchdays ?? 1);
+  }, [source.config_revision, config?.id, config?.total_matchdays]);
+  const singleDay = single && total === 1;
+  const configuredCoins = Object.values(config?.coin_rewards ?? {});
+  const commonCoins =
+    configuredCoins.length && new Set(configuredCoins).size === 1
+      ? configuredCoins[0]
+      : undefined;
   // Only the observed initial assignment can start a single league; an older
   // season keeps Liga A and Liga B, as the server requires.
   const choosable = setup.initial_assignment_rule === "observed_deaths_v1";
@@ -254,12 +264,19 @@ function Structure({ setup }: { setup: Setup }) {
           onSubmit={(event) => {
             const data = form(event);
             if (busy || stale) return;
-            const scores = text(data, "points").split(",").map(Number),
-              coins = text(data, "coins").split(",").map(Number);
+            const scores = singleDay
+                ? Array<number>(setup.participants.length).fill(0)
+                : text(data, "points").split(",").map(Number),
+              coins = singleDay
+                ? Array<number>(setup.participants.length).fill(
+                    Number(text(data, "commonCoins")),
+                  )
+                : text(data, "coins").split(",").map(Number);
             const values = ["total", "a", "b", "movement"].map((k) =>
               single && k !== "total" ? 0 : number(data, k),
             );
             if (
+              (singleDay && text(data, "commonCoins") === "") ||
               ![...scores, ...coins, ...values].every(
                 (v) => Number.isSafeInteger(v) && v >= 0 && v <= 2147483647,
               ) ||
@@ -387,32 +404,61 @@ function Structure({ setup }: { setup: Setup }) {
                       step={1}
                       required
                       defaultValue={value}
+                      onChange={
+                        name === "total"
+                          ? (event) => setTotal(Number(event.target.value))
+                          : undefined
+                      }
                     />
                   </Field>
                 ))}
-              {(
-                [
-                  ["points", "Puntos por posición", config?.scoring],
-                  ["coins", "Monedas por posición", config?.coin_rewards],
-                ] as const
-              ).map(([name, label, v]) => (
-                <Field key={name} label={label}>
+              {singleDay && (
+                <Field label="Monedas de jornada para cada participante">
                   <input
-                    name={name}
+                    name="commonCoins"
+                    type="number"
+                    min={0}
+                    max={2147483647}
+                    step={1}
                     required
-                    pattern="[0-9]+(,[0-9]+)*"
-                    placeholder="10,8,6,4"
-                    defaultValue={
-                      v &&
-                      Object.entries(v)
-                        .sort((a, b) => Number(a[0]) - Number(b[0]))
-                        .map(([, n]) => n)
-                        .join(",")
-                    }
+                    defaultValue={commonCoins}
                   />
                 </Field>
-              ))}
+              )}
+              {!singleDay && (
+                <>
+                  {(
+                    [
+                      ["points", "Puntos por posición", config?.scoring],
+                      ["coins", "Monedas por posición", config?.coin_rewards],
+                    ] as const
+                  ).map(([name, label, v]) => (
+                    <Field key={name} label={label}>
+                      <input
+                        name={name}
+                        required
+                        pattern="[0-9]+(,[0-9]+)*"
+                        placeholder="10,8,6,4"
+                        defaultValue={
+                          v &&
+                          Object.entries(v)
+                            .sort((a, b) => Number(a[0]) - Number(b[0]))
+                            .map(([, n]) => n)
+                            .join(",")
+                        }
+                      />
+                    </Field>
+                  ))}
+                </>
+              )}
             </div>
+            {singleDay && (
+              <p>
+                Todos contra todos: 2 puntos por victoria y 0 por derrota.
+                Primero: Blindar Pokémon extra. Último: Robar Pokémon extra. Las
+                monedas de jornada son iguales para todos.
+              </p>
+            )}
             <label className="check">
               <input
                 type="checkbox"
