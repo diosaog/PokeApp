@@ -23,5 +23,11 @@ var p = new PK6 { Species = 650, PID = 123456, EncryptionConstant = 987654,
 p.RefreshChecksum(); save.PartyData = new PKM[] { p };
 File.WriteAllBytes(args[0], save.Write());
 '@ | Set-Content -LiteralPath (Join-Path $fixture 'Program.cs') -Encoding UTF8
-& $Dotnet run --project (Join-Path $fixture 'Fixture.csproj') -c Release -- (Join-Path $fixture 'main')
+# Generate with the same complete self-contained runtime as the distributed
+# parser. A partial shared .NET 8 install on the build host must not decide
+# whether a synthetic save can be created.
+$generator = Join-Path $fixture 'generator'
+& $Dotnet publish (Join-Path $fixture 'Fixture.csproj') -c Release -r win-x64 --self-contained true -p:RuntimeFrameworkVersion=8.0.29 -o $generator
+if ($LASTEXITCODE -ne 0) { throw 'Synthetic fixture generator publish failed' }
+& (Join-Path $generator 'Fixture.exe') (Join-Path $fixture 'main')
 if ($LASTEXITCODE -ne 0) { throw 'Synthetic fixture generation failed' }

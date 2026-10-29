@@ -1,6 +1,6 @@
 // Focused packaged startup: isolated profile/APPDATA, no account or owner save.
 import { chromium } from '../web/node_modules/@playwright/test/index.mjs';
-import { spawn } from 'node:child_process';
+import { spawn, execFileSync } from 'node:child_process';
 import { mkdir, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import assert from 'node:assert/strict';
@@ -54,6 +54,24 @@ try {
   const boundary=await web.evaluate(v=>({node:typeof require,bridge:typeof window.launcher,version:navigator.userAgent.includes('PokeAppLauncher/'+v)}),VERSION);
   assert(boundary.node==='undefined'&&boundary.bridge==='undefined'&&boundary.version,'web IPC boundary/version');
   report.checks=['Packaged startup','Real core IPC','Supervised core READY','Isolated empty profile','Official web login','No web Node/IPC bridge',VERSION+' user agent'];
+  // Fail only the disposable child's idle core, then wait for its supervisor.
+  // Never enumerate or stop another Launcher, an owner's profile or a writer.
+  const ownedCore=JSON.parse(execFileSync('powershell.exe',['-NoProfile','-NonInteractive','-Command',
+    `$rows=@(Get-CimInstance Win32_Process | Where-Object { $_.ParentProcessId -eq ${child.pid} -and $_.Name -eq 'PokeApp.Core.exe' }); ConvertTo-Json -InputObject $rows -Compress`],
+    {encoding:'utf8',windowsHide:true}));
+  assert(ownedCore.length===1,'exactly one core belongs to the disposable Launcher');
+  assert(path.resolve(ownedCore[0].ExecutablePath)===path.resolve(path.dirname(exe),'resources/runtime/core/PokeApp.Core.exe'),'owned packaged core path');
+  execFileSync('taskkill.exe',['/PID',String(ownedCore[0].ProcessId),'/F'],{stdio:'ignore',windowsHide:true});
+  let restarted;
+  for(let n=0;n<80;n++) {
+    restarted=await shell.evaluate(()=>window.launcher.core()).catch(()=>null);
+    if(restarted?.status==='READY'&&restarted.starts===2) break;
+    await pause(250);
+  }
+  assert(restarted?.status==='READY'&&restarted.starts===2,'packaged core recovers after an external idle-core failure');
+  state=await shell.evaluate(()=>window.launcher.state());
+  assert(state.local_status&&!state.principal&&!state.selected_save,'same isolated profile answers after recovery');
+  report.checks.push('Core restarts automatically after an idle crash','Same isolated profile answers after recovery');
   report.status='PASS';
 } catch(error) {
   report.status='FAIL';report.error=error.message;

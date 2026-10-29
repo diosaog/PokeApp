@@ -24,6 +24,11 @@ from tools.production_readonly import WEB, http
 
 API = "https://pokeapp-api-production.up.railway.app"
 INSTALLERS = {
+    "0.26.8": {
+        "bytes": 159427247,
+        "sha256_prefix": "3c8f54a9",
+        "sha256_suffix": "7cb233",
+    },
     "0.25.0": {
         "bytes": 159293410,
         "sha256_prefix": "f02eccd0",
@@ -56,6 +61,13 @@ INSTALLERS = {
     },
 }
 EXPECTED = {
+    "shop_delivery_league": {
+        "routes": 121,
+        "division_required": ["A"],
+        "incidents": True,
+        "feed": "feed",
+        "launcher": "0.26.8",
+    },
     "before": {
         "routes": 88,
         "division_required": ["A", "B"],
@@ -259,6 +271,7 @@ def main():
         "/v1/me",
         f"/v1/admin/seasons/{ZERO}/incidents",
         f"/v1/launcher/seasons/{ZERO}/item-uses",
+        *([f"/v1/launcher/seasons/{ZERO}/deliveries"] if args.stage == "shop_delivery_league" else []),
     ):
         if (
             not want["incidents"]
@@ -271,6 +284,10 @@ def main():
         check(
             f"{path.split(ZERO)[0]}... refuses without a session", status == 401, status
         )
+    if args.stage == "shop_delivery_league":
+        receipt = spec.get("components", {}).get("schemas", {}).get("DeliveryReceipt", {})
+        check("delivery contract includes server-bound native trainer identity",
+              "authorized_trainer_key" in receipt.get("properties", {}))
     preflight = http(
         "OPTIONS",
         API + "/v1/me",
