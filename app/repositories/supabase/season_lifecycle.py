@@ -48,14 +48,14 @@ class SupabaseSeasonLifecycleRepository:
 
     def execute(self, operation, request):
         try:
-            rpc = (
-                "api_admin_championship_read"
-                if operation == "championship"
-                else "api_admin_season_lifecycle"
-            )
+            reads = {
+                "championship": "api_admin_championship_read",
+                "cancellation_preview": "api_admin_season_cancellation_preview",
+            }
+            rpc = reads.get(operation, "api_admin_season_lifecycle")
             payload = (
                 dict(request)
-                if operation == "championship"
+                if operation in reads
                 else dict(request, operation=operation)
             )
             data = self.client.rpc(rpc, {"p_request": payload}).execute().data

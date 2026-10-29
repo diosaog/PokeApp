@@ -1,3 +1,4 @@
+from datetime import datetime
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, Header, Request, Query
@@ -326,6 +327,103 @@ def reset_pin(
         )
 
     return invoke(action)
+
+
+class AccountDetail(BaseModel):
+    trainer_id: UUID
+    display_name: str
+    globally_enabled: bool
+    is_admin: bool
+    provisioned: bool
+    revision: int
+    deleted: bool
+    created_at: datetime
+    credential: dict | None = None
+    session_guard: dict | None = None
+    pin_change_pending: bool
+    personal_save: dict | None = None
+    seasons: list[dict]
+    history: dict
+
+
+class AccountCommandReceipt(BaseModel):
+    trainer_id: UUID
+    sessions_ended: int | None = None
+    refresh_revoked: bool | None = None
+    removed: bool | None = None
+
+
+class DeleteAccountRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    # The account's exact current name, typed by the administrator.
+    confirmation: str = Field(min_length=1, max_length=64)
+
+
+class DeleteAccountReceipt(BaseModel):
+    trainer_id: UUID
+    deleted: bool
+    sessions_ended: int
+    history_kept: dict
+
+
+@router.get("/admin/accounts/{trainer_id}", response_model=AccountDetail)
+def admin_account_detail(
+    trainer_id: UUID,
+    principal=Depends(require_admin_principal),
+    service=Depends(account_service),
+):
+    return invoke(lambda: service.admin_detail(principal.trainer_id, str(trainer_id)))
+
+
+@router.post(
+    "/admin/accounts/{trainer_id}/revoke-sessions",
+    response_model=AccountCommandReceipt,
+)
+def admin_revoke_sessions(
+    trainer_id: UUID,
+    key: UUID = Header(alias="Idempotency-Key"),
+    principal=Depends(require_admin_principal),
+    service=Depends(account_service),
+):
+    return invoke(
+        lambda: service.admin_revoke_sessions(
+            principal.trainer_id, str(trainer_id), key
+        )
+    )
+
+
+@router.post(
+    "/admin/accounts/{trainer_id}/unlink-personal-save",
+    response_model=AccountCommandReceipt,
+)
+def admin_unlink_personal_save(
+    trainer_id: UUID,
+    key: UUID = Header(alias="Idempotency-Key"),
+    principal=Depends(require_admin_principal),
+    service=Depends(account_service),
+):
+    return invoke(
+        lambda: service.admin_unlink_personal_save(
+            principal.trainer_id, str(trainer_id), key
+        )
+    )
+
+
+@router.post("/admin/accounts/{trainer_id}/delete", response_model=DeleteAccountReceipt)
+def admin_delete_account(
+    trainer_id: UUID,
+    payload: DeleteAccountRequest,
+    key: UUID = Header(alias="Idempotency-Key"),
+    principal=Depends(require_admin_principal),
+    service=Depends(account_service),
+):
+    if str(trainer_id) == principal.trainer_id:
+        raise api_error(403, "ACCOUNT_FORBIDDEN", "An account cannot delete itself.")
+    return invoke(
+        lambda: service.admin_delete(
+            principal.trainer_id, str(trainer_id), key, payload.confirmation
+        )
+    )
 
 
 class RenewalRequest(ResetPinRequest):

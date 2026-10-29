@@ -30,6 +30,24 @@ class SupabasePersonalSaveRepository:
             raise PersistenceError("personal_save_ambiguous")
         return rows[0] if rows else None
 
+    def summaries(self):
+        # Progress facts only, selected by JSON path: no Pokémon list travels.
+        try:
+            rows = (
+                self._client.table("trainer_personal_saves")
+                .select(
+                    "trainer_id,game,uploaded_at,"
+                    "observed:payload->observed_progress,native:payload->native_progress"
+                )
+                .order("trainer_id")
+                .limit(500)
+                .execute()
+                .data
+            )
+        except Exception as error:  # noqa: BLE001 - transport boundary, no detail leaks
+            raise PersistenceError("personal_save_unavailable") from error
+        return rows
+
     def upsert(self, row):
         try:
             self._client.table("trainer_personal_saves").upsert(

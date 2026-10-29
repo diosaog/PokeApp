@@ -6,6 +6,20 @@ from storage3.exceptions import StorageApiError
 from app.repositories.errors import PersistenceError
 from app.repositories.supabase.season_admin import SeasonAdminRejected
 
+# The SQL reason, as a stable public code the Launcher can explain. Anything
+# else stays the generic refusal; no SQL text ever reaches a client.
+REJECTIONS = {
+    "save_owner_required": "SEASON_PARTICIPANT_REQUIRED",
+    "save_context_not_active": "SEASON_NOT_ACCEPTING_SAVES",
+    "save_current_changed": "SAVE_CONTEXT_CHANGED",
+    "save_identity_changed": "SAVE_IDENTITY_CHANGED",
+    "save_identity_other_owner": "SAVE_IDENTITY_OTHER_OWNER",
+    "save_not_registered": "SAVE_NOT_REGISTERED",
+    "save_parse_changed": "SAVE_PARSE_MISMATCH",
+    "save_existing_unproven": "SAVE_EXISTING_UNPROVEN",
+    "transfer_reconciliation_required": "TRANSFER_RECONCILIATION_REQUIRED",
+}
+
 
 class SupabaseSaveIngestionRepository:
     def __init__(self, client):
@@ -30,9 +44,10 @@ class SupabaseSaveIngestionRepository:
         except Exception as error:
             code = str(getattr(error, "code", ""))
             if code in ("PT403", "PT404", "PT409", "PT422"):
-                raise SeasonAdminRejected(
-                    "SAVE_REQUEST_REJECTED", int(code[2:])
-                ) from error
+                reason = REJECTIONS.get(
+                    str(getattr(error, "message", "")), "SAVE_REQUEST_REJECTED"
+                )
+                raise SeasonAdminRejected(reason, int(code[2:])) from error
             raise PersistenceError("save_registration_unavailable") from error
 
     def store_raw(self, key, data, raw_hash):

@@ -60,9 +60,9 @@ def progress_read(row):
             if native.island_stamp_flags is not None
             else None,
             island_challenge_completed=native.island_challenge_completed,
-            reward_state="pending_validation"
-            if native.model == "gym_badges"
-            else "pending_policy",
+            # 069: X/Y/ORAS badges and the champion pay the season's rules;
+            # Gen7 island stamps are not badges (only the champion pays).
+            reward_state=None if native.model == "gym_badges" else "pending_policy",
         )
     value = row["progress"]
     if value is None:

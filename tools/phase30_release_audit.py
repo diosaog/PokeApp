@@ -26,10 +26,11 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 MIGRATIONS = sorted((ROOT / "supabase/v2/migrations").glob("*.sql"))
 # 054-064 went out with the final release, 065 (personal saves, «Mi PC»
-# outside seasons) and 066 (its least privilege) after it; 067 (Discord
-# announcement outbox) is the window after those.
-DEPLOYED = [m for m in MIGRATIONS if int(m.name[:3]) <= 66]
-PENDING = [m for m in MIGRATIONS if 67 <= int(m.name[:3]) <= 68]
+# outside seasons) and 066 (its least privilege) after it, 067-068 (Discord
+# outbox, preparation readiness) next; 069 (real-test corrections: Gen6/7
+# progress coins, cancellation at any stage, account repair) is this window.
+DEPLOYED = [m for m in MIGRATIONS if int(m.name[:3]) <= 68]
+PENDING = [m for m in MIGRATIONS if 69 <= int(m.name[:3]) <= 69]
 WINDOW = f"{PENDING[0].name[:3]}-{PENDING[-1].name[:3]}"
 SCHEMAS = "('public','v1_shadow')"
 

@@ -120,6 +120,7 @@ def create_app(
     api.include_router(launcher.router)
     api.include_router(saves.router)
     api.include_router(personal_saves.router)
+    api.include_router(personal_saves.public_router)
     api.include_router(accounts.router)
     api.include_router(item_use.router)
     api.include_router(transfers.router)

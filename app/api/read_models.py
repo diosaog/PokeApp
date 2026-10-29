@@ -166,6 +166,14 @@ class LeagueStandingRead(BaseModel):
     dead_count: int | None = Field(ge=0, le=30)
     dead_count_source: Literal["observed_current_save", "unknown"]
     dead_count_observed_at: datetime | None
+    # 069, active seasons only: what the next closing will subtract (0.2 per
+    # adjusted death, resolved points sanctions). Never an official total.
+    provisional_matchday_number: int | None = Field(default=None, ge=1)
+    provisional_dead_count: int | None = Field(default=None, ge=0)
+    provisional_points_reduction: Decimal | None = Field(
+        default=None, allow_inf_nan=False
+    )
+    provisional_points: Decimal | None = Field(default=None, allow_inf_nan=False)
 
 
 class LeagueGeneralRead(BaseModel):

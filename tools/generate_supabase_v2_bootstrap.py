@@ -77,6 +77,7 @@ EXPECTED_MIGRATIONS = [
     "066_personal_saves_least_privilege.sql",
     "067_discord_announcements.sql",
     "068_precompetition_readiness.sql",
+    "069_real_test_corrections.sql",
 ]
 
 FORBIDDEN_TOKENS = [

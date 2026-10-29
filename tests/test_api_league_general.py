@@ -96,6 +96,24 @@ class LeagueGeneralTests(unittest.TestCase):
         self.assertIsNone(row["dead_count"])
         self.assertNotIn("champion", row)
         self.assertNotIn("rank", row)
+        # A 068 database has no provisional figures: absent, never invented.
+        self.assertIsNone(row["provisional_points"])
+        self.assertIsNone(row["provisional_dead_count"])
+
+    def test_provisional_figures_pass_through_exactly(self):
+        self.store.result["rows"][0].update(
+            total_points="0",
+            provisional_matchday_number=1,
+            provisional_dead_count=3,
+            provisional_points_reduction="1.5",
+            provisional_points="-2.1",
+        )
+        row = self.get().json()["rows"][0]
+        self.assertEqual(row["total_points"], "0")
+        self.assertEqual(row["provisional_points"], "-2.1")
+        self.assertEqual(row["provisional_points_reduction"], "1.5")
+        self.assertEqual(row["provisional_dead_count"], 3)
+        self.assertEqual(row["provisional_matchday_number"], 1)
 
     def test_single_rpc_for_all_players_preserves_server_order(self):
         rows = self.store.result["rows"]

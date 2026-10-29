@@ -18,6 +18,9 @@ class SupabaseAccountRepository:
                 ("account_forbidden", 403),
                 ("account_renewal_required", 403),
                 ("account_reconciliation_required", 409),
+                ("account_not_found", 404),
+                ("account_confirmation_required", 422),
+                ("account_active_participant", 409),
             ):
                 if code in str(exc):
                     raise AccountError(code.upper(), status) from None
@@ -126,6 +129,13 @@ class SupabaseAccountRepository:
         except Exception:
             raise AuthBackendError("Portrait lookup unavailable.") from None
 
+    def delete_photo(self, key):
+        try:
+            self.client.storage.from_("trainer-photos").remove([key])
+        except Exception:
+            # The trainer row no longer points to it; a later replay retries.
+            raise AuthBackendError("Portrait removal requires a retry.") from None
+
     def upload_photo(self, key, data):
         bucket = self.client.storage.from_("trainer-photos")
         try:
@@ -195,6 +205,20 @@ class SupabaseAccountAuth:
         except Exception:
             raise AuthBackendError(
                 "PIN update outcome requires reconciliation."
+            ) from None
+
+    def delete(self, auth_id):
+        """Remove a deleted account's login identity; already gone is done."""
+        try:
+            self.admin.delete_user(auth_id)
+        except Exception as exc:
+            if (
+                getattr(exc, "status", None) == 404
+                or getattr(exc, "code", None) == "user_not_found"
+            ):
+                return
+            raise AuthBackendError(
+                "Account login removal requires a retry."
             ) from None
 
     def revoke(self, token):

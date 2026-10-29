@@ -4,10 +4,15 @@ Same wire protocol as /v1/seasons/{id}/saves (context, receipt, raw) so the
 Launcher's outbox delivers it unchanged; /v1/me/pc reads it back.
 """
 
+from datetime import datetime
+from uuid import UUID
+
 from fastapi import APIRouter, Query, Request
+from pydantic import BaseModel
 from starlette.concurrency import run_in_threadpool
 
 from app.api.errors import api_error
+from app.api.progress_models import ProgressRead
 from app.api.read_models import PCRead
 from app.api.routes.cups import Reader
 from app.api.routes.saves import Hash
@@ -18,6 +23,18 @@ from app.save_parser.files import MAX_SAVE_BYTES
 from app.save_parser.registration import SaveRegistration
 
 router = APIRouter(prefix="/v1/me", tags=["saves"])
+public_router = APIRouter(prefix="/v1/read", tags=["saves"])
+
+
+class ActiveSaveRead(BaseModel):
+    trainer_id: UUID
+    game: str | None
+    uploaded_at: datetime
+    progress: ProgressRead
+
+
+class ActiveSavePage(BaseModel):
+    items: list[ActiveSaveRead]
 
 
 def execute(container, operation, *args):
@@ -71,3 +88,9 @@ async def receive(
 @router.get("/pc", response_model=PCRead)
 def pc(principal: Reader, container: Container):
     return execute(container, "pc", str(principal.trainer_id))
+
+
+@public_router.get("/active-saves", response_model=ActiveSavePage)
+def active_saves(principal: Reader, container: Container):
+    """Each trainer's active save (game and badges), for «Entrenadores»."""
+    return execute(container, "summaries")

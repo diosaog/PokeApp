@@ -175,7 +175,9 @@ class SeasonAdminApiTests(unittest.TestCase):
         # The account administration routes made it 40 (count not updated then);
         # Phase 28 adds the incident center read and its two commands: 43.
         # Phase 29 adds the cancellation of a reversible robbery: 44.
-        self.assertEqual(len(routes), 44)
+        # 069 adds the season cancellation preview and the account detail,
+        # session revocation, personal-save unlink and deletion: 49.
+        self.assertEqual(len(routes), 49)
         for path, method in routes:
             self.assertIn("security", schema["paths"][path][method])
 

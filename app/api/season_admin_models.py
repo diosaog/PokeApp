@@ -205,6 +205,9 @@ class Readiness(StrictBody):
 
 class SeasonSetup(StrictBody):
     can_discard: bool = False
+    # 069: how a cancellation would go ("clean": nothing official yet;
+    # "preserving": history and coins kept, season hidden and stopped).
+    cancellation_mode: Literal["clean", "preserving", "unavailable"] | None = None
     initial_assignment_rule: Literal["observed_deaths_v1"] | None = None
     season: SeasonSummary
     setup_revision: Revision

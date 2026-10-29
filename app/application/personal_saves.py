@@ -89,6 +89,36 @@ class PersonalSaves:
             self.slots.release()
         return self._receipt(trainer_id, row, raw_hash)
 
+    def summaries(self):
+        """Every trainer's active save — the one their Launcher has selected
+        and last synced — as game and progress only (no Pokémon, no bytes).
+        «Entrenadores» shows these so every screen names the same game."""
+        from app.api.progress_models import ProgressRead
+        from app.application.progress import progress_read
+
+        items = []
+        for row in self.repository.summaries():
+            try:
+                progress = progress_read(
+                    {
+                        "game": row["game"],
+                        "observed_at": row["uploaded_at"],
+                        "progress": (row.get("observed") or {}).get("progress"),
+                        "native_progress": row.get("native"),
+                    }
+                )
+            except Exception:  # noqa: BLE001 - unreadable progress is "unknown", never invented
+                progress = ProgressRead()
+            items.append(
+                {
+                    "trainer_id": row["trainer_id"],
+                    "game": row["game"] if row["game"] in GAMES else None,
+                    "uploaded_at": row["uploaded_at"],
+                    "progress": progress,
+                }
+            )
+        return {"items": items}
+
     def pc(self, trainer_id):
         row = self.repository.get(trainer_id)
         if not row:

@@ -8,6 +8,7 @@ from app.api.routes.cups import Reader
 from app.api.season_lifecycle_models import (
     FinishSeasonBody,
     ArchiveSeasonBody,
+    CancellationPreview,
     DiscardSeasonBody,
     SeasonLifecycleReceipt,
     ChampionshipRead,
@@ -143,6 +144,29 @@ def archive(
     container: Container,
 ):
     return execute("archive", season_id, principal, container, payload, idempotency_key)
+
+
+@router.get("/{season_id}/cancellation-preview", response_model=CancellationPreview)
+def cancellation_preview(season_id: UUID, principal: Admin, container: Container):
+    """Consequences of cancelling: what is kept, what stops, what blocks it."""
+    try:
+        if container.season_lifecycle_repository is None:
+            raise PersistenceError("Missing backend")
+        result = CancellationPreview.model_validate(
+            container.season_lifecycle_repository.execute(
+                "cancellation_preview",
+                dict(actor_trainer_id=principal.trainer_id, season_id=str(season_id)),
+            )
+        )
+        if result.season_id != season_id:
+            raise ValueError("Scope mismatch")
+        return result
+    except SeasonAdminRejected as exc:
+        raise api_error(exc.status, exc.code, "Cancellation preview rejected.") from exc
+    except (PersistenceError, ValidationError, ValueError, TypeError) as exc:
+        raise api_error(
+            503, "SEASON_LIFECYCLE_UNAVAILABLE", "Cancellation preview is unavailable."
+        ) from exc
 
 
 @router.post("/{season_id}/discard", response_model=SeasonLifecycleReceipt)

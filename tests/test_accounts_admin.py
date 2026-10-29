@@ -113,9 +113,11 @@ class AdminAccountsTests(unittest.TestCase):
             ).status_code,
             422,
         )
+        # The account path now has an admin detail read; deletion is only the
+        # explicit, name-confirmed POST command, never a bare HTTP DELETE.
         self.assertEqual(
             client.delete(f"/v1/admin/accounts/{target}", headers=headers).status_code,
-            404,
+            405,
         )
         self.assertEqual(self.service.calls, [])
 

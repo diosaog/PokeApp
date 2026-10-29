@@ -37,6 +37,33 @@ class DiscardSeasonBody(LifecycleRevisionBody):
     confirmation: Literal["DISCARD"]
 
 
+class CancellationPreview(BaseModel):
+    """What cancelling a season would leave behind, before confirming it."""
+
+    season_id: UUID
+    name: str
+    status: str
+    allowed: bool
+    mode: Literal["clean", "preserving", "unavailable"]
+    open_robberies: int
+    open_item_uses: int
+    participants: int
+    matchdays: int
+    closed_matchdays: int
+    open_matchdays: int
+    results: int
+    team_locks: int
+    purchases: int
+    pending_purchases: int
+    coin_transactions: int
+    coins_awarded: str
+    progress_rewards: int
+    saves: int
+    cups: int
+    penalties: int
+    trials: int
+
+
 class SeasonLifecycleReceipt(BaseModel):
     operation_id: UUID
     event_id: UUID

@@ -232,9 +232,14 @@ def reads(pg: SupabaseLikePG) -> dict[str, str]:
         f"view {v}": f"select md5(coalesce(string_agg(t::text,E'\\n' order by t::text),'-'))||':'||count(*) from {v} t"
         for v in views
     }
+    # 069 only ADDS provisional figures to active seasons' rows; everything the
+    # read returned before must stay identical, so they are compared without.
+    provisional = "array['provisional_matchday_number','provisional_dead_count','provisional_points_reduction','provisional_points']"
     for s in seasons:
         calls[f"league_general_read {s}"] = (
-            f"select md5(public.league_general_read('{s}')::text)"
+            f"select md5((select jsonb_set(r,'{{rows}}',coalesce((select jsonb_agg(x-{provisional} order by o)"
+            f" from jsonb_array_elements(r->'rows') with ordinality y(x,o)),'[]'::jsonb))"
+            f" from (select public.league_general_read('{s}') r) q)::text)"
         )
         calls[f"initial_assignment_observations {s}"] = (
             f"select md5(public.initial_assignment_observations('{s}')::text)"
@@ -411,22 +416,78 @@ def rehearse(args) -> dict:
             )
 
         rows_after = local_fingerprints(pg, public_tables)
+        # 069 settles medal/champion coins of saves already accepted in ACTIVE
+        # seasons, as a new accepted save would. Only those two ledgers may
+        # move, and every new row must be a linked, unique progress reward.
+        settlement = ("public.coin_transactions", "public.progress_reward_claims")
         changed = [t for t in public_tables if rows_before[t] != rows_after[t]]
         ok(
-            not changed,
-            f"{len(public_tables)} existing tables keep byte-identical rows (seasons, economy, saves, history)",
+            not [t for t in changed if t not in settlement],
+            f"{len(public_tables) - len(settlement)} existing tables keep byte-identical rows (seasons, saves, history, purchases)",
             changed,
         )
+        paid = pg.lines(
+            "select c.trainer_id||'|'||c.season_id||'|'||count(*)||'|'||sum(c.amount) from public.coin_transactions c"
+            " join public.progress_reward_claims r on r.coin_transaction_id=c.id"
+            " where c.reference_type='progress_reward' and c.created_at>now()-interval '1 hour'"
+            " group by c.trainer_id,c.season_id order by 1",
+            "supabase_admin",
+        )
+        report["progress_settlement"] = paid
+        orphan = pg.lines(
+            "select count(*) from public.coin_transactions c where c.reference_type='progress_reward'"
+            " and not exists(select 1 from public.progress_reward_claims r where r.coin_transaction_id=c.id)",
+            "supabase_admin",
+        )
+        inactive = pg.lines(
+            "select count(*) from public.progress_reward_claims r join public.seasons s on s.id=r.season_id"
+            " where r.created_at>now()-interval '1 hour' and s.status<>'active'",
+            "supabase_admin",
+        )
+        replay = pg.lines(
+            "select coalesce(sum(public.settle_observed_progress_rewards(p.season_id,p.trainer_id)),0)"
+            " from public.season_players p join public.seasons s on s.id=p.season_id"
+            " where s.status='active' and p.status='active'",
+            "supabase_admin",
+        )
+        ok(orphan == ["0"] and inactive == ["0"] and replay == ["0"],
+           "medal settlement: linked claims only, active seasons only, a second run pays nothing",
+           {"orphans": orphan, "outside_active": inactive, "replay": replay})  # fmt: skip
+        rows_after = local_fingerprints(pg, public_tables)
         reads_after = reads(pg)
+        paid_trainers = {line.split("|")[0] for line in paid}
         moved = {
             k: [reads_before[k], reads_after.get(k)]
             for k in reads_before
             if reads_before[k] != reads_after.get(k)
         }
+        # Balances shown by the league read and the coin views move only when
+        # the settlement paid someone.
+        unexplained = {
+            k: v for k, v in moved.items()
+            if not (paid and (k.startswith("league_general_read ") or k in (
+                "view public.public_coin_balances", "view public.public_coin_transactions")))
+        }  # fmt: skip
+        report["reads_moved_by_settlement"] = sorted(set(moved) - set(unexplained))
+        # What each active season's League now shows as provisional (read only).
+        report["league_provisional"] = pg.lines(
+            "select s.id||'|'||count(*)||'|'||count(*) filter (where r ? 'provisional_points')"
+            "||'|'||count(*) filter (where r->>'provisional_points' is null)"
+            "||'|'||coalesce(sum((r->>'provisional_dead_count')::integer),0)"
+            "||'|'||coalesce(sum((r->>'provisional_points_reduction')::numeric),0)"
+            " from public.seasons s cross join lateral jsonb_array_elements(public.league_general_read(s.id)->'rows') r"
+            " where s.status='active' group by s.id order by 1",
+            "supabase_admin",
+        )
         ok(
-            not moved,
-            f"{len(reads_before)} API reads return identical results after {WINDOW}",
-            moved,
+            all(line.split("|")[1] == line.split("|")[2] for line in report["league_provisional"]),
+            "active League rows carry provisional figures (season|rows|with|unknown|deaths|sanctions)",
+            report["league_provisional"],
+        )
+        ok(
+            not unexplained,
+            f"{len(reads_before)} API reads return identical results after {WINDOW} (balances aside for {len(paid_trainers)} paid trainers)",
+            unexplained,
         )
         privileges_after = privileges(pg)
         lost = sorted(set(privileges_before) - set(privileges_after))
@@ -454,8 +515,8 @@ def rehearse(args) -> dict:
             verifier == ["falsefalsefalse"],
             "verifier role created without login, superuser or RLS bypass",
         )
-        from tools.validate_final_corrections_pg import validate
-        report["final_corrections"] = validate(pg)
+        from tools.validate_phase069_pg import validate
+        report["phase069"] = validate(pg)
         ok(local_fingerprints(pg, public_tables) == rows_after, "focused fixtures rolled back exactly")
         upgraded = catalog_local(pg)
     finally:

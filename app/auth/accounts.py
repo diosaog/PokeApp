@@ -309,6 +309,64 @@ class AccountService:
             "account_admin_list", dict(p_actor=actor, p_offset=offset)
         )
 
+    # Repair tools (069). Every one is checked again in SQL: an administrator
+    # actor, an idempotent operation id and an audit row.
+    def admin_detail(self, actor, target):
+        return self.repository.rpc(
+            "account_admin_detail", dict(p_actor=actor, p_target=target)
+        )
+
+    def _admin_command(self, rpc, kind, actor, target, operation, **extra):
+        digest = self.fingerprint(
+            [kind, actor, target, str(operation), *map(str, extra.values())]
+        )
+        return self.repository.rpc(
+            rpc,
+            dict(
+                p_actor=actor,
+                p_target=target,
+                p_operation=str(operation),
+                p_hash=digest,
+                **{"p_" + k: v for k, v in extra.items()},
+            ),
+        )
+
+    def admin_revoke_sessions(self, actor, target, operation):
+        return self._admin_command(
+            "account_admin_revoke_sessions", "revoke_sessions", actor, target, operation
+        )
+
+    def admin_unlink_personal_save(self, actor, target, operation):
+        return self._admin_command(
+            "account_admin_unlink_personal_save",
+            "unlink_personal_save",
+            actor,
+            target,
+            operation,
+        )
+
+    def admin_delete(self, actor, target, operation, confirmation):
+        result = self._admin_command(
+            "account_admin_delete",
+            "delete_account",
+            actor,
+            target,
+            operation,
+            confirmation=confirmation,
+        )
+        # Login identity and photo live outside SQL. Both removals are
+        # idempotent; a replay of the same operation repeats them.
+        if result.get("auth_user_id"):
+            self.auth.delete(result["auth_user_id"])
+        if result.get("photo_key"):
+            self.repository.delete_photo(result["photo_key"])
+        return {
+            "trainer_id": result["trainer_id"],
+            "deleted": True,
+            "sessions_ended": result.get("sessions_ended", 0),
+            "history_kept": result.get("history_kept") or {},
+        }
+
     def admin_status(self, actor, target, operation, revision, enabled):
         digest = self.fingerprint(
             ["account_status", actor, target, str(operation), revision, enabled]

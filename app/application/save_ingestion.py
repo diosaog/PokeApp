@@ -99,7 +99,14 @@ class TrustedSaveIngestion:
         context = self.repository.execute(
             "context", {"season_id": season_id, "trainer_id": trainer_id}
         )
-        return {"current_save_id": context["current_save_id"]}
+        # The trainer's own bound game and in-game trainer (null before the
+        # first accepted save): the Launcher sends this season only the save
+        # it accepts and explains when another game is selected.
+        identity = context.get("save_identity")
+        return {
+            "current_save_id": context["current_save_id"],
+            "save_identity": identity if isinstance(identity, dict) else None,
+        }
 
     def receipt(self, season_id, trainer_id, raw_hash):
         return SaveRegistration.model_validate(

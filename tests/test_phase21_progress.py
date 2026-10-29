@@ -167,7 +167,7 @@ class NativeProgressApiTests(ProgressTests):
             self.assertEqual(body["badges_count"], 0 if game in GAMES[:4] else None)
             self.assertEqual(
                 body["reward_state"],
-                "pending_validation" if game in GAMES[:4] else "pending_policy",
+                None if game in GAMES[:4] else "pending_policy",
             )
             for private in (
                 "schema_version",
