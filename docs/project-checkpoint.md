@@ -5,6 +5,13 @@ milestone record; it does not maintain a second live phase-status ledger.
 
 ## Current project position
 
+- Multi-day League format hotfix (2026-10-30): **PUBLISHED / VERIFIED.** Web
+  `f5b68e9`, Cloudflare `02916b5d`: five participants require five positional
+  points/coin values; switching 1/2/3/4 days preserves edits and reloads saved
+  values. Isolated API/SQL save/read and four closes/replays PASS; 23 React,
+  26 API and 6 League tests PASS. Supabase 073, API and Launcher 0.26.8 unchanged.
+  [Authoritative current record](work-in-progress/final-corrections-live.md).
+
 - Shop delivery and League rules (2026-10-29): **PUBLISHED / VERIFIED.** Supabase
   072–073 applied once (65 history records); API **120 routes**, Railway
   `3526625a`; Cloudflare `f3c144a0`; signed stable Launcher **0.26.8**.

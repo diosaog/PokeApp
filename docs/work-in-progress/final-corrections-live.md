@@ -1,5 +1,41 @@
 # Final corrections — live execution record
 
+## Multi-day League format hotfix — 2026-10-30
+
+**PUBLISHED / VERIFIED.** Source commit `f5b68e9`; Cloudflare web version
+`02916b5d-c903-4b1b-aaf6-ee3366accadc`. This entry supersedes the web version
+below. API `3526625a`, Supabase 001–073 and Launcher 0.26.8 remain unchanged.
+
+- Reproduced with five participants and a switch from one to four matchdays:
+  React accepted `10,8,6,4`, but the existing SQL validator requires exactly
+  positions 1 through participant count in **both** maps (also with divisions).
+  The fixed four-number placeholder suggested values that were not saved.
+  Conditional uncontrolled inputs also lost edited values when changing modes.
+- Minimal web fix: show actual saved values, remove the misleading placeholder,
+  explain the required count, reject missing/extra/blank/noninteger values before
+  sending, keep explicit zero rewards, preserve separate positional/common-coin
+  drafts across switches, and reload the saved shape/values together. Division
+  capacity/movement validation now matches SQL. No reward amounts are invented.
+- **23 React tests PASS**, including initial failing regressions, 1/2/3/4
+  switches, valid five-position submission, invalid input and saved reread.
+  **26 season-admin API tests + 6 League 073 tests PASS**. TypeScript/Vite,
+  affected Prettier, correctness Ruff and diff checks PASS.
+- `python -m tools.validate_league_format_hotfix --pg-bin <local PostgreSQL bin>`
+  PASS on a disposable loopback database built from 001–073: actual FastAPI
+  routes/repository/SQL create, replace and read one/four/two/three-day configs;
+  A and A/B; rejected four-value update leaves stored setup unchanged. Synthetic
+  native observations and actual initial-assignment RPC prepare five players;
+  **four real close RPCs plus four replays** apply points `10,8,6,4,2` and coins
+  `50,40,30,20,0` each day without duplicate payouts or one-day prizes.
+  Existing 073 SQL regression also passes: 2 points/win, equal configured coins,
+  Blindar/Robar, death 0.1 / wipe revival 0.2, corrections and frozen history.
+- **18 public HTML/config/JS/CSS assets** match the final build byte for byte.
+  Evidence: `%LOCALAPPDATA%/PokeApp-migration-evidence/league-format-hotfix/20261030/`
+  (`acceptance.json`, `web-deploy.log`). No production season/configuration was
+  edited during testing; no new migration, API or Launcher deployment.
+- Implementation and this MultiIA closure are committed and pushed; use Git for
+  the closure hash. The protected product guide and unrelated files were excluded.
+
 ## Shop delivery 072 and League rules — 2026-10-29, final publication
 
 **PUBLISHED / VERIFIED.** Implementation and publication are complete. Acceptance
