@@ -39,7 +39,14 @@ try {
   assert(!state.selected_save,'no owner save selected');
   const web=browser.contexts().flatMap(c=>c.pages()).find(p=>p.url().startsWith('https://pokeapp-web.'));
   assert(web,'official web origin');
-  await web.getByRole('button',{name:'Entrar a PokeApp'}).waitFor();
+  // Read the DOM directly: on this machine Playwright's frame tracking can wait
+  // forever on the Launcher's intercepted (never committed) session navigation.
+  let login=false;
+  for(let n=0;n<60&&!login;n++) {
+    login=await web.evaluate(()=>[...document.querySelectorAll('button')].some(b=>b.textContent.trim()==='Entrar a PokeApp'&&b.offsetParent!==null)).catch(()=>false);
+    if(!login) await pause(500);
+  }
+  assert(login,'official web login form');
   const boundary=await web.evaluate(v=>({node:typeof require,bridge:typeof window.launcher,version:navigator.userAgent.includes('PokeAppLauncher/'+v)}),VERSION);
   assert(boundary.node==='undefined'&&boundary.bridge==='undefined'&&boundary.version,'web IPC boundary/version');
   report.checks=['Packaged startup','Real core IPC','Isolated empty profile','Official web login','No web Node/IPC bridge',VERSION+' user agent'];

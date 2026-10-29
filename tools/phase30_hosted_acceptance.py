@@ -39,6 +39,11 @@ INSTALLERS = {
         "sha256_prefix": "7b31ad92",
         "sha256_suffix": "507bef",
     },
+    "0.26.5": {
+        "bytes": 159332349,
+        "sha256_prefix": "975939d2",
+        "sha256_suffix": "ea4301",
+    },
 }
 EXPECTED = {
     "before": {
@@ -61,6 +66,15 @@ EXPECTED = {
         "incidents": True,
         "feed": "feed",
         "launcher": "0.26.3",
+    },
+    # After 069: account repair, cancellation preview, active saves (114
+    # routes); 0.26.5 is the download and the stable feed's offer.
+    "real_tests": {
+        "routes": 114,
+        "division_required": ["A"],
+        "incidents": True,
+        "feed": "feed",
+        "launcher": "0.26.5",
     },
 }
 ZERO = "00000000-0000-4000-8000-000000000000"
