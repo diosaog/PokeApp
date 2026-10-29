@@ -1,5 +1,86 @@
 # Final corrections — live execution record
 
+## Second real test (Objetos ∞, live data, Box 7, one total) — 2026-10-29 11:55 UTC
+
+**PUBLISHED / VERIFIED.** Commits `a0b121e` (Launcher), `b0e4406` (API+DB 070),
+`2041edd` (web), `c3d9f41` (0.26.6), `ea98192` (release card). Supersedes the
+069/0.26.5 state below.
+
+- **Objetos ∞ root cause (reproduced on the installed 0.26.5 core with a copy
+  of the owner's Y save):** the build overlay copied one fixed domain module,
+  so `app.domain.unlimited_items` was missing from `PokeApp.Core.exe`; every
+  quick-item command raised ImportError outside its handler, the panel stayed
+  on «Leyendo…» and the save was marked LOCAL_UNAVAILABLE. Second blocker found
+  on the way: a write was refused whenever the cloud round held its read
+  (seconds, every 30 s). Fixes: overlay by AST (transitive), audit requires
+  every desktop module, quick steps always end with counts or a reason, writes
+  wait up to 30 s with writer preference. «Cambios en tu partida» no longer
+  says trades are disabled (that text was the idle state of the physical-write
+  journal) and hides when idle.
+- **Proof on disposable copies only:** source core and the packaged 0.26.6
+  core both read the bag (0.25-0.5 s), add 3 Caramelos Raros and 2 Escamas
+  Corazón (~2.3 s each, backup verified, native re-read 3/2), refuse an
+  over-limit amount with the file untouched. The owner's real save hash
+  (`1abf8fa2…`) is unchanged.
+- **Restart needed for Liga: root cause in production logs.** After the owner's
+  «Revividos» PUT (10:24:14, 200) every League/wipe read returned 503 for ~30 s
+  (`frontend_read_retry … ReadError` then failed): supabase-py's single shared
+  HTTP/2 connection dropped and took every multiplexed read and its retry with
+  it; the web retried once and kept the old figures. PostgREST now runs on one
+  pooled HTTP/1.1 client (reads retry once on a dropped connection); the web
+  retries 5xx/network reads at 1/2/4 s, refreshes visible screens every 60 s
+  and coalesces a sync's Launcher events. The tested invalidation map already
+  refreshed the League after «Revividos»; it is unchanged.
+- **Sync timing (measured before changing):** local stat 0.35 ms, read 2-8 ms,
+  PKHeX parse ~0.19 s; a real sync took ~29 s from first request to
+  «Sincronizado», ~6 s of it uploads, the rest ~10 sequential requests at
+  ~1.2 s each. Now: 1 s poll, 0.75 s stability window, the season copy goes
+  first and, with a fresh cached state, uploads start at once (no health probe,
+  /v1/me, five season reads or two receipt re-reads); the web is told when each
+  copy is accepted. Expected League refresh ~8 s after saving (estimate from
+  the measured request times; owner-side measurement pending).
+- **070** (sha256 `826ccd09…e89d3b`): `season_players.dead_box_number`
+  (default 8) used by the League, closings (`matchday_context_v034`), revive
+  overlap/redemption, initial divisions and robbery targets (never the dead
+  box); audited admin command `PUT …/participants/{id}/dead-box`; the League
+  read returns ONE total (active season: official points with the current
+  cumulative deductions, the figures the next closing records, so nothing is
+  subtracted twice; `official_points` kept). Owner request: Anto's active
+  participation counts Box 7. Fresh 001-070 + focused validator PASS. Backup
+  `pre-release-20261029T113052Z.dump` (sha256 `3def1caa…4f5b7c`) rehearsal
+  **17/17 PASS** (94 tables byte-identical, `season_players` identical apart
+  from the column and `updated_at` on the one row set, no privilege change,
+  equals a fresh build). Applied **once** as `20261029113828`. Rehearsed
+  result: Anto −0.6 (Box 7 holds 1, one wipe revival counts 2), others 0.
+  The engineering-only physical revive (054, disabled) keeps its Box 8 contract.
+- **Railway** `pokeapp-api` deployment `8e1f43ed-cf5c-4a5d-8312-9f2425b4318a`
+  from export of `c3d9f41`; **115 routes**. Verifier worker unchanged (it uses
+  direct Postgres repositories).
+- **Web:** one «Puntos totales» (Spanish format, negatives), no provisional
+  line, preseason box or death dates; «Revividos tras wipe» = Cantidad +
+  Actualizar; «Mi PC»/profiles/revive targets use the participant's dead box;
+  admin «Caja de muertos»; permanent explanatory paragraphs cut across the main
+  screens. Cloudflare `a343b0cf-294c-459e-b203-c12a55f0e901`.
+- **Launcher 0.26.6:** audit PASS (core lists `app.domain.unlimited_items`);
+  packaged acceptance **6/6 PASS**; the installed 0.26.5's own updater and key
+  accept the signed 0.26.6 manifest (size/SHA-512 bound), 0.26.6 sees no
+  further update. Installer 159337184 bytes, sha256
+  `4ae3962dfe625a44812a34da756a5acc690d5ad2c55a7bc2e52a767c79ac6be2`, unsigned
+  under the private-distribution policy. R2 installer read back, then
+  `updates/stable.json` (minimum 0.26.0). No install on the owner's profile.
+- **Validation:** Python **1275 OK**; web **224/224**, TS, Prettier; Electron
+  **32/32**; hosted acceptance `--stage live_league` **20/20 PASS**; API logs
+  clean after the deploy.
+- **Owner acceptance pending:** in-app update 0.26.5 → 0.26.6; «Objetos ∞» on
+  the real save (emulator closed); a save with a Pokémon in Box 7 and the
+  League total changing without restart; «Revividos» and a purchase refreshing
+  at once.
+
+Private evidence: `%LOCALAPPDATA%/PokeApp-migration-evidence/real-test-corrections-2/20261029/`
+(`rehearsal.json`, `070-migration-*.json`, `update-chain.json`,
+`packaged/acceptance.json`, `hosted-acceptance.json`, `api-deploy.log`,
+`launcher-publication.log`). Build root `%LOCALAPPDATA%/PokeApp-releases/0.26.6/`.
+
 ## Real-test corrections (15 incidents) — 2026-10-29 03:00 UTC
 
 **PUBLISHED / VERIFIED.** Commits `886f8de` (API+DB 069), `5c165d1` (Launcher),
