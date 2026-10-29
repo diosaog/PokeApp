@@ -45,6 +45,15 @@ Supersedes the 0.26.4/068 production state below.
   Heart Scale on a real save; account repair tools and season cancellation on
   real data; provisional League figures with real deaths.
 
+- **Second packet (verification only, no new code):** real read-only emulator
+  search on the owner PC finds the Lime3DS AppData Pokémon Y save
+  (`real-discovery.json`). Production has **no personal-save rows yet** (0.26.4
+  sent saves only to the season); 0.26.5 always syncs the selected save to the
+  personal record and to the season only when it is the save that season
+  accepts, so Entrenadores/Mi PC follow the selection after both players update.
+  No player-facing coin movement list exists (balance in League/shop; claims and
+  ledger traceable for the admin) — left as an owner decision, not built.
+
 Private evidence: `%LOCALAPPDATA%/PokeApp-migration-evidence/real-test-corrections/20261029/`
 (`rehearsal.json`, `069-migration-*.json`, `preservation.json`, `update-chain.json`,
 `packaged/acceptance.json`, `hosted-acceptance.json`, `public-browser.json`, logs).
