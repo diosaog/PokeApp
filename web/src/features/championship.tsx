@@ -196,10 +196,7 @@ export function ChampionshipReview({
           </form>
         )}
       {data.state !== "legacy" && data.state !== "incomplete" && (
-        <p>
-          La regla de finalista está pendiente de una decisión del propietario;
-          no se asigna un finalista automáticamente.
-        </p>
+        <p className="muted">Sin finalista automático.</p>
       )}
       {canFinish && (
         <button

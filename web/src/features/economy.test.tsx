@@ -321,7 +321,7 @@ const leg = (
 it("keeps robbery unavailable unless the backend enables this account", () => {
   mocks.inventory = { purchases: [robbery], targets: [], physical_items: true };
   render(<Inventory />);
-  expect(screen.getByText(/aún no está\s+habilitada/)).toBeInTheDocument();
+  expect(screen.getByText(/Aún no se puede aplicar/)).toBeInTheDocument();
   expect(
     screen.queryByRole("button", { name: "Canjear" }),
   ).not.toBeInTheDocument();
@@ -497,10 +497,7 @@ it("in a browser, an infinite item opens a popup that points to the Launcher hon
   );
   const dialog = screen.getByRole("dialog", { name: "Escama Corazón" });
   expect(dialog).toHaveTextContent(
-    /a la bolsa de tu partida activa, no a un Pokémon/,
-  );
-  expect(dialog).toHaveTextContent(
-    /comprueba solo que el emulador está cerrado/,
+    /a la bolsa de tu partida desde PokeApp Launcher/,
   );
   expect(
     screen.getByRole("link", { name: /Descargar Launcher/ }),

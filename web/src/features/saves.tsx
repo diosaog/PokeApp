@@ -101,10 +101,7 @@ function Saves() {
                   ? "Consultando tu partida…"
                   : "Aún no hay ninguna partida sincronizada"}
               </h2>
-              <p>
-                PokeApp Launcher busca tu partida en el emulador y la envía sola
-                cuando cambia.
-              </p>
+              <p>El Launcher la envía sola al guardar.</p>
             </div>
           )}
         </Card>
@@ -124,10 +121,7 @@ function Saves() {
           {launcherWithoutHub() ? (
             <OlderLauncherPanel panel="partida" label="Abrir Mi partida" />
           ) : insideLauncher() ? (
-            <p className="muted">
-              Estás en PokeApp Launcher: abre «Saves y Launcher» en la barra
-              lateral para ver la partida de este equipo.
-            </p>
+            <p className="muted">Ábrela en «Saves y Launcher».</p>
           ) : (
             <LauncherDownload />
           )}
@@ -170,10 +164,7 @@ function Backups() {
       ))}
       <Card className="hub-feature wide">
         <h2>Tus copias viven en tu equipo</h2>
-        <p>
-          Las copias de seguridad se guardan en el ordenador donde juegas, no en
-          la nube. Consúltalas, expórtalas o restáuralas desde PokeApp Launcher.
-        </p>
+        <p>En el ordenador donde juegas, no en la nube.</p>
         {launcherWithoutHub() ? (
           <OlderLauncherPanel
             panel="copias"
@@ -201,24 +192,14 @@ function LauncherTab() {
         </h2>
         {launcherWithoutHub() ? (
           <>
-            <p>
-              Esta versión se actualiza instalando la nueva desde la web de
-              PokeApp cuando se publique. Su conexión y su sincronización están
-              en «Conexión».
-            </p>
+            <p>Instala la nueva versión desde la web.</p>
             <OlderLauncherPanel panel="nube" label="Abrir Conexión" />
           </>
         ) : insideLauncher() ? (
-          <p>
-            Abre «Saves y Launcher» › Launcher para buscar actualizaciones. Solo
-            se instalan versiones firmadas y verificadas.
-          </p>
+          <p>En «Saves y Launcher» › Launcher.</p>
         ) : (
           <>
-            <p>
-              PokeApp completo en tu escritorio, con tu partida al lado. Inicias
-              sesión una vez y se queda guardada de forma segura en tu equipo.
-            </p>
+            <p>PokeApp en tu escritorio, con tu partida al lado.</p>
             <LauncherDownload />
           </>
         )}

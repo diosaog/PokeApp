@@ -243,6 +243,23 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/v1/admin/seasons/{season_id}/participants/{season_player_id}/dead-box": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    /** Set Dead Box */
+    put: operations["set_dead_box_v1_admin_seasons__season_id__participants__season_player_id__dead_box_put"];
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/v1/admin/seasons/{season_id}/config-versions": {
     parameters: {
       query?: never;
@@ -2928,6 +2945,11 @@ export interface components {
       /** Matches */
       matches: components["schemas"]["DayMatch"][];
     };
+    /** DeadBoxBody */
+    DeadBoxBody: {
+      /** Dead Box Number */
+      dead_box_number: number;
+    };
     /** DeleteAccountReceipt */
     DeleteAccountReceipt: {
       /**
@@ -3632,14 +3654,10 @@ export interface components {
       dead_count_source: "observed_current_save" | "unknown";
       /** Dead Count Observed At */
       dead_count_observed_at: string | null;
-      /** Provisional Matchday Number */
-      provisional_matchday_number?: number | null;
-      /** Provisional Dead Count */
-      provisional_dead_count?: number | null;
-      /** Provisional Points Reduction */
-      provisional_points_reduction?: string | null;
-      /** Provisional Points */
-      provisional_points?: string | null;
+      /** Official Points */
+      official_points?: string | null;
+      /** Dead Box Number */
+      dead_box_number?: number | null;
     };
     /** LiveRulesBody */
     LiveRulesBody: {
@@ -3936,6 +3954,8 @@ export interface components {
       status: "no_current_save" | "not_ready" | "ready" | "unsupported_payload";
       /** Pokemon */
       pokemon: components["schemas"]["SlotRead"][];
+      /** Dead Box */
+      dead_box?: number | null;
     };
     /** ParticipantCloseDayBody */
     ParticipantCloseDayBody: {
@@ -5297,6 +5317,8 @@ export interface components {
       game?: string | null;
       /** Revived After Wipe */
       revived_after_wipe?: number | null;
+      /** Dead Box */
+      dead_box?: number | null;
     };
     /** TrainerRead */
     TrainerRead: {
@@ -6299,6 +6321,44 @@ export interface operations {
     requestBody: {
       content: {
         "application/json": components["schemas"]["RemoveParticipantBody"];
+      };
+    };
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["AdminReceipt"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  set_dead_box_v1_admin_seasons__season_id__participants__season_player_id__dead_box_put: {
+    parameters: {
+      query?: never;
+      header: {
+        "idempotency-key": string;
+      };
+      path: {
+        season_id: string;
+        season_player_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["DeadBoxBody"];
       };
     };
     responses: {

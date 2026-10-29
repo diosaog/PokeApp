@@ -11,11 +11,7 @@ export function TeamLockWarning({ own = false }: { own?: boolean }) {
             ? "Tu Team Lock está pendiente."
             : "Falta el Team Lock de este entrenador."}
         </strong>
-        <p>
-          No hay un equipo fijado para esta jornada. El equipo del save no lo
-          sustituye. Puedes continuar en la Liga; revisa el Team Lock antes de
-          combatir.
-        </p>
+        <p>El equipo del save no lo sustituye.</p>
         {own && <Link to="/battle">Revisar Team Preview →</Link>}
       </div>
     </div>

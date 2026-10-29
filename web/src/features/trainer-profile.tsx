@@ -79,10 +79,7 @@ function AccountProfileView({ trainer }: { trainer: string }) {
             {overview.error ? (
               <Notice error={overview.error} />
             ) : (
-              <p>
-                Cuenta de entrenador. Sin participación en la temporada
-                seleccionada.
-              </p>
+              <p>Sin participación en esta temporada.</p>
             )}
           </Card>
         </>
@@ -191,8 +188,7 @@ export function Profile({
           <SaveGame game={pc.data?.save?.game} />
           {pc.seasonGame && (
             <p className="muted">
-              La temporada seleccionada compite con tu partida de Pokémon{" "}
-              {gameName(pc.seasonGame)}; aquí ves tu partida activa.
+              La temporada compite con Pokémon {gameName(pc.seasonGame)}.
             </p>
           )}
           <Notice error={pc.error} />
@@ -203,6 +199,7 @@ export function Profile({
               <Collection
                 key={pc.data.save?.id}
                 slots={pc.data.pokemon}
+                deadBox={pc.data.dead_box}
                 showDead
               />
             </SpriteGeneration>
@@ -238,20 +235,13 @@ export function Profile({
                 </div>
               </SpriteGeneration>
             ) : (
-              <Empty>
-                Aún no hay Team Lock. Puedes consultar su partida sincronizada
-                más abajo.
-              </Empty>
+              <Empty>Aún no hay Team Lock.</Empty>
             )}
           </Card>
           <Card className="live-collection-heading">
             <span className="eyebrow">PARTIDA ACTUAL</span>
             <h2>Equipo, cajas y muertos</h2>
             <SaveGame game={collection.data?.game} />
-            <p>
-              Última partida sincronizada. El equipo oficial de la jornada se
-              conserva por separado.
-            </p>
             <p>
               Revividos tras wipe:{" "}
               <strong>
@@ -267,6 +257,7 @@ export function Profile({
               <Collection
                 slots={collection.data.pokemon}
                 visibility="public"
+                deadBox={collection.data.dead_box}
                 showDead
               />
             </SpriteGeneration>

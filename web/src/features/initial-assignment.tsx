@@ -129,12 +129,9 @@ export function InitialAssignment({
   return (
     <Card>
       <h2>{single ? "Inicio de la Liga" : "Reparto inicial A/B"}</h2>
-      <p>
-        La temporada está abierta para preparar las partidas. Cuando todos
-        alcancen la Medalla 2 observada,{" "}
-        {single
-          ? "empieza la Liga con todos los participantes."
-          : "las menores muertes competitivas ajustadas determinan el reparto."}
+      <p className="muted">
+        Cuando todos tengan la Medalla 2
+        {single ? ", empieza la Liga." : ", el reparto sigue las muertes."}
       </p>
       <Tag>
         {data.state === "assigned"
@@ -147,10 +144,7 @@ export function InitialAssignment({
       </Tag>
       {data.division_sizes &&
         (single ? (
-          <p>
-            Una Liga: los {data.division_sizes.A} participantes juegan en una
-            sola clasificación.
-          </p>
+          <p>{data.division_sizes.A} participantes.</p>
         ) : (
           <p>
             Capacidad configurada: A · {data.division_sizes.A}; B ·{" "}
@@ -187,10 +181,6 @@ export function InitialAssignment({
       </div>
       {data.state === "pending" && !data.ready && (
         <>
-          <p>
-            Falta completar los requisitos indicados. El Launcher actualiza el
-            save automáticamente al guardar en el juego.
-          </p>
           {data.blocking_reasons.map(
             (reason) =>
               blockingLabels[reason] && (
@@ -202,17 +192,9 @@ export function InitialAssignment({
       {data.state === "pending" &&
         data.ready &&
         !data.boundary_tie &&
-        !single && (
-          <p>
-            No hay empate que cruce el corte. Los empates dentro de una misma
-            división no requieren ninguna decisión.
-          </p>
-        )}
+        !single && <p className="muted">Sin empate en el corte.</p>}
       {data.state === "pending" && data.boundary_tie && !admin && (
-        <p>
-          Un empate cruza el corte A/B. Un administrador debe registrar la
-          decisión deportiva externa antes de confirmar el reparto.
-        </p>
+        <p>Empate en el corte A/B: lo resuelve un administrador.</p>
       )}
       {admin && data.state === "pending" && (
         <>

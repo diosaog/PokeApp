@@ -131,7 +131,9 @@ it("another trainer's profile never shows the app settings", () => {
 it("the own profile shows the active save and names the season's other game", () => {
   profile("me");
   expect(screen.getAllByText(/Pokémon Y/).length).toBeGreaterThan(0);
-  expect(screen.getByText(/compite con Pokémon Sol/)).toBeInTheDocument();
+  expect(screen.getAllByText(/compite con Pokémon Sol/).length).toBeGreaterThan(
+    0,
+  );
 });
 
 it("without a season the own profile still ends with the settings", () => {

@@ -34,7 +34,6 @@ export function WipeRevivals({ data }: { data: Model<"LeagueGeneralRead"> }) {
       key={data.season.id}
       seasonId={data.season.id}
       dayId={data.season.current_matchday_id ?? null}
-      visibleDeaths={own.dead_count}
     />
   );
 }
@@ -42,11 +41,9 @@ export function WipeRevivals({ data }: { data: Model<"LeagueGeneralRead"> }) {
 function OwnedWipeRevivals({
   seasonId,
   dayId,
-  visibleDeaths,
 }: {
   seasonId: string;
   dayId: string | null;
-  visibleDeaths: number | null;
 }) {
   const path = `/v1/seasons/${seasonId}/wipe-revivals`,
     query = useRead<Model<"WipeRevivalsRead">>(path),
@@ -75,28 +72,15 @@ function OwnedWipeRevivals({
     query.isFetching ||
     !current.editable;
   return (
-    <Card>
+    <Card className="wipe-revivals">
       <h2>Revividos tras wipe</h2>
-      <p>
-        Indica cuántos Pokémon has recuperado tras un wipe. Cada uno aplica una
-        penalización adicional de 0,4 puntos.
-      </p>
-      <p>
-        Cantidad registrada: <strong>{current.revived_after_wipe}</strong>
-      </p>
-      {visibleDeaths === null && (
+      {!current.editable && (
         <p>
-          Pendiente de observar las muertes del save. Este recuento no confirma
-          cuántos Pokémon muertos hay en la Caja 8.
+          Cantidad: <strong>{current.revived_after_wipe}</strong>
         </p>
       )}
-      <p className="muted">
-        Este cambio se aplicará al próximo cálculo de Liga que corresponda. Las
-        jornadas cerradas y el reparto inicial ya registrado conservan su
-        historia.
-      </p>
       {current.blocking_reason && (
-        <p>{blockingLabels[current.blocking_reason]}</p>
+        <p className="muted">{blockingLabels[current.blocking_reason]}</p>
       )}
       {current.editable && (
         <form
@@ -119,7 +103,7 @@ function OwnedWipeRevivals({
           }}
         >
           <fieldset disabled={disabled}>
-            <Field label="Cantidad de revividos tras wipe">
+            <Field label="Cantidad">
               <input
                 name="revived_after_wipe"
                 type="number"
@@ -132,7 +116,7 @@ function OwnedWipeRevivals({
               />
             </Field>
             <Submit pending={command.pending} disabled={disabled}>
-              Actualizar revividos
+              Actualizar
             </Submit>
           </fieldset>
         </form>

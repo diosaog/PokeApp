@@ -38,9 +38,13 @@ vi.mock("../state", () => ({
           ? [{ id: "new-trainer", display_name: "Elena" }]
           : path.endsWith("/cancellation-preview")
             ? mocks.preview
-            : path.startsWith("/v1/read/seasons?")
-              ? { items: [], next_offset: null }
-              : mocks.day,
+            : path.endsWith("/league")
+              ? {
+                  rows: [{ season_player_id: "player", dead_box_number: 8 }],
+                }
+              : path.startsWith("/v1/read/seasons?")
+                ? { items: [], next_offset: null }
+                : mocks.day,
     isPending: false,
     error: path.endsWith("/rules") ? mocks.rulesError : null,
   }),
@@ -393,9 +397,7 @@ it("disables participation changes after the current day opens and explains the 
     screen.getByRole("option", { name: "Descalificación de la Liga" }),
   ).toBeInTheDocument();
   expect(
-    within(screen.getByRole("dialog")).getByText(
-      /no implica una descalificación automática de la Copa/,
-    ),
+    within(screen.getByRole("dialog")).getByText(/no afecta a la Copa/),
   ).toBeInTheDocument();
   mocks.overview = {
     ...mocks.overview,
@@ -503,4 +505,24 @@ it("an unfinished robbery blocks cancellation and says how to resolve it", () =>
   expect(
     within(dialog).getByRole("button", { name: /Confirmar operación/ }),
   ).toBeDisabled();
+});
+
+it("sets one participant's dead box with an audited PUT", () => {
+  render(page());
+  tab("Entrenadores");
+  const card = screen
+    .getByRole("heading", { name: "Caja de muertos" })
+    .closest("section")!;
+  const input = within(card).getByLabelText("Antonio");
+  expect(input).toHaveValue(8);
+  fireEvent.change(input, { target: { value: "7" } });
+  fireEvent.click(within(card).getByRole("button", { name: "Guardar" }));
+  expect(mocks.execute).toHaveBeenCalledWith(
+    "/v1/admin/seasons/season/participants/player/dead-box",
+    { dead_box_number: 7 },
+    "PUT",
+  );
+  fireEvent.change(input, { target: { value: "33" } });
+  fireEvent.submit(input.closest("form")!);
+  expect(mocks.execute).toHaveBeenCalledTimes(1);
 });

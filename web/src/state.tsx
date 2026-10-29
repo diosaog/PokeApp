@@ -47,11 +47,21 @@ export const queries = new QueryClient({
   defaultOptions: {
     queries: {
       staleTime: 15000,
+      // A dropped connection or a 5xx right after a confirmed change must not
+      // leave the old figures on screen: retried at 1, 2 and 4 s.
       retry: (count, error) =>
-        count < 1 && error instanceof ApiError && error.status >= 500,
+        count < 3 &&
+        error instanceof ApiError &&
+        (error.status === 0 || error.status >= 500) &&
+        error.code !== "SESSION_RENEWAL_PENDING",
+      retryDelay: (attempt) => Math.min(1000 * 2 ** attempt, 8000),
       // Coming back to the window shows what changed meanwhile (stale reads
       // only: at most one refetch per screen, never a polling loop).
       refetchOnWindowFocus: true,
+      // What others change (results, their deaths, an administrator) reaches
+      // the screen being looked at within a minute; hidden windows pause.
+      refetchInterval: 60000,
+      refetchIntervalInBackground: false,
     },
     mutations: { retry: false },
   },
@@ -60,6 +70,14 @@ export const queries = new QueryClient({
 // when opened): after a confirmed save sync, another active save, items.
 export function refreshEverything() {
   return queries.invalidateQueries();
+}
+// One sync can announce several confirmed steps within a moment (each copy
+// accepted, then the end of the sync). Each refresh cancels the reads in
+// flight, so close events become one refresh.
+let refreshTimer: ReturnType<typeof setTimeout> | undefined;
+export function refreshSoon(delay = 400) {
+  clearTimeout(refreshTimer);
+  refreshTimer = setTimeout(() => void refreshEverything(), delay);
 }
 const sessionLost = (error: unknown) =>
   error instanceof ApiError && (error.status === 401 || error.status === 403);
@@ -177,7 +195,7 @@ export function AppState({ children }: { children: ReactNode }) {
         if (api.signedIn && api.launcherSession) api.logout();
       },
     );
-    const events = listenForLauncherEvents(() => void refreshEverything());
+    const events = listenForLauncherEvents(() => refreshSoon());
     requestLauncherSession();
     return () => {
       stop();
@@ -240,7 +258,7 @@ export function useRead<T>(path: string, enabled = true, live?: number) {
     queryKey: [me?.trainer_id, path],
     queryFn: ({ signal }) => api.request<T>(path, { signal }),
     enabled: Boolean(me) && enabled,
-    refetchInterval: live,
+    ...(live ? { refetchInterval: live } : {}),
   });
 }
 export function useOverview() {

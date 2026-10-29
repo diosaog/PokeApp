@@ -341,10 +341,7 @@ function LockConfirmation({
         if (!cmd.pending && !cmd.uncertain) onClose();
       }}
     >
-      <p>
-        Se fijará el equipo del save actual. El servidor comprobará la jornada,
-        los seis Pokémon y tu elegibilidad.
-      </p>
+      <p>Se fijará el equipo de tu partida actual.</p>
       {pc.isPending ? (
         <Loading />
       ) : pc.error ? (

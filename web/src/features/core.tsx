@@ -36,14 +36,7 @@ import {
 
 export function WithSeason({ children }: { children: ReactNode }) {
   const { season } = useApp();
-  return season ? (
-    <>{children}</>
-  ) : (
-    <Empty>
-      Selecciona una temporada para continuar. Si aún no hay ninguna, un
-      administrador puede crearla.
-    </Empty>
-  );
+  return season ? <>{children}</> : <Empty>Selecciona una temporada.</Empty>;
 }
 function OverviewState({
   children,
@@ -282,35 +275,16 @@ function LeagueDay({ dayId }: { dayId: string }) {
     </OverviewState>
   );
 }
-// What the next closing will subtract (deaths and sanctions), shown apart from
-// the official total and only when it would change it.
-export function ProvisionalPoints({
-  row,
-}: {
-  row: Model<"LeagueStandingRead">;
-}) {
-  if (
-    row.provisional_points == null ||
-    Number(row.provisional_points) === Number(row.total_points)
-  )
-    return null;
-  const reduction = Number(row.provisional_points_reduction ?? 0);
-  const parts = [
-    row.provisional_dead_count
-      ? `${row.provisional_dead_count} ${row.provisional_dead_count === 1 ? "muerte" : "muertes"}`
-      : "",
-    reduction ? `sanciones −${row.provisional_points_reduction}` : "",
-  ].filter(Boolean);
-  return (
-    <small className="muted standings-source provisional-points">
-      Provisional: {row.provisional_points}
-      {parts.length ? ` (${parts.join(", ")})` : ""} · se aplica al cerrar J
-      {row.provisional_matchday_number}
-    </small>
-  );
+// One total per trainer: in an active season the server already includes the
+// current deaths and sanctions, so nothing is shown "provisional".
+export function points(value: string) {
+  const n = Number(value);
+  return Number.isFinite(n)
+    ? n.toLocaleString("es-ES", { maximumFractionDigits: 1 })
+    : value;
 }
 
-function LeagueGeneral({ data }: { data: Model<"LeagueGeneralRead"> }) {
+export function LeagueGeneral({ data }: { data: Model<"LeagueGeneralRead"> }) {
   if (!data.rows.length) return <Empty>Aún no hay participantes.</Empty>;
   const states: Record<string, string> = {
     retired: "Retirado",
@@ -320,24 +294,6 @@ function LeagueGeneral({ data }: { data: Model<"LeagueGeneralRead"> }) {
   return (
     <Card className="league-table-card">
       <h2>Clasificación general</h2>
-      <p>
-        Puntos oficiales acumulados y saldo actual. A igualdad de puntos, el
-        orden mostrado no decide el desempate.
-      </p>
-      {!data.days.some((d) => d.status === "closed") && (
-        // Preseason: the rules give points per matchday position only, so
-        // they start at 0; medals and the champion already pay coins, and
-        // deaths and sanctions already count for the first closing.
-        <p className="notice" role="status">
-          Pretemporada: los puntos oficiales empiezan con la primera jornada
-          cerrada (por posición en cada jornada). Las monedas sí cuentan ya:
-          cada medalla y vencer al Campeón, observados en tu partida
-          sincronizada, suman según las reglas de la temporada. Las muertes
-          (−0,2 puntos cada una; un revivido tras wipe cuenta dos) y las
-          sanciones de puntos también cuentan ya: se ven como provisionales y se
-          restan al cerrar la primera jornada.
-        </p>
-      )}
       <div
         className="table-scroll"
         tabIndex={0}
@@ -353,55 +309,28 @@ function LeagueGeneral({ data }: { data: Model<"LeagueGeneralRead"> }) {
             </tr>
           </thead>
           <tbody>
-            {data.rows.map((row) => {
-              const source = data.days.find(
-                (d) => d.id === row.points_source_matchday_id,
-              );
-              return (
-                <tr key={row.season_player_id}>
-                  <td>
-                    <Link
-                      className="standing-trainer"
-                      to={`/entrenadores/${row.trainer_id}`}
-                    >
-                      <TrainerPhoto name={row.display_name} />
-                      <span>{row.display_name}</span>
-                    </Link>
-                    {states[row.status] && (
-                      <span className="muted"> · {states[row.status]}</span>
-                    )}
-                  </td>
-                  <td>
-                    {row.total_points}
-                    <small className="muted standings-source">
-                      {row.points_source_matchday_id
-                        ? source
-                          ? `Hasta J${source.number}`
-                          : "Captura oficial"
-                        : "Sin jornadas oficiales"}
-                    </small>
-                    <ProvisionalPoints row={row} />
-                  </td>
-                  <td>{row.coin_balance}</td>
-                  <td>
-                    {row.dead_count ?? "Desconocido"}
-                    {row.dead_count_observed_at && (
-                      <small className="muted standings-source">
-                        {date(row.dead_count_observed_at)}
-                      </small>
-                    )}
-                  </td>
-                </tr>
-              );
-            })}
+            {data.rows.map((row) => (
+              <tr key={row.season_player_id}>
+                <td>
+                  <Link
+                    className="standing-trainer"
+                    to={`/entrenadores/${row.trainer_id}`}
+                  >
+                    <TrainerPhoto name={row.display_name} />
+                    <span>{row.display_name}</span>
+                  </Link>
+                  {states[row.status] && (
+                    <span className="muted"> · {states[row.status]}</span>
+                  )}
+                </td>
+                <td>{points(row.total_points)}</td>
+                <td>{row.coin_balance}</td>
+                <td>{row.dead_count ?? "Desconocido"}</td>
+              </tr>
+            ))}
           </tbody>
         </table>
       </div>
-      <p className="muted">
-        Muertos: ocupantes observados de la Caja 8 del save seleccionado. Sin
-        una observación completa, el recuento es desconocido. Esta columna no
-        incluye revividos ni modifica puntos ya cerrados.
-      </p>
     </Card>
   );
 }
@@ -409,9 +338,7 @@ export function LeaguePage() {
   const [selected, setSelected] = useState({ season: "", day: "" });
   return (
     <>
-      <Heading eyebrow="LA CARRERA POR EL TÍTULO" title="Cada punto cuenta.">
-        Resultados oficiales, congelados al cerrar cada jornada.
-      </Heading>
+      <Heading eyebrow="LA CARRERA POR EL TÍTULO" title="Cada punto cuenta." />
       <LeagueState>
         {(data) => {
           const days = data.days
@@ -481,28 +408,22 @@ export function PCPage() {
       ) : pc.data?.status === "ready" ? (
         <>
           <SaveGame game={pc.data.save?.game} />
-          {pc.seasonGame ? (
+          {pc.seasonGame && (
             <p className="muted">
-              Tu partida activa es la de tu Launcher. La temporada seleccionada
-              compite con tu partida de Pokémon {gameName(pc.seasonGame)}, que
-              queda vinculada a la competición.
+              La temporada compite con Pokémon {gameName(pc.seasonGame)}.
             </p>
-          ) : (
-            pc.personal && (
-              <p className="muted">
-                Tu partida activa, sincronizada por tu Launcher.
-              </p>
-            )
           )}
           <SpriteGeneration value={gameGeneration(pc.data.save?.game)}>
-            <Collection key={pc.data.save?.id} slots={pc.data.pokemon} />
+            <Collection
+              key={pc.data.save?.id}
+              slots={pc.data.pokemon}
+              deadBox={pc.data.dead_box}
+            />
           </SpriteGeneration>
         </>
       ) : (
         <Empty>
-          Todavía no hay una partida sincronizada. Abre PokeApp Launcher:
-          detecta tu partida y la envía sola.{" "}
-          <Link to="/saves">Saves y Launcher →</Link>
+          Sin partida sincronizada. <Link to="/saves">Saves y Launcher →</Link>
         </Empty>
       )}
     </>
@@ -545,10 +466,7 @@ export function ShopPage() {
               </div>
               <CommandState command={cmd} />
               {["finished", "archived"].includes(query.data.season_status) && (
-                <p>
-                  La Liga ha terminado. Puedes seguir gastando tus monedas en
-                  artículos disponibles.
-                </p>
+                <p>La Liga ha terminado: tus monedas siguen valiendo.</p>
               )}
               <nav className="tabs" aria-label="Categorías de tienda">
                 {(

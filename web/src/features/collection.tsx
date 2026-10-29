@@ -19,10 +19,14 @@ export function Collection({
   slots,
   showDead = false,
   visibility = "self",
+  deadBox = null,
 }: {
   slots: (Model<"SlotRead"> | Model<"PublicSlotRead">)[];
   visibility?: "self" | "public";
   showDead?: boolean;
+  // The participant's dead box in the season (Box 8 unless the administrator
+  // set another); none outside a season.
+  deadBox?: number | null;
 }) {
   const [index, setIndex] = useState(0),
     [search, setSearch] = useState("");
@@ -118,7 +122,7 @@ export function Collection({
             <div>
               <h2>
                 {box ? `Caja ${box}` : "Cajas"}
-                {box === 8 && <small> · Muertos</small>}
+                {box === deadBox && <small> · Muertos</small>}
               </h2>
               <span className="caption">
                 {boxes.length
@@ -175,19 +179,16 @@ export function Collection({
           <Empty>Todavía no hay Pokémon en las cajas disponibles.</Empty>
         )}
       </Card>
-      {showDead && (
+      {showDead && deadBox != null && (
         <Card>
-          <h2>Muertos</h2>
-          <p className="muted">Pokémon observados en la caja de muertos.</p>
+          <h2>Muertos · Caja {deadBox}</h2>
           <div className="dead-slots">
             {located
-              .filter((s) => s.position?.box === 8)
+              .filter((s) => s.position?.box === deadBox)
               .map((s, i) => slot(s.pokemon, i, s.location))}
           </div>
-          {!located.some((s) => s.position?.box === 8) && (
-            <p className="muted">
-              No hay Pokémon en la caja de muertos de esta partida.
-            </p>
+          {!located.some((s) => s.position?.box === deadBox) && (
+            <p className="muted">Ninguno.</p>
           )}
         </Card>
       )}

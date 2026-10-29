@@ -191,10 +191,7 @@ function TrialForm({
           </>
         ) : decision ? (
           <>
-            <p>
-              Registra el acuerdo explícito tomado en Discord. PokeApp aplica
-              sus consecuencias; no hay votación dentro de la aplicación.
-            </p>
+            <p className="muted">El acuerdo tomado en Discord.</p>
             <Field label="Veredicto">
               <select
                 value={verdict}

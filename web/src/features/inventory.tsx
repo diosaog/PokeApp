@@ -26,8 +26,9 @@ const pokemonActions = [
   "robbery_shield_voucher",
 ];
 
-function isDead(target: PokemonTarget) {
-  return target.location.toLowerCase().startsWith("caja 8");
+// The trainer's own dead box (070: Box 8 unless the administrator set another).
+function isDead(target: PokemonTarget, deadBox: number) {
+  return Number(/^caja (\d+)/i.exec(target.location)?.[1]) === deadBox;
 }
 
 export const itemUseLabels: Record<string, string> = {
@@ -86,7 +87,7 @@ const withdrawable = [
 ];
 
 export function Inventory() {
-  const { season } = useApp();
+  const { season, me } = useApp();
   const q = useRead<Model<"InventoryRead">>(
     `/v1/read/seasons/${season}/inventory`,
     !!season,
@@ -119,6 +120,13 @@ export function Inventory() {
     "/v1/read/trainers",
     !!season && !!purchase,
   );
+  const league = useRead<Model<"LeagueGeneralRead">>(
+    `/v1/read/seasons/${season}/league`,
+    !!season && !!purchase,
+  );
+  const deadBox =
+    league.data?.rows?.find((row) => row.trainer_id === me?.trainer_id)
+      ?.dead_box_number ?? 8;
 
   // Rivals come from the robbable targets themselves; the names list only
   // labels them, so a slow or unavailable list never hides a rival.
@@ -151,9 +159,10 @@ export function Inventory() {
         );
       }
       if (target.visibility !== "own") return false;
-      if (purchase?.item_code === "revivir_pokemon") return isDead(target);
+      if (purchase?.item_code === "revivir_pokemon")
+        return isDead(target, deadBox);
       if (purchase?.item_code === "blindar_pokemon")
-        return !isDead(target) && target.can_shield;
+        return !isDead(target, deadBox) && target.can_shield;
       if (purchase?.item_code === "robbery_shield_voucher")
         return target.can_shield;
       return false;
@@ -237,16 +246,9 @@ export function Inventory() {
             <ItemIcon name={unlimitedInfo.name} />
             <p>
               <strong>Gratis e ilimitado.</strong> Se añade a la bolsa de tu
-              partida activa, no a un Pokémon. Nunca supera lo que cabe en la
-              bolsa.
+              partida desde PokeApp Launcher.
             </p>
           </div>
-          <p className="muted">
-            Disponible en PokeApp Launcher, que trabaja con la partida de tu
-            equipo: eliges la cantidad y pulsas «Añadir a la bolsa». El Launcher
-            comprueba solo que el emulador está cerrado, guarda una copia
-            verificada, aplica el cambio y lo vuelve a comprobar.
-          </p>
           <LauncherDownload />
         </Modal>
       )}
@@ -292,14 +294,10 @@ export function Inventory() {
                 </p>
                 {item.status === "pending" &&
                   (transfer ? (
-                    <p>
-                      PokeApp decide el robo; la entrega física se completa en
-                      cada partida con el Launcher. Tu estado aparece arriba.
-                    </p>
+                    <p className="muted">Se entrega con el Launcher.</p>
                   ) : physicalItem(item.item_code) && !robbery ? (
-                    <p>
-                      La aplicación física mediante Launcher aún no está
-                      habilitada. El objeto se conserva sin consumir.
+                    <p className="muted">
+                      Aún no se puede aplicar. No se ha consumido.
                     </p>
                   ) : pokemonActions.includes(item.item_code) ? (
                     <button
@@ -312,10 +310,7 @@ export function Inventory() {
                       Canjear
                     </button>
                   ) : (
-                    <p>
-                      Este artículo todavía no tiene un canje disponible en
-                      PokeApp.
-                    </p>
+                    <p className="muted">Sin canje disponible.</p>
                   ))}
               </Card>
             );

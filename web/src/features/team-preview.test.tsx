@@ -144,7 +144,9 @@ it("missing lock is a strong advisory, with no fake team or live save read", () 
   mocks.missing = true;
   show();
   expect(screen.getAllByRole("alert")).toHaveLength(2);
-  expect(screen.getAllByText(/Puedes continuar en la Liga/)).toHaveLength(2);
+  expect(
+    screen.getAllByText(/El equipo del save no lo sustituye/),
+  ).toHaveLength(2);
   expect(screen.queryByText("Fijado")).not.toBeInTheDocument();
   expect(screen.getByRole("button", { name: "Fijar mi equipo" })).toBeEnabled();
   expect(mocks.pc).not.toHaveBeenCalled();

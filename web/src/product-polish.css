@@ -777,3 +777,29 @@ button[aria-busy="true"] {
     grid-template-columns: 1fr;
   }
 }
+
+/* One-line admin settings (070 dead box): label + value + button. */
+.inline-form {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 0.75rem;
+  margin-block: 0.5rem;
+}
+.inline-form .field {
+  flex: 1 1 12rem;
+  margin: 0;
+}
+.wipe-revivals form fieldset {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 0.75rem;
+  border: 0;
+  padding: 0;
+  margin: 0;
+}
+.wipe-revivals .field {
+  flex: 0 1 10rem;
+  margin: 0;
+}

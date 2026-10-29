@@ -91,10 +91,6 @@ function Participants({ setup }: { setup: Setup }) {
     <>
       <Card>
         <h2>Añadir entrenador</h2>
-        <p>
-          Incorpora un perfil existente a esta Liga. La creación de cuentas y su
-          acceso se gestionan por separado.
-        </p>
         <form
           onSubmit={(event) => {
             const data = form(event);
@@ -123,23 +119,13 @@ function Participants({ setup }: { setup: Setup }) {
             Añadir a la temporada
           </Submit>
         </form>
-        {!canAdd && (
-          <p>
-            Solo se pueden añadir entrenadores durante el borrador, antes de
-            preparar las divisiones y la primera jornada.
-          </p>
-        )}
+        {!canAdd && <p className="muted">Solo durante el borrador.</p>}
         <Notice error={trainers.error} />
       </Card>
-      <p>
-        Las retiradas, abandonos y descalificaciones de Liga se registran antes
-        de abrir la jornada actual y conservan el historial. La descalificación
-        de Liga no descalifica automáticamente de la Copa.
-      </p>
       {!canChange && setup.season.status === "active" && (
-        <p>
-          Los cambios de participación estarán disponibles con la jornada actual
-          preparada y sin resultados.
+        <p className="muted">
+          Cambios de participación: con la jornada actual preparada y sin
+          resultados.
         </p>
       )}
       <Notice error={overview.error} />
@@ -170,6 +156,9 @@ function Participants({ setup }: { setup: Setup }) {
         ))}
       </div>
       {!target && <CommandState command={cmd} />}
+      {["draft", "active"].includes(setup.season.status) && (
+        <DeadBoxes setup={setup} />
+      )}
       {target && (
         <Modal
           title={`Estado de ${setup.participants.find((p) => p.id === target)?.display_name}`}
@@ -221,10 +210,8 @@ function Participants({ setup }: { setup: Setup }) {
                 <textarea name="reason" required maxLength={500} />
               </Field>
               <p>
-                Se aplicarán las reglas de participación de la temporada. El
-                historial se conserva. La descalificación afecta a la Liga; no
-                implica una descalificación automática de la Copa. Esta decisión
-                no puede deshacerse desde esta pantalla.
+                No se puede deshacer desde aquí. La descalificación de Liga no
+                afecta a la Copa.
               </p>
               <Submit pending={cmd.pending} disabled={busy || !allowed}>
                 Confirmar cambio de estado
@@ -235,6 +222,59 @@ function Participants({ setup }: { setup: Setup }) {
         </Modal>
       )}
     </>
+  );
+}
+// 070: the box each participant's dead Pokémon go to (Box 8 unless set here).
+// It never changes on its own when a save unlocks more boxes.
+function DeadBoxes({ setup }: { setup: Setup }) {
+  const { season } = useApp(),
+    league = useRead<Model<"LeagueGeneralRead">>(
+      `/v1/read/seasons/${season}/league`,
+    ),
+    cmd = useAdminCommand(),
+    busy = cmd.pending || cmd.uncertain;
+  const boxes = new Map(
+    league.data?.rows?.map((r) => [r.season_player_id, r.dead_box_number]),
+  );
+  return (
+    <Card>
+      <h2>Caja de muertos</h2>
+      <Notice error={league.error} />
+      {setup.participants.map((p) => (
+        <form
+          key={`${p.id}:${boxes.get(p.id) ?? ""}`}
+          className="inline-form"
+          onSubmit={(event) => {
+            const value = Number(text(form(event), "box"));
+            if (busy || !Number.isInteger(value) || value < 1 || value > 32)
+              return;
+            void cmd.execute(
+              `/v1/admin/seasons/${season}/participants/${p.id}/dead-box`,
+              { dead_box_number: value } satisfies Model<"DeadBoxBody">,
+              "PUT",
+            );
+          }}
+        >
+          <Field label={p.display_name}>
+            <input
+              name="box"
+              type="number"
+              inputMode="numeric"
+              min={1}
+              max={32}
+              step={1}
+              required
+              defaultValue={boxes.get(p.id) ?? 8}
+              disabled={busy || !league.data}
+            />
+          </Field>
+          <Submit pending={cmd.pending} disabled={busy || !league.data}>
+            Guardar
+          </Submit>
+        </form>
+      ))}
+      <CommandState command={cmd} />
+    </Card>
   );
 }
 function DayAdmin({ dayId, setup }: { dayId: string; setup: Setup }) {
@@ -601,9 +641,8 @@ function Competition({ setup }: { setup: Setup }) {
           </form>
         )}
         {observedInitial && setup.season.status === "draft" && (
-          <p>
-            Activa la Liga para comenzar el primer tramo. Las divisiones y la
-            primera jornada se prepararán al confirmar el reparto observado.
+          <p className="muted">
+            Las divisiones y la J1 se preparan al confirmar el reparto.
           </p>
         )}
         <div className="toolbar">
@@ -849,15 +888,9 @@ function Risk({ setup }: { setup: Setup }) {
   return (
     <Card className="risk">
       <h2>Zona de riesgo</h2>
-      <p>
-        Finalizar da por cerrada la Liga. Archivar congela su paquete histórico
-        y registra el título en el Hall.
-      </p>
-      <p>
-        Puedes cancelar una temporada en cualquier momento mientras está en
-        borrador o en curso, también con jornadas empezadas. Antes de confirmar
-        verás qué se conserva y qué se detiene. Archivar está disponible después
-        de finalizar la Liga.
+      <p className="muted">
+        Archivar (tras finalizar) registra el título en el Hall. Cancelar
+        muestra antes qué se conserva.
       </p>
       <div className="toolbar">
         {[
@@ -1109,11 +1142,6 @@ export function AdminPage() {
                 ) : (
                   <Card>
                     <h2>Historia oficial</h2>
-                    <p>
-                      Consulta las jornadas congeladas y los campeones
-                      certificados. Cada corrección conserva el registro de lo
-                      que cambió.
-                    </p>
                     <div className="toolbar">
                       <AdminLink className="button" to="/liga">
                         Jornadas oficiales
