@@ -4,6 +4,8 @@ import { spawn } from 'node:child_process';
 import { mkdir, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
+const VERSION=JSON.parse(readFileSync(new URL('../companion/launcher/package.json',import.meta.url),'utf8')).version;
 const [exe, output] = process.argv.slice(2);
 assert(exe && output);
 await mkdir(path.join(output,'appdata'),{recursive:true});
@@ -12,7 +14,7 @@ delete env.ELECTRON_RUN_AS_NODE;
 const child=spawn(exe,['--remote-debugging-port=9343'],{env,windowsHide:true,stdio:'ignore'});
 const pause=ms=>new Promise(resolve=>setTimeout(resolve,ms));
 let browser;
-const report={status:'RUNNING',version:'0.26.4',checks:[]};
+const report={status:'RUNNING',version:VERSION,checks:[]};
 try {
   for(let n=0;n<60&&!browser;n++) {
     await pause(500);
@@ -38,9 +40,9 @@ try {
   const web=browser.contexts().flatMap(c=>c.pages()).find(p=>p.url().startsWith('https://pokeapp-web.'));
   assert(web,'official web origin');
   await web.getByRole('button',{name:'Entrar a PokeApp'}).waitFor();
-  const boundary=await web.evaluate(()=>({node:typeof require,bridge:typeof window.launcher,version:navigator.userAgent.includes('PokeAppLauncher/0.26.4')}));
+  const boundary=await web.evaluate(v=>({node:typeof require,bridge:typeof window.launcher,version:navigator.userAgent.includes('PokeAppLauncher/'+v)}),VERSION);
   assert(boundary.node==='undefined'&&boundary.bridge==='undefined'&&boundary.version,'web IPC boundary/version');
-  report.checks=['Packaged startup','Real core IPC','Isolated empty profile','Official web login','No web Node/IPC bridge','0.26.4 user agent'];
+  report.checks=['Packaged startup','Real core IPC','Isolated empty profile','Official web login','No web Node/IPC bridge',VERSION+' user agent'];
   report.status='PASS';
 } catch(error) {
   report.status='FAIL';report.error=error.message;
