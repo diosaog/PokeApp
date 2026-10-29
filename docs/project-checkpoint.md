@@ -5,6 +5,12 @@ milestone record; it does not maintain a second live phase-status ledger.
 
 ## Current project position
 
+- Real-test corrections (2026-10-29): **PUBLISHED / VERIFIED.** Supabase 069
+  (61 records), Railway API 114 routes `5e537567`, Cloudflare `166e044c`, Launcher
+  0.26.5 on the signed stable feed. Preseason deaths/sanctions shown as provisional
+  League figures; Gen6/7 medal coins. Owner real-save acceptance pending.
+  [Current live record](work-in-progress/final-corrections-live.md).
+
 - Sprite correction (2026-10-28): **PUBLISHED / VERIFIED**, web `cf68afc`,
   Cloudflare `f12d4c1f-589e-44ae-aa75-2811193c2104`. Shared species/form resolution
   fixes Keldeo/Zygarde/Bagon; 51 React, 6 local browser, 2 hosted browser cases and

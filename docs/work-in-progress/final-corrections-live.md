@@ -1,5 +1,55 @@
 # Final corrections — live execution record
 
+## Real-test corrections (15 incidents) — 2026-10-29 03:00 UTC
+
+**PUBLISHED / VERIFIED.** Commits `886f8de` (API+DB 069), `5c165d1` (Launcher),
+`8a3b163` (web), `795673a` (0.26.5), `8200da8` (release card); main = origin/main.
+Supersedes the 0.26.4/068 production state below.
+
+- **Validation:** Python **1258 OK** (the interrupted run's 7 failures were 3
+  runner artefacts without `PYTHONPATH=tests`, 3 stale route counts 108→114 /
+  44→49 / 404→405, and one real Launcher bug: a non-dict season save context now
+  reads as an older API). Web **222/222**, TS, Prettier; Electron **32/32**.
+- **Preseason rule check:** existing rules give points only per matchday position;
+  each closing subtracts cumulatively 0.2 per adjusted death (Box 8 + revivals −
+  overlap + 2 per wipe revival) and resolved points sanctions. Nothing was lost
+  before J1, but it was invisible. 069 §4 adds read-only provisional figures to the
+  League (`provisional_points/dead_count/points_reduction/matchday_number`, active
+  seasons, same inputs as `matchday_context`); the web shows them apart from the
+  official total. Coin sanctions already hit the ledger at once; Gen6/7 medals and
+  the champion now pay the existing coin rules once (Gen7 stamps pay nothing).
+- **069** (sha256 `c5ddb335…754803`): fresh 001–069 validator PASS; production
+  backup `pre-release-20261029T023853Z.dump` (sha256 `e3245e41…68f712`) restored,
+  rehearsal **PASS** (93 tables identical, 78 reads identical apart from one paid
+  balance, no new browser grant, replay pays 0, upgrade = fresh build). Applied
+  **once** as `20261029024119`. Only data change: Anto (Prueba, Pokémon Y, 8
+  observed badges, no champion) **8 claims / 32 coins**; Samuel (US) 0. The system
+  cannot tell PKHeX-set badges from played ones — same standard as Gen3-5.
+  Post-capture: **114/117 tables byte-identical**; only ledger 0→8, claims 0→8,
+  history 60→61. New functions service-role only; no Discord row or activity event.
+- **Railway** `pokeapp-api` deployment `5e537567-baa2-4021-ae64-0a7a1500f0ac`
+  SUCCESS from export of `8a3b163` (321 files). 114 routes. Verifier worker not
+  redeployed (its changed imports are API-only/Windows-only).
+- **Launcher 0.26.5**: package audit PASS; isolated packaged executable **6/6 PASS**;
+  0.26.4's embedded key and unchanged updater accept the signed 0.26.5 manifest
+  (size/SHA-512 bound), 0.26.5 sees no further update. Installer 159332349 bytes,
+  sha256 `975939d26c6def1ff9403ad75752e1f34e73f12ebf70a671099527ebe1ea4301`,
+  unsigned under the private-distribution policy. R2 installer read back, then
+  `updates/stable.json` (minimum 0.26.0). No install on the owner's profile.
+- **Cloudflare** `166e044c-29ad-4cc4-953e-69f3d279855a`; hosted bundle equals local.
+- **Hosted acceptance `--stage real_tests`: 20/20 PASS**; public Edge 1440/390 login
+  and Gen6/Gen7 PNG assets PASS; API logs clean.
+- **Owner acceptance pending (real saves/accounts, not simulated here):** 0.26.4 →
+  0.26.5 in-app update on both PCs; emulator search and live sync with real
+  saves; same active game in Launcher/Entrenadores/Mi PC/profile; Rare Candy /
+  Heart Scale on a real save; account repair tools and season cancellation on
+  real data; provisional League figures with real deaths.
+
+Private evidence: `%LOCALAPPDATA%/PokeApp-migration-evidence/real-test-corrections/20261029/`
+(`rehearsal.json`, `069-migration-*.json`, `preservation.json`, `update-chain.json`,
+`packaged/acceptance.json`, `hosted-acceptance.json`, `public-browser.json`, logs).
+Build root `%LOCALAPPDATA%/PokeApp-releases/0.26.5/`.
+
 ## Sprite correction — 2026-10-28 19:46 UTC
 
 **PUBLISHED / VERIFIED.** Entry `384d181bf8e6f20fd9ae0aabf425af7d6750647b`,
