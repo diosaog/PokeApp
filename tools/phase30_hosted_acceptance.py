@@ -49,6 +49,11 @@ INSTALLERS = {
         "sha256_prefix": "4ae3962d",
         "sha256_suffix": "ac6be2",
     },
+    "0.26.7": {
+        "bytes": 159398331,
+        "sha256_prefix": "e884350a",
+        "sha256_suffix": "919e11",
+    },
 }
 EXPECTED = {
     "before": {
@@ -89,6 +94,15 @@ EXPECTED = {
         "incidents": True,
         "feed": "feed",
         "launcher": "0.26.6",
+    },
+    # Launcher 0.26.7 (supervised core): API unchanged (115 routes); 0.26.7
+    # is the download and the stable feed's offer.
+    "launcher_recovery": {
+        "routes": 115,
+        "division_required": ["A"],
+        "incidents": True,
+        "feed": "feed",
+        "launcher": "0.26.7",
     },
 }
 ZERO = "00000000-0000-4000-8000-000000000000"

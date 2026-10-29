@@ -28,12 +28,16 @@ try {
   }
   assert(shell,'native shell');
   await shell.waitForFunction(()=>typeof window.launcher?.state==='function');
+  // 0.26.7: a core that is still starting is refused at once with its status
+  // (the hub shows it); the state arrives as soon as the core is READY.
   let state;
-  for(let n=0;n<40;n++) {
-    state=await shell.evaluate(()=>window.launcher.state());
+  for(let n=0;n<80;n++) {
+    state=await shell.evaluate(()=>window.launcher.state()).catch(()=>null);
     if(state?.local_status) break;
     await pause(250);
   }
+  const core=await shell.evaluate(()=>window.launcher.core());
+  assert(core?.status==='READY'&&core.starts===1,'supervised core READY on its first start');
   assert(state?.local_status,'packaged Python core answers IPC');
   assert(!state.principal,'no real account');
   assert(!state.selected_save,'no owner save selected');
@@ -49,7 +53,7 @@ try {
   assert(login,'official web login form');
   const boundary=await web.evaluate(v=>({node:typeof require,bridge:typeof window.launcher,version:navigator.userAgent.includes('PokeAppLauncher/'+v)}),VERSION);
   assert(boundary.node==='undefined'&&boundary.bridge==='undefined'&&boundary.version,'web IPC boundary/version');
-  report.checks=['Packaged startup','Real core IPC','Isolated empty profile','Official web login','No web Node/IPC bridge',VERSION+' user agent'];
+  report.checks=['Packaged startup','Real core IPC','Supervised core READY','Isolated empty profile','Official web login','No web Node/IPC bridge',VERSION+' user agent'];
   report.status='PASS';
 } catch(error) {
   report.status='FAIL';report.error=error.message;
