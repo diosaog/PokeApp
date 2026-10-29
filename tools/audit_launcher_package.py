@@ -40,6 +40,7 @@ def audit(build):
         "updater.cjs",
         "webview.cjs",
         "confirmations.cjs",
+        "core-supervisor.cjs",
         "preload.cjs",
         "renderer.js",
         "index.html",

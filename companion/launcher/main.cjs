@@ -6,6 +6,7 @@ const {
   dialog,
   shell,
   net,
+  clipboard,
 } = require("electron");
 const webview = require("./webview.cjs");
 const {
@@ -15,10 +16,16 @@ const {
   restorable,
   robberyOpen,
 } = require("./confirmations.cjs");
+const {
+  createCoreSupervisor,
+  createLog,
+  tail,
+  mask,
+} = require("./core-supervisor.cjs");
 const { spawn } = require("node:child_process");
+const os = require("node:os");
 const path = require("node:path");
 const { pathToFileURL } = require("node:url");
-const { createInterface } = require("node:readline");
 const metadata = require("./package.json");
 const privateCandidate = metadata.pokeappPrivateCandidate === true;
 // Update rehearsal builds (private only) keep their own profile and never see
@@ -43,17 +50,34 @@ app.setPath("userData", path.join(profile, "shell"));
 app.setAppUserModelId(
   privateCandidate ? "app.pokeapp.launcher.private" : "app.pokeapp.launcher",
 );
+// One Launcher per profile: a second window (a double click, the Start menu
+// while it is still opening) would start a second core on the same data and
+// that core could never start. The running one comes to the front instead.
+if (!app.requestSingleInstanceLock()) {
+  app.quit();
+  return;
+}
+app.on("second-instance", () => {
+  if (!win) return;
+  if (win.isMinimized()) win.restore();
+  win.show();
+  win.focus();
+});
+const launcherLog = createLog(path.join(profile, "logs", "launcher.log"));
 // In-app confirmations: main writes the summary from the core's state and
 // issues a single-use ticket bound to that action, target and state.
 const confirmations = createConfirmations();
-let worker,
+let core,
   win,
   tools,
-  sequence = 0,
   installing = false;
-const pending = new Map();
 // Searching every emulator folder can take longer than a state read.
-const TIMEOUTS = { discover_saves: 30000, select: 15000, select_discovered: 15000 };
+const TIMEOUTS = {
+  state: 5000,
+  discover_saves: 60000,
+  select: 15000,
+  select_discovered: 15000,
+};
 // The core's refusal codes, as sentences for the trainer. Unknown codes stay
 // generic: no path, PIN or token ever travels in an error.
 const CORE_ERRORS = {
@@ -68,27 +92,26 @@ const CORE_ERRORS = {
   INVALID_QUICK_ITEM_ARGUMENTS: "Revisa el objeto y la cantidad.",
   WRITE_CONFIRMATION_REQUIRED: "El cambio ya no está pendiente de confirmar.",
 };
-function request(command, args = {}) {
-  if (!worker || worker.killed || pending.size >= 8)
-    return Promise.reject(
-      new Error("El núcleo del Launcher no responde. Reinicia el Launcher si sigue así."),
-    );
+// `waitReady`: wait for a core that is still starting (internal callers).
+function request(command, args = {}, { waitReady = 0 } = {}) {
   // Once an update install is confirmed, no new local operation may start.
   if (installing && command !== "state")
     return Promise.reject(new Error("Actualización en curso"));
-  const id = ++sequence;
-  return new Promise((resolve, reject) => {
-    const timer = setTimeout(() => {
-      pending.delete(id);
-      reject(
-        new Error(
-          "El núcleo del Launcher está tardando en responder. Vuelve a intentarlo en unos segundos.",
-        ),
-      );
-    }, TIMEOUTS[command] ?? 5000);
-    pending.set(id, { resolve, reject, timer, command });
-    worker.stdin.write(JSON.stringify({ id, command, args }) + "\n");
-  });
+  return core
+    .request(command, args, {
+      timeout: TIMEOUTS[command] ?? 10000,
+      waitReady,
+    })
+    .catch((error) => {
+      // The core's refusal codes become sentences for the trainer; unknown
+      // codes stay generic: no path, PIN or token ever travels in an error.
+      if (/^[A-Z][A-Z_]+$/.test(error.message))
+        throw new Error(
+          CORE_ERRORS[error.message] ||
+            "No se pudo completar la acción en el Launcher. Vuelve a intentarlo.",
+        );
+      throw error;
+    });
 }
 // Only the Launcher's own page (the native tools view) may call the core.
 function authorize(event) {
@@ -116,44 +139,65 @@ app.whenReady().then(() => {
       );
   const args = app.isPackaged ? [] : ["-m", "app.launcher.stdio"];
   args.push("--parser", parser, "--profile", profile);
-  worker = spawn(python, args, {
-    cwd: app.isPackaged ? process.resourcesPath : root,
-    env: rehearsal
-      ? { ...process.env, APPDATA: path.join(profile, "sandbox-appdata") }
-      : process.env,
-    windowsHide: true,
-    stdio: ["pipe", "pipe", "ignore"],
+  launcherLog.write(
+    `Launcher ${app.getVersion()} start · Windows ${os.release()} ${os.arch()}`,
+  );
+  // Supervised: an exited or stuck core is started again by itself (see
+  // core-supervisor.cjs); its stderr goes to the local log, masked.
+  core = createCoreSupervisor({
+    spawn,
+    executable: python,
+    args,
+    options: {
+      cwd: app.isPackaged ? process.resourcesPath : root,
+      env: rehearsal
+        ? { ...process.env, APPDATA: path.join(profile, "sandbox-appdata") }
+        : process.env,
+      windowsHide: true,
+      stdio: ["pipe", "pipe", "pipe"],
+    },
+    log: launcherLog,
   });
-  const rejectPending = () => {
-    for (const task of pending.values()) {
-      clearTimeout(task.timer);
-      task.reject(
-        new Error("El núcleo del Launcher se ha detenido. Reinicia el Launcher."),
-      );
-    }
-    pending.clear();
-  };
-  worker.on("error", rejectPending);
-  worker.on("exit", rejectPending);
-  worker.stdin.on("error", rejectPending);
-  createInterface({ input: worker.stdout }).on("line", (line) => {
-    try {
-      const msg = JSON.parse(line),
-        task = pending.get(msg.id);
-      if (!task) return;
-      pending.delete(msg.id);
-      clearTimeout(task.timer);
-      if (msg.error)
-        task.reject(
-          new Error(
-            CORE_ERRORS[msg.error] ||
-              "No se pudo completar la acción en el Launcher. Vuelve a intentarlo.",
-          ),
-        );
-      else task.resolve(msg.result);
-    } catch {
-      rejectPending();
-    }
+  core.start();
+  ipcMain.handle("launcher:core", (event) => {
+    authorize(event);
+    return core.snapshot();
+  });
+  ipcMain.handle("launcher:core-restart", (event) => {
+    authorize(event);
+    return core.restartNow();
+  });
+  // A diagnosis the trainer can paste to the administration: versions, the
+  // states the hub shows and the last log lines. No token, PIN, save data or
+  // user folder (masked); nothing is sent anywhere by the Launcher itself.
+  ipcMain.handle("launcher:diagnostics", async (event) => {
+    authorize(event);
+    const state = await request("state").catch(() => null);
+    const snap = core.snapshot();
+    const lines = [
+      `PokeApp Launcher ${app.getVersion()} · Windows ${os.release()} ${os.arch()} · ${new Date().toISOString()}`,
+      `Núcleo: ${snap.status}${snap.reason ? ` (${snap.reason})` : ""} · arranques ${snap.starts} · inicio ${snap.startup_seconds ?? "?"} s`,
+      ...snap.exits.map(
+        (e) =>
+          `  salida ${new Date(e.at).toISOString()} código ${e.code} motivo ${e.why}`,
+      ),
+      state
+        ? `Conexión con PokeApp: ${state.cloud_status}${state.error ? ` · ${state.error}` : ""}${state.error_cause ? ` (${state.error_cause})` : ""}`
+        : "Conexión con PokeApp: desconocida (núcleo no disponible)",
+      state
+        ? `Cuenta: ${state.principal ? `vinculada · ${state.auth_status}` : "sin sesión"}`
+        : "Cuenta: desconocida",
+      state
+        ? `Partida: ${state.selected_save ? `elegida · ${state.observation?.game || "?"} · ${state.local_status}` : "ninguna"} · sincronización ${state.cloud_sync ? "automática" : "en pausa"} · pendientes ${state.outbox?.pending ?? 0}`
+        : "Partida: desconocida",
+      "--- launcher.log",
+      ...tail(launcherLog.file, 40),
+      "--- core.log",
+      ...tail(path.join(profile, "logs", "core.log"), 40),
+    ];
+    const text = mask(lines.join("\n"));
+    clipboard.writeText(text);
+    return { copied: true, lines: lines.length };
   });
   ipcMain.handle("launcher:state", (event, revision) => {
     authorize(event);
@@ -445,16 +489,25 @@ app.whenReady().then(() => {
       layout();
     });
   });
+  // Session sharing starts once the web's API and the core's agree. 0.26.6
+  // asked the core once: a core that needed more than 5 s to start (a slow
+  // PC, an antivirus scan) left the web without the Launcher's session for
+  // the whole run. Now each step is retried until both have answered.
   const shareApi = (async () => {
-    try {
-      const config = await (
-        await net.fetch(webAt + "/build-config.json")
-      ).json();
-      const state = await request("state");
-      const api = new URL(config.api_base_url).origin;
-      return api === state.backend_origin ? api : null;
-    } catch {
-      return null;
+    for (let attempt = 0; ; attempt++) {
+      try {
+        const config = await (
+          await net.fetch(webAt + "/build-config.json")
+        ).json();
+        const state = await request("state", {}, { waitReady: 120000 });
+        const api = new URL(config.api_base_url).origin;
+        return api === state.backend_origin ? api : null;
+      } catch {
+        if (installing || attempt >= 40) return null;
+        await new Promise((resolve) =>
+          setTimeout(resolve, Math.min(30000, 2000 * (attempt + 1))),
+        );
+      }
     }
   })();
   const onWebOrigin = () => {
@@ -480,7 +533,11 @@ app.whenReady().then(() => {
       if (!(await shareApi)) return;
       for (let attempt = 0; attempt < 20; attempt++) {
         if (!onWebOrigin()) return;
-        const reply = await request("web_session").catch(() => null);
+        const reply = await request(
+          "web_session",
+          {},
+          { waitReady: 30000 },
+        ).catch(() => null);
         if (reply?.status === "LOGIN_REQUIRED")
           return toWeb("__pokeappLauncherSession", { signed_out: true });
         if (reply?.status === "OK")
@@ -534,13 +591,15 @@ app.whenReady().then(() => {
       const login = pending.get(details.id);
       pending.delete(details.id);
       if (!login || details.statusCode !== 200) return;
-      const state = await request("state").catch(() => null);
+      const state = await request("state", {}, { waitReady: 30000 }).catch(
+        () => null,
+      );
       const linked = state?.principal?.display_name;
       if (
         !linked ||
         linked.toLocaleLowerCase() !== login.trainer.toLocaleLowerCase()
       )
-        await request("login", login).catch(() => {});
+        await request("login", login, { waitReady: 30000 }).catch(() => {});
     });
     webRequest.onErrorOccurred(filter, (details) => pending.delete(details.id));
   });
@@ -792,16 +851,7 @@ app.whenReady().then(() => {
   void checkFeed();
   const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
   // The core must be gone before the installer replaces its files.
-  const stopCore = () =>
-    new Promise((resolve) => {
-      if (!worker || worker.exitCode !== null) return resolve();
-      const child = worker;
-      child.once("exit", () => resolve());
-      child.stdin.end();
-      setTimeout(() => {
-        if (child.exitCode === null) child.kill();
-      }, 15000).unref();
-    });
+  const stopCore = () => core.stop({ killAfter: 15000 });
   // Download (once) → verify → wait for critical work → stop the core →
   // run the verified installer silently → it restarts the Launcher.
   const applyUpdate = async () => {
@@ -828,7 +878,7 @@ app.whenReady().then(() => {
       // Sync settles by itself: wait for it. Other work defers the install.
       for (let wait = 0; ; wait++) {
         const blocker = updates.installBlocker(
-          await request("state").catch(() => null),
+          await request("state", {}, { waitReady: 15000 }).catch(() => null),
         );
         if (!blocker) break;
         if (blocker !== "SYNC_IN_PROGRESS" || wait >= 60) {
@@ -951,12 +1001,10 @@ app.whenReady().then(() => {
   });
 });
 app.on("window-all-closed", () => app.quit());
+// The core gets its pipe closed: it finishes a running physical step, then
+// exits within seconds (a core that is still starting is ended at once). A
+// Launcher opened meanwhile waits for it instead of failing.
 app.on("before-quit", () => {
-  if (worker) {
-    worker.stdin.end();
-    const child = worker;
-    setTimeout(() => {
-      if (child.exitCode === null) child.kill();
-    }, 20000).unref();
-  }
+  launcherLog.write("Launcher closing");
+  void core?.stop();
 });

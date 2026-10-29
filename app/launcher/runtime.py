@@ -2,6 +2,7 @@
 
 import hashlib
 import json
+import logging
 import os
 import threading
 import time
@@ -16,6 +17,7 @@ from app.launcher.backend import (
     LauncherSession,
 )
 from app.launcher.core import LauncherCore
+from app.launcher.diagnostics import failure
 from app.launcher.emulator_qualification import qualification_status
 from app.launcher.journal import LocalConflict
 # Imported here, not inside the quick step: a module missing from the packaged
@@ -125,9 +127,12 @@ class LauncherRuntime:
         token_store=None,
         start=True,
         discover=False,
+        log=None,
     ):
         # Emulator discovery at start is for the real Launcher only (stdio).
         self.discover_on_start = discover
+        self.log = log or logging.getLogger("pokeapp.core")
+        self._logged_failure = None
         self.core = LauncherCore(profile, inspector)
         self.client = client or BackendClient(PRODUCTION_API)
         self.session = LauncherSession(self.client)
@@ -185,6 +190,9 @@ class LauncherRuntime:
             "outbox": {"pending": 0, "paused": 0},
             "error": None,
             "error_detail": None,
+            # The kind of network failure behind BACKEND_UNAVAILABLE
+            # (TLS_UNTRUSTED, ConnectTimeout…), never its text.
+            "error_cause": None,
             "write_error": None,
             "transfer_result": None,
             "quick_items": None,
@@ -987,6 +995,7 @@ class LauncherRuntime:
             last_online=time.time(),
             error=None,
             error_detail=None,
+            error_cause=None,
             **({"last_synced": time.time()} if accepted else {}),
         )
         self.next_cloud_refresh = 0  # wallet, robberies and receipts next turn
@@ -1158,6 +1167,7 @@ class LauncherRuntime:
             last_online=time.time(),
             error=None,
             error_detail=None,
+            error_cause=None,
             **({"last_synced": time.time()} if accepted else {}),
         )
 
@@ -1278,6 +1288,7 @@ class LauncherRuntime:
                             cloud_sync=False,
                             error=None,
                             error_detail=None,
+                            error_cause=None,
                         )
                     elif name == "login":
                         self._patch(
@@ -1343,21 +1354,39 @@ class LauncherRuntime:
                     self._patch(auth_status="LOGIN_REQUIRED")
                 # One slow or failed answer is not "offline": two in a row are.
                 offline = code == "BACKEND_UNAVAILABLE" and failures >= 2
+                cause = getattr(exc, "cause", None)
+                self._note_failure(code, getattr(exc, "detail", None), cause)
                 self._patch(
                     error=code,
                     error_detail=getattr(exc, "detail", None),
+                    error_cause=cause,
                     **({"cloud_status": "OFFLINE"} if offline else {}),
                 )
-            except Exception:  # noqa: BLE001 - isolate cloud/storage failures from local browsing
+            except Exception as exc:  # noqa: BLE001 - isolate cloud/storage failures from local browsing
                 failures += 1
                 next_attempt = time.monotonic() + 60
+                self._note_failure("SYNC_UNAVAILABLE", None, failure(exc))
                 self._patch(
                     error="SYNC_UNAVAILABLE",
+                    error_cause=None,
                     **({"cloud_status": "OFFLINE"} if failures >= 2 else {}),
                 )
 
+    def _note_failure(self, code, detail, cause):
+        """One log line per new kind of cloud failure, not one every retry."""
+        key = (code, detail, cause)
+        if key != self._logged_failure:
+            self._logged_failure = key
+            self.log.warning("CLOUD %s detail=%s cause=%s", code, detail, cause)
+
     def close(self):
+        """The pipe closed (the window closed or an update stops the core).
+        A physical write or recovery step finishes first: the local loop owns
+        them. The cloud step only talks to the network: an upload cut here is
+        reconciled by its receipt at the next start, so the profile is
+        released within seconds instead of after the slowest request."""
         self.stop.set()
-        for thread in self.threads:
-            thread.join(timeout=90)
-        self.client.close()
+        for thread, wait in zip(self.threads, (90, 3)):
+            thread.join(timeout=wait)
+        if not any(thread.is_alive() for thread in self.threads):
+            self.client.close()

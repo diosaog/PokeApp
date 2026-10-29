@@ -85,6 +85,7 @@ module.exports = {
     "updater.cjs",
     "webview.cjs",
     "confirmations.cjs",
+    "core-supervisor.cjs",
   ],
   extraResources: [
     {

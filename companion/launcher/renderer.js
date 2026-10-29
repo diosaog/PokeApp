@@ -124,6 +124,10 @@ const detailText = {
   UNSUPPORTED_GAME: "PokeApp no admite este juego.",
 };
 const gameLabel = (code) => `Pokémon ${gameNames[code] || code || "?"}`;
+// The core reached PokeApp but could not verify its certificate: something on
+// this PC (an antivirus that scans HTTPS, a proxy) is intercepting it.
+const tlsText =
+  "No se puede verificar la conexión segura con PokeApp: un antivirus o un proxy de este equipo la está interceptando.";
 // The active season's relation to the selected save, in one line.
 function seasonLine(state) {
   const data = state.cloud?.data;
@@ -182,9 +186,10 @@ function syncStatus(state) {
     return [
       "offline",
       "Sin conexión",
-      pending
-        ? `${pending} cambio(s) en cola: se enviarán solos al volver la conexión.`
-        : "Se sincronizará sola al volver la conexión.",
+      (state.error_cause === "TLS_UNTRUSTED" ? `${tlsText} ` : "") +
+        (pending
+          ? `${pending} cambio(s) en cola: se enviarán solos al volver la conexión.`
+          : "Se sincronizará sola al volver la conexión."),
     ];
   if (state.error === "SAVE_READBACK_PENDING")
     return ["busy", "Comprobando", "PokeApp está comprobando tu partida…"];
@@ -455,12 +460,22 @@ function renderSaveCard(state, tone, label, detail) {
   );
 }
 
-// Saves y Launcher · Launcher: version, account, automatic sync.
+// Saves y Launcher · Launcher: version, core, connection, account, sync.
 function renderLauncher(state, label) {
+  text(
+    "launcher-connection",
+    state.cloud_status === "ONLINE"
+      ? "Conectado"
+      : !state.last_online && !state.error
+        ? "Conectando…"
+        : state.error_cause === "TLS_UNTRUSTED"
+          ? `Sin conexión · ${tlsText}`
+          : "Sin conexión · lo reintentamos solo",
+  );
   text(
     "launcher-account",
     state.principal
-      ? `${state.principal.display_name} · ${state.auth_status === "VERIFIED" ? "verificada" : "pendiente de verificar"}`
+      ? `${state.principal.display_name} · ${state.auth_status === "VERIFIED" ? "verificada" : "guardada en este equipo, pendiente de verificar"}`
       : "Sin vincular: inicia sesión en PokeApp",
   );
   text(
@@ -1797,11 +1812,57 @@ $("update-later").onclick = async () => {
 };
 $("update-open").onclick = () => present("update", { check: false });
 
+// The local core is one thing, the connection with PokeApp another and the
+// account a third: a core that is starting or restarting never shows the
+// trainer as signed out or offline. Its own status comes from main.
+const coreLabels = {
+  STARTING: "● Iniciando…",
+  WAITING_PREVIOUS: "● Cerrando la sesión anterior…",
+  RESTARTING: "● Reconectando con el núcleo…",
+  FAILED: "● Núcleo local detenido",
+  STOPPED: "● Cerrando…",
+};
+function renderCore(core, state) {
+  const ready = core?.status === "READY";
+  text(
+    "launcher-core",
+    !core
+      ? "Comprobando…"
+      : ready
+        ? core.stalled
+          ? core.message
+          : "Disponible"
+        : core.message +
+          (core.next_attempt_in != null
+            ? ` Próximo intento en ${core.next_attempt_in} s.`
+            : ""),
+  );
+  $("core-restart").hidden = !["RESTARTING", "FAILED"].includes(core?.status);
+  // Only while it cannot answer: the header and the message say why, and the
+  // last account and save read stay on screen.
+  text("message", ready && !core.stalled ? "" : core?.message || "");
+  if (state || ready) return;
+  text("connection", coreLabels[core?.status] || "● Comprobando…");
+  if (lastState?.principal)
+    text(
+      "identity",
+      `${lastState.principal.display_name} · Cuenta guardada en este equipo. El núcleo local se está recuperando; no hace falta volver a iniciar sesión.`,
+    );
+  else if (!lastState) text("identity", "Comprobando tu cuenta…");
+}
 async function poll() {
   if (polling) return;
   polling = true;
   try {
-    const state = await window.launcher.state(revision);
+    const [state, core] = await Promise.all([
+      window.launcher.state(revision).catch(() => null),
+      (window.launcher.core
+        ? window.launcher.core()
+        : Promise.resolve({ status: "READY" })
+      ).catch(() => null),
+    ]);
+    renderCore(core, state);
+    if (!state) return;
     lastState = state;
     render(state);
     renderQuick(state);
@@ -1811,16 +1872,22 @@ async function poll() {
     if ($("selector-dialog").open) renderSelector(state);
     if ($("restore-dialog").open) updateRestore();
     autoChoose(state);
-    void renderUpdate();
-  } catch {
-    text(
-      "message",
-      "Núcleo local no disponible. La lectura ya cargada sigue accesible.",
-    );
   } finally {
     polling = false;
+    // Update notices never depend on the core.
+    void renderUpdate();
   }
 }
+$("core-restart").onclick = () => action(() => window.launcher.coreRestart());
+$("copy-diagnostics").onclick = async () => {
+  const result = await action(() => window.launcher.copyDiagnostics());
+  if (result?.copied)
+    toast(
+      "Diagnóstico copiado. Pégalo en un mensaje a la administración: no incluye tu PIN, tus claves ni tu partida.",
+      "ok",
+      10000,
+    );
+};
 slots("party", Array(6).fill(null), "Equipo");
 void poll();
 setInterval(poll, 1000);

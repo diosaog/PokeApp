@@ -149,8 +149,23 @@ const base = () => ({
   },
 });
 const state = () => ({ ...base(), ...overrides });
+// The supervised core's own status; while it is not READY, state() fails
+// like the real IPC does.
+let core = { status: "READY", message: "", stalled: false };
 contextBridge.exposeInMainWorld("launcher", {
-  state: async () => state(),
+  state: async () => {
+    if (core.status !== "READY") throw new Error(core.message);
+    return state();
+  },
+  core: async () => core,
+  coreRestart: async () => (calls.push(["coreRestart"]), core),
+  copyDiagnostics: async () => (
+    calls.push(["copyDiagnostics"]),
+    { copied: true }
+  ),
+  __core: (snapshot) => {
+    core = { stalled: false, ...snapshot };
+  },
   quickItems: async () => ({ status: "QUEUED" }),
   addQuickItem: async (...args) => (calls.push(args), { status: "QUEUED" }),
   transfer: async (...args) => (

@@ -143,6 +143,27 @@ const script = `(async () => {
   check(/verificación de firma/.test(uq("update-message").textContent) && uq("update-go").textContent.trim() === "Reintentar", "a forged update is refused and explained");
   window.launcher.__setUpdate({ status: "UP_TO_DATE", current: "0.27.0", channel: "private" }); await sleep(1300);
   check(/Estás utilizando la última versión/.test(uq("update-message").textContent) && uq("update-go").hidden, "no update: «Estás utilizando la última versión»");
+  shut(ud);
+  // Friend's Launcher: a core that is restarting is not «Sin conexión» and
+  // never looks like a signed-out account; it recovers without a restart.
+  const textOf = (id) => document.getElementById(id).textContent;
+  window.launcher.__set({ principal: { display_name: "Amigo", trainer_id: "t" }, auth_status: "VERIFIED", cloud_status: "ONLINE", last_online: Date.now() / 1000, error: null, error_cause: null }); await sleep(1300);
+  check(/● Online/.test(textOf("connection")) && textOf("launcher-core") === "Disponible" && /Amigo · Cuenta verificada/.test(textOf("identity")), "ready core: core, connection and account each on their own line");
+  window.launcher.__core({ status: "RESTARTING", reason: "LAUNCHER_ALREADY_RUNNING", message: "Otra ventana de PokeApp Launcher, o una sesión anterior que todavía se está cerrando, está usando tus datos locales. Lo reintentamos solo.", next_attempt_in: 12 }); await sleep(1300);
+  check(/Reconectando con el núcleo/.test(textOf("connection")) && !/Sin conexión/.test(textOf("connection")), "a restarting core is not shown as «Sin conexión»");
+  check(/Amigo · Cuenta guardada en este equipo/.test(textOf("identity")) && /no hace falta volver a iniciar sesión/.test(textOf("identity")) && document.getElementById("login").hidden, "the account stays; no new sign-in is asked");
+  check(/sesión anterior/.test(textOf("launcher-core")) && /Próximo intento en 12 s/.test(textOf("launcher-core")) && /sesión anterior/.test(textOf("message")) && !document.getElementById("core-restart").hidden, "the real reason, the next attempt and «Reintentar ahora»");
+  document.getElementById("core-restart").click(); await sleep(200);
+  check(JSON.stringify(window.launcher.__calls().at(-1)) === JSON.stringify(["coreRestart"]), "«Reintentar ahora» asks main to start the core at once");
+  window.launcher.__core({ status: "READY", message: "" }); await sleep(1300);
+  check(/● Online/.test(textOf("connection")) && textOf("launcher-core") === "Disponible" && document.getElementById("core-restart").hidden && textOf("message") === "" && /Amigo · Cuenta verificada/.test(textOf("identity")), "back without restarting the Launcher: same account, online, message cleared");
+  window.launcher.__core({ status: "READY", message: "El núcleo del Launcher está terminando una operación en tu partida. Espera unos segundos y no abras el emulador.", stalled: true }); await sleep(1300);
+  check(/terminando una operación en tu partida/.test(textOf("launcher-core")) && /no abras el emulador/.test(textOf("message")), "a core finishing a save operation is waited for and said so");
+  window.launcher.__core({ status: "READY", message: "" });
+  window.launcher.__set({ selected_save: "C:/fixture/main", cloud_sync: true, cloud_status: "OFFLINE", error: "BACKEND_UNAVAILABLE", error_cause: "TLS_UNTRUSTED", outbox: { pending: 0 } }); await sleep(1300);
+  check(/antivirus o un proxy/.test(textOf("launcher-connection")) && /antivirus o un proxy/.test(textOf("sync-detail")), "an intercepted secure connection is named, not a generic offline");
+  document.getElementById("copy-diagnostics").click(); await sleep(300);
+  check(JSON.stringify(window.launcher.__calls().at(-1)) === JSON.stringify(["copyDiagnostics"]) && /Diagnóstico copiado/.test(textOf("toasts")), "«Copiar diagnóstico» copies a safe summary");
   return out;
 })()`;
 app.whenReady().then(async () => {

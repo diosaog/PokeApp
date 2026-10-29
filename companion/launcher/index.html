@@ -15,7 +15,7 @@
       <button id="panel-back" type="button">← Volver a PokeApp</button>
       <strong id="panel-title" tabindex="-1">POKEAPP · Launcher</strong
       ><span id="launcher-version" class="muted"></span
-      ><span id="connection" role="status">● Sin conexión</span>
+      ><span id="connection" role="status">● Iniciando…</span>
     </header>
     <p id="offline-note" role="status" hidden>
       PokeApp no responde ahora mismo (sin conexión o servidor no disponible).
@@ -185,25 +185,38 @@
                 <dd id="launcher-version-detail">—</dd>
               </div>
               <div>
+                <dt>Núcleo local</dt>
+                <dd id="launcher-core">Iniciando…</dd>
+              </div>
+              <div>
+                <dt>Conexión con PokeApp</dt>
+                <dd id="launcher-connection">Comprobando…</dd>
+              </div>
+              <div>
                 <dt>Cuenta</dt>
-                <dd id="launcher-account">Sin vincular</dd>
+                <dd id="launcher-account">Comprobando…</dd>
               </div>
               <div>
                 <dt>Sincronización</dt>
-                <dd id="launcher-sync">Se activa al iniciar sesión</dd>
+                <dd id="launcher-sync">Comprobando…</dd>
               </div>
             </dl>
             <div class="toolbar">
               <button id="check-update" type="button" class="primary">
                 Buscar actualizaciones</button
+              ><button id="core-restart" type="button" hidden>
+                Reintentar ahora</button
               ><button id="retry">Reintentar conexión</button
-              ><button id="logout">Cerrar sesión</button>
+              ><button id="logout" hidden>Cerrar sesión</button
+              ><button id="copy-diagnostics" type="button">
+                Copiar diagnóstico
+              </button>
             </div>
           </article>
           <article aria-labelledby="account-title">
             <h2 id="account-title">Cuenta de PokeApp</h2>
-            <p id="identity">Inicia sesión para conectar tu Launcher.</p>
-            <form id="login">
+            <p id="identity">Comprobando tu cuenta…</p>
+            <form id="login" hidden>
               <label
                 >Entrenador<input
                   name="trainer"

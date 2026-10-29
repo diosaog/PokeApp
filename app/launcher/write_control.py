@@ -242,9 +242,14 @@ class LocalWriteController:
         with self._operation(recovery=True):
             if self.engine is None:
                 raise WriteSafetyError("LOCAL_BACKUPS_UNAVAILABLE")
+            # Re-reading and hashing every copy can take seconds: done outside
+            # the lock that the 1 s state poll needs (the operation lease
+            # above already keeps writes out meanwhile).
+            selected = self.selected()
+            backups = self.engine.backups_for(selected)
             with self._lock:
-                self._backups = self.engine.backups_for(self.selected())
-                self._backup_selection = self.selected()
+                self._backups = backups
+                self._backup_selection = selected
                 self._backup_message = None
         return self.state()
 

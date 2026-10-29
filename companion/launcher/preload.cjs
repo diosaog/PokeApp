@@ -1,6 +1,11 @@
 const { contextBridge, ipcRenderer } = require("electron");
 contextBridge.exposeInMainWorld("launcher", {
   state: (revision) => ipcRenderer.invoke("launcher:state", revision),
+  // The local core's own status (starting, restarting, why), apart from the
+  // account and the connection with PokeApp.
+  core: () => ipcRenderer.invoke("launcher:core"),
+  coreRestart: () => ipcRenderer.invoke("launcher:core-restart"),
+  copyDiagnostics: () => ipcRenderer.invoke("launcher:diagnostics"),
   chooseSave: () => ipcRenderer.invoke("launcher:select"),
   login: (trainer, pin) => ipcRenderer.invoke("launcher:login", trainer, pin),
   logout: () => ipcRenderer.invoke("launcher:logout"),

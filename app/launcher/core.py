@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import os
+import time
 from pathlib import Path
 
 from app.launcher.backup import BackupService
@@ -11,13 +12,31 @@ from app.save_parser.adapter import SaveInspector
 
 
 class LauncherLease:
-    """OS-released single-instance lock for one local profile; no stale PID guessing."""
+    """OS-released single-instance lock for one local profile; no stale PID guessing.
 
-    def __init__(self, directory: Path):
+    `wait`: a previous core still finishing (its window just closed while a
+    request or a physical step was running) keeps the lock for a while; the
+    new core waits for it instead of failing. `on_wait` is told once."""
+
+    def __init__(self, directory: Path, *, wait=0.0, on_wait=None, sleep=time.sleep):
         self.path = local_directory(directory, create=True) / "launcher.lock"
         self.stream = None
+        self.wait, self.on_wait, self._sleep = wait, on_wait, sleep
 
     def __enter__(self):
+        deadline = time.monotonic() + self.wait
+        while True:
+            try:
+                return self._acquire()
+            except LocalConflict as exc:
+                if str(exc) != "LAUNCHER_ALREADY_RUNNING" or time.monotonic() >= deadline:
+                    raise
+                if self.on_wait is not None:
+                    self.on_wait()
+                    self.on_wait = None
+                self._sleep(0.25)
+
+    def _acquire(self):
         if self.path.is_symlink():
             raise LocalConflict("INVALID_PROFILE_LOCK")
         self.stream = self.path.open("a+b")
@@ -50,7 +69,18 @@ class LauncherCore:
     def __init__(self, profile: Path, inspector: SaveInspector):
         self.profile = local_directory(profile, create=True)
         self.config_path = self.profile / "config.json"
-        self.config = LauncherConfig.load(self.config_path)
+        self.config_reset = False
+        try:
+            self.config = LauncherConfig.load(self.config_path)
+        except ValueError:
+            # An unreadable config (a cut write, another version's fields) used
+            # to stop the core at every start. It only remembers the chosen save,
+            # which discovery finds again; the file is kept aside, never deleted.
+            self.config_path.replace(
+                self.profile / f"config.invalid-{time.strftime('%Y%m%d-%H%M%S')}.json"
+            )
+            self.config = LauncherConfig()
+            self.config_reset = True
         self.journal = LocalJournal(self.profile / "observations.sqlite3")
         self.queue = LocalOperationQueue(self.journal)
         self.sync = SaveSyncService(inspector, self.journal)

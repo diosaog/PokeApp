@@ -3,23 +3,41 @@
 from __future__ import annotations
 
 import re
+import ssl
 import time
 from dataclasses import dataclass, field
 
+import certifi
 import httpx
 from pydantic import Field, ValidationError
 
 from app.launcher.config import backend_origin
+from app.launcher.diagnostics import failure
 from app.save_parser.models import WireModel
 
 
 class BackendError(Exception):
     """`str(error)` is the code the runtime acts on; `detail` is the API's own
-    code (e.g. SAVE_TRAINER_MISMATCH), kept so the trainer sees the real cause."""
+    code (e.g. SAVE_TRAINER_MISMATCH), kept so the trainer sees the real cause.
+    `cause` is the kind of network failure (TLS_UNTRUSTED, ConnectTimeout…)."""
 
-    def __init__(self, code, *, status=None, detail=None):
+    def __init__(self, code, *, status=None, detail=None, cause=None):
         super().__init__(code)
-        self.status, self.detail = status, detail
+        self.status, self.detail, self.cause = status, detail, cause
+
+
+def tls_context():
+    """The bundled public roots plus the Windows certificate store, the same
+    trust the PokeApp web gets from Chromium. An antivirus or proxy that scans
+    HTTPS installs its own root there; with the bundle alone the Launcher was
+    offline on such PCs while the web stayed signed in. Hostname and chain
+    checks are unchanged."""
+    context = ssl.create_default_context(cafile=certifi.where())
+    try:
+        context.load_default_certs(ssl.Purpose.SERVER_AUTH)
+    except (OSError, ssl.SSLError):
+        pass  # an unreadable system store still leaves the public roots
+    return context
 
 
 # Only these end the Launcher's session. A 403 on one resource (a season this
@@ -89,6 +107,7 @@ class BackendClient:
             follow_redirects=False,
             trust_env=False,
             transport=transport,
+            verify=tls_context() if transport is None else True,
         )
 
     def close(self):
@@ -115,8 +134,8 @@ class BackendClient:
             if len(response.content) > 65536:
                 raise BackendError("BACKEND_UNAVAILABLE")
             return response.json()
-        except (httpx.HTTPError, ValueError):
-            raise BackendError("BACKEND_UNAVAILABLE") from None
+        except (httpx.HTTPError, ValueError) as exc:
+            raise BackendError("BACKEND_UNAVAILABLE", cause=failure(exc)) from None
 
     def _request(self, method, path, model, *, body=None, token=None):
         try:
@@ -132,8 +151,8 @@ class BackendClient:
             if len(response.content) > 65536:
                 raise BackendError("BACKEND_UNAVAILABLE")
             return model.model_validate_json(response.content)
-        except (httpx.HTTPError, ValidationError, ValueError):
-            raise BackendError("BACKEND_UNAVAILABLE") from None
+        except (httpx.HTTPError, ValidationError, ValueError) as exc:
+            raise BackendError("BACKEND_UNAVAILABLE", cause=failure(exc)) from None
 
     def login(self, trainer_identifier: str, pin: str) -> LoginResponse:
         return self._request(
@@ -175,8 +194,8 @@ class BackendClient:
             if not isinstance(data, dict):
                 raise TypeError("invalid_response")
             return data
-        except (httpx.HTTPError, ValueError, TypeError):
-            raise BackendError("BACKEND_UNAVAILABLE") from None
+        except (httpx.HTTPError, ValueError, TypeError) as exc:
+            raise BackendError("BACKEND_UNAVAILABLE", cause=failure(exc)) from None
 
 
 @dataclass
@@ -205,17 +224,24 @@ class LauncherSession:
         if not self._tokens or not self._principal:
             raise BackendError("LOGIN_REQUIRED")
         try:
+            refreshed_now = False
             if (
                 self._tokens.expires_at is None
                 or self._tokens.expires_at <= time.time() + min_validity
             ):
-                if not self._tokens.refresh_token:
-                    raise BackendError("LOGIN_REQUIRED")
-                refreshed = self.client.refresh(self._tokens.refresh_token)
-                if refreshed.user_id != self._tokens.user_id:
-                    raise BackendError("SESSION_REJECTED")
-                self._tokens = refreshed
-            principal = self.client.me(self._tokens.access_token)
+                self._refresh()
+                refreshed_now = True
+            try:
+                principal = self.client.me(self._tokens.access_token)
+            except BackendError as exc:
+                # An access token the server already considers expired (a PC
+                # clock behind the server's, a token ended early) is renewed
+                # once before the session counts as closed: only a refused
+                # refresh signs the Launcher out.
+                if str(exc) != "SESSION_REJECTED" or refreshed_now:
+                    raise
+                self._refresh()
+                principal = self.client.me(self._tokens.access_token)
             if (
                 not principal.globally_enabled
                 or principal.trainer_id != self._principal.trainer_id
@@ -228,6 +254,14 @@ class LauncherSession:
             if str(exc) in SESSION_ENDED:
                 self.logout()
             raise
+
+    def _refresh(self):
+        if not self._tokens.refresh_token:
+            raise BackendError("LOGIN_REQUIRED")
+        refreshed = self.client.refresh(self._tokens.refresh_token)
+        if refreshed.user_id != self._tokens.user_id:
+            raise BackendError("SESSION_REJECTED")
+        self._tokens = refreshed
 
     def request(self, method, path, *, body=None, missing=False):
         if not self._tokens or not self._principal:
