@@ -8,7 +8,7 @@ from uuid import uuid4
 from fastapi.testclient import TestClient
 from app.api.dependencies import ApiContainer
 from app.api.main import create_app
-from app.api.matchday_models import ResultsBody, CorrectDayBody
+from app.api.matchday_models import ResultsBody, CorrectDayBody, RankingReview
 from app.application.matchdays import plan_close
 from app.application.daily_ranking import LEGACY_RULE, RankingDecisionRequired
 from app.auth.errors import InvalidSessionError
@@ -76,6 +76,30 @@ class MatchdayApiTests(unittest.TestCase):
     def test_no_client_authority_or_plan(self):
         for name in ('actor_trainer_id','is_admin','plan','input_hash','standings','reward','current_matchday_id'):
             self.assertEqual(self.post(body={'expected_revision':0,name:TRAINER_ID}).status_code,422)
+
+    def test_single_day_last_prize_tie_returns_review_409_for_admin_and_participant(self):
+        from tools.validate_phase073_league import fixture
+
+        _, context, ids = fixture()
+        bottom = ids[3:]
+        cycle = {(bottom[0], bottom[1]): bottom[0], (bottom[1], bottom[2]): bottom[1],
+                 (bottom[0], bottom[2]): bottom[2]}
+        for match in context['inputs']['matches']:
+            pair = (match['player_a_id'], match['player_b_id'])
+            if pair in cycle:
+                match['winner_id'] = cycle[pair]
+        with self.assertRaises(RankingDecisionRequired) as caught:
+            plan_close(context)
+        review = RankingReview.model_validate(caught.exception.review)
+        self.assertEqual(review.groups[-1].consequences, ['single_league_prize'])
+        self.repo.failure = caught.exception
+        for base in (self.base, f'/v1/seasons/{SID}/matchdays/{DID}'):
+            with self.subTest(base=base):
+                response = self.client.post(base+'/close', json={'expected_results_revision':0}, headers=self.headers)
+                self.assertEqual(response.status_code,409,response.text)
+                detail = response.json()['detail']
+                self.assertEqual(detail['code'],'RANKING_TIE_UNRESOLVED')
+                self.assertEqual(detail['ranking']['groups'][-1]['consequences'], ['single_league_prize'])
 
     def test_strict_revision(self):
         for value in (True,-1,'1',1.2,None):

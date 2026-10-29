@@ -22,6 +22,7 @@ function rankingReview(value: unknown): Model<"RankingReview"> | undefined {
     "podium",
     "movement",
     "last_b_reward",
+    "single_league_prize",
   ]);
   const clean: Model<"TieGroup">[] = [];
   for (const group of groups) {

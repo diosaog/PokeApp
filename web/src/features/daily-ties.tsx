@@ -16,6 +16,7 @@ const consequenceLabels: Record<
   podium: "podio",
   movement: "ascensos o descensos",
   last_b_reward: "robo del último de B",
+  single_league_prize: "premio extra de Blindar o Robar Pokémon",
 };
 
 // One league has no division letter: its groups are simply «Liga». Inside a

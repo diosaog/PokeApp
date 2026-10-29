@@ -120,7 +120,7 @@ class TieGroup(BaseModel):
     wins: Annotated[int, Field(ge=0)]
     adjusted_deaths: Annotated[int, Field(ge=0)]
     consequences: list[
-        Literal["points", "coins", "podium", "movement", "last_b_reward"]
+        Literal["points", "coins", "podium", "movement", "last_b_reward", "single_league_prize"]
     ]
 
 

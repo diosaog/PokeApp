@@ -5561,7 +5561,12 @@ export interface components {
       adjusted_deaths: number;
       /** Consequences */
       consequences: (
-        "points" | "coins" | "podium" | "movement" | "last_b_reward"
+        | "points"
+        | "coins"
+        | "podium"
+        | "movement"
+        | "last_b_reward"
+        | "single_league_prize"
       )[];
     };
     /** TieOrder */

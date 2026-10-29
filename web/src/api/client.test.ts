@@ -13,6 +13,41 @@ const response = (data: unknown, status = 200) =>
   });
 afterEach(() => vi.unstubAllGlobals());
 describe("API transport", () => {
+  it("preserves the single-day prize tie review from a 409 response", async () => {
+    const ranking = {
+      input_hash: "a".repeat(64),
+      groups: [
+        {
+          division: "A",
+          player_ids: ["p4", "p5"],
+          position: 4,
+          position_end: 5,
+          wins: 1,
+          adjusted_deaths: 0,
+          consequences: ["single_league_prize"],
+        },
+      ],
+    };
+    vi.stubGlobal(
+      "fetch",
+      vi
+        .fn()
+        .mockResolvedValue(
+          response(
+            { detail: { code: "RANKING_TIE_UNRESOLVED", ranking } },
+            409,
+          ),
+        ),
+    );
+    const client = new ApiClient("https://api.example");
+    await expect(
+      client.command("/close", { expected_results_revision: 1 }, "close-key"),
+    ).rejects.toMatchObject({
+      status: 409,
+      code: "RANKING_TIE_UNRESOLVED",
+      ranking,
+    });
+  });
   it("ends a stalled read with a visible timeout and does not repeat it", async () => {
     const controller = new AbortController();
     vi.spyOn(AbortSignal, "timeout").mockReturnValue(controller.signal);

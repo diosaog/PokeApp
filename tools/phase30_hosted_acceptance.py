@@ -62,7 +62,8 @@ INSTALLERS = {
 }
 EXPECTED = {
     "shop_delivery_league": {
-        "routes": 121,
+        # 9222cd4 removed the parallel 072 refund route: reuse audited 062.
+        "routes": 120,
         "division_required": ["A"],
         "incidents": True,
         "feed": "feed",
