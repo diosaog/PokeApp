@@ -82,18 +82,10 @@
               <button id="discover-saves">Buscar partidas en un emulador</button
               ><button id="select-save">Elegir archivo…</button>
             </div>
-            <p class="muted">
-              Buscar revisa Lime3DS, Azahar y Citra (instalados, portables o
-              con carpeta personalizada) sin abrir ni modificar tus partidas.
-              Una partida nueva nunca sustituye a la activa sin que tú lo
-              elijas.
-            </p>
           </article>
           <article id="write-article" aria-labelledby="write-title">
             <h2 id="write-title">Cambios en tu partida</h2>
-            <p id="write-state" role="status">
-              No hay cambios autorizados pendientes.
-            </p>
+            <p id="write-state" role="status">No hay cambios pendientes.</p>
             <p id="write-description"></p>
             <div id="write-confirmation" hidden>
               <button id="confirm-write" disabled>
@@ -110,18 +102,11 @@
           <h2 id="transfer-title" tabindex="-1">Robos y entregas</h2>
           <p id="transfer-summary" role="status">No hay robos en curso.</p>
           <div id="transfer-list"></div>
-          <p class="muted">
-            Solo se admiten robos entre partidas del mismo juego con el Pokémon
-            en las Cajas 1–7. Los Pokémon del equipo y los cruces entre juegos
-            aún no están disponibles. Aplicar tu parte no completa el robo:
-            PokeApp tiene que verificar las dos partidas.
-          </p>
+          <p class="muted">Mismo juego, Pokémon en una caja.</p>
         </article>
         <article id="quick-article" aria-labelledby="quick-title">
           <h2 id="quick-title" tabindex="-1">Objetos ∞</h2>
-          <p id="quick-state" role="status">
-            Selecciona tu partida para ver tus objetos.
-          </p>
+          <p id="quick-state" role="status"></p>
           <div class="quick-item" data-item="rare_candy">
             <img src="assets/items/50.png" alt="" width="32" height="32" />
             <span class="quick-name">Caramelo Raro</span>
@@ -170,13 +155,6 @@
             <span class="quick-error" role="status"></span>
           </div>
           <button id="quick-refresh">Volver a leer las cantidades</button>
-          <p class="muted">
-            Se añaden a la bolsa de tu partida activa, no a un Pokémon. Al
-            pulsar «Añadir a la bolsa» el Launcher comprueba que el emulador
-            está cerrado y el archivo libre, guarda una copia verificada,
-            aplica el cambio y vuelve a leer la partida antes de darlo por
-            hecho.
-          </p>
         </article>
         <article id="team-article" aria-labelledby="team-title">
           <h2 id="team-title">Equipo</h2>
@@ -186,12 +164,7 @@
       <section id="backups-view" hidden>
         <article aria-labelledby="backups-title">
           <h2 id="backups-title" tabindex="-1">Copias de seguridad</h2>
-          <p>
-            Copias completas de tu partida, guardadas en este equipo y
-            verificadas por su huella. PokeApp conserva la copia original de
-            cada cambio y una copia diaria durante 30 días. Guardar una copia no
-            modifica la partida activa ni necesita conexión.
-          </p>
+          <p class="muted">Copia original de cada cambio y una diaria (30 días).</p>
           <div class="toolbar">
             <button id="refresh-backups">Actualizar lista</button
             ><button id="export-save" disabled>
@@ -200,11 +173,6 @@
           </div>
           <p id="backup-notice" role="status"></p>
           <div id="backup-list" class="backup-list"></div>
-          <p class="muted">
-            Si hay una recuperación pendiente, no abras el emulador. Restaurar
-            solo aparece en las copias que este Launcher puede devolver con
-            seguridad; siempre puedes exportar cualquier copia verificada.
-          </p>
         </article>
       </section>
       <section id="cloud-view" hidden>
@@ -235,12 +203,6 @@
           <article aria-labelledby="account-title">
             <h2 id="account-title">Cuenta de PokeApp</h2>
             <p id="identity">Inicia sesión para conectar tu Launcher.</p>
-            <p class="muted">
-              Normalmente no hace falta: al iniciar sesión en PokeApp, este
-              Launcher se conecta solo. La sesión se guarda cifrada en este
-              equipo; el PIN nunca se guarda. Cerrar sesión detiene la
-              sincronización.
-            </p>
             <form id="login">
               <label
                 >Entrenador<input

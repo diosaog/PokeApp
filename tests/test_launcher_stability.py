@@ -305,7 +305,8 @@ class NoFreezeUntilRestartTests(Harness):
         runtime.watch = None  # as after a write that ended without a verified apply
         runtime._local_step()
         self.assertIsNotNone(runtime.watch)
-        self.assertEqual(runtime.watch.poll_seconds, 2.0)
+        self.assertEqual(runtime.watch.poll_seconds, 1.0)
+        self.assertEqual(runtime.watch.debounce_seconds, 0.75)
 
 
 class OneClickItemTests(Harness):

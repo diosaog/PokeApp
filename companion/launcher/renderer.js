@@ -229,12 +229,19 @@ function announce(state) {
     quickSeq: state.quick_item_seq ?? 0,
     quickDone: state.quick_item_result?.at ?? null,
     receipt: state.receipt_id,
+    // Each copy PokeApp accepts (season first, then personal) refreshes the
+    // web at once, without waiting for the rest of the sync.
+    accepted: [state.season_receipt?.save_id, state.cloud_receipt?.save_id].join(),
   };
   const before = seen;
   seen = now;
   if (!before) return;
   const tell = (type) => void window.launcher.webEvent?.(type).catch(() => {});
-  if (now.synced && now.synced !== before.synced) tell("save-synced");
+  if (
+    (now.synced && now.synced !== before.synced) ||
+    (now.accepted !== before.accepted && now.accepted !== ",")
+  )
+    tell("save-synced");
   if (now.save !== before.save) tell("save-changed");
   if (now.trainer !== before.trainer) tell("account-changed");
   if (now.writeError && now.writeError !== before.writeError)
@@ -254,10 +261,9 @@ function announce(state) {
 function render(state) {
   const write = state.write;
   pendingWrite = write?.operation_id || null;
-  text(
-    "write-state",
-    write?.message || "No hay cambios autorizados pendientes.",
-  );
+  text("write-state", write?.message || "No hay cambios pendientes.");
+  // Nothing pending: no permanent box saying so.
+  $("write-article").hidden = Boolean(write?.idle) && !state.write_error;
   text("write-description", write?.description || "");
   text("write-error", state.write_error || "");
   $("write-confirmation").hidden = !write?.can_confirm;
@@ -891,8 +897,7 @@ function fillSheet(view) {
     homes.set(section, mark);
     $("sheet-body").append(section);
   }
-  if (view === "objetos" && lastState?.selected_save && !lastState.quick_items)
-    void action(() => window.launcher.quickItems());
+  if (view === "objetos") requestQuick(true);
 }
 function returnSheet() {
   for (const [section, mark] of homes) mark.replaceWith(section);
@@ -1402,30 +1407,69 @@ function renderTransfers(state) {
 // Quick items: ONE text state per item, shared by keyboard, + and −.
 const quantities = { rare_candy: "1", heart_scale: "1" };
 let quickPending = false;
+// One read at a time. It always ends: with the counts, with the core's reason,
+// or — if the core never answers — with a message and «Volver a leer».
+const quickRead = { pending: false, since: 0, seq: 0, tries: 0, stalled: false };
+function requestQuick(manual = false) {
+  if (quickRead.pending || !lastState?.selected_save) return;
+  if (manual) quickRead.tries = 0;
+  Object.assign(quickRead, {
+    pending: true,
+    stalled: false,
+    since: Date.now(),
+    seq: lastState.quick_item_seq ?? 0,
+    tries: quickRead.tries + 1,
+  });
+  void action(() => window.launcher.quickItems()).then((result) => {
+    if (result?.status !== "QUEUED") quickRead.pending = false;
+    if (lastState) renderQuick(lastState);
+  });
+}
+const objetosOpen = () =>
+  $("sheet-dialog").open && $("sheet-dialog").dataset.sheet === "objetos";
 function renderQuick(state) {
   const write = state.write || {};
   const view = state.quick_items;
   const enabled = Boolean(view?.application_enabled);
   const adding = (write.description || "").startsWith("Añadir");
+  if (quickRead.pending && (state.quick_item_seq ?? 0) !== quickRead.seq)
+    quickRead.pending = false;
+  if (quickRead.pending && Date.now() - quickRead.since > 20000)
+    Object.assign(quickRead, { pending: false, stalled: true });
+  if (view) quickRead.tries = 0;
+  // Saved in game meanwhile: the core dropped the old counts; read again.
+  if (
+    objetosOpen() &&
+    state.selected_save &&
+    !view &&
+    !state.quick_item_error &&
+    !quickRead.stalled &&
+    quickRead.tries < 3
+  )
+    requestQuick();
   text(
     "quick-state",
     !state.selected_save
-      ? "Elige tu partida en «Mis partidas» para ver y añadir objetos."
+      ? "Elige tu partida en «Saves y Launcher»."
       : write.status === "RECOVERY_REQUIRED"
-        ? "Hay una operación de tu partida pendiente de comprobar: revísala en «Cambios en tu partida»."
+        ? "Hay una operación pendiente de comprobar en «Cambios en tu partida»."
         : write.busy || quickPending
-          ? "Comprobando el emulador, guardando la copia y aplicando… no abras el juego."
+          ? "Añadiendo… no abras el juego."
           : write.status === "AWAITING_CONFIRMATION" && adding
-            ? "Hay un cambio preparado de antes: confírmalo o descártalo en «Cambios en tu partida»."
-            : state.quick_item_error
-              ? state.quick_item_error
-              : !view
-                ? "Leyendo las cantidades de tu partida…"
-                : !enabled
-                  ? "Este Launcher no puede añadir objetos. Puedes consultar tus cantidades."
-                  : state.quick_item_result
-                    ? "Hecho: el cambio está guardado y comprobado en tu partida."
-                    : "Elige la cantidad y pulsa «Añadir a la bolsa».",
+            ? "Hay un cambio preparado de antes en «Cambios en tu partida»."
+            : quickRead.pending && !view
+              ? "Leyendo las cantidades de tu partida…"
+              : state.quick_item_error
+                ? state.quick_item_error
+                : !view
+                  ? quickRead.stalled
+                    ? "El Launcher no ha respondido. Pulsa «Volver a leer las cantidades»."
+                    : "Pulsa «Volver a leer las cantidades»."
+                  : !enabled
+                    ? "Este Launcher no puede añadir objetos."
+                    : state.quick_item_result
+                      ? "Hecho: añadido y comprobado en tu partida."
+                      : "",
   );
   for (const row of document.querySelectorAll(".quick-item")) {
     const item = row.dataset.item;
@@ -1492,7 +1536,7 @@ for (const row of document.querySelectorAll(".quick-item")) {
     }
   };
 }
-$("quick-refresh").onclick = () => action(() => window.launcher.quickItems());
+$("quick-refresh").onclick = () => requestQuick(true);
 
 function renderEmulator(state) {
   text(

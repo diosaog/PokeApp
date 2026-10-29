@@ -18,6 +18,10 @@ from app.launcher.backend import (
 from app.launcher.core import LauncherCore
 from app.launcher.emulator_qualification import qualification_status
 from app.launcher.journal import LocalConflict
+# Imported here, not inside the quick step: a module missing from the packaged
+# core then stops the build's own checks instead of every «Objetos ∞» read
+# (0.26.5 shipped without app.domain.unlimited_items and failed silently).
+from app.launcher.quick_items import inventory_view, quick_item_intent
 from app.launcher.save_activity import SaveActivityGate, SaveBusy, save_read
 from app.launcher.secrets import TokenStore
 from app.launcher.sync import SaveWatchService
@@ -32,7 +36,7 @@ from app.launcher.write_engine import EngineeringCapability, LocalWriteEngine
 from app.launcher.write_files import WriteSafetyError
 from app.save_parser.files import SaveSource, SnapshotReader
 from app.save_parser.models import SaveError
-from app.save_parser.writer import PkhexProcessWriter
+from app.save_parser.writer import NativeWriteError, PkhexProcessWriter
 
 PRODUCTION_API = "https://pokeapp-api-production.up.railway.app"
 QUICK_COMMANDS = ("quick_items_refresh", "quick_item_offer", "quick_item_apply")
@@ -53,7 +57,12 @@ QUICK_ERRORS = {
     "NATIVE_VERIFICATION_FAILED": "No se pudo preparar un archivo verificable con esa cantidad. Prueba con otra; tu partida no se ha modificado.",
     "NO_SELECTED_WRITE_TARGET": "Selecciona tu partida primero.",
     "UNSUPPORTED_FORMAT": "Esta partida no admite objetos rápidos. Juegos admitidos: X/Y, Rubí Omega/Zafiro Alfa y Sol/Luna/Ultrasol/Ultraluna.",
+    "VERIFICATION_FAILED": "No se pudo leer la bolsa de tu partida. Pulsa «Volver a leer las cantidades»; si sigue fallando, guarda de nuevo en el juego.",
+    "NATIVE_WRITER_FAILURE": "No se pudo leer la bolsa de tu partida. Pulsa «Volver a leer las cantidades»; si sigue fallando, reinicia el Launcher.",
+    "SAVE_CHANGED_DURING_READ": "Tu partida estaba guardándose. Vuelve a leer las cantidades en unos segundos.",
+    "WRITE_ALREADY_RUNNING": "Otra instancia de PokeApp Launcher está usando esta partida. Ciérrala y vuelve a intentarlo.",
 }
+QUICK_READ_FAILED = "No se pudieron leer las cantidades de tu partida. Pulsa «Volver a leer las cantidades»."
 GAME_NAMES = {
     "X": "Pokémon X",
     "Y": "Pokémon Y",
@@ -471,10 +480,12 @@ class LauncherRuntime:
         self.watch = SaveWatchService(
             self.core.sync,
             source,
-            # Metadata checks are cheap: a change is seen within ~3 s even on
-            # profiles that still store the old 5 s interval.
-            poll_seconds=min(2.0, self.core.config.poll_seconds),
-            debounce_seconds=self.core.config.debounce_seconds,
+            # A metadata check is one stat (~0.3 ms), a full read 2-8 ms and a
+            # parse ~0.2 s (measured 2026-10-29): a save is seen within 1 s and
+            # read once it stays identical for 0.75 s, even on profiles that
+            # still store the old 5 s / 1 s values.
+            poll_seconds=min(1.0, self.core.config.poll_seconds),
+            debounce_seconds=min(0.75, self.core.config.debounce_seconds),
         )
 
     def _auto_consent(self, trainer_id):
@@ -559,8 +570,15 @@ class LauncherRuntime:
             except Exception:  # noqa: BLE001 - discovery is a convenience only
                 self._patch(save_choice={"status": "NONE", "count": 0})
         while not self.stop.wait(0.1):
+            # A failed write/quick command never marks the save itself as
+            # unreadable: each step reports on its own line.
             try:
                 self._write_step()
+            except SaveBusy:
+                pass
+            except Exception:  # noqa: BLE001 - sanitized local boundary
+                self._patch(write_error=self._unexpected_write_failure())
+            try:
                 self._local_step()
             except SaveBusy:
                 continue  # a local physical write/recovery exclusively owns the save
@@ -655,17 +673,24 @@ class LauncherRuntime:
         return "No se pudo completar la operación. Tu partida no ha cambiado; vuelve a intentarlo."
 
     def _quick_step(self, name, args):
+        """Every finished step ends with counts or a reason, never neither:
+        the panel's «Leyendo…» always resolves."""
         self._patch(quick_item_result=None)
         try:
             self._quick_attempt(name, args)
+        except Exception:  # noqa: BLE001 - no native output, path or journal data to UI
+            self._patch(quick_item_error=QUICK_READ_FAILED)
         finally:
             with self.lock:
+                if (
+                    self.value["quick_items"] is None
+                    and self.value["quick_item_error"] is None
+                    and self.value["quick_item_result"] is None
+                ):
+                    self.value["quick_item_error"] = QUICK_READ_FAILED
                 self.value["quick_item_seq"] += 1
 
     def _quick_attempt(self, name, args):
-        from app.launcher.quick_items import inventory_view, quick_item_intent
-        from app.save_parser.writer import NativeWriteError
-
         engine = self.writes.engine
         try:
             native = getattr(engine, "native", None)
@@ -700,7 +725,12 @@ class LauncherRuntime:
                 )
             )
         except Exception:  # noqa: BLE001 - no native output, path or journal data to UI
-            self._patch(quick_item_error=self._unexpected_write_failure())
+            # Reading the counts writes nothing: no recovery to settle.
+            self._patch(
+                quick_item_error=QUICK_READ_FAILED
+                if name == "quick_items_refresh"
+                else self._unexpected_write_failure()
+            )
 
     def _apply_quick_item(self, intent, args):
         """The prepared change is applied at once: the engine re-checks that no
@@ -720,8 +750,6 @@ class LauncherRuntime:
             if result["status"] == "RECOVERY_REQUIRED":
                 raise RuntimeError("quick_item_recovery")
             raise WriteSafetyError(error or "NATIVE_VERIFICATION_FAILED")
-        from app.launcher.quick_items import inventory_view
-
         # Counts are re-read from the written file, never assumed.
         self._patch(quick_items=None)
         self._load_local()
@@ -847,6 +875,14 @@ class LauncherRuntime:
                     receipt = self.core.journal.head(self.watch.source)
                     if self.receipt is None or self.receipt.id != receipt.id:
                         self._patch(cloud_receipt=None)
+                        with self.lock:
+                            # Saved in game: counts of another version of the
+                            # file are never shown as current; the panel re-reads.
+                            view = self.value["quick_items"]
+                            if view and view.get("source_sha256") != (
+                                receipt.fingerprint.sha256
+                            ):
+                                self.value["quick_items"] = None
                     self.receipt = receipt
                     self._patch(
                         local_status="READY",
@@ -896,7 +932,9 @@ class LauncherRuntime:
             missing = [s for s in scopes if not self.store.has(origin, trainer, s, raw_hash)]
             if missing:
                 snapshot = SnapshotReader().read(SaveSource.enroll(state["selected_save"]))
-                for scope in missing:
+                # The season copy first: League deaths and the season «Mi PC»
+                # come from it; the personal record follows in the same pass.
+                for scope in sorted(missing, key=lambda s: s == PERSONAL):
                     self.store.enqueue_raw(origin, trainer, scope, receipt, snapshot.data)
                 self._cloud_wake.set()
             accepted = self.store.receipt(origin, trainer, PERSONAL, raw_hash)
@@ -914,8 +952,50 @@ class LauncherRuntime:
         except (LocalConflict, SaveError) as error:
             self._patch(cloud_receipt=None, local_status="READING", error=str(error))
 
+    def _fast_delivery(self):
+        """A new save version goes up at once. Measured on 0.26.5 (2026-10-29)
+        a sync took ~29 s, mostly a health probe, /v1/me and five season reads
+        before the uploads and two receipt re-reads after them, ~1.2 s each.
+        While the cached cloud state is fresh (<120 s) and the access token
+        valid, only the uploads run: the server re-checks each one against its
+        own state, and the full refresh follows on the next turn."""
+        principal = self.session._principal
+        tokens = self.session._tokens
+        if (
+            principal is None
+            or self._web_token_wanted
+            or time.monotonic() >= self.next_cloud_refresh
+            or not tokens
+            or not isinstance(tokens.expires_at, (int, float))
+            or tokens.expires_at <= time.time() + 120
+        ):
+            return False
+        origin, trainer = self.client.origin, principal.trainer_id
+        with self.lock:
+            cached = self.value.get("cloud")
+        if (
+            not cached
+            or not self.store.enabled(origin, trainer)
+            or self.store.pending(origin, trainer) is None
+        ):
+            return False
+        self._deliver_pending(trainer)
+        accepted = self.state()["cloud_receipt"]
+        self._patch(
+            outbox=self.store.summary(origin, trainer),
+            cloud_status="ONLINE",
+            last_online=time.time(),
+            error=None,
+            error_detail=None,
+            **({"last_synced": time.time()} if accepted else {}),
+        )
+        self.next_cloud_refresh = 0  # wallet, robberies and receipts next turn
+        return True
+
     @save_read
     def _cloud_step(self):
+        if self._fast_delivery():
+            return
         health = self.client.json("GET", "/health")
         if health.get("status") != "ok" or health.get("service") != "pokeapp-api":
             raise BackendError("BACKEND_UNAVAILABLE")

@@ -10,6 +10,8 @@ from app.launcher.save_activity import SaveBusy
 from app.launcher.write_engine import EngineeringCapability
 from app.launcher.write_files import WriteSafetyError
 
+WRITE_WAIT_SECONDS = 30.0
+
 
 class LocalWriteController:
     def __init__(self, gate, selected, engine=None, *, on_verified=None):
@@ -125,6 +127,11 @@ class LocalWriteController:
                 else None,
                 "can_reconcile": not self._busy and bool(self._pending or receipt),
                 "busy": self._busy,
+                # Nothing to show: no operation, recovery or robbery notice.
+                "idle": not self._busy
+                and receipt is None
+                and transfer_notice is None
+                and state == "IDLE",
                 "production_operations_enabled": False,
                 "description": self._description,
                 "mode": receipt.mode if receipt else None,
@@ -153,7 +160,7 @@ class LocalWriteController:
     @staticmethod
     def _message(state):
         return {
-            "IDLE": "No hay cambios autorizados pendientes. Los canjes sobre el save siguen desactivados.",
+            "IDLE": "No hay cambios pendientes.",
             "PREPARED": "Cambio preparado. Falta comprobarlo antes de pedir confirmación.",
             "AWAITING_CONFIRMATION": "Hay un cambio local preparado. Cierra el juego y el emulador antes de confirmarlo.",
             "APPLIED_VERIFIED": "Cambio guardado y comprobado. La copia original se conserva.",
@@ -171,7 +178,9 @@ class LocalWriteController:
         if not self._operation_lock.acquire(blocking=False):
             raise SaveBusy("SAVE_WRITE_BUSY")
         try:
-            with self.gate.writing(recovery=recovery):
+            # A sync or upload in progress finishes first (bounded): the click
+            # is not refused because the cloud step happened to be reading.
+            with self.gate.writing(recovery=recovery, wait=WRITE_WAIT_SECONDS):
                 with self._lock:
                     self._busy = True
                 try:

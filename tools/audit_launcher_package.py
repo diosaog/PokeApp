@@ -7,6 +7,7 @@ import subprocess
 import zipfile
 from pathlib import Path
 
+from prepare_launcher_core import required_domain_modules
 from PyInstaller.archive.readers import CArchiveReader
 
 REPO = Path(__file__).resolve().parents[1]
@@ -52,13 +53,24 @@ def audit(build):
         for name in archive.open_embedded_archive("PYZ.pyz").toc
         if name.startswith("app.")
     ]
+    sources = [
+        path for group in ("launcher", "save_parser") for path in (REPO / "app" / group).glob("*.py")
+    ]
+    domain = set(required_domain_modules(sources))
     assert modules and all(
-        name.startswith(
-            ("app.launcher", "app.save_parser", "app.domain.pokemon_identity")
-        )
+        name.startswith(("app.launcher", "app.save_parser"))
+        or name in domain
         or name == "app.domain"
         for name in modules
     ), modules
+    # Every desktop module is really inside: a lazily imported one that the
+    # analysis missed fails here, not in the trainer's «Objetos ∞».
+    expected = {
+        f"app.{path.parent.name}.{path.stem}"
+        for path in sources
+        if path.stem != "__init__" and path.stem != "__main__"
+    } | domain
+    assert expected <= set(modules), sorted(expected - set(modules))
     for relative in (
         "core/PokeApp.Core.exe",
         "core/_internal/python314.dll",
