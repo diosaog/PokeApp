@@ -304,9 +304,25 @@ it("holds navigation and editing while a rule request has an uncertain outcome",
   expect(mocks.execute).not.toHaveBeenCalled();
 });
 
-it("configures draft structure with generated internal metadata and preserves reward defaults", () => {
+function fourPlayerDraft() {
   mocks.setup.season.status = "draft";
   mocks.setup.config_versions[0].used = false;
+  mocks.setup.participants = Array.from({ length: 4 }, (_, i) => ({
+    ...mocks.setup.participants[0],
+    id: `player-${i}`,
+    trainer_id: `trainer-${i}`,
+  }));
+  mocks.setup.config_versions[0].scoring = { "1": 4, "2": 2, "3": 1, "4": 0 };
+  mocks.setup.config_versions[0].coin_rewards = {
+    "1": 4,
+    "2": 2,
+    "3": 1,
+    "4": 0,
+  };
+}
+
+it("configures draft structure with generated internal metadata and preserves reward defaults", () => {
+  fourPlayerDraft();
   render(page());
   tab("Configuración");
   fireEvent.submit(screen.getByLabelText("Total de jornadas").closest("form")!);
@@ -325,8 +341,7 @@ it("configures draft structure with generated internal metadata and preserves re
 });
 
 it("configures one league without a B division, movement or last-of-B reward", () => {
-  mocks.setup.season.status = "draft";
-  mocks.setup.config_versions[0].used = false;
+  fourPlayerDraft();
   render(page());
   tab("Configuración");
   expect(screen.getByLabelText(/Liga A y Liga B/)).toBeChecked();
@@ -336,17 +351,16 @@ it("configures one league without a B division, movement or last-of-B reward", (
     screen.queryByLabelText("Ascensos / descensos"),
   ).not.toBeInTheDocument();
   expect(screen.queryByText("Último de B recibe robo")).not.toBeInTheDocument();
-  expect(screen.getByText(/Participantes en la Liga/)).toHaveTextContent("1");
+  expect(screen.getByText(/Participantes en la Liga/)).toHaveTextContent("4");
   fireEvent.submit(screen.getByLabelText("Total de jornadas").closest("form")!);
   const body = mocks.execute.mock.calls[0][1];
-  expect(body.division_sizes).toEqual({ A: 1 });
+  expect(body.division_sizes).toEqual({ A: 4 });
   expect(body.movement_count).toBe(0);
   expect(body.rules.last_b_gets_steal).toBe(false);
 });
 
 it("an older season without the observed assignment keeps Liga A and Liga B", () => {
-  mocks.setup.season.status = "draft";
-  mocks.setup.config_versions[0].used = false;
+  fourPlayerDraft();
   mocks.setup.initial_assignment_rule = null;
   render(page());
   tab("Configuración");
@@ -417,6 +431,153 @@ it("shows the fixed competition structure once the season has started", () => {
   expect(
     screen.getByText(/no pueden cambiarse con la temporada en marcha/),
   ).toBeInTheDocument();
+});
+
+function fivePlayerDraft() {
+  mocks.setup.season.status = "draft";
+  mocks.setup.participants = Array.from({ length: 5 }, (_, i) => ({
+    ...mocks.setup.participants[0],
+    id: `player-${i}`,
+    trainer_id: `trainer-${i}`,
+  }));
+  Object.assign(mocks.setup.config_versions[0], {
+    used: false,
+    total_matchdays: 1,
+    division_sizes: { A: 5 },
+    movement_count: 0,
+    scoring: { "1": 0, "2": 0, "3": 0, "4": 0, "5": 0 },
+    coin_rewards: { "1": 9, "2": 9, "3": 9, "4": 9, "5": 9 },
+  });
+}
+
+it("shows empty rewards as empty and rejects missing, extra or noninteger positions", () => {
+  fivePlayerDraft();
+  mocks.setup.config_versions = [];
+  render(page());
+  tab("Configuración");
+  fireEvent.click(screen.getByLabelText(/Una Liga/));
+  fireEvent.change(screen.getByLabelText("Total de jornadas"), {
+    target: { value: "4" },
+  });
+  const points = screen.getByLabelText("Puntos por posición");
+  const coins = screen.getByLabelText("Monedas por posición");
+  expect(points).toHaveValue("");
+  expect(points).not.toHaveAttribute("placeholder", "10,8,6,4");
+  fireEvent.change(coins, { target: { value: "5,4,3,2,0" } });
+  for (const value of [
+    "",
+    "10,8,6,4",
+    "10,8,6,4,2,0",
+    "10,8,6,4,",
+    "10,8,6,4,-1",
+    "10,8,6,4,1.5",
+  ]) {
+    fireEvent.change(points, { target: { value } });
+    fireEvent.submit(points.closest("form")!);
+    expect(mocks.execute).not.toHaveBeenCalled();
+  }
+  fireEvent.change(points, { target: { value: "10, 8, 6, 4, 0" } });
+  fireEvent.submit(points.closest("form")!);
+  expect(mocks.execute).toHaveBeenCalledOnce();
+  expect(mocks.execute.mock.lastCall![0]).toBe(
+    "/v1/admin/seasons/season/config-versions",
+  );
+});
+
+it("requires five actual positional values for five players when changing 1 to 4 days", () => {
+  fivePlayerDraft();
+  render(page());
+  tab("Configuración");
+  fireEvent.change(screen.getByLabelText("Total de jornadas"), {
+    target: { value: "4" },
+  });
+  const points = screen.getByLabelText("Puntos por posición");
+  const coins = screen.getByLabelText("Monedas por posición");
+  expect(points).toHaveValue("0,0,0,0,0");
+  expect(coins).toHaveValue("9,9,9,9,9");
+  fireEvent.change(points, { target: { value: "10,8,6,4" } });
+  fireEvent.change(coins, { target: { value: "10,8,6,4" } });
+  fireEvent.submit(points.closest("form")!);
+  expect(mocks.execute).not.toHaveBeenCalled();
+  expect(screen.getByRole("alert")).toHaveTextContent("5 valores");
+  fireEvent.change(points, { target: { value: "10,8,6,4,2" } });
+  fireEvent.change(coins, { target: { value: "50,40,30,20,0" } });
+  fireEvent.submit(points.closest("form")!);
+  expect(mocks.execute.mock.calls[0][1]).toEqual(
+    expect.objectContaining({
+      total_matchdays: 4,
+      division_sizes: { A: 5 },
+      movement_count: 0,
+      scoring: { "1": 10, "2": 8, "3": 6, "4": 4, "5": 2 },
+      coin_rewards: { "1": 50, "2": 40, "3": 30, "4": 20, "5": 0 },
+    }),
+  );
+});
+
+it("preserves separate one-day and positional edits across 1/2/3/4 switches and reloads saved values", () => {
+  fivePlayerDraft();
+  const view = render(page());
+  tab("Configuración");
+  const total = () => screen.getByLabelText("Total de jornadas");
+  fireEvent.change(
+    screen.getByLabelText("Monedas de jornada para cada participante"),
+    { target: { value: "17" } },
+  );
+  fireEvent.change(total(), { target: { value: "4" } });
+  fireEvent.change(screen.getByLabelText("Puntos por posición"), {
+    target: { value: "10,8,6,4,2" },
+  });
+  fireEvent.change(screen.getByLabelText("Monedas por posición"), {
+    target: { value: "50,40,30,20,0" },
+  });
+  for (const days of [1, 2, 1, 3, 1, 4]) {
+    fireEvent.change(total(), { target: { value: String(days) } });
+    if (days === 1) {
+      expect(
+        screen.getByLabelText("Monedas de jornada para cada participante"),
+      ).toHaveValue(17);
+      fireEvent.submit(total().closest("form")!);
+      expect(mocks.execute.mock.lastCall![1].coin_rewards).toEqual({
+        "1": 17,
+        "2": 17,
+        "3": 17,
+        "4": 17,
+        "5": 17,
+      });
+    } else {
+      expect(screen.getByLabelText("Puntos por posición")).toHaveValue(
+        "10,8,6,4,2",
+      );
+      expect(screen.getByLabelText("Monedas por posición")).toHaveValue(
+        "50,40,30,20,0",
+      );
+    }
+  }
+  fireEvent.submit(total().closest("form")!);
+  const body = mocks.execute.mock.lastCall![1];
+  mocks.setup = {
+    ...mocks.setup,
+    config_revision: 4,
+    config_versions: [
+      {
+        ...mocks.setup.config_versions[0],
+        ...body,
+      },
+    ],
+  };
+  view.rerender(page());
+  fireEvent.click(
+    screen.getByRole("button", { name: "Revisar formato actual" }),
+  );
+  expect(total()).toHaveValue(4);
+  expect(screen.getByLabelText("Puntos por posición")).toHaveValue(
+    "10,8,6,4,2",
+  );
+  expect(screen.getByLabelText("Monedas por posición")).toHaveValue(
+    "50,40,30,20,0",
+  );
+  fireEvent.submit(total().closest("form")!);
+  expect(mocks.execute.mock.lastCall![1].expected_config_revision).toBe(4);
 });
 
 it("renders human readiness and status names without leaking unknown internal reason codes", () => {

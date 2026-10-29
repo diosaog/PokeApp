@@ -204,6 +204,13 @@ function RewardForm({
   );
 }
 
+function rewardText(values?: Record<string, number>) {
+  return Object.entries(values ?? {})
+    .sort((a, b) => Number(a[0]) - Number(b[0]))
+    .map(([, n]) => n)
+    .join(",");
+}
+
 function Structure({ setup }: { setup: Setup }) {
   const { season } = useApp(),
     cmd = useRulesCommand();
@@ -221,15 +228,27 @@ function Structure({ setup }: { setup: Setup }) {
   );
   const single = shape === "single";
   const [total, setTotal] = useState(config?.total_matchdays ?? 1);
-  useEffect(() => {
-    setTotal(config?.total_matchdays ?? 1);
-  }, [source.config_revision, config?.id, config?.total_matchdays]);
   const singleDay = single && total === 1;
   const configuredCoins = Object.values(config?.coin_rewards ?? {});
   const commonCoins =
     configuredCoins.length && new Set(configuredCoins).size === 1
       ? configuredCoins[0]
       : undefined;
+  const [points, setPoints] = useState(rewardText(config?.scoring)),
+    [coins, setCoins] = useState(rewardText(config?.coin_rewards)),
+    [commonAmount, setCommonAmount] = useState(String(commonCoins ?? ""));
+  useEffect(() => {
+    setTotal(config?.total_matchdays ?? 1);
+    setShape(
+      config?.division_sizes && config.division_sizes.B == null
+        ? "single"
+        : "two",
+    );
+    setPoints(rewardText(config?.scoring));
+    setCoins(rewardText(config?.coin_rewards));
+    setCommonAmount(String(commonCoins ?? ""));
+    setError("");
+  }, [source, config, commonCoins]);
   // Only the observed initial assignment can start a single league; an older
   // season keeps Liga A and Liga B, as the server requires.
   const choosable = setup.initial_assignment_rule === "observed_deaths_v1";
@@ -264,25 +283,47 @@ function Structure({ setup }: { setup: Setup }) {
           onSubmit={(event) => {
             const data = form(event);
             if (busy || stale) return;
+            const count = setup.participants.length;
+            if (
+              !singleDay &&
+              [points, coins].some(
+                (v) =>
+                  v.split(",").length !== count ||
+                  v.split(",").some((entry) => !/^\d+$/.test(entry.trim())),
+              )
+            ) {
+              setError(
+                `Introduce ${count} valores en puntos y ${count} en monedas, uno por posición. Usa 0 si no hay recompensa.`,
+              );
+              return;
+            }
             const scores = singleDay
-                ? Array<number>(setup.participants.length).fill(0)
-                : text(data, "points").split(",").map(Number),
-              coins = singleDay
-                ? Array<number>(setup.participants.length).fill(
-                    Number(text(data, "commonCoins")),
-                  )
-                : text(data, "coins").split(",").map(Number);
+                ? Array<number>(count).fill(0)
+                : points.split(",").map(Number),
+              rewards = singleDay
+                ? Array<number>(count).fill(Number(commonAmount))
+                : coins.split(",").map(Number);
             const values = ["total", "a", "b", "movement"].map((k) =>
               single && k !== "total" ? 0 : number(data, k),
             );
             if (
-              (singleDay && text(data, "commonCoins") === "") ||
-              ![...scores, ...coins, ...values].every(
+              (singleDay && commonAmount === "") ||
+              ![...scores, ...rewards, ...values].every(
                 (v) => Number.isSafeInteger(v) && v >= 0 && v <= 2147483647,
               ) ||
               values.slice(0, single ? 1 : 3).some((v) => v === 0)
             ) {
               setError("Introduce cantidades enteras válidas.");
+              return;
+            }
+            if (
+              !single &&
+              (values[1] + values[2] !== count ||
+                values[3] > Math.min(values[1], values[2]))
+            ) {
+              setError(
+                `Las divisiones deben sumar ${count} participantes; los ascensos y descensos no pueden superar la división menor.`,
+              );
               return;
             }
             setError("");
@@ -297,7 +338,7 @@ function Structure({ setup }: { setup: Setup }) {
                 : { A: values[1], B: values[2] },
               movement_count: values[3],
               scoring: positions(scores),
-              coin_rewards: positions(coins),
+              coin_rewards: positions(rewards),
               rules: {
                 badge_reward_coins: 4,
                 game_completion_reward_coins: 12,
@@ -403,7 +444,9 @@ function Structure({ setup }: { setup: Setup }) {
                       max={2147483647}
                       step={1}
                       required
-                      defaultValue={value}
+                      {...(name === "total"
+                        ? { value: total }
+                        : { defaultValue: value })}
                       onChange={
                         name === "total"
                           ? (event) => setTotal(Number(event.target.value))
@@ -421,7 +464,8 @@ function Structure({ setup }: { setup: Setup }) {
                     max={2147483647}
                     step={1}
                     required
-                    defaultValue={commonCoins}
+                    value={commonAmount}
+                    onChange={(event) => setCommonAmount(event.target.value)}
                   />
                 </Field>
               )}
@@ -429,29 +473,30 @@ function Structure({ setup }: { setup: Setup }) {
                 <>
                   {(
                     [
-                      ["points", "Puntos por posición", config?.scoring],
-                      ["coins", "Monedas por posición", config?.coin_rewards],
+                      ["points", "Puntos por posición", points, setPoints],
+                      ["coins", "Monedas por posición", coins, setCoins],
                     ] as const
-                  ).map(([name, label, v]) => (
+                  ).map(([name, label, value, setValue]) => (
                     <Field key={name} label={label}>
                       <input
                         name={name}
                         required
-                        pattern="[0-9]+(,[0-9]+)*"
-                        placeholder="10,8,6,4"
-                        defaultValue={
-                          v &&
-                          Object.entries(v)
-                            .sort((a, b) => Number(a[0]) - Number(b[0]))
-                            .map(([, n]) => n)
-                            .join(",")
-                        }
+                        value={value}
+                        onChange={(event) => setValue(event.target.value)}
                       />
                     </Field>
                   ))}
                 </>
               )}
             </div>
+            {!singleDay && (
+              <p>
+                Introduce {setup.participants.length} valores en cada campo,
+                separados por comas, del primer al último puesto. La cantidad
+                depende de los participantes, no de las jornadas. Usa 0 si una
+                posición no recibe puntos o monedas.
+              </p>
+            )}
             {singleDay && (
               <p>
                 Todos contra todos: 2 puntos por victoria y 0 por derrota.
