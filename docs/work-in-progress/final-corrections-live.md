@@ -1,5 +1,52 @@
 # Final corrections — live execution record
 
+## Shop in the preseason and selective animated sprites — 2026-10-29 15:50 UTC
+
+**PUBLISHED / VERIFIED.** Commits `792ab48` (DB 071, API, Shop web), `ca2c513`
+(sprites). Launcher unchanged (0.26.6: no packaged component changed).
+
+- **Shop root cause (reproduced on a restored production backup):** every
+  purchase in an active season resolved the current matchday, and
+  `api_resolve_current_matchday` raises 409 `current_matchday_required` while
+  J1 is not prepared (Prueba2's preseason). Production logs: six purchase
+  attempts, all 409. The web showed the generic 409 text plus «Los datos
+  cambiaron mientras editabas» for any 409.
+- **071** (sha256 `82dfc27b…0ad621`): preseason purchases run with a NULL
+  matchday (as after a finished League); price confirmation, promotions,
+  Store Ban, balance, idempotency, ledger and audit unchanged. Shop proof on
+  the backup (`tools.validate_phase071_shop`): owner's exact purchase refused
+  before, accepted after (32 → 20 PK₽, once), all enabled catalog items
+  purchasable within the balance, same key = same receipt, past the balance =
+  `insufficient_funds`; rolled back. Rehearsal on a fresh backup
+  `pre-release-20261029T153428Z` **14/14 PASS**; applied **once** as
+  `20261029154136`.
+- **Web:** Spanish reason per purchase refusal; «Los datos cambiaron» only for
+  stale-data codes; «Saldo insuficiente» on the item before trying.
+- **API** `002dd4dd-d682-4fcc-a9c8-fb11aca9acc5` (115 routes): Supabase Auth
+  (the session check on every request) on a pooled HTTP/1.1 client, after
+  bursts of `AUTH_UNAVAILABLE` across endpoints in the same millisecond.
+- **Sprites:** `animated/v2` = Showdown battle-model clips (pinned PokeAPI
+  mirror, same clips as the Gen7 stills' source), base forms, normal + shiny,
+  **799** species. Frame 0 checked against each Gen7 still; 36 pose/scale
+  differences reviewed by eye; 666 Vivillon and 716 Xerneas excluded (clip
+  shows another form); 597 and 803-807 static. Attribution and licence files
+  retained (same terms as the existing v1 set). Animate only in Home, a
+  trainer's team (Entrenadores) and the Pokémon card; «Mi PC», boxes, Team
+  Preview, selectors, Shop, Inventory and League static. Visible-only, on
+  demand, stopped off-screen/hidden/unmounted, never with reduced motion.
+- **Cloudflare** `20710365-a626-4a5b-9dd8-5865aaf8814b`; live GIFs and chunks
+  byte-identical to the build; hosted acceptance `live_league` **19/19 PASS**;
+  API logs clean.
+- **Validation:** web **242/242**, TS, Prettier; Python focused **211 OK**
+  (20 affected modules); new tests for purchase reasons, stale-only notice,
+  funds hint, animation contexts, forms/exclusions, shiny, reduced motion.
+- **Owner acceptance pending:** a real preseason purchase (balance and
+  inventory refresh), and the three animated contexts in the Launcher.
+
+Private evidence: `%LOCALAPPDATA%/PokeApp-migration-evidence/shop-sprites/20261029/`
+(`shop-proof.json`, `rehearsal.json`, `apply/` with the 071 intent/result,
+`hosted-acceptance.json`, `api-deploy.log`).
+
 ## Second real test (Objetos ∞, live data, Box 7, one total) — 2026-10-29 11:55 UTC
 
 **PUBLISHED / VERIFIED.** Commits `a0b121e` (Launcher), `b0e4406` (API+DB 070),
