@@ -16,9 +16,11 @@ from app.launcher.backend import (
     BackendError,
     LauncherSession,
 )
+from app.domain.shop_item_uses import BAG_ITEMS
 from app.launcher.core import LauncherCore
 from app.launcher.diagnostics import failure
 from app.launcher.emulator_qualification import qualification_status
+from app.launcher.item_delivery import DeliveryRefused, DeliveryRemote, LauncherDeliveries
 from app.launcher.journal import LocalConflict
 # Imported here, not inside the quick step: a module missing from the packaged
 # core then stops the build's own checks instead of every «Objetos ∞» read
@@ -65,6 +67,26 @@ QUICK_ERRORS = {
     "WRITE_ALREADY_RUNNING": "Otra instancia de PokeApp Launcher está usando esta partida. Ciérrala y vuelve a intentarlo.",
 }
 QUICK_READ_FAILED = "No se pudieron leer las cantidades de tu partida. Pulsa «Volver a leer las cantidades»."
+# 072: paid Shop objects into the bag (app/launcher/item_delivery.py).
+DELIVERY_COMMANDS = ("deliveries_refresh", "delivery_apply")
+DELIVERY_ERRORS = {
+    "ITEM_NOT_IN_GAME": "Ese objeto no existe en el juego de esta partida.",
+    "ITEM_INCOMPATIBLE_WITH_GAME": "Ese objeto no existe en el juego de esta partida.",
+    "INVENTORY_FULL": "No cabe en la bolsa: ya tienes el máximo de ese objeto o la bolsa está llena. Tu compra sigue disponible.",
+    "INVENTORY_LIMIT": "No cabe en la bolsa: ya tienes el máximo de ese objeto. Tu compra sigue disponible.",
+    "DELIVERY_OTHER_GAME": "La entrega es para tu partida de la Liga: elígela en «Cambiar partida» y vuelve a intentarlo. No se ha modificado nada.",
+    "DELIVERY_IN_PROGRESS": "Esta compra se está entregando en otro equipo. Termina allí la entrega.",
+    "DELIVERY_PENDING": "La entrega anterior de esta compra aún se está comprobando. Vuelve a intentarlo en unos segundos.",
+    "PURCHASE_NOT_REDEEMABLE": "Esta compra ya se ha usado o devuelto.",
+    "PURCHASE_NOT_FOUND": "Esta compra ya no está disponible.",
+    "DELIVERY_ITEM_NOT_OFFERED": "Ese objeto no corresponde a esta compra.",
+    "PARTICIPANT_INACTIVE": "No participas en esta temporada.",
+    "DELIVERY_RECOVERY_REQUIRED": "No se pudo confirmar el cambio. La compra queda reservada hasta comprobarlo; conserva las copias.",
+    "CORRUPT_SAVE": "No se pudo preparar un archivo verificable. Guarda otra vez en el juego y vuelve a intentarlo; tu partida no ha cambiado.",
+    "DELIVERY_DISABLED": "Entregar objetos no está disponible en este Launcher.",
+    "DELIVERY_CONTEXT_UNAVAILABLE": "Inicia sesión y espera a que se cargue tu temporada.",
+    "BACKEND_UNAVAILABLE": "No hay conexión con PokeApp: tu compra no se ha gastado. Vuelve a intentarlo.",
+}
 GAME_NAMES = {
     "X": "Pokémon X",
     "Y": "Pokémon Y",
@@ -201,6 +223,12 @@ class LauncherRuntime:
             # Counts finished quick-item steps, so the same refusal twice is
             # still told twice.
             "quick_item_seq": 0,
+            # 072: paid Shop objects waiting for the bag, the last delivery and
+            # its refusal; the sequence counts finished steps like quick items.
+            "deliveries": None,
+            "delivery_error": None,
+            "delivery_result": None,
+            "delivery_seq": 0,
             "emulator_saves": [],
             # What the last search checked, so «no saves» can say why.
             "discovery": None,
@@ -411,6 +439,23 @@ class LauncherRuntime:
                 )
             if not valid:
                 raise ValueError("invalid_quick_item_arguments")
+            try:
+                self.write_commands.put_nowait((name, dict(args)))
+            except Full:
+                return {"status": "BUSY"}
+            return {"status": "QUEUED"}
+        if name in DELIVERY_COMMANDS:
+            if name == "deliveries_refresh":
+                valid = args == {}
+            else:
+                valid = (
+                    set(args) == {"purchase_id", "item"}
+                    and isinstance(args["purchase_id"], str)
+                    and len(args["purchase_id"]) == 36
+                    and args["item"] in BAG_ITEMS
+                )
+            if not valid:
+                raise ValueError("invalid_delivery_arguments")
             try:
                 self.write_commands.put_nowait((name, dict(args)))
             except Full:
@@ -660,6 +705,154 @@ class LauncherRuntime:
         except Exception:  # noqa: BLE001 - no native output, private path or journal data to UI
             self._patch(write_error=self._unexpected_write_failure())
 
+    def _deliveries_unsettled(self, trainer_id):
+        engine = getattr(self.writes, "engine", None)
+        if engine is None:
+            return False
+        try:
+            with engine._db() as db:
+                if not db.execute(
+                    "SELECT 1 FROM sqlite_master WHERE type='table' AND name='delivery_bindings'"
+                ).fetchone():
+                    return False
+                rows = db.execute("SELECT record FROM delivery_bindings").fetchall()
+            return any(
+                (record := json.loads(row[0]))["trainer_id"] == trainer_id
+                and record["state"] not in ("DELIVERED", "RELEASED")
+                for row in rows
+            )
+        except Exception:  # noqa: BLE001 - a hint only; the panel still settles
+            return False
+
+    def _delivery_context(self):
+        principal = self.session._principal
+        with self.lock:
+            data = (deepcopy(self.value.get("cloud")) or {}).get("data") or {}
+        season = data.get("season")
+        if principal is None or not season:
+            raise WriteSafetyError("DELIVERY_CONTEXT_UNAVAILABLE")
+        remote = DeliveryRemote(self.session, season["id"])
+        flow = LauncherDeliveries(self.writes, remote, trainer_id=principal.trainer_id)
+        return flow, remote, data.get("season_link") or {}
+
+    def _delivery_view(self, flow, remote, waiting):
+        """Paid objects still to deliver, from the server; each says whether
+        it can be delivered here now (READY), is being recovered on this PC
+        (RECOVERING) or was started on another one (ELSEWHERE)."""
+        listing = remote.list()
+        local = {r["purchase_id"] for r in flow.pending()} | set(waiting)
+        game = self.receipt.observation.game if self.receipt else None
+        items = []
+        for item in listing.get("items") or []:
+            reserved = item.get("reserved")
+            state = "READY"
+            if reserved:
+                state = (
+                    "RECOVERING"
+                    if item["purchase_id"] in local
+                    or reserved.get("operation_id") in local
+                    else "ELSEWHERE"
+                )
+            items.append(
+                {
+                    "purchase_id": item["purchase_id"],
+                    "name": item["name"],
+                    "mode": item["mode"],
+                    "state": state,
+                    "options": [
+                        {
+                            "code": option["code"],
+                            "name": option["name"],
+                            "compatible": game in option["games"] if game else None,
+                        }
+                        for option in item.get("options") or []
+                        if option.get("code") in BAG_ITEMS
+                    ],
+                }
+            )
+        return {
+            "items": items,
+            "league_game": listing.get("league_game"),
+            "save_game": game,
+            "application_enabled": flow.engine.allows("deliver_item"),
+        }
+
+    def _delivery_step(self, name, args):
+        """Every finished step ends with the list or a reason, never neither."""
+        if name == "delivery_apply":
+            self._patch(delivery_result=None)
+        try:
+            flow, remote, link = self._delivery_context()
+            waiting = flow.settle()
+            if name == "delivery_apply":
+                # The object goes to the save this season competes with.
+                if (
+                    link.get("status") == "BOUND"
+                    and link.get("identity") != save_identity(self.receipt)
+                ):
+                    raise WriteSafetyError("DELIVERY_OTHER_GAME")
+                result = flow.deliver(args["purchase_id"], args["item"])
+                self._patch(quick_items=None)  # another version of the file now
+                self._load_local()
+                self.next_cloud_refresh = 0  # the new save syncs at once
+                count = None
+                try:
+                    data = self.writes.engine.files.read_path(
+                        Path(self.writes.selected())
+                    )
+                    reading = self.writes.engine.native.inventory(data, (args["item"],))
+                    count = reading["items"][args["item"]]["count"]
+                except Exception:  # noqa: BLE001 - the write itself is verified
+                    pass
+                self._patch(
+                    delivery_result={
+                        "purchase_id": args["purchase_id"],
+                        "item": args["item"],
+                        "name": BAG_ITEMS[args["item"]][1],
+                        "status": result["status"],
+                        "game": result["game"],
+                        "count": count,
+                        "at": int(time.time()),
+                    }
+                )
+                waiting = flow.settle()
+            self._patch(
+                deliveries=self._delivery_view(flow, remote, waiting),
+                delivery_error=None,
+            )
+        except SaveBusy:
+            self._patch(
+                delivery_error="Hay una lectura, sincronización u operación en curso. Espera unos segundos y vuelve a intentarlo."
+            )
+        except DeliveryRefused as error:
+            self._patch(
+                delivery_error=DELIVERY_ERRORS.get(
+                    error.code, "PokeApp no permite entregar esta compra ahora."
+                )
+            )
+        except BackendError as error:
+            self._patch(
+                delivery_error=DELIVERY_ERRORS["BACKEND_UNAVAILABLE"]
+                if str(error) == "BACKEND_UNAVAILABLE"
+                else DELIVERY_ERRORS.get(
+                    error.detail or "", "PokeApp no permite entregar esta compra ahora."
+                )
+            )
+        except (NativeWriteError, WriteSafetyError) as error:
+            code = str(error) or getattr(error, "code", "")
+            self._patch(
+                delivery_error=DELIVERY_ERRORS.get(code)
+                or QUICK_ERRORS.get(
+                    code,
+                    "No se pudo entregar el objeto. Tu partida no ha cambiado; vuelve a intentarlo.",
+                )
+            )
+        except Exception:  # noqa: BLE001 - no native output, path or journal data to UI
+            self._patch(delivery_error=self._unexpected_write_failure())
+        finally:
+            with self.lock:
+                self.value["delivery_seq"] += 1
+
     def _settle_recovery(self):
         """After an unexpected failure, pause reads and sync only for a really
         uncertain physical write — the engine's journal or an open robbery
@@ -793,6 +986,12 @@ class LauncherRuntime:
         if name in TRANSFER_COMMANDS:
             try:
                 self._transfer_step(name, args)
+            finally:
+                self.write_commands.task_done()
+            return
+        if name in DELIVERY_COMMANDS:
+            try:
+                self._delivery_step(name, args)
             finally:
                 self.write_commands.task_done()
             return
@@ -1133,6 +1332,13 @@ class LauncherRuntime:
         # Only the locally ready selected save is eligible; never upload old/missing cache as new.
         self._enqueue_local()
         self._deliver_pending(principal.trainer_id)
+        if season and self._deliveries_unsettled(principal.trainer_id):
+            # An interrupted Shop delivery is finished without the trainer
+            # having to open its panel (completed if written, else released).
+            try:
+                self.write_commands.put_nowait(("deliveries_refresh", {}))
+            except Full:
+                pass
         accepted = self.state()["cloud_receipt"]
         if accepted:
             # A different device may have registered a newer file since our last

@@ -59,6 +59,7 @@ class ApiContainer:
     account_service: object | None = None
     incident_repository: object | None = None
     announcer: object | None = None
+    item_delivery_repository: object | None = None
 
 
 def get_api_container(request: Request) -> ApiContainer:
@@ -76,6 +77,7 @@ def create_default_container(config: APIConfig | None = None) -> ApiContainer:
     team_lock_repo = None
     purchase_repo = None
     redemption_repo = None
+    item_delivery_repo = None
     item_use_repo = None
     item_use_transport = None
     transfer_integration = None
@@ -160,6 +162,11 @@ def create_default_container(config: APIConfig | None = None) -> ApiContainer:
         redemption_repo = SupabaseRedemptionRepository.from_url_key(
             config.supabase_url,
             config.supabase_service_role_key,
+        )
+        from app.repositories.supabase.item_delivery import SupabaseItemDeliveryRepository
+
+        item_delivery_repo = SupabaseItemDeliveryRepository.from_url_key(
+            config.supabase_url, config.supabase_service_role_key
         )
         from app.repositories.supabase.item_use import SupabaseItemUseRepository
 
@@ -342,4 +349,5 @@ def create_default_container(config: APIConfig | None = None) -> ApiContainer:
         personal_saves=personal_saves,
         account_service=accounts,
         announcer=create_announcer(config),
+        item_delivery_repository=item_delivery_repo,
     )

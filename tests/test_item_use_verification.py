@@ -244,9 +244,11 @@ class ReviveVerificationTests(unittest.TestCase):
             (1, 1),
         )
         self.assertIn("Caja 2, posición 2", LocalWriteController._describe(intent))
-        # Revive is not a production mutation; only the owner's enabled kinds are.
+        # Revive is not a production mutation; only the owner's enabled kinds
+        # are (072 adds the coordinated Shop delivery, deliver_item).
         self.assertEqual(
-            PRODUCTION_MUTATIONS, {"add_item", "transfer_remove", "transfer_insert"}
+            PRODUCTION_MUTATIONS,
+            {"add_item", "deliver_item", "transfer_remove", "transfer_insert"},
         )
 
     def test_wrong_claim_and_bare_client_receipt_denied(self):

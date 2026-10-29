@@ -360,14 +360,37 @@ class FrontendReads:
             if season["status"] in ("active", "finished", "archived")
             else []
         )
+        from app.domain.shop_item_uses import describe_use
+
+        game = self.league_game(sid, tid)
+        items = self.rows(
+            "public_shop_items", "id,code,name,category,description,base_price"
+        )
+        for item in items:
+            item["use"] = describe_use(item["code"], game)
         return ShopRead(
-            items=self.rows(
-                "public_shop_items", "id,code,name,category,description,base_price"
-            ),
+            items=items,
             promotions=promotions,
             balance=self.balance(sid, tid),
             season_status=season["status"],
+            league_game=game,
         )
+
+    def league_game(self, sid, tid):
+        """The game of the save this trainer's season accepted (its bound
+        identity), or None before one: what the Shop's compatibility uses."""
+        from app.domain.shop_item_uses import GAMES
+
+        players = self.rows(
+            "season_players", "current_save_file_id", season_id=sid, trainer_id=tid
+        )
+        save = players[0]["current_save_file_id"] if players else None
+        if not save:
+            return None
+        rows = self.rows("save_files", "metadata", id=save)
+        identity = (rows[0].get("metadata") or {}).get("save_identity") if rows else None
+        game = identity.get("game") if isinstance(identity, dict) else None
+        return game if game in GAMES else None
 
     def observed_entities(self, sid, tid, save):
         # Look up recorded reconciliations, never manufacture identity from a slot.
@@ -459,18 +482,43 @@ class FrontendReads:
                     season_id=sid, trainer_id=tid,
                 )
             }
+        from app.domain.shop_item_uses import BAG_ITEMS, describe_use
+
+        game = self.league_game(sid, tid) if purchases else None
+        deliveries = (
+            {
+                d["purchase_id"]: d
+                for d in self.rows(
+                    "item_deliveries",
+                    "purchase_id,kind,item_code,game,status,finished_at",
+                    season_id=sid,
+                    trainer_id=tid,
+                )
+                if d["status"] != "RELEASED"
+            }
+            if purchases
+            else {}
+        )
         for purchase in purchases:
             item = catalog[purchase["shop_item_id"]]
             purchase.update(item_name=item["name"], item_code=item["code"])
             purchase['physical_state'] = physical_state(
                 item['code'], uses.get(purchase['id']), used=purchase['status'] == 'used'
             )
+            purchase["use"] = describe_use(item["code"], game)
+            delivery = deliveries.get(purchase["id"])
+            if delivery:
+                purchase["delivery"] = {
+                    **{k: delivery[k] for k in ("status", "kind", "item_code", "game", "finished_at")},
+                    "item_name": BAG_ITEMS.get(delivery["item_code"], (None, None))[1],
+                }
         from app.domain.unlimited_items import UNLIMITED_ITEMS
 
         return InventoryRead(
             purchases=purchases,
             targets=targets,
             unlimited_items=[dict(item) for item in UNLIMITED_ITEMS],
+            league_game=game,
         )
 
     def hall(self, offset=0):

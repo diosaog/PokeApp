@@ -148,6 +148,7 @@ class SupabaseV2SchemaTests(unittest.TestCase):
                 "069_real_test_corrections.sql",
                 "070_dead_box_and_live_league.sql",
                 "071_preseason_shop.sql",
+                "072_shop_item_delivery.sql",
             ],
         )
         for path in _migration_files():
@@ -358,7 +359,7 @@ class SupabaseV2SchemaTests(unittest.TestCase):
         self.assertTrue(bootstrap.startswith("-- ONLY FOR EMPTY POKEAPP V2 DATABASE."))
         self.assertEqual(bootstrap, render_bootstrap())
         self.assertIn(
-            "Source of truth: supabase/v2/migrations/001_core.sql through 071_preseason_shop.sql",
+            "Source of truth: supabase/v2/migrations/001_core.sql through 072_shop_item_delivery.sql",
             bootstrap,
         )
         self.assertNotIn("drop table", lowered)
@@ -411,6 +412,13 @@ class SupabaseV2SchemaTests(unittest.TestCase):
                 self.assertIn('revoke all on public.discord_announcements from public, anon, authenticated, service_role', security_sql)
                 self.assertIn('grant select, update on public.discord_announcements to service_role', security_sql)
                 continue
+            if table == 'item_deliveries':
+                # 072: backend-only single use of a paid in-game object; no delete.
+                self.assertIn('alter table public.item_deliveries enable row level security', security_sql)
+                self.assertIn('alter table public.item_deliveries force row level security', security_sql)
+                self.assertIn('revoke all on public.item_deliveries from public,anon,authenticated,service_role', security_sql)
+                self.assertIn('grant select,insert,update on public.item_deliveries to service_role', security_sql)
+                continue
             if table == 'launcher_observations':
                 self.assertIn('alter table public.launcher_observations enable row level security', security_sql)
                 self.assertIn('alter table public.launcher_observations force row level security', security_sql)
@@ -452,7 +460,7 @@ class SupabaseV2SchemaTests(unittest.TestCase):
             else:
                 self.assertIn(f"'{table}'", security_sql, table)
 
-        self.assertEqual(security_sql.count("enable row level security"), 39)
+        self.assertEqual(security_sql.count("enable row level security"), 40)
         self.assertIn("alter table public.%i enable row level security", security_sql)
 
 

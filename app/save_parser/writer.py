@@ -296,24 +296,29 @@ class PkhexProcessWriter:
             raise NativeWriteError("VERIFICATION_FAILED")
         return plans
 
-    def inventory(self, source: bytes) -> dict:
-        """Read-only quick-item counts and per-title limits for this exact file."""
+    def inventory(self, source: bytes, items: tuple[str, ...] | None = None) -> dict:
+        """Read-only counts and per-title limits for this exact file: the quick
+        items, or up to 8 named objects (072: Shop objects; `max` 0 = this
+        game's bag cannot hold it)."""
         if type(source) is not bytes or len(source) not in NATIVE_SIZES.values():
             raise NativeWriteError("UNSUPPORTED_FORMAT")
-        response = self._run(
-            "--inventory-items",
-            {
-                "schema_version": 1,
-                "source_base64": base64.b64encode(source).decode("ascii"),
-            },
-        )
+        request = {
+            "schema_version": 1,
+            "source_base64": base64.b64encode(source).decode("ascii"),
+        }
+        if items is not None:
+            if not 1 <= len(items) <= 8 or len(set(items)) != len(items):
+                raise NativeWriteError("INVALID_REQUEST")
+            request["items"] = list(items)
+        response = self._run("--inventory-items", request)
+        names = set(QUICK_ITEMS if items is None else items)
         items = response["semantic_diff"]
         if (
             response["status"] != "inspected"
             or response["source_sha256"] != _digest(source)
             or response["output_base64"] is not None
             or not isinstance(items, dict)
-            or set(items) != set(QUICK_ITEMS)
+            or set(items) != names
             or any(
                 set(v) != {"count", "max", "addable"}
                 or any(type(v[k]) is not int or v[k] < 0 for k in v)

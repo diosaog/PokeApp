@@ -33,11 +33,19 @@ GAMES = frozenset(("X", "Y", "OR", "AS", "SN", "MN", "US", "UM"))
 # a robbery leg also needs the server's paired begin (PairedApplyPermit) and the
 # hosted verifier's proofs. Which trainers may run them is decided server-side.
 # test_marking and revive never pass this switch (revive has no product flow).
+# 072 (owner decision 2026-10-29): deliver_item puts one paid Shop object in the
+# bag; like a robbery leg it applies only with the in-process permit of the
+# delivery flow, after the server reserved that purchase (app/launcher/item_delivery.py).
 PRODUCTION_MUTATIONS: frozenset[str] = frozenset(
-    {"add_item", "transfer_remove", "transfer_insert"}
+    {"add_item", "deliver_item", "transfer_remove", "transfer_insert"}
 )
 PUBLIC_READY_MUTATIONS: frozenset[str] = frozenset(
-    {"add_item", "transfer_remove", "transfer_insert"}
+    {"add_item", "deliver_item", "transfer_remove", "transfer_insert"}
+)
+# Applied only by their coordinated flow (PairedApplyPermit), never by the
+# generic «confirm» of a prepared change.
+COORDINATED_MUTATIONS: frozenset[str] = frozenset(
+    {"deliver_item", "transfer_remove", "transfer_insert"}
 )
 PENDING = ("PREPARED", "AWAITING_CONFIRMATION", "RECOVERY_REQUIRED")
 # Owner decision 2026-10-26: one ordinary daily restore point per save, kept 30 days.
@@ -330,6 +338,7 @@ class LocalWriteEngine:
                 "transfer_remove",
                 "transfer_insert",
                 "add_item",
+                "deliver_item",
             )
             or target.path == capability.fixture_root
             or not target.path.is_relative_to(capability.fixture_root)
@@ -741,11 +750,16 @@ class LocalWriteEngine:
         paired_permit: PairedApplyPermit | None = None,
     ) -> WriteReceipt:
         record = self._load(operation_id)
-        if record["intent"]["mutation"]["kind"].startswith("transfer_") and (
+        kind = record["intent"]["mutation"]["kind"]
+        if kind in COORDINATED_MUTATIONS and (
             type(paired_permit) is not PairedApplyPermit
             or paired_permit.operation_id != operation_id
         ):
-            raise WriteSafetyError("TRANSFER_COORDINATED_APPLICATION_REQUIRED")
+            raise WriteSafetyError(
+                "DELIVERY_COORDINATED_APPLICATION_REQUIRED"
+                if kind == "deliver_item"
+                else "TRANSFER_COORDINATED_APPLICATION_REQUIRED"
+            )
         if record.get("mode") == "export":
             return self._confirm_export(
                 record, closed_emulator_confirmed=closed_emulator_confirmed
@@ -1287,7 +1301,8 @@ class LocalWriteEngine:
     def cancel_paired_prepared(
         self, operation_id: str, *, paired_permit
     ) -> WriteReceipt:
-        """Retain backup/stage; only abandon an unstarted, server-cancelled pair.
+        """Retain backup/stage; only abandon an unstarted, server-cancelled pair
+        or an unapplied Shop delivery (072).
 
         No namespace mutation or compensating restore is performed here.
         """
@@ -1295,8 +1310,7 @@ class LocalWriteEngine:
         if (
             type(paired_permit) is not PairedApplyPermit
             or paired_permit.operation_id != operation_id
-            or record["intent"]["mutation"].get("kind")
-            not in ("transfer_remove", "transfer_insert")
+            or record["intent"]["mutation"].get("kind") not in COORDINATED_MUTATIONS
             or record.get("commit_started")
             or record.get("phase") == "restore"
         ):

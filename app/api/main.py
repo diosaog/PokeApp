@@ -26,7 +26,7 @@ from app.api.routes import wipe_revivals
 from app.api.routes import launcher
 from app.api.routes import saves
 from app.api.routes import personal_saves
-from app.api.routes import accounts, incidents, item_use, transfers
+from app.api.routes import accounts, incidents, item_delivery, item_use, transfers
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 
@@ -123,6 +123,7 @@ def create_app(
     api.include_router(personal_saves.public_router)
     api.include_router(accounts.router)
     api.include_router(item_use.router)
+    api.include_router(item_delivery.router)
     api.include_router(transfers.router)
     api.include_router(incidents.router)
     return api

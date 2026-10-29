@@ -424,9 +424,8 @@ def rehearse(args) -> dict:
             )
 
         rows_after = local_fingerprints(pg, public_tables)
-        # 071 only redefines the normal purchase function: no row and no read
-        # changes (purchases are commands; the shop proof buys on the same
-        # backup in rolled-back transactions, tools.validate_phase071_shop).
+        # 072 adds the private item_deliveries table, its commands and the
+        # purchase_refund ledger type: no existing row and no read changes.
         changed = [t for t in public_tables if rows_before[t] != rows_after[t]]
         ok(
             not changed,
@@ -457,11 +456,12 @@ def rehearse(args) -> dict:
             """select c.relname||' rls='||c.relrowsecurity||' force='||c.relforcerowsecurity
             from pg_class c join pg_namespace n on n.oid=c.relnamespace where n.nspname='public' and c.relkind='r'
             and c.relname in ('item_use_authorizations','item_use_verifications','item_use_artifacts','item_use_transfers',
-            'item_use_transfer_legs','transfer_provenance','transfer_commit_permits','admin_incident_commands','discord_announcements') order by 1""",
+            'item_use_transfer_legs','transfer_provenance','transfer_commit_permits','admin_incident_commands','discord_announcements',
+            'item_deliveries') order by 1""",
             "supabase_admin",
         )
-        ok(len(new_tables) == 9 and all(t.endswith("rls=true force=true") for t in new_tables),
-           "9 private operational tables exist and force RLS", new_tables)  # fmt: skip
+        ok(len(new_tables) == 10 and all(t.endswith("rls=true force=true") for t in new_tables),
+           "10 private operational tables exist and force RLS", new_tables)  # fmt: skip
         verifier = pg.lines(
             "select rolcanlogin::text||rolsuper::text||rolbypassrls::text from pg_roles where rolname='pokeapp_item_verifier'",
             "supabase_admin",
@@ -471,7 +471,9 @@ def rehearse(args) -> dict:
             "verifier role created without login, superuser or RLS bypass",
         )
         from tools.validate_phase070_pg import validate
+        from tools.validate_phase072_delivery import validate as validate_072
         report["phase070"] = validate(pg)
+        report["phase072"] = validate_072(pg)
         ok(local_fingerprints(pg, public_tables) == rows_after, "focused fixtures rolled back exactly")
         upgraded = catalog_local(pg)
     finally:

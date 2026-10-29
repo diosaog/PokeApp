@@ -152,8 +152,17 @@ class LocalWriteController:
             }
 
     def _confirmable(self, receipt):
+        from app.launcher.write_engine import COORDINATED_MUTATIONS
+
         try:
-            return bool(receipt) and self.engine.allows_operation(receipt.operation_id)
+            # A Shop delivery or a robbery leg applies only through its own
+            # coordinated flow, never through this generic confirmation.
+            return (
+                bool(receipt)
+                and self.engine.allows_operation(receipt.operation_id)
+                and self.engine.intent_for(receipt.operation_id).mutation.get("kind")
+                not in COORDINATED_MUTATIONS
+            )
         except Exception:  # noqa: BLE001 - unreadable journal never becomes a confirmable write
             return False
 
@@ -306,6 +315,10 @@ class LocalWriteController:
             )
         if change.get("kind") == "add_item":
             from app.launcher.quick_items import describe
+
+            return describe(change)
+        if change.get("kind") == "deliver_item":
+            from app.launcher.item_delivery import describe
 
             return describe(change)
         if change.get("kind") != "test_marking":

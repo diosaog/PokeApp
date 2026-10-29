@@ -15,6 +15,12 @@ if (args.Length == 3 && args[0] == "--quick-item-checks")
     return;
 }
 
+if (args.Length == 3 && args[0] == "--shop-item-checks")
+{
+    ShopItemChecks.Run(args[1], args[2]);
+    return;
+}
+
 if (args.Length == 2 && args[0] == "--transfer-compatibility")
 {
     TransferChecks.Compatibility(args[1]);

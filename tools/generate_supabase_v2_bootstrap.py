@@ -80,6 +80,7 @@ EXPECTED_MIGRATIONS = [
     "069_real_test_corrections.sql",
     "070_dead_box_and_live_league.sql",
     "071_preseason_shop.sql",
+    "072_shop_item_delivery.sql",
 ]
 
 FORBIDDEN_TOKENS = [

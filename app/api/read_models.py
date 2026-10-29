@@ -218,6 +218,28 @@ class TrainerCollectionRead(BaseModel):
     dead_box: int | None = Field(default=None, ge=1, le=32)
 
 
+GameCode = Literal["X", "Y", "OR", "AS", "SN", "MN", "US", "UM"]
+
+
+class ItemUseOption(BaseModel):
+    code: str
+    name: str
+    item_id: int
+    games: list[GameCode]
+
+
+class ItemUseRead(BaseModel):
+    """How a Shop item is used (072, app/domain/shop_item_uses.py): `bag` and
+    `choice` reach the bag through the Launcher; `compatible` is for the
+    trainer's league game (null while no save is accepted yet)."""
+
+    mode: Literal["pokemon", "bag", "choice", "permission", "unavailable", "unknown"]
+    games: list[GameCode]
+    compatible: bool | None = None
+    reason: Literal["ITEM_NOT_USABLE", "ITEM_INCOMPATIBLE_WITH_GAME"] | None = None
+    options: list[ItemUseOption] = Field(default_factory=list)
+
+
 class ItemRead(BaseModel):
     id: UUID
     code: str
@@ -225,6 +247,7 @@ class ItemRead(BaseModel):
     category: str
     description: str
     base_price: int
+    use: ItemUseRead | None = None
 
 
 class PromotionRead(BaseModel):
@@ -243,6 +266,20 @@ class ShopRead(BaseModel):
     promotions: list[PromotionRead]
     balance: str | None = Field(pattern=r"^-?(0|[1-9][0-9]*)$")
     season_status: str
+    # The game of the save this trainer's league uses (null before one).
+    league_game: GameCode | None = None
+
+
+class DeliveryRead(BaseModel):
+    """The single use of an in-game object: in the trainer's Launcher
+    (RESERVED), in the bag (DELIVERED) or recorded (USED)."""
+
+    status: Literal["RESERVED", "DELIVERED", "USED"]
+    kind: Literal["bag", "permission"]
+    item_code: str | None = None
+    item_name: str | None = None
+    game: GameCode | None = None
+    finished_at: datetime | None = None
 
 
 class PurchaseRead(BaseModel):
@@ -255,6 +292,8 @@ class PurchaseRead(BaseModel):
     item_code: str
     acquisition_type: Literal["paid", "reward"] = "paid"
     physical_state: str | None = None
+    use: ItemUseRead | None = None
+    delivery: DeliveryRead | None = None
 
 
 class TargetRead(BaseModel):
@@ -284,6 +323,7 @@ class InventoryRead(BaseModel):
     # onwards). Older APIs omit the field and the web keeps their direct
     # redemption, so a web release never removes a flow its API still serves.
     physical_items: Literal[True] = True
+    league_game: GameCode | None = None
 
 
 class HallRead(BaseModel):

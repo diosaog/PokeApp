@@ -177,7 +177,7 @@ class SeasonAdminApiTests(unittest.TestCase):
         # Phase 29 adds the cancellation of a reversible robbery: 44.
         # 069 adds the season cancellation preview and the account detail,
         # session revocation, personal-save unlink and deletion: 49.
-        self.assertEqual(len(routes), 50)
+        self.assertEqual(len(routes), 51)
         for path, method in routes:
             self.assertIn("security", schema["paths"][path][method])
 
@@ -200,7 +200,7 @@ class SeasonAdminAdapterTests(unittest.TestCase):
         self.assertEqual((exc.exception.code,exc.exception.status),('INVALID_REQUEST',422))
 
     def test_each_operation_has_separate_rpc(self):
-        self.assertEqual(len(set(RPCS.values())), 13)
+        self.assertEqual(len(set(RPCS.values())), 14)
         calls = []
         client = SimpleNamespace(rpc=lambda name, args: (calls.append((name, args)) or SimpleNamespace(execute=lambda: SimpleNamespace(data={}))))
         repo = SupabaseSeasonAdminRepository(client)

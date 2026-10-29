@@ -114,6 +114,11 @@ class DeadBoxBody(StrictBody):
     dead_box_number: Annotated[int, Field(strict=True, ge=1, le=32)]
 
 
+class PurchaseRefundBody(StrictBody):
+    # 072: why an untouched paid purchase is refunded (kept in the audit).
+    reason: Annotated[str, Field(min_length=3, max_length=500)]
+
+
 class AdminReceipt(StrictBody):
     operation_id: UUID
     resource_id: UUID

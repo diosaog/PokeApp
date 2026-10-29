@@ -46,6 +46,14 @@ class ItemUseRejectedError(RepositoryError):
         self.code, self.status = code, status
 
 
+class ItemDeliveryRejectedError(RepositoryError):
+    """Whitelisted rejection of a bag delivery, a permission use or a refund."""
+
+    def __init__(self, code: str, status: int):
+        super().__init__(code)
+        self.code, self.status = code, status
+
+
 class TransferRejectedError(PersistenceError):
     """Whitelisted paired-transfer rejection; still a persistence failure to callers."""
 
