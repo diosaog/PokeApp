@@ -5,6 +5,20 @@ milestone record; it does not maintain a second live phase-status ledger.
 
 ## Current project position
 
+- Shop delivery and League rules (2026-10-29): **PUBLISHED / VERIFIED.** Supabase
+  072–073 applied once (65 history records); API **120 routes**, Railway
+  `3526625a`; Cloudflare `f3c144a0`; signed stable Launcher **0.26.8**.
+  Delivery is bound to the authorized save and recovers through its journal.
+  Single-day League uses 2 points/win, configured common coins and existing
+  prizes; new adjusted-death rate 0.1, historical rules preserved. Backup
+  rehearsal 18/18, public acceptance 22/22, package delivery 21/21 and isolated
+  installed update 8/8 PASS. Friends' real-PC acceptance remains pending;
+  physical robbery/revive is not newly certified. No active season currently:
+  owner setup/common coins/Caja 7 remain normal next use.
+  [Authoritative current record](work-in-progress/final-corrections-live.md).
+
+- Earlier milestones below are historical and do not override that live record.
+
 - Real-test corrections (2026-10-29): **PUBLISHED / VERIFIED.** Supabase 069
   (61 records), Railway API 114 routes `5e537567`, Cloudflare `166e044c`, Launcher
   0.26.5 on the signed stable feed. Preseason deaths/sanctions shown as provisional

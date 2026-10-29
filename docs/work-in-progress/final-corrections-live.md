@@ -1,47 +1,136 @@
 # Final corrections — live execution record
 
-## Shop delivery 072 and League rules — Codex continuation, 2026-10-29
+## Shop delivery 072 and League rules — 2026-10-29, final publication
 
-**IN PROGRESS; publication is not claimed.** Entry HEAD `9222cd4`, main two
-commits ahead of the fetched origin `3d59900`; tracked tree initially clean.
-Claude's `74f9536` and `9222cd4` are preserved. All unrelated untracked files,
-including the protected guide, are excluded from this work.
+**PUBLISHED / VERIFIED.** Implementation and publication are complete. Acceptance
+on friends' PCs and physical robbery/revive with real saves remains explicitly
+pending. This entry supersedes the operational state below.
 
-- Public Launcher **0.26.7 VERIFIED**: full installer 159398331 bytes, SHA-256
-  `e884350a3a455efb9954ffa51b8b5282d48471cd859fa971ef9acc4766919e11`;
-  stable feed 0.26.7/minimum 0.26.0, Ed25519 verified against the packaged key.
-  No claim of acceptance on a friend's PC. 0.26.8 is free in remote R2.
-- Recovered Claude results: web 246/246, TypeScript and Prettier PASS,
-  Electron UI 80/80. Native 1776 and quick-item 281 evidence retained; those
-  matrices are not repeated. Focused checks will cover changes and final package.
-- Remote migration history currently ends at 071; 072 is committed locally,
-  not published. API remains deployment `002dd4dd`; final live preflight pending.
-- League changes are still required: confirmed wins in one-day round robin,
-  new death deductions, equal configured coins and existing item rewards.
-  A prospective 073 will preserve closed history and existing discarded configs.
-- Assigned disjoint subtasks: League implementation/tests; delivery safety and
-  integration; Launcher package/update acceptance. Root owns publication,
-  production rehearsal, explicit Git staging and this operational record.
-- Definitive 072/073 rehearsal **15/15 PASS** on backup captured 22:06 UTC
-  (`pre-release-20261029T220554Z.dump`, SHA-256 `1ce033a2…73bc3`): 117 restored
-  table fingerprints and catalog match; 95 business/Storage/Shadow tables and
-  104 reads unchanged, zero new browser grants, fixtures rolled back, upgrade
-  equals fresh 001–073. Both SQL files were frozen throughout. Later harness
-  hardening also checks hashes at start/application/end; SQL bytes unchanged.
-- New delivery identity check and recovery refresh: Python 96 PASS, Electron UI
-  81/81 PASS. New League: Python 85 PASS, React Admin/League 22 PASS, real SQL
-  closing/replay/correction plus positional multi-day regression PASS. Release
-  gates 6 PASS; focused Electron confirmation/supervisor 23 PASS. Groups overlap.
-- Stable 0.26.8 candidate built/signed, not published: package audit PASS;
-  packaged startup/recovery 9/9; packaged Python/native/NTFS delivery 17/17.
+Entry HEAD was `9222cd4`, two commits ahead of fetched origin `3d59900`, with a
+clean tracked tree. Claude's `74f9536` and `9222cd4` were retained and pushed.
+Codex implementation `1166aa4`, package acceptance `3809621` and final tie-contract
+fix `fcdda56` are committed and pushed. The documentation closure follows those
+commits; use Git for its exact HEAD. Unrelated untracked files remain excluded.
+
+### Final deployed components
+
+- **Supabase 001–073**, 65 history records (001–009 predate the history table).
+  Applied once: 072 `20261029221701`; 073 `20261029221703`. **Do not reapply.**
+  SQL SHA-256: 072 `7535336d24f976dd1a71cceaf46ea3dee4d28fd732abafa91dbb592be02613ee`;
+  073 `c43b1b91914f5e4dde43a20bf427d185407b7c0b35945df1328b8d04ee798432`.
+- **Railway API** `3526625a-ec5c-411d-9f55-677b8fcb854a`, SUCCESS, from committed
+  export `fcdda56` (328 files). Health 200, **120 routes**, deployed delivery
+  identity field and `single_league_prize` enum checked. Claude's `9222cd4` removed
+  the redundant refund route: 120 is correct, rather than the earlier draft's
+  121. Refunds reuse audited 062. Verifier service/configuration unchanged.
+- **Cloudflare** `f3c144a0-eefa-40c7-93a0-5305a11d27cb`, final `fcdda56` source;
+  17 live JS/CSS/config assets byte-identical to the final build. The final deploy
+  completed during the interruption; its completion was recovered, not repeated.
+- **Launcher 0.26.8**, stable Ed25519 feed, minimum 0.26.0, existing stable key.
   Installer 159427247 bytes, SHA-256
   `3c8f54a96938b0a16d4e3b71176c2fc7cc97fbfa64011212d50c18a0c87cb233`.
-  Isolated actual NSIS install/update retention check is running.
+  Immutable installer uploaded and read back before switching the feed; official
+  download then checked in full after web deployment. The actual shipped 0.26.7
+  updater accepts the remote 0.26.8 offer; 0.26.8 sees no further update.
+  Authenticode remains unsigned under the established private-distribution policy.
+  0.26.7 remains available at its immutable version URL.
 
-Private evidence: `%LOCALAPPDATA%/PokeApp-migration-evidence/shop-delivery-league/20261029/`.
-No production business mutation, refund or real-save write is authorized by this
-record. Only the deployments/migrations requested by the owner will be applied
-after the backup and rehearsal gates pass.
+### What was completed
+
+- Claude had implemented the 072 table/RPCs, item contract, native delivery,
+  Launcher journal flow and web/Electron panels. Recovered final evidence:
+  web 246/246, TypeScript/Prettier PASS, Electron UI 80/80, native 1776 and free
+  quick-item 281 checks. Those native matrices were retained, not rerun.
+- Delivery now binds the reservation to the **server-accepted native trainer
+  identity**, checked against the actual local bytes before preparation. An
+  unbound or wrong same-game save cannot receive the object. Recovery completion
+  now refreshes Inventory even when it finishes after the original action.
+  Backups, emulator blocking, exact quantity, account isolation, idempotency,
+  uncertain reservations and journal reconciliation remain enforced. Caramelos
+  and Escamas retain their free independent flow. Chapa Plateada is refused in Y.
+- **073**: one-division, one-day round robin earns 2 points per confirmed win,
+  0 per loss, immediately in the League; closing does not add wins twice.
+  Equal coins come from the configured reward map. A nonuniform map requires an
+  explicit common amount during setup; no amount is invented or backfilled.
+  First/last receive the existing Blindar/Robar items through audited reward
+  purchases, once, after material ties are resolved. Multiple-day positional
+  points/coins and Cup rules are preserved.
+- New adjusted-death rate is 0.1; one wipe revival contributes two adjusted
+  deaths (0.2), with the existing overlap protection and participant dead box.
+  Three ordinary deaths plus one wipe revival deduct 0.5. One live total is
+  shown; final closed totals and older corrections preserve their frozen rules.
+- Final integration review caught a missing prize-tie value in the API model,
+  browser parser and label. `fcdda56` fixes the full path; real planner tie →
+  HTTP 409 → web parser → resolution form is tested. No SQL or Launcher rebuild
+  was required for this API/web correction.
+
+### Verification and preservation
+
+- Fresh private backup captured 22:06 UTC:
+  `pre-release-20261029T220554Z.dump`, SHA-256
+  `1ce033a26b2221668066746307e2a7e93479831524acd3341b481a8700d73bc3`.
+  Final committed-LF rehearsal **18/18 PASS**: 117 restored table fingerprints
+  and catalog match; 95 business/Storage/Shadow tables and 104 reads unchanged;
+  no new browser grants; fixtures rolled back; upgrade equals fresh 001–073.
+  Migration hashes are fixed and checked throughout. The earlier CRLF-source
+  rehearsal is retained separately; publication used the final LF hashes above.
+- Focused tests PASS: delivery Python **96**, Launcher UI **81**, League Python
+  **85**, Admin/League React **22**, final tie API **36** and React **21**;
+  release gates **6**, Electron confirmation/supervisor **23**. Groups overlap
+  and must not be added as unique tests. Final TypeScript/Vite build, affected
+  Prettier, correctness Ruff and diff checks passed.
+- Final package: audit PASS; actual executable startup/recovery **9/9**;
+  packaged Python bytecode + real native writer + disposable NTFS saves **21/21**,
+  including uncertain post-publish recovery without double delivery. Dependency
+  audit: 71 core and 185 parser PE files use bundled or stock Windows libraries;
+  parser is self-contained .NET 8.0.29. Fixture generation also uses a complete
+  self-contained runtime, avoiding the host's incomplete shared runtime.
+- Actual NSIS clean install/update **8/8**, using a disposable UpdateTest identity
+  with byte-identical stable code/runtime payloads (15 app and 303 runtime files
+  per version, except test package metadata). Encrypted session marker, selected
+  synthetic save, backups and Electron storage survive 0.26.7 → 0.26.8. Test
+  installation uninstalled; zero UpdateTest registrations remain. This proves
+  isolated retention, not a login on an actual friend's PC or an owner install.
+- Post-migration production preservation **8/8**: **116 previous tables remain
+  byte-identical**; only the 117th, migration history, grows 63 → 65. New delivery
+  table empty, FORCE RLS, no browser rights; 17 operational functions service-only.
+  Existing policies/schema ACLs unchanged. Advisors add only two expected INFO
+  entries (private table without policy, fresh unused index), no WARN/ERROR delta.
+  Owner purchases (including Chapa Plateada), balances, saves and seasons unchanged.
+- Final public acceptance **22/22**, including full installer hash/signature,
+  tamper rejection, API authorization denial and CORS. Public Edge at 1440/390:
+  both screenshots reviewed, zero overflow and JS/HTTP errors. Final API runtime
+  log has no traceback or HTTP 5xx in the inspected window. No real account login
+  or production business write was used to produce these checks.
+
+### Next normal use and acceptance boundary
+
+No remaining deployment or known reproducible technical blocker in this scope.
+There are currently **no active seasons** (the three existing seasons were already
+discarded on entry). Normal setup still belongs to the owner: create a season,
+enrol players, select the format/common coins and set Anto's Y participation to
+**Caja 7**, then prepare/open the matchday. Existing discarded seasons were not
+changed or replaced by this work.
+
+Friends should install/update to 0.26.8, confirm the correct account, reopen to
+check retained session/save, and verify automatic sync after saving. Reuse
+[the short installation/linking instructions](../launcher-amigos.md). If a PC
+fails, collect its masked Launcher diagnostic. No acceptance on that PC is
+claimed until it is observed. Physical robbery and physical revive remain
+pending real-save acceptance; this release does not certify them.
+
+Private evidence: `%LOCALAPPDATA%/PokeApp-migration-evidence/shop-delivery-league/20261029/`:
+`recovered-claude-tests.json`, `rehearsal.json`, `apply/`,
+`final-readonly-preservation.json`, `api-final-deployment.json`,
+`final-assets-api.json`, `hosted-acceptance.json`, `hosted-final/`,
+`package-delivery-final/`, `packaged/`, `installed-rehearsal-final/`,
+`public0268updateproof.json`, build/deployment logs. Build root:
+`%LOCALAPPDATA%/PokeApp-releases/0.26.8/`.
+
+Protected guide was not opened, read, searched, copied, moved, hashed, modified
+or staged. Unrelated untracked files remain untouched. Explicit staging only;
+no forced push, destructive Git cleanup, owner installation, real-save write,
+automatic refund, credential exposure or Discord message.
 
 ## Launcher 0.26.7: supervised core («Sin conexión» on a friend's PC) — 2026-10-29 17:40 UTC
 
