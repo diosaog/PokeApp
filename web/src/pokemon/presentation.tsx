@@ -20,6 +20,7 @@ import itemIds from "./visual-items.json";
 import moveTypes from "./move-types.json";
 import catalogShopArt from "./shop-art.json";
 import animatedIds from "./animated-sprites.json";
+import animatedModels from "./animated-models.json";
 import formSprites from "./visual-forms.json";
 import generationSprites from "./generation-sprites.json";
 import { badgeAsset } from "./badges";
@@ -27,6 +28,9 @@ import { useReducedMotion } from "../preferences";
 
 const base = "/visuals/v1";
 const items = new Set(itemIds);
+const pixelIds = new Set<number>(animatedIds);
+const modelIds = new Set<number>(animatedModels.normal);
+const shinyIds = new Set<number>(animatedModels.shiny);
 // Art of the save's own generation: X/Y renders for Gen6 games, Ultra Sun/
 // Ultra Moon renders for Gen7. A screen that knows its game wraps its
 // Pokémon in <SpriteGeneration value={gameGeneration(game)}>.
@@ -119,11 +123,14 @@ export function PokemonSprite({
   form,
   large = false,
   animated = false,
+  shiny = false,
 }: {
   species: string;
   form?: number | null;
   large?: boolean;
+  // Only Home, a trainer's team and the Pokémon card ask for motion.
   animated?: boolean;
+  shiny?: boolean;
 }) {
   const id = catalogId("species", species);
   const generation = useContext(SpriteGeneration);
@@ -138,20 +145,30 @@ export function PokemonSprite({
       ? `${base}/gen${generation}/${variant}.png`
       : `${base}/pokemon/${variant}.png`
     : null;
-  // Existing animations depict base forms only, in Black/White-era pixel art:
-  // never mixed into a Gen6/7 save's renders.
-  const animationId =
-    !form && id && !ownSet && animatedIds.includes(id) ? id : null;
+  // Authentic animations, base forms only (an alternate form never animates
+  // as another), and only where a screen asks for them. A Gen6/7 game's art
+  // animates with its battle models (animated/v2: the clips the Gen7 stills
+  // come from); screens without a game keep the Black/White ones of their
+  // Black/White stills. Shiny clips where verified. Downloaded on demand.
+  const animation =
+    !animated || form || !id
+      ? null
+      : ownSet
+        ? modelIds.has(id)
+          ? `/visuals/animated/v2/${shiny && shinyIds.has(id) ? "shiny/" : ""}${id}.gif`
+          : null
+        : pixelIds.has(id)
+          ? `/visuals/animated/v1/${id}.gif`
+          : null;
   const ref = useRef<HTMLImageElement>(null);
   const [moving, setMoving] = useState(false);
   const [failed, setFailed] = useState<string | null>(null);
-  const [failedAnimation, setFailedAnimation] = useState<number | null>(null);
+  const [failedAnimation, setFailedAnimation] = useState<string | null>(null);
   const reduced = useReducedMotion();
   useEffect(() => {
     setMoving(false);
     if (
-      !animated ||
-      !animationId ||
+      !animation ||
       failed === still ||
       !ref.current ||
       typeof IntersectionObserver === "undefined" ||
@@ -170,44 +187,44 @@ export function PokemonSprite({
       observer.disconnect();
       document.removeEventListener("visibilitychange", update);
     };
-  }, [animated, animationId, reduced, still, failed]);
+  }, [animation, reduced, still, failed]);
   // Keep the still image on screen until the animation has downloaded, so a
   // Pokémon never blinks out while its GIF arrives.
-  const [loadedAnimation, setLoadedAnimation] = useState<number | null>(null);
+  const [loadedAnimation, setLoadedAnimation] = useState<string | null>(null);
   useEffect(() => {
     if (
       !moving ||
-      !animationId ||
-      failedAnimation === animationId ||
-      loadedAnimation === animationId
+      !animation ||
+      failedAnimation === animation ||
+      loadedAnimation === animation
     )
       return;
     const preload = new Image();
-    preload.onload = () => setLoadedAnimation(animationId);
-    preload.onerror = () => setFailedAnimation(animationId);
-    preload.src = `/visuals/animated/v1/${animationId}.gif`;
+    preload.onload = () => setLoadedAnimation(animation);
+    preload.onerror = () => setFailedAnimation(animation);
+    preload.src = animation;
     return () => {
       preload.onload = preload.onerror = null;
     };
-  }, [moving, animationId, failedAnimation, loadedAnimation]);
+  }, [moving, animation, failedAnimation, loadedAnimation]);
   const animate =
     moving &&
-    !!animationId &&
-    failedAnimation !== animationId &&
-    loadedAnimation === animationId;
+    !!animation &&
+    failedAnimation !== animation &&
+    loadedAnimation === animation;
   return still && failed !== still ? (
     <img
       ref={ref}
       key={still}
       className={`pokemon-sprite ${large ? "large" : ""}`}
-      src={animate ? `/visuals/animated/v1/${animationId}.gif` : still}
+      src={animate ? animation : still}
       width={96}
       height={96}
       alt={pokemonName("species", species)}
       loading="lazy"
       decoding="async"
       onError={() => {
-        if (animate) setFailedAnimation(animationId);
+        if (animate) setFailedAnimation(animation);
         else {
           console.warn("pokemon_sprite_load_failed", still);
           setFailed(still);

@@ -201,6 +201,7 @@ export function Profile({
                 slots={pc.data.pokemon}
                 deadBox={pc.data.dead_box}
                 showDead
+                animateTeam
               />
             </SpriteGeneration>
           ) : (
@@ -230,6 +231,7 @@ export function Profile({
                       key={i}
                       pokemon={pokemon}
                       onClick={() => setSelected(pokemon)}
+                      animated
                     />
                   ))}
                 </div>
@@ -259,6 +261,7 @@ export function Profile({
                 visibility="public"
                 deadBox={collection.data.dead_box}
                 showDead
+                animateTeam
               />
             </SpriteGeneration>
           ) : (

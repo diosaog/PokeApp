@@ -18,7 +18,7 @@ type Public = Pick<
   | "item"
   | "form"
   | "item_generation"
-> & { moves?: { name: string }[] | null };
+> & { moves?: { name: string }[] | null; is_shiny?: boolean };
 export type DetailPokemon =
   | { visibility: "public"; pokemon: Public }
   | { visibility: "self"; pokemon: Model<"PrivatePokemonRead"> };
@@ -42,7 +42,13 @@ export function PokemonDetails(props: DetailPokemon) {
         </span>
         {/* Pokédex-style stage: the Pokémon on its type colour. */}
         <div className="dex-stage">
-          <PokemonSprite species={p.species} form={p.form} large animated />
+          <PokemonSprite
+            species={p.species}
+            form={p.form}
+            shiny={p.is_shiny}
+            large
+            animated
+          />
         </div>
         {dex && (
           <span className="dex-number">Nº {String(dex).padStart(3, "0")}</span>

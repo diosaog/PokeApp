@@ -153,6 +153,7 @@ export function HomePage() {
                     <PokemonSprite
                       species={p.pokemon.species}
                       form={p.pokemon.form}
+                      shiny={p.pokemon.is_shiny}
                       animated
                     />
                     {!!p.pokemon.form && <small>Forma {p.pokemon.form}</small>}

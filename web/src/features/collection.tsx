@@ -20,10 +20,13 @@ export function Collection({
   showDead = false,
   visibility = "self",
   deadBox = null,
+  animateTeam = false,
 }: {
   slots: (Model<"SlotRead"> | Model<"PublicSlotRead">)[];
   visibility?: "self" | "public";
   showDead?: boolean;
+  // A trainer's team in Entrenadores moves; «Mi PC» and every box stay still.
+  animateTeam?: boolean;
   // The participant's dead box in the season (Box 8 unless the administrator
   // set another); none outside a season.
   deadBox?: number | null;
@@ -69,7 +72,12 @@ export function Collection({
         }
         aria-label={`${pokemonTitle(p)} · ${label}`}
       >
-        <PokemonSprite species={p.species} form={p.form} animated={animated} />
+        <PokemonSprite
+          species={p.species}
+          form={p.form}
+          shiny={p.is_shiny}
+          animated={animated}
+        />
         <PokemonStatusFlags flags={p.status_flags} />
         <span>{pokemonTitle(p)}</span>
         <small>Nv. {p.level ?? "—"}</small>
@@ -103,7 +111,7 @@ export function Collection({
               team.find((s) => s.position?.slot === i + 1)?.pokemon,
               i,
               `Equipo ${i + 1}`,
-              true,
+              animateTeam,
             ),
           )}
         </div>
