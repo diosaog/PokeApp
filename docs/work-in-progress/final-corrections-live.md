@@ -1,5 +1,66 @@
 # Final corrections — live execution record
 
+## Launcher 0.26.7: supervised core («Sin conexión» on a friend's PC) — 2026-10-29 17:40 UTC
+
+**PUBLISHED / VERIFIED here; the friend's PC itself was not accessed.** Commits
+`262a993` (fix), `1f972b5` (0.26.7), `f51dac0` (web card, acceptance stage).
+API, DB (071) and verifier unchanged.
+
+- **Symptom:** the hub stayed «● Sin conexión» and actions said «El núcleo del
+  Launcher está tardando en responder» while the web showed the account signed
+  in. **Reproduced exactly:** once the Python core exits, 0.26.6 never starts
+  it again (`worker.killed` stays false, writes to the dead pipe fail
+  silently) and every later request, forever, ends in that timeout; the hub
+  never gets a state, so its initial «Sin conexión» stays.
+- **Code-detectable causes found:** (1) no single-instance lock: a second
+  window (double click while the first opens) starts a second core, which
+  dies in 0.6 s on `LAUNCHER_ALREADY_RUNNING` (reproduced with the packaged
+  0.26.6 core; its traceback went to an ignored stderr); a core outliving its
+  window holds the profile 15 s with a request in flight (measured; up to
+  90 s by the joins). In the packaged app libuv's kill-on-close job ends the
+  core with Electron, so overlapping instances are the main path. (2) Any
+  startup error ended it the same way (e.g. an unreadable `config.json`).
+  (3) TLS: the core trusted only the bundled certifi roots; this PC's Windows
+  store holds a Kaspersky interception root that does not intercept the core
+  here, but an antivirus/proxy that scans HTTPS would leave the core offline
+  while Chromium (Windows store) keeps the web signed in. (4) `state` waited
+  behind backup re-verification (under the controller lock) and the emulator
+  search (on the pipe thread). (5) Session sharing asked the core once at
+  start: a core slower than 5 s left the web without the Launcher session.
+  Packaged dependencies checked: 71 core + 185 parser PE files, no import
+  outside the bundle or stock Windows.
+- **0.26.7:** single instance; supervised core (`core-supervisor.cjs`:
+  STARTING/WAITING_PREVIOUS/READY/FATAL events, restart with backoff, a silent
+  core restarted only if no physical command was sent in 120 s and no state
+  said `write.busy`; otherwise waited for and reported); core waits up to
+  120 s for a held profile; FATAL codes + exit codes; bad `config.json` set
+  aside (`config.invalid-*.json`); shutdown joins the write loop (90 s) but
+  not a hung request (3 s); Windows store + certifi roots; failure kinds
+  (`TLS_UNTRUSTED`…) in the state and the hub; an access token the server
+  already expired is refreshed once before signing out; discovery beside the
+  pipe; backups verified outside the lock; hub rows «Núcleo local»,
+  «Conexión con PokeApp», «Cuenta» apart (the last account kept while the
+  core restarts), «Reintentar ahora», «Copiar diagnóstico» (masked
+  `logs/launcher.log` + `logs/core.log`, no token/PIN/save); update notices
+  no longer depend on the core.
+- **Validation:** Python **1294 OK** (18 new); Electron **45/45** (13 new);
+  UI smoke **71/71** (9 new); dev and **packaged** end-to-end: core killed →
+  READY again by itself ~1.8 s; second instance exits, no second core;
+  Launcher killed → its core gone in 0.8 s; reopened → READY 1.3 s.
+  Package audit PASS; packaged acceptance **7/7**; installed 0.26.6's own
+  updater/key accept the 0.26.7 manifest, 0.26.7 sees no update. Installer
+  159398331 bytes, sha256 `e884350a…919e11`, unsigned (private distribution);
+  R2 read back, then `updates/stable.json` (min 0.26.0). Web `c4dd88e2`
+  (card 0.26.7); hosted acceptance `--stage launcher_recovery` **19/19**.
+- **Pending on the friend's PC (not claimed solved there):** update to 0.26.7
+  (in-app offer, or the web download); if the hub still shows a core problem,
+  «Saves y Launcher → Launcher → Copiar diagnóstico» and send the text.
+
+Private evidence: `%LOCALAPPDATA%/PokeApp-migration-evidence/launcher-recovery/20261029/`
+(`packaged/acceptance.json`, `packaged-recovery.txt`, `update-chain.json`,
+`launcher-publication.log`, `web-deploy.log`, `hosted-acceptance.json`).
+Build root `%LOCALAPPDATA%/PokeApp-releases/0.26.7/`.
+
 ## Shop in the preseason and selective animated sprites — 2026-10-29 15:50 UTC
 
 **PUBLISHED / VERIFIED.** Commits `792ab48` (DB 071, API, Shop web), `ca2c513`
