@@ -634,6 +634,26 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/v1/admin/seasons/{season_id}/cancellation-preview": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Cancellation Preview
+     * @description Consequences of cancelling: what is kept, what stops, what blocks it.
+     */
+    get: operations["cancellation_preview_v1_admin_seasons__season_id__cancellation_preview_get"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/v1/admin/seasons/{season_id}/discard": {
     parameters: {
       query?: never;
@@ -1368,6 +1388,26 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/v1/read/active-saves": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Active Saves
+     * @description Each trainer's active save (game and badges), for «Entrenadores».
+     */
+    get: operations["active_saves_v1_read_active_saves_get"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/v1/auth/account-capabilities": {
     parameters: {
       query?: never;
@@ -1549,6 +1589,74 @@ export interface paths {
     put?: never;
     /** Reset Pin */
     post: operations["reset_pin_v1_admin_accounts__trainer_id__reset_pin_post"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/admin/accounts/{trainer_id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Admin Account Detail */
+    get: operations["admin_account_detail_v1_admin_accounts__trainer_id__get"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/admin/accounts/{trainer_id}/revoke-sessions": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** Admin Revoke Sessions */
+    post: operations["admin_revoke_sessions_v1_admin_accounts__trainer_id__revoke_sessions_post"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/admin/accounts/{trainer_id}/unlink-personal-save": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** Admin Unlink Personal Save */
+    post: operations["admin_unlink_personal_save_v1_admin_accounts__trainer_id__unlink_personal_save_post"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/admin/accounts/{trainer_id}/delete": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** Admin Delete Account */
+    post: operations["admin_delete_account_v1_admin_accounts__trainer_id__delete_post"];
     delete?: never;
     options?: never;
     head?: never;
@@ -1864,6 +1972,67 @@ export interface components {
       /** Bootstrap Required */
       bootstrap_required: boolean;
     };
+    /** AccountCommandReceipt */
+    AccountCommandReceipt: {
+      /**
+       * Trainer Id
+       * Format: uuid
+       */
+      trainer_id: string;
+      /** Sessions Ended */
+      sessions_ended?: number | null;
+      /** Refresh Revoked */
+      refresh_revoked?: boolean | null;
+      /** Removed */
+      removed?: boolean | null;
+    };
+    /** AccountDetail */
+    AccountDetail: {
+      /**
+       * Trainer Id
+       * Format: uuid
+       */
+      trainer_id: string;
+      /** Display Name */
+      display_name: string;
+      /** Globally Enabled */
+      globally_enabled: boolean;
+      /** Is Admin */
+      is_admin: boolean;
+      /** Provisioned */
+      provisioned: boolean;
+      /** Revision */
+      revision: number;
+      /** Deleted */
+      deleted: boolean;
+      /**
+       * Created At
+       * Format: date-time
+       */
+      created_at: string;
+      /** Credential */
+      credential?: {
+        [key: string]: unknown;
+      } | null;
+      /** Session Guard */
+      session_guard?: {
+        [key: string]: unknown;
+      } | null;
+      /** Pin Change Pending */
+      pin_change_pending: boolean;
+      /** Personal Save */
+      personal_save?: {
+        [key: string]: unknown;
+      } | null;
+      /** Seasons */
+      seasons: {
+        [key: string]: unknown;
+      }[];
+      /** History */
+      history: {
+        [key: string]: unknown;
+      };
+    };
     /** AccountStatusReceipt */
     AccountStatusReceipt: {
       /**
@@ -1882,6 +2051,27 @@ export interface components {
       expected_revision: number;
       /** Enabled */
       enabled: boolean;
+    };
+    /** ActiveSavePage */
+    ActiveSavePage: {
+      /** Items */
+      items: components["schemas"]["ActiveSaveRead"][];
+    };
+    /** ActiveSaveRead */
+    ActiveSaveRead: {
+      /**
+       * Trainer Id
+       * Format: uuid
+       */
+      trainer_id: string;
+      /** Game */
+      game: string | null;
+      /**
+       * Uploaded At
+       * Format: date-time
+       */
+      uploaded_at: string;
+      progress: components["schemas"]["ProgressRead"];
     };
     /** AddParticipantBody */
     AddParticipantBody: {
@@ -2003,6 +2193,62 @@ export interface components {
       expected_case_revision: number;
       /** Reason */
       reason: string;
+    };
+    /**
+     * CancellationPreview
+     * @description What cancelling a season would leave behind, before confirming it.
+     */
+    CancellationPreview: {
+      /**
+       * Season Id
+       * Format: uuid
+       */
+      season_id: string;
+      /** Name */
+      name: string;
+      /** Status */
+      status: string;
+      /** Allowed */
+      allowed: boolean;
+      /**
+       * Mode
+       * @enum {string}
+       */
+      mode: "clean" | "preserving" | "unavailable";
+      /** Open Robberies */
+      open_robberies: number;
+      /** Open Item Uses */
+      open_item_uses: number;
+      /** Participants */
+      participants: number;
+      /** Matchdays */
+      matchdays: number;
+      /** Closed Matchdays */
+      closed_matchdays: number;
+      /** Open Matchdays */
+      open_matchdays: number;
+      /** Results */
+      results: number;
+      /** Team Locks */
+      team_locks: number;
+      /** Purchases */
+      purchases: number;
+      /** Pending Purchases */
+      pending_purchases: number;
+      /** Coin Transactions */
+      coin_transactions: number;
+      /** Coins Awarded */
+      coins_awarded: string;
+      /** Progress Rewards */
+      progress_rewards: number;
+      /** Saves */
+      saves: number;
+      /** Cups */
+      cups: number;
+      /** Penalties */
+      penalties: number;
+      /** Trials */
+      trials: number;
     };
     /** ChampionshipBo3Body */
     ChampionshipBo3Body: {
@@ -2681,6 +2927,27 @@ export interface components {
       snapshot_revision: number;
       /** Matches */
       matches: components["schemas"]["DayMatch"][];
+    };
+    /** DeleteAccountReceipt */
+    DeleteAccountReceipt: {
+      /**
+       * Trainer Id
+       * Format: uuid
+       */
+      trainer_id: string;
+      /** Deleted */
+      deleted: boolean;
+      /** Sessions Ended */
+      sessions_ended: number;
+      /** History Kept */
+      history_kept: {
+        [key: string]: unknown;
+      };
+    };
+    /** DeleteAccountRequest */
+    DeleteAccountRequest: {
+      /** Confirmation */
+      confirmation: string;
     };
     /** DiscardSeasonBody */
     DiscardSeasonBody: {
@@ -3365,6 +3632,14 @@ export interface components {
       dead_count_source: "observed_current_save" | "unknown";
       /** Dead Count Observed At */
       dead_count_observed_at: string | null;
+      /** Provisional Matchday Number */
+      provisional_matchday_number?: number | null;
+      /** Provisional Dead Count */
+      provisional_dead_count?: number | null;
+      /** Provisional Points Reduction */
+      provisional_points_reduction?: string | null;
+      /** Provisional Points */
+      provisional_points?: string | null;
     };
     /** LiveRulesBody */
     LiveRulesBody: {
@@ -4672,6 +4947,8 @@ export interface components {
        * @default false
        */
       can_discard: boolean;
+      /** Cancellation Mode */
+      cancellation_mode?: ("clean" | "preserving" | "unavailable") | null;
       /** Initial Assignment Rule */
       initial_assignment_rule?: "observed_deaths_v1" | null;
       season: components["schemas"]["SeasonSummary"];
@@ -6919,6 +7196,37 @@ export interface operations {
       };
     };
   };
+  cancellation_preview_v1_admin_seasons__season_id__cancellation_preview_get: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        season_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["CancellationPreview"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
   discard_v1_admin_seasons__season_id__discard_post: {
     parameters: {
       query?: never;
@@ -8455,6 +8763,26 @@ export interface operations {
       };
     };
   };
+  active_saves_v1_read_active_saves_get: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ActiveSavePage"];
+        };
+      };
+    };
+  };
   account_capabilities_v1_auth_account_capabilities_get: {
     parameters: {
       query?: never;
@@ -8802,6 +9130,140 @@ export interface operations {
         };
         content: {
           "application/json": components["schemas"]["PinChangeResponse"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  admin_account_detail_v1_admin_accounts__trainer_id__get: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        trainer_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["AccountDetail"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  admin_revoke_sessions_v1_admin_accounts__trainer_id__revoke_sessions_post: {
+    parameters: {
+      query?: never;
+      header: {
+        "Idempotency-Key": string;
+      };
+      path: {
+        trainer_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["AccountCommandReceipt"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  admin_unlink_personal_save_v1_admin_accounts__trainer_id__unlink_personal_save_post: {
+    parameters: {
+      query?: never;
+      header: {
+        "Idempotency-Key": string;
+      };
+      path: {
+        trainer_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["AccountCommandReceipt"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  admin_delete_account_v1_admin_accounts__trainer_id__delete_post: {
+    parameters: {
+      query?: never;
+      header: {
+        "Idempotency-Key": string;
+      };
+      path: {
+        trainer_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["DeleteAccountRequest"];
+      };
+    };
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["DeleteAccountReceipt"];
         };
       };
       /** @description Validation Error */

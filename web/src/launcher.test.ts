@@ -72,16 +72,48 @@ it("adopts an access token only, never a refresh token, and rejects junk", () =>
   expect(session.access_token).toBe(offer.access_token);
 });
 
-it("renewal waits for the Launcher and gives up without a session", async () => {
+it("renewal waits for the Launcher; a slow answer is null, not a sign-out", async () => {
   vi.useFakeTimers();
   inLauncher();
   navigation();
   listenForLauncherSession(() => {});
   const renewed = renewFromLauncher();
   window.__pokeappLauncherSession!(offer);
-  expect((await renewed)?.access_token).toBe(offer.access_token);
+  const fresh = await renewed;
+  expect(fresh !== "signed_out" && fresh?.access_token).toBe(
+    offer.access_token,
+  );
   const none = renewFromLauncher();
+  vi.advanceTimersByTime(15000);
+  let settled = false;
+  void none.then(() => (settled = true));
+  await Promise.resolve();
+  expect(settled).toBe(false); // still waiting after 15 s
   vi.advanceTimersByTime(15000);
   expect(await none).toBeNull();
   vi.useRealTimers();
+});
+
+it("an explicit «no session» from the Launcher is definitive", async () => {
+  inLauncher();
+  navigation();
+  const signedOut = vi.fn();
+  listenForLauncherSession(() => {}, signedOut);
+  const renewal = renewFromLauncher();
+  window.__pokeappLauncherSession!({ signed_out: true });
+  expect(await renewal).toBe("signed_out");
+  expect(signedOut).toHaveBeenCalledTimes(1);
+});
+
+it("Launcher events refresh the web for known changes only", async () => {
+  const { listenForLauncherEvents } = await import("./launcher");
+  inLauncher();
+  const seen = vi.fn();
+  const stop = listenForLauncherEvents(seen);
+  window.__pokeappLauncherEvent!({ type: "save-synced" });
+  window.__pokeappLauncherEvent!({ type: "rm -rf" });
+  window.__pokeappLauncherEvent!(null);
+  expect(seen.mock.calls).toEqual([["save-synced"]]);
+  stop();
+  expect(window.__pokeappLauncherEvent).toBeUndefined();
 });

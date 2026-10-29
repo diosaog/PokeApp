@@ -17,6 +17,8 @@ const mocks = vi.hoisted(() => ({
 vi.mock("../state", () => ({
   useApp: () => ({ season: mocks.season, me: { trainer_id: "owner" } }),
   queries: { invalidateQueries: mocks.invalidations },
+  // Sprite generation per trainer: no season progress in these fixtures.
+  useOverview: () => ({ data: { players: [] } }),
   usePC: () => {
     mocks.pc();
     return { data: { save: null, status: "no_current_save" } };

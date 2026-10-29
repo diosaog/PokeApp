@@ -78,6 +78,8 @@ export class ApiError extends Error {
 export function errorText(error: unknown) {
   if (error instanceof ApiError && error.code === "READ_TIMEOUT")
     return "La consulta ha tardado demasiado. Puedes volver a consultar los datos.";
+  if (error instanceof ApiError && error.code === "SESSION_RENEWAL_PENDING")
+    return "Renovando tu sesión con PokeApp Launcher… vuelve a intentarlo en unos segundos.";
   if (!(error instanceof ApiError))
     return "No se pudo conectar. Comprueba la conexión y vuelve a intentarlo.";
   const adminErrors: Record<string, string> = {
@@ -162,7 +164,14 @@ export function errorText(error: unknown) {
     ONGOING_COMPETITION_DEPENDENCY:
       "Hay una Copa en curso o en preparación vinculada a este entrenador. Resuelve esa participación antes de cambiar su estado en Liga.",
     DISCARD_NOT_ALLOWED:
-      "Esta temporada no puede descartarse. Solo se permite un borrador sin actividad que necesite conservarse.",
+      "No se puede cancelar ahora: la temporada no está en marcha o tiene robos o revividos sin cerrar. Revisa la vista previa de la cancelación.",
+    ACCOUNT_NOT_FOUND: "Esa cuenta ya no existe. Actualiza la lista.",
+    ACCOUNT_CONFIRMATION_REQUIRED:
+      "Escribe exactamente el nombre actual de la cuenta para confirmar.",
+    ACCOUNT_ACTIVE_PARTICIPANT:
+      "Esta cuenta participa en una Liga en curso. Retírala primero de esa temporada (Administración › Entrenadores) y vuelve a intentarlo.",
+    SEASON_PARTICIPANT_REQUIRED:
+      "Ese entrenador no participa en la temporada seleccionada.",
     PARTICIPANT_HAS_CURRENT_TEAM_LOCK:
       "Este entrenador ya fijó su equipo para la jornada. Su participación no puede cambiarse ahora.",
     ROUND_OPEN:
@@ -236,6 +245,39 @@ export function errorText(error: unknown) {
   return labels[error.status] ?? "Servicio temporalmente no disponible.";
 }
 
+// A browser keeps its own sign-in across reloads and restarts (refresh token
+// only, never the PIN); inside the Launcher the Launcher keeps it instead.
+type StoredSession = { refresh_token: string; user_id: string };
+export type SessionStore = {
+  read(): StoredSession | null;
+  write(value: StoredSession | null): void;
+};
+const STORE_KEY = "pokeapp.session.v1";
+export const browserSessionStore: SessionStore = {
+  read() {
+    try {
+      const value = JSON.parse(localStorage.getItem(STORE_KEY) || "null");
+      return value &&
+        typeof value.refresh_token === "string" &&
+        value.refresh_token.length >= 8 &&
+        value.refresh_token.length <= 16384 &&
+        typeof value.user_id === "string"
+        ? { refresh_token: value.refresh_token, user_id: value.user_id }
+        : null;
+    } catch {
+      return null;
+    }
+  },
+  write(value) {
+    try {
+      if (value) localStorage.setItem(STORE_KEY, JSON.stringify(value));
+      else localStorage.removeItem(STORE_KEY);
+    } catch {
+      // Storage unavailable (private mode): the session stays in memory.
+    }
+  },
+};
+
 export class ApiClient {
   private session: Session | null = null;
   private refreshing: Promise<void> | null = null;
@@ -247,16 +289,37 @@ export class ApiClient {
   onExpired = () => {};
   // Inside PokeApp Launcher the session belongs to the Launcher: this web holds
   // an access token only and asks the Launcher for a fresh one instead.
-  renewSession: (() => Promise<Session | null>) | null = null;
+  renewSession: (() => Promise<Session | "signed_out" | null>) | null = null;
+  persist: SessionStore | null = null;
   constructor(readonly base = import.meta.env.VITE_API_BASE_URL || "") {}
   setSession(session: Session | null) {
     this.generation++;
     this.session = session;
     this.commands.clear();
+    this.remember(session);
+  }
+  private remember(session: Session | null) {
+    this.persist?.write(
+      session?.refresh_token
+        ? { refresh_token: session.refresh_token, user_id: session.user_id }
+        : null,
+    );
   }
   logout() {
     this.setSession(null);
     this.onExpired();
+  }
+  // A remembered browser sign-in, renewed once; false when there is none.
+  async restore() {
+    const stored = this.persist?.read();
+    if (!stored || this.session) return false;
+    this.session = {
+      user_id: stored.user_id,
+      access_token: "",
+      refresh_token: stored.refresh_token,
+    };
+    await this.refresh();
+    return true;
   }
   // The same signed-in trainer, with a newer access token from the Launcher.
   renewAccess(session: Session) {
@@ -264,6 +327,10 @@ export class ApiClient {
   }
   get signedIn() {
     return this.session !== null;
+  }
+  // A token handed over by the Launcher (renewed only through it).
+  get launcherSession() {
+    return this.session !== null && !this.session.refresh_token;
   }
   get configured() {
     return Boolean(this.base);
@@ -322,16 +389,26 @@ export class ApiClient {
   private refresh() {
     if (!this.refreshing) {
       const generation = this.generation;
-      const token = this.session?.refresh_token;
+      // Another tab may already have rotated the remembered token.
+      const stored = this.persist?.read();
+      const token =
+        stored && stored.user_id === this.session?.user_id
+          ? stored.refresh_token
+          : this.session?.refresh_token;
       this.refreshing = (async () => {
         if (!token && this.renewSession) {
           const renewed = await this.renewSession();
           if (generation !== this.generation)
             throw new ApiError(401, "SESSION_CHANGED");
+          if (renewed === "signed_out")
+            throw new ApiError(401, "INVALID_SESSION");
           if (renewed) {
             this.session = renewed;
             return;
           }
+          // No answer yet: the session is kept and the next request asks
+          // the Launcher again. A slow answer is never a sign-out.
+          throw new ApiError(0, "SESSION_RENEWAL_PENDING");
         }
         if (!token) throw new ApiError(401, "INVALID_SESSION");
         const data = await this.send<Model<"RefreshResponse">>(
@@ -345,9 +422,17 @@ export class ApiClient {
         if (generation !== this.generation)
           throw new ApiError(401, "SESSION_CHANGED");
         this.session = data.session;
+        this.remember(data.session);
       })()
         .catch((error) => {
-          if (generation === this.generation) this.logout();
+          // Only a rejected session signs out; a network failure or a busy
+          // server keeps it for the next attempt.
+          if (
+            generation === this.generation &&
+            error instanceof ApiError &&
+            error.status === 401
+          )
+            this.logout();
           throw error;
         })
         .finally(() => {

@@ -1,11 +1,17 @@
 import { useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import type { Model } from "../api/types";
-import { queries, useApp, useOverview, useRead } from "../state";
+import { queries, useApp, useMyPC, useOverview, useRead } from "../state";
 import { Card, Empty, Heading, Loading, Notice, Tag } from "../ui";
 import { Pokemon, WithSeason } from "./core";
-import { TrainerPhoto, StatPill } from "../pokemon/presentation";
-import { GameProgress, SaveGame } from "./progress";
+import {
+  SpriteGeneration,
+  TrainerPhoto,
+  StatPill,
+  gameGeneration,
+} from "../pokemon/presentation";
+import { SaveGame, gameName } from "./progress";
+import { TrainerGame, useActiveSaves } from "./trainers";
 import { Collection } from "./collection";
 import { Inventory } from "./inventory";
 import { WipeRevivals } from "./wipe-revivals";
@@ -82,7 +88,8 @@ function AccountProfileView({ trainer }: { trainer: string }) {
         </>
       )}
       {own && (
-        <>
+        // Personal options, at the very end of the trainer's own profile.
+        <section className="profile-personal" aria-label="Opciones personales">
           <button
             className="button primary"
             disabled={adminOperationPending}
@@ -93,7 +100,8 @@ function AccountProfileView({ trainer }: { trainer: string }) {
           {editing && (
             <AccountEditor profile={profile.data} refresh={refresh} />
           )}
-        </>
+          <PreferencesCard />
+        </section>
       )}
     </>
   );
@@ -117,10 +125,9 @@ export function Profile({
     `/v1/read/seasons/${season}/scouting?trainer_id=${encodeURIComponent(trainer)}`,
     !!season && !own,
   );
-  const pc = useRead<Model<"PCRead">>(
-    `/v1/read/seasons/${season}/pc`,
-    !!season && own,
-  );
+  // Own profile: the active save, as in «Mi PC» and «Entrenadores».
+  const pc = useMyPC(own);
+  const active = useActiveSaves();
   const collection = useRead<Model<"TrainerCollectionRead">>(
     `/v1/read/seasons/${season}/trainers/${trainer}/collection`,
     !!season && !own,
@@ -160,7 +167,10 @@ export function Profile({
               <StatPill label="Monedas" value={row?.coin_balance} />
               <StatPill label="Muertos" value={row?.dead_count ?? "—"} />
             </div>
-            <GameProgress progress={player.progress} compact />
+            <TrainerGame
+              active={active.get(trainer)}
+              seasonProgress={player.progress}
+            />
           </div>
         </Card>
         {own && (
@@ -170,7 +180,6 @@ export function Profile({
         )}
       </div>
       <Notice error={league.error} />
-      {own && <PreferencesCard />}
       {own && league.data && (
         <details className="profile-wipe">
           <summary>Revividos tras wipe · consultar o actualizar</summary>
@@ -180,15 +189,23 @@ export function Profile({
       {own ? (
         <>
           <SaveGame game={pc.data?.save?.game} />
+          {pc.seasonGame && (
+            <p className="muted">
+              La temporada seleccionada compite con tu partida de Pokémon{" "}
+              {gameName(pc.seasonGame)}; aquí ves tu partida activa.
+            </p>
+          )}
           <Notice error={pc.error} />
-          {pc.isPending ? (
+          {pc.isPending && !pc.data ? (
             <Loading />
           ) : pc.data?.status === "ready" ? (
-            <Collection
-              key={pc.data.save?.id}
-              slots={pc.data.pokemon}
-              showDead
-            />
+            <SpriteGeneration value={gameGeneration(pc.data.save?.game)}>
+              <Collection
+                key={pc.data.save?.id}
+                slots={pc.data.pokemon}
+                showDead
+              />
+            </SpriteGeneration>
           ) : (
             <Empty>
               Tu equipo y tus cajas aparecerán al sincronizar tu partida.{" "}
@@ -208,15 +225,18 @@ export function Profile({
             ) : rival.error ? (
               <Notice error={rival.error} />
             ) : rival.data?.team?.length ? (
-              <div className="public-party">
-                {rival.data.team.map((pokemon, i) => (
-                  <Pokemon
-                    key={i}
-                    pokemon={pokemon}
-                    onClick={() => setSelected(pokemon)}
-                  />
-                ))}
-              </div>
+              // The official team competes with the season's save.
+              <SpriteGeneration value={gameGeneration(player.progress?.game)}>
+                <div className="public-party">
+                  {rival.data.team.map((pokemon, i) => (
+                    <Pokemon
+                      key={i}
+                      pokemon={pokemon}
+                      onClick={() => setSelected(pokemon)}
+                    />
+                  ))}
+                </div>
+              </SpriteGeneration>
             ) : (
               <Empty>
                 Aún no hay Team Lock. Puedes consultar su partida sincronizada
@@ -243,11 +263,13 @@ export function Profile({
           {collection.isPending ? (
             <Loading />
           ) : collection.data?.status === "ready" ? (
-            <Collection
-              slots={collection.data.pokemon}
-              visibility="public"
-              showDead
-            />
+            <SpriteGeneration value={gameGeneration(collection.data.game)}>
+              <Collection
+                slots={collection.data.pokemon}
+                visibility="public"
+                showDead
+              />
+            </SpriteGeneration>
           ) : (
             !collection.error && (
               <Empty>
@@ -259,12 +281,17 @@ export function Profile({
         </>
       )}
       {selected && (
-        <PokemonDetailModal
-          visibility="public"
-          pokemon={selected}
-          onClose={() => setSelected(null)}
-        />
+        <SpriteGeneration value={gameGeneration(player.progress?.game)}>
+          <PokemonDetailModal
+            visibility="public"
+            pokemon={selected}
+            onClose={() => setSelected(null)}
+          />
+        </SpriteGeneration>
       )}
+      {/* Without accounts there is no «Editar mi perfil» block: the app
+          settings still close the trainer's own profile. */}
+      {own && !account && <PreferencesCard />}
     </>
   );
 }

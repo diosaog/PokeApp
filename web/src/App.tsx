@@ -28,7 +28,7 @@ import {
 import { api } from "./api/client";
 import type { Model } from "./api/types";
 import { useApp, useRead } from "./state";
-import { Field, Notice, Submit, Loading, form, text } from "./ui";
+import { Field, Notice, Submit, Loading, TopNotices, form, text } from "./ui";
 // Every screen behind the sign-in loads on demand: the sign-in screen ships
 // only the shell. Once signed in, the screens are fetched while the browser is
 // idle (warmScreens), so moving between them stays instant.
@@ -335,7 +335,8 @@ function SeasonPicker() {
   );
 }
 export default function App() {
-  const { me, logout, adminOperationPending, accountsEnabled } = useApp(),
+  const { me, restoring, logout, adminOperationPending, accountsEnabled } =
+      useApp(),
     [menu, setMenu] = useState(false),
     location = useLocation(),
     visited = useRef(location.pathname);
@@ -367,6 +368,15 @@ export default function App() {
     window.addEventListener("beforeunload", warn);
     return () => window.removeEventListener("beforeunload", warn);
   }, [adminOperationPending]);
+  if (!me && restoring)
+    return (
+      <main className="login" aria-busy="true">
+        <section className="login-form">
+          <Loading />
+          <p>Recuperando tu sesión…</p>
+        </section>
+      </main>
+    );
   if (!me) return <Login />;
   return (
     <div
@@ -511,6 +521,7 @@ export default function App() {
             PokeApp V2
           </span>
         </header>
+        <TopNotices />
         <main id="main" tabIndex={-1}>
           {adminOperationPending && (
             <p role="status" className="notice">

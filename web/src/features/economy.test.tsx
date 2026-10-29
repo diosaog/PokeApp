@@ -496,8 +496,12 @@ it("in a browser, an infinite item opens a popup that points to the Launcher hon
     screen.getAllByRole("button", { name: "Añadir a la bolsa" })[1],
   );
   const dialog = screen.getByRole("dialog", { name: "Escama Corazón" });
-  expect(dialog).toHaveTextContent(/a la bolsa de tu partida, no a un Pokémon/);
-  expect(dialog).toHaveTextContent(/confirmas con el emulador cerrado/);
+  expect(dialog).toHaveTextContent(
+    /a la bolsa de tu partida activa, no a un Pokémon/,
+  );
+  expect(dialog).toHaveTextContent(
+    /comprueba solo que el emulador está cerrado/,
+  );
   expect(
     screen.getByRole("link", { name: /Descargar Launcher/ }),
   ).toHaveAttribute("href", "/launcher/download");

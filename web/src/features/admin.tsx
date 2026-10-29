@@ -485,6 +485,41 @@ function DayAdmin({ dayId, setup }: { dayId: string; setup: Setup }) {
     </Card>
   );
 }
+// Why «Activar Liga» is not available, next to the button itself. Only one
+// League can be in progress: the whole product (sync, coins, Launcher) works
+// on one active season, so another one must be finished or cancelled first.
+function ActivationBlockers({ setup }: { setup: Setup }) {
+  const { setSeason } = useApp();
+  const seasons = useRead<Model<"SeasonPage">>("/v1/read/seasons?offset=0");
+  const reasons = setup.readiness.blocking_reasons;
+  if (setup.season.status !== "draft" || !reasons.length) return null;
+  const active = seasons.data?.items.find(
+    (s) => s.status === "active" && s.id !== setup.season.id,
+  );
+  return (
+    <div className="notice" role="status">
+      <strong>Para activar esta Liga falta:</strong>
+      <ul>
+        {reasons.map((reason) => (
+          <li key={reason}>
+            {reason === "no_other_active_season" && active ? (
+              <>
+                Ya hay otra Liga en curso: «{active.name}». Solo puede haber una
+                a la vez (la sincronización, las monedas y el Launcher trabajan
+                con una sola). Finalízala o cancélala en su «Zona de riesgo».{" "}
+                <button type="button" onClick={() => setSeason(active.id)}>
+                  Ir a «{active.name}»
+                </button>
+              </>
+            ) : (
+              readinessLabel(reason)
+            )}
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
 function Competition({ setup }: { setup: Setup }) {
   const { season, adminOperationPending } = useApp(),
     cmd = useAdminCommand(),
@@ -600,6 +635,7 @@ function Competition({ setup }: { setup: Setup }) {
             Gestionar Copas →
           </AdminLink>
         </div>
+        <ActivationBlockers setup={setup} />
         {!activate && <CommandState command={cmd} />}
       </Card>
       {activate && (
@@ -692,21 +728,122 @@ function Competition({ setup }: { setup: Setup }) {
     </>
   );
 }
+type CancellationPreview = {
+  season_id: string;
+  name: string;
+  status: string;
+  allowed: boolean;
+  mode: "clean" | "preserving" | "unavailable";
+  open_robberies: number;
+  open_item_uses: number;
+  participants: number;
+  matchdays: number;
+  closed_matchdays: number;
+  open_matchdays: number;
+  results: number;
+  team_locks: number;
+  purchases: number;
+  pending_purchases: number;
+  coin_transactions: number;
+  coins_awarded: string;
+  progress_rewards: number;
+  saves: number;
+  cups: number;
+  penalties: number;
+  trials: number;
+};
+// What a cancellation keeps, stops and needs first, before confirming.
+function CancellationConsequences({
+  preview,
+}: {
+  preview: CancellationPreview;
+}) {
+  const kept = [
+    [preview.closed_matchdays, "jornadas cerradas"],
+    [preview.open_matchdays, "jornadas abiertas (se detienen)"],
+    [preview.results, "resultados"],
+    [preview.team_locks, "equipos fijados"],
+    [preview.purchases, "compras"],
+    [
+      preview.coin_transactions,
+      `movimientos de monedas (${preview.coins_awarded} monedas concedidas)`,
+    ],
+    [preview.progress_rewards, "recompensas de progreso"],
+    [preview.saves, "partidas registradas"],
+    [preview.cups, "Copas vinculadas (quedan ocultas)"],
+    [preview.penalties, "sanciones"],
+    [preview.trials, "juicios"],
+  ].filter(([count]) => Number(count) > 0) as [number, string][];
+  return (
+    <>
+      {preview.mode === "clean" ? (
+        <p>
+          Sin actividad oficial: la temporada se descarta limpiamente. Deja de
+          verse y no queda nada que conservar.
+        </p>
+      ) : (
+        <>
+          <p>
+            La temporada quedará <strong>cancelada</strong>: deja de verse para
+            los entrenadores y no admite nuevas operaciones (jornadas, compras,
+            robos ni sincronización de partidas). Todo lo que ya ocurrió se
+            conserva para la trazabilidad y la auditoría; las monedas no se
+            restan ni se vuelven a dar.
+          </p>
+          {!!kept.length && (
+            <ul>
+              {kept.map(([count, label]) => (
+                <li key={label}>
+                  {count} {label}
+                </li>
+              ))}
+            </ul>
+          )}
+        </>
+      )}
+      <p>
+        {preview.participants} participante
+        {preview.participants === 1 ? "" : "s"}. Después podrás crear o activar
+        otra temporada.
+      </p>
+      {!preview.allowed && preview.mode !== "unavailable" && (
+        <p role="alert">
+          No se puede cancelar todavía:{" "}
+          {preview.open_robberies > 0 &&
+            `${preview.open_robberies} robo${preview.open_robberies === 1 ? "" : "s"} sin cerrar`}
+          {preview.open_robberies > 0 && preview.open_item_uses > 0 && " y "}
+          {preview.open_item_uses > 0 &&
+            `${preview.open_item_uses} revivir${preview.open_item_uses === 1 ? "" : "es"} aplicándose`}
+          . Un Pokémon a medio mover entre partidas podría quedar duplicado o
+          perdido: anúlalos o complétalos en «Economía e incidencias» y vuelve
+          aquí.
+        </p>
+      )}
+    </>
+  );
+}
 function Risk({ setup }: { setup: Setup }) {
   const { season } = useApp(),
     cmd = useAdminCommand(),
     [action, setAction] = useState(""),
     [actionRevision, setActionRevision] = useState(setup.setup_revision);
+  const cancellable = ["draft", "active"].includes(setup.season.status);
+  const preview = useRead<CancellationPreview>(
+    `/v1/admin/seasons/${season}/cancellation-preview`,
+    action === "discard" && cancellable,
+  );
   const labels: Record<string, string> = {
       archive: "Archivar temporada",
       discard:
-        setup.season.status === "active"
-          ? "Cancelar temporada sin competición"
-          : "Descartar temporada",
+        setup.season.status === "draft"
+          ? "Descartar temporada"
+          : "Cancelar temporada",
     },
     allowed: Record<string, boolean> = {
       archive: setup.season.status === "finished",
-      discard: setup.can_discard ?? setup.season.status === "draft",
+      // Always offered for a draft or active season; the preview says what
+      // happens and what, if anything, has to be resolved first.
+      discard: cancellable && (preview.data?.allowed ?? true),
     },
     busy = cmd.pending || cmd.uncertain;
   return (
@@ -714,12 +851,13 @@ function Risk({ setup }: { setup: Setup }) {
       <h2>Zona de riesgo</h2>
       <p>
         Finalizar da por cerrada la Liga. Archivar congela su paquete histórico
-        y registra el título en el Hall. Descartar conserva la trazabilidad.
+        y registra el título en el Hall.
       </p>
       <p>
-        Archivar está disponible después de finalizar la Liga. Solo se puede
-        descartar un borrador o cancelar una temporada activa sin jornadas,
-        resultados ni actividad económica. Se conserva su trazabilidad.
+        Puedes cancelar una temporada en cualquier momento mientras está en
+        borrador o en curso, también con jornadas empezadas. Antes de confirmar
+        verás qué se conserva y qué se detiene. Archivar está disponible después
+        de finalizar la Liga.
       </p>
       <div className="toolbar">
         {[
@@ -729,7 +867,14 @@ function Risk({ setup }: { setup: Setup }) {
           <button
             className="danger"
             key={op}
-            disabled={busy || !allowed[op]}
+            disabled={
+              busy || (op === "archive" ? !allowed.archive : !cancellable)
+            }
+            title={
+              op === "discard" && !cancellable
+                ? "Una temporada finalizada o archivada ya no está en marcha: no hay nada que cancelar."
+                : undefined
+            }
             onClick={() => {
               setActionRevision(setup.setup_revision);
               setAction(op);
@@ -739,6 +884,12 @@ function Risk({ setup }: { setup: Setup }) {
           </button>
         ))}
       </div>
+      {!cancellable && (
+        <p className="muted">
+          Esta temporada está {seasonLabel(setup.season.status).toLowerCase()}:
+          ya no está en marcha, así que no hay competición que cancelar.
+        </p>
+      )}
       {action && (
         <Modal
           title={labels[action]}
@@ -748,8 +899,15 @@ function Risk({ setup }: { setup: Setup }) {
         >
           <p>
             Acción: <strong>{labels[action]}</strong> · {setup.season.name}.
-            Revisa la temporada seleccionada.
           </p>
+          {action === "discard" &&
+            (preview.isPending ? (
+              <Loading />
+            ) : preview.data ? (
+              <CancellationConsequences preview={preview.data} />
+            ) : (
+              <Notice error={preview.error} />
+            ))}
           <form
             onSubmit={async (event) => {
               const data = form(event);
@@ -778,12 +936,12 @@ function Risk({ setup }: { setup: Setup }) {
               </p>
             )}
             {action === "discard" && (
-              <Field label="Motivo">
+              <Field label="Motivo (queda en la auditoría)">
                 <textarea name="reason" required maxLength={500} />
               </Field>
             )}
             <Field label={`Escribe ${setup.season.name} para confirmar`}>
-              <input name="confirmation" required />
+              <input name="confirmation" required autoComplete="off" />
             </Field>
             <CommandState command={cmd} />
             <Submit
@@ -791,6 +949,7 @@ function Risk({ setup }: { setup: Setup }) {
               disabled={
                 busy ||
                 !allowed[action] ||
+                (action === "discard" && !preview.data) ||
                 actionRevision !== setup.setup_revision
               }
             >

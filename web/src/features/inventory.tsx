@@ -237,15 +237,15 @@ export function Inventory() {
             <ItemIcon name={unlimitedInfo.name} />
             <p>
               <strong>Gratis e ilimitado.</strong> Se añade a la bolsa de tu
-              partida, no a un Pokémon: eliges la cantidad, PokeApp prepara una
-              copia verificada y confirmas. Nunca supera lo que cabe en la
+              partida activa, no a un Pokémon. Nunca supera lo que cabe en la
               bolsa.
             </p>
           </div>
           <p className="muted">
             Disponible en PokeApp Launcher, que trabaja con la partida de tu
-            equipo: eliges la cantidad, se guarda una copia de seguridad y
-            confirmas con el emulador cerrado.
+            equipo: eliges la cantidad y pulsas «Añadir a la bolsa». El Launcher
+            comprueba solo que el emulador está cerrado, guarda una copia
+            verificada, aplica el cambio y lo vuelve a comprobar.
           </p>
           <LauncherDownload />
         </Modal>

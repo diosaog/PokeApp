@@ -99,7 +99,7 @@ function Saves() {
               <h2>
                 {pc.isPending
                   ? "Consultando tu partida…"
-                  : "Aún no hay partida en esta temporada"}
+                  : "Aún no hay ninguna partida sincronizada"}
               </h2>
               <p>
                 PokeApp Launcher busca tu partida en el emulador y la envía sola

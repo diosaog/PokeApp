@@ -110,3 +110,113 @@ it("offers a targeted PIN reset without deletion or role editing", () => {
     screen.queryByRole("button", { name: /Eliminar|Administrador/ }),
   ).toBeNull();
 });
+
+const detail = {
+  trainer_id: "other",
+  display_name: "Ana",
+  globally_enabled: true,
+  is_admin: false,
+  provisioned: true,
+  revision: 3,
+  deleted: false,
+  created_at: "2026-10-01T10:00:00Z",
+  credential: { version: 2, reset_required: false },
+  session_guard: null,
+  pin_change_pending: false,
+  personal_save: { game: "Y", uploaded_at: "2026-10-28T20:00:00Z" },
+  seasons: [
+    {
+      season_id: "s1",
+      name: "Prueba",
+      status: "active",
+      participant_status: "active",
+      bound_game: "SN",
+      save_uploaded_at: null,
+      coin_balance: "16",
+    },
+  ],
+  history: { seasons: 1, coin_transactions: 4, saves: 2 },
+};
+function openRepair() {
+  mocks.read.mockImplementation((path: string) =>
+    path === "/v1/admin/accounts/other"
+      ? { data: detail, isPending: false, error: null }
+      : {
+          data: {
+            items: [
+              {
+                trainer_id: "other",
+                display_name: "Ana",
+                globally_enabled: true,
+                is_admin: false,
+                revision: 3,
+                provisioned: true,
+              },
+            ],
+            has_more: false,
+          },
+          isPending: false,
+          error: null,
+        },
+  );
+  render(
+    <MemoryRouter>
+      <AdminAccountsPage />
+    </MemoryRouter>,
+  );
+  fireEvent.click(
+    screen.getByRole("button", { name: "Estado y herramientas" }),
+  );
+}
+
+it("an account's real state is shown with its repair tools", () => {
+  openRepair();
+  expect(screen.getByText(/Pokémon Y · sincronizada/)).toBeInTheDocument();
+  expect(
+    screen.getByText(/Prueba \(En curso\).*compite con Pokémon Sol/),
+  ).toBeInTheDocument();
+  expect(screen.getByText(/Versión 2/)).toBeInTheDocument();
+});
+
+it("ending all sessions asks first and sends one command", async () => {
+  openRepair();
+  fireEvent.click(
+    screen.getByRole("button", { name: "Cerrar todas sus sesiones" }),
+  );
+  expect(mocks.execute).not.toHaveBeenCalled();
+  fireEvent.click(
+    screen.getByRole("button", { name: "Confirmar cierre de sesiones" }),
+  );
+  await waitFor(() =>
+    expect(mocks.execute).toHaveBeenCalledWith(
+      "/v1/admin/accounts/other/revoke-sessions",
+      {},
+    ),
+  );
+});
+
+it("deleting needs the exact name and keeps history under an anonymous name", async () => {
+  openRepair();
+  fireEvent.click(screen.getByRole("button", { name: "Borrar cuenta…" }));
+  expect(
+    screen.getByText(/se conserva a nombre de «Entrenador eliminado»/),
+  ).toBeInTheDocument();
+  const go = screen.getByRole("button", { name: "Borrar definitivamente" });
+  expect(go).toBeDisabled();
+  fireEvent.change(screen.getByLabelText("Escribe Ana para confirmar"), {
+    target: { value: "ana" },
+  });
+  expect(go).toBeDisabled();
+  fireEvent.change(screen.getByLabelText("Escribe Ana para confirmar"), {
+    target: { value: "Ana" },
+  });
+  fireEvent.click(go);
+  await waitFor(() =>
+    expect(mocks.execute).toHaveBeenCalledWith(
+      "/v1/admin/accounts/other/delete",
+      {
+        confirmation: "Ana",
+      },
+    ),
+  );
+});

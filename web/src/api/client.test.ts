@@ -77,7 +77,7 @@ describe("API transport", () => {
       fetcher.mock.calls.some(([path]) => String(path).endsWith("/refresh")),
     ).toBe(false);
   });
-  it("without a Launcher answer the Launcher session ends", async () => {
+  it("a slow Launcher answer keeps the session (no sign-out)", async () => {
     vi.stubGlobal(
       "fetch",
       vi.fn().mockResolvedValue(response({ detail: {} }, 401)),
@@ -92,9 +92,88 @@ describe("API transport", () => {
     });
     client.renewSession = vi.fn().mockResolvedValue(null);
     await expect(client.request("/v1/me")).rejects.toMatchObject({
+      status: 0,
+      code: "SESSION_RENEWAL_PENDING",
+    });
+    expect(expired).not.toHaveBeenCalled();
+    expect(client.signedIn).toBe(true);
+  });
+  it("the Launcher saying it has no session ends the web session", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue(response({ detail: {} }, 401)),
+    );
+    const client = new ApiClient("https://api.example");
+    const expired = vi.fn();
+    client.onExpired = expired;
+    client.setSession({
+      user_id: "",
+      access_token: "stale",
+      refresh_token: "",
+    });
+    client.renewSession = vi.fn().mockResolvedValue("signed_out");
+    await expect(client.request("/v1/me")).rejects.toMatchObject({
       status: 401,
     });
     expect(expired).toHaveBeenCalled();
+  });
+  it("a network failure while renewing never signs a browser out", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async (path: string) => {
+        if (path.endsWith("/refresh")) throw new TypeError("offline");
+        return response({ detail: { code: "EXPIRED" } }, 401);
+      }),
+    );
+    const client = new ApiClient("https://api.example");
+    const expired = vi.fn();
+    client.onExpired = expired;
+    client.setSession(session);
+    await expect(client.request("/v1/me")).rejects.toMatchObject({ status: 0 });
+    expect(expired).not.toHaveBeenCalled();
+    expect(client.signedIn).toBe(true);
+  });
+  it("a browser remembers its sign-in, rotates it, and forgets it on sign-out", async () => {
+    const memory: { value: unknown } = { value: null };
+    const store = {
+      read: () =>
+        memory.value as { refresh_token: string; user_id: string } | null,
+      write: (value: unknown) => {
+        memory.value = value;
+      },
+    };
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async (path: string) =>
+        path.endsWith("/refresh")
+          ? response({
+              session: {
+                ...session,
+                access_token: "new",
+                refresh_token: "rotated-1",
+              },
+            })
+          : response({ ok: true }),
+      ),
+    );
+    const client = new ApiClient("https://api.example");
+    client.persist = store;
+    client.setSession(session);
+    expect(memory.value).toEqual({
+      refresh_token: session.refresh_token,
+      user_id: session.user_id,
+    });
+    // A new page load: nothing in memory, the remembered token is renewed.
+    const reloaded = new ApiClient("https://api.example");
+    reloaded.persist = store;
+    await expect(reloaded.restore()).resolves.toBe(true);
+    expect(reloaded.signedIn).toBe(true);
+    expect(memory.value).toMatchObject({ refresh_token: "rotated-1" });
+    reloaded.logout();
+    expect(memory.value).toBeNull();
+    await expect(new ApiClient("https://api.example").restore()).resolves.toBe(
+      false,
+    );
   });
   it("coalesces simultaneous 401 refreshes and retries with the new JWT", async () => {
     let refreshes = 0;

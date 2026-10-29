@@ -20,6 +20,8 @@ import {
   PokemonStatusFlags,
   StatPill,
   TrainerPhoto,
+  SpriteGeneration,
+  gameGeneration,
 } from "../pokemon/presentation";
 import { WithSeason, playerName } from "./core";
 import { GameProgress, SaveGame } from "./progress";
@@ -144,19 +146,21 @@ export function HomePage() {
               />
               <SaveGame game={pc.data?.save?.game} />
             </div>
-            <div className="home-sprites" aria-label="Equipo de tu partida">
-              {party.map((p, i) => (
-                <span className="home-sprite-slot" key={i}>
-                  <PokemonSprite
-                    species={p.pokemon.species}
-                    form={p.pokemon.form}
-                    animated
-                  />
-                  {!!p.pokemon.form && <small>Forma {p.pokemon.form}</small>}
-                  <PokemonStatusFlags flags={p.pokemon.status_flags} />
-                </span>
-              ))}
-            </div>
+            <SpriteGeneration value={gameGeneration(pc.data?.save?.game)}>
+              <div className="home-sprites" aria-label="Equipo de tu partida">
+                {party.map((p, i) => (
+                  <span className="home-sprite-slot" key={i}>
+                    <PokemonSprite
+                      species={p.pokemon.species}
+                      form={p.pokemon.form}
+                      animated
+                    />
+                    {!!p.pokemon.form && <small>Forma {p.pokemon.form}</small>}
+                    <PokemonStatusFlags flags={p.pokemon.status_flags} />
+                  </span>
+                ))}
+              </div>
+            </SpriteGeneration>
             <Notice error={pc.error} />
             {!party.length && (
               <p className="stage-empty">

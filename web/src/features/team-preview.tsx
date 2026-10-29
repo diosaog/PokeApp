@@ -7,8 +7,10 @@ import {
   MovePopover,
   IVBars,
   typeClass,
+  SpriteGeneration,
+  gameGeneration,
 } from "../pokemon/presentation";
-import { useApp, useRead, usePC } from "../state";
+import { useApp, useOverview, useRead, usePC } from "../state";
 import { LockStatus } from "./lock-status";
 import {
   Card,
@@ -45,6 +47,13 @@ export function BattlePage() {
 
 function Preview({ season }: { season: string }) {
   const { me } = useApp();
+  // Each team is drawn in the art of the save its trainer competes with.
+  const overview = useOverview();
+  const generationOf = (trainer: string) =>
+    gameGeneration(
+      overview.data?.players.find((p) => p.trainer_id === trainer)?.progress
+        ?.game,
+    );
   const [selection, setSelection] = useState<Selection>({ mode: "spectator" });
   const [confirm, setConfirm] = useState(false);
   const params = new URLSearchParams({ mode: selection.mode });
@@ -204,74 +213,78 @@ function Preview({ season }: { season: string }) {
                             />{" "}
                             · {date(entry.lock.locked_at)}
                           </p>
-                          <div className="battle-roster">
-                            {entry.lock.team.map((pokemon, index) => (
-                              <article
-                                className={`battle-pokemon ${typeClass(pokemon.types?.[0])}`}
-                                key={index}
-                              >
-                                <div className="battle-identity">
-                                  <Pokemon animated pokemon={pokemon} />
-                                  <span className="held-item">
-                                    {pokemon.item && (
-                                      <ItemIcon name={pokemon.item} />
-                                    )}
-                                    {pokemon.item
-                                      ? pokemonName("item", pokemon.item)
-                                      : "Sin objeto"}
-                                  </span>
-                                  {entry.visibility === "self" && (
-                                    <dl className="battle-private">
-                                      <dt>Habilidad</dt>
-                                      <dd>
-                                        {entry.lock!.team[index].ability
-                                          ? pokemonName(
-                                              "ability",
-                                              entry.lock!.team[index].ability,
-                                            )
-                                          : "—"}
-                                      </dd>
-                                      <dt>Naturaleza</dt>
-                                      <dd>
-                                        {entry.lock!.team[index].nature
-                                          ? pokemonName(
-                                              "nature",
-                                              entry.lock!.team[index].nature,
-                                            )
-                                          : "—"}
-                                      </dd>
-                                    </dl>
-                                  )}
-                                </div>
-                                <div
-                                  className="battle-moves"
-                                  aria-label="Movimientos"
+                          <SpriteGeneration
+                            value={generationOf(entry.trainer_id)}
+                          >
+                            <div className="battle-roster">
+                              {entry.lock.team.map((pokemon, index) => (
+                                <article
+                                  className={`battle-pokemon ${typeClass(pokemon.types?.[0])}`}
+                                  key={index}
                                 >
-                                  {Array.from({ length: 4 }, (_, i) =>
-                                    pokemon.moves?.[i] ? (
-                                      <MovePopover
-                                        key={i}
-                                        name={pokemon.moves[i].name}
-                                        pp={pokemon.moves[i].pp}
+                                  <div className="battle-identity">
+                                    <Pokemon animated pokemon={pokemon} />
+                                    <span className="held-item">
+                                      {pokemon.item && (
+                                        <ItemIcon name={pokemon.item} />
+                                      )}
+                                      {pokemon.item
+                                        ? pokemonName("item", pokemon.item)
+                                        : "Sin objeto"}
+                                    </span>
+                                    {entry.visibility === "self" && (
+                                      <dl className="battle-private">
+                                        <dt>Habilidad</dt>
+                                        <dd>
+                                          {entry.lock!.team[index].ability
+                                            ? pokemonName(
+                                                "ability",
+                                                entry.lock!.team[index].ability,
+                                              )
+                                            : "—"}
+                                        </dd>
+                                        <dt>Naturaleza</dt>
+                                        <dd>
+                                          {entry.lock!.team[index].nature
+                                            ? pokemonName(
+                                                "nature",
+                                                entry.lock!.team[index].nature,
+                                              )
+                                            : "—"}
+                                        </dd>
+                                      </dl>
+                                    )}
+                                  </div>
+                                  <div
+                                    className="battle-moves"
+                                    aria-label="Movimientos"
+                                  >
+                                    {Array.from({ length: 4 }, (_, i) =>
+                                      pokemon.moves?.[i] ? (
+                                        <MovePopover
+                                          key={i}
+                                          name={pokemon.moves[i].name}
+                                          pp={pokemon.moves[i].pp}
+                                        />
+                                      ) : (
+                                        <span className="move-vacant" key={i}>
+                                          No disponible
+                                        </span>
+                                      ),
+                                    )}
+                                  </div>
+                                  {entry.visibility === "self" && (
+                                    <details className="battle-values">
+                                      <summary>Ver IVs</summary>
+                                      <PrivateDetails
+                                        pokemon={entry.lock!.team[index]}
                                       />
-                                    ) : (
-                                      <span className="move-vacant" key={i}>
-                                        No disponible
-                                      </span>
-                                    ),
+                                    </details>
                                   )}
-                                </div>
-                                {entry.visibility === "self" && (
-                                  <details className="battle-values">
-                                    <summary>Ver IVs</summary>
-                                    <PrivateDetails
-                                      pokemon={entry.lock!.team[index]}
-                                    />
-                                  </details>
-                                )}
-                              </article>
-                            ))}
-                          </div>
+                                </article>
+                              ))}
+                            </div>
+                          </SpriteGeneration>
                         </>
                       )}
                     </Card>

@@ -38,6 +38,9 @@ const games: Record<string, string> = {
   UM: "Ultraluna",
 };
 
+export const gameName = (game?: string | null) =>
+  (game && games[game]) || game || "desconocido";
+
 export function SaveGame({ game }: { game?: string | null }) {
   return game && games[game] ? (
     <p className="caption">Pokémon {games[game]}</p>
@@ -193,7 +196,7 @@ export function GameProgress({
         <p className="muted">
           {progress.reward_state === "pending_validation"
             ? "Las recompensas de progreso de este juego están pendientes de validación."
-            : "El recorrido insular no concede recompensas de medallas. Su política competitiva está pendiente."}
+            : "El recorrido insular no da monedas por medalla; vencer al Campeón sí da la recompensa de juego completado."}
         </p>
       )}
       {!compact && progress.observed_at && (

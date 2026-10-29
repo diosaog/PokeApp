@@ -21,6 +21,7 @@ const mocks = vi.hoisted(() => ({
   releaseNavigation: vi.fn(),
   uncertain: false,
   rulesError: null as Error | null,
+  preview: null as Record<string, unknown> | null,
 }));
 vi.mock("../state", () => ({
   useApp: () => ({
@@ -35,7 +36,11 @@ vi.mock("../state", () => ({
         ? mocks.setup
         : path.endsWith("/trainers")
           ? [{ id: "new-trainer", display_name: "Elena" }]
-          : mocks.day,
+          : path.endsWith("/cancellation-preview")
+            ? mocks.preview
+            : path.startsWith("/v1/read/seasons?")
+              ? { items: [], next_offset: null }
+              : mocks.day,
     isPending: false,
     error: path.endsWith("/rules") ? mocks.rulesError : null,
   }),
@@ -422,9 +427,13 @@ it("disables invalid historical operations and shows Team Lock presence without 
   expect(
     screen.getByRole("button", { name: "Archivar temporada" }),
   ).toBeDisabled();
+  // An archived season is no longer running: nothing to cancel, and it says so.
   expect(
-    screen.getByRole("button", { name: "Descartar temporada" }),
+    screen.getByRole("button", { name: "Cancelar temporada" }),
   ).toBeDisabled();
+  expect(
+    screen.getByText(/no hay competición que cancelar/),
+  ).toBeInTheDocument();
   tab("Competición");
   expect(screen.getByRole("button", { name: "Abrir jornada" })).toBeDisabled();
   expect(screen.getByText(/horario sin evidencia/)).toBeInTheDocument();
@@ -434,18 +443,64 @@ it("disables invalid historical operations and shows Team Lock presence without 
   ).not.toBeInTheDocument();
 });
 
-it("allows cancellation of active preparation only when the server confirms it is safe", () => {
-  mocks.setup.can_discard = true;
+const preview = (patch = {}) => ({
+  season_id: "season",
+  name: "Liga Horizonte",
+  status: "active",
+  allowed: true,
+  mode: "preserving",
+  open_robberies: 0,
+  open_item_uses: 0,
+  participants: 2,
+  matchdays: 3,
+  closed_matchdays: 2,
+  open_matchdays: 1,
+  results: 4,
+  team_locks: 4,
+  purchases: 1,
+  pending_purchases: 0,
+  coin_transactions: 9,
+  coins_awarded: "44",
+  progress_rewards: 3,
+  saves: 2,
+  cups: 0,
+  penalties: 0,
+  trials: 0,
+  ...patch,
+});
+it("an active season with matchdays can be cancelled after seeing what is kept", () => {
+  mocks.preview = preview();
   render(page());
   tab("Zona de riesgo");
-  const cancel = screen.getByRole("button", {
-    name: "Cancelar temporada sin competición",
-  });
+  const cancel = screen.getByRole("button", { name: "Cancelar temporada" });
   expect(cancel).toBeEnabled();
   fireEvent.click(cancel);
-  expect(screen.getByLabelText("Motivo")).toBeRequired();
+  const dialog = screen.getByRole("dialog", { name: "Cancelar temporada" });
+  expect(dialog).toHaveTextContent(/2 jornadas cerradas/);
+  expect(dialog).toHaveTextContent(
+    /9 movimientos de monedas \(44 monedas concedidas\)/,
+  );
+  expect(dialog).toHaveTextContent(/se conserva para la trazabilidad/);
+  expect(
+    screen.getByLabelText("Motivo (queda en la auditoría)"),
+  ).toBeRequired();
   expect(
     screen.getByLabelText("Escribe Liga Horizonte para confirmar"),
   ).toBeRequired();
+  expect(
+    within(dialog).getByRole("button", { name: /Confirmar operación/ }),
+  ).toBeEnabled();
   expect(mocks.execute).not.toHaveBeenCalled();
+});
+it("an unfinished robbery blocks cancellation and says how to resolve it", () => {
+  mocks.preview = preview({ allowed: false, open_robberies: 1 });
+  render(page());
+  tab("Zona de riesgo");
+  fireEvent.click(screen.getByRole("button", { name: "Cancelar temporada" }));
+  const dialog = screen.getByRole("dialog", { name: "Cancelar temporada" });
+  expect(dialog).toHaveTextContent(/1 robo sin cerrar/);
+  expect(dialog).toHaveTextContent(/Economía e incidencias/);
+  expect(
+    within(dialog).getByRole("button", { name: /Confirmar operación/ }),
+  ).toBeDisabled();
 });

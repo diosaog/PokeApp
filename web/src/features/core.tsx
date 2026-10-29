@@ -10,12 +10,14 @@ import {
   ItemIcon,
   TrainerPhoto,
   typeClass,
+  SpriteGeneration,
+  gameGeneration,
 } from "../pokemon/presentation";
 import { useApp, useRead, useOverview, useMyPC } from "../state";
 import { ParticipantResults } from "./league-results";
 import { WipeRevivals } from "./wipe-revivals";
 import { Collection } from "./collection";
-import { SaveGame } from "./progress";
+import { SaveGame, gameName } from "./progress";
 import { matchLabel } from "./admin-labels";
 import { LeagueOperations } from "./league-operations";
 import { TeamLockWarning } from "./team-lock-warning";
@@ -280,6 +282,34 @@ function LeagueDay({ dayId }: { dayId: string }) {
     </OverviewState>
   );
 }
+// What the next closing will subtract (deaths and sanctions), shown apart from
+// the official total and only when it would change it.
+export function ProvisionalPoints({
+  row,
+}: {
+  row: Model<"LeagueStandingRead">;
+}) {
+  if (
+    row.provisional_points == null ||
+    Number(row.provisional_points) === Number(row.total_points)
+  )
+    return null;
+  const reduction = Number(row.provisional_points_reduction ?? 0);
+  const parts = [
+    row.provisional_dead_count
+      ? `${row.provisional_dead_count} ${row.provisional_dead_count === 1 ? "muerte" : "muertes"}`
+      : "",
+    reduction ? `sanciones −${row.provisional_points_reduction}` : "",
+  ].filter(Boolean);
+  return (
+    <small className="muted standings-source provisional-points">
+      Provisional: {row.provisional_points}
+      {parts.length ? ` (${parts.join(", ")})` : ""} · se aplica al cerrar J
+      {row.provisional_matchday_number}
+    </small>
+  );
+}
+
 function LeagueGeneral({ data }: { data: Model<"LeagueGeneralRead"> }) {
   if (!data.rows.length) return <Empty>Aún no hay participantes.</Empty>;
   const states: Record<string, string> = {
@@ -294,6 +324,20 @@ function LeagueGeneral({ data }: { data: Model<"LeagueGeneralRead"> }) {
         Puntos oficiales acumulados y saldo actual. A igualdad de puntos, el
         orden mostrado no decide el desempate.
       </p>
+      {!data.days.some((d) => d.status === "closed") && (
+        // Preseason: the rules give points per matchday position only, so
+        // they start at 0; medals and the champion already pay coins, and
+        // deaths and sanctions already count for the first closing.
+        <p className="notice" role="status">
+          Pretemporada: los puntos oficiales empiezan con la primera jornada
+          cerrada (por posición en cada jornada). Las monedas sí cuentan ya:
+          cada medalla y vencer al Campeón, observados en tu partida
+          sincronizada, suman según las reglas de la temporada. Las muertes
+          (−0,2 puntos cada una; un revivido tras wipe cuenta dos) y las
+          sanciones de puntos también cuentan ya: se ven como provisionales y se
+          restan al cerrar la primera jornada.
+        </p>
+      )}
       <div
         className="table-scroll"
         tabIndex={0}
@@ -336,6 +380,7 @@ function LeagueGeneral({ data }: { data: Model<"LeagueGeneralRead"> }) {
                           : "Captura oficial"
                         : "Sin jornadas oficiales"}
                     </small>
+                    <ProvisionalPoints row={row} />
                   </td>
                   <td>{row.coin_balance}</td>
                   <td>
@@ -436,12 +481,22 @@ export function PCPage() {
       ) : pc.data?.status === "ready" ? (
         <>
           <SaveGame game={pc.data.save?.game} />
-          {pc.personal && (
+          {pc.seasonGame ? (
             <p className="muted">
-              Tu partida personal: no estás jugando una temporada ahora.
+              Tu partida activa es la de tu Launcher. La temporada seleccionada
+              compite con tu partida de Pokémon {gameName(pc.seasonGame)}, que
+              queda vinculada a la competición.
             </p>
+          ) : (
+            pc.personal && (
+              <p className="muted">
+                Tu partida activa, sincronizada por tu Launcher.
+              </p>
+            )
           )}
-          <Collection key={pc.data.save?.id} slots={pc.data.pokemon} />
+          <SpriteGeneration value={gameGeneration(pc.data.save?.game)}>
+            <Collection key={pc.data.save?.id} slots={pc.data.pokemon} />
+          </SpriteGeneration>
         </>
       ) : (
         <Empty>

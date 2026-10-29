@@ -7,14 +7,17 @@ import {
   type ReactNode,
 } from "react";
 import {
+  QueryCache,
   QueryClient,
   QueryClientProvider,
   useQuery,
 } from "@tanstack/react-query";
-import { api, ApiError } from "./api/client";
+import { api, ApiError, browserSessionStore } from "./api/client";
+import { dismissNotice, notify } from "./notices";
 import type { Me, Model, Overview } from "./api/types";
 import {
   insideLauncher,
+  listenForLauncherEvents,
   listenForLauncherSession,
   renewFromLauncher,
   requestLauncherSession,
@@ -22,19 +25,50 @@ import {
 } from "./launcher";
 
 export const queries = new QueryClient({
+  // A lost connection is said once at the top and retired as soon as a read
+  // succeeds again; each screen still shows its own detail.
+  queryCache: new QueryCache({
+    onError: (error) => {
+      if (
+        error instanceof ApiError &&
+        (error.status === 0 || error.status >= 500) &&
+        error.code !== "SESSION_RENEWAL_PENDING"
+      )
+        notify(
+          error.code === "READ_TIMEOUT"
+            ? "PokeApp está tardando en responder. Lo reintentamos solo."
+            : "No se pudo conectar con PokeApp. Lo reintentamos solo; no hace falta recargar.",
+          "warn",
+          { key: "connectivity", ttl: 30000 },
+        );
+    },
+    onSuccess: () => dismissNotice("connectivity"),
+  }),
   defaultOptions: {
     queries: {
       staleTime: 15000,
       retry: (count, error) =>
         count < 1 && error instanceof ApiError && error.status >= 500,
-      refetchOnWindowFocus: false,
+      // Coming back to the window shows what changed meanwhile (stale reads
+      // only: at most one refetch per screen, never a polling loop).
+      refetchOnWindowFocus: true,
     },
     mutations: { retry: false },
   },
 });
+// Every screen the trainer is looking at reads again (inactive ones refetch
+// when opened): after a confirmed save sync, another active save, items.
+export function refreshEverything() {
+  return queries.invalidateQueries();
+}
+const sessionLost = (error: unknown) =>
+  error instanceof ApiError && (error.status === 401 || error.status === 403);
+const pause = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 type State = {
   me: Me | null;
   setMe: (me: Me | null) => void;
+  // A remembered session is being renewed: no sign-in form in the meantime.
+  restoring: boolean;
   season: string;
   setSeason: (id: string) => void;
   logout: () => void;
@@ -82,26 +116,72 @@ export function AppState({ children }: { children: ReactNode }) {
       .catch(() => setCapabilitiesKnown(true));
     return () => controller.abort();
   }, []);
+  const [restoring, setRestoring] = useState(
+    () => !insideLauncher() && browserSessionStore.read() !== null,
+  );
+  // In a browser: the sign-in survives reloads and restarts until the trainer
+  // signs out or the session is really rejected (never on a slow network).
+  useEffect(() => {
+    if (insideLauncher()) return;
+    api.persist = browserSessionStore;
+    let cancelled = false;
+    void (async () => {
+      for (let attempt = 0; attempt < 6 && !cancelled; attempt++) {
+        try {
+          if (!(await api.restore()) && !api.signedIn) break;
+          const value = await api.request<Me>("/v1/me");
+          if (!cancelled) setMe(value);
+          break;
+        } catch (error) {
+          if (sessionLost(error) || !api.signedIn) break;
+          await pause(Math.min(8000, 1000 * 2 ** attempt));
+        }
+      }
+      if (!cancelled) setRestoring(false);
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
   // Inside PokeApp Launcher: one sign-in. The Launcher keeps the session
   // (encrypted on this PC) and hands this web an access token, kept in memory
   // only; an explicit sign-out here also signs the Launcher out.
   useEffect(() => {
     if (!insideLauncher()) return;
     api.renewSession = renewFromLauncher;
-    const stop = listenForLauncherSession((session, trainerId) => {
-      if (api.signedIn) return api.renewAccess(session);
-      api.setSession(session);
-      void api
-        .request<Me>("/v1/me")
-        .then((value) => {
-          if (value.trainer_id === trainerId) setMe(value);
-          else api.setSession(null);
-        })
-        .catch(() => api.setSession(null));
-    });
+    let adopting = 0;
+    const stop = listenForLauncherSession(
+      (session, trainerId) => {
+        if (api.signedIn) return api.renewAccess(session);
+        api.setSession(session);
+        const turn = ++adopting;
+        void (async () => {
+          // A slow or failed /me is retried; only a rejected session drops it.
+          for (let attempt = 0; attempt < 6 && turn === adopting; attempt++) {
+            try {
+              const value = await api.request<Me>("/v1/me");
+              if (value.trainer_id === trainerId) setMe(value);
+              else api.setSession(null);
+              return;
+            } catch (error) {
+              if (sessionLost(error)) return api.setSession(null);
+              await pause(Math.min(8000, 1000 * 2 ** attempt));
+            }
+          }
+        })();
+      },
+      // The Launcher has no session any more: a token it handed out cannot be
+      // renewed, so the web signs out too. A web that signed in on its own
+      // (it holds its own refresh token) is left alone.
+      () => {
+        if (api.signedIn && api.launcherSession) api.logout();
+      },
+    );
+    const events = listenForLauncherEvents(() => void refreshEverything());
     requestLauncherSession();
     return () => {
       stop();
+      events();
       api.renewSession = null;
     };
   }, []);
@@ -123,6 +203,7 @@ export function AppState({ children }: { children: ReactNode }) {
         value={{
           me,
           setMe,
+          restoring: restoring && !me,
           season,
           setSeason,
           logout: () => {
@@ -169,23 +250,33 @@ export function useOverview() {
     Boolean(season),
   );
 }
-// «Mi PC»: the season's save when it is ready, otherwise the trainer's own
-// latest synced save (outside any season). Refreshed while on screen, so a
-// save made in game appears after the Launcher syncs it, with no reload.
-export function useMyPC() {
+// «Mi PC» shows the trainer's ACTIVE save: the one their Launcher has
+// selected and synced (personal record) — the same game on every screen.
+// When the selected season competes with that same game, its copy is shown
+// instead (identical file, plus competitive marks such as deaths). A season
+// bound to another game is named, never silently swapped in. Refreshed while
+// on screen, so a save made in game appears after the Launcher syncs it.
+export function useMyPC(enabled = true) {
   const { season } = useApp();
   const seasonPc = useRead<Model<"PCRead">>(
     `/v1/read/seasons/${season}/pc`,
-    Boolean(season),
+    Boolean(season) && enabled,
     15000,
   );
-  const personal = useRead<Model<"PCRead">>("/v1/me/pc", true, 15000);
-  const inSeason = seasonPc.data?.status === "ready";
+  const personal = useRead<Model<"PCRead">>("/v1/me/pc", enabled, 15000);
+  const active = personal.data?.status === "ready" ? personal.data : null;
+  const competing = seasonPc.data?.status === "ready" ? seasonPc.data : null;
+  const sameGame =
+    !!active && !!competing && active.save?.game === competing.save?.game;
+  const data = sameGame || !active ? (competing ?? personal.data) : active;
   return {
-    data: inSeason ? seasonPc.data : personal.data,
-    error: inSeason ? null : personal.error,
+    data,
+    error: data ? null : personal.error,
     isPending: (Boolean(season) && seasonPc.isPending) || personal.isPending,
-    personal: !inSeason,
+    personal: data !== competing,
+    // The season competes with another game than the active save.
+    seasonGame:
+      active && competing && !sameGame ? (competing.save?.game ?? null) : null,
   };
 }
 export function usePC() {

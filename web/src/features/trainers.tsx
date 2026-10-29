@@ -4,11 +4,44 @@ import type { Model } from "../api/types";
 import { useApp, useOverview, useRead } from "../state";
 import { Empty, Heading, Loading, Notice, Tag } from "../ui";
 import { TrainerPhoto, StatPill } from "../pokemon/presentation";
-import { GameProgress } from "./progress";
+import { GameProgress, gameName } from "./progress";
 import { participantLabel } from "./admin-labels";
 import { WithSeason } from "./core";
 import { useState } from "react";
 import type { AccountProfile } from "./account-editor";
+
+type ActiveSave = {
+  trainer_id: string;
+  game: string | null;
+  uploaded_at: string;
+  progress: Model<"ProgressRead">;
+};
+// Each trainer's active save (the one their Launcher has selected): the
+// same game everywhere. A season competing with another game is named.
+export function useActiveSaves() {
+  const read = useRead<{ items: ActiveSave[] }>("/v1/read/active-saves");
+  return new Map((read.data?.items ?? []).map((s) => [s.trainer_id, s]));
+}
+export function TrainerGame({
+  active,
+  seasonProgress,
+}: {
+  active?: ActiveSave;
+  seasonProgress?: Model<"ProgressRead">;
+}) {
+  const seasonGame =
+    seasonProgress?.state === "observed" ? seasonProgress.game : null;
+  return (
+    <div className="trainer-badges">
+      <GameProgress progress={active?.progress ?? seasonProgress} compact />
+      {active?.game && seasonGame && seasonGame !== active.game && (
+        <p className="caption">
+          En la temporada compite con Pokémon {gameName(seasonGame)}.
+        </p>
+      )}
+    </div>
+  );
+}
 
 export function TrainersPage() {
   const { accountsEnabled } = useApp();
@@ -25,6 +58,7 @@ function AccountTrainers() {
     `/v1/read/seasons/${season}/league`,
     !!season,
   );
+  const active = useActiveSaves();
   return (
     <>
       <Heading eyebrow="LA COMUNIDAD" title="Entrenadores">
@@ -63,10 +97,11 @@ function AccountTrainers() {
                     )}
                   </div>
                 </div>
-                {p && (
-                  <div className="trainer-badges">
-                    <GameProgress progress={p.progress} compact />
-                  </div>
+                {(p || active.get(a.trainer_id)) && (
+                  <TrainerGame
+                    active={active.get(a.trainer_id)}
+                    seasonProgress={p?.progress}
+                  />
                 )}
                 <Link
                   className="button primary"
@@ -100,6 +135,7 @@ function SeasonTrainers() {
     `/v1/read/seasons/${season}/league`,
     !!season,
   );
+  const active = useActiveSaves();
   return (
     <>
       <Heading eyebrow="LA COMUNIDAD" title="Entrenadores">
@@ -146,9 +182,10 @@ function SeasonTrainers() {
                         </div>
                       </div>
                     </div>
-                    <div className="trainer-badges">
-                      <GameProgress progress={p.progress} compact />
-                    </div>
+                    <TrainerGame
+                      active={active.get(p.trainer_id)}
+                      seasonProgress={p.progress}
+                    />
                     <Link
                       className="button primary"
                       to={`/entrenadores/${p.trainer_id}`}

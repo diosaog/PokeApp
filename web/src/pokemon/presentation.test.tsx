@@ -7,6 +7,8 @@ import {
   ItemIcon,
   MovePopover,
   PokemonStatusFlags,
+  SpriteGeneration,
+  gameGeneration,
 } from "./presentation";
 import { catalogId } from "./localization";
 afterEach(() => {
@@ -141,4 +143,43 @@ it("opening a second move dismisses the first; Escape returns focus", () => {
   fireEvent.keyDown(window, { key: "Escape" });
   expect(second).toHaveAttribute("aria-expanded", "false");
   expect(second).toHaveFocus();
+});
+
+it("a save's own generation decides the art, never another generation's", () => {
+  render(
+    <>
+      <SpriteGeneration value={gameGeneration("Y")}>
+        <PokemonSprite species="Pokémon #25" animated />
+        <PokemonSprite species="Pokémon #6" form={1} />
+      </SpriteGeneration>
+      <SpriteGeneration value={gameGeneration("UM")}>
+        <PokemonSprite species="Pokémon #722" />
+        <PokemonSprite species="Pokémon #807" />
+      </SpriteGeneration>
+      <PokemonSprite species="Pokémon #635" />
+    </>,
+  );
+  const [pikachu] = screen.getAllByRole("img", { name: /Pikachu/ });
+  // X/Y render, static: the Black/White animation is never mixed in.
+  expect(pikachu).toHaveAttribute("src", "/visuals/v1/gen6/25.png");
+  expect(screen.getByAltText(/Charizard/)).toHaveAttribute(
+    "src",
+    "/visuals/v1/gen6/6-form-1.png",
+  );
+  expect(screen.getByAltText(/Rowlet/)).toHaveAttribute(
+    "src",
+    "/visuals/v1/gen7/722.png",
+  );
+  // No Ultra Sun/Moon render for Zeraora: its own species art, not another
+  // generation's design.
+  expect(screen.getByAltText(/Zeraora/)).toHaveAttribute(
+    "src",
+    "/visuals/v1/pokemon/807.png",
+  );
+  // Without a known game the established collection stays.
+  expect(screen.getByAltText("Hydreigon")).toHaveAttribute(
+    "src",
+    "/visuals/v1/pokemon/635.png",
+  );
+  expect(gameGeneration("B2")).toBeNull();
 });

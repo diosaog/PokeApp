@@ -19,6 +19,8 @@ import { api, ApiError, errorText } from "./api/client";
 import { queries, useViewer } from "./state";
 import { invalidationFor } from "./read-invalidation";
 import { play } from "./sound";
+import { notify } from "./notices";
+export { notify, dismissNotice, TopNotices } from "./notices";
 
 export function Empty({ children }: { children: ReactNode }) {
   return <div className="empty">{children}</div>;
@@ -195,6 +197,7 @@ export function useCommand(invalidatePaths?: readonly string[]) {
       setUncertain(false);
       setSuccess(true);
       play(command.path.includes("/purchases") ? "coin" : "confirm");
+      notify("Cambio confirmado.", "ok", { key: "command-ok" });
       await refresh();
       return true;
     } catch (err) {
@@ -203,6 +206,13 @@ export function useCommand(invalidatePaths?: readonly string[]) {
         !(err instanceof ApiError) || err.status === 0 || err.status >= 500;
       setUncertain(unknown);
       play(unknown ? "notice" : "error");
+      // The real cause on top, besides the detail next to the form.
+      notify(
+        unknown
+          ? `${errorText(err)} No se ha confirmado el resultado: puedes reintentar la misma solicitud sin duplicarla.`
+          : errorText(err),
+        unknown ? "warn" : "error",
+      );
       if (!unknown) request.current = null;
       if (err instanceof ApiError && err.status === 409 && !unknown)
         await refresh();

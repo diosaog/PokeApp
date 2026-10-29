@@ -1,4 +1,11 @@
-import { useEffect, useId, useRef, useState } from "react";
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useId,
+  useRef,
+  useState,
+} from "react";
 import {
   Award,
   ChevronDown,
@@ -14,11 +21,35 @@ import moveTypes from "./move-types.json";
 import catalogShopArt from "./shop-art.json";
 import animatedIds from "./animated-sprites.json";
 import formSprites from "./visual-forms.json";
+import generationSprites from "./generation-sprites.json";
 import { badgeAsset } from "./badges";
 import { useReducedMotion } from "../preferences";
 
 const base = "/visuals/v1";
 const items = new Set(itemIds);
+// Art of the save's own generation: X/Y renders for Gen6 games, Ultra Sun/
+// Ultra Moon renders for Gen7. A screen that knows its game wraps its
+// Pokémon in <SpriteGeneration value={gameGeneration(game)}>.
+const generationSets: Record<string, Set<string>> = Object.fromEntries(
+  Object.entries(generationSprites).map(([set, names]) => [
+    set,
+    new Set(names),
+  ]),
+);
+const GENERATIONS: Record<string, number> = {
+  X: 6,
+  Y: 6,
+  OR: 6,
+  AS: 6,
+  SN: 7,
+  MN: 7,
+  US: 7,
+  UM: 7,
+};
+export function gameGeneration(game?: string | null) {
+  return (game && GENERATIONS[game]) || null;
+}
+export const SpriteGeneration = createContext<number | null>(null);
 const portraits: Record<string, string> = {
   anto: "ANTO",
   victor: "VICTOR",
@@ -95,14 +126,22 @@ export function PokemonSprite({
   animated?: boolean;
 }) {
   const id = catalogId("species", species);
+  const generation = useContext(SpriteGeneration);
   // Only explicitly mapped forms use alternate art; an unknown form is never
   // silently shown as the base form. All asset paths are local catalog entries.
   const variant = form
     ? (formSprites as Record<string, string>)[`${id}:${form}`]
     : id;
-  const still = variant ? `${base}/pokemon/${variant}.png` : null;
-  // Existing animations depict base forms only.
-  const animationId = !form && id && animatedIds.includes(id) ? id : null;
+  const ownSet = generation ? generationSets[`gen${generation}`] : undefined;
+  const still = variant
+    ? ownSet?.has(String(variant))
+      ? `${base}/gen${generation}/${variant}.png`
+      : `${base}/pokemon/${variant}.png`
+    : null;
+  // Existing animations depict base forms only, in Black/White-era pixel art:
+  // never mixed into a Gen6/7 save's renders.
+  const animationId =
+    !form && id && !ownSet && animatedIds.includes(id) ? id : null;
   const ref = useRef<HTMLImageElement>(null);
   const [moving, setMoving] = useState(false);
   const [failed, setFailed] = useState<string | null>(null);
