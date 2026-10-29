@@ -3,7 +3,7 @@
 from typing import Any, Protocol
 import logging
 import re
-from httpx import ReadError
+from httpx import ReadError, RemoteProtocolError
 from app.repositories.errors import PersistenceError
 
 logger = logging.getLogger(__name__)
@@ -22,10 +22,14 @@ def _execute_read(query, operation: str):
     # These SELECTs and explicitly read-only RPCs have no durable effects.
     # A dropped response can be retried once; mutation repositories must not use
     # this helper. Do not retry status errors, malformed data or arbitrary failures.
+    # A dropped or stale pooled connection fails before any answer; the retry
+    # runs on a fresh one.
     try:
         return query.execute().data
-    except ReadError:
-        logger.warning("frontend_read_retry operation=%s cause=ReadError", operation)
+    except (ReadError, RemoteProtocolError) as error:
+        logger.warning(
+            "frontend_read_retry operation=%s cause=%s", operation, type(error).__name__
+        )
         return query.execute().data
 
 
@@ -59,7 +63,7 @@ class SupabaseFrontendReadRepository:
 
     @classmethod
     def from_url_key(cls, url: str, key: str):
-        from supabase import create_client
+        from app.repositories.supabase.http import create_client
 
         return cls(create_client(url, key))
 

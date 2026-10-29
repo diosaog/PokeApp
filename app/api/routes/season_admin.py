@@ -9,7 +9,7 @@ from app.api.errors import api_error
 from app.api.models import AuthenticatedPrincipal
 from app.api.security import require_admin_principal
 from app.api.season_admin_models import (
-    AddParticipantBody, AdminReceipt, ConfigVersionBody, CreateSeasonBody, InitialDivisionsBody,
+    AddParticipantBody, AdminReceipt, ConfigVersionBody, CreateSeasonBody, DeadBoxBody, InitialDivisionsBody,
     RemoveParticipantBody, RenameSeasonBody, ReplaceConfigBody, SeasonSetup, SetupRevisionBody,
 )
 from app.repositories.errors import PersistenceError
@@ -47,7 +47,7 @@ def _execute(op, principal, container, payload=None, season_id=None, resource_id
         actual_season = result.season.id if op == "setup" else result.season_id
         if season_id is not None and str(actual_season) != str(season_id):
             raise ValueError("Mismatched scope")
-        if op in ("replace_config", "remove_participant") and str(result.resource_id) != str(resource_id):
+        if op in ("replace_config", "remove_participant", "dead_box") and str(result.resource_id) != str(resource_id):
             raise ValueError("Mismatched resource")
         return result
     except SeasonAdminRejected as exc:
@@ -90,6 +90,12 @@ def add_participant(season_id: UUID, payload: AddParticipantBody, idempotency_ke
 def remove_participant(season_id: UUID, season_player_id: UUID, payload: RemoveParticipantBody,
                        idempotency_key: Key, principal: Admin, container: Container):
     return _execute("remove_participant", principal, container, payload, season_id, season_player_id, idempotency_key)
+
+
+@router.put("/seasons/{season_id}/participants/{season_player_id}/dead-box", response_model=AdminReceipt)
+def set_dead_box(season_id: UUID, season_player_id: UUID, payload: DeadBoxBody,
+                 idempotency_key: Key, principal: Admin, container: Container):
+    return _execute("dead_box", principal, container, payload, season_id, season_player_id, idempotency_key)
 
 
 @router.post("/seasons/{season_id}/config-versions", response_model=AdminReceipt)

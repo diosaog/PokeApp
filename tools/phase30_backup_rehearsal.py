@@ -219,6 +219,20 @@ def local_fingerprints(pg: SupabaseLikePG, tables: list[str]) -> dict[str, str]:
     return result
 
 
+def players_without_dead_box(pg: SupabaseLikePG) -> dict[str, tuple[str, str]]:
+    """Each season_players row as (hash without 070's column and updated_at,
+    updated_at). The trigger bumps updated_at on the row set to Box 7, so the
+    caller proves which rows it moved instead of hashing it."""
+    rows = pg.lines(
+        "select p.id||'|'||md5((to_jsonb(p)-'dead_box_number'-'updated_at')::text)||'|'||p.updated_at"
+        " from public.season_players p order by p.id",
+        "supabase_admin",
+    )
+    return {
+        line.split("|")[0]: (line.split("|")[1], line.split("|")[2]) for line in rows
+    }
+
+
 def reads(pg: SupabaseLikePG) -> dict[str, str]:
     """API reads as service_role, each inside a rolled-back transaction."""
     seasons = pg.lines("select id from public.seasons order by id", "supabase_admin")
@@ -232,14 +246,22 @@ def reads(pg: SupabaseLikePG) -> dict[str, str]:
         f"view {v}": f"select md5(coalesce(string_agg(t::text,E'\\n' order by t::text),'-'))||':'||count(*) from {v} t"
         for v in views
     }
-    # 069 only ADDS provisional figures to active seasons' rows; everything the
-    # read returned before must stay identical, so they are compared without.
-    provisional = "array['provisional_matchday_number','provisional_dead_count','provisional_points_reduction','provisional_points']"
+    # The League read is compared in two parts: the official rows without the
+    # live figures 069/070 add (always identical), and the live figures of the
+    # active season (070: one total and the participant's dead box).
+    added = ("array['provisional_matchday_number','provisional_dead_count','provisional_points_reduction',"
+             "'provisional_points','official_points','dead_box_number']")
+    live = "array['total_points','dead_count','dead_count_source','dead_count_observed_at']"
     for s in seasons:
         calls[f"league_general_read {s}"] = (
-            f"select md5((select jsonb_set(r,'{{rows}}',coalesce((select jsonb_agg(x-{provisional} order by o)"
-            f" from jsonb_array_elements(r->'rows') with ordinality y(x,o)),'[]'::jsonb))"
+            f"select md5((select jsonb_set(r,'{{rows}}',coalesce((select jsonb_agg(x-{added}-{live}"
+            f" order by x->>'season_player_id') from jsonb_array_elements(r->'rows') x),'[]'::jsonb))"
             f" from (select public.league_general_read('{s}') r) q)::text)"
+        )
+        calls[f"league_live {s}"] = (
+            f"select md5((select coalesce(jsonb_agg(jsonb_build_object('p',x->'season_player_id','t',"
+            f"coalesce(x->'official_points',x->'total_points'),'d',x->'dead_count') order by x->>'season_player_id'),'[]')"
+            f" from jsonb_array_elements(public.league_general_read('{s}')->'rows') x)::text)"
         )
         calls[f"initial_assignment_observations {s}"] = (
             f"select md5(public.initial_assignment_observations('{s}')::text)"
@@ -384,6 +406,7 @@ def rehearse(args) -> dict:
             t for t in tables if t.startswith(("public.", "v1_shadow.", "storage."))
         ]
         rows_before = local_fingerprints(pg, public_tables)
+        players_before = players_without_dead_box(pg)
 
         report["applied"] = {}
         # Production's supautils.policy_grants lets postgres manage policies on
@@ -416,77 +439,73 @@ def rehearse(args) -> dict:
             )
 
         rows_after = local_fingerprints(pg, public_tables)
-        # 069 settles medal/champion coins of saves already accepted in ACTIVE
-        # seasons, as a new accepted save would. Only those two ledgers may
-        # move, and every new row must be a linked, unique progress reward.
-        settlement = ("public.coin_transactions", "public.progress_reward_claims")
+        # 070 adds season_players.dead_box_number (default 8) and sets Box 7 for
+        # one participation (Anto, active season). Every other row of every
+        # table stays byte-identical; season_players is compared without the
+        # new column.
         changed = [t for t in public_tables if rows_before[t] != rows_after[t]]
         ok(
-            not [t for t in changed if t not in settlement],
-            f"{len(public_tables) - len(settlement)} existing tables keep byte-identical rows (seasons, saves, history, purchases)",
+            not [t for t in changed if t != "public.season_players"],
+            f"{len(public_tables) - 1} existing tables keep byte-identical rows (seasons, saves, history, purchases, coins)",
             changed,
         )
-        paid = pg.lines(
-            "select c.trainer_id||'|'||c.season_id||'|'||count(*)||'|'||sum(c.amount) from public.coin_transactions c"
-            " join public.progress_reward_claims r on r.coin_transaction_id=c.id"
-            " where c.reference_type='progress_reward' and c.created_at>now()-interval '1 hour'"
-            " group by c.trainer_id,c.season_id order by 1",
+        players_after = players_without_dead_box(pg)
+        moved = sorted(k for k in players_before if players_before[k][1] != players_after.get(k, ("", ""))[1])
+        boxed = sorted(pg.lines("select id from public.season_players where dead_box_number<>8", "supabase_admin"))
+        ok(
+            players_before.keys() == players_after.keys()
+            and all(players_before[k][0] == players_after[k][0] for k in players_before)
+            and moved == boxed,
+            "season_players rows identical apart from the new dead box column (updated_at only on the row set)",
+            {"updated_at_moved": moved, "dead_box_not_8": boxed},
+        )
+        boxes = pg.lines(
+            "select s.name||'|'||s.status||'|'||t.display_name||'|'||p.dead_box_number from public.season_players p"
+            " join public.seasons s on s.id=p.season_id join public.trainers t on t.id=p.trainer_id"
+            " where p.dead_box_number<>8 order by 1",
             "supabase_admin",
         )
-        report["progress_settlement"] = paid
-        orphan = pg.lines(
-            "select count(*) from public.coin_transactions c where c.reference_type='progress_reward'"
-            " and not exists(select 1 from public.progress_reward_claims r where r.coin_transaction_id=c.id)",
-            "supabase_admin",
-        )
-        inactive = pg.lines(
-            "select count(*) from public.progress_reward_claims r join public.seasons s on s.id=r.season_id"
-            " where r.created_at>now()-interval '1 hour' and s.status<>'active'",
-            "supabase_admin",
-        )
-        replay = pg.lines(
-            "select coalesce(sum(public.settle_observed_progress_rewards(p.season_id,p.trainer_id)),0)"
-            " from public.season_players p join public.seasons s on s.id=p.season_id"
-            " where s.status='active' and p.status='active'",
-            "supabase_admin",
-        )
-        ok(orphan == ["0"] and inactive == ["0"] and replay == ["0"],
-           "medal settlement: linked claims only, active seasons only, a second run pays nothing",
-           {"orphans": orphan, "outside_active": inactive, "replay": replay})  # fmt: skip
-        rows_after = local_fingerprints(pg, public_tables)
+        report["dead_boxes_not_8"] = boxes
+        ok(
+            len(boxes) <= 1 and all(b.split("|")[1] == "active" and b.split("|")[2].lower() == "anto"
+                                    and b.endswith("|7") for b in boxes),
+            "Box 7 only for Anto's participation in the active season; everyone else keeps Box 8",
+            boxes,
+        )  # fmt: skip
         reads_after = reads(pg)
-        paid_trainers = {line.split("|")[0] for line in paid}
+        active = set(pg.lines("select id from public.seasons where status='active'", "supabase_admin"))
         moved = {
             k: [reads_before[k], reads_after.get(k)]
             for k in reads_before
             if reads_before[k] != reads_after.get(k)
         }
-        # Balances shown by the league read and the coin views move only when
-        # the settlement paid someone.
+        # The active season's League (one live total, its dead boxes) and its
+        # initial-assignment inputs may move; so may public_season_players, an
+        # explicit projection (without the new column) that shows updated_at,
+        # already proven above to move only on the row set to Box 7.
         unexplained = {
             k: v for k, v in moved.items()
-            if not (paid and (k.startswith("league_general_read ") or k in (
-                "view public.public_coin_balances", "view public.public_coin_transactions")))
+            if not (k.split(" ")[0] in ("league_live", "initial_assignment_observations")
+                    and k.split(" ")[-1] in active)
+            and not (k == "view public.public_season_players" and boxed)
         }  # fmt: skip
-        report["reads_moved_by_settlement"] = sorted(set(moved) - set(unexplained))
-        # What each active season's League now shows as provisional (read only).
-        report["league_provisional"] = pg.lines(
-            "select s.id||'|'||count(*)||'|'||count(*) filter (where r ? 'provisional_points')"
-            "||'|'||count(*) filter (where r->>'provisional_points' is null)"
-            "||'|'||coalesce(sum((r->>'provisional_dead_count')::integer),0)"
-            "||'|'||coalesce(sum((r->>'provisional_points_reduction')::numeric),0)"
+        report["reads_moved_in_active_season"] = sorted(set(moved) - set(unexplained))
+        report["league_live"] = pg.lines(
+            "select s.name||'|'||(r->>'display_name')||'|official='||(r->>'official_points')||'|total='||(r->>'total_points')"
+            "||'|dead_box='||(r->>'dead_box_number')||'|dead='||coalesce(r->>'dead_count','unknown')"
+            "||'|provisional='||(r ? 'provisional_points')::text"
             " from public.seasons s cross join lateral jsonb_array_elements(public.league_general_read(s.id)->'rows') r"
-            " where s.status='active' group by s.id order by 1",
+            " where s.status='active' order by 1",
             "supabase_admin",
         )
         ok(
-            all(line.split("|")[1] == line.split("|")[2] for line in report["league_provisional"]),
-            "active League rows carry provisional figures (season|rows|with|unknown|deaths|sanctions)",
-            report["league_provisional"],
+            all(line.endswith("|provisional=false") for line in report["league_live"]),
+            "active League rows show one total (no provisional line) and each dead box",
+            report["league_live"],
         )
         ok(
             not unexplained,
-            f"{len(reads_before)} API reads return identical results after {WINDOW} (balances aside for {len(paid_trainers)} paid trainers)",
+            f"{len(reads_before)} API reads return identical results after {WINDOW} (active-season League aside)",
             unexplained,
         )
         privileges_after = privileges(pg)
@@ -515,8 +534,8 @@ def rehearse(args) -> dict:
             verifier == ["falsefalsefalse"],
             "verifier role created without login, superuser or RLS bypass",
         )
-        from tools.validate_phase069_pg import validate
-        report["phase069"] = validate(pg)
+        from tools.validate_phase070_pg import validate
+        report["phase070"] = validate(pg)
         ok(local_fingerprints(pg, public_tables) == rows_after, "focused fixtures rolled back exactly")
         upgraded = catalog_local(pg)
     finally:

@@ -36,7 +36,7 @@ class SupabaseRedemptionRepository:
 
     @classmethod
     def from_url_key(cls, url, service_role_key):
-        from supabase import create_client
+        from app.repositories.supabase.http import create_client
 
         return cls(create_client(url, service_role_key))
 

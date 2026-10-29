@@ -238,17 +238,25 @@ class FrontendReads:
 
     def _pc(self, sid, tid, *, public=False):
         # Caller has already validated the season in this request.
-        def result(save, status, pokemon):
-            if public:
-                return TrainerCollectionRead(status=status, pokemon=pokemon)
-            return PCRead(save=save, status=status, pokemon=pokemon)
-
         players = self.rows(
-            "season_players", "current_save_file_id", season_id=sid, trainer_id=tid
+            "season_players",
+            "current_save_file_id,dead_box_number",
+            season_id=sid,
+            trainer_id=tid,
         )
         if len(players) > 1:
             raise PersistenceError("Ambiguous participant")
         current = players[0]["current_save_file_id"] if players else None
+        # 070: which box holds this participant's dead Pokémon (default 8).
+        dead_box = players[0].get("dead_box_number") if players else None
+
+        def result(save, status, pokemon):
+            if public:
+                return TrainerCollectionRead(
+                    status=status, pokemon=pokemon, dead_box=dead_box
+                )
+            return PCRead(save=save, status=status, pokemon=pokemon, dead_box=dead_box)
+
         saves = (
             self.rows(
                 "save_files",

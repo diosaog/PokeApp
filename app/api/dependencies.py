@@ -106,7 +106,7 @@ def create_default_container(config: APIConfig | None = None) -> ApiContainer:
             config.supabase_url,
             config.supabase_service_role_key,
         )
-        from supabase import create_client
+        from app.repositories.supabase.http import create_client
         from app.auth.accounts import AccountService
         from app.auth.supabase_adapter import SupabaseAuthClient
         from app.repositories.supabase.accounts import (
@@ -254,7 +254,7 @@ def create_default_container(config: APIConfig | None = None) -> ApiContainer:
         and config.supabase_url
         and config.supabase_service_role_key
     ):
-        from supabase import create_client
+        from app.repositories.supabase.http import create_client
         from app.application.item_use_transport import ItemUseTransport
         from app.repositories.supabase.item_use_transport import (
             SupabaseItemUseTransport,
@@ -279,7 +279,7 @@ def create_default_container(config: APIConfig | None = None) -> ApiContainer:
         from app.application.transfer_transport import TransferTransport
         from app.repositories.supabase.item_use_transport import PrivateItemUseBlobs
         from app.repositories.supabase.transfer import TransferRepository
-        from supabase import create_client
+        from app.repositories.supabase.http import create_client
 
         client = create_client(config.supabase_url, config.supabase_service_role_key)
         repository = TransferRepository(client)

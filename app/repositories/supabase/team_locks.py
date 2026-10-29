@@ -23,7 +23,7 @@ class SupabaseTeamLockRepository:
 
     @classmethod
     def from_url_key(cls, url: str, service_role_key: str) -> "SupabaseTeamLockRepository":
-        from supabase import create_client
+        from app.repositories.supabase.http import create_client
 
         return cls(create_client(url, service_role_key))
 

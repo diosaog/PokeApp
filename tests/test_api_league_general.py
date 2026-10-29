@@ -96,24 +96,26 @@ class LeagueGeneralTests(unittest.TestCase):
         self.assertIsNone(row["dead_count"])
         self.assertNotIn("champion", row)
         self.assertNotIn("rank", row)
-        # A 068 database has no provisional figures: absent, never invented.
-        self.assertIsNone(row["provisional_points"])
-        self.assertIsNone(row["provisional_dead_count"])
+        # An older database has no 070 fields: absent, never invented.
+        self.assertIsNone(row["official_points"])
+        self.assertIsNone(row["dead_box_number"])
+        # One total only: the 069 provisional line is gone from the contract.
+        self.assertNotIn("provisional_points", row)
 
-    def test_provisional_figures_pass_through_exactly(self):
+    def test_one_live_total_and_dead_box_pass_through_exactly(self):
+        # 070: in an active season total_points already includes the current
+        # deaths and sanctions; official_points is the last closing's figure.
         self.store.result["rows"][0].update(
-            total_points="0",
-            provisional_matchday_number=1,
-            provisional_dead_count=3,
-            provisional_points_reduction="1.5",
-            provisional_points="-2.1",
+            total_points="-2.1",
+            official_points="0",
+            dead_box_number=7,
+            provisional_points="-9",
         )
         row = self.get().json()["rows"][0]
-        self.assertEqual(row["total_points"], "0")
-        self.assertEqual(row["provisional_points"], "-2.1")
-        self.assertEqual(row["provisional_points_reduction"], "1.5")
-        self.assertEqual(row["provisional_dead_count"], 3)
-        self.assertEqual(row["provisional_matchday_number"], 1)
+        self.assertEqual(row["total_points"], "-2.1")
+        self.assertEqual(row["official_points"], "0")
+        self.assertEqual(row["dead_box_number"], 7)
+        self.assertNotIn("provisional_points", row)
 
     def test_single_rpc_for_all_players_preserves_server_order(self):
         rows = self.store.result["rows"]

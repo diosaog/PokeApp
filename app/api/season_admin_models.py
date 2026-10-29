@@ -109,6 +109,11 @@ class SetupRevisionBody(StrictBody):
     expected_setup_revision: Revision
 
 
+class DeadBoxBody(StrictBody):
+    # 070: the box this participant's dead Pokémon go to (Box 8 by default).
+    dead_box_number: Annotated[int, Field(strict=True, ge=1, le=32)]
+
+
 class AdminReceipt(StrictBody):
     operation_id: UUID
     resource_id: UUID

@@ -33,6 +33,7 @@ from tools.phase30_release_audit import DEPLOYED, PENDING
 from tools.production_readonly import SUPABASE_REF, _supabase, query, supabase_get
 
 EXPECTED_SHA256 = {
+    '070_dead_box_and_live_league.sql': '826ccd09a6828717e4f1a8b99643651e782e1971cd38d66d6a5707b1b7e89d3b',
     '069_real_test_corrections.sql': 'c5ddb335ce4683f35c8b83911a86762520122d46f144c6eafe93315579754803',
     '068_precompetition_readiness.sql': 'e582c4a973581003b194eb157370521b37f6a002189491f564b7710d7afcad69',
     '067_discord_announcements.sql': '63300555a3b927765a5984ceb7353d2229656b8a529f306e8704ca20a0a462e2',

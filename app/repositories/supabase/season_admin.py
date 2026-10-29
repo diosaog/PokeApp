@@ -12,6 +12,7 @@ RPCS = {
     "remove_participant": "api_admin_remove_participant", "create_config": "api_admin_create_config",
     "replace_config": "api_admin_replace_config", "initial_divisions": "api_admin_initial_divisions",
     "prepare": "api_admin_prepare_first_matchday", "activate": "api_admin_activate_season",
+    "dead_box": "api_admin_set_dead_box",
 }
 REJECTIONS = {
     **dict.fromkeys(("trainer_disabled", "admin_required"), 403),
@@ -20,7 +21,8 @@ REJECTIONS = {
         "idempotency_conflict", "trainer_unavailable", "participant_exists", "participant_referenced",
         "invalid_roster", "invalid_config", "invalid_rewards", "effective_round_exists", "config_window_closed",
         "config_already_used", "initial_setup_locked", "division_capacity_mismatch", "matchday_already_prepared",
-        "config_not_effective", "competition_structure_locked", "competition_structure_mismatch"), 409),
+        "config_not_effective", "competition_structure_locked", "competition_structure_mismatch",
+        "season_not_editable"), 409),
     **dict.fromkeys(("initial_assignment_required", "initial_assignment_not_ready",
         "initial_assignment_locked", "initial_assignment_review_stale", "stale_inputs",
         "initial_boundary_tie_unresolved", "invalid_tie_resolution"), 409),
@@ -44,7 +46,7 @@ class SupabaseSeasonAdminRepository:
 
     @classmethod
     def from_url_key(cls, url: str, service_role_key: str):
-        from supabase import create_client
+        from app.repositories.supabase.http import create_client
         return cls(create_client(url, service_role_key))
 
     def execute(self, operation: str, request: dict) -> dict:

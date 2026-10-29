@@ -11,7 +11,7 @@ class SupabasePersonalSaveRepository:
 
     @classmethod
     def from_url_key(cls, url, key):
-        from supabase import create_client
+        from app.repositories.supabase.http import create_client
 
         return cls(create_client(url, key))
 
