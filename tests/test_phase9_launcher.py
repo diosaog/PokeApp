@@ -4,6 +4,7 @@ import ast
 from concurrent.futures import ThreadPoolExecutor
 from dataclasses import asdict
 import json
+import os
 from pathlib import Path
 import tempfile
 import threading
@@ -137,11 +138,32 @@ class Phase9LauncherTests(unittest.TestCase):
         self.assertEqual(watch.tick(1).status, "SYNCED")
         for _ in range(10):
             watch.notify(1.1)
-        self.assertEqual(watch.tick(2).status, "NO_CHANGE")
+        # Unchanged file: only its metadata is checked, nothing is re-read.
+        with patch.object(
+            self.sync.inspector.reader, "read", side_effect=AssertionError("read")
+        ):
+            self.assertIsNone(watch.tick(2))
         self.assertEqual(self.parser.calls, 1)
         self.path.write_bytes(b"new without notification")
         self.assertIsNone(watch.tick(7))
         self.assertEqual(watch.tick(8).status, "SYNCED")
+        self.assertEqual(self.parser.calls, 2)
+        # A full verifying read still runs periodically.
+        self.assertEqual(watch.tick(8 + watch.verify_seconds + 1).status, "NO_CHANGE")
+        self.assertEqual(self.parser.calls, 2)
+
+    def test_a_file_replaced_under_the_same_name_is_seen(self):
+        # PKHeX/atomic writers replace the file: new identity, same path.
+        watch = SaveWatchService(
+            self.sync, self.source, poll_seconds=2, debounce_seconds=1
+        )
+        self.assertIsNone(watch.tick(0))
+        self.assertEqual(watch.tick(1).status, "SYNCED")
+        replacement = self.path.with_name(self.path.name + ".tmp")
+        replacement.write_bytes(b"medals edited elsewhere, same size?")
+        os.replace(replacement, self.path)
+        self.assertIsNone(watch.tick(3))
+        self.assertEqual(watch.tick(4).status, "SYNCED")
         self.assertEqual(self.parser.calls, 2)
 
     def test_journal_cas_and_same_input_race_independent_connections(self):

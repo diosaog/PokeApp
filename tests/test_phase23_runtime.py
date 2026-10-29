@@ -39,6 +39,8 @@ class ItemStatusRuntimeTests(unittest.TestCase):
             self.assertEqual(method, "GET")
             if path == "/v1/read/seasons":
                 return {"items": [{"id": SEASON_ID, "status": "active"}]}
+            if path.endswith("/saves/context"):
+                return {"current_save_id": None, "save_identity": None}
             if path.endswith("/shop"):
                 return {"balance": "25"}
             if path.endswith("/item-uses"):

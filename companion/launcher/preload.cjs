@@ -30,13 +30,10 @@ contextBridge.exposeInMainWorld("launcher", {
       ticket,
     ),
   quickItems: () => ipcRenderer.invoke("launcher:quick-items"),
-  addQuickItem: (item, quantity, emulatorClosed) =>
-    ipcRenderer.invoke(
-      "launcher:quick-item-add",
-      item,
-      quantity,
-      emulatorClosed,
-    ),
+  addQuickItem: (item, quantity, ticket) =>
+    ipcRenderer.invoke("launcher:quick-item-add", item, quantity, ticket),
+  // A confirmed change the web should show at once (fixed names only).
+  webEvent: (type) => ipcRenderer.invoke("launcher:web-event", type),
   transfer: (kind, authorizationId, emulatorClosed, ticket) =>
     ipcRenderer.invoke(
       "launcher:transfer",

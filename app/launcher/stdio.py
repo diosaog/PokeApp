@@ -2,6 +2,7 @@
 
 import argparse
 import json
+import re
 import sys
 from pathlib import Path
 
@@ -11,6 +12,16 @@ from app.launcher.core import LauncherLease
 from app.launcher.runtime import PRODUCTION_API, LauncherRuntime
 from app.save_parser.adapter import PkhexProcessParser, SaveInspector
 from app.save_parser.models import ErrorCode, SaveError
+
+
+def error_code(exc):
+    """A refusal's own code (ValueError("invalid_selection") → INVALID_SELECTION)
+    so the shell can explain it; anything else stays generic. Never a message,
+    path or secret."""
+    text = str(exc) if isinstance(exc, (ValueError, LookupError)) else ""
+    if re.fullmatch(r"[a-z][a-z_]{2,63}", text):
+        return text.upper()
+    return "LAUNCHER_REQUEST_FAILED"
 
 
 class UnavailableParser:
@@ -50,8 +61,8 @@ def main():
                     identifier = command["id"]
                     value = runtime.command(command["command"], command.get("args"))
                     result = {"id": identifier, "result": value}
-                except Exception:  # noqa: BLE001 - sanitized pipe boundary, never return secrets
-                    result = {"id": identifier, "error": "LAUNCHER_REQUEST_FAILED"}
+                except Exception as exc:  # noqa: BLE001 - sanitized pipe boundary, never return secrets
+                    result = {"id": identifier, "error": error_code(exc)}
                 print(json.dumps(result, ensure_ascii=True), flush=True)
         finally:
             runtime.close()

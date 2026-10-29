@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import re
 import time
 from dataclasses import dataclass, field
 
@@ -13,7 +14,45 @@ from app.save_parser.models import WireModel
 
 
 class BackendError(Exception):
-    pass
+    """`str(error)` is the code the runtime acts on; `detail` is the API's own
+    code (e.g. SAVE_TRAINER_MISMATCH), kept so the trainer sees the real cause."""
+
+    def __init__(self, code, *, status=None, detail=None):
+        super().__init__(code)
+        self.status, self.detail = status, detail
+
+
+# Only these end the Launcher's session. A 403 on one resource (a season this
+# trainer does not play, a disabled feature) is a refusal, never a sign-out.
+SESSION_ENDED = ("SESSION_REJECTED", "LOGIN_REQUIRED", "ACCOUNT_DISABLED")
+
+
+def _detail(response):
+    try:
+        data = response.json()
+    except ValueError:
+        return None
+    detail = data.get("detail") if isinstance(data, dict) else None
+    code = detail.get("code") if isinstance(detail, dict) else None
+    return code if isinstance(code, str) and re.fullmatch(r"[A-Z0-9_]{1,64}", code) else None
+
+
+def _refusal(response, semantic, code):
+    """The Launcher's code for a non-200 answer, with the API's reason attached."""
+    status, detail = response.status_code, _detail(response)
+    if status == 401:
+        return BackendError("SESSION_REJECTED", status=status, detail=detail)
+    if status == 403:
+        return BackendError(
+            "ACCOUNT_DISABLED" if detail == "TRAINER_DISABLED" else "FORBIDDEN",
+            status=status,
+            detail=detail,
+        )
+    if status == 429:
+        return BackendError("RATE_LIMITED", status=status, detail=detail)
+    if status in semantic:
+        return BackendError(code, status=status, detail=detail)
+    return BackendError("BACKEND_UNAVAILABLE", status=status, detail=detail)
 
 
 class SessionTokens(WireModel):
@@ -71,11 +110,9 @@ class BackendClient:
                     "Content-Type": "application/octet-stream",
                 },
             )
-            if response.status_code in (401, 403):
-                raise BackendError("SESSION_REJECTED")
-            if response.status_code in (409, 413, 415, 422):
-                raise BackendError("SAVE_REJECTED")
-            if response.status_code != 200 or len(response.content) > 65536:
+            if response.status_code != 200:
+                raise _refusal(response, (409, 413, 415, 422), "SAVE_REJECTED")
+            if len(response.content) > 65536:
                 raise BackendError("BACKEND_UNAVAILABLE")
             return response.json()
         except (httpx.HTTPError, ValueError):
@@ -90,11 +127,9 @@ class BackendClient:
                 headers={"Authorization": "Bearer " + token} if token else {},
                 follow_redirects=False,
             )
-            if response.status_code in (401, 403):
-                raise BackendError("SESSION_REJECTED")
-            if response.status_code == 429:
-                raise BackendError("RATE_LIMITED")
-            if response.status_code != 200 or len(response.content) > 65536:
+            if response.status_code != 200:
+                raise _refusal(response, (), "BACKEND_UNAVAILABLE")
+            if len(response.content) > 65536:
                 raise BackendError("BACKEND_UNAVAILABLE")
             return model.model_validate_json(response.content)
         except (httpx.HTTPError, ValidationError, ValueError):
@@ -130,13 +165,11 @@ class BackendClient:
                 json=body,
                 headers={"Authorization": "Bearer " + token} if token else {},
             )
-            if response.status_code in (401, 403):
-                raise BackendError("SESSION_REJECTED")
             if response.status_code == 404 and missing:
                 return None
-            if response.status_code in (409, 413, 422):
-                raise BackendError("OBSERVATION_REJECTED")
-            if response.status_code != 200 or len(response.content) > 2 * 1024 * 1024:
+            if response.status_code != 200:
+                raise _refusal(response, (409, 413, 422), "OBSERVATION_REJECTED")
+            if len(response.content) > 2 * 1024 * 1024:
                 raise BackendError("BACKEND_UNAVAILABLE")
             data = response.json()
             if not isinstance(data, dict):
@@ -192,7 +225,7 @@ class LauncherSession:
             return principal
         except BackendError as exc:
             # A network failure does not revoke the identity or erase offline recovery.
-            if str(exc) in ("SESSION_REJECTED", "LOGIN_REQUIRED"):
+            if str(exc) in SESSION_ENDED:
                 self.logout()
             raise
 

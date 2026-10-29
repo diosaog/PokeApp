@@ -94,6 +94,11 @@ def _kernel():
 
 def windows_process_names() -> tuple[str, ...]:
     """A native snapshot; a failed/incomplete enumeration never means no emulator."""
+    return tuple(name for _pid, name in windows_process_entries())
+
+
+def windows_process_entries() -> tuple[tuple[int, str], ...]:
+    """(pid, executable name) of every process in one native snapshot."""
     import ctypes
     from ctypes import wintypes
 
@@ -129,7 +134,7 @@ def windows_process_names() -> tuple[str, ...]:
             raise WriteSafetyError("PROCESS_CHECK_UNAVAILABLE")
         result = []
         while True:
-            result.append(entry.szExeFile)
+            result.append((entry.th32ProcessID, entry.szExeFile))
             if not kernel.Process32NextW(handle, ctypes.byref(entry)):
                 if ctypes.get_last_error() != 18:  # ERROR_NO_MORE_FILES
                     raise WriteSafetyError("PROCESS_CHECK_UNAVAILABLE")

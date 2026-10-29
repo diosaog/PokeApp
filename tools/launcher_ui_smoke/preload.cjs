@@ -4,6 +4,7 @@ const calls = [];
 let enabled = true;
 let navigate = null;
 let overrides = {};
+let discoverReply = { status: "DONE", count: 1 };
 let updateInfo = {
   status: "AVAILABLE",
   current: "0.22.0-rc.3",
@@ -156,7 +157,18 @@ contextBridge.exposeInMainWorld("launcher", {
     calls.push(["transfer", ...args]),
     { status: "QUEUED" }
   ),
-  discoverSaves: async () => ({ status: "DONE", count: 1 }),
+  // Like the core: the search updates its own state before it answers.
+  discoverSaves: async () => {
+    if (discoverReply.saves)
+      overrides = { ...overrides, emulator_saves: discoverReply.saves, discovery: discoverReply.discovery };
+    return discoverReply;
+  },
+  __discover: (reply) => {
+    discoverReply = reply;
+  },
+  webEvent: async (type) => (calls.push(["webEvent", type]), { sent: true }),
+  chooseSave: async () => ({ status: "CANCELLED" }),
+  retry: async () => ({ status: "QUEUED" }),
   selectDiscovered: async (p) => (
     calls.push(["select", p]),
     { status: "QUEUED" }

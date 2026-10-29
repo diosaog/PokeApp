@@ -27,6 +27,9 @@
       <button id="update-open" type="button" hidden>Ver actualización</button>
     </div>
     <div id="notices" class="notices" role="status" hidden></div>
+    <!-- Short notices about the action just taken: the real reason when it
+         could not be done, a confirmation when it was. -->
+    <div id="toasts" class="toasts" popover="manual" aria-live="polite"></div>
     <main>
       <nav id="hub-tabs" aria-label="Saves y Launcher">
         <button id="web-tab" aria-pressed="false">PokeApp</button
@@ -56,6 +59,7 @@
                 >Sin partida</span
               ><span id="sync-detail" class="muted"></span>
             </div>
+            <p id="season-line" class="season-line" hidden></p>
             <p id="other-saves" class="other-saves" hidden></p>
           </div>
           <div class="save-card-actions">
@@ -79,9 +83,10 @@
               ><button id="select-save">Elegir archivo…</button>
             </div>
             <p class="muted">
-              Buscar solo lee la lista de archivos del emulador: no abre ni
-              modifica tus partidas. Una partida nueva nunca sustituye a la
-              activa sin que tú lo elijas.
+              Buscar revisa Lime3DS, Azahar y Citra (instalados, portables o
+              con carpeta personalizada) sin abrir ni modificar tus partidas.
+              Una partida nueva nunca sustituye a la activa sin que tú lo
+              elijas.
             </p>
           </article>
           <article id="write-article" aria-labelledby="write-title">
@@ -91,10 +96,6 @@
             </p>
             <p id="write-description"></p>
             <div id="write-confirmation" hidden>
-              <label
-                ><input id="emulator-closed" type="checkbox" /> He cerrado el
-                juego y el emulador.</label
-              >
               <button id="confirm-write" disabled>
                 Revisar y confirmar cambio
               </button>
@@ -109,10 +110,6 @@
           <h2 id="transfer-title" tabindex="-1">Robos y entregas</h2>
           <p id="transfer-summary" role="status">No hay robos en curso.</p>
           <div id="transfer-list"></div>
-          <label
-            ><input id="transfer-emulator-closed" type="checkbox" /> He cerrado
-            el juego y el emulador.</label
-          >
           <p class="muted">
             Solo se admiten robos entre partidas del mismo juego con el Pokémon
             en las Cajas 1–7. Los Pokémon del equipo y los cruces entre juegos
@@ -172,16 +169,13 @@
             <button class="quick-add">Añadir a la bolsa</button>
             <span class="quick-error" role="status"></span>
           </div>
-          <label
-            ><input id="quick-emulator-closed" type="checkbox" /> He cerrado el
-            juego y el emulador.</label
-          >
-          <button id="quick-refresh">Leer objetos de la partida</button>
+          <button id="quick-refresh">Volver a leer las cantidades</button>
           <p class="muted">
-            Se añaden a la bolsa de tu partida, no a un Pokémon. Primero se
-            prepara una copia verificada; después confirmas el cambio en
-            «Cambios en tu partida». Solo se muestra «aplicado» tras releer la
-            partida.
+            Se añaden a la bolsa de tu partida activa, no a un Pokémon. Al
+            pulsar «Añadir a la bolsa» el Launcher comprueba que el emulador
+            está cerrado y el archivo libre, guarda una copia verificada,
+            aplica el cambio y vuelve a leer la partida antes de darlo por
+            hecho.
           </p>
         </article>
         <article id="team-article" aria-labelledby="team-title">
@@ -204,11 +198,6 @@
               Exportar la partida actual…
             </button>
           </div>
-          <label
-            ><input id="backup-emulator-closed" type="checkbox" /> He cerrado el
-            juego y el emulador (necesario para exportar la partida
-            actual).</label
-          >
           <p id="backup-notice" role="status"></p>
           <div id="backup-list" class="backup-list"></div>
           <p class="muted">
@@ -312,6 +301,7 @@
         equipo. Abre tu juego una vez en el emulador y vuelve a buscar, o elige
         el archivo a mano.
       </p>
+      <div id="selector-report" class="selector-report" hidden></div>
       <div class="dialog-actions">
         <button id="selector-rescan" type="button">Buscar de nuevo</button
         ><button id="selector-manual" type="button">Elegir archivo…</button>
@@ -330,10 +320,6 @@
       </header>
       <dl id="restore-summary" class="facts"></dl>
       <ul id="restore-checks" class="checks"></ul>
-      <label class="check-row"
-        ><input id="restore-closed" type="checkbox" /> He cerrado el juego y el
-        emulador y no los abriré hasta terminar.</label
-      >
       <label class="confirm-row"
         ><span>Escribe <strong>Confirmo</strong> para restaurar</span>
         <input

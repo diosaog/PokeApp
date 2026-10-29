@@ -162,3 +162,46 @@ test("open robberies block restores until their delivery is verified", () => {
   );
   assert.equal(robberyOpen([{ mandatory: true }]), true);
 });
+
+test("«Añadir a la bolsa» is one confirmation bound to the save and its reading", () => {
+  const { describe, fingerprint } = require("./confirmations.cjs");
+  const state = {
+    selected_save: "C:/saves/main",
+    receipt_id: "r1",
+    observation: { game: "Y", trainer: { name: "Ami" } },
+    quick_items: { items: { rare_candy: { count: 3 } } },
+    write: { busy: false, status: "IDLE" },
+  };
+  const offer = describe("quick-item", "rare_candy:5", state);
+  assert.equal(offer.go, "Añadir a la bolsa");
+  assert.match(offer.message, /5 × Caramelo Raro · Pokémon Y · Ami/);
+  assert.match(offer.detail, /tendrás 8/);
+  // No checkbox: the text says the Launcher checks the emulator itself.
+  assert.match(offer.detail, /comprueba antes que el emulador está cerrado/);
+  const c = createConfirmations();
+  const id = c.issue(
+    "quick-item",
+    "rare_candy:5",
+    fingerprint("quick-item", "rare_candy:5", state),
+  );
+  // The save was re-read (new receipt) after the dialog opened: refused.
+  assert.throws(
+    () =>
+      c.redeem(
+        id,
+        "quick-item",
+        "rare_candy:5",
+        fingerprint("quick-item", "rare_candy:5", { ...state, receipt_id: "r2" }),
+      ),
+    { message: STALE },
+  );
+  assert.throws(
+    () => describe("quick-item", "rare_candy:5", { ...state, write: { busy: true } }),
+    /otra operación/,
+  );
+  assert.throws(
+    () => describe("quick-item", "rare_candy:5", { ...state, selected_save: null }),
+    /Selecciona tu partida/,
+  );
+  assert.throws(() => describe("quick-item", "nugget:1", state), /objeto/);
+});

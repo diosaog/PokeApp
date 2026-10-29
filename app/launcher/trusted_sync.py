@@ -25,6 +25,8 @@ class TrustedStore(CloudStore):
                 receipt TEXT, verified INTEGER NOT NULL DEFAULT 0,
                 PRIMARY KEY(origin,trainer,season,id));
             """)
+            # A blocked row is never uploaded again: its bytes only filled the outbox.
+            db.execute("UPDATE trusted_save_outbox SET raw=NULL WHERE blocked=1")
 
     def enabled(self, origin, trainer):
         with self.journal.connection() as db:
@@ -58,6 +60,17 @@ class TrustedStore(CloudStore):
     def scope(row):
         return tuple(row[k] for k in ("origin", "trainer", "season", "id"))
 
+    def has(self, origin, trainer, season, raw_hash):
+        """This exact content is already queued, delivered or refused for the scope."""
+        with self.journal.connection() as db:
+            return (
+                db.execute(
+                    "SELECT 1 FROM trusted_save_outbox WHERE origin=? AND trainer=? AND season=? AND id=?",
+                    (origin, trainer, season, raw_hash),
+                ).fetchone()
+                is not None
+            )
+
     def enqueue_raw(self, origin, trainer, season, local, data):
         raw_hash = sha256(data).hexdigest()
         if raw_hash != local.fingerprint.sha256 or len(data) != local.fingerprint.size:
@@ -80,7 +93,8 @@ class TrustedStore(CloudStore):
             )
             if (
                 db.execute(
-                    "SELECT count(*) FROM trusted_save_outbox WHERE raw IS NOT NULL"
+                    "SELECT count(*) FROM trusted_save_outbox WHERE raw IS NOT NULL "
+                    "AND blocked=0 AND verified=0"
                 ).fetchone()[0]
                 >= 8
             ):
@@ -128,7 +142,7 @@ class TrustedStore(CloudStore):
             )
 
     def block(self, row):
-        self.update(row, blocked=1)
+        self.update(row, blocked=1, raw=None)
 
     def retry(self, origin, trainer):
         with self.journal.connection() as db:

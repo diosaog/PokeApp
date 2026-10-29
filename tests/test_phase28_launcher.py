@@ -70,8 +70,24 @@ class SaveChoiceTests(unittest.TestCase):
             for name in names
         ]
 
+    def report(self, found):
+        return {"checked": [], "found": len(found), "at": 0}
+
+    def remember(self, runtime):
+        """A remembered save that really exists on disk."""
+        path = runtime.core.profile / "remembered" / "main"
+        path.parent.mkdir()
+        path.write_bytes(b"save")
+        runtime.core.config = runtime.core.config.model_copy(
+            update={"selected_save": str(path)}
+        )
+        return [{"path": str(path), "emulator": "Lime3DS", "game": "Y"}]
+
     def choose(self, runtime, found):
-        with patch("app.launcher.discovery.emulator_saves", return_value=found):
+        with patch(
+            "app.launcher.discovery.discover_emulator_saves",
+            return_value=(found, self.report(found)),
+        ):
             runtime._discover_on_start()
         return runtime.state()["save_choice"]
 
@@ -97,37 +113,53 @@ class SaveChoiceTests(unittest.TestCase):
 
     def test_remembered_save_is_never_replaced_and_new_ones_are_announced(self):
         runtime = self.runtime()
-        runtime.core.config = runtime.core.config.model_copy(
-            update={"selected_save": "C:/fixture/a/main"}
-        )
+        mine = self.remember(runtime)
         # First run sets the baseline: nothing is "new" yet.
-        first = self.choose(runtime, self.found("a", "b"))
+        first = self.choose(runtime, mine + self.found("b"))
         self.assertEqual(
             (first["status"], first["count"], first["new"]), ("KEPT", 1, 0)
         )
-        later = self.choose(runtime, self.found("a", "b", "c"))
+        later = self.choose(runtime, mine + self.found("b", "c"))
         self.assertEqual(
             (later["status"], later["count"], later["new"]), ("KEPT", 2, 1)
         )
         self.assertTrue(runtime.local_commands.empty())
-        self.assertEqual(runtime.core.config.selected_save, "C:/fixture/a/main")
+        self.assertEqual(runtime.core.config.selected_save, mine[0]["path"])
         # The memory holds path hashes only, never paths.
         stored = (runtime.core.profile / "known-saves.json").read_text("utf-8")
         self.assertNotIn("fixture", stored)
         self.assertEqual(len(json.loads(stored)), 3)
 
-    def test_manual_search_with_a_save_selected_keeps_it(self):
+    def test_a_remembered_file_that_is_gone_is_said_plainly(self):
+        # Renamed, moved or deleted: the trainer is told instead of a silent
+        # read failure, and nothing is chosen in their place.
         runtime = self.runtime()
         runtime.core.config = runtime.core.config.model_copy(
-            update={"selected_save": "C:/fixture/a/main"}
+            update={"selected_save": "C:/fixture/gone/main"}
         )
+        choice = self.choose(runtime, self.found("b"))
+        self.assertEqual((choice["status"], choice["count"]), ("MISSING", 1))
+        self.assertTrue(runtime.local_commands.empty())
+
+    def test_manual_search_with_a_save_selected_keeps_it(self):
+        runtime = self.runtime()
+        found = self.remember(runtime) + self.found("b")
         with patch(
-            "app.launcher.discovery.emulator_saves",
-            return_value=self.found("a", "b"),
+            "app.launcher.discovery.discover_emulator_saves",
+            return_value=(found, self.report(found)),
         ):
             result = runtime.command("discover_saves", {})
-        self.assertEqual(result, {"status": "DONE", "count": 2, "auto_selected": False})
+        # The answer itself carries the list and what was checked, so the
+        # selector never opens on an older state poll.
+        self.assertEqual(
+            (result["status"], result["count"], result["auto_selected"]),
+            ("DONE", 2, False),
+        )
+        self.assertEqual(result["saves"], found)
+        self.assertEqual(result["discovery"], self.report(found))
+        self.assertEqual(result["save_choice"]["status"], "KEPT")
         self.assertEqual(runtime.state()["save_choice"]["status"], "KEPT")
+        self.assertEqual(runtime.state()["discovery"], self.report(found))
         self.assertTrue(runtime.local_commands.empty())
 
 
@@ -242,10 +274,74 @@ class AutomaticSyncTests(unittest.TestCase):
     def pending(self):
         return self.runtime.store.summary(self.ORIGIN, self.TRAINER)["pending"]
 
+    def scopes(self):
+        with self.runtime.store.journal.connection() as db:
+            return sorted(
+                (r["season"], r["id"])
+                for r in db.execute(
+                    "SELECT season,id FROM trusted_save_outbox WHERE verified=0 AND blocked=0"
+                )
+            )
+
     def test_first_trainer_signing_in_syncs_automatically(self):
+        # The selected save is the active save everywhere: personal record
+        # and, while it is the season's save, the active season too.
         self.assertTrue(self.runtime.state()["cloud_sync"])
         self.runtime._enqueue_local()
-        self.assertEqual(self.pending(), 1)
+        digest = sha256(self.data).hexdigest()
+        self.assertEqual(
+            self.scopes(), sorted([("personal", digest), (self.SEASON, digest)])
+        )
+
+    def test_a_season_bound_to_another_game_keeps_it_and_personal_still_syncs(self):
+        # The friend's case: «Prueba» uses their Sun save, the Launcher has Y.
+        self.runtime._patch(
+            cloud={
+                "data": {
+                    "season": {"id": self.SEASON},
+                    "season_link": {
+                        "status": "BOUND",
+                        "game": "SN",
+                        "identity": {"game": "SN", "trainer": {"name": "Other"}},
+                    },
+                }
+            }
+        )
+        self.runtime._enqueue_local()
+        self.assertEqual(
+            self.scopes(), [("personal", sha256(self.data).hexdigest())]
+        )
+
+    def test_a_season_this_trainer_does_not_play_never_receives_the_save(self):
+        self.runtime._patch(
+            cloud={
+                "data": {
+                    "season": {"id": self.SEASON},
+                    "season_link": {"status": "NOT_PARTICIPANT"},
+                }
+            }
+        )
+        self.runtime._enqueue_local()
+        self.assertEqual([s for s, _ in self.scopes()], ["personal"])
+
+    def test_the_same_save_already_bound_keeps_syncing_to_the_season(self):
+        from app.launcher.runtime import save_identity
+
+        self.runtime._patch(
+            cloud={
+                "data": {
+                    "season": {"id": self.SEASON},
+                    "season_link": {
+                        "status": "BOUND",
+                        "identity": save_identity(self.runtime.receipt),
+                    },
+                }
+            }
+        )
+        self.runtime._enqueue_local()
+        self.assertEqual(
+            [s for s, _ in self.scopes()], sorted(["personal", self.SEASON])
+        )
 
     def test_without_an_active_season_the_save_goes_to_the_personal_record(self):
         # It used to wait forever («Pendiente · Se enviará en un momento»).
@@ -263,7 +359,7 @@ class AutomaticSyncTests(unittest.TestCase):
     def test_same_content_is_queued_once(self):
         for _ in range(3):
             self.runtime._enqueue_local()
-        self.assertEqual(self.pending(), 1)
+        self.assertEqual(self.pending(), 2)  # one per scope, never repeated
 
     def test_new_content_replaces_the_unsent_snapshot(self):
         self.runtime._enqueue_local()
@@ -271,9 +367,18 @@ class AutomaticSyncTests(unittest.TestCase):
         self.save.write_bytes(changed)
         self.runtime.receipt = self.receipt(changed)
         self.runtime._enqueue_local()
-        self.assertEqual(self.pending(), 1)
-        row = self.runtime.store.pending(self.ORIGIN, self.TRAINER)
-        self.assertEqual(row["id"], sha256(changed).hexdigest())
+        digest = sha256(changed).hexdigest()
+        self.assertEqual(
+            self.scopes(), sorted([("personal", digest), (self.SEASON, digest)])
+        )
+
+    def test_a_queued_change_wakes_the_cloud_loop_at_once(self):
+        self.runtime._cloud_wake.clear()
+        self.runtime._enqueue_local()
+        self.assertTrue(self.runtime._cloud_wake.is_set())
+        self.runtime._cloud_wake.clear()
+        self.runtime._enqueue_local()  # nothing new: no wake-up
+        self.assertFalse(self.runtime._cloud_wake.is_set())
 
     def test_bytes_changing_during_the_read_are_never_queued(self):
         # The emulator is writing: the bytes no longer match the stable read.

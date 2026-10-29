@@ -293,28 +293,35 @@ class TrustedOutboxTests(unittest.TestCase):
         # Byte enqueue was already proved; isolate the cloud worker's UI state.
         runtime._enqueue_local = Mock()
         seasons = {"items": [{"id": SID, "status": "active"}]}
+        # The season's own context: a participant with no save bound yet.
+        context = {"current_save_id": None, "save_identity": None}
         self.session.request.side_effect = [
             # Old backend: item-use and transfer endpoints absent (missing=True).
-            seasons, {"balance": "0"}, None, None, self.registration, {"status": "not_ready"},
+            seasons, context, {"balance": "0"}, None, None, self.registration,
+            {"status": "not_ready"},
         ]
         with self.assertRaisesRegex(BackendError, "SAVE_READBACK_PENDING"):
             runtime._cloud_step()
-        self.assertIsNone(runtime.state()["cloud_receipt"])
+        self.assertIsNone(runtime.state()["season_receipt"])
         self.session.request.side_effect = [
             # Old backend: item-use and transfer endpoints absent (missing=True).
-            seasons, {"balance": "0"}, None, None, self.registration,
+            seasons, context, {"balance": "0"}, None, None, self.registration,
             {"status": "ready", "save": {"id": SID}}, self.registration,
         ]
         runtime._cloud_step()
-        self.assertEqual(runtime.state()["cloud_receipt"]["save_id"], SID)
+        self.assertEqual(runtime.state()["season_receipt"]["save_id"], SID)
         runtime.next_cloud_refresh = 0
         self.session.request.side_effect = [
             # Old backend: item-use and transfer endpoints absent (missing=True).
-            seasons, {"balance": "0"}, None, None, self.registration | {"is_current": False},
+            seasons, context, {"balance": "0"}, None, None,
+            self.registration | {"is_current": False},
         ]
-        with self.assertRaisesRegex(BackendError, "SAVE_SUPERSEDED"):
-            runtime._cloud_step()
-        self.assertIsNone(runtime.state()["cloud_receipt"])
+        # Another device's newer season save is reported on the season line;
+        # it is not a failure of this trainer's sync.
+        runtime._cloud_step()
+        self.assertIsNone(runtime.state()["season_receipt"])
+        link = runtime.state()["cloud"]["data"]["season_link"]
+        self.assertEqual(link["status"], "SUPERSEDED")
         self.session.upload.assert_not_called()
 
 

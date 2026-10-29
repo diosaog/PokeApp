@@ -1089,3 +1089,90 @@ body {
   background-attachment: fixed;
 }
 /* scenes:end */
+
+/* Action notices (toasts): small, at the top, above the web, the hub and any
+   dialog (a popover in the top layer). Errors, warnings and confirmations. */
+.toasts {
+  position: fixed;
+  inset: 8px 12px auto auto;
+  margin: 0;
+  padding: 0;
+  width: min(440px, calc(100vw - 24px));
+  display: grid;
+  gap: 6px;
+  background: transparent;
+  border: 0;
+  overflow: visible;
+}
+.toasts:not(:popover-open):empty {
+  display: none;
+}
+.toast {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  margin: 0;
+  padding: 8px 6px 8px 14px;
+  border-radius: 12px;
+  font-size: 0.88rem;
+  line-height: 1.35;
+  color: var(--c-text);
+  background: color-mix(in srgb, var(--c-danger) 18%, var(--c-bg-1));
+  border: 1px solid color-mix(in srgb, var(--c-danger) 45%, transparent);
+  box-shadow:
+    inset 4px 0 0 var(--c-danger),
+    0 10px 28px rgb(0 0 0 / 0.45);
+  animation: toast-in var(--t) ease-out;
+}
+.toast span {
+  flex: 1;
+  min-width: 0;
+  padding-top: 0.2rem;
+}
+.toast[data-tone="warn"] {
+  background: color-mix(in srgb, var(--c-gold) 16%, var(--c-bg-1));
+  border-color: color-mix(in srgb, var(--c-gold) 45%, transparent);
+  box-shadow:
+    inset 4px 0 0 var(--c-gold),
+    0 10px 28px rgb(0 0 0 / 0.45);
+}
+.toast[data-tone="ok"] {
+  background: color-mix(in srgb, var(--c-accent) 14%, var(--c-bg-1));
+  border-color: color-mix(in srgb, var(--c-accent) 45%, transparent);
+  box-shadow:
+    inset 4px 0 0 var(--c-accent),
+    0 10px 28px rgb(0 0 0 / 0.45);
+}
+@keyframes toast-in {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .toast {
+    animation: none;
+  }
+}
+
+/* The active season's relation to the selected save. */
+.season-line {
+  margin: 0.35rem 0 0;
+  font-size: 0.86rem;
+  color: var(--c-text-soft);
+}
+
+/* «Dónde hemos buscado» under the save selector. */
+.selector-report {
+  margin-top: 0.75rem;
+  padding: 0.6rem 0.9rem;
+  border-radius: 12px;
+  font-size: 0.85rem;
+  color: var(--c-text-soft);
+  background: var(--c-surface-1);
+  border: 1px solid var(--c-line);
+}
+.selector-report ul {
+  margin: 0.35rem 0 0;
+  padding-left: 1.1rem;
+}

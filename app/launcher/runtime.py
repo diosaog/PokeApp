@@ -9,7 +9,12 @@ from copy import deepcopy
 from pathlib import Path
 from queue import Empty, Full, Queue
 
-from app.launcher.backend import BackendClient, BackendError, LauncherSession
+from app.launcher.backend import (
+    SESSION_ENDED,
+    BackendClient,
+    BackendError,
+    LauncherSession,
+)
 from app.launcher.core import LauncherCore
 from app.launcher.emulator_qualification import qualification_status
 from app.launcher.journal import LocalConflict
@@ -30,19 +35,46 @@ from app.save_parser.models import SaveError
 from app.save_parser.writer import PkhexProcessWriter
 
 PRODUCTION_API = "https://pokeapp-api-production.up.railway.app"
-QUICK_COMMANDS = ("quick_items_refresh", "quick_item_offer")
+QUICK_COMMANDS = ("quick_items_refresh", "quick_item_offer", "quick_item_apply")
 QUICK_ERRORS = {
     "INVENTORY_LIMIT": "Esa cantidad supera el máximo de la bolsa en este juego.",
     "INVENTORY_FULL": "La bolsa está llena: no cabe un objeto nuevo.",
     "CORRUPT_SAVE": "No se pudo preparar un archivo verificable con esa cantidad. Prueba con otra; tu partida no se ha modificado.",
     "STALE_SOURCE": "La partida ha cambiado. Vuelve a leerla e inténtalo de nuevo.",
     "STALE_MUTATION": "La partida ha cambiado. Vuelve a leerla e inténtalo de nuevo.",
-    "EMULATOR_RUNNING": "Cierra el juego y el emulador antes de añadir objetos.",
-    "QUICK_ITEMS_DISABLED": "Añadir objetos se activará cuando termine la certificación real del Launcher con Lime3DS. Ya puedes consultar tus cantidades.",
+    "EMULATOR_RUNNING": "El emulador está abierto: ciérralo (y el juego) y vuelve a pulsar «Añadir a la bolsa». Tu partida no ha cambiado.",
+    "PROCESS_CHECK_UNAVAILABLE": "No se pudo comprobar si el emulador está abierto. Vuelve a intentarlo; tu partida no ha cambiado.",
+    "FILE_LOCKED_OR_ACCESS_DENIED": "No se puede añadir el objeto porque el archivo de la partida está siendo utilizado por otro programa. Tu partida no ha cambiado.",
+    "TARGET_READ_ONLY": "El archivo de la partida es de solo lectura. Tu partida no ha cambiado.",
+    "SOURCE_HASH_CHANGED": "La partida ha cambiado mientras se preparaba. Vuelve a intentarlo; tu partida no ha cambiado.",
+    "BACKUP_INVALID": "No se pudo verificar la copia de seguridad. Tu partida no ha cambiado.",
+    "ARTIFACT_VERIFICATION_FAILED": "No se pudo verificar la copia de seguridad. Tu partida no ha cambiado.",
+    "QUICK_ITEMS_DISABLED": "Añadir objetos no está disponible en este Launcher. Ya puedes consultar tus cantidades.",
     "NATIVE_VERIFICATION_FAILED": "No se pudo preparar un archivo verificable con esa cantidad. Prueba con otra; tu partida no se ha modificado.",
     "NO_SELECTED_WRITE_TARGET": "Selecciona tu partida primero.",
     "UNSUPPORTED_FORMAT": "Esta partida no admite objetos rápidos. Juegos admitidos: X/Y, Rubí Omega/Zafiro Alfa y Sol/Luna/Ultrasol/Ultraluna.",
 }
+GAME_NAMES = {
+    "X": "Pokémon X",
+    "Y": "Pokémon Y",
+    "OR": "Pokémon Rubí Omega",
+    "AS": "Pokémon Zafiro Alfa",
+    "SN": "Pokémon Sol",
+    "MN": "Pokémon Luna",
+    "US": "Pokémon Ultrasol",
+    "UM": "Pokémon Ultraluna",
+}
+
+
+def save_identity(receipt):
+    """What a season binds: game and in-game trainer, exactly as the server
+    builds it from its own parse of the same bytes."""
+    if receipt is None:
+        return None
+    return {
+        "game": receipt.observation.game,
+        "trainer": receipt.observation.trainer.model_dump(mode="json"),
+    }
 TRANSFER_COMMANDS = (
     "transfer_prepare",
     "transfer_apply",
@@ -115,6 +147,9 @@ class LauncherRuntime:
         if writer is None and had_recovery_material:
             self.save_activity.recovery_required = True
         self.stop = threading.Event()
+        # A new local change or a web token request runs the cloud step now
+        # instead of at its next 30 s turn.
+        self._cloud_wake = threading.Event()
         self.next_cloud_refresh = 0.0
         self.local_commands, self.cloud_commands = Queue(maxsize=1), Queue(maxsize=1)
         self.write_commands = Queue(maxsize=1)
@@ -131,14 +166,27 @@ class LauncherRuntime:
             "last_synced": None,
             "auth_status": "LOGIN_REQUIRED",
             "cloud_sync": False,
+            # PokeApp's receipt for the selected save as the trainer's active
+            # save (personal record), and for the active season when it uses it.
             "cloud_receipt": None,
+            "season_receipt": None,
+            # True only while bytes are actually being sent; connectivity is
+            # cloud_status alone, so the UI never flickers every cycle.
+            "syncing": False,
             "outbox": {"pending": 0, "paused": 0},
             "error": None,
+            "error_detail": None,
             "write_error": None,
             "transfer_result": None,
             "quick_items": None,
             "quick_item_error": None,
+            "quick_item_result": None,
+            # Counts finished quick-item steps, so the same refusal twice is
+            # still told twice.
+            "quick_item_seq": 0,
             "emulator_saves": [],
+            # What the last search checked, so «no saves» can say why.
+            "discovery": None,
             # Automatic save choice: PENDING | NONE | AUTO_SELECTED | CHOOSE | KEPT.
             "save_choice": {"status": "PENDING", "count": 0},
             "backend_origin": self.client.origin,
@@ -188,10 +236,7 @@ class LauncherRuntime:
             or time.time() - result["last_online"] > 90
             or result["cloud_status"] == "OFFLINE"
         )
-        if (
-            time.time() - result["last_online"] > 90
-            and result["cloud_status"] != "SYNCING"
-        ):
+        if time.time() - result["last_online"] > 90 and not result["syncing"]:
             result["cloud_status"] = "OFFLINE"
         result["write"] = self.writes.state()
         engine = getattr(self.writes, "engine", None)
@@ -287,18 +332,20 @@ class LauncherRuntime:
                     return {"status": "LOGIN_REQUIRED"}
             if token and token["expires_at"] > time.time() + 300:
                 return {"status": "OK", **token}
-            # Ask the cloud loop for a fresh token; main retries shortly.
+            # Ask the cloud loop for a fresh token now; main retries shortly.
             self._web_token_wanted = True
             self.next_cloud_refresh = 0
+            self._cloud_wake.set()
             return {
                 "status": "PENDING" if self.session._principal else "LOGIN_REQUIRED"
             }
         if name == "discover_saves":
-            from app.launcher.discovery import emulator_saves
+            from app.launcher.discovery import discover_emulator_saves
 
             if args:
                 raise ValueError("unexpected_discovery_arguments")
-            found = emulator_saves()
+            found, report = discover_emulator_saves()
+            self._patch(discovery=report)
             auto = self._choose_save(found)
             if auto:
                 try:
@@ -307,7 +354,18 @@ class LauncherRuntime:
                     )
                 except Full:
                     return {"status": "BUSY"}
-            return {"status": "DONE", "count": len(found), "auto_selected": auto}
+            # The list itself goes back with the answer: the selector never
+            # opens on a state poll that predates this search.
+            with self.lock:
+                choice = deepcopy(self.value["save_choice"])
+            return {
+                "status": "DONE",
+                "count": len(found),
+                "auto_selected": auto,
+                "saves": found,
+                "discovery": report,
+                "save_choice": choice,
+            }
         if name == "select_discovered":
             with self.lock:
                 known = {s["path"] for s in self.value["emulator_saves"]}
@@ -317,6 +375,15 @@ class LauncherRuntime:
         if name in QUICK_COMMANDS:
             if name == "quick_items_refresh":
                 valid = args == {}
+            elif name == "quick_item_apply":
+                # One click: the core itself checks that no emulator runs and
+                # that the file is free, then backs up, writes and verifies.
+                valid = (
+                    set(args) == {"item", "quantity"}
+                    and args["item"] in ("rare_candy", "heart_scale")
+                    and type(args["quantity"]) is int
+                    and 1 <= args["quantity"] <= 9999
+                )
             else:
                 valid = (
                     set(args) == {"item", "quantity", "closed_emulator_confirmed"}
@@ -356,6 +423,13 @@ class LauncherRuntime:
             not isinstance(args.get("path"), str) or len(args["path"]) > 4096
         ):
             raise ValueError("invalid_selection")
+        if name == "select":
+            # A file that cannot be a save is refused now, with its reason,
+            # instead of failing silently in the background reader.
+            try:
+                SaveSource.enroll(Path(args["path"]))
+            except SaveError as exc:
+                raise ValueError(exc.code.value.lower()) from None
         if name == "login" and (
             not isinstance(args.get("trainer"), str)
             or not 1 <= len(args["trainer"]) <= 128
@@ -397,7 +471,9 @@ class LauncherRuntime:
         self.watch = SaveWatchService(
             self.core.sync,
             source,
-            poll_seconds=self.core.config.poll_seconds,
+            # Metadata checks are cheap: a change is seen within ~3 s even on
+            # profiles that still store the old 5 s interval.
+            poll_seconds=min(2.0, self.core.config.poll_seconds),
             debounce_seconds=self.core.config.debounce_seconds,
         )
 
@@ -446,7 +522,14 @@ class LauncherRuntime:
         selected = self.core.config.selected_save
         if selected:
             others = [f for f in found if f["path"] != selected]
-            choice = {"status": "KEPT", "count": len(others), "new": len(new)}
+            # A remembered file that is gone (renamed, moved, emulator
+            # reinstalled) is said plainly instead of failing every read.
+            missing = not Path(selected).is_file()
+            choice = {
+                "status": "MISSING" if missing else "KEPT",
+                "count": len(others),
+                "new": len(new),
+            }
         elif len(found) == 1:
             choice = {"status": "AUTO_SELECTED", "count": 1, "new": 0}
         else:
@@ -459,12 +542,13 @@ class LauncherRuntime:
         return choice["status"] == "AUTO_SELECTED"
 
     def _discover_on_start(self):
-        from app.launcher.discovery import emulator_saves
+        from app.launcher.discovery import discover_emulator_saves
 
         try:
-            found = emulator_saves()
+            found, report = discover_emulator_saves()
         except OSError:
-            found = []
+            found, report = [], None
+        self._patch(discovery=report)
         if self._choose_save(found):
             self.local_commands.put_nowait(("select", {"path": found[0]["path"]}))
 
@@ -493,6 +577,23 @@ class LauncherRuntime:
             season = (cloud.get("data") or {}).get("season")
             if principal is None or not season:
                 raise WriteSafetyError("TRANSFER_CONTEXT_UNAVAILABLE")
+            # A robbery acts on the save this season uses, never on another
+            # game the trainer happens to have selected.
+            link = (cloud.get("data") or {}).get("season_link") or {}
+            if (
+                name != "transfer_refresh"
+                and link.get("status") == "BOUND"
+                and link.get("identity") != save_identity(self.receipt)
+            ):
+                self._patch(
+                    write_error=(
+                        "Este robo es sobre tu partida de la Liga ("
+                        + GAME_NAMES.get(link.get("game"), "otra partida")
+                        + "). Elígela en «Cambiar partida» y vuelve a intentarlo; "
+                        "no se ha modificado nada."
+                    )
+                )
+                return
             transfers = LauncherTransfers(
                 self.writes,
                 AuthenticatedTransferRemote(
@@ -531,12 +632,37 @@ class LauncherRuntime:
                 else "No se pudo continuar el robo. Mantén el emulador cerrado y conserva las copias."
             )
         except Exception:  # noqa: BLE001 - no native output, private path or journal data to UI
-            self.save_activity.recovery_required = True
-            self._patch(
-                write_error="No se pudo verificar la operación. La sincronización queda pausada."
+            self._patch(write_error=self._unexpected_write_failure())
+
+    def _settle_recovery(self):
+        """After an unexpected failure, pause reads and sync only for a really
+        uncertain physical write — the engine's journal or an open robbery
+        binding says so — never for a preparation that left the save as it was."""
+        engine = getattr(self.writes, "engine", None)
+        try:
+            pending = engine.pending() if engine is not None else ()
+            self.save_activity.recovery_required = (
+                any(r.status in ("RECOVERY_REQUIRED", "PREPARED") for r in pending)
+                or self.writes._transfer_notice() is not None
             )
+        except Exception:  # noqa: BLE001 - an unreadable journal is uncertainty
+            self.save_activity.recovery_required = True
+        return self.save_activity.recovery_required
+
+    def _unexpected_write_failure(self):
+        if self._settle_recovery():
+            return "No se pudo verificar la operación. La sincronización queda pausada hasta comprobarla."
+        return "No se pudo completar la operación. Tu partida no ha cambiado; vuelve a intentarlo."
 
     def _quick_step(self, name, args):
+        self._patch(quick_item_result=None)
+        try:
+            self._quick_attempt(name, args)
+        finally:
+            with self.lock:
+                self.value["quick_item_seq"] += 1
+
+    def _quick_attempt(self, name, args):
         from app.launcher.quick_items import inventory_view, quick_item_intent
         from app.save_parser.writer import NativeWriteError
 
@@ -557,12 +683,14 @@ class LauncherRuntime:
             if not enabled:
                 raise WriteSafetyError("QUICK_ITEMS_DISABLED")
             intent = quick_item_intent(native, data, args["item"], args["quantity"])
-            # Existing journal: backup, explicit write_confirm, readback, recovery.
+            # Existing journal: verified backup, process check, readback, recovery.
             self.writes.offer(intent, closed_emulator_confirmed=True)
+            if name == "quick_item_apply":
+                self._apply_quick_item(intent, args)
             self._patch(quick_item_error=None, write_error=None)
         except SaveBusy:
             self._patch(
-                quick_item_error="Hay una lectura o sincronización en curso. Espera y vuelve a intentarlo."
+                quick_item_error="Hay una lectura o sincronización en curso. Espera unos segundos y vuelve a intentarlo."
             )
         except (NativeWriteError, WriteSafetyError) as error:
             self._patch(
@@ -572,11 +700,48 @@ class LauncherRuntime:
                 )
             )
         except Exception:  # noqa: BLE001 - no native output, path or journal data to UI
-            if name == "quick_item_offer":
-                self.save_activity.recovery_required = True
+            self._patch(quick_item_error=self._unexpected_write_failure())
+
+    def _apply_quick_item(self, intent, args):
+        """The prepared change is applied at once: the engine re-checks that no
+        emulator runs and that source, backup and staged bytes are exact, then
+        re-reads the result natively. Anything else leaves the save as it was."""
+        state = self.writes.state()
+        if state["status"] != "AWAITING_CONFIRMATION" or not state["operation_id"]:
+            raise WriteSafetyError("NATIVE_VERIFICATION_FAILED")
+        operation = state["operation_id"]
+        result = self.writes.confirm(operation, closed_emulator_confirmed=True)
+        if result["status"] != "APPLIED_VERIFIED":
+            error = None
+            try:
+                error = self.writes.engine.status(operation).error
+            except Exception:  # noqa: BLE001 - the status below still decides
+                pass
+            if result["status"] == "RECOVERY_REQUIRED":
+                raise RuntimeError("quick_item_recovery")
+            raise WriteSafetyError(error or "NATIVE_VERIFICATION_FAILED")
+        from app.launcher.quick_items import inventory_view
+
+        # Counts are re-read from the written file, never assumed.
+        self._patch(quick_items=None)
+        self._load_local()
+        try:
+            data = self.writes.engine.files.read_path(Path(self.writes.selected()))
+            view = inventory_view(self.writes.engine.native, data)
+        except Exception:  # noqa: BLE001 - the change itself is verified
+            view = None
+        if view is not None:
             self._patch(
-                quick_item_error="No se pudo comprobar la partida. Conserva las copias y vuelve a intentarlo."
+                quick_items=view | {"application_enabled": True},
             )
+        self._patch(
+            quick_item_result={
+                "item": args["item"],
+                "quantity": args["quantity"],
+                "game": intent.game,
+                "at": int(time.time()),
+            }
+        )
 
     def _write_step(self):
         try:
@@ -624,13 +789,13 @@ class LauncherRuntime:
             self._patch(
                 write_error="Otra instancia de PokeApp Launcher está trabajando con esta partida. Ciérrala y vuelve a intentarlo; no se ha modificado nada."
                 if str(error) == "WRITE_ALREADY_RUNNING"
-                else "No se pudo confirmar el cambio. Revisa la partida seleccionada y conserva las copias."
+                else QUICK_ERRORS.get(
+                    str(error),
+                    "No se pudo confirmar el cambio. Revisa la partida seleccionada y conserva las copias.",
+                )
             )
         except Exception:  # no native output, private path or journal data to UI
-            self.save_activity.recovery_required = True
-            self._patch(
-                write_error="No se pudo verificar la operación. La sincronización queda pausada."
-            )
+            self._patch(write_error=self._unexpected_write_failure())
         finally:
             self.write_commands.task_done()
 
@@ -671,6 +836,10 @@ class LauncherRuntime:
             self.local_commands.task_done()
         except Empty:
             pass
+        if self.watch is None and self.core.config.selected_save:
+            # A write that ended in any other way than a verified apply/restore
+            # used to leave the save unwatched until the Launcher restarted.
+            self._load_local()
         if self.watch:
             result = self.watch.tick(time.monotonic())
             if result:
@@ -688,14 +857,30 @@ class LauncherRuntime:
                 else:
                     self._patch(local_status=result.error or "LOCAL_UNAVAILABLE")
 
+    @staticmethod
+    def _sync_scopes(data, receipt):
+        """Owner rule (2026-10-28): the selected save is the trainer's active
+        save on every screen, so it always goes to the personal record. The
+        active season also gets it while it is the save that season accepts:
+        same game and in-game trainer, or none bound yet. A season never
+        silently changes the save (and Pokémon) it competes with."""
+        scopes = [PERSONAL]
+        season = data.get("season")
+        if not season or data.get("mandatory_sync"):
+            return scopes
+        link = data.get("season_link") or {"status": "UNKNOWN"}
+        if link.get("status") in ("OPEN", "UNKNOWN") or (
+            link.get("status") == "BOUND"
+            and link.get("identity") == save_identity(receipt)
+        ):
+            scopes.append(season["id"])
+        return scopes
+
     @save_read
     def _enqueue_local(self):
         state = self.state()
         principal = state["principal"]
-        season = (state["cloud"] or {}).get("data", {}).get("season")
         receipt = self.receipt
-        # Without an active season the save still syncs, to the personal record.
-        scope = season["id"] if season else PERSONAL
         if not (
             state["cloud_sync"]
             and principal
@@ -704,21 +889,27 @@ class LauncherRuntime:
             and state["local_status"] == "READY"
         ):
             return
+        origin, trainer = self.client.origin, principal["trainer_id"]
+        raw_hash = receipt.fingerprint.sha256
+        scopes = self._sync_scopes(state["cloud"].get("data") or {}, receipt)
         try:
-            snapshot = SnapshotReader().read(SaveSource.enroll(state["selected_save"]))
-            oid = self.store.enqueue_raw(
-                self.client.origin,
-                principal["trainer_id"],
-                scope,
-                receipt,
-                snapshot.data,
-            )
-            accepted = self.store.receipt(
-                self.client.origin, principal["trainer_id"], scope, oid
+            missing = [s for s in scopes if not self.store.has(origin, trainer, s, raw_hash)]
+            if missing:
+                snapshot = SnapshotReader().read(SaveSource.enroll(state["selected_save"]))
+                for scope in missing:
+                    self.store.enqueue_raw(origin, trainer, scope, receipt, snapshot.data)
+                self._cloud_wake.set()
+            accepted = self.store.receipt(origin, trainer, PERSONAL, raw_hash)
+            in_season = next((s for s in scopes if s != PERSONAL), None)
+            season_accepted = (
+                self.store.receipt(origin, trainer, in_season, raw_hash)
+                if in_season
+                else None
             )
             self._patch(
                 cloud_receipt=accepted.model_dump() if accepted else None,
-                outbox=self.store.summary(self.client.origin, principal["trainer_id"]),
+                season_receipt=season_accepted.model_dump() if season_accepted else None,
+                outbox=self.store.summary(origin, trainer),
             )
         except (LocalConflict, SaveError) as error:
             self._patch(cloud_receipt=None, local_status="READING", error=str(error))
@@ -776,10 +967,13 @@ class LauncherRuntime:
         wallet = None
         item_uses = None
         transfers = None
+        link = None
         if season:
             from uuid import UUID
 
             sid = str(UUID(season["id"]))
+            link = self._season_link(sid)
+        if season and link["status"] != "NOT_PARTICIPANT":
             shop = self.session.request("GET", f"/v1/read/seasons/{sid}/shop")
             wallet = shop.get("balance")
             raw_uses = self.session.request(
@@ -832,10 +1026,13 @@ class LauncherRuntime:
         data = {
             "principal": principal.model_dump(),
             "season": season,
+            # Whether, and with which save, this trainer plays the active season.
+            "season_link": link,
             "wallet": wallet,
             "item_uses": item_uses,
             "transfers": transfers,
-            # 27A: a decided robbery's removal comes before any ordinary sync.
+            # 27A: a decided robbery's removal comes before any ordinary season
+            # sync; the personal record (no competitive effect) still syncs.
             "mandatory_sync": any(t["mandatory"] for t in transfers or []),
         }
         self.store.save_cache(self.client.origin, principal.trainer_id, data)
@@ -844,37 +1041,9 @@ class LauncherRuntime:
             last_online=time.time(),
         )
         self.next_cloud_refresh = time.monotonic() + 120
-        if data["mandatory_sync"]:
-            return  # the server refuses ordinary sync until the removal is verified
         # Only the locally ready selected save is eligible; never upload old/missing cache as new.
         self._enqueue_local()
-        row = self.store.pending(self.client.origin, principal.trainer_id)
-        if row:
-            try:
-                current = self.receipt
-                state = self.state()
-                delivered = deliver_trusted(
-                    self.session,
-                    self.store,
-                    row,
-                    selected_hash=current.fingerprint.sha256
-                    if current
-                    and state["local_status"] == "READY"
-                    and state["cloud_sync"]
-                    and row["season"] == (season["id"] if season else PERSONAL)
-                    else None,
-                )
-                if delivered is not None:
-                    self._patch(cloud_receipt=delivered.model_dump())
-                self._enqueue_local()
-            except BackendError as exc:
-                if str(exc) in (
-                    "OBSERVATION_REJECTED",
-                    "SAVE_REJECTED",
-                    "SAVE_RECEIPT_MISMATCH",
-                ):
-                    self.store.block(row)
-                raise
+        self._deliver_pending(principal.trainer_id)
         accepted = self.state()["cloud_receipt"]
         if accepted:
             # A different device may have registered a newer file since our last
@@ -889,16 +1058,127 @@ class LauncherRuntime:
             ):
                 self._patch(cloud_receipt=None)
                 raise BackendError("SAVE_SUPERSEDED")
+        in_season = self.state()["season_receipt"]
+        if in_season:
+            # Same proof for the season copy; another device's newer season
+            # save is reported on the season line, never as a sync failure.
+            latest = self.session.request(
+                "GET",
+                f"{save_paths(in_season['season_id'])[0]}/receipt?sha256={in_season['sha256']}",
+            )
+            if (
+                not latest.get("is_current")
+                or latest.get("save_id") != in_season["save_id"]
+            ):
+                self._patch(season_receipt=None)
+                self._season_refused(BackendError("SAVE_SUPERSEDED"))
         self._patch(
             outbox=self.store.summary(self.client.origin, principal.trainer_id),
             cloud_status="ONLINE",
             last_online=time.time(),
             error=None,
+            error_detail=None,
             **({"last_synced": time.time()} if accepted else {}),
         )
 
+    def _season_link(self, sid):
+        """Does this trainer play the active season, and with which save?
+        Read from the season's own save context: 403 means not enrolled, 409
+        means no longer playing (withdrawn, or the season stopped accepting)."""
+        try:
+            context = self.session.request("GET", f"/v1/seasons/{sid}/saves/context")
+        except BackendError as exc:
+            if str(exc) == "FORBIDDEN":
+                return {"status": "NOT_PARTICIPANT"}
+            if str(exc) == "OBSERVATION_REJECTED":
+                return {"status": "CLOSED", "reason": exc.detail}
+            raise
+        if not isinstance(context, dict) or "save_identity" not in context:
+            return {"status": "UNKNOWN"}  # an API that does not say it yet
+        identity = context["save_identity"]
+        if not isinstance(identity, dict):
+            return {"status": "OPEN"}
+        return {"status": "BOUND", "game": identity.get("game"), "identity": identity}
+
+    def _season_refused(self, exc):
+        """The season kept its own save: remember why, for the UI, until the
+        next refresh reads its context again."""
+        detail = getattr(exc, "detail", None)
+        status = (
+            "NOT_PARTICIPANT"
+            if str(exc) == "FORBIDDEN"
+            else "SUPERSEDED"
+            if str(exc) == "SAVE_SUPERSEDED"
+            else "OTHER_SAVE"
+            if detail
+            in ("SAVE_TRAINER_MISMATCH", "SAVE_IDENTITY_CHANGED", "SAVE_IDENTITY_OTHER_OWNER")
+            else "REFUSED"
+        )
+        with self.lock:
+            cloud = deepcopy(self.value.get("cloud"))
+            if not cloud or not isinstance(cloud.get("data"), dict):
+                return
+            link = dict(cloud["data"].get("season_link") or {})
+            link.update(status=status, reason=detail or str(exc))
+            cloud["data"]["season_link"] = link
+            self.value["cloud"] = cloud
+
+    def _deliver_pending(self, trainer):
+        """Every queued row, oldest first, in one pass (bounded). A season that
+        refuses the save never stops the personal record from syncing."""
+        origin = self.client.origin
+        for _ in range(8):
+            row = self.store.pending(origin, trainer)
+            if row is None:
+                break
+            current, state = self.receipt, self.state()
+            scopes = (
+                self._sync_scopes((state["cloud"] or {}).get("data") or {}, current)
+                if current
+                else []
+            )
+            ready = (
+                current is not None
+                and state["local_status"] == "READY"
+                and state["cloud_sync"]
+            )
+            self._patch(syncing=True)
+            try:
+                delivered = deliver_trusted(
+                    self.session,
+                    self.store,
+                    row,
+                    selected_hash=current.fingerprint.sha256
+                    if ready and row["season"] in scopes
+                    else None,
+                )
+            except BackendError as exc:
+                code = str(exc)
+                if row["season"] != PERSONAL and code in (
+                    "FORBIDDEN",
+                    "SAVE_REJECTED",
+                    "OBSERVATION_REJECTED",
+                    "SAVE_SUPERSEDED",
+                ):
+                    self.store.block(row)
+                    self._season_refused(exc)
+                    continue
+                if code == "SAVE_SUPERSEDED":
+                    continue  # that row is blocked; a newer one may follow
+                if code in ("OBSERVATION_REJECTED", "SAVE_REJECTED", "SAVE_RECEIPT_MISMATCH"):
+                    self.store.block(row)
+                raise
+            finally:
+                self._patch(syncing=False)
+            if delivered is not None and current is not None and (
+                delivered.sha256 == current.fingerprint.sha256
+            ):
+                key = "cloud_receipt" if row["season"] == PERSONAL else "season_receipt"
+                self._patch(**{key: delivered.model_dump()})
+        self._enqueue_local()
+
     def _cloud_loop(self):
-        next_attempt, failures = 0.0, 0
+        next_attempt, failures, last_attempt = 0.0, 0, float("-inf")
         while not self.stop.wait(0.2):
             try:
                 try:
@@ -912,18 +1192,20 @@ class LauncherRuntime:
                             principal=None,
                             cloud=None,
                             cloud_receipt=None,
+                            season_receipt=None,
                             last_synced=None,
                             auth_status="LOGIN_REQUIRED",
                             cloud_sync=False,
                             error=None,
+                            error_detail=None,
                         )
                     elif name == "login":
                         self._patch(
                             auth_status="CHECKING",
-                            cloud_status="SYNCING",
                             cloud=None,
                             principal=None,
                             cloud_receipt=None,
+                            season_receipt=None,
                         )
                         self.tokens.clear()
                         try:
@@ -948,40 +1230,51 @@ class LauncherRuntime:
                     self.next_cloud_refresh = 0
                 except Empty:
                     pass
+                if self._cloud_wake.is_set():
+                    self._cloud_wake.clear()
+                    # A local change or a web token request runs the next step
+                    # now; a failure backoff is never shortened below 5 s.
+                    now = time.monotonic()
+                    next_attempt = min(
+                        next_attempt, max(now, last_attempt + 5) if failures else now
+                    )
                 if time.monotonic() < next_attempt:
                     continue
-                self._patch(cloud_status="SYNCING")
+                last_attempt = time.monotonic()
                 self._cloud_step()
                 failures, next_attempt = 0, time.monotonic() + 30
             except SaveBusy:
                 continue  # no upload/reimport overlaps a physical write/recovery
             except BackendError as exc:
                 code = str(exc)
-                if code in ("LOGIN_REQUIRED", "SESSION_REJECTED"):
+                if code in SESSION_ENDED:
+                    # Only a rejected session or a disabled account signs out:
+                    # a refused resource (403) or a slow answer never does.
                     self.session.logout()
                     self.tokens.clear()
+                    with self.lock:
+                        self._web_token = None
                     self._patch(auth_status="LOGIN_REQUIRED", principal=None)
                 failures += 1
                 # Recover unattended after an outage. Each upload still reconciles
                 # its exact receipt/CAS before retry; semantic rejection stays blocked.
-                next_attempt = time.monotonic() + min(
-                    300, 5 * 3 ** min(failures - 1, 4)
-                )
+                next_attempt = time.monotonic() + min(60, 5 * 3 ** min(failures - 1, 3))
                 if not self.session._principal:
                     self._patch(auth_status="LOGIN_REQUIRED")
-                rejected = code in (
-                    "SAVE_REJECTED",
-                    "OBSERVATION_REJECTED",
-                    "SAVE_SUPERSEDED",
-                    "SAVE_RECEIPT_MISMATCH",
-                )
+                # One slow or failed answer is not "offline": two in a row are.
+                offline = code == "BACKEND_UNAVAILABLE" and failures >= 2
                 self._patch(
-                    cloud_status="ONLINE" if rejected else "OFFLINE", error=code
+                    error=code,
+                    error_detail=getattr(exc, "detail", None),
+                    **({"cloud_status": "OFFLINE"} if offline else {}),
                 )
             except Exception:  # noqa: BLE001 - isolate cloud/storage failures from local browsing
                 failures += 1
-                next_attempt = time.monotonic() + 300
-                self._patch(cloud_status="OFFLINE", error="SYNC_UNAVAILABLE")
+                next_attempt = time.monotonic() + 60
+                self._patch(
+                    error="SYNC_UNAVAILABLE",
+                    **({"cloud_status": "OFFLINE"} if failures >= 2 else {}),
+                )
 
     def close(self):
         self.stop.set()

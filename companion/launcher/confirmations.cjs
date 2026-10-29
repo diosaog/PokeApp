@@ -76,6 +76,8 @@ const transferFor = (state, authorizationId) =>
 function fingerprint(kind, target, state) {
   if (kind === "write")
     return [state.selected_save, target, state.write?.description];
+  if (kind === "quick-item")
+    return [state.selected_save, target, state.receipt_id ?? null];
   if (kind === "export")
     return [state.selected_save, JSON.stringify(state.write?.export_intent)];
   if (kind === "restore") {
@@ -103,10 +105,32 @@ const GAMES = {
   US: "Ultrasol",
   UM: "Ultraluna",
 };
-const CLOSED = "\n\nMantén el juego y el emulador cerrados hasta que termine.";
+const CLOSED =
+  "\n\nEl Launcher comprueba antes que el emulador está cerrado y que el archivo está libre; si no, no cambia nada y te dice por qué.";
+const ITEMS = { rare_candy: "Caramelo Raro", heart_scale: "Escama Corazón" };
 // The dialog text for one action, or an error when it is not available now.
 function describe(kind, target, state) {
   const save = state.selected_save || "";
+  if (kind === "quick-item") {
+    const [item, amount] = target.split(":");
+    const quantity = Number(amount);
+    const info = state.quick_items?.items?.[item];
+    if (!state.selected_save) throw new Error("Selecciona tu partida primero.");
+    if (!ITEMS[item] || !Number.isInteger(quantity) || quantity < 1)
+      throw new Error("Revisa el objeto y la cantidad.");
+    if (state.write?.busy || state.write?.status === "RECOVERY_REQUIRED")
+      throw new Error(
+        "Hay otra operación en tu partida. Espera a que termine o revísala en «Cambios en tu partida».",
+      );
+    const game = state.observation?.game || state.quick_items?.game;
+    const trainer = state.observation?.trainer?.name;
+    return {
+      title: "Añadir a la bolsa",
+      message: `${quantity} × ${ITEMS[item]}${game ? ` · Pokémon ${GAMES[game] || game}` : ""}${trainer ? ` · ${trainer}` : ""}`,
+      detail: `${info ? `Ahora tienes ${info.count}; tendrás ${info.count + quantity}. ` : ""}Antes de cambiar nada se guarda y verifica una copia completa de tu partida; después se vuelve a leer para comprobar el resultado.${CLOSED}`,
+      go: "Añadir a la bolsa",
+    };
+  }
   if (kind === "write") {
     const write = state.write || {};
     if (
@@ -118,7 +142,7 @@ function describe(kind, target, state) {
     return {
       title: "Confirmar cambio en tu partida",
       message: `${write.game ? `${GAMES[write.game] || write.game} · ` : ""}${write.description}`,
-      detail: `${save}\n\nEl juego y el emulador deben permanecer cerrados. Se conservará una copia del archivo original. No se consume ningún artículo.`,
+      detail: `${save}\n\nSe conservará una copia del archivo original. No se consume ningún artículo.${CLOSED}`,
       go: "Confirmar cambio",
     };
   }

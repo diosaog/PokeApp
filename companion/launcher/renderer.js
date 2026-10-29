@@ -87,25 +87,71 @@ function slots(id, data, prefix) {
   });
 }
 const errorText = {
-  LOGIN_REQUIRED: "Vuelve a iniciar sesión para sincronizar.",
-  SESSION_REJECTED: "Sesión no válida. Vuelve a conectar.",
+  LOGIN_REQUIRED: "Inicia sesión en PokeApp para sincronizar.",
+  SESSION_REJECTED:
+    "No se pudo sincronizar: la sesión ha caducado o se cerró en otro sitio. Vuelve a iniciar sesión.",
+  ACCOUNT_DISABLED:
+    "Tu cuenta de PokeApp está deshabilitada. Contacta con la administración.",
+  FORBIDDEN:
+    "PokeApp no permite esta operación a tu cuenta. Tu partida sigue guardada en este equipo.",
+  RATE_LIMITED:
+    "PokeApp está recibiendo muchas solicitudes. Lo reintentamos en unos segundos.",
   OBSERVATION_REJECTED:
-    "PokeApp no ha aceptado este save. Tu lectura local sigue disponible.",
+    "PokeApp no ha aceptado esta partida. Tu lectura local sigue disponible.",
   SAVE_REJECTED:
-    "No se pudo registrar el save. Revisa el archivo, la cuenta y la Liga.",
+    "PokeApp no ha aceptado esta partida. Tu lectura local sigue disponible.",
   SAVE_SUPERSEDED:
-    "La web tiene otro save actual. Selecciona tu archivo actualizado antes de sincronizar.",
-  SAVE_READBACK_PENDING:
-    "Falta comprobar el save en la web. Pulsa Reintentar; no se duplicará la subida.",
+    "PokeApp ya tiene otra versión más reciente de tu partida, enviada desde otro equipo.",
   SAVE_PARSE_MISMATCH:
-    "La lectura local no coincide. Vuelve a abrir el save con el Launcher actualizado.",
+    "La lectura de este Launcher no coincide con la de PokeApp. Actualiza el Launcher.",
   SAVE_CHANGED_DURING_READ:
     "El archivo ha cambiado. Esperando una lectura estable.",
+  OUTBOX_FULL:
+    "Hay demasiadas versiones pendientes de enviar. Se enviará la más reciente.",
   BACKEND_UNAVAILABLE:
-    "Sin conexión con PokeApp. Puedes seguir explorando tu save.",
+    "Sin conexión con PokeApp. Tu partida se enviará sola al volver la conexión.",
   SYNC_UNAVAILABLE:
-    "No se pudo sincronizar. Puedes seguir explorando y reintentar.",
+    "No se pudo sincronizar ahora. Lo reintentamos solo en un minuto.",
 };
+// The API's own reason, when it gave one: more precise than the code above.
+const detailText = {
+  SAVE_TRAINER_MISMATCH:
+    "Esta partida es de otro juego o entrenador distinto del que ya usa PokeApp para ti.",
+  SAVE_PARSE_MISMATCH: errorText.SAVE_PARSE_MISMATCH,
+  INVALID_SAVE_SIZE: "El archivo no tiene el tamaño de una partida válida.",
+  SAVE_HASH_MISMATCH: "El archivo cambió durante el envío. Se reintentará.",
+  CORRUPT_SAVE: "PokeApp no ha podido leer esta partida: parece dañada o incompleta.",
+  UNSUPPORTED_GAME: "PokeApp no admite este juego.",
+};
+const gameLabel = (code) => `Pokémon ${gameNames[code] || code || "?"}`;
+// The active season's relation to the selected save, in one line.
+function seasonLine(state) {
+  const data = state.cloud?.data;
+  const season = data?.season;
+  const link = data?.season_link;
+  if (!season || !link || !state.principal) return "";
+  const name = `«${season.name || "la Liga"}»`;
+  const same =
+    link.status === "BOUND" &&
+    observation &&
+    link.identity?.game === observation.game &&
+    JSON.stringify(link.identity?.trainer) ===
+      JSON.stringify(observation.trainer);
+  if (link.status === "NOT_PARTICIPANT")
+    return `No participas en la Liga ${name}: tu partida se guarda en tu perfil y en Mi PC.`;
+  if (link.status === "CLOSED")
+    return `La Liga ${name} no admite partidas ahora mismo. Tu perfil y Mi PC sí se actualizan.`;
+  if (link.status === "SUPERSEDED")
+    return `La Liga ${name} tiene una versión más reciente de esta partida enviada desde otro equipo.`;
+  if (link.status === "OTHER_SAVE" || (link.status === "BOUND" && !same))
+    return `La Liga ${name} usa tu partida de ${gameLabel(link.game)}, que queda vinculada durante la competición. Esta partida se muestra en tu perfil, Mi PC y Entrenadores.`;
+  if (link.status === "REFUSED")
+    return `La Liga ${name} no ha aceptado esta partida (${detailText[link.reason] || "motivo no disponible"}). Tu perfil y Mi PC sí se actualizan.`;
+  if (link.status === "OPEN")
+    return `Liga ${name}: esta partida quedará vinculada a la competición al sincronizarse.`;
+  if (state.season_receipt?.is_current) return `Liga ${name}: sincronizada.`;
+  return `Liga ${name}: se sincroniza con esta partida.`;
+}
 // The five owner-facing sync states, plus "no save" and "no account".
 function syncStatus(state) {
   const pending = state.outbox?.pending || 0;
@@ -118,11 +164,13 @@ function syncStatus(state) {
       "Sincronización en pausa: hay una recuperación pendiente. No abras el emulador.",
     ];
   if (!state.principal)
-    return [
-      "idle",
-      "Sin cuenta",
-      "Inicia sesión en PokeApp y esta partida se sincronizará sola.",
-    ];
+    return ["SESSION_REJECTED", "ACCOUNT_DISABLED"].includes(state.error)
+      ? ["error", "Sesión cerrada", errorText[state.error]]
+      : [
+          "idle",
+          "Sin cuenta",
+          "Inicia sesión en PokeApp y esta partida se sincronizará sola.",
+        ];
   // Shared PC: another trainer synced from this Launcher before.
   if (!state.cloud_sync)
     return [
@@ -135,17 +183,18 @@ function syncStatus(state) {
       "offline",
       "Sin conexión",
       pending
-        ? `${pending} cambio(s) en cola: se enviarán al volver la conexión.`
-        : "Se sincronizará al volver la conexión.",
+        ? `${pending} cambio(s) en cola: se enviarán solos al volver la conexión.`
+        : "Se sincronizará sola al volver la conexión.",
     ];
-  if (
-    state.outbox?.paused ||
-    (state.error && state.error !== "SAVE_CHANGED_DURING_READ")
-  )
+  if (state.error === "SAVE_READBACK_PENDING")
+    return ["busy", "Comprobando", "PokeApp está comprobando tu partida…"];
+  if (state.error && !["SAVE_CHANGED_DURING_READ", "RATE_LIMITED"].includes(state.error))
     return [
       "error",
       "Error",
-      errorText[state.error] || "No se pudo sincronizar. Lo reintentaremos.",
+      detailText[state.error_detail] ||
+        errorText[state.error] ||
+        "No se pudo sincronizar. Lo reintentamos solo.",
     ];
   if (
     !pending &&
@@ -159,7 +208,7 @@ function syncStatus(state) {
         ? `Última sincronización: ${when(state.last_synced)}`
         : "Tu partida está al día en PokeApp.",
     ];
-  if (pending && state.cloud_status === "SYNCING")
+  if (state.syncing || (pending && state.error === "RATE_LIMITED"))
     return ["busy", "Sincronizando", "Enviando tu partida a PokeApp…"];
   return [
     "pending",
@@ -169,10 +218,41 @@ function syncStatus(state) {
       : "Esperando a que el archivo deje de cambiar.",
   ];
 }
+// Changes that toasts or the web must hear about once, not every second.
+let seen = null;
+function announce(state) {
+  const now = {
+    synced: state.last_synced,
+    save: state.selected_save,
+    trainer: state.principal?.trainer_id ?? null,
+    writeError: state.write_error,
+    quickSeq: state.quick_item_seq ?? 0,
+    quickDone: state.quick_item_result?.at ?? null,
+    receipt: state.receipt_id,
+  };
+  const before = seen;
+  seen = now;
+  if (!before) return;
+  const tell = (type) => void window.launcher.webEvent?.(type).catch(() => {});
+  if (now.synced && now.synced !== before.synced) tell("save-synced");
+  if (now.save !== before.save) tell("save-changed");
+  if (now.trainer !== before.trainer) tell("account-changed");
+  if (now.writeError && now.writeError !== before.writeError)
+    toast(now.writeError);
+  // Every finished attempt that failed says why, even the same reason twice.
+  if (now.quickSeq !== before.quickSeq && state.quick_item_error)
+    toast(state.quick_item_error);
+  if (now.quickDone && now.quickDone !== before.quickDone) {
+    const r = state.quick_item_result;
+    toast(
+      `${r.quantity} × ${r.item === "rare_candy" ? "Caramelo Raro" : "Escama Corazón"} añadidos a la bolsa y comprobados en tu partida. Se sincronizará sola.`,
+      "ok",
+    );
+    tell("items-changed");
+  }
+}
 function render(state) {
   const write = state.write;
-  if (pendingWrite !== write?.operation_id)
-    $("emulator-closed").checked = false;
   pendingWrite = write?.operation_id || null;
   text(
     "write-state",
@@ -181,16 +261,11 @@ function render(state) {
   text("write-description", write?.description || "");
   text("write-error", state.write_error || "");
   $("write-confirmation").hidden = !write?.can_confirm;
-  $("confirm-write").disabled =
-    !write?.can_confirm || !$("emulator-closed").checked;
-  if (selectedSave !== state.selected_save) {
-    selectedSave = state.selected_save;
-    $("backup-emulator-closed").checked = false;
-  }
+  $("confirm-write").disabled = !write?.can_confirm;
+  selectedSave = state.selected_save;
   exportAvailable = Boolean(write?.can_export);
   backupBusy = Boolean(write?.busy);
-  $("export-save").disabled =
-    !exportAvailable || !$("backup-emulator-closed").checked;
+  $("export-save").disabled = !exportAvailable;
   text("backup-notice", write?.backup_message || "");
   const key = JSON.stringify([write?.backups || [], write?.busy]);
   if (key !== backupKey) {
@@ -231,14 +306,15 @@ function render(state) {
               ? "Esperando una lectura estable del save seleccionado."
               : "Selecciona tu archivo para empezar. Puedes explorar sin conexión.";
   text("save-state", local);
+  // Connectivity only: syncing shows on the save card, never here.
   text(
     "connection",
     recovery
       ? "● Sincronización pausada"
       : state.cloud_status === "ONLINE"
         ? "● Online"
-        : state.cloud_status === "SYNCING"
-          ? "● Sincronizando"
+        : !state.last_online && !state.error
+          ? "● Conectando…"
           : "● Sin conexión",
   );
   text(
@@ -309,9 +385,9 @@ function render(state) {
   text("receipt", `${label} · ${detail}`);
   $("login").querySelector("button").disabled =
     state.auth_status === "CHECKING";
-  text("message", errorText[state.error] || "");
   renderSaveCard(state, tone, label, detail);
   renderLauncher(state, label);
+  announce(state);
 }
 
 // Saves y Launcher · Mis partidas: the active save at a glance.
@@ -347,9 +423,20 @@ function renderSaveCard(state, tone, label, detail) {
   $("sync-chip").dataset.tone = tone;
   text("sync-chip", label);
   text("sync-detail", detail);
+  const season = seasonLine(state);
+  $("season-line").hidden = !season;
+  text("season-line", season);
   $("choose-save").hidden = !state.selected_save;
   $("choose-save").disabled = state.write?.status === "RECOVERY_REQUIRED";
   const choice = state.save_choice || {};
+  if (choice.status === "MISSING") {
+    $("other-saves").hidden = false;
+    text(
+      "other-saves",
+      "No encontramos el archivo de tu partida activa: puede haberse movido o renombrado. Pulsa «Buscar partidas en un emulador» o «Cambiar partida».",
+    );
+    return;
+  }
   const others = state.selected_save
     ? saves.filter((s) => s.path !== state.selected_save).length
     : 0;
@@ -396,7 +483,15 @@ function renderNotices(state) {
       "Elegir partida",
       () => present("selector"),
     ]);
-  if (choice.new && state.selected_save)
+  if (choice.status === "MISSING")
+    notices.push([
+      "missing-save",
+      "danger",
+      "No encontramos el archivo de tu partida activa. Elige otra o vuelve a buscar.",
+      "Elegir partida",
+      () => present("selector"),
+    ]);
+  else if (choice.new && state.selected_save)
     notices.push([
       "new-save",
       "info",
@@ -422,15 +517,34 @@ function renderNotices(state) {
       "Ver detalles",
       () => openHub("partidas"),
     ]);
-  else if (state.principal && state.outbox?.paused)
+  else if (
+    !state.principal &&
+    ["SESSION_REJECTED", "ACCOUNT_DISABLED"].includes(state.error)
+  )
+    notices.push([
+      "session",
+      "danger",
+      errorText[state.error],
+      "Ver detalles",
+      () => openHub("launcher"),
+    ]);
+  else if (
+    state.principal &&
+    state.error &&
+    !["SAVE_CHANGED_DURING_READ", "SAVE_READBACK_PENDING", "RATE_LIMITED", "BACKEND_UNAVAILABLE"].includes(state.error)
+  )
+    // The real cause, not a generic "we will retry".
     notices.push([
       "sync-error",
       "danger",
-      "No se pudo sincronizar tu partida. Lo reintentaremos.",
+      `No se pudo sincronizar: ${(detailText[state.error_detail] || errorText[state.error] || "lo reintentamos solo.").replace(/^./, (c) => c.toLowerCase())}`,
       "Ver detalles",
       () => openHub("partidas"),
     ]);
-  const shown = notices.filter(([id]) => !dismissed.has(id));
+  // Dismissing hides that exact notice; a different cause shows again.
+  const shown = notices.filter(
+    ([id, , message]) => !dismissed.has(`${id}:${message}`),
+  );
   const key = JSON.stringify(shown.map(([id, , message]) => [id, message]));
   if (key === noticeKey) return;
   noticeKey = key;
@@ -453,7 +567,7 @@ function renderNotices(state) {
       close.textContent = "×";
       close.setAttribute("aria-label", "Ocultar aviso");
       close.onclick = () => {
-        dismissed.add(id);
+        dismissed.add(`${id}:${message}`);
         renderNotices(lastState || state);
       };
       row.append(span, button, close);
@@ -523,19 +637,71 @@ function renderBackups(busy) {
     list.append(row);
   }
 }
+// Short notices at the top: the real reason an action could not be done, or a
+// confirmation that it was. Each lives a few seconds, the same text is never
+// stacked twice, and the list is a popover so it also shows over dialogs.
+const toastTimers = new Map();
+function toast(message, tone = "error", ttl = 8000) {
+  if (!message) return;
+  const box = $("toasts");
+  let row = [...box.children].find((el) => el.dataset.message === message);
+  if (!row) {
+    row = document.createElement("p");
+    row.className = "toast";
+    row.dataset.message = message;
+    const span = document.createElement("span"),
+      close = document.createElement("button");
+    span.textContent = message;
+    close.type = "button";
+    close.className = "icon-close";
+    close.textContent = "×";
+    close.setAttribute("aria-label", "Cerrar aviso");
+    close.onclick = () => dropToast(row);
+    row.append(span, close);
+    box.append(row);
+    while (box.children.length > 3) dropToast(box.firstElementChild);
+  }
+  row.dataset.tone = tone;
+  clearTimeout(toastTimers.get(row));
+  toastTimers.set(
+    row,
+    setTimeout(() => dropToast(row), ttl),
+  );
+  showToasts();
+}
+function dropToast(row) {
+  if (!row?.isConnected) return;
+  clearTimeout(toastTimers.get(row));
+  toastTimers.delete(row);
+  row.remove();
+  showToasts();
+}
+// Re-shown after a dialog opens so it stays above it.
+function showToasts() {
+  const box = $("toasts");
+  try {
+    if (box.matches(":popover-open")) box.hidePopover();
+    if (box.children.length) box.showPopover();
+  } catch {
+    box.hidden = !box.children.length;
+  }
+  reportStrip();
+}
 async function action(fn) {
   try {
     const result = await fn();
     if (result?.status === "BUSY")
-      text("message", "Hay una operación pendiente.");
+      toast(
+        "Hay otra operación en curso en el Launcher. Espera a que termine y vuelve a intentarlo.",
+        "warn",
+      );
     return result;
   } catch (error) {
     // Main's own refusals are sentences meant for the trainer; codes are not.
     const reason = String(error?.message || "")
       .split("Error: ")
       .pop();
-    text(
-      "message",
+    toast(
       /^[A-ZÁÉÍÓÚ¿¡].* /.test(reason)
         ? reason
         : "No se pudo contactar con el núcleo local del Launcher.",
@@ -589,7 +755,9 @@ function mode(name) {
 let stripHeight = -1;
 function reportStrip() {
   if (!unified || document.body.dataset.mode !== "strip") return;
-  const shown = [$("update-banner"), $("notices")].filter((el) => !el.hidden);
+  const shown = [$("update-banner"), $("notices"), $("toasts")].filter(
+    (el) => !el.hidden && (el.id !== "toasts" || el.children.length),
+  );
   const height = shown.length
     ? Math.min(
         160,
@@ -648,6 +816,7 @@ function openDialog(view, item) {
   }
   const dialog = $(dialogIds[view]);
   if (!dialog.open) dialog.showModal();
+  if ($("toasts").children.length) showToasts(); // stay above the dialog
   if (view === "objetos") focusItem(item);
 }
 // Every close goes through here, synchronously: the dialog "close" event is
@@ -698,6 +867,7 @@ function confirmDialog({ title, message, detail, go, danger }) {
     };
     dialog.addEventListener("shut", () => resolve(ok), { once: true });
     dialog.showModal();
+    if ($("toasts").children.length) showToasts();
     $("confirm-go").focus();
   });
 }
@@ -755,41 +925,38 @@ window.launcher.onNavigate(({ view, panel, item, tab: hub }) => {
 });
 if (unified) mode("strip");
 $("close-details").onclick = () => $("details").close();
-$("select-save").onclick = () => action(() => window.launcher.chooseSave());
+async function chooseFile() {
+  const result = await window.launcher.chooseSave();
+  if (result?.status === "QUEUED")
+    toast(
+      "Partida elegida. Se leerá y sincronizará sola; todas las pantallas de PokeApp pasarán a mostrarla.",
+      "ok",
+    );
+  return result;
+}
+$("select-save").onclick = () => action(chooseFile);
 $("selector-manual").onclick = () =>
   action(async () => {
-    const result = await window.launcher.chooseSave();
-    if (result?.status !== "CANCELLED") shut($("selector-dialog"));
+    const result = await chooseFile();
+    if (result && result.status !== "CANCELLED") shut($("selector-dialog"));
     return result;
   });
+// The core checks that no emulator runs before any physical change.
 $("export-save").onclick = async () => {
   const ticket = await confirmWith("export", "current");
-  if (ticket)
-    void action(() =>
-      window.launcher.exportSave($("backup-emulator-closed").checked, ticket),
-    );
+  if (ticket) void action(() => window.launcher.exportSave(true, ticket));
 };
 $("refresh-backups").onclick = () => action(() => window.launcher.backups());
-$("backup-emulator-closed").onchange = () => {
-  $("export-save").disabled =
-    !exportAvailable || !$("backup-emulator-closed").checked;
+$("retry").onclick = async () => {
+  const result = await action(() => window.launcher.retry());
+  if (result) toast("Reintentando la conexión con PokeApp…", "ok", 4000);
 };
-$("retry").onclick = () => action(() => window.launcher.retry());
 $("logout").onclick = () => action(() => window.launcher.logout());
-$("emulator-closed").onchange = () => {
-  $("confirm-write").disabled = !pendingWrite || !$("emulator-closed").checked;
-};
 $("confirm-write").onclick = async () => {
   const operation = pendingWrite;
   const ticket = await confirmWith("write", operation);
   if (ticket)
-    void action(() =>
-      window.launcher.confirmWrite(
-        operation,
-        $("emulator-closed").checked,
-        ticket,
-      ),
-    );
+    void action(() => window.launcher.confirmWrite(operation, true, ticket));
 };
 $("reconcile-write").onclick = () =>
   action(() => window.launcher.reconcileWrite());
@@ -806,10 +973,22 @@ $("login").onsubmit = (event) => {
 function renderSelector(state, force) {
   const found = state?.emulator_saves || [];
   const list = $("selector-list");
-  const key = JSON.stringify([found, state?.selected_save, observation?.game]);
+  const key = JSON.stringify([
+    found,
+    state?.selected_save,
+    observation?.game,
+    state?.discovery?.at,
+  ]);
   if (!force && list.dataset.key === key) return;
   list.dataset.key = key;
   $("selector-empty").hidden = found.length > 0;
+  if (!found.length)
+    text(
+      "selector-empty",
+      explainSearch(state?.discovery) ||
+        "No hemos encontrado partidas compatibles. Abre tu juego una vez en el emulador y vuelve a buscar, o elige el archivo a mano.",
+    );
+  renderReport(state?.discovery);
   list.replaceChildren(
     ...found.map((save) => {
       const current = save.path === state.selected_save;
@@ -828,7 +1007,7 @@ function renderSelector(state, force) {
       body.className = "save-option-body";
       title.textContent = `Pokémon ${gameNames[save.game] || "partida"}${current && observation ? ` · ${observation.trainer.name}` : ""}`;
       meta.textContent = [
-        save.emulator || "Emulador",
+        `${save.emulator || "Emulador"}${save.location && save.location !== "appdata" ? ` (${locationNames[save.location] || save.location})` : ""}`,
         save.modified
           ? `modificada ${when(save.modified)}`
           : "fecha no disponible",
@@ -848,7 +1027,13 @@ function renderSelector(state, force) {
       button.append(badge, body, status);
       button.onclick = () =>
         action(async () => {
-          if (!current) await window.launcher.selectDiscovered(save.path);
+          if (!current) {
+            await window.launcher.selectDiscovered(save.path);
+            toast(
+              `Partida activa: ${gameLabel(save.game)}. Se leerá y sincronizará sola; todas las pantallas de PokeApp pasarán a mostrarla.`,
+              "ok",
+            );
+          }
           shut($("selector-dialog"));
         });
       return button;
@@ -858,22 +1043,107 @@ function renderSelector(state, force) {
 $("selector-rescan").onclick = () => action(discover);
 $("choose-save").onclick = () => present("selector");
 $("discover-primary").onclick = () => action(discover);
-async function discover() {
-  const result = await window.launcher.discoverSaves();
-  if (result?.count === 0)
-    text(
-      "message",
-      "No se han encontrado partidas compatibles en los emuladores de este equipo.",
-    );
-  else if (result?.count > 1 && !result.auto_selected) {
-    // Wait for the core to publish the list, then let the trainer choose.
-    await poll();
-    present("selector");
+const locationNames = {
+  appdata: "instalación normal",
+  portable: "versión portable",
+  custom: "carpeta personalizada",
+};
+// Why a search found what it found, in plain words.
+function explainSearch(report) {
+  const checked = report?.checked || [];
+  if (!checked.length)
+    return "No hemos encontrado Lime3DS, Azahar ni Citra en este equipo. Si usas una versión portable, ábrela y vuelve a buscar, o elige el archivo a mano con «Elegir archivo…».";
+  const denied = checked.find((c) => c.error === "ACCESS_DENIED");
+  if (denied)
+    return `Windows no deja leer la carpeta de ${denied.emulator}. Revisa sus permisos o elige el archivo a mano.`;
+  if (checked.every((c) => !c.saves && c.other_titles))
+    return `${checked.map((c) => c.emulator).join(" y ")} tiene partidas, pero de juegos que PokeApp no admite. Juegos admitidos: X/Y, Rubí Omega/Zafiro Alfa y Sol/Luna/Ultrasol/Ultraluna.`;
+  if (checked.every((c) => !c.saves))
+    return `Hemos encontrado ${[...new Set(checked.map((c) => c.emulator))].join(" y ")}, pero todavía sin partidas guardadas. Abre tu juego, guarda una vez dentro del juego y vuelve a buscar.`;
+  return "";
+}
+function renderReport(report) {
+  const box = $("selector-report");
+  const checked = report?.checked || [];
+  box.hidden = !report;
+  box.replaceChildren();
+  if (!report) return;
+  const title = document.createElement("strong");
+  title.textContent = "Dónde hemos buscado";
+  const list = document.createElement("ul");
+  for (const c of checked) {
+    const li = document.createElement("li");
+    li.textContent = `${c.emulator} (${locationNames[c.location] || c.location}): ${
+      c.error === "ACCESS_DENIED"
+        ? "sin permiso de lectura"
+        : c.error
+          ? "no se pudo leer"
+          : c.saves
+            ? `${c.saves} partida${c.saves === 1 ? "" : "s"} compatible${c.saves === 1 ? "" : "s"}`
+            : c.other_titles
+              ? "solo juegos no admitidos"
+              : "sin partidas guardadas"
+    }`;
+    list.append(li);
   }
-  return result;
+  if (!checked.length) {
+    const li = document.createElement("li");
+    li.textContent =
+      "Ninguna carpeta de Lime3DS, Azahar o Citra (instalada, portable abierta o personalizada).";
+    list.append(li);
+  }
+  box.append(title, list);
+}
+let searching = false;
+async function discover() {
+  if (searching) return;
+  searching = true;
+  const buttons = ["discover-primary", "discover-saves", "selector-rescan"];
+  for (const id of buttons) {
+    $(id).disabled = true;
+    $(id).dataset.label ??= $(id).textContent;
+    $(id).textContent = "Buscando…";
+  }
+  try {
+    const result = await window.launcher.discoverSaves();
+    if (!result || result.status === "BUSY") return result;
+    // The answer carries the list: the selector never shows an older poll.
+    lastState = {
+      ...(lastState || {}),
+      emulator_saves: result.saves || [],
+      discovery: result.discovery || null,
+      save_choice: result.save_choice || lastState?.save_choice,
+    };
+    renderEmulator(lastState);
+    if (result.auto_selected) {
+      const [only] = result.saves;
+      toast(
+        `Hemos encontrado tu partida de ${gameLabel(only?.game)} y la hemos elegido. Se sincronizará sola.`,
+        "ok",
+      );
+      return result;
+    }
+    if (!result.count) toast(explainSearch(result.discovery), "warn", 12000);
+    else
+      toast(
+        result.count === 1
+          ? "Hemos encontrado 1 partida compatible."
+          : `Hemos encontrado ${result.count} partidas compatibles. Elige cuál usar.`,
+        "ok",
+      );
+    present("selector");
+    return result;
+  } finally {
+    searching = false;
+    for (const id of buttons) {
+      $(id).disabled = false;
+      $(id).textContent = $(id).dataset.label;
+    }
+  }
 }
 
-// Restore: a summary, the safety checks, closed emulator and "Confirmo".
+// Restore: a summary, the safety checks and "Confirmo"; the core itself
+// refuses while an emulator is running.
 let restoreTarget = null;
 function restoreChecks(state) {
   const write = state?.write || {};
@@ -908,11 +1178,10 @@ async function openRestore(backup) {
     dd.textContent = value;
     $("restore-summary").append(dt, dd);
   }
-  $("restore-closed").checked = false;
   $("restore-word").value = "";
   updateRestore();
   present("restore");
-  $("restore-closed").focus();
+  $("restore-word").focus();
 }
 function updateRestore() {
   if (!restoreTarget) return;
@@ -926,12 +1195,9 @@ function updateRestore() {
     }),
   );
   $("restore-confirm").disabled = !(
-    checks.every(([ok]) => ok) &&
-    $("restore-closed").checked &&
-    $("restore-word").value === "Confirmo"
+    checks.every(([ok]) => ok) && $("restore-word").value === "Confirmo"
   );
 }
-$("restore-closed").onchange = updateRestore;
 $("restore-word").oninput = updateRestore;
 // Enter never confirms: the button is the only way.
 $("restore-word").onkeydown = (event) => {
@@ -1021,7 +1287,6 @@ function renderTransfers(state) {
   const items = state.cloud?.data?.transfers || [];
   const write = state.write || {};
   const enabled = Boolean(write.transfer_application_enabled);
-  const closed = $("transfer-emulator-closed").checked;
   text(
     "transfer-summary",
     !items.length
@@ -1037,7 +1302,6 @@ function renderTransfers(state) {
     enabled,
     write.busy,
     write.status,
-    closed,
     state.selected_save,
     revision,
   ]);
@@ -1099,7 +1363,7 @@ function renderTransfers(state) {
       const actions = transferActions(t);
       if (enabled && (actions.prepare || actions.apply || actions.fulfil))
         line(
-          "Cierra el juego y el emulador y marca la casilla antes de continuar.",
+          "Antes de cada paso el Launcher comprueba que el emulador está cerrado; si no, no cambia nada y te lo dice.",
         );
       const labels = {
         prepare: "Preparar copia",
@@ -1116,10 +1380,7 @@ function renderTransfers(state) {
         const button = document.createElement("button");
         button.textContent = labels[kind];
         button.dataset.kind = kind;
-        button.disabled =
-          !enabled ||
-          write.busy ||
-          (["prepare", "apply", "fulfil"].includes(kind) && !closed);
+        button.disabled = !enabled || write.busy;
         button.onclick = async () => {
           // Main says what this step does to the local file before it runs.
           const ticket =
@@ -1128,12 +1389,7 @@ function renderTransfers(state) {
               : await confirmWith("transfer:" + kind, t.authorization_id);
           if (kind === "refresh" || ticket)
             void action(() =>
-              window.launcher.transfer(
-                kind,
-                t.authorization_id,
-                closed,
-                ticket,
-              ),
+              window.launcher.transfer(kind, t.authorization_id, true, ticket),
             );
         };
         card.append(button);
@@ -1142,11 +1398,10 @@ function renderTransfers(state) {
     }),
   );
 }
-$("transfer-emulator-closed").onchange = () =>
-  lastState && renderTransfers(lastState);
 
 // Quick items: ONE text state per item, shared by keyboard, + and −.
 const quantities = { rare_candy: "1", heart_scale: "1" };
+let quickPending = false;
 function renderQuick(state) {
   const write = state.write || {};
   const view = state.quick_items;
@@ -1155,22 +1410,22 @@ function renderQuick(state) {
   text(
     "quick-state",
     !state.selected_save
-      ? "Selecciona tu partida para ver tus objetos."
+      ? "Elige tu partida en «Mis partidas» para ver y añadir objetos."
       : write.status === "RECOVERY_REQUIRED"
-        ? "Recuperación necesaria. Conserva las copias y no abras el emulador."
-        : write.busy
-          ? "Preparando copia, aplicando o verificando. Mantén el juego cerrado."
+        ? "Hay una operación de tu partida pendiente de comprobar: revísala en «Cambios en tu partida»."
+        : write.busy || quickPending
+          ? "Comprobando el emulador, guardando la copia y aplicando… no abras el juego."
           : write.status === "AWAITING_CONFIRMATION" && adding
-            ? "Esperando cierre del emulador: marca la casilla y confirma en «Cambios en tu partida»."
-            : write.status === "APPLIED_VERIFIED" && adding
-              ? "Aplicado correctamente: la partida se ha releído y verificado."
-              : state.quick_item_error
-                ? "Error recuperable: " + state.quick_item_error
-                : !view
-                  ? "Pulsa «Leer objetos de la partida» para ver tus cantidades."
-                  : !enabled
-                    ? "Operación bloqueada: añadir objetos se activará tras la certificación real con Lime3DS. Puedes consultar tus cantidades."
-                    : "Listo para añadir.",
+            ? "Hay un cambio preparado de antes: confírmalo o descártalo en «Cambios en tu partida»."
+            : state.quick_item_error
+              ? state.quick_item_error
+              : !view
+                ? "Leyendo las cantidades de tu partida…"
+                : !enabled
+                  ? "Este Launcher no puede añadir objetos. Puedes consultar tus cantidades."
+                  : state.quick_item_result
+                    ? "Hecho: el cambio está guardado y comprobado en tu partida."
+                    : "Elige la cantidad y pulsa «Añadir a la bolsa».",
   );
   for (const row of document.querySelectorAll(".quick-item")) {
     const item = row.dataset.item;
@@ -1188,13 +1443,13 @@ function renderQuick(state) {
       !enabled ||
       !info ||
       write.busy ||
+      quickPending ||
       ["RECOVERY_REQUIRED", "AWAITING_CONFIRMATION", "PREPARED"].includes(
         write.status,
       );
     for (const name of [".quick-minus", ".quick-plus", ".quick-input"])
       row.querySelector(name).disabled = blocked;
-    row.querySelector(".quick-add").disabled =
-      blocked || parsed.value === null || !$("quick-emulator-closed").checked;
+    row.querySelector(".quick-add").disabled = blocked || parsed.value === null;
   }
 }
 for (const row of document.querySelectorAll(".quick-item")) {
@@ -1211,19 +1466,32 @@ for (const row of document.querySelectorAll(".quick-item")) {
     update(PokeQuantity.step(quantities[item], -1, max()));
   row.querySelector(".quick-plus").onclick = () =>
     update(PokeQuantity.step(quantities[item], 1, max()));
-  row.querySelector(".quick-add").onclick = () => {
+  // One confirmation; the core checks the emulator and the file itself.
+  row.querySelector(".quick-add").onclick = async () => {
     const parsed = PokeQuantity.parse(quantities[item], max());
     if (parsed.value === null) return update(quantities[item]);
-    action(() =>
-      window.launcher.addQuickItem(
-        item,
-        parsed.value,
-        $("quick-emulator-closed").checked,
-      ),
-    );
+    const target = `${item}:${parsed.value}`;
+    const ticket = await confirmWith("quick-item", target);
+    if (!ticket) return;
+    quickPending = true;
+    if (lastState) renderQuick(lastState);
+    const before = lastState?.quick_item_seq ?? 0;
+    try {
+      const queued = await action(() =>
+        window.launcher.addQuickItem(item, parsed.value, ticket),
+      );
+      // The core answers QUEUED; its outcome (done or the reason it was not)
+      // arrives with the next completed quick step.
+      for (let i = 0; queued && i < 120; i++) {
+        await new Promise((resolve) => setTimeout(resolve, 500));
+        if ((lastState?.quick_item_seq ?? 0) !== before) break;
+      }
+    } finally {
+      quickPending = false;
+      if (lastState) renderQuick(lastState);
+    }
   };
 }
-$("quick-emulator-closed").onchange = () => lastState && renderQuick(lastState);
 $("quick-refresh").onclick = () => action(() => window.launcher.quickItems());
 
 function renderEmulator(state) {

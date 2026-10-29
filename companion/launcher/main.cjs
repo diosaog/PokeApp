@@ -52,9 +52,27 @@ let worker,
   sequence = 0,
   installing = false;
 const pending = new Map();
+// Searching every emulator folder can take longer than a state read.
+const TIMEOUTS = { discover_saves: 30000, select: 15000, select_discovered: 15000 };
+// The core's refusal codes, as sentences for the trainer. Unknown codes stay
+// generic: no path, PIN or token ever travels in an error.
+const CORE_ERRORS = {
+  INVALID_SELECTION:
+    "Esa partida ya no aparece en la búsqueda. Vuelve a buscar y elígela de nuevo.",
+  INVALID_PATH:
+    "Ese archivo no es una partida compatible (main de 3DS, .sav, .dsv o .srm).",
+  SAVE_NOT_FOUND: "No se encuentra ese archivo. Puede haberse movido o borrado.",
+  ACCESS_DENIED: "Windows no permite leer ese archivo. Revisa sus permisos.",
+  FILE_LOCKED: "Otro programa está usando ese archivo. Ciérralo y vuelve a intentarlo.",
+  INVALID_LOGIN: "Revisa el entrenador y el PIN.",
+  INVALID_QUICK_ITEM_ARGUMENTS: "Revisa el objeto y la cantidad.",
+  WRITE_CONFIRMATION_REQUIRED: "El cambio ya no está pendiente de confirmar.",
+};
 function request(command, args = {}) {
   if (!worker || worker.killed || pending.size >= 8)
-    return Promise.reject(new Error("Launcher no disponible"));
+    return Promise.reject(
+      new Error("El núcleo del Launcher no responde. Reinicia el Launcher si sigue así."),
+    );
   // Once an update install is confirmed, no new local operation may start.
   if (installing && command !== "state")
     return Promise.reject(new Error("Actualización en curso"));
@@ -62,9 +80,13 @@ function request(command, args = {}) {
   return new Promise((resolve, reject) => {
     const timer = setTimeout(() => {
       pending.delete(id);
-      reject(new Error("Launcher no disponible"));
-    }, 5000);
-    pending.set(id, { resolve, reject, timer });
+      reject(
+        new Error(
+          "El núcleo del Launcher está tardando en responder. Vuelve a intentarlo en unos segundos.",
+        ),
+      );
+    }, TIMEOUTS[command] ?? 5000);
+    pending.set(id, { resolve, reject, timer, command });
     worker.stdin.write(JSON.stringify({ id, command, args }) + "\n");
   });
 }
@@ -105,7 +127,9 @@ app.whenReady().then(() => {
   const rejectPending = () => {
     for (const task of pending.values()) {
       clearTimeout(task.timer);
-      task.reject(new Error("Launcher no disponible"));
+      task.reject(
+        new Error("El núcleo del Launcher se ha detenido. Reinicia el Launcher."),
+      );
     }
     pending.clear();
   };
@@ -120,7 +144,12 @@ app.whenReady().then(() => {
       pending.delete(msg.id);
       clearTimeout(task.timer);
       if (msg.error)
-        task.reject(new Error("No se pudo completar la solicitud local"));
+        task.reject(
+          new Error(
+            CORE_ERRORS[msg.error] ||
+              "No se pudo completar la acción en el Launcher. Vuelve a intentarlo.",
+          ),
+        );
       else task.resolve(msg.result);
     } catch {
       rejectPending();
@@ -164,16 +193,15 @@ app.whenReady().then(() => {
       authorize(event);
       return request(name);
     });
+  // Every physical change below is checked by the core itself: no emulator
+  // process may run and the file must be free, or it is refused with the
+  // reason. The trainer never has to tick «he cerrado el emulador».
   ipcMain.handle(
     "launcher:write-confirm",
-    async (event, operationId, emulatorClosed, ticket) => {
+    async (event, operationId, _emulatorClosed, ticket) => {
       authorize(event);
-      if (
-        typeof operationId !== "string" ||
-        operationId.length > 128 ||
-        emulatorClosed !== true
-      )
-        throw new Error("Confirma que el juego y el emulador están cerrados.");
+      if (typeof operationId !== "string" || operationId.length > 128)
+        throw new Error("La acción ya no está pendiente de confirmación.");
       const state = await request("state");
       describe("write", operationId, state);
       confirmations.redeem(
@@ -223,12 +251,10 @@ app.whenReady().then(() => {
   });
   ipcMain.handle(
     "launcher:backup-restore",
-    async (event, operationId, emulatorClosed, typed, ticket) => {
+    async (event, operationId, _emulatorClosed, typed, ticket) => {
       authorize(event);
       if (typeof operationId !== "string" || operationId.length > 128)
         throw new Error("Restauración no disponible.");
-      if (emulatorClosed !== true)
-        throw new Error("Confirma que el juego y el emulador están cerrados.");
       if (typed !== "Confirmo")
         throw new Error("Escribe Confirmo para restaurar.");
       const state = await request("state");
@@ -257,10 +283,8 @@ app.whenReady().then(() => {
       });
     },
   );
-  ipcMain.handle("launcher:export", async (event, emulatorClosed, ticket) => {
+  ipcMain.handle("launcher:export", async (event, _emulatorClosed, ticket) => {
     authorize(event);
-    if (emulatorClosed !== true)
-      throw new Error("Confirma que el juego y el emulador están cerrados.");
     const state = await request("state");
     describe("export", "current", state);
     confirmations.redeem(
@@ -440,28 +464,47 @@ app.whenReady().then(() => {
       return false;
     }
   };
-  const pushSession = async () => {
-    if (!(await shareApi)) return;
-    for (let attempt = 0; attempt < 8; attempt++) {
-      if (!onWebOrigin()) return;
-      const reply = await request("web_session").catch(() => null);
-      if (!reply || reply.status === "LOGIN_REQUIRED") return;
-      if (reply.status === "OK") {
-        const session = JSON.stringify({
-          access_token: reply.access_token,
-          expires_at: reply.expires_at,
-          trainer_id: reply.trainer_id,
-        });
-        await web.webContents
-          .executeJavaScript(
-            `window.__pokeappLauncherSession && window.__pokeappLauncherSession(${session})`,
-          )
-          .catch(() => {});
-        return;
+  const toWeb = (name, value) =>
+    web.webContents
+      .executeJavaScript(
+        `window.${name} && window.${name}(${JSON.stringify(value)})`,
+      )
+      .catch(() => {});
+  // The core wakes its cloud step for a token request, so an answer normally
+  // arrives in a second or two; a slow network gets up to ~30 s. Only a real
+  // "no session" signs the web out — a slow answer never does.
+  let pushing = null;
+  const pushSession = () => {
+    if (pushing) return pushing;
+    pushing = (async () => {
+      if (!(await shareApi)) return;
+      for (let attempt = 0; attempt < 20; attempt++) {
+        if (!onWebOrigin()) return;
+        const reply = await request("web_session").catch(() => null);
+        if (reply?.status === "LOGIN_REQUIRED")
+          return toWeb("__pokeappLauncherSession", { signed_out: true });
+        if (reply?.status === "OK")
+          return toWeb("__pokeappLauncherSession", {
+            access_token: reply.access_token,
+            expires_at: reply.expires_at,
+            trainer_id: reply.trainer_id,
+          });
+        await new Promise((resolve) => setTimeout(resolve, 1500));
       }
-      await new Promise((resolve) => setTimeout(resolve, 1500));
-    }
+    })().finally(() => {
+      pushing = null;
+    });
+    return pushing;
   };
+  // Changes the Launcher confirmed (a synced save, another active save, an
+  // account change, items added) refresh the web's screens without a reload.
+  ipcMain.handle("launcher:web-event", (event, type) => {
+    authorize(event);
+    if (!["save-synced", "save-changed", "account-changed", "items-changed"].includes(type))
+      throw new Error("Evento no válido");
+    if (onWebOrigin()) void toWeb("__pokeappLauncherEvent", { type });
+    return { sent: true };
+  });
   // One sign-in: when the web signs in successfully, the core signs in with
   // the same credentials, which pass through memory only (never stored).
   void shareApi.then((api) => {
@@ -566,26 +609,30 @@ app.whenReady().then(() => {
     authorize(event);
     return request("quick_items_refresh");
   });
+  // «Añadir a la bolsa»: one confirmation, then the core checks that no
+  // emulator runs and the file is free, saves a verified copy, writes,
+  // re-reads natively and only then reports the new count.
   ipcMain.handle(
     "launcher:quick-item-add",
-    (event, item, quantity, emulatorClosed) => {
+    async (event, item, quantity, ticket) => {
       authorize(event);
       if (
         !["rare_candy", "heart_scale"].includes(item) ||
         !Number.isInteger(quantity) ||
         quantity < 1 ||
-        quantity > 9999 ||
-        emulatorClosed !== true
+        quantity > 9999
       )
-        throw new Error(
-          "Revisa el objeto, la cantidad y el cierre del emulador.",
-        );
-      // Only prepares; the existing write confirmation still applies it.
-      return request("quick_item_offer", {
-        item,
-        quantity,
-        closed_emulator_confirmed: true,
-      });
+        throw new Error("Revisa el objeto y la cantidad.");
+      const target = `${item}:${quantity}`;
+      const state = await request("state");
+      describe("quick-item", target, state);
+      confirmations.redeem(
+        ticket,
+        "quick-item",
+        target,
+        fingerprint("quick-item", target, state),
+      );
+      return request("quick_item_apply", { item, quantity });
     },
   );
   // Robbery: only this trainer's listed leg; runtime and server recheck all.
@@ -593,7 +640,7 @@ app.whenReady().then(() => {
   // explicit confirmation; completion is the server's verdict.
   ipcMain.handle(
     "launcher:transfer",
-    async (event, kind, authorizationId, emulatorClosed, ticket) => {
+    async (event, kind, authorizationId, _emulatorClosed, ticket) => {
       authorize(event);
       if (
         !["prepare", "apply", "fulfil", "cancel", "refresh"].includes(kind) ||
@@ -617,8 +664,6 @@ app.whenReady().then(() => {
         fingerprint(step, authorizationId, state),
       );
       if (kind === "cancel") return request("transfer_cancel", args);
-      if (emulatorClosed !== true)
-        throw new Error("Confirma que el juego y el emulador están cerrados.");
       if (kind === "fulfil") {
         return request("transfer_fulfil", {
           ...args,
@@ -881,6 +926,7 @@ app.whenReady().then(() => {
         "write",
         "export",
         "restore",
+        "quick-item",
         "transfer:prepare",
         "transfer:apply",
         "transfer:fulfil",

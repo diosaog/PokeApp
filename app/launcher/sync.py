@@ -103,7 +103,11 @@ class SaveSyncService:
 
 
 class SaveWatchService:
-    """UI/OS watcher hints plus mandatory bounded polling; caller owns scheduling."""
+    """UI/OS watcher hints plus mandatory bounded polling; caller owns scheduling.
+
+    Between full reads only the file's metadata is checked: a save in game, a
+    PKHeX edit, a replaced or renamed-over file all change size, mtime or file
+    identity. A full verifying read still runs every `verify_seconds`."""
 
     def __init__(
         self,
@@ -112,34 +116,57 @@ class SaveWatchService:
         *,
         poll_seconds=5.0,
         debounce_seconds=1.0,
+        verify_seconds=60.0,
     ):
         if poll_seconds < 1 or debounce_seconds < 0.25:
             raise ValueError("invalid_watch_interval")
         self.sync_service, self.source = sync, source
         self.poll_seconds, self.debounce_seconds = poll_seconds, debounce_seconds
+        self.verify_seconds = verify_seconds
         self.next_poll = 0.0
         self.last_poll = -poll_seconds
         self.pending = None
         self.stable_since = 0.0
+        self.settled = None  # metadata of the last stable, recorded read
+        self.verify_at = 0.0
 
     def notify(self, now: float):
         self.next_poll = min(self.next_poll, max(now, self.last_poll + 1.0))
+
+    def _metadata(self):
+        try:
+            value = self.source.verified_path().stat()
+        except (SaveError, OSError):
+            return None
+        return (value.st_size, value.st_mtime_ns, value.st_dev, value.st_ino)
 
     def tick(self, now: float) -> SyncResult | None:
         if now < self.next_poll:
             return None
         self.last_poll = now
         self.next_poll = now + self.poll_seconds
+        if (
+            self.settled is not None
+            and now < self.verify_at
+            and self._metadata() == self.settled
+        ):
+            return None
         try:
             snapshot = self.sync_service.inspector.reader.read(self.source)
         except SaveError as exc:
-            self.pending = None
+            self.pending = self.settled = None
             return SyncResult("ERROR", str(uuid4()), error=exc.code.value)
         stamp = (snapshot.metadata, snapshot.fingerprint)
         if stamp != self.pending:
             self.pending, self.stable_since = stamp, now
+            self.settled = None
             self.next_poll = now + self.debounce_seconds
             return None
         if now - self.stable_since < self.debounce_seconds:
             return None
-        return self.sync_service.sync(self.source, snapshot=snapshot)
+        result = self.sync_service.sync(self.source, snapshot=snapshot)
+        if result.status in ("SYNCED", "NO_CHANGE"):
+            meta = snapshot.metadata
+            self.settled = (meta.size, meta.mtime_ns, meta.device, meta.inode)
+            self.verify_at = now + self.verify_seconds
+        return result

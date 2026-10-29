@@ -191,16 +191,28 @@ class RuntimeCommandTests(unittest.TestCase):
         runtime = self.runtime()
         with self.assertRaises(ValueError):
             runtime.command("select_discovered", {"path": "C:/elsewhere/main"})
+        listed = runtime.core.profile / "fixture" / "main"
+        listed.parent.mkdir()
+        listed.write_bytes(b"save")
         runtime.value["emulator_saves"] = [
-            {"path": "C:/fixture/main", "emulator": "Lime3DS", "game": "Y"}
+            {"path": str(listed), "emulator": "Lime3DS", "game": "Y"}
         ]
         self.assertEqual(
-            runtime.command("select_discovered", {"path": "C:/fixture/main"}),
+            runtime.command("select_discovered", {"path": str(listed)}),
             {"status": "QUEUED"},
         )
         self.assertEqual(
-            runtime.local_commands.get_nowait(), ("select", {"path": "C:/fixture/main"})
+            runtime.local_commands.get_nowait(), ("select", {"path": str(listed)})
         )
+
+    def test_a_listed_save_that_vanished_is_refused_with_its_reason(self):
+        runtime = self.runtime()
+        runtime.value["emulator_saves"] = [
+            {"path": "C:/fixture/gone/main", "emulator": "Lime3DS", "game": "Y"}
+        ]
+        with self.assertRaisesRegex(ValueError, "save_not_found|invalid_path"):
+            runtime.command("select_discovered", {"path": "C:/fixture/gone/main"})
+        self.assertTrue(runtime.local_commands.empty())
 
 
 if __name__ == "__main__":

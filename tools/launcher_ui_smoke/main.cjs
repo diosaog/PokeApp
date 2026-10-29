@@ -18,11 +18,17 @@ const script = `(async () => {
   type("250"); plus.click(); check(input.value === "251", "buttons continue from typed value");
   type("-1.5"); check(input.value === "15", "only digits kept");
   type("995"); check(add.disabled && /máximo que cabe ahora es 994/.test(row.querySelector(".quick-error").textContent), "above real maximum refused");
-  type("994"); check(add.disabled, "emulator checkbox required");
-  const box = document.getElementById("quick-emulator-closed"); box.click();
-  check(!add.disabled, "valid value and confirmation enable Añadir");
+  type("994");
+  check(!add.disabled && !document.getElementById("quick-emulator-closed"), "no «he cerrado el emulador» checkbox: a valid value enables Añadir");
   add.click(); await sleep(200);
-  check(JSON.stringify(window.launcher.__calls()) === JSON.stringify([["rare_candy", 994, true]]), "exact request sent once");
+  check(document.getElementById("confirm-dialog").open && JSON.stringify(window.launcher.__calls()) === JSON.stringify([["begin", "quick-item", "rare_candy:994"]]), "one in-app confirmation first, nothing applied yet");
+  document.getElementById("confirm-go").click(); await sleep(200);
+  check(JSON.stringify(window.launcher.__calls().at(-1)) === JSON.stringify(["rare_candy", 994, "t:quick-item:rare_candy:994"]), "exact ticketed request sent once");
+  window.launcher.__set({ quick_item_seq: 1, quick_item_result: { item: "rare_candy", quantity: 994, game: "Y", at: 1 } }); await sleep(1300);
+  check(/994 × Caramelo Raro añadidos/.test(document.getElementById("toasts").textContent) && window.launcher.__calls().some((c) => c[0] === "webEvent" && c[1] === "items-changed"), "verified result is confirmed on top and the web refreshes");
+  window.launcher.__set({ quick_item_seq: 2, quick_item_result: null, quick_item_error: "El emulador está abierto: ciérralo (y el juego) y vuelve a pulsar «Añadir a la bolsa». Tu partida no ha cambiado." }); await sleep(1300);
+  check(/El emulador está abierto/.test(document.getElementById("toasts").textContent), "a refusal shows its real cause on top");
+  window.launcher.__unset(["quick_item_seq", "quick_item_result", "quick_item_error"]);
   const full = document.querySelector('[data-item="heart_scale"]');
   check(full.querySelector(".quick-add").disabled && /No cabe/.test(full.querySelector(".quick-error").textContent), "full stack cannot add");
   check(!document.getElementById("update-banner").hidden && !document.getElementById("update-open").hidden && /0\.23\.0/.test(document.getElementById("update-text").textContent), "update offered discreetly in the strip");
@@ -32,11 +38,8 @@ const script = `(async () => {
   const kinds = (id) => [...card(id).querySelectorAll("button")].map((b) => b.dataset.kind).join(",");
   check(kinds("a") === "cancel,refresh" && /Has solicitado/.test(card("a").textContent) && /Caja 2, posición 5/.test(card("a").textContent), "requester waits for source: only cancel/refresh");
   check(kinds("b") === "apply,refresh" && /Te van a robar/.test(card("b").textContent) && /Pikachu · Caja 1, posición 2/.test(card("b").textContent), "victim sees own role, Pokémon and turn; no cancel");
-  const apply = card("b").querySelector('[data-kind="apply"]');
-  check(apply.disabled, "apply needs emulator-closed confirmation");
-  document.getElementById("transfer-emulator-closed").click(); await sleep(50);
   const applyNow = card("b").querySelector('[data-kind="apply"]');
-  check(!applyNow.disabled, "confirmation enables own action");
+  check(!applyNow.disabled && !document.getElementById("transfer-emulator-closed"), "own action available without a checkbox (the core checks the emulator)");
   applyNow.click(); await sleep(100);
   check(document.getElementById("confirm-dialog").open && /Aplicar tu parte del robo/.test(document.getElementById("confirm-message").textContent) && window.launcher.__calls().at(-1)[0] !== "transfer", "in-app confirmation first, nothing sent yet");
   document.getElementById("confirm-go").click(); await sleep(200);
@@ -52,12 +55,12 @@ const script = `(async () => {
   backupRows[0].querySelectorAll("button")[1].click(); await sleep(100);
   const confirm = document.getElementById("restore-confirm"), word = document.getElementById("restore-word");
   const typeWord = (v) => { word.value = v; word.dispatchEvent(new Event("input")); };
-  document.getElementById("restore-closed").click(); typeWord("Confirmo");
+  typeWord("Confirmo");
   check(document.getElementById("restore-dialog").open && /desde main/.test(document.getElementById("restore-summary").textContent) && confirm.disabled && /✕ Sin entregas de robo pendientes/.test(document.getElementById("restore-checks").textContent), "pending robbery blocks restore");
   window.launcher.__set({ cloud: { data: { transfers: [] } } }); await sleep(1300);
   typeWord("confirmo"); check(confirm.disabled, "restore word is exact (case)");
   typeWord("Confirmo "); check(confirm.disabled, "restore word is exact (spaces)");
-  typeWord("Confirmo"); check(!confirm.disabled, "checks, closed emulator and Confirmo enable restore");
+  typeWord("Confirmo"); check(!confirm.disabled && !document.getElementById("restore-closed"), "checks and Confirmo enable restore, no checkbox");
   word.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true, cancelable: true }));
   check(document.getElementById("restore-dialog").open && !window.launcher.__calls().some((c) => c[0] === "restore"), "Enter never restores");
   confirm.click(); await sleep(200);
@@ -69,12 +72,23 @@ const script = `(async () => {
   check(!document.getElementById("save-view").hidden && document.activeElement === document.querySelector('[data-item="heart_scale"] .quick-input') && JSON.stringify(window.launcher.__calls().at(-1)) === JSON.stringify(["web", false, false]), "web inventory link opens the native Heart Scale input");
   window.launcher.__disable(); await sleep(1300);
   check(/aún no aplica cambios/.test(document.getElementById("transfer-summary").textContent) && [...document.querySelectorAll("#transfer-list button")].every((b) => b.disabled), "no capability: robbery visible but every action disabled");
-  check(add.disabled && /Operación bloqueada/.test(document.getElementById("quick-state").textContent), "disabled capability blocks with explanation");
+  check(add.disabled && /no puede añadir objetos/.test(document.getElementById("quick-state").textContent), "disabled capability blocks with explanation");
   // Sync status chip: discreet, from the core's state only.
   const chip = () => document.getElementById("sync-chip").textContent;
   check(chip() === "Sin cuenta", "no account: no sync claimed");
   window.launcher.__set({ principal: { display_name: "Test" }, cloud_sync: true, outbox: { pending: 0 }, cloud_receipt: { status: "registered", is_current: true }, last_synced: Date.now() / 1000 - 120 }); await sleep(1300);
   check(chip() === "Sincronizado" && /hace 2 min/.test(document.getElementById("sync-detail").textContent), "synced with last sync time");
+  window.launcher.__set({ cloud: { data: { season: { id: "s", name: "Prueba" }, season_link: { status: "BOUND", game: "SN", identity: { game: "SN", trainer: { name: "Otro" } } }, transfers: [] } } }); await sleep(1300);
+  check(/La Liga «Prueba» usa tu partida de Pokémon Sol/.test(document.getElementById("season-line").textContent) && /perfil, Mi PC y Entrenadores/.test(document.getElementById("season-line").textContent), "a season bound to another game is explained, never silent");
+  window.launcher.__set({ cloud: { data: { season: { id: "s", name: "Prueba" }, season_link: { status: "NOT_PARTICIPANT" }, transfers: [] } } }); await sleep(1300);
+  check(/No participas en la Liga «Prueba»/.test(document.getElementById("season-line").textContent), "not enrolled: the save still goes to the profile");
+  window.launcher.__set({ cloud_receipt: null, syncing: true, outbox: { pending: 1 } }); await sleep(1300);
+  check(chip() === "Sincronizando" && /● Online/.test(document.getElementById("connection").textContent), "sending shows on the card; connection stays Online");
+  window.launcher.__set({ syncing: false, error: "SAVE_READBACK_PENDING" }); await sleep(1300);
+  check(chip() === "Comprobando" && !/No se pudo sincronizar/.test(document.getElementById("notices").textContent), "a pending server check is not an error");
+  window.launcher.__set({ error: "SAVE_REJECTED", error_detail: "CORRUPT_SAVE" }); await sleep(1300);
+  check(chip() === "Error" && /parece dañada/.test(document.getElementById("notices").textContent), "a rejection shows its real cause");
+  window.launcher.__set({ error: null, error_detail: null });
   window.launcher.__set({ cloud_status: "OFFLINE", outbox: { pending: 2 } }); await sleep(1300);
   check(chip() === "Sin conexión" && /2 cambio/.test(document.getElementById("sync-detail").textContent), "offline keeps changes queued");
   // Saves y Launcher hub and dialogs over the web.
@@ -97,6 +111,17 @@ const script = `(async () => {
   check(/Hemos encontrado varias partidas/.test(document.getElementById("notices").textContent), "choice also stays as a notice");
   options[1].click(); await sleep(200);
   check(JSON.stringify(window.launcher.__calls().at(-1)) === JSON.stringify(["select", "C:/fx/Azahar/sdmc/Nintendo 3DS/a/b/title/00040000/00175e00/data/00000001/main"]), "choosing sends exactly that save");
+  // Search: the answer itself fills the selector; nothing found says why.
+  shut(document.getElementById("selector-dialog"));
+  window.launcher.__discover({ status: "DONE", count: 0, auto_selected: false, saves: [], save_choice: { status: "NONE", count: 0 }, discovery: { found: 0, at: 5, checked: [{ emulator: "Citra", location: "appdata", saves: 0, other_titles: 2, error: null }] } });
+  document.getElementById("discover-saves").click(); await sleep(400);
+  check(document.getElementById("selector-dialog").open && /no admite/.test(document.getElementById("selector-empty").textContent) && /Citra \\(instalación normal\\): solo juegos no admitidos/.test(document.getElementById("selector-report").textContent) && /no admite/.test(document.getElementById("toasts").textContent), "nothing found: selector opens and explains why, with what was checked");
+  shut(document.getElementById("selector-dialog"));
+  window.launcher.__discover({ status: "DONE", count: 2, auto_selected: false, save_choice: { status: "KEPT", count: 1 }, saves: [{ path: "C:/p/main", emulator: "Azahar", location: "portable", game: "Y", modified: null }, { path: "C:/q/main", emulator: "Lime3DS", location: "appdata", game: "SN", modified: null }], discovery: { found: 2, at: 6, checked: [] } });
+  document.getElementById("discover-primary").click(); await sleep(400);
+  const found = [...document.querySelectorAll("#selector-list .save-option")];
+  check(document.getElementById("selector-dialog").open && found.length === 2 && /Azahar \\(versión portable\\)/.test(found[0].textContent) && /Hemos encontrado 2 partidas/.test(document.getElementById("toasts").textContent), "results appear at once, even before the next state poll");
+  shut(document.getElementById("selector-dialog"));
   // Updates: the popup opens by itself once per version, «Más tarde» is kept,
   // «Actualizar» goes through a main ticket, progress and errors are shown.
   const ud = document.getElementById("update-dialog"), uq = (id) => document.getElementById(id);
