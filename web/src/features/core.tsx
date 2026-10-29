@@ -78,6 +78,7 @@ export function Pokemon({
       <PokemonSprite
         species={pokemon.species}
         form={pokemon.form}
+        shiny={pokemon.is_shiny}
         animated={animated}
       />
       <div>
@@ -447,6 +448,9 @@ export function ShopPage() {
   const promo = query.data?.promotions.find(
     (p) => p.shop_item_id === item?.id && p.status === "active",
   );
+  // The server checks the balance again; this only says it before trying.
+  const short = (price: number) =>
+    query.data?.balance != null && Number(query.data.balance) < price;
   return (
     <>
       <Heading eyebrow="PREPARA TU PRÓXIMA JUGADA" title="Tienda">
@@ -534,6 +538,7 @@ export function ShopPage() {
                             disabled={
                               cmd.pending ||
                               cmd.uncertain ||
+                              short(p?.effective_price ?? i.base_price) ||
                               (!p &&
                                 upcoming.length > 0 &&
                                 i.category !== "comodines")
@@ -543,7 +548,9 @@ export function ShopPage() {
                               setBase(false);
                             }}
                           >
-                            Comprar
+                            {short(p?.effective_price ?? i.base_price)
+                              ? "Saldo insuficiente"
+                              : "Comprar"}
                           </button>
                         </div>
                       </Card>

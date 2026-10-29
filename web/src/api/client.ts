@@ -75,6 +75,15 @@ export class ApiError extends Error {
     super(code);
   }
 }
+// A 409 that means "what you were looking at is out of date" (refresh and
+// review), as opposed to a refusal with its own reason (funds, availability…).
+export function isStaleConflict(error: unknown) {
+  return (
+    error instanceof ApiError &&
+    error.status === 409 &&
+    /STALE|REVISION_CONFLICT|_CHANGED$|_MISMATCH$/.test(error.code)
+  );
+}
 export function errorText(error: unknown) {
   if (error instanceof ApiError && error.code === "READ_TIMEOUT")
     return "La consulta ha tardado demasiado. Puedes volver a consultar los datos.";
@@ -108,6 +117,35 @@ export function errorText(error: unknown) {
     ACCOUNT_FORBIDDEN: "Esta cuenta no permite la operación solicitada.",
     INSUFFICIENT_FUNDS:
       "No tienes suficientes monedas para esta compra. Revisa tu saldo.",
+    // Purchases: the server's real reason, never a generic "data changed".
+    ITEM_UNAVAILABLE: "Este objeto no está disponible ahora mismo.",
+    ITEM_NOT_FOUND: "Este objeto ya no está en la Tienda.",
+    STORE_BANNED: "Tienes la Tienda bloqueada por una sanción en esta jornada.",
+    PARTICIPANT_INACTIVE: "Tu participación en esta temporada no está activa.",
+    TRAINER_DISABLED: "Tu cuenta está desactivada.",
+    BASE_PRICE_CONFIRMATION_REQUIRED:
+      "La promoción de este objeto ha terminado: confirma el precio base para comprarlo.",
+    PROMOTION_AVAILABLE:
+      "Este objeto tiene ahora una promoción: revisa el precio actualizado y confirma.",
+    PROMOTION_PENDING:
+      "Este objeto tendrá una promoción en breve. Podrás comprarlo cuando empiece.",
+    PROMOTION_NOT_FOUND:
+      "Esta promoción ya no está activa. Revisa el precio actual.",
+    PROMOTION_NOT_CURRENT:
+      "Esta promoción ya no está activa. Revisa el precio actual.",
+    PROMOTION_EXPIRED: "Esta promoción ha terminado. Revisa el precio actual.",
+    PROMOTION_CHANGED:
+      "La promoción ha cambiado. Revisa el precio actualizado y confirma de nuevo.",
+    PROMOTION_EXHAUSTED: "Esta promoción se ha agotado.",
+    PROMOTION_ALREADY_CLAIMED: "Ya has usado esta promoción.",
+    PROMOTION_PRICE_INVALID:
+      "Esta promoción no tiene un precio válido. Avisa a un administrador.",
+    INVALID_PURCHASE_REQUEST:
+      "La solicitud de compra no es válida. Vuelve a intentarlo.",
+    PURCHASE_UNAVAILABLE: "La Tienda no ha respondido.",
+    CURRENT_MATCHDAY_REQUIRED: "Esta acción necesita una jornada preparada.",
+    CURRENT_MATCHDAY_INVALID:
+      "La jornada actual no está disponible. Avisa a un administrador.",
     ADMIN_REQUIRED: "Esta acción está disponible solo para administradores.",
     ROBBERY_RECONCILIATION_REQUIRED:
       "Este robo ya tiene decisión competitiva o cambios en las partidas: no se anula cambiando un estado. Requiere conciliación.",

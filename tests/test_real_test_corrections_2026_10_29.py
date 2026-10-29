@@ -293,6 +293,45 @@ class SupabaseTransportTests(unittest.TestCase):
         self.assertTrue(all(r.headers.get("apikey") == key for r in seen))
         self.assertTrue(all(r.headers["authorization"] == f"Bearer {key}" for r in seen))
 
+    def test_auth_session_checks_run_on_a_shared_http11_pool(self):
+        """Every request's Supabase Auth check (get_user) and the admin API
+        leave GoTrue's single HTTP/2 connection: one drop failed every
+        concurrent request with AUTH_UNAVAILABLE (production, 2026-10-29)."""
+        import base64
+        import json
+
+        from supabase_auth.errors import AuthApiError
+
+        from app.repositories.supabase import http
+
+        seen = []
+
+        def handler(request):
+            seen.append(request)
+            return httpx.Response(401, json={"code": 401, "msg": "invalid JWT"})
+
+        def part(value):
+            return base64.urlsafe_b64encode(json.dumps(value).encode()).decode().rstrip("=")
+
+        key = part({"alg": "HS256", "typ": "JWT"}) + "." + part({"role": "anon"}) + ".s"
+        pool = httpx.Client(transport=httpx.MockTransport(handler))
+        with patch.object(http, "_auth_session", pool):
+            first = http.create_client("https://example.supabase.co", key)
+            second = http.create_client("https://example.supabase.co", key)
+            self.assertIs(first.auth._http_client, pool)
+            self.assertIs(first.auth.admin._http_client, pool)
+            self.assertIs(second.auth._http_client, pool)
+            with self.assertRaises(AuthApiError):
+                first.auth.get_user("user-token")
+        self.assertEqual(str(seen[0].url), "https://example.supabase.co/auth/v1/user")
+        self.assertEqual(seen[0].headers["authorization"], "Bearer user-token")
+        self.assertEqual(seen[0].headers["apikey"], key)
+        with patch.object(http, "_auth_session", None):
+            real = http.auth_session()
+            self.addCleanup(real.close)
+            self.assertFalse(real._transport._pool._http2)
+            self.assertEqual(real.timeout.read, 5.0)
+
     def test_the_real_pool_is_http11(self):
         from app.repositories.supabase import http
 

@@ -68,7 +68,7 @@ class SupabaseAuthClient:
     @classmethod
     def from_url_key(cls, url: str, anon_key: str) -> "SupabaseAuthClient":
         try:
-            from supabase import create_client
+            from app.repositories.supabase.http import create_client
         except Exception as exc:
             raise AuthBackendError("Supabase Python client is not available.") from exc
         return cls(create_client(url, anon_key))
@@ -109,7 +109,7 @@ class SupabaseAdminAuthClient:
     @classmethod
     def from_url_key(cls, url: str, service_role_key: str) -> "SupabaseAdminAuthClient":
         try:
-            from supabase import create_client
+            from app.repositories.supabase.http import create_client
         except Exception as exc:
             raise AuthBackendError("Supabase Python client is not available.") from exc
         return cls(create_client(url, service_role_key))

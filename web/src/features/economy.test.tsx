@@ -165,6 +165,28 @@ it("renders exact large and negative wallets and allows explicit post-League pur
     ]),
   );
 });
+it("says «Saldo insuficiente» before trying when the price exceeds the balance", () => {
+  mocks.shop.balance = "20";
+  mocks.shop.season_status = "active";
+  render(
+    <MemoryRouter>
+      <ShopPage />
+    </MemoryRouter>,
+  );
+  fireEvent.click(screen.getByRole("button", { name: "Competitivos" }));
+  expect(
+    screen.getByRole("button", { name: "Saldo insuficiente" }),
+  ).toBeDisabled();
+  mocks.shop.balance = "32";
+  cleanup();
+  render(
+    <MemoryRouter>
+      <ShopPage />
+    </MemoryRouter>,
+  );
+  fireEvent.click(screen.getByRole("button", { name: "Competitivos" }));
+  expect(screen.getByRole("button", { name: "Comprar" })).toBeEnabled();
+});
 it("shows pending promotions without inventing activation dates or enabling their price", () => {
   mocks.shop.promotions = [
     {

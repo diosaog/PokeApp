@@ -219,20 +219,6 @@ def local_fingerprints(pg: SupabaseLikePG, tables: list[str]) -> dict[str, str]:
     return result
 
 
-def players_without_dead_box(pg: SupabaseLikePG) -> dict[str, tuple[str, str]]:
-    """Each season_players row as (hash without 070's column and updated_at,
-    updated_at). The trigger bumps updated_at on the row set to Box 7, so the
-    caller proves which rows it moved instead of hashing it."""
-    rows = pg.lines(
-        "select p.id||'|'||md5((to_jsonb(p)-'dead_box_number'-'updated_at')::text)||'|'||p.updated_at"
-        " from public.season_players p order by p.id",
-        "supabase_admin",
-    )
-    return {
-        line.split("|")[0]: (line.split("|")[1], line.split("|")[2]) for line in rows
-    }
-
-
 def reads(pg: SupabaseLikePG) -> dict[str, str]:
     """API reads as service_role, each inside a rolled-back transaction."""
     seasons = pg.lines("select id from public.seasons order by id", "supabase_admin")
@@ -406,7 +392,6 @@ def rehearse(args) -> dict:
             t for t in tables if t.startswith(("public.", "v1_shadow.", "storage."))
         ]
         rows_before = local_fingerprints(pg, public_tables)
-        players_before = players_without_dead_box(pg)
 
         report["applied"] = {}
         # Production's supautils.policy_grants lets postgres manage policies on
@@ -439,73 +424,24 @@ def rehearse(args) -> dict:
             )
 
         rows_after = local_fingerprints(pg, public_tables)
-        # 070 adds season_players.dead_box_number (default 8) and sets Box 7 for
-        # one participation (Anto, active season). Every other row of every
-        # table stays byte-identical; season_players is compared without the
-        # new column.
+        # 071 only redefines the normal purchase function: no row and no read
+        # changes (purchases are commands; the shop proof buys on the same
+        # backup in rolled-back transactions, tools.validate_phase071_shop).
         changed = [t for t in public_tables if rows_before[t] != rows_after[t]]
         ok(
-            not [t for t in changed if t != "public.season_players"],
-            f"{len(public_tables) - 1} existing tables keep byte-identical rows (seasons, saves, history, purchases, coins)",
+            not changed,
+            f"{len(public_tables)} existing tables keep byte-identical rows (seasons, saves, history, purchases, coins)",
             changed,
         )
-        players_after = players_without_dead_box(pg)
-        moved = sorted(k for k in players_before if players_before[k][1] != players_after.get(k, ("", ""))[1])
-        boxed = sorted(pg.lines("select id from public.season_players where dead_box_number<>8", "supabase_admin"))
-        ok(
-            players_before.keys() == players_after.keys()
-            and all(players_before[k][0] == players_after[k][0] for k in players_before)
-            and moved == boxed,
-            "season_players rows identical apart from the new dead box column (updated_at only on the row set)",
-            {"updated_at_moved": moved, "dead_box_not_8": boxed},
-        )
-        boxes = pg.lines(
-            "select s.name||'|'||s.status||'|'||t.display_name||'|'||p.dead_box_number from public.season_players p"
-            " join public.seasons s on s.id=p.season_id join public.trainers t on t.id=p.trainer_id"
-            " where p.dead_box_number<>8 order by 1",
-            "supabase_admin",
-        )
-        report["dead_boxes_not_8"] = boxes
-        ok(
-            len(boxes) <= 1 and all(b.split("|")[1] == "active" and b.split("|")[2].lower() == "anto"
-                                    and b.endswith("|7") for b in boxes),
-            "Box 7 only for Anto's participation in the active season; everyone else keeps Box 8",
-            boxes,
-        )  # fmt: skip
         reads_after = reads(pg)
-        active = set(pg.lines("select id from public.seasons where status='active'", "supabase_admin"))
-        moved = {
+        unexplained = {
             k: [reads_before[k], reads_after.get(k)]
             for k in reads_before
             if reads_before[k] != reads_after.get(k)
         }
-        # The active season's League (one live total, its dead boxes) and its
-        # initial-assignment inputs may move; so may public_season_players, an
-        # explicit projection (without the new column) that shows updated_at,
-        # already proven above to move only on the row set to Box 7.
-        unexplained = {
-            k: v for k, v in moved.items()
-            if not (k.split(" ")[0] in ("league_live", "initial_assignment_observations")
-                    and k.split(" ")[-1] in active)
-            and not (k == "view public.public_season_players" and boxed)
-        }  # fmt: skip
-        report["reads_moved_in_active_season"] = sorted(set(moved) - set(unexplained))
-        report["league_live"] = pg.lines(
-            "select s.name||'|'||(r->>'display_name')||'|official='||(r->>'official_points')||'|total='||(r->>'total_points')"
-            "||'|dead_box='||(r->>'dead_box_number')||'|dead='||coalesce(r->>'dead_count','unknown')"
-            "||'|provisional='||(r ? 'provisional_points')::text"
-            " from public.seasons s cross join lateral jsonb_array_elements(public.league_general_read(s.id)->'rows') r"
-            " where s.status='active' order by 1",
-            "supabase_admin",
-        )
-        ok(
-            all(line.endswith("|provisional=false") for line in report["league_live"]),
-            "active League rows show one total (no provisional line) and each dead box",
-            report["league_live"],
-        )
         ok(
             not unexplained,
-            f"{len(reads_before)} API reads return identical results after {WINDOW} (active-season League aside)",
+            f"{len(reads_before)} API reads return identical results after {WINDOW}",
             unexplained,
         )
         privileges_after = privileges(pg)

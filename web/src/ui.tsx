@@ -15,7 +15,7 @@ import {
   LoaderCircle,
   X,
 } from "lucide-react";
-import { api, ApiError, errorText } from "./api/client";
+import { api, ApiError, errorText, isStaleConflict } from "./api/client";
 import { queries, useViewer } from "./state";
 import { invalidationFor } from "./read-invalidation";
 import { play } from "./sound";
@@ -246,13 +246,11 @@ export function CommandState({
   return (
     <>
       <Notice error={command.error} />
-      {command.error instanceof ApiError &&
-        command.error.status === 409 &&
-        !command.uncertain && (
-          <p role="status">
-            Los datos cambiaron mientras editabas. Revísalos y vuelve a guardar.
-          </p>
-        )}
+      {isStaleConflict(command.error) && !command.uncertain && (
+        <p role="status">
+          Los datos cambiaron mientras editabas. Revísalos y vuelve a guardar.
+        </p>
+      )}
       {command.uncertain && (
         <div className="notice">
           No se ha confirmado el resultado. Conservamos la solicitud para evitar

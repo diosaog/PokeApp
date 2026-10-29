@@ -28,10 +28,11 @@ MIGRATIONS = sorted((ROOT / "supabase/v2/migrations").glob("*.sql"))
 # 054-064 went out with the final release, 065 (personal saves, «Mi PC»
 # outside seasons) and 066 (its least privilege) after it, 067-068 (Discord
 # outbox, preparation readiness) next; 069 (real-test corrections: Gen6/7
-# progress coins, cancellation at any stage, account repair) followed; 070
-# (each participant's dead box, one live League total) is this window.
-DEPLOYED = [m for m in MIGRATIONS if int(m.name[:3]) <= 69]
-PENDING = [m for m in MIGRATIONS if 70 <= int(m.name[:3]) <= 70]
+# progress coins, cancellation at any stage, account repair) followed, then
+# 070 (each participant's dead box, one live League total); 071 (the shop is
+# open in the preseason) is this window.
+DEPLOYED = [m for m in MIGRATIONS if int(m.name[:3]) <= 70]
+PENDING = [m for m in MIGRATIONS if 71 <= int(m.name[:3]) <= 71]
 WINDOW = f"{PENDING[0].name[:3]}-{PENDING[-1].name[:3]}"
 SCHEMAS = "('public','v1_shadow')"
 
