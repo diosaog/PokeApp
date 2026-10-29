@@ -1783,6 +1783,94 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/v1/launcher/seasons/{season_id}/deliveries": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Deliveries */
+    get: operations["deliveries_v1_launcher_seasons__season_id__deliveries_get"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/launcher/seasons/{season_id}/deliveries/{operation_id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    /**
+     * Reserve
+     * @description Idempotent per operation: the same request returns the same receipt.
+     */
+    put: operations["reserve_v1_launcher_seasons__season_id__deliveries__operation_id__put"];
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/launcher/seasons/{season_id}/deliveries/{operation_id}/complete": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    /** Complete */
+    put: operations["complete_v1_launcher_seasons__season_id__deliveries__operation_id__complete_put"];
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/launcher/seasons/{season_id}/deliveries/{operation_id}/release": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    /** Release */
+    put: operations["release_v1_launcher_seasons__season_id__deliveries__operation_id__release_put"];
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/seasons/{season_id}/shop/purchases/{purchase_id}/use": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** Use Permission */
+    post: operations["use_permission_v1_seasons__season_id__shop_purchases__purchase_id__use_post"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/v1/seasons/{season_id}/shop/purchases/{purchase_id}/transfer": {
     parameters: {
       query?: never;
@@ -2971,6 +3059,136 @@ export interface components {
       /** Confirmation */
       confirmation: string;
     };
+    /** DeliverablePurchase */
+    DeliverablePurchase: {
+      /**
+       * Purchase Id
+       * Format: uuid
+       */
+      purchase_id: string;
+      /** Shop Code */
+      shop_code: string;
+      /** Name */
+      name: string;
+      /**
+       * Mode
+       * @enum {string}
+       */
+      mode: "bag" | "choice";
+      /** Options */
+      options: components["schemas"]["ItemUseOption"][];
+      reserved?: components["schemas"]["PendingDelivery"] | null;
+    };
+    /** DeliveryCompleteBody */
+    DeliveryCompleteBody: {
+      /** Source Sha256 */
+      source_sha256: string;
+      /** Output Sha256 */
+      output_sha256: string;
+    };
+    /** DeliveryList */
+    DeliveryList: {
+      /** Items */
+      items: components["schemas"]["DeliverablePurchase"][];
+      /** League Game */
+      league_game?:
+        ("X" | "Y" | "OR" | "AS" | "SN" | "MN" | "US" | "UM") | null;
+    };
+    /**
+     * DeliveryRead
+     * @description The single use of an in-game object: in the trainer's Launcher
+     *     (RESERVED), in the bag (DELIVERED) or recorded (USED).
+     */
+    DeliveryRead: {
+      /**
+       * Status
+       * @enum {string}
+       */
+      status: "RESERVED" | "DELIVERED" | "USED";
+      /**
+       * Kind
+       * @enum {string}
+       */
+      kind: "bag" | "permission";
+      /** Item Code */
+      item_code?: string | null;
+      /** Item Name */
+      item_name?: string | null;
+      /** Game */
+      game?: ("X" | "Y" | "OR" | "AS" | "SN" | "MN" | "US" | "UM") | null;
+      /** Finished At */
+      finished_at?: string | null;
+    };
+    /** DeliveryReceipt */
+    DeliveryReceipt: {
+      /**
+       * Delivery Id
+       * Format: uuid
+       */
+      delivery_id: string;
+      /**
+       * Purchase Id
+       * Format: uuid
+       */
+      purchase_id: string;
+      /**
+       * Season Id
+       * Format: uuid
+       */
+      season_id: string;
+      /**
+       * Trainer Id
+       * Format: uuid
+       */
+      trainer_id: string;
+      /**
+       * Operation Id
+       * Format: uuid
+       */
+      operation_id: string;
+      /**
+       * Kind
+       * @enum {string}
+       */
+      kind: "bag" | "permission";
+      /** Item Code */
+      item_code: string | null;
+      /** Game Item Id */
+      game_item_id: number | null;
+      /** Game */
+      game: ("X" | "Y" | "OR" | "AS" | "SN" | "MN" | "US" | "UM") | null;
+      /**
+       * Status
+       * @enum {string}
+       */
+      status: "RESERVED" | "DELIVERED" | "RELEASED" | "USED";
+      /**
+       * Reserved At
+       * Format: date-time
+       */
+      reserved_at: string;
+      /** Finished At */
+      finished_at: string | null;
+      /** Purchase Status */
+      purchase_status: string;
+    };
+    /** DeliveryReleaseBody */
+    DeliveryReleaseBody: Record<string, never>;
+    /** DeliveryReserveBody */
+    DeliveryReserveBody: {
+      /**
+       * Purchase Id
+       * Format: uuid
+       */
+      purchase_id: string;
+      /** Item */
+      item: string;
+      /**
+       * Game
+       * @enum {string}
+       */
+      game: "X" | "Y" | "OR" | "AS" | "SN" | "MN" | "US" | "UM";
+    };
     /** DiscardSeasonBody */
     DiscardSeasonBody: {
       /** Expected Revision */
@@ -3432,6 +3650,9 @@ export interface components {
        * @constant
        */
       physical_items: true;
+      /** League Game */
+      league_game?:
+        ("X" | "Y" | "OR" | "AS" | "SN" | "MN" | "US" | "UM") | null;
     };
     /** ItemArtifactResponse */
     ItemArtifactResponse: {
@@ -3473,6 +3694,7 @@ export interface components {
       description: string;
       /** Base Price */
       base_price: number;
+      use?: components["schemas"]["ItemUseRead"] | null;
     };
     /** ItemUseClaimBody */
     ItemUseClaimBody: {
@@ -3518,6 +3740,17 @@ export interface components {
        */
       physical_application_enabled: false;
     };
+    /** ItemUseOption */
+    ItemUseOption: {
+      /** Code */
+      code: string;
+      /** Name */
+      name: string;
+      /** Item Id */
+      item_id: number;
+      /** Games */
+      games: ("X" | "Y" | "OR" | "AS" | "SN" | "MN" | "US" | "UM")[];
+    };
     /** ItemUsePrepareBody */
     ItemUsePrepareBody: {
       /**
@@ -3534,6 +3767,28 @@ export interface components {
       save_sha256: string;
       /** Operation Id */
       operation_id: string;
+    };
+    /**
+     * ItemUseRead
+     * @description How a Shop item is used (072, app/domain/shop_item_uses.py): `bag` and
+     *     `choice` reach the bag through the Launcher; `compatible` is for the
+     *     trainer's league game (null while no save is accepted yet).
+     */
+    ItemUseRead: {
+      /**
+       * Mode
+       * @enum {string}
+       */
+      mode:
+        "pokemon" | "bag" | "choice" | "permission" | "unavailable" | "unknown";
+      /** Games */
+      games: ("X" | "Y" | "OR" | "AS" | "SN" | "MN" | "US" | "UM")[];
+      /** Compatible */
+      compatible?: boolean | null;
+      /** Reason */
+      reason?: ("ITEM_NOT_USABLE" | "ITEM_INCOMPATIBLE_WITH_GAME") | null;
+      /** Options */
+      options?: components["schemas"]["ItemUseOption"][];
     };
     /** ItemUseResponse */
     ItemUseResponse: {
@@ -4053,6 +4308,21 @@ export interface components {
       /** Status Effective Matchday Number */
       status_effective_matchday_number?: number | null;
     };
+    /** PendingDelivery */
+    PendingDelivery: {
+      /**
+       * Operation Id
+       * Format: uuid
+       */
+      operation_id: string;
+      /** Item Code */
+      item_code: string;
+      /**
+       * Game
+       * @enum {string}
+       */
+      game: "X" | "Y" | "OR" | "AS" | "SN" | "MN" | "US" | "UM";
+    };
     /** PinChangeRequest */
     PinChangeRequest: {
       /** Current Pin */
@@ -4488,6 +4758,8 @@ export interface components {
       acquisition_type: "paid" | "reward";
       /** Physical State */
       physical_state?: string | null;
+      use?: components["schemas"]["ItemUseRead"] | null;
+      delivery?: components["schemas"]["DeliveryRead"] | null;
     };
     /** PurchaseResolveBody */
     PurchaseResolveBody: {
@@ -5078,6 +5350,9 @@ export interface components {
       balance: string | null;
       /** Season Status */
       season_status: string;
+      /** League Game */
+      league_game?:
+        ("X" | "Y" | "OR" | "AS" | "SN" | "MN" | "US" | "UM") | null;
     };
     /** SlotRead */
     SlotRead: {
@@ -9568,6 +9843,179 @@ export interface operations {
         };
         content: {
           "application/json": components["schemas"]["ItemArtifactResponse"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  deliveries_v1_launcher_seasons__season_id__deliveries_get: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        season_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["DeliveryList"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  reserve_v1_launcher_seasons__season_id__deliveries__operation_id__put: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        season_id: string;
+        operation_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["DeliveryReserveBody"];
+      };
+    };
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["DeliveryReceipt"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  complete_v1_launcher_seasons__season_id__deliveries__operation_id__complete_put: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        season_id: string;
+        operation_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["DeliveryCompleteBody"];
+      };
+    };
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["DeliveryReceipt"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  release_v1_launcher_seasons__season_id__deliveries__operation_id__release_put: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        season_id: string;
+        operation_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["DeliveryReleaseBody"];
+      };
+    };
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["DeliveryReceipt"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  use_permission_v1_seasons__season_id__shop_purchases__purchase_id__use_post: {
+    parameters: {
+      query?: never;
+      header: {
+        "idempotency-key": string;
+      };
+      path: {
+        season_id: string;
+        purchase_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["DeliveryReceipt"];
         };
       };
       /** @description Validation Error */

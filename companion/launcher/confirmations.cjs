@@ -78,6 +78,8 @@ function fingerprint(kind, target, state) {
     return [state.selected_save, target, state.write?.description];
   if (kind === "quick-item")
     return [state.selected_save, target, state.receipt_id ?? null];
+  if (kind === "delivery")
+    return [state.selected_save, target, state.receipt_id ?? null];
   if (kind === "export")
     return [state.selected_save, JSON.stringify(state.write?.export_intent)];
   if (kind === "restore") {
@@ -128,6 +130,31 @@ function describe(kind, target, state) {
       title: "Añadir a la bolsa",
       message: `${quantity} × ${ITEMS[item]}${game ? ` · Pokémon ${GAMES[game] || game}` : ""}${trainer ? ` · ${trainer}` : ""}`,
       detail: `${info ? `Ahora tienes ${info.count}; tendrás ${info.count + quantity}. ` : ""}Antes de cambiar nada se guarda y verifica una copia completa de tu partida; después se vuelve a leer para comprobar el resultado.${CLOSED}`,
+      go: "Añadir a la bolsa",
+    };
+  }
+  if (kind === "delivery") {
+    // 072: one paid Shop object into the bag of the league save.
+    const [purchaseId, item] = target.split(":");
+    const entry = (state.deliveries?.items || []).find(
+      (i) => i.purchase_id === purchaseId,
+    );
+    const option = entry?.options.find((o) => o.code === item);
+    if (!state.selected_save) throw new Error("Selecciona tu partida primero.");
+    if (!entry || !option || entry.state !== "READY")
+      throw new Error("Esta compra ya no se puede entregar desde aquí.");
+    if (option.compatible === false)
+      throw new Error("Ese objeto no existe en el juego de esta partida.");
+    if (state.write?.busy || state.write?.status === "RECOVERY_REQUIRED")
+      throw new Error(
+        "Hay otra operación en tu partida. Espera a que termine o revísala en «Cambios en tu partida».",
+      );
+    const game = state.observation?.game || state.deliveries?.save_game;
+    const trainer = state.observation?.trainer?.name;
+    return {
+      title: "Añadir a la bolsa",
+      message: `1 × ${option.name}${game ? ` · Pokémon ${GAMES[game] || game}` : ""}${trainer ? ` · ${trainer}` : ""}`,
+      detail: `Compra de la Tienda: ${entry.name}. Se gasta solo cuando el objeto está en tu bolsa y comprobado. Antes de cambiar nada se guarda y verifica una copia completa de tu partida; después se vuelve a leer para comprobar el resultado.${CLOSED}`,
       go: "Añadir a la bolsa",
     };
   }

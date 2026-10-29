@@ -10,7 +10,7 @@ from app.api.models import AuthenticatedPrincipal
 from app.api.security import require_admin_principal
 from app.api.season_admin_models import (
     AddParticipantBody, AdminReceipt, ConfigVersionBody, CreateSeasonBody, DeadBoxBody, InitialDivisionsBody,
-    PurchaseRefundBody, RemoveParticipantBody, RenameSeasonBody, ReplaceConfigBody, SeasonSetup, SetupRevisionBody,
+    RemoveParticipantBody, RenameSeasonBody, ReplaceConfigBody, SeasonSetup, SetupRevisionBody,
 )
 from app.repositories.errors import PersistenceError
 from app.repositories.supabase.season_admin import SeasonAdminRejected
@@ -47,7 +47,7 @@ def _execute(op, principal, container, payload=None, season_id=None, resource_id
         actual_season = result.season.id if op == "setup" else result.season_id
         if season_id is not None and str(actual_season) != str(season_id):
             raise ValueError("Mismatched scope")
-        if op in ("replace_config", "remove_participant", "dead_box", "purchase_refund") and str(result.resource_id) != str(resource_id):
+        if op in ("replace_config", "remove_participant", "dead_box") and str(result.resource_id) != str(resource_id):
             raise ValueError("Mismatched resource")
         return result
     except SeasonAdminRejected as exc:
@@ -96,14 +96,6 @@ def remove_participant(season_id: UUID, season_player_id: UUID, payload: RemoveP
 def set_dead_box(season_id: UUID, season_player_id: UUID, payload: DeadBoxBody,
                  idempotency_key: Key, principal: Admin, container: Container):
     return _execute("dead_box", principal, container, payload, season_id, season_player_id, idempotency_key)
-
-
-# 072: audited refund of a paid purchase that was never used (for example an
-# object that does not exist in the trainer's game). Exactly the price paid.
-@router.post("/seasons/{season_id}/purchases/{purchase_id}/refund", response_model=AdminReceipt)
-def refund_purchase(season_id: UUID, purchase_id: UUID, payload: PurchaseRefundBody,
-                    idempotency_key: Key, principal: Admin, container: Container):
-    return _execute("purchase_refund", principal, container, payload, season_id, purchase_id, idempotency_key)
 
 
 @router.post("/seasons/{season_id}/config-versions", response_model=AdminReceipt)

@@ -37,6 +37,10 @@ contextBridge.exposeInMainWorld("launcher", {
   quickItems: () => ipcRenderer.invoke("launcher:quick-items"),
   addQuickItem: (item, quantity, ticket) =>
     ipcRenderer.invoke("launcher:quick-item-add", item, quantity, ticket),
+  // 072: paid Shop objects waiting for the bag, and one delivery.
+  deliveries: () => ipcRenderer.invoke("launcher:deliveries"),
+  addDelivery: (purchaseId, item, ticket) =>
+    ipcRenderer.invoke("launcher:delivery-add", purchaseId, item, ticket),
   // A confirmed change the web should show at once (fixed names only).
   webEvent: (type) => ipcRenderer.invoke("launcher:web-event", type),
   transfer: (kind, authorizationId, emulatorClosed, ticket) =>

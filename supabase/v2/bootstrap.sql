@@ -15891,10 +15891,11 @@ commit;
 -- object, its game item id and the league game from the server-owned contract
 -- (app/domain/shop_item_uses.py) before calling these functions.
 --
--- api_admin_refund_purchase: audited refund of a pending paid purchase that
--- was never used (e.g. an object that does not exist in the trainer's game):
--- the purchase becomes refunded, a positive purchase_refund ledger row returns
--- exactly what was paid, the owner and the administration each get an event.
+-- Returning the coins of an unusable purchase (e.g. a Chapa Plateada bought
+-- for Pokémon Y) reuses the audited incident center (062: «Cancelar compra»
+-- gives back exactly its price once, with a reason). 072 only teaches it that
+-- a purchase being delivered is tied to a save operation: it is never
+-- cancelled while its object may be on its way to the bag.
 begin;
 
 create table public.item_deliveries (
@@ -15931,11 +15932,6 @@ alter table public.item_deliveries enable row level security;
 alter table public.item_deliveries force row level security;
 revoke all on public.item_deliveries from public,anon,authenticated,service_role;
 grant select,insert,update on public.item_deliveries to service_role;
-
-alter table public.coin_transactions drop constraint coin_transactions_type_chk;
-alter table public.coin_transactions add constraint coin_transactions_type_chk check(transaction_type in
- ('matchday_reward','purchase','penalty','admin_adjustment','compensation','badge_reward',
-  'game_completion_reward','purchase_refund'));
 
 create function public.item_delivery_receipt(d public.item_deliveries) returns jsonb
 language sql stable security invoker set search_path='' as $$
@@ -16076,39 +16072,128 @@ begin
   return public.item_delivery_receipt(v_row);
 end $$;
 
--- Administrator only, idempotent receipt (admin_setup_*), a written reason.
--- Only an untouched paid purchase: never one delivered, used, redeemed,
--- authorized for a physical use or in delivery.
-create function public.api_admin_refund_purchase(p_request jsonb) returns jsonb
-language plpgsql set search_path=pg_catalog,public as $$
-declare cached jsonb; sid uuid=(p_request->>'season_id')::uuid; pid uuid=(p_request->>'resource_id')::uuid;
-  b jsonb=p_request->'body'; v public.purchases; v_name text; v_ledger uuid=gen_random_uuid();
-  v_reason text; v_actor uuid=(p_request->>'actor_trainer_id')::uuid;
+-- 062's audited command, unchanged except that a purchase in delivery is
+-- tied to a save operation (the same refusal as a revive or a robbery).
+create or replace function public.admin_purchase_resolve(p_actor uuid,p_season uuid,p_purchase uuid,
+  p_kind text,p_operation uuid,p_hash text,p_reason text) returns jsonb
+language plpgsql security definer set search_path='' as $$
+declare
+  s public.seasons; p public.purchases; sp public.season_players;
+  prior jsonb; ledger uuid; credit integer; result jsonb; next_status text;
 begin
-  cached=public.admin_setup_begin('purchase_refund',p_request); if cached is not null then return cached; end if;
-  if pid is null or jsonb_typeof(b) is distinct from 'object' or b-array['reason']<>'{}'::jsonb
-    or jsonb_typeof(b->'reason') is distinct from 'string'
-    or length(btrim(b->>'reason')) not between 3 and 500 then
-    perform public.admin_setup_fail('invalid_request',422); end if;
-  v_reason=btrim(b->>'reason');
-  select * into v from public.purchases where id=pid and season_id=sid for update;
-  if not found then perform public.admin_setup_fail('purchase_not_found',404); end if;
-  if v.status<>'pending' or v.acquisition_type<>'paid' or coalesce(v.total_price,0)<=0
-    or exists(select 1 from public.item_deliveries where purchase_id=pid and status<>'RELEASED')
-    or exists(select 1 from public.redemptions where purchase_id=pid)
-    or exists(select 1 from public.item_use_authorizations where purchase_id=pid) then
-    perform public.admin_setup_fail('purchase_not_refundable'); end if;
-  select name into v_name from public.shop_items where id=v.shop_item_id;
-  update public.purchases set status='refunded' where id=pid;
-  insert into public.coin_transactions(id,season_id,trainer_id,season_player_id,amount,
-    transaction_type,reference_type,reference_id,created_by_trainer_id)
-  values(v_ledger,sid,v.trainer_id,v.season_player_id,v.total_price,'purchase_refund','purchase',pid,v_actor);
-  insert into public.activity_events(season_id,type,actor_trainer_id,trainer_id,visibility,dedupe_key,payload)
-  values(sid,'PURCHASE_REFUNDED',v_actor,v.trainer_id,'owner','purchase_refunded:'||pid::text,
-    jsonb_build_object('purchase_id',pid,'item',v_name,'amount',v.total_price,'reason',v_reason,
-      'ledger_id',v_ledger));
-  return public.admin_setup_finish('purchase_refund',p_request,sid,pid,jsonb_build_object(
-    'trainer_id',v.trainer_id,'item',v_name,'amount',v.total_price,'ledger_id',v_ledger,'reason',v_reason));
+  perform public.admin_incident_actor(p_actor);
+  if p_kind not in ('purchase_cancel','purchase_refund') or p_operation is null
+     or p_hash is null or p_hash !~ '^[a-f0-9]{64}$' then
+    raise exception 'invalid_incident_request';
+  end if;
+  if p_reason is null or length(btrim(p_reason)) not between 5 and 500 then
+    raise exception 'incident_reason_required';
+  end if;
+  select * into s from public.seasons where id=p_season for share;
+  if not found then raise exception 'season_not_found'; end if;
+  select * into p from public.purchases where id=p_purchase and season_id=p_season;
+  if not found then raise exception 'purchase_not_found'; end if;
+  -- Same wallet lock every purchase and reward takes first: one writer.
+  select * into sp from public.season_players
+    where season_id=p_season and trainer_id=p.trainer_id for update;
+  prior := public.admin_incident_replay(p_operation,p_actor,p_kind,p_season,p_hash);
+  if prior is not null then return prior; end if;
+  if s.status='archived' then raise exception 'historical_artifact_immutable'; end if;
+  select * into p from public.purchases where id=p_purchase for update;
+  if exists(select 1 from public.item_use_authorizations a where a.purchase_id=p.id)
+     or exists(select 1 from public.item_deliveries d where d.purchase_id=p.id and d.status='RESERVED') then
+    raise exception 'purchase_linked_to_save_operation';
+  end if;
+  if p_kind='purchase_cancel' then
+    if p.status<>'pending' or exists(select 1 from public.redemptions r
+        where r.purchase_id=p.id and r.status='applied') then
+      raise exception 'purchase_not_cancellable';
+    end if;
+    next_status := 'cancelled';
+  else
+    if p.status<>'used' then raise exception 'purchase_not_refundable'; end if;
+    next_status := 'refunded';
+  end if;
+  credit := p.total_price;
+  update public.purchases set status=next_status,
+    metadata=metadata || jsonb_build_object('admin_incident', jsonb_build_object(
+      'operation_id',p_operation,'kind',p_kind,'actor_trainer_id',p_actor,
+      'previous_status',p.status,'at',clock_timestamp()))
+    where id=p.id;
+  if credit>0 then
+    ledger := gen_random_uuid();
+    insert into public.coin_transactions(id,season_id,trainer_id,season_player_id,amount,
+      transaction_type,reference_type,reference_id,metadata,created_by_trainer_id)
+    values(ledger,p_season,p.trainer_id,sp.id,credit,'compensation',
+      case p_kind when 'purchase_cancel' then 'purchase_cancellation' else 'purchase_refund' end,
+      p.id,jsonb_build_object('operation_id',p_operation,'reason',btrim(p_reason)),p_actor);
+  end if;
+  result := jsonb_build_object('operation_id',p_operation,'kind',p_kind,'season_id',p_season,
+    'trainer_id',p.trainer_id,'purchase_id',p.id,'status',next_status,'amount',credit,
+    'ledger_id',ledger,'balance_after',public.admin_incident_balance(p_season,p.trainer_id),
+    'replayed',false);
+  insert into public.admin_incident_commands(operation_id,season_id,actor_trainer_id,kind,
+    target_trainer_id,purchase_id,request_hash,reason,amount,ledger_id,result)
+  values(p_operation,p_season,p_actor,p_kind,p.trainer_id,p.id,p_hash,btrim(p_reason),
+    credit,ledger,result);
+  return result;
+end $$;
+
+-- 064's overview, unchanged except that a purchase in delivery shows as tied
+-- to a save operation and is not offered for cancellation.
+create or replace function public.admin_incident_read(p_actor uuid,p_season uuid) returns jsonb
+language plpgsql stable security definer set search_path='' as $$
+declare s public.seasons;
+begin
+  perform public.admin_incident_actor(p_actor);
+  select * into s from public.seasons where id=p_season;
+  if not found then raise exception 'season_not_found'; end if;
+  return jsonb_build_object(
+    'season_id',s.id,'season_status',s.status,
+    'wallets',coalesce((select jsonb_agg(w order by w->>'display_name') from (
+      select jsonb_build_object('trainer_id',sp.trainer_id,'display_name',t.display_name,
+        'status',sp.status,'balance',public.admin_incident_balance(s.id,sp.trainer_id)) w
+      from public.season_players sp join public.trainers t on t.id=sp.trainer_id
+      where sp.season_id=s.id) q),'[]'::jsonb),
+    'purchases',coalesce((select jsonb_agg(x order by x->>'purchased_at' desc) from (
+      select jsonb_build_object('id',p.id,'trainer_id',p.trainer_id,'display_name',t.display_name,
+        'item_name',i.name,'item_code',i.code,'total_price',p.total_price,'status',p.status,
+        'acquisition_type',p.acquisition_type,'purchased_at',p.purchased_at,
+        'linked_operation',exists(select 1 from public.item_use_authorizations a where a.purchase_id=p.id)
+          or exists(select 1 from public.item_deliveries d where d.purchase_id=p.id and d.status='RESERVED'),
+        'cancellable',p.status='pending' and s.status<>'archived'
+          and not exists(select 1 from public.item_use_authorizations a where a.purchase_id=p.id)
+          and not exists(select 1 from public.item_deliveries d where d.purchase_id=p.id and d.status='RESERVED')
+          and not exists(select 1 from public.redemptions r where r.purchase_id=p.id and r.status='applied'),
+        'refundable',p.status='used' and s.status<>'archived'
+          and not exists(select 1 from public.item_use_authorizations a where a.purchase_id=p.id)) x
+      from public.purchases p join public.trainers t on t.id=p.trainer_id
+        join public.shop_items i on i.id=p.shop_item_id
+      where p.season_id=s.id order by p.purchased_at desc limit 300) q),'[]'::jsonb),
+    'robberies',coalesce((select jsonb_agg(r order by r->>'created_at' desc) from (
+      select jsonb_build_object('authorization_id',x.authorization_id,'purchase_id',a.purchase_id,
+        'requester',(select display_name from public.trainers where id=a.trainer_id),
+        'donor',(select display_name from public.trainers where id=x.donor_id),
+        'state',public.transfer_state(x.authorization_id),
+        'source_obligation',public.transfer_obligation(x.authorization_id,'source'),
+        'destination_obligation',public.transfer_obligation(x.authorization_id,'destination'),
+        'price',(select total_price from public.purchases where id=a.purchase_id),
+        'cancellable',s.status<>'archived' and public.admin_robbery_blocker(x.authorization_id) is null,
+        'reconciliation_required',x.terminal is null and coalesce(
+          public.admin_robbery_blocker(x.authorization_id)='robbery_reconciliation_required',false),
+        'cancelled_by_admin',exists(select 1 from public.admin_incident_commands c
+          where c.authorization_id=x.authorization_id),
+        'created_at',x.created_at) r
+      from public.item_use_transfers x join public.item_use_authorizations a on a.id=x.authorization_id
+      where a.season_id=s.id order by x.created_at desc limit 200) q),'[]'::jsonb),
+    'history',coalesce((select jsonb_agg(h order by h->>'created_at' desc) from (
+      select jsonb_build_object('operation_id',c.operation_id,'kind',c.kind,
+        'actor',(select display_name from public.trainers where id=c.actor_trainer_id),
+        'target',(select display_name from public.trainers where id=c.target_trainer_id),
+        'purchase_id',c.purchase_id,'amount',c.amount,'reason',c.reason,
+        'status',c.result->>'status','created_at',c.created_at) h
+      from public.admin_incident_commands c where c.season_id=s.id
+      order by c.created_at desc limit 200) q),'[]'::jsonb));
 end $$;
 
 do $$ declare f regprocedure; begin
@@ -16118,8 +16203,7 @@ do $$ declare f regprocedure; begin
     'public.api_reserve_item_delivery(uuid,uuid,uuid,uuid,text,integer,text)'::regprocedure,
     'public.api_complete_item_delivery(uuid,uuid,uuid,text,text)'::regprocedure,
     'public.api_release_item_delivery(uuid,uuid,uuid)'::regprocedure,
-    'public.api_use_permission_item(uuid,uuid,uuid,uuid)'::regprocedure,
-    'public.api_admin_refund_purchase(jsonb)'::regprocedure
+    'public.api_use_permission_item(uuid,uuid,uuid,uuid)'::regprocedure
   ] loop
     execute format('revoke all on function %s from public,anon,authenticated,service_role',f);
     execute format('grant execute on function %s to service_role',f);

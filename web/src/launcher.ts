@@ -10,6 +10,17 @@ export const insideLauncher = () =>
   navigator.userAgent.includes("PokeAppLauncher/");
 
 export const infiniteItemPath = (item: string) => `/escritorio/objetos/${item}`;
+// 072: the same native items sheet lists the paid Shop objects for the bag.
+export const shopObjectsPath = "/escritorio/objetos";
+// Launchers from 0.26.8 deliver Shop objects; older ones only show the free items.
+export function launcherDeliversShopObjects() {
+  const version = /PokeAppLauncher\/(\d+)\.(\d+)\.(\d+)/.exec(
+    typeof navigator === "undefined" ? "" : navigator.userAgent,
+  );
+  if (!version) return false;
+  const [major, minor, patch] = version.slice(1).map(Number);
+  return major > 0 || minor > 26 || (minor === 26 && patch >= 8);
+}
 export const deliveriesPath = "/escritorio/robos";
 // Links from 27C (Mi partida, Copias, Conexión) now live in the hub's tabs.
 export const legacyDesktopPanels = ["partida", "copias", "nube"] as const;

@@ -205,3 +205,59 @@ test("«Añadir a la bolsa» is one confirmation bound to the save and its readi
   );
   assert.throws(() => describe("quick-item", "nugget:1", state), /objeto/);
 });
+
+test("072: a Shop delivery confirms one purchase and one object of the league save", () => {
+  const { describe, fingerprint } = require("./confirmations.cjs");
+  const purchase = "c0000000-0000-4000-8000-000000000001";
+  const state = {
+    selected_save: "C:/saves/main",
+    receipt_id: "r1",
+    observation: { game: "US", trainer: { name: "Samu" } },
+    deliveries: {
+      save_game: "US",
+      items: [
+        {
+          purchase_id: purchase,
+          name: "Objeto Evolutivo",
+          mode: "choice",
+          state: "READY",
+          options: [
+            { code: "ice_stone", name: "Piedra Hielo", compatible: true },
+            { code: "fire_stone", name: "Piedra Fuego", compatible: true },
+          ],
+        },
+      ],
+    },
+    write: { busy: false, status: "IDLE" },
+  };
+  const target = `${purchase}:ice_stone`;
+  const offer = describe("delivery", target, state);
+  assert.equal(offer.go, "Añadir a la bolsa");
+  assert.match(offer.message, /1 × Piedra Hielo · Pokémon Ultrasol · Samu/);
+  assert.match(offer.detail, /Compra de la Tienda: Objeto Evolutivo/);
+  assert.match(offer.detail, /Se gasta solo cuando el objeto está en tu bolsa/);
+  const c = createConfirmations();
+  const id = c.issue("delivery", target, fingerprint("delivery", target, state));
+  // Another object of the family than the one confirmed: refused.
+  assert.throws(
+    () =>
+      c.redeem(id, "delivery", `${purchase}:fire_stone`, fingerprint("delivery", target, state)),
+    { message: STALE },
+  );
+  const blocked = (changes) => () => describe("delivery", target, { ...state, ...changes });
+  assert.throws(blocked({ selected_save: null }), /Selecciona tu partida/);
+  assert.throws(blocked({ write: { busy: true } }), /otra operación/);
+  assert.throws(
+    blocked({ deliveries: { items: [{ ...state.deliveries.items[0], state: "ELSEWHERE" }] } }),
+    /ya no se puede entregar/,
+  );
+  assert.throws(
+    () => describe("delivery", `${purchase}:dusk_stone`, state),
+    /ya no se puede entregar/,
+  );
+  const absent = {
+    ...state.deliveries.items[0],
+    options: [{ code: "ice_stone", name: "Piedra Hielo", compatible: false }],
+  };
+  assert.throws(blocked({ deliveries: { items: [absent] } }), /no existe en el juego/);
+});

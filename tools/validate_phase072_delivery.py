@@ -6,9 +6,9 @@ gets an event), a second reservation or another device is refused, a release
 returns the purchase untouched, idempotent replays return the same receipt
 and a different request with the same operation is refused; Captura Extra
 records its use once; Pokémon comodines and unavailable objects are never
-delivered; an administrator refunds an untouched paid purchase exactly once
-(ledger +price, owner and admin events, receipt replay), never one in
-delivery, used or by a non-admin; nothing new for browsers.
+delivered; the existing incident center (062) gives the coins of an unusable
+purchase back exactly once and never while it is being delivered; nothing new
+for browsers.
 """
 
 from tools.validate_phase21_native import PLAYER, SEASON, TRAINER
@@ -26,6 +26,9 @@ OP1 = "d0000000-0000-4000-8000-000000000001"
 OP2 = "d0000000-0000-4000-8000-000000000002"
 OP3 = "d0000000-0000-4000-8000-000000000003"
 OP4 = "d0000000-0000-4000-8000-000000000004"
+OP5 = "d0000000-0000-4000-8000-000000000005"
+OP6 = "d0000000-0000-4000-8000-000000000006"
+P_BERRY2 = "c0000000-0000-4000-8000-000000000006"  # Baya Aranja
 A, B = "a" * 64, "b" * 64
 
 
@@ -50,6 +53,7 @@ def validate(pg):
             (P_CAPTURE, "captura_extra", 5),
             (P_SHIELD, "blindar_pokemon", 12),
             (P_REFUND, "menta_naturaleza", 6),
+            (P_BERRY2, "baya_aranja", 3),
         )
     )
     checks = f"""
@@ -80,10 +84,10 @@ begin
     raise exception 'another trainer reserved';
   exception when sqlstate 'PT404' then null; end;
   begin
-    perform public.api_admin_refund_purchase(jsonb_build_object('actor_trainer_id','{ADMIN}','season_id','{SEASON}',
-      'resource_id','{P_CAP}','idempotency_key','072-reserved','body',jsonb_build_object('reason','En entrega')));
-    raise exception 'refunded a purchase in delivery';
-  exception when sqlstate 'PT409' then assert sqlerrm='purchase_not_refundable', sqlerrm; end;
+    perform public.admin_purchase_resolve('{ADMIN}','{SEASON}','{P_CAP}','purchase_cancel',
+      gen_random_uuid(),repeat('d',64),'En entrega');
+    raise exception 'cancelled a purchase in delivery';
+  exception when others then assert sqlerrm='purchase_linked_to_save_operation', sqlerrm; end;
 
   -- 2. Complete: once, with the write's proof; replay returns the receipt.
   r=public.api_complete_item_delivery('{SEASON}','{TRAINER}','{OP1}','{A}','{B}');
@@ -137,44 +141,41 @@ begin
     raise exception 'invalid code accepted';
   exception when sqlstate 'PT422' then null; end;
 
-  -- 5. Refund: administrator only, once, exactly the price, audited.
+  -- 5. Coins back for an unusable purchase: 062's audited «Cancelar compra»,
+  --    never while the purchase is being delivered, exactly once.
+  r=public.api_reserve_item_delivery('{SEASON}','{TRAINER}','{P_BERRY2}','{OP5}','oran_berry',155,'SN');
+  begin
+    perform public.admin_purchase_resolve('{ADMIN}','{SEASON}','{P_BERRY2}','purchase_cancel',
+      gen_random_uuid(),repeat('a',64),'En entrega');
+    raise exception 'cancelled a purchase in delivery';
+  exception when others then assert sqlerrm='purchase_linked_to_save_operation', sqlerrm; end;
+  r=public.admin_incident_read('{ADMIN}','{SEASON}');
+  assert (select (x->>'cancellable')::boolean=false and (x->>'linked_operation')::boolean
+    from jsonb_array_elements(r->'purchases') x where x->>'id'='{P_BERRY2}'), 'overview: in delivery';
+  assert (select (x->>'cancellable')::boolean from jsonb_array_elements(r->'purchases') x
+    where x->>'id'='{P_REFUND}'), 'overview: an unusable purchase can be cancelled';
+  perform public.api_release_item_delivery('{SEASON}','{TRAINER}','{OP5}');
   balance=(select sum(amount) from public.coin_transactions where season_id='{SEASON}' and trainer_id='{TRAINER}');
-  request=jsonb_build_object('actor_trainer_id','{ADMIN}','season_id','{SEASON}','resource_id','{P_REFUND}',
-    'idempotency_key','072-refund','body',jsonb_build_object('reason','No existe en los juegos Gen 6/7'));
-  begin
-    perform public.api_admin_refund_purchase(jsonb_set(request,'{{actor_trainer_id}}','"{OTHER}"'));
-    raise exception 'non-admin refund';
-  exception when sqlstate 'PT403' then null; end;
-  begin
-    perform public.api_admin_refund_purchase(jsonb_set(jsonb_set(request,'{{body,reason}}','"x"'),'{{idempotency_key}}','"072-short"'));
-    raise exception 'empty reason accepted';
-  exception when sqlstate 'PT422' then null; end;
-  r=public.api_admin_refund_purchase(request);
-  assert r->>'replayed'='false' and r->>'resource_id'='{P_REFUND}', format('refund %s',r);
-  assert public.api_admin_refund_purchase(request)->>'replayed'='true', 'refund replay';
-  assert (select status from public.purchases where id='{P_REFUND}')='refunded', 'refunded';
+  r=public.admin_purchase_resolve('{ADMIN}','{SEASON}','{P_REFUND}','purchase_cancel',
+    '{OP6}',repeat('b',64),'No existe en los juegos Gen 6/7');
+  assert r->>'status'='cancelled' and (r->>'amount')::int=6, format('cancel %s',r);
   assert (select sum(amount) from public.coin_transactions where season_id='{SEASON}' and trainer_id='{TRAINER}')=balance+6,
     'exactly the price back, once';
-  assert (select count(*) from public.coin_transactions where reference_id='{P_REFUND}' and transaction_type='purchase_refund')=1,
-    'one refund row';
-  assert (select count(*) from public.activity_events where type='PURCHASE_REFUNDED' and trainer_id='{TRAINER}'
-    and visibility='owner')=1, 'owner event';
-  assert (select count(*) from public.activity_events where type='SEASON_ADMIN_PURCHASE_REFUND'
-    and visibility='admin')=1, 'admin event';
   begin
-    perform public.api_admin_refund_purchase(jsonb_set(request,'{{idempotency_key}}','"072-again"'));
-    raise exception 'refunded twice';
-  exception when sqlstate 'PT409' then assert sqlerrm='purchase_not_refundable', sqlerrm; end;
+    perform public.admin_purchase_resolve('{ADMIN}','{SEASON}','{P_REFUND}','purchase_cancel',
+      gen_random_uuid(),repeat('c',64),'Otra vez');
+    raise exception 'cancelled twice';
+  exception when others then assert sqlerrm='purchase_not_cancellable', sqlerrm; end;
   begin
-    perform public.api_admin_refund_purchase(jsonb_set(jsonb_set(request,'{{resource_id}}','"{P_CAP}"'),'{{idempotency_key}}','"072-used"'));
-    raise exception 'refunded a delivered purchase';
-  exception when sqlstate 'PT409' then assert sqlerrm='purchase_not_refundable', sqlerrm; end;
+    perform public.api_reserve_item_delivery('{SEASON}','{TRAINER}','{P_REFUND}',gen_random_uuid(),'leaf_stone',85,'SN');
+    raise exception 'a cancelled purchase delivered';
+  exception when sqlstate 'PT409' then null; end;
 
   -- 6. Private: nothing new for browsers.
   assert not has_table_privilege('authenticated','public.item_deliveries','SELECT'), 'no browser read';
   assert not has_table_privilege('anon','public.item_deliveries','SELECT'), 'no anon read';
   assert not has_function_privilege('authenticated','public.api_reserve_item_delivery(uuid,uuid,uuid,uuid,text,integer,text)','EXECUTE'), 'private reserve';
-  assert not has_function_privilege('authenticated','public.api_admin_refund_purchase(jsonb)','EXECUTE'), 'private refund';
+  assert not has_function_privilege('authenticated','public.admin_purchase_resolve(uuid,uuid,uuid,text,uuid,text,text)','EXECUTE'), 'private cancel';
   assert has_function_privilege('service_role','public.api_complete_item_delivery(uuid,uuid,uuid,text,text)','EXECUTE'), 'API complete';
   assert (select relforcerowsecurity from pg_class where oid='public.item_deliveries'::regclass), 'forced RLS';
 end $$;
@@ -183,7 +184,7 @@ set local role service_role;
 do $$ declare r jsonb; begin
   r=public.api_complete_item_delivery('{SEASON}','{TRAINER}','{OP3}','{A}','{B}');
   assert r->>'status'='DELIVERED', format('service_role complete %s',r);
-  assert (select count(*) from public.item_deliveries where trainer_id='{TRAINER}')=4, 'service_role reads its rows';
+  assert (select count(*) from public.item_deliveries where trainer_id='{TRAINER}')=5, 'service_role reads its rows';
 end $$;
 reset role;
 rollback;
@@ -193,6 +194,6 @@ rollback;
         "PASS: reserve once (replay, second/changed/other trainer refused), complete once "
         "with proof (purchase used, one owner event, release refused), release returns "
         "the purchase (reserve again), Captura Extra used once, comodines and mints never "
-        "delivered, admin-only audited refund of exactly the price once (never in delivery "
-        "or used), no browser privilege, service_role runs the commands"
+        "delivered, 062 cancellation returns exactly the price once and never while in "
+        "delivery, no browser privilege, service_role runs the commands"
     )

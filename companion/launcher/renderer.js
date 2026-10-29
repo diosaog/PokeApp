@@ -233,6 +233,8 @@ function announce(state) {
     writeError: state.write_error,
     quickSeq: state.quick_item_seq ?? 0,
     quickDone: state.quick_item_result?.at ?? null,
+    deliverySeq: state.delivery_seq ?? 0,
+    deliveryDone: state.delivery_result?.at ?? null,
     receipt: state.receipt_id,
     // Each copy PokeApp accepts (season first, then personal) refreshes the
     // web at once, without waiting for the rest of the sync.
@@ -258,6 +260,19 @@ function announce(state) {
     const r = state.quick_item_result;
     toast(
       `${r.quantity} × ${r.item === "rare_candy" ? "Caramelo Raro" : "Escama Corazón"} añadidos a la bolsa y comprobados en tu partida. Se sincronizará sola.`,
+      "ok",
+    );
+    tell("items-changed");
+  }
+  // 072: a delivery the trainer asked for says how it ended, once.
+  if (now.deliverySeq !== before.deliverySeq && state.delivery_error && shopPending)
+    toast(state.delivery_error);
+  if (now.deliveryDone && now.deliveryDone !== before.deliveryDone) {
+    const r = state.delivery_result;
+    toast(
+      r.status === "DELIVERED"
+        ? `${r.name} añadido a la bolsa y comprobado en tu partida${Number.isInteger(r.count) ? ` (ahora tienes ${r.count})` : ""}. Se sincronizará sola.`
+        : `${r.name} ya está en tu bolsa. Falta avisarlo a PokeApp: se hará solo en cuanto haya conexión.`,
       "ok",
     );
     tell("items-changed");
@@ -896,7 +911,7 @@ function confirmDialog({ title, message, detail, go, danger }) {
 // Objetos ∞ and Robos y entregas open as sheets: the same native sections,
 // moved into the dialog and returned when it closes.
 const sheets = {
-  objetos: ["Objetos ∞", ["quick-article", "write-article"]],
+  objetos: ["Objetos", ["quick-article", "shop-article", "write-article"]],
   robos: ["Robos y entregas", ["transfer-article", "write-article"]],
 };
 const homes = new Map();
@@ -912,7 +927,10 @@ function fillSheet(view) {
     homes.set(section, mark);
     $("sheet-body").append(section);
   }
-  if (view === "objetos") requestQuick(true);
+  if (view === "objetos") {
+    requestQuick(true);
+    requestDeliveries();
+  }
 }
 function returnSheet() {
   for (const [section, mark] of homes) mark.replaceWith(section);
@@ -1553,6 +1571,135 @@ for (const row of document.querySelectorAll(".quick-item")) {
 }
 $("quick-refresh").onclick = () => requestQuick(true);
 
+// 072: paid Shop objects into the bag of the league save. The list is
+// PokeApp's; one confirmation per object; the core reserves the purchase,
+// writes, re-reads and only then spends it (never twice).
+const shopRead = { pending: false, since: 0, seq: 0 };
+let shopPending = false;
+const shopChoice = {}; // purchase_id -> chosen object of a family
+function requestDeliveries() {
+  if (shopRead.pending || !lastState?.principal) return;
+  Object.assign(shopRead, {
+    pending: true,
+    since: Date.now(),
+    seq: lastState.delivery_seq ?? 0,
+  });
+  void action(() => window.launcher.deliveries()).then((result) => {
+    if (result?.status !== "QUEUED") shopRead.pending = false;
+    if (lastState) renderShop(lastState);
+  });
+}
+function renderShop(state) {
+  const write = state.write || {};
+  const view = state.deliveries;
+  if (shopRead.pending && (state.delivery_seq ?? 0) !== shopRead.seq)
+    shopRead.pending = false;
+  if (shopRead.pending && Date.now() - shopRead.since > 20000)
+    shopRead.pending = false;
+  const items = view?.items || [];
+  text(
+    "shop-state",
+    !state.principal
+      ? "Inicia sesión para ver tus compras."
+      : !state.selected_save
+        ? "Elige tu partida en «Saves y Launcher»."
+        : shopPending || write.busy
+          ? "Entregando… no abras el juego."
+          : shopRead.pending && !view
+            ? "Comprobando tus compras…"
+            : state.delivery_error
+              ? state.delivery_error
+              : !view
+                ? "Pulsa «Volver a comprobar»."
+                : !items.length
+                  ? "No tienes objetos de la Tienda pendientes de entregar."
+                  : "Cada compra se entrega una sola vez, en la bolsa de tu partida de la Liga.",
+  );
+  const blocked =
+    shopPending ||
+    write.busy ||
+    !view?.application_enabled ||
+    ["RECOVERY_REQUIRED", "AWAITING_CONFIRMATION", "PREPARED"].includes(
+      write.status,
+    );
+  const list = $("shop-list");
+  const key = JSON.stringify([items, blocked]);
+  if (list.dataset.key === key) return;
+  list.dataset.key = key;
+  list.replaceChildren(...items.map((entry) => shopRow(entry, blocked)));
+}
+function shopRow(entry, blocked) {
+  const row = document.createElement("div");
+  row.className = "shop-item";
+  const name = document.createElement("span");
+  name.className = "quick-name";
+  name.textContent = entry.name;
+  const note = document.createElement("span");
+  note.className = "quick-count muted";
+  row.append(name);
+  const usable = entry.options.filter((o) => o.compatible !== false);
+  if (entry.state !== "READY" || !usable.length) {
+    note.textContent =
+      entry.state === "ELSEWHERE"
+        ? "Se está entregando en otro equipo: termina allí."
+        : entry.state === "RECOVERING"
+          ? "Comprobando una entrega anterior…"
+          : "No existe en el juego de esta partida. Pide la devolución al administrador.";
+    row.append(note);
+    return row;
+  }
+  let chosen = shopChoice[entry.purchase_id];
+  if (!usable.some((o) => o.code === chosen)) chosen = usable[0].code;
+  if (usable.length > 1) {
+    const select = document.createElement("select");
+    select.setAttribute("aria-label", `Objeto de ${entry.name}`);
+    for (const option of usable) {
+      const choice = document.createElement("option");
+      choice.value = option.code;
+      choice.textContent = option.name;
+      choice.selected = option.code === chosen;
+      select.append(choice);
+    }
+    select.disabled = blocked;
+    select.onchange = () => {
+      shopChoice[entry.purchase_id] = select.value;
+    };
+    row.append(select);
+  } else if (usable[0].name !== entry.name) {
+    // The in-game name when the catalog uses another one (e.g. «Lupa»).
+    note.textContent = usable[0].name;
+    row.append(note);
+  }
+  const add = document.createElement("button");
+  add.className = "quick-add";
+  add.textContent = "Añadir a la bolsa";
+  add.disabled = blocked;
+  add.onclick = () => deliver(entry, shopChoice[entry.purchase_id] || chosen);
+  row.append(add);
+  return row;
+}
+async function deliver(entry, item) {
+  const ticket = await confirmWith("delivery", `${entry.purchase_id}:${item}`);
+  if (!ticket) return;
+  shopPending = true;
+  if (lastState) renderShop(lastState);
+  const before = lastState?.delivery_seq ?? 0;
+  try {
+    const queued = await action(() =>
+      window.launcher.addDelivery(entry.purchase_id, item, ticket),
+    );
+    // QUEUED: the outcome arrives with the next finished delivery step.
+    for (let i = 0; queued && i < 240; i++) {
+      await new Promise((resolve) => setTimeout(resolve, 500));
+      if ((lastState?.delivery_seq ?? 0) !== before) break;
+    }
+  } finally {
+    shopPending = false;
+    if (lastState) renderShop(lastState);
+  }
+}
+$("shop-refresh").onclick = () => requestDeliveries();
+
 function renderEmulator(state) {
   text(
     "emulator-state",
@@ -1866,6 +2013,7 @@ async function poll() {
     lastState = state;
     render(state);
     renderQuick(state);
+    renderShop(state);
     renderTransfers(state);
     renderEmulator(state);
     renderNotices(state);

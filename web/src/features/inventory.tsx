@@ -16,7 +16,14 @@ import {
   useCommand,
 } from "../ui";
 import { PokemonSelectorModal, type PokemonTarget } from "./pokemon-selector";
-import { deliveriesPath, infiniteItemPath, insideLauncher } from "../launcher";
+import {
+  deliveriesPath,
+  infiniteItemPath,
+  insideLauncher,
+  launcherDeliversShopObjects,
+  shopObjectsPath,
+} from "../launcher";
+import { gameName } from "./progress";
 import { LauncherDownload } from "./launcher-download";
 
 const pokemonActions = [
@@ -44,6 +51,58 @@ export const itemUseLabels: Record<string, string> = {
   BLOCKED_UNCERTAIN: "Operación bloqueada",
 };
 const physicalCodes = ["revivir_pokemon", "robar_pokemon"];
+
+// 072: a pending paid object goes to the bag through PokeApp Launcher (once);
+// Captura Extra is used here; what the game cannot hold says so honestly.
+function ObjectUse({
+  purchase,
+  leagueGame,
+  disabled,
+  onUse,
+}: {
+  purchase: Model<"PurchaseRead">;
+  leagueGame?: string | null;
+  disabled: boolean;
+  onUse: () => void;
+}) {
+  const use = purchase.use;
+  if (purchase.delivery?.status === "RESERVED")
+    return (
+      <p className="muted">PokeApp Launcher la está añadiendo a tu bolsa.</p>
+    );
+  if (use?.mode === "permission")
+    return (
+      <button type="button" disabled={disabled} onClick={onUse}>
+        Usar
+      </button>
+    );
+  if (use?.mode === "unavailable" || use?.compatible === false)
+    return (
+      <p className="muted">
+        {use.mode === "unavailable"
+          ? "No existe en los juegos de 3DS."
+          : `No existe en tu Pokémon ${gameName(leagueGame)}.`}{" "}
+        El administrador puede devolverte sus monedas.
+      </p>
+    );
+  if (use?.mode === "bag" || use?.mode === "choice")
+    return insideLauncher() ? (
+      launcherDeliversShopObjects() ? (
+        <Link className="button primary" to={shopObjectsPath}>
+          Añadir a la bolsa
+        </Link>
+      ) : (
+        <p className="muted">
+          Actualiza PokeApp Launcher para añadirla a tu bolsa.
+        </p>
+      )
+    ) : (
+      <p className="muted">
+        Se añade a la bolsa de tu partida con PokeApp Launcher.
+      </p>
+    );
+  return <p className="muted">Sin canje disponible.</p>;
+}
 
 // The competitive decision (adjudicated) and each save's physical delivery are
 // shown separately; only RECONCILED/COMMITTED means both saves are verified.
@@ -277,14 +336,20 @@ export function Inventory() {
                     : physicalItem(item.item_code)
                       ? (itemUseLabels[item.physical_state ?? "UNKNOWN"] ??
                         "Estado físico no disponible")
-                      : ((
-                          {
-                            pending: "Objeto disponible",
-                            used: "Canjeado",
-                            cancelled: "Cancelado",
-                            refunded: "Reembolsado",
-                          } as Record<string, string>
-                        )[item.status] ?? "Estado no disponible")}
+                      : item.delivery?.status === "DELIVERED"
+                        ? "En tu bolsa"
+                        : item.delivery?.status === "USED"
+                          ? "Usado"
+                          : item.delivery?.status === "RESERVED"
+                            ? "Entregándose"
+                            : ((
+                                {
+                                  pending: "Objeto disponible",
+                                  used: "Canjeado",
+                                  cancelled: "Cancelado",
+                                  refunded: "Reembolsado",
+                                } as Record<string, string>
+                              )[item.status] ?? "Estado no disponible")}
                 </Tag>
                 {item.acquisition_type === "reward" && (
                   <Tag>Vale de recompensa</Tag>
@@ -292,6 +357,14 @@ export function Inventory() {
                 <p>
                   {date(item.purchased_at)} · {item.total_price} PK₽
                 </p>
+                {item.delivery?.status === "DELIVERED" && (
+                  <p className="muted">
+                    {item.delivery.item_name ?? item.item_name} · Pokémon{" "}
+                    {gameName(item.delivery.game)}
+                    {item.delivery.finished_at &&
+                      ` · ${date(item.delivery.finished_at)}`}
+                  </p>
+                )}
                 {item.status === "pending" &&
                   (transfer ? (
                     <p className="muted">Se entrega con el Launcher.</p>
@@ -310,7 +383,17 @@ export function Inventory() {
                       Canjear
                     </button>
                   ) : (
-                    <p className="muted">Sin canje disponible.</p>
+                    <ObjectUse
+                      purchase={item}
+                      leagueGame={q.data?.league_game}
+                      disabled={cmd.pending || cmd.uncertain}
+                      onUse={() =>
+                        cmd.execute(
+                          `/v1/seasons/${season}/shop/purchases/${item.id}/use`,
+                          {},
+                        )
+                      }
+                    />
                   ))}
               </Card>
             );

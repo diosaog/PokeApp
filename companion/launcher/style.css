@@ -328,7 +328,8 @@ dd {
 }
 
 #update-banner,
-.quick-item {
+.quick-item,
+.shop-item {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
@@ -344,7 +345,8 @@ dd {
   border-bottom: 1px solid color-mix(in srgb, var(--c-gold) 45%, transparent);
   box-shadow: inset 4px 0 0 var(--c-gold);
 }
-.quick-item {
+.quick-item,
+.shop-item {
   margin: 8px 0;
   padding: 8px 12px;
   border-radius: 999px;
@@ -362,6 +364,16 @@ dd {
 .quick-error {
   color: var(--c-danger-soft);
 }
+/* 072: a family purchase (Fósil, Gemas…) chooses its object here. */
+.shop-item select {
+  font: inherit;
+  color: var(--c-text);
+  background: var(--c-surface-3);
+  border: 1px solid var(--c-line-strong);
+  border-radius: 12px;
+  padding: 0.5rem 0.8rem;
+  max-width: 16em;
+}
 /* Section titles carry the web's ribbon; quick items wear the brand border of
    the web's infinite-item cards. */
 article > h2:first-child {
@@ -376,7 +388,8 @@ article > h2:first-child::before {
   border-radius: 999px;
   background: linear-gradient(180deg, var(--c-accent), var(--c-magenta));
 }
-.quick-item {
+.quick-item,
+.shop-item {
   border: 2px solid transparent;
   background:
     linear-gradient(var(--c-bg-1), var(--c-bg-1)) padding-box,

@@ -1,5 +1,5 @@
 """072 server side: the use contract, the Launcher delivery routes, the
-purchase guard, the reads and the audited refund. Fakes only."""
+purchase guard and the reads. Fakes only (refunds: 062 incident center)."""
 
 import re
 import unittest
@@ -13,7 +13,7 @@ from app.api.config import APIConfig
 from app.api.dependencies import ApiContainer
 from app.api.main import create_app
 from app.api.models import AuthenticatedPrincipal
-from app.api.security import require_admin_principal, require_enabled_principal
+from app.api.security import require_enabled_principal
 from app.domain.shop_item_uses import (
     BAG_ITEMS,
     GAMES,
@@ -264,30 +264,6 @@ class RouteTests(unittest.TestCase):
                 self.assertEqual(409, response.status_code)
                 self.assertEqual(reason, response.json()["detail"]["code"])
         self.purchases.assert_not_called()
-
-
-class RefundRouteTests(unittest.TestCase):
-    def test_admin_refund_passes_the_purchase_and_reason(self):
-        sid, pid = str(uuid4()), str(uuid4())
-        repo = Mock()
-        repo.execute.return_value = {
-            "operation_id": str(uuid4()), "resource_id": pid, "season_id": sid, "event_id": str(uuid4()),
-            "replayed": False, "state": "active", "setup_revision": 1, "roster_revision": 1, "config_revision": 1,
-        }  # fmt: skip
-        app = create_app(container=ApiContainer(season_admin_repository=repo), config=APIConfig())
-        app.dependency_overrides[require_admin_principal] = lambda: AuthenticatedPrincipal(
-            trainer_id=str(uuid4()), display_name="Admin", is_admin=True, globally_enabled=True
-        )
-        client = TestClient(app)
-        path = f"/v1/admin/seasons/{sid}/purchases/{pid}/refund"
-        ok = client.post(path, json={"reason": "No existe en Pokémon Y"}, headers={"Idempotency-Key": "r1"})
-        self.assertEqual(200, ok.status_code, ok.text)
-        operation, request = repo.execute.call_args.args
-        self.assertEqual("purchase_refund", operation)
-        self.assertEqual((sid, pid, {"reason": "No existe en Pokémon Y"}), (request["season_id"], request["resource_id"], request["body"]))
-        for bad in ({"reason": "x"}, {}, {"reason": "ok reason", "amount": 5}):
-            self.assertEqual(422, client.post(path, json=bad, headers={"Idempotency-Key": "r2"}).status_code)
-        self.assertEqual(422, client.post(path, json={"reason": "valid reason"}).status_code)
 
 
 class TransportTests(unittest.TestCase):

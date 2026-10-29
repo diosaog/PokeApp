@@ -23,6 +23,8 @@ const PHYSICAL = new Set([
   "export_reconcile",
   "quick_item_offer",
   "quick_item_apply",
+  "deliveries_refresh",
+  "delivery_apply",
   "transfer_prepare",
   "transfer_apply",
   "transfer_fulfil",

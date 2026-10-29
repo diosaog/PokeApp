@@ -117,6 +117,46 @@ const base = () => ({
     },
   },
   quick_item_error: null,
+  // 072: paid Shop objects waiting for the bag of a Pokémon Y save.
+  deliveries: {
+    save_game: "Y",
+    league_game: "Y",
+    application_enabled: enabled,
+    items: [
+      {
+        purchase_id: "c0000000-0000-4000-8000-000000000001",
+        name: "Objeto Evolutivo",
+        mode: "choice",
+        state: "READY",
+        options: [
+          { code: "fire_stone", name: "Piedra Fuego", compatible: true },
+          { code: "ice_stone", name: "Piedra Hielo", compatible: false },
+          { code: "dusk_stone", name: "Piedra Noche", compatible: true },
+        ],
+      },
+      {
+        purchase_id: "c0000000-0000-4000-8000-000000000002",
+        name: "Chapa Plateada",
+        mode: "bag",
+        state: "READY",
+        options: [{ code: "bottle_cap", name: "Chapa Plateada", compatible: false }],
+      },
+      {
+        purchase_id: "c0000000-0000-4000-8000-000000000003",
+        name: "Lupa",
+        mode: "bag",
+        state: "READY",
+        options: [{ code: "zoom_lens", name: "Telescopio", compatible: true }],
+      },
+      {
+        purchase_id: "c0000000-0000-4000-8000-000000000004",
+        name: "Restos",
+        mode: "bag",
+        state: "ELSEWHERE",
+        options: [{ code: "leftovers", name: "Restos", compatible: true }],
+      },
+    ],
+  },
   write: {
     status: "IDLE",
     busy: false,
@@ -167,6 +207,11 @@ contextBridge.exposeInMainWorld("launcher", {
     core = { stalled: false, ...snapshot };
   },
   quickItems: async () => ({ status: "QUEUED" }),
+  deliveries: async () => (calls.push(["deliveries"]), { status: "QUEUED" }),
+  addDelivery: async (...args) => (
+    calls.push(["delivery", ...args]),
+    { status: "QUEUED" }
+  ),
   addQuickItem: async (...args) => (calls.push(args), { status: "QUEUED" }),
   transfer: async (...args) => (
     calls.push(["transfer", ...args]),
@@ -242,5 +287,8 @@ contextBridge.exposeInMainWorld("launcher", {
   __calls: () => calls.map((c) => [...c]),
   __disable: () => {
     enabled = false;
+  },
+  __enable: () => {
+    enabled = true;
   },
 });

@@ -18,6 +18,7 @@ import { ParticipantResults } from "./league-results";
 import { WipeRevivals } from "./wipe-revivals";
 import { Collection } from "./collection";
 import { SaveGame, gameName } from "./progress";
+import { purchaseBlock, useSummary } from "./item-uses";
 import { matchLabel } from "./admin-labels";
 import { LeagueOperations } from "./league-operations";
 import { TeamLockWarning } from "./team-lock-warning";
@@ -510,6 +511,14 @@ export function ShopPage() {
                         </div>
                         <h2>{pokemonName("item", i.name)}</h2>
                         <p>{i.description}</p>
+                        {useSummary(i.use) && (
+                          <p className="item-use muted">{useSummary(i.use)}</p>
+                        )}
+                        {i.use?.compatible === true && (
+                          <Tag>
+                            Para tu Pokémon {gameName(query.data!.league_game)}
+                          </Tag>
+                        )}
                         {p && (
                           <Tag>
                             Promoción activa ·{" "}
@@ -538,6 +547,7 @@ export function ShopPage() {
                             disabled={
                               cmd.pending ||
                               cmd.uncertain ||
+                              !!purchaseBlock(i.use) ||
                               short(p?.effective_price ?? i.base_price) ||
                               (!p &&
                                 upcoming.length > 0 &&
@@ -548,9 +558,10 @@ export function ShopPage() {
                               setBase(false);
                             }}
                           >
-                            {short(p?.effective_price ?? i.base_price)
-                              ? "Saldo insuficiente"
-                              : "Comprar"}
+                            {purchaseBlock(i.use) ??
+                              (short(p?.effective_price ?? i.base_price)
+                                ? "Saldo insuficiente"
+                                : "Comprar")}
                           </button>
                         </div>
                       </Card>

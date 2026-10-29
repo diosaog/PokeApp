@@ -694,6 +694,35 @@ app.whenReady().then(() => {
       return request("quick_item_apply", { item, quantity });
     },
   );
+  // 072: paid Shop objects. The list comes from PokeApp; the core rechecks the
+  // purchase, the league save and the bag, then reserves, writes and re-reads.
+  ipcMain.handle("launcher:deliveries", (event) => {
+    authorize(event);
+    return request("deliveries_refresh");
+  });
+  ipcMain.handle(
+    "launcher:delivery-add",
+    async (event, purchaseId, item, ticket) => {
+      authorize(event);
+      if (
+        typeof purchaseId !== "string" ||
+        !/^[0-9a-f-]{36}$/.test(purchaseId) ||
+        typeof item !== "string" ||
+        !/^[a-z0-9_]{1,40}$/.test(item)
+      )
+        throw new Error("Revisa la compra y el objeto.");
+      const target = `${purchaseId}:${item}`;
+      const state = await request("state");
+      describe("delivery", target, state);
+      confirmations.redeem(
+        ticket,
+        "delivery",
+        target,
+        fingerprint("delivery", target, state),
+      );
+      return request("delivery_apply", { purchase_id: purchaseId, item });
+    },
+  );
   // Robbery: only this trainer's listed leg; runtime and server recheck all.
   // The tools page explains the LOCAL effect in its own dialog and passes an
   // explicit confirmation; completion is the server's verdict.
@@ -977,6 +1006,7 @@ app.whenReady().then(() => {
         "export",
         "restore",
         "quick-item",
+        "delivery",
         "transfer:prepare",
         "transfer:apply",
         "transfer:fulfil",

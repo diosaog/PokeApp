@@ -646,3 +646,243 @@ it("keeps direct robbery redemption with an API that predates the Launcher flow"
     expect.anything(),
   );
 });
+
+// 072: an honest Shop and bag delivery through PokeApp Launcher.
+const gen7 = ["SN", "MN", "US", "UM"] as const;
+const all = ["X", "Y", "OR", "AS", ...gen7] as const;
+const objectPurchase = (
+  overrides: Partial<Model<"PurchaseRead">>,
+): Model<"PurchaseRead"> => ({
+  id: "p-object",
+  shop_item_id: "item-object",
+  item_name: "Objeto Evolutivo",
+  item_code: "objeto_evolutivo",
+  acquisition_type: "paid",
+  status: "pending",
+  total_price: 8,
+  purchased_at: "2026-10-29T10:00:00Z",
+  use: {
+    mode: "choice",
+    games: [...all],
+    compatible: true,
+    reason: null,
+    options: [],
+  },
+  ...overrides,
+});
+
+it("072: the Shop says what each item is for and never sells what the league game lacks", () => {
+  mocks.shop = {
+    balance: "100",
+    season_status: "active",
+    promotions: [],
+    league_game: "Y",
+    items: [
+      {
+        id: "cap",
+        code: "chapa_plateada",
+        name: "Chapa Plateada",
+        category: "crianza",
+        description: "Entrena una estadística al máximo.",
+        base_price: 6,
+        use: {
+          mode: "bag",
+          games: [...gen7],
+          compatible: false,
+          reason: "ITEM_INCOMPATIBLE_WITH_GAME",
+          options: [],
+        },
+      },
+      {
+        id: "mint",
+        code: "menta_naturaleza",
+        name: "Menta de Naturaleza",
+        category: "crianza",
+        description: "Cambia la naturaleza.",
+        base_price: 6,
+        use: {
+          mode: "unavailable",
+          games: [],
+          compatible: false,
+          reason: "ITEM_NOT_USABLE",
+          options: [],
+        },
+      },
+      {
+        id: "capsule",
+        code: "capsula_habilidad",
+        name: "Cápsula Habilidad",
+        category: "crianza",
+        description: "Cambia la habilidad.",
+        base_price: 6,
+        use: {
+          mode: "bag",
+          games: [...all],
+          compatible: true,
+          reason: null,
+          options: [],
+        },
+      },
+    ],
+  };
+  render(
+    <MemoryRouter>
+      <ShopPage />
+    </MemoryRouter>,
+  );
+  fireEvent.click(screen.getByRole("button", { name: "Crianza" }));
+  expect(
+    screen.getByRole("button", { name: "No existe en tu juego" }),
+  ).toBeDisabled();
+  expect(
+    screen.getByText(/Solo existe en Sol, Luna, Ultrasol y Ultraluna\./),
+  ).toBeInTheDocument();
+  expect(screen.getByRole("button", { name: "No disponible" })).toBeDisabled();
+  expect(
+    screen.getByText("No existe en los juegos de 3DS."),
+  ).toBeInTheDocument();
+  expect(screen.getByRole("button", { name: "Comprar" })).toBeEnabled();
+  expect(screen.getByText("Para tu Pokémon Y")).toBeInTheDocument();
+  expect(
+    screen.getByText(
+      /PokeApp Launcher lo añade a la bolsa de tu partida\. Existe en los 8 juegos de 3DS\./,
+    ),
+  ).toBeInTheDocument();
+});
+
+it("072: a pending object is added to the bag from PokeApp Launcher 0.26.8, once", () => {
+  mocks.inventory = {
+    purchases: [objectPurchase({})],
+    targets: [],
+    physical_items: true,
+    league_game: "Y",
+  };
+  const { unmount } = render(
+    <MemoryRouter>
+      <Inventory />
+    </MemoryRouter>,
+  );
+  expect(
+    screen.getByText("Se añade a la bolsa de tu partida con PokeApp Launcher."),
+  ).toBeInTheDocument();
+  unmount();
+  for (const [agent, link] of [
+    ["Mozilla/5.0 PokeAppLauncher/0.26.8", true],
+    ["Mozilla/5.0 PokeAppLauncher/0.26.7", false],
+  ] as const) {
+    const spy = vi.spyOn(navigator, "userAgent", "get").mockReturnValue(agent);
+    const view = render(
+      <MemoryRouter>
+        <Inventory />
+      </MemoryRouter>,
+    );
+    if (link)
+      expect(
+        screen.getByRole("link", { name: "Añadir a la bolsa" }),
+      ).toHaveAttribute("href", "/escritorio/objetos");
+    else
+      expect(
+        screen.getByText(
+          "Actualiza PokeApp Launcher para añadirla a tu bolsa.",
+        ),
+      ).toBeInTheDocument();
+    view.unmount();
+    spy.mockRestore();
+  }
+  expect(mocks.execute).not.toHaveBeenCalled();
+});
+
+it("072: delivered, in delivery and incompatible purchases each say where they are", () => {
+  mocks.inventory = {
+    targets: [],
+    physical_items: true,
+    league_game: "Y",
+    purchases: [
+      objectPurchase({
+        id: "done",
+        status: "used",
+        delivery: {
+          status: "DELIVERED",
+          kind: "bag",
+          item_code: "dusk_stone",
+          item_name: "Piedra Noche",
+          game: "Y",
+          finished_at: "2026-10-29T12:00:00Z",
+        },
+      }),
+      objectPurchase({
+        id: "going",
+        delivery: {
+          status: "RESERVED",
+          kind: "bag",
+          item_code: "fire_stone",
+          item_name: "Piedra Fuego",
+          game: "Y",
+          finished_at: null,
+        },
+      }),
+      objectPurchase({
+        id: "cap",
+        item_name: "Chapa Plateada",
+        item_code: "chapa_plateada",
+        use: {
+          mode: "bag",
+          games: [...gen7],
+          compatible: false,
+          reason: "ITEM_INCOMPATIBLE_WITH_GAME",
+          options: [],
+        },
+      }),
+    ],
+  };
+  render(
+    <MemoryRouter>
+      <Inventory />
+    </MemoryRouter>,
+  );
+  expect(screen.getByText("En tu bolsa")).toBeInTheDocument();
+  expect(screen.getByText(/Piedra Noche · Pokémon Y · /)).toBeInTheDocument();
+  expect(screen.getByText("Entregándose")).toBeInTheDocument();
+  expect(
+    screen.getByText("PokeApp Launcher la está añadiendo a tu bolsa."),
+  ).toBeInTheDocument();
+  expect(
+    screen.getByText(
+      /No existe en tu Pokémon Y\. El administrador puede devolverte sus monedas\./,
+    ),
+  ).toBeInTheDocument();
+  expect(screen.queryByText("Sin canje disponible.")).not.toBeInTheDocument();
+});
+
+it("072: Captura Extra is used once from the inventory, not sent to the bag", async () => {
+  mocks.inventory = {
+    targets: [],
+    physical_items: true,
+    purchases: [
+      objectPurchase({
+        id: "capture",
+        item_name: "Captura Extra",
+        item_code: "captura_extra",
+        use: {
+          mode: "permission",
+          games: [...all],
+          compatible: true,
+          reason: null,
+          options: [],
+        },
+      }),
+    ],
+  };
+  render(
+    <MemoryRouter>
+      <Inventory />
+    </MemoryRouter>,
+  );
+  fireEvent.click(screen.getByRole("button", { name: "Usar" }));
+  await waitFor(() =>
+    expect(mocks.execute).toHaveBeenCalledWith(
+      "/v1/seasons/season/shop/purchases/capture/use",
+      {},
+    ),
+  );
+});

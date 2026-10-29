@@ -101,8 +101,30 @@ const script = `(async () => {
   check(JSON.stringify(window.launcher.__calls().at(-1)) === JSON.stringify(["closePanel"]), "closing the last dialog hands the window back to the web");
   window.launcher.__navigateTo({ view: "modal", panel: "objetos", item: "rare_candy" }); await sleep(100);
   check(document.getElementById("sheet-dialog").open && document.getElementById("sheet-body").contains(document.getElementById("quick-article")) && document.getElementById("sheet-body").contains(document.getElementById("write-article")), "items open as a sheet with the confirmation step");
+  // 072: the same sheet lists the paid Shop objects for the bag.
+  const shopRows = [...document.querySelectorAll("#shop-list .shop-item")];
+  const rowOf = (name) => shopRows.find((r) => r.querySelector(".quick-name").textContent === name);
+  check(document.getElementById("sheet-body").contains(document.getElementById("shop-article")) && window.launcher.__calls().some((c) => c[0] === "deliveries") && shopRows.length === 4, "Shop objects open in the items sheet and are read from PokeApp");
+  const family = rowOf("Objeto Evolutivo"), select = family.querySelector("select");
+  check(select && [...select.options].map((o) => o.textContent).join() === "Piedra Fuego,Piedra Noche", "a family offers only the objects this save's game holds");
+  check(!rowOf("Chapa Plateada").querySelector("button") && /No existe en el juego de esta partida/.test(rowOf("Chapa Plateada").textContent), "an object absent from the game cannot be delivered and says why");
+  check(/Telescopio/.test(rowOf("Lupa").textContent) && rowOf("Lupa").querySelector(".quick-add"), "a catalog name shows the in-game object it delivers");
+  check(!rowOf("Restos").querySelector("button") && /otro equipo/.test(rowOf("Restos").textContent), "a delivery started on another PC is finished there");
+  check(family.querySelector(".quick-add").disabled && select.disabled, "a Launcher that cannot write objects cannot start a delivery");
+  window.launcher.__enable(); await sleep(1300);
+  const ready = [...document.querySelectorAll("#shop-list .shop-item")].find((r) => r.querySelector(".quick-name").textContent === "Objeto Evolutivo");
+  const choose = ready.querySelector("select");
+  choose.value = "dusk_stone"; choose.dispatchEvent(new Event("change"));
+  ready.querySelector(".quick-add").click(); await sleep(200);
+  check(document.getElementById("confirm-dialog").open && JSON.stringify(window.launcher.__calls().at(-1)) === JSON.stringify(["begin", "delivery", "c0000000-0000-4000-8000-000000000001:dusk_stone"]), "one in-app confirmation for the chosen object first");
+  document.getElementById("confirm-go").click(); await sleep(200);
+  check(JSON.stringify(window.launcher.__calls().at(-1)) === JSON.stringify(["delivery", "c0000000-0000-4000-8000-000000000001", "dusk_stone", "t:delivery:c0000000-0000-4000-8000-000000000001:dusk_stone"]), "exact ticketed delivery sent once");
+  window.launcher.__set({ delivery_seq: 1, delivery_result: { purchase_id: "c0000000-0000-4000-8000-000000000001", item: "dusk_stone", name: "Piedra Noche", status: "DELIVERED", game: "Y", count: 2, at: 2 } }); await sleep(1300);
+  check(/Piedra Noche añadido a la bolsa y comprobado en tu partida \\(ahora tienes 2\\)/.test(document.getElementById("toasts").textContent) && window.launcher.__calls().filter((c) => c[0] === "webEvent" && c[1] === "items-changed").length >= 2, "a verified delivery is confirmed with the new count and the web refreshes");
+  window.launcher.__unset(["delivery_seq", "delivery_result"]);
+  window.launcher.__disable();
   document.querySelector("#sheet-dialog [data-close]").click(); await sleep(50);
-  check(document.getElementById("save-view").contains(document.getElementById("quick-article")) && document.getElementById("save-view").contains(document.getElementById("write-article")), "sheet sections return home on close");
+  check(document.getElementById("save-view").contains(document.getElementById("quick-article")) && document.getElementById("save-view").contains(document.getElementById("write-article")) && document.getElementById("save-view").contains(document.getElementById("shop-article")), "sheet sections return home on close");
   // Several saves and none chosen: the selector opens by itself, once.
   window.launcher.__navigateTo({ view: "strip" });
   window.launcher.__set({ selected_save: null, save_choice: { status: "CHOOSE", count: 2 }, emulator_saves: [{ path: "C:/fx/Lime3DS/sdmc/Nintendo 3DS/a/b/title/00040000/00055e00/data/00000001/main", emulator: "Lime3DS", game: "Y", modified: Math.floor(Date.now() / 1000) - 30 }, { path: "C:/fx/Azahar/sdmc/Nintendo 3DS/a/b/title/00040000/00175e00/data/00000001/main", emulator: "Azahar", game: "MN", modified: null }] }); await sleep(1300);
