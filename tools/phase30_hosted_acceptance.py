@@ -44,6 +44,11 @@ INSTALLERS = {
         "sha256_prefix": "975939d2",
         "sha256_suffix": "ea4301",
     },
+    "0.26.6": {
+        "bytes": 159337184,
+        "sha256_prefix": "4ae3962d",
+        "sha256_suffix": "ac6be2",
+    },
 }
 EXPECTED = {
     "before": {
@@ -75,6 +80,15 @@ EXPECTED = {
         "incidents": True,
         "feed": "feed",
         "launcher": "0.26.5",
+    },
+    # After 070: participant dead box command (115 routes); 0.26.6 is the
+    # download and the stable feed's offer.
+    "live_league": {
+        "routes": 115,
+        "division_required": ["A"],
+        "incidents": True,
+        "feed": "feed",
+        "launcher": "0.26.6",
     },
 }
 ZERO = "00000000-0000-4000-8000-000000000000"
