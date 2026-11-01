@@ -5,7 +5,7 @@ milestone record; it does not maintain a second live phase-status ledger.
 
 ## Current project position
 
-- Virtual Mints and Bottle Caps (2026-11-01): **IN PROGRESS, NOT PUBLISHED.**
+- Virtual Mints and Bottle Caps (2026-11-01): **BLOCKED, NOT PUBLISHED.**
   Integration and isolated safety gates implemented; a captured intermittent
   native legality rejection blocks final release. Continue only from the
   [authoritative live record](work-in-progress/final-corrections-live.md).

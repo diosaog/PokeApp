@@ -2,7 +2,9 @@
 
 ## Virtual Mints and Bottle Caps — 2026-11-01
 
-**IMPLEMENTED, NOT PUBLISHED. Final native acceptance is BLOCKING release.**
+**BLOCKED / NOT PUBLISHED. Implementation is committed and pushed on
+`codex/virtual-training-native-gate` (`9597c62`). Final native acceptance blocks
+release; do not merge or activate this feature yet.**
 The four preceding fixes (`662c3ea`, `f1d147c`) remain deployed and were not
 repeated. Production still uses API `c70f9bd9`, web `754550f9`, Supabase 073 and
 Launcher 0.26.8. No production migration, purchase or save has been changed for
@@ -39,6 +41,28 @@ this feature.
   as a fix. Original failures and raw inputs remain retained. Failure-only
   Release diagnostics are being exercised through actual service and NTFS
   workloads; legality rules have not been relaxed. Do not publish this candidate.
+- Subsequent diagnostics did **not** establish a fix: modified-diagnostic CLI
+  service 24/24 and journal 81 checks completed; the **unchanged original final
+  CLI** also completed service 24/24 and journal 81 checks under startup
+  EventPipe, with zero managed exceptions captured. A bounded replay of the
+  exact failed UM request completed 512 processes without rejection (509 traces;
+  three PID filenames were reused). These are marked diagnostic-only and do
+  not supersede the original failures. No functional legality correction has
+  been identified. Current source adds opt-in failure diagnostics which are
+  absent from the original `0.26.9-final` DLL `739ab360…`; rebuild after fixing.
+- Exact-payload disposable NSIS install/update **0.26.8 → 0.26.9: 8/8 PASS**
+  (`installed-update-final-2/`). Session marker, synthetic save, backups and
+  Electron state remain byte-identical. Updated runtime was started by the
+  isolated harness; this is not an owner's real-PC acceptance. First run's
+  harness failure is retained separately: CDP attachment took about 45 seconds,
+  exceeding its original deadline; core startup itself took about one second.
+  The harness now bounds/retries attachment and passes `/currentuser` to its
+  disposable uninstaller. Zero UpdateTest processes/registrations remain.
+- The Docker build now contains a final-image 24-case native-training gate with
+  an independent complete-PKM oracle. Its Windows replay passes; **Linux has
+  not run**, since no Railway build/deployment was started. All disposable
+  PostgreSQL clusters are stopped. Port 55674 can be resumed using
+  `074-pg-stopped.json` and `pg_ctl start`, never `initdb`.
 - Private evidence: `%LOCALAPPDATA%/PokeApp-migration-evidence/virtual-training/20261101/`.
   Backup `database/pre-release-20261101T144128Z.dump`, captured 14:41:51 UTC,
   SHA-256 `0d4980c6f40abd6b111d14686dee927e3e1a285beddebf2895dd173a4ce5829a`;
@@ -50,12 +74,16 @@ this feature.
   immutable 0.26.9 installer, full public size/SHA-512 readback, signed feed last;
   finally web download card 0.26.9. The public readback can use the guarded
   Railway SSH transport because direct workers.dev access times out here.
-  Its temporary key must be removed after publication or abandonment; private
-  config/proofs are in `railway-public-readback/`, host pin is initial TOFU.
+  Private config/proofs are in `railway-public-readback/`; host pin is initial
+  TOFU. The temporary Railway SSH registration and newly generated key files
+  were removed and absence verified (`cleanup.json`); preexisting keys remain.
+  A new temporary transport must be prepared if publication later needs it.
 
-Next: identify and fix the captured native intermittent rejection, then rebuild
-and pass final package/journal, real-service, Linux and installed-update gates;
-commit/push, publish and replace this pending entry with verified release IDs.
+Next: identify and fix the captured native intermittent rejection using its
+retained failing raw inputs; do not substitute another passing retry or repeat
+the preceding four fixes. Then rebuild and pass final package/journal,
+real-service, Linux and installed-update gates, refresh the two-hour backup if
+needed, publish and replace this blocked entry with verified release IDs.
 
 ## League, trainer profiles, navigation and held items — 2026-11-01
 
