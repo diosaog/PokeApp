@@ -79,6 +79,47 @@ this feature.
   were removed and absence verified (`cleanup.json`); preexisting keys remain.
   A new temporary transport must be prepared if publication later needs it.
 
+### Focused blocker follow-up (same review branch, no deployment)
+
+No functional correction or release clearance. Only the native diagnostic
+harness changed. It now supports `--case AS:gold --case UM:gold --repeat 8`,
+records verification preflight / native-process / response-contract /
+semantic-proof failures separately, and binds EventPipe files to unique call
+numbers instead of reusable process IDs. Focused runs cannot claim full-matrix
+acceptance. All real validation and consumption checks still execute.
+
+- Exact historical source copies were reconstructed at `exact-blocker-fixtures/`:
+  AS `d3fa62cc…c29c43`, UM `ff57f58e…bf15b`. Original evidence was not modified.
+- One finite targeted run (`blockers-focused-8/`) completed eight fresh AS/Gold
+  and eight fresh UM/Gold handoffs: 48 assertions, verified independent backups,
+  native readback and exactly-once spending; 192 native calls / 192 unique
+  EventPipe traces, zero managed exceptions. Every AS output equals the
+  original retained output `9cb09e02…35dd3`; every UM output is `b2a81134…def`.
+  `findings.json` explicitly says `NO_RECAPTURE_NOT_RESOLVED`, release_ready=false.
+- **AS narrowed:** the old `NATIVE_VERIFICATION_FAILED` occurred inside
+  `native.verify` after hash gates, not in the filesystem read/identity gates.
+  Exact journal recipe and bytes pass a fresh packaged handoff. Original child
+  response/inner exception was never captured, so process/transport, native
+  rejection, response-contract and semantic-proof branches remain unresolved.
+  Details: `as-boundary-probe-2/{assessment,result,calls}.json`.
+- **UM narrowed:** original rejection occurs after source integrity and target
+  checks, in legality analysis/new-invalid comparison, before output-save
+  serialization. Original-DLL reflection shows Parsed=true on both normal
+  targets and identical Encounter/Geography invalid findings. Gold preserves
+  EXP/level/Nature/met data and HT flags0. Controlled disposable cases prove
+  that !Parsed (suppressed NRE in NicknameVerifier) and a genuine new HT/IV
+  violation produce the same public error, but different managed stacks.
+  Neither control establishes the original cause. Details:
+  `um-semantic-discriminator/report.json`. No settings-init cycle was found.
+
+No full eight-game matrix was repeated: neither historical cause has been
+demonstrated or corrected. Next genuine failure must be captured with the
+focused harness, `--trace-native`, `POKEAPP_NATIVE_DIAGNOSTICS=1` and startup
+EventPipe on the diagnostic CLI. Inspect the matching raw response/stderr and
+`native-process-failure-*.json` / `verification-failure-*.json` stage, then decode
+that call's `.nettrace` with the retained eventpipe-stack-decoder. Do not repeat
+the prior 512 passing requests as a substitute for this missing discriminator.
+
 Next: identify and fix the captured native intermittent rejection using its
 retained failing raw inputs; do not substitute another passing retry or repeat
 the preceding four fixes. Then rebuild and pass final package/journal,

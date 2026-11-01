@@ -8,6 +8,7 @@ import argparse
 import base64
 from hashlib import sha256
 import json
+import os
 from pathlib import Path
 import subprocess
 import sys
@@ -22,13 +23,22 @@ def main():
     cli.add_argument("--packaged-core", type=Path)
     cli.add_argument("--trace-native", action="store_true", help="retain bounded native pipes for these synthetic fixtures")
     cli.add_argument("--diagnostic", action="store_true", help="record checks without treating this run as release acceptance")
+    cli.add_argument("--case", action="append", choices=[f"{game}:{effect}" for game in
+                     ("X", "Y", "OR", "AS", "SN", "MN", "US", "UM") for effect in ("mint", "silver", "gold")],
+                     help="run only selected isolated handoffs; excludes the full recovery matrix")
+    cli.add_argument("--repeat", type=int, default=1, help="fresh isolated copies per selected case (1-32)")
     args = cli.parse_args()
+    if not 1 <= args.repeat <= 32 or args.repeat != 1 and not args.case:
+        cli.error("--repeat must be 1-32 and repetitions require --case")
     output = args.out.resolve()
     if output.exists():
         raise ValueError("Use a fresh isolated evidence directory")
     output.mkdir(parents=True)
     report = {"status": "RUNNING", "checks": [], "packaged": bool(args.packaged_core),
-              "acceptance_gate": not args.diagnostic}
+              "acceptance_gate": not (args.diagnostic or args.case),
+              "scope": "focused handoffs" if args.case else "full matrix",
+              "native_files_sha256": {p.name: sha256(p.read_bytes()).hexdigest() for p in
+                  (args.native, args.native.with_suffix(".dll"), args.native.parent / "PKHeX.Core.dll") if p.is_file()}}
     if args.packaged_core:
         from tools.validate_shop_delivery_package import PackagedApplication, portable_code
         importer = PackagedApplication(args.packaged_core)
@@ -73,10 +83,15 @@ def main():
 
         def traced_popen(command, *values, **options):
             nonlocal counter
-            child = original_popen(command, *values, **options)
             counter += 1
             mode = command[1].lstrip("-") if len(command) > 1 else "read-save"
             prefix = f"{counter:05d}-{mode}"
+            if os.environ.get("DOTNET_EnableEventPipe") == "1":
+                # PIDs can be reused: bind each trace to its unique invocation.
+                environment = dict(options.get("env") or os.environ)
+                environment["DOTNET_EventPipeOutputPath"] = str(trace / (prefix + ".nettrace"))
+                options["env"] = environment
+            child = original_popen(command, *values, **options)
             (trace / (prefix + ".process.json")).write_text(json.dumps(
                 {"pid": child.pid, "command": command}), encoding="utf8")
             for name, extension, limit in (("stdin", "request.json", 2 * 1024 * 1024),
@@ -98,6 +113,48 @@ def main():
     from app.launcher.write_files import WindowsWriteFiles, WriteSafetyError
     from app.save_parser.writer import PkhexProcessWriter
 
+    failure_sequence = 0
+
+    class RecordedWriter(PkhexProcessWriter):
+        """Keep real validation intact; retain the lost AS failure boundary."""
+        def _run(self, mode, request):
+            nonlocal failure_sequence
+            self.proof_stage = "native_process:" + mode
+            try:
+                response = super()._run(mode, request)
+            except Exception as error:
+                if args.trace_native:
+                    failure_sequence += 1
+                    (output / f"native-process-failure-{failure_sequence:03d}.json").write_text(
+                        json.dumps(dict(stage=self.proof_stage, error_type=type(error).__name__,
+                            error_code=getattr(error, "code", None), intent=request.get("intent")), indent=2), encoding="utf8")
+                raise
+            self.proof_response = {k: v for k, v in response.items() if k != "output_base64"}
+            return response
+
+        def _validate(self, response, source, output, intent, status):
+            self.proof_stage = "response_contract"
+            super()._validate(response, source, output, intent, status)
+            self.proof_stage = "semantic_proof"
+
+        def verify(self, original, persisted, intent, prepared):
+            nonlocal failure_sequence
+            self.proof_stage, self.proof_response = "preflight", None
+            try:
+                return super().verify(original, persisted, intent, prepared)
+            except Exception as error:
+                if args.trace_native:
+                    failure_sequence += 1
+                    detail = dict(stage=self.proof_stage, error_type=type(error).__name__,
+                        error_code=getattr(error, "code", None), intent=intent.to_payload(),
+                        source_sha256=sha256(original).hexdigest(), persisted_sha256=sha256(persisted).hexdigest(),
+                        prepared_source_sha256=prepared.source_hash, prepared_output_sha256=prepared.output_hash,
+                        prepared_contract=prepared.contract, prepared_semantic_diff=prepared.semantic_diff,
+                        native_response=self.proof_response)
+                    (output / f"verification-failure-{failure_sequence:03d}.json").write_text(
+                        json.dumps(detail, indent=2), encoding="utf8")
+                raise
+
     def check(ok, label):
         if not ok:
             raise AssertionError(label)
@@ -109,7 +166,7 @@ def main():
             self.sid, self.tid, self.purchase, self.entity = (str(uuid4()) for _ in range(4))
             self.source, self.template = source, template
             self.operations, self.consumed, self.lost_reserve, self.lost_complete = {}, 0, False, False
-            self.writer = PkhexProcessWriter(args.native)
+            self.writer = RecordedWriter(args.native)
 
         def reserve(self, op, request):
             if self.consumed:
@@ -159,7 +216,7 @@ def main():
         directory.mkdir()
         target = directory / "main"
         target.write_bytes(source)
-        engine = LocalWriteEngine(directory / "profile", PkhexProcessWriter(args.native),
+        engine = LocalWriteEngine(directory / "profile", RecordedWriter(args.native),
             files=WindowsWriteFiles(process_names=lambda: processes or []), fault_hook=fault)
         controller = LocalWriteController(SaveActivityGate(), lambda: str(target), engine)
         server = Server(source, template)
@@ -175,9 +232,13 @@ def main():
         return source, target, engine, controller, server, flow, payload
 
     try:
-        for game in ("X", "Y", "OR", "AS", "SN", "MN", "US", "UM"):
-            for effect in ("mint", "silver", "gold"):
-                source, target, engine, controller, server, flow, payload = case(game, effect)
+        selected = [tuple(item.split(":")) for item in args.case] if args.case else [
+            (game, effect) for game in ("X", "Y", "OR", "AS", "SN", "MN", "US", "UM")
+            for effect in ("mint", "silver", "gold")]
+        for repetition in range(args.repeat):
+            for game, effect in selected:
+                suffix = f"-repeat-{repetition + 1:02d}" if args.case else ""
+                source, target, engine, controller, server, flow, payload = case(game, effect, suffix)
                 result = flow.apply(payload)
                 check(result["status"] == "APPLIED" and server.consumed == 1, f"{game} {effect}: real journal + native write + independent result verification spends once")
                 native_id = flow._records()[0]["native_id"]
@@ -191,6 +252,10 @@ def main():
                 else:
                     raise AssertionError("second click unexpectedly accepted")
                 check(target.read_bytes() == before and server.consumed == 1, f"{game} {effect}: second click cannot edit/spend twice")
+
+        if args.case:
+            report["status"] = "PASS"
+            return
 
         source, target, engine, controller, server, flow, payload = case("Y", "silver", "-lost-reserve")
         server.lost_reserve = True
@@ -222,7 +287,7 @@ def main():
                 pass
             check(server.consumed == 0 and flow.pending() and controller.gate.recovery_required,
                   f"{game} crash after publication does not release or consume uncertain purchase")
-            fresh = LocalWriteEngine(engine.profile, PkhexProcessWriter(args.native), files=WindowsWriteFiles(process_names=lambda: []))
+            fresh = LocalWriteEngine(engine.profile, RecordedWriter(args.native), files=WindowsWriteFiles(process_names=lambda: []))
             recovered_controller = LocalWriteController(SaveActivityGate(), lambda: str(target), fresh)
             recovered_controller.reconcile()
             recovered = LauncherTraining(recovered_controller, server, trainer_id=server.tid)
