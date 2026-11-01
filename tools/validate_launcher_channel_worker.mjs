@@ -174,8 +174,8 @@ try {
       `no listing or traversal: ${p}`, r.status); // prettier-ignore
   }
   const missing = await get("/launcher/updates/private/9.9.9.exe");
-  check(missing.status === 503 && missing.headers.get("cache-control") === "no-store",
-    "unpublished version: 503, no-store, nothing cached"); // prettier-ignore
+  check(missing.status === 404 && missing.headers.get("cache-control") === "no-store",
+    "unpublished version: 404, no-store, nothing cached"); // prettier-ignore
 
   // The shipped updater, end to end through the Worker.
   const manifest = updater.verifyManifest(JSON.parse(feedBody), fs.readFileSync(keys.publicFile, "utf8"), {

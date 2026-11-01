@@ -3,6 +3,36 @@ using PokeApp.Parser;
 using System.Text.Json;
 using static System.Buffers.Binary.BinaryPrimitives;
 
+if (args.Length == 3 && args[0] == "--training-runtime-fixtures")
+{
+    ChecksRuntimeSmoke.Export(args[1], args[2]);
+    return;
+}
+
+if (args.Length == 3 && args[0] == "--training-checks")
+{
+    TrainingChecks.Run(args[1], args[2]);
+    return;
+}
+
+if (args.Length == 3 && args[0] == "--training-signature-checks")
+{
+    TrainingChecks.SignatureRegression(args[1], args[2]);
+    return;
+}
+
+if (args.Length == 3 && args[0] == "--training-service-fixtures")
+{
+    TrainingChecks.ExportServiceFixtures(args[1], args[2]);
+    return;
+}
+
+if (args.Length == 3 && args[0] == "--training-foreign-fixture")
+{
+    TrainingChecks.ExportForeignFixture(args[1], args[2]);
+    return;
+}
+
 if (args.Length == 3 && args[0] == "--party-transfer-checks")
 {
     PartyTransferChecks.Run(args[1], args[2]);

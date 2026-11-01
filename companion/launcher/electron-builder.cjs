@@ -82,6 +82,7 @@ module.exports = {
     "assets/fonts/rubik-latin-wght.woff2",
     "assets/fonts/OFL.txt",
     "quantity.js",
+    "training.js",
     "updater.cjs",
     "webview.cjs",
     "confirmations.cjs",

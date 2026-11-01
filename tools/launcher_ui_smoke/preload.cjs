@@ -1,6 +1,7 @@
 // Test double for window.launcher: fixed state, records requested actions.
-const { contextBridge } = require("electron");
+const { contextBridge, ipcRenderer } = require("electron");
 const calls = [];
+const training = require("../../companion/launcher/training.js");
 let enabled = true;
 let navigate = null;
 let overrides = {};
@@ -139,7 +140,9 @@ const base = () => ({
         name: "Chapa Plateada",
         mode: "bag",
         state: "READY",
-        options: [{ code: "bottle_cap", name: "Chapa Plateada", compatible: false }],
+        options: [
+          { code: "bottle_cap", name: "Chapa Plateada", compatible: false },
+        ],
       },
       {
         purchase_id: "c0000000-0000-4000-8000-000000000003",
@@ -193,6 +196,8 @@ const state = () => ({ ...base(), ...overrides });
 // like the real IPC does.
 let core = { status: "READY", message: "", stalled: false };
 contextBridge.exposeInMainWorld("launcher", {
+  __trainingCapture: (label) =>
+    ipcRenderer.invoke("smoke:training-capture", label),
   state: async () => {
     if (core.status !== "READY") throw new Error(core.message);
     return state();
@@ -212,6 +217,11 @@ contextBridge.exposeInMainWorld("launcher", {
     calls.push(["delivery", ...args]),
     { status: "QUEUED" }
   ),
+  trainingList: async () => (calls.push(["training-list"]), { status: "DONE" }),
+  trainingApply: async (...args) => (
+    calls.push(["training-apply", ...args]),
+    { status: "QUEUED" }
+  ),
   addQuickItem: async (...args) => (calls.push(args), { status: "QUEUED" }),
   transfer: async (...args) => (
     calls.push(["transfer", ...args]),
@@ -220,7 +230,11 @@ contextBridge.exposeInMainWorld("launcher", {
   // Like the core: the search updates its own state before it answers.
   discoverSaves: async () => {
     if (discoverReply.saves)
-      overrides = { ...overrides, emulator_saves: discoverReply.saves, discovery: discoverReply.discovery };
+      overrides = {
+        ...overrides,
+        emulator_saves: discoverReply.saves,
+        discovery: discoverReply.discovery,
+      };
     return discoverReply;
   },
   __discover: (reply) => {
@@ -260,6 +274,9 @@ contextBridge.exposeInMainWorld("launcher", {
         kind === "transfer:apply" ? "Aplicar tu parte del robo" : "Confirmar",
       detail: "",
       go: "Confirmar",
+      ...(kind === "training"
+        ? training.summary(state(), training.parse(target))
+        : {}),
       facts: [["Juego", "Y (desde main)"]],
     }
   ),

@@ -436,6 +436,10 @@ def rehearse(args) -> dict:
                 from tools.validate_phase073_league import validate as validate_073
 
                 report["phase073"] = validate_073(pg)
+            if migration.name.startswith("074_"):
+                from tools.validate_phase074_training import validate as validate_074
+
+                report["phase074"] = validate_074(pg)
 
         rows_after = local_fingerprints(pg, public_tables)
         # 072 adds the private item_deliveries table, its commands and the

@@ -5,12 +5,13 @@ from __future__ import annotations
 import base64
 import binascii
 import json
+import re
 import subprocess
 import threading
 from hashlib import sha256
 from pathlib import Path
 
-from app.launcher.write_engine import PreparedNative, WriteIntent
+from app.save_parser.write_models import PreparedNative, WriteIntent
 from app.save_parser.native_sizes import NATIVE_SIZES
 
 WRITER_VERSION = "pokeapp-writer/1;pkhex/24.11.11"
@@ -33,6 +34,8 @@ ERRORS = frozenset(
         "INVENTORY_LIMIT",
         "INVENTORY_FULL",
         "LAST_PARTY_MEMBER",
+        "TRAINING_NO_CHANGE",
+        "TRAINING_LEGALITY_UNSUPPORTED",
     }
 )
 QUICK_ITEMS = ("rare_candy", "heart_scale")
@@ -240,6 +243,8 @@ class PkhexProcessWriter:
             "signature_valid": True,
         }
         actual_diff = response["semantic_diff"]
+        if payload["mutation"].get("kind") == "virtual_training":
+            expected_diff = PkhexProcessWriter._training_diff(payload["mutation"], actual_diff)
         if (
             response["status"] != status
             or response["game"] != payload["game"]
@@ -256,6 +261,83 @@ class PkhexProcessWriter:
             )
         ):
             raise NativeWriteError("VERIFICATION_FAILED")
+
+    @staticmethod
+    def _training_diff(mutation, diff):
+        extra = {"before_nature", "after_nature", "before_ivs", "after_ivs",
+                 "target_pid", "target_ec", "before_pokemon_sha256", "after_pokemon_sha256",
+                 "legality_warnings_before", "legality_warnings_after",
+                 "hidden_power_before", "hidden_power_after"}
+        flags = {"preserved_unrelated": True, "checksums_valid": True, "signature_valid": True}
+        if not isinstance(diff, dict) or set(diff) != set(mutation) | extra | set(flags):
+            raise NativeWriteError("VERIFICATION_FAILED")
+        before, after = mutation.get("expected_ivs"), diff["after_ivs"]
+        if (not isinstance(before, list) or len(before) != 6
+            or any(type(v) is not int or not 0 <= v <= 31 for v in before)):
+            raise NativeWriteError("VERIFICATION_FAILED")
+        expected_ivs = before.copy()
+        expected_nature = mutation.get("expected_nature")
+        if mutation.get("item_code") == "menta_naturaleza":
+            expected_nature = mutation.get("nature_id")
+        elif mutation.get("item_code") == "chapa_plateada":
+            stats = ("hp", "atk", "defense", "spa", "spd", "spe")
+            if mutation.get("stat") not in stats:
+                raise NativeWriteError("VERIFICATION_FAILED")
+            expected_ivs[stats.index(mutation["stat"])] = 31
+        elif mutation.get("item_code") == "chapa_dorada":
+            expected_ivs = [31] * 6
+        else:
+            raise NativeWriteError("VERIFICATION_FAILED")
+        if (type(expected_nature) is not int or not 0 <= expected_nature <= 24
+            or type(diff["before_nature"]) is not int or type(diff["after_nature"]) is not int
+            or diff["before_nature"] != mutation.get("expected_nature")
+            or diff["after_nature"] != expected_nature
+            or not isinstance(diff["before_ivs"], list) or not isinstance(after, list)
+            or diff["before_ivs"] != before or after != expected_ivs
+            or any(type(v) is not int for v in diff["before_ivs"] + after)
+            or diff["before_pokemon_sha256"] != mutation.get("expected_pokemon_sha256")
+            or not re.fullmatch(r"[a-f0-9]{64}", str(diff["after_pokemon_sha256"]))
+            or diff["after_pokemon_sha256"] == diff["before_pokemon_sha256"]
+            or any(type(diff[k]) is not int or not 0 <= diff[k] <= 0xffffffff for k in ("target_pid", "target_ec"))
+            or any(type(diff[k]) is not int or not 0 <= diff[k] <= 15 for k in ("hidden_power_before", "hidden_power_after"))
+            or any(not isinstance(diff[k], list) or len(diff[k]) > 200 or
+                   any(not isinstance(v, str) or len(v) > 2048 for v in diff[k])
+                   for k in ("legality_warnings_before", "legality_warnings_after"))):
+            raise NativeWriteError("VERIFICATION_FAILED")
+        return mutation | flags | {k: diff[k] for k in extra}
+
+    def inspect_training(self, source, location, box_index, slot_index):
+        """Read-only target fingerprint and actual values, from these exact bytes."""
+        if (type(source) is not bytes or len(source) not in NATIVE_SIZES.values()
+            or location not in ("party", "box") or type(slot_index) is not int
+            or not 0 <= slot_index < (6 if location == "party" else 30)
+            or (box_index is not None if location == "party" else
+                type(box_index) is not int or not 0 <= box_index < 32)):
+            raise NativeWriteError("INVALID_REQUEST")
+        response = self._run("--inspect-training", dict(schema_version=1,
+            source_base64=base64.b64encode(source).decode("ascii"), location=location,
+            box_index=box_index, slot_index=slot_index))
+        info = response["semantic_diff"]
+        keys = {"location", "box_index", "slot_index", "pokemon_sha256", "nature", "ivs",
+                "target_pid", "target_ec", "is_egg", "legality_warnings", "hidden_power_type"}
+        if (response["status"] != "inspected" or response["source_sha256"] != _digest(source)
+            or response["game"] not in NATIVE_SIZES or not re.fullmatch(r"[a-f0-9]{64}", str(response["trainer_key"]))
+            or response["output_base64"] is not None or response["output_sha256"] is not None
+            or not isinstance(info, dict) or set(info) != keys
+            or (info["location"], info["box_index"], info["slot_index"]) != (location, box_index, slot_index)
+            or type(info["box_index"]) is not type(box_index) or type(info["slot_index"]) is not int
+            or not re.fullmatch(r"[a-f0-9]{64}", str(info["pokemon_sha256"]))
+            or type(info["nature"]) is not int or not 0 <= info["nature"] <= 24
+            or not isinstance(info["ivs"], list) or len(info["ivs"]) != 6
+            or any(type(v) is not int or not 0 <= v <= 31 for v in info["ivs"])
+            or type(info["is_egg"]) is not bool
+            or any(type(info[k]) is not int or not 0 <= info[k] <= 0xffffffff for k in ("target_pid", "target_ec"))
+            or type(info["hidden_power_type"]) is not int or not 0 <= info["hidden_power_type"] <= 15
+            or not isinstance(info["legality_warnings"], list) or len(info["legality_warnings"]) > 200
+            or any(not isinstance(v, str) or len(v) > 2048 for v in info["legality_warnings"])):
+            raise NativeWriteError("VERIFICATION_FAILED")
+        return {"game": response["game"], "trainer_key": response["trainer_key"],
+                "source_sha256": response["source_sha256"], **info}
 
     def plan_transfer(
         self,

@@ -82,6 +82,7 @@ EXPECTED_MIGRATIONS = [
     "071_preseason_shop.sql",
     "072_shop_item_delivery.sql",
     "073_single_day_league_rules.sql",
+    "074_virtual_training.sql",
 ]
 
 FORBIDDEN_TOKENS = [

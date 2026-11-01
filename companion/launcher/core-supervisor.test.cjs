@@ -238,6 +238,23 @@ test("a state that says a write is busy also protects the core", async () => {
   assert.notEqual(spawned[0].killed, true);
 });
 
+for (const command of ["training_list", "training_apply"]) {
+  test(`a silent core is never killed during ${command} or its reconciliation`, async () => {
+    const { supervisor, spawned, clock } = setup();
+    supervisor.start();
+    spawned[0].event("READY");
+    await flush();
+    void supervisor.request(command, {}).catch(() => {});
+    for (let i = 0; i < 60; i++) {
+      void supervisor.request("state").catch(() => {});
+      await clock.advance(1000);
+    }
+    assert.notEqual(spawned[0].killed, true);
+    assert.equal(supervisor.snapshot().stalled, true);
+    assert.equal(spawned.length, 1);
+  });
+}
+
 test("closing: a ready core finishes by itself; a starting one is ended; nothing restarts", async () => {
   const ready = setup();
   ready.supervisor.start();

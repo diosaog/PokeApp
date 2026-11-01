@@ -50,6 +50,8 @@ public static class NativeWrite
                 return NativeTransfer.Execute(root, verify);
             if (Text(root.GetProperty("intent").GetProperty("mutation"), "kind") is "add_item" or "deliver_item")
                 return NativeItems.Execute(root, verify);
+            if (Text(root.GetProperty("intent").GetProperty("mutation"), "kind") == "virtual_training")
+                return NativeTraining.Execute(root, verify);
             var intent = ParseIntent(root.GetProperty("intent"));
             var original = Bytes(root, "source_base64");
             var source = Validate(original);

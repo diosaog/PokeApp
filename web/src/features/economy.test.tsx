@@ -671,7 +671,7 @@ const objectPurchase = (
   ...overrides,
 });
 
-it("072: the Shop says what each item is for and never sells what the league game lacks", () => {
+it("the Shop offers virtual Mints and Caps in Y and distinguishes ordinary bag objects", () => {
   mocks.shop = {
     balance: "100",
     season_status: "active",
@@ -686,10 +686,11 @@ it("072: the Shop says what each item is for and never sells what the league gam
         description: "Entrena una estadística al máximo.",
         base_price: 6,
         use: {
-          mode: "bag",
-          games: [...gen7],
-          compatible: false,
-          reason: "ITEM_INCOMPATIBLE_WITH_GAME",
+          mode: "training",
+          training_effect: "iv",
+          games: [...all],
+          compatible: true,
+          reason: null,
           options: [],
         },
       },
@@ -701,10 +702,11 @@ it("072: the Shop says what each item is for and never sells what the league gam
         description: "Cambia la naturaleza.",
         base_price: 6,
         use: {
-          mode: "unavailable",
-          games: [],
-          compatible: false,
-          reason: "ITEM_NOT_USABLE",
+          mode: "training",
+          training_effect: "nature",
+          games: [...all],
+          compatible: true,
+          reason: null,
           options: [],
         },
       },
@@ -732,17 +734,19 @@ it("072: the Shop says what each item is for and never sells what the league gam
   );
   fireEvent.click(screen.getByRole("button", { name: "Crianza" }));
   expect(
-    screen.getByRole("button", { name: "No existe en tu juego" }),
-  ).toBeDisabled();
+    screen.queryByRole("button", { name: "No existe en tu juego" }),
+  ).not.toBeInTheDocument();
+  expect(screen.getByText(/maximiza un IV real a 31/)).toBeInTheDocument();
   expect(
-    screen.getByText(/Solo existe en Sol, Luna, Ultrasol y Ultraluna\./),
-  ).toBeInTheDocument();
-  expect(screen.getByRole("button", { name: "No disponible" })).toBeDisabled();
+    screen.queryByRole("button", { name: "No disponible" }),
+  ).not.toBeInTheDocument();
   expect(
-    screen.getByText("No existe en los juegos de 3DS."),
+    screen.getByText(/cambia la naturaleza real de un Pokémon/),
   ).toBeInTheDocument();
-  expect(screen.getByRole("button", { name: "Comprar" })).toBeEnabled();
-  expect(screen.getByText("Para tu Pokémon Y")).toBeInTheDocument();
+  expect(screen.getAllByRole("button", { name: "Comprar" })).toHaveLength(3);
+  for (const button of screen.getAllByRole("button", { name: "Comprar" }))
+    expect(button).toBeEnabled();
+  expect(screen.getAllByText("Para tu Pokémon Y")).toHaveLength(3);
   expect(
     screen.getByText(
       /PokeApp Launcher lo añade a la bolsa de tu partida\. Existe en los 8 juegos de 3DS\./,
@@ -792,7 +796,7 @@ it("072: a pending object is added to the bag from PokeApp Launcher 0.26.8, once
   expect(mocks.execute).not.toHaveBeenCalled();
 });
 
-it("072: delivered, in delivery and incompatible purchases each say where they are", () => {
+it("delivered and pending bag objects keep their state, while an old Silver Cap becomes usable", () => {
   mocks.inventory = {
     targets: [],
     physical_items: true,
@@ -848,11 +852,67 @@ it("072: delivered, in delivery and incompatible purchases each say where they a
   ).toBeInTheDocument();
   expect(
     screen.getByText(
-      /No existe en tu Pokémon Y\. El administrador puede devolverte sus monedas\./,
+      /Usa Chapa Plateada desde tu inventario en PokeApp Launcher 0.26.9 o posterior\./,
     ),
   ).toBeInTheDocument();
   expect(screen.queryByText("Sin canje disponible.")).not.toBeInTheDocument();
 });
+
+it.each([
+  ["menta_naturaleza", "Menta de Naturaleza", "nature"],
+  ["chapa_plateada", "Chapa Plateada", "iv"],
+  ["chapa_dorada", "Chapa Dorada", "ivs"],
+] as const)(
+  "virtual %s opens its native wizard only in Launcher 0.26.9 or later",
+  (code, name, effect) => {
+    mocks.inventory = {
+      targets: [],
+      physical_items: true,
+      league_game: "Y",
+      purchases: [
+        objectPurchase({
+          item_code: code,
+          item_name: name,
+          use: {
+            mode: "training",
+            training_effect: effect,
+            games: [...all],
+            compatible: true,
+            reason: null,
+            options: [],
+          },
+        }),
+      ],
+    };
+    for (const version of ["0.26.8", "0.26.9", "0.27.0"]) {
+      const agent = vi
+        .spyOn(navigator, "userAgent", "get")
+        .mockReturnValue(`Mozilla/5.0 PokeAppLauncher/${version}`);
+      const view = render(
+        <MemoryRouter>
+          <Inventory />
+        </MemoryRouter>,
+      );
+      if (version === "0.26.8") {
+        expect(
+          screen.getByText(new RegExp(`Actualiza PokeApp Launcher.*${name}`)),
+        ).toBeInTheDocument();
+        expect(
+          screen.queryByRole("link", { name: `Usar ${name}` }),
+        ).not.toBeInTheDocument();
+      } else
+        expect(
+          screen.getByRole("link", { name: `Usar ${name}` }),
+        ).toHaveAttribute("href", `/escritorio/entrenamiento/${code}`);
+      expect(
+        screen.queryByRole("link", { name: "Añadir a la bolsa" }),
+      ).not.toBeInTheDocument();
+      view.unmount();
+      agent.mockRestore();
+    }
+    expect(mocks.execute).not.toHaveBeenCalled();
+  },
+);
 
 it("072: Captura Extra is used once from the inventory, not sent to the bag", async () => {
   mocks.inventory = {
@@ -885,4 +945,43 @@ it("072: Captura Extra is used once from the inventory, not sent to the bag", as
       {},
     ),
   );
+});
+
+it("reserved virtual training stays separate from a bag delivery and opens its recovery panel", () => {
+  mocks.inventory = {
+    targets: [],
+    physical_items: true,
+    league_game: "Y",
+    purchases: [
+      objectPurchase({
+        id: "old-purchase",
+        item_code: "chapa_plateada",
+        item_name: "Chapa Plateada",
+        purchase_season_id: "old-season",
+        training_status: "RESERVED",
+        use: {
+          mode: "training",
+          training_effect: "iv",
+          games: [...all],
+          compatible: true,
+          reason: null,
+          options: [],
+        },
+      }),
+    ],
+  };
+  vi.spyOn(navigator, "userAgent", "get").mockReturnValue(
+    "Mozilla/5.0 PokeAppLauncher/0.26.9",
+  );
+  render(
+    <MemoryRouter>
+      <Inventory />
+    </MemoryRouter>,
+  );
+  expect(screen.getByText("Aplicándose")).toBeInTheDocument();
+  expect(
+    screen.getByRole("link", { name: "Comprobar aplicación" }),
+  ).toHaveAttribute("href", "/escritorio/entrenamiento/chapa_plateada");
+  expect(screen.queryByText("Entregándose")).not.toBeInTheDocument();
+  expect(mocks.execute).not.toHaveBeenCalled();
 });

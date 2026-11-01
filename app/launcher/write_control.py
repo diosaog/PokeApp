@@ -80,6 +80,10 @@ class LocalWriteController:
 
         try:
             with self.engine._db() as db:
+                if db.execute("SELECT 1 FROM sqlite_master WHERE type='table' AND name='training_bindings'").fetchone():
+                    if any(json.loads(row[0]).get("state") not in ("APPLIED", "RELEASED") for row in db.execute("SELECT record FROM training_bindings")):
+                        from app.launcher.training import TRAINING_PENDING_NOTICE
+                        return TRAINING_PENDING_NOTICE
                 if not db.execute(
                     "SELECT 1 FROM sqlite_master WHERE type='table' AND name='transfer_bindings'"
                 ).fetchone():
@@ -234,7 +238,7 @@ class LocalWriteController:
             self._description = description
         self.gate.recovery_required = any(
             r.status in ("RECOVERY_REQUIRED", "PREPARED") for r in pending
-        )
+        ) or self._transfer_notice() is not None
         if self.engine is not None and hasattr(self.engine, "backups_for"):
             self._backups = self.engine.backups_for(self.selected())
             self._backup_selection = self.selected()
@@ -290,6 +294,11 @@ class LocalWriteController:
     @staticmethod
     def _describe(intent):
         change = intent.mutation
+        if change.get("kind") == "virtual_training":
+            names = {"menta_naturaleza": "Menta de Naturaleza", "chapa_plateada": "Chapa Plateada", "chapa_dorada": "Chapa Dorada"}
+            if change.get("item_code") not in names:
+                raise WriteSafetyError("INVALID_WRITE_INTENT")
+            return f"Aplicar {names[change['item_code']]} al Pokémon confirmado. Cambia sus valores reales; se conserva una copia independiente y se verifica el resultado."
         if change.get("kind") == "revive":
             if (
                 change.get("location") != "box"
@@ -401,7 +410,7 @@ class LocalWriteController:
             for receipt in pending:
                 self._record(self.engine.reconcile(receipt.operation_id))
             if not pending:
-                self.gate.recovery_required = False
+                self.gate.recovery_required = self._transfer_notice() is not None
         return self.state()
 
     # Export is deliberately kept on the same serialized controller seam as

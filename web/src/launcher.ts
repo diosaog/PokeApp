@@ -12,6 +12,19 @@ export const insideLauncher = () =>
 export const infiniteItemPath = (item: string) => `/escritorio/objetos/${item}`;
 // 072: the same native items sheet lists the paid Shop objects for the bag.
 export const shopObjectsPath = "/escritorio/objetos";
+export const trainingPath = "/escritorio/entrenamiento";
+export const trainingItemPath = (code: string) =>
+  ["menta_naturaleza", "chapa_plateada", "chapa_dorada"].includes(code)
+    ? `${trainingPath}/${code}`
+    : trainingPath;
+export function launcherTrainsPokemon() {
+  const version = /PokeAppLauncher\/(\d+)\.(\d+)\.(\d+)/.exec(
+    typeof navigator === "undefined" ? "" : navigator.userAgent,
+  );
+  if (!version) return false;
+  const [major, minor, patch] = version.slice(1).map(Number);
+  return major > 0 || minor > 26 || (minor === 26 && patch >= 9);
+}
 // Launchers from 0.26.8 deliver Shop objects; older ones only show the free items.
 export function launcherDeliversShopObjects() {
   const version = /PokeAppLauncher\/(\d+)\.(\d+)\.(\d+)/.exec(

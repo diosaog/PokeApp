@@ -21,6 +21,7 @@ from app.launcher.core import LauncherCore
 from app.launcher.diagnostics import failure
 from app.launcher.emulator_qualification import qualification_status
 from app.launcher.item_delivery import DeliveryRefused, DeliveryRemote, LauncherDeliveries
+from app.launcher.training import LauncherTraining, TrainingRemote, validate_arguments as valid_training_arguments
 from app.launcher.journal import LocalConflict
 # Imported here, not inside the quick step: a module missing from the packaged
 # core then stops the build's own checks instead of every «Objetos ∞» read
@@ -69,6 +70,7 @@ QUICK_ERRORS = {
 QUICK_READ_FAILED = "No se pudieron leer las cantidades de tu partida. Pulsa «Volver a leer las cantidades»."
 # 072: paid Shop objects into the bag (app/launcher/item_delivery.py).
 DELIVERY_COMMANDS = ("deliveries_refresh", "delivery_apply")
+TRAINING_COMMANDS = ("training_list", "training_apply")
 DELIVERY_ERRORS = {
     "ITEM_NOT_IN_GAME": "Ese objeto no existe en el juego de esta partida.",
     "ITEM_INCOMPATIBLE_WITH_GAME": "Ese objeto no existe en el juego de esta partida.",
@@ -190,6 +192,7 @@ class LauncherRuntime:
         self.next_cloud_refresh = 0.0
         self.local_commands, self.cloud_commands = Queue(maxsize=1), Queue(maxsize=1)
         self.write_commands = Queue(maxsize=1)
+        self._next_training_recovery = 0.0
         self.value = {
             "local_status": "NO_SAVE",
             "receipt_id": None,
@@ -230,6 +233,10 @@ class LauncherRuntime:
             "delivery_error": None,
             "delivery_result": None,
             "delivery_seq": 0,
+            "training": None,
+            "training_error": None,
+            "training_result": None,
+            "training_seq": 0,
             "emulator_saves": [],
             # What the last search checked, so «no saves» can say why.
             "discovery": None,
@@ -445,6 +452,14 @@ class LauncherRuntime:
             except Full:
                 return {"status": "BUSY"}
             return {"status": "QUEUED"}
+        if name in TRAINING_COMMANDS:
+            if not (args == {} if name == "training_list" else valid_training_arguments(args)):
+                raise ValueError("invalid_training_arguments")
+            try:
+                self.write_commands.put_nowait((name, dict(args)))
+            except Full:
+                return {"status": "BUSY"}
+            return {"status": "QUEUED"}
         if name in DELIVERY_COMMANDS:
             if name == "deliveries_refresh":
                 valid = args == {}
@@ -508,6 +523,7 @@ class LauncherRuntime:
                 self._web_token = None
                 self._web_token_wanted = False
                 self._web_signed_out = True
+                self.value.update(training=None, training_error=None, training_result=None)
         try:
             queue.put_nowait((name, args))
         except Full:
@@ -632,6 +648,12 @@ class LauncherRuntime:
                 pass
             except Exception:  # noqa: BLE001 - sanitized local boundary
                 self._patch(write_error=self._unexpected_write_failure())
+            if time.monotonic() >= self._next_training_recovery:
+                self._next_training_recovery = time.monotonic() + 10
+                try:
+                    self._recover_training()
+                except Exception:  # recovery uncertainty never enables sync
+                    self._settle_recovery()
             try:
                 self._local_step()
             except SaveBusy:
@@ -735,6 +757,89 @@ class LauncherRuntime:
         remote = DeliveryRemote(self.session, season["id"])
         flow = LauncherDeliveries(self.writes, remote, trainer_id=principal.trainer_id)
         return flow, remote, data.get("season_link") or {}
+
+    def _training_context(self):
+        principal = self.session._principal
+        with self.lock:
+            data = (deepcopy(self.value.get("cloud")) or {}).get("data") or {}
+        season = data.get("season")
+        if principal is None or not season:
+            raise WriteSafetyError("TRAINING_CONTEXT_UNAVAILABLE")
+        remote = TrainingRemote(self.session, season["id"])
+        return LauncherTraining(self.writes, remote, trainer_id=principal.trainer_id), remote, data.get("season_link") or {}
+
+    def _training_finished(self, result):
+        self._patch(training_result={**result, "at": time.time_ns()})
+        self.next_cloud_refresh = 0
+        self._cloud_wake.set()
+        self._load_local()
+
+    def _recover_training(self):
+        engine = self.writes.engine
+        principal = self.session._principal
+        if engine is None or principal is None:
+            return
+        with engine._db() as db:
+            if not db.execute("SELECT 1 FROM sqlite_master WHERE type='table' AND name='training_bindings'").fetchone():
+                return
+            records = [json.loads(r[0]) for r in db.execute("SELECT record FROM training_bindings")]
+        pending = [r for r in records if r["state"] not in ("APPLIED", "RELEASED") and r["trainer_id"] == principal.trainer_id]
+        if not pending:
+            return
+        if any(r.status in ("PREPARED", "RECOVERY_REQUIRED") for r in engine.pending()):
+            self.writes.reconcile()
+        for sid in sorted({r["season_id"] for r in pending}):
+            flow = LauncherTraining(self.writes, TrainingRemote(self.session, sid), trainer_id=principal.trainer_id)
+            settled = flow.settle()
+            for operation in settled["completed"]:
+                record = next(r for r in pending if r["operation_id"] == operation)
+                self._training_finished(dict(status="APPLIED", operation_id=operation, purchase_id=record["args"]["purchase_id"]))
+
+    def _training_step(self, name, args):
+        if name == "training_apply":
+            self._patch(training_result=None)
+        try:
+            flow, remote, link = self._training_context()
+            settled = flow.settle()
+            if name == "training_apply":
+                if link.get("status") != "BOUND" or link.get("identity") != save_identity(self.receipt):
+                    raise WriteSafetyError("TRAINING_SAVE_NOT_BOUND")
+                self._training_finished(flow.apply(args))
+                settled = flow.settle()
+            listing = remote.list()
+            # Species IDs come from the same authorized server observation,
+            # never from a nickname or an arbitrary image URL.
+            import re
+            for target in listing.get("targets") or []:
+                pokemon = target.get("pokemon") or {}
+                match = re.fullmatch(r"(?:Pokémon|PokÃ©mon|Pokemon|Species)\s*#?\s*(\d+)", str(pokemon.get("species", "")))
+                if match:
+                    pokemon["species_id"] = int(match[1])
+            pending = {r["args"]["purchase_id"] for r in flow.pending()}
+            reserved = {str(r.get("purchase_id")) for r in listing.get("operations", []) if r.get("status") == "RESERVED"}
+            for item in listing.get("items") or []:
+                item["state"] = "RECOVERING" if str(item["purchase_id"]) in pending else "ELSEWHERE" if str(item["purchase_id"]) in reserved else "READY"
+            listing["application_enabled"] = flow.engine.allows("virtual_training") and link.get("status") == "BOUND"
+            listing["waiting"] = settled["waiting"]
+            self._patch(training=listing, training_error=None)
+        except SaveBusy:
+            self._patch(training_error="Otra operación está usando la partida. Espera unos segundos.")
+        except (BackendError, WriteSafetyError, NativeWriteError) as error:
+            code = getattr(error, "detail", None) or getattr(error, "code", None) or str(error)
+            messages = {
+                "TRAINING_NO_CHANGE": "Ese valor ya está al máximo o ya tiene esa naturaleza. La compra sigue disponible.",
+                "TRAINING_LEGALITY_UNSUPPORTED": "Este cambio no es compatible con las restricciones de este Pokémon. No se ha modificado ni consumido nada.",
+                "TRAINING_SAVE_NOT_BOUND": "Selecciona y sincroniza la partida vinculada a tu Liga antes de mejorar un Pokémon.",
+                "TRAINING_RECOVERY_REQUIRED": "La mejora sigue pendiente de comprobar. La compra queda reservada; conserva las copias y vuelve a abrir el Launcher.",
+                "TRAINING_CONTEXT_UNAVAILABLE": "Inicia sesión y espera a que se cargue tu Liga.",
+                "STALE_SOURCE": "La partida ha cambiado. Sincronízala y selecciona de nuevo el Pokémon y la mejora.",
+            }
+            self._patch(training_error=messages.get(code) or QUICK_ERRORS.get(code) or "No se pudo confirmar la mejora. Conserva las copias; una operación pendiente mantiene su compra reservada.")
+        except Exception:
+            self._patch(training_error=self._unexpected_write_failure())
+        finally:
+            with self.lock:
+                self.value["training_seq"] += 1
 
     def _delivery_view(self, flow, remote, waiting):
         """Paid objects still to deliver, from the server; each says whether
@@ -989,6 +1094,12 @@ class LauncherRuntime:
             finally:
                 self.write_commands.task_done()
             return
+        if name in TRAINING_COMMANDS:
+            try:
+                self._training_step(name, args)
+            finally:
+                self.write_commands.task_done()
+            return
         if name in DELIVERY_COMMANDS:
             try:
                 self._delivery_step(name, args)
@@ -1058,6 +1169,9 @@ class LauncherRuntime:
                     receipt_id=None,
                     cloud_receipt=None,
                     local_status="READING",
+                    training=None,
+                    training_error=None,
+                    training_result=None,
                 )
                 self._load_local()
             elif name == "sync":
@@ -1495,6 +1609,9 @@ class LauncherRuntime:
                             error=None,
                             error_detail=None,
                             error_cause=None,
+                            training=None,
+                            training_error=None,
+                            training_result=None,
                         )
                     elif name == "login":
                         self._patch(
@@ -1503,6 +1620,9 @@ class LauncherRuntime:
                             principal=None,
                             cloud_receipt=None,
                             season_receipt=None,
+                            training=None,
+                            training_error=None,
+                            training_result=None,
                         )
                         self.tokens.clear()
                         try:

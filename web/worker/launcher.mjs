@@ -25,8 +25,13 @@ export default {
         ? await env.LAUNCHER_RELEASES.head(key)
         : await env.LAUNCHER_RELEASES.get(key);
     if (!object)
-      return update?.kind === "feed"
-        ? unavailable(404, "Sin versiones publicadas")
+      return update
+        ? unavailable(
+            404,
+            update.kind === "feed"
+              ? "Sin versiones publicadas"
+              : "Versión no publicada",
+          )
         : unavailable(503, "Descarga temporalmente no disponible");
     if (update?.kind === "feed")
       return new Response(request.method === "HEAD" ? null : object.body, {

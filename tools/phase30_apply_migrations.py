@@ -34,6 +34,7 @@ from tools.phase30_release_audit import DEPLOYED, PENDING
 from tools.production_readonly import SUPABASE_REF, _supabase, query, supabase_get
 
 EXPECTED_SHA256 = {
+    '074_virtual_training.sql': '2398c53bfcbded60a90da4ffe6e91c39b83d403ff5b69d2f94e8ab5079dc606b',
     '073_single_day_league_rules.sql': 'c43b1b91914f5e4dde43a20bf427d185407b7c0b35945df1328b8d04ee798432',
     '072_shop_item_delivery.sql': '7535336d24f976dd1a71cceaf46ea3dee4d28fd732abafa91dbb592be02613ee',
     '071_preseason_shop.sql': '82dfc27bc6a4dbed245f8e79a4c514eed7457a9cc65d691c771badc7280ad621',

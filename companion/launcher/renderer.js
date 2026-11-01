@@ -239,6 +239,8 @@ function announce(state) {
     quickDone: state.quick_item_result?.at ?? null,
     deliverySeq: state.delivery_seq ?? 0,
     deliveryDone: state.delivery_result?.at ?? null,
+    trainingSeq: state.training_seq ?? 0,
+    trainingDone: state.training_result?.at ?? null,
     receipt: state.receipt_id,
     // Each copy PokeApp accepts (season first, then personal) refreshes the
     // web at once, without waiting for the rest of the sync.
@@ -291,6 +293,31 @@ function announce(state) {
       "ok",
     );
     if (now.deliverySeq === before.deliverySeq) tell("items-changed");
+  }
+  if (now.trainingSeq !== before.trainingSeq && !state.training_error) {
+    tell("items-changed");
+    tell("save-changed");
+  }
+  if (now.trainingDone && now.trainingDone !== before.trainingDone) {
+    if (
+      state.training_result.status === "APPLIED" &&
+      trainingWizard &&
+      !trainingApplying
+    )
+      requestTraining();
+    if (
+      now.trainingSeq === before.trainingSeq &&
+      state.training_result.status === "APPLIED"
+    ) {
+      tell("items-changed");
+      tell("save-changed");
+    }
+    toast(
+      state.training_result.status === "APPLIED"
+        ? "Cambio comprobado en tu Pokémon. El inventario y la partida se actualizarán automáticamente."
+        : "El cambio está pendiente de comprobar. Conserva las copias; la compra sigue reservada hasta resolverlo.",
+      state.training_result.status === "APPLIED" ? "ok" : undefined,
+    );
   }
 }
 function render(state) {
@@ -851,6 +878,7 @@ const dialogIds = {
   restore: "restore-dialog",
   objetos: "sheet-dialog",
   robos: "sheet-dialog",
+  entrenamiento: "training-dialog",
 };
 const anyOpen = () => document.querySelector("dialog[open]") !== null;
 // The update popup re-checks the feed when the trainer opens it; opened by
@@ -863,6 +891,7 @@ function present(view, { check = true } = {}) {
   openDialog(view);
 }
 function openDialog(view, item) {
+  if (view === "entrenamiento") openTraining(item);
   if (view === "objetos" || view === "robos") fillSheet(view, item);
   if (view === "selector") renderSelector(lastState, true);
   if (view === "update") {
@@ -874,6 +903,7 @@ function openDialog(view, item) {
   if (!dialog.open) dialog.showModal();
   if ($("toasts").children.length) showToasts(); // stay above the dialog
   if (view === "objetos") focusItem(item);
+  if (view === "entrenamiento" && lastState) renderTraining(lastState);
 }
 // Every close goes through here, synchronously: the dialog "close" event is
 // queued and is not delivered while the window is not painting.
@@ -881,6 +911,7 @@ function shut(dialog, quiet = false) {
   if (!dialog.open) return;
   dialog.close();
   if (dialog.id === "sheet-dialog") returnSheet();
+  if (dialog.id === "training-dialog") clearTraining();
   dialog.dispatchEvent(new Event("shut"));
   if (!quiet && document.body.dataset.mode === "modal" && !anyOpen())
     void action(() => window.launcher.closePanel());
@@ -1726,6 +1757,448 @@ async function deliver(entry, item) {
 }
 $("shop-refresh").onclick = () => requestDeliveries();
 
+// Virtual Mints and Caps: selection and preview are local UI only. Main issues
+// a single-use ticket for the final summary; only Confirmar sends training_apply.
+let trainingWizard = null;
+let trainingGeneration = 0;
+let trainingApplying = false;
+const trainingRead = { pending: false, seq: 0, since: 0 };
+function clearTraining() {
+  trainingGeneration += 1;
+  trainingWizard = null;
+}
+function openTraining(code) {
+  clearTraining();
+  trainingWizard = {
+    step: "items",
+    code,
+    purchase: null,
+    target: null,
+    change: null,
+    ticket: null,
+    offer: null,
+    error: null,
+    preparing: false,
+    account: lastState?.principal?.trainer_id,
+    save: lastState?.selected_save,
+  };
+  requestTraining();
+}
+function requestTraining() {
+  if (trainingRead.pending || !lastState?.principal) return;
+  Object.assign(trainingRead, {
+    pending: true,
+    seq: lastState.training_seq ?? 0,
+    since: Date.now(),
+  });
+  void action(() => window.launcher.trainingList()).then((result) => {
+    if (result?.status !== "QUEUED") trainingRead.pending = false;
+    if (lastState) renderTraining(lastState);
+  });
+}
+function trainingElement(tag, label, className) {
+  const element = document.createElement(tag);
+  if (label !== undefined) element.textContent = label;
+  if (className) element.className = className;
+  return element;
+}
+function trainingPokemon(target) {
+  const p = target.pokemon;
+  const card = trainingElement("div", undefined, "training-pokemon");
+  const sprite = PokeTraining.sprite(p);
+  if (sprite) {
+    const image = document.createElement("img");
+    image.className = "training-sprite";
+    image.alt = `Sprite de ${PokeTraining.speciesName(p)}`;
+    image.src = sprite;
+    image.onerror = () => {
+      image.hidden = true;
+    };
+    card.append(image);
+  }
+  const body = trainingElement("span");
+  body.append(
+    trainingElement("strong", PokeTraining.name(p)),
+    trainingElement("span", `${PokeTraining.speciesName(p)} · Nv. ${p.level}`),
+    trainingElement(
+      "span",
+      `Naturaleza actual: ${PokeTraining.natureName(p.nature_id)}`,
+    ),
+  );
+  const location =
+    typeof target.location === "string"
+      ? target.location
+      : target.source === "party"
+        ? `Equipo · posición ${target.slot_number}`
+        : target.box_number
+          ? `Caja ${target.box_number} · posición ${target.slot_number}`
+          : "Partida vinculada";
+  body.append(trainingElement("span", location, "muted"));
+  card.append(body);
+  return card;
+}
+function trainingChoice(label, detail, select, disabled = false) {
+  const button = trainingElement("button", undefined, "training-option");
+  button.type = "button";
+  button.append(
+    trainingElement("strong", label),
+    trainingElement("span", detail, "muted"),
+  );
+  button.disabled = disabled || trainingApplying;
+  button.onclick = select;
+  return button;
+}
+function trainingArgs() {
+  const w = trainingWizard;
+  return PokeTraining.input({
+    purchase_id: w.purchase.purchase_id,
+    pokemon_entity_id: w.target.pokemon_entity_id,
+    source_sha256: w.target.source_sha256,
+    change: w.change,
+  });
+}
+function selectTrainingItem(item) {
+  Object.assign(trainingWizard, {
+    purchase: item,
+    step: "pokemon",
+    code: null,
+    target: null,
+    change: null,
+    offer: null,
+    ticket: null,
+    error: null,
+  });
+  renderTraining(lastState);
+}
+async function previewTraining(change) {
+  const w = trainingWizard;
+  Object.assign(w, {
+    change,
+    step: "confirm",
+    preparing: true,
+    ticket: null,
+    offer: null,
+    error: null,
+  });
+  const generation = ++trainingGeneration;
+  renderTraining(lastState);
+  const offer = await action(() =>
+    window.launcher.confirmBegin("training", PokeTraining.key(trainingArgs())),
+  );
+  if (generation !== trainingGeneration || trainingWizard !== w) return;
+  w.preparing = false;
+  if (offer?.ticket) {
+    w.ticket = offer.ticket;
+    w.offer = offer;
+  } else
+    w.error =
+      "La selección ya no se puede confirmar. Vuelve atrás o comprueba la lista.";
+  renderTraining(lastState);
+}
+function trainingIvTable(target, change) {
+  const table = trainingElement("table", undefined, "training-ivs");
+  table.setAttribute("aria-label", "IV actuales y resultado");
+  const heading = trainingElement("tr");
+  for (const label of ["Estadística", "IV actual", "Resultado"])
+    heading.append(trainingElement("th", label));
+  const head = trainingElement("thead");
+  head.append(heading);
+  table.append(head);
+  const body = trainingElement("tbody");
+  const ivs = PokeTraining.values(target.pokemon);
+  for (const [stat, label] of PokeTraining.stats) {
+    const row = trainingElement("tr");
+    for (const value of [
+      label,
+      ivs[stat],
+      change?.kind === "ivs" || change?.stat === stat ? 31 : ivs[stat],
+    ])
+      row.append(trainingElement("td", String(value)));
+    body.append(row);
+  }
+  table.append(body);
+  return table;
+}
+function renderTraining(state) {
+  const w = trainingWizard;
+  if (!w || !$("training-dialog").open) return;
+  if (
+    trainingRead.pending &&
+    ((state.training_seq ?? 0) !== trainingRead.seq ||
+      Date.now() - trainingRead.since > 25000)
+  )
+    trainingRead.pending = false;
+  if (
+    w.account !== state.principal?.trainer_id ||
+    w.save !== state.selected_save
+  ) {
+    clearTraining();
+    trainingWizard = {
+      ...w,
+      step: "items",
+      purchase: null,
+      target: null,
+      change: null,
+      ticket: null,
+      offer: null,
+      preparing: false,
+      code: null,
+      account: state.principal?.trainer_id,
+      save: state.selected_save,
+      error: "La cuenta o la partida ha cambiado. Vuelve a comprobar la lista.",
+    };
+    return renderTraining(state);
+  }
+  const view = state.training;
+  const items = (view?.items || []).filter(
+    (item) =>
+      PokeTraining.effects[item.item_code] &&
+      (!item.state || item.state === "READY"),
+  );
+  if (w.code && items.some((item) => item.item_code === w.code)) {
+    const selected = items.find((item) => item.item_code === w.code);
+    Object.assign(w, { code: null, purchase: selected, step: "pokemon" });
+  }
+  const busy = trainingApplying || state.write?.busy;
+  const locked =
+    busy ||
+    !state.principal ||
+    !state.selected_save ||
+    trainingRead.pending ||
+    !view?.application_enabled ||
+    ["RECOVERY_REQUIRED", "AWAITING_CONFIRMATION", "PREPARED"].includes(
+      state.write?.status,
+    );
+  const issue =
+    w.error ||
+    state.training_error ||
+    (!state.principal
+      ? "Inicia sesión para usar tus compras."
+      : !state.selected_save
+        ? "Selecciona tu partida vinculada en Saves y Launcher."
+        : !view && !trainingRead.pending
+          ? "No se pudo leer la lista. Pulsa «Volver a comprobar»."
+          : null);
+  text("training-error", issue || "");
+  $("training-error").hidden = !issue;
+  text(
+    "training-title",
+    w.purchase ? `Usar ${w.purchase.name}` : "Entrenamiento Pokémon",
+  );
+  text(
+    "training-step",
+    trainingApplying
+      ? "Aplicando y comprobando… no abras el emulador."
+      : trainingRead.pending && !view
+        ? "Leyendo compras y Pokémon de tu partida vinculada…"
+        : w.step === "items"
+          ? "Elige un consumible virtual de tu inventario."
+          : w.step === "pokemon"
+            ? "1 · Elige un Pokémon"
+            : w.step === "nature"
+              ? "2 · Elige la nueva naturaleza"
+              : w.step === "iv"
+                ? "2 · Elige un IV para maximizar"
+                : "Confirma el cambio antes de modificar tu partida",
+  );
+  const body = $("training-body");
+  body.replaceChildren();
+  if (w.step === "items") {
+    const options = trainingElement("div", undefined, "training-options");
+    for (const item of items)
+      options.append(
+        trainingChoice(
+          item.name,
+          "Consumible virtual · no va a la bolsa",
+          () => selectTrainingItem(item),
+          locked,
+        ),
+      );
+    body.append(options);
+    const pending = (view?.items || []).filter(
+      (item) => item.state && item.state !== "READY",
+    );
+    for (const item of pending) {
+      const note = trainingElement("div", undefined, "training-pokemon");
+      note.append(
+        trainingElement("strong", item.name),
+        trainingElement(
+          "span",
+          item.state === "ELSEWHERE"
+            ? "Aplicación iniciada en otro equipo: termínala allí."
+            : "Comprobando una aplicación anterior. La compra sigue reservada.",
+          "muted",
+        ),
+      );
+      body.append(note);
+    }
+    if (view && !items.length && !pending.length)
+      body.append(
+        trainingElement(
+          "p",
+          "No tienes Mentas o Chapas disponibles para usar.",
+          "empty-note",
+        ),
+      );
+  } else if (w.step === "pokemon") {
+    const targets = view?.targets || [];
+    for (const target of targets) {
+      const effect =
+        w.purchase.effect || PokeTraining.effects[w.purchase.item_code];
+      const maxed =
+        effect !== "nature" &&
+        PokeTraining.stats.every(
+          ([stat]) => PokeTraining.values(target.pokemon)[stat] === 31,
+        );
+      const choose = trainingElement("button", undefined, "training-pokemon");
+      choose.type = "button";
+      choose.append(trainingPokemon(target));
+      choose.disabled = locked || maxed || target.eligible === false;
+      if (maxed)
+        choose.append(
+          trainingElement("span", "Los seis IV ya están al máximo", "muted"),
+        );
+      choose.onclick = () => {
+        Object.assign(w, { target, error: null, ticket: null, offer: null });
+        if (effect === "ivs") void previewTraining({ kind: "ivs" });
+        else {
+          w.step = effect === "nature" ? "nature" : "iv";
+          renderTraining(lastState);
+        }
+      };
+      body.append(choose);
+    }
+    if (!targets.length)
+      body.append(
+        trainingElement(
+          "p",
+          "No hay Pokémon elegibles en la partida vinculada. Comprueba la sincronización y las restricciones de la Liga.",
+          "empty-note",
+        ),
+      );
+  } else {
+    body.append(trainingPokemon(w.target));
+    if (w.step === "nature") {
+      const options = trainingElement("div", undefined, "training-options");
+      for (const nature of PokeTraining.natures)
+        options.append(
+          trainingChoice(
+            nature.name,
+            nature.modifier,
+            () =>
+              void previewTraining({ kind: "nature", nature_id: nature.id }),
+            locked || nature.id === w.target.pokemon.nature_id,
+          ),
+        );
+      body.append(options);
+    } else if (w.step === "iv") {
+      const options = trainingElement("div", undefined, "training-options");
+      const ivs = PokeTraining.values(w.target.pokemon);
+      for (const [stat, label] of PokeTraining.stats)
+        options.append(
+          trainingChoice(
+            label,
+            `${ivs[stat]}${ivs[stat] === 31 ? " · Ya está al máximo" : " → 31"}`,
+            () => void previewTraining({ kind: "iv", stat }),
+            locked || !Number.isInteger(ivs[stat]) || ivs[stat] >= 31,
+          ),
+        );
+      body.append(options);
+    } else {
+      if (w.change.kind !== "nature")
+        body.append(trainingIvTable(w.target, w.change));
+      if (w.offer) {
+        body.append(
+          trainingElement("p", w.offer.message, "lead training-confirmation"),
+          trainingElement("p", w.offer.detail, "muted training-confirmation"),
+        );
+      } else if (w.preparing)
+        body.append(trainingElement("p", "Comprobando la selección…", "muted"));
+    }
+  }
+  $("training-refresh").hidden = w.step !== "items" && w.step !== "pokemon";
+  $("training-refresh").disabled = busy || trainingRead.pending;
+  $("training-back").hidden = w.step === "items";
+  $("training-back").disabled = busy;
+  $("training-cancel").disabled = trainingApplying;
+  $("training-confirm").hidden = w.step !== "confirm";
+  $("training-confirm").disabled = locked || w.preparing || !w.ticket;
+}
+$("training-back").onclick = () => {
+  if (!trainingWizard || trainingApplying) return;
+  trainingGeneration += 1;
+  const w = trainingWizard;
+  w.step =
+    w.step === "pokemon"
+      ? "items"
+      : w.step === "confirm"
+        ? w.change.kind === "ivs"
+          ? "pokemon"
+          : w.change.kind === "nature"
+            ? "nature"
+            : "iv"
+        : "pokemon";
+  Object.assign(w, {
+    ticket: null,
+    offer: null,
+    error: null,
+    preparing: false,
+    code: null,
+  });
+  renderTraining(lastState);
+};
+$("training-cancel").onclick = () => shut($("training-dialog"));
+$("training-refresh").onclick = () => {
+  if (!trainingWizard) return;
+  Object.assign(trainingWizard, {
+    step: "items",
+    target: null,
+    change: null,
+    ticket: null,
+    offer: null,
+    error: null,
+    code: null,
+  });
+  requestTraining();
+  renderTraining(lastState);
+};
+$("training-confirm").onclick = async () => {
+  const w = trainingWizard;
+  if (!w?.ticket || trainingApplying) return;
+  const args = trainingArgs(),
+    ticket = w.ticket;
+  w.ticket = null;
+  trainingApplying = true;
+  const before = lastState?.training_seq ?? 0;
+  renderTraining(lastState);
+  try {
+    const queued = await action(() =>
+      window.launcher.trainingApply(args, ticket),
+    );
+    for (let i = 0; queued && i < 240; i++) {
+      if ((lastState?.training_seq ?? 0) !== before) break;
+      await new Promise((resolve) => setTimeout(resolve, 500));
+    }
+    if (trainingWizard === w) {
+      Object.assign(w, {
+        step: "items",
+        target: null,
+        change: null,
+        ticket: null,
+        offer: null,
+        error:
+          lastState?.training_error ||
+          (queued
+            ? null
+            : "No se pudo confirmar. Vuelve a comprobar la lista."),
+      });
+    }
+  } finally {
+    trainingApplying = false;
+    if (lastState) renderTraining(lastState);
+  }
+};
+
 function renderEmulator(state) {
   text(
     "emulator-state",
@@ -2040,6 +2513,7 @@ async function poll() {
     render(state);
     renderQuick(state);
     renderShop(state);
+    renderTraining(state);
     renderTransfers(state);
     renderEmulator(state);
     renderNotices(state);

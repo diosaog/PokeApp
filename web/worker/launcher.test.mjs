@@ -120,19 +120,51 @@ test("update channel: signed feed and versioned installers, nothing else", async
   assert.equal((await get("/launcher/updates/stable.json", "PUT")).status, 405);
   assert.deepEqual(keys, []);
 });
-test("a channel without a published feed answers 404, a missing installer 503", async () => {
+test("unpublished versioned installers answer 404 for GET and HEAD; current download stays 503", async () => {
   const env = {
     ASSETS: { fetch: async () => new Response("static") },
-    LAUNCHER_RELEASES: { get: async () => null },
+    LAUNCHER_RELEASES: { get: async () => null, head: async () => null },
   };
   const feed = await worker.fetch(
     new Request("https://app.test/launcher/updates/stable.json"),
     env,
   );
   assert.equal(feed.status, 404);
-  const binary = await worker.fetch(
-    new Request("https://app.test/launcher/updates/stable/0.27.0.exe"),
-    env,
+  for (const method of ["GET", "HEAD"]) {
+    for (const channel of ["stable", "private"]) {
+      const binary = await worker.fetch(
+        new Request(`https://app.test/launcher/updates/${channel}/0.27.0.exe`, {
+          method,
+        }),
+        env,
+      );
+      assert.equal(binary.status, 404);
+      assert.equal(binary.headers.get("cache-control"), "no-store");
+    }
+    const current = await worker.fetch(
+      new Request("https://app.test/launcher/download", { method }),
+      env,
+    );
+    assert.equal(current.status, 503);
+    assert.equal(current.headers.get("cache-control"), "no-store");
+  }
+});
+
+test("R2 access errors cannot masquerade as a verified absent version", async () => {
+  const env = {
+    LAUNCHER_RELEASES: {
+      head: async () => {
+        throw new Error("R2 unavailable");
+      },
+    },
+  };
+  await assert.rejects(
+    worker.fetch(
+      new Request("https://app.test/launcher/updates/stable/0.27.0.exe", {
+        method: "HEAD",
+      }),
+      env,
+    ),
+    /R2 unavailable/,
   );
-  assert.equal(binary.status, 503);
 });

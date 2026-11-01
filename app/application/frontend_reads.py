@@ -504,15 +504,27 @@ class FrontendReads:
                         )
         purchases = self.rows(
             "purchases",
-            "id,shop_item_id,status,total_price,purchased_at,acquisition_type",
+            "id,shop_item_id,status,total_price,purchased_at,acquisition_type,season_id",
             season_id=sid,
             trainer_id=tid,
         )
+        # The owner's explicit virtual-consumable rule also covers an old paid
+        # purchase in a stopped season. Keep its original season/ledger and expose
+        # only these three pending effects; no other inventory crosses seasons.
+        historical_virtual = self.rows(
+            "purchases", "id,shop_item_id,status,total_price,purchased_at,acquisition_type,season_id",
+            trainer_id=tid, status="pending", acquisition_type="paid",
+        )
         catalog = (
             {i["id"]: i for i in self.rows("shop_items", "id,code,name")}
-            if purchases
+            if purchases or historical_virtual
             else {}
         )
+        known = {p["id"] for p in purchases}
+        purchases.extend(p for p in historical_virtual if p["id"] not in known
+            and p.get("status") == "pending" and p.get("acquisition_type") == "paid"
+            and catalog.get(p["shop_item_id"], {}).get("code") in
+                ("menta_naturaleza", "chapa_plateada", "chapa_dorada"))
         from app.domain.item_use_status import physical_state
 
         uses = {}
@@ -526,6 +538,12 @@ class FrontendReads:
         from app.domain.shop_item_uses import BAG_ITEMS, describe_use
 
         game = self.league_game(sid, tid) if purchases else None
+        training = {
+            t["purchase_id"]: t["status"]
+            for t in self.rows("training_operations", "purchase_id,status", trainer_id=tid)
+            if t["status"] in ("RESERVED", "APPLIED")
+        } if any(catalog[p["shop_item_id"]]["code"] in
+            ("menta_naturaleza", "chapa_plateada", "chapa_dorada") for p in purchases) else {}
         deliveries = (
             {
                 d["purchase_id"]: d
@@ -541,6 +559,8 @@ class FrontendReads:
             else {}
         )
         for purchase in purchases:
+            purchase["purchase_season_id"] = purchase.get("season_id")
+            purchase["training_status"] = training.get(purchase["id"])
             item = catalog[purchase["shop_item_id"]]
             purchase.update(item_name=item["name"], item_code=item["code"])
             purchase['physical_state'] = physical_state(

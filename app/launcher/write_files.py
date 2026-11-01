@@ -17,13 +17,7 @@ import stat
 from typing import Callable
 
 
-class WriteSafetyError(Exception):
-    """A stable local code, never a pathname or native/parser diagnostic."""
-
-    def __init__(self, code: str):
-        self.code = code
-        super().__init__(code)
-
+from app.save_parser.write_models import WriteSafetyError
 
 @dataclass(frozen=True)
 class EnrolledTarget:

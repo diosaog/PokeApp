@@ -235,7 +235,8 @@ class ItemUseRead(BaseModel):
     `choice` reach the bag through the Launcher; `compatible` is for the
     trainer's league game (null while no save is accepted yet)."""
 
-    mode: Literal["pokemon", "bag", "choice", "permission", "unavailable", "unknown"]
+    mode: Literal["pokemon", "bag", "choice", "permission", "training", "unavailable", "unknown"]
+    training_effect: Literal["nature", "iv", "ivs"] | None = None
     games: list[GameCode]
     compatible: bool | None = None
     reason: Literal["ITEM_NOT_USABLE", "ITEM_INCOMPATIBLE_WITH_GAME"] | None = None
@@ -292,6 +293,8 @@ class PurchaseRead(BaseModel):
     purchased_at: datetime
     item_name: str
     item_code: str
+    purchase_season_id: UUID | None = None
+    training_status: Literal["RESERVED", "APPLIED"] | None = None
     acquisition_type: Literal["paid", "reward"] = "paid"
     physical_state: str | None = None
     use: ItemUseRead | None = None

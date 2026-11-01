@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <meta
       http-equiv="Content-Security-Policy"
-      content="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'"
+      content="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' data: https://pokeapp-web.pokeapp-v2.workers.dev; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'"
     />
     <title>PokeApp Launcher</title>
     <link rel="stylesheet" href="style.css" />
@@ -170,7 +170,9 @@
       <section id="backups-view" hidden>
         <article aria-labelledby="backups-title">
           <h2 id="backups-title" tabindex="-1">Copias de seguridad</h2>
-          <p class="muted">Copia original de cada cambio y una diaria (30 días).</p>
+          <p class="muted">
+            Copia original de cada cambio y una diaria (30 días).
+          </p>
           <div class="toolbar">
             <button id="refresh-backups">Actualizar lista</button
             ><button id="export-save" disabled>
@@ -383,7 +385,31 @@
       </header>
       <div id="sheet-body"></div>
     </dialog>
+    <dialog
+      id="training-dialog"
+      class="game-dialog wide"
+      aria-labelledby="training-title"
+    >
+      <header class="dialog-head">
+        <h2 id="training-title">Entrenamiento Pokémon</h2>
+        <button type="button" class="icon-close" data-close aria-label="Cerrar">
+          ×
+        </button>
+      </header>
+      <p id="training-step" class="muted" role="status"></p>
+      <p id="training-error" class="error" role="alert" hidden></p>
+      <div id="training-body"></div>
+      <div class="dialog-actions">
+        <button id="training-refresh" type="button">Volver a comprobar</button>
+        <button id="training-back" type="button">Atrás</button>
+        <button id="training-cancel" type="button">Cancelar</button>
+        <button id="training-confirm" type="button" class="primary" hidden>
+          Confirmar
+        </button>
+      </div>
+    </dialog>
     <script src="quantity.js"></script>
+    <script src="training.js"></script>
     <script src="renderer.js"></script>
   </body>
 </html>

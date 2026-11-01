@@ -41,6 +41,9 @@ contextBridge.exposeInMainWorld("launcher", {
   deliveries: () => ipcRenderer.invoke("launcher:deliveries"),
   addDelivery: (purchaseId, item, ticket) =>
     ipcRenderer.invoke("launcher:delivery-add", purchaseId, item, ticket),
+  trainingList: () => ipcRenderer.invoke("launcher:training-list"),
+  trainingApply: (args, ticket) =>
+    ipcRenderer.invoke("launcher:training-apply", args, ticket),
   // A confirmed change the web should show at once (fixed names only).
   webEvent: (type) => ipcRenderer.invoke("launcher:web-event", type),
   transfer: (kind, authorizationId, emulatorClosed, ticket) =>
@@ -67,7 +70,14 @@ contextBridge.exposeInMainWorld("launcher", {
       const items = ["rare_candy", "heart_scale"];
       const panels = ["saves"];
       const tabs = ["partidas", "copias", "launcher"];
-      const modals = ["objetos", "robos", "selector", "update", "restore"];
+      const modals = [
+        "objetos",
+        "robos",
+        "entrenamiento",
+        "selector",
+        "update",
+        "restore",
+      ];
       if (message?.view === "quick-items" && items.includes(message.item))
         callback({ view: "quick-items", item: message.item });
       else if (message?.view === "panel" && panels.includes(message.panel))
@@ -80,7 +90,14 @@ contextBridge.exposeInMainWorld("launcher", {
         callback({
           view: "modal",
           panel: message.panel,
-          item: items.includes(message.item) ? message.item : undefined,
+          item: [
+            ...items,
+            "menta_naturaleza",
+            "chapa_plateada",
+            "chapa_dorada",
+          ].includes(message.item)
+            ? message.item
+            : undefined,
         });
       else if (message?.view === "strip" || message?.view === "offline")
         callback({ view: message.view });

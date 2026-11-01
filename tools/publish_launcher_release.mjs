@@ -17,6 +17,11 @@
 //
 //   node tools/publish_launcher_release.mjs --build <build root> --manifest <stable.json>
 //        [--unsigned-policy private-distribution] [--apply --owner-authorized]
+//        [--public-reader <outside-repository SSH reader JSON>]
+// The optional provider transport reads the SAME complete public HTTPS route
+// from the existing Railway container. Its pinned SSH channel returns only
+// URL/method/status/size/SHA-512; the exact signed size/hash are checked here
+// before the feed upload. It cannot substitute an R2 read or skip verification.
 import { execFileSync } from "node:child_process";
 import { createRequire } from "node:module";
 import crypto from "node:crypto";
@@ -25,6 +30,7 @@ import path from "node:path";
 
 const require = createRequire(import.meta.url);
 const updater = require("../companion/launcher/updater.cjs");
+const { createSSHReader } = require("./launcher_public_reader.cjs");
 const { UNSIGNED_POLICY } = require("./sign_launcher_update.cjs");
 const asar = require("../companion/launcher/node_modules/@electron/asar");
 const argv = process.argv.slice(2);
@@ -36,6 +42,9 @@ const flag = (name) => argv.includes("--" + name);
 const WEB = "https://pokeapp-web.pokeapp-v2.workers.dev";
 const BUCKET = "pokeapp-launcher-releases";
 const build = path.resolve(arg("build") || "");
+const publicReader = arg("public-reader")
+  ? createSSHReader(path.resolve(arg("public-reader")), { buildRoot: build })
+  : null;
 const installer = path.join(build, "release", "PokeApp-Launcher-Setup.exe");
 const problems = [];
 const need = (ok, problem) => ok || problems.push(problem);
@@ -121,16 +130,19 @@ if (manifest) {
 const key =
   manifest && `windows/${manifest.version}/PokeApp-Launcher-Setup.exe`;
 if (key) {
-  const head = await fetch(
-    `${WEB}/launcher/updates/stable/${manifest.version}.exe`,
-    { method: "HEAD" },
-  );
+  const url = `${WEB}/launcher/updates/stable/${manifest.version}.exe`;
+  const head = publicReader
+    ? await publicReader(url, "HEAD")
+    : await fetch(url, { method: "HEAD", redirect: "manual" });
   need(
-    head.status !== 200,
-    `R2 already serves ${key}: published versions are never overwritten`,
+    head.status === 404,
+    head.status === 200
+      ? `R2 already serves ${key}: published versions are never overwritten`
+      : `public route returned HTTP ${head.status} for ${key}: absence is not verified (requires 404)`,
   );
 }
 const plan = {
+  public_readback_transport: publicReader?.transport || "local HTTPS fetch",
   version: manifest?.version ?? null,
   installer: {
     bytes: bytes.length,
@@ -154,13 +166,26 @@ const put = (objectKey, file, type) =>
   execFileSync(process.execPath, [wrangler, "r2", "object", "put", `${BUCKET}/${objectKey}`, "--file", file,
     "--remote", ...(type ? ["--content-type", type] : [])], { cwd: "web", stdio: "inherit" }); // prettier-ignore
 put(key, installer);
-const served = Buffer.from(
-  await (await fetch(manifest.installer.url)).arrayBuffer(),
-);
+let readback;
+if (publicReader) readback = await publicReader(manifest.installer.url, "GET");
+else {
+  const response = await fetch(manifest.installer.url, { redirect: "error" });
+  const served = Buffer.from(await response.arrayBuffer());
+  readback = {
+    url: response.url,
+    method: "GET",
+    status: response.status,
+    size: served.length,
+    sha512: crypto.createHash("sha512").update(served).digest("base64"),
+  };
+}
 if (
-  crypto.createHash("sha512").update(served).digest("base64") !==
-  manifest.installer.sha512
+  readback.url !== manifest.installer.url ||
+  readback.status !== 200 ||
+  readback.size !== manifest.installer.size ||
+  readback.sha512 !== manifest.installer.sha512
 )
   throw new Error("read-back SHA-512 differs: the manifest was NOT published");
+console.log(JSON.stringify({ public_readback: readback }));
 put("updates/stable.json", path.resolve(arg("manifest")), "application/json");
 console.log(`published ${manifest.version}: installer verified, then manifest`);

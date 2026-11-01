@@ -1871,6 +1871,74 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/v1/launcher/seasons/{season_id}/training": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Listing */
+    get: operations["listing_v1_launcher_seasons__season_id__training_get"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/launcher/seasons/{season_id}/training/{operation_id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    /** Reserve */
+    put: operations["reserve_v1_launcher_seasons__season_id__training__operation_id__put"];
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/launcher/seasons/{season_id}/training/{operation_id}/complete": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    /** Complete */
+    put: operations["complete_v1_launcher_seasons__season_id__training__operation_id__complete_put"];
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/launcher/seasons/{season_id}/training/{operation_id}/release": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    /** Release */
+    put: operations["release_v1_launcher_seasons__season_id__training__operation_id__release_put"];
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/v1/seasons/{season_id}/shop/purchases/{purchase_id}/transfer": {
     parameters: {
       query?: never;
@@ -3782,7 +3850,15 @@ export interface components {
        * @enum {string}
        */
       mode:
-        "pokemon" | "bag" | "choice" | "permission" | "unavailable" | "unknown";
+        | "pokemon"
+        | "bag"
+        | "choice"
+        | "permission"
+        | "training"
+        | "unavailable"
+        | "unknown";
+      /** Training Effect */
+      training_effect?: ("nature" | "iv" | "ivs") | null;
       /** Games */
       games: ("X" | "Y" | "OR" | "AS" | "SN" | "MN" | "US" | "UM")[];
       /** Compatible */
@@ -4752,6 +4828,10 @@ export interface components {
       item_name: string;
       /** Item Code */
       item_code: string;
+      /** Purchase Season Id */
+      purchase_season_id?: string | null;
+      /** Training Status */
+      training_status?: ("RESERVED" | "APPLIED") | null;
       /**
        * Acquisition Type
        * @default paid
@@ -5625,6 +5705,177 @@ export interface components {
       id: string;
       /** Display Name */
       display_name: string;
+    };
+    /** TrainingChange */
+    TrainingChange: {
+      /**
+       * Kind
+       * @enum {string}
+       */
+      kind: "nature" | "iv" | "ivs";
+      /** Nature Id */
+      nature_id?: number | null;
+      /** Stat */
+      stat?: ("hp" | "atk" | "defense" | "spa" | "spd" | "spe") | null;
+    };
+    /** TrainingItem */
+    TrainingItem: {
+      /**
+       * Purchase Id
+       * Format: uuid
+       */
+      purchase_id: string;
+      /**
+       * Purchase Season Id
+       * Format: uuid
+       */
+      purchase_season_id: string;
+      /**
+       * Item Code
+       * @enum {string}
+       */
+      item_code: "menta_naturaleza" | "chapa_plateada" | "chapa_dorada";
+      /** Name */
+      name: string;
+      /**
+       * Effect
+       * @enum {string}
+       */
+      effect: "nature" | "iv" | "ivs";
+    };
+    /** TrainingList */
+    TrainingList: {
+      /** Items */
+      items: components["schemas"]["TrainingItem"][];
+      /** Targets */
+      targets: components["schemas"]["TrainingTarget"][];
+      /** Operations */
+      operations: components["schemas"]["TrainingReceipt"][];
+    };
+    /** TrainingPokemon */
+    TrainingPokemon: {
+      /** Species */
+      species: string;
+      /** Nickname */
+      nickname: string;
+      /** Level */
+      level: number;
+      /** Nature Id */
+      nature_id: number;
+      /** Ivs */
+      ivs: {
+        [key: string]: number;
+      };
+      /** Is Shiny */
+      is_shiny: boolean;
+      /** Form */
+      form: number;
+    };
+    /** TrainingReceipt */
+    TrainingReceipt: {
+      /**
+       * Season Id
+       * Format: uuid
+       */
+      season_id: string;
+      /**
+       * Trainer Id
+       * Format: uuid
+       */
+      trainer_id: string;
+      /**
+       * Operation Id
+       * Format: uuid
+       */
+      operation_id: string;
+      /**
+       * Purchase Id
+       * Format: uuid
+       */
+      purchase_id: string;
+      /**
+       * Purchase Season Id
+       * Format: uuid
+       */
+      purchase_season_id: string;
+      /**
+       * Pokemon Entity Id
+       * Format: uuid
+       */
+      pokemon_entity_id: string;
+      /**
+       * Save File Id
+       * Format: uuid
+       */
+      save_file_id: string;
+      /**
+       * Identity Revision Id
+       * Format: uuid
+       */
+      identity_revision_id: string;
+      /**
+       * Status
+       * @enum {string}
+       */
+      status: "RESERVED" | "APPLIED" | "RELEASED";
+      /** Intent */
+      intent: {
+        [key: string]: unknown;
+      };
+      /**
+       * Reserved At
+       * Format: date-time
+       */
+      reserved_at: string;
+      /** Finished At */
+      finished_at: string | null;
+      /** Result */
+      result: {
+        [key: string]: unknown;
+      } | null;
+    };
+    /** TrainingReleaseBody */
+    TrainingReleaseBody: Record<string, never>;
+    /** TrainingReserveBody */
+    TrainingReserveBody: {
+      /**
+       * Purchase Id
+       * Format: uuid
+       */
+      purchase_id: string;
+      /**
+       * Pokemon Entity Id
+       * Format: uuid
+       */
+      pokemon_entity_id: string;
+      /** Source Sha256 */
+      source_sha256: string;
+      change: components["schemas"]["TrainingChange"];
+    };
+    /** TrainingTarget */
+    TrainingTarget: {
+      /**
+       * Pokemon Entity Id
+       * Format: uuid
+       */
+      pokemon_entity_id: string;
+      /** Source Sha256 */
+      source_sha256: string;
+      /**
+       * Game
+       * @enum {string}
+       */
+      game: "X" | "Y" | "OR" | "AS" | "SN" | "MN" | "US" | "UM";
+      /**
+       * Source
+       * @enum {string}
+       */
+      source: "party" | "box";
+      /** Box Number */
+      box_number: number;
+      /** Slot Number */
+      slot_number: number;
+      pokemon: components["schemas"]["TrainingPokemon"];
     };
     /** TransferLauncherItem */
     TransferLauncherItem: {
@@ -10037,6 +10288,141 @@ export interface operations {
         };
         content: {
           "application/json": components["schemas"]["DeliveryReceipt"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  listing_v1_launcher_seasons__season_id__training_get: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        season_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["TrainingList"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  reserve_v1_launcher_seasons__season_id__training__operation_id__put: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        season_id: string;
+        operation_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["TrainingReserveBody"];
+      };
+    };
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["TrainingReceipt"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  complete_v1_launcher_seasons__season_id__training__operation_id__complete_put: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        season_id: string;
+        operation_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["TrainingReceipt"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  release_v1_launcher_seasons__season_id__training__operation_id__release_put: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        season_id: string;
+        operation_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["TrainingReleaseBody"];
+      };
+    };
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["TrainingReceipt"];
         };
       };
       /** @description Validation Error */

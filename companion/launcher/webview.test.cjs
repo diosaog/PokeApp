@@ -119,6 +119,19 @@ test("only the web's own routes open native views, from a fixed list", () => {
     panel: "robos",
     modal: true,
   });
+  assert.deepEqual(w.desktopPanel(o + "/escritorio/entrenamiento", o), {
+    panel: "entrenamiento",
+    modal: true,
+  });
+  for (const item of ["menta_naturaleza", "chapa_plateada", "chapa_dorada"])
+    assert.deepEqual(
+      w.desktopPanel(o + "/escritorio/entrenamiento/" + item, o),
+      {
+        panel: "entrenamiento",
+        item,
+        modal: true,
+      },
+    );
   for (const url of [
     o + "/liga",
     o + "/saves/copias",
@@ -127,6 +140,8 @@ test("only the web's own routes open native views, from a fixed list", () => {
     o + "/escritorio/objetos/master_ball",
     o + "/escritorio/partida/rare_candy",
     o + "/escritorio/robos/abc",
+    o + "/escritorio/entrenamiento/rare_candy",
+    o + "/escritorio/entrenamiento/a0000000-0000-4000-8000-000000000001",
     "https://evil.test/saves",
     "http://pokeapp-web.pokeapp-v2.workers.dev/saves",
     "not a url",

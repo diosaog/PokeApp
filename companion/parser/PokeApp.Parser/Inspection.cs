@@ -38,9 +38,7 @@ public static class Inspection
                     || (ultra ? save.Version is not (GameVersion.US or GameVersion.UM)
                               : save.Version is not (GameVersion.SN or GameVersion.MN)))
                     return Failure("UNSUPPORTED_VERSION");
-                var signature = bytes.AsSpan((ultra ? 0x6C000 : 0x6BA00) + MemeCrypto.SaveFileSignatureOffset, MemeCrypto.SaveFileSignatureLength);
-                if (!MemeCrypto.VerifyMemeData(signature, out var verified, MemeKeyIndex.PokedexAndSaveFile)
-                    || !SHA256.HashData(bytes.AsSpan(bytes.Length - 0x200, ultra ? 0x150 : 0x140)).AsSpan().SequenceEqual(verified.AsSpan(0, 32)))
+                if (!NativeSignature.VerifySave(bytes))
                     return Failure("CORRUPT_SAVE");
             }
             // This pinned library's Gen5 IsVersionValid inherits an unconditional

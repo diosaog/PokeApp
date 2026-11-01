@@ -1,5 +1,62 @@
 # Final corrections — live execution record
 
+## Virtual Mints and Bottle Caps — 2026-11-01
+
+**IMPLEMENTED, NOT PUBLISHED. Final native acceptance is BLOCKING release.**
+The four preceding fixes (`662c3ea`, `f1d147c`) remain deployed and were not
+repeated. Production still uses API `c70f9bd9`, web `754550f9`, Supabase 073 and
+Launcher 0.26.8. No production migration, purchase or save has been changed for
+this feature.
+
+- Mint changes actual Nature; Silver changes one actual IV to 31; Gold changes
+  all six actual IVs. Identical custom mechanics for X/Y/OR/AS/SN/MN/US/UM,
+  without bag delivery, Hyper Training flags or a level-100 restriction.
+- Native wizard binds the final confirmation to purchase/entity/save hash and
+  chosen change. The API derives the slot, exact PKM hash, current values and
+  identity revision from trusted stored bytes. Existing owned paid purchases,
+  including discarded-season caps, remain redeemable against an authorized
+  current bound save; their purchase season and original payment stay intact.
+- Independent verified backups, the existing NTFS write journal and a durable
+  training binding hold synchronization until reconciliation. Atomic SQL
+  completion registers the verified save, preserves entity UUID/provenance and
+  consumes one purchase. Uncertain writes cannot release the purchase.
+- Migration 074 is frozen at SHA-256
+  `2398c53bfcbded60a90da4ffe6e91c39b83d403ff5b69d2f94e8ab5079dc606b`.
+  Fresh 001–074, restored-backup rehearsal, concurrent reservation guards and
+  foreign-OT two-IV-change/ordinary-sync proof pass. Backend 77 tests plus two
+  strict native-protocol tests pass. UI: 39 Node, 20 native-wizard, 53 React
+  tests and TypeScript pass; screenshots reviewed.
+- Native matrix: 496 isolated changes across eight games, party and boxes,
+  with unrelated-field, checksum, signature and tamper assertions pass. The
+  pinned PKHeX RSA short-result padding defect is narrowly corrected without
+  disabling signature verification. Packaged startup/recovery passes with the
+  built frontend served at its expected origin in an isolated test profile.
+- **Unresolved:** an earlier package completed all eight-game journal cases,
+  but the final immutable candidate fails intermittently: AS/Gold enters
+  `RECOVERY_REQUIRED` at local readback; real service/SQL reaches 23/24 then
+  UM/Gold refuses `TRAINING_LEGALITY_UNSUPPORTED` during completion preparation.
+  Identical retained requests subsequently verify, so retries are not accepted
+  as a fix. Original failures and raw inputs remain retained. Failure-only
+  Release diagnostics are being exercised through actual service and NTFS
+  workloads; legality rules have not been relaxed. Do not publish this candidate.
+- Private evidence: `%LOCALAPPDATA%/PokeApp-migration-evidence/virtual-training/20261101/`.
+  Backup `database/pre-release-20261101T144128Z.dump`, captured 14:41:51 UTC,
+  SHA-256 `0d4980c6f40abd6b111d14686dee927e3e1a285beddebf2895dd173a4ce5829a`;
+  refresh if older than two hours before applying 074. Candidate build roots
+  `PokeApp-releases/0.26.9-final` and `0.26.9-final-rehearsal` are outside Git.
+- Release ordering after all gates pass: committed-source API bundle; apply
+  rehearsed 074; API image with final Linux 24-case training gate; web with
+  download card still 0.26.8 (missing versioned binaries now return 404); then
+  immutable 0.26.9 installer, full public size/SHA-512 readback, signed feed last;
+  finally web download card 0.26.9. The public readback can use the guarded
+  Railway SSH transport because direct workers.dev access times out here.
+  Its temporary key must be removed after publication or abandonment; private
+  config/proofs are in `railway-public-readback/`, host pin is initial TOFU.
+
+Next: identify and fix the captured native intermittent rejection, then rebuild
+and pass final package/journal, real-service, Linux and installed-update gates;
+commit/push, publish and replace this pending entry with verified release IDs.
+
 ## League, trainer profiles, navigation and held items — 2026-11-01
 
 **PUBLISHED. Focused acceptance PASS; direct hosted-web visual acceptance remains

@@ -37,6 +37,7 @@ def audit(build):
         "assets/fonts/OFL.txt",
         "main.cjs",
         "quantity.js",
+        "training.js",
         "updater.cjs",
         "webview.cjs",
         "confirmations.cjs",

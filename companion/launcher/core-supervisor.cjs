@@ -25,6 +25,8 @@ const PHYSICAL = new Set([
   "quick_item_apply",
   "deliveries_refresh",
   "delivery_apply",
+  "training_list",
+  "training_apply",
   "transfer_prepare",
   "transfer_apply",
   "transfer_fulfil",

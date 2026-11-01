@@ -21,7 +21,9 @@ import {
   infiniteItemPath,
   insideLauncher,
   launcherDeliversShopObjects,
+  launcherTrainsPokemon,
   shopObjectsPath,
+  trainingItemPath,
 } from "../launcher";
 import { gameName } from "./progress";
 import { LauncherDownload } from "./launcher-download";
@@ -66,6 +68,40 @@ function ObjectUse({
   onUse: () => void;
 }) {
   const use = purchase.use;
+  if (
+    use?.mode === "training" ||
+    ["menta_naturaleza", "chapa_plateada", "chapa_dorada"].includes(
+      purchase.item_code ?? "",
+    )
+  ) {
+    const name =
+      purchase.item_code === "menta_naturaleza"
+        ? "Menta de Naturaleza"
+        : purchase.item_code === "chapa_plateada"
+          ? "Chapa Plateada"
+          : "Chapa Dorada";
+    return insideLauncher() ? (
+      launcherTrainsPokemon() ? (
+        <Link
+          className="button primary"
+          to={trainingItemPath(purchase.item_code)}
+        >
+          {purchase.training_status === "RESERVED"
+            ? "Comprobar aplicación"
+            : `Usar ${name}`}
+        </Link>
+      ) : (
+        <p className="muted">
+          Actualiza PokeApp Launcher a la versión 0.26.9 o posterior para usar{" "}
+          {name}.
+        </p>
+      )
+    ) : (
+      <p className="muted">
+        Usa {name} desde tu inventario en PokeApp Launcher 0.26.9 o posterior.
+      </p>
+    );
+  }
   if (purchase.delivery?.status === "RESERVED")
     return (
       <p className="muted">PokeApp Launcher la está añadiendo a tu bolsa.</p>
@@ -333,23 +369,27 @@ export function Inventory() {
                   {transfer
                     ? (transferLabels[transfer.status] ??
                       "Estado del robo no disponible")
-                    : physicalItem(item.item_code)
-                      ? (itemUseLabels[item.physical_state ?? "UNKNOWN"] ??
-                        "Estado físico no disponible")
-                      : item.delivery?.status === "DELIVERED"
-                        ? "En tu bolsa"
-                        : item.delivery?.status === "USED"
-                          ? "Usado"
-                          : item.delivery?.status === "RESERVED"
-                            ? "Entregándose"
-                            : ((
-                                {
-                                  pending: "Objeto disponible",
-                                  used: "Canjeado",
-                                  cancelled: "Cancelado",
-                                  refunded: "Reembolsado",
-                                } as Record<string, string>
-                              )[item.status] ?? "Estado no disponible")}
+                    : item.training_status === "RESERVED"
+                      ? "Aplicándose"
+                      : item.training_status === "APPLIED"
+                        ? "Usado"
+                        : physicalItem(item.item_code)
+                          ? (itemUseLabels[item.physical_state ?? "UNKNOWN"] ??
+                            "Estado físico no disponible")
+                          : item.delivery?.status === "DELIVERED"
+                            ? "En tu bolsa"
+                            : item.delivery?.status === "USED"
+                              ? "Usado"
+                              : item.delivery?.status === "RESERVED"
+                                ? "Entregándose"
+                                : ((
+                                    {
+                                      pending: "Objeto disponible",
+                                      used: "Canjeado",
+                                      cancelled: "Cancelado",
+                                      refunded: "Reembolsado",
+                                    } as Record<string, string>
+                                  )[item.status] ?? "Estado no disponible")}
                 </Tag>
                 {item.acquisition_type === "reward" && (
                   <Tag>Vale de recompensa</Tag>

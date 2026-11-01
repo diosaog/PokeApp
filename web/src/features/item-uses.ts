@@ -16,6 +16,14 @@ function gamesText(games: string[]) {
 export function useSummary(use?: Use | null): string | null {
   if (!use) return null;
   switch (use.mode) {
+    case "training":
+      return use.training_effect === "nature"
+        ? "Consumible virtual de PokeApp: cambia la naturaleza real de un Pokémon con el Launcher, en los 8 juegos."
+        : use.training_effect === "iv"
+          ? "Consumible virtual de PokeApp: maximiza un IV real a 31 con el Launcher, en los 8 juegos."
+          : use.training_effect === "ivs"
+            ? "Consumible virtual de PokeApp: maximiza los seis IV reales a 31 con el Launcher, en los 8 juegos."
+            : "Consumible virtual de PokeApp: se aplica a un Pokémon con el Launcher, en los 8 juegos.";
     case "pokemon":
       return "Se usa sobre un Pokémon desde tu inventario.";
     case "bag":

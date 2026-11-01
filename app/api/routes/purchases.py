@@ -20,9 +20,8 @@ IdempotencyHeader = Annotated[str, Header(min_length=1, max_length=128, pattern=
 
 
 def _usable_for_trainer(container, season_id, trainer_id, item_code):
-    """072: never sell an object that cannot be used. Menta de Naturaleza
-    exists in no Gen 6/7 game; an object absent from the trainer's league game
-    (e.g. the Chapa Plateada in Pokémon Y) is refused while that game is known."""
+    """Never sell an unusable bag object. Virtual training consumables are
+    supported in all eight games under PokeApp's explicit custom rules."""
     from app.api.routes.item_delivery import league_game
     from app.domain.shop_item_uses import purchase_refusal
 

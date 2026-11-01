@@ -49,23 +49,24 @@ class ContractTests(unittest.TestCase):
         native = {name: int(value) for name, value in re.findall(r'\["([a-z0-9_]+)"\] = (\d+)', block)}
         self.assertEqual({code: item[0] for code, item in BAG_ITEMS.items()}, native)
 
-    def test_bottle_cap_is_gen7_only_and_refused_for_pokemon_y(self):
-        self.assertEqual(GEN7, use_of("chapa_plateada")["games"])
-        self.assertEqual("ITEM_INCOMPATIBLE_WITH_GAME", purchase_refusal("chapa_plateada", "Y"))
+    def test_virtual_bottle_cap_is_supported_in_y_and_never_enters_the_bag(self):
+        self.assertEqual(GAMES, use_of("chapa_plateada")["games"])
+        self.assertIsNone(purchase_refusal("chapa_plateada", "Y"))
         self.assertIsNone(purchase_refusal("chapa_plateada", "US"))
         # No accepted save yet: the delivery checks the real save later.
         self.assertIsNone(purchase_refusal("chapa_plateada", None))
         view = describe_use("chapa_plateada", "Y")
-        self.assertEqual((False, "ITEM_INCOMPATIBLE_WITH_GAME"), (view["compatible"], view["reason"]))
-        self.assertEqual([{"code": "bottle_cap", "name": "Chapa Plateada", "item_id": 795, "games": list(GEN7)}], view["options"])
+        self.assertEqual((True, None), (view["compatible"], view["reason"]))
+        self.assertEqual([], view["options"])
+        self.assertEqual(("training", "iv"), (view["mode"], view["training_effect"]))
 
     def test_modes_keep_comodines_and_permissions_apart(self):
         for code in ("blindar_pokemon", "robar_pokemon", "revivir_pokemon", "robbery_shield_voucher"):
             self.assertEqual("pokemon", use_of(code)["mode"])
             self.assertEqual((), deliverable(code, "Y"))
         self.assertEqual("permission", use_of("captura_extra")["mode"])
-        self.assertEqual("unavailable", use_of("menta_naturaleza")["mode"])
-        self.assertEqual("ITEM_NOT_USABLE", purchase_refusal("menta_naturaleza", None))
+        self.assertEqual("training", use_of("menta_naturaleza")["mode"])
+        self.assertIsNone(purchase_refusal("menta_naturaleza", None))
         self.assertEqual("unknown", use_of("added_later_by_an_admin")["mode"])
 
     def test_choice_families_offer_only_what_the_game_holds(self):
@@ -173,7 +174,7 @@ class RouteTests(unittest.TestCase):
         self.sid, self.pid, self.op = str(uuid4()), str(uuid4()), str(uuid4())
         self.base = f"/v1/launcher/seasons/{self.sid}/deliveries"
 
-    def reserve(self, item="bottle_cap", game="US", code="chapa_plateada"):
+    def reserve(self, item="ice_stone", game="US", code="objeto_evolutivo"):
         self.repo.codes[self.pid] = code
         return self.client.put(
             f"{self.base}/{self.op}", json={"purchase_id": self.pid, "item": item, "game": game}
@@ -184,7 +185,7 @@ class RouteTests(unittest.TestCase):
         self.assertEqual(200, response.status_code, response.text)
         name, args = self.repo.calls[-1]
         self.assertEqual("reserve", name)
-        self.assertEqual((self.sid, TRAINER, self.pid, self.op, "bottle_cap", 795, "US"), args)
+        self.assertEqual((self.sid, TRAINER, self.pid, self.op, "ice_stone", 849, "US"), args)
         self.assertEqual(native_key(), response.json()["authorized_trainer_key"])
         self.assertIn(("save_files", {"id": "save-1", "season_id": self.sid, "trainer_id": TRAINER}), self.reads.filters)
 
@@ -287,16 +288,12 @@ class RouteTests(unittest.TestCase):
         self.assertEqual(str(uuid5(NAMESPACE_URL, f"pokeapp:item-use:{TRAINER}:{self.pid}:k1")), first)
         self.assertEqual(422, self.client.post(path).status_code)
 
-    def test_purchase_guard_refuses_what_cannot_be_used(self):
-        item = str(uuid4())
-        path = f"/v1/seasons/{self.sid}/shop/purchases"
+    def test_purchase_guard_accepts_virtual_effects_in_y(self):
+        from app.api.routes.purchases import _usable_for_trainer
         self.reads.game = "Y"
-        for code, reason in (("chapa_plateada", "ITEM_INCOMPATIBLE_WITH_GAME"), ("menta_naturaleza", "ITEM_NOT_USABLE")):
+        for code in ("chapa_plateada", "chapa_dorada", "menta_naturaleza"):
             with self.subTest(code=code):
-                self.repo.codes[item] = code
-                response = self.client.post(path, json={"item_id": item}, headers={"Idempotency-Key": "k"})
-                self.assertEqual(409, response.status_code)
-                self.assertEqual(reason, response.json()["detail"]["code"])
+                self.assertIsNone(_usable_for_trainer(self.container, self.sid, TRAINER, code))
         self.purchases.assert_not_called()
 
 

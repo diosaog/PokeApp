@@ -24,6 +24,7 @@ from typing import Protocol
 from uuid import NAMESPACE_URL, UUID, uuid4, uuid5
 
 from app.launcher.write_files import EnrolledTarget, WindowsWriteFiles, WriteSafetyError
+from app.save_parser.write_models import PreparedNative, WriteIntent
 
 GAMES = frozenset(("X", "Y", "OR", "AS", "SN", "MN", "US", "UM"))
 # Owner decision 2026-10-28 (real tests between two players): Rare Candy and
@@ -37,15 +38,15 @@ GAMES = frozenset(("X", "Y", "OR", "AS", "SN", "MN", "US", "UM"))
 # bag; like a robbery leg it applies only with the in-process permit of the
 # delivery flow, after the server reserved that purchase (app/launcher/item_delivery.py).
 PRODUCTION_MUTATIONS: frozenset[str] = frozenset(
-    {"add_item", "deliver_item", "transfer_remove", "transfer_insert"}
+    {"add_item", "deliver_item", "transfer_remove", "transfer_insert", "virtual_training"}
 )
 PUBLIC_READY_MUTATIONS: frozenset[str] = frozenset(
-    {"add_item", "deliver_item", "transfer_remove", "transfer_insert"}
+    {"add_item", "deliver_item", "transfer_remove", "transfer_insert", "virtual_training"}
 )
 # Applied only by their coordinated flow (PairedApplyPermit), never by the
 # generic «confirm» of a prepared change.
 COORDINATED_MUTATIONS: frozenset[str] = frozenset(
-    {"deliver_item", "transfer_remove", "transfer_insert"}
+    {"deliver_item", "transfer_remove", "transfer_insert", "virtual_training"}
 )
 PENDING = ("PREPARED", "AWAITING_CONFIRMATION", "RECOVERY_REQUIRED")
 # Owner decision 2026-10-26: one ordinary daily restore point per save, kept 30 days.
@@ -94,54 +95,6 @@ def _hash(data: bytes) -> str:
     return sha256(data).hexdigest()
 
 
-@dataclass(frozen=True)
-class WriteIntent:
-    expected_sha256: str
-    game: str
-    trainer_key: str
-    mutation: dict
-
-    @classmethod
-    def create(
-        cls, *, expected_sha256: str, game: str, trainer_key: str, mutation: dict
-    ):
-        if (
-            game not in GAMES
-            or not re.fullmatch("[0-9a-f]{64}", expected_sha256)
-            or not re.fullmatch("[0-9a-f]{64}", trainer_key)
-            or not isinstance(mutation, dict)
-        ):
-            raise WriteSafetyError("INVALID_WRITE_INTENT")
-        # Deep-copy removes caller-owned mutable references from the authorized intent.
-        clean = json.loads(_json(mutation))
-        if len(_json(clean)) > 4096:
-            raise WriteSafetyError("INVALID_WRITE_INTENT")
-        return cls(expected_sha256, game, trainer_key, clean)
-
-    def to_payload(self) -> dict:
-        return {
-            "expected_sha256": self.expected_sha256,
-            "game": self.game,
-            "trainer_key": self.trainer_key,
-            "mutation": json.loads(_json(self.mutation)),
-        }
-
-    @property
-    def operation_id(self) -> str:
-        return str(
-            uuid5(NAMESPACE_URL, "pokeapp-local-write/1:" + _json(self.to_payload()))
-        )
-
-
-@dataclass(frozen=True)
-class PreparedNative:
-    output: bytes
-    game: str
-    trainer_key: str
-    source_hash: str
-    output_hash: str
-    semantic_diff: dict
-    contract: dict
 
 
 class NativeWriter(Protocol):
@@ -339,6 +292,7 @@ class LocalWriteEngine:
                 "transfer_insert",
                 "add_item",
                 "deliver_item",
+                "virtual_training",
             )
             or target.path == capability.fixture_root
             or not target.path.is_relative_to(capability.fixture_root)
@@ -757,7 +711,7 @@ class LocalWriteEngine:
         ):
             raise WriteSafetyError(
                 "DELIVERY_COORDINATED_APPLICATION_REQUIRED"
-                if kind == "deliver_item"
+                if kind in ("deliver_item", "virtual_training")
                 else "TRANSFER_COORDINATED_APPLICATION_REQUIRED"
             )
         if record.get("mode") == "export":

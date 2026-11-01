@@ -9,6 +9,7 @@ const {
   clipboard,
 } = require("electron");
 const webview = require("./webview.cjs");
+const training = require("./training.js");
 const {
   createConfirmations,
   describe,
@@ -85,9 +86,11 @@ const CORE_ERRORS = {
     "Esa partida ya no aparece en la búsqueda. Vuelve a buscar y elígela de nuevo.",
   INVALID_PATH:
     "Ese archivo no es una partida compatible (main de 3DS, .sav, .dsv o .srm).",
-  SAVE_NOT_FOUND: "No se encuentra ese archivo. Puede haberse movido o borrado.",
+  SAVE_NOT_FOUND:
+    "No se encuentra ese archivo. Puede haberse movido o borrado.",
   ACCESS_DENIED: "Windows no permite leer ese archivo. Revisa sus permisos.",
-  FILE_LOCKED: "Otro programa está usando ese archivo. Ciérralo y vuelve a intentarlo.",
+  FILE_LOCKED:
+    "Otro programa está usando ese archivo. Ciérralo y vuelve a intentarlo.",
   INVALID_LOGIN: "Revisa el entrenador y el PIN.",
   INVALID_QUICK_ITEM_ARGUMENTS: "Revisa el objeto y la cantidad.",
   WRITE_CONFIRMATION_REQUIRED: "El cambio ya no está pendiente de confirmar.",
@@ -557,7 +560,14 @@ app.whenReady().then(() => {
   // account change, items added) refresh the web's screens without a reload.
   ipcMain.handle("launcher:web-event", (event, type) => {
     authorize(event);
-    if (!["save-synced", "save-changed", "account-changed", "items-changed"].includes(type))
+    if (
+      ![
+        "save-synced",
+        "save-changed",
+        "account-changed",
+        "items-changed",
+      ].includes(type)
+    )
       throw new Error("Evento no válido");
     if (onWebOrigin()) void toWeb("__pokeappLauncherEvent", { type });
     return { sent: true };
@@ -616,7 +626,16 @@ app.whenReady().then(() => {
   });
   ipcMain.handle("launcher:present", (event, view) => {
     authorize(event);
-    if (!["selector", "update", "robos", "objetos", "restore"].includes(view))
+    if (
+      ![
+        "selector",
+        "update",
+        "robos",
+        "objetos",
+        "entrenamiento",
+        "restore",
+      ].includes(view)
+    )
       throw new Error("Vista no válida");
     void openPanel({ panel: view, modal: true }, false);
     return { shown: true };
@@ -699,6 +718,24 @@ app.whenReady().then(() => {
   ipcMain.handle("launcher:deliveries", (event) => {
     authorize(event);
     return request("deliveries_refresh");
+  });
+  ipcMain.handle("launcher:training-list", (event) => {
+    authorize(event);
+    return request("training_list");
+  });
+  ipcMain.handle("launcher:training-apply", async (event, args, ticket) => {
+    authorize(event);
+    const clean = training.input(args);
+    const target = training.key(clean);
+    const state = await request("state");
+    describe("training", target, state);
+    confirmations.redeem(
+      ticket,
+      "training",
+      target,
+      fingerprint("training", target, state),
+    );
+    return request("training_apply", clean);
   });
   ipcMain.handle(
     "launcher:delivery-add",
@@ -983,7 +1020,7 @@ app.whenReady().then(() => {
     if (
       typeof kind !== "string" ||
       typeof target !== "string" ||
-      target.length > 128
+      target.length > (kind === "training" ? 600 : 128)
     )
       throw new Error("Confirmación no válida");
     if (kind === "update") {
@@ -1007,6 +1044,7 @@ app.whenReady().then(() => {
         "restore",
         "quick-item",
         "delivery",
+        "training",
         "transfer:prepare",
         "transfer:apply",
         "transfer:fulfil",

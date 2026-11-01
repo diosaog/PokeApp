@@ -60,6 +60,7 @@ class ApiContainer:
     incident_repository: object | None = None
     announcer: object | None = None
     item_delivery_repository: object | None = None
+    training_service: object | None = None
 
 
 def get_api_container(request: Request) -> ApiContainer:
@@ -92,6 +93,7 @@ def create_default_container(config: APIConfig | None = None) -> ApiContainer:
     launcher_repo = None
     save_ingestion = None
     personal_saves = None
+    training_service = None
     accounts = None
 
     if config.supabase_url and config.supabase_anon_key:
@@ -255,6 +257,14 @@ def create_default_container(config: APIConfig | None = None) -> ApiContainer:
                 ),
                 save_ingestion.parser,
             )
+            from app.application.training import VirtualTraining
+            from app.repositories.supabase.training import SupabaseTrainingRepository
+            from app.save_parser.writer import PkhexProcessWriter
+
+            training_service = VirtualTraining(
+                SupabaseTrainingRepository(create_client(config.supabase_url, config.supabase_service_role_key)),
+                save_ingestion.parser, PkhexProcessWriter(Path(parser_path)),
+            )
 
     if (
         config.item_verification_transport_enabled
@@ -350,4 +360,5 @@ def create_default_container(config: APIConfig | None = None) -> ApiContainer:
         account_service=accounts,
         announcer=create_announcer(config),
         item_delivery_repository=item_delivery_repo,
+        training_service=training_service,
     )

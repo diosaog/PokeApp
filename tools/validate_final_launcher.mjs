@@ -6,7 +6,9 @@ import path from 'node:path';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 const VERSION=JSON.parse(readFileSync(new URL('../companion/launcher/package.json',import.meta.url),'utf8')).version;
-const [exe, output] = process.argv.slice(2);
+// Optional pre-deploy web fixture: run the real built frontend at its expected
+// origin without depending on public connectivity. Never changes the package.
+const [exe, output, webDist] = process.argv.slice(2);
 assert(exe && output);
 await mkdir(path.join(output,'appdata'),{recursive:true});
 const env={...process.env,APPDATA:path.join(output,'appdata'),POKEAPP_LAUNCHER_PROFILE:path.join(output,'profile'),POKEAPP_LAUNCHER_HEADLESS_TEST:'1'};
@@ -14,13 +16,24 @@ delete env.ELECTRON_RUN_AS_NODE;
 const child=spawn(exe,['--remote-debugging-port=9343'],{env,windowsHide:true,stdio:'ignore'});
 const pause=ms=>new Promise(resolve=>setTimeout(resolve,ms));
 let browser;
-const report={status:'RUNNING',version:VERSION,checks:[]};
+const report={status:'RUNNING',version:VERSION,web_source:webDist?'isolated built frontend':'public origin',checks:[]};
 try {
   for(let n=0;n<60&&!browser;n++) {
     await pause(500);
     browser=await chromium.connectOverCDP('http://127.0.0.1:9343').catch(()=>null);
   }
   assert(browser,'packaged startup');
+  if(webDist) {
+    const root=path.resolve(webDist);
+    await browser.contexts()[0].route('https://pokeapp-web.pokeapp-v2.workers.dev/**',async route=>{
+      const requested=path.resolve(root,'.'+decodeURIComponent(new URL(route.request().url()).pathname));
+      assert(requested===root||requested.startsWith(root+path.sep),'fixture stays inside built web');
+      const file=/\.[a-z0-9]+$/i.test(requested)?requested:path.join(root,'index.html');
+      const ext=path.extname(file);
+      const type={'.html':'text/html','.js':'text/javascript','.css':'text/css','.png':'image/png','.woff2':'font/woff2','.svg':'image/svg+xml'}[ext]||'application/octet-stream';
+      await route.fulfill({status:200,body:readFileSync(file),contentType:type});
+    });
+  }
   let shell;
   for(let n=0;n<60&&!shell;n++) {
     shell=browser.contexts().flatMap(c=>c.pages()).find(p=>p.url().includes('shell=unified'));
@@ -41,6 +54,10 @@ try {
   assert(state?.local_status,'packaged Python core answers IPC');
   assert(!state.principal,'no real account');
   assert(!state.selected_save,'no owner save selected');
+  if(webDist) for(const page of browser.contexts()[0].pages()) {
+    if(page!==shell && (page.url().startsWith('https://pokeapp-web.')||page.url().startsWith('chrome-error://')))
+      await page.goto('https://pokeapp-web.pokeapp-v2.workers.dev/',{waitUntil:'domcontentloaded'});
+  }
   const web=browser.contexts().flatMap(c=>c.pages()).find(p=>p.url().startsWith('https://pokeapp-web.'));
   assert(web,'official web origin');
   // Read the DOM directly: on this machine Playwright's frame tracking can wait
@@ -50,10 +67,10 @@ try {
     login=await web.evaluate(()=>[...document.querySelectorAll('button')].some(b=>b.textContent.trim()==='Entrar a PokeApp'&&b.offsetParent!==null)).catch(()=>false);
     if(!login) await pause(500);
   }
-  assert(login,'official web login form');
+  assert(login,'web login form');
   const boundary=await web.evaluate(v=>({node:typeof require,bridge:typeof window.launcher,version:navigator.userAgent.includes('PokeAppLauncher/'+v)}),VERSION);
   assert(boundary.node==='undefined'&&boundary.bridge==='undefined'&&boundary.version,'web IPC boundary/version');
-  report.checks=['Packaged startup','Real core IPC','Supervised core READY','Isolated empty profile','Official web login','No web Node/IPC bridge',VERSION+' user agent'];
+  report.checks=['Packaged startup','Real core IPC','Supervised core READY','Isolated empty profile',webDist?'Built frontend login at intercepted official origin':'Official web login','No web Node/IPC bridge',VERSION+' user agent'];
   // Fail only the disposable child's idle core, then wait for its supervisor.
   // Never enumerate or stop another Launcher, an owner's profile or a writer.
   const ownedCore=JSON.parse(execFileSync('powershell.exe',['-NoProfile','-NonInteractive','-Command',

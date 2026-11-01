@@ -8,8 +8,8 @@
 - `choice`: the same, after choosing which object of the family (Fósil,
   Objeto Evolutivo, Objeto Potenciador de Tipo, Gemas Elementales).
 - `permission`: no object exists (Captura Extra): using it records the use.
-- `unavailable`: no Gen 6/7 game has the object (Menta de Naturaleza: mints
-  arrived in Gen 8); it is not sold and its purchases can be refunded.
+- `training`: PokeApp virtual Mints and Bottle Caps change actual Nature/IVs
+  through the verified writer in all eight games; they never enter the bag.
 
 Compatibility comes from the native writer's own pouch tables, read on X…UM
 saves (its --shop-item-checks gate): Bottle Caps and the Ice Stone exist only
@@ -197,14 +197,14 @@ POKEMON_ITEMS = ("blindar_pokemon", "revivir_pokemon", "robar_pokemon", "robbery
 SHOP_USES = {
     **{code: {"mode": "pokemon"} for code in POKEMON_ITEMS},
     "captura_extra": {"mode": "permission"},
-    "menta_naturaleza": {"mode": "unavailable"},
+    "menta_naturaleza": {"mode": "training", "training_effect": "nature"},
     "fosil": {"mode": "choice", "items": _FOSSILS},
     "gemas_elementales": {"mode": "choice", "items": _GEMS},
     "objeto_potenciador_tipo": {"mode": "choice", "items": _BOOSTERS},
     "objeto_evolutivo": {"mode": "choice", "items": _EVOLUTION},
     "capsula_habilidad": {"mode": "bag", "items": ("ability_capsule",)},
-    "chapa_plateada": {"mode": "bag", "items": ("bottle_cap",)},
-    "chapa_dorada": {"mode": "bag", "items": ("gold_bottle_cap",)},
+    "chapa_plateada": {"mode": "training", "training_effect": "iv"},
+    "chapa_dorada": {"mode": "training", "training_effect": "ivs"},
     **{
         shop: {"mode": "bag", "items": (bag,)}
         for shop, bag in {
@@ -276,11 +276,12 @@ def use_of(shop_code):
     items = tuple(use.get("items", ()))
     if use["mode"] in ("bag", "choice"):
         games = tuple(g for g in GAMES if any(g in item_games(i) for i in items))
-    elif use["mode"] in ("pokemon", "permission"):
+    elif use["mode"] in ("pokemon", "permission", "training"):
         games = GAMES
     else:
         games = ()
-    return {"mode": use["mode"], "items": items, "games": games}
+    return {"mode": use["mode"], "items": items, "games": games,
+            "training_effect": use.get("training_effect")}
 
 
 def deliverable(shop_code, game):
@@ -316,6 +317,7 @@ def describe_use(shop_code, league_game=None):
         "games": list(use["games"]),
         "compatible": None if league_game not in GAMES else refusal is None,
         "reason": refusal,
+        "training_effect": use["training_effect"],
         "options": [
             {
                 "code": code,

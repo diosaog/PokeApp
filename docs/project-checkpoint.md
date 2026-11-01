@@ -5,6 +5,11 @@ milestone record; it does not maintain a second live phase-status ledger.
 
 ## Current project position
 
+- Virtual Mints and Bottle Caps (2026-11-01): **IN PROGRESS, NOT PUBLISHED.**
+  Integration and isolated safety gates implemented; a captured intermittent
+  native legality rejection blocks final release. Continue only from the
+  [authoritative live record](work-in-progress/final-corrections-live.md).
+
 - League/profile/navigation/item fixes (2026-11-01): **PUBLISHED.** Source
   `662c3ea`, Railway `c70f9bd9` SUCCESS, Cloudflare `754550f9` active 100%.
   75 React / 103 Python / 3 browser cases and isolated SQL closes/replays PASS;

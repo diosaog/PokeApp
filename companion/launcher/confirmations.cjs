@@ -4,6 +4,7 @@
 // to the kind of action, its target and a fingerprint of the state it was
 // issued for, so a stale, reused or swapped confirmation is refused.
 const crypto = require("node:crypto");
+const training = require("./training.js");
 
 const STALE =
   "La confirmación ha caducado o ya no corresponde a esta operación. Vuelve a abrirla.";
@@ -74,6 +75,17 @@ const transferFor = (state, authorizationId) =>
     (t) => t.authorization_id === authorizationId,
   );
 function fingerprint(kind, target, state) {
+  if (kind === "training") {
+    const value = training.parse(target);
+    const selected = training.selection(state, value);
+    return [
+      state.selected_save,
+      state.principal?.trainer_id,
+      state.receipt_id,
+      training.key(value),
+      selected.target.pokemon,
+    ];
+  }
   if (kind === "write")
     return [state.selected_save, target, state.write?.description];
   if (kind === "quick-item")
@@ -112,6 +124,8 @@ const CLOSED =
 const ITEMS = { rare_candy: "Caramelo Raro", heart_scale: "Escama Corazón" };
 // The dialog text for one action, or an error when it is not available now.
 function describe(kind, target, state) {
+  if (kind === "training")
+    return training.summary(state, training.parse(target));
   const save = state.selected_save || "";
   if (kind === "quick-item") {
     const [item, amount] = target.split(":");
