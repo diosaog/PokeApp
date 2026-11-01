@@ -1,7 +1,6 @@
 import { Link } from "react-router-dom";
 import {
   ArrowUpRight,
-  Box,
   Crown,
   HardDrive,
   Medal,
@@ -33,7 +32,6 @@ const tiles = [
   ["/liga", "Liga", "Clasificación y jornadas", Trophy],
   ["/battle", "Batallas", "Team Preview y combate", Swords],
   ["/copa", "Copa", "Eliminatorias", Crown],
-  ["/pc", "Mi PC", "Equipo y cajas", Box],
   ["/tienda", "Tienda", "Objetos y comodines", ShoppingBag],
   ["/entrenadores", "Entrenadores", "Rivales y scouting", Users],
   ["/hall", "Hall de la Fama", "Campeones", Medal],
@@ -176,8 +174,11 @@ export function HomePage() {
                 : "Equipo actual del juego · revisa el Team Lock antes de jugar."}
             </p>
             <div className="toolbar">
-              <Link className="text-link" to="/pc">
-                Abrir Mi PC →
+              <Link
+                className="text-link"
+                to={`/entrenadores/${me?.trainer_id}`}
+              >
+                Ver mi equipo y cajas →
               </Link>
               <Link className="text-link" to="/battle">
                 Team Preview →

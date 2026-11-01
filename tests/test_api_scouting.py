@@ -35,7 +35,7 @@ class ScoutingTests(unittest.TestCase):
         self.assertEqual(set(data), {"season", "day", "trainers", "trainer_id", "team", "team_lock_status"})
         for mon in data["team"] or []:
             self.assertEqual(
-                set(mon), {"species", "nickname", "level", "types", "item", "moves"}
+                set(mon), {"species", "nickname", "level", "types", "item", "item_generation", "moves"}
             )
             for move in mon["moves"]:
                 self.assertEqual(set(move), {"name"})
@@ -82,6 +82,7 @@ class ScoutingTests(unittest.TestCase):
                 level=20,
                 types=["Electric"],
                 item="Berry",
+                item_generation=None,
                 moves=[dict(name="Thunder")],
             ),
         )
@@ -194,7 +195,7 @@ class ScoutingTests(unittest.TestCase):
         self.assertEqual(
             response.json()["team"][0],
             dict(
-                species="Pikachu", nickname="", level=None, types=[], item="", moves=[]
+                species="Pikachu", nickname="", level=None, types=[], item="", item_generation=None, moves=[]
             ),
         )
 

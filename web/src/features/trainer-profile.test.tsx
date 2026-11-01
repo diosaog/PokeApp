@@ -3,7 +3,7 @@ import { cleanup, render, screen } from "@testing-library/react";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { TrainerProfilePage } from "./trainer-profile";
 
-const mocks = vi.hoisted(() => ({ member: true }));
+const mocks = vi.hoisted(() => ({ member: true, noSave: false }));
 const observed = (game: string) => ({
   state: "observed",
   game,
@@ -75,7 +75,13 @@ vi.mock("../state", () => ({
         : path.endsWith("/league")
           ? { rows: [], days: [] }
           : path.includes("/collection")
-            ? { status: "ready", game: "Y", pokemon: [] }
+            ? mocks.noSave
+              ? {
+                  status: "no_current_save",
+                  reason: "no_synced_save",
+                  pokemon: [],
+                }
+              : { status: "ready", source: "personal", game: "Y", pokemon: [] }
             : undefined,
   }),
 }));
@@ -101,6 +107,7 @@ function profile(id: string) {
 }
 beforeEach(() => {
   mocks.member = true;
+  mocks.noSave = false;
 });
 afterEach(cleanup);
 
@@ -123,9 +130,19 @@ it("another trainer's profile never shows the app settings", () => {
   expect(
     screen.queryByRole("region", { name: "Ajustes de la app" }),
   ).not.toBeInTheDocument();
+  expect(screen.getByRole("heading", { name: /^Equipo$/ })).toBeVisible();
+  expect(screen.getByText(/Partida personal sincronizada/)).toBeVisible();
   expect(
     screen.queryByRole("button", { name: "Editar mi perfil" }),
   ).not.toBeInTheDocument();
+});
+
+it("explains a genuine missing observation without blaming the absent Team Lock", () => {
+  mocks.noSave = true;
+  profile("rival");
+  expect(
+    screen.getByText(/aún no tiene una partida sincronizada/),
+  ).toBeVisible();
 });
 
 it("the own profile shows the active save and names the season's other game", () => {
@@ -139,6 +156,7 @@ it("the own profile shows the active save and names the season's other game", ()
 it("without a season the own profile still ends with the settings", () => {
   mocks.member = false;
   profile("me");
+  expect(screen.getByRole("heading", { name: "Equipo" })).toBeVisible();
   expect(
     screen.getByRole("region", { name: "Opciones personales" }),
   ).toContainElement(screen.getByRole("region", { name: "Ajustes de la app" }));

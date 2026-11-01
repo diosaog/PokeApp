@@ -12,6 +12,7 @@ from app.api.read_models import (
     TrainerCollectionRead,
 )
 from app.application.progress import progress_read
+from app.application.pokemon_read_context import pokemon_context
 from app.api.progress_models import ProgressRead
 from app.repositories.errors import NotFoundError, PersistenceError
 from app.repositories.supabase.frontend_reads import FrontendReadRepository
@@ -201,8 +202,8 @@ class FrontendReads:
         return self._pc(sid, tid)
 
     def trainer_collection(self, sid, tid):
-        self.season(sid)
-        players = self.rows("season_players", "id", season_id=sid, trainer_id=tid)
+        season = self.season(sid)
+        players = self.rows("season_players", "id,status,current_save_file_id", season_id=sid, trainer_id=tid)
         if not players:
             raise NotFoundError("Participant not found")
         if len(players) != 1:
@@ -212,10 +213,43 @@ class FrontendReads:
         if len(stats) > 1:
             raise PersistenceError("Ambiguous counter")
         collection = self._pc(sid, tid, public=True)
+        # During preparation no competitive save may be linked yet. The current
+        # participant's synced save can still supply the existing PUBLIC field
+        # allowlist. Never use it as an official lock or competitive evidence.
+        # A broken/foreign competitive pointer is not a reason to broaden access.
+        if collection.status == "no_current_save" and not players[0].get("current_save_file_id"):
+            if season["status"] in ("draft", "active") and players[0].get("status") == "active":
+                collection = self._personal_collection(tid)
+            else:
+                collection.reason = "ineligible_personal_save"
         return TrainerCollectionRead.model_validate({
             **collection.model_dump(),
             "revived_after_wipe": stats[0].get("revived_after_wipe") if stats else None,
         })
+
+    def _personal_collection(self, tid):
+        from app.application.personal_saves import PersonalSaves
+
+        # Only a currently enabled participant reaches this path. Private IVs,
+        # abilities, identities, file IDs/hashes and metadata never leave it.
+        enabled = self.rows("trainers", "id", id=tid, globally_enabled=True)
+        if not enabled:
+            return TrainerCollectionRead(status="no_current_save", pokemon=[], reason="ineligible_personal_save")
+        rows = self.rows("trainer_personal_saves",
+                         "trainer_id,sha256,parser_version,game,payload,uploaded_at", trainer_id=tid)
+        if len(rows) > 1:
+            raise PersistenceError("Ambiguous personal save")
+        if not rows:
+            return TrainerCollectionRead(status="no_current_save", pokemon=[], reason="no_synced_save")
+        row = rows[0]
+        if str(row["trainer_id"]) != tid:
+            raise PersistenceError("Personal save owner mismatch")
+        class SelectedSave:
+            def get(self, trainer_id):
+                if trainer_id != tid:
+                    raise PersistenceError("Personal save scope mismatch")
+                return row
+        return PersonalSaves(SelectedSave(), None).pc(tid, public=True)
 
     def _public_flags(self, sid, entity_ids):
         reader = getattr(self.repo, "public_pokemon_flags", None)
@@ -253,7 +287,9 @@ class FrontendReads:
         def result(save, status, pokemon):
             if public:
                 return TrainerCollectionRead(
-                    status=status, pokemon=pokemon, dead_box=dead_box
+                    status=status, pokemon=pokemon, dead_box=dead_box, source="league" if save else None,
+                    reason={"no_current_save": "no_linked_save", "not_ready": "processing",
+                            "unsupported_payload": "unsupported_payload"}.get(status)
                 )
             return PCRead(save=save, status=status, pokemon=pokemon, dead_box=dead_box)
 
@@ -315,7 +351,7 @@ class FrontendReads:
             dict(
                 location=f"Equipo · {s['slot_number']}",
                 pokemon={
-                    **s["pokemon"],
+                    **pokemon_context(s["pokemon"], payload),
                     "status_flags": flags.get(
                         entities.get(("party", 0, s["slot_number"])), []
                     ),
@@ -332,7 +368,7 @@ class FrontendReads:
                         dict(
                             location=f"Caja {box['box_number']} · {slot['slot_number']}",
                             pokemon={
-                                **slot["pokemon"],
+                                **pokemon_context(slot["pokemon"], payload),
                                 "status_flags": flags.get(
                                     entities.get(("box", box["box_number"], slot["slot_number"])), []
                                 ),

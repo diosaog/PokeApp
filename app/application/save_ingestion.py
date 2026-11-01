@@ -38,6 +38,7 @@ def parsed_payload(observation, save_id, trainer_id, raw_hash):
             "level": p.level,
             "types": [],
             "item": f"Item #{p.item_id}" if p.item_id else "",
+            "item_generation": observation.generation,
             "moves": [{"name": f"Move #{m.id}", "pp": m.pp} for m in p.moves if m.id],
             "is_shiny": p.shiny,
             "ability": f"Ability #{p.ability_id}",

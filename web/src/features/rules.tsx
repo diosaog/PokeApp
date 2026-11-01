@@ -218,7 +218,9 @@ function Structure({ setup }: { setup: Setup }) {
     [error, setError] = useState("");
   const config =
     source.config_versions.find((c) => c.is_current) ??
-    source.config_versions[0];
+    source.config_versions
+      .slice()
+      .sort((a, b) => b.version_number - a.version_number)[0];
   const editable = setup.season.status === "draft" && !config?.used;
   // One league is stored as division_sizes {A}; two leagues as {A, B}.
   const [shape, setShape] = useState<"single" | "two">(
@@ -236,7 +238,11 @@ function Structure({ setup }: { setup: Setup }) {
       : undefined;
   const [points, setPoints] = useState(rewardText(config?.scoring)),
     [coins, setCoins] = useState(rewardText(config?.coin_rewards)),
-    [commonAmount, setCommonAmount] = useState(String(commonCoins ?? ""));
+    [commonAmount, setCommonAmount] = useState(String(commonCoins ?? "")),
+    [coinMode, setCoinMode] = useState<"equal" | "position">(
+      commonCoins === undefined ? "position" : "equal",
+    );
+  const equalCoins = singleDay || coinMode === "equal";
   useEffect(() => {
     setTotal(config?.total_matchdays ?? 1);
     setShape(
@@ -247,6 +253,7 @@ function Structure({ setup }: { setup: Setup }) {
     setPoints(rewardText(config?.scoring));
     setCoins(rewardText(config?.coin_rewards));
     setCommonAmount(String(commonCoins ?? ""));
+    setCoinMode(commonCoins === undefined ? "position" : "equal");
     setError("");
   }, [source, config, commonCoins]);
   // Only the observed initial assignment can start a single league; an older
@@ -286,28 +293,33 @@ function Structure({ setup }: { setup: Setup }) {
             const count = setup.participants.length;
             if (
               !singleDay &&
-              [points, coins].some(
+              [points, ...(!equalCoins ? [coins] : [])].some(
                 (v) =>
                   v.split(",").length !== count ||
                   v.split(",").some((entry) => !/^\d+$/.test(entry.trim())),
               )
             ) {
               setError(
-                `Introduce ${count} valores en puntos y ${count} en monedas, uno por posición. Usa 0 si no hay recompensa.`,
+                `Introduce ${count} valores por posición en puntos${equalCoins ? "" : " y monedas"}. Usa 0 si no hay recompensa.`,
               );
               return;
             }
             const scores = singleDay
-                ? Array<number>(count).fill(0)
+                ? // 073 ignores positional points in this format. Preserve the
+                  // configured map so returning to multiple days loses no edits.
+                  points.split(",").length === count &&
+                  points.split(",").every((v) => /^\d+$/.test(v.trim()))
+                  ? points.split(",").map(Number)
+                  : Array<number>(count).fill(0)
                 : points.split(",").map(Number),
-              rewards = singleDay
+              rewards = equalCoins
                 ? Array<number>(count).fill(Number(commonAmount))
                 : coins.split(",").map(Number);
             const values = ["total", "a", "b", "movement"].map((k) =>
               single && k !== "total" ? 0 : number(data, k),
             );
             if (
-              (singleDay && commonAmount === "") ||
+              (equalCoins && commonAmount === "") ||
               ![...scores, ...rewards, ...values].every(
                 (v) => Number.isSafeInteger(v) && v >= 0 && v <= 2147483647,
               ) ||
@@ -455,7 +467,20 @@ function Structure({ setup }: { setup: Setup }) {
                     />
                   </Field>
                 ))}
-              {singleDay && (
+              {!singleDay && (
+                <Field label="Reparto de monedas">
+                  <select
+                    value={coinMode}
+                    onChange={(event) =>
+                      setCoinMode(event.target.value as "equal" | "position")
+                    }
+                  >
+                    <option value="equal">Las mismas monedas para todos</option>
+                    <option value="position">Monedas por posición</option>
+                  </select>
+                </Field>
+              )}
+              {equalCoins && (
                 <Field label="Monedas de jornada para cada participante">
                   <input
                     name="commonCoins"
@@ -465,7 +490,10 @@ function Structure({ setup }: { setup: Setup }) {
                     step={1}
                     required
                     value={commonAmount}
-                    onChange={(event) => setCommonAmount(event.target.value)}
+                    onChange={(event) => {
+                      setCommonAmount(event.target.value);
+                      setCoinMode("equal");
+                    }}
                   />
                 </Field>
               )}
@@ -476,25 +504,30 @@ function Structure({ setup }: { setup: Setup }) {
                       ["points", "Puntos por posición", points, setPoints],
                       ["coins", "Monedas por posición", coins, setCoins],
                     ] as const
-                  ).map(([name, label, value, setValue]) => (
-                    <Field key={name} label={label}>
-                      <input
-                        name={name}
-                        required
-                        value={value}
-                        onChange={(event) => setValue(event.target.value)}
-                      />
-                    </Field>
-                  ))}
+                  )
+                    .filter(([name]) => name !== "coins" || !equalCoins)
+                    .map(([name, label, value, setValue]) => (
+                      <Field key={name} label={label}>
+                        <input
+                          name={name}
+                          required
+                          value={value}
+                          onChange={(event) => setValue(event.target.value)}
+                        />
+                      </Field>
+                    ))}
                 </>
               )}
             </div>
             {!singleDay && (
               <p>
-                Introduce {setup.participants.length} valores en cada campo,
-                separados por comas, del primer al último puesto. La cantidad
-                depende de los participantes, no de las jornadas. Usa 0 si una
-                posición no recibe puntos o monedas.
+                Puntuación de varias jornadas: se aplican los puntos por
+                posición guardados en cada cierre. El reparto de monedas se
+                elige aparte. Cambiar la jornada consultada no modifica estas
+                reglas. Introduce {setup.participants.length} valores en cada
+                campo, separados por comas, del primer al último puesto. La
+                cantidad depende de los participantes, no de las jornadas. Usa 0
+                si una posición no recibe puntos o monedas.
               </p>
             )}
             {singleDay && (

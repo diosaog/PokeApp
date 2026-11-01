@@ -8,7 +8,7 @@ import {
   Radar,
   ShieldCheck,
 } from "lucide-react";
-import { useMyPC } from "../state";
+import { useApp, useMyPC } from "../state";
 import { Card, Heading, Notice, Tag, date } from "../ui";
 import { insideLauncher, launcherWithoutHub } from "../launcher";
 import { MyProgress, SaveGame } from "./progress";
@@ -69,6 +69,7 @@ export function SavesPage() {
 
 function Saves() {
   const pc = useMyPC();
+  const { me } = useApp();
   const save = pc.data?.save;
   return (
     <>
@@ -89,8 +90,11 @@ function Saves() {
               <p className="hub-save-when">
                 Última sincronización · {date(save.uploaded_at)}
               </p>
-              <Link className="button primary" to="/pc">
-                Abrir mi PC
+              <Link
+                className="button primary"
+                to={`/entrenadores/${me?.trainer_id}`}
+              >
+                Ver mi equipo y cajas
               </Link>
             </>
           ) : (

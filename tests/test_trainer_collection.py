@@ -137,6 +137,67 @@ class PublicCollectionTests(unittest.TestCase):
             self.assertEqual(data["status"], "unsupported_payload")
             self.assertEqual(data["pokemon"], [])
 
+    def personal_fixture(self):
+        self.store.data["seasons"][0]["status"] = "draft"
+        self.store.data["season_players"][0].update(status="active", current_save_file_id=None)
+        self.store.data["trainers"] = [dict(id=TRAINER_ID, globally_enabled=True)]
+        payload = deepcopy(self.before["parsed_saves"][0]["payload"])
+        payload.update(save_record_id=TRAINER_ID, game="Y", generation=6)
+        payload["party"][0]["pokemon"]["item"] = "Item #158"
+        self.store.data["trainer_personal_saves"] = [dict(trainer_id=TRAINER_ID,
+            sha256="a"*64, parser_version="server-parser", game="Y", payload=payload,
+            uploaded_at="2026-11-01T10:00:00Z")]
+
+    def test_draft_personal_observation_without_team_lock_is_public_allowlist_only(self):
+        self.personal_fixture()
+        result = self.get()
+        self.assertEqual(result.status_code, 200, result.text)
+        self.assertEqual((result.json()["status"], result.json()["source"], result.json()["game"]),
+                         ("ready", "personal", "Y"))
+        self.assertIsNone(result.json()["dead_box"])
+        self.assertEqual(result.json()["pokemon"][0]["pokemon"]["item_generation"], 6)
+        self.assertEqual(len(result.json()["pokemon"]), 3)
+        for forbidden in ("PRIVATE", "SECRET", '"ivs"', '"evs"', '"ability"',
+                          '"nature"', "source_hash", "trainer_id", "save_record_id"):
+            self.assertNotIn(forbidden, result.text)
+
+    def test_no_personal_save_control_and_no_fallback_for_private_or_foreign_scope(self):
+        self.personal_fixture()
+        del self.store.data["trainer_personal_saves"]
+        self.assertEqual(self.get().json()["reason"], "no_synced_save")
+        for table, field, value in (("season_players", "status", "disqualified"),
+                                    ("seasons", "status", "archived"),
+                                    ("trainers", "globally_enabled", False)):
+            self.personal_fixture()
+            self.store.data[table][0][field] = value
+            self.store.calls.clear()
+            self.assertEqual(self.get().json()["reason"], "ineligible_personal_save")
+            self.assertNotIn("trainer_personal_saves", [c[0] for c in self.store.calls])
+        self.personal_fixture()
+        self.store.data["season_players"][0]["current_save_file_id"] = str(uuid4())
+        self.store.calls.clear()
+        self.assertEqual(self.get().json()["reason"], "no_linked_save")
+        self.assertNotIn("trainer_personal_saves", [c[0] for c in self.store.calls])
+
+    def test_personal_provenance_and_game_conflicts_fail_closed(self):
+        for field, value in (("trainer_id", str(uuid4())), ("source_hash", "f"*64),
+                             ("game", "SN"), ("generation", 7)):
+            self.personal_fixture()
+            self.store.data["trainer_personal_saves"][0]["payload"][field] = value
+            self.assertEqual(self.get().status_code, 503)
+
+    def test_old_xy_collection_recovers_item_context_only_from_its_own_save(self):
+        for game, generation in (("X", 6), ("Y", 6), ("OR", 6), ("AS", 6),
+                                 ("SN", 7), ("MN", 7), ("US", 7), ("UM", 7)):
+            payload = self.store.data["parsed_saves"][0]["payload"]
+            payload.update(game=game, generation=generation)
+            payload["party"][0]["pokemon"]["item"] = "Item #217"
+            result = self.get()
+            self.assertEqual(result.status_code, 200, result.text)
+            self.assertEqual(result.json()["pokemon"][0]["pokemon"]["item_generation"], generation)
+        payload.pop("game")
+        self.assertIsNone(self.get().json()["pokemon"][0]["pokemon"]["item_generation"])
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -268,7 +268,7 @@ export function useOverview() {
     Boolean(season),
   );
 }
-// «Mi PC» shows the trainer's ACTIVE save: the one their Launcher has
+// The own profile shows the trainer's ACTIVE save: the one their Launcher has
 // selected and synced (personal record) — the same game on every screen.
 // When the selected season competes with that same game, its copy is shown
 // instead (identical file, plus competitive marks such as deaths). A season
@@ -286,7 +286,14 @@ export function useMyPC(enabled = true) {
   const competing = seasonPc.data?.status === "ready" ? seasonPc.data : null;
   const sameGame =
     !!active && !!competing && active.save?.game === competing.save?.game;
-  const data = sameGame || !active ? (competing ?? personal.data) : active;
+  const personalIsNewer =
+    sameGame &&
+    Date.parse(active.save?.uploaded_at ?? "") >
+      Date.parse(competing.save?.uploaded_at ?? "");
+  const data =
+    !active || (sameGame && !personalIsNewer)
+      ? (competing ?? personal.data)
+      : active;
   return {
     data,
     error: data ? null : personal.error,

@@ -214,6 +214,8 @@ class TrainerCollectionRead(BaseModel):
     status: Literal["no_current_save", "not_ready", "ready", "unsupported_payload"]
     pokemon: list[PublicSlotRead]
     game: str | None = None
+    source: Literal["league", "personal"] | None = None
+    reason: Literal["no_linked_save", "no_synced_save", "processing", "unsupported_payload", "ineligible_personal_save"] | None = None
     revived_after_wipe: int | None = Field(default=None, ge=0, strict=True)
     dead_box: int | None = Field(default=None, ge=1, le=32)
 

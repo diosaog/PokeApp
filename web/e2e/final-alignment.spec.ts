@@ -66,10 +66,16 @@ for (const width of [1440, 390])
       path: info.outputPath(`self-profile-${width}.png`),
       fullPage: true,
     });
-    await navigate(page, "Mi PC");
-    await expect(page).toHaveURL(/\/pc$/);
-    await expect(page.locator(".pokemon")).toHaveCount(12);
-    expect(commands).toHaveLength(0);
+    await expect(
+      page.getByRole("link", { name: "Mi PC", exact: true }),
+    ).toHaveCount(0);
+    // Both old bookmarks and same-origin Launcher links use this route.
+    await page.goto("/pc");
+    await expect(page).toHaveURL(new RegExp(`/entrenadores/${tid}$`));
+    await expect(page.locator(".party-slots button")).toHaveCount(6);
+    expect(
+      commands.filter((c) => !c.path.startsWith("/v1/auth/")),
+    ).toHaveLength(0);
   });
 
 test("four Shop categories use metadata, without new HTTP reads or name matching", async ({

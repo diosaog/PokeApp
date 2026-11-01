@@ -79,3 +79,54 @@ it("IV bars preserve exact zero/max and omit EVs, invalid or missing IV is not z
     screen.queryByRole("button", { name: /Ver Rayo/ }),
   ).not.toBeInTheDocument();
 });
+
+it.each([6, 7] as const)(
+  "resolves actual modern held item IDs with Gen %i context",
+  (generation) => {
+    const { rerender } = render(
+      <PokemonDetails
+        visibility="self"
+        pokemon={{ ...pokemon, item: "Item #158", item_generation: generation }}
+      />,
+    );
+    expect(screen.getByText("Baya Zidra")).toBeVisible();
+    rerender(
+      <PokemonDetails
+        visibility="self"
+        pokemon={{ ...pokemon, item: "Item #217", item_generation: generation }}
+      />,
+    );
+    expect(screen.getByText("Garra Rápida")).toBeVisible();
+    rerender(
+      <PokemonDetails
+        visibility="self"
+        pokemon={{ ...pokemon, item: "", item_generation: generation }}
+      />,
+    );
+    expect(screen.getByText("Sin objeto")).toBeVisible();
+    expect(screen.getByText("Rayo")).toBeVisible();
+    expect(screen.getByRole("meter", { name: "PS" })).toHaveAttribute(
+      "aria-valuenow",
+      "31",
+    );
+  },
+);
+
+it("does not guess an ambiguous item when source game is missing", () => {
+  const { rerender } = render(
+    <PokemonDetails
+      visibility="self"
+      pokemon={{ ...pokemon, species: "Clefable", item: "Item #158" }}
+    />,
+  );
+  expect(
+    screen.getByText("Objeto sin identificar (falta el juego)"),
+  ).toBeVisible();
+  rerender(
+    <PokemonDetails
+      visibility="self"
+      pokemon={{ ...pokemon, item: "Item #158", item_generation: 3 }}
+    />,
+  );
+  expect(screen.queryByText("Baya Zidra")).not.toBeInTheDocument();
+});

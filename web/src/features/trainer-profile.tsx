@@ -82,6 +82,7 @@ function AccountProfileView({ trainer }: { trainer: string }) {
               <p>Sin participación en esta temporada.</p>
             )}
           </Card>
+          {own && <OwnSave />}
         </>
       )}
       {own && (
@@ -122,8 +123,6 @@ export function Profile({
     `/v1/read/seasons/${season}/scouting?trainer_id=${encodeURIComponent(trainer)}`,
     !!season && !own,
   );
-  // Own profile: the active save, as in «Mi PC» and «Entrenadores».
-  const pc = useMyPC(own);
   const active = useActiveSaves();
   const collection = useRead<Model<"TrainerCollectionRead">>(
     `/v1/read/seasons/${season}/trainers/${trainer}/collection`,
@@ -184,33 +183,7 @@ export function Profile({
         </details>
       )}
       {own ? (
-        <>
-          <SaveGame game={pc.data?.save?.game} />
-          {pc.seasonGame && (
-            <p className="muted">
-              La temporada compite con Pokémon {gameName(pc.seasonGame)}.
-            </p>
-          )}
-          <Notice error={pc.error} />
-          {pc.isPending && !pc.data ? (
-            <Loading />
-          ) : pc.data?.status === "ready" ? (
-            <SpriteGeneration value={gameGeneration(pc.data.save?.game)}>
-              <Collection
-                key={pc.data.save?.id}
-                slots={pc.data.pokemon}
-                deadBox={pc.data.dead_box}
-                showDead
-                animateTeam
-              />
-            </SpriteGeneration>
-          ) : (
-            <Empty>
-              Tu equipo y tus cajas aparecerán al sincronizar tu partida.{" "}
-              <Link to="/saves">Abrir Saves y Launcher →</Link>
-            </Empty>
-          )}
-        </>
+        <OwnSave />
       ) : (
         <>
           <Card>
@@ -244,8 +217,14 @@ export function Profile({
             <span className="eyebrow">PARTIDA ACTUAL</span>
             <h2>Equipo, cajas y muertos</h2>
             <SaveGame game={collection.data?.game} />
+            {collection.data?.source === "personal" && (
+              <p>
+                Partida personal sincronizada; todavía no está vinculada a esta
+                Liga. No es un Team Lock.
+              </p>
+            )}
             <p>
-              Revividos tras wipe:{" "}
+              Revividos tras wipe en la Liga:{" "}
               <strong>
                 {collection.data?.revived_after_wipe ?? "Sin observar"}
               </strong>
@@ -266,10 +245,7 @@ export function Profile({
             </SpriteGeneration>
           ) : (
             !collection.error && (
-              <Empty>
-                Este entrenador todavía no tiene una partida disponible para
-                consulta.
-              </Empty>
+              <Empty>{collectionReason(collection.data?.reason)}</Empty>
             )
           )}
         </>
@@ -288,4 +264,52 @@ export function Profile({
       {own && !account && <PreferencesCard />}
     </>
   );
+}
+
+function OwnSave() {
+  const pc = useMyPC();
+  return (
+    <>
+      <SaveGame game={pc.data?.save?.game} />
+      {pc.seasonGame && (
+        <p className="muted">
+          La temporada compite con Pokémon {gameName(pc.seasonGame)}.
+        </p>
+      )}
+      <Notice error={pc.error} />
+      {pc.isPending && !pc.data ? (
+        <Loading />
+      ) : pc.data?.status === "ready" ? (
+        <SpriteGeneration value={gameGeneration(pc.data.save?.game)}>
+          <Collection
+            key={pc.data.save?.id}
+            slots={pc.data.pokemon}
+            deadBox={pc.data.dead_box}
+            showDead
+            animateTeam
+          />
+        </SpriteGeneration>
+      ) : (
+        <Empty>
+          Tu equipo y tus cajas aparecerán al sincronizar tu partida.{" "}
+          <Link to="/saves">Abrir Saves y Launcher →</Link>
+        </Empty>
+      )}
+    </>
+  );
+}
+
+function collectionReason(reason?: Model<"TrainerCollectionRead">["reason"]) {
+  switch (reason) {
+    case "processing":
+      return "La partida vinculada se está preparando. Vuelve a consultar en unos instantes.";
+    case "unsupported_payload":
+      return "La observación guardada no incluye un equipo y cajas compatibles. Sincroniza de nuevo desde el Launcher.";
+    case "ineligible_personal_save":
+      return "No hay una partida vinculada a esta Liga disponible para consultar. Las partidas personales de participantes inactivos no se publican aquí.";
+    case "no_synced_save":
+      return "Este participante aún no tiene una partida sincronizada ni vinculada a esta Liga.";
+    default:
+      return "Este participante aún no tiene una partida vinculada a la Liga.";
+  }
 }

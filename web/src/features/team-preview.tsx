@@ -226,10 +226,22 @@ function Preview({ season }: { season: string }) {
                                     <Pokemon pokemon={pokemon} />
                                     <span className="held-item">
                                       {pokemon.item && (
-                                        <ItemIcon name={pokemon.item} />
+                                        <ItemIcon
+                                          name={pokemonName(
+                                            "item",
+                                            pokemon.item,
+                                            pokemon.item_generation ??
+                                              undefined,
+                                          )}
+                                        />
                                       )}
                                       {pokemon.item
-                                        ? pokemonName("item", pokemon.item)
+                                        ? pokemonName(
+                                            "item",
+                                            pokemon.item,
+                                            pokemon.item_generation ??
+                                              undefined,
+                                          )
                                         : "Sin objeto"}
                                     </span>
                                     {entry.visibility === "self" && (

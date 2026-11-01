@@ -5138,6 +5138,8 @@ export interface components {
        * @default
        */
       item: string;
+      /** Item Generation */
+      item_generation?: (3 | 4 | 5 | 6 | 7) | null;
       /** Moves */
       moves?: components["schemas"]["ScoutingMove"][];
     };
@@ -5597,6 +5599,18 @@ export interface components {
       pokemon: components["schemas"]["PublicSlotRead"][];
       /** Game */
       game?: string | null;
+      /** Source */
+      source?: ("league" | "personal") | null;
+      /** Reason */
+      reason?:
+        | (
+            | "no_linked_save"
+            | "no_synced_save"
+            | "processing"
+            | "unsupported_payload"
+            | "ineligible_personal_save"
+          )
+        | null;
       /** Revived After Wipe */
       revived_after_wipe?: number | null;
       /** Dead Box */

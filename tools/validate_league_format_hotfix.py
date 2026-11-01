@@ -27,7 +27,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "tests"))
 from test_api_phase8b import FakePrincipalRepository, FakeTokenVerifier, TRAINER_ID
 
 
-def validate(pg):
+def validate(pg, equal_coins=False):
     # Keep the existing single-day prizes, death/wipe deductions and history gate.
     print(validate_073(pg), flush=True)
     pg.sql("alter database pokeapp rename to pokeapp_v2_validation_format;",
@@ -58,7 +58,7 @@ def validate(pg):
             call(base + "/participants", dict(trainer_id=tid, expected_roster_revision=state["roster_revision"]))
 
         points = {str(i): v for i, v in enumerate([10, 8, 6, 4, 2], 1)}
-        coins = {str(i): v for i, v in enumerate([50, 40, 30, 20, 0], 1)}
+        coins = {str(i): v for i, v in enumerate([17]*5 if equal_coins else [50, 40, 30, 20, 0], 1)}
         cid = None
 
         def save(days, sizes=None, bad=False):
@@ -66,7 +66,7 @@ def validate(pg):
             state = call(base + "/setup")
             sizes = sizes or {"A": 5}
             single = days == 1 and "B" not in sizes
-            scoring = {str(i): 0 for i in range(1, 6)} if single else points
+            scoring = points  # retained while 073 uses wins for a single day
             rewards = {str(i): 17 for i in range(1, 6)} if single else coins
             body = dict(name="Reglas de la Liga", effective_from_matchday=1, total_matchdays=days,
                 division_sizes=sizes, movement_count=0, scoring=scoring, coin_rewards=rewards,
@@ -142,7 +142,7 @@ def validate(pg):
                 assert row["points_awarded"] == points[str(row["position"])]
                 assert row["coins_awarded"] == coins[str(row["position"])]
             ledger = local.table("coin_transactions").select("*").eq("reward_matchday_id", day).execute().data
-            assert sum(row["amount"] for row in ledger) == 140
+            assert sum(row["amount"] for row in ledger) == sum(coins.values())
             assert len(ledger) == len({row["trainer_id"] for row in ledger}), "duplicate payout"
         assert len(local.table("matchdays").select("*").eq("season_id", sid).execute().data) == 4
         assert not local.table("purchases").select("*").eq("season_id", sid).execute().data, "single-day prizes leaked"
@@ -153,6 +153,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--pg-bin", type=Path, required=True)
     parser.add_argument("--port", type=int, default=55583)
+    parser.add_argument("--equal-coins", action="store_true")
     args = parser.parse_args()
     pg = SupabaseLikePG(args.pg_bin, args.port)
     try:
@@ -160,7 +161,7 @@ def main():
         for migration in MIGRATIONS:
             pg.sql(migration.read_text(encoding="utf-8"))
         try:
-            validate(pg)
+            validate(pg, args.equal_coins)
         except SqlError as exc:
             raise AssertionError(f"Local fixture: {exc.code} {exc.message}") from exc
     finally:

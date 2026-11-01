@@ -10,14 +10,11 @@ import {
   ItemIcon,
   TrainerPhoto,
   typeClass,
-  SpriteGeneration,
-  gameGeneration,
 } from "../pokemon/presentation";
-import { useApp, useRead, useOverview, useMyPC } from "../state";
+import { useApp, useRead, useOverview } from "../state";
 import { ParticipantResults } from "./league-results";
 import { WipeRevivals } from "./wipe-revivals";
-import { Collection } from "./collection";
-import { SaveGame, gameName } from "./progress";
+import { gameName } from "./progress";
 import { purchaseBlock, useSummary } from "./item-uses";
 import { matchLabel } from "./admin-labels";
 import { LeagueOperations } from "./league-operations";
@@ -397,40 +394,6 @@ export function LeaguePage() {
   );
 }
 export { TrainersPage } from "./trainers";
-export function PCPage() {
-  const pc = useMyPC();
-  return (
-    <>
-      <Heading eyebrow="TU PARTIDA" title="Mi PC">
-        Tu equipo y tus cajas, a un movimiento de distancia.
-      </Heading>
-      <Notice error={pc.error} />
-      {pc.isPending && !pc.data ? (
-        <Loading />
-      ) : pc.data?.status === "ready" ? (
-        <>
-          <SaveGame game={pc.data.save?.game} />
-          {pc.seasonGame && (
-            <p className="muted">
-              La temporada compite con Pokémon {gameName(pc.seasonGame)}.
-            </p>
-          )}
-          <SpriteGeneration value={gameGeneration(pc.data.save?.game)}>
-            <Collection
-              key={pc.data.save?.id}
-              slots={pc.data.pokemon}
-              deadBox={pc.data.dead_box}
-            />
-          </SpriteGeneration>
-        </>
-      ) : (
-        <Empty>
-          Sin partida sincronizada. <Link to="/saves">Saves y Launcher →</Link>
-        </Empty>
-      )}
-    </>
-  );
-}
 export function ShopPage() {
   const { season, me } = useApp(),
     query = useRead<Model<"ShopRead">>(

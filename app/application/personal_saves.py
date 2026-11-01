@@ -17,8 +17,10 @@ from datetime import UTC, datetime
 from hashlib import sha256
 from threading import BoundedSemaphore
 
-from app.api.read_models import PCRead
+from app.api.read_models import PCRead, TrainerCollectionRead
 from app.application.save_ingestion import parsed_payload, reject
+from app.application.pokemon_read_context import pokemon_context
+from app.repositories.errors import PersistenceError
 from app.save_parser.files import MAX_SAVE_BYTES
 from app.save_parser.models import SaveError
 from app.save_parser.registration import SaveRegistration, observation_digest
@@ -119,11 +121,15 @@ class PersonalSaves:
             )
         return {"items": items}
 
-    def pc(self, trainer_id):
+    def pc(self, trainer_id, *, public=False):
         row = self.repository.get(trainer_id)
         if not row:
             return PCRead(save=None, status="no_current_save", pokemon=[])
         payload = row["payload"]
+        for key, expected in (("trainer_id", trainer_id), ("save_record_id", trainer_id),
+                              ("source_hash", row["sha256"])):
+            if key in payload and payload[key] != expected:
+                raise PersistenceError("Personal save identity mismatch")
         save = {
             "id": trainer_id,
             "parser_status": "parsed",
@@ -133,9 +139,11 @@ class PersonalSaves:
         }
         party, boxes = payload.get("party"), payload.get("boxes")
         if not isinstance(party, list) or not isinstance(boxes, list):
+            if public:
+                return TrainerCollectionRead(status="unsupported_payload", pokemon=[], source="personal", reason="unsupported_payload")
             return PCRead(save=save, status="unsupported_payload", pokemon=[])
         pokemon = [
-            {"location": f"Equipo · {s['slot_number']}", "pokemon": {**s["pokemon"], "status_flags": []}}
+            {"location": f"Equipo · {s['slot_number']}", "pokemon": {**pokemon_context(s["pokemon"], payload, row["game"]), "status_flags": []}}
             for s in party
             if s.get("pokemon")
         ]
@@ -145,7 +153,10 @@ class PersonalSaves:
                     pokemon.append(
                         {
                             "location": f"Caja {box['box_number']} · {slot['slot_number']}",
-                            "pokemon": {**slot["pokemon"], "status_flags": []},
+                            "pokemon": {**pokemon_context(slot["pokemon"], payload, row["game"]), "status_flags": []},
                         }
                     )
+        if public:
+            return TrainerCollectionRead(status="ready", pokemon=pokemon,
+                                         game=save["game"], source="personal")
         return PCRead(save=save, status="ready", pokemon=pokemon)

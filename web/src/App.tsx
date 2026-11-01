@@ -13,7 +13,6 @@ import {
   Swords,
   Trophy,
   Users,
-  Box,
   ShoppingBag,
   Crown,
   Scale,
@@ -51,7 +50,6 @@ const LeaguePage = lazy(() =>
 const TrainersPage = lazy(() =>
   screens.core().then((m) => ({ default: m.TrainersPage })),
 );
-const PCPage = lazy(() => screens.core().then((m) => ({ default: m.PCPage })));
 const ShopPage = lazy(() =>
   screens.core().then((m) => ({ default: m.ShopPage })),
 );
@@ -114,10 +112,7 @@ const linkGroups = [
   },
   {
     label: "COLECCIÓN",
-    links: [
-      ["/entrenadores", "Entrenadores", Users],
-      ["/pc", "Mi PC", Box],
-    ],
+    links: [["/entrenadores", "Entrenadores", Users]],
   },
   { label: "ECONOMÍA", links: [["/tienda", "Tienda", ShoppingBag]] },
   {
@@ -548,7 +543,12 @@ export default function App() {
                   path="/entrenadores/:trainerId"
                   element={<TrainerProfilePage />}
                 />
-                <Route path="/pc" element={<PCPage />} />
+                <Route
+                  path="/pc/*"
+                  element={
+                    <Navigate to={`/entrenadores/${me.trainer_id}`} replace />
+                  }
+                />
                 <Route path="/tienda" element={<ShopPage />} />
                 <Route path="/copa/*" element={<CupsPage />} />
                 <Route path="/hall" element={<HallPage />} />

@@ -24,6 +24,7 @@ class ScoutingPokemon(BaseModel):
     level: int | None = Field(default=None, ge=1, le=100)
     types: list[str] = Field(default_factory=list)
     item: str = ""
+    item_generation: Literal[3, 4, 5, 6, 7] | None = None
     moves: list[ScoutingMove] = Field(default_factory=list)
 
 

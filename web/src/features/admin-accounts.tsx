@@ -197,7 +197,7 @@ function AccountRepair({ account }: { account: ManagedAccount }) {
           aria-label="Confirmar desvinculación"
         >
           <p>
-            Se quitará su partida activa de «Mi PC» y «Entrenadores». Las
+            Se quitará la partida activa de su perfil de entrenador. Las
             temporadas no cambian. Su Launcher volverá a enviar la partida que
             tenga elegida en la próxima sincronización: si era la equivocada,
             pídele que elija la correcta en «Cambiar partida».
