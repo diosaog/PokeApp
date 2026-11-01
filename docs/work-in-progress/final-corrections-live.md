@@ -1,5 +1,43 @@
 # Final corrections — live execution record
 
+## PokeApp 0.26.9 - published and verified, 2026-11-01
+
+**RELEASE CLOSED / NO REMAINING RELEASE BLOCKERS.** This entry supersedes the
+historical publication holds below. Product source: `6408a41`; release closure
+continues on `codex/virtual-training-native-gate`.
+
+- Refreshed production backup at **18:15:22 UTC**, SHA256 `99659df3...c1df9`:
+  restored 118 tables with exact row fingerprints/catalog; 074 rehearsal and
+  preflight PASS. Production migration **074_virtual_training** applied once,
+  version `20261101181732`; forced RLS / browser isolation verified.
+- API Railway **`657dcd97-677d-45b6-9a7f-d38aff8ff2ed` SUCCESS**. All 338 bundled
+  inputs match committed source; 306 deployed Python files match byte-for-byte.
+  Final Debian/Python3.14.3 image passed its mandatory native runtime gates,
+  including all **24 training cases**. Image digest
+  `sha256:2328fc80cedfb0ff4237c0f05986d236842827af013f6bfc1f34b6bf7afca43a`.
+  Public health PASS, 124 OpenAPI paths and training contract present; anonymous
+  training GET returns 401. Existing verifier service unchanged.
+- Safe order completed: DB -> API -> preparatory web `663b5a46` (download card
+  still 0.26.8) -> immutable installer -> full public readback -> signed feed ->
+  final web **`6664ab72-a87c-4cd8-9d01-db89069b135b`**, card **0.26.9**.
+  Final public HTML/config/JS/CSS: **18 exact hashes PASS**, correct API target.
+- Launcher **0.26.9** final tested installer: **159464245 bytes**, SHA256
+  `7739047e0e795848a727739327605ef0b95d8e6f0b1a4f999ceddea42a285c2e`.
+  Complete public HTTPS download matched signed SHA512 before feed activation.
+  Published feed equals signed build, Ed25519 verifies with the shipped key,
+  updater accepts current version 0.26.8; download routes return the new size.
+  Existing private unsigned-Authenticode distribution policy retained.
+- Reused the valid native, transactional, packaged, Linux and NSIS evidence
+  recorded below; no completed acceptance matrix was manually repeated.
+  Public web readback used the established pinned Railway SSH transport;
+  temporary registration and generated keys removed, other keys preserved.
+  No real save writes or purchases. No additional development or migration.
+
+Machine-readable closure: `docs/evidence/virtual-training-release-0269.json`.
+Private detailed release evidence: `release-6408a41/` under the evidence root
+below, including source/image/API/DB/web/feed proofs, backup and rehearsal.
+
+
 ## Virtual training: randomized-save policy correction — 2026-11-01
 
 **NATIVE / TRANSACTIONAL ACCEPTANCE PASS; NOT PUBLISHED.** Continue on

@@ -1,0 +1,83 @@
+{
+  "status": "PUBLISHED_VERIFIED",
+  "release": "0.26.9",
+  "verified_at_utc": "2026-11-01T18:25:21.940512+00:00",
+  "source_commit": "6408a4135cae361659b13a1ca50b443d88e19178",
+  "database": {
+    "result": "PASS",
+    "migration": [
+      {
+        "version": "20261101181732",
+        "name": "074_virtual_training"
+      }
+    ],
+    "training_operations_protection": [
+      {
+        "relrowsecurity": true,
+        "relforcerowsecurity": true,
+        "anon_select": false,
+        "authenticated_select": false
+      }
+    ]
+  },
+  "backup": {
+    "captured_at": "2026-11-01T18:15:22+00:00",
+    "sha256": "99659df3d5ed220e04ba873825c9a0e67f462d9113dd45d26772522ab61c1df9",
+    "restored_tables_exact": 118,
+    "rehearsal": "PASS",
+    "preflight_problems": []
+  },
+  "api": {
+    "deployment_id": "657dcd97-677d-45b6-9a7f-d38aff8ff2ed",
+    "status": "SUCCESS",
+    "image_digest": "sha256:2328fc80cedfb0ff4237c0f05986d236842827af013f6bfc1f34b6bf7afca43a",
+    "committed_bundle_files": 338,
+    "runtime_source_files_exact": 306,
+    "production_image_training_cases": 24,
+    "health": {
+      "service": "pokeapp-api",
+      "status": "ok"
+    },
+    "openapi_paths": 124,
+    "unauthenticated_training_read": 401
+  },
+  "web": {
+    "cloudflare_version_id": "6664ab72-a87c-4cd8-9d01-db89069b135b",
+    "public_web_assets_exact": 18,
+    "launcher_card": "0.26.9",
+    "api_target": "https://pokeapp-api-production.up.railway.app"
+  },
+  "launcher": {
+    "result": "PASS",
+    "published_version": "0.26.9",
+    "minimum_version": "0.26.0",
+    "ed25519_verified_with_shipped_key": true,
+    "installer": {
+      "url": "https://pokeapp-web.pokeapp-v2.workers.dev/launcher/updates/stable/0.26.9.exe",
+      "sha512": "FUB9H97i2ROq2ivMLxVmuwH2U+4mU1QrojcaY9L2XSPGGw+MdMmMLXoKvSazjt/j51EuKI59R2AWGc8QHITXQw==",
+      "size": 159464245
+    },
+    "updater_accepts_current_version_0268": true
+  },
+  "installer_sha256": "7739047e0e795848a727739327605ef0b95d8e6f0b1a4f999ceddea42a285c2e",
+  "installer_full_public_readback": "PASS; signed size and SHA-512 matched before feed publication",
+  "authenticode_policy": "NotSigned; established private-distribution policy; Ed25519 update signature verified",
+  "reused_acceptance_evidence": {
+    "native_transformations": 496,
+    "randomized_policy_regressions": 40,
+    "as_receipt_checks": 15,
+    "service_native_sql_cases": 24,
+    "packaged_full_checks": 81,
+    "packaged_focused_checks": 18,
+    "packaged_startup_checks": 9,
+    "linux_cases": 24,
+    "linux_native_calls": 120,
+    "prior_nsis_update_checks": 8
+  },
+  "evidence_root": "%LOCALAPPDATA%/PokeApp-migration-evidence/virtual-training/20261101/",
+  "release_evidence_subdirectory": "release-6408a41/",
+  "temporary_readback_key_removed": true,
+  "real_saves_modified": false,
+  "real_purchases_executed": false,
+  "blockers": []
+}

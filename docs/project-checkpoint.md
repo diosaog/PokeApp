@@ -5,10 +5,12 @@ milestone record; it does not maintain a second live phase-status ledger.
 
 ## Current project position
 
-- Virtual Mints and Bottle Caps (2026-11-01): **POLICY CORRECTED, NOT PUBLISHED.**
-  Randomized saves no longer require official legality; native, packaged and
-  transactional gates pass. Historical AS attribution limit and remaining
-  production-image/preflight requirements are recorded. Continue only from the
+- Virtual Mints and Bottle Caps (2026-11-01): **0.26.9 PUBLISHED / VERIFIED.**
+  Source `6408a41`; Supabase 074 applied once; Railway `657dcd97` SUCCESS;
+  Cloudflare `6664ab72` and Launcher stable 0.26.9 verified. Final production
+  image, fresh backup/rehearsal/preflight, public installer/full digest,
+  Ed25519 feed and web hashes PASS. Prior acceptance evidence reused; no real
+  save or purchase writes. No release blockers. Closure and evidence in the
   [authoritative live record](work-in-progress/final-corrections-live.md).
 
 - League/profile/navigation/item fixes (2026-11-01): **PUBLISHED.** Source

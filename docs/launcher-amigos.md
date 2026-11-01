@@ -1,6 +1,6 @@
 # PokeApp Launcher: instalar, entrar y vincular tu partida
 
-Versión actual: **0.26.8** (Windows 10 y 11). No hace falta ser administrador.
+Versión actual: **0.26.9** (Windows 10 y 11). No hace falta ser administrador.
 
 ## Si todavía no lo tienes
 
@@ -15,7 +15,7 @@ Versión actual: **0.26.8** (Windows 10 y 11). No hace falta ser administrador.
 
 ## Si ya lo tenías
 
-- Si te ofrece la **0.26.8**, pulsa **Actualizar**. Se cierra y vuelve a abrirse
+- Si te ofrece la **0.26.9**, pulsa **Actualizar**. Se cierra y vuelve a abrirse
   solo.
 - Si no se actualiza, o se queda en «Sin conexión» o «El núcleo del Launcher
   está tardando en responder»:
