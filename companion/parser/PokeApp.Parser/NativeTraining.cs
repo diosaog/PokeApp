@@ -14,7 +14,6 @@ public static class NativeTraining
     private sealed record Location(string Name, int? Box, int Slot);
     private sealed record Mutation(string Item, string Attempt, Location At, string ExpectedPokemonSha256,
         int ExpectedNature, int[] ExpectedIvs, int? NatureId, string? Stat);
-    private sealed record Legality(string[] Warnings, string[] Invalid);
     private static readonly string[] Games = ["X", "Y", "OR", "AS", "SN", "MN", "US", "UM"];
     private static readonly string[] Stats = ["hp", "atk", "defense", "spa", "spd", "spe"];
 
@@ -31,7 +30,6 @@ public static class NativeTraining
             var save = Validate(bytes);
             var at = ParseLocation(root);
             var pokemon = Target(save, at);
-            var legality = Analyze(pokemon, save, at);
             return new
             {
                 SchemaVersion = 1, WriterVersion, Status = "inspected", Error = (string?)null,
@@ -42,7 +40,7 @@ public static class NativeTraining
                     Location = at.Name, BoxIndex = at.Box, SlotIndex = at.Slot,
                     PokemonSha256 = PokemonHash(pokemon), Nature = (int)pokemon.Nature, Ivs = Ivs(pokemon),
                     TargetPid = pokemon.PID, TargetEc = pokemon.EncryptionConstant, pokemon.IsEgg,
-                    LegalityWarnings = legality.Warnings, HiddenPowerType = pokemon.HPType,
+                    LegalityWarnings = Array.Empty<string>(), HiddenPowerType = pokemon.HPType,
                 },
             };
         }
@@ -75,16 +73,9 @@ public static class NativeTraining
         if (m.At.Name == "party") UpdateDependentStats(before, changed);
         changed.RefreshChecksum();
         ValidatePokemonDiff(before, changed, m);
-        var beforeLegality = Analyze(before, source, m.At);
-        var afterLegality = Analyze(changed, source, m.At);
-        // Existing randomizer/legacy findings are shown to the player. A new
-        // violation (including event/encounter/PID correlations) is refused.
-        if (afterLegality.Invalid.Except(beforeLegality.Invalid, StringComparer.Ordinal).Any())
-        {
-            Diagnostic("before=" + string.Join(";;", beforeLegality.Invalid));
-            Diagnostic("after=" + string.Join(";;", afterLegality.Invalid));
-            throw new Rejection("TRAINING_LEGALITY_UNSUPPORTED");
-        }
+        // Randomized/private saves are intentional. Official encounter,
+        // learnset, ability and event legality does not authorize this change.
+        // The exact native diff and structural checks below are the authority.
 
         var clone = source.Clone();
         int offset = Offset(clone, m.At), length = m.At.Name == "box" ? StoredSize : PartySize;
@@ -115,7 +106,7 @@ public static class NativeTraining
                 BeforeNature = (int)before.Nature, AfterNature = (int)after.Nature,
                 BeforeIvs = Ivs(before), AfterIvs = Ivs(after), TargetPid = before.PID, TargetEc = before.EncryptionConstant,
                 BeforePokemonSha256 = PokemonHash(before), AfterPokemonSha256 = PokemonHash(after),
-                LegalityWarningsBefore = beforeLegality.Warnings, LegalityWarningsAfter = afterLegality.Warnings,
+                LegalityWarningsBefore = Array.Empty<string>(), LegalityWarningsAfter = Array.Empty<string>(),
                 HiddenPowerBefore = before.HPType, HiddenPowerAfter = after.HPType,
                 PreservedUnrelated = true, ChecksumsValid = true, SignatureValid = true,
             },
@@ -177,7 +168,9 @@ public static class NativeTraining
             if (at.Slot < 0 || at.Slot >= save.PartyCount) throw new Rejection("UNSAFE_TARGET");
             pokemon = save.GetPartySlotAtIndex(at.Slot);
         }
-        if (pokemon.Species == 0 || pokemon.IsEgg || !pokemon.ChecksumValid
+        if (pokemon.Species == 0 || pokemon.Species > pokemon.MaxSpeciesID || pokemon.Species > save.MaxSpeciesID
+            || !save.Personal.IsPresentInGame(pokemon.Species, pokemon.Form) || (int)pokemon.Nature is < 0 or > 24
+            || pokemon.IsEgg || !pokemon.ChecksumValid
             || pokemon is not (PK6 or PK7) || pokemon is not G6PKM { Sanity: 0 }) throw new Rejection("UNSAFE_TARGET");
         return pokemon;
     }
@@ -234,52 +227,6 @@ public static class NativeTraining
             if (m.At.Name == "party" && i is >= 0xF2 and <= 0xFD) continue;
             throw new Rejection("UNEXPECTED_DIFF");
         }
-    }
-
-    private static Legality Analyze(PKM p, SaveFile save, Location at)
-    {
-        LegalityAnalysis analysis;
-#if DEBUG
-        var diagnostics = new List<string>();
-        void ExceptionRaised(object? sender, System.Runtime.ExceptionServices.FirstChanceExceptionEventArgs args)
-            => diagnostics.Add(args.Exception.GetType().Name + "|" + args.Exception.Message);
-        bool diagnose = Environment.GetEnvironmentVariable("POKEAPP_NATIVE_DIAGNOSTICS") == "1";
-        if (diagnose) AppDomain.CurrentDomain.FirstChanceException += ExceptionRaised;
-        try
-        {
-#endif
-            analysis = new LegalityAnalysis(p.Clone(), save.Personal, at.Name == "party" ? StorageSlotType.Party : StorageSlotType.Box);
-#if DEBUG
-        }
-        finally { if (diagnose) AppDomain.CurrentDomain.FirstChanceException -= ExceptionRaised; }
-#endif
-        if (!analysis.Parsed)
-        {
-            Diagnostic("unparsed-results=" + string.Join(";;", analysis.Results.Select(r => $"{r.Identifier}|{r.Judgement}|{r.Comment}")));
-#if DEBUG
-            Diagnostic("unparsed=" + string.Join(";;", diagnostics));
-#endif
-            throw new Rejection("TRAINING_LEGALITY_UNSUPPORTED");
-        }
-        var warnings = analysis.Results.Where(r => r.Judgement != Severity.Valid)
-            .Select(r => $"{r.Identifier}|{r.Judgement}|{r.Comment}").ToList();
-        var invalid = analysis.Results.Where(r => !r.Valid)
-            .Select(r => $"{r.Identifier}|{r.Judgement}|{r.Comment}").ToList();
-        foreach (var (name, moves) in new[] { ("move", analysis.Info.Moves), ("relearn", analysis.Info.Relearn) })
-            for (int i = 0; i < moves.Length; i++)
-                if (!moves[i].Valid)
-                {
-                    var finding = $"{name}:{i}|Invalid|{moves[i]}";
-                    warnings.Add(finding); invalid.Add(finding);
-                }
-        return new(warnings.Distinct(StringComparer.Ordinal).Order(StringComparer.Ordinal).ToArray(),
-            invalid.Distinct(StringComparer.Ordinal).Order(StringComparer.Ordinal).ToArray());
-    }
-
-    private static void Diagnostic(string value)
-    {
-        if (Environment.GetEnvironmentVariable("POKEAPP_NATIVE_DIAGNOSTICS") == "1")
-            Console.Error.WriteLine("native-training-legality " + value);
     }
 
     private static void VerifySaveDiff(byte[] original, byte[] output, SAV_BEEF source, int offset, int length)

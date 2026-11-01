@@ -82,6 +82,9 @@ internal static class TrainingChecks
         var verified = Execute(verify, true);
         Check(verified["status"]!.GetValue<string>() == "verified", label + " native verify " + Error(verified));
         Check(JsonNode.DeepEquals(verified["semantic_diff"], response["semantic_diff"]), label + " stable semantic diff");
+        Check(response["semantic_diff"]!["legality_warnings_before"]!.AsArray().Count == 0
+            && response["semantic_diff"]!["legality_warnings_after"]!.AsArray().Count == 0,
+            label + " official legality is not consulted");
         return (output, response);
     }
 
@@ -100,7 +103,7 @@ internal static class TrainingChecks
             derived.SetBoxSlotAtIndex(p.Clone(), 0, 0);
             if (derived.PartyCount == 0) derived.PartyData = [p.Clone()];
             Put(derived, p.Clone(), "party");
-            var source = derived.Write();
+            var source = WriteFixture(derived);
             var initial = Node(Inspection.Inspect(source));
             Check(initial["error"] is null, game + " disposable source valid: " + initial["error"]);
             int successful = 0;
@@ -193,18 +196,18 @@ internal static class TrainingChecks
                         if (location == "box" && forgery is "status" or "hp") continue;
                         Put(forged, pk, location);
                     }
-                    altered = Copy(gold); altered["output_base64"] = Convert.ToBase64String(forged.Write());
+                    altered = Copy(gold); altered["output_base64"] = Convert.ToBase64String(WriteFixture(forged));
                     Reject(altered, game + " independent extra " + forgery, true);
                 }
                 var egg = SaveUtil.GetVariantSAV((byte[])source.Clone())!;
                 var eggPkm = Target(egg, location); eggPkm.IsEgg = true; Put(egg, eggPkm, location);
-                Reject(Request(egg.Write(), location, "chapa_dorada"), game + " egg refused", code: "UNSAFE_TARGET");
+                Reject(Request(WriteFixture(egg), location, "chapa_dorada"), game + " egg refused", code: "UNSAFE_TARGET");
             }
             Check(originalHash == NativeWrite.Hash(File.ReadAllBytes(sourcePath)), game + " public original untouched");
             report.Add(new { game, contributor_source_sha256 = originalHash, derived_sha256 = NativeWrite.Hash(source), transformations = successful });
             Console.WriteLine($"PASS TRAINING {game}: {successful} actual Nature/IV transformations, both storage locations and refusal/forgery checks");
         }
-        EventRestrictions(fixtureRoot);
+        PolicyRegression(fixtureRoot, Path.Combine(outputRoot, "policy"));
         File.WriteAllText(Path.Combine(outputRoot, "native-training-evidence.json"), JsonSerializer.Serialize(new
         {
             schema_version = 1, writer_version = NativeWrite.WriterVersion, checks, games = report,
@@ -237,12 +240,83 @@ internal static class TrainingChecks
         File.WriteAllText(Path.Combine(folder, "response.json"), response.ToJsonString());
     }
 
-    private static void EventRestrictions(string fixtureRoot)
+    private static byte[] WriteFixture(SaveFile save)
     {
-        foreach (string game in new[] { "X", "SN" })
+        var bytes = save.Write().ToArray();
+        // Fixture serialization only: the existing strict RSA-padding repair
+        // changes no PKM or game data, and still requires the full signature.
+        typeof(NativeTraining).GetMethod("NormalizeGeneratedSignature",
+            System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Static)!
+            .Invoke(null, new object[] { bytes, save });
+        Check(save is not SAV7 || NativeSignature.VerifySave(bytes), "synthetic source signature");
+        return bytes;
+    }
+
+    public static void PolicyRegression(string fixtureRoot, string outputRoot, string[]? games = null)
+    {
+        Directory.CreateDirectory(outputRoot);
+        var selected = games ?? new[] { "X", "Y", "OR", "AS", "SN", "MN", "US", "UM" };
+        foreach (string game in selected)
         {
             var save = SaveUtil.GetVariantSAV(File.ReadAllBytes(Path.Combine(fixtureRoot, game, "prepared")))!;
-            IEnumerable<MysteryGift> gifts = game == "X" ? EncounterEvent.MGDB_G6 : EncounterEvent.MGDB_G7;
+            var random = Specimen(save);
+            random.Ability = 1; // A supported ability, intentionally foreign to Pikachu.
+            random.Move1 = 147; random.Move1_PP = 15; // Spore, intentionally outside its learnset.
+            random.Nickname = "Randomizer"; random.IsNicknamed = true;
+            save.PartyData = [random.Clone()]; Put(save, random, "party");
+            var source = WriteFixture(save);
+            Check(Node(Inspection.Inspect(source))["error"] is null, game + " randomized source structurally valid");
+            var at = new JsonObject { ["schema_version"] = 1, ["source_base64"] = Convert.ToBase64String(source),
+                ["location"] = "party", ["box_index"] = null, ["slot_index"] = 0 };
+            var inspected = Node(NativeTraining.Inspect(JsonSerializer.SerializeToUtf8Bytes(at)));
+            Check(inspected["status"]!.GetValue<string>() == "inspected"
+                && inspected["semantic_diff"]!["legality_warnings"]!.AsArray().Count == 0, game + " randomized target inspect");
+            foreach (var (effect, item, nature, stat) in new (string, string, int?, string?)[] {
+                ("mint", "menta_naturaleza", 15, null), ("silver", "chapa_plateada", null, "hp"),
+                ("gold", "chapa_dorada", null, null) })
+            {
+                var request = Request(source, "party", item, nature, stat);
+                var (output, response) = Accept(request, game + " randomized " + effect);
+                var before = SaveUtil.GetVariantSAV((byte[])source.Clone())!.GetPartySlotAtIndex(0);
+                var after = SaveUtil.GetVariantSAV((byte[])output.Clone())!.GetPartySlotAtIndex(0);
+                var expected = Ivs(before);
+                if (effect == "silver") expected[0] = 31;
+                if (effect == "gold") Array.Fill(expected, 31);
+                Check(Ivs(after).SequenceEqual(expected) && (int)after.Nature == (nature ?? (int)before.Nature), game + " exact authorized values");
+                AssertPokemon(before, after, "party", effect == "mint", game);
+                Check(after.Ability == 1 && after.Move1 == 147, game + " no legalization of ability or move");
+                SaveCase(outputRoot, game, "party", effect, source, request, output, response);
+                var forged = SaveUtil.GetVariantSAV((byte[])output.Clone())!;
+                forged.Money++;
+                var verify = Copy(request); verify["output_base64"] = Convert.ToBase64String(WriteFixture(forged));
+                Reject(verify, game + " extra unrelated bytes rejected", true, "UNEXPECTED_DIFF");
+            }
+            foreach (string invalid in new[] { "nature", "species", "form", "egg", "checksum" })
+            {
+                var broken = SaveUtil.GetVariantSAV((byte[])source.Clone())!;
+                var p = broken.GetPartySlotAtIndex(0);
+                if (invalid == "nature") p.Nature = (Nature)255;
+                if (invalid == "species") p.Species = (ushort)(broken.MaxSpeciesID + 1);
+                if (invalid == "form") p.Form = 31;
+                if (invalid == "egg") p.IsEgg = true;
+                Put(broken, p, "party");
+                if (invalid == "checksum") broken.Data[broken.GetPartyOffset(0) + 20] ^= 1;
+                var bytes = WriteFixture(broken);
+                var inspect = at.DeepClone(); inspect["source_base64"] = Convert.ToBase64String(bytes);
+                Check(Node(NativeTraining.Inspect(JsonSerializer.SerializeToUtf8Bytes(inspect)))["status"]!.GetValue<string>() == "rejected",
+                    game + " structurally invalid " + invalid + " inspect refused");
+                Reject(Request(bytes, "party", "chapa_dorada"), game + " structurally invalid " + invalid + " write refused");
+            }
+            FixedEventTraining(save, game, outputRoot);
+            Console.WriteLine("PASS POLICY " + game + ": randomized ability/move/encounter accepted; exact diffs and structural refusals");
+        }
+        File.WriteAllText(Path.Combine(outputRoot, "policy-evidence.json"), JsonSerializer.Serialize(new
+        { games = selected, checks, official_legality_authority = false, structural_checks_retained = true }));
+    }
+
+    private static void FixedEventTraining(SaveFile save, string game, string outputRoot)
+    {
+            IEnumerable<MysteryGift> gifts = save.Generation == 6 ? EncounterEvent.MGDB_G6 : EncounterEvent.MGDB_G7;
             int natureCases = 0, ivCases = 0;
             foreach (var gift in gifts)
             {
@@ -250,16 +324,21 @@ internal static class TrainingChecks
                 PKM p;
                 try { p = gift.ConvertToPKM(save, EncounterCriteria.Unrestricted); }
                 catch { continue; }
-                var legal = new LegalityAnalysis(p);
-                if (!legal.Valid) continue;
-                var derived = save.Clone(); Put(derived, p, "box"); var bytes = derived.Write();
+                if (p.Format != save.Generation || p.Species > save.MaxSpeciesID
+                    || !save.Personal.IsPresentInGame(p.Species, p.Form) || (int)p.Nature is < 0 or > 24) continue;
+                var derived = save.Clone(); Put(derived, p, "box"); var bytes = WriteFixture(derived);
+                if (Node(Inspection.Inspect(bytes))["error"] is not null) continue;
+                var before = SaveUtil.GetVariantSAV((byte[])bytes.Clone())!.GetBoxSlotAtIndex(0, 0);
                 int fixedNature = gift is WC6 wc6 ? (int)wc6.Nature : (int)((WC7)gift).Nature;
                 if (natureCases == 0 && fixedNature is >= 0 and < 25)
                 {
                     var request = Request(bytes, "box", "menta_naturaleza", (fixedNature + 1) % 25);
-                    var response = Execute(request);
-                    if (Error(response) == "TRAINING_LEGALITY_UNSUPPORTED")
-                    { Check(response["output_base64"] is null, game + " fixed event Nature refused without PID rewriting"); natureCases++; }
+                    var (output, response) = Accept(request, game + " fixed event Nature accepted");
+                    var after = SaveUtil.GetVariantSAV((byte[])output.Clone())!.GetBoxSlotAtIndex(0, 0);
+                    Check((int)after.Nature == (fixedNature + 1) % 25, game + " event actual Nature");
+                    AssertPokemon(before, after, "box", true, game);
+                    SaveCase(outputRoot, game, "box", "event-nature", bytes, request, output, response);
+                    natureCases++;
                 }
                 var fixedIvs = gift is WC6 w6 ? new[] { w6.IV_HP,w6.IV_ATK,w6.IV_DEF,w6.IV_SPA,w6.IV_SPD,w6.IV_SPE }
                     : new[] { ((WC7)gift).IV_HP,((WC7)gift).IV_ATK,((WC7)gift).IV_DEF,((WC7)gift).IV_SPA,((WC7)gift).IV_SPD,((WC7)gift).IV_SPE };
@@ -267,14 +346,17 @@ internal static class TrainingChecks
                 if (ivCases == 0 && index >= 0)
                 {
                     var request = Request(bytes, "box", "chapa_plateada", stat: new[] { "hp","atk","defense","spa","spd","spe" }[index]);
-                    var response = Execute(request);
-                    if (Error(response) == "TRAINING_LEGALITY_UNSUPPORTED")
-                    { Check(response["output_base64"] is null, game + " fixed event IV refused without identity rewriting"); ivCases++; }
+                    var (output, response) = Accept(request, game + " fixed event IV accepted");
+                    var after = SaveUtil.GetVariantSAV((byte[])output.Clone())!.GetBoxSlotAtIndex(0, 0);
+                    var expected = Ivs(before); expected[index] = 31;
+                    Check(Ivs(after).SequenceEqual(expected), game + " event actual IV31");
+                    AssertPokemon(before, after, "box", false, game);
+                    SaveCase(outputRoot, game, "box", "event-iv", bytes, request, output, response);
+                    ivCases++;
                 }
                 if (natureCases > 0 && ivCases > 0) break;
             }
-            Check(natureCases > 0 && ivCases > 0, game + " actual pinned event restrictions tested for Nature and IVs");
-        }
+            Check(natureCases > 0 && ivCases > 0, game + " fixed event Nature and IV permit exact authorized edits");
     }
 
     public static void SignatureRegression(string trainingFixtureRoot, string outputRoot)

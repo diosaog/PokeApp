@@ -469,5 +469,21 @@ class PkhexProcessWriter:
         if response["output_base64"] is not None:
             raise NativeWriteError("VERIFICATION_FAILED")
         self._validate(response, original, persisted, intent, "verified")
-        if response["semantic_diff"] != prepared.semantic_diff:
+        actual_diff, recorded_diff = response["semantic_diff"], prepared.semantic_diff
+        if intent.mutation.get("kind") == "virtual_training":
+            # Historical journals contain official-game legality diagnostics.
+            # These are not authority for PokeApp randomized saves. Validate
+            # the recorded proof schema, then exclude only these two lists;
+            # native byte regeneration and every integrity/identity field stay
+            # mandatory. Canonical JSON also distinguishes bool from int.
+            self._training_diff(intent.mutation, recorded_diff)
+            informational = {"legality_warnings_before", "legality_warnings_after"}
+            try:
+                actual_diff = json.dumps({k: v for k, v in actual_diff.items() if k not in informational},
+                                         sort_keys=True, allow_nan=False)
+                recorded_diff = json.dumps({k: v for k, v in recorded_diff.items() if k not in informational},
+                                           sort_keys=True, allow_nan=False)
+            except (TypeError, ValueError):
+                raise NativeWriteError("VERIFICATION_FAILED") from None
+        if actual_diff != recorded_diff:
             raise NativeWriteError("VERIFICATION_FAILED")

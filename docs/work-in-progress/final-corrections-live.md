@@ -1,6 +1,86 @@
 # Final corrections — live execution record
 
-## Virtual Mints and Bottle Caps — 2026-11-01
+## Virtual training: randomized-save policy correction — 2026-11-01
+
+**NATIVE / TRANSACTIONAL ACCEPTANCE PASS; NOT PUBLISHED.** Continue on
+`codex/virtual-training-native-gate`. The owner's explicit clarification
+supersedes the earlier official-legality requirement and the historical
+diagnostic-only stop below. Production remains unchanged.
+
+PokeApp uses randomized ROMs and privately modified saves. Official encounter,
+learnset, ability, provenance or event legality is not authority for training.
+`NativeTraining` no longer invokes `LegalityAnalysis`, including its `Parsed`
+result: that is a legality-engine result, not native save parsing. All native
+format/integrity parsing, target identity, requested prior values, bounded
+Nature/IV input, exact PKM/save byte differences, serialization, CRC/signature,
+independent backups and readback remain mandatory. Unsupported species/forms
+and malformed Nature/PKM structures fail closed. No Pokémon is regenerated,
+legalized, replaced or normalized; unrelated fields/PID/EC/HT are preserved.
+
+**Demonstrated causes and limits:**
+
+- **UM:** the old DLL rejects a structurally intact modified UM fixture solely
+  because Gold makes an official HT/IV finding invalid. New native applies and
+  independently verifies the exact actual-IV change, keeping its existing HT
+  flags/PID/EC. Both old possible `TRAINING_LEGALITY_UNSUPPORTED` paths were
+  inappropriate authority under the clarified policy and have been removed.
+  The exact historical call's sub-branch remains uncaptured; this is a proven
+  policy correction, not a claim to have reproduced its suppressed exception.
+- **AS:** native verification previously re-ran the same official analysis;
+  Python additionally required exact equality of its warning lists. A real
+  before/after regression proves the old writer rejects the historical receipt
+  after successful native byte verification when those informational lists
+  change, while the corrected writer accepts identical `9cb09e…` bytes. Only
+  `legality_warnings_before/after` are excluded from training proof comparison;
+  their wire bounds and every authoritative field/type remain checked. Other
+  mutations are unchanged; no journal migration. The exact original AS inner
+  error was never captured, so its unique historical cause is not asserted.
+
+**Focused and complete evidence, isolated only:**
+
+- Old-reject/new-accept randomized/event regression, AS+UM first, then all8.
+  Native matrix once: **496 transformations +40 policy regressions PASS**,
+  including exact unrelated bytes, PID/EC, HP/status, noops, stale data,
+  corruption, unsupported structures, forged valid-checksum outputs and native
+  signatures. `policy-native/full-native-matrix/` (144896 byte/assertion checks).
+- AS historical receipt: **15 checks PASS**. Old writer fails/new writer passes;
+  hashes/contract/IV/Nature/PID/EC/PKM hashes/integrity-flag tampering still fails.
+  `as-legacy-proof-compat/run-1/`. Native bridge/protocol **16 tests PASS** and
+  portable API import PASS.
+- Actual service/native/atomic SQL: AS+UM **6/6**, then **24/24** across8 games,
+  purchase consumption/replay/corruption refusal/identity preserved. Foreign-OT
+  two-training/ordinary-sync proof PASS, preserving original UUID, flags and
+  transfer provenance. `policy-service-*.json`, `policy-foreign.json`.
+  SQL074 SHA `2398c53b…c606b` unchanged. Disposable PG55674 stopped/retained,
+  restart metadata `policy-074-pg-stopped.json` (never initdb).
+- Rebuilt **0.26.9** at `%LOCALAPPDATA%/PokeApp-releases/0.26.9-randomized-policy/`:
+  audit and signed manifest PASS; final packaged bytecode + native NTFS full
+  **81 checks PASS** (all8, independent backups, readback, answer loss, crash
+  recovery and exactly-once spending); exact historical AS/UM source copies,
+  three fresh handoffs each, **18 checks PASS**. Isolated packaged core/startup
+  recovery **9 checks PASS** with built frontend fixture at the expected origin.
+  `policy-packaged-{full,focused,startup}/`.
+- Real Linux execution: **24 cases /120 native calls PASS**, independent whole
+  PKM oracle, actual Nature/IV, unchanged PID/EC/HT, source, CRC and signatures.
+  `policy-linux/run-2/report.json`; self-contained .NET8.0.29, pinned PKHeX24.11.11,
+  WSL Ubuntu26.04 x86_64/Python3.14.4. This is **not** a final Debian Docker image
+  execution. Source/build provenance and logs retained; no packages installed.
+
+All evidence remains under
+`%LOCALAPPDATA%/PokeApp-migration-evidence/virtual-training/20261101/`.
+No owner save, real purchase, production data, hosting setting or update feed
+was changed. No SQL migration added/edited. No unrelated UI or billing work.
+
+**Release decision:** the corrected randomized-save policy passes the native,
+Windows packaged and transactional gates; no current failure was observed.
+Publication remains held by the owner's instruction. Before any later release:
+run the final production-image build gates, refresh backup/rehearsal/preflight
+as required, use the committed-source bundle and obtain deployment instruction.
+Keep the historical AS attribution limit explicit; do not call it proven flaky
+or claim a reproduced process-lifecycle fault. Prior NSIS8/8 evidence is retained;
+installer/update logic was unchanged and not broadly rerun in this correction.
+
+## Historical pre-clarification: virtual Mints and Bottle Caps — 2026-11-01
 
 **BLOCKED / NOT PUBLISHED. Implementation is committed and pushed on
 `codex/virtual-training-native-gate` (`9597c62`). Final native acceptance blocks
