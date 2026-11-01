@@ -1,5 +1,81 @@
 # Final corrections — live execution record
 
+## League, trainer profiles, navigation and held items — 2026-11-01
+
+**PUBLISHED. Focused acceptance PASS; direct hosted-web visual acceptance remains
+limited by the current network.** Source `662c3ea` supersedes the API/web versions
+below. Railway `c70f9bd9-9c87-4a02-9310-1866b1140465` is SUCCESS, health OK,
+**120 routes**, new collection source/reason and scouting item context verified
+in the live OpenAPI. Cloudflare `754550f9-fc37-47e5-b112-91afacae5dd9` is active
+at **100%**, with all 16 changed assets uploaded successfully. Supabase remains
+001–073 (latest history entries 073 `20261029221703`, 072 `20261029221701`).
+Launcher remains **0.26.8** and loads the published web; no native update needed.
+
+- **League:** coin editing was coupled to the number of days, so a common amount
+  could revert to the earlier positional map. Saving one day also replaced the
+  stored positional points with zeros. Common/positional coins are now chosen
+  independently for multiple days; the configured common amount survives day
+  changes, while a valid positional point map is retained in one-day saves.
+  The form uses the current/latest saved version, never obsolete default maps.
+  Viewing another matchday does not change configuration. 073 still owns the
+  effective scoring: one division + one day = 2/win, equal configured coins and
+  Blindar/Robar prizes; multiple days = configured positional points and coins
+  (including a uniform coin map). No scoring/default migration was introduced.
+- **Profiles:** genuine Iker Y observations existed only in the personal sync
+  record; the draft had no League-bound saves, while its collection read required
+  that link. An enabled, active participant in a draft/active season with **no
+  competitive pointer** can now show their synced observation through the same
+  public Pokémon allowlist. It is labelled personal, never an official Team Lock
+  or competitive identity/death evidence. Nonparticipants, inactive/disabled
+  targets, historical seasons and broken/foreign pointers do not gain a personal
+  fallback. Owner/hash/game/generation checks fail closed. IVs, abilities, private
+  identities, raw metadata and storage details remain private. Explicit absence,
+  processing and unsupported-data reasons replace the misleading generic text.
+  The own profile also shows its save outside a season and prefers a newer
+  personal sync over an older same-game League copy.
+- **Navigation:** removed Mi PC from desktop/mobile sidebar, home tiles and
+  internal links; `/pc/*` bookmarks and Launcher links redirect to the signed-in
+  trainer's own profile. Existing save endpoints/data and native tools remain.
+- **Held items:** X/Y ingestion omitted `item_generation`; older saved payloads
+  also lost this display context. New ingestion includes it and reads recover it
+  from the **same authoritative save game**, with conflict checks. No reupload
+  is needed for old X/Y observations. Public scouting retains this harmless
+  context; modal and battle rendering use it. IDs 158/217 resolve to Baya Zidra /
+  Garra Rápida for Gen6/7, empty items stay empty, ambiguous missing-game IDs are
+  not guessed from species or the viewer's game. Native parser/binary untouched.
+
+### Focused evidence
+
+- **75 React tests, 103 Python tests, 3 browser cases PASS**. Browser cases cover
+  1440/390 px profiles and old-bookmark redirect, plus newer sync selection and
+  held-item modal. TypeScript/Vite, affected Prettier, correctness Ruff, portable
+  API/verifier imports and diff checks PASS. The final Linux image also passed
+  its existing eight-game parser/native-progress smoke. Runtime log sample:
+  zero tracebacks / HTTP 5xx.
+- Fresh isolated 001–073 databases: five-player API create/save/read/switches
+  1/2/3/4 days and A/A+B; **four actual close RPCs + four replays**, both positional
+  coins and common 17-coin maps, no duplicate payouts or single-day prize leakage.
+  Original 073 close/correction/prize/death/wipe/frozen-history regression PASS.
+- Read-only projection against **genuine existing production observations**:
+  Iker ready/personal/Y, 12 Pokémon including his six-member party; Aaron has no
+  synced observation and returns `no_synced_save`; Anto ready/personal/Y, 20
+  Pokémon with one actual ID158 and one ID217. Private fields absent in each
+  public projection. No trainer, save, purchase, season, result or reward was
+  modified in production during tests.
+- Private evidence:
+  `%LOCALAPPDATA%/PokeApp-migration-evidence/profile-league-hotfix/20261101/`
+  (`acceptance.json`, `existing-observations.json`, `api-openapi.json`,
+  `api-runtime.log`, `web-deploy.log`, committed API export `api-662c3ea/`).
+- **Remaining verification limit:** public workers.dev requests time out from
+  this connection, including before deployment. Provider activation is verified;
+  a full public asset readback and authenticated visual check in the real
+  web/Launcher session are **not claimed**. Recheck from a working connection.
+
+Implementation and this MultiIA closure are committed/pushed; use Git for the
+closure hash. The protected guide and unrelated initial untracked files remain
+excluded. No database migration, native write, account alteration or installer
+publication was needed.
+
 ## Multi-day League format hotfix — 2026-10-30
 
 **PUBLISHED / VERIFIED.** Source commit `f5b68e9`; Cloudflare web version

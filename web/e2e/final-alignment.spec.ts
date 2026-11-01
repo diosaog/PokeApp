@@ -8,6 +8,7 @@ import {
   day,
   overview,
   players,
+  pokemon,
 } from "./fixtures";
 
 for (const width of [1440, 390])
@@ -77,6 +78,53 @@ for (const width of [1440, 390])
       commands.filter((c) => !c.path.startsWith("/v1/auth/")),
     ).toHaveLength(0);
   });
+
+test("own profile uses the newer synced save and retains held item context", async ({
+  page,
+}) => {
+  await fixture(page);
+  const pc = (nickname: string, uploaded_at: string) => ({
+    status: "ready",
+    save: {
+      id: "save",
+      game: "Y",
+      uploaded_at,
+      parser_status: "parsed",
+      parser_version: "fixture",
+    },
+    pokemon: [
+      {
+        location: "Equipo · 1",
+        pokemon: {
+          ...pokemon,
+          nickname,
+          item: "Item #158",
+          item_generation: 6,
+        },
+      },
+    ],
+  });
+  for (const [url, value] of [
+    [`**/v1/me/pc`, pc("Reciente", "2026-11-01T12:00:00Z")],
+    [`**/v1/read/seasons/${sid}/pc`, pc("Anterior", "2026-10-29T12:00:00Z")],
+  ] as const) {
+    await page.route(url, (route) =>
+      route.request().method() === "OPTIONS"
+        ? route.fallback()
+        : route.fulfill({
+            json: value,
+            headers: { "Access-Control-Allow-Origin": "http://127.0.0.1:5173" },
+          }),
+    );
+  }
+  await login(page);
+  await navigate(page, "Entrenadores");
+  await page.locator(`a[href="/entrenadores/${tid}"]`).click();
+  await expect(page.locator(".party-slots")).toContainText("Reciente");
+  await expect(page.locator(".party-slots")).not.toContainText("Anterior");
+  await page.locator(".party-slots button").first().click();
+  await expect(page.getByRole("dialog")).toContainText("Baya Zidra");
+});
 
 test("four Shop categories use metadata, without new HTTP reads or name matching", async ({
   page,

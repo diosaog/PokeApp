@@ -5,6 +5,14 @@ milestone record; it does not maintain a second live phase-status ledger.
 
 ## Current project position
 
+- League/profile/navigation/item fixes (2026-11-01): **PUBLISHED.** Source
+  `662c3ea`, Railway `c70f9bd9` SUCCESS, Cloudflare `754550f9` active 100%.
+  75 React / 103 Python / 3 browser cases and isolated SQL closes/replays PASS;
+  genuine Iker/Aaron/Anto observations checked read-only. Supabase 001–073 and
+  Launcher 0.26.8 unchanged. Direct public-web readback / real-session visual
+  acceptance is limited by connection timeouts; see the live record.
+  [Authoritative current record](work-in-progress/final-corrections-live.md).
+
 - Multi-day League format hotfix (2026-10-30): **PUBLISHED / VERIFIED.** Web
   `f5b68e9`, Cloudflare `02916b5d`: five participants require five positional
   points/coin values; switching 1/2/3/4 days preserves edits and reloads saved
