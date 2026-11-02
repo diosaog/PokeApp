@@ -55,6 +55,13 @@ class Store:
             raise self.result
         return deepcopy(self.result)
 
+    def rows(self, table, columns, *, filters, limit):
+        assert table == "season_players"
+        assert filters == {"season_id": SID}
+        return [dict(id=r["season_player_id"], trainer_id=r["trainer_id"],
+                     current_save_file_id=getattr(self, "save_id", None))
+                for r in self.result["rows"]]
+
 
 class LeagueGeneralTests(unittest.TestCase):
     def setUp(self):
@@ -116,6 +123,17 @@ class LeagueGeneralTests(unittest.TestCase):
         self.assertEqual(row["official_points"], "0")
         self.assertEqual(row["dead_box_number"], 7)
         self.assertNotIn("provisional_points", row)
+
+    def test_league_linkage_is_scoped_and_never_exposes_save_identifier(self):
+        self.assertEqual(self.get().json()["rows"][0]["league_save_status"], "unlinked")
+        self.store.save_id = str(uuid4())
+        response = self.get()
+        self.assertEqual(response.json()["rows"][0]["league_save_status"], "linked")
+        self.assertNotIn(self.store.save_id, response.text)
+        self.store.rows = lambda *a, **k: [dict(
+            id=self.store.result["rows"][0]["season_player_id"],
+            trainer_id=str(uuid4()), current_save_file_id=self.store.save_id)]
+        self.assertEqual(self.get().status_code, 503)
 
     def test_single_rpc_for_all_players_preserves_server_order(self):
         rows = self.store.result["rows"]

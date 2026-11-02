@@ -1,5 +1,34 @@
 # Final corrections — live execution record
 
+## Trainer evidence / Launcher 0.26.11 - 2026-11-02
+
+**TESTED; RELEASE IN PROGRESS.** Branch `codex/trainer-evidence-077`, base
+`c4cff18`. Task077 does not require a database migration: production remains076.
+
+- Read-only production checks: Anto has two authoritative League badges, exactly
+  two4-coin claims and8coins; Aaron one badge/claim and4coins. No deductions or
+  unpaid eligible rewards were found. Their historical baselines are unconfirmed:
+  current dead-box occupancy0/1 is not an all-time death total.
+- Iker has two personal-save badges and three Pokémon in Box7, but no League
+  upload, pointer or identity revision. His own Launcher must upload the original
+  save into the active League; personal payloads cannot fabricate that evidence.
+  ByVisan02/Samu also have personal-only saves, with no observed badges.
+- Cards/profiles now use075 historical deaths and exact pending prerequisites,
+  expose personal progress scope, and retain ledger balances/NET totals. A bounded,
+  authenticated API read adds linkage status without exposing save identifiers.
+  GENERAL alone removes the Victories/Penalties columns; day views stay unchanged.
+- 84 focused Python checks PASS;20 React checks/TypeScript PASS. Isolated001-076
+  SQL proves high-water claims, valid linking, deductions, concurrency, configured
+  Box7/Box4, audited3deaths=-0.3NET, repeated/moved Pokémon and frozen snapshots.
+  No scoring, reward, identity, native-write or Launcher-sync logic was changed.
+- Launcher0.26.11 is explicitly requested by the owner. Its version-only rebuild
+  will reuse valid native/transaction evidence after payload comparison and the
+  packaged startup gate. No real save or purchase is used for testing.
+
+Private evidence: `%LOCALAPPDATA%/PokeApp-migration-evidence/trainer-077/`.
+No production data repair has been performed. Historical baseline confirmation
+and Iker's original League upload remain factual prerequisites, not release gates.
+
 ## Final championship tiebreak popup / 076 - 2026-11-02
 
 **PUBLISHED / VERIFIED. NO REMAINING PUBLICATION BLOCKERS.**

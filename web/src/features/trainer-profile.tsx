@@ -7,7 +7,6 @@ import { Pokemon, WithSeason } from "./core";
 import {
   SpriteGeneration,
   TrainerPhoto,
-  StatPill,
   gameGeneration,
 } from "../pokemon/presentation";
 import { SaveGame, gameName } from "./progress";
@@ -19,6 +18,7 @@ import { PokemonDetailModal } from "./pokemon-details";
 import { participantLabel } from "./admin-labels";
 import { AccountEditor, type AccountProfile } from "./account-editor";
 import { PreferencesCard } from "./preferences";
+import { TrainerLeagueStats } from "./trainer-league-stats";
 
 export function TrainerProfilePage() {
   const { season, accountsEnabled } = useApp(),
@@ -158,11 +158,7 @@ export function Profile({
                 <Tag>{participantLabel(player.status)}</Tag>
               )}
             </div>
-            <div className="mini-stats">
-              <StatPill label="Puntos" value={row?.total_points} />
-              <StatPill label="Monedas" value={row?.coin_balance} />
-              <StatPill label="Muertos" value={row?.dead_count ?? "—"} />
-            </div>
+            <TrainerLeagueStats row={row} />
             <TrainerGame
               active={active.get(trainer)}
               seasonProgress={player.progress}

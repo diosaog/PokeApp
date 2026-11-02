@@ -3,12 +3,13 @@ import { ArrowUpRight } from "lucide-react";
 import type { Model } from "../api/types";
 import { useApp, useOverview, useRead } from "../state";
 import { Empty, Heading, Loading, Notice, Tag } from "../ui";
-import { TrainerPhoto, StatPill } from "../pokemon/presentation";
+import { TrainerPhoto } from "../pokemon/presentation";
 import { GameProgress, gameName } from "./progress";
 import { participantLabel } from "./admin-labels";
 import { WithSeason } from "./core";
 import { useState } from "react";
 import type { AccountProfile } from "./account-editor";
+import { TrainerLeagueStats } from "./trainer-league-stats";
 
 type ActiveSave = {
   trainer_id: string;
@@ -33,7 +34,16 @@ export function TrainerGame({
     seasonProgress?.state === "observed" ? seasonProgress.game : null;
   return (
     <div className="trainer-badges">
+      <p className="caption">
+        {active ? "Partida activa · progreso personal" : "Partida de la Liga"}
+      </p>
       <GameProgress progress={active?.progress ?? seasonProgress} compact />
+      {active && (
+        <p className="caption">
+          Las medallas observadas no acreditan por sí solas premios en esta
+          Liga.
+        </p>
+      )}
       {active?.game && seasonGame && seasonGame !== active.game && (
         <p className="caption">
           En la temporada compite con Pokémon {gameName(seasonGame)}.
@@ -64,7 +74,7 @@ function AccountTrainers() {
       <Heading eyebrow="LA COMUNIDAD" title="Entrenadores">
         Cada equipo tiene una historia. Conoce a tus rivales.
       </Heading>
-      <Notice error={accounts.error} />
+      <Notice error={accounts.error || overview.error || league.error} />
       {accounts.isPending ? (
         <Loading />
       ) : (
@@ -84,14 +94,7 @@ function AccountTrainers() {
                     <h2>{a.display_name}</h2>
                     {a.trainer_id === me?.trainer_id && <Tag>TÚ</Tag>}
                     {p ? (
-                      <div className="mini-stats">
-                        <StatPill label="Puntos" value={row?.total_points} />
-                        <StatPill label="Monedas" value={row?.coin_balance} />
-                        <StatPill
-                          label="Muertos"
-                          value={row?.dead_count ?? "—"}
-                        />
-                      </div>
+                      <TrainerLeagueStats row={row} />
                     ) : (
                       <p>Sin participación en esta temporada</p>
                     )}
@@ -172,14 +175,7 @@ function SeasonTrainers() {
                         {p.status !== "active" && (
                           <small>{participantLabel(p.status)}</small>
                         )}
-                        <div className="mini-stats">
-                          <StatPill label="Puntos" value={row?.total_points} />
-                          <StatPill label="Monedas" value={row?.coin_balance} />
-                          <StatPill
-                            label="Muertos"
-                            value={row?.dead_count ?? "—"}
-                          />
-                        </div>
+                        <TrainerLeagueStats row={row} />
                       </div>
                     </div>
                     <TrainerGame

@@ -62,10 +62,14 @@ it("shows one total with the deaths already subtracted, and no dates", () => {
     within(anto)
       .getAllByRole("cell")
       .map((c) => c.textContent),
-  ).toEqual(["Anto", "0", "−0,4", "-0,4", "2", "32"]);
+  ).toEqual(["Anto", "-0,4", "2", "32"]);
+  expect(screen.queryByRole("columnheader", { name: "Victorias" })).toBeNull();
+  expect(
+    screen.queryByRole("columnheader", { name: "Penalizaciones" }),
+  ).toBeNull();
   // Unknown stays unknown, never a false zero.
   const samu = screen.getByRole("row", { name: /Samu/ });
-  expect(within(samu).getAllByRole("cell")[4]).toHaveTextContent("Desconocido");
+  expect(within(samu).getAllByRole("cell")[2]).toHaveTextContent("Desconocido");
   for (const gone of [
     /Provisional/,
     /se aplica al cerrar/,
@@ -85,7 +89,7 @@ it("formats totals in Spanish, negative ones included", () => {
   expect(points("9007199254740993.1")).toBe("9.007.199.254.740.993,1");
 });
 
-it("shows wins separately from net points and does not reinterpret occupied dead slots as history", () => {
+it("keeps general net ordering and historical deaths without showing wins or penalties", () => {
   render(
     <MemoryRouter>
       <LeagueGeneral
@@ -113,7 +117,7 @@ it("shows wins separately from net points and does not reinterpret occupied dead
   );
   expect(screen.getAllByRole("row")[1]).toHaveTextContent("B");
   expect(
-    within(screen.getByRole("row", { name: /A/ })).getAllByRole("cell")[4],
+    within(screen.getByRole("row", { name: /A/ })).getAllByRole("cell")[2],
   ).toHaveTextContent("Desconocido");
 });
 
@@ -174,7 +178,7 @@ it("keeps unknown live net points pending even when an earlier official total ex
   const cells = within(screen.getByRole("row", { name: /Anto/ })).getAllByRole(
     "cell",
   );
-  expect(cells[3]).toHaveTextContent("Pendiente de confirmar");
+  expect(cells[1]).toHaveTextContent("Pendiente de confirmar");
   expect(cells[2]).toHaveTextContent("Desconocido");
   expect(screen.getByText(/Provisional:/)).toBeInTheDocument();
 });

@@ -4186,6 +4186,12 @@ export interface components {
       historical_deaths_source?: string | null;
       /** Points Provisional */
       points_provisional?: boolean | null;
+      /**
+       * League Save Status
+       * @default unavailable
+       * @enum {string}
+       */
+      league_save_status: "linked" | "unlinked" | "unavailable";
     };
     /** LiveRulesBody */
     LiveRulesBody: {

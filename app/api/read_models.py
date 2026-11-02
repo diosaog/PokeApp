@@ -201,6 +201,8 @@ class LeagueStandingRead(BaseModel):
     historical_deaths_status: Literal["known", "unknown", "incomplete"] | None = None
     historical_deaths_source: str | None = None
     points_provisional: bool | None = None
+    # Presence of this participant's League save, independent of personal previews.
+    league_save_status: Literal["linked", "unlinked", "unavailable"] = "unavailable"
 
 
 class LeagueGeneralRead(BaseModel):

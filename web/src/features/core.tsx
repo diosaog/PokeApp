@@ -367,10 +367,7 @@ export function LeagueGeneral({ data }: { data: Model<"LeagueGeneralRead"> }) {
   return (
     <Card className="league-table-card">
       <h2>Clasificación general</h2>
-      <p>
-        La Liga se ordena por puntos netos acumulados. Las victorias normales se
-        conservan por separado de las penalizaciones.
-      </p>
+      <p>La Liga se ordena por puntos netos acumulados.</p>
       {data.rows.some((row) => row.points_provisional) && (
         <p className="muted">
           Provisional: incluye los resultados y penalizaciones actuales. Los
@@ -386,8 +383,6 @@ export function LeagueGeneral({ data }: { data: Model<"LeagueGeneralRead"> }) {
           <thead>
             <tr>
               <th>Entrenador</th>
-              <th>Victorias</th>
-              <th>Penalizaciones</th>
               <th>Puntos netos</th>
               <th>Muertes históricas</th>
               <th>Monedas</th>
@@ -408,8 +403,6 @@ export function LeagueGeneral({ data }: { data: Model<"LeagueGeneralRead"> }) {
                     <span className="muted"> · {states[row.status]}</span>
                   )}
                 </td>
-                <td>{row.normal_wins ?? "No registrado"}</td>
-                <td>{deduction(row.total_penalties)}</td>
                 <td>
                   {row.total_points == null
                     ? "Pendiente de confirmar"

@@ -61,6 +61,7 @@ const league = (): Model<"LeagueGeneralRead"> => ({
       dead_count: null,
       dead_count_source: "unknown",
       dead_count_observed_at: null,
+      league_save_status: "unavailable",
     },
   ],
 });

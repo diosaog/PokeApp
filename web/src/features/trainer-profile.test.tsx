@@ -1,9 +1,16 @@
 import { afterEach, beforeEach, expect, it, vi } from "vitest";
-import { cleanup, render, screen } from "@testing-library/react";
+import { cleanup, render, screen, within } from "@testing-library/react";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { TrainerProfilePage } from "./trainer-profile";
+import { TrainersPage } from "./trainers";
 
-const mocks = vi.hoisted(() => ({ member: true, noSave: false }));
+const mocks = vi.hoisted(() => ({
+  member: true,
+  noSave: false,
+  accountsEnabled: true,
+  historyKnown: true,
+  linked: true,
+}));
 const observed = (game: string) => ({
   state: "observed",
   game,
@@ -15,10 +22,11 @@ const observed = (game: string) => ({
 });
 vi.mock("../state", () => ({
   queries: { invalidateQueries: vi.fn() },
+  useViewer: () => "me",
   useApp: () => ({
     me: { trainer_id: "me", is_admin: false },
     season: "season",
-    accountsEnabled: true,
+    accountsEnabled: mocks.accountsEnabled,
     adminOperationPending: false,
   }),
   useOverview: () => ({
@@ -54,35 +62,65 @@ vi.mock("../state", () => ({
   useRead: (path: string) => ({
     isPending: false,
     error: null,
-    data: path.startsWith("/v1/accounts/")
+    data: path.startsWith("/v1/accounts?")
       ? {
-          trainer_id: path.split("/").pop(),
-          display_name: "Perfil",
-          photo_url: null,
-          revision: 1,
+          items: [
+            { trainer_id: "me", display_name: "Yo", photo_url: null },
+            { trainer_id: "rival", display_name: "Rival", photo_url: null },
+          ],
+          has_more: false,
         }
-      : path === "/v1/read/active-saves"
+      : path.startsWith("/v1/accounts/")
         ? {
-            items: [
-              {
-                trainer_id: "me",
-                game: "Y",
-                uploaded_at: "2026-10-28T20:00:00Z",
-                progress: observed("Y"),
-              },
-            ],
+            trainer_id: path.split("/").pop(),
+            display_name: "Perfil",
+            photo_url: null,
+            revision: 1,
           }
-        : path.endsWith("/league")
-          ? { rows: [], days: [] }
-          : path.includes("/collection")
-            ? mocks.noSave
-              ? {
-                  status: "no_current_save",
-                  reason: "no_synced_save",
-                  pokemon: [],
-                }
-              : { status: "ready", source: "personal", game: "Y", pokemon: [] }
-            : undefined,
+        : path === "/v1/read/active-saves"
+          ? {
+              items: [
+                {
+                  trainer_id: "me",
+                  game: "Y",
+                  uploaded_at: "2026-10-28T20:00:00Z",
+                  progress: observed("Y"),
+                },
+              ],
+            }
+          : path.endsWith("/league")
+            ? {
+                season: { id: "season", status: "active" },
+                rows: ["me", "rival"].map((trainer_id) => ({
+                  trainer_id,
+                  league_save_status: mocks.linked ? "linked" : "unlinked",
+                  coin_balance: "4",
+                  total_points: mocks.historyKnown ? "-0.6" : null,
+                  dead_count: 3,
+                  historical_deaths: mocks.historyKnown ? 6 : null,
+                  historical_deaths_status: mocks.historyKnown
+                    ? "known"
+                    : "unknown",
+                  historical_deaths_source: mocks.historyKnown
+                    ? "audited_event_history"
+                    : "death_history_baseline_required",
+                })),
+                days: [],
+              }
+            : path.includes("/collection")
+              ? mocks.noSave
+                ? {
+                    status: "no_current_save",
+                    reason: "no_synced_save",
+                    pokemon: [],
+                  }
+                : {
+                    status: "ready",
+                    source: "personal",
+                    game: "Y",
+                    pokemon: [],
+                  }
+              : undefined,
   }),
 }));
 vi.mock("./inventory", () => ({ Inventory: () => <p>Inventario</p> }));
@@ -108,6 +146,9 @@ function profile(id: string) {
 beforeEach(() => {
   mocks.member = true;
   mocks.noSave = false;
+  mocks.accountsEnabled = true;
+  mocks.historyKnown = true;
+  mocks.linked = true;
 });
 afterEach(cleanup);
 
@@ -160,4 +201,96 @@ it("without a season the own profile still ends with the settings", () => {
   expect(
     screen.getByRole("region", { name: "Opciones personales" }),
   ).toContainElement(screen.getByRole("region", { name: "Ajustes de la app" }));
+});
+
+function expectLeagueStats(container: HTMLElement, deathTotal: string) {
+  const field = (name: string) =>
+    within(container).getByText(name).closest(".stat-pill")!;
+  expect(field("Muertes históricas")).toHaveTextContent(deathTotal);
+  expect(field("Monedas")).toHaveTextContent("4");
+  expect(field("Puntos netos")).toHaveTextContent("-0,6");
+  expect(
+    within(container).getByText(/Liga seleccionada: puntos netos/),
+  ).toBeVisible();
+}
+
+it.each([true, false])(
+  "cards and profile agree on historical deaths and ledger balance (accounts=%s)",
+  (accountsEnabled) => {
+    mocks.accountsEnabled = accountsEnabled;
+    render(
+      <MemoryRouter>
+        <TrainersPage />
+      </MemoryRouter>,
+    );
+    const card = screen
+      .getByRole("heading", { name: "Yo" })
+      .closest("article")!;
+    expectLeagueStats(card, "6");
+    expect(
+      within(card).getByText("Partida activa · progreso personal"),
+    ).toBeVisible();
+    expect(
+      within(card).getByText(/no acreditan por sí solas premios/),
+    ).toBeVisible();
+    cleanup();
+    profile("me");
+    expectLeagueStats(document.querySelector(".profile-identity")!, "6");
+  },
+);
+
+it("does not turn current occupied dead slots or personal progress into a historical total", () => {
+  mocks.historyKnown = false;
+  render(
+    <MemoryRouter>
+      <TrainersPage />
+    </MemoryRouter>,
+  );
+  const card = screen.getByRole("heading", { name: "Yo" }).closest("article")!;
+  expect(
+    within(card).getByText("Muertes históricas").closest(".stat-pill"),
+  ).toHaveTextContent("—");
+  expect(
+    within(card).getByText(/Falta confirmar el historial de muertes/),
+  ).toBeVisible();
+  expect(
+    within(card).getByText("Puntos netos pendientes de confirmar."),
+  ).toBeVisible();
+  cleanup();
+  profile("rival");
+  const identity = document.querySelector<HTMLElement>(".profile-identity")!;
+  expect(
+    within(identity).getByText("Muertes históricas").closest(".stat-pill"),
+  ).toHaveTextContent("—");
+  expect(
+    within(identity).getByText(/Falta confirmar el historial de muertes/),
+  ).toBeVisible();
+  expect(screen.getByText(/Partida personal sincronizada/)).toBeVisible();
+  expect(screen.queryByRole("button", { name: "Editar mi perfil" })).toBeNull();
+  expect(screen.queryByText("Inventario")).toBeNull();
+});
+
+it("gives the same actionable missing League linkage on cards and a public personal preview", () => {
+  mocks.historyKnown = false;
+  mocks.linked = false;
+  render(
+    <MemoryRouter>
+      <TrainersPage />
+    </MemoryRouter>,
+  );
+  const card = screen
+    .getByRole("heading", { name: "Rival" })
+    .closest("article")!;
+  expect(
+    within(card).getByText(/Sin partida vinculada a esta Liga/),
+  ).toHaveTextContent("desde su propio Launcher");
+  cleanup();
+  profile("rival");
+  expect(
+    screen.getByText(/Sin partida vinculada a esta Liga/),
+  ).toHaveTextContent(
+    "el progreso personal no acredita premios ni muertes de Liga",
+  );
+  expect(screen.getByText(/Partida personal sincronizada/)).toBeVisible();
+  expect(screen.queryByRole("button", { name: /vincular/i })).toBeNull();
 });

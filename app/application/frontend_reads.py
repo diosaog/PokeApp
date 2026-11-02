@@ -102,6 +102,19 @@ class FrontendReads:
         data = LeagueGeneralRead.model_validate(result)
         if str(data.season.id) != sid or data.season.status == "discarded":
             raise PersistenceError("Invalid league scope")
+        participants = self.rows(
+            "season_players", "id,trainer_id,current_save_file_id", season_id=sid
+        )
+        by_id = {str(p["id"]): p for p in participants}
+        if len(by_id) != len(participants):
+            raise PersistenceError("Ambiguous League participants")
+        for row in data.rows:
+            participant = by_id.get(str(row.season_player_id))
+            if participant is None or str(participant["trainer_id"]) != str(row.trainer_id):
+                raise PersistenceError("Invalid League participant scope")
+            row.league_save_status = (
+                "linked" if participant["current_save_file_id"] is not None else "unlinked"
+            )
         return data
 
     def season(self, sid):
