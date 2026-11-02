@@ -5,6 +5,13 @@ milestone record; it does not maintain a second live phase-status ledger.
 
 ## Current project position
 
+- Launcher 0.26.10 / owner inventory correction (2026-11-02): **PUBLISHED / VERIFIED.**
+  Build `9faaf3b`, signed feed/full installer readback, package audit and9startup
+  checks PASS; native/Python logic unchanged, prior matrices reused. Web
+  `e9a8967b` active100%, API9fb35778/DB075 unchanged. Requested old Prueba2 Silver
+  cancelled once through the audited incident pipeline; ChampionsLocke0 unchanged.
+  [Authoritative live record](work-in-progress/final-corrections-live.md).
+
 - Final League NET / historical deaths (2026-11-02): **PUBLISHED / VERIFIED.**
   Additive075, exact +1/win NET across all days, immutable actual-death segments,
   equal coins and existing first/last rewards; 181 Python /68 React plus actual

@@ -10,7 +10,7 @@ Reconciled: 2026-09-26. Keep one copy at this path.
 | How do AI instances continue the same work? | This protocol |
 | What are the project-wide constraints and roadmap? | [Master protocol](../PokeApp_2.0_Protocolo_Maestro_MultiIA.md) |
 | Which phase is active and where is its memory? | [Project checkpoint](../project-checkpoint.md) |
-| What is the current operational state and next action? | [Current live record](../work-in-progress/final-corrections-live.md) (2026-11-02: final League NET/death history published and verified from440c1d3; Supabase075, API9fb35778, web552a8512; Launcher0.26.9 unchanged; final equal-NET title rule remains an owner decision), indexed by the checkpoint |
+| What is the current operational state and next action? | [Current live record](../work-in-progress/final-corrections-live.md) (2026-11-02: Launcher0.26.10 signed update published/verified from9faaf3b, web e9a8967b; requested old Silver cap cancelled once; API9fb35778/DB075 unchanged; equal-final-NET title rule remains an owner decision), indexed by the checkpoint |
 | What behavior was approved? | [Functional alignment contract](../phase10-5-functional-alignment.md) |
 | What was implemented and what evidence exists? | Active phase evidence in its live record until closure; [previous Phase 10 report](../phase10-completion-report.md) retains historical delivery evidence |
 

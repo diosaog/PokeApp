@@ -1,5 +1,44 @@
 # Final corrections — live execution record
 
+## Launcher 0.26.10 and requested inventory correction - 2026-11-02
+
+**PUBLISHED / VERIFIED. NO RELEASE BLOCKERS.** Branch
+`codex/launcher-02610-inventory`, build source `9faaf3b` (only Launcher version
+metadata changed). The League075 API/database changes remain deployed unchanged.
+
+- Owner requested removal of the cap shown on Anto's ChampionsLocke profile.
+  It was **Chapa Plateada**, not Gold: a pending paid record from discarded
+  **Prueba2**, dated 2026-10-29, carried by the existing virtual-item rule.
+  Scoped preimage/ledger checks found its original -6 debit and no save/training
+  reservation or applied redemption. Used the existing audited/idempotent
+  `admin_purchase_resolve` cancellation once, preserving the record/history;
+  one +6 compensation in Prueba2 only (2 ->8), ChampionsLocke stays **0**.
+  No pending Silver/Gold remains for the owner. No inventory rules changed.
+  Private operation/preimage/receipt are under `launcher-02610/` evidence.
+- Launcher **0.26.10**: package audit PASS, actual packaged startup/recovery
+  **9/9 PASS** isolated. All **40** shipped Python modules match the commit and
+  0.26.9. All **474** native method bodies/IL/signatures/runtime attributes match;
+  changes are only Git build provenance in ProductVersion/InformationalVersion
+  and derived build IDs. PKHeX/CoreCLR/hostfxr identical. Existing native,
+  transactional and NSIS matrices are valid and reused, without repeating them.
+- Old actual shipped 0.26.9 updater/key accepts the new canonical signed manifest,
+  SHA512/size and numeric 0.26.9 ->0.26.10 ordering. Final installer
+  **159464261 bytes**, SHA256
+  `ff9a35fef144859150a4994176522a51b2703dca7deb8393212595a9f7038514`.
+  Uploaded immutable installer first, complete public HTTPS SHA512 readback PASS,
+  then Ed25519 stable feed; final public feed equals the signed build exactly.
+- Web download card/worker then published **0.26.10**:
+  **`e9a8967b-7ca6-4b0a-b710-78c4b96e18c7` active100%**, **18** public hashes PASS.
+  API **9fb35778** and DB **075** unchanged; no new migration or native changes.
+  Temporary readback registration/generated keys removed, other keys preserved.
+
+Machine-readable closure: `docs/evidence/launcher-release-02610.json`.
+Build/provenance: `%LOCALAPPDATA%/PokeApp-releases/0.26.10-league-net/`;
+private acceptance and publication: `%LOCALAPPDATA%/PokeApp-migration-evidence/launcher-02610/`.
+No real save modified, no new real purchase executed. The cap cancellation was
+an explicitly owner-authorized data correction, not deployment testing.
+
+
 ## Final League NET / death history - 2026-11-02
 
 **PUBLISHED / VERIFIED. NO PUBLICATION BLOCKERS.**

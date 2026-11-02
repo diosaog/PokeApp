@@ -1,0 +1,40 @@
+{
+  "status": "PUBLISHED_VERIFIED",
+  "version": "0.26.10",
+  "source_commit": "9faaf3b",
+  "verified_at_utc": "2026-11-02T17:36:59.086748+00:00",
+  "installer": {
+    "size": 159464261,
+    "sha256": "ff9a35fef144859150a4994176522a51b2703dca7deb8393212595a9f7038514",
+    "sha512": "ZO6ahO4x3Gs7RhvZ5oygmvfwijjAdzNxzLi/114Z96EzHl6+u+2TWHQCDhBi8dzO23vEhUksVCamYLo4GuQYlQ==",
+    "url": "https://pokeapp-web.pokeapp-v2.workers.dev/launcher/updates/stable/0.26.10.exe"
+  },
+  "signed_feed": "Ed25519 PASS; exact canonical build; published after complete public installer hash comparison",
+  "authenticode_policy": "NotSigned; established private-distribution policy",
+  "package_audit": "PASS",
+  "packaged_startup_recovery_checks": 9,
+  "old_shipped_0269_updater_accepts_02610": true,
+  "python_modules_unchanged": 40,
+  "native_method_bodies_identical": 474,
+  "native_differences": "Only Git build provenance attributes/resources and derived build IDs; PKHeX/runtime unchanged",
+  "previous_native_transactional_and_nsis_evidence_reused": true,
+  "web_version": "e9a8967b-7ca6-4b0a-b710-78c4b96e18c7",
+  "web_active_percent": 100,
+  "public_web_files_exact": 18,
+  "api_unchanged": "9fb35778-200a-444d-b754-d496dc58f350",
+  "database_unchanged": "075",
+  "inventory_correction": {
+    "item": "Chapa Plateada",
+    "source": "pending paid record from discarded Prueba2 displayed through the existing cross-season virtual-item rule",
+    "action": "existing audited purchase_cancel RPC, exactly once; original record preserved",
+    "credit_returned_to_source_season": 6,
+    "championslocke_balance_unchanged": 0,
+    "pending_owned_caps_after": 0
+  },
+  "real_save_writes": false,
+  "new_real_purchases": false,
+  "temporary_readback_keys_removed": true,
+  "evidence_root": "%LOCALAPPDATA%/PokeApp-migration-evidence/launcher-02610/",
+  "build_root": "%LOCALAPPDATA%/PokeApp-releases/0.26.10-league-net/",
+  "blockers": []
+}
