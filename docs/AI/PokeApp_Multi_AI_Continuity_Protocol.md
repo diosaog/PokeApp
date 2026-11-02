@@ -10,7 +10,7 @@ Reconciled: 2026-09-26. Keep one copy at this path.
 | How do AI instances continue the same work? | This protocol |
 | What are the project-wide constraints and roadmap? | [Master protocol](../PokeApp_2.0_Protocolo_Maestro_MultiIA.md) |
 | Which phase is active and where is its memory? | [Project checkpoint](../project-checkpoint.md) |
-| What is the current operational state and next action? | [Current live record](../work-in-progress/final-corrections-live.md) (2026-11-02: trainer evidence077 task published/verified from3eea9f5; database076 unchanged, API46969e2a, web975c2dde active100%, signed Launcher0.26.11 verified; Iker still needs an original League upload and historical baselines require factual confirmation), indexed by the checkpoint |
+| What is the current operational state and next action? | [Current live record](../work-in-progress/final-corrections-live.md) (2026-11-02: compact trainer cards078 published/verified froma5d0f99; Puntos/Monedas/Muertos with configured-box counts, owner-confirmed initial Anto/Aaron baselines resolved once; API1aebe1a7, web053e50cf active100%; DB076 and signed Launcher0.26.11 unchanged), indexed by the checkpoint |
 | What behavior was approved? | [Functional alignment contract](../phase10-5-functional-alignment.md) |
 | What was implemented and what evidence exists? | Active phase evidence in its live record until closure; [previous Phase 10 report](../phase10-completion-report.md) retains historical delivery evidence |
 

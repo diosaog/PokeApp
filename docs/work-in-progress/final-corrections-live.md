@@ -2,7 +2,7 @@
 
 ## Compact trainer cards / Box7 count - 2026-11-02
 
-**TESTED; PUBLICATION IN PROGRESS.** Owner clarification supersedes the previous
+**PUBLISHED / VERIFIED.** Owner clarification supersedes the previous
 card presentation: show **Puntos / Monedas / Muertos**, remove the new explanatory
 paragraphs, and count the configured dead box (empty complete box is zero).
 
@@ -21,6 +21,17 @@ paragraphs, and count the configured dead box (empty complete box is zero).
   hosted web directly; another binary rebuild is unnecessary.
 
 Private evidence: `%LOCALAPPDATA%/PokeApp-migration-evidence/trainer-078/`.
+API source **a5d0f99**, Railway **1aebe1a7-80f0-4780-a48f-1ceb8c6de265 SUCCESS**,
+307 deployed Python files exact; final-image8-game parse/24 training gates PASS,
+health200/anonymousLeague401. Web source **eea72c7** (unchanged in a5d0f99),
+Cloudflare **053e50cf-a025-486f-85bc-4eb7ea4c66ac active100%**,18 public files exact.
+Stable Launcher0.26.11 installer/feed remain unchanged; existing Ed25519 signature
+and download route verified. New hosted UI is available in the existing Launcher.
+No binary rebuild, migration, raw-save write, purchase or coin change. Only the
+two owner-confirmed initial baselines were reconciled, once each with exact replay.
+All5 displayed counts verified: Anto0/Aaron1/Iker3/ByVisan02/Samu0. Own temporary
+readback key and generated files removed; release keys preserved.
+Machine evidence: `docs/evidence/trainer-box-count-078.json`.
 
 ## Trainer evidence / Launcher 0.26.11 - 2026-11-02
 

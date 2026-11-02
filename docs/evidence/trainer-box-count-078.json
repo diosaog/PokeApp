@@ -1,0 +1,110 @@
+{
+  "status": "PUBLISHED_VERIFIED",
+  "verified_at_utc": "2026-11-02T18:45:29.180159+00:00",
+  "source_commit": "a5d0f99982b758cb5c894c08ffd9966398be9371",
+  "web_source_commit": "eea72c7",
+  "database": "076 unchanged; no new migration",
+  "labels": [
+    "Puntos",
+    "Monedas",
+    "Muertos"
+  ],
+  "removed_text": "All newly introduced trainer-card/profile explanatory paragraphs and personal-badge disclaimers removed",
+  "displayed_dead_count": "Configured complete dead box; empty means0. Owned/hash/game-bound server-parsed personal fallback only when participant is active and League save absent. No League identity/points/reward promotion.",
+  "production_reads": [
+    {
+      "trainer": "Anto",
+      "dead": 0,
+      "points": "0.00000000000000000000",
+      "coins": "8",
+      "source": "observed_current_save"
+    },
+    {
+      "trainer": "Aaron",
+      "dead": 1,
+      "points": "-0.10000000000000000000",
+      "coins": "4",
+      "source": "observed_current_save"
+    },
+    {
+      "trainer": "ByVisan02",
+      "dead": 0,
+      "points": null,
+      "coins": "0",
+      "source": "observed_personal_save"
+    },
+    {
+      "trainer": "Iker",
+      "dead": 3,
+      "points": null,
+      "coins": "0",
+      "source": "observed_personal_save"
+    },
+    {
+      "trainer": "Samu",
+      "dead": 0,
+      "points": null,
+      "coins": "0",
+      "source": "observed_personal_save"
+    }
+  ],
+  "owner_confirmed_baselines": {
+    "Anto": 0,
+    "Aaron": 1,
+    "procedure": "existing075 api_admin_death_history with exact source/revision, actor and audit",
+    "each_replayed_same_resolution": true,
+    "resolutions_created": 2
+  },
+  "python_checks_passed": 78,
+  "react_checks_passed": 47,
+  "typescript_build": "PASS",
+  "backup_sha256": "d53a6bbb451c5fe2ba0ab455f52e654665fd63251690105aae2abb0bfa8a5ea2",
+  "backup_exact_tables": 123,
+  "baseline_rehearsal": [
+    "Exact source/revision/current Box7 occupancy matches retained production backup",
+    "Existing service-only audited075 reconciliation confirms owner-authorized0/1 counts",
+    "Repeated identical requests replay exactly one resolution per participant",
+    "General read returns Anto0 points/0dead/8coins, Aaron-0.1points/1dead/4coins",
+    "Save records/parsed payloads/identities/events/purchases/coin ledger/snapshots/participants/stats unchanged",
+    "Entire rehearsal transaction rolled back"
+  ],
+  "api": {
+    "deployment_id": "1aebe1a7-80f0-4780-a48f-1ceb8c6de265",
+    "status": "SUCCESS",
+    "image_digest": "sha256:344df42585f53965146c40cc9dd17a557edb0bcc6f46384d6e36e48700688957",
+    "source_commit": "a5d0f99982b758cb5c894c08ffd9966398be9371",
+    "python_files_exact": 307,
+    "python": "3.14.3 (main, Apr  7 2026, 02:23:36) [GCC 12.2.0]",
+    "health": 200,
+    "paths": 126,
+    "personal_deadbox_contract": true,
+    "anonymous_league": 401,
+    "native_final_image_gates": "8-game parse and24 training cases PASS"
+  },
+  "web": {
+    "status": "PASS",
+    "web_source_commit": "eea72c7",
+    "source_commit": "a5d0f99",
+    "version_id": "053e50cf-a025-486f-85bc-4eb7ea4c66ac",
+    "active_percent": 100,
+    "public_files_exact": 18,
+    "launcher_version": "0.26.11",
+    "launcher_feed_exact_unchanged": true,
+    "Ed25519_signature": "PASS",
+    "launcher_download_HEAD": 200,
+    "launcher_installer_previous_full_hash_evidence_reused": true
+  },
+  "launcher": "0.26.11 unchanged binary; hosted UI updated; stable Ed25519 feed exact and download route verified; prior full installer digest evidence reused",
+  "coin_rows_unchanged": 23,
+  "purchases_unchanged": 3,
+  "real_save_writes": false,
+  "test_purchases": false,
+  "new_migration": false,
+  "cleanup": {
+    "own_registered_key_removed": true,
+    "own_generated_files_removed": true,
+    "preexisting_keys_preserved": true
+  },
+  "publication_blockers": [],
+  "private_evidence_root": "%LOCALAPPDATA%/PokeApp-migration-evidence/trainer-078/"
+}

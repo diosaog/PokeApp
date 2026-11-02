@@ -5,6 +5,13 @@ milestone record; it does not maintain a second live phase-status ledger.
 
 ## Current project position
 
+- Compact trainer cards /078 task (2026-11-02): **PUBLISHED / VERIFIED.**
+  Removed new card/profile paragraphs; visible Puntos/Monedas/Muertos, configured
+  box counts0/1/3/0/0 including validated personal previews. Owner-confirmed initial
+  Anto0/Aaron1 baselines reconciled through075 once; coins unchanged.78Python /
+  47React, backup/rehearsal/readback gates PASS. API1aebe1a7, web053e50cf active100%;
+  DB076 and signed Launcher0.26.11 unchanged. [Live record](work-in-progress/final-corrections-live.md).
+
 - Trainer evidence /077 task (2026-11-02): **PUBLISHED / VERIFIED.**
   Personal-vs-League scope and permanent death counts corrected in cards/profile;
   GENERAL drops victories/penalties columns. Existing claims reconcile correctly;
