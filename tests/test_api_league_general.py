@@ -130,6 +130,10 @@ class LeagueGeneralTests(unittest.TestCase):
         self.assertEqual(row["dead_box_number"], 7)
         self.assertNotIn("provisional_points", row)
 
+    def test_zero_points_are_plain_decimal_text_not_scientific_notation(self):
+        self.store.result["rows"][0]["total_points"] = "0.00000000000000000000"
+        self.assertEqual(self.get().json()["rows"][0]["total_points"], "0.00000000000000000000")
+
     def test_league_linkage_is_scoped_and_never_exposes_save_identifier(self):
         self.assertEqual(self.get().json()["rows"][0]["league_save_status"], "unlinked")
         self.store.save_id = str(uuid4())

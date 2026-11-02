@@ -5,11 +5,14 @@ from decimal import Decimal
 from typing import Annotated, Literal
 from uuid import UUID
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, PlainSerializer
 from app.api.cup_models import CupSide
 from app.api.progress_models import ProgressRead
 
-ExactDecimalText = Annotated[Decimal, Field(allow_inf_nan=False)]
+ExactDecimalText = Annotated[
+    Decimal, Field(allow_inf_nan=False),
+    PlainSerializer(lambda value: format(value, "f"), return_type=str, when_used="json"),
+]
 
 
 class SeasonRead(BaseModel):

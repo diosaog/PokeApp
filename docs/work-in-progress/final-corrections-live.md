@@ -15,7 +15,7 @@ paragraphs, and count the configured dead box (empty complete box is zero).
   rollback rehearsal on the verified123-table backup. Replay returns the same
   resolution. Official reads now show Anto0points/8coins and Aaron-0.1points/4coins.
   Iker's visible count3 and ByVisan02/Samu0 require no manual League linkage.
-- 77 Python /47 React checks PASS; malformed/partial/foreign boxes remain unknown,
+- 78 Python /47 React checks PASS; malformed/partial/foreign boxes remain unknown,
   linked sources take precedence, personal counts do not change points/claims.
   No new migration or native/save-write changes. Launcher0.26.11 loads the updated
   hosted web directly; another binary rebuild is unnecessary.
