@@ -1,5 +1,27 @@
 # Final corrections — live execution record
 
+## Compact trainer cards / Box7 count - 2026-11-02
+
+**TESTED; PUBLICATION IN PROGRESS.** Owner clarification supersedes the previous
+card presentation: show **Puntos / Monedas / Muertos**, remove the new explanatory
+paragraphs, and count the configured dead box (empty complete box is zero).
+
+- Cards/profile/GENERAL now display the same current-box count. Personal-only
+  participants receive a public numeric count from their own server-parsed,
+  hash/owner/game-bound complete30-slot box; this never credits coins, creates
+  League identity, changes Team Locks or manufactures sporting evidence.
+- Owner explicitly confirmed the initial Box7 totals. Existing075 audited RPC
+  confirmed Anto0 and Aaron1 against their exact accepted sources/revision, after
+  rollback rehearsal on the verified123-table backup. Replay returns the same
+  resolution. Official reads now show Anto0points/8coins and Aaron-0.1points/4coins.
+  Iker's visible count3 and ByVisan02/Samu0 require no manual League linkage.
+- 77 Python /47 React checks PASS; malformed/partial/foreign boxes remain unknown,
+  linked sources take precedence, personal counts do not change points/claims.
+  No new migration or native/save-write changes. Launcher0.26.11 loads the updated
+  hosted web directly; another binary rebuild is unnecessary.
+
+Private evidence: `%LOCALAPPDATA%/PokeApp-migration-evidence/trainer-078/`.
+
 ## Trainer evidence / Launcher 0.26.11 - 2026-11-02
 
 **PUBLISHED / VERIFIED. NO PUBLICATION BLOCKERS.** Branch `codex/trainer-evidence-077`, base

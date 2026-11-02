@@ -34,16 +34,7 @@ export function TrainerGame({
     seasonProgress?.state === "observed" ? seasonProgress.game : null;
   return (
     <div className="trainer-badges">
-      <p className="caption">
-        {active ? "Partida activa · progreso personal" : "Partida de la Liga"}
-      </p>
       <GameProgress progress={active?.progress ?? seasonProgress} compact />
-      {active && (
-        <p className="caption">
-          Las medallas observadas no acreditan por sí solas premios en esta
-          Liga.
-        </p>
-      )}
       {active?.game && seasonGame && seasonGame !== active.game && (
         <p className="caption">
           En la temporada compite con Pokémon {gameName(seasonGame)}.

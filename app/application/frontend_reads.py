@@ -1,5 +1,8 @@
 """Safe read composition; mutations remain authoritative in their existing services."""
 
+from datetime import datetime
+import re
+
 from app.api.read_models import (
     HallPage,
     OverviewRead,
@@ -16,6 +19,39 @@ from app.application.pokemon_read_context import pokemon_context
 from app.api.progress_models import ProgressRead
 from app.repositories.errors import NotFoundError, PersistenceError
 from app.repositories.supabase.frontend_reads import FrontendReadRepository
+
+
+def personal_dead_box_count(record, trainer_id, box_number):
+    """A complete server-parsed personal box is a public count, never League proof."""
+    try:
+        payload = record["payload"]
+        if (str(record["trainer_id"]) != trainer_id
+            or record["game"] not in {"X", "Y", "OR", "AS", "SN", "MN", "US", "UM"}
+            or not re.fullmatch(r"[a-f0-9]{64}", record["sha256"])
+            or not record["parser_version"]
+            or not isinstance(payload, dict)
+            or payload.get("game") != record["game"]
+            or payload.get("trainer_id") != trainer_id
+            or payload.get("save_record_id") != trainer_id
+            or payload.get("source_hash") != record["sha256"]
+            or not isinstance(payload.get("boxes"), list)):
+            return None
+        boxes = [b for b in payload["boxes"] if isinstance(b, dict)
+                 and type(b.get("box_number")) is int and b["box_number"] == box_number]
+        if len(boxes) != 1 or not isinstance(boxes[0].get("slots"), list):
+            return None
+        slots = boxes[0]["slots"]
+        if (len(slots) != 30 or any(not isinstance(s, dict)
+            or type(s.get("slot_number")) is not int or "pokemon" not in s
+            or (s["pokemon"] is not None and (not isinstance(s["pokemon"], dict) or not s["pokemon"]))
+            for s in slots) or {s["slot_number"] for s in slots} != set(range(1, 31))):
+            return None
+        observed_at = datetime.fromisoformat(record["uploaded_at"])
+        if observed_at.tzinfo is None:
+            return None
+        return sum(s["pokemon"] is not None for s in slots), observed_at
+    except (KeyError, TypeError, ValueError):
+        return None
 
 
 def public_daily_standing(snapshot, standing):
@@ -115,6 +151,19 @@ class FrontendReads:
             row.league_save_status = (
                 "linked" if participant["current_save_file_id"] is not None else "unlinked"
             )
+            if (row.league_save_status == "unlinked" and row.status == "active"
+                and data.season.status in ("draft", "active") and row.dead_box_number is not None):
+                tid = str(row.trainer_id)
+                if not self.rows("trainers", "id", id=tid, globally_enabled=True):
+                    continue
+                personal = self.rows("trainer_personal_saves",
+                    "trainer_id,sha256,parser_version,game,payload,uploaded_at", trainer_id=tid)
+                if len(personal) > 1:
+                    raise PersistenceError("Ambiguous personal save")
+                seen = personal_dead_box_count(personal[0], tid, row.dead_box_number) if personal else None
+                if seen is not None:
+                    row.dead_count, row.dead_count_observed_at = seen
+                    row.dead_count_source = "observed_personal_save"
         return data
 
     def season(self, sid):

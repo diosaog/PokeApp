@@ -84,7 +84,7 @@ const open = () =>
   );
 function fill() {
   for (const [label, value] of [
-    ["Total de muertes históricas", "7"],
+    ["Muertos", "7"],
     ["Muertes revividas tras wipe", "5"],
     ["Muertes de la progresión actual", "6"],
     ["Motivo de la confirmación", "Revisión del tramo J2"],
@@ -101,15 +101,13 @@ it("never turns unknown counts or empty inputs into zero", () => {
   open();
   expect(screen.getByText("Desconocido")).toBeInTheDocument();
   for (const label of [
-    "Total de muertes históricas",
+    "Muertos",
     "Muertes revividas tras wipe",
     "Muertes de la progresión actual",
   ])
     expect(screen.getByLabelText(label)).toHaveValue(null);
   fireEvent.click(screen.getByLabelText(/He revisado la partida/));
-  fireEvent.submit(
-    screen.getByLabelText("Total de muertes históricas").closest("form")!,
-  );
+  fireEvent.submit(screen.getByLabelText("Muertos").closest("form")!);
   expect(mocks.execute).not.toHaveBeenCalled();
 });
 it("submits explicit counts and revival evidence bound to the reviewed source and revision", () => {
@@ -117,9 +115,7 @@ it("submits explicit counts and revival evidence bound to the reviewed source an
   open();
   fill();
   fireEvent.click(screen.getByLabelText(/Confirmo que Pikachu fue revivido/));
-  fireEvent.submit(
-    screen.getByLabelText("Total de muertes históricas").closest("form")!,
-  );
+  fireEvent.submit(screen.getByLabelText("Muertos").closest("form")!);
   expect(mocks.execute).toHaveBeenCalledWith(
     "/v1/admin/seasons/season/participants/player/death-history",
     {
@@ -144,17 +140,13 @@ it("blocks changed evidence until it is explicitly reviewed", () => {
   expect(
     screen.getByRole("button", { name: "Confirmar historial auditado" }),
   ).toBeDisabled();
-  fireEvent.submit(
-    screen.getByLabelText("Total de muertes históricas").closest("form")!,
-  );
+  fireEvent.submit(screen.getByLabelText("Muertos").closest("form")!);
   expect(mocks.execute).not.toHaveBeenCalled();
   fireEvent.click(
     screen.getByRole("button", { name: "Revisar evidencia actual" }),
   );
-  expect(screen.getByLabelText("Total de muertes históricas")).toHaveValue(7);
-  fireEvent.submit(
-    screen.getByLabelText("Total de muertes históricas").closest("form")!,
-  );
+  expect(screen.getByLabelText("Muertos")).toHaveValue(7);
+  fireEvent.submit(screen.getByLabelText("Muertos").closest("form")!);
   expect(mocks.execute.mock.lastCall![1]).toEqual(
     expect.objectContaining({
       expected_revision: 5,
@@ -169,7 +161,7 @@ it("does not allow reconciliation with incomplete source evidence", () => {
   expect(
     screen.getByRole("button", { name: "Confirmar historial auditado" }),
   ).toBeDisabled();
-  expect(screen.getByLabelText("Total de muertes históricas")).toBeDisabled();
+  expect(screen.getByLabelText("Muertos")).toBeDisabled();
 });
 
 it("does not substitute zero for an unavailable wipe counter or revision", () => {

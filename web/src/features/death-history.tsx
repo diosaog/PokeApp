@@ -64,7 +64,7 @@ function HistoryReview({
       {source && (
         <>
           <p>
-            Muertes históricas confirmadas:{" "}
+            Muertos confirmados:{" "}
             <strong>
               {source.known ? source.actual_deaths : "Desconocido"}
             </strong>
@@ -132,7 +132,7 @@ function HistoryReview({
             <fieldset
               disabled={busy || !canReconcile || !!stale || query.isFetching}
             >
-              <Field label="Total de muertes históricas">
+              <Field label="Muertos">
                 <input
                   name="actual"
                   type="number"

@@ -187,7 +187,7 @@ class LeagueStandingRead(BaseModel):
     points_source_matchday_id: UUID | None
     coin_balance: str = Field(pattern=r"^-?(0|[1-9][0-9]*)$")
     dead_count: int | None = Field(ge=0, le=30)
-    dead_count_source: Literal["observed_current_save", "unknown"]
+    dead_count_source: Literal["observed_current_save", "observed_personal_save", "unknown"]
     dead_count_observed_at: datetime | None
     # 070: total_points is the one total shown. In an active season it already
     # includes the current deaths and sanctions (the cumulative figures the

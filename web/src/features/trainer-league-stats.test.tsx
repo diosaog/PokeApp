@@ -14,65 +14,60 @@ const row = (extra: Partial<Model<"LeagueStandingRead">> = {}) => ({
   total_points: "-0.7",
   coin_balance: "3",
   points_source_matchday_id: null,
-  dead_count: 30,
+  dead_count: 3,
   dead_count_source: "observed_current_save" as const,
   dead_count_observed_at: null,
-  historical_deaths: null,
-  historical_deaths_status: "unknown" as const,
+  historical_deaths: 7,
+  historical_deaths_status: "known" as const,
   league_save_status: "linked" as const,
   ...extra,
 });
 
-const deaths = () =>
-  screen.getByText("Muertes históricas").closest(".stat-pill");
+const deaths = () => screen.getByText("Muertos").closest(".stat-pill");
 
-it("shows known totals above box capacity and confirmed zero without consulting occupancy", () => {
-  const view = render(
-    <TrainerLeagueStats
-      row={row({ historical_deaths: 37, historical_deaths_status: "known" })}
-    />,
-  );
-  expect(deaths()).toHaveTextContent("37");
-  view.rerender(
-    <TrainerLeagueStats
-      row={row({ historical_deaths: 0, historical_deaths_status: "known" })}
-    />,
-  );
+it("shows the configured-box count and a genuinely empty box as zero", () => {
+  const view = render(<TrainerLeagueStats row={row()} />);
+  expect(deaths()).toHaveTextContent("3");
+  view.rerender(<TrainerLeagueStats row={row({ dead_count: 0 })} />);
   expect(deaths()).toHaveTextContent("0");
 });
 
-it("does not present partial historical evidence as a confirmed total", () => {
+it("keeps an unreadable count unknown rather than manufacturing zero", () => {
   render(
     <TrainerLeagueStats
+      row={row({ dead_count: null, dead_count_source: "unknown" })}
+    />,
+  );
+  expect(deaths()).toHaveTextContent("\u2014");
+});
+
+it("shows a server-counted personal fallback with no explanatory paragraphs", () => {
+  const view = render(
+    <TrainerLeagueStats
       row={row({
-        historical_deaths: 7,
-        historical_deaths_status: "incomplete",
-        historical_deaths_source: "death_history_observation_gap",
+        league_save_status: "unlinked",
+        historical_deaths: null,
+        historical_deaths_status: "unknown",
       })}
     />,
   );
-  expect(deaths()).toHaveTextContent("—");
-  expect(
-    screen.getByText(/7 muertes registradas; total sin confirmar/),
-  ).toHaveTextContent(
-    "Hay un intervalo del historial sin evidencia suficiente.",
+  expect(deaths()).toHaveTextContent("3");
+  expect(screen.getByText("Puntos").closest(".stat-pill")).toHaveTextContent(
+    "-0,7",
   );
+  expect(screen.getByText("Monedas").closest(".stat-pill")).toHaveTextContent(
+    "3",
+  );
+  expect(view.container.querySelector("p")).toBeNull();
+  expect(
+    screen.queryByText(/historial|vinculada|premios|pendientes/i),
+  ).toBeNull();
 });
 
-it("leaves an unavailable League response unknown and never manufactures zero", () => {
+it("leaves an unavailable response unknown with only the three requested labels", () => {
   render(<TrainerLeagueStats />);
-  for (const pill of document.querySelectorAll(".stat-pill"))
-    expect(pill.querySelector("strong")).toHaveTextContent("—");
-  expect(screen.queryByText(/Falta confirmar/)).toBeNull();
-});
-
-it("does not mistake unavailable linkage evidence for an unlinked save", () => {
-  render(
-    <TrainerLeagueStats row={row({ league_save_status: "unavailable" })} />,
-  );
+  expect(screen.getAllByText("\u2014")).toHaveLength(3);
   expect(
-    screen.getByText(/No se ha podido comprobar la vinculación/),
-  ).toBeVisible();
-  expect(screen.queryByText(/Sin partida vinculada/)).toBeNull();
-  expect(deaths()).toHaveTextContent("—");
+    [...document.querySelectorAll(".stat-pill span")].map((p) => p.textContent),
+  ).toEqual(["Puntos", "Monedas", "Muertos"]);
 });

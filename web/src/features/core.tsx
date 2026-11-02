@@ -242,7 +242,7 @@ function LeagueDay({ dayId }: { dayId: string }) {
                             <small>
                               {s.net_points == null
                                 ? "puntos de jornada (histórico)"
-                                : "puntos netos de jornada"}
+                                : "puntos de jornada"}
                             </small>
                           </strong>
                         </Card>
@@ -367,7 +367,7 @@ export function LeagueGeneral({ data }: { data: Model<"LeagueGeneralRead"> }) {
   return (
     <Card className="league-table-card">
       <h2>Clasificación general</h2>
-      <p>La Liga se ordena por puntos netos acumulados.</p>
+      <p>La Liga se ordena por puntos acumulados.</p>
       {data.rows.some((row) => row.points_provisional) && (
         <p className="muted">
           Provisional: incluye los resultados y penalizaciones actuales. Los
@@ -383,8 +383,8 @@ export function LeagueGeneral({ data }: { data: Model<"LeagueGeneralRead"> }) {
           <thead>
             <tr>
               <th>Entrenador</th>
-              <th>Puntos netos</th>
-              <th>Muertes históricas</th>
+              <th>Puntos</th>
+              <th>Muertos</th>
               <th>Monedas</th>
             </tr>
           </thead>
@@ -408,13 +408,7 @@ export function LeagueGeneral({ data }: { data: Model<"LeagueGeneralRead"> }) {
                     ? "Pendiente de confirmar"
                     : points(row.total_points)}
                 </td>
-                <td>
-                  {row.historical_deaths == null
-                    ? "Desconocido"
-                    : row.historical_deaths_status === "known"
-                      ? row.historical_deaths
-                      : `${row.historical_deaths} · historial incompleto`}
-                </td>
+                <td>{row.dead_count ?? "—"}</td>
                 <td>{row.coin_balance}</td>
               </tr>
             ))}

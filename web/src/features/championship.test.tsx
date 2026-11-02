@@ -250,9 +250,7 @@ it("opens only the unresolved NET title popup with exactly two choices and histo
     screen.getByRole("columnheader", { name: "Muertes totales del Locke" }),
   ).toBeInTheDocument();
   expect(screen.queryByRole("cell", { name: "999" })).not.toBeInTheDocument();
-  expect(
-    popup.getByText("Primera fila: 3 muertes históricas"),
-  ).toBeInTheDocument();
+  expect(popup.getByText("Primera fila: 3 muertos")).toBeInTheDocument();
   expect(
     screen.queryByRole("button", { name: "Finalizar Liga" }),
   ).not.toBeInTheDocument();

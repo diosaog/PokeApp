@@ -69,7 +69,7 @@ it("shows one total with the deaths already subtracted, and no dates", () => {
   ).toBeNull();
   // Unknown stays unknown, never a false zero.
   const samu = screen.getByRole("row", { name: /Samu/ });
-  expect(within(samu).getAllByRole("cell")[2]).toHaveTextContent("Desconocido");
+  expect(within(samu).getAllByRole("cell")[2]).toHaveTextContent("\u2014");
   for (const gone of [
     /Provisional/,
     /se aplica al cerrar/,
@@ -89,7 +89,7 @@ it("formats totals in Spanish, negative ones included", () => {
   expect(points("9007199254740993.1")).toBe("9.007.199.254.740.993,1");
 });
 
-it("keeps general net ordering and historical deaths without showing wins or penalties", () => {
+it("keeps point ordering and current box counts without showing wins or penalties", () => {
   render(
     <MemoryRouter>
       <LeagueGeneral
@@ -118,7 +118,7 @@ it("keeps general net ordering and historical deaths without showing wins or pen
   expect(screen.getAllByRole("row")[1]).toHaveTextContent("B");
   expect(
     within(screen.getByRole("row", { name: /A/ })).getAllByRole("cell")[2],
-  ).toHaveTextContent("Desconocido");
+  ).toHaveTextContent("30");
 });
 
 it("displays actual segment deaths, exact deductions and separate 1v1/rewards in a frozen row", () => {
@@ -179,6 +179,6 @@ it("keeps unknown live net points pending even when an earlier official total ex
     "cell",
   );
   expect(cells[1]).toHaveTextContent("Pendiente de confirmar");
-  expect(cells[2]).toHaveTextContent("Desconocido");
+  expect(cells[2]).toHaveTextContent("2");
   expect(screen.getByText(/Provisional:/)).toBeInTheDocument();
 });

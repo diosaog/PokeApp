@@ -446,9 +446,9 @@ function Structure({ setup }: { setup: Setup }) {
             </div>
             <p>
               Todos contra todos en cada jornada: 1 punto por victoria y 0 por
-              derrota. Los puntos netos se calculan automáticamente, restando
-              0,1 por muerte y 0,2 por cada muerte revivida tras wipe, sin sumar
-              ambas penalizaciones. Se conservan las demás sanciones aplicables.
+              derrota. Los puntos se calculan automáticamente, restando 0,1 por
+              muerte y 0,2 por cada muerte revivida tras wipe, sin sumar ambas
+              penalizaciones. Se conservan las demás sanciones aplicables.
               Primero: Blindar Pokémon extra. Último: Robar Pokémon extra. Las
               monedas de jornada son iguales para todos. Cambiar la jornada
               consultada no modifica estas reglas.

@@ -142,7 +142,7 @@ export function errorText(error: unknown) {
     legacy_scoring_migration_required:
       "Esta temporada conserva un contrato de puntuación anterior. Adoptar las reglas nuevas requiere una corrección explícita y auditada; no se sobrescribirá su historial.",
     OWNER_DECISION_REQUIRED:
-      "Hay un empate exacto en los puntos netos finales. Falta definir la regla oficial para decidir el campeón; no se aplicará un desempate inventado.",
+      "Hay un empate exacto en los puntos finales. Falta definir la regla oficial para decidir el campeón; no se aplicará un desempate inventado.",
     ACCOUNTS_UNAVAILABLE:
       "La gestión de cuentas no está disponible en este momento.",
     ACCOUNT_CONFLICT:

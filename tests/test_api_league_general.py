@@ -56,6 +56,12 @@ class Store:
         return deepcopy(self.result)
 
     def rows(self, table, columns, *, filters, limit):
+        if table == "trainers":
+            assert filters == {"id": TRAINER_ID, "globally_enabled": True}
+            return [{"id": TRAINER_ID}] if getattr(self, "enabled", True) else []
+        if table == "trainer_personal_saves":
+            assert filters == {"trainer_id": TRAINER_ID}
+            return deepcopy(getattr(self, "personal", []))
         assert table == "season_players"
         assert filters == {"season_id": SID}
         return [dict(id=r["season_player_id"], trainer_id=r["trainer_id"],
@@ -134,6 +140,67 @@ class LeagueGeneralTests(unittest.TestCase):
             id=self.store.result["rows"][0]["season_player_id"],
             trainer_id=str(uuid4()), current_save_file_id=self.store.save_id)]
         self.assertEqual(self.get().status_code, 503)
+
+    def personal_box(self, occupied=3, box=7):
+        self.store.result["rows"][0].update(status="active", dead_box_number=box,
+            total_points=None, dead_count=None, dead_count_source="unknown")
+        self.store.personal = [dict(trainer_id=TRAINER_ID, game="Y", sha256="a" * 64,
+            parser_version="native-v2", uploaded_at="2026-11-02T18:00:00+00:00",
+            payload=dict(trainer_id=TRAINER_ID, save_record_id=TRAINER_ID,
+                game="Y", source_hash="a" * 64, boxes=[dict(box_number=box,
+                    slots=[dict(slot_number=i, pokemon={"species": "PRIVATE_POKEMON"}
+                                if i <= occupied else None) for i in range(1, 31)])]))]
+        return self.store.personal[0]
+
+    def test_personal_box_count_is_visible_without_promoting_competitive_evidence(self):
+        for occupied, box in [(3, 7), (0, 7), (2, 4)]:
+            with self.subTest(occupied=occupied, box=box):
+                self.personal_box(occupied, box)
+                response = self.get()
+                self.assertEqual(response.status_code, 200)
+                row = response.json()["rows"][0]
+                self.assertEqual(row["dead_count"], occupied)
+                self.assertEqual(row["dead_count_source"], "observed_personal_save")
+                self.assertIsNone(row["total_points"])
+                self.assertIsNone(row["historical_deaths"])
+                self.assertEqual(row["coin_balance"], "-4294967294")
+                self.assertEqual(row["league_save_status"], "unlinked")
+                self.assertNotIn("PRIVATE_POKEMON", response.text)
+                self.assertNotIn("a" * 64, response.text)
+
+    def test_personal_partial_foreign_and_invalid_boxes_do_not_invent_counts(self):
+        for case in ("foreign_owner", "foreign_payload", "wrong_hash", "wrong_game",
+                     "partial_box", "missing_box", "duplicate_slot", "duplicate_box", "invalid_pokemon"):
+            with self.subTest(case=case):
+                record = self.personal_box()
+                payload = record["payload"]
+                slots = payload["boxes"][0]["slots"]
+                if case == "foreign_owner": record["trainer_id"] = str(uuid4())
+                elif case == "foreign_payload": payload["trainer_id"] = str(uuid4())
+                elif case == "wrong_hash": payload["source_hash"] = "b" * 64
+                elif case == "wrong_game": payload["game"] = "X"
+                elif case == "partial_box": slots.pop()
+                elif case == "missing_box": payload["boxes"] = []
+                elif case == "duplicate_slot": slots[29]["slot_number"] = 1
+                elif case == "duplicate_box": payload["boxes"] *= 2
+                else: slots[0]["pokemon"] = "invalid"
+                row = self.get().json()["rows"][0]
+                self.assertIsNone(row["dead_count"])
+                self.assertEqual(row["dead_count_source"], "unknown")
+
+    def test_personal_preview_cannot_override_linked_or_ineligible_league_data(self):
+        self.personal_box()
+        self.store.save_id = str(uuid4())
+        self.store.result["rows"][0].update(dead_count=1, dead_count_source="observed_current_save")
+        self.assertEqual(self.get().json()["rows"][0]["dead_count"], 1)
+        del self.store.save_id
+        for case in ("disabled", "retired", "archived"):
+            with self.subTest(case=case):
+                self.personal_box()
+                self.store.enabled = case != "disabled"
+                self.store.result["rows"][0]["status"] = "retired" if case == "retired" else "active"
+                self.store.result["season"]["status"] = "archived" if case == "archived" else "active"
+                self.assertIsNone(self.get().json()["rows"][0]["dead_count"])
 
     def test_single_rpc_for_all_players_preserves_server_order(self):
         rows = self.store.result["rows"]

@@ -31,7 +31,7 @@ const labels: Record<Championship["state"], string> = {
 
 const unresolvedReasons: Record<string, string> = {
   league_net_championship_tie_rule_required:
-    "Hay un empate exacto en los puntos netos finales. La regla para decidir el campeón aún no está definida; no se aplicarán automáticamente muertes, victorias ni un Mejor de 3.",
+    "Hay un empate exacto en los puntos finales. La regla para decidir el campeón aún no está definida; no se aplicarán automáticamente muertes, victorias ni un Mejor de 3.",
   championship_deaths_unavailable:
     "Faltan muertes oficiales fiables para comparar a los líderes empatados. No se puede asignar un campeón con datos desconocidos.",
 };
@@ -141,7 +141,7 @@ export function ChampionshipReview({
         <p>
           {data.state === "battle_required"
             ? "Las muertes totales del Locke también están empatadas. Hace falta registrar los combates de desempate."
-            : "Hay un empate en el primer puesto por puntos NETOS acumulados."}{" "}
+            : "Hay un empate en el primer puesto por puntos acumulados."}{" "}
           El campeón sigue provisional hasta que Administración confirme el
           desempate.
         </p>
@@ -405,8 +405,8 @@ function ChampionshipTiebreak({
       }}
     >
       <p>
-        Esta decisión solo resuelve el título final. Conserva los puntos NETOS,
-        las victorias, las muertes oficiales y los premios de las jornadas.
+        Esta decisión solo resuelve el título final. Conserva los puntos, las
+        victorias, las muertes oficiales y los premios de las jornadas.
       </p>
       <fieldset disabled={disabled}>
         <legend>Método de desempate</legend>
@@ -422,8 +422,8 @@ function ChampionshipTiebreak({
           Muertes totales del Locke
         </label>
         <p className="muted">
-          Opción preferida: compara cada muerte histórica una sola vez,
-          incluidas las de Pokémon revividos con comodines o tras wipes.
+          Opción preferida: compara cada muerte una sola vez, incluidas las de
+          Pokémon revividos con comodines o tras wipes.
         </p>
         <label>
           <input
@@ -451,8 +451,7 @@ function ChampionshipTiebreak({
           {candidates.map((player) => (
             <li key={player.season_player_id}>
               {player.display_name}:{" "}
-              {player.actual_deaths ?? "sin evidencia oficial"} muertes
-              históricas
+              {player.actual_deaths ?? "sin evidencia oficial"} muertos
             </li>
           ))}
         </ul>

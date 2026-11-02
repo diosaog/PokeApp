@@ -206,16 +206,18 @@ it("without a season the own profile still ends with the settings", () => {
 function expectLeagueStats(container: HTMLElement, deathTotal: string) {
   const field = (name: string) =>
     within(container).getByText(name).closest(".stat-pill")!;
-  expect(field("Muertes históricas")).toHaveTextContent(deathTotal);
+  expect(field("Muertos")).toHaveTextContent(deathTotal);
   expect(field("Monedas")).toHaveTextContent("4");
-  expect(field("Puntos netos")).toHaveTextContent("-0,6");
+  expect(field("Puntos")).toHaveTextContent("-0,6");
   expect(
-    within(container).getByText(/Liga seleccionada: puntos netos/),
-  ).toBeVisible();
+    within(container).queryByText(
+      /Liga seleccionada|Falta confirmar|no acreditan/,
+    ),
+  ).toBeNull();
 }
 
 it.each([true, false])(
-  "cards and profile agree on historical deaths and ledger balance (accounts=%s)",
+  "cards and profile agree on configured-box deaths and ledger balance (accounts=%s)",
   (accountsEnabled) => {
     mocks.accountsEnabled = accountsEnabled;
     render(
@@ -226,20 +228,17 @@ it.each([true, false])(
     const card = screen
       .getByRole("heading", { name: "Yo" })
       .closest("article")!;
-    expectLeagueStats(card, "6");
+    expectLeagueStats(card, "3");
     expect(
-      within(card).getByText("Partida activa · progreso personal"),
-    ).toBeVisible();
-    expect(
-      within(card).getByText(/no acreditan por sí solas premios/),
-    ).toBeVisible();
+      within(card).queryByText(/Partida activa|progreso personal|no acreditan/),
+    ).toBeNull();
     cleanup();
     profile("me");
-    expectLeagueStats(document.querySelector(".profile-identity")!, "6");
+    expectLeagueStats(document.querySelector(".profile-identity")!, "3");
   },
 );
 
-it("does not turn current occupied dead slots or personal progress into a historical total", () => {
+it("shows the observed box count even when the historical baseline is pending", () => {
   mocks.historyKnown = false;
   render(
     <MemoryRouter>
@@ -248,29 +247,30 @@ it("does not turn current occupied dead slots or personal progress into a histor
   );
   const card = screen.getByRole("heading", { name: "Yo" }).closest("article")!;
   expect(
-    within(card).getByText("Muertes históricas").closest(".stat-pill"),
-  ).toHaveTextContent("—");
+    within(card).getByText("Muertos").closest(".stat-pill"),
+  ).toHaveTextContent("3");
   expect(
-    within(card).getByText(/Falta confirmar el historial de muertes/),
-  ).toBeVisible();
+    within(card).getByText("Puntos").closest(".stat-pill"),
+  ).toHaveTextContent("\u2014");
   expect(
-    within(card).getByText("Puntos netos pendientes de confirmar."),
-  ).toBeVisible();
+    within(card).queryByText(/Falta confirmar|pendientes|Liga seleccionada/),
+  ).toBeNull();
   cleanup();
   profile("rival");
   const identity = document.querySelector<HTMLElement>(".profile-identity")!;
   expect(
-    within(identity).getByText("Muertes históricas").closest(".stat-pill"),
-  ).toHaveTextContent("—");
+    within(identity).getByText("Muertos").closest(".stat-pill"),
+  ).toHaveTextContent("3");
   expect(
-    within(identity).getByText(/Falta confirmar el historial de muertes/),
-  ).toBeVisible();
-  expect(screen.getByText(/Partida personal sincronizada/)).toBeVisible();
+    within(identity).queryByText(
+      /Falta confirmar|pendientes|Liga seleccionada/,
+    ),
+  ).toBeNull();
   expect(screen.queryByRole("button", { name: "Editar mi perfil" })).toBeNull();
   expect(screen.queryByText("Inventario")).toBeNull();
 });
 
-it("gives the same actionable missing League linkage on cards and a public personal preview", () => {
+it("shows a validated personal fallback without linking disclaimers or a public mutation", () => {
   mocks.historyKnown = false;
   mocks.linked = false;
   render(
@@ -282,15 +282,19 @@ it("gives the same actionable missing League linkage on cards and a public perso
     .getByRole("heading", { name: "Rival" })
     .closest("article")!;
   expect(
-    within(card).getByText(/Sin partida vinculada a esta Liga/),
-  ).toHaveTextContent("desde su propio Launcher");
+    within(card).getByText("Muertos").closest(".stat-pill"),
+  ).toHaveTextContent("3");
+  expect(
+    within(card).queryByText(/Sin partida vinculada|premios ni muertes/),
+  ).toBeNull();
   cleanup();
   profile("rival");
+  const identity = document.querySelector<HTMLElement>(".profile-identity")!;
   expect(
-    screen.getByText(/Sin partida vinculada a esta Liga/),
-  ).toHaveTextContent(
-    "el progreso personal no acredita premios ni muertes de Liga",
-  );
-  expect(screen.getByText(/Partida personal sincronizada/)).toBeVisible();
+    within(identity).getByText("Muertos").closest(".stat-pill"),
+  ).toHaveTextContent("3");
+  expect(
+    within(identity).queryByText(/Sin partida vinculada|premios ni muertes/),
+  ).toBeNull();
   expect(screen.queryByRole("button", { name: /vincular/i })).toBeNull();
 });

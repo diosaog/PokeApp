@@ -4167,7 +4167,8 @@ export interface components {
        * Dead Count Source
        * @enum {string}
        */
-      dead_count_source: "observed_current_save" | "unknown";
+      dead_count_source:
+        "observed_current_save" | "observed_personal_save" | "unknown";
       /** Dead Count Observed At */
       dead_count_observed_at: string | null;
       /** Official Points */
