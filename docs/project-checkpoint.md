@@ -5,11 +5,12 @@ milestone record; it does not maintain a second live phase-status ledger.
 
 ## Current project position
 
-- Final championship tiebreak /076 (2026-11-02): **IMPLEMENTED; RELEASE IN PROGRESS.**
+- Final championship tiebreak /076 (2026-11-02): **PUBLISHED / VERIFIED.**
   Explicit admin popup: actual total deaths (default) or recorded1v1. Pending
   equal-death/multiway cases never invent a champion; authenticated/audited/
   idempotent, existing NET/death/day-reward facts unchanged. 78backend/54React
   and isolated SQL/concurrency/backup-upgrade gates PASS; Launcher0.26.10 retained.
+  Source45ef745, Supabase076, API4f1ad76c SUCCESS, webe4243599 active100%.
   [Authoritative live record](work-in-progress/final-corrections-live.md).
 
 - Launcher 0.26.10 / owner inventory correction (2026-11-02): **PUBLISHED / VERIFIED.**

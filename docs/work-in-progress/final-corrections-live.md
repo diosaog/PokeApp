@@ -2,7 +2,7 @@
 
 ## Final championship tiebreak popup / 076 - 2026-11-02
 
-**IMPLEMENTED / AUTOMATED ACCEPTANCE AND MIGRATION REHEARSAL PASS; RELEASE IN PROGRESS.**
+**PUBLISHED / VERIFIED. NO REMAINING PUBLICATION BLOCKERS.**
 Branch `codex/championship-tiebreak-076`, based on `4244ca8` (not the older owner
 reference01164f5). Baseline production: DB075, API9fb35778, webe9a8967b,
 Launcher0.26.10. No Launcher rebuild is required.
@@ -35,7 +35,18 @@ Launcher0.26.10. No Launcher rebuild is required.
 Machine-readable evidence: `docs/evidence/championship-tiebreak-076.json`;
 private evidence `%LOCALAPPDATA%/PokeApp-migration-evidence/championship-076/`.
 The previously undefined title rule is now implemented. Historical releases below
-remain dated records. Production publication identifiers will follow on closure.
+remain dated records. Published DB -> API -> web from committed source **`45ef745`**.
+Production migration **076 / `20261102180220`** applied once; RPC execute remains
+backend-only and the unique final-winner guard is present.
+Railway **`4f1ad76c-2c57-459f-9d70-84fbae3d2416` SUCCESS**, **307** deployed Python
+files match committed source; final image/runtime gates and health PASS;
+126 OpenAPI paths include the new two-method authenticated admin contract,
+anonymous review returns401. Image digest
+`sha256:8688a2de3f4c60498d84699438e42042f12d9704adcffddbaed8ab1089079f55`.
+Cloudflare **`e4243599-45e4-49e1-9f78-435145a69517` active100%**; all **18** public
+asset hashes match the tested build. Launcher **0.26.10** installer/feed unchanged,
+no rebuild or native change. Temporary readback registration/generated keys removed;
+fixture clusters stopped/retained. No real save, purchase or title was used for tests.
 
 
 ## Launcher 0.26.10 and requested inventory correction - 2026-11-02

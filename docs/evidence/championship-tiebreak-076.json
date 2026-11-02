@@ -1,5 +1,5 @@
 {
-  "status": "READY_FOR_PUBLICATION",
+  "status": "PUBLISHED_VERIFIED",
   "date": "2026-11-02",
   "source_base": "4244ca8",
   "migration": "076_final_championship_tiebreak.sql",
@@ -26,8 +26,26 @@
     "existing_application_tables_unchanged": 101
   },
   "rehearsal": "PASS; upgraded catalog equals fresh001-076; existing rows and browser privileges preserved",
-  "launcher": "0.26.10 unchanged",
+  "launcher": "0.26.10 unchanged; no rebuild, signed feed/installer unchanged",
   "real_save_writes": false,
   "real_test_purchases_or_title_decisions": false,
-  "evidence_root": "%LOCALAPPDATA%/PokeApp-migration-evidence/championship-076/"
+  "evidence_root": "%LOCALAPPDATA%/PokeApp-migration-evidence/championship-076/",
+  "source_commit": "45ef745530ef0183b6c8cd601dc3a6fb70795744",
+  "verified_at_utc": "2026-11-02T18:08:27.451872+00:00",
+  "migration_version": "20261102180220",
+  "api": {
+    "deployment_id": "4f1ad76c-2c57-459f-9d70-84fbae3d2416",
+    "status": "SUCCESS",
+    "deployed_python_files_exact": 307,
+    "openapi_paths": 126,
+    "anonymous_admin_review_status": 401,
+    "image_digest": "sha256:8688a2de3f4c60498d84699438e42042f12d9704adcffddbaed8ab1089079f55"
+  },
+  "web": {
+    "version_id": "e4243599-45e4-49e1-9f78-435145a69517",
+    "active_percent": 100,
+    "public_files_exact": 18
+  },
+  "temporary_readback_key_removed": true,
+  "publication_blockers": []
 }
