@@ -1,7 +1,7 @@
 from typing import Annotated, Literal
 from uuid import UUID
 
-from pydantic import BaseModel, Field, field_validator
+from pydantic import AwareDatetime, BaseModel, Field, field_validator, model_validator
 from app.api.season_admin_models import StrictBody, Revision, Reason
 
 
@@ -37,6 +37,7 @@ class CloseDayBody(StrictBody):
 
 class ParticipantCloseDayBody(StrictBody):
     expected_results_revision: Revision
+    tie_resolution: "TieResolution | None" = None
 
 
 class CorrectDayBody(StrictBody):
@@ -84,9 +85,30 @@ class DayState(BaseModel):
     matches: list[DayMatch]
 
 
+class TieBattle(StrictBody):
+    """An extra ranking battle, never a normal League match or a point award."""
+
+    player_a_id: UUID
+    player_b_id: UUID
+    winner_id: UUID
+    played_at: AwareDatetime
+    evidence: Reason
+
+    @model_validator(mode="after")
+    def valid_participants(self):
+        if self.player_a_id == self.player_b_id or self.winner_id not in (
+            self.player_a_id, self.player_b_id
+        ):
+            raise ValueError("Invalid tiebreak battle outcome")
+        return self
+
+
 class TieOrder(StrictBody):
     player_ids: Annotated[list[UUID], Field(min_length=2, max_length=500)]
     reason: Reason
+    # None preserves historical receipt bodies. New scoring requires played,
+    # auditable extra battles; an administrative order alone is insufficient.
+    battles: Annotated[list[TieBattle], Field(min_length=1, max_length=1000)] | None = None
 
     @field_validator("player_ids")
     @classmethod
@@ -94,6 +116,13 @@ class TieOrder(StrictBody):
         if len(set(value)) != len(value):
             raise ValueError("Duplicate participant in resolution")
         return value
+
+    @field_validator("battles")
+    @classmethod
+    def canonical_battles(cls, value):
+        if value is None:
+            return value
+        return sorted(value, key=lambda b: sorted((str(b.player_a_id), str(b.player_b_id))))
 
 
 class TieResolution(StrictBody):
@@ -119,14 +148,16 @@ class TieGroup(BaseModel):
     position_end: Annotated[int, Field(gt=0)]
     wins: Annotated[int, Field(ge=0)]
     adjusted_deaths: Annotated[int, Field(ge=0)]
+    segment_deaths: Annotated[int, Field(ge=0)] | None = None
     consequences: list[
-        Literal["points", "coins", "podium", "movement", "last_b_reward", "single_league_prize"]
+        Literal["points", "coins", "podium", "movement", "last_b_reward", "single_league_prize", "matchday_prize"]
     ]
 
 
 class RankingReview(BaseModel):
     input_hash: Annotated[str, Field(pattern=r"^[a-f0-9]{64}$")]
     groups: Annotated[list[TieGroup], Field(max_length=250)]
+    ranking_rule: Literal["wins_adjusted_deaths_v1", "wins_segment_deaths_v2"] | None = None
 
 
 class RankingErrorDetail(BaseModel):
@@ -141,3 +172,4 @@ class RankingErrorResponse(BaseModel):
 
 CloseDayBody.model_rebuild()
 CorrectDayBody.model_rebuild()
+ParticipantCloseDayBody.model_rebuild()

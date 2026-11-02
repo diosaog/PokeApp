@@ -2,12 +2,14 @@
 
 from datetime import datetime
 from decimal import Decimal
-from typing import Literal
+from typing import Annotated, Literal
 from uuid import UUID
 
 from pydantic import BaseModel, Field
 from app.api.cup_models import CupSide
 from app.api.progress_models import ProgressRead
+
+ExactDecimalText = Annotated[Decimal, Field(allow_inf_nan=False)]
 
 
 class SeasonRead(BaseModel):
@@ -124,6 +126,12 @@ class StandingRead(BaseModel):
     score: Decimal
     position_end: int | None = Field(default=None, ge=1)
     tie_status: Literal["unique", "externally_resolved", "unresolved_neutral"] | None = None
+    actual_segment_deaths: int | None = Field(default=None, ge=0)
+    wins: int | None = Field(default=None, ge=0)
+    losses: int | None = Field(default=None, ge=0)
+    point_penalties: Decimal | None = Field(default=None, allow_inf_nan=False)
+    net_points: Decimal | None = Field(default=None, allow_inf_nan=False)
+    placement_rewards: list[str] | None = None
 
 
 class SnapshotRead(BaseModel):
@@ -142,6 +150,20 @@ class PointsRead(BaseModel):
     source_matchday_id: UUID
 
 
+class ProvisionalStandingRead(StandingRead):
+    # Unknown or contested placements remain null; closed StandingRead keeps
+    # its stricter historical contract.
+    position: int | None = Field(default=None, ge=1)
+    division_position: int | None = Field(default=None, ge=1)
+    score: Decimal | None = Field(default=None, allow_inf_nan=False)
+
+
+class MatchdayScoreRead(BaseModel):
+    matchday_id: UUID
+    standings: list[ProvisionalStandingRead]
+    provisional: bool = True
+
+
 class OverviewRead(BaseModel):
     season: SeasonRead
     players: list[PlayerRead]
@@ -153,6 +175,7 @@ class OverviewRead(BaseModel):
     points: list[PointsRead]
     locks: list[LockRead]
     balance: str | None = Field(pattern=r"^-?(0|[1-9][0-9]*)$")
+    matchday_scores: list[MatchdayScoreRead] = Field(default_factory=list)
 
 
 class LeagueStandingRead(BaseModel):
@@ -160,7 +183,7 @@ class LeagueStandingRead(BaseModel):
     trainer_id: UUID
     display_name: str
     status: str
-    total_points: Decimal = Field(allow_inf_nan=False)
+    total_points: ExactDecimalText | None
     points_source_matchday_id: UUID | None
     coin_balance: str = Field(pattern=r"^-?(0|[1-9][0-9]*)$")
     dead_count: int | None = Field(ge=0, le=30)
@@ -172,6 +195,12 @@ class LeagueStandingRead(BaseModel):
     official_points: Decimal | None = Field(default=None, allow_inf_nan=False)
     # The participant's dead box (default 8), set by an administrator.
     dead_box_number: int | None = Field(default=None, ge=1, le=32)
+    normal_wins: int | None = Field(default=None, ge=0)
+    total_penalties: Decimal | None = Field(default=None, allow_inf_nan=False)
+    historical_deaths: int | None = Field(default=None, ge=0)
+    historical_deaths_status: Literal["known", "unknown", "incomplete"] | None = None
+    historical_deaths_source: str | None = None
+    points_provisional: bool | None = None
 
 
 class LeagueGeneralRead(BaseModel):

@@ -14,6 +14,16 @@ RPCS = {
     "prepare": "api_admin_prepare_first_matchday", "activate": "api_admin_activate_season",
     "dead_box": "api_admin_set_dead_box",
 }
+DEATH_HISTORY_REJECTIONS = {
+    **dict.fromkeys(("death_history_source_unavailable", "death_history_revision_conflict",
+        "death_history_source_changed", "death_history_inconsistent", "death_history_closed",
+        "death_history_baseline_required", "death_history_confirmation_required",
+        "death_history_dead_box_changed", "death_history_observation_gap",
+        "death_history_segment_frozen", "death_history_start_unproven",
+        "death_history_unmapped_revival", "death_history_wipe_reconciliation_required",
+        "death_history_wipe_state_unavailable"), 409),
+    "death_history_evidence_required": 422,
+}
 REJECTIONS = {
     **dict.fromkeys(("trainer_disabled", "admin_required"), 403),
     **dict.fromkeys(("season_not_found", "participant_not_found", "config_not_found"), 404),
@@ -27,6 +37,8 @@ REJECTIONS = {
         "initial_assignment_locked", "initial_assignment_review_stale", "stale_inputs",
         "initial_boundary_tie_unresolved", "invalid_tie_resolution"), 409),
     "invalid_request": 422,
+    **DEATH_HISTORY_REJECTIONS,
+    **dict.fromkeys(("legacy_scoring_migration_required", "league_common_coins_required"), 409),
 }
 
 
@@ -50,6 +62,11 @@ class SupabaseSeasonAdminRepository:
         return cls(create_client(url, service_role_key))
 
     def execute(self, operation: str, request: dict) -> dict:
+        if operation in ("death_history_state", "death_history_reconcile"):
+            return self._rpc("api_admin_death_history", dict(
+                operation="state" if operation == "death_history_state" else "reconcile",
+                request=request,
+            ))
         if operation in ("initial_state", "initial_finalize"):
             envelope = dict(operation="read" if operation == "initial_state" else "finalize", request=request)
             context = self._rpc("initial_assignment_context", envelope)

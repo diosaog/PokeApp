@@ -91,6 +91,10 @@ it("offers no fabricated champion or finalization for unresolved title", () => {
 });
 it.each([
   ["championship_deaths_unavailable", /Faltan muertes oficiales fiables/],
+  [
+    "league_net_championship_tie_rule_required",
+    /La regla para decidir el campeón aún no está definida/,
+  ],
 ])(
   "explains %s without inventing an Admin resolution or ranking",
   (reason, message) => {

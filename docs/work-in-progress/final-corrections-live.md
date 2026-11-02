@@ -1,5 +1,46 @@
 # Final corrections — live execution record
 
+## Final League NET / death history - 2026-11-02
+
+**IMPLEMENTED / ACCEPTANCE AND MIGRATION REHEARSAL PASS; RELEASE IN PROGRESS.**
+Branch `codex/league-net-deaths-075`, based on `0327291`. Production verified
+before release: Supabase074, Railway657dcd97, Cloudflare6664ab72, Launcher0.26.9;
+no closed snapshots and no active season. Only DB/API/web are to be published.
+
+- New prospective `league_net_v1`: every matchday global round robin, +1 per
+  normal win; no position points. Decimal-exact accumulated NET subtracts only
+  the latest cumulative death/sanction deductions. Day contribution uses deltas.
+  Divisions/movements and existing reward purchase/voucher pipeline retained.
+- Every day pays the configured common coins, first Blindar / last Robar once.
+  Daily ranking is wins then actual frozen segment deaths. Consequential ties
+  require explicit played 1v1 results, time and evidence; no extra win points.
+- Four private structures retain event identity/cycles, audited baseline and
+  reconciliation, and immutable per-player opening snapshots. Actual history
+  is separate from wipe adjustments: penalty tenths = actual deaths + applicable
+  wipe deaths. Ordinary revivals never erase/count another death. Box settings,
+  accepted source hashes, chain gaps, counter revisions and phase boundaries
+  are checked; unknown evidence blocks opening instead of becoming zero.
+- Existing closed scoring contracts/corrections stay frozen. Mixed legacy/new
+  continuation requires an explicit rule migration, never automatic rewriting.
+  Exact final NET ties deliberately require an owner rule; old BO3/death fallback
+  cannot decide a new title. Initial history confirmation is an audited admin
+  action in Entrenadores, never inferred from current dead-box occupancy alone.
+- PASS: **181 Python checks**, **68 React checks** and web build; actual SQL
+  five players/four days, two divisions, J1=1/J2=6/GENERAL=7, normal/wipe
+  revivals, source replay, missing data, corrections, failure atomicity, 1v1
+  evidence, old history and simultaneous closes. 12-2.0 loses to 11-0.5.
+- Fresh production backup **119 tables** restored exactly; 075 applies once as
+  non-superuser, **97 existing application tables** keep byte-identical rows,
+  compatible reads/privileges unchanged and upgraded catalog equals 001-075.
+  Migration SHA256 `da86fc0100961c36aacdddd2a831470b95b042e093eb720217887bb4ab24ca81`.
+  Machine-readable evidence: `docs/evidence/league-net-075.json`; detailed
+  private evidence at `%LOCALAPPDATA%/PokeApp-migration-evidence/league-075/`.
+
+No real save or purchase was used. Launcher/native writer, migration074 and
+hosting/update distribution are unchanged. Publication identifiers follow below
+when verification completes.
+
+
 ## PokeApp 0.26.9 - published and verified, 2026-11-01
 
 **RELEASE CLOSED / NO REMAINING RELEASE BLOCKERS.** This entry supersedes the

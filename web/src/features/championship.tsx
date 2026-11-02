@@ -28,6 +28,8 @@ const labels: Record<Championship["state"], string> = {
 };
 
 const unresolvedReasons: Record<string, string> = {
+  league_net_championship_tie_rule_required:
+    "Hay un empate exacto en los puntos netos finales. La regla para decidir el campeón aún no está definida; no se aplicarán automáticamente muertes, victorias ni un Mejor de 3.",
   championship_deaths_unavailable:
     "Faltan muertes oficiales fiables para comparar a los líderes empatados. No se puede asignar un campeón con datos desconocidos.",
 };

@@ -13,6 +13,20 @@ const response = (data: unknown, status = 200) =>
   });
 afterEach(() => vi.unstubAllGlobals());
 describe("API transport", () => {
+  it("explains missing historical evidence and stale confirmations without inventing zero counts", () => {
+    expect(
+      errorText(new ApiError(409, "DEATH_HISTORY_BASELINE_REQUIRED")),
+    ).toContain("Historial de muertes");
+    expect(
+      errorText(new ApiError(409, "death_history_source_unavailable")),
+    ).toContain("no cuenta como cero");
+    expect(
+      errorText(new ApiError(409, "death_history_source_changed")),
+    ).toContain("evidencia actual");
+    expect(
+      errorText(new ApiError(409, "legacy_scoring_migration_required")),
+    ).toContain("contrato de puntuación anterior");
+  });
   it("preserves the single-day prize tie review from a 409 response", async () => {
     const ranking = {
       input_hash: "a".repeat(64),

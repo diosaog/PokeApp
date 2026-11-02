@@ -32,6 +32,7 @@ import {
 } from "./admin-labels";
 import { IncidentCenter } from "./admin-incidents";
 import { AdminAccountsPage } from "./admin-accounts";
+import { DeathHistory } from "./death-history";
 
 type Setup = Model<"SeasonSetup">;
 function AdminLink(props: ComponentProps<typeof Link>) {
@@ -157,7 +158,10 @@ function Participants({ setup }: { setup: Setup }) {
       </div>
       {!target && <CommandState command={cmd} />}
       {["draft", "active"].includes(setup.season.status) && (
-        <DeadBoxes setup={setup} />
+        <>
+          <DeadBoxes setup={setup} />
+          <DeathHistory setup={setup} />
+        </>
       )}
       {target && (
         <Modal

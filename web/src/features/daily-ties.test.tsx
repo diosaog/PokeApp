@@ -1,8 +1,8 @@
-import { cleanup, render, screen } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, expect, it, vi } from "vitest";
 import { ApiClient, ApiError } from "../api/client";
 import type { Model } from "../api/types";
-import { DailyTieFields, tieReview } from "./daily-ties";
+import { DailyTieFields, readTieResolution, tieReview } from "./daily-ties";
 
 afterEach(() => {
   cleanup();
@@ -56,16 +56,14 @@ it("renders the last-place prize tie from a raw API 409 through the browser pars
   };
   vi.stubGlobal(
     "fetch",
-    vi
-      .fn()
-      .mockResolvedValue(
-        new Response(
-          JSON.stringify({
-            detail: { code: "RANKING_TIE_UNRESOLVED", ranking },
-          }),
-          { status: 409, headers: { "Content-Type": "application/json" } },
-        ),
+    vi.fn().mockResolvedValue(
+      new Response(
+        JSON.stringify({
+          detail: { code: "RANKING_TIE_UNRESOLVED", ranking },
+        }),
+        { status: 409, headers: { "Content-Type": "application/json" } },
       ),
+    ),
   );
   const client = new ApiClient("https://api.example");
   const error = await client
@@ -80,4 +78,133 @@ it("renders the last-place prize tie from a raw API 409 through the browser pars
   );
   expect(screen.getByLabelText("Posición 4 · liga")).toBeRequired();
   expect(screen.getByLabelText("Posición 5 · liga")).toBeRequired();
+});
+
+it("requires actual 1v1 outcomes with time and evidence for the new global prize tie", () => {
+  const current: Model<"RankingReview"> = {
+    ...review,
+    ranking_rule: "wins_segment_deaths_v2",
+    groups: [
+      {
+        ...review.groups[0],
+        segment_deaths: 5,
+        adjusted_deaths: 10,
+        consequences: ["matchday_prize"],
+      },
+    ],
+  };
+  render(
+    <form data-testid="form">
+      <DailyTieFields review={current} name={name} single />
+    </form>,
+  );
+  expect(
+    screen.getByRole("heading", { name: "Registrar desempates 1v1" }),
+  ).toBeInTheDocument();
+  expect(screen.getByText(/muertes de progresión/)).toHaveTextContent(
+    "5 muertes de progresión",
+  );
+  expect(screen.queryByText(/10 muertes/)).not.toBeInTheDocument();
+  fireEvent.change(screen.getByLabelText("Posición 1 · liga"), {
+    target: { value: "p1" },
+  });
+  fireEvent.change(screen.getByLabelText("Posición 2 · liga"), {
+    target: { value: "p2" },
+  });
+  fireEvent.change(screen.getByLabelText(/Motivo del desempate/), {
+    target: { value: "Resultado del desempate" },
+  });
+  const winner = screen.getByLabelText("Ganador 1v1 · Lucía / Mario");
+  expect(winner).toBeRequired();
+  fireEvent.change(winner, { target: { value: "p1" } });
+  fireEvent.change(screen.getByLabelText("Fecha del 1v1 · Lucía / Mario"), {
+    target: { value: "2026-11-01T15:30" },
+  });
+  fireEvent.change(screen.getByLabelText("Evidencia del 1v1 · Lucía / Mario"), {
+    target: { value: "Repetición del combate 42" },
+  });
+  expect(
+    readTieResolution(
+      new FormData(screen.getByTestId("form") as HTMLFormElement),
+      current,
+    ),
+  ).toEqual({
+    input_hash: "h",
+    orders: [
+      {
+        player_ids: ["p1", "p2"],
+        reason: "Resultado del desempate",
+        battles: [
+          {
+            player_a_id: "p1",
+            player_b_id: "p2",
+            winner_id: "p1",
+            played_at: new Date("2026-11-01T15:30").toISOString(),
+            evidence: "Repetición del combate 42",
+          },
+        ],
+      },
+    ],
+  });
+});
+
+it("keeps the actual-death criterion and required prize consequence through the browser parser", async () => {
+  const current = {
+    ...review,
+    input_hash: "b".repeat(64),
+    ranking_rule: "wins_segment_deaths_v2",
+    groups: [
+      {
+        ...review.groups[0],
+        segment_deaths: 3,
+        consequences: ["matchday_prize"],
+      },
+    ],
+  };
+  vi.stubGlobal(
+    "fetch",
+    vi.fn().mockResolvedValue(
+      new Response(
+        JSON.stringify({
+          detail: { code: "RANKING_TIE_UNRESOLVED", ranking: current },
+        }),
+        { status: 409, headers: { "Content-Type": "application/json" } },
+      ),
+    ),
+  );
+  const error = await new ApiClient("https://api.example")
+    .command("/close", {}, "key")
+    .catch((failure: unknown) => failure);
+  expect(tieReview(error)).toEqual(current);
+});
+
+it("accepts the nullable added fields on historical API tie reviews", async () => {
+  const historical = {
+    ...review,
+    input_hash: "c".repeat(64),
+    ranking_rule: null,
+    groups: [{ ...review.groups[0], segment_deaths: null }],
+  };
+  vi.stubGlobal(
+    "fetch",
+    vi
+      .fn()
+      .mockResolvedValue(
+        new Response(
+          JSON.stringify({
+            detail: { code: "RANKING_TIE_UNRESOLVED", ranking: historical },
+          }),
+          { status: 409, headers: { "Content-Type": "application/json" } },
+        ),
+      ),
+  );
+  const error = await new ApiClient("https://api.example")
+    .command("/close", {}, "key")
+    .catch((failure: unknown) => failure);
+  expect(tieReview(error)).toEqual(historical);
+  render(<DailyTieFields review={tieReview(error)} name={name} />);
+  expect(screen.queryByLabelText(/Ganador 1v1/)).not.toBeInTheDocument();
+  expect(
+    screen.getByRole("heading", { name: "Registrar decisión externa" }),
+  ).toBeInTheDocument();
 });

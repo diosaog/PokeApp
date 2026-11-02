@@ -1,8 +1,9 @@
 import { useState, useEffect } from "react";
 import type { Model } from "../api/types";
 import { useApp, useRead } from "../state";
-import { Card, CommandState, Modal, Notice, useCommand } from "../ui";
+import { Card, CommandState, Modal, Notice, form, useCommand } from "../ui";
 import { ChampionshipReview } from "./championship";
+import { DailyTieFields, readTieResolution, tieReview } from "./daily-ties";
 
 export function LeagueOperations({
   data,
@@ -22,7 +23,15 @@ export function LeagueOperations({
   }, [eligible, day?.status]);
   return (
     <>
-      <DayOperations season={data.season.id} day={day} eligible={eligible} />
+      <DayOperations
+        season={data.season.id}
+        day={day}
+        eligible={eligible}
+        name={(id) =>
+          data.rows.find((row) => row.season_player_id === id)?.display_name ??
+          "Participante"
+        }
+      />
       {review && (
         <ChampionshipReview participant seasonName={data.season.name} />
       )}
@@ -33,10 +42,12 @@ function DayOperations({
   season,
   day,
   eligible,
+  name,
 }: {
   season: string;
   day?: Model<"DayRead">;
   eligible: boolean;
+  name: (id: string) => string;
 }) {
   const base = `/v1/seasons/${season}/matchdays/${day?.id}`,
     query = useRead<Model<"DayState">>(
@@ -69,6 +80,7 @@ function DayOperations({
     (intent.op !== op || intent.revision !== revision || intent.base !== base);
   const busy = cmd.pending || cmd.uncertain || query.isFetching;
   const label = op === "open" ? "Abrir jornada" : "Cerrar jornada";
+  const review = tieReview(cmd.error);
   if (!eligible && !intent && !cmd.uncertain) return null;
   return (
     <Card>
@@ -93,7 +105,7 @@ function DayOperations({
         >
           <p>
             {intent.op === "open"
-              ? "Los participantes podrán registrar los combates de esta jornada."
+              ? "Se fijarán las muertes de la progresión con las partidas sincronizadas. Después los participantes podrán registrar los combates de esta jornada. Si falta evidencia, la apertura quedará bloqueada."
               : "Se guardará la clasificación oficial y se concederán sus premios."}
           </p>
           {stale && (
@@ -101,23 +113,34 @@ function DayOperations({
               La jornada cambió. Revisa su estado antes de confirmar.
             </p>
           )}
-          <button
-            className="button primary"
-            disabled={busy || !!stale}
-            onClick={async () => {
+          <form
+            onSubmit={async (event) => {
+              const values = form(event);
+              if (busy || stale) return;
+              const resolution = readTieResolution(values, review);
               if (
                 await cmd.execute(
                   `${intent.base}/${intent.op}`,
                   intent.op === "open"
                     ? { expected_revision: intent.revision }
-                    : { expected_results_revision: intent.revision },
+                    : {
+                        expected_results_revision: intent.revision,
+                        ...(resolution ? { tie_resolution: resolution } : {}),
+                      },
                 )
               )
                 setIntent(null);
             }}
           >
-            Confirmar
-          </button>
+            <fieldset disabled={busy || !!stale}>
+              {intent.op === "close" && (
+                <DailyTieFields review={review} name={name} single />
+              )}
+              <button className="button primary" disabled={busy || !!stale}>
+                Confirmar
+              </button>
+            </fieldset>
+          </form>
           <CommandState command={cmd} />
         </Modal>
       )}

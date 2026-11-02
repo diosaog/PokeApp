@@ -8,12 +8,18 @@ const rankingCodes = new Set([
 
 function rankingReview(value: unknown): Model<"RankingReview"> | undefined {
   if (!value || typeof value !== "object") return;
-  const { input_hash, groups } = value as Record<string, unknown>;
+  const { input_hash, groups, ranking_rule } = value as Record<string, unknown>;
   if (
     typeof input_hash !== "string" ||
     !/^[a-f0-9]{64}$/.test(input_hash) ||
     !Array.isArray(groups) ||
-    groups.length > 250
+    groups.length > 250 ||
+    (ranking_rule != null &&
+      ![
+        "wins_adjusted_deaths_v1",
+        "wins_segment_deaths_v2",
+        "legacy_pre_10_5d",
+      ].includes(String(ranking_rule)))
   )
     return;
   const allowed = new Set([
@@ -23,6 +29,7 @@ function rankingReview(value: unknown): Model<"RankingReview"> | undefined {
     "movement",
     "last_b_reward",
     "single_league_prize",
+    "matchday_prize",
   ]);
   const clean: Model<"TieGroup">[] = [];
   for (const group of groups) {
@@ -34,6 +41,7 @@ function rankingReview(value: unknown): Model<"RankingReview"> | undefined {
       position_end,
       wins,
       adjusted_deaths,
+      segment_deaths,
       consequences,
     } = group;
     if (
@@ -50,6 +58,9 @@ function rankingReview(value: unknown): Model<"RankingReview"> | undefined {
       position_end < position ||
       wins < 0 ||
       adjusted_deaths < 0 ||
+      (segment_deaths != null &&
+        (!Number.isSafeInteger(segment_deaths) || segment_deaths < 0)) ||
+      (ranking_rule === "wins_segment_deaths_v2" && segment_deaths == null) ||
       !Array.isArray(consequences) ||
       consequences.some((effect: unknown) => !allowed.has(String(effect)))
     )
@@ -61,10 +72,17 @@ function rankingReview(value: unknown): Model<"RankingReview"> | undefined {
       position_end,
       wins,
       adjusted_deaths,
+      ...(segment_deaths !== undefined ? { segment_deaths } : {}),
       consequences: [...consequences],
     });
   }
-  return { input_hash, groups: clean };
+  return {
+    input_hash,
+    groups: clean,
+    ...(ranking_rule !== undefined
+      ? { ranking_rule: ranking_rule as Model<"RankingReview">["ranking_rule"] }
+      : {}),
+  };
 }
 
 export class ApiError extends Error {
@@ -93,6 +111,38 @@ export function errorText(error: unknown) {
   if (!(error instanceof ApiError))
     return "No se pudo conectar. Comprueba la conexión y vuelve a intentarlo.";
   const adminErrors: Record<string, string> = {
+    death_history_baseline_required:
+      "Falta confirmar el historial de muertes. Administración debe revisar los recuentos y su evidencia en Entrenadores → Historial de muertes antes de abrir la jornada.",
+    death_history_source_unavailable:
+      "Falta una partida completa y válida del participante. Sincronízala y vuelve a revisar el historial; la ausencia de datos no cuenta como cero muertes.",
+    death_history_source_changed:
+      "La partida sincronizada cambió. Revisa la evidencia actual antes de confirmar el historial.",
+    death_history_observation_gap:
+      "Hay un intervalo del historial sin evidencia suficiente. Administración debe reconciliar las muertes antes de continuar.",
+    death_history_dead_box_changed:
+      "La caja de muertos cambió. Revisa el historial con la caja actual antes de abrir la jornada.",
+    death_history_wipe_reconciliation_required:
+      "El contador de revividos tras wipe cambió. Confirma las muertes reales y su penalización en Historial de muertes.",
+    death_history_wipe_state_unavailable:
+      "No se puede verificar el contador de revividos tras wipe. Administración debe reparar su registro antes de confirmar el historial; no se supondrá un cero.",
+    death_history_unmapped_revival:
+      "Existe un revivir histórico sin identidad de Pokémon suficiente. Administración debe reconciliarlo con evidencia antes de continuar.",
+    death_history_revision_conflict:
+      "El historial cambió. Actualiza y revisa sus recuentos antes de volver a confirmar.",
+    death_history_inconsistent:
+      "Los recuentos no coinciden con la evidencia. Revisa el total histórico, las muertes del tramo y el contador de wipe actual.",
+    death_history_segment_frozen:
+      "Las muertes de este tramo ya quedaron fijadas al abrir la jornada. Una partida posterior no puede reescribirlas.",
+    death_history_start_unproven:
+      "No hay evidencia fiable de la primera apertura de esta jornada histórica. Se necesita una resolución auditada; no se inventará un recuento de cero.",
+    death_history_evidence_required:
+      "Introduce recuentos explícitos, un motivo y evidencia del historial y del tramo de progresión.",
+    death_history_closed:
+      "Esta temporada ya está cerrada y conserva su historial oficial.",
+    legacy_scoring_migration_required:
+      "Esta temporada conserva un contrato de puntuación anterior. Adoptar las reglas nuevas requiere una corrección explícita y auditada; no se sobrescribirá su historial.",
+    OWNER_DECISION_REQUIRED:
+      "Hay un empate exacto en los puntos netos finales. Falta definir la regla oficial para decidir el campeón; no se aplicará un desempate inventado.",
     ACCOUNTS_UNAVAILABLE:
       "La gestión de cuentas no está disponible en este momento.",
     ACCOUNT_CONFLICT:
@@ -234,15 +284,16 @@ export function errorText(error: unknown) {
     PENDING_RETRY_REQUIRED:
       "Primero confirma el resultado de la solicitud pendiente con «Reintentar la misma solicitud».",
   };
-  if (adminErrors[error.code]) return adminErrors[error.code];
+  if (adminErrors[error.code] || adminErrors[error.code.toLowerCase()])
+    return adminErrors[error.code] ?? adminErrors[error.code.toLowerCase()];
   if (error.code === "POKEMON_REVIVE_PENDING")
     return "Ya has usado un revivir para esta muerte. El save todavía no muestra a este Pokémon vivo.";
   if (error.code === "RANKING_TIE_UNRESOLVED")
-    return "Hay un empate que afecta al reparto de posiciones o recompensas. Registra la decisión externa antes de continuar.";
+    return "Hay un empate que afecta a posiciones o recompensas. Registra el desempate aplicable y, en la Liga actual, los resultados reales de los combates extra 1v1 antes de continuar.";
   if (error.code === "RANKING_REVIEW_STALE")
     return "Los datos del empate han cambiado. Revisa los grupos actuales y registra de nuevo la decisión.";
   if (error.code === "INVALID_TIE_RESOLUTION")
-    return "Revisa el orden y el motivo de cada empate pendiente.";
+    return "Revisa el orden y el motivo de cada empate pendiente, y los resultados 1v1 con fecha y evidencia cuando sean necesarios.";
   if (error.code === "INITIAL_ASSIGNMENT_REVIEW_STALE")
     return "El progreso o las muertes han cambiado. Revisa el reparto actualizado y registra de nuevo cualquier decisión pendiente.";
   if (error.code === "INITIAL_BOUNDARY_TIE_UNRESOLVED")

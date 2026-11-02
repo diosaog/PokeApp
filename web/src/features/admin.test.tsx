@@ -315,9 +315,9 @@ function fourPlayerDraft() {
   mocks.setup.config_versions[0].scoring = { "1": 4, "2": 2, "3": 1, "4": 0 };
   mocks.setup.config_versions[0].coin_rewards = {
     "1": 4,
-    "2": 2,
-    "3": 1,
-    "4": 0,
+    "2": 4,
+    "3": 4,
+    "4": 4,
   };
 }
 
@@ -392,7 +392,7 @@ it("requires explicit common coins for a single-day round robin and shows its wi
   expect(
     screen.queryByLabelText("Monedas por posición"),
   ).not.toBeInTheDocument();
-  expect(screen.getByText(/2 puntos por victoria/)).toHaveTextContent(
+  expect(screen.getByText(/1 punto por victoria/)).toHaveTextContent(
     "Primero: Blindar Pokémon extra. Último: Robar Pokémon extra.",
   );
   fireEvent.submit(common.closest("form")!);
@@ -450,7 +450,7 @@ function fivePlayerDraft() {
   });
 }
 
-it("shows empty rewards as empty and rejects missing, extra or noninteger positions", () => {
+it("requires an explicit common reward and never exposes positional editing", () => {
   fivePlayerDraft();
   mocks.setup.config_versions = [];
   render(page());
@@ -459,65 +459,82 @@ it("shows empty rewards as empty and rejects missing, extra or noninteger positi
   fireEvent.change(screen.getByLabelText("Total de jornadas"), {
     target: { value: "4" },
   });
-  const points = screen.getByLabelText("Puntos por posición");
-  const coins = screen.getByLabelText("Monedas por posición");
-  expect(points).toHaveValue("");
-  expect(points).not.toHaveAttribute("placeholder", "10,8,6,4");
-  fireEvent.change(coins, { target: { value: "5,4,3,2,0" } });
-  for (const value of [
-    "",
-    "10,8,6,4",
-    "10,8,6,4,2,0",
-    "10,8,6,4,",
-    "10,8,6,4,-1",
-    "10,8,6,4,1.5",
-  ]) {
-    fireEvent.change(points, { target: { value } });
-    fireEvent.submit(points.closest("form")!);
+  const coins = screen.getByLabelText(
+    "Monedas de jornada para cada participante",
+  );
+  expect(coins).toHaveValue(null);
+  expect(
+    screen.queryByLabelText("Puntos por posición"),
+  ).not.toBeInTheDocument();
+  expect(
+    screen.queryByLabelText("Monedas por posición"),
+  ).not.toBeInTheDocument();
+  for (const value of ["", "-1", "1.5", "2147483648"]) {
+    fireEvent.change(coins, { target: { value } });
+    fireEvent.submit(coins.closest("form")!);
     expect(mocks.execute).not.toHaveBeenCalled();
   }
-  fireEvent.change(points, { target: { value: "10, 8, 6, 4, 0" } });
-  fireEvent.submit(points.closest("form")!);
+  fireEvent.change(coins, { target: { value: "0" } });
+  fireEvent.submit(coins.closest("form")!);
   expect(mocks.execute).toHaveBeenCalledOnce();
-  expect(mocks.execute.mock.lastCall![0]).toBe(
-    "/v1/admin/seasons/season/config-versions",
-  );
+  expect(mocks.execute.mock.lastCall![1].coin_rewards).toEqual({
+    "1": 0,
+    "2": 0,
+    "3": 0,
+    "4": 0,
+    "5": 0,
+  });
 });
 
-it("requires five actual positional values for five players when changing 1 to 4 days", () => {
+it("uses the same automatic scoring and equal coins for five players over 1/2/3/4/more days", () => {
   fivePlayerDraft();
   render(page());
   tab("Configuración");
-  fireEvent.change(screen.getByLabelText("Total de jornadas"), {
-    target: { value: "4" },
-  });
-  fireEvent.change(screen.getByLabelText("Reparto de monedas"), {
-    target: { value: "position" },
-  });
-  const points = screen.getByLabelText("Puntos por posición");
-  const coins = screen.getByLabelText("Monedas por posición");
-  expect(points).toHaveValue("0,0,0,0,0");
-  expect(coins).toHaveValue("9,9,9,9,9");
-  fireEvent.change(points, { target: { value: "10,8,6,4" } });
-  fireEvent.change(coins, { target: { value: "10,8,6,4" } });
-  fireEvent.submit(points.closest("form")!);
-  expect(mocks.execute).not.toHaveBeenCalled();
-  expect(screen.getByRole("alert")).toHaveTextContent("5 valores");
-  fireEvent.change(points, { target: { value: "10,8,6,4,2" } });
-  fireEvent.change(coins, { target: { value: "50,40,30,20,0" } });
-  fireEvent.submit(points.closest("form")!);
-  expect(mocks.execute.mock.calls[0][1]).toEqual(
-    expect.objectContaining({
-      total_matchdays: 4,
-      division_sizes: { A: 5 },
-      movement_count: 0,
-      scoring: { "1": 10, "2": 8, "3": 6, "4": 4, "5": 2 },
-      coin_rewards: { "1": 50, "2": 40, "3": 30, "4": 20, "5": 0 },
-    }),
+  const total = screen.getByLabelText("Total de jornadas");
+  fireEvent.change(
+    screen.getByLabelText("Monedas de jornada para cada participante"),
+    { target: { value: "17" } },
+  );
+  for (const days of [1, 2, 3, 4, 9]) {
+    fireEvent.change(total, { target: { value: String(days) } });
+    fireEvent.submit(total.closest("form")!);
+    expect(mocks.execute.mock.lastCall![1]).toEqual(
+      expect.objectContaining({
+        total_matchdays: days,
+        division_sizes: { A: 5 },
+        scoring: { "1": 0, "2": 0, "3": 0, "4": 0, "5": 0 },
+        coin_rewards: { "1": 17, "2": 17, "3": 17, "4": 17, "5": 17 },
+      }),
+    );
+    expect(
+      screen.queryByLabelText("Puntos por posición"),
+    ).not.toBeInTheDocument();
+  }
+  expect(screen.getByText(/1 punto por victoria/)).toHaveTextContent(
+    /0,1 por muerte y 0,2/,
   );
 });
 
-it("preserves separate one-day and positional edits across 1/2/3/4 switches and reloads saved values", () => {
+it("does not guess a common coin reward from a legacy positional map", () => {
+  fivePlayerDraft();
+  mocks.setup.config_versions[0].coin_rewards = {
+    "1": 50,
+    "2": 40,
+    "3": 30,
+    "4": 20,
+    "5": 0,
+  };
+  render(page());
+  tab("Configuración");
+  const common = screen.getByLabelText(
+    "Monedas de jornada para cada participante",
+  );
+  expect(common).toHaveValue(null);
+  fireEvent.submit(common.closest("form")!);
+  expect(mocks.execute).not.toHaveBeenCalled();
+});
+
+it("preserves equal coins, team lock and participant settings across day switches and saved reload", () => {
   fivePlayerDraft();
   const view = render(page());
   tab("Configuración");
@@ -526,62 +543,40 @@ it("preserves separate one-day and positional edits across 1/2/3/4 switches and 
     screen.getByLabelText("Monedas de jornada para cada participante"),
     { target: { value: "17" } },
   );
-  fireEvent.change(total(), { target: { value: "4" } });
-  fireEvent.change(screen.getByLabelText("Reparto de monedas"), {
-    target: { value: "position" },
-  });
-  fireEvent.change(screen.getByLabelText("Puntos por posición"), {
-    target: { value: "10,8,6,4,2" },
-  });
-  fireEvent.change(screen.getByLabelText("Monedas por posición"), {
-    target: { value: "50,40,30,20,0" },
-  });
-  for (const days of [1, 2, 1, 3, 1, 4]) {
+  fireEvent.click(screen.getByLabelText("Avisar si falta Team Lock"));
+  for (const days of [4, 1, 3, 2, 4])
     fireEvent.change(total(), { target: { value: String(days) } });
-    if (days === 1) {
-      expect(
-        screen.getByLabelText("Monedas de jornada para cada participante"),
-      ).toHaveValue(17);
-      fireEvent.submit(total().closest("form")!);
-      expect(mocks.execute.mock.lastCall![1].coin_rewards).toEqual({
-        "1": 17,
-        "2": 17,
-        "3": 17,
-        "4": 17,
-        "5": 17,
-      });
-    } else {
-      expect(screen.getByLabelText("Puntos por posición")).toHaveValue(
-        "10,8,6,4,2",
-      );
-      expect(screen.getByLabelText("Monedas por posición")).toHaveValue(
-        "50,40,30,20,0",
-      );
-    }
-  }
+  mocks.overview = {
+    ...mocks.overview,
+    days: [{ id: "other", number: 4, status: "open" }],
+  };
+  view.rerender(page());
+  expect(
+    screen.getByLabelText("Monedas de jornada para cada participante"),
+  ).toHaveValue(17);
+  expect(screen.getByLabelText("Avisar si falta Team Lock")).not.toBeChecked();
   fireEvent.submit(total().closest("form")!);
   const body = mocks.execute.mock.lastCall![1];
+  expect(body.rules).toEqual(
+    expect.objectContaining({
+      team_lock_required: false,
+      badge_reward_coins: 0,
+      game_completion_reward_coins: 20,
+    }),
+  );
   mocks.setup = {
     ...mocks.setup,
     config_revision: 4,
-    config_versions: [
-      {
-        ...mocks.setup.config_versions[0],
-        ...body,
-      },
-    ],
+    config_versions: [{ ...mocks.setup.config_versions[0], ...body }],
   };
   view.rerender(page());
   fireEvent.click(
     screen.getByRole("button", { name: "Revisar formato actual" }),
   );
   expect(total()).toHaveValue(4);
-  expect(screen.getByLabelText("Puntos por posición")).toHaveValue(
-    "10,8,6,4,2",
-  );
-  expect(screen.getByLabelText("Monedas por posición")).toHaveValue(
-    "50,40,30,20,0",
-  );
+  expect(
+    screen.getByLabelText("Monedas de jornada para cada participante"),
+  ).toHaveValue(17);
   fireEvent.submit(total().closest("form")!);
   expect(mocks.execute.mock.lastCall![1].expected_config_revision).toBe(4);
 });
@@ -741,62 +736,4 @@ it("sets one participant's dead box with an audited PUT", () => {
   fireEvent.change(input, { target: { value: "33" } });
   fireEvent.submit(input.closest("form")!);
   expect(mocks.execute).toHaveBeenCalledTimes(1);
-});
-
-it("keeps configured equal coins through one/four days and preserves positional edits in a one-day save", () => {
-  fivePlayerDraft();
-  const view = render(page());
-  tab("Configuración");
-  fireEvent.change(
-    screen.getByLabelText("Monedas de jornada para cada participante"),
-    { target: { value: "17" } },
-  );
-  fireEvent.change(screen.getByLabelText("Total de jornadas"), {
-    target: { value: "4" },
-  });
-  expect(screen.getByLabelText("Reparto de monedas")).toHaveValue("equal");
-  expect(
-    screen.queryByLabelText("Monedas por posici?n"),
-  ).not.toBeInTheDocument();
-  fireEvent.change(screen.getByLabelText("Puntos por posición"), {
-    target: { value: "10,8,6,4,2" },
-  });
-  // Looking at another current matchday must not reset this season-wide form.
-  mocks.overview = {
-    ...mocks.overview,
-    days: [{ id: "other", number: 4, status: "open" }],
-  };
-  view.rerender(page());
-  fireEvent.submit(screen.getByLabelText("Total de jornadas").closest("form")!);
-  expect(mocks.execute.mock.lastCall![1].coin_rewards).toEqual({
-    "1": 17,
-    "2": 17,
-    "3": 17,
-    "4": 17,
-    "5": 17,
-  });
-  fireEvent.change(screen.getByLabelText("Total de jornadas"), {
-    target: { value: "1" },
-  });
-  fireEvent.submit(screen.getByLabelText("Total de jornadas").closest("form")!);
-  const body = mocks.execute.mock.lastCall![1];
-  expect(body.scoring).toEqual({ "1": 10, "2": 8, "3": 6, "4": 4, "5": 2 });
-  mocks.setup = {
-    ...mocks.setup,
-    config_revision: 4,
-    config_versions: [{ ...mocks.setup.config_versions[0], ...body }],
-  };
-  view.rerender(page());
-  fireEvent.click(
-    screen.getByRole("button", { name: "Revisar formato actual" }),
-  );
-  fireEvent.change(screen.getByLabelText("Total de jornadas"), {
-    target: { value: "4" },
-  });
-  expect(screen.getByLabelText("Puntos por posición")).toHaveValue(
-    "10,8,6,4,2",
-  );
-  expect(
-    screen.getByLabelText("Monedas de jornada para cada participante"),
-  ).toHaveValue(17);
 });

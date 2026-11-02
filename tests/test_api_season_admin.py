@@ -177,7 +177,8 @@ class SeasonAdminApiTests(unittest.TestCase):
         # Phase 29 adds the cancellation of a reversible robbery: 44.
         # 069 adds the season cancellation preview and the account detail,
         # session revocation, personal-save unlink and deletion: 49.
-        self.assertEqual(len(routes), 50)
+        # 075 adds authenticated history review and audited reconciliation.
+        self.assertEqual(len(routes), 52)
         for path, method in routes:
             self.assertIn("security", schema["paths"][path][method])
 

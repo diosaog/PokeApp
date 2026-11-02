@@ -22,6 +22,7 @@ ERRORS = {
             "correction_window_closed",
             "stale_inputs",
             "reward_item_unavailable",
+            "ranking_tie_unresolved",
         ),
         409,
     ),

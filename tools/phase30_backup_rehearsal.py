@@ -235,12 +235,16 @@ def reads(pg: SupabaseLikePG) -> dict[str, str]:
     # The League read is compared in two parts: the official rows without the
     # live figures 069/070 add (always identical), and the live figures of the
     # active season (070: one total and the participant's dead box).
+    # 075 adds explicit historical/NET facts and provisional matchday rows.
+    # Their correctness is checked by actual-RPC 075 fixtures below; the
+    # unchanged fields and every existing table fingerprint must still match.
     added = ("array['provisional_matchday_number','provisional_dead_count','provisional_points_reduction',"
-             "'provisional_points','official_points','dead_box_number']")
+             "'provisional_points','official_points','dead_box_number','normal_wins','total_penalties',"
+             "'historical_deaths','historical_deaths_status','historical_deaths_source','points_provisional']")
     live = "array['total_points','dead_count','dead_count_source','dead_count_observed_at']"
     for s in seasons:
         calls[f"league_general_read {s}"] = (
-            f"select md5((select jsonb_set(r,'{{rows}}',coalesce((select jsonb_agg(x-{added}-{live}"
+            f"select md5((select jsonb_set(r-'scoring_contract'-'matchday_scores','{{rows}}',coalesce((select jsonb_agg(x-{added}-{live}"
             f" order by x->>'season_player_id') from jsonb_array_elements(r->'rows') x),'[]'::jsonb))"
             f" from (select public.league_general_read('{s}') r) q)::text)"
         )
@@ -440,6 +444,16 @@ def rehearse(args) -> dict:
                 from tools.validate_phase074_training import validate as validate_074
 
                 report["phase074"] = validate_074(pg)
+            if migration.name.startswith("075_"):
+                from tools.validate_phase075_deaths import validate as validate_deaths
+                from tools.validate_phase075_league import validate as validate_league, validate_two_divisions, validate_legacy
+                from tools.validate_phase075_guards import validate as validate_guards
+
+                report["phase075_deaths"] = validate_deaths(pg)
+                report["phase075_league"] = validate_league(pg)
+                report["phase075_divisions"] = validate_two_divisions(pg)
+                report["phase075_legacy"] = validate_legacy(pg)
+                report["phase075_guards"] = validate_guards(pg)
 
         rows_after = local_fingerprints(pg, public_tables)
         # 072 adds the private item_deliveries table, its commands and the

@@ -32,9 +32,10 @@ MIGRATIONS = sorted((ROOT / "supabase/v2/migrations").glob("*.sql"))
 # 070 (each participant's dead box, one live League total), 071 (the shop is
 # open in the preseason); 072 (in-game Shop objects delivered to the bag once,
 # audited refunds) and 073 (prospective League scoring) are deployed.
-# 074 adds coordinated virtual Nature/IV training without changing existing rows.
-DEPLOYED = [m for m in MIGRATIONS if int(m.name[:3]) <= 73]
-PENDING = [m for m in MIGRATIONS if int(m.name[:3]) == 74]
+# 074 virtual Nature/IV training is deployed; 075 adds prospective NET League
+# scoring and auditable death history without rewriting existing rows.
+DEPLOYED = [m for m in MIGRATIONS if int(m.name[:3]) <= 74]
+PENDING = [m for m in MIGRATIONS if int(m.name[:3]) == 75]
 WINDOW = f"{PENDING[0].name[:3]}-{PENDING[-1].name[:3]}"
 SCHEMAS = "('public','v1_shadow')"
 

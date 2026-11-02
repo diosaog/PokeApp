@@ -37,7 +37,7 @@ def public_daily_standing(snapshot, standing):
     rule = ranking.get("rule")
     if rule == "legacy_pre_10_5d":
         return result
-    if rule != "wins_adjusted_deaths_v1":
+    if rule not in ("wins_adjusted_deaths_v1", "wins_segment_deaths_v2"):
         raise PersistenceError("Unsupported official ranking")
     metadata = standing.get("metadata")
     if not isinstance(metadata, dict) or metadata.get("ranking_rule") != rule:
@@ -62,6 +62,11 @@ def public_daily_standing(snapshot, standing):
     ):
         raise PersistenceError("Invalid official sporting position")
     result.update(position_end=end, tie_status=status)
+    if rule == "wins_segment_deaths_v2":
+        for name in ("actual_segment_deaths", "wins", "losses", "point_penalties", "net_points", "placement_rewards"):
+            if name not in metadata:
+                raise PersistenceError("Missing official League scoring breakdown")
+            result[name] = metadata[name]
     return result
 
 
@@ -158,6 +163,12 @@ class FrontendReads:
                 public_daily_standing(snapshot, s) for s in snapshot["standings"]
             ]
             snapshots.append(r)
+        # The existing aggregate RPC carries the current matchday's provisional
+        # scoring. Historical rows still come only from their frozen snapshots.
+        league_reader = getattr(self.repo, "league_general", None)
+        league = league_reader(sid) if callable(league_reader) else None
+        if league is not None and (not isinstance(league, dict) or str(league.get("season", {}).get("id")) != sid):
+            raise PersistenceError("Invalid provisional League scope")
         return OverviewRead(
             season=season,
             players=players,
@@ -185,6 +196,7 @@ class FrontendReads:
                 season_id=sid,
             ),
             balance=self.balance(sid, tid),
+            matchday_scores=league.get("matchday_scores", []) if league else [],
         )
 
     def progress(self, sid, tid):

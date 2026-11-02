@@ -15,6 +15,7 @@ from app.api.season_admin_models import (
 from app.repositories.errors import PersistenceError
 from app.repositories.supabase.season_admin import SeasonAdminRejected
 from app.api.season_admin_models import LiveRulesBody, LiveRulesRead
+from app.api.death_history_models import DeathHistoryBody, DeathHistoryRead
 
 router = APIRouter(prefix="/v1/admin", tags=["season administration"])
 Admin = Annotated[AuthenticatedPrincipal, Depends(require_admin_principal)]
@@ -38,17 +39,23 @@ def _execute(op, principal, container, payload=None, season_id=None, resource_id
     for name, value in (("season_id", season_id), ("resource_id", resource_id), ("idempotency_key", key)):
         if value is not None:
             request[name] = str(value)
+    if op == "death_history_state":
+        request["body"] = {}
     try:
         if repo is None:
             raise PersistenceError("Missing backend")
         raw = repo.execute(op, request)
-        model = SeasonSetup if op == "setup" else LiveRulesRead if op == "live_rules_read" else AdminReceipt
+        model = (SeasonSetup if op == "setup" else LiveRulesRead if op == "live_rules_read"
+                 else DeathHistoryRead if op in ("death_history_state", "death_history_reconcile")
+                 else AdminReceipt)
         result = model.model_validate(raw)
         actual_season = result.season.id if op == "setup" else result.season_id
         if season_id is not None and str(actual_season) != str(season_id):
             raise ValueError("Mismatched scope")
         if op in ("replace_config", "remove_participant", "dead_box") and str(result.resource_id) != str(resource_id):
             raise ValueError("Mismatched resource")
+        if op in ("death_history_state", "death_history_reconcile") and str(result.season_player_id) != str(resource_id):
+            raise ValueError("Mismatched participant")
         return result
     except SeasonAdminRejected as exc:
         raise api_error(exc.status, exc.code, "Season setup operation rejected.") from exc
@@ -96,6 +103,18 @@ def remove_participant(season_id: UUID, season_player_id: UUID, payload: RemoveP
 def set_dead_box(season_id: UUID, season_player_id: UUID, payload: DeadBoxBody,
                  idempotency_key: Key, principal: Admin, container: Container):
     return _execute("dead_box", principal, container, payload, season_id, season_player_id, idempotency_key)
+
+
+@router.get("/seasons/{season_id}/participants/{season_player_id}/death-history", response_model=DeathHistoryRead)
+def death_history(season_id: UUID, season_player_id: UUID, principal: Admin, container: Container):
+    return _execute("death_history_state", principal, container, season_id=season_id, resource_id=season_player_id)
+
+
+@router.put("/seasons/{season_id}/participants/{season_player_id}/death-history", response_model=DeathHistoryRead)
+def reconcile_death_history(season_id: UUID, season_player_id: UUID, payload: DeathHistoryBody,
+                            idempotency_key: Key, principal: Admin, container: Container):
+    return _execute("death_history_reconcile", principal, container, payload, season_id,
+                    season_player_id, idempotency_key)
 
 
 @router.post("/seasons/{season_id}/config-versions", response_model=AdminReceipt)

@@ -1,7 +1,7 @@
 import { cleanup, render, screen, within } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 import { afterEach, expect, it, vi } from "vitest";
-import { LeagueGeneral, points } from "./core";
+import { DayStandingCells, LeagueGeneral, points } from "./core";
 vi.mock("../state", () => ({}));
 afterEach(cleanup);
 
@@ -18,6 +18,11 @@ const row = (extra: Record<string, unknown> = {}) => ({
   dead_count_source: "observed_current_save" as const,
   dead_count_observed_at: "2026-10-29T10:35:23Z",
   dead_box_number: 7,
+  normal_wins: 0,
+  total_penalties: "0.4",
+  historical_deaths: 2,
+  historical_deaths_status: "known",
+  points_provisional: false,
   ...extra,
 });
 
@@ -44,6 +49,9 @@ it("shows one total with the deaths already subtracted, and no dates", () => {
             dead_count: null,
             dead_count_source: "unknown",
             dead_count_observed_at: null,
+            historical_deaths: null,
+            historical_deaths_status: "unknown",
+            total_penalties: "0",
           }),
         ])}
       />
@@ -54,10 +62,10 @@ it("shows one total with the deaths already subtracted, and no dates", () => {
     within(anto)
       .getAllByRole("cell")
       .map((c) => c.textContent),
-  ).toEqual(["Anto", "-0,4", "32", "2"]);
+  ).toEqual(["Anto", "0", "−0,4", "-0,4", "2", "32"]);
   // Unknown stays unknown, never a false zero.
   const samu = screen.getByRole("row", { name: /Samu/ });
-  expect(within(samu).getAllByRole("cell")[3]).toHaveTextContent("Desconocido");
+  expect(within(samu).getAllByRole("cell")[4]).toHaveTextContent("Desconocido");
   for (const gone of [
     /Provisional/,
     /se aplica al cerrar/,
@@ -73,4 +81,100 @@ it("formats totals in Spanish, negative ones included", () => {
   expect(points("-2.3")).toBe("-2,3");
   expect(points("0.7")).toBe("0,7");
   expect(points("12")).toBe("12");
+  expect(points("10.25")).toBe("10,25");
+  expect(points("9007199254740993.1")).toBe("9.007.199.254.740.993,1");
+});
+
+it("shows wins separately from net points and does not reinterpret occupied dead slots as history", () => {
+  render(
+    <MemoryRouter>
+      <LeagueGeneral
+        data={league([
+          row({
+            display_name: "B",
+            normal_wins: 11,
+            total_penalties: "0.5",
+            total_points: "10.5",
+            historical_deaths: 5,
+          }),
+          row({
+            season_player_id: "a",
+            display_name: "A",
+            normal_wins: 12,
+            total_penalties: "2",
+            total_points: "10",
+            dead_count: 30,
+            historical_deaths: null,
+            historical_deaths_status: "unknown",
+          }),
+        ])}
+      />
+    </MemoryRouter>,
+  );
+  expect(screen.getAllByRole("row")[1]).toHaveTextContent("B");
+  expect(
+    within(screen.getByRole("row", { name: /A/ })).getAllByRole("cell")[4],
+  ).toHaveTextContent("Desconocido");
+});
+
+it("displays actual segment deaths, exact deductions and separate 1v1/rewards in a frozen row", () => {
+  render(
+    <table>
+      <tbody>
+        <tr>
+          <DayStandingCells
+            row={{
+              season_player_id: "p",
+              division: "A",
+              position: 1,
+              division_position: 1,
+              points_awarded: 3,
+              score: "2",
+              wins: 3,
+              losses: 1,
+              actual_segment_deaths: 5,
+              point_penalties: "1.0",
+              net_points: "2.0",
+              tie_status: "externally_resolved",
+              placement_rewards: ["blindar_pokemon"],
+            }}
+          />
+        </tr>
+      </tbody>
+    </table>,
+  );
+  expect(screen.getAllByRole("cell").map((cell) => cell.textContent)).toEqual([
+    "3",
+    "1",
+    "5",
+    "−1",
+    "2",
+    "1v1 registrado",
+    "Blindar Pokémon extra",
+  ]);
+});
+
+it("keeps unknown live net points pending even when an earlier official total exists", () => {
+  render(
+    <MemoryRouter>
+      <LeagueGeneral
+        data={league([
+          row({
+            total_points: null,
+            official_points: "3",
+            total_penalties: null,
+            historical_deaths: null,
+            historical_deaths_status: "unknown",
+            points_provisional: true,
+          }),
+        ])}
+      />
+    </MemoryRouter>,
+  );
+  const cells = within(screen.getByRole("row", { name: /Anto/ })).getAllByRole(
+    "cell",
+  );
+  expect(cells[3]).toHaveTextContent("Pendiente de confirmar");
+  expect(cells[2]).toHaveTextContent("Desconocido");
+  expect(screen.getByText(/Provisional:/)).toBeInTheDocument();
 });

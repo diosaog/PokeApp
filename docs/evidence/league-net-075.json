@@ -1,0 +1,37 @@
+{
+  "status": "READY_FOR_PUBLICATION",
+  "source_base": "0327291",
+  "date": "2026-11-02",
+  "migration": "075_league_net_death_history.sql",
+  "migration_sha256": "da86fc0100961c36aacdddd2a831470b95b042e093eb720217887bb4ab24ca81",
+  "scoring_contract": "league_net_v1",
+  "ranking_rule": "wins_segment_deaths_v2",
+  "python_checks_passed": 181,
+  "react_checks_passed": 68,
+  "sql_checks": {
+    "phase075_deaths": [
+      "ordinary + three actual comodin revivals, repeated death, movement/replay and CAS rollback",
+      "wipe five=5/-1.0, audited rearm, immutable open snapshot, reopen and revised-counter uncertainty",
+      "J1=1/J2=6/GENERAL=7, participant Box7, phase boundaries, partial-source unknown and private tables",
+      "real Python identity plans + api_register_save ordering, automatic death capture and historical save replay"
+    ],
+    "phase075_league": "PASS: J1: global10matches +1wins exact5coinpayouts/2prizes close/replay; J2: global10matches +1wins exact5coinpayouts/2prizes close/replay; J3: global10matches +1wins exact5coinpayouts/2prizes close/replay; J4: global10matches +1wins exact5coinpayouts/2prizes close/replay; 12wins-2.0=10.0 loses championship to11wins-0.5=10.5; cumulativepenalties notduplicated; snapshotsstable; auditedcorrect/replay keepsoriginalrevision, equalcoinpayoutnotrepeated, twoactiveprizes",
+    "phase075_divisions": "PASS: 2divisions retain3A/2B andmovements; globalRR10pairs; globalwinnerB/lastA prizes; nextday10pairs",
+    "phase075_legacy": "PASS: pre075closed073 +2/rate0.1 snapshot/correctioncontractunchanged; newopen/closeblockedexplicitlegacydecision",
+    "phase075_guards": "PASS: double_wins rejected in authoritative SQL with exact transaction footprint unchanged; position_points rejected in authoritative SQL with exact transaction footprint unchanged; first/last prize ties block Python planning and SQL closure without actual recorded 1v1 outcomes; no partial prizes; 4wins-1.0 equals3wins: champion staysnull; finish and legacyBO3 blocked; newer source cannot rewrite frozen deaths/net totals"
+  },
+  "concurrent_close": "PASS: onecommit/onereplay,5coinpayouts,2prizes,1snapshot",
+  "backup": {
+    "captured_at": "2026-11-02T16:58:18+00:00",
+    "sha256": "311a56bdb6549addc75129b746fde1894d93e24e212e110549b187552fab590b",
+    "tables_restored_exact": 119,
+    "existing_application_tables_unchanged": 97
+  },
+  "migration_rehearsal": "PASS; upgraded copy equals fresh001-075; existingrows/browserprivilegespreserved",
+  "launcher": "0.26.9 unchanged",
+  "no_real_save_writes": true,
+  "no_real_purchases": true,
+  "owner_decision": "Final equal NET championship tiebreak undefined; finish explicitly blocked for that condition",
+  "historical_baseline": "Explicit audited source/revision-bound admin confirmation required; missingcountsareunknown",
+  "evidence_root": "%LOCALAPPDATA%/PokeApp-migration-evidence/league-075/"
+}

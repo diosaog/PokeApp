@@ -5,6 +5,12 @@ milestone record; it does not maintain a second live phase-status ledger.
 
 ## Current project position
 
+- Final League NET / historical deaths (2026-11-02): **IMPLEMENTED; RELEASE IN PROGRESS.**
+  Additive075, exact +1/win NET across all days, immutable actual-death segments,
+  equal coins and existing first/last rewards; 181 Python /68 React plus actual
+  SQL concurrency/history/upgrade gates PASS. Exact final NET tie remains an
+  explicit owner decision. [Authoritative live record](work-in-progress/final-corrections-live.md).
+
 - Virtual Mints and Bottle Caps (2026-11-01): **0.26.9 PUBLISHED / VERIFIED.**
   Source `6408a41`; Supabase 074 applied once; Railway `657dcd97` SUCCESS;
   Cloudflare `6664ab72` and Launcher stable 0.26.9 verified. Final production

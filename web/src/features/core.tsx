@@ -143,13 +143,54 @@ function leagueCodes(data: Overview, standings: { division: string }[]) {
   ].sort();
   return codes.length ? codes : ["A", "B"];
 }
-function dailyPosition(row: Model<"StandingRead">, division = false) {
+type DisplayStanding = Model<"StandingRead"> | Model<"ProvisionalStandingRead">;
+function dailyPosition(row: DisplayStanding, division = false) {
   const start = division ? row.division_position : row.position;
+  if (start == null || row.position == null) return "Pendiente";
   if (row.tie_status === "unresolved_neutral" && row.position_end != null) {
     const end = start + row.position_end - row.position;
     return `${start}.º–${end}.º · empate`;
   }
   return String(start);
+}
+const deduction = (value?: string | null) =>
+  value == null
+    ? "Desconocido"
+    : /^0(?:\.0+)?$/.test(value.replace(/^-/, ""))
+      ? "0"
+      : `−${points(value.replace(/^-/, ""))}`;
+const rewardNames: Record<string, string> = {
+  blindar_pokemon: "Blindar Pokémon extra",
+  robar_pokemon: "Robar Pokémon extra",
+};
+export function DayStandingCells({ row }: { row: DisplayStanding }) {
+  const tie =
+    row.tie_status === "unresolved_neutral"
+      ? "Empate compartido"
+      : row.tie_status === "externally_resolved"
+        ? row.actual_segment_deaths != null
+          ? "1v1 registrado"
+          : "Decisión histórica registrada"
+        : row.tie_status === "unique"
+          ? "Sin empate"
+          : "No registrado";
+  return (
+    <>
+      <td>{row.wins ?? "No registrado"}</td>
+      <td>{row.losses ?? "No registrado"}</td>
+      <td>{row.actual_segment_deaths ?? "Desconocido"}</td>
+      <td>{deduction(row.point_penalties)}</td>
+      <td>{row.net_points == null ? "Desconocido" : points(row.net_points)}</td>
+      <td>{tie}</td>
+      <td>
+        {row.placement_rewards == null
+          ? "No registrado"
+          : row.placement_rewards
+              .map((code) => rewardNames[code] ?? code)
+              .join(" · ") || "—"}
+      </td>
+    </>
+  );
 }
 function LeagueDay({ dayId }: { dayId: string }) {
   const { me } = useApp();
@@ -157,6 +198,13 @@ function LeagueDay({ dayId }: { dayId: string }) {
     <OverviewState>
       {(data) => {
         const snapshot = data.snapshots.find((s) => s.matchday_id === dayId);
+        const current = data.matchday_scores?.find(
+          (s) => s.matchday_id === dayId,
+        );
+        const standings = snapshot?.standings ?? current?.standings;
+        const global =
+          !snapshot ||
+          snapshot.standings.some((s) => s.actual_segment_deaths != null);
         const canRecord =
           data.season.status === "active" &&
           data.season.current_matchday_id === dayId &&
@@ -167,28 +215,41 @@ function LeagueDay({ dayId }: { dayId: string }) {
         return (
           <>
             <Tag>
-              {snapshot ? "Resultado oficial" : "Aún sin clasificación oficial"}
+              {snapshot
+                ? "Resultado oficial congelado"
+                : current
+                  ? "Provisional · jornada en curso"
+                  : "Aún sin clasificación oficial"}
             </Tag>
-            {snapshot ? (
+            {standings?.length ? (
               <>
-                <div className="podium">
-                  {[...snapshot.standings]
-                    .sort((a, b) => a.position - b.position)
-                    .filter((s) => s.position <= 3)
-                    .map((s) => (
-                      <Card key={s.season_player_id}>
-                        <Trophy />
-                        <span className="eyebrow">
-                          POSICIÓN {dailyPosition(s)}
-                        </span>
-                        <h2>{playerName(data, s.season_player_id)}</h2>
-                        <strong>
-                          {s.points_awarded} <small>puntos de jornada</small>
-                        </strong>
-                      </Card>
-                    ))}
-                </div>
-                {leagueCodes(data, snapshot.standings).map(
+                {snapshot && (
+                  <div className="podium">
+                    {[...snapshot.standings]
+                      .sort((a, b) => a.position - b.position)
+                      .filter((s) => s.position <= 3)
+                      .map((s) => (
+                        <Card key={s.season_player_id}>
+                          <Trophy />
+                          <span className="eyebrow">
+                            POSICIÓN {dailyPosition(s)}
+                          </span>
+                          <h2>{playerName(data, s.season_player_id)}</h2>
+                          <strong>
+                            {s.net_points == null
+                              ? s.points_awarded
+                              : points(s.net_points)}{" "}
+                            <small>
+                              {s.net_points == null
+                                ? "puntos de jornada (histórico)"
+                                : "puntos netos de jornada"}
+                            </small>
+                          </strong>
+                        </Card>
+                      ))}
+                  </div>
+                )}
+                {(global ? [""] : leagueCodes(data, standings)).map(
                   (division, _, codes) => (
                     <Card key={division}>
                       <h2>
@@ -200,23 +261,34 @@ function LeagueDay({ dayId }: { dayId: string }) {
                             <tr>
                               <th>Pos.</th>
                               <th>Entrenador</th>
-                              <th>Puntos de jornada</th>
+                              {!global && <th>Puntos históricos de jornada</th>}
+                              <th>Victorias</th>
+                              <th>Derrotas</th>
+                              <th>Muertes de progresión</th>
+                              <th>Penalizaciones</th>
+                              <th>Aportación neta</th>
+                              <th>Desempate</th>
+                              <th>Premios</th>
                             </tr>
                           </thead>
                           <tbody>
-                            {snapshot.standings
-                              .filter((s) => s.division === division)
-                              .sort(
-                                (a, b) =>
-                                  a.division_position - b.division_position,
+                            {standings
+                              .filter((s) => global || s.division === division)
+                              .sort((a, b) =>
+                                global
+                                  ? (a.position ?? Infinity) -
+                                    (b.position ?? Infinity)
+                                  : (a.division_position ?? Infinity) -
+                                    (b.division_position ?? Infinity),
                               )
                               .map((s) => (
                                 <tr key={s.season_player_id}>
-                                  <td>{dailyPosition(s, true)}</td>
+                                  <td>{dailyPosition(s, !global)}</td>
                                   <td>
                                     {playerName(data, s.season_player_id)}
                                   </td>
-                                  <td>{s.points_awarded}</td>
+                                  {!global && <td>{s.points_awarded}</td>}
+                                  <DayStandingCells row={s} />
                                 </tr>
                               ))}
                           </tbody>
@@ -274,13 +346,15 @@ function LeagueDay({ dayId }: { dayId: string }) {
     </OverviewState>
   );
 }
-// One total per trainer: in an active season the server already includes the
-// current deaths and sanctions, so nothing is shown "provisional".
+// Official values arrive as decimal text; formatting must not round sanctions
+// or convert large totals through binary floating-point numbers.
 export function points(value: string) {
-  const n = Number(value);
-  return Number.isFinite(n)
-    ? n.toLocaleString("es-ES", { maximumFractionDigits: 1 })
-    : value;
+  const match = /^(-?)(\d+)(?:\.(\d+))?$/.exec(value);
+  if (!match) return value;
+  const fraction = (match[3] ?? "").replace(/0+$/, "");
+  const integer = BigInt(match[2]).toLocaleString("es-ES");
+  const sign = match[1] && (BigInt(match[2]) !== 0n || fraction) ? "-" : "";
+  return `${sign}${integer}${fraction ? `,${fraction}` : ""}`;
 }
 
 export function LeagueGeneral({ data }: { data: Model<"LeagueGeneralRead"> }) {
@@ -293,6 +367,16 @@ export function LeagueGeneral({ data }: { data: Model<"LeagueGeneralRead"> }) {
   return (
     <Card className="league-table-card">
       <h2>Clasificación general</h2>
+      <p>
+        La Liga se ordena por puntos netos acumulados. Las victorias normales se
+        conservan por separado de las penalizaciones.
+      </p>
+      {data.rows.some((row) => row.points_provisional) && (
+        <p className="muted">
+          Provisional: incluye los resultados y penalizaciones actuales. Los
+          cierres oficiales se conservan.
+        </p>
+      )}
       <div
         className="table-scroll"
         tabIndex={0}
@@ -302,9 +386,11 @@ export function LeagueGeneral({ data }: { data: Model<"LeagueGeneralRead"> }) {
           <thead>
             <tr>
               <th>Entrenador</th>
-              <th>Puntos totales</th>
+              <th>Victorias</th>
+              <th>Penalizaciones</th>
+              <th>Puntos netos</th>
+              <th>Muertes históricas</th>
               <th>Monedas</th>
-              <th>Pokémon muertos</th>
             </tr>
           </thead>
           <tbody>
@@ -322,9 +408,21 @@ export function LeagueGeneral({ data }: { data: Model<"LeagueGeneralRead"> }) {
                     <span className="muted"> · {states[row.status]}</span>
                   )}
                 </td>
-                <td>{points(row.total_points)}</td>
+                <td>{row.normal_wins ?? "No registrado"}</td>
+                <td>{deduction(row.total_penalties)}</td>
+                <td>
+                  {row.total_points == null
+                    ? "Pendiente de confirmar"
+                    : points(row.total_points)}
+                </td>
+                <td>
+                  {row.historical_deaths == null
+                    ? "Desconocido"
+                    : row.historical_deaths_status === "known"
+                      ? row.historical_deaths
+                      : `${row.historical_deaths} · historial incompleto`}
+                </td>
                 <td>{row.coin_balance}</td>
-                <td>{row.dead_count ?? "Desconocido"}</td>
               </tr>
             ))}
           </tbody>

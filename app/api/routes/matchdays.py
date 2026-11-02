@@ -37,6 +37,12 @@ def execute(op, sid, day, principal, container, payload=None, key=None):
         # Preserve canonical bodies of pre-D receipts, including explicit null winners.
         if request["body"].get("tie_resolution") is None:
             request["body"].pop("tie_resolution", None)
+        else:
+            # Do not change pre-075 canonical idempotency bodies merely because
+            # their historical administrative order has no battle-evidence list.
+            for order in request["body"]["tie_resolution"]["orders"]:
+                if order.get("battles") is None:
+                    order.pop("battles", None)
     if key is not None:
         request["idempotency_key"] = key
     try:

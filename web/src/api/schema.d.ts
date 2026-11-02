@@ -260,6 +260,24 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/v1/admin/seasons/{season_id}/participants/{season_player_id}/death-history": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Death History */
+    get: operations["death_history_v1_admin_seasons__season_id__participants__season_player_id__death_history_get"];
+    /** Reconcile Death History */
+    put: operations["reconcile_death_history_v1_admin_seasons__season_id__participants__season_player_id__death_history_put"];
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/v1/admin/seasons/{season_id}/config-versions": {
     parameters: {
       query?: never;
@@ -3106,6 +3124,98 @@ export interface components {
       /** Dead Box Number */
       dead_box_number: number;
     };
+    /** DeathHistoryBody */
+    DeathHistoryBody: {
+      /** Actual Deaths */
+      actual_deaths: number;
+      /** Wipe Deaths */
+      wipe_deaths: number;
+      /** Segment Deaths */
+      segment_deaths: number;
+      /** Source Sha256 */
+      source_sha256: string;
+      /** Expected Revision */
+      expected_revision: number;
+      /** Reason */
+      reason: string;
+      /** Evidence */
+      evidence: string;
+      /** Revived Entity Ids */
+      revived_entity_ids?: string[];
+    };
+    /** DeathHistoryEntity */
+    DeathHistoryEntity: {
+      /**
+       * Pokemon Entity Id
+       * Format: uuid
+       */
+      pokemon_entity_id: string;
+      /** Currently Dead */
+      currently_dead: boolean;
+      /** Has Recorded Death */
+      has_recorded_death: boolean;
+      /** Display Name */
+      display_name?: string | null;
+      /** Species */
+      species?: string | null;
+      /** Nickname */
+      nickname?: string | null;
+    };
+    /** DeathHistoryRead */
+    DeathHistoryRead: {
+      /**
+       * Season Id
+       * Format: uuid
+       */
+      season_id: string;
+      /**
+       * Season Player Id
+       * Format: uuid
+       */
+      season_player_id: string;
+      /**
+       * Trainer Id
+       * Format: uuid
+       */
+      trainer_id: string;
+      /** Revision */
+      revision: number;
+      /** Known */
+      known: boolean;
+      /** Blocking Reason */
+      blocking_reason: string | null;
+      /** Actual Deaths */
+      actual_deaths: number | null;
+      /** Wipe Deaths */
+      wipe_deaths: number | null;
+      /** Death Penalty Tenths */
+      death_penalty_tenths: number | null;
+      /** Source Save Id */
+      source_save_id: string | null;
+      /** Source Sha256 */
+      source_sha256: string | null;
+      /** Identity Revision Id */
+      identity_revision_id: string | null;
+      /** Wipe Revision */
+      wipe_revision: number | null;
+      /** Wipe Counter */
+      wipe_counter: number | null;
+      /** Current Matchday Id */
+      current_matchday_id: string | null;
+      /** Segment Deaths */
+      segment_deaths: number | null;
+      /** Can Reconcile */
+      can_reconcile: boolean;
+      /** Recorded Deaths */
+      recorded_deaths: number;
+      /** Observed Dead Entities */
+      observed_dead_entities: components["schemas"]["DeathHistoryEntity"][];
+      /**
+       * Replayed
+       * @default false
+       */
+      replayed: boolean;
+    };
     /** DeleteAccountReceipt */
     DeleteAccountReceipt: {
       /**
@@ -3973,7 +4083,7 @@ export interface components {
       /** Status */
       status: string;
       /** Total Points */
-      total_points: string;
+      total_points: string | null;
       /** Points Source Matchday Id */
       points_source_matchday_id: string | null;
       /** Coin Balance */
@@ -3991,6 +4101,18 @@ export interface components {
       official_points?: string | null;
       /** Dead Box Number */
       dead_box_number?: number | null;
+      /** Normal Wins */
+      normal_wins?: number | null;
+      /** Total Penalties */
+      total_penalties?: string | null;
+      /** Historical Deaths */
+      historical_deaths?: number | null;
+      /** Historical Deaths Status */
+      historical_deaths_status?: ("known" | "unknown" | "incomplete") | null;
+      /** Historical Deaths Source */
+      historical_deaths_source?: string | null;
+      /** Points Provisional */
+      points_provisional?: boolean | null;
     };
     /** LiveRulesBody */
     LiveRulesBody: {
@@ -4092,6 +4214,21 @@ export interface components {
       match_id: string;
       /** Winner Season Player Id */
       winner_season_player_id: string | null;
+    };
+    /** MatchdayScoreRead */
+    MatchdayScoreRead: {
+      /**
+       * Matchday Id
+       * Format: uuid
+       */
+      matchday_id: string;
+      /** Standings */
+      standings: components["schemas"]["ProvisionalStandingRead"][];
+      /**
+       * Provisional
+       * @default true
+       */
+      provisional: boolean;
     };
     /** MeResponse */
     MeResponse: {
@@ -4276,6 +4413,8 @@ export interface components {
       locks: components["schemas"]["LockRead"][];
       /** Balance */
       balance: string | null;
+      /** Matchday Scores */
+      matchday_scores?: components["schemas"]["MatchdayScoreRead"][];
     };
     /** PCRead */
     PCRead: {
@@ -4294,6 +4433,7 @@ export interface components {
     ParticipantCloseDayBody: {
       /** Expected Results Revision */
       expected_results_revision: number;
+      tie_resolution?: components["schemas"]["TieResolution"] | null;
     };
     /** ParticipantStatusBody */
     ParticipantStatusBody: {
@@ -4765,6 +4905,41 @@ export interface components {
        */
       evidence: string;
     };
+    /** ProvisionalStandingRead */
+    ProvisionalStandingRead: {
+      /**
+       * Season Player Id
+       * Format: uuid
+       */
+      season_player_id: string;
+      /** Division */
+      division: string;
+      /** Position */
+      position?: number | null;
+      /** Division Position */
+      division_position?: number | null;
+      /** Points Awarded */
+      points_awarded: number;
+      /** Score */
+      score?: string | null;
+      /** Position End */
+      position_end?: number | null;
+      /** Tie Status */
+      tie_status?:
+        ("unique" | "externally_resolved" | "unresolved_neutral") | null;
+      /** Actual Segment Deaths */
+      actual_segment_deaths?: number | null;
+      /** Wins */
+      wins?: number | null;
+      /** Losses */
+      losses?: number | null;
+      /** Point Penalties */
+      point_penalties?: string | null;
+      /** Net Points */
+      net_points?: string | null;
+      /** Placement Rewards */
+      placement_rewards?: string[] | null;
+    };
     /** PublicPreviewLock */
     PublicPreviewLock: {
       /**
@@ -4871,6 +5046,9 @@ export interface components {
       input_hash: string;
       /** Groups */
       groups: components["schemas"]["TieGroup"][];
+      /** Ranking Rule */
+      ranking_rule?:
+        ("wins_adjusted_deaths_v1" | "wins_segment_deaths_v2") | null;
     };
     /** Readiness */
     Readiness: {
@@ -5485,6 +5663,18 @@ export interface components {
       /** Tie Status */
       tie_status?:
         ("unique" | "externally_resolved" | "unresolved_neutral") | null;
+      /** Actual Segment Deaths */
+      actual_segment_deaths?: number | null;
+      /** Wins */
+      wins?: number | null;
+      /** Losses */
+      losses?: number | null;
+      /** Point Penalties */
+      point_penalties?: string | null;
+      /** Net Points */
+      net_points?: string | null;
+      /** Placement Rewards */
+      placement_rewards?: string[] | null;
     };
     /** StatsRead */
     StatsRead: {
@@ -5624,6 +5814,34 @@ export interface components {
         | components["schemas"]["SelfPreviewTeam"]
       )[];
     };
+    /**
+     * TieBattle
+     * @description An extra ranking battle, never a normal League match or a point award.
+     */
+    TieBattle: {
+      /**
+       * Player A Id
+       * Format: uuid
+       */
+      player_a_id: string;
+      /**
+       * Player B Id
+       * Format: uuid
+       */
+      player_b_id: string;
+      /**
+       * Winner Id
+       * Format: uuid
+       */
+      winner_id: string;
+      /**
+       * Played At
+       * Format: date-time
+       */
+      played_at: string;
+      /** Evidence */
+      evidence: string;
+    };
     /** TieGroup */
     TieGroup: {
       /**
@@ -5641,6 +5859,8 @@ export interface components {
       wins: number;
       /** Adjusted Deaths */
       adjusted_deaths: number;
+      /** Segment Deaths */
+      segment_deaths?: number | null;
       /** Consequences */
       consequences: (
         | "points"
@@ -5649,6 +5869,7 @@ export interface components {
         | "movement"
         | "last_b_reward"
         | "single_league_prize"
+        | "matchday_prize"
       )[];
     };
     /** TieOrder */
@@ -5657,6 +5878,8 @@ export interface components {
       player_ids: string[];
       /** Reason */
       reason: string;
+      /** Battles */
+      battles?: components["schemas"]["TieBattle"][] | null;
     };
     /** TieResolution */
     TieResolution: {
@@ -6916,6 +7139,76 @@ export interface operations {
         };
         content: {
           "application/json": components["schemas"]["AdminReceipt"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  death_history_v1_admin_seasons__season_id__participants__season_player_id__death_history_get: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        season_id: string;
+        season_player_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["DeathHistoryRead"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  reconcile_death_history_v1_admin_seasons__season_id__participants__season_player_id__death_history_put: {
+    parameters: {
+      query?: never;
+      header: {
+        "idempotency-key": string;
+      };
+      path: {
+        season_id: string;
+        season_player_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["DeathHistoryBody"];
+      };
+    };
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["DeathHistoryRead"];
         };
       };
       /** @description Validation Error */

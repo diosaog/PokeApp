@@ -204,13 +204,6 @@ function RewardForm({
   );
 }
 
-function rewardText(values?: Record<string, number>) {
-  return Object.entries(values ?? {})
-    .sort((a, b) => Number(a[0]) - Number(b[0]))
-    .map(([, n]) => n)
-    .join(",");
-}
-
 function Structure({ setup }: { setup: Setup }) {
   const { season } = useApp(),
     cmd = useRulesCommand();
@@ -230,19 +223,12 @@ function Structure({ setup }: { setup: Setup }) {
   );
   const single = shape === "single";
   const [total, setTotal] = useState(config?.total_matchdays ?? 1);
-  const singleDay = single && total === 1;
   const configuredCoins = Object.values(config?.coin_rewards ?? {});
   const commonCoins =
     configuredCoins.length && new Set(configuredCoins).size === 1
       ? configuredCoins[0]
       : undefined;
-  const [points, setPoints] = useState(rewardText(config?.scoring)),
-    [coins, setCoins] = useState(rewardText(config?.coin_rewards)),
-    [commonAmount, setCommonAmount] = useState(String(commonCoins ?? "")),
-    [coinMode, setCoinMode] = useState<"equal" | "position">(
-      commonCoins === undefined ? "position" : "equal",
-    );
-  const equalCoins = singleDay || coinMode === "equal";
+  const [commonAmount, setCommonAmount] = useState(String(commonCoins ?? ""));
   useEffect(() => {
     setTotal(config?.total_matchdays ?? 1);
     setShape(
@@ -250,10 +236,7 @@ function Structure({ setup }: { setup: Setup }) {
         ? "single"
         : "two",
     );
-    setPoints(rewardText(config?.scoring));
-    setCoins(rewardText(config?.coin_rewards));
     setCommonAmount(String(commonCoins ?? ""));
-    setCoinMode(commonCoins === undefined ? "position" : "equal");
     setError("");
   }, [source, config, commonCoins]);
   // Only the observed initial assignment can start a single league; an older
@@ -291,35 +274,15 @@ function Structure({ setup }: { setup: Setup }) {
             const data = form(event);
             if (busy || stale) return;
             const count = setup.participants.length;
-            if (
-              !singleDay &&
-              [points, ...(!equalCoins ? [coins] : [])].some(
-                (v) =>
-                  v.split(",").length !== count ||
-                  v.split(",").some((entry) => !/^\d+$/.test(entry.trim())),
-              )
-            ) {
-              setError(
-                `Introduce ${count} valores por posición en puntos${equalCoins ? "" : " y monedas"}. Usa 0 si no hay recompensa.`,
-              );
-              return;
-            }
-            const scores = singleDay
-                ? // 073 ignores positional points in this format. Preserve the
-                  // configured map so returning to multiple days loses no edits.
-                  points.split(",").length === count &&
-                  points.split(",").every((v) => /^\d+$/.test(v.trim()))
-                  ? points.split(",").map(Number)
-                  : Array<number>(count).fill(0)
-                : points.split(",").map(Number),
-              rewards = equalCoins
-                ? Array<number>(count).fill(Number(commonAmount))
-                : coins.split(",").map(Number);
+            // The transport retains its positional-map shape for compatibility;
+            // official League points are calculated from wins and penalties.
+            const scores = Array<number>(count).fill(0),
+              rewards = Array<number>(count).fill(Number(commonAmount));
             const values = ["total", "a", "b", "movement"].map((k) =>
               single && k !== "total" ? 0 : number(data, k),
             );
             if (
-              (equalCoins && commonAmount === "") ||
+              !/^\d+$/.test(commonAmount) ||
               ![...scores, ...rewards, ...values].every(
                 (v) => Number.isSafeInteger(v) && v >= 0 && v <= 2147483647,
               ) ||
@@ -356,7 +319,8 @@ function Structure({ setup }: { setup: Setup }) {
                 game_completion_reward_coins: 12,
                 ...config?.rules,
                 team_lock_required: data.has("lock"),
-                last_b_gets_steal: !single && data.has("steal"),
+                last_b_gets_steal:
+                  !single && config?.rules.last_b_gets_steal === true,
               },
               expected_config_revision: source.config_revision,
               expected_roster_revision: source.roster_revision,
@@ -467,76 +431,28 @@ function Structure({ setup }: { setup: Setup }) {
                     />
                   </Field>
                 ))}
-              {!singleDay && (
-                <Field label="Reparto de monedas">
-                  <select
-                    value={coinMode}
-                    onChange={(event) =>
-                      setCoinMode(event.target.value as "equal" | "position")
-                    }
-                  >
-                    <option value="equal">Las mismas monedas para todos</option>
-                    <option value="position">Monedas por posición</option>
-                  </select>
-                </Field>
-              )}
-              {equalCoins && (
-                <Field label="Monedas de jornada para cada participante">
-                  <input
-                    name="commonCoins"
-                    type="number"
-                    min={0}
-                    max={2147483647}
-                    step={1}
-                    required
-                    value={commonAmount}
-                    onChange={(event) => {
-                      setCommonAmount(event.target.value);
-                      setCoinMode("equal");
-                    }}
-                  />
-                </Field>
-              )}
-              {!singleDay && (
-                <>
-                  {(
-                    [
-                      ["points", "Puntos por posición", points, setPoints],
-                      ["coins", "Monedas por posición", coins, setCoins],
-                    ] as const
-                  )
-                    .filter(([name]) => name !== "coins" || !equalCoins)
-                    .map(([name, label, value, setValue]) => (
-                      <Field key={name} label={label}>
-                        <input
-                          name={name}
-                          required
-                          value={value}
-                          onChange={(event) => setValue(event.target.value)}
-                        />
-                      </Field>
-                    ))}
-                </>
-              )}
+              <Field label="Monedas de jornada para cada participante">
+                <input
+                  name="commonCoins"
+                  type="number"
+                  min={0}
+                  max={2147483647}
+                  step={1}
+                  required
+                  value={commonAmount}
+                  onChange={(event) => setCommonAmount(event.target.value)}
+                />
+              </Field>
             </div>
-            {!singleDay && (
-              <p>
-                Puntuación de varias jornadas: se aplican los puntos por
-                posición guardados en cada cierre. El reparto de monedas se
-                elige aparte. Cambiar la jornada consultada no modifica estas
-                reglas. Introduce {setup.participants.length} valores en cada
-                campo, separados por comas, del primer al último puesto. La
-                cantidad depende de los participantes, no de las jornadas. Usa 0
-                si una posición no recibe puntos o monedas.
-              </p>
-            )}
-            {singleDay && (
-              <p>
-                Todos contra todos: 2 puntos por victoria y 0 por derrota.
-                Primero: Blindar Pokémon extra. Último: Robar Pokémon extra. Las
-                monedas de jornada son iguales para todos.
-              </p>
-            )}
+            <p>
+              Todos contra todos en cada jornada: 1 punto por victoria y 0 por
+              derrota. Los puntos netos se calculan automáticamente, restando
+              0,1 por muerte y 0,2 por cada muerte revivida tras wipe, sin sumar
+              ambas penalizaciones. Se conservan las demás sanciones aplicables.
+              Primero: Blindar Pokémon extra. Último: Robar Pokémon extra. Las
+              monedas de jornada son iguales para todos. Cambiar la jornada
+              consultada no modifica estas reglas.
+            </p>
             <label className="check">
               <input
                 type="checkbox"
@@ -545,16 +461,6 @@ function Structure({ setup }: { setup: Setup }) {
               />
               Avisar si falta Team Lock
             </label>
-            {!single && (
-              <label className="check">
-                <input
-                  type="checkbox"
-                  name="steal"
-                  defaultChecked={config?.rules.last_b_gets_steal === true}
-                />
-                Último de B recibe robo
-              </label>
-            )}
             {error && <p role="alert">{error}</p>}
             <Submit pending={cmd.pending} disabled={busy || stale}>
               Guardar formato

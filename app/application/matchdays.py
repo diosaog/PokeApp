@@ -1,10 +1,11 @@
 """Pure close planning; SQL rechecks the input fingerprint under mutation locks."""
 
 from dataclasses import asdict
-from decimal import Decimal
+from decimal import Decimal, InvalidOperation, localcontext
+from itertools import combinations
 import random
 
-from app.application.daily_ranking import RULE, consequence_order
+from app.application.daily_ranking import NET_RULE, NET_SCORING, RULE, consequence_order
 from app.domain.league import PenaltySummary
 from app.domain.seasons import SeasonRules, SeasonVersion
 from app.domain.services.league import calculate_division_movements, last_b_steal_award
@@ -19,13 +20,15 @@ def plan_close(
 ) -> dict:
     inputs = context["inputs"]
     cfg = inputs["config"]
+    net_league = cfg.get("scoring_mode") == NET_SCORING
     single_round_robin = cfg.get("scoring_mode") == "single_round_robin_v1"
     death_rate = Decimal(str(cfg.get("death_penalty_per_mon", "0.2")))
     common_coins = None
-    if single_round_robin:
+    if single_round_robin or net_league:
         rewards = set(cfg["coin_rewards_json"].values())
-        if cfg["total_matchdays"] != 1 or set(cfg["division_sizes"]) != {"A"} or len(rewards) != 1:
-            raise ValueError("Single-day League requires one common configured coin reward")
+        if (len(rewards) != 1 or (single_round_robin and
+            (cfg["total_matchdays"] != 1 or set(cfg["division_sizes"]) != {"A"}))):
+            raise ValueError("League requires one common configured coin reward")
         common_coins = next(iter(rewards))
     players = {p["id"]: p for p in inputs["players"]}
     matches = {m["id"]: dict(m) for m in inputs["matches"]}
@@ -38,8 +41,10 @@ def plan_close(
     for match in matches.values():
         if match["winner_id"] not in (match["player_a_id"], match["player_b_id"]):
             raise ValueError("Incomplete results")
+    if net_league:
+        _validate_net_inputs(inputs, players, matches)
     ordering = consequence_order(
-        inputs, matches, context.get("ranking_rule", RULE), tie_resolution
+        inputs, matches, context.get("ranking_rule", NET_RULE if net_league else RULE), tie_resolution
     )
     ranks = ordering.allocations
     version = SeasonVersion(
@@ -67,8 +72,8 @@ def plan_close(
     penalties = {
         p["id"]: PenaltySummary(
             dead_count=p["dead_count"],
-            dead_points_penalty=float(death_rate * p["dead_count"]),
-            points_reduction=p["points_reduction"],
+            dead_points_penalty=0 if net_league else float(death_rate * p["dead_count"]),
+            points_reduction=0 if net_league else p["points_reduction"],
             coins_reduction=p["coins_reduction"],
         )
         for p in players.values()
@@ -93,6 +98,38 @@ def plan_close(
                 m["winner_id"] == standing["trainer_id"] for m in matches.values()
             )
             standing["coins_awarded"] = common_coins
+        elif net_league:
+            player = players[standing["trainer_id"]]
+            wins = standing["metadata"]["wins"]
+            units = player["death_penalty_tenths"]
+            previous_units = player["prior_death_penalty_tenths"]
+            sanction = Decimal(str(player["points_reduction"]))
+            previous_sanction = Decimal(str(player["prior_points_reduction"]))
+            # Serialize exact decimal text; old domain floats never participate
+            # in the new contract's arithmetic or cumulative reconciliation.
+            death_penalty = Decimal(f"{units}e-1")
+            previous_death_penalty = Decimal(f"{previous_units}e-1")
+            values = (death_penalty, previous_death_penalty, sanction, previous_sanction, Decimal(wins))
+            # SQL numeric sanctions are not limited to binary-float precision
+            # or Decimal's process-wide 28-digit default context.
+            with localcontext() as exact:
+                exact.prec = max(1, max(v.adjusted() for v in values)
+                                 - min(v.as_tuple().exponent for v in values) + 5)
+                contribution_penalty = death_penalty - previous_death_penalty + sanction - previous_sanction
+                contribution = Decimal(wins) - contribution_penalty
+            standing["points_awarded"] = wins
+            standing["coins_awarded"] = common_coins
+            standing["score"] = str(contribution)
+            standing["penalties"].update(dead_points_penalty=str(death_penalty),
+                                         points_reduction=str(sanction))
+            standing["metadata"].update(
+                actual_deaths=player["actual_deaths"], wipe_deaths=player["wipe_deaths"],
+                death_penalty_tenths=units, death_snapshot_id=player["death_snapshot_id"],
+                prior_death_penalty_tenths=previous_units,
+                prior_points_reduction=str(previous_sanction),
+                point_penalties=str(contribution_penalty),
+                net_points=str(contribution),
+            )
         value = players[standing["trainer_id"]]["points_reduction"]
         if isinstance(value, str):
             standing["penalties"]["points_reduction"] = value
@@ -100,7 +137,7 @@ def plan_close(
     movement = calculate_division_movements(
         ranks["A"], ranks["B"], 0 if final else cfg["promotion_relegation_count"]
     )
-    award = last_b_steal_award(
+    award = None if net_league else last_b_steal_award(
         ranks["B"], enabled=cfg["rules_json"]["last_b_gets_steal"]
     )
     promotions = []
@@ -158,9 +195,54 @@ def plan_close(
         last_b_player_id=award.trainer_id if award else None,
         promotions=promotions,
     )
-    if single_round_robin:
+    if single_round_robin or net_league:
+        global_order = sorted(standings, key=lambda s: s["metadata"]["allocation_position"]) if net_league else []
+        first = global_order[0]["trainer_id"] if net_league else ranks["A"][0]
+        last = global_order[-1]["trainer_id"] if net_league else ranks["A"][-1]
         result["single_league_rewards"] = [
-            dict(code="blindar_pokemon", season_player_id=ranks["A"][0]),
-            dict(code="robar_pokemon", season_player_id=ranks["A"][-1]),
+            dict(code="blindar_pokemon", season_player_id=first),
+            dict(code="robar_pokemon", season_player_id=last),
         ]
+        if net_league:
+            for standing in standings:
+                standing["metadata"]["placement_rewards"] = [
+                    reward["code"] for reward in result["single_league_rewards"]
+                    if reward["season_player_id"] == standing["trainer_id"]
+                ]
     return result
+
+
+def _validate_net_inputs(inputs, players, matches):
+    """Missing history is unknown, never an inferred zero or penalty counter."""
+    if len(players) != len(inputs["players"]) or len(players) < 2:
+        raise ValueError("Invalid League roster")
+    expected = {frozenset(pair) for pair in combinations(players, 2)}
+    actual = [frozenset((m["player_a_id"], m["player_b_id"])) for m in matches.values()]
+    if len(matches) != len(inputs["matches"]) or len(actual) != len(expected) or set(actual) != expected:
+        raise ValueError("League requires the complete global round robin")
+    cfg = inputs["config"]
+    if (set(cfg["coin_rewards_json"]) != {str(i) for i in range(1, len(players) + 1)}
+        or any(type(v) is not int or v < 0 for v in cfg["coin_rewards_json"].values())):
+        raise ValueError("Invalid common configured coin reward")
+    if cfg.get("death_penalty_per_mon") != "0.1":
+        raise ValueError("Official ordinary-death rate must be 0.1")
+    for player in players.values():
+        fields = ("actual_deaths", "wipe_deaths", "segment_deaths", "death_penalty_tenths",
+                  "prior_death_penalty_tenths")
+        if any(type(player.get(k)) is not int or player[k] < 0 for k in fields):
+            raise ValueError("Authoritative historical death evidence is required")
+        if (player["wipe_deaths"] > player["actual_deaths"]
+            or player["segment_deaths"] > player["actual_deaths"]
+            or player["death_penalty_tenths"] != player["actual_deaths"] + player["wipe_deaths"]
+            or player.get("dead_count") != player["death_penalty_tenths"]
+            or not isinstance(player.get("death_snapshot_id"), str)
+            or not player["death_snapshot_id"]
+            or player.get("division") not in ("A", "B")):
+            raise ValueError("Inconsistent historical death evidence")
+        for field in ("points_reduction", "prior_points_reduction"):
+            try:
+                value = Decimal(str(player[field]))
+            except InvalidOperation:
+                raise ValueError("Invalid cumulative sanction") from None
+            if not value.is_finite() or value < 0:
+                raise ValueError("Invalid cumulative sanction")
