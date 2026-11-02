@@ -1,0 +1,94 @@
+{
+  "status": "PUBLISHED_VERIFIED",
+  "verified_at": "2026-11-02T18:27:57.306184+00:00",
+  "base_commit": "c4cff18",
+  "source_commit": "3eea9f581997bd683d98576ae29d195c0d3e1976",
+  "web_source_commit": "7eca61c",
+  "database": "076_final_championship_tiebreak unchanged; no077 migration needed",
+  "confirmed_findings": {
+    "Anto": "2accepted League badges,2claims,8coins; no missing reward; historical baseline unconfirmed",
+    "Aaron": "1accepted League badge,1claim,4coins; one immutable death event; historical baseline unconfirmed",
+    "Iker": "2personal badges,3Pokemon in personal Box7,zero League uploads/pointer/identity/claims; cannot safely promote parsed personal payload without original bytes",
+    "ByVisan02_and_Samu": "Personal-only saves,zero observed badges; no proven reward entitlement"
+  },
+  "corrections": [
+    "Cards and profile use075 historical deaths, not current dead-box occupancy",
+    "Personal progress and League wallet/NET explicitly scoped with precise pending prerequisites",
+    "Authenticated bounded linkage status read validates participant/trainer scope and exposes no save identifiers",
+    "Only GENERAL removes victories and penalties columns; day views and all scoring unchanged"
+  ],
+  "python_checks_passed": 84,
+  "react_checks_passed": 20,
+  "typescript_and_production_build": "PASS",
+  "sql_acceptance": [
+    "Personal native badge evidence without League identity/pointer creates zero rewards and unavailable League death history",
+    "One/two/later badges pay configured four coins each exactly once with source and identity provenance",
+    "Ledger reconciles earned12 minus purchase3 minus penalty1 = balance8",
+    "High-water regression, repeat, malformed flags, unknown participant, missing pointer, disabled trainer, inactive participant, draft season, future config, foreign hash and foreign trainer fail closed",
+    "Anon/authenticated cannot directly execute reward settlement",
+    "Box7 and Box4 observe three unique deaths; baseline remains unknown until explicit audited confirmation; three ordinary deaths and zero victories gives -0.3 NET",
+    "Repeated/moved observed deaths never disappear or duplicate; frozen death snapshots unchanged",
+    "Before any matchday NET remains unknown until baseline confirmation, then -0.3 provisional with no fabricated snapshot or reward",
+    "Two concurrent service-role settlements return zero and two: exactly two claims, two ledger transactions, eight coins"
+  ],
+  "backup": {
+    "sha256": "d53a6bbb451c5fe2ba0ab455f52e654665fd63251690105aae2abb0bfa8a5ea2",
+    "tables_restored_exact": 123,
+    "catalog_and_migration_history_exact": true,
+    "migrations_reapplied": 0
+  },
+  "api": {
+    "deployment_id": "46969e2a-78f3-4dee-b648-ebf4541ed09f",
+    "status": "SUCCESS",
+    "image_digest": "sha256:a32a54399d02fa3d1ef82035dd4f559797f56e5124d3d0204043a57f91d081ab",
+    "source_commit": "3eea9f581997bd683d98576ae29d195c0d3e1976",
+    "python_files_exact": 307,
+    "python": "3.14.3 (main, Apr  7 2026, 02:23:36) [GCC 12.2.0]",
+    "health": 200,
+    "paths": 126,
+    "linkage_contract": true,
+    "anonymous_league": 401,
+    "native_final_image_gates": "8-game parse and24 training cases PASS"
+  },
+  "web": {
+    "status": "PASS",
+    "web_source_commit": "7eca61c",
+    "version_id": "975c2dde-5dbe-44a1-a780-37c751179471",
+    "active_percent": 100,
+    "public_files_exact": 18
+  },
+  "launcher": {
+    "version": "0.26.11",
+    "source_commit": "3eea9f581997bd683d98576ae29d195c0d3e1976",
+    "python_modules_identical": 40,
+    "native_methods_identical": 474,
+    "package_audit": "PASS",
+    "packaged_startup_and_recovery_checks": 9,
+    "old_updater_compatibility": "PASS",
+    "prior_native_transactional_matrices_reused": true,
+    "signed_feed": "Ed25519 exact public feed verified with existing stable key",
+    "installer": {
+      "status": 200,
+      "size": 159462974,
+      "sha256": "606a3651acf150c09ea4cb6d75b386ed20f6ff3fdfaa6481d9b768ded83ca608",
+      "sha512": "ieKdGH5anABJMRQ9w6wJ1+KrJIO/1x79yu8DGDVpHQGUtnmkEAVjDPoIp3TRycohzW9Py+gwSBYAyyOfqfb2Mg==",
+      "url": "https://pokeapp-web.pokeapp-v2.workers.dev/launcher/download"
+    },
+    "publication_order": "installer upload, full public SHA512 readback, signed feed, web download pointer"
+  },
+  "production_data_repairs": [],
+  "all5_participant_pointers_claims_balances_death_evidence_unchanged": true,
+  "real_save_writes": false,
+  "real_test_purchases": false,
+  "cleanup": {
+    "own_registered_key_removed": true,
+    "own_generated_files_removed": true,
+    "preexisting_keys_preserved": true
+  },
+  "publication_blockers": [],
+  "data_prerequisites": [
+    "Iker must upload original save through own authenticated Launcher into active League before rewards/death history can be attributed",
+    "Administrator must confirm factual lifetime-death/wipe baseline through existing audited075 workflow; unknown NET remains unknown until evidence is sufficient"
+  ],
+  "private_evidence_root": "%LOCALAPPDATA%/PokeApp-migration-evidence/trainer-077/"
+}

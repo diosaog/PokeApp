@@ -5,11 +5,13 @@ milestone record; it does not maintain a second live phase-status ledger.
 
 ## Current project position
 
-- Trainer evidence /077 task (2026-11-02): **TESTED; RELEASE IN PROGRESS.**
+- Trainer evidence /077 task (2026-11-02): **PUBLISHED / VERIFIED.**
   Personal-vs-League scope and permanent death counts corrected in cards/profile;
   GENERAL drops victories/penalties columns. Existing claims reconcile correctly;
-  no new migration or invented data repairs. Explicit owner-requested Launcher
-  0.26.11 version-only rebuild pending. [Live record](work-in-progress/final-corrections-live.md).
+  no new migration or invented data repairs.84Python/20React, SQL, backup123tables,
+  packaged9checks PASS. Source3eea9f5; API46969e2a, web975c2dde active100%; stable
+  Launcher0.26.11 installer/full digest/Ed25519 feed verified. Iker's own League
+  upload and factual historical baselines remain required. [Live record](work-in-progress/final-corrections-live.md).
 
 - Final championship tiebreak /076 (2026-11-02): **PUBLISHED / VERIFIED.**
   Explicit admin popup: actual total deaths (default) or recorded1v1. Pending

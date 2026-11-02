@@ -2,7 +2,7 @@
 
 ## Trainer evidence / Launcher 0.26.11 - 2026-11-02
 
-**TESTED; RELEASE IN PROGRESS.** Branch `codex/trainer-evidence-077`, base
+**PUBLISHED / VERIFIED. NO PUBLICATION BLOCKERS.** Branch `codex/trainer-evidence-077`, base
 `c4cff18`. Task077 does not require a database migration: production remains076.
 
 - Read-only production checks: Anto has two authoritative League badges, exactly
@@ -21,13 +21,29 @@
   SQL proves high-water claims, valid linking, deductions, concurrency, configured
   Box7/Box4, audited3deaths=-0.3NET, repeated/moved Pokémon and frozen snapshots.
   No scoring, reward, identity, native-write or Launcher-sync logic was changed.
-- Launcher0.26.11 is explicitly requested by the owner. Its version-only rebuild
-  will reuse valid native/transaction evidence after payload comparison and the
-  packaged startup gate. No real save or purchase is used for testing.
+- Launcher0.26.11 was explicitly requested by the owner. Its version-only rebuild
+  retains40 identical Python modules and474 identical native method bodies; the
+  prior native/transaction matrices remain valid. Packaged startup/recovery9/9,
+  package audit and compatibility with the shipped02610 updater PASS.
+- Fresh backup SHA256 `d53a6bbb451c5fe2ba0ab455f52e654665fd63251690105aae2abb0bfa8a5ea2`:
+  123 tables, catalog and migration history restored exactly; copy retained/stopped.
+- API/Launcher source **3eea9f5**, web source **7eca61c**. Railway
+  **46969e2a-78f3-4dee-b648-ebf4541ed09f SUCCESS**,307 Python files match the committed
+  bundle; final-image8-game parse/24 training gates PASS; health200 and anonymous
+  League401. Image `sha256:a32a54399d02fa3d1ef82035dd4f559797f56e5124d3d0204043a57f91d081ab`.
+- Cloudflare **975c2dde-5dbe-44a1-a780-37c751179471 active100%**;18 public files match
+  the tested build. Installer159462974 bytes; SHA256
+  `606a3651acf150c09ea4cb6d75b386ed20f6ff3fdfaa6481d9b768ded83ca608`.
+  Full public download SHA512 matches the signed manifest; existing stable Ed25519
+  key verifies the exact served02611 feed. Installer published before feed, then
+  public download/web card updated. Only own ephemeral readback key/files removed.
+  Existing release keys remain intact. No real save or purchase was used for tests.
 
 Private evidence: `%LOCALAPPDATA%/PokeApp-migration-evidence/trainer-077/`.
 No production data repair has been performed. Historical baseline confirmation
 and Iker's original League upload remain factual prerequisites, not release gates.
+All five participants' pointers, claims, balances and death evidence were compared
+before/after and remain unchanged. Evidence: `docs/evidence/trainer-evidence-077.json`.
 
 ## Final championship tiebreak popup / 076 - 2026-11-02
 
