@@ -102,9 +102,11 @@ def validate(pg):
             rpc(conn, 'api_admin_matchday', envelope)
             snapshot = value(conn, 'select snapshot from public.matchday_snapshots where matchday_id=%s', (v['day1'],))
             title = value(conn, 'select public.championship_context(%s)', (v['sid'],))
-            assert title['state'] == 'owner_decision_required', title
+            # 075 leaves the rule undefined; 076 supplies an explicit admin
+            # choice. Neither version may assign a title without confirmation.
+            assert title['state'] in ('owner_decision_required', 'tiebreak_required'), title
             assert title['champion_trainer_id'] is None and title['resolution_type'] is None, title
-            assert title['blocking_reason'] == 'league_net_championship_tie_rule_required'
+            assert title['blocking_reason'] in ('league_net_championship_tie_rule_required', 'championship_tiebreak_required')
             assert set(title['tied_player_ids']) == set(v['players'][:2])
             leaders = {p['season_player_id']: Decimal(p['total_points']) for p in title['players']}
             assert leaders[v['players'][0]] == leaders[v['players'][1]] == Decimal('3')

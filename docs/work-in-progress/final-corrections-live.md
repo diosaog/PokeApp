@@ -1,5 +1,43 @@
 # Final corrections — live execution record
 
+## Final championship tiebreak popup / 076 - 2026-11-02
+
+**IMPLEMENTED / AUTOMATED ACCEPTANCE AND MIGRATION REHEARSAL PASS; RELEASE IN PROGRESS.**
+Branch `codex/championship-tiebreak-076`, based on `4244ca8` (not the older owner
+reference01164f5). Baseline production: DB075, API9fb35778, webe9a8967b,
+Launcher0.26.10. No Launcher rebuild is required.
+
+- Final overall NET title only. Admin popup has exactly two methods: actual
+  total Locke deaths (initial default) or recorded extra1v1 results. Explicit
+  confirmation/reason required. Ordinary trainers only see read-only status.
+- Historical counts come exclusively from final075 frozen actual-death evidence
+  and matching frozen inputs, including normal/comodin/wipe deaths once. No
+  adjusted units/current box proxy. Equal NET/deaths persist an audited pending
+  choice and require battle results; the champion remains null until resolved.
+- Reused championship resolution table with additive decision/outcome fields,
+  preserving old methods/final titles. One final winner per fingerprint; actor,
+  original contenders, sources, method, evidence and result retained. Existing
+  auth/CAS/hash/receipt/season locks provide idempotency and concurrency safety.
+- Multiway results are entered manually, never auto-scheduled/ranked. Evidence
+  must establish one undefeated winner covering all eligible contenders through
+  recorded victories; incomplete, cyclic/disconnected or foreign results fail.
+  No normal points, victories, death snapshots, coins or rewards are changed.
+- **78 backend /54 React checks PASS**, web build PASS; six SQL rollback groups,
+  explicit/admin permissions, actual-vs-adjusted/comodin/wipe evidence, source
+  changes, multiway/loser-cycle cases, repeated confirmation/frozen results and
+  two concurrent confirmations PASS. Existing075 scoring/legacy guards PASS.
+- Fresh backup **123 tables** restored exactly; **101 existing application tables**
+  keep byte-identical rows and browser privileges unchanged. Upgraded copy equals
+  fresh001-076. Fixture initialization handles an already active season only
+  inside the isolated transaction, whose rollback/fingerprints are verified.
+  Migration LF SHA256 `b153e3a44c34929ec9910cce6862e1c0a1626ccecd48dbcde29d615af6f112fb`.
+
+Machine-readable evidence: `docs/evidence/championship-tiebreak-076.json`;
+private evidence `%LOCALAPPDATA%/PokeApp-migration-evidence/championship-076/`.
+The previously undefined title rule is now implemented. Historical releases below
+remain dated records. Production publication identifiers will follow on closure.
+
+
 ## Launcher 0.26.10 and requested inventory correction - 2026-11-02
 
 **PUBLISHED / VERIFIED. NO RELEASE BLOCKERS.** Branch

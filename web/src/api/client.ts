@@ -306,6 +306,18 @@ export function errorText(error: unknown) {
     return "El reparto inicial ya no puede modificarse en este estado.";
   if (error.code === "CHAMPIONSHIP_REVIEW_STALE")
     return "Los datos del campeonato han cambiado. Revisa los puntos y el desempate antes de continuar.";
+  if (error.code === "CHAMPIONSHIP_TIEBREAK_NOT_REQUIRED")
+    return "El campeonato ya no tiene este empate pendiente. Actualiza la revisión antes de confirmar.";
+  if (error.code === "CHAMPIONSHIP_BATTLE_REQUIRED")
+    return "Las muertes totales también están empatadas. Registra los combates 1v1 que resuelven el título.";
+  if (error.code === "CHAMPIONSHIP_DEATHS_UNAVAILABLE")
+    return "Falta historial oficial de muertes para esta comparación. No cuenta como cero: revisa la evidencia o registra el desempate 1v1.";
+  if (error.code === "CHAMPIONSHIP_RESOLUTION_CONFLICT")
+    return "Ya existe una confirmación de este desempate. Actualiza la revisión para consultar su resultado.";
+  if (error.code === "CHAMPIONSHIP_BATTLE_INVALID")
+    return "Revisa los participantes, el ganador, la fecha y la evidencia de cada combate 1v1 registrado.";
+  if (error.code === "CHAMPIONSHIP_BATTLE_AMBIGUOUS")
+    return "Los combates registrados no acreditan un ganador único entre todos los candidatos. El título sigue pendiente; no se asignará un campeón arbitrario.";
   if (error.code === "STALE_REVISION")
     return "La temporada ha cambiado. Actualiza los datos y revisa la operación antes de continuar.";
   if (error.code === "WIPE_REVISION_CONFLICT")

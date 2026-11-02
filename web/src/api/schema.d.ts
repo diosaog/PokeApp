@@ -635,6 +635,23 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/v1/admin/seasons/{season_id}/championship/tiebreak": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** Championship Tiebreak */
+    post: operations["championship_tiebreak_v1_admin_seasons__season_id__championship_tiebreak_post"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/v1/admin/seasons/{season_id}/championship/residual": {
     parameters: {
       query?: never;
@@ -2441,6 +2458,34 @@ export interface components {
       /** Trials */
       trials: number;
     };
+    /**
+     * ChampionshipBattle
+     * @description A recorded title battle, kept separate from normal League matches.
+     */
+    ChampionshipBattle: {
+      /**
+       * Player A Id
+       * Format: uuid
+       */
+      player_a_id: string;
+      /**
+       * Player B Id
+       * Format: uuid
+       */
+      player_b_id: string;
+      /**
+       * Winner Id
+       * Format: uuid
+       */
+      winner_id: string;
+      /**
+       * Played At
+       * Format: date-time
+       */
+      played_at: string;
+      /** Evidence */
+      evidence: string;
+    };
     /** ChampionshipBo3Body */
     ChampionshipBo3Body: {
       /** Expected Revision */
@@ -2473,6 +2518,8 @@ export interface components {
       total_points: string;
       /** Adjusted Deaths */
       adjusted_deaths: number | null;
+      /** Actual Deaths */
+      actual_deaths?: number | null;
     };
     /** ChampionshipRead */
     ChampionshipRead: {
@@ -2491,6 +2538,8 @@ export interface components {
         | "bo3_required"
         | "residual_required"
         | "owner_decision_required"
+        | "tiebreak_required"
+        | "battle_required"
         | "frozen"
         | "legacy";
       /** Setup Revision */
@@ -2511,8 +2560,12 @@ export interface components {
             | "triple_adjusted_deaths"
             | "multiple_adjusted_deaths"
             | "championship_residual"
+            | "total_actual_deaths"
+            | "championship_1v1"
           )
         | null;
+      /** Tiebreak Method */
+      tiebreak_method?: ("total_actual_deaths" | "championship_1v1") | null;
       /**
        * Finalist Status
        * @constant
@@ -2520,6 +2573,26 @@ export interface components {
       finalist_status: "OWNER_DECISION_REQUIRED";
       /** Blocking Reason */
       blocking_reason: string | null;
+    };
+    /** ChampionshipTiebreakBody */
+    ChampionshipTiebreakBody: {
+      /** Expected Revision */
+      expected_revision: number;
+      /** Input Hash */
+      input_hash: string;
+      /**
+       * Method
+       * @enum {string}
+       */
+      method: "total_actual_deaths" | "championship_1v1";
+      /** Confirmation */
+      confirmation: boolean;
+      /** Reason */
+      reason: string;
+      /** Winner Season Player Id */
+      winner_season_player_id?: string | null;
+      /** Battles */
+      battles?: components["schemas"]["ChampionshipBattle"][] | null;
     };
     /** CloseDayBody */
     CloseDayBody: {
@@ -5444,7 +5517,8 @@ export interface components {
         | "archive"
         | "discard"
         | "championship_bo3"
-        | "championship_residual";
+        | "championship_residual"
+        | "championship_tiebreak";
       /**
        * State
        * @enum {string}
@@ -7999,6 +8073,43 @@ export interface operations {
     requestBody: {
       content: {
         "application/json": components["schemas"]["ChampionshipBo3Body"];
+      };
+    };
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["SeasonLifecycleReceipt"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  championship_tiebreak_v1_admin_seasons__season_id__championship_tiebreak_post: {
+    parameters: {
+      query?: never;
+      header: {
+        "idempotency-key": string;
+      };
+      path: {
+        season_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["ChampionshipTiebreakBody"];
       };
     };
     responses: {

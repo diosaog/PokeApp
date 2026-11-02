@@ -1,0 +1,33 @@
+{
+  "status": "READY_FOR_PUBLICATION",
+  "date": "2026-11-02",
+  "source_base": "4244ca8",
+  "migration": "076_final_championship_tiebreak.sql",
+  "migration_sha256": "b153e3a44c34929ec9910cce6862e1c0a1626ccecd48dbcde29d615af6f112fb",
+  "methods": [
+    "total_actual_deaths",
+    "championship_1v1"
+  ],
+  "default_method": "total_actual_deaths",
+  "admin_explicit_confirmation": true,
+  "historical_count_source": "075 final frozen actual_deaths metadata and matching frozen player inputs; no adjusted units/current box",
+  "multiway": "Recorded results only; unique undefeated winner with evidence paths covering every eligible contender; ambiguous/cyclic/disconnected results blocked",
+  "backend_checks_passed": 78,
+  "react_checks_passed": 54,
+  "sql_acceptance": "PASS: Actual075 history selects5wipe deaths over10ordinary despite equal10penaltyunits; explicit/admin/auth/stale/CAS/idempotency/frozen protections; points/wins/deaths/rewards unchanged; ThreewayNET tie -> confirmedactualdeaths narrows to2 -> recorded1v1 only; unresolvedchoice audited, no arbitrary rank or extra sporting effects; Multiwayactual1v1 proof accepted only for a unique undefeated winner covering all candidates; incomplete/cyclic/disconnected/repeated/foreign results rejected atomically; Three actual comodin revivals leave3historicaldeaths: emptycurrentbox cannot defeat equal3deaths still in the other box; recordedbattle required; UniqueNET title never offers or accepts a tiebreak; browser roles cannot execute lifecycle RPC directly; Completednormalmatches without official finalclosure cannot decide the championship",
+  "unchanged_scoring": "PASS: J1: global10matches +1wins exact5coinpayouts/2prizes close/replay; J2: global10matches +1wins exact5coinpayouts/2prizes close/replay; J3: global10matches +1wins exact5coinpayouts/2prizes close/replay; J4: global10matches +1wins exact5coinpayouts/2prizes close/replay; 12wins-2.0=10.0 loses championship to11wins-0.5=10.5; cumulativepenalties notduplicated; snapshotsstable; auditedcorrect/replay keepsoriginalrevision, equalcoinpayoutnotrepeated, twoactiveprizes",
+  "unchanged_guards": "PASS: double_wins rejected in authoritative SQL with exact transaction footprint unchanged; position_points rejected in authoritative SQL with exact transaction footprint unchanged; first/last prize ties block Python planning and SQL closure without actual recorded 1v1 outcomes; no partial prizes; 4wins-1.0 equals3wins: champion staysnull; finish and legacyBO3 blocked; newer source cannot rewrite frozen deaths/net totals",
+  "legacy": "PASS: pre075closed073 +2/rate0.1 snapshot/correctioncontractunchanged; newopen/closeblockedexplicitlegacydecision",
+  "concurrency": "PASS one decision and one receipt replay",
+  "backup": {
+    "captured_at": "2026-11-02T17:52:20+00:00",
+    "sha256": "06e97ffaec528bbd45bd10a8e18ce2a4b00a03e51d1754c4f7a4dc0ad620887e",
+    "restored_tables_exact": 123,
+    "existing_application_tables_unchanged": 101
+  },
+  "rehearsal": "PASS; upgraded catalog equals fresh001-076; existing rows and browser privileges preserved",
+  "launcher": "0.26.10 unchanged",
+  "real_save_writes": false,
+  "real_test_purchases_or_title_decisions": false,
+  "evidence_root": "%LOCALAPPDATA%/PokeApp-migration-evidence/championship-076/"
+}

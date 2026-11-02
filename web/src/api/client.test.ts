@@ -13,6 +13,23 @@ const response = (data: unknown, status = 200) =>
   });
 afterEach(() => vi.unstubAllGlobals());
 describe("API transport", () => {
+  it("explains final championship evidence and ambiguity refusals without inventing a winner", () => {
+    expect(
+      errorText(new ApiError(409, "CHAMPIONSHIP_BATTLE_REQUIRED")),
+    ).toContain("muertes totales también están empatadas");
+    expect(
+      errorText(new ApiError(409, "CHAMPIONSHIP_DEATHS_UNAVAILABLE")),
+    ).toContain("No cuenta como cero");
+    expect(
+      errorText(new ApiError(409, "CHAMPIONSHIP_BATTLE_INVALID")),
+    ).toContain("evidencia de cada combate");
+    expect(
+      errorText(new ApiError(409, "CHAMPIONSHIP_BATTLE_AMBIGUOUS")),
+    ).toContain("no acreditan un ganador único");
+    expect(
+      errorText(new ApiError(409, "CHAMPIONSHIP_RESOLUTION_CONFLICT")),
+    ).toContain("Ya existe una confirmación");
+  });
   it("explains missing historical evidence and stale confirmations without inventing zero counts", () => {
     expect(
       errorText(new ApiError(409, "DEATH_HISTORY_BASELINE_REQUIRED")),

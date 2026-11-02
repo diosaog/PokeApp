@@ -178,7 +178,7 @@ class SeasonAdminApiTests(unittest.TestCase):
         # 069 adds the season cancellation preview and the account detail,
         # session revocation, personal-save unlink and deletion: 49.
         # 075 adds authenticated history review and audited reconciliation.
-        self.assertEqual(len(routes), 52)
+        self.assertEqual(len(routes), 53)
         for path, method in routes:
             self.assertIn("security", schema["paths"][path][method])
 

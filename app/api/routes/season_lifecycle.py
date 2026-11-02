@@ -13,6 +13,7 @@ from app.api.season_lifecycle_models import (
     SeasonLifecycleReceipt,
     ChampionshipRead,
     ChampionshipBo3Body,
+    ChampionshipTiebreakBody,
 )
 from app.repositories.errors import PersistenceError
 from app.repositories.supabase.season_admin import SeasonAdminRejected
@@ -25,6 +26,7 @@ STATES = {
     "discard": "discarded",
     "championship_bo3": "active",
     "championship_residual": "active",
+    "championship_tiebreak": "active",
 }
 
 
@@ -115,6 +117,19 @@ def championship_bo3(
 ):
     return execute(
         "championship_bo3", season_id, principal, container, payload, idempotency_key
+    )
+
+
+@router.post("/{season_id}/championship/tiebreak", response_model=SeasonLifecycleReceipt)
+def championship_tiebreak(
+    season_id: UUID,
+    payload: ChampionshipTiebreakBody,
+    idempotency_key: Key,
+    principal: Admin,
+    container: Container,
+):
+    return execute(
+        "championship_tiebreak", season_id, principal, container, payload, idempotency_key
     )
 
 

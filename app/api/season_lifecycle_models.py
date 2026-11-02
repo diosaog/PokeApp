@@ -1,10 +1,10 @@
 """Explicit lifecycle commands, not a generic season status patch."""
 
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Annotated, Literal
 from uuid import UUID
 
-from pydantic import BaseModel, Field, model_validator
+from pydantic import AwareDatetime, BaseModel, Field, field_validator, model_validator
 from app.api.season_admin_models import StrictBody, Revision, Reason, Name
 
 
@@ -26,6 +26,71 @@ class ChampionshipBo3Body(FinishSeasonBody):
     input_hash: Digest
     winner_season_player_id: UUID
     reason: Reason
+
+
+class ChampionshipBattle(StrictBody):
+    """A recorded title battle, kept separate from normal League matches."""
+
+    player_a_id: UUID
+    player_b_id: UUID
+    winner_id: UUID
+    played_at: AwareDatetime
+    evidence: Reason
+
+    @field_validator("played_at", mode="before")
+    @classmethod
+    def explicit_recorded_time(cls, value):
+        if not isinstance(value, (str, datetime)):
+            raise ValueError("A recorded battle requires an explicit timestamp")
+        return value
+
+    @field_validator("played_at")
+    @classmethod
+    def recorded_time(cls, value):
+        value = value.astimezone(timezone.utc)
+        if value > datetime.now(timezone.utc):
+            raise ValueError("A recorded championship battle cannot be in the future")
+        return value
+
+    @model_validator(mode="after")
+    def valid_outcome(self):
+        if self.player_a_id == self.player_b_id or self.winner_id not in (
+            self.player_a_id, self.player_b_id
+        ):
+            raise ValueError("Invalid championship battle outcome")
+        return self
+
+
+class ChampionshipTiebreakBody(LifecycleRevisionBody):
+    input_hash: Digest
+    method: Literal["total_actual_deaths", "championship_1v1"]
+    confirmation: Annotated[bool, Field(strict=True)]
+    reason: Reason
+    winner_season_player_id: UUID | None = None
+    battles: Annotated[list[ChampionshipBattle], Field(min_length=1, max_length=1000)] | None = None
+
+    @field_validator("battles")
+    @classmethod
+    def canonical_battles(cls, value):
+        if value is None:
+            return value
+        pairs = [tuple(sorted((str(b.player_a_id), str(b.player_b_id)))) for b in value]
+        if len(set(pairs)) != len(pairs):
+            raise ValueError("Duplicate championship battle pair")
+        return [battle for _, battle in sorted(zip(pairs, value), key=lambda pair: pair[0])]
+
+    @model_validator(mode="after")
+    def explicit_method(self):
+        if self.confirmation is not True:
+            raise ValueError("Explicit administrator confirmation is required")
+        if self.method == "total_actual_deaths":
+            if self.winner_season_player_id is not None or self.battles is not None:
+                raise ValueError("Historical deaths are resolved by the authoritative server")
+        elif self.winner_season_player_id is None or not self.battles:
+            raise ValueError("Recorded championship battles and a winner are required")
+        elif self.winner_season_player_id not in {b.winner_id for b in self.battles}:
+            raise ValueError("The selected champion must have a recorded battle victory")
+        return self
 
 
 class ArchiveSeasonBody(LifecycleRevisionBody):
@@ -68,7 +133,7 @@ class SeasonLifecycleReceipt(BaseModel):
     operation_id: UUID
     event_id: UUID
     season_id: UUID
-    operation: Literal["finish", "archive", "discard", "championship_bo3", "championship_residual"]
+    operation: Literal["finish", "archive", "discard", "championship_bo3", "championship_residual", "championship_tiebreak"]
     state: Literal["finished", "archived", "discarded", "active"]
     actor_trainer_id: UUID
     changed_at: datetime
@@ -85,6 +150,9 @@ class ChampionshipPlayer(StrictBody):
     display_name: Annotated[str, Field(strict=True, max_length=512)]
     total_points: ExactPoints
     adjusted_deaths: Revision | None
+    # Only the frozen, actual historical count is authority for the new title
+    # rule. Legacy adjusted penalty units remain a separate compatibility field.
+    actual_deaths: Revision | None = None
 
 
 class ChampionshipRead(StrictBody):
@@ -95,6 +163,8 @@ class ChampionshipRead(StrictBody):
         "bo3_required",
         "residual_required",
         "owner_decision_required",
+        "tiebreak_required",
+        "battle_required",
         "frozen",
         "legacy",
     ]
@@ -104,8 +174,9 @@ class ChampionshipRead(StrictBody):
     tied_player_ids: Annotated[list[UUID], Field(max_length=500)]
     champion_trainer_id: UUID | None
     resolution_type: (
-        Literal["unique_points", "championship_bo3", "triple_adjusted_deaths", "multiple_adjusted_deaths", "championship_residual"] | None
+        Literal["unique_points", "championship_bo3", "triple_adjusted_deaths", "multiple_adjusted_deaths", "championship_residual", "total_actual_deaths", "championship_1v1"] | None
     )
+    tiebreak_method: Literal["total_actual_deaths", "championship_1v1"] | None = None
     finalist_status: Literal["OWNER_DECISION_REQUIRED"]
     blocking_reason: Annotated[str, Field(strict=True, max_length=200)] | None
 
@@ -142,4 +213,16 @@ class ChampionshipRead(StrictBody):
             len(self.tied_player_ids) < 2 or self.input_hash is None
         ):
             raise ValueError("Invalid residual championship state")
+        if self.state in ("tiebreak_required", "battle_required") and (
+            len(self.tied_player_ids) < 2 or self.input_hash is None
+        ):
+            raise ValueError("Invalid championship tiebreak scope")
+        if self.state == "battle_required" and self.tiebreak_method != "total_actual_deaths":
+            raise ValueError("A required battle must follow the confirmed deaths comparison")
+        if self.resolution_type in ("total_actual_deaths", "championship_1v1"):
+            if self.tiebreak_method != self.resolution_type:
+                raise ValueError("The championship method must match its resolution")
+            winner = next(p for p in self.players if p.trainer_id == self.champion_trainer_id)
+            if self.tied_player_ids and winner.season_player_id not in self.tied_player_ids:
+                raise ValueError("The champion must belong to the reviewed tiebreak candidates")
         return self

@@ -95,6 +95,12 @@ def confirm(conn, index, actual, segment):
 
 
 def initialize(conn, total=4, two_divisions=False):
+    # A restored production copy can already have an active season. The
+    # synthetic fixture must fit the one-active index without persisting any
+    # change to that copied season; all acceptance callers roll back their
+    # transaction (concurrency uses a dedicated empty disposable database).
+    assert conn.info.host == '127.0.0.1' and not conn.autocommit
+    conn.execute("update public.seasons set status='draft' where status='active'")
     sql, v = fixture(total,two_divisions)
     conn.execute(sql)
     conn.execute('set local role service_role')

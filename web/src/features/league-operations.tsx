@@ -19,8 +19,8 @@ export function LeagueOperations({
     );
   const [review, setReview] = useState(false);
   useEffect(() => {
-    if (eligible && day?.status === "closed") setReview(true);
-  }, [eligible, day?.status]);
+    if ((eligible || me?.is_admin) && day?.status === "closed") setReview(true);
+  }, [eligible, me?.is_admin, day?.status]);
   return (
     <>
       <DayOperations
@@ -33,7 +33,10 @@ export function LeagueOperations({
         }
       />
       {review && (
-        <ChampionshipReview participant seasonName={data.season.name} />
+        <ChampionshipReview
+          participant={!me?.is_admin}
+          seasonName={data.season.name}
+        />
       )}
     </>
   );
