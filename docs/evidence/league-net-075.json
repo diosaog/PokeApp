@@ -3,7 +3,7 @@
   "source_base": "0327291",
   "date": "2026-11-02",
   "migration": "075_league_net_death_history.sql",
-  "migration_sha256": "da86fc0100961c36aacdddd2a831470b95b042e093eb720217887bb4ab24ca81",
+  "migration_sha256": "ea43eb035a1ea1e082ca342db2988960b59ce1c5056bf3f56ae35d9ba432d167",
   "scoring_contract": "league_net_v1",
   "ranking_rule": "wins_segment_deaths_v2",
   "python_checks_passed": 181,

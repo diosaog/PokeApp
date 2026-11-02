@@ -32,7 +32,7 @@ no closed snapshots and no active season. Only DB/API/web are to be published.
 - Fresh production backup **119 tables** restored exactly; 075 applies once as
   non-superuser, **97 existing application tables** keep byte-identical rows,
   compatible reads/privileges unchanged and upgraded catalog equals 001-075.
-  Migration SHA256 `da86fc0100961c36aacdddd2a831470b95b042e093eb720217887bb4ab24ca81`.
+  Migration SHA256 `ea43eb035a1ea1e082ca342db2988960b59ce1c5056bf3f56ae35d9ba432d167`.
   Machine-readable evidence: `docs/evidence/league-net-075.json`; detailed
   private evidence at `%LOCALAPPDATA%/PokeApp-migration-evidence/league-075/`.
 
