@@ -2,10 +2,10 @@
 
 ## Final League NET / death history - 2026-11-02
 
-**IMPLEMENTED / ACCEPTANCE AND MIGRATION REHEARSAL PASS; RELEASE IN PROGRESS.**
+**PUBLISHED / VERIFIED. NO PUBLICATION BLOCKERS.**
 Branch `codex/league-net-deaths-075`, based on `0327291`. Production verified
 before release: Supabase074, Railway657dcd97, Cloudflare6664ab72, Launcher0.26.9;
-no closed snapshots and no active season. Only DB/API/web are to be published.
+no closed snapshots and no active season. Only DB/API/web were published.
 
 - New prospective `league_net_v1`: every matchday global round robin, +1 per
   normal win; no position points. Decimal-exact accumulated NET subtracts only
@@ -37,8 +37,21 @@ no closed snapshots and no active season. Only DB/API/web are to be published.
   private evidence at `%LOCALAPPDATA%/PokeApp-migration-evidence/league-075/`.
 
 No real save or purchase was used. Launcher/native writer, migration074 and
-hosting/update distribution are unchanged. Publication identifiers follow below
-when verification completes.
+hosting/update distribution are unchanged. Published in safe order DB -> API -> web from committed source **`440c1d3`**
+(implementation `f57f6dd`; canonical LF migration bytes pinned by `440c1d3`).
+The exact committed LF bytes were re-rehearsed before release; no source check
+was waived. Production migration **075 / `20261102171453`** applied once.
+Railway **`9fb35778-200a-444d-b754-d496dc58f350` SUCCESS**; all **307** deployed
+Python files match the committed bundle; final Debian image gates PASS,
+health/API contract present, anonymous history access returns 401.
+Cloudflare **`552a8512-e79e-4187-8600-923ff5806fe9` active100%**; all **18** public
+HTML/config/JS/CSS hashes match the tested build. Launcher0.26.9 installer and
+Ed25519 feed unchanged. Four new history tables force RLS/no browser access
+and remain empty in production: no historical backfill or real test actions.
+Temporary readback SSH registration/generated keys removed; other keys preserved.
+Fixture clusters stopped. Release evidence is under `production-release/`.
+The undefined equal-final-NET title rule is an intentional conditional finish
+block, not a publication blocker; the owner must define it before that case.
 
 
 ## PokeApp 0.26.9 - published and verified, 2026-11-01

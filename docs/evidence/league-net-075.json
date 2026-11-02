@@ -1,5 +1,5 @@
 {
-  "status": "READY_FOR_PUBLICATION",
+  "status": "PUBLISHED_VERIFIED",
   "source_base": "0327291",
   "date": "2026-11-02",
   "migration": "075_league_net_death_history.sql",
@@ -28,10 +28,30 @@
     "existing_application_tables_unchanged": 97
   },
   "migration_rehearsal": "PASS; upgraded copy equals fresh001-075; existingrows/browserprivilegespreserved",
-  "launcher": "0.26.9 unchanged",
+  "launcher": "0.26.9 unchanged; installer size and signed feed unchanged",
   "no_real_save_writes": true,
   "no_real_purchases": true,
   "owner_decision": "Final equal NET championship tiebreak undefined; finish explicitly blocked for that condition",
   "historical_baseline": "Explicit audited source/revision-bound admin confirmation required; missingcountsareunknown",
-  "evidence_root": "%LOCALAPPDATA%/PokeApp-migration-evidence/league-075/"
+  "evidence_root": "%LOCALAPPDATA%/PokeApp-migration-evidence/league-075/",
+  "source_commit": "440c1d34d301bf1452bc50f80e7bec26adbf9251",
+  "implementation_commit": "f57f6dd",
+  "verified_at_utc": "2026-11-02T17:21:00.281331+00:00",
+  "migration_version": "20261102171453",
+  "api": {
+    "deployment_id": "9fb35778-200a-444d-b754-d496dc58f350",
+    "status": "SUCCESS",
+    "image_digest": "sha256:dc5667e65c30b0afd1dc99504be6cbf2b35a03255490f89a56b2d4996c960b53",
+    "deployed_python_files_exact": 307,
+    "health": "PASS",
+    "openapi_paths": 125,
+    "unauthenticated_admin_history_status": 401
+  },
+  "web": {
+    "version_id": "552a8512-e79e-4187-8600-923ff5806fe9",
+    "active_percent": 100,
+    "public_files_exact": 18
+  },
+  "temporary_verification_key_removed": true,
+  "publication_blockers": []
 }
