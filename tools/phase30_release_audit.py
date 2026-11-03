@@ -32,10 +32,10 @@ MIGRATIONS = sorted((ROOT / "supabase/v2/migrations").glob("*.sql"))
 # 070 (each participant's dead box, one live League total), 071 (the shop is
 # open in the preseason); 072 (in-game Shop objects delivered to the bag once,
 # audited refunds) and 073 (prospective League scoring) are deployed.
-# 074 training and 075 NET League/death history are deployed. 076 adds only
-# explicitly confirmed final championship tiebreaks, retaining old titles.
-DEPLOYED = [m for m in MIGRATIONS if int(m.name[:3]) <= 75]
-PENDING = [m for m in MIGRATIONS if int(m.name[:3]) == 76]
+# 074-076 are deployed. 077 adds only an explicit audited false-death correction;
+# its production application still requires the owner's release approval.
+DEPLOYED = [m for m in MIGRATIONS if int(m.name[:3]) <= 76]
+PENDING = [m for m in MIGRATIONS if int(m.name[:3]) == 77]
 WINDOW = f"{PENDING[0].name[:3]}-{PENDING[-1].name[:3]}"
 SCHEMAS = "('public','v1_shadow')"
 

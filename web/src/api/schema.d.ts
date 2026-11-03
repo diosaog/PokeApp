@@ -3215,6 +3215,8 @@ export interface components {
       evidence: string;
       /** Revived Entity Ids */
       revived_entity_ids?: string[];
+      /** Invalidated Event Ids */
+      invalidated_event_ids?: string[];
     };
     /** DeathHistoryEntity */
     DeathHistoryEntity: {
@@ -3281,6 +3283,10 @@ export interface components {
       can_reconcile: boolean;
       /** Recorded Deaths */
       recorded_deaths: number;
+      /** Raw Recorded Deaths */
+      raw_recorded_deaths?: number | null;
+      /** Invalidated Event Ids */
+      invalidated_event_ids?: string[];
       /** Observed Dead Entities */
       observed_dead_entities: components["schemas"]["DeathHistoryEntity"][];
       /**

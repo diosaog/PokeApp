@@ -247,6 +247,43 @@ class DeathHistoryApiTests(unittest.TestCase):
         self.assertEqual(request["body"]["expected_revision"],0)
         self.assertIn("actor_trainer_id",request)
 
+    def test_false_event_correction_is_explicit_and_preserves_old_receipt_body(self):
+        # Ordinary historical confirmations must retain their pre-correction
+        # request shape, including exact idempotency receipt hashes.
+        self.assertEqual(self.client.put(self.path,json=self.body,headers=self.headers).status_code,200)
+        self.assertNotIn("invalidated_event_ids",self.repo.calls[-1][1]["body"])
+        event_ids = [str(uuid4()), str(uuid4())]
+        response = self.client.put(self.path,
+            json={**self.body,"invalidated_event_ids":event_ids},headers=self.headers)
+        self.assertEqual(response.status_code,200)
+        operation, request = self.repo.calls[-1]
+        self.assertEqual(operation,"death_history_reconcile")
+        self.assertEqual(request["resource_id"],self.pid)
+        self.assertEqual(request["body"]["invalidated_event_ids"],sorted(event_ids))
+        self.assertIn("actor_trainer_id",request)
+
+    def test_false_event_ids_are_valid_unique_bounded_uuids(self):
+        event_id = str(uuid4())
+        for ids in ([event_id,event_id], ["not-an-event-id"], [str(uuid4()) for _ in range(501)]):
+            with self.subTest(ids=len(ids)):
+                response = self.client.put(self.path,
+                    json={**self.body,"invalidated_event_ids":ids},headers=self.headers)
+                self.assertEqual(response.status_code,422)
+        self.assertFalse(self.repo.calls)
+
+    def test_corrected_history_retains_consistent_raw_event_provenance(self):
+        event_id = str(uuid4())
+        corrected = {**self.repo.response,"recorded_deaths":4,"raw_recorded_deaths":5,
+                     "invalidated_event_ids":[event_id],"known":True,"actual_deaths":4,
+                     "wipe_deaths":0,"death_penalty_tenths":4}
+        result = DeathHistoryRead.model_validate(corrected)
+        self.assertEqual(result.raw_recorded_deaths,5)
+        self.assertEqual(result.recorded_deaths,4)
+        for change in ({"raw_recorded_deaths":4},{"invalidated_event_ids":[event_id,event_id]}):
+            with self.subTest(change=change):
+                with self.assertRaises(ValueError):
+                    DeathHistoryRead.model_validate({**corrected,**change})
+
     def test_read_and_write_require_admin_and_write_requires_idempotency(self):
         self.assertEqual(self.client.get(self.path).status_code,401)
         self.assertEqual(self.client.put(self.path,json=self.body,headers={"Authorization":"Bearer validated"}).status_code,422)

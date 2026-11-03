@@ -28,6 +28,9 @@ def _execute(op, principal, container, payload=None, season_id=None, resource_id
     request = {"actor_trainer_id": principal.trainer_id}
     if payload is not None:
         request["body"] = payload.model_dump(mode="json")
+        if op == "death_history_reconcile" and "invalidated_event_ids" not in payload.model_fields_set:
+            # Existing callers must replay their original receipt hashes exactly.
+            request["body"].pop("invalidated_event_ids", None)
         if op in ("create_config", "replace_config"):
             # Preserve exact pre-I request hashes on old-client receipt replay.
             for field in ("badge_reward_coins", "game_completion_reward_coins"):

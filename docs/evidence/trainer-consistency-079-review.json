@@ -1,0 +1,108 @@
+{
+  "status": "AWAITING_OWNER_APPROVAL_NOT_PUBLISHED",
+  "date": "2026-11-03",
+  "verified_at_utc": "2026-11-03T12:28:06.871061+00:00",
+  "base_commit": "e7feb39",
+  "production": {
+    "api": [
+      {
+        "id": "1aebe1a7-80f0-4780-a48f-1ceb8c6de265",
+        "status": "SUCCESS",
+        "imageDigest": "sha256:344df42585f53965146c40cc9dd17a557edb0bcc6f46384d6e36e48700688957",
+        "message": "Compact trainer cards and configured deadbox count; sourcea5d0f99; DB076 unchanged",
+        "created_at": "2026-11-02T18:40:52.302Z"
+      },
+      {
+        "id": "46969e2a-78f3-4dee-b648-ebf4541ed09f",
+        "status": "REMOVED",
+        "imageDigest": "sha256:a32a54399d02fa3d1ef82035dd4f559797f56e5124d3d0204043a57f91d081ab",
+        "message": "Trainer evidence scope and historical death reads; source3eea9f5; DB076 unchanged",
+        "created_at": "2026-11-02T18:20:01.413Z"
+      }
+    ],
+    "web": {
+      "id": "dc25a0ca-b71e-4be7-bb98-c41f6c3f8f89",
+      "created_on": "2026-11-02T18:42:56.450069Z",
+      "versions": [
+        {
+          "version_id": "053e50cf-a025-486f-85bc-4eb7ea4c66ac",
+          "percentage": 100
+        }
+      ]
+    },
+    "migrations": [
+      {
+        "version": "20261102180220",
+        "name": "076_final_championship_tiebreak"
+      },
+      {
+        "version": "20261102171453",
+        "name": "075_league_net_death_history"
+      },
+      {
+        "version": "20261101181732",
+        "name": "074_virtual_training"
+      }
+    ]
+  },
+  "production_business_writes": false,
+  "native_save_writes": false,
+  "purchases_or_manual_coin_credits": false,
+  "confirmed_causes": {
+    "Aaron": "Five distinct initial death events; one Gible was boxed by mistake then movedBox1/8. Owner confirms never died. No duplicateidentity/cycle, wipe, sanction or offset. Current4box vs5historical causes-0.5.",
+    "Iker": "Two personal badges/three personal Box7 occupants displayed beside League0coins/nullpoints. ZeroacceptedLeagueupload, identity, claim or retainedraw. OwnerconfirmsLeagueattribution; no currentLeague server rejection found.",
+    "other_trainers": "Anto2badges/8coins/0points correct. Aaron now2badges/8coins correct. ByVisan02/Samu personalonly,0badges/0coins/nullpoints. Fourclaims eachmatchone4cointransactionandownsource; no currentLeaguepurchases/redemptions/sanctions/closed snapshots."
+  },
+  "proposed_change": {
+    "migration": "077_false_death_event_corrections.sql",
+    "sha256": "b906bd0658b8ff38cba201e07ca5d9bd35fe87b72b3ba1dbf4a40236dda8e168",
+    "new_tables": 0,
+    "mechanism": "Explicit admin invalidated_event_ids in existing audited reconciliation; retain raw events, effectivecounthelper, trustedcurrent source/CAS/receipt guards, future actualdeath once; no formula or native-write change",
+    "Aaron_after": {
+      "visible_box": 4,
+      "effective_actual_deaths": 4,
+      "points": "-0.4",
+      "coins": 8,
+      "raw_death_events_retained": 5,
+      "other_four_trainers": "unchanged"
+    },
+    "Iker_next": "Normal authenticated original-save sync from his Launcher; after validation existing two4coinclaims once and existing075 three-deathbaseline. No promotion of personalJSON or manualmoney.",
+    "web_and_launcher": "No production UI/Launcher code change; existing0.26.11 retained"
+  },
+  "tests": {
+    "backend": 81,
+    "schema_and_release": 21,
+    "react": 24,
+    "typescript": "PASS",
+    "red_before": "RED: exact four-box/five-history/-0.5 fixture;075 blocks actual4 with409 death_history_inconsistent; explicit event correction unsupported422",
+    "green_after": "GREEN: explicit false event4/-0.4;immutable originals/provenance;source/revive/frozen/permission guards;future real death and snapshots correct",
+    "concurrency": "concurrent same confirmation:one correction/one replay,one shared resolution,five immutable raw events",
+    "regressions": {
+      "075_deaths": [
+        "ordinary + three actual comodin revivals, repeated death, movement/replay and CAS rollback",
+        "wipe five=5/-1.0, audited rearm, immutable open snapshot, reopen and revised-counter uncertainty",
+        "J1=1/J2=6/GENERAL=7, participant Box7, phase boundaries, partial-source unknown and private tables",
+        "real Python identity plans + api_register_save ordering, automatic death capture and historical save replay"
+      ],
+      "075_four_matchdays": "PASS: J1: global10matches +1wins exact5coinpayouts/2prizes close/replay; J2: global10matches +1wins exact5coinpayouts/2prizes close/replay; J3: global10matches +1wins exact5coinpayouts/2prizes close/replay; J4: global10matches +1wins exact5coinpayouts/2prizes close/replay; 12wins-2.0=10.0 loses championship to11wins-0.5=10.5; cumulativepenalties notduplicated; snapshotsstable; auditedcorrect/replay keepsoriginalrevision, equalcoinpayoutnotrepeated, twoactiveprizes",
+      "075_two_divisions": "PASS: 2divisions retain3A/2B andmovements; globalRR10pairs; globalwinnerB/lastA prizes; nextday10pairs",
+      "075_legacy": "PASS: pre075closed073 +2/rate0.1 snapshot/correctioncontractunchanged; newopen/closeblockedexplicitlegacydecision",
+      "075_guards": "PASS: double_wins rejected in authoritative SQL with exact transaction footprint unchanged; position_points rejected in authoritative SQL with exact transaction footprint unchanged; first/last prize ties block Python planning and SQL closure without actual recorded 1v1 outcomes; no partial prizes; 4wins-1.0 equals3wins: champion staysnull; finish and legacyBO3 blocked; newer source cannot rewrite frozen deaths/net totals",
+      "076_championship": "PASS: Actual075 history selects5wipe deaths over10ordinary despite equal10penaltyunits; explicit/admin/auth/stale/CAS/idempotency/frozen protections; points/wins/deaths/rewards unchanged; ThreewayNET tie -> confirmedactualdeaths narrows to2 -> recorded1v1 only; unresolvedchoice audited, no arbitrary rank or extra sporting effects; Multiwayactual1v1 proof accepted only for a unique undefeated winner covering all candidates; incomplete/cyclic/disconnected/repeated/foreign results rejected atomically; Three actual comodin revivals leave3historicaldeaths: emptycurrentbox cannot defeat equal3deaths still in the other box; recordedbattle required; UniqueNET title never offers or accepts a tiebreak; browser roles cannot execute lifecycle RPC directly; Completednormalmatches without official finalclosure cannot decide the championship"
+    },
+    "independent_SQL_review": "PASS; invalidated entity cannot be misused as a revival to suppress future real death"
+  },
+  "backup": {
+    "archive": "pre-release-20261103T120707Z.dump",
+    "sha256": "bcd1cd50e34ee74956eaed04ae43148c82835d0c193ad8b189cfc1c8cf334eaa",
+    "restored_tables_exact": 123,
+    "existing_tables_unchanged": 101,
+    "reads_unchanged": 104,
+    "grants_unchanged": true,
+    "fresh077_catalog_equal": true,
+    "actual_Aaron_rehearsal": "PASS; raw5/effective4/-0.4/8coins, idempotent, fourpeers unchanged, rollback123 fingerprints exact"
+  },
+  "deployment_authorized": false,
+  "pending_approval": "Database077/API publication and exact audited false Gible correction; normalIkeroriginalsync and source-validated baseline only after authorization",
+  "private_evidence_root": "%LOCALAPPDATA%/PokeApp-migration-evidence/trainer-079-readonly/"
+}

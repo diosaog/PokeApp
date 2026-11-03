@@ -1,5 +1,58 @@
 # Final corrections — live execution record
 
+## Trainer consistency audit / 077 review - 2026-11-03
+
+**REVIEW ONLY / NOT PUBLISHED. OWNER APPROVAL REQUIRED BEFORE ANY PRODUCTION WRITE.**
+Branch `codex/trainer-consistency-079`, base `e7feb39`. Actual production verified:
+DB076, Railway `1aebe1a7`, web `053e50cf` active100%, signed Launcher0.26.11.
+No deployment, native save write or production reconciliation was performed.
+
+- Aaron's extra0.1 is one specific Gible event: revision1Box7/1, revision2Box1/8,
+  exact same native identity/MATCHED. Five distinct initial events, offset0,
+  wipe0, no sanctions/redemptions; four current occupants. Owner now confirms
+  this Gible NEVER died and was boxed by mistake. This is a false historical
+  observation, not duplicate arithmetic or a legitimate extra sanction.
+- Iker's two badges/three occupants are personal-save facts; League source,
+  identity, claims and retained raw bytes are absent. Owner confirms this is
+  his ChampionsLocke save. Captured server logs show successful personal sync
+  before League activation and no observed subsequent League attempt for that
+  hash; no League403/409/422/5xx explains it. Local client state remains unknown.
+  Do not blame a blocked outbox or grant money from a public display alone.
+- All5 active participants checked. Anto2badges/8coins/0points; Aaron2badges/
+  8coins/-0.5currently; Iker0coins/unknownpoints; ByVisan02/Samu personal-only,
+  zero observed badges and0coins/unknownpoints. Four reward claims each match
+  one owned source and one4-coin ledger entry. No current purchases, revives,
+  penalties or closed matchdays/snapshots. No identity collision or transfer gate.
+- Prepared additive077 reuses the existing immutable resolution/audit structures:
+  explicit `invalidated_event_ids`, admin/source/CAS/idempotency, no raw deletion
+  or negative offset. Counted events exclude only audited false IDs; later real
+  death of the same Pokemon counts once. Closed references, live dead-box targets,
+  foreign events and revive/wipe ambiguity reject correction. Old request hashes
+  remain exact. No new table, scoring formula, storefront or Launcher changes.
+- API regression fails before the patch and passes after it;81 backend/24React
+  checks plus TypeScript PASS. SQL exact4box/5events/-0.5 reproduction fails old
+  reconciliation409; explicit correction yields4/-0.4 with5raw rows preserved.
+  Replay/concurrency, future death, permissions/source/frozen guards and075/076
+  scoring/death/championship regressions PASS. Independent SQL review completed.
+- Fresh read-only backup123tables SHA256
+  `bcd1cd50e34ee74956eaed04ae43148c82835d0c193ad8b189cfc1c8cf334eaa`.
+  Exact restore,101 unchanged existing tables,104 unchanged reads/browser grants,
+  and fresh001-077 catalog parity PASS. Actual Aaron case in the copied data
+  gives4/-0.4/8coins,5 immutable originals and one correction on receipt replay;
+  the other4 trainers stay identical. Full rollback restores all123 fingerprints.
+  Schema/export/release21checks PASS; the stale empty-database export inventory
+  was updated to include already-published075/076 and pending077. No old migration
+  was edited. All copied clusters are stopped/retained. Approval is still required.
+
+Private evidence: `%LOCALAPPDATA%/PokeApp-migration-evidence/trainer-079-readonly/`.
+Pending: present tested correction and affected records for approval. Iker needs
+the original save through normal authenticated League ingestion; only then can
+existing settlement issue missing claims once and075 confirm the owner-attested
+three deaths. No manual balance or personal-payload promotion is authorized.
+Concrete correction request is preserved privately in
+`backup/aaron-production-review-plan.json`, explicitly NOT_APPROVED_FOR_PRODUCTION.
+Public review evidence: `docs/evidence/trainer-consistency-079-review.json`.
+
 ## Compact trainer cards / Box7 count - 2026-11-02
 
 **PUBLISHED / VERIFIED.** Owner clarification supersedes the previous

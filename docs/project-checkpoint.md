@@ -5,6 +5,13 @@ milestone record; it does not maintain a second live phase-status ledger.
 
 ## Current project position
 
+- Trainer consistency audit /077 review (2026-11-03): **NOT PUBLISHED.**
+  Owner confirmed Aaron's extra Gible event was a mistaken box placement, not a
+  death. Reviewed/tested audit-only correction prepared; Iker's official-source
+  registration remains absent despite confirmed League attribution. Production
+  DB076/API1aebe1a7/web053e50cf/Launcher0.26.11 unchanged. Approval is required
+  before deploying or reconciling any real data. [Live record](work-in-progress/final-corrections-live.md).
+
 - Compact trainer cards /078 task (2026-11-02): **PUBLISHED / VERIFIED.**
   Removed new card/profile paragraphs; visible Puntos/Monedas/Muertos, configured
   box counts0/1/3/0/0 including validated personal previews. Owner-confirmed initial

@@ -32,6 +32,41 @@ it("shows the configured-box count and a genuinely empty box as zero", () => {
   expect(deaths()).toHaveTextContent("0");
 });
 
+it("uses the authoritative points before and after a false-event correction", () => {
+  const view = render(
+    <TrainerLeagueStats
+      row={row({
+        dead_count: 4,
+        historical_deaths: 5,
+        total_points: "-0.5",
+        coin_balance: "8",
+      })}
+    />,
+  );
+  expect(deaths()).toHaveTextContent("4");
+  expect(screen.getByText("Puntos").closest(".stat-pill")).toHaveTextContent(
+    "-0,5",
+  );
+  view.rerender(
+    <TrainerLeagueStats
+      row={row({
+        dead_count: 4,
+        historical_deaths: 4,
+        total_points: "-0.4",
+        coin_balance: "8",
+      })}
+    />,
+  );
+  expect(deaths()).toHaveTextContent("4");
+  expect(screen.getByText("Puntos").closest(".stat-pill")).toHaveTextContent(
+    "-0,4",
+  );
+  expect(screen.getByText("Monedas").closest(".stat-pill")).toHaveTextContent(
+    "8",
+  );
+  expect(view.container.querySelector("p")).toBeNull();
+});
+
 it("keeps an unreadable count unknown rather than manufacturing zero", () => {
   render(
     <TrainerLeagueStats

@@ -21,7 +21,8 @@ DEATH_HISTORY_REJECTIONS = {
         "death_history_dead_box_changed", "death_history_observation_gap",
         "death_history_segment_frozen", "death_history_start_unproven",
         "death_history_unmapped_revival", "death_history_wipe_reconciliation_required",
-        "death_history_wipe_state_unavailable"), 409),
+        "death_history_wipe_state_unavailable", "death_history_event_not_correctable",
+        "death_history_event_frozen"), 409),
     "death_history_evidence_required": 422,
 }
 REJECTIONS = {

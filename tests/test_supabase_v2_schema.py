@@ -151,6 +151,9 @@ class SupabaseV2SchemaTests(unittest.TestCase):
                 "072_shop_item_delivery.sql",
                 "073_single_day_league_rules.sql",
                 "074_virtual_training.sql",
+                "075_league_net_death_history.sql",
+                "076_final_championship_tiebreak.sql",
+                "077_false_death_event_corrections.sql",
             ],
         )
         for path in _migration_files():
@@ -361,7 +364,7 @@ class SupabaseV2SchemaTests(unittest.TestCase):
         self.assertTrue(bootstrap.startswith("-- ONLY FOR EMPTY POKEAPP V2 DATABASE."))
         self.assertEqual(bootstrap, render_bootstrap())
         self.assertIn(
-            "Source of truth: supabase/v2/migrations/001_core.sql through 074_virtual_training.sql",
+            "Source of truth: supabase/v2/migrations/001_core.sql through 077_false_death_event_corrections.sql",
             bootstrap,
         )
         self.assertNotIn("drop table", lowered)
@@ -462,7 +465,8 @@ class SupabaseV2SchemaTests(unittest.TestCase):
             else:
                 self.assertIn(f"'{table}'", security_sql, table)
 
-        self.assertEqual(security_sql.count("enable row level security"), 41)
+        # 075 adds the separately revoked death-history RLS group. 077 adds no table.
+        self.assertEqual(security_sql.count("enable row level security"), 42)
         self.assertIn("alter table public.%i enable row level security", security_sql)
 
 

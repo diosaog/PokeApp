@@ -17,8 +17,9 @@ class DeathHistoryBody(StrictBody):
     reason: Reason
     evidence: Annotated[str, Field(strict=True, min_length=1, max_length=2000)]
     revived_entity_ids: Annotated[list[UUID], Field(max_length=500)] = Field(default_factory=list)
+    invalidated_event_ids: Annotated[list[UUID], Field(max_length=500)] = Field(default_factory=list)
 
-    @field_validator("revived_entity_ids")
+    @field_validator("revived_entity_ids", "invalidated_event_ids")
     @classmethod
     def unique_entities(cls, values):
         if len(set(values)) != len(values):
@@ -60,11 +61,17 @@ class DeathHistoryRead(BaseModel):
     segment_deaths: int | None = Field(ge=0)
     can_reconcile: bool
     recorded_deaths: int = Field(ge=0)
+    raw_recorded_deaths: int | None = Field(default=None, ge=0)
+    invalidated_event_ids: list[UUID] = Field(default_factory=list)
     observed_dead_entities: list[DeathHistoryEntity]
     replayed: bool = False
 
     @model_validator(mode="after")
     def valid_evidence(self):
+        if (len(set(self.invalidated_event_ids)) != len(self.invalidated_event_ids)
+            or (self.raw_recorded_deaths is not None
+                and self.raw_recorded_deaths - len(self.invalidated_event_ids) != self.recorded_deaths)):
+            raise ValueError("Inconsistent corrected death evidence")
         if self.known and (
             self.actual_deaths is None or self.wipe_deaths is None
             or self.death_penalty_tenths != self.actual_deaths + self.wipe_deaths

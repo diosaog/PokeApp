@@ -463,6 +463,10 @@ def rehearse(args) -> dict:
                 report["phase075_unchanged_scoring"] = validate_league(pg)
                 report["phase075_legacy"] = validate_legacy(pg)
                 report["phase075_unchanged_guards"] = validate_guards(pg)
+            if migration.name.startswith("077_"):
+                from tools.validate_false_death_corrections import validate as validate_corrections
+
+                report["phase077_false_death_corrections"] = validate_corrections(pg)
 
         rows_after = local_fingerprints(pg, public_tables)
         # 072 adds the private item_deliveries table, its commands and the
