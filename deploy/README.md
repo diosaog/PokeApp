@@ -62,17 +62,47 @@ Since 2026-11-03 its Railway start command overrides the image's `sleep 5`:
 /bin/sh -c "while true; do python run_item_use_verifier.py; sleep 60; done"
 ```
 
-A turn every ~63 s instead of ~7 s cut its billed usage from ~$0.15/day (about
-80% of the project's usage, for an empty queue) while a queued job is still
+A turn every ~61 s instead of ~7 s cut its billed usage (about 80% of the
+project's usage, for an empty queue) from $0.0063 to $0.0007 per hour, measured
+on Railway billing for 18:30-19:30 UTC against the two hours before (-89%),
+while a queued job is still
 leased well inside the 2-minute `RETRY_REQUIRED` and 15-minute authorization
 limits of migrations 054/056. Revisit the cadence if robberies or item-use
-verification go live for players. Apply or revert only through a new deployment
-of the service instance, which picks up current settings
-(`serviceInstanceUpdate` startCommand, then `serviceInstanceRedeploy`);
-`deploymentRedeploy` of an old deployment keeps that deployment's own settings.
-Revert (tested 2026-11-03): set the start command to an empty string, then
-redeploy the instance; the image's `sleep 5` loop returns on the same image.
-The API ignores `startCommand: null`.
+verification go live for players.
+
+Apply or revert only with a new deployment of the service instance, which takes
+the current settings. `deploymentRedeploy` of an existing deployment keeps that
+deployment's own settings (tried 2026-11-03: the start command did not change).
+Rollback procedure, tested on production 2026-11-03 18:25 UTC (Railway GraphQL
+`https://backboard.railway.com/graphql/v2`, the owner's CLI token):
+
+1. Unset the override. The value must be the empty string `""`; the API
+   silently ignores `startCommand: null` (tried: the 60 s command stayed).
+
+   ```graphql
+   mutation { serviceInstanceUpdate(
+     environmentId: "d05ccec3-7a85-4eeb-9b01-c0f8d2111896",
+     serviceId: "0564a8f6-7d04-4ea2-ad43-0b293e8edb9e",
+     input: { startCommand: "" }) }
+   ```
+
+2. Deploy the instance with its current settings (no source change; the build
+   is a cache hit and the image digest stays the same):
+
+   ```graphql
+   mutation { serviceInstanceRedeploy(
+     environmentId: "d05ccec3-7a85-4eeb-9b01-c0f8d2111896",
+     serviceId: "0564a8f6-7d04-4ea2-ad43-0b293e8edb9e") }
+   ```
+
+3. Check: the new deployment is `SUCCESS`, its `meta.serviceManifest.deploy.
+   startCommand` is `''`, `meta.imageDigest` is unchanged
+   (`sha256:cf64f9b4...`), and its logs show `IDLE` / `TRANSFER []` every
+   ~8 s (test result: deployment `849568aa`, 9 turns, median 8.0 s, no error).
+
+To apply the 60 s cadence again, run step 1 with the command above as the
+`startCommand` value and repeat steps 2-3 expecting a turn every ~63 s (done the
+same day: deployment `2853bbc4`, the current one).
 
 Build React with `VITE_API_BASE_URL` set to the allocated HTTPS backend, then use
 the [web runbook](../web/README.md). Verify public liveness, rejected/allowed CORS,

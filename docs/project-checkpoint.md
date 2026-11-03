@@ -5,14 +5,20 @@ milestone record; it does not maintain a second live phase-status ledger.
 
 ## Current project position
 
+- **Continuation point (2026-11-03): branch `claude/api-session-isolation`, its tip
+  on `origin`.** It contains `main`, every `codex/*` branch (075-079 included) and
+  the published session fix; `release/27c-api` is superseded (`c39c2fa`). New work
+  branches from this tip, never from `codex/trainer-consistency-079` or older.
+
 - API session fix + Railway cost (2026-11-03): **PUBLISHED; VERIFIER 5s->60s.**
   Owner-approved API-only release `81eb260` (branch `claude/api-session-isolation`):
   server Supabase clients no longer keep or renew trainers' sessions and refuse
   empty tokens. Railway `3cd6aebb` SUCCESS, live 23/23, OpenAPI identical (126);
   Python1418/web302/node70 PASS. The hosted verifier (81% of usage, empty queue)
-  now polls every 60 s on the same image, rollback tested. Live token cycle and
-  Iker/ByVisan02/Samu League registrations (then admin baselines 3/0/3, 0/0/0,
-  0/0/0) wait for real use. [Live record](work-in-progress/final-corrections-live.md).
+  now polls every 60 s on the same image, rollback tested: billed usage -89%
+  (first full hour). Iker registered his League save 18:40 UTC (8 coins, 3
+  deaths); admin baseline 3/0/3 pending. ByVisan02/Samu (0/0/0) and a full live
+  token cycle wait for real use. [Live record](work-in-progress/final-corrections-live.md).
 
 - Post-Codex stabilization audit (2026-11-03): **SUPERSEDED (approved, published).**
   Iker/ByVisan02/Samu have no authenticated activity since the League started:

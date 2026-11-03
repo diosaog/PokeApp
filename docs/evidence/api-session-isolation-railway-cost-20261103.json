@@ -1,5 +1,5 @@
 {
-  "status": "API_FIX_PUBLISHED_VERIFIER_CADENCE_CHANGED",
+  "status": "CLOSED_2026-11-03: API fix published; verifier cadence measured -89%; full live token cycle and ByVisan02/Samu registrations pending real use",
   "date": "2026-11-03",
   "author": "Claude (owner-authorized stabilization release and Railway cost review)",
   "authorization": "Owner approval of 2026-11-03: publish the API-only session fix; read-only Railway cost audit; reversible low-risk Railway tuning",
@@ -26,7 +26,10 @@
       "python_files": 307,
       "python_tree_sha256": "36d803285318ebdc972a761843fcf306be483636372487774d17d2357d37350c",
       "mismatch_vs_git": 0,
-      "differs_from_live_base_77c4ec1": ["app/auth/supabase_adapter.py", "app/repositories/supabase/http.py"],
+      "differs_from_live_base_77c4ec1": [
+        "app/auth/supabase_adapter.py",
+        "app/repositories/supabase/http.py"
+      ],
       "railway_snapshot_sha256": "b34c247a6e68e02bf45e25021227ae9eeedee70e6ec646728786ea7211f53ec5",
       "build_gates": "PASS Linux production-runtime eight-game parser and native progression smoke; PASS 24 virtual training cases",
       "image_digest_build": "sha256:adf6a8bf1f9c2485c0cecb3ee4ba6472805eb9b0669d654331b745485ec287ad",
@@ -46,33 +49,95 @@
       "after_on_3cd6aebb": "23/23: health 200; OpenAPI 126 paths, document byte-identical to a5112677; 7 protected GETs anonymous 401; random/malformed/empty/basic bearer 401; refresh empty 422, missing 422, unknown token of issued shape 401 INVALID_SESSION; CORS admits web and refuses another origin; /v1 no-store; Launcher feed 0.26.11 min 0.26.0; web 200",
       "note_503": "A refresh token not shaped like Supabase's (all 190 issued are 12 chars [a-z0-9]) gets 503 AUTH_UNAVAILABLE before and after: pre-existing GoTrue answer mapping, not a client path; unchanged"
     },
-    "session_cycle_verification": "PENDING_REAL_USE"
+    "session_cycle_verification": {
+      "checked_at_utc": "2026-11-03T19:37Z",
+      "real_refreshes_through_new_api": [
+        {
+          "trainer": "Iker",
+          "session": "4cdc64e2",
+          "rotation_utc": "18:40:03",
+          "client_refresh_request": true
+        },
+        {
+          "trainer": "Anto",
+          "session": "153b47e2",
+          "rotation_utc": "19:23:27",
+          "client_refresh_request": true
+        }
+      ],
+      "server_renewal_signature": "none (no ~3590 s or sub-second double rotation)",
+      "revoked_sessions": "none",
+      "detector_validated_on": "2026-11-02 incident (Anto 623be4bf flagged FAIL)",
+      "full_token_cycle": "PENDING_REAL_USE: no client stayed connected for a full ~1 h cycle (the API slept 19:15-19:23 UTC)"
+    }
   },
   "phase_b_trainer_readiness": {
     "owner_confirmed_baselines_pending_source": {
-      "Iker": {"actual_deaths": 3, "wipe_revived": 0, "segment_deaths": 3, "expected_points": "-0.3", "expected_coins": 8, "note": "three Dead Box 7 Pokemon are genuine deaths; no wipe revival"},
-      "ByVisan02": {"actual_deaths": 0, "wipe_revived": 0, "segment_deaths": 0},
-      "Samu": {"actual_deaths": 0, "wipe_revived": 0, "segment_deaths": 0}
+      "Iker": {
+        "actual_deaths": 3,
+        "wipe_revived": 0,
+        "segment_deaths": 3,
+        "expected_points": "-0.3",
+        "expected_coins": 8,
+        "note": "three Dead Box 7 Pokemon are genuine deaths; no wipe revival"
+      },
+      "ByVisan02": {
+        "actual_deaths": 0,
+        "wipe_revived": 0,
+        "segment_deaths": 0
+      },
+      "Samu": {
+        "actual_deaths": 0,
+        "wipe_revived": 0,
+        "segment_deaths": 0
+      }
     },
     "why_pending": "PUT .../participants/{id}/death-history binds source_sha256 and expected_revision of the trainer's current League save; none of the three has one, so no valid reconciliation exists yet. Not forced, not impersonated.",
     "league_saves_verified": "2026-11-03 ~18:00 UTC: Iker, ByVisan02, Samu 0 League saves, 0 claims, 0 death events; personal saves all Pokemon Y (Iker b30a7a8b 11-02 02:25, ByVisan02 ae4e6450 10-29, Samu cfd3a021 10-29)",
     "recent_activity": "ByVisan02 session refreshed 11-03 17:17:29 UTC from a browser (CORS preflight, web reads); no Launcher sync, so no upload",
     "reward_rule": "ChampionsLocke revision 1: 4 coins per badge, 12 for completion (effective 2026-11-02 17:51:27)",
-    "next": "each trainer opens their own Launcher with their own account and correct ChampionsLocke Y save; then the admin confirms Entrenadores > Historial de muertes; coins only from normal settlement"
+    "next": "each trainer opens their own Launcher with their own account and correct ChampionsLocke Y save; then the admin confirms Entrenadores > Historial de muertes; coins only from normal settlement",
+    "update_19_37_utc": {
+      "Iker": "own Launcher registered League save b30a7a8b at 2026-11-03T18:40:09Z (the owner-confirmed save); claims badge:1=4, badge:2=4 (8 coins, normal settlement); 3 death events; league_death_history revision 1 unconfirmed -> admin confirms 3/0/3 (-0.3)",
+      "ByVisan02": "no League save",
+      "Samu": "no League save"
+    }
   },
   "phase_c_railway_baseline": {
     "plan": "Hobby, $5/month including $5 of resource usage; workspace 6265e07f; billing period 2026-10-22T16:43Z..2026-11-22T16:43Z; no usage limit set",
     "invoices": [
-      {"period": "2026-10-22..2026-11-01", "total_usd": 4.11, "status": "paid", "reading": "prorated Hobby subscription for 21.1 of 31 days ($3.40) + 21% VAT"},
-      {"next_invoice": "2026-11-22", "current_total_usd": 6.05, "reading": "$5.00 subscription + 21% VAT; usage so far inside the included $5"}
+      {
+        "period": "2026-10-22..2026-11-01",
+        "total_usd": 4.11,
+        "status": "paid",
+        "reading": "prorated Hobby subscription for 21.1 of 31 days ($3.40) + 21% VAT"
+      },
+      {
+        "next_invoice": "2026-11-22",
+        "current_total_usd": 6.05,
+        "reading": "$5.00 subscription + 21% VAT; usage so far inside the included $5"
+      }
     ],
     "services": {
       "pokeapp-api": "sleepApplication true, 1 replica EU West, Dockerfile, uvicorn 1 worker, deploy-time healthcheck /health 120 s, restart ON_FAILURE x10, limits 8 vCPU / 8 GB (plan default)",
       "pokeapp-verifier": "sleepApplication true but never sleeps, 1 replica EU West, image CMD loop: python run_item_use_verifier.py; sleep 5 (fresh Python process, imports and verify-full TLS Postgres connection every ~7.4 s), item and transfer verification enabled, limits 8 vCPU / 8 GB"
     },
-    "billed_usage_period_to_2026-11-03T18:00Z": {"total_usd": 1.0834, "verifier_usd": 0.8809, "api_usd": 0.2025, "verifier_share": "81%"},
-    "daily_billed_usage_full_days_10-29..11-02": {"verifier_usd_per_day": 0.1451, "api_usd_per_day": 0.0284, "api_range_usd_per_month": "0.35-1.51"},
-    "projected_full_month_before": {"usage_usd": 5.28, "over_included_5_usd": 0.28, "note": "plus 21% VAT on any overage; grows with League activity"},
+    "billed_usage_period_to_2026-11-03T18:00Z": {
+      "total_usd": 1.0834,
+      "verifier_usd": 0.8809,
+      "api_usd": 0.2025,
+      "verifier_share": "81%"
+    },
+    "daily_billed_usage_full_days_10-29..11-02": {
+      "verifier_usd_per_day": 0.1451,
+      "api_usd_per_day": 0.0284,
+      "api_range_usd_per_month": "0.35-1.51"
+    },
+    "projected_full_month_before": {
+      "usage_usd": 5.28,
+      "over_included_5_usd": 0.28,
+      "note": "plus 21% VAT on any overage; grows with League activity"
+    },
     "verifier_work_done": "item_use_authorizations, item_use_verifications, item_use_artifacts, item_use_transfers, item_use_transfer_legs, robbery_cycles, transfer_commit_permits, item_deliveries: 0 rows ever; logs only IDLE / TRANSFER []",
     "verifier_reachability": "API POKEAPP_ITEM_VERIFICATION_TRANSPORT_ENABLED unset; transfers only for an engineering cohort of 1 trainer and no production Launcher build can apply them",
     "api_sleep": "last ~23 h (11-02 18:41..11-03 17:56) awake ~4.4 h in 12 bursts; every wake was a real web/Launcher session except one internet GET / at 07:54 (~5 min awake); no monitor, ping or background loop; cold start ~3-4 s",
@@ -84,14 +149,65 @@
     "unchanged": "image (same digest on every deployment), code, variables (item and transfer verification still enabled), sleepApplication, region, restart policy, the API service",
     "constraints_checked": "054 authorization expiry 15 min; 056 QUEUED > 2 min reported RETRY_REQUIRED and 3-min lease; no other short time limits in 057-077; the Launcher treats transfer verification as asynchronous; a worker with no inbound traffic must never sleep (turn < 5 min)",
     "deployments": [
-      {"id": "b6088158-4d82-4846-aded-3bfce193d249", "how": "deploymentRedeploy(4cdaeef7, usePreviousImageTag)", "result": "SUCCESS but kept the old manifest (startCommand null): period still ~6.4 s; lesson recorded"},
-      {"id": "cdc2936e-8576-4443-86d0-64ec8aef2ef6", "how": "serviceInstanceRedeploy", "result": "SUCCESS, manifest with the 60 s command, same image; 7 turns, median period 63.1 s, all IDLE / TRANSFER [], 0 errors"},
-      {"id": "2e38340a-67f4-4feb-bcfb-9ab8d62ba99f", "how": "rollback attempt with startCommand null", "result": "null is ignored by serviceInstanceUpdate: still 60 s, same image"},
-      {"id": "849568aa-9cd6-42d6-a73b-4f20aa474b76", "how": "rollback test: startCommand \"\" + serviceInstanceRedeploy", "result": "SUCCESS, image CMD again: 9 turns, median 8.0 s, 0 errors (rollback path verified)"},
-      {"id": "2853bbc4-44be-453f-b4f3-7ff22a8d51cf", "how": "re-applied 60 s + serviceInstanceRedeploy", "result": "SUCCESS 18:27:51 UTC, final, same image, manifest with the 60 s command"}
+      {
+        "id": "b6088158-4d82-4846-aded-3bfce193d249",
+        "how": "deploymentRedeploy(4cdaeef7, usePreviousImageTag)",
+        "result": "SUCCESS but kept the old manifest (startCommand null): period still ~6.4 s; lesson recorded"
+      },
+      {
+        "id": "cdc2936e-8576-4443-86d0-64ec8aef2ef6",
+        "how": "serviceInstanceRedeploy",
+        "result": "SUCCESS, manifest with the 60 s command, same image; 7 turns, median period 63.1 s, all IDLE / TRANSFER [], 0 errors"
+      },
+      {
+        "id": "2e38340a-67f4-4feb-bcfb-9ab8d62ba99f",
+        "how": "rollback attempt with startCommand null",
+        "result": "null is ignored by serviceInstanceUpdate: still 60 s, same image"
+      },
+      {
+        "id": "849568aa-9cd6-42d6-a73b-4f20aa474b76",
+        "how": "rollback test: startCommand \"\" + serviceInstanceRedeploy",
+        "result": "SUCCESS, image CMD again: 9 turns, median 8.0 s, 0 errors (rollback path verified)"
+      },
+      {
+        "id": "2853bbc4-44be-453f-b4f3-7ff22a8d51cf",
+        "how": "re-applied 60 s + serviceInstanceRedeploy",
+        "result": "SUCCESS 18:27:51 UTC, final, same image, manifest with the 60 s command"
+      }
     ],
     "rollback": "serviceInstanceUpdate(startCommand: \"\") then serviceInstanceRedeploy for pokeapp-verifier; tested on production 18:25 UTC",
-    "after_measurements": "PENDING_19_32_UTC"
+    "after_measurements": {
+      "billed_usage_verifier_per_hour": {
+        "16:00-17:00_before": 0.00635,
+        "17:00-18:00_before": 0.0062,
+        "18:30-19:30_after": 0.0007
+      },
+      "cpu_vcpu_min_per_hour": {
+        "before": [
+          12.043,
+          11.525
+        ],
+        "after": 1.359
+      },
+      "ram_gb_min_per_hour": {
+        "before": [
+          2.881,
+          3.232
+        ],
+        "after": 0.249
+      },
+      "egress_gb_per_hour": {
+        "before": [
+          0.00221,
+          0.00223
+        ],
+        "after": 0.00027
+      },
+      "measured_reduction": "-89% (real, one full hour)",
+      "cadence": "68 turns 18:27-19:37, median 60.1 s, all IDLE / TRANSFER [], 0 errors",
+      "estimate_not_measured": "extrapolating one hour: ~$0.13/day and ~$4/month less usage; full month ~$1.4 usage (verifier ~$0.5 + API ~$0.9), inside Hobby's $5 included -> invoice $5 + 21% VAT; the 2026-11-22 invoice is $6.05 either way",
+      "final_state_19_37_utc": "pokeapp-api 3cd6aebb only deployment (SLEEPING when idle); pokeapp-verifier 2853bbc4 SUCCESS with the 60 s command in setting and manifest, image cf64f9b4"
+    }
   },
   "rejected_or_unnecessary": {
     "lower_cpu_or_memory_limits": "billing is by usage, not limits; plan defaults 8 vCPU / 8 GB; lowering only risks out-of-memory during save parsing",
@@ -103,5 +219,6 @@
     "railway_cron": "5-minute minimum interval exceeds the 2-minute RETRY_REQUIRED limit",
     "block_internet_scanners": "one GET / per day costs ~$0.0001; would need extra infrastructure",
     "supabase_client_lazy_init": "a few MB while awake (cents per year); not worth a code change"
-  }
+  },
+  "continuation": "Continue all new work from the tip of claude/api-session-isolation (contains main and every codex/* branch; release/27c-api superseded by c39c2fa)"
 }

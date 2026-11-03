@@ -2,8 +2,9 @@
 
 ## API session fix published; Railway verifier cadence - 2026-11-03 (Claude)
 
-**API FIX PUBLISHED AND VERIFIED; VERIFIER CADENCE 5 s -> 60 s. LIVE TOKEN CYCLE
-AND THE THREE LEAGUE REGISTRATIONS WAIT FOR REAL PLAYER USE.** Owner approved
+**API FIX PUBLISHED AND VERIFIED; VERIFIER CADENCE 5 s -> 60 s (-89% MEASURED).
+IKER REGISTERED (ADMIN BASELINE PENDING); BYVISAN02/SAMU AND A FULL LIVE TOKEN
+CYCLE WAIT FOR REAL PLAYER USE.** Owner approved
 both. Branch `claude/api-session-isolation` from `77c4ec1`, pushed. No trainer,
 coin, death, purchase, save or database data was changed.
 Evidence: `docs/evidence/api-session-isolation-railway-cost-20261103.json`.
@@ -54,6 +55,28 @@ Evidence: `docs/evidence/api-session-isolation-railway-cost-20261103.json`.
   tested on production: start command `""` -> 8.0 s period on the same image;
   null is ignored by the API. Queued jobs stay well inside the 2-minute
   `RETRY_REQUIRED` and 15-minute authorization limits; runbook in `deploy/README.md`.
+- **Closing checks (19:37 UTC).** Billed verifier usage: $0.00635 and $0.00620 in
+  the two hours before, **$0.00070 in 18:30-19:30 (-89%; CPU 11.5-12.0 -> 1.36
+  vCPU-min/h, RAM 2.9-3.2 -> 0.25 GB-min/h)**; 68 turns, median 60.1 s, 0 errors.
+  Estimate only (one hour extrapolated): ~$0.13/day, ~$4/month less usage, so a
+  full month is ~$1.4 of usage, inside the $5 included (invoice $5 + VAT); the
+  22-11 invoice is $6.05 either way. Final services: `pokeapp-api` `3cd6aebb`
+  (only deployment, sleeps when idle), `pokeapp-verifier` `2853bbc4` (60 s
+  command in setting and manifest, image `cf64f9b4...`).
+- Sessions: two real refreshes through the new API (Iker 18:40:03, Anto
+  19:23:27), both matched to client refresh requests, no 3590 s or double
+  rotation, no revoked session: PASS. No client stayed connected across a full
+  ~1 h token cycle (the API slept 19:15-19:23), so the full cycle stays
+  **PENDING REAL USE**; not claimed as verified.
+- **Iker's own Launcher registered his League save at 18:40:09 UTC**: save
+  `b30a7a8b` (the owner-confirmed ChampionsLocke save), claims badge:1 + badge:2
+  = 8 coins by normal settlement, 3 death events, death history revision 1
+  unconfirmed. Next: the admin confirms Entrenadores > Historial de muertes >
+  Iker: Muertos 3, revividas tras wipe 0, progresion actual 3 (-0.3). ByVisan02
+  and Samu: still no League save.
+- **Continue from the tip of `claude/api-session-isolation`.** It contains
+  `main`, every `codex/*` branch and these fixes; `release/27c-api` is superseded
+  (its change is in `c39c2fa`). Do not resume from `codex/trainer-consistency-079`.
 
 ## Post-Codex stabilization audit - 2026-11-03 (Claude)
 
