@@ -77,9 +77,11 @@ for (const width of [1440, 900, 390]) {
       .click();
     await expect(page.getByRole("dialog")).toBeVisible();
     await page.keyboard.press("Escape");
-    await page.locator(".profile-wipe summary").click();
+    // The own wipe counter sits right under the licence card.
+    const licence = page.locator(".profile-licence-column");
+    await expect(licence.locator(".wipe-revivals")).toBeVisible();
     await expect(
-      page.getByLabel("Cantidad de revividos tras wipe"),
+      licence.getByRole("button", { name: "Sumar un revivido" }),
     ).toBeVisible();
     await page.screenshot({
       path: info.outputPath(`own-profile-${width}.png`),

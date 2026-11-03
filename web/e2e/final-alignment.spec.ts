@@ -257,24 +257,27 @@ test("eligible participant opens and closes with current revisions and sees refr
   });
   await login(page);
   await navigate(page, "Liga");
+  // Liga › General: opening sits right below the standings.
   await page
-    .getByRole("button", { name: "Abrir jornada", exact: true })
+    .getByRole("button", { name: "Abrir jornada 4", exact: true })
     .click();
   await page
     .getByRole("dialog")
-    .getByRole("button", { name: "Confirmar", exact: true })
+    .getByRole("button", { name: "Confirmar apertura", exact: true })
     .click();
+  // The opened matchday's own tab ends with its closing control.
   await expect(
-    page.getByRole("button", { name: "Cerrar jornada", exact: true }),
+    page.getByRole("button", { name: "Cerrar jornada 4", exact: true }),
   ).toBeVisible();
   expect(commands[0].body).toEqual({ expected_revision: 2 });
   await page
-    .getByRole("button", { name: "Cerrar jornada", exact: true })
+    .getByRole("button", { name: "Cerrar jornada 4", exact: true })
     .click();
   await page
     .getByRole("dialog")
-    .getByRole("button", { name: "Confirmar", exact: true })
+    .getByRole("button", { name: "Confirmar cierre", exact: true })
     .click();
+  await page.getByRole("button", { name: "GENERAL", exact: true }).click();
   await expect(
     page.getByText("Liga pendiente de completar", { exact: true }),
   ).toBeVisible();

@@ -194,6 +194,8 @@ for (const width of [1440, 390])
       .filter({ hasText: "Ver perfil" })
       .click();
     // Personal settings open from the sidebar «Mi perfil», over this page.
+    const menu = page.getByRole("button", { name: "Abrir navegación" });
+    if (await menu.isVisible()) await menu.click();
     await page.getByRole("button", { name: "Mi perfil", exact: true }).click();
     const settings = page.getByRole("dialog", { name: "Mi perfil" });
     await expect(settings).toBeVisible();

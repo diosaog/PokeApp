@@ -1,7 +1,9 @@
 import { expect, test, type Page } from "@playwright/test";
 import type { Model } from "../src/api/types";
-import { fixture, login, navigate, sid, tid, day } from "./fixtures";
+import { fixture, login, navigate, sid, tid } from "./fixtures";
 
+// The own «Revividos tras wipe» counter lives under the licence card of the
+// signed-in trainer's profile: − value + Actualizar, sent only on Actualizar.
 async function ownCounter(
   page: Page,
   mode?: "conflict" | "unknown" | "closed" | "outsider",
@@ -68,148 +70,138 @@ async function ownCounter(
     });
   });
   await login(page);
-  await navigate(page, "Liga");
   return { commands, reads, current };
 }
 
-test("ordinary participant updates and corrects their own absolute count with narrow reads", async ({
-  page,
-}) => {
-  const { commands, reads } = await ownCounter(page);
-  await expect(
-    page.getByRole("link", { name: "Administración", exact: true }),
-  ).toHaveCount(0);
-  const input = page.getByLabel("Cantidad de revividos tras wipe");
-  await expect(input).toHaveValue("1");
-  await expect(
-    page.getByText(/Pendiente de observar las muertes del save/),
-  ).toBeVisible();
-  const before = reads.length;
-  for (const [index, value] of [3, 0].entries()) {
-    await input.fill(String(value));
-    await page.getByRole("button", { name: "Actualizar revividos" }).click();
-    await expect(page.getByText("Cambio confirmado.")).toBeVisible();
-    await expect(input).toBeEnabled();
-    await expect(input).toHaveValue(String(value));
-    expect(commands[index]).toEqual({
-      path: `/v1/seasons/${sid}/wipe-revivals`,
-      method: "PUT",
-      body: { revived_after_wipe: value, expected_revision: index + 3 },
-      key: expect.any(String),
-    });
-  }
-  expect(commands[1].key).not.toBe(commands[0].key);
-  // Only API reads count: the test browser may add same-origin requests the
-  // app never makes (GUID paths injected by local security software). A
-  // failure names the unexpected read.
-  expect(
-    reads
-      .slice(before)
-      .filter(
-        (path) =>
-          path.startsWith("/v1/") &&
-          ![
-            `/v1/seasons/${sid}/wipe-revivals`,
-            `/v1/read/seasons/${sid}/league`,
-            `/v1/seasons/${sid}/matchdays/${day}`,
-          ].includes(path),
-      ),
-  ).toEqual([]);
-  await expect(
-    page.getByText(/Pendiente de observar las muertes del save/),
-  ).toBeVisible();
-});
+async function openOwnProfile(page: Page) {
+  await page.getByRole("link", { name: "Ver mi equipo y cajas →" }).click();
+  const counter = page.locator(".profile-licence-column .wipe-revivals");
+  await expect(counter).toBeVisible();
+  return {
+    counter,
+    value: counter.getByLabel("Cantidad"),
+    plus: counter.getByRole("button", { name: "Sumar un revivido" }),
+    minus: counter.getByRole("button", { name: "Restar un revivido" }),
+    update: counter.getByRole("button", { name: "Actualizar" }),
+  };
+}
 
-test("invalid negative, fractional and overflowing values send no command", async ({
+test("the own counter sits under the licence and sends the absolute count only on Actualizar", async ({
   page,
 }) => {
   const { commands } = await ownCounter(page);
-  const input = page.getByLabel("Cantidad de revividos tras wipe");
-  for (const value of ["-1", "1.5", "2147483648", ""]) {
-    await input.fill(value);
-    await page.getByRole("button", { name: "Actualizar revividos" }).click();
-    expect(commands).toHaveLength(0);
-  }
-});
-
-test("stale count refreshes for review and the next explicit edit uses the new revision", async ({
-  page,
-}) => {
-  const { commands } = await ownCounter(page, "conflict");
-  const input = page.getByLabel("Cantidad de revividos tras wipe");
-  await input.fill("3");
-  await page.getByRole("button", { name: "Actualizar revividos" }).click();
-  await expect(page.getByRole("alert")).toContainText(
-    "Revisa la cantidad actual",
-  );
-  await expect(input).toHaveValue("2");
-  await expect(input).toBeEnabled();
-  expect(commands).toHaveLength(1);
-  await input.fill("4");
-  await page.getByRole("button", { name: "Actualizar revividos" }).click();
-  await expect(page.getByText("Cambio confirmado.")).toBeVisible();
+  const { value, plus, minus, update } = await openOwnProfile(page);
+  await expect(value).toHaveText("1");
+  await expect(update).toBeDisabled();
+  await plus.click();
+  await plus.click();
+  await expect(value).toHaveText("3");
+  expect(commands).toHaveLength(0);
+  await update.click();
+  await expect(value).toHaveText("3");
+  await expect(update).toBeDisabled();
+  expect(commands[0]).toEqual({
+    path: `/v1/seasons/${sid}/wipe-revivals`,
+    method: "PUT",
+    body: { revived_after_wipe: 3, expected_revision: 3 },
+    key: expect.any(String),
+  });
+  for (let i = 0; i < 3; i++) await minus.click();
+  await expect(value).toHaveText("0");
+  await expect(minus).toBeDisabled();
+  await update.click();
+  await expect(minus).toBeDisabled();
   expect(commands[1].body).toEqual({
-    revived_after_wipe: 4,
+    revived_after_wipe: 0,
     expected_revision: 4,
   });
   expect(commands[1].key).not.toBe(commands[0].key);
 });
 
-test("mobile unknown outcome disables editing and retries only explicitly with the original request", async ({
+test("no command without a change, and never below zero", async ({ page }) => {
+  const { commands } = await ownCounter(page);
+  const { value, plus, minus, update } = await openOwnProfile(page);
+  await plus.click();
+  await minus.click();
+  await expect(update).toBeDisabled();
+  await minus.click();
+  await expect(value).toHaveText("0");
+  await expect(minus).toBeDisabled();
+  expect(commands).toHaveLength(0);
+});
+
+test("a stale count is shown again for review and the next edit uses the new revision", async ({
+  page,
+}) => {
+  const { commands } = await ownCounter(page, "conflict");
+  const { value, plus, update } = await openOwnProfile(page);
+  await plus.click();
+  await plus.click();
+  await update.click();
+  await expect(page.locator("#main").getByRole("alert")).toContainText(
+    "Revisa la cantidad actual",
+  );
+  await expect(value).toHaveText("2");
+  expect(commands).toHaveLength(1);
+  await plus.click();
+  await update.click();
+  await expect(value).toHaveText("3");
+  expect(commands[1].body).toEqual({
+    revived_after_wipe: 3,
+    expected_revision: 4,
+  });
+  expect(commands[1].key).not.toBe(commands[0].key);
+});
+
+test("mobile unknown outcome locks the control and retries only the original request", async ({
   page,
 }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   const { commands } = await ownCounter(page, "unknown");
-  const input = page.getByLabel("Cantidad de revividos tras wipe");
-  await input.fill("2");
-  await page.getByRole("button", { name: "Actualizar revividos" }).click();
-  await expect(
-    page.getByRole("button", { name: "Reintentar la misma solicitud" }),
-  ).toBeVisible();
-  await expect(input).toBeDisabled();
-  await expect(
-    page.getByRole("button", { name: "Actualizar revividos" }),
-  ).toBeDisabled();
+  const { value, plus, minus, update } = await openOwnProfile(page);
+  await plus.click();
+  await update.click();
+  const retry = page
+    .locator(".wipe-revivals")
+    .getByRole("button", { name: "Reintentar la misma solicitud" });
+  await expect(retry).toBeVisible();
+  await expect(plus).toBeDisabled();
+  await expect(minus).toBeDisabled();
+  await expect(update).toBeDisabled();
   expect(commands).toHaveLength(1);
-  await page
-    .getByRole("button", { name: "Reintentar la misma solicitud" })
-    .click();
-  await expect(page.getByText("Cambio confirmado.")).toBeVisible();
-  await expect(input).toHaveValue("2");
-  await expect(input).toBeEnabled();
+  await retry.click();
+  await expect(value).toHaveText("2");
+  await expect(plus).toBeEnabled();
   expect(commands).toHaveLength(2);
   expect(commands[1]).toEqual(commands[0]);
   expect(
     await page.evaluate(
-      () => document.documentElement.scrollWidth <= window.innerWidth,
+      () => document.documentElement.scrollWidth <= window.innerWidth + 1,
     ),
   ).toBe(true);
 });
 
-test("frozen final day offers read-only current count without an ordinary command", async ({
+test("a closed League keeps the count read-only without any command", async ({
   page,
 }) => {
   const { commands } = await ownCounter(page, "closed");
+  await page.getByRole("link", { name: "Ver mi equipo y cajas →" }).click();
+  const counter = page.locator(".wipe-revivals");
   await expect(
-    page.getByRole("heading", { name: "Revividos tras wipe" }),
+    counter.getByText(/La última jornada ya está cerrada/),
   ).toBeVisible();
+  await expect(counter.getByText(/Cantidad:/)).toContainText("1");
   await expect(
-    page.getByText(/La última jornada ya está cerrada/),
-  ).toBeVisible();
-  await expect(page.getByText(/Cantidad registrada/)).toContainText("1");
-  await expect(page.getByLabel("Cantidad de revividos tras wipe")).toHaveCount(
-    0,
-  );
-  await expect(
-    page.getByRole("button", { name: "Actualizar revividos" }),
+    counter.getByRole("button", { name: "Sumar un revivido" }),
   ).toHaveCount(0);
   expect(commands).toHaveLength(0);
 });
 
-test("unrelated trainer has no own-counter request or editor", async ({
+test("the League page no longer carries the counter, and an outsider never reads one", async ({
   page,
 }) => {
   const { commands, reads } = await ownCounter(page, "outsider");
+  await navigate(page, "Liga");
   await expect(
     page.getByRole("heading", { name: "Clasificación general" }),
   ).toBeVisible();

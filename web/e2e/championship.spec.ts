@@ -46,7 +46,8 @@ test("review preserves exact points and requires its current title evidence to f
     page.getByRole("heading", { name: "Campeón de Liga: Lucía" }),
   ).toBeVisible();
   await expect(
-    page.getByText("-1.250000000000000001", { exact: true }),
+    // Exact digits with the app's decimal separator, never rounded.
+    page.getByText("-1,250000000000000001", { exact: true }),
   ).toBeVisible();
   await page
     .getByRole("button", { name: "Finalizar Liga", exact: true })

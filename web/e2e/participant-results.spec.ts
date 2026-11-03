@@ -118,7 +118,9 @@ test("normal non-admin participant records, edits and clears another pair; narro
     ] as const
   ).entries()) {
     await record(page, name);
-    await expect(page.getByText("Cambio confirmado.")).toBeVisible();
+    await expect(
+      page.locator("#main").getByText("Cambio confirmado."),
+    ).toBeVisible();
     await expect(dialog(page)).toHaveCount(0);
     await expect(card(page)).toBeEnabled();
     expect(requests[i].body).toEqual({
@@ -160,7 +162,9 @@ test("409 stays visible with no automatic mutation retry; automatic read obtains
   ).toBeVisible();
   expect(requests).toHaveLength(1);
   await record(page, "Elena");
-  await expect(page.getByText("Cambio confirmado.")).toBeVisible();
+  await expect(
+    page.locator("#main").getByText("Cambio confirmado."),
+  ).toBeVisible();
   expect(requests[1].body.expected_results_revision).toBe(4);
   expect(requests[1].key).not.toBe(requests[0].key);
 });
@@ -179,7 +183,9 @@ test("unknown outcome retry retains original body/key and freezes inputs", async
   await dialog(page)
     .getByRole("button", { name: "Reintentar la misma solicitud" })
     .click();
-  await expect(page.getByText("Cambio confirmado.")).toBeVisible();
+  await expect(
+    page.locator("#main").getByText("Cambio confirmado."),
+  ).toBeVisible();
   expect(requests).toHaveLength(2);
   expect(requests[1]).toEqual(requests[0]);
 });

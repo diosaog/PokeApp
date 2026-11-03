@@ -155,7 +155,8 @@ export function CloseMatchday({
   if (state.state !== "open" || state.current_matchday_id !== dayId)
     return null;
   const pending = state.matches.filter((m) => !m.winner_id);
-  const complete = state.matches.length > 0 && pending.length === 0;
+  // Every scheduled battle has a winner; the server validates it again.
+  const complete = pending.length === 0;
   const busy = cmd.pending || cmd.uncertain || query.isFetching;
   const stale = !!intent && intent.revision !== state.results_revision;
   const review = tieReview(cmd.error);
@@ -163,11 +164,13 @@ export function CloseMatchday({
     <section className="matchday-close" aria-labelledby="matchday-close-title">
       <div>
         <h2 id="matchday-close-title">
-          <Flag size={18} aria-hidden="true" /> Cerrar jornada {number}
+          <Flag size={18} aria-hidden="true" /> Cerrar la J{number}
         </h2>
         <p className={complete ? "is-ready" : "muted"}>
           {complete
-            ? "Todos los combates tienen resultado: la jornada está lista para cerrarse."
+            ? state.matches.length
+              ? "Todos los combates tienen resultado: la jornada está lista para cerrarse."
+              : "No hay combates pendientes: la jornada está lista para cerrarse."
             : `Faltan ${pending.length} ${pending.length === 1 ? "combate" : "combates"} por registrar.`}
         </p>
       </div>

@@ -22,7 +22,10 @@ test("audio-visual preferences default on, persist and apply", async ({
 
   await page.getByRole("button", { name: "Mi perfil", exact: true }).click();
   const dialog = page.getByRole("dialog", { name: "Mi perfil" });
-  await dialog.getByRole("tab", { name: "Preferencias" }).click();
+  // With accounts enabled the dialog has tabs; without them it only shows
+  // the app preferences.
+  const tab = dialog.getByRole("tab", { name: "Preferencias" });
+  if (await tab.count()) await tab.click();
   const settings = dialog.locator(".prefs-card");
   await expect(settings.getByRole("heading")).toHaveText("Ajustes de la app");
   await settings
