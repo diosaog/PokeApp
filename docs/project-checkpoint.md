@@ -10,6 +10,18 @@ milestone record; it does not maintain a second live phase-status ledger.
   the published session fix; `release/27c-api` is superseded (`c39c2fa`). New work
   branches from this tip, never from `codex/trainer-consistency-079` or older.
 
+- UX, Showdown export, public Team Lock pastes, player-managed matchdays
+  (2026-11-03): **IN PROGRESS · LOCAL ONLY · NOT PUBLISHED.** Branch
+  `claude/ux-showdown-matchdays` from `be7d73c`. Done: exact points formatter
+  (`1943da3`), «Mi perfil» settings dialog (`65e4c6a`), wipe stepper under the
+  licence (`a7b2105`), League open below standings / close at the end of each
+  J tab with no authority widened (`661fd44`, SQL proof
+  `tools/validate_player_matchdays.py`). Next: server-side Showdown serializer
+  + private «Generar Poképaste», then Pokepast.es link for confirmed Team Locks
+  in the Discord outbox. Owner decisions: the public paste excludes ability,
+  nature, IVs and EVs; one synthetic live paste is authorized. Production
+  needs explicit owner approval.
+
 - API session fix + Railway cost (2026-11-03): **PUBLISHED; VERIFIER 5s->60s.**
   Owner-approved API-only release `81eb260` (branch `claude/api-session-isolation`):
   server Supabase clients no longer keep or renew trainers' sessions and refuse
