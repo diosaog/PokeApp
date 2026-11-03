@@ -110,6 +110,30 @@ export function Profile({
   if (overview.error) return <Notice error={overview.error} />;
   if (!player)
     return <Empty>Este entrenador no está en la temporada seleccionada.</Empty>;
+  // «Licencia de entrenador» (the card's printed label, see evolution.css).
+  const licence = (
+    <Card
+      className={`profile-identity ${player.status !== "active" ? "inactive-trainer" : ""}`}
+    >
+      <TrainerPhoto
+        name={account?.display_name || player.display_name}
+        url={account?.photo_url}
+      />
+      <div>
+        <div className="tags">
+          {own && <Tag>TÚ</Tag>}
+          {player.status !== "active" && (
+            <Tag>{participantLabel(player.status)}</Tag>
+          )}
+        </div>
+        <TrainerLeagueStats row={row} />
+        <TrainerGame
+          active={active.get(trainer)}
+          seasonProgress={player.progress}
+        />
+      </div>
+    </Card>
+  );
   return (
     <>
       <Heading
@@ -117,27 +141,16 @@ export function Profile({
         title={account?.display_name || player.display_name}
       />
       <div className="profile-command-center">
-        <Card
-          className={`profile-identity ${player.status !== "active" ? "inactive-trainer" : ""}`}
-        >
-          <TrainerPhoto
-            name={account?.display_name || player.display_name}
-            url={account?.photo_url}
-          />
-          <div>
-            <div className="tags">
-              {own && <Tag>TÚ</Tag>}
-              {player.status !== "active" && (
-                <Tag>{participantLabel(player.status)}</Tag>
-              )}
-            </div>
-            <TrainerLeagueStats row={row} />
-            <TrainerGame
-              active={active.get(trainer)}
-              seasonProgress={player.progress}
-            />
+        {own ? (
+          // The licence and, just under it, the trainer's own wipe counter.
+          // Other trainers' profiles never carry this editor.
+          <div className="profile-licence-column">
+            {licence}
+            {league.data && <WipeRevivals data={league.data} />}
           </div>
-        </Card>
+        ) : (
+          licence
+        )}
         {own && (
           <aside className="profile-inventory">
             <Inventory />
@@ -145,12 +158,6 @@ export function Profile({
         )}
       </div>
       <Notice error={league.error} />
-      {own && league.data && (
-        <details className="profile-wipe">
-          <summary>Revividos tras wipe · consultar o actualizar</summary>
-          <WipeRevivals data={league.data} />
-        </details>
-      )}
       {own ? (
         <OwnSave />
       ) : (

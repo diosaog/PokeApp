@@ -81,10 +81,19 @@ beforeEach(() => {
     replayed: false,
   };
 });
-it("is compact: the count and one button, no explanatory paragraphs", () => {
+const count = () => screen.getByLabelText("Cantidad");
+const minus = () => screen.getByRole("button", { name: "Restar un revivido" });
+const plus = () => screen.getByRole("button", { name: "Sumar un revivido" });
+const update = () => screen.getByRole("button", { name: "Actualizar" });
+
+it("is a compact − value + Actualizar control with no explanatory paragraphs", () => {
   render(<WipeRevivals data={league()} />);
-  expect(screen.getByLabelText("Cantidad")).toHaveValue(1);
-  expect(screen.getByRole("button", { name: "Actualizar" })).toBeEnabled();
+  expect(
+    screen.getByRole("heading", { name: "Revividos tras wipe" }),
+  ).toBeVisible();
+  expect(count()).toHaveTextContent("1");
+  // Nothing to send until the pending value differs from the server's.
+  expect(update()).toBeDisabled();
   for (const gone of [
     /Pendiente de observar/,
     /penalización adicional/,
@@ -100,11 +109,38 @@ it("has no own-counter read or editor for an unrelated trainer", () => {
   expect(screen.queryByRole("heading")).not.toBeInTheDocument();
   expect(mocks.read).not.toHaveBeenCalled();
 });
+it("+ and − change only a pending value; nothing is sent before Actualizar", () => {
+  render(<WipeRevivals data={league()} />);
+  fireEvent.click(plus());
+  fireEvent.click(plus());
+  expect(count()).toHaveTextContent("3");
+  fireEvent.click(minus());
+  expect(count()).toHaveTextContent("2");
+  expect(screen.getByText("Sin guardar · antes: 1")).toBeVisible();
+  expect(mocks.execute).not.toHaveBeenCalled();
+  fireEvent.click(minus());
+  expect(count()).toHaveTextContent("1");
+  expect(update()).toBeDisabled();
+});
+it("never goes below zero", () => {
+  mocks.data!.revived_after_wipe = 0;
+  render(<WipeRevivals data={league()} />);
+  expect(minus()).toBeDisabled();
+  fireEvent.click(minus());
+  expect(count()).toHaveTextContent("0");
+  expect(update()).toBeDisabled();
+});
+it("stops at the server's upper bound", () => {
+  mocks.data!.revived_after_wipe = 2147483647;
+  render(<WipeRevivals data={league()} />);
+  expect(plus()).toBeDisabled();
+});
 it("submits the absolute owned count and current revision with narrow invalidation", () => {
   render(<WipeRevivals data={league()} />);
-  const input = screen.getByLabelText("Cantidad");
-  fireEvent.change(input, { target: { value: "3" } });
-  fireEvent.submit(input.closest("form")!);
+  fireEvent.click(plus());
+  fireEvent.click(plus());
+  fireEvent.click(update());
+  expect(mocks.execute).toHaveBeenCalledOnce();
   expect(mocks.execute).toHaveBeenCalledWith(
     "/v1/seasons/season/wipe-revivals",
     { revived_after_wipe: 3, expected_revision: 4 },
@@ -117,14 +153,18 @@ it("submits the absolute owned count and current revision with narrow invalidati
     "/v1/admin/seasons/season/matchdays/day",
   ]);
 });
-it("rejects negative, fractional and overflowing counts without clamping", () => {
-  render(<WipeRevivals data={league()} />);
-  const input = screen.getByLabelText("Cantidad");
-  for (const value of ["-1", "1.5", "2147483648", "1e3", ""]) {
-    fireEvent.change(input, { target: { value } });
-    fireEvent.submit(input.closest("form")!);
-  }
-  expect(mocks.execute).not.toHaveBeenCalled();
+it("shows the refreshed authoritative value after a confirmed change", () => {
+  const { rerender } = render(<WipeRevivals data={league()} />);
+  fireEvent.click(plus());
+  Object.assign(mocks.data!, { revived_after_wipe: 2, revision: 5 });
+  rerender(<WipeRevivals data={league()} />);
+  expect(count()).toHaveTextContent("2");
+  expect(update()).toBeDisabled();
+  // Another device changed it meanwhile: the server's number wins.
+  fireEvent.click(plus());
+  Object.assign(mocks.data!, { revived_after_wipe: 0, revision: 6 });
+  rerender(<WipeRevivals data={league()} />);
+  expect(count()).toHaveTextContent("0");
 });
 it("a closed league keeps its count visible without an ordinary editor", () => {
   Object.assign(mocks.data!, {
@@ -136,27 +176,34 @@ it("a closed league keeps its count visible without an ordinary editor", () => {
     screen.getByText(/La última jornada ya está cerrada/),
   ).toBeInTheDocument();
   expect(screen.getByText(/Cantidad:/)).toHaveTextContent("Cantidad: 1");
-  expect(screen.queryByRole("spinbutton")).not.toBeInTheDocument();
+  expect(
+    screen.queryByRole("button", { name: "Sumar un revivido" }),
+  ).not.toBeInTheDocument();
   expect(mocks.execute).not.toHaveBeenCalled();
 });
-it("an uncertain outcome locks the form and offers only an explicit same-request retry", () => {
+it("an uncertain outcome locks the control and offers only an explicit same-request retry", () => {
   mocks.uncertain = true;
   mocks.error = new ApiError(503, "WIPE_STATE_UNAVAILABLE");
   render(<WipeRevivals data={league()} />);
-  expect(screen.getByLabelText("Cantidad")).toBeDisabled();
-  expect(screen.getByRole("button", { name: "Actualizar" })).toBeDisabled();
+  expect(plus()).toBeDisabled();
+  expect(minus()).toBeDisabled();
+  expect(update()).toBeDisabled();
   expect(
     screen.getByRole("button", { name: "Reintentar la misma solicitud" }),
   ).toBeEnabled();
   expect(mocks.execute).not.toHaveBeenCalled();
 });
-it("a stale write refreshes the owned state and asks for review without retrying", () => {
+it("a stale write shows the reason and resets to the authoritative value", () => {
+  const { rerender } = render(<WipeRevivals data={league()} />);
+  fireEvent.click(plus());
+  expect(count()).toHaveTextContent("2");
   mocks.error = new ApiError(409, "WIPE_REVISION_CONFLICT");
-  render(<WipeRevivals data={league()} />);
+  rerender(<WipeRevivals data={league()} />);
   expect(screen.getByRole("alert")).toHaveTextContent(
     "Revisa la cantidad actual",
   );
-  // useCommand owns the single refresh; this form must not duplicate it.
+  expect(count()).toHaveTextContent("1");
+  // useCommand owns the single refresh; this control must not duplicate it.
   expect(mocks.refetch).not.toHaveBeenCalled();
   expect(mocks.execute).not.toHaveBeenCalled();
 });

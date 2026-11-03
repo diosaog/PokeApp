@@ -14,7 +14,6 @@ import {
 import { useApp, useRead, useOverview } from "../state";
 import { points } from "../points";
 import { ParticipantResults } from "./league-results";
-import { WipeRevivals } from "./wipe-revivals";
 import { gameName } from "./progress";
 import { purchaseBlock, useSummary } from "./item-uses";
 import { matchLabel } from "./admin-labels";
@@ -457,7 +456,6 @@ export function LeaguePage() {
                 <>
                   <LeagueGeneral data={data} />
                   <LeagueOperations key={data.season.id} data={data} />
-                  <WipeRevivals data={data} />
                 </>
               ) : (
                 <>

@@ -159,21 +159,6 @@
 .profile-inventory .inventory-item h3 {
   margin: 0;
 }
-.profile-wipe {
-  padding: 18px 22px;
-  border: 1px solid var(--c-line);
-  border-radius: 12px;
-  background: var(--c-bg-1);
-  margin-bottom: 22px;
-}
-.profile-wipe summary {
-  cursor: pointer;
-  color: var(--c-accent-soft);
-  font-weight: 650;
-}
-.profile-wipe .card {
-  margin: 18px 0 0;
-}
 .live-collection-heading {
   border-left: 3px solid var(--accent);
 }
@@ -790,16 +775,47 @@ button[aria-busy="true"] {
   flex: 1 1 12rem;
   margin: 0;
 }
-.wipe-revivals form fieldset {
+/* Own profile: the licence card with the wipe counter just below it. */
+.profile-licence-column {
+  display: grid;
+  gap: 14px;
+  min-width: 0;
+}
+.profile-licence-column .wipe-revivals {
+  margin: 0;
+  padding: 16px 20px;
+}
+.wipe-revivals h2 {
+  margin: 0 0 10px;
+  font-size: 1rem;
+}
+.wipe-stepper fieldset {
   display: flex;
   flex-wrap: wrap;
-  align-items: flex-end;
-  gap: 0.75rem;
+  align-items: center;
+  gap: 10px;
   border: 0;
   padding: 0;
   margin: 0;
 }
-.wipe-revivals .field {
-  flex: 0 1 10rem;
-  margin: 0;
+.wipe-stepper output {
+  min-width: 3ch;
+  text-align: center;
+  font-size: 1.5rem;
+  font-weight: 850;
+  font-variant-numeric: tabular-nums;
+}
+.wipe-stepper .icon-button {
+  width: 38px;
+  height: 38px;
+  padding: 0;
+  display: grid;
+  place-items: center;
+}
+.wipe-stepper .button.primary {
+  margin-left: auto;
+}
+.wipe-stepper .caption {
+  display: block;
+  margin-top: 6px;
 }

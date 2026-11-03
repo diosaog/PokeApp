@@ -1,19 +1,12 @@
 import { useEffect, useState } from "react";
+import { Minus, Plus } from "lucide-react";
 import { ApiError } from "../api/client";
 import type { Model } from "../api/types";
 import { useApp, useRead } from "../state";
-import {
-  Card,
-  CommandState,
-  Field,
-  Loading,
-  Notice,
-  Submit,
-  form,
-  text,
-  useCommand,
-} from "../ui";
+import { Card, CommandState, Loading, Notice, Submit, useCommand } from "../ui";
 
+// Same bound as the server contract (WipeCount, 0..2^31-1).
+const MAX_COUNT = 2147483647;
 const blockingLabels = {
   participant_inactive:
     "Tu participación ya no está activa. El recuento se conserva para consulta.",
@@ -24,7 +17,11 @@ const blockingLabels = {
     "No tienes una plaza elegible en la jornada actual para cambiar este recuento.",
 };
 
-/** A personal live counter; totals and sporting history remain server-controlled. */
+/**
+ * The signed-in trainer's own live counter, under their licence card. The
+ * server owns the value, its revision and every official consequence: − and
+ * + only change a pending number that is sent with «Actualizar».
+ */
 export function WipeRevivals({ data }: { data: Model<"LeagueGeneralRead"> }) {
   const { me } = useApp();
   const own = data.rows.find((p) => p.trainer_id === me?.trainer_id);
@@ -58,6 +55,7 @@ function OwnedWipeRevivals({
     command.error instanceof ApiError && command.error.status === 409
       ? command.error
       : null;
+  // A rejected change goes back to the authoritative value.
   useEffect(() => {
     if (!conflict) return;
     setReset((value) => value + 1);
@@ -66,32 +64,19 @@ function OwnedWipeRevivals({
   if (query.error) return <Notice error={query.error} />;
   const current = query.data;
   if (!current) return null;
-  const disabled =
-    command.pending ||
-    command.uncertain ||
-    query.isFetching ||
-    !current.editable;
+  const busy = command.pending || command.uncertain || query.isFetching;
   return (
     <Card className="wipe-revivals">
       <h2>Revividos tras wipe</h2>
-      {!current.editable && (
-        <p>
-          Cantidad: <strong>{current.revived_after_wipe}</strong>
-        </p>
-      )}
-      {current.blocking_reason && (
-        <p className="muted">{blockingLabels[current.blocking_reason]}</p>
-      )}
-      {current.editable && (
-        <form
-          key={`${current.revision}:${reset}`}
-          onSubmit={(event) => {
-            const values = form(event),
-              raw = text(values, "revived_after_wipe");
-            if (disabled || !/^[0-9]+$/.test(raw)) return;
-            const count = Number(raw);
-            if (!Number.isSafeInteger(count) || count < 0 || count > 2147483647)
-              return;
+      {current.editable ? (
+        <Stepper
+          // A new authoritative value (after any confirmed or rejected
+          // change) starts from the server's number again.
+          key={`${current.revision}:${current.revived_after_wipe}:${reset}`}
+          value={current.revived_after_wipe}
+          busy={busy}
+          pending={command.pending}
+          onSubmit={(count) =>
             void command.execute(
               path,
               {
@@ -99,29 +84,73 @@ function OwnedWipeRevivals({
                 expected_revision: current.revision,
               } satisfies Model<"SetWipeRevivalsBody">,
               "PUT",
-            );
-          }}
-        >
-          <fieldset disabled={disabled}>
-            <Field label="Cantidad">
-              <input
-                name="revived_after_wipe"
-                type="number"
-                inputMode="numeric"
-                min={0}
-                max={2147483647}
-                step={1}
-                required
-                defaultValue={current.revived_after_wipe}
-              />
-            </Field>
-            <Submit pending={command.pending} disabled={disabled}>
-              Actualizar
-            </Submit>
-          </fieldset>
-        </form>
+            )
+          }
+        />
+      ) : (
+        <p className="wipe-count">
+          Cantidad: <strong>{current.revived_after_wipe}</strong>
+        </p>
+      )}
+      {current.blocking_reason && (
+        <p className="muted">{blockingLabels[current.blocking_reason]}</p>
       )}
       <CommandState command={command} />
     </Card>
+  );
+}
+
+function Stepper({
+  value,
+  busy,
+  pending,
+  onSubmit,
+}: {
+  value: number;
+  busy: boolean;
+  pending: boolean;
+  onSubmit: (count: number) => void;
+}) {
+  const [count, setCount] = useState(value);
+  const valid = Number.isSafeInteger(count) && count >= 0 && count <= MAX_COUNT;
+  const changed = count !== value;
+  return (
+    <form
+      className="wipe-stepper"
+      onSubmit={(event) => {
+        event.preventDefault();
+        if (busy || !valid || !changed) return;
+        onSubmit(count);
+      }}
+    >
+      <fieldset disabled={busy}>
+        <legend className="sr-only">Revividos tras wipe</legend>
+        <button
+          type="button"
+          className="icon-button"
+          aria-label="Restar un revivido"
+          disabled={count <= 0}
+          onClick={() => setCount((n) => Math.max(0, n - 1))}
+        >
+          <Minus size={18} />
+        </button>
+        <output aria-live="polite" aria-label="Cantidad">
+          {count}
+        </output>
+        <button
+          type="button"
+          className="icon-button"
+          aria-label="Sumar un revivido"
+          disabled={count >= MAX_COUNT}
+          onClick={() => setCount((n) => Math.min(MAX_COUNT, n + 1))}
+        >
+          <Plus size={18} />
+        </button>
+        <Submit pending={pending} disabled={!valid || !changed}>
+          Actualizar
+        </Submit>
+      </fieldset>
+      {changed && <span className="caption">Sin guardar · antes: {value}</span>}
+    </form>
   );
 }

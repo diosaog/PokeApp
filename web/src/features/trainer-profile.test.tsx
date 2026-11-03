@@ -93,39 +93,48 @@ vi.mock("../state", () => ({
                 },
               ],
             }
-          : path.endsWith("/league")
+          : path.endsWith("/wipe-revivals")
             ? {
-                season: { id: "season", status: "active" },
-                rows: ["me", "rival"].map((trainer_id) => ({
-                  trainer_id,
-                  league_save_status: mocks.linked ? "linked" : "unlinked",
-                  coin_balance: "4",
-                  total_points: mocks.historyKnown ? "-0.6" : null,
-                  dead_count: 3,
-                  historical_deaths: mocks.historyKnown ? 6 : null,
-                  historical_deaths_status: mocks.historyKnown
-                    ? "known"
-                    : "unknown",
-                  historical_deaths_source: mocks.historyKnown
-                    ? "audited_event_history"
-                    : "death_history_baseline_required",
-                })),
-                days: [],
+                season_id: "season",
+                revived_after_wipe: 2,
+                revision: 1,
+                editable: true,
+                blocking_reason: null,
+                replayed: false,
               }
-            : path.includes("/collection")
-              ? mocks.noSave
-                ? {
-                    status: "no_current_save",
-                    reason: "no_synced_save",
-                    pokemon: [],
-                  }
-                : {
-                    status: "ready",
-                    source: "personal",
-                    game: "Y",
-                    pokemon: [],
-                  }
-              : undefined,
+            : path.endsWith("/league")
+              ? {
+                  season: { id: "season", status: "active" },
+                  rows: ["me", "rival"].map((trainer_id) => ({
+                    trainer_id,
+                    league_save_status: mocks.linked ? "linked" : "unlinked",
+                    coin_balance: "4",
+                    total_points: mocks.historyKnown ? "-0.6" : null,
+                    dead_count: 3,
+                    historical_deaths: mocks.historyKnown ? 6 : null,
+                    historical_deaths_status: mocks.historyKnown
+                      ? "known"
+                      : "unknown",
+                    historical_deaths_source: mocks.historyKnown
+                      ? "audited_event_history"
+                      : "death_history_baseline_required",
+                  })),
+                  days: [],
+                }
+              : path.includes("/collection")
+                ? mocks.noSave
+                  ? {
+                      status: "no_current_save",
+                      reason: "no_synced_save",
+                      pokemon: [],
+                    }
+                  : {
+                      status: "ready",
+                      source: "personal",
+                      game: "Y",
+                      pokemon: [],
+                    }
+                : undefined,
   }),
 }));
 vi.mock("./inventory", () => ({ Inventory: () => <p>Inventario</p> }));
@@ -301,4 +310,26 @@ it("shows a validated personal fallback without linking disclaimers or a public 
     within(identity).queryByText(/Sin partida vinculada|premios ni muertes/),
   ).toBeNull();
   expect(screen.queryByRole("button", { name: /vincular/i })).toBeNull();
+});
+
+it("the wipe counter sits right under the own licence card", () => {
+  profile("me");
+  const identity = document.querySelector(".profile-identity")!;
+  const wipe = screen
+    .getByRole("heading", { name: "Revividos tras wipe" })
+    .closest(".wipe-revivals")!;
+  expect(identity.nextElementSibling).toBe(wipe);
+  expect(identity.parentElement).toHaveClass("profile-licence-column");
+  expect(screen.getByLabelText("Cantidad")).toHaveTextContent("2");
+  expect(
+    screen.getByRole("button", { name: "Sumar un revivido" }),
+  ).toBeEnabled();
+});
+
+it("another trainer's profile never offers the wipe editor", () => {
+  profile("rival");
+  expect(
+    screen.queryByRole("button", { name: "Sumar un revivido" }),
+  ).toBeNull();
+  expect(screen.queryByRole("button", { name: "Actualizar" })).toBeNull();
 });
