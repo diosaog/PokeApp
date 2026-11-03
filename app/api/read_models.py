@@ -5,7 +5,7 @@ from decimal import Decimal
 from typing import Annotated, Literal
 from uuid import UUID
 
-from pydantic import BaseModel, Field, PlainSerializer
+from pydantic import BaseModel, Field, PlainSerializer, field_validator
 from app.api.cup_models import CupSide
 from app.api.progress_models import ProgressRead
 
@@ -98,6 +98,12 @@ class PrivatePokemonRead(PokemonRead):
     # these facts were kept. Never inferred from species or sprites.
     gender: Literal["M", "F", "N"] | None = None
     is_egg: bool | None = None
+
+    @field_validator("gender", mode="before")
+    @classmethod
+    def known_gender(cls, value):
+        # Team Lock snapshots stored before 078 carry the DTO default "".
+        return value if value in ("M", "F", "N") else None
 
 
 class LockRead(BaseModel):

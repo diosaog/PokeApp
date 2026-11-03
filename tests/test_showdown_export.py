@@ -338,6 +338,22 @@ class IngestionAndProjectionTests(unittest.TestCase):
         self.assertEqual(caught.exception.code, "SHOWDOWN_TEAM_EMPTY")
 
 
+class ReadModelTests(unittest.TestCase):
+    def test_existing_private_snapshots_with_empty_gender_still_read(self):
+        from app.api.read_models import PrivatePokemonRead
+        from app.api.team_preview_models import SelfPreviewLock
+
+        _, private = snapshots_from_parsed_payload({
+            "party": [{"slot_number": i, "pokemon": {"species": f"{SPECIES}#25", "moves": []}}
+                      for i in range(1, 7)]
+        })
+        self.assertEqual(private[0]["gender"], "")  # the stored default
+        lock = SelfPreviewLock(locked_at=datetime(2026, 11, 3, tzinfo=timezone.utc), is_late=False, team=private)
+        self.assertIsNone(lock.team[0].gender)
+        for value, expected in (("M", "M"), ("F", "F"), ("N", "N"), ("♂", None), (None, None), (0, None)):
+            self.assertEqual(PrivatePokemonRead(species="x", gender=value).gender, expected)
+
+
 class Repo:
     def __init__(self):
         self.row = None
