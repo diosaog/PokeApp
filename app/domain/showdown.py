@@ -273,6 +273,17 @@ def format_set(pokemon: Mapping, *, generation: int, projection: Projection, slo
     return "\n".join(lines)
 
 
+def public_names(pokemon: Mapping, generation: int | None = None) -> dict[str, str | None]:
+    """English species (with form) and held-item names of a public Pokémon,
+    or None where its ID has no known name. Used for public announcements."""
+    identified = _species(pokemon, generation or 7, 0, [])
+    item_id = _identify("item", pokemon.get("item")) if pokemon.get("item") else None
+    return {
+        "species": identified[1] if identified else None,
+        "item": _named(DATA["items"], item_id) or _named(DATA["items_english"], item_id),
+    }
+
+
 def export_team(team: Iterable[Mapping], *, generation: int, projection: Projection) -> ShowdownExport:
     """The importable text of up to six Pokémon, in the given order."""
     if projection not in ("private", "public"):

@@ -22,6 +22,8 @@ from decimal import Decimal, InvalidOperation
 import logging
 import re
 
+from app.application.pokemon_read_context import GAME_GENERATIONS
+from app.domain.showdown import export_team, public_names
 from app.repositories.errors import PersistenceError
 
 logger = logging.getLogger(__name__)
@@ -31,6 +33,10 @@ ACCENT, WARM, INFO, VIOLET = 0x2DE2C8, 0xFF9A4D, 0x5F9DFF, 0xA68BFF
 GOLD, MAGENTA, DANGER, LEAF, MUTED = 0xFFCC3D, 0xFF3D8B, 0xFF5C8A, 0x9BE15D, 0x9AA4D8
 
 MAX_ATTEMPTS = 8
+# Pokepast.es attempts per announcement revision; afterwards the lock is
+# announced without a link (never with an old or invented one).
+PASTE_ATTEMPTS = 3
+PASTE_URL = re.compile(r"https://pokepast\.es/[0-9a-f]{16}")
 BACKOFF_SECONDS = (10, 30, 120, 300, 900, 1800, 3600, 7200)
 LEASE = timedelta(minutes=3)
 # A post still undelivered after this long is history, not news.
@@ -280,10 +286,11 @@ def _season_started(f: Facts, s: dict) -> dict:
 
 
 def _team_locked(f: Facts, s: dict) -> dict:
+    # Only the public snapshot: the private one is never selected here.
     lock = one(
         f.read(
             "team_locks",
-            "id,season_id,matchday_id,trainer_id,public_team_snapshot,is_late,locked_at,created_at",
+            "id,season_id,matchday_id,trainer_id,public_team_snapshot,is_late,locked_at,created_at,save_file_id",
             id=s["lock_id"],
         )
     )
@@ -320,7 +327,19 @@ def _team_locked(f: Facts, s: dict) -> dict:
         fixed=fixed,
         participants=len(active),
         at=instant(lock["locked_at"]),
+        generation=_lock_generation(f, lock),
     )
+
+
+def _lock_generation(f: Facts, lock: dict) -> int | None:
+    """Game generation of the locked save (its accepted identity), for forms."""
+    if not lock.get("save_file_id"):
+        return None
+    rows = f.read("save_files", "metadata", id=lock["save_file_id"])
+    metadata = rows[0].get("metadata") if len(rows) == 1 else None
+    identity = metadata.get("save_identity") if isinstance(metadata, dict) else None
+    game = identity.get("game") if isinstance(identity, dict) else None
+    return GAME_GENERATIONS.get(game)
 
 
 def _matchday(f: Facts, s: dict) -> dict:
@@ -724,8 +743,10 @@ def _participant_status(f: Facts, s: dict) -> dict:
 # -- embeds -----------------------------------------------------------------------
 
 
-def _mon(m: dict) -> str:
-    species = clean(m.get("species"), 40)
+def _mon(m: dict, generation: int | None = None) -> str:
+    # Save IDs ("Pokémon #25", "Item #234") shown by their names.
+    names = public_names(m, generation)
+    species = clean(names["species"] or m.get("species"), 40)
     nick = clean(m.get("nickname"), 24)
     label = (
         f"{nick} ({species})" if nick and nick.lower() != species.lower() else species
@@ -734,7 +755,7 @@ def _mon(m: dict) -> str:
     if isinstance(m.get("level"), int):
         parts.append(f"Nv. {m['level']}")
     if m.get("item"):
-        parts.append(f"@ {clean(m['item'], 32)}")
+        parts.append(f"@ {clean(names['item'] or m['item'], 32)}")
     return " · ".join(parts)
 
 
@@ -770,8 +791,17 @@ def render(facts: dict) -> dict:
             lines.append("⏰ Fijado fuera de plazo.")
         if facts["revision"] > 1:
             lines.append("🔁 Equipo reemplazado mientras la jornada sigue abierta.")
+        paste = facts.get("paste")
+        if isinstance(paste, str) and PASTE_URL.fullmatch(paste):
+            lines.append(f"🔗 **Ver equipo:** {paste}")
+        elif paste is False:
+            lines.append("🔗 El enlace público del equipo no está disponible ahora.")
         fields = lines_fields(
-            "Equipo", [f"`{i}` {_mon(m)}" for i, m in enumerate(facts["team"], 1)]
+            "Equipo",
+            [
+                f"`{i}` {_mon(m, facts.get('generation'))}"
+                for i, m in enumerate(facts["team"], 1)
+            ],
         )
         fields.append(
             {
@@ -1052,6 +1082,8 @@ TEST_PAYLOAD = embed(
 
 # -- delivery ---------------------------------------------------------------------
 
+RESCHEDULED = object()  # the delivery was put back in the queue
+
 
 @dataclass
 class Dispatcher:
@@ -1062,6 +1094,8 @@ class Dispatcher:
     webhook: object
     now: object = lambda: datetime.now(UTC)
     paused_until: datetime | None = None
+    # Pokepast.es transport; None keeps announcements without a public link.
+    pastes: object | None = None
 
     def run_once(self) -> float | None:
         """Deliver what is due. Seconds until the next due row, or None when idle."""
@@ -1091,6 +1125,11 @@ class Dispatcher:
             facts = gather(
                 claimed["kind"], claimed["subject"], self.read, revision=revision
             )
+            if claimed["kind"] == "team_locked" and self.pastes is not None:
+                paste = self._public_paste(claimed, facts, edit)
+                if paste is RESCHEDULED:
+                    return True
+                facts["paste"] = paste
             payload = render(facts)
         except Skip as skip:
             logger.info(
@@ -1155,6 +1194,68 @@ class Dispatcher:
         else:
             self._close(claimed, edit, "failed", outcome.code)
         return True
+
+    def _public_paste(self, claimed, facts, edit):
+        """The link of this revision's public team: stored, new, or False.
+
+        Recorded before Discord is called, so a retried or edited message
+        reuses it. A transient failure retries the whole delivery a bounded
+        number of times; then the lock is announced without a link.
+        """
+        revision = claimed["revision"]
+        if claimed.get("public_paste_revision") == revision and claimed.get(
+            "public_paste_url"
+        ):
+            return claimed["public_paste_url"]
+        failures = (
+            claimed.get("public_paste_attempts") or 0
+            if claimed.get("public_paste_attempt_revision") == revision
+            else 0
+        )
+        if failures >= PASTE_ATTEMPTS:
+            return False
+        team = export_team(
+            facts["team"], generation=facts.get("generation") or 7, projection="public"
+        )
+        outcome = (
+            self.pastes.create(
+                paste=team.text,
+                title=f"{facts['trainer']} · Jornada {facts['matchday']}"[:120],
+                author="PokeApp",
+                notes=f"Team Lock oficial · {facts['season']}"[:120],
+            )
+            if team.count
+            else None
+        )
+        if outcome is not None and outcome.url and PASTE_URL.fullmatch(outcome.url):
+            fields = dict(
+                public_paste_url=outcome.url,
+                public_paste_revision=revision,
+                public_paste_error=None,
+            )
+            self.outbox.update(claimed, fields)
+            claimed.update(fields)
+            return outcome.url
+        code = outcome.code if outcome is not None else "pokepaste_empty_team"
+        retry = outcome is not None and outcome.retry
+        failures = failures + 1 if retry else PASTE_ATTEMPTS
+        fields = dict(
+            public_paste_attempt_revision=revision,
+            public_paste_attempts=failures,
+            public_paste_error=code,
+        )
+        self.outbox.update(claimed, fields)
+        claimed.update(fields)
+        logger.info(
+            "discord_announcement id=%s public_paste=%s attempt=%s",
+            claimed["id"],
+            code,
+            failures,
+        )
+        if retry and failures < PASTE_ATTEMPTS:
+            self._retry(claimed, edit, code, 0)
+            return RESCHEDULED
+        return False
 
     def _close(self, row, edit, status, code):
         if edit:  # keep the message as it is; stop editing it

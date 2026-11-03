@@ -73,13 +73,17 @@ def create_announcer(config):
     from app.application.announcements import Dispatcher
     from app.repositories.supabase.announcements import SupabaseAnnouncementRepository
 
+    pastes = config.public_team_pastes_enabled
     repository = SupabaseAnnouncementRepository.from_url_key(
-        config.supabase_url, config.supabase_service_role_key
+        config.supabase_url, config.supabase_service_role_key, public_pastes=pastes
     )
+    if pastes:
+        from app.application.pokepaste import Pokepaste
     return Announcer(
         Dispatcher(
             outbox=repository,
             read=repository.rows,
             webhook=DiscordWebhook(config.discord_webhook_url),
+            pastes=Pokepaste() if pastes else None,
         )
     )

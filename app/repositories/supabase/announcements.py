@@ -8,6 +8,9 @@ from app.repositories.errors import PersistenceError
 
 TABLE = "discord_announcements"
 COLUMNS = "id,kind,season_id,subject,status,revision,delivered_revision,attempts,discord_message_id,created_at,claimed_at"
+# 078: only read when public Team Lock pastes are enabled, so this API keeps
+# working against a database without that migration while they are off.
+PASTE_COLUMNS = ",public_paste_url,public_paste_revision,public_paste_attempt_revision,public_paste_attempts,public_paste_error"
 # Every source read is bounded, below the API's 1000-row cap so that a
 # truncated answer is detected instead of read as complete.
 READ_LIMIT = 999
@@ -18,14 +21,15 @@ def _iso(stamp: datetime) -> str:
 
 
 class SupabaseAnnouncementRepository:
-    def __init__(self, client):
+    def __init__(self, client, *, public_pastes=False):
         self._client = client
+        self._columns = COLUMNS + (PASTE_COLUMNS if public_pastes else "")
 
     @classmethod
-    def from_url_key(cls, url, key):
+    def from_url_key(cls, url, key, *, public_pastes=False):
         from app.repositories.supabase.http import create_client
 
-        return cls(create_client(url, key))
+        return cls(create_client(url, key), public_pastes=public_pastes)
 
     def _run(self, query):
         try:
@@ -84,7 +88,7 @@ class SupabaseAnnouncementRepository:
     def due(self, now, limit):
         return self._run(
             self._client.table(TABLE)
-            .select(COLUMNS)
+            .select(self._columns)
             .eq("awaiting_delivery", True)
             .lte("next_attempt_at", _iso(now))
             .order("next_attempt_at")
@@ -120,7 +124,7 @@ class SupabaseAnnouncementRepository:
         )
         if len(rows) != 1:
             return None
-        return {key: rows[0][key] for key in COLUMNS.split(",")}
+        return {key: rows[0][key] for key in self._columns.split(",")}
 
     def update(self, claim, fields):
         rows = self._run(

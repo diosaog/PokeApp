@@ -26,6 +26,8 @@ class APIConfig:
     admin_incidents_enabled: bool = False
     # «Aaron Avisa!»: the URL carries the webhook token; server secret only.
     discord_webhook_url: str = field(default="", repr=False)
+    # Public Pokepast.es link in Team Lock announcements; needs migration 078.
+    public_team_pastes_enabled: bool = False
     registration_access_code: str = field(default="", repr=False)
     registration_bootstrap_hash: str = field(default="", repr=False)
     credential_keyring: object | None = field(default=None, repr=False)
@@ -108,6 +110,8 @@ class APIConfig:
             if versioned
             else None,
             discord_webhook_url=source.get("POKEAPP_DISCORD_WEBHOOK_URL", "").strip(),
+            public_team_pastes_enabled=source.get("POKEAPP_PUBLIC_TEAM_PASTES_ENABLED")
+            == "true",
             registration_access_code=source.get("POKEAPP_REGISTRATION_ACCESS_CODE", ""),
             registration_bootstrap_hash=source.get(
                 "POKEAPP_REGISTRATION_BOOTSTRAP_HASH", ""
