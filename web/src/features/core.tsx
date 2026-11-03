@@ -18,6 +18,7 @@ import { gameName } from "./progress";
 import { purchaseBlock, useSummary } from "./item-uses";
 import { matchLabel } from "./admin-labels";
 import { LeagueOperations } from "./league-operations";
+import { CloseMatchday } from "./league-matchday";
 import { TeamLockWarning } from "./team-lock-warning";
 import {
   Card,
@@ -205,6 +206,9 @@ function LeagueDay({ dayId }: { dayId: string }) {
         const global =
           !snapshot ||
           snapshot.standings.some((s) => s.actual_segment_deaths != null);
+        const scheduled =
+          data.season.current_matchday_id === dayId &&
+          data.days.some((d) => d.id === dayId && d.status === "scheduled");
         const canRecord =
           data.season.status === "active" &&
           data.season.current_matchday_id === dayId &&
@@ -309,7 +313,14 @@ function LeagueDay({ dayId }: { dayId: string }) {
                   lock.trainer_id === me?.trainer_id &&
                   lock.matchday_id === dayId,
               ) && <TeamLockWarning own />}
-            <h2>Enfrentamientos</h2>
+            {scheduled ? (
+              <Empty>
+                Esta jornada aún no está abierta. Se abre desde General, debajo
+                de la clasificación.
+              </Empty>
+            ) : (
+              <h2>Enfrentamientos</h2>
+            )}
             {canRecord ? (
               <ParticipantResults
                 key={`${data.season.id}:${dayId}`}
@@ -339,6 +350,17 @@ function LeagueDay({ dayId }: { dayId: string }) {
                     ))}
                 </div>
               </>
+            )}
+            {canRecord && (
+              // The end of the matchday's own page: its closing control.
+              <CloseMatchday
+                key={`close:${data.season.id}:${dayId}`}
+                seasonId={data.season.id}
+                dayId={dayId}
+                number={data.days.find((day) => day.id === dayId)?.number}
+                single={data.divisions.length <= 1}
+                name={(id) => playerName(data, id)}
+              />
             )}
           </>
         );
@@ -455,7 +477,13 @@ export function LeaguePage() {
               {!day ? (
                 <>
                   <LeagueGeneral data={data} />
-                  <LeagueOperations key={data.season.id} data={data} />
+                  <LeagueOperations
+                    key={data.season.id}
+                    data={data}
+                    onShowDay={(id) =>
+                      setSelected({ season: data.season.id, day: id })
+                    }
+                  />
                 </>
               ) : (
                 <>

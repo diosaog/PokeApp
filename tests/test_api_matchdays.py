@@ -49,6 +49,36 @@ class MatchdayApiTests(unittest.TestCase):
         self.assertEqual(self.post(headers={'Idempotency-Key':'x'}).status_code,401)
         self.assertFalse(self.repo.calls)
 
+    def test_participant_routes_refuse_anonymous_callers(self):
+        base=f'/v1/seasons/{SID}/matchdays/{DID}'
+        for method,path,body in (('post','/open',{'expected_revision':0}),
+                ('post','/close',{'expected_results_revision':0}),
+                ('put','/results',{'expected_results_revision':0,'results':[dict(match_id=MID,winner_season_player_id=None)]}),
+                ('get','',None)):
+            with self.subTest(path=path or 'state'):
+                call=getattr(self.client,method)
+                kwargs={'headers':{'Idempotency-Key':'x'}}
+                if body is not None: kwargs['json']=body
+                self.assertEqual(call(base+path,**kwargs).status_code,401)
+        self.assertFalse(self.repo.calls)
+
+    def test_participant_open_and_close_reach_sql_as_the_caller_not_as_admin(self):
+        # Season membership and activity are enforced by the SQL principal
+        # (tools/validate_player_matchdays.py); the API forwards only the
+        # authenticated caller and never a client-supplied authority.
+        self.principals.trainer=replace(self.principals.trainer,is_admin=False)
+        base=f'/v1/seasons/{SID}/matchdays/{DID}'
+        self.assertEqual(self.client.post(base+'/open',json={'expected_revision':0},headers=self.headers).status_code,200)
+        self.repo.response=dict(self.repo.response,state='closed')
+        self.assertEqual(self.client.post(base+'/close',json={'expected_results_revision':1},headers=self.headers).status_code,200)
+        self.assertEqual([c[0] for c in self.repo.calls],['open','close'])
+        self.assertTrue(all(c[1]['actor_trainer_id']==TRAINER_ID for c in self.repo.calls))
+        for name in ('actor_trainer_id','is_admin','plan'):
+            self.assertEqual(self.client.post(base+'/open',json={'expected_revision':0,name:TRAINER_ID},headers=self.headers).status_code,422)
+        # Exceptional operations have no participant route at all.
+        for op in ('cancel-editing','correct'):
+            self.assertIn(self.client.post(base+'/'+op,json={},headers=self.headers).status_code,(404,405))
+
     def test_invalid_bearer(self):
         self.tokens.fail=InvalidSessionError()
         self.assertEqual(self.post().status_code,401)

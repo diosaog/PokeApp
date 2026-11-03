@@ -1,14 +1,19 @@
 import { useState, useEffect } from "react";
 import type { Model } from "../api/types";
-import { useApp, useRead } from "../state";
-import { Card, CommandState, Modal, Notice, form, useCommand } from "../ui";
+import { useApp } from "../state";
 import { ChampionshipReview } from "./championship";
-import { DailyTieFields, readTieResolution, tieReview } from "./daily-ties";
+import { OpenMatchday } from "./league-matchday";
 
+// Liga › General, below the standings: opening the next matchday, and the
+// final championship review (076: its own audited workflow and permissions,
+// unchanged) once the last matchday is closed. Closing a matchday lives at
+// the bottom of that matchday's own tab.
 export function LeagueOperations({
   data,
+  onShowDay = () => {},
 }: {
   data: Model<"LeagueGeneralRead">;
+  onShowDay?: (dayId: string) => void;
 }) {
   const { me } = useApp(),
     day = data.days.find((d) => d.id === data.season.current_matchday_id);
@@ -23,15 +28,7 @@ export function LeagueOperations({
   }, [eligible, me?.is_admin, day?.status]);
   return (
     <>
-      <DayOperations
-        season={data.season.id}
-        day={day}
-        eligible={eligible}
-        name={(id) =>
-          data.rows.find((row) => row.season_player_id === id)?.display_name ??
-          "Participante"
-        }
-      />
+      <OpenMatchday data={data} onShowDay={onShowDay} />
       {review && (
         <ChampionshipReview
           participant={!me?.is_admin}
@@ -39,114 +36,5 @@ export function LeagueOperations({
         />
       )}
     </>
-  );
-}
-function DayOperations({
-  season,
-  day,
-  eligible,
-  name,
-}: {
-  season: string;
-  day?: Model<"DayRead">;
-  eligible: boolean;
-  name: (id: string) => string;
-}) {
-  const base = `/v1/seasons/${season}/matchdays/${day?.id}`,
-    query = useRead<Model<"DayState">>(
-      base,
-      eligible && !!day && day.status !== "closed",
-    );
-  const cmd = useCommand(),
-    { holdAdminNavigation } = useApp();
-  const [intent, setIntent] = useState<{
-    op: "open" | "close";
-    revision: number;
-    base: string;
-  } | null>(null);
-  useEffect(() => {
-    if ((cmd.pending || cmd.uncertain) && holdAdminNavigation)
-      return holdAdminNavigation();
-  }, [cmd.pending, cmd.uncertain, holdAdminNavigation]);
-  const state = query.data,
-    op =
-      !eligible || day?.status === "closed"
-        ? null
-        : state?.state === "scheduled"
-          ? "open"
-          : state?.state === "open"
-            ? "close"
-            : null;
-  const revision = op === "open" ? state?.revision : state?.results_revision;
-  const stale =
-    intent &&
-    (intent.op !== op || intent.revision !== revision || intent.base !== base);
-  const busy = cmd.pending || cmd.uncertain || query.isFetching;
-  const label = op === "open" ? "Abrir jornada" : "Cerrar jornada";
-  const review = tieReview(cmd.error);
-  if (!eligible && !intent && !cmd.uncertain) return null;
-  return (
-    <Card>
-      <h2>Jornada {day?.number}</h2>
-      <Notice error={query.error} />
-      {op && (
-        <button
-          className="button"
-          disabled={busy}
-          onClick={() => setIntent({ op, revision: revision!, base })}
-        >
-          {label}
-        </button>
-      )}
-      {!intent && <CommandState command={cmd} />}
-      {intent && (
-        <Modal
-          title={intent.op === "open" ? "Abrir jornada" : "Cerrar jornada"}
-          onClose={() => {
-            if (!cmd.pending && !cmd.uncertain) setIntent(null);
-          }}
-        >
-          <p>
-            {intent.op === "open"
-              ? "Se fijarán las muertes de la progresión con las partidas sincronizadas. Después los participantes podrán registrar los combates de esta jornada. Si falta evidencia, la apertura quedará bloqueada."
-              : "Se guardará la clasificación oficial y se concederán sus premios."}
-          </p>
-          {stale && (
-            <p role="alert">
-              La jornada cambió. Revisa su estado antes de confirmar.
-            </p>
-          )}
-          <form
-            onSubmit={async (event) => {
-              const values = form(event);
-              if (busy || stale) return;
-              const resolution = readTieResolution(values, review);
-              if (
-                await cmd.execute(
-                  `${intent.base}/${intent.op}`,
-                  intent.op === "open"
-                    ? { expected_revision: intent.revision }
-                    : {
-                        expected_results_revision: intent.revision,
-                        ...(resolution ? { tie_resolution: resolution } : {}),
-                      },
-                )
-              )
-                setIntent(null);
-            }}
-          >
-            <fieldset disabled={busy || !!stale}>
-              {intent.op === "close" && (
-                <DailyTieFields review={review} name={name} single />
-              )}
-              <button className="button primary" disabled={busy || !!stale}>
-                Confirmar
-              </button>
-            </fieldset>
-          </form>
-          <CommandState command={cmd} />
-        </Modal>
-      )}
-    </Card>
   );
 }

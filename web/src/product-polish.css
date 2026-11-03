@@ -819,3 +819,66 @@ button[aria-busy="true"] {
   display: block;
   margin-top: 6px;
 }
+
+/* ---------- Liga: ordinary matchday actions for participants ---------- */
+.matchday-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px 16px;
+  margin: -6px 0 22px;
+  padding: 14px 18px;
+  border: 1px solid var(--c-line);
+  border-left: 3px solid var(--accent);
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--c-bg-1) 88%, transparent);
+}
+.matchday-bar > span {
+  flex: 1 1 16rem;
+}
+.matchday-bar.is-open {
+  border-left-color: var(--c-gold, var(--accent));
+}
+.matchday-bar > .notice,
+.matchday-bar > [role="status"],
+.matchday-bar > .success {
+  flex-basis: 100%;
+}
+.matchday-close {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px 18px;
+  margin-top: 26px;
+  padding: 18px 20px;
+  border: 1px solid var(--c-line);
+  border-top: 2px solid var(--accent);
+  border-radius: 14px;
+  background: color-mix(in srgb, var(--c-bg-1) 90%, transparent);
+}
+.matchday-close h2 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 4px;
+  font-size: 1.05rem;
+}
+.matchday-close p {
+  margin: 0;
+}
+.matchday-close p.is-ready {
+  color: var(--c-accent-soft, var(--accent));
+  font-weight: 650;
+}
+.matchday-close > .notice,
+.matchday-close > [role="status"],
+.matchday-close > .success {
+  flex-basis: 100%;
+}
+.matchday-close-summary {
+  margin: 0 0 16px;
+  padding-left: 18px;
+  display: grid;
+  gap: 4px;
+}
