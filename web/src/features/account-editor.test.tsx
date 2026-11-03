@@ -6,7 +6,11 @@ import {
   screen,
   waitFor,
 } from "@testing-library/react";
-import { AccountEditor, PinForm, pinRecoveryKey } from "./account-editor";
+import {
+  AccountIdentityForms,
+  PinForm,
+  pinRecoveryKey,
+} from "./account-editor";
 import { ApiError } from "../api/client";
 
 const mocks = vi.hoisted(() => ({
@@ -73,7 +77,7 @@ it("requires independent renewal authorization, preserves retry, and stores only
   });
 });
 it("renames only the current account with its revision", async () => {
-  render(<AccountEditor profile={profile} refresh={vi.fn()} />);
+  render(<AccountIdentityForms profile={profile} refresh={vi.fn()} />);
   fireEvent.change(screen.getByLabelText("Nombre de entrenador"), {
     target: { value: "Nuevo" },
   });
@@ -88,7 +92,7 @@ it("renames only the current account with its revision", async () => {
 });
 it("keeps the exact profile key and body after a lost response", async () => {
   mocks.request.mockRejectedValueOnce(new ApiError(0, "NETWORK_ERROR"));
-  render(<AccountEditor profile={profile} refresh={vi.fn()} />);
+  render(<AccountIdentityForms profile={profile} refresh={vi.fn()} />);
   fireEvent.click(screen.getByRole("button", { name: "Guardar nombre" }));
   fireEvent.click(
     await screen.findByRole("button", {

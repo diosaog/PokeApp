@@ -1,5 +1,5 @@
 import { test, expect } from "@playwright/test";
-import { fixture, login, navigate, tid } from "./fixtures";
+import { fixture, login } from "./fixtures";
 
 // Artistic Evolution: sounds and animations are on by default, can be changed
 // from the own profile, persist in this browser and never break the page.
@@ -20,9 +20,10 @@ test("audio-visual preferences default on, persist and apply", async ({
     page.locator(".home-sprites .pokemon-sprite").first(),
   ).toHaveAttribute("src", /animated.*gif/);
 
-  await navigate(page, "Entrenadores");
-  await page.locator(`a[href='/entrenadores/${tid}']`).first().click();
-  const settings = page.locator(".prefs-card");
+  await page.getByRole("button", { name: "Mi perfil", exact: true }).click();
+  const dialog = page.getByRole("dialog", { name: "Mi perfil" });
+  await dialog.getByRole("tab", { name: "Preferencias" }).click();
+  const settings = dialog.locator(".prefs-card");
   await expect(settings.getByRole("heading")).toHaveText("Ajustes de la app");
   await settings
     .getByRole("group", { name: "Animaciones" })

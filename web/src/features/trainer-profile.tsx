@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import type { Model } from "../api/types";
-import { queries, useApp, useMyPC, useOverview, useRead } from "../state";
+import { useApp, useMyPC, useOverview, useRead } from "../state";
 import { Card, Empty, Heading, Loading, Notice, Tag } from "../ui";
 import { Pokemon, WithSeason } from "./core";
 import {
@@ -16,8 +16,7 @@ import { Inventory } from "./inventory";
 import { WipeRevivals } from "./wipe-revivals";
 import { PokemonDetailModal } from "./pokemon-details";
 import { participantLabel } from "./admin-labels";
-import { AccountEditor, type AccountProfile } from "./account-editor";
-import { PreferencesCard } from "./preferences";
+import { type AccountProfile } from "./account-editor";
 import { TrainerLeagueStats } from "./trainer-league-stats";
 
 export function TrainerProfilePage() {
@@ -36,26 +35,16 @@ export function TrainerProfilePage() {
     </>
   );
 }
+// Personal settings (name, photo, PIN, sound, animations) live in the «Mi
+// perfil» dialog of the sidebar; the trainer page is about the trainer.
 function AccountProfileView({ trainer }: { trainer: string }) {
-  const { me, season, adminOperationPending } = useApp(),
+  const { me, season } = useApp(),
     profile = useRead<AccountProfile>(`/v1/accounts/${trainer}`),
     overview = useOverview();
-  const [editing, setEditing] = useState(false);
   if (profile.isPending) return <Loading />;
   if (!profile.data) return <Notice error={profile.error} />;
   const own = trainer === me?.trainer_id,
     member = overview.data?.players.some((p) => p.trainer_id === trainer);
-  async function refresh() {
-    await queries.invalidateQueries({
-      predicate: (q) =>
-        q.queryKey[0] === me?.trainer_id &&
-        (String(q.queryKey[1]).startsWith("/v1/accounts") ||
-          String(q.queryKey[1]) === "/v1/read/trainers" ||
-          new RegExp(
-            `/seasons/${season}/(overview|league|team-preview|scouting|setup)`,
-          ).test(String(q.queryKey[1]))),
-    });
-  }
   return (
     <>
       <Link className="text-link" to="/entrenadores">
@@ -84,22 +73,6 @@ function AccountProfileView({ trainer }: { trainer: string }) {
           </Card>
           {own && <OwnSave />}
         </>
-      )}
-      {own && (
-        // Personal options, at the very end of the trainer's own profile.
-        <section className="profile-personal" aria-label="Opciones personales">
-          <button
-            className="button primary"
-            disabled={adminOperationPending}
-            onClick={() => setEditing(!editing)}
-          >
-            Editar mi perfil
-          </button>
-          {editing && (
-            <AccountEditor profile={profile.data} refresh={refresh} />
-          )}
-          <PreferencesCard />
-        </section>
       )}
     </>
   );
@@ -255,9 +228,6 @@ export function Profile({
           />
         </SpriteGeneration>
       )}
-      {/* Without accounts there is no «Editar mi perfil» block: the app
-          settings still close the trainer's own profile. */}
-      {own && !account && <PreferencesCard />}
     </>
   );
 }

@@ -1,5 +1,5 @@
 import { Volume2, VolumeX } from "lucide-react";
-import { Card, Tag } from "../ui";
+import { Tag } from "../ui";
 import { usePrefs, useReducedMotion, writePrefs } from "../preferences";
 import { play } from "../sound";
 
@@ -30,15 +30,16 @@ function Choice({
   );
 }
 
-// Own profile: how PokeApp looks and sounds on this device.
-export function PreferencesCard() {
+// «Mi perfil» › Preferencias: how PokeApp looks and sounds on this device.
+// Each choice applies and persists at once; nothing is left unsaved.
+export function PreferencesPanel() {
   const prefs = usePrefs(),
     reduced = useReducedMotion(),
     systemAsks = reduced && prefs.motion === "full";
   return (
-    <Card className="prefs-card">
+    <div className="prefs-card">
       <div className="section-row">
-        <h2>Ajustes de la app</h2>
+        <h3>Ajustes de la app</h3>
         <Tag>En este dispositivo</Tag>
       </div>
       <div className="pref-row">
@@ -96,7 +97,7 @@ export function PreferencesCard() {
           }
         />
       </div>
-    </Card>
+    </div>
   );
 }
 

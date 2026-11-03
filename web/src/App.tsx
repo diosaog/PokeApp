@@ -94,6 +94,7 @@ import { RegistrationForm } from "./features/registration";
 import { PinForm, pinRecoveryKey } from "./features/account-editor";
 import { play } from "./sound";
 import { SoundToggle } from "./features/preferences";
+import { ProfileSettings } from "./features/profile-settings";
 const AdminAccountsPage = lazy(() =>
   import("./features/admin-accounts").then((m) => ({
     default: m.AdminAccountsPage,
@@ -333,6 +334,7 @@ export default function App() {
   const { me, restoring, logout, adminOperationPending, accountsEnabled } =
       useApp(),
     [menu, setMenu] = useState(false),
+    [settings, setSettings] = useState(false),
     location = useLocation(),
     visited = useRef(location.pathname);
   const signedIn = Boolean(me);
@@ -469,17 +471,18 @@ export default function App() {
           <div>
             <strong>{me.display_name}</strong>
             <span>{me.is_admin ? "Administrador" : "Entrenador"}</span>
-            {accountsEnabled && (
-              <Link
-                to={`/entrenadores/${me.trainer_id}`}
-                onClick={(e) => {
-                  if (adminOperationPending) e.preventDefault();
-                  else setMenu(false);
-                }}
-              >
-                Mi perfil
-              </Link>
-            )}
+            <button
+              type="button"
+              className="profile-open"
+              aria-haspopup="dialog"
+              disabled={adminOperationPending}
+              onClick={() => {
+                setMenu(false);
+                setSettings(true);
+              }}
+            >
+              Mi perfil
+            </button>
           </div>
           <SoundToggle />
           <button
@@ -492,6 +495,7 @@ export default function App() {
           </button>
         </div>
       </aside>
+      {settings && <ProfileSettings onClose={() => setSettings(false)} />}
       <div className="workspace">
         {/* Decorative light of the current area; a new node per area keeps
             route changes free of layout shift. */}

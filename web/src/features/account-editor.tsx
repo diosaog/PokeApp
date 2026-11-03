@@ -198,7 +198,8 @@ export function PinForm({
   );
 }
 
-export function AccountEditor({
+/** Name and photo of the signed-in trainer («Mi perfil» › Perfil). */
+export function AccountIdentityForms({
   profile,
   refresh,
 }: {
@@ -206,6 +207,7 @@ export function AccountEditor({
   refresh: () => Promise<unknown>;
 }) {
   const { me, setMe, holdAdminNavigation } = useApp();
+  const photoForm = useRef<HTMLFormElement>(null);
   const [pending, setPending] = useState(false),
     [error, setError] = useState<unknown>(null);
   const [retry, setRetry] = useState(false),
@@ -228,6 +230,8 @@ export function AccountEditor({
     try {
       await api.request(saved.path, saved.init);
       if (saved.name && me) setMe({ ...me, display_name: saved.name });
+      // A confirmed photo is no longer an unsaved selection.
+      if (!saved.name) photoForm.current?.reset();
       intent.current = null;
       setRetry(false);
       setSuccess(true);
@@ -247,94 +251,91 @@ export function AccountEditor({
     }
   }
   return (
-    <>
-      <Card>
-        <h2>Editar mi perfil</h2>
-        <form
-          onSubmit={(event) => {
-            const data = form(event);
-            if (pending || retry) return;
-            const name = text(data, "display_name");
-            intent.current = {
-              path: "/v1/account/name",
-              name,
-              init: {
-                method: "PUT",
-                headers: {
-                  "Content-Type": "application/json",
-                  "Idempotency-Key": crypto.randomUUID(),
-                },
-                body: JSON.stringify({
-                  display_name: name,
-                  expected_revision: profile.revision,
-                }),
+    <div className="account-identity">
+      <form
+        onSubmit={(event) => {
+          const data = form(event);
+          if (pending || retry) return;
+          const name = text(data, "display_name");
+          intent.current = {
+            path: "/v1/account/name",
+            name,
+            init: {
+              method: "PUT",
+              headers: {
+                "Content-Type": "application/json",
+                "Idempotency-Key": crypto.randomUUID(),
               },
-            };
-            void send();
-          }}
-        >
-          <fieldset disabled={pending || retry}>
-            <Field label="Nombre de entrenador">
-              <input
-                key={profile.display_name}
-                name="display_name"
-                defaultValue={profile.display_name}
-                maxLength={48}
-                required
-              />
-            </Field>
-            <Submit pending={pending}>Guardar nombre</Submit>
-          </fieldset>
-        </form>
-        <form
-          onSubmit={(event) => {
-            const data = form(event);
-            if (pending || retry) return;
-            const photo = data.get("photo");
-            if (
-              !(photo instanceof File) ||
-              !photo.size ||
-              photo.size > 5 * 1024 * 1024
-            ) {
-              setError(new ApiError(422, "INVALID_PHOTO"));
-              return;
-            }
-            intent.current = {
-              path: `/v1/account/photo?expected_revision=${profile.revision}`,
-              init: {
-                method: "PUT",
-                headers: {
-                  "Content-Type": photo.type,
-                  "Idempotency-Key": crypto.randomUUID(),
-                },
-                body: photo,
+              body: JSON.stringify({
+                display_name: name,
+                expected_revision: profile.revision,
+              }),
+            },
+          };
+          void send();
+        }}
+      >
+        <fieldset disabled={pending || retry}>
+          <Field label="Nombre de entrenador">
+            <input
+              key={profile.display_name}
+              name="display_name"
+              defaultValue={profile.display_name}
+              maxLength={48}
+              required
+            />
+          </Field>
+          <Submit pending={pending}>Guardar nombre</Submit>
+        </fieldset>
+      </form>
+      <form
+        ref={photoForm}
+        onSubmit={(event) => {
+          const data = form(event);
+          if (pending || retry) return;
+          const photo = data.get("photo");
+          if (
+            !(photo instanceof File) ||
+            !photo.size ||
+            photo.size > 5 * 1024 * 1024
+          ) {
+            setError(new ApiError(422, "INVALID_PHOTO"));
+            return;
+          }
+          intent.current = {
+            path: `/v1/account/photo?expected_revision=${profile.revision}`,
+            init: {
+              method: "PUT",
+              headers: {
+                "Content-Type": photo.type,
+                "Idempotency-Key": crypto.randomUUID(),
               },
-            };
-            void send();
-          }}
-        >
-          <fieldset disabled={pending || retry}>
-            <Field label="Foto de perfil">
-              <input
-                name="photo"
-                type="file"
-                accept="image/jpeg,image/png,image/webp"
-                required
-              />
-            </Field>
-            <p>JPEG, PNG o WebP, máximo 5 MB. Retrato vertical recomendado.</p>
-            <Submit pending={pending}>Guardar foto</Submit>
-          </fieldset>
-        </form>
-        <Notice error={error} />
-        {success && <p role="status">Perfil actualizado.</p>}
-        {retry && (
-          <button disabled={pending} onClick={() => void send()}>
-            Reintentar la misma solicitud
-          </button>
-        )}
-      </Card>
-      <PinForm />
-    </>
+              body: photo,
+            },
+          };
+          void send();
+        }}
+      >
+        <fieldset disabled={pending || retry}>
+          <Field label="Foto de perfil">
+            <input
+              name="photo"
+              type="file"
+              accept="image/jpeg,image/png,image/webp"
+              required
+            />
+          </Field>
+          <p>JPEG, PNG o WebP, máximo 5 MB. Retrato vertical recomendado.</p>
+          <Submit pending={pending}>Guardar foto</Submit>
+        </fieldset>
+      </form>
+      <Notice error={error} />
+      {success && <p role="status">Perfil actualizado.</p>}
+      {retry && (
+        <button disabled={pending} onClick={() => void send()}>
+          Reintentar la misma solicitud
+        </button>
+      )}
+    </div>
   );
 }

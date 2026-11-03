@@ -53,7 +53,12 @@ vi.mock("../state", () => ({
     },
   }),
   useMyPC: () => ({
-    data: { status: "ready", save: { id: "me", game: "Y" }, pokemon: [] },
+    data: {
+      status: "ready",
+      save: { id: "me", game: "Y" },
+      pokemon: [],
+      dead_box: 7,
+    },
     personal: true,
     seasonGame: "SN",
     isPending: false,
@@ -124,12 +129,6 @@ vi.mock("../state", () => ({
   }),
 }));
 vi.mock("./inventory", () => ({ Inventory: () => <p>Inventario</p> }));
-vi.mock("./preferences", () => ({
-  PreferencesCard: () => (
-    <section aria-label="Ajustes de la app">Ajustes de la app</section>
-  ),
-}));
-vi.mock("./account-editor", () => ({ AccountEditor: () => null }));
 
 function profile(id: string) {
   render(
@@ -152,18 +151,25 @@ beforeEach(() => {
 });
 afterEach(cleanup);
 
-it("app settings close the own profile, next to «Editar mi perfil»", () => {
-  profile("me");
-  const settings = screen.getByRole("region", { name: "Ajustes de la app" });
-  const edit = screen.getByRole("button", { name: "Editar mi perfil" });
-  // Nothing of the profile comes after the personal options.
+function expectNoInlineSettings() {
+  // Name, photo, PIN and app preferences live in the «Mi perfil» dialog.
   expect(
-    edit.compareDocumentPosition(settings) & Node.DOCUMENT_POSITION_FOLLOWING,
-  ).toBeTruthy();
-  const personal = screen.getByRole("region", { name: "Opciones personales" });
-  expect(personal).toContainElement(settings);
-  expect(personal).toContainElement(edit);
-  expect(personal.nextElementSibling).toBeNull();
+    screen.queryByRole("region", { name: "Opciones personales" }),
+  ).toBeNull();
+  expect(screen.queryByRole("button", { name: "Editar mi perfil" })).toBeNull();
+  expect(screen.queryByText("Ajustes de la app")).toBeNull();
+  expect(screen.queryByLabelText("PIN actual")).toBeNull();
+  expect(screen.queryByLabelText("Nombre de entrenador")).toBeNull();
+}
+
+it("the own profile keeps team, boxes and Dead Box 7 without inline settings", () => {
+  profile("me");
+  expectNoInlineSettings();
+  expect(screen.getByRole("heading", { name: "Equipo" })).toBeVisible();
+  expect(
+    screen.getByRole("heading", { name: "Muertos · Caja 7" }),
+  ).toBeVisible();
+  expect(screen.getByText("Inventario")).toBeVisible();
 });
 
 it("another trainer's profile never shows the app settings", () => {
@@ -194,13 +200,11 @@ it("the own profile shows the active save and names the season's other game", ()
   );
 });
 
-it("without a season the own profile still ends with the settings", () => {
+it("without a season the own profile shows the save and no inline settings", () => {
   mocks.member = false;
   profile("me");
   expect(screen.getByRole("heading", { name: "Equipo" })).toBeVisible();
-  expect(
-    screen.getByRole("region", { name: "Opciones personales" }),
-  ).toContainElement(screen.getByRole("region", { name: "Ajustes de la app" }));
+  expectNoInlineSettings();
 });
 
 function expectLeagueStats(container: HTMLElement, deathTotal: string) {

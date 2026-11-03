@@ -48,6 +48,8 @@ it("accepts numbers without floating-point noise for exact values", () => {
 it("keeps unknown points distinguishable from a real zero", () => {
   expect(pointsOr(null)).toBe("—");
   expect(pointsOr(undefined)).toBe("—");
-  expect(pointsOr(null, "Pendiente de confirmar")).toBe("Pendiente de confirmar");
+  expect(pointsOr(null, "Pendiente de confirmar")).toBe(
+    "Pendiente de confirmar",
+  );
   expect(pointsOr("0.000")).toBe("0");
 });

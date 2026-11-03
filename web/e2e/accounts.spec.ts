@@ -193,18 +193,16 @@ for (const width of [1440, 390])
       .locator(`a[href='/entrenadores/${tid}']`)
       .filter({ hasText: "Ver perfil" })
       .click();
-    await expect(
-      page.getByText("Cuenta de entrenador.", { exact: false }),
-    ).toBeVisible();
-    await page
-      .getByRole("button", { name: "Editar mi perfil", exact: true })
-      .click();
-    await page.getByLabel("Nombre de entrenador").fill("Antonio Nuevo");
-    await page.getByRole("button", { name: "Guardar nombre" }).click();
+    // Personal settings open from the sidebar «Mi perfil», over this page.
+    await page.getByRole("button", { name: "Mi perfil", exact: true }).click();
+    const settings = page.getByRole("dialog", { name: "Mi perfil" });
+    await expect(settings).toBeVisible();
+    await settings.getByLabel("Nombre de entrenador").fill("Antonio Nuevo");
+    await settings.getByRole("button", { name: "Guardar nombre" }).click();
     await expect(
       page.getByRole("heading", { name: "Antonio Nuevo", exact: true }),
     ).toBeVisible();
-    await page.getByLabel("Foto de perfil").setInputFiles({
+    await settings.getByLabel("Foto de perfil").setInputFiles({
       name: "portrait.png",
       mimeType: "image/png",
       buffer: Buffer.from(
@@ -212,7 +210,7 @@ for (const width of [1440, 390])
         "base64",
       ),
     });
-    await page.getByRole("button", { name: "Guardar foto" }).click();
+    await settings.getByRole("button", { name: "Guardar foto" }).click();
     await expect(page.locator("main .trainer-photo img")).toHaveAttribute(
       "src",
       "/visuals/v1/trainers/ANTO.png",
@@ -226,10 +224,11 @@ for (const width of [1440, 390])
         () => document.documentElement.scrollWidth <= innerWidth + 1,
       ),
     ).toBe(true);
-    await page.getByLabel("PIN actual").fill("0017");
-    await page.getByLabel("Nuevo PIN", { exact: true }).fill("0028");
-    await page.getByLabel("Repetir nuevo PIN").fill("0028");
-    await page
+    await settings.getByRole("tab", { name: "Seguridad" }).click();
+    await settings.getByLabel("PIN actual").fill("0017");
+    await settings.getByLabel("Nuevo PIN", { exact: true }).fill("0028");
+    await settings.getByLabel("Repetir nuevo PIN").fill("0028");
+    await settings
       .getByRole("button", { name: "Cambiar PIN", exact: true })
       .click();
     await expect(
