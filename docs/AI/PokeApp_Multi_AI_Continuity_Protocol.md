@@ -10,7 +10,7 @@ Reconciled: 2026-09-26. Keep one copy at this path.
 | How do AI instances continue the same work? | This protocol |
 | What are the project-wide constraints and roadmap? | [Master protocol](../PokeApp_2.0_Protocolo_Maestro_MultiIA.md) |
 | Which phase is active and where is its memory? | [Project checkpoint](../project-checkpoint.md) |
-| What is the current operational state and next action? | [Current live record](../work-in-progress/final-corrections-live.md) (2026-11-03: consistency audit/review only; owner-confirmed false Gible event explains Aaron's extra0.1, additive077 correction prepared/tested; Iker still lacks original League registration. Production076/API1aebe1a7/web053e50cf/Launcher0.26.11 unchanged. Explicit owner approval required before deployment or data reconciliation), indexed by the checkpoint |
+| What is the current operational state and next action? | [Current live record](../work-in-progress/final-corrections-live.md) (2026-11-03: approved077/API published; Aaron's false Gible event corrected once,4/-0.4/8coins, originals preserved. APIa5112677/web053e50cf/Launcher0.26.11 verified. Iker/ByVisan02/Samu still need their own authenticated original-save uploads before further authorized baseline reconciliation; no impersonation or manual credits), indexed by the checkpoint |
 | What behavior was approved? | [Functional alignment contract](../phase10-5-functional-alignment.md) |
 | What was implemented and what evidence exists? | Active phase evidence in its live record until closure; [previous Phase 10 report](../phase10-completion-report.md) retains historical delivery evidence |
 

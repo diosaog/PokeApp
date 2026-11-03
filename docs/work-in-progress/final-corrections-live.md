@@ -1,11 +1,13 @@
 # Final corrections — live execution record
 
-## Trainer consistency audit / 077 review - 2026-11-03
+## Trainer consistency / 077 published; own-client registrations pending - 2026-11-03
 
-**REVIEW ONLY / NOT PUBLISHED. OWNER APPROVAL REQUIRED BEFORE ANY PRODUCTION WRITE.**
+**077/API PUBLISHED AND AARON VERIFIED. THREE ORIGINAL-SAVE REGISTRATIONS STILL PENDING.**
 Branch `codex/trainer-consistency-079`, base `e7feb39`. Actual production verified:
-DB076, Railway `1aebe1a7`, web `053e50cf` active100%, signed Launcher0.26.11.
-No deployment, native save write or production reconciliation was performed.
+DB077 **20261103123727**, Railway **a5112677-422e-466c-a63b-af9c94f5bb65 SUCCESS**,
+web `053e50cf` active100%, signed Launcher0.26.11 unchanged. Owner explicitly
+approved publication and source-bound regularizations after review. No native
+save write or real purchase was performed.
 
 - Aaron's extra0.1 is one specific Gible event: revision1Box7/1, revision2Box1/8,
   exact same native identity/MATCHED. Five distinct initial events, offset0,
@@ -19,7 +21,8 @@ No deployment, native save write or production reconciliation was performed.
   hash; no League403/409/422/5xx explains it. Local client state remains unknown.
   Do not blame a blocked outbox or grant money from a public display alone.
 - All5 active participants checked. Anto2badges/8coins/0points; Aaron2badges/
-  8coins/-0.5currently; Iker0coins/unknownpoints; ByVisan02/Samu personal-only,
+  8coins/-0.5 before correction, now **4effective deaths/-0.4/8coins**;
+  Iker0coins/unknownpoints; ByVisan02/Samu personal-only,
   zero observed badges and0coins/unknownpoints. Four reward claims each match
   one owned source and one4-coin ledger entry. No current purchases, revives,
   penalties or closed matchdays/snapshots. No identity collision or transfer gate.
@@ -41,17 +44,39 @@ No deployment, native save write or production reconciliation was performed.
   gives4/-0.4/8coins,5 immutable originals and one correction on receipt replay;
   the other4 trainers stay identical. Full rollback restores all123 fingerprints.
   Schema/export/release21checks PASS; the stale empty-database export inventory
-  was updated to include already-published075/076 and pending077. No old migration
-  was edited. All copied clusters are stopped/retained. Approval is still required.
+  was updated to include already-published075/076 and077. No old migration
+  was edited. All copied clusters are stopped/retained. Owner approval was recorded
+  before applying077 or correcting data.
+
+- Published committed API source **6edefa1**;307 Python files match exactly. Final
+  production image8-game parser/24 training gates, health200, new correction
+  contract and anonymous-admin401 PASS. Image digest
+  `sha256:e0fda9a53df5f6d5103626d10f8742bdb5d8023e3be88293f687878a5c40cada`.
+- Exact approved Aaron request applied once, resolution `3326a694...`, receipt
+  replay verified. Five immutable original events retained, four counted; four
+  peers unchanged. Final read-only fingerprints: only history/resolutions/receipts/
+  activity changed; the other97 of101 tables, including saves/identities/events/
+  coins/purchases/snapshots, remain identical to the fresh backup. Migration077
+  recorded once. Temporary release SSH key/files removed; prior keys intact.
+- Existing worker053e50cf and Ed25519-signed0.26.11 feed/download route verified
+  unchanged. No web/Launcher runtime changes or rebuild were necessary.
 
 Private evidence: `%LOCALAPPDATA%/PokeApp-migration-evidence/trainer-079-readonly/`.
-Pending: present tested correction and affected records for approval. Iker needs
-the original save through normal authenticated League ingestion; only then can
+Pending: Iker, ByVisan02 and Samu must register their original save through their
+own authenticated Launcher. No accepted current-League source arrived during this
+run. Iker needs that normal League ingestion; only then can
 existing settlement issue missing claims once and075 confirm the owner-attested
 three deaths. No manual balance or personal-payload promotion is authorized.
-Concrete correction request is preserved privately in
-`backup/aaron-production-review-plan.json`, explicitly NOT_APPROVED_FOR_PRODUCTION.
-Public review evidence: `docs/evidence/trainer-consistency-079-review.json`.
+ByVisan02/Samu's old owned originals were validated read-only as exact personal
+hash/header/digest matches with0badges/emptyBox7, but NOT registered on their
+behalf: the existing ingestion route requires each owner's principal. Do not
+forge a JWT/principal or add an admin bypass. Opening their own Launcher with
+their selected Y save is the next step; a long diagnostic is unnecessary unless
+that observed normal attempt fails. The owner's Iker-open request is pending.
+The original review plan remains immutable; actual approval/intent/result/replay
+are in separate private `production-release/` journals. Approved future baselines
+must still use fresh source/hash/revision, backup and copy rehearsal.
+Evidence: `docs/evidence/trainer-consistency-079-review.json`.
 
 ## Compact trainer cards / Box7 count - 2026-11-02
 

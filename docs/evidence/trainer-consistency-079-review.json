@@ -1,7 +1,7 @@
 {
-  "status": "AWAITING_OWNER_APPROVAL_NOT_PUBLISHED",
+  "status": "PUBLISHED_AARON_VERIFIED_THREE_CLIENT_UPLOADS_PENDING",
   "date": "2026-11-03",
-  "verified_at_utc": "2026-11-03T12:28:06.871061+00:00",
+  "verified_at_utc": "2026-11-03T12:55:42.109635+00:00",
   "base_commit": "e7feb39",
   "production": {
     "api": [
@@ -45,7 +45,7 @@
       }
     ]
   },
-  "production_business_writes": false,
+  "production_business_writes": true,
   "native_save_writes": false,
   "purchases_or_manual_coin_credits": false,
   "confirmed_causes": {
@@ -102,10 +102,10 @@
     "fresh077_catalog_equal": true,
     "actual_Aaron_rehearsal": "PASS; raw5/effective4/-0.4/8coins, idempotent, fourpeers unchanged, rollback123 fingerprints exact"
   },
-  "deployment_authorized": false,
-  "pending_approval": "Database077/API publication and exact audited false Gible correction; normalIkeroriginalsync and source-validated baseline only after authorization",
+  "deployment_authorized": true,
+  "pending_approval": null,
   "private_evidence_root": "%LOCALAPPDATA%/PokeApp-migration-evidence/trainer-079-readonly/",
-  "source_commit": "b5382ec",
+  "source_commit": "6edefa1863f809b187c518ba94099e352c566d26",
   "read_only_preflight": {
     "passed": true,
     "problems": [],
@@ -161,5 +161,94 @@
       "pass": true
     }
   ],
-  "local_review_only": true
+  "local_review_only": false,
+  "approval_received": "Explicit owner answer: Autorizar esas operaciones",
+  "production_write_scope": [
+    "077 schema/function migration once",
+    "one audited false Gible event exclusion; no original-event deletion"
+  ],
+  "production_after": {
+    "database_migration": [
+      {
+        "version": "20261103123727",
+        "name": "077_false_death_event_corrections"
+      }
+    ],
+    "api": {
+      "status": "PASS",
+      "deployment_id": "a5112677-422e-466c-a63b-af9c94f5bb65",
+      "image_digest": "sha256:e0fda9a53df5f6d5103626d10f8742bdb5d8023e3be88293f687878a5c40cada",
+      "source_commit": "6edefa1863f809b187c518ba94099e352c566d26",
+      "python_files_exact": 307,
+      "python": "3.14.3 (main, Apr  7 2026, 02:23:36) [GCC 12.2.0]",
+      "health": 200,
+      "openapi_paths": 126,
+      "correction_contract": true,
+      "anonymous_admin_history": 401,
+      "final_image_native_gates": "8gameparse+24trainingPASS"
+    },
+    "unchanged_components": {
+      "web_version_id": "053e50cf-a025-486f-85bc-4eb7ea4c66ac",
+      "active_percent": 100,
+      "launcher_version": "0.26.11",
+      "existing_Ed25519_feed_exact": true,
+      "download_HEAD": 200,
+      "installer_bytes": 159462974,
+      "full_installer_digest_evidence_reused_from02611": true
+    },
+    "Aaron": {
+      "status": "VERIFIED",
+      "exact_replay": true,
+      "points": "-0.40000000000000000000",
+      "coins": "8",
+      "raw_events_retained": 5,
+      "effective_deaths": 4,
+      "other_four_rows_unchanged": true
+    },
+    "current_registration_status": [
+      {
+        "display_name": "Aaron",
+        "current_save_file_id": "6996d879-21a0-5445-a768-839584b85e08",
+        "claims": 2
+      },
+      {
+        "display_name": "Anto",
+        "current_save_file_id": "7e60de89-bfbf-5ffd-b74e-b8449683e20a",
+        "claims": 2
+      },
+      {
+        "display_name": "ByVisan02",
+        "current_save_file_id": null,
+        "claims": 0
+      },
+      {
+        "display_name": "Iker",
+        "current_save_file_id": null,
+        "claims": 0
+      },
+      {
+        "display_name": "Samu",
+        "current_save_file_id": null,
+        "claims": 0
+      }
+    ]
+  },
+  "final_invariants": "PASS: only four expected audit/history tables changed; other97 of101 fingerprints identical, including raw events, saves, identities, claims, coins, purchases and snapshots",
+  "cleanup": {
+    "own_registered_key_removed": true,
+    "own_generated_files_removed": true,
+    "preexisting_keys_preserved": true
+  },
+  "pending_work": [
+    "Iker/ByVisan02/Samu must submit their original save through their own authenticated Launcher; no new current-League source arrived",
+    "After actual accepted source, verify native badges/deaths/identity/hash/revision and existing ordinal credits; use fresh backup+copied-data rehearsal before any remaining approved075 baseline reconciliation",
+    "Do not impersonate another principal or promote personal parsed JSON/old raw on their behalf through an owner-only route"
+  ],
+  "Iker_expected_if_current_confirmed_source_arrives": {
+    "badges": 2,
+    "coins_from_two_claims": 8,
+    "ordinary_deaths": 3,
+    "points": "-0.3",
+    "conditional_on_authoritative_source": true
+  }
 }

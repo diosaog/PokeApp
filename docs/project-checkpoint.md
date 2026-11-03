@@ -5,12 +5,14 @@ milestone record; it does not maintain a second live phase-status ledger.
 
 ## Current project position
 
-- Trainer consistency audit /077 review (2026-11-03): **NOT PUBLISHED.**
-  Owner confirmed Aaron's extra Gible event was a mistaken box placement, not a
-  death. Reviewed/tested audit-only correction prepared; Iker's official-source
-  registration remains absent despite confirmed League attribution. Production
-  DB076/API1aebe1a7/web053e50cf/Launcher0.26.11 unchanged. Approval is required
-  before deploying or reconciling any real data. [Live record](work-in-progress/final-corrections-live.md).
+- Trainer consistency /077 (2026-11-03): **PUBLISHED; DATA REGISTRATIONS PENDING.**
+  After explicit owner approval, false Gible event corrected through audit:
+  Aaron4/-0.4/8coins,5original events retained;97 unaffected tables exact.
+  DB077/APIa5112677 verified from6edefa1; web053e50cf/Launcher0.26.11 retained.
+  Iker/ByVisan02/Samu still need their own authenticated original-save uploads;
+  no personal-JSON promotion, manual credits or impersonation allowed. Backup,
+  copied-data rehearsal,81backend/21schema/24React and SQL regressions PASS.
+  [Live record](work-in-progress/final-corrections-live.md).
 
 - Compact trainer cards /078 task (2026-11-02): **PUBLISHED / VERIFIED.**
   Removed new card/profile paragraphs; visible Puntos/Monedas/Muertos, configured
