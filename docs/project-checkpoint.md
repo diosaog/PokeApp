@@ -5,6 +5,21 @@ milestone record; it does not maintain a second live phase-status ledger.
 
 ## Current project position
 
+- API session fix + Railway cost (2026-11-03): **PUBLISHED; VERIFIER 5s->60s.**
+  Owner-approved API-only release `81eb260` (branch `claude/api-session-isolation`):
+  server Supabase clients no longer keep or renew trainers' sessions and refuse
+  empty tokens. Railway `3cd6aebb` SUCCESS, live 23/23, OpenAPI identical (126);
+  Python1418/web302/node70 PASS. The hosted verifier (81% of usage, empty queue)
+  now polls every 60 s on the same image, rollback tested. Live token cycle and
+  Iker/ByVisan02/Samu League registrations (then admin baselines 3/0/3, 0/0/0,
+  0/0/0) wait for real use. [Live record](work-in-progress/final-corrections-live.md).
+
+- Post-Codex stabilization audit (2026-11-03): **SUPERSEDED (approved, published).**
+  Iker/ByVisan02/Samu have no authenticated activity since the League started:
+  pending own-Launcher sync, not a server rejection. Confirmed defect: server
+  Supabase clients renewed trainers' sessions in the background, revoking them
+  (Anto x3, Iker x1). [Live record](work-in-progress/final-corrections-live.md).
+
 - Trainer consistency /077 (2026-11-03): **PUBLISHED; DATA REGISTRATIONS PENDING.**
   After explicit owner approval, false Gible event corrected through audit:
   Aaron4/-0.4/8coins,5original events retained;97 unaffected tables exact.

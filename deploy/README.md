@@ -48,6 +48,32 @@ it excludes documentation, protected/untracked files, saves, credentials, local
 builds and tests. A source/hash manifest accompanies the upload. Do not use
 `railway up` on the whole workspace or `--no-gitignore`.
 
+## Hosted verifier (`pokeapp-verifier`)
+
+Second service of the same project (`0564a8f6-7d04-4ea2-ad43-0b293e8edb9e`),
+built with `build_api_deploy_bundle --worker`: the API image ending in a loop
+that runs `tools/run_item_use_verifier.py` once per turn (item-use artifacts and
+server-authoritative robbery steps). It has no listener, so app sleeping can
+never wake it: keep every turn shorter than Railway's 5-10 minute idle window.
+
+Since 2026-11-03 its Railway start command overrides the image's `sleep 5`:
+
+```text
+/bin/sh -c "while true; do python run_item_use_verifier.py; sleep 60; done"
+```
+
+A turn every ~63 s instead of ~7 s cut its billed usage from ~$0.15/day (about
+80% of the project's usage, for an empty queue) while a queued job is still
+leased well inside the 2-minute `RETRY_REQUIRED` and 15-minute authorization
+limits of migrations 054/056. Revisit the cadence if robberies or item-use
+verification go live for players. Apply or revert only through a new deployment
+of the service instance, which picks up current settings
+(`serviceInstanceUpdate` startCommand, then `serviceInstanceRedeploy`);
+`deploymentRedeploy` of an old deployment keeps that deployment's own settings.
+Revert (tested 2026-11-03): set the start command to an empty string, then
+redeploy the instance; the image's `sleep 5` loop returns on the same image.
+The API ignores `startCommand: null`.
+
 Build React with `VITE_API_BASE_URL` set to the allocated HTTPS backend, then use
 the [web runbook](../web/README.md). Verify public liveness, rejected/allowed CORS,
 real login/refresh/reads/mutations and browser flows before claiming deployment

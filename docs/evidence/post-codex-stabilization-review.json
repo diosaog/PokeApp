@@ -1,0 +1,74 @@
+{
+  "status": "LOCAL_FIX_PENDING_OWNER_APPROVAL (at the time of this audit)",
+  "superseded_by": "docs/evidence/api-session-isolation-railway-cost-20261103.json (owner approved; published as 81eb260, Railway 3cd6aebb)",
+  "date": "2026-11-03",
+  "base_commit": "77c4ec1",
+  "author": "Claude (post-Codex stabilization audit)",
+  "production_mutations": false,
+  "production_verified_readonly": {
+    "verified_at_utc": "2026-11-03T17:04:00Z",
+    "database_latest_migration": {"version": "20261103123727", "name": "077_false_death_event_corrections"},
+    "railway_api": {"deployment": "a5112677-422e-466c-a63b-af9c94f5bb65", "health": 200, "openapi_paths": 126},
+    "launcher_feed_version": "0.26.11",
+    "season": {"name": "ChampionsLocke", "id": "40ab0910-ff5c-4581-a651-e99c9515fd8e", "status": "active", "started_at": "2026-11-02T17:51:35Z", "matchdays": 0, "badge_reward_coins": 4},
+    "participants": {
+      "Anto": {"league_save": true, "coins": 8, "claims": ["badge:1", "badge:2"], "raw_death_events": 0, "effective_death_events": 0, "baseline_confirmed": true},
+      "Aaron": {"league_save": true, "coins": 8, "claims": ["badge:1", "badge:2"], "raw_death_events": 5, "effective_death_events": 4, "baseline_confirmed": true, "points": "-0.4"},
+      "Iker": {"league_save": false, "coins": 0, "claims": [], "last_personal_upload": "2026-11-02T02:25:34Z", "last_auth_activity": "2026-11-02T02:20:05Z"},
+      "ByVisan02": {"league_save": false, "coins": 0, "claims": [], "last_personal_upload": "2026-10-29T18:14:21Z", "last_auth_activity": "2026-10-29T17:38:28Z"},
+      "Samu": {"league_save": false, "coins": 0, "claims": [], "last_personal_upload": "2026-10-29T18:14:34Z", "last_auth_activity": "2026-10-30T00:08:58Z"}
+    },
+    "ledger": "only badge_reward transactions, each linked to one progress_reward_claim; no purchases, orphans or deductions",
+    "identity_collisions": "none (personal and League identities compared per participant)"
+  },
+  "iker_diagnosis": {
+    "classification": "INCOMPLETE_USER_SETUP, not a software rejection",
+    "evidence": [
+      "No authenticated session activity (web or Launcher) for Iker, ByVisan02 or Samu after the League activation at 2026-11-02T17:51:35Z (auth.sessions)",
+      "Railway uvicorn access logs 2026-11-01T18:19Z..2026-11-03T17:04Z: every ChampionsLocke /saves request belongs to Anto (ccd13626) or Aaron (c7338561, 88abe62a); no 4xx/5xx on any League save path",
+      "Iker's current personal hash b30a7a8b was last polled at 2026-11-02T02:30:19Z; his Launcher has not contacted PokeApp since",
+      "Anto's and Aaron's open Launchers registered their unchanged personal saves in the League 44 s and 2 min after activation through the same automatic path"
+    ],
+    "expected_after_own_launcher_sync": {"coins": 8, "claims": ["badge:1", "badge:2"], "initial_death_events": 3, "points_before_admin_baseline": null, "points_after_admin_baseline_3_0_3": "-0.3"}
+  },
+  "session_revocation_defect": {
+    "classification": "CONFIRMED_DEFECT",
+    "cause": "Server Supabase clients used SDK defaults (auto_refresh_token, persist_session). Every sign-in/refresh through the API stored that trainer's session and renewed it on a background timer 10 s before expiry; the trainer's own client then presented the rotated refresh token, Supabase reuse detection revoked the whole session and the Launcher was signed out and stopped syncing.",
+    "auth_settings": {"jwt_exp": 3600, "refresh_token_rotation_enabled": true, "security_refresh_token_reuse_interval": 10},
+    "revoked_sessions_matching_pattern": [
+      {"trainer": "Anto", "session": "18954243", "server_rotation": "2026-10-28T22:40:59Z", "interval_s": 3590.3, "revoked": "2026-10-28T22:42:28Z"},
+      {"trainer": "Anto", "session": "0a13c8e0", "server_rotation": "2026-10-31T17:36:16Z", "interval_s": 3589.3, "revoked": "2026-10-31T17:37:47Z"},
+      {"trainer": "Iker", "session": "6434b7be", "server_rotation": "2026-11-01T17:28:02Z", "interval_s": 3590.3, "revoked": "2026-11-01T17:29:12Z"},
+      {"trainer": "Anto", "session": "623be4bf", "server_rotation": "2026-11-02T19:51:50Z", "interval_s": 3590.3, "revoked": "2026-11-02T19:52:30Z"}
+    ],
+    "signature": "rotation exactly 3600-10 s after the previous one, a second rotation 0.1-0.4 s later (timer get_session + refresh), then whole-session revocation on the client's next renewal",
+    "fix": "app/repositories/supabase/http.py create_client: SyncClientOptions(auto_refresh_token=False, persist_session=False); app/auth/supabase_adapter.py get_user refuses an empty token instead of the SDK's stored-session fallback",
+    "requires": "API deployment only; no migration, web or Launcher release"
+  },
+  "local_changes": [
+    "app/repositories/supabase/http.py",
+    "app/auth/supabase_adapter.py",
+    "tests/test_server_auth_sessions.py (new: red before fix, green after)",
+    "tests/test_league_registration_recovery.py (new: restart after activation and lost answer; hash-only dedupe mutant detected)",
+    "tests/test_api_portable_imports.py, tests/test_api_daily_ranking.py, tests/test_item_use_verification.py (stale expectations from 074/075/076, failing identically on clean 77c4ec1)"
+  ],
+  "tests": {
+    "python_full_suite": "120 modules / 1417 tests PASS, 0 skipped (untracked foreign test_validate_ai_repository_map excluded); before the stale-test update the same suite had 5 failures that also fail on clean 77c4ec1",
+    "web_vitest": "36 files / 302 tests PASS",
+    "web_typescript": "PASS",
+    "node_launcher_tools_worker": "70/70 PASS (one transient updater .tmp cleanup failure on the first run, not reproduced in 4 reruns)",
+    "sql_disposable_pg17_001_077": [
+      "validate_phase077_trainers: personal vs League scope, badge 1/2 settlement, Box7 three deaths once, audited baseline -0.3 NET, concurrent settlement 2 claims/8 coins",
+      "validate_false_death_corrections --regressions: 077 red->green, 075 deaths/four matchdays/two divisions/legacy/guards, 076 championship, concurrency"
+    ]
+  },
+  "proposed_production_actions": [
+    "Deploy the API from a committed source containing the two app changes (existing build_api_deploy_bundle + railway up pipeline); verify health, 126 OpenAPI paths, exact Python files and anonymous 401",
+    "No database migration, data correction, web or Launcher release"
+  ],
+  "owner_actions_after_registration": [
+    "Iker, ByVisan02 and Samu open their own Launcher signed in with their own account and the correct ChampionsLocke Pokemon Y save selected, online for a few minutes",
+    "Admin confirms each new death baseline in Admin > Historial de muertes (Iker: 3 / 0 wipe / 3 progression if the owner confirms the three deaths)",
+    "J1 cannot open until every participant has a League save and a confirmed baseline (league_freeze_death_segment)"
+  ]
+}

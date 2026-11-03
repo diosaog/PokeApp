@@ -1,5 +1,110 @@
 # Final corrections — live execution record
 
+## API session fix published; Railway verifier cadence - 2026-11-03 (Claude)
+
+**API FIX PUBLISHED AND VERIFIED; VERIFIER CADENCE 5 s -> 60 s. LIVE TOKEN CYCLE
+AND THE THREE LEAGUE REGISTRATIONS WAIT FOR REAL PLAYER USE.** Owner approved
+both. Branch `claude/api-session-isolation` from `77c4ec1`, pushed. No trainer,
+coin, death, purchase, save or database data was changed.
+Evidence: `docs/evidence/api-session-isolation-railway-cost-20261103.json`.
+
+- Commits: `65c75c5` fix + `test_server_auth_sessions` (5 tests: 4 failures and
+  1 error on the production source, all pass after), `4e1b917` three stale tests
+  (074-076), `81eb260` League registration recovery test. Added since the audit:
+  `refresh_session` also refuses an empty token (red: the SDK renewed the session
+  it last kept in memory and returned it; over HTTP an empty token is already 422).
+- Tests on the `81eb260` tree: Python 120 modules/1418 PASS, 0 skipped; web
+  36/302 + tsc PASS; node 70/70. SQL not rerun: no SQL changed since this
+  morning's 001-077 PASS.
+- Artifact: committed-source bundle, 339 files (307 .py) byte-identical to Git,
+  differs from the live base only in the two fix files. Railway
+  **`3cd6aebb-3528-4b29-b80b-17c0ed3ae59e` SUCCESS** since 17:56:19 UTC, snapshot
+  `b34c247a...`, image `adf6a8bf...`; 8-game parser and 24 training gates PASS.
+  In-container hashing not done: registering a temporary Railway SSH key was
+  refused by this session's permission policy. Rollback: Railway rollback to
+  `a5112677` (image `e0fda9a5...`).
+- Live 23/23: health, 126 paths with an OpenAPI document byte-identical to
+  `a5112677`, anonymous and bad-bearer 401, refresh empty/missing 422 and unknown
+  issued-shape token 401, CORS, no-store, feed 0.26.11, web. A refresh token not
+  shaped like Supabase's (all 190 issued: 12 chars `[a-z0-9]`) gets 503 before and
+  after: pre-existing, not a client path. Cold start after sleep ~3.2 s.
+- Live token cycle: see the session check below (no trainer used PokeApp right
+  after the deploy). Detector (rotations vs client refresh POSTs, 3590 s or
+  sub-second double rotations, fully revoked sessions) flags the 02-11 incident.
+- League: ByVisan02 used the web at 17:17 UTC (browser refresh and reads, no
+  Launcher), so Iker, ByVisan02 and Samu still have no League save. Owner-confirmed
+  baselines kept as pending: Iker 3 actual / 0 wipe-revived / 3 progression
+  (-0.3; 8 coins from badges at 4 per badge via normal settlement), ByVisan02
+  0/0/0, Samu 0/0/0. A reconciliation binds the trainer's current League save
+  hash and revision, so it cannot be applied before their own Launcher sync.
+- Railway baseline (Hobby $5 including $5 of usage; period 22-10..22-11; paid
+  01-11 $4.11 = prorated $3.40 + 21% VAT; next 22-11 $6.05 = $5 + VAT): usage to
+  18:00 $1.08 = verifier $0.88 (81%) + API $0.20. The verifier restarted Python
+  and a TLS Postgres connection every ~7.4 s (~0.19 vCPU around the clock,
+  $0.145/day) for a queue that has never had a job (all eight job tables empty;
+  item-use transport off in the API; transfers only for an engineering cohort
+  of one). The API sleeps: awake ~4.4 of the last ~23 h, every wake real use
+  except one scanner `GET /`; ~$0.03/day. A full month at that rate: $5.28.
+- Change (config only, same image `cf64f9b4...`, no code or variable change):
+  verifier start command `/bin/sh -c "while true; do python
+  run_item_use_verifier.py; sleep 60; done"` (before: none, image CMD `sleep 5`).
+  `deploymentRedeploy` keeps a deployment's old settings; `serviceInstanceRedeploy`
+  applies current ones. Final **`2853bbc4-44be-453f-b4f3-7ff22a8d51cf` SUCCESS**.
+  Period 7.4 s -> 63 s median, every turn IDLE / TRANSFER [], no error. Rollback
+  tested on production: start command `""` -> 8.0 s period on the same image;
+  null is ignored by the API. Queued jobs stay well inside the 2-minute
+  `RETRY_REQUIRED` and 15-minute authorization limits; runbook in `deploy/README.md`.
+
+## Post-Codex stabilization audit - 2026-11-03 (Claude)
+
+**Superseded by the section above: the API fix was approved and published.**
+Status at the time: local only, not published. Base
+`77c4ec1` on `codex/trainer-consistency-079`, uncommitted. Production verified
+read-only at 17:04 UTC: DB 077 `20261103123727`, Railway `a5112677` health 200 /
+126 OpenAPI paths, Launcher feed 0.26.11. No production write was made.
+
+- **Iker is pending user setup, not a rejected registration.** ChampionsLocke
+  started 2026-11-02 17:51:35 UTC. `auth.sessions` shows no authenticated
+  activity for Iker after 02:20 UTC that day (ByVisan02 29-10, Samu 30-10).
+  Railway uvicorn logs (01-11 18:19 to 03-11 17:04) contain only Anto's and
+  Aaron's ChampionsLocke `/saves` requests, all 200/expected 404; Iker's personal
+  hash `b30a7a8b` was last polled 02:30 UTC. Anto's and Aaron's open Launchers
+  registered their unchanged personal saves 44 s and ~2 min after activation by
+  the same automatic path. Launchers since 0.26.3 upload to the active season.
+- Verified production facts: Anto 8 coins/0 deaths, Aaron 8 coins/5 raw/4
+  effective events/-0.4; Iker, ByVisan02, Samu no League save, history or claims.
+  Ledger has only badge rewards, each linked to its claim. No identity collision.
+  Badge reward 4; 0 matchdays. After his own sync Iker gets badge:1/badge:2 (8
+  coins) automatically and three initial events; points stay unknown until the
+  admin confirms his baseline (owner-confirmed 3 / 0 wipe / 3 progression gives
+  -0.3). J1 cannot open while any participant lacks a League save or baseline.
+- **Confirmed defect: server-side session renewal revoked trainers' sessions.**
+  Server Supabase clients used SDK defaults: each API sign-in/refresh stored the
+  trainer's session and renewed it 10 s before expiry; the trainer's Launcher or
+  web then presented the rotated token and Supabase reuse detection revoked the
+  whole session. Four revoked sessions show the exact signature (rotation 3590 s
+  after the previous one, a second 0.1-0.4 s later, revocation 40-91 s after):
+  Anto 28-10, 31-10, 02-11 and Iker 01-11. A signed-out Launcher stops syncing.
+  Fix: `create_client` uses `auto_refresh_token=False, persist_session=False`;
+  `SupabaseAuthClient.get_user` refuses an empty token instead of the SDK's
+  stored-session fallback. API deploy only; no migration, web or Launcher change.
+- Tests: new `test_server_auth_sessions` (red: background double renewal and
+  stored-session fallback reproduced; green after fix) and
+  `test_league_registration_recovery` (restart after activation, lost answer
+  reconciled by receipt; hash-only dedupe mutant detected). Three stale tests
+  failing identically on clean `77c4ec1` updated to published 074/075/076
+  contracts (126 routes, `virtual_training`, nullable `segment_deaths`/
+  `ranking_rule`). Python 120 modules/1417 PASS; web 36 files/302 PASS,
+  TypeScript PASS, node 70/70 PASS. SQL on
+  disposable PG17 001-077: `validate_phase077_trainers` and
+  `validate_false_death_corrections --regressions` PASS.
+
+Pending: owner approval for the API deployment; Iker, ByVisan02 and Samu open
+their own Launcher signed in with the correct ChampionsLocke save selected; then
+admin baselines. There is no admin tool to unbind a wrong first League binding,
+so the selected save must be checked before signing in.
+Evidence: `docs/evidence/post-codex-stabilization-review.json`.
+
 ## Trainer consistency / 077 published; own-client registrations pending - 2026-11-03
 
 **077/API PUBLISHED AND AARON VERIFIED. THREE ORIGINAL-SAVE REGISTRATIONS STILL PENDING.**
