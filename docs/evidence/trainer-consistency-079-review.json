@@ -104,5 +104,62 @@
   },
   "deployment_authorized": false,
   "pending_approval": "Database077/API publication and exact audited false Gible correction; normalIkeroriginalsync and source-validated baseline only after authorization",
-  "private_evidence_root": "%LOCALAPPDATA%/PokeApp-migration-evidence/trainer-079-readonly/"
+  "private_evidence_root": "%LOCALAPPDATA%/PokeApp-migration-evidence/trainer-079-readonly/",
+  "source_commit": "b5382ec",
+  "read_only_preflight": {
+    "passed": true,
+    "problems": [],
+    "pending": [
+      "077_false_death_event_corrections.sql"
+    ],
+    "apply_invoked": false,
+    "owner_authorized": false
+  },
+  "actual_case_rehearsal_checks": [
+    {
+      "check": "prior attempts rolled back every123table fingerprint exactly",
+      "pass": true
+    },
+    {
+      "check": "transaction uses canonical UTC0 fingerprint session formatting",
+      "pass": true
+    },
+    {
+      "check": "current Aaron source/hash/revision3 reproduces5historical/4Box7/wipe0",
+      "pass": true
+    },
+    {
+      "check": "reviewed exact correction yields4deaths/-0.4points/8coins withBox7=4/wipe0",
+      "pass": true
+    },
+    {
+      "check": "exact replay creates one resolution, one receipt and one audit event",
+      "pass": true
+    },
+    {
+      "check": "all five raw events retained; exactly four effective deaths",
+      "pass": true
+    },
+    {
+      "check": "all four other trainers General rows identical",
+      "pass": true
+    },
+    {
+      "check": "next generic request without invalidated IDs and its exact replay keep4deaths",
+      "pass": true
+    },
+    {
+      "check": "only allowed history/resolution/receipt/audit tables change; saves/identities/coins/purchases/snapshots unchanged",
+      "pass": true
+    },
+    {
+      "check": "full actual-case rollback restores all123table fingerprints exactly",
+      "pass": true
+    },
+    {
+      "check": "frozen migration hash unchanged throughout actual-case rehearsal",
+      "pass": true
+    }
+  ],
+  "local_review_only": true
 }
