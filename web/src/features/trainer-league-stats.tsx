@@ -9,10 +9,7 @@ export function TrainerLeagueStats({
 }) {
   return (
     <div className="mini-stats">
-      <StatPill
-        label="Puntos"
-        value={pointsOr(row?.total_points)}
-      />
+      <StatPill label="Puntos" value={pointsOr(row?.total_points)} />
       <StatPill label="Monedas" value={row?.coin_balance} />
       <StatPill label="Muertos" value={row?.dead_count} />
     </div>

@@ -214,7 +214,9 @@ export function HomePage() {
                   <h2>Cada jornada cuenta.</h2>
                 )}
                 {!match && (
-                  <p>No tienes un enfrentamiento pendiente en la jornada actual.</p>
+                  <p>
+                    No tienes un enfrentamiento pendiente en la jornada actual.
+                  </p>
                 )}
                 <Link
                   className="button primary"
