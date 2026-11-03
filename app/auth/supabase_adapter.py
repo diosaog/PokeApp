@@ -84,6 +84,10 @@ class SupabaseAuthClient:
         return _session_from_response(response)
 
     def refresh_session(self, *, refresh_token: str) -> SupabaseAuthSession:
+        # Same fallback as get_user: without a token the SDK would renew the
+        # session it last kept in memory and hand it to this caller.
+        if not refresh_token:
+            raise InvalidSessionError()
         try:
             response = self._client.auth.refresh_session(refresh_token)
         except Exception as exc:
@@ -93,6 +97,10 @@ class SupabaseAuthClient:
         return _session_from_response(response)
 
     def get_user(self, *, access_token: str) -> SupabaseAuthUser:
+        # The SDK resolves a missing token from the client's last stored
+        # session, which on a shared server client is another trainer's.
+        if not access_token:
+            raise InvalidSessionError()
         try:
             response = self._client.auth.get_user(access_token)
         except Exception as exc:

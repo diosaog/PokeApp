@@ -58,12 +58,23 @@ def auth_session():
 
 def create_client(url, key):
     """supabase.create_client with PostgREST and Auth (and its admin API) on
-    the shared HTTP/1.1 pools. Storage keeps its own client."""
+    the shared HTTP/1.1 pools. Storage keeps its own client.
+
+    A server client never keeps or renews a trainer's session. With the SDK
+    defaults it stored each session it signed in or refreshed and renewed it
+    on a timer 10 s before expiry; the trainer's Launcher then presented the
+    rotated token, Supabase took it as reuse and revoked the whole session
+    (production, 2026-10-28 .. 2026-11-02)."""
     from postgrest import SyncPostgrestClient
 
     from supabase import create_client as create
+    from supabase.lib.client_options import SyncClientOptions
 
-    client = create(url, key)
+    client = create(
+        url,
+        key,
+        SyncClientOptions(auto_refresh_token=False, persist_session=False),
+    )
     client._postgrest = SyncPostgrestClient(
         str(client.rest_url),
         schema=client.options.schema,
