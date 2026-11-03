@@ -23,6 +23,7 @@ import logging
 import re
 
 from app.application.pokemon_read_context import GAME_GENERATIONS
+from app.application.pokepaste import PasteOutcome
 from app.domain.showdown import export_team, public_names
 from app.repositories.errors import PersistenceError
 
@@ -1214,19 +1215,28 @@ class Dispatcher:
         )
         if failures >= PASTE_ATTEMPTS:
             return False
-        team = export_team(
-            facts["team"], generation=facts.get("generation") or 7, projection="public"
-        )
-        outcome = (
-            self.pastes.create(
-                paste=team.text,
-                title=f"{facts['trainer']} · Jornada {facts['matchday']}"[:120],
-                author="PokeApp",
-                notes=f"Team Lock oficial · {facts['season']}"[:120],
+        # The link is optional: no problem building or sending it may keep
+        # the lock from being announced.
+        try:
+            team = export_team(
+                facts["team"],
+                generation=facts.get("generation") or 7,
+                projection="public",
             )
-            if team.count
-            else None
-        )
+        except (KeyError, TypeError, ValueError, AttributeError):
+            team = None
+        if team is None or not team.count:
+            outcome = None
+        else:
+            try:
+                outcome = self.pastes.create(
+                    paste=team.text,
+                    title=f"{facts['trainer']} · Jornada {facts['matchday']}"[:120],
+                    author="PokeApp",
+                    notes=f"Team Lock oficial · {facts['season']}"[:120],
+                )
+            except Exception:  # noqa: BLE001 - transport boundary, bounded retry
+                outcome = PasteOutcome(None, "pokepaste_failed", retry=True)
         if outcome is not None and outcome.url and PASTE_URL.fullmatch(outcome.url):
             fields = dict(
                 public_paste_url=outcome.url,

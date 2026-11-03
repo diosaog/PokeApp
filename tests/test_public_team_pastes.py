@@ -275,6 +275,27 @@ class DispatcherTests(unittest.TestCase):
         self.assertIn("reemplazado", edited)
         self.assertEqual((h.stored["public_paste_url"], h.stored["public_paste_revision"]), (URL_2, 2))
 
+    def test_an_unrepresentable_team_still_announces_the_lock(self):
+        h = Harness()
+        h.tables["team_locks"][0]["public_team_snapshot"][0]["moves"] = 5  # malformed
+        h.run()
+        self.assertEqual(h.pastes.calls, [])
+        self.assertEqual((len(h.webhook.posts), h.stored["status"]), (1, "sent"))
+        self.assertIn("no está disponible", text_of(h.webhook.posts[0]))
+
+    def test_an_unexpected_transport_error_is_a_bounded_retry(self):
+        class Broken(Pastes):
+            def create(self, **form):
+                self.calls.append(form)
+                raise RuntimeError("boom")
+
+        h = Harness()
+        h.pastes = h.dispatcher.pastes = Broken()
+        for minutes in (0, 1, 1, 1):
+            h.run(minutes=minutes)
+        self.assertEqual(len(h.pastes.calls), PASTE_ATTEMPTS)
+        self.assertEqual((len(h.webhook.posts), h.stored["status"]), (1, "sent"))
+
     def test_other_announcements_never_create_pastes(self):
         h = Harness(rows=[row(kind="season_started", subject={"season_id": "s"})])
         h.tables["season_config_versions"] = [dict(version_number=1, effective_from_matchday=1, total_matchdays=4)]
