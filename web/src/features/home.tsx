@@ -23,6 +23,7 @@ import {
   gameGeneration,
 } from "../pokemon/presentation";
 import { WithSeason, playerName } from "./core";
+import { pointsOr } from "../points";
 import { GameProgress, SaveGame } from "./progress";
 import { LockStatus } from "./lock-status";
 
@@ -124,7 +125,7 @@ export function HomePage() {
         </div>
         {data && (
           <div className="home-stats stage-hud">
-            <StatPill label="Puntos" value={row?.total_points} />
+            <StatPill label="Puntos" value={pointsOr(row?.total_points)} />
             <StatPill label="Monedas" value={row?.coin_balance} />
             <StatPill label="Muertos" value={row?.dead_count} />
             <Link className="text-link" to="/liga">
@@ -168,11 +169,6 @@ export function HomePage() {
                   : "Sincroniza tu partida para ver tu equipo."}
               </p>
             )}
-            <p className="caption">
-              {lock
-                ? "Tu equipo de batalla está fijado para esta jornada."
-                : "Equipo actual del juego · revisa el Team Lock antes de jugar."}
-            </p>
             <div className="toolbar">
               <Link
                 className="text-link"
@@ -217,11 +213,9 @@ export function HomePage() {
                 ) : (
                   <h2>Cada jornada cuenta.</h2>
                 )}
-                <p>
-                  {match
-                    ? "Prepara tu equipo para el próximo enfrentamiento."
-                    : "No tienes un enfrentamiento pendiente en la jornada actual."}
-                </p>
+                {!match && (
+                  <p>No tienes un enfrentamiento pendiente en la jornada actual.</p>
+                )}
                 <Link
                   className="button primary"
                   to={match ? "/battle" : "/liga"}
@@ -233,7 +227,7 @@ export function HomePage() {
               </Card>
               <Card className="home-progress">
                 <h2>Tu aventura</h2>
-                <GameProgress progress={player?.progress} />
+                <GameProgress progress={player?.progress} summary />
                 <Link className="text-link" to="/saves">
                   Saves y Launcher →
                 </Link>

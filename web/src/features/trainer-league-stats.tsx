@@ -1,6 +1,6 @@
 import type { Model } from "../api/types";
 import { StatPill } from "../pokemon/presentation";
-import { points } from "./core";
+import { pointsOr } from "../points";
 
 export function TrainerLeagueStats({
   row,
@@ -11,7 +11,7 @@ export function TrainerLeagueStats({
     <div className="mini-stats">
       <StatPill
         label="Puntos"
-        value={row?.total_points == null ? "—" : points(row.total_points)}
+        value={pointsOr(row?.total_points)}
       />
       <StatPill label="Monedas" value={row?.coin_balance} />
       <StatPill label="Muertos" value={row?.dead_count} />

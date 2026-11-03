@@ -106,8 +106,9 @@ it("renders exact official totals and the server's champion without ranking or r
   expect(
     screen.getByRole("heading", { name: "Campeón de Liga: Ganadora oficial" }),
   ).toBeInTheDocument();
-  expect(screen.getByText("-0.000000000000000001")).toBeInTheDocument();
-  expect(screen.getByText("0.000000000000000001")).toBeInTheDocument();
+  // Exact digits with the app's decimal separator: never rounded to 0.
+  expect(screen.getByText("-0,000000000000000001")).toBeInTheDocument();
+  expect(screen.getByText("0,000000000000000001")).toBeInTheDocument();
   expect(screen.getByText("Sin evidencia oficial")).toBeInTheDocument();
   expect(screen.getByRole("button", { name: "Finalizar Liga" })).toBeEnabled();
 });

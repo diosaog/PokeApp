@@ -50,9 +50,13 @@ export function SaveGame({ game }: { game?: string | null }) {
 export function GameProgress({
   progress,
   compact = false,
+  summary = false,
 }: {
   progress?: Model<"ProgressRead">;
   compact?: boolean;
+  // Home card: badges and the champion line; the Saves screen keeps the
+  // full observation detail (Hall of Fame, League access, date).
+  summary?: boolean;
 }) {
   if (!progress || progress.state !== "observed") {
     return (
@@ -95,7 +99,7 @@ export function GameProgress({
           {progress.game && games[progress.game] && (
             <p className="game-context">Pokémon {games[progress.game]}</p>
           )}
-          <Tag>Progreso observado</Tag>
+          {!summary && <Tag>Progreso observado</Tag>}
           {progress.native_model !== "island_challenge" && (
             <p>{progress.badges_count} medallas observadas</p>
           )}
@@ -168,7 +172,7 @@ export function GameProgress({
               : "Victoria ante el Campeón del juego: sin observar."}
         </p>
       )}
-      {!compact && progress.native_model === "gym_badges" && (
+      {!compact && !summary && progress.native_model === "gym_badges" && (
         <>
           <p>
             {progress.hall_of_fame_entered === true
@@ -199,7 +203,7 @@ export function GameProgress({
             : "El recorrido insular no da monedas por medalla; vencer al Campeón sí da la recompensa de juego completado."}
         </p>
       )}
-      {!compact && progress.observed_at && (
+      {!compact && !summary && progress.observed_at && (
         <p className="muted">
           Observado en PokeApp el {date(progress.observed_at)}
         </p>

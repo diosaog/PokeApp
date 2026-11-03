@@ -12,6 +12,7 @@ import {
   typeClass,
 } from "../pokemon/presentation";
 import { useApp, useRead, useOverview } from "../state";
+import { points } from "../points";
 import { ParticipantResults } from "./league-results";
 import { WipeRevivals } from "./wipe-revivals";
 import { gameName } from "./progress";
@@ -346,16 +347,9 @@ function LeagueDay({ dayId }: { dayId: string }) {
     </OverviewState>
   );
 }
-// Official values arrive as decimal text; formatting must not round sanctions
-// or convert large totals through binary floating-point numbers.
-export function points(value: string) {
-  const match = /^(-?)(\d+)(?:\.(\d+))?$/.exec(value);
-  if (!match) return value;
-  const fraction = (match[3] ?? "").replace(/0+$/, "");
-  const integer = BigInt(match[2]).toLocaleString("es-ES");
-  const sign = match[1] && (BigInt(match[2]) !== 0n || fraction) ? "-" : "";
-  return `${sign}${integer}${fraction ? `,${fraction}` : ""}`;
-}
+// Official values arrive as decimal text; one shared formatter (../points)
+// never rounds sanctions or converts totals through floating point.
+export { points };
 
 export function LeagueGeneral({ data }: { data: Model<"LeagueGeneralRead"> }) {
   if (!data.rows.length) return <Empty>Aún no hay participantes.</Empty>;
@@ -367,7 +361,6 @@ export function LeagueGeneral({ data }: { data: Model<"LeagueGeneralRead"> }) {
   return (
     <Card className="league-table-card">
       <h2>Clasificación general</h2>
-      <p>La Liga se ordena por puntos acumulados.</p>
       {data.rows.some((row) => row.points_provisional) && (
         <p className="muted">
           Provisional: incluye los resultados y penalizaciones actuales. Los

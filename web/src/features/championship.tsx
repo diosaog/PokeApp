@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { ApiError } from "../api/client";
 import type { Model } from "../api/types";
 import { useApp, useRead } from "../state";
+import { pointsOr } from "../points";
 import {
   Card,
   CommandState,
@@ -165,7 +166,7 @@ export function ChampionshipReview({
               {data.players.map((player) => (
                 <tr key={player.season_player_id}>
                   <td>{player.display_name}</td>
-                  <td>{player.total_points}</td>
+                  <td>{pointsOr(player.total_points, "Sin confirmar")}</td>
                   <td>
                     {(actualHistory
                       ? player.actual_deaths
