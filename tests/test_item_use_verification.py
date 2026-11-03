@@ -245,10 +245,17 @@ class ReviveVerificationTests(unittest.TestCase):
         )
         self.assertIn("Caja 2, posición 2", LocalWriteController._describe(intent))
         # Revive is not a production mutation; only the owner's enabled kinds
-        # are (072 adds the coordinated Shop delivery, deliver_item).
+        # are (072 adds the coordinated Shop delivery, deliver_item; 074 the
+        # coordinated virtual training published with Launcher 0.26.9).
         self.assertEqual(
             PRODUCTION_MUTATIONS,
-            {"add_item", "deliver_item", "transfer_remove", "transfer_insert"},
+            {
+                "add_item",
+                "deliver_item",
+                "transfer_remove",
+                "transfer_insert",
+                "virtual_training",
+            },
         )
 
     def test_wrong_claim_and_bare_client_receipt_denied(self):

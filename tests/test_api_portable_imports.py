@@ -19,7 +19,9 @@ class ApiPortableImportsTest(unittest.TestCase):
             check=False,
         )
         self.assertEqual(result.returncode, 0, result.stderr[-2000:])
-        self.assertIn("124 routes", result.stdout)
+        # 075 death history (GET/PUT) and 076 final tiebreak; production's
+        # OpenAPI lists the same 126 paths (verified 2026-11-03).
+        self.assertIn("126 routes", result.stdout)
 
 
 if __name__ == "__main__":

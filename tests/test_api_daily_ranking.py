@@ -201,7 +201,10 @@ class DailyRankingApiTests(unittest.TestCase):
                 result = self.post()
                 self.assertEqual(result.status_code, 409)
                 self.assertEqual(result.json()["detail"]["code"], code)
-                self.assertEqual(result.json()["detail"]["ranking"], review())
+                # 075 adds two whitelisted facts, null for a v1 review.
+                expected = review() | {"ranking_rule": None}
+                expected["groups"][0]["segment_deaths"] = None
+                self.assertEqual(result.json()["detail"]["ranking"], expected)
                 self.assertNotIn("PRIVATE", result.text)
                 self.assertNotIn("allocation_position", result.text)
         self.assertEqual(len(self.repo.calls), 3)
