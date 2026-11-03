@@ -22,6 +22,8 @@ from app.api.scouting_models import ScoutingQuery, ScoutingRead
 from app.api.progress_models import ProgressQuery, ProgressRead
 from app.application.scouting import scouting
 from app.repositories.errors import NotFoundError, PersistenceError
+from app.api.showdown_models import ShowdownExportRead
+from app.api.routes.personal_saves import showdown
 from app.repositories.supabase.frontend_reads import _report_failure
 
 router = APIRouter(prefix="/v1/read", tags=["frontend reads"])
@@ -79,6 +81,12 @@ def preview(
 @router.get("/seasons/{season_id}/pc", response_model=PCRead)
 def pc(season_id: UUID, principal: Reader, container: Container):
     return read(container, "pc", str(season_id), str(principal.trainer_id))
+
+
+@router.get("/seasons/{season_id}/pc/showdown", response_model=ShowdownExportRead)
+def pc_showdown(season_id: UUID, principal: Reader, container: Container):
+    """The owner's League-save current party as Showdown text (on request only)."""
+    return showdown(read(container, "pc", str(season_id), str(principal.trainer_id)))
 
 
 @router.get("/seasons/{season_id}/progress", response_model=ProgressRead)

@@ -15,6 +15,7 @@ import { Collection } from "./collection";
 import { Inventory } from "./inventory";
 import { WipeRevivals } from "./wipe-revivals";
 import { PokemonDetailModal } from "./pokemon-details";
+import { ShowdownExport } from "./showdown-export";
 import { participantLabel } from "./admin-labels";
 import { type AccountProfile } from "./account-editor";
 import { TrainerLeagueStats } from "./trainer-league-stats";
@@ -260,6 +261,13 @@ function OwnSave() {
             deadBox={pc.data.dead_box}
             showDead
             animateTeam
+            partyAction={
+              // The team displayed right here, never a Team Lock snapshot.
+              pc.data.save &&
+              pc.data.pokemon.some((s) =>
+                s.location.startsWith("Equipo · "),
+              ) && <ShowdownExport save={pc.data.save} personal={pc.personal} />
+            }
           />
         </SpriteGeneration>
       ) : (

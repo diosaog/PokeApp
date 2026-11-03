@@ -1132,6 +1132,26 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/v1/read/seasons/{season_id}/pc/showdown": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Pc Showdown
+     * @description The owner's League-save current party as Showdown text (on request only).
+     */
+    get: operations["pc_showdown_v1_read_seasons__season_id__pc_showdown_get"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/v1/read/seasons/{season_id}/progress": {
     parameters: {
       query?: never;
@@ -1432,6 +1452,26 @@ export interface paths {
     };
     /** Pc */
     get: operations["pc_v1_me_pc_get"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/me/pc/showdown": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Pc Showdown
+     * @description The owner's personal current party as Showdown text (on request only).
+     */
+    get: operations["pc_showdown_v1_me_pc_showdown_get"];
     put?: never;
     post?: never;
     delete?: never;
@@ -4798,6 +4838,10 @@ export interface components {
       nature: string;
       ivs?: components["schemas"]["StatsRead"] | null;
       evs?: components["schemas"]["StatsRead"] | null;
+      /** Gender */
+      gender?: ("M" | "F" | "N") | null;
+      /** Is Egg */
+      is_egg?: boolean | null;
     };
     /** ProfilePage */
     ProfilePage: {
@@ -5702,6 +5746,43 @@ export interface components {
       /** League Game */
       league_game?:
         ("X" | "Y" | "OR" | "AS" | "SN" | "MN" | "US" | "UM") | null;
+    };
+    /**
+     * ShowdownExportRead
+     * @description Generated on request from the same save projection as the «Equipo»
+     *     card; the client compares save_id/uploaded_at with what it shows.
+     */
+    ShowdownExportRead: {
+      /**
+       * Save Id
+       * Format: uuid
+       */
+      save_id: string;
+      /**
+       * Uploaded At
+       * Format: date-time
+       */
+      uploaded_at: string;
+      /** Game */
+      game: string | null;
+      /** Text */
+      text: string;
+      /** Count */
+      count: number;
+      /** Warnings */
+      warnings?: components["schemas"]["ShowdownWarningRead"][];
+    };
+    /** ShowdownWarningRead */
+    ShowdownWarningRead: {
+      /** Code */
+      code: string;
+      /** Slot */
+      slot: number;
+      /**
+       * Detail
+       * @default
+       */
+      detail: string;
     };
     /** SlotRead */
     SlotRead: {
@@ -9164,6 +9245,37 @@ export interface operations {
       };
     };
   };
+  pc_showdown_v1_read_seasons__season_id__pc_showdown_get: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        season_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ShowdownExportRead"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
   progress_v1_read_seasons__season_id__progress_get: {
     parameters: {
       query?: never;
@@ -9783,6 +9895,26 @@ export interface operations {
         };
         content: {
           "application/json": components["schemas"]["PCRead"];
+        };
+      };
+    };
+  };
+  pc_showdown_v1_me_pc_showdown_get: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ShowdownExportRead"];
         };
       };
     };

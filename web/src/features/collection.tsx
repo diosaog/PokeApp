@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import { ChevronLeft, ChevronRight, Search } from "lucide-react";
 import type { Model } from "../api/types";
 import { Card, Empty } from "../ui";
@@ -21,6 +21,7 @@ export function Collection({
   visibility = "self",
   deadBox = null,
   animateTeam = false,
+  partyAction,
 }: {
   slots: (Model<"SlotRead"> | Model<"PublicSlotRead">)[];
   visibility?: "self" | "public";
@@ -30,6 +31,8 @@ export function Collection({
   // The participant's dead box in the season (Box 8 unless the administrator
   // set another); none outside a season.
   deadBox?: number | null;
+  // An action about the team shown here (own profile: «Generar Poképaste»).
+  partyAction?: ReactNode;
 }) {
   const [index, setIndex] = useState(0),
     [search, setSearch] = useState("");
@@ -104,6 +107,7 @@ export function Collection({
         <div className="section-row">
           <h2>Equipo</h2>
           <span className="caption">{team.length} / 6</span>
+          {partyAction}
         </div>
         <div className="party-slots">
           {Array.from({ length: 6 }, (_, i) =>

@@ -281,6 +281,10 @@ export function errorText(error: unknown) {
       "La jornada y la configuración consultadas ya no coinciden. Actualiza antes de continuar.",
     IDEMPOTENCY_CONFLICT:
       "Esta solicitud ya se registró con otros datos. Actualiza y revisa el resultado antes de realizar otra acción.",
+    SHOWDOWN_SAVE_NOT_READY:
+      "Tu partida aún no está lista en PokeApp. Sincronízala desde el Launcher y vuelve a intentarlo.",
+    SHOWDOWN_TEAM_EMPTY:
+      "Tu partida sincronizada no tiene Pokémon en el equipo para exportar.",
     PENDING_RETRY_REQUIRED:
       "Primero confirma el resultado de la solicitud pendiente con «Reintentar la misma solicitud».",
   };

@@ -10,6 +10,7 @@ const mocks = vi.hoisted(() => ({
   accountsEnabled: true,
   historyKnown: true,
   linked: true,
+  party: false,
 }));
 const observed = (game: string) => ({
   state: "observed",
@@ -55,8 +56,22 @@ vi.mock("../state", () => ({
   useMyPC: () => ({
     data: {
       status: "ready",
-      save: { id: "me", game: "Y" },
-      pokemon: [],
+      save: { id: "me", game: "Y", uploaded_at: "2026-11-03T20:00:00Z" },
+      pokemon: mocks.party
+        ? [
+            {
+              location: "Equipo · 1",
+              pokemon: {
+                species: "Pokémon #25",
+                nickname: "",
+                level: 30,
+                types: [],
+                moves: [],
+                status_flags: [],
+              },
+            },
+          ]
+        : [],
       dead_box: 7,
     },
     personal: true,
@@ -157,6 +172,7 @@ beforeEach(() => {
   mocks.accountsEnabled = true;
   mocks.historyKnown = true;
   mocks.linked = true;
+  mocks.party = false;
 });
 afterEach(cleanup);
 
@@ -332,4 +348,29 @@ it("another trainer's profile never offers the wipe editor", () => {
     screen.queryByRole("button", { name: "Sumar un revivido" }),
   ).toBeNull();
   expect(screen.queryByRole("button", { name: "Actualizar" })).toBeNull();
+});
+
+it("«Generar Poképaste» belongs to the own «Equipo» card only", () => {
+  mocks.party = true;
+  profile("me");
+  const team = screen
+    .getByRole("heading", { name: "Equipo" })
+    .closest(".party-panel")!;
+  expect(
+    within(team as HTMLElement).getByRole("button", {
+      name: "Generar Poképaste",
+    }),
+  ).toBeVisible();
+  cleanup();
+  profile("rival");
+  expect(
+    screen.queryByRole("button", { name: "Generar Poképaste" }),
+  ).toBeNull();
+});
+
+it("no team on screen, no export button", () => {
+  profile("me");
+  expect(
+    screen.queryByRole("button", { name: "Generar Poképaste" }),
+  ).toBeNull();
 });

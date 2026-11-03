@@ -19,6 +19,10 @@ from app.save_parser.models import SaveError, progress_evidence
 from app.save_parser.registration import SaveRegistration, observation_digest
 
 
+# ParsedPokemon.gender: 0 male, 1 female, 2 genderless (PKHeX convention).
+GENDERS = ("M", "F", "N")
+
+
 def reject(code, status=409):
     raise SeasonAdminRejected(code, status)
 
@@ -41,6 +45,11 @@ def parsed_payload(observation, save_id, trainer_id, raw_hash):
             "item_generation": observation.generation,
             "moves": [{"name": f"Move #{m.id}", "pp": m.pp} for m in p.moves if m.id],
             "is_shiny": p.shiny,
+            # Facts the trusted parser already reads, kept so the owner's
+            # Showdown export and Team Lock snapshots name the exact Pokémon
+            # (Meowstic-F, Rotom-Wash, a male Pikachu) in every game.
+            "gender": GENDERS[p.gender],
+            "form": p.form,
             "ability": f"Ability #{p.ability_id}",
             "nature": f"Nature #{p.nature_id}",
             "ivs": stats(p.ivs),

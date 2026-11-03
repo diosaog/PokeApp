@@ -87,6 +87,9 @@ def snapshots_from_parsed_payload(payload: dict) -> tuple[list[dict], list[dict]
         if slotted:
             # Rehydrate the established PrivatePokemon DTO, including typed children.
             data = {f.name: deepcopy(raw[f.name]) for f in fields(PrivatePokemon) if f.name in raw}
+            # The parsed save's form number is the DTO's public form_index.
+            if "form_index" not in data and type(raw.get("form")) is int:
+                data["form_index"] = raw["form"]
             data["moves"] = tuple(PokemonMove(**move) for move in data.get("moves", []))
             data["flags"] = PokemonFlags(**data.get("flags", {}))
             for key in ("ivs", "evs"):

@@ -1,0 +1,83 @@
+{
+  "purpose": "Showdown export regression: the party of a public Pokémon Y fixture save, Pokémon fields only (no trainer or identity evidence).",
+  "source_manifest": "tests/fixtures/phase21-public-saves.json",
+  "file": "Y-before-transfer/main",
+  "sha256": "d67f2772eda54de759cfa928a2f11d9697182545bd832ed29e8017e74381336c",
+  "game": "Y",
+  "generation": 6,
+  "parser": "PokeApp server parser (PKHeX.Core 24.11.11)",
+  "party": [
+    {
+      "species_id": 235,
+      "nickname": "HM Friend",
+      "level": 73,
+      "form": 0,
+      "gender": 0,
+      "shiny": false,
+      "is_egg": false,
+      "ability_id": 101,
+      "nature_id": 17,
+      "item_id": 0,
+      "ivs": [
+        17,
+        28,
+        21,
+        24,
+        19,
+        6
+      ],
+      "evs": [
+        52,
+        135,
+        49,
+        112,
+        36,
+        126
+      ],
+      "move_ids": [
+        19,
+        70,
+        57,
+        15
+      ]
+    },
+    {
+      "species_id": 342,
+      "nickname": "Crawdaunt",
+      "level": 95,
+      "form": 0,
+      "gender": 0,
+      "shiny": false,
+      "is_egg": false,
+      "ability_id": 52,
+      "nature_id": 14,
+      "item_id": 243,
+      "ivs": [
+        2,
+        22,
+        17,
+        23,
+        25,
+        21
+      ],
+      "evs": [
+        0,
+        252,
+        0,
+        0,
+        6,
+        252
+      ],
+      "move_ids": [
+        242,
+        127,
+        152,
+        14
+      ]
+    }
+  ],
+  "pkhex_showdown_reference": [
+    "HM Friend (Smeargle) (M)\nIVs: 17 HP / 28 Atk / 21 Def / 24 SpA / 19 SpD / 6 Spe\nEVs: 52 HP / 135 Atk / 49 Def / 112 SpA / 36 SpD / 126 Spe\nAbility: Technician\nLevel: 73\nQuiet Nature\n- Fly\n- Strength\n- Surf\n- Cut",
+    "Crawdaunt (M) @ Mystic Water\nIVs: 2 HP / 22 Atk / 17 Def / 23 SpA / 25 SpD / 21 Spe\nEVs: 252 Atk / 6 SpD / 252 Spe\nAbility: Hyper Cutter\nLevel: 95\nNaive Nature\n- Crunch\n- Waterfall\n- Crabhammer\n- Swords Dance"
+  ]
+}

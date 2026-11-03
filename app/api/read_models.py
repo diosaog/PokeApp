@@ -94,6 +94,10 @@ class PrivatePokemonRead(PokemonRead):
     nature: str = ""
     ivs: StatsRead | None = None
     evs: StatsRead | None = None
+    # From the same parsed save; absent (None) in projections stored before
+    # these facts were kept. Never inferred from species or sprites.
+    gender: Literal["M", "F", "N"] | None = None
+    is_egg: bool | None = None
 
 
 class LockRead(BaseModel):

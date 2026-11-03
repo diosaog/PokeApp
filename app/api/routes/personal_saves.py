@@ -14,6 +14,8 @@ from starlette.concurrency import run_in_threadpool
 from app.api.errors import api_error
 from app.api.progress_models import ProgressRead
 from app.api.read_models import PCRead
+from app.api.showdown_models import ShowdownExportRead
+from app.application.showdown_export import ShowdownUnavailable, party_export
 from app.api.routes.cups import Reader
 from app.api.routes.saves import Hash
 from app.api.routes.season_admin import Container
@@ -88,6 +90,19 @@ async def receive(
 @router.get("/pc", response_model=PCRead)
 def pc(principal: Reader, container: Container):
     return execute(container, "pc", str(principal.trainer_id))
+
+
+@router.get("/pc/showdown", response_model=ShowdownExportRead)
+def pc_showdown(principal: Reader, container: Container):
+    """The owner's personal current party as Showdown text (on request only)."""
+    return showdown(execute(container, "pc", str(principal.trainer_id)))
+
+
+def showdown(pc: PCRead) -> ShowdownExportRead:
+    try:
+        return party_export(pc)
+    except ShowdownUnavailable as error:
+        raise api_error(409, error.code, "No hay un equipo listo para exportar.") from None
 
 
 @public_router.get("/active-saves", response_model=ActiveSavePage)

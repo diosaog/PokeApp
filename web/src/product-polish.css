@@ -882,3 +882,24 @@ button[aria-busy="true"] {
   display: grid;
   gap: 4px;
 }
+
+/* ---------- «Generar Poképaste» on the own «Equipo» card ---------- */
+.party-panel .section-row {
+  flex-wrap: wrap;
+  gap: 8px 12px;
+}
+.party-panel .showdown-export {
+  margin-left: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 34px;
+  padding: 6px 12px;
+  font-size: 0.82rem;
+}
+dialog.showdown-manual textarea {
+  width: 100%;
+  font-family: ui-monospace, "Cascadia Mono", Consolas, monospace;
+  font-size: 0.85rem;
+  resize: vertical;
+}
