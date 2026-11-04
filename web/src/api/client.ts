@@ -246,6 +246,14 @@ export function errorText(error: unknown) {
     SEASON_NOT_DRAFT:
       "Esta acción solo está disponible mientras la temporada es un borrador.",
     SEASON_NOT_ACTIVE: "La Liga debe estar en curso para realizar esta acción.",
+    ENROLLMENT_PREVIEW_STALE:
+      "La Liga ha cambiado. Actualiza y revisa de nuevo la incorporación.",
+    ENROLLMENT_NOT_SUPPORTED:
+      "La incorporación durante la temporada está disponible en la Liga todos contra todos.",
+    ENROLLMENT_HISTORY_UNPROVEN:
+      "El historial de jornadas necesita revisión antes de incorporar entrenadores.",
+    ENROLLMENT_CHAMPIONSHIP_CLOSED:
+      "El campeonato ya ha finalizado. No se pueden incorporar entrenadores.",
     SEASON_NOT_FINISHED:
       "Primero confirma el campeón y finaliza la Liga antes de archivarla.",
     ACTIVE_SEASON_EXISTS:

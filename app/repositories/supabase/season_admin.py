@@ -34,6 +34,8 @@ REJECTIONS = {
         "config_already_used", "initial_setup_locked", "division_capacity_mismatch", "matchday_already_prepared",
         "config_not_effective", "competition_structure_locked", "competition_structure_mismatch",
         "season_not_editable"), 409),
+    **dict.fromkeys(("season_not_active", "enrollment_not_supported", "enrollment_history_unproven",
+        "enrollment_championship_closed", "enrollment_preview_stale"), 409),
     **dict.fromkeys(("initial_assignment_required", "initial_assignment_not_ready",
         "initial_assignment_locked", "initial_assignment_review_stale", "stale_inputs",
         "initial_boundary_tie_unresolved", "invalid_tie_resolution"), 409),
@@ -63,6 +65,9 @@ class SupabaseSeasonAdminRepository:
         return cls(create_client(url, service_role_key))
 
     def execute(self, operation: str, request: dict) -> dict:
+        if operation in ("enrollment_preview", "enrollment_confirm"):
+            return self._rpc("api_admin_league_enrollment", dict(
+                operation="preview" if operation == "enrollment_preview" else "confirm", request=request))
         if operation in ("death_history_state", "death_history_reconcile"):
             return self._rpc("api_admin_death_history", dict(
                 operation="state" if operation == "death_history_state" else "reconcile",

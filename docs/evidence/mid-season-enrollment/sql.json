@@ -1,0 +1,44 @@
+{
+  "timing": [
+    "before-j1: exact coins, six-player pairs, preserved history, baseline, ordinary close/rewards",
+    "prepared-j1: exact coins, six-player pairs, preserved history, baseline, ordinary close/rewards",
+    "during-j1: exact coins, six-player pairs, preserved history, baseline, ordinary close/rewards",
+    "after-j1: exact coins, six-player pairs, preserved history, baseline, ordinary close/rewards",
+    "during-j2: exact coins, six-player pairs, preserved history, baseline, ordinary close/rewards",
+    "after-j2: exact coins, six-player pairs, preserved history, baseline, ordinary close/rewards"
+  ],
+  "boundaries": [
+    "admin/ownership/strict body/stale preview/idempotency guards",
+    "atomic rollback of the whole enrollment",
+    "audited initial dead observations preserved; future actual deaths and event deduplication",
+    "first two badges pay zero, third badge pays four once",
+    "wipe = ordinary + replacement rate, unchanged frozen progression",
+    "entrant Team Lock on active day: one outbox row, replacement edits",
+    "entrant records a normal victory as a participant: +1 minus 0.3 actual/wipe penalties = 0.7 NET",
+    "configurable 17-coin reward; no retroactive eligibility; final championship/finished season refused",
+    "private enrollment table and service-only RPC/helper ACLs",
+    "eight initial badges plus existing championship: nine zero-value claims; repeated sync pays nothing"
+  ],
+  "regressions": {
+    "deaths_075": [
+      "ordinary + three actual comodin revivals, repeated death, movement/replay and CAS rollback",
+      "wipe five=5/-1.0, audited rearm, immutable open snapshot, reopen and revised-counter uncertainty",
+      "J1=1/J2=6/GENERAL=7, participant Box7, phase boundaries, partial-source unknown and private tables",
+      "real Python identity plans + api_register_save ordering, automatic death capture and historical save replay"
+    ],
+    "league_075": "PASS: J1: global10matches +1wins exact5coinpayouts/2prizes close/replay; J2: global10matches +1wins exact5coinpayouts/2prizes close/replay; J3: global10matches +1wins exact5coinpayouts/2prizes close/replay; J4: global10matches +1wins exact5coinpayouts/2prizes close/replay; 12wins-2.0=10.0 loses championship to11wins-0.5=10.5; cumulativepenalties notduplicated; snapshotsstable; auditedcorrect/replay keepsoriginalrevision, equalcoinpayoutnotrepeated, twoactiveprizes",
+    "two_divisions": "PASS: 2divisions retain3A/2B andmovements; globalRR10pairs; globalwinnerB/lastA prizes; nextday10pairs",
+    "legacy": "PASS: pre075closed073 +2/rate0.1 snapshot/correctioncontractunchanged; newopen/closeblockedexplicitlegacydecision",
+    "guards": "PASS: double_wins rejected in authoritative SQL with exact transaction footprint unchanged; position_points rejected in authoritative SQL with exact transaction footprint unchanged; first/last prize ties block Python planning and SQL closure without actual recorded 1v1 outcomes; no partial prizes; 4wins-1.0 equals3wins: champion staysnull; finish and legacyBO3 blocked; newer source cannot rewrite frozen deaths/net totals",
+    "championship_076": "PASS: Actual075 history selects5wipe deaths over10ordinary despite equal10penaltyunits; explicit/admin/auth/stale/CAS/idempotency/frozen protections; points/wins/deaths/rewards unchanged; ThreewayNET tie -> confirmedactualdeaths narrows to2 -> recorded1v1 only; unresolvedchoice audited, no arbitrary rank or extra sporting effects; Multiwayactual1v1 proof accepted only for a unique undefeated winner covering all candidates; incomplete/cyclic/disconnected/repeated/foreign results rejected atomically; Three actual comodin revivals leave3historicaldeaths: emptycurrentbox cannot defeat equal3deaths still in the other box; recordedbattle required; UniqueNET title never offers or accepts a tiebreak; browser roles cannot execute lifecycle RPC directly; Completednormalmatches without official finalclosure cannot decide the championship",
+    "false_deaths_077": "GREEN: explicit false event4/-0.4;immutable originals/provenance;source/revive/frozen/permission guards;future real death and snapshots correct",
+    "pastes_078": "PASS: service_role records link and bounded attempts; 8 invalid states refused (url host/case, ahead, half, bounds, code, other kinds); anon/authenticated cannot read the outbox; a newer revision leaves the old link stale (never reused)",
+    "all_vs_all_079": "PASS: zero matchdays: readiness unprepared, every trainer save_missing+baseline; A/B review not_required; outsider/retired/disabled refused; two-league season keeps the observed A/B assignment; participant prepared J1 once: 1 Liga, 5 members, 10 unique pairs, audited all_vs_all_v1; replay/2nd caller same J1; readiness per trainer: save_missing, badges_missing, death_history_baseline_required; opening refused while a prerequisite is missing (no partial freeze); own observed baseline 3/0/3 confirmed once (shown values, revision, source, owner-only; receipt replay; audited); own wipe counter acknowledged (3/1/3 = 0.4); wipes>deaths stays administrative; admin pre-tracking offset (2) preserved by the trainer's acknowledgement; Team Lock on the prepared J1 (on time); one Discord row; replacement only edits it; participant opened J1 once every prerequisite held: 5 frozen death snapshots (Iker segment 3); participant closed J1; J2 created as before with 10 pairs; J2 readiness has no J1 badge gate",
+    "player_matchdays": "PASS: outsider/retired/disabled refused; cancel stays admin-only; participant opened once (replay safe, 2nd open refused); 5 death snapshots frozen; actor audited; results by two participants; stale contradicting write refused; each actor audited; participant closed once (replay safe, 2nd close refused); 5 coin payouts; 1 snapshot; correct stays admin-only"
+  },
+  "concurrency": [
+    "three concurrent exact retries: one participant, one audit event/receipt, one 10-coin credit, exactly five added pairs",
+    "different concurrent keys: one enrollment; duplicate refused",
+    "close vs enrollment: one operation commits; outdated competing preview rejected atomically"
+  ]
+}

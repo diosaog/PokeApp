@@ -25,6 +25,19 @@ it.each([
   ],
   ["rules", [], ["pc", "shop"]],
   [
+    "enrollment",
+    [
+      "league",
+      "overview",
+      "team-preview",
+      "scouting",
+      "shop",
+      "inventory",
+      "matchdays",
+    ],
+    ["pc"],
+  ],
+  [
     "finish",
     ["league", "overview", "shop", "team-preview?mode=spectator"],
     ["pc"],
@@ -55,6 +68,18 @@ it("isolates viewers and seasons while marking all public/self modes stale", () 
   expect(predicate({ queryKey: ["owner", "/v1/read/trainers"] })).toBe(false);
 });
 it("rules refresh current rules/setup and close refreshes participant/admin day state", () => {
+  expect(
+    affectedRead(
+      "/v1/admin/seasons/s/enrollment",
+      "/v1/admin/seasons/s/enrollment",
+    ),
+  ).toBe(true);
+  expect(
+    affectedRead(
+      "/v1/seasons/s/matchdays/d/results",
+      "/v1/admin/seasons/s/enrollment",
+    ),
+  ).toBe(true);
   for (const path of ["rules", "setup"])
     expect(
       affectedRead("/v1/admin/seasons/s/rules", `/v1/admin/seasons/s/${path}`),

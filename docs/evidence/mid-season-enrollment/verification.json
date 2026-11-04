@@ -1,0 +1,80 @@
+{
+  "date": "2026-11-04",
+  "branch": "codex/mid-season-enrollment",
+  "base_commit": "c2e86170d5a70d0974a3d598755bc33a7ba8ee9f",
+  "published_base": "16708e951dc890cf8208dfbee786d1159f8abac7",
+  "migration": {
+    "file": "080_mid_season_enrollment.sql",
+    "sha256": "297b48f306242b00ae8fd361e8bbdcd11bdc3fe0ff3e5dfb93b87c936caae5b5",
+    "applied_to_production": false
+  },
+  "scope": "Local only, no push/deployment/enrollment/real save operation or external paste creation. Historical production backup restored only to isolated loopback clusters.",
+  "python": {
+    "tests": 1490,
+    "failures": 0,
+    "errors": 0,
+    "skips": 0,
+    "seconds": 153.904,
+    "exit_code": 0,
+    "runner": "tools.run_unit_tests.main(); unittest discover replaced with tracked module names plus test_api_enrollment. PYTHONPATH repo + tests, inherited by subprocesses; untracked owner tests excluded."
+  },
+  "react": {
+    "command": "npm test",
+    "files": 45,
+    "tests": 378,
+    "exit_code": 0
+  },
+  "node_launcher": {
+    "command": "node --test companion/launcher/*.test.cjs tools/launcher_public_reader.test.cjs tools/sign_launcher_update.test.cjs web/worker/launcher.test.mjs",
+    "tests": 70,
+    "exit_code": 0
+  },
+  "browser": {
+    "command": "npx playwright test e2e/enrollment.spec.ts e2e/league-start.spec.ts --reporter=list",
+    "tests": 9,
+    "exit_code": 0,
+    "browser": "Installed Edge / Playwright",
+    "viewports": [
+      1440,
+      390
+    ],
+    "screenshots_visually_inspected": true
+  },
+  "build": {
+    "command": "VITE_API_BASE_URL=https://pokeapp-api-production.up.railway.app npm run build",
+    "typescript": true,
+    "vite_build": true,
+    "exit_code": 0,
+    "deployed": false
+  },
+  "sql": {
+    "command": "python -m tools.validate_phase080_enrollment --regressions --output docs/evidence/mid-season-enrollment/sql.json",
+    "result": "PASS",
+    "last_addition": "Focused validate_boundaries on a fresh 001-080 cluster: 10 PASS, including actual participant result and 0.7 NET. Other validated timing/concurrency/regression groups unchanged."
+  },
+  "historical_rehearsal": {
+    "checks": 19,
+    "result": "PASS",
+    "existing_tables_unchanged": 101,
+    "api_reads_unchanged": 104,
+    "fresh_production_preflight": false,
+    "archive_schema_before": 78,
+    "local_upgrade": [
+      79,
+      80
+    ]
+  },
+  "checks": {
+    "compileall": "app tests tools/validate_phase080_enrollment.py: exit 0",
+    "new_file_lint": "ruff check tools/validate_phase080_enrollment.py tests/test_api_enrollment.py: exit 0",
+    "bootstrap": "generated from 80 migrations; schema tests pass; upgraded historical copy matches fresh 001-080 catalog",
+    "pokepaste_and_private_export": "git diff c2e8617 -- app/application/pokepaste.py app/domain/showdown.py: unchanged",
+    "api_paths": 132,
+    "admin_operations": 55
+  },
+  "resolved_validation_issues": [
+    "First Python run: static RLS inventory test needed the new private table; added its explicit assertions and FORCE RLS, then 1490 tests passed.",
+    "First web build refused missing VITE_API_BASE_URL; repeated with the configured public URL without changing the guard."
+  ],
+  "evidence_boundary": "First accepted complete official source is the audited progression baseline. Before-source dates are not inferred; death evidence is retained for administrative historical review."
+}

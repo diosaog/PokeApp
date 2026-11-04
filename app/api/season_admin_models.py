@@ -4,7 +4,7 @@ from datetime import datetime
 from typing import Annotated, Literal
 from uuid import UUID
 
-from pydantic import BaseModel, ConfigDict, Field, field_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
 Revision = Annotated[int, Field(strict=True, ge=0)]
 Positive = Annotated[int, Field(strict=True, gt=0)]
@@ -28,6 +28,40 @@ class AddParticipantBody(StrictBody):
     trainer_id: UUID
     seed_order: Positive | None = None
     expected_roster_revision: Revision
+
+
+class EnrollmentBody(StrictBody):
+    trainer_id: UUID
+    preview_hash: Annotated[str, Field(strict=True, pattern=r"^[a-f0-9]{64}$")]
+
+
+class EnrollmentCandidate(StrictBody):
+    id: UUID
+    display_name: str
+
+
+class EnrollmentPreview(StrictBody):
+    season_id: UUID
+    season_name: str
+    eligible_trainers: list[EnrollmentCandidate]
+    first_matchday_number: Positive
+    matchday_id: UUID | None
+    matchday_status: Literal["scheduled", "open"] | None
+    closed_matchdays: Revision
+    initial_coins: Annotated[int, Field(strict=True, ge=0, le=2147483647)]
+    initial_points: Literal["0"]
+    new_matchups: Revision
+    preview_hash: Annotated[str, Field(strict=True, pattern=r"^[a-f0-9]{64}$")]
+
+    @model_validator(mode="after")
+    def consistent(self):
+        if (self.matchday_id is None) != (self.matchday_status is None):
+            raise ValueError("Inconsistent matchday")
+        if len({t.id for t in self.eligible_trainers}) != len(self.eligible_trainers):
+            raise ValueError("Duplicate trainer")
+        if self.closed_matchdays == 0 and self.initial_coins != 0:
+            raise ValueError("Unproven enrollment coins")
+        return self
 
 
 class RemoveParticipantBody(StrictBody):

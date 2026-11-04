@@ -488,6 +488,15 @@ def rehearse(args) -> dict:
                 report["phase079_player_matchdays"] = validate_player_days(pg)
                 # The restored season itself, in a rolled-back transaction.
                 report["phase079_restored_season"] = validate_restored(pg)
+            if migration.name.startswith("080_"):
+                from tools.validate_phase080_enrollment import validate as validate_enrollment, validate_boundaries
+                from tools.validate_phase079_all_vs_all import validate as validate_all_vs_all
+                from tools.validate_player_matchdays import validate as validate_player_days
+
+                report["phase080_enrollment"] = validate_enrollment(pg)
+                report["phase080_boundaries"] = validate_boundaries(pg)
+                report["phase080_existing_all_vs_all"] = validate_all_vs_all(pg)
+                report["phase080_existing_player_matchdays"] = validate_player_days(pg)
 
         rows_after = local_fingerprints(pg, public_tables)
         # 072 adds the private item_deliveries table, its commands and the

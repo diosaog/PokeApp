@@ -226,6 +226,24 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/v1/admin/seasons/{season_id}/enrollment": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Enrollment Preview */
+    get: operations["enrollment_preview_v1_admin_seasons__season_id__enrollment_get"];
+    put?: never;
+    /** Enroll Participant */
+    post: operations["enroll_participant_v1_admin_seasons__season_id__enrollment_post"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/v1/admin/seasons/{season_id}/participants/{season_player_id}/remove-from-draft": {
     parameters: {
       query?: never;
@@ -3600,6 +3618,57 @@ export interface components {
       code: string;
       /** Tier Order */
       tier_order: number;
+    };
+    /** EnrollmentBody */
+    EnrollmentBody: {
+      /**
+       * Trainer Id
+       * Format: uuid
+       */
+      trainer_id: string;
+      /** Preview Hash */
+      preview_hash: string;
+    };
+    /** EnrollmentCandidate */
+    EnrollmentCandidate: {
+      /**
+       * Id
+       * Format: uuid
+       */
+      id: string;
+      /** Display Name */
+      display_name: string;
+    };
+    /** EnrollmentPreview */
+    EnrollmentPreview: {
+      /**
+       * Season Id
+       * Format: uuid
+       */
+      season_id: string;
+      /** Season Name */
+      season_name: string;
+      /** Eligible Trainers */
+      eligible_trainers: components["schemas"]["EnrollmentCandidate"][];
+      /** First Matchday Number */
+      first_matchday_number: number;
+      /** Matchday Id */
+      matchday_id: string | null;
+      /** Matchday Status */
+      matchday_status: ("scheduled" | "open") | null;
+      /** Closed Matchdays */
+      closed_matchdays: number;
+      /** Initial Coins */
+      initial_coins: number;
+      /**
+       * Initial Points
+       * @constant
+       */
+      initial_points: "0";
+      /** New Matchups */
+      new_matchups: number;
+      /** Preview Hash */
+      preview_hash: string;
     };
     /** FinalizeInitialAssignmentBody */
     FinalizeInitialAssignmentBody: {
@@ -7537,6 +7606,74 @@ export interface operations {
     requestBody: {
       content: {
         "application/json": components["schemas"]["AddParticipantBody"];
+      };
+    };
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["AdminReceipt"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  enrollment_preview_v1_admin_seasons__season_id__enrollment_get: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        season_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["EnrollmentPreview"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  enroll_participant_v1_admin_seasons__season_id__enrollment_post: {
+    parameters: {
+      query?: never;
+      header: {
+        "idempotency-key": string;
+      };
+      path: {
+        season_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["EnrollmentBody"];
       };
     };
     responses: {

@@ -11,6 +11,7 @@ from app.api.security import require_admin_principal
 from app.api.season_admin_models import (
     AddParticipantBody, AdminReceipt, ConfigVersionBody, CreateSeasonBody, DeadBoxBody, InitialDivisionsBody,
     RemoveParticipantBody, RenameSeasonBody, ReplaceConfigBody, SeasonSetup, SetupRevisionBody,
+    EnrollmentBody, EnrollmentPreview,
 )
 from app.repositories.errors import PersistenceError
 from app.repositories.supabase.season_admin import SeasonAdminRejected
@@ -48,7 +49,8 @@ def _execute(op, principal, container, payload=None, season_id=None, resource_id
         if repo is None:
             raise PersistenceError("Missing backend")
         raw = repo.execute(op, request)
-        model = (SeasonSetup if op == "setup" else LiveRulesRead if op == "live_rules_read"
+        model = (SeasonSetup if op == "setup" else EnrollmentPreview if op == "enrollment_preview"
+                 else LiveRulesRead if op == "live_rules_read"
                  else DeathHistoryRead if op in ("death_history_state", "death_history_reconcile")
                  else AdminReceipt)
         result = model.model_validate(raw)
@@ -94,6 +96,16 @@ def rename_season(season_id: UUID, payload: RenameSeasonBody, principal: Admin, 
 @router.post("/seasons/{season_id}/participants", response_model=AdminReceipt)
 def add_participant(season_id: UUID, payload: AddParticipantBody, idempotency_key: Key, principal: Admin, container: Container):
     return _execute("add_participant", principal, container, payload, season_id, key=idempotency_key)
+
+
+@router.get("/seasons/{season_id}/enrollment", response_model=EnrollmentPreview)
+def enrollment_preview(season_id: UUID, principal: Admin, container: Container):
+    return _execute("enrollment_preview", principal, container, season_id=season_id)
+
+
+@router.post("/seasons/{season_id}/enrollment", response_model=AdminReceipt)
+def enroll_participant(season_id: UUID, payload: EnrollmentBody, idempotency_key: Key, principal: Admin, container: Container):
+    return _execute("enrollment_confirm", principal, container, payload, season_id, key=idempotency_key)
 
 
 @router.post("/seasons/{season_id}/participants/{season_player_id}/remove-from-draft", response_model=AdminReceipt)

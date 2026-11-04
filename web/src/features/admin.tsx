@@ -33,6 +33,7 @@ import {
 import { IncidentCenter } from "./admin-incidents";
 import { AdminAccountsPage } from "./admin-accounts";
 import { DeathHistory } from "./death-history";
+import { Enrollment } from "./enrollment";
 
 type Setup = Model<"SeasonSetup">;
 function AdminLink(props: ComponentProps<typeof Link>) {
@@ -90,39 +91,44 @@ function Participants({ setup }: { setup: Setup }) {
       (setup.season.status === "draft" ? canRemove : canChange);
   return (
     <>
-      <Card>
-        <h2>Añadir entrenador</h2>
-        <form
-          onSubmit={(event) => {
-            const data = form(event);
-            if (!canAdd || busy) return;
-            void cmd.execute(`/v1/admin/seasons/${season}/participants`, {
-              trainer_id: text(data, "trainer"),
-              expected_roster_revision: setup.roster_revision,
-            } satisfies Model<"AddParticipantBody">);
-          }}
-        >
-          <Field label="Entrenador">
-            <select name="trainer" required disabled={!canAdd || busy}>
-              <option value="">Seleccionar</option>
-              {trainers.data
-                ?.filter(
-                  (t) => !setup.participants.some((p) => p.trainer_id === t.id),
-                )
-                .map((t) => (
-                  <option key={t.id} value={t.id}>
-                    {t.display_name}
-                  </option>
-                ))}
-            </select>
-          </Field>
-          <Submit pending={cmd.pending} disabled={busy || !canAdd}>
-            Añadir a la temporada
-          </Submit>
-        </form>
-        {!canAdd && <p className="muted">Solo durante el borrador.</p>}
-        <Notice error={trainers.error} />
-      </Card>
+      {setup.season.status === "active" ? (
+        <Enrollment />
+      ) : (
+        <Card>
+          <h2>Añadir entrenador</h2>
+          <form
+            onSubmit={(event) => {
+              const data = form(event);
+              if (!canAdd || busy) return;
+              void cmd.execute(`/v1/admin/seasons/${season}/participants`, {
+                trainer_id: text(data, "trainer"),
+                expected_roster_revision: setup.roster_revision,
+              } satisfies Model<"AddParticipantBody">);
+            }}
+          >
+            <Field label="Entrenador">
+              <select name="trainer" required disabled={!canAdd || busy}>
+                <option value="">Seleccionar</option>
+                {trainers.data
+                  ?.filter(
+                    (t) =>
+                      !setup.participants.some((p) => p.trainer_id === t.id),
+                  )
+                  .map((t) => (
+                    <option key={t.id} value={t.id}>
+                      {t.display_name}
+                    </option>
+                  ))}
+              </select>
+            </Field>
+            <Submit pending={cmd.pending} disabled={busy || !canAdd}>
+              Añadir a la temporada
+            </Submit>
+          </form>
+          {!canAdd && <p className="muted">Solo durante el borrador.</p>}
+          <Notice error={trainers.error} />
+        </Card>
+      )}
       {!canChange && setup.season.status === "active" && (
         <p className="muted">
           Cambios de participación: con la jornada actual preparada y sin

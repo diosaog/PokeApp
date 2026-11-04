@@ -1,0 +1,117 @@
+{
+  "archive": "pre-release-20261104T114551Z.dump",
+  "archive_sha256": "f49bb921c4b602a5876962978d2b3991cd087dfa24a3702594e3ef4269395121",
+  "result": "PASS",
+  "deployed_before": 78,
+  "pending": [
+    "079_all_vs_all_first_matchday.sql",
+    "080_mid_season_enrollment.sql"
+  ],
+  "pending_sha256": {
+    "079_all_vs_all_first_matchday.sql": "ce57e6b75906f6418b9b1181b20087f90a6dfcf6f266349943b658b72e70d145",
+    "080_mid_season_enrollment.sql": "297b48f306242b00ae8fd361e8bbdcd11bdc3fe0ff3e5dfb93b87c936caae5b5"
+  },
+  "scope": "Historical production archive at 078, locally upgraded through 079 then 080. Not a fresh production preflight.",
+  "captured_at": "2026-11-04T11:46:16+00:00",
+  "checks": [
+    {
+      "check": "backup restores into an isolated cluster with owners and grants",
+      "pass": true
+    },
+    {
+      "check": "restored rows identical to production: 123 tables (count + hash)",
+      "pass": true
+    },
+    {
+      "check": "restored catalog identical to production (objects, definitions, owners, ACLs)",
+      "pass": true
+    },
+    {
+      "check": "migration history restored: 079-080 (historical archive) not recorded",
+      "pass": true
+    },
+    {
+      "check": "104 API reads run on the restored copy (no privilege or missing-object error)",
+      "pass": true
+    },
+    {
+      "check": "079_all_vs_all_first_matchday.sql still matches the bytes frozen at rehearsal start",
+      "pass": true
+    },
+    {
+      "check": "079_all_vs_all_first_matchday.sql applies once as non-superuser postgres",
+      "pass": true
+    },
+    {
+      "check": "080_mid_season_enrollment.sql still matches the bytes frozen at rehearsal start",
+      "pass": true
+    },
+    {
+      "check": "080_mid_season_enrollment.sql applies once as non-superuser postgres",
+      "pass": true
+    },
+    {
+      "check": "discord_announcements rows identical apart from the new 078 columns",
+      "pass": true
+    },
+    {
+      "check": "101 existing tables keep byte-identical rows (seasons, saves, history, purchases, coins)",
+      "pass": true
+    },
+    {
+      "check": "104 API reads return identical results after 079-080 (historical archive)",
+      "pass": true
+    },
+    {
+      "check": "no browser privilege removed from existing objects",
+      "pass": true
+    },
+    {
+      "check": "no new privilege for anon/authenticated (tables, views or functions)",
+      "pass": true
+    },
+    {
+      "check": "10 private operational tables exist and force RLS",
+      "pass": true
+    },
+    {
+      "check": "verifier role created without login, superuser or RLS bypass",
+      "pass": true
+    },
+    {
+      "check": "focused fixtures rolled back exactly",
+      "pass": true
+    },
+    {
+      "check": "upgraded copy equals a fresh 001-080 build (Supabase-shaped)",
+      "pass": true
+    },
+    {
+      "check": "pending migration bytes unchanged throughout the rehearsal",
+      "pass": true
+    }
+  ],
+  "acceptance": {
+    "phase080_enrollment": [
+      "before-j1: exact coins, six-player pairs, preserved history, baseline, ordinary close/rewards",
+      "prepared-j1: exact coins, six-player pairs, preserved history, baseline, ordinary close/rewards",
+      "during-j1: exact coins, six-player pairs, preserved history, baseline, ordinary close/rewards",
+      "after-j1: exact coins, six-player pairs, preserved history, baseline, ordinary close/rewards",
+      "during-j2: exact coins, six-player pairs, preserved history, baseline, ordinary close/rewards",
+      "after-j2: exact coins, six-player pairs, preserved history, baseline, ordinary close/rewards"
+    ],
+    "phase080_boundaries": [
+      "admin/ownership/strict body/stale preview/idempotency guards",
+      "atomic rollback of the whole enrollment",
+      "audited initial dead observations preserved; future actual deaths and event deduplication",
+      "first two badges pay zero, third badge pays four once",
+      "wipe = ordinary + replacement rate, unchanged frozen progression",
+      "entrant Team Lock on active day: one outbox row, replacement edits",
+      "configurable 17-coin reward; no retroactive eligibility; final championship/finished season refused",
+      "private enrollment table and service-only RPC/helper ACLs",
+      "eight initial badges plus existing championship: nine zero-value claims; repeated sync pays nothing"
+    ],
+    "phase080_existing_all_vs_all": "PASS: zero matchdays: readiness unprepared, every trainer save_missing+baseline; A/B review not_required; outsider/retired/disabled refused; two-league season keeps the observed A/B assignment; participant prepared J1 once: 1 Liga, 5 members, 10 unique pairs, audited all_vs_all_v1; replay/2nd caller same J1; readiness per trainer: save_missing, badges_missing, death_history_baseline_required; opening refused while a prerequisite is missing (no partial freeze); own observed baseline 3/0/3 confirmed once (shown values, revision, source, owner-only; receipt replay; audited); own wipe counter acknowledged (3/1/3 = 0.4); wipes>deaths stays administrative; admin pre-tracking offset (2) preserved by the trainer's acknowledgement; Team Lock on the prepared J1 (on time); one Discord row; replacement only edits it; participant opened J1 once every prerequisite held: 5 frozen death snapshots (Iker segment 3); participant closed J1; J2 created as before with 10 pairs; J2 readiness has no J1 badge gate",
+    "phase080_existing_player_matchdays": "PASS: outsider/retired/disabled refused; cancel stays admin-only; participant opened once (replay safe, 2nd open refused); 5 death snapshots frozen; actor audited; results by two participants; stale contradicting write refused; each actor audited; participant closed once (replay safe, 2nd close refused); 5 coin payouts; 1 snapshot; correct stays admin-only"
+  }
+}

@@ -36,15 +36,31 @@ vi.mock("../state", () => ({
         ? mocks.setup
         : path.endsWith("/trainers")
           ? [{ id: "new-trainer", display_name: "Elena" }]
-          : path.endsWith("/cancellation-preview")
-            ? mocks.preview
-            : path.endsWith("/league")
-              ? {
-                  rows: [{ season_player_id: "player", dead_box_number: 8 }],
-                }
-              : path.startsWith("/v1/read/seasons?")
-                ? { items: [], next_offset: null }
-                : mocks.day,
+          : path.endsWith("/enrollment")
+            ? {
+                season_id: "season",
+                season_name: "Liga Horizonte",
+                eligible_trainers: [
+                  { id: "new-trainer", display_name: "Elena" },
+                ],
+                first_matchday_number: 2,
+                matchday_id: "day",
+                matchday_status: "scheduled",
+                closed_matchdays: 1,
+                initial_coins: 10,
+                initial_points: "0",
+                new_matchups: 5,
+                preview_hash: "a".repeat(64),
+              }
+            : path.endsWith("/cancellation-preview")
+              ? mocks.preview
+              : path.endsWith("/league")
+                ? {
+                    rows: [{ season_player_id: "player", dead_box_number: 8 }],
+                  }
+                : path.startsWith("/v1/read/seasons?")
+                  ? { items: [], next_offset: null }
+                  : mocks.day,
     isPending: false,
     error: path.endsWith("/rules") ? mocks.rulesError : null,
   }),

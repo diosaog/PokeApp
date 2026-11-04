@@ -10,7 +10,7 @@ export function affectedRead(command: string, read: string): boolean {
     /^\/v1\/(?:read\/|admin\/)?seasons\/([^/?]+)(.*)$/,
   );
   const lifecycle =
-    /\/(open|close|cancel|finish|archive|discard|activate|prepare|participants|initial-assignment|initial-divisions|correct)(\/|$|-)/.test(
+    /\/(open|close|cancel|finish|archive|discard|activate|prepare|participants|enrollment|initial-assignment|initial-divisions|correct)(\/|$|-)/.test(
       action,
     );
   if (read === "/v1/read/seasons?offset=0")
@@ -42,6 +42,7 @@ export function affectedRead(command: string, read: string): boolean {
       "/shop",
       "/inventory",
       "/wipe-revivals",
+      "/enrollment",
     );
   if (action.includes("/championship/")) return is("/championship", "/setup");
   // Incident center (Phase 28): a cancellation, refund or correction moves
@@ -69,7 +70,14 @@ export function affectedRead(command: string, read: string): boolean {
       "/setup",
     );
   if (action.endsWith("/results"))
-    return is("/league", "/overview", "/matchdays", "/championship", "/setup");
+    return is(
+      "/league",
+      "/overview",
+      "/matchdays",
+      "/championship",
+      "/setup",
+      "/enrollment",
+    );
   return is("/setup");
 }
 

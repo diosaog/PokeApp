@@ -34,9 +34,10 @@ MIGRATIONS = sorted((ROOT / "supabase/v2/migrations").glob("*.sql"))
 # audited refunds) and 073 (prospective League scoring) are deployed.
 # 074-078 are deployed (078: the public Pokepast.es link columns of the
 # Discord outbox, owner-approved release 2026-11-04). 079 (all-vs-all League
-# start by participants, readiness, own death history) is pending approval.
-DEPLOYED = [m for m in MIGRATIONS if int(m.name[:3]) <= 78]
-PENDING = [m for m in MIGRATIONS if int(m.name[:3]) == 79]
+# start, readiness, own death history) was published 2026-11-04. 080 (admin
+# enrollment during a season) is local only and requires explicit approval.
+DEPLOYED = [m for m in MIGRATIONS if int(m.name[:3]) <= 79]
+PENDING = [m for m in MIGRATIONS if int(m.name[:3]) == 80]
 WINDOW = f"{PENDING[0].name[:3]}-{PENDING[-1].name[:3]}"
 SCHEMAS = "('public','v1_shadow')"
 

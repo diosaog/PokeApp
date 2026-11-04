@@ -5,6 +5,15 @@ milestone record; it does not maintain a second live phase-status ledger.
 
 ## Current project position
 
+- Incorporación administrativa durante ChampionsLocke (2026-11-04):
+  **IMPLEMENTADA Y VERIFICADA LOCALMENTE / SIN PUBLICAR**. Rama
+  `codex/mid-season-enrollment`, desde el fix independiente `c2e8617`.
+  080 pendiente; cero NET inicial, crédito solo por cierres oficiales,
+  entrada en jornada abierta/siguiente, cruces nuevos y bases auditadas.
+  Python 1490, React 378, Node 70 y navegador 9 PASS; ensayo histórico
+  19/19. Requiere autorización para SQL + API + web; CRLF puede salir
+  solo con API. [Informe y próximo paso](work-in-progress/mid-season-enrollment.md).
+
 - Public Pokepast.es format follow-up (2026-11-04): **LOCAL ONLY**, branch
   `codex/public-pokepaste-format` from published tip `16708e9` below.
   Corrects the HTTP form's LF → CRLF so Pokepast.es recognizes all six

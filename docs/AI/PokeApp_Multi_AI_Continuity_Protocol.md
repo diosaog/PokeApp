@@ -20,6 +20,13 @@ from that local branch. [Its verification record](../work-in-progress/public-pok
 contains the CRLF defect, tests, screenshot and API-only deployment requirement.
 It has not been deployed or pushed; the published release above remains unchanged.
 
+Later local continuation (2026-11-04): `codex/mid-season-enrollment` descends
+from `c2e8617` and preserves that separate Pokepast.es commit. Continue this
+task from its tip. [Enrollment record](../work-in-progress/mid-season-enrollment.md)
+contains the owner contract, 080, API/web changes, verified tests, historical
+backup rehearsal and approval-dependent release plan. Nothing was pushed
+or deployed; the latest published database remains 079 as reported above.
+
 The live handoff is the single maintained operational record for an active phase.
 Other documents link to it instead of maintaining competing live Git, test or
 staging snapshots. Reports retain dated evidence; checkpoints retain explicitly

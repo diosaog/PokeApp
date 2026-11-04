@@ -156,6 +156,7 @@ class SupabaseV2SchemaTests(unittest.TestCase):
                 "077_false_death_event_corrections.sql",
                 "078_team_lock_public_pastes.sql",
                 "079_all_vs_all_first_matchday.sql",
+                "080_mid_season_enrollment.sql",
             ],
         )
         for path in _migration_files():
@@ -366,7 +367,7 @@ class SupabaseV2SchemaTests(unittest.TestCase):
         self.assertTrue(bootstrap.startswith("-- ONLY FOR EMPTY POKEAPP V2 DATABASE."))
         self.assertEqual(bootstrap, render_bootstrap())
         self.assertIn(
-            "Source of truth: supabase/v2/migrations/001_core.sql through 079_all_vs_all_first_matchday.sql",
+            "Source of truth: supabase/v2/migrations/001_core.sql through 080_mid_season_enrollment.sql",
             bootstrap,
         )
         self.assertNotIn("drop table", lowered)
@@ -419,7 +420,7 @@ class SupabaseV2SchemaTests(unittest.TestCase):
                 self.assertIn('revoke all on public.discord_announcements from public, anon, authenticated, service_role', security_sql)
                 self.assertIn('grant select, update on public.discord_announcements to service_role', security_sql)
                 continue
-            if table in ('item_deliveries', 'training_operations'):
+            if table in ('item_deliveries', 'training_operations', 'league_enrollments'):
                 # 072: backend-only single use of a paid in-game object; no delete.
                 self.assertIn(f'alter table public.{table} enable row level security', security_sql)
                 self.assertIn(f'alter table public.{table} force row level security', security_sql)
@@ -468,7 +469,7 @@ class SupabaseV2SchemaTests(unittest.TestCase):
                 self.assertIn(f"'{table}'", security_sql, table)
 
         # 075 adds the separately revoked death-history RLS group. 077 adds no table.
-        self.assertEqual(security_sql.count("enable row level security"), 42)
+        self.assertEqual(security_sql.count("enable row level security"), 43)  # 080 private enrollment audit
         self.assertIn("alter table public.%i enable row level security", security_sql)
 
 
