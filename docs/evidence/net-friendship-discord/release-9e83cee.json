@@ -1,0 +1,39 @@
+{
+  "source_commit": "9e83cee162680bb61f97558165669389eb784cd6",
+  "scope": "Gourgeist plain species in private/public Showdown export; profile wipe count refresh. No SQL, no Launcher, no save write.",
+  "api": {
+    "railway_deployment": "3c6b1d9f-52bb-42b3-9519-bc3f9701e746",
+    "status": "SUCCESS",
+    "created_at": "2026-11-04T22:53:01Z",
+    "image_digest": "sha256:09f5ed7e1ec7245bf69f0edc39dd77bc93a322f66e2939a6a15d67651943d955",
+    "bundle_files": 346,
+    "only_api_input_changed_vs_live_source_6490e3d": "app/domain/showdown.py",
+    "checks": {
+      "health": 200,
+      "openapi_paths": 132,
+      "anonymous_showdown_export": 401
+    },
+    "rollback": {
+      "deployment": "adfca5c4-fb5e-4739-a239-b08ccfbb92c2",
+      "image_digest": "sha256:e7f315606f85b41d153d821498111250c2b82fb92741e99ac9aa391da7862449"
+    }
+  },
+  "web": {
+    "cloudflare_version": "43e98b76-53d7-4309-920b-590f8c8379c4",
+    "traffic": "100%",
+    "index_identical_to_build": true,
+    "api_base_url": "https://pokeapp-api-production.up.railway.app",
+    "rollback": "0eef4feb-835c-4203-b581-ed1bd9692586"
+  },
+  "unchanged": [
+    "Supabase 001-081",
+    "verifier 2853bbc4",
+    "Launcher 0.26.11 feed/installer",
+    "Railway optimization"
+  ],
+  "tests": {
+    "python_focused": "showdown export + public pastes + announcements (80 OK before commit split)",
+    "web": "read-invalidation 12/12 (fails without the fix)",
+    "build": "tsc -b && vite build PASS"
+  }
+}

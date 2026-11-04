@@ -5,6 +5,16 @@ milestone record; it does not maintain a second live phase-status ledger.
 
 ## Current project position
 
+- NET con revividos tras wipe, Felicidad máxima y anuncios Team Lock (2026-11-05):
+  **PARCIAL PUBLICADO**. Continuar desde el tip de `origin/claude/net-friendship-discord`
+  (base `68c674f`). Publicado `9e83cee`: Gourgeist sin sufijo en exportación privada y
+  Pokepast.es + refresco de la ficha; API `3c6b1d9f` (rollback `adfca5c4`), web
+  `43e98b76` (rollback `0eef4feb`). Pendiente de aprobación: SQL 082/083 + API Discord
+  (`c49888c`; 13 + 11 SQL PASS, defecto 081 reproducido) y «Felicidad máxima»
+  (`0ab7a6e`; 256 C# + 9 Python con motor real; producción bloqueada por
+  `PRODUCTION_MUTATIONS`). DB 001–081; Launcher 0.26.11 y verifier sin cambios.
+  [Registro vivo](work-in-progress/net-friendship-discord.md).
+
 - Automatic observed points (2026-11-04): **PUBLISHED / VERIFIED**. No player
   death-history confirmation. Continue from the tip of
   `origin/codex/automatic-observed-points`, source `add17d3`. DB 081

@@ -10,7 +10,7 @@ Reconciled: 2026-09-26. Keep one copy at this path.
 | How do AI instances continue the same work? | This protocol |
 | What are the project-wide constraints and roadmap? | [Master protocol](../PokeApp_2.0_Protocolo_Maestro_MultiIA.md) |
 | Which phase is active and where is its memory? | [Project checkpoint](../project-checkpoint.md) |
-| What is the current operational state and next action? | [Automatic observed points live record](../work-in-progress/automatic-observed-points.md) (2026-11-04: PUBLISHED / VERIFIED, SQL 081 `20261104165722`, web `0eef4feb` at 100%, source `add17d3`; actual reads Samu 0 / Iker -0.3 with no player confirmation or data rewrite). **Continue from the tip of `origin/codex/automatic-observed-points`.** No pending migrations; never reapply 081. API `adfca5c4`, verifier and Launcher unchanged. Discord per-version messages remain outside this authorization. |
+| What is the current operational state and next action? | [NET/Felicidad/Discord live record](../work-in-progress/net-friendship-discord.md) (2026-11-05: PARTIALLY PUBLISHED. Gourgeist export + profile refresh live: API `3c6b1d9f`, web `43e98b76`, source `9e83cee`. SQL 082 (wipe-revived deaths in NET) and 083 (one Team Lock announcement per confirmation) are committed in `c49888c`, NOT applied, and await owner approval; the API with the 083 code must only be deployed after 083. «Felicidad máxima» is committed in `0ab7a6e` behind the production write gate (`max_friendship` not in PRODUCTION_MUTATIONS); Launcher 0.26.12 and the web row await approval). **Continue from the tip of `origin/claude/net-friendship-discord`.** DB 001–081 in production; never reapply 081. |
 | What behavior was approved? | [Functional alignment contract](../phase10-5-functional-alignment.md) |
 | What was implemented and what evidence exists? | Active phase evidence in its live record until closure; [previous Phase 10 report](../phase10-completion-report.md) retains historical delivery evidence |
 
@@ -40,6 +40,11 @@ build and one local + one hosted synthetic browser test PASS. Samu and Iker
 both await their own baseline confirmation (0/0/0 and 3/0/3); no data correction.
 Discord per-version announcements require a new migration and are stopped
 under the owner's explicit no-migration boundary. No worker/API/SQL change.
+
+NET/Felicidad/Discord (2026-11-05): see the live record above. 082 replaces only
+`league_death_totals` (guarded by the deployed 081 fingerprint); 083 adds an immutable
+per-confirmation table and outbox row and drops the 067 edit trigger. Both validators
+and the rehearsal hooks are in place; release tools pin PENDING 082–083.
 
 Latest owner clarification (2026-11-04): players must not confirm death history
 to obtain observable points. Continue from `codex/automatic-observed-points`

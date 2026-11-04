@@ -1,0 +1,41 @@
+{
+  "observed": "2026-11-04/05 local",
+  "source_commit": "c49888c",
+  "environment": "Windows, .venv-api, disposable PostgreSQL 17 on loopback (SupabaseLikePG), 001-081 then 082 then 083; every scenario rolled back",
+  "command": "tools.validate_phase082_wipe_deaths (reproduce_defect on 081, validate on 082) and tools.validate_phase083_team_lock_announcements",
+  "result": "PASS",
+  "defect_reproduced_on_081": [
+    "081: 11 wipe revivals with an empty dead box make NET unknown",
+    "081: 4 deaths still in the dead box + 1 wipe revival deduct only 0.5"
+  ],
+  "phase082_checks": [
+    "11 wipe revivals with no dead-box event: 11 deaths at 0.2 each, NET -2.2",
+    "3 ordinary deaths still in the dead box: NET -0.3",
+    "no deaths and no wins: known NET 0, never unknown",
+    "4 ordinary deaths + 1 separate wipe revival: NET -0.6",
+    "a dead-box death later alive with no comod?n is the wipe's own death: charged once (-0.2)",
+    "a prepared J1 changes no accumulated NET",
+    "an open J1 changes no accumulated NET",
+    "a new death during an open matchday counts at once",
+    "after J1 closes, NET = wins - the same accumulated death penalties",
+    "an audited baseline that already contains its wipe deaths is not charged twice",
+    "a missing official source stays unknown, never zero",
+    "league_death_totals keeps its service-only ACL",
+    "a comod?n-revived death keeps its 0.1 and a later wipe revival adds its own 0.2"
+  ],
+  "phase083_checks": [
+    "first ?Fijar Equipo?: one immutable confirmation and one announcement, no legacy row",
+    "automatic retry with the same key replays: no second record or announcement",
+    "a different valid team replaces the same Team Lock",
+    "a different team and the same team again are two new announcements; the sent one is never edited",
+    "every announcement keeps its own trainer and matchday",
+    "the Team Lock itself holds the latest confirmed team",
+    "reusing a key for a different request is refused without effects",
+    "confirmations cannot be updated or deleted",
+    "legacy call: one first-lock row; a replacement no longer edits it",
+    "a closed matchday still refuses a Team Lock and records nothing",
+    "browser roles cannot read confirmations or call the confirmation RPC"
+  ],
+  "phase082_checks_after_083": 13,
+  "production_modified": false
+}

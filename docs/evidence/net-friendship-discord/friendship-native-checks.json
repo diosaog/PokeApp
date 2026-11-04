@@ -1,0 +1,42 @@
+{
+  "observed": "2026-11-05 local",
+  "source_commit": "0ab7a6e",
+  "command": "PokeApp.Parser.Checks --friendship-checks <retained public contributor fixtures> <scratch>",
+  "inputs": "in-memory copies of the retained public contributor fixtures (X,Y,OR,AS,SN,MN,US,UM); no player save",
+  "result": "PASS",
+  "checks": 256,
+  "games": [
+    {
+      "game": "X",
+      "checks": 32
+    },
+    {
+      "game": "Y",
+      "checks": 64
+    },
+    {
+      "game": "OR",
+      "checks": 96
+    },
+    {
+      "game": "AS",
+      "checks": 128
+    },
+    {
+      "game": "SN",
+      "checks": 160
+    },
+    {
+      "game": "MN",
+      "checks": 192
+    },
+    {
+      "game": "US",
+      "checks": 224
+    },
+    {
+      "game": "UM",
+      "checks": 256
+    }
+  ]
+}
