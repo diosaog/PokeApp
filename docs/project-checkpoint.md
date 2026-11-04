@@ -6,14 +6,15 @@ milestone record; it does not maintain a second live phase-status ledger.
 ## Current project position
 
 - All-vs-all League start, always-available Team Preview, «Fijar Equipo»,
-  gender check, «Mi perfil» tabs (2026-11-04): **IMPLEMENTED / VERIFIED
-  LOCALLY, NOT PUBLISHED (awaiting owner approval).** Branch
+  gender check, «Mi perfil» tabs (2026-11-04): **PUBLISHED 2026-11-04 /
+  VERIFIED.** API `ef13a7ce` (source `f2f799c`), DB 079 (`20261104134028`),
+  web `a81eb04f`, Launcher 0.26.11 unchanged. **Continuation point: tip of
+  `claude/all-vs-all-league-start`.** Branch
   `claude/all-vs-all-league-start` from `e237255`. Migration 079 (participants
   prepare an all-vs-all J1; readiness; own death-history confirmation of
   observed values), API 131 paths, web League/profile/Team Preview. Rehearsal
-  on a fresh production backup 17/17 PASS. Production stays DB 078 / API
-  `554bf854` / web `0b061103` / Launcher 0.26.11. Release order (API, 079,
-  web), rollback and evidence: [live record](work-in-progress/all-vs-all-league-start.md).
+  on a fresh production backup 17/17 PASS (re-run by the owner with the
+  final bytes). Rollback targets API `554bf854`, web `0b061103`. Evidence: [live record](work-in-progress/all-vs-all-league-start.md).
 
 - **Continuation point (2026-11-03): branch `claude/api-session-isolation`, its tip
   on `origin`.** It contains `main`, every `codex/*` branch (075-079 included) and

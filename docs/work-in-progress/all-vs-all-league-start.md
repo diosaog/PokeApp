@@ -1,8 +1,24 @@
 # All-vs-all League start, always-available Team Preview, «Fijar Equipo», gender check, «Mi perfil» — live record
 
 Branch `claude/all-vs-all-league-start`, from `e237255` (tip of the published
-`claude/ux-showdown-matchdays`). **IMPLEMENTED AND VERIFIED LOCALLY — NOT
-PUBLISHED. Production is untouched pending the owner's approval.**
+`claude/ux-showdown-matchdays`). **PUBLISHED 2026-11-04 with the owner's
+approval; verified read-only afterwards.**
+
+| Layer | Live state |
+|---|---|
+| Railway API | `ef13a7ce` SUCCESS (source `f2f799c`, bundle of committed HEAD); previous `554bf854`; pastes flag `true`; 131 OpenAPI paths; `/health` 200; new routes 401 anonymous and with a bad bearer |
+| Supabase | 001-079; 079 = `20261104134028`, applied once by `tools.phase30_apply_migrations` (owner-run). The owner re-ran the rehearsal with the final LF bytes (`ce57e6b7…`) on the verified backup: all PASS, preflight `problems: []` |
+| Cloudflare web | `a81eb04f-ae65-4f53-821b-14e201a0a8ad` (100%), built with `VITE_API_BASE_URL=https://pokeapp-api-production.up.railway.app`; previous `0b061103`. Bundle contains the API URL, readiness/first-matchday/death-history routes, «Abrir jornada», «Fijar Equipo», provisional Team Preview, own death confirmation, profile tab CSS, gender mark, «Generar Poképaste» |
+| Launcher | unchanged 0.26.11 (loads the new web) |
+| Verifier | unchanged `2853bbc4`, `sleep 60` loop |
+| ChampionsLocke after release | still 0 matchdays, 0 divisions, 0 initial snapshots, 0 Team Locks, no J1 preparation event, no new death resolution |
+
+Pending real use (not simulated): a trainer preparing/opening J1, Iker
+confirming 3/0/3 from his profile, ByVisan02 and Samu registering their
+League saves with their own Launcher and confirming, the first «Fijar Equipo»
+with its Discord/Pokepast.es announcement, and authenticated reads/refresh
+cycles on `ef13a7ce` (no trainer request had reached it at verification:
+1 request, no 5xx).
 
 Production at the start (re-verified read-only 2026-11-04): Supabase 001-078,
 API `554bf854`, web `0b061103`, Launcher 0.26.11. ChampionsLocke active, one
@@ -84,7 +100,7 @@ Team Lock), Railway verifier, sessions.
   identity + tabs, each tab its own content; Liga › General blockers; the
   «Equipo» header; the «Fijar Equipo» confirmation; provisional Team Preview.
 
-## Release (only after explicit owner approval)
+## Release (done 2026-11-04 in this order)
 
 1. Re-capture and rehearse (`tools.phase30_backup_rehearsal`; pins are now
    DEPLOYED ≤078, PENDING 079, sha256 `ce57e6b7…` of the LF bytes in git;
@@ -97,7 +113,7 @@ Team Lock), Railway verifier, sessions.
 4. Web: `npm run build` + `npm run deploy`.
 5. No Launcher release.
 
-Rollback: web → Cloudflare `0b061103`; API → Railway `554bf854`; 079 can stay
+Rollback: web → Cloudflare `0b061103`; API → Railway `554bf854` (now listed REMOVED: redeploy its image); 079 can stay
 (additive). With the old API on 079, only the obsolete admin initial-assignment
 review answers 503 for ChampionsLocke. A J1 prepared after release is
 permanent (it ends the "discard before competition" window, as the admin
