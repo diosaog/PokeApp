@@ -32,6 +32,13 @@ actual published images). API `adfca5c4` unchanged. No SQL/save/League,
 Team Lock, Showdown or Pokepast.es change. Previous enrollment authentication
 limits remain in its own record; they are not reclassified by this visual fix.
 
+Focused continuation (2026-11-04): `codex/home-points-followup`, base `3f64ba3`.
+[Home/points/Discord record](../work-in-progress/focused-home-points.md): small
+web fixes verified, authorized web-only release in progress. Samu and Iker
+both await their own baseline confirmation (0/0/0 and 3/0/3); no data correction.
+Discord per-version announcements require a new migration and are stopped
+under the owner's explicit no-migration boundary. No worker/API/SQL change.
+
 The live handoff is the single maintained operational record for an active phase.
 Other documents link to it instead of maintaining competing live Git, test or
 staging snapshots. Reports retain dated evidence; checkpoints retain explicitly

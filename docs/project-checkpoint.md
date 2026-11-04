@@ -5,6 +5,12 @@ milestone record; it does not maintain a second live phase-status ledger.
 
 ## Current project position
 
+- Focused Home/points follow-up (2026-11-04): web label/message/cache fixes
+  verified; authorized web release in progress on `codex/home-points-followup`
+  from `3f64ba3`. Samu and Iker await own history confirmation. Discord needs
+  an unapproved migration; worker unchanged.
+  [Diagnosis and release record](work-in-progress/focused-home-points.md).
+
 - Gourgeist/Pumpkaboo sprite fix (2026-11-04): **PUBLISHED / VERIFIED**,
   web-only `babf0ab2` at 100%, source `1ab6cdb`. Continue from the tip of
   `origin/codex/gourgeist-sprite-forms` (base `85d99d4`). 29 targeted tests,

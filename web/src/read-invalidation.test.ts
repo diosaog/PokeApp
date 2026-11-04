@@ -2,6 +2,7 @@ import { expect, it } from "vitest";
 import { affectedRead, invalidationFor } from "./read-invalidation";
 const read = (tail: string) => `/v1/read/seasons/s/${tail}`;
 it.each([
+  ["death-history", ["league", "overview"], ["shop", "pc", "scouting"]],
   ["matchdays/d/results", ["league", "overview"], ["shop", "pc"]],
   [
     "wipe-revivals",

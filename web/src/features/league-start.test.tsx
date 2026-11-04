@@ -83,7 +83,9 @@ it("the trainer confirms exactly the observed values, nothing typed, on their ow
   expect(within(card).queryByRole("textbox")).not.toBeInTheDocument();
   expect(within(card).queryByRole("spinbutton")).not.toBeInTheDocument();
   fireEvent.click(
-    within(card).getByRole("button", { name: "Confirmar historial" }),
+    within(card).getByRole("button", {
+      name: "Confirmar historial de muertes",
+    }),
   );
   const dialog = screen.getByRole("dialog", {
     name: "Confirmar mi historial de muertes",
@@ -101,6 +103,34 @@ it("the trainer confirms exactly the observed values, nothing typed, on their ow
       actual_deaths: 3,
       wipe_deaths: 0,
       segment_deaths: 3,
+    },
+    "PUT",
+  );
+});
+
+it("explains that zero deaths still need confirmation and submits exactly zero", async () => {
+  mocks.data = own({
+    proposed: { actual_deaths: 0, wipe_deaths: 0, segment_deaths: 0 },
+  });
+  render(<OwnDeathHistory />);
+  expect(
+    screen.getByText(/Tus puntos oficiales aparecen como/),
+  ).toHaveTextContent("incluso si tienes cero muertes");
+  fireEvent.click(
+    screen.getByRole("button", { name: "Confirmar historial de muertes" }),
+  );
+  fireEvent.click(
+    screen.getByRole("button", { name: "Confirmar estos valores" }),
+  );
+  await vi.waitFor(() => expect(mocks.execute).toHaveBeenCalledOnce());
+  expect(mocks.execute).toHaveBeenCalledWith(
+    "/v1/seasons/season/death-history",
+    {
+      expected_revision: 1,
+      source_sha256: "a".repeat(64),
+      actual_deaths: 0,
+      wipe_deaths: 0,
+      segment_deaths: 0,
     },
     "PUT",
   );

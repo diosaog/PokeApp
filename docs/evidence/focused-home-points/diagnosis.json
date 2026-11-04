@@ -1,0 +1,90 @@
+{
+  "checked_at": "2026-11-04T16:15:28.665419+00:00",
+  "mode": "read-only SQL, read helpers without actor or confirmation inputs",
+  "players": [
+    {
+      "name": "Iker",
+      "official_game": "Y",
+      "official_registered": true,
+      "parser_status": "parsed",
+      "latest_official_upload": "2026-11-03 18:40:09.457219+00",
+      "latest_accepted_save_is_current_official": true,
+      "badge_count": 2,
+      "known": false,
+      "blocking_reason": "death_history_baseline_required",
+      "can_confirm": true,
+      "confirm_blocker": null,
+      "proposed": {
+        "wipe_deaths": 0,
+        "actual_deaths": 3,
+        "segment_deaths": 3
+      },
+      "net_points": null,
+      "coin_balance": "8",
+      "dead_count": 3,
+      "normal_wins": 0,
+      "point_reduction": 0,
+      "credits": [
+        {
+          "display_name": "Iker",
+          "reward_key": "badge:1",
+          "amount": 4,
+          "ledger_amount": 4,
+          "transaction_type": "badge_reward",
+          "created_at": "2026-11-03 18:40:09.437036+00"
+        },
+        {
+          "display_name": "Iker",
+          "reward_key": "badge:2",
+          "amount": 4,
+          "ledger_amount": 4,
+          "transaction_type": "badge_reward",
+          "created_at": "2026-11-03 18:40:09.437036+00"
+        }
+      ]
+    },
+    {
+      "name": "Samu",
+      "official_game": "Y",
+      "official_registered": true,
+      "parser_status": "parsed",
+      "latest_official_upload": "2026-11-04 15:57:32.427226+00",
+      "latest_accepted_save_is_current_official": true,
+      "badge_count": 1,
+      "known": false,
+      "blocking_reason": "death_history_baseline_required",
+      "can_confirm": true,
+      "confirm_blocker": null,
+      "proposed": {
+        "wipe_deaths": 0,
+        "actual_deaths": 0,
+        "segment_deaths": 0
+      },
+      "net_points": null,
+      "coin_balance": "4",
+      "dead_count": 0,
+      "normal_wins": 0,
+      "point_reduction": 0,
+      "credits": [
+        {
+          "display_name": "Samu",
+          "reward_key": "badge:1",
+          "amount": 4,
+          "ledger_amount": 4,
+          "transaction_type": "badge_reward",
+          "created_at": "2026-11-04 15:56:26.633741+00"
+        }
+      ]
+    }
+  ],
+  "discord_blocker": {
+    "requires_migration": true,
+    "migration_authorized": false,
+    "outbox_unique_key": "team_locked:<lock_id>",
+    "trigger": "increments existing row revision on public snapshot change; excludes failed/uncertain/expired/skipped",
+    "snapshot": "latest mutable team_locks.public_team_snapshot",
+    "why_api_only_is_insufficient": "does not durably retain each committed version; rapid replacements can coalesce; uncertain delivery and subsequent revisions lack independent state",
+    "changed": false
+  },
+  "data_corrections_performed": false
+}

@@ -21,6 +21,10 @@ export function affectedRead(command: string, read: string): boolean {
   const target = readSeason[2].split("?")[0];
   const is = (...paths: string[]) =>
     paths.some((p) => target === p || target.startsWith(p + "/"));
+  // A confirmed baseline makes official NET available; refresh the cached
+  // standings immediately, alongside the own history/readiness response.
+  if (action === "/death-history")
+    return is("/league", "/overview", "/death-history", "/setup");
   if (action.includes("/cups")) return is("/cups", "/overview");
   if (action.includes("/team-lock"))
     return is("/overview", "/team-preview", "/scouting", "/setup");

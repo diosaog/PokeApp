@@ -174,12 +174,15 @@ export function OwnDeathHistory({ inline = false }: { inline?: boolean }) {
       {data.can_confirm && data.proposed ? (
         <>
           <p>
-            Falta tu confirmación para abrir la jornada. PokeApp ha observado en
-            tu partida oficial (Caja {data.dead_box_number}):
+            Tus puntos oficiales aparecen como «—» hasta que confirmes tu
+            historial de muertes, incluso si tienes cero muertes. Esta
+            confirmación también es necesaria para abrir la jornada. PokeApp ha
+            observado en tu partida oficial (Caja {data.dead_box_number}):
           </p>
           {countLine(data.proposed)}
           <button className="button primary" onClick={() => setOpen(true)}>
-            <ShieldCheck size={16} aria-hidden="true" /> Confirmar historial
+            <ShieldCheck size={16} aria-hidden="true" /> Confirmar historial de
+            muertes
           </button>
         </>
       ) : (
