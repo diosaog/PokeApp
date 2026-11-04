@@ -1,9 +1,9 @@
 # Puntos desde evidencia observada, sin confirmación — 2026-11-04
 
-Estado: PUBLICACIÓN SQL + WEB AUTORIZADA Y EN CURSO.
+Estado: PUBLICADO Y VERIFICADO. `STAGING_DONE_ZERO_RESIDUE`.
 Rama `codex/automatic-observed-points`, desde `87d56b7`.
-Estado de esta intervención: `STAGING_UNTOUCHED`, salvo consultas de lectura;
-081 formalizada, respaldo fresco en curso. No se ha aplicado SQL remoto todavía.
+081 aplicada UNA VEZ: `20261104165722`. No reaplicar.
+Web `0eef4feb` al 100%; saldos reales leídos: Samu 0, Iker −0,3.
 
 El propietario aclara que los jugadores no deben confirmar el historial para
 obtener puntos. La app debe usar automáticamente la partida oficial y los
@@ -12,13 +12,13 @@ confirmación descrito en el informe anterior. No se inventa historia ausente.
 
 ## Evidencia y cambio concreto
 
-Lectura actual de `league_death_totals`: Samu e Iker tienen `valid=true`,
+Antes de publicar, `league_death_totals` mostraba en Samu e Iker `valid=true`,
 fuente completa aceptada, contador wipe 0/revisión 0 y respectivamente 0 y
 3 eventos efectivos de muerte. El bloqueo es solo
 `death_history_baseline_required`; no falta sincronizar sus partidas.
 Con los resultados y sanciones comprobados, los saldos son **0 y −0,3**.
 
-La propuesta cambia exclusivamente la función SQL de lectura
+La 081 cambia exclusivamente la función SQL de lectura
 `league_death_totals(uuid)`. Usa eventos efectivos + offsets ya auditados y el
 contador wipe vigente, sin esperar campos de confirmación del jugador. Una
 fuente ausente/incompleta, salto de observación, identidad ambigua o contador
@@ -31,7 +31,7 @@ La propuesta se probó primero sin crear una migración ni tocar producción.
 Tras la autorización posterior se formalizó como 081, sin alterar 001–080 ni
 añadir UPDATE de cuentas. La función coincide exactamente con ese diff.
 
-La web preparada elimina el aviso y enlace de confirmación de Home, el botón
+La web publicada elimina el aviso y enlace de confirmación de Home, el botón
 y diálogo del historial y la acción inline de Liga. Mantiene diagnósticos de
 fuente ausente/inconsistente, los sprites y los datos auténticos. API compatible:
 su lectura ya acepta recuentos conocidos con `confirmed_at=null`. No se inventan
@@ -78,13 +78,49 @@ historiales; 15 tests de esquema y 6 gates del runner PASS. Build web repetido P
 Proyecto remoto correcto ACTIVE_HEALTHY, historial hasta 080, función anterior
 con hash esperado; API `adfca5c4` SUCCESS y web `4f46cbcb` al 100%.
 
-Siguiente paso autorizado: ensayar con respaldo fresco 080, aplicar una vez
-solo 081 y publicar la web; API y
-Launcher no necesitan versión nueva. Comprobar mediante lecturas los saldos
-automáticos y ausencia de cambios en datos existentes. No hacer correcciones
-individuales, Team Locks, monedas, pastes o mensajes de prueba. Discord por
-versión continúa fuera de este cambio y pendiente de su autorización separada.
+## Resultado remoto, respaldo y cierre
 
-Última publicación registrada: web `4f46cbcb`, API `adfca5c4`, DB 080. Esta
-rama debe continuarse desde su tip; no desplegarla ignorando el gate SQL.
+Fuente comprometida/publicada: `add17d386bcfb5759cc678ddc485a26e6860b8f9`,
+que incluye la preparación `617a570`. SQL 081 registrada una sola vez como
+`20261104165722`, a las 16:57 UTC. Web Cloudflare
+**`0eef4feb-835c-4203-b581-ed1bd9692586` al 100%**, despliegue
+`526a4fff-2399-4e8a-9024-1f2811845ca7`, 16:58:47 UTC.
+
+Respaldo fresco 080: `pre-release-20261104T165409Z.dump`, capturado 16:54:41
+UTC, SHA-256 `161a1e54372e172d94a9a9437952a8c73fd83acf0d4881164beb841312eede1e`.
+Privado en `%LOCALAPPDATA%/PokeApp-migration-evidence/automatic-observed-points-081`.
+Ensayo **17/17 PASS**, 126 tablas restauradas, 104 tablas de datos idénticas,
+116 lecturas de compatibilidad iguales, 13 checks funcionales 081 PASS,
+fixtures revertidos y catálogo igual a 001–081. Preflight sin problemas.
+El primer intento de preparar la conexión del respaldo falló antes de crear
+archivo o ejecutar migración; un reintento secuencial permitió capturar el
+respaldo fresco. No se reutilizó un archivo anterior como gate.
+
+Verificación remota 16:58 UTC: **Samu 0 puntos / 4 monedas / 0 muertos;
+Iker −0,3 / 8 / 3**. Ambos `known=true`, `can_confirm=false`, `confirmed_at=null`
+y `actual_offset=null`: no se simula ni registra una confirmación humana.
+La respuesta real valida contra los modelos de la API existente. Las 104
+tablas mantienen sus huellas antes/después; no hay cambios de filas. Función
+exacta, STABLE/invoker, owner postgres y ACL service-only conservados. Advisor
+antes/después: 24 ERROR / 6 WARN / 232 INFO, ningún hallazgo nuevo o resuelto;
+los anteriores no se declaran corregidos.
+
+Verificación web 17:00 UTC: index/chunks idénticos al build, controles manuales
+ausentes y **1 Playwright PASS** sobre la web publicada, con API interceptada
+y equipo sintético. API `adfca5c4` SUCCESS, health 200, 132 rutas; verifier
+`2853bbc4` SUCCESS. Launcher 0.26.11, feed idéntico e instalador con mismo
+tamaño/ETag. No se publican API, verifier o Launcher ni se cambia su optimización.
+[Evidencia saneada](../evidence/automatic-observed-points/release.json),
+[captura publicada sintética](../evidence/automatic-observed-points/home-hosted-synthetic.png).
+
+Runner actualizado a 001–081 desplegadas y ninguna pendiente. Backup,
+preflight, intent/result, Advisor y huellas quedan en el directorio privado;
+logs transitorios en TEMP. Clusters y navegadores de pruebas cerrados. Sin
+datos de prueba remotos, Team Locks, pastes, envíos Discord o ajustes individuales.
+Discord por versión sigue pendiente de autorización separada.
+
+Continuar desde el tip de `origin/codex/automatic-observed-points`. El commit
+de cierre solo actualiza registros, evidencias y plan operativo. Rollback web:
+`4f46cbcb-c83c-4d97-96dd-56dc4bc3b714`; SQL por fix-forward conservando la
+historia, sin restaurar cuentas o partidas para revertir una función de lectura.
 MultiIA actualizado; guía protegida y archivos del propietario excluidos.

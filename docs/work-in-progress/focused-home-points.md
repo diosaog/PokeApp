@@ -3,8 +3,8 @@
 **Aclaración posterior del propietario:** no debe existir confirmación del
 jugador para los puntos observables. El requisito manual y las instrucciones
 de confirmación de este informe quedan sustituidos por el
-[cambio automático preparado](automatic-observed-points.md), aún sin publicar
-por la autorización SQL pendiente. Los hechos de lectura y despliegue siguientes
+[cambio automático publicado](automatic-observed-points.md), SQL 081 y web
+`0eef4feb`, con lecturas reales Samu 0 / Iker −0,3 sin confirmación manual. Los hechos de lectura y despliegue siguientes
 conservan su valor histórico.
 
 Estado: CORRECCIONES WEB PUBLICADAS Y VERIFICADAS; diagnóstico completado.

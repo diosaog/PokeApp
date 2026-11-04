@@ -1,0 +1,219 @@
+{
+  "recorded_at": "2026-11-04T17:02:27.370867+00:00",
+  "result": "PUBLISHED_VERIFIED",
+  "remote_state": "STAGING_DONE_ZERO_RESIDUE",
+  "authorization": "owner si for automatic points SQL read function and web only",
+  "source_commit": "add17d386bcfb5759cc678ddc485a26e6860b8f9",
+  "branch": "codex/automatic-observed-points",
+  "migration": {
+    "file": "081_automatic_observed_points.sql",
+    "version": "20261104165722",
+    "sha256": "06f9c9911a3c375d67f793e5189ef7d3dc772bc01dd8cb348e9bcad3fba0d7c0",
+    "applied_once": true,
+    "do_not_reapply": true
+  },
+  "fresh_backup": {
+    "captured_at": "2026-11-04T16:54:41+00:00",
+    "archive": "pre-release-20261104T165409Z.dump",
+    "sha256": "161a1e54372e172d94a9a9437952a8c73fd83acf0d4881164beb841312eede1e",
+    "tables_fingerprinted": 126
+  },
+  "rehearsal": {
+    "result": "PASS",
+    "checks": [
+      {
+        "check": "backup restores into an isolated cluster with owners and grants",
+        "pass": true
+      },
+      {
+        "check": "restored rows identical to production: 126 tables (count + hash)",
+        "pass": true
+      },
+      {
+        "check": "restored catalog identical to production (objects, definitions, owners, ACLs)",
+        "pass": true
+      },
+      {
+        "check": "migration history restored: 081-081 not recorded",
+        "pass": true
+      },
+      {
+        "check": "116 API reads run on the restored copy (no privilege or missing-object error)",
+        "pass": true
+      },
+      {
+        "check": "081_automatic_observed_points.sql still matches the bytes frozen at rehearsal start",
+        "pass": true
+      },
+      {
+        "check": "081_automatic_observed_points.sql applies once as non-superuser postgres",
+        "pass": true
+      },
+      {
+        "check": "discord_announcements rows identical apart from the new 078 columns",
+        "pass": true
+      },
+      {
+        "check": "104 existing tables keep byte-identical rows (seasons, saves, history, purchases, coins)",
+        "pass": true
+      },
+      {
+        "check": "116 API reads return identical results after 081-081",
+        "pass": true
+      },
+      {
+        "check": "no browser privilege removed from existing objects",
+        "pass": true
+      },
+      {
+        "check": "no new privilege for anon/authenticated (tables, views or functions)",
+        "pass": true
+      },
+      {
+        "check": "10 private operational tables exist and force RLS",
+        "pass": true
+      },
+      {
+        "check": "verifier role created without login, superuser or RLS bypass",
+        "pass": true
+      },
+      {
+        "check": "focused fixtures rolled back exactly",
+        "pass": true
+      },
+      {
+        "check": "upgraded copy equals a fresh 001-081 build (Supabase-shaped)",
+        "pass": true
+      },
+      {
+        "check": "pending migration bytes unchanged throughout the rehearsal",
+        "pass": true
+      }
+    ]
+  },
+  "focused_sql": [
+    "automatic NET 0/-0.3 from valid observed sources, without confirmation",
+    "automatic reads leave all seven relevant tables unchanged",
+    "known API state with no player confirmation or fabricated timestamp",
+    "complete official sources make J1 ready without a confirmation gate",
+    "normal participant opening freezes five observed death snapshots without manual baselines",
+    "existing audited historical offset retained",
+    "later observed death counted once across repeated complete observations",
+    "current authoritative wipe counter applies without another confirmation",
+    "080 enrollment still starts at zero and excludes its initial death evidence",
+    "missing official source remains unknown, never an invented zero",
+    "real observation gap remains blocked",
+    "inconsistent wipe/death counters remain unknown",
+    "private read function keeps its existing service-only privileges"
+  ],
+  "database": {
+    "unchanged_tables": 104,
+    "changed_tables": [],
+    "function": {
+      "body_md5": "24e8e03f9fa8cf60cfb75a15c0ee8e99",
+      "provolatile": "s",
+      "prosecdef": false,
+      "owner": "postgres",
+      "anon_execute": false,
+      "authenticated_execute": false,
+      "service_execute": true
+    },
+    "history": [
+      {
+        "version": "20261104165722",
+        "name": "081_automatic_observed_points"
+      }
+    ]
+  },
+  "live_points": {
+    "checked_at": "2026-11-04T16:58:07.443566+00:00",
+    "players": [
+      {
+        "name": "Iker",
+        "net": "-0.30000000000000000000",
+        "coins": "8",
+        "deaths": 3,
+        "known": true,
+        "can_confirm": false,
+        "confirmed_at": null,
+        "actual_offset": null,
+        "actual_deaths": 3,
+        "wipe_deaths": 0
+      },
+      {
+        "name": "Samu",
+        "net": "0.00000000000000000000",
+        "coins": "4",
+        "deaths": 0,
+        "known": true,
+        "can_confirm": false,
+        "confirmed_at": null,
+        "actual_offset": null,
+        "actual_deaths": 0,
+        "wipe_deaths": 0
+      }
+    ]
+  },
+  "advisor_delta": {
+    "before": {
+      "INFO": 232,
+      "ERROR": 24,
+      "WARN": 6
+    },
+    "after": {
+      "INFO": 232,
+      "ERROR": 24,
+      "WARN": 6
+    },
+    "new_error_warn": 0,
+    "resolved_error_warn": 0
+  },
+  "web_acceptance": {
+    "checked_at": "2026-11-04T17:00:01.587715+00:00",
+    "source_commit": "add17d386bcfb5759cc678ddc485a26e6860b8f9",
+    "web": {
+      "id": "526a4fff-2399-4e8a-9024-1f2811845ca7",
+      "created_on": "2026-11-04T16:58:47.075977Z",
+      "versions": [
+        {
+          "version_id": "0eef4feb-835c-4203-b581-ed1bd9692586",
+          "percentage": 100
+        }
+      ]
+    },
+    "index_and_chunks_match_build": true,
+    "manual_confirmation_controls_absent": true,
+    "api_id": "adfca5c4-fb5e-4739-a239-b08ccfbb92c2",
+    "api_status": "SUCCESS",
+    "api_health": 200,
+    "api_paths": 132,
+    "launcher_version": "0.26.11",
+    "launcher_feed_sha256": "31e9c42f2670e83192ee1e89af8c05319263c7d67b950bf7709961ec25b78e30",
+    "launcher_installer_unchanged": true,
+    "verifier_id": "2853bbc4-44be-453f-b4f3-7ff22a8d51cf",
+    "verifier_status": "SUCCESS"
+  },
+  "tests": {
+    "web_prior_preparation": 66,
+    "api_prior_preparation": 10,
+    "schema_release": 15,
+    "release_gates": 6,
+    "sql_081": 13,
+    "playwright_hosted": 1,
+    "build": "PASS"
+  },
+  "no_individual_data_writes": true,
+  "no_real_team_locks_pastes_or_messages": true,
+  "discord_change": "outside this authorization; existing behavior retained",
+  "cleanup": {
+    "private_clusters_removed": true,
+    "test_browsers_closed": true,
+    "owner_untracked_files_excluded": true,
+    "protected_guide_not_accessed": true
+  },
+  "rollback": {
+    "web": "4f46cbcb-c83c-4d97-96dd-56dc4bc3b714",
+    "sql": "fix-forward; preserve all history/data"
+  },
+  "diagnostic_note": "First backup CLI connection preparation failed before archive creation; retry succeeded."
+}

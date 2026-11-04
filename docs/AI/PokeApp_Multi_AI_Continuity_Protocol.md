@@ -10,7 +10,7 @@ Reconciled: 2026-09-26. Keep one copy at this path.
 | How do AI instances continue the same work? | This protocol |
 | What are the project-wide constraints and roadmap? | [Master protocol](../PokeApp_2.0_Protocolo_Maestro_MultiIA.md) |
 | Which phase is active and where is its memory? | [Project checkpoint](../project-checkpoint.md) |
-| What is the current operational state and next action? | [Automatic observed points record](../work-in-progress/automatic-observed-points.md) (2026-11-04: owner removes player confirmation; automatic 0/-0.3 proven locally; web confirmation UI removed locally). **Continue from the tip of `origin/codex/automatic-observed-points`.** Owner authorized this SQL read-function change and web with si. 081 is formalized; fresh backup/rehearsal and release are in progress. No remote migration applied yet. Production remains web `4f46cbcb`, API `adfca5c4`, DB 080; do not give superseded player-confirmation instructions. |
+| What is the current operational state and next action? | [Automatic observed points live record](../work-in-progress/automatic-observed-points.md) (2026-11-04: PUBLISHED / VERIFIED, SQL 081 `20261104165722`, web `0eef4feb` at 100%, source `add17d3`; actual reads Samu 0 / Iker -0.3 with no player confirmation or data rewrite). **Continue from the tip of `origin/codex/automatic-observed-points`.** No pending migrations; never reapply 081. API `adfca5c4`, verifier and Launcher unchanged. Discord per-version messages remain outside this authorization. |
 | What behavior was approved? | [Functional alignment contract](../phase10-5-functional-alignment.md) |
 | What was implemented and what evidence exists? | Active phase evidence in its live record until closure; [previous Phase 10 report](../phase10-completion-report.md) retains historical delivery evidence |
 
@@ -21,7 +21,7 @@ contains authorization, fresh 079-to-080 backup rehearsal, exact deployment
 IDs, verification limits and rollback. SQL, API and web are published.
 [Pokepast.es verification](../work-in-progress/public-pokepaste-format.md)
 retains the renderer evidence and the limit on artificial external tests.
-The release tool now has 001-080 deployed and no pending migration.
+That historical release deployed 001-080; the current baseline is 081 as recorded above.
 
 Sprite follow-up (2026-11-04): **PUBLISHED / VERIFIED**. Continue from the tip
 of `origin/codex/gourgeist-sprite-forms` (base `85d99d4`), fix `1ab6cdb`.
@@ -46,10 +46,10 @@ to obtain observable points. Continue from `codex/automatic-observed-points`
 (base `87d56b7`). [Automatic points record](../work-in-progress/automatic-observed-points.md)
 contains the one-function SQL proposal, tested automatic 0/-0.3 results,
 prepared web removal of confirmation controls and SQL authorization boundary.
-Owner subsequently authorized SQL + web with «si». 081 now formalized with
-the exact tested function, bytes pinned; fresh backup/rehearsal and publication
-in progress. No production migration applied yet. Complete this authorized
-release without asking for the same permission again.
+Owner subsequently authorized SQL + web with si. Release completed: 081
+`20261104165722`, web `0eef4feb` at 100%, actual observed NET Samu 0 / Iker -0.3.
+Fresh backup/rehearsal 17/17 and focused SQL 13 PASS; 104 data tables unchanged.
+No pending migration. Do not repeat any player-confirmation instruction.
 Do not repeat the superseded player-confirmation instructions.
 
 The live handoff is the single maintained operational record for an active phase.

@@ -36,9 +36,10 @@ MIGRATIONS = sorted((ROOT / "supabase/v2/migrations").glob("*.sql"))
 # Discord outbox, owner-approved release 2026-11-04). 079 (all-vs-all League
 # start, readiness, own death history) and 080 (admin enrollment during a
 # season) were published 2026-11-04. 080 is recorded as 20261104153603;
-# 081 (automatic observed NET) is owner-authorized and awaits its release.
-DEPLOYED = [m for m in MIGRATIONS if int(m.name[:3]) <= 80]
-PENDING = [m for m in MIGRATIONS if int(m.name[:3]) == 81]
+# 081 (automatic observed NET) was published as 20261104165722 after owner
+# approval. No migration is pending; a future release must open its window.
+DEPLOYED = [m for m in MIGRATIONS if int(m.name[:3]) <= 81]
+PENDING: list[Path] = []
 WINDOW = f"{PENDING[0].name[:3]}-{PENDING[-1].name[:3]}" if PENDING else "none"
 SCHEMAS = "('public','v1_shadow')"
 
