@@ -34,6 +34,7 @@ from tools.phase30_release_audit import DEPLOYED, PENDING
 from tools.production_readonly import SUPABASE_REF, _supabase, query, supabase_get
 
 EXPECTED_SHA256 = {
+    '078_team_lock_public_pastes.sql': '1dc36e4ffd0196796a3045c125abb689a71ee1763bf80c76d3cf56d30227f2d9',
     '077_false_death_event_corrections.sql': 'b906bd0658b8ff38cba201e07ca5d9bd35fe87b72b3ba1dbf4a40236dda8e168',
     '076_final_championship_tiebreak.sql': 'b153e3a44c34929ec9910cce6862e1c0a1626ccecd48dbcde29d615af6f112fb',
     '075_league_net_death_history.sql': 'ea43eb035a1ea1e082ca342db2988960b59ce1c5056bf3f56ae35d9ba432d167',

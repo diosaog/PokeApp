@@ -397,6 +397,14 @@ def rehearse(args) -> dict:
             t for t in tables if t.startswith(("public.", "v1_shadow.", "storage."))
         ]
         rows_before = local_fingerprints(pg, public_tables)
+        # 078 adds columns to the outbox: its existing rows are compared
+        # without them (they only receive their null/zero defaults).
+        added_078 = ("public_paste_url", "public_paste_revision", "public_paste_attempt_revision",
+                     "public_paste_attempts", "public_paste_error")
+        outbox_sql = ("select count(*)||':'||coalesce(md5(string_agg((to_jsonb(t) - array["
+                      + ",".join(f"'{c}'" for c in added_078)
+                      + "])::text, E'\\n' order by t.id::text)), '-') from public.discord_announcements t")
+        outbox_before = pg.lines(outbox_sql, "supabase_admin")
 
         report["applied"] = {}
         # Production's supautils.policy_grants lets postgres manage policies on
@@ -467,11 +475,19 @@ def rehearse(args) -> dict:
                 from tools.validate_false_death_corrections import validate as validate_corrections
 
                 report["phase077_false_death_corrections"] = validate_corrections(pg)
+            if migration.name.startswith("078_"):
+                from tools.validate_phase078_public_pastes import validate as validate_pastes
+
+                report["phase078_public_pastes"] = validate_pastes(pg)
 
         rows_after = local_fingerprints(pg, public_tables)
         # 072 adds the private item_deliveries table, its commands and the
         # purchase_refund ledger type: no existing row and no read changes.
-        changed = [t for t in public_tables if rows_before[t] != rows_after[t]]
+        outbox_after = pg.lines(outbox_sql, "supabase_admin")
+        ok(outbox_before == outbox_after,
+           "discord_announcements rows identical apart from the new 078 columns", [outbox_before, outbox_after])
+        changed = [t for t in public_tables if rows_before[t] != rows_after[t]
+                   and t != "public.discord_announcements"]
         ok(
             not changed,
             f"{len(public_tables)} existing tables keep byte-identical rows (seasons, saves, history, purchases, coins)",
