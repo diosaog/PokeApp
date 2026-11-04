@@ -97,6 +97,21 @@ test("Observed points need no confirmation and Home preserves Jalowin", async ({
     "/visuals/v1/gen6/711-form-2.png",
   );
   await expect(home.getByText(/Forma \d/)).toHaveCount(0);
+  await expect
+    .poll(() =>
+      home
+        .locator("img.pokemon-sprite")
+        .evaluateAll(
+          (images) =>
+            images.length === 6 &&
+            images.every(
+              (image) =>
+                (image as HTMLImageElement).complete &&
+                (image as HTMLImageElement).naturalWidth > 0,
+            ),
+        ),
+    )
+    .toBe(true);
   await expect(
     page.getByRole("link", { name: /confirmar mi historial/i }),
   ).toHaveCount(0);
