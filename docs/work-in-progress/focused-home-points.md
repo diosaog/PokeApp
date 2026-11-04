@@ -1,7 +1,8 @@
 # Home, anuncios Team Lock y puntos pendientes — 2026-11-04
 
-Estado: correcciones web verificadas, publicación autorizada en curso.
-Discord detenido por límite de autorización: requiere migración nueva.
+Estado: CORRECCIONES WEB PUBLICADAS Y VERIFICADAS; diagnóstico completado.
+Estado global `VALIDATION_PARTIAL`: Discord detenido por límite de
+autorización, pues requiere migración nueva. No se declara implementado.
 Rama `codex/home-points-followup`, desde `3f64ba3`; contiene 080 y el fix
 Gourgeist/Pumpkaboo `1ab6cdb`. Historial remoto verificado hasta 080
 (`20261104153603`). No se aplican ni crean migraciones.
@@ -63,7 +64,8 @@ sincronización muestra otros valores, debe revisarlos antes de confirmar.
 067 mantiene una fila `event_key=team_locked:<lock_id>` con UNIQUE, y el
 reemplazo sobrescribe `team_locks.public_team_snapshot`. El trigger incrementa
 la revisión de esa misma fila y excluye estados failed/uncertain/expired/skipped.
-Se verificaron el constraint y el trigger reales. El worker edita el mensaje
+Se verificaron el constraint y el trigger reales. Un reemplazo con idéntico
+snapshot público ni siquiera aumenta la revisión de anuncio. El worker edita el mensaje
 anterior; la recuperación de un envío también usa ese ID como prueba de edición.
 
 Cambiar solo edit por POST no garantiza un anuncio por versión confirmada:
@@ -85,7 +87,24 @@ conservada, aviso/enlace, confirmación exacta 0/0/0 con idempotencia y refresco
 de clasificación a 0 sin recargar. API totalmente interceptada, equipo sintético.
 No se ejecutan las suites completas ni una auditoría general.
 
-Publicación solo web en curso. Rollback: versión Cloudflare
-`babf0ab2-88be-4cb7-a603-72655c993a54`. API `adfca5c4`, verifier y Launcher
-0.26.11 se conservan. Archivos no versionados del propietario excluidos y guía
-protegida sin leer, buscar, copiar, mover, calcular hash, editar o indexar.
+Publicación solo web: fuente **`e57fe2c4e8d15883562a741e6411465ffe9908d5`**,
+Cloudflare **`4f46cbcb-c83c-4d97-96dd-56dc4bc3b714` al 100%**, despliegue
+`04109b7d-9679-41c9-b433-416b4d76d43a`, 2026-11-04 16:17:19 UTC.
+Comprobaciones 16:18 UTC: index y chunks idénticos al build, API configurada
+correctamente, health 200, OpenAPI 132 rutas y API `adfca5c4` SUCCESS sin
+despliegue nuevo. Feed del Launcher idéntico y mismo instalador por tamaño/ETag.
+Verifier y optimización Railway sin cambios.
+
+Playwright repetido sobre los archivos publicados: **1 PASS** para el mismo
+recorrido, incluyendo la confirmación sintética y el refresco inmediato.
+[Captura inspeccionada](../evidence/focused-home-points/home-hosted-synthetic.png),
+[despliegue y verificación](../evidence/focused-home-points/release.json).
+La confirmación real de Samu/Iker sigue reservada a sus propias cuentas;
+estas pruebas no la ejecutan ni afirman haberla ejecutado.
+
+Rollback web: `babf0ab2-88be-4cb7-a603-72655c993a54`. Para continuar trabajo,
+usar el tip de `origin/codex/home-points-followup`. El commit de cierre solo
+actualiza registros y evidencias; no necesita otro despliegue.
+Servidor local detenido; navegadores cerrados y sin fixtures remotos. Archivos
+no versionados del propietario excluidos y guía protegida sin leer, buscar,
+copiar, mover, calcular hash, editar o indexar.

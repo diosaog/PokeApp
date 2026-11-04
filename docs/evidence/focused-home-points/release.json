@@ -1,0 +1,43 @@
+{
+  "checked_at": "2026-11-04T16:18:05.773652+00:00",
+  "source_commit": "e57fe2c4e8d15883562a741e6411465ffe9908d5",
+  "web": {
+    "deployment_id": "04109b7d-9679-41c9-b433-416b4d76d43a",
+    "created_on": "2026-11-04T16:17:19.540262Z",
+    "versions": [
+      {
+        "version_id": "4f46cbcb-c83c-4d97-96dd-56dc4bc3b714",
+        "percentage": 100
+      }
+    ]
+  },
+  "index_matches_build": true,
+  "entry_bundle_matches_build": true,
+  "home_chunk_matches_build": true,
+  "production_api_target": true,
+  "api_deployment_unchanged": "adfca5c4-fb5e-4739-a239-b08ccfbb92c2",
+  "api_health": 200,
+  "api_path_count": 132,
+  "launcher_feed_unchanged": true,
+  "launcher_installer_unchanged": true,
+  "tests": {
+    "web": 50,
+    "python": 9,
+    "playwright_local_build": 1,
+    "build": "PASS",
+    "playwright_hosted": 1
+  },
+  "discord_change": "not implemented; durable per-version outbox needs unauthorized migration",
+  "sql_migrations_applied": 0,
+  "production_data_corrections": 0,
+  "real_team_locks_or_pastes_created": 0,
+  "browser_verification": {
+    "synthetic_api_only": true,
+    "home_numerical_form_labels": false,
+    "gourgeist_form_2_sprite_loaded": true,
+    "profile_form_2_retained": true,
+    "zero_history_confirmation_exact_and_idempotent": true,
+    "standings_refetched_after_confirmation": true,
+    "points_zero_without_reload": true
+  }
+}

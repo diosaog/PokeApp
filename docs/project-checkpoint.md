@@ -6,9 +6,11 @@ milestone record; it does not maintain a second live phase-status ledger.
 ## Current project position
 
 - Focused Home/points follow-up (2026-11-04): web label/message/cache fixes
-  verified; authorized web release in progress on `codex/home-points-followup`
-  from `3f64ba3`. Samu and Iker await own history confirmation. Discord needs
-  an unapproved migration; worker unchanged.
+  **PUBLISHED / VERIFIED**, `4f46cbcb` at 100%, source `e57fe2c`. Continue from
+  the tip of `origin/codex/home-points-followup` (base `3f64ba3`). 50 web / 9 API
+  focused tests, build, 1 local + 1 hosted browser test PASS. Samu and Iker
+  await own confirmation 0/0/0 and 3/0/3, expected NET 0 / -0.3. Discord
+  requires an unapproved migration and remains unchanged (`VALIDATION_PARTIAL`).
   [Diagnosis and release record](work-in-progress/focused-home-points.md).
 
 - Gourgeist/Pumpkaboo sprite fix (2026-11-04): **PUBLISHED / VERIFIED**,

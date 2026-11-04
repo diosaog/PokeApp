@@ -10,7 +10,7 @@ Reconciled: 2026-09-26. Keep one copy at this path.
 | How do AI instances continue the same work? | This protocol |
 | What are the project-wide constraints and roadmap? | [Master protocol](../PokeApp_2.0_Protocolo_Maestro_MultiIA.md) |
 | Which phase is active and where is its memory? | [Project checkpoint](../project-checkpoint.md) |
-| What is the current operational state and next action? | [Current sprite fix record](../work-in-progress/gourgeist-sprite.md) (2026-11-04: owner-approved web-only fix `1ab6cdb`, Cloudflare `babf0ab2` at 100%, verified with synthetic data and published sprites). **Continue from the tip of `origin/codex/gourgeist-sprite-forms`.** API `adfca5c4`, DB 080 and Launcher unchanged; no SQL/save/League action. [Enrollment release record](../work-in-progress/mid-season-enrollment.md) retains its authenticated real-use limits; never reapply 080. |
+| What is the current operational state and next action? | [Current focused Home/points record](../work-in-progress/focused-home-points.md) (2026-11-04: web `4f46cbcb` at 100%, source `e57fe2c`; Home form labels removed, pending-history explanation and post-confirmation cache refresh fixed). **Continue from the tip of `origin/codex/home-points-followup`.** Samu/Iker await own confirmation 0/0/0 and 3/0/3. Discord per-version announcements require an unauthorized migration and remain unchanged (`VALIDATION_PARTIAL`). API `adfca5c4`, DB 080, Launcher and verifier unchanged; never reapply 080. |
 | What behavior was approved? | [Functional alignment contract](../phase10-5-functional-alignment.md) |
 | What was implemented and what evidence exists? | Active phase evidence in its live record until closure; [previous Phase 10 report](../phase10-completion-report.md) retains historical delivery evidence |
 
@@ -32,9 +32,11 @@ actual published images). API `adfca5c4` unchanged. No SQL/save/League,
 Team Lock, Showdown or Pokepast.es change. Previous enrollment authentication
 limits remain in its own record; they are not reclassified by this visual fix.
 
-Focused continuation (2026-11-04): `codex/home-points-followup`, base `3f64ba3`.
+Focused continuation (2026-11-04): continue from the tip of
+`origin/codex/home-points-followup`, base `3f64ba3`, deployed fix `e57fe2c`.
 [Home/points/Discord record](../work-in-progress/focused-home-points.md): small
-web fixes verified, authorized web-only release in progress. Samu and Iker
+web fixes PUBLISHED / VERIFIED, web `4f46cbcb` at 100%, 50 web / 9 API tests,
+build and one local + one hosted synthetic browser test PASS. Samu and Iker
 both await their own baseline confirmation (0/0/0 and 3/0/3); no data correction.
 Discord per-version announcements require a new migration and are stopped
 under the owner's explicit no-migration boundary. No worker/API/SQL change.
