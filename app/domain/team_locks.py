@@ -78,6 +78,8 @@ class TeamLockMutation:
     parsed_payload: JsonObject
     public_team_snapshot: list[JsonObject]
     private_team_snapshot: list[JsonObject]
+    # 083: one explicit «Fijar Equipo» confirmation; a retry reuses it.
+    idempotency_key: str
 
 
 @dataclass(frozen=True)

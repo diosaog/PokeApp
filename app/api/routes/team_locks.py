@@ -1,8 +1,9 @@
 from __future__ import annotations
 
+from typing import Annotated
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, Header, HTTPException
 
 from app.api.dependencies import ApiContainer, get_api_container
 from app.api.errors import api_error
@@ -21,7 +22,13 @@ REASONS = frozenset((
     "save_not_ready", "invalid_save_hash", "parsed_save_not_ready", "parsed_save_changed",
     "parsed_save_identity_mismatch", "invalid_parsed_team", "invalid_team_snapshot",
     "team_requires_six", "team_lock_not_saved",
+    # 083: the same Idempotency-Key for another request, or an old retry.
+    "idempotency_conflict", "team_lock_superseded", "invalid_idempotency_key",
 ))
+# Each explicit confirmation sends a new key; an automatic retry repeats it.
+ConfirmationKey = Annotated[
+    str | None, Header(alias="Idempotency-Key", min_length=1, max_length=128, pattern=r"^[!-~]+$")
+]
 
 
 def _refusal(status: int, code: str, message: str, exc: Exception) -> HTTPException:
@@ -36,6 +43,7 @@ def put_team_lock(
     season_id: UUID, matchday_id: UUID, payload: TeamLockRequest,
     principal: AuthenticatedPrincipal = Depends(require_enabled_principal),
     container: ApiContainer = Depends(get_api_container),
+    idempotency_key: ConfirmationKey = None,
 ) -> TeamLockResponse:
     if container.team_lock_repository is None:
         raise api_error(503, "TEAM_LOCK_UNAVAILABLE", "Team lock backend is unavailable.")
@@ -43,6 +51,7 @@ def put_team_lock(
         result = lock_team_v2(
             container.team_lock_repository, season_id=str(season_id), matchday_id=str(matchday_id),
             trainer_id=principal.trainer_id, save_file_id=str(payload.save_file_id),
+            idempotency_key=idempotency_key,
         )
     except NotFoundError as exc:
         raise _refusal(404, "TEAM_LOCK_SOURCE_NOT_FOUND", "Team lock source was not found.", exc) from exc

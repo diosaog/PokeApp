@@ -355,8 +355,9 @@ def validate(pg):
             team[0] = dict(species="Pokémon #1")
             assert lock()[0] == first[0]
             assert value(conn, "select count(*) from public.discord_announcements where event_key=%s", ("team_locked:" + first[0],)) == 1
-            assert value(conn, "select revision from public.discord_announcements where event_key=%s", ("team_locked:" + first[0],)) == 2
-            checks.append("Team Lock on the prepared J1 (on time); one Discord row; replacement only edits it")
+            # 083 (owner rule): a replacement through this legacy call no longer edits the message.
+            assert value(conn, "select revision from public.discord_announcements where event_key=%s", ("team_locked:" + first[0],)) == 1
+            checks.append("Team Lock on the prepared J1 (on time); one legacy Discord row; replacement never edits it")
 
             opened = call(conn, "api_admin_matchday", dict(operation="open", request=envelope(
                 t[3], v, day, "079-open", dict(expected_revision=ready["matchday"]["revision"]))))

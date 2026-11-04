@@ -7277,7 +7277,9 @@ export interface operations {
   put_team_lock_v1_seasons__season_id__matchdays__matchday_id__team_lock_put: {
     parameters: {
       query?: never;
-      header?: never;
+      header?: {
+        "Idempotency-Key"?: string | null;
+      };
       path: {
         season_id: string;
         matchday_id: string;

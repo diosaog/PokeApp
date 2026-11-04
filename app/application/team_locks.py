@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from copy import deepcopy
 import re
+from uuid import uuid4
 
 from app.domain.pokemon import PublicPokemon
 from app.domain.seasons import SeasonRules
@@ -54,8 +55,11 @@ def lock_team_for_matchday(
 
 def lock_team_v2(
     repository: TeamLockMutationRepository, *, season_id: str, matchday_id: str,
-    trainer_id: str, save_file_id: str,
+    trainer_id: str, save_file_id: str, idempotency_key: str | None = None,
 ) -> TeamLockRecord:
+    """One explicit confirmation per Idempotency-Key (083): a new key is a new
+    Team Lock announcement, the same key an automatic retry. Without a key,
+    every call is its own confirmation."""
     source = repository.load_source(
         season_id=season_id, matchday_id=matchday_id,
         trainer_id=trainer_id, save_file_id=save_file_id,
@@ -102,4 +106,5 @@ def lock_team_v2(
         season_player_id=str(player["id"]), save_file_id=save_file_id, save_sha256=save["sha256"],
         parsed_save_id=str(parsed["id"]), parsed_payload=deepcopy(payload),
         public_team_snapshot=public, private_team_snapshot=private,
+        idempotency_key=idempotency_key or str(uuid4()),
     ))

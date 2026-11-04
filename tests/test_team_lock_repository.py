@@ -46,7 +46,8 @@ class TeamLockRepositoryTests(unittest.TestCase):
         self.assertEqual(len(self.requests), 1)
         request = self.requests[0]
         self.assertEqual(request.method, "POST")
-        self.assertTrue(request.url.path.endswith("/rpc/api_upsert_team_lock"))
+        self.assertTrue(request.url.path.endswith("/rpc/api_confirm_team_lock"))
+        self.assertEqual(json.loads(request.content)["p_idempotency_key"], self.mutation.idempotency_key)
         payload = json.loads(request.content)
         self.assertEqual(payload, {"p_" + f.name: getattr(self.mutation, f.name) for f in fields(self.mutation)})
         self.assertEqual(payload["p_save_sha256"], "a" * 64)

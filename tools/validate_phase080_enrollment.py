@@ -523,7 +523,7 @@ def validate_boundaries(pg):
                 )
                 == 1
             )
-            # The current day supports a normal Team Lock and the existing one-row outbox.
+            # The current day supports a normal Team Lock (legacy call: one row, never edited since 083).
             source = conn.execute(
                 "select f.id,f.sha256,ps.id,ps.payload from public.season_players sp join public.save_files f on f.id=sp.current_save_file_id join public.parsed_saves ps on ps.save_file_id=f.id where sp.id=%s",
                 (pid,),
@@ -565,7 +565,7 @@ def validate_boundaries(pg):
                     "select revision from public.discord_announcements where event_key=%s",
                     ("team_locked:" + locked,),
                 )
-                == 2
+                == 1
             )
             match = str(
                 value(

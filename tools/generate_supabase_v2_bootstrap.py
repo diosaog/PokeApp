@@ -90,6 +90,8 @@ EXPECTED_MIGRATIONS = [
     "079_all_vs_all_first_matchday.sql",
     "080_mid_season_enrollment.sql",
     "081_automatic_observed_points.sql",
+    "082_wipe_revival_deaths.sql",
+    "083_team_lock_confirmation_announcements.sql",
 ]
 
 FORBIDDEN_TOKENS = [

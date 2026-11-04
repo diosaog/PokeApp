@@ -10,7 +10,8 @@ from app.domain.team_locks import TeamLockMutation, TeamLockRecord, TeamLockSour
 from app.repositories.errors import ConflictError, NotFoundError, PermissionDeniedError, PersistenceError
 
 
-RPC_NAME = "api_upsert_team_lock"
+# 083: the same upsert plus one immutable confirmation and announcement per key.
+RPC_NAME = "api_confirm_team_lock"
 RPC_ERRORS = {
     "PT403": PermissionDeniedError,
     "PT404": NotFoundError,

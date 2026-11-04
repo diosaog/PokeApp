@@ -501,6 +501,16 @@ def rehearse(args) -> dict:
                 from tools.validate_phase081_observed_points import validate as validate_observed_points
 
                 report["phase081_observed_points"] = validate_observed_points(pg)
+            if migration.name.startswith("082_"):
+                from tools.validate_phase082_wipe_deaths import validate as validate_wipe_deaths
+
+                report["phase082_wipe_deaths"] = validate_wipe_deaths(pg)
+            if migration.name.startswith("083_"):
+                from tools.validate_phase083_team_lock_announcements import validate as validate_announcements
+                from tools.validate_phase082_wipe_deaths import validate as validate_wipe_deaths
+
+                report["phase083_team_lock_announcements"] = validate_announcements(pg)
+                report["phase083_wipe_deaths_unchanged"] = validate_wipe_deaths(pg)
 
         rows_after = local_fingerprints(pg, public_tables)
         # 072 adds the private item_deliveries table, its commands and the

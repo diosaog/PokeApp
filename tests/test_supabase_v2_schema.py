@@ -158,6 +158,8 @@ class SupabaseV2SchemaTests(unittest.TestCase):
                 "079_all_vs_all_first_matchday.sql",
                 "080_mid_season_enrollment.sql",
                 "081_automatic_observed_points.sql",
+                "082_wipe_revival_deaths.sql",
+                "083_team_lock_confirmation_announcements.sql",
             ],
         )
         for path in _migration_files():
@@ -368,7 +370,7 @@ class SupabaseV2SchemaTests(unittest.TestCase):
         self.assertTrue(bootstrap.startswith("-- ONLY FOR EMPTY POKEAPP V2 DATABASE."))
         self.assertEqual(bootstrap, render_bootstrap())
         self.assertIn(
-            "Source of truth: supabase/v2/migrations/001_core.sql through 081_automatic_observed_points.sql",
+            "Source of truth: supabase/v2/migrations/001_core.sql through 083_team_lock_confirmation_announcements.sql",
             bootstrap,
         )
         self.assertNotIn("drop table", lowered)
@@ -421,6 +423,12 @@ class SupabaseV2SchemaTests(unittest.TestCase):
                 self.assertIn('revoke all on public.discord_announcements from public, anon, authenticated, service_role', security_sql)
                 self.assertIn('grant select, update on public.discord_announcements to service_role', security_sql)
                 continue
+            if table == 'team_lock_confirmations':
+                # 083: immutable per-confirmation record; backend-only, no update/delete grant.
+                self.assertIn('alter table public.team_lock_confirmations force row level security', security_sql)
+                self.assertIn('revoke all on public.team_lock_confirmations from public, anon, authenticated, service_role', security_sql)
+                self.assertIn('grant select, insert on public.team_lock_confirmations to service_role', security_sql)
+                continue
             if table in ('item_deliveries', 'training_operations', 'league_enrollments'):
                 # 072: backend-only single use of a paid in-game object; no delete.
                 self.assertIn(f'alter table public.{table} enable row level security', security_sql)
@@ -470,7 +478,7 @@ class SupabaseV2SchemaTests(unittest.TestCase):
                 self.assertIn(f"'{table}'", security_sql, table)
 
         # 075 adds the separately revoked death-history RLS group. 077 adds no table.
-        self.assertEqual(security_sql.count("enable row level security"), 43)  # 080 private enrollment audit
+        self.assertEqual(security_sql.count("enable row level security"), 44)  # 083 private Team Lock confirmations
         self.assertIn("alter table public.%i enable row level security", security_sql)
 
 

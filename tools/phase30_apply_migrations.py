@@ -34,6 +34,8 @@ from tools.phase30_release_audit import DEPLOYED, PENDING
 from tools.production_readonly import SUPABASE_REF, _supabase, query, supabase_get
 
 EXPECTED_SHA256 = {
+    '083_team_lock_confirmation_announcements.sql': '3ef757446a4c0f0f2e9b6bdb0439122c264b810ece9ece8e8ef7ce6ec3bed74c',
+    '082_wipe_revival_deaths.sql': 'b4b4ecfbb0afd25ece14a9356e3992b0fa0119d34179f1182b48c284672dfc47',
     '081_automatic_observed_points.sql': '06f9c9911a3c375d67f793e5189ef7d3dc772bc01dd8cb348e9bcad3fba0d7c0',
     '080_mid_season_enrollment.sql': '297b48f306242b00ae8fd361e8bbdcd11bdc3fe0ff3e5dfb93b87c936caae5b5',
     '079_all_vs_all_first_matchday.sql': 'ce57e6b75906f6418b9b1181b20087f90a6dfcf6f266349943b658b72e70d145',

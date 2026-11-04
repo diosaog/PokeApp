@@ -9,8 +9,10 @@ trainer reaches Discord: public team snapshots, official results and
 rewards, public trial cases, never private snapshots, saves or evidence.
 
 Delivery is at most once per announcement: a post whose outcome is unknown
-is marked ``uncertain`` and never sent again. A replaced team lock edits the
-message already sent (edits are idempotent and may be retried).
+is marked ``uncertain`` and never sent again. Since 083 every explicit Team
+Lock confirmation is its own row and message, announced with the immutable
+snapshot it confirmed; earlier messages are never edited. (Rows from before
+083 keep their single-row behaviour; no new revision is ever queued for them.)
 """
 
 from __future__ import annotations
@@ -295,12 +297,32 @@ def _team_locked(f: Facts, s: dict) -> dict:
             id=s["lock_id"],
         )
     )
+    team, at, replaced, save_id = (
+        lock["public_team_snapshot"], instant(lock["locked_at"]), False, lock.get("save_file_id"),
+    )
+    # Teams fixed for that matchday when this one was first fixed.
+    created = instant(lock["created_at"])
+    if s.get("confirmation_id"):
+        # 083: exactly what this confirmation fixed, never the lock's latest team.
+        confirmation = one(
+            f.read(
+                "team_lock_confirmations",
+                "id,team_lock_id,season_id,matchday_id,trainer_id,save_file_id,public_team_snapshot,is_replacement,confirmed_at",
+                id=s["confirmation_id"],
+            )
+        )
+        if confirmation["team_lock_id"] != lock["id"] or any(
+            confirmation[key] != lock[key] for key in ("season_id", "matchday_id", "trainer_id")
+        ):
+            raise Skip("confirmation_mismatch")
+        team, replaced, save_id = (
+            confirmation["public_team_snapshot"], bool(confirmation["is_replacement"]), confirmation["save_file_id"],
+        )
+        at = created = instant(confirmation["confirmed_at"])
     season = f.season(lock["season_id"])
     day = one(f.read("matchdays", "number,status", id=lock["matchday_id"]))
     players = f.players(season["id"])
     active = [p for p in players.values() if p["status"] == "active"]
-    # Teams fixed for that matchday when this one was first fixed.
-    created = instant(lock["created_at"])
     stamps = [
         instant(o["created_at"])
         for o in f.read(
@@ -310,7 +332,6 @@ def _team_locked(f: Facts, s: dict) -> dict:
     fixed = sum(
         1 for stamp in stamps if created is None or stamp is None or stamp <= created
     )
-    team = lock["public_team_snapshot"]
     if not isinstance(team, list) or not all(
         isinstance(m, dict) and m.get("species") for m in team
     ):
@@ -327,8 +348,9 @@ def _team_locked(f: Facts, s: dict) -> dict:
         team=team,
         fixed=fixed,
         participants=len(active),
-        at=instant(lock["locked_at"]),
-        generation=_lock_generation(f, lock),
+        at=at,
+        replaced=replaced,
+        generation=_lock_generation(f, {"save_file_id": save_id}),
     )
 
 
@@ -792,6 +814,8 @@ def render(facts: dict) -> dict:
             lines.append("⏰ Fijado fuera de plazo.")
         if facts["revision"] > 1:
             lines.append("🔁 Equipo reemplazado mientras la jornada sigue abierta.")
+        elif facts.get("replaced"):
+            lines.append("🔁 Equipo confirmado de nuevo para esta jornada.")
         paste = facts.get("paste")
         if isinstance(paste, str) and PASTE_URL.fullmatch(paste):
             lines.append(f"🔗 **Ver equipo:** {paste}")
