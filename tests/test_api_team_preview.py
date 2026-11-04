@@ -1,4 +1,4 @@
-"""H: JWT-owned private locks; spectator/public projection and no save fallback."""
+"""H: JWT-owned private locks; spectator/public projection; 079 labelled provisional parties."""
 
 from copy import deepcopy
 from dataclasses import replace
@@ -179,21 +179,65 @@ class TeamPreviewTests(unittest.TestCase):
         self.assertEqual(self.get().status_code, 403)
         self.assertEqual(self.store.calls, [])
 
-    def test_missing_lock_null_never_live_save_or_old_day_fallback(self):
+    def seed_current_parties(self):
+        """RIVAL has a synchronized League save; THIRD has never synchronized."""
+        rival_save = str(uuid4())
+        private = dict(species="Meowstic", form=1, nickname="Live", level=31, item="Item #1",
+                       moves=[dict(name="Psychic", pp=10)], ability="RIVAL_ABILITY",
+                       nature="RIVAL_NATURE", gender="F", identity_evidence="RAW_SECRET",
+                       ivs={k: 30 for k in ("hp", "atk", "defense", "spa", "spd", "spe")})
+        self.store.data["season_players"] += [
+            dict(id=str(uuid4()), season_id=SID, trainer_id=RIVAL, status="active",
+                 current_save_file_id=rival_save),
+            dict(id=str(uuid4()), season_id=SID, trainer_id=THIRD, status="active",
+                 current_save_file_id=None),
+        ]
+        self.store.data["save_files"].append(dict(
+            id=rival_save, season_id=SID, trainer_id=RIVAL, deleted_at=None, parser_status="parsed",
+            parser_version="v1", uploaded_at="2026-11-04T12:00:00Z", sha256="b" * 64))
+        self.store.data["parsed_saves"].append(dict(
+            save_file_id=rival_save, parser_version="v1", status="parsed", schema_version=1,
+            payload=dict(save_record_id=rival_save, trainer_id=RIVAL, source_hash="b" * 64,
+                         party=[dict(slot_number=2, pokemon=deepcopy(private)),
+                                dict(slot_number=1, pokemon=dict(private, nickname="First"))],
+                         boxes=[dict(box_number=1, slots=[dict(slot_number=1, pokemon=private)])])))
+        self.store.data["trainers"] = [dict(id=THIRD, globally_enabled=True)]
+
+    def test_missing_lock_shows_labelled_provisional_party_never_old_day_lock(self):
+        self.seed_current_parties()
         for row in self.store.data["public_team_locks"] + self.store.data["team_locks"]:
             row["matchday_id"] = str(uuid4())
-        for mode in ("spectator", "battle"):
-            response = self.get(mode=mode, trainer_id=TRAINER_ID)
-            self.assertEqual(response.status_code, 200, response.text)
-            self.assertTrue(all(t["lock"] is None for t in response.json()["teams"]))
-        forbidden = {
-            "save_files",
-            "parsed_saves",
-            "pokemon_observations",
-            "pokemon_entities",
-            "public_matches",
-        }
-        self.assertFalse(forbidden.intersection(c[0] for c in self.store.calls))
+        response = self.get(trainer_id=RIVAL, second_trainer_id=THIRD)
+        self.assert_public(response)
+        rival, third = response.json()["teams"]
+        self.assertIsNone(rival["lock"])
+        self.assertEqual(rival["provisional"]["source"], "league")
+        # Party only (never boxes), in slot order, public allowlist only.
+        self.assertEqual([p["nickname"] for p in rival["provisional"]["team"]], ["First", "Live"])
+        self.assertEqual(rival["provisional"]["team"][0]["form"], 1)
+        self.assertNotIn("RIVAL_", response.text)
+        self.assertNotIn("gender", rival["provisional"]["team"][0])
+        self.assertEqual((third["lock"], third["provisional"], third["unavailable_reason"]),
+                         (None, None, "no_synced_save"))
+        # The owner's own battle view: their private details, still provisional.
+        own = self.get(mode="battle", trainer_id=TRAINER_ID).json()["teams"][0]
+        self.assertEqual((own["visibility"], own["lock"]), ("self", None))
+        self.assertEqual(own["provisional"]["team"][0]["ability"], "Static")
+        self.assertNotIn("SECRET", str(own))
+        # The rival in battle mode stays public, even for the viewer's own request.
+        self.assert_public(self.get(mode="battle", trainer_id=RIVAL))
+        self.assertNotIn("public_matches", [c[0] for c in self.store.calls])
+
+    def test_finished_season_without_lock_never_shows_a_live_party(self):
+        self.seed_current_parties()
+        self.store.data["seasons"][0]["status"] = "finished"
+        for row in self.store.data["public_team_locks"] + self.store.data["team_locks"]:
+            row["matchday_id"] = str(uuid4())
+        response = self.get(trainer_id=RIVAL, second_trainer_id=THIRD)
+        self.assertEqual(response.status_code, 200, response.text)
+        self.assertEqual([(t["provisional"], t["unavailable_reason"]) for t in response.json()["teams"]],
+                         [(None, "no_team_lock")] * 2)
+        self.assertFalse({"save_files", "parsed_saves"}.intersection(c[0] for c in self.store.calls))
 
     def test_wrong_season_and_outsider_cannot_retrieve_private(self):
         self.assertEqual(
@@ -206,12 +250,18 @@ class TeamPreviewTests(unittest.TestCase):
         self.store.data["seasons"][0]["status"] = "discarded"
         self.assertEqual(self.get().status_code, 404)
 
-    def test_missing_day_and_empty_roster_are_explicit(self):
+    def test_missing_day_still_previews_current_parties_and_empty_roster_is_explicit(self):
+        # No prepared J1 yet: Team Preview stays available with current parties.
+        self.seed_current_parties()
         self.store.data["seasons"][0]["current_matchday_id"] = None
-        response = self.get().json()
-        self.assertIsNone(response["day"])
-        self.assertEqual(response["teams"], [])
+        response = self.get(trainer_id=RIVAL, second_trainer_id=TRAINER_ID)
+        self.assert_public(response)
+        body = response.json()
+        self.assertIsNone(body["day"])
+        self.assertEqual([t["trainer_id"] for t in body["teams"]], [RIVAL, TRAINER_ID])
+        self.assertTrue(all(t["lock"] is None and t["provisional"] for t in body["teams"]))
         self.assertNotIn("team_locks", [c[0] for c in self.store.calls])
+        self.assertNotIn("public_team_locks", [c[0] for c in self.store.calls])
         self.store.data["public_season_players"] = []
         self.assertEqual(self.get().json()["trainers"], [])
 

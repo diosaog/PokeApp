@@ -301,7 +301,7 @@ class FrontendReads:
             "revived_after_wipe": stats[0].get("revived_after_wipe") if stats else None,
         })
 
-    def _personal_collection(self, tid):
+    def _personal_collection(self, tid, *, public=True):
         from app.application.personal_saves import PersonalSaves
 
         # Only a currently enabled participant reaches this path. Private IVs,
@@ -323,7 +323,8 @@ class FrontendReads:
                 if trainer_id != tid:
                     raise PersistenceError("Personal save scope mismatch")
                 return row
-        return PersonalSaves(SelectedSave(), None).pc(tid, public=True)
+        # public=False only for the owner's own Team Preview (079).
+        return PersonalSaves(SelectedSave(), None).pc(tid, public=public)
 
     def _public_flags(self, sid, entity_ids):
         reader = getattr(self.repo, "public_pokemon_flags", None)

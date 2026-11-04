@@ -94,7 +94,9 @@ def lock_team_v2(
     try:
         public, private = team_lock_domain.snapshots_from_parsed_payload(payload)
     except (ValueError, TypeError, KeyError, AttributeError) as exc:
-        raise ConflictError("invalid_parsed_team") from exc
+        # A party of fewer than six is the trainer's to fix, not a damaged save.
+        reason = "team_requires_six" if str(exc) == "team_requires_six" else "invalid_parsed_team"
+        raise ConflictError(reason) from exc
     return repository.upsert_with_activity(TeamLockMutation(
         season_id=season_id, matchday_id=matchday_id, trainer_id=trainer_id,
         season_player_id=str(player["id"]), save_file_id=save_file_id, save_sha256=save["sha256"],

@@ -23,6 +23,11 @@ ERRORS = {
             "stale_inputs",
             "reward_item_unavailable",
             "ranking_tie_unresolved",
+            # 079: ordinary League start and own death history.
+            "opponent_missing",
+            "death_history_admin_required",
+            "death_history_already_confirmed",
+            "death_history_changed",
         ),
         409,
     ),
@@ -30,6 +35,13 @@ ERRORS = {
     **dict.fromkeys(
         ("participant_required", "participant_inactive", "participant_ineligible"), 403
     ),
+}
+
+
+# 079: participant League start; both RPCs take {actor_trainer_id, season_id}.
+LEAGUE_RPCS = {
+    "league_readiness": "api_league_readiness",
+    "prepare_first": "api_league_prepare_first_matchday",
 }
 
 
@@ -61,6 +73,13 @@ class SupabaseMatchdayRepository:
         return data
 
     def execute(self, operation, request):
+        if operation in LEAGUE_RPCS:
+            return self.rpc(LEAGUE_RPCS[operation], request)
+        if operation in ("own_death_state", "own_death_confirm"):
+            return self.rpc(
+                "api_participant_death_history",
+                dict(operation=operation.removeprefix("own_death_"), request=request),
+            )
         if operation in ("participant_state", "participant_results"):
             return self.rpc(
                 "api_participant_matchday",

@@ -1,4 +1,15 @@
-"""Bounded current-day competitive preview, independent of scheduled matches."""
+"""Bounded current-day competitive preview, independent of scheduled matches.
+
+079 (owner decision 2026-11-04): Team Preview is always available. When a
+trainer has no official Team Lock for the current matchday (or there is no
+prepared matchday yet), an active season shows that trainer's current
+synchronized party instead, labelled provisional: exactly the public
+projection their trainer profile already shows, and the owner's private
+details only to the owner in battle mode. A provisional team is never an
+official lock, never another matchday's lock and never published anywhere.
+"""
+
+import re
 
 from app.api.team_preview_models import TeamPreviewRead
 from app.application.frontend_reads import FrontendReads
@@ -53,6 +64,7 @@ def team_preview(
             raise PersistenceError("Preview day unavailable")
         day = days[0]
     teams = []
+    official = {}
     if day:
         # One bounded public query for the day; no per-player read loop. Private
         # columns are never selected here, including when the viewer is selected.
@@ -137,9 +149,54 @@ def team_preview(
                     locked_at=source["locked_at"], is_late=source["is_late"], team=team,
                     timing_status=timing,
                 )
-            teams.append(
-                dict(trainer_id=tid, visibility="self" if own else "public", lock=lock)
+            official[tid] = lock
+    # Fixed day, or none yet: every selected trainer gets an entry.
+    live = not single_public and season["status"] in ("draft", "active")
+    for tid in selected:
+        own = selection.mode == "battle" and tid == viewer_trainer_id
+        lock, provisional, reason = official.get(tid), None, None
+        if lock is None:
+            provisional, reason = (
+                _provisional(reads, season_id, tid, own) if live else (None, "no_team_lock")
             )
+        teams.append(
+            dict(trainer_id=tid, visibility="self" if own else "public", lock=lock,
+                 provisional=provisional, unavailable_reason=reason)
+        )
     return TeamPreviewRead(
         season=season, day=day, trainers=trainers, mode=selection.mode, teams=teams
     )
+
+
+_PARTY = re.compile(r"Equipo · ([1-6])")
+
+
+def _provisional(reads, season_id, trainer_id, own):
+    """The trainer's current synchronized party, or why there is none.
+
+    Reuses the trainer profile's public collection (League save, or the
+    synchronized personal save of an active participant during preparation),
+    so no field becomes visible that the profile does not already show.
+    """
+    try:
+        collection = reads.trainer_collection(season_id, trainer_id)
+    except NotFoundError as exc:
+        # The public roster listed this trainer: a missing row is inconsistent.
+        raise PersistenceError("Preview roster mismatch") from exc
+    if collection.status != "ready":
+        return None, collection.reason or "no_linked_save"
+    slots = collection.pokemon
+    if own:
+        private = (
+            reads.pc(season_id, trainer_id)
+            if collection.source == "league"
+            else reads._personal_collection(trainer_id, public=False)
+        )
+        slots = private.pokemon if private.status == "ready" else []
+    party = sorted(
+        (s for s in slots if _PARTY.fullmatch(s.location)),
+        key=lambda s: int(_PARTY.fullmatch(s.location).group(1)),
+    )
+    if not party:
+        return None, "empty_party"
+    return dict(source=collection.source, team=[s.pokemon.model_dump() for s in party]), None

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from copy import deepcopy
+import re
 from dataclasses import fields
 from typing import Any
 from uuid import UUID
@@ -62,7 +63,11 @@ class SupabaseTeamLockRepository:
             rows = self._client.rpc(RPC_NAME, args).execute().data
         except Exception as exc:
             error = RPC_ERRORS.get(str(getattr(exc, "code", "")), PersistenceError)
-            raise error("Team lock mutation was rejected." if error is not PersistenceError else "Team lock backend is unavailable.") from exc
+            if error is PersistenceError:
+                raise error("Team lock backend is unavailable.") from exc
+            # The SQL refusal code (e.g. matchday_not_lockable), when it is one.
+            message = str(getattr(exc, "message", "") or "")
+            raise error(message if re.fullmatch(r"[a-z_]{3,64}", message) else "Team lock mutation was rejected.") from exc
         if not isinstance(rows, list) or len(rows) != 1:
             raise PersistenceError("Team lock mutation returned no unique receipt.")
         try:

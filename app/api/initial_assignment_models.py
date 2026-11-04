@@ -20,6 +20,8 @@ BlockReason = Literal[
     "death_inputs_unobserved",
     "initial_assignment_locked",
     "initial_assignment_legacy",
+    # 079: an all-vs-all League starts without this review.
+    "initial_assignment_not_required",
 ]
 
 
@@ -61,7 +63,7 @@ class InitialBoundaryTie(StrictBody):
 class InitialAssignmentRead(StrictBody):
     season_id: UUID
     rule: InitialRule | None
-    state: Literal["legacy", "pending", "assigned"]
+    state: Literal["legacy", "pending", "assigned", "not_required"]
     config_version_id: UUID | None
     division_sizes: DivisionSizes | None
     setup_revision: Revision
@@ -79,8 +81,11 @@ class InitialAssignmentRead(StrictBody):
             {p.trainer_id for p in self.players}
         ) != len(ids):
             raise ValueError("Duplicate roster")
-        if (self.state == "legacy") != (self.rule is None):
+        # Only an observed A/B review has a rule; legacy and all-vs-all have none.
+        if (self.state in ("legacy", "not_required")) != (self.rule is None):
             raise ValueError("Invalid rule state")
+        if self.state == "not_required" and (self.players or self.ready):
+            raise ValueError("An all-vs-all League has no initial review")
         if self.ready and (
             self.state != "pending"
             or self.blocking_reasons

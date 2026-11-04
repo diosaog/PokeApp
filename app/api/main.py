@@ -23,6 +23,7 @@ from app.api.routes import cups
 from app.api.routes import reads
 from app.api.routes import initial_assignment
 from app.api.routes import wipe_revivals
+from app.api.routes import league_start
 from app.api.routes import launcher
 from app.api.routes import saves
 from app.api.routes import personal_saves
@@ -117,6 +118,7 @@ def create_app(
     api.include_router(reads.router)
     api.include_router(initial_assignment.router)
     api.include_router(wipe_revivals.router)
+    api.include_router(league_start.router)
     api.include_router(launcher.router)
     api.include_router(saves.router)
     api.include_router(personal_saves.router)
