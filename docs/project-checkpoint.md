@@ -6,13 +6,12 @@ milestone record; it does not maintain a second live phase-status ledger.
 ## Current project position
 
 - NET con revividos tras wipe, Felicidad máxima y anuncios Team Lock (2026-11-05):
-  **PARCIAL PUBLICADO**. Continuar desde el tip de `origin/claude/net-friendship-discord`
-  (base `68c674f`). Publicado `9e83cee`: Gourgeist sin sufijo en exportación privada y
-  Pokepast.es + refresco de la ficha; API `3c6b1d9f` (rollback `adfca5c4`), web
-  `43e98b76` (rollback `0eef4feb`). Pendiente de aprobación: SQL 082/083 + API Discord
-  (`c49888c`; 13 + 11 SQL PASS, defecto 081 reproducido) y «Felicidad máxima»
-  (`0ab7a6e`; 256 C# + 9 Python con motor real; producción bloqueada por
-  `PRODUCTION_MUTATIONS`). DB 001–081; Launcher 0.26.11 y verifier sin cambios.
+  **PUBLICADO / VERIFICADO**. Continuar desde el tip de `origin/claude/net-friendship-discord`.
+  DB 082 `20261104232636` y 083 `20261104232638` aplicadas una vez (ensayo 19/19 sobre
+  copia fresca; sin cambios de filas); API `f1d2896a` (rollback `3c6b1d9f`), web `9a17a56c`
+  (rollback `43e98b76`), fuente `5627f8c`. NET real: Samu −2,2; resto sin cambios.
+  «Felicidad máxima» preparada; escritura en producción cerrada hasta habilitar
+  `max_friendship` y publicar Launcher 0.26.12. Verifier y Launcher 0.26.11 sin cambios.
   [Registro vivo](work-in-progress/net-friendship-discord.md).
 
 - Automatic observed points (2026-11-04): **PUBLISHED / VERIFIED**. No player
