@@ -72,6 +72,25 @@ const statusFlagLabels: Record<PokemonStatusFlag, string> = {
   blindado: "BLINDADO",
   revivido: "REVIVIDO",
 };
+/**
+ * The gender the trainer's own save stores (079): ♂ or ♀, nothing for a
+ * genderless Pokémon or an older projection that did not keep it (never
+ * guessed). Only own/private reads carry it; public views have no gender.
+ */
+export function GenderMark({ gender }: { gender?: string | null }) {
+  if (gender !== "M" && gender !== "F") return null;
+  const male = gender === "M";
+  return (
+    <span
+      className={`gender-mark ${male ? "is-male" : "is-female"}`}
+      role="img"
+      aria-label={male ? "Macho" : "Hembra"}
+      title={male ? "Macho" : "Hembra"}
+    >
+      {male ? "♂" : "♀"}
+    </span>
+  );
+}
 export function PokemonStatusFlags({
   flags,
 }: {

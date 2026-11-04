@@ -1,6 +1,7 @@
 import type { Model } from "../api/types";
 import { catalogId, pokemonName, pokemonTitle } from "../pokemon/localization";
 import {
+  GenderMark,
   ItemIcon,
   MoveLabel,
   PokemonSprite,
@@ -53,7 +54,12 @@ export function PokemonDetails(props: DetailPokemon) {
         {dex && (
           <span className="dex-number">Nº {String(dex).padStart(3, "0")}</span>
         )}
-        <h3>{pokemonName("species", p.species)}</h3>
+        <h3>
+          {pokemonName("species", p.species)}
+          {props.visibility === "self" && (
+            <GenderMark gender={props.pokemon.gender} />
+          )}
+        </h3>
         {!!p.form && <p>Forma {p.form}</p>}
         <p className="dex-level">Nivel {p.level ?? "—"}</p>
         <div className="tags">
