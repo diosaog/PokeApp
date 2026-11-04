@@ -8,8 +8,9 @@ milestone record; it does not maintain a second live phase-status ledger.
 - Automatic observed points (2026-11-04): owner's clarification removes player
   death-history confirmation. Prepared on `codex/automatic-observed-points`
   from `87d56b7`: one read-function proposal + web cleanup, SQL 13 / web 66 /
-  API 10 / browser 1 / build PASS. No new migration created or deployed;
-  SQL authorization is required under the previous explicit restriction.
+  API 10 / browser 1 / build PASS. Owner subsequently authorized SQL + web
+  with «si»: 081 formalized, hash pinned, fresh backup/release in progress.
+  Complete the authorized publication; no further approval is required.
   [Prepared change and exact next step](work-in-progress/automatic-observed-points.md).
 
 - Focused Home/points follow-up (2026-11-04): web label/message/cache fixes

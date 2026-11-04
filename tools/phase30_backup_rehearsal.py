@@ -497,6 +497,10 @@ def rehearse(args) -> dict:
                 report["phase080_boundaries"] = validate_boundaries(pg)
                 report["phase080_existing_all_vs_all"] = validate_all_vs_all(pg)
                 report["phase080_existing_player_matchdays"] = validate_player_days(pg)
+            if migration.name.startswith("081_"):
+                from tools.validate_phase081_observed_points import validate as validate_observed_points
+
+                report["phase081_observed_points"] = validate_observed_points(pg)
 
         rows_after = local_fingerprints(pg, public_tables)
         # 072 adds the private item_deliveries table, its commands and the

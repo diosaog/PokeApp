@@ -1,8 +1,9 @@
 # Puntos desde evidencia observada, sin confirmación — 2026-11-04
 
-Estado: CAMBIO PREPARADO Y PROBADO LOCALMENTE; NO PUBLICADO.
+Estado: PUBLICACIÓN SQL + WEB AUTORIZADA Y EN CURSO.
 Rama `codex/automatic-observed-points`, desde `87d56b7`.
-Estado de esta intervención: `STAGING_UNTOUCHED`, salvo consultas de lectura.
+Estado de esta intervención: `STAGING_UNTOUCHED`, salvo consultas de lectura;
+081 formalizada, respaldo fresco en curso. No se ha aplicado SQL remoto todavía.
 
 El propietario aclara que los jugadores no deben confirmar el historial para
 obtener puntos. La app debe usar automáticamente la partida oficial y los
@@ -26,9 +27,9 @@ correcciones 077, la deduplicación y la exclusión de muertes anteriores al alt
 080. Los snapshots cerrados y el cálculo de victorias/sanciones no se modifican.
 
 [Diff SQL revisable](../evidence/automatic-observed-points/candidate.diff).
-Es una propuesta de función, aplicada únicamente al PostgreSQL local de prueba;
-no se ha creado ninguna migración nueva en `supabase/v2/migrations`, alterado
-001–080, añadido un UPDATE de cuentas ni aplicado SQL remoto.
+La propuesta se probó primero sin crear una migración ni tocar producción.
+Tras la autorización posterior se formalizó como 081, sin alterar 001–080 ni
+añadir UPDATE de cuentas. La función coincide exactamente con ese diff.
 
 La web preparada elimina el aviso y enlace de confirmación de Home, el botón
 y diálogo del historial y la acción inline de Liga. Mantiene diagnósticos de
@@ -60,21 +61,30 @@ local, sin conexiones remotas ni archivos de partidas reales.
   cambiar el producto. Servidor y navegadores cerrados; cluster eliminado.
   [Captura local sintética](../evidence/automatic-observed-points/home-local-synthetic.png).
 
-## Autorización pendiente y siguiente paso
+## Publicación autorizada
 
-La petición anterior excluía explícitamente «New SQL migrations without further
-approval». Por ello no se aplica esta función a producción ni se publica una
-web que prometa puntos automáticos contra el SQL antiguo. La autorización
-pendiente es del despliegue SQL por el propietario, nunca una confirmación de
-los jugadores.
+El propietario respondió **«si»** a la autorización concreta de esta función
+SQL y la web, sin modificar partidas, monedas o historiales. La restricción
+anterior de nuevas migraciones queda ampliada únicamente para este cambio.
+No se requiere otra autorización para completar esta publicación.
 
-Tras autorizar esa corrección SQL: formalizar una migración con esta función,
-ensayar con respaldo fresco 080, aplicar una vez y publicar solo la web; API y
+081 `081_automatic_observed_points.sql` solo sustituye la función de lectura,
+con guard de la definición previa; conserva owner/ACL y no modifica tablas.
+SHA-256: `06f9c9911a3c375d67f793e5189ef7d3dc772bc01dd8cb348e9bcad3fba0d7c0`.
+Bootstrap regenerado 001–081, runner fijado a esos bytes y ensayo focalizado
+reproducible en `tools.validate_phase081_observed_points`. La 081 completa
+supera 13 comprobaciones SQL, incluida apertura normal J1 sin confirmar
+historiales; 15 tests de esquema y 6 gates del runner PASS. Build web repetido PASS.
+Proyecto remoto correcto ACTIVE_HEALTHY, historial hasta 080, función anterior
+con hash esperado; API `adfca5c4` SUCCESS y web `4f46cbcb` al 100%.
+
+Siguiente paso autorizado: ensayar con respaldo fresco 080, aplicar una vez
+solo 081 y publicar la web; API y
 Launcher no necesitan versión nueva. Comprobar mediante lecturas los saldos
 automáticos y ausencia de cambios en datos existentes. No hacer correcciones
 individuales, Team Locks, monedas, pastes o mensajes de prueba. Discord por
 versión continúa fuera de este cambio y pendiente de su autorización separada.
 
 Última publicación registrada: web `4f46cbcb`, API `adfca5c4`, DB 080. Esta
-rama preparada debe continuarse desde su tip; no desplegarla ignorando el gate
-SQL. MultiIA actualizado; guía protegida y archivos del propietario excluidos.
+rama debe continuarse desde su tip; no desplegarla ignorando el gate SQL.
+MultiIA actualizado; guía protegida y archivos del propietario excluidos.
