@@ -368,6 +368,30 @@ it("«Generar Poképaste» belongs to the own «Equipo» card only", () => {
   ).toBeNull();
 });
 
+it("«Fijar Equipo» sits centred above the six, between the title and «Generar Poképaste»", () => {
+  mocks.party = true;
+  profile("me");
+  const team = screen
+    .getByRole("heading", { name: "Equipo" })
+    .closest(".party-panel")! as HTMLElement;
+  const header = team.querySelector(".section-row.has-center")!;
+  const [title, center, action] = Array.from(header.children);
+  expect(title).toHaveClass("party-title");
+  expect(
+    within(center as HTMLElement).getByRole("button", { name: "Fijar Equipo" }),
+  ).toBeVisible();
+  expect(
+    within(action as HTMLElement).getByRole("button", {
+      name: "Generar Poképaste",
+    }),
+  ).toBeVisible();
+  // Above the six cards, never over them.
+  expect(header.nextElementSibling).toHaveClass("party-slots");
+  cleanup();
+  profile("rival");
+  expect(screen.queryByRole("button", { name: "Fijar Equipo" })).toBeNull();
+});
+
 it("no team on screen, no export button", () => {
   profile("me");
   expect(

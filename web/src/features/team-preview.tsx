@@ -1,5 +1,4 @@
-import { Fragment, useEffect, useRef, useState } from "react";
-import { ShieldCheck } from "lucide-react";
+import { Fragment, useState } from "react";
 import type { Model } from "../api/types";
 import { pokemonName } from "../pokemon/localization";
 import {
@@ -10,23 +9,33 @@ import {
   SpriteGeneration,
   gameGeneration,
 } from "../pokemon/presentation";
-import { useApp, useOverview, useRead, usePC } from "../state";
+import { useApp, useOverview, useRead } from "../state";
 import { LockStatus } from "./lock-status";
-import {
-  Card,
-  CommandState,
-  Empty,
-  Field,
-  Heading,
-  Loading,
-  Modal,
-  Notice,
-  Tag,
-  date,
-  useCommand,
-} from "../ui";
+import { Card, Empty, Field, Heading, Loading, Notice, Tag, date } from "../ui";
 import { Pokemon, WithSeason } from "./core";
-import { TeamLockWarning } from "./team-lock-warning";
+import { FixTeamButton } from "./fix-team";
+
+type Entry = Model<"TeamPreviewRead">["teams"][number];
+type ShownPokemon = Model<"PokemonRead"> | Model<"PrivatePokemonRead">;
+
+// 079: Team Preview is always available. Without an official Team Lock the
+// trainer's current synchronized party is shown, clearly provisional; an
+// official lock is never replaced or mixed with it.
+const unavailableText: Record<
+  NonNullable<Entry["unavailable_reason"]>,
+  string
+> = {
+  no_team_lock: "No registró Team Lock en esta jornada.",
+  no_linked_save: "Aún no tiene una partida vinculada a la Liga.",
+  no_synced_save: "Aún no ha sincronizado ninguna partida.",
+  processing:
+    "Su partida se está procesando. Vuelve a mirar en unos instantes.",
+  unsupported_payload:
+    "Su última partida no incluye un equipo compatible. Debe volver a sincronizar.",
+  ineligible_personal_save:
+    "No hay una partida de la Liga disponible para consultar.",
+  empty_party: "Su partida sincronizada no tiene Pokémon en el equipo.",
+};
 
 type Mode = "spectator" | "battle";
 type Selection = { mode: Mode; first?: string; second?: string };
@@ -55,7 +64,6 @@ function Preview({ season }: { season: string }) {
         ?.game,
     );
   const [selection, setSelection] = useState<Selection>({ mode: "spectator" });
-  const [confirm, setConfirm] = useState(false);
   const params = new URLSearchParams({ mode: selection.mode });
   if (selection.first) params.set("trainer_id", selection.first);
   if (selection.second) params.set("second_trainer_id", selection.second);
@@ -80,7 +88,6 @@ function Preview({ season }: { season: string }) {
             aria-selected={selection.mode === mode}
             onClick={() => {
               setSelection({ mode, first: first || undefined });
-              setConfirm(false);
             }}
           >
             {mode === "spectator" ? "Espectador" : "Batalla"}
@@ -99,7 +106,11 @@ function Preview({ season }: { season: string }) {
       ) : (
         data && (
           <>
-            {data.day && <Tag>J{data.day.number} · Team Locks</Tag>}
+            <Tag>
+              {data.day
+                ? `J${data.day.number} · Team Locks`
+                : "Sin jornada preparada · equipos actuales"}
+            </Tag>
             <div className="toolbar">
               <Field
                 label={
@@ -152,29 +163,14 @@ function Preview({ season }: { season: string }) {
                   </select>
                 </Field>
               )}
-              <button
-                className="button primary"
-                onClick={() => setConfirm(true)}
-                disabled={
-                  !data.day ||
-                  !["scheduled", "open"].includes(data.day.status) ||
-                  data.season.status !== "active" ||
-                  !data.trainers.some(
-                    (t) =>
-                      t.trainer_id === me?.trainer_id && t.status === "active",
-                  )
-                }
-              >
-                <ShieldCheck size={18} />
-                Fijar mi equipo
-              </button>
+              {data.season.status === "active" &&
+                data.trainers.some(
+                  (t) =>
+                    t.trainer_id === me?.trainer_id && t.status === "active",
+                ) && <FixTeamButton />}
             </div>
             {!data.trainers.length ? (
               <Empty>Aún no hay participantes.</Empty>
-            ) : !data.day ? (
-              <Empty>
-                Aún no hay una jornada disponible para consultar Team Locks.
-              </Empty>
             ) : (
               <div
                 className={
@@ -198,118 +194,14 @@ function Preview({ season }: { season: string }) {
                           )?.display_name
                         }
                       </h2>
-                      {!entry.lock ? (
-                        <TeamLockWarning />
-                      ) : (
-                        <>
-                          <Tag>
-                            {entry.visibility === "self"
-                              ? "Tu equipo · detalles privados"
-                              : "Equipo público"}
-                          </Tag>
-                          <p>
-                            <LockStatus
-                              status={entry.lock.timing_status ?? "unknown"}
-                            />{" "}
-                            · {date(entry.lock.locked_at)}
-                          </p>
-                          <SpriteGeneration
-                            value={generationOf(entry.trainer_id)}
-                          >
-                            <div className="battle-roster">
-                              {entry.lock.team.map((pokemon, index) => (
-                                <article
-                                  className={`battle-pokemon ${typeClass(pokemon.types?.[0])}`}
-                                  key={index}
-                                >
-                                  <div className="battle-identity">
-                                    <Pokemon pokemon={pokemon} />
-                                    <span className="held-item">
-                                      {pokemon.item && (
-                                        <ItemIcon
-                                          name={pokemonName(
-                                            "item",
-                                            pokemon.item,
-                                            pokemon.item_generation ??
-                                              undefined,
-                                          )}
-                                        />
-                                      )}
-                                      {pokemon.item
-                                        ? pokemonName(
-                                            "item",
-                                            pokemon.item,
-                                            pokemon.item_generation ??
-                                              undefined,
-                                          )
-                                        : "Sin objeto"}
-                                    </span>
-                                    {entry.visibility === "self" && (
-                                      <dl className="battle-private">
-                                        <dt>Habilidad</dt>
-                                        <dd>
-                                          {entry.lock!.team[index].ability
-                                            ? pokemonName(
-                                                "ability",
-                                                entry.lock!.team[index].ability,
-                                              )
-                                            : "—"}
-                                        </dd>
-                                        <dt>Naturaleza</dt>
-                                        <dd>
-                                          {entry.lock!.team[index].nature
-                                            ? pokemonName(
-                                                "nature",
-                                                entry.lock!.team[index].nature,
-                                              )
-                                            : "—"}
-                                        </dd>
-                                      </dl>
-                                    )}
-                                  </div>
-                                  <div
-                                    className="battle-moves"
-                                    aria-label="Movimientos"
-                                  >
-                                    {Array.from({ length: 4 }, (_, i) =>
-                                      pokemon.moves?.[i] ? (
-                                        <MovePopover
-                                          key={i}
-                                          name={pokemon.moves[i].name}
-                                          pp={pokemon.moves[i].pp}
-                                        />
-                                      ) : (
-                                        <span className="move-vacant" key={i}>
-                                          No disponible
-                                        </span>
-                                      ),
-                                    )}
-                                  </div>
-                                  {entry.visibility === "self" && (
-                                    <details className="battle-values">
-                                      <summary>Ver IVs</summary>
-                                      <PrivateDetails
-                                        pokemon={entry.lock!.team[index]}
-                                      />
-                                    </details>
-                                  )}
-                                </article>
-                              ))}
-                            </div>
-                          </SpriteGeneration>
-                        </>
-                      )}
+                      <TeamEntry
+                        entry={entry}
+                        generation={generationOf(entry.trainer_id)}
+                      />
                     </Card>
                   </Fragment>
                 ))}
               </div>
-            )}
-            {confirm && data.day && (
-              <LockConfirmation
-                season={season}
-                day={data.day.id}
-                onClose={() => setConfirm(false)}
-              />
             )}
           </>
         )
@@ -327,57 +219,136 @@ function PrivateDetails({ pokemon }: { pokemon: Model<"PrivatePokemonRead"> }) {
   );
 }
 
-function LockConfirmation({
-  season,
-  day,
-  onClose,
+function TeamEntry({
+  entry,
+  generation,
 }: {
-  season: string;
-  day: string;
-  onClose: () => void;
+  entry: Entry;
+  generation: ReturnType<typeof gameGeneration>;
 }) {
-  // The live save is consulted only for the existing explicit lock command,
-  // never as a replacement for a missing competitive preview.
-  const pc = usePC();
-  const cmd = useCommand([`/v1/read/seasons/${season}/overview`]);
-  const refreshed = useRef(false);
-  useEffect(() => {
-    if (!cmd.success || cmd.pending || refreshed.current) return;
-    refreshed.current = true;
-    onClose();
-  }, [cmd.success, cmd.pending, season, onClose]);
+  const self = entry.visibility === "self";
+  if (entry.lock)
+    return (
+      <>
+        <div className="team-source is-official">
+          <Tag>
+            {self
+              ? "Team Lock oficial · tus detalles privados"
+              : "Team Lock oficial"}
+          </Tag>
+        </div>
+        <p>
+          <LockStatus status={entry.lock.timing_status ?? "unknown"} /> ·{" "}
+          {date(entry.lock.locked_at)}
+        </p>
+        <Roster team={entry.lock.team} self={self} generation={generation} />
+      </>
+    );
+  if (entry.provisional)
+    return (
+      <>
+        <div className="team-source is-provisional">
+          <Tag>Provisional · equipo actual sin fijar</Tag>
+        </div>
+        <p className="muted">
+          {entry.provisional.source === "personal"
+            ? "Última partida personal sincronizada; aún no está vinculada a la Liga. No es un Team Lock."
+            : "Equipo actual de su partida oficial. No es un Team Lock: puede cambiar hasta que lo fije."}
+        </p>
+        <Roster
+          team={entry.provisional.team}
+          self={self}
+          generation={generation}
+        />
+      </>
+    );
   return (
-    <Modal
-      title="Confirmar Team Lock"
-      onClose={() => {
-        if (!cmd.pending && !cmd.uncertain) onClose();
-      }}
-    >
-      <p>Se fijará el equipo de tu partida actual.</p>
-      {pc.isPending ? (
-        <Loading />
-      ) : pc.error ? (
-        <Notice error={pc.error} />
-      ) : pc.data?.save && pc.data.status === "ready" ? (
-        <button
-          className="button primary"
-          disabled={cmd.pending || cmd.uncertain}
-          onClick={async () => {
-            await cmd.execute(
-              `/v1/seasons/${season}/matchdays/${day}/team-lock`,
-              { save_file_id: pc.data!.save!.id },
-              "PUT",
-            );
-          }}
-        >
-          Confirmar mi equipo
-        </button>
-      ) : (
-        <Empty>
-          No hay un save actual analizado disponible para fijar tu equipo.
-        </Empty>
-      )}
-      <CommandState command={cmd} />
-    </Modal>
+    <Empty>
+      {entry.unavailable_reason
+        ? unavailableText[entry.unavailable_reason]
+        : "Sin equipo disponible."}
+    </Empty>
+  );
+}
+
+function Roster({
+  team,
+  self,
+  generation,
+}: {
+  team: ShownPokemon[];
+  self: boolean;
+  generation: ReturnType<typeof gameGeneration>;
+}) {
+  return (
+    <SpriteGeneration value={generation}>
+      <div className="battle-roster">
+        {team.map((pokemon, index) => (
+          <article
+            className={`battle-pokemon ${typeClass(pokemon.types?.[0])}`}
+            key={index}
+          >
+            <div className="battle-identity">
+              <Pokemon pokemon={pokemon} />
+              <span className="held-item">
+                {pokemon.item && (
+                  <ItemIcon
+                    name={pokemonName(
+                      "item",
+                      pokemon.item,
+                      pokemon.item_generation ?? undefined,
+                    )}
+                  />
+                )}
+                {pokemon.item
+                  ? pokemonName(
+                      "item",
+                      pokemon.item,
+                      pokemon.item_generation ?? undefined,
+                    )
+                  : "Sin objeto"}
+              </span>
+              {self && "ability" in pokemon && (
+                <dl className="battle-private">
+                  <dt>Habilidad</dt>
+                  <dd>
+                    {pokemon.ability
+                      ? pokemonName("ability", pokemon.ability)
+                      : "—"}
+                  </dd>
+                  <dt>Naturaleza</dt>
+                  <dd>
+                    {pokemon.nature
+                      ? pokemonName("nature", pokemon.nature)
+                      : "—"}
+                  </dd>
+                </dl>
+              )}
+            </div>
+            <div className="battle-moves" aria-label="Movimientos">
+              {Array.from({ length: 4 }, (_, i) =>
+                pokemon.moves?.[i] ? (
+                  <MovePopover
+                    key={i}
+                    name={pokemon.moves[i].name}
+                    pp={pokemon.moves[i].pp}
+                  />
+                ) : (
+                  <span className="move-vacant" key={i}>
+                    No disponible
+                  </span>
+                ),
+              )}
+            </div>
+            {self && "ability" in pokemon && (
+              <details className="battle-values">
+                <summary>Ver IVs</summary>
+                <PrivateDetails pokemon={pokemon} />
+              </details>
+            )}
+          </article>
+        ))}
+      </div>
+    </SpriteGeneration>
   );
 }

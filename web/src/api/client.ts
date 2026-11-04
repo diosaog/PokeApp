@@ -90,10 +90,36 @@ export class ApiError extends Error {
     public status: number,
     public code: string,
     public ranking?: Model<"RankingReview">,
+    // A refusal's own server reason (Team Lock: `team_requires_six`…).
+    public reason?: string,
   ) {
     super(code);
   }
 }
+// Team Lock refusals the trainer can act on (079: «Fijar Equipo»).
+const teamLockReasons: Record<string, string> = {
+  season_not_active:
+    "La Liga no está en curso: no hay ninguna jornada en la que fijar un equipo.",
+  matchday_not_found:
+    "Esa jornada ya no existe. Actualiza la Liga y vuelve a intentarlo.",
+  matchday_not_lockable:
+    "La jornada actual ya está cerrada. Podrás fijar tu equipo cuando se prepare la siguiente.",
+  participant_inactive: "Tu participación en esta Liga no está activa.",
+  participation_not_found: "No participas en esta Liga.",
+  trainer_disabled: "Tu cuenta está desactivada.",
+  save_not_found:
+    "Tu partida oficial ya no está disponible. Sincronízala de nuevo desde PokeApp Launcher.",
+  save_not_ready:
+    "Tu partida oficial aún se está procesando. Vuelve a intentarlo en unos segundos.",
+  parsed_save_not_ready:
+    "Tu partida oficial aún se está procesando. Vuelve a intentarlo en unos segundos.",
+  parsed_save_changed:
+    "Tu partida acaba de cambiar. Revisa el equipo actualizado y vuelve a fijarlo.",
+  team_requires_six:
+    "Necesitas exactamente seis Pokémon en el equipo de tu partida oficial.",
+  invalid_parsed_team:
+    "El equipo de tu partida oficial no se puede leer. Vuelve a sincronizar desde PokeApp Launcher.",
+};
 // A 409 that means "what you were looking at is out of date" (refresh and
 // review), as opposed to a refusal with its own reason (funds, availability…).
 export function isStaleConflict(error: unknown) {
@@ -110,9 +136,22 @@ export function errorText(error: unknown) {
     return "Renovando tu sesión con PokeApp Launcher… vuelve a intentarlo en unos segundos.";
   if (!(error instanceof ApiError))
     return "No se pudo conectar. Comprueba la conexión y vuelve a intentarlo.";
+  if (
+    error.code.startsWith("TEAM_LOCK_") &&
+    error.reason &&
+    teamLockReasons[error.reason]
+  )
+    return teamLockReasons[error.reason];
   const adminErrors: Record<string, string> = {
     death_history_baseline_required:
-      "Falta confirmar el historial de muertes. Administración debe revisar los recuentos y su evidencia en Entrenadores → Historial de muertes antes de abrir la jornada.",
+      "Falta que algún participante confirme su historial de muertes. Cada entrenador lo confirma en su perfil; en Liga › General verás quién.",
+    death_history_admin_required:
+      "Tu historial necesita una revisión de Administración: es un caso excepcional que no se confirma desde el perfil.",
+    death_history_already_confirmed:
+      "Tu historial de muertes ya está confirmado.",
+    death_history_changed:
+      "Tus muertes observadas acaban de cambiar. Revisa los valores actualizados y vuelve a confirmar.",
+    opponent_missing: "Hacen falta al menos dos participantes.",
     death_history_source_unavailable:
       "Falta una partida completa y válida del participante. Sincronízala y vuelve a revisar el historial; la ausencia de datos no cuenta como cero muertes.",
     death_history_source_changed:
@@ -122,7 +161,7 @@ export function errorText(error: unknown) {
     death_history_dead_box_changed:
       "La caja de muertos cambió. Revisa el historial con la caja actual antes de abrir la jornada.",
     death_history_wipe_reconciliation_required:
-      "El contador de revividos tras wipe cambió. Confirma las muertes reales y su penalización en Historial de muertes.",
+      "Un contador de revividos tras wipe cambió. Su entrenador lo confirma desde su perfil; en Liga › General verás quién.",
     death_history_wipe_state_unavailable:
       "No se puede verificar el contador de revividos tras wipe. Administración debe reparar su registro antes de confirmar el historial; no se supondrá un cero.",
     death_history_unmapped_revival:
@@ -303,9 +342,9 @@ export function errorText(error: unknown) {
   if (error.code === "INITIAL_BOUNDARY_TIE_UNRESOLVED")
     return "Hay un empate en el corte A/B. Registra la decisión deportiva externa y su motivo.";
   if (error.code === "INITIAL_ASSIGNMENT_NOT_READY")
-    return "El reparto necesita progreso observado suficiente, muertes observadas y una temporada preparada.";
+    return "Algún participante aún no tiene una partida oficial con las dos primeras medallas observadas. En Liga › General verás quién.";
   if (error.code === "INITIAL_ASSIGNMENT_REQUIRED")
-    return "Confirma el reparto inicial observado antes de abrir la jornada.";
+    return "Esta temporada se juega en Liga A y Liga B: Administración confirma su reparto inicial antes de la J1.";
   if (error.code === "INITIAL_ASSIGNMENT_LOCKED")
     return "El reparto inicial ya no puede modificarse en este estado.";
   if (error.code === "CHAMPIONSHIP_REVIEW_STALE")
@@ -484,11 +523,15 @@ export class ApiClient {
         typeof data?.detail?.code === "string"
           ? data.detail.code
           : `HTTP_${response.status}`;
+      const reason = data?.detail?.reason;
       throw new ApiError(
         response.status,
         code,
         response.status === 409 && rankingCodes.has(code)
           ? rankingReview(data?.detail?.ranking)
+          : undefined,
+        typeof reason === "string" && /^[a-z_]{3,64}$/.test(reason)
+          ? reason
           : undefined,
       );
     }

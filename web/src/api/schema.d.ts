@@ -1323,6 +1323,67 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/v1/seasons/{season_id}/league/readiness": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Readiness
+     * @description Why the next matchday can or cannot open now (the open stays authoritative).
+     */
+    get: operations["readiness_v1_seasons__season_id__league_readiness_get"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/seasons/{season_id}/league/first-matchday": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Prepare First
+     * @description Prepare J1 of an all-vs-all League. Idempotent by state: always the same J1.
+     */
+    post: operations["prepare_first_v1_seasons__season_id__league_first_matchday_post"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/seasons/{season_id}/death-history": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Own Death History */
+    get: operations["own_death_history_v1_seasons__season_id__death_history_get"];
+    /**
+     * Confirm Own Death History
+     * @description Confirm the observed values shown; corrections stay administrative.
+     */
+    put: operations["confirm_own_death_history_v1_seasons__season_id__death_history_put"];
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/v1/launcher/seasons/{season_id}/observations/{observation_id}": {
     parameters: {
       query?: never;
@@ -3237,6 +3298,15 @@ export interface components {
       /** Dead Box Number */
       dead_box_number: number;
     };
+    /** DeathCounts */
+    DeathCounts: {
+      /** Actual Deaths */
+      actual_deaths: number;
+      /** Wipe Deaths */
+      wipe_deaths: number;
+      /** Segment Deaths */
+      segment_deaths: number;
+    };
     /** DeathHistoryBody */
     DeathHistoryBody: {
       /** Actual Deaths */
@@ -3566,6 +3636,30 @@ export interface components {
       /** Initial Assignment Pending */
       initial_assignment_pending: boolean;
     };
+    /** FirstMatchdayRead */
+    FirstMatchdayRead: {
+      /**
+       * Season Id
+       * Format: uuid
+       */
+      season_id: string;
+      /**
+       * Matchday Id
+       * Format: uuid
+       */
+      matchday_id: string;
+      /** Number */
+      number: number;
+      /**
+       * Status
+       * @enum {string}
+       */
+      status: "scheduled" | "open" | "closed" | "cancelled";
+      /** Revision */
+      revision: number;
+      /** Created */
+      created: boolean;
+    };
     /** FirstMatchdaySummary */
     FirstMatchdaySummary: {
       /**
@@ -3885,7 +3979,7 @@ export interface components {
        * State
        * @enum {string}
        */
-      state: "legacy" | "pending" | "assigned";
+      state: "legacy" | "pending" | "assigned" | "not_required";
       /** Config Version Id */
       config_version_id: string | null;
       division_sizes: components["schemas"]["DivisionSizes"] | null;
@@ -3908,6 +4002,7 @@ export interface components {
         | "death_inputs_unobserved"
         | "initial_assignment_locked"
         | "initial_assignment_legacy"
+        | "initial_assignment_not_required"
       )[];
       /** Players */
       players: components["schemas"]["InitialAssignmentPlayer"][];
@@ -4184,6 +4279,55 @@ export interface components {
       days: components["schemas"]["DayRead"][];
       /** Rows */
       rows: components["schemas"]["LeagueStandingRead"][];
+    };
+    /**
+     * LeagueReadinessRead
+     * @description What opening the next matchday needs, as the server would decide it.
+     */
+    LeagueReadinessRead: {
+      /**
+       * Season Id
+       * Format: uuid
+       */
+      season_id: string;
+      /**
+       * State
+       * @enum {string}
+       */
+      state:
+        | "unprepared"
+        | "scheduled"
+        | "open"
+        | "completed"
+        | "finished"
+        | "unavailable";
+      /**
+       * Structure
+       * @enum {string}
+       */
+      structure: "all_vs_all" | "divisions" | "legacy";
+      matchday: components["schemas"]["ReadinessMatchday"] | null;
+      /** Next Number */
+      next_number: number | null;
+      /** Can Prepare */
+      can_prepare: boolean;
+      /** Can Open */
+      can_open: boolean;
+      /** Can Operate */
+      can_operate: boolean;
+      /** Reasons */
+      reasons: (
+        | "season_not_active"
+        | "matchday_unavailable"
+        | "matchday_already_prepared"
+        | "initial_assignment_required"
+        | "initial_setup_locked"
+        | "invalid_roster"
+        | "opponent_missing"
+        | "config_not_effective"
+      )[];
+      /** Participants */
+      participants: components["schemas"]["ReadinessParticipant"][];
     };
     /** LeagueStandingRead */
     LeagueStandingRead: {
@@ -4541,6 +4685,80 @@ export interface components {
       balance: string | null;
       /** Matchday Scores */
       matchday_scores?: components["schemas"]["MatchdayScoreRead"][];
+    };
+    /**
+     * OwnDeathHistoryBody
+     * @description Confirms exactly the observed values the trainer was shown.
+     */
+    OwnDeathHistoryBody: {
+      /** Actual Deaths */
+      actual_deaths: number;
+      /** Wipe Deaths */
+      wipe_deaths: number;
+      /** Segment Deaths */
+      segment_deaths: number;
+      /** Expected Revision */
+      expected_revision: number;
+      /** Source Sha256 */
+      source_sha256: string;
+    };
+    /** OwnDeathHistoryRead */
+    OwnDeathHistoryRead: {
+      /**
+       * Season Id
+       * Format: uuid
+       */
+      season_id: string;
+      /**
+       * Season Player Id
+       * Format: uuid
+       */
+      season_player_id: string;
+      /**
+       * Trainer Id
+       * Format: uuid
+       */
+      trainer_id: string;
+      /** Revision */
+      revision: number;
+      /** Known */
+      known: boolean;
+      /** Blocking Reason */
+      blocking_reason: string | null;
+      /** Actual Deaths */
+      actual_deaths: number | null;
+      /** Wipe Deaths */
+      wipe_deaths: number | null;
+      /** Segment Deaths */
+      segment_deaths: number | null;
+      /** Dead Box Number */
+      dead_box_number: number;
+      /** Source Sha256 */
+      source_sha256: string | null;
+      /** Confirmed At */
+      confirmed_at: string | null;
+      /** Current Matchday Id */
+      current_matchday_id: string | null;
+      /** Can Confirm */
+      can_confirm: boolean;
+      /** Confirm Blocker */
+      confirm_blocker:
+        | (
+            | "death_history_confirmed"
+            | "save_missing"
+            | "death_history_closed"
+            | "death_history_pending_sync"
+            | "death_history_admin_required"
+          )
+        | null;
+      proposed: components["schemas"]["DeathCounts"] | null;
+      /**
+       * Replayed
+       * @default false
+       */
+      replayed: boolean;
+      /** Resolution Id */
+      resolution_id?: string | null;
     };
     /** PCRead */
     PCRead: {
@@ -5101,6 +5319,32 @@ export interface components {
        */
       visibility: "public";
       lock: components["schemas"]["PublicPreviewLock"] | null;
+      provisional?: components["schemas"]["PublicProvisionalTeam"] | null;
+      /** Unavailable Reason */
+      unavailable_reason?:
+        | (
+            | "no_team_lock"
+            | "no_linked_save"
+            | "no_synced_save"
+            | "processing"
+            | "unsupported_payload"
+            | "ineligible_personal_save"
+            | "empty_party"
+          )
+        | null;
+    };
+    /**
+     * PublicProvisionalTeam
+     * @description Current synchronized party, NOT a Team Lock (public projection only).
+     */
+    PublicProvisionalTeam: {
+      /**
+       * Source
+       * @enum {string}
+       */
+      source: "league" | "personal";
+      /** Team */
+      team: components["schemas"]["PokemonRead"][];
     };
     /** PublicSlotRead */
     PublicSlotRead: {
@@ -5211,6 +5455,55 @@ export interface components {
       no_other_active_season: boolean;
       /** Is Draft */
       is_draft: boolean;
+    };
+    /** ReadinessMatchday */
+    ReadinessMatchday: {
+      /**
+       * Id
+       * Format: uuid
+       */
+      id: string;
+      /** Number */
+      number: number;
+      /**
+       * Status
+       * @enum {string}
+       */
+      status: "scheduled" | "open" | "closed" | "cancelled";
+      /** Revision */
+      revision: number;
+    };
+    /** ReadinessParticipant */
+    ReadinessParticipant: {
+      /**
+       * Season Player Id
+       * Format: uuid
+       */
+      season_player_id: string;
+      /**
+       * Trainer Id
+       * Format: uuid
+       */
+      trainer_id: string;
+      /** Display Name */
+      display_name: string;
+      /** Reasons */
+      reasons: (
+        | "trainer_disabled"
+        | "save_missing"
+        | "progress_unobserved"
+        | "badges_missing"
+        | "death_history_baseline_required"
+        | "death_history_source_unavailable"
+        | "death_history_wipe_state_unavailable"
+        | "death_history_dead_box_changed"
+        | "death_history_observation_gap"
+        | "death_history_wipe_reconciliation_required"
+        | "death_history_unmapped_revival"
+        | "death_history_inconsistent"
+      )[];
+      /** Self Confirmable */
+      self_confirmable: boolean;
     };
     /** RedemptionBody */
     RedemptionBody: {
@@ -5704,6 +5997,29 @@ export interface components {
        */
       visibility: "self";
       lock: components["schemas"]["SelfPreviewLock"] | null;
+      provisional?: components["schemas"]["SelfProvisionalTeam"] | null;
+      /** Unavailable Reason */
+      unavailable_reason?:
+        | (
+            | "no_team_lock"
+            | "no_linked_save"
+            | "no_synced_save"
+            | "processing"
+            | "unsupported_payload"
+            | "ineligible_personal_save"
+            | "empty_party"
+          )
+        | null;
+    };
+    /** SelfProvisionalTeam */
+    SelfProvisionalTeam: {
+      /**
+       * Source
+       * @enum {string}
+       */
+      source: "league" | "personal";
+      /** Team */
+      team: components["schemas"]["PrivatePokemonRead"][];
     };
     /** SessionResponse */
     SessionResponse: {
@@ -9619,6 +9935,136 @@ export interface operations {
         };
         content: {
           "application/json": components["schemas"]["WipeRevivalsRead"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  readiness_v1_seasons__season_id__league_readiness_get: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        season_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["LeagueReadinessRead"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  prepare_first_v1_seasons__season_id__league_first_matchday_post: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        season_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["FirstMatchdayRead"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  own_death_history_v1_seasons__season_id__death_history_get: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        season_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["OwnDeathHistoryRead"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  confirm_own_death_history_v1_seasons__season_id__death_history_put: {
+    parameters: {
+      query?: never;
+      header: {
+        "idempotency-key": string;
+      };
+      path: {
+        season_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["OwnDeathHistoryBody"];
+      };
+    };
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["OwnDeathHistoryRead"];
         };
       };
       /** @description Validation Error */

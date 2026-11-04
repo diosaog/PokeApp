@@ -2,7 +2,11 @@ import { useState, type ReactNode } from "react";
 import { ChevronLeft, ChevronRight, Search } from "lucide-react";
 import type { Model } from "../api/types";
 import { Card, Empty } from "../ui";
-import { PokemonSprite, PokemonStatusFlags } from "../pokemon/presentation";
+import {
+  GenderMark,
+  PokemonSprite,
+  PokemonStatusFlags,
+} from "../pokemon/presentation";
 import { pokemonTitle, pokemonName } from "../pokemon/localization";
 import { PokemonDetailModal, type DetailPokemon } from "./pokemon-details";
 
@@ -22,6 +26,7 @@ export function Collection({
   deadBox = null,
   animateTeam = false,
   partyAction,
+  partyCenter,
 }: {
   slots: (Model<"SlotRead"> | Model<"PublicSlotRead">)[];
   visibility?: "self" | "public";
@@ -33,6 +38,8 @@ export function Collection({
   deadBox?: number | null;
   // An action about the team shown here (own profile: «Generar Poképaste»).
   partyAction?: ReactNode;
+  // Centred above the six, between slots 3 and 4 (own profile: «Fijar Equipo»).
+  partyCenter?: ReactNode;
 }) {
   const [index, setIndex] = useState(0),
     [search, setSearch] = useState("");
@@ -83,6 +90,9 @@ export function Collection({
         />
         <PokemonStatusFlags flags={p.status_flags} />
         <span>{pokemonTitle(p)}</span>
+        {visibility === "self" && "gender" in p && (
+          <GenderMark gender={p.gender} />
+        )}
         <small>Nv. {p.level ?? "—"}</small>
         {!!p.form && <small>Forma {p.form}</small>}
       </button>
@@ -104,11 +114,22 @@ export function Collection({
   return (
     <div className="collection">
       <Card className="party-panel">
-        <div className="section-row">
-          <h2>Equipo</h2>
-          <span className="caption">{team.length} / 6</span>
-          {partyAction}
-        </div>
+        {partyCenter ? (
+          <div className="section-row has-center">
+            <div className="party-title">
+              <h2>Equipo</h2>
+              <span className="caption">{team.length} / 6</span>
+            </div>
+            <div className="party-center">{partyCenter}</div>
+            <div className="party-action">{partyAction}</div>
+          </div>
+        ) : (
+          <div className="section-row">
+            <h2>Equipo</h2>
+            <span className="caption">{team.length} / 6</span>
+            {partyAction}
+          </div>
+        )}
         <div className="party-slots">
           {Array.from({ length: 6 }, (_, i) =>
             slot(

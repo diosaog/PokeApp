@@ -7,6 +7,7 @@ import { TeamLockWarning } from "./team-lock-warning";
 const mocks = vi.hoisted(() => ({
   season: "season",
   missing: false,
+  unsynced: false,
   day: true,
   error: null as Error | null,
   reads: vi.fn(),
@@ -49,30 +50,37 @@ vi.mock("../state", () => ({
           { trainer_id: "rival", display_name: "Lucía", status: "active" },
           { trainer_id: "third", display_name: "Marcos", status: "active" },
         ],
-        teams: !mocks.day
-          ? []
-          : (mode === "spectator" ? [first, second] : [first]).map((id) => ({
-              trainer_id: id,
-              visibility:
-                mode === "battle" && id === "owner" ? "self" : "public",
-              lock: mocks.missing
-                ? null
-                : {
-                    locked_at: "2026-10-07T10:00:00Z",
-                    is_late: false,
-                    team: Array.from({ length: 6 }, () =>
-                      mode === "battle" && id === "owner"
-                        ? {
-                            ...mon,
-                            ability: "Estática privada",
-                            nature: "Miedosa privada",
-                            ivs: null,
-                            evs: null,
-                          }
-                        : mon,
-                    ),
-                  },
-            })),
+        // 079: every selected trainer has an entry, with or without a day.
+        teams: (mode === "spectator" ? [first, second] : [first]).map((id) => ({
+          trainer_id: id,
+          visibility: mode === "battle" && id === "owner" ? "self" : "public",
+          provisional:
+            (mocks.missing || !mocks.day) && !mocks.unsynced
+              ? {
+                  source: "league",
+                  team: [{ ...mon, nickname: "Actual" }],
+                }
+              : null,
+          unavailable_reason: mocks.unsynced ? "no_synced_save" : null,
+          lock:
+            mocks.missing || !mocks.day
+              ? null
+              : {
+                  locked_at: "2026-10-07T10:00:00Z",
+                  is_late: false,
+                  team: Array.from({ length: 6 }, () =>
+                    mode === "battle" && id === "owner"
+                      ? {
+                          ...mon,
+                          ability: "Estática privada",
+                          nature: "Miedosa privada",
+                          ivs: null,
+                          evs: null,
+                        }
+                      : mon,
+                  ),
+                },
+        })),
       },
     };
   },
@@ -104,6 +112,7 @@ beforeEach(() => {
   vi.clearAllMocks();
   mocks.season = "season";
   mocks.missing = false;
+  mocks.unsynced = false;
   mocks.day = true;
   mocks.error = null;
 });
@@ -120,7 +129,7 @@ it("spectator has two independent public selectors without a scheduled match", (
   expect(mocks.reads).toHaveBeenLastCalledWith(
     "/v1/read/seasons/season/team-preview?mode=spectator&trainer_id=rival&second_trainer_id=third",
   );
-  expect(screen.getAllByText("Equipo público")).toHaveLength(2);
+  expect(screen.getAllByText("Team Lock oficial")).toHaveLength(2);
   expect(screen.queryByText("Estática privada")).not.toBeInTheDocument();
   expect(mocks.pc).not.toHaveBeenCalled();
 });
@@ -138,29 +147,42 @@ it("battle has one selector; self details disappear on rival or spectator switch
   });
   fireEvent.click(screen.getByRole("tab", { name: "Espectador" }));
   expect(screen.queryByText("Estática privada")).not.toBeInTheDocument();
-  expect(screen.getAllByText("Equipo público")).toHaveLength(2);
+  expect(screen.getAllByText("Team Lock oficial")).toHaveLength(2);
 });
-it("missing lock is a strong advisory, with no fake team or live save read", () => {
+it("without a Team Lock the current party is shown, clearly provisional", () => {
   mocks.missing = true;
   show();
-  expect(screen.getAllByRole("alert")).toHaveLength(2);
   expect(
-    screen.getAllByText(/El equipo del save no lo sustituye/),
+    screen.getAllByText("Provisional · equipo actual sin fijar"),
   ).toHaveLength(2);
+  expect(screen.getAllByText(/No es un Team Lock/)).toHaveLength(2);
+  expect(screen.getAllByText("Actual")).toHaveLength(2);
+  // Never presented as an official lock.
+  expect(screen.queryByText("Team Lock oficial")).not.toBeInTheDocument();
   expect(screen.queryByText("Fijado")).not.toBeInTheDocument();
-  expect(screen.getByRole("button", { name: "Fijar mi equipo" })).toBeEnabled();
+  expect(screen.getByRole("button", { name: "Fijar Equipo" })).toBeEnabled();
   expect(mocks.pc).not.toHaveBeenCalled();
 });
-it("an unavailable day is explicit and cannot create a lock", () => {
+it("with no prepared matchday Team Preview stays available and can fix a team", () => {
   mocks.day = false;
   show();
   expect(
-    screen.getByText(/Aún no hay una jornada disponible/),
-  ).toBeInTheDocument();
+    screen.getByText("Sin jornada preparada · equipos actuales"),
+  ).toBeVisible();
   expect(
-    screen.getByRole("button", { name: "Fijar mi equipo" }),
-  ).toBeDisabled();
+    screen.getAllByText("Provisional · equipo actual sin fijar"),
+  ).toHaveLength(2);
+  expect(screen.getByRole("button", { name: "Fijar Equipo" })).toBeEnabled();
   expect(mocks.pc).not.toHaveBeenCalled();
+});
+it("a trainer who never synchronized gets a useful empty state, never an invented team", () => {
+  mocks.missing = true;
+  mocks.unsynced = true;
+  show();
+  expect(
+    screen.getAllByText("Aún no ha sincronizado ninguna partida."),
+  ).toHaveLength(2);
+  expect(screen.queryByText("Actual")).not.toBeInTheDocument();
 });
 it("season change resets private mode and selections", () => {
   const view = show();

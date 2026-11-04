@@ -19,6 +19,8 @@ import { ShowdownExport } from "./showdown-export";
 import { participantLabel } from "./admin-labels";
 import { type AccountProfile } from "./account-editor";
 import { TrainerLeagueStats } from "./trainer-league-stats";
+import { FixTeamButton } from "./fix-team";
+import { OwnDeathHistory } from "./league-start";
 
 export function TrainerProfilePage() {
   const { season, accountsEnabled } = useApp(),
@@ -148,6 +150,7 @@ export function Profile({
           <div className="profile-licence-column">
             {licence}
             {league.data && <WipeRevivals data={league.data} />}
+            {player.status === "active" && <OwnDeathHistory />}
           </div>
         ) : (
           licence
@@ -160,7 +163,7 @@ export function Profile({
       </div>
       <Notice error={league.error} />
       {own ? (
-        <OwnSave />
+        <OwnSave league={player.status === "active"} />
       ) : (
         <>
           <Card>
@@ -240,8 +243,10 @@ export function Profile({
   );
 }
 
-function OwnSave() {
+function OwnSave({ league = false }: { league?: boolean }) {
   const pc = useMyPC();
+  // An active participant fixes the team shown here for the League.
+  const fix = league ? <FixTeamButton shownPersonal={pc.personal} /> : null;
   return (
     <>
       <SaveGame game={pc.data?.save?.game} />
@@ -261,6 +266,7 @@ function OwnSave() {
             deadBox={pc.data.dead_box}
             showDead
             animateTeam
+            partyCenter={fix}
             partyAction={
               // The team displayed right here, never a Team Lock snapshot.
               pc.data.save &&
@@ -271,10 +277,13 @@ function OwnSave() {
           />
         </SpriteGeneration>
       ) : (
-        <Empty>
-          Tu equipo y tus cajas aparecerán al sincronizar tu partida.{" "}
-          <Link to="/saves">Abrir Saves y Launcher →</Link>
-        </Empty>
+        <>
+          <Empty>
+            Tu equipo y tus cajas aparecerán al sincronizar tu partida.{" "}
+            <Link to="/saves">Abrir Saves y Launcher →</Link>
+          </Empty>
+          {fix}
+        </>
       )}
     </>
   );

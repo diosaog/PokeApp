@@ -120,7 +120,8 @@ export function InitialAssignment({
       </>
     );
   const data = query.data;
-  if (!data || data.state === "legacy")
+  // 079: an all-vs-all League (one Liga) starts from Liga › General: no review.
+  if (!data || data.state === "legacy" || data.state === "not_required")
     return <CommandState command={command} />;
   const admin = administrative && me?.is_admin;
   // One league (division_sizes {A}) has no cut: everyone starts in the Liga.

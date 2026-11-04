@@ -65,3 +65,20 @@ it("does not infer a box from malformed location or turn unknown source into a d
   expect(collectionLocation("missing")).toBeNull();
   expect(collectionLocation("Caja 8 · 7")).toEqual({ box: 8, slot: 7 });
 });
+it("the own team shows the gender its save stores, never a guessed one", () => {
+  const slots: Model<"SlotRead">[] = [
+    { location: "Equipo · 1", pokemon: { ...mon, gender: "M" } },
+    { location: "Equipo · 2", pokemon: { ...mon, gender: "F" } },
+    { location: "Equipo · 3", pokemon: { ...mon, gender: "N" } },
+    { location: "Equipo · 4", pokemon: { ...mon, gender: null } },
+  ];
+  render(<Collection slots={slots} />);
+  expect(screen.getAllByRole("img", { name: "Macho" })).toHaveLength(1);
+  expect(screen.getAllByRole("img", { name: "Hembra" })).toHaveLength(1);
+  cleanup();
+  // A public view has no gender at all.
+  render(<Collection slots={slots} visibility="public" />);
+  expect(
+    screen.queryByRole("img", { name: /Macho|Hembra/ }),
+  ).not.toBeInTheDocument();
+});

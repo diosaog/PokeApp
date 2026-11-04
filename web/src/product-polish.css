@@ -903,3 +903,174 @@ dialog.showdown-manual textarea {
   font-size: 0.85rem;
   resize: vertical;
 }
+
+/* ---------- 079: League start, own death history, «Fijar Equipo» ---------- */
+.button.small {
+  min-height: 30px;
+  padding: 4px 10px;
+  font-size: 0.8rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.matchday-bar.is-blocked {
+  border-left-color: var(--c-warn, var(--accent));
+}
+.matchday-bar.is-done {
+  border-left-color: var(--c-line-strong);
+}
+.matchday-blockers {
+  flex-basis: 100%;
+  margin: 0;
+  padding: 12px 14px;
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--c-bg-0) 45%, transparent);
+  font-size: 0.9rem;
+}
+.matchday-blockers > p {
+  margin: 0 0 6px;
+  font-weight: 700;
+}
+.matchday-blockers ul {
+  margin: 0;
+  padding-left: 18px;
+  display: grid;
+  gap: 6px;
+}
+.matchday-blockers li.is-own {
+  color: var(--c-text);
+}
+.matchday-blockers li .button.small {
+  margin-left: 10px;
+  vertical-align: middle;
+}
+.own-death-history {
+  display: grid;
+  gap: 10px;
+  padding: 16px 18px;
+  border: 1px solid var(--c-line);
+  border-left: 3px solid var(--c-warn, var(--accent));
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--c-bg-1) 88%, transparent);
+}
+.own-death-history h2 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  font-size: 1rem;
+}
+.own-death-history p {
+  margin: 0;
+}
+.own-death-history .button {
+  justify-self: start;
+}
+.death-counts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 18px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.death-counts strong {
+  font-size: 1.15rem;
+}
+/* The own «Equipo» header: title | «Fijar Equipo» | «Generar Poképaste».
+   Equal side tracks keep the centre exactly over the gap between slots 3
+   and 4 of the six-column party. */
+.party-panel .section-row.has-center {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: center;
+  gap: 8px 16px;
+}
+.party-panel .section-row.has-center .party-title {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  min-width: 0;
+}
+.party-panel .section-row.has-center .party-center {
+  justify-self: center;
+}
+.party-panel .section-row.has-center .party-action {
+  justify-self: end;
+}
+.party-panel .section-row.has-center .showdown-export {
+  margin-left: 0;
+}
+.fix-team {
+  display: grid;
+  justify-items: center;
+  gap: 4px;
+}
+.fix-team-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 36px;
+  padding: 6px 16px;
+}
+.fix-team-status {
+  color: var(--c-text-soft, var(--c-text));
+  font-size: 0.75rem;
+}
+.fix-team-preview {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 8px;
+  margin: 12px 0;
+  padding: 0;
+  list-style: none;
+}
+.fix-team-preview li {
+  display: grid;
+  justify-items: center;
+  gap: 2px;
+  padding: 8px 4px;
+  border: 1px solid var(--c-line);
+  border-radius: 10px;
+  text-align: center;
+  font-size: 0.78rem;
+}
+.fix-team-preview .pokemon-sprite {
+  width: 64px;
+  height: 64px;
+  object-fit: contain;
+}
+.team-source {
+  margin-bottom: 6px;
+}
+.team-source.is-provisional .tag,
+.team-source.is-provisional > span {
+  border-style: dashed;
+}
+@media (max-width: 760px) {
+  .party-panel .section-row.has-center {
+    grid-template-columns: minmax(0, 1fr);
+    justify-items: start;
+  }
+  .party-panel .section-row.has-center .party-center,
+  .party-panel .section-row.has-center .party-action {
+    justify-self: start;
+  }
+  .fix-team {
+    justify-items: start;
+  }
+  .fix-team-preview {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+.gender-mark {
+  margin-left: 4px;
+  font-weight: 800;
+  line-height: 1;
+}
+.gender-mark.is-male {
+  color: #5aa9ff;
+}
+.gender-mark.is-female {
+  color: #ff7ab6;
+}

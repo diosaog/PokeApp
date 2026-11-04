@@ -31,9 +31,12 @@ describe("API transport", () => {
     ).toContain("Ya existe una confirmación");
   });
   it("explains missing historical evidence and stale confirmations without inventing zero counts", () => {
-    expect(
-      errorText(new ApiError(409, "DEATH_HISTORY_BASELINE_REQUIRED")),
-    ).toContain("Historial de muertes");
+    // 079: each trainer confirms their own; nobody is sent to Administración.
+    const baseline = errorText(
+      new ApiError(409, "DEATH_HISTORY_BASELINE_REQUIRED"),
+    );
+    expect(baseline).toContain("Cada entrenador lo confirma en su perfil");
+    expect(baseline).not.toContain("Administración");
     expect(
       errorText(new ApiError(409, "death_history_source_unavailable")),
     ).toContain("no cuenta como cero");
@@ -43,6 +46,33 @@ describe("API transport", () => {
     expect(
       errorText(new ApiError(409, "legacy_scoring_migration_required")),
     ).toContain("contrato de puntuación anterior");
+  });
+  it("names the actionable Team Lock refusal reason, never an unknown one", async () => {
+    for (const [reason, text] of [
+      ["team_requires_six", "seis Pokémon"],
+      ["matchday_not_lockable", "ya está cerrada"],
+      ["<script>", "no permite"],
+    ] as const) {
+      vi.stubGlobal(
+        "fetch",
+        vi.fn(
+          async () =>
+            new Response(
+              JSON.stringify({
+                detail: { code: "TEAM_LOCK_CONFLICT", message: "x", reason },
+              }),
+              { status: 409, headers: { "Content-Type": "application/json" } },
+            ),
+        ),
+      );
+      const error = (await new ApiClient("https://api.example")
+        .request("/x")
+        .catch((e: unknown) => e)) as ApiError;
+      expect(error).toBeInstanceOf(ApiError);
+      expect(error.reason).toBe(reason === "<script>" ? undefined : reason);
+      if (reason !== "<script>") expect(errorText(error)).toContain(text);
+    }
+    vi.unstubAllGlobals();
   });
   it("preserves the single-day prize tie review from a 409 response", async () => {
     const ranking = {

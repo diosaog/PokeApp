@@ -28,8 +28,9 @@ vi.mock("../state", () => ({
     me: { trainer_id: "t2", is_admin: mocks.isAdmin },
     holdAdminNavigation: mocks.hold,
   }),
-  useRead: () => ({
-    data: mocks.data,
+  // 079: the opening control reads its own readiness (not under test here).
+  useRead: (path: string) => ({
+    data: path.includes("/league/readiness") ? undefined : mocks.data,
     isPending: false,
     isFetching: false,
     error: null,
