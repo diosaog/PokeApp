@@ -5,6 +5,11 @@ milestone record; it does not maintain a second live phase-status ledger.
 
 ## Current project position
 
+- Gourgeist/Pumpkaboo sprite fix (2026-11-04): specific tests/build verified,
+  web-only publication authorized and in progress on
+  `codex/gourgeist-sprite-forms` from `85d99d4`.
+  [Cause and release record](work-in-progress/gourgeist-sprite.md).
+
 - Incorporación administrativa durante ChampionsLocke (2026-11-04):
   **PUBLICADA; aceptación técnica remota PASS**, comprobaciones autenticadas
   con sesiones legítimas pendientes (`VALIDATION_PARTIAL`). Continuar desde

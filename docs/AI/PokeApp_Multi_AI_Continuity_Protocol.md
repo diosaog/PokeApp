@@ -23,6 +23,12 @@ IDs, verification limits and rollback. SQL, API and web are published.
 retains the renderer evidence and the limit on artificial external tests.
 The release tool now has 001-080 deployed and no pending migration.
 
+Sprite follow-up (2026-11-04): continue this punctual fix from
+`codex/gourgeist-sprite-forms` (base `85d99d4`).
+[Gourgeist/Pumpkaboo record](../work-in-progress/gourgeist-sprite.md): missing
+size-form catalog entries and assets, specific tests PASS, web-only deployment
+explicitly authorized and in progress. No API/SQL/save/League change.
+
 The live handoff is the single maintained operational record for an active phase.
 Other documents link to it instead of maintaining competing live Git, test or
 staging snapshots. Reports retain dated evidence; checkpoints retain explicitly

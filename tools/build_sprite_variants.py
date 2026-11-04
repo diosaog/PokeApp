@@ -28,6 +28,12 @@ FORMS = {
     "479:4": 10011,  # Fan
     "479:5": 10012,  # Mow
     "647:1": 10024,  # Resolute
+    "710:1": 10027,  # Pumpkaboo Small (0 is Average)
+    "710:2": 10028,  # Pumpkaboo Large
+    "710:3": 10029,  # Pumpkaboo Super
+    "711:1": 10030,  # Gourgeist Small (0 is Average)
+    "711:2": 10031,  # Gourgeist Large
+    "711:3": 10032,  # Gourgeist Super
     "718:1": 10181,  # 10%, Aura Break
     "718:2": 10118,  # 10%, Power Construct
     "718:3": 10119,  # 50%, Power Construct

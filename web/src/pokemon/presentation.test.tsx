@@ -98,6 +98,49 @@ it("never substitutes base art for an unknown form or masks a load failure as un
     "/visuals/v1/pokemon/647.png",
   );
 });
+it.each(["Y", "UM", null])(
+  "resolves all Gourgeist and Pumpkaboo sizes for %s without substituting average art",
+  (game) => {
+    render(
+      <SpriteGeneration value={gameGeneration(game)}>
+        {["Pumpkaboo", "Gourgeist"].map((species) =>
+          [0, 1, 2, 3].map((form) => (
+            <PokemonSprite
+              key={`${species}:${form}`}
+              species={species}
+              form={form}
+              animated
+            />
+          )),
+        )}
+      </SpriteGeneration>,
+    );
+    const folder = game === "Y" ? "gen6" : game === "UM" ? "gen7" : "pokemon";
+    for (const [species, id] of [
+      ["Pumpkaboo", 710],
+      ["Gourgeist", 711],
+    ] as const) {
+      const images = screen.getAllByAltText(species);
+      expect(images).toHaveLength(4);
+      images.forEach((image, form) => {
+        expect(image).toHaveAttribute(
+          "src",
+          `/visuals/v1/${folder}/${id}${form ? `-form-${form}` : ""}.png`,
+        );
+      });
+    }
+  },
+);
+it.each(["Pumpkaboo", "Gourgeist"])(
+  "keeps an invalid size of %s unresolved",
+  (species) => {
+    render(<PokemonSprite species={species} form={255} />);
+    expect(
+      screen.getByLabelText("Imagen de esta forma no disponible"),
+    ).toBeVisible();
+    expect(screen.queryByAltText(species)).not.toBeInTheDocument();
+  },
+);
 it("loads the explicitly versioned local reference only on move interaction", async () => {
   const fetcher = vi.spyOn(globalThis, "fetch").mockResolvedValue(
     new Response(

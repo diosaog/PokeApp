@@ -3483,10 +3483,40 @@
       "sha256": "9cc1b9c97b68a60fdf159a6156c0c4c20add952c156ffcdc6047ba975111c05d",
       "bytes": 2419
     },
+    "gen6/710-form-1.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/ba403973fdf9d0ac59175813861e6a1f8ed5020c/sprites/pokemon/versions/generation-vi/x-y/10027.png",
+      "sha256": "ee03230588e7eb0294d6e9eba9055a8e79d4d4b1accb30812817d7b966daf8bb",
+      "bytes": 1458
+    },
+    "gen6/710-form-2.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/ba403973fdf9d0ac59175813861e6a1f8ed5020c/sprites/pokemon/versions/generation-vi/x-y/10028.png",
+      "sha256": "a32634816ca641cd952a7bf6fcc7a96a93d0bbdfb431372f405b3346be06923a",
+      "bytes": 2016
+    },
+    "gen6/710-form-3.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/ba403973fdf9d0ac59175813861e6a1f8ed5020c/sprites/pokemon/versions/generation-vi/x-y/10029.png",
+      "sha256": "2b5248e4b593b9dbfb1aa0664f8214adbb26945251dc15a9398e3c15595056ad",
+      "bytes": 2110
+    },
     "gen6/710.png": {
       "url": "https://raw.githubusercontent.com/PokeAPI/sprites/ba403973fdf9d0ac59175813861e6a1f8ed5020c/sprites/pokemon/versions/generation-vi/x-y/710.png",
       "sha256": "d9808c033ce2371a1efe7162d85154e3761a6019ad4eb35d0fe50026b650764b",
       "bytes": 1867
+    },
+    "gen6/711-form-1.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/ba403973fdf9d0ac59175813861e6a1f8ed5020c/sprites/pokemon/versions/generation-vi/x-y/10030.png",
+      "sha256": "a3aaa872ac898f7e8b7774e51ede8004b70d1995863dd7871ffd67bf353d8039",
+      "bytes": 2085
+    },
+    "gen6/711-form-2.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/ba403973fdf9d0ac59175813861e6a1f8ed5020c/sprites/pokemon/versions/generation-vi/x-y/10031.png",
+      "sha256": "ef4587113f4ec2a8e072065a9395f2cd88b78eaa5d0fd7c9c223cdb463ab11e0",
+      "bytes": 2678
+    },
+    "gen6/711-form-3.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/ba403973fdf9d0ac59175813861e6a1f8ed5020c/sprites/pokemon/versions/generation-vi/x-y/10032.png",
+      "sha256": "740a8541a4e5843578010abb364f225fc7618e1dad52a4bfbf3003429db15545",
+      "bytes": 3501
     },
     "gen6/711.png": {
       "url": "https://raw.githubusercontent.com/PokeAPI/sprites/ba403973fdf9d0ac59175813861e6a1f8ed5020c/sprites/pokemon/versions/generation-vi/x-y/711.png",
@@ -8530,11 +8560,53 @@
       "source_sha256": "a62aa7e743d31a7844b93a2ce9231055c07439dc60da0707dfe391e195deb178",
       "derived": "first animation frame, centred on 96x96"
     },
+    "gen7/710-form-1.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/ba403973fdf9d0ac59175813861e6a1f8ed5020c/sprites/pokemon/versions/generation-vii/ultra-sun-ultra-moon/10027.gif",
+      "sha256": "1c2a1cc41352d9cb870a6d57d42bc0a13fdff39669aaf41c007bfbd9a6fcfb43",
+      "bytes": 2055,
+      "source_sha256": "f3de817ef04780b7ec150f73fd80f2ecb1b5abe1039bfb95a962fff54e03fec3",
+      "derived": "first animation frame, centred on 96x96"
+    },
+    "gen7/710-form-2.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/ba403973fdf9d0ac59175813861e6a1f8ed5020c/sprites/pokemon/versions/generation-vii/ultra-sun-ultra-moon/10028.gif",
+      "sha256": "17741fe32a4424863446ce9e4564e053e6d85bb59fa1e1303cacadd01abaef9e",
+      "bytes": 2949,
+      "source_sha256": "1d85f6bba0228707cba7b267841c3e0b6a97d7d72ceaefd4db56ead6e499b9d7",
+      "derived": "first animation frame, centred on 96x96"
+    },
+    "gen7/710-form-3.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/ba403973fdf9d0ac59175813861e6a1f8ed5020c/sprites/pokemon/versions/generation-vii/ultra-sun-ultra-moon/10029.gif",
+      "sha256": "1f877be67bcc7738b2cf779e4d58a5c7479826ca804f845ffd5b082eac2de2de",
+      "bytes": 4486,
+      "source_sha256": "9cc927b001ffb76f47fcb14b5ac8634663be996ebeceaac2f127bfb7f51d7335",
+      "derived": "first animation frame, centred on 96x96"
+    },
     "gen7/710.png": {
       "url": "https://raw.githubusercontent.com/PokeAPI/sprites/ba403973fdf9d0ac59175813861e6a1f8ed5020c/sprites/pokemon/versions/generation-vii/ultra-sun-ultra-moon/710.gif",
       "sha256": "436513c1832517e0df28ccdc6114ef4ddd8f05ac1d89a3c6f5df52ff93665f13",
       "bytes": 2690,
       "source_sha256": "d74b4218e1aad081b121fde626c3a5d99fa96246da2c74573de1377deb0fe171",
+      "derived": "first animation frame, centred on 96x96"
+    },
+    "gen7/711-form-1.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/ba403973fdf9d0ac59175813861e6a1f8ed5020c/sprites/pokemon/versions/generation-vii/ultra-sun-ultra-moon/10030.gif",
+      "sha256": "e29e84cd02bfe944498527ea5ef4658727e63cc47aba483c43f1dbf7165ec1ea",
+      "bytes": 4185,
+      "source_sha256": "45a5e65fc5aaca393eac10d2ad2542d0d38cd1d380fc41711bdcf4620b8f2b11",
+      "derived": "first animation frame, centred on 96x96"
+    },
+    "gen7/711-form-2.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/ba403973fdf9d0ac59175813861e6a1f8ed5020c/sprites/pokemon/versions/generation-vii/ultra-sun-ultra-moon/10031.gif",
+      "sha256": "e716536f51d7dfc44a6b6755f66f6623986543ee89596286096d539e00040ca7",
+      "bytes": 5529,
+      "source_sha256": "504c736b6d3f9386e22d9e17afbf179ab004d50d303ab6b93aa22a870245fd15",
+      "derived": "first animation frame, centred on 96x96"
+    },
+    "gen7/711-form-3.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/ba403973fdf9d0ac59175813861e6a1f8ed5020c/sprites/pokemon/versions/generation-vii/ultra-sun-ultra-moon/10032.gif",
+      "sha256": "c4eeabbd2e17031026d3aa5b6640e7edd1618d56e420742006e621191f23643c",
+      "bytes": 10259,
+      "source_sha256": "a506c6da3e900224470134ff41129f04b3ba01dd6dd23c5f12897a4571e2f466",
       "derived": "first animation frame, centred on 96x96"
     },
     "gen7/711.png": {
@@ -16313,10 +16385,40 @@
       "sha256": "e1c03238814f6dc010f8c28bc7f61a12b5a04ec9af42f0926646ae715b5402da",
       "bytes": 932
     },
+    "pokemon/710-form-1.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/ba403973fdf9d0ac59175813861e6a1f8ed5020c/sprites/pokemon/10027.png",
+      "sha256": "3f008fcde37f0c3631423f46cded11a3b522536c348169aba280daf9c7703f98",
+      "bytes": 1733
+    },
+    "pokemon/710-form-2.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/ba403973fdf9d0ac59175813861e6a1f8ed5020c/sprites/pokemon/10028.png",
+      "sha256": "3f008fcde37f0c3631423f46cded11a3b522536c348169aba280daf9c7703f98",
+      "bytes": 1733
+    },
+    "pokemon/710-form-3.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/ba403973fdf9d0ac59175813861e6a1f8ed5020c/sprites/pokemon/10029.png",
+      "sha256": "3f008fcde37f0c3631423f46cded11a3b522536c348169aba280daf9c7703f98",
+      "bytes": 1733
+    },
     "pokemon/710.png": {
       "url": "https://raw.githubusercontent.com/PokeAPI/sprites/ba403973fdf9d0ac59175813861e6a1f8ed5020c/sprites/pokemon/versions/generation-vi/x-y/710.png",
       "sha256": "d9808c033ce2371a1efe7162d85154e3761a6019ad4eb35d0fe50026b650764b",
       "bytes": 1867
+    },
+    "pokemon/711-form-1.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/ba403973fdf9d0ac59175813861e6a1f8ed5020c/sprites/pokemon/10030.png",
+      "sha256": "611af3323289c1fb1b9beae2a26f0ae85e4a88bab55ef3f13c719a5511ef6faa",
+      "bytes": 1966
+    },
+    "pokemon/711-form-2.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/ba403973fdf9d0ac59175813861e6a1f8ed5020c/sprites/pokemon/10031.png",
+      "sha256": "611af3323289c1fb1b9beae2a26f0ae85e4a88bab55ef3f13c719a5511ef6faa",
+      "bytes": 1966
+    },
+    "pokemon/711-form-3.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/ba403973fdf9d0ac59175813861e6a1f8ed5020c/sprites/pokemon/10032.png",
+      "sha256": "611af3323289c1fb1b9beae2a26f0ae85e4a88bab55ef3f13c719a5511ef6faa",
+      "bytes": 1966
     },
     "pokemon/711.png": {
       "url": "https://raw.githubusercontent.com/PokeAPI/sprites/ba403973fdf9d0ac59175813861e6a1f8ed5020c/sprites/pokemon/versions/generation-vi/x-y/711.png",
