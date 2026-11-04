@@ -22,7 +22,21 @@ Branch `claude/ux-showdown-matchdays`, from `be7d73c` (`claude/api-session-isola
 | Wipe stepper | `a7b2105` | − value + Actualizar under the licence card; same API/revision; removed from Liga |
 | League | `661fd44` | open below standings, close at the end of each J tab; no authority widened (SQL since 041/034); `tools/validate_player_matchdays.py` |
 | Showdown export | `7b696cd` | server serializer + name table; `GET /v1/me/pc/showdown`, `GET /v1/read/seasons/{id}/pc/showdown`; payload keeps gender/form |
-| Team Lock pastes | (this block) | migration 078; `app/application/pokepaste.py`; outbox dispatcher creates/reuses the link; flag `POKEAPP_PUBLIC_TEAM_PASTES_ENABLED` |
+| Team Lock pastes | `4da598c`, `c99a4d3` | migration 078; `app/application/pokepaste.py`; outbox dispatcher creates/reuses the link; flag `POKEAPP_PUBLIC_TEAM_PASTES_ENABLED`; a link problem never blocks the announcement |
+| Hardening / specs | `aa17884`, `94b7e60`, `d234202` | pre-078 private snapshots (`gender: ""`) stay readable; browser specs aligned; formatting |
+
+## Verification (2026-11-04, branch tip)
+
+- Python: 122 tracked modules, **1465 tests OK**.
+- Web: `tsc -b` clean; Vitest **42 files / 353 tests** pass. Node: **70/70**.
+- SQL (disposable PG17, 001-078): `validate_player_matchdays` PASS,
+  `validate_phase078_public_pastes` PASS, `validate_phase077_trainers --upto 78` PASS.
+- Showdown export of a public Pokémon Y fixture party equals PKHeX's own
+  ShowdownSet except the EV line (owner rule).
+- Playwright: **69 passed / 50 failed / 11 skipped**; the untouched base
+  `be7d73c` gives 59 / 60 / 11. No new failure; 10 fixed. The 50 remaining
+  fail identically at base (stale specs, e.g. a removed «Mi PC» link and
+  duplicated «Cambio confirmado.» locators) and are outside this work.
 
 ## Release prerequisites
 

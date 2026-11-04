@@ -11,16 +11,15 @@ milestone record; it does not maintain a second live phase-status ledger.
   branches from this tip, never from `codex/trainer-consistency-079` or older.
 
 - UX, Showdown export, public Team Lock pastes, player-managed matchdays
-  (2026-11-03): **IN PROGRESS · LOCAL ONLY · NOT PUBLISHED.** Branch
-  `claude/ux-showdown-matchdays` from `be7d73c`. Done: exact points formatter
-  (`1943da3`), «Mi perfil» settings dialog (`65e4c6a`), wipe stepper under the
-  licence (`a7b2105`), League open below standings / close at the end of each
-  J tab with no authority widened (`661fd44`, SQL proof
-  `tools/validate_player_matchdays.py`). Next: server-side Showdown serializer
-  + private «Generar Poképaste», then Pokepast.es link for confirmed Team Locks
-  in the Discord outbox. Owner decisions: the public paste excludes ability,
-  nature, IVs and EVs; one synthetic live paste is authorized. Production
-  needs explicit owner approval.
+  (2026-11-03/04): **IMPLEMENTED LOCALLY · NOT PUBLISHED · AWAITING OWNER
+  APPROVAL.** Branch `claude/ux-showdown-matchdays` from `be7d73c`: exact
+  points formatter, «Mi perfil» dialog, wipe stepper under the licence,
+  League open below standings / close at the end of each J tab (no authority
+  widened), private «Generar Poképaste» (real IVs, EVs 1), public Pokepast.es
+  link for confirmed Team Locks (migration 078, flag
+  `POKEAPP_PUBLIC_TEAM_PASTES_ENABLED`, off by default). Public paste excludes
+  ability/nature/IVs/EVs (owner decision). Release steps, rollback and
+  limitations: [live record](work-in-progress/ux-showdown-matchdays-live.md).
 
 - API session fix + Railway cost (2026-11-03): **PUBLISHED; VERIFIER 5s->60s.**
   Owner-approved API-only release `81eb260` (branch `claude/api-session-isolation`):
