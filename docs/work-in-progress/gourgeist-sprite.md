@@ -1,6 +1,7 @@
 # Gourgeist/Pumpkaboo: sprites de tamaño — 2026-11-04
 
-Estado: VERIFICADO LOCALMENTE; publicación web autorizada y en curso.
+Estado: PUBLICADO Y VERIFICADO. Estado remoto de este fix visual:
+`STAGING_DONE_ZERO_RESIDUE`; las comprobaciones de datos del equipo usan fixtures.
 Rama `codex/gourgeist-sprite-forms`, desde `85d99d4`.
 
 El propietario autoriza este fix y su publicación puntual, solo web. No se
@@ -42,8 +43,27 @@ No hay refactor ni cambio en `PokemonSprite`, datos del Pokémon o animaciones.
 
 ## Publicación
 
-Pendiente de terminar la publicación web y repetir la comprobación visual
-contra los archivos servidos. Rollback web: `82349ea3-0afd-4757-847e-144f7d32040f`.
-La API publicada sigue siendo `adfca5c4`; DB 080 y Launcher 0.26.11 se conservan.
-No confirmar Team Lock ni generar pastes como prueba. El propietario comprobará
-su equipo real desde el Launcher después de la publicación.
+Commit desplegado: **`1ab6cdbd1810d32e917eeb129842d53cb604ca1c`**, subido a
+`origin/codex/gourgeist-sprite-forms`. Web Cloudflare **100%**:
+`babf0ab2-88be-4cb7-a603-72655c993a54`, despliegue
+`327bc47e-7c16-4876-afcc-ee180b6dabc1`, 2026-11-04 15:58:26 UTC.
+Dry-run y publicación PASS. Rollback web:
+`82349ea3-0afd-4757-847e-144f7d32040f`.
+
+Comprobaciones remotas 15:59 UTC: **18/18 PNG**, HTTP 200, MIME correcto,
+hash exacto y píxeles decodificados. Index idéntico al build. Playwright
+repetido sobre la web publicada: **1 PASS**, Jalowin con el sprite correcto,
+«Forma 2» intacta y seis imágenes sin interrogaciones. API totalmente
+interceptada en el navegador: esta es verificación visual de la web publicada
+con datos sintéticos, no una lectura del Pokémon real del propietario.
+[Captura inspeccionada](../evidence/gourgeist-sprite/jalowin-hosted-synthetic.png),
+[evidencia de publicación](../evidence/gourgeist-sprite/release.json).
+
+La API `adfca5c4` continúa SUCCESS sin nuevo despliegue. Feed del Launcher
+idéntico y mismo tamaño/ETag del instalador. Ninguna actuación SQL ni sobre
+partidas, Liga, Team Lock, Showdown o Pokepast.es; datos y forma auténtica
+intactos. Sin llamadas reales de confirmación, exportación o envío Discord.
+Servidor local detenido y navegadores de pruebas cerrados. No se dejan
+fixtures remotos. El propietario comprobará su equipo real desde el Launcher.
+El commit de cierre solo actualiza MultiIA, este registro y evidencias; no
+requiere otro despliegue.

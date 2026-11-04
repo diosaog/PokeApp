@@ -1,0 +1,207 @@
+{
+  "checked_at": "2026-11-04T15:59:00.965307+00:00",
+  "source_commit": "1ab6cdbd1810d32e917eeb129842d53cb604ca1c",
+  "web": {
+    "deployment_id": "327bc47e-7c16-4876-afcc-ee180b6dabc1",
+    "created_on": "2026-11-04T15:58:26.887251Z",
+    "versions": [
+      {
+        "version_id": "babf0ab2-88be-4cb7-a603-72655c993a54",
+        "percentage": 100
+      }
+    ]
+  },
+  "assets": [
+    {
+      "path": "pokemon/710-form-1.png",
+      "status": 200,
+      "sha256": "3f008fcde37f0c3631423f46cded11a3b522536c348169aba280daf9c7703f98",
+      "dimensions": [
+        96,
+        96
+      ]
+    },
+    {
+      "path": "pokemon/710-form-2.png",
+      "status": 200,
+      "sha256": "3f008fcde37f0c3631423f46cded11a3b522536c348169aba280daf9c7703f98",
+      "dimensions": [
+        96,
+        96
+      ]
+    },
+    {
+      "path": "pokemon/710-form-3.png",
+      "status": 200,
+      "sha256": "3f008fcde37f0c3631423f46cded11a3b522536c348169aba280daf9c7703f98",
+      "dimensions": [
+        96,
+        96
+      ]
+    },
+    {
+      "path": "pokemon/711-form-1.png",
+      "status": 200,
+      "sha256": "611af3323289c1fb1b9beae2a26f0ae85e4a88bab55ef3f13c719a5511ef6faa",
+      "dimensions": [
+        96,
+        96
+      ]
+    },
+    {
+      "path": "pokemon/711-form-2.png",
+      "status": 200,
+      "sha256": "611af3323289c1fb1b9beae2a26f0ae85e4a88bab55ef3f13c719a5511ef6faa",
+      "dimensions": [
+        96,
+        96
+      ]
+    },
+    {
+      "path": "pokemon/711-form-3.png",
+      "status": 200,
+      "sha256": "611af3323289c1fb1b9beae2a26f0ae85e4a88bab55ef3f13c719a5511ef6faa",
+      "dimensions": [
+        96,
+        96
+      ]
+    },
+    {
+      "path": "gen6/710-form-1.png",
+      "status": 200,
+      "sha256": "ee03230588e7eb0294d6e9eba9055a8e79d4d4b1accb30812817d7b966daf8bb",
+      "dimensions": [
+        43,
+        42
+      ]
+    },
+    {
+      "path": "gen6/710-form-2.png",
+      "status": 200,
+      "sha256": "a32634816ca641cd952a7bf6fcc7a96a93d0bbdfb431372f405b3346be06923a",
+      "dimensions": [
+        57,
+        54
+      ]
+    },
+    {
+      "path": "gen6/710-form-3.png",
+      "status": 200,
+      "sha256": "2b5248e4b593b9dbfb1aa0664f8214adbb26945251dc15a9398e3c15595056ad",
+      "dimensions": [
+        67,
+        66
+      ]
+    },
+    {
+      "path": "gen6/711-form-1.png",
+      "status": 200,
+      "sha256": "a3aaa872ac898f7e8b7774e51ede8004b70d1995863dd7871ffd67bf353d8039",
+      "dimensions": [
+        43,
+        74
+      ]
+    },
+    {
+      "path": "gen6/711-form-2.png",
+      "status": 200,
+      "sha256": "ef4587113f4ec2a8e072065a9395f2cd88b78eaa5d0fd7c9c223cdb463ab11e0",
+      "dimensions": [
+        53,
+        90
+      ]
+    },
+    {
+      "path": "gen6/711-form-3.png",
+      "status": 200,
+      "sha256": "740a8541a4e5843578010abb364f225fc7618e1dad52a4bfbf3003429db15545",
+      "dimensions": [
+        64,
+        108
+      ]
+    },
+    {
+      "path": "gen7/710-form-1.png",
+      "status": 200,
+      "sha256": "1c2a1cc41352d9cb870a6d57d42bc0a13fdff39669aaf41c007bfbd9a6fcfb43",
+      "dimensions": [
+        96,
+        96
+      ]
+    },
+    {
+      "path": "gen7/710-form-2.png",
+      "status": 200,
+      "sha256": "17741fe32a4424863446ce9e4564e053e6d85bb59fa1e1303cacadd01abaef9e",
+      "dimensions": [
+        96,
+        96
+      ]
+    },
+    {
+      "path": "gen7/710-form-3.png",
+      "status": 200,
+      "sha256": "1f877be67bcc7738b2cf779e4d58a5c7479826ca804f845ffd5b082eac2de2de",
+      "dimensions": [
+        96,
+        96
+      ]
+    },
+    {
+      "path": "gen7/711-form-1.png",
+      "status": 200,
+      "sha256": "e29e84cd02bfe944498527ea5ef4658727e63cc47aba483c43f1dbf7165ec1ea",
+      "dimensions": [
+        96,
+        96
+      ]
+    },
+    {
+      "path": "gen7/711-form-2.png",
+      "status": 200,
+      "sha256": "e716536f51d7dfc44a6b6755f66f6623986543ee89596286096d539e00040ca7",
+      "dimensions": [
+        96,
+        96
+      ]
+    },
+    {
+      "path": "gen7/711-form-3.png",
+      "status": 200,
+      "sha256": "c4eeabbd2e17031026d3aa5b6640e7edd1618d56e420742006e621191f23643c",
+      "dimensions": [
+        96,
+        96
+      ]
+    }
+  ],
+  "index_matches_build": true,
+  "api_deployment_unchanged": "adfca5c4-fb5e-4739-a239-b08ccfbb92c2",
+  "launcher_feed_unchanged": true,
+  "launcher_installer_unchanged": true,
+  "no_api_or_sql_deployment": true,
+  "tests": {
+    "vitest": {
+      "passed": 29,
+      "files": 2
+    },
+    "build": "PASS",
+    "playwright_local_build": 1,
+    "playwright_hosted_assets": 1
+  },
+  "production_writes": "web deployment only; all browser API requests intercepted",
+  "visual_verification": {
+    "synthetic_team": true,
+    "hosted_app": true,
+    "nickname": "Jalowin",
+    "species": "Gourgeist",
+    "form_unchanged": 2,
+    "sprite": "/visuals/v1/gen6/711-form-2.png",
+    "image_complete": true,
+    "natural_width_positive": true,
+    "party_sprites": 6,
+    "unresolved": 0,
+    "real_save_used": false,
+    "all_api_calls_intercepted": true
+  }
+}

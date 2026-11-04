@@ -10,7 +10,7 @@ Reconciled: 2026-09-26. Keep one copy at this path.
 | How do AI instances continue the same work? | This protocol |
 | What are the project-wide constraints and roadmap? | [Master protocol](../PokeApp_2.0_Protocolo_Maestro_MultiIA.md) |
 | Which phase is active and where is its memory? | [Project checkpoint](../project-checkpoint.md) |
-| What is the current operational state and next action? | [Current enrollment/release record](../work-in-progress/mid-season-enrollment.md) (2026-11-04: owner-approved DB 080 `20261104153603`, API `adfca5c4` from `6490e3d` including Pokepast.es CRLF `c2e8617`, web `82349ea3` at 100%; Launcher 0.26.11 and verifier `2853bbc4` unchanged). Technical remote acceptance PASS; `VALIDATION_PARTIAL` only for legitimate authenticated checks and first real use. No test enrollments or new external pastes. **Continue from the tip of `origin/codex/mid-season-enrollment`; never reapply 080.** Historical releases remain indexed in the checkpoint. |
+| What is the current operational state and next action? | [Current sprite fix record](../work-in-progress/gourgeist-sprite.md) (2026-11-04: owner-approved web-only fix `1ab6cdb`, Cloudflare `babf0ab2` at 100%, verified with synthetic data and published sprites). **Continue from the tip of `origin/codex/gourgeist-sprite-forms`.** API `adfca5c4`, DB 080 and Launcher unchanged; no SQL/save/League action. [Enrollment release record](../work-in-progress/mid-season-enrollment.md) retains its authenticated real-use limits; never reapply 080. |
 | What behavior was approved? | [Functional alignment contract](../phase10-5-functional-alignment.md) |
 | What was implemented and what evidence exists? | Active phase evidence in its live record until closure; [previous Phase 10 report](../phase10-completion-report.md) retains historical delivery evidence |
 
@@ -23,11 +23,14 @@ IDs, verification limits and rollback. SQL, API and web are published.
 retains the renderer evidence and the limit on artificial external tests.
 The release tool now has 001-080 deployed and no pending migration.
 
-Sprite follow-up (2026-11-04): continue this punctual fix from
-`codex/gourgeist-sprite-forms` (base `85d99d4`).
+Sprite follow-up (2026-11-04): **PUBLISHED / VERIFIED**. Continue from the tip
+of `origin/codex/gourgeist-sprite-forms` (base `85d99d4`), fix `1ab6cdb`.
 [Gourgeist/Pumpkaboo record](../work-in-progress/gourgeist-sprite.md): missing
-size-form catalog entries and assets, specific tests PASS, web-only deployment
-explicitly authorized and in progress. No API/SQL/save/League change.
+size-form catalog entries and assets; web `babf0ab2` at 100%, 29 specific
+tests/build and local + hosted browser verification PASS (synthetic team,
+actual published images). API `adfca5c4` unchanged. No SQL/save/League,
+Team Lock, Showdown or Pokepast.es change. Previous enrollment authentication
+limits remain in its own record; they are not reclassified by this visual fix.
 
 The live handoff is the single maintained operational record for an active phase.
 Other documents link to it instead of maintaining competing live Git, test or

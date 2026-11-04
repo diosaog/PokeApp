@@ -5,9 +5,12 @@ milestone record; it does not maintain a second live phase-status ledger.
 
 ## Current project position
 
-- Gourgeist/Pumpkaboo sprite fix (2026-11-04): specific tests/build verified,
-  web-only publication authorized and in progress on
-  `codex/gourgeist-sprite-forms` from `85d99d4`.
+- Gourgeist/Pumpkaboo sprite fix (2026-11-04): **PUBLISHED / VERIFIED**,
+  web-only `babf0ab2` at 100%, source `1ab6cdb`. Continue from the tip of
+  `origin/codex/gourgeist-sprite-forms` (base `85d99d4`). 29 targeted tests,
+  build, 1 local + 1 hosted browser check and 18 hosted PNGs PASS. Jalowin
+  retains form 2; browser verification uses a synthetic team. API `adfca5c4`,
+  Launcher and all Pokémon/League data unchanged; no SQL operation.
   [Cause and release record](work-in-progress/gourgeist-sprite.md).
 
 - Incorporación administrativa durante ChampionsLocke (2026-11-04):
