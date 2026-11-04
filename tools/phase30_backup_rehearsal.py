@@ -479,6 +479,15 @@ def rehearse(args) -> dict:
                 from tools.validate_phase078_public_pastes import validate as validate_pastes
 
                 report["phase078_public_pastes"] = validate_pastes(pg)
+            if migration.name.startswith("079_"):
+                from tools.validate_phase079_all_vs_all import validate as validate_all_vs_all
+                from tools.validate_phase079_all_vs_all import validate_restored
+                from tools.validate_player_matchdays import validate as validate_player_days
+
+                report["phase079_all_vs_all"] = validate_all_vs_all(pg)
+                report["phase079_player_matchdays"] = validate_player_days(pg)
+                # The restored season itself, in a rolled-back transaction.
+                report["phase079_restored_season"] = validate_restored(pg)
 
         rows_after = local_fingerprints(pg, public_tables)
         # 072 adds the private item_deliveries table, its commands and the

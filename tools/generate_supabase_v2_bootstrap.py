@@ -87,6 +87,7 @@ EXPECTED_MIGRATIONS = [
     "076_final_championship_tiebreak.sql",
     "077_false_death_event_corrections.sql",
     "078_team_lock_public_pastes.sql",
+    "079_all_vs_all_first_matchday.sql",
 ]
 
 FORBIDDEN_TOKENS = [

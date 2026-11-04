@@ -32,10 +32,11 @@ MIGRATIONS = sorted((ROOT / "supabase/v2/migrations").glob("*.sql"))
 # 070 (each participant's dead box, one live League total), 071 (the shop is
 # open in the preseason); 072 (in-game Shop objects delivered to the bag once,
 # audited refunds) and 073 (prospective League scoring) are deployed.
-# 074-077 are deployed. 078 only adds the public Pokepast.es link columns of
-# the Discord outbox (owner-approved release 2026-11-04).
-DEPLOYED = [m for m in MIGRATIONS if int(m.name[:3]) <= 77]
-PENDING = [m for m in MIGRATIONS if int(m.name[:3]) == 78]
+# 074-078 are deployed (078: the public Pokepast.es link columns of the
+# Discord outbox, owner-approved release 2026-11-04). 079 (all-vs-all League
+# start by participants, readiness, own death history) is pending approval.
+DEPLOYED = [m for m in MIGRATIONS if int(m.name[:3]) <= 78]
+PENDING = [m for m in MIGRATIONS if int(m.name[:3]) == 79]
 WINDOW = f"{PENDING[0].name[:3]}-{PENDING[-1].name[:3]}"
 SCHEMAS = "('public','v1_shadow')"
 
