@@ -1,5 +1,12 @@
 # Home, anuncios Team Lock y puntos pendientes — 2026-11-04
 
+**Aclaración posterior del propietario:** no debe existir confirmación del
+jugador para los puntos observables. El requisito manual y las instrucciones
+de confirmación de este informe quedan sustituidos por el
+[cambio automático preparado](automatic-observed-points.md), aún sin publicar
+por la autorización SQL pendiente. Los hechos de lectura y despliegue siguientes
+conservan su valor histórico.
+
 Estado: CORRECCIONES WEB PUBLICADAS Y VERIFICADAS; diagnóstico completado.
 Estado global `VALIDATION_PARTIAL`: Discord detenido por límite de
 autorización, pues requiere migración nueva. No se declara implementado.

@@ -10,7 +10,7 @@ Reconciled: 2026-09-26. Keep one copy at this path.
 | How do AI instances continue the same work? | This protocol |
 | What are the project-wide constraints and roadmap? | [Master protocol](../PokeApp_2.0_Protocolo_Maestro_MultiIA.md) |
 | Which phase is active and where is its memory? | [Project checkpoint](../project-checkpoint.md) |
-| What is the current operational state and next action? | [Current focused Home/points record](../work-in-progress/focused-home-points.md) (2026-11-04: web `4f46cbcb` at 100%, source `e57fe2c`; Home form labels removed, pending-history explanation and post-confirmation cache refresh fixed). **Continue from the tip of `origin/codex/home-points-followup`.** Samu/Iker await own confirmation 0/0/0 and 3/0/3. Discord per-version announcements require an unauthorized migration and remain unchanged (`VALIDATION_PARTIAL`). API `adfca5c4`, DB 080, Launcher and verifier unchanged; never reapply 080. |
+| What is the current operational state and next action? | [Automatic observed points record](../work-in-progress/automatic-observed-points.md) (2026-11-04: owner removes player confirmation; automatic 0/-0.3 proven locally; web confirmation UI removed locally). **Continue from the tip of `origin/codex/automatic-observed-points`.** SQL read-function proposal awaits owner deployment authorization under the prior no-migration restriction. No new migration created or deployed. Production remains web `4f46cbcb`, API `adfca5c4`, DB 080; do not give superseded player-confirmation instructions. |
 | What behavior was approved? | [Functional alignment contract](../phase10-5-functional-alignment.md) |
 | What was implemented and what evidence exists? | Active phase evidence in its live record until closure; [previous Phase 10 report](../phase10-completion-report.md) retains historical delivery evidence |
 
@@ -40,6 +40,14 @@ build and one local + one hosted synthetic browser test PASS. Samu and Iker
 both await their own baseline confirmation (0/0/0 and 3/0/3); no data correction.
 Discord per-version announcements require a new migration and are stopped
 under the owner's explicit no-migration boundary. No worker/API/SQL change.
+
+Latest owner clarification (2026-11-04): players must not confirm death history
+to obtain observable points. Continue from `codex/automatic-observed-points`
+(base `87d56b7`). [Automatic points record](../work-in-progress/automatic-observed-points.md)
+contains the one-function SQL proposal, tested automatic 0/-0.3 results,
+prepared web removal of confirmation controls and SQL authorization boundary.
+LOCAL ONLY, no new migration created; production remains at the release above.
+Do not repeat the superseded player-confirmation instructions.
 
 The live handoff is the single maintained operational record for an active phase.
 Other documents link to it instead of maintaining competing live Git, test or

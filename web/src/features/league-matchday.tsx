@@ -5,7 +5,6 @@ import { useApp, useRead } from "../state";
 import { CommandState, Modal, Notice, form, useCommand } from "../ui";
 import { DailyTieFields, readTieResolution, tieReview } from "./daily-ties";
 import {
-  OwnDeathHistory,
   prepareFirstMatchday,
   readinessPath,
   readinessText,
@@ -142,7 +141,6 @@ export function OpenMatchday({
                 <li key={p.season_player_id} className={own ? "is-own" : ""}>
                   <strong>{own ? "Tú" : p.display_name}:</strong>{" "}
                   {p.reasons.map((r) => trainerReasonText(r, own)).join("; ")}.
-                  {own && p.self_confirmable && <OwnDeathHistory inline />}
                 </li>
               );
             })}

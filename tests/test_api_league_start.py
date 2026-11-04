@@ -100,6 +100,20 @@ class LeagueStartApiTests(unittest.TestCase):
                 self.assertEqual(getattr(self.client, method)(self.base + path, **kwargs).status_code, 401)
         self.assertEqual(self.repo.calls, [])
 
+    def test_observed_zero_is_readable_without_human_confirmation(self):
+        self.repo.responses["own_death_state"] = own_state(
+            known=True, blocking_reason=None, actual_deaths=0, wipe_deaths=0,
+            segment_deaths=0, confirmed_at=None, can_confirm=False,
+            confirm_blocker="death_history_confirmed", proposed=None,
+        )
+        response = self.client.get(self.base + "/death-history", headers=self.auth)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json()["actual_deaths"], 0)
+        self.assertIsNone(response.json()["confirmed_at"])
+        self.assertTrue(response.json()["known"])
+        self.assertFalse(response.json()["can_confirm"])
+        self.assertEqual([op for op, _ in self.repo.calls], ["own_death_state"])
+
     def test_readiness_and_preparation_reach_sql_as_the_caller_only(self):
         response = self.client.get(self.base + "/league/readiness", headers=self.auth)
         self.assertEqual(response.status_code, 200, response.text)

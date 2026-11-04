@@ -1,0 +1,37 @@
+{
+  "result": "PASS",
+  "scope": "temporary local function proposal only; repository migrations remain 001-080",
+  "checks": [
+    "reproduces original null NET despite valid 0 and 3 observed deaths",
+    "automatic NET 0 and -0.3 from observed sources without confirmation",
+    "automatic reads do not alter history, saves, events, players, counters or coins",
+    "no human confirmation or forged confirmation timestamp",
+    "valid sources no longer block League readiness on baseline confirmation",
+    "existing audited historical offset is retained",
+    "later death tracked once across duplicate full observations",
+    "current authoritative wipe counter applies without extra confirmation",
+    "080 entrant keeps zero NET and excludes pre-enrollment deaths",
+    "missing source remains unknown instead of invented zero",
+    "genuine evidence gap remains blocked",
+    "inconsistent wipe/death evidence remains unknown",
+    "service-only function privileges remain unchanged"
+  ],
+  "production_modified": false,
+  "recorded_at": "2026-11-04T16:41:01.208533+00:00",
+  "source_base": "87d56b7ef2d31488d2a0d3c66fabffcf308202fa",
+  "proposal_diff_sha256": "6e61d49323dc8f2ab4d41542007b13b3aec5f2df7a922f018567ecf89a595c97",
+  "environment": {
+    "os": "Windows",
+    "python": "3.14.3",
+    "postgresql": 17,
+    "scope": "disposable loopback; built 001-080 as postgres"
+  },
+  "focused_tests": {
+    "web": 66,
+    "api": 10,
+    "browser_local_build": 1,
+    "build": "PASS"
+  },
+  "sql_migrations_created": 0,
+  "sql_migrations_applied": 0
+}

@@ -133,17 +133,6 @@ export function HomePage() {
             </Link>
           </div>
         )}
-        {row?.total_points === null &&
-          row.historical_deaths_source ===
-            "death_history_baseline_required" && (
-            <p>
-              Tus puntos oficiales aparecen como «—» hasta que confirmes tu
-              historial de muertes.{" "}
-              <Link to={`/entrenadores/${me?.trainer_id}`}>
-                Ir a confirmar mi historial →
-              </Link>
-            </p>
-          )}
         <Notice error={league.error} />
         {data && (
           <div className="home-party stage-team">

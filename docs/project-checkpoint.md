@@ -5,6 +5,13 @@ milestone record; it does not maintain a second live phase-status ledger.
 
 ## Current project position
 
+- Automatic observed points (2026-11-04): owner's clarification removes player
+  death-history confirmation. Prepared on `codex/automatic-observed-points`
+  from `87d56b7`: one read-function proposal + web cleanup, SQL 13 / web 66 /
+  API 10 / browser 1 / build PASS. No new migration created or deployed;
+  SQL authorization is required under the previous explicit restriction.
+  [Prepared change and exact next step](work-in-progress/automatic-observed-points.md).
+
 - Focused Home/points follow-up (2026-11-04): web label/message/cache fixes
   **PUBLISHED / VERIFIED**, `4f46cbcb` at 100%, source `e57fe2c`. Continue from
   the tip of `origin/codex/home-points-followup` (base `3f64ba3`). 50 web / 9 API

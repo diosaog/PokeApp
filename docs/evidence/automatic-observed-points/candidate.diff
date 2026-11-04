@@ -1,0 +1,31 @@
+--- current league_death_totals (077, used by 080)
++++ proposed automatic observed totals
+@@ -13,22 +13,20 @@
+      and st.metadata->>'wipe_revision' ~ '^(0|[1-9][0-9]{0,15})$')) then
+    wipe_revision=coalesce((st.metadata->>'wipe_revision')::bigint,0);
+  end if;
+- actual=h.actual_offset+recorded;
++ actual=coalesce(h.actual_offset,0)+recorded;
+  reason=case when not (src->>'valid')::boolean then 'death_history_source_unavailable'
+    when wipe_revision is null then 'death_history_wipe_state_unavailable'
+-   when h.season_player_id is null or h.actual_offset is null then 'death_history_baseline_required'
++   when h.season_player_id is null then 'death_history_source_unavailable'
+    when h.dead_box_number<>p.dead_box_number then 'death_history_dead_box_changed'
+    when h.blocking_reason is not null then h.blocking_reason
+    when h.last_identity_revision_id is distinct from (src->>'identity_revision_id')::uuid then 'death_history_source_changed'
+-   when h.confirmed_wipe_deaths is distinct from st.revived_after_wipe::bigint
+-     or h.confirmed_wipe_revision is distinct from wipe_revision then 'death_history_wipe_reconciliation_required'
+-   when h.confirmed_unmapped_revives is distinct from public.league_unmapped_revives(pid) then 'death_history_unmapped_revival'
+-   when actual<0 or h.confirmed_wipe_deaths>actual then 'death_history_inconsistent' else null end;
++   when coalesce(h.confirmed_unmapped_revives,0) is distinct from public.league_unmapped_revives(pid) then 'death_history_unmapped_revival'
++   when actual<0 or st.revived_after_wipe<0 or st.revived_after_wipe>actual then 'death_history_inconsistent' else null end;
+  return src||jsonb_build_object('known',reason is null,'blocking_reason',reason,
+    'season_id',p.season_id,'season_player_id',pid,'trainer_id',p.trainer_id,'revision',coalesce(h.revision,0),
+    'actual_deaths',case when reason is null then actual end,
+-   'wipe_deaths',case when reason is null then h.confirmed_wipe_deaths end,
+-   'death_penalty_tenths',case when reason is null then actual+h.confirmed_wipe_deaths end,
++   'wipe_deaths',case when reason is null then st.revived_after_wipe end,
++   'death_penalty_tenths',case when reason is null then actual+st.revived_after_wipe end,
+    'wipe_counter',st.revived_after_wipe,'wipe_revision',wipe_revision,'recorded_deaths',recorded,
+    'raw_recorded_deaths',(select count(*) from public.league_death_events where season_player_id=pid),
+    'invalidated_event_ids',(select coalesce(jsonb_agg(e.id order by e.id),'[]'::jsonb)

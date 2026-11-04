@@ -1,18 +1,11 @@
-import { afterEach, beforeAll, beforeEach, expect, it, vi } from "vitest";
-import {
-  cleanup,
-  fireEvent,
-  render,
-  screen,
-  within,
-} from "@testing-library/react";
+import { cleanup, render, screen } from "@testing-library/react";
+import { afterEach, beforeEach, expect, it, vi } from "vitest";
 import type { Model } from "../api/types";
 import { OwnDeathHistory, trainerReasonText } from "./league-start";
 
 type Own = Model<"OwnDeathHistoryRead">;
 const mocks = vi.hoisted(() => ({
   data: null as Own | null,
-  execute: vi.fn(),
   reads: [] as string[],
 }));
 vi.mock("../state", () => ({
@@ -23,178 +16,95 @@ vi.mock("../state", () => ({
     return { data: mocks.data, isPending: false, error: null };
   },
 }));
-vi.mock("../ui", async (original) => ({
-  ...(await original<typeof import("../ui")>()),
-  useCommand: () => ({
-    pending: false,
-    uncertain: false,
-    error: null,
-    success: false,
-    execute: mocks.execute,
-    retry: vi.fn(),
-  }),
-}));
-beforeAll(() => {
-  HTMLDialogElement.prototype.showModal ??= function (this: HTMLDialogElement) {
-    this.setAttribute("open", "");
-  };
-  HTMLDialogElement.prototype.close ??= function (this: HTMLDialogElement) {
-    this.removeAttribute("open");
-  };
-});
 const own = (changes: Partial<Own> = {}): Own => ({
   season_id: "season",
   season_player_id: "p1",
   trainer_id: "t1",
   revision: 1,
-  known: false,
-  blocking_reason: "death_history_baseline_required",
-  actual_deaths: null,
-  wipe_deaths: null,
-  segment_deaths: null,
+  known: true,
+  blocking_reason: null,
+  actual_deaths: 0,
+  wipe_deaths: 0,
+  segment_deaths: 0,
   dead_box_number: 7,
   source_sha256: "a".repeat(64),
   confirmed_at: null,
   current_matchday_id: null,
-  can_confirm: true,
-  confirm_blocker: null,
-  proposed: { actual_deaths: 3, wipe_deaths: 0, segment_deaths: 3 },
+  can_confirm: false,
+  confirm_blocker: "death_history_confirmed",
+  proposed: null,
   replayed: false,
   ...changes,
 });
 beforeEach(() => {
-  vi.clearAllMocks();
-  mocks.reads = [];
   mocks.data = own();
-  mocks.execute.mockResolvedValue(true);
+  mocks.reads = [];
 });
 afterEach(cleanup);
-
-it("the trainer confirms exactly the observed values, nothing typed, on their own history", async () => {
-  render(<OwnDeathHistory />);
-  expect(mocks.reads).toContain("/v1/seasons/season/death-history");
-  const card = screen.getByRole("region", {
-    name: /Historial de muertes de la Liga/,
-  });
-  expect(card).toHaveTextContent("Caja 7");
-  expect(card).toHaveTextContent("3 muertes reales");
-  expect(card).toHaveTextContent("0 revividos tras wipe");
-  expect(card).toHaveTextContent("3 muertes de progresión actuales");
-  expect(within(card).queryByRole("textbox")).not.toBeInTheDocument();
-  expect(within(card).queryByRole("spinbutton")).not.toBeInTheDocument();
-  fireEvent.click(
-    within(card).getByRole("button", {
-      name: "Confirmar historial de muertes",
-    }),
-  );
-  const dialog = screen.getByRole("dialog", {
-    name: "Confirmar mi historial de muertes",
-  });
-  expect(dialog).toHaveTextContent(/Solo puedes confirmar tu propio historial/);
-  fireEvent.click(
-    within(dialog).getByRole("button", { name: "Confirmar estos valores" }),
-  );
-  await vi.waitFor(() => expect(mocks.execute).toHaveBeenCalledOnce());
-  expect(mocks.execute).toHaveBeenCalledWith(
-    "/v1/seasons/season/death-history",
-    {
-      expected_revision: 1,
-      source_sha256: "a".repeat(64),
-      actual_deaths: 3,
-      wipe_deaths: 0,
-      segment_deaths: 3,
-    },
-    "PUT",
-  );
-});
-
-it("explains that zero deaths still need confirmation and submits exactly zero", async () => {
+it.each([0, 3])(
+  "observed history with %s deaths never asks for confirmation",
+  (count) => {
+    mocks.data = own({ actual_deaths: count, segment_deaths: count });
+    render(<OwnDeathHistory />);
+    expect(mocks.reads).toContain("/v1/seasons/season/death-history");
+    expect(screen.queryByRole("region")).not.toBeInTheDocument();
+    expect(screen.queryByRole("button")).not.toBeInTheDocument();
+  },
+);
+it("a legacy unconfirmed answer cannot expose a confirmation action", () => {
   mocks.data = own({
+    known: false,
+    blocking_reason: "death_history_baseline_required",
+    actual_deaths: null,
+    wipe_deaths: null,
+    segment_deaths: null,
+    can_confirm: true,
+    confirm_blocker: null,
     proposed: { actual_deaths: 0, wipe_deaths: 0, segment_deaths: 0 },
   });
   render(<OwnDeathHistory />);
-  expect(
-    screen.getByText(/Tus puntos oficiales aparecen como/),
-  ).toHaveTextContent("incluso si tienes cero muertes");
-  fireEvent.click(
-    screen.getByRole("button", { name: "Confirmar historial de muertes" }),
-  );
-  fireEvent.click(
-    screen.getByRole("button", { name: "Confirmar estos valores" }),
-  );
-  await vi.waitFor(() => expect(mocks.execute).toHaveBeenCalledOnce());
-  expect(mocks.execute).toHaveBeenCalledWith(
-    "/v1/seasons/season/death-history",
-    {
-      expected_revision: 1,
-      source_sha256: "a".repeat(64),
-      actual_deaths: 0,
-      wipe_deaths: 0,
-      segment_deaths: 0,
-    },
-    "PUT",
-  );
+  expect(screen.getByText(/Los puntos se calculan/)).toBeVisible();
+  expect(screen.queryByRole("button")).not.toBeInTheDocument();
+  expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
 });
-
-it("a confirmed history needs nothing; exceptional cases say who acts", () => {
+it("missing or inconsistent evidence remains explicit without a player confirmation", () => {
   mocks.data = own({
-    known: true,
-    blocking_reason: null,
-    actual_deaths: 3,
-    wipe_deaths: 0,
-    segment_deaths: 3,
-    can_confirm: false,
-    confirm_blocker: "death_history_confirmed",
-    proposed: null,
+    known: false,
+    confirm_blocker: "save_missing",
+    source_sha256: null,
   });
   const view = render(<OwnDeathHistory />);
-  expect(screen.queryByRole("region")).not.toBeInTheDocument();
+  expect(screen.getByText(/Sincroniza tu partida oficial/)).toBeVisible();
   mocks.data = own({
-    can_confirm: false,
+    known: false,
     confirm_blocker: "death_history_admin_required",
-    proposed: null,
   });
   view.rerender(<OwnDeathHistory />);
   expect(
     screen.getByText(
-      /necesita una revisión de Administración: es un caso excepcional/,
+      /La evidencia de tu historial es inconsistente o incompleta/,
     ),
   ).toBeVisible();
   expect(screen.queryByRole("button")).not.toBeInTheDocument();
-  mocks.data = own({
-    can_confirm: false,
-    confirm_blocker: "save_missing",
-    proposed: null,
-    source_sha256: null,
-  });
-  view.rerender(<OwnDeathHistory />);
-  expect(
-    screen.getByText(/Registra tu partida oficial desde PokeApp Launcher/),
-  ).toBeVisible();
 });
-
-it("the inline action only appears when the trainer can confirm", () => {
-  const view = render(<OwnDeathHistory inline />);
-  expect(
-    screen.getByRole("button", { name: "Confirmar mi historial" }),
-  ).toBeVisible();
+it("League readiness never offers an inline confirmation action", () => {
   mocks.data = own({
-    can_confirm: false,
-    confirm_blocker: "death_history_pending_sync",
-    proposed: null,
+    known: false,
+    confirm_blocker: null,
+    can_confirm: true,
+    proposed: { actual_deaths: 3, wipe_deaths: 0, segment_deaths: 3 },
   });
-  view.rerender(<OwnDeathHistory inline />);
+  render(<OwnDeathHistory inline />);
   expect(screen.queryByRole("button")).not.toBeInTheDocument();
 });
-
-it("reasons speak to the viewer in second person and to the others in third", () => {
+it("readiness reasons describe missing evidence without asking the player to confirm", () => {
+  for (const code of [
+    "death_history_baseline_required",
+    "death_history_wipe_reconciliation_required",
+  ] as const)
+    for (const viewer of [true, false])
+      expect(trainerReasonText(code, viewer)).not.toMatch(/confirm/i);
   expect(trainerReasonText("save_missing", true)).toMatch(
     /^registra tu partida oficial/,
-  );
-  expect(trainerReasonText("save_missing", false)).toMatch(
-    /^falta registrar su partida oficial/,
-  );
-  expect(trainerReasonText("badges_missing", false)).toBe(
-    "necesita las dos primeras medallas para la J1",
   );
 });

@@ -2,11 +2,11 @@
 import { test, expect } from "@playwright/test";
 import { fixture, login, pokemon, tid, pid, sid, overview } from "./fixtures";
 
-test("Home hides form labels, preserves Jalowin and refreshes points after own history confirmation", async ({
+test("Observed points need no confirmation and Home preserves Jalowin", async ({
   page,
 }, info) => {
   await page.setViewportSize({ width: 1440, height: 1000 });
-  await fixture(
+  const commands = await fixture(
     page,
     false,
     process.env.POKEAPP_E2E_API_ORIGIN || "http://127.0.0.1:8000",
@@ -39,19 +39,12 @@ test("Home hides form labels, preserves Jalowin and refreshes points after own h
       },
     }),
   );
-  let confirmed = false;
-  let leagueReads = 0;
-  const confirms: unknown[] = [];
-  const headers = (origin?: string) => ({
-    "Access-Control-Allow-Origin": origin || "*",
-    "Access-Control-Allow-Methods": "GET,PUT,OPTIONS",
-    "Access-Control-Allow-Headers":
-      "authorization,content-type,idempotency-key",
-  });
-  await page.route(`**/v1/read/seasons/${sid}/league`, (route) => {
-    leagueReads++;
-    return route.fulfill({
-      headers: headers(route.request().headers()["origin"]),
+  await page.route(`**/v1/read/seasons/${sid}/league`, (route) =>
+    route.fulfill({
+      headers: {
+        "Access-Control-Allow-Origin":
+          route.request().headers()["origin"] || "*",
+      },
       json: {
         season: overview.season,
         days: overview.days,
@@ -61,51 +54,39 @@ test("Home hides form labels, preserves Jalowin and refreshes points after own h
             trainer_id: tid,
             display_name: "Antonio",
             status: "active",
-            total_points: confirmed ? "0" : null,
+            total_points: "0",
             coin_balance: "4",
             dead_count: 0,
-            historical_deaths_source: confirmed
-              ? "audited_event_history"
-              : "death_history_baseline_required",
+            historical_deaths_source: "audited_event_history",
           },
         ],
       },
-    });
-  });
+    }),
+  );
   await page.route(`**/v1/seasons/${sid}/death-history`, (route) => {
-    const request = route.request();
-    if (request.method() === "OPTIONS")
-      return route.fulfill({
-        status: 204,
-        headers: headers(request.headers()["origin"]),
-      });
-    if (request.method() === "PUT") {
-      confirms.push(request.postDataJSON());
-      expect(request.headers()["idempotency-key"]).toBeTruthy();
-      confirmed = true;
-    }
+    expect(route.request().method()).toBe("GET");
     return route.fulfill({
-      headers: headers(request.headers()["origin"]),
+      headers: {
+        "Access-Control-Allow-Origin":
+          route.request().headers()["origin"] || "*",
+      },
       json: {
         season_id: sid,
         season_player_id: pid,
         trainer_id: tid,
-        revision: confirmed ? 3 : 2,
-        known: confirmed,
-        blocking_reason: confirmed ? null : "death_history_baseline_required",
-        actual_deaths: confirmed ? 0 : null,
-        wipe_deaths: confirmed ? 0 : null,
-        segment_deaths: confirmed ? 0 : null,
+        known: true,
+        revision: 2,
+        actual_deaths: 0,
+        wipe_deaths: 0,
+        segment_deaths: 0,
+        confirmed_at: null,
+        can_confirm: false,
+        confirm_blocker: "death_history_confirmed",
+        proposed: null,
+        blocking_reason: null,
         dead_box_number: 7,
         source_sha256: "a".repeat(64),
-        confirmed_at: confirmed ? "2026-11-04T12:00:00Z" : null,
         current_matchday_id: null,
-        can_confirm: !confirmed,
-        confirm_blocker: confirmed ? "death_history_confirmed" : null,
-        proposed: confirmed
-          ? null
-          : { actual_deaths: 0, wipe_deaths: 0, segment_deaths: 0 },
-        replayed: false,
       },
     });
   });
@@ -117,13 +98,16 @@ test("Home hides form labels, preserves Jalowin and refreshes points after own h
   );
   await expect(home.getByText(/Forma \d/)).toHaveCount(0);
   await expect(
-    page.getByText(/Tus puntos oficiales aparecen como/),
-  ).toBeVisible();
+    page.getByRole("link", { name: /confirmar mi historial/i }),
+  ).toHaveCount(0);
+  await expect(
+    page.getByText("Puntos", { exact: true }).locator("..").locator("strong"),
+  ).toHaveText("0");
   await page.screenshot({
-    path: info.outputPath("home-no-form-label.png"),
+    path: info.outputPath("automatic-points-home.png"),
     fullPage: true,
   });
-  await page.getByRole("link", { name: /Ir a confirmar mi historial/ }).click();
+  await page.goto(`/entrenadores/${tid}`);
   const panel = page.locator(".party-panel");
   await expect(panel.getByText("Jalowin", { exact: true })).toBeVisible();
   await expect(panel.getByText("Forma 2", { exact: true })).toBeVisible();
@@ -141,28 +125,14 @@ test("Home hides form labels, preserves Jalowin and refreshes points after own h
     .toBe(true);
   await expect(panel.locator("img.pokemon-sprite")).toHaveCount(6);
   await expect(panel.locator(".pokemon-sprite.unresolved")).toHaveCount(0);
-  await panel.screenshot({ path: info.outputPath("jalowin-form-2.png") });
-  await page
-    .getByRole("button", { name: "Confirmar historial de muertes" })
-    .click();
-  const dialog = page.getByRole("dialog", {
-    name: "Confirmar mi historial de muertes",
-  });
-  await expect(dialog).toContainText("0 muertes reales");
-  const before = leagueReads;
-  await dialog.getByRole("button", { name: "Confirmar estos valores" }).click();
-  await expect(dialog).toBeHidden();
-  expect(confirms).toEqual([
-    {
-      expected_revision: 2,
-      source_sha256: "a".repeat(64),
-      actual_deaths: 0,
-      wipe_deaths: 0,
-      segment_deaths: 0,
-    },
-  ]);
-  await expect.poll(() => leagueReads).toBeGreaterThan(before);
+  await expect(
+    page.getByRole("button", { name: /confirmar.*historial/i }),
+  ).toHaveCount(0);
   await expect(
     page.getByText("Puntos", { exact: true }).locator("..").locator("strong"),
   ).toHaveText("0");
+  expect(commands.filter(({ path }) => !path.startsWith("/v1/auth/"))).toEqual(
+    [],
+  );
+  await panel.screenshot({ path: info.outputPath("jalowin-form-2.png") });
 });

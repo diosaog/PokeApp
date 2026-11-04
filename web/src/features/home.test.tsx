@@ -130,24 +130,33 @@ it("Home hides numerical form labels while preserving the Gourgeist form sprite"
   expect(screen.queryByText(/Forma \d/)).not.toBeInTheDocument();
 });
 
-it("links an unconfirmed points balance to the own history without inventing zero", () => {
-  fixture(null, "death_history_baseline_required");
+it("shows observed balances automatically and keeps missing data distinct", () => {
+  fixture("0", "audited_event_history");
   const view = render(
     <MemoryRouter>
       <HomePage />
     </MemoryRouter>,
   );
-  expect(screen.getByText(/Tus puntos oficiales aparecen como/)).toBeVisible();
-  expect(
-    screen.getByRole("link", { name: /Ir a confirmar mi historial/ }),
-  ).toHaveAttribute("href", "/entrenadores/t");
-  fixture("0", "audited_event_history");
+  const points = () =>
+    screen
+      .getByText("Puntos", { selector: ".stat-pill span" })
+      .parentElement!.querySelector("strong")!;
+  expect(points()).toHaveTextContent("0");
+  fixture("-0.3", "audited_event_history");
   view.rerender(
     <MemoryRouter>
       <HomePage />
     </MemoryRouter>,
   );
+  expect(points()).toHaveTextContent("-0,3");
+  fixture(null, "death_history_source_unavailable");
+  view.rerender(
+    <MemoryRouter>
+      <HomePage />
+    </MemoryRouter>,
+  );
+  expect(points().textContent).toBe(String.fromCharCode(8212));
   expect(
-    screen.queryByText(/Tus puntos oficiales aparecen como/),
+    screen.queryByRole("link", { name: /confirmar mi historial/i }),
   ).not.toBeInTheDocument();
 });

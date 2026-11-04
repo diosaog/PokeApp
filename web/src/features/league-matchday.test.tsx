@@ -217,17 +217,19 @@ it("with no J1 yet, «Abrir jornada 1» stays visible with each trainer's exact 
   const blockers = document.getElementById(
     open.getAttribute("aria-describedby")!,
   )!;
-  expect(blockers).toHaveTextContent("Tú: confirma tu historial de muertes.");
   expect(blockers).toHaveTextContent(
-    "Aaron: falta registrar su partida oficial desde PokeApp Launcher; falta que confirme su historial de muertes.",
+    "Tú: falta una lectura válida de tu historial de muertes.",
+  );
+  expect(blockers).toHaveTextContent(
+    "Aaron: falta registrar su partida oficial desde PokeApp Launcher; falta una lectura válida de su historial de muertes.",
   );
   expect(blockers).toHaveTextContent(
     "Iker: necesita las dos primeras medallas para la J1.",
   );
-  // The own fixable reason is resolved right there, by the trainer.
+  // Observed scoring must not require any player confirmation.
   expect(
-    within(blockers).getByRole("button", { name: "Confirmar mi historial" }),
-  ).toBeVisible();
+    within(blockers).queryByRole("button", { name: "Confirmar mi historial" }),
+  ).not.toBeInTheDocument();
   // Nothing routine is sent to Administración.
   expect(blockers).not.toHaveTextContent(/Administración/);
   expect(mocks.execute).not.toHaveBeenCalled();
