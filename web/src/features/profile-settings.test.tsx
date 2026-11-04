@@ -9,6 +9,7 @@ import {
 } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 import { ProfileSettings } from "./profile-settings";
+import { readFileSync } from "node:fs";
 
 const mocks = vi.hoisted(() => ({
   request: vi.fn(),
@@ -92,6 +93,25 @@ it("groups every existing personal setting in three tabs", () => {
   expect(screen.getByRole("group", { name: "Sonidos" })).toBeVisible();
   expect(screen.getByRole("slider")).toBeVisible();
   expect(screen.getByRole("group", { name: "Animaciones" })).toBeVisible();
+});
+
+it("no stylesheet rule can force a hidden tab panel back on screen", () => {
+  // 079: jsdom ignores author CSS, so the tests above passed while a
+  // `.profile-settings-body > section { display: grid }` rule showed every
+  // panel at once in the real app. Guard the shipped stylesheet itself.
+  // Vitest runs from web/; jsdom gives import.meta.url an http scheme.
+  const shell = readFileSync("src/design/hub.css", "utf8");
+  const rules = shell.match(/[^{}]+\{[^}]*\}/g) ?? [];
+  const panelRules = rules.filter((rule) =>
+    /profile-settings-body\s*>\s*section/.test(rule.split("{")[0]),
+  );
+  expect(panelRules.length).toBeGreaterThan(0);
+  for (const rule of panelRules)
+    if (/display\s*:(?!\s*none)/.test(rule))
+      expect(rule.split("{")[0]).toMatch(/:not\(\[hidden\]\)/);
+  expect(shell).toMatch(
+    /\.profile-settings-body > section\[hidden\] \{\s*display: none;/,
+  );
 });
 
 it("keyboard arrows move between tabs", () => {

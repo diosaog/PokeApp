@@ -51,7 +51,9 @@ export function refreshAccountReads(trainerId?: string, season?: string) {
 /**
  * «Mi perfil»: the signed-in trainer's personal settings, opened from the
  * sidebar. Same forms, validation and requests as before; only the place
- * changed. All panels stay mounted, so switching tabs never drops input.
+ * changed. All panels stay mounted, so switching tabs never drops input,
+ * and only the selected tab is visible (079: the panels used to be forced
+ * visible by a CSS display rule that overrode `hidden`).
  */
 export function ProfileSettings({ onClose }: { onClose: () => void }) {
   const { me, season, accountsEnabled, adminOperationPending } = useApp();
@@ -99,48 +101,50 @@ export function ProfileSettings({ onClose }: { onClose: () => void }) {
       onClose={requestClose}
       className="profile-settings"
     >
-      <div className="profile-settings-identity">
-        <TrainerPhoto
-          name={profile.data?.display_name ?? me?.display_name ?? ""}
-          url={profile.data?.photo_url}
-        />
-        <div>
-          <strong>{profile.data?.display_name ?? me?.display_name}</strong>
-          <Link
-            className="text-link"
-            to={`/entrenadores/${me?.trainer_id}`}
-            onClick={(event) => {
-              if (!leave()) event.preventDefault();
-              else onClose();
-            }}
-          >
-            Ver mi ficha de entrenador →
-          </Link>
-        </div>
-      </div>
-      {available.length > 1 && (
-        <div
-          className="tabs"
-          role="tablist"
-          aria-label="Secciones de Mi perfil"
-        >
-          {available.map(([id, label, Icon], index) => (
-            <button
-              key={id}
-              id={`profile-tab-${id}`}
-              type="button"
-              role="tab"
-              aria-selected={tab === id}
-              aria-controls={`profile-panel-${id}`}
-              tabIndex={tab === id ? 0 : -1}
-              onClick={() => setTab(id)}
-              onKeyDown={(event) => keyNav(event, index)}
+      <div className="profile-settings-head">
+        <div className="profile-settings-identity">
+          <TrainerPhoto
+            name={profile.data?.display_name ?? me?.display_name ?? ""}
+            url={profile.data?.photo_url}
+          />
+          <div>
+            <strong>{profile.data?.display_name ?? me?.display_name}</strong>
+            <Link
+              className="text-link"
+              to={`/entrenadores/${me?.trainer_id}`}
+              onClick={(event) => {
+                if (!leave()) event.preventDefault();
+                else onClose();
+              }}
             >
-              <Icon size={16} aria-hidden="true" /> {label}
-            </button>
-          ))}
+              Ver mi ficha de entrenador →
+            </Link>
+          </div>
         </div>
-      )}
+        {available.length > 1 && (
+          <div
+            className="tabs"
+            role="tablist"
+            aria-label="Secciones de Mi perfil"
+          >
+            {available.map(([id, label, Icon], index) => (
+              <button
+                key={id}
+                id={`profile-tab-${id}`}
+                type="button"
+                role="tab"
+                aria-selected={tab === id}
+                aria-controls={`profile-panel-${id}`}
+                tabIndex={tab === id ? 0 : -1}
+                onClick={() => setTab(id)}
+                onKeyDown={(event) => keyNav(event, index)}
+              >
+                <Icon size={16} aria-hidden="true" /> {label}
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
       <div ref={body} className="profile-settings-body">
         {accountsEnabled && (
           <>
@@ -167,7 +171,23 @@ export function ProfileSettings({ onClose }: { onClose: () => void }) {
               aria-labelledby="profile-tab-seguridad"
               hidden={tab !== "seguridad"}
             >
-              <PinForm />
+              <div className="profile-security">
+                <PinForm />
+                <aside className="profile-security-notes">
+                  <h3>Tu PIN</h3>
+                  <ul>
+                    <li>Protege tu cuenta en la web y en PokeApp Launcher.</li>
+                    <li>
+                      Al cambiarlo se cierran tus sesiones anteriores, también
+                      la del Launcher: vuelve a entrar con el nuevo PIN.
+                    </li>
+                    <li>
+                      Si lo olvidas, el responsable de PokeApp puede darte una
+                      autorización de renovación tras verificar tu identidad.
+                    </li>
+                  </ul>
+                </aside>
+              </div>
             </section>
           </>
         )}

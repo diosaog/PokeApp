@@ -450,18 +450,30 @@
   opacity: 0.55;
   cursor: not-allowed;
 }
+/* «Mi perfil» (079): a medium, balanced settings card. Identity and tabs
+   share one header row; each tab replaces the body (only the selected
+   panel renders: `hidden` must never be overridden by a display rule). */
 dialog.profile-settings {
-  width: min(560px, calc(100vw - 24px));
+  width: min(880px, calc(100vw - 32px));
+  max-height: min(700px, calc(100dvh - 32px));
+}
+.profile-settings-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px 24px;
+  margin-bottom: 18px;
 }
 .profile-settings-identity {
   display: flex;
   align-items: center;
   gap: 14px;
-  margin-bottom: 16px;
+  min-width: 0;
 }
 .profile-settings-identity .trainer-photo {
-  width: 56px;
-  height: 66px;
+  width: 52px;
+  height: 60px;
   border-radius: 12px;
   flex: none;
 }
@@ -470,14 +482,20 @@ dialog.profile-settings {
   font-size: 1.05rem;
 }
 .profile-settings .tabs {
-  margin-bottom: 16px;
+  margin: 0;
 }
 .profile-settings .tabs button {
   display: inline-flex;
   align-items: center;
   gap: 6px;
 }
-.profile-settings-body > section {
+.profile-settings-body {
+  min-height: 240px;
+}
+.profile-settings-body > section[hidden] {
+  display: none;
+}
+.profile-settings-body > section:not([hidden]) {
   display: grid;
   gap: 16px;
 }
@@ -502,8 +520,61 @@ dialog.profile-settings {
   display: grid;
   gap: 18px;
 }
+/* Perfil: name and photo side by side. */
+.profile-settings-body .account-identity {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px 28px;
+  align-items: start;
+}
+/* Seguridad: the PIN form beside what changing it means. */
+.profile-security {
+  display: grid;
+  grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr);
+  gap: 18px 28px;
+  align-items: start;
+}
+.profile-security fieldset {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  align-items: end;
+}
+.profile-security fieldset > :not(.field) {
+  grid-column: 1 / -1;
+}
+.profile-security fieldset > button {
+  justify-self: start;
+}
+.profile-security-notes {
+  padding: 4px 0 4px 20px;
+  border-left: 1px solid var(--c-line);
+  color: var(--c-text-soft, var(--c-text));
+  font-size: 0.88rem;
+}
+.profile-security-notes ul {
+  margin: 0;
+  padding-left: 18px;
+  display: grid;
+  gap: 8px;
+}
+/* Preferencias: compact rows across the width. */
+.profile-settings-body .pref-row {
+  padding: 12px 0;
+}
 .profile-settings-discard {
   margin-top: 16px;
   display: grid;
   gap: 10px;
+}
+@media (max-width: 720px) {
+  .profile-settings-body .account-identity,
+  .profile-security,
+  .profile-security fieldset {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .profile-security-notes {
+    padding: 12px 0 0;
+    border-left: 0;
+    border-top: 1px solid var(--c-line);
+  }
 }
