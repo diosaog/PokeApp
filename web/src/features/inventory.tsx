@@ -18,9 +18,11 @@ import {
 import { PokemonSelectorModal, type PokemonTarget } from "./pokemon-selector";
 import {
   deliveriesPath,
+  friendshipPath,
   infiniteItemPath,
   insideLauncher,
   launcherDeliversShopObjects,
+  launcherRaisesFriendship,
   launcherTrainsPokemon,
   shopObjectsPath,
   trainingItemPath,
@@ -211,6 +213,7 @@ export function Inventory() {
   const [unlimitedInfo, setUnlimitedInfo] = useState<
     NonNullable<Model<"InventoryRead">["unlimited_items"]>[number] | null
   >(null);
+  const [friendshipInfo, setFriendshipInfo] = useState(false);
   const trainers = useRead<Model<"TrainerRead">[]>(
     "/v1/read/trainers",
     !!season && !!purchase,
@@ -329,8 +332,64 @@ export function Inventory() {
                 )}
               </li>
             ))}
+            {/* «Felicidad máxima»: free and unlimited, applied by PokeApp
+                Launcher to one Pokémon of the current party (its native
+                dialog shows the party, the current value and confirms). */}
+            <li className="unlimited-row">
+              <ItemIcon name="Soothe Bell" />
+              <span className="unlimited-text">
+                <strong>Felicidad máxima</strong>
+                <span id="unlimited-felicidad">
+                  Sube a 255 la felicidad de un Pokémon de tu equipo. No cambia
+                  nada más ni lo hace evolucionar por sí sola.
+                </span>
+              </span>
+              <Tag>∞ · Gratis</Tag>
+              {insideLauncher() && launcherRaisesFriendship() ? (
+                <Link
+                  className="button primary"
+                  to={friendshipPath}
+                  aria-describedby="unlimited-felicidad"
+                >
+                  Subir felicidad
+                </Link>
+              ) : (
+                <button
+                  type="button"
+                  className="button primary"
+                  aria-describedby="unlimited-felicidad"
+                  onClick={() => setFriendshipInfo(true)}
+                >
+                  Subir felicidad
+                </button>
+              )}
+            </li>
           </ul>
         </section>
+      )}
+      {friendshipInfo && (
+        <Modal
+          title="Felicidad máxima"
+          onClose={() => setFriendshipInfo(false)}
+        >
+          <div className="unlimited-dialog">
+            <ItemIcon name="Soothe Bell" />
+            <p>
+              <strong>Gratis e ilimitado.</strong> Elige un Pokémon de tu equipo
+              en PokeApp Launcher y su felicidad sube a 255, comprobada en tu
+              partida. Si evoluciona por amistad, aún tendrá que cumplir su
+              condición en el juego (por ejemplo, subir de nivel).
+            </p>
+          </div>
+          {insideLauncher() ? (
+            <p className="muted">
+              Actualiza PokeApp Launcher a la versión 0.26.12 o posterior para
+              usarla.
+            </p>
+          ) : (
+            <LauncherDownload />
+          )}
+        </Modal>
       )}
       {unlimitedInfo && (
         <Modal

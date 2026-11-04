@@ -330,6 +330,10 @@ class LocalWriteController:
             from app.launcher.item_delivery import describe
 
             return describe(change)
+        if change.get("kind") == "max_friendship":
+            from app.launcher.friendship import describe
+
+            return describe(change)
         if change.get("kind") != "test_marking":
             raise WriteSafetyError("PRODUCTION_WRITES_DISABLED")
         if change.get("location") == "party":

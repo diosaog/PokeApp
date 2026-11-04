@@ -492,7 +492,8 @@ it("shows Rare Candy and Heart Scale as compact, infinite and free with no purch
   render(<Inventory />);
   expect(screen.getByText("Caramelo Raro")).toBeInTheDocument();
   expect(screen.getByText("Escama Corazón")).toBeInTheDocument();
-  expect(screen.getAllByText("∞ · Gratis")).toHaveLength(2);
+  // Two bag items plus «Felicidad máxima».
+  expect(screen.getAllByText("∞ · Gratis")).toHaveLength(3);
   const add = screen.getAllByRole("button", { name: "Añadir a la bolsa" });
   expect(add).toHaveLength(2);
   // The description stays available to assistive technology.
@@ -551,6 +552,51 @@ it("inside the Launcher opens each infinite item in the native popup", () => {
   ]);
   expect(mocks.execute).not.toHaveBeenCalled();
   agent.mockRestore();
+});
+
+it("offers «Felicidad máxima» free: the native dialog from Launcher 0.26.12, an honest notice otherwise", () => {
+  mocks.inventory = {
+    purchases: [],
+    targets: [],
+    unlimited_items: unlimited,
+    physical_items: true,
+  };
+  for (const [agent, native] of [
+    ["Mozilla/5.0 PokeAppLauncher/0.26.12", true],
+    ["Mozilla/5.0 PokeAppLauncher/0.26.11", false],
+  ] as const) {
+    const spy = vi.spyOn(navigator, "userAgent", "get").mockReturnValue(agent);
+    const { unmount } = render(
+      <MemoryRouter>
+        <Inventory />
+      </MemoryRouter>,
+    );
+    if (native)
+      expect(
+        screen.getByRole("link", { name: "Subir felicidad" }),
+      ).toHaveAttribute("href", "/escritorio/felicidad");
+    else {
+      fireEvent.click(screen.getByRole("button", { name: "Subir felicidad" }));
+      expect(
+        screen.getByRole("dialog", { name: "Felicidad máxima" }),
+      ).toHaveTextContent(/versión 0\.26\.12 o posterior/);
+    }
+    unmount();
+    spy.mockRestore();
+  }
+  render(
+    <MemoryRouter>
+      <Inventory />
+    </MemoryRouter>,
+  );
+  fireEvent.click(screen.getByRole("button", { name: "Subir felicidad" }));
+  const dialog = screen.getByRole("dialog", { name: "Felicidad máxima" });
+  expect(dialog).toHaveTextContent(/Gratis e ilimitado/);
+  expect(dialog).toHaveTextContent(/aún tendrá que cumplir su condición/);
+  expect(
+    screen.getByRole("link", { name: /Descargar Launcher/ }),
+  ).toHaveAttribute("href", "/launcher/download");
+  expect(mocks.execute).not.toHaveBeenCalled();
 });
 
 // The production API before the Launcher item flow (no `physical_items`):

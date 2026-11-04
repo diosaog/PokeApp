@@ -90,6 +90,8 @@ function fingerprint(kind, target, state) {
     return [state.selected_save, target, state.write?.description];
   if (kind === "quick-item")
     return [state.selected_save, target, state.receipt_id ?? null];
+  if (kind === "friendship")
+    return [state.selected_save, target, state.receipt_id ?? null];
   if (kind === "delivery")
     return [state.selected_save, target, state.receipt_id ?? null];
   if (kind === "export")
@@ -122,11 +124,47 @@ const GAMES = {
 const CLOSED =
   "\n\nEl Launcher comprueba antes que el emulador está cerrado y que el archivo está libre; si no, no cambia nada y te dice por qué.";
 const ITEMS = { rare_candy: "Caramelo Raro", heart_scale: "Escama Corazón" };
+// «Felicidad máxima»: target is "<party slot>:<that Pokémon's exact hash>".
+const friendshipFor = (state, target) => {
+  const [slot, hash] = String(target).split(":");
+  return (state.friendship?.party || []).find(
+    (m) => String(m.slot_index) === slot && m.pokemon_sha256 === hash,
+  );
+};
 // The dialog text for one action, or an error when it is not available now.
 function describe(kind, target, state) {
   if (kind === "training")
     return training.summary(state, training.parse(target));
   const save = state.selected_save || "";
+  if (kind === "friendship") {
+    const member = friendshipFor(state, target);
+    if (!state.selected_save) throw new Error("Selecciona tu partida primero.");
+    if (!member || !member.eligible)
+      throw new Error(
+        "Vuelve a leer el equipo: ese Pokémon ya no está en esa posición.",
+      );
+    if (!state.friendship?.application_enabled)
+      throw new Error("Subir la felicidad aún no está activado en este Launcher.");
+    if (member.friendship >= 255)
+      throw new Error("Ese Pokémon ya tiene la felicidad máxima (255).");
+    if (state.write?.busy || state.write?.status === "RECOVERY_REQUIRED")
+      throw new Error(
+        "Hay otra operación en tu partida. Espera a que termine o revísala en «Cambios en tu partida».",
+      );
+    const species = training.speciesName({ species: member.species });
+    const label =
+      member.nickname && member.nickname !== species
+        ? `${member.nickname} (${species})`
+        : species;
+    const game = state.observation?.game || state.friendship?.game;
+    const trainer = state.observation?.trainer?.name;
+    return {
+      title: "Felicidad máxima",
+      message: `${label} · Nv. ${member.level}${game ? ` · Pokémon ${GAMES[game] || game}` : ""}${trainer ? ` · ${trainer}` : ""}`,
+      detail: `Felicidad: ${member.friendship} → 255. Solo cambia ese valor: no toca el afecto de Pokémon-Amie, la especie, los movimientos ni nada más. No hace evolucionar al Pokémon por sí sola: si evoluciona por amistad, todavía tendrá que cumplir su condición en el juego (por ejemplo, subir de nivel). Antes de cambiar nada se guarda y verifica una copia completa de tu partida; después se vuelve a leer para comprobar el resultado.${CLOSED}`,
+      go: "Subir a 255",
+    };
+  }
   if (kind === "quick-item") {
     const [item, amount] = target.split(":");
     const quantity = Number(amount);

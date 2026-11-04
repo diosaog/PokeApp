@@ -35,6 +35,16 @@ export function launcherDeliversShopObjects() {
   return major > 0 || minor > 26 || (minor === 26 && patch >= 8);
 }
 export const deliveriesPath = "/escritorio/robos";
+// «Felicidad máxima» opens the Launcher's native party dialog (0.26.12+).
+export const friendshipPath = "/escritorio/felicidad";
+export function launcherRaisesFriendship() {
+  const version = /PokeAppLauncher\/(\d+)\.(\d+)\.(\d+)/.exec(
+    typeof navigator === "undefined" ? "" : navigator.userAgent,
+  );
+  if (!version) return false;
+  const [major, minor, patch] = version.slice(1).map(Number);
+  return major > 0 || minor > 26 || (minor === 26 && patch >= 12);
+}
 // Links from 27C (Mi partida, Copias, Conexión) now live in the hub's tabs.
 export const legacyDesktopPanels = ["partida", "copias", "nube"] as const;
 // Launchers before 0.26.0 have no native hub at /saves: they still open their

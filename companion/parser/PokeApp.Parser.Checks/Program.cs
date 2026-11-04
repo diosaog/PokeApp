@@ -9,6 +9,12 @@ if (args.Length == 3 && args[0] == "--training-runtime-fixtures")
     return;
 }
 
+if (args.Length == 3 && args[0] == "--friendship-checks")
+{
+    FriendshipChecks.Run(args[1], args[2]);
+    return;
+}
+
 if (args.Length == 3 && args[0] == "--training-checks")
 {
     TrainingChecks.Run(args[1], args[2]);

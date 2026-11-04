@@ -41,6 +41,9 @@ contextBridge.exposeInMainWorld("launcher", {
   deliveries: () => ipcRenderer.invoke("launcher:deliveries"),
   addDelivery: (purchaseId, item, ticket) =>
     ipcRenderer.invoke("launcher:delivery-add", purchaseId, item, ticket),
+  friendship: () => ipcRenderer.invoke("launcher:friendship"),
+  applyFriendship: (slot, hash, ticket) =>
+    ipcRenderer.invoke("launcher:friendship-apply", slot, hash, ticket),
   trainingList: () => ipcRenderer.invoke("launcher:training-list"),
   trainingApply: (args, ticket) =>
     ipcRenderer.invoke("launcher:training-apply", args, ticket),
@@ -74,6 +77,7 @@ contextBridge.exposeInMainWorld("launcher", {
         "objetos",
         "robos",
         "entrenamiento",
+        "felicidad",
         "selector",
         "update",
         "restore",

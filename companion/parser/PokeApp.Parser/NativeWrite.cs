@@ -52,6 +52,8 @@ public static class NativeWrite
                 return NativeItems.Execute(root, verify);
             if (Text(root.GetProperty("intent").GetProperty("mutation"), "kind") == "virtual_training")
                 return NativeTraining.Execute(root, verify);
+            if (Text(root.GetProperty("intent").GetProperty("mutation"), "kind") == "max_friendship")
+                return NativeFriendship.Execute(root, verify);
             var intent = ParseIntent(root.GetProperty("intent"));
             var original = Bytes(root, "source_base64");
             var source = Validate(original);

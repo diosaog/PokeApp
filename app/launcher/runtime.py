@@ -27,6 +27,7 @@ from app.launcher.journal import LocalConflict
 # core then stops the build's own checks instead of every «Objetos ∞» read
 # (0.26.5 shipped without app.domain.unlimited_items and failed silently).
 from app.launcher.quick_items import inventory_view, quick_item_intent
+from app.launcher.friendship import KIND as FRIENDSHIP_KIND, MAX_FRIENDSHIP, friendship_intent, party_view
 from app.launcher.save_activity import SaveActivityGate, SaveBusy, save_read
 from app.launcher.secrets import TokenStore
 from app.launcher.sync import SaveWatchService
@@ -68,6 +69,23 @@ QUICK_ERRORS = {
     "WRITE_ALREADY_RUNNING": "Otra instancia de PokeApp Launcher está usando esta partida. Ciérrala y vuelve a intentarlo.",
 }
 QUICK_READ_FAILED = "No se pudieron leer las cantidades de tu partida. Pulsa «Volver a leer las cantidades»."
+# «Felicidad máxima» (app/launcher/friendship.py): same engine and journal.
+FRIENDSHIP_COMMANDS = ("friendship_refresh", "friendship_apply")
+FRIENDSHIP_READ_FAILED = "No se pudo leer el equipo de tu partida. Pulsa «Volver a leer el equipo»."
+FRIENDSHIP_ERRORS = QUICK_ERRORS | {
+    "FRIENDSHIP_ALREADY_MAX": "Ese Pokémon ya tiene la felicidad máxima (255). Tu partida no ha cambiado.",
+    "FRIENDSHIP_NOT_ELIGIBLE": "Ese hueco del equipo no admite este cambio (por ejemplo, un huevo). Tu partida no ha cambiado.",
+    "UNSAFE_TARGET": "Ese hueco del equipo no admite este cambio (por ejemplo, un huevo). Tu partida no ha cambiado.",
+    "FRIENDSHIP_DISABLED": "Subir la felicidad aún no está activado en este Launcher. Ya puedes ver la felicidad de tu equipo.",
+    "PRODUCTION_WRITES_DISABLED": "Subir la felicidad aún no está activado en este Launcher. Tu partida no ha cambiado.",
+    "EMULATOR_RUNNING": "El emulador está abierto: ciérralo (y el juego) y vuelve a confirmar. Tu partida no ha cambiado.",
+    "CORRUPT_SAVE": "No se pudo preparar un archivo verificable. Tu partida no se ha modificado.",
+    "NATIVE_VERIFICATION_FAILED": "No se pudo preparar un archivo verificable. Tu partida no se ha modificado.",
+    "UNSUPPORTED_FORMAT": "Esta partida no admite este cambio. Juegos admitidos: X/Y, Rubí Omega/Zafiro Alfa y Sol/Luna/Ultrasol/Ultraluna.",
+    "VERIFICATION_FAILED": "No se pudo leer el equipo de tu partida. Pulsa «Volver a leer el equipo»; si sigue fallando, guarda de nuevo en el juego.",
+    "NATIVE_WRITER_FAILURE": "No se pudo leer el equipo de tu partida. Pulsa «Volver a leer el equipo»; si sigue fallando, reinicia el Launcher.",
+    "SAVE_CHANGED_DURING_READ": "Tu partida estaba guardándose. Vuelve a leer el equipo en unos segundos.",
+}
 # 072: paid Shop objects into the bag (app/launcher/item_delivery.py).
 DELIVERY_COMMANDS = ("deliveries_refresh", "delivery_apply")
 TRAINING_COMMANDS = ("training_list", "training_apply")
@@ -237,6 +255,12 @@ class LauncherRuntime:
             "training_error": None,
             "training_result": None,
             "training_seq": 0,
+            # «Felicidad máxima»: the read party, the last verified change and
+            # its refusal; the sequence counts finished steps like quick items.
+            "friendship": None,
+            "friendship_error": None,
+            "friendship_result": None,
+            "friendship_seq": 0,
             "emulator_saves": [],
             # What the last search checked, so «no saves» can say why.
             "discovery": None,
@@ -447,6 +471,22 @@ class LauncherRuntime:
                 )
             if not valid:
                 raise ValueError("invalid_quick_item_arguments")
+            try:
+                self.write_commands.put_nowait((name, dict(args)))
+            except Full:
+                return {"status": "BUSY"}
+            return {"status": "QUEUED"}
+        if name in FRIENDSHIP_COMMANDS:
+            valid = args == {} if name == "friendship_refresh" else (
+                set(args) == {"slot_index", "pokemon_sha256"}
+                and type(args["slot_index"]) is int
+                and 0 <= args["slot_index"] <= 5
+                and isinstance(args["pokemon_sha256"], str)
+                and len(args["pokemon_sha256"]) == 64
+                and all(c in "0123456789abcdef" for c in args["pokemon_sha256"])
+            )
+            if not valid:
+                raise ValueError("invalid_friendship_arguments")
             try:
                 self.write_commands.put_nowait((name, dict(args)))
             except Full:
@@ -1077,6 +1117,101 @@ class LauncherRuntime:
             }
         )
 
+    def _friendship_step(self, name, args):
+        """Like quick items: every finished step ends with the party or a reason."""
+        self._patch(friendship_result=None)
+        try:
+            self._friendship_attempt(name, args)
+        except Exception:  # noqa: BLE001 - no native output, path or journal data to UI
+            self._patch(friendship_error=FRIENDSHIP_READ_FAILED)
+        finally:
+            with self.lock:
+                if (
+                    self.value["friendship"] is None
+                    and self.value["friendship_error"] is None
+                    and self.value["friendship_result"] is None
+                ):
+                    self.value["friendship_error"] = FRIENDSHIP_READ_FAILED
+                self.value["friendship_seq"] += 1
+
+    def _friendship_attempt(self, name, args):
+        engine = self.writes.engine
+        try:
+            native = getattr(engine, "native", None)
+            if native is None or not self.writes.selected():
+                raise WriteSafetyError("NO_SELECTED_WRITE_TARGET")
+            data = engine.files.read_path(Path(self.writes.selected()))
+            enabled = engine.allows(FRIENDSHIP_KIND)
+            if name == "friendship_refresh":
+                self._patch(
+                    friendship=party_view(native, data) | {"application_enabled": enabled},
+                    friendship_error=None,
+                )
+                return
+            if not enabled:
+                raise WriteSafetyError("FRIENDSHIP_DISABLED")
+            intent = friendship_intent(native, data, args["slot_index"], args["pokemon_sha256"])
+            # Existing journal: verified backup, process check, readback, recovery.
+            self.writes.offer(intent, closed_emulator_confirmed=True)
+            self._apply_friendship(intent)
+            self._patch(friendship_error=None, write_error=None)
+        except SaveBusy:
+            self._patch(
+                friendship_error="Hay una lectura o sincronización en curso. Espera unos segundos y vuelve a intentarlo."
+            )
+        except (NativeWriteError, WriteSafetyError) as error:
+            self._patch(
+                friendship_error=FRIENDSHIP_ERRORS.get(
+                    str(error) or getattr(error, "code", ""),
+                    "No se puede preparar el cambio. Revisa la partida seleccionada; no se ha modificado.",
+                )
+            )
+        except Exception:  # noqa: BLE001 - no native output, path or journal data to UI
+            self._patch(
+                friendship_error=FRIENDSHIP_READ_FAILED
+                if name == "friendship_refresh"
+                else self._unexpected_write_failure()
+            )
+
+    def _apply_friendship(self, intent):
+        """Applied at once after the engine re-checks the emulator, source,
+        backup and staged bytes; the result is then re-read from the file."""
+        state = self.writes.state()
+        if state["status"] != "AWAITING_CONFIRMATION" or not state["operation_id"]:
+            raise WriteSafetyError("NATIVE_VERIFICATION_FAILED")
+        operation = state["operation_id"]
+        result = self.writes.confirm(operation, closed_emulator_confirmed=True)
+        if result["status"] != "APPLIED_VERIFIED":
+            error = None
+            try:
+                error = self.writes.engine.status(operation).error
+            except Exception:  # noqa: BLE001 - the status below still decides
+                pass
+            if result["status"] == "RECOVERY_REQUIRED":
+                raise RuntimeError("friendship_recovery")
+            raise WriteSafetyError(error or "NATIVE_VERIFICATION_FAILED")
+        self._patch(friendship=None)
+        self._load_local()
+        slot = intent.mutation["slot_index"]
+        try:
+            data = self.writes.engine.files.read_path(Path(self.writes.selected()))
+            view = party_view(self.writes.engine.native, data)
+            member = next(m for m in view["party"] if m["slot_index"] == slot)
+        except Exception:  # noqa: BLE001 - the change itself is verified
+            view = member = None
+        if view is not None:
+            self._patch(friendship=view | {"application_enabled": True})
+        self._patch(
+            friendship_result={
+                "slot_index": slot,
+                # Re-read from the written file, never assumed.
+                "friendship": member["friendship"] if member else None,
+                "readback_verified": bool(member) and member["friendship"] == MAX_FRIENDSHIP,
+                "game": intent.game,
+                "at": int(time.time()),
+            }
+        )
+
     def _write_step(self):
         try:
             name, args = self.write_commands.get_nowait()
@@ -1085,6 +1220,12 @@ class LauncherRuntime:
         if name in QUICK_COMMANDS:
             try:
                 self._quick_step(name, args)
+            finally:
+                self.write_commands.task_done()
+            return
+        if name in FRIENDSHIP_COMMANDS:
+            try:
+                self._friendship_step(name, args)
             finally:
                 self.write_commands.task_done()
             return

@@ -37,6 +37,9 @@ GAMES = frozenset(("X", "Y", "OR", "AS", "SN", "MN", "US", "UM"))
 # 072 (owner decision 2026-10-29): deliver_item puts one paid Shop object in the
 # bag; like a robbery leg it applies only with the in-process permit of the
 # delivery flow, after the server reserved that purchase (app/launcher/item_delivery.py).
+# max_friendship («Felicidad máxima», 2026-11-04) is implemented and fixture-
+# qualified but deliberately NOT listed here: enabling it is a separate owner
+# decision after a real-save qualification and a Launcher release.
 PRODUCTION_MUTATIONS: frozenset[str] = frozenset(
     {"add_item", "deliver_item", "transfer_remove", "transfer_insert", "virtual_training"}
 )
@@ -293,6 +296,7 @@ class LocalWriteEngine:
                 "add_item",
                 "deliver_item",
                 "virtual_training",
+                "max_friendship",
             )
             or target.path == capability.fixture_root
             or not target.path.is_relative_to(capability.fixture_root)

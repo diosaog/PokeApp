@@ -241,6 +241,8 @@ function announce(state) {
     deliveryDone: state.delivery_result?.at ?? null,
     trainingSeq: state.training_seq ?? 0,
     trainingDone: state.training_result?.at ?? null,
+    friendshipSeq: state.friendship_seq ?? 0,
+    friendshipDone: state.friendship_result?.at ?? null,
     receipt: state.receipt_id,
     // Each copy PokeApp accepts (season first, then personal) refreshes the
     // web at once, without waiting for the rest of the sync.
@@ -265,6 +267,18 @@ function announce(state) {
   // Every finished attempt that failed says why, even the same reason twice.
   if (now.quickSeq !== before.quickSeq && state.quick_item_error)
     toast(state.quick_item_error);
+  if (now.friendshipSeq !== before.friendshipSeq && state.friendship_error)
+    toast(state.friendship_error);
+  if (now.friendshipDone && now.friendshipDone !== before.friendshipDone) {
+    const r = state.friendship_result;
+    toast(
+      r.readback_verified
+        ? "Felicidad 255 aplicada y comprobada en tu partida. Se sincronizará sola."
+        : "Cambio aplicado y verificado por el Launcher, pero no se pudo volver a leer el equipo. Pulsa «Volver a leer el equipo».",
+      r.readback_verified ? "ok" : undefined,
+    );
+    tell("items-changed");
+  }
   if (now.quickDone && now.quickDone !== before.quickDone) {
     const r = state.quick_item_result;
     toast(
@@ -878,6 +892,7 @@ const dialogIds = {
   restore: "restore-dialog",
   objetos: "sheet-dialog",
   robos: "sheet-dialog",
+  felicidad: "sheet-dialog",
   entrenamiento: "training-dialog",
 };
 const anyOpen = () => document.querySelector("dialog[open]") !== null;
@@ -892,7 +907,8 @@ function present(view, { check = true } = {}) {
 }
 function openDialog(view, item) {
   if (view === "entrenamiento") openTraining(item);
-  if (view === "objetos" || view === "robos") fillSheet(view, item);
+  if (view === "objetos" || view === "robos" || view === "felicidad")
+    fillSheet(view, item);
   if (view === "selector") renderSelector(lastState, true);
   if (view === "update") {
     if (updateCheckOnOpen || !lastUpdate) void checkForUpdates();
@@ -964,6 +980,7 @@ function confirmDialog({ title, message, detail, go, danger }) {
 const sheets = {
   objetos: ["Objetos", ["quick-article", "shop-article", "write-article"]],
   robos: ["Robos y entregas", ["transfer-article", "write-article"]],
+  felicidad: ["Felicidad máxima", ["friendship-article", "write-article"]],
 };
 const homes = new Map();
 function fillSheet(view) {
@@ -982,6 +999,7 @@ function fillSheet(view) {
     requestQuick(true);
     requestDeliveries();
   }
+  if (view === "felicidad") requestFriendship(true);
 }
 function returnSheet() {
   for (const [section, mark] of homes) mark.replaceWith(section);
@@ -1627,6 +1645,119 @@ for (const row of document.querySelectorAll(".quick-item")) {
   };
 }
 $("quick-refresh").onclick = () => requestQuick(true);
+
+// «Felicidad máxima»: the party as the core read it from the save, one
+// confirmation per Pokémon; the core checks the emulator and the file itself.
+const friendshipRead = { pending: false, since: 0, seq: 0 };
+let friendshipPending = false;
+function requestFriendship(manual = false) {
+  if (friendshipRead.pending || !lastState?.selected_save) return;
+  Object.assign(friendshipRead, {
+    pending: true,
+    since: Date.now(),
+    seq: lastState.friendship_seq ?? 0,
+  });
+  void action(() => window.launcher.friendship()).then((result) => {
+    if (result?.status !== "QUEUED") friendshipRead.pending = false;
+    if (lastState) renderFriendship(lastState);
+  });
+}
+function renderFriendship(state) {
+  const write = state.write || {};
+  const view = state.friendship;
+  const enabled = Boolean(view?.application_enabled);
+  if (
+    friendshipRead.pending &&
+    ((state.friendship_seq ?? 0) !== friendshipRead.seq ||
+      Date.now() - friendshipRead.since > 20000)
+  )
+    friendshipRead.pending = false;
+  text(
+    "friendship-state",
+    !state.selected_save
+      ? "Elige tu partida en «Saves y Launcher»."
+      : write.status === "RECOVERY_REQUIRED"
+        ? "Hay una operación pendiente de comprobar en «Cambios en tu partida»."
+        : write.busy || friendshipPending
+          ? "Subiendo la felicidad… no abras el juego."
+          : friendshipRead.pending && !view
+            ? "Leyendo tu equipo…"
+            : state.friendship_error
+              ? state.friendship_error
+              : !view
+                ? "Pulsa «Volver a leer el equipo»."
+                : !enabled
+                  ? "Subir la felicidad aún no está activado en este Launcher."
+                  : state.friendship_result?.readback_verified
+                    ? "Hecho: felicidad 255 comprobada en tu partida."
+                    : "",
+  );
+  const blocked =
+    !enabled ||
+    write.busy ||
+    friendshipPending ||
+    ["RECOVERY_REQUIRED", "AWAITING_CONFIRMATION", "PREPARED"].includes(
+      write.status,
+    );
+  const list = $("friendship-party");
+  const rows = (view?.party || []).filter((m) => m.eligible);
+  const key = JSON.stringify([rows, blocked]);
+  if (list.dataset.key === key) return;
+  list.dataset.key = key;
+  list.replaceChildren(
+    ...rows.map((m) => {
+      const species = PokeTraining.speciesName({ species: m.species });
+      const row = document.createElement("div");
+      row.className = "quick-item";
+      const name = document.createElement("span");
+      name.className = "quick-name";
+      name.textContent =
+        m.nickname && m.nickname !== species
+          ? `${m.nickname} (${species})`
+          : species;
+      const info = document.createElement("span");
+      info.className = "quick-count muted";
+      info.textContent = `Nv. ${m.level} · Felicidad ${m.friendship}`;
+      const button = document.createElement("button");
+      button.className = "quick-add";
+      const full = m.friendship >= 255;
+      button.textContent = full ? "Ya está al máximo" : "Subir a 255";
+      button.disabled = blocked || full;
+      button.onclick = () => void raiseFriendship(m);
+      row.append(name, info, button);
+      return row;
+    }),
+  );
+}
+async function raiseFriendship(member) {
+  const ticket = await confirmWith(
+    "friendship",
+    `${member.slot_index}:${member.pokemon_sha256}`,
+  );
+  if (!ticket) return;
+  friendshipPending = true;
+  if (lastState) renderFriendship(lastState);
+  const before = lastState?.friendship_seq ?? 0;
+  try {
+    const queued = await action(() =>
+      window.launcher.applyFriendship(
+        member.slot_index,
+        member.pokemon_sha256,
+        ticket,
+      ),
+    );
+    // QUEUED: the outcome (verified or the reason it was not) arrives with
+    // the next completed friendship step.
+    for (let i = 0; queued && i < 120; i++) {
+      await new Promise((resolve) => setTimeout(resolve, 500));
+      if ((lastState?.friendship_seq ?? 0) !== before) break;
+    }
+  } finally {
+    friendshipPending = false;
+    if (lastState) renderFriendship(lastState);
+  }
+}
+$("friendship-refresh").onclick = () => requestFriendship(true);
 
 // 072: paid Shop objects into the bag of the league save. The list is
 // PokeApp's; one confirmation per object; the core reserves the purchase,
@@ -2512,6 +2643,7 @@ async function poll() {
     lastState = state;
     render(state);
     renderQuick(state);
+    renderFriendship(state);
     renderShop(state);
     renderTraining(state);
     renderTransfers(state);

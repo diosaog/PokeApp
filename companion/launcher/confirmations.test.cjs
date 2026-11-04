@@ -206,6 +206,43 @@ test("«Añadir a la bolsa» is one confirmation bound to the save and its readi
   assert.throws(() => describe("quick-item", "nugget:1", state), /objeto/);
 });
 
+test("«Felicidad máxima» confirms one party Pokémon by its exact bytes, never promising evolution", () => {
+  const { describe, fingerprint } = require("./confirmations.cjs");
+  const hash = "c".repeat(64);
+  const state = {
+    selected_save: "C:/saves/main",
+    receipt_id: "r1",
+    observation: { game: "Y", trainer: { name: "Ami" } },
+    friendship: {
+      application_enabled: true,
+      party: [
+        { slot_index: 0, species: 711, nickname: "Jalowin", level: 31, friendship: 70, eligible: true, pokemon_sha256: hash },
+        { slot_index: 1, species: 25, nickname: "", level: 9, friendship: 255, eligible: true, pokemon_sha256: "d".repeat(64) },
+      ],
+    },
+    write: { busy: false, status: "IDLE" },
+  };
+  const offer = describe("friendship", `0:${hash}`, state);
+  assert.equal(offer.go, "Subir a 255");
+  assert.match(offer.message, /^Jalowin \(Gourgeist\) · Nv\. 31 · Pokémon Y · Ami$/);
+  assert.match(offer.detail, /70 → 255/);
+  assert.match(offer.detail, /no toca el afecto de Pokémon-Amie/);
+  assert.match(offer.detail, /No hace evolucionar/);
+  const c = createConfirmations();
+  const id = c.issue("friendship", `0:${hash}`, fingerprint("friendship", `0:${hash}`, state));
+  assert.throws(
+    () => c.redeem(id, "friendship", `0:${hash}`, fingerprint("friendship", `0:${hash}`, { ...state, receipt_id: "r2" })),
+    { message: STALE },
+  );
+  assert.throws(() => describe("friendship", `0:${"e".repeat(64)}`, state), /Vuelve a leer el equipo/);
+  assert.throws(() => describe("friendship", `1:${"d".repeat(64)}`, state), /ya tiene la felicidad máxima/);
+  assert.throws(
+    () => describe("friendship", `0:${hash}`, { ...state, friendship: { ...state.friendship, application_enabled: false } }),
+    /aún no está activado/,
+  );
+  assert.throws(() => describe("friendship", `0:${hash}`, { ...state, write: { busy: true } }), /otra operación/);
+});
+
 test("072: a Shop delivery confirms one purchase and one object of the league save", () => {
   const { describe, fingerprint } = require("./confirmations.cjs");
   const purchase = "c0000000-0000-4000-8000-000000000001";

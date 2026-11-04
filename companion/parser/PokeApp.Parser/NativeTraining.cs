@@ -229,7 +229,7 @@ public static class NativeTraining
         }
     }
 
-    private static void VerifySaveDiff(byte[] original, byte[] output, SAV_BEEF source, int offset, int length)
+    internal static void VerifySaveDiff(byte[] original, byte[] output, SAV_BEEF source, int offset, int length)
     {
         var blocks = source.AllBlocks.Where(b => offset >= b.Offset && offset + length <= b.Offset + b.Length).ToArray();
         if (blocks.Length != 1) throw new Rejection("UNSUPPORTED_FORMAT");
@@ -242,7 +242,7 @@ public static class NativeTraining
                 throw new Rejection("UNEXPECTED_DIFF");
     }
 
-    private static void NormalizeGeneratedSignature(byte[] output, SaveFile source)
+    internal static void NormalizeGeneratedSignature(byte[] output, SaveFile source)
     {
         if (source is not SAV7) return;
         int start = (source is SAV7USUM ? 0x6C000 : 0x6BA00) + MemeCrypto.SaveFileSignatureOffset;

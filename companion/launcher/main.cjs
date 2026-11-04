@@ -633,6 +633,7 @@ app.whenReady().then(() => {
         "robos",
         "objetos",
         "entrenamiento",
+        "felicidad",
         "restore",
       ].includes(view)
     )
@@ -715,6 +716,39 @@ app.whenReady().then(() => {
   );
   // 072: paid Shop objects. The list comes from PokeApp; the core rechecks the
   // purchase, the league save and the bag, then reserves, writes and re-reads.
+  // «Felicidad máxima»: the core reads the party and, after one confirmation,
+  // checks the emulator and the file, backs up, writes and re-reads.
+  ipcMain.handle("launcher:friendship", (event) => {
+    authorize(event);
+    return request("friendship_refresh");
+  });
+  ipcMain.handle(
+    "launcher:friendship-apply",
+    async (event, slot, hash, ticket) => {
+      authorize(event);
+      if (
+        !Number.isInteger(slot) ||
+        slot < 0 ||
+        slot > 5 ||
+        typeof hash !== "string" ||
+        !/^[0-9a-f]{64}$/.test(hash)
+      )
+        throw new Error("Vuelve a leer el equipo.");
+      const target = `${slot}:${hash}`;
+      const state = await request("state");
+      describe("friendship", target, state);
+      confirmations.redeem(
+        ticket,
+        "friendship",
+        target,
+        fingerprint("friendship", target, state),
+      );
+      return request("friendship_apply", {
+        slot_index: slot,
+        pokemon_sha256: hash,
+      });
+    },
+  );
   ipcMain.handle("launcher:deliveries", (event) => {
     authorize(event);
     return request("deliveries_refresh");
@@ -1043,6 +1077,7 @@ app.whenReady().then(() => {
         "export",
         "restore",
         "quick-item",
+        "friendship",
         "delivery",
         "training",
         "transfer:prepare",

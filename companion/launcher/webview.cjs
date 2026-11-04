@@ -16,7 +16,7 @@ const QUICK_ITEMS = ["rare_candy", "heart_scale"];
 // - Infinite items and robbery deliveries open as dialogs over the web.
 // - The 27C /escritorio/<panel> links keep working and land in the same views.
 const HUB_TABS = ["partidas", "copias", "launcher"];
-const MODALS = ["objetos", "robos", "entrenamiento"];
+const MODALS = ["objetos", "robos", "entrenamiento", "felicidad"];
 const LEGACY = { partida: "partidas", copias: "copias", nube: "launcher" };
 // Kept for older webs and tests that list the 27C panel names.
 const DESKTOP_PANELS = ["partida", "objetos", "robos", "copias", "nube"];
@@ -39,6 +39,7 @@ function desktopPanel(url, origin) {
   if (name === "robos" && !item) return { panel: "robos", modal: true };
   if (name === "entrenamiento" && !item)
     return { panel: "entrenamiento", modal: true };
+  if (name === "felicidad" && !item) return { panel: "felicidad", modal: true };
   if (
     name === "entrenamiento" &&
     ["menta_naturaleza", "chapa_plateada", "chapa_dorada"].includes(item)

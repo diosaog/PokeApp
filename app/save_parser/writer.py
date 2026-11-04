@@ -339,6 +339,31 @@ class PkhexProcessWriter:
         return {"game": response["game"], "trainer_key": response["trainer_key"],
                 "source_sha256": response["source_sha256"], **info}
 
+    def inspect_friendship(self, source):
+        """Read-only current party with each member's real (game) friendship,
+        from these exact bytes. Eggs and unsupported slots are not eligible."""
+        if type(source) is not bytes or len(source) not in NATIVE_SIZES.values():
+            raise NativeWriteError("UNSUPPORTED_FORMAT")
+        response = self._run("--inspect-friendship", dict(schema_version=1,
+            source_base64=base64.b64encode(source).decode("ascii")))
+        info = response["semantic_diff"]
+        keys = {"slot_index", "species", "form", "nickname", "level", "friendship", "eligible", "pokemon_sha256"}
+        party = info.get("party") if isinstance(info, dict) and set(info) == {"party"} else None
+        if (response["status"] != "inspected" or response["source_sha256"] != _digest(source)
+            or response["game"] not in NATIVE_SIZES or not re.fullmatch(r"[a-f0-9]{64}", str(response["trainer_key"]))
+            or response["output_base64"] is not None or response["output_sha256"] is not None
+            or not isinstance(party, list) or len(party) > 6
+            or any(not isinstance(m, dict) or set(m) != keys or m["slot_index"] != i
+                   or any(type(m[k]) is not int for k in ("slot_index", "species", "form", "level", "friendship"))
+                   or not 0 <= m["species"] <= 1023 or not 0 <= m["form"] <= 255 or not 0 <= m["level"] <= 100
+                   or not 0 <= m["friendship"] <= 255 or type(m["eligible"]) is not bool
+                   or not isinstance(m["nickname"], str) or len(m["nickname"]) > 24
+                   or not re.fullmatch(r"[a-f0-9]{64}", str(m["pokemon_sha256"]))
+                   for i, m in enumerate(party))):
+            raise NativeWriteError("VERIFICATION_FAILED")
+        return {"game": response["game"], "trainer_key": response["trainer_key"],
+                "source_sha256": response["source_sha256"], "party": party}
+
     def plan_transfer(
         self,
         source,
