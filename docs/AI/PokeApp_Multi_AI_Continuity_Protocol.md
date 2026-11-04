@@ -14,6 +14,12 @@ Reconciled: 2026-09-26. Keep one copy at this path.
 | What behavior was approved? | [Functional alignment contract](../phase10-5-functional-alignment.md) |
 | What was implemented and what evidence exists? | Active phase evidence in its live record until closure; [previous Phase 10 report](../phase10-completion-report.md) retains historical delivery evidence |
 
+Local follow-up (2026-11-04): the public Pokepast.es format correction is on
+`codex/public-pokepaste-format`, from published `16708e9`; continue this task
+from that local branch. [Its verification record](../work-in-progress/public-pokepaste-format.md)
+contains the CRLF defect, tests, screenshot and API-only deployment requirement.
+It has not been deployed or pushed; the published release above remains unchanged.
+
 The live handoff is the single maintained operational record for an active phase.
 Other documents link to it instead of maintaining competing live Git, test or
 staging snapshots. Reports retain dated evidence; checkpoints retain explicitly

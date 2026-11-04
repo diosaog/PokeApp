@@ -3,10 +3,11 @@
 Everything external is mocked: no request ever reaches pokepast.es or Discord.
 """
 
-from copy import deepcopy
-from datetime import UTC, datetime, timedelta
 import json
 import unittest
+from copy import deepcopy
+from datetime import UTC, datetime, timedelta
+from pathlib import Path
 
 import httpx
 
@@ -15,6 +16,7 @@ from app.api.config import APIConfig
 from app.application.announcements import PASTE_ATTEMPTS, Dispatcher
 from app.application.discord_webhook import Outcome
 from app.application.pokepaste import CREATE_URL, PasteOutcome, Pokepaste
+from app.domain.showdown import export_team
 from app.repositories.supabase.announcements import (
     COLUMNS,
     PASTE_COLUMNS,
@@ -60,6 +62,17 @@ PRIVATE_TEAM = [
          evs={"hp": 252, "atk": 252, "defense": 4, "spa": 0, "spd": 0, "spe": 0})
     for m in PUBLIC_TEAM
 ]
+
+# The owner's structural example, synthetic IDs only; never a player's save.
+EXAMPLE_TEAM = [
+    mon(85, nickname="TriPollo", item=239, moves=(38, 282, 438, 73), gender=""),
+    mon(711, nickname="Jalowin", item=540, moves=(221, 398, 152, 38), gender=""),
+    mon(73, nickname="Pulpo Pol", item=640, moves=(473, 518, 586, 338), gender=""),
+    mon(637, nickname="Miguel", item=650, moves=(284, 448, 518, 204), gender=""),
+    mon(24, nickname="Pollita", item=217, moves=(370, 155, 337, 226), gender=""),
+    mon(36, nickname="Leffa", item=158, moves=(326, 405, 586, 229), gender=""),
+]
+EXAMPLE_TEXT = (Path(__file__).parent / "fixtures/public-pokepaste-example.txt").read_text(encoding="utf-8")
 
 
 class Outbox:
@@ -183,6 +196,28 @@ def text_of(payload):
 
 
 class DispatcherTests(unittest.TestCase):
+    def test_example_reaches_pokepaste_as_six_recognizable_sets(self):
+        requests = []
+
+        def handler(request):
+            requests.append(request)
+            return httpx.Response(303, headers={"Location": URL_1})
+
+        h = Harness()
+        h.tables["team_locks"][0]["public_team_snapshot"] = deepcopy(EXAMPLE_TEAM)
+        h.dispatcher.pastes = transport(handler)
+        h.run()
+        h.run(minutes=1)
+        self.assertEqual((len(requests), len(h.webhook.posts)), (1, 1))
+        paste = dict(httpx.QueryParams(requests[0].content.decode()))["paste"]
+        # Pokepast.es v3 syntax.go splits on these exact bytes, not splitlines().
+        sets = paste.rstrip("\r\n").split("\r\n\r\n")
+        self.assertEqual(len(sets), 6)
+        self.assertEqual([sum(line.startswith("- ") for line in s.split("\r\n")) for s in sets], [4] * 6)
+        self.assertEqual(paste.count("Level: 50\r\n"), 6)
+        self.assertEqual(paste.replace("Level: 50\r\n", "").replace("\r\n", "\n"), EXAMPLE_TEXT)
+        self.assertIn(URL_1, text_of(h.webhook.posts[0]))
+
     def test_confirmed_lock_gets_one_public_paste_and_one_announcement(self):
         h = Harness()
         h.run()
@@ -212,6 +247,28 @@ class DispatcherTests(unittest.TestCase):
             self.assertNotIn(private, paste)
         # The private snapshot is never even read.
         self.assertFalse(any("private_team_snapshot" in columns for _, columns in h.reads))
+
+    def test_private_fields_and_mutable_party_cannot_change_the_public_paste(self):
+        h = Harness()
+        h.tables["team_locks"][0]["public_team_snapshot"] = deepcopy(PRIVATE_TEAM)
+        h.tables["parsed_saves"] = [{"payload": {"party": [mon(150, nickname="Mutable secret")]}}]
+        h.run()
+        expected = export_team(PUBLIC_TEAM, generation=6, projection="public").text
+        self.assertEqual(h.pastes.calls[0]["paste"], expected)
+        self.assertFalse(any(table == "parsed_saves" for table, _ in h.reads))
+
+    def test_public_forms_and_gender_with_no_nicknames_or_items(self):
+        team = [
+            mon(678, gender="M"), mon(678, gender="F", form=1),
+            mon(29, gender="F"), mon(32, gender="M"),
+            mon(668, gender="F"), mon(479, gender="N", form=2),
+        ]
+        exported = export_team(team, generation=6, projection="public")
+        self.assertEqual(exported.count, 6)
+        self.assertEqual([s.splitlines()[0] for s in exported.text.strip().split("\n\n")],
+                         ["Meowstic", "Meowstic-F", "Nidoran-F", "Nidoran-M", "Pyroar (F)", "Rotom-Wash"])
+        self.assertNotIn("@", exported.text)
+        self.assertEqual(exported.warnings, ())
 
     def test_discord_embed_names_the_team(self):
         h = Harness()
@@ -343,7 +400,27 @@ class TransportTests(unittest.TestCase):
         request = seen[0]
         self.assertEqual((request.method, str(request.url)), ("POST", CREATE_URL))
         form = dict(httpx.QueryParams(request.content.decode()))
-        self.assertEqual(form, {"paste": "Pikachu\n- Thunderbolt\n", "title": "T", "author": "PokeApp", "notes": "N"})
+        self.assertEqual(form, {"paste": "Pikachu\r\n- Thunderbolt\r\n", "title": "T", "author": "PokeApp", "notes": "N"})
+
+    def test_line_endings_are_normalized_once_in_the_http_form(self):
+        expected = "Pikachu\r\n- Thunderbolt\r\n\r\nRaichu\r\n- Surf\r\n"
+        for paste in (expected, expected.replace("\r\n", "\n"), expected.replace("\r\n", "\r"),
+                      "Pikachu\r\n- Thunderbolt\n\nRaichu\r- Surf\n"):
+            with self.subTest(paste=repr(paste)):
+                requests = []
+                client = transport(lambda r, requests=requests: requests.append(r) or httpx.Response(303, headers={"Location": URL_1}))
+                self.assertEqual(client.create(paste=paste, title="", author="", notes="").url, URL_1)
+                self.assertEqual(dict(httpx.QueryParams(requests[0].content.decode()))["paste"], expected)
+
+    def test_response_url_is_restricted_to_the_exact_public_pokepaste_path(self):
+        for location in ("//evil.example/0123456789abcdef", "http://pokepast.es/0123456789abcdef",
+                         "https://pokepast.es.evil.example/0123456789abcdef",
+                         "https://user@pokepast.es/0123456789abcdef", "/0123456789abcdef/raw",
+                         "/0123456789abcdef?x=y", "/0123456789abcde", ""):
+            with self.subTest(location=location):
+                client = transport(lambda r, location=location: httpx.Response(303, headers={"Location": location}))
+                self.assertEqual(client.create(paste="Pikachu", title="", author="", notes=""),
+                                 PasteOutcome(None, "pokepaste_unexpected_location"))
 
     def test_failures_are_classified_and_never_invent_a_url(self):
         cases = [

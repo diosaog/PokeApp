@@ -5,6 +5,13 @@ milestone record; it does not maintain a second live phase-status ledger.
 
 ## Current project position
 
+- Public Pokepast.es format follow-up (2026-11-04): **LOCAL ONLY**, branch
+  `codex/public-pokepaste-format` from published tip `16708e9` below.
+  Corrects the HTTP form's LF → CRLF so Pokepast.es recognizes all six
+  sets. No schema, UI, private-export or Team Lock rule change; no new
+  external paste or deployment. Evidence and next action:
+  [format verification](work-in-progress/public-pokepaste-format.md).
+
 - All-vs-all League start, always-available Team Preview, «Fijar Equipo»,
   gender check, «Mi perfil» tabs (2026-11-04): **PUBLISHED 2026-11-04 /
   VERIFIED.** API `ef13a7ce` (source `f2f799c`), DB 079 (`20261104134028`),

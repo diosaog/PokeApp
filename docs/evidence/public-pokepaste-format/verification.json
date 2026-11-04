@@ -1,0 +1,185 @@
+{
+  "date": "2026-11-04",
+  "base_commit": "16708e951dc890cf8208dfbee786d1159f8abac7",
+  "scope": "Local rendering of synthetic fixture; read-only external GETs; no external POST or new paste.",
+  "upstream": {
+    "repository": "https://github.com/felixphew/pokepaste",
+    "commit": "617fd20ebb1b3bf0a059e68247c6266fea49db90",
+    "files": [
+      "syntax.go",
+      "data.go",
+      "paste.tmpl"
+    ],
+    "execution": "Original Go renderer; package renamed to main; stdin + httptest.ResponseRecorder wrapper, no server or database. Go 1.27.3 portable in temp; official archive SHA256 verified."
+  },
+  "input": "Public export of tests/test_public_team_pastes.py EXAMPLE_TEAM, captured after app/application/pokepaste.py via httpx.MockTransport. Fixture matches the owner example plus public Level: 50.",
+  "renderer": {
+    "example-lf": {
+      "articles": 1,
+      "pokemon_images": [
+        "/img/pokemon/0-0.png"
+      ],
+      "item_images": [],
+      "typed_moves": 0
+    },
+    "example-crlf": {
+      "articles": 6,
+      "pokemon_images": [
+        "/img/pokemon/85-0.png",
+        "/img/pokemon/711-0.png",
+        "/img/pokemon/73-0.png",
+        "/img/pokemon/637-0.png",
+        "/img/pokemon/24-0.png",
+        "/img/pokemon/36-0.png"
+      ],
+      "item_images": [
+        "/img/items/239.png",
+        "/img/items/540.png",
+        "/img/items/640.png",
+        "/img/items/650.png",
+        "/img/items/217.png",
+        "/img/items/158.png"
+      ],
+      "typed_moves": 24
+    },
+    "forms-crlf": {
+      "articles": 6,
+      "pokemon_images": [
+        "/img/pokemon/678-0.png",
+        "/img/pokemon/678-1.png",
+        "/img/pokemon/29-0.png",
+        "/img/pokemon/32-0.png",
+        "/img/pokemon/668-0.png",
+        "/img/pokemon/479-2.png"
+      ],
+      "item_images": [],
+      "typed_moves": 0
+    },
+    "en": {
+      "typed_moves": 3
+    },
+    "es": {
+      "typed_moves": 0
+    }
+  },
+  "browser": {
+    "engine": "Playwright / installed Chrome, headless, 1440x1100",
+    "method": "Fulfilled one intercepted synthetic HTML document with local upstream output. Original Pokepast.es CSS/images fetched with GET; all non-GET browser requests aborted.",
+    "result": {
+      "articles": 6,
+      "images": [
+        {
+          "src": "/img/pokemon/85-0.png",
+          "loaded": true
+        },
+        {
+          "src": "/img/items/239.png",
+          "loaded": true
+        },
+        {
+          "src": "/img/pokemon/711-0.png",
+          "loaded": true
+        },
+        {
+          "src": "/img/items/540.png",
+          "loaded": true
+        },
+        {
+          "src": "/img/pokemon/73-0.png",
+          "loaded": true
+        },
+        {
+          "src": "/img/items/640.png",
+          "loaded": true
+        },
+        {
+          "src": "/img/pokemon/637-0.png",
+          "loaded": true
+        },
+        {
+          "src": "/img/items/650.png",
+          "loaded": true
+        },
+        {
+          "src": "/img/pokemon/24-0.png",
+          "loaded": true
+        },
+        {
+          "src": "/img/items/217.png",
+          "loaded": true
+        },
+        {
+          "src": "/img/pokemon/36-0.png",
+          "loaded": true
+        },
+        {
+          "src": "/img/items/158.png",
+          "loaded": true
+        }
+      ]
+    },
+    "screenshot": "example-local.png",
+    "visual_inspection": "Six correct species, nicknames, item icons and four colored moves each; no private fields.",
+    "forms_result": {
+      "articles": 6,
+      "images": [
+        {
+          "src": "/img/pokemon/678-0.png",
+          "loaded": true
+        },
+        {
+          "src": "/img/pokemon/678-1.png",
+          "loaded": true
+        },
+        {
+          "src": "/img/pokemon/29-0.png",
+          "loaded": true
+        },
+        {
+          "src": "/img/pokemon/32-0.png",
+          "loaded": true
+        },
+        {
+          "src": "/img/pokemon/668-0.png",
+          "loaded": true
+        },
+        {
+          "src": "/img/pokemon/479-2.png",
+          "loaded": true
+        }
+      ]
+    }
+  },
+  "existing_synthetic_read_only": {
+    "url": "https://pokepast.es/7a00cfd5f754cb45",
+    "raw_crlf": 0,
+    "raw_lf": 35,
+    "articles": 1,
+    "pokemon_image": "/img/pokemon/0-0.png",
+    "item_images": 0
+  },
+  "limitations": [
+    "Local upstream renderer verification is not a post-deployment end-to-end Discord test.",
+    "Pokepast.es data has gaps, including Furfrou trims, several Pikachu hats, Unown letters, cosmetic gender art (e.g. Pyroar F uses the same 668-0 image), Vise Grip, Conversion 2 and some item icons. Correct Showdown identities were preserved.",
+    "No existing stored paste URLs were reset or regenerated."
+  ],
+  "tests": {
+    "environment": "Windows, .venv-api Python 3.14; tools/run_unit_tests.py isolated temporary SQLite and no live credentials",
+    "selection": "124 tracked test modules from git ls-files tests/test*.py; unittest TestLoader.discover replaced with loadTestsFromNames of those modules. Untracked owner tests excluded.",
+    "pythonpath": "Repository root and tests directory, inherited by subprocess tests",
+    "final_result": {
+      "tests": 1484,
+      "failures": 0,
+      "errors": 0,
+      "skips": 0,
+      "seconds": 157.543,
+      "exit_code": 0
+    },
+    "focused_public_pastes": 24,
+    "private_showdown": 26,
+    "gender_pipeline": 4,
+    "compile": "python -m compileall -q app tests: exit 0",
+    "lint": "No new findings. Unfiltered lint retains the 10 baseline C408 findings in the test harness; --ignore C408 passes.",
+    "earlier_invocation_failures": "Direct unittest import of phase9_fixtures, and three Launcher subprocess imports without tests in PYTHONPATH. Corrected invocation; final tracked suite passes."
+  }
+}

@@ -17,8 +17,8 @@ content is never logged.
 
 from __future__ import annotations
 
-from dataclasses import dataclass
 import re
+from dataclasses import dataclass
 
 import httpx
 
@@ -41,6 +41,10 @@ class Pokepaste:
         self._client = client or httpx.Client(timeout=TIMEOUT, follow_redirects=False)
 
     def create(self, *, paste: str, title: str, author: str, notes: str) -> PasteOutcome:
+        # Pokepast.es v3 splits sets on CRLF CRLF and lines on CRLF.
+        # httpx form encoding preserves LF; unlike a browser form, it does
+        # not normalize line endings. Keep this out of the private export.
+        paste = paste.replace("\r\n", "\n").replace("\r", "\n").replace("\n", "\r\n")
         if not paste.strip() or len(paste) > MAX_PASTE:
             return PasteOutcome(None, "pokepaste_invalid_paste")
         form = {
