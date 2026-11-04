@@ -8,8 +8,7 @@ abilities are never judged. Every write goes through the same engine as the
 other operations: emulator closed, exact source bytes, independent verified
 backup, durable journal, native re-read and recovery/restore.
 
-Production writes stay off until the owner enables "max_friendship" in
-write_engine.PRODUCTION_MUTATIONS after real-save qualification.
+Enabled in production with Launcher 0.26.12 (owner authorization 2026-11-05).
 """
 
 from hashlib import sha256

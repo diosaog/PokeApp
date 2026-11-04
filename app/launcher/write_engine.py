@@ -37,14 +37,14 @@ GAMES = frozenset(("X", "Y", "OR", "AS", "SN", "MN", "US", "UM"))
 # 072 (owner decision 2026-10-29): deliver_item puts one paid Shop object in the
 # bag; like a robbery leg it applies only with the in-process permit of the
 # delivery flow, after the server reserved that purchase (app/launcher/item_delivery.py).
-# max_friendship («Felicidad máxima», 2026-11-04) is implemented and fixture-
-# qualified but deliberately NOT listed here: enabling it is a separate owner
-# decision after a real-save qualification and a Launcher release.
+# max_friendship («Felicidad máxima»): owner-authorized release with Launcher
+# 0.26.12 (2026-11-05). Free and unlimited like add_item, through the same
+# engine: emulator closed, exact source, verified backup, native re-read.
 PRODUCTION_MUTATIONS: frozenset[str] = frozenset(
-    {"add_item", "deliver_item", "transfer_remove", "transfer_insert", "virtual_training"}
+    {"add_item", "deliver_item", "transfer_remove", "transfer_insert", "virtual_training", "max_friendship"}
 )
 PUBLIC_READY_MUTATIONS: frozenset[str] = frozenset(
-    {"add_item", "deliver_item", "transfer_remove", "transfer_insert", "virtual_training"}
+    {"add_item", "deliver_item", "transfer_remove", "transfer_insert", "virtual_training", "max_friendship"}
 )
 # Applied only by their coordinated flow (PairedApplyPermit), never by the
 # generic «confirm» of a prepared change.

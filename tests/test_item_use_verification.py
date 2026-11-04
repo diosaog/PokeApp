@@ -255,6 +255,8 @@ class ReviveVerificationTests(unittest.TestCase):
                 "transfer_remove",
                 "transfer_insert",
                 "virtual_training",
+                # Launcher 0.26.12: «Felicidad máxima», free and unlimited.
+                "max_friendship",
             },
         )
 

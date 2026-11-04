@@ -134,15 +134,20 @@ class FriendshipEngineTests(unittest.TestCase):
             self.intent(slot=3)
         self.assertEqual(caught.exception.code, "FRIENDSHIP_NOT_ELIGIBLE")
 
-    def test_production_mode_refuses_until_the_owner_enables_it(self):
+    def test_production_mode_enables_only_friendship_among_new_kinds(self):
+        # Launcher 0.26.12: the production engine (no engineering capability)
+        # applies «Felicidad máxima» with the same backup and readback; the
+        # fixture-only kinds stay refused.
         production = self.engine_at(enabled=False)
-        self.assertFalse(production.allows("max_friendship"))
-        with self.assertRaises(WriteSafetyError) as caught:
-            production.prepare(production.enroll(self.target), self.intent(), closed_emulator_confirmed=True)
-        self.assertEqual(caught.exception.code, "PRODUCTION_WRITES_DISABLED")
-        self.assertEqual(self.target.read_bytes(), self.source)
-        self.assertFalse((self.root / "profile/write-backups").exists()
-                         and any((self.root / "profile/write-backups").iterdir()))
+        self.assertTrue(production.allows("max_friendship"))
+        self.assertFalse(production.allows("revive") or production.allows("test_marking"))
+        intent = self.intent()
+        production.prepare(production.enroll(self.target), intent, closed_emulator_confirmed=True)
+        self.assertEqual(production.confirm(intent.operation_id, closed_emulator_confirmed=True).status,
+                         "APPLIED_VERIFIED")
+        self.assertEqual(party_view(self.native, self.target.read_bytes())["party"][0]["friendship"], 255)
+        backup = self.root / "profile/write-backups" / (intent.operation_id + ".original")
+        self.assertEqual(backup.read_bytes(), self.source)
 
 
 class FriendshipRuntimeTests(Harness):
