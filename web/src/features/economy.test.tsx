@@ -492,8 +492,7 @@ it("shows Rare Candy and Heart Scale as compact, infinite and free with no purch
   render(<Inventory />);
   expect(screen.getByText("Caramelo Raro")).toBeInTheDocument();
   expect(screen.getByText("Escama Corazón")).toBeInTheDocument();
-  // Two bag items plus «Felicidad máxima».
-  expect(screen.getAllByText("∞ · Gratis")).toHaveLength(3);
+  expect(screen.getAllByText("∞ · Gratis")).toHaveLength(2);
   const add = screen.getAllByRole("button", { name: "Añadir a la bolsa" });
   expect(add).toHaveLength(2);
   // The description stays available to assistive technology.
@@ -554,7 +553,7 @@ it("inside the Launcher opens each infinite item in the native popup", () => {
   agent.mockRestore();
 });
 
-it("offers «Felicidad máxima» free: the native dialog from Launcher 0.26.12, an honest notice otherwise", () => {
+it("offers «Felicidad máxima» only where it works: the native dialog of Launcher 0.26.12+", () => {
   mocks.inventory = {
     purchases: [],
     targets: [],
@@ -564,6 +563,7 @@ it("offers «Felicidad máxima» free: the native dialog from Launcher 0.26.12, 
   for (const [agent, native] of [
     ["Mozilla/5.0 PokeAppLauncher/0.26.12", true],
     ["Mozilla/5.0 PokeAppLauncher/0.26.11", false],
+    ["Mozilla/5.0 (Windows NT 10.0) Chrome/130", false],
   ] as const) {
     const spy = vi.spyOn(navigator, "userAgent", "get").mockReturnValue(agent);
     const { unmount } = render(
@@ -571,31 +571,16 @@ it("offers «Felicidad máxima» free: the native dialog from Launcher 0.26.12, 
         <Inventory />
       </MemoryRouter>,
     );
-    if (native)
+    if (native) {
       expect(
         screen.getByRole("link", { name: "Subir felicidad" }),
       ).toHaveAttribute("href", "/escritorio/felicidad");
-    else {
-      fireEvent.click(screen.getByRole("button", { name: "Subir felicidad" }));
-      expect(
-        screen.getByRole("dialog", { name: "Felicidad máxima" }),
-      ).toHaveTextContent(/versión 0\.26\.12 o posterior/);
-    }
+      expect(screen.getByText("Felicidad máxima")).toBeInTheDocument();
+    } else
+      expect(screen.queryByText("Felicidad máxima")).not.toBeInTheDocument();
     unmount();
     spy.mockRestore();
   }
-  render(
-    <MemoryRouter>
-      <Inventory />
-    </MemoryRouter>,
-  );
-  fireEvent.click(screen.getByRole("button", { name: "Subir felicidad" }));
-  const dialog = screen.getByRole("dialog", { name: "Felicidad máxima" });
-  expect(dialog).toHaveTextContent(/Gratis e ilimitado/);
-  expect(dialog).toHaveTextContent(/aún tendrá que cumplir su condición/);
-  expect(
-    screen.getByRole("link", { name: /Descargar Launcher/ }),
-  ).toHaveAttribute("href", "/launcher/download");
   expect(mocks.execute).not.toHaveBeenCalled();
 });
 
