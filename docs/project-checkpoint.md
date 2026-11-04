@@ -10,8 +10,9 @@ milestone record; it does not maintain a second live phase-status ledger.
   DB 082 `20261104232636` y 083 `20261104232638` aplicadas una vez (ensayo 19/19 sobre
   copia fresca; sin cambios de filas); API `f1d2896a` (rollback `3c6b1d9f`), web `9a17a56c`
   (rollback `43e98b76`), fuente `5627f8c`. NET real: Samu −2,2; resto sin cambios.
-  «Felicidad máxima» preparada; escritura en producción cerrada hasta habilitar
-  `max_friendship` y publicar Launcher 0.26.12. Verifier y Launcher 0.26.11 sin cambios.
+  **Launcher 0.26.12 publicado** (feed estable, 2026-11-04 23:42 UTC, fuente `b954ad1`) con
+  «Felicidad máxima» habilitada (solo `max_friendship`); manifest firmado e instalador
+  verificados. Verifier sin cambios.
   [Registro vivo](work-in-progress/net-friendship-discord.md).
 
 - Automatic observed points (2026-11-04): **PUBLISHED / VERIFIED**. No player

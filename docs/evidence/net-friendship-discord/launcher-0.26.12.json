@@ -1,0 +1,54 @@
+{
+  "authorization": "Owner message 2026-11-05: publish Launcher 0.26.12 with «Felicidad máxima» enabled; no other physical write.",
+  "source_commit": "b954ad1",
+  "enabled_mutation": "max_friendship (PRODUCTION_MUTATIONS and PUBLIC_READY_MUTATIONS); no other kind added",
+  "build": {
+    "root": "%LOCALAPPDATA%/PokeApp-builds/0.26.12-public",
+    "script": "tools/build_launcher_windows.ps1",
+    "audit": "PASS (public stable build, updates configured, app.launcher.friendship bundled)",
+    "installer": "PokeApp-Launcher-Setup.exe",
+    "bytes": 159472702,
+    "sha256": "3fa8b195f10d412604655a5808aab594956c70c962308e12d4a45dda1e57d2e7",
+    "sha512_base64": "q3N36mV5DsRpJD7EizedtOYf1hmzIhvuqSAxHdX+WQp+VWqlgU6t/ljZX7d/fn+6Xewh65iCvtQjprMh3y5rMQ==",
+    "authenticode": "NotSigned (owner private-distribution policy, as 0.26.11)",
+    "manifest_signature": "Ed25519, stable release key (DPAPI-protected, outside repo and build root)",
+    "toolchain": "Electron 44.7.0 / electron-builder 26.15.3 NSIS x64, unchanged from 0.26.11 (Windows 10/11)"
+  },
+  "packaged_smoke": {
+    "parser": "release/win-unpacked/resources/runtime/parser/PokeApp.Parser.exe",
+    "save": "isolated copy of the public-fixture Pokémon Y save (no player save)",
+    "engine": "production mode, real emulator/process check",
+    "result": "PASS: backup verified, friendship 70 -> 255 after native readback, other party members unchanged, exact restore"
+  },
+  "reused_evidence": [
+    "friendship-native-checks.json (256 checks, 8 games)",
+    "tests/test_launcher_friendship.py incl. interrupted write recovered from the journal (24 tests with gate tests, PASS at b954ad1)"
+  ],
+  "publication": {
+    "tool": "tools/publish_launcher_release.mjs --apply --owner-authorized",
+    "dry_run_problems": [],
+    "r2_installer": "windows/0.26.12/PokeApp-Launcher-Setup.exe",
+    "r2_manifest": "updates/stable.json (uploaded last)",
+    "released_at": "2026-11-04T23:42:07.906Z"
+  },
+  "public_verification": {
+    "feed": "https://pokeapp-web.pokeapp-v2.workers.dev/launcher/updates/stable.json",
+    "channel": "stable",
+    "version": "0.26.12",
+    "minimum_version": "0.26.0",
+    "signature_valid": true,
+    "installer_url": "https://pokeapp-web.pokeapp-v2.workers.dev/launcher/updates/stable/0.26.12.exe",
+    "installer_status": 200,
+    "size_matches": true,
+    "sha512_matches": true,
+    "identical_to_build": true
+  },
+  "not_changed": [
+    "web worker (download card /launcher/download still 0.26.11 until the next web deploy; it updates to 0.26.12 through the feed)",
+    "Supabase",
+    "Railway",
+    "points, deaths, coins, Team Locks",
+    "player saves"
+  ],
+  "rollback": "restore the previous updates/stable.json (0.26.11) and publish a corrected higher version; clients never downgrade"
+}

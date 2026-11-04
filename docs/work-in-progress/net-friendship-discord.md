@@ -1,7 +1,8 @@
 # NET con revividos tras wipe, Felicidad máxima y anuncios Team Lock — 2026-11-04/05
 
-Estado: **082/083, API y web PUBLICADOS Y VERIFICADOS**. «Felicidad máxima»
-**PREPARADA**, con la puerta de escritura en producción cerrada.
+Estado: **082/083, API, web y Launcher 0.26.12 PUBLICADOS Y VERIFICADOS**.
+«Felicidad máxima» **DISPONIBLE** en Launcher 0.26.12 (autorización del
+propietario 2026-11-05); solo se habilitó `max_friendship`.
 Rama `claude/net-friendship-discord`, desde `68c674f` (tip de
 `codex/automatic-observed-points`). Producción: DB 001–083.
 
@@ -9,7 +10,7 @@ Rama `claude/net-friendship-discord`, desde `68c674f` (tip de
 |---|---|---|
 | `9e83cee` | Gourgeist sin sufijo de tamaño; refresco del recuento wipe en la ficha | Publicado (API `3c6b1d9f`, web `43e98b76`) |
 | `c49888c` | SQL 082 (NET con wipe) y 083 (anuncio por confirmación) + API Discord | **Publicado**: 082 `20261104232636`, 083 `20261104232638`, API `f1d2896a` |
-| `0ab7a6e`, `5627f8c` | «Felicidad máxima» (nativo, Launcher, web) | Preparada; web `9a17a56c` sin cambio visible; producción cerrada |
+| `0ab7a6e`, `5627f8c`, `b954ad1` | «Felicidad máxima» (nativo, Launcher, web) | **Publicada**: Launcher 0.26.12 en el feed estable; web `9a17a56c` |
 
 Los datos de los entrenadores son válidos y se respetan (instrucción del
 propietario, 2026-11-05): 082 aplica las reglas oficiales a los registros
@@ -57,12 +58,14 @@ ya en 255 se rechazan antes de escribir. Launcher: mismo motor protegido que
 Caramelos/Escamas y diálogo nativo `/escritorio/felicidad`. Web: fila en
 Inventario › Objetos ilimitados, visible solo dentro del Launcher 0.26.12+.
 
-**Puerta restante (única decisión explícita):** añadir `max_friendship` a
-`PRODUCTION_MUTATIONS` y `PUBLIC_READY_MUTATIONS` en
-`app/launcher/write_engine.py`, subir el Launcher a 0.26.12 y publicarlo por
-el procedimiento habitual (firma y feed). La web ya está publicada y mostrará
-la fila sola en ese Launcher. Hasta entonces ningún Launcher puede escribir la
-felicidad en producción (el 0.26.11 publicado no la tiene).
+**Publicada en Launcher 0.26.12** (2026-11-04 23:42 UTC, feed estable): build
+auditado, manifest Ed25519 válido, instalador público idéntico al build
+(159 472 702 bytes, SHA-256 `3fa8b195…`). Prueba empaquetada con el parser
+publicado en modo producción sobre copia aislada de Y: emulador cerrado
+comprobado, copia verificada, 70 → 255 tras relectura, restauración exacta.
+`/launcher/download` sigue en 0.26.11 hasta el próximo despliegue web (ya
+fijado a 0.26.12 en el repositorio); esa versión se actualiza sola por el feed.
+[Evidencia](../evidence/net-friendship-discord/launcher-0.26.12.json).
 
 ## 3. Anuncios Team Lock
 
