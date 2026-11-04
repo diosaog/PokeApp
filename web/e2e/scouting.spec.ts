@@ -14,11 +14,9 @@ test("a confirmed Team Lock invalidates only this season's public scouting cache
   });
   await expect(page.locator(".party-slots .pokemon")).toHaveCount(6);
   await navigate(page, "Batallas");
+  await page.getByRole("button", { name: "Fijar Equipo", exact: true }).click();
   await page
-    .getByRole("button", { name: "Fijar mi equipo", exact: true })
-    .click();
-  await page
-    .getByRole("button", { name: "Confirmar mi equipo", exact: true })
+    .getByRole("button", { name: "Confirmar y fijar equipo", exact: true })
     .click();
   await expect(page.getByRole("dialog")).toHaveCount(0);
   await navigate(page, "Entrenadores");

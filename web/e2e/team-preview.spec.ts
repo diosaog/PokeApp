@@ -10,9 +10,9 @@ test("spectator chooses unscheduled Lucía and Marcos with public fields only", 
   await page.getByLabel("Primer entrenador").selectOption("rival-trainer");
   await page.getByLabel("Segundo entrenador").selectOption("t3");
   await expect(page.locator(".battle-side h2")).toHaveText(["Lucía", "Marcos"]);
-  await expect(page.getByText("Equipo público", { exact: true })).toHaveCount(
-    2,
-  );
+  await expect(
+    page.getByText("Team Lock oficial", { exact: true }),
+  ).toHaveCount(2);
   await expect(page.getByText("Foco interno", { exact: true })).toHaveCount(0);
   await expect(page.locator(".battle-identity .held-item")).toHaveText(
     Array(12).fill("Vidasfera"),
@@ -44,7 +44,7 @@ test("battle self has private lock details; rival and spectator never retain the
   await expect(page.getByText("Foco interno", { exact: true })).toHaveCount(0);
 });
 
-test("missing lock warns without a save fallback or a League result blocker", async ({
+test("missing lock explains why, invents no team and never blocks League results", async ({
   page,
 }) => {
   const commands = await fixture(page);
@@ -62,13 +62,12 @@ test("missing lock warns without a save fallback or a League result blocker", as
   });
   await navigate(page, "Batallas");
   await page.getByLabel("Segundo entrenador").selectOption("t4");
-  await expect(page.getByRole("alert")).toContainText("Falta el Team Lock");
-  await expect(page.getByRole("alert")).toContainText(
-    "Puedes continuar en la Liga",
-  );
-  expect(reads.some((p) => p.endsWith("/pc") || p.endsWith("/overview"))).toBe(
-    false,
-  );
+  // 079: no lock and no synchronized party: an explicit reason, no team.
+  await expect(
+    page.getByText("Aún no ha sincronizado ninguna partida."),
+  ).toBeVisible();
+  await expect(page.getByText("Team Lock oficial")).toHaveCount(1);
+  expect(reads.some((p) => p.endsWith("/pc"))).toBe(false);
   expect(commands).toHaveLength(0);
   await navigate(page, "Liga");
   await page.getByRole("button", { name: "J4", exact: true }).click();
@@ -101,8 +100,8 @@ test("explicit Team Lock retry preserves its request and refreshes the preview",
   });
   await login(page);
   await navigate(page, "Batallas");
-  await page.getByRole("button", { name: "Fijar mi equipo" }).click();
-  await page.getByRole("button", { name: "Confirmar mi equipo" }).click();
+  await page.getByRole("button", { name: "Fijar Equipo" }).click();
+  await page.getByRole("button", { name: "Confirmar y fijar equipo" }).click();
   await expect(
     page.getByRole("button", { name: "Reintentar la misma solicitud" }),
   ).toBeVisible();
@@ -149,7 +148,9 @@ for (const width of [1440, 390]) {
     await page.keyboard.press("Escape");
     await expect(popover).toHaveCount(0);
     await page.getByLabel("Segundo entrenador").selectOption("t4");
-    await expect(page.getByRole("alert")).toBeVisible();
+    await expect(
+      page.getByText("Aún no ha sincronizado ninguna partida."),
+    ).toBeVisible();
     expect(
       await page.evaluate(
         () => document.documentElement.scrollWidth <= innerWidth + 1,

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { ShieldCheck } from "lucide-react";
 import type { Model } from "../api/types";
@@ -94,6 +94,18 @@ function FixTeamDialog({
   const [preparing, setPreparing] = useState(false),
     [error, setError] = useState<unknown>(null);
   const busy = cmd.pending || cmd.uncertain || preparing;
+  const fixedFor = useRef<number | undefined>(undefined);
+  // A confirmed lock closes the dialog, also after «Reintentar la misma
+  // solicitud» (which runs outside the confirm button).
+  useEffect(() => {
+    if (!cmd.success || cmd.pending) return;
+    notify(
+      `Equipo fijado para la J${fixedFor.current ?? ""}. Se anunciará en Discord con su enlace de Pokepast.es.`,
+      "ok",
+      { key: "command-ok" },
+    );
+    onClose();
+  }, [cmd.success, cmd.pending, onClose]);
   const close = () => {
     if (!busy) onClose();
   };
@@ -204,20 +216,12 @@ function FixTeamDialog({
                   }
                 }
                 if (!day) return;
-                if (
-                  await cmd.execute(
-                    `/v1/seasons/${season}/matchdays/${day}/team-lock`,
-                    { save_file_id: save.id },
-                    "PUT",
-                  )
-                ) {
-                  notify(
-                    `Equipo fijado para la J${target}. Se anunciará en Discord con su enlace de Pokepast.es.`,
-                    "ok",
-                    { key: "command-ok" },
-                  );
-                  onClose();
-                }
+                fixedFor.current = target;
+                await cmd.execute(
+                  `/v1/seasons/${season}/matchdays/${day}/team-lock`,
+                  { save_file_id: save.id },
+                  "PUT",
+                );
               }}
             >
               {preparing ? "Preparando la J1…" : "Confirmar y fijar equipo"}

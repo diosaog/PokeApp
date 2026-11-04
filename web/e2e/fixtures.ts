@@ -326,6 +326,9 @@ export async function fixture(
         teams: (mode === "spectator" ? [first, second] : [first]).map((id) => ({
           trainer_id: id,
           visibility: mode === "battle" && id === tid ? "self" : "public",
+          // 079: without a lock, a provisional party or an explicit reason.
+          provisional: null,
+          unavailable_reason: id === "t4" ? "no_synced_save" : null,
           lock:
             id === "t4"
               ? null
@@ -610,6 +613,40 @@ export async function fixture(
         memberships: [],
         first_matchday: null,
         readiness: { checks: {}, blocking_reasons: [], can_activate: false },
+      };
+    // 079: the opening control and the own death history.
+    else if (path.endsWith("/league/readiness"))
+      result = {
+        season_id: sid,
+        state: "open",
+        structure: "all_vs_all",
+        matchday: { id: day, number: 4, status: "open", revision: 2 },
+        next_number: 4,
+        can_prepare: false,
+        can_open: false,
+        can_operate: true,
+        reasons: [],
+        participants: [],
+      };
+    else if (path.endsWith("/death-history"))
+      result = {
+        season_id: sid,
+        season_player_id: pid,
+        trainer_id: tid,
+        revision: 2,
+        known: true,
+        blocking_reason: null,
+        actual_deaths: 1,
+        wipe_deaths: 0,
+        segment_deaths: 0,
+        dead_box_number: 8,
+        source_sha256: "a".repeat(64),
+        confirmed_at: "2026-10-20T10:00:00Z",
+        current_matchday_id: day,
+        can_confirm: false,
+        confirm_blocker: "death_history_confirmed",
+        proposed: null,
+        replayed: false,
       };
     else if (path.endsWith("/matchdays/" + day))
       result = {

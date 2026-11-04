@@ -34,6 +34,7 @@ const mocks = vi.hoisted(() => ({
   execute: vi.fn(),
   prepare: vi.fn(),
   notify: vi.fn(),
+  success: false,
 }));
 vi.mock("../state", () => ({
   queries: { invalidateQueries: vi.fn() },
@@ -58,7 +59,7 @@ vi.mock("../ui", async (original) => ({
     pending: false,
     uncertain: false,
     error: null,
-    success: false,
+    success: mocks.success,
     execute: mocks.execute,
     retry: vi.fn(),
   }),
@@ -98,6 +99,7 @@ const pc = (party: ReturnType<typeof slot>[]): Model<"PCRead"> => ({
 });
 beforeEach(() => {
   vi.clearAllMocks();
+  mocks.success = false;
   mocks.readiness = readiness();
   // Out of order on purpose: the dialog lists them in slot order.
   mocks.pc = pc([6, 2, 3, 1, 5, 4].map((n) => slot(n)));
@@ -117,12 +119,14 @@ beforeEach(() => {
   });
 });
 afterEach(cleanup);
+const tree = () => (
+  <MemoryRouter>
+    <FixTeamButton />
+  </MemoryRouter>
+);
+let view: ReturnType<typeof render>;
 const open = () => {
-  render(
-    <MemoryRouter>
-      <FixTeamButton />
-    </MemoryRouter>,
-  );
+  view = render(tree());
   fireEvent.click(screen.getByRole("button", { name: "Fijar Equipo" }));
   return screen.getByRole("dialog", { name: "Fijar Equipo" });
 };
@@ -153,11 +157,17 @@ it("confirms the six of the official save, prepares J1 when needed and fixes the
     { save_file_id: "league-save" },
     "PUT",
   );
+  // The confirmed answer (also a «Reintentar» one) closes and announces it.
+  mocks.success = true;
+  view.rerender(tree());
   expect(mocks.notify).toHaveBeenCalledWith(
     expect.stringContaining("Equipo fijado para la J1"),
     "ok",
     { key: "command-ok" },
   );
+  expect(
+    screen.queryByRole("dialog", { name: "Fijar Equipo" }),
+  ).not.toBeInTheDocument();
 });
 
 it("a prepared matchday is used as is; an open one warns that the lock is late", async () => {

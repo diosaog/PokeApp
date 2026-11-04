@@ -226,6 +226,23 @@ test("eligible participant opens and closes with current revisions and sees refr
       },
     }),
   );
+  // 079: the opening control follows the server readiness of that same day.
+  await page.route(`**/v1/seasons/${sid}/league/readiness`, (route) =>
+    route.fulfill({
+      json: {
+        season_id: sid,
+        state: state === "closed" ? "completed" : state,
+        structure: "all_vs_all",
+        matchday: { id: day, number: 4, status: state, revision },
+        next_number: state === "closed" ? null : 4,
+        can_prepare: false,
+        can_open: state === "scheduled",
+        can_operate: true,
+        reasons: [],
+        participants: [],
+      },
+    }),
+  );
   await page.route(`**/v1/seasons/${sid}/matchdays/${day}**`, (route) => {
     const request = route.request();
     if (request.method() === "OPTIONS") return route.fallback();

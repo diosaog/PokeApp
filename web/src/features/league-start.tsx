@@ -1,9 +1,9 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { ShieldCheck, Skull } from "lucide-react";
 import { api } from "../api/client";
 import type { Model } from "../api/types";
 import { queries, useApp, useRead } from "../state";
-import { CommandState, Modal, Notice, useCommand } from "../ui";
+import { CommandState, Modal, useCommand } from "../ui";
 
 // 079: the League starts from the League itself. Any active participant
 // prepares and opens J1 (everyone against everyone), and each trainer
@@ -153,8 +153,10 @@ export function OwnDeathHistory({ inline = false }: { inline?: boolean }) {
   const query = useRead<OwnDeaths>(path, !!season);
   const [open, setOpen] = useState(false);
   const data = query.data;
+  // Auxiliary card: a failed read stays quiet here (Liga › General keeps
+  // listing what is missing), never a second alert on the profile.
   if (!data || data.known || data.confirm_blocker === "death_history_closed")
-    return inline ? null : <Notice error={query.error} />;
+    return null;
   if (inline)
     return data.can_confirm ? (
       <>
@@ -199,6 +201,10 @@ function ConfirmDeaths({
   const cmd = useCommand([ownDeathPath(season), readinessPath(season)]);
   const proposed = data.proposed!;
   const busy = cmd.pending || cmd.uncertain;
+  // Closes on a confirmed answer, also after «Reintentar la misma solicitud».
+  useEffect(() => {
+    if (cmd.success && !cmd.pending) onClose();
+  }, [cmd.success, cmd.pending, onClose]);
   return (
     <Modal
       title="Confirmar mi historial de muertes"
@@ -218,20 +224,17 @@ function ConfirmDeaths({
       <button
         className="button primary"
         disabled={busy}
-        onClick={async () => {
-          if (
-            await cmd.execute(
-              ownDeathPath(season),
-              {
-                expected_revision: data.revision,
-                source_sha256: data.source_sha256!,
-                ...proposed,
-              } satisfies Model<"OwnDeathHistoryBody">,
-              "PUT",
-            )
+        onClick={() =>
+          void cmd.execute(
+            ownDeathPath(season),
+            {
+              expected_revision: data.revision,
+              source_sha256: data.source_sha256!,
+              ...proposed,
+            } satisfies Model<"OwnDeathHistoryBody">,
+            "PUT",
           )
-            onClose();
-        }}
+        }
       >
         Confirmar estos valores
       </button>
