@@ -10,22 +10,18 @@ Reconciled: 2026-09-26. Keep one copy at this path.
 | How do AI instances continue the same work? | This protocol |
 | What are the project-wide constraints and roadmap? | [Master protocol](../PokeApp_2.0_Protocolo_Maestro_MultiIA.md) |
 | Which phase is active and where is its memory? | [Project checkpoint](../project-checkpoint.md) |
-| What is the current operational state and next action? | [Current live record](../work-in-progress/final-corrections-live.md) (2026-11-03: approved077/API published; Aaron's false Gible event corrected once,4/-0.4/8coins, originals preserved. APIa5112677/web053e50cf/Launcher0.26.11 verified. Iker/ByVisan02/Samu still need their own authenticated original-save uploads before further authorized baseline reconciliation; no impersonation or manual credits. Later: none of the three has synced since the League started. API session fix published 03-11 (`81eb260`, Railway3cd6aebb, branch `claude/api-session-isolation`); hosted verifier polls every 60 s instead of 5 s (Railway2853bbc4, same image; billed usage -89%). Iker's League save registered 18:40 UTC (admin baseline 3/0/3 pending); ByVisan02/Samu and a full live token cycle wait for real use. **Continue all new work from the tip of `claude/api-session-isolation`** (it contains `main` and every `codex/*` branch; `release/27c-api` is superseded by `c39c2fa`); do not branch from `codex/trainer-consistency-079` or older), indexed by the checkpoint. 2026-11-04: the UX/Showdown/matchday release is PUBLISHED (DB 078, API `554bf854` from `0c4678c`, web `0b061103`, Launcher 0.26.11 unchanged). **Continue new work from the tip of `claude/ux-showdown-matchdays`** (it contains `claude/api-session-isolation`); [its live record](../work-in-progress/ux-showdown-matchdays-live.md) holds facts and rollback. 2026-11-04 later: all-vs-all League start (079), always-available Team Preview, «Fijar Equipo», gender check and «Mi perfil» tabs are PUBLISHED 2026-11-04 (API `ef13a7ce` from `f2f799c`, DB 079 `20261104134028`, web `a81eb04f`, Launcher 0.26.11 unchanged), branch `claude/all-vs-all-league-start` (from `e237255`). **Continue new work from the tip of `claude/all-vs-all-league-start`**; [its live record](../work-in-progress/all-vs-all-league-start.md) holds release order and rollback |
+| What is the current operational state and next action? | [Current enrollment/release record](../work-in-progress/mid-season-enrollment.md) (2026-11-04: owner-approved DB 080 `20261104153603`, API `adfca5c4` from `6490e3d` including Pokepast.es CRLF `c2e8617`, web `82349ea3` at 100%; Launcher 0.26.11 and verifier `2853bbc4` unchanged). Technical remote acceptance PASS; `VALIDATION_PARTIAL` only for legitimate authenticated checks and first real use. No test enrollments or new external pastes. **Continue from the tip of `origin/codex/mid-season-enrollment`; never reapply 080.** Historical releases remain indexed in the checkpoint. |
 | What behavior was approved? | [Functional alignment contract](../phase10-5-functional-alignment.md) |
 | What was implemented and what evidence exists? | Active phase evidence in its live record until closure; [previous Phase 10 report](../phase10-completion-report.md) retains historical delivery evidence |
 
-Local follow-up (2026-11-04): the public Pokepast.es format correction is on
-`codex/public-pokepaste-format`, from published `16708e9`; continue this task
-from that local branch. [Its verification record](../work-in-progress/public-pokepaste-format.md)
-contains the CRLF defect, tests, screenshot and API-only deployment requirement.
-It has not been deployed or pushed; the published release above remains unchanged.
-
-Later local continuation (2026-11-04): `codex/mid-season-enrollment` descends
-from `c2e8617` and preserves that separate Pokepast.es commit. Continue this
-task from its tip. [Enrollment record](../work-in-progress/mid-season-enrollment.md)
-contains the owner contract, 080, API/web changes, verified tests, historical
-backup rehearsal and approval-dependent release plan. Nothing was pushed
-or deployed; the latest published database remains 079 as reported above.
+Published continuation (2026-11-04): `codex/mid-season-enrollment` descends
+from `c2e8617`, preserves the independent Pokepast.es fix and is pushed to
+origin. [Enrollment record](../work-in-progress/mid-season-enrollment.md)
+contains authorization, fresh 079-to-080 backup rehearsal, exact deployment
+IDs, verification limits and rollback. SQL, API and web are published.
+[Pokepast.es verification](../work-in-progress/public-pokepaste-format.md)
+retains the renderer evidence and the limit on artificial external tests.
+The release tool now has 001-080 deployed and no pending migration.
 
 The live handoff is the single maintained operational record for an active phase.
 Other documents link to it instead of maintaining competing live Git, test or

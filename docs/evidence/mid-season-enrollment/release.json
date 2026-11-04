@@ -1,0 +1,315 @@
+{
+  "recorded_at": "2026-11-04T15:48:19.057768+00:00",
+  "result": "DEPLOYED_TECHNICAL_ACCEPTANCE_PASS",
+  "remote_state": "VALIDATION_PARTIAL",
+  "authorization": {
+    "owner_response": "si",
+    "scope": [
+      "SQL 080",
+      "API including Pokepast.es CRLF",
+      "web"
+    ]
+  },
+  "source": {
+    "branch": "codex/mid-season-enrollment",
+    "feature_commit": "332a01dc0b738545de32f17aaf1a693cbd0e662e",
+    "pokepaste_commit": "c2e86170d5a70d0974a3d598755bc33a7ba8ee9f",
+    "deployed_commit": "6490e3de84c575a771348c26c9fe0d0544aa6b14",
+    "api_bundle_committed_files": 346,
+    "closure_changes": "documentation and operational migration plan only"
+  },
+  "target": {
+    "supabase_project": "uwleqeuzsveqlugugzba",
+    "railway_project": "f5c4666a-508f-4e5a-8aae-a54581814f29",
+    "railway_api_service": "9a78e086-c927-471f-8bb9-befe62c77de7",
+    "api": "https://pokeapp-api-production.up.railway.app",
+    "web": "https://pokeapp-web.pokeapp-v2.workers.dev"
+  },
+  "fresh_backup": {
+    "captured_at": "2026-11-04T15:31:34+00:00",
+    "archive": "pre-release-20261104T153100Z.dump",
+    "sha256": "6cfe1e93e615ce88cc6e6e00aa4b59ffa9de1712e21374c74bb383151d68559e",
+    "table_data_entries": 125,
+    "tables_fingerprinted": 125
+  },
+  "fresh_rehearsal": {
+    "result": "PASS",
+    "deployed_before": 79,
+    "pending": [
+      "080_mid_season_enrollment.sql"
+    ],
+    "pending_sha256": {
+      "080_mid_season_enrollment.sql": "297b48f306242b00ae8fd361e8bbdcd11bdc3fe0ff3e5dfb93b87c936caae5b5"
+    },
+    "checks": [
+      {
+        "check": "backup restores into an isolated cluster with owners and grants",
+        "pass": true
+      },
+      {
+        "check": "restored rows identical to production: 125 tables (count + hash)",
+        "pass": true
+      },
+      {
+        "check": "restored catalog identical to production (objects, definitions, owners, ACLs)",
+        "pass": true
+      },
+      {
+        "check": "migration history restored: 080-080 not recorded",
+        "pass": true
+      },
+      {
+        "check": "116 API reads run on the restored copy (no privilege or missing-object error)",
+        "pass": true
+      },
+      {
+        "check": "080_mid_season_enrollment.sql still matches the bytes frozen at rehearsal start",
+        "pass": true
+      },
+      {
+        "check": "080_mid_season_enrollment.sql applies once as non-superuser postgres",
+        "pass": true
+      },
+      {
+        "check": "discord_announcements rows identical apart from the new 078 columns",
+        "pass": true
+      },
+      {
+        "check": "103 existing tables keep byte-identical rows (seasons, saves, history, purchases, coins)",
+        "pass": true
+      },
+      {
+        "check": "116 API reads return identical results after 080-080",
+        "pass": true
+      },
+      {
+        "check": "no browser privilege removed from existing objects",
+        "pass": true
+      },
+      {
+        "check": "no new privilege for anon/authenticated (tables, views or functions)",
+        "pass": true
+      },
+      {
+        "check": "10 private operational tables exist and force RLS",
+        "pass": true
+      },
+      {
+        "check": "verifier role created without login, superuser or RLS bypass",
+        "pass": true
+      },
+      {
+        "check": "focused fixtures rolled back exactly",
+        "pass": true
+      },
+      {
+        "check": "upgraded copy equals a fresh 001-080 build (Supabase-shaped)",
+        "pass": true
+      },
+      {
+        "check": "pending migration bytes unchanged throughout the rehearsal",
+        "pass": true
+      }
+    ],
+    "private_data_not_copied_to_repository": true
+  },
+  "migration": {
+    "file": "080_mid_season_enrollment.sql",
+    "sha256": "297b48f306242b00ae8fd361e8bbdcd11bdc3fe0ff3e5dfb93b87c936caae5b5",
+    "intent_at": "2026-11-04T15:36:02.746096+00:00",
+    "version": "20261104153603",
+    "applied_once": true,
+    "do_not_reapply": true
+  },
+  "database_after": {
+    "version": "20261104153603",
+    "tables_unchanged": 103,
+    "changed": [],
+    "catalog": {
+      "history_records": 1,
+      "version": "20261104153603",
+      "enrollments": 0,
+      "private_rls": true,
+      "service_execute": true,
+      "anon_execute": false,
+      "authenticated_execute": false,
+      "anon_read": false,
+      "authenticated_read": false
+    }
+  },
+  "advisor_delta": {
+    "before": {
+      "INFO": 229,
+      "ERROR": 24,
+      "WARN": 6
+    },
+    "after": {
+      "INFO": 232,
+      "ERROR": 24,
+      "WARN": 6
+    },
+    "new_error_warn": 0,
+    "resolved_error_warn": 0
+  },
+  "api_acceptance": {
+    "checked_at": "2026-11-04T15:43:14.045490+00:00",
+    "health_status": 200,
+    "openapi_status": 200,
+    "path_count": 132,
+    "enrollment_methods": [
+      "GET",
+      "POST"
+    ],
+    "request_schema": "EnrollmentBody",
+    "request_extra_forbidden": true,
+    "checks": [
+      {
+        "check": "enrollment_get_anonymous",
+        "status": 401
+      },
+      {
+        "check": "enrollment_post_anonymous",
+        "status": 401
+      },
+      {
+        "check": "enrollment_get_invalid_bearer",
+        "status": 401
+      },
+      {
+        "check": "enrollment_post_invalid_bearer",
+        "status": 401
+      },
+      {
+        "check": "cors_allowed",
+        "status": 200,
+        "origin_allowed": true
+      },
+      {
+        "check": "cors_rejected",
+        "status": 400,
+        "origin_allowed": false
+      }
+    ],
+    "authenticated_participant_live_check": "not performed; no impersonation",
+    "admin_preview_live_check": "pending legitimate administrator session",
+    "admin_operations": 55,
+    "all_admin_operations_declare_authentication": true
+  },
+  "web_acceptance": {
+    "checked_at": "2026-11-04T15:44:58.250854+00:00",
+    "worker_version": "82349ea3-0afd-4757-847e-144f7d32040f",
+    "checks": [
+      {
+        "check": "published index matches built source",
+        "pass": true,
+        "status": 200,
+        "sha256": "a16f754ad2f4c71964d6a6e3db1078fe135a74e97c66f23e3201a9fe19b604dd"
+      },
+      {
+        "check": "published build points to production API",
+        "pass": true
+      },
+      {
+        "check": "entry JavaScript matches built asset",
+        "pass": true,
+        "asset": "/assets/index-C9_RgsF5.js",
+        "status": 200
+      },
+      {
+        "check": "published admin includes enrollment controls",
+        "pass": true,
+        "asset": "admin-Bv3zQQva.js"
+      },
+      {
+        "check": "SPA route /login",
+        "pass": true,
+        "status": 200
+      },
+      {
+        "check": "SPA route /admin",
+        "pass": true,
+        "status": 200
+      },
+      {
+        "check": "CSP permits production API",
+        "pass": true
+      },
+      {
+        "check": "signed launcher feed unchanged",
+        "pass": true,
+        "sha256": "31e9c42f2670e83192ee1e89af8c05319263c7d67b950bf7709961ec25b78e30"
+      },
+      {
+        "check": "launcher signature valid",
+        "pass": true
+      },
+      {
+        "check": "launcher version unchanged",
+        "pass": true,
+        "version": "0.26.11"
+      },
+      {
+        "check": "launcher installer unchanged",
+        "pass": true,
+        "status": 200,
+        "bytes": "159462974",
+        "etag": "\"c969fe73ee8a586cffbcf543569c65c1\""
+      }
+    ],
+    "authenticated_admin_preview": "pending legitimate administrator session",
+    "deployment_id": "329cd675-112a-481d-9b28-0beb1f5b9881",
+    "deployment_at": "2026-11-04T15:43:35.102144Z",
+    "percentage": 100
+  },
+  "final_state": {
+    "checked_at": "2026-11-04T15:45:35.705134+00:00",
+    "database": {
+      "enrollments": 0,
+      "migration_records": 1,
+      "latest_version": "20261104153603"
+    },
+    "api": {
+      "id": "adfca5c4-fb5e-4739-a239-b08ccfbb92c2",
+      "status": "SUCCESS",
+      "createdAt": "2026-11-04T15:37:16.412Z"
+    },
+    "verifier": {
+      "id": "2853bbc4-44be-453f-b4f3-7ff22a8d51cf",
+      "status": "SUCCESS",
+      "createdAt": "2026-11-03T18:27:27.823Z"
+    }
+  },
+  "operational_plan": {
+    "deployed_through": 80,
+    "pending": [],
+    "dry_run_to_apply": [],
+    "dry_run_problems": [],
+    "release_gate_tests": {
+      "passed": 6,
+      "failed": 0
+    }
+  },
+  "rollback": {
+    "api_deployment": "ef13a7ce-6d2c-476a-bb2e-78ace27b594b",
+    "api_status_after_replacement": "REMOVED",
+    "api_source": "f2f799c",
+    "web_version": "a81eb04f-ae65-4f53-821b-14e201a0a8ad",
+    "database": "retain 080 and all real enrollment/ledger/history data; fix forward"
+  },
+  "limitations": [
+    "No legitimate authenticated admin preview or participant 403 live check; locally tested only",
+    "No real enrollment, save sync or Team Lock delivery performed as a test",
+    "No new public paste or Discord test message",
+    "No claim that initial deaths or milestones can be dated before the first reliable observation"
+  ],
+  "cleanup": {
+    "production_test_enrollments": 0,
+    "no_new_launcher_release": true,
+    "no_verifier_deployment": true,
+    "private_restore_clusters_stopped_and_removed": true,
+    "protected_guide_not_accessed": true,
+    "owner_untracked_files_excluded": true,
+    "raw_logs": "TEMP and private migration evidence directory only"
+  },
+  "verification_harness_note": "Initial admin chunk glob selected admin-accounts. Corrected selector; hosted source matches build and enrollment controls pass. No product change."
+}

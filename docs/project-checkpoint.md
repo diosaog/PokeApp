@@ -6,19 +6,25 @@ milestone record; it does not maintain a second live phase-status ledger.
 ## Current project position
 
 - Incorporación administrativa durante ChampionsLocke (2026-11-04):
-  **IMPLEMENTADA Y VERIFICADA LOCALMENTE / SIN PUBLICAR**. Rama
-  `codex/mid-season-enrollment`, desde el fix independiente `c2e8617`.
-  080 pendiente; cero NET inicial, crédito solo por cierres oficiales,
+  **PUBLICADA; aceptación técnica remota PASS**, comprobaciones autenticadas
+  con sesiones legítimas pendientes (`VALIDATION_PARTIAL`). Continuar desde
+  el tip de `origin/codex/mid-season-enrollment`, implementación `332a01d`,
+  fuente desplegada `6490e3d` (incluye CRLF `c2e8617`). DB 080 aplicada una
+  vez (`20261104153603`); API `adfca5c4` SUCCESS, 132 rutas / 55 operaciones
+  administrativas; web `82349ea3` al 100%. Launcher 0.26.11 y verifier
+  `2853bbc4` sin cambios. Cero NET inicial, crédito solo por cierres oficiales,
   entrada en jornada abierta/siguiente, cruces nuevos y bases auditadas.
   Python 1490, React 378, Node 70 y navegador 9 PASS; ensayo histórico
-  19/19. Requiere autorización para SQL + API + web; CRLF puede salir
-  solo con API. [Informe y próximo paso](work-in-progress/mid-season-enrollment.md).
+  19/19; respaldo fresco 079 → 080 17/17, 103 tablas anteriores idénticas,
+  sin nuevos ERROR/WARN del Advisor. Cero altas de prueba en producción.
+  No reaplicar 080. [Publicación, límites y rollback](work-in-progress/mid-season-enrollment.md).
 
-- Public Pokepast.es format follow-up (2026-11-04): **LOCAL ONLY**, branch
-  `codex/public-pokepaste-format` from published tip `16708e9` below.
+- Public Pokepast.es format follow-up (2026-11-04): **PUBLISHED** in API
+  `adfca5c4` from `6490e3d`, with enrollment above. Separate fix `c2e8617`,
+  branch `codex/public-pokepaste-format` from published tip `16708e9` below.
   Corrects the HTTP form's LF → CRLF so Pokepast.es recognizes all six
   sets. No schema, UI, private-export or Team Lock rule change; no new
-  external paste or deployment. Evidence and next action:
+  external paste was created; existing URLs are preserved. Evidence and limits:
   [format verification](work-in-progress/public-pokepaste-format.md).
 
 - All-vs-all League start, always-available Team Preview, «Fijar Equipo»,

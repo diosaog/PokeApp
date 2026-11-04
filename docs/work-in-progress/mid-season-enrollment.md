@@ -1,15 +1,19 @@
 # Incorporación durante ChampionsLocke — registro de continuidad
 
-Estado: PUBLICACIÓN AUTORIZADA Y EN CURSO (2026-11-04).
+Estado: PUBLICADA (2026-11-04); comprobaciones técnicas del despliegue PASS.
+Estado remoto: VALIDATION_PARTIAL, limitado a la comprobación autenticada con
+sesiones legítimas y al primer uso real, pendientes como se detalla abajo.
 Fecha: 2026-11-04. Rama `codex/mid-season-enrollment`, desde
-`c2e86170d5a70d0974a3d598755bc33a7ba8ee9f`. El commit que contiene este informe
-agrupa implementación, pruebas y evidencias. Estado al cerrar la implementación: sin push ni cambios en producción.
+`c2e86170d5a70d0974a3d598755bc33a7ba8ee9f`. El commit `332a01d` agrupa
+implementación, pruebas y evidencias iniciales. Al cerrar esa implementación
+todavía no había push ni cambios en producción; la publicación posterior
+autorizada se registra a continuación.
 
 Referencias: [MultiIA](../AI/PokeApp_Multi_AI_Continuity_Protocol.md),
 [checkpoint](../project-checkpoint.md), [publicación 079](all-vs-all-league-start.md),
 [fix independiente Pokepast.es](public-pokepaste-format.md).
 
-## Publicación autorizada (en curso)
+## Publicación autorizada y verificación remota
 
 El propietario autorizó explícitamente SQL 080 + API con CRLF + web al
 responder «si» a la solicitud final. No se volverá a pedir la misma autorización.
@@ -20,9 +24,59 @@ Estado remoto comprobado antes de publicar: Supabase V2 correcto y saludable,
 historial hasta 079; 080 ausente. Cero jornadas abiertas, reservas de entrega
 u operaciones físicas pendientes. API `ef13a7ce` SUCCESS, 131 rutas; web
 `a81eb04f-ae65-4f53-821b-14e201a0a8ad` al 100%. Son los objetivos de rollback.
-Respaldo fresco capturado en el directorio privado
-`%LOCALAPPDATA%/PokeApp-migration-evidence/mid-season-080-release`; ensayo 080
-en curso. No reaplicar 079. Aún no se ha ejecutado la migración remota.
+Respaldo fresco capturado a las 15:31:34 UTC en el directorio privado
+`%LOCALAPPDATA%/PokeApp-migration-evidence/mid-season-080-release`:
+`pre-release-20261104T153100Z.dump`, SHA-256
+`6cfe1e93e615ce88cc6e6e00aa4b59ffa9de1712e21374c74bb383151d68559e`.
+Ensayo exclusivo 079 → 080: **17/17 PASS**, 125 tablas restauradas,
+103 tablas anteriores idénticas, 116 lecturas iguales y catálogo igual a
+001–080. El preflight no presentó problemas; la compra pendiente era inventario
+sin usar y se conservó. No reaplicar 079. 080 se aplicó UNA VEZ:
+versión `20261104153603`; no reaplicar.
+Validación de base completada: 103 tablas anteriores idénticas, cero altas,
+RLS/FORCE RLS y ACL service-only verificadas; RPC visible en la caché PostgREST.
+Advisor: 24 ERROR/6 WARN anteriores, ningún hallazgo nuevo de esos niveles;
+INFO 229 → 232. Los avisos anteriores se conservan, no se declaran resueltos.
+
+API **SUCCESS**: `adfca5c4-fb5e-4739-a239-b08ccfbb92c2`, creada a las
+15:37:16 UTC desde el bundle de `6490e3de84c575a771348c26c9fe0d0544aa6b14`
+(346 archivos permitidos, solo fuentes comprometidas). Contiene la
+implementación `332a01d` y el fix CRLF `c2e8617`. Health 200, OpenAPI 200,
+**132 rutas / 55 operaciones administrativas autenticadas**, GET/POST nuevos
+y cuerpo estricto verificados. GET y POST anónimos y con bearer inválido:
+401. CORS de la web permitido; origen ajeno rechazado. POST sin identidad
+se rechazó antes de ejecutar ninguna escritura.
+
+Web **100%**: versión `82349ea3-0afd-4757-847e-144f7d32040f`, despliegue
+`329cd675-112a-481d-9b28-0beb1f5b9881`, publicado a las 15:43:35 UTC.
+Build con API de producción, dry-run y publicación correctos. Once
+comprobaciones remotas PASS: index y JavaScript idénticos al build local,
+chunk administrativo con incorporación, rutas SPA, configuración API, CSP,
+feed firmado e instalador del Launcher. El primer sondeo seleccionó por
+error el chunk admin-accounts; se corrigió la selección del comprobador y
+pasó sin modificar el producto.
+
+Launcher **0.26.11**: mismo feed byte por byte, firma Ed25519 válida e
+instalador con el mismo tamaño/ETag. Verifier `2853bbc4` continúa SUCCESS,
+sin nuevo despliegue. Comprobación final 15:45:35 UTC: una sola entrada 080,
+**cero incorporaciones** y API SUCCESS. No se crearon cuentas ni fixtures
+en producción. La tabla y el RPC nuevos siguen sin acceso anon/authenticated.
+
+La verificación autenticada del preview administrativo y del 403 de un
+participante no se ejecutó en producción: no se suplantaron identidades.
+Esas protecciones y la confirmación completa están probadas localmente con
+fixtures; las capturas de este informe son sintéticas. Primera incorporación,
+sincronización inicial y entrega Team Lock/Discord/Pokepast.es quedan al uso
+legítimo de los usuarios. No se presenta ese uso como verificado remotamente.
+
+[Evidencia saneada de publicación](../evidence/mid-season-enrollment/release.json).
+Los originales privados conservan capture/rehearsal/preflight, intent/result,
+huellas anteriores/posteriores, Advisor y aceptación API/web. El plan del runner
+ya marca 001–080 desplegadas y ninguna pendiente; dry-run sin escrituras:
+`to_apply=[]`, `problems=[]`. Sus seis tests de gates vuelven a pasar.
+La rama está publicada en `origin/codex/mid-season-enrollment`; continuar
+desde su tip. El commit de cierre solo actualiza registros y el plan operativo,
+sin cambiar los bytes 080 ni el código de producto desplegado desde `6490e3d`.
 
 También se corrigieron los signos de interrogación que sustituían acentos
 por la codificación de la tubería PowerShell/Python al escribir este informe.
@@ -120,8 +174,9 @@ mediante el endpoint normal, sin permisos de administración.
   OpenAPI distintas y 55 operaciones administrativas autenticadas.
 - Web: control en la pestaña existente, resumen, confirmación, refresco tras
   conflictos y conservación de solicitud incierta. Capturas inspeccionadas a 1440/390 px.
-- Herramientas: validador 080, plan 079 desplegada/080 pendiente, bytes 080
-  fijados y ensayo requerido. SHA-256 080:
+- Herramientas: validador 080, plan inicial 079 desplegada/080 pendiente,
+  actualizado a 080 desplegada tras la publicación; bytes 080 fijados y
+  ensayo requerido. SHA-256 080:
   `297b48f306242b00ae8fd361e8bbdcd11bdc3fe0ff3e5dfb93b87c936caae5b5`.
 - SQL vuelve a comprobar administrador/estado y reutiliza locks/receipts.
   anon/authenticated no acceden a tablas o funciones nuevas. Inyección local
@@ -170,30 +225,26 @@ ampliaciones, fixtures revertidos y catálogo igual a una base vacía 001–080.
 Los datos reales solo estuvieron en la copia privada local. Este ensayo histórico
 no sustituye al respaldo fresco/preflight que necesita una publicación.
 
-Próximo paso exacto, **solo tras autorización explícita del propietario**:
+La publicación autorizada se ejecutó con un respaldo nuevo en 079 y solo 080,
+seguida de API y web. No repetir migraciones ni despliegues por los pasos del
+plan histórico. Próximo paso funcional: un administrador legítimo puede abrir
+Administración → Entrenadores → Añadir entrenador y revisar el preview; solo
+confirmará una incorporación que realmente corresponda. El usuario nuevo debe
+sincronizar su partida oficial antes de continuar la progresión de Liga.
 
-1. Verificar Git, proyecto Supabase y despliegues vigentes; capturar respaldo
-   fresco en 079 y ensayar solo 080 con los bytes comprometidos. Revisar preflight,
-   actividad, grants y ausencia de operaciones físicas pendientes. No reutilizar
-   el archivo histórico como gate de publicación.
-2. Aplicar una vez 080 con el runner protegido, conservar intent/result e historial;
-   verificar funciones/ACL sin ejecutar altas reales.
-3. Publicar API de esta rama, incluido CRLF; comprobar health, 132 rutas, 401
-   anónimo y 403 participante en las operaciones nuevas.
-4. Publicar web verificada y revisar el preview administrativo. No confirmar
-   entrenadores, crear cruces/monedas o publicar pastes como prueba.
-5. Registrar despliegues y validación; primera incorporación/Team Lock reales
-   quedan al uso legítimo de los usuarios.
-
-El fix c2e8617 puede salir solo con API, sin 080 ni web. La función completa
-necesita SQL + API + web. Rollback: web/API anteriores, conservando 080 y su
+El fix c2e8617 ya está publicado en la misma API. Rollback: API anterior
+`ef13a7ce-6d2c-476a-bb2e-78ace27b594b` (referencia de despliegue; Railway la
+marca REMOVED tras sustituirla, por lo que puede requerir redeploy de su fuente
+`f2f799c`) y web `a81eb04f-ae65-4f53-821b-14e201a0a8ad`, conservando 080 y su
 historia si hubo incorporaciones. No borrar créditos, miembros ni capturas,
 ni retirar el tipo de ledger usado. SQL mantiene compatibilidad con la API
 anterior; las reparaciones posteriores requieren auditoría y fix-forward.
 
-Producción no modificada: sin migración remota, Railway/Cloudflare, altas,
-créditos, cruces, Team Locks o archivos Pokémon reales. Sin push.
-Estado remoto: STAGING_UNVERIFIED; última publicación según el registro 079.
+Producción actualizada únicamente con SQL 080, API y web autorizadas.
+Sin altas, créditos, cruces, Team Locks ni archivos Pokémon reales usados como
+prueba; sin pastes nuevos o mensajes Discord de prueba. No se modificó el Launcher.
+Estado remoto VALIDATION_PARTIAL por los límites autenticados descritos arriba;
+base, ACL, despliegues y aceptación HTTP comprobados remotamente.
 Los clusters se detuvieron/eliminaron y los navegadores se cerraron. Sin nuevo
 sondeo/servicio. Logs crudos en TEMP y directorio privado de ensayo; el repositorio
 contiene solo evidencias saneadas y capturas sintéticas.

@@ -1,10 +1,18 @@
 # Public Pokepast.es format verification — 2026-11-04
 
-Status: LOCAL VERIFICATION COMPLETE / READY FOR AUTHORIZED API DEPLOYMENT.
-Branch `codex/public-pokepaste-format`,
+Status: PUBLISHED 2026-11-04; API deployment and HTTP acceptance verified.
+Original branch `codex/public-pokepaste-format`,
 from `16708e9` (`claude/all-vs-all-league-start`, matched against origin
-with `git ls-remote`). No deployment, migration or external paste creation
-is authorized. Existing untracked owner files are excluded from this work.
+with `git ls-remote`). Separate fix commit `c2e8617`, preserved in
+`codex/mid-season-enrollment`. The owner subsequently authorized SQL 080,
+API and web; the API includes this fix. Existing untracked owner files are
+excluded; no new external paste was created.
+
+Published API: `adfca5c4-fb5e-4739-a239-b08ccfbb92c2` SUCCESS, source
+`6490e3de84c575a771348c26c9fe0d0544aa6b14`, 2026-11-04 15:37 UTC.
+Health 200 / OpenAPI 132 routes. Migration 080 and the web belong to the
+enrollment feature; the transport correction itself needs neither.
+[Combined release evidence, authorization and rollback](mid-season-enrollment.md).
 
 Continuity: [MultiIA protocol](../AI/PokeApp_Multi_AI_Continuity_Protocol.md),
 [checkpoint](../project-checkpoint.md),
@@ -122,22 +130,26 @@ for its artwork (`668-0`). Vise Grip, Conversion 2 and some item icons also
 have upstream gaps. Preserve correct identities; do not guess alternative
 species/forms, invent names or promise unsupported sprites/icons.
 
-## Remaining / next exact step
+## Published state and remaining evidence limit
 
-The focused implementation, tests and evidence are committed together on
-the local branch (the commit containing this record). No upstream branch
-has been created. Next action, only after the owner's authorization:
-**API only**, no migration, web or Launcher release. Rollback is reverting
-this transport correction/redeploying the prior API. New Team Lock pastes
-will use CRLF after deployment; existing stored links remain untouched.
+The focused implementation, tests and evidence were committed as `c2e8617`.
+They are published within the combined release above; continue from the tip
+of `origin/codex/mid-season-enrollment`. New legitimate Team Lock pastes
+use the corrected CRLF transport; existing stored links remain untouched.
+The upstream-renderer result remains local evidence. A new hosted paste and
+post-deployment Discord delivery were not tested artificially; their first
+real delivery remains an observation for legitimate user activity.
 
-No public POSTs, Discord sends, real save operations, schema changes,
-deployment or push were performed. The protected product guide was not
+Rollback uses the previous API source `f2f799c` / deployment `ef13a7ce`
+(now REMOVED after replacement), as detailed in the enrollment record.
+No public POSTs, Discord sends or real save operations were performed for
+this verification. The protected product guide was not
 read, searched, hashed, changed, moved or staged. Other owner work remains
-excluded. No SQL/bootstrap/remote validation was needed for a transport-only change.
+excluded. The combined release separately validates 080 and the hosted API/web.
 All audit/test/compiler/browser processes started for this work completed;
 the browser was closed. Synthetic scratch files and raw logs remain only
 in the temporary audit directory noted above.
 
-Remote DB/deployment state is historical/reported by the published release
-record; it has not been re-audited in this task (STAGING_UNVERIFIED).
+Remote DB/API/web were verified in the combined release. Its exact remote
+state is `VALIDATION_PARTIAL`: technical checks passed, authenticated preview
+and first real enrollment/delivery remain pending legitimate sessions.
