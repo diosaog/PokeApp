@@ -6,7 +6,7 @@ it.each([
   ["matchdays/d/results", ["league", "overview"], ["shop", "pc"]],
   [
     "wipe-revivals",
-    ["league", "overview", "inventory"],
+    ["league", "overview", "inventory", "trainers/t/collection"],
     ["pc", "scouting?trainer_id=x"],
   ],
   [
@@ -14,7 +14,11 @@ it.each([
     ["league", "overview", "shop", "inventory"],
     ["pc"],
   ],
-  ["progress", ["league", "overview", "shop", "progress"], ["pc"]],
+  [
+    "progress",
+    ["league", "overview", "shop", "progress"],
+    ["pc", "trainers/t/collection"],
+  ],
   [
     "matchdays/d/team-lock",
     [

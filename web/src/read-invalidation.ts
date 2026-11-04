@@ -53,6 +53,8 @@ export function affectedRead(command: string, read: string): boolean {
   // coins and purchase states, so every wallet and inventory read refreshes.
   if (action.includes("/incidents"))
     return is("/incidents", "/shop", "/inventory", "/league", "/overview");
+  // The own trainer profile also shows the wipe count it just changed.
+  if (action.includes("/wipe-revivals") && is("/trainers")) return true;
   // Economic commands can change deaths/eligibility as well as the wallet.
   if (
     action.includes("/shop") ||

@@ -195,6 +195,19 @@ class PrivateExportTests(unittest.TestCase):
                 first = self.export(pokemon, generation=generation).text.split("\n")[0]
                 self.assertEqual(first.split(" (")[0].split(" @ ")[0], expected)
 
+    def test_gourgeist_is_plain_in_both_projections_and_only_gourgeist(self):
+        # Owner rule 2026-11-04: «Jalowin (Gourgeist)», never a size suffix;
+        # the stored form itself is untouched. Pumpkaboo keeps its size form.
+        for form in range(4):
+            jalowin = stored(711, form=form, gender="F", nickname="Jalowin", item=540, moves=(221,))
+            for projection in ("private", "public"):
+                with self.subTest(form=form, projection=projection):
+                    result = export_team([jalowin], generation=6, projection=projection)
+                    self.assertEqual(result.text.split("\n")[0], "Jalowin (Gourgeist) (F) @ Rocky Helmet")
+                    self.assertNotIn("form", " ".join(w.code for w in result.warnings))
+                    self.assertEqual(jalowin["form"], form)
+        self.assertTrue(self.export(stored(710, form=2)).text.startswith("Pumpkaboo-Large"))
+
     def test_unknown_or_missing_form_is_reported_never_guessed(self):
         unknown = self.export(stored(479, form=9, gender="N"))
         self.assertTrue(unknown.text.startswith("Rotom\n"))

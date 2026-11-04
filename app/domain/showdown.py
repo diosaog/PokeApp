@@ -43,6 +43,11 @@ _PREFIX = {
 }
 # Characters that would change the meaning of a Showdown set line.
 _UNSAFE_NICKNAME = re.compile(r"[()@\[\]|\r\n]")
+# Owner decision (2026-11-04): Gourgeist is exported as plain «Gourgeist» in
+# both projections, without a size suffix. Showdown then simulates its default
+# (Average) size, whose HP/Atk/Spe differ from Small/Large/Super; the real size
+# stays in PokeApp and in the save. No other species is affected.
+_PLAIN_SPECIES = frozenset({711})
 
 
 @dataclass(frozen=True)
@@ -140,6 +145,8 @@ def _species(pokemon: Mapping, generation: int, slot: int, warnings: list) -> tu
     if base is None:
         warnings.append(ShowdownWarning("species_unknown", slot, str(pokemon.get("species") or "")))
         return None
+    if number in _PLAIN_SPECIES:
+        return base, base
     form = pokemon.get("form")
     if form is None:
         form = pokemon.get("form_index")
