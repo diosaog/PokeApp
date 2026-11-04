@@ -11,8 +11,10 @@ milestone record; it does not maintain a second live phase-status ledger.
   branches from this tip, never from `codex/trainer-consistency-079` or older.
 
 - UX, Showdown export, public Team Lock pastes, player-managed matchdays
-  (2026-11-03/04): **IMPLEMENTED LOCALLY · NOT PUBLISHED · AWAITING OWNER
-  APPROVAL.** Branch `claude/ux-showdown-matchdays` from `be7d73c`: exact
+  (2026-11-03/04): **PUBLISHED 2026-11-04 / VERIFIED.** DB 078
+  (`20261104002034`), API `554bf854` (source `0c4678c`, pastes flag on), web
+  `0b061103`, Launcher 0.26.11 unchanged. **Continuation point: tip of
+  `claude/ux-showdown-matchdays`.** Branch from `be7d73c`: exact
   points formatter, «Mi perfil» dialog, wipe stepper under the licence,
   League open below standings / close at the end of each J tab (no authority
   widened), private «Generar Poképaste» (real IVs, EVs 1), public Pokepast.es

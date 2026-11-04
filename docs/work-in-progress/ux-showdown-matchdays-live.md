@@ -1,7 +1,16 @@
 # UX, Showdown export, Team Lock pastes and player-managed matchdays — live record
 
 Branch `claude/ux-showdown-matchdays`, from `be7d73c` (`claude/api-session-isolation`).
-**Local only. Nothing published. Production changes need explicit owner approval.**
+**PUBLISHED 2026-11-04 (~00:26 UTC) after explicit owner approval.**
+
+| Layer | Live state |
+|---|---|
+| Supabase | 001-078; 078 = `20261104002034`, applied once by `tools.phase30_apply_migrations` |
+| Backup | `pre-release-20261104T001816Z` (SHA-256 `4243088b…`), 123 tables; rehearsal 17/17 PASS (private folder `PokeApp-migration-evidence/ux-showdown-078`) |
+| Railway API | `554bf854` (source `0c4678c`, flag `POKEAPP_PUBLIC_TEAM_PASTES_ENABLED=true`); `0766967e` was the same image before the flag; previous release `3cd6aebb` |
+| Cloudflare web | `0b061103-05b7-4b69-aad0-21db084506d8`; previous `053e50cf` |
+| Launcher | unchanged, stable 0.26.11 (min 0.26.0): it loads the new web |
+| Checks | health 200; 128 OpenAPI paths (only decimal `pattern` annotations differ from a local build: unpinned pydantic); anonymous and bad bearer 401 on the new routes; CORS preflight OK; refresh 422; feed signed 0.26.11 |
 
 ## Owner decisions (2026-11-03, final)
 
