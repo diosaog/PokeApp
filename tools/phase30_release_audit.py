@@ -39,10 +39,11 @@ MIGRATIONS = sorted((ROOT / "supabase/v2/migrations").glob("*.sql"))
 # 081 (automatic observed NET) was published as 20261104165722 after owner
 # approval. 082 (wipe-revived deaths in NET) and 083 (one Team Lock
 # announcement per confirmation) were published after owner approval as
-# 20261104232636 and 20261104232638. No migration is pending; a future
-# release must open its window.
-DEPLOYED = [m for m in MIGRATIONS if int(m.name[:3]) <= 83]
-PENDING: list[Path] = [m for m in MIGRATIONS if m.name.startswith("084_")]
+# 20261104232636 and 20261104232638. 084 (Administracion > Avisos, additive
+# and informative) was published as 20261108192609 after a fresh backup and
+# rehearsal. No migration is pending; a future release must open its window.
+DEPLOYED = [m for m in MIGRATIONS if int(m.name[:3]) <= 84]
+PENDING: list[Path] = []
 WINDOW = f"{PENDING[0].name[:3]}-{PENDING[-1].name[:3]}" if PENDING else "none"
 SCHEMAS = "('public','v1_shadow')"
 

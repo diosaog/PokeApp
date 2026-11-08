@@ -5,6 +5,14 @@ milestone record; it does not maintain a second live phase-status ledger.
 
 ## Current project position
 
+- Administración › Avisos, vigilancia informativa de saves (2026-11-08):
+  **PUBLICADO / VERIFICADO**. Continuar desde el tip de `origin/claude/net-friendship-discord`.
+  DB 084 `20261108192609` (aditiva; ensayo 17/17 + 25/25 sobre copia fresca), API `336f3f05`
+  (rollback `f1d2896a`), web `b4076f0a` (rollback `9a17a56c`), fuente `72adbc4`. Solo informa:
+  nunca bloquea, sanciona ni escribe saves. Launcher y verifier sin cambios. Primer análisis real
+  con la próxima sincronización. Tests: Python 1526, Vitest 393, node 71, validador SQL 25/25.
+  [Registro vivo](work-in-progress/save-audit-notices.md).
+
 - NET con revividos tras wipe, Felicidad máxima y anuncios Team Lock (2026-11-05):
   **PUBLICADO / VERIFICADO**. Continuar desde el tip de `origin/claude/net-friendship-discord`.
   DB 082 `20261104232636` y 083 `20261104232638` aplicadas una vez (ensayo 19/19 sobre

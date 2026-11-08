@@ -10,7 +10,7 @@ Reconciled: 2026-09-26. Keep one copy at this path.
 | How do AI instances continue the same work? | This protocol |
 | What are the project-wide constraints and roadmap? | [Master protocol](../PokeApp_2.0_Protocolo_Maestro_MultiIA.md) |
 | Which phase is active and where is its memory? | [Project checkpoint](../project-checkpoint.md) |
-| What is the current operational state and next action? | [NET/Felicidad/Discord live record](../work-in-progress/net-friendship-discord.md) (2026-11-05: PUBLISHED / VERIFIED. SQL 082 `20261104232636` and 083 `20261104232638`; API `f1d2896a`, web `9a17a56c`; **Launcher 0.26.12** on the stable feed with «Felicidad máxima» (`max_friendship`, the only newly enabled physical write), source `b954ad1`, installer SHA-256 `3fa8b195…`, manifest released 2026-11-04 23:42 UTC. `/launcher/download` stays 0.26.11 until the next web deploy. Never reapply 082/083; no pending migration). **Continue from the tip of `origin/claude/net-friendship-discord`.** |
+| What is the current operational state and next action? | [Administración › Avisos live record](../work-in-progress/save-audit-notices.md) (2026-11-08: PUBLISHED / VERIFIED. SQL 084 `20261108192609`: additive, informative, never blocks or writes a save; API `336f3f05`; web `b4076f0a`, source `72adbc4`. The first real analysis happens with the next trainer sync. Never reapply 084; no pending migration). Previous record: [NET/Felicidad/Discord](../work-in-progress/net-friendship-discord.md). **Continue from the tip of `origin/claude/net-friendship-discord`.** |
 | What behavior was approved? | [Functional alignment contract](../phase10-5-functional-alignment.md) |
 | What was implemented and what evidence exists? | Active phase evidence in its live record until closure; [previous Phase 10 report](../phase10-completion-report.md) retains historical delivery evidence |
 
@@ -40,6 +40,11 @@ build and one local + one hosted synthetic browser test PASS. Samu and Iker
 both await their own baseline confirmation (0/0/0 and 3/0/3); no data correction.
 Discord per-version announcements require a new migration and are stopped
 under the owner's explicit no-migration boundary. No worker/API/SQL change.
+
+Administración › Avisos (2026-11-08): successive-save comparison on its own worker
+after each accepted sync; it never writes a save, blocks or sanctions. Release tools
+pin DEPLOYED ≤084 with nothing pending. The native reader gained a read-only
+`--audit-snapshot` mode (server side; the Launcher does not call it).
 
 NET/Felicidad/Discord (2026-11-05): see the live record above. 082 replaces only
 `league_death_totals`; 083 adds an immutable per-confirmation table and outbox row

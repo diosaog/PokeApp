@@ -1,7 +1,7 @@
 import { test, expect, type Page } from "@playwright/test";
 import { fixture, login, navigate, sid } from "./fixtures";
 
-// Phase 28: the admin console in three areas and the incident center, with
+// Phase 28: the admin console in its areas and the incident center, with
 // synthetic data. Every command waits for the server's receipt.
 const api = "http://127.0.0.1:8000";
 const incidents = `/v1/admin/seasons/${sid}/incidents`;
@@ -131,7 +131,7 @@ async function console_(page: Page) {
 }
 
 for (const width of [1440, 390]) {
-  test(`three admin areas and a reasoned cancellation at ${width}px`, async ({
+  test(`admin areas and a reasoned cancellation at ${width}px`, async ({
     page,
   }, info) => {
     await page.setViewportSize({ width, height: 900 });
@@ -139,7 +139,7 @@ for (const width of [1440, 390]) {
     const areas = page.getByRole("navigation", {
       name: "Áreas de administración",
     });
-    await expect(areas.getByRole("button")).toHaveCount(3);
+    await expect(areas.getByRole("button")).toHaveCount(4); // 084: Avisos
     // The League tools keep their tabs inside the first area.
     await expect(
       page.getByRole("tab", { name: "Configuración", exact: true }),

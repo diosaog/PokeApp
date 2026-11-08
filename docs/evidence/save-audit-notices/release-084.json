@@ -1,0 +1,65 @@
+{
+  "authorization": "Owner message 2026-11-08: publish once every test passes, overriding the earlier request to present the migration plan first.",
+  "source_commit": "72adbc427a01ae8d83df3f69bab5afe8732f09d5",
+  "backup": {
+    "archive": "pre-release-20261108T192328Z.dump",
+    "captured_at": "2026-11-08T19:24:05+00:00",
+    "sha256": "9157202a5b7d8a81abebaa793600e518d981096bd4db2d81997ab8d5730533c1",
+    "tables_fingerprinted": 127
+  },
+  "rehearsal": {
+    "result": "PASS",
+    "restored_rows_identical": true,
+    "checks": "17/17",
+    "phase084_save_audit": "25/25"
+  },
+  "migration": {
+    "name": "084_save_audit_notices",
+    "applied_as": "20261108192609",
+    "sha256": "0fc5359ce80ee0d0c590a9b94eadd540925f418b0827dc235e1a373bf87ef23c",
+    "additive": true
+  },
+  "api": {
+    "railway_deployment": "336f3f05-3b43-46d3-9efa-9847493fc8dc",
+    "rollback": "f1d2896a-37c9-4552-81dc-3fb804edf1ba",
+    "openapi_paths": 136,
+    "health": 200,
+    "anonymous_notices": 401,
+    "bad_bearer": 401,
+    "cors_preflight": 200,
+    "docker_build_parser_checks": "PASS"
+  },
+  "web": {
+    "cloudflare_version": "b4076f0a-1719-4ee0-bbd6-9e9edad81091",
+    "rollback": "9a17a56c",
+    "percent": 100,
+    "bundle_contains_notices": true,
+    "note": "Direct connections from the release machine to the DNS-resolved Cloudflare IPs timed out at release time; the page was fetched through another Cloudflare edge address."
+  },
+  "production_state_after": {
+    "save_audit_config_rows": 1,
+    "activated_at": "2026-11-08 19:26:09.775789+00",
+    "analyses": 0,
+    "notices": 0,
+    "functions": 10
+  },
+  "tests": {
+    "python": "1526 OK",
+    "vitest": "46 files / 393 OK",
+    "node": "71 OK",
+    "playwright_focused": "admin-notices 2 OK, admin-incidents 2 OK",
+    "playwright_preexisting_failures": "5 in admin.spec.ts, the same 5 fail at 6f19f3c",
+    "native_snapshot_real_fixtures": "8 games PASS"
+  },
+  "history_dry_run": {
+    "source": "local restore of the release backup; bag data unavailable there",
+    "comparisons": 38,
+    "trainers": 6,
+    "notices": 1,
+    "notice": "one ability change on a Pokemon of the trainer Anto"
+  },
+  "limits": [
+    "The first analysis in production waits for the next real Launcher sync.",
+    "Authenticated admin screens were not exercised against production: no owner session is used here."
+  ]
+}
