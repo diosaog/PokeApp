@@ -364,6 +364,34 @@ class PkhexProcessWriter:
         return {"game": response["game"], "trainer_key": response["trainer_key"],
                 "source_sha256": response["source_sha256"], "party": party}
 
+    def audit_snapshot(self, source):
+        """Read-only bag and friendship of these exact bytes, for the admin audit."""
+        if type(source) is not bytes or len(source) not in NATIVE_SIZES.values():
+            raise NativeWriteError("UNSUPPORTED_FORMAT")
+        response = self._run("--audit-snapshot", dict(schema_version=1,
+            source_base64=base64.b64encode(source).decode("ascii")))
+        info = response["semantic_diff"]
+        if (response["status"] != "inspected" or response["source_sha256"] != _digest(source)
+            or response["game"] not in NATIVE_SIZES or response["output_base64"] is not None
+            or response["output_sha256"] is not None or not isinstance(info, dict)
+            or set(info) != {"pouches", "pokemon"} or not isinstance(info["pouches"], list)
+            or not isinstance(info["pokemon"], list)):
+            raise NativeWriteError("VERIFICATION_FAILED")
+        for pouch in info["pouches"]:
+            if (not isinstance(pouch, dict) or set(pouch) != {"type", "items"}
+                or not isinstance(pouch["type"], str) or not isinstance(pouch["items"], list)
+                or any(not isinstance(i, dict) or set(i) != {"id", "count"}
+                       or type(i["id"]) is not int or type(i["count"]) is not int
+                       or i["id"] < 1 or i["count"] < 1 for i in pouch["items"])):
+                raise NativeWriteError("VERIFICATION_FAILED")
+        if any(not isinstance(p, dict) or set(p) != {"pid", "ec", "friendship"}
+               or type(p["pid"]) is not int or type(p["ec"]) is not int
+               or type(p["friendship"]) is not int or not 0 <= p["friendship"] <= 255
+               for p in info["pokemon"]):
+            raise NativeWriteError("VERIFICATION_FAILED")
+        return {"game": response["game"], "source_sha256": response["source_sha256"],
+                "pouches": info["pouches"], "pokemon": info["pokemon"]}
+
     def plan_transfer(
         self,
         source,
