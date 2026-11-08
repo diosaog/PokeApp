@@ -511,6 +511,10 @@ def rehearse(args) -> dict:
 
                 report["phase083_team_lock_announcements"] = validate_announcements(pg)
                 report["phase083_wipe_deaths_unchanged"] = validate_wipe_deaths(pg)
+            if migration.name.startswith("084_"):
+                from tools.validate_phase084_save_audit import validate as validate_save_audit
+
+                report["phase084_save_audit"] = validate_save_audit(pg)
 
         rows_after = local_fingerprints(pg, public_tables)
         # 072 adds the private item_deliveries table, its commands and the

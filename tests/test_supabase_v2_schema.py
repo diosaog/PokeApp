@@ -160,6 +160,7 @@ class SupabaseV2SchemaTests(unittest.TestCase):
                 "081_automatic_observed_points.sql",
                 "082_wipe_revival_deaths.sql",
                 "083_team_lock_confirmation_announcements.sql",
+                "084_save_audit_notices.sql",
             ],
         )
         for path in _migration_files():
@@ -370,7 +371,7 @@ class SupabaseV2SchemaTests(unittest.TestCase):
         self.assertTrue(bootstrap.startswith("-- ONLY FOR EMPTY POKEAPP V2 DATABASE."))
         self.assertEqual(bootstrap, render_bootstrap())
         self.assertIn(
-            "Source of truth: supabase/v2/migrations/001_core.sql through 083_team_lock_confirmation_announcements.sql",
+            "Source of truth: supabase/v2/migrations/001_core.sql through 084_save_audit_notices.sql",
             bootstrap,
         )
         self.assertNotIn("drop table", lowered)
@@ -478,7 +479,7 @@ class SupabaseV2SchemaTests(unittest.TestCase):
                 self.assertIn(f"'{table}'", security_sql, table)
 
         # 075 adds the separately revoked death-history RLS group. 077 adds no table.
-        self.assertEqual(security_sql.count("enable row level security"), 44)  # 083 private Team Lock confirmations
+        self.assertEqual(security_sql.count("enable row level security"), 45)  # 084 Administración › Avisos (one %I loop)
         self.assertIn("alter table public.%i enable row level security", security_sql)
 
 

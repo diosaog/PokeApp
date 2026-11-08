@@ -42,7 +42,7 @@ MIGRATIONS = sorted((ROOT / "supabase/v2/migrations").glob("*.sql"))
 # 20261104232636 and 20261104232638. No migration is pending; a future
 # release must open its window.
 DEPLOYED = [m for m in MIGRATIONS if int(m.name[:3]) <= 83]
-PENDING: list[Path] = []
+PENDING: list[Path] = [m for m in MIGRATIONS if m.name.startswith("084_")]
 WINDOW = f"{PENDING[0].name[:3]}-{PENDING[-1].name[:3]}" if PENDING else "none"
 SCHEMAS = "('public','v1_shadow')"
 
