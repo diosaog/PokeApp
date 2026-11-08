@@ -101,9 +101,12 @@ def parsed_payload(observation, save_id, trainer_id, raw_hash):
 
 
 class TrustedSaveIngestion:
-    def __init__(self, repository, parser):
+    def __init__(self, repository, parser, after_registration=None):
         self.repository, self.parser = repository, parser
         self.slots = BoundedSemaphore(2)
+        # Optional best-effort hook (Administración › Avisos): only queues work
+        # on its own thread, never delays or fails an accepted registration.
+        self.after_registration = after_registration
 
     def context(self, season_id, trainer_id):
         context = self.repository.execute(
@@ -180,9 +183,15 @@ class TrustedSaveIngestion:
         )
         key = request["storage_key"]
         self.repository.store_raw(key, data, raw_hash)
-        return SaveRegistration.model_validate(
+        registration = SaveRegistration.model_validate(
             self.repository.execute("register", request)
         )
+        if self.after_registration is not None:
+            try:
+                self.after_registration(sid, tid)
+            except Exception:  # noqa: BLE001 - the save is already accepted
+                pass
+        return registration
 
 
 def registration_request(

@@ -61,6 +61,8 @@ class ApiContainer:
     announcer: object | None = None
     item_delivery_repository: object | None = None
     training_service: object | None = None
+    save_audit: object | None = None
+    save_audit_repository: object | None = None
 
 
 def get_api_container(request: Request) -> ApiContainer:
@@ -94,6 +96,8 @@ def create_default_container(config: APIConfig | None = None) -> ApiContainer:
     save_ingestion = None
     personal_saves = None
     training_service = None
+    save_audit = None
+    save_audit_repo = None
     accounts = None
 
     if config.supabase_url and config.supabase_anon_key:
@@ -238,13 +242,24 @@ def create_default_container(config: APIConfig | None = None) -> ApiContainer:
         )
         from app.save_parser.adapter import PkhexProcessParser
 
+        from app.repositories.supabase.save_audit import SupabaseSaveAuditRepository
+
+        save_audit_repo = SupabaseSaveAuditRepository.from_url_key(
+            config.supabase_url, config.supabase_service_role_key
+        )
         parser_path = os.environ.get("POKEAPP_SERVER_PARSER")
         if parser_path:
+            from app.application.save_audit import SaveAudit
+            from app.save_parser.writer import PkhexProcessWriter
+
+            # Read-only native inspection; its own worker, never in a sync's path.
+            save_audit = SaveAudit(save_audit_repo, PkhexProcessWriter(Path(parser_path)))
             save_ingestion = TrustedSaveIngestion(
                 SupabaseSaveIngestionRepository.from_url_key(
                     config.supabase_url, config.supabase_service_role_key
                 ),
                 PkhexProcessParser(Path(parser_path)),
+                after_registration=save_audit.enqueue,
             )
             from app.application.personal_saves import PersonalSaves
             from app.repositories.supabase.personal_saves import (
@@ -361,4 +376,6 @@ def create_default_container(config: APIConfig | None = None) -> ApiContainer:
         announcer=create_announcer(config),
         item_delivery_repository=item_delivery_repo,
         training_service=training_service,
+        save_audit=save_audit,
+        save_audit_repository=save_audit_repo,
     )

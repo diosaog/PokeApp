@@ -2284,6 +2284,74 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/v1/admin/seasons/{season_id}/notices": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Overview */
+    get: operations["overview_v1_admin_seasons__season_id__notices_get"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/admin/seasons/{season_id}/notices/summary": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Summary */
+    get: operations["summary_v1_admin_seasons__season_id__notices_summary_get"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/admin/seasons/{season_id}/notices/analyze": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** Analyze Pending */
+    post: operations["analyze_pending_v1_admin_seasons__season_id__notices_analyze_post"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/admin/seasons/{season_id}/notices/{notice_id}/status": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** Update Status */
+    post: operations["update_status_v1_admin_seasons__season_id__notices__notice_id__status_post"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -4703,6 +4771,19 @@ export interface components {
       /** Matchday Number */
       matchday_number: number | null;
     };
+    /** NoticeStatusBody */
+    NoticeStatusBody: {
+      /**
+       * Status
+       * @enum {string}
+       */
+      status: "pending" | "reviewed" | "justified" | "confirmed";
+      /**
+       * Note
+       * @default
+       */
+      note: string;
+    };
     /** ObservationReceipt */
     ObservationReceipt: {
       /** Id */
@@ -5823,6 +5904,266 @@ export interface components {
       type: "other" | "pokemon_release";
       /** Text */
       text: string;
+    };
+    /** SaveAuditChange */
+    SaveAuditChange: {
+      /** Field */
+      field: string;
+      /** Label */
+      label: string;
+      /** Kind */
+      kind: string;
+      /** Before */
+      before?: number | string | boolean | string[] | null;
+      /** After */
+      after?: number | string | boolean | string[] | null;
+      /**
+       * Severity
+       * @enum {string}
+       */
+      severity: "alta" | "media" | "baja";
+      /** Reason */
+      reason: string;
+      /** Item */
+      item?: string | null;
+      /** Delta */
+      delta?: number | null;
+      /** Justified */
+      justified?: number | null;
+      /** Unjustified */
+      unjustified?: number | null;
+      /**
+       * Holders
+       * @default []
+       */
+      holders: string[];
+    };
+    /** SaveAuditComparison */
+    SaveAuditComparison: {
+      previous: components["schemas"]["SaveAuditSide"];
+      current: components["schemas"]["SaveAuditSide"];
+      /** Inventory Status */
+      inventory_status: string;
+    };
+    /** SaveAuditEvent */
+    SaveAuditEvent: {
+      /**
+       * At
+       * Format: date-time
+       */
+      at: string;
+      /** Actor */
+      actor?: string | null;
+      /**
+       * From Status
+       * @enum {string}
+       */
+      from_status: "pending" | "reviewed" | "justified" | "confirmed";
+      /**
+       * To Status
+       * @enum {string}
+       */
+      to_status: "pending" | "reviewed" | "justified" | "confirmed";
+      /**
+       * Note
+       * @default
+       */
+      note: string;
+    };
+    /** SaveAuditLocation */
+    SaveAuditLocation: {
+      /**
+       * Source
+       * @enum {string}
+       */
+      source: "party" | "box";
+      /** Box */
+      box: number;
+      /** Slot */
+      slot: number;
+    };
+    /** SaveAuditNotice */
+    SaveAuditNotice: {
+      /**
+       * Id
+       * Format: uuid
+       */
+      id: string;
+      /**
+       * Trainer Id
+       * Format: uuid
+       */
+      trainer_id: string;
+      /** Display Name */
+      display_name: string;
+      /** Game */
+      game: string;
+      /**
+       * Detected At
+       * Format: date-time
+       */
+      detected_at: string;
+      /**
+       * Updated At
+       * Format: date-time
+       */
+      updated_at: string;
+      /**
+       * Category
+       * @enum {string}
+       */
+      category: "pokemon" | "objetos" | "origen";
+      /**
+       * Severity
+       * @enum {string}
+       */
+      severity: "alta" | "media" | "baja";
+      /**
+       * Status
+       * @enum {string}
+       */
+      status: "pending" | "reviewed" | "justified" | "confirmed";
+      /** Title */
+      title: string;
+      /** Summary */
+      summary: string;
+      /** Origin */
+      origin: string;
+      pokemon?: components["schemas"]["SaveAuditPokemon"] | null;
+      /** Changes */
+      changes: components["schemas"]["SaveAuditChange"][];
+      /** Operations */
+      operations: components["schemas"]["SaveAuditOperation"][];
+      compared?: components["schemas"]["SaveAuditComparison"] | null;
+      /** Detector Version */
+      detector_version: number;
+      /** Events */
+      events: components["schemas"]["SaveAuditEvent"][];
+      /** Replayed */
+      replayed?: boolean | null;
+    };
+    /** SaveAuditOperation */
+    SaveAuditOperation: {
+      /** Kind */
+      kind: string;
+      /** Label */
+      label: string;
+      /** At */
+      at?: string | null;
+      /**
+       * Detail
+       * @default
+       */
+      detail: string;
+    };
+    /** SaveAuditOverview */
+    SaveAuditOverview: {
+      /**
+       * Season Id
+       * Format: uuid
+       */
+      season_id: string;
+      /** Season Status */
+      season_status: string;
+      /**
+       * Activated At
+       * Format: date-time
+       */
+      activated_at: string;
+      /** Pending Saves */
+      pending_saves: number;
+      /** Analyzed Saves */
+      analyzed_saves: number;
+      /** Last Analyzed At */
+      last_analyzed_at?: string | null;
+      /** Trainers */
+      trainers: components["schemas"]["SaveAuditTrainer"][];
+      /** Notices */
+      notices: components["schemas"]["SaveAuditNotice"][];
+    };
+    /** SaveAuditPokemon */
+    SaveAuditPokemon: {
+      /** Key */
+      key: string;
+      /** Species */
+      species: string;
+      /** Form */
+      form?: number | null;
+      /**
+       * Nickname
+       * @default
+       */
+      nickname: string;
+      /** Level */
+      level?: number | null;
+      /** Gender */
+      gender?: string | null;
+      /**
+       * Shiny
+       * @default false
+       */
+      shiny: boolean;
+      /**
+       * Is Egg
+       * @default false
+       */
+      is_egg: boolean;
+      location: components["schemas"]["SaveAuditLocation"];
+      previous_location?: components["schemas"]["SaveAuditLocation"] | null;
+      /** Previous Species */
+      previous_species?: string | null;
+      /** Item */
+      item?: string | null;
+    };
+    /** SaveAuditRunResult */
+    SaveAuditRunResult: {
+      /** Processed */
+      processed: number;
+      /** Failed */
+      failed: number;
+      /** Busy */
+      busy: boolean;
+      /** Pending Saves */
+      pending_saves: number;
+    };
+    /** SaveAuditSide */
+    SaveAuditSide: {
+      /**
+       * Save File Id
+       * Format: uuid
+       */
+      save_file_id: string;
+      /** Sha256 */
+      sha256: string;
+      /**
+       * Uploaded At
+       * Format: date-time
+       */
+      uploaded_at: string;
+      /** Revision */
+      revision: number;
+    };
+    /** SaveAuditSummary */
+    SaveAuditSummary: {
+      /**
+       * Season Id
+       * Format: uuid
+       */
+      season_id: string;
+      /** Pending */
+      pending: number;
+      /** Pending High */
+      pending_high: number;
+    };
+    /** SaveAuditTrainer */
+    SaveAuditTrainer: {
+      /**
+       * Trainer Id
+       * Format: uuid
+       */
+      trainer_id: string;
+      /** Display Name */
+      display_name: string;
     };
     /** SaveRead */
     SaveRead: {
@@ -11967,6 +12308,137 @@ export interface operations {
         };
         content: {
           "application/json": components["schemas"]["IncidentReceipt"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  overview_v1_admin_seasons__season_id__notices_get: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        season_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["SaveAuditOverview"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  summary_v1_admin_seasons__season_id__notices_summary_get: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        season_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["SaveAuditSummary"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  analyze_pending_v1_admin_seasons__season_id__notices_analyze_post: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        season_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["SaveAuditRunResult"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  update_status_v1_admin_seasons__season_id__notices__notice_id__status_post: {
+    parameters: {
+      query?: never;
+      header: {
+        "Idempotency-Key": string;
+      };
+      path: {
+        season_id: string;
+        notice_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["NoticeStatusBody"];
+      };
+    };
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["SaveAuditNotice"];
         };
       };
       /** @description Validation Error */

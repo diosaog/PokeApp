@@ -28,6 +28,7 @@ from app.api.routes import launcher
 from app.api.routes import saves
 from app.api.routes import personal_saves
 from app.api.routes import accounts, incidents, item_delivery, item_use, transfers, training
+from app.api.routes import save_audit
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 
@@ -129,6 +130,7 @@ def create_app(
     api.include_router(training.router)
     api.include_router(transfers.router)
     api.include_router(incidents.router)
+    api.include_router(save_audit.router)
     return api
 
 
