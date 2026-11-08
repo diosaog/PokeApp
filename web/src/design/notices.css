@@ -1,0 +1,483 @@
+/* Administración › Avisos. Night-stadium tokens only: severity is one signal
+   per notice (lamp, rail, meter), and the before → after meter is the one
+   loud element on the screen; everything around it stays quiet. */
+.avisos {
+  display: grid;
+  gap: 1.1rem;
+}
+[data-severity="alta"] {
+  --sev: var(--c-danger);
+  --sev-deep: var(--c-danger-deep);
+  --sev-soft: var(--c-danger-soft);
+}
+[data-severity="media"] {
+  --sev: var(--c-gold);
+  --sev-deep: var(--c-gold-deep);
+  --sev-soft: var(--c-gold-soft);
+}
+[data-severity="baja"] {
+  --sev: var(--c-info);
+  --sev-deep: var(--c-info-deep);
+  --sev-soft: var(--c-info-soft);
+}
+
+/* The state of the desk, said in a sentence. */
+.avisos-lede {
+  padding: 1.1rem 1.3rem;
+  border-radius: var(--radius-lg, 18px);
+  background: var(--c-surface-1);
+  border: 1px solid var(--c-line);
+  border-inline-start: 5px solid var(--sev, var(--c-accent));
+}
+.avisos-lede h2 {
+  margin: 0 0 0.3rem;
+  font-size: var(--text-xl);
+  font-weight: 800;
+  color: var(--c-text);
+}
+.avisos-lede > p {
+  margin: 0;
+  max-width: 68ch;
+  color: var(--c-text-muted);
+}
+.avisos-sync {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.7rem;
+  margin-top: 0.8rem;
+  color: var(--c-text-soft);
+  font-size: 0.9rem;
+}
+.avisos-sync button svg {
+  vertical-align: -2px;
+}
+
+.avisos-filters {
+  display: grid;
+  gap: 0.7rem;
+}
+.avisos-severities {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+.avisos-severities button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.9rem;
+  border-radius: 999px;
+  background: var(--c-bg-1);
+  border: 1px solid var(--c-line);
+  color: var(--c-text-soft);
+  font-weight: 700;
+}
+.avisos-severities button b {
+  color: var(--c-text);
+}
+.avisos-severities button[aria-pressed="true"] {
+  background: var(--sev-deep);
+  border-color: var(--sev);
+  color: var(--sev-soft);
+}
+.avisos-selects {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+.avisos-selects label {
+  display: grid;
+  gap: 0.2rem;
+  color: var(--c-text-muted);
+  font-size: 0.85rem;
+}
+.avisos-selects select {
+  min-width: 11rem;
+}
+
+.avisos-list {
+  display: grid;
+  gap: 0.6rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.aviso {
+  border-radius: var(--radius-md);
+  background: var(--c-bg-1);
+  border: 1px solid var(--c-line);
+  box-shadow: inset 5px 0 0 var(--sev);
+}
+.aviso[data-status="justified"],
+.aviso[data-status="confirmed"] {
+  box-shadow: inset 5px 0 0 var(--c-line-strong);
+}
+.aviso-head {
+  display: grid;
+  grid-template-columns: auto 64px minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: 0.85rem;
+  width: 100%;
+  padding: 0.75rem 1rem 0.75rem 1.2rem;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  text-align: start;
+  cursor: pointer;
+}
+.aviso-head:focus-visible {
+  outline: 2px solid var(--c-accent);
+  outline-offset: -2px;
+  border-radius: var(--radius-md);
+}
+.aviso-lamp {
+  display: block;
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  background: var(--sev);
+  box-shadow: 0 0 0 3px var(--sev-deep);
+}
+.aviso-art {
+  display: grid;
+  place-items: center;
+  width: 64px;
+  height: 64px;
+}
+.aviso-art img {
+  max-width: 64px;
+  max-height: 64px;
+}
+.aviso-summary {
+  display: grid;
+  gap: 0.15rem;
+  min-width: 0;
+}
+.aviso-summary > strong {
+  font-size: 1.05rem;
+  color: var(--c-text);
+}
+.aviso-who {
+  color: var(--c-text-soft);
+  font-size: 0.92rem;
+}
+.aviso-who b {
+  color: var(--sev-soft);
+  font-weight: 700;
+}
+.aviso-when {
+  color: var(--c-text-muted);
+  font-size: 0.83rem;
+}
+.aviso-tags {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.35rem 0.5rem;
+  max-width: 19rem;
+}
+.aviso-severity {
+  color: var(--sev-soft);
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+.aviso-chevron {
+  color: var(--c-text-muted);
+}
+
+/* Evidence: what changed, in the plainest possible form. */
+.aviso-detail {
+  display: grid;
+  gap: 1rem;
+  padding: 0.3rem 1.2rem 1.1rem;
+  border-top: 1px solid var(--c-line);
+}
+.aviso-evidences {
+  display: grid;
+  gap: 0.35rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.aviso-evidence {
+  display: grid;
+  grid-template-columns: minmax(8rem, 13rem) minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 0.8rem;
+  padding: 0.3rem 0;
+}
+.aviso-field {
+  color: var(--c-text-soft);
+  font-weight: 650;
+}
+.aviso-meter {
+  position: relative;
+  display: block;
+  height: 12px;
+  border-radius: 6px;
+  background: var(--c-surface-2);
+  overflow: hidden;
+}
+.aviso-meter-before,
+.aviso-meter-change {
+  position: absolute;
+  inset-block: 0;
+  inset-inline-start: 0;
+  border-radius: inherit;
+}
+.aviso-meter-before {
+  width: var(--before);
+  background: var(--c-line-strong);
+}
+.aviso-meter-change {
+  inset-inline-start: var(--before);
+  width: calc(var(--after) - var(--before));
+  background: var(--sev);
+  animation: notice-jump 420ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  transform-origin: left center;
+}
+.aviso-meter[data-rise="false"] .aviso-meter-before {
+  width: var(--before);
+  background: var(--sev);
+}
+.aviso-meter[data-rise="false"] .aviso-meter-change {
+  inset-inline-start: var(--after);
+  width: calc(var(--before) - var(--after));
+  background: var(--c-surface-3);
+  animation: none;
+}
+@keyframes notice-jump {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+.aviso-values {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.aviso-was {
+  color: var(--c-text-muted);
+}
+.aviso-values strong {
+  color: var(--sev-soft);
+  font-weight: 800;
+}
+.aviso-values small {
+  margin-inline-start: 0.2rem;
+  padding: 0.05rem 0.4rem;
+  border-radius: 6px;
+  background: var(--sev-deep);
+  color: var(--sev-soft);
+  font-weight: 700;
+}
+
+/* Objects: one line per object, its count jump first. */
+.aviso-item {
+  display: grid;
+  grid-template-columns: 46px minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: 0.9rem;
+  padding: 0.5rem 0.2rem;
+  border-bottom: 1px solid var(--c-line);
+}
+.aviso-item:last-child {
+  border-bottom: 0;
+}
+.aviso-item-art img,
+.aviso-item-art svg {
+  width: 40px;
+  height: 40px;
+}
+.aviso-item-name {
+  display: grid;
+  min-width: 0;
+}
+.aviso-item-name small {
+  color: var(--c-text-muted);
+}
+.aviso-count-jump {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-size: 1.5rem;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  color: var(--c-text-muted);
+}
+.aviso-count-jump strong {
+  color: var(--sev-soft);
+}
+.aviso-justify {
+  display: grid;
+  grid-template-columns: auto auto;
+  column-gap: 0.7rem;
+  align-items: center;
+  font-size: 0.82rem;
+  color: var(--c-text-muted);
+}
+.aviso-justify b {
+  color: var(--c-text);
+  text-align: end;
+}
+.aviso-unjustified {
+  color: var(--sev-soft) !important;
+}
+
+/* Why, what was considered, what was compared. */
+.aviso-facts {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 0.9rem 1.5rem;
+}
+.aviso-facts h3,
+.aviso-history h3 {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin: 0 0 0.3rem;
+  font-size: 0.86rem;
+  color: var(--c-text-muted);
+}
+.aviso-facts p {
+  margin: 0 0 0.3rem;
+}
+.aviso-origin {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  color: var(--c-text-soft);
+}
+.aviso-disclaimer {
+  grid-column: 1 / -1;
+  display: flex;
+  gap: 0.45rem;
+  color: var(--c-text-muted);
+  font-size: 0.85rem;
+}
+.aviso-disclaimer svg {
+  flex: none;
+  margin-top: 0.15rem;
+}
+.aviso-plain {
+  display: grid;
+  gap: 0.3rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.aviso-plain li {
+  display: flex;
+  gap: 0.4rem;
+}
+.aviso-plain svg {
+  flex: none;
+  margin-top: 0.2rem;
+  color: var(--c-accent);
+}
+.aviso-plain small {
+  display: block;
+  color: var(--c-text-muted);
+}
+
+/* The administrator's decision. */
+.aviso-decide {
+  display: grid;
+  gap: 0.6rem;
+  padding: 0.8rem 0.9rem;
+  border-radius: var(--radius-md);
+  background: var(--c-surface-1);
+}
+.aviso-decide-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+}
+.aviso-decide-actions button[aria-pressed="true"] {
+  background: var(--c-surface-3);
+  border-color: var(--c-accent);
+}
+.aviso-decide form {
+  display: grid;
+  gap: 0.5rem;
+}
+.aviso-note {
+  display: grid;
+  gap: 0.25rem;
+  color: var(--c-text-soft);
+}
+.aviso-decide .muted {
+  margin: 0;
+  font-size: 0.85rem;
+}
+.aviso-decide .button {
+  justify-self: start;
+}
+.aviso-history ol {
+  display: grid;
+  gap: 0.3rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  color: var(--c-text-soft);
+  font-size: 0.9rem;
+}
+.aviso-history q {
+  display: block;
+  color: var(--c-text-muted);
+}
+
+/* Sidebar counter of pending notices. */
+.nav-notice-count {
+  margin-inline-start: auto;
+  padding: 0.05rem 0.45rem;
+  border-radius: 999px;
+  background: var(--c-info-deep);
+  color: var(--c-info-soft);
+  font-size: 0.75rem;
+  font-weight: 800;
+}
+.nav-notice-count[data-alta="true"] {
+  background: var(--c-danger-deep);
+  color: var(--c-danger-soft);
+}
+
+@media (max-width: 720px) {
+  .aviso-head {
+    grid-template-columns: auto 48px minmax(0, 1fr) auto;
+  }
+  .aviso-art,
+  .aviso-art img {
+    width: 48px;
+    height: 48px;
+  }
+  .aviso-tags {
+    grid-column: 2 / -1;
+    justify-content: flex-start;
+    max-width: none;
+  }
+  .aviso-chevron {
+    grid-column: -2;
+    grid-row: 1;
+  }
+  .aviso-evidence {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+  .aviso-evidence .aviso-meter {
+    grid-column: 1 / -1;
+  }
+  .aviso-item {
+    grid-template-columns: 42px minmax(0, 1fr) auto;
+  }
+  .aviso-justify {
+    grid-column: 1 / -1;
+  }
+}

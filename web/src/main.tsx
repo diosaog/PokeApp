@@ -16,6 +16,7 @@ import "./design/arena.css";
 import "./design/evolution.css";
 import "./design/scenes.css";
 import "./design/hub.css";
+import "./design/notices.css";
 installPreferences();
 installSound();
 installIdleMotion();

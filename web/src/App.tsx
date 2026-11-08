@@ -22,6 +22,7 @@ import {
   Menu,
   ArrowUpRight,
   ShieldCheck,
+  BellRing,
   X,
 } from "lucide-react";
 import { api } from "./api/client";
@@ -100,6 +101,28 @@ const AdminAccountsPage = lazy(() =>
     default: m.AdminAccountsPage,
   })),
 );
+
+// Pending notices in the sidebar. Administrators only; never polled for anyone
+// else, and it loads only a two-number summary, never the notices themselves.
+function NoticesCount() {
+  const { season } = useApp();
+  const q = useRead<Model<"SaveAuditSummary">>(
+    `/v1/admin/seasons/${season}/notices/summary`,
+    Boolean(season),
+    60000,
+  );
+  const pending = q.data?.pending ?? 0;
+  if (!pending) return null;
+  return (
+    <span
+      className="nav-notice-count"
+      data-alta={(q.data?.pending_high ?? 0) > 0 || undefined}
+      aria-label={`${pending} avisos pendientes`}
+    >
+      {pending}
+    </span>
+  );
+}
 
 const linkGroups = [
   { label: "GENERAL", links: [["/", "Inicio", Home]] },
@@ -448,6 +471,18 @@ export default function App() {
                 <Settings2 size={19} />
                 Administración
               </NavLink>
+              <NavLink
+                to="/admin/avisos"
+                aria-disabled={adminOperationPending || undefined}
+                onClick={(event) => {
+                  if (adminOperationPending) event.preventDefault();
+                  else setMenu(false);
+                }}
+              >
+                <BellRing size={19} />
+                Avisos
+                <NoticesCount />
+              </NavLink>
               {accountsEnabled && (
                 <NavLink
                   to="/admin/cuentas"
@@ -562,7 +597,19 @@ export default function App() {
                   element={
                     me.is_admin ? (
                       <Suspense fallback={<Loading />}>
-                        <AdminPage />
+                        <AdminPage key="admin" />
+                      </Suspense>
+                    ) : (
+                      <Navigate to="/" replace />
+                    )
+                  }
+                />
+                <Route
+                  path="/admin/avisos"
+                  element={
+                    me.is_admin ? (
+                      <Suspense fallback={<Loading />}>
+                        <AdminPage key="avisos" initialArea="avisos" />
                       </Suspense>
                     ) : (
                       <Navigate to="/" replace />

@@ -1,6 +1,6 @@
 import { useEffect, useState, type ComponentProps } from "react";
 import { Link } from "react-router-dom";
-import { Coins, Trophy, Users } from "lucide-react";
+import { BellRing, Coins, Trophy, Users } from "lucide-react";
 import type { Model } from "../api/types";
 import { useApp, useOverview, useRead } from "../state";
 import {
@@ -31,6 +31,7 @@ import {
   seasonLabel,
 } from "./admin-labels";
 import { IncidentCenter } from "./admin-incidents";
+import { NoticesDesk } from "./admin-notices";
 import { AdminAccountsPage } from "./admin-accounts";
 import { DeathHistory } from "./death-history";
 import { Enrollment } from "./enrollment";
@@ -1004,8 +1005,8 @@ function Risk({ setup }: { setup: Setup }) {
     </Card>
   );
 }
-// Three areas, no more: the League itself, its economy and incidents, and
-// accounts with the system. Every existing tool keeps its place inside them.
+// Four areas: the League itself, its economy and incidents, the save audit
+// notices, and accounts with the system. Every tool keeps its place inside them.
 const areas = [
   [
     "liga",
@@ -1019,6 +1020,7 @@ const areas = [
     Coins,
     "Compras, monedas, robos e intervenciones",
   ],
+  ["avisos", "Avisos", BellRing, "Cambios sospechosos en las partidas"],
   ["cuentas", "Cuentas y sistema", Users, "Cuentas, accesos y estado"],
 ] as const;
 type Area = (typeof areas)[number][0];
@@ -1038,11 +1040,11 @@ function SystemStatus() {
     </Card>
   );
 }
-export function AdminPage() {
+export function AdminPage({ initialArea = "liga" }: { initialArea?: Area }) {
   const { season, adminOperationPending } = useApp(),
     // Polls while open: a change made by another administrator shows up.
     q = useRead<Setup>(`/v1/admin/seasons/${season}/setup`, !!season, 20000),
-    [area, setArea] = useState<Area>("liga"),
+    [area, setArea] = useState<Area>(initialArea),
     [tab, setTab] = useState("Resumen"),
     [create, setCreate] = useState(false),
     cmd = useAdminCommand();
@@ -1070,6 +1072,12 @@ export function AdminPage() {
       {area === "economia" &&
         (season ? (
           <IncidentCenter />
+        ) : (
+          <Empty>Crea o selecciona una temporada.</Empty>
+        ))}
+      {area === "avisos" &&
+        (season ? (
+          <NoticesDesk />
         ) : (
           <Empty>Crea o selecciona una temporada.</Empty>
         ))}
