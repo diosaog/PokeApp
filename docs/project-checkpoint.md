@@ -5,6 +5,11 @@ milestone record; it does not maintain a second live phase-status ledger.
 
 ## Current project position
 
+- Avisos, detector v2 (2026-11-09): **PUBLICADO / VERIFICADO**. Solo objetos competitivos y
+  de crianza, desde una unidad, mochila más equipados. API `a15cfd4f` (rollback `336f3f05`),
+  web `681d7e85` (rollback `983449a9`), fuente `f8c9a8b`. Sin SQL ni Launcher. Primer análisis
+  v2 con la próxima sincronización. [Registro](work-in-progress/save-audit-notices.md) §7.
+
 - Normativa de la ChampionsLocke (2026-11-09): **PUBLICADA / VERIFICADA**. Solo web:
   `983449a9` (rollback `b4076f0a`), fuente `9f2a1fc`, ruta `/normativa` visible para todos.
   Contenido estático en `web/src/features/normativa-content.ts`. API, SQL, verifier y

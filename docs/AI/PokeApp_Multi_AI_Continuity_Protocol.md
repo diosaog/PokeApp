@@ -10,7 +10,7 @@ Reconciled: 2026-09-26. Keep one copy at this path.
 | How do AI instances continue the same work? | This protocol |
 | What are the project-wide constraints and roadmap? | [Master protocol](../PokeApp_2.0_Protocolo_Maestro_MultiIA.md) |
 | Which phase is active and where is its memory? | [Project checkpoint](../project-checkpoint.md) |
-| What is the current operational state and next action? | [Normativa live record](../work-in-progress/normativa.md) (2026-11-09: PUBLISHED / VERIFIED, web only: `983449a9`, rollback `b4076f0a`, source `9f2a1fc`). Latest full release: [Administración › Avisos live record](../work-in-progress/save-audit-notices.md) (2026-11-08: SQL 084 `20261108192609`: additive, informative, never blocks or writes a save; API `336f3f05`. The first real analysis happens with the next trainer sync. Never reapply 084; no pending migration). Previous record: [NET/Felicidad/Discord](../work-in-progress/net-friendship-discord.md). **Continue from the tip of `origin/claude/net-friendship-discord`.** |
+| What is the current operational state and next action? | [Administración › Avisos live record](../work-in-progress/save-audit-notices.md) (2026-11-09: detector v2 PUBLISHED / VERIFIED: API `a15cfd4f`, rollback `336f3f05`; web `681d7e85`, rollback `983449a9`; source `f8c9a8b`; first v2 analysis with the next trainer sync. SQL 084 `20261108192609` additive, informative, never blocks or writes a save. Never reapply 084; no pending migration). [Normativa live record](../work-in-progress/normativa.md) (2026-11-09: PUBLISHED / VERIFIED, source `9f2a1fc`). Previous record: [NET/Felicidad/Discord](../work-in-progress/net-friendship-discord.md). **Continue from the tip of `origin/claude/net-friendship-discord`.** |
 | What behavior was approved? | [Functional alignment contract](../phase10-5-functional-alignment.md) |
 | What was implemented and what evidence exists? | Active phase evidence in its live record until closure; [previous Phase 10 report](../phase10-completion-report.md) retains historical delivery evidence |
 
@@ -45,6 +45,10 @@ Normativa (2026-11-09): static rulebook at `/normativa`, content in
 `web/src/features/normativa-content.ts`. A rule change is an edit there, its
 `rulebookUpdated` date and a web deploy. Revivir and Robar are shown as not yet
 usable: when they are enabled, update `wildcards` too.
+
+Avisos detector v2 (2026-11-09): object notices cover only competitive and breeding
+gear (`WATCHED_ITEMS` in `app/domain/save_audit.py`, owner decision), from one unit,
+over total possession (bag plus every Pokémon's held item).
 
 Administración › Avisos (2026-11-08): successive-save comparison on its own worker
 after each accepted sync; it never writes a save, blocks or sanctions. Release tools

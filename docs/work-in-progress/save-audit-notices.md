@@ -1,5 +1,9 @@
 # Administración › Avisos: vigilancia informativa de saves — 2026-11-08
 
+> **Detector v2 (2026-11-09).** Publicado: API `a15cfd4f` (rollback `336f3f05`),
+> web `681d7e85` (rollback `983449a9`), fuente `f8c9a8b`. Sin SQL ni Launcher.
+> Sustituye la parte de objetos de §1 y §2; ver [§7](#7-detector-v2-objetos-competitivos-y-de-crianza).
+
 Estado: **PUBLICADO / VERIFICADO** (2026-11-08). Rama
 `claude/net-friendship-discord`. DB 084 `20261108192609`, API `336f3f05`
 (rollback `f1d2896a`), web `b4076f0a` (rollback `9a17a56c`), fuente `72adbc4`.
@@ -120,3 +124,60 @@ aquí no se usa ninguna sesión del propietario.
 
 Rollback sin tocar datos: API `f1d2896a`, web `9a17a56c`. La 084 es aditiva y
 puede quedarse.
+
+## 7. Detector v2: objetos competitivos y de crianza
+
+Decisión del propietario (2026-11-09), que sustituye a su encargo inmediatamente
+anterior de avisar de todo: **solo se revisan los objetos competitivos y de crianza**.
+«Me da igual si alguien se pone un Carbón; un objeto evolutivo o un Pañuelo Elegido
+sí». Cualquier otro objeto no genera aviso, aunque aparezca de golpe.
+
+| Categoría | Objetos vigilados (`WATCHED_ITEMS`) |
+|---|---|
+| Megapiedra | Todas las de Gen 6/7 |
+| Cristal Z | Identificador de mochila (el equipado usa otro y el cristal sigue en la mochila) |
+| Competitivo | Los de la categoría «Competitivos» de la Tienda salvo potenciadores de tipo, más Chaleco Asalto, Seguro Debilidad, Cinta Experto, Cinta Fuerte, Gafas Especiales, Lodo Negro, Refleluz, Hierba Única, Hierba Mental, Gafa Protectora, Cascabel Concha, Bola Luminosa, Hueso Grueso y Rocío Bondad |
+| Evolutivo | Los del «Objeto Evolutivo» de la Tienda |
+| Crianza | Cápsula Habilidad, Chapas, Piedra Eterna, Lazo Destino y objetos Recios |
+
+**Fuera:** potenciadores de tipo (Carbón, Tablas), objetos corrientes, Pociones, Poké
+Balls (Master Ball incluida), bayas, MT, objetos clave, fósiles, vitaminas, Caramelo
+Raro y Escama Corazón.
+
+**Comparación:** posesión total desde una unidad = mochila + lo que lleva cualquier
+Pokémon del equipo o las cajas, con o sin pareja en la partida anterior. Mover entre
+mochila, equipo y cajas no cuenta; un Pokémon que se va nunca suma; uno nuevo con un
+objeto vigilado sí, indicando que puede venir de una captura o un intercambio.
+Explican el aumento las entregas de la Tienda y los Pokémon recibidos por
+transferencia, ambos registrados en el servidor. Eliminados `IGNORED_POUCHES`,
+`ORDINARY_ITEMS`, `WATCHED_MEDICINE`, `BULK_UNITS`, `BULK_RECORDS` y los niveles.
+
+**Por qué se escapaban objetos en v1:** los filtros silenciaban todo lo común y las
+bayas, el botiquín, los objetos clave y las MT; y los objetos equipados solo contaban
+en Pokémon presentes en ambas partidas. En los datos reales, las megapiedras que
+entraron en la mochila entre dos partidas comparadas sí avisaron (Aerodactylita,
+Blazikenita). Las cinco de Anto no avisaron: v1 avisaba de cualquier aumento de esos
+identificadores, de modo que ya debían estar en su referencia del 6 de noviembre.
+
+**Referencia:** la mochila guardada era completa, sin categorías omitidas, así que v2
+sigue comparando desde las referencias existentes. Los 10 análisis v1 no se recalculan.
+
+**Pruebas:** `tests/test_save_audit.py` 19 OK (una unidad por categoría, Carbón y
+objetos corrientes en silencio, compra total y parcial, mochila↔Pokémon, equipo↔caja,
+varios objetos, Pokémon nuevo o que se va, transferencia, repetición, Cristal Z, y
+lectura nativa real de los 8 juegos). `test_domain_services` 8 OK. Vitest
+`admin-notices` 4 OK. Playwright `admin-notices` 2 OK en local y contra la web
+publicada con API sintética. Simulación de solo lectura sobre las 8 comparaciones
+reales con referencia guardada: 2 filas (Piedra Hoja y Blazikenita) en lugar de las 6 de v1.
+
+Categorías leídas por juego: X, Y, OR, AS → Items, KeyItems, Medicine, TMHMs, Berries;
+SN, MN → además ZCrystals; US, UM → además BattleItems.
+
+**Publicación:** API `a15cfd4f` SUCCESS (salud 200, 136 rutas, anónimo y token inválido
+401, `category` en el contrato); web `681d7e85` idéntica al build. Tras publicar: 10
+análisis, ninguno pendiente y ninguna sincronización nueva todavía, así que el primer
+análisis v2 real ocurrirá con la siguiente. La pantalla autenticada de producción no se
+ha abierto con una sesión real.
+
+**Límites:** un Pokémon retirado de la guardería con un objeto vigilado cuenta como
+nuevo; un objeto conseguido jugando avisa igualmente, y lo decide el administrador.
