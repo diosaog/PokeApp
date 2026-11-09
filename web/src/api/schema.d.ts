@@ -5926,6 +5926,8 @@ export interface components {
       reason: string;
       /** Item */
       item?: string | null;
+      /** Category */
+      category?: string | null;
       /** Delta */
       delta?: number | null;
       /** Justified */

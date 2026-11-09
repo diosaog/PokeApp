@@ -118,6 +118,7 @@ const capsules: Overview["notices"][number] = {
       severity: "media",
       reason: "Sin compras registradas.",
       item: "Item #645",
+      category: "Crianza",
       delta: 5,
       justified: 0,
       unjustified: 5,
@@ -162,8 +163,11 @@ it("shows object jumps with their registered origin", () => {
   render(<NoticesDesk />);
   fireEvent.click(screen.getByRole("button", { name: /Objeto con aumento/ }));
   expect(screen.getByText("Cápsula Habilidad")).toBeInTheDocument();
+  expect(screen.getByText("Crianza")).toBeInTheDocument();
   const row = screen.getByText("Sin justificar").closest("li") as HTMLElement;
-  expect(within(row).getByText("+5")).toBeInTheDocument();
+  expect(within(row).getByText("Incremento")).toBeInTheDocument();
+  expect(within(row).getAllByText("+5")).toHaveLength(2);
+  expect(within(row).getByText("Operaciones autorizadas")).toBeInTheDocument();
 });
 
 it("justifying needs an observation; the decision only reaches this notice", async () => {

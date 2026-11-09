@@ -13,14 +13,14 @@ never used as truth and pre-existing attributes are never judged.
 from __future__ import annotations
 
 import re
-from collections import Counter, defaultdict
+from collections import defaultdict
 from dataclasses import dataclass
 from datetime import datetime
 
 from app.domain.pokemon_evolutions import EVOLUTIONS
-from app.domain.unlimited_items import UNLIMITED_ITEMS
+from app.domain.shop_item_uses import BAG_ITEMS, SHOP_USES
 
-DETECTOR_VERSION = 1
+DETECTOR_VERSION = 2
 
 STATS = ("hp", "atk", "defense", "spa", "spd", "spe")
 STAT_LABELS = {
@@ -33,35 +33,45 @@ STAT_LABELS = {
 }
 SEVERITY_RANK = {"baja": 0, "media": 1, "alta": 2}
 
-# Free and unlimited by owner decision, with no server record: never a notice.
-UNLIMITED_ITEM_IDS = frozenset(item["item_id"] for item in UNLIMITED_ITEMS)
 ABILITY_CAPSULE = 645
-# Objects in the bag's own "key" pouch are story progress, not competitive gain.
-IGNORED_POUCHES = frozenset({"KeyItems"})
-# Medicine pouch objects that are worth a notice on their own.
-WATCHED_MEDICINE = frozenset({44, 45, 46, 47, 48, 49, 51, 52, 53})  # Ceniza Sagrada, vitaminas, Más PP / PP Máximos
-# Common objects a normal game hands out constantly (ids from the game's item
-# table): Poké Balls except Master/Gloria, curas y Pociones, Repelentes, Cuerda
-# Huida, Miel, objetos para vender, plumas y abonos. They only count when they
-# jump absurdly.
-ORDINARY_ITEMS = frozenset(
-    {
-        *range(2, 16),
-        *range(492, 500),
-        576,
-        851,
-        *range(17, 44),
-        54,
-        63, 64, *range(65, 76),
-        76, 77, 78, 79,
-        *range(86, 93),
-        94, 95, 96, 97, 98, 106,
-        *range(565, 572),
-        580, 581, 582, 583,
-    }
-)  # fmt: skip
-BULK_UNITS = 100
-BULK_RECORDS = 10
+
+
+def _bag_ids(codes):
+    return {BAG_ITEMS[code][0] for code in codes}
+
+
+# The objects worth a notice (owner decision, 2026-11-09): the competitive and
+# breeding gear someone could add to gain an edge. Anything else (a Charcoal, a
+# Potion, a berry, a TM, a key item, the free Rare Candy) is ordinary play. The
+# ids are the game's own item table, shared by every game whose bag is read.
+MEGA_STONES = {*range(656, 686), *range(752, 765), *range(767, 771)}
+# Bag side only: a Pokémon holding a Z-Crystal shows another id and the crystal
+# stays in the bag, so counting the held id would invent an object.
+Z_CRYSTALS = {*range(807, 836), *range(927, 933)}
+COMPETITIVE_ITEMS = _bag_ids(
+    (
+        "choice_specs", "choice_band", "choice_scarf", "leftovers", "focus_sash",
+        "life_orb", "eviolite", "rocky_helmet", "air_balloon", "eject_button",
+        "red_card", "white_herb", "kings_rock", "scope_lens", "zoom_lens",
+        "toxic_orb", "flame_orb", *SHOP_USES["gemas_elementales"]["items"],
+    )
+) | {
+    # Not sold in the Tienda: Chaleco Asalto, Seguro Debilidad, Cinta Experto,
+    # Cinta Fuerte, Gafas Especiales, Lodo Negro, Refleluz, Hierba Única,
+    # Hierba Mental, Gafa Protectora, Cascabel Concha, Bola Luminosa, Hueso
+    # Grueso y Rocío Bondad.
+    640, 639, 268, 266, 267, 281, 269, 271, 219, 650, 253, 236, 258, 225,
+}  # fmt: skip
+EVOLUTION_ITEMS = _bag_ids(SHOP_USES["objeto_evolutivo"]["items"])
+# Cápsula Habilidad, Chapas, Piedra Eterna, Lazo Destino y objetos Recios.
+BREEDING_ITEMS = {ABILITY_CAPSULE, 795, 796, 229, 280, *range(289, 295)}
+WATCHED_ITEMS = {
+    **dict.fromkeys(BREEDING_ITEMS, "Crianza"),
+    **dict.fromkeys(EVOLUTION_ITEMS, "Evolutivo"),
+    **dict.fromkeys(COMPETITIVE_ITEMS, "Competitivo"),
+    **dict.fromkeys(Z_CRYSTALS, "Cristal Z"),
+    **dict.fromkeys(MEGA_STONES, "Megapiedra"),
+}
 
 MAX_EV = {3: 255, 4: 255, 5: 255, 6: 252, 7: 252}
 MAX_EV_TOTAL = 510
@@ -703,37 +713,49 @@ def _credits(operations, start, end):
     return available
 
 
-def _item_tier(item, pouch):
-    if item in UNLIMITED_ITEM_IDS or pouch in IGNORED_POUCHES:
-        return "ignored"
-    if pouch in ("TMHMs", "ZCrystals"):
-        return "record"
-    if pouch in ("Berries", "BattleItems", "Balls"):
-        return "ordinary" if item not in (1, 16) else "watch"
-    if pouch == "Medicine":
-        return "watch" if item in WATCHED_MEDICINE else "ordinary"
-    return "ordinary" if item in ORDINARY_ITEMS else "watch"
+def _all_pokemon(payload):
+    for entry in payload.get("party") or []:
+        if isinstance(entry.get("pokemon"), dict):
+            yield entry["pokemon"]
+    for box in payload.get("boxes") or []:
+        for entry in box.get("slots") or []:
+            if isinstance(entry.get("pokemon"), dict):
+                yield entry["pokemon"]
 
 
-def _compare_inventory(previous_bag, current_bag, pairs, operations, start, end):
-    """Bag plus objects held by Pokémon present in both saves: moving an object
-    from the bag to a Pokémon (or back) is never an increase."""
-    bag_before, pouch_before = _bag_view(previous_bag)
-    bag_after, pouch_after = _bag_view(current_bag)
-    held_before = Counter(b.item for b, _ in pairs if b.item)
-    held_after = Counter(a.item for _, a in pairs if a.item)
+def _key_of(pokemon):
+    evidence = pokemon.get("identity_evidence")
+    return identity_key(evidence) if isinstance(evidence, dict) else None
+
+
+def _carried(payload):
+    """Item id → the Pokémon carrying it, each counted once wherever it sits."""
+    carried = defaultdict(list)
+    for pokemon in _all_pokemon(payload):
+        item = _id(pokemon.get("item"))
+        if item:
+            carried[item].append(pokemon)
+    return carried
+
+
+def _compare_inventory(previous_bag, current_bag, before_payload, after_payload, operations, start, end, transfers_in):
+    """Total possession of the watched objects: bag plus whatever every Pokémon
+    carries. Moving an object between the bag and a Pokémon, or a Pokémon
+    between team and boxes, changes nothing; a Pokémon leaving never adds."""
+    bag_before = _bag_view(previous_bag)[0]
+    bag_after = _bag_view(current_bag)[0]
+    held_before, held_after = _carried(before_payload), _carried(after_payload)
+    earlier = {_key_of(p): _id(p.get("item")) for p in _all_pokemon(before_payload)}
     credits = _credits(operations, start, end)
     credited_ids: list[str] = []
     considered: list[dict] = []
     rows: list[dict] = []
-    records = 0
     for item in sorted(set(bag_before) | set(bag_after) | set(held_before) | set(held_after)):
-        pouch = pouch_after.get(item) or pouch_before.get(item)
-        tier = _item_tier(item, pouch)
-        if tier == "ignored":
+        category = WATCHED_ITEMS.get(item)
+        if category is None:
             continue
-        before_total = bag_before.get(item, 0) + held_before.get(item, 0)
-        after_total = bag_after.get(item, 0) + held_after.get(item, 0)
+        before_total = bag_before.get(item, 0) + len(held_before.get(item, ()))
+        after_total = bag_after.get(item, 0) + len(held_after.get(item, ()))
         delta = after_total - before_total
         if delta <= 0:
             continue
@@ -748,20 +770,30 @@ def _compare_inventory(previous_bag, current_bag, pairs, operations, start, end)
             }
             for d in matched
         )
-        unjustified = delta - len(matched)
+        carriers = [p for p in held_after.get(item, ()) if earlier.get(_key_of(p)) != item]
+        arrived = [p for p in carriers if _key_of(p) not in earlier]
+        received = [p for p in arrived if _key_of(p) in transfers_in][: delta - len(matched)]
+        considered.extend(
+            {
+                "kind": "transfer",
+                "label": "Pokémon recibido por transferencia",
+                "detail": "Llegó con este objeto equipado en una transferencia registrada por el servidor.",
+            }
+            for _ in received
+        )
+        justified = len(matched) + len(received)
+        unjustified = delta - justified
         if unjustified <= 0:
             continue
-        if tier == "record":
-            records += 1
-            continue
-        if tier == "ordinary" and unjustified < BULK_UNITS:
-            continue
-        carriers = [
-            (a.nickname or _ref("Pokémon", a.species))
-            for b, a in pairs
-            if a.item == item and b.item != item
-        ]
-        severity = "media" if tier == "watch" else "baja"
+        reason = (
+            f"Solo {justified} de las {delta} unidades "
+            + ("consta como autorizada" if justified == 1 else "constan como autorizadas")
+            + " por PokeApp; el resto no tiene origen verificado."
+            if justified
+            else "Objeto incorporado sin una operación registrada que explique su procedencia."
+        )
+        if any(_key_of(p) not in transfers_in for p in arrived):
+            reason += " Lo lleva un Pokémon nuevo: puede proceder de una captura o un intercambio."
         rows.append(
             _change(
                 f"item_{item}",
@@ -769,36 +801,14 @@ def _compare_inventory(previous_bag, current_bag, pairs, operations, start, end)
                 "item",
                 before_total,
                 after_total,
-                severity,
-                (
-                    "Aumento de un objeto de uso común muy por encima de lo habitual; "
-                    if tier == "ordinary"
-                    else ""
-                )
-                + (
-                    f"Solo {len(matched)} de las {delta} unidades "
-                    + ("consta como entregada" if len(matched) == 1 else "constan como entregadas")
-                    + " por PokeApp; el resto no tiene origen verificado."
-                    if matched
-                    else "Sin compras, recompensas ni entregas registradas en PokeApp que lo expliquen."
-                ),
+                "media",
+                reason,
                 item=_ref("Item", item),
+                category=category,
                 delta=delta,
-                justified=len(matched),
+                justified=justified,
                 unjustified=unjustified,
-                holders=carriers[:6],
-            )
-        )
-    if records >= BULK_RECORDS:
-        rows.append(
-            _change(
-                "records",
-                "MT y cristales Z",
-                "text",
-                None,
-                f"+{records} a la vez",
-                "baja",
-                "Han aparecido muchas MT o cristales Z de golpe; jugando se obtienen poco a poco.",
+                holders=[p.get("nickname") or _ref("Pokémon", _id(p.get("species"))) for p in carriers][:6],
             )
         )
     return rows, credited_ids, considered
@@ -839,14 +849,12 @@ def analyze(previous, current, operations) -> dict:
         friendship_after=current.get("friendship") or {},
     )
     notices: list[dict] = []
-    pairs: list[tuple[Slot, Slot]] = []
     for key in sorted(after_groups):
         after_list, before_list = after_groups[key], before_groups.get(key, [])
         if len(after_list) > 1 and len(after_list) > len(before_list):
             notices.append(_clone_notice(key, after_list, len(before_list)))
         elif len(after_list) == 1 and len(before_list) == 1:
             before, after = before_list[0], after_list[0]
-            pairs.append((before, after))
             ops = training.get(key, [])
             changes = _compare_pokemon(before, after, ops, facts=facts)
             if changes:
@@ -859,7 +867,14 @@ def analyze(previous, current, operations) -> dict:
     inventory_status = "compared"
     if bag_known:
         rows, credited, considered = _compare_inventory(
-            previous.get("bag"), current.get("bag"), pairs, operations, start, end
+            previous.get("bag"),
+            current.get("bag"),
+            previous["payload"],
+            current["payload"],
+            operations,
+            start,
+            end,
+            transfers_in,
         )
         if rows:
             justified = sum(r.get("justified") or 0 for r in rows)
@@ -869,9 +884,9 @@ def analyze(previous, current, operations) -> dict:
                     "category": "objetos",
                     "severity": _worst(rows),
                     "title": (
-                        f"{len(rows)} objetos con aumento sin verificar"
+                        f"{len(rows)} objetos añadidos sin origen verificado"
                         if len(rows) != 1
-                        else "Objeto con aumento sin verificar"
+                        else "Objeto añadido sin origen verificado"
                     ),
                     "summary": "La ausencia de compra en PokeApp no demuestra por sí sola que el objeto sea "
                     "ilegítimo: también se pueden conseguir jugando. " + NO_PROOF,

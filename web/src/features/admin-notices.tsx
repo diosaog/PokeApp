@@ -140,6 +140,7 @@ function Evidence({ change }: { change: Change }) {
         </span>
         <span className="aviso-item-name">
           <strong>{name}</strong>
+          {change.category && <small>{change.category}</small>}
           {!!change.holders?.length && (
             <small>Equipado en {change.holders.join(", ")}</small>
           )}
@@ -150,7 +151,9 @@ function Evidence({ change }: { change: Change }) {
           <strong>{String(change.after)}</strong>
         </span>
         <span className="aviso-justify">
-          <span>Compras y entregas registradas</span>
+          <span>Incremento</span>
+          <b>+{change.delta ?? 0}</b>
+          <span>Operaciones autorizadas</span>
           <b>{change.justified ?? 0}</b>
           <span>Sin justificar</span>
           <b className="aviso-unjustified">+{change.unjustified ?? 0}</b>

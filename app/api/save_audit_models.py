@@ -32,6 +32,7 @@ class SaveAuditChange(BaseModel):
     severity: NoticeSeverity
     reason: str
     item: str | None = None
+    category: str | None = None
     delta: int | None = None
     justified: int | None = None
     unjustified: int | None = None
