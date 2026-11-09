@@ -23,6 +23,7 @@ import {
   ArrowUpRight,
   ShieldCheck,
   BellRing,
+  ScrollText,
   X,
 } from "lucide-react";
 import { api } from "./api/client";
@@ -41,6 +42,7 @@ const screens = {
   profile: () => import("./features/trainer-profile"),
   desktop: () => import("./features/desktop"),
   saves: () => import("./features/saves"),
+  normativa: () => import("./features/normativa"),
 };
 const HomePage = lazy(() =>
   screens.core().then((m) => ({ default: m.HomePage })),
@@ -90,6 +92,9 @@ const DesktopPage = lazy(() =>
 const SavesPage = lazy(() =>
   screens.saves().then((m) => ({ default: m.SavesPage })),
 );
+const NormativaPage = lazy(() =>
+  screens.normativa().then((m) => ({ default: m.NormativaPage })),
+);
 import { insideLauncher } from "./launcher";
 import { RegistrationForm } from "./features/registration";
 import { PinForm, pinRecoveryKey } from "./features/account-editor";
@@ -125,7 +130,13 @@ function NoticesCount() {
 }
 
 const linkGroups = [
-  { label: "GENERAL", links: [["/", "Inicio", Home]] },
+  {
+    label: "GENERAL",
+    links: [
+      ["/", "Inicio", Home],
+      ["/normativa", "Normativa", ScrollText],
+    ],
+  },
   {
     label: "COMPETICIÓN",
     links: [
@@ -571,6 +582,7 @@ export default function App() {
             <Suspense fallback={<Loading />}>
               <Routes>
                 <Route path="/" element={<HomePage />} />
+                <Route path="/normativa" element={<NormativaPage />} />
                 <Route path="/liga" element={<LeaguePage />} />
                 <Route path="/battle" element={<BattlePage />} />
                 <Route path="/entrenadores" element={<TrainersPage />} />

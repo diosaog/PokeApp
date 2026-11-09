@@ -1,0 +1,1692 @@
+/* Normativa: the ChampionsLocke rulebook. Its colours come from The Champions
+   Cup crest; its body type is a book serif so that reading here feels unlike
+   any other screen. Everything is scoped under .rulebook or nv-*.
+   Motion: the climb lights once when it enters the view; the seal turns slowly
+   and holds with the rest of the idle/reduced-motion loops. */
+.section-normativa {
+  --scene-art: url("./scenes/rulebook.svg");
+  --scene-o: 0.32;
+  --sparkles-o: 0;
+  --scene-size: 1500px;
+}
+.rulebook {
+  --nv-display: "Rubik Variable", var(--font-display);
+  --nv-book: "Palatino Linotype", Palatino, "Book Antiqua", Georgia, serif;
+  --nv-line: color-mix(in srgb, var(--c-rule-iron) 70%, transparent);
+  --nv-sheet: color-mix(in srgb, var(--c-rule-coal) 90%, transparent);
+  container-type: inline-size;
+  color: var(--c-rule-parchment);
+  font-family: var(--nv-book);
+  font-size: 1.04rem;
+  line-height: 1.58;
+  max-width: 1320px;
+  margin: 0 auto;
+}
+:where(.rulebook) :where(h2, h3, h4) {
+  font-family: var(--nv-display);
+  color: var(--c-rule-ivory);
+  margin: 0;
+  letter-spacing: 0;
+}
+:where(.rulebook) h3 {
+  font-size: 1.14rem;
+  font-weight: 750;
+}
+:where(.rulebook) h4 {
+  font-size: 0.99rem;
+  font-weight: 700;
+}
+:where(.rulebook) p {
+  margin: 0;
+  color: inherit;
+}
+:where(.rulebook) :where(ol, ul) {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.rulebook a:focus-visible,
+.rulebook button:focus-visible {
+  outline: 2px solid var(--c-rule-flame);
+  outline-offset: 2px;
+}
+
+/* ---------- Cover ---------- */
+.nv-hero {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  display: grid;
+  grid-template-columns: minmax(200px, 330px) minmax(0, 1fr);
+  align-items: center;
+  gap: clamp(20px, 4cqi, 64px);
+  padding: clamp(24px, 4.2cqi, 60px);
+  border-radius: 28px 28px 28px 6px;
+  border: 1px solid color-mix(in srgb, var(--c-rule-ember) 45%, transparent);
+  background:
+    radial-gradient(
+      60% 120% at 12% 30%,
+      color-mix(in srgb, var(--c-rule-ember) 42%, transparent),
+      transparent 70%
+    ),
+    radial-gradient(
+      50% 90% at 85% 110%,
+      color-mix(in srgb, var(--c-rule-carmine) 22%, transparent),
+      transparent 72%
+    ),
+    var(--c-rule-coal);
+}
+.nv-seal {
+  position: absolute;
+  z-index: -1;
+  width: clamp(300px, 36cqi, 470px);
+  aspect-ratio: 1;
+  left: clamp(-20px, 1cqi, 30px);
+  top: 50%;
+  translate: 0 -50%;
+  border-radius: 50%;
+  border: 2px solid color-mix(in srgb, var(--c-rule-flame) 22%, transparent);
+  background:
+    radial-gradient(
+      circle,
+      transparent 0 13.5%,
+      color-mix(in srgb, var(--c-rule-flame) 24%, transparent) 13.7% 14.6%,
+      transparent 14.8%
+    ),
+    linear-gradient(
+      transparent calc(50% - 3px),
+      color-mix(in srgb, var(--c-rule-flame) 24%, transparent) calc(50% - 3px)
+        calc(50% + 3px),
+      transparent calc(50% + 3px)
+    );
+  animation: nv-seal 150s linear infinite;
+}
+@keyframes nv-seal {
+  to {
+    rotate: 360deg;
+  }
+}
+.nv-crest {
+  width: 100%;
+  height: auto;
+  filter: drop-shadow(
+    0 14px 26px color-mix(in srgb, var(--c-ink) 80%, transparent)
+  );
+}
+.nv-hero-kicker {
+  font-family: var(--nv-display);
+  font-weight: 600;
+  color: var(--c-rule-peach);
+  font-size: clamp(0.92rem, 1.9cqi, 1.18rem);
+}
+.nv-hero h1 {
+  margin: 2px 0 14px -4px;
+  font-family: var(--nv-display);
+  font-weight: 900;
+  font-size: clamp(2.6rem, 8cqi, 6.5rem);
+  white-space: nowrap;
+  line-height: 0.96;
+  letter-spacing: -0.015em;
+  text-transform: uppercase;
+  transform: skewX(-8deg);
+  transform-origin: left bottom;
+  /* Two-tone lettering, as on the crest. */
+  color: transparent;
+  background: linear-gradient(
+    180deg,
+    var(--c-rule-ivory) 0 54%,
+    var(--c-rule-peach) 54% 100%
+  );
+  background-clip: text;
+  -webkit-background-clip: text;
+  filter: drop-shadow(0 3px 0 var(--c-rule-coal))
+    drop-shadow(
+      0 5px 18px color-mix(in srgb, var(--c-rule-ember) 45%, transparent)
+    );
+}
+.nv-hero-lead {
+  max-width: 54ch;
+  color: var(--c-rule-ivory);
+  font-size: clamp(1.02rem, 1.8cqi, 1.2rem);
+}
+.nv-hero-date {
+  margin-top: 12px;
+  color: var(--c-rule-ash);
+  font-size: 0.9rem;
+}
+
+/* ---------- Layout and index ---------- */
+.nv-layout {
+  display: grid;
+  grid-template-columns: 228px minmax(0, 1fr);
+  gap: clamp(24px, 3.4cqi, 48px);
+  margin-top: 28px;
+  align-items: start;
+}
+.nv-index {
+  position: sticky;
+  top: 92px;
+  padding: 14px 12px 12px;
+  border-radius: 18px 18px 18px 4px;
+  /* The shell of a Pokédex. */
+  background: linear-gradient(
+    160deg,
+    color-mix(in srgb, var(--c-rule-carmine) 74%, var(--c-rule-coal)),
+    color-mix(in srgb, var(--c-rule-carmine) 44%, var(--c-rule-coal))
+  );
+  box-shadow: inset 0 0 0 2px
+    color-mix(in srgb, var(--c-rule-ivory) 12%, transparent);
+}
+.nv-dex-lights {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0 0 12px 2px;
+}
+.nv-dex-lights i {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle at 35% 30%,
+    var(--c-rule-ivory),
+    var(--c-rule-lens) 34%,
+    color-mix(in srgb, var(--c-rule-lens) 50%, var(--c-rule-coal)) 90%
+  );
+  box-shadow: 0 0 0 3px var(--c-rule-ivory);
+}
+.nv-dex-lights b {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--c-rule-flame);
+  box-shadow: inset 0 0 0 1px
+    color-mix(in srgb, var(--c-rule-coal) 40%, transparent);
+}
+.nv-dex-lights b:nth-of-type(2) {
+  background: var(--c-leaf);
+}
+.nv-dex-lights b:nth-of-type(3) {
+  background: var(--c-rule-ember);
+}
+.nv-index ol {
+  display: grid;
+  gap: 3px;
+  padding: 7px;
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--c-rule-coal) 90%, var(--c-rule-carmine));
+}
+.nv-index-link {
+  display: grid;
+  grid-template-columns: 26px minmax(0, 1fr);
+  align-items: baseline;
+  gap: 4px;
+  padding: 7px 8px;
+  border-radius: 8px;
+  font-family: var(--nv-display);
+  font-size: 0.87rem;
+  font-weight: 500;
+  line-height: 1.25;
+  color: var(--c-rule-parchment);
+  text-decoration: none;
+  background: none;
+}
+.nv-index-link span {
+  font-weight: 800;
+  color: var(--c-rule-peach);
+}
+.nv-index-link:hover {
+  background: color-mix(in srgb, var(--c-rule-ember) 16%, transparent);
+}
+.nv-index-link[aria-current="true"] {
+  background: var(--c-rule-flame);
+  color: var(--c-rule-coal);
+  font-weight: 700;
+}
+.nv-index-link[aria-current="true"] span {
+  color: var(--c-rule-coal);
+}
+.nv-chapters {
+  display: grid;
+  gap: clamp(46px, 7cqi, 90px);
+  min-width: 0;
+}
+.nv-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 20px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--nv-line);
+}
+.nv-legend-item {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 7px;
+  font-family: var(--nv-display);
+  font-size: 0.82rem;
+}
+.nv-legend-item strong {
+  color: var(--rule-tone, var(--c-rule-ivory));
+  font-weight: 700;
+}
+.nv-legend-item small {
+  color: var(--c-rule-ash);
+  font-size: 0.78rem;
+}
+.is-obligatorio {
+  --rule-tone: var(--c-rule-flame);
+}
+.is-prohibido {
+  --rule-tone: var(--c-rule-carmine);
+}
+.is-excepcion {
+  --rule-tone: var(--c-rule-lens);
+}
+.is-aclaracion {
+  --rule-tone: var(--c-rule-ash);
+}
+
+/* ---------- Chapters and rules ---------- */
+.nv-chapter {
+  display: grid;
+  gap: 22px;
+  scroll-margin-top: 92px;
+}
+.nv-chapter-head {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: clamp(12px, 2.4cqi, 30px);
+  padding-bottom: 16px;
+  position: relative;
+}
+/* The rule under each title ends in a small Poké Ball. */
+.nv-chapter-head::after {
+  content: "";
+  position: absolute;
+  inset: auto 0 0;
+  height: 16px;
+  background:
+    radial-gradient(
+      circle at 8px 8px,
+      var(--c-rule-ivory) 0 2.2px,
+      var(--c-rule-coal) 2.4px 3.4px,
+      transparent 3.6px
+    ),
+    conic-gradient(
+        from 270deg at 8px 8px,
+        var(--c-rule-carmine) 0 180deg,
+        var(--c-rule-ivory) 180deg 360deg
+      )
+      0 0 / 16px 16px no-repeat,
+    linear-gradient(
+        90deg,
+        var(--c-rule-ember),
+        color-mix(in srgb, var(--c-rule-ember) 0%, transparent)
+      )
+      0 7px / 100% 2px no-repeat;
+  -webkit-mask:
+    radial-gradient(circle at 8px 8px, #000 7.5px, transparent 8px),
+    linear-gradient(#000 0 0) 0 7px / 100% 2px no-repeat;
+  mask:
+    radial-gradient(circle at 8px 8px, #000 7.5px, transparent 8px),
+    linear-gradient(#000 0 0) 0 7px / 100% 2px no-repeat;
+}
+.nv-numeral {
+  font-family: var(--nv-display);
+  font-weight: 900;
+  font-size: clamp(3.4rem, 8.5cqi, 6rem);
+  line-height: 1;
+  transform: skewX(-8deg);
+  color: transparent;
+  background: linear-gradient(
+    180deg,
+    var(--c-rule-flame) 0 52%,
+    var(--c-rule-ember) 52% 100%
+  );
+  background-clip: text;
+  -webkit-background-clip: text;
+  min-width: 1.15em;
+  text-align: center;
+}
+.nv-chapter-label {
+  font-family: var(--nv-display);
+  font-size: 0.86rem;
+  font-weight: 600;
+  color: var(--c-rule-peach);
+}
+.nv-chapter-head h2 {
+  font-size: clamp(1.7rem, 4cqi, 2.7rem);
+  font-weight: 800;
+  line-height: 1.08;
+}
+.nv-chapter-intro {
+  margin-top: 6px;
+  max-width: 62ch;
+  color: var(--c-rule-parchment);
+}
+.nv-sub {
+  margin-top: 8px;
+  font-size: 1.3rem;
+}
+
+.nv-rules {
+  display: grid;
+  gap: 2px;
+}
+.nv-rule {
+  display: grid;
+  grid-template-columns: 3.1em minmax(0, 1fr);
+  gap: 6px;
+  padding: 7px 8px 7px 10px;
+  border-left: 3px solid var(--rule-tone, var(--nv-line));
+  border-radius: 0 8px 8px 0;
+}
+.nv-rule.is-prohibido {
+  background: color-mix(in srgb, var(--c-rule-carmine) 13%, transparent);
+}
+.nv-rule.is-obligatorio {
+  background: color-mix(in srgb, var(--c-rule-flame) 9%, transparent);
+}
+.nv-rule.is-excepcion {
+  background: color-mix(in srgb, var(--c-rule-lens) 9%, transparent);
+}
+.nv-rule p {
+  max-width: 66ch;
+}
+.nv-rule-id {
+  font-family: var(--nv-display);
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--c-rule-peach);
+  padding-top: 0.27em;
+}
+.nv-rule-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-right: 8px;
+  font-family: var(--nv-display);
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--rule-tone);
+  vertical-align: 0.05em;
+}
+
+/* ---------- I. Nuzlocke ---------- */
+.nv-bento {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 14px;
+}
+.nv-group {
+  position: relative;
+  display: grid;
+  align-content: start;
+  gap: 12px;
+  padding: 18px;
+  border-radius: 18px;
+  background: var(--nv-sheet);
+  border: 1px solid var(--nv-line);
+  overflow: hidden;
+  grid-column: span 3;
+}
+.nv-group.is-clausulas,
+.nv-group.is-shiny {
+  grid-column: span 6;
+}
+.nv-group.is-caja,
+.nv-group.is-shiny {
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-areas: "title art" "rules rules";
+  align-items: center;
+}
+.nv-group.is-caja h3,
+.nv-group.is-shiny h3 {
+  grid-area: title;
+}
+.nv-group.is-caja .nv-art,
+.nv-group.is-shiny .nv-art {
+  grid-area: art;
+}
+.nv-group.is-caja .nv-rules,
+.nv-group.is-shiny .nv-rules {
+  grid-area: rules;
+}
+.nv-group.is-shiny .nv-rules {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-items: start;
+  gap: 4px 12px;
+}
+.nv-climb-note {
+  margin-top: -10px;
+  color: var(--c-rule-ash);
+  font-size: 0.95rem;
+}
+.nv-group.is-clausulas {
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-areas: "title art" "rules art";
+  align-items: start;
+  gap: 8px 22px;
+}
+.nv-group.is-clausulas h3 {
+  grid-area: title;
+}
+.nv-group.is-clausulas .nv-rules {
+  grid-area: rules;
+}
+.nv-group.is-clausulas .nv-art {
+  grid-area: art;
+}
+.nv-art {
+  display: flex;
+  align-items: center;
+  min-height: 60px;
+}
+.nv-art .pokemon-sprite {
+  width: 76px;
+  height: 76px;
+}
+.nv-art-route {
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.nv-sign {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 13px 6px 8px;
+  background: var(--c-rule-ivory);
+  color: var(--c-rule-coal);
+  font-family: var(--nv-display);
+  font-weight: 750;
+  font-size: 0.86rem;
+  border-radius: 6px;
+  box-shadow: 3px 3px 0 var(--c-rule-ember);
+}
+.nv-sign .item-icon {
+  width: 26px;
+  height: 26px;
+}
+.nv-tag-mote {
+  padding: 5px 12px;
+  border: 1.5px dashed var(--c-rule-peach);
+  border-radius: 999px;
+  color: var(--c-rule-peach);
+  font-family: var(--nv-display);
+  font-size: 0.82rem;
+}
+.nv-group.is-caja {
+  background:
+    linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--c-rule-iron) 32%, transparent),
+      transparent 42%
+    ),
+    var(--nv-sheet);
+}
+.nv-art-line {
+  gap: 0;
+}
+.nv-art-line .pokemon-sprite {
+  width: 84px;
+  height: 84px;
+}
+.nv-legend-ban {
+  position: relative;
+  margin-left: 14px;
+  padding-left: 14px;
+  border-left: 1px solid var(--nv-line);
+}
+.nv-legend-ban .pokemon-sprite {
+  filter: brightness(0) drop-shadow(0 0 1px var(--c-rule-ash));
+}
+.nv-legend-ban::after {
+  content: "";
+  position: absolute;
+  inset: 8px -2px 8px 12px;
+  border-radius: 50%;
+  border: 4px solid var(--c-rule-carmine);
+  background: linear-gradient(
+    45deg,
+    transparent calc(50% - 2px),
+    var(--c-rule-carmine) calc(50% - 2px) calc(50% + 2px),
+    transparent calc(50% + 2px)
+  );
+}
+.nv-group.is-shiny {
+  background:
+    radial-gradient(
+      70% 80% at 100% 0%,
+      color-mix(in srgb, var(--c-rule-flame) 20%, transparent),
+      transparent 70%
+    ),
+    var(--nv-sheet);
+}
+.nv-art-shiny .pokemon-sprite {
+  width: 84px;
+  height: 84px;
+}
+.nv-art-shop {
+  gap: 10px;
+}
+.nv-art-shop span {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 46px;
+  height: 46px;
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--c-rule-ivory) 10%, transparent);
+}
+.nv-art-shop span::after {
+  content: "";
+  position: absolute;
+  inset: 21px 3px auto;
+  height: 3px;
+  rotate: -40deg;
+  background: var(--c-rule-carmine);
+  border-radius: 3px;
+}
+.nv-art-shop .item-icon {
+  width: 32px;
+  height: 32px;
+}
+.nv-aaron {
+  display: grid;
+  grid-template-columns: 76px minmax(0, 1fr);
+  gap: 14px;
+  align-items: center;
+  margin-top: 4px;
+  padding: 14px;
+  border-radius: 14px;
+  background: color-mix(in srgb, var(--c-rule-peach) 11%, transparent);
+}
+.nv-aaron .pokemon-sprite {
+  width: 76px;
+  height: 76px;
+}
+.nv-aaron h4 {
+  padding-left: 10px;
+}
+.nv-joke {
+  margin: 4px 0 0 13px;
+  color: var(--c-rule-ash);
+  font-style: italic;
+  font-size: 0.93rem;
+}
+
+/* ---------- II. The climb ---------- */
+.nv-climb {
+  container-type: inline-size;
+  display: flex;
+  align-items: flex-end;
+  gap: 10px;
+  padding: 22px 16px 16px;
+  border-radius: 20px;
+  background:
+    linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--c-rule-ember) 11%, transparent),
+      transparent 60%
+    ),
+    var(--nv-sheet);
+  border: 1px solid var(--nv-line);
+}
+.nv-stretch {
+  flex: var(--stops) 1 0;
+  min-width: 0;
+}
+.nv-stops {
+  display: flex;
+  align-items: flex-end;
+  gap: 5px;
+}
+.nv-stop {
+  flex: 1 1 0;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+.nv-medal {
+  width: 46px;
+  height: 46px;
+  object-fit: contain;
+  margin-bottom: 2px;
+}
+.nv-elite {
+  display: grid;
+  grid-template-columns: repeat(2, 21px);
+  gap: 2px;
+  margin-bottom: 4px;
+}
+.nv-champion .pokemon-sprite {
+  width: 58px;
+  height: 58px;
+}
+.nv-level {
+  font-family: var(--nv-display);
+  font-weight: 900;
+  font-size: clamp(1.5rem, 3.4cqi, 2.3rem);
+  line-height: 1.05;
+  color: var(--c-rule-ivory);
+}
+.nv-bar {
+  position: relative;
+  display: block;
+  width: 100%;
+  height: calc(var(--lv) * 3.05px);
+  margin-top: 5px;
+  border-radius: 7px 7px 2px 2px;
+  transform-origin: bottom;
+  /* Hotter as the level rises. */
+  background: linear-gradient(
+    180deg,
+    color-mix(
+      in srgb,
+      var(--c-rule-ember) calc(var(--lv) * 1.05%),
+      var(--c-rule-flame)
+    ),
+    color-mix(in srgb, var(--c-rule-ember) 28%, var(--c-rule-coal))
+  );
+  box-shadow: inset 0 3px 0 var(--type);
+}
+.nv-climb[data-state="armed"] .nv-bar {
+  transform: scaleY(0.04);
+}
+.nv-climb[data-state="lit"] .nv-bar {
+  animation: nv-rise 620ms var(--ease-spring) backwards;
+  animation-delay: calc(var(--step) * 55ms);
+}
+@keyframes nv-rise {
+  from {
+    transform: scaleY(0.04);
+  }
+}
+.nv-flag {
+  position: absolute;
+  top: 8px;
+  right: 7px;
+  padding: 1px 11px 1px 6px;
+  font-family: var(--nv-display);
+  font-size: 0.82rem;
+  font-weight: 800;
+  color: var(--c-rule-coal);
+  background: var(--c-rule-ivory);
+  clip-path: polygon(0 0, 100% 0, calc(100% - 7px) 50%, 100% 100%, 0 100%);
+  white-space: nowrap;
+}
+.nv-stop-who {
+  display: grid;
+  gap: 1px;
+  margin-top: 8px;
+  min-height: 3.5em;
+  align-content: start;
+  width: 100%;
+}
+.nv-stop-who strong {
+  font-family: var(--nv-display);
+  font-size: 0.86rem;
+  font-weight: 700;
+  color: var(--c-rule-ivory);
+  line-height: 1.15;
+}
+.nv-stop-who small {
+  font-family: var(--nv-display);
+  font-size: 0.72rem;
+  color: var(--c-rule-ash);
+  line-height: 1.2;
+}
+.nv-stretch-foot {
+  display: grid;
+  gap: 1px;
+  margin-top: 6px;
+  padding-top: 7px;
+  border-top: 3px solid var(--tone);
+  text-align: center;
+  font-family: var(--nv-display);
+}
+.nv-stretch-foot strong {
+  font-size: 0.92rem;
+  color: var(--tone);
+}
+.nv-stretch-foot span {
+  font-size: 0.78rem;
+  color: var(--c-rule-parchment);
+}
+.is-t1 {
+  --tone: var(--c-leaf);
+}
+.is-t2 {
+  --tone: var(--c-rule-lens);
+}
+.is-t3 {
+  --tone: var(--c-rule-flame);
+}
+.is-t4 {
+  --tone: var(--c-rule-ember);
+}
+@container (max-width: 640px) {
+  .nv-climb {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 16px;
+  }
+  .nv-stops {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 4px;
+  }
+  .nv-stop {
+    display: grid;
+    grid-template-columns: 50px 2.6em minmax(0, 1fr);
+    grid-template-rows: auto auto;
+    align-items: center;
+    column-gap: 8px;
+    text-align: left;
+  }
+  .nv-stop > :first-child {
+    grid-row: 1 / span 2;
+    justify-self: center;
+  }
+  .nv-level {
+    grid-row: 1 / span 2;
+    font-size: 1.7rem;
+  }
+  .nv-bar {
+    grid-column: 3;
+    grid-row: 2;
+    height: 9px;
+    width: calc(var(--lv) * 1.15%);
+    margin: 3px 0 0;
+    transform-origin: left;
+  }
+  .nv-climb[data-state="armed"] .nv-bar {
+    transform: scaleX(0.04);
+  }
+  .nv-climb[data-state="lit"] .nv-bar {
+    animation-name: nv-rise-x;
+  }
+  .nv-flag {
+    display: none;
+  }
+  .nv-stop-who {
+    grid-column: 3;
+    grid-row: 1;
+    min-height: 0;
+    margin-top: 0;
+    grid-template-columns: auto minmax(0, 1fr);
+    align-items: baseline;
+    gap: 6px;
+  }
+  .nv-stretch-foot {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 8px;
+  }
+}
+@keyframes nv-rise-x {
+  from {
+    transform: scaleX(0.04);
+  }
+}
+.nv-two {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 22px;
+  align-items: start;
+}
+.nv-chapter-niveles .nv-two {
+  grid-template-columns: minmax(0, 1.7fr) minmax(0, 1fr);
+}
+.nv-rewards {
+  display: grid;
+  gap: 10px;
+  padding: 18px;
+  border-radius: 16px;
+  background: color-mix(in srgb, var(--c-rule-flame) 13%, transparent);
+  border: 1px solid color-mix(in srgb, var(--c-rule-flame) 40%, transparent);
+}
+.nv-rewards p {
+  display: grid;
+  grid-template-columns: 2.6rem minmax(0, 1fr);
+  align-items: center;
+  gap: 8px;
+}
+.nv-rewards strong {
+  font-family: var(--nv-display);
+  font-weight: 900;
+  font-size: 1.9rem;
+  line-height: 1;
+  color: var(--c-rule-flame);
+}
+.nv-rewards small {
+  color: var(--c-rule-parchment);
+  font-size: 0.9rem;
+}
+
+/* ---------- III. Tramos y jornadas ---------- */
+.nv-route-table {
+  display: grid;
+  gap: 6px;
+}
+.nv-route-table li {
+  display: grid;
+  grid-template-columns: 7em minmax(0, 1fr) auto;
+  gap: 12px;
+  align-items: center;
+  padding: 11px 16px;
+  border-radius: 12px;
+  background: var(--nv-sheet);
+  box-shadow: inset 4px 0 0 var(--tone);
+}
+.nv-route-table strong {
+  font-family: var(--nv-display);
+  font-weight: 800;
+  color: var(--tone);
+}
+.nv-route-table b {
+  display: grid;
+  text-align: right;
+  font-family: var(--nv-display);
+  font-weight: 750;
+  color: var(--c-rule-ivory);
+}
+.nv-route-table small {
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--c-rule-ash);
+}
+.nv-cycle {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 22px 18px;
+  counter-reset: nv-step;
+}
+.nv-cycle li {
+  counter-increment: nv-step;
+  position: relative;
+  padding-top: 44px;
+}
+.nv-cycle li::before {
+  content: counter(nv-step);
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  font-family: var(--nv-display);
+  font-weight: 900;
+  color: var(--c-rule-coal);
+  background: linear-gradient(
+    180deg,
+    var(--c-rule-flame) 50%,
+    var(--c-rule-ember) 50%
+  );
+}
+.nv-cycle li::after {
+  content: "";
+  position: absolute;
+  top: 17px;
+  left: 42px;
+  right: -14px;
+  height: 2px;
+  background: var(--nv-line);
+}
+.nv-cycle li:nth-child(3n)::after {
+  display: none;
+}
+.nv-cycle p {
+  margin-top: 4px;
+  font-size: 0.98rem;
+}
+.nv-panels {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+}
+.nv-panel {
+  padding: 18px;
+  border-radius: 16px;
+  background: var(--nv-sheet);
+  border-top: 3px solid var(--tone);
+}
+.nv-panel.is-fijar {
+  --tone: var(--c-rule-flame);
+}
+.nv-panel.is-lock {
+  --tone: var(--c-rule-ember);
+}
+.nv-panel.is-preview {
+  --tone: var(--c-rule-lens);
+}
+.nv-panel ul {
+  display: grid;
+  gap: 8px;
+  margin-top: 8px;
+}
+.nv-panel li {
+  font-size: 0.97rem;
+  padding-left: 15px;
+  position: relative;
+}
+.nv-panel li::before {
+  content: "";
+  position: absolute;
+  left: 1px;
+  top: 0.62em;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--tone);
+}
+.nv-states {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0;
+}
+.nv-states li {
+  padding: 13px 26px 13px 18px;
+  background: var(--tone);
+  color: var(--c-rule-coal);
+  clip-path: polygon(
+    0 0,
+    calc(100% - 16px) 0,
+    100% 50%,
+    calc(100% - 16px) 100%,
+    0 100%
+  );
+  margin-right: -6px;
+}
+.nv-states li:last-child {
+  margin-right: 0;
+}
+.nv-states .is-preparada {
+  --tone: var(--c-rule-parchment);
+}
+.nv-states .is-abierta {
+  --tone: var(--c-rule-flame);
+}
+.nv-states .is-cerrada {
+  --tone: var(--c-rule-peach);
+}
+.nv-states h4 {
+  color: var(--c-rule-coal);
+  font-weight: 800;
+}
+.nv-states p {
+  font-size: 0.93rem;
+  line-height: 1.38;
+}
+
+/* ---------- IV. Sistema competitivo ---------- */
+.nv-board {
+  display: grid;
+  gap: 16px;
+  padding: clamp(16px, 2.8cqi, 28px);
+  border-radius: 20px;
+  background: var(--c-rule-coal);
+  border: 3px solid var(--c-rule-ember);
+  box-shadow:
+    0 0 26px color-mix(in srgb, var(--c-rule-ember) 34%, transparent),
+    inset 0 0 0 1px color-mix(in srgb, var(--c-rule-flame) 30%, transparent);
+}
+.nv-formula {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 6px 12px;
+  font-family: var(--nv-display);
+  font-weight: 800;
+  font-size: clamp(1.02rem, 2.7cqi, 1.65rem);
+  color: var(--c-rule-ivory);
+  text-align: center;
+}
+.nv-formula span {
+  white-space: nowrap;
+}
+.nv-formula span:first-child {
+  color: var(--c-rule-flame);
+}
+.nv-formula i {
+  font-style: normal;
+  color: var(--c-rule-peach);
+  margin-right: 0.35em;
+}
+.nv-tiles {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+}
+.nv-tiles li {
+  display: grid;
+  gap: 2px;
+  place-items: center;
+  align-content: center;
+  padding: 12px 8px;
+  text-align: center;
+  border-radius: 10px;
+  background: var(--c-rule-plum);
+}
+.nv-tiles strong {
+  font-family: var(--nv-display);
+  font-weight: 900;
+  font-size: clamp(1.8rem, 4.5cqi, 2.9rem);
+  line-height: 1.05;
+  font-variant-numeric: tabular-nums;
+}
+.nv-tiles span {
+  font-family: var(--nv-display);
+  font-size: 0.82rem;
+  color: var(--c-rule-parchment);
+  line-height: 1.22;
+}
+.nv-tiles .is-win strong {
+  color: var(--c-leaf);
+}
+.nv-tiles .is-loss strong {
+  color: var(--c-rule-ivory);
+}
+.nv-tiles .is-death strong {
+  color: var(--c-rule-flame);
+}
+.nv-tiles .is-wipe strong {
+  color: var(--c-rule-carmine);
+}
+.nv-score-lab {
+  display: grid;
+  grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr);
+  gap: 18px;
+}
+.nv-examples ul {
+  display: grid;
+  gap: 8px;
+  margin-top: 10px;
+}
+.nv-examples li {
+  display: grid;
+  grid-template-columns: 5.6em minmax(0, 1fr) auto;
+  gap: 10px;
+  align-items: center;
+  padding: 11px 14px;
+  border-radius: 10px;
+  background: var(--nv-sheet);
+  border-bottom: 2px solid var(--nv-line);
+}
+.nv-examples strong {
+  font-family: var(--nv-display);
+  font-weight: 900;
+  font-size: 1.55rem;
+  color: var(--c-rule-flame);
+  font-variant-numeric: tabular-nums;
+}
+.nv-pips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+.nv-pips i {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+}
+.nv-pips .is-win {
+  background: linear-gradient(
+    180deg,
+    var(--c-rule-carmine) 44%,
+    var(--c-rule-coal) 44% 56%,
+    var(--c-rule-ivory) 56%
+  );
+}
+.nv-pips .is-death {
+  background: var(--c-rule-flame);
+  clip-path: polygon(
+    50% 0,
+    62% 38%,
+    100% 50%,
+    62% 62%,
+    50% 100%,
+    38% 62%,
+    0 50%,
+    38% 38%
+  );
+}
+.nv-pips .is-wipe {
+  background: var(--c-rule-carmine);
+  clip-path: polygon(
+    50% 0,
+    62% 38%,
+    100% 50%,
+    62% 62%,
+    50% 100%,
+    38% 62%,
+    0 50%,
+    38% 38%
+  );
+}
+.nv-calc {
+  display: grid;
+  gap: 9px;
+  padding: 16px;
+  border-radius: 16px;
+  background: var(--c-rule-plum);
+}
+.nv-stepper {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--nv-display);
+  font-size: 0.87rem;
+  color: var(--c-rule-parchment);
+}
+.nv-stepper div {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+.nv-stepper output {
+  min-width: 2ch;
+  text-align: center;
+  font-weight: 800;
+  font-size: 1.06rem;
+  color: var(--c-rule-ivory);
+  font-variant-numeric: tabular-nums;
+}
+.nv-stepper button {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: 0;
+  border-radius: 8px;
+  color: var(--c-rule-coal);
+  background: var(--c-rule-flame);
+  cursor: pointer;
+}
+.nv-stepper button:disabled {
+  background: var(--c-rule-iron);
+  cursor: default;
+  opacity: 0.6;
+}
+.nv-calc-result {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  padding-top: 9px;
+  border-top: 1px solid var(--nv-line);
+  font-family: var(--nv-display);
+  color: var(--c-rule-parchment);
+}
+.nv-calc-result strong {
+  font-weight: 900;
+  font-size: 2.3rem;
+  line-height: 1;
+  color: var(--c-rule-flame);
+  font-variant-numeric: tabular-nums;
+}
+.nv-format {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 18px;
+}
+.nv-format svg {
+  color: var(--c-rule-flame);
+  margin-bottom: 4px;
+}
+.nv-format p {
+  margin-top: 3px;
+  font-size: 0.97rem;
+}
+.nv-standing {
+  display: grid;
+  gap: 6px;
+}
+.nv-detail {
+  color: var(--c-rule-ash);
+  font-size: 0.95rem;
+}
+.nv-tiebreak {
+  display: grid;
+  gap: 12px;
+  padding: 18px;
+  border-radius: 16px;
+  background: color-mix(in srgb, var(--c-rule-lens) 9%, transparent);
+  border: 1px solid color-mix(in srgb, var(--c-rule-lens) 34%, transparent);
+}
+.nv-tiebreak ol {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+  counter-reset: nv-tb;
+}
+.nv-tiebreak li {
+  counter-increment: nv-tb;
+  display: grid;
+  grid-template-columns: 2em minmax(0, 1fr);
+  column-gap: 5px;
+}
+.nv-tiebreak li::before {
+  content: counter(nv-tb);
+  grid-row: 1 / span 2;
+  font-family: var(--nv-display);
+  font-weight: 900;
+  font-size: 1.9rem;
+  line-height: 1;
+  color: var(--c-rule-lens);
+}
+.nv-tiebreak p {
+  font-size: 0.97rem;
+}
+.nv-prizes {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+}
+.nv-prizes li {
+  display: grid;
+  gap: 8px;
+  padding: 14px;
+  border-radius: 14px;
+  background: var(--nv-sheet);
+  align-content: start;
+}
+.nv-prizes .item-icon {
+  width: 40px;
+  height: 40px;
+}
+.nv-prizes div {
+  display: grid;
+}
+.nv-prizes strong {
+  font-family: var(--nv-display);
+  font-weight: 750;
+  font-size: 0.92rem;
+  color: var(--c-rule-ivory);
+}
+.nv-prizes span {
+  font-size: 0.97rem;
+}
+.nv-prizes svg {
+  width: 38px;
+  height: 38px;
+  color: var(--c-rule-flame);
+}
+.nv-prizes .is-campeon {
+  background: linear-gradient(
+    140deg,
+    color-mix(in srgb, var(--c-rule-flame) 22%, transparent),
+    var(--nv-sheet)
+  );
+}
+
+/* ---------- V. Partida y conducta ---------- */
+.nv-conduct {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  gap: 14px;
+}
+.nv-conduct article {
+  display: grid;
+  align-content: start;
+  gap: 10px;
+  padding: 18px;
+  border-radius: 16px;
+  background: var(--nv-sheet);
+  border: 1px solid var(--nv-line);
+}
+.nv-conduct h3 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.nv-live {
+  grid-column: span 5;
+  border-color: color-mix(in srgb, var(--c-rule-discord) 65%, transparent);
+  background:
+    radial-gradient(
+      90% 100% at 0% 0%,
+      color-mix(in srgb, var(--c-rule-discord) 22%, transparent),
+      transparent 72%
+    ),
+    var(--nv-sheet);
+}
+.nv-live h3 svg {
+  color: var(--c-rule-discord);
+}
+.nv-stream {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 14px;
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--c-rule-discord) 16%, var(--c-rule-coal));
+}
+.nv-stream span {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-family: var(--nv-display);
+  font-weight: 700;
+  font-size: 0.86rem;
+  color: var(--c-rule-ivory);
+}
+.nv-stream span::before {
+  content: "";
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--c-rule-carmine);
+  animation: nv-live 2.2s ease-in-out infinite;
+}
+@keyframes nv-live {
+  50% {
+    opacity: 0.35;
+  }
+}
+.nv-stream .pokemon-sprite {
+  width: 62px;
+  height: 62px;
+}
+.nv-free {
+  grid-column: span 7;
+}
+.nv-respect {
+  grid-column: span 12;
+}
+.nv-infinite {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.nv-infinite .item-icon {
+  width: 38px;
+  height: 38px;
+}
+.nv-infinite b {
+  font-family: var(--nv-display);
+  font-size: 2rem;
+  font-weight: 900;
+  line-height: 1;
+  color: var(--c-rule-flame);
+}
+
+/* ---------- VI. Comodines ---------- */
+.nv-cards {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+}
+.nv-card {
+  position: relative;
+  display: grid;
+  align-content: start;
+  gap: 7px;
+  padding: 11px 13px 13px;
+  border-radius: 16px;
+  /* A collectible card: yellow border, printed art window. */
+  background:
+    linear-gradient(var(--c-rule-plum), var(--c-rule-coal)) padding-box,
+    linear-gradient(
+        150deg,
+        var(--c-rule-flame),
+        var(--c-rule-ember) 48%,
+        var(--c-rule-flame)
+      )
+      border-box;
+  border: 4px solid transparent;
+  transition: translate var(--t-base) var(--ease-out);
+}
+.nv-card:hover {
+  translate: 0 -3px;
+}
+.nv-card.is-waiting {
+  background:
+    linear-gradient(var(--c-rule-plum), var(--c-rule-coal)) padding-box,
+    linear-gradient(
+        150deg,
+        var(--c-rule-iron),
+        var(--c-rule-ash) 48%,
+        var(--c-rule-iron)
+      )
+      border-box;
+}
+.nv-card-art {
+  display: grid;
+  place-items: center;
+  height: 94px;
+  border-radius: 9px;
+  background: radial-gradient(
+    circle,
+    color-mix(in srgb, var(--c-rule-ember) 34%, transparent),
+    color-mix(in srgb, var(--c-rule-coal) 76%, transparent)
+  );
+  box-shadow: inset 0 0 0 1px
+    color-mix(in srgb, var(--c-rule-ivory) 18%, transparent);
+}
+.nv-card.is-waiting .nv-card-art {
+  background: radial-gradient(
+    circle,
+    color-mix(in srgb, var(--c-rule-iron) 54%, transparent),
+    color-mix(in srgb, var(--c-rule-coal) 76%, transparent)
+  );
+}
+.nv-card-art .item-icon {
+  width: 70px;
+  height: 70px;
+  object-fit: contain;
+}
+.nv-card h4 {
+  font-size: 1.1rem;
+  font-weight: 800;
+}
+.nv-card-price {
+  font-family: var(--nv-display);
+  font-weight: 800;
+  color: var(--c-rule-flame);
+  font-size: 0.92rem;
+}
+.nv-card p:not([class]) {
+  font-size: 0.96rem;
+  line-height: 1.42;
+}
+.nv-card-note {
+  color: var(--c-rule-ash);
+  font-size: 0.9rem;
+  line-height: 1.38;
+}
+.nv-card-status {
+  margin-top: 2px;
+  padding-top: 6px;
+  border-top: 1px solid var(--nv-line);
+  font-family: var(--nv-display);
+  font-size: 0.78rem;
+  font-weight: 650;
+  line-height: 1.3;
+  color: var(--c-leaf);
+}
+.nv-card.is-waiting .nv-card-status {
+  color: var(--c-rule-peach);
+}
+.nv-shop {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px 24px;
+  margin: 0;
+}
+.nv-shop dt {
+  font-family: var(--nv-display);
+  font-weight: 700;
+  color: var(--c-rule-ivory);
+}
+.nv-shop dd {
+  margin: 2px 0 0;
+  font-size: 0.98rem;
+}
+
+/* ---------- VII. Otras ---------- */
+.nv-others {
+  display: grid;
+  gap: 2px;
+}
+.nv-others li {
+  display: grid;
+  grid-template-columns: 3.1em minmax(0, 1fr);
+  gap: 6px;
+  padding: 11px 10px;
+  border-left: 3px solid var(--nv-line);
+}
+.nv-others p {
+  margin-top: 2px;
+  max-width: 68ch;
+}
+
+/* ---------- Narrower content ---------- */
+@container (max-width: 980px) {
+  .nv-layout {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 18px;
+  }
+  .nv-index {
+    z-index: 5;
+    top: 76px;
+    padding: 6px;
+    border-radius: 12px;
+  }
+  .nv-dex-lights {
+    display: none;
+  }
+  .nv-index ol {
+    display: flex;
+    gap: 4px;
+    padding: 4px;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .nv-index li {
+    flex: none;
+  }
+  .nv-index-link {
+    display: inline-flex;
+    gap: 5px;
+    white-space: nowrap;
+  }
+  .nv-chapter {
+    scroll-margin-top: 136px;
+  }
+  .nv-cards {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@container (max-width: 760px) {
+  .nv-hero {
+    grid-template-columns: minmax(0, 1fr);
+    justify-items: center;
+    text-align: center;
+  }
+  .nv-crest {
+    width: min(68cqi, 280px);
+  }
+  .nv-hero h1 {
+    margin-left: 0;
+    transform-origin: center bottom;
+  }
+  .nv-hero-lead {
+    margin: 0 auto;
+  }
+  .nv-group,
+  .nv-group.is-shiny {
+    grid-column: span 6;
+  }
+  .nv-group.is-shiny .nv-rules {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .nv-two,
+  .nv-chapter-niveles .nv-two,
+  .nv-score-lab,
+  .nv-panels,
+  .nv-format,
+  .nv-tiebreak ol,
+  .nv-shop {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .nv-cycle {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .nv-cycle li:nth-child(3n)::after {
+    display: block;
+  }
+  .nv-cycle li:nth-child(2n)::after {
+    display: none;
+  }
+  .nv-states {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 4px;
+  }
+  .nv-states li {
+    clip-path: none;
+    margin-right: 0;
+    border-radius: 9px;
+  }
+  .nv-tiles,
+  .nv-prizes {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .nv-live,
+  .nv-free {
+    grid-column: span 12;
+  }
+  .nv-group.is-clausulas {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas: "title" "art" "rules";
+  }
+  .nv-route-table li {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+  .nv-route-table span {
+    grid-column: 1 / -1;
+    grid-row: 2;
+  }
+}
+@container (max-width: 460px) {
+  .nv-cycle {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .nv-cycle li::after {
+    display: none;
+  }
+  .nv-cards {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .nv-art-line .pokemon-sprite {
+    width: 62px;
+    height: 62px;
+  }
+  .nv-examples li {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+  .nv-pips {
+    grid-column: 1 / -1;
+  }
+  .nv-rule {
+    grid-template-columns: 2.8em minmax(0, 1fr);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .nv-seal,
+  .nv-stream span::before {
+    animation: none;
+  }
+}
+:root[data-motion="reduced"] .nv-seal,
+:root[data-motion="reduced"] .nv-stream span::before {
+  animation: none;
+}

@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1000" fill="none">
+  <!-- Normativa backdrop: a lattice tower of Kalos under an ember sky. Original art. -->
+  <defs>
+    <radialGradient id="g" cx="62%" cy="10%" r="70%">
+      <stop offset="0" stop-color="#ff6f1f" stop-opacity=".30"/>
+      <stop offset=".55" stop-color="#ffc93a" stop-opacity=".06"/>
+      <stop offset="1" stop-color="#150d20" stop-opacity="0"/>
+    </radialGradient>
+    <pattern id="p" width="44" height="44" patternUnits="userSpaceOnUse">
+      <path d="M0 0L44 44M44 0L0 44M0 0H44V44" stroke="#c98a4a" stroke-width="1.4" stroke-opacity=".55"/>
+    </pattern>
+    <clipPath id="c">
+      <path d="M1250 40l26 0 14 170 46 330 62 460h-260l62-460 46-330z"/>
+    </clipPath>
+  </defs>
+  <rect width="1600" height="1000" fill="url(#g)"/>
+  <g clip-path="url(#c)">
+    <rect x="1100" y="0" width="420" height="1000" fill="url(#p)"/>
+  </g>
+  <path d="M1263 0v40M1250 40h26M1236 210h54M1190 540h146M1128 1000l62-460 46-330 14-170M1398 1000l-62-460-46-330-14-170" stroke="#e8a35c" stroke-width="3" stroke-opacity=".6"/>
+  <circle cx="1263" cy="26" r="9" fill="#ffc93a" fill-opacity=".85"/>
+</svg>

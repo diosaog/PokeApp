@@ -37,6 +37,19 @@
   --c-magenta: #ff3d8b;
   --c-leaf: #9be15d;
   --c-ink: #06131d;
+  /* Normativa: the colours of The Champions Cup crest (coal, ember, flame) */
+  --c-rule-coal: #150d20;
+  --c-rule-plum: #231538;
+  --c-rule-iron: #55426f;
+  --c-rule-ivory: #f8efdf;
+  --c-rule-parchment: #e3d8c9;
+  --c-rule-ash: #b5a8ba;
+  --c-rule-ember: #ff6f1f;
+  --c-rule-flame: #ffc93a;
+  --c-rule-peach: #ffb98a;
+  --c-rule-carmine: #ff4d6a;
+  --c-rule-lens: #5cc4ff;
+  --c-rule-discord: #7f8cff;
   /* Pokémon types (Artistic Evolution): eighteen distinct signals, tuned for
      the night background; original values, not an official chart. */
   --type-normal: #b9b49b;
