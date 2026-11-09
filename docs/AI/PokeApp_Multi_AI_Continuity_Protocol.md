@@ -41,10 +41,20 @@ both await their own baseline confirmation (0/0/0 and 3/0/3); no data correction
 Discord per-version announcements require a new migration and are stopped
 under the owner's explicit no-migration boundary. No worker/API/SQL change.
 
+Robar y Revivir (2026-11-09, PUBLISHED): DB 001-085 (085 = `20261109203241`), API
+`909765eb`, verifier `39181f7f` (image rebuilt, same 60 s cycle), web `6da892d5`, Launcher
+0.26.13. Open to every valid participant, no Team Lock or matchday; the engineering
+allowlist variable is gone. Global robbery round in SQL (`robbery_open_victims`,
+`api_robbery_board`): a victim counts from the verifier's adjudication, trainers who cannot
+be robbed do not block the round. `revive` is a coordinated production mutation over the
+participant's dead box (Caja 7). No real robbery or revive has happened yet. Continue from
+the tip of `claude/net-friendship-discord`. Live record:
+[Robar y Revivir](../work-in-progress/robar-revivir.md).
+
 Normativa (2026-11-09): static rulebook at `/normativa`, content in
 `web/src/features/normativa-content.ts`. A rule change is an edit there, its
-`rulebookUpdated` date and a web deploy. Revivir and Robar are shown as not yet
-usable: when they are enabled, update `wildcards` too.
+`rulebookUpdated` date and a web deploy. Revivir and Robar are shown as available
+since the 085 release.
 
 Avisos detector v2 (2026-11-09): object notices cover only competitive and breeding
 gear (`WATCHED_ITEMS` in `app/domain/save_audit.py`, owner decision), from one unit,

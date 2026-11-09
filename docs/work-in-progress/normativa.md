@@ -53,11 +53,41 @@ capítulos. El «remate» de la cláusula de Aarón se omite y consta que no hay
 Configuración viva: 4 jornadas, una división, 10 monedas por jornada, 4 por medalla,
 12 por Campeón, Caja 7 como caja de muertos, 6 participantes activos.
 
-**Revivir y Robar no se presentan como disponibles.** Se venden, pero su aplicación no
-está activa: `POKEAPP_ITEM_VERIFICATION_TRANSPORT_ENABLED` sin definir y robos limitados
-a 1 de los 6 participantes (lista de ingeniería). El inventario responde «Aún no se puede
-aplicar. No se ha consumido». Al activarlos hay que cambiar `active` y `status` en
-`wildcards`.
+**Revivir y Robar se presentan como disponibles desde la publicación de 085** (web
+`6da892d5`, Launcher 0.26.13), una vez verificada su activación en producción. Ver el
+[registro de Robar y Revivir](robar-revivir.md).
+
+## Diagnóstico de comodines en producción (2026-11-09, antes de 085)
+
+Estado previo a la publicación de 085; se conserva como historia.
+
+Solo lectura: variables de Railway de API y verifier, funciones SQL desplegadas y las
+fuentes exactas del Launcher 0.26.12, cuyo instalador coincide con el SHA-512 del feed.
+
+| Mecánica | Compra | Uso | Escritura en save | Estado |
+|---|---|---|---|---|
+| Blindar | Sí | Sí | No necesita | Operativa |
+| Captura Extra | Sí | Sí | No necesita | Operativa |
+| Fósil | Sí | Sí, con Launcher | `deliver_item` permitida | Operativa, sin entregas todavía |
+| Blindaje por Robo | Solo recompensa | Tras un robo | No necesita | Depende de Robar |
+| Robar | Sí | No | `transfer_remove` y `transfer_insert` permitidas | Parcial: lista de la API solo con Anto, y deben estar los dos entrenadores |
+| Revivir | Sí | No | `revive` no permitida | Desactivada |
+
+Los textos «uso aún no activado» de Revivir y Robar son ciertos para todos los
+entrenadores y salieron de estos flags vivos, no de documentación antigua. Sin cambios.
+
+**Abrir Robar (decisión del propietario, sin desarrollo):** añadir los identificadores de
+los entrenadores a `POKEAPP_TRANSFER_ENGINEERING_TRAINERS`. Antes: ByVisan02 necesita
+partida oficial; la víctima necesita Team Lock para aparecer como objetivo; y conviene un
+primer robo controlado entre dos entrenadores voluntarios, porque nunca se ha hecho uno
+real. Rollback: quitar los identificadores. Al abrirlo, actualizar `wildcards`.
+
+**Activar Revivir (requiere desarrollo):** flujo de producto y `revive` en las escrituras
+del Launcher (versión nueva); corregir la Caja 8 fija en `api_prepare_item_use` (migración)
+y `NativeRevive.cs`, porque la temporada usa la Caja 7; activar
+`POKEAPP_ITEM_VERIFICATION_TRANSPORT_ENABLED` con su lista; habilitar el botón en Inventario;
+y certificarlo con emulador real. La muerte no se borra por diseño: los eventos de
+muerte son inmutables (trigger verificado) y el NET sigue contándolos.
 
 ## Pendiente de decisión del propietario (no bloquea)
 

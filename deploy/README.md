@@ -67,8 +67,9 @@ project's usage, for an empty queue) from $0.0063 to $0.0007 per hour, measured
 on Railway billing for 18:30-19:30 UTC against the two hours before (-89%),
 while a queued job is still
 leased well inside the 2-minute `RETRY_REQUIRED` and 15-minute authorization
-limits of migrations 054/056. Revisit the cadence if robberies or item-use
-verification go live for players.
+limits of migrations 054/056. Since 085 each turn drains the queue in bounded
+passes (plan then adjudicate, verify then settle, up to five item jobs), so a
+step no longer waits for another 60 s turn.
 
 Apply or revert only with a new deployment of the service instance, which takes
 the current settings. `deploymentRedeploy` of an existing deployment keeps that

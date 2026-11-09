@@ -1,0 +1,62 @@
+{
+  "authorization": "Owner message 2026-11-09: develop, finish and publish Robar and Revivir once critical checks pass.",
+  "source_commit": "dc2f3fa",
+  "database": {
+    "migration": "085_robbery_revive_activation.sql",
+    "recorded_as": "20261109203241",
+    "sha256": "5ac48808b01984f457b58f48bf082e35581a86b77ae9e218a9b57a2c9a242ff6",
+    "backup": "pre-release-20261109T203011Z.dump",
+    "backup_sha256": "7649448b083849bcc15e256d4d43aadaded820e85eb640d8efcd2dd63343f444",
+    "rehearsal": "PASS 17/17 on that same backup",
+    "problems": []
+  },
+  "api": {
+    "railway_deployment": "909765eb",
+    "rollback": "a15cfd4f",
+    "paths": 139,
+    "variables": {
+      "POKEAPP_ITEM_VERIFICATION_TRANSPORT_ENABLED": "true",
+      "POKEAPP_TRANSFER_ENGINEERING_TRAINERS": "deleted"
+    }
+  },
+  "verifier": {
+    "railway_deployment": "39181f7f",
+    "image": "sha256:777314cc4",
+    "rollback": "2853bbc4",
+    "start_command": "unchanged, 60 s cycle",
+    "first_turns": "IDLE / TRANSFER []"
+  },
+  "web": {
+    "cloudflare_version": "6da892d5-d50d-4ba8-9797-f55d337e7a6e",
+    "rollback": "681d7e85"
+  },
+  "launcher": {
+    "version": "0.26.13",
+    "minimum_version": "0.26.0",
+    "installer_bytes": 159493659,
+    "installer_sha256": "42c1c77a3f6a277fa86f27bdcac34cf43f4d9cfc07d4bb58ae47dd84c9f10e6c",
+    "authenticode": "NotSigned (owner private-distribution policy)",
+    "manifest_signature": "Ed25519 stable key, verified against the public feed",
+    "public_download": "/launcher/download serves 159493659 bytes",
+    "bundled_modules_checked": ["app.launcher.revive", "app.domain.revive_plan"],
+    "packaged_parser_validation": "PASS 63 checks with the installer's PokeApp.Parser.exe"
+  },
+  "focused_checks": {
+    "native_revive": 200,
+    "native_box_transfer": 168,
+    "native_party_transfer": 500,
+    "acceptance_063": "tools/validate_phase085_activation.py on disposable PostgreSQL",
+    "web": "47 files / 400 tests + tsc",
+    "node": 57,
+    "python": "1527 once; 4 stale expectations fixed and their modules rerun (60 OK)"
+  },
+  "production_data_unchanged": {
+    "coin_ledger_total": 72,
+    "death_events": 10,
+    "redemptions": 1,
+    "pending_purchases": 1,
+    "item_use_authorizations": 0
+  },
+  "real_saves_used": false,
+  "real_robbery_or_revive_performed": false
+}

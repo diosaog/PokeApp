@@ -1260,3 +1260,13 @@ remain disabled or unchanged until Phase 22 real-emulator qualification. No
 remote migration, deployment, owner mutation, balance change, save change or
 Phase 24 work occurred. See [Phase 23 report](phase23-shop-item-use-report.md)
 and [live handoff](work-in-progress/phase23-live.md).
+
+## Robar y Revivir para toda la Liga (2026-11-09)
+
+Publicado con autorización del propietario: DB 001-085 (085 = `20261109203241`), API
+`909765eb`, verifier `39181f7f`, web `6da892d5`, Launcher 0.26.13 en el canal estable.
+Robar sin Team Lock ni jornadas, con rotación global en el servidor, 24 h y blindajes;
+Revivir sobre la Caja 7, con prueba independiente antes de consumir el comodín. Muertes y
+NET sin cambios. Ningún robo ni revivido real todavía. No hay migraciones pendientes.
+Continuar desde la punta de `claude/net-friendship-discord`. Ver
+[registro vivo](work-in-progress/robar-revivir.md).
