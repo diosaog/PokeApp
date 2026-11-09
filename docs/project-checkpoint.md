@@ -5,6 +5,13 @@ milestone record; it does not maintain a second live phase-status ledger.
 
 ## Current project position
 
+- Normativa de la ChampionsLocke (2026-11-09): **PUBLICADA / VERIFICADA**. Solo web:
+  `983449a9` (rollback `b4076f0a`), fuente `9f2a1fc`, ruta `/normativa` visible para todos.
+  Contenido estático en `web/src/features/normativa-content.ts`. API, SQL, verifier y
+  Launcher sin cambios. Revivir y Robar constan como no activados todavía.
+  Continuar desde el tip de `origin/claude/net-friendship-discord`.
+  [Registro vivo](work-in-progress/normativa.md).
+
 - Administración › Avisos, vigilancia informativa de saves (2026-11-08):
   **PUBLICADO / VERIFICADO**. Continuar desde el tip de `origin/claude/net-friendship-discord`.
   DB 084 `20261108192609` (aditiva; ensayo 17/17 + 25/25 sobre copia fresca), API `336f3f05`
