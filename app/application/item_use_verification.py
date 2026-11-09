@@ -13,6 +13,7 @@ from datetime import UTC, datetime
 from hashlib import sha256
 
 from app.domain.pokemon_identity import digest, trusted_native_identity
+from app.domain.revive_plan import revive_destination, revive_mutation, trainer_key
 from app.save_parser.native_sizes import NATIVE_SIZES
 
 
@@ -76,7 +77,7 @@ class TrustedItemUseVerification:
             and e["identity_status"] == "unambiguous"
             and o["revision_id"] == a["identity_revision_id"]
             and o["source"] == "box"
-            and o["box_number"] == 8
+            and o["box_number"] == c["dead_box_number"]
             and o["outcome"] in ("NEW", "MATCHED"),
             "TARGET_UNPROVEN",
         )
@@ -97,7 +98,8 @@ class TrustedItemUseVerification:
             saved["metadata"].get("save_identity") == identity,
             "SAVE_OWNERSHIP_UNPROVEN",
         )
-        box = next((b for b in obs.boxes if b.number == 8), None)
+        dead_box = c["dead_box_number"]
+        box = next((b for b in obs.boxes if b.number == dead_box), None)
         slot = o["slot_number"] - 1
         require(
             box is not None and 0 <= slot < 30 and box.slots[slot] is not None,
@@ -123,23 +125,8 @@ class TrustedItemUseVerification:
             == 1,
             "TARGET_AMBIGUOUS",
         )
-        destination = next(
-            (
-                (b.number - 1, i)
-                for b in sorted(obs.boxes, key=lambda b: b.number)
-                if 1 <= b.number <= 7
-                for i, q in enumerate(b.slots)
-                if q is None
-            ),
-            None,
-        )
+        destination = revive_destination(obs.boxes, dead_box)
         require(destination is not None, "NO_FREE_SLOT")
-        t = obs.trainer
-        key = sha256(
-            "\0".join(
-                map(str, (obs.game, t.name, t.tid, t.sid, t.gender, t.language))
-            ).encode()
-        ).hexdigest()
         # The writer engine is Windows-only; the API imports this module on Linux
         # for VerificationRejected and never reaches this verifier step.
         from app.launcher.write_engine import WriteIntent
@@ -147,17 +134,15 @@ class TrustedItemUseVerification:
         intent = WriteIntent.create(
             game=obs.game,
             expected_sha256=saved["sha256"],
-            trainer_key=key,
-            mutation={
-                "kind": "revive",
-                "location": "box",
-                "box_index": 7,
-                "slot_index": slot,
-                "target_pid": evidence.pid,
-                "target_ec": evidence.encryption_constant,
-                "destination_box_index": destination[0],
-                "destination_slot_index": destination[1],
-            },
+            trainer_key=trainer_key(obs),
+            mutation=revive_mutation(
+                dead_box,
+                o["slot_number"],
+                evidence.pid,
+                evidence.encryption_constant,
+                destination,
+                a["id"],
+            ),
         )
         return c, source, intent
 

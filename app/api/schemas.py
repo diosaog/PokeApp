@@ -6,6 +6,8 @@ from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field, field_serializer
 
+from app.api.read_models import PokemonRead
+
 
 class HealthResponse(BaseModel):
     service: str
@@ -162,6 +164,7 @@ class ItemUseResponse(BaseModel):
     target_pokemon_entity_id: UUID
     save_file_id: UUID
     save_sha256: str = Field(pattern=r"^[a-f0-9]{64}$")
+    identity_revision_id: UUID | None = None
     effect_code: Literal["revive", "steal"]
     status: Literal[
         "PREPARED",
@@ -183,6 +186,63 @@ class ItemUseResponse(BaseModel):
 class ItemUseListResponse(BaseModel):
     items: list[ItemUseResponse]
     physical_application_enabled: Literal[False] = False
+
+
+class ReviveAuthorizationRead(BaseModel):
+    id: UUID
+    status: str
+    target_pokemon_entity_id: UUID
+    operation_id: str
+    expires_at: datetime
+
+
+class RevivePurchaseRead(BaseModel):
+    id: UUID
+    purchased_at: datetime
+    authorization: ReviveAuthorizationRead | None = None
+
+
+class ReviveSaveRead(BaseModel):
+    id: UUID
+    sha256: str = Field(pattern=r"^[a-f0-9]{64}$")
+
+
+class ReviveTargetRead(BaseModel):
+    pokemon_entity_id: UUID
+    slot_number: int = Field(ge=1, le=30)
+
+
+class ReviveBoardResponse(BaseModel):
+    dead_box_number: int = Field(ge=1, le=32)
+    save: ReviveSaveRead | None = None
+    purchases: list[RevivePurchaseRead]
+    targets: list[ReviveTargetRead]
+
+
+class RobberyTargetRead(BaseModel):
+    pokemon_entity_id: UUID
+    location: str
+    available_at: datetime
+    blocked: Literal["shielded", "recent_capture", "last_party_member"] | None = None
+    message: str | None = None
+    pokemon: PokemonRead
+
+
+class RobberyTrainerRead(BaseModel):
+    trainer_id: UUID
+    display_name: str
+    status: Literal[
+        "available", "already_robbed", "no_save", "other_game", "reserved", "no_targets"
+    ]
+    message: str | None = None
+    targets: list[RobberyTargetRead]
+
+
+class RobberyBoardResponse(BaseModel):
+    round: int = Field(ge=1)
+    has_voucher: bool
+    own_official_save: bool
+    trainers: list[RobberyTrainerRead]
 
 
 TransferStatus = Literal[
@@ -237,6 +297,8 @@ class TransferSummary(BaseModel):
     apply_started: bool
     verified: bool
     accepted_save_id: UUID | None = None
+    # Why a request ended without effect (own requests only).
+    reason: str | None = None
     expires_at: datetime
     created_at: datetime
 

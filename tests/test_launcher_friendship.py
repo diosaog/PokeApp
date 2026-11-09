@@ -140,7 +140,8 @@ class FriendshipEngineTests(unittest.TestCase):
         # fixture-only kinds stay refused.
         production = self.engine_at(enabled=False)
         self.assertTrue(production.allows("max_friendship"))
-        self.assertFalse(production.allows("revive") or production.allows("test_marking"))
+        # Revive: owner decision 2026-11-09, only through its coordinated flow.
+        self.assertFalse(production.allows("test_marking"))
         intent = self.intent()
         production.prepare(production.enroll(self.target), intent, closed_emulator_confirmed=True)
         self.assertEqual(production.confirm(intent.operation_id, closed_emulator_confirmed=True).status,

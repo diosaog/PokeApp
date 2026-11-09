@@ -124,6 +124,10 @@ test("only the web's own routes open native views, from a fixed list", () => {
     modal: true,
   });
   // «Felicidad máxima» from the web Inventory opens the native dialog.
+  assert.deepEqual(w.desktopPanel(o + "/escritorio/revivir", o), {
+    panel: "revivir",
+    modal: true,
+  });
   assert.deepEqual(w.desktopPanel(o + "/escritorio/felicidad", o), {
     panel: "felicidad",
     modal: true,

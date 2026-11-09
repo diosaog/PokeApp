@@ -243,6 +243,7 @@ function announce(state) {
     trainingDone: state.training_result?.at ?? null,
     friendshipSeq: state.friendship_seq ?? 0,
     friendshipDone: state.friendship_result?.at ?? null,
+    reviveDone: state.revive_result?.at ?? null,
     receipt: state.receipt_id,
     // Each copy PokeApp accepts (season first, then personal) refreshes the
     // web at once, without waiting for the rest of the sync.
@@ -269,6 +270,11 @@ function announce(state) {
     toast(state.quick_item_error);
   if (now.friendshipSeq !== before.friendshipSeq && state.friendship_error)
     toast(state.friendship_error);
+  if (now.reviveDone && now.reviveDone !== before.reviveDone) {
+    const r = state.revive_result;
+    toast(r.message, r.completed ? "ok" : undefined);
+    if (r.completed) tell("items-changed");
+  }
   if (now.friendshipDone && now.friendshipDone !== before.friendshipDone) {
     const r = state.friendship_result;
     toast(
@@ -893,6 +899,7 @@ const dialogIds = {
   objetos: "sheet-dialog",
   robos: "sheet-dialog",
   felicidad: "sheet-dialog",
+  revivir: "sheet-dialog",
   entrenamiento: "training-dialog",
 };
 const anyOpen = () => document.querySelector("dialog[open]") !== null;
@@ -907,7 +914,12 @@ function present(view, { check = true } = {}) {
 }
 function openDialog(view, item) {
   if (view === "entrenamiento") openTraining(item);
-  if (view === "objetos" || view === "robos" || view === "felicidad")
+  if (
+    view === "objetos" ||
+    view === "robos" ||
+    view === "felicidad" ||
+    view === "revivir"
+  )
     fillSheet(view, item);
   if (view === "selector") renderSelector(lastState, true);
   if (view === "update") {
@@ -981,6 +993,7 @@ const sheets = {
   objetos: ["Objetos", ["quick-article", "shop-article", "write-article"]],
   robos: ["Robos y entregas", ["transfer-article", "write-article"]],
   felicidad: ["Felicidad máxima", ["friendship-article", "write-article"]],
+  revivir: ["Revivir Pokémon", ["revive-article", "write-article"]],
 };
 const homes = new Map();
 function fillSheet(view) {
@@ -1000,6 +1013,7 @@ function fillSheet(view) {
     requestDeliveries();
   }
   if (view === "felicidad") requestFriendship(true);
+  if (view === "revivir") requestRevive();
 }
 function returnSheet() {
   for (const [section, mark] of homes) mark.replaceWith(section);
@@ -1758,6 +1772,127 @@ async function raiseFriendship(member) {
   }
 }
 $("friendship-refresh").onclick = () => requestFriendship(true);
+
+// «Revivir Pokémon»: the dead box as the core read it from the save, one
+// confirmation per Pokémon; the result is only announced once verified.
+const reviveRead = { pending: false, since: 0, seq: 0 };
+let revivePending = false;
+function requestRevive() {
+  if (reviveRead.pending || !lastState?.selected_save) return;
+  Object.assign(reviveRead, {
+    pending: true,
+    since: Date.now(),
+    seq: lastState.revive_seq ?? 0,
+  });
+  void action(() => window.launcher.revive()).then((result) => {
+    if (result?.status !== "QUEUED") reviveRead.pending = false;
+    if (lastState) renderRevive(lastState);
+  });
+}
+function reviveMessage(state, view) {
+  const write = state.write || {};
+  if (!state.selected_save) return "Elige tu partida en «Saves y Launcher».";
+  if (write.busy || revivePending)
+    return "Reviviendo y verificando… no abras el juego (puede tardar hasta dos minutos).";
+  if (reviveRead.pending && !view) return "Leyendo tu Caja de Muertos…";
+  if (state.revive_error) return state.revive_error;
+  if (state.revive_result?.completed) return state.revive_result.message;
+  if (!view) return "Pulsa «Volver a leer».";
+  if (!view.application_enabled)
+    return "Este Launcher no puede aplicar Revivir. Actualízalo.";
+  if (!view.official_save)
+    return "Tu partida de la Liga todavía no está disponible. Sincronízala con el Launcher.";
+  if (!view.voucher_count) return "No tienes comodines Revivir disponibles.";
+  if (!view.candidates.length)
+    return `No hay Pokémon muertos válidos en la Caja ${view.dead_box_number}.`;
+  if (!view.in_sync)
+    return "Tu partida tiene cambios sin sincronizar. Espera a que se sincronice y vuelve a leer.";
+  if (!view.free_slot)
+    return "No tienes ningún hueco libre en tus cajas. Libera uno y vuelve a leer.";
+  return `Comodines disponibles: ${view.voucher_count}.`;
+}
+function renderRevive(state) {
+  const write = state.write || {};
+  const view = state.revive;
+  if (
+    reviveRead.pending &&
+    ((state.revive_seq ?? 0) !== reviveRead.seq ||
+      Date.now() - reviveRead.since > 20000)
+  )
+    reviveRead.pending = false;
+  text("revive-state", reviveMessage(state, view));
+  const blocked =
+    !view?.application_enabled ||
+    !view?.in_sync ||
+    !view?.free_slot ||
+    !view?.purchases?.length ||
+    write.busy ||
+    revivePending ||
+    ["RECOVERY_REQUIRED", "AWAITING_CONFIRMATION", "PREPARED"].includes(
+      write.status,
+    );
+  const list = $("revive-list");
+  const rows = view?.candidates || [];
+  const key = JSON.stringify([rows, blocked]);
+  if (list.dataset.key === key) return;
+  list.dataset.key = key;
+  list.replaceChildren(
+    ...rows.map((m) => {
+      const species = PokeTraining.speciesName({ species: m.species });
+      const row = document.createElement("div");
+      row.className = "quick-item";
+      const sprite = PokeTraining.sprite({ species: m.species, form: m.form });
+      if (sprite) {
+        const image = document.createElement("img");
+        image.className = "training-sprite";
+        image.alt = `Sprite de ${species}`;
+        image.src = sprite;
+        row.append(image);
+      }
+      const name = document.createElement("span");
+      name.className = "quick-name";
+      name.textContent =
+        m.nickname && m.nickname !== species
+          ? `${m.nickname} (${species})`
+          : species;
+      const info = document.createElement("span");
+      info.className = "quick-count muted";
+      info.textContent = `Nv. ${m.level} · Caja ${view.dead_box_number}, posición ${m.slot_number}`;
+      const button = document.createElement("button");
+      button.className = "quick-add";
+      button.textContent = "Revivir";
+      button.disabled = blocked;
+      button.onclick = () => void revivePokemon(m);
+      row.append(name, info, button);
+      return row;
+    }),
+  );
+}
+async function revivePokemon(member) {
+  const purchase = lastState?.revive?.purchases?.[0];
+  if (!purchase) return;
+  const target = `${purchase}:${member.pokemon_entity_id}`;
+  const ticket = await confirmWith("revive", target);
+  if (!ticket) return;
+  revivePending = true;
+  if (lastState) renderRevive(lastState);
+  const before = lastState?.revive_seq ?? 0;
+  try {
+    const queued = await action(() =>
+      window.launcher.applyRevive(purchase, member.pokemon_entity_id, ticket),
+    );
+    // QUEUED: the outcome arrives with the next completed step (the wait for
+    // the server's verification can take up to about three minutes).
+    for (let i = 0; queued && i < 400; i++) {
+      await new Promise((resolve) => setTimeout(resolve, 500));
+      if ((lastState?.revive_seq ?? 0) !== before) break;
+    }
+  } finally {
+    revivePending = false;
+    if (lastState) renderRevive(lastState);
+  }
+}
+$("revive-refresh").onclick = () => requestRevive();
 
 // 072: paid Shop objects into the bag of the league save. The list is
 // PokeApp's; one confirmation per object; the core reserves the purchase,
@@ -2644,6 +2779,7 @@ async function poll() {
     render(state);
     renderQuick(state);
     renderFriendship(state);
+    renderRevive(state);
     renderShop(state);
     renderTraining(state);
     renderTransfers(state);

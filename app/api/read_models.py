@@ -349,7 +349,7 @@ class TargetRead(BaseModel):
     pokemon_entity_id: UUID
     trainer_id: UUID
     location: str
-    visibility: Literal["own", "public_team_lock"]
+    visibility: Literal["own", "public_team_lock", "rival_save"]
     can_shield: bool = False
     pokemon: PokemonRead
 

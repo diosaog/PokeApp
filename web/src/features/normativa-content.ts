@@ -622,8 +622,6 @@ export type Wildcard = {
   active: boolean;
   status: string;
 };
-const PENDING_USE =
-  "A la venta. Su uso aún no está activado y la compra se conserva hasta entonces.";
 export const wildcards: Wildcard[] = [
   {
     code: "blindar_pokemon",
@@ -640,10 +638,10 @@ export const wildcards: Wildcard[] = [
     name: "Revivir Pokémon",
     price: 12,
     effect:
-      "Devuelve a la vida a un Pokémon de tu caja de muertos. Queda REVIVIDO y BLINDADO.",
-    note: "Su muerte sigue registrada y sigue restando puntos.",
-    active: false,
-    status: PENDING_USE,
+      "Devuelve a la vida a un Pokémon de tu Caja 7. Queda REVIVIDO y BLINDADO.",
+    note: "Su muerte sigue registrada y la penalización NET no desaparece.",
+    active: true,
+    status: "Disponible. Se usa cuando quieras desde PokeApp Launcher.",
   },
   {
     code: "robar_pokemon",
@@ -652,8 +650,8 @@ export const wildcards: Wildcard[] = [
     effect:
       "Te llevas un Pokémon de otro participante. Queda ROBADO y BLINDADO, y conserva su historia.",
     note: "Quien roba recibe un vale de Blindaje por Robo.",
-    active: false,
-    status: PENDING_USE,
+    active: true,
+    status: "Disponible. Se guarda y se usa cuando quieras.",
   },
   {
     code: "captura_extra",
@@ -679,15 +677,15 @@ export const wildcards: Wildcard[] = [
     price: null,
     effect: "Vale para blindar a uno de tus Pokémon.",
     note: "No se compra: lo recibe quien completa un robo.",
-    active: false,
-    status: "Llegará con el primer robo.",
+    active: true,
+    status: "Se recibe al completar un robo.",
   },
 ];
 export const robberyRules: Rule[] = [
   {
     id: "6.7",
     kind: "prohibido",
-    text: "Usar Robo de Pokémon sobre un jugador que ya haya sido objetivo, hasta que todos los demás jugadores lo hayan sido también.",
+    text: "Usar Robo de Pokémon sobre un jugador que ya haya sido robado en la ronda actual. Nadie puede volver a ser víctima hasta que todos los demás entrenadores que se pueden robar lo hayan sido también.",
   },
   {
     id: "6.8",
@@ -708,6 +706,31 @@ export const robberyRules: Rule[] = [
     id: "6.11",
     kind: "aclaracion",
     text: "La víctima no puede rechazar un robo válido: PokeApp es quien lo decide.",
+  },
+  {
+    id: "6.12",
+    kind: "norma",
+    text: "Robar se puede usar en cualquier momento: no hace falta Team Lock ni que haya una jornada abierta, y no depende de los combates. El comodín se compra y se guarda para cuando quieras.",
+  },
+  {
+    id: "6.13",
+    kind: "norma",
+    text: "La rotación de víctimas es global y compartida por toda la Liga: cuando todos los entrenadores que se pueden robar han sido víctimas, empieza una nueva ronda.",
+  },
+  {
+    id: "6.14",
+    kind: "aclaracion",
+    text: "Las 24 horas se cuentan desde la primera vez que PokeApp ve a ese Pokémon en una partida sincronizada. Los Pokémon blindados están protegidos.",
+  },
+  {
+    id: "6.15",
+    kind: "norma",
+    text: "Revivir se compra y se guarda; se usa cuando quieras desde PokeApp Launcher, sin Team Lock y sin depender de las jornadas. Recupera un Pokémon muerto de la Caja 7.",
+  },
+  {
+    id: "6.16",
+    kind: "aclaracion",
+    text: "Revivir no borra la muerte: sigue en tu historial y la penalización NET no desaparece. Revivir no cobra ninguna penalización nueva.",
   },
 ];
 export const shopFacts = [

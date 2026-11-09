@@ -17,13 +17,14 @@ def public_receipt(row):
 
 
 class ItemUseTransport:
-    def __init__(self, repository, blobs, *, allowed_trainers):
+    def __init__(self, repository, blobs, *, allowed_trainers=()):
         self.repository, self.blobs = repository, blobs
-        self.allowed_trainers = frozenset(allowed_trainers)
+        # Empty: every participant; the RPC binds the authorization to its trainer.
+        self.allowed_trainers = frozenset(allowed_trainers) or None
         self.slots = BoundedSemaphore(2)
 
     def scope(self, aid, sid, tid, claim):
-        if tid not in self.allowed_trainers:
+        if self.allowed_trainers is not None and tid not in self.allowed_trainers:
             raise ItemUseRejectedError("ITEM_USE_FORBIDDEN", 403)
         return {
             "authorization_id": aid,

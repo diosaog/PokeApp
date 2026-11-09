@@ -45,6 +45,16 @@ export function launcherRaisesFriendship() {
   const [major, minor, patch] = version.slice(1).map(Number);
   return major > 0 || minor > 26 || (minor === 26 && patch >= 12);
 }
+// «Revivir Pokémon» opens the Launcher's native dead-box dialog (0.26.13+).
+export const revivePath = "/escritorio/revivir";
+export function launcherRevives() {
+  const version = /PokeAppLauncher\/(\d+)\.(\d+)\.(\d+)/.exec(
+    typeof navigator === "undefined" ? "" : navigator.userAgent,
+  );
+  if (!version) return false;
+  const [major, minor, patch] = version.slice(1).map(Number);
+  return major > 0 || minor > 26 || (minor === 26 && patch >= 13);
+}
 // Links from 27C (Mi partida, Copias, Conexión) now live in the hub's tabs.
 export const legacyDesktopPanels = ["partida", "copias", "nube"] as const;
 // Launchers before 0.26.0 have no native hub at /saves: they still open their

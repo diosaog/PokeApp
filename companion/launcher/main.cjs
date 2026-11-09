@@ -634,6 +634,7 @@ app.whenReady().then(() => {
         "objetos",
         "entrenamiento",
         "felicidad",
+        "revivir",
         "restore",
       ].includes(view)
     )
@@ -746,6 +747,39 @@ app.whenReady().then(() => {
       return request("friendship_apply", {
         slot_index: slot,
         pokemon_sha256: hash,
+      });
+    },
+  );
+  // «Revivir Pokémon»: the core reads the dead box and, after one confirmation,
+  // checks the save and the emulator, applies, and waits for the server's proof.
+  ipcMain.handle("launcher:revive", (event) => {
+    authorize(event);
+    return request("revive_refresh");
+  });
+  ipcMain.handle(
+    "launcher:revive-apply",
+    async (event, purchaseId, entityId, ticket) => {
+      authorize(event);
+      const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
+      if (
+        typeof purchaseId !== "string" ||
+        typeof entityId !== "string" ||
+        !uuid.test(purchaseId) ||
+        !uuid.test(entityId)
+      )
+        throw new Error("Vuelve a leer la Caja de Muertos.");
+      const target = `${purchaseId}:${entityId}`;
+      const state = await request("state");
+      describe("revive", target, state);
+      confirmations.redeem(
+        ticket,
+        "revive",
+        target,
+        fingerprint("revive", target, state),
+      );
+      return request("revive_apply", {
+        purchase_id: purchaseId,
+        pokemon_entity_id: entityId,
       });
     },
   );
@@ -1078,6 +1112,7 @@ app.whenReady().then(() => {
         "restore",
         "quick-item",
         "friendship",
+        "revive",
         "delivery",
         "training",
         "transfer:prepare",

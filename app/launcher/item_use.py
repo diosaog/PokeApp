@@ -1,8 +1,8 @@
-"""Engineering-only item-use bridge on the existing physical journal/controller.
+"""Item-use bridge on the existing physical journal/controller.
 
-No production IPC command or trusted-proof issuer lives in the Launcher.
-The isolated harness can bind a server-derived revive plan or the older synthetic
-test_marking. Neither a local receipt nor this capability is server evidence.
+The Launcher never issues proof. The server's claim authorizes the local change;
+the upload is verified independently and only then does the server consume the
+comodín. A local receipt alone is never server evidence.
 """
 
 import json
@@ -14,10 +14,13 @@ from uuid import UUID, uuid4
 
 from pydantic import BaseModel, ConfigDict, Field
 
-from app.launcher.write_engine import EngineeringCapability
+from app.launcher.backend import BackendError
+from app.launcher.write_engine import EngineeringCapability, PairedApplyPermit
 from app.launcher.write_files import WriteSafetyError
 
 _UUID = r"^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+# Nothing else to do for these bindings: no recovery holds the sync back.
+SETTLED_STATES = ("APPLIED_VERIFIED", "RELEASED")
 
 
 class ItemUseStatusWire(BaseModel):
@@ -66,7 +69,11 @@ class EngineeringItemUse:
         self.controller, self.repo = controller, repository
         self.engine = controller.engine
         self.season_id, self.trainer_id = season_id, trainer_id
-        if type(getattr(self.engine, "capability", None)) is not EngineeringCapability:
+        if type(
+            getattr(self.engine, "capability", None)
+        ) is not EngineeringCapability and not (
+            self.engine is not None and self.engine.allows("revive")
+        ):
             raise WriteSafetyError("ITEM_APPLICATION_DISABLED")
         with self.engine._db() as db:
             db.execute(
@@ -74,7 +81,7 @@ class EngineeringItemUse:
                 "(id TEXT PRIMARY KEY, native_id TEXT UNIQUE NOT NULL, record TEXT NOT NULL)"
             )
             pending = db.execute("SELECT record FROM item_use_bindings").fetchall()
-        if any(json.loads(r[0])["state"] != "APPLIED_VERIFIED" for r in pending):
+        if any(json.loads(r[0])["state"] not in SETTLED_STATES for r in pending):
             controller.gate.recovery_required = True
 
     def bind_fixture(self, authorization, intent, *, pokemon_entity_id):
@@ -84,7 +91,7 @@ class EngineeringItemUse:
         return self._bind(authorization, intent, pokemon_entity_id=pokemon_entity_id)
 
     def bind_revive(self, authorization, intent, *, pokemon_entity_id):
-        """Engineering-only intake of the independently derived server plan."""
+        """Binds the plan to the server's authorization before any change."""
         if (
             authorization.get("effect_code") != "revive"
             or intent.mutation.get("kind") != "revive"
@@ -138,6 +145,20 @@ class EngineeringItemUse:
                 (a["id"], intent.operation_id, json.dumps(record)),
             )
 
+    def bindings(self):
+        """Every local binding of this trainer and season, with its id."""
+        with self.engine._db() as db:
+            rows = db.execute("SELECT id,record FROM item_use_bindings").fetchall()
+        result = []
+        for identifier, raw in rows:
+            record = json.loads(raw)
+            if (
+                record["binding"]["season_id"] == self.season_id
+                and record["binding"]["trainer_id"] == self.trainer_id
+            ):
+                result.append((identifier, record))
+        return result
+
     def _load(self, identifier):
         with self.engine._db() as db:
             row = db.execute(
@@ -165,9 +186,11 @@ class EngineeringItemUse:
                 (json.dumps(record), identifier),
             )
             remaining = db.execute("SELECT record FROM item_use_bindings").fetchall()
-        self.controller.gate.recovery_required = any(
-            json.loads(row[0])["state"] != "APPLIED_VERIFIED" for row in remaining
-        ) or bool(self.engine.pending())
+        self.controller.gate.recovery_required = (
+            any(json.loads(row[0])["state"] not in SETTLED_STATES for row in remaining)
+            or bool(self.engine.pending())
+            or self.controller._transfer_notice() is not None
+        )
         return state
 
     def _claim(self, identifier, record):
@@ -222,17 +245,40 @@ class EngineeringItemUse:
                 receipt.status == "AWAITING_CONFIRMATION"
                 and remote["status"] == "PENDING_APPLICATION"
             ):
-                receipt = self.engine.confirm(native_id, closed_emulator_confirmed=True)
+                receipt = self.engine.confirm(
+                    native_id,
+                    closed_emulator_confirmed=True,
+                    paired_permit=PairedApplyPermit(native_id),
+                )
             self.controller._record(receipt)
-            state = (
-                "LOCAL_VERIFIED_AWAITING_CONFIRMATION"
-                if receipt.status == "APPLIED_VERIFIED"
-                else "RECOVERY_REQUIRED"
-            )
+            state = {
+                "APPLIED_VERIFIED": "LOCAL_VERIFIED_AWAITING_CONFIRMATION",
+                # The engine only rejects with the original proven intact.
+                "REJECTED": "LOCAL_REJECTED",
+            }.get(receipt.status, "RECOVERY_REQUIRED")
             return self._state(identifier, record, state)
 
+    def _applied(self, native_id):
+        """The journal, not the file on disk, says the change happened.
+
+        The trainer may have played since (a crash before completing): the file
+        then differs, but the verified result is still rebuilt byte for byte
+        from the retained original.
+        """
+        receipt = self.engine.reconcile(native_id)
+        return receipt.status == "APPLIED_VERIFIED"
+
+    def _result_bytes(self, native_id):
+        intent, original, prepared = self.engine._materials(
+            self.engine._load(native_id)
+        )
+        output = self.engine.native.prepare(original, intent).output
+        if sha256(output).hexdigest() != prepared.output_hash:
+            raise WriteSafetyError("ITEM_RECEIPT_MISMATCH")
+        return output, prepared
+
     def submit_verification(self, identifier, transport):
-        """Engineering seam only. Reconcile server intake before any byte resend.
+        """Reconcile server intake before any byte resend.
 
         Transport is scoped/authenticated externally. No verifier credentials or
         proof endpoint belong here; restart uses the existing durable binding.
@@ -240,13 +286,9 @@ class EngineeringItemUse:
         with self.controller._operation(recovery=True):
             native_id, record = self._load(identifier)
             self._state(identifier, record, "RECOVERY_REQUIRED")
-            receipt = self.engine.reconcile(native_id)
-            if (
-                receipt.status != "APPLIED_VERIFIED"
-                or receipt.current_matches_receipt is not True
-            ):
+            if not self._applied(native_id):
                 return "RECOVERY_REQUIRED"
-            _, _, prepared = self.engine._materials(self.engine._load(native_id))
+            data, prepared = self._result_bytes(native_id)
             scope = (identifier, self.season_id, self.trainer_id, record["claim_id"])
             remote = transport.status(*scope)
             if remote.get("authorization_id") != identifier or remote.get(
@@ -254,11 +296,6 @@ class EngineeringItemUse:
             ) not in (None, prepared.output_hash):
                 raise WriteSafetyError("ITEM_RECEIPT_MISMATCH")
             if remote["status"] in ("NOT_SUBMITTED", "UPLOADING", "RETRY_REQUIRED"):
-                # Read the journal-bound target and match the verified receipt.
-                # External changes cannot turn into a different submitted result.
-                data = self.engine.files.read_path(Path(record["binding"]["path"]))
-                if sha256(data).hexdigest() != prepared.output_hash:
-                    raise WriteSafetyError("ITEM_RECEIPT_MISMATCH")
                 remote = transport.submit(*scope, data)
             if remote.get("authorization_id") != identifier or remote.get(
                 "result_sha256"
@@ -277,11 +314,7 @@ class EngineeringItemUse:
         with self.controller._operation(recovery=True):
             native_id, record = self._load(identifier)
             self._state(identifier, record, "RECOVERY_REQUIRED")
-            receipt = self.engine.reconcile(native_id)
-            if (
-                receipt.status != "APPLIED_VERIFIED"
-                or receipt.current_matches_receipt is not True
-            ):
+            if not self._applied(native_id):
                 return self._state(identifier, record, "RECOVERY_REQUIRED")
             _, _, prepared = self.engine._materials(self.engine._load(native_id))
             remote = self.repo.complete(
@@ -308,3 +341,49 @@ class EngineeringItemUse:
             ):
                 state = "BLOCKED_UNCERTAIN"
             return self._state(identifier, record, state)
+
+    def release(self, identifier, *, code):
+        """End an attempt that cannot be completed, with the comodín intact.
+
+        Unverified, or never applied: an applied file goes back to the retained
+        original (only if it is still exactly the result), and the server hears
+        that the attempt failed. A file that has moved on is never overwritten.
+        """
+        with self.controller._operation(recovery=True):
+            native_id, record = self._load(identifier)
+            self._state(identifier, record, "RECOVERY_REQUIRED")
+            with self.engine._db() as db:
+                exists = db.execute(
+                    "SELECT 1 FROM physical_writes WHERE id=?", (native_id,)
+                ).fetchone()
+            if exists:
+                receipt = self.engine.reconcile(native_id)
+                if receipt.status == "APPLIED_VERIFIED":
+                    if receipt.current_matches_receipt is not True:
+                        return self._state(identifier, record, "RECOVERY_REQUIRED")
+                    receipt = self.engine.restore(
+                        native_id, closed_emulator_confirmed=True
+                    )
+                    self.controller._record(receipt)
+                    if receipt.status != "RESTORED_VERIFIED":
+                        return self._state(identifier, record, "RECOVERY_REQUIRED")
+                elif receipt.status not in ("REJECTED", "RESTORED_VERIFIED"):
+                    return self._state(identifier, record, "RECOVERY_REQUIRED")
+            try:
+                self.repo.complete(
+                    identifier,
+                    self.season_id,
+                    self.trainer_id,
+                    {
+                        "operation_id": record["binding"]["operation_id"],
+                        "claim_id": record["claim_id"],
+                        "status": "FAILED_RECOVERABLE",
+                        "error_code": code,
+                    },
+                )
+            except BackendError as error:
+                # Never claimed, or already ended on the server: nothing to
+                # record there. A lost connection is retried.
+                if error.status not in (403, 404, 409):
+                    raise
+            return self._state(identifier, record, "RELEASED")

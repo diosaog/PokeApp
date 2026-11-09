@@ -1868,6 +1868,46 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/v1/launcher/seasons/{season_id}/revive": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Revive Board
+     * @description Own revive comodines, accepted save and dead Pokémon, for the Launcher.
+     */
+    get: operations["revive_board_v1_launcher_seasons__season_id__revive_get"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/launcher/seasons/{season_id}/revive/{purchase_id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    /**
+     * Launcher Prepare Revive
+     * @description Launcher transport (PUT, no custom headers): operation_id is the key.
+     */
+    put: operations["launcher_prepare_revive_v1_launcher_seasons__season_id__revive__purchase_id__put"];
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/v1/launcher/seasons/{season_id}/item-uses": {
     parameters: {
       query?: never;
@@ -2086,6 +2126,23 @@ export interface paths {
     get?: never;
     /** Release */
     put: operations["release_v1_launcher_seasons__season_id__training__operation_id__release_put"];
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/seasons/{season_id}/robbery/board": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Robbery Board */
+    get: operations["robbery_board_v1_seasons__season_id__robbery_board_get"];
+    put?: never;
     post?: never;
     delete?: never;
     options?: never;
@@ -5872,10 +5929,132 @@ export interface components {
       /** Results */
       results: components["schemas"]["MatchResult"][];
     };
+    /** ReviveAuthorizationRead */
+    ReviveAuthorizationRead: {
+      /**
+       * Id
+       * Format: uuid
+       */
+      id: string;
+      /** Status */
+      status: string;
+      /**
+       * Target Pokemon Entity Id
+       * Format: uuid
+       */
+      target_pokemon_entity_id: string;
+      /** Operation Id */
+      operation_id: string;
+      /**
+       * Expires At
+       * Format: date-time
+       */
+      expires_at: string;
+    };
+    /** ReviveBoardResponse */
+    ReviveBoardResponse: {
+      /** Dead Box Number */
+      dead_box_number: number;
+      save?: components["schemas"]["ReviveSaveRead"] | null;
+      /** Purchases */
+      purchases: components["schemas"]["RevivePurchaseRead"][];
+      /** Targets */
+      targets: components["schemas"]["ReviveTargetRead"][];
+    };
+    /** RevivePurchaseRead */
+    RevivePurchaseRead: {
+      /**
+       * Id
+       * Format: uuid
+       */
+      id: string;
+      /**
+       * Purchased At
+       * Format: date-time
+       */
+      purchased_at: string;
+      authorization?: components["schemas"]["ReviveAuthorizationRead"] | null;
+    };
+    /** ReviveSaveRead */
+    ReviveSaveRead: {
+      /**
+       * Id
+       * Format: uuid
+       */
+      id: string;
+      /** Sha256 */
+      sha256: string;
+    };
+    /** ReviveTargetRead */
+    ReviveTargetRead: {
+      /**
+       * Pokemon Entity Id
+       * Format: uuid
+       */
+      pokemon_entity_id: string;
+      /** Slot Number */
+      slot_number: number;
+    };
+    /** RobberyBoardResponse */
+    RobberyBoardResponse: {
+      /** Round */
+      round: number;
+      /** Has Voucher */
+      has_voucher: boolean;
+      /** Own Official Save */
+      own_official_save: boolean;
+      /** Trainers */
+      trainers: components["schemas"]["RobberyTrainerRead"][];
+    };
     /** RobberyCancelBody */
     RobberyCancelBody: {
       /** Reason */
       reason: string;
+    };
+    /** RobberyTargetRead */
+    RobberyTargetRead: {
+      /**
+       * Pokemon Entity Id
+       * Format: uuid
+       */
+      pokemon_entity_id: string;
+      /** Location */
+      location: string;
+      /**
+       * Available At
+       * Format: date-time
+       */
+      available_at: string;
+      /** Blocked */
+      blocked?: ("shielded" | "recent_capture" | "last_party_member") | null;
+      /** Message */
+      message?: string | null;
+      pokemon: components["schemas"]["PokemonRead"];
+    };
+    /** RobberyTrainerRead */
+    RobberyTrainerRead: {
+      /**
+       * Trainer Id
+       * Format: uuid
+       */
+      trainer_id: string;
+      /** Display Name */
+      display_name: string;
+      /**
+       * Status
+       * @enum {string}
+       */
+      status:
+        | "available"
+        | "already_robbed"
+        | "no_save"
+        | "other_game"
+        | "reserved"
+        | "no_targets";
+      /** Message */
+      message?: string | null;
+      /** Targets */
+      targets: components["schemas"]["RobberyTargetRead"][];
     };
     /** SafeSanction */
     SafeSanction: {
@@ -6615,7 +6794,7 @@ export interface components {
        * Visibility
        * @enum {string}
        */
-      visibility: "own" | "public_team_lock";
+      visibility: "own" | "public_team_lock" | "rival_save";
       /**
        * Can Shield
        * @default false
@@ -7056,6 +7235,8 @@ export interface components {
       verified: boolean;
       /** Accepted Save Id */
       accepted_save_id?: string | null;
+      /** Reason */
+      reason?: string | null;
       /**
        * Expires At
        * Format: date-time
@@ -7262,6 +7443,8 @@ export interface components {
       verified: boolean;
       /** Accepted Save Id */
       accepted_save_id?: string | null;
+      /** Reason */
+      reason?: string | null;
       /**
        * Expires At
        * Format: date-time
@@ -11434,6 +11617,73 @@ export interface operations {
       };
     };
   };
+  revive_board_v1_launcher_seasons__season_id__revive_get: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        season_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ReviveBoardResponse"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  launcher_prepare_revive_v1_launcher_seasons__season_id__revive__purchase_id__put: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        season_id: string;
+        purchase_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["ItemUsePrepareBody"];
+      };
+    };
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ItemUseResponse"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
   pending_v1_launcher_seasons__season_id__item_uses_get: {
     parameters: {
       query?: never;
@@ -11900,6 +12150,37 @@ export interface operations {
         };
         content: {
           "application/json": components["schemas"]["TrainingReceipt"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  robbery_board_v1_seasons__season_id__robbery_board_get: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        season_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["RobberyBoardResponse"];
         };
       };
       /** @description Validation Error */

@@ -92,6 +92,7 @@ class LocalVerifierStore:
             "trainer_enabled": self.one("trainers", id=tid)["globally_enabled"],
             "participant_active": p["status"] == "active",
             "purchase_pending": purchase["status"] == "pending",
+            "dead_box_number": p["dead_box_number"],
             "purchase_effect": "revive"
             if self.one("shop_items", id=purchase["shop_item_id"])["code"]
             == "revivir_pokemon"

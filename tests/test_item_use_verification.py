@@ -18,6 +18,7 @@ from app.domain.pokemon_identity import trusted_native_identity
 from app.launcher.item_use import EngineeringItemUse
 from app.launcher.save_activity import SaveActivityGate
 from app.launcher.write_control import LocalWriteController
+from app.launcher.write_engine import COORDINATED_MUTATIONS
 from app.launcher.write_engine import PRODUCTION_MUTATIONS
 from app.save_parser.models import ParsedTrainer
 from app.save_parser.writer import NATIVE_SIZES
@@ -111,6 +112,7 @@ class ReviveVerificationTests(unittest.TestCase):
             "participant_active": True,
             "purchase_pending": True,
             "purchase_effect": "revive",
+            "dead_box_number": 8,
             "current_save_id": a["save_file_id"],
             "head_id": a["identity_revision_id"],
         }
@@ -151,6 +153,7 @@ class ReviveVerificationTests(unittest.TestCase):
                 "target_ec": 456,
                 "destination_box_index": 0,
                 "destination_slot_index": 0,
+                "authorization_id": self.a["id"],
             },
         )
         self.native.verify.assert_called_once_with(
@@ -244,9 +247,8 @@ class ReviveVerificationTests(unittest.TestCase):
             (1, 1),
         )
         self.assertIn("Caja 2, posición 2", LocalWriteController._describe(intent))
-        # Revive is not a production mutation; only the owner's enabled kinds
-        # are (072 adds the coordinated Shop delivery, deliver_item; 074 the
-        # coordinated virtual training published with Launcher 0.26.9).
+        # Only the owner's enabled kinds (072: coordinated Shop delivery;
+        # 074: virtual training; 0.26.12: Felicidad máxima; 0.26.13: Revivir).
         self.assertEqual(
             PRODUCTION_MUTATIONS,
             {
@@ -257,6 +259,7 @@ class ReviveVerificationTests(unittest.TestCase):
                 "virtual_training",
                 # Launcher 0.26.12: «Felicidad máxima», free and unlimited.
                 "max_friendship",
+                "revive",
             },
         )
 
@@ -356,7 +359,7 @@ class ReviveBindingTests(unittest.TestCase):
             service._state(b["id"], r, "APPLIED_VERIFIED")
             self.assertFalse(controller.gate.recovery_required)
 
-    def test_revive_requires_exact_effect_and_scope_and_production_remains_disabled(
+    def test_revive_requires_exact_effect_and_scope_and_coordinated_application(
         self,
     ):
         from test_phase22_write_engine import SOURCE, engine_at, intent
@@ -368,11 +371,11 @@ class ReviveBindingTests(unittest.TestCase):
             target = root / "main"
             target.write_bytes(SOURCE)
             native_intent = replace(intent(), mutation={"kind": "revive"})
+            # Owner decision 2026-11-09: production accepts revive, but only its
+            # coordinated flow applies it; the generic confirmation cannot.
             prod = engine_at(root, enabled=False)
-            with self.assertRaises(WriteSafetyError):
-                prod.prepare(
-                    prod.enroll(target), native_intent, closed_emulator_confirmed=True
-                )
+            self.assertTrue(prod.allows("revive"))
+            self.assertIn("revive", COORDINATED_MUTATIONS)
             self.assertEqual(target.read_bytes(), SOURCE)
             controller = LocalWriteController(
                 SaveActivityGate(), lambda: str(target), engine_at(root)

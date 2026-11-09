@@ -34,6 +34,7 @@ from tools.phase30_release_audit import DEPLOYED, PENDING
 from tools.production_readonly import SUPABASE_REF, _supabase, query, supabase_get
 
 EXPECTED_SHA256 = {
+    '085_robbery_revive_activation.sql': '5ac48808b01984f457b58f48bf082e35581a86b77ae9e218a9b57a2c9a242ff6',
     '084_save_audit_notices.sql': '0fc5359ce80ee0d0c590a9b94eadd540925f418b0827dc235e1a373bf87ef23c',
     '083_team_lock_confirmation_announcements.sql': '3ef757446a4c0f0f2e9b6bdb0439122c264b810ece9ece8e8ef7ce6ec3bed74c',
     '082_wipe_revival_deaths.sql': 'b4b4ecfbb0afd25ece14a9356e3992b0fa0119d34179f1182b48c284672dfc47',

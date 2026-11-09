@@ -23,7 +23,9 @@ import {
   insideLauncher,
   launcherDeliversShopObjects,
   launcherRaisesFriendship,
+  launcherRevives,
   launcherTrainsPokemon,
+  revivePath,
   shopObjectsPath,
   trainingItemPath,
 } from "../launcher";
@@ -182,6 +184,14 @@ const withdrawable = [
   "WAITING_OTHER",
   "PENDING_SOURCE",
 ];
+// Why a request ended without effect; the comodín stays available.
+function cancelledReason(reason?: string | null) {
+  if (reason === "TRANSFER_EXPIRED")
+    return "La solicitud caducó antes de poder comprobarse.";
+  if (reason?.startsWith("TRANSFER_PLAN_"))
+    return "No se pudo preparar. Comprueba que tienes un hueco libre en las Cajas 1 a 6 y vuelve a intentarlo.";
+  return null;
+}
 
 export function Inventory() {
   const { season, me } = useApp();
@@ -199,8 +209,11 @@ export function Inventory() {
     !!season && launcherFlow,
   );
   const robberyEnabled = transfers.data?.transfer_enabled === true;
+  // A cancelled attempt leaves the comodín free for another one.
   const transferFor = (purchaseId: string) =>
-    transfers.data?.items.find((t) => t.purchase_id === purchaseId);
+    transfers.data?.items.find(
+      (t) => t.purchase_id === purchaseId && t.status !== "CANCELLED",
+    );
   const cmd = useCommand([
     `/v1/seasons/${season}/transfers`,
     `/v1/read/seasons/${season}/inventory`,
@@ -213,9 +226,10 @@ export function Inventory() {
   const [unlimitedInfo, setUnlimitedInfo] = useState<
     NonNullable<Model<"InventoryRead">["unlimited_items"]>[number] | null
   >(null);
-  const trainers = useRead<Model<"TrainerRead">[]>(
-    "/v1/read/trainers",
-    !!season && !!purchase,
+  // Rotation, rivals and their Pokémon are the server's: nothing is decided here.
+  const board = useRead<Model<"RobberyBoardResponse">>(
+    `/v1/seasons/${season}/robbery/board`,
+    !!season && purchase?.item_code === "robar_pokemon",
   );
   const league = useRead<Model<"LeagueGeneralRead">>(
     `/v1/read/seasons/${season}/league`,
@@ -223,47 +237,29 @@ export function Inventory() {
   );
   const deadBox =
     league.data?.rows?.find((row) => row.trainer_id === me?.trainer_id)
-      ?.dead_box_number ?? 8;
+      ?.dead_box_number ?? 7;
 
-  // Rivals come from the robbable targets themselves; the names list only
-  // labels them, so a slow or unavailable list never hides a rival.
-  const names = new Map(
-    trainers.data?.map((trainer) => [trainer.id, trainer.display_name]),
-  );
-  const candidateTrainers = [
-    ...new Set(
-      q.data?.targets
-        .filter(
-          (target) =>
-            target.visibility === "public_team_lock" &&
-            !target.pokemon.status_flags?.includes("robado") &&
-            !target.pokemon.status_flags?.includes("blindado"),
-        )
-        .map((target) => target.trainer_id),
-    ),
-  ].map((id) => ({ id, display_name: names.get(id) ?? "Entrenador" }));
-  const selectedTrainer = candidateTrainers.find(
-    (trainer) => trainer.id === robberyTrainer,
+  const selectedTrainer = board.data?.trainers.find(
+    (trainer) => trainer.trainer_id === robberyTrainer,
   );
   const targets: PokemonTarget[] =
-    q.data?.targets.filter((target) => {
-      if (purchase?.item_code === "robar_pokemon") {
-        return (
-          target.visibility === "public_team_lock" &&
-          target.trainer_id === robberyTrainer &&
-          !target.pokemon.status_flags?.includes("robado") &&
-          !target.pokemon.status_flags?.includes("blindado")
-        );
-      }
-      if (target.visibility !== "own") return false;
-      if (purchase?.item_code === "revivir_pokemon")
-        return isDead(target, deadBox);
-      if (purchase?.item_code === "blindar_pokemon")
-        return !isDead(target, deadBox) && target.can_shield;
-      if (purchase?.item_code === "robbery_shield_voucher")
-        return target.can_shield;
-      return false;
-    }) || [];
+    purchase?.item_code === "robar_pokemon"
+      ? (selectedTrainer?.targets ?? []).map((target) => ({
+          ...target,
+          trainer_id: selectedTrainer!.trainer_id,
+          visibility: "rival_save" as const,
+          can_shield: false,
+        }))
+      : (q.data?.targets ?? []).filter((target) => {
+          if (target.visibility !== "own") return false;
+          if (purchase?.item_code === "revivir_pokemon")
+            return isDead(target, deadBox);
+          if (purchase?.item_code === "blindar_pokemon")
+            return !isDead(target, deadBox) && target.can_shield;
+          if (purchase?.item_code === "robbery_shield_voucher")
+            return target.can_shield;
+          return false;
+        });
   const usesPokemonSelector = pokemonActions.includes(
     purchase?.item_code || "",
   );
@@ -435,9 +431,28 @@ export function Inventory() {
                 {item.status === "pending" &&
                   (transfer ? (
                     <p className="muted">Se entrega con el Launcher.</p>
+                  ) : item.item_code === "revivir_pokemon" &&
+                    physicalItem(item.item_code) ? (
+                    insideLauncher() ? (
+                      launcherRevives() ? (
+                        <Link className="button primary" to={revivePath}>
+                          Revivir Pokémon
+                        </Link>
+                      ) : (
+                        <p className="muted">
+                          Actualiza PokeApp Launcher a la versión 0.26.13 o
+                          posterior para usar este comodín.
+                        </p>
+                      )
+                    ) : (
+                      <p className="muted">
+                        Se usa desde tu inventario en PokeApp Launcher, cuando
+                        quieras. Queda guardado hasta entonces.
+                      </p>
+                    )
                   ) : physicalItem(item.item_code) && !robbery ? (
                     <p className="muted">
-                      Aún no se puede aplicar. No se ha consumido.
+                      Ahora mismo no se puede aplicar. No se ha consumido.
                     </p>
                   ) : pokemonActions.includes(item.item_code) ? (
                     <button
@@ -484,6 +499,10 @@ export function Inventory() {
                 {transferLabels[transfer.status] ??
                   "Estado del robo no disponible"}
               </Tag>
+              {transfer.status === "CANCELLED" &&
+                cancelledReason(transfer.reason) && (
+                  <p className="muted">{cancelledReason(transfer.reason)}</p>
+                )}
               {transfer.obligation && (
                 <p>
                   {obligationLabels[transfer.obligation] ??
@@ -518,7 +537,10 @@ export function Inventory() {
 
       {purchase?.item_code === "robar_pokemon" && !robberyTrainer && (
         <TrainerPickerModal
-          trainers={candidateTrainers}
+          trainers={board.data?.trainers ?? []}
+          round={board.data?.round}
+          ownSave={board.data?.own_official_save !== false}
+          loading={board.isPending}
           onClose={() => {
             if (!cmd.pending && !cmd.uncertain) setPurchase(null);
           }}
@@ -558,7 +580,7 @@ export function Inventory() {
               purchase.item_code === "revivir_pokemon"
                 ? "No hay Pokémon muertos disponibles para revivir."
                 : purchase.item_code === "robar_pokemon"
-                  ? "Ese entrenador no tiene Pokémon públicos disponibles para robar."
+                  ? "Ese entrenador no tiene Pokémon disponibles para robar."
                   : "No hay Pokémon vivos elegibles para blindar."
             }
           />
@@ -569,10 +591,16 @@ export function Inventory() {
 
 function TrainerPickerModal({
   trainers,
+  round,
+  ownSave,
+  loading,
   onClose,
   onSelect,
 }: {
-  trainers: { id: string; display_name: string }[];
+  trainers: Model<"RobberyBoardResponse">["trainers"];
+  round?: number;
+  ownSave: boolean;
+  loading: boolean;
   onClose: () => void;
   onSelect: (trainerId: string) => void;
 }) {
@@ -595,22 +623,39 @@ function TrainerPickerModal({
             ×
           </button>
         </div>
-        <p>Después elegirás un Pokémon público de su equipo oficial.</p>
-        <div className="trainer-selector-grid">
-          {trainers.map((trainer) => (
-            <button
-              type="button"
-              className="trainer-selector-card"
-              key={trainer.id}
-              onClick={() => onSelect(trainer.id)}
-            >
-              <TrainerPhoto name={trainer.display_name} />
-              <span>{trainer.display_name}</span>
-            </button>
-          ))}
-        </div>
-        {!trainers.length && (
-          <Empty>No hay rivales con un Pokémon público disponible.</Empty>
+        <p>
+          Después elegirás uno de sus Pokémon de su última partida oficial.
+          {round != null && ` Ronda de robos ${round}.`}
+        </p>
+        {!ownSave && (
+          <p className="muted">
+            Tu partida de la Liga todavía no está disponible. Sincronízala con
+            el Launcher.
+          </p>
+        )}
+        {loading ? (
+          <Loading />
+        ) : (
+          <div className="trainer-selector-grid">
+            {trainers.map((trainer) => (
+              <button
+                type="button"
+                className="trainer-selector-card"
+                key={trainer.trainer_id}
+                disabled={trainer.status !== "available" || !ownSave}
+                onClick={() => onSelect(trainer.trainer_id)}
+              >
+                <TrainerPhoto name={trainer.display_name} />
+                <span>{trainer.display_name}</span>
+                {trainer.message && (
+                  <small className="muted">{trainer.message}</small>
+                )}
+              </button>
+            ))}
+          </div>
+        )}
+        {!loading && !trainers.length && (
+          <Empty>No hay más entrenadores en esta temporada.</Empty>
         )}
       </div>
     </div>

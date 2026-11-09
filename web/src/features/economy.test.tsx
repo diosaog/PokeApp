@@ -28,6 +28,12 @@ const mocks = vi.hoisted(() => ({
   uncertain: false,
   trainers: [{ id: "owner", display_name: "Antonio" }] as
     Model<"TrainerRead">[] | undefined,
+  board: {
+    round: 1,
+    has_voucher: true,
+    own_official_save: true,
+    trainers: [],
+  } as Model<"RobberyBoardResponse">,
 }));
 vi.mock("../state", () => ({
   useApp: () => ({ season: "season", me: { trainer_id: "owner" } }),
@@ -40,7 +46,9 @@ vi.mock("../state", () => ({
           ? mocks.trainers
           : path.endsWith("/shop")
             ? mocks.shop
-            : path.endsWith("/item-uses")
+            : path.endsWith("/robbery/board")
+              ? mocks.board
+              : path.endsWith("/item-uses")
               ? mocks.itemUses
               : path.endsWith("/transfers")
                 ? mocks.transfers
@@ -85,6 +93,12 @@ beforeEach(() => {
   mocks.itemUses = { items: [], physical_application_enabled: false };
   mocks.transfers = { items: [], transfer_enabled: false };
   mocks.trainers = [{ id: "owner", display_name: "Antonio" }];
+  mocks.board = {
+    round: 1,
+    has_voucher: true,
+    own_official_save: true,
+    trainers: [],
+  };
   mocks.execute.mockResolvedValue(true);
   mocks.shop = {
     balance: "9007199254740993",
@@ -343,7 +357,7 @@ const leg = (
 it("keeps robbery unavailable unless the backend enables this account", () => {
   mocks.inventory = { purchases: [robbery], targets: [], physical_items: true };
   render(<Inventory />);
-  expect(screen.getByText(/Aún no se puede aplicar/)).toBeInTheDocument();
+  expect(screen.getByText(/Ahora mismo no se puede aplicar/)).toBeInTheDocument();
   expect(
     screen.queryByRole("button", { name: "Canjear" }),
   ).not.toBeInTheDocument();
@@ -351,37 +365,91 @@ it("keeps robbery unavailable unless the backend enables this account", () => {
 
 it("requests an enabled robbery through the paired transfer route only", async () => {
   mocks.transfers = { items: [], transfer_enabled: true };
-  mocks.trainers = [
-    { id: "rival", display_name: "Rival" },
-  ] as Model<"TrainerRead">[];
-  mocks.inventory = {
-    physical_items: true,
-    purchases: [robbery],
-    targets: [
+  mocks.board = {
+    round: 2,
+    has_voucher: true,
+    own_official_save: true,
+    trainers: [
       {
-        pokemon_entity_id: "rival",
         trainer_id: "rival",
-        visibility: "public_team_lock",
-        can_shield: false,
-        location: "Equipo rival",
-        pokemon: { species: "Eevee", nickname: "", item: "", is_shiny: false },
+        display_name: "Rival",
+        status: "available",
+        message: null,
+        targets: [
+          {
+            pokemon_entity_id: "free",
+            location: "Caja 1 · 1",
+            available_at: "2026-10-01T10:00:00Z",
+            blocked: null,
+            pokemon: { species: "Eevee", nickname: "", item: "", is_shiny: false },
+          },
+          {
+            pokemon_entity_id: "shielded",
+            location: "Caja 1 · 2",
+            available_at: "2026-10-01T10:00:00Z",
+            blocked: "shielded",
+            message: "Este Pokémon está blindado.",
+            pokemon: { species: "Mew", nickname: "", item: "", is_shiny: false },
+          },
+        ],
+      },
+      {
+        trainer_id: "done",
+        display_name: "Robado",
+        status: "already_robbed",
+        message: "Este entrenador ya ha sido robado durante la ronda actual.",
+        targets: [],
       },
     ],
   };
+  mocks.inventory = { physical_items: true, purchases: [robbery], targets: [] };
   render(<Inventory />);
   fireEvent.click(screen.getByRole("button", { name: "Canjear" }));
+  expect(screen.getByText(/Ronda de robos 2/)).toBeInTheDocument();
+  expect(screen.getByRole("button", { name: /Robado/ })).toBeDisabled();
+  expect(
+    screen.getByText("Este entrenador ya ha sido robado durante la ronda actual."),
+  ).toBeInTheDocument();
   fireEvent.click(screen.getByRole("button", { name: /Rival/ }));
+  expect(screen.getByRole("button", { name: /Mew/ })).toBeDisabled();
+  expect(screen.getByText("Este Pokémon está blindado.")).toBeInTheDocument();
   fireEvent.click(screen.getByRole("button", { name: /Eevee/ }));
   fireEvent.click(screen.getByRole("button", { name: "Sí, robar" }));
   await waitFor(() =>
     expect(mocks.execute).toHaveBeenCalledWith(
       "/v1/seasons/season/shop/purchases/steal/transfer",
-      { pokemon_entity_id: "rival" },
+      { pokemon_entity_id: "free" },
     ),
   );
   expect(mocks.paths).toHaveBeenCalledWith(
     expect.arrayContaining(["/v1/seasons/season/transfers"]),
   );
+});
+
+it("keeps a bought Revivir until the trainer uses it in the Launcher", () => {
+  mocks.inventory = {
+    physical_items: true,
+    targets: [],
+    purchases: [
+      {
+        id: "revive",
+        shop_item_id: "revivir",
+        item_name: "Revivir Pokémon",
+        item_code: "revivir_pokemon",
+        acquisition_type: "paid",
+        status: "pending",
+        total_price: 12,
+        purchased_at: "2026-11-09T10:00:00Z",
+        physical_state: "AVAILABLE",
+      },
+    ],
+  };
+  render(<Inventory />);
+  expect(screen.getByText("Objeto disponible")).toBeInTheDocument();
+  expect(screen.getByText(/cuando\s+quieras/)).toBeInTheDocument();
+  expect(
+    screen.queryByRole("button", { name: "Canjear" }),
+  ).not.toBeInTheDocument();
 });
 
 it.each(Object.entries(transferLabels))(
@@ -401,9 +469,10 @@ it.each(Object.entries(transferLabels))(
     expect(screen.queryAllByText("Robo completado").length > 0).toBe(
       status === "COMMITTED",
     );
-    expect(
-      screen.queryByRole("button", { name: "Canjear" }),
-    ).not.toBeInTheDocument();
+    // A cancelled attempt leaves the comodín free for another one.
+    expect(screen.queryByRole("button", { name: "Canjear" }) !== null).toBe(
+      status === "CANCELLED",
+    );
     expect(
       screen.queryByRole("button", { name: "Cancelar robo" }) !== null,
     ).toBe(
@@ -609,7 +678,7 @@ it("keeps direct revive redemption with an API that predates the Launcher flow",
         trainer_id: "owner",
         visibility: "own",
         can_shield: false,
-        location: "Caja 8 · 1",
+        location: "Caja 7 · 1",
         pokemon: {
           species: "Pikachu",
           nickname: "",
@@ -640,41 +709,6 @@ it("keeps direct revive redemption with an API that predates the Launcher flow",
       "/v1/seasons/season/shop/purchases/revive/redemptions",
       { pokemon_entity_id: "fallen" },
     ),
-  );
-});
-
-it("keeps direct robbery redemption with an API that predates the Launcher flow", async () => {
-  mocks.trainers = [
-    { id: "rival", display_name: "Rival" },
-  ] as Model<"TrainerRead">[];
-  const { physical_state: _unused, ...plain } = robbery;
-  mocks.inventory = legacy({
-    purchases: [plain],
-    targets: [
-      {
-        pokemon_entity_id: "rival",
-        trainer_id: "rival",
-        visibility: "public_team_lock",
-        can_shield: false,
-        location: "Equipo rival",
-        pokemon: { species: "Eevee", nickname: "", item: "", is_shiny: false },
-      },
-    ],
-  });
-  render(<Inventory />);
-  fireEvent.click(screen.getByRole("button", { name: "Canjear" }));
-  fireEvent.click(screen.getByRole("button", { name: /Rival/ }));
-  fireEvent.click(screen.getByRole("button", { name: /Eevee/ }));
-  fireEvent.click(screen.getByRole("button", { name: "Sí, robar" }));
-  await waitFor(() =>
-    expect(mocks.execute).toHaveBeenCalledWith(
-      "/v1/seasons/season/shop/purchases/steal/redemptions",
-      { pokemon_entity_id: "rival" },
-    ),
-  );
-  expect(mocks.execute).not.toHaveBeenCalledWith(
-    expect.stringContaining("/transfer"),
-    expect.anything(),
   );
 });
 

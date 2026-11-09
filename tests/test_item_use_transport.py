@@ -37,8 +37,14 @@ class TransportTests(unittest.TestCase):
 
     def test_off_default_and_exact_allowlist(self):
         self.assertFalse(APIConfig.from_env({}).item_verification_transport_enabled)
+        # Open to every participant unless an operational list is configured;
+        # a malformed list still fails at start.
+        APIConfig(item_verification_transport_enabled=True)
         with self.assertRaises(ValueError):
-            APIConfig(item_verification_transport_enabled=True)
+            APIConfig(
+                item_verification_transport_enabled=True,
+                item_verification_trainers=("not-a-uuid",),
+            )
         with self.assertRaises(ItemUseRejectedError):
             self.transport.status(
                 self.scope[0], self.scope[1], str(uuid4()), self.scope[3]

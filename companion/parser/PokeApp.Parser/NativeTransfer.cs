@@ -6,13 +6,14 @@ namespace PokeApp.Parser;
 
 // Byte-only paired plan. Same title only (owner rule: cross-title robbery is
 // prohibited). Source: stored PKM in boxes 1..7 or a party member; destination:
-// first free slot of boxes 1..7. Party removal uses PKHeX's own compaction and
-// never leaves an empty party.
+// first free slot of boxes 1..6, never the official dead box (Caja 7): a stolen
+// Pokémon stored there would count as a death. Party removal uses PKHeX's own
+// compaction and never leaves an empty party.
 public static class NativeTransfer
 {
     private static (int Box, int Slot) Free(SaveFile save)
     {
-        for (int b=0;b<7;b++) for (int s=0;s<30;s++)
+        for (int b=0;b<6;b++) for (int s=0;s<30;s++)
             if (save.GetBoxSlotAtIndex(b,s).Species==0 && !save.IsBoxSlotOverwriteProtected(b,s)) return (b,s);
         throw new Rejection("UNSAFE_TARGET");
     }
@@ -102,7 +103,9 @@ public static class NativeTransfer
         if(party) clone.DeletePartySlot(slot); // PKHeX compaction: later members move up, count - 1
         else if(remove) clone.WriteBoxSlot(clone.BlankPKM,clone.Data.AsSpan(offset,232));
         else pkm.CopyTo(clone.Data,offset); // preserve OT, IVs, moves, ability and all PKM bytes
-        byte[] expected=clone.Write(),output=verify?Bytes(root,"output_base64"):expected;
+        byte[] expected=clone.Write();
+        NativeTraining.NormalizeGeneratedSignature(expected,save);
+        byte[] output=verify?Bytes(root,"output_base64"):expected;
         if(original.AsSpan().SequenceEqual(output)||!output.AsSpan().SequenceEqual(expected)) throw new Rejection("UNEXPECTED_DIFF");
         var result=Validate(output);
         if(TrainerKey(result)!=TrainerKey(save)||result.Version!=save.Version) throw new Rejection("VERIFICATION_FAILED");

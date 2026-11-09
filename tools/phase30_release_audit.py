@@ -41,9 +41,9 @@ MIGRATIONS = sorted((ROOT / "supabase/v2/migrations").glob("*.sql"))
 # announcement per confirmation) were published after owner approval as
 # 20261104232636 and 20261104232638. 084 (Administracion > Avisos, additive
 # and informative) was published as 20261108192609 after a fresh backup and
-# rehearsal. No migration is pending; a future release must open its window.
+# rehearsal. 085 (Robar y Revivir para toda la Liga) is the open window.
 DEPLOYED = [m for m in MIGRATIONS if int(m.name[:3]) <= 84]
-PENDING: list[Path] = []
+PENDING: list[Path] = [m for m in MIGRATIONS if m.name.startswith("085_")]
 WINDOW = f"{PENDING[0].name[:3]}-{PENDING[-1].name[:3]}" if PENDING else "none"
 SCHEMAS = "('public','v1_shadow')"
 

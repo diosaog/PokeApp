@@ -97,8 +97,6 @@ class ItemBridgeTests(unittest.TestCase):
         )
 
     def test_production_engine_and_unconfirmed_intents_are_denied(self):
-        with self.assertRaisesRegex(WriteSafetyError, "ITEM_APPLICATION_DISABLED"):
-            self.create(enabled=False)
         for value in (False, None, "true", 1):
             with self.assertRaises(WriteSafetyError):
                 self.bridge.apply(self.a["id"], closed_emulator_confirmed=value)

@@ -22,7 +22,7 @@ class ApiPortableImportsTest(unittest.TestCase):
         # 075 death history (GET/PUT) and 076 final tiebreak; production's
         # OpenAPI lists 128 paths (2026-11-03: +2 Showdown exports). 079 adds
         # League readiness, the J1 preparation and the own death history: 131.
-        self.assertIn("136 routes", result.stdout)  # 080: enrollment GET/POST share one path; 084: four notices routes.
+        self.assertIn("139 routes", result.stdout)  # 080: enrollment GET/POST share one path; 084: four notices routes; 085: board and revive.
 
 
 if __name__ == "__main__":

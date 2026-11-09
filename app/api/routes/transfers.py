@@ -1,4 +1,4 @@
-"""Paired robbery routes. Disabled (503) unless the engineering service is wired.
+"""Paired robbery routes. Disabled (503) unless the transfer service is wired.
 
 Nothing here issues a proof, completes a leg or consumes an entitlement: the
 restricted verifier alone does that. Trainer scope is the authenticated principal.
@@ -15,6 +15,7 @@ from app.api.errors import api_error
 from app.api.models import AuthenticatedPrincipal
 from app.api.routes.purchases import IdempotencyHeader
 from app.api.schemas import (
+    RobberyBoardResponse,
     TransferLauncherListResponse,
     TransferLegBody,
     TransferLegResponse,
@@ -23,6 +24,7 @@ from app.api.schemas import (
     TransferRequestResponse,
 )
 from app.api.security import require_enabled_principal
+from app.application.frontend_reads import FrontendReads
 from app.application.item_use_verification import VerificationRejected
 from app.repositories.errors import PersistenceError, TransferRejectedError
 from app.save_parser.native_sizes import NATIVE_SIZES
@@ -35,14 +37,20 @@ MESSAGES = {
     "TRANSFER_FORBIDDEN": "Los robos entre guardados no están habilitados para tu cuenta.",
     "TRANSFER_PEER_UNAVAILABLE": "Ese entrenador todavía no puede participar en robos entre guardados.",
     "TRANSFER_TARGET_INVALID": "Ese Pokémon no se puede robar.",
-    "TRANSFER_NATIVE_SCOPE_UNQUALIFIED": "Solo se pueden robar Pokémon del equipo o de las cajas 1–7.",
+    "TRANSFER_NATIVE_SCOPE_UNQUALIFIED": "Solo se pueden robar Pokémon vivos del equipo o de las cajas de la 1 a la 6.",
     "TRANSFER_CROSS_TITLE_FORBIDDEN": "Solo se puede robar a un entrenador que juega el mismo título.",
     "TRANSFER_NOT_ADJUDICATED": "PokeApp todavía no ha decidido este robo.",
     "TRANSFER_ADJUDICATED": "El robo ya está decidido: no se puede cancelar ni rechazar.",
     "TRANSFER_LEG_SETTLED": "Tu parte ya está completada.",
     "TRANSFER_CANDIDATE_CONFLICT": "Ya se está revisando tu partida actual.",
-    "STEAL_TARGET_SHIELDED": "Ese Pokémon está blindado o ya ha sido robado.",
-    "STEAL_VICTIM_ALREADY_ROBBED": "Ese entrenador ya ha sido robado en este ciclo.",
+    "TRANSFER_CONFLICT": "Este comodín ya está en un robo en curso.",
+    "STEAL_SELF_TARGET": "No puedes robarte a ti mismo.",
+    "STEAL_TARGET_SHIELDED": "Este Pokémon está blindado.",
+    "STEAL_TARGET_RECENT_CAPTURE": "Este Pokémon todavía no lleva 24 horas capturado.",
+    "STEAL_TARGET_LAST_PARTY_MEMBER": "No se puede robar el último Pokémon del equipo de un entrenador.",
+    "STEAL_VICTIM_ALREADY_ROBBED": "Este entrenador ya ha sido robado durante la ronda actual.",
+    "STEAL_VICTIM_NO_SAVE": "La partida del entrenador objetivo todavía no está disponible.",
+    "STEAL_THIEF_NO_SAVE": "Tu partida de la Liga todavía no está disponible. Sincronízala con el Launcher.",
     "TRANSFER_RESERVED": "Uno de los entrenadores ya tiene una operación en curso.",
     "PURCHASE_NOT_REDEEMABLE": "Este objeto ya no está disponible para canjear.",
     "SAVE_CONTEXT_CHANGED": "Los guardados han cambiado. Sincroniza y vuelve a intentarlo.",
@@ -93,6 +101,77 @@ def _validated(model, value):
         raise api_error(
             503, "TRANSFER_UNAVAILABLE", "La operación no coincide."
         ) from None
+
+
+BOARD_MESSAGES = {
+    "available": None,
+    "already_robbed": "Este entrenador ya ha sido robado durante la ronda actual.",
+    "no_save": "La partida del entrenador objetivo todavía no está disponible.",
+    "other_game": "Solo se puede robar a un entrenador que juega el mismo título.",
+    "reserved": "Este entrenador tiene otra operación en curso. Vuelve a intentarlo más tarde.",
+    "no_targets": "Ahora mismo no tiene ningún Pokémon que se pueda robar.",
+}
+BLOCKED_MESSAGES = {
+    "shielded": "Este Pokémon está blindado.",
+    "recent_capture": "Este Pokémon todavía no lleva 24 horas capturado.",
+    "last_party_member": "Es el último Pokémon de su equipo.",
+}
+
+
+def _board(season_id: str, trainer_id: str, container: ApiContainer):
+    """The server's rotation and rules, with public facts of each candidate.
+
+    Rival boxes leave the server only for the trainer holding a Robar comodín,
+    and only through the public field allowlist: never IVs, abilities or evidence.
+    """
+    service = _service(container)
+    if container.frontend_read_repository is None:
+        raise api_error(503, "TRANSFER_UNAVAILABLE", "No se puede comprobar el robo ahora.")
+    board = _execute(service.board, season_id, trainer_id)
+    reads = FrontendReads(container.frontend_read_repository)
+    for trainer in board["trainers"]:
+        trainer["message"] = BOARD_MESSAGES.get(trainer["status"])
+        if not trainer["targets"]:
+            continue
+        public = {
+            slot.location: slot.pokemon.model_dump()
+            for slot in reads._pc(season_id, trainer["trainer_id"], public=True).pokemon
+        }
+        targets = []
+        for target in trainer["targets"]:
+            location = (
+                f"Equipo · {target['slot_number']}"
+                if target["source"] == "party"
+                else f"Caja {target['box_number']} · {target['slot_number']}"
+            )
+            if location in public:
+                targets.append(
+                    {
+                        "pokemon_entity_id": target["pokemon_entity_id"],
+                        "location": location,
+                        "available_at": target["available_at"],
+                        "blocked": target["blocked"],
+                        "message": BLOCKED_MESSAGES.get(target["blocked"]),
+                        "pokemon": public[location],
+                    }
+                )
+        trainer["targets"] = targets
+    return board
+
+
+@router.get(
+    "/v1/seasons/{season_id}/robbery/board",
+    response_model=RobberyBoardResponse,
+)
+def robbery_board(
+    season_id: UUID,
+    principal: AuthenticatedPrincipal = Reader,
+    container: ApiContainer = ContainerReader,
+):
+    return _validated(
+        RobberyBoardResponse,
+        _board(str(season_id), principal.trainer_id, container),
+    )
 
 
 @router.post(

@@ -1,9 +1,7 @@
-"""Durable local write protocol; no production mutation kinds are enabled.
+"""Durable local write protocol; only the kinds listed below reach a real save.
 
-Only an explicit in-process engineering capability admits the isolated fixture
-mutation. Neither an API/renderer JSON object nor a database right grants it.
+Neither an API/renderer JSON object nor a database right grants a mutation.
 This does not certify a hostile same-user filesystem or arbitrary emulator.
-The no-replace handoff has a temporary missing pathname and remains fixture-only.
 """
 
 from __future__ import annotations
@@ -33,7 +31,10 @@ GAMES = frozenset(("X", "Y", "OR", "AS", "SN", "MN", "US", "UM"))
 # verified backup first, emulator closed, exact source bytes, native re-read;
 # a robbery leg also needs the server's paired begin (PairedApplyPermit) and the
 # hosted verifier's proofs. Which trainers may run them is decided server-side.
-# test_marking and revive never pass this switch (revive has no product flow).
+# test_marking never passes this switch.
+# revive (owner decision 2026-11-09, Launcher 0.26.13): applied only by its
+# coordinated flow (app/launcher/revive.py) after the server's claim; the comodín
+# is consumed by the server once the hosted verifier has proved the result.
 # 072 (owner decision 2026-10-29): deliver_item puts one paid Shop object in the
 # bag; like a robbery leg it applies only with the in-process permit of the
 # delivery flow, after the server reserved that purchase (app/launcher/item_delivery.py).
@@ -41,15 +42,15 @@ GAMES = frozenset(("X", "Y", "OR", "AS", "SN", "MN", "US", "UM"))
 # 0.26.12 (2026-11-05). Free and unlimited like add_item, through the same
 # engine: emulator closed, exact source, verified backup, native re-read.
 PRODUCTION_MUTATIONS: frozenset[str] = frozenset(
-    {"add_item", "deliver_item", "transfer_remove", "transfer_insert", "virtual_training", "max_friendship"}
+    {"add_item", "deliver_item", "transfer_remove", "transfer_insert", "virtual_training", "max_friendship", "revive"}
 )
 PUBLIC_READY_MUTATIONS: frozenset[str] = frozenset(
-    {"add_item", "deliver_item", "transfer_remove", "transfer_insert", "virtual_training", "max_friendship"}
+    {"add_item", "deliver_item", "transfer_remove", "transfer_insert", "virtual_training", "max_friendship", "revive"}
 )
 # Applied only by their coordinated flow (PairedApplyPermit), never by the
 # generic «confirm» of a prepared change.
 COORDINATED_MUTATIONS: frozenset[str] = frozenset(
-    {"deliver_item", "transfer_remove", "transfer_insert", "virtual_training"}
+    {"deliver_item", "transfer_remove", "transfer_insert", "virtual_training", "revive"}
 )
 PENDING = ("PREPARED", "AWAITING_CONFIRMATION", "RECOVERY_REQUIRED")
 # Owner decision 2026-10-26: one ordinary daily restore point per save, kept 30 days.

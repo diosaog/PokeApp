@@ -15,6 +15,7 @@ from app.api.schemas import (
     ItemUseListResponse,
     ItemUsePrepareBody,
     ItemUseResponse,
+    ReviveBoardResponse,
 )
 from app.api.security import require_enabled_principal
 from app.application.item_use import prepare_item_use
@@ -35,12 +36,30 @@ def _repo(container: ApiContainer):
     return container.item_use_repository
 
 
+MESSAGES = {
+    "PURCHASE_NOT_REDEEMABLE": "No tienes comodines Revivir disponibles.",
+    "PURCHASE_NOT_FOUND": "No tienes comodines Revivir disponibles.",
+    "POKEMON_NOT_REVIVABLE": "Ese Pokémon no está en tu Caja de Muertos.",
+    "POKEMON_TARGET_INVALID": "Ese Pokémon ya no está disponible.",
+    "POKEMON_NOT_OWNED": "Ese Pokémon no es tuyo.",
+    "POKEMON_IDENTITY_AMBIGUOUS": "PokeApp no puede identificar ese Pokémon con seguridad en tu partida.",
+    "SAVE_CONTEXT_CHANGED": "La partida ha cambiado desde que seleccionaste este Pokémon.",
+    "ITEM_USE_CONFLICT": "Ese Pokémon ya tiene una operación de Revivir en curso.",
+    "ITEM_USE_IN_PROGRESS": "Este comodín tiene una operación en curso. Espera a que termine o vuelve a abrir el Launcher para recuperarla.",
+    "ITEM_USE_EXPIRED": "La autorización ha caducado. El comodín no se ha gastado.",
+    "TRANSFER_RECONCILIATION_REQUIRED": "Tienes un robo pendiente de entregar. Complétalo antes de usar este comodín.",
+    "PARTICIPANT_INACTIVE": "No participas en esta temporada.",
+}
+
+
 def _execute(operation, *args):
     try:
         return operation(*args)
     except ItemUseRejectedError as exc:
         raise api_error(
-            exc.status, exc.code, "La operación de objeto no puede continuar."
+            exc.status,
+            exc.code,
+            MESSAGES.get(exc.code, "La operación de objeto no puede continuar."),
         ) from None
     except PersistenceError:
         raise api_error(
@@ -70,6 +89,49 @@ def prepare(
             save_file_id=str(payload.save_file_id),
             save_sha256=payload.save_sha256,
             idempotency_key=idempotency_key,
+            operation_id=payload.operation_id,
+        )
+    )
+    return _receipt(result, season_id, principal.trainer_id)
+
+
+@router.get(
+    "/v1/launcher/seasons/{season_id}/revive",
+    response_model=ReviveBoardResponse,
+)
+def revive_board(
+    season_id: UUID,
+    principal: AuthenticatedPrincipal = Reader,
+    container: ApiContainer = ContainerReader,
+):
+    """Own revive comodines, accepted save and dead Pokémon, for the Launcher."""
+    return _execute(
+        lambda: _repo(container).revive_board(str(season_id), principal.trainer_id)
+    )
+
+
+@router.put(
+    "/v1/launcher/seasons/{season_id}/revive/{purchase_id}",
+    response_model=ItemUseResponse,
+)
+def launcher_prepare_revive(
+    season_id: UUID,
+    purchase_id: UUID,
+    payload: ItemUsePrepareBody,
+    principal: AuthenticatedPrincipal = Reader,
+    container: ApiContainer = ContainerReader,
+):
+    """Launcher transport (PUT, no custom headers): operation_id is the key."""
+    result = _execute(
+        lambda: prepare_item_use(
+            _repo(container),
+            season_id=str(season_id),
+            trainer_id=principal.trainer_id,
+            purchase_id=str(purchase_id),
+            pokemon_entity_id=str(payload.pokemon_entity_id),
+            save_file_id=str(payload.save_file_id),
+            save_sha256=payload.save_sha256,
+            idempotency_key=payload.operation_id,
             operation_id=payload.operation_id,
         )
     )

@@ -607,7 +607,7 @@ class FrontendReads:
             uses = {
                 a['purchase_id']: a for a in self.rows(
                     'item_use_authorizations', 'purchase_id,status,expires_at',
-                    season_id=sid, trainer_id=tid,
+                    season_id=sid, trainer_id=tid, superseded_at=None,
                 )
             }
         from app.domain.shop_item_uses import BAG_ITEMS, describe_use

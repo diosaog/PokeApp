@@ -302,22 +302,23 @@ class LocalWriteController:
         if change.get("kind") == "revive":
             if (
                 change.get("location") != "box"
-                or change.get("box_index") != 7
                 or any(
                     type(change.get(k)) is not int
                     for k in (
+                        "box_index",
                         "slot_index",
                         "destination_box_index",
                         "destination_slot_index",
                     )
                 )
+                or not 1 <= change["box_index"] < 32
                 or not 0 <= change["slot_index"] < 30
-                or not 0 <= change["destination_box_index"] < 7
+                or not 0 <= change["destination_box_index"] < min(change["box_index"], 7)
                 or not 0 <= change["destination_slot_index"] < 30
             ):
                 raise WriteSafetyError("INVALID_WRITE_INTENT")
             return (
-                f"Revivir: mover el Pokémon de la Caja 8, posición {change['slot_index'] + 1}, "
+                f"Revivir: mover el Pokémon de la Caja {change['box_index'] + 1}, posición {change['slot_index'] + 1}, "
                 f"a la Caja {change['destination_box_index'] + 1}, posición "
                 f"{change['destination_slot_index'] + 1}. Se conservan sus atributos y una copia original. "
                 "El canje requiere además verificación del servidor."

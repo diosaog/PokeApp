@@ -90,7 +90,7 @@ function fingerprint(kind, target, state) {
     return [state.selected_save, target, state.write?.description];
   if (kind === "quick-item")
     return [state.selected_save, target, state.receipt_id ?? null];
-  if (kind === "friendship")
+  if (kind === "friendship" || kind === "revive")
     return [state.selected_save, target, state.receipt_id ?? null];
   if (kind === "delivery")
     return [state.selected_save, target, state.receipt_id ?? null];
@@ -131,11 +131,43 @@ const friendshipFor = (state, target) => {
     (m) => String(m.slot_index) === slot && m.pokemon_sha256 === hash,
   );
 };
+// «Revivir Pokémon»: target is "<purchase>:<pokemon entity>".
+const reviveFor = (state, target) => {
+  const [purchaseId, entityId] = String(target).split(":");
+  const view = state.revive;
+  if (!view?.purchases?.includes(purchaseId)) return undefined;
+  return view.candidates?.find((c) => c.pokemon_entity_id === entityId);
+};
 // The dialog text for one action, or an error when it is not available now.
 function describe(kind, target, state) {
   if (kind === "training")
     return training.summary(state, training.parse(target));
   const save = state.selected_save || "";
+  if (kind === "revive") {
+    const member = reviveFor(state, target);
+    if (!state.selected_save) throw new Error("Selecciona tu partida primero.");
+    if (!state.revive?.application_enabled)
+      throw new Error("Este Launcher no puede aplicar Revivir. Actualízalo.");
+    if (!member)
+      throw new Error(
+        "Vuelve a leer la Caja de Muertos: ese Pokémon o el comodín ya no están disponibles.",
+      );
+    if (state.write?.busy || state.write?.status === "RECOVERY_REQUIRED")
+      throw new Error(
+        "Hay otra operación en tu partida. Espera a que termine o revísala en «Cambios en tu partida».",
+      );
+    const species = training.speciesName({ species: member.species });
+    const label =
+      member.nickname && member.nickname !== species
+        ? `${member.nickname} (${species})`
+        : species;
+    return {
+      title: "Revivir Pokémon",
+      message: `${label} · Nv. ${member.level} · Caja ${state.revive.dead_box_number}, posición ${member.slot_number}`,
+      detail: `Volverá a una de tus cajas para poder usarlo de nuevo. Su muerte sigue registrada y la penalización NET no desaparece. El comodín solo se gasta cuando PokeApp verifique el resultado. Antes de cambiar nada se guarda y verifica una copia completa de tu partida.${CLOSED}`,
+      go: "Revivir",
+    };
+  }
   if (kind === "friendship") {
     const member = friendshipFor(state, target);
     if (!state.selected_save) throw new Error("Selecciona tu partida primero.");

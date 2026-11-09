@@ -33,24 +33,14 @@ class APIConfig:
     credential_keyring: object | None = field(default=None, repr=False)
 
     def __post_init__(self):
-        if self.item_verification_transport_enabled:
-            from uuid import UUID
+        # Owner decision 2026-11-09: both flows are open to every participant and
+        # authorized by SQL. A list stays possible as an operational brake only.
+        from uuid import UUID
 
-            if not self.item_verification_trainers or any(
-                str(UUID(t)) != t for t in self.item_verification_trainers
-            ):
-                raise ValueError(
-                    "Restricted verifier acceptance needs exact trainer UUIDs"
-                )
-        if self.transfer_engineering_enabled:
-            from uuid import UUID
-
-            if not self.transfer_engineering_trainers or any(
-                str(UUID(t)) != t for t in self.transfer_engineering_trainers
-            ):
-                raise ValueError(
-                    "Engineering transfers need an exact trainer UUID cohort"
-                )
+        if any(str(UUID(t)) != t for t in self.item_verification_trainers):
+            raise ValueError("Restricted verifier acceptance needs exact trainer UUIDs")
+        if any(str(UUID(t)) != t for t in self.transfer_engineering_trainers):
+            raise ValueError("Engineering transfers need an exact trainer UUID cohort")
         for origin in self.cors_origins:
             parsed = urlsplit(origin)
             local = parsed.hostname in ("localhost", "127.0.0.1", "::1")

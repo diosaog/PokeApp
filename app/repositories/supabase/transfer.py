@@ -1,7 +1,4 @@
-"""Server-side scope must originate from verified identity, never a public DTO.
-
-Only the disabled-by-default engineering transfer service wires this repository.
-"""
+"""Server-side scope must originate from verified identity, never a public DTO."""
 
 from app.repositories.errors import PersistenceError, TransferRejectedError
 
@@ -35,6 +32,11 @@ REJECTIONS = {
     "transfer_leg_settled": 409,
     "transfer_candidate_conflict": 409,
     "transfer_cross_title_forbidden": 409,
+    "steal_self_target": 409,
+    "steal_victim_no_save": 409,
+    "steal_thief_no_save": 409,
+    "steal_target_recent_capture": 409,
+    "steal_target_last_party_member": 409,
 }
 
 
@@ -54,6 +56,12 @@ class TransferRepository:
 
     def reserve(self, request):
         return self._call("api_prepare_transfer", request)
+
+    def board(self, request):
+        board = self._call("api_robbery_board", request)
+        if not isinstance(board, dict):
+            raise PersistenceError("transfer_unavailable")
+        return board
 
     def leg(self, request):
         return self._call("api_transfer_leg", request)

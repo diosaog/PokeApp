@@ -305,8 +305,6 @@ def create_default_container(config: APIConfig | None = None) -> ApiContainer:
         and config.supabase_url
         and config.supabase_service_role_key
     ):
-        # Engineering cohort only; physical application still needs a Launcher
-        # engineering capability that no production build constructs.
         from app.application.transfer_integration import TransferIntegration
         from app.application.transfer_transport import TransferTransport
         from app.repositories.supabase.item_use_transport import PrivateItemUseBlobs

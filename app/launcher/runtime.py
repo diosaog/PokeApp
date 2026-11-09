@@ -86,6 +86,33 @@ FRIENDSHIP_ERRORS = QUICK_ERRORS | {
     "NATIVE_WRITER_FAILURE": "No se pudo leer el equipo de tu partida. Pulsa «Volver a leer el equipo»; si sigue fallando, reinicia el Launcher.",
     "SAVE_CHANGED_DURING_READ": "Tu partida estaba guardándose. Vuelve a leer el equipo en unos segundos.",
 }
+# «Revivir Pokémon» (app/launcher/revive.py): server claim + independent proof.
+REVIVE_COMMANDS = ("revive_refresh", "revive_apply")
+REVIVE_READ_FAILED = "No se pudo leer tu partida. Pulsa «Volver a leer»."
+REVIVE_ERRORS = {
+    "EMULATOR_RUNNING": "Debes cerrar el juego antes de aplicar esta operación.",
+    "NO_SELECTED_WRITE_TARGET": "Selecciona tu partida primero.",
+    "REVIVE_CONTEXT_UNAVAILABLE": "Inicia sesión y espera a que se cargue tu temporada.",
+    "REVIVE_UNAVAILABLE": "Revivir no está disponible ahora mismo. El comodín no se ha gastado.",
+    "SOURCE_HASH_CHANGED": "La partida ha cambiado desde que seleccionaste este Pokémon.",
+    "STALE_SOURCE": "La partida ha cambiado desde que seleccionaste este Pokémon.",
+    "ITEM_APPLICATION_DISABLED": "Este Launcher no puede aplicar Revivir. Actualízalo.",
+    "PRODUCTION_WRITES_DISABLED": "Este Launcher no puede aplicar Revivir. Actualízalo.",
+    "ITEM_AUTHORIZATION_UNAVAILABLE": "Este comodín tiene una operación en otro equipo. Termínala allí.",
+    "ITEM_BINDING_MISMATCH": "Hay una operación de Revivir para otra partida. Elige esa partida en «Cambiar partida».",
+}
+REVIVE_API_ERRORS = {
+    "SAVE_CONTEXT_CHANGED": "La partida ha cambiado desde que seleccionaste este Pokémon.",
+    "PURCHASE_NOT_REDEEMABLE": "No tienes comodines Revivir disponibles.",
+    "PURCHASE_NOT_FOUND": "No tienes comodines Revivir disponibles.",
+    "POKEMON_NOT_REVIVABLE": "Ese Pokémon ya no está en tu Caja de Muertos.",
+    "POKEMON_IDENTITY_AMBIGUOUS": "PokeApp no puede identificar ese Pokémon con seguridad en tu partida.",
+    "ITEM_USE_CONFLICT": "Ese Pokémon ya tiene una operación de Revivir en curso.",
+    "ITEM_USE_IN_PROGRESS": "Este comodín tiene una operación en curso. Vuelve a abrir esta ventana para recuperarla.",
+    "ITEM_USE_EXPIRED": "La autorización ha caducado. El comodín no se ha gastado.",
+    "TRANSFER_RECONCILIATION_REQUIRED": "Tienes un robo pendiente de entregar. Complétalo antes de usar este comodín.",
+    "ITEM_USE_UNAVAILABLE": "La verificación de Revivir no está disponible ahora mismo. El comodín no se ha gastado.",
+}
 # 072: paid Shop objects into the bag (app/launcher/item_delivery.py).
 DELIVERY_COMMANDS = ("deliveries_refresh", "delivery_apply")
 TRAINING_COMMANDS = ("training_list", "training_apply")
@@ -261,6 +288,12 @@ class LauncherRuntime:
             "friendship_error": None,
             "friendship_result": None,
             "friendship_seq": 0,
+            # «Revivir Pokémon»: dead Pokémon read from the save, the last
+            # finished operation and its refusal; sequence as in quick items.
+            "revive": None,
+            "revive_error": None,
+            "revive_result": None,
+            "revive_seq": 0,
             "emulator_saves": [],
             # What the last search checked, so «no saves» can say why.
             "discovery": None,
@@ -487,6 +520,18 @@ class LauncherRuntime:
             )
             if not valid:
                 raise ValueError("invalid_friendship_arguments")
+            try:
+                self.write_commands.put_nowait((name, dict(args)))
+            except Full:
+                return {"status": "BUSY"}
+            return {"status": "QUEUED"}
+        if name in REVIVE_COMMANDS:
+            valid = args == {} if name == "revive_refresh" else (
+                set(args) == {"purchase_id", "pokemon_entity_id"}
+                and all(isinstance(v, str) and len(v) == 36 for v in args.values())
+            )
+            if not valid:
+                raise ValueError("invalid_revive_arguments")
             try:
                 self.write_commands.put_nowait((name, dict(args)))
             except Full:
@@ -763,10 +808,29 @@ class LauncherRuntime:
             self._patch(
                 write_error="La aplicación física de robos no está habilitada en este Launcher."
                 if str(error) == "TRANSFER_APPLICATION_DISABLED"
+                else "Debes cerrar el juego antes de aplicar esta operación."
+                if str(error) == "EMULATOR_RUNNING"
                 else "No se pudo continuar el robo. Mantén el emulador cerrado y conserva las copias."
             )
         except Exception:  # noqa: BLE001 - no native output, private path or journal data to UI
             self._patch(write_error=self._unexpected_write_failure())
+
+    def _revive_unsettled(self):
+        from app.launcher.item_use import SETTLED_STATES
+
+        engine = getattr(self.writes, "engine", None)
+        if engine is None:
+            return False
+        try:
+            with engine._db() as db:
+                if not db.execute(
+                    "SELECT 1 FROM sqlite_master WHERE type='table' AND name='item_use_bindings'"
+                ).fetchone():
+                    return False
+                rows = db.execute("SELECT record FROM item_use_bindings").fetchall()
+            return any(json.loads(r[0])["state"] not in SETTLED_STATES for r in rows)
+        except Exception:  # noqa: BLE001 - an unreadable journal is handled by recovery
+            return False
 
     def _deliveries_unsettled(self, trainer_id):
         engine = getattr(self.writes, "engine", None)
@@ -1212,6 +1276,84 @@ class LauncherRuntime:
             }
         )
 
+    def _revive_flow(self):
+        from app.launcher.revive import LauncherRevive, ReviveRemote
+
+        principal = self.session._principal
+        with self.lock:
+            cloud = deepcopy(self.value.get("cloud")) or {}
+        season = (cloud.get("data") or {}).get("season")
+        if principal is None or not season:
+            raise WriteSafetyError("REVIVE_CONTEXT_UNAVAILABLE")
+        return LauncherRevive(
+            self.writes,
+            ReviveRemote(self.session, season["id"], principal.trainer_id),
+            session=self.session,
+        ), cloud
+
+    def _revive_step(self, name, args):
+        """Every finished step ends with the list, a result or the reason why not."""
+        self._patch(revive_result=None)
+        try:
+            self._revive_attempt(name, args)
+        except Exception:  # noqa: BLE001 - no native output, path or journal data to UI
+            self._patch(revive_error=REVIVE_READ_FAILED)
+        finally:
+            with self.lock:
+                self.value["revive_seq"] += 1
+
+    def _revive_attempt(self, name, args):
+        try:
+            if not self.writes.selected() or self.writes.engine is None:
+                raise WriteSafetyError("NO_SELECTED_WRITE_TARGET")
+            flow, cloud = self._revive_flow()
+            # An interrupted operation goes first, with or without a new request.
+            resumed = flow.resume()
+            if resumed:
+                self._revive_finished(resumed[-1])
+            if name == "revive_apply":
+                link = (cloud.get("data") or {}).get("season_link") or {}
+                if link.get("status") == "BOUND" and link.get("identity") != save_identity(self.receipt):
+                    self._patch(
+                        revive_error=(
+                            "Revivir actúa sobre tu partida de la Liga ("
+                            + GAME_NAMES.get(link.get("game"), "otra partida")
+                            + "). Elígela en «Cambiar partida» y vuelve a intentarlo; "
+                            "no se ha modificado nada."
+                        )
+                    )
+                    return
+                self._revive_finished(flow.apply(args["purchase_id"], args["pokemon_entity_id"]))
+            self._patch(revive=flow.view(), revive_error=None if name == "revive_refresh" else self.value["revive_error"])
+        except SaveBusy:
+            self._patch(
+                revive_error="Hay una lectura o sincronización en curso. Espera unos segundos y vuelve a intentarlo."
+            )
+        except BackendError as error:
+            detail = getattr(error, "detail", None)
+            self._patch(
+                revive_error=REVIVE_API_ERRORS.get(
+                    detail,
+                    "No hay conexión con PokeApp o no se ha podido comprobar. El comodín no se ha gastado.",
+                )
+            )
+        except (NativeWriteError, WriteSafetyError) as error:
+            self._patch(
+                revive_error=REVIVE_ERRORS.get(
+                    str(error) or getattr(error, "code", ""),
+                    "No se puede aplicar a esta partida. No se ha modificado nada y el comodín no se ha gastado.",
+                )
+            )
+
+    def _revive_finished(self, result):
+        self._patch(
+            revive_result=result | {"at": int(time.time())},
+            revive_error=None if result["completed"] else result["message"],
+        )
+        if result["completed"]:
+            self._load_local()
+            self.next_cloud_refresh = 0
+
     def _write_step(self):
         try:
             name, args = self.write_commands.get_nowait()
@@ -1220,6 +1362,12 @@ class LauncherRuntime:
         if name in QUICK_COMMANDS:
             try:
                 self._quick_step(name, args)
+            finally:
+                self.write_commands.task_done()
+            return
+        if name in REVIVE_COMMANDS:
+            try:
+                self._revive_step(name, args)
             finally:
                 self.write_commands.task_done()
             return
@@ -1592,6 +1740,12 @@ class LauncherRuntime:
             # having to open its panel (completed if written, else released).
             try:
                 self.write_commands.put_nowait(("deliveries_refresh", {}))
+            except Full:
+                pass
+        if season and self._revive_unsettled():
+            # Same for an interrupted Revivir: the journal finishes or releases it.
+            try:
+                self.write_commands.put_nowait(("revive_refresh", {}))
             except Full:
                 pass
         accepted = self.state()["cloud_receipt"]

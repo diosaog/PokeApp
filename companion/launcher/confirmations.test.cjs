@@ -298,3 +298,34 @@ test("072: a Shop delivery confirms one purchase and one object of the league sa
   };
   assert.throws(blocked({ deliveries: { items: [absent] } }), /no existe en el juego/);
 });
+
+test("revive confirmation names the Pokémon and keeps the NET penalty explicit", () => {
+  const { describe } = require("./confirmations.cjs");
+  const purchase = "a".repeat(8) + "-0000-4000-8000-" + "0".repeat(12);
+  const entity = "b".repeat(8) + "-0000-4000-8000-" + "0".repeat(12);
+  const state = {
+    selected_save: "main",
+    receipt_id: "r1",
+    write: {},
+    revive: {
+      application_enabled: true,
+      dead_box_number: 7,
+      purchases: [purchase],
+      candidates: [{ pokemon_entity_id: entity, slot_number: 3, species: 711, nickname: "Jalowin", level: 31 }],
+    },
+  };
+  const target = `${purchase}:${entity}`;
+  const offer = describe("revive", target, state);
+  assert.match(offer.message, /Jalowin/);
+  assert.match(offer.message, /Caja 7, posición 3/);
+  assert.match(offer.detail, /Su muerte sigue registrada y la penalización NET no desaparece/);
+  assert.throws(
+    () => describe("revive", `${purchase}:${"c".repeat(36)}`, state),
+    /Vuelve a leer la Caja de Muertos/,
+  );
+  assert.throws(
+    () => describe("revive", target, { ...state, revive: { ...state.revive, application_enabled: false } }),
+    /no puede aplicar Revivir/,
+  );
+  assert.throws(() => describe("revive", target, { ...state, write: { busy: true } }), /otra operación/);
+});

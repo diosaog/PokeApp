@@ -26,6 +26,8 @@ REJECTIONS = {
     "pokemon_identity_ambiguous": 409,
     "pokemon_not_revivable": 409,
     "steal_target_ineligible": 409,
+    "item_use_in_progress": 409,
+    "transfer_reconciliation_required": 409,
 }
 
 
@@ -84,6 +86,15 @@ class SupabaseItemUseRepository:
                 "p_claim_id": request["claim_id"],
             },
         )
+
+    def revive_board(self, season_id: str, trainer_id: str):
+        board = self._rpc(
+            "api_revive_board",
+            {"p_request": {"season_id": season_id, "trainer_id": trainer_id}},
+        )
+        if not isinstance(board, dict):
+            raise PersistenceError("Revive board is invalid.")
+        return board
 
     def list(self, season_id: str, trainer_id: str):
         data = self._rpc(

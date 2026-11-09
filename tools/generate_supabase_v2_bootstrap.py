@@ -93,6 +93,7 @@ EXPECTED_MIGRATIONS = [
     "082_wipe_revival_deaths.sql",
     "083_team_lock_confirmation_announcements.sql",
     "084_save_audit_notices.sql",
+    "085_robbery_revive_activation.sql",
 ]
 
 FORBIDDEN_TOKENS = [

@@ -75,6 +75,12 @@ if (args.Length == 3 && args[0] == "--transport-forgeries")
     return;
 }
 
+if (args.Length == 3 && args[0] == "--phase085-fixtures")
+{
+    Phase085Fixtures.Run(args[1], args[2]);
+    return;
+}
+
 if (args.Length == 3 && args[0] == "--revive-checks")
 {
     ReviveChecks.Run(args[1], args[2]);

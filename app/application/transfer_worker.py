@@ -41,6 +41,17 @@ def run_transfer_step(rpc, verification, *, limit=10):
                 "PARSER_FAILURE",
             )
             outcome = "RETRY_LATER" if transient else "REJECTED"
+            # 085: a request that can never be planned ends now, explained, with
+            # the comodín intact, instead of holding both trainers until it expires.
+            if not transient and action in ("plan", "adjudicate"):
+                code = getattr(exc, "code", None) or str(exc)
+                rpc(
+                    {
+                        "operation": "reject_request",
+                        "authorization_id": aid,
+                        "code": f"TRANSFER_PLAN_{code}"[:64],
+                    }
+                )
         except PersistenceError:
             outcome = "RETRY_LATER"
         results.append({"authorization_id": aid, "action": action, "outcome": outcome})

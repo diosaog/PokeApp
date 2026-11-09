@@ -99,7 +99,7 @@ describe("Normativa", () => {
       "Incluir objetos en un intercambio",
       "combates de práctica",
       "cartas comodín",
-      "hasta que todos los demás jugadores lo hayan sido también",
+      "hasta que todos los demás entrenadores que se pueden robar lo hayan sido también",
       "24 horas desde la captura",
     ])
       expect(body, rule).toContain(rule);
@@ -128,14 +128,14 @@ describe("Normativa", () => {
     expect(screen.getByText("−0,2")).toBeTruthy();
   });
 
-  it("does not announce unavailable wildcards as available", () => {
+  it("announces Robar and Revivir as available once activated", () => {
     page();
     for (const name of ["Revivir Pokémon", "Robar Pokémon"]) {
       const card = screen
         .getByRole("heading", { level: 4, name })
         .closest("li")!;
-      expect(card.textContent).toContain("Su uso aún no está activado");
-      expect(card.textContent).not.toContain("Disponible");
+      expect(card.textContent).toContain("Disponible");
+      expect(card.textContent).not.toContain("Su uso aún no está activado");
     }
     const shield = screen
       .getByRole("heading", { level: 4, name: "Blindar Pokémon" })

@@ -4,7 +4,13 @@ import { pokemonName, pokemonTitle } from "../pokemon/localization";
 import { PokemonSprite, PokemonStatusFlags } from "../pokemon/presentation";
 import { Empty, Modal, Tag } from "../ui";
 
-export type PokemonTarget = Model<"TargetRead">;
+// A target the server shows but refuses (blindado, recién capturado…) carries
+// the reason: it stays visible, explained, and cannot be chosen.
+export type PokemonTarget = Model<"TargetRead"> & {
+  blocked?: string | null;
+  message?: string | null;
+  available_at?: string;
+};
 
 type PokemonSelectorModalProps = {
   title: string;
@@ -25,6 +31,17 @@ function isParty(location: string) {
   return location.toLowerCase().startsWith("equipo");
 }
 
+// «Faltan 3 h 20 min» while the 24 h since the first verified sighting run out.
+function remaining(availableAt?: string) {
+  const left = availableAt ? new Date(availableAt).getTime() - Date.now() : 0;
+  if (!(left > 0)) return "";
+  const minutes = Math.ceil(left / 60000);
+  const hours = Math.floor(minutes / 60);
+  return hours
+    ? ` Faltan ${hours} h ${minutes % 60} min.`
+    : ` Faltan ${minutes} min.`;
+}
+
 function TargetCard({
   target,
   selected,
@@ -34,11 +51,13 @@ function TargetCard({
   selected: boolean;
   onSelect: () => void;
 }) {
+  const refused = Boolean(target.blocked);
   return (
     <button
       type="button"
       className={`pokemon-selector-card${selected ? " is-selected" : ""}`}
       aria-pressed={selected}
+      disabled={refused}
       onClick={onSelect}
     >
       <PokemonSprite
@@ -55,6 +74,13 @@ function TargetCard({
         </small>
         <span className="muted">{target.location}</span>
         <PokemonStatusFlags flags={target.pokemon.status_flags} />
+        {refused && (
+          <span className="muted">
+            {target.message}
+            {target.blocked === "recent_capture" &&
+              remaining(target.available_at)}
+          </span>
+        )}
       </span>
     </button>
   );
