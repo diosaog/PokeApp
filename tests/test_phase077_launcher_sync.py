@@ -25,6 +25,7 @@ ORIGIN = "https://api.invalid"
 TRAINER = "11111111-1111-4111-8111-111111111111"
 OTHER = "33333333-3333-4333-8333-333333333333"
 SEASON = "22222222-2222-4222-8222-222222222222"
+DISCARDED = "44444444-4444-4444-8444-444444444444"
 VERSION = "pokeapp-reader/3;pkhex/24.11.11"
 
 
@@ -102,6 +103,56 @@ class PersonalToLeagueSyncTests(unittest.TestCase):
             "season": {"id": SEASON},
             "season_link": {"status": status, "identity": identity},
         }})
+
+    def stale_discarded_row(self):
+        """An upload the server accepted for a season discarded before its readback."""
+        self.select(b"synthetic Y snapshot: old discarded season", badges=1)
+        old = self.runtime.receipt
+        data = self.source.read_bytes()
+        self.runtime.store.enqueue_raw(ORIGIN, TRAINER, DISCARDED, old, data)
+        digest = self.queued()[0]["digest"]
+        self.select(b"synthetic Y snapshot: the League save", badges=2)
+        self.link("OPEN")
+        return dict(
+            status="registered", save_id=DISCARDED, trainer_id=TRAINER, season_id=DISCARDED,
+            sha256=old.fingerprint.sha256, parser_version=VERSION,
+            observation_digest=digest, is_current=True,
+        )
+
+    def test_discarded_season_row_held_back_every_newer_save(self):
+        # Reproduces production: the receipt still answered 200 and the readback
+        # 404, classified as a lost connection, so the oldest row never finished.
+        accepted = self.stale_discarded_row()
+        self.receipts[
+            f"/v1/seasons/{DISCARDED}/saves/receipt?sha256={accepted['sha256']}"
+        ] = accepted
+
+        def request(method, path, **kwargs):
+            if path == f"/v1/read/seasons/{DISCARDED}/pc":
+                raise BackendError("BACKEND_UNAVAILABLE", status=404, detail="NOT_FOUND")
+            return self.request(method, path, **kwargs)
+
+        self.runtime.session.request.side_effect = request
+        self.runtime._enqueue_local()
+        for _ in range(3):
+            with self.assertRaises(BackendError):
+                self.runtime._deliver_pending(TRAINER)
+        self.assertEqual(self.uploads, [])
+        self.assertEqual(self.queued()[0]["season"], DISCARDED)
+        self.assertEqual(self.queued()[0]["attempts"], 3)
+
+    def test_discarded_season_row_is_closed_and_the_league_save_goes_up(self):
+        # The API now answers 404 for that receipt: installed Launchers close
+        # the row themselves, and the selected save reaches the League.
+        self.stale_discarded_row()
+        self.runtime._enqueue_local()
+        self.runtime._deliver_pending(TRAINER)
+        self.assertEqual({scope for scope, _ in self.uploads}, {SEASON, PERSONAL})
+        self.assertEqual(self.uploads[0][1], self.source.read_bytes())
+        self.assertEqual(self.runtime.state()["season_receipt"]["season_id"], SEASON)
+        stale = next(r for r in self.queued() if r["season"] == DISCARDED)
+        self.assertEqual((stale["blocked"], stale["raw"]), (1, None))
+        self.assertIsNone(self.runtime.store.pending(ORIGIN, TRAINER))
 
     def test_same_selected_bytes_sync_to_newly_active_league_once_then_new_progress(self):
         self.runtime._enqueue_local()

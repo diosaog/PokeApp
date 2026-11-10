@@ -18,6 +18,7 @@ from app.application.save_ingestion import TrustedSaveIngestion, parsed_payload
 from app.launcher.backend import BackendError
 from app.launcher.journal import LocalConflict, LocalJournal, LocalReceipt
 from app.launcher.trusted_sync import TrustedStore, deliver_trusted
+from app.repositories.errors import PersistenceError
 from app.repositories.supabase.season_admin import SeasonAdminRejected
 from app.save_parser.models import ErrorCode, SaveError, SaveFingerprint
 from app.save_parser.registration import observation_digest
@@ -184,6 +185,41 @@ class IngestionTests(unittest.TestCase):
                 ).status_code,
                 422,
             )
+
+    def test_receipt_of_a_discarded_season_is_not_found(self):
+        principals = FakePrincipalRepository()
+        principals.trainer = replace(principals.trainer, is_admin=False)
+        reads = Mock()
+        with TestClient(
+            create_app(
+                container=ApiContainer(
+                    token_verifier=FakeTokenVerifier(),
+                    principal_repository=principals,
+                    save_ingestion=self.service,
+                    frontend_read_repository=reads,
+                )
+            )
+        ) as client:
+            headers = {
+                "Authorization": "Bearer validated",
+                "Content-Type": "application/octet-stream",
+            }
+            client.put(
+                f"/v1/seasons/{SID}/saves/raw?sha256={HASH}&observation_digest={self.digest}&expected_save_id=none",
+                content=DATA,
+                headers=headers,
+            )
+            path = f"/v1/seasons/{SID}/saves/receipt?sha256={HASH}"
+            reads.rows.return_value = [{"status": "discarded"}]
+            refused = client.get(path, headers=headers)
+            self.assertEqual(refused.status_code, 404)
+            self.assertEqual(refused.json()["detail"]["code"], "SEASON_NOT_FOUND")
+            # Any other state keeps its receipt; a failed check changes nothing.
+            for answer in ([{"status": "active"}], [{"status": "finished"}], []):
+                reads.rows.return_value = answer
+                self.assertEqual(client.get(path, headers=headers).status_code, 200)
+            reads.rows.side_effect = PersistenceError("read_unavailable")
+            self.assertEqual(client.get(path, headers=headers).status_code, 200)
 
 
 class TrustedOutboxTests(unittest.TestCase):

@@ -40,8 +40,26 @@ def context(season_id: UUID, principal: Reader, container: Container):
     return execute(container, "context", str(season_id), str(principal.trainer_id))
 
 
+def season_discarded(container, season_id) -> bool:
+    repository = container.frontend_read_repository
+    if repository is None:
+        return False
+    try:
+        rows = repository.rows(
+            "seasons", "status", filters={"id": str(season_id)}, limit=1
+        )
+    except PersistenceError:
+        return False
+    return bool(rows) and rows[0]["status"] == "discarded"
+
+
 @router.get("/receipt", response_model=SaveRegistration)
 def receipt(season_id: UUID, sha256: Hash, principal: Reader, container: Container):
+    # A discarded season no longer exists for any read. Saying so lets a Launcher
+    # close a copy still queued for it: its readback could never finish, and
+    # that oldest row held back every newer save behind it.
+    if season_discarded(container, season_id):
+        raise api_error(404, "SEASON_NOT_FOUND", "Esa temporada ya no existe.")
     return execute(
         container, "receipt", str(season_id), str(principal.trainer_id), sha256
     )
