@@ -51,6 +51,14 @@ participant's dead box (Caja 7). No real robbery or revive has happened yet. Con
 the tip of `claude/net-friendship-discord`. Live record:
 [Robar y Revivir](../work-in-progress/robar-revivir.md).
 
+Launcher sync incident (2026-11-10, PUBLISHED, API only): `bdff9a8`, API `4af3e38a`
+(rollback `909765eb`). A row accepted for a season discarded later wedged the FIFO
+`trusted_save_outbox`: receipt 200, readback 404, reported as offline, so newer League and
+personal copies never went up. The receipt now answers 404 for a discarded season and
+installed Launchers close the row. "Víctor" has no production record; ByVisan02 is an
+inference awaiting the owner. Live confirmation pending. Record:
+[discarded-season sync](../work-in-progress/launcher-discarded-season-sync.md).
+
 Normativa (2026-11-09): static rulebook at `/normativa`, content in
 `web/src/features/normativa-content.ts`. A rule change is an edit there, its
 `rulebookUpdated` date and a web deploy. Revivir and Robar are shown as available

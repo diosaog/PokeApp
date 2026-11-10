@@ -1270,3 +1270,11 @@ Revivir sobre la Caja 7, con prueba independiente antes de consumir el comodín.
 NET sin cambios. Ningún robo ni revivido real todavía. No hay migraciones pendientes.
 Continuar desde la punta de `claude/net-friendship-discord`. Ver
 [registro vivo](work-in-progress/robar-revivir.md).
+
+## Incidencia de carga de partida en el Launcher (2026-11-10)
+
+Publicada solo la API: commit `bdff9a8`, Railway `4af3e38a` (rollback `909765eb`). Una copia
+pendiente de una temporada descartada bloqueaba la cola de sincronización y la partida de
+la Liga nunca se enviaba. Sin SQL, Launcher nuevo ni datos modificados. Falta confirmar con
+el entrenador afectado (`ByVisan02` por inferencia; ningún registro se llama Víctor). Ver
+[registro](work-in-progress/launcher-discarded-season-sync.md).
