@@ -120,6 +120,58 @@ class TeamPreviewTests(unittest.TestCase):
             self.assertEqual(response.status_code, 200)
             self.assertEqual(response.json()['teams'][0]['lock']['timing_status'], status)
 
+    def test_locks_stored_without_item_table_are_named_with_the_league_game(self):
+        # Locks fixed before 2026-11-11 kept "Item #287" without its table: the
+        # web could only say «Objeto sin identificar». The participant's League
+        # save game (public in the overview) names it; a stored value wins.
+        games = {RIVAL: "X", THIRD: None}
+        self.store.observed_progress = lambda season_id, trainer_id=None: [
+            {"trainer_id": t, "game": g} for t, g in games.items()
+        ]
+        for row in self.store.data["public_team_locks"]:
+            for mon in row["public_team_snapshot"]:
+                mon["item"] = "Item #287"
+        self.store.data["public_team_locks"][2]["public_team_snapshot"][0][
+            "item"
+        ] = ""
+        response = self.get(trainer_id=RIVAL, second_trainer_id=THIRD)
+        self.assert_public(response)
+        rival, third = (t["lock"]["team"] for t in response.json()["teams"])
+        self.assertEqual([m["item_generation"] for m in rival], [6] * 6)
+        self.assertEqual([m["item"] for m in rival], ["Item #287"] * 6)
+        # No League game known: nothing is guessed.
+        self.assertEqual([m["item_generation"] for m in third], [None] * 6)
+        # A snapshot that already names its table keeps it.
+        for mon in self.store.data["public_team_locks"][1]["public_team_snapshot"]:
+            mon["item_generation"] = 7
+        rival = self.get(trainer_id=RIVAL).json()["teams"][0]["lock"]["team"]
+        self.assertEqual([m["item_generation"] for m in rival], [7] * 6)
+        self.assertFalse(
+            {"team_locks", "save_files", "parsed_saves"}.intersection(
+                c[0] for c in self.store.calls
+            )
+        )
+
+    def test_own_private_lock_without_item_table_is_named_in_battle(self):
+        # Batallas › own Team Lock «tus detalles privados»: Garra Rápida (#217)
+        # and Baya Zidra (#158) read «Objeto sin identificar» on locks fixed
+        # before 2026-11-11, while the live Equipo view named them.
+        self.store.observed_progress = lambda season_id, trainer_id=None: [
+            {"trainer_id": TRAINER_ID, "game": "OR"}
+        ]
+        own = self.store.data["team_locks"][0]["private_team_snapshot"]
+        for mon, item in zip(own, ("Item #217", "Item #158", "", "Item #217", "Item #158", "")):
+            mon["item"] = item
+        response = self.get(mode="battle", trainer_id=TRAINER_ID)
+        self.assertEqual(response.status_code, 200, response.text)
+        entry = response.json()["teams"][0]
+        self.assertEqual(entry["visibility"], "self")
+        self.assertEqual(
+            [m["item_generation"] for m in entry["lock"]["team"]],
+            [6, 6, None, 6, 6, None],
+        )
+        self.assertEqual(entry["lock"]["team"][0]["ability"], "OWN_ABILITY")
+
     def test_spectator_self_stays_public_without_private_query(self):
         self.assert_public(self.get(trainer_id=TRAINER_ID, second_trainer_id=RIVAL))
         self.assertNotIn("team_locks", [c[0] for c in self.store.calls])

@@ -2523,6 +2523,15 @@ const updateErrors = {
     "La información de la versión no es válida. Se ha ignorado.",
   UPDATE_CHECK_FAILED:
     "No se pudo comprobar ahora mismo. Tu Launcher sigue funcionando.",
+  INSTALLER_BLOCKED:
+    "Windows o el antivirus no han dejado abrir el instalador. Descárgalo desde la web de PokeApp («Descargar Launcher») y ábrelo tú; tu sesión, tu partida y tus copias se conservan.",
+};
+// After an install that did not finish on this PC, the installer opens with
+// its window (main.cjs): the trainer sees its progress and any warning.
+const assistedText = {
+  INSTALL_INCOMPLETE:
+    "La actualización anterior no terminó de instalarse en este equipo. «Instalar con asistente» abre el instalador de Windows para que veas su progreso y cualquier aviso; al terminar, abre PokeApp Launcher. Si tampoco termina, descárgalo desde la web de PokeApp («Descargar Launcher»).",
+  INSTALLER_BLOCKED: updateErrors.INSTALLER_BLOCKED,
 };
 let updateAutoShown = new Set(),
   updateWatch = null;
@@ -2543,7 +2552,9 @@ async function renderUpdate() {
     running
       ? `Actualizando PokeApp Launcher ${u.version}…${u.progress ? ` ${percent(u.progress)} %` : ""}`
       : offer
-        ? `Nueva versión ${u.version} de PokeApp Launcher.`
+        ? u.assisted
+          ? `La actualización ${u.version} de PokeApp Launcher no terminó de instalarse.`
+          : `Nueva versión ${u.version} de PokeApp Launcher.`
         : "",
   );
   $("update-open").hidden = $("update-banner").hidden;
@@ -2575,12 +2586,15 @@ function fillUpdateDialog(u) {
     AVAILABLE: "Hay una versión nueva de PokeApp Launcher.",
     READY: u.deferred
       ? `Lista para instalar. Esperando a que termine ${blockerText[u.deferred] || "una operación en curso"}.`
-      : "La nueva versión está descargada y verificada.",
+      : u.assisted
+        ? assistedText[u.failure] || assistedText.INSTALL_INCOMPLETE
+        : "La nueva versión está descargada y verificada.",
     DOWNLOADING: `Descargando la versión ${u.version}…`,
     VERIFYING: "Verificando la firma y la integridad…",
     WAITING: `Esperando a que termine ${blockerText[u.deferred] || "una operación en curso"}…`,
-    INSTALLING:
-      "Instalando. PokeApp Launcher se reiniciará solo; tu sesión, tu partida y tus copias se conservan.",
+    INSTALLING: u.assisted
+      ? "Se abre el instalador de Windows. Sigue sus pasos y, al terminar, abre PokeApp Launcher. Tu sesión, tu partida y tus copias se conservan."
+      : "Instalando. Tarda uno o dos minutos y PokeApp Launcher se abrirá solo: no lo abras mientras tanto. Tu sesión, tu partida y tus copias se conservan.",
     ERROR:
       updateErrors[u.reason] ||
       "No se pudo completar la actualización. Tu Launcher sigue funcionando.",
@@ -2662,7 +2676,9 @@ function fillUpdateDialog(u) {
   text(
     "update-go",
     u.status === "READY"
-      ? "Instalar ahora"
+      ? u.assisted
+        ? "Instalar con asistente"
+        : "Instalar ahora"
       : u.status === "ERROR"
         ? "Reintentar"
         : "Actualizar",

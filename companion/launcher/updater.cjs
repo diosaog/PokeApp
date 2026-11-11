@@ -261,12 +261,91 @@ function readPending(directory) {
   }
 }
 
+// Every installer handed to Windows is recorded first. If the next start still
+// runs the older version, that install did not finish on this PC (an
+// antivirus, a file in use, a folder that needs administrator rights…): the
+// invisible route is then not repeated blindly (see main.cjs).
+function recordAttempt(directory, version, mode) {
+  parseVersion(version);
+  if (!["silent", "assisted"].includes(mode))
+    throw new UpdateError("ATTEMPT_INVALID");
+  const previous = readAttempt(directory);
+  fs.mkdirSync(directory, { recursive: true });
+  fs.writeFileSync(
+    path.join(directory, "attempt.json"),
+    JSON.stringify({
+      version,
+      mode,
+      blocked: false,
+      at: new Date().toISOString(),
+      count: (previous?.count || 0) + 1,
+    }),
+  );
+}
+
+// Windows (or an antivirus) refused to start the installer at all.
+function markAttemptBlocked(directory) {
+  const attempt = readAttempt(directory);
+  if (!attempt) return;
+  fs.writeFileSync(
+    path.join(directory, "attempt.json"),
+    JSON.stringify({ ...attempt, blocked: true }),
+  );
+}
+
+function readAttempt(directory) {
+  try {
+    const attempt = JSON.parse(
+      fs.readFileSync(path.join(directory, "attempt.json"), "utf8"),
+    );
+    parseVersion(attempt.version);
+    if (!Number.isInteger(attempt.count) || attempt.count < 1) return null;
+    return {
+      version: attempt.version,
+      mode: attempt.mode === "assisted" ? "assisted" : "silent",
+      blocked: attempt.blocked === true,
+      at: typeof attempt.at === "string" ? attempt.at : null,
+      count: attempt.count,
+    };
+  } catch {
+    return null;
+  }
+}
+
+// While the installer runs, Windows keeps its file open and refuses to open
+// it for writing (EBUSY). A Launcher opened during an install it started a
+// few minutes ago would be closed by that installer and could hold the very
+// files it replaces. Old records never count: a stale lock is not an install.
+// Answers the running install's mode ("silent" | "assisted") or null.
+function installerRunning(directory, now = Date.now()) {
+  const pending = readPending(directory);
+  const attempt = readAttempt(directory);
+  if (!pending || !attempt || attempt.version !== pending.version) return null;
+  const since = now - Date.parse(attempt.at);
+  if (!(since >= 0 && since < 15 * 60 * 1000)) return null;
+  let handle = null;
+  try {
+    handle = fs.openSync(path.join(directory, pending.file), "r+");
+    return null;
+  } catch (error) {
+    return error.code === "EBUSY" ? attempt.mode : null;
+  } finally {
+    if (handle !== null) fs.closeSync(handle);
+  }
+}
+
 // On start: an installed target clears the leftovers; an older running version
-// means the previous install did not finish, so the verified file is kept.
+// means the previous install did not finish, so the verified file is kept and
+// any install already handed to Windows is reported with it.
 function reconcileStartup(directory, currentVersion) {
   const pending = readPending(directory);
-  if (!pending) return { status: "IDLE" };
+  const attempts = path.join(directory, "attempt.json");
+  if (!pending) {
+    fs.rmSync(attempts, { force: true });
+    return { status: "IDLE" };
+  }
   if (compareVersions(currentVersion, pending.version) >= 0) {
+    fs.rmSync(attempts, { force: true });
     // The installer starts the new version itself and may still be running:
     // a file in use stays, with its record, for the next attempt.
     try {
@@ -277,7 +356,18 @@ function reconcileStartup(directory, currentVersion) {
       return { status: "INSTALLED", version: pending.version, leftover: true };
     }
   }
-  return { status: "INSTALL_INCOMPLETE", version: pending.version };
+  const attempt = readAttempt(directory);
+  return {
+    status: "INSTALL_INCOMPLETE",
+    version: pending.version,
+    ...(attempt
+      ? {
+          attempts: attempt.count,
+          mode: attempt.mode,
+          blocked: attempt.blocked,
+        }
+      : {}),
+  };
 }
 
 // «Más tarde» is remembered per version: no popup again for that version at
@@ -315,4 +405,7 @@ module.exports = {
   download,
   verifiedInstaller,
   reconcileStartup,
+  recordAttempt,
+  markAttemptBlocked,
+  installerRunning,
 };

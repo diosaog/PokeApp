@@ -4,6 +4,7 @@ from copy import deepcopy
 import re
 from uuid import uuid4
 
+from app.application.pokemon_read_context import item_generation_of, with_item_generation
 from app.domain.pokemon import PublicPokemon
 from app.domain.seasons import SeasonRules
 from app.domain.services import team_locks as team_lock_domain
@@ -101,6 +102,11 @@ def lock_team_v2(
         # A party of fewer than six is the trainer's to fix, not a damaged save.
         reason = "team_requires_six" if str(exc) == "team_requires_six" else "invalid_parsed_team"
         raise ConflictError(reason) from exc
+    # The locked save's own item table travels with its frozen team, so every
+    # later read names "Item #234" for that game (Leftovers, not a Gen 3 item).
+    generation = item_generation_of(payload)
+    public = with_item_generation(public, generation)
+    private = with_item_generation(private, generation)
     return repository.upsert_with_activity(TeamLockMutation(
         season_id=season_id, matchday_id=matchday_id, trainer_id=trainer_id,
         season_player_id=str(player["id"]), save_file_id=save_file_id, save_sha256=save["sha256"],

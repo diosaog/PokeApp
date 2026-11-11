@@ -28,6 +28,7 @@ const os = require("node:os");
 const path = require("node:path");
 const { pathToFileURL } = require("node:url");
 const metadata = require("./package.json");
+const updates = require("./updater.cjs");
 const privateCandidate = metadata.pokeappPrivateCandidate === true;
 // Update rehearsal builds (private only) keep their own profile and never see
 // the real emulator folders.
@@ -47,6 +48,7 @@ const profile =
         ? "Launcher-Private"
         : "Launcher",
   );
+const updateDir = path.join(profile, "updates");
 app.setPath("userData", path.join(profile, "shell"));
 app.setAppUserModelId(
   privateCandidate ? "app.pokeapp.launcher.private" : "app.pokeapp.launcher",
@@ -129,6 +131,38 @@ function authorize(event) {
     throw new Error("Solicitud no permitida");
 }
 app.whenReady().then(() => {
+  // Opened while its own update is still installing (the installer has no
+  // window): this copy would be closed by the installer and its core could
+  // hold the files being replaced. Say so and step aside.
+  let updateInstalling = null;
+  try {
+    updateInstalling = updates.installerRunning(updateDir);
+  } catch {
+    updateInstalling = null;
+  }
+  if (updateInstalling) {
+    launcherLog.write(
+      `Launcher opened while its update installs (${updateInstalling})`,
+    );
+    const choice = dialog.showMessageBoxSync({
+      type: "info",
+      title: "PokeApp Launcher",
+      message: "Se está instalando la actualización de PokeApp Launcher.",
+      detail:
+        (updateInstalling === "assisted"
+          ? "Termina la instalación en la ventana del instalador y después abre PokeApp Launcher."
+          : "Tarda uno o dos minutos y el Launcher se abrirá solo al terminar.") +
+        " Tu sesión, tu partida y tus copias se conservan.",
+      buttons: ["Entendido", "Abrir igualmente"],
+      defaultId: 0,
+      cancelId: 0,
+      noLink: true,
+    });
+    if (choice === 0) {
+      app.quit();
+      return;
+    }
+  }
   const python = app.isPackaged
     ? path.join(process.resourcesPath, "runtime/core/PokeApp.Core.exe")
     : process.env.POKEAPP_LAUNCHER_PYTHON ||
@@ -883,10 +917,8 @@ app.whenReady().then(() => {
     return request("select_discovered", { path: savePath });
   });
 
-  const updates = require("./updater.cjs");
   const updateConfig = require("./package.json").pokeappUpdate || {};
   const channel = privateCandidate ? "private" : "stable";
-  const updateDir = path.join(profile, "updates");
   const feed = updateConfig.feed && updateConfig.feed[channel];
   // Rehearsal feeds on loopback exist only in private candidates.
   const allowLoopback = privateCandidate;
@@ -907,16 +939,35 @@ app.whenReady().then(() => {
   const recovered = configured ? reconcile() : { status: "IDLE" };
   // The installer that restarted us may still hold its file: retry shortly.
   if (recovered.leftover) setTimeout(reconcile, 60000).unref();
+  const incomplete = recovered.status === "INSTALL_INCOMPLETE";
+  // An install already handed to Windows that left this version running did
+  // not finish on this PC. Repeating it invisibly is a loop (the Launcher
+  // closes, nothing changes, the offer comes back): from now on the installer
+  // opens with its window, so its progress and any refusal are seen.
+  const assisted = incomplete && recovered.attempts > 0;
+  if (recovered.status === "INSTALLED")
+    launcherLog.write(`update ${recovered.version} installed`);
+  else if (incomplete)
+    launcherLog.write(
+      `update ${recovered.version} not installed yet` +
+        (recovered.attempts
+          ? ` · ${recovered.attempts} ${recovered.mode} install(s) did not finish` +
+            (recovered.blocked ? " · the installer could not start" : "")
+          : ""),
+    );
   let update = configured
     ? {
-        status: recovered.status === "INSTALL_INCOMPLETE" ? "READY" : "IDLE",
+        status: incomplete ? "READY" : "IDLE",
         current,
         channel,
         recovered,
-        version:
-          recovered.status === "INSTALL_INCOMPLETE"
-            ? recovered.version
-            : undefined,
+        version: incomplete ? recovered.version : undefined,
+        assisted,
+        failure: assisted
+          ? recovered.blocked
+            ? "INSTALLER_BLOCKED"
+            : "INSTALL_INCOMPLETE"
+          : undefined,
       }
     : {
         status: "DISABLED",
@@ -1027,11 +1078,36 @@ app.whenReady().then(() => {
       await stopCore();
       // Re-hash at the last moment: the file run is the file signed.
       const final = updates.verifiedInstaller(updateDir);
-      spawn(final.file, ["/S", "--updated", "--force-run"], {
-        detached: true,
-        stdio: "ignore",
-        windowsHide: true,
-      }).unref();
+      // Silent by default (it restarts the Launcher by itself); with its
+      // window after an install that did not finish here.
+      const mode = update.assisted ? "assisted" : "silent";
+      updates.recordAttempt(updateDir, final.version, mode);
+      const child = spawn(
+        final.file,
+        mode === "assisted"
+          ? ["--updated"]
+          : ["/S", "--updated", "--force-run"],
+        { detached: true, stdio: "ignore", windowsHide: mode === "silent" },
+      );
+      // Quit only once Windows has really started it: a blocked installer
+      // (antivirus, policy) must not leave the trainer with nothing open.
+      await new Promise((resolve, reject) => {
+        child.once("spawn", resolve);
+        child.once("error", (error) => {
+          launcherLog.write(
+            `update ${final.version} installer could not start: ${error.code || error.name}`,
+          );
+          try {
+            updates.markAttemptBlocked(updateDir);
+          } catch {
+            // the relaunch still reports an unfinished install
+          }
+          reject(new updates.UpdateError("INSTALLER_BLOCKED"));
+        });
+      });
+      child.on("error", () => {});
+      child.unref();
+      launcherLog.write(`update ${final.version} installer started (${mode})`);
       app.quit();
     } catch (error) {
       update = {

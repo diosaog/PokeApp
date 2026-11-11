@@ -359,3 +359,74 @@ test("after an update, a file still in use never stops the start and is retried"
   });
   assert.deepEqual(fs.readdirSync(dir), []);
 });
+
+test("an install handed to Windows that left the old version running is reported, not hidden", async () => {
+  const dir = temp();
+  await u.download(fetchOf([INSTALLER]), manifest(), dir);
+  u.recordAttempt(dir, "0.23.0", "silent");
+  assert.deepEqual(u.reconcileStartup(dir, CURRENT), {
+    status: "INSTALL_INCOMPLETE",
+    version: "0.23.0",
+    attempts: 1,
+    mode: "silent",
+    blocked: false,
+  });
+  // The next try (with the installer's window) counts on top and can be
+  // reported as refused by Windows.
+  u.recordAttempt(dir, "0.23.0", "assisted");
+  u.markAttemptBlocked(dir);
+  assert.deepEqual(u.reconcileStartup(dir, CURRENT), {
+    status: "INSTALL_INCOMPLETE",
+    version: "0.23.0",
+    attempts: 2,
+    mode: "assisted",
+    blocked: true,
+  });
+  assert.throws(() => u.recordAttempt(dir, "0.23.0", "other"));
+  assert.throws(() => u.recordAttempt(dir, "../../evil", "silent"));
+  // Installed (by the Launcher or by hand from the web): every trace goes.
+  assert.deepEqual(u.reconcileStartup(dir, "0.23.0"), {
+    status: "INSTALLED",
+    version: "0.23.0",
+  });
+  assert.deepEqual(fs.readdirSync(dir), []);
+  // A record without a verified installer is never kept around.
+  u.recordAttempt(dir, "0.23.0", "silent");
+  assert.deepEqual(u.reconcileStartup(dir, CURRENT), { status: "IDLE" });
+  assert.deepEqual(fs.readdirSync(dir), []);
+});
+
+test("a Launcher opened while its recent installer still runs knows it, and only then", async () => {
+  const dir = temp();
+  await u.download(fetchOf([INSTALLER]), manifest(), dir);
+  const openSync = fs.openSync;
+  const busy = (codeName) => (target, flags) => {
+    if (String(target).endsWith(".exe") && flags === "r+") {
+      const error = new Error(codeName);
+      error.code = codeName;
+      throw error;
+    }
+    return openSync(target, flags);
+  };
+  // No install handed to Windows: a locked file is not an install.
+  fs.openSync = busy("EBUSY");
+  try {
+    assert.equal(u.installerRunning(dir), null);
+  } finally {
+    fs.openSync = openSync;
+  }
+  u.recordAttempt(dir, "0.23.0", "silent");
+  assert.equal(u.installerRunning(dir), null, "file free: installer finished");
+  fs.openSync = busy("EBUSY");
+  try {
+    assert.equal(u.installerRunning(dir), "silent");
+    u.recordAttempt(dir, "0.23.0", "assisted");
+    assert.equal(u.installerRunning(dir), "assisted");
+    // An old attempt never blocks a start, nor a lock that is not "in use".
+    assert.equal(u.installerRunning(dir, Date.now() + 16 * 60 * 1000), null);
+    fs.openSync = busy("EPERM");
+    assert.equal(u.installerRunning(dir), null);
+  } finally {
+    fs.openSync = openSync;
+  }
+});

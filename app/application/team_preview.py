@@ -145,6 +145,7 @@ def team_preview(
                     }
                     for index, pokemon in enumerate(team, 1)
                 ]
+                team = reads.frozen_team(season_id, tid, team)
                 lock = dict(
                     locked_at=source["locked_at"], is_late=source["is_late"], team=team,
                     timing_status=timing,

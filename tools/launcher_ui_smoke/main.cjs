@@ -173,6 +173,14 @@ const script = `(async () => {
   check(!uq("update-progress-box").hidden && /80 MB de 160 MB · 50 %/.test(uq("update-progress-text").textContent) && uq("update-later").hidden, "download progress is shown; no «Más tarde» once accepted");
   window.launcher.__setUpdate({ ...offer, prompt: false, status: "ERROR", reason: "SIGNATURE_INVALID" }); await sleep(1300);
   check(/verificación de firma/.test(uq("update-message").textContent) && uq("update-go").textContent.trim() === "Reintentar", "a forged update is refused and explained");
+  // An install handed to Windows that left the old version running: never the
+  // same invisible route again, the installer opens with its window.
+  window.launcher.__setUpdate({ ...offer, status: "READY", prompt: false, assisted: true, failure: "INSTALL_INCOMPLETE" }); await sleep(1300);
+  check(/no terminó de instalarse en este equipo/.test(uq("update-message").textContent) && uq("update-go").textContent.trim() === "Instalar con asistente" && uq("update-later").textContent.trim() === "Más tarde", "an unfinished install offers the installer with its window, explained");
+  window.launcher.__setUpdate({ ...offer, status: "READY", prompt: false, assisted: true, failure: "INSTALLER_BLOCKED" }); await sleep(1300);
+  check(/antivirus no han dejado abrir el instalador/.test(uq("update-message").textContent) && /Descargar Launcher/.test(uq("update-message").textContent), "a blocked installer points to the web download");
+  window.launcher.__setUpdate({ ...offer, status: "INSTALLING", prompt: false }); await sleep(1300);
+  check(/se abrirá solo: no lo abras mientras tanto/.test(uq("update-message").textContent), "a silent install says it reopens by itself and not to open it meanwhile");
   window.launcher.__setUpdate({ status: "UP_TO_DATE", current: "0.27.0", channel: "private" }); await sleep(1300);
   check(/Estás utilizando la última versión/.test(uq("update-message").textContent) && uq("update-go").hidden, "no update: «Estás utilizando la última versión»");
   shut(ud);

@@ -170,6 +170,31 @@ it("shows object jumps with their registered origin", () => {
   expect(within(row).getByText("Operaciones autorizadas")).toBeInTheDocument();
 });
 
+it("names low-numbered objects with the notice's own game, never as unidentified", () => {
+  // Item #287 is Choice Scarf and #280 Destiny Knot in X/Y and Sun/Moon, but
+  // other objects in Gen 3: without the game they were «sin identificar».
+  const gear = {
+    ...capsules,
+    id: "n3",
+    title: "Objeto añadido sin origen verificado",
+    changes: [
+      { ...capsules.changes[0], field: "item_287", item: "Item #287" },
+      { ...capsules.changes[0], field: "item_280", item: "Item #280" },
+    ],
+  };
+  for (const game of ["X", "UM"]) {
+    mocks.data = overview([{ ...gear, game }]);
+    const view = render(<NoticesDesk />);
+    fireEvent.click(
+      screen.getByRole("button", { name: /sin origen verificado/ }),
+    );
+    expect(screen.getByText("Pañuelo Elección")).toBeInTheDocument();
+    expect(screen.getByText("Lazo Destino")).toBeInTheDocument();
+    expect(screen.queryByText(/sin identificar/)).not.toBeInTheDocument();
+    view.unmount();
+  }
+});
+
 it("justifying needs an observation; the decision only reaches this notice", async () => {
   mocks.data = overview([capsules]);
   render(<NoticesDesk />);

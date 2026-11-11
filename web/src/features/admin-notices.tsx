@@ -70,6 +70,12 @@ const placeName = (place: { source: string; box: number; slot: number }) =>
 
 const SCALE: Record<string, number> = { iv: 31, ev: 252 };
 
+// Objects arrive as the save's own IDs ("Item #234"): only the notice's game
+// says which item table they belong to (Gen 3 numbers mean other objects).
+type ItemTable = 6 | 7 | undefined;
+const itemTable = (game: string): ItemTable =>
+  (gameGeneration(game) ?? undefined) as ItemTable;
+
 function shown(change: Change, value: Change["before"]) {
   if (value === null || value === undefined) return "—";
   if (change.kind === "ability" || change.kind === "nature")
@@ -130,13 +136,13 @@ function Values({ change }: { change: Change }) {
   );
 }
 
-function Evidence({ change }: { change: Change }) {
+function Evidence({ change, table }: { change: Change; table: ItemTable }) {
   if (change.kind === "item") {
-    const name = pokemonName("item", change.item ?? "");
+    const name = pokemonName("item", change.item ?? "", table);
     return (
       <li className="aviso-item" data-severity={change.severity}>
         <span className="aviso-item-art">
-          <ItemIcon name={change.item ?? ""} />
+          <ItemIcon name={name} />
         </span>
         <span className="aviso-item-name">
           <strong>{name}</strong>
@@ -191,7 +197,11 @@ function Details({
       <section aria-label="Qué ha cambiado">
         <ul className="aviso-evidences">
           {notice.changes.map((change) => (
-            <Evidence change={change} key={change.field} />
+            <Evidence
+              change={change}
+              table={itemTable(notice.game)}
+              key={change.field}
+            />
           ))}
         </ul>
       </section>
@@ -428,7 +438,13 @@ function NoticeCard({
             </SpriteGeneration.Provider>
           ) : (
             notice.changes[0]?.item && (
-              <ItemIcon name={notice.changes[0].item} />
+              <ItemIcon
+                name={pokemonName(
+                  "item",
+                  notice.changes[0].item,
+                  itemTable(notice.game),
+                )}
+              />
             )
           )}
         </span>

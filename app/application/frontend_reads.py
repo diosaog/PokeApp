@@ -15,10 +15,18 @@ from app.api.read_models import (
     TrainerCollectionRead,
 )
 from app.application.progress import progress_read
-from app.application.pokemon_read_context import pokemon_context
+from app.application.pokemon_read_context import (
+    game_item_generation,
+    pokemon_context,
+    with_item_generation,
+)
 from app.api.progress_models import ProgressRead
 from app.repositories.errors import NotFoundError, PersistenceError
 from app.repositories.supabase.frontend_reads import FrontendReadRepository
+
+# A save's own numeric object reference ("Item #234"): its name depends on the
+# game's item table. Named objects ("Leftovers") never need one.
+_SAVE_ITEM = re.compile(r"^(?:item|objeto)?\s*#?\s*\d+$", re.IGNORECASE)
 
 
 def personal_dead_box_count(record, trainer_id, box_number):
@@ -498,6 +506,33 @@ class FrontendReads:
         rows = self.rows("save_files", "metadata", id=save, season_id=sid, trainer_id=tid)
         identity = (rows[0].get("metadata") or {}).get("save_identity") if rows else None
         return identity if isinstance(identity, dict) else None
+
+    def frozen_team(self, sid, tid, team):
+        """A Team Lock snapshot stored without its item table, named with the
+        game of this participant's League save (one identity per season: a
+        lock can only come from that save). Public and already shown in the
+        League overview; nothing else is read or exposed."""
+        if not isinstance(team, list) or not any(
+            isinstance(mon, dict)
+            and not mon.get("item_generation")
+            and _SAVE_ITEM.match(str(mon.get("item") or ""))
+            for mon in team
+        ):
+            return team
+        if not hasattr(self, "_league_games"):
+            reader = getattr(self.repo, "observed_progress", None)
+            try:
+                rows = (reader(sid) if callable(reader) else None) or []
+            except PersistenceError:
+                rows = []
+            self._league_games = {
+                str(row.get("trainer_id")): row.get("game")
+                for row in rows
+                if isinstance(row, dict)
+            }
+        return with_item_generation(
+            team, game_item_generation(self._league_games.get(str(tid)))
+        )
 
     def league_game(self, sid, tid):
         """The game of the save this trainer's season accepted (its bound

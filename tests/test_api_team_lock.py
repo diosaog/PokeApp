@@ -225,6 +225,28 @@ class TeamLockApiTests(unittest.TestCase):
         self.assertEqual(self.put().status_code, 200)
         self.assertEqual(self.repository.mutations[0].private_team_snapshot[0]["ivs"]["hp"], 31)
 
+    def test_frozen_team_keeps_the_item_table_of_its_save(self):
+        # "Item #287" is Choice Scarf in X/Y and Sun/Moon but another object in
+        # Gen 3: the snapshot carries the locked save's own table.
+        payload = deepcopy(self.repository.source.parsed["payload"])
+        for slot in payload["party"]:
+            slot["pokemon"]["item"] = "Item #287"
+        cases = (
+            ({"game": "X", "generation": 6}, 6),
+            ({"game": "UM", "generation": 7}, 7),
+            ({}, None),  # no game: nothing is guessed
+            ({"game": "X", "generation": 7}, None),  # contradictory payload
+        )
+        for extra, expected in cases:
+            with self.subTest(extra=extra):
+                self.repository.mutations.clear()
+                self.repository.change("parsed", payload={**payload, **extra})
+                self.assertEqual(self.put().status_code, 200)
+                mutation = self.repository.mutations[0]
+                for snapshot in (mutation.public_team_snapshot, mutation.private_team_snapshot):
+                    self.assertEqual([m.get("item_generation") for m in snapshot], [expected] * 6)
+                    self.assertEqual([m["item"] for m in snapshot], ["Item #287"] * 6)
+
     def test_open_matchday_and_no_deadline(self):
         self.repository.change("matchday", status="open")
         data = self.put().json()
