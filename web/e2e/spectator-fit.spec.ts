@@ -104,9 +104,13 @@ const teamB = [
   ]),
 ];
 
+// The hosted web can be checked too (POKEAPP_E2E_BASE_URL plus its API origin):
+// every API request is still answered here, none reaches a server.
+const api = process.env.POKEAPP_E2E_API_ORIGIN || "http://127.0.0.1:8000";
+
 async function spectatorFixture(page: Page) {
-  await fixture(page);
-  await page.route("http://127.0.0.1:8000/**/team-preview*", async (route) => {
+  await fixture(page, false, api);
+  await page.route(`${api}/**/team-preview*`, async (route) => {
     const request = route.request();
     if (request.method() !== "GET") return route.fallback();
     const params = new URL(request.url()).searchParams;
@@ -252,8 +256,19 @@ async function openSpectator(
     12,
   );
   await expect(page.locator(".spectator-matchup .move-button")).toHaveCount(48);
-  // Every sprite settles before measuring.
-  await page.waitForLoadState("networkidle");
+  // Every sprite settles before measuring (lazy ones below the fold too).
+  await page.evaluate(async () => {
+    for (const image of document.querySelectorAll(".spectator-matchup img")) {
+      image.scrollIntoView({ block: "center" });
+      await new Promise((resolve) => setTimeout(resolve, 40));
+    }
+    window.scrollTo(0, 0);
+  });
+  await page.waitForFunction(() =>
+    [
+      ...document.querySelectorAll<HTMLImageElement>(".spectator-matchup img"),
+    ].every((image) => image.complete),
+  );
 }
 
 for (const size of [

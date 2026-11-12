@@ -5,6 +5,13 @@ milestone record; it does not maintain a second live phase-status ledger.
 
 ## Current project position
 
+- Felicidad máxima en el PC y Batallas › Espectador sin scroll (2026-11-12): **PUBLICADO /
+  VERIFICADO**. Launcher 0.26.15 en el canal estable (instalador `9eb3a60b…`, firma válida),
+  web `08fb936b` (rollback `5e241403`), código `fb92000`. Antes: Launcher 0.26.14 y API
+  `010a6546` (2026-11-11, bucle de actualización y nombres de objetos). Sin SQL, API ni verifier.
+  Continuar desde el tip de `origin/claude/net-friendship-discord`.
+  [Registro vivo](work-in-progress/felicidad-pc-y-batallas-espectador.md).
+
 - Avisos, detector v2 (2026-11-09): **PUBLICADO / VERIFICADO**. Solo objetos competitivos y
   de crianza, desde una unidad, mochila más equipados. API `a15cfd4f` (rollback `336f3f05`),
   web `681d7e85` (rollback `983449a9`), fuente `f8c9a8b`. Sin SQL ni Launcher. Primer análisis
@@ -1278,3 +1285,11 @@ pendiente de una temporada descartada bloqueaba la cola de sincronización y la 
 la Liga nunca se enviaba. Sin SQL, Launcher nuevo ni datos modificados. Falta confirmar con
 el entrenador afectado (`ByVisan02` por inferencia; ningún registro se llama Víctor). Ver
 [registro](work-in-progress/launcher-discarded-season-sync.md).
+
+## Felicidad máxima en el PC y Batallas › Espectador (2026-11-12)
+
+Launcher 0.26.15: «Felicidad máxima» lista el equipo y todas las cajas del PC (filtro por sitio y
+buscador) y sube a 255 la felicidad del Pokémon elegido donde está, con la misma operación
+`max_friendship`, copia, journal, relectura y restauración. Web `08fb936b`: en Espectador los dos
+equipos completos caben sin scroll a 1650×900, 1920×1080 y 1366×768. Sin SQL ni cambios de API.
+Ver [registro](work-in-progress/felicidad-pc-y-batallas-espectador.md).

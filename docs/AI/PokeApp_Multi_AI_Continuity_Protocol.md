@@ -59,6 +59,19 @@ installed Launchers close the row. "Víctor" has no production record; ByVisan02
 inference awaiting the owner. Live confirmation pending. Record:
 [discarded-season sync](../work-in-progress/launcher-discarded-season-sync.md).
 
+Launcher update loop and item names (2026-11-11, PUBLISHED): `259a9e3`, API `010a6546`
+(rollback `4af3e38a`), web `5e241403`, Launcher 0.26.14. Record:
+[update loop and item names](../work-in-progress/launcher-update-loop-and-item-names.md).
+
+Felicidad máxima in the PC and Batallas › Espectador (2026-11-12, PUBLISHED): `fb92000`,
+Launcher 0.26.15 (installer `9eb3a60b…`, stable feed, signature valid), web `08fb936b`
+(rollback `5e241403`); API, SQL and verifier unchanged. `max_friendship` now also targets
+a PC box slot in place (`location: "box"` + `box_index`; party intents keep their old shape so
+earlier journals still verify); the confirmation is bound to `box:<box>:<slot>:<hash>` or
+`party:<slot>:<hash>`. Espectador uses `MatchupRoster` + `web/src/design/matchup.css`;
+`web/e2e/spectator-fit.spec.ts` guards the no-scroll fit. Record:
+[Felicidad PC y Espectador](../work-in-progress/felicidad-pc-y-batallas-espectador.md).
+
 Normativa (2026-11-09): static rulebook at `/normativa`, content in
 `web/src/features/normativa-content.ts`. A rule change is an edit there, its
 `rulebookUpdated` date and a web deploy. Revivir and Robar are shown as available
