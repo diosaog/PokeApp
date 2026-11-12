@@ -198,6 +198,8 @@ let core = { status: "READY", message: "", stalled: false };
 contextBridge.exposeInMainWorld("launcher", {
   __trainingCapture: (label) =>
     ipcRenderer.invoke("smoke:training-capture", label),
+  __friendshipCapture: (label) =>
+    ipcRenderer.invoke("smoke:friendship-capture", label),
   state: async () => {
     if (core.status !== "READY") throw new Error(core.message);
     return state();
@@ -215,6 +217,11 @@ contextBridge.exposeInMainWorld("launcher", {
   deliveries: async () => (calls.push(["deliveries"]), { status: "QUEUED" }),
   addDelivery: async (...args) => (
     calls.push(["delivery", ...args]),
+    { status: "QUEUED" }
+  ),
+  friendship: async () => (calls.push(["friendship"]), { status: "QUEUED" }),
+  applyFriendship: async (...args) => (
+    calls.push(["friendship-apply", ...args]),
     { status: "QUEUED" }
   ),
   trainingList: async () => (calls.push(["training-list"]), { status: "DONE" }),

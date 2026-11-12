@@ -45,6 +45,16 @@ export function launcherRaisesFriendship() {
   const [major, minor, patch] = version.slice(1).map(Number);
   return major > 0 || minor > 26 || (minor === 26 && patch >= 12);
 }
+// From 0.26.15 that dialog also lists every PC box (the Pokémon is raised
+// where it is); older Launchers still offer only the party.
+export function launcherRaisesBoxFriendship() {
+  const version = /PokeAppLauncher\/(\d+)\.(\d+)\.(\d+)/.exec(
+    typeof navigator === "undefined" ? "" : navigator.userAgent,
+  );
+  if (!version) return false;
+  const [major, minor, patch] = version.slice(1).map(Number);
+  return major > 0 || minor > 26 || (minor === 26 && patch >= 15);
+}
 // «Revivir Pokémon» opens the Launcher's native dead-box dialog (0.26.13+).
 export const revivePath = "/escritorio/revivir";
 export function launcherRevives() {

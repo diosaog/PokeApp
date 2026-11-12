@@ -1,10 +1,13 @@
 import { Fragment, useState } from "react";
 import type { Model } from "../api/types";
-import { pokemonName } from "../pokemon/localization";
+import { pokemonName, pokemonTitle } from "../pokemon/localization";
 import {
   ItemIcon,
   MovePopover,
   IVBars,
+  PokemonSprite,
+  PokemonStatusFlags,
+  TypeBadge,
   typeClass,
   SpriteGeneration,
   gameGeneration,
@@ -43,14 +46,14 @@ type Selection = { mode: Mode; first?: string; second?: string };
 export function BattlePage() {
   const { season } = useApp();
   return (
-    <>
+    <div className="battle-page">
       <Heading eyebrow="BATALLAS" title="Team Preview">
         Equipos de la jornada. Todo lo que necesitas antes de combatir.
       </Heading>
       <WithSeason>
         <Preview key={season} season={season} />
       </WithSeason>
-    </>
+    </div>
   );
 }
 
@@ -78,37 +81,30 @@ function Preview({ season }: { season: string }) {
     data?.trainers[0]?.trainer_id ??
     "";
   const second = selection.second ?? data?.teams[1]?.trainer_id ?? "";
+  const ready = !query.isPending && !query.error && data ? data : null;
+  const spectator = selection.mode === "spectator";
   return (
     <>
-      <div className="tabs" role="tablist" aria-label="Modo de Team Preview">
-        {(["spectator", "battle"] as const).map((mode) => (
-          <button
-            key={mode}
-            role="tab"
-            aria-selected={selection.mode === mode}
-            onClick={() => {
-              setSelection({ mode, first: first || undefined });
-            }}
-          >
-            {mode === "spectator" ? "Espectador" : "Batalla"}
-          </button>
-        ))}
-      </div>
-      <p>
-        {selection.mode === "spectator"
-          ? "Compara dos equipos públicos."
-          : "Consulta un equipo. Tus detalles privados solo aparecen al elegirte a ti."}
-      </p>
-      {query.isPending ? (
-        <Loading />
-      ) : query.error ? (
-        <Notice error={query.error} />
-      ) : (
-        data && (
+      <div className="battle-controls">
+        <div className="tabs" role="tablist" aria-label="Modo de Team Preview">
+          {(["spectator", "battle"] as const).map((mode) => (
+            <button
+              key={mode}
+              role="tab"
+              aria-selected={selection.mode === mode}
+              onClick={() => {
+                setSelection({ mode, first: first || undefined });
+              }}
+            >
+              {mode === "spectator" ? "Espectador" : "Batalla"}
+            </button>
+          ))}
+        </div>
+        {ready && (
           <>
             <Tag>
-              {data.day
-                ? `J${data.day.number} · Team Locks`
+              {ready.day
+                ? `J${ready.day.number} · Team Locks`
                 : "Sin jornada preparada · equipos actuales"}
             </Tag>
             <div className="toolbar">
@@ -134,7 +130,7 @@ function Preview({ season }: { season: string }) {
                     })
                   }
                 >
-                  {data.trainers.map((t) => (
+                  {ready.trainers.map((t) => (
                     <option key={t.trainer_id} value={t.trainer_id}>
                       {t.display_name}
                     </option>
@@ -153,7 +149,7 @@ function Preview({ season }: { season: string }) {
                       })
                     }
                   >
-                    {data.trainers
+                    {ready.trainers
                       .filter((t) => t.trainer_id !== first)
                       .map((t) => (
                         <option key={t.trainer_id} value={t.trainer_id}>
@@ -163,30 +159,41 @@ function Preview({ season }: { season: string }) {
                   </select>
                 </Field>
               )}
-              {data.season.status === "active" &&
-                data.trainers.some(
+              {ready.season.status === "active" &&
+                ready.trainers.some(
                   (t) =>
                     t.trainer_id === me?.trainer_id && t.status === "active",
                 ) && <FixTeamButton />}
             </div>
+          </>
+        )}
+        <p className="battle-mode-hint">
+          {spectator
+            ? "Compara dos equipos públicos."
+            : "Consulta un equipo. Tus detalles privados solo aparecen al elegirte a ti."}
+        </p>
+      </div>
+      {query.isPending ? (
+        <Loading />
+      ) : query.error ? (
+        <Notice error={query.error} />
+      ) : (
+        data && (
+          <>
             {!data.trainers.length ? (
               <Empty>Aún no hay participantes.</Empty>
             ) : (
-              <div
-                className={
-                  selection.mode === "spectator"
-                    ? "battle-grid spectator-matchup"
-                    : ""
-                }
-              >
+              <div className={spectator ? "battle-grid spectator-matchup" : ""}>
                 {data.teams.map((entry, index) => (
                   <Fragment key={entry.trainer_id}>
-                    {selection.mode === "spectator" && index === 1 && (
+                    {spectator && index === 1 && (
                       <div className="spectator-vs" aria-label="Contra">
-                        VS
+                        <span>VS</span>
                       </div>
                     )}
-                    <Card className="battle-side">
+                    <Card
+                      className={`battle-side${spectator ? (index === 0 ? " matchup-left" : " matchup-right") : ""}`}
+                    >
                       <h2>
                         {
                           data.trainers.find(
@@ -197,6 +204,7 @@ function Preview({ season }: { season: string }) {
                       <TeamEntry
                         entry={entry}
                         generation={generationOf(entry.trainer_id)}
+                        compact={spectator}
                       />
                     </Card>
                   </Fragment>
@@ -222,11 +230,15 @@ function PrivateDetails({ pokemon }: { pokemon: Model<"PrivatePokemonRead"> }) {
 function TeamEntry({
   entry,
   generation,
+  compact = false,
 }: {
   entry: Entry;
   generation: ReturnType<typeof gameGeneration>;
+  // Spectator: both teams face each other on one screen (public fields only).
+  compact?: boolean;
 }) {
   const self = entry.visibility === "self";
+  const Team = compact ? MatchupRoster : Roster;
   if (entry.lock)
     return (
       <>
@@ -241,7 +253,7 @@ function TeamEntry({
           <LockStatus status={entry.lock.timing_status ?? "unknown"} /> ·{" "}
           {date(entry.lock.locked_at)}
         </p>
-        <Roster team={entry.lock.team} self={self} generation={generation} />
+        <Team team={entry.lock.team} self={self} generation={generation} />
       </>
     );
   if (entry.provisional)
@@ -255,7 +267,7 @@ function TeamEntry({
             ? "Última partida personal sincronizada; aún no está vinculada a la Liga. No es un Team Lock."
             : "Equipo actual de su partida oficial. No es un Team Lock: puede cambiar hasta que lo fije."}
         </p>
-        <Roster
+        <Team
           team={entry.provisional.team}
           self={self}
           generation={generation}
@@ -348,6 +360,95 @@ function Roster({
             )}
           </article>
         ))}
+      </div>
+    </SpriteGeneration>
+  );
+}
+
+// Spectator face-off: the twelve Pokémon of both teams fit one desktop screen.
+// Each row keeps exactly the public card's data (sprite, nickname, species,
+// level, types, item, public status flags and the four moves with their PP and
+// type colour), only laid out densely. Spectator reads are always public: no
+// private field (ability, nature, IVs) is ever drawn here.
+function MatchupRoster({
+  team,
+  generation,
+}: {
+  team: ShownPokemon[];
+  self: boolean;
+  generation: ReturnType<typeof gameGeneration>;
+}) {
+  return (
+    <SpriteGeneration value={generation}>
+      <div className="battle-roster matchup-roster">
+        {team.map((pokemon, index) => {
+          const item = pokemon.item
+            ? pokemonName(
+                "item",
+                pokemon.item,
+                pokemon.item_generation ?? undefined,
+              )
+            : null;
+          return (
+            <article
+              className={`battle-pokemon matchup-pokemon ${typeClass(pokemon.types?.[0])}`}
+              key={index}
+            >
+              <span className="matchup-sprite">
+                <PokemonSprite
+                  species={pokemon.species}
+                  form={pokemon.form}
+                  shiny={pokemon.is_shiny}
+                />
+              </span>
+              <div className="matchup-identity">
+                <strong>{pokemonTitle(pokemon)}</strong>
+                <span className="matchup-species">
+                  {pokemon.nickname
+                    ? pokemonName("species", pokemon.species)
+                    : "Pokémon"}{" "}
+                  · Nv. {pokemon.level ?? "—"}
+                  {!!pokemon.form && ` · Forma ${pokemon.form}`}
+                </span>
+                {!!pokemon.types?.length && (
+                  <span className="matchup-types">
+                    {pokemon.types.map((t) => (
+                      // A tight row shows only the type icon; the name stays
+                      // in the badge for assistive technology and on hover.
+                      <span
+                        className="matchup-type"
+                        key={t}
+                        title={pokemonName("type", t)}
+                      >
+                        <TypeBadge type={t} />
+                      </span>
+                    ))}
+                  </span>
+                )}
+                <span className="held-item">
+                  {item && <ItemIcon name={item} />}
+                  {item ?? "Sin objeto"}
+                </span>
+                <PokemonStatusFlags flags={pokemon.status_flags} />
+              </div>
+              <div className="battle-moves" aria-label="Movimientos">
+                {Array.from({ length: 4 }, (_, i) =>
+                  pokemon.moves?.[i] ? (
+                    <MovePopover
+                      key={i}
+                      name={pokemon.moves[i].name}
+                      pp={pokemon.moves[i].pp}
+                    />
+                  ) : (
+                    <span className="move-vacant" key={i}>
+                      No disponible
+                    </span>
+                  ),
+                )}
+              </div>
+            </article>
+          );
+        })}
       </div>
     </SpriteGeneration>
   );

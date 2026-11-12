@@ -49,10 +49,10 @@ vi.mock("../state", () => ({
             : path.endsWith("/robbery/board")
               ? mocks.board
               : path.endsWith("/item-uses")
-              ? mocks.itemUses
-              : path.endsWith("/transfers")
-                ? mocks.transfers
-                : mocks.inventory,
+                ? mocks.itemUses
+                : path.endsWith("/transfers")
+                  ? mocks.transfers
+                  : mocks.inventory,
       isPending: false,
       error: null,
     };
@@ -357,7 +357,9 @@ const leg = (
 it("keeps robbery unavailable unless the backend enables this account", () => {
   mocks.inventory = { purchases: [robbery], targets: [], physical_items: true };
   render(<Inventory />);
-  expect(screen.getByText(/Ahora mismo no se puede aplicar/)).toBeInTheDocument();
+  expect(
+    screen.getByText(/Ahora mismo no se puede aplicar/),
+  ).toBeInTheDocument();
   expect(
     screen.queryByRole("button", { name: "Canjear" }),
   ).not.toBeInTheDocument();
@@ -381,7 +383,12 @@ it("requests an enabled robbery through the paired transfer route only", async (
             location: "Caja 1 · 1",
             available_at: "2026-10-01T10:00:00Z",
             blocked: null,
-            pokemon: { species: "Eevee", nickname: "", item: "", is_shiny: false },
+            pokemon: {
+              species: "Eevee",
+              nickname: "",
+              item: "",
+              is_shiny: false,
+            },
           },
           {
             pokemon_entity_id: "shielded",
@@ -389,7 +396,12 @@ it("requests an enabled robbery through the paired transfer route only", async (
             available_at: "2026-10-01T10:00:00Z",
             blocked: "shielded",
             message: "Este Pokémon está blindado.",
-            pokemon: { species: "Mew", nickname: "", item: "", is_shiny: false },
+            pokemon: {
+              species: "Mew",
+              nickname: "",
+              item: "",
+              is_shiny: false,
+            },
           },
         ],
       },
@@ -408,7 +420,9 @@ it("requests an enabled robbery through the paired transfer route only", async (
   expect(screen.getByText(/Ronda de robos 2/)).toBeInTheDocument();
   expect(screen.getByRole("button", { name: /Robado/ })).toBeDisabled();
   expect(
-    screen.getByText("Este entrenador ya ha sido robado durante la ronda actual."),
+    screen.getByText(
+      "Este entrenador ya ha sido robado durante la ronda actual.",
+    ),
   ).toBeInTheDocument();
   fireEvent.click(screen.getByRole("button", { name: /Rival/ }));
   expect(screen.getByRole("button", { name: /Mew/ })).toBeDisabled();
@@ -629,10 +643,12 @@ it("offers «Felicidad máxima» only where it works: the native dialog of Launc
     unlimited_items: unlimited,
     physical_items: true,
   };
-  for (const [agent, native] of [
-    ["Mozilla/5.0 PokeAppLauncher/0.26.12", true],
-    ["Mozilla/5.0 PokeAppLauncher/0.26.11", false],
-    ["Mozilla/5.0 (Windows NT 10.0) Chrome/130", false],
+  for (const [agent, native, pc] of [
+    ["Mozilla/5.0 PokeAppLauncher/0.26.15", true, true],
+    ["Mozilla/5.0 PokeAppLauncher/0.26.14", true, false],
+    ["Mozilla/5.0 PokeAppLauncher/0.26.12", true, false],
+    ["Mozilla/5.0 PokeAppLauncher/0.26.11", false, false],
+    ["Mozilla/5.0 (Windows NT 10.0) Chrome/130", false, false],
   ] as const) {
     const spy = vi.spyOn(navigator, "userAgent", "get").mockReturnValue(agent);
     const { unmount } = render(
@@ -645,6 +661,10 @@ it("offers «Felicidad máxima» only where it works: the native dialog of Launc
         screen.getByRole("link", { name: "Subir felicidad" }),
       ).toHaveAttribute("href", "/escritorio/felicidad");
       expect(screen.getByText("Felicidad máxima")).toBeInTheDocument();
+      // 0.26.15+: the dialog also lists the PC boxes; older ones the party.
+      expect(
+        document.getElementById("unlimited-felicidad")?.textContent,
+      ).toContain(pc ? "de tu equipo o de tus cajas del PC" : "de tu equipo.");
     } else
       expect(screen.queryByText("Felicidad máxima")).not.toBeInTheDocument();
     unmount();

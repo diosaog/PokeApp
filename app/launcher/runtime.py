@@ -27,7 +27,14 @@ from app.launcher.journal import LocalConflict
 # core then stops the build's own checks instead of every «Objetos ∞» read
 # (0.26.5 shipped without app.domain.unlimited_items and failed silently).
 from app.launcher.quick_items import inventory_view, quick_item_intent
-from app.launcher.friendship import KIND as FRIENDSHIP_KIND, MAX_FRIENDSHIP, friendship_intent, party_view
+from app.launcher.friendship import (
+    KIND as FRIENDSHIP_KIND,
+    MAX_FRIENDSHIP,
+    find_member as friendship_member,
+    friendship_intent,
+    party_view,
+    valid_place as friendship_place,
+)
 from app.launcher.save_activity import SaveActivityGate, SaveBusy, save_read
 from app.launcher.secrets import TokenStore
 from app.launcher.sync import SaveWatchService
@@ -71,20 +78,21 @@ QUICK_ERRORS = {
 QUICK_READ_FAILED = "No se pudieron leer las cantidades de tu partida. Pulsa «Volver a leer las cantidades»."
 # «Felicidad máxima» (app/launcher/friendship.py): same engine and journal.
 FRIENDSHIP_COMMANDS = ("friendship_refresh", "friendship_apply")
-FRIENDSHIP_READ_FAILED = "No se pudo leer el equipo de tu partida. Pulsa «Volver a leer el equipo»."
+FRIENDSHIP_READ_FAILED = "No se pudieron leer tu equipo y tus cajas. Pulsa «Volver a leer equipo y cajas»."
 FRIENDSHIP_ERRORS = QUICK_ERRORS | {
     "FRIENDSHIP_ALREADY_MAX": "Ese Pokémon ya tiene la felicidad máxima (255). Tu partida no ha cambiado.",
-    "FRIENDSHIP_NOT_ELIGIBLE": "Ese hueco del equipo no admite este cambio (por ejemplo, un huevo). Tu partida no ha cambiado.",
-    "UNSAFE_TARGET": "Ese hueco del equipo no admite este cambio (por ejemplo, un huevo). Tu partida no ha cambiado.",
-    "FRIENDSHIP_DISABLED": "Subir la felicidad aún no está activado en este Launcher. Ya puedes ver la felicidad de tu equipo.",
+    "FRIENDSHIP_NOT_ELIGIBLE": "Ese Pokémon ya no está en ese sitio o no admite este cambio (por ejemplo, un huevo). Vuelve a leer equipo y cajas; tu partida no ha cambiado.",
+    "UNSAFE_TARGET": "Ese Pokémon ya no está en ese sitio o no admite este cambio (por ejemplo, un huevo). Vuelve a leer equipo y cajas; tu partida no ha cambiado.",
+    "STALE_MUTATION": "Ese Pokémon ya no está en ese sitio. Vuelve a leer equipo y cajas; tu partida no ha cambiado.",
+    "FRIENDSHIP_DISABLED": "Subir la felicidad aún no está activado en este Launcher. Ya puedes ver la felicidad de tus Pokémon.",
     "PRODUCTION_WRITES_DISABLED": "Subir la felicidad aún no está activado en este Launcher. Tu partida no ha cambiado.",
     "EMULATOR_RUNNING": "El emulador está abierto: ciérralo (y el juego) y vuelve a confirmar. Tu partida no ha cambiado.",
     "CORRUPT_SAVE": "No se pudo preparar un archivo verificable. Tu partida no se ha modificado.",
     "NATIVE_VERIFICATION_FAILED": "No se pudo preparar un archivo verificable. Tu partida no se ha modificado.",
     "UNSUPPORTED_FORMAT": "Esta partida no admite este cambio. Juegos admitidos: X/Y, Rubí Omega/Zafiro Alfa y Sol/Luna/Ultrasol/Ultraluna.",
-    "VERIFICATION_FAILED": "No se pudo leer el equipo de tu partida. Pulsa «Volver a leer el equipo»; si sigue fallando, guarda de nuevo en el juego.",
-    "NATIVE_WRITER_FAILURE": "No se pudo leer el equipo de tu partida. Pulsa «Volver a leer el equipo»; si sigue fallando, reinicia el Launcher.",
-    "SAVE_CHANGED_DURING_READ": "Tu partida estaba guardándose. Vuelve a leer el equipo en unos segundos.",
+    "VERIFICATION_FAILED": "No se pudieron leer tu equipo y tus cajas. Pulsa «Volver a leer equipo y cajas»; si sigue fallando, guarda de nuevo en el juego.",
+    "NATIVE_WRITER_FAILURE": "No se pudieron leer tu equipo y tus cajas. Pulsa «Volver a leer equipo y cajas»; si sigue fallando, reinicia el Launcher.",
+    "SAVE_CHANGED_DURING_READ": "Tu partida estaba guardándose. Vuelve a leer equipo y cajas en unos segundos.",
 }
 # «Revivir Pokémon» (app/launcher/revive.py): server claim + independent proof.
 REVIVE_COMMANDS = ("revive_refresh", "revive_apply")
@@ -510,10 +518,10 @@ class LauncherRuntime:
                 return {"status": "BUSY"}
             return {"status": "QUEUED"}
         if name in FRIENDSHIP_COMMANDS:
+            # One exact place: a party slot (no box) or a PC box and slot.
             valid = args == {} if name == "friendship_refresh" else (
-                set(args) == {"slot_index", "pokemon_sha256"}
-                and type(args["slot_index"]) is int
-                and 0 <= args["slot_index"] <= 5
+                set(args) == {"location", "box_index", "slot_index", "pokemon_sha256"}
+                and friendship_place(args["location"], args["box_index"], args["slot_index"])
                 and isinstance(args["pokemon_sha256"], str)
                 and len(args["pokemon_sha256"]) == 64
                 and all(c in "0123456789abcdef" for c in args["pokemon_sha256"])
@@ -1214,7 +1222,9 @@ class LauncherRuntime:
                 return
             if not enabled:
                 raise WriteSafetyError("FRIENDSHIP_DISABLED")
-            intent = friendship_intent(native, data, args["slot_index"], args["pokemon_sha256"])
+            intent = friendship_intent(
+                native, data, args["slot_index"], args["pokemon_sha256"], box_index=args["box_index"]
+            )
             # Existing journal: verified backup, process check, readback, recovery.
             self.writes.offer(intent, closed_emulator_confirmed=True)
             self._apply_friendship(intent)
@@ -1256,17 +1266,22 @@ class LauncherRuntime:
             raise WriteSafetyError(error or "NATIVE_VERIFICATION_FAILED")
         self._patch(friendship=None)
         self._load_local()
+        location = intent.mutation["location"]
+        box = intent.mutation.get("box_index")
         slot = intent.mutation["slot_index"]
         try:
             data = self.writes.engine.files.read_path(Path(self.writes.selected()))
             view = party_view(self.writes.engine.native, data)
-            member = next(m for m in view["party"] if m["slot_index"] == slot)
+            # Re-read in the same place: the Pokémon was changed where it is.
+            member = friendship_member(view, location, box, slot)
         except Exception:  # noqa: BLE001 - the change itself is verified
             view = member = None
         if view is not None:
             self._patch(friendship=view | {"application_enabled": True})
         self._patch(
             friendship_result={
+                "location": location,
+                "box_index": box,
                 "slot_index": slot,
                 # Re-read from the written file, never assumed.
                 "friendship": member["friendship"] if member else None,

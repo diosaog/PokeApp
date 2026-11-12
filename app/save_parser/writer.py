@@ -340,29 +340,42 @@ class PkhexProcessWriter:
                 "source_sha256": response["source_sha256"], **info}
 
     def inspect_friendship(self, source):
-        """Read-only current party with each member's real (game) friendship,
-        from these exact bytes. Eggs and unsupported slots are not eligible."""
+        """Read-only current party and every occupied PC box slot, each with its
+        real (game) friendship, from these exact bytes. Eggs, locked slots and
+        unsupported Pokémon are not eligible; empty box slots are not listed."""
         if type(source) is not bytes or len(source) not in NATIVE_SIZES.values():
             raise NativeWriteError("UNSUPPORTED_FORMAT")
         response = self._run("--inspect-friendship", dict(schema_version=1,
             source_base64=base64.b64encode(source).decode("ascii")))
         info = response["semantic_diff"]
         keys = {"slot_index", "species", "form", "nickname", "level", "friendship", "eligible", "pokemon_sha256"}
-        party = info.get("party") if isinstance(info, dict) and set(info) == {"party"} else None
+        valid = isinstance(info, dict) and set(info) == {"party", "boxes"}
+        party = info["party"] if valid else None
+        boxes = info["boxes"] if valid else None
+
+        def bad(m, extra):
+            return (not isinstance(m, dict) or set(m) != keys | extra
+                    or any(type(m[k]) is not int for k in ("slot_index", "species", "form", "level", "friendship"))
+                    or not 0 <= m["species"] <= 1023 or not 0 <= m["form"] <= 255 or not 0 <= m["level"] <= 100
+                    or not 0 <= m["friendship"] <= 255 or type(m["eligible"]) is not bool
+                    or not isinstance(m["nickname"], str) or len(m["nickname"]) > 24
+                    or not re.fullmatch(r"[a-f0-9]{64}", str(m["pokemon_sha256"])))
+
         if (response["status"] != "inspected" or response["source_sha256"] != _digest(source)
             or response["game"] not in NATIVE_SIZES or not re.fullmatch(r"[a-f0-9]{64}", str(response["trainer_key"]))
             or response["output_base64"] is not None or response["output_sha256"] is not None
             or not isinstance(party, list) or len(party) > 6
-            or any(not isinstance(m, dict) or set(m) != keys or m["slot_index"] != i
-                   or any(type(m[k]) is not int for k in ("slot_index", "species", "form", "level", "friendship"))
-                   or not 0 <= m["species"] <= 1023 or not 0 <= m["form"] <= 255 or not 0 <= m["level"] <= 100
-                   or not 0 <= m["friendship"] <= 255 or type(m["eligible"]) is not bool
-                   or not isinstance(m["nickname"], str) or len(m["nickname"]) > 24
-                   or not re.fullmatch(r"[a-f0-9]{64}", str(m["pokemon_sha256"]))
-                   for i, m in enumerate(party))):
+            or any(bad(m, set()) or m["slot_index"] != i for i, m in enumerate(party))
+            or not isinstance(boxes, list) or len(boxes) > 32 * 30
+            or any(bad(m, {"box_index"}) or type(m["box_index"]) is not int or not 0 <= m["box_index"] < 32
+                   or not 0 <= m["slot_index"] < 30 or m["species"] == 0 for m in boxes)):
+            raise NativeWriteError("VERIFICATION_FAILED")
+        # Strictly increasing box/slot order: each place is listed at most once.
+        places = [m["box_index"] * 30 + m["slot_index"] for m in boxes]
+        if any(a >= b for a, b in zip(places, places[1:])):
             raise NativeWriteError("VERIFICATION_FAILED")
         return {"game": response["game"], "trainer_key": response["trainer_key"],
-                "source_sha256": response["source_sha256"], "party": party}
+                "source_sha256": response["source_sha256"], "party": party, "boxes": boxes}
 
     def audit_snapshot(self, source):
         """Read-only bag and friendship of these exact bytes, for the admin audit."""

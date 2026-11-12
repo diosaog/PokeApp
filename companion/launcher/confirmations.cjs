@@ -124,13 +124,28 @@ const GAMES = {
 const CLOSED =
   "\n\nEl Launcher comprueba antes que el emulador está cerrado y que el archivo está libre; si no, no cambia nada y te dice por qué.";
 const ITEMS = { rare_candy: "Caramelo Raro", heart_scale: "Escama Corazón" };
-// «Felicidad máxima»: target is "<party slot>:<that Pokémon's exact hash>".
+// «Felicidad máxima»: target is the exact place and that Pokémon's exact
+// hash: "party:<slot>:<hash>" or "box:<box>:<slot>:<hash>".
 const friendshipFor = (state, target) => {
-  const [slot, hash] = String(target).split(":");
-  return (state.friendship?.party || []).find(
-    (m) => String(m.slot_index) === slot && m.pokemon_sha256 === hash,
-  );
+  const parts = String(target).split(":");
+  const view = state.friendship || {};
+  if (parts[0] === "party" && parts.length === 3)
+    return (view.party || []).find(
+      (m) => String(m.slot_index) === parts[1] && m.pokemon_sha256 === parts[2],
+    );
+  if (parts[0] === "box" && parts.length === 4)
+    return (view.boxes || []).find(
+      (m) =>
+        String(m.box_index) === parts[1] &&
+        String(m.slot_index) === parts[2] &&
+        m.pokemon_sha256 === parts[3],
+    );
+  return undefined;
 };
+const friendshipPlace = (member) =>
+  member.box_index == null
+    ? `Equipo, posición ${member.slot_index + 1}`
+    : `Caja ${member.box_index + 1}, posición ${member.slot_index + 1}`;
 // «Revivir Pokémon»: target is "<purchase>:<pokemon entity>".
 const reviveFor = (state, target) => {
   const [purchaseId, entityId] = String(target).split(":");
@@ -173,7 +188,7 @@ function describe(kind, target, state) {
     if (!state.selected_save) throw new Error("Selecciona tu partida primero.");
     if (!member || !member.eligible)
       throw new Error(
-        "Vuelve a leer el equipo: ese Pokémon ya no está en esa posición.",
+        "Vuelve a leer equipo y cajas: ese Pokémon ya no está en ese sitio.",
       );
     if (!state.friendship?.application_enabled)
       throw new Error("Subir la felicidad aún no está activado en este Launcher.");
@@ -192,8 +207,8 @@ function describe(kind, target, state) {
     const trainer = state.observation?.trainer?.name;
     return {
       title: "Felicidad máxima",
-      message: `${label} · Nv. ${member.level}${game ? ` · Pokémon ${GAMES[game] || game}` : ""}${trainer ? ` · ${trainer}` : ""}`,
-      detail: `Felicidad: ${member.friendship} → 255. Solo cambia ese valor: no toca el afecto de Pokémon-Amie, la especie, los movimientos ni nada más. No hace evolucionar al Pokémon por sí sola: si evoluciona por amistad, todavía tendrá que cumplir su condición en el juego (por ejemplo, subir de nivel). Antes de cambiar nada se guarda y verifica una copia completa de tu partida; después se vuelve a leer para comprobar el resultado.${CLOSED}`,
+      message: `${label} · Nv. ${member.level} · ${friendshipPlace(member)}${game ? ` · Pokémon ${GAMES[game] || game}` : ""}${trainer ? ` · ${trainer}` : ""}`,
+      detail: `Felicidad: ${member.friendship} → 255. El Pokémon se queda donde está. Solo cambia ese valor: no toca el afecto de Pokémon-Amie, la especie, los movimientos ni nada más. No hace evolucionar al Pokémon por sí sola: si evoluciona por amistad, todavía tendrá que cumplir su condición en el juego (por ejemplo, subir de nivel). Antes de cambiar nada se guarda y verifica una copia completa de tu partida; después se vuelve a leer para comprobar el resultado.${CLOSED}`,
       go: "Subir a 255",
     };
   }

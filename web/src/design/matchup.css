@@ -1,0 +1,579 @@
+/* ---------- BATALLAS: compact page head, one band of controls ----------
+   Owner request 2026-11-12: in Espectador both full teams (6 vs 6) must be
+   visible at once on a desktop screen (reference 1650×900) with no page
+   scroll and no per-team scrollbars. Presentation only: same reads, same
+   public fields. */
+
+/* The screen fills the window exactly: the footer rests at the bottom (it
+   never slides up or away while data arrives) and adds no scroll. */
+.section-battle .workspace {
+  display: flex;
+  flex-direction: column;
+}
+.section-battle main#main {
+  flex: 1 0 auto;
+  width: 100%;
+  min-height: 0;
+  margin: 0 auto;
+  padding: 16px 28px 18px;
+}
+.battle-page > .page-heading {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 16px;
+  margin: 0 0 12px;
+  max-width: none;
+}
+.battle-page > .page-heading .eyebrow {
+  margin: 0;
+}
+.battle-page > .page-heading h1 {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin: 0;
+  font-size: clamp(1.45rem, 1.9vw, 1.9rem);
+  line-height: 1.1;
+}
+.battle-page > .page-heading h1::after {
+  margin: 0;
+  flex: none;
+}
+.battle-page > .page-heading p {
+  flex: 1 1 260px;
+  margin: 0;
+  font-size: 0.8rem;
+  line-height: 1.4;
+}
+.battle-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 8px 14px;
+  margin-bottom: 12px;
+}
+.battle-controls .tabs {
+  margin: 0;
+  padding: 4px;
+}
+.battle-controls .tabs button {
+  padding: 8px 16px;
+  font-size: 0.76rem;
+}
+.battle-controls > .tag {
+  align-self: center;
+}
+.battle-controls .toolbar {
+  margin: 0;
+  gap: 8px 12px;
+  align-items: flex-end;
+}
+.battle-controls .toolbar .field {
+  min-width: 150px;
+  gap: 3px;
+}
+.battle-controls .toolbar .field label {
+  margin: 0;
+  font-size: 0.66rem;
+}
+.battle-controls .toolbar select {
+  min-height: 0;
+  height: 38px;
+  padding-block: 0;
+}
+.battle-controls .toolbar .button,
+.battle-controls .toolbar button {
+  min-height: 38px;
+}
+.battle-mode-hint {
+  flex: 1 1 170px;
+  align-self: center;
+  margin: 0;
+  font-size: 0.76rem;
+  color: var(--c-text-soft);
+}
+
+/* ---------- Espectador: two teams face each other ---------- */
+.spectator-matchup {
+  grid-template-columns: minmax(0, 1fr) 36px minmax(0, 1fr);
+  gap: 0 8px;
+  align-items: stretch;
+}
+.spectator-matchup .battle-side {
+  container-type: inline-size;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  align-content: flex-start;
+  gap: 4px 10px;
+  margin: 0;
+  padding: 10px;
+}
+.spectator-matchup .battle-side > h2 {
+  margin: 0;
+  font-size: 1.2rem;
+  line-height: 1.2;
+}
+.spectator-matchup .battle-side > .team-source {
+  margin: 0;
+}
+.spectator-matchup .battle-side > p {
+  margin: 0;
+  font-size: 0.72rem;
+  line-height: 1.35;
+}
+.spectator-matchup .battle-side > p.muted,
+.spectator-matchup .battle-side > .empty {
+  flex: 1 0 100%;
+}
+/* The VS medallion sits on a light line between the two teams. */
+.spectator-vs {
+  position: relative;
+  top: auto;
+  display: grid;
+  place-items: center;
+  align-self: stretch;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: none;
+}
+.spectator-vs::before {
+  content: "";
+  position: absolute;
+  top: 6%;
+  bottom: 6%;
+  left: 50%;
+  width: 2px;
+  transform: translateX(-50%);
+  background: linear-gradient(
+    180deg,
+    transparent,
+    color-mix(in srgb, var(--c-gold) 70%, transparent),
+    transparent
+  );
+}
+.spectator-vs span {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border: 1px solid var(--c-gold);
+  border-radius: 50%;
+  background: var(--c-warm-deep);
+  color: var(--c-gold-soft);
+  font-size: 0.72rem;
+  font-weight: 850;
+  letter-spacing: 0.06em;
+  box-shadow: 0 0 22px color-mix(in srgb, var(--c-gold) 28%, transparent);
+}
+
+/* ---------- One Pokémon per row: sprite · identity · four moves ---------- */
+.spectator-matchup .matchup-roster {
+  flex: 1 0 100%;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  grid-auto-rows: 1fr;
+  gap: 6px;
+  margin: 2px 0 0;
+}
+.spectator-matchup .matchup-pokemon {
+  display: grid;
+  grid-template-columns: 54px minmax(124px, 0.8fr) minmax(0, 2fr);
+  grid-template-areas: "sprite identity moves";
+  align-items: center;
+  gap: 0 10px;
+  padding: 6px 8px;
+  box-shadow: none;
+}
+.matchup-sprite {
+  grid-area: sprite;
+  display: grid;
+  place-items: center;
+}
+.spectator-matchup .matchup-sprite .pokemon-sprite {
+  width: 54px;
+  height: 54px;
+}
+.matchup-identity {
+  grid-area: identity;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  min-width: 0;
+}
+.matchup-identity strong {
+  max-width: 100%;
+  font-size: 0.92rem;
+  line-height: 1.15;
+  letter-spacing: -0.01em;
+  overflow-wrap: anywhere;
+}
+.matchup-species {
+  font-size: 0.68rem;
+  line-height: 1.25;
+  color: var(--c-text-soft);
+}
+.matchup-types {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 3px;
+}
+.matchup-type {
+  display: inline-flex;
+}
+.matchup-types .type-badge {
+  gap: 3px;
+  padding: 1px 5px;
+  border-radius: 4px;
+  font-size: 0.58rem;
+  line-height: 1.5;
+}
+.matchup-types .type-badge img {
+  width: 10px;
+  height: 10px;
+}
+.matchup-identity .held-item {
+  max-width: 100%;
+  gap: 4px;
+  margin: 0;
+  font-size: 0.7rem;
+  line-height: 1.2;
+  color: var(--c-info-soft);
+  overflow-wrap: anywhere;
+}
+.matchup-identity .item-icon {
+  width: 18px;
+  height: 18px;
+  margin: 0;
+  flex: none;
+}
+.matchup-identity .pokemon-status-flags {
+  margin: 0;
+}
+.spectator-matchup .matchup-pokemon .battle-moves {
+  grid-area: moves;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 4px;
+  min-width: 0;
+}
+.spectator-matchup .matchup-pokemon .move-disclosure {
+  position: relative;
+  min-width: 0;
+}
+.spectator-matchup .matchup-pokemon .move-button {
+  width: 100%;
+  min-height: 32px;
+  padding: 4px 7px;
+  gap: 6px;
+  font-size: 0.72rem;
+}
+.spectator-matchup .matchup-pokemon .move-name {
+  min-width: 0;
+  line-height: 1.15;
+  text-align: left;
+}
+/* PP always shows here, also where a narrow card elsewhere hides it. */
+.spectator-matchup .matchup-pokemon .move-button small {
+  display: inline;
+  flex: none;
+  font-size: 0.62rem;
+  white-space: nowrap;
+}
+.spectator-matchup .matchup-pokemon .move-button svg {
+  flex: none;
+  width: 12px;
+  height: 12px;
+}
+.spectator-matchup .matchup-pokemon .move-vacant {
+  display: flex;
+  align-items: center;
+  min-height: 32px;
+  padding: 4px 8px;
+  font-size: 0.64rem;
+}
+/* A move's details float over the card instead of pushing the team down:
+   right-column moves open leftwards, the lower rows open upwards. */
+.spectator-matchup .matchup-pokemon:has(.move-expansion) {
+  z-index: 5;
+}
+.spectator-matchup .matchup-pokemon .move-expansion {
+  position: absolute;
+  z-index: 30;
+  top: calc(100% + 3px);
+  left: 0;
+  width: max(100%, 280px);
+  margin: 0;
+  border-top: 1px solid
+    color-mix(in srgb, var(--type) 35%, var(--c-info-deep));
+  border-radius: 8px;
+  box-shadow: var(--shadow-2, 0 12px 30px rgb(0 0 0 / 0.45));
+}
+.spectator-matchup
+  .matchup-pokemon
+  .move-disclosure:nth-child(even)
+  .move-expansion {
+  left: auto;
+  right: 0;
+}
+.spectator-matchup .matchup-pokemon:nth-child(n + 4) .move-expansion {
+  top: auto;
+  bottom: calc(100% + 3px);
+}
+
+/* Face-off: on a wide screen the second team is mirrored, so both sprites
+   look at the VS line and both movesets meet in the middle. */
+@media (min-width: 901px) {
+  .matchup-left .matchup-sprite {
+    transform: scaleX(-1);
+  }
+  .matchup-right.battle-side {
+    flex-direction: row-reverse;
+  }
+  .spectator-matchup .matchup-right .matchup-pokemon {
+    grid-template-columns: minmax(0, 2fr) minmax(124px, 0.8fr) 54px;
+    grid-template-areas: "moves identity sprite";
+  }
+  .matchup-right .matchup-identity {
+    align-items: flex-end;
+    text-align: right;
+  }
+  .matchup-right .matchup-types,
+  .matchup-right .matchup-identity .held-item {
+    justify-content: flex-end;
+  }
+}
+
+/* Tight rows (short window or narrow side): the type icons sit beside the
+   nickname, the item keeps its own line. */
+@media (min-width: 901px) and (max-height: 820px) {
+  .battle-page > .page-heading {
+    margin-bottom: 8px;
+  }
+  .battle-page > .page-heading h1 {
+    font-size: 1.4rem;
+  }
+  .battle-controls {
+    margin-bottom: 8px;
+  }
+  .battle-controls .tabs button {
+    padding-block: 6px;
+  }
+  .battle-controls .toolbar select {
+    height: 34px;
+  }
+  .battle-controls .toolbar .button,
+  .battle-controls .toolbar button {
+    min-height: 34px;
+  }
+  .spectator-matchup .battle-side {
+    padding: 8px;
+  }
+  .spectator-matchup .battle-side > h2 {
+    font-size: 1.08rem;
+  }
+  .spectator-matchup .matchup-roster {
+    gap: 4px;
+  }
+  .spectator-matchup .matchup-pokemon {
+    padding-block: 4px;
+  }
+  .spectator-matchup .matchup-pokemon .move-button,
+  .spectator-matchup .matchup-pokemon .move-vacant {
+    min-height: 27px;
+    padding-block: 2px;
+  }
+  .matchup-identity {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    align-items: center;
+    justify-items: start;
+    gap: 1px 6px;
+  }
+  .matchup-identity > strong {
+    grid-area: 1 / 1;
+  }
+  .matchup-identity > .matchup-types {
+    grid-area: 1 / 2;
+  }
+  .matchup-identity > :not(strong, .matchup-types) {
+    grid-column: 1 / -1;
+  }
+  .matchup-type .type-badge {
+    gap: 0;
+    padding: 2px;
+    font-size: 0;
+    line-height: 0;
+  }
+  .matchup-type .type-badge img {
+    width: 11px;
+    height: 11px;
+  }
+  .matchup-right .matchup-identity {
+    grid-template-columns: minmax(0, 1fr) auto;
+    justify-items: end;
+  }
+  .matchup-right .matchup-identity > strong {
+    grid-area: 1 / 2;
+  }
+  .matchup-right .matchup-identity > .matchup-types {
+    grid-area: 1 / 1;
+  }
+}
+@container (max-width: 560px) {
+  .spectator-matchup .matchup-pokemon,
+  .spectator-matchup .matchup-right .matchup-pokemon {
+    column-gap: 8px;
+    padding-inline: 7px;
+  }
+  .spectator-matchup .matchup-pokemon {
+    grid-template-columns: 44px minmax(118px, 0.72fr) minmax(0, 2fr);
+  }
+  .spectator-matchup .matchup-right .matchup-pokemon {
+    grid-template-columns: minmax(0, 2fr) minmax(118px, 0.72fr) 44px;
+  }
+  .spectator-matchup .matchup-sprite .pokemon-sprite {
+    width: 44px;
+    height: 44px;
+  }
+  .matchup-identity strong {
+    font-size: 0.84rem;
+  }
+  .matchup-identity .held-item {
+    font-size: 0.66rem;
+  }
+  .matchup-identity .item-icon {
+    width: 18px;
+    height: 18px;
+  }
+  .spectator-matchup .matchup-pokemon .move-button {
+    padding-inline: 6px;
+    gap: 4px;
+    font-size: 0.68rem;
+  }
+  .spectator-matchup .matchup-pokemon .move-button small {
+    font-size: 0.58rem;
+  }
+  .spectator-matchup .matchup-pokemon .move-button svg {
+    display: none;
+  }
+  .matchup-identity {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    align-items: center;
+    justify-items: start;
+    gap: 1px 6px;
+  }
+  .matchup-identity > strong {
+    grid-area: 1 / 1;
+  }
+  .matchup-identity > .matchup-types {
+    grid-area: 1 / 2;
+  }
+  .matchup-identity > :not(strong, .matchup-types) {
+    grid-column: 1 / -1;
+  }
+  .matchup-type .type-badge {
+    gap: 0;
+    padding: 2px;
+    font-size: 0;
+    line-height: 0;
+  }
+  .matchup-type .type-badge img {
+    width: 11px;
+    height: 11px;
+  }
+  .matchup-right .matchup-identity {
+    grid-template-columns: minmax(0, 1fr) auto;
+    justify-items: end;
+  }
+  .matchup-right .matchup-identity > strong {
+    grid-area: 1 / 2;
+  }
+  .matchup-right .matchup-identity > .matchup-types {
+    grid-area: 1 / 1;
+  }
+}
+/* Very narrow: identity above, the four moves below in two columns. */
+@container (max-width: 400px) {
+  .spectator-matchup .matchup-pokemon,
+  .spectator-matchup .matchup-right .matchup-pokemon {
+    grid-template-columns: 44px minmax(0, 1fr);
+    grid-template-areas:
+      "sprite identity"
+      "moves moves";
+    row-gap: 6px;
+  }
+  .matchup-right .matchup-identity {
+    grid-template-columns: auto minmax(0, 1fr);
+    justify-items: start;
+    text-align: left;
+  }
+  .matchup-right .matchup-identity > strong {
+    grid-area: 1 / 1;
+  }
+  .matchup-right .matchup-identity > .matchup-types {
+    grid-area: 1 / 2;
+  }
+  .spectator-matchup .matchup-pokemon .move-button svg {
+    display: block;
+  }
+}
+
+/* Tall windows: the same rows breathe a little more. */
+@media (min-width: 1500px) and (min-height: 1000px) {
+  .spectator-matchup .matchup-roster {
+    gap: 8px;
+  }
+  .spectator-matchup .matchup-pokemon {
+    padding: 9px 10px;
+  }
+  .spectator-matchup .matchup-pokemon {
+    grid-template-columns: 64px minmax(140px, 0.8fr) minmax(0, 2fr);
+  }
+  .spectator-matchup .matchup-right .matchup-pokemon {
+    grid-template-columns: minmax(0, 2fr) minmax(140px, 0.8fr) 64px;
+  }
+  .spectator-matchup .matchup-sprite .pokemon-sprite {
+    width: 64px;
+    height: 64px;
+  }
+  .matchup-identity strong {
+    font-size: 1rem;
+  }
+  .spectator-matchup .matchup-pokemon .move-button,
+  .spectator-matchup .matchup-pokemon .move-vacant {
+    min-height: 36px;
+    font-size: 0.75rem;
+  }
+}
+
+/* Small screens: the teams stack (existing rule) and the VS lies flat. */
+@media (max-width: 900px) {
+  .spectator-matchup {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 10px;
+  }
+  .spectator-vs {
+    min-height: 36px;
+  }
+  .spectator-vs::before {
+    top: 50%;
+    bottom: auto;
+    left: 8%;
+    right: 8%;
+    width: auto;
+    height: 2px;
+    transform: translateY(-50%);
+    background: linear-gradient(
+      90deg,
+      transparent,
+      color-mix(in srgb, var(--c-gold) 70%, transparent),
+      transparent
+    );
+  }
+}

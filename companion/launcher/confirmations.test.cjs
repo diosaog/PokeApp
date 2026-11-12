@@ -206,9 +206,10 @@ test("«Añadir a la bolsa» is one confirmation bound to the save and its readi
   assert.throws(() => describe("quick-item", "nugget:1", state), /objeto/);
 });
 
-test("«Felicidad máxima» confirms one party Pokémon by its exact bytes, never promising evolution", () => {
+test("«Felicidad máxima» confirms one Pokémon by its exact place and bytes, never promising evolution", () => {
   const { describe, fingerprint } = require("./confirmations.cjs");
   const hash = "c".repeat(64);
+  const boxed = "f".repeat(64);
   const state = {
     selected_save: "C:/saves/main",
     receipt_id: "r1",
@@ -219,28 +220,46 @@ test("«Felicidad máxima» confirms one party Pokémon by its exact bytes, neve
         { slot_index: 0, species: 711, nickname: "Jalowin", level: 31, friendship: 70, eligible: true, pokemon_sha256: hash },
         { slot_index: 1, species: 25, nickname: "", level: 9, friendship: 255, eligible: true, pokemon_sha256: "d".repeat(64) },
       ],
+      boxes: [
+        { box_index: 4, slot_index: 17, species: 448, nickname: "Caja", level: 40, friendship: 50, eligible: true, pokemon_sha256: boxed },
+        { box_index: 5, slot_index: 0, species: 175, nickname: "", level: 0, friendship: 0, eligible: false, pokemon_sha256: "a".repeat(64) },
+      ],
     },
     write: { busy: false, status: "IDLE" },
   };
-  const offer = describe("friendship", `0:${hash}`, state);
+  const offer = describe("friendship", `party:0:${hash}`, state);
   assert.equal(offer.go, "Subir a 255");
-  assert.match(offer.message, /^Jalowin \(Gourgeist\) · Nv\. 31 · Pokémon Y · Ami$/);
+  assert.match(offer.message, /^Jalowin \(Gourgeist\) · Nv\. 31 · Equipo, posición 1 · Pokémon Y · Ami$/);
   assert.match(offer.detail, /70 → 255/);
+  assert.match(offer.detail, /se queda donde está/);
   assert.match(offer.detail, /no toca el afecto de Pokémon-Amie/);
   assert.match(offer.detail, /No hace evolucionar/);
+  // A PC Pokémon names its box and slot; it is never moved to the party.
+  const pc = describe("friendship", `box:4:17:${boxed}`, state);
+  assert.match(pc.message, /^Caja \(Lucario\) · Nv\. 40 · Caja 5, posición 18 · Pokémon Y · Ami$/);
+  assert.match(pc.detail, /50 → 255/);
   const c = createConfirmations();
-  const id = c.issue("friendship", `0:${hash}`, fingerprint("friendship", `0:${hash}`, state));
+  const id = c.issue("friendship", `party:0:${hash}`, fingerprint("friendship", `party:0:${hash}`, state));
   assert.throws(
-    () => c.redeem(id, "friendship", `0:${hash}`, fingerprint("friendship", `0:${hash}`, { ...state, receipt_id: "r2" })),
+    () => c.redeem(id, "friendship", `party:0:${hash}`, fingerprint("friendship", `party:0:${hash}`, { ...state, receipt_id: "r2" })),
     { message: STALE },
   );
-  assert.throws(() => describe("friendship", `0:${"e".repeat(64)}`, state), /Vuelve a leer el equipo/);
-  assert.throws(() => describe("friendship", `1:${"d".repeat(64)}`, state), /ya tiene la felicidad máxima/);
+  // Wrong place, wrong bytes, old target format, egg: never a Pokémon by mistake.
+  for (const target of [
+    `party:0:${"e".repeat(64)}`,
+    `box:4:16:${boxed}`,
+    `box:3:17:${boxed}`,
+    `party:0:${boxed}`,
+    `0:${hash}`,
+    `box:5:0:${"a".repeat(64)}`,
+  ])
+    assert.throws(() => describe("friendship", target, state), /Vuelve a leer equipo y cajas/, target);
+  assert.throws(() => describe("friendship", `party:1:${"d".repeat(64)}`, state), /ya tiene la felicidad máxima/);
   assert.throws(
-    () => describe("friendship", `0:${hash}`, { ...state, friendship: { ...state.friendship, application_enabled: false } }),
+    () => describe("friendship", `box:4:17:${boxed}`, { ...state, friendship: { ...state.friendship, application_enabled: false } }),
     /aún no está activado/,
   );
-  assert.throws(() => describe("friendship", `0:${hash}`, { ...state, write: { busy: true } }), /otra operación/);
+  assert.throws(() => describe("friendship", `party:0:${hash}`, { ...state, write: { busy: true } }), /otra operación/);
 });
 
 test("072: a Shop delivery confirms one purchase and one object of the league save", () => {

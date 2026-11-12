@@ -3,7 +3,7 @@
 // the original PDF. Nothing here reads or changes competitive data.
 import { points } from "../points";
 
-export const rulebookUpdated = "9 de noviembre de 2026";
+export const rulebookUpdated = "12 de noviembre de 2026";
 
 export type RuleKind =
   "norma" | "obligatorio" | "prohibido" | "excepcion" | "aclaracion";
@@ -767,7 +767,7 @@ export const otherRules = [
   {
     id: "7.3",
     title: "Felicidad máxima",
-    text: "Gratis e ilimitada. Sube a 255 la felicidad de un Pokémon de tu equipo desde tu inventario en PokeApp Launcher. No cambia nada más ni lo hace evolucionar por sí sola.",
+    text: "Gratis e ilimitada. Sube a 255 la felicidad de un Pokémon de tu equipo o de tus cajas del PC (sin moverlo) desde tu inventario en PokeApp Launcher. No cambia nada más ni lo hace evolucionar por sí sola.",
   },
   {
     id: "7.4",

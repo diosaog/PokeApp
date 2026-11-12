@@ -159,14 +159,38 @@
         <article id="friendship-article" aria-labelledby="friendship-title">
           <h2 id="friendship-title" tabindex="-1">Felicidad máxima</h2>
           <p class="muted">
-            Sube a 255 la felicidad de un Pokémon de tu equipo. Gratis e
-            ilimitado. No cambia el afecto de Pokémon-Amie ni nada más; si
-            evoluciona por amistad, aún tendrá que cumplir su condición en el
-            juego (por ejemplo, subir de nivel).
+            Sube a 255 la felicidad de un Pokémon de tu equipo o de cualquier
+            caja del PC, sin moverlo de donde está. Gratis e ilimitado. No
+            cambia el afecto de Pokémon-Amie ni nada más; si evoluciona por
+            amistad, aún tendrá que cumplir su condición en el juego (por
+            ejemplo, subir de nivel).
           </p>
+          <div class="friendship-filters">
+            <label>
+              Dónde
+              <select id="friendship-place">
+                <option value="all">Equipo y cajas</option>
+              </select>
+            </label>
+            <label>
+              Buscar
+              <input
+                id="friendship-search"
+                type="search"
+                placeholder="Mote o especie"
+                autocomplete="off"
+                spellcheck="false"
+              />
+            </label>
+            <label>
+              <input id="friendship-hide-max" type="checkbox" />
+              Ocultar los que ya están a 255
+            </label>
+          </div>
           <p id="friendship-state" role="status"></p>
+          <p id="friendship-count" class="muted"></p>
           <div id="friendship-party"></div>
-          <button id="friendship-refresh">Volver a leer el equipo</button>
+          <button id="friendship-refresh">Volver a leer equipo y cajas</button>
         </article>
         <article id="revive-article" aria-labelledby="revive-title">
           <h2 id="revive-title" tabindex="-1">Revivir Pokémon</h2>

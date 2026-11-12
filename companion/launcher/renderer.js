@@ -1660,10 +1660,28 @@ for (const row of document.querySelectorAll(".quick-item")) {
 }
 $("quick-refresh").onclick = () => requestQuick(true);
 
-// «Felicidad máxima»: the party as the core read it from the save, one
-// confirmation per Pokémon; the core checks the emulator and the file itself.
+// «Felicidad máxima»: the party and every PC box as the core read them from
+// the save, grouped by place and filterable; one confirmation per Pokémon. The
+// core checks the emulator and the file itself and changes the Pokémon where
+// it is (never moved).
 const friendshipRead = { pending: false, since: 0, seq: 0 };
 let friendshipPending = false;
+const friendshipFilter = { place: "all", query: "", hideMax: false };
+const fold = (value) =>
+  String(value || "")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase();
+const friendshipKey = (m) =>
+  m.box_index == null ? "party" : `box:${m.box_index}`;
+const friendshipGroup = (m) =>
+  m.box_index == null ? "Equipo" : `Caja ${m.box_index + 1}`;
+function friendshipMembers(view) {
+  return [
+    ...(view?.party || []).map((m) => ({ ...m, box_index: null })),
+    ...(view?.boxes || []),
+  ].filter((m) => m.eligible);
+}
 function requestFriendship(manual = false) {
   if (friendshipRead.pending || !lastState?.selected_save) return;
   Object.assign(friendshipRead, {
@@ -1675,6 +1693,87 @@ function requestFriendship(manual = false) {
     if (result?.status !== "QUEUED") friendshipRead.pending = false;
     if (lastState) renderFriendship(lastState);
   });
+}
+function renderFriendshipPlaces(members) {
+  const select = $("friendship-place");
+  const counts = new Map();
+  for (const m of members)
+    counts.set(friendshipKey(m), (counts.get(friendshipKey(m)) || 0) + 1);
+  const options = [["all", `Equipo y cajas (${members.length})`]];
+  if (counts.has("party"))
+    options.push(["party", `Equipo (${counts.get("party")})`]);
+  for (const [key, count] of counts)
+    if (key !== "party")
+      options.push([key, `Caja ${Number(key.slice(4)) + 1} (${count})`]);
+  if (!options.some(([value]) => value === friendshipFilter.place))
+    friendshipFilter.place = "all";
+  const key = JSON.stringify(options);
+  if (select.dataset.key !== key) {
+    select.dataset.key = key;
+    select.replaceChildren(
+      ...options.map(([value, label]) => {
+        const option = document.createElement("option");
+        option.value = value;
+        option.textContent = label;
+        return option;
+      }),
+    );
+  }
+  select.value = friendshipFilter.place;
+}
+function friendshipRow(m, blocked) {
+  const species = PokeTraining.speciesName({ species: m.species });
+  const row = document.createElement("div");
+  row.className = "friendship-row";
+  const sprite = PokeTraining.sprite({ species: m.species, form: m.form });
+  const image = document.createElement("img");
+  image.className = "friendship-sprite";
+  image.alt = `Sprite de ${species}`;
+  image.loading = "lazy";
+  image.onerror = () => {
+    image.style.visibility = "hidden";
+  };
+  if (sprite) image.src = sprite;
+  const name = document.createElement("span");
+  name.className = "friendship-name";
+  const title = document.createElement("strong");
+  title.textContent = m.nickname || species;
+  const detail = document.createElement("span");
+  detail.className = "muted";
+  detail.textContent = `${species} · Nv. ${m.level}`;
+  name.append(title, detail);
+  const place = document.createElement("span");
+  place.className = "friendship-place";
+  place.textContent =
+    m.box_index == null
+      ? `Equipo · ${m.slot_index + 1}`
+      : `Caja ${m.box_index + 1} · ${m.slot_index + 1}`;
+  place.title =
+    m.box_index == null
+      ? `Equipo, posición ${m.slot_index + 1}`
+      : `Caja ${m.box_index + 1}, posición ${m.slot_index + 1}`;
+  const value = document.createElement("span");
+  value.className = "friendship-value";
+  const meter = document.createElement("meter");
+  meter.min = 0;
+  meter.max = 255;
+  meter.low = 120;
+  meter.high = 254;
+  meter.optimum = 255;
+  meter.value = m.friendship;
+  meter.setAttribute("aria-hidden", "true");
+  const amount = document.createElement("span");
+  amount.textContent = `Felicidad ${m.friendship}`;
+  value.append(amount, meter);
+  const button = document.createElement("button");
+  button.className = "quick-add";
+  const full = m.friendship >= 255;
+  button.textContent = full ? "Ya está al máximo" : "Subir a 255";
+  button.disabled = blocked || full;
+  button.setAttribute("aria-label", `${button.textContent}: ${title.textContent}, ${place.title}`);
+  button.onclick = () => void raiseFriendship(m);
+  row.append(image, name, place, value, button);
+  return row;
 }
 function renderFriendship(state) {
   const write = state.write || {};
@@ -1695,11 +1794,11 @@ function renderFriendship(state) {
         : write.busy || friendshipPending
           ? "Subiendo la felicidad… no abras el juego."
           : friendshipRead.pending && !view
-            ? "Leyendo tu equipo…"
+            ? "Leyendo tu equipo y tus cajas…"
             : state.friendship_error
               ? state.friendship_error
               : !view
-                ? "Pulsa «Volver a leer el equipo»."
+                ? "Pulsa «Volver a leer equipo y cajas»."
                 : !enabled
                   ? "Subir la felicidad aún no está activado en este Launcher."
                   : state.friendship_result?.readback_verified
@@ -1713,40 +1812,75 @@ function renderFriendship(state) {
     ["RECOVERY_REQUIRED", "AWAITING_CONFIRMATION", "PREPARED"].includes(
       write.status,
     );
+  const members = friendshipMembers(view);
+  renderFriendshipPlaces(members);
+  const query = fold(friendshipFilter.query.trim());
+  const rows = members.filter(
+    (m) =>
+      (friendshipFilter.place === "all" ||
+        friendshipKey(m) === friendshipFilter.place) &&
+      !(friendshipFilter.hideMax && m.friendship >= 255) &&
+      (!query ||
+        fold(m.nickname).includes(query) ||
+        fold(PokeTraining.speciesName({ species: m.species })).includes(query)),
+  );
+  text(
+    "friendship-count",
+    !view
+      ? ""
+      : rows.length === members.length
+        ? `${members.length} Pokémon en tu equipo y tus cajas.`
+        : `Mostrando ${rows.length} de ${members.length} Pokémon.`,
+  );
   const list = $("friendship-party");
-  const rows = (view?.party || []).filter((m) => m.eligible);
   const key = JSON.stringify([rows, blocked]);
   if (list.dataset.key === key) return;
   list.dataset.key = key;
-  list.replaceChildren(
-    ...rows.map((m) => {
-      const species = PokeTraining.speciesName({ species: m.species });
-      const row = document.createElement("div");
-      row.className = "quick-item";
-      const name = document.createElement("span");
-      name.className = "quick-name";
-      name.textContent =
-        m.nickname && m.nickname !== species
-          ? `${m.nickname} (${species})`
-          : species;
-      const info = document.createElement("span");
-      info.className = "quick-count muted";
-      info.textContent = `Nv. ${m.level} · Felicidad ${m.friendship}`;
-      const button = document.createElement("button");
-      button.className = "quick-add";
-      const full = m.friendship >= 255;
-      button.textContent = full ? "Ya está al máximo" : "Subir a 255";
-      button.disabled = blocked || full;
-      button.onclick = () => void raiseFriendship(m);
-      row.append(name, info, button);
-      return row;
-    }),
-  );
+  const children = [];
+  let group = null;
+  for (const m of rows) {
+    if (friendshipGroup(m) !== group) {
+      group = friendshipGroup(m);
+      const heading = document.createElement("h3");
+      heading.className = "friendship-group";
+      const count = rows.filter((r) => friendshipGroup(r) === group).length;
+      const label = document.createElement("span");
+      label.textContent = group;
+      const muted = document.createElement("span");
+      muted.className = "muted";
+      muted.textContent = `· ${count} Pokémon`;
+      heading.append(label, muted);
+      children.push(heading);
+    }
+    children.push(friendshipRow(m, blocked));
+  }
+  if (view && !rows.length) {
+    const empty = document.createElement("p");
+    empty.className = "empty-note";
+    empty.textContent = members.length
+      ? "Ningún Pokémon coincide con la búsqueda."
+      : "No hay Pokémon en tu equipo ni en tus cajas.";
+    children.push(empty);
+  }
+  list.replaceChildren(...children);
 }
+function onFriendshipFilter() {
+  friendshipFilter.place = $("friendship-place").value;
+  friendshipFilter.query = $("friendship-search").value;
+  friendshipFilter.hideMax = $("friendship-hide-max").checked;
+  if (lastState) renderFriendship(lastState);
+}
+$("friendship-place").onchange = onFriendshipFilter;
+$("friendship-search").oninput = onFriendshipFilter;
+$("friendship-hide-max").onchange = onFriendshipFilter;
 async function raiseFriendship(member) {
+  const boxed = member.box_index != null;
+  // The exact place and that Pokémon's exact bytes: anything else is refused.
   const ticket = await confirmWith(
     "friendship",
-    `${member.slot_index}:${member.pokemon_sha256}`,
+    boxed
+      ? `box:${member.box_index}:${member.slot_index}:${member.pokemon_sha256}`
+      : `party:${member.slot_index}:${member.pokemon_sha256}`,
   );
   if (!ticket) return;
   friendshipPending = true;
@@ -1755,6 +1889,8 @@ async function raiseFriendship(member) {
   try {
     const queued = await action(() =>
       window.launcher.applyFriendship(
+        boxed ? "box" : "party",
+        boxed ? member.box_index : null,
         member.slot_index,
         member.pokemon_sha256,
         ticket,

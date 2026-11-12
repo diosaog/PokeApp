@@ -45,8 +45,15 @@ contextBridge.exposeInMainWorld("launcher", {
   applyRevive: (purchaseId, entityId, ticket) =>
     ipcRenderer.invoke("launcher:revive-apply", purchaseId, entityId, ticket),
   friendship: () => ipcRenderer.invoke("launcher:friendship"),
-  applyFriendship: (slot, hash, ticket) =>
-    ipcRenderer.invoke("launcher:friendship-apply", slot, hash, ticket),
+  applyFriendship: (location, box, slot, hash, ticket) =>
+    ipcRenderer.invoke(
+      "launcher:friendship-apply",
+      location,
+      box,
+      slot,
+      hash,
+      ticket,
+    ),
   trainingList: () => ipcRenderer.invoke("launcher:training-list"),
   trainingApply: (args, ticket) =>
     ipcRenderer.invoke("launcher:training-apply", args, ticket),

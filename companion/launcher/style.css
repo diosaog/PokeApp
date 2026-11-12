@@ -973,6 +973,120 @@ html[data-mode="strip"] {
   margin-top: 0.5rem;
   box-shadow: none;
 }
+/* «Felicidad máxima»: party and PC, grouped by place, filterable. */
+.friendship-filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  gap: 0.6rem 1rem;
+  margin: 0.75rem 0 0.25rem;
+}
+.friendship-filters label {
+  gap: 0.3rem;
+  font-size: 0.85rem;
+  color: var(--c-text-soft);
+}
+.friendship-filters label:has(input[type="checkbox"]) {
+  margin: 0 0 0.55rem;
+  gap: 0.45rem;
+}
+.friendship-filters select {
+  font: inherit;
+  color: var(--c-text);
+  background: var(--c-surface-3);
+  border: 1px solid var(--c-line-strong);
+  border-radius: 12px;
+  padding: 0.5rem 0.8rem;
+  min-width: 13em;
+}
+.friendship-filters input[type="search"] {
+  width: 14em;
+  padding: 0.5rem 0.8rem;
+}
+#friendship-count {
+  margin: 0.25rem 0 0;
+  font-size: 0.85rem;
+}
+.friendship-group {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  margin: 1rem 0 0.35rem;
+  font-size: 0.95rem;
+  letter-spacing: 0.02em;
+}
+.friendship-group .muted {
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+.friendship-row {
+  display: grid;
+  grid-template-columns: 48px minmax(0, 1fr) 7.5em 7.5em 12.5em;
+  align-items: center;
+  gap: 0.35rem 0.9rem;
+  margin: 0.35rem 0;
+  padding: 0.3rem 0.6rem 0.3rem 0.4rem;
+  border-radius: 14px;
+  border: 2px solid transparent;
+  background:
+    linear-gradient(var(--c-bg-1), var(--c-bg-1)) padding-box,
+    var(--brand-gradient) border-box;
+}
+.friendship-sprite {
+  width: 48px;
+  height: 48px;
+  object-fit: contain;
+}
+.friendship-name {
+  display: grid;
+  gap: 0.1rem;
+  min-width: 0;
+}
+.friendship-name strong {
+  overflow-wrap: anywhere;
+}
+.friendship-name .muted {
+  font-size: 0.82rem;
+}
+.friendship-place {
+  justify-self: end;
+  padding: 0.2rem 0.6rem;
+  border-radius: 999px;
+  background: var(--c-surface-3);
+  font-size: 0.8rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+.friendship-value {
+  display: grid;
+  justify-items: end;
+  gap: 0.2rem;
+  font-size: 0.8rem;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.friendship-row > button {
+  width: 100%;
+  white-space: nowrap;
+}
+.friendship-value meter {
+  width: 6.5em;
+  height: 0.55em;
+}
+@media (max-width: 620px) {
+  .friendship-row {
+    grid-template-columns: 48px minmax(0, 1fr) 7.5em;
+  }
+  .friendship-row .friendship-place {
+    grid-column: 2;
+    justify-self: start;
+  }
+  .friendship-row > button {
+    grid-column: 2 / -1;
+    justify-self: end;
+    width: auto;
+  }
+}
 /* The dialog already carries the title (and its accessible name). */
 #sheet-body > #quick-article > h2:first-child,
 #sheet-body > #transfer-article > h2:first-child {

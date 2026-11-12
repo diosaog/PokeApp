@@ -23,6 +23,7 @@ import {
   insideLauncher,
   launcherDeliversShopObjects,
   launcherRaisesFriendship,
+  launcherRaisesBoxFriendship,
   launcherRevives,
   launcherTrainsPokemon,
   revivePath,
@@ -328,8 +329,9 @@ export function Inventory() {
               </li>
             ))}
             {/* «Felicidad máxima»: free and unlimited, applied by PokeApp
-                Launcher 0.26.12+ to one Pokémon of the current party (its
-                native dialog shows the party, the current value and asks for
+                Launcher 0.26.12+ to one Pokémon of the current party, and
+                from 0.26.15 also to any Pokémon of the PC boxes, where it is
+                (its native dialog shows them, the current value and asks for
                 confirmation). Shown only where it can work: never a promise
                 to a browser or an older Launcher. */}
             {insideLauncher() && launcherRaisesFriendship() && (
@@ -338,8 +340,10 @@ export function Inventory() {
                 <span className="unlimited-text">
                   <strong>Felicidad máxima</strong>
                   <span id="unlimited-felicidad">
-                    Sube a 255 la felicidad de un Pokémon de tu equipo. No
-                    cambia nada más ni lo hace evolucionar por sí sola.
+                    {launcherRaisesBoxFriendship()
+                      ? "Sube a 255 la felicidad de un Pokémon de tu equipo o de tus cajas del PC, sin moverlo."
+                      : "Sube a 255 la felicidad de un Pokémon de tu equipo."}{" "}
+                    No cambia nada más ni lo hace evolucionar por sí sola.
                   </span>
                 </span>
                 <Tag>∞ · Gratis</Tag>

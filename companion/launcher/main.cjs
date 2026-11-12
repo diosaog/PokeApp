@@ -751,25 +751,41 @@ app.whenReady().then(() => {
   );
   // 072: paid Shop objects. The list comes from PokeApp; the core rechecks the
   // purchase, the league save and the bag, then reserves, writes and re-reads.
-  // «Felicidad máxima»: the core reads the party and, after one confirmation,
-  // checks the emulator and the file, backs up, writes and re-reads.
+  // «Felicidad máxima»: the core reads the party and every PC box and, after
+  // one confirmation, checks the emulator and the file, backs up, writes the
+  // Pokémon where it is (never moved) and re-reads.
   ipcMain.handle("launcher:friendship", (event) => {
     authorize(event);
     return request("friendship_refresh");
   });
   ipcMain.handle(
     "launcher:friendship-apply",
-    async (event, slot, hash, ticket) => {
+    async (event, location, box, slot, hash, ticket) => {
       authorize(event);
+      // One exact place: a party slot (no box) or a PC box and slot.
+      const party =
+        location === "party" &&
+        box === null &&
+        Number.isInteger(slot) &&
+        slot >= 0 &&
+        slot <= 5;
+      const boxed =
+        location === "box" &&
+        Number.isInteger(box) &&
+        box >= 0 &&
+        box <= 31 &&
+        Number.isInteger(slot) &&
+        slot >= 0 &&
+        slot <= 29;
       if (
-        !Number.isInteger(slot) ||
-        slot < 0 ||
-        slot > 5 ||
+        !(party || boxed) ||
         typeof hash !== "string" ||
         !/^[0-9a-f]{64}$/.test(hash)
       )
-        throw new Error("Vuelve a leer el equipo.");
-      const target = `${slot}:${hash}`;
+        throw new Error("Vuelve a leer equipo y cajas.");
+      const target = party
+        ? `party:${slot}:${hash}`
+        : `box:${box}:${slot}:${hash}`;
       const state = await request("state");
       describe("friendship", target, state);
       confirmations.redeem(
@@ -779,6 +795,8 @@ app.whenReady().then(() => {
         fingerprint("friendship", target, state),
       );
       return request("friendship_apply", {
+        location,
+        box_index: party ? null : box,
         slot_index: slot,
         pokemon_sha256: hash,
       });

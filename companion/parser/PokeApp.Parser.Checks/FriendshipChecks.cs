@@ -6,7 +6,9 @@ using System.Text.Json.Nodes;
 // «Felicidad máxima» on in-memory copies of the retained public contributor
 // fixtures (never a player's save). A deliberately randomized party: a species
 // with moves it cannot learn, a traded Pokémon held by another handler, one
-// already at 255 and an egg. Proves the exact byte change and every refusal.
+// already at 255 and an egg. Since 2026-11-12 also the PC: a Pokémon in Box 1,
+// a traded one in the last box's last slot, an empty slot and a boxed egg.
+// Proves the exact byte change in place (nothing moves) and every refusal.
 internal static class FriendshipChecks
 {
     private static int checks;
@@ -53,6 +55,27 @@ internal static class FriendshipChecks
         return edit is null ? request : edit(request);
     }
 
+    private static JsonObject BoxRequest(byte[] source, int box, int slot, Func<JsonObject, JsonObject>? edit = null)
+    {
+        var save = SaveUtil.GetVariantSAV((byte[])source.Clone())!;
+        var p = save.GetBoxSlotAtIndex(box, slot);
+        var request = Request(source, 0);
+        request["intent"]!["mutation"] = new JsonObject
+        {
+            ["kind"] = "max_friendship", ["location"] = "box", ["box_index"] = box, ["slot_index"] = slot,
+            ["expected_pokemon_sha256"] = NativeWrite.Hash(p.DecryptedBoxData),
+            ["expected_friendship"] = (int)p.CurrentFriendship,
+        };
+        return edit is null ? request : edit(request);
+    }
+
+    // Raw stored write, as the game keeps a boxed Pokémon (no import helper).
+    private static void PutBox(SaveFile save, PKM? p, int box, int slot)
+        => save.WriteBoxSlot(p ?? save.BlankPKM, save.Data.AsSpan(save.GetBoxSlotOffset(box, slot), 232));
+
+    private static byte[] Write(SaveFile save) => (byte[])typeof(TrainingChecks).GetMethod("WriteFixture",
+        System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Static)!.Invoke(null, new object[] { save })!;
+
     private static void Reject(JsonObject request, string code, string label, bool verify = false)
     {
         var response = Execute(request, verify);
@@ -85,6 +108,22 @@ internal static class FriendshipChecks
             egg.IsEgg = true; egg.OriginalTrainerFriendship = 10;
             foreach (var p in new[] { own, traded, full, egg }) p.RefreshChecksum();
             derived.PartyData = [own, traded, full, egg];
+            // The PC: Box 1 slot 1, an empty Box 1 slot 2, a boxed egg and a
+            // traded Pokémon (handler friendship) in the very last box slot.
+            int lastBox = derived.BoxCount - 1;
+            var boxed = Member(derived, 448, 0, 0x55555555, "Caja");
+            boxed.CurrentHandler = 0; boxed.OriginalTrainerFriendship = 50; boxed.HandlingTrainerFriendship = 4;
+            ((IAffection)boxed).OriginalTrainerAffection = 20; ((IAffection)boxed).HandlingTrainerAffection = 2;
+            boxed.HeldItem = 234; boxed.EV_SPA = 252; boxed.IV_SPE = 31; boxed.Nature = Nature.Timid;
+            var far = Member(derived, 149, 0, 0x66666666, "Lejos");
+            far.OriginalTrainerName = "Otra"; far.TID16 = (ushort)(derived.TID16 ^ 0x3333);
+            far.HandlingTrainerName = derived.OT; far.HandlingTrainerGender = derived.Gender; far.CurrentHandler = 1;
+            far.OriginalTrainerFriendship = 200; far.HandlingTrainerFriendship = 33;
+            var boxEgg = Member(derived, 175, 0, 0x77777777, "Huevo");
+            boxEgg.IsEgg = true; boxEgg.OriginalTrainerFriendship = 10;
+            foreach (var p in new[] { boxed, far, boxEgg }) p.RefreshChecksum();
+            PutBox(derived, boxed, 0, 0); PutBox(derived, null, 0, 1); PutBox(derived, null, 0, 2);
+            PutBox(derived, boxEgg, 1, 5); PutBox(derived, far, lastBox, 29);
             var source = (byte[])typeof(TrainingChecks).GetMethod("WriteFixture",
                 System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Static)!
                 .Invoke(null, new object[] { derived })!;
@@ -110,6 +149,20 @@ internal static class FriendshipChecks
                   && party[0]!["species"]!.GetValue<int>() == 711 && party[0]!["form"]!.GetValue<int>() == 2
                   && party[0]!["nickname"]!.GetValue<string>() == "Jalowin",
                   game + " current friendship per member; eggs are not eligible");
+            var boxes = inspected["semantic_diff"]!["boxes"]!.AsArray();
+            JsonNode? At(int b, int s) => boxes.FirstOrDefault(e =>
+                e!["box_index"]!.GetValue<int>() == b && e!["slot_index"]!.GetValue<int>() == s);
+            var keys = boxes.Select(e => e!["box_index"]!.GetValue<int>() * 30 + e!["slot_index"]!.GetValue<int>()).ToArray();
+            int occupied = Enumerable.Range(0, parsed.BoxCount)
+                .Sum(b => Enumerable.Range(0, 30).Count(s => parsed.GetBoxSlotAtIndex(b, s).Species != 0));
+            Check(keys.Zip(keys.Skip(1)).All(k => k.First < k.Second) && keys.Length == occupied
+                  && boxes.All(e => e!["species"]!.GetValue<int>() != 0),
+                  game + " every occupied slot of every box is listed once, in order; empty slots are not");
+            Check(At(0, 0)?["friendship"]!.GetValue<int>() == 50 && At(0, 0)!["eligible"]!.GetValue<bool>()
+                  && At(0, 0)!["species"]!.GetValue<int>() == 448 && At(0, 0)!["nickname"]!.GetValue<string>() == "Caja"
+                  && At(0, 1) is null && At(1, 5)?["eligible"]!.GetValue<bool>() == false
+                  && At(lastBox, 29)?["friendship"]!.GetValue<int>() == 33 && At(lastBox, 29)!["eligible"]!.GetValue<bool>(),
+                  game + " Box 1, the last box, an empty slot and a boxed egg read correctly");
 
             foreach (int slot in new[] { 0, 1 })
             {
@@ -173,6 +226,83 @@ internal static class FriendshipChecks
             Reject(Request(source, 0, r => { r["intent"]!["trainer_key"] = new string('0', 64); return r; }),
                    "WRONG_TRAINER", game + " another trainer's save");
             Reject(Request(source, 5, r => r), "UNSAFE_TARGET", game + " empty party slot");
+
+            // ---- PC boxes: the Pokémon changes where it is; nothing else moves ----
+            int sigStart = parsed is SAV7USUM ? 0x6C000 + MemeCrypto.SaveFileSignatureOffset
+                : parsed is SAV7SM ? 0x6BA00 + MemeCrypto.SaveFileSignatureOffset : -1;
+            foreach (var (box, slot, field) in new[] { (0, 0, 0xCA), (lastBox, 29, 0xA2) })
+            {
+                string label = game + " box " + (box + 1) + " slot " + (slot + 1);
+                var request = BoxRequest(source, box, slot);
+                var response = Execute(request);
+                Check(response["status"]!.GetValue<string>() == "prepared", label + " prepared: " + Error(response));
+                var diff = response["semantic_diff"]!.AsObject();
+                Check(diff["location"]!.GetValue<string>() == "box" && diff["box_index"]!.GetValue<int>() == box
+                      && diff["slot_index"]!.GetValue<int>() == slot, label + " receipt names the box and slot");
+                var output = Convert.FromBase64String(response["output_base64"]!.GetValue<string>());
+                var verify = request.DeepClone().AsObject();
+                verify["output_base64"] = Convert.ToBase64String(output);
+                Check(Execute(verify, true)["status"]!.GetValue<string>() == "verified", label + " independent verify");
+                var after = SaveUtil.GetVariantSAV((byte[])output.Clone())!;
+                var before = parsed.GetBoxSlotAtIndex(box, slot);
+                var changed = after.GetBoxSlotAtIndex(box, slot);
+                Check(changed.CurrentFriendship == 255 && changed.ChecksumValid && changed.PID == before.PID,
+                      label + " friendship 255 on the same Pokémon, still in its slot");
+                var differing = Enumerable.Range(0, before.Data.Length).Where(i => before.Data[i] != changed.Data[i]).ToArray();
+                Check(differing.All(i => i == field || i is 6 or 7) && differing.Contains(field),
+                      label + " only the game's friendship byte (+checksum) changed");
+                int other = field == 0xCA ? 0xA2 : 0xCA;
+                Check(changed.Data[0xCB] == before.Data[0xCB] && changed.Data[0xA3] == before.Data[0xA3]
+                      && changed.Data[other] == before.Data[other],
+                      label + " Amie affection and the other friendship untouched");
+                Check(changed.Species == before.Species && changed.Form == before.Form && changed.Nickname == before.Nickname
+                      && changed.EXP == before.EXP && changed.CurrentLevel == before.CurrentLevel
+                      && changed.HeldItem == before.HeldItem && changed.Nature == before.Nature
+                      && changed.Ability == before.Ability && changed.IV_SPE == before.IV_SPE
+                      && changed.EV_SPA == before.EV_SPA && changed.Move1 == 221 && changed.Move4 == 394,
+                      label + " species, level, item, nature, ability, IVs, EVs and moves preserved");
+                Check(after.PartyCount == parsed.PartyCount
+                      && Enumerable.Range(0, parsed.PartyCount).All(i =>
+                          parsed.GetPartySlotAtIndex(i).Data.AsSpan().SequenceEqual(after.GetPartySlotAtIndex(i).Data))
+                      && Enumerable.Range(0, parsed.BoxCount).All(b => Enumerable.Range(0, 30).All(s => (b, s) == (box, slot)
+                          || parsed.GetBoxSlotAtIndex(b, s).Data.AsSpan().SequenceEqual(after.GetBoxSlotAtIndex(b, s).Data))),
+                      label + " the party and every other box slot unchanged (nothing moved to the party)");
+                int offset = parsed.GetBoxSlotOffset(box, slot);
+                var outside = Enumerable.Range(0, source.Length).Where(i => source[i] != output[i]
+                    && (i < offset || i >= offset + 232)
+                    && !(sigStart >= 0 && i >= sigStart && i < sigStart + MemeCrypto.SaveFileSignatureLength)).ToArray();
+                Check(outside.Length <= 2, label + " outside the slot only the block checksum changed (" + outside.Length + ")");
+                Check(after is not SAV7 || NativeSignature.VerifySave(output), label + " signature valid");
+                Reject(BoxRequest(output, box, slot), "FRIENDSHIP_ALREADY_MAX", label + " repeat on 255");
+                // A forged output that also fills another slot of that box is refused.
+                var forged = SaveUtil.GetVariantSAV((byte[])output.Clone())!;
+                PutBox(forged, TrainingChecks.Specimen(forged), box, slot == 29 ? 27 : 2);
+                var bad = request.DeepClone().AsObject();
+                bad["output_base64"] = Convert.ToBase64String(Write(forged));
+                Check(Execute(bad, true)["status"]!.GetValue<string>() == "rejected", label + " forged change to another slot refused");
+                if (game == "Y" && box == 0) File.WriteAllBytes(Path.Combine(outputRoot, "Y-box-output.sav"), output);
+            }
+            Reject(BoxRequest(source, 0, 1), "UNSAFE_TARGET", game + " empty box slot");
+            Reject(BoxRequest(source, 1, 5), "UNSAFE_TARGET", game + " boxed egg");
+            Reject(BoxRequest(source, 0, 0, r => { r["intent"]!["mutation"]!["slot_index"] = 2; return r; }),
+                   "UNSAFE_TARGET", game + " the chosen Pokémon is no longer in that slot (empty now)");
+            Reject(BoxRequest(source, 0, 0, r => { r["intent"]!["mutation"]!["box_index"] = lastBox; r["intent"]!["mutation"]!["slot_index"] = 29; return r; }),
+                   "STALE_MUTATION", game + " another Pokémon in that slot is never changed");
+            Reject(BoxRequest(source, 0, 0, r => { r["intent"]!["mutation"]!["expected_friendship"] = 51; return r; }),
+                   "STALE_MUTATION", game + " box friendship changed since shown");
+            if (parsed.BoxCount < 32)
+                Reject(BoxRequest(source, 0, 0, r => { r["intent"]!["mutation"]!["box_index"] = parsed.BoxCount; return r; }),
+                       "UNSAFE_TARGET", game + " a box this game does not have");
+            Reject(BoxRequest(source, 0, 0, r => { r["intent"]!["mutation"]!["box_index"] = 32; return r; }),
+                   "INVALID_REQUEST", game + " box index out of range");
+            Reject(BoxRequest(source, 0, 0, r => { r["intent"]!["mutation"]!["slot_index"] = 30; return r; }),
+                   "INVALID_REQUEST", game + " box slot out of range");
+            Reject(BoxRequest(source, 0, 0, r => { r["intent"]!["mutation"]!.AsObject().Remove("box_index"); return r; }),
+                   "INVALID_REQUEST", game + " a box change without its box");
+            Reject(Request(source, 0, r => { r["intent"]!["mutation"]!["box_index"] = 0; return r; }),
+                   "INVALID_REQUEST", game + " a party change never names a box");
+            Reject(BoxRequest(source, 0, 0, r => { r["intent"]!["mutation"]!["location"] = "pc"; return r; }),
+                   "INVALID_REQUEST", game + " unknown location");
             report.Add(new { game, checks });
         }
         File.WriteAllText(Path.Combine(outputRoot, "friendship-checks.json"),

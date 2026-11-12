@@ -14,7 +14,7 @@ test("spectator chooses unscheduled Lucía and Marcos with public fields only", 
     page.getByText("Team Lock oficial", { exact: true }),
   ).toHaveCount(2);
   await expect(page.getByText("Foco interno", { exact: true })).toHaveCount(0);
-  await expect(page.locator(".battle-identity .held-item")).toHaveText(
+  await expect(page.locator(".battle-pokemon .held-item")).toHaveText(
     Array(12).fill("Vidasfera"),
   );
 });
