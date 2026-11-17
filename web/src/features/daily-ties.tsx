@@ -20,6 +20,11 @@ const consequenceLabels: Record<
   matchday_prize: "premio extra de Blindar o Robar Pokémon",
 };
 
+// The modern League rules (stretch deaths, and since 086 direct match first)
+// both resolve their remaining ties with recorded extra 1v1 battles.
+const leagueRule = (rule: Model<"RankingReview">["ranking_rule"]) =>
+  rule === "wins_segment_deaths_v2" || rule === "wins_h2h_deaths_v3";
+
 const pairs = (ids: string[]) =>
   ids.flatMap((a, i) => ids.slice(i + 1).map((b) => [a, b] as const));
 
@@ -166,16 +171,16 @@ export function DailyTieFields({
   single?: boolean;
 }) {
   if (!review) return null;
-  const global = single || review.ranking_rule === "wins_segment_deaths_v2";
+  const global = single || leagueRule(review.ranking_rule);
   return (
     <section aria-label="Resolución de empates">
       <h3>
-        {review.ranking_rule === "wins_segment_deaths_v2"
+        {leagueRule(review.ranking_rule)
           ? "Registrar desempates 1v1"
           : "Registrar decisión externa"}
       </h3>
       <p>
-        {review.ranking_rule === "wins_segment_deaths_v2"
+        {leagueRule(review.ranking_rule)
           ? "El orden debe estar respaldado por los resultados reales de los combates extra, su fecha y evidencia."
           : "Introduce el orden acordado y su motivo. Los nombres de la lista no constituyen un criterio de desempate."}
       </p>
@@ -188,8 +193,7 @@ export function DailyTieFields({
             name={name}
             single={global}
             battlesRequired={
-              review.ranking_rule === "wins_segment_deaths_v2" ||
-              group.segment_deaths != null
+              leagueRule(review.ranking_rule) || group.segment_deaths != null
             }
           />
         ) : (
@@ -217,8 +221,7 @@ export function readTieResolution(
               text(data, `tie-${index}-${place}`),
             ),
             reason: text(data, `tie-${index}-reason`).trim(),
-            ...(review.ranking_rule === "wins_segment_deaths_v2" ||
-            group.segment_deaths != null
+            ...(leagueRule(review.ranking_rule) || group.segment_deaths != null
               ? {
                   battles: pairs(group.player_ids).map(([a, b], pair) => {
                     const date = new Date(

@@ -20,6 +20,9 @@ class SportingGroup:
     adjusted_deaths: int
     # Within a group this is transport order, never a sporting decision.
     display_members: tuple[str, ...]
+    # Automatic criterion that separated this group from equal wins
+    # ("head_to_head" or "segment_deaths"); None when nothing separated it.
+    tiebreak: str | None = None
 
 
 @dataclass(frozen=True)
@@ -149,6 +152,67 @@ def rank_division(
             for key, members in sorted(groups.items())
         )
     )
+
+
+def rank_head_to_head(
+    players: list[str] | tuple[str, ...],
+    results: MatchResults,
+    *,
+    dead_counts: Mapping[str, int],
+) -> DivisionRanking:
+    """Matchday order of the owner rule of 2026-11-17.
+
+    Wins first. Exactly two on equal wins: the winner of their direct match
+    goes ahead. Three or more: fewer deaths of the stretch go ahead; a pair
+    still level on deaths is decided by their direct match. Three or more with
+    equal wins and deaths stay one group for the extra 1v1 battles (or share
+    the place). Points never take part. Every direct match must be decided.
+    """
+    if len(set(players)) != len(players):
+        raise ValueError("Duplicate participant")
+    for player in players:
+        value = dead_counts.get(player)
+        if type(value) is not int or value < 0:
+            raise ValueError("Segment deaths must be authoritative nonnegative integers")
+    for (a, b), winner in results.items():
+        if a == b or a not in players or b not in players or winner not in (a, b):
+            raise ValueError("Invalid sporting result")
+    records = wins_losses(players, results)
+
+    def pair(members: list[str], wins: int) -> list[SportingGroup]:
+        first, second = sorted(members)
+        winner = head_to_head(first, second, results)
+        if winner is None:
+            raise ValueError("Undecided direct match")
+        loser = second if winner == first else first
+        return [
+            SportingGroup(wins, dead_counts[pid], (pid,), "head_to_head")
+            for pid in (winner, loser)
+        ]
+
+    by_wins: dict[int, list[str]] = {}
+    for player in players:
+        by_wins.setdefault(records[player].wins, []).append(player)
+    groups: list[SportingGroup] = []
+    for wins in sorted(by_wins, reverse=True):
+        members = by_wins[wins]
+        if len(members) == 1:
+            groups.append(SportingGroup(wins, dead_counts[members[0]], (members[0],)))
+        elif len(members) == 2:
+            groups.extend(pair(members, wins))
+        else:
+            by_deaths: dict[int, list[str]] = {}
+            for player in members:
+                by_deaths.setdefault(dead_counts[player], []).append(player)
+            for deaths in sorted(by_deaths):
+                level = by_deaths[deaths]
+                if len(level) == 1:
+                    groups.append(SportingGroup(wins, deaths, (level[0],), "segment_deaths"))
+                elif len(level) == 2:
+                    groups.extend(pair(level, wins))
+                else:
+                    groups.append(SportingGroup(wins, deaths, tuple(sorted(level))))
+    return DivisionRanking(tuple(groups))
 
 
 def calculate_division_movements(

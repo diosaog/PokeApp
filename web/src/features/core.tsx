@@ -172,9 +172,13 @@ export function DayStandingCells({ row }: { row: DisplayStanding }) {
         ? row.actual_segment_deaths != null
           ? "1v1 registrado"
           : "Decisión histórica registrada"
-        : row.tie_status === "unique"
-          ? "Sin empate"
-          : "No registrado";
+        : row.tiebreak === "head_to_head"
+          ? "Combate directo"
+          : row.tiebreak === "segment_deaths"
+            ? "Menos muertes"
+            : row.tie_status === "unique"
+              ? "Sin empate"
+              : "No registrado";
   return (
     <>
       <td>{row.wins ?? "No registrado"}</td>

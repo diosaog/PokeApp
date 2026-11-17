@@ -405,6 +405,12 @@ def rehearse(args) -> dict:
                       + ",".join(f"'{c}'" for c in added_078)
                       + "])::text, E'\\n' order by t.id::text)), '-') from public.discord_announcements t")
         outbox_before = pg.lines(outbox_sql, "supabase_admin")
+        # 086 re-ranks closed jornadas on purpose: every row of its tables is
+        # hashed first so that exactly the expected rows may change.
+        from tools import rehearsal_086
+
+        before_086 = (rehearsal_086.row_hashes(pg)
+                      if any(m.name[:3] in ("086", "087") for m in PENDING) else None)
 
         report["applied"] = {}
         # Production's supautils.policy_grants lets postgres manage policies on
@@ -515,25 +521,54 @@ def rehearse(args) -> dict:
                 from tools.validate_phase084_save_audit import validate as validate_save_audit
 
                 report["phase084_save_audit"] = validate_save_audit(pg)
+            if migration.name.startswith("086_"):
+                from tools.validate_phase086_h2h_tiebreak import validate as validate_h2h
+
+                report["phase086_h2h"] = validate_h2h(pg)
+            if migration.name.startswith("087_"):
+                from tools.validate_phase086_h2h_tiebreak import validate_087
+
+                report["phase087_voucher"] = validate_087(pg)
+        if before_086 is not None:
+            # After the whole window: only the expected rows of 086/087 changed.
+            rerank = rehearsal_086.verify(pg, before_086)
+            report["phase086_rerank"] = rerank
+            ok(not rerank["problems"],
+               "086/087 change only re-ranked jornadas, their prizes, announcements and retired vouchers",
+               rerank["problems"])
 
         rows_after = local_fingerprints(pg, public_tables)
+        reranked = bool(report.get("phase086_rerank", {}).get("reranked"))
+        retired = bool(report.get("phase086_rerank", {}).get("retired_vouchers"))
+        expected_086 = set(rehearsal_086.TABLES) if reranked else set()
+        if retired:
+            expected_086.add("public.purchases")
+        if reranked:
+            # New «Jornada corregida» rows are verified above; old rows must not move.
+            outbox_sql += (" where t.id::text not in (select x.id::text from public.discord_announcements x"
+                           " where x.kind='matchday_corrected' and x.event_key in (select 'matchday:'||r.matchday_id||':'||r.revision"
+                           " from public.matchday_snapshot_revisions r where r.snapshot->'correction'->>'kind'='h2h_tiebreak_rule'))")
         # 072 adds the private item_deliveries table, its commands and the
         # purchase_refund ledger type: no existing row and no read changes.
         outbox_after = pg.lines(outbox_sql, "supabase_admin")
         ok(outbox_before == outbox_after,
            "discord_announcements rows identical apart from the new 078 columns", [outbox_before, outbox_after])
         changed = [t for t in public_tables if rows_before[t] != rows_after[t]
-                   and t != "public.discord_announcements"]
+                   and t != "public.discord_announcements" and t not in expected_086]
         ok(
             not changed,
             f"{len(public_tables)} existing tables keep byte-identical rows (seasons, saves, history, purchases, coins)",
             changed,
         )
         reads_after = reads(pg)
+        # Only views over the re-ranked rows may read differently after 086.
+        allowed_reads = rehearsal_086.dependent_views(pg) if reranked or retired else set()
+        report["phase086_changed_reads"] = sorted(
+            k for k in reads_before if reads_before[k] != reads_after.get(k) and k in allowed_reads)
         unexplained = {
             k: [reads_before[k], reads_after.get(k)]
             for k in reads_before
-            if reads_before[k] != reads_after.get(k)
+            if reads_before[k] != reads_after.get(k) and k not in allowed_reads
         }
         ok(
             not unexplained,

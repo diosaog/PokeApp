@@ -157,7 +157,7 @@ class TieGroup(BaseModel):
 class RankingReview(BaseModel):
     input_hash: Annotated[str, Field(pattern=r"^[a-f0-9]{64}$")]
     groups: Annotated[list[TieGroup], Field(max_length=250)]
-    ranking_rule: Literal["wins_adjusted_deaths_v1", "wins_segment_deaths_v2"] | None = None
+    ranking_rule: Literal["wins_adjusted_deaths_v1", "wins_segment_deaths_v2", "wins_h2h_deaths_v3"] | None = None
 
 
 class RankingErrorDetail(BaseModel):

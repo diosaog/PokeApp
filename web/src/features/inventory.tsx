@@ -33,12 +33,8 @@ import {
 import { gameName } from "./progress";
 import { LauncherDownload } from "./launcher-download";
 
-const pokemonActions = [
-  "blindar_pokemon",
-  "revivir_pokemon",
-  "robar_pokemon",
-  "robbery_shield_voucher",
-];
+// 087: «Blindaje por Robo» is no longer issued; the stolen Pokémon is shielded.
+const pokemonActions = ["blindar_pokemon", "revivir_pokemon", "robar_pokemon"];
 
 // The trainer's own dead box (070: Box 8 unless the administrator set another).
 function isDead(target: PokemonTarget, deadBox: number) {
@@ -257,8 +253,6 @@ export function Inventory() {
             return isDead(target, deadBox);
           if (purchase?.item_code === "blindar_pokemon")
             return !isDead(target, deadBox) && target.can_shield;
-          if (purchase?.item_code === "robbery_shield_voucher")
-            return target.can_shield;
           return false;
         });
   const usesPokemonSelector = pokemonActions.includes(
@@ -458,6 +452,11 @@ export function Inventory() {
                     <p className="muted">
                       Ahora mismo no se puede aplicar. No se ha consumido.
                     </p>
+                  ) : item.item_code === "robbery_shield_voucher" ? (
+                    <p className="muted">
+                      Comodín retirado: el Pokémon robado ya queda blindado al
+                      robarlo.
+                    </p>
                   ) : pokemonActions.includes(item.item_code) ? (
                     <button
                       type="button"
@@ -569,9 +568,7 @@ export function Inventory() {
                 ? "Sí, blindar"
                 : purchase.item_code === "revivir_pokemon"
                   ? "Sí, revivir"
-                  : purchase.item_code === "robbery_shield_voucher"
-                    ? "Sí, blindar"
-                    : "Sí, robar"
+                  : "Sí, robar"
             }
             confirmation={(target) =>
               purchase.item_code === "robar_pokemon"

@@ -187,16 +187,14 @@ it("accepts the nullable added fields on historical API tie reviews", async () =
   };
   vi.stubGlobal(
     "fetch",
-    vi
-      .fn()
-      .mockResolvedValue(
-        new Response(
-          JSON.stringify({
-            detail: { code: "RANKING_TIE_UNRESOLVED", ranking: historical },
-          }),
-          { status: 409, headers: { "Content-Type": "application/json" } },
-        ),
+    vi.fn().mockResolvedValue(
+      new Response(
+        JSON.stringify({
+          detail: { code: "RANKING_TIE_UNRESOLVED", ranking: historical },
+        }),
+        { status: 409, headers: { "Content-Type": "application/json" } },
       ),
+    ),
   );
   const error = await new ApiClient("https://api.example")
     .command("/close", {}, "key")
@@ -207,4 +205,35 @@ it("accepts the nullable added fields on historical API tie reviews", async () =
   expect(
     screen.getByRole("heading", { name: "Registrar decisión externa" }),
   ).toBeInTheDocument();
+});
+
+it("086: a three-way tie under the direct-match rule still records every 1v1", () => {
+  const three: Model<"RankingReview"> = {
+    input_hash: "h3",
+    ranking_rule: "wins_h2h_deaths_v3",
+    groups: [
+      {
+        division: "A",
+        player_ids: ["p1", "p2", "p3"],
+        position: 1,
+        position_end: 3,
+        wins: 2,
+        adjusted_deaths: 1,
+        segment_deaths: 1,
+        consequences: ["podium", "matchday_prize"],
+      },
+    ],
+  };
+  const names = (id: string) =>
+    ({ p1: "Lucía", p2: "Mario", p3: "Iker" })[id] ?? id;
+  render(<DailyTieFields review={three} name={names} />);
+  expect(
+    screen.getByRole("heading", { name: "Registrar desempates 1v1" }),
+  ).toBeInTheDocument();
+  // One league: never a division, even without the «single» flag.
+  expect(screen.getByText(/Liga · posiciones 1–3/)).toBeInTheDocument();
+  for (const pair of ["Lucía / Mario", "Lucía / Iker", "Mario / Iker"]) {
+    expect(screen.getByLabelText(`Ganador 1v1 · ${pair}`)).toBeRequired();
+    expect(screen.getByLabelText(`Evidencia del 1v1 · ${pair}`)).toBeRequired();
+  }
 });

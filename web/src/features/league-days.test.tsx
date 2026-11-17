@@ -179,3 +179,52 @@ it("does not turn an unknown open segment or net calculation into zero", () => {
   for (const index of [4, 5, 6])
     expect(cells[index]).toHaveTextContent("Desconocido");
 });
+it("086: names the automatic criterion that placed each trainer", () => {
+  fixture();
+  mocks.overview = {
+    ...mocks.overview,
+    players: [
+      { id: "p", display_name: "Iker", trainer_id: "t", status: "active" },
+      { id: "q", display_name: "Anto", trainer_id: "u", status: "active" },
+      { id: "r", display_name: "Samu", trainer_id: "v", status: "active" },
+    ],
+    snapshots: [
+      {
+        matchday_id: "j1",
+        revision: 2,
+        closed_at: "2026-11-17T12:00:00Z",
+        standings: [
+          row({ tiebreak: "head_to_head" }),
+          row({
+            season_player_id: "q",
+            position: 2,
+            division_position: 2,
+            tiebreak: "head_to_head",
+            placement_rewards: [],
+          }),
+          row({
+            season_player_id: "r",
+            position: 3,
+            division_position: 3,
+            wins: 1,
+            tiebreak: null,
+            placement_rewards: ["robar_pokemon"],
+          }),
+        ],
+      },
+    ],
+  };
+  render(
+    <MemoryRouter>
+      <LeaguePage />
+    </MemoryRouter>,
+  );
+  fireEvent.click(screen.getByRole("button", { name: "J1" }));
+  const cells = (who: RegExp) =>
+    within(screen.getByRole("row", { name: who })).getAllByRole("cell");
+  expect(cells(/Iker/)[7]).toHaveTextContent("Combate directo");
+  expect(cells(/Iker/)[8]).toHaveTextContent("Blindar Pokémon extra");
+  expect(cells(/Anto/)[7]).toHaveTextContent("Combate directo");
+  expect(cells(/Samu/)[7]).toHaveTextContent("Sin empate");
+  expect(cells(/Samu/)[8]).toHaveTextContent("Robar Pokémon extra");
+});

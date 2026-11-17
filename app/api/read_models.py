@@ -145,6 +145,8 @@ class StandingRead(BaseModel):
     point_penalties: Decimal | None = Field(default=None, allow_inf_nan=False)
     net_points: Decimal | None = Field(default=None, allow_inf_nan=False)
     placement_rewards: list[str] | None = None
+    # 086: automatic criterion among equal wins (direct match or stretch deaths).
+    tiebreak: Literal["head_to_head", "segment_deaths"] | None = None
 
 
 class SnapshotRead(BaseModel):

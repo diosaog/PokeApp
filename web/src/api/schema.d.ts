@@ -4424,6 +4424,8 @@ export interface components {
       save_file_id: string;
       /** Save Sha256 */
       save_sha256: string;
+      /** Identity Revision Id */
+      identity_revision_id?: string | null;
       /**
        * Effect Code
        * @enum {string}
@@ -5494,6 +5496,8 @@ export interface components {
       net_points?: string | null;
       /** Placement Rewards */
       placement_rewards?: string[] | null;
+      /** Tiebreak */
+      tiebreak?: ("head_to_head" | "segment_deaths") | null;
     };
     /** PublicPreviewLock */
     PublicPreviewLock: {
@@ -5629,7 +5633,12 @@ export interface components {
       groups: components["schemas"]["TieGroup"][];
       /** Ranking Rule */
       ranking_rule?:
-        ("wins_adjusted_deaths_v1" | "wins_segment_deaths_v2") | null;
+        | (
+            | "wins_adjusted_deaths_v1"
+            | "wins_segment_deaths_v2"
+            | "wins_h2h_deaths_v3"
+          )
+        | null;
     };
     /** Readiness */
     Readiness: {
@@ -6750,6 +6759,8 @@ export interface components {
       net_points?: string | null;
       /** Placement Rewards */
       placement_rewards?: string[] | null;
+      /** Tiebreak */
+      tiebreak?: ("head_to_head" | "segment_deaths") | null;
     };
     /** StatsRead */
     StatsRead: {

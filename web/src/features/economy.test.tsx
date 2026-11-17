@@ -258,7 +258,7 @@ it("uses only the authoritative active offer ID for its promotional price", asyn
     ),
   );
 });
-it("redeems a reward voucher only against a server-approved owned target without physical-save copy", async () => {
+it("087: a leftover «Blindaje por Robo» voucher is retired, never redeemable", () => {
   mocks.inventory = {
     physical_items: true,
     purchases: [
@@ -287,42 +287,14 @@ it("redeems a reward voucher only against a server-approved owned target without
           is_shiny: false,
         },
       },
-      {
-        pokemon_entity_id: "shielded",
-        trainer_id: "owner",
-        visibility: "own",
-        can_shield: false,
-        location: "Equipo 2",
-        pokemon: { species: "Gastly", nickname: "", item: "", is_shiny: false },
-      },
-      {
-        pokemon_entity_id: "rival",
-        trainer_id: "rival",
-        visibility: "public_team_lock",
-        can_shield: false,
-        location: "Equipo rival",
-        pokemon: { species: "Eevee", nickname: "", item: "", is_shiny: false },
-      },
     ],
   };
   render(<Inventory />);
-  expect(screen.getByText("Vale de recompensa")).toBeInTheDocument();
-  fireEvent.click(screen.getByRole("button", { name: "Canjear" }));
+  expect(screen.getByText(/Comodín retirado/)).toBeInTheDocument();
   expect(
-    screen.getByRole("button", { name: /Pikachu.*Equipo 1/ }),
-  ).toBeInTheDocument();
-  expect(
-    screen.queryByRole("button", { name: /Gastly|Eevee/ }),
+    screen.queryByRole("button", { name: /Canjear|Usar/ }),
   ).not.toBeInTheDocument();
-  expect(screen.queryByText(/cambio fÃ­sico/)).not.toBeInTheDocument();
-  fireEvent.click(screen.getByRole("button", { name: /Pikachu.*Equipo 1/ }));
-  fireEvent.click(screen.getByRole("button", { name: "Sí, blindar" }));
-  await waitFor(() =>
-    expect(mocks.execute).toHaveBeenCalledWith(
-      "/v1/seasons/season/shop/purchases/gift/redemptions",
-      { pokemon_entity_id: "eligible" },
-    ),
-  );
+  expect(mocks.execute).not.toHaveBeenCalled();
 });
 
 const robbery = {

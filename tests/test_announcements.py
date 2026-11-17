@@ -46,6 +46,33 @@ class FactsTests(unittest.TestCase):
         with self.assertRaises(Skip):
             gather('matchday_closed',{'matchday_id':'day','revision':1},self.read)
 
+    def test_head_to_head_correction_names_the_new_prize_winners(self):
+        # 086: same results, new order; Blindar/Robar follow the new first/last.
+        snapshot=dict(schema_version=2, closed_at='2026-11-17T10:00:00Z', final=False,
+                      standings=[dict(trainer_id='p2',division_id='A',position=1,division_position=1,points_awarded=1,coins_awarded=10),
+                                 dict(trainer_id='p1',division_id='A',position=2,division_position=2,points_awarded=0,coins_awarded=10)],
+                      inputs={'matches':[dict(player_a_id='p1',player_b_id='p2',winner_id='p2',division='A')]},
+                      single_league_rewards=[dict(code='blindar_pokemon',season_player_id='p2'),
+                                             dict(code='robar_pokemon',season_player_id='p1')],
+                      correction=dict(kind='h2h_tiebreak_rule',previous_revision=1))
+        self.tables.update(matchdays=[dict(id='day',season_id='s',number=1)],
+                           matchday_snapshots=[dict(matchday_id='day',revision=2,snapshot=snapshot)],
+                           matchday_snapshot_revisions=[dict(matchday_id='day',revision=2,snapshot=snapshot)],
+                           coin_transactions=[])
+        facts=gather('matchday_corrected',{'matchday_id':'day','revision':2},self.read)
+        body=json.dumps(render(facts),ensure_ascii=False)
+        self.assertIn('Jornada 1 corregida',body)
+        self.assertIn('combate directo',body)
+        self.assertNotIn('Resultados corregidos',body)
+        self.assertIn('Blindar Pokémon extra → **Two**, primero de la jornada',body)
+        self.assertIn('Robar Pokémon extra → **One**, último de la jornada',body)
+        # A closing without prizes in its snapshot keeps the previous message.
+        snapshot.pop('single_league_rewards'); snapshot.pop('correction')
+        facts=gather('matchday_corrected',{'matchday_id':'day','revision':2},self.read)
+        body=json.dumps(render(facts),ensure_ascii=False)
+        self.assertIn('Resultados corregidos',body)
+        self.assertNotIn('Comodines de la jornada',body)
+
     def test_cup_round_and_certificate_use_frozen_sides(self):
         snapshot=dict(season_id='s',name='Fixture Cup',format='singles',sides=[dict(id='a',name='One'),dict(id='b',name='Two')],
                       rounds=[dict(number=1,status='closed',phase='final',matches=[dict(a='a',b='b',winner='b',score_a=1,score_b=2)])], standings=[])

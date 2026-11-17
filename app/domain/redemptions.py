@@ -52,8 +52,11 @@ class RedemptionReceipt:
                 or self.physical_effect_completed_at is not None):
             raise ValueError('invalid_redemption_receipt')
         if self.effect_code == 'steal':
-            if not self.gift_purchase_id or self.target_owner_trainer_id == self.trainer_id:
+            if self.target_owner_trainer_id == self.trainer_id:
                 raise ValueError('invalid_robbery_receipt')
-            UUID(self.gift_purchase_id)
+            # 087: a robbery no longer issues «Blindaje por Robo» (the stolen
+            # Pokémon is shielded); earlier receipts keep their gift purchase.
+            if self.gift_purchase_id is not None:
+                UUID(self.gift_purchase_id)
         elif self.gift_purchase_id is not None or self.target_owner_trainer_id != self.trainer_id:
             raise ValueError('invalid_redemption_receipt')

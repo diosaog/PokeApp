@@ -81,7 +81,7 @@ def public_daily_standing(snapshot, standing):
     rule = ranking.get("rule")
     if rule == "legacy_pre_10_5d":
         return result
-    if rule not in ("wins_adjusted_deaths_v1", "wins_segment_deaths_v2"):
+    if rule not in ("wins_adjusted_deaths_v1", "wins_segment_deaths_v2", "wins_h2h_deaths_v3"):
         raise PersistenceError("Unsupported official ranking")
     metadata = standing.get("metadata")
     if not isinstance(metadata, dict) or metadata.get("ranking_rule") != rule:
@@ -106,8 +106,10 @@ def public_daily_standing(snapshot, standing):
     ):
         raise PersistenceError("Invalid official sporting position")
     result.update(position_end=end, tie_status=status)
-    if rule == "wins_segment_deaths_v2":
-        for name in ("actual_segment_deaths", "wins", "losses", "point_penalties", "net_points", "placement_rewards"):
+    if rule in ("wins_segment_deaths_v2", "wins_h2h_deaths_v3"):
+        names = ("actual_segment_deaths", "wins", "losses", "point_penalties", "net_points", "placement_rewards")
+        # 086: which automatic criterion placed the trainer among equal wins.
+        for name in names + (("tiebreak",) if rule == "wins_h2h_deaths_v3" else ()):
             if name not in metadata:
                 raise PersistenceError("Missing official League scoring breakdown")
             result[name] = metadata[name]

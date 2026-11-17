@@ -488,9 +488,9 @@ export const formatFacts = [
 export const standings = [
   {
     title: "Clasificación de jornada",
-    text: "Se ordena por victorias. A igualdad de victorias va delante quien haya tenido menos muertes durante ese tramo.",
+    text: "Se ordena por victorias y derrotas. Si empatan dos entrenadores, va delante quien ganó su combate directo en esa jornada. Si empatan tres o más, va delante quien haya tenido menos muertes durante ese tramo. Los puntos NET no cuentan para este orden.",
     detail:
-      "Si un empate afecta al podio, al primer puesto o al último, se resuelve con combates 1v1 adicionales entre los empatados. No suman puntos ni victorias, y se registran al cerrar la jornada con fecha y evidencia. Si no afecta a nada de eso, los empatados comparten posición.",
+      "Si después de las muertes siguen empatados dos, decide su combate directo. Si siguen empatados tres o más y eso afecta al podio, al primer puesto o al último, se resuelve con combates 1v1 adicionales entre ellos: no suman puntos ni victorias, y se registran al cerrar la jornada con fecha y evidencia. Si no afecta a nada de eso, comparten posición.",
   },
   {
     title: "Clasificación general",
@@ -649,7 +649,7 @@ export const wildcards: Wildcard[] = [
     price: 12,
     effect:
       "Te llevas un Pokémon de otro participante. Queda ROBADO y BLINDADO, y conserva su historia.",
-    note: "Quien roba recibe un vale de Blindaje por Robo.",
+    note: "El Pokémon robado queda blindado automáticamente: no hay vale aparte.",
     active: true,
     status: "Disponible. Se guarda y se usa cuando quieras.",
   },
@@ -670,15 +670,6 @@ export const wildcards: Wildcard[] = [
     note: "PokeApp Launcher lo añade a tu bolsa.",
     active: true,
     status: "Disponible",
-  },
-  {
-    code: "robbery_shield_voucher",
-    name: "Blindaje por Robo",
-    price: null,
-    effect: "Vale para blindar a uno de tus Pokémon.",
-    note: "No se compra: lo recibe quien completa un robo.",
-    active: true,
-    status: "Se recibe al completar un robo.",
   },
 ];
 export const robberyRules: Rule[] = [

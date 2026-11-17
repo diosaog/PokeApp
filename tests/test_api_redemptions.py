@@ -161,8 +161,16 @@ class RedemptionTests(unittest.TestCase):
         self.rpc_body = asdict(replace(self.receipt,effect_code='robbery_shield'))
         self.assertEqual(self.post().status_code,200)
 
-    def test_robbery_receipt_requires_foreign_owner_and_gift(self):
-        for changes in ({'gift_purchase_id':None},{'gift_purchase_id':'invalid'},
+    def test_robbery_receipt_after_087_has_no_gift(self):
+        self.target_owner = str(uuid4())
+        self.rpc_body = asdict(replace(self.receipt,effect_code='steal',physical_effect_status='pending',
+            target_owner_trainer_id=self.target_owner,gift_purchase_id=None))
+        response = self.post()
+        self.assertEqual(response.status_code,200,response.text)
+        self.assertIsNone(response.json()['gift_purchase_id'])
+
+    def test_robbery_receipt_requires_foreign_owner_and_valid_gift(self):
+        for changes in ({'gift_purchase_id':'invalid'},
                         {'target_owner_trainer_id':TRAINER_ID},{'physical_effect_status':'not_required'}):
             body=dict(asdict(self.receipt),effect_code='steal',physical_effect_status='pending',
                       target_owner_trainer_id=str(uuid4()),gift_purchase_id=str(uuid4()))

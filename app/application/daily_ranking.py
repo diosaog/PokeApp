@@ -6,12 +6,16 @@ import hashlib
 import json
 from itertools import combinations
 
-from app.domain.services.league import rank_division
+from app.domain.services.league import rank_division, rank_head_to_head
 from app.domain.services.legacy_league import legacy_rank_division
 
 RULE = "wins_adjusted_deaths_v1"
 LEGACY_RULE = "legacy_pre_10_5d"
 NET_RULE = "wins_segment_deaths_v2"
+# Owner rule 2026-11-17: wins; two tied by their direct match; three or more
+# by fewer stretch deaths (a pair still level: direct match).
+H2H_RULE = "wins_h2h_deaths_v3"
+NET_RULES = (NET_RULE, H2H_RULE)
 NET_SCORING = "league_net_v1"
 
 
@@ -246,8 +250,8 @@ def _battle_order(decision, ids):
 
 
 def _net_consequence_order(inputs, matches, rule, resolution):
-    if rule != NET_RULE:
-        raise ValueError("New League requires its frozen segment-death ranking rule")
+    if rule not in NET_RULES:
+        raise ValueError("New League requires a frozen League ranking rule")
     players = {p["id"]: p for p in inputs["players"]}
     cfg = inputs["config"]
     canonical = dict(
@@ -260,8 +264,9 @@ def _net_consequence_order(inputs, matches, rule, resolution):
     digest = hashlib.sha256(json.dumps(canonical, sort_keys=True, separators=(",", ":")).encode()).hexdigest()
     review = dict(input_hash=digest, ranking_rule=rule, groups=[])
     global_results = {(m["player_a_id"], m["player_b_id"]): m["winner_id"] for m in matches.values()}
-    ranking = rank_division(list(players), global_results,
-                            dead_counts={pid: p["segment_deaths"] for pid, p in players.items()})
+    rank = rank_head_to_head if rule == H2H_RULE else rank_division
+    ranking = rank(list(players), global_results,
+                   dead_counts={pid: p["segment_deaths"] for pid, p in players.items()})
     sizes = {d: sum(p["division"] == d for p in players.values()) for d in ("A", "B")}
     moving = 0 if inputs["number"] == cfg["total_matchdays"] else min(
         cfg["promotion_relegation_count"], sizes["A"], sizes["B"])
@@ -285,9 +290,10 @@ def _net_consequence_order(inputs, matches, rule, resolution):
                     position=position, position_end=end, wins=group.wins,
                     # Compatibility alias; explicitly actual segment deaths here.
                     adjusted_deaths=group.adjusted_deaths,
-                    segment_deaths=group.adjusted_deaths, consequences=effects)
+                    segment_deaths=group.adjusted_deaths, consequences=effects,
+                    tiebreak=group.tiebreak)
         if len(ids) > 1:
-            review["groups"].append(item)
+            review["groups"].append({k: v for k, v in item.items() if k != "tiebreak"})
         groups.append(item)
         for division in division_offsets:
             division_offsets[division] += sum(players[p]["division"] == division for p in ids)
@@ -322,16 +328,19 @@ def _net_consequence_order(inputs, matches, rule, resolution):
         for index, pid in enumerate(allocation):
             division = players[pid]["division"]
             division_position = starts[division] if neutral else len(ordered[division]) + 1
+            metadata = dict(ranking_rule=rule, allocation_position=group["position"] + index,
+                position_end=group["position_end"] if neutral else group["position"] + index,
+                tie_status=status, tie_size=len(ids), wins=group["wins"],
+                losses=sum(m["winner_id"] != pid and pid in (m["player_a_id"], m["player_b_id"])
+                           for m in matches.values()),
+                # Each trainer's own frozen deaths (v2 groups share one value).
+                actual_segment_deaths=players[pid]["segment_deaths"])
+            if rule == H2H_RULE:
+                metadata["tiebreak"] = group["tiebreak"]
             rows[pid] = dict(position=group["position"] if neutral else group["position"] + index,
-                division_position=division_position,
-                metadata=dict(ranking_rule=rule, allocation_position=group["position"] + index,
-                    position_end=group["position_end"] if neutral else group["position"] + index,
-                    tie_status=status, tie_size=len(ids), wins=group["wins"],
-                    losses=sum(m["winner_id"] != pid and pid in (m["player_a_id"], m["player_b_id"])
-                               for m in matches.values()),
-                    actual_segment_deaths=group["segment_deaths"]))
+                division_position=division_position, metadata=metadata)
             ordered[division].append(pid)
         if len(ids) > 1:
-            audit.append(dict(group, status=status))
+            audit.append({**{k: v for k, v in group.items() if k != "tiebreak"}, "status": status})
     return ConsequenceOrder(ordered, rows, dict(rule=rule, input_hash=digest, groups=audit,
         resolutions=[decisions[key] for key in sorted(decisions, key=lambda k: sorted(k))]))

@@ -462,10 +462,18 @@ def _matchday(f: Facts, s: dict) -> dict:
                         (target, players.get(pid, {}).get("name", "Entrenador"))
                     )
     gift = snapshot.get("last_b_player_id")
+    # One-league placement prizes frozen in the snapshot (1st Blindar, last Robar).
+    prizes = [
+        (r["code"], players.get(r["season_player_id"], {}).get("name", "Entrenador"))
+        for r in snapshot.get("single_league_rewards") or []
+        if isinstance(r, dict) and r.get("code") in PRIZES and r.get("season_player_id")
+    ]
     return dict(
         season=season["name"],
         matchday=day["number"],
         corrected=s["revision"] > 1,
+        correction=(snapshot.get("correction") or {}).get("kind"),
+        prizes=prizes,
         final=bool(snapshot.get("final")),
         leagues=leagues,
         rows=rows,
@@ -958,6 +966,12 @@ def _sanction(p: dict) -> str:
     return "• Otra sanción (detalle en PokeApp)"
 
 
+PRIZES = {
+    "blindar_pokemon": ("🛡️ Blindar Pokémon extra", "primero de la jornada"),
+    "robar_pokemon": ("🗡️ Robar Pokémon extra", "último de la jornada"),
+}
+
+
 def _render_matchday(facts: dict, footer: str) -> dict:
     leagues = facts["leagues"]
     corrected = facts["corrected"]
@@ -966,7 +980,13 @@ def _render_matchday(facts: dict, footer: str) -> dict:
     ]
     if facts["final"]:
         desc.append("🏁 Última jornada de la temporada.")
-    if corrected:
+    if corrected and facts.get("correction") == "h2h_tiebreak_rule":
+        desc.append(
+            "✏️ Clasificación recalculada con el nuevo desempate: con las mismas victorias, "
+            "entre dos decide su combate directo; entre tres o más, menos muertes del tramo. "
+            "Los resultados no cambian; la clasificación y los comodines, sí."
+        )
+    elif corrected:
         desc.append(
             "✏️ Resultados corregidos por la administración: estas son las cifras oficiales."
         )
@@ -1015,6 +1035,15 @@ def _render_matchday(facts: dict, footer: str) -> dict:
             [f"⬇️ Descienden a Liga B: {', '.join(downs)}"] if downs else []
         )
         fields += lines_fields("🔄 Ascensos y descensos", lines)
+    prize_lines = [
+        f"{PRIZES[code][0]} → **{clean(name)}**, {PRIZES[code][1]}"
+        for code, name in facts.get("prizes") or []
+        if code in PRIZES
+    ]
+    if prize_lines:
+        fields.append(
+            {"name": "🎁 Comodines de la jornada", "value": "\n".join(prize_lines), "inline": False}
+        )
     if facts["gift"]:
         fields.append(
             {
