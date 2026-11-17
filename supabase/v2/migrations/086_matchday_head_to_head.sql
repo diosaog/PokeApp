@@ -244,6 +244,17 @@ begin
   perform public.matchday_commit_close_v034(op,r,jsonb_set(ctx,'{inputs,ranking}',plan->'ranking'),plan);
 end $$;
 
+-- A modern League pairs its next matchday inside its own season only: the
+-- 075 pairing did not filter the second member's season, so another season
+-- with memberships for the same number would have broken the close.
+do $$ declare definition text=pg_get_functiondef('public.matchday_commit_close_v034(text,jsonb,jsonb,jsonb)'::regprocedure);
+  pairing text='where a.season_id=sid and a.effective_from_matchday_number=d.number+1 and b.effective_from_matchday_number=d.number+1;';
+begin
+  if position(pairing in definition)=0 then raise exception 'unexpected next-matchday pairing before 086'; end if;
+  execute replace(definition,pairing,
+    'where a.season_id=sid and b.season_id=sid and a.effective_from_matchday_number=d.number+1 and b.effective_from_matchday_number=d.number+1;');
+end $$;
+
 -- Provisional order of the open matchday, same rule. A pair whose direct match
 -- is not played yet shares the place until it is.
 create or replace function public.league_live_matchday_scores(sid uuid,did uuid) returns jsonb

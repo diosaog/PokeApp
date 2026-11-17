@@ -35,7 +35,7 @@ from tools.production_readonly import SUPABASE_REF, _supabase, query, supabase_g
 
 EXPECTED_SHA256 = {
     '087_retire_robbery_shield_voucher.sql': 'ed9eded5d9a760dd1bc9a3d74ba5a5e8d5968633bab3f27bd5930e7e2e853867',
-    '086_matchday_head_to_head.sql': 'e195ab8985055cf20ba0aa93ada25be9d0c9eba416248d43657b1248841a2dae',
+    '086_matchday_head_to_head.sql': '992e7ee2409f914074c670722dc2ee5f48208193584c111039c925dd63f44924',
     '085_robbery_revive_activation.sql': '5ac48808b01984f457b58f48bf082e35581a86b77ae9e218a9b57a2c9a242ff6',
     '084_save_audit_notices.sql': '0fc5359ce80ee0d0c590a9b94eadd540925f418b0827dc235e1a373bf87ef23c',
     '083_team_lock_confirmation_announcements.sql': '3ef757446a4c0f0f2e9b6bdb0439122c264b810ece9ece8e8ef7ce6ec3bed74c',
@@ -117,9 +117,17 @@ def preflight(args) -> dict:
     )
     if busy["open_matchdays"] or busy["reserved_deliveries"]:
         problems.append("an open matchday or reserved delivery: wait for it to finish")
+    in_flight = []
     if busy["open_physical_authorizations"] or busy["unsettled_transfer_legs"]:
-        problems.append("an unsettled physical operation: wait for its journal to settle")
+        in_flight = query(
+            """select a.id::text as id, a.created_at::text as created_at from public.item_use_authorizations a
+            where a.id in (select authorization_id from public.item_use_transfer_legs where not released)
+              or (a.status<>'APPLIED_VERIFIED' and not exists(select 1 from public.item_use_transfers x
+                where x.authorization_id=a.id and (x.terminal='CANCELLED' or x.adjudicated_at is not null)))
+            order by 1"""
+        )
     backup = None
+    manifest = None
     if args.backup:
         manifest = json.loads(Path(args.backup).read_text(encoding="utf-8"))
         rehearsal = json.loads(
@@ -153,6 +161,19 @@ def preflight(args) -> dict:
                 problems.append(f"{migration.name} is not the committed source")
     elif args.apply:
         problems.append("no rehearsed backup manifest given")
+    if in_flight:
+        # An operation named explicitly that already existed in the rehearsed
+        # backup was part of the proven state; anything else still blocks.
+        named = set(getattr(args, "in_flight_ok", None) or [])
+        captured = datetime.fromisoformat(manifest["captured_at"]) if manifest else None
+        accepted = [
+            op for op in in_flight
+            if op["id"] in named and captured is not None
+            and datetime.fromisoformat(op["created_at"]) < captured
+        ]
+        busy["accepted_in_flight"] = [op["id"] for op in accepted]
+        if len(accepted) != len(in_flight):
+            problems.append("an unsettled physical operation: wait for its journal to settle")
     return {
         "project": SUPABASE_REF,
         "history_records": len(names),
@@ -211,6 +232,10 @@ def main():
     parser.add_argument("--backup", type=Path, help="manifest of the rehearsed backup")
     parser.add_argument("--apply", action="store_true")
     parser.add_argument("--owner-authorized", action="store_true")
+    parser.add_argument(
+        "--in-flight-ok", action="append", default=[],
+        help="authorization id of an unsettled physical operation already in the rehearsed backup",
+    )
     args = parser.parse_args()
     plan = preflight(args)
     print(json.dumps(plan, indent=2, default=str))
