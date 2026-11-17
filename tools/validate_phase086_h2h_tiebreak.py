@@ -280,8 +280,8 @@ def validate_retroactive(pg_bin, port):
             j2_before = snapshot(conn, j2)
             general = value(conn, "select public.league_general_read(%s)->'rows'", (v["sid"],))
             coins = value(conn, "select count(*)||':'||sum(amount) from public.coin_transactions where season_id=%s", (v["sid"],))
-            results = conn.execute("select id,winner_id from public.matches m join public.matchdays d on d.id=m.matchday_id"
-                                   " where d.season_id=%s order by id", (v["sid"],)).fetchall()
+            results = conn.execute("select m.id,m.winner_id from public.matches m join public.matchdays d on d.id=m.matchday_id"
+                                   " where d.season_id=%s order by m.id", (v["sid"],)).fetchall()
             conn.commit()
             checks.append("<=085: J1 v2 gives Blindar to p1 (fewer deaths, lost to p0); J2 unique")
 
@@ -298,8 +298,12 @@ def validate_retroactive(pg_bin, port):
             conn.rollback()
             checks.append("used reward: 086 aborts atomically (J1 revision 1, no new function)")
 
+            steal = conn.execute("select p.id from public.purchases p join public.shop_items i on i.id=p.shop_item_id"
+                                 " where p.origin_matchday_id=%s and i.code='robar_pokemon'", (j1,)).fetchone()[0]
             conn.execute("alter table public.purchases disable trigger user")
             conn.execute("update public.purchases set status='pending' where id=%s", (reward,))
+            # As in production: the unchanged last place already used its Robar.
+            conn.execute("update public.purchases set status='used' where id=%s", (steal,))
             conn.execute("alter table public.purchases enable trigger user")
             conn.commit()
             run = pg.sql(h2h, "postgres", ok=False)
@@ -315,7 +319,7 @@ def validate_retroactive(pg_bin, port):
             assert [rows[i]["points_awarded"] for i in range(5)] == [before_row["points_awarded"] for before_row in
                     sorted(before["standings"], key=lambda r: v["players"].index(r["trainer_id"]))]
             assert prizes(conn, v, j1) == [("blindar_pokemon", 0, "pending"), ("blindar_pokemon", 1, "cancelled"),
-                                           ("robar_pokemon", 4, "pending")], prizes(conn, v, j1)
+                                           ("robar_pokemon", 4, "used")], prizes(conn, v, j1)
             assert value(conn, "select revision from public.matchday_snapshot_revisions where matchday_id=%s and revision=1",
                          (j1,)) == 1
             event = conn.execute("select type,payload->>'source' from public.activity_events where dedupe_key=%s",
@@ -328,8 +332,8 @@ def validate_retroactive(pg_bin, port):
             assert value(conn, "select public.league_general_read(%s)->'rows'", (v["sid"],)) == general
             assert value(conn, "select count(*)||':'||sum(amount) from public.coin_transactions where season_id=%s",
                          (v["sid"],)) == coins
-            assert conn.execute("select id,winner_id from public.matches m join public.matchdays d on d.id=m.matchday_id"
-                                " where d.season_id=%s order by id", (v["sid"],)).fetchall() == results
+            assert conn.execute("select m.id,m.winner_id from public.matches m join public.matchdays d on d.id=m.matchday_id"
+                                " where d.season_id=%s order by m.id", (v["sid"],)).fetchall() == results
             assert to_regprocedure(conn, "public.league_h2h_rerank_closed(uuid,uuid,text)") is None
             public_rows(after)
             conn.rollback()
@@ -337,7 +341,8 @@ def validate_retroactive(pg_bin, port):
                          "postgres", ok=False)
             assert not run.returncode, run.err[-600:]
             checks.append(validate_087(pg))
-            checks.append("086: J1 rev2 v3, Blindar p1 cancelled -> p0 pending, Robar kept, «Jornada corregida» queued;"
+            checks.append("086: J1 rev2 v3, Blindar p1 cancelled -> p0 pending, used Robar kept (no duplicate),"
+                          " «Jornada corregida» queued;"
                           " J2/results/points/coins unchanged")
 
             conn.execute("set role service_role")

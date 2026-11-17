@@ -400,8 +400,9 @@ begin
     pid=(prize->>'season_player_id')::uuid;
     select id into gift from public.shop_items where code=prize->>'code' and acquisition_mode='purchasable' for share;
     if gift is null or pid is null then raise exception '086: matchday % prize % unavailable',d.number,prize->>'code'; end if;
+    -- A prize that keeps its recipient is never issued twice, used or not.
     if not exists(select 1 from public.purchases where origin_matchday_id=did and season_player_id=pid
-        and shop_item_id=gift and status='pending') then
+        and shop_item_id=gift and status<>'cancelled') then
       select trainer_id into tid from public.season_players where id=pid;
       insert into public.purchases(season_id,trainer_id,season_player_id,shop_item_id,quantity,unit_price,status,
         acquisition_type,origin_matchday_id,origin_snapshot_revision)
