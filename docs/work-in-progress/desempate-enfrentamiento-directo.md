@@ -1,7 +1,30 @@
 # Desempate por enfrentamiento directo y retirada del Blindaje por Robo — registro vivo
 
-**PREPARADO, SIN PUBLICAR LA BASE DE DATOS (2026-11-17).** Rama `claude/net-friendship-discord`.
-Migraciones 086 y 087 pendientes de validar en PostgreSQL (ver «Verificación»).
+**PUBLICADO Y VERIFICADO el 2026-11-18 (00:20 hora local)**, con autorización expresa del propietario.
+Rama `claude/net-friendship-discord`. Evidencia: [release.json](../evidence/h2h-086-087/release.json).
+
+| Capa | Estado | Rollback |
+|---|---|---|
+| Supabase | 001–087. 086 = `20261117231718`, 087 = `20261117231721` | Corrección hacia delante (086 reescribe la J1 con revisión auditada) |
+| API | Railway `14ba5fa1` (fuente `b6671ea`, 139 rutas) | `010a6546` (solo antes de 086: no lee snapshots v3) |
+| Web | Cloudflare `165bfc7d` | `08fb936b` |
+| Launcher / verificador | Sin cambios | — |
+
+Copia y ensayo: `%LOCALAPPDATA%/PokeApp-migration-evidence/h2h-086-087`
+(`pre-release-20261117T231117Z`, ensayo 20/20).
+
+**Resultado en producción:** J1 en revisión 2: Iker 1.º (Blindar pendiente), Anto 2.º (su Blindar,
+sin usar, cancelado), Samu 3.º, STeeLAG 4.º y Aaron 5.º (antes 4.º compartido, ahora por
+combate directo), ByVisan02 6.º (su Robar, ya usado, intacto). «Jornada 1 corregida» enviada a
+Discord. Vales «Blindaje por Robo»: 0 pendientes, 2 retirados (ByVisan02, STeeLAG).
+
+**Robo en curso al publicar:** autorización `febddd4b…` (víctima Aaron, adjudicado 21:59 UTC),
+a la espera del Launcher. Estaba en la copia ensayada y 086/087 no tocan transferencias; se
+aceptó con `phase30_apply_migrations --in-flight-ok`.
+
+**Fallos encontrados por el ensayo y corregidos antes de publicar:** la 086 habría emitido un
+segundo Robar al último si ya había usado el suyo (`b6671ea`), y el emparejamiento de la jornada
+siguiente de la Liga no filtraba la temporada del segundo jugador (`5426002`).
 
 ## Regla (decisión del propietario, 2026-11-17)
 
@@ -66,17 +89,14 @@ Sin Launcher.
 
 ## Verificación
 
-- Python: suite completa 1549 tests OK (módulos versionados + `tests/test_phase086_h2h_tiebreak.py`).
-- Web: 47 ficheros / 403 tests; `tsc -b` limpio.
-- SQL: **pendiente**. `tools/validate_phase086_h2h_tiebreak.py` (cierres reales, plan v2 y
-  orden falsificado rechazados, corrección auditada, orden provisional, 086 retroactiva que
-  aborta con comodín usado y mueve el Blindar sin usar; `validate_087`). El PostgreSQL
-  portátil de `%LOCALAPPDATA%/Temp/phase10-5l-pg17` perdió sus DLL; los binarios oficiales
-  17.2 están descargados en `%LOCALAPPDATA%/PokeAppDev/pg17-download/pg17.zip`, pero el
-  control de permisos de Claude Code bloquea extraerlos y ejecutarlos. Sin PostgreSQL local
-  tampoco se puede hacer la copia (`pg_dump`) ni el ensayo, así que 086/087 no se aplican.
-  Comando, una vez extraído en `%LOCALAPPDATA%/PokeAppDev/pg17`:
-  `python -m tools.validate_phase086_h2h_tiebreak --pg-bin %LOCALAPPDATA%/PokeAppDev/pg17/pgsql/bin`.
+- Python: suite completa 1549 OK. Web: 47 ficheros / 403 tests; `tsc -b` limpio.
+- SQL (PostgreSQL 17.2 portátil en `%LOCALAPPDATA%/PokeAppDev/pg17`):
+  `validate_phase086_h2h_tiebreak` PASS (cierres, corrección, orden provisional, 1v1, 087 y
+  retroactiva). 075 Liga, dos divisiones, legado y jornadas de participantes PASS en 001–087.
+  `validate_phase079_all_vs_all` falla igual en 001–085 (aserción de preparación anterior).
+- Ensayo sobre la copia de producción: 20/20, cambios fila a fila solo en lo previsto.
+- Producción: API sana con 139 rutas; snapshot J1 leído por el código de la API; web con la regla
+  nueva y sin «Blindaje por Robo».
 
 ## Cola del propietario (solo después de cerrar esto)
 

@@ -1,0 +1,97 @@
+{
+  "published_at_utc": "2026-11-17T23:20Z",
+  "owner_authorization": "explicit in chat, 2026-11-17/18",
+  "source_commits": {
+    "api": "b6671ea",
+    "migrations": "5426002"
+  },
+  "supabase": {
+    "086_matchday_head_to_head": "20261117231718",
+    "087_retire_robbery_shield_voucher": "20261117231721"
+  },
+  "api": {
+    "railway_deployment": "14ba5fa1",
+    "rollback": "010a6546",
+    "openapi_paths": 139,
+    "health": "ok"
+  },
+  "web": {
+    "cloudflare_version": "165bfc7d",
+    "rollback": "08fb936b"
+  },
+  "backup": {
+    "archive": "pre-release-20261117T231117Z.dump",
+    "sha256": "1c2856de161d0ea73c8280e7382b823a8e07665bf30d714437d9c8ef468180be",
+    "tables": 131
+  },
+  "rehearsal": {
+    "result": "PASS",
+    "checks": [
+      "backup restores into an isolated cluster with owners and grants",
+      "restored rows identical to production: 131 tables (count + hash)",
+      "restored catalog identical to production (objects, definitions, owners, ACLs)",
+      "migration history restored: 086-087 not recorded",
+      "116 API reads run on the restored copy (no privilege or missing-object error)",
+      "086_matchday_head_to_head.sql still matches the bytes frozen at rehearsal start",
+      "086_matchday_head_to_head.sql applies once as non-superuser postgres",
+      "087_retire_robbery_shield_voucher.sql still matches the bytes frozen at rehearsal start",
+      "087_retire_robbery_shield_voucher.sql applies once as non-superuser postgres",
+      "086/087 change only re-ranked jornadas, their prizes, announcements and retired vouchers",
+      "discord_announcements rows identical apart from the new 078 columns",
+      "109 existing tables keep byte-identical rows (seasons, saves, history, purchases, coins)",
+      "116 API reads return identical results after 086-087",
+      "no browser privilege removed from existing objects",
+      "no new privilege for anon/authenticated (tables, views or functions)",
+      "10 private operational tables exist and force RLS",
+      "verifier role created without login, superuser or RLS bypass",
+      "focused fixtures rolled back exactly",
+      "upgraded copy equals a fresh 001-087 build (Supabase-shaped)",
+      "pending migration bytes unchanged throughout the rehearsal"
+    ],
+    "failed": [],
+    "rerank": {
+      "rule": "wins_h2h_deaths_v3",
+      "reranked": [
+        {
+          "jornada": 1,
+          "revision": 2,
+          "before": "Anto 1, Iker 2, Samu 3, Aaron 4, STeeLAG 4, ByVisan02 6",
+          "after": "Iker 1 [head_to_head], Anto 2 [head_to_head], Samu 3, STeeLAG 4 [head_to_head], Aaron 5 [head_to_head], ByVisan02 6",
+          "prize_moves": [
+            "blindar_pokemon cancelled Anto",
+            "blindar_pokemon pending Iker"
+          ]
+        }
+      ],
+      "retired_vouchers": [
+        "ByVisan02 1",
+        "STeeLAG 1"
+      ],
+      "counts": {
+        "public.matchday_snapshots": 0,
+        "public.matchday_snapshot_revisions": 1,
+        "public.purchases": 1,
+        "public.matchdays": 0,
+        "public.activity_events": 1,
+        "public.discord_announcements": 1
+      },
+      "problems": []
+    },
+    "changed_reads": [
+      "view public.public_matchday_snapshots",
+      "view public.public_matchdays"
+    ],
+    "h2h_validator": "PASS (rolled back): J1 2-level on wins: direct match beats fewer deaths; v2-ordered and forged plans refused; Blindar p0/Robar p4; audited correction re-planned with v3 (revision 2); J2 3-level: fewer deaths, remaining pair by direct match; live order uses direct match; J3 3-level on wins and deaths for the podium: extra 1v1 battles accepted",
+    "voucher_validator": "PASS (read-only): robbery issues no «Blindaje por Robo»; steal receipts valid without gift; 0 usable vouchers (2 retired)"
+  },
+  "in_flight_accepted": {
+    "authorization": "febddd4b-c34f-4192-a0d0-7bf214b00091",
+    "why": "robbery adjudicated 2026-11-17T21:59Z awaiting the victim's Launcher; present in the rehearsed backup; 086/087 touch no transfer function"
+  },
+  "production_after": {
+    "J1": "revision 2, wins_h2h_deaths_v3: Iker 1 (Blindar pending), Anto 2 (Blindar cancelled), Samu 3, STeeLAG 4, Aaron 5, ByVisan02 6 (Robar used, untouched)",
+    "discord": "matchday_corrected sent 2026-11-17T23:19:24Z",
+    "robbery_shield_vouchers": "0 pending, 2 retired (ByVisan02, STeeLAG); api_redeem_purchase issues none"
+  },
+  "local_validation": "PostgreSQL 17.2: validate_phase086_h2h_tiebreak PASS (+087, retroactive); 075 League/divisions/legacy and player matchdays PASS on 001-087; 079 all-vs-all fails identically on 001-085 (pre-existing readiness assertion)"
+}

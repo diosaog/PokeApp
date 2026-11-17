@@ -43,11 +43,12 @@ MIGRATIONS = sorted((ROOT / "supabase/v2/migrations").glob("*.sql"))
 # and informative) was published as 20261108192609 after a fresh backup and
 # rehearsal. 085 (Robar y Revivir para toda la Liga) was published as
 # 20261109203241 after a fresh backup and rehearsal, with owner authorization.
-# 086 (jornada order by direct match, owner rule of 2026-11-17; re-ranks the
-# closed jornadas and moves their prizes) and 087 («Blindaje por Robo»
-# retired: no longer issued, unused vouchers cancelled) are the open window.
-DEPLOYED = [m for m in MIGRATIONS if int(m.name[:3]) <= 85]
-PENDING: list[Path] = [m for m in MIGRATIONS if m.name[:3] in ("086", "087")]
+# 086 (jornada order by direct match, owner rule of 2026-11-17; re-ranked J1
+# and moved its Blindar) and 087 («Blindaje por Robo» retired) were published
+# as 20261117231718 and 20261117231721 after a fresh backup and rehearsal,
+# with owner authorization. No migration is pending.
+DEPLOYED = [m for m in MIGRATIONS if int(m.name[:3]) <= 87]
+PENDING: list[Path] = []
 WINDOW = f"{PENDING[0].name[:3]}-{PENDING[-1].name[:3]}" if PENDING else "none"
 SCHEMAS = "('public','v1_shadow')"
 
