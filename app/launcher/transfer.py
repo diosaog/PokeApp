@@ -58,6 +58,12 @@ OPEN = (
     "RECIPIENT_PHYSICAL_PENDING",
     "RECIPIENT_RECOVERY_REQUIRED",
 )
+# A local binding in one of these states is over on this PC: PokeApp proved
+# this side (or the whole robbery), or it ended without effect. Only these
+# release the pause. Until 0.26.15 only COMMITTED/CANCELLED did, so every side
+# PokeApp had already verified (DONOR_/RECIPIENT_VERIFIED) kept that trainer's
+# reads and sync paused for good (2026-11-18, all four robbery participants).
+LOCAL_FINAL = ("COMMITTED", "CANCELLED", "RECONCILED") + SETTLED
 
 
 class _Wire(BaseModel):
@@ -121,12 +127,12 @@ TRANSFER_MESSAGES = {
     "ELIGIBILITY_VERIFIED": "Robo válido. PokeApp lo está adjudicando.",
     "COMPETITIVELY_ADJUDICATED": "Robo adjudicado por PokeApp: es definitivo. Falta la entrega física en las partidas.",
     "RECONCILED": "Robo completado: decisión y entrega física verificadas en las dos partidas.",
-    "DONOR_PHYSICAL_PENDING": "Sincronización obligatoria: PokeApp debe retirar este Pokémon de tu partida antes de cualquier otra sincronización. Cierra el juego y el emulador.",
+    "DONOR_PHYSICAL_PENDING": "PokeApp retira este Pokémon de tu partida automáticamente en cuanto el juego y el emulador estén cerrados. Si llevaba un objeto, vuelve a tu mochila.",
     "DONOR_RECOVERY_REQUIRED": "No se pudo preparar la retirada sobre tu partida actual. Cierra el juego y vuelve a intentarlo.",
     "DONOR_VERIFIED": "Retirada verificada. Tu partida vuelve a sincronizar con normalidad.",
     "DONOR_ABSENT_VERIFIED": "Tu partida actual ya no tenía ese Pokémon. Sincronización normal restablecida.",
     "DONOR_BLOCKED_UNCERTAIN": "Retirada bloqueada. Conserva tus copias: necesitas recuperación asistida.",
-    "RECIPIENT_PHYSICAL_PENDING": "Pokémon adjudicado, pendiente de recepción: aún no está en tu partida y no puedes usarlo.",
+    "RECIPIENT_PHYSICAL_PENDING": "Pokémon adjudicado: PokeApp lo añade a tu partida automáticamente en cuanto el juego esté cerrado. Llega sin objeto equipado.",
     "RECIPIENT_RECOVERY_REQUIRED": "No se pudo preparar la entrega en tu partida actual (¿cajas llenas?). Libera un hueco y vuelve a intentarlo.",
     "RECIPIENT_VERIFIED": "Pokémon recibido y verificado en tu partida.",
     "RECIPIENT_BLOCKED_UNCERTAIN": "Entrega bloqueada. Conserva tus copias: necesitas recuperación asistida.",
@@ -163,7 +169,11 @@ class EngineeringTransfer:
             db.execute(
                 "CREATE TABLE IF NOT EXISTS transfer_bindings(id TEXT PRIMARY KEY,record TEXT NOT NULL)"
             )
-            if db.execute("SELECT 1 FROM transfer_bindings LIMIT 1").fetchone():
+            # Only an unfinished side pauses; a settled one is history.
+            if any(
+                json.loads(row[0]).get("state") not in LOCAL_FINAL
+                for row in db.execute("SELECT record FROM transfer_bindings")
+            ):
                 controller.gate.recovery_required = True
 
     def bind(self, aid, side, intent):
@@ -352,6 +362,30 @@ class EngineeringTransfer:
             remote = self._remote("get", record)
             return self._state(record, remote.get("obligation") or remote["status"])
 
+    def _proven_here(self, intent, remote):
+        """PokeApp proved this side from the result uploaded by this PC.
+
+        The journal only has to show that this exact result was applied here.
+        Playing afterwards is legitimate and never reopens a settled side: the
+        current file is NOT required to still equal the result (until 0.26.15
+        it was, so a trainer who saved once more stayed paused for good).
+        """
+        try:
+            local = self.engine._load(intent.operation_id)
+        except WriteSafetyError as error:
+            if str(error) == "WRITE_OPERATION_NOT_FOUND":
+                return False
+            raise
+        if local["status"] in PENDING:
+            # An interrupted local step: the journal decides, never a guess.
+            self.engine.reconcile(intent.operation_id)
+            local = self.engine._load(intent.operation_id)
+        return (
+            local["status"] == "APPLIED_VERIFIED"
+            and remote.get("result_sha256") == local["output_hash"]
+            and bool(remote.get("accepted_save_id"))
+        )
+
     def state(self, aid):
         with self.controller._operation(recovery=True):
             record, intent = self._load(aid)
@@ -361,14 +395,7 @@ class EngineeringTransfer:
                 "DONOR_VERIFIED",
                 "RECIPIENT_VERIFIED",
             ):
-                receipt = self.engine.reconcile(intent.operation_id)
-                local = self.engine._load(intent.operation_id)
-                if (
-                    receipt.status != "APPLIED_VERIFIED"
-                    or receipt.current_matches_receipt is not True
-                    or remote.get("result_sha256") != local["output_hash"]
-                    or not remote.get("accepted_save_id")
-                ):
+                if not self._proven_here(intent, remote):
                     return self._state(record, "RECOVERY_REQUIRED")
             elif remote["status"] == "CANCELLED":
                 try:

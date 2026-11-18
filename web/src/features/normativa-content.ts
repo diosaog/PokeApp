@@ -3,7 +3,7 @@
 // the original PDF. Nothing here reads or changes competitive data.
 import { points } from "../points";
 
-export const rulebookUpdated = "12 de noviembre de 2026";
+export const rulebookUpdated = "18 de noviembre de 2026";
 
 export type RuleKind =
   "norma" | "obligatorio" | "prohibido" | "excepcion" | "aclaracion";
@@ -199,9 +199,9 @@ export const stretches: Stretch[] = [
   {
     number: 2,
     matchday: 2,
-    cap: 41,
-    capLeader: "Amaro",
-    ends: "Termina al derrotar al cuarto líder, Amaro.",
+    cap: 44,
+    capLeader: "Lem",
+    ends: "Termina al derrotar al quinto líder, Lem.",
     challenges: [
       {
         name: "Corelia",
@@ -217,15 +217,6 @@ export const stretches: Stretch[] = [
         type: "grass",
         badge: 4,
       },
-    ],
-  },
-  {
-    number: 3,
-    matchday: 3,
-    cap: 50,
-    capLeader: "Valeria",
-    ends: "Termina al derrotar a la sexta líder, Valeria.",
-    challenges: [
       {
         name: "Lem",
         label: "Gimnasio 5",
@@ -233,12 +224,28 @@ export const stretches: Stretch[] = [
         type: "electric",
         badge: 5,
       },
+    ],
+  },
+  {
+    number: 3,
+    matchday: 3,
+    cap: 58,
+    capLeader: "Astrid",
+    ends: "Termina al derrotar a la séptima líder, Astrid.",
+    challenges: [
       {
         name: "Valeria",
         label: "Gimnasio 6",
         level: 50,
         type: "fairy",
         badge: 6,
+      },
+      {
+        name: "Astrid",
+        label: "Gimnasio 7",
+        level: 58,
+        type: "psychic",
+        badge: 7,
       },
     ],
   },
@@ -249,13 +256,6 @@ export const stretches: Stretch[] = [
     capLeader: "Dianta",
     ends: "Termina al acabar el juego.",
     challenges: [
-      {
-        name: "Astrid",
-        label: "Gimnasio 7",
-        level: 58,
-        type: "psychic",
-        badge: 7,
-      },
       { name: "Edel", label: "Gimnasio 8", level: 70, type: "ice", badge: 8 },
       {
         name: "Alto Mando",
@@ -648,7 +648,7 @@ export const wildcards: Wildcard[] = [
     name: "Robar Pokémon",
     price: 12,
     effect:
-      "Te llevas un Pokémon de otro participante. Queda ROBADO y BLINDADO, y conserva su historia.",
+      "Te llevas un Pokémon de otro participante, sin su objeto. Queda ROBADO y BLINDADO, y conserva su historia.",
     note: "El Pokémon robado queda blindado automáticamente: no hay vale aparte.",
     active: true,
     status: "Disponible. Se guarda y se usa cuando quieras.",
@@ -701,25 +701,35 @@ export const robberyRules: Rule[] = [
   {
     id: "6.12",
     kind: "norma",
-    text: "Robar se puede usar en cualquier momento: no hace falta Team Lock ni que haya una jornada abierta, y no depende de los combates. El comodín se compra y se guarda para cuando quieras.",
+    text: "El robo se lleva solo el Pokémon, nunca su objeto: si llevaba uno equipado, vuelve a la mochila de la víctima y el Pokémon llega sin objeto.",
   },
   {
     id: "6.13",
-    kind: "norma",
-    text: "La rotación de víctimas es global y compartida por toda la Liga: cuando todos los entrenadores que se pueden robar han sido víctimas, empieza una nueva ronda.",
+    kind: "aclaracion",
+    text: "Nadie tiene que solicitar ni aceptar la entrega: en cuanto PokeApp decide el robo, PokeApp Launcher lo aplica solo en cada partida al abrirlo con el juego cerrado.",
   },
   {
     id: "6.14",
-    kind: "aclaracion",
-    text: "Las 24 horas se cuentan desde la primera vez que PokeApp ve a ese Pokémon en una partida sincronizada. Los Pokémon blindados están protegidos.",
+    kind: "norma",
+    text: "Robar se puede usar en cualquier momento: no hace falta Team Lock ni que haya una jornada abierta, y no depende de los combates. El comodín se compra y se guarda para cuando quieras.",
   },
   {
     id: "6.15",
     kind: "norma",
-    text: "Revivir se compra y se guarda; se usa cuando quieras desde PokeApp Launcher, sin Team Lock y sin depender de las jornadas. Recupera un Pokémon muerto de la Caja 7.",
+    text: "La rotación de víctimas es global y compartida por toda la Liga: cuando todos los entrenadores que se pueden robar han sido víctimas, empieza una nueva ronda.",
   },
   {
     id: "6.16",
+    kind: "aclaracion",
+    text: "Las 24 horas se cuentan desde la primera vez que PokeApp ve a ese Pokémon en una partida sincronizada. Los Pokémon blindados están protegidos.",
+  },
+  {
+    id: "6.17",
+    kind: "norma",
+    text: "Revivir se compra y se guarda; se usa cuando quieras desde PokeApp Launcher, sin Team Lock y sin depender de las jornadas. Recupera un Pokémon muerto de la Caja 7.",
+  },
+  {
+    id: "6.18",
     kind: "aclaracion",
     text: "Revivir no borra la muerte: sigue en tu historial y la penalización NET no desaparece. Revivir no cobra ninguna penalización nueva.",
   },

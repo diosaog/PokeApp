@@ -81,7 +81,7 @@ public static class NativeItems
         return save;
     }
 
-    private static (int pouch, InventoryItem? slot) Find(IReadOnlyList<InventoryPouch> pouches, ushort id)
+    internal static (int pouch, InventoryItem? slot) Find(IReadOnlyList<InventoryPouch> pouches, ushort id)
     {
         var candidates = Enumerable.Range(0, pouches.Count).Where(i => pouches[i].CanContain(id)).ToArray();
         if (candidates.Length != 1) throw new Rejection("UNSUPPORTED_FORMAT");

@@ -59,8 +59,12 @@ const robberyOpen = (transfers) =>
   (transfers || []).some(
     (t) =>
       t.mandatory ||
-      (t.obligation && !t.obligation.endsWith("_VERIFIED")) ||
-      (t.apply_started && !["COMMITTED", "CANCELLED"].includes(t.status)),
+      // A side PokeApp has proven (…_VERIFIED) is over, whatever the other
+      // side does; RECONCILED is the finished state of a decided robbery.
+      (t.obligation
+        ? !t.obligation.endsWith("_VERIFIED")
+        : t.apply_started &&
+          !["COMMITTED", "CANCELLED", "RECONCILED"].includes(t.status)),
   );
 const restorable = (state, operationId) =>
   state.write?.backups?.find(

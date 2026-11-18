@@ -89,11 +89,16 @@ internal static class PartyTransferChecks
                         for (int i = 0; i < after.PartyCount; i++)
                             Check(after.GetPartySlotAtIndex(i).EncryptedPartyData.AsSpan().SequenceEqual(parsed.GetPartySlotAtIndex(i < p ? i : i + 1).EncryptedPartyData), game + " remaining members intact");
                         Check(after.BoxData.Concat(after.PartyData).All(x => x.Species == 0 || x.PID != target.PID && x.EncryptionConstant != target.EncryptionConstant), game + " removed, no clone");
+                        int held = target.HeldItem;
+                        int Bag(SaveFile s, int item) => item == 0 ? 0 : s.Inventory.SelectMany(q => q.Items).Where(i => i.Index == item).Sum(i => i.Count);
+                        Check(Bag(after, held) == Bag(parsed, held) + (held != 0 && NativeTransfer.BagCanTake(parsed, held) ? 1 : 0), game + " held item back in the victim bag (item " + held + ", party " + p + ")");
                     }
                     else
                     {
                         var inserted = after.GetBoxSlotAtIndex(0, 0);
-                        Check(inserted.EncryptedBoxData.AsSpan().SequenceEqual(target.EncryptedBoxData), game + " exact stored PKM");
+                        var stripped = target.Clone(); if (stripped.HeldItem != 0) { stripped.HeldItem = 0; stripped.RefreshChecksum(); }
+                        Check(inserted.EncryptedBoxData.AsSpan().SequenceEqual(stripped.EncryptedBoxData), game + " exact stored PKM without its held item");
+                        Check(inserted.HeldItem == 0, game + " robber gets no item");
                         Check(inserted.PID == target.PID && inserted.EncryptionConstant == target.EncryptionConstant && inserted.OriginalTrainerName == target.OriginalTrainerName
                             && inserted.TID16 == target.TID16 && inserted.EXP == target.EXP && inserted.IV_HP == target.IV_HP && inserted.IV_ATK == target.IV_ATK && inserted.IV_SPE == target.IV_SPE && inserted.Move1 == target.Move1, game + " identity/OT/IVs/EXP/moves kept");
                     }

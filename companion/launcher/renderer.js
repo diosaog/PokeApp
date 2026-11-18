@@ -39,8 +39,12 @@ const robberyOpen = (transfers) =>
   (transfers || []).some(
     (t) =>
       t.mandatory ||
-      (t.obligation && !t.obligation.endsWith("_VERIFIED")) ||
-      (t.apply_started && !["COMMITTED", "CANCELLED"].includes(t.status)),
+      // A side PokeApp has proven (…_VERIFIED) is over, whatever the other
+      // side does; RECONCILED is the finished state of a decided robbery.
+      (t.obligation
+        ? !t.obligation.endsWith("_VERIFIED")
+        : t.apply_started &&
+          !["COMMITTED", "CANCELLED", "RECONCILED"].includes(t.status)),
   );
 function details(p, location) {
   text("pokemon-title", p.nickname || `Pokémon #${p.species_id}`);
@@ -597,17 +601,25 @@ function renderNotices(state) {
       "Ver partidas",
       () => present("selector"),
     ]);
-  if (robberyOpen(state.cloud?.data?.transfers))
+  // A robbery in its normal course is a calm notice; «Recuperación
+  // pendiente» is kept for a real uncertainty (2026-11-18: both showed for a
+  // robbery that was already finished).
+  const robberyWaiting = state.write?.robbery_waiting === true;
+  if (robberyOpen(state.cloud?.data?.transfers) || robberyWaiting)
     notices.push([
       "robbery",
       "gold",
-      state.cloud?.data?.mandatory_sync
-        ? "Sincronización obligatoria: PokeApp ha decidido un robo sobre tu partida."
-        : "Tienes una entrega de robo pendiente en tu partida.",
+      state.transfer_auto === "EMULATOR_OPEN"
+        ? "Robo pendiente: cierra el juego y PokeApp lo aplicará solo."
+        : state.transfer_auto === "WRONG_SAVE"
+          ? "Hay un robo sobre tu partida de la Liga: elígela en «Cambiar partida» y PokeApp lo aplicará solo."
+          : robberyWaiting
+            ? "PokeApp está terminando un robo en tu partida. La sincronización vuelve sola en cuanto lo compruebe."
+            : "PokeApp está aplicando un robo en tu partida.",
       "Ver entrega",
       () => present("robos"),
     ]);
-  if (state.write?.status === "RECOVERY_REQUIRED")
+  if (state.write?.status === "RECOVERY_REQUIRED" && !robberyWaiting)
     notices.push([
       "recovery",
       "danger",
@@ -1362,7 +1374,7 @@ const transferProgress = {
 };
 const obligationText = {
   DONOR_PHYSICAL_PENDING:
-    "Sincronización obligatoria: PokeApp debe retirar este Pokémon de tu partida antes de cualquier otra sincronización.",
+    "PokeApp retira este Pokémon de tu partida automáticamente en cuanto el juego esté cerrado. Si llevaba un objeto, vuelve a tu mochila.",
   DONOR_RECOVERY_REQUIRED:
     "No se pudo preparar la retirada sobre tu partida actual. Cierra el juego y vuelve a intentarlo.",
   DONOR_VERIFIED: "Retirada verificada en tu partida.",
@@ -1370,7 +1382,7 @@ const obligationText = {
   DONOR_BLOCKED_UNCERTAIN:
     "Retirada bloqueada: necesitas recuperación asistida.",
   RECIPIENT_PHYSICAL_PENDING:
-    "Pendiente de recepción: el Pokémon aún no está en tu partida y no puedes usarlo.",
+    "PokeApp lo añade a tu partida automáticamente en cuanto el juego esté cerrado. Llega sin objeto equipado.",
   RECIPIENT_RECOVERY_REQUIRED:
     "No se pudo preparar la entrega en tu partida actual (¿cajas llenas?). Libera un hueco y vuelve a intentarlo.",
   RECIPIENT_VERIFIED: "Pokémon recibido y verificado en tu partida.",
@@ -1405,7 +1417,13 @@ function transferActions(t) {
   };
 }
 function renderTransfers(state) {
-  const items = state.cloud?.data?.transfers || [];
+  // Only robberies still in progress for this trainer: a side PokeApp has
+  // proven, or a robbery that ended, is history (owner, 2026-11-18).
+  const items = (state.cloud?.data?.transfers || []).filter((t) =>
+    t.obligation
+      ? !t.obligation.endsWith("_VERIFIED")
+      : !["COMMITTED", "CANCELLED", "RECONCILED"].includes(t.status),
+  );
   const write = state.write || {};
   const enabled = Boolean(write.transfer_application_enabled);
   text(
@@ -1414,9 +1432,15 @@ function renderTransfers(state) {
       ? "No hay robos en curso."
       : !enabled
         ? "Puedes consultar tus robos, pero este Launcher aún no aplica cambios: falta la certificación con Lime3DS."
-        : items.some((t) => t.mandatory)
-          ? "Sincronización obligatoria: PokeApp ya ha decidido un robo sobre tu partida. Tu sincronización normal está en pausa hasta retirar ese Pokémon."
-          : "Sigue los pasos de cada robo. Solo puedes confirmar lo que te corresponde.",
+        : state.transfer_auto === "EMULATOR_OPEN"
+          ? "Hay un robo listo para aplicarse en tu partida: cierra el juego y el emulador y PokeApp lo hará solo."
+          : state.transfer_auto === "WRONG_SAVE"
+            ? "Hay un robo sobre tu partida de la Liga: elígela en «Cambiar partida» y PokeApp lo aplicará solo."
+            : state.transfer_auto === "APPLYING"
+              ? "Aplicando el robo en tu partida…"
+              : items.some((t) => t.mandatory)
+                ? "PokeApp ya ha decidido un robo sobre tu partida y lo aplica solo en cuanto el juego esté cerrado."
+                : "Los robos se aplican solos en cada partida en cuanto el juego está cerrado.",
   );
   const key = JSON.stringify([
     items,
@@ -1489,10 +1513,7 @@ function renderTransfers(state) {
       const labels = {
         prepare: "Preparar copia",
         apply: t.apply_started ? "Reanudar mi parte" : "Aplicar mi parte",
-        fulfil:
-          t.side === "source"
-            ? "Aplicar retirada obligatoria"
-            : "Recibir el Pokémon",
+        fulfil: "Aplicar ahora",
         cancel: "Cancelar robo",
         refresh: "Comprobar estado",
       };

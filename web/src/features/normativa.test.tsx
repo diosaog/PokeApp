@@ -82,8 +82,9 @@ describe("Normativa", () => {
       "puedes hacer reset",
       // 3 Tramos y combates
       "segundo líder",
-      "cuarto líder",
-      "sexta líder",
+      // 2026-11-17: the stretches end at the 5th and 7th badges.
+      "quinto líder, Lem",
+      "séptima líder, Astrid",
       "al acabar el juego",
       "lo marca el último líder del tramo",
       "antes de que se abra la jornada",
@@ -148,7 +149,17 @@ describe("Normativa", () => {
     expect(stretches.flatMap((s) => s.challenges.map((c) => c.level))).toEqual([
       14, 30, 38, 41, 44, 50, 58, 70, 78, 82,
     ]);
-    expect(stretches.map((s) => s.cap)).toEqual([30, 41, 50, 82]);
+    // Owner rule 2026-11-17: J2 at the 5th badge, J3 at the 7th.
+    expect(stretches.map((s) => s.cap)).toEqual([30, 44, 58, 82]);
+    expect(
+      stretches.map((s) => s.challenges.flatMap((c) => c.badge ?? [])),
+    ).toEqual([[1, 2], [3, 4, 5], [6, 7], [8]]);
+    expect(stretches.map((s) => s.capLeader)).toEqual([
+      "Lino",
+      "Lem",
+      "Astrid",
+      "Dianta",
+    ]);
     expect(
       [...document.querySelectorAll(".nv-level")].map((node) =>
         node.textContent?.replace("Límite de nivel ", ""),

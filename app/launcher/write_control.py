@@ -75,8 +75,37 @@ class LocalWriteController:
         self._notice_key, self._notice = key, notice
         return notice
 
+    def open_transfers(self):
+        """Robbery sides bound on the selected save that are not over yet,
+        and whether this PC already applied its own change (only the server's
+        proof is then missing)."""
+        from app.launcher.transfer import LOCAL_FINAL
+        from app.launcher.write_engine import WriteIntent
+
+        if self.engine is None or not self.selected():
+            return []
+        with self.engine._db() as db:
+            if not db.execute(
+                "SELECT 1 FROM sqlite_master WHERE type='table' AND name='transfer_bindings'"
+            ).fetchone():
+                return []
+            rows = db.execute("SELECT id, record FROM transfer_bindings").fetchall()
+        selected = str(Path(self.selected()).absolute())
+        result = []
+        for aid, raw in rows:
+            record = json.loads(raw)
+            if record.get("state") in LOCAL_FINAL or record["binding"]["path"] != selected:
+                continue
+            try:
+                operation = WriteIntent.create(**record["binding"]["intent"]).operation_id
+                applied = self.engine._load(operation)["status"] == "APPLIED_VERIFIED"
+            except WriteSafetyError:
+                applied = False  # nothing applied here yet
+            result.append({"authorization_id": aid, "applied": applied})
+        return result
+
     def _read_transfer_notice(self):
-        from app.launcher.transfer import TRANSFER_MESSAGES
+        from app.launcher.transfer import LOCAL_FINAL, TRANSFER_MESSAGES
 
         try:
             with self.engine._db() as db:
@@ -93,7 +122,7 @@ class LocalWriteController:
                     for row in db.execute(
                         "SELECT record FROM transfer_bindings"
                     ).fetchall()
-                    if json.loads(row[0]).get("state") not in ("COMMITTED", "CANCELLED")
+                    if json.loads(row[0]).get("state") not in LOCAL_FINAL
                 ]
             for row in rows:
                 record = json.loads(row[0])
@@ -147,6 +176,10 @@ class LocalWriteController:
                 "backup_message": self._backup_message,
                 "restart_blocked_by_recovery": self._busy
                 or self.gate.recovery_required,
+                # The pause only waits for a robbery side in its normal course
+                # (to apply, or applied and awaiting PokeApp's proof): the
+                # Launcher shows a robbery notice, not an alarming recovery.
+                "robbery_waiting": self._robbery_waiting(transfer_notice),
                 "emulator_restart_allowed": False,  # no real lifecycle adapter qualified
                 "emulator_qualified": False,
                 # Exact private errors, fingerprints, paths and parameters stay local.
@@ -154,6 +187,21 @@ class LocalWriteController:
                 if self._busy
                 else transfer_notice or self._message(state),
             }
+
+    def _robbery_waiting(self, transfer_notice):
+        from app.launcher.transfer import TRANSFER_MESSAGES
+
+        return (
+            transfer_notice is not None
+            and not self._pending
+            and self._error is None
+            and transfer_notice
+            in (
+                TRANSFER_MESSAGES["DONOR_PHYSICAL_PENDING"],
+                TRANSFER_MESSAGES["RECIPIENT_PHYSICAL_PENDING"],
+                TRANSFER_MESSAGES["COMPETITIVELY_ADJUDICATED"],
+            )
+        )
 
     def _confirmable(self, receipt):
         from app.launcher.write_engine import COORDINATED_MUTATIONS

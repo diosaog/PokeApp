@@ -164,6 +164,15 @@ def save_identity(receipt):
         "game": receipt.observation.game,
         "trainer": receipt.observation.trainer.model_dump(mode="json"),
     }
+# 2026-11-17: sides a Launcher fulfils by itself, how often it looks, and how
+# long a side that needs assistance waits before another automatic attempt.
+AUTO_TRANSFER_OBLIGATIONS = ("DONOR_PHYSICAL_PENDING", "RECIPIENT_PHYSICAL_PENDING")
+AUTO_TRANSFER_SECONDS = 30
+AUTO_TRANSFER_HOLD_SECONDS = 600
+TRANSIENT_TRANSFER_ERRORS = (
+    "Hay una lectura o sincronización en curso. Espera y vuelve a intentarlo.",
+    "Debes cerrar el juego antes de aplicar esta operación.",
+)
 TRANSFER_COMMANDS = (
     "transfer_prepare",
     "transfer_apply",
@@ -246,7 +255,12 @@ class LauncherRuntime:
         self.local_commands, self.cloud_commands = Queue(maxsize=1), Queue(maxsize=1)
         self.write_commands = Queue(maxsize=1)
         self._next_training_recovery = 0.0
+        # Owner rule 2026-11-17: a decided robbery is applied without asking.
+        self._next_auto_transfer = 0.0
+        self._next_session_keep = 0.0
+        self._auto_transfer_hold: dict[str, float] = {}
         self.value = {
+            "transfer_auto": None,
             "local_status": "NO_SAVE",
             "receipt_id": None,
             "observation": None,
@@ -741,6 +755,12 @@ class LauncherRuntime:
                 pass
             except Exception:  # noqa: BLE001 - sanitized local boundary
                 self._patch(write_error=self._unexpected_write_failure())
+            try:
+                self._auto_transfer_step()
+            except SaveBusy:
+                pass
+            except Exception:  # noqa: BLE001 - automatic delivery never stops the loop
+                self._patch(transfer_auto=None)
             if time.monotonic() >= self._next_training_recovery:
                 self._next_training_recovery = time.monotonic() + 10
                 try:
@@ -753,6 +773,92 @@ class LauncherRuntime:
                 continue  # a local physical write/recovery exclusively owns the save
             except Exception:  # noqa: BLE001 - sanitized local boundary
                 self._patch(local_status="LOCAL_UNAVAILABLE")
+
+    def _auto_transfer_step(self):
+        """Owner rule 2026-11-17: robbery delivery needs no request or button.
+
+        As soon as PokeApp has decided a robbery, each Launcher fulfils its own
+        side by itself (the robber receives, the victim's save gives it up),
+        through exactly the same safe path as the manual button: closed
+        emulator, verified backup, native verification and server proof. An
+        open emulator or another write only postpones it; a side that needs
+        assistance is not retried in a loop.
+        """
+        now = time.monotonic()
+        if now < self._next_auto_transfer or not self.write_commands.empty():
+            return
+        self._next_auto_transfer = now + AUTO_TRANSFER_SECONDS
+        engine = getattr(self.writes, "engine", None)
+        if engine is None or not (
+            engine.allows("transfer_remove") and engine.allows("transfer_insert")
+        ):
+            return
+        if not self._session_usable():
+            # The cloud loop renews it first; asking with an expired token
+            # would only fail. Look again soon.
+            self._next_auto_transfer = now + 5
+            return
+        # 1. A side this PC already applied only waits for PokeApp's proof: ask
+        #    for it, and a proven side releases the pause by itself. The cloud
+        #    read is paused meanwhile, so this never relies on the cached list.
+        try:
+            applied = [
+                t["authorization_id"]
+                for t in self.writes.open_transfers()
+                if t["applied"]
+            ]
+        except Exception:  # noqa: BLE001 - an unreadable journal stays paused
+            applied = []
+        for aid in applied:
+            if self._auto_transfer_hold.get(aid, 0.0) > now:
+                continue
+            self._transfer_step("transfer_refresh", {"authorization_id": aid})
+            with self.lock:
+                result = self.value.get("transfer_result") or {}
+            if result.get("status") in ("RECOVERY_REQUIRED", "BLOCKED_UNCERTAIN"):
+                self._auto_transfer_hold[aid] = now + AUTO_TRANSFER_HOLD_SECONDS
+            # Asking is silent: a pending proof is not an error for the trainer.
+            self._patch(write_error=None)
+        with self.lock:
+            data = deepcopy((self.value.get("cloud") or {}).get("data")) or {}
+        due = [
+            t
+            for t in data.get("transfers") or []
+            if t.get("obligation") in AUTO_TRANSFER_OBLIGATIONS
+            and t.get("authorization_id") not in applied
+            and self._auto_transfer_hold.get(t.get("authorization_id"), 0.0) <= now
+        ]
+        link = data.get("season_link") or {}
+        if not due or (
+            link.get("status") == "BOUND"
+            and link.get("identity") != save_identity(self.receipt)
+        ):
+            # Another game is selected: the robbery waits for the League save.
+            self._patch(transfer_auto="WRONG_SAVE" if due else None)
+            return
+        try:
+            engine.files.assert_closed(True)
+        except WriteSafetyError:
+            self._patch(transfer_auto="EMULATOR_OPEN")
+            return
+        aid = due[0]["authorization_id"]
+        self._patch(transfer_auto="APPLYING", write_error=None, transfer_result=None)
+        self._transfer_step(
+            "transfer_fulfil", {"authorization_id": aid, "closed_emulator_confirmed": True}
+        )
+        with self.lock:
+            result = self.value.get("transfer_result") or {}
+            error = self.value.get("write_error")
+        if error in TRANSIENT_TRANSFER_ERRORS:
+            # A read in progress or a just-opened emulator: simply look again soon.
+            self._patch(write_error=None)
+        elif error is not None or result.get("status") in (
+            "RECOVERY_REQUIRED",
+            "BLOCKED_UNCERTAIN",
+        ):
+            # Needs a person (or the other side): try again much later, not in a loop.
+            self._auto_transfer_hold[aid] = now + AUTO_TRANSFER_HOLD_SECONDS
+        self._patch(transfer_auto=None)
 
     def _transfer_step(self, name, args):
         from app.launcher.transfer import AuthenticatedTransferRemote, LauncherTransfers
@@ -813,6 +919,12 @@ class LauncherRuntime:
                 write_error="PokeApp todavía no permite este paso: esperando al otro entrenador o a la verificación. Nada se ha confirmado."
             )
         except WriteSafetyError as error:
+            if str(error) == "TRANSFER_NO_OPEN_OBLIGATION":
+                # Already fulfilled (by this Launcher or proven meanwhile):
+                # nothing to do and nothing to report; just look again.
+                self._patch(write_error=None)
+                self.next_cloud_refresh = 0
+                return
             self._patch(
                 write_error="La aplicación física de robos no está habilitada en este Launcher."
                 if str(error) == "TRANSFER_APPLICATION_DISABLED"
@@ -1746,7 +1858,14 @@ class LauncherRuntime:
             cloud=self.store.cache(self.client.origin, principal.trainer_id),
             last_online=time.time(),
         )
-        self.next_cloud_refresh = time.monotonic() + 120
+        # While this trainer has a robbery side of its own in progress, look
+        # again soon so it is delivered without waiting minutes.
+        own_robbery = any(
+            t["obligation"] in AUTO_TRANSFER_OBLIGATIONS
+            or t["status"] in ("REQUESTED", "ELIGIBILITY_VERIFIED")
+            for t in transfers or []
+        )
+        self.next_cloud_refresh = time.monotonic() + (20 if own_robbery else 120)
         # Only the locally ready selected save is eligible; never upload old/missing cache as new.
         self._enqueue_local()
         self._deliver_pending(principal.trainer_id)
@@ -1971,7 +2090,10 @@ class LauncherRuntime:
                 self._cloud_step()
                 failures, next_attempt = 0, time.monotonic() + 30
             except SaveBusy:
-                continue  # no upload/reimport overlaps a physical write/recovery
+                # No upload/reimport overlaps a physical write/recovery, but the
+                # session stays alive: a robbery side is settled with it.
+                self._keep_session()
+                continue
             except BackendError as exc:
                 code = str(exc)
                 if code in SESSION_ENDED:
@@ -2007,6 +2129,48 @@ class LauncherRuntime:
                     error_cause=None,
                     **({"cloud_status": "OFFLINE"} if failures >= 2 else {}),
                 )
+
+    def _keep_session(self):
+        """Renew the session while the save is paused (cloud loop only).
+
+        Until 0.26.16 only the cloud step renewed it, and that step never runs
+        while a robbery side keeps the save paused: the Launcher could then no
+        longer ask PokeApp whether that side was proven (2026-11-18). Cheap
+        when the token is still valid; at most one attempt every 30 s.
+        """
+        tokens = self.session._tokens
+        if (
+            not tokens
+            or not self.session._principal
+            or (
+                isinstance(tokens.expires_at, (int, float))
+                and tokens.expires_at > time.time() + 300
+            )
+            or time.monotonic() < self._next_session_keep
+        ):
+            return
+        self._next_session_keep = time.monotonic() + 30
+        try:
+            self.session.principal(min_validity=600)
+            self.tokens.save(self.client.origin, self.session)
+        except BackendError as exc:
+            if str(exc) in SESSION_ENDED:
+                self.session.logout()
+                self.tokens.clear()
+                with self.lock:
+                    self._web_token = None
+                self._patch(auth_status="LOGIN_REQUIRED", principal=None)
+        except Exception:  # noqa: BLE001 - a network failure is retried later
+            return
+
+    def _session_usable(self):
+        tokens = self.session._tokens
+        return bool(
+            tokens
+            and self.session._principal
+            and isinstance(tokens.expires_at, (int, float))
+            and tokens.expires_at > time.time() + 30
+        )
 
     def _note_failure(self, code, detail, cause):
         """One log line per new kind of cloud failure, not one every retry."""

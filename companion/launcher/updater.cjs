@@ -151,7 +151,16 @@ function installBlocker(state) {
   if (state.cloud_status === "SYNCING") return "SYNC_IN_PROGRESS";
   const transfers =
     (state.cloud && state.cloud.data && state.cloud.data.transfers) || [];
-  if (transfers.some((t) => !["COMMITTED", "CANCELLED"].includes(t.status)))
+  // A robbery side PokeApp has proven (…_VERIFIED) or a robbery that ended
+  // never defers it: until 0.26.15 a finished robbery (RECONCILED) deferred
+  // every update of its two trainers for good.
+  if (
+    transfers.some((t) =>
+      t.obligation
+        ? !t.obligation.endsWith("_VERIFIED")
+        : !["COMMITTED", "CANCELLED", "RECONCILED"].includes(t.status),
+    )
+  )
     return "TRANSFER_IN_PROGRESS";
   return null;
 }

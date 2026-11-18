@@ -5,6 +5,7 @@ import {
   render,
   screen,
   waitFor,
+  within,
 } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 import type { Model } from "../api/types";
@@ -442,7 +443,13 @@ it.each(Object.entries(transferLabels))(
   "shows transfer %s without claiming an unconfirmed robbery",
   (status, label) => {
     mocks.transfers = {
-      items: [leg(status as Model<"TransferSummary">["status"])],
+      items: [
+        {
+          ...leg(status as Model<"TransferSummary">["status"]),
+          // A cancelled attempt is listed for a day, with its reason.
+          created_at: new Date().toISOString(),
+        },
+      ],
       transfer_enabled: true,
     };
     mocks.inventory = {
@@ -504,6 +511,61 @@ it("separates the decided robbery from each save's pending delivery", () => {
   expect(
     screen.queryByRole("button", { name: "Cancelar robo" }),
   ).not.toBeInTheDocument();
+});
+
+it("2026-11-18: finished robberies, old cancelled attempts and retired comodines leave the inventory", () => {
+  mocks.transfers = {
+    items: [
+      // The victim's side, proven: the robbery is over for this trainer.
+      {
+        ...leg("RECONCILED", "source"),
+        authorization_id: "done",
+        obligation: "DONOR_VERIFIED",
+      },
+      // The robber's side proven while the victim's is still pending.
+      {
+        ...leg("COMPETITIVELY_ADJUDICATED"),
+        authorization_id: "mine",
+        purchase_id: "used",
+        obligation: "RECIPIENT_VERIFIED",
+      },
+      { ...leg("CANCELLED"), authorization_id: "old", purchase_id: null },
+      // Still in progress: the only one listed.
+      {
+        ...leg("COMPETITIVELY_ADJUDICATED", "source"),
+        authorization_id: "open",
+        obligation: "DONOR_PHYSICAL_PENDING",
+      },
+    ],
+    transfer_enabled: true,
+  };
+  mocks.inventory = {
+    physical_items: true,
+    purchases: [
+      {
+        ...robbery,
+        id: "shield",
+        item_name: "Blindar Pokémon",
+        item_code: "blindar_pokemon",
+        acquisition_type: "reward",
+        status: "cancelled",
+      },
+    ],
+    targets: [],
+  };
+  render(<Inventory />);
+  const section = screen.getByRole("region", { name: "Robos entre guardados" });
+  expect(
+    within(section).getAllByText(/No necesita tu aprobación/),
+  ).toHaveLength(1);
+  expect(within(section).getByText(/Retirada pendiente/)).toBeInTheDocument();
+  expect(
+    within(section).queryByText(/Robo completado/),
+  ).not.toBeInTheDocument();
+  expect(within(section).queryByText(/Robo cancelado/)).not.toBeInTheDocument();
+  expect(screen.queryByText("Blindar Pokémon")).not.toBeInTheDocument();
+  expect(screen.queryByText("Cancelado")).not.toBeInTheDocument();
+  expect(screen.getByText(/Aún no hay compras/)).toBeInTheDocument();
 });
 
 it("withdraws a requested robbery before any application", async () => {

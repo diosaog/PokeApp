@@ -161,14 +161,14 @@ export const transferLabels: Record<string, string> = {
 };
 export const obligationLabels: Record<string, string> = {
   DONOR_PHYSICAL_PENDING:
-    "Retirada pendiente: abre tu Launcher con el juego cerrado. Tu sincronización normal está en pausa hasta entonces.",
+    "Retirada pendiente: PokeApp Launcher la aplica sola en cuanto lo abras con el juego cerrado. Hasta entonces tu partida de la Liga no se sincroniza.",
   DONOR_RECOVERY_REQUIRED:
     "PokeApp no pudo preparar la retirada en tu partida actual. Abre tu Launcher para reintentarlo.",
   DONOR_VERIFIED: "Retirada verificada en tu partida.",
   DONOR_ABSENT_VERIFIED: "Tu partida ya no tenía ese Pokémon: verificado.",
   DONOR_BLOCKED_UNCERTAIN: "Retirada bloqueada: recuperación asistida.",
   RECIPIENT_PHYSICAL_PENDING:
-    "Pendiente de recepción: aún no está en tu partida y no puedes usarlo. Abre tu Launcher para recibirlo.",
+    "Pendiente de recepción: PokeApp Launcher lo añade solo a tu partida en cuanto lo abras con el juego cerrado. Llega sin objeto equipado.",
   RECIPIENT_RECOVERY_REQUIRED:
     "PokeApp no pudo preparar la entrega en tu partida actual (¿cajas llenas?). Libera un hueco y abre tu Launcher.",
   RECIPIENT_VERIFIED: "Pokémon recibido y verificado en tu partida.",
@@ -181,6 +181,21 @@ const withdrawable = [
   "WAITING_OTHER",
   "PENDING_SOURCE",
 ];
+// Owner rule 2026-11-18: finished robberies and retired comodines are history
+// and leave the inventory. A robbery stays listed while it is in progress for
+// this trainer; the robber's own cancelled attempt, only for a day, so its
+// reason can still be read.
+const finishedTransfer = ["COMMITTED", "CANCELLED", "RECONCILED"];
+function transferInProgress(transfer: Model<"TransferSummary">) {
+  if (transfer.status === "CANCELLED")
+    return (
+      transfer.side === "destination" &&
+      Date.now() - Date.parse(transfer.created_at) < 24 * 3600 * 1000
+    );
+  return transfer.obligation
+    ? !transfer.obligation.endsWith("_VERIFIED")
+    : !finishedTransfer.includes(transfer.status);
+}
 // Why a request ended without effect; the comodín stays available.
 function cancelledReason(reason?: string | null) {
   if (reason === "TRANSFER_EXPIRED")
@@ -206,6 +221,13 @@ export function Inventory() {
     !!season && launcherFlow,
   );
   const robberyEnabled = transfers.data?.transfer_enabled === true;
+  const openTransfers = (transfers.data?.items ?? []).filter(
+    transferInProgress,
+  );
+  // A retired or cancelled comodín (e.g. 086/087) is no longer shown.
+  const purchases = (q.data?.purchases ?? []).filter(
+    (item) => item.status !== "cancelled",
+  );
   // A cancelled attempt leaves the comodín free for another one.
   const transferFor = (purchaseId: string) =>
     transfers.data?.items.find(
@@ -371,9 +393,9 @@ export function Inventory() {
       <CommandState command={cmd} />
       {q.isPending ? (
         <Loading />
-      ) : q.data?.purchases.length ? (
+      ) : purchases.length ? (
         <div className="inventory-grid">
-          {q.data.purchases.map((item) => {
+          {purchases.map((item) => {
             const transfer = transferFor(item.id);
             const robbery =
               item.item_code === "robar_pokemon" && robberyEnabled && !transfer;
@@ -488,14 +510,14 @@ export function Inventory() {
         <Empty>Aún no hay compras ni vales registrados.</Empty>
       )}
 
-      {!!transfers.data?.items.length && (
+      {!!openTransfers.length && (
         <section aria-labelledby="transfers-title">
           <h3 id="transfers-title">Robos entre guardados</h3>
-          {transfers.data.items.map((transfer) => (
+          {openTransfers.map((transfer) => (
             <Card key={transfer.authorization_id} className="inventory-card">
               <p>
                 {transfer.side === "destination"
-                  ? "Has solicitado este robo."
+                  ? "Tu robo. PokeApp te entrega el Pokémon sin que tengas que hacer nada."
                   : "PokeApp ha decidido un robo sobre uno de tus Pokémon. No necesita tu aprobación."}
               </p>
               <Tag>

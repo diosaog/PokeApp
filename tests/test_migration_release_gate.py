@@ -56,6 +56,9 @@ class MigrationReleaseGateTests(TestCase):
             return [{"present": True}]
         if "item_deliveries" in sql:
             return [{"n": self.reserved}]
+        if "a.id::text as id" in sql:
+            # The in-flight operations themselves (086 release tooling).
+            return [{"id": "op", "created_at": "2026-11-01T00:00:00+00:00"}]
         return [{"active_seasons": 0, "open_matchdays": 0, "pending_purchases": 2,
                  "open_physical_authorizations": self.physical, "unsettled_transfer_legs": 0}]
 

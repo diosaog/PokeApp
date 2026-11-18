@@ -216,6 +216,26 @@ test("installation is deferred while any physical, journal, transfer or sync wor
     }),
     "TRANSFER_IN_PROGRESS",
   );
+  const robbery = (status, obligation) => ({
+    ...idle,
+    cloud: { data: { transfers: [{ status, obligation }] } },
+  });
+  // A decided robbery whose own side is still pending defers the install…
+  assert.equal(
+    u.installBlocker(
+      robbery("COMPETITIVELY_ADJUDICATED", "DONOR_PHYSICAL_PENDING"),
+    ),
+    "TRANSFER_IN_PROGRESS",
+  );
+  // …a side PokeApp proved, or a finished robbery, never does (2026-11-18).
+  assert.equal(
+    u.installBlocker(
+      robbery("COMPETITIVELY_ADJUDICATED", "RECIPIENT_VERIFIED"),
+    ),
+    null,
+  );
+  assert.equal(u.installBlocker(robbery("RECONCILED", "DONOR_VERIFIED")), null);
+  assert.equal(u.installBlocker(robbery("RECONCILED", null)), null);
 });
 
 test("restart reconciliation: incomplete install keeps the verified file, success cleans up", async () => {
