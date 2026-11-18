@@ -6,7 +6,7 @@ import {
   SpriteGeneration,
   TrainerPhoto,
 } from "../pokemon/presentation";
-import { legends } from "./hall-legends";
+import { legendSprite, legends } from "./hall-legends";
 
 const titles = (n: number) => (n === 1 ? "1 título" : `${n} títulos`);
 
@@ -76,7 +76,7 @@ export function HallLegends() {
                       className="legend-team"
                       aria-label={`Equipo campeón de ${legend.trainer}`}
                     >
-                      {title.team.map((pokemon, i) => (
+                      {title.team.map(legendSprite).map((pokemon, i) => (
                         <li
                           key={`${pokemon.species}-${i}`}
                           title={

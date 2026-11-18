@@ -45,6 +45,7 @@ for (const [label, width, height] of [
           "/visuals/animated/v2/forms/386-form-1.gif",
           "/visuals/animated/v2/forms/479-form-2.gif",
           "/visuals/animated/v2/forms/65-form-1.gif",
+          "/visuals/animated/v2/forms/323-form-1.gif",
         ]),
       );
     const overflow = await page.evaluate(

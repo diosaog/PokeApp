@@ -120,6 +120,15 @@ it("2026-11-18: Leyendas shows each past champion's portrait and moving team, no
     "src",
     "/visuals/v1/pokemon/65-form-1.png",
   );
+  // Miguel's Camerupt holds its own Mega Stone: the Hall shows Mega-Camerupt.
+  const rubi = cards[3];
+  expect(within(rubi).getByTitle("Mega-Camerupt")).toBeVisible();
+  expect(within(rubi).getByAltText("Camerupt")).toHaveAttribute(
+    "src",
+    "/visuals/v1/pokemon/323-form-1.png",
+  );
   // Sprites only: no moves, items or abilities.
-  expect(screen.queryByText(/Close Combat|Focus Sash|Cameruptite/)).toBeNull();
+  expect(
+    screen.queryByText(/Close Combat|Focus Sash|Cameruptite|Choice Band/),
+  ).toBeNull();
 });

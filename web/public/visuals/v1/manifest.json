@@ -17310,6 +17310,11 @@
       "url": "https://raw.githubusercontent.com/PokeAPI/sprites/ba403973fdf9d0ac59175813861e6a1f8ed5020c/sprites/pokemon/10037.png",
       "sha256": "e76b98794b6d2cff8e96d1c2f797776169fa20c9922cb269ff2e9cb68426f031",
       "bytes": 1734
+    },
+    "pokemon/323-form-1.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/ba403973fdf9d0ac59175813861e6a1f8ed5020c/sprites/pokemon/10087.png",
+      "sha256": "2915c7ea7c92cbc113deac0cbd35a8d1a3201edd3582b9322c8ad777ca4e8a9f",
+      "bytes": 1200
     }
   }
 }

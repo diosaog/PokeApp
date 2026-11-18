@@ -11337,6 +11337,11 @@
       "source": "https://raw.githubusercontent.com/PokeAPI/sprites/ba403973fdf9d0ac59175813861e6a1f8ed5020c/sprites/pokemon/other/showdown/10037.gif",
       "bytes": 151441,
       "sha256": "661a0dcc910c6fbe51cf8ffbc8e28877ad5db25ca2b6e033ce6cefe89a3f836c"
+    },
+    "323-form-1": {
+      "source": "https://raw.githubusercontent.com/PokeAPI/sprites/ba403973fdf9d0ac59175813861e6a1f8ed5020c/sprites/pokemon/other/showdown/10087.gif",
+      "bytes": 157927,
+      "sha256": "6e23887646f2e696b69bf79082dcac77d9db070b63476b38b370d908ac261c94"
     }
   }
 }
