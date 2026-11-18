@@ -69,20 +69,45 @@
             <button id="choose-save" type="button">Cambiar partida</button>
           </div>
         </article>
+        <!-- 2026-11-18: what a trainer does here, one tap each. The full
+             lists open as popups; the technical details stay folded below. -->
+        <div id="hub-actions" class="hub-actions" role="group" aria-label="Acciones de tu partida">
+          <button type="button" class="hub-tile" data-open="objetos">
+            <span class="hub-tile-icon" aria-hidden="true"
+              ><img src="assets/items/50.png" alt="" width="36" height="36"
+            /></span>
+            <span class="hub-tile-text">
+              <strong>Objetos</strong>
+              <span>Caramelo Raro y Escama Corazón gratis, y lo que compres en la Tienda</span>
+            </span>
+          </button>
+          <button type="button" class="hub-tile" data-open="felicidad">
+            <span class="hub-tile-icon" aria-hidden="true">♥</span>
+            <span class="hub-tile-text">
+              <strong>Felicidad máxima</strong>
+              <span>Sube a 255 la felicidad de un Pokémon, gratis</span>
+            </span>
+          </button>
+          <button type="button" class="hub-tile" data-open="revivir">
+            <span class="hub-tile-icon" aria-hidden="true">✚</span>
+            <span class="hub-tile-text">
+              <strong>Revivir Pokémon</strong>
+              <span>Con tu comodín Revivir, desde tu caja de muertos</span>
+            </span>
+          </button>
+          <button type="button" class="hub-tile" data-open="robos">
+            <span class="hub-tile-icon" aria-hidden="true">⇄</span>
+            <span class="hub-tile-text">
+              <strong>Robos y entregas</strong>
+              <span id="hub-robos-state">No hay robos en curso</span>
+            </span>
+          </button>
+        </div>
+        <article id="team-article" aria-labelledby="team-title">
+          <h2 id="team-title">Tu equipo</h2>
+          <div id="party" class="slots party" aria-label="Equipo"></div>
+        </article>
         <div class="hub-grid">
-          <article id="save-tools" aria-labelledby="save-tools-title">
-            <h2 id="save-tools-title">Partidas en este equipo</h2>
-            <p id="save-state">
-              Selecciona tu archivo para empezar. Puedes explorar sin conexión.
-            </p>
-            <p id="save-identity"></p>
-            <p id="emulator-state" class="muted"></p>
-            <div id="discovered-saves" class="discovered"></div>
-            <div class="toolbar">
-              <button id="discover-saves">Buscar partidas en un emulador</button
-              ><button id="select-save">Elegir archivo…</button>
-            </div>
-          </article>
           <article id="write-article" aria-labelledby="write-title">
             <h2 id="write-title">Cambios en tu partida</h2>
             <p id="write-state" role="status">No hay cambios pendientes.</p>
@@ -98,6 +123,22 @@
             <p id="write-error" role="status"></p>
           </article>
         </div>
+        <details id="save-advanced" class="hub-details">
+          <summary>Partidas en este equipo y detalles del archivo</summary>
+          <article id="save-tools" aria-labelledby="save-tools-title">
+            <h2 id="save-tools-title">Partidas en este equipo</h2>
+            <p id="save-state">
+              Selecciona tu archivo para empezar. Puedes explorar sin conexión.
+            </p>
+            <p id="save-identity"></p>
+            <p id="emulator-state" class="muted"></p>
+            <div id="discovered-saves" class="discovered"></div>
+            <div class="toolbar">
+              <button id="discover-saves">Buscar partidas en un emulador</button
+              ><button id="select-save">Elegir archivo…</button>
+            </div>
+          </article>
+        </details>
         <article id="transfer-article" aria-labelledby="transfer-title">
           <h2 id="transfer-title" tabindex="-1">Robos y entregas</h2>
           <p id="transfer-summary" role="status">No hay robos en curso.</p>
@@ -208,10 +249,6 @@
           <div id="shop-list"></div>
           <button id="shop-refresh">Volver a comprobar</button>
         </article>
-        <article id="team-article" aria-labelledby="team-title">
-          <h2 id="team-title">Equipo</h2>
-          <div id="party" class="slots party" aria-label="Equipo"></div>
-        </article>
       </section>
       <section id="backups-view" hidden>
         <article aria-labelledby="backups-title">
@@ -289,19 +326,22 @@
             </form>
           </article>
         </div>
-        <div class="hub-grid">
-          <article aria-labelledby="cloud-title">
-            <h2 id="cloud-title">Último estado de la nube</h2>
-            <p id="cloud-state">Todavía no hay datos guardados.</p>
-            <p id="cloud-age"></p>
-            <p id="item-use-state">Aplicación de objetos deshabilitada.</p>
-            <p id="transfer-state" role="status">No hay robos en curso.</p>
-          </article>
-          <article aria-labelledby="sync-title">
-            <h2 id="sync-title">Sincronización automática</h2>
-            <p id="receipt">Sin sincronizar</p>
-          </article>
-        </div>
+        <details class="hub-details">
+          <summary>Detalles técnicos</summary>
+          <div class="hub-grid">
+            <article aria-labelledby="cloud-title">
+              <h2 id="cloud-title">Último estado de la nube</h2>
+              <p id="cloud-state">Todavía no hay datos guardados.</p>
+              <p id="cloud-age"></p>
+              <p id="item-use-state">Aplicación de objetos deshabilitada.</p>
+              <p id="transfer-state" role="status">No hay robos en curso.</p>
+            </article>
+            <article aria-labelledby="sync-title">
+              <h2 id="sync-title">Sincronización automática</h2>
+              <p id="receipt">Sin sincronizar</p>
+            </article>
+          </div>
+        </details>
       </section>
       <dialog id="details" class="pokemon-dialog">
         <h2 id="pokemon-title"></h2>

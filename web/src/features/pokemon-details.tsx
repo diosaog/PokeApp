@@ -5,6 +5,7 @@ import {
   ItemIcon,
   MoveLabel,
   PokemonSprite,
+  PokemonStatusFlags,
   TypeBadge,
   IVBars,
   typeClass,
@@ -19,6 +20,7 @@ type Public = Pick<
   | "item"
   | "form"
   | "item_generation"
+  | "status_flags"
 > & { moves?: { name: string }[] | null; is_shiny?: boolean };
 export type DetailPokemon =
   | { visibility: "public"; pokemon: Public }
@@ -67,6 +69,7 @@ export function PokemonDetails(props: DetailPokemon) {
             <TypeBadge key={t} type={t} />
           ))}
         </div>
+        <PokemonStatusFlags flags={p.status_flags} />
       </section>
       <section className="detail-data" aria-label="Características">
         {props.visibility === "self" && (

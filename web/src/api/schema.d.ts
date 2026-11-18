@@ -4475,6 +4475,8 @@ export interface components {
       days: components["schemas"]["DayRead"][];
       /** Rows */
       rows: components["schemas"]["LeagueStandingRead"][];
+      /** Robbery Round */
+      robbery_round?: number | null;
     };
     /**
      * LeagueReadinessRead
@@ -4579,6 +4581,8 @@ export interface components {
        * @enum {string}
        */
       league_save_status: "linked" | "unlinked" | "unavailable";
+      /** Robbed This Round */
+      robbed_this_round?: boolean | null;
     };
     /** LiveRulesBody */
     LiveRulesBody: {

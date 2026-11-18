@@ -638,7 +638,7 @@ export const wildcards: Wildcard[] = [
     name: "Revivir Pokémon",
     price: 12,
     effect:
-      "Devuelve a la vida a un Pokémon de tu Caja 7. Queda REVIVIDO y BLINDADO.",
+      "Devuelve a la vida a un Pokémon de tu Caja 7. Queda REVIVIDO, pero no blindado: se puede robar y se puede blindar.",
     note: "Su muerte sigue registrada y la penalización NET no desaparece.",
     active: true,
     status: "Disponible. Se usa cuando quieras desde PokeApp Launcher.",

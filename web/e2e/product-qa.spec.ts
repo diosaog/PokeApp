@@ -114,7 +114,8 @@ for (const width of [1440, 900, 390]) {
         fullPage: true,
       });
     }
-    // A missing Hall is an intentional empty state, not a synthetic champion.
+    // A missing Hall shows no synthetic champion and, since 2026-11-18, no
+    // empty-state card either: only the Leyendas of the earlier games.
     await page.route("**/v1/read/hall?*", (route) =>
       route.fulfill({ json: { items: [], next_offset: null } }),
     );
@@ -125,8 +126,11 @@ for (const width of [1440, 900, 390]) {
     await login(page);
     await navigate(page, "Hall de la Fama");
     await expect(
-      page.getByText("Tu próxima historia empieza aquí."),
+      page.getByRole("heading", { name: "Leyendas" }),
     ).toBeVisible();
+    await expect(
+      page.getByText("Tu próxima historia empieza aquí."),
+    ).toHaveCount(0);
     await expect(page.locator(".hall-card")).toHaveCount(0);
     expect(commands).toHaveLength(0);
     expect(errors).toEqual([]);

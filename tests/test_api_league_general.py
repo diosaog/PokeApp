@@ -271,3 +271,67 @@ class LeagueGeneralTests(unittest.TestCase):
                 )
                 with self.assertRaises(PersistenceError):
                     SupabaseFrontendReadRepository(client).league_general(SID)
+
+
+class RobbedThisRoundTests(unittest.TestCase):
+    """Owner 2026-11-18: the standings mark who was robbed in the current round."""
+
+    get = LeagueGeneralTests.get
+
+    def setUp(self):
+        LeagueGeneralTests.setUp(self)
+        self.store.result["rows"][0]["status"] = "active"
+        self.other = str(uuid4())
+        self.store.result["rows"].append(
+            dict(self.store.result["rows"][0], season_player_id=str(uuid4()),
+                 trainer_id=self.other, display_name="STeeLAG"))
+        self.store.rows = lambda table, columns, *, filters, limit: [
+            dict(id=r["season_player_id"], trainer_id=r["trainer_id"],
+                 current_save_file_id=str(uuid4())) for r in self.store.result["rows"]]
+
+    def test_current_round_victims_are_marked_and_the_rest_are_not(self):
+        self.store.robbery_round_victims = lambda sid: {"round": 2, "victims": [self.other]}
+        data = self.get().json()
+        self.assertEqual(data["robbery_round"], 2)
+        self.assertEqual([r["robbed_this_round"] for r in data["rows"]], [False, True])
+
+    def test_unreadable_rotation_keeps_the_standings_without_guessing(self):
+        def broken(sid):
+            raise PersistenceError("SECRET")
+        self.store.robbery_round_victims = broken
+        response = self.get()
+        self.assertEqual(response.status_code, 200)
+        self.assertNotIn("SECRET", response.text)
+        self.assertIsNone(response.json()["robbery_round"])
+        self.assertEqual([r["robbed_this_round"] for r in response.json()["rows"]], [None, None])
+
+    def test_finished_seasons_show_no_robbery_label(self):
+        self.store.robbery_round_victims = lambda sid: {"round": 1, "victims": [self.other]}
+        self.store.result["season"]["status"] = "archived"
+        self.assertIsNone(self.get().json()["rows"][1]["robbed_this_round"])
+
+    def test_postgrest_reads_the_round_then_its_applied_robberies(self):
+        calls = []
+
+        def handler(request):
+            calls.append(request)
+            if request.url.path.endswith("/rpc/robbery_round"):
+                return httpx.Response(200, json=3)
+            return httpx.Response(200, json=[{"target_owner_trainer_id": self.other},
+                                             {"target_owner_trainer_id": self.other}])
+
+        with httpx.Client(transport=httpx.MockTransport(handler)) as http:
+            repo = SupabaseFrontendReadRepository(SyncPostgrestClient(
+                "https://example.invalid/rest/v1", http_client=http))
+            self.assertEqual(repo.robbery_round_victims(SID), {"round": 3, "victims": [self.other]})
+        self.assertEqual(json.loads(calls[0].content), {"sid": SID})
+        query = str(calls[1].url)
+        for part in ("effect_code=eq.steal", "status=eq.applied", "robbery_cycle_number=eq.3",
+                     f"season_id=eq.{SID}"):
+            self.assertIn(part, query)
+        for bad in (True, 0, "3", None):
+            with httpx.Client(transport=httpx.MockTransport(
+                    lambda r, bad=bad: httpx.Response(200, json=bad))) as http:
+                with self.assertRaises(PersistenceError):
+                    SupabaseFrontendReadRepository(SyncPostgrestClient(
+                        "https://example.invalid/rest/v1", http_client=http)).robbery_round_victims(SID)

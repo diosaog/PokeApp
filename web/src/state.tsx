@@ -3,6 +3,7 @@ import {
   useCallback,
   useEffect,
   useContext,
+  useMemo,
   useState,
   type ReactNode,
 } from "react";
@@ -290,10 +291,19 @@ export function useMyPC(enabled = true) {
     sameGame &&
     Date.parse(active.save?.uploaded_at ?? "") >
       Date.parse(competing.save?.uploaded_at ?? "");
-  const data =
+  const shown =
     !active || (sameGame && !personalIsNewer)
       ? (competing ?? personal.data)
       : active;
+  // A newer personal save of the same game is the season's Pokémon too:
+  // ROBADO / BLINDADO / REVIVIDO always show, whichever save is drawn.
+  const data = useMemo(
+    () =>
+      shown && shown === active && sameGame && competing
+        ? withSeasonFlags(shown, competing)
+        : shown,
+    [shown, active, sameGame, competing],
+  );
   return {
     data,
     error: data ? null : personal.error,
@@ -302,6 +312,62 @@ export function useMyPC(enabled = true) {
     // The season competes with another game than the active save.
     seasonGame:
       active && competing && !sameGame ? (competing.save?.game ?? null) : null,
+  };
+}
+type PCSlot = Model<"PCRead">["pokemon"][number];
+// What stays the same for one Pokémon between two syncs of the same game, even
+// if it levelled up, moved box, evolved or used a Mint: never its slot.
+function pcFingerprints(p: PCSlot["pokemon"]) {
+  const ivs = p.ivs
+    ? [p.ivs.hp, p.ivs.atk, p.ivs.defense, p.ivs.spa, p.ivs.spd, p.ivs.spe].join(
+        ".",
+      )
+    : null;
+  if (ivs == null) return [];
+  const stable = [p.nickname, p.gender ?? "", p.is_shiny, ivs].join("|");
+  return [`${p.species}|${stable}`, stable];
+}
+function uniqueBy(slots: PCSlot[], index: number) {
+  const seen = new Map<string, PCSlot | null>();
+  for (const slot of slots) {
+    const key = pcFingerprints(slot.pokemon)[index];
+    if (key == null) continue;
+    seen.set(key, seen.has(key) ? null : slot);
+  }
+  return seen;
+}
+/** The season save's public labels, carried to the same Pokémon of a newer
+ * personal save. Only an unambiguous match carries them: never a guess. */
+export function withSeasonFlags(
+  shown: Model<"PCRead">,
+  season: Model<"PCRead">,
+): Model<"PCRead"> {
+  const labelled = season.pokemon.filter(
+    (slot) => slot.pokemon.status_flags?.length,
+  );
+  if (!labelled.length) return shown;
+  const pick = (slot: PCSlot) => {
+    for (const index of [0, 1]) {
+      const key = pcFingerprints(slot.pokemon)[index];
+      if (key == null) return null;
+      const own = uniqueBy(shown.pokemon, index).get(key);
+      const match = uniqueBy(season.pokemon, index).get(key);
+      if (own === slot && match) return match;
+    }
+    return null;
+  };
+  return {
+    ...shown,
+    pokemon: shown.pokemon.map((slot) => {
+      if (slot.pokemon.status_flags?.length) return slot;
+      const match = pick(slot);
+      return match?.pokemon.status_flags?.length
+        ? {
+            ...slot,
+            pokemon: { ...slot.pokemon, status_flags: match.pokemon.status_flags },
+          }
+        : slot;
+    }),
   };
 }
 export function usePC() {

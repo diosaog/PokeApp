@@ -98,6 +98,41 @@ class SupabaseFrontendReadRepository:
             _report_failure("league_general", exc)
             raise PersistenceError("League read backend unavailable") from exc
 
+    def robbery_round_victims(self, season_id):
+        """The current robbery round (085 `robbery_round`) and its victims.
+
+        The same rotation the robbery board applies: a round that no longer
+        misses any eligible victim already counts as the next one, empty.
+        """
+        try:
+            round_number = _execute_read(
+                self._client.rpc("robbery_round", {"sid": season_id}),
+                "robbery_round",
+            )
+            if isinstance(round_number, bool) or not isinstance(round_number, int) or round_number < 1:
+                raise ValueError("Invalid robbery round")
+            rows = _execute_read(
+                self._client.table("redemptions")
+                .select("target_owner_trainer_id")
+                .eq("season_id", season_id)
+                .eq("effect_code", "steal")
+                .eq("status", "applied")
+                .eq("robbery_cycle_number", round_number)
+                .range(0, 499),
+                "robbery_round_victims",
+            )
+            if not isinstance(rows, list) or len(rows) > 499:
+                raise ValueError("Invalid robbery victims")
+            victims = sorted({
+                row["target_owner_trainer_id"]
+                for row in rows
+                if isinstance(row.get("target_owner_trainer_id"), str)
+            })
+            return {"round": round_number, "victims": victims}
+        except Exception as exc:
+            _report_failure("robbery_round_victims", exc)
+            raise PersistenceError("Robbery round unavailable") from exc
+
     def initial_observations(self, season_id):
         try:
             data = _execute_read(

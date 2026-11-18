@@ -1301,3 +1301,15 @@ dialog::backdrop {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }
+/* Owner 2026-11-18: «ROBADO» beside the trainer for the current robbery round. */
+.standing-cell {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 12px;
+}
+.standing-robbed {
+  min-height: 20px;
+  padding: 3px 8px;
+  font-size: 0.62rem;
+}

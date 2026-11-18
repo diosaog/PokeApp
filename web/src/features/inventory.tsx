@@ -612,6 +612,15 @@ export function Inventory() {
   );
 }
 
+// Owner 2026-11-18: the same large popup as every other chooser.
+const robberyStatus: Record<string, string> = {
+  available: "Disponible",
+  already_robbed: "Ya robado en esta ronda",
+  no_save: "Sin partida",
+  other_game: "Otro juego",
+  reserved: "Ocupado",
+  no_targets: "Sin Pokémon robables",
+};
 function TrainerPickerModal({
   trainers,
   round,
@@ -628,59 +637,42 @@ function TrainerPickerModal({
   onSelect: (trainerId: string) => void;
 }) {
   return (
-    <div className="trainer-picker-layer">
-      <div
-        className="trainer-picker-panel"
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="trainer-picker-title"
-      >
-        <div className="dialog-heading">
-          <h2 id="trainer-picker-title">Elige un entrenador</h2>
-          <button
-            type="button"
-            className="icon-button"
-            aria-label="Cerrar"
-            onClick={onClose}
-          >
-            ×
-          </button>
-        </div>
-        <p>
-          Después elegirás uno de sus Pokémon de su última partida oficial.
-          {round != null && ` Ronda de robos ${round}.`}
+    <Modal title="Elige un entrenador" onClose={onClose} size="lg">
+      <p className="trainer-picker-intro">
+        Después elegirás uno de sus Pokémon de su última partida oficial.
+        {round != null && ` Ronda de robos ${round}.`}
+      </p>
+      {!ownSave && (
+        <p className="muted">
+          Tu partida de la Liga todavía no está disponible. Sincronízala con el
+          Launcher.
         </p>
-        {!ownSave && (
-          <p className="muted">
-            Tu partida de la Liga todavía no está disponible. Sincronízala con
-            el Launcher.
-          </p>
-        )}
-        {loading ? (
-          <Loading />
-        ) : (
-          <div className="trainer-selector-grid">
-            {trainers.map((trainer) => (
-              <button
-                type="button"
-                className="trainer-selector-card"
-                key={trainer.trainer_id}
-                disabled={trainer.status !== "available" || !ownSave}
-                onClick={() => onSelect(trainer.trainer_id)}
-              >
-                <TrainerPhoto name={trainer.display_name} />
-                <span>{trainer.display_name}</span>
-                {trainer.message && (
-                  <small className="muted">{trainer.message}</small>
-                )}
-              </button>
-            ))}
-          </div>
-        )}
-        {!loading && !trainers.length && (
-          <Empty>No hay más entrenadores en esta temporada.</Empty>
-        )}
-      </div>
-    </div>
+      )}
+      {loading ? (
+        <Loading />
+      ) : (
+        <div className="trainer-selector-grid">
+          {trainers.map((trainer) => (
+            <button
+              type="button"
+              className="trainer-selector-card"
+              key={trainer.trainer_id}
+              disabled={trainer.status !== "available" || !ownSave}
+              onClick={() => onSelect(trainer.trainer_id)}
+            >
+              <TrainerPhoto name={trainer.display_name} />
+              <strong>{trainer.display_name}</strong>
+              <Tag>{robberyStatus[trainer.status] ?? trainer.status}</Tag>
+              {trainer.message && (
+                <small className="muted">{trainer.message}</small>
+              )}
+            </button>
+          ))}
+        </div>
+      )}
+      {!loading && !trainers.length && (
+        <Empty>No hay más entrenadores en esta temporada.</Empty>
+      )}
+    </Modal>
   );
 }

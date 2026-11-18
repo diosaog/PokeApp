@@ -174,7 +174,28 @@ class FrontendReads:
                 if seen is not None:
                     row.dead_count, row.dead_count_observed_at = seen
                     row.dead_count_source = "observed_personal_save"
+        self._robbery_round(sid, data)
         return data
+
+    def _robbery_round(self, sid, data):
+        """Owner 2026-11-18: the standings mark who was already robbed this round.
+
+        A label only: when the rotation cannot be read the standings still
+        load, with the field absent rather than a guessed «no robado».
+        """
+        reader = getattr(self.repo, "robbery_round_victims", None)
+        if not callable(reader) or data.season.status != "active":
+            return
+        try:
+            result = reader(sid)
+        except PersistenceError:
+            return
+        if not isinstance(result, dict) or not isinstance(result.get("victims"), list):
+            return
+        victims = {str(value) for value in result["victims"]}
+        data.robbery_round = result.get("round")
+        for row in data.rows:
+            row.robbed_this_round = str(row.trainer_id) in victims
 
     def season(self, sid):
         rows = self.rows("seasons", "id,name,status,current_matchday_id,metadata", id=sid)

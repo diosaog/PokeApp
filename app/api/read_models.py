@@ -218,6 +218,9 @@ class LeagueStandingRead(BaseModel):
     points_provisional: bool | None = None
     # Presence of this participant's League save, independent of personal previews.
     league_save_status: Literal["linked", "unlinked", "unavailable"] = "unavailable"
+    # Owner 2026-11-18: already a victim in the current robbery round (the same
+    # rotation the robbery board applies). None when it could not be read.
+    robbed_this_round: bool | None = None
 
 
 class LeagueGeneralRead(BaseModel):
@@ -225,6 +228,8 @@ class LeagueGeneralRead(BaseModel):
     days: list[DayRead]
     # Server ordering is presentation only; no sporting rank or inferred title.
     rows: list[LeagueStandingRead] = Field(max_length=500)
+    # The current robbery round (085 rotation); None when it could not be read.
+    robbery_round: int | None = Field(default=None, ge=1)
 
 
 class SaveRead(BaseModel):

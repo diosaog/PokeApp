@@ -46,9 +46,10 @@ MIGRATIONS = sorted((ROOT / "supabase/v2/migrations").glob("*.sql"))
 # 086 (jornada order by direct match, owner rule of 2026-11-17; re-ranked J1
 # and moved its Blindar) and 087 («Blindaje por Robo» retired) were published
 # as 20261117231718 and 20261117231721 after a fresh backup and rehearsal,
-# with owner authorization. No migration is pending.
+# with owner authorization. 088 (Revivir ya no blinda, owner rule of
+# 2026-11-18) is pending.
 DEPLOYED = [m for m in MIGRATIONS if int(m.name[:3]) <= 87]
-PENDING: list[Path] = []
+PENDING: list[Path] = [m for m in MIGRATIONS if int(m.name[:3]) == 88]
 WINDOW = f"{PENDING[0].name[:3]}-{PENDING[-1].name[:3]}" if PENDING else "none"
 SCHEMAS = "('public','v1_shadow')"
 

@@ -1,0 +1,364 @@
+/* ---------- Owner 2026-11-18: one popup system for the whole web ----------
+   A large, ordered panel: the heading stays fixed, the body scrolls on its
+   own, the actions sit at the end. Three widths: md (confirmations, forms),
+   lg (choosers), xl (Pokémon choosers with boxes). Phones keep the sheet. */
+dialog.app-dialog {
+  display: none;
+  flex-direction: column;
+  width: min(640px, calc(100vw - 32px));
+  max-height: min(860px, calc(100dvh - 40px));
+  padding: 0;
+  overflow: hidden;
+  border-radius: 20px;
+}
+dialog.app-dialog[open] {
+  display: flex;
+}
+dialog.app-dialog.dialog-lg {
+  width: min(880px, calc(100vw - 32px));
+}
+dialog.app-dialog.dialog-xl {
+  width: min(1080px, calc(100vw - 32px));
+  min-height: min(520px, calc(100dvh - 40px));
+}
+dialog.app-dialog:has(.pokemon-detail-layout) {
+  width: min(960px, calc(100vw - 32px));
+}
+dialog.app-dialog > .dialog-heading {
+  position: static;
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin: 0;
+  padding: 18px 20px 16px 26px;
+  border-bottom: 1px solid var(--border-subtle);
+  background: color-mix(in srgb, var(--c-surface-2) 92%, var(--accent) 8%);
+}
+dialog.app-dialog > .dialog-heading h2 {
+  margin: 0;
+  font-size: 1.3rem;
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+}
+dialog.app-dialog > .dialog-heading .icon-button {
+  flex: none;
+  width: 40px;
+  height: 40px;
+  margin: 0;
+}
+dialog.app-dialog > .dialog-body {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: auto;
+  padding: 22px 26px 26px;
+  overscroll-behavior: contain;
+}
+.dialog-body > :first-child {
+  margin-top: 0;
+}
+.dialog-body > :last-child {
+  margin-bottom: 0;
+}
+.dialog-body > p {
+  line-height: 1.5;
+}
+/* The main action of a simple popup closes it, full width on its own line. */
+.dialog-body > .button.primary:last-child,
+.dialog-body > button.primary:last-child {
+  width: 100%;
+  margin-top: 18px;
+}
+/* Any row of actions: secondary on the left, the decision on the right. */
+.dialog-actions,
+.dialog-body .selector-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 22px;
+  padding-top: 18px;
+  border-top: 1px solid var(--border-subtle);
+}
+.dialog-actions button,
+.dialog-actions .button,
+.dialog-body .selector-actions button {
+  min-width: 140px;
+  min-height: 44px;
+}
+.dialog-body .purchase-summary {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px 18px;
+  border: 1px solid var(--border-subtle);
+  border-radius: 14px;
+  background: var(--c-surface-1);
+}
+.dialog-body .purchase-summary strong {
+  font-size: 1.6rem;
+}
+.dialog-body label.check {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin-top: 14px;
+  padding: 12px 14px;
+  border: 1px solid var(--border-subtle);
+  border-radius: 12px;
+  background: var(--c-surface-1);
+  line-height: 1.4;
+}
+
+/* ---------- Pokémon chooser (Blindar, Revivir, Robar) ---------- */
+.pokemon-selector {
+  display: grid;
+  gap: 22px;
+}
+.pokemon-selector-hint {
+  margin: 0;
+  color: var(--c-text-soft);
+}
+.pokemon-selector section {
+  display: grid;
+  gap: 12px;
+  margin: 0;
+}
+.pokemon-selector section + section {
+  margin: 0;
+  padding-top: 18px;
+  border-top: 1px solid var(--border-subtle);
+}
+.selector-section-heading {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin: 0;
+}
+.selector-section-heading h3 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  font-size: 1rem;
+}
+.selector-box-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.selector-box-tabs button {
+  min-height: 34px;
+  padding: 4px 12px;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 750;
+}
+.selector-box-tabs button[aria-pressed="true"] {
+  border-color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 22%, var(--c-surface-2));
+  color: var(--c-text);
+}
+.pokemon-selector-grid,
+.party-selector-grid,
+.box-selector-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 12px;
+}
+.party-selector-grid {
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+}
+.pokemon-selector-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  min-height: 0;
+  height: 100%;
+  padding: 14px 10px 12px;
+  border: 1px solid var(--border-subtle);
+  border-radius: 14px;
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--c-surface-2) 80%, var(--accent) 6%),
+    var(--c-surface-1)
+  );
+  color: var(--c-text);
+  text-align: center;
+  cursor: pointer;
+  transition:
+    transform var(--t-fast, 120ms) ease,
+    border-color var(--t-fast, 120ms) ease,
+    box-shadow var(--t-fast, 120ms) ease;
+}
+.pokemon-selector-card:hover:not(:disabled),
+.pokemon-selector-card:focus-visible {
+  transform: translateY(-2px);
+  border-color: var(--accent);
+  box-shadow: 0 10px 26px color-mix(in srgb, var(--accent) 22%, transparent);
+}
+.pokemon-selector-card.is-selected {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px var(--accent);
+}
+.pokemon-selector-card:disabled {
+  cursor: not-allowed;
+  opacity: 0.62;
+  filter: saturate(0.6);
+}
+.pokemon-selector-card .pokemon-sprite {
+  width: 72px;
+  height: 72px;
+  margin: 0;
+}
+.pokemon-selector-copy {
+  display: grid;
+  justify-items: center;
+  gap: 3px;
+  width: 100%;
+  min-width: 0;
+}
+.pokemon-selector-copy strong {
+  max-width: 100%;
+  font-size: 0.95rem;
+  line-height: 1.2;
+  overflow-wrap: anywhere;
+}
+.pokemon-selector-copy small,
+.pokemon-selector-copy .muted {
+  font-size: 0.74rem;
+  line-height: 1.3;
+}
+.pokemon-selector-copy .pokemon-status-flags {
+  margin-top: 2px;
+}
+.selector-refusal {
+  display: block;
+  width: 100%;
+  margin-top: 4px;
+  padding: 5px 8px;
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--c-danger) 22%, transparent);
+  color: var(--c-danger-soft);
+  font-size: 0.7rem;
+  line-height: 1.3;
+}
+/* Confirmation: the chosen Pokémon large, the question, two clear answers. */
+.pokemon-selector-confirm {
+  display: grid;
+  justify-items: center;
+  gap: 16px;
+  max-width: 460px;
+  margin: 8px auto 0;
+  text-align: center;
+}
+.pokemon-selector-confirm .pokemon-selector-card {
+  width: 220px;
+  cursor: default;
+}
+.pokemon-selector-confirm .pokemon-selector-card .pokemon-sprite {
+  width: 110px;
+  height: 110px;
+}
+.selector-confirmation {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 700;
+  line-height: 1.4;
+}
+.pokemon-selector-confirm .selector-actions {
+  justify-content: center;
+  width: 100%;
+}
+
+/* ---------- Trainer chooser (Robar) ---------- */
+.trainer-picker-intro {
+  margin: 0 0 18px;
+  line-height: 1.5;
+}
+.trainer-selector-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 14px;
+}
+.trainer-selector-card {
+  display: grid;
+  justify-items: center;
+  align-content: start;
+  gap: 8px;
+  min-height: 210px;
+  padding: 16px 12px 14px;
+  border: 1px solid var(--border-subtle);
+  border-radius: 16px;
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--c-surface-2) 85%, var(--accent) 6%),
+    var(--c-surface-1)
+  );
+  color: var(--c-text);
+  text-align: center;
+  cursor: pointer;
+  transition:
+    transform var(--t-fast, 120ms) ease,
+    border-color var(--t-fast, 120ms) ease;
+}
+.trainer-selector-card:hover:not(:disabled),
+.trainer-selector-card:focus-visible {
+  transform: translateY(-2px);
+  border-color: var(--accent);
+}
+.trainer-selector-card:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+.trainer-selector-card .trainer-photo {
+  width: 84px;
+  height: 104px;
+  border-radius: 12px;
+}
+.trainer-selector-card strong {
+  font-size: 1.02rem;
+}
+.trainer-selector-card .tag {
+  justify-self: center;
+}
+.trainer-selector-card small {
+  font-size: 0.72rem;
+  line-height: 1.35;
+}
+
+/* Phones: the sheet from evolution.css, with the same fixed heading. */
+@media (max-width: 640px) {
+  dialog.app-dialog[open] {
+    max-height: 92dvh;
+  }
+  dialog.app-dialog.dialog-xl {
+    min-height: 0;
+  }
+  dialog.app-dialog > .dialog-heading {
+    padding: 14px 14px 12px 18px;
+  }
+  dialog.app-dialog > .dialog-body {
+    padding: 16px 16px 22px;
+  }
+  .pokemon-selector-grid,
+  .party-selector-grid,
+  .box-selector-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+  }
+  .trainer-selector-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .dialog-actions button,
+  .dialog-actions .button,
+  .dialog-body .selector-actions button {
+    flex: 1 1 0;
+    min-width: 0;
+  }
+}

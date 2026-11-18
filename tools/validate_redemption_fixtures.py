@@ -91,8 +91,9 @@ class RedemptionFixtures(IdentityFixtures):
         flags=self.select('pokemon_entity_flags',pokemon_entity_id=self.dead[0])
         timestamp=next(f for f in flags if f['flag_type']=='revivido_at')
         require(timestamp['flag_timestamp'] and timestamp['flag_value'] is None,'revivido_at must be timestamp')
-        require(next(f for f in flags if f['flag_type']=='blindado')['flag_value'],'revive shield missing')
-        self.passed('RF08/RF13 Store Ban does not block revive; Caja 8, timestamp, pending physical')
+        # 088 (owner rule 2026-11-18): Revivir leaves the Pokémon REVIVIDO only, never BLINDADO.
+        require(not any(f['flag_type']=='blindado' and f['flag_value'] for f in flags),'revive must not shield (088)')
+        self.passed('RF08/RF13 Store Ban does not block revive; Caja 8, timestamp, pending physical, no shield')
         self.reject(lambda:self.redeem(self.purchase('revivir_pokemon'),self.party[2]),'POKEMON_NOT_REVIVABLE')
         self.reject(lambda:self.redeem(self.purchase(),self.outside),'INVALID_POKEMON_TARGET')
         self.passed('F34/F44 current location eligibility, including configured eight-box limit')

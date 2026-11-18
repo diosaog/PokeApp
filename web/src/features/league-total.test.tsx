@@ -182,3 +182,41 @@ it("keeps unknown live net points pending even when an earlier official total ex
   expect(cells[2]).toHaveTextContent("2");
   expect(screen.getByText(/Provisional:/)).toBeInTheDocument();
 });
+
+it("2026-11-18: marks who was already robbed in the current robbery round", () => {
+  render(
+    <MemoryRouter>
+      <LeagueGeneral
+        data={
+          {
+            ...(league([
+              row({ robbed_this_round: true }),
+              row({
+                season_player_id: "q",
+                trainer_id: "u",
+                display_name: "Samu",
+                robbed_this_round: false,
+              }),
+              row({
+                season_player_id: "r",
+                trainer_id: "v",
+                display_name: "Iker",
+                robbed_this_round: null,
+              }),
+            ]) as object),
+            robbery_round: 2,
+          } as never
+        }
+      />
+    </MemoryRouter>,
+  );
+  const robbed = within(screen.getByRole("row", { name: /Anto/ })).getByText(
+    "ROBADO",
+  );
+  expect(robbed).toHaveAttribute("title", "Ya robado en la ronda de robos 2");
+  expect(screen.getAllByText("ROBADO")).toHaveLength(1);
+  // The trainer link keeps its own name: the tag sits beside it.
+  expect(screen.getByRole("link", { name: /Anto/ })).not.toHaveTextContent(
+    "ROBADO",
+  );
+});

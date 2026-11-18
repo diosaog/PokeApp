@@ -75,7 +75,7 @@ function TargetCard({
         <span className="muted">{target.location}</span>
         <PokemonStatusFlags flags={target.pokemon.status_flags} />
         {refused && (
-          <span className="muted">
+          <span className="selector-refusal">
             {target.message}
             {target.blocked === "recent_capture" &&
               remaining(target.available_at)}
@@ -118,7 +118,7 @@ export function PokemonSelectorModal({
   const currentBox = boxes[boxIndex];
 
   return (
-    <Modal title={title} onClose={onClose}>
+    <Modal title={title} onClose={onClose} size="xl">
       {!targets.length ? (
         <Empty>{emptyText}</Empty>
       ) : confirming && selected ? (
@@ -129,7 +129,7 @@ export function PokemonSelectorModal({
             onSelect={() => setConfirming(false)}
           />
           <p className="selector-confirmation">{confirmation(selected)}</p>
-          <div className="selector-actions">
+          <div className="selector-actions dialog-actions">
             <button type="button" onClick={() => setConfirming(false)}>
               Cancelar
             </button>
@@ -144,7 +144,9 @@ export function PokemonSelectorModal({
         </div>
       ) : (
         <div className="pokemon-selector">
-          <p className="muted">Selecciona un Pokémon para continuar.</p>
+          <p className="pokemon-selector-hint">
+            Elige un Pokémon. Antes de aplicar nada te pediremos confirmación.
+          </p>
           {party.length > 0 && (
             <section>
               <div className="selector-section-heading">
@@ -169,30 +171,26 @@ export function PokemonSelectorModal({
           {currentBox && (
             <section>
               <div className="selector-section-heading">
-                <h3>Caja {currentBox[0]}</h3>
+                <h3>
+                  Caja {currentBox[0]} <Tag>{currentBox[1].length}</Tag>
+                </h3>
+                {/* Every box with Pokémon is one tap away. */}
                 {boxes.length > 1 && (
-                  <div className="selector-box-controls">
-                    <button
-                      type="button"
-                      aria-label="Caja anterior"
-                      onClick={() =>
-                        setBoxIndex(
-                          (boxIndex - 1 + boxes.length) % boxes.length,
-                        )
-                      }
-                    >
-                      ‹
-                    </button>
-                    <span>
-                      {boxIndex + 1} / {boxes.length}
-                    </span>
-                    <button
-                      type="button"
-                      aria-label="Caja siguiente"
-                      onClick={() => setBoxIndex((boxIndex + 1) % boxes.length)}
-                    >
-                      ›
-                    </button>
+                  <div
+                    className="selector-box-tabs"
+                    role="group"
+                    aria-label="Cajas"
+                  >
+                    {boxes.map(([number], index) => (
+                      <button
+                        key={number}
+                        type="button"
+                        aria-pressed={index === boxIndex}
+                        onClick={() => setBoxIndex(index)}
+                      >
+                        Caja {number}
+                      </button>
+                    ))}
                   </div>
                 )}
               </div>

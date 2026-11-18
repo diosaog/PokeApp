@@ -412,6 +412,12 @@ def rehearse(args) -> dict:
         before_086 = (rehearsal_086.row_hashes(pg)
                       if any(m.name[:3] in ("086", "087") for m in PENDING) else None)
 
+        # 088 unshields revive-only Pokémon on purpose: those flag rows only.
+        from tools import validate_phase088_revive_shield as rehearsal_088
+
+        before_088 = (rehearsal_088.rehearsal_rows(pg)
+                      if any(m.name[:3] == "088" for m in PENDING) else None)
+
         report["applied"] = {}
         # Production's supautils.policy_grants lets postgres manage policies on
         # storage.objects (read from pg_settings). Vanilla PostgreSQL has no
@@ -537,12 +543,20 @@ def rehearse(args) -> dict:
                "086/087 change only re-ranked jornadas, their prizes, announcements and retired vouchers",
                rerank["problems"])
 
+        if before_088 is not None:
+            unshield = rehearsal_088.verify_rehearsal(pg, before_088)
+            report["phase088_revive_shield"] = unshield
+            ok(not unshield["problems"],
+               "088 only turns revive-only BLINDADO flags off", unshield["problems"])
+
         rows_after = local_fingerprints(pg, public_tables)
         reranked = bool(report.get("phase086_rerank", {}).get("reranked"))
         retired = bool(report.get("phase086_rerank", {}).get("retired_vouchers"))
         expected_086 = set(rehearsal_086.TABLES) if reranked else set()
         if retired:
             expected_086.add("public.purchases")
+        if report.get("phase088_revive_shield", {}).get("unshielded_revived"):
+            expected_086.add("public.pokemon_entity_flags")
         if reranked:
             # New «Jornada corregida» rows are verified above; old rows must not move.
             outbox_sql += (" where t.id::text not in (select x.id::text from public.discord_announcements x"

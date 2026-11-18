@@ -86,16 +86,20 @@ export function Field({
     </div>
   );
 }
+// Owner 2026-11-18: every popup is one large, ordered panel: a fixed heading,
+// a body that scrolls on its own and, for choosers, a wide size.
 export function Modal({
   title,
   children,
   onClose,
   className,
+  size = "md",
 }: {
   title: string;
   children: ReactNode;
   onClose: () => void;
   className?: string;
+  size?: "md" | "lg" | "xl";
 }) {
   const ref = useRef<HTMLDialogElement>(null),
     id = useId();
@@ -113,7 +117,9 @@ export function Modal({
   return (
     <dialog
       ref={ref}
-      className={className}
+      className={["app-dialog", `dialog-${size}`, className]
+        .filter(Boolean)
+        .join(" ")}
       aria-labelledby={id}
       onCancel={(event) => {
         event.preventDefault();
@@ -129,7 +135,7 @@ export function Modal({
           <X />
         </button>
       </div>
-      {children}
+      <div className="dialog-body">{children}</div>
     </dialog>
   );
 }

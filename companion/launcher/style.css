@@ -1359,3 +1359,542 @@ body {
   margin: 0.35rem 0 0;
   padding-left: 1.1rem;
 }
+
+/* ===================== 2026-11-18: popups and «Saves y Launcher» =====================
+   Owner: every popup a large, ordered panel where choosing is comfortable;
+   the hub shows what a trainer does, with the technical details folded. */
+
+/* ---------- Popups: larger, a fixed heading, comfortable choices ---------- */
+.game-dialog {
+  width: min(620px, calc(100vw - 32px));
+  padding: 0 1.6rem 1.5rem;
+  border-radius: 22px;
+}
+.game-dialog.wide {
+  width: min(1040px, calc(100vw - 32px));
+  min-height: min(560px, calc(100vh - 48px));
+}
+.dialog-head {
+  margin: 0 -1.6rem 1rem;
+  padding: 1.1rem 1.1rem 0.9rem 1.6rem;
+}
+.dialog-head h2 {
+  font-size: 1.3rem;
+}
+.dialog-head .icon-close {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border-radius: 50%;
+  font-size: 1.3rem;
+}
+.dialog-actions {
+  position: sticky;
+  bottom: -1.5rem;
+  margin: 1.25rem -1.6rem -1.5rem;
+  padding: 0.9rem 1.6rem 1.2rem;
+  border-top: 1px solid var(--c-line);
+  background: color-mix(in srgb, var(--c-surface-1) 96%, transparent);
+}
+.dialog-actions button {
+  min-width: 8.5rem;
+  min-height: 44px;
+}
+#training-step {
+  margin: 0 0 0.9rem;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--c-accent-soft);
+}
+/* Inside a popup, an article is the popup's content, not a second card. */
+#sheet-body > article {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+}
+#sheet-body > article + article {
+  margin-top: 1.25rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--c-line);
+}
+#sheet-body > #friendship-article > h2:first-child,
+#sheet-body > #revive-article > h2:first-child {
+  display: none;
+}
+
+/* ---------- Choosers: cards in a grid ---------- */
+.training-grid,
+.training-options {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+  gap: 0.75rem;
+}
+.training-pick {
+  display: grid;
+  gap: 0.35rem;
+  padding: 0;
+  border: 0;
+  background: none;
+  text-align: left;
+}
+.training-pick > .training-pokemon,
+.training-option {
+  height: 100%;
+  border: 2px solid var(--c-line);
+  border-radius: 16px;
+  background: linear-gradient(170deg, var(--c-surface-2), var(--c-bg-1));
+  transition:
+    transform var(--t),
+    border-color var(--t);
+}
+.training-pick:hover:not(:disabled) > .training-pokemon,
+.training-pick:focus-visible > .training-pokemon,
+.training-option:hover:not(:disabled),
+.training-option:focus-visible {
+  transform: translateY(-2px);
+  border-color: var(--c-accent);
+}
+.training-pick:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+.training-pick > .muted {
+  padding: 0 0.6rem 0.4rem;
+  font-size: 0.8rem;
+}
+.training-option {
+  gap: 0.35rem;
+  min-height: 92px;
+  padding: 0.9rem 1rem;
+}
+.training-option strong {
+  font-size: 1.02rem;
+}
+.training-option:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+.training-pokemon {
+  padding: 0.75rem 0.9rem;
+}
+.training-sprite {
+  width: 80px;
+  height: 80px;
+  flex: none;
+  border-radius: 14px;
+  background: color-mix(in srgb, var(--c-accent) 8%, var(--c-bg-1));
+}
+.iv-options .training-option {
+  min-height: 0;
+}
+.iv-bar {
+  display: block;
+  width: 100%;
+  height: 8px;
+  margin-top: 0.3rem;
+  border-radius: 999px;
+  background: var(--c-surface-3);
+  overflow: hidden;
+}
+.iv-fill {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, var(--c-info), var(--c-accent));
+}
+.training-ivs {
+  border: 1px solid var(--c-line);
+  border-radius: 14px;
+  border-collapse: separate;
+  border-spacing: 0;
+  overflow: hidden;
+}
+.training-ivs th {
+  background: var(--c-surface-2);
+  font-size: 0.85rem;
+}
+.training-ivs tr:last-child td {
+  border-bottom: 0;
+}
+
+/* ---------- Mints: the 5 × 5 nature table ---------- */
+.nature-legend {
+  margin: 1rem 0 0.6rem;
+  font-size: 0.85rem;
+}
+.nature-up {
+  color: var(--c-accent);
+  font-weight: 850;
+}
+.nature-down {
+  color: var(--c-danger);
+  font-weight: 850;
+}
+.nature-neutral {
+  color: var(--c-text-muted);
+  font-weight: 750;
+}
+.nature-table {
+  display: grid;
+  grid-template-columns: 4.6rem repeat(5, minmax(0, 1fr));
+  gap: 0.4rem;
+  align-items: stretch;
+}
+.nature-corner,
+.nature-head {
+  display: grid;
+  place-items: center;
+  padding: 0.3rem;
+  border-radius: 10px;
+  font-size: 0.82rem;
+  text-align: center;
+}
+.nature-corner {
+  font-size: 0.68rem;
+  color: var(--c-text-muted);
+}
+.nature-head.nature-up {
+  background: color-mix(in srgb, var(--c-accent) 12%, transparent);
+}
+.nature-head.nature-down {
+  background: color-mix(in srgb, var(--c-danger) 12%, transparent);
+}
+.training-nature {
+  position: relative;
+  display: grid;
+  justify-items: center;
+  align-content: center;
+  gap: 0.2rem;
+  min-height: 66px;
+  padding: 0.45rem 0.3rem;
+  border: 2px solid var(--c-line);
+  border-radius: 12px;
+  background: var(--c-bg-1);
+  text-align: center;
+  transition:
+    transform var(--t),
+    border-color var(--t);
+}
+.training-nature strong {
+  font-size: 0.92rem;
+}
+.nature-effect {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.15rem 0.4rem;
+  font-size: 0.74rem;
+}
+.training-nature[data-neutral="true"] {
+  background: var(--c-surface-1);
+  border-style: dashed;
+}
+.training-nature:hover:not(:disabled),
+.training-nature:focus-visible {
+  transform: translateY(-2px);
+  border-color: var(--c-accent);
+}
+.training-nature[data-current="true"] {
+  border-color: var(--c-gold);
+  opacity: 1;
+}
+.training-nature:disabled:not([data-current="true"]) {
+  opacity: 0.5;
+}
+.nature-current {
+  position: absolute;
+  top: -0.55rem;
+  padding: 0.05rem 0.45rem;
+  border-radius: 999px;
+  background: var(--c-gold);
+  color: var(--c-ink);
+  font-size: 0.62rem;
+  font-weight: 900;
+  letter-spacing: 0.04em;
+}
+/* The Mint's confirmation: now, then after, each with its colours. */
+.nature-diff {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem 1.25rem;
+  margin: 1rem 0 0.5rem;
+}
+.nature-chip {
+  display: grid;
+  justify-items: center;
+  gap: 0.2rem;
+  min-width: 11rem;
+  padding: 0.8rem 1rem;
+  border: 2px solid var(--c-line);
+  border-radius: 16px;
+  background: var(--c-bg-1);
+}
+.nature-chip:last-child {
+  border-color: var(--c-accent);
+}
+.nature-chip small {
+  color: var(--c-text-muted);
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.nature-chip strong {
+  font-size: 1.2rem;
+}
+.nature-chip .nature-effect {
+  font-size: 0.9rem;
+}
+.nature-arrow {
+  font-size: 1.6rem;
+  font-weight: 900;
+  color: var(--c-accent);
+}
+@media (max-width: 700px) {
+  .nature-table {
+    grid-template-columns: 3.2rem repeat(5, minmax(0, 1fr));
+    gap: 0.25rem;
+  }
+  .training-nature strong {
+    font-size: 0.72rem;
+  }
+  .nature-effect {
+    font-size: 0.6rem;
+  }
+}
+
+/* ---------- Revivir and Felicidad: cards ---------- */
+#revive-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+  gap: 0.75rem;
+  margin: 0.75rem 0;
+}
+.revive-card {
+  display: grid;
+  justify-items: center;
+  gap: 0.3rem;
+  padding: 1rem 0.8rem 0.9rem;
+  border: 2px solid var(--c-line);
+  border-radius: 16px;
+  background: linear-gradient(170deg, var(--c-surface-2), var(--c-bg-1));
+  text-align: center;
+}
+.revive-card .revive-name {
+  font-size: 1.02rem;
+  overflow-wrap: anywhere;
+}
+.revive-card .friendship-place {
+  justify-self: center;
+}
+.revive-card > button {
+  width: 100%;
+  margin-top: 0.35rem;
+}
+#friendship-party {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(215px, 1fr));
+  gap: 0.6rem;
+}
+#friendship-party > .friendship-group,
+#friendship-party > .empty-note {
+  grid-column: 1 / -1;
+}
+#friendship-party > .friendship-group {
+  margin: 0.75rem 0 0;
+}
+.friendship-row {
+  grid-template-columns: 52px minmax(0, 1fr);
+  grid-template-areas:
+    "sprite name"
+    "place value"
+    "button button";
+  align-items: center;
+  gap: 0.45rem 0.6rem;
+  margin: 0;
+  padding: 0.7rem;
+  border-radius: 16px;
+}
+.friendship-sprite {
+  grid-area: sprite;
+  width: 52px;
+  height: 52px;
+}
+.friendship-name {
+  grid-area: name;
+}
+.friendship-row .friendship-place {
+  grid-area: place;
+  justify-self: start;
+}
+.friendship-value {
+  grid-area: value;
+}
+.friendship-row > button {
+  grid-area: button;
+}
+@media (max-width: 620px) {
+  .friendship-row {
+    grid-template-columns: 52px minmax(0, 1fr);
+  }
+  .friendship-row .friendship-place {
+    grid-column: auto;
+  }
+  .friendship-row > button {
+    grid-column: 1 / -1;
+    width: 100%;
+  }
+}
+/* Objetos: each row a clear card, the action on the right. */
+#sheet-body .quick-item,
+#sheet-body .shop-item {
+  gap: 0.6rem 0.8rem;
+  padding: 0.7rem 1rem;
+  border-radius: 16px;
+}
+#sheet-body .quick-item img {
+  width: 40px;
+  height: 40px;
+}
+#sheet-body .quick-add {
+  margin-left: auto;
+}
+
+/* ---------- «Saves y Launcher»: what you do, at a glance ---------- */
+.hub-actions {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 230px), 1fr));
+  gap: 0.9rem;
+  margin: 1.25rem 0 0.25rem;
+}
+.hub-tile {
+  display: grid;
+  grid-template-columns: 52px minmax(0, 1fr);
+  align-items: center;
+  gap: 0.9rem;
+  min-height: 96px;
+  padding: 1rem 1.1rem;
+  border: 2px solid var(--c-line);
+  border-radius: 18px;
+  background: linear-gradient(160deg, var(--c-surface-2), var(--c-bg-1));
+  color: var(--c-text);
+  text-align: left;
+  transition:
+    transform var(--t),
+    border-color var(--t);
+}
+.hub-tile:hover,
+.hub-tile:focus-visible {
+  transform: translateY(-2px);
+  border-color: var(--c-accent);
+}
+.hub-tile.is-active {
+  border-color: var(--c-gold);
+  box-shadow: inset 4px 0 0 var(--c-gold);
+}
+.hub-tile-icon {
+  display: grid;
+  place-items: center;
+  width: 52px;
+  height: 52px;
+  border-radius: 16px;
+  background: var(--brand-gradient);
+  color: var(--c-ink);
+  font-size: 1.5rem;
+  font-weight: 900;
+}
+.hub-tile-icon img {
+  width: 36px;
+  height: 36px;
+  image-rendering: pixelated;
+}
+.hub-tile-text {
+  display: grid;
+  gap: 0.2rem;
+  min-width: 0;
+}
+.hub-tile-text strong {
+  font-size: 1.05rem;
+}
+.hub-tile-text span {
+  color: var(--c-text-muted);
+  font-size: 0.82rem;
+  line-height: 1.35;
+}
+.hub-details {
+  margin-top: 1.25rem;
+  border: 1px solid var(--c-line);
+  border-radius: 16px;
+  background: var(--c-bg-1);
+}
+.hub-details > summary {
+  padding: 0.9rem 1.2rem;
+  color: var(--c-text-soft);
+  font-weight: 750;
+  cursor: pointer;
+}
+.hub-details[open] > summary {
+  border-bottom: 1px solid var(--c-line);
+}
+.hub-details > article,
+.hub-details > .hub-grid {
+  margin: 0;
+  padding: 0.25rem 1.2rem 1rem;
+}
+.hub-details article {
+  border: 0;
+  background: none;
+  box-shadow: none;
+}
+/* In the hub the lists live in their popups: the tiles open them. */
+[data-mode="panel"] #save-view > #friendship-article,
+[data-mode="panel"] #save-view > #revive-article,
+[data-mode="panel"] #save-view > #shop-article {
+  display: none;
+}
+
+/* The team, drawn: sprite above, nickname and species under it. */
+.slot:not(.empty) {
+  display: grid;
+  justify-items: center;
+  align-content: start;
+  gap: 0.15rem;
+  text-align: center;
+}
+.slot-sprite {
+  width: 64px;
+  height: 64px;
+  object-fit: contain;
+  image-rendering: auto;
+}
+.slot span {
+  color: var(--c-text-muted);
+  font-size: 0.74rem;
+}
+
+/* Training: each Pokémon a vertical card, blocks evenly spaced. */
+#training-body > * + * {
+  margin-top: 0.9rem;
+}
+.training-grid {
+  grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+}
+.training-pick > .training-pokemon {
+  flex-direction: column;
+  justify-content: flex-start;
+  text-align: center;
+  gap: 0.5rem;
+  padding: 1rem 0.8rem;
+}
+.training-pick > .training-pokemon > span {
+  justify-items: center;
+  gap: 0.15rem;
+}
+.training-pick > .training-pokemon > span > span {
+  font-size: 0.85rem;
+}

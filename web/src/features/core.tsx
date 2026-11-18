@@ -411,16 +411,28 @@ export function LeagueGeneral({ data }: { data: Model<"LeagueGeneralRead"> }) {
             {data.rows.map((row) => (
               <tr key={row.season_player_id}>
                 <td>
-                  <Link
-                    className="standing-trainer"
-                    to={`/entrenadores/${row.trainer_id}`}
-                  >
-                    <TrainerPhoto name={row.display_name} />
-                    <span>{row.display_name}</span>
-                  </Link>
-                  {states[row.status] && (
-                    <span className="muted"> · {states[row.status]}</span>
-                  )}
+                  <div className="standing-cell">
+                    <Link
+                      className="standing-trainer"
+                      to={`/entrenadores/${row.trainer_id}`}
+                    >
+                      <TrainerPhoto name={row.display_name} />
+                      <span>{row.display_name}</span>
+                    </Link>
+                    {/* Owner 2026-11-18: who was already robbed in the current
+                        round of the robbery rotation (server-decided). */}
+                    {row.robbed_this_round && (
+                      <span
+                        className="pokemon-status-flag robado standing-robbed"
+                        title={`Ya robado en la ronda de robos ${data.robbery_round ?? ""}`.trim()}
+                      >
+                        ROBADO
+                      </span>
+                    )}
+                    {states[row.status] && (
+                      <span className="muted"> · {states[row.status]}</span>
+                    )}
+                  </div>
                 </td>
                 <td>
                   {row.total_points == null
@@ -778,16 +790,9 @@ export function HallPage() {
             );
           })}
         </div>
-      ) : (
-        <div className="hall-empty">
-          <Trophy size={60} />
-          <h2>Tu próxima historia empieza aquí.</h2>
-          <p>Los campeones aparecerán cuando su título sea oficial.</p>
-          <Link to="/liga" className="button">
-            Volver a la Liga
-          </Link>
-        </div>
-      )}
+      ) : // Owner 2026-11-18: no empty-state card. The Hall already has its
+      // Leyendas, so a season without a certified title shows only them.
+      null}
       <div className="toolbar">
         {offset > 0 && (
           <button onClick={() => setOffset(Math.max(0, offset - 50))}>

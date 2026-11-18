@@ -80,11 +80,21 @@ function slots(id, data, prefix) {
     const el = document.createElement(p ? "button" : "div");
     el.className = "slot" + (p ? "" : " empty");
     if (p) {
+      // 2026-11-18: the team is drawn, not listed by number.
+      const species = PokeTraining.speciesName({ species: p.species_id });
+      const sprite = PokeTraining.sprite({ species: p.species_id, form: p.form });
+      const image = document.createElement("img");
+      image.className = "slot-sprite";
+      image.alt = "";
+      image.onerror = () => {
+        image.style.visibility = "hidden";
+      };
+      if (sprite) image.src = sprite;
       const name = document.createElement("strong"),
         meta = document.createElement("span");
-      name.textContent = p.nickname || `Pokémon #${p.species_id}`;
-      meta.textContent = `#${p.species_id} · Nv. ${p.level}`;
-      el.append(name, meta);
+      name.textContent = p.nickname || species;
+      meta.textContent = `${species} · Nv. ${p.level}`;
+      el.append(image, name, meta);
       el.addEventListener("click", () => details(p, `${prefix} · ${i + 1}`));
     } else el.textContent = `Vacío · ${i + 1}`;
     $(id).append(el);
@@ -915,6 +925,9 @@ const dialogIds = {
   entrenamiento: "training-dialog",
 };
 const anyOpen = () => document.querySelector("dialog[open]") !== null;
+// «Saves y Launcher»: each action tile opens its popup (2026-11-18).
+for (const tile of document.querySelectorAll(".hub-tile[data-open]"))
+  tile.onclick = () => present(tile.dataset.open);
 // The update popup re-checks the feed when the trainer opens it; opened by
 // the updater itself (or from the strip) it shows the offer already verified.
 let updateCheckOnOpen = true;
@@ -1442,6 +1455,16 @@ function renderTransfers(state) {
                 ? "PokeApp ya ha decidido un robo sobre tu partida y lo aplica solo en cuanto el juego esté cerrado."
                 : "Los robos se aplican solos en cada partida en cuanto el juego está cerrado.",
   );
+  // The hub tile says at a glance whether a robbery is under way.
+  text(
+    "hub-robos-state",
+    items.length
+      ? `${items.length === 1 ? "Hay 1 robo" : `Hay ${items.length} robos`} en curso`
+      : "No hay robos en curso",
+  );
+  $("hub-actions")
+    .querySelector('[data-open="robos"]')
+    .classList.toggle("is-active", items.length > 0);
   const key = JSON.stringify([
     items,
     enabled,
@@ -1997,30 +2020,32 @@ function renderRevive(state) {
     ...rows.map((m) => {
       const species = PokeTraining.speciesName({ species: m.species });
       const row = document.createElement("div");
-      row.className = "quick-item";
+      row.className = "revive-card";
       const sprite = PokeTraining.sprite({ species: m.species, form: m.form });
-      if (sprite) {
-        const image = document.createElement("img");
-        image.className = "training-sprite";
-        image.alt = `Sprite de ${species}`;
-        image.src = sprite;
-        row.append(image);
-      }
-      const name = document.createElement("span");
-      name.className = "quick-name";
+      const image = document.createElement("img");
+      image.className = "training-sprite";
+      image.alt = `Sprite de ${species}`;
+      image.onerror = () => {
+        image.style.visibility = "hidden";
+      };
+      if (sprite) image.src = sprite;
+      const name = document.createElement("strong");
+      name.className = "revive-name";
       name.textContent =
-        m.nickname && m.nickname !== species
-          ? `${m.nickname} (${species})`
-          : species;
+        m.nickname && m.nickname !== species ? m.nickname : species;
       const info = document.createElement("span");
-      info.className = "quick-count muted";
-      info.textContent = `Nv. ${m.level} · Caja ${view.dead_box_number}, posición ${m.slot_number}`;
+      info.className = "muted";
+      info.textContent = `${species} · Nv. ${m.level}`;
+      const place = document.createElement("span");
+      place.className = "friendship-place";
+      place.textContent = `Caja ${view.dead_box_number} · ${m.slot_number}`;
       const button = document.createElement("button");
-      button.className = "quick-add";
+      button.className = "primary";
       button.textContent = "Revivir";
       button.disabled = blocked;
+      button.setAttribute("aria-label", `Revivir a ${name.textContent}`);
       button.onclick = () => void revivePokemon(m);
-      row.append(name, info, button);
+      row.append(image, name, info, place, button);
       return row;
     }),
   );
@@ -2271,6 +2296,71 @@ function trainingChoice(label, detail, select, disabled = false) {
   button.onclick = select;
   return button;
 }
+// 2026-11-18: Mints as a 5 × 5 table. Rows: the stat that goes up (+10 %);
+// columns: the one that goes down (−10 %); the diagonal is neutral. PKHeX
+// nature n raises stat floor(n / 5) and lowers stat n % 5 (Atk, Def, Spe,
+// SpA, SpD), so row r, column c is nature r * 5 + c.
+const natureShort = ["Atq", "Def", "Vel", "AtEsp", "DefEsp"];
+function natureEffect(id) {
+  const up = Math.floor(id / 5),
+    down = id % 5;
+  const effect = trainingElement("span", undefined, "nature-effect");
+  if (up === down)
+    effect.append(trainingElement("span", "Neutra", "nature-neutral"));
+  else
+    effect.append(
+      trainingElement("span", `+${natureShort[up]}`, "nature-up"),
+      trainingElement("span", `−${natureShort[down]}`, "nature-down"),
+    );
+  return effect;
+}
+function natureTable(current, locked) {
+  const table = trainingElement("div", undefined, "nature-table");
+  table.setAttribute("role", "group");
+  table.setAttribute("aria-label", "Naturalezas: fila sube, columna baja");
+  table.append(trainingElement("span", "Sube ↓ · Baja →", "nature-corner"));
+  for (const label of natureShort)
+    table.append(trainingElement("span", `−${label}`, "nature-head nature-down"));
+  for (let up = 0; up < 5; up++) {
+    table.append(
+      trainingElement("span", `+${natureShort[up]}`, "nature-head nature-up"),
+    );
+    for (let down = 0; down < 5; down++) {
+      const nature = PokeTraining.natures[up * 5 + down];
+      const cell = trainingElement("button", undefined, "training-nature");
+      cell.type = "button";
+      cell.dataset.neutral = String(up === down);
+      cell.title = `${nature.name}: ${nature.modifier}`;
+      cell.append(trainingElement("strong", nature.name), natureEffect(nature.id));
+      if (nature.id === current) {
+        cell.dataset.current = "true";
+        cell.append(trainingElement("span", "Actual", "nature-current"));
+      }
+      cell.disabled = locked || nature.id === current;
+      cell.onclick = () =>
+        void previewTraining({ kind: "nature", nature_id: nature.id });
+      table.append(cell);
+    }
+  }
+  return table;
+}
+function natureChip(id, label) {
+  const chip = trainingElement("div", undefined, "nature-chip");
+  chip.append(
+    trainingElement("small", label),
+    trainingElement("strong", PokeTraining.natureName(id)),
+    natureEffect(id),
+  );
+  return chip;
+}
+function ivBar(value) {
+  const bar = trainingElement("span", undefined, "iv-bar");
+  bar.setAttribute("aria-hidden", "true");
+  const fill = trainingElement("span", undefined, "iv-fill");
+  fill.style.width = `${Math.round(((Number(value) || 0) / 31) * 100)}%`;
+  bar.append(fill);
+  return bar;
+}
 function trainingArgs() {
   const w = trainingWizard;
   return PokeTraining.input({
@@ -2465,6 +2555,8 @@ function renderTraining(state) {
       );
   } else if (w.step === "pokemon") {
     const targets = view?.targets || [];
+    const grid = trainingElement("div", undefined, "training-grid");
+    body.append(grid);
     for (const target of targets) {
       const effect =
         w.purchase.effect || PokeTraining.effects[w.purchase.item_code];
@@ -2473,7 +2565,7 @@ function renderTraining(state) {
         PokeTraining.stats.every(
           ([stat]) => PokeTraining.values(target.pokemon)[stat] === 31,
         );
-      const choose = trainingElement("button", undefined, "training-pokemon");
+      const choose = trainingElement("button", undefined, "training-pick");
       choose.type = "button";
       choose.append(trainingPokemon(target));
       choose.disabled = locked || maxed || target.eligible === false;
@@ -2489,7 +2581,7 @@ function renderTraining(state) {
           renderTraining(lastState);
         }
       };
-      body.append(choose);
+      grid.append(choose);
     }
     if (!targets.length)
       body.append(
@@ -2502,34 +2594,42 @@ function renderTraining(state) {
   } else {
     body.append(trainingPokemon(w.target));
     if (w.step === "nature") {
-      const options = trainingElement("div", undefined, "training-options");
-      for (const nature of PokeTraining.natures)
-        options.append(
-          trainingChoice(
-            nature.name,
-            nature.modifier,
-            () =>
-              void previewTraining({ kind: "nature", nature_id: nature.id }),
-            locked || nature.id === w.target.pokemon.nature_id,
-          ),
-        );
-      body.append(options);
+      body.append(
+        trainingElement(
+          "p",
+          "Verde: la estadística sube un 10 %. Rojo: baja un 10 %. En la diagonal, naturalezas neutras.",
+          "muted nature-legend",
+        ),
+        natureTable(w.target.pokemon.nature_id, locked),
+      );
     } else if (w.step === "iv") {
-      const options = trainingElement("div", undefined, "training-options");
+      const options = trainingElement(
+        "div",
+        undefined,
+        "training-options iv-options",
+      );
       const ivs = PokeTraining.values(w.target.pokemon);
-      for (const [stat, label] of PokeTraining.stats)
-        options.append(
-          trainingChoice(
-            label,
-            `${ivs[stat]}${ivs[stat] === 31 ? " · Ya está al máximo" : " → 31"}`,
-            () => void previewTraining({ kind: "iv", stat }),
-            locked || !Number.isInteger(ivs[stat]) || ivs[stat] >= 31,
-          ),
+      for (const [stat, label] of PokeTraining.stats) {
+        const option = trainingChoice(
+          label,
+          `${ivs[stat]}${ivs[stat] === 31 ? " · Ya está al máximo" : " → 31"}`,
+          () => void previewTraining({ kind: "iv", stat }),
+          locked || !Number.isInteger(ivs[stat]) || ivs[stat] >= 31,
         );
+        option.append(ivBar(ivs[stat]));
+        options.append(option);
+      }
       body.append(options);
     } else {
-      if (w.change.kind !== "nature")
-        body.append(trainingIvTable(w.target, w.change));
+      if (w.change.kind === "nature") {
+        const diff = trainingElement("div", undefined, "nature-diff");
+        diff.append(
+          natureChip(w.target.pokemon.nature_id, "Ahora"),
+          trainingElement("span", "→", "nature-arrow"),
+          natureChip(w.change.nature_id, "Después"),
+        );
+        body.append(diff);
+      } else body.append(trainingIvTable(w.target, w.change));
       if (w.offer) {
         body.append(
           trainingElement("p", w.offer.message, "lead training-confirmation"),
