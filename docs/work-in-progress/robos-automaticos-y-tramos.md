@@ -7,7 +7,7 @@ descarga `379eb56`. Rama `claude/net-friendship-discord`.
 |---|---|---|
 | Launcher | 0.26.16 en el canal estable: instalador `4046240f…`, 159 505 891 bytes, firma Ed25519 válida, mínimo 0.26.0 | Restaurar `updates/stable.json` de 0.26.15 y publicar una versión superior |
 | Web Cloudflare | `3594521e` (`/launcher/download` sirve 0.26.16) | `165bfc7d` |
-| Verificador | **Sin desplegar**: sigue `39181f7f` (imagen `777314cc`). El paquete está listo en `%LOCALAPPDATA%/PokeApp-builds/verifier-0.26.16-379eb56`; el despliegue lo bloqueó el control de permisos | — |
+| Verificador | Railway `79e5308c` (imagen `2756a8f2`, fuente `379eb56`), ciclo de 60 s conservado; primeros turnos `IDLE` / `TRANSFER []` | `39181f7f` (imagen `777314cc`) |
 | API, SQL | Sin cambios (API `14ba5fa1`, DB 087) | — |
 
 ## Incidente: sincronización en pausa tras los dos robos
@@ -48,9 +48,10 @@ cerrado. Anto: instalado en su PC el 2026-11-18 (silencioso, sin abrir).
 - **El objeto no se roba** (17-11): `held_item` en los dos planes; el ladrón recibe el mismo
   individuo con objeto 0 y la víctima recupera una unidad en la mochila (un cristal Z
   equipado de 7.ª gen. no va a la mochila: la víctima conserva su versión de objeto clave).
-  **Solo se aplica a robos planificados por un verificador con el escritor nuevo.**
-  Pendiente de decisión: la Volcarona robada a Anto el 17-11 llevaba Seguro Debilidad (639)
-  y STeeLAG lo conserva.
+  Vigente desde el verificador `79e5308c` (2026-11-18 ~12:10 local) para los robos que se
+  planifiquen a partir de entonces.
+  La Volcarona robada a Anto el 17-11 llevaba Seguro Debilidad (639) y STeeLAG lo conserva:
+  el propietario lo gestiona por su cuenta.
 - **Tramos** (17-11): J2 al 5.º gimnasio (Lem, nivel 44), J3 al 7.º (Astrid, nivel 58).
   Normativa III actualizada, fecha 18 de noviembre de 2026, reglas 6.12–6.13 nuevas.
 - **Avisos que estorban** (18-11): Inventario oculta compras canceladas o retiradas (086/087)
