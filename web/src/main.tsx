@@ -18,6 +18,7 @@ import "./design/scenes.css";
 import "./design/hub.css";
 import "./design/notices.css";
 import "./design/matchup.css";
+import "./design/hall.css";
 installPreferences();
 installSound();
 installIdleMotion();

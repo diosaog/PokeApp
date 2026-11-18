@@ -11321,5 +11321,22 @@
         "unavailable": "normal clip not verified"
       }
     }
+  },
+  "forms": {
+    "386-form-1": {
+      "source": "https://raw.githubusercontent.com/PokeAPI/sprites/ba403973fdf9d0ac59175813861e6a1f8ed5020c/sprites/pokemon/other/showdown/10001.gif",
+      "bytes": 83352,
+      "sha256": "87f053e591f1b2f373677b4f1861202e7cbb78636b921d28a2aeb8aa60e09a6f"
+    },
+    "479-form-2": {
+      "source": "https://raw.githubusercontent.com/PokeAPI/sprites/ba403973fdf9d0ac59175813861e6a1f8ed5020c/sprites/pokemon/other/showdown/10009.gif",
+      "bytes": 57819,
+      "sha256": "02d45feed62b2e028ee5c366cc893945bc8829c70327d354cf50addf66fc7ea2"
+    },
+    "65-form-1": {
+      "source": "https://raw.githubusercontent.com/PokeAPI/sprites/ba403973fdf9d0ac59175813861e6a1f8ed5020c/sprites/pokemon/other/showdown/10037.gif",
+      "bytes": 151441,
+      "sha256": "661a0dcc910c6fbe51cf8ffbc8e28877ad5db25ca2b6e033ce6cefe89a3f836c"
+    }
   }
 }

@@ -1,6 +1,6 @@
-import { render, screen } from "@testing-library/react";
+import { cleanup, render, screen, within } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
-import { expect, it, vi } from "vitest";
+import { afterEach, expect, it, vi } from "vitest";
 import { HallPage } from "./core";
 vi.mock("../state", () => ({
   useRead: (path: string) => ({
@@ -62,6 +62,7 @@ vi.mock("../state", () => ({
   useOverview: () => ({}),
   usePC: () => ({}),
 }));
+afterEach(cleanup);
 it("renders both certified doubles members and links the exact Cup and season", () => {
   render(
     <MemoryRouter>
@@ -79,4 +80,46 @@ it("renders both certified doubles members and links the exact Cup and season", 
     "href",
     "/copa/exact-cup?season=season",
   );
+});
+
+it("2026-11-18: Leyendas shows each past champion's portrait and moving team, nothing else", () => {
+  render(
+    <MemoryRouter>
+      <HallPage />
+    </MemoryRouter>,
+  );
+  // One showcase per trainer, ranked by titles, with portrait and trophies.
+  const showcases = screen.getAllByRole("listitem", { name: /títulos$/ });
+  expect(showcases.map((s) => s.getAttribute("aria-label"))).toEqual([
+    "Samu, 3 títulos",
+    "Miguel, 2 títulos",
+  ]);
+  for (const showcase of showcases)
+    expect(within(showcase).getAllByAltText(/Retrato de/)).toHaveLength(1);
+  const cards = screen.getAllByRole("article");
+  expect(cards.map((c) => c.getAttribute("aria-label"))).toEqual([
+    "Samu, campeón de Pokémon Añil",
+    "Samu, campeón de Pokémon Rojo Fuego",
+    "Samu, campeón de la Copa Rojo Fuego",
+    "Miguel, campeón de Pokémon Rubí Omega",
+    "Miguel, campeón de Pokémon Platino",
+  ]);
+  for (const card of cards)
+    expect(within(card).getAllByRole("img")).toHaveLength(6); // the team only
+  // Every Pokémon resolves to real art; alternate forms keep their own.
+  expect(
+    screen.queryAllByLabelText(/No se pudo cargar la imagen/),
+  ).toHaveLength(0);
+  const platino = cards[4];
+  expect(within(platino).getByTitle("Deoxys (forma Ataque)")).toBeVisible();
+  expect(within(platino).getByAltText("Deoxys")).toHaveAttribute(
+    "src",
+    "/visuals/v1/gen7/386-form-1.png",
+  );
+  expect(within(cards[0]).getByAltText("Alakazam")).toHaveAttribute(
+    "src",
+    "/visuals/v1/pokemon/65-form-1.png",
+  );
+  // Sprites only: no moves, items or abilities.
+  expect(screen.queryByText(/Close Combat|Focus Sash|Cameruptite/)).toBeNull();
 });

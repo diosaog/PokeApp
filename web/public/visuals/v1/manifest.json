@@ -17305,6 +17305,11 @@
       "sha256": "8d98b33ee3e83cd32df98a185bfb9e48a228d317df5f1453026f8887eb86b9e2",
       "bytes": 574,
       "transform": "thumbnail only; original preserved"
+    },
+    "pokemon/65-form-1.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/ba403973fdf9d0ac59175813861e6a1f8ed5020c/sprites/pokemon/10037.png",
+      "sha256": "e76b98794b6d2cff8e96d1c2f797776169fa20c9922cb269ff2e9cb68426f031",
+      "bytes": 1734
     }
   }
 }

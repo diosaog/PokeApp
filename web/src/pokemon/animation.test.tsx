@@ -191,3 +191,32 @@ it("«Mi PC» never moves; an Entrenadores team moves, its boxes don't", async (
   await settle();
   expect(fetched).toEqual(["/visuals/animated/v2/25.gif"]);
 });
+
+it("an alternate form moves only with its own verified clip (Hall de la Fama)", async () => {
+  render(
+    <SpriteGeneration value={7}>
+      <PokemonSprite species="Deoxys" form={1} animated />
+      <PokemonSprite species="Rotom" form={2} animated />
+      <PokemonSprite species="Alakazam" form={1} animated />
+      <PokemonSprite species="Charizard" form={1} animated />
+    </SpriteGeneration>,
+  );
+  await settle();
+  expect(screen.getByAltText("Deoxys")).toHaveAttribute(
+    "src",
+    "/visuals/animated/v2/forms/386-form-1.gif",
+  );
+  expect(screen.getByAltText("Rotom")).toHaveAttribute(
+    "src",
+    "/visuals/animated/v2/forms/479-form-2.gif",
+  );
+  expect(screen.getByAltText("Alakazam")).toHaveAttribute(
+    "src",
+    "/visuals/animated/v2/forms/65-form-1.gif",
+  );
+  // A form without its own clip never borrows the base form's animation.
+  expect(screen.getByAltText("Charizard")).toHaveAttribute(
+    "src",
+    "/visuals/v1/gen7/6-form-1.png",
+  );
+});

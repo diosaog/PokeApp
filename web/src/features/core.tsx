@@ -20,6 +20,7 @@ import { matchLabel } from "./admin-labels";
 import { LeagueOperations } from "./league-operations";
 import { CloseMatchday } from "./league-matchday";
 import { TeamLockWarning } from "./team-lock-warning";
+import { HallLegends } from "./hall-legends-section";
 import {
   Card,
   CommandState,
@@ -799,6 +800,7 @@ export function HallPage() {
           </button>
         )}
       </div>
+      <HallLegends />
     </>
   );
 }

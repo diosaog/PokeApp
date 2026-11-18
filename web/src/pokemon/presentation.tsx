@@ -31,6 +31,8 @@ const items = new Set(itemIds);
 const pixelIds = new Set<number>(animatedIds);
 const modelIds = new Set<number>(animatedModels.normal);
 const shinyIds = new Set<number>(animatedModels.shiny);
+// Alternate forms with their own verified battle-model clip (`<id>:<form>`).
+const formModels = new Set<string>(animatedModels.forms);
 // Art of the save's own generation: X/Y renders for Gen6 games, Ultra Sun/
 // Ultra Moon renders for Gen7. A screen that knows its game wraps its
 // Pokémon in <SpriteGeneration value={gameGeneration(game)}>.
@@ -164,21 +166,26 @@ export function PokemonSprite({
       ? `${base}/gen${generation}/${variant}.png`
       : `${base}/pokemon/${variant}.png`
     : null;
-  // Authentic animations, base forms only (an alternate form never animates
-  // as another), and only where a screen asks for them. A Gen6/7 game's art
-  // animates with its battle models (animated/v2: the clips the Gen7 stills
-  // come from); screens without a game keep the Black/White ones of their
-  // Black/White stills. Shiny clips where verified. Downloaded on demand.
+  // Authentic animations only where a screen asks for them. An alternate
+  // form never animates as another: it moves only with its own verified clip
+  // (a few battle models, e.g. the Hall de la Fama's Deoxys Attack). A Gen6/7
+  // game's art animates with its battle models (animated/v2: the clips the
+  // Gen7 stills come from); screens without a game keep the Black/White ones
+  // of their Black/White stills. Shiny clips where verified. On demand.
   const animation =
-    !animated || form || !id
+    !animated || !id
       ? null
-      : ownSet
-        ? modelIds.has(id)
-          ? `/visuals/animated/v2/${shiny && shinyIds.has(id) ? "shiny/" : ""}${id}.gif`
+      : form
+        ? ownSet && !shiny && variant && formModels.has(`${id}:${form}`)
+          ? `/visuals/animated/v2/forms/${variant}.gif`
           : null
-        : pixelIds.has(id)
-          ? `/visuals/animated/v1/${id}.gif`
-          : null;
+        : ownSet
+          ? modelIds.has(id)
+            ? `/visuals/animated/v2/${shiny && shinyIds.has(id) ? "shiny/" : ""}${id}.gif`
+            : null
+          : pixelIds.has(id)
+            ? `/visuals/animated/v1/${id}.gif`
+            : null;
   const ref = useRef<HTMLImageElement>(null);
   const [moving, setMoving] = useState(false);
   const [failed, setFailed] = useState<string | null>(null);

@@ -1,0 +1,350 @@
+/* Hall de la Fama › Leyendas (2026-11-18). Loaded last; palette primitives
+   from tokens.css only. One showcase per trainer: the portrait on a gold
+   pedestal, then each title in the colours of its game (--game / --game-2),
+   its Pokémon standing on a small spotlight of that colour. */
+
+.legend-anil {
+  --game: var(--c-info);
+  --game-2: var(--type-dragon);
+}
+.legend-rojo-fuego {
+  --game: var(--c-rule-ember);
+  --game-2: var(--c-rule-flame);
+}
+.legend-copa-rojo-fuego {
+  --game: var(--c-gold);
+  --game-2: var(--c-rule-ember);
+}
+.legend-rubi-omega {
+  --game: var(--c-rule-carmine);
+  --game-2: var(--c-magenta);
+}
+.legend-platino {
+  --game: var(--type-steel);
+  --game-2: var(--c-violet);
+}
+
+/* ---------- Section ---------- */
+.legends {
+  display: grid;
+  gap: var(--space-5);
+  margin-top: var(--space-7);
+}
+.legends-head {
+  display: grid;
+  gap: var(--space-1);
+}
+.legends-head .eyebrow {
+  color: var(--c-gold);
+}
+.legends-head h2 {
+  margin: 0;
+  font-size: clamp(1.8rem, 1.3rem + 1.8vw, 2.6rem);
+  font-weight: var(--weight-heavy);
+  letter-spacing: -0.01em;
+  background: var(--gold-gradient);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+.legends-head p {
+  margin: 0;
+  max-width: 60ch;
+  color: var(--c-text-muted);
+}
+.legends-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: var(--space-6);
+}
+
+/* ---------- One trainer's showcase ---------- */
+.legend-showcase {
+  display: grid;
+  grid-template-columns: 196px minmax(0, 1fr);
+  gap: var(--space-4);
+  align-items: stretch;
+  animation: arena-rise var(--t-slow) var(--ease-out) both;
+}
+.legend-champion {
+  position: relative;
+  align-self: start;
+  display: grid;
+  align-content: start;
+  justify-items: center;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  border-radius: var(--radius-lg);
+  border: 1px solid color-mix(in srgb, var(--c-gold) 45%, var(--c-line));
+  background:
+    radial-gradient(
+      90% 55% at 50% 0%,
+      color-mix(in srgb, var(--c-gold) 22%, transparent),
+      transparent 70%
+    ),
+    linear-gradient(180deg, var(--c-surface-2), var(--c-bg-1));
+  box-shadow: var(--shadow-2);
+  text-align: center;
+}
+.legend-rank {
+  position: absolute;
+  top: var(--space-3);
+  left: var(--space-3);
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: var(--gold-gradient);
+  color: var(--c-ink);
+  font-family: var(--font-display);
+  font-weight: 900;
+  box-shadow: var(--shadow-1);
+}
+.legend-portrait {
+  position: relative;
+  width: 100%;
+}
+.legend-portrait .trainer-photo {
+  width: 100%;
+  min-width: 0;
+  height: 204px;
+  border-radius: var(--radius-md);
+  border: 2px solid color-mix(in srgb, var(--c-gold) 60%, transparent);
+  box-shadow: 0 12px 28px color-mix(in srgb, var(--c-gold) 18%, transparent);
+}
+.legend-portrait .trainer-photo img {
+  object-position: center top;
+  image-rendering: pixelated;
+}
+.legend-medal {
+  position: absolute;
+  right: -10px;
+  bottom: -12px;
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background: var(--gold-gradient);
+  color: var(--c-ink);
+  border: 3px solid var(--c-surface-1);
+  box-shadow: 0 6px 16px color-mix(in srgb, var(--c-gold) 35%, transparent);
+}
+.legend-medal svg {
+  width: 22px;
+  height: 22px;
+}
+.legend-champion-text {
+  display: grid;
+  justify-items: center;
+  gap: 2px;
+}
+.legend-champion-text h3 {
+  margin: 0;
+  font-size: var(--text-xl);
+  font-weight: var(--weight-heavy);
+}
+.legend-champion-text > span:not(.legend-trophies) {
+  color: var(--c-gold-soft);
+  font-size: var(--text-sm);
+  font-weight: 700;
+}
+.legend-trophies {
+  display: flex;
+  gap: 3px;
+  margin-top: var(--space-1);
+  color: var(--c-gold);
+}
+.legend-trophies svg {
+  width: 20px;
+  height: 20px;
+  filter: drop-shadow(
+    0 0 6px color-mix(in srgb, var(--c-gold) 55%, transparent)
+  );
+}
+
+/* ---------- Titles: one card per game ---------- */
+.legend-titles {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 236px), 1fr));
+  gap: var(--space-4);
+  min-width: 0;
+}
+.legend-card {
+  position: relative;
+  overflow: hidden;
+  display: grid;
+  align-content: start;
+  gap: 2px;
+  padding: var(--space-4) var(--space-4) var(--space-3);
+  border-radius: var(--radius-lg);
+  border: 1px solid color-mix(in srgb, var(--game) 40%, var(--c-line));
+  background:
+    radial-gradient(
+      110% 75% at 100% 0%,
+      color-mix(in srgb, var(--game) 26%, transparent),
+      transparent 62%
+    ),
+    radial-gradient(
+      80% 55% at 0% 100%,
+      color-mix(in srgb, var(--game-2) 14%, transparent),
+      transparent 70%
+    ),
+    repeating-linear-gradient(
+      -58deg,
+      color-mix(in srgb, var(--c-text) 3%, transparent) 0 2px,
+      transparent 2px 22px
+    ),
+    linear-gradient(160deg, var(--c-surface-2), var(--c-bg-1));
+  box-shadow: var(--shadow-2);
+  transition:
+    transform var(--t-base) var(--ease-spring),
+    border-color var(--t-base),
+    box-shadow var(--t-base);
+}
+.legend-card::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto;
+  height: 4px;
+  background: linear-gradient(90deg, var(--game), var(--game-2));
+}
+.legend-card:hover {
+  transform: translateY(-4px);
+  border-color: color-mix(in srgb, var(--game) 70%, var(--c-line));
+  box-shadow:
+    var(--shadow-2),
+    0 16px 38px color-mix(in srgb, var(--game) 22%, transparent);
+}
+.legend-kind {
+  font-size: var(--text-xs);
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: color-mix(in srgb, var(--game) 75%, var(--c-text));
+}
+.legend-game {
+  margin: 0;
+  font-size: clamp(1.55rem, 1.2rem + 1vw, 2.1rem);
+  font-weight: var(--weight-heavy);
+  line-height: 1.05;
+  letter-spacing: -0.01em;
+  background: linear-gradient(
+    100deg,
+    var(--c-text) 0%,
+    color-mix(in srgb, var(--game) 70%, var(--c-text)) 55%,
+    var(--game-2) 100%
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+.legend-game small {
+  display: block;
+  margin-bottom: 2px;
+  font-size: var(--text-xs);
+  font-weight: 700;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  -webkit-text-fill-color: var(--c-text-muted);
+  color: var(--c-text-muted);
+}
+.legend-team {
+  list-style: none;
+  margin: var(--space-2) 0 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0 var(--space-1);
+}
+.legend-team li {
+  position: relative;
+  display: grid;
+  place-items: end center;
+  height: 96px;
+  animation: legend-step var(--t-slow) var(--ease-out) both;
+  animation-delay: calc(var(--i, 0) * 70ms);
+}
+/* The spotlight each Pokémon stands on. */
+.legend-team li::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: 4px;
+  width: 86%;
+  height: 18px;
+  transform: translateX(-50%);
+  border-radius: 50%;
+  background: radial-gradient(
+    closest-side,
+    color-mix(in srgb, var(--game) 50%, transparent),
+    transparent
+  );
+}
+.legend-team .pokemon-sprite.large {
+  position: relative;
+  width: min(88px, 100%);
+  height: auto;
+  aspect-ratio: 1;
+}
+@keyframes legend-step {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+}
+
+/* ---------- Laptops: a slimmer pedestal keeps three titles in a row ---------- */
+@media (max-width: 1360px) {
+  .legend-showcase {
+    grid-template-columns: 164px minmax(0, 1fr);
+  }
+  .legend-portrait .trainer-photo {
+    height: 176px;
+  }
+}
+
+/* ---------- Narrow screens: the pedestal becomes a header ---------- */
+@media (max-width: 760px) {
+  .legend-showcase {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .legend-champion {
+    grid-template-columns: 96px minmax(0, 1fr);
+    align-items: center;
+    justify-items: start;
+    text-align: left;
+  }
+  .legend-portrait .trainer-photo {
+    height: 120px;
+  }
+  .legend-medal {
+    width: 34px;
+    height: 34px;
+  }
+  .legend-medal svg {
+    width: 18px;
+    height: 18px;
+  }
+  .legend-champion-text {
+    justify-items: start;
+  }
+}
+@media (max-width: 400px) {
+  .legend-team li {
+    height: 84px;
+  }
+  .legend-team .pokemon-sprite.large {
+    width: min(76px, 100%);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .legend-showcase,
+  .legend-team li {
+    animation: none;
+  }
+}
