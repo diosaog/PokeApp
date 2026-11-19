@@ -24,6 +24,7 @@ import {
 } from "../pokemon/presentation";
 import { WithSeason, playerName } from "./core";
 import { pointsOr } from "../points";
+import { totalDeaths } from "./trainer-league-stats";
 import { GameProgress, SaveGame } from "./progress";
 import { LockStatus } from "./lock-status";
 
@@ -127,7 +128,7 @@ export function HomePage() {
           <div className="home-stats stage-hud">
             <StatPill label="Puntos" value={pointsOr(row?.total_points)} />
             <StatPill label="Monedas" value={row?.coin_balance} />
-            <StatPill label="Muertos" value={row?.dead_count} />
+            <StatPill label="Muertos" value={totalDeaths(row)} />
             <Link className="text-link" to="/liga">
               Clasificación →
             </Link>

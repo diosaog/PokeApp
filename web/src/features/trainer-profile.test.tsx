@@ -246,7 +246,8 @@ function expectLeagueStats(container: HTMLElement, deathTotal: string) {
 }
 
 it.each([true, false])(
-  "cards and profile agree on configured-box deaths and ledger balance (accounts=%s)",
+  // Owner 2026-11-19: «Muertos» is the Locke's total (6, the −0,6), not the box (3).
+  "cards and profile agree on total deaths and ledger balance (accounts=%s)",
   (accountsEnabled) => {
     mocks.accountsEnabled = accountsEnabled;
     render(
@@ -257,13 +258,13 @@ it.each([true, false])(
     const card = screen
       .getByRole("heading", { name: "Yo" })
       .closest("article")!;
-    expectLeagueStats(card, "3");
+    expectLeagueStats(card, "6");
     expect(
       within(card).queryByText(/Partida activa|progreso personal|no acreditan/),
     ).toBeNull();
     cleanup();
     profile("me");
-    expectLeagueStats(document.querySelector(".profile-identity")!, "3");
+    expectLeagueStats(document.querySelector(".profile-identity")!, "6");
   },
 );
 

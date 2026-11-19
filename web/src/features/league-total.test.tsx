@@ -220,3 +220,18 @@ it("2026-11-18: marks who was already robbed in the current robbery round", () =
     "ROBADO",
   );
 });
+
+it("2026-11-19: «Muertos» is the total, revived Pokémon included, not the box", () => {
+  render(
+    <MemoryRouter>
+      <LeagueGeneral
+        data={league([
+          row({ dead_count: 2, historical_deaths: 3, total_points: "3.7", total_penalties: "0.3" }),
+        ])}
+      />
+    </MemoryRouter>,
+  );
+  expect(
+    within(screen.getByRole("row", { name: /Anto/ })).getAllByRole("cell")[2],
+  ).toHaveTextContent("3");
+});

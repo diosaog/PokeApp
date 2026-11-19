@@ -21,6 +21,7 @@ import { LeagueOperations } from "./league-operations";
 import { CloseMatchday } from "./league-matchday";
 import { TeamLockWarning } from "./team-lock-warning";
 import { HallLegends } from "./hall-legends-section";
+import { totalDeaths } from "./trainer-league-stats";
 import {
   Card,
   CommandState,
@@ -439,7 +440,7 @@ export function LeagueGeneral({ data }: { data: Model<"LeagueGeneralRead"> }) {
                     ? "Pendiente de confirmar"
                     : points(row.total_points)}
                 </td>
-                <td>{row.dead_count ?? "—"}</td>
+                <td>{totalDeaths(row) ?? "—"}</td>
                 <td>{row.coin_balance}</td>
               </tr>
             ))}

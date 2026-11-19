@@ -25,11 +25,29 @@ const row = (extra: Partial<Model<"LeagueStandingRead">> = {}) => ({
 
 const deaths = () => screen.getByText("Muertos").closest(".stat-pill");
 
-it("shows the configured-box count and a genuinely empty box as zero", () => {
-  const view = render(<TrainerLeagueStats row={row()} />);
+it("2026-11-19: shows the Locke's total deaths, a revived Pokémon still counted", () => {
+  // Anto: 3 deaths, Excadrill revived -> the box holds 2, «Muertos» stays 3.
+  render(
+    <TrainerLeagueStats
+      row={row({ dead_count: 2, historical_deaths: 3, total_points: "3.7" })}
+    />,
+  );
   expect(deaths()).toHaveTextContent("3");
-  view.rerender(<TrainerLeagueStats row={row({ dead_count: 0 })} />);
+  expect(deaths()).not.toHaveTextContent("2");
+});
+
+it("falls back to the box count only while the total is unknown, an empty box as zero", () => {
+  const unknown = { historical_deaths: null, historical_deaths_status: "unknown" as const };
+  const view = render(<TrainerLeagueStats row={row({ ...unknown })} />);
+  expect(deaths()).toHaveTextContent("3");
+  view.rerender(<TrainerLeagueStats row={row({ ...unknown, dead_count: 0 })} />);
   expect(deaths()).toHaveTextContent("0");
+  view.rerender(
+    <TrainerLeagueStats
+      row={row({ dead_count: 1, historical_deaths: 4, historical_deaths_status: "incomplete" })}
+    />,
+  );
+  expect(deaths()).toHaveTextContent("1");
 });
 
 it("uses the authoritative points before and after a false-event correction", () => {
@@ -43,7 +61,7 @@ it("uses the authoritative points before and after a false-event correction", ()
       })}
     />,
   );
-  expect(deaths()).toHaveTextContent("4");
+  expect(deaths()).toHaveTextContent("5");
   expect(screen.getByText("Puntos").closest(".stat-pill")).toHaveTextContent(
     "-0,5",
   );
@@ -70,7 +88,12 @@ it("uses the authoritative points before and after a false-event correction", ()
 it("keeps an unreadable count unknown rather than manufacturing zero", () => {
   render(
     <TrainerLeagueStats
-      row={row({ dead_count: null, dead_count_source: "unknown" })}
+      row={row({
+        dead_count: null,
+        dead_count_source: "unknown",
+        historical_deaths: null,
+        historical_deaths_status: "unknown",
+      })}
     />,
   );
   expect(deaths()).toHaveTextContent("\u2014");
