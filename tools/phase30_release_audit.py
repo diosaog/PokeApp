@@ -49,9 +49,12 @@ MIGRATIONS = sorted((ROOT / "supabase/v2/migrations").glob("*.sql"))
 # with owner authorization. 088 (Revivir ya no blinda, owner rule of
 # 2026-11-18; unshielded the one revive-only Pokémon) was published as
 # 20261118221629 after a fresh backup and rehearsal, with owner authorization.
-# 089 («Cancelar jornada», owner request of 2026-11-19) is pending.
-DEPLOYED = [m for m in MIGRATIONS if int(m.name[:3]) <= 88]
-PENDING: list[Path] = [m for m in MIGRATIONS if int(m.name[:3]) == 89]
+# 089 («Cancelar jornada», owner request of 2026-11-19, to undo the J2 opened
+# by mistake) was published as 20261119170753 after a fresh backup and
+# rehearsal, with owner authorization, while that J2 was open (accepted by
+# --open-matchday-ok: it was already open in the rehearsed backup).
+DEPLOYED = [m for m in MIGRATIONS if int(m.name[:3]) <= 89]
+PENDING: list[Path] = []
 WINDOW = f"{PENDING[0].name[:3]}-{PENDING[-1].name[:3]}" if PENDING else "none"
 SCHEMAS = "('public','v1_shadow')"
 
