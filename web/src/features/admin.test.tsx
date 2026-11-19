@@ -753,3 +753,57 @@ it("sets one participant's dead box with an audited PUT", () => {
   fireEvent.submit(input.closest("form")!);
   expect(mocks.execute).toHaveBeenCalledTimes(1);
 });
+
+it("«Cancelar jornada» explains what is undone and posts the audited reset", async () => {
+  mocks.overview = {
+    ...mocks.overview,
+    days: [{ id: "day", number: 2, status: "open" }],
+  };
+  mocks.day = {
+    ...mocks.day,
+    state: "open",
+    revision: 3,
+    matches: [
+      {
+        id: "m1",
+        player_a_id: "player",
+        player_b_id: "other",
+        winner_id: "player",
+      },
+      {
+        id: "m2",
+        player_a_id: "player",
+        player_b_id: "third",
+        winner_id: null,
+      },
+    ],
+  };
+  render(page());
+  tab("Competición");
+  fireEvent.click(screen.getByRole("button", { name: "Cancelar jornada" }));
+  const dialog = screen.getByRole("dialog", { name: "Cancelar jornada" });
+  expect(
+    within(dialog).getByText(/vuelve a\s+quedar programada/),
+  ).toHaveTextContent("La jornada 2");
+  expect(
+    within(dialog).getByText(/Se borran las muertes del tramo/),
+  ).toBeInTheDocument();
+  expect(
+    within(dialog).getByText("Se descartan 1 resultado provisional."),
+  ).toBeInTheDocument();
+  fireEvent.change(within(dialog).getByLabelText("Motivo"), {
+    target: { value: "Abierta por error" },
+  });
+  fireEvent.click(
+    within(dialog).getByRole("button", { name: "Confirmar: cancelar jornada" }),
+  );
+  await vi.waitFor(() => expect(mocks.execute).toHaveBeenCalledTimes(1));
+  expect(mocks.execute).toHaveBeenCalledWith(
+    "/v1/admin/seasons/season/matchdays/day/reset",
+    { expected_revision: 3, reason: "Abierta por error" },
+  );
+  // «Cancelar edición» keeps its own route.
+  expect(
+    screen.getByRole("button", { name: "Cancelar edición" }),
+  ).toBeEnabled();
+});

@@ -76,7 +76,7 @@ class MatchdayApiTests(unittest.TestCase):
         for name in ('actor_trainer_id','is_admin','plan'):
             self.assertEqual(self.client.post(base+'/open',json={'expected_revision':0,name:TRAINER_ID},headers=self.headers).status_code,422)
         # Exceptional operations have no participant route at all.
-        for op in ('cancel-editing','correct'):
+        for op in ('cancel-editing','correct','reset'):
             self.assertIn(self.client.post(base+'/'+op,json={},headers=self.headers).status_code,(404,405))
 
     def test_invalid_bearer(self):
@@ -98,6 +98,7 @@ class MatchdayApiTests(unittest.TestCase):
 
     def test_all_mutation_keys_required(self):
         for op,body in [('open',{'expected_revision':0}),('cancel-editing',{'expected_revision':0,'reason':'x'}),
+            ('reset',{'expected_revision':0,'reason':'x'}),
             ('close',{'expected_results_revision':0}),('correct',{'expected_snapshot_revision':1,'reason':'x',
                 'results':[dict(match_id=MID,winner_season_player_id=TRAINER_ID)]})]:
             with self.subTest(op=op):
@@ -136,8 +137,28 @@ class MatchdayApiTests(unittest.TestCase):
             self.assertEqual(self.post(body={'expected_revision':value}).status_code,422)
 
     def test_reason_required(self):
-        for reason in ('','   ','x'*501):
-            self.assertEqual(self.post('cancel-editing',{'expected_revision':0,'reason':reason}).status_code,422)
+        for op in ('cancel-editing','reset'):
+            for reason in ('','   ','x'*501):
+                self.assertEqual(self.post(op,{'expected_revision':0,'reason':reason}).status_code,422)
+
+    def test_reset_reaches_sql_as_admin_operation(self):
+        # 089 «Cancelar jornada»: the open day back to before its opening.
+        self.repo.response=dict(self.repo.response,state='scheduled',revision=2,results_revision=2)
+        response=self.post('reset',{'expected_revision':1,'reason':'Abierta por error'})
+        self.assertEqual(response.status_code,200,response.text)
+        self.assertEqual(response.json()['state'],'scheduled')
+        operation,request=self.repo.calls[-1]
+        self.assertEqual(operation,'reset')
+        self.assertEqual(request['body'],{'expected_revision':1,'reason':'Abierta por error'})
+        self.assertEqual((request['actor_trainer_id'],request['resource_id'],request['idempotency_key']),
+            (TRAINER_ID,DID,'matchday-key'))
+        for extra in ('snapshots','delete_deaths','actor_trainer_id'):
+            self.assertEqual(self.post('reset',{'expected_revision':1,'reason':'x',extra:True}).status_code,422)
+
+    def test_reset_refused_to_non_admin(self):
+        self.principals.trainer=replace(self.principals.trainer,is_admin=False)
+        self.assertEqual(self.post('reset',{'expected_revision':1,'reason':'x'}).status_code,403)
+        self.assertFalse(self.repo.calls)
 
     def test_results_route_batch_and_null(self):
         response=self.client.put(self.base+'/results',json={'expected_results_revision':1,
@@ -200,6 +221,8 @@ class MatchdayApiTests(unittest.TestCase):
         request['body']={'expected_revision':1,'reason':'No results'}
         transport.execute('cancel',request)
         self.assertEqual(self.repo.calls[-1][0],'cancel')
+        transport.execute('reset',request)
+        self.assertEqual(self.repo.calls[-1][0],'reset')
 
     def test_staging_transport_distinguishes_schema_and_business_errors(self):
         from tools.validate_supabase_v2_matchdays import MatchdayApiTransport

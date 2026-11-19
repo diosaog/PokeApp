@@ -535,6 +535,15 @@ def rehearse(args) -> dict:
                 from tools.validate_phase086_h2h_tiebreak import validate_087
 
                 report["phase087_voucher"] = validate_087(pg)
+            if migration.name.startswith("089_"):
+                from tools.validate_phase089_matchday_reset import validate as validate_reset
+                from tools.validate_phase089_matchday_reset import validate_restored as validate_reset_restored
+
+                report["phase089_matchday_reset"] = validate_reset(pg)
+                # The restored current matchday itself, reset and reopened, rolled back.
+                report["phase089_restored_matchday"] = validate_reset_restored(pg)
+                ok(not report["phase089_restored_matchday"].startswith("FAIL"),
+                   "089 resets and reopens the restored current matchday (rolled back)")
         if before_086 is not None:
             # After the whole window: only the expected rows of 086/087 changed.
             rerank = rehearsal_086.verify(pg, before_086)

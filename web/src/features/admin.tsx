@@ -297,8 +297,10 @@ function DayAdmin({ dayId, setup }: { dayId: string; setup: Setup }) {
     cmd = useAdminCommand(),
     [confirm, setConfirm] = useState(false),
     [cancel, setCancel] = useState(false),
+    [reset, setReset] = useState(false),
     [confirmedResults, setConfirmedResults] = useState<number | null>(null),
-    [cancelRevision, setCancelRevision] = useState<number | null>(null);
+    [cancelRevision, setCancelRevision] = useState<number | null>(null),
+    [resetRevision, setResetRevision] = useState<number | null>(null);
   if (q.isPending) return <Loading />;
   if (q.error)
     return (
@@ -328,7 +330,11 @@ function DayAdmin({ dayId, setup }: { dayId: string; setup: Setup }) {
       day.state === "open" &&
       confirmedResults === day.results_revision,
     canCancel =
-      canOperate && day.state === "open" && cancelRevision === day.revision;
+      canOperate && day.state === "open" && cancelRevision === day.revision,
+    // 089 «Cancelar jornada»: back to before the opening, frozen deaths included.
+    canReset =
+      canOperate && day.state === "open" && resetRevision === day.revision,
+    provisionalResults = day.matches.filter((m) => !!m.winner_id).length;
   return (
     <Card>
       <h2>
@@ -340,7 +346,7 @@ function DayAdmin({ dayId, setup }: { dayId: string; setup: Setup }) {
           Consulta histórica: esta temporada ya no admite cambios de jornada.
         </p>
       )}
-      {!confirm && !cancel && <CommandState command={cmd} />}
+      {!confirm && !cancel && !reset && <CommandState command={cmd} />}
       {day.state === "scheduled" && (
         <button
           disabled={busy || !canOperate}
@@ -446,7 +452,79 @@ function DayAdmin({ dayId, setup }: { dayId: string; setup: Setup }) {
           >
             Cancelar edición
           </button>
+          <button
+            disabled={busy || !canOperate}
+            onClick={() => {
+              setResetRevision(day.revision);
+              setReset(true);
+            }}
+          >
+            Cancelar jornada
+          </button>
         </div>
+      )}
+      {reset && (
+        <Modal
+          title="Cancelar jornada"
+          onClose={() => {
+            if (!cmd.pending && !cmd.uncertain) setReset(false);
+          }}
+        >
+          <p>
+            La jornada{displayDay ? ` ${displayDay.number}` : ""} vuelve a
+            quedar programada como si no se hubiera abierto:
+          </p>
+          <ul>
+            <li>
+              Se borran las muertes del tramo que se guardaron al abrirla. Se
+              guardarán de nuevo cuando la abras otra vez.
+            </li>
+            <li>
+              Las muertes que haya habido mientras estaba abierta cuentan para
+              el tramo.
+            </li>
+            <li>
+              Los equipos fijados mientras estaba abierta siguen fijados y
+              cuentan como a tiempo.
+            </li>
+            <li>
+              {provisionalResults
+                ? `Se descartan ${provisionalResults} ${provisionalResults === 1 ? "resultado provisional" : "resultados provisionales"}.`
+                : "No hay resultados que descartar."}
+            </li>
+          </ul>
+          <p>
+            No cambia nada de las jornadas cerradas, monedas, premios, robos ni
+            compras.
+          </p>
+          <form
+            onSubmit={async (event) => {
+              const data = form(event);
+              if (busy || !canReset || resetRevision === null) return;
+              if (
+                await cmd.execute(`${base}/reset`, {
+                  expected_revision: resetRevision,
+                  reason: text(data, "reason"),
+                } satisfies Model<"CancelDayBody">)
+              )
+                setReset(false);
+            }}
+          >
+            {!canReset && (
+              <p role="alert">
+                La jornada ha cambiado. Cierra esta confirmación y revisa sus
+                datos actuales.
+              </p>
+            )}
+            <Field label="Motivo">
+              <textarea name="reason" required maxLength={500} />
+            </Field>
+            <CommandState command={cmd} />
+            <Submit pending={cmd.pending} disabled={busy || !canReset}>
+              Confirmar: cancelar jornada
+            </Submit>
+          </form>
+        </Modal>
       )}
       {cancel && (
         <Modal

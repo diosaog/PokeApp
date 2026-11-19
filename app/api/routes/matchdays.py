@@ -131,6 +131,25 @@ def cancel(
     )
 
 
+@router.post("/{day_id}/reset", response_model=DayReceipt)
+def reset(
+    season_id: UUID,
+    day_id: UUID,
+    payload: CancelDayBody,
+    idempotency_key: Key,
+    principal: Admin,
+    container: Container,
+):
+    """«Cancelar jornada» (089): an open matchday back to before its opening.
+
+    Unlike cancel-editing it also removes the death snapshots frozen by the
+    opening and the first-start evidence, so the next opening freezes again.
+    """
+    return execute(
+        "reset", season_id, day_id, principal, container, payload, idempotency_key
+    )
+
+
 @router.post(
     "/{day_id}/close",
     response_model=DayReceipt,

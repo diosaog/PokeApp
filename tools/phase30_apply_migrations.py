@@ -34,6 +34,7 @@ from tools.phase30_release_audit import DEPLOYED, PENDING
 from tools.production_readonly import SUPABASE_REF, _supabase, query, supabase_get
 
 EXPECTED_SHA256 = {
+    '089_matchday_reset_opening.sql': '8794af0325c9877ac7a99f60f07664276e8070603e94b03034b2abba3d3c2de9',
     '088_revive_does_not_shield.sql': '0a2b371c903d1761e7b79b1206209fc48193978a1b3162e992f56b23efdeecd7',
     '087_retire_robbery_shield_voucher.sql': 'ed9eded5d9a760dd1bc9a3d74ba5a5e8d5968633bab3f27bd5930e7e2e853867',
     '086_matchday_head_to_head.sql': '992e7ee2409f914074c670722dc2ee5f48208193584c111039c925dd63f44924',

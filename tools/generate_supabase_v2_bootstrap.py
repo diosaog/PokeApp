@@ -97,6 +97,7 @@ EXPECTED_MIGRATIONS = [
     "086_matchday_head_to_head.sql",
     "087_retire_robbery_shield_voucher.sql",
     "088_revive_does_not_shield.sql",
+    "089_matchday_reset_opening.sql",
 ]
 
 FORBIDDEN_TOKENS = [

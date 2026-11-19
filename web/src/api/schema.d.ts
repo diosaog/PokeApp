@@ -449,6 +449,29 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/v1/admin/seasons/{season_id}/matchdays/{day_id}/reset": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Reset
+     * @description «Cancelar jornada» (089): an open matchday back to before its opening.
+     *
+     *     Unlike cancel-editing it also removes the death snapshots frozen by the
+     *     opening and the first-start evidence, so the next opening freezes again.
+     */
+    post: operations["reset_v1_admin_seasons__season_id__matchdays__day_id__reset_post"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/v1/admin/seasons/{season_id}/matchdays/{day_id}/close": {
     parameters: {
       query?: never;
@@ -8681,6 +8704,44 @@ export interface operations {
     };
   };
   cancel_v1_admin_seasons__season_id__matchdays__day_id__cancel_editing_post: {
+    parameters: {
+      query?: never;
+      header: {
+        "idempotency-key": string;
+      };
+      path: {
+        season_id: string;
+        day_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["CancelDayBody"];
+      };
+    };
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["DayReceipt"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  reset_v1_admin_seasons__season_id__matchdays__day_id__reset_post: {
     parameters: {
       query?: never;
       header: {
