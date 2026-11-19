@@ -117,8 +117,14 @@ def preflight(args) -> dict:
         query("select count(*) as n from public.item_deliveries where status='RESERVED'")[0]["n"]
         if has_deliveries else 0
     )
-    if busy["open_matchdays"] or busy["reserved_deliveries"]:
-        problems.append("an open matchday or reserved delivery: wait for it to finish")
+    busy_message = "an open matchday or reserved delivery: wait for it to finish"
+    if busy["reserved_deliveries"]:
+        problems.append(busy_message)
+    open_days = []
+    if busy["open_matchdays"]:
+        open_days = query(
+            "select id::text as id, opened_at::text as opened_at from public.matchdays where status='open' order by 1"
+        )
     in_flight = []
     if busy["open_physical_authorizations"] or busy["unsettled_transfer_legs"]:
         in_flight = query(
@@ -176,6 +182,21 @@ def preflight(args) -> dict:
         busy["accepted_in_flight"] = [op["id"] for op in accepted]
         if len(accepted) != len(in_flight):
             problems.append("an unsettled physical operation: wait for its journal to settle")
+    if open_days:
+        # 089 («Cancelar jornada») exists to undo a matchday opened by mistake,
+        # so it may ship while that matchday is open: only a matchday named
+        # explicitly that was already open in the rehearsed backup (whose
+        # rehearsal reset and reopened it) is accepted; anything else blocks.
+        named = set(getattr(args, "open_matchday_ok", None) or [])
+        captured = datetime.fromisoformat(manifest["captured_at"]) if manifest else None
+        accepted = [
+            day for day in open_days
+            if day["id"] in named and captured is not None and day["opened_at"]
+            and datetime.fromisoformat(day["opened_at"]) < captured
+        ]
+        busy["accepted_open_matchdays"] = [day["id"] for day in accepted]
+        if len(accepted) != len(open_days) and busy_message not in problems:
+            problems.append(busy_message)
     return {
         "project": SUPABASE_REF,
         "history_records": len(names),
@@ -237,6 +258,10 @@ def main():
     parser.add_argument(
         "--in-flight-ok", action="append", default=[],
         help="authorization id of an unsettled physical operation already in the rehearsed backup",
+    )
+    parser.add_argument(
+        "--open-matchday-ok", action="append", default=[],
+        help="id of a matchday that was already open in the rehearsed backup",
     )
     args = parser.parse_args()
     plan = preflight(args)

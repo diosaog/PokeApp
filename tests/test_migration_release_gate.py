@@ -37,6 +37,7 @@ class MigrationReleaseGateTests(TestCase):
         self.args = SimpleNamespace(backup=self.manifest, apply=True)
         self.reserved = 0
         self.physical = 0
+        self.open_days = []
         patches = (
             patch.object(release, "PENDING", [self.migration]),
             patch.object(release, "DEPLOYED", []),
@@ -56,10 +57,12 @@ class MigrationReleaseGateTests(TestCase):
             return [{"present": True}]
         if "item_deliveries" in sql:
             return [{"n": self.reserved}]
+        if "opened_at::text as opened_at" in sql:
+            return self.open_days
         if "a.id::text as id" in sql:
             # The in-flight operations themselves (086 release tooling).
             return [{"id": "op", "created_at": "2026-11-01T00:00:00+00:00"}]
-        return [{"active_seasons": 0, "open_matchdays": 0, "pending_purchases": 2,
+        return [{"active_seasons": 0, "open_matchdays": len(self.open_days), "pending_purchases": 2,
                  "open_physical_authorizations": self.physical, "unsettled_transfer_legs": 0}]
 
     def test_owned_unused_inventory_is_preserved_without_forced_refund(self):
@@ -89,3 +92,29 @@ class MigrationReleaseGateTests(TestCase):
     def test_uncommitted_migration_is_rejected(self):
         release.subprocess.run.return_value.stdout = b"older committed bytes"
         self.assertIn("072_test.sql is not the committed source", release.preflight(self.args)["problems"])
+
+    def test_open_matchday_blocks_the_release(self):
+        self.open_days = [{"id": "day", "opened_at": "2026-11-01T00:00:00+00:00"}]
+        self.assertIn("an open matchday or reserved delivery: wait for it to finish",
+                      release.preflight(self.args)["problems"])
+
+    def test_named_matchday_already_open_in_the_rehearsed_backup_is_accepted(self):
+        # 089: «Cancelar jornada» ships while the mistaken matchday is open.
+        self.open_days = [{"id": "day", "opened_at": "2026-11-01T00:00:00+00:00"}]
+        self.args.open_matchday_ok = ["day"]
+        plan = release.preflight(self.args)
+        self.assertEqual(plan["problems"], [])
+        self.assertEqual(plan["activity"]["accepted_open_matchdays"], ["day"])
+
+    def test_named_matchday_opened_after_the_backup_still_blocks(self):
+        self.open_days = [{"id": "day", "opened_at": "2999-01-01T00:00:00+00:00"}]
+        self.args.open_matchday_ok = ["day"]
+        self.assertIn("an open matchday or reserved delivery: wait for it to finish",
+                      release.preflight(self.args)["problems"])
+
+    def test_naming_an_open_matchday_does_not_excuse_a_reserved_delivery(self):
+        self.open_days = [{"id": "day", "opened_at": "2026-11-01T00:00:00+00:00"}]
+        self.args.open_matchday_ok = ["day"]
+        self.reserved = 1
+        self.assertEqual(release.preflight(self.args)["problems"],
+                         ["an open matchday or reserved delivery: wait for it to finish"])
