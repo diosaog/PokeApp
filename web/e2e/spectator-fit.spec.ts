@@ -3,7 +3,9 @@ import { fixture, login, navigate, overview, players } from "./fixtures";
 
 // Spectator mode must show both full teams (6 vs 6) at once on a desktop
 // screen: sprite, nickname, species, level, item and four moves with PP for
-// every Pokémon, with no page or per-team scroll. Synthetic data only.
+// every Pokémon, with no page or per-team scroll. On a big screen it grows
+// with it, and a move's details open inside their own card without covering
+// anything (owner, 2026-11-18). Synthetic data only.
 type Mon = {
   species: string;
   nickname: string | null;
@@ -274,6 +276,7 @@ async function openSpectator(
 for (const size of [
   { width: 1650, height: 900 },
   { width: 1920, height: 1080 },
+  { width: 2560, height: 1440 },
   { width: 1366, height: 768 },
 ]) {
   test(`spectator shows both full teams without scroll at ${size.width}×${size.height}`, async ({
@@ -324,35 +327,126 @@ for (const size of [
   });
 }
 
-test("a move of the last row opens over the team without moving the page", async ({
+// Owner 2026-11-18: on a big screen the face-off grows with it, and its text
+// reads comfortably (no magnifier). Computed sizes in CSS pixels.
+async function sizes(page: Page) {
+  return page.evaluate(() => {
+    const px = (selector: string, property: "fontSize" | "width") =>
+      Math.min(
+        ...[...document.querySelectorAll(`.spectator-matchup ${selector}`)].map(
+          (el) =>
+            property === "width"
+              ? el.getBoundingClientRect().width
+              : parseFloat(getComputedStyle(el).fontSize),
+        ),
+      );
+    return {
+      card: px(".battle-pokemon", "width"),
+      sprite: px(".matchup-sprite", "width"),
+      name: px(".matchup-identity strong", "fontSize"),
+      species: px(".matchup-species", "fontSize"),
+      item: px(".held-item", "fontSize"),
+      move: px(".move-name", "fontSize"),
+      pp: px(".move-button small", "fontSize"),
+    };
+  });
+}
+
+test("the face-off grows with a big screen and reads without a magnifier", async ({
   page,
-}, info) => {
+}) => {
   await openSpectator(page, { width: 1650, height: 900 });
-  const move = page.getByRole("button", { name: "Ver Pantalla de Luz" });
-  await move.click();
-  const details = page.locator(".move-expansion");
-  await expect(details).toContainText("Referencia Pokémon X/Y");
-  await page.screenshot({
-    path: info.outputPath("spectator-move-open.png"),
-    animations: "disabled",
-  });
-  // The details paint above the neighbouring cards.
-  const top = await details.evaluate((el) => {
-    const r = el.getBoundingClientRect();
-    const hit = document.elementFromPoint(
-      r.left + r.width / 2,
-      r.top + r.height / 2,
-    );
-    return !!hit && el.contains(hit);
-  });
-  expect(top).toBe(true);
-  const box = (await details.boundingBox())!;
-  expect(box.y).toBeGreaterThanOrEqual(0);
-  expect(box.y + box.height).toBeLessThanOrEqual(900);
-  expect(box.x + box.width).toBeLessThanOrEqual(1650);
-  const layout = await measure(page);
-  expect(layout.scrollHeight).toBeLessThanOrEqual(layout.innerHeight + 1);
-  expect(layout.scrollWidth).toBeLessThanOrEqual(layout.innerWidth + 1);
-  await page.keyboard.press("Escape");
-  await expect(details).toHaveCount(0);
+  const reference = await sizes(page);
+  await page.setViewportSize({ width: 2560, height: 1440 });
+  await expect
+    .poll(async () => (await sizes(page)).card)
+    .toBeGreaterThan(reference.card * 1.4);
+  const big = await sizes(page);
+  expect(big.sprite).toBeGreaterThanOrEqual(100);
+  expect(big.name).toBeGreaterThanOrEqual(21);
+  expect(big.species).toBeGreaterThanOrEqual(15);
+  expect(big.item).toBeGreaterThanOrEqual(15);
+  expect(big.move).toBeGreaterThanOrEqual(16);
+  expect(big.pp).toBeGreaterThanOrEqual(12.5);
+  // The reference screen never shrinks below the previous sizes.
+  expect(reference.move).toBeGreaterThanOrEqual(11.5);
+  expect(reference.species).toBeGreaterThanOrEqual(10.5);
+  expect(reference.name).toBeGreaterThanOrEqual(14.4);
 });
+
+// A move's details open inside their own card, under the move: they never
+// paint over another card, the card's other moves or the other team.
+for (const size of [
+  { width: 2560, height: 1440 },
+  { width: 1650, height: 900 },
+]) {
+  test(`a move's details cover nothing at ${size.width}×${size.height}`, async ({
+    page,
+  }, info) => {
+    await openSpectator(page, size);
+    for (const [label, side, index] of [
+      ["Ver Paz Mental", ".matchup-left", 2],
+      ["Ver Pantalla de Luz", ".matchup-right", 5],
+    ] as const) {
+      const card = page.locator(`${side} .battle-pokemon`).nth(index);
+      await card.getByRole("button", { name: label }).click();
+      const details = card.locator(".move-expansion");
+      await expect(details).toContainText("Referencia Pokémon X/Y");
+      await expect(details).toContainText("Potencia");
+      await expect(details).toBeInViewport({ ratio: 1 });
+      await page.screenshot({
+        path: info.outputPath(
+          `spectator-move-${index}-${size.width}x${size.height}.png`,
+        ),
+        animations: "disabled",
+      });
+      const result = await details.evaluate((panel) => {
+        const box = panel.getBoundingClientRect();
+        const own = panel.closest(".battle-pokemon")!;
+        const ownBox = own.getBoundingClientRect();
+        const hits = (a: DOMRect, b: DOMRect) =>
+          a.left < b.right - 1 &&
+          b.left < a.right - 1 &&
+          a.top < b.bottom - 1 &&
+          b.top < a.bottom - 1;
+        // Inside its own card, over no other card.
+        const inside =
+          box.left >= ownBox.left - 1 &&
+          box.right <= ownBox.right + 1 &&
+          box.top >= ownBox.top - 1 &&
+          box.bottom <= ownBox.bottom + 1;
+        const covered = [
+          ...document.querySelectorAll(".spectator-matchup .battle-pokemon"),
+        ].filter((card) => card !== own && hits(box, card.getBoundingClientRect()))
+          .length;
+        // Every move button of the page is still reachable where it is drawn.
+        const hidden = [
+          ...document.querySelectorAll<HTMLElement>(
+            ".spectator-matchup .move-button",
+          ),
+        ].filter((button) => {
+          const r = button.getBoundingClientRect();
+          if (r.bottom < 0 || r.top > innerHeight) return false;
+          const hit = document.elementFromPoint(
+            r.left + r.width / 2,
+            r.top + r.height / 2,
+          );
+          return !hit || !button.contains(hit);
+        }).length;
+        return { inside, covered, hidden };
+      });
+      expect(result).toEqual({ inside: true, covered: 0, hidden: 0 });
+      const layout = await measure(page);
+      expect(layout.overlaps).toBe(0);
+      expect(layout.clipped).toEqual([]);
+      expect(layout.scrollWidth).toBeLessThanOrEqual(layout.innerWidth + 1);
+      // The owner's screen keeps everything in view even with a move open.
+      if (size.width >= 2560)
+        expect(layout.scrollHeight).toBeLessThanOrEqual(
+          layout.innerHeight + 1,
+        );
+      await page.keyboard.press("Escape");
+      await expect(details).toHaveCount(0);
+    }
+  });
+}

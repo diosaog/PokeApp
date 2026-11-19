@@ -459,6 +459,8 @@ export function MovePopover({
   const id = useId(),
     move = catalogId("move", name);
   const trigger = useRef<HTMLButtonElement>(null);
+  const panel = useRef<HTMLDivElement>(null);
+  const reduced = useReducedMotion();
   const [open, setOpen] = useState(false);
   const [result, setResult] = useState<{
     move: number | null;
@@ -466,6 +468,15 @@ export function MovePopover({
   } | null>(null);
   const [failed, setFailed] = useState(false);
   const info = result?.move === move ? result.info : null;
+  // Details that open below the edge of the window slide into view; details
+  // already in view leave the page where it is.
+  useEffect(() => {
+    if (!open) return;
+    panel.current?.scrollIntoView?.({
+      block: "nearest",
+      behavior: reduced ? "auto" : "smooth",
+    });
+  }, [open, info, reduced]);
   useEffect(() => {
     setOpen(false);
     setResult(null);
@@ -531,6 +542,7 @@ export function MovePopover({
       </button>
       {open && (
         <div
+          ref={panel}
           id={id}
           className="move-expansion"
           role="region"

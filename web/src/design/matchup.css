@@ -1,8 +1,12 @@
 /* ---------- BATALLAS: compact page head, one band of controls ----------
    Owner request 2026-11-12: in Espectador both full teams (6 vs 6) must be
    visible at once on a desktop screen (reference 1650×900) with no page
-   scroll and no per-team scrollbars. Presentation only: same reads, same
-   public fields. */
+   scroll and no per-team scrollbars.
+   Owner request 2026-11-18 (second pass): on a big screen it must grow too.
+   Batallas uses the whole width (up to 2400px) and every spectator size
+   scales with the room each team has, so nothing needs a magnifier; a
+   move's details open inside their own card and never cover anything.
+   Presentation only: same reads, same public fields. */
 
 /* The screen fills the window exactly: the footer rests at the bottom (it
    never slides up or away while data arrives) and adds no scroll. */
@@ -13,9 +17,10 @@
 .section-battle main#main {
   flex: 1 0 auto;
   width: 100%;
+  max-width: 2400px;
   min-height: 0;
   margin: 0 auto;
-  padding: 16px 28px 18px;
+  padding: 16px clamp(20px, 1.7vw, 40px) 18px;
 }
 .battle-page > .page-heading {
   display: flex;
@@ -33,7 +38,7 @@
   align-items: center;
   gap: 14px;
   margin: 0;
-  font-size: clamp(1.45rem, 1.9vw, 1.9rem);
+  font-size: clamp(1.45rem, 1.9vw, 2.3rem);
   line-height: 1.1;
 }
 .battle-page > .page-heading h1::after {
@@ -94,10 +99,73 @@
   color: var(--c-text-soft);
 }
 
+/* Big screens: the head and the controls grow with the teams. */
+@media (min-width: 2000px) and (min-height: 1100px) {
+  .battle-page > .page-heading {
+    margin-bottom: 16px;
+  }
+  .battle-page > .page-heading p {
+    font-size: 0.95rem;
+  }
+  .battle-controls {
+    gap: 10px 18px;
+    margin-bottom: 16px;
+  }
+  .battle-controls .tabs button {
+    padding: 10px 20px;
+    font-size: 0.9rem;
+  }
+  .battle-controls > .tag {
+    font-size: 0.8rem;
+  }
+  .battle-controls .toolbar .field {
+    min-width: 190px;
+  }
+  .battle-controls .toolbar .field label {
+    font-size: 0.78rem;
+  }
+  .battle-controls .toolbar select {
+    height: 46px;
+    font-size: 0.95rem;
+  }
+  .battle-controls .toolbar .button,
+  .battle-controls .toolbar button {
+    min-height: 46px;
+    font-size: 0.95rem;
+  }
+  .battle-mode-hint {
+    font-size: 0.9rem;
+  }
+}
+
+/* Batalla (one team): a wide screen shows its six cards in three columns
+   instead of stretching two very wide ones. */
+@media (min-width: 1800px) {
+  .battle-page .battle-roster:not(.matchup-roster) {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
 /* ---------- Espectador: two teams face each other ---------- */
+/* One scale for both teams. The tokens resolve inside each team (a size
+   container), so every size follows the room that team has: at the
+   reference 1650×900 they match the previous sizes, and on a 2560-wide
+   screen sprites, names, items and moves are about 50% larger. */
 .spectator-matchup {
-  grid-template-columns: minmax(0, 1fr) 36px minmax(0, 1fr);
-  gap: 0 8px;
+  --mu-sprite: clamp(56px, 13.6cqi - 30px, 116px);
+  --mu-name: clamp(0.9rem, 0.06rem + 2.1cqi, 1.5rem);
+  --mu-text: clamp(0.68rem, 0.18rem + 1.25cqi, 1.04rem);
+  --mu-move: clamp(0.72rem, 0.16rem + 1.4cqi, 1.1rem);
+  --mu-pp: clamp(0.6rem, 0.22rem + 0.95cqi, 0.88rem);
+  --mu-move-h: clamp(28px, 5.3cqi - 5.5px, 52px);
+  --mu-move-gap: clamp(4px, 0.6cqi, 8px);
+  --mu-pad: clamp(9px, 1.4cqi, 18px);
+  --mu-gap: clamp(8px, 1.15cqi, 14px);
+  --mu-icon: clamp(16px, 2.2cqi, 26px);
+  --mu-type-icon: clamp(12px, 1.55cqi, 18px);
+  --mu-small: clamp(0.62rem, 0.2rem + 0.95cqi, 0.88rem);
+  grid-template-columns: minmax(0, 1fr) clamp(36px, 2.2vw, 56px) minmax(0, 1fr);
+  gap: 0 clamp(8px, 0.6vw, 16px);
   align-items: stretch;
 }
 .spectator-matchup .battle-side {
@@ -108,19 +176,22 @@
   align-content: flex-start;
   gap: 4px 10px;
   margin: 0;
-  padding: 10px;
+  padding: clamp(10px, 0.8vw - 3px, 20px);
 }
 .spectator-matchup .battle-side > h2 {
   margin: 0;
-  font-size: 1.2rem;
+  font-size: clamp(1.15rem, 0.35rem + 2.1cqi, 1.8rem);
   line-height: 1.2;
 }
 .spectator-matchup .battle-side > .team-source {
   margin: 0;
 }
+.spectator-matchup .battle-side > .team-source .tag {
+  font-size: var(--mu-small);
+}
 .spectator-matchup .battle-side > p {
   margin: 0;
-  font-size: 0.72rem;
+  font-size: clamp(0.72rem, 0.35rem + 0.9cqi, 0.95rem);
   line-height: 1.35;
 }
 .spectator-matchup .battle-side > p.muted,
@@ -158,41 +229,42 @@
   position: relative;
   display: grid;
   place-items: center;
-  width: 36px;
-  height: 36px;
+  width: 100%;
+  max-width: 56px;
+  aspect-ratio: 1;
   border: 1px solid var(--c-gold);
   border-radius: 50%;
   background: var(--c-warm-deep);
   color: var(--c-gold-soft);
-  font-size: 0.72rem;
+  font-size: clamp(0.72rem, 0.55vw, 1rem);
   font-weight: 850;
   letter-spacing: 0.06em;
   box-shadow: 0 0 22px color-mix(in srgb, var(--c-gold) 28%, transparent);
 }
 
-/* ---------- Owner 2026-11-18: each team is a 3 × 2 grid of mini cards ----------
+/* ---------- Each team is a 3 × 2 grid of cards ----------
    Both sides are built the same way (symmetric): sprite and identity on top,
-   the four moves underneath. Same public fields as before. */
+   the four moves underneath. Rows take the height of their tallest card, so
+   a card with an open move grows without stretching the other row. */
 .spectator-matchup .matchup-roster {
   flex: 1 0 100%;
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  grid-auto-rows: 1fr;
-  gap: 8px;
+  gap: var(--mu-gap);
   margin: 4px 0 0;
 }
 .spectator-matchup .matchup-pokemon {
   position: relative;
   display: grid;
-  grid-template-columns: 56px minmax(0, 1fr);
+  grid-template-columns: var(--mu-sprite) minmax(0, 1fr);
   grid-template-areas:
     "sprite identity"
     "moves moves";
   align-content: start;
-  align-items: start;
-  gap: 8px;
+  align-items: center;
+  gap: var(--mu-gap);
   min-width: 0;
-  padding: 9px 9px 10px;
+  padding: var(--mu-pad);
   border-radius: 12px;
   box-shadow: none;
 }
@@ -200,46 +272,50 @@
   grid-area: sprite;
   display: grid;
   place-items: center;
-  width: 56px;
-  height: 56px;
-  border-radius: 10px;
-  background: color-mix(in srgb, var(--type, var(--c-info)) 14%, transparent);
+  width: var(--mu-sprite, 56px);
+  height: var(--mu-sprite, 56px);
+  border-radius: 12px;
+  background: radial-gradient(
+    circle at 50% 62%,
+    color-mix(in srgb, var(--type, var(--c-info)) 26%, transparent),
+    color-mix(in srgb, var(--type, var(--c-info)) 9%, transparent) 72%
+  );
 }
 .spectator-matchup .matchup-sprite .pokemon-sprite {
-  width: 52px;
-  height: 52px;
+  width: calc(var(--mu-sprite) - 4px);
+  height: calc(var(--mu-sprite) - 4px);
 }
 .matchup-identity {
   grid-area: identity;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: 2px;
+  gap: clamp(2px, 0.3cqi, 4px);
   min-width: 0;
 }
 .matchup-identity strong {
   max-width: 100%;
-  font-size: 0.9rem;
+  font-size: var(--mu-name, 0.9rem);
   line-height: 1.15;
   letter-spacing: -0.01em;
   overflow-wrap: anywhere;
 }
 .matchup-species {
   max-width: 100%;
-  font-size: 0.66rem;
+  font-size: var(--mu-text, 0.68rem);
   line-height: 1.25;
-  color: var(--c-text-soft);
+  color: color-mix(in srgb, var(--c-text) 30%, var(--c-text-soft));
 }
 .matchup-types {
   display: flex;
   flex-wrap: wrap;
-  gap: 3px;
+  gap: 4px;
 }
 .matchup-type {
   display: inline-flex;
 }
-/* Icons only in a mini card; the type name stays for assistive technology
-   and on hover. */
+/* Icons only in a narrow card; the type name stays for assistive technology
+   and on hover. A wide card shows the names too (below). */
 .matchup-type .type-badge {
   gap: 0;
   padding: 2px 3px;
@@ -248,23 +324,23 @@
   line-height: 0;
 }
 .matchup-type .type-badge img {
-  width: 12px;
-  height: 12px;
+  width: var(--mu-type-icon, 12px);
+  height: var(--mu-type-icon, 12px);
 }
 .matchup-identity .held-item {
   display: flex;
   align-items: center;
   max-width: 100%;
-  gap: 4px;
+  gap: 5px;
   margin: 0;
-  font-size: 0.68rem;
+  font-size: var(--mu-text, 0.68rem);
   line-height: 1.2;
   color: var(--c-info-soft);
   overflow-wrap: anywhere;
 }
 .matchup-identity .item-icon {
-  width: 16px;
-  height: 16px;
+  width: var(--mu-icon, 16px);
+  height: var(--mu-icon, 16px);
   margin: 0;
   flex: none;
 }
@@ -272,11 +348,14 @@
   justify-content: flex-start;
   margin: 2px 0 0;
 }
+.matchup-identity .pokemon-status-flag {
+  font-size: clamp(0.56rem, 0.2rem + 0.6cqi, 0.74rem);
+}
 .spectator-matchup .matchup-pokemon .battle-moves {
   grid-area: moves;
   display: grid;
   grid-template-columns: minmax(0, 1fr);
-  gap: 4px;
+  gap: var(--mu-move-gap);
   min-width: 0;
 }
 .spectator-matchup .matchup-pokemon .move-disclosure {
@@ -285,10 +364,15 @@
 }
 .spectator-matchup .matchup-pokemon .move-button {
   width: 100%;
-  min-height: 28px;
-  padding: 3px 8px;
-  gap: 6px;
-  font-size: 0.72rem;
+  min-height: var(--mu-move-h);
+  padding: 3px clamp(8px, 1cqi, 12px);
+  gap: clamp(6px, 0.8cqi, 10px);
+  font-size: var(--mu-move);
+}
+.spectator-matchup .matchup-pokemon .move-button .type-dot {
+  width: clamp(5px, 0.6cqi, 7px);
+  height: clamp(5px, 0.6cqi, 7px);
+  flex-basis: clamp(5px, 0.6cqi, 7px);
 }
 /* Never cut a move: a long name takes a second line. */
 .spectator-matchup .matchup-pokemon .move-name {
@@ -302,45 +386,110 @@
   display: inline;
   flex: none;
   margin-left: auto;
-  font-size: 0.6rem;
+  font-size: var(--mu-pp);
   white-space: nowrap;
 }
 .spectator-matchup .matchup-pokemon .move-button svg {
   flex: none;
-  width: 11px;
-  height: 11px;
+  width: clamp(11px, 1.3cqi, 16px);
+  height: clamp(11px, 1.3cqi, 16px);
 }
 .spectator-matchup .matchup-pokemon .move-vacant {
   display: flex;
   align-items: center;
-  min-height: 28px;
-  padding: 3px 8px;
-  font-size: 0.64rem;
+  min-height: var(--mu-move-h);
+  padding: 3px clamp(8px, 1cqi, 12px);
+  font-size: calc(var(--mu-move) * 0.9);
 }
-/* A move's details float over the cards instead of pushing the team down:
-   the third column opens leftwards, the second row opens upwards. */
-.spectator-matchup .matchup-pokemon:has(.move-expansion) {
-  z-index: 5;
+
+/* ---------- A move's details: a drawer inside its own card ----------
+   Owner 2026-11-18: the details must not cover anything. They open right
+   under the chosen move, joined to it, and push that card's next moves
+   down; no other card, team or control is ever painted over. */
+.spectator-matchup .matchup-pokemon .move-button[aria-expanded="true"] {
+  border-bottom-color: color-mix(in srgb, var(--type) 30%, transparent);
+  border-radius: 7px 7px 0 0;
+  box-shadow: 0 8px 22px -12px var(--type);
 }
 .spectator-matchup .matchup-pokemon .move-expansion {
-  position: absolute;
-  z-index: 30;
-  top: calc(100% + 3px);
-  left: 0;
-  width: max(100%, 280px);
+  position: relative;
   margin: 0;
-  border-top: 1px solid
-    color-mix(in srgb, var(--type) 35%, var(--c-info-deep));
-  border-radius: 8px;
-  box-shadow: var(--shadow-2, 0 12px 30px rgb(0 0 0 / 0.45));
+  padding: clamp(8px, 1.1cqi, 14px) clamp(10px, 1.2cqi, 16px)
+    clamp(10px, 1.3cqi, 16px);
+  border: 1px solid color-mix(in srgb, var(--type) 45%, var(--c-info-deep));
+  border-left: 3px solid var(--type);
+  border-top: 0;
+  border-radius: 0 0 8px 8px;
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--type) 15%, var(--c-surface-1)),
+    var(--c-surface-1) 75%
+  );
+  box-shadow: none;
+  animation: matchup-drawer 180ms var(--ease-out, ease-out);
 }
-.spectator-matchup .matchup-pokemon:nth-child(3n) .move-expansion {
-  left: auto;
-  right: 0;
+@keyframes matchup-drawer {
+  from {
+    opacity: 0;
+    transform: translateY(-5px);
+  }
 }
-.spectator-matchup .matchup-pokemon:nth-child(n + 4) .move-expansion {
-  top: auto;
-  bottom: calc(100% + 3px);
+/* The caption sits close to the move; the close button does not push it. */
+.spectator-matchup .move-expansion-heading {
+  margin: -2px -4px clamp(6px, 0.8cqi, 10px) 0;
+}
+.spectator-matchup .move-expansion-heading > span {
+  font-size: var(--mu-small);
+  letter-spacing: 0.03em;
+}
+.spectator-matchup .move-expansion-heading .icon-button {
+  width: clamp(26px, 3cqi, 34px);
+  min-width: clamp(26px, 3cqi, 34px);
+  height: clamp(26px, 3cqi, 34px);
+  margin-block: -4px;
+}
+.spectator-matchup .move-expansion-heading .icon-button svg {
+  width: clamp(14px, 1.5cqi, 18px);
+  height: clamp(14px, 1.5cqi, 18px);
+}
+.spectator-matchup .move-facts {
+  gap: clamp(8px, 1cqi, 14px);
+}
+.spectator-matchup .move-facts .type-badge {
+  gap: 5px;
+  padding: 4px 8px 4px 6px;
+  font-size: var(--mu-small);
+}
+.spectator-matchup .move-facts .type-badge img {
+  width: clamp(12px, 1.4cqi, 17px);
+  height: clamp(12px, 1.4cqi, 17px);
+}
+.spectator-matchup .move-category {
+  font-size: var(--mu-small);
+}
+.spectator-matchup .move-category img {
+  width: auto;
+  height: clamp(14px, 1.6cqi, 19px);
+}
+.spectator-matchup .move-numbers {
+  gap: 6px clamp(12px, 1.6cqi, 20px);
+  margin: clamp(8px, 1cqi, 12px) 0 clamp(6px, 0.8cqi, 10px);
+}
+.spectator-matchup .move-numbers > span {
+  font-size: var(--mu-small);
+}
+.spectator-matchup .move-numbers strong {
+  font-size: calc(var(--mu-move) * 1.06);
+}
+.spectator-matchup .move-expansion p {
+  font-size: var(--mu-text);
+  line-height: 1.5;
+  color: color-mix(in srgb, var(--c-text) 55%, var(--c-info-soft));
+}
+@media (prefers-reduced-motion: reduce) {
+  .spectator-matchup .matchup-pokemon .move-expansion {
+    animation: none;
+  }
 }
 
 /* Face-off: the left team's sprites turn towards the VS line, and the
@@ -375,46 +524,33 @@
   .battle-controls .toolbar button {
     min-height: 34px;
   }
+  .spectator-matchup {
+    --mu-move-h: clamp(25px, 4cqi - 2px, 44px);
+    --mu-pad: clamp(7px, 1.1cqi, 14px);
+    --mu-gap: clamp(6px, 0.9cqi, 12px);
+  }
   .spectator-matchup .battle-side {
     padding: 8px;
   }
   .spectator-matchup .battle-side > h2 {
-    font-size: 1.08rem;
-  }
-  .spectator-matchup .matchup-roster {
-    gap: 6px;
-  }
-  .spectator-matchup .matchup-pokemon {
-    gap: 6px;
-    padding: 7px;
+    font-size: clamp(1.08rem, 0.3rem + 2cqi, 1.6rem);
   }
   .spectator-matchup .matchup-pokemon .move-button,
   .spectator-matchup .matchup-pokemon .move-vacant {
-    min-height: 25px;
     padding-block: 2px;
   }
 }
 /* A narrow side keeps three columns with a smaller sprite. */
 @container (max-width: 620px) {
-  .spectator-matchup .matchup-pokemon {
-    grid-template-columns: 44px minmax(0, 1fr);
-    padding: 7px;
-  }
-  .matchup-sprite {
-    width: 44px;
-    height: 44px;
-  }
-  .spectator-matchup .matchup-sprite .pokemon-sprite {
-    width: 42px;
-    height: 42px;
-  }
-  .matchup-identity strong {
-    font-size: 0.82rem;
+  .spectator-matchup .matchup-roster {
+    --mu-sprite: 44px;
+    --mu-name: 0.82rem;
+    --mu-move: 0.68rem;
+    --mu-pad: 7px;
   }
   .spectator-matchup .matchup-pokemon .move-button {
     padding-inline: 6px;
     gap: 4px;
-    font-size: 0.68rem;
   }
   .spectator-matchup .matchup-pokemon .move-button svg {
     display: none;
@@ -425,48 +561,14 @@
   .spectator-matchup .matchup-roster {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
-  .spectator-matchup .matchup-pokemon:nth-child(3n) .move-expansion {
-    left: 0;
-    right: auto;
-  }
-  .spectator-matchup .matchup-pokemon:nth-child(2n) .move-expansion {
-    left: auto;
-    right: 0;
-  }
-  .spectator-matchup .matchup-pokemon:nth-child(n + 4) .move-expansion {
-    top: calc(100% + 3px);
-    bottom: auto;
-  }
-  .spectator-matchup .matchup-pokemon:nth-child(n + 5) .move-expansion {
-    top: auto;
-    bottom: calc(100% + 3px);
-  }
 }
-
-/* Tall windows: the same cards breathe a little more. */
-@media (min-width: 1500px) and (min-height: 1000px) {
-  .spectator-matchup .matchup-roster {
-    gap: 10px;
-  }
-  .spectator-matchup .matchup-pokemon {
-    grid-template-columns: 64px minmax(0, 1fr);
-    padding: 11px;
-  }
-  .matchup-sprite {
-    width: 64px;
-    height: 64px;
-  }
-  .spectator-matchup .matchup-sprite .pokemon-sprite {
-    width: 60px;
-    height: 60px;
-  }
-  .matchup-identity strong {
-    font-size: 1rem;
-  }
-  .spectator-matchup .matchup-pokemon .move-button,
-  .spectator-matchup .matchup-pokemon .move-vacant {
-    min-height: 31px;
-    font-size: 0.75rem;
+/* A wide card names its types next to their icons. */
+@container (min-width: 940px) {
+  .matchup-type .type-badge {
+    gap: 4px;
+    padding: 3px 7px 3px 5px;
+    font-size: var(--mu-small);
+    line-height: 1;
   }
 }
 
@@ -478,6 +580,9 @@
   }
   .spectator-vs {
     min-height: 36px;
+  }
+  .spectator-vs span {
+    width: 36px;
   }
   .spectator-vs::before {
     top: 50%;
